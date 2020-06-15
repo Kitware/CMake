@@ -1,0 +1,116 @@
+# Windows-specific builder configurations and build commands
+
+## Base configurations
+
+.windows:
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci ext\\$CI_CONCURRENT_ID"
+
+### Build and test
+
+.windows_build:
+    extends: .windows
+
+    variables:
+        # Note that shell runners only support runners with a single
+        # concurrency level. We can't use `$CI_CONCURRENCY_ID` because this may
+        # change between the build and test stages which CMake doesn't support.
+        # Even if we could, it could change if other runners on the machine
+        # could run at the same time, so we drop it.
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci"
+
+.windows_ninja:
+    extends: .windows_build
+
+    variables:
+        # Debug and RelWithDebinfo build types use the `/Zi` which results in
+        # uncacheable compiations.
+        # https://github.com/mozilla/sccache/issues/242
+        CMAKE_BUILD_TYPE: Release
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.windows_vs2019_x64_ninja:
+    extends: .windows_ninja
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2019_x64_ninja
+        VCVARSALL: "${VS160COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSPLATFORM: "x64"
+        VCVARSVERSION: "14.26"
+
+### External testing
+
+.windows_vs2019_x64:
+    extends: .windows
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2019_x64
+        CMAKE_GENERATOR: "Visual Studio 16 2019"
+        CMAKE_GENERATOR_PLATFORM: "x64"
+        CMAKE_GENERATOR_TOOLSET: "v142,version=14.26"
+
+## Tags
+
+.windows_builder_tags:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows
+        - shell
+        - vs2019
+        - msvc-19.25
+        - nonconcurrent
+
+.windows_builder_ext_tags:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows
+        - shell
+        - vs2019
+        - msvc-19.25
+        - concurrent
+
+## Windows-specific scripts
+
+.before_script_windows: &before_script_windows
+    - Invoke-Expression -Command .gitlab/ci/cmake.ps1
+    - Invoke-Expression -Command .gitlab/ci/ninja.ps1
+    - $pwdpath = $pwd.Path
+    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$pwdpath\.gitlab\cmake\bin;$env:PATH"
+    - cmake --version
+    - ninja --version
+    - cmake -P .gitlab/ci/download_qt.cmake
+    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\qt\bin;$env:PATH"
+
+.cmake_build_windows:
+    stage: build
+
+    script:
+        - *before_script_windows
+        - Set-Item -Force -Path "env:PATH" -Value "$env:PATH;$env:SCCACHE_PATH"
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - sccache --start-server
+        - sccache --show-stats
+        - ctest -VV -S .gitlab/ci/ctest_configure.cmake
+        - ctest -VV -S .gitlab/ci/ctest_build.cmake
+        - sccache --show-stats
+        - sccache --stop-server
+
+    interruptible: true
+
+.cmake_test_windows:
+    stage: test
+
+    script:
+        - *before_script_windows
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake
+
+    interruptible: true
+
+.cmake_test_windows_external:
+    stage: test-ext
+
+    script:
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+
+    interruptible: true
