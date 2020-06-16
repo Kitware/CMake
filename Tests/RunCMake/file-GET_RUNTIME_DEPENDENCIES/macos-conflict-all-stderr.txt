@@ -1,0 +1,7 @@
+^CMake Error at cmake_install\.cmake:[0-9]+ \(file\):
+  file Multiple conflicting paths found for librpath\.dylib:
+
+    [^
+]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-conflict-build/root-all/lib/rpath1/librpath\.dylib
+    [^
+]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-conflict-build/root-all/lib/rpath2/librpath\.dylib$

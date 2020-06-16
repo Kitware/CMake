@@ -127,9 +127,9 @@ endforeach()
 
 target_link_libraries(testlib PRIVATE ${testlib_names})
 
-add_executable(topexe file-GET_RUNTIME_DEPENDENCIES-macos/topexe.c)
-add_library(toplib SHARED file-GET_RUNTIME_DEPENDENCIES-macos/toplib.c)
-add_library(topmod MODULE file-GET_RUNTIME_DEPENDENCIES-macos/toplib.c)
+add_executable(topexe macos/topexe.c)
+add_library(toplib SHARED macos/toplib.c)
+add_library(topmod MODULE macos/toplib.c)
 target_link_libraries(topexe PRIVATE testlib)
 target_link_libraries(toplib PRIVATE testlib)
 target_link_libraries(topmod PRIVATE testlib)
