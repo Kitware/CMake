@@ -1,0 +1,11 @@
+include(RunCMake)
+
+run_cmake(TARGET_GENEX_EVAL-no-arg)
+run_cmake(TARGET_GENEX_EVAL-no-target)
+run_cmake(TARGET_GENEX_EVAL-non-valid-target)
+run_cmake(TARGET_GENEX_EVAL-recursion1)
+run_cmake(TARGET_GENEX_EVAL-recursion2)
+run_cmake(TARGET_GENEX_EVAL)
+run_cmake(GENEX_EVAL-recursion1)
+run_cmake(GENEX_EVAL-recursion2)
+run_cmake(GENEX_EVAL)
