@@ -703,7 +703,7 @@ Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
 .. literalinclude:: Step10/MathFunctions/MathFunctions.h
   :language: c++
 
-At this point, if you build everything, you will notice that linking fails
+At this point, if you build everything, you may notice that linking fails
 as we are combining a static library without position independent code with a
 library that has position independent code. The solution to this is to
 explicitly set the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property of
