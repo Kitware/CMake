@@ -57,6 +57,14 @@ Policies Introduced by CMake 3.18
 .. toctree::
    :maxdepth: 1
 
+   CMP0109: find_program() requires permission to execute but not to read. </policy/CMP0109>
+
+Policies Introduced by CMake 3.18
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
    CMP0108: A target cannot link to itself through an alias. </policy/CMP0108>
    CMP0107: An ALIAS target cannot overwrite another target. </policy/CMP0107>
    CMP0106: The Documentation module is removed. </policy/CMP0106>

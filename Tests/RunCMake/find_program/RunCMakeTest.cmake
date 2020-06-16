@@ -17,7 +17,9 @@ else()
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   if(NOT "${uid}" STREQUAL "0")
-    run_cmake(ExeNoRead)
+    run_cmake(CMP0109-WARN)
+    run_cmake(CMP0109-OLD)
+    run_cmake(CMP0109-NEW)
   endif()
 endif()
 
