@@ -289,7 +289,9 @@ if(BLAS_FOUND)
         endif()
         set(LAPACK_mkl_LIB_PATH_SUFFIXES
             "compiler/lib" "compiler/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
+            "compiler/lib/${LAPACK_mkl_ARCH_NAME}"
             "mkl/lib" "mkl/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
+            "mkl/lib/${LAPACK_mkl_ARCH_NAME}"
             "lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}")
 
         # First try empty lapack libs
