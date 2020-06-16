@@ -13,7 +13,8 @@ New Features
 Languages
 ---------
 
-* The ``CUDA`` language can now be compiled using Clang.
+* The ``CUDA`` language can now be compiled using Clang on non-Windows
+  platforms. Separable compilation is not yet supported on any platform.
 
 Command-Line
 ------------
