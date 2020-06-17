@@ -698,38 +698,28 @@ if(BUILD_TESTING)
   # build the "Simple" test with the ExtraGenerators, if available
   # This doesn't test whether the generated project files work (unfortunately),
   # mainly it tests that cmake doesn't crash when generating these project files.
-  if(${CMAKE_GENERATOR} MATCHES "Unix Makefiles" OR ${CMAKE_GENERATOR} MATCHES "Ninja")
-
-    # check which generators we have
-    execute_process(COMMAND ${CMAKE_CMAKE_COMMAND} --help
-      OUTPUT_VARIABLE cmakeOutput ERROR_VARIABLE cmakeOutput)
-
-    set(extraGenerators
-      "CodeBlocks"
-      "CodeLite"
-      "Eclipse CDT4"
-      "Kate"
-      "Sublime Text 2")
-
-    foreach(extraGenerator ${extraGenerators})
-      if ("${cmakeOutput}" MATCHES "${extraGenerator} - ${CMAKE_GENERATOR}")
-        set(extraGeneratorTestName "Simple_${extraGenerator}Generator")
-        string(REPLACE " " "" extraGeneratorTestName ${extraGeneratorTestName})
-
-        add_test(${extraGeneratorTestName} ${CMAKE_CTEST_COMMAND}
-          --build-and-test
-          "${CMake_SOURCE_DIR}/Tests/Simple"
-          "${CMake_BINARY_DIR}/Tests/${extraGeneratorTestName}"
-          --build-two-config
-          --build-generator "${extraGenerator} - ${CMAKE_GENERATOR}"
-          --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
-          --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
-          --build-project Simple
-          --test-command Simple)
-        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${extraGeneratorTestName}")
-      endif ()
-    endforeach(extraGenerator)
-
+  if(CMAKE_GENERATOR MATCHES "^(Unix Makefiles|Ninja)$"
+      AND NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+    foreach(extraGenerator
+        "CodeBlocks"
+        "CodeLite"
+        "Eclipse CDT4"
+        "Kate"
+        "Sublime Text 2"
+        )
+      string(REPLACE " " "" extraGeneratorTestName "Simple_${extraGenerator}Generator")
+      add_test(${extraGeneratorTestName} ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Simple"
+        "${CMake_BINARY_DIR}/Tests/${extraGeneratorTestName}"
+        --build-two-config
+        --build-generator "${extraGenerator} - ${CMAKE_GENERATOR}"
+        --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
+        --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
+        --build-project Simple
+        --test-command Simple)
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${extraGeneratorTestName}")
+    endforeach()
   endif()
 
   # test for correct sub-project generation
