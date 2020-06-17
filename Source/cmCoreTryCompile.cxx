@@ -1050,7 +1050,9 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
   std::set<std::string> deletedFiles;
   for (unsigned long i = 0; i < dir.GetNumberOfFiles(); ++i) {
     const char* fileName = dir.GetFile(i);
-    if (strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0) {
+    if (strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0 &&
+        // Do not delete NFS temporary files.
+        !cmHasPrefix(fileName, ".nfs")) {
       if (deletedFiles.insert(fileName).second) {
         std::string const fullPath =
           std::string(binDir).append("/").append(fileName);
