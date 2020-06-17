@@ -64,10 +64,6 @@
 #  include "cmVariableWatch.h"
 #endif
 
-#if !defined(CMAKE_BOOTSTRAP)
-#  define CMAKE_USE_ECLIPSE
-#endif
-
 #if defined(__MINGW32__) && defined(CMAKE_BOOTSTRAP)
 #  define CMAKE_BOOT_MINGW
 #endif
@@ -101,16 +97,13 @@
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmGlobalNinjaGenerator.h"
 #endif
-#include "cmExtraCodeLiteGenerator.h"
 
-#if !defined(CMAKE_BOOT_MINGW)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmExtraCodeBlocksGenerator.h"
-#endif
-#include "cmExtraKateGenerator.h"
-#include "cmExtraSublimeTextGenerator.h"
-
-#ifdef CMAKE_USE_ECLIPSE
+#  include "cmExtraCodeLiteGenerator.h"
 #  include "cmExtraEclipseCDT4Generator.h"
+#  include "cmExtraKateGenerator.h"
+#  include "cmExtraSublimeTextGenerator.h"
 #endif
 
 #if defined(__linux__) || defined(_WIN32)
@@ -1137,13 +1130,9 @@ void cmake::AddDefaultExtraGenerators()
 #if !defined(CMAKE_BOOTSTRAP)
   this->ExtraGenerators.push_back(cmExtraCodeBlocksGenerator::GetFactory());
   this->ExtraGenerators.push_back(cmExtraCodeLiteGenerator::GetFactory());
-  this->ExtraGenerators.push_back(cmExtraSublimeTextGenerator::GetFactory());
-  this->ExtraGenerators.push_back(cmExtraKateGenerator::GetFactory());
-
-#  ifdef CMAKE_USE_ECLIPSE
   this->ExtraGenerators.push_back(cmExtraEclipseCDT4Generator::GetFactory());
-#  endif
-
+  this->ExtraGenerators.push_back(cmExtraKateGenerator::GetFactory());
+  this->ExtraGenerators.push_back(cmExtraSublimeTextGenerator::GetFactory());
 #endif
 }
 
