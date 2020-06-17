@@ -1134,7 +1134,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
             break;
           case cmStateEnums::EXECUTABLE:
             if (this->NsightTegra &&
-                !this->GeneratorTarget->GetPropertyAsBool("ANDROID_GUI")) {
+                !this->GeneratorTarget->Target->IsAndroidGuiExecutable()) {
               // Android executables are .so too.
               configType = "DynamicLibrary";
             } else {
@@ -4015,8 +4015,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups(Elem& e0)
     //    output manifest flags  <Manifest></Manifest>
     this->WriteManifestOptions(e1, c);
     if (this->NsightTegra &&
-        this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE &&
-        this->GeneratorTarget->GetPropertyAsBool("ANDROID_GUI")) {
+        this->GeneratorTarget->Target->IsAndroidGuiExecutable()) {
       this->WriteAntBuildOptions(e1, c);
     }
   }

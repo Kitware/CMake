@@ -209,6 +209,9 @@ public:
   //! Return whether this target is an executable Bundle on Apple.
   bool IsAppBundleOnApple() const;
 
+  //! Return whether this target is a GUI executable on Android.
+  bool IsAndroidGuiExecutable() const;
+
   //! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
 
