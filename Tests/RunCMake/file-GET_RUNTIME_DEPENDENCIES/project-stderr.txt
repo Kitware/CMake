@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at file-GET_RUNTIME_DEPENDENCIES-project\.cmake:[0-9]+ \(file\):
+^CMake Warning \(dev\) at project\.cmake:[0-9]+ \(file\):
   You have used file\(GET_RUNTIME_DEPENDENCIES\) in project mode\.  This is
   probably not what you intended to do\.  Instead, please consider using it in
   an install\(CODE\) or install\(SCRIPT\) command\.  For example:
