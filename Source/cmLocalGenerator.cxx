@@ -1997,7 +1997,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       if (separable) {
         this->Makefile->IssueMessage(
           MessageType::FATAL_ERROR,
-          "CUDA_SEPARABLE_COMPILATION isn't supported on Clang.");
+          "CUDA_SEPARABLE_COMPILATION isn't supported on Clang. "
+          "See CMake issue #20726.");
       }
     }
   }

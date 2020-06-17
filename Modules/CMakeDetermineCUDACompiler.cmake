@@ -198,6 +198,10 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
       string(APPEND nvcc_test_flags " -ccbin=${CMAKE_CUDA_HOST_COMPILER}")
     endif()
   elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
+    if(WIN32)
+      message(FATAL_ERROR "Clang with CUDA is not yet supported on Windows. See CMake issue #20776.")
+    endif()
+
     set(clang_test_flags "--cuda-path=\"${CMAKE_CUDA_COMPILER_LIBRARY_ROOT}\"")
     if(CMAKE_CROSSCOMPILING)
       # Need to pass the host target and include directories if we're crosscompiling.
