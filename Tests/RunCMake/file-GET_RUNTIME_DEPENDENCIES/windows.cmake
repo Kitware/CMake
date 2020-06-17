@@ -38,9 +38,9 @@ install(TARGETS testlib libdir_postexcluded libdir conflict testlib_noconflict D
 install(TARGETS libdir search_postexcluded search DESTINATION bin/.search) # Prefixing with "." ensures it is the first item after list(SORT)
 install(TARGETS testlib_conflict conflict DESTINATION bin/.conflict)
 
-add_executable(topexe file-GET_RUNTIME_DEPENDENCIES-windows/topexe.c)
-add_library(toplib SHARED file-GET_RUNTIME_DEPENDENCIES-windows/toplib.c)
-add_library(topmod MODULE file-GET_RUNTIME_DEPENDENCIES-windows/toplib.c)
+add_executable(topexe windows/topexe.c)
+add_library(toplib SHARED windows/toplib.c)
+add_library(topmod MODULE windows/toplib.c)
 target_link_libraries(topexe PRIVATE testlib)
 target_link_libraries(toplib PRIVATE testlib)
 target_link_libraries(topmod PRIVATE testlib)
