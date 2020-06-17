@@ -157,6 +157,14 @@ Modules
 
 * The :module:`FindBLAS` module now provides an imported target.
 
+* The :module:`FindCUDAToolkit` module:
+
+  * gained the variable
+    ``CUDAToolkit_LIBRARY_ROOT``, which is the directory containing the
+    ``nvvm`` directory and ``version.txt``.
+
+  * uses toolkit and library root found during ``CUDA`` compiler detection.
+
 * The :module:`FindLAPACK` module now provides an imported target.
 
 * The :module:`FindPython3`, :module:`FindPython2` and :module:`FindPython`
@@ -194,14 +202,6 @@ Modules
   the ``SWIG_EXECUTABLE`` is SWIG-Fortran_.
 
 .. _`SWIG-Fortran`: https://github.com/swig-fortran/swig
-
-* The :module:`FindCUDAToolkit` module:
-
-  * gained the variable
-    ``CUDAToolkit_LIBRARY_ROOT``, which is the directory containing the
-    ``nvvm`` directory and ``version.txt``.
-
-  * uses toolkit and library root found during ``CUDA`` compiler detection.
 
 Generator Expressions
 ---------------------
