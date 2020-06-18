@@ -28,7 +28,7 @@ struct cmDocumentationEntry;
 /** \class cmGlobalXCodeGenerator
  * \brief Write a Unix makefiles.
  *
- * cmGlobalXCodeGenerator manages UNIX build process for a tree
+ * cmGlobalXCodeGenerator manages Xcode build process for a tree
  */
 class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
@@ -295,6 +295,7 @@ private:
   std::map<std::string, cmXCodeObject*> TargetGroup;
   std::map<std::string, cmXCodeObject*> FileRefs;
   std::map<cmGeneratorTarget const*, cmXCodeObject*> XCodeObjectMap;
+  std::map<cmXCodeObject*, cmXCodeObject*> FileRefToBuildFileMap;
   std::vector<std::string> Architectures;
   std::string ObjectDirArchDefault;
   std::string ObjectDirArch;
