@@ -675,9 +675,9 @@ The first step is to update the starting section of the top-level
 
 Now that we have made MathFunctions always be used, we will need to update
 the logic of that library. So, in ``MathFunctions/CMakeLists.txt`` we need to
-create a SqrtLibrary that will conditionally be built when ``USE_MYMATH`` is
-enabled. Now, since this is a tutorial, we are going to explicitly require
-that SqrtLibrary is built statically.
+create a SqrtLibrary that will conditionally be built and installed when
+``USE_MYMATH`` is enabled. Now, since this is a tutorial, we are going to
+explicitly require that SqrtLibrary is built statically.
 
 The end result is that ``MathFunctions/CMakeLists.txt`` should look like:
 

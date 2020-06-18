@@ -51,5 +51,9 @@ target_link_libraries(MathFunctions PUBLIC tutorial_compiler_flags)
 target_compile_definitions(MathFunctions PRIVATE "EXPORTING_MYMATH")
 
 # install rules
-install(TARGETS MathFunctions DESTINATION lib)
+set(installable_libs MathFunctions tutorial_compiler_flags)
+if(TARGET SqrtLibrary)
+  list(APPEND installable_libs SqrtLibrary)
+endif()
+install(TARGETS ${installable_libs} DESTINATION lib)
 install(FILES MathFunctions.h DESTINATION include)
