@@ -6,7 +6,7 @@ Windows CE, Windows Phone or a Windows Store application.
 
 If the target platform doesn't support deployment, this property won't have any effect.
 
-Generator expressions are supported.
+:manual:`Generator expressions <cmake-generator-expressions(7)>` are supported.
 
 Example 1
 ^^^^^^^^^
