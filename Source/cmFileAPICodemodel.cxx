@@ -277,6 +277,7 @@ struct CompileData
 
   std::string Language;
   std::string Sysroot;
+  JBT<std::string> LanguageStandard;
   std::vector<JBT<std::string>> Flags;
   std::vector<JBT<std::string>> Defines;
   std::vector<JBT<std::string>> PrecompileHeaders;
@@ -287,6 +288,7 @@ struct CompileData
     return (l.Language == r.Language && l.Sysroot == r.Sysroot &&
             l.Flags == r.Flags && l.Defines == r.Defines &&
             l.PrecompileHeaders == r.PrecompileHeaders &&
+            l.LanguageStandard == r.LanguageStandard &&
             l.Includes == r.Includes);
   }
 };
@@ -319,6 +321,10 @@ struct hash<CompileData>
     for (auto const& i : in.PrecompileHeaders) {
       result = result ^ hash<std::string>()(i.Value) ^
         hash<Json::ArrayIndex>()(i.Backtrace.Index);
+    }
+    if (!in.LanguageStandard.Value.empty()) {
+      result = result ^ hash<std::string>()(in.LanguageStandard.Value) ^
+        hash<Json::ArrayIndex>()(in.LanguageStandard.Backtrace.Index);
     }
     return result;
   }
@@ -377,6 +383,7 @@ class Target
   Json::Value DumpCompileData(CompileData const& cd);
   Json::Value DumpInclude(CompileData::IncludeEntry const& inc);
   Json::Value DumpPrecompileHeader(JBT<std::string> const& header);
+  Json::Value DumpLanguageStandard(JBT<std::string> const& standard);
   Json::Value DumpDefine(JBT<std::string> const& def);
   Json::Value DumpSources();
   Json::Value DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
@@ -838,6 +845,11 @@ void Target::ProcessLanguage(std::string const& lang)
   for (BT<std::string> const& pch : precompileHeaders) {
     cd.PrecompileHeaders.emplace_back(this->ToJBT(pch));
   }
+  BT<std::string> const* languageStandard =
+    this->GT->GetLanguageStandardProperty(lang, this->Config);
+  if (languageStandard) {
+    cd.LanguageStandard = this->ToJBT(*languageStandard);
+  }
 }
 
 Json::ArrayIndex Target::AddSourceGroup(cmSourceGroup* sg, Json::ArrayIndex si)
@@ -996,6 +1008,9 @@ CompileData Target::MergeCompileData(CompileData const& fd)
   // All compile groups share the precompile headers of the target.
   cd.PrecompileHeaders = td.PrecompileHeaders;
 
+  // All compile groups share the language standard of the target.
+  cd.LanguageStandard = td.LanguageStandard;
+
   // Use target-wide flags followed by source-specific flags.
   cd.Flags.reserve(td.Flags.size() + fd.Flags.size());
   cd.Flags.insert(cd.Flags.end(), td.Flags.begin(), td.Flags.end());
@@ -1153,6 +1168,10 @@ Json::Value Target::DumpCompileData(CompileData const& cd)
     }
     result["precompileHeaders"] = std::move(precompileHeaders);
   }
+  if (!cd.LanguageStandard.Value.empty()) {
+    result["languageStandard"] =
+      this->DumpLanguageStandard(cd.LanguageStandard);
+  }
 
   return result;
 }
@@ -1174,6 +1193,23 @@ Json::Value Target::DumpPrecompileHeader(JBT<std::string> const& header)
   precompileHeader["header"] = header.Value;
   this->AddBacktrace(precompileHeader, header.Backtrace);
   return precompileHeader;
+}
+
+Json::Value Target::DumpLanguageStandard(JBT<std::string> const& standard)
+{
+  Json::Value languageStandard = Json::objectValue;
+  languageStandard["standard"] = standard.Value;
+  if (standard.Backtrace) {
+    // Only one backtrace is currently stored for a given language standard,
+    // but we represent this as an array because it's possible for multiple
+    // compile features to set the same language standard value. Representing
+    // this as an array will allow things to just work once we support storing
+    // multiple backtraces for a language standard value.
+    Json::Value backtraces = Json::arrayValue;
+    backtraces.append(standard.Backtrace.Index);
+    languageStandard["backtraces"] = backtraces;
+  }
+  return languageStandard;
 }
 
 Json::Value Target::DumpDefine(JBT<std::string> const& def)
