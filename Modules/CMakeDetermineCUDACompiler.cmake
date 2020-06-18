@@ -173,7 +173,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   endif()
 
   get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${_CUDA_NVCC_EXECUTABLE}" DIRECTORY)
-  get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}" DIRECTORY ABSOLUTE)
+  get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}" DIRECTORY)
 
   # CMAKE_CUDA_COMPILER_LIBRARY_ROOT contains the device library and version file.
   # In a non-scattered installation this is equivalent to CMAKE_CUDA_COMPILER_TOOLKIT_ROOT.
