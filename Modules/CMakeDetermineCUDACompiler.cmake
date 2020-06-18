@@ -76,13 +76,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
   # For NVCC we can easily deduce the SDK binary directory from the compiler path.
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
-    get_filename_component(_CUDA_BIN_DIR "${CMAKE_CUDA_COMPILER}" DIRECTORY)
-    find_program(CUDAToolkit_NVCC_EXECUTABLE
-      NAMES nvcc nvcc.exe
-      PATHS ${_CUDA_BIN_DIR}
-      NO_DEFAULT_PATH
-    )
-    unset(_CUDA_BIN_DIR)
+    set(_CUDA_NVCC_EXECUTABLE "${CMAKE_CUDA_COMPILER}")
   endif()
 
   # Search using CUDAToolkit_ROOT and then CUDA_PATH for equivalence with FindCUDAToolkit.
