@@ -51,20 +51,13 @@ endif()
 if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   set(CMAKE_CUDA_COMPILER_ID_RUN 1)
 
-  # Try to identify the compiler.
-  set(CMAKE_CUDA_COMPILER_ID)
-  set(CMAKE_CUDA_PLATFORM_ID)
-  file(READ ${CMAKE_ROOT}/Modules/CMakePlatformId.h.in
-    CMAKE_CUDA_COMPILER_ID_PLATFORM_CONTENT)
+  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
 
+  # We determine the vendor to help with find the toolkit and use the right flags for detection right away.
+  # The main compiler identification is still needed below to extract other information.
   list(APPEND CMAKE_CUDA_COMPILER_ID_VENDORS NVIDIA Clang)
   set(CMAKE_CUDA_COMPILER_ID_VENDOR_REGEX_NVIDIA "nvcc: NVIDIA \\(R\\) Cuda compiler driver")
   set(CMAKE_CUDA_COMPILER_ID_VENDOR_REGEX_Clang "(clang version)")
-
-  set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-v")
-
-  # We determine the vendor to help with find the toolkit and use the right flags for detection right away.
-  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID_VENDOR(CUDA "--version")
 
   # Find the CUDA toolkit. We store the CMAKE_CUDA_COMPILER_TOOLKIT_ROOT and CMAKE_CUDA_COMPILER_LIBRARY_ROOT
@@ -184,6 +177,8 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_SYSROOT}/usr/lib/cuda")
   endif()
 
+  set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-v")
+
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
     set(nvcc_test_flags "--keep --keep-dir tmp")
     if(CMAKE_CUDA_HOST_COMPILER)
@@ -234,7 +229,10 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   # We also use it to verify that CMAKE_CUDA_ARCHITECTURES and additionaly on Clang that CUDA toolkit path works.
   # The latter could be done during compiler testing in the future to avoid doing this for Clang.
   # We need to unset the compiler ID otherwise CMAKE_DETERMINE_COMPILER_ID() doesn't work.
-  unset(CMAKE_CUDA_COMPILER_ID)
+  set(CMAKE_CUDA_COMPILER_ID)
+  set(CMAKE_CUDA_PLATFORM_ID)
+  file(READ ${CMAKE_ROOT}/Modules/CMakePlatformId.h.in
+    CMAKE_CUDA_COMPILER_ID_PLATFORM_CONTENT)
 
   CMAKE_DETERMINE_COMPILER_ID(CUDA CUDAFLAGS CMakeCUDACompilerId.cu)
 
