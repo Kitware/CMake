@@ -77,98 +77,98 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   # For NVCC we can easily deduce the SDK binary directory from the compiler path.
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
     set(_CUDA_NVCC_EXECUTABLE "${CMAKE_CUDA_COMPILER}")
-  endif()
-
-  # Search using CUDAToolkit_ROOT and then CUDA_PATH for equivalence with FindCUDAToolkit.
-  # In FindCUDAToolkit CUDAToolkit_ROOT is searched automatically due to being in a find_package().
-  # First we search candidate non-default paths to give them priority.
-  find_program(_CUDA_NVCC_EXECUTABLE
-    NAMES nvcc nvcc.exe
-    PATHS ${CUDAToolkit_ROOT}
-    ENV CUDAToolkit_ROOT
-    ENV CUDA_PATH
-    PATH_SUFFIXES bin
-    NO_DEFAULT_PATH
-  )
-
-  # If we didn't find NVCC, then try the default paths.
-  find_program(_CUDA_NVCC_EXECUTABLE
-    NAMES nvcc nvcc.exe
-    PATH_SUFFIXES bin
-  )
-
-  # If the user specified CUDAToolkit_ROOT but nvcc could not be found, this is an error.
-  if(NOT _CUDA_NVCC_EXECUTABLE AND (DEFINED CUDAToolkit_ROOT OR DEFINED ENV{CUDAToolkit_ROOT}))
-    set(fail_base "Could not find nvcc executable in path specified by")
-
-    if(DEFINED CUDAToolkit_ROOT)
-      message(FATAL_ERROR "${fail_base} CUDAToolkit_ROOT=${CUDAToolkit_ROOT}")
-    elseif(DEFINED ENV{CUDAToolkit_ROOT})
-      message(FATAL_ERROR "${fail_base} environment variable CUDAToolkit_ROOT=$ENV{CUDAToolkit_ROOT}")
-    endif()
-  endif()
-
-  # CUDAToolkit_ROOT cmake/env variable not specified, try platform defaults.
-  #
-  # - Linux: /usr/local/cuda-X.Y
-  # - macOS: /Developer/NVIDIA/CUDA-X.Y
-  # - Windows: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vX.Y
-  #
-  # We will also search the default symlink location /usr/local/cuda first since
-  # if CUDAToolkit_ROOT is not specified, it is assumed that the symlinked
-  # directory is the desired location.
-  if(NOT _CUDA_NVCC_EXECUTABLE)
-    if(UNIX)
-      if(NOT APPLE)
-        set(platform_base "/usr/local/cuda-")
-      else()
-        set(platform_base "/Developer/NVIDIA/CUDA-")
-      endif()
-    else()
-      set(platform_base "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v")
-    endif()
-
-    # Build out a descending list of possible cuda installations, e.g.
-    file(GLOB possible_paths "${platform_base}*")
-    # Iterate the glob results and create a descending list.
-    set(versions)
-    foreach(p ${possible_paths})
-      # Extract version number from end of string
-      string(REGEX MATCH "[0-9][0-9]?\\.[0-9]$" p_version ${p})
-      if(IS_DIRECTORY ${p} AND p_version)
-        list(APPEND versions ${p_version})
-      endif()
-    endforeach()
-
-    # Sort numerically in descending order, so we try the newest versions first.
-    list(SORT versions COMPARE NATURAL ORDER DESCENDING)
-
-    # With a descending list of versions, populate possible paths to search.
-    set(search_paths)
-    foreach(v ${versions})
-      list(APPEND search_paths "${platform_base}${v}")
-    endforeach()
-
-    # Force the global default /usr/local/cuda to the front on Unix.
-    if(UNIX)
-      list(INSERT search_paths 0 "/usr/local/cuda")
-    endif()
-
-    # Now search for nvcc again using the platform default search paths.
+  else()
+    # Search using CUDAToolkit_ROOT and then CUDA_PATH for equivalence with FindCUDAToolkit.
+    # In FindCUDAToolkit CUDAToolkit_ROOT is searched automatically due to being in a find_package().
+    # First we search candidate non-default paths to give them priority.
     find_program(_CUDA_NVCC_EXECUTABLE
       NAMES nvcc nvcc.exe
-      PATHS ${search_paths}
+      PATHS ${CUDAToolkit_ROOT}
+      ENV CUDAToolkit_ROOT
+      ENV CUDA_PATH
+      PATH_SUFFIXES bin
+      NO_DEFAULT_PATH
+    )
+
+    # If we didn't find NVCC, then try the default paths.
+    find_program(_CUDA_NVCC_EXECUTABLE
+      NAMES nvcc nvcc.exe
       PATH_SUFFIXES bin
     )
 
-    # We are done with these variables now, cleanup.
-    unset(platform_base)
-    unset(possible_paths)
-    unset(versions)
-    unset(search_paths)
+    # If the user specified CUDAToolkit_ROOT but nvcc could not be found, this is an error.
+    if(NOT _CUDA_NVCC_EXECUTABLE AND (DEFINED CUDAToolkit_ROOT OR DEFINED ENV{CUDAToolkit_ROOT}))
+      set(fail_base "Could not find nvcc executable in path specified by")
 
+      if(DEFINED CUDAToolkit_ROOT)
+        message(FATAL_ERROR "${fail_base} CUDAToolkit_ROOT=${CUDAToolkit_ROOT}")
+      elseif(DEFINED ENV{CUDAToolkit_ROOT})
+        message(FATAL_ERROR "${fail_base} environment variable CUDAToolkit_ROOT=$ENV{CUDAToolkit_ROOT}")
+      endif()
+    endif()
+
+    # CUDAToolkit_ROOT cmake/env variable not specified, try platform defaults.
+    #
+    # - Linux: /usr/local/cuda-X.Y
+    # - macOS: /Developer/NVIDIA/CUDA-X.Y
+    # - Windows: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vX.Y
+    #
+    # We will also search the default symlink location /usr/local/cuda first since
+    # if CUDAToolkit_ROOT is not specified, it is assumed that the symlinked
+    # directory is the desired location.
     if(NOT _CUDA_NVCC_EXECUTABLE)
-      message(FATAL_ERROR "Could not find nvcc, please set CUDAToolkit_ROOT.")
+      if(UNIX)
+        if(NOT APPLE)
+          set(platform_base "/usr/local/cuda-")
+        else()
+          set(platform_base "/Developer/NVIDIA/CUDA-")
+        endif()
+      else()
+        set(platform_base "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v")
+      endif()
+
+      # Build out a descending list of possible cuda installations, e.g.
+      file(GLOB possible_paths "${platform_base}*")
+      # Iterate the glob results and create a descending list.
+      set(versions)
+      foreach(p ${possible_paths})
+        # Extract version number from end of string
+        string(REGEX MATCH "[0-9][0-9]?\\.[0-9]$" p_version ${p})
+        if(IS_DIRECTORY ${p} AND p_version)
+          list(APPEND versions ${p_version})
+        endif()
+      endforeach()
+
+      # Sort numerically in descending order, so we try the newest versions first.
+      list(SORT versions COMPARE NATURAL ORDER DESCENDING)
+
+      # With a descending list of versions, populate possible paths to search.
+      set(search_paths)
+      foreach(v ${versions})
+        list(APPEND search_paths "${platform_base}${v}")
+      endforeach()
+
+      # Force the global default /usr/local/cuda to the front on Unix.
+      if(UNIX)
+        list(INSERT search_paths 0 "/usr/local/cuda")
+      endif()
+
+      # Now search for nvcc again using the platform default search paths.
+      find_program(_CUDA_NVCC_EXECUTABLE
+        NAMES nvcc nvcc.exe
+        PATHS ${search_paths}
+        PATH_SUFFIXES bin
+      )
+
+      # We are done with these variables now, cleanup.
+      unset(platform_base)
+      unset(possible_paths)
+      unset(versions)
+      unset(search_paths)
+
+      if(NOT _CUDA_NVCC_EXECUTABLE)
+        message(FATAL_ERROR "Could not find nvcc, please set CUDAToolkit_ROOT.")
+      endif()
     endif()
   endif()
 
