@@ -1,4 +1,4 @@
-CMake Error at genex_LINK_LANGUAGE-bad-usage.cmake:4 \(target_link_libraries\):
+CMake Error at bad-usage.cmake:4 \(target_link_libraries\):
   Error evaluating generator expression:
 
     \$<LINK_LANGUAGE>
