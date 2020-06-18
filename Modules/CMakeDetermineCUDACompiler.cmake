@@ -61,8 +61,6 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   set(CMAKE_CUDA_COMPILER_ID_VENDOR_REGEX_NVIDIA "nvcc: NVIDIA \\(R\\) Cuda compiler driver")
   set(CMAKE_CUDA_COMPILER_ID_VENDOR_REGEX_Clang "(clang version)")
 
-  set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCUDA/(\\./)?(CompilerIdCUDA.xctest/)?CompilerIdCUDA[ \t\n\\\"]")
-  set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_INDEX 2)
   set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-v")
 
   # We determine the vendor to help with find the toolkit and use the right flags for detection right away.
