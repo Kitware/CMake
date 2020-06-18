@@ -61,7 +61,7 @@ function(__armlink_set_cpu_list lang out_var)
   if(__CMAKE_ARMClang_USING_armlink)
     set(__linker_wrapper_flags "")
   else()
-    set(__linker_wrapper_flags --target=${CMAKE_${lang}_COMPILER_TARGET} -XLinker)
+    set(__linker_wrapper_flags --target=${CMAKE_${lang}_COMPILER_TARGET} -Xlinker)
   endif()
 
   execute_process(COMMAND "${CMAKE_LINKER}" ${__linker_wrapper_flags} --cpu=list
