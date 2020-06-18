@@ -14,6 +14,7 @@ bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
 {
   if (args.size() < 3) {
     status.SetError("called with incorrect number of arguments");
+    cmSystemTools::SetFatalErrorOccured();
     return false;
   }
 
@@ -114,6 +115,7 @@ bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
   } else {
     std::string err = "unknown component " + args[2];
     status.SetError(err);
+    cmSystemTools::SetFatalErrorOccured();
     return false;
   }
 
