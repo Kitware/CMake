@@ -117,6 +117,9 @@ Properties
 * The :prop_sf:`OBJECT_OUTPUTS` source file property now supports
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
+* The :prop_tgt:`PCH_WARN_INVALID` target property was added to allow the
+  removal of the precompiled header invalid warning.
+
 * The :prop_tgt:`UNITY_BUILD_MODE` target property was added to tell
   generators which algorithm to use for grouping included source
   files.
@@ -243,9 +246,9 @@ CPack
   installer is DPI-aware.
 
 * The :cpack_gen:`CPack RPM Generator` gained
-  :variable:`CPACK_RPM_PRE_TRANS_SCRIPT_FILE`
+  :variable:`CPACK_RPM_PRE_TRANS_SCRIPT_FILE` and
   :variable:`CPACK_RPM_POST_TRANS_SCRIPT_FILE`
-  variables to specify pre- and post-trans scripts.
+  variables to specify pre- and post-transaction scripts.
 
 Other
 -----

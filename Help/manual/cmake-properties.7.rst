@@ -128,7 +128,6 @@ Properties on Targets
    /prop_tgt/ARCHIVE_OUTPUT_DIRECTORY
    /prop_tgt/ARCHIVE_OUTPUT_NAME_CONFIG
    /prop_tgt/ARCHIVE_OUTPUT_NAME
-   /prop_tgt/PCH_WARN_INVALID
    /prop_tgt/AUTOGEN_BUILD_DIR
    /prop_tgt/AUTOGEN_ORIGIN_DEPENDS
    /prop_tgt/AUTOGEN_PARALLEL
@@ -312,6 +311,7 @@ Properties on Targets
    /prop_tgt/OSX_ARCHITECTURES
    /prop_tgt/OUTPUT_NAME_CONFIG
    /prop_tgt/OUTPUT_NAME
+   /prop_tgt/PCH_WARN_INVALID
    /prop_tgt/PDB_NAME_CONFIG
    /prop_tgt/PDB_NAME
    /prop_tgt/PDB_OUTPUT_DIRECTORY_CONFIG
