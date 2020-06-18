@@ -233,6 +233,13 @@ public:
   void AddSystemIncludeDirectories(std::set<std::string> const& incs);
   std::set<std::string> const& GetSystemIncludeDirectories() const;
 
+  BT<std::string> const* GetLanguageStandardProperty(
+    const std::string& propertyName) const;
+
+  void SetLanguageStandardProperty(std::string const& lang,
+                                   std::string const& value,
+                                   const std::string& feature);
+
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
 

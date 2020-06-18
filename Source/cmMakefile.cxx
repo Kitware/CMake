@@ -5070,7 +5070,7 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
         target->GetProperty(cmStrCat(lang, "_STANDARD")), newRequiredStandard,
         error)) {
     if (!newRequiredStandard.empty()) {
-      target->SetProperty(cmStrCat(lang, "_STANDARD"), newRequiredStandard);
+      target->SetLanguageStandardProperty(lang, newRequiredStandard, feature);
     }
     return true;
   }
@@ -5251,7 +5251,7 @@ bool cmMakefile::AddRequiredTargetCudaFeature(cmTarget* target,
         target->GetProperty(cmStrCat(lang, "_STANDARD")), newRequiredStandard,
         error)) {
     if (!newRequiredStandard.empty()) {
-      target->SetProperty(cmStrCat(lang, "_STANDARD"), newRequiredStandard);
+      target->SetLanguageStandardProperty(lang, newRequiredStandard, feature);
     }
     return true;
   }
@@ -5356,7 +5356,7 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
         target->GetProperty(cmStrCat(lang, "_STANDARD")), newRequiredStandard,
         error)) {
     if (!newRequiredStandard.empty()) {
-      target->SetProperty(cmStrCat(lang, "_STANDARD"), newRequiredStandard);
+      target->SetLanguageStandardProperty(lang, newRequiredStandard, feature);
     }
     return true;
   }
