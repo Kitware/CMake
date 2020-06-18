@@ -959,16 +959,17 @@ cmProp cmGeneratorTarget::GetLanguageStandard(std::string const& lang,
   return this->Target->GetProperty(cmStrCat(lang, "_STANDARD"));
 }
 
-cmProp cmGeneratorTarget::GetLanguageStandardProperty(std::string const& lang,
-                                                      const char* suffix) const
+cmProp cmGeneratorTarget::GetPropertyWithPairedLanguageSupport(
+  std::string const& lang, const char* suffix) const
 {
   cmProp propertyValue = this->Target->GetProperty(cmStrCat(lang, suffix));
   if (propertyValue == nullptr) {
     // Check if we should use the value set by another language.
     if (lang == "OBJC") {
-      propertyValue = this->GetLanguageStandardProperty("C", suffix);
+      propertyValue = this->GetPropertyWithPairedLanguageSupport("C", suffix);
     } else if (lang == "OBJCXX" || lang == "CUDA") {
-      propertyValue = this->GetLanguageStandardProperty("CXX", suffix);
+      propertyValue =
+        this->GetPropertyWithPairedLanguageSupport("CXX", suffix);
     }
   }
   return propertyValue;
@@ -976,13 +977,14 @@ cmProp cmGeneratorTarget::GetLanguageStandardProperty(std::string const& lang,
 
 cmProp cmGeneratorTarget::GetLanguageExtensions(std::string const& lang) const
 {
-  return this->GetLanguageStandardProperty(lang, "_EXTENSIONS");
+  return this->GetPropertyWithPairedLanguageSupport(lang, "_EXTENSIONS");
 }
 
 bool cmGeneratorTarget::GetLanguageStandardRequired(
   std::string const& lang) const
 {
-  cmProp p = this->GetLanguageStandardProperty(lang, "_STANDARD_REQUIRED");
+  cmProp p =
+    this->GetPropertyWithPairedLanguageSupport(lang, "_STANDARD_REQUIRED");
   return p && cmIsOn(*p);
 }
 

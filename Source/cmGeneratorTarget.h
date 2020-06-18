@@ -1052,8 +1052,8 @@ private:
 
   mutable std::map<std::string, std::string> LanguageStandardMap;
 
-  cmProp GetLanguageStandardProperty(std::string const& lang,
-                                     const char* suffix) const;
+  cmProp GetPropertyWithPairedLanguageSupport(std::string const& lang,
+                                              const char* suffix) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(
