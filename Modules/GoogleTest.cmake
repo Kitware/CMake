@@ -155,7 +155,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
                          [DISCOVERY_MODE <POST_BUILD|PRE_TEST>]
     )
 
-  ``gtest_discover_tests`` sets up a post-build command on the test executable
+  ``gtest_discover_tests()`` sets up a post-build command on the test executable
   that generates the list of tests by parsing the output from running the test
   with the ``--gtest_list_tests`` argument.  Compared to the source parsing
   approach of :command:`gtest_add_tests`, this ensures that the full list of
@@ -212,7 +212,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
 
   ``PROPERTIES name1 value1...``
     Specifies additional properties to be set on all tests discovered by this
-    invocation of ``gtest_discover_tests``.
+    invocation of ``gtest_discover_tests()``.
 
   ``TEST_LIST var``
     Make the list of tests available in the variable ``var``, rather than the
@@ -246,7 +246,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     XML result output when using parallel test execution.
 
   ``DISCOVERY_MODE``
-    Provides greater control over when ``gtest_discover_tests``performs test
+    Provides greater control over when ``gtest_discover_tests()`` performs test
     discovery. By default, ``POST_BUILD`` sets up a post-build command
     to perform test discovery at build time. In certain scenarios, like
     cross-compiling, this ``POST_BUILD`` behavior is not desirable.
@@ -257,7 +257,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
 
     ``DISCOVERY_MODE`` defaults to the value of the
     ``CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE`` variable if it is not
-    passed when calling ``gtest_discover_tests``. This provides a mechanism
+    passed when calling ``gtest_discover_tests()``. This provides a mechanism
     for globally selecting a preferred test discovery behavior without having
     to modify each call site.
 
