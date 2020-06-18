@@ -165,61 +165,53 @@ private:
   std::string RequiredValue;
   std::string ExtensionValue;
 };
-}
 
-static std::string const kCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN =
+std::string const kCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN =
   "CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN";
-static std::string const kCMAKE_C_COMPILER_TARGET = "CMAKE_C_COMPILER_TARGET";
-static std::string const kCMAKE_C_LINK_NO_PIE_SUPPORTED =
+std::string const kCMAKE_C_COMPILER_TARGET = "CMAKE_C_COMPILER_TARGET";
+std::string const kCMAKE_C_LINK_NO_PIE_SUPPORTED =
   "CMAKE_C_LINK_NO_PIE_SUPPORTED";
-static std::string const kCMAKE_C_LINK_PIE_SUPPORTED =
-  "CMAKE_C_LINK_PIE_SUPPORTED";
-static std::string const kCMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN =
+std::string const kCMAKE_C_LINK_PIE_SUPPORTED = "CMAKE_C_LINK_PIE_SUPPORTED";
+std::string const kCMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN =
   "CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN";
-static std::string const kCMAKE_CXX_COMPILER_TARGET =
-  "CMAKE_CXX_COMPILER_TARGET";
-static std::string const kCMAKE_CXX_LINK_NO_PIE_SUPPORTED =
+std::string const kCMAKE_CXX_COMPILER_TARGET = "CMAKE_CXX_COMPILER_TARGET";
+std::string const kCMAKE_CXX_LINK_NO_PIE_SUPPORTED =
   "CMAKE_CXX_LINK_NO_PIE_SUPPORTED";
-static std::string const kCMAKE_CXX_LINK_PIE_SUPPORTED =
+std::string const kCMAKE_CXX_LINK_PIE_SUPPORTED =
   "CMAKE_CXX_LINK_PIE_SUPPORTED";
-static std::string const kCMAKE_CUDA_ARCHITECTURES =
-  "CMAKE_CUDA_ARCHITECTURES";
-static std::string const kCMAKE_CUDA_COMPILER_TARGET =
-  "CMAKE_CUDA_COMPILER_TARGET";
-static std::string const kCMAKE_CUDA_RUNTIME_LIBRARY =
-  "CMAKE_CUDA_RUNTIME_LIBRARY";
-static std::string const kCMAKE_ENABLE_EXPORTS = "CMAKE_ENABLE_EXPORTS";
-static std::string const kCMAKE_LINK_SEARCH_END_STATIC =
+std::string const kCMAKE_CUDA_ARCHITECTURES = "CMAKE_CUDA_ARCHITECTURES";
+std::string const kCMAKE_CUDA_COMPILER_TARGET = "CMAKE_CUDA_COMPILER_TARGET";
+std::string const kCMAKE_CUDA_RUNTIME_LIBRARY = "CMAKE_CUDA_RUNTIME_LIBRARY";
+std::string const kCMAKE_ENABLE_EXPORTS = "CMAKE_ENABLE_EXPORTS";
+std::string const kCMAKE_LINK_SEARCH_END_STATIC =
   "CMAKE_LINK_SEARCH_END_STATIC";
-static std::string const kCMAKE_LINK_SEARCH_START_STATIC =
+std::string const kCMAKE_LINK_SEARCH_START_STATIC =
   "CMAKE_LINK_SEARCH_START_STATIC";
-static std::string const kCMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT =
+std::string const kCMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT =
   "CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT";
-static std::string const kCMAKE_OSX_ARCHITECTURES = "CMAKE_OSX_ARCHITECTURES";
-static std::string const kCMAKE_OSX_DEPLOYMENT_TARGET =
-  "CMAKE_OSX_DEPLOYMENT_TARGET";
-static std::string const kCMAKE_OSX_SYSROOT = "CMAKE_OSX_SYSROOT";
-static std::string const kCMAKE_APPLE_ARCH_SYSROOTS =
-  "CMAKE_APPLE_ARCH_SYSROOTS";
-static std::string const kCMAKE_POSITION_INDEPENDENT_CODE =
+std::string const kCMAKE_OSX_ARCHITECTURES = "CMAKE_OSX_ARCHITECTURES";
+std::string const kCMAKE_OSX_DEPLOYMENT_TARGET = "CMAKE_OSX_DEPLOYMENT_TARGET";
+std::string const kCMAKE_OSX_SYSROOT = "CMAKE_OSX_SYSROOT";
+std::string const kCMAKE_APPLE_ARCH_SYSROOTS = "CMAKE_APPLE_ARCH_SYSROOTS";
+std::string const kCMAKE_POSITION_INDEPENDENT_CODE =
   "CMAKE_POSITION_INDEPENDENT_CODE";
-static std::string const kCMAKE_SYSROOT = "CMAKE_SYSROOT";
-static std::string const kCMAKE_SYSROOT_COMPILE = "CMAKE_SYSROOT_COMPILE";
-static std::string const kCMAKE_SYSROOT_LINK = "CMAKE_SYSROOT_LINK";
-static std::string const kCMAKE_Swift_COMPILER_TARGET =
-  "CMAKE_Swift_COMPILER_TARGET";
-static std::string const kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES =
+std::string const kCMAKE_SYSROOT = "CMAKE_SYSROOT";
+std::string const kCMAKE_SYSROOT_COMPILE = "CMAKE_SYSROOT_COMPILE";
+std::string const kCMAKE_SYSROOT_LINK = "CMAKE_SYSROOT_LINK";
+std::string const kCMAKE_Swift_COMPILER_TARGET = "CMAKE_Swift_COMPILER_TARGET";
+std::string const kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES =
   "CMAKE_TRY_COMPILE_OSX_ARCHITECTURES";
-static std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
+std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
   "CMAKE_TRY_COMPILE_PLATFORM_VARIABLES";
-static std::string const kCMAKE_WARN_DEPRECATED = "CMAKE_WARN_DEPRECATED";
+std::string const kCMAKE_WARN_DEPRECATED = "CMAKE_WARN_DEPRECATED";
 
 /* GHS Multi platform variables */
-static std::set<std::string> ghs_platform_vars{
+std::set<std::string> const ghs_platform_vars{
   "GHS_TARGET_PLATFORM", "GHS_PRIMARY_TARGET", "GHS_TOOLSET_ROOT",
   "GHS_OS_ROOT",         "GHS_OS_DIR",         "GHS_BSP_NAME",
   "GHS_OS_DIR_OPTION"
 };
+}
 
 int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      bool isTryRun)
