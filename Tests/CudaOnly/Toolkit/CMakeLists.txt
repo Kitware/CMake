@@ -11,8 +11,17 @@ message(STATUS "CUDAToolkit_INCLUDE_DIRS: ${CUDAToolkit_INCLUDE_DIRS}")
 message(STATUS "CUDAToolkit_LIBRARY_DIR: ${CUDAToolkit_LIBRARY_DIR}")
 message(STATUS "CUDAToolkit_NVCC_EXECUTABLE ${CUDAToolkit_NVCC_EXECUTABLE}")
 
+
+set(cuda_libs cudart cuda_driver cublas cufft cufftw curand cusolver cusparse)
+if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.1)
+  list(APPEND cuda_libs cublasLt)
+endif()
+if(CUDAToolkit_VERSION_MAJOR VERSION_LESS 11)
+  list(APPEND cuda_libs nvgraph)
+endif()
+
 # Verify that all the CUDA:: targets and variables exist
-foreach (cuda_lib cudart cuda_driver cublas cufft cufftw curand cusolver cusparse nvgraph)
+foreach (cuda_lib IN LISTS cuda_libs)
   if(NOT CUDA_${cuda_lib}_LIBRARY)
     message(FATAL_ERROR "expected CUDAToolkit variable CUDA_${cuda_lib}_LIBRARY not found")
   endif()
@@ -21,7 +30,11 @@ foreach (cuda_lib cudart cuda_driver cublas cufft cufftw curand cusolver cuspars
   endif()
 endforeach()
 
-foreach (cuda_lib nppc nppial nppicc nppidei nppif nppig nppim nppist nppitc npps nppicom nppisu)
+set(npp_libs nppc nppial nppicc nppidei nppif nppig nppim nppist nppitc npps nppisu)
+if(CUDAToolkit_VERSION_MAJOR VERSION_LESS 11)
+  list(APPEND npp_libs nppicom)
+endif()
+foreach (cuda_lib )
   if(NOT CUDA_${cuda_lib}_LIBRARY)
     message(FATAL_ERROR "expected CUDAToolkit variable CUDA_${cuda_lib}_LIBRARY not found")
   endif()

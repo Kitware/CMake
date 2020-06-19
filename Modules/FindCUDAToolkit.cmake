@@ -154,6 +154,8 @@ Targets Created:
 
 - ``CUDA::cublas``
 - ``CUDA::cublas_static``
+- ``CUDA::cublasLt`` starting in CUDA 10.1
+- ``CUDA::cublasLt_static`` starting in CUDA 10.1
 
 .. _`cuda_toolkit_cuFFT`:
 
@@ -240,6 +242,7 @@ Targets Created:
   - ``CUDA::nppicc_static``
 
 - `nppicom`: JPEG compression and decompression functions in `nppi_compression_functions.h`
+  Removed starting in CUDA 11.0, use :ref:`nvJPEG<cuda_toolkit_nvJPEG>` instead.
 
   - ``CUDA::nppicom``
   - ``CUDA::nppicom_static``
@@ -302,6 +305,7 @@ nvGRAPH
 """""""
 
 The `nvGRAPH <https://docs.nvidia.com/cuda/nvgraph/index.html>`_ library.
+Removed starting in CUDA 11.0
 
 Targets Created:
 
@@ -821,7 +825,7 @@ if(CUDAToolkit_FOUND)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(culibos) # it's a static library
-  foreach (cuda_lib cublas cufft curand cusparse nppc nvjpeg)
+  foreach (cuda_lib cublasLt cublas cufft curand cusparse nppc nvjpeg)
     _CUDAToolkit_find_and_add_import_lib(${cuda_lib})
     _CUDAToolkit_find_and_add_import_lib(${cuda_lib}_static DEPS culibos)
   endforeach()
