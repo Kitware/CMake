@@ -5,30 +5,69 @@
 FindSDL
 -------
 
-Locate SDL library
-
-This module defines
-
-::
-
-  SDL_LIBRARY, the name of the library to link against
-  SDL_FOUND, if false, do not try to link to SDL
-  SDL_INCLUDE_DIR, where to find SDL.h
-  SDL_VERSION_STRING, human-readable string containing the version of SDL
+Locate the SDL library
 
 
+Imported targets
+^^^^^^^^^^^^^^^^
+
+This module defines the following :prop_tgt:`IMPORTED` target:
+
+``SDL::SDL``
+  The SDL library, if found
+
+Result variables
+^^^^^^^^^^^^^^^^
+
+This module will set the following variables in your project:
+
+``SDL_INCLUDE_DIRS``
+  where to find SDL.h
+``SDL_LIBRARIES``
+  the name of the library to link against
+``SDL_FOUND``
+  if false, do not try to link to SDL
+``SDL_VERSION``
+  the human-readable string containing the version of SDL if found
+``SDL_VERSION_MAJOR``
+  SDL major version
+``SDL_VERSION_MINOR``
+  SDL minor version
+``SDL_VERSION_PATCH``
+  SDL patch version
+
+Cache variables
+^^^^^^^^^^^^^^^
+
+These variables may optionally be set to help this module find the correct files:
+
+``SDL_INCLUDE_DIR``
+  where to find SDL.h
+``SDL_LIBRARY``
+  the name of the library to link against
+
+
+Variables for locating SDL
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This module responds to the flag:
 
-::
-
-  SDL_BUILDING_LIBRARY
+``SDL_BUILDING_LIBRARY``
     If this is defined, then no SDL_main will be linked in because
     only applications need main().
     Otherwise, it is assumed you are building an application and this
     module will attempt to locate and set the proper link flags
     as part of the returned SDL_LIBRARY variable.
 
+
+Obsolete variables
+^^^^^^^^^^^^^^^^^^
+
+These variables are obsolete and provided for backwards compatibility:
+
+``SDL_VERSION_STRING``
+  the human-readable string containing the version of SDL if found.
+  Identical to SDL_VERSION
 
 
 Don't forget to include SDLmain.h and SDLmain.m your project for the
@@ -51,15 +90,6 @@ does not get created.
 
 $SDLDIR is an environment variable that would correspond to the
 ./configure --prefix=$SDLDIR used in building SDL.  l.e.galup 9-20-02
-
-Modified by Eric Wing.  Added code to assist with automated building
-by using environmental variables and providing a more
-controlled/consistent search behavior.  Added new modifications to
-recognize OS X frameworks and additional Unix paths (FreeBSD, etc).
-Also corrected the header search path to follow "proper" SDL
-guidelines.  Added a search for SDLmain which is needed by some
-platforms.  Added a search for threads which is needed by some
-platforms.  Added needed compile switches for MinGW.
 
 On OSX, this will prefer the Framework version (if found) over others.
 People will have to manually change the cache values of SDL_LIBRARY to
@@ -174,13 +204,11 @@ if(SDL_INCLUDE_DIR AND EXISTS "${SDL_INCLUDE_DIR}/SDL_version.h")
   string(REGEX REPLACE "^#define[ \t]+SDL_MAJOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_VERSION_MAJOR "${SDL_VERSION_MAJOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_MINOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_VERSION_MINOR "${SDL_VERSION_MINOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_PATCHLEVEL[ \t]+([0-9]+)$" "\\1" SDL_VERSION_PATCH "${SDL_VERSION_PATCH_LINE}")
-  set(SDL_VERSION_STRING ${SDL_VERSION_MAJOR}.${SDL_VERSION_MINOR}.${SDL_VERSION_PATCH})
   unset(SDL_VERSION_MAJOR_LINE)
   unset(SDL_VERSION_MINOR_LINE)
   unset(SDL_VERSION_PATCH_LINE)
-  unset(SDL_VERSION_MAJOR)
-  unset(SDL_VERSION_MINOR)
-  unset(SDL_VERSION_PATCH)
+  set(SDL_VERSION ${SDL_VERSION_MAJOR}.${SDL_VERSION_MINOR}.${SDL_VERSION_PATCH})
+  set(SDL_VERSION_STRING ${SDL_VERSION})
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
@@ -188,3 +216,14 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL
                                   REQUIRED_VARS SDL_LIBRARY SDL_INCLUDE_DIR
                                   VERSION_VAR SDL_VERSION_STRING)
+
+if(SDL_FOUND)
+  set(SDL_LIBRARIES ${SDL_LIBRARY})
+  set(SDL_INCLUDE_DIRS ${SDL_INCLUDE_DIR})
+  if(NOT TARGET SDL::SDL)
+    add_library(SDL::SDL INTERFACE IMPORTED)
+    set_target_properties(SDL::SDL PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${SDL_INCLUDE_DIR}"
+      INTERFACE_LINK_LIBRARIES "${SDL_LIBRARY}")
+  endif()
+endif()

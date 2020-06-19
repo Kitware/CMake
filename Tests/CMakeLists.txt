@@ -1442,6 +1442,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
             Patch
             PostgreSQL
             Protobuf
+            SDL
             SQLite3
             TIFF
             Vulkan
