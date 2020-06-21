@@ -479,6 +479,7 @@ if ${cmake_system_mingw}; then
 fi
 
 CMAKE_STD_CXX_HEADERS="\
+  filesystem \
   memory \
   optional \
   shared_mutex \
@@ -486,6 +487,7 @@ CMAKE_STD_CXX_HEADERS="\
   utility \
 "
 CMAKE_STD_CXX_SOURCES="\
+  fs_path \
   string_view \
 "
 
@@ -1252,7 +1254,7 @@ echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
 #-----------------------------------------------------------------------------
 # Test CXX features
 
-cmake_cxx_features="make_unique"
+cmake_cxx_features="make_unique filesystem"
 
 for feature in ${cmake_cxx_features}; do
   eval "cmake_have_cxx_${feature}=0"

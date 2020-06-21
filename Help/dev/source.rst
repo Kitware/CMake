@@ -56,6 +56,9 @@ Available features are:
   * ``<cm/algorithm>``:
     ``cm::clamp``
 
+  * ``cm/filesystem>``:
+    ``cm::filesystem::path``
+
   * ``<cm/iterator>``:
     ``cm::size``, ``cm::empty``, ``cm::data``
 
