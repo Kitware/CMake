@@ -450,6 +450,9 @@ The options are:
 ``--component <comp>``
   Component-based install. Only install component ``<comp>``.
 
+``--default-directory-permissions <permissions>``
+  Default directory install permissions. Permissions in format ``<u=rwx,g=rx,o=rx>``.
+
 ``--prefix <prefix>``
   Override the installation prefix, :variable:`CMAKE_INSTALL_PREFIX`.
 
