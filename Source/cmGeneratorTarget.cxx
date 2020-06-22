@@ -43,6 +43,7 @@
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
+#include "cmStandardLevelResolver.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -4464,11 +4465,12 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
 bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
 {
   // Compute the language standard based on the compile features.
+  cmStandardLevelResolver standardResolver(this->Makefile);
   std::vector<BT<std::string>> features = this->GetCompileFeatures(config);
   for (BT<std::string> const& f : features) {
     std::string lang;
-    if (!this->Makefile->CompileFeatureKnown(this->Target->GetName(), f.Value,
-                                             lang, nullptr)) {
+    if (!standardResolver.CompileFeatureKnown(this->Target->GetName(), f.Value,
+                                              lang, nullptr)) {
       return false;
     }
 
@@ -4476,7 +4478,7 @@ bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
     cmProp currentLanguageStandard = this->GetLanguageStandard(lang, config);
 
     std::string newRequiredStandard;
-    if (!this->Makefile->GetNewRequiredStandard(
+    if (!standardResolver.GetNewRequiredStandard(
           this->Target->GetName(), f.Value, currentLanguageStandard,
           newRequiredStandard)) {
       return false;

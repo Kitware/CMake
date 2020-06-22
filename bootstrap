@@ -432,6 +432,7 @@ CMAKE_CXX_SOURCES="\
   cmSiteNameCommand \
   cmSourceFile \
   cmSourceFileLocation \
+  cmStandardLevelResolver \
   cmState \
   cmStateDirectory \
   cmStateSnapshot \

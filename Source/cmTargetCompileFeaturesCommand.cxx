@@ -4,6 +4,7 @@
 
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmStandardLevelResolver.h"
 #include "cmStringAlgorithms.h"
 #include "cmTargetPropCommandBase.h"
 
@@ -29,9 +30,10 @@ private:
                            const std::vector<std::string>& content,
                            bool /*prepend*/, bool /*system*/) override
   {
+    cmStandardLevelResolver standardResolver(this->Makefile);
     for (std::string const& it : content) {
       std::string error;
-      if (!this->Makefile->AddRequiredTargetFeature(tgt, it, &error)) {
+      if (!standardResolver.AddRequiredTargetFeature(tgt, it, &error)) {
         this->SetError(error);
         return false; // Not (successfully) handled.
       }

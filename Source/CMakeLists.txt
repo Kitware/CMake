@@ -412,6 +412,8 @@ set(SRCS
   cmSourceFileLocationKind.h
   cmSourceGroup.cxx
   cmSourceGroup.h
+  cmStandardLevelResolver.cxx
+  cmStandardLevelResolver.h
   cmState.cxx
   cmState.h
   cmStateDirectory.cxx
