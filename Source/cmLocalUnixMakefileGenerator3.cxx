@@ -713,9 +713,10 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsTop(
     // "VERBOSE=1" to be added as a make variable which will change the
     // name of this special target.  This gives a make-time choice to
     // the user.
-    this->WriteMakeRule(makefileStream,
-                        "Suppress display of executed commands.",
-                        "$(VERBOSE).SILENT", no_depends, no_commands, false);
+    // Write directly to the stream since WriteMakeRule escapes '$'.
+    makefileStream << "#Suppress display of executed commands.\n"
+                      "$(VERBOSE).SILENT:\n"
+                      "\n";
   }
 
   // Work-around for makes that drop rules that have no dependencies
