@@ -357,7 +357,8 @@ The script defines the following variables::
   CUDA_nppicc_LIBRARY   -- NVIDIA Performance Primitives lib (image processing).
                            Only available for CUDA version 9.0.
   CUDA_nppicom_LIBRARY  -- NVIDIA Performance Primitives lib (image processing).
-                           Only available for CUDA version 9.0.
+                           Only available for CUDA version 9.0 - 10.2.
+                           Replaced by nvjpeg.
   CUDA_nppidei_LIBRARY  -- NVIDIA Performance Primitives lib (image processing).
                            Only available for CUDA version 9.0.
   CUDA_nppif_LIBRARY    -- NVIDIA Performance Primitives lib (image processing).
@@ -1002,7 +1003,9 @@ if(NOT CUDA_VERSION VERSION_LESS "9.0")
   find_cuda_helper_libs(nppc)
   find_cuda_helper_libs(nppial)
   find_cuda_helper_libs(nppicc)
-  find_cuda_helper_libs(nppicom)
+  if(CUDA_VERSION VERSION_LESS "11.0")
+    find_cuda_helper_libs(nppicom)
+  endif()
   find_cuda_helper_libs(nppidei)
   find_cuda_helper_libs(nppif)
   find_cuda_helper_libs(nppig)
