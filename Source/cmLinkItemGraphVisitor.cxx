@@ -24,10 +24,6 @@ void cmLinkItemGraphVisitor::VisitItem(cmLinkItem const& item)
 void cmLinkItemGraphVisitor::VisitLinks(cmLinkItem const& item,
                                         cmLinkItem const& rootItem)
 {
-  if (this->LinkVisited(item, rootItem)) {
-    return;
-  }
-
   if (item.Target == nullptr) {
     return;
   }
