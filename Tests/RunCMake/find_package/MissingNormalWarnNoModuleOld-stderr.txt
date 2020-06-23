@@ -1,9 +1,10 @@
 CMake Warning \(dev\) at MissingNormalWarnNoModuleOld.cmake:2 \(find_package\):
-  find_package called without NO_MODULE option and no FindNotHere.cmake
-  module is in CMAKE_MODULE_PATH.  Add NO_MODULE to exclusively request
-  Config mode and search for a package configuration file provided by NotHere
-  \(NotHereConfig.cmake or nothere-config.cmake\).  Otherwise make
-  FindNotHere.cmake available in CMAKE_MODULE_PATH.
+  find_package called without either MODULE or CONFIG option and no
+  FindNotHere.cmake module is in CMAKE_MODULE_PATH.  Add MODULE to
+  exclusively request Module mode and fail if FindNotHere.cmake is missing.
+  Add CONFIG to exclusively request Config mode and search for a package
+  configuration file provided by NotHere \(NotHereConfig.cmake or
+  nothere-config.cmake\).
 
   \(Variable CMAKE_FIND_PACKAGE_WARN_NO_MODULE enabled this warning.\)
 Call Stack \(most recent call first\):
