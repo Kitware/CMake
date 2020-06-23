@@ -113,7 +113,7 @@ static CURLcode ftp_parse_url_path(struct connectdata *conn);
 static CURLcode ftp_regular_transfer(struct connectdata *conn, bool *done);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void ftp_pasv_verbose(struct connectdata *conn,
-                             Curl_addrinfo *ai,
+                             struct Curl_addrinfo *ai,
                              char *newhost, /* ascii version */
                              int port);
 #endif
@@ -136,7 +136,7 @@ static int ftp_getsock(struct connectdata *conn, curl_socket_t *socks);
 static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks);
 static CURLcode ftp_doing(struct connectdata *conn,
                           bool *dophase_done);
-static CURLcode ftp_setup_connection(struct connectdata * conn);
+static CURLcode ftp_setup_connection(struct connectdata *conn);
 
 static CURLcode init_wc_data(struct connectdata *conn);
 static CURLcode wc_statemach(struct connectdata *conn);
@@ -221,6 +221,9 @@ static void close_secondarysocket(struct connectdata *conn)
     conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
   }
   conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
+#ifndef CURL_DISABLE_PROXY
+  conn->bits.proxy_ssl_connected[SECONDARYSOCKET] = FALSE;
+#endif
 }
 
 /*
@@ -291,7 +294,7 @@ static CURLcode AcceptServerConnect(struct connectdata *conn)
 
   conn->sock[SECONDARYSOCKET] = s;
   (void)curlx_nonblock(s, TRUE); /* enable non-blocking */
-  conn->sock_accepted = TRUE;
+  conn->bits.sock_accepted = TRUE;
 
   if(data->set.fsockopt) {
     int error = 0;
@@ -334,7 +337,7 @@ static timediff_t ftp_timeleft_accept(struct Curl_easy *data)
   now = Curl_now();
 
   /* check if the generic timeout possibly is set shorter */
-  other =  Curl_timeleft(data, &now, FALSE);
+  other = Curl_timeleft(data, &now, FALSE);
   if(other && (other < timeout_ms))
     /* note that this also works fine for when other happens to be negative
        due to it already having elapsed */
@@ -386,7 +389,7 @@ static CURLcode ReceivedServerConnect(struct connectdata *conn, bool *received)
   if(pp->cache_size && pp->cache && pp->cache[0] > '3') {
     /* Data connection could not be established, let's return */
     infof(data, "There is negative response in cache while serv connect\n");
-    Curl_GetFTPResponse(&nread, conn, &ftpcode);
+    (void)Curl_GetFTPResponse(&nread, conn, &ftpcode);
     return CURLE_FTP_ACCEPT_FAILED;
   }
 
@@ -408,7 +411,7 @@ static CURLcode ReceivedServerConnect(struct connectdata *conn, bool *received)
     }
     else if(result & CURL_CSELECT_IN) {
       infof(data, "Ctrl conn has data while waiting for data conn\n");
-      Curl_GetFTPResponse(&nread, conn, &ftpcode);
+      (void)Curl_GetFTPResponse(&nread, conn, &ftpcode);
 
       if(ftpcode/100 > 3)
         return CURLE_FTP_ACCEPT_FAILED;
@@ -632,8 +635,8 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
   while(!*ftpcode && !result) {
     /* check and reset timeout value every lap */
-    time_t timeout = Curl_pp_state_timeout(pp, FALSE);
-    time_t interval_ms;
+    timediff_t timeout = Curl_pp_state_timeout(pp, FALSE);
+    timediff_t interval_ms;
 
     if(timeout <= 0) {
       failf(data, "FTP response timeout");
@@ -815,6 +818,7 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks)
 
   if(FTP_STOP == ftpc->state) {
     int bits = GETSOCK_READSOCK(0);
+    bool any = FALSE;
 
     /* if stopped and still in this state, then we're also waiting for a
        connect on the secondary connection */
@@ -829,10 +833,11 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks)
         if(conn->tempsock[i] != CURL_SOCKET_BAD) {
           socks[s] = conn->tempsock[i];
           bits |= GETSOCK_WRITESOCK(s++);
+          any = TRUE;
         }
       }
     }
-    else {
+    if(!any) {
       socks[1] = conn->sock[SECONDARYSOCKET];
       bits |= GETSOCK_WRITESOCK(1) | GETSOCK_READSOCK(1);
     }
@@ -913,7 +918,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   char myhost[MAX_IPADR_LEN + 1] = "";
 
   struct Curl_sockaddr_storage ss;
-  Curl_addrinfo *res, *ai;
+  struct Curl_addrinfo *res, *ai;
   curl_socklen_t sslen;
   char hbuf[NI_MAXHOST];
   struct sockaddr *sa = (struct sockaddr *)&ss;
@@ -1293,7 +1298,7 @@ static CURLcode ftp_state_use_pasv(struct connectdata *conn)
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result = CURLE_OK;
   /*
-    Here's the excecutive summary on what to do:
+    Here's the executive summary on what to do:
 
     PASV is RFC959, expect:
     227 Entering Passive Mode (a1,a2,a3,a4,p1,p2)
@@ -1759,7 +1764,11 @@ static CURLcode ftp_epsv_disable(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
 
-  if(conn->bits.ipv6 && !(conn->bits.tunnel_proxy || conn->bits.socksproxy)) {
+  if(conn->bits.ipv6
+#ifndef CURL_DISABLE_PROXY
+     && !(conn->bits.tunnel_proxy || conn->bits.socksproxy)
+#endif
+    ) {
     /* We can't disable EPSV when doing IPv6, so this is instead a fail */
     failf(conn->data, "Failed EPSV attempt, exiting\n");
     return CURLE_WEIRD_SERVER_REPLY;
@@ -1784,9 +1793,10 @@ static char *control_address(struct connectdata *conn)
      If a proxy tunnel is used, returns the original host name instead, because
      the effective control connection address is the proxy address,
      not the ftp host. */
+#ifndef CURL_DISABLE_PROXY
   if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
     return conn->host.name;
-
+#endif
   return conn->ip_addr_str;
 }
 
@@ -1903,6 +1913,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     return CURLE_FTP_WEIRD_PASV_REPLY;
   }
 
+#ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy) {
     /*
      * This connection uses a proxy and we need to connect to the proxy again
@@ -1925,7 +1936,9 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
       return CURLE_COULDNT_RESOLVE_PROXY;
     }
   }
-  else {
+  else
+#endif
+  {
     /* normal, direct, ftp connection */
     rc = Curl_resolv(conn, ftpc->newhost, ftpc->newport, FALSE, &addr);
     if(rc == CURLRESOLV_PENDING)
@@ -2634,9 +2647,12 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
 #endif
 
       if(data->set.use_ssl &&
-         (!conn->ssl[FIRSTSOCKET].use ||
-          (conn->bits.proxy_ssl_connected[FIRSTSOCKET] &&
-           !conn->proxy_ssl[FIRSTSOCKET].use))) {
+         (!conn->ssl[FIRSTSOCKET].use
+#ifndef CURL_DISABLE_PROXY
+          || (conn->bits.proxy_ssl_connected[FIRSTSOCKET] &&
+              !conn->proxy_ssl[FIRSTSOCKET].use)
+#endif
+           )) {
         /* We don't have a SSL/TLS connection yet, but FTPS is
            requested. Try a FTPS connection now */
 
@@ -3231,9 +3247,9 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     }
 
     if(conn->ssl[SECONDARYSOCKET].use) {
-      /* The secondary socket is using SSL so we must close down that part
-         first before we close the socket for real */
-      Curl_ssl_close(conn, SECONDARYSOCKET);
+      /* The secondary socket used SSL so we must close down that part first
+         before we close the socket for real */
+      result = Curl_ssl_shutdown(conn, SECONDARYSOCKET);
 
       /* Note that we keep "use" set to TRUE since that (next) connection is
          still requested to use SSL */
@@ -3249,7 +3265,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
      * data has been transferred. This happens when doing through NATs etc that
      * abandon old silent connections.
      */
-    long old_time = pp->response_time;
+    timediff_t old_time = pp->response_time;
 
     pp->response_time = 60*1000; /* give it only a minute for now */
     pp->response = Curl_now(); /* timeout relative now */
@@ -3442,7 +3458,7 @@ static CURLcode ftp_nb_type(struct connectdata *conn,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void
 ftp_pasv_verbose(struct connectdata *conn,
-                 Curl_addrinfo *ai,
+                 struct Curl_addrinfo *ai,
                  char *newhost, /* ascii version */
                  int port)
 {
@@ -3500,6 +3516,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
     }
   }
 
+#ifndef CURL_DISABLE_PROXY
   result = Curl_proxy_connect(conn, SECONDARYSOCKET);
   if(result)
     return result;
@@ -3510,7 +3527,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
   if(conn->bits.tunnel_proxy && conn->bits.httpproxy &&
      Curl_connect_ongoing(conn))
     return result;
-
+#endif
 
   if(ftpc->state) {
     /* already in a state so skip the initial commands.
@@ -4337,7 +4354,6 @@ static CURLcode ftp_setup_connection(struct connectdata *conn)
     char command;
     *type = 0;                     /* it was in the middle of the hostname */
     command = Curl_raw_toupper(type[6]);
-    conn->bits.type_set = TRUE;
 
     switch(command) {
     case 'A': /* ASCII mode */

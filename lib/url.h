@@ -47,7 +47,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_open(struct Curl_easy **curl);
 CURLcode Curl_init_userdefined(struct Curl_easy *data);
 
-void Curl_freeset(struct Curl_easy * data);
+void Curl_freeset(struct Curl_easy *data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);
 CURLcode Curl_close(struct Curl_easy **datap); /* opposite of curl_open() */
 CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
@@ -77,6 +77,10 @@ void Curl_free_idnconverted_hostname(struct hostname *host);
 void Curl_verboseconnect(struct connectdata *conn);
 #endif
 
+#ifdef CURL_DISABLE_PROXY
+#define CONNECT_PROXY_SSL() FALSE
+#else
+
 #define CONNECT_PROXY_SSL()\
   (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
   !conn->bits.proxy_ssl_connected[sockindex])
@@ -88,5 +92,6 @@ void Curl_verboseconnect(struct connectdata *conn);
 #define CONNECT_SECONDARYSOCKET_PROXY_SSL()\
   (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
   !conn->bits.proxy_ssl_connected[SECONDARYSOCKET])
+#endif /* !CURL_DISABLE_PROXY */
 
 #endif /* HEADER_CURL_URL_H */

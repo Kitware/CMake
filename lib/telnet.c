@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1315,7 +1315,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   DWORD readfile_read;
   int err;
 #else
-  int interval_ms;
+  timediff_t interval_ms;
   struct pollfd pfd[2];
   int poll_cnt;
   curl_off_t total_dl = 0;

@@ -26,7 +26,6 @@
 # The output .so file lacks the soname number which we currently have within the lib/Makefile.am file
 # Add full (4 or 5 libs) SSL support
 # Add INSTALL target (EXTRA_DIST variables in Makefile.am may be moved to Makefile.inc so that CMake/CPack is aware of what's to include).
-# Add CTests(?)
 # Check on all possible platforms
 # Test with as many configurations possible (With or without any option)
 # Create scripts that help keeping the CMake build system up to date (to reduce maintenance). According to Tetetest:
@@ -38,7 +37,7 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-cmake_minimum_required(VERSION 3.0...3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2...3.16 FATAL_ERROR)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
@@ -172,6 +171,8 @@ option(CURL_DISABLE_SMTP "to disable SMTP" OFF)
 mark_as_advanced(CURL_DISABLE_SMTP)
 option(CURL_DISABLE_GOPHER "to disable Gopher" OFF)
 mark_as_advanced(CURL_DISABLE_GOPHER)
+option(CURL_ENABLE_MQTT "to enable MQTT" OFF)
+mark_as_advanced(CURL_ENABLE_MQTT)
 
 if(HTTP_ONLY)
   set(CURL_DISABLE_FTP ON)
@@ -219,10 +220,6 @@ cmake_dependent_option(ENABLE_MANUAL "to provide the built-in manual"
     ON "NROFF_USEFUL;PERL_FOUND"
     OFF)
 
-if(NOT PERL_FOUND)
-  message(STATUS "Perl not found, testing disabled.")
-  set(BUILD_TESTING OFF)
-endif()
 if(ENABLE_MANUAL)
   set(USE_MANUAL ON)
 endif()
@@ -232,6 +229,7 @@ set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
 set(CMAKE_REQUIRED_FLAGS ${CMAKE_ANSI_CFLAGS})
 
 if(CURL_STATIC_CRT)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
 endif()
@@ -298,7 +296,7 @@ if(WIN32)
 endif()
 
 # check SSL libraries
-# TODO support GnuTLS and WolfSSL
+# TODO support GnuTLS
 
 if(APPLE)
   option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF)
@@ -311,9 +309,10 @@ endif()
 option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
 option(CMAKE_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF)
 option(CMAKE_USE_NSS "Enable NSS for SSL/TLS" OFF)
+option(CMAKE_USE_WOLFSSL "enable wolfSSL for SSL/TLS" OFF)
 
 set(openssl_default ON)
-if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS OR CMAKE_USE_NSS)
+if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS OR CMAKE_USE_NSS OR CMAKE_USE_WOLFSSL)
   set(openssl_default OFF)
 endif()
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
@@ -325,6 +324,7 @@ count_true(enabled_ssl_options_count
   CMAKE_USE_MBEDTLS
   CMAKE_USE_BEARSSL
   CMAKE_USE_NSS
+  CMAKE_USE_WOLFSSL
 )
 if(enabled_ssl_options_count GREATER "1")
   set(CURL_WITH_MULTI_SSL ON)
@@ -405,6 +405,14 @@ if(CMAKE_USE_BEARSSL)
   include_directories(${BEARSSL_INCLUDE_DIRS})
 endif()
 
+if(CMAKE_USE_WOLFSSL)
+  find_package(WolfSSL REQUIRED)
+  set(SSL_ENABLED ON)
+  set(USE_WOLFSSL ON)
+  list(APPEND CURL_LIBS ${WolfSSL_LIBRARIES})
+  include_directories(${WolfSSL_INCLUDE_DIRS})
+endif()
+
 if(CMAKE_USE_NSS)
   find_package(NSS REQUIRED)
   include_directories(${NSS_INCLUDE_DIRS})
@@ -423,6 +431,56 @@ if(USE_NGHTTP2)
   find_package(NGHTTP2 REQUIRED)
   include_directories(${NGHTTP2_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})
+endif()
+
+function(CheckQuicSupportInOpenSSL)
+  # Be sure that the OpenSSL library actually supports QUIC.
+  cmake_push_check_state()
+  set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
+  set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
+  check_symbol_exists(SSL_CTX_set_quic_method "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+  if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
+    message(FATAL_ERROR "QUIC support is missing in OpenSSL/boringssl. Try setting -DOPENSSL_ROOT_DIR")
+  endif()
+  cmake_pop_check_state()
+endfunction()
+
+option(USE_NGTCP2 "Use ngtcp2 and nghttp3 libraries for HTTP/3 support" OFF)
+if(USE_NGTCP2)
+  if(USE_OPENSSL)
+    find_package(NGTCP2 REQUIRED OpenSSL)
+    CheckQuicSupportInOpenSSL()
+  elseif(USE_GNUTLS)
+    # TODO add GnuTLS support as vtls library.
+    find_package(NGTCP2 REQUIRED GnuTLS)
+  else()
+    message(FATAL_ERROR "ngtcp2 requires OpenSSL or GnuTLS")
+  endif()
+  set(USE_NGTCP2 ON)
+  include_directories(${NGTCP2_INCLUDE_DIRS})
+  list(APPEND CURL_LIBS ${NGTCP2_LIBRARIES})
+
+  find_package(NGHTTP3 REQUIRED)
+  set(USE_NGHTTP3 ON)
+  include_directories(${NGHTTP3_INCLUDE_DIRS})
+  list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
+endif()
+
+option(USE_QUICHE "Use quiche library for HTTP/3 support" OFF)
+if(USE_QUICHE)
+  if(USE_NGTCP2)
+    message(FATAL_ERROR "Only one HTTP/3 backend can be selected!")
+  endif()
+  find_package(QUICHE REQUIRED)
+  CheckQuicSupportInOpenSSL()
+  set(USE_QUICHE ON)
+  include_directories(${QUICHE_INCLUDE_DIRS})
+  list(APPEND CURL_LIBS ${QUICHE_LIBRARIES})
+  cmake_push_check_state()
+  set(CMAKE_REQUIRED_INCLUDES   "${QUICHE_INCLUDE_DIRS}")
+  set(CMAKE_REQUIRED_LIBRARIES  "${QUICHE_LIBRARIES}")
+  check_symbol_exists(quiche_conn_set_qlog_fd "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
+  cmake_pop_check_state()
 endif()
 
 if(WIN32)
@@ -614,6 +672,20 @@ if(CMAKE_USE_LIBSSH2)
   endif()
 endif()
 
+# libssh
+option(CMAKE_USE_LIBSSH "Use libSSH" OFF)
+mark_as_advanced(CMAKE_USE_LIBSSH)
+if(NOT HAVE_LIBSSH2 AND CMAKE_USE_LIBSSH)
+  find_package(libssh CONFIG)
+  if(libssh_FOUND)
+    message(STATUS "Found libssh ${libssh_VERSION}")
+    # Use imported target for include and library paths.
+    list(APPEND CURL_LIBS ssh)
+    set(USE_LIBSSH ON)
+    set(HAVE_LIBSSH_LIBSSH_H 1)
+  endif()
+endif()
+
 option(CMAKE_USE_GSSAPI "Use GSSAPI implementation (right now only Heimdal is supported with CMake build)" OFF)
 mark_as_advanced(CMAKE_USE_GSSAPI)
 
@@ -681,6 +753,9 @@ if(ENABLE_UNIX_SOCKETS)
 else()
   unset(USE_UNIX_SOCKETS CACHE)
 endif()
+
+option(ENABLE_ALT_SVC "Enable alt-svc support" OFF)
+set(USE_ALTSVC ${ENABLE_ALT_SVC})
 
 #
 # CA handling
@@ -750,7 +825,7 @@ elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
 endif()
 
 if(CURL_CA_PATH_SET AND NOT USE_OPENSSL AND NOT USE_MBEDTLS)
-  message(FATAL_ERROR
+  message(STATUS
           "CA path only supported by OpenSSL, GnuTLS or mbed TLS. "
           "Set CURL_CA_PATH=none or enable one of those TLS backends.")
 endif()
@@ -788,7 +863,6 @@ check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
 check_include_file_concat("arpa/tftp.h"      HAVE_ARPA_TFTP_H)
 check_include_file_concat("assert.h"         HAVE_ASSERT_H)
 check_include_file_concat("crypto.h"         HAVE_CRYPTO_H)
-check_include_file_concat("des.h"            HAVE_DES_H)
 check_include_file_concat("err.h"            HAVE_ERR_H)
 check_include_file_concat("errno.h"          HAVE_ERRNO_H)
 check_include_file_concat("fcntl.h"          HAVE_FCNTL_H)
@@ -1194,7 +1268,7 @@ function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
   string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace $() with ${}
   string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})    # Replace @@ with ${}, even if that may not be read by CMake scripts.
   file(WRITE ${OUTPUT_FILE} ${MAKEFILE_INC_TEXT})
-
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${INPUT_FILE}")
 endfunction()
 
 include(GNUInstallDirs)
@@ -1215,8 +1289,10 @@ if(BUILD_CURL_EXE)
   add_subdirectory(src)
 endif()
 
-include(CTest)
-if(BUILD_TESTING)
+option(BUILD_TESTING "Build tests" "${PERL_FOUND}")
+if(NOT PERL_FOUND)
+  message(STATUS "Perl not found, testing disabled.")
+elseif(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
@@ -1250,6 +1326,7 @@ _add_if("Largefile"     (CURL_SIZEOF_CURL_OFF_T GREATER 4) AND
 # TODO SSP1 (WinSSL) check is missing
 _add_if("SSPI"          USE_WINDOWS_SSPI)
 _add_if("GSS-API"       HAVE_GSSAPI)
+_add_if("alt-svc"       ENABLE_ALT_SVC)
 # TODO SSP1 missing for SPNEGO
 _add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
@@ -1264,6 +1341,8 @@ _add_if("NTLM_WB"     use_ntlm AND NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
 _add_if("TLS-SRP"       USE_TLS_SRP)
 # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
 _add_if("HTTP2"         USE_NGHTTP2)
+_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
+_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS))
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
@@ -1293,10 +1372,11 @@ _add_if("SMB"           NOT CURL_DISABLE_SMB AND use_ntlm)
 _add_if("SMBS"          NOT CURL_DISABLE_SMB AND SSL_ENABLED AND use_ntlm)
 _add_if("SMTP"          NOT CURL_DISABLE_SMTP)
 _add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND SSL_ENABLED)
-_add_if("SCP"           USE_LIBSSH2)
-_add_if("SFTP"          USE_LIBSSH2)
+_add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH)
+_add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH)
 _add_if("RTSP"          NOT CURL_DISABLE_RTSP)
 _add_if("RTMP"          USE_LIBRTMP)
+_add_if("MQTT"          CURL_ENABLE_MQTT)
 if(_items)
   list(SORT _items)
 endif()
@@ -1311,6 +1391,7 @@ _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
 _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
 _add_if("BearSSL"          SSL_ENABLED AND USE_BEARSSL)
 _add_if("NSS"              SSL_ENABLED AND USE_NSS)
+_add_if("wolfSSL"          SSL_ENABLED AND USE_WOLFSSL)
 if(_items)
   list(SORT _items)
 endif()
@@ -1324,25 +1405,43 @@ set(CONFIGURE_OPTIONS       "")
 # TODO when to set "-DCURL_STATICLIB" for CPPFLAG_CURL_STATICLIB?
 set(CPPFLAG_CURL_STATICLIB  "")
 set(CURLVERSION             "${CURL_VERSION}")
-if(BUILD_SHARED_LIBS)
-  set(ENABLE_SHARED         "yes")
-  set(ENABLE_STATIC         "no")
-else()
-  set(ENABLE_SHARED         "no")
-  set(ENABLE_STATIC         "yes")
-endif()
 set(exec_prefix             "\${prefix}")
 set(includedir              "\${prefix}/include")
 set(LDFLAGS                 "${CMAKE_SHARED_LINKER_FLAGS}")
 set(LIBCURL_LIBS            "")
 set(libdir                  "${CMAKE_INSTALL_PREFIX}/lib")
 foreach(_lib ${CMAKE_C_IMPLICIT_LINK_LIBRARIES} ${CURL_LIBS})
+  if(TARGET "${_lib}")
+    set(_libname "${_lib}")
+    get_target_property(_libtype "${_libname}" TYPE)
+    if(_libtype STREQUAL INTERFACE_LIBRARY)
+      # Interface libraries can occur when an external project embeds curl and
+      # defined targets such as ZLIB::ZLIB by themselves. Ignore these as
+      # reading the LOCATION property will error out. Assume the user won't need
+      # this information in the .pc file.
+      continue()
+    endif()
+    get_target_property(_lib "${_libname}" LOCATION)
+    if(NOT _lib)
+      message(WARNING "Bad lib in library list: ${_libname}")
+      continue()
+    endif()
+  endif()
   if(_lib MATCHES ".*/.*" OR _lib MATCHES "^-")
     set(LIBCURL_LIBS          "${LIBCURL_LIBS} ${_lib}")
   else()
     set(LIBCURL_LIBS          "${LIBCURL_LIBS} -l${_lib}")
   endif()
 endforeach()
+if(BUILD_SHARED_LIBS)
+  set(ENABLE_SHARED         "yes")
+  set(ENABLE_STATIC         "no")
+  set(LIBCURL_NO_SHARED     "")
+else()
+  set(ENABLE_SHARED         "no")
+  set(ENABLE_STATIC         "yes")
+  set(LIBCURL_NO_SHARED     "${LIBCURL_LIBS}")
+endif()
 # "a" (Linux) or "lib" (Windows)
 string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(prefix                  "${CMAKE_INSTALL_PREFIX}")
