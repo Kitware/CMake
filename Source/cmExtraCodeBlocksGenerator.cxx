@@ -370,7 +370,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             std::string lang = s->GetOrDetermineLanguage();
             if (lang == "C" || lang == "CXX" || lang == "CUDA") {
               std::string const& srcext = s->GetExtension();
-              isCFile = cm->IsSourceExtension(srcext);
+              isCFile = cm->IsACLikeSourceExtension(srcext);
             }
 
             std::string const& fullPath = s->ResolveFullPath();
