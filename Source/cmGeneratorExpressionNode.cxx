@@ -881,7 +881,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 {
   ConfigurationTestNode() {} // NOLINT(modernize-use-equals-default)
 
-  int NumExpectedParameters() const override { return OneOrZeroParameters; }
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -899,13 +899,15 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return std::string();
     }
     context->HadContextSensitiveCondition = true;
-    if (context->Config.empty()) {
-      return parameters.front().empty() ? "1" : "0";
-    }
-
-    if (cmsysString_strcasecmp(parameters.front().c_str(),
-                               context->Config.c_str()) == 0) {
-      return "1";
+    for (auto& param : parameters) {
+      if (context->Config.empty()) {
+        if (param.empty()) {
+          return "1";
+        }
+      } else if (cmsysString_strcasecmp(param.c_str(),
+                                        context->Config.c_str()) == 0) {
+        return "1";
+      }
     }
 
     if (context->CurrentTarget && context->CurrentTarget->IsImported()) {
@@ -922,10 +924,12 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
           "MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(context->Config));
         if (cmProp mapValue = context->CurrentTarget->GetProperty(mapProp)) {
           cmExpandList(cmSystemTools::UpperCase(*mapValue), mappedConfigs);
-          return cm::contains(mappedConfigs,
-                              cmSystemTools::UpperCase(parameters.front()))
-            ? "1"
-            : "0";
+
+          for (auto& param : parameters) {
+            if (cm::contains(mappedConfigs, cmSystemTools::UpperCase(param))) {
+              return "1";
+            }
+          }
         }
       }
     }
