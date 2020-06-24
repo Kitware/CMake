@@ -36,7 +36,7 @@ The following variables may be set to influence this module's behavior:
   * ``SCSL``
   * ``SGIMATH``
   * ``IBMESSL``
-  * ``Intel10_32`` (intel mkl v10 32 bit)
+  * ``Intel10_32`` (intel mkl v10 32 bit, threaded code)
   * ``Intel10_64lp`` (intel mkl v10+ 64 bit, threaded code, lp64 model)
   * ``Intel10_64lp_seq`` (intel mkl v10+ 64 bit, sequential code, lp64 model)
   * ``Intel10_64ilp`` (intel mkl v10+ 64 bit, threaded code, ilp64 model)
@@ -397,6 +397,10 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
           # Add threading/sequential libs
           set(BLAS_SEARCH_LIBS_WIN_THREAD "")
+          if(BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
+            list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
+              "libiomp5md mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
+          endif()
           if(BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
             # old version
             list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD

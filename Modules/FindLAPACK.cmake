@@ -28,7 +28,7 @@ The following variables may be set to influence this module's behavior:
 
   * ``OpenBLAS``
   * ``FLAME``
-  * ``Intel10_32`` (intel mkl v10 32 bit)
+  * ``Intel10_32`` (intel mkl v10 32 bit, threaded code)
   * ``Intel10_64lp`` (intel mkl v10+ 64 bit, threaded code, lp64 model)
   * ``Intel10_64lp_seq`` (intel mkl v10+ 64 bit, sequential code, lp64 model)
   * ``Intel10_64ilp`` (intel mkl v10+ 64 bit, threaded code, ilp64 model)
