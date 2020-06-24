@@ -62,13 +62,15 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
   int result;
   *n = 0;
   for(;;) {
-    timediff_t timeleft = Curl_timeleft(conn->data, NULL, TRUE);
-    if(timeleft < 0) {
+    timediff_t timeout_ms = Curl_timeleft(conn->data, NULL, TRUE);
+    if(timeout_ms < 0) {
       /* we already got the timeout */
       result = CURLE_OPERATION_TIMEDOUT;
       break;
     }
-    if(SOCKET_READABLE(sockfd, timeleft) <= 0) {
+    if(!timeout_ms)
+      timeout_ms = TIMEDIFF_T_MAX;
+    if(SOCKET_READABLE(sockfd, timeout_ms) <= 0) {
       result = ~CURLE_OK;
       break;
     }
@@ -205,6 +207,8 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
 
   switch(sx->state) {
   case CONNECT_SOCKS_INIT:
+    /* SOCKS4 can only do IPv4, insist! */
+    conn->ip_version = CURL_IPRESOLVE_V4;
     if(conn->bits.httpproxy)
       infof(conn->data, "SOCKS4%s: connecting to HTTP proxy %s port %d\n",
             protocol4a ? "a" : "", hostname, remote_port);
@@ -261,13 +265,13 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
     }
     else {
       result = Curl_resolv_check(data->conn, &dns);
-      /* stay in the state or error out */
-      return result;
+      if(!dns)
+        return result;
     }
     /* FALLTHROUGH */
   CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
-    Curl_addrinfo *hp = NULL;
+    struct Curl_addrinfo *hp = NULL;
     char buf[64];
     /*
      * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
@@ -376,6 +380,11 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
     if(result && (CURLE_AGAIN != result)) {
       failf(data, "SOCKS4: Failed receiving connect request ack: %s",
             curl_easy_strerror(result));
+      return CURLE_COULDNT_CONNECT;
+    }
+    else if(!result && !actualread) {
+      /* connection closed */
+      failf(data, "connection to proxy closed");
       return CURLE_COULDNT_CONNECT;
     }
     else if(actualread != sx->outstanding) {
@@ -588,6 +597,11 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       failf(data, "Unable to receive initial SOCKS5 response.");
       return CURLE_COULDNT_CONNECT;
     }
+    else if(!result && !actualread) {
+      /* connection closed */
+      failf(data, "Connection to proxy closed");
+      return CURLE_COULDNT_CONNECT;
+    }
     else if(actualread != sx->outstanding) {
       /* remain in reading state */
       sx->outstanding -= actualread;
@@ -629,11 +643,10 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
         failf(data, "No authentication method was acceptable.");
         return CURLE_COULDNT_CONNECT;
       }
-      failf(data,
-            "Undocumented SOCKS5 mode attempted to be used by server.");
-      return CURLE_COULDNT_CONNECT;
     }
-    break;
+    failf(data,
+          "Undocumented SOCKS5 mode attempted to be used by server.");
+    return CURLE_COULDNT_CONNECT;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CONNECT_GSSAPI_INIT:
     /* GSSAPI stuff done non-blocking */
@@ -714,15 +727,19 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       failf(data, "Unable to receive SOCKS5 sub-negotiation response.");
       return CURLE_COULDNT_CONNECT;
     }
-    if(actualread != sx->outstanding) {
+    else if(!result && !actualread) {
+      /* connection closed */
+      failf(data, "connection to proxy closed");
+      return CURLE_COULDNT_CONNECT;
+    }
+    else if(actualread != sx->outstanding) {
       /* remain in state */
       sx->outstanding -= actualread;
       sx->outp += actualread;
       return CURLE_OK;
     }
-
     /* ignore the first (VER) byte */
-    if(socksreq[1] != 0) { /* status */
+    else if(socksreq[1] != 0) { /* status */
       failf(data, "User was rejected by the SOCKS5 server (%d %d).",
             socksreq[0], socksreq[1]);
       return CURLE_COULDNT_CONNECT;
@@ -763,13 +780,14 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
 
     if(!dns) {
       result = Curl_resolv_check(data->conn, &dns);
-      /* stay in the state or error out */
-      return result;
+      if(!dns)
+        return result;
     }
     /* FALLTHROUGH */
   CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
-    Curl_addrinfo *hp = NULL;
+    struct Curl_addrinfo *hp = NULL;
+    size_t destlen;
     if(dns)
       hp = dns->addr;
     if(!hp) {
@@ -778,13 +796,9 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       return CURLE_COULDNT_RESOLVE_HOST;
     }
 
-    if(Curl_printable_address(hp, dest, sizeof(dest))) {
-      size_t destlen = strlen(dest);
-      msnprintf(dest + destlen, sizeof(dest) - destlen, ":%d", remote_port);
-    }
-    else {
-      strcpy(dest, "unknown");
-    }
+    Curl_printable_address(hp, dest, sizeof(dest));
+    destlen = strlen(dest);
+    msnprintf(dest + destlen, sizeof(dest) - destlen, ":%d", remote_port);
 
     len = 0;
     socksreq[len++] = 5; /* version (SOCKS5) */
@@ -890,6 +904,11 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       failf(data, "Failed to receive SOCKS5 connect request ack.");
       return CURLE_COULDNT_CONNECT;
     }
+    else if(!result && !actualread) {
+      /* connection closed */
+      failf(data, "connection to proxy closed");
+      return CURLE_COULDNT_CONNECT;
+    }
     else if(actualread != sx->outstanding) {
       /* remain in state */
       sx->outstanding -= actualread;
@@ -934,6 +953,13 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       /* IPv6 */
       len = 4 + 16 + 2;
     }
+    else if(socksreq[3] == 1) {
+      len = 4 + 4 + 2;
+    }
+    else {
+      failf(data, "SOCKS5 reply has wrong address type.");
+      return CURLE_COULDNT_CONNECT;
+    }
 
     /* At this point we already read first 10 bytes */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
@@ -960,7 +986,12 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       failf(data, "Failed to receive SOCKS5 connect request ack.");
       return CURLE_COULDNT_CONNECT;
     }
-    if(actualread != sx->outstanding) {
+    else if(!result && !actualread) {
+      /* connection closed */
+      failf(data, "connection to proxy closed");
+      return CURLE_COULDNT_CONNECT;
+    }
+    else if(actualread != sx->outstanding) {
       /* remain in state */
       sx->outstanding -= actualread;
       sx->outp += actualread;

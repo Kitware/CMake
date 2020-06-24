@@ -103,20 +103,16 @@ bool Curl_ipvalid(struct connectdata *conn)
 #if defined(CURLRES_SYNCH)
 
 #ifdef DEBUG_ADDRINFO
-static void dump_addrinfo(struct connectdata *conn, const Curl_addrinfo *ai)
+static void dump_addrinfo(struct connectdata *conn,
+                          const struct Curl_addrinfo *ai)
 {
   printf("dump_addrinfo:\n");
   for(; ai; ai = ai->ai_next) {
     char buf[INET6_ADDRSTRLEN];
     printf("    fam %2d, CNAME %s, ",
            ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
-    if(Curl_printable_address(ai, buf, sizeof(buf)))
-      printf("%s\n", buf);
-    else {
-      char buffer[STRERROR_LEN];
-      printf("failed; %s\n",
-             Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-    }
+    Curl_printable_address(ai, buf, sizeof(buf));
+    printf("%s\n", buf);
   }
 }
 #else
@@ -132,13 +128,13 @@ static void dump_addrinfo(struct connectdata *conn, const Curl_addrinfo *ai)
  * memory we need to free after use. That memory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
-Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
-                                const char *hostname,
-                                int port,
-                                int *waitp)
+struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+                                       const char *hostname,
+                                       int port,
+                                       int *waitp)
 {
   struct addrinfo hints;
-  Curl_addrinfo *res;
+  struct Curl_addrinfo *res;
   int error;
   char sbuf[12];
   char *sbufptr = NULL;
