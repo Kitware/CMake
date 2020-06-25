@@ -34,6 +34,7 @@
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h" // IWYU pragma: keep
 #include "cmExportBuildFileGenerator.h"
+#include "cmFSPermissions.h"
 #include "cmFileLockPool.h"
 #include "cmFunctionBlocker.h"
 #include "cmGeneratedFileStream.h"
@@ -68,6 +69,8 @@
 #endif
 
 class cmMessenger;
+
+using namespace cmFSPermissions;
 
 cmDirectoryId::cmDirectoryId(std::string s)
   : String(std::move(s))
@@ -3997,6 +4000,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
 int cmMakefile::ConfigureFile(const std::string& infile,
                               const std::string& outfile, bool copyonly,
                               bool atOnly, bool escapeQuotes,
+                              bool use_source_permissions,
                               cmNewLineStyle newLine)
 {
   int res = 1;
@@ -4020,7 +4024,13 @@ int cmMakefile::ConfigureFile(const std::string& infile,
   this->AddCMakeOutputFile(soutfile);
 
   mode_t perm = 0;
-  cmSystemTools::GetPermissions(sinfile, perm);
+  if (!use_source_permissions) {
+    perm = perm | mode_owner_read | mode_owner_write | mode_group_read |
+      mode_world_read;
+  } else {
+    cmSystemTools::GetPermissions(sinfile, perm);
+  }
+
   std::string::size_type pos = soutfile.rfind('/');
   if (pos != std::string::npos) {
     std::string path = soutfile.substr(0, pos);
@@ -4029,6 +4039,11 @@ int cmMakefile::ConfigureFile(const std::string& infile,
 
   if (copyonly) {
     if (!cmSystemTools::CopyFileIfDifferent(sinfile, soutfile)) {
+      this->IssueMessage(MessageType::FATAL_ERROR,
+                         cmSystemTools::GetLastSystemError());
+      return 0;
+    }
+    if (!cmSystemTools::SetPermissions(soutfile, perm)) {
       this->IssueMessage(MessageType::FATAL_ERROR,
                          cmSystemTools::GetLastSystemError());
       return 0;
