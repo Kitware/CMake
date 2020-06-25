@@ -1272,6 +1272,9 @@ for feature in ${cmake_cxx_features}; do
   fi
 done
 
+cmake_generate_file "${cmake_bootstrap_dir}/cmSTL.hxx" ""
+
+
 #-----------------------------------------------------------------------------
 # Test Make
 

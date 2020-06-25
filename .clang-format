@@ -20,6 +20,8 @@ SortUsingDeclarations: false
 SpaceAfterTemplateKeyword: true
 IncludeBlocks: Regroup
 IncludeCategories:
+  - Regex:           '^[<"]cmSTL\.hxx'
+    Priority:        -2
   - Regex:           '^[<"]cmConfigure\.h'
     Priority:        -1
   - Regex:           '^<queue>'
