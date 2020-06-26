@@ -83,8 +83,8 @@
     dest->var = NULL;
 
 bool
-Curl_ssl_config_matches(struct ssl_primary_config* data,
-                        struct ssl_primary_config* needle)
+Curl_ssl_config_matches(struct ssl_primary_config *data,
+                        struct ssl_primary_config *needle)
 {
   if((data->version == needle->version) &&
      (data->version_max == needle->version_max) &&
@@ -127,7 +127,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   return TRUE;
 }
 
-void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc)
+void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
 {
   Curl_safefree(sslc->CApath);
   Curl_safefree(sslc->CAfile);
@@ -174,6 +174,9 @@ int Curl_ssl_init(void)
   return Curl_ssl->init();
 }
 
+#if defined(CURL_WITH_MULTI_SSL)
+static const struct Curl_ssl Curl_ssl_multi;
+#endif
 
 /* Global cleanup */
 void Curl_ssl_cleanup(void)
@@ -181,6 +184,9 @@ void Curl_ssl_cleanup(void)
   if(init_ssl) {
     /* only cleanup if we did a previous init */
     Curl_ssl->cleanup();
+#if defined(CURL_WITH_MULTI_SSL)
+    Curl_ssl = &Curl_ssl_multi;
+#endif
     init_ssl = FALSE;
   }
 }
@@ -209,6 +215,7 @@ static bool ssl_prefs_check(struct Curl_easy *data)
   return TRUE;
 }
 
+#ifndef CURL_DISABLE_PROXY
 static CURLcode
 ssl_connect_init_proxy(struct connectdata *conn, int sockindex)
 {
@@ -232,17 +239,20 @@ ssl_connect_init_proxy(struct connectdata *conn, int sockindex)
   }
   return CURLE_OK;
 }
+#endif
 
 CURLcode
 Curl_ssl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
 
+#ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy_ssl_connected[sockindex]) {
     result = ssl_connect_init_proxy(conn, sockindex);
     if(result)
       return result;
   }
+#endif
 
   if(!ssl_prefs_check(conn->data))
     return CURLE_SSL_CONNECT_ERROR;
@@ -264,12 +274,13 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
                              bool *done)
 {
   CURLcode result;
+#ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy_ssl_connected[sockindex]) {
     result = ssl_connect_init_proxy(conn, sockindex);
     if(result)
       return result;
   }
-
+#endif
   if(!ssl_prefs_check(conn->data))
     return CURLE_SSL_CONNECT_ERROR;
 
@@ -315,13 +326,21 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
   long *general_age;
   bool no_match = TRUE;
 
+#ifndef CURL_DISABLE_PROXY
   const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
-  const char * const name = isProxy ? conn->http_proxy.host.name :
-    conn->host.name;
+  const char * const name = isProxy ?
+    conn->http_proxy.host.name : conn->host.name;
   int port = isProxy ? (int)conn->port : conn->remote_port;
+#else
+  /* no proxy support */
+  struct ssl_primary_config * const ssl_config = &conn->ssl_config;
+  const char * const name = conn->host.name;
+  int port = conn->remote_port;
+  (void)sockindex;
+#endif
   *ssl_sessionid = NULL;
 
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
@@ -423,14 +442,23 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   char *clone_conn_to_host;
   int conn_to_port;
   long *general_age;
+#ifndef CURL_DISABLE_PROXY
   const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
-
+  const char *hostname = isProxy ? conn->http_proxy.host.name :
+    conn->host.name;
+#else
+  /* proxy support disabled */
+  const bool isProxy = FALSE;
+  struct ssl_primary_config * const ssl_config = &conn->ssl_config;
+  const char *hostname = conn->host.name;
+  (void)sockindex;
+#endif
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
-  clone_host = strdup(isProxy ? conn->http_proxy.host.name : conn->host.name);
+  clone_host = strdup(hostname);
   if(!clone_host)
     return CURLE_OUT_OF_MEMORY; /* bail out */
 
@@ -489,6 +517,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   store->scheme = conn->handler->scheme;
 
   if(!Curl_clone_primary_ssl_config(ssl_config, &store->ssl_config)) {
+    Curl_free_primary_ssl_config(&store->ssl_config);
     store->sessionid = NULL; /* let caller free sessionid */
     free(clone_host);
     free(clone_conn_to_host);
@@ -1077,7 +1106,7 @@ bool Curl_none_false_start(void)
 CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
                           unsigned char *md5sum, size_t md5len UNUSED_PARAM)
 {
-  MD5_context *MD5pw;
+  struct MD5_context *MD5pw;
 
   (void)md5len;
 

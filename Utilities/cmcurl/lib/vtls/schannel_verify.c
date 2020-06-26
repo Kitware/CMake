@@ -57,7 +57,7 @@
 #define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
 #define END_CERT "\n-----END CERTIFICATE-----"
 
-typedef struct {
+struct cert_chain_engine_config_win7 {
   DWORD cbSize;
   HCERTSTORE hRestrictedRoot;
   HCERTSTORE hRestrictedTrust;
@@ -70,7 +70,7 @@ typedef struct {
   DWORD CycleDetectionModulus;
   HCERTSTORE hExclusiveRoot;
   HCERTSTORE hExclusiveTrustedPeople;
-} CERT_CHAIN_ENGINE_CONFIG_WIN7, *PCERT_CHAIN_ENGINE_CONFIG_WIN7;
+};
 
 static int is_cr_or_lf(char c)
 {
@@ -94,7 +94,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
   int num_certs = 0;
   size_t END_CERT_LEN;
 
-  ca_file_tstr = Curl_convert_UTF8_to_tchar((char *)ca_file);
+  ca_file_tstr = curlx_convert_UTF8_to_tchar((char *)ca_file);
   if(!ca_file_tstr) {
     char buffer[STRERROR_LEN];
     failf(data,
@@ -288,7 +288,7 @@ cleanup:
     CloseHandle(ca_file_handle);
   }
   Curl_safefree(ca_file_buffer);
-  Curl_unicodefree(ca_file_tstr);
+  curlx_unicodefree(ca_file_tstr);
 
   return result;
 }
@@ -361,7 +361,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     return actual_length;
   }
 
-  decode_para.cbSize  =  sizeof(CRYPT_DECODE_PARA);
+  decode_para.cbSize = sizeof(CRYPT_DECODE_PARA);
 
   ret_val =
     CryptDecodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
@@ -476,7 +476,7 @@ static CURLcode verify_host(struct Curl_easy *data,
      * is acceptable since both values are assumed to use ASCII
      * (or some equivalent) encoding
      */
-    cert_hostname = Curl_convert_tchar_to_UTF8(
+    cert_hostname = curlx_convert_tchar_to_UTF8(
         &cert_hostname_buff[cert_hostname_buff_index]);
     if(!cert_hostname) {
       result = CURLE_OUT_OF_MEMORY;
@@ -508,7 +508,7 @@ static CURLcode verify_host(struct Curl_easy *data,
 
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
-      Curl_unicodefree(cert_hostname);
+      curlx_unicodefree(cert_hostname);
     }
   }
 
@@ -522,7 +522,7 @@ static CURLcode verify_host(struct Curl_easy *data,
     failf(data, "schannel: server certificate name verification failed");
 
 cleanup:
-  Curl_unicodefree(cert_hostname_buff);
+  curlx_unicodefree(cert_hostname_buff);
 
   return result;
 }
@@ -537,9 +537,13 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
   HCERTCHAINENGINE cert_chain_engine = NULL;
   HCERTSTORE trust_store = NULL;
+#ifndef CURL_DISABLE_PROXY
   const char * const conn_hostname = SSL_IS_PROXY() ?
     conn->http_proxy.host.name :
     conn->host.name;
+#else
+  const char * const conn_hostname = conn->host.name;
+#endif
 
   sspi_status =
     s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
@@ -585,7 +589,7 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
     }
 
     if(result == CURLE_OK) {
-      CERT_CHAIN_ENGINE_CONFIG_WIN7 engine_config;
+      struct cert_chain_engine_config_win7 engine_config;
       BOOL create_engine_result;
 
       memset(&engine_config, 0, sizeof(engine_config));
@@ -636,6 +640,15 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
       CERT_SIMPLE_CHAIN *pSimpleChain = pChainContext->rgpChain[0];
       DWORD dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED);
       dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
+
+      if(data->set.ssl.revoke_best_effort) {
+        /* Ignore errors when root certificates are missing the revocation
+         * list URL, or when the list could not be downloaded because the
+         * server is currently unreachable. */
+        dwTrustErrorMask &= ~(DWORD)(CERT_TRUST_REVOCATION_STATUS_UNKNOWN |
+          CERT_TRUST_IS_OFFLINE_REVOCATION);
+      }
+
       if(dwTrustErrorMask) {
         if(dwTrustErrorMask & CERT_TRUST_IS_REVOKED)
           failf(data, "schannel: CertGetCertificateChain trust error"
