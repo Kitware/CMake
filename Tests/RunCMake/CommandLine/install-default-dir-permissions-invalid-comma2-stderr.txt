@@ -1,0 +1,1 @@
+--default-directory-permissions is in incorrect format

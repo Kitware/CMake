@@ -3,11 +3,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <climits>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -517,6 +519,121 @@ int do_build(int ac, char const* const* av)
 #endif
 }
 
+bool parse_default_directory_permissions(const std::string& permissions,
+                                         std::string& parsedPermissionsVar)
+{
+  std::vector<std::string> parsedPermissions;
+  enum Doing
+  {
+    DoingNone,
+    DoingOwner,
+    DoingGroup,
+    DoingWorld,
+    DoingOwnerAssignment,
+    DoingGroupAssignment,
+    DoingWorldAssignment,
+  };
+  Doing doing = DoingNone;
+
+  auto uniquePushBack = [&parsedPermissions](const std::string& e) {
+    if (std::find(parsedPermissions.begin(), parsedPermissions.end(), e) ==
+        parsedPermissions.end()) {
+      parsedPermissions.push_back(e);
+    }
+  };
+
+  for (auto const& e : permissions) {
+    switch (doing) {
+      case DoingNone:
+        if (e == 'u') {
+          doing = DoingOwner;
+        } else if (e == 'g') {
+          doing = DoingGroup;
+        } else if (e == 'o') {
+          doing = DoingWorld;
+        } else {
+          return false;
+        }
+        break;
+      case DoingOwner:
+        if (e == '=') {
+          doing = DoingOwnerAssignment;
+        } else {
+          return false;
+        }
+        break;
+      case DoingGroup:
+        if (e == '=') {
+          doing = DoingGroupAssignment;
+        } else {
+          return false;
+        }
+        break;
+      case DoingWorld:
+        if (e == '=') {
+          doing = DoingWorldAssignment;
+        } else {
+          return false;
+        }
+        break;
+      case DoingOwnerAssignment:
+        if (e == 'r') {
+          uniquePushBack("OWNER_READ");
+        } else if (e == 'w') {
+          uniquePushBack("OWNER_WRITE");
+        } else if (e == 'x') {
+          uniquePushBack("OWNER_EXECUTE");
+        } else if (e == ',') {
+          doing = DoingNone;
+        } else {
+          return false;
+        }
+        break;
+      case DoingGroupAssignment:
+        if (e == 'r') {
+          uniquePushBack("GROUP_READ");
+        } else if (e == 'w') {
+          uniquePushBack("GROUP_WRITE");
+        } else if (e == 'x') {
+          uniquePushBack("GROUP_EXECUTE");
+        } else if (e == ',') {
+          doing = DoingNone;
+        } else {
+          return false;
+        }
+        break;
+      case DoingWorldAssignment:
+        if (e == 'r') {
+          uniquePushBack("WORLD_READ");
+        } else if (e == 'w') {
+          uniquePushBack("WORLD_WRITE");
+        } else if (e == 'x') {
+          uniquePushBack("WORLD_EXECUTE");
+        } else if (e == ',') {
+          doing = DoingNone;
+        } else {
+          return false;
+        }
+        break;
+    }
+  }
+  if (doing != DoingOwnerAssignment && doing != DoingGroupAssignment &&
+      doing != DoingWorldAssignment) {
+    return false;
+  }
+
+  std::ostringstream oss;
+  for (auto i = 0u; i < parsedPermissions.size(); i++) {
+    if (i != 0) {
+      oss << ";";
+    }
+    oss << parsedPermissions[i];
+  }
+
+  parsedPermissionsVar = oss.str();
+  return true;
+}
+
 int do_install(int ac, char const* const* av)
 {
 #ifdef CMAKE_BOOTSTRAP
@@ -527,6 +644,7 @@ int do_install(int ac, char const* const* av)
 
   std::string config;
   std::string component;
+  std::string defaultDirectoryPermissions;
   std::string prefix;
   std::string dir;
   bool strip = false;
@@ -539,6 +657,7 @@ int do_install(int ac, char const* const* av)
     DoingConfig,
     DoingComponent,
     DoingPrefix,
+    DoingDefaultDirectoryPermissions,
   };
 
   Doing doing = DoingDir;
@@ -557,6 +676,8 @@ int do_install(int ac, char const* const* av)
                (strcmp(av[i], "-v") == 0)) {
       verbose = true;
       doing = DoingNone;
+    } else if (strcmp(av[i], "--default-directory-permissions") == 0) {
+      doing = DoingDefaultDirectoryPermissions;
     } else {
       switch (doing) {
         case DoingDir:
@@ -575,6 +696,10 @@ int do_install(int ac, char const* const* av)
           prefix = av[i];
           doing = DoingNone;
           break;
+        case DoingDefaultDirectoryPermissions:
+          defaultDirectoryPermissions = av[i];
+          doing = DoingNone;
+          break;
         default:
           std::cerr << "Unknown argument " << av[i] << std::endl;
           dir.clear();
@@ -591,6 +716,8 @@ int do_install(int ac, char const* const* av)
       "  <dir>              = Project binary directory to install.\n"
       "  --config <cfg>     = For multi-configuration tools, choose <cfg>.\n"
       "  --component <comp> = Component-based install. Only install <comp>.\n"
+      "  --default-directory-permissions <permission> \n"
+      "     Default install permission. Use default permission <permission>.\n"
       "  --prefix <prefix>  = The installation prefix CMAKE_INSTALL_PREFIX.\n"
       "  --strip            = Performing install/strip.\n"
       "  -v --verbose       = Enable verbose output.\n"
@@ -629,6 +756,18 @@ int do_install(int ac, char const* const* av)
 
   if (!config.empty()) {
     args.emplace_back("-DCMAKE_INSTALL_CONFIG_NAME=" + config);
+  }
+
+  if (!defaultDirectoryPermissions.empty()) {
+    std::string parsedPermissionsVar;
+    if (!parse_default_directory_permissions(defaultDirectoryPermissions,
+                                             parsedPermissionsVar)) {
+      std::cerr << "--default-directory-permissions is in incorrect format"
+                << std::endl;
+      return 1;
+    }
+    args.emplace_back("-DCMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS=" +
+                      parsedPermissionsVar);
   }
 
   args.emplace_back("-P");
