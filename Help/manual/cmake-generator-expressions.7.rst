@@ -105,10 +105,11 @@ Variable Queries
 
 ``$<TARGET_EXISTS:target>``
   ``1`` if ``target`` exists, else ``0``.
-``$<CONFIG:cfg>``
-  ``1`` if config is ``cfg``, else ``0``. This is a case-insensitive comparison.
-  The mapping in :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by
-  this expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
+``$<CONFIG:cfgs>``
+  ``1`` if config is any one of the entires in ``cfgs``, else ``0``. This is a
+  case-insensitive comparison. The mapping in
+  :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by this
+  expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
   target.
 ``$<PLATFORM_ID:platform_ids>``
   where ``platform_ids`` is a comma-separated list.
