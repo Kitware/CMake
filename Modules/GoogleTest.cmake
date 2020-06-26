@@ -527,7 +527,7 @@ function(gtest_discover_tests TARGET)
     endif()
 
   else()
-    message(SEND_ERROR "Unknown DISCOVERY_MODE: ${_DISCOVERY_MODE}")
+    message(FATAL_ERROR "Unknown DISCOVERY_MODE: ${_DISCOVERY_MODE}")
   endif()
 
   # Add discovered tests to directory TEST_INCLUDE_FILES
