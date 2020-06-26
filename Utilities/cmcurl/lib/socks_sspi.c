@@ -160,7 +160,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   for(;;) {
     TCHAR *sname;
 
-    sname = Curl_convert_UTF8_to_tchar(service_name);
+    sname = curlx_convert_UTF8_to_tchar(service_name);
     if(!sname)
       return CURLE_OUT_OF_MEMORY;
 
@@ -180,7 +180,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
                                                  &sspi_ret_flags,
                                                  &expiry);
 
-    Curl_unicodefree(sname);
+    curlx_unicodefree(sname);
 
     if(sspi_recv_token.pvBuffer) {
       s_pSecFn->FreeContextBuffer(sspi_recv_token.pvBuffer);
@@ -327,7 +327,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     failf(data, "Failed to determine user name.");
     return CURLE_COULDNT_CONNECT;
   }
-  infof(data, "SOCKS5 server authencticated user %s with GSS-API.\n",
+  infof(data, "SOCKS5 server authenticated user %s with GSS-API.\n",
         names.sUserName);
   s_pSecFn->FreeContextBuffer(names.sUserName);
 

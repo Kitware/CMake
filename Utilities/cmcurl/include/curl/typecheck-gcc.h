@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -248,7 +248,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
   (0 < (option) && (option) < CURLOPTTYPE_OBJECTPOINT)
 
 #define curlcheck_off_t_option(option)          \
-  ((option) > CURLOPTTYPE_OFF_T)
+  (((option) > CURLOPTTYPE_OFF_T) && ((option) < CURLOPTTYPE_BLOB))
 
 /* evaluates to true if option takes a char* argument */
 #define curlcheck_string_option(option)                                       \
@@ -392,8 +392,9 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
 /* groups of curl_easy_getinfo infos that take the same type of argument */
 
 /* evaluates to true if info expects a pointer to char * argument */
-#define curlcheck_string_info(info)                     \
-  (CURLINFO_STRING < (info) && (info) < CURLINFO_LONG)
+#define curlcheck_string_info(info)                             \
+  (CURLINFO_STRING < (info) && (info) < CURLINFO_LONG &&        \
+   (info) != CURLINFO_PRIVATE)
 
 /* evaluates to true if info expects a pointer to long argument */
 #define curlcheck_long_info(info)                       \
