@@ -1,5 +1,4 @@
-project(test_include_dirs)
-include(CTest)
+project(test_include_dirs LANGUAGES CXX)
 include(GoogleTest)
 
 enable_testing()

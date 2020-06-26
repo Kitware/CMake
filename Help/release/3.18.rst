@@ -194,7 +194,9 @@ Modules
 
   * gained a new ``DISCOVERY_MODE`` option to control when the test
     discovery step is run.  It offers a new ``PRE_TEST`` setting to
-    run the discovery at test time instead of build time.
+    run the discovery at test time instead of build time.  A new
+    ``CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE`` variable can be used
+    to change the default globally.
 
   * gained a new optional parameter ``XML_OUTPUT_DIR``. When set the
     JUnit XML test results are stored in that directory.
