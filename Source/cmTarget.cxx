@@ -636,6 +636,12 @@ bool cmTarget::IsAppBundleOnApple() const
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
 }
 
+bool cmTarget::IsAndroidGuiExecutable() const
+{
+  return (this->GetType() == cmStateEnums::EXECUTABLE && impl->IsAndroid &&
+          this->GetPropertyAsBool("ANDROID_GUI"));
+}
+
 std::vector<cmCustomCommand> const& cmTarget::GetPreBuildCommands() const
 {
   return impl->PreBuildCommands;
@@ -1865,7 +1871,7 @@ const char* cmTarget::GetSuffixVariableInternal(
         case cmStateEnums::RuntimeBinaryArtifact:
           // Android GUI application packages store the native
           // binary as a shared library.
-          return (impl->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+          return (this->IsAndroidGuiExecutable()
                     ? "CMAKE_SHARED_LIBRARY_SUFFIX"
                     : "CMAKE_EXECUTABLE_SUFFIX");
         case cmStateEnums::ImportLibraryArtifact:
@@ -1906,7 +1912,7 @@ const char* cmTarget::GetPrefixVariableInternal(
         case cmStateEnums::RuntimeBinaryArtifact:
           // Android GUI application packages store the native
           // binary as a shared library.
-          return (impl->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+          return (this->IsAndroidGuiExecutable()
                     ? "CMAKE_SHARED_LIBRARY_PREFIX"
                     : "");
         case cmStateEnums::ImportLibraryArtifact:

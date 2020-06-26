@@ -596,6 +596,16 @@ void cmGlobalGenerator::EnableLanguage(
       mf->ReadListFile(fpath);
     }
   }
+
+  if (readCMakeSystem) {
+    // Find the native build tool for this generator.
+    // This has to be done early so that MSBuild can be used to examine the
+    // cross-compilation environment.
+    if (!this->FindMakeProgram(mf)) {
+      return;
+    }
+  }
+
   //  Load the CMakeDetermineSystem.cmake file and find out
   // what platform we are running on
   if (!mf->GetDefinition("CMAKE_SYSTEM")) {
@@ -665,11 +675,6 @@ void cmGlobalGenerator::EnableLanguage(
     std::string toolset = mf->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET");
     if (!this->SetGeneratorToolset(toolset, false, mf)) {
       cmSystemTools::SetFatalErrorOccured();
-      return;
-    }
-
-    // Find the native build tool for this generator.
-    if (!this->FindMakeProgram(mf)) {
       return;
     }
   }

@@ -683,8 +683,8 @@ add_RunCMake_test(AutoExportDll
 add_RunCMake_test(AndroidMK)
 
 if(CMake_TEST_ANDROID_NDK OR CMake_TEST_ANDROID_STANDALONE_TOOLCHAIN)
-  if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
-    message(FATAL_ERROR "Android tests supported only by Makefile and Ninja generators")
+  if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja|Visual Studio 1[456]")
+    message(FATAL_ERROR "Android tests supported only by Makefile, Ninja, and Visual Studio >= 14 generators")
   endif()
   foreach(v TEST_ANDROID_NDK TEST_ANDROID_STANDALONE_TOOLCHAIN)
     if(CMake_${v})
