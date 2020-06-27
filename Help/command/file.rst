@@ -42,9 +42,9 @@ Synopsis
   `Locking`_
     file(`LOCK`_ <path> [...])
 
-   `Archiving`_
-     file(`ARCHIVE_CREATE`_ OUTPUT <archive> FILES <files> [...])
-     file(`ARCHIVE_EXTRACT`_ INPUT <archive> DESTINATION <dir> [...])
+  `Archiving`_
+    file(`ARCHIVE_CREATE`_ OUTPUT <archive> FILES <files> [...])
+    file(`ARCHIVE_EXTRACT`_ INPUT <archive> DESTINATION <dir> [...])
 
 Reading
 ^^^^^^^
