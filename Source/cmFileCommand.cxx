@@ -2941,7 +2941,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   {
     std::string Output;
     std::string Format;
-    std::string Type;
+    std::string Compression;
     std::string MTime;
     bool Verbose = false;
     std::vector<std::string> Files;
@@ -2951,7 +2951,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   static auto const parser = cmArgumentParser<Arguments>{}
                                .Bind("OUTPUT"_s, &Arguments::Output)
                                .Bind("FORMAT"_s, &Arguments::Format)
-                               .Bind("TYPE"_s, &Arguments::Type)
+                               .Bind("COMPRESSION"_s, &Arguments::Compression)
                                .Bind("MTIME"_s, &Arguments::MTime)
                                .Bind("VERBOSE"_s, &Arguments::Verbose)
                                .Bind("FILES"_s, &Arguments::Files)
@@ -2970,7 +2970,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   }
 
   const std::vector<std::string> LIST_ARGS = {
-    "OUTPUT", "FORMAT", "TYPE", "MTIME", "FILES", "DIRECTORY",
+    "OUTPUT", "FORMAT", "COMPRESSION", "MTIME", "FILES", "DIRECTORY",
   };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
@@ -2994,10 +2994,10 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   }
 
   const char* zipFileFormats[] = { "7zip", "zip" };
-  if (!parsedArgs.Type.empty() &&
+  if (!parsedArgs.Compression.empty() &&
       cm::contains(zipFileFormats, parsedArgs.Format)) {
     status.SetError(cmStrCat("archive format ", parsedArgs.Format,
-                             " does not support TYPE arguments"));
+                             " does not support COMPRESSION arguments"));
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -3015,12 +3015,12 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
             std::back_inserter(files));
 
   cmSystemTools::cmTarCompression compress = cmSystemTools::TarCompressNone;
-  auto typeIt = compressionTypeMap.find(parsedArgs.Type);
+  auto typeIt = compressionTypeMap.find(parsedArgs.Compression);
   if (typeIt != compressionTypeMap.end()) {
     compress = typeIt->second;
-  } else if (!parsedArgs.Type.empty()) {
-    status.SetError(
-      cmStrCat("compression type ", parsedArgs.Type, " is not supported"));
+  } else if (!parsedArgs.Compression.empty()) {
+    status.SetError(cmStrCat("compression type ", parsedArgs.Compression,
+                             " is not supported"));
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }

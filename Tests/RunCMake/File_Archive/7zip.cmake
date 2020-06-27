@@ -1,6 +1,6 @@
 set(OUTPUT_NAME "test.7z")
 
-set(COMPRESSION_FORMAT 7zip)
+set(ARCHIVE_FORMAT 7zip)
 
 include(${CMAKE_CURRENT_LIST_DIR}/roundtrip.cmake)
 

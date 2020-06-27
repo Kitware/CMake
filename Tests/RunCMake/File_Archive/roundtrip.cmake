@@ -1,4 +1,4 @@
-foreach(parameter OUTPUT_NAME COMPRESSION_FORMAT)
+foreach(parameter OUTPUT_NAME ARCHIVE_FORMAT)
   if(NOT DEFINED ${parameter})
     message(FATAL_ERROR "missing required parameter ${parameter}")
   endif()
@@ -37,8 +37,8 @@ file(MAKE_DIRECTORY ${FULL_DECOMPRESS_DIR})
 
 file(ARCHIVE_CREATE
     OUTPUT ${FULL_OUTPUT_NAME}
-    FORMAT "${COMPRESSION_FORMAT}"
-    TYPE "${COMPRESSION_TYPE}"
+    FORMAT "${ARCHIVE_FORMAT}"
+    COMPRESSION "${COMPRESSION_TYPE}"
     VERBOSE
     DIRECTORY ${COMPRESS_DIR})
 
