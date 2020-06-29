@@ -148,6 +148,9 @@ public:
   bool HasExplicitObjectName(cmSourceFile const* file) const;
   void AddExplicitObjectName(cmSourceFile const* sf);
 
+  BT<std::string> const* GetLanguageStandardProperty(
+    std::string const& lang, std::string const& config) const;
+
   cmProp GetLanguageStandard(std::string const& lang,
                              std::string const& config) const;
 
@@ -1050,10 +1053,10 @@ private:
   bool GetRPATH(const std::string& config, const std::string& prop,
                 std::string& rpath) const;
 
-  mutable std::map<std::string, std::string> LanguageStandardMap;
+  mutable std::map<std::string, BT<std::string>> LanguageStandardMap;
 
-  cmProp GetLanguageStandardProperty(std::string const& lang,
-                                     const char* suffix) const;
+  cmProp GetPropertyWithPairedLanguageSupport(std::string const& lang,
+                                              const char* suffix) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(
