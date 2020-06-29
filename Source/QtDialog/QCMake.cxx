@@ -21,7 +21,6 @@ QCMake::QCMake(QObject* p)
   : QObject(p)
 {
   this->WarnUninitializedMode = false;
-  this->WarnUnusedMode = false;
   qRegisterMetaType<QCMakeProperty>();
   qRegisterMetaType<QCMakePropertyList>();
 
@@ -170,7 +169,6 @@ void QCMake::configure()
   this->CMakeInstance->SetGeneratorToolset(this->Toolset.toLocal8Bit().data());
   this->CMakeInstance->LoadCache();
   this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
-  this->CMakeInstance->SetWarnUnused(this->WarnUnusedMode);
   this->CMakeInstance->PreLoadCMakeFiles();
 
   InterruptFlag = 0;
@@ -476,11 +474,6 @@ void QCMake::setDeprecatedWarningsAsErrors(bool value)
 void QCMake::setWarnUninitializedMode(bool value)
 {
   this->WarnUninitializedMode = value;
-}
-
-void QCMake::setWarnUnusedMode(bool value)
-{
-  this->WarnUnusedMode = value;
 }
 
 void QCMake::checkOpenPossible()

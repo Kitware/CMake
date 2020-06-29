@@ -341,9 +341,9 @@ Options
  Print a warning when an uninitialized variable is used.
 
 ``--warn-unused-vars``
- Warn about unused variables.
-
- Find variables that are declared or set, but not used.
+ Does nothing.  In CMake versions 3.2 and below this enabled warnings about
+ unused variables.  In CMake versions 3.3 through 3.18 the option was broken.
+ In CMake 3.19 and above the option has been removed.
 
 ``--no-warn-unused-cli``
  Don't warn about command line options.

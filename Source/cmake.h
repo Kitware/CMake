@@ -450,8 +450,6 @@ public:
 
   bool GetWarnUninitialized() { return this->WarnUninitialized; }
   void SetWarnUninitialized(bool b) { this->WarnUninitialized = b; }
-  bool GetWarnUnused() { return this->WarnUnused; }
-  void SetWarnUnused(bool b) { this->WarnUnused = b; }
   bool GetWarnUnusedCli() { return this->WarnUnusedCli; }
   void SetWarnUnusedCli(bool b) { this->WarnUnusedCli = b; }
   bool GetCheckSystemVars() { return this->CheckSystemVars; }
@@ -605,7 +603,6 @@ private:
   TraceFormat TraceFormatVar = TRACE_HUMAN;
   cmGeneratedFileStream TraceFile;
   bool WarnUninitialized = false;
-  bool WarnUnused = false;
   bool WarnUnusedCli = true;
   bool CheckSystemVars = false;
   std::map<std::string, bool> UsedCliVariables;
