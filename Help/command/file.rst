@@ -42,9 +42,9 @@ Synopsis
   `Locking`_
     file(`LOCK`_ <path> [...])
 
-   `Archiving`_
-     file(`ARCHIVE_CREATE`_ OUTPUT <archive> FILES <files> [...])
-     file(`ARCHIVE_EXTRACT`_ INPUT <archive> DESTINATION <dir> [...])
+  `Archiving`_
+    file(`ARCHIVE_CREATE`_ OUTPUT <archive> FILES <files> [...])
+    file(`ARCHIVE_EXTRACT`_ INPUT <archive> DESTINATION <dir> [...])
 
 Reading
 ^^^^^^^
@@ -903,28 +903,30 @@ Archiving
     [FILES <files>]
     [DIRECTORY <dirs>]
     [FORMAT <format>]
-    [TYPE <type>]
+    [COMPRESSION <compression>]
     [MTIME <mtime>]
     [VERBOSE])
 
-Creates an archive specifed by ``OUTPUT`` with the content of ``FILES`` and
-``DIRECTORY``.
+Creates the specified ``<archive>`` file with the content of ``<files>`` and
+``<dirs>``.
 
-To specify the format of the archive set the ``FORMAT`` option.
-Supported formats are: ``7zip``, ``gnutar``, ``pax``, ``paxr``, ``raw``,
-(restricted pax, default), and ``zip``.
+Use the ``FORMAT`` option to specify the archive format.  Supported values
+for ``<format>`` are ``7zip``, ``gnutar``, ``pax``, ``paxr``, ``raw`` and
+``zip``.  If ``FORMAT`` is not given, the default format is ``paxr``.
 
-To specify the type of compression set the ``TYPE`` option.
-Supported compression types are: ``None``, ``BZip2``, ``GZip``, ``XZ``,
-and ``Zstd``.
+Some archive formats allow the type of compression to be specified.
+The ``7zip`` and ``zip`` archive formats already imply a specific type of
+compression.  The other formats use no compression by default, but can be
+directed to do so with the ``COMPRESSION`` option.  Valid values for
+``<compression>`` are ``None``, ``BZip2``, ``GZip``, ``XZ``, and ``Zstd``.
 
 .. note::
   With ``FORMAT`` set to ``raw`` only one file will be compressed with the
-  compression type specified by ``TYPE``.
+  compression type specified by ``COMPRESSION``.
 
-With ``VERBOSE`` the command will produce verbose output.
+The ``VERBOSE`` option enables verbose output for the archive operation.
 
-To specify the modification time recorded in tarball entries use
+To specify the modification time recorded in tarball entries, use
 the ``MTIME`` option.
 
 .. _ARCHIVE_EXTRACT:

@@ -14,4 +14,5 @@ run_cmake(zip)
 run_cmake(zip-filtered)
 
 run_cmake(unsupported-format)
-run_cmake(zip-with-bad-type)
+run_cmake(zip-with-bad-compression)
+run_cmake(7zip-with-bad-compression)
