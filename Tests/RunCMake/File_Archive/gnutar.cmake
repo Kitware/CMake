@@ -1,6 +1,6 @@
 set(OUTPUT_NAME "test.tar")
 
-set(COMPRESSION_FORMAT gnutar)
+set(ARCHIVE_FORMAT gnutar)
 
 include(${CMAKE_CURRENT_LIST_DIR}/roundtrip.cmake)
 
