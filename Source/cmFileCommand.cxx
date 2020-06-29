@@ -2862,7 +2862,8 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
 
   // Check for generator expressions
   const std::string input = args[4];
-  std::string outputFile = args[2];
+  std::string outputFile = cmSystemTools::CollapseFullPath(
+    args[2], status.GetMakefile().GetCurrentBinaryDirectory());
 
   std::string::size_type pos = input.find_first_of("<>");
   if (pos != std::string::npos) {
