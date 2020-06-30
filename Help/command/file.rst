@@ -508,8 +508,7 @@ The arguments are:
 
 ``OUTPUT <output-file>``
   Specify the output file name to generate. A relative path is treated with
-  respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`. See policy
-  :policy:`CMP0070`.
+  respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
   ``<output-file>`` does not support generator expressions.
 
 ``CONTENT <content>``
