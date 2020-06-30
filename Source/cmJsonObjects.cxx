@@ -51,11 +51,7 @@ std::vector<std::string> getConfigurations(const cmake* cm)
     return configurations;
   }
 
-  makefiles[0]->GetConfigurations(configurations);
-  if (configurations.empty()) {
-    configurations.emplace_back();
-  }
-  return configurations;
+  return makefiles[0]->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 }
 
 bool hasString(const Json::Value& v, const std::string& s)

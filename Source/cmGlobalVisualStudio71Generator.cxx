@@ -19,8 +19,8 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(
   std::ostream& fout, cmLocalGenerator* root,
   std::vector<cmLocalGenerator*>& generators)
 {
-  std::vector<std::string> configs;
-  root->GetMakefile()->GetConfigurations(configs);
+  std::vector<std::string> configs =
+    root->GetMakefile()->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
 
   // Write out the header for a SLN file
   this->WriteSLNHeader(fout);

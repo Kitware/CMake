@@ -568,8 +568,9 @@ void cmGlobalVisualStudio7Generator::WriteSLNFooter(std::ostream& fout)
 std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
   cmGeneratorTarget const* target)
 {
-  std::vector<std::string> configs;
-  target->Target->GetMakefile()->GetConfigurations(configs);
+  std::vector<std::string> configs =
+    target->Target->GetMakefile()->GetGeneratorConfigs(
+      cmMakefile::ExcludeEmptyConfig);
   std::string pname = cmStrCat(target->GetName(), "_UTILITY");
   std::string fname =
     cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',

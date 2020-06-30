@@ -801,7 +801,8 @@ void cmGeneratorTarget::GetObjectSources(
 
 void cmGeneratorTarget::ComputeObjectMapping()
 {
-  auto const& configs = this->Makefile->GetGeneratorConfigs();
+  auto const& configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   std::set<std::string> configSet(configs.begin(), configs.end());
   if (configSet == this->VisitedConfigsForObjects) {
     return;
@@ -1778,8 +1779,8 @@ cmGeneratorTarget::GetAllConfigSources() const
 
 void cmGeneratorTarget::ComputeAllConfigSources() const
 {
-  std::vector<std::string> configs;
-  this->Makefile->GetConfigurations(configs);
+  std::vector<std::string> configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   std::map<cmSourceFile const*, size_t> index;
 
@@ -2812,7 +2813,7 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
   if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
     std::set<cmSourceFile*> emitted;
     std::vector<std::string> const& configs =
-      this->Makefile->GetGeneratorConfigs();
+      this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
     for (std::string const& c : configs) {
       std::vector<cmSourceFile*> sources;
       this->GeneratorTarget->GetSourceFiles(sources, c);
@@ -3023,7 +3024,7 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
   // Queue the custom command dependencies.
   std::set<std::string> emitted;
   std::vector<std::string> const& configs =
-    this->Makefile->GetGeneratorConfigs();
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   for (std::string const& conf : configs) {
     this->FollowCommandDepends(cc, conf, emitted);
   }
@@ -6843,7 +6844,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
   std::vector<cmSourceFile*>& files) const
 {
   std::vector<std::string> const& configs =
-    this->Makefile->GetGeneratorConfigs();
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   auto it = configs.begin();
   const std::string& firstConfig = *it;

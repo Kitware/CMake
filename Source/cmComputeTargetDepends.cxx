@@ -196,7 +196,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     std::set<cmLinkItem> emitted;
 
     std::vector<std::string> const& configs =
-      depender->Makefile->GetGeneratorConfigs();
+      depender->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
     for (std::string const& it : configs) {
       cmLinkImplementation const* impl = depender->GetLinkImplementation(it);
 

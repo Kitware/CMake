@@ -223,11 +223,9 @@ bool cmExportCommand(std::vector<std::string> const& args,
   ebfg->SetExportOld(arguments.ExportOld);
 
   // Compute the set of configurations exported.
-  std::vector<std::string> configurationTypes;
-  mf.GetConfigurations(configurationTypes);
-  if (configurationTypes.empty()) {
-    configurationTypes.emplace_back();
-  }
+  std::vector<std::string> configurationTypes =
+    mf.GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+
   for (std::string const& ct : configurationTypes) {
     ebfg->AddConfiguration(ct);
   }

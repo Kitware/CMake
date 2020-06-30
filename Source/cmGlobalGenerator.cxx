@@ -313,19 +313,16 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
         }
       }
 
-      std::vector<std::string> configs;
-      target->Makefile->GetConfigurations(configs);
+      std::vector<std::string> configs =
+        target->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
       std::vector<cmSourceFile*> srcs;
-      if (configs.empty()) {
-        target->GetSourceFiles(srcs, "");
-      } else {
-        for (std::string const& config : configs) {
-          target->GetSourceFiles(srcs, config);
-          if (!srcs.empty()) {
-            break;
-          }
+      for (std::string const& config : configs) {
+        target->GetSourceFiles(srcs, config);
+        if (!srcs.empty()) {
+          break;
         }
       }
+
       if (srcs.empty()) {
         std::ostringstream e;
         e << "No SOURCES given to target: " << target->GetName();
@@ -349,7 +346,8 @@ bool cmGlobalGenerator::CheckTargetsForType() const
       if (target->GetType() == cmStateEnums::EXECUTABLE &&
           target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
         std::vector<std::string> const& configs =
-          target->Makefile->GetGeneratorConfigs();
+          target->Makefile->GetGeneratorConfigs(
+            cmMakefile::IncludeEmptyConfig);
         for (std::string const& config : configs) {
           if (target->GetLinkerLanguage(config) == "Swift") {
             this->GetCMakeInstance()->IssueMessage(
@@ -1701,8 +1699,8 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
       cmPolicies::PolicyStatus polSt =
         mf->GetPolicyStatus(cmPolicies::CMP0043);
       if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-        std::vector<std::string> configs;
-        mf->GetConfigurations(configs);
+        std::vector<std::string> configs =
+          mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
 
         for (std::string const& c : configs) {
           std::string defPropName =
@@ -3127,7 +3125,8 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     fout << "# Source files and their labels\n";
     std::vector<cmSourceFile*> sources;
     std::vector<std::string> const& configs =
-      target->Target->GetMakefile()->GetGeneratorConfigs();
+      target->Target->GetMakefile()->GetGeneratorConfigs(
+        cmMakefile::IncludeEmptyConfig);
     for (std::string const& c : configs) {
       target->GetSourceFiles(sources, c);
     }
@@ -3226,8 +3225,9 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
   const auto& lg = this->LocalGenerators[0];
   cmMakefile* mf = lg->GetMakefile();
 
-  std::vector<std::string> configs;
-  std::string config = mf->GetConfigurations(configs, false);
+  std::vector<std::string> configs =
+    mf->GetGeneratorConfigs(cmMakefile::OnlyMultiConfig);
+  std::string config = mf->GetDefaultConfiguration();
 
   std::string path = cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(),
                               "/CPackProperties.cmake");
