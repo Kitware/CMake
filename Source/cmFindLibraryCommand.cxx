@@ -433,7 +433,8 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
 #endif
     if (name.Regex.find(testName)) {
       this->TestPath = cmStrCat(path, origName);
-      if (!cmSystemTools::FileIsDirectory(this->TestPath)) {
+      // Make sure the path is readable and is not a directory.
+      if (cmSystemTools::FileExists(this->TestPath, true)) {
         this->DebugLibraryFound(name.Raw, dir);
 
         // This is a matching file.  Check if it is better than the
