@@ -8,7 +8,6 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <iterator>
 #include <map>
 #include <set>
 #include <sstream>
@@ -2944,8 +2943,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     std::string Compression;
     std::string MTime;
     bool Verbose = false;
-    std::vector<std::string> Files;
-    std::vector<std::string> Directories;
+    std::vector<std::string> Paths;
   };
 
   static auto const parser = cmArgumentParser<Arguments>{}
@@ -2954,8 +2952,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
                                .Bind("COMPRESSION"_s, &Arguments::Compression)
                                .Bind("MTIME"_s, &Arguments::MTime)
                                .Bind("VERBOSE"_s, &Arguments::Verbose)
-                               .Bind("FILES"_s, &Arguments::Files)
-                               .Bind("DIRECTORY"_s, &Arguments::Directories);
+                               .Bind("PATHS"_s, &Arguments::Paths);
 
   std::vector<std::string> unrecognizedArguments;
   std::vector<std::string> keywordsMissingValues;
@@ -2969,9 +2966,9 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::vector<std::string> LIST_ARGS = {
-    "OUTPUT", "FORMAT", "COMPRESSION", "MTIME", "FILES", "DIRECTORY",
-  };
+  const std::vector<std::string> LIST_ARGS = { "OUTPUT", "FORMAT",
+                                               "COMPRESSION", "MTIME",
+                                               "PATHS" };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
   if (kwend != kwbegin) {
@@ -3009,11 +3006,6 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
                            { "XZ", cmSystemTools::TarCompressXZ },
                            { "Zstd", cmSystemTools::TarCompressZstd } };
 
-  std::string const& outFile = parsedArgs.Output;
-  std::vector<std::string> files = parsedArgs.Files;
-  std::copy(parsedArgs.Directories.begin(), parsedArgs.Directories.end(),
-            std::back_inserter(files));
-
   cmSystemTools::cmTarCompression compress = cmSystemTools::TarCompressNone;
   auto typeIt = compressionTypeMap.find(parsedArgs.Compression);
   if (typeIt != compressionTypeMap.end()) {
@@ -3025,14 +3017,16 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  if (files.empty()) {
-    status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING,
-                                      "No files or directories specified");
+  if (parsedArgs.Paths.empty()) {
+    status.SetError("ARCHIVE_CREATE requires a non-empty list of PATHS");
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
   }
 
-  if (!cmSystemTools::CreateTar(outFile, files, compress, parsedArgs.Verbose,
-                                parsedArgs.MTime, parsedArgs.Format)) {
-    status.SetError(cmStrCat("failed to compress: ", outFile));
+  if (!cmSystemTools::CreateTar(parsedArgs.Output, parsedArgs.Paths, compress,
+                                parsedArgs.Verbose, parsedArgs.MTime,
+                                parsedArgs.Format)) {
+    status.SetError(cmStrCat("failed to compress: ", parsedArgs.Output));
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -3049,8 +3043,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     bool Verbose = false;
     bool ListOnly = false;
     std::string Destination;
-    std::vector<std::string> Files;
-    std::vector<std::string> Directories;
+    std::vector<std::string> Patterns;
   };
 
   static auto const parser = cmArgumentParser<Arguments>{}
@@ -3058,8 +3051,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
                                .Bind("VERBOSE"_s, &Arguments::Verbose)
                                .Bind("LIST_ONLY"_s, &Arguments::ListOnly)
                                .Bind("DESTINATION"_s, &Arguments::Destination)
-                               .Bind("FILES"_s, &Arguments::Files)
-                               .Bind("DIRECTORY"_s, &Arguments::Directories);
+                               .Bind("PATTERNS"_s, &Arguments::Patterns);
 
   std::vector<std::string> unrecognizedArguments;
   std::vector<std::string> keywordsMissingValues;
@@ -3073,12 +3065,8 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::vector<std::string> LIST_ARGS = {
-    "INPUT",
-    "DESTINATION",
-    "FILES",
-    "DIRECTORY",
-  };
+  const std::vector<std::string> LIST_ARGS = { "INPUT", "DESTINATION",
+                                               "PATTERNS" };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
   if (kwend != kwbegin) {
@@ -3089,18 +3077,16 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
   }
 
   std::string inFile = parsedArgs.Input;
-  std::vector<std::string> files = parsedArgs.Files;
-  std::copy(parsedArgs.Directories.begin(), parsedArgs.Directories.end(),
-            std::back_inserter(files));
 
   if (parsedArgs.ListOnly) {
-    if (!cmSystemTools::ListTar(inFile, files, parsedArgs.Verbose)) {
+    if (!cmSystemTools::ListTar(inFile, parsedArgs.Patterns,
+                                parsedArgs.Verbose)) {
       status.SetError(cmStrCat("failed to list: ", inFile));
       cmSystemTools::SetFatalErrorOccured();
       return false;
     }
   } else {
-    std::string destDir = cmSystemTools::GetCurrentWorkingDirectory();
+    std::string destDir = status.GetMakefile().GetCurrentBinaryDirectory();
     if (!parsedArgs.Destination.empty()) {
       if (cmSystemTools::FileIsFullPath(parsedArgs.Destination)) {
         destDir = parsedArgs.Destination;
@@ -3128,7 +3114,8 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
       return false;
     }
 
-    if (!cmSystemTools::ExtractTar(inFile, files, parsedArgs.Verbose)) {
+    if (!cmSystemTools::ExtractTar(inFile, parsedArgs.Patterns,
+                                   parsedArgs.Verbose)) {
       status.SetError(cmStrCat("failed to extract: ", inFile));
       cmSystemTools::SetFatalErrorOccured();
       return false;

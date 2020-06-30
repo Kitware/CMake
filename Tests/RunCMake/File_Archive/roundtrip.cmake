@@ -36,17 +36,17 @@ file(REMOVE_RECURSE ${FULL_DECOMPRESS_DIR})
 file(MAKE_DIRECTORY ${FULL_DECOMPRESS_DIR})
 
 file(ARCHIVE_CREATE
-    OUTPUT ${FULL_OUTPUT_NAME}
-    FORMAT "${ARCHIVE_FORMAT}"
-    COMPRESSION "${COMPRESSION_TYPE}"
-    VERBOSE
-    DIRECTORY ${COMPRESS_DIR})
+  OUTPUT ${FULL_OUTPUT_NAME}
+  FORMAT "${ARCHIVE_FORMAT}"
+  COMPRESSION "${COMPRESSION_TYPE}"
+  VERBOSE
+  PATHS ${COMPRESS_DIR})
 
 file(ARCHIVE_EXTRACT
-    INPUT ${FULL_OUTPUT_NAME}
-    ${DECOMPRESSION_OPTIONS}
-    DESTINATION ${FULL_DECOMPRESS_DIR}
-    VERBOSE)
+  INPUT ${FULL_OUTPUT_NAME}
+  ${DECOMPRESSION_OPTIONS}
+  DESTINATION ${FULL_DECOMPRESS_DIR}
+  VERBOSE)
 
 if(CUSTOM_CHECK_FILES)
   set(CHECK_FILES ${CUSTOM_CHECK_FILES})
@@ -57,11 +57,11 @@ foreach(file ${CHECK_FILES})
   set(output ${FULL_DECOMPRESS_DIR}/${COMPRESS_DIR}/${file})
 
   if(NOT EXISTS ${input})
-     message(SEND_ERROR "Cannot find input file ${output}")
+    message(SEND_ERROR "Cannot find input file ${output}")
   endif()
 
   if(NOT EXISTS ${output})
-     message(SEND_ERROR "Cannot find output file ${output}")
+    message(SEND_ERROR "Cannot find output file ${output}")
   endif()
 
   file(MD5 ${input} input_md5)
@@ -76,7 +76,7 @@ foreach(file ${NOT_EXISTING_FILES_CHECK})
   set(output ${FULL_DECOMPRESS_DIR}/${COMPRESS_DIR}/${file})
 
   if(EXISTS ${output})
-     message(SEND_ERROR "File ${output} exists but it shouldn't")
+    message(SEND_ERROR "File ${output} exists but it shouldn't")
   endif()
 endforeach()
 
