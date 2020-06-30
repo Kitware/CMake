@@ -90,6 +90,11 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       return replaceValues.AIXExports;
     }
   }
+  if (replaceValues.ISPCHeader) {
+    if (variable == "ISPC_HEADER") {
+      return replaceValues.ISPCHeader;
+    }
+  }
   if (replaceValues.Defines && variable == "DEFINES") {
     return replaceValues.Defines;
   }

@@ -2408,6 +2408,38 @@ void cmLocalGenerator::AppendFlagEscape(std::string& flags,
     this->EscapeForShell(rawFlag, false, false, false, this->IsNinjaMulti()));
 }
 
+void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
+{
+  //
+  std::vector<std::string> configsList =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+  for (std::string const& config : configsList) {
+
+    std::string perConfigDir = target->GetObjectDirectory(config);
+    if (cmProp prop = target->GetProperty("ISPC_HEADER_DIRECTORY")) {
+      perConfigDir = cmSystemTools::CollapseFullPath(
+        cmStrCat(this->GetBinaryDirectory(), '/', *prop));
+    }
+
+    std::vector<cmSourceFile*> sources;
+    target->GetSourceFiles(sources, config);
+
+    // build up the list of ispc headers that this target is generating
+    for (cmSourceFile const* sf : sources) {
+      // Generate this object file's rule file.
+      const std::string& lang = sf->GetLanguage();
+      if (lang == "ISPC") {
+        std::string const& objectName = target->GetObjectName(sf);
+        std::string ispcSource =
+          cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+
+        auto headerPath = cmStrCat(perConfigDir, '/', ispcSource, ".h");
+        target->AddISPCGeneratedHeader(headerPath, config);
+      }
+    }
+  }
+}
+
 void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 {
   std::vector<std::string> configsList =

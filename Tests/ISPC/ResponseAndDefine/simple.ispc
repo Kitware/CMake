@@ -1,5 +1,5 @@
 
-STRUCT_DEFINE};
+STRUCT_DEFINE;};
 
 #include "simple_include.h"
 

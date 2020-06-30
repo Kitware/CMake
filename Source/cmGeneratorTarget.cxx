@@ -1334,10 +1334,17 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
 
 namespace {
 
+enum class IncludeDirectoryFallBack
+{
+  BINARY,
+  OBJECT
+};
+
 std::string AddLangSpecificInterfaceIncludeDirectories(
   const cmGeneratorTarget* root, const cmGeneratorTarget* target,
   const std::string& lang, const std::string& config,
-  const std::string& propertyName, cmGeneratorExpressionDAGChecker* context)
+  const std::string& propertyName, IncludeDirectoryFallBack mode,
+  cmGeneratorExpressionDAGChecker* context)
 {
   cmGeneratorExpressionDAGChecker dag{ target->GetBacktrace(), target,
                                        propertyName, nullptr, context };
@@ -1364,7 +1371,12 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
           auto* lg = dependency->GetLocalGenerator();
           std::string value = dependency->GetSafeProperty(propertyName);
           if (value.empty()) {
-            value = lg->GetCurrentBinaryDirectory();
+            if (mode == IncludeDirectoryFallBack::BINARY) {
+              value = lg->GetCurrentBinaryDirectory();
+            } else if (mode == IncludeDirectoryFallBack::OBJECT) {
+              value = cmStrCat(lg->GetCurrentBinaryDirectory(), '/',
+                               lg->GetTargetDirectory(dependency));
+            }
           }
 
           if (!directories.empty()) {
@@ -1381,7 +1393,7 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
 void AddLangSpecificImplicitIncludeDirectories(
   const cmGeneratorTarget* target, const std::string& lang,
   const std::string& config, const std::string& propertyName,
-  EvaluatedTargetPropertyEntries& entries)
+  IncludeDirectoryFallBack mode, EvaluatedTargetPropertyEntries& entries)
 {
   if (const auto* libraries = target->GetLinkImplementationLibraries(config)) {
     cmGeneratorExpressionDAGChecker dag{ target->GetBacktrace(), target,
@@ -1399,12 +1411,18 @@ void AddLangSpecificImplicitIncludeDirectories(
           if (cmProp val = dependency->GetProperty(propertyName)) {
             entry.Values.emplace_back(*val);
           } else {
-            entry.Values.emplace_back(lg->GetCurrentBinaryDirectory());
+            if (mode == IncludeDirectoryFallBack::BINARY) {
+              entry.Values.emplace_back(lg->GetCurrentBinaryDirectory());
+            } else if (mode == IncludeDirectoryFallBack::OBJECT) {
+              entry.Values.emplace_back(
+                dependency->GetObjectDirectory(config));
+            }
           }
 
-          cmExpandList(AddLangSpecificInterfaceIncludeDirectories(
-                         target, dependency, lang, config, propertyName, &dag),
-                       entry.Values);
+          cmExpandList(
+            AddLangSpecificInterfaceIncludeDirectories(
+              target, dependency, lang, config, propertyName, mode, &dag),
+            entry.Values);
           entries.Entries.emplace_back(std::move(entry));
         }
       }
@@ -3439,7 +3457,27 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
 
   if (lang == "Swift") {
     AddLangSpecificImplicitIncludeDirectories(
-      this, lang, config, "Swift_MODULE_DIRECTORY", entries);
+      this, lang, config, "Swift_MODULE_DIRECTORY",
+      IncludeDirectoryFallBack::BINARY, entries);
+  }
+
+  if (this->CanCompileSources() && (lang != "Swift" && lang != "Fortran")) {
+
+    const std::string propertyName = "ISPC_HEADER_DIRECTORY";
+
+    // If this target has ISPC sources make sure to add the header
+    // directory to other compilation units
+    if (cm::contains(this->GetAllConfigCompileLanguages(), "ISPC")) {
+      if (cmProp val = this->GetProperty(propertyName)) {
+        includes.emplace_back(*val);
+      } else {
+        includes.emplace_back(this->GetObjectDirectory(config));
+      }
+    }
+
+    AddLangSpecificImplicitIncludeDirectories(
+      this, "ISPC", config, propertyName, IncludeDirectoryFallBack::OBJECT,
+      entries);
   }
 
   AddInterfaceEntries(this, config, "INTERFACE_INCLUDE_DIRECTORIES", lang,
@@ -5931,6 +5969,37 @@ std::string cmGeneratorTarget::CreateFortranModuleDirectory(
     cmSystemTools::MakeDirectory(mod_dir);
   }
   return mod_dir;
+}
+
+void cmGeneratorTarget::AddISPCGeneratedHeader(std::string const& header,
+                                               std::string const& config)
+{
+  std::string config_upper;
+  if (!config.empty()) {
+    config_upper = cmSystemTools::UpperCase(config);
+  }
+  auto iter = this->ISPCGeneratedHeaders.find(config_upper);
+  if (iter == this->ISPCGeneratedHeaders.end()) {
+    std::vector<std::string> headers;
+    headers.emplace_back(header);
+    this->ISPCGeneratedHeaders.insert({ config_upper, headers });
+  } else {
+    iter->second.emplace_back(header);
+  }
+}
+
+std::vector<std::string> cmGeneratorTarget::GetGeneratedISPCHeaders(
+  std::string const& config) const
+{
+  std::string config_upper;
+  if (!config.empty()) {
+    config_upper = cmSystemTools::UpperCase(config);
+  }
+  auto iter = this->ISPCGeneratedHeaders.find(config_upper);
+  if (iter == this->ISPCGeneratedHeaders.end()) {
+    return std::vector<std::string>{};
+  }
+  return iter->second;
 }
 
 std::string cmGeneratorTarget::GetFrameworkVersion() const

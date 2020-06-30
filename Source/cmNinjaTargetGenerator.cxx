@@ -630,6 +630,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
+  vars.ISPCHeader = "$ISPC_HEADER_FILE";
 
   cmMakefile* mf = this->GetMakefile();
 
@@ -1367,6 +1368,42 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   this->SetMsvcTargetPdbVariable(vars, config);
 
   objBuild.RspFile = cmStrCat(objectFileName, ".rsp");
+
+  if (language == "ISPC") {
+    std::string const& objectName =
+      this->GeneratorTarget->GetObjectName(source);
+    std::string ispcSource =
+      cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+
+    std::string ispcDirectory = objectFileDir;
+    if (cmProp prop =
+          this->GeneratorTarget->GetProperty("ISPC_HEADER_DIRECTORY")) {
+      ispcDirectory = *prop;
+    }
+    ispcDirectory =
+      cmStrCat(this->LocalGenerator->GetBinaryDirectory(), '/', ispcDirectory);
+
+    std::string ispcHeader = cmStrCat(ispcDirectory, '/', ispcSource, ".h");
+    ispcHeader = this->ConvertToNinjaPath(ispcHeader);
+
+    // Make sure ninja knows what command generates the header
+    objBuild.ImplicitOuts.push_back(ispcHeader);
+
+    // Make sure ninja knows how to clean the generated header
+    this->GetGlobalGenerator()->AddAdditionalCleanFile(ispcHeader, config);
+
+    vars["ISPC_HEADER_FILE"] =
+      this->GetLocalGenerator()->ConvertToOutputFormat(
+        ispcHeader, cmOutputConverter::SHELL);
+  } else {
+    auto headers = this->GeneratorTarget->GetGeneratedISPCHeaders(config);
+    if (!headers.empty()) {
+      std::transform(headers.begin(), headers.end(), headers.begin(),
+                     MapToNinjaPath());
+      objBuild.OrderOnlyDeps.insert(objBuild.OrderOnlyDeps.end(),
+                                    headers.begin(), headers.end());
+    }
+  }
 
   if (language == "Swift") {
     this->EmitSwiftDependencyInfo(source, config);

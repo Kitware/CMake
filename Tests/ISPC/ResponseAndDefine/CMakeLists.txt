@@ -1,5 +1,5 @@
-
-project(ispc_spaces_in_path)
+cmake_minimum_required(VERSION 3.18)
+project(ispc_spaces_in_path ISPC CXX)
 
 set(CMAKE_NINJA_FORCE_RESPONSE_FILE ON)
 
@@ -10,15 +10,19 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/path with spaces/simple_include.h"
 "
 )
 
-add_executable(SpacesInPath main.cxx simple.ispc)
-set_target_properties(SpacesInPath PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_include_directories(SpacesInPath PRIVATE  "${CMAKE_CURRENT_BINARY_DIR}")
+add_executable(ISPCResponseAndDefine main.cxx simple.ispc)
+set_target_properties(ISPCResponseAndDefine PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(ISPCResponseAndDefine PRIVATE  "${CMAKE_CURRENT_BINARY_DIR}")
 
-target_compile_options(SpacesInPath PRIVATE
-  "$<$<COMPILE_LANGUAGE:ISPC>:--target=sse2-i32x4;--arch=x86-64>")
+target_compile_options(ISPCResponseAndDefine PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--target=sse2-i32x4>")
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+  target_compile_options(ISPCResponseAndDefine PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--arch=x86>")
+endif()
 
-target_compile_definitions(SpacesInPath PRIVATE
-  "$<$<COMPILE_LANGUAGE:ISPC>:STRUCT_DEFINE=\"struct{uniform int a;varying int b;\";M_PI=3.1415926535f>")
-target_include_directories(SpacesInPath PRIVATE
-  "$<$<COMPILE_LANGUAGE:ISPC>:\"fake path with spaces\">""
-  "$<$<COMPILE_LANGUAGE:ISPC>:\"path with spaces\">")
+
+
+target_compile_definitions(ISPCResponseAndDefine PRIVATE
+  "$<$<COMPILE_LANGUAGE:ISPC>:STRUCT_DEFINE=struct{uniform int a>;M_PI=3.14159f")
+target_include_directories(ISPCResponseAndDefine PRIVATE
+  "$<$<COMPILE_LANGUAGE:ISPC>:${CMAKE_CURRENT_BINARY_DIR}/fake path with spaces>"
+  "$<$<COMPILE_LANGUAGE:ISPC>:${CMAKE_CURRENT_BINARY_DIR}/path with spaces>")
