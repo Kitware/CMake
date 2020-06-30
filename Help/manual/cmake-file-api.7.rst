@@ -425,7 +425,7 @@ Version 1 does not exist to avoid confusion with that from
 
   {
     "kind": "codemodel",
-    "version": { "major": 2, "minor": 0 },
+    "version": { "major": 2, "minor": 1 },
     "paths": {
       "source": "/path/to/top-level-source-dir",
       "build": "/path/to/top-level-build-dir"
@@ -914,6 +914,8 @@ with members:
       that added this precompiled header is available.  The value is an
       unsigned integer 0-based index into the ``backtraceGraph`` member's
       ``nodes`` array.
+
+    This field was added in codemodel version 2.1.
 
   ``defines``
     Optional member that is present when there are preprocessor definitions.

@@ -312,3 +312,9 @@ Other Changes
   network communication via ``http(s)``, such as :command:`file(DOWNLOAD)`,
   :command:`file(UPLOAD)`, and :command:`ctest_submit`.
   The precompiled binaries provided on ``cmake.org`` now support HTTP/2.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 ``version`` field has
+  been updated to 2.1.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "target" object gained
+  a new ``precompileHeaders`` field in the ``compileGroups`` objects.
