@@ -425,7 +425,7 @@ Version 1 does not exist to avoid confusion with that from
 
   {
     "kind": "codemodel",
-    "version": { "major": 2, "minor": 0 },
+    "version": { "major": 2, "minor": 2 },
     "paths": {
       "source": "/path/to/top-level-source-dir",
       "build": "/path/to/top-level-build-dir"
@@ -887,6 +887,8 @@ with members:
     ``standard``
       String representing the language standard.
 
+    This field was added in codemodel version 2.2.
+
   ``compileCommandFragments``
     Optional member that is present when fragments of the compiler command
     line invocation are available.  The value is a JSON array of entries
@@ -932,6 +934,8 @@ with members:
       that added this precompiled header is available.  The value is an
       unsigned integer 0-based index into the ``backtraceGraph`` member's
       ``nodes`` array.
+
+    This field was added in codemodel version 2.1.
 
   ``defines``
     Optional member that is present when there are preprocessor definitions.
