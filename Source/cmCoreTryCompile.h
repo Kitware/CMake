@@ -47,10 +47,6 @@ protected:
   std::string OutputFile;
   std::string FindErrorMessage;
   bool SrcFileSignature = false;
-
-private:
-  std::vector<std::string> WarnCMP0067;
-  std::string LookupStdVar(std::string const& var, bool warnCMP0067);
 };
 
 #endif

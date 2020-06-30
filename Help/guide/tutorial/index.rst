@@ -675,9 +675,9 @@ The first step is to update the starting section of the top-level
 
 Now that we have made MathFunctions always be used, we will need to update
 the logic of that library. So, in ``MathFunctions/CMakeLists.txt`` we need to
-create a SqrtLibrary that will conditionally be built when ``USE_MYMATH`` is
-enabled. Now, since this is a tutorial, we are going to explicitly require
-that SqrtLibrary is built statically.
+create a SqrtLibrary that will conditionally be built and installed when
+``USE_MYMATH`` is enabled. Now, since this is a tutorial, we are going to
+explicitly require that SqrtLibrary is built statically.
 
 The end result is that ``MathFunctions/CMakeLists.txt`` should look like:
 
@@ -703,7 +703,7 @@ Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
 .. literalinclude:: Step10/MathFunctions/MathFunctions.h
   :language: c++
 
-At this point, if you build everything, you will notice that linking fails
+At this point, if you build everything, you may notice that linking fails
 as we are combining a static library without position independent code with a
 library that has position independent code. The solution to this is to
 explicitly set the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property of

@@ -881,7 +881,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 {
   ConfigurationTestNode() {} // NOLINT(modernize-use-equals-default)
 
-  int NumExpectedParameters() const override { return OneOrZeroParameters; }
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -899,13 +899,15 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return std::string();
     }
     context->HadContextSensitiveCondition = true;
-    if (context->Config.empty()) {
-      return parameters.front().empty() ? "1" : "0";
-    }
-
-    if (cmsysString_strcasecmp(parameters.front().c_str(),
-                               context->Config.c_str()) == 0) {
-      return "1";
+    for (auto& param : parameters) {
+      if (context->Config.empty()) {
+        if (param.empty()) {
+          return "1";
+        }
+      } else if (cmsysString_strcasecmp(param.c_str(),
+                                        context->Config.c_str()) == 0) {
+        return "1";
+      }
     }
 
     if (context->CurrentTarget && context->CurrentTarget->IsImported()) {
@@ -922,10 +924,12 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
           "MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(context->Config));
         if (cmProp mapValue = context->CurrentTarget->GetProperty(mapProp)) {
           cmExpandList(cmSystemTools::UpperCase(*mapValue), mappedConfigs);
-          return cm::contains(mappedConfigs,
-                              cmSystemTools::UpperCase(parameters.front()))
-            ? "1"
-            : "0";
+
+          for (auto& param : parameters) {
+            if (cm::contains(mappedConfigs, cmSystemTools::UpperCase(param))) {
+              return "1";
+            }
+          }
         }
       }
     }
@@ -1708,7 +1712,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       std::string error;
       std::string lang;
       if (!context->LG->GetMakefile()->CompileFeatureKnown(
-            context->HeadTarget->Target, p, lang, &error)) {
+            context->HeadTarget->Target->GetName(), p, lang, &error)) {
         reportError(context, content->GetOriginalExpression(), error);
         return std::string();
       }
@@ -1742,9 +1746,9 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
           continue;
         }
         if (!context->LG->GetMakefile()->HaveStandardAvailable(
-              target->Target, lit.first, it)) {
+              target, lit.first, context->Config, it)) {
           if (evalLL) {
-            cmProp l = target->GetProperty(lit.first + "_STANDARD");
+            cmProp l = target->GetLanguageStandard(lit.first, context->Config);
             if (!l) {
               l = standardDefault;
             }

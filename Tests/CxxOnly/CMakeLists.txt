@@ -1,4 +1,5 @@
 # a simple CXX only test case
+cmake_minimum_required(VERSION 2.8.12)
 project (CxxOnly CXX)
 
 set(CMAKE_DEBUG_POSTFIX "_test_debug_postfix")

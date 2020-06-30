@@ -582,12 +582,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         filesDiffer = cmsys::SystemTools::TextFilesDiffer(args[3], args[4]);
       } else {
         ::CMakeCommandUsage(args[0].c_str());
-        return 1;
+        return 2;
       }
 
       if (filesDiffer) {
-        std::cerr << "Files \"" << args[args.size() - 2] << "\" to \""
-                  << args[args.size() - 1] << "\" are different.\n";
         return 1;
       }
       return 0;

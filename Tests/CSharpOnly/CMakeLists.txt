@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.3)
 # a simple CSharp only test case
 project (CSharpOnly CSharp)
 

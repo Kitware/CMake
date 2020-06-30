@@ -947,6 +947,61 @@ bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
   return it != this->ExplicitObjectName.end();
 }
 
+BT<std::string> const* cmGeneratorTarget::GetLanguageStandardProperty(
+  std::string const& lang, std::string const& config) const
+{
+  std::string key = cmStrCat(cmSystemTools::UpperCase(config), '-', lang);
+  auto langStandardIter = this->LanguageStandardMap.find(key);
+  if (langStandardIter != this->LanguageStandardMap.end()) {
+    return &langStandardIter->second;
+  }
+
+  return this->Target->GetLanguageStandardProperty(
+    cmStrCat(lang, "_STANDARD"));
+}
+
+cmProp cmGeneratorTarget::GetLanguageStandard(std::string const& lang,
+                                              std::string const& config) const
+{
+  BT<std::string> const* languageStandard =
+    this->GetLanguageStandardProperty(lang, config);
+
+  if (languageStandard) {
+    return &(languageStandard->Value);
+  }
+
+  return nullptr;
+}
+
+cmProp cmGeneratorTarget::GetPropertyWithPairedLanguageSupport(
+  std::string const& lang, const char* suffix) const
+{
+  cmProp propertyValue = this->Target->GetProperty(cmStrCat(lang, suffix));
+  if (propertyValue == nullptr) {
+    // Check if we should use the value set by another language.
+    if (lang == "OBJC") {
+      propertyValue = this->GetPropertyWithPairedLanguageSupport("C", suffix);
+    } else if (lang == "OBJCXX" || lang == "CUDA") {
+      propertyValue =
+        this->GetPropertyWithPairedLanguageSupport("CXX", suffix);
+    }
+  }
+  return propertyValue;
+}
+
+cmProp cmGeneratorTarget::GetLanguageExtensions(std::string const& lang) const
+{
+  return this->GetPropertyWithPairedLanguageSupport(lang, "_EXTENSIONS");
+}
+
+bool cmGeneratorTarget::GetLanguageStandardRequired(
+  std::string const& lang) const
+{
+  cmProp p =
+    this->GetPropertyWithPairedLanguageSupport(lang, "_STANDARD_REQUIRED");
+  return p && cmIsOn(*p);
+}
+
 void cmGeneratorTarget::GetModuleDefinitionSources(
   std::vector<cmSourceFile const*>& data, const std::string& config) const
 {
@@ -4408,12 +4463,69 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
 
 bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
 {
+  // Compute the language standard based on the compile features.
   std::vector<BT<std::string>> features = this->GetCompileFeatures(config);
   for (BT<std::string> const& f : features) {
-    if (!this->Makefile->AddRequiredTargetFeature(this->Target, f.Value)) {
+    std::string lang;
+    if (!this->Makefile->CompileFeatureKnown(this->Target->GetName(), f.Value,
+                                             lang, nullptr)) {
       return false;
     }
+
+    std::string key = cmStrCat(cmSystemTools::UpperCase(config), '-', lang);
+    cmProp currentLanguageStandard = this->GetLanguageStandard(lang, config);
+
+    std::string newRequiredStandard;
+    if (!this->Makefile->GetNewRequiredStandard(
+          this->Target->GetName(), f.Value, currentLanguageStandard,
+          newRequiredStandard)) {
+      return false;
+    }
+
+    if (!newRequiredStandard.empty()) {
+      this->LanguageStandardMap[key] =
+        BT<std::string>(newRequiredStandard, f.Backtrace);
+    }
   }
+
+  return true;
+}
+
+bool cmGeneratorTarget::ComputeCompileFeatures(
+  std::string const& config, std::set<LanguagePair> const& languagePairs) const
+{
+  for (const auto& language : languagePairs) {
+    BT<std::string> const* generatorTargetLanguageStandard =
+      this->GetLanguageStandardProperty(language.first, config);
+    if (!generatorTargetLanguageStandard) {
+      // If the standard isn't explicitly set we copy it over from the
+      // specified paired language.
+      std::string key =
+        cmStrCat(cmSystemTools::UpperCase(config), '-', language.first);
+      BT<std::string> const* standardToCopy =
+        this->GetLanguageStandardProperty(language.second, config);
+      if (standardToCopy != nullptr) {
+        this->LanguageStandardMap[key] = *standardToCopy;
+        generatorTargetLanguageStandard = &this->LanguageStandardMap[key];
+      } else {
+        cmProp defaultStandard = this->Makefile->GetDef(
+          cmStrCat("CMAKE_", language.second, "_STANDARD_DEFAULT"));
+        if (defaultStandard != nullptr) {
+          this->LanguageStandardMap[key] = BT<std::string>(*defaultStandard);
+          generatorTargetLanguageStandard = &this->LanguageStandardMap[key];
+        }
+      }
+
+      // Custom updates for the CUDA standard.
+      if (generatorTargetLanguageStandard != nullptr &&
+          language.first == "CUDA") {
+        if (generatorTargetLanguageStandard->Value == "98") {
+          this->LanguageStandardMap[key].Value = "03";
+        }
+      }
+    }
+  }
+
   return true;
 }
 

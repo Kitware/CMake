@@ -28,7 +28,7 @@ The following variables may be set to influence this module's behavior:
 
   * ``OpenBLAS``
   * ``FLAME``
-  * ``Intel10_32`` (intel mkl v10 32 bit)
+  * ``Intel10_32`` (intel mkl v10 32 bit, threaded code)
   * ``Intel10_64lp`` (intel mkl v10+ 64 bit, threaded code, lp64 model)
   * ``Intel10_64lp_seq`` (intel mkl v10+ 64 bit, sequential code, lp64 model)
   * ``Intel10_64ilp`` (intel mkl v10+ 64 bit, threaded code, ilp64 model)
@@ -289,7 +289,9 @@ if(BLAS_FOUND)
         endif()
         set(LAPACK_mkl_LIB_PATH_SUFFIXES
             "compiler/lib" "compiler/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
+            "compiler/lib/${LAPACK_mkl_ARCH_NAME}"
             "mkl/lib" "mkl/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
+            "mkl/lib/${LAPACK_mkl_ARCH_NAME}"
             "lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}")
 
         # First try empty lapack libs

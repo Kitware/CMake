@@ -39,6 +39,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h" // IWYU pragma: keep
 #include "cmInstallSubdirectoryGenerator.h"
@@ -1658,7 +1659,8 @@ void cmMakefile::Configure()
         this->SetCheckCMP0000(true);
 
         // Implicitly set the version for the user.
-        this->SetPolicyVersion("2.4", std::string());
+        cmPolicies::ApplyPolicyVersion(this, 2, 4, 0,
+                                       cmPolicies::WarnCompat::Off);
       }
     }
     bool hasProject = false;
@@ -4027,6 +4029,8 @@ int cmMakefile::ConfigureFile(const std::string& infile,
 
   if (copyonly) {
     if (!cmSystemTools::CopyFileIfDifferent(sinfile, soutfile)) {
+      this->IssueMessage(MessageType::FATAL_ERROR,
+                         cmSystemTools::GetLastSystemError());
       return 0;
     }
   } else {
@@ -4077,9 +4081,15 @@ int cmMakefile::ConfigureFile(const std::string& infile,
     fin.close();
     fout.close();
     if (!cmSystemTools::CopyFileIfDifferent(tempOutputFile, soutfile)) {
+      this->IssueMessage(MessageType::FATAL_ERROR,
+                         cmSystemTools::GetLastSystemError());
       res = 0;
     } else {
-      cmSystemTools::SetPermissions(soutfile, perm);
+      if (!cmSystemTools::SetPermissions(soutfile, perm)) {
+        this->IssueMessage(MessageType::FATAL_ERROR,
+                           cmSystemTools::GetLastSystemError());
+        res = 0;
+      }
     }
     cmSystemTools::RemoveFile(tempOutputFile);
   }
@@ -4554,7 +4564,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 
   // Deprecate old policies, especially those that require a lot
   // of code to maintain the old behavior.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0071 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0072 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
@@ -4596,7 +4606,7 @@ void cmMakefile::PopSnapshot(bool reportError)
   // cmStateSnapshot manages nested policy scopes within it.
   // Since the scope corresponding to the snapshot is closing,
   // reject any still-open nested policy scopes with an error.
-  while (!this->StateSnapshot.CanPopPolicyScope()) {
+  while (this->StateSnapshot.CanPopPolicyScope()) {
     if (reportError) {
       this->IssueMessage(MessageType::FATAL_ERROR,
                          "cmake_policy PUSH without matching POP");
@@ -4612,7 +4622,8 @@ void cmMakefile::PopSnapshot(bool reportError)
 bool cmMakefile::SetPolicyVersion(std::string const& version_min,
                                   std::string const& version_max)
 {
-  return cmPolicies::ApplyPolicyVersion(this, version_min, version_max);
+  return cmPolicies::ApplyPolicyVersion(this, version_min, version_max,
+                                        cmPolicies::WarnCompat::On);
 }
 
 bool cmMakefile::HasCMP0054AlreadyBeenReported(
@@ -4673,7 +4684,33 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
   }
 
   std::string lang;
-  if (!this->CompileFeatureKnown(target, feature, lang, error)) {
+  if (!this->CheckCompileFeaturesAvailable(target->GetName(), feature, lang,
+                                           error)) {
+    return false;
+  }
+
+  target->AppendProperty("COMPILE_FEATURES", feature);
+
+  // FIXME: Add a policy to avoid updating the <LANG>_STANDARD target
+  // property due to COMPILE_FEATURES.  The language standard selection
+  // should be done purely at generate time based on whatever the project
+  // code put in these properties explicitly.  That is mostly true now,
+  // but for compatibility we need to continue updating the property here.
+  if (lang == "C" || lang == "OBJC") {
+    return this->AddRequiredTargetCFeature(target, feature, lang, error);
+  }
+  if (lang == "CUDA") {
+    return this->AddRequiredTargetCudaFeature(target, feature, lang, error);
+  }
+  return this->AddRequiredTargetCxxFeature(target, feature, lang, error);
+}
+
+bool cmMakefile::CheckCompileFeaturesAvailable(const std::string& targetName,
+                                               const std::string& feature,
+                                               std::string& lang,
+                                               std::string* error) const
+{
+  if (!this->CompileFeatureKnown(targetName, feature, lang, error)) {
     return false;
   }
 
@@ -4699,18 +4736,10 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
     return false;
   }
 
-  target->AppendProperty("COMPILE_FEATURES", feature);
-
-  if (lang == "C" || lang == "OBJC") {
-    return this->AddRequiredTargetCFeature(target, feature, lang, error);
-  }
-  if (lang == "CUDA") {
-    return this->AddRequiredTargetCudaFeature(target, feature, lang, error);
-  }
-  return this->AddRequiredTargetCxxFeature(target, feature, lang, error);
+  return true;
 }
 
-bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
+bool cmMakefile::CompileFeatureKnown(const std::string& targetName,
                                      const std::string& feature,
                                      std::string& lang,
                                      std::string* error) const
@@ -4747,7 +4776,7 @@ bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
   e << " unknown feature \"" << feature
     << "\" for "
        "target \""
-    << target->GetName() << "\".";
+    << targetName << "\".";
   if (error) {
     *error = e.str();
   } else {
@@ -4802,22 +4831,50 @@ const char* cmMakefile::CompileFeaturesAvailable(const std::string& lang,
   return featuresKnown;
 }
 
-bool cmMakefile::HaveStandardAvailable(cmTarget const* target,
+bool cmMakefile::GetNewRequiredStandard(const std::string& targetName,
+                                        const std::string& feature,
+                                        cmProp currentLangStandardValue,
+                                        std::string& newRequiredStandard,
+                                        std::string* error) const
+{
+  std::string lang;
+  if (!this->CheckCompileFeaturesAvailable(targetName, feature, lang, error)) {
+    return false;
+  }
+
+  if (lang == "C" || lang == "OBJC") {
+    return this->GetNewRequiredCStandard(targetName, feature, lang,
+                                         currentLangStandardValue,
+                                         newRequiredStandard, error);
+  }
+  if (lang == "CUDA") {
+    return this->GetNewRequiredCudaStandard(targetName, feature, lang,
+                                            currentLangStandardValue,
+                                            newRequiredStandard, error);
+  }
+  return this->GetNewRequiredCxxStandard(targetName, feature, lang,
+                                         currentLangStandardValue,
+                                         newRequiredStandard, error);
+}
+
+bool cmMakefile::HaveStandardAvailable(cmGeneratorTarget const* target,
                                        std::string const& lang,
+                                       std::string const& config,
                                        const std::string& feature) const
 {
   if (lang == "C" || lang == "OBJC") {
-    return this->HaveCStandardAvailable(target, feature, lang);
+    return this->HaveCStandardAvailable(target, lang, config, feature);
   }
   if (lang == "CUDA") {
-    return this->HaveCudaStandardAvailable(target, feature, lang);
+    return this->HaveCudaStandardAvailable(target, lang, config, feature);
   }
-  return this->HaveCxxStandardAvailable(target, feature, lang);
+  return this->HaveCxxStandardAvailable(target, lang, config, feature);
 }
 
-bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
-                                        const std::string& feature,
-                                        std::string const& lang) const
+bool cmMakefile::HaveCStandardAvailable(cmGeneratorTarget const* target,
+                                        std::string const& lang,
+                                        std::string const& config,
+                                        const std::string& feature) const
 {
   cmProp defaultCStandard =
     this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
@@ -4846,7 +4903,7 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
 
   this->CheckNeededCLanguage(feature, lang, needC90, needC99, needC11);
 
-  cmProp existingCStandard = target->GetProperty(cmStrCat(lang, "_STANDARD"));
+  cmProp existingCStandard = target->GetLanguageStandard(lang, config);
   if (!existingCStandard) {
     existingCStandard = defaultCStandard;
   }
@@ -4909,9 +4966,10 @@ bool cmMakefile::IsLaterStandard(std::string const& lang,
     cm::cend(CXX_STANDARDS);
 }
 
-bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
-                                          const std::string& feature,
-                                          std::string const& lang) const
+bool cmMakefile::HaveCxxStandardAvailable(cmGeneratorTarget const* target,
+                                          std::string const& lang,
+                                          std::string const& config,
+                                          const std::string& feature) const
 {
   cmProp defaultCxxStandard =
     this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
@@ -4941,8 +4999,7 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
   this->CheckNeededCxxLanguage(feature, lang, needCxx98, needCxx11, needCxx14,
                                needCxx17, needCxx20);
 
-  cmProp existingCxxStandard =
-    target->GetProperty(cmStrCat(lang, "_STANDARD"));
+  cmProp existingCxxStandard = target->GetLanguageStandard(lang, config);
   if (!existingCxxStandard) {
     existingCxxStandard = defaultCxxStandard;
   }
@@ -5009,6 +5066,29 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
                                              std::string const& lang,
                                              std::string* error) const
 {
+  std::string newRequiredStandard;
+  if (this->GetNewRequiredCxxStandard(
+        target->GetName(), feature, lang,
+        target->GetProperty(cmStrCat(lang, "_STANDARD")), newRequiredStandard,
+        error)) {
+    if (!newRequiredStandard.empty()) {
+      target->SetLanguageStandardProperty(lang, newRequiredStandard, feature);
+    }
+    return true;
+  }
+
+  return false;
+}
+
+bool cmMakefile::GetNewRequiredCxxStandard(const std::string& targetName,
+                                           const std::string& feature,
+                                           std::string const& lang,
+                                           cmProp currentLangStandardValue,
+                                           std::string& newRequiredStandard,
+                                           std::string* error) const
+{
+  newRequiredStandard.clear();
+
   bool needCxx98 = false;
   bool needCxx11 = false;
   bool needCxx14 = false;
@@ -5018,8 +5098,7 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
   this->CheckNeededCxxLanguage(feature, lang, needCxx98, needCxx11, needCxx14,
                                needCxx17, needCxx20);
 
-  cmProp existingCxxStandard =
-    target->GetProperty(cmStrCat(lang, "_STANDARD"));
+  cmProp existingCxxStandard = currentLangStandardValue;
   if (existingCxxStandard == nullptr) {
     cmProp defaultCxxStandard =
       this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
@@ -5034,7 +5113,7 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
                    cmStrCmp(*existingCxxStandard));
     if (existingCxxLevel == cm::cend(CXX_STANDARDS)) {
       const std::string e = cmStrCat(
-        "The ", lang, "_STANDARD property on target \"", target->GetName(),
+        "The ", lang, "_STANDARD property on target \"", targetName,
         "\" contained an invalid value: \"", *existingCxxStandard, "\".");
       if (error) {
         *error = e;
@@ -5060,16 +5139,17 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     // Ensure the C++ language level is high enough to support
     // the needed C++ features.
     if (!existingCxxLevel || existingCxxLevel < needCxxLevel) {
-      target->SetProperty(cmStrCat(lang, "_STANDARD"), *needCxxLevel);
+      newRequiredStandard = *needCxxLevel;
     }
   }
 
   return true;
 }
 
-bool cmMakefile::HaveCudaStandardAvailable(cmTarget const* target,
-                                           const std::string& feature,
-                                           std::string const& lang) const
+bool cmMakefile::HaveCudaStandardAvailable(cmGeneratorTarget const* target,
+                                           std::string const& lang,
+                                           std::string const& config,
+                                           const std::string& feature) const
 {
   cmProp defaultCudaStandard =
     this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
@@ -5100,8 +5180,7 @@ bool cmMakefile::HaveCudaStandardAvailable(cmTarget const* target,
   this->CheckNeededCudaLanguage(feature, lang, needCuda03, needCuda11,
                                 needCuda14, needCuda17, needCuda20);
 
-  cmProp existingCudaStandard =
-    target->GetProperty(cmStrCat(lang, "_STANDARD"));
+  cmProp existingCudaStandard = target->GetLanguageStandard(lang, config);
   if (!existingCudaStandard) {
     existingCudaStandard = defaultCudaStandard;
   }
@@ -5168,6 +5247,28 @@ bool cmMakefile::AddRequiredTargetCudaFeature(cmTarget* target,
                                               std::string const& lang,
                                               std::string* error) const
 {
+  std::string newRequiredStandard;
+  if (this->GetNewRequiredCudaStandard(
+        target->GetName(), feature, lang,
+        target->GetProperty(cmStrCat(lang, "_STANDARD")), newRequiredStandard,
+        error)) {
+    if (!newRequiredStandard.empty()) {
+      target->SetLanguageStandardProperty(lang, newRequiredStandard, feature);
+    }
+    return true;
+  }
+  return false;
+}
+
+bool cmMakefile::GetNewRequiredCudaStandard(const std::string& targetName,
+                                            const std::string& feature,
+                                            std::string const& lang,
+                                            cmProp currentLangStandardValue,
+                                            std::string& newRequiredStandard,
+                                            std::string* error) const
+{
+  newRequiredStandard.clear();
+
   bool needCuda03 = false;
   bool needCuda11 = false;
   bool needCuda14 = false;
@@ -5177,8 +5278,7 @@ bool cmMakefile::AddRequiredTargetCudaFeature(cmTarget* target,
   this->CheckNeededCudaLanguage(feature, lang, needCuda03, needCuda11,
                                 needCuda14, needCuda17, needCuda20);
 
-  cmProp existingCudaStandard =
-    target->GetProperty(cmStrCat(lang, "_STANDARD"));
+  cmProp existingCudaStandard = currentLangStandardValue;
   if (existingCudaStandard == nullptr) {
     cmProp defaultCudaStandard =
       this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
@@ -5193,7 +5293,7 @@ bool cmMakefile::AddRequiredTargetCudaFeature(cmTarget* target,
                    cmStrCmp(*existingCudaStandard));
     if (existingCudaLevel == cm::cend(CUDA_STANDARDS)) {
       const std::string e = cmStrCat(
-        "The ", lang, "_STANDARD property on target \"", target->GetName(),
+        "The ", lang, "_STANDARD property on target \"", targetName,
         "\" contained an invalid value: \"", *existingCudaStandard, "\".");
       if (error) {
         *error = e;
@@ -5219,7 +5319,7 @@ bool cmMakefile::AddRequiredTargetCudaFeature(cmTarget* target,
     // Ensure the CUDA language level is high enough to support
     // the needed CUDA features.
     if (!existingCudaLevel || existingCudaLevel < needCudaLevel) {
-      target->SetProperty("CUDA_STANDARD", *needCudaLevel);
+      newRequiredStandard = *needCudaLevel;
     }
   }
 
@@ -5252,13 +5352,36 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
                                            std::string const& lang,
                                            std::string* error) const
 {
+  std::string newRequiredStandard;
+  if (this->GetNewRequiredCStandard(
+        target->GetName(), feature, lang,
+        target->GetProperty(cmStrCat(lang, "_STANDARD")), newRequiredStandard,
+        error)) {
+    if (!newRequiredStandard.empty()) {
+      target->SetLanguageStandardProperty(lang, newRequiredStandard, feature);
+    }
+    return true;
+  }
+
+  return false;
+}
+
+bool cmMakefile::GetNewRequiredCStandard(const std::string& targetName,
+                                         const std::string& feature,
+                                         std::string const& lang,
+                                         cmProp currentLangStandardValue,
+                                         std::string& newRequiredStandard,
+                                         std::string* error) const
+{
+  newRequiredStandard.clear();
+
   bool needC90 = false;
   bool needC99 = false;
   bool needC11 = false;
 
   this->CheckNeededCLanguage(feature, lang, needC90, needC99, needC11);
 
-  cmProp existingCStandard = target->GetProperty(cmStrCat(lang, "_STANDARD"));
+  cmProp existingCStandard = currentLangStandardValue;
   if (existingCStandard == nullptr) {
     cmProp defaultCStandard =
       this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
@@ -5270,7 +5393,7 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
     if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
                      cmStrCmp(*existingCStandard)) == cm::cend(C_STANDARDS)) {
       const std::string e = cmStrCat(
-        "The ", lang, "_STANDARD property on target \"", target->GetName(),
+        "The ", lang, "_STANDARD property on target \"", targetName,
         "\" contained an invalid value: \"", *existingCStandard, "\".");
       if (error) {
         *error = e;
@@ -5307,11 +5430,11 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
   }
 
   if (setC11) {
-    target->SetProperty(cmStrCat(lang, "_STANDARD"), "11");
+    newRequiredStandard = "11";
   } else if (setC99) {
-    target->SetProperty(cmStrCat(lang, "_STANDARD"), "99");
+    newRequiredStandard = "99";
   } else if (setC90) {
-    target->SetProperty(cmStrCat(lang, "_STANDARD"), "90");
+    newRequiredStandard = "90";
   }
   return true;
 }

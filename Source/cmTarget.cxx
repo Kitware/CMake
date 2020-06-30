@@ -7,6 +7,7 @@
 #include <cstring>
 #include <initializer_list>
 #include <iterator>
+#include <map>
 #include <set>
 #include <sstream>
 #include <unordered_set>
@@ -185,6 +186,7 @@ public:
   std::vector<cmInstallTargetGenerator*> InstallGenerators;
   std::set<std::string> SystemIncludeDirectories;
   cmTarget::LinkLibraryVectorType OriginalLinkLibraries;
+  std::map<std::string, BT<std::string>> LanguageStandardProperties;
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
   std::vector<std::string> CompileOptionsEntries;
@@ -598,6 +600,35 @@ cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
   return impl->Makefile->GetGlobalGenerator();
 }
 
+BT<std::string> const* cmTarget::GetLanguageStandardProperty(
+  const std::string& propertyName) const
+{
+  auto entry = impl->LanguageStandardProperties.find(propertyName);
+  if (entry != impl->LanguageStandardProperties.end()) {
+    return &entry->second;
+  }
+
+  return nullptr;
+}
+
+void cmTarget::SetLanguageStandardProperty(std::string const& lang,
+                                           std::string const& value,
+                                           const std::string& feature)
+{
+  cmListFileBacktrace featureBacktrace;
+  for (size_t i = 0; i < impl->CompileFeaturesEntries.size(); i++) {
+    if (impl->CompileFeaturesEntries[i] == feature) {
+      if (i < impl->CompileFeaturesBacktraces.size()) {
+        featureBacktrace = impl->CompileFeaturesBacktraces[i];
+      }
+      break;
+    }
+  }
+
+  impl->LanguageStandardProperties[cmStrCat(lang, "_STANDARD")] =
+    BT<std::string>(value, featureBacktrace);
+}
+
 void cmTarget::AddUtility(std::string const& name, bool cross, cmMakefile* mf)
 {
   impl->Utilities.insert(BT<std::pair<std::string, bool>>(
@@ -634,6 +665,12 @@ bool cmTarget::IsAppBundleOnApple() const
   return (this->GetType() == cmStateEnums::EXECUTABLE &&
           impl->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
+}
+
+bool cmTarget::IsAndroidGuiExecutable() const
+{
+  return (this->GetType() == cmStateEnums::EXECUTABLE && impl->IsAndroid &&
+          this->GetPropertyAsBool("ANDROID_GUI"));
 }
 
 std::vector<cmCustomCommand> const& cmTarget::GetPreBuildCommands() const
@@ -1127,6 +1164,11 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     return;
   }
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
+  MAKE_STATIC_PROP(C_STANDARD);
+  MAKE_STATIC_PROP(CXX_STANDARD);
+  MAKE_STATIC_PROP(CUDA_STANDARD);
+  MAKE_STATIC_PROP(OBJC_STANDARD);
+  MAKE_STATIC_PROP(OBJCXX_STANDARD);
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
   MAKE_STATIC_PROP(COMPILE_FEATURES);
   MAKE_STATIC_PROP(COMPILE_OPTIONS);
@@ -1310,6 +1352,15 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     cmProp tmp = reusedTarget->GetProperty("COMPILE_PDB_NAME");
     this->SetProperty("COMPILE_PDB_NAME", tmp ? tmp->c_str() : nullptr);
     this->AddUtility(reusedFrom, false, impl->Makefile);
+  } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
+             prop == propCUDA_STANDARD || prop == propOBJC_STANDARD ||
+             prop == propOBJCXX_STANDARD) {
+    if (value) {
+      impl->LanguageStandardProperties[prop] =
+        BT<std::string>(value, impl->Makefile->GetBacktrace());
+    } else {
+      impl->LanguageStandardProperties.erase(prop);
+    }
   } else {
     impl->Properties.SetProperty(prop, value);
   }
@@ -1413,6 +1464,11 @@ void cmTarget::AppendProperty(const std::string& prop,
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME")) {
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  prop + " property may not be APPENDed.");
+  } else if (prop == "C_STANDARD" || prop == "CXX_STANDARD" ||
+             prop == "CUDA_STANDARD" || prop == "OBJC_STANDARD" ||
+             prop == "OBJCXX_STANDARD") {
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 prop + " property may not be appended.");
   } else {
     impl->Properties.AppendProperty(prop, value, asString);
   }
@@ -1626,6 +1682,11 @@ cmProp cmTarget::GetComputedProperty(const std::string& prop,
 cmProp cmTarget::GetProperty(const std::string& prop) const
 {
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
+  MAKE_STATIC_PROP(C_STANDARD);
+  MAKE_STATIC_PROP(CXX_STANDARD);
+  MAKE_STATIC_PROP(CUDA_STANDARD);
+  MAKE_STATIC_PROP(OBJC_STANDARD);
+  MAKE_STATIC_PROP(OBJCXX_STANDARD);
   MAKE_STATIC_PROP(LINK_LIBRARIES);
   MAKE_STATIC_PROP(TYPE);
   MAKE_STATIC_PROP(INCLUDE_DIRECTORIES);
@@ -1646,6 +1707,11 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(TRUE);
 #undef MAKE_STATIC_PROP
   static std::unordered_set<std::string> const specialProps{
+    propC_STANDARD,
+    propCXX_STANDARD,
+    propCUDA_STANDARD,
+    propOBJC_STANDARD,
+    propOBJCXX_STANDARD,
     propLINK_LIBRARIES,
     propTYPE,
     propINCLUDE_DIRECTORIES,
@@ -1664,6 +1730,15 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
     propSOURCES
   };
   if (specialProps.count(prop)) {
+    if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
+        prop == propCUDA_STANDARD || prop == propOBJC_STANDARD ||
+        prop == propOBJCXX_STANDARD) {
+      auto propertyIter = impl->LanguageStandardProperties.find(prop);
+      if (propertyIter == impl->LanguageStandardProperties.end()) {
+        return nullptr;
+      }
+      return &(propertyIter->second.Value);
+    }
     if (prop == propLINK_LIBRARIES) {
       if (impl->LinkImplementationPropertyEntries.empty()) {
         return nullptr;
@@ -1865,7 +1940,7 @@ const char* cmTarget::GetSuffixVariableInternal(
         case cmStateEnums::RuntimeBinaryArtifact:
           // Android GUI application packages store the native
           // binary as a shared library.
-          return (impl->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+          return (this->IsAndroidGuiExecutable()
                     ? "CMAKE_SHARED_LIBRARY_SUFFIX"
                     : "CMAKE_EXECUTABLE_SUFFIX");
         case cmStateEnums::ImportLibraryArtifact:
@@ -1906,7 +1981,7 @@ const char* cmTarget::GetPrefixVariableInternal(
         case cmStateEnums::RuntimeBinaryArtifact:
           // Android GUI application packages store the native
           // binary as a shared library.
-          return (impl->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+          return (this->IsAndroidGuiExecutable()
                     ? "CMAKE_SHARED_LIBRARY_PREFIX"
                     : "");
         case cmStateEnums::ImportLibraryArtifact:

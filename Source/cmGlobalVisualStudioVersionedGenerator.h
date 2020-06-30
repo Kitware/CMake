@@ -36,6 +36,8 @@ public:
 
   bool IsStdOutEncodingSupported() const override;
 
+  const char* GetAndroidApplicationTypeRevision() const override;
+
 protected:
   cmGlobalVisualStudioVersionedGenerator(
     VSVersion version, cmake* cm, const std::string& name,

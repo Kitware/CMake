@@ -1,1 +1,0 @@
-^Files ".*/compare_files/lf" to ".*/compare_files/crlf" are different.$

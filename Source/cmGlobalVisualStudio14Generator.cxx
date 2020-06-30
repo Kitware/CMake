@@ -109,6 +109,7 @@ cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
     "ProductDir",
     vc14Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v140";
+  this->DefaultAndroidToolset = "Clang_3_8";
   this->DefaultCLFlagTableName = "v140";
   this->DefaultCSharpFlagTableName = "v140";
   this->DefaultLibFlagTableName = "v14";
@@ -156,6 +157,11 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
   if (cmHasLiteralPrefix(this->SystemVersion, "10.0")) {
     return this->SelectWindows10SDK(mf, true);
   }
+  return true;
+}
+
+bool cmGlobalVisualStudio14Generator::InitializeAndroid(cmMakefile*)
+{
   return true;
 }
 

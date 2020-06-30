@@ -1,0 +1,3 @@
+void initialize_system()
+{
+}

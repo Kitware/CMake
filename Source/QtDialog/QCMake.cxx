@@ -340,10 +340,10 @@ void QCMake::interrupt()
 
 bool QCMake::interruptCallback()
 {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return this->InterruptFlag;
-#else
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
   return this->InterruptFlag.load();
+#else
+  return this->InterruptFlag.loadRelaxed();
 #endif
 }
 

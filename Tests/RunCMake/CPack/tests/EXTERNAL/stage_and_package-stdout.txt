@@ -1,1 +1,11 @@
 -- This status message is expected to be visible
+CPack: - package: .*/Tests/RunCMake/External/CPack/EXTERNAL-build-stage_and_package-subtest/external-0\.1\.1-.*\.json generated\.
+CPack: - checksum file: .*/Tests/RunCMake/External/CPack/EXTERNAL-build-stage_and_package-subtest/external-0\.1\.1-.*\.json\.sha1 generated\.
+CPack: - package: .*/Tests/RunCMake/External/CPack/EXTERNAL-build-stage_and_package-subtest/f1\.txt generated\.
+CPack: - checksum file: .*/Tests/RunCMake/External/CPack/EXTERNAL-build-stage_and_package-subtest/f1\.txt\.sha1 generated\.
+CPack: - package: .*/Tests/RunCMake/External/CPack/EXTERNAL-build-stage_and_package-subtest/f2\.txt generated\.
+CPack: - checksum file: .*/Tests/RunCMake/External/CPack/EXTERNAL-build-stage_and_package-subtest/f2\.txt\.sha1 generated\.
+CPack: - package: .*/Tests/RunCMake/External/CPack/EXTERNAL-build-stage_and_package-subtest/f3\.txt generated\.
+CPack: - checksum file: .*/Tests/RunCMake/External/CPack/EXTERNAL-build-stage_and_package-subtest/f3\.txt\.sha1 generated\.
+CPack: - package: .*/Tests/RunCMake/External/CPack/EXTERNAL-build-stage_and_package-subtest/f4\.txt generated\.
+CPack: - checksum file: .*/Tests/RunCMake/External/CPack/EXTERNAL-build-stage_and_package-subtest/f4\.txt\.sha1 generated\.

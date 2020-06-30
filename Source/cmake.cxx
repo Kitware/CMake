@@ -64,10 +64,6 @@
 #  include "cmVariableWatch.h"
 #endif
 
-#if !defined(CMAKE_BOOTSTRAP)
-#  define CMAKE_USE_ECLIPSE
-#endif
-
 #if defined(__MINGW32__) && defined(CMAKE_BOOTSTRAP)
 #  define CMAKE_BOOT_MINGW
 #endif
@@ -101,16 +97,13 @@
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmGlobalNinjaGenerator.h"
 #endif
-#include "cmExtraCodeLiteGenerator.h"
 
-#if !defined(CMAKE_BOOT_MINGW)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmExtraCodeBlocksGenerator.h"
-#endif
-#include "cmExtraKateGenerator.h"
-#include "cmExtraSublimeTextGenerator.h"
-
-#ifdef CMAKE_USE_ECLIPSE
+#  include "cmExtraCodeLiteGenerator.h"
 #  include "cmExtraEclipseCDT4Generator.h"
+#  include "cmExtraKateGenerator.h"
+#  include "cmExtraSublimeTextGenerator.h"
 #endif
 
 #if defined(__linux__) || defined(_WIN32)
@@ -201,7 +194,7 @@ cmake::cmake(Role role, cmState::Mode mode)
     };
 
     // The "c" extension MUST precede the "C" extension.
-    setupExts(this->SourceFileExtensions,
+    setupExts(this->CLikeSourceFileExtensions,
               { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "m", "M", "mm" });
     setupExts(this->HeaderFileExtensions,
               { "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" });
@@ -1137,13 +1130,9 @@ void cmake::AddDefaultExtraGenerators()
 #if !defined(CMAKE_BOOTSTRAP)
   this->ExtraGenerators.push_back(cmExtraCodeBlocksGenerator::GetFactory());
   this->ExtraGenerators.push_back(cmExtraCodeLiteGenerator::GetFactory());
-  this->ExtraGenerators.push_back(cmExtraSublimeTextGenerator::GetFactory());
-  this->ExtraGenerators.push_back(cmExtraKateGenerator::GetFactory());
-
-#  ifdef CMAKE_USE_ECLIPSE
   this->ExtraGenerators.push_back(cmExtraEclipseCDT4Generator::GetFactory());
-#  endif
-
+  this->ExtraGenerators.push_back(cmExtraKateGenerator::GetFactory());
+  this->ExtraGenerators.push_back(cmExtraSublimeTextGenerator::GetFactory());
 #endif
 }
 
@@ -1970,6 +1959,17 @@ void cmake::AddGlobCacheEntry(bool recurse, bool listDirectories,
                                  backtrace);
 }
 
+std::vector<std::string> cmake::GetAllExtensions() const
+{
+  std::vector<std::string> allExt = this->CLikeSourceFileExtensions.ordered;
+  allExt.insert(allExt.end(), this->HeaderFileExtensions.ordered.begin(),
+                this->HeaderFileExtensions.ordered.end());
+  // cuda extensions are also in SourceFileExtensions so we ignore it here
+  allExt.insert(allExt.end(), this->FortranFileExtensions.ordered.begin(),
+                this->FortranFileExtensions.ordered.end());
+  return allExt;
+}
+
 std::string cmake::StripExtension(const std::string& file) const
 {
   auto dotpos = file.rfind('.');
@@ -1979,7 +1979,7 @@ std::string cmake::StripExtension(const std::string& file) const
 #else
     auto ext = cm::string_view(file).substr(dotpos + 1);
 #endif
-    if (this->IsSourceExtension(ext) || this->IsHeaderExtension(ext)) {
+    if (this->IsAKnownExtension(ext)) {
       return file.substr(0, dotpos);
     }
   }

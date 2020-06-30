@@ -209,6 +209,9 @@ public:
   //! Return whether this target is an executable Bundle on Apple.
   bool IsAppBundleOnApple() const;
 
+  //! Return whether this target is a GUI executable on Android.
+  bool IsAndroidGuiExecutable() const;
+
   //! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
 
@@ -232,6 +235,13 @@ public:
 
   void AddSystemIncludeDirectories(std::set<std::string> const& incs);
   std::set<std::string> const& GetSystemIncludeDirectories() const;
+
+  BT<std::string> const* GetLanguageStandardProperty(
+    const std::string& propertyName) const;
+
+  void SetLanguageStandardProperty(std::string const& lang,
+                                   std::string const& value,
+                                   const std::string& feature);
 
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
