@@ -1043,6 +1043,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   } /* data->set.ftpport */
 
   if(!host) {
+    const char *r;
     /* not an interface and not a host name, get default by extracting
        the IP from the control connection */
     sslen = sizeof(ss);
@@ -1055,13 +1056,15 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     switch(sa->sa_family) {
 #ifdef ENABLE_IPV6
     case AF_INET6:
-      Curl_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
+      r = Curl_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
       break;
 #endif
     default:
-      Curl_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
+      r = Curl_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
       break;
     }
+    if(!r)
+      return CURLE_FTP_PORT_FAILED;
     host = hbuf; /* use this host name */
     possibly_non_local = FALSE; /* we know it is local now */
   }
@@ -1449,7 +1452,7 @@ static CURLcode ftp_state_list(struct connectdata *conn)
     /* url-decode before evaluation: e.g. paths starting/ending with %2f */
     const char *slashPos = NULL;
     char *rawPath = NULL;
-    result = Curl_urldecode(data, ftp->path, 0, &rawPath, NULL, TRUE);
+    result = Curl_urldecode(data, ftp->path, 0, &rawPath, NULL, REJECT_CTRL);
     if(result)
       return result;
 
@@ -2824,7 +2827,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
             store++;
             ptr++;
           }
-          *store = '\0'; /* zero terminate */
+          *store = '\0'; /* null-terminate */
         }
         if(entry_extracted) {
           /* If the path name does not look like an absolute path (i.e.: it
@@ -2888,7 +2891,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
           ptr++;
         for(store = os; *ptr && *ptr != ' ';)
           *store++ = *ptr++;
-        *store = '\0'; /* zero terminate */
+        *store = '\0'; /* null-terminate */
 
         /* Check for special servers here. */
 
@@ -3191,7 +3194,8 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 
   if(!result)
     /* get the url-decoded "raw" path */
-    result = Curl_urldecode(data, ftp->path, 0, &rawPath, &pathLen, TRUE);
+    result = Curl_urldecode(data, ftp->path, 0, &rawPath, &pathLen,
+                            REJECT_CTRL);
   if(result) {
     /* We can limp along anyway (and should try to since we may already be in
      * the error path) */
@@ -4107,7 +4111,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   ftpc->cwdfail = FALSE;
 
   /* url-decode ftp path before further evaluation */
-  result = Curl_urldecode(data, ftp->path, 0, &rawPath, &pathLen, TRUE);
+  result = Curl_urldecode(data, ftp->path, 0, &rawPath, &pathLen, REJECT_CTRL);
   if(result)
     return result;
 

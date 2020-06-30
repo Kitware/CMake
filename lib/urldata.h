@@ -229,6 +229,7 @@ struct ssl_primary_config {
   char *cipher_list;     /* list of ciphers to use */
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
   char *pinned_key;
+  struct curl_blob *cert_blob;
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
   BIT(verifystatus);     /* set TRUE if certificate status must be checked */
@@ -766,6 +767,8 @@ struct Curl_handler {
                                          HTTP proxy as HTTP proxies may know
                                          this protocol and act as a gateway */
 #define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
+#define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ascii) in
+                                       user name and password */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
@@ -1562,7 +1565,7 @@ enum dupstring {
   STRING_DNS_LOCAL_IP4,
   STRING_DNS_LOCAL_IP6,
 
-  /* -- end of zero-terminated strings -- */
+  /* -- end of null-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
 
