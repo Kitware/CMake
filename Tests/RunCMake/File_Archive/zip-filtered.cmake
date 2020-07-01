@@ -3,9 +3,9 @@ set(OUTPUT_NAME "test.zip")
 set(ARCHIVE_FORMAT zip)
 
 set(DECOMPRESSION_OPTIONS
-  FILES
+  PATTERNS
     compress_dir/f1.txt # Decompress only file
-    compress_dir/d1     # and whole directory
+    compress_*/d?       # and whole directory (has only one match)
 )
 
 set(CUSTOM_CHECK_FILES

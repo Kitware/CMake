@@ -899,15 +899,15 @@ Archiving
 .. code-block:: cmake
 
   file(ARCHIVE_CREATE OUTPUT <archive>
-    [FILES <files>]
-    [DIRECTORY <dirs>]
+    PATHS <paths>...
     [FORMAT <format>]
     [COMPRESSION <compression>]
     [MTIME <mtime>]
     [VERBOSE])
 
-Creates the specified ``<archive>`` file with the content of ``<files>`` and
-``<dirs>``.
+Creates the specified ``<archive>`` file with the files and directories
+listed in ``<paths>``.  Note that ``<paths>`` must list actual files or
+directories, wildcards are not supported.
 
 Use the ``FORMAT`` option to specify the archive format.  Supported values
 for ``<format>`` are ``7zip``, ``gnutar``, ``pax``, ``paxr``, ``raw`` and
@@ -933,21 +933,23 @@ the ``MTIME`` option.
 .. code-block:: cmake
 
   file(ARCHIVE_EXTRACT INPUT <archive>
-    [FILES <files>]
-    [DIRECTORY <dirs>]
     [DESTINATION <dir>]
+    [PATTERNS <patterns>...]
     [LIST_ONLY]
     [VERBOSE])
 
-Extracts or lists the content of an archive specified by ``INPUT``.
+Extracts or lists the content of the specified ``<archive>``.
 
-The directory where the content of the archive will be extracted can
-be specified via ``DESTINATION``. If the directory does not exit, it
-will be created.
+The directory where the content of the archive will be extracted to can
+be specified using the ``DESTINATION`` option.  If the directory does not
+exist, it will be created.  If ``DESTINATION`` is not given, the current
+binary directory will be used.
 
-To select which files and directories will be extracted or listed
-use  ``FILES`` and ``DIRECTORY`` options.
+If required, you may select which files and directories to list or extract
+from the archive using the specified ``<patterns>``.  Wildcards are supported.
+If the ``PATTERNS`` option is not given, the entire archive will be listed or
+extracted.
 
-``LIST_ONLY`` will only list the files in the archive.
+``LIST_ONLY`` will list the files in the archive rather than extract them.
 
-With ``VERBOSE`` the command will produce verbose output.
+With ``VERBOSE``, the command will produce verbose output.
