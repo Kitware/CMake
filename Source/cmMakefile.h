@@ -687,6 +687,7 @@ public:
    */
   int ConfigureFile(const std::string& infile, const std::string& outfile,
                     bool copyonly, bool atOnly, bool escapeQuotes,
+                    bool use_source_permissions,
                     cmNewLineStyle = cmNewLineStyle());
 
   /**
