@@ -125,7 +125,8 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* connection_check */
   PORT_HTTP,                            /* defport */
   CURLPROTO_HTTP,                       /* protocol */
-  PROTOPT_CREDSPERREQUEST               /* flags */
+  PROTOPT_CREDSPERREQUEST |             /* flags */
+  PROTOPT_USERPWDCTRL
 };
 
 #ifdef USE_SSL
@@ -150,7 +151,8 @@ const struct Curl_handler Curl_handler_https = {
   ZERO_NULL,                            /* connection_check */
   PORT_HTTPS,                           /* defport */
   CURLPROTO_HTTPS,                      /* protocol */
-  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN_NPN /* flags */
+  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN_NPN | /* flags */
+  PROTOPT_USERPWDCTRL
 };
 #endif
 
@@ -268,7 +270,7 @@ char *Curl_copy_header_value(const char *header)
     return NULL;
 
   memcpy(value, start, len);
-  value[len] = 0; /* zero terminate */
+  value[len] = 0; /* null-terminate */
 
   return value;
 }
@@ -306,7 +308,7 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
     pwd = conn->passwd;
   }
 
-  out = aprintf("%s:%s", user, pwd);
+  out = aprintf("%s:%s", user, pwd ? pwd : "");
   if(!out)
     return CURLE_OUT_OF_MEMORY;
 
