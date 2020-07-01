@@ -34,10 +34,12 @@
             - build/Tests/CMake*/PseudoMemcheck/purify
             - build/Tests/CMake*/PseudoMemcheck/memcheck_fail
             - build/Tests/CMake*/PseudoMemcheck/BC
+            - build/Tests/CMake*/PseudoMemcheck/cuda-memcheck
             - build/Tests/CMake*/PseudoMemcheck/valgrind.exe
             - build/Tests/CMake*/PseudoMemcheck/purify.exe
             - build/Tests/CMake*/PseudoMemcheck/memcheck_fail.exe
             - build/Tests/CMake*/PseudoMemcheck/BC.exe
+            - build/Tests/CMake*/PseudoMemcheck/cuda-memcheck.exe
             - build/Tests/CMake*/PseudoMemcheck/NoLog
             - build/Tests/CMake*Lib/*LibTests
             - build/Tests/CMake*Lib/*LibTests.exe
