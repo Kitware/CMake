@@ -139,11 +139,13 @@ __glew_set_find_library_suffix(SHARED)
 
 find_library(GLEW_SHARED_LIBRARY_RELEASE
              NAMES GLEW glew glew32
+             NAMES_PER_DIR
              PATH_SUFFIXES lib lib64 libx32 lib/Release/${_arch}
              PATHS ENV GLEW_ROOT)
 
 find_library(GLEW_SHARED_LIBRARY_DEBUG
              NAMES GLEWd glewd glew32d
+             NAMES_PER_DIR
              PATH_SUFFIXES lib lib64
              PATHS ENV GLEW_ROOT)
 
@@ -152,11 +154,13 @@ __glew_set_find_library_suffix(STATIC)
 
 find_library(GLEW_STATIC_LIBRARY_RELEASE
              NAMES GLEW glew glew32s
+             NAMES_PER_DIR
              PATH_SUFFIXES lib lib64 libx32 lib/Release/${_arch}
              PATHS ENV GLEW_ROOT)
 
 find_library(GLEW_STATIC_LIBRARY_DEBUG
              NAMES GLEWds glewds glew32ds
+             NAMES_PER_DIR
              PATH_SUFFIXES lib lib64
              PATHS ENV GLEW_ROOT)
 
