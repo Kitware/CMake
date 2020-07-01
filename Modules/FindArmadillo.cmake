@@ -84,6 +84,7 @@ if(_ARMA_USE_WRAPPER)
   # Link to the armadillo wrapper library.
   find_library(ARMADILLO_LIBRARY
     NAMES armadillo
+    NAMES_PER_DIR
     PATHS
       "$ENV{ProgramFiles}/Armadillo/lib"
       "$ENV{ProgramFiles}/Armadillo/lib64"
