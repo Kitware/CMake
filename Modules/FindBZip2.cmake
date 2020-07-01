@@ -45,8 +45,8 @@ set(_BZIP2_PATHS PATHS
 find_path(BZIP2_INCLUDE_DIR bzlib.h ${_BZIP2_PATHS} PATH_SUFFIXES include)
 
 if (NOT BZIP2_LIBRARIES)
-    find_library(BZIP2_LIBRARY_RELEASE NAMES bz2 bzip2 libbz2 libbzip2 ${_BZIP2_PATHS} PATH_SUFFIXES lib)
-    find_library(BZIP2_LIBRARY_DEBUG NAMES bz2d bzip2d libbz2d libbzip2d ${_BZIP2_PATHS} PATH_SUFFIXES lib)
+    find_library(BZIP2_LIBRARY_RELEASE NAMES bz2 bzip2 libbz2 libbzip2 NAMES_PER_DIR ${_BZIP2_PATHS} PATH_SUFFIXES lib)
+    find_library(BZIP2_LIBRARY_DEBUG NAMES bz2d bzip2d libbz2d libbzip2d NAMES_PER_DIR ${_BZIP2_PATHS} PATH_SUFFIXES lib)
 
     include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
     SELECT_LIBRARY_CONFIGURATIONS(BZIP2)
