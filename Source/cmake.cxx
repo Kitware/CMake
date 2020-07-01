@@ -773,8 +773,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       std::cout << "Warn about uninitialized values.\n";
       this->SetWarnUninitialized(true);
     } else if (cmHasLiteralPrefix(arg, "--warn-unused-vars")) {
-      std::cout << "Finding unused variables.\n";
-      this->SetWarnUnused(true);
+      // Option was removed.
     } else if (cmHasLiteralPrefix(arg, "--no-warn-unused-cli")) {
       std::cout << "Not searching for unused variables given on the "
                 << "command line.\n";

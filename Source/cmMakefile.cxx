@@ -86,7 +86,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 {
   this->IsSourceFileTryCompile = false;
 
-  this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 
   this->SuppressSideEffects = false;
@@ -754,7 +753,6 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
       break;
     }
   }
-  this->CheckForUnusedVariables();
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile);
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile);
@@ -1514,8 +1512,6 @@ void cmMakefile::PopFunctionScope(bool reportError)
 #endif
 
   this->PopLoopBlockBarrier();
-
-  this->CheckForUnusedVariables();
 }
 
 void cmMakefile::PushMacroScope(std::string const& fileName,
@@ -1862,9 +1858,6 @@ void cmMakefile::AddSystemIncludeDirectories(const std::set<std::string>& incs)
 
 void cmMakefile::AddDefinition(const std::string& name, cm::string_view value)
 {
-  if (this->VariableInitialized(name)) {
-    this->LogUnused("changing definition", name);
-  }
   this->StateSnapshot.SetDefinition(name, value);
 
 #ifndef CMAKE_BOOTSTRAP
@@ -1925,16 +1918,6 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
   this->StateSnapshot.RemoveDefinition(name);
 }
 
-void cmMakefile::CheckForUnusedVariables() const
-{
-  if (!this->WarnUnused) {
-    return;
-  }
-  for (const std::string& key : this->StateSnapshot.UnusedKeys()) {
-    this->LogUnused("out of scope", key);
-  }
-}
-
 void cmMakefile::MarkVariableAsUsed(const std::string& var)
 {
   this->StateSnapshot.GetDefinition(var);
@@ -1962,29 +1945,8 @@ void cmMakefile::MaybeWarnUninitialized(std::string const& variable,
   }
 }
 
-void cmMakefile::LogUnused(const char* reason, const std::string& name) const
-{
-  if (this->WarnUnused) {
-    std::string path;
-    if (!this->ExecutionStatusStack.empty()) {
-      path = this->GetExecutionContext().FilePath;
-    } else {
-      path = cmStrCat(this->GetCurrentSourceDirectory(), "/CMakeLists.txt");
-    }
-
-    if (this->CheckSystemVars || this->IsProjectFile(path.c_str())) {
-      std::ostringstream msg;
-      msg << "unused variable (" << reason << ") \'" << name << "\'";
-      this->IssueMessage(MessageType::AUTHOR_WARNING, msg.str());
-    }
-  }
-}
-
 void cmMakefile::RemoveDefinition(const std::string& name)
 {
-  if (this->VariableInitialized(name)) {
-    this->LogUnused("unsetting", name);
-  }
   this->StateSnapshot.RemoveDefinition(name);
 #ifndef CMAKE_BOOTSTRAP
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -3727,7 +3689,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   if (cmakeArgs) {
     // FIXME: Workaround to ignore unused CLI variables in try-compile.
     //
-    // Ideally we should use SetArgs to honor options like --warn-unused-vars.
+    // Ideally we should use SetArgs for options like --no-warn-unused-cli.
     // However, there is a subtle problem when certain arguments are passed to
     // a macro wrapping around try_compile or try_run that does not escape
     // semicolons in its parameters but just passes ${ARGV} or ${ARGN}.  In
@@ -3746,7 +3708,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     // the value VAR=a is sufficient for the try_compile or try_run to get the
     // correct result.  Calling SetArgs here would break such projects that
     // previously built.  Instead we work around the issue by never reporting
-    // unused arguments and ignoring options such as --warn-unused-vars.
+    // unused arguments and ignoring options such as --no-warn-unused-cli.
     cm.SetWarnUnusedCli(false);
     // cm.SetArgs(*cmakeArgs, true);
 
@@ -4261,8 +4223,6 @@ void cmMakefile::PopScope()
 #endif
 
   this->PopLoopBlockBarrier();
-
-  this->CheckForUnusedVariables();
 
   this->PopSnapshot();
 }

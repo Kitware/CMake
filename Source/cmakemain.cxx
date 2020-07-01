@@ -93,7 +93,6 @@ const char* cmDocumentationOptions[][2] = {
   { "--trace-redirect=<file>",
     "Redirect trace output to a file instead of stderr." },
   { "--warn-uninitialized", "Warn about uninitialized values." },
-  { "--warn-unused-vars", "Warn about unused variables." },
   { "--no-warn-unused-cli", "Don't warn about command line options." },
   { "--check-system-vars",
     "Find problems with variable usage in system "

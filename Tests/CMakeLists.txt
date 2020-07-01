@@ -2417,36 +2417,6 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleGeneratorTest")
   endif()
 
-  add_test(WarnUnusedUnusedViaSet ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/VariableUnusedViaSet"
-    "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaSet"
-    ${build_generator_args}
-    --build-noclean
-    --build-project WarnUnusedUnusedViaSet
-    --build-options
-      "--warn-unused-vars")
-  set_tests_properties(WarnUnusedUnusedViaSet PROPERTIES
-    PASS_REGULAR_EXPRESSION "unused variable \\(changing definition\\) 'UNUSED_VARIABLE'")
-  set_tests_properties(WarnUnusedUnusedViaSet PROPERTIES
-    FAIL_REGULAR_EXPRESSION "unused variable \\(unsetting\\) 'UNUSED_VARIABLE'")
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaSet")
-
-  add_test(WarnUnusedUnusedViaUnset ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/VariableUnusedViaUnset"
-    "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset"
-    ${build_generator_args}
-    --build-noclean
-    --build-project WarnUnusedUnusedViaUnset
-    --build-options
-      "--warn-unused-vars")
-  set_tests_properties(WarnUnusedUnusedViaUnset PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMake Warning \\(dev\\) at CMakeLists.txt:7 \\(set\\):")
-  set_tests_properties(WarnUnusedUnusedViaUnset PROPERTIES
-    FAIL_REGULAR_EXPRESSION "CMakeLists.txt:5 \\(set\\):")
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset")
-
   add_test(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/WarnUnusedCliUnused"

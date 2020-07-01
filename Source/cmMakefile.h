@@ -996,9 +996,6 @@ protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(cmTarget& target);
 
-  // Check for a an unused variable
-  void LogUnused(const char* reason, const std::string& name) const;
-
   mutable std::set<cmListFileContext> CMP0054ReportedIds;
 
   // libraries, classes, and executables
@@ -1234,10 +1231,6 @@ private:
                                  std::string const& config,
                                  const std::string& feature) const;
 
-  void CheckForUnusedVariables() const;
-
-  // Unused variable flags
-  bool WarnUnused;
   bool CheckSystemVars;
   bool CheckCMP0000;
   std::set<std::string> WarnedCMP0074;

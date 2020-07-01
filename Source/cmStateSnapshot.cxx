@@ -232,11 +232,6 @@ void cmStateSnapshot::RemoveDefinition(std::string const& name)
   this->Position->Vars->Unset(name);
 }
 
-std::vector<std::string> cmStateSnapshot::UnusedKeys() const
-{
-  return this->Position->Vars->UnusedKeys();
-}
-
 std::vector<std::string> cmStateSnapshot::ClosureKeys() const
 {
   return cmDefinitions::ClosureKeys(this->Position->Vars,

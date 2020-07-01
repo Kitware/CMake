@@ -111,7 +111,6 @@ protected:
   QAction* ConfigureAction;
   QAction* GenerateAction;
   QAction* WarnUninitializedAction;
-  QAction* WarnUnusedAction;
   QAction* InstallForCommandLineAction;
   State CurrentState;
 
