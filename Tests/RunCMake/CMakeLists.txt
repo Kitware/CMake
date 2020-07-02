@@ -436,6 +436,10 @@ else()
   message(STATUS "Could not find ctresalloc")
 endif()
 
+if(NOT WIN32)
+  add_RunCMake_test(SymlinkTrees)
+endif ()
+
 find_package(Qt4 QUIET)
 find_package(Qt5Core QUIET)
 if (QT4_FOUND AND Qt5Core_FOUND AND NOT Qt5Core_VERSION VERSION_LESS 5.1.0)

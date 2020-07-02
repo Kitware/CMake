@@ -312,7 +312,7 @@ int main(int argc, char const* const* argv)
     // The value has not been set on the command line
     else {
       // get a default value (current working directory)
-      cpackProjectDirectory = cmsys::SystemTools::GetCurrentWorkingDirectory();
+      cpackProjectDirectory = cmSystemTools::GetCurrentWorkingDirectory();
       // use default value if no value has been provided by the config file
       if (!globalMF.IsSet("CPACK_PACKAGE_DIRECTORY")) {
         globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY",
