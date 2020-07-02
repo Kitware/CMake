@@ -823,7 +823,9 @@ void cmSystemTools::InitializeLibUV()
   // Perform libuv one-time initialization now, and then un-do its
   // global _fmode setting so that using libuv does not change the
   // default file text/binary mode.  See libuv issue 840.
-  uv_loop_close(uv_default_loop());
+  if (uv_loop_t* loop = uv_default_loop()) {
+    uv_loop_close(loop);
+  }
 #  ifdef _MSC_VER
   _set_fmode(_O_TEXT);
 #  else
