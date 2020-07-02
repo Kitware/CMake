@@ -301,6 +301,7 @@ private:
   std::string ObjectDirArch;
   std::string GeneratorToolset;
   std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
+  std::vector<std::string> EnabledLangs;
 };
 
 #endif
