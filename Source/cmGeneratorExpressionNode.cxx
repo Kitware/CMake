@@ -37,6 +37,7 @@
 #include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmRange.h"
+#include "cmStandardLevelResolver.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
@@ -1707,11 +1708,11 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
     static LangMap availableFeatures;
 
     LangMap testedFeatures;
-
+    cmStandardLevelResolver standardResolver(context->LG->GetMakefile());
     for (std::string const& p : parameters) {
       std::string error;
       std::string lang;
-      if (!context->LG->GetMakefile()->CompileFeatureKnown(
+      if (!standardResolver.CompileFeatureKnown(
             context->HeadTarget->Target->GetName(), p, lang, &error)) {
         reportError(context, content->GetOriginalExpression(), error);
         return std::string();
@@ -1720,7 +1721,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 
       if (availableFeatures.find(lang) == availableFeatures.end()) {
         const char* featuresKnown =
-          context->LG->GetMakefile()->CompileFeaturesAvailable(lang, &error);
+          standardResolver.CompileFeaturesAvailable(lang, &error);
         if (!featuresKnown) {
           reportError(context, content->GetOriginalExpression(), error);
           return std::string();
@@ -1745,8 +1746,8 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
           // All features known for the language are always available.
           continue;
         }
-        if (!context->LG->GetMakefile()->HaveStandardAvailable(
-              target, lit.first, context->Config, it)) {
+        if (!standardResolver.HaveStandardAvailable(target, lit.first,
+                                                    context->Config, it)) {
           if (evalLL) {
             cmProp l = target->GetLanguageStandard(lit.first, context->Config);
             if (!l) {
