@@ -101,6 +101,13 @@ function(run_GoogleTestXML DISCOVERY_MODE)
   -R GoogleTestXML
   --no-label-summary
   )
+
+  run_cmake_command(GoogleTestXML-special-result
+  ${CMAKE_CTEST_COMMAND}
+  -C Debug
+  -R GoogleTestXMLSpecial
+  --no-label-summary
+  )
 endfunction()
 
 function(run_GoogleTest_discovery_timeout DISCOVERY_MODE)
