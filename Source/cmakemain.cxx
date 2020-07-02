@@ -855,6 +855,8 @@ int main(int ac, char const* const* av)
 #ifndef CMAKE_BOOTSTRAP
   cmDynamicLoader::FlushCache();
 #endif
-  uv_loop_close(uv_default_loop());
+  if (uv_loop_t* loop = uv_default_loop()) {
+    uv_loop_close(loop);
+  }
   return ret;
 }
