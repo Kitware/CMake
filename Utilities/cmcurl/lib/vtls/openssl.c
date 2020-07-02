@@ -31,6 +31,11 @@
 
 #include <limits.h>
 
+/* Wincrypt must be included before anything that could include OpenSSL. */
+#if defined(USE_WIN32_CRYPTO)
+#include <wincrypt.h>
+#endif
+
 #include "urldata.h"
 #include "sendf.h"
 #include "formdata.h" /* for the boundary function */
@@ -47,10 +52,6 @@
 #include "multiif.h"
 #include "strerror.h"
 #include "curl_printf.h"
-
-#if defined(USE_WIN32_CRYPTO)
-#include <wincrypt.h>
-#endif
 
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
@@ -1635,7 +1636,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
              type itself: for example for an IA5String the data will be ASCII"
 
              It has been however verified that in 0.9.6 and 0.9.7, IA5String
-             is always zero-terminated.
+             is always null-terminated.
           */
           if((altlen == strlen(altptr)) &&
              /* if this isn't true, there was an embedded zero in the name
