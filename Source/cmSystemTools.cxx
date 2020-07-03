@@ -2082,6 +2082,12 @@ std::string const& cmSystemTools::GetCMakeRoot()
   return cmSystemToolsCMakeRoot;
 }
 
+std::string cmSystemTools::GetCurrentWorkingDirectory()
+{
+  return cmSystemTools::CollapseFullPath(
+    cmsys::SystemTools::GetCurrentWorkingDirectory());
+}
+
 void cmSystemTools::MakefileColorEcho(int color, const char* message,
                                       bool newline, bool enabled)
 {
