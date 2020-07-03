@@ -62,10 +62,10 @@ elseif("${CMAKE_GENERATOR}" MATCHES Xcode
   # Find installed SDKs in either Xcode-4.3+ or pre-4.3 SDKs directory.
   set(_CMAKE_OSX_SDKS_DIR "")
   if(OSX_DEVELOPER_ROOT)
-    foreach(d Platforms/MacOSX.platform/Developer/SDKs SDKs)
-      file(GLOB _CMAKE_OSX_SDKS ${OSX_DEVELOPER_ROOT}/${d}/*)
+    foreach(_d Platforms/MacOSX.platform/Developer/SDKs SDKs)
+      file(GLOB _CMAKE_OSX_SDKS ${OSX_DEVELOPER_ROOT}/${_d}/*)
       if(_CMAKE_OSX_SDKS)
-        set(_CMAKE_OSX_SDKS_DIR ${OSX_DEVELOPER_ROOT}/${d})
+        set(_CMAKE_OSX_SDKS_DIR ${OSX_DEVELOPER_ROOT}/${_d})
         break()
       endif()
     endforeach()
@@ -88,10 +88,10 @@ elseif("${CMAKE_GENERATOR}" MATCHES Xcode
 
     # pick an SDK that works
     set(_CMAKE_OSX_SYSROOT_DEFAULT)
-    foreach(ver ${CMAKE_OSX_DEPLOYMENT_TARGET}
-                ${_CURRENT_OSX_VERSION}
-                ${_CMAKE_OSX_LATEST_SDK_VERSION})
-      set(_CMAKE_OSX_DEPLOYMENT_TARGET ${ver})
+    foreach(_ver ${CMAKE_OSX_DEPLOYMENT_TARGET}
+                 ${_CURRENT_OSX_VERSION}
+                 ${_CMAKE_OSX_LATEST_SDK_VERSION})
+      set(_CMAKE_OSX_DEPLOYMENT_TARGET ${_ver})
       set(_CMAKE_OSX_SDKS_VER ${_CMAKE_OSX_DEPLOYMENT_TARGET}${_CMAKE_OSX_SDKS_VER_SUFFIX_${_CMAKE_OSX_DEPLOYMENT_TARGET}})
       set(_CMAKE_OSX_SYSROOT_CHECK "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_SDKS_VER}.sdk")
       if(IS_DIRECTORY "${_CMAKE_OSX_SYSROOT_CHECK}")
@@ -113,8 +113,8 @@ endif()
 # Set cache variable - end user may change this during ccmake or cmake-gui configure.
 # Choose the type based on the current value.
 set(_CMAKE_OSX_SYSROOT_TYPE STRING)
-foreach(v CMAKE_OSX_SYSROOT _CMAKE_OSX_SYSROOT_DEFAULT)
-  if("x${${v}}" MATCHES "/")
+foreach(_v CMAKE_OSX_SYSROOT _CMAKE_OSX_SYSROOT_DEFAULT)
+  if("x${${_v}}" MATCHES "/")
     set(_CMAKE_OSX_SYSROOT_TYPE PATH)
     break()
   endif()
