@@ -2156,152 +2156,17 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
   std::string& flags, cmGeneratorTarget const* target, const std::string& lang,
   const std::string& config)
 {
-  if (lang.empty()) {
-    return;
-  }
-  const char* defaultStd =
-    this->Makefile->GetDefinition("CMAKE_" + lang + "_STANDARD_DEFAULT");
-  if (!defaultStd || !*defaultStd) {
-    // This compiler has no notion of language standard levels.
-    return;
-  }
-  bool ext = true;
-  if (cmProp extPropValue = target->GetLanguageExtensions(lang)) {
-    if (cmIsOff(*extPropValue)) {
-      ext = false;
-    }
-  }
-  cmProp standardProp = target->GetLanguageStandard(lang, config);
-  if (!standardProp) {
-    if (ext) {
-      // No language standard is specified and extensions are not disabled.
-      // Check if this compiler needs a flag to enable extensions.
-      std::string const option_flag =
-        "CMAKE_" + lang + "_EXTENSION_COMPILE_OPTION";
-      if (const char* opt =
-            target->Target->GetMakefile()->GetDefinition(option_flag)) {
-        std::vector<std::string> optVec = cmExpandedList(opt);
-        for (std::string const& i : optVec) {
-          this->AppendFlagEscape(flags, i);
-        }
-      }
-    }
-    return;
-  }
+  cmStandardLevelResolver standardResolver(this->Makefile);
 
-  std::string const type = ext ? "EXTENSION" : "STANDARD";
-
-  if (target->GetLanguageStandardRequired(lang)) {
-    std::string option_flag =
-      "CMAKE_" + lang + *standardProp + "_" + type + "_COMPILE_OPTION";
-
-    const char* opt =
-      target->Target->GetMakefile()->GetDefinition(option_flag);
-    if (!opt) {
-      std::ostringstream e;
-      e << "Target \"" << target->GetName()
-        << "\" requires the language "
-           "dialect \""
-        << lang << *standardProp << "\" "
-        << (ext ? "(with compiler extensions)" : "")
-        << ", but CMake "
-           "does not know the compile flags to use to enable it.";
-      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    } else {
+  std::string const& optionFlagDef =
+    standardResolver.GetCompileOptionDef(target, lang, config);
+  if (!optionFlagDef.empty()) {
+    auto opt = target->Target->GetMakefile()->GetDefinition(optionFlagDef);
+    if (opt) {
       std::vector<std::string> optVec = cmExpandedList(opt);
       for (std::string const& i : optVec) {
         this->AppendFlagEscape(flags, i);
       }
-    }
-    return;
-  }
-
-  static std::map<std::string, std::vector<std::string>> langStdMap;
-  if (langStdMap.empty()) {
-    // Maintain sorted order, most recent first.
-    langStdMap["CXX"].emplace_back("20");
-    langStdMap["CXX"].emplace_back("17");
-    langStdMap["CXX"].emplace_back("14");
-    langStdMap["CXX"].emplace_back("11");
-    langStdMap["CXX"].emplace_back("98");
-
-    langStdMap["OBJCXX"].emplace_back("20");
-    langStdMap["OBJCXX"].emplace_back("17");
-    langStdMap["OBJCXX"].emplace_back("14");
-    langStdMap["OBJCXX"].emplace_back("11");
-    langStdMap["OBJCXX"].emplace_back("98");
-
-    langStdMap["C"].emplace_back("11");
-    langStdMap["C"].emplace_back("99");
-    langStdMap["C"].emplace_back("90");
-
-    langStdMap["OBJC"].emplace_back("11");
-    langStdMap["OBJC"].emplace_back("99");
-    langStdMap["OBJC"].emplace_back("90");
-
-    langStdMap["CUDA"].emplace_back("20");
-    langStdMap["CUDA"].emplace_back("17");
-    langStdMap["CUDA"].emplace_back("14");
-    langStdMap["CUDA"].emplace_back("11");
-    langStdMap["CUDA"].emplace_back("03");
-  }
-
-  std::string standard(*standardProp);
-  if (lang == "CUDA" && standard == "98") {
-    standard = "03";
-  }
-  std::vector<std::string>& stds = langStdMap[lang];
-
-  auto stdIt = std::find(stds.begin(), stds.end(), standard);
-  if (stdIt == stds.end()) {
-
-    std::string e =
-      lang + "_STANDARD is set to invalid value '" + standard + "'";
-    this->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
-      MessageType::FATAL_ERROR, e, target->GetBacktrace());
-    return;
-  }
-
-  auto defaultStdIt = std::find(stds.begin(), stds.end(), defaultStd);
-  if (defaultStdIt == stds.end()) {
-    std::string e = "CMAKE_" + lang +
-      "_STANDARD_DEFAULT is set to invalid value '" + std::string(defaultStd) +
-      "'";
-    this->IssueMessage(MessageType::INTERNAL_ERROR, e);
-    return;
-  }
-
-  // If the standard requested is older than the compiler's default
-  // then we need to use a flag to change it.  The comparison is
-  // greater-or-equal because the standards are stored in backward
-  // chronological order.
-  if (stdIt >= defaultStdIt) {
-    std::string option_flag =
-      "CMAKE_" + lang + *stdIt + "_" + type + "_COMPILE_OPTION";
-
-    std::string const& opt =
-      target->Target->GetMakefile()->GetRequiredDefinition(option_flag);
-    std::vector<std::string> optVec = cmExpandedList(opt);
-    for (std::string const& i : optVec) {
-      this->AppendFlagEscape(flags, i);
-    }
-    return;
-  }
-
-  // The standard requested is at least as new as the compiler's default,
-  // and the standard request is not required.  Decay to the newest standard
-  // for which a flag is defined.
-  for (; stdIt < defaultStdIt; ++stdIt) {
-    std::string option_flag =
-      cmStrCat("CMAKE_", lang, *stdIt, "_", type, "_COMPILE_OPTION");
-
-    if (const char* opt =
-          target->Target->GetMakefile()->GetDefinition(option_flag)) {
-      std::vector<std::string> optVec = cmExpandedList(opt);
-      for (std::string const& i : optVec) {
-        this->AppendFlagEscape(flags, i);
-      }
-      return;
     }
   }
 }
