@@ -468,6 +468,9 @@ void cmGlobalXCodeGenerator::Generate()
       }
     }
 
+    // cache the enabled languages for source file type queries
+    this->GetEnabledLanguages(this->EnabledLangs);
+
     this->SetGenerationRoot(root);
     // now create the project
     this->OutputXCodeProject(root, keyVal.second);
@@ -922,9 +925,9 @@ void cmGlobalXCodeGenerator::AddXCodeProjBuildRule(
   }
 }
 
-std::string GetSourcecodeValueFromFileExtension(const std::string& _ext,
-                                                const std::string& lang,
-                                                bool& keepLastKnownFileType)
+std::string GetSourcecodeValueFromFileExtension(
+  const std::string& _ext, const std::string& lang,
+  bool& keepLastKnownFileType, const std::vector<std::string>& enabled_langs)
 {
   std::string ext = cmSystemTools::LowerCase(_ext);
   std::string sourcecode = "sourcecode";
@@ -939,9 +942,9 @@ std::string GetSourcecodeValueFromFileExtension(const std::string& _ext,
   } else if (ext == "storyboard") {
     keepLastKnownFileType = true;
     sourcecode = "file.storyboard";
-  } else if (ext == "mm") {
+  } else if (ext == "mm" && !cm::contains(enabled_langs, "OBJCXX")) {
     sourcecode += ".cpp.objcpp";
-  } else if (ext == "m") {
+  } else if (ext == "m" && !cm::contains(enabled_langs, "OBJC")) {
     sourcecode += ".c.objc";
   } else if (ext == "swift") {
     sourcecode += ".swift";
@@ -1028,8 +1031,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
       fileType = (ext == "xcassets" ? "folder.assetcatalog" : "folder");
       useLastKnownFileType = true;
     } else {
-      fileType =
-        GetSourcecodeValueFromFileExtension(ext, lang, useLastKnownFileType);
+      fileType = GetSourcecodeValueFromFileExtension(
+        ext, lang, useLastKnownFileType, this->EnabledLangs);
     }
   }
 
