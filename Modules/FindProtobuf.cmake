@@ -376,11 +376,13 @@ function(_protobuf_find_libraries name filename)
   else()
     find_library(${name}_LIBRARY_RELEASE
       NAMES ${filename}
+      NAMES_PER_DIR
       PATHS ${Protobuf_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Release)
     mark_as_advanced(${name}_LIBRARY_RELEASE)
 
     find_library(${name}_LIBRARY_DEBUG
       NAMES ${filename}d ${filename}
+      NAMES_PER_DIR
       PATHS ${Protobuf_SRC_ROOT_FOLDER}/vsprojects/${_PROTOBUF_ARCH_DIR}Debug)
     mark_as_advanced(${name}_LIBRARY_DEBUG)
 

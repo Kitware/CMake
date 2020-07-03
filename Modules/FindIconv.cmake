@@ -110,6 +110,7 @@ endif()
 
 find_library(Iconv_LIBRARY
   NAMES ${Iconv_LIBRARY_NAMES}
+  NAMES_PER_DIR
   DOC "iconv library (potentially the C library)")
 
 mark_as_advanced(Iconv_INCLUDE_DIR)

@@ -162,6 +162,7 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
       if(_libraries_work)
         find_library(${_prefix}_${_library}_LIBRARY
           NAMES ${_library}
+          NAMES_PER_DIR
           PATHS ${_extaddlibdir}
           PATH_SUFFIXES ${_subdirs}
         )
