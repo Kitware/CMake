@@ -28,7 +28,8 @@ void cmLinkItemGraphVisitor::VisitLinks(cmLinkItem const& item,
     return;
   }
 
-  for (auto const& config : item.Target->Makefile->GetGeneratorConfigs()) {
+  for (auto const& config : item.Target->Makefile->GetGeneratorConfigs(
+         cmMakefile::IncludeEmptyConfig)) {
     this->VisitLinks(item, rootItem, config);
   }
 }

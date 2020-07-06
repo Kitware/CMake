@@ -1435,8 +1435,8 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
     cmProp p = parent->GetProperty("COMPILE_DEFINITIONS");
     this->SetProperty("COMPILE_DEFINITIONS", p ? p->c_str() : nullptr);
-    std::vector<std::string> configs;
-    this->GetConfigurations(configs);
+    std::vector<std::string> configs =
+      this->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
     for (std::string const& config : configs) {
       std::string defPropName =
         cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
@@ -3250,25 +3250,28 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
   }
 }
 
-std::string cmMakefile::GetConfigurations(std::vector<std::string>& configs,
-                                          bool singleConfig) const
+std::string cmMakefile::GetDefaultConfiguration() const
 {
   if (this->GetGlobalGenerator()->IsMultiConfig()) {
-    this->GetDefExpandList("CMAKE_CONFIGURATION_TYPES", configs);
-    return "";
+    return std::string{};
   }
-  const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  if (singleConfig && !buildType.empty()) {
-    configs.push_back(buildType);
-  }
-  return buildType;
+  return this->GetSafeDefinition("CMAKE_BUILD_TYPE");
 }
 
-std::vector<std::string> cmMakefile::GetGeneratorConfigs() const
+std::vector<std::string> cmMakefile::GetGeneratorConfigs(
+  GeneratorConfigQuery mode) const
 {
   std::vector<std::string> configs;
-  GetConfigurations(configs);
-  if (configs.empty()) {
+  if (this->GetGlobalGenerator()->IsMultiConfig() ||
+      mode == cmMakefile::OnlyMultiConfig) {
+    this->GetDefExpandList("CMAKE_CONFIGURATION_TYPES", configs);
+  } else {
+    const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+    if (!buildType.empty()) {
+      configs.emplace_back(buildType);
+    }
+  }
+  if (mode == cmMakefile::IncludeEmptyConfig && configs.empty()) {
     configs.emplace_back();
   }
   return configs;

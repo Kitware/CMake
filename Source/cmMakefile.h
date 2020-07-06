@@ -342,12 +342,19 @@ public:
    */
   void SetProjectName(std::string const& name);
 
-  /** Get the configurations to be generated.  */
-  std::string GetConfigurations(std::vector<std::string>& configs,
-                                bool single = true) const;
+  /* Get the default configuration */
+  std::string GetDefaultConfiguration() const;
+
+  enum GeneratorConfigQuery
+  {
+    IncludeEmptyConfig, // Include "" aka noconfig
+    ExcludeEmptyConfig, // Exclude "" aka noconfig
+    OnlyMultiConfig,
+  };
 
   /** Get the configurations for dependency checking.  */
-  std::vector<std::string> GetGeneratorConfigs() const;
+  std::vector<std::string> GetGeneratorConfigs(
+    GeneratorConfigQuery mode) const;
 
   /**
    * Set the name of the library.

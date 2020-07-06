@@ -157,12 +157,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
 
   std::map<std::string, std::string> outputFiles;
 
-  std::vector<std::string> allConfigs;
-  lg->GetMakefile()->GetConfigurations(allConfigs);
-
-  if (allConfigs.empty()) {
-    allConfigs.emplace_back();
-  }
+  std::vector<std::string> allConfigs =
+    lg->GetMakefile()->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   std::vector<std::string> enabledLanguages;
   cmGlobalGenerator* gg = lg->GetGlobalGenerator();

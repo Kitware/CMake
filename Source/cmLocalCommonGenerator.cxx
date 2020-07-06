@@ -17,10 +17,8 @@ cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
   : cmLocalGenerator(gg, mf)
   , WorkingDirectory(std::move(wd))
 {
-  this->Makefile->GetConfigurations(this->ConfigNames);
-  if (this->ConfigNames.empty()) {
-    this->ConfigNames.emplace_back();
-  }
+  this->ConfigNames =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 }
 
 cmLocalCommonGenerator::~cmLocalCommonGenerator() = default;

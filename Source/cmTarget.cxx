@@ -419,8 +419,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       "INTERPROCEDURAL_OPTIMIZATION_"
     };
     // Collect the set of configuration types.
-    std::vector<std::string> configNames;
-    mf->GetConfigurations(configNames);
+    std::vector<std::string> configNames =
+      mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
     for (std::string const& configName : configNames) {
       std::string configUpper = cmSystemTools::UpperCase(configName);
       for (auto const& prop : configProps) {

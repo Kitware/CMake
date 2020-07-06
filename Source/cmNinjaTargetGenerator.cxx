@@ -65,7 +65,8 @@ cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
   , LocalGenerator(
       static_cast<cmLocalNinjaGenerator*>(target->GetLocalGenerator()))
 {
-  for (auto const& fileConfig : target->Makefile->GetGeneratorConfigs()) {
+  for (auto const& fileConfig :
+       target->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig)) {
     this->Configs[fileConfig].MacOSXContentGenerator =
       cm::make_unique<MacOSXContentGeneratorType>(this, fileConfig);
   }

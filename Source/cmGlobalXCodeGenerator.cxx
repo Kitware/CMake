@@ -1080,11 +1080,8 @@ void cmGlobalXCodeGenerator::SetCurrentLocalGenerator(cmLocalGenerator* gen)
   this->CurrentMakefile = gen->GetMakefile();
 
   // Select the current set of configuration types.
-  this->CurrentConfigurationTypes.clear();
-  this->CurrentMakefile->GetConfigurations(this->CurrentConfigurationTypes);
-  if (this->CurrentConfigurationTypes.empty()) {
-    this->CurrentConfigurationTypes.emplace_back();
-  }
+  this->CurrentConfigurationTypes =
+    this->CurrentMakefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 }
 
 struct cmSourceFilePathCompare

@@ -315,10 +315,9 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 {
   // Configurations
   this->MultiConfig = this->GlobalGen->IsMultiConfig();
-  this->ConfigDefault = this->Makefile->GetConfigurations(this->ConfigsList);
-  if (this->ConfigsList.empty()) {
-    this->ConfigsList.push_back(this->ConfigDefault);
-  }
+  this->ConfigDefault = this->Makefile->GetDefaultConfiguration();
+  this->ConfigsList =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   // Verbosity
   {

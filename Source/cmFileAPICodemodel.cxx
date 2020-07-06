@@ -445,7 +445,7 @@ Json::Value Codemodel::DumpConfigurations()
   const auto& makefiles = gg->GetMakefiles();
   if (!makefiles.empty()) {
     std::vector<std::string> const& configs =
-      makefiles[0]->GetGeneratorConfigs();
+      makefiles[0]->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
     for (std::string const& config : configs) {
       configurations.append(this->DumpConfiguration(config));
     }

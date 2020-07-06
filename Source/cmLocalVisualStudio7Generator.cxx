@@ -1331,8 +1331,8 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
                                                     const std::string& libName,
                                                     cmGeneratorTarget* target)
 {
-  std::vector<std::string> configs;
-  this->Makefile->GetConfigurations(configs);
+  std::vector<std::string> configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
 
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
@@ -1580,8 +1580,9 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
 std::string cmLocalVisualStudio7Generator::ComputeLongestObjectDirectory(
   cmGeneratorTarget const* target) const
 {
-  std::vector<std::string> configs;
-  target->Target->GetMakefile()->GetConfigurations(configs);
+  std::vector<std::string> configs =
+    target->Target->GetMakefile()->GetGeneratorConfigs(
+      cmMakefile::ExcludeEmptyConfig);
 
   // Compute the maximum length configuration name.
   std::string config_max;

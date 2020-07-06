@@ -298,9 +298,9 @@ void cmLocalGenerator::GenerateTestFiles()
   }
 
   // Compute the set of configurations.
-  std::vector<std::string> configurationTypes;
-  const std::string& config =
-    this->Makefile->GetConfigurations(configurationTypes, false);
+  std::vector<std::string> configurationTypes =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::OnlyMultiConfig);
+  std::string config = this->Makefile->GetDefaultConfiguration();
 
   std::string file =
     cmStrCat(this->StateSnapshot.GetDirectory().GetCurrentBinary(),
@@ -380,7 +380,7 @@ void cmLocalGenerator::GenerateTestFiles()
 void cmLocalGenerator::CreateEvaluationFileOutputs()
 {
   std::vector<std::string> const& configs =
-    this->Makefile->GetGeneratorConfigs();
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   for (std::string const& c : configs) {
     this->CreateEvaluationFileOutputs(c);
   }
@@ -463,9 +463,9 @@ void cmLocalGenerator::GenerateInstallRules()
   }
 
   // Compute the set of configurations.
-  std::vector<std::string> configurationTypes;
-  const std::string& config =
-    this->Makefile->GetConfigurations(configurationTypes, false);
+  std::vector<std::string> configurationTypes =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::OnlyMultiConfig);
+  std::string config = this->Makefile->GetDefaultConfiguration();
 
   // Choose a default install configuration.
   std::string default_config = config;
@@ -754,11 +754,8 @@ cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
 void cmLocalGenerator::ComputeTargetManifest()
 {
   // Collect the set of configuration types.
-  std::vector<std::string> configNames;
-  this->Makefile->GetConfigurations(configNames);
-  if (configNames.empty()) {
-    configNames.emplace_back();
-  }
+  std::vector<std::string> configNames =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   // Add our targets to the manifest for each configuration.
   const auto& targets = this->GetGeneratorTargets();
@@ -775,11 +772,8 @@ void cmLocalGenerator::ComputeTargetManifest()
 bool cmLocalGenerator::ComputeTargetCompileFeatures()
 {
   // Collect the set of configuration types.
-  std::vector<std::string> configNames;
-  this->Makefile->GetConfigurations(configNames);
-  if (configNames.empty()) {
-    configNames.emplace_back();
-  }
+  std::vector<std::string> configNames =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   using LanguagePair = std::pair<std::string, std::string>;
   std::vector<LanguagePair> pairedLanguages{ { "OBJC", "C" },
@@ -2553,11 +2547,8 @@ void cmLocalGenerator::AppendFlagEscape(std::string& flags,
 
 void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 {
-  std::vector<std::string> configsList;
-  std::string configDefault = this->Makefile->GetConfigurations(configsList);
-  if (configsList.empty()) {
-    configsList.push_back(configDefault);
-  }
+  std::vector<std::string> configsList =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   for (std::string const& config : configsList) {
     // FIXME: Refactor collection of sources to not evaluate object
