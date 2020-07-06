@@ -1,6 +1,8 @@
 CMP0092
 -------
 
+.. versionadded:: 3.15
+
 MSVC warning flags are not in :variable:`CMAKE_<LANG>_FLAGS` by default.
 
 When using MSVC-like compilers in CMake 3.14 and below, warning flags

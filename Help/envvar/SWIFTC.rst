@@ -1,6 +1,8 @@
 SWIFTC
 ------
 
+.. versionadded:: 3.15
+
 .. include:: ENV_VAR.txt
 
 Preferred executable for compiling ``Swift`` language files. Will only be used by

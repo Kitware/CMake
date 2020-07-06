@@ -1,6 +1,8 @@
 CMP0089
 -------
 
+.. versionadded:: 3.15
+
 Compiler id for IBM Clang-based XL compilers is now ``XLClang``.
 
 CMake 3.15 and above recognize that IBM's Clang-based XL compilers

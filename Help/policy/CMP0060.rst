@@ -1,6 +1,8 @@
 CMP0060
 -------
 
+.. versionadded:: 3.3
+
 Link libraries by full path even in implicit directories.
 
 Policy :policy:`CMP0003` was introduced with the intention of always

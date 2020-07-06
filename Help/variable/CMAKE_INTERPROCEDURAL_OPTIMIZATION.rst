@@ -1,6 +1,8 @@
 CMAKE_INTERPROCEDURAL_OPTIMIZATION
 ----------------------------------
 
+.. versionadded:: 3.9
+
 Default value for :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION` of targets.
 
 This variable is used to initialize the :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION`

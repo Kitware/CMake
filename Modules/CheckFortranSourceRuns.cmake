@@ -5,6 +5,8 @@
 CheckFortranSourceRuns
 ----------------------
 
+.. versionadded:: 3.14
+
 Check if given Fortran source compiles and links into an executable and can
 subsequently be run.
 

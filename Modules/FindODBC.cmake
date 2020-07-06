@@ -5,6 +5,8 @@
 FindODBC
 --------
 
+.. versionadded:: 3.12
+
 Find an Open Database Connectivity (ODBC) include directory and library.
 
 On Windows, when building with Visual Studio, this module assumes the ODBC

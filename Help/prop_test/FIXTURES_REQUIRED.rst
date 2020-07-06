@@ -1,6 +1,8 @@
 FIXTURES_REQUIRED
 -----------------
 
+.. versionadded:: 3.7
+
 Specifies a list of fixtures the test requires. Fixture names are case
 sensitive and they are not required to have any similarity to test names.
 

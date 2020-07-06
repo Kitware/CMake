@@ -1,6 +1,8 @@
 CMAKE_<LANG>_COMPILER_LAUNCHER
 ------------------------------
 
+.. versionadded:: 3.17
+
 .. include:: ENV_VAR.txt
 
 Default compiler launcher to use for the specified language. Will only be used

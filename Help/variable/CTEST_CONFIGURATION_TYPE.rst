@@ -1,6 +1,8 @@
 CTEST_CONFIGURATION_TYPE
 ------------------------
 
+.. versionadded:: 3.1
+
 Specify the CTest ``DefaultCTestConfigurationType`` setting
 in a :manual:`ctest(1)` dashboard client script.
 

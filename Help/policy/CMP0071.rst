@@ -1,6 +1,8 @@
 CMP0071
 -------
 
+.. versionadded:: 3.10
+
 Let :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC` process
 :prop_sf:`GENERATED` files.
 

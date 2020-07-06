@@ -1,6 +1,8 @@
 DISABLED
 --------
 
+.. versionadded:: 3.9
+
 If set to ``True``, the test will be skipped and its status will be 'Not Run'. A
 ``DISABLED`` test will not be counted in the total number of tests and its
 completion status will be reported to CDash as ``Disabled``.

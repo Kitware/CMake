@@ -1,6 +1,8 @@
 CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION
 ----------------------------------------
 
+.. versionadded:: 3.4
+
 Visual Studio Windows Target Platform Version.
 
 When targeting Windows 10 and above Visual Studio 2015 and above support

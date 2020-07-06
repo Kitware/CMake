@@ -1,6 +1,8 @@
 VS_PACKAGE_REFERENCES
 ---------------------
 
+.. versionadded:: 3.15
+
 Visual Studio package references for nuget.
 
 Adds one or more semicolon-delimited package references to a generated

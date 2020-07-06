@@ -1,6 +1,8 @@
 TIMEOUT_AFTER_MATCH
 -------------------
 
+.. versionadded:: 3.6
+
 Change a test's timeout duration after a matching line is encountered
 in its output.
 

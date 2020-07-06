@@ -1,6 +1,8 @@
 CMAKE_XCODE_SCHEME_ENVIRONMENT
 ------------------------------
 
+.. versionadded:: 3.17
+
 Specify environment variables that should be added to the Arguments
 section of the generated Xcode scheme.
 

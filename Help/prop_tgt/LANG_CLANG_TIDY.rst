@@ -1,6 +1,8 @@
 <LANG>_CLANG_TIDY
 -----------------
 
+.. versionadded:: 3.6
+
 This property is implemented only when ``<LANG>`` is ``C`` or ``CXX``.
 
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a command

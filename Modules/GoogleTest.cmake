@@ -5,6 +5,8 @@
 GoogleTest
 ----------
 
+.. versionadded:: 3.9
+
 This module defines functions to help use the Google Test infrastructure.  Two
 mechanisms for adding tests are provided. :command:`gtest_add_tests` has been
 around for some time, originally via ``find_package(GTest)``.

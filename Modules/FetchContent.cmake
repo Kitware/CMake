@@ -5,6 +5,8 @@
 FetchContent
 ------------------
 
+.. versionadded:: 3.11
+
 .. only:: html
 
   .. contents::

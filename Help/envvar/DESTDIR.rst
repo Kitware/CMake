@@ -1,6 +1,8 @@
 DESTDIR
 -------
 
+.. versionadded:: 3.12
+
 .. include:: ENV_VAR.txt
 
 On UNIX one can use the ``DESTDIR`` mechanism in order to relocate the

@@ -5,6 +5,8 @@
 FindIntl
 --------
 
+.. versionadded:: 3.2
+
 Find the Gettext libintl headers and libraries.
 
 This module reports information about the Gettext libintl

@@ -5,6 +5,8 @@
 CheckFortranSourceCompiles
 --------------------------
 
+.. versionadded:: 3.1
+
 Check if given Fortran source compiles and links into an executable.
 
 .. command:: check_fortran_source_compiles

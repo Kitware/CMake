@@ -1,6 +1,8 @@
 ASM<DIALECT>FLAGS
 -----------------
 
+.. versionadded:: 3.10
+
 .. include:: ENV_VAR.txt
 
 Default compilation flags to be used when compiling a specific dialect of an

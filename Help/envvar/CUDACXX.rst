@@ -1,6 +1,8 @@
 CUDACXX
 -------
 
+.. versionadded:: 3.10
+
 .. include:: ENV_VAR.txt
 
 Preferred executable for compiling ``CUDA`` language files. Will only be used by

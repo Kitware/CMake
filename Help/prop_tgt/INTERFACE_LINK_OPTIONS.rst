@@ -1,6 +1,8 @@
 INTERFACE_LINK_OPTIONS
 ----------------------
 
+.. versionadded:: 3.13
+
 .. |property_name| replace:: link options
 .. |command_name| replace:: :command:`target_link_options`
 .. |PROPERTY_INTERFACE_NAME| replace:: ``INTERFACE_LINK_OPTIONS``

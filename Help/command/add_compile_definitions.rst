@@ -1,6 +1,8 @@
 add_compile_definitions
 -----------------------
 
+.. versionadded:: 3.12
+
 Add preprocessor definitions to the compilation of source files.
 
 .. code-block:: cmake

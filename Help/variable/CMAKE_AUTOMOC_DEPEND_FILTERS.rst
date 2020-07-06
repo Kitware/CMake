@@ -1,6 +1,8 @@
 CMAKE_AUTOMOC_DEPEND_FILTERS
 ----------------------------
 
+.. versionadded:: 3.9
+
 Filter definitions used by :variable:`CMAKE_AUTOMOC`
 to extract file names from source code as additional dependencies
 for the ``moc`` file.

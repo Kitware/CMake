@@ -1,6 +1,8 @@
 cmake_language
 --------------
 
+.. versionadded:: 3.18
+
 Call meta-operations on CMake commands.
 
 Synopsis

@@ -1,6 +1,8 @@
 CMAKE_MESSAGE_CONTEXT
 ---------------------
 
+.. versionadded:: 3.17
+
 When enabled by the :manual:`cmake <cmake(1)>` ``--log-context`` command line
 option or the :variable:`CMAKE_MESSAGE_CONTEXT_SHOW` variable, the
 :command:`message` command converts the ``CMAKE_MESSAGE_CONTEXT`` list into a

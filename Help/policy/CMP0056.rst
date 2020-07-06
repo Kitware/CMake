@@ -1,6 +1,8 @@
 CMP0056
 -------
 
+.. versionadded:: 3.2
+
 Honor link flags in :command:`try_compile` source-file signature.
 
 The :command:`try_compile` command source-file signature generates a

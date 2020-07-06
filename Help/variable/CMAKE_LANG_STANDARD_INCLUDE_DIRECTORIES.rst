@@ -1,6 +1,8 @@
 CMAKE_<LANG>_STANDARD_INCLUDE_DIRECTORIES
 -----------------------------------------
 
+.. versionadded:: 3.6
+
 Include directories to be used for every source file compiled with
 the ``<LANG>`` compiler.  This is meant for specification of system
 include directories needed by the language for the current platform.

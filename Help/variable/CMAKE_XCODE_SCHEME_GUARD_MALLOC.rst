@@ -1,6 +1,8 @@
 CMAKE_XCODE_SCHEME_GUARD_MALLOC
 -------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Guard Malloc``
 in the Diagnostics section of the generated Xcode scheme.
 

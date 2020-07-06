@@ -1,6 +1,8 @@
 CMP0109
 -------
 
+.. versionadded:: 3.19
+
 :command:`find_program` requires permission to execute but not to read.
 
 In CMake 3.18 and below, the :command:`find_program` command on UNIX

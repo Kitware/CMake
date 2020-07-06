@@ -1,6 +1,8 @@
 CMAKE_LINK_SEARCH_END_STATIC
 ----------------------------
 
+.. versionadded:: 3.4
+
 End a link line such that static system libraries are used.
 
 Some linkers support switches such as ``-Bstatic`` and ``-Bdynamic`` to

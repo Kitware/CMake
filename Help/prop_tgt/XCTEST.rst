@@ -1,6 +1,8 @@
 XCTEST
 ------
 
+.. versionadded:: 3.3
+
 This target is a XCTest CFBundle on the Mac.
 
 This property will usually get set via the :command:`xctest_add_bundle`

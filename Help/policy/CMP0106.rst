@@ -1,6 +1,8 @@
 CMP0106
 -------
 
+.. versionadded:: 3.18
+
 The :module:`Documentation` module is removed.
 
 The :module:`Documentation` was added as a support mechanism for the VTK

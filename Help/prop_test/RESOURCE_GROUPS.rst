@@ -1,6 +1,8 @@
 RESOURCE_GROUPS
 ---------------
 
+.. versionadded:: 3.16
+
 Specify resources required by a test, grouped in a way that is meaningful to
 the test.  See :ref:`resource allocation <ctest-resource-allocation>`
 for more information on how this property integrates into the CTest resource

@@ -1,6 +1,8 @@
 CMP0102
 -------
 
+.. versionadded:: 3.17
+
 The :command:`mark_as_advanced` command no longer creates a cache entry if one
 does not already exist.
 

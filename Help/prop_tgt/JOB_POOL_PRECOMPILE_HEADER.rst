@@ -1,6 +1,8 @@
 JOB_POOL_PRECOMPILE_HEADER
 --------------------------
 
+.. versionadded:: 3.17
+
 Ninja only: Pool used for generating pre-compiled headers.
 
 The number of parallel compile processes could be limited by defining

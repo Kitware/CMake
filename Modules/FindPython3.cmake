@@ -5,6 +5,8 @@
 FindPython3
 -----------
 
+.. versionadded:: 3.12
+
 Find Python 3 interpreter, compiler and development environment (include
 directories and libraries).
 

@@ -1,6 +1,8 @@
 Ninja Multi-Config
 ------------------
 
+.. versionadded:: 3.17
+
 Generates multiple ``build-<Config>.ninja`` files.
 
 This generator is very much like the :generator:`Ninja` generator, but with

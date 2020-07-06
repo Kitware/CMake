@@ -1,6 +1,8 @@
 CMAKE_AUTOGEN_VERBOSE
 ---------------------
 
+.. versionadded:: 3.13
+
 Sets the verbosity of :prop_tgt:`AUTOMOC`, :prop_tgt:`AUTOUIC` and
 :prop_tgt:`AUTORCC`.  A positive integer value or a true boolean value
 lets the ``AUTO*`` generators output additional processing information.

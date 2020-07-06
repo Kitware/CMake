@@ -1,6 +1,8 @@
 CMAKE_C_STANDARD
 ----------------
 
+.. versionadded:: 3.1
+
 Default value for :prop_tgt:`C_STANDARD` property of targets.
 
 This variable is used to initialize the :prop_tgt:`C_STANDARD`

@@ -1,6 +1,8 @@
 CTEST_PARALLEL_LEVEL
 --------------------
 
+.. versionadded:: 3.10
+
 .. include:: ENV_VAR.txt
 
 Specify the number of tests for CTest to run in parallel. See :manual:`ctest(1)`

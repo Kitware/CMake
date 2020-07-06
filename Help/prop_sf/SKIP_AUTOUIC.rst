@@ -1,6 +1,8 @@
 SKIP_AUTOUIC
 ------------
 
+.. versionadded:: 3.8
+
 Exclude the source file from :prop_tgt:`AUTOUIC` processing (for Qt projects).
 
 :prop_sf:`SKIP_AUTOUIC` can be set on C++ header and source files and on

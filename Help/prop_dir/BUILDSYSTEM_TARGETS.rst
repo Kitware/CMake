@@ -1,6 +1,8 @@
 BUILDSYSTEM_TARGETS
 -------------------
 
+.. versionadded:: 3.7
+
 This read-only directory property contains a
 :ref:`semicolon-separated list <CMake Language Lists>` of buildsystem targets added in the
 directory by calls to the :command:`add_library`, :command:`add_executable`,

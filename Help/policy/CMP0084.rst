@@ -1,6 +1,8 @@
 CMP0084
 -------
 
+.. versionadded:: 3.14
+
 The :module:`FindQt` module does not exist for :command:`find_package`.
 
 The existence of :module:`FindQt` means that for Qt upstream to provide

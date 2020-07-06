@@ -5,6 +5,8 @@
 FindPython2
 -----------
 
+.. versionadded:: 3.12
+
 Find Python 2 interpreter, compiler and development environment (include
 directories and libraries).
 

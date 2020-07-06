@@ -1,6 +1,8 @@
 CMP0094
 -------
 
+.. versionadded:: 3.15
+
 Modules :module:`FindPython3`, :module:`FindPython2` and :module:`FindPython`
 use ``LOCATION`` for lookup strategy.
 

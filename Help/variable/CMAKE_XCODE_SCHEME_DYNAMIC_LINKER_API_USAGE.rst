@@ -1,6 +1,8 @@
 CMAKE_XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE
 -------------------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Dynamic Linker API usage``
 in the Diagnostics section of the generated Xcode scheme.
 

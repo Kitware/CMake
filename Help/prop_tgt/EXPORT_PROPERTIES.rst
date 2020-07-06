@@ -1,6 +1,8 @@
 EXPORT_PROPERTIES
 -----------------
 
+.. versionadded:: 3.12
+
 List additional properties to export for a target.
 
 This property contains a list of property names that should be exported by

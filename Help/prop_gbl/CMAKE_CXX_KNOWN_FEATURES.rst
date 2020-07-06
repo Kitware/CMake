@@ -1,6 +1,8 @@
 CMAKE_CXX_KNOWN_FEATURES
 ------------------------
 
+.. versionadded:: 3.1
+
 List of C++ features known to this version of CMake.
 
 The features listed in this global property may be known to be available to the

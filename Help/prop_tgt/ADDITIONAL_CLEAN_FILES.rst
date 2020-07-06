@@ -1,6 +1,8 @@
 ADDITIONAL_CLEAN_FILES
 ----------------------
 
+.. versionadded:: 3.15
+
 A :ref:`;-list <CMake Language Lists>` of files or directories that will be
 removed as a part of the global ``clean`` target.  It can be used to specify
 files and directories that are generated as part of building the target or

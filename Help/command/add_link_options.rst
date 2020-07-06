@@ -1,6 +1,8 @@
 add_link_options
 ----------------
 
+.. versionadded:: 3.13
+
 Add options to the link step for executable, shared library or module
 library targets in the current directory and below that are added after
 this command is invoked.
