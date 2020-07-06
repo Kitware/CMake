@@ -8,7 +8,7 @@ When building with configuration ``<CONFIG>`` the value of this property
 is appended to the framework file name built on disk.
 
 For example, given a framework called ``my_fw``, a value of ``_debug``
-for the ``FRAMEWORK_MULTI_CONFIG_POSTFIX_<CONFIG>`` property, and
+for the ``FRAMEWORK_MULTI_CONFIG_POSTFIX_DEBUG`` property, and
 ``Debug;Release`` in :variable:`CMAKE_CONFIGURATION_TYPES`, the following
 relevant files would be created for the ``Debug`` and ``Release``
 configurations:
