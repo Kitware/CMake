@@ -43,8 +43,8 @@ Synopsis
     file(`LOCK`_ <path> [...])
 
   `Archiving`_
-    file(`ARCHIVE_CREATE`_ OUTPUT <archive> FILES <files> [...])
-    file(`ARCHIVE_EXTRACT`_ INPUT <archive> DESTINATION <dir> [...])
+    file(`ARCHIVE_CREATE`_ OUTPUT <archive> PATHS <paths>... [...])
+    file(`ARCHIVE_EXTRACT`_ INPUT <archive> [...])
 
 Reading
 ^^^^^^^
