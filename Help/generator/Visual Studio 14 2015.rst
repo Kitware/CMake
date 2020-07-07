@@ -1,6 +1,8 @@
 Visual Studio 14 2015
 ---------------------
 
+.. versionadded:: 3.1
+
 Generates Visual Studio 14 (VS 2015) project files.
 
 Project Types

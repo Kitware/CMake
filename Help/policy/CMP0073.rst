@@ -1,6 +1,8 @@
 CMP0073
 -------
 
+.. versionadded:: 3.12
+
 Do not produce legacy ``_LIB_DEPENDS`` cache entries.
 
 Ancient CMake versions once used ``<tgt>_LIB_DEPENDS`` cache entries to

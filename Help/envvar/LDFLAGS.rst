@@ -1,6 +1,8 @@
 LDFLAGS
 -------
 
+.. versionadded:: 3.10
+
 .. include:: ENV_VAR.txt
 
 Will only be used by CMake on the first configuration to determine the default

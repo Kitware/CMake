@@ -5,6 +5,8 @@
 CheckLinkerFlag
 ---------------
 
+.. versionadded:: 3.18
+
 Check whether the compiler supports a given link flag.
 
 .. command:: check_linker_flag

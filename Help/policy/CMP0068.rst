@@ -1,6 +1,8 @@
 CMP0068
 -------
 
+.. versionadded:: 3.9
+
 ``RPATH`` settings on macOS do not affect ``install_name``.
 
 CMake 3.9 and newer remove any effect the following settings may have on the

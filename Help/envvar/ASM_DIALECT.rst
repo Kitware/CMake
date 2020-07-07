@@ -1,6 +1,8 @@
 ASM<DIALECT>
 ------------
 
+.. versionadded:: 3.10
+
 .. include:: ENV_VAR.txt
 
 Preferred executable for compiling a specific dialect of assembly language

@@ -1,6 +1,8 @@
 CMP0075
 -------
 
+.. versionadded:: 3.12
+
 Include file check macros honor ``CMAKE_REQUIRED_LIBRARIES``.
 
 In CMake 3.12 and above, the

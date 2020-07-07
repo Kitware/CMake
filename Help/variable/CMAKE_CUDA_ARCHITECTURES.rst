@@ -1,6 +1,8 @@
 CMAKE_CUDA_ARCHITECTURES
 ------------------------
 
+.. versionadded:: 3.18
+
 Default value for :prop_tgt:`CUDA_ARCHITECTURES` property of targets.
 
 This is initialized as follows depending on :variable:`CMAKE_CUDA_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>`:

@@ -1,6 +1,8 @@
 DEPLOYMENT_REMOTE_DIRECTORY
 ---------------------------
 
+.. versionadded:: 3.6
+
 Set the WinCE project ``RemoteDirectory`` in ``DeploymentTool`` and
 ``RemoteExecutable`` in ``DebuggerTool`` in ``.vcproj`` files generated
 by the :generator:`Visual Studio 9 2008` generator.

@@ -1,6 +1,8 @@
 CMP0080
 -------
 
+.. versionadded:: 3.13
+
 :module:`BundleUtilities` cannot be included at configure time.
 
 The macros provided by :module:`BundleUtilities` are intended to be invoked

@@ -1,6 +1,8 @@
 CMP0083
 -------
 
+.. versionadded:: 3.14
+
 To control generation of Position Independent Executable (``PIE``) or not, some
 flags are required at link time.
 

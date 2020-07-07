@@ -1,6 +1,8 @@
 DOTNET_TARGET_FRAMEWORK_VERSION
 -------------------------------
 
+.. versionadded:: 3.12
+
 Specify the .NET target framework version.
 
 Used to specify the .NET target framework version for C++/CLI and C#.

@@ -1,6 +1,8 @@
 CSFLAGS
 -------
 
+.. versionadded:: 3.10
+
 .. include:: ENV_VAR.txt
 
 Preferred executable for compiling ``CSharp`` language files. Will only be

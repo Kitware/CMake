@@ -1,6 +1,8 @@
 C_STANDARD_REQUIRED
 -------------------
 
+.. versionadded:: 3.1
+
 Boolean describing whether the value of :prop_tgt:`C_STANDARD` is a requirement.
 
 If this property is set to ``ON``, then the value of the

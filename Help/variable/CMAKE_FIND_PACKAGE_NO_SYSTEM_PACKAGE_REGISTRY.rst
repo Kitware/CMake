@@ -1,6 +1,8 @@
 CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
 ---------------------------------------------
 
+.. versionadded:: 3.1
+
 .. deprecated:: 3.16
 
   Use the :variable:`CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY` variable instead.

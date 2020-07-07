@@ -1,6 +1,8 @@
 VS_CSHARP_<tagname>
 -------------------
 
+.. versionadded:: 3.8
+
 Visual Studio and CSharp source-file-specific configuration.
 
 Tell the :manual:`Visual Studio generators <cmake-generators(7)>`

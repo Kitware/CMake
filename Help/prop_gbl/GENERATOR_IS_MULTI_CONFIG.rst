@@ -1,6 +1,8 @@
 GENERATOR_IS_MULTI_CONFIG
 -------------------------
 
+.. versionadded:: 3.9
+
 Read-only property that is true on multi-configuration generators.
 
 True when using a multi-configuration generator

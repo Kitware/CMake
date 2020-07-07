@@ -1,6 +1,8 @@
 CMAKE_DOTNET_TARGET_FRAMEWORK_VERSION
 -------------------------------------
 
+.. versionadded:: 3.12
+
 Default value for :prop_tgt:`DOTNET_TARGET_FRAMEWORK_VERSION`
 property of targets.
 

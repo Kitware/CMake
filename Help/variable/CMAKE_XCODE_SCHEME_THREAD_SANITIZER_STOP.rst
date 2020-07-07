@@ -1,6 +1,8 @@
 CMAKE_XCODE_SCHEME_THREAD_SANITIZER_STOP
 ----------------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Thread Sanitizer - Pause on issues``
 in the Diagnostics section of the generated Xcode scheme.
 

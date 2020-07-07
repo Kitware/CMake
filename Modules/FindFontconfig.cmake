@@ -5,6 +5,8 @@
 FindFontconfig
 --------------
 
+.. versionadded:: 3.14
+
 Find Fontconfig headers and library.
 
 Imported Targets

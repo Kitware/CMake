@@ -5,6 +5,8 @@
 FindVulkan
 ----------
 
+.. versionadded:: 3.7
+
 Find Vulkan, which is a low-overhead, cross-platform 3D graphics
 and computing API.
 

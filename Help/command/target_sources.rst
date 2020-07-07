@@ -1,6 +1,8 @@
 target_sources
 --------------
 
+.. versionadded:: 3.1
+
 Add sources to a target.
 
 .. code-block:: cmake

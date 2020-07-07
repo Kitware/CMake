@@ -1,6 +1,8 @@
 CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX
 ------------------------------------
 
+.. versionadded:: 3.9
+
 Specify a ``<suffix>`` to tell the :command:`find_library` command to
 search in a ``lib<suffix>`` directory before each ``lib`` directory that
 would normally be searched.

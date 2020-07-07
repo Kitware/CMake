@@ -1,6 +1,8 @@
 CMAKE_MAXIMUM_RECURSION_DEPTH
 -----------------------------
 
+.. versionadded:: 3.14
+
 Maximum recursion depth for CMake scripts. It is intended to be set on the
 command line with ``-DCMAKE_MAXIMUM_RECURSION_DEPTH=<x>``, or within
 ``CMakeLists.txt`` by projects that require a large recursion depth. Projects

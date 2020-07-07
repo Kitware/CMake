@@ -1,6 +1,8 @@
 OBJC
 ----
 
+.. versionadded:: 3.16.7
+
 .. include:: ENV_VAR.txt
 
 Preferred executable for compiling ``OBJC`` language files. Will only be used

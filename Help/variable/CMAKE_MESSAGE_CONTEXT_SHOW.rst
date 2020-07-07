@@ -1,6 +1,8 @@
 CMAKE_MESSAGE_CONTEXT_SHOW
 --------------------------
 
+.. versionadded:: 3.17
+
 Setting this variable to true enables showing a context with each line
 logged by the :command:`message` command (see :variable:`CMAKE_MESSAGE_CONTEXT`
 for how the context itself is specified).

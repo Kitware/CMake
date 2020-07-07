@@ -200,6 +200,23 @@ the notes, and revise wording.  Then commit with a message such as::
   Add section headers similar to the $prev release notes and move each
   individual bullet into an appropriate section.  Revise a few bullets.
 
+Update Sphinx ``versionadded`` directives in documents added since
+the previous release by running the `update_versions.py`_ script:
+
+.. code-block:: shell
+
+  Utilities/Sphinx/update_versions.py --since v$prev.0 --overwrite
+
+.. _`update_versions.py`: ../../Utilities/Sphinx/update_versions.py
+
+Commit the changes with a message such as::
+
+  Help: Update Sphinx versionadded directives for $ver release
+
+  Run the script:
+
+      Utilities/Sphinx/update_versions.py --since v$prev.0 --overwrite
+
 Open a merge request with the ``doc-$ver-relnotes`` branch for review
 and integration.  Further steps may proceed after this has been merged
 to ``master``.

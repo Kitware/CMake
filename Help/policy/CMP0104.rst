@@ -1,6 +1,8 @@
 CMP0104
 -------
 
+.. versionadded:: 3.18
+
 Initialize :variable:`CMAKE_CUDA_ARCHITECTURES` when
 :variable:`CMAKE_CUDA_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>` is ``NVIDIA``.
 Raise an error if :prop_tgt:`CUDA_ARCHITECTURES` is empty.

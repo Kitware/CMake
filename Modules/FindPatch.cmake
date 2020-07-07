@@ -5,6 +5,8 @@
 FindPatch
 ---------
 
+.. versionadded:: 3.10
+
 The module defines the following variables:
 
 ``Patch_EXECUTABLE``

@@ -1,6 +1,8 @@
 XCODE_EMIT_EFFECTIVE_PLATFORM_NAME
 ----------------------------------
 
+.. versionadded:: 3.8
+
 Control emission of ``EFFECTIVE_PLATFORM_NAME`` by the :generator:`Xcode`
 generator.
 

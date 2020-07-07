@@ -1,6 +1,8 @@
 CMAKE_NO_VERBOSE
 ----------------
 
+.. versionadded:: 3.14
+
 Disables verbose output from CMake when :envvar:`VERBOSE` environment variable
 is set.
 

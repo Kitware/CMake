@@ -1,6 +1,8 @@
 IOS_INSTALL_COMBINED
 --------------------
 
+.. versionadded:: 3.5
+
 Build a combined (device and simulator) target when installing.
 
 When this property is set to set to false (which is the default) then it will

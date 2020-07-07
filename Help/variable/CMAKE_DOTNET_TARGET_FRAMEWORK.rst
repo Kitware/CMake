@@ -1,6 +1,8 @@
 CMAKE_DOTNET_TARGET_FRAMEWORK
 -----------------------------
 
+.. versionadded:: 3.17
+
 Default value for :prop_tgt:`DOTNET_TARGET_FRAMEWORK` property	of
 targets.
 

@@ -1,6 +1,8 @@
 CMAKE_MSVC_RUNTIME_LIBRARY
 --------------------------
 
+.. versionadded:: 3.15
+
 Select the MSVC runtime library for use by compilers targeting the MSVC ABI.
 This variable is used to initialize the :prop_tgt:`MSVC_RUNTIME_LIBRARY`
 property on all targets as they are created.  It is also propagated by

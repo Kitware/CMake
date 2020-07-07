@@ -1,6 +1,8 @@
 CPACK_WIX_ACL
 -------------
 
+.. versionadded:: 3.1
+
 Specifies access permissions for files or directories
 installed by a WiX installer.
 

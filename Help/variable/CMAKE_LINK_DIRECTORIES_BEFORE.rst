@@ -1,6 +1,8 @@
 CMAKE_LINK_DIRECTORIES_BEFORE
 -----------------------------
 
+.. versionadded:: 3.13
+
 Whether to append or prepend directories by default in
 :command:`link_directories`.
 

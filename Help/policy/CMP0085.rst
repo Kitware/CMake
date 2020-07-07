@@ -1,6 +1,8 @@
 CMP0085
 -------
 
+.. versionadded:: 3.14
+
 ``$<IN_LIST:...>`` handles empty list items.
 
 In CMake 3.13 and lower, the ``$<IN_LIST:...>`` generator expression always

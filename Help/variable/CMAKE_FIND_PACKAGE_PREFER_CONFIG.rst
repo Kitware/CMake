@@ -1,6 +1,8 @@
 CMAKE_FIND_PACKAGE_PREFER_CONFIG
 ---------------------------------
 
+.. versionadded:: 3.15
+
 Tell :command:`find_package` to try "Config" mode before "Module" mode if no
 mode was specified.
 

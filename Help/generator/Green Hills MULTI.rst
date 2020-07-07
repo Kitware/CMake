@@ -1,6 +1,8 @@
 Green Hills MULTI
 -----------------
 
+.. versionadded:: 3.3
+
 Generates Green Hills MULTI project files (experimental, work-in-progress).
 
 The buildsystem has predetermined build-configuration settings that can be controlled

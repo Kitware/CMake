@@ -1,6 +1,8 @@
 CMP0055
 -------
 
+.. versionadded:: 3.2
+
 Strict checking for the :command:`break` command.
 
 CMake 3.1 and lower allowed calls to the :command:`break` command

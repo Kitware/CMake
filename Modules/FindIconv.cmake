@@ -5,6 +5,8 @@
 FindIconv
 ---------
 
+.. versionadded:: 3.11
+
 This module finds the ``iconv()`` POSIX.1 functions on the system.
 These functions might be provided in the regular C library or externally
 in the form of an additional library.

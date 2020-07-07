@@ -1,6 +1,8 @@
 VS_SOLUTION_DEPLOY
 ------------------
 
+.. versionadded:: 3.18
+
 Specify that the target should be marked for deployment when not targeting
 Windows CE, Windows Phone or a Windows Store application.
 

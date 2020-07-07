@@ -1,6 +1,8 @@
 MSVC_RUNTIME_LIBRARY
 --------------------
 
+.. versionadded:: 3.15
+
 Select the MSVC runtime library for use by compilers targeting the MSVC ABI.
 
 The allowed values are:

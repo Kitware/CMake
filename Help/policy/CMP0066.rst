@@ -1,6 +1,8 @@
 CMP0066
 -------
 
+.. versionadded:: 3.7
+
 Honor per-config flags in :command:`try_compile` source-file signature.
 
 The source file signature of the :command:`try_compile` command uses the value

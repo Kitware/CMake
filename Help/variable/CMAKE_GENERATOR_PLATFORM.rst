@@ -1,6 +1,8 @@
 CMAKE_GENERATOR_PLATFORM
 ------------------------
 
+.. versionadded:: 3.1
+
 Generator-specific target platform specification provided by user.
 
 Some CMake generators support a target platform name to be given

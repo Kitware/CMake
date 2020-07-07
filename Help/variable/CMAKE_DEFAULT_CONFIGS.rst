@@ -1,6 +1,8 @@
 CMAKE_DEFAULT_CONFIGS
 ---------------------
 
+.. versionadded:: 3.17
+
 Specifies a :ref:`semicolon-separated list <CMake Language Lists>` of configurations
 to build for a target in ``build.ninja`` if no ``:<Config>`` suffix is specified in
 the :generator:`Ninja Multi-Config` generator. If it is set to ``all``, all

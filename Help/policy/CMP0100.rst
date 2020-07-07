@@ -1,6 +1,8 @@
 CMP0100
 -------
 
+.. versionadded:: 3.17
+
 Let :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC` process
 header files that end with a ``.hh`` extension.
 

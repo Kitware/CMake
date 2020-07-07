@@ -1,6 +1,8 @@
 CMAKE_RUNTIME_OUTPUT_DIRECTORY_<CONFIG>
 ---------------------------------------
 
+.. versionadded:: 3.3
+
 Where to put all the :ref:`RUNTIME <Runtime Output Artifacts>`
 target files when built for a specific configuration.
 

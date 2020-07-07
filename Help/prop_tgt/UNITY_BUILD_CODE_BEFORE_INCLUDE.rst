@@ -1,6 +1,8 @@
 UNITY_BUILD_CODE_BEFORE_INCLUDE
 -------------------------------
 
+.. versionadded:: 3.16
+
 Code snippet which is included verbatim by the :prop_tgt:`UNITY_BUILD`
 feature just before every ``#include`` statement in the generated unity
 source files.  For example:

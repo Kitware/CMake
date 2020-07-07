@@ -1,6 +1,8 @@
 CMAKE_MSVCIDE_RUN_PATH
 ----------------------
 
+.. versionadded:: 3.10
+
 .. include:: ENV_VAR.txt
 
 Extra PATH locations for custom commands when using

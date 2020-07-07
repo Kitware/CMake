@@ -1,6 +1,8 @@
 RC
 --
 
+.. versionadded:: 3.10
+
 .. include:: ENV_VAR.txt
 
 Preferred executable for compiling ``resource`` files. Will only be used by CMake

@@ -1,6 +1,8 @@
 OBJCXX_STANDARD
 ---------------
 
+.. versionadded:: 3.16
+
 The ObjC++ standard whose features are requested to build this target.
 
 This property specifies the ObjC++ standard whose features are requested

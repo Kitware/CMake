@@ -1,6 +1,8 @@
 CMAKE_TRY_COMPILE_TARGET_TYPE
 -----------------------------
 
+.. versionadded:: 3.6
+
 Type of target generated for :command:`try_compile` calls using the
 source file signature.  Valid values are:
 

@@ -1,6 +1,8 @@
 CMP0053
 -------
 
+.. versionadded:: 3.1
+
 Simplify variable reference and escape sequence evaluation.
 
 CMake 3.1 introduced a much faster implementation of evaluation of the

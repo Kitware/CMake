@@ -1,6 +1,8 @@
 CMAKE_VS_PLATFORM_TOOLSET_VERSION
 ---------------------------------
 
+.. versionadded:: 3.12
+
 Visual Studio Platform Toolset version.
 
 The :ref:`Visual Studio Generators` for VS 2017 and above allow to

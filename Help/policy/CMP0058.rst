@@ -1,6 +1,8 @@
 CMP0058
 -------
 
+.. versionadded:: 3.3
+
 Ninja requires custom command byproducts to be explicit.
 
 When an intermediate file generated during the build is consumed

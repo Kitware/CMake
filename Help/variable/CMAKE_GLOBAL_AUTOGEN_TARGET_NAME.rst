@@ -1,6 +1,8 @@
 CMAKE_GLOBAL_AUTOGEN_TARGET_NAME
 --------------------------------
 
+.. versionadded:: 3.14
+
 Change the name of the global ``autogen`` target.
 
 When :variable:`CMAKE_GLOBAL_AUTOGEN_TARGET` is enabled, a global custom target

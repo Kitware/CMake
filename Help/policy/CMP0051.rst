@@ -1,6 +1,8 @@
 CMP0051
 -------
 
+.. versionadded:: 3.1
+
 List TARGET_OBJECTS in SOURCES target property.
 
 CMake 3.0 and lower did not include the ``TARGET_OBJECTS``

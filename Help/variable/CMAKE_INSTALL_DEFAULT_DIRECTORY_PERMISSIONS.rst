@@ -1,6 +1,8 @@
 CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
 -------------------------------------------
 
+.. versionadded:: 3.11
+
 Default permissions for directories created implicitly during installation
 of files by :command:`install` and :command:`file(INSTALL)`.
 

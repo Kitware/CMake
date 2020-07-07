@@ -1,6 +1,8 @@
 <LANG>_CPPLINT
 --------------
 
+.. versionadded:: 3.8
+
 This property is supported only when ``<LANG>`` is ``C`` or ``CXX``.
 
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a command line
