@@ -129,7 +129,9 @@ void cmGeneratedFileStreamBase::Open(std::string const& name)
   if (!this->TempExt.empty()) {
     this->TempName += this->TempExt;
   } else {
-    this->TempName += "tmp";
+    char buf[64];
+    sprintf(buf, "tmp%05x", cmSystemTools::RandomSeed() & 0xFFFFF);
+    this->TempName += buf;
   }
 
   // Make sure the temporary file that will be used is not present.
