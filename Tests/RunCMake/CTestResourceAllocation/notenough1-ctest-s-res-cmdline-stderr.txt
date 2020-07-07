@@ -1,0 +1,14 @@
+^Insufficient resources for test Test1:
+
+  Test requested resources of type 'fluxcapacitors' in the following amounts:
+    200 slots
+  but only the following units were available:
+    'outatime': 121 slots
+
+Resource spec file:
+
+  [^
+]*/Tests/RunCMake/CTestResourceAllocation/resspec.json
+CMake Error at [^
+]*/Tests/RunCMake/CTestResourceAllocation/notenough1-ctest-s-res-cmdline/test\.cmake:[0-9]+ \(message\):
+  Tests did not pass$
