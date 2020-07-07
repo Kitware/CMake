@@ -43,6 +43,9 @@ protected:
   // The name of the final destination file for the output.
   std::string Name;
 
+  // The extension of the temporary file.
+  std::string TempExt;
+
   // The name of the temporary file.
   std::string TempName;
 
@@ -138,6 +141,12 @@ public:
    * the output file to be changed during the use of cmGeneratedFileStream.
    */
   void SetName(const std::string& fname);
+
+  /**
+   * Set set a custom temporary file extension used with 'Open'.
+   * This does not work if the file was opened by the constructor.
+   */
+  void SetTempExt(std::string const& ext);
 };
 
 #endif
