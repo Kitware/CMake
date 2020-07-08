@@ -175,6 +175,32 @@ public:
 
 std::ostream& operator<<(std::ostream& os, BT<std::string> const& s);
 
+// Wrap type T as a value with potentially multiple backtraces.  For purposes
+// of ordering and equality comparison, only the original value is used.  The
+// backtrace is considered incidental.
+template <typename T>
+class BTs
+{
+public:
+  BTs(T v = T(), cmListFileBacktrace bt = cmListFileBacktrace())
+    : Value(std::move(v))
+  {
+    Backtraces.emplace_back(std::move(bt));
+  }
+  T Value;
+  std::vector<cmListFileBacktrace> Backtraces;
+  friend bool operator==(BTs<T> const& l, BTs<T> const& r)
+  {
+    return l.Value == r.Value;
+  }
+  friend bool operator<(BTs<T> const& l, BTs<T> const& r)
+  {
+    return l.Value < r.Value;
+  }
+  friend bool operator==(BTs<T> const& l, T const& r) { return l.Value == r; }
+  friend bool operator==(T const& l, BTs<T> const& r) { return l == r.Value; }
+};
+
 std::vector<BT<std::string>> ExpandListWithBacktrace(
   std::string const& list,
   cmListFileBacktrace const& bt = cmListFileBacktrace());

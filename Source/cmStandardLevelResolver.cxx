@@ -58,7 +58,11 @@ struct StanardLevelComputer
                               std::string& newRequiredStandard,
                               std::string* error) const
   {
-    newRequiredStandard.clear();
+    if (currentLangStandardValue) {
+      newRequiredStandard = *currentLangStandardValue;
+    } else {
+      newRequiredStandard.clear();
+    }
 
     auto needed = this->HighestStandardNeeded(makefile, feature);
 

@@ -175,6 +175,38 @@ public:
   }
 };
 
+template <typename T>
+class JBTs
+{
+public:
+  JBTs(T v = T(), std::vector<JBTIndex> ids = std::vector<JBTIndex>())
+    : Value(std::move(v))
+    , Backtraces(std::move(ids))
+  {
+  }
+  T Value;
+  std::vector<JBTIndex> Backtraces;
+  friend bool operator==(JBTs<T> const& l, JBTs<T> const& r)
+  {
+    if ((l.Value == r.Value) && (l.Backtraces.size() == r.Backtraces.size())) {
+      for (size_t i = 0; i < l.Backtraces.size(); i++) {
+        if (l.Backtraces[i].Index != r.Backtraces[i].Index) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  static bool ValueEq(JBTs<T> const& l, JBTs<T> const& r)
+  {
+    return l.Value == r.Value;
+  }
+  static bool ValueLess(JBTs<T> const& l, JBTs<T> const& r)
+  {
+    return l.Value < r.Value;
+  }
+};
+
 class BacktraceData
 {
   std::string TopSource;
@@ -277,7 +309,7 @@ struct CompileData
 
   std::string Language;
   std::string Sysroot;
-  JBT<std::string> LanguageStandard;
+  JBTs<std::string> LanguageStandard;
   std::vector<JBT<std::string>> Flags;
   std::vector<JBT<std::string>> Defines;
   std::vector<JBT<std::string>> PrecompileHeaders;
@@ -323,8 +355,10 @@ struct hash<CompileData>
         hash<Json::ArrayIndex>()(i.Backtrace.Index);
     }
     if (!in.LanguageStandard.Value.empty()) {
-      result = result ^ hash<std::string>()(in.LanguageStandard.Value) ^
-        hash<Json::ArrayIndex>()(in.LanguageStandard.Backtrace.Index);
+      result = result ^ hash<std::string>()(in.LanguageStandard.Value);
+      for (JBTIndex backtrace : in.LanguageStandard.Backtraces) {
+        result = result ^ hash<Json::ArrayIndex>()(backtrace.Index);
+      }
     }
     return result;
   }
@@ -369,6 +403,16 @@ class Target
     return JBT<T>(bt.Value, this->Backtraces.Add(bt.Backtrace));
   }
 
+  template <typename T>
+  JBTs<T> ToJBTs(BTs<T> const& bts)
+  {
+    std::vector<JBTIndex> ids;
+    for (cmListFileBacktrace const& backtrace : bts.Backtraces) {
+      ids.emplace_back(this->Backtraces.Add(backtrace));
+    }
+    return JBTs<T>(bts.Value, ids);
+  }
+
   void ProcessLanguages();
   void ProcessLanguage(std::string const& lang);
 
@@ -383,7 +427,7 @@ class Target
   Json::Value DumpCompileData(CompileData const& cd);
   Json::Value DumpInclude(CompileData::IncludeEntry const& inc);
   Json::Value DumpPrecompileHeader(JBT<std::string> const& header);
-  Json::Value DumpLanguageStandard(JBT<std::string> const& standard);
+  Json::Value DumpLanguageStandard(JBTs<std::string> const& standard);
   Json::Value DumpDefine(JBT<std::string> const& def);
   Json::Value DumpSources();
   Json::Value DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
@@ -845,10 +889,10 @@ void Target::ProcessLanguage(std::string const& lang)
   for (BT<std::string> const& pch : precompileHeaders) {
     cd.PrecompileHeaders.emplace_back(this->ToJBT(pch));
   }
-  BT<std::string> const* languageStandard =
+  BTs<std::string> const* languageStandard =
     this->GT->GetLanguageStandardProperty(lang, this->Config);
   if (languageStandard) {
-    cd.LanguageStandard = this->ToJBT(*languageStandard);
+    cd.LanguageStandard = this->ToJBTs(*languageStandard);
   }
 }
 
@@ -1195,18 +1239,15 @@ Json::Value Target::DumpPrecompileHeader(JBT<std::string> const& header)
   return precompileHeader;
 }
 
-Json::Value Target::DumpLanguageStandard(JBT<std::string> const& standard)
+Json::Value Target::DumpLanguageStandard(JBTs<std::string> const& standard)
 {
   Json::Value languageStandard = Json::objectValue;
   languageStandard["standard"] = standard.Value;
-  if (standard.Backtrace) {
-    // Only one backtrace is currently stored for a given language standard,
-    // but we represent this as an array because it's possible for multiple
-    // compile features to set the same language standard value. Representing
-    // this as an array will allow things to just work once we support storing
-    // multiple backtraces for a language standard value.
+  if (!standard.Backtraces.empty()) {
     Json::Value backtraces = Json::arrayValue;
-    backtraces.append(standard.Backtrace.Index);
+    for (JBTIndex backtrace : standard.Backtraces) {
+      backtraces.append(backtrace.Index);
+    }
     languageStandard["backtraces"] = backtraces;
   }
   return languageStandard;
