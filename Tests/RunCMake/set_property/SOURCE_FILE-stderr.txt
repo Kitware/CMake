@@ -16,7 +16,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Error at SOURCE_FILE.cmake:4 \(set_property\):
-  set_property given non-existent target for DIRECTORY_TARGET
+  set_property given non-existent target for TARGET_DIRECTORY
   non_existing_target
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$

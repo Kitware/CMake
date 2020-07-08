@@ -101,7 +101,7 @@ bool HandleSourceFileDirectoryScopes(
       cmTarget* target = current_dir_mf->FindTargetToUse(target_name);
       if (!target) {
         status.SetError(cmStrCat(
-          "given non-existent target for DIRECTORY_TARGET ", target_name));
+          "given non-existent target for TARGET_DIRECTORY ", target_name));
         return false;
       }
       cmProp target_source_dir = target->GetProperty("SOURCE_DIR");
