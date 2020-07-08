@@ -1410,9 +1410,16 @@ Resource Specification File
 
 The resource specification file is a JSON file which is passed to CTest, either
 on the :manual:`ctest(1)` command line as ``--resource-spec-file``, or as the
-``RESOURCE_SPEC_FILE`` argument of :command:`ctest_test`. The resource
-specification file must be a JSON object. All examples in this document assume
-the following resource specification file:
+``RESOURCE_SPEC_FILE`` argument of :command:`ctest_test`. If a dashboard script
+is used and ``RESOURCE_SPEC_FILE`` is not specified, the value of
+:variable:`CTEST_RESOURCE_SPEC_FILE` in the dashboard script is used instead.
+If ``--resource-spec-file``, ``RESOURCE_SPEC_FILE``, and
+:variable:`CTEST_RESOURCE_SPEC_FILE` in the dashboard script are not specified,
+the value of :variable:`CTEST_RESOURCE_SPEC_FILE` in the CMake build is used
+instead. If none of these are specified, no resource spec file is used.
+
+The resource specification file must be a JSON object. All examples in this
+document assume the following resource specification file:
 
 .. code-block:: json
 
