@@ -153,6 +153,7 @@ function(run_ctest_resource name parallel random extra)
   if(extra)
     run_ctest("${name}-ctest-s-res-variable" "-DCTEST_RESOURCE_ALLOC_ENABLED=1" "-DCTEST_RESOURCE_SPEC_SOURCE=VARIABLE" "-DCTRESALLOC_COMMAND=${CTRESALLOC_COMMAND}" "-DCTEST_PARALLEL=${parallel}" "-DCTEST_RANDOM=${random}")
     run_ctest("${name}-ctest-s-res-cache" "-DCTEST_RESOURCE_ALLOC_ENABLED=1" "-DCTEST_RESOURCE_SPEC_SOURCE=CACHE" "-DCTRESALLOC_COMMAND=${CTRESALLOC_COMMAND}" "-DCTEST_PARALLEL=${parallel}" "-DCTEST_RANDOM=${random}")
+    run_ctest("${name}-ctest-s-res-cmdline" "-DCTEST_RESOURCE_ALLOC_ENABLED=1" "-DCTEST_RESOURCE_SPEC_SOURCE=CMDLINE" "-DCTRESALLOC_COMMAND=${CTRESALLOC_COMMAND}" "-DCTEST_PARALLEL=${parallel}" "-DCTEST_RANDOM=${random}" --resource-spec-file "${RunCMake_SOURCE_DIR}/resspec.json")
   endif()
 endfunction()
 
