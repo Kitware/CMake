@@ -153,6 +153,22 @@ if(expected_file_mask)
         message(FATAL_ERROR "error: running 'hdiutil udifderez -xml' on\n  ${expected_file}\ndid not show '${key}' key:\n${out}")
       endif()
     endforeach()
+    foreach(line
+        # LPic first and last base64 lines
+        "\tAAIAEQADAAEAAAAAAAIAAAAIAAMAAAABAAQAAAAEAAUAAAAOAAYA\n"
+        "\tAA0AAABbAAQAAAAzAA8AAQAMABAAAAALAA4AAA==\n"
+        # STR# first and last base64 lines
+        "\tAAkHRW5nbGlzaAVBZ3JlZQhEaXNhZ3JlZQVQcmludAdTYXZlLi4u\n"
+        "\tdGVkIGEgcHJpbnRlci4=\n"
+        # TEXT first and last base64 lines
+        "\tTElDRU5TRQ0tLS0tLS0tDVRoaXMgaXMgYW4gaW5zdGFsbGVyIGNy\n"
+        "\tTm8gbGljZW5zZSBwcm92aWRlZC4NDQ==\n"
+        )
+      if(NOT out MATCHES "${line}")
+        string(REPLACE "\n" "\n  " out "  ${out}")
+        message(FATAL_ERROR "error: running 'hdiutil udifderez -xml' on\n  ${expected_file}\ndid not show '${line}':\n${out}")
+      endif()
+    endforeach()
   endif()
 endif()
 
