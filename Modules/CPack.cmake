@@ -79,7 +79,7 @@ one may call ``cmake --build . --target package`` or ``make package`` or
 
 If CMake is run with the Makefile or Ninja generator, then ``include(CPack)``
 also generates a target ``package_source``. To build a source package,
-instead of ``cpack -G TGZ --config CPackConfig.cmake`` one may call
+instead of ``cpack -G TGZ --config CPackSourceConfig.cmake`` one may call
 ``cmake --build . --target package_source``, ``make package_source``,
 or ``ninja package_source``.
 
