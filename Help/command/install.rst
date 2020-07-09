@@ -45,6 +45,9 @@ signatures that specify them.  The common options are:
 
   As absolute paths are not supported by :manual:`cpack <cpack(1)>` installer
   generators, it is preferable to use relative paths throughout.
+  In particular, there is no need to make paths absolute by prepending
+  :variable:`CMAKE_INSTALL_PREFIX`; this prefix is used by default if
+  the DESTINATION is a relative path.
 
 ``PERMISSIONS``
   Specify permissions for installed files.  Valid permissions are
