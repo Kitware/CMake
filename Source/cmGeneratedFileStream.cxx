@@ -122,10 +122,17 @@ void cmGeneratedFileStreamBase::Open(std::string const& name)
   // Create the name of the temporary file.
   this->TempName = name;
 #if defined(__VMS)
-  this->TempName += "_tmp";
+  this->TempName += "_";
 #else
-  this->TempName += ".tmp";
+  this->TempName += ".";
 #endif
+  if (!this->TempExt.empty()) {
+    this->TempName += this->TempExt;
+  } else {
+    char buf[64];
+    sprintf(buf, "tmp%05x", cmSystemTools::RandomSeed() & 0xFFFFF);
+    this->TempName += buf;
+  }
 
   // Make sure the temporary file that will be used is not present.
   cmSystemTools::RemoveFile(this->TempName);
@@ -215,4 +222,9 @@ int cmGeneratedFileStreamBase::RenameFile(std::string const& oldname,
 void cmGeneratedFileStream::SetName(const std::string& fname)
 {
   this->Name = fname;
+}
+
+void cmGeneratedFileStream::SetTempExt(std::string const& ext)
+{
+  this->TempExt = ext;
 }
