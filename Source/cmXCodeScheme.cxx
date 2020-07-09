@@ -33,7 +33,7 @@ void cmXCodeScheme::WriteXCodeSharedScheme(const std::string& xcProjDir,
   // Create shared scheme sub-directory tree
   //
   std::string xcodeSchemeDir = cmStrCat(xcProjDir, "/xcshareddata/xcschemes");
-  cmSystemTools::MakeDirectory(xcodeSchemeDir.c_str());
+  cmSystemTools::MakeDirectory(xcodeSchemeDir);
 
   std::string xcodeSchemeFile =
     cmStrCat(xcodeSchemeDir, '/', this->TargetName, ".xcscheme");

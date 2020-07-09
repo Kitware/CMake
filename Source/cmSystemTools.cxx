@@ -1213,7 +1213,7 @@ bool cmSystemTools::UnsetEnv(const char* value)
 {
 #  if !defined(HAVE_UNSETENV)
   std::string var = cmStrCat(value, '=');
-  return cmSystemTools::PutEnv(var.c_str());
+  return cmSystemTools::PutEnv(var);
 #  else
   unsetenv(value);
   return true;
