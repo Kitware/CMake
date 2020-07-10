@@ -509,8 +509,8 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
       _OPENMP_GET_SPEC_DATE("${LANG}" OpenMP_${LANG}_SPEC_DATE_INTERNAL)
       set(OpenMP_${LANG}_SPEC_DATE "${OpenMP_${LANG}_SPEC_DATE_INTERNAL}" CACHE
         INTERNAL "${LANG} compiler's OpenMP specification date")
-      _OPENMP_SET_VERSION_BY_SPEC_DATE("${LANG}")
     endif()
+    _OPENMP_SET_VERSION_BY_SPEC_DATE("${LANG}")
 
     set(OpenMP_${LANG}_FIND_QUIETLY ${OpenMP_FIND_QUIETLY})
     set(OpenMP_${LANG}_FIND_REQUIRED ${OpenMP_FIND_REQUIRED})
