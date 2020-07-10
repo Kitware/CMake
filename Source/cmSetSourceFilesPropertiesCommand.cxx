@@ -35,11 +35,11 @@ bool cmSetSourceFilesPropertiesCommand(std::vector<std::string> const& args,
     "OBJECT_DEPENDS", "PROPERTIES", "DIRECTORY",    "TARGET_DIRECTORY"
   };
 
-  auto isNotAPropertyKeyword =
+  auto isAPropertyKeyword =
     [](const std::vector<std::string>::const_iterator& arg_it) {
-      return std::all_of(
+      return std::any_of(
         std::begin(prop_names), std::end(prop_names),
-        [&arg_it](cm::string_view prop_name) { return *arg_it != prop_name; });
+        [&arg_it](cm::string_view prop_name) { return *arg_it == prop_name; });
     };
 
   auto options_begin = std::find_first_of(
@@ -53,21 +53,32 @@ bool cmSetSourceFilesPropertiesCommand(std::vector<std::string> const& args,
   bool source_file_target_option_enabled = false;
   std::vector<cmMakefile*> source_file_directory_makefiles;
 
-  if (options_it != args.end() && *options_it == "DIRECTORY") {
-    source_file_directory_option_enabled = true;
-    ++options_it;
-    while (options_it != args.end() && isNotAPropertyKeyword(options_it)) {
+  enum Doing
+  {
+    DoingNone,
+    DoingSourceDirectory,
+    DoingSourceTargetDirectory
+  };
+  Doing doing = DoingNone;
+  for (; options_it != args.end(); ++options_it) {
+    if (*options_it == "DIRECTORY") {
+      doing = DoingSourceDirectory;
+      source_file_directory_option_enabled = true;
+    } else if (*options_it == "TARGET_DIRECTORY") {
+      doing = DoingSourceTargetDirectory;
+      source_file_target_option_enabled = true;
+    } else if (isAPropertyKeyword(options_it)) {
+      break;
+    } else if (doing == DoingSourceDirectory) {
       source_file_directories.push_back(*options_it);
-      ++options_it;
-    }
-  } else if (options_it != args.end() && *options_it == "TARGET_DIRECTORY") {
-    source_file_target_option_enabled = true;
-    ++options_it;
-    while (options_it != args.end() && isNotAPropertyKeyword(options_it)) {
+    } else if (doing == DoingSourceTargetDirectory) {
       source_file_target_directories.push_back(*options_it);
-      ++options_it;
+    } else {
+      status.SetError(
+        cmStrCat("given invalid argument \"", *options_it, "\"."));
     }
   }
+
   const auto props_begin = options_it;
 
   bool file_scopes_handled =

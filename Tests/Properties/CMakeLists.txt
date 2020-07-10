@@ -146,18 +146,25 @@ check_cache_props()
 
 function(generate_file_for_set_property_test i target_name)
     set(src_path "${CMAKE_CURRENT_BINARY_DIR}/src${i}.cpp")
-    file(GENERATE OUTPUT "${src_path}" CONTENT
+    file(CONFIGURE OUTPUT "${src_path}" CONTENT
         "#ifndef def${i}\n\
         #error Expected def${i}\n\
         #endif\n\
         #ifdef _WIN32\n\
         __declspec(dllexport)\n\
         #endif\n\
-        void dummy_symbol${i}() {}\n")
+        void dummy_symbol${i}() {}\n"
+        NEWLINE_STYLE UNIX)
     target_sources(${target_name} PRIVATE "${src_path}")
 endfunction()
 
 add_library(maindirtest SHARED)
+
+# Generate file to be used with both DIRECTORY and TARGET_DIRECTORY options in
+# set_source_files_properties and set_property().
+generate_file_for_set_property_test(32 maindirtest)
+generate_file_for_set_property_test(33 maindirtest)
+
 add_subdirectory(SubDir2)
 
 set(src_prefix "${CMAKE_CURRENT_BINARY_DIR}/SubDir2/")
@@ -232,6 +239,19 @@ set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/src30.cpp"
 # Check that specifying files without any properties doesn't crash.
 set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/src30.cpp"
                             "${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src31.cpp")
+
+
+# Check that specifying both DIRECTORY and TARGET_DIRECTORY works.
+set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/src32.cpp"
+                            DIRECTORY .
+                            TARGET_DIRECTORY set_prop_lib_3
+                            PROPERTIES COMPILE_DEFINITIONS "def32")
+
+set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/src33.cpp"
+             DIRECTORY SubDir2
+             TARGET_DIRECTORY maindirtest
+             PROPERTY COMPILE_DEFINITIONS "def33")
+
 
 function(check_get_property_value expected)
     if(NOT actual STREQUAL expected)
