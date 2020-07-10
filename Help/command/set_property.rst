@@ -9,7 +9,8 @@ Set a named property in a given scope.
                 DIRECTORY [<dir>]           |
                 TARGET    [<target1> ...]   |
                 SOURCE    [<src1> ...]
-                          [<TARGET_DIRECTORY ... | DIRECTORY ...>]   |
+                          [TARGET_DIRECTORY <target1> ...]
+                          [DIRECTORY <dir1> ...] |
                 INSTALL   [<file1> ...]     |
                 TEST      [<test1> ...]     |
                 CACHE     [<entry1> ...]    >
@@ -38,7 +39,7 @@ It must be one of the following:
   file properties are by default visible only to targets added in the same
   directory (``CMakeLists.txt``).
   The file properties can be made visible in a different directory by specifying
-  one of the additional options: ``TARGET_DIRECTORY`` or ``DIRECTORY``.
+  one or both of the additional options: ``TARGET_DIRECTORY`` and ``DIRECTORY``.
 
   ``DIRECTORY`` takes a list of processed directories paths, and sets the file
   properties in those directory scopes.

@@ -5,7 +5,7 @@ Get a property for a source file.
 
 .. code-block:: cmake
 
-  get_source_file_property(VAR file [<TARGET_DIRECTORY ... | DIRECTORY ...>] property)
+  get_source_file_property(VAR file [TARGET_DIRECTORY <target> | DIRECTORY <dir>] property)
 
 Gets a property from a source file.  The value of the property is
 stored in the variable ``VAR``.  If the source property is not found, the

@@ -96,12 +96,14 @@ bool HandleSourceFileDirectoryScopes(
       }
       directory_makefiles.push_back(dir_mf);
     }
-  } else if (!source_file_target_directories.empty()) {
+  }
+
+  if (!source_file_target_directories.empty()) {
     for (const std::string& target_name : source_file_target_directories) {
       cmTarget* target = current_dir_mf->FindTargetToUse(target_name);
       if (!target) {
         status.SetError(cmStrCat(
-          "given non-existent target for DIRECTORY_TARGET ", target_name));
+          "given non-existent target for TARGET_DIRECTORY ", target_name));
         return false;
       }
       cmProp target_source_dir = target->GetProperty("SOURCE_DIR");
@@ -110,7 +112,10 @@ bool HandleSourceFileDirectoryScopes(
           *target_source_dir);
       directory_makefiles.push_back(target_dir_mf);
     }
-  } else {
+  }
+
+  if (source_file_directories.empty() &&
+      source_file_target_directories.empty()) {
     directory_makefiles.push_back(current_dir_mf);
   }
   return true;
@@ -271,12 +276,12 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
       appendMode = true;
       remove = false;
       appendAsString = true;
-    } else if (doing == DoingNames && scope == cmProperty::SOURCE_FILE &&
-               arg == "DIRECTORY") {
+    } else if (doing != DoingProperty && doing != DoingValues &&
+               scope == cmProperty::SOURCE_FILE && arg == "DIRECTORY") {
       doing = DoingSourceDirectory;
       source_file_directory_option_enabled = true;
-    } else if (doing == DoingNames && scope == cmProperty::SOURCE_FILE &&
-               arg == "TARGET_DIRECTORY") {
+    } else if (doing != DoingProperty && doing != DoingValues &&
+               scope == cmProperty::SOURCE_FILE && arg == "TARGET_DIRECTORY") {
       doing = DoingSourceTargetDirectory;
       source_file_target_option_enabled = true;
     } else if (doing == DoingNames) {

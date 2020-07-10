@@ -28,3 +28,7 @@ generate_file_for_set_property_test(23 set_prop_lib_3)
 
 # For set_source_files_properties + multiple files in multiple directories
 generate_file_for_set_property_test(31 set_prop_lib_3)
+
+# For specifying both DIRECTORY and TARGET_DIRECTORY
+target_sources(set_prop_lib_3 PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/../src32.cpp")
+target_sources(set_prop_lib_3 PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/../src33.cpp")
