@@ -5411,8 +5411,7 @@ bool getTypedProperty<bool>(cmGeneratorTarget const* tgt,
   }
 
   cmProp value = tgt->GetProperty(prop);
-  return cmIsOn(
-    genexInterpreter->Evaluate(value ? value->c_str() : nullptr, prop));
+  return cmIsOn(genexInterpreter->Evaluate(value ? *value : "", prop));
 }
 
 template <>
@@ -5426,8 +5425,7 @@ const char* getTypedProperty<const char*>(
     return value ? value->c_str() : nullptr;
   }
 
-  return genexInterpreter->Evaluate(value ? value->c_str() : nullptr, prop)
-    .c_str();
+  return genexInterpreter->Evaluate(value ? *value : "", prop).c_str();
 }
 
 template <>
@@ -5441,7 +5439,7 @@ std::string getTypedProperty<std::string>(
     return valueAsString(value ? value->c_str() : nullptr);
   }
 
-  return genexInterpreter->Evaluate(value ? value->c_str() : nullptr, prop);
+  return genexInterpreter->Evaluate(value ? *value : "", prop);
 }
 
 template <typename PropertyType>
