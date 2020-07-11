@@ -1038,17 +1038,31 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
       fileType = *l;
     }
   }
+  // Make a copy so that we can override it later
+  std::string path = fullpath;
   // Compute the extension without leading '.'.
-  std::string ext = cmSystemTools::GetFilenameLastExtension(fullpath);
+  std::string ext = cmSystemTools::GetFilenameLastExtension(path);
   if (!ext.empty()) {
     ext = ext.substr(1);
   }
   if (fileType.empty()) {
+    // If file has no extension it's either a raw executable or might
+    // be a direct reference to binary within a framework (bad practice!)
+    // so this is where we change the path to the point to framework
+    // directory.
+    if (ext.empty()) {
+      auto parentDir = cmSystemTools::GetParentDirectory(path);
+      auto parentExt = cmSystemTools::GetFilenameLastExtension(parentDir);
+      if (parentExt == ".framework") {
+        path = parentDir;
+        ext = parentExt.substr(1);
+      }
+    }
     // If fullpath references a directory, then we need to specify
     // lastKnownFileType as folder in order for Xcode to be able to
     // open the contents of the folder.
     // (Xcode 4.6 does not like explicitFileType=folder).
-    if (cmSystemTools::FileIsDirectory(fullpath)) {
+    if (cmSystemTools::FileIsDirectory(path)) {
       fileType = GetDirectoryValueFromFileExtension(ext);
       useLastKnownFileType = true;
     } else {
@@ -1057,11 +1071,11 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     }
   }
 
-  std::string key = GetGroupMapKeyFromPath(target, fullpath);
+  std::string key = GetGroupMapKeyFromPath(target, path);
   cmXCodeObject* fileRef = this->FileRefs[key];
   if (!fileRef) {
     fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-    fileRef->SetComment(fullpath);
+    fileRef->SetComment(path);
     this->FileRefs[key] = fileRef;
   }
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
@@ -1069,9 +1083,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
                                              : "explicitFileType",
                         this->CreateString(fileType));
   // Store the file path relative to the top of the source tree.
-  std::string path = fullpath;
   if (!IsLibraryType(fileType)) {
-    path = this->RelativeToSource(fullpath);
+    path = this->RelativeToSource(path);
   }
   std::string name = cmSystemTools::GetFilenameName(path);
   const char* sourceTree =
