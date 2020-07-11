@@ -27,6 +27,7 @@ macro(__compiler_ti lang)
 
   set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> qr <TARGET> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> qa <TARGET> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_FINISH "")
 
   set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_${lang}_COMPILER> --run_linker --output_file=<TARGET> --map_file=<TARGET_NAME>.map <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES>")
 endmacro()
