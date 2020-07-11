@@ -1,0 +1,35 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
+
+# This module is shared by multiple languages; use include blocker.
+if(__COMPILER_TI)
+  return()
+endif()
+set(__COMPILER_TI 1)
+
+macro(__compiler_ti lang)
+  string(TOLOWER ${lang} prefix)
+  if("x${lang}" STREQUAL "xCXX")
+    set(prefix "cpp")
+  endif()
+
+  set(CMAKE_${lang}_RESPONSE_FILE_FLAG "--cmd_file=")
+  set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG " ")
+
+  set(CMAKE_INCLUDE_FLAG_${lang} "--include_path=")
+  set(CMAKE_DEPFILE_FLAGS_${lang} "--preproc_with_compile --preproc_dependency=<DEPFILE>")
+
+  set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> --preproc_only --${prefix}_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<PREPROCESSED_SOURCE>")
+  set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> --compile_only --skip_assembler --${prefix}_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<ASSEMBLY_SOURCE>")
+
+  set(CMAKE_${lang}_COMPILE_OBJECT  "<CMAKE_${lang}_COMPILER> --compile_only --${prefix}_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<OBJECT>")
+
+  set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> qr <TARGET> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> qa <TARGET> <OBJECTS>")
+
+  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_${lang}_COMPILER> --run_linker --output_file=<TARGET> --map_file=<TARGET_NAME>.map <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES>")
+endmacro()
+
+set(CMAKE_LIBRARY_PATH_FLAG "--search_path=")
+set(CMAKE_LINK_LIBRARY_FLAG "--library=")
