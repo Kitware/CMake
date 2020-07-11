@@ -175,8 +175,8 @@ public:
 
   void ComputeObjectMapping();
 
-  const char* GetFeature(const std::string& feature,
-                         const std::string& config) const;
+  cmProp GetFeature(const std::string& feature,
+                    const std::string& config) const;
 
   const char* GetLinkPIEProperty(const std::string& config) const;
 

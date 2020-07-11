@@ -20,6 +20,7 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmStateSnapshot.h"
 
 class cmComputeLinkInformation;
@@ -209,8 +210,7 @@ public:
   void AppendFeatureOptions(std::string& flags, const std::string& lang,
                             const char* feature);
 
-  const char* GetFeature(const std::string& feature,
-                         const std::string& config);
+  cmProp GetFeature(const std::string& feature, const std::string& config);
 
   /** \brief Get absolute path to dependency \a name
    *

@@ -41,7 +41,7 @@ std::vector<std::string> const& cmCommonTargetGenerator::GetConfigNames() const
 const char* cmCommonTargetGenerator::GetFeature(const std::string& feature,
                                                 const std::string& config)
 {
-  return this->GeneratorTarget->GetFeature(feature, config);
+  return this->GeneratorTarget->GetFeature(feature, config)->c_str();
 }
 
 void cmCommonTargetGenerator::AddModuleDefinitionFlag(

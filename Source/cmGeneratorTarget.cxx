@@ -815,18 +815,18 @@ void cmGeneratorTarget::ComputeObjectMapping()
   }
 }
 
-const char* cmGeneratorTarget::GetFeature(const std::string& feature,
-                                          const std::string& config) const
+cmProp cmGeneratorTarget::GetFeature(const std::string& feature,
+                                     const std::string& config) const
 {
   if (!config.empty()) {
     std::string featureConfig =
       cmStrCat(feature, '_', cmSystemTools::UpperCase(config));
     if (cmProp value = this->GetProperty(featureConfig)) {
-      return value->c_str();
+      return value;
     }
   }
   if (cmProp value = this->GetProperty(feature)) {
-    return value->c_str();
+    return value;
   }
   return this->LocalGenerator->GetFeature(feature, config);
 }
@@ -853,8 +853,8 @@ const char* cmGeneratorTarget::GetLinkPIEProperty(
 bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
                                      std::string const& config) const
 {
-  const char* feature = "INTERPROCEDURAL_OPTIMIZATION";
-  const bool result = cmIsOn(this->GetFeature(feature, config));
+  cmProp feature = this->GetFeature("INTERPROCEDURAL_OPTIMIZATION", config);
+  const bool result = feature && cmIsOn(*feature);
 
   if (!result) {
     // 'INTERPROCEDURAL_OPTIMIZATION' is off, no need to check policies
