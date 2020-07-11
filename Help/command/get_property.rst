@@ -10,7 +10,7 @@ Get a property.
                 DIRECTORY [<dir>]  |
                 TARGET    <target> |
                 SOURCE    <source> |
-                          [TARGET_DIRECTORY <target> | DIRECTORY <dir>] |
+                          [DIRECTORY <dir> | TARGET_DIRECTORY <target>] |
                 INSTALL   <file>   |
                 TEST      <test>   |
                 CACHE     <entry>  |
@@ -31,33 +31,42 @@ It must be one of the following:
   Scope defaults to the current directory but another
   directory (already processed by CMake) may be named by the
   full or relative path ``<dir>``.
+  See also the :command:`get_directory_property` command.
 
 ``TARGET``
   Scope must name one existing target.
+  See also the :command:`get_target_property` command.
 
 ``SOURCE``
-  Scope must name one source file.
+  Scope must name one source file.  By default, the source file's property
+  will be read from the current source directory's scope, but this can be
+  overridden with one of the following sub-options:
+
+  ``DIRECTORY <dir>``
+    The source file property will be read from the ``<dir>`` directory's
+    scope.  CMake must already know about that source directory, either by
+    having added it through a call to :command:`add_subdirectory` or ``<dir>``
+    being the top level source directory.  Relative paths are treated as
+    relative to the current source directory.
+
+  ``TARGET_DIRECTORY <target>``
+    The source file property will be read from the directory scope in which
+    ``<target>`` was created (``<target>`` must therefore already exist).
+
+  See also the :command:`get_source_file_property` command.
 
 ``INSTALL``
   Scope must name one installed file path.
 
 ``TEST``
   Scope must name one existing test.
+  See also the :command:`get_test_property` command.
 
 ``CACHE``
   Scope must name one cache entry.
 
 ``VARIABLE``
   Scope is unique and does not accept a name.
-
-In the ``SOURCE`` case, the queried source file scope can be changed by
-specifying one of the additional options: ``DIRECTORY`` or ``TARGET_DIRECTORY``.
-
-``DIRECTORY`` takes a path to a processed directory, and the source file property
-will be read from that directory scope.
-
-``TARGET_DIRECTORY`` takes the name of an existing target. The source file
-property will be read from this target's directory scope.
 
 The required ``PROPERTY`` option is immediately followed by the name of
 the property to get.  If the property is not set an empty value is
