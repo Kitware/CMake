@@ -9,13 +9,13 @@ Set a named property in a given scope.
                 DIRECTORY [<dir>]           |
                 TARGET    [<target1> ...]   |
                 SOURCE    [<src1> ...]
-                          [TARGET_DIRECTORY <target1> ...]
-                          [DIRECTORY <dir1> ...] |
+                          [DIRECTORY <dirs> ...] |
+                          [TARGET_DIRECTORY <targets> ...]
                 INSTALL   [<file1> ...]     |
                 TEST      [<test1> ...]     |
                 CACHE     [<entry1> ...]    >
                [APPEND] [APPEND_STRING]
-               PROPERTY <name> [value1 ...])
+               PROPERTY <name> [<value1> ...])
 
 Sets one property on zero or more objects of a scope.
 
@@ -35,17 +35,23 @@ It must be one of the following:
   See also the :command:`set_target_properties` command.
 
 ``SOURCE``
-  Scope may name zero or more source files.  Note that source
-  file properties are by default visible only to targets added in the same
-  directory (``CMakeLists.txt``).
-  The file properties can be made visible in a different directory by specifying
-  one or both of the additional options: ``TARGET_DIRECTORY`` and ``DIRECTORY``.
+  Scope may name zero or more source files.  By default, source file properties
+  are only visible to targets added in the same directory (``CMakeLists.txt``).
+  Visibility can be set in other directory scopes using one or both of the
+  following sub-options:
 
-  ``DIRECTORY`` takes a list of processed directories paths, and sets the file
-  properties in those directory scopes.
+  ``DIRECTORY <dirs>...``
+    The source file property will be set in each of the ``<dirs>``
+    directories' scopes.  CMake must already know about each of these
+    source directories, either by having added them through a call to
+    :command:`add_subdirectory` or it being the top level source directory.
+    Relative paths are treated as relative to the current source directory.
 
-  ``TARGET_DIRECTORY`` takes a list of existing targets. The file
-  properties will be set in these targets' directory scopes.
+  ``TARGET_DIRECTORY <targets>...``
+    The source file property will be set in each of the directory scopes
+    where any of the specified ``<targets>`` were created (the ``<targets>``
+    must therefore already exist).
+
   See also the :command:`set_source_files_properties` command.
 
 ``INSTALL``
