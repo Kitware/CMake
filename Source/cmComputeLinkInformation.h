@@ -144,11 +144,11 @@ private:
   cmsys::RegularExpression ExtractSharedLibraryName;
   cmsys::RegularExpression ExtractAnyLibraryName;
   std::string SharedRegexString;
-  void AddLinkPrefix(const char* p);
-  void AddLinkExtension(const char* e, LinkType type);
+  void AddLinkPrefix(std::string const& p);
+  void AddLinkExtension(std::string const& e, LinkType type);
   std::string CreateExtensionRegex(std::vector<std::string> const& exts,
                                    LinkType type);
-  std::string NoCaseExpression(const char* str);
+  std::string NoCaseExpression(std::string const& str);
 
   // Handling of link items.
   void AddTargetItem(BT<std::string> const& item,
