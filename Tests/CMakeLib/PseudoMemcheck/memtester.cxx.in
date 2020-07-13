@@ -1,8 +1,14 @@
-#include <cmSystemTools.h>
-#include "cmsys/Encoding.hxx"
 #include <string>
+#include <vector>
 
+#include "cmsys/Encoding.hxx"
+
+#include <cmSystemTools.h>
+
+// clang-format off
 #define RETVAL @_retval@
+#define CMAKE_COMMAND "@CMAKE_COMMAND@"
+// clang-format on
 
 int main(int ac, char** av)
 {
@@ -14,6 +20,9 @@ int main(int ac, char** av)
   std::string exename = argv[0];
   std::string logarg;
   bool nextarg = false;
+  // execute the part after the last argument?
+  // the logfile path gets passed as environment variable PSEUDO_LOGFILE
+  bool exec = false;
 
   if (exename.find("valgrind") != std::string::npos) {
     logarg = "--log-file=";
@@ -26,6 +35,10 @@ int main(int ac, char** av)
   } else if (exename.find("BC") != std::string::npos) {
     nextarg = true;
     logarg = "/X";
+  } else if (exename.find("cuda-memcheck") != std::string::npos) {
+    nextarg = true;
+    exec = true;
+    logarg = "--log-file";
   }
 
   if (!logarg.empty()) {
@@ -45,8 +58,25 @@ int main(int ac, char** av)
       }
     }
 
+    // find the last argument position
+    int lastarg_pos = 1;
+    for (int i = 1; i < argc; ++i) {
+      std::string arg = argv[i];
+      if (arg.find("--") == 0) {
+        lastarg_pos = i;
+      }
+    }
+
     if (!logfile.empty()) {
       cmSystemTools::Touch(logfile, true);
+      // execute everything after the last argument with additional environment
+      int callarg_pos = lastarg_pos + (nextarg ? 2 : 1);
+      if (exec && callarg_pos < argc) {
+        std::vector<std::string> callargs{ CMAKE_COMMAND, "-E", "env",
+                                           "PSEUDO_LOGFILE=" + logfile };
+        callargs.insert(callargs.end(), &argv[callarg_pos], &argv[argc]);
+        cmSystemTools::RunSingleCommand(callargs);
+      }
     }
   }
 

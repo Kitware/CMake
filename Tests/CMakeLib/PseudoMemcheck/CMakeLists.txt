@@ -15,6 +15,9 @@ target_link_libraries(pseudo_purify CMakeLib)
 add_executable(pseudo_BC "${CMAKE_CURRENT_BINARY_DIR}/ret0.cxx")
 set_target_properties(pseudo_BC PROPERTIES OUTPUT_NAME BC)
 target_link_libraries(pseudo_BC CMakeLib)
+add_executable(pseudo_cuda-memcheck "${CMAKE_CURRENT_BINARY_DIR}/ret0.cxx")
+set_target_properties(pseudo_cuda-memcheck PROPERTIES OUTPUT_NAME cuda-memcheck)
+target_link_libraries(pseudo_cuda-memcheck CMakeLib)
 
 # binary to be used as pre- and post-memcheck command that fails
 add_executable(memcheck_fail "${CMAKE_CURRENT_BINARY_DIR}/ret1.cxx")
