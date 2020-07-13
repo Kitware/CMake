@@ -1461,6 +1461,9 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   // Imported targets.
   this->ImportedTargets = parent->ImportedTargets;
 
+  // Non-global Alias targets.
+  this->AliasTargets = parent->AliasTargets;
+
   // Recursion depth.
   this->RecursionDepth = parent->RecursionDepth;
 }
