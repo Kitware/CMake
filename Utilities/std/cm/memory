@@ -6,7 +6,10 @@
 #ifndef cm_memory
 #define cm_memory
 
+#include "cmSTL.hxx" // IWYU pragma: keep
+
 #include <memory> // IWYU pragma: export
+
 #if !defined(CMake_HAVE_CXX_MAKE_UNIQUE)
 #  include <cstddef>
 #  include <type_traits>

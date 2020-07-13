@@ -35,6 +35,9 @@ Available features are:
 
 * From ``C++14``:
 
+  * ``<cm/iomanip>``:
+    ``cm::quoted``
+
   * ``<cm/iterator>``:
     ``cm::make_reverse_iterator``, ``cm::cbegin``, ``cm::cend``,
     ``cm::rbegin``, ``cm::rend``, ``cm::crbegin``, ``cm::crend``
@@ -52,6 +55,9 @@ Available features are:
 
   * ``<cm/algorithm>``:
     ``cm::clamp``
+
+  * ``cm/filesystem>``:
+    ``cm::filesystem::path``
 
   * ``<cm/iterator>``:
     ``cm::size``, ``cm::empty``, ``cm::data``
