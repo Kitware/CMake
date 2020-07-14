@@ -3253,8 +3253,8 @@ void cmLocalGenerator::AppendFeatureOptions(std::string& flags,
   }
 }
 
-const char* cmLocalGenerator::GetFeature(const std::string& feature,
-                                         const std::string& config)
+cmProp cmLocalGenerator::GetFeature(const std::string& feature,
+                                    const std::string& config)
 {
   std::string featureName = feature;
   // TODO: Define accumulation policy for features (prepend, append,
@@ -3266,7 +3266,7 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
   cmStateSnapshot snp = this->StateSnapshot;
   while (snp.IsValid()) {
     if (cmProp value = snp.GetDirectory().GetProperty(featureName)) {
-      return value->c_str();
+      return value;
     }
     snp = snp.GetBuildsystemDirectoryParent();
   }
