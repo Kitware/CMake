@@ -1976,7 +1976,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
   }
 
   cmProp toolOverride = sf->GetProperty("VS_TOOL_OVERRIDE");
-  if (toolOverride && !toolOverride->empty()) {
+  if (cmNonempty(toolOverride)) {
     tool = toolOverride->c_str();
   }
 
@@ -1985,12 +1985,12 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
   if (this->GlobalGenerator->TargetsWindowsPhone() ||
       this->GlobalGenerator->TargetsWindowsStore()) {
     cmProp content = sf->GetProperty("VS_DEPLOYMENT_CONTENT");
-    if (content && !content->empty()) {
+    if (cmNonempty(content)) {
       toolHasSettings = true;
       deployContent = *content;
 
       cmProp location = sf->GetProperty("VS_DEPLOYMENT_LOCATION");
-      if (location && !location->empty()) {
+      if (cmNonempty(location)) {
         deployLocation = *location;
       }
     }

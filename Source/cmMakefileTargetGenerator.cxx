@@ -807,7 +807,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
          lang == "OBJC" || lang == "OBJCXX")) {
       std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
       cmProp clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
-      if (clauncher && !clauncher->empty()) {
+      if (cmNonempty(clauncher)) {
         compilerLauncher = *clauncher;
       }
     }
@@ -822,8 +822,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       cmProp cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
       std::string const cppcheck_prop = lang + "_CPPCHECK";
       cmProp cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
-      if ((iwyu && !iwyu->empty()) || (tidy && !tidy->empty()) ||
-          (cpplint && !cpplint->empty()) || (cppcheck && !cppcheck->empty())) {
+      if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
+          cmNonempty(cppcheck)) {
         std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_co_compile";
         if (!compilerLauncher.empty()) {
           // In __run_co_compile case the launcher command is supplied
@@ -832,11 +832,11 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
           run_iwyu += this->LocalGenerator->EscapeForShell(compilerLauncher);
           compilerLauncher.clear();
         }
-        if (iwyu && !iwyu->empty()) {
+        if (cmNonempty(iwyu)) {
           run_iwyu += " --iwyu=";
           run_iwyu += this->LocalGenerator->EscapeForShell(*iwyu);
         }
-        if (tidy && !tidy->empty()) {
+        if (cmNonempty(tidy)) {
           run_iwyu += " --tidy=";
           const char* driverMode = this->Makefile->GetDefinition(
             "CMAKE_" + lang + "_CLANG_TIDY_DRIVER_MODE");
@@ -846,16 +846,16 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
           run_iwyu += this->LocalGenerator->EscapeForShell(
             cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode));
         }
-        if (cpplint && !cpplint->empty()) {
+        if (cmNonempty(cpplint)) {
           run_iwyu += " --cpplint=";
           run_iwyu += this->LocalGenerator->EscapeForShell(*cpplint);
         }
-        if (cppcheck && !cppcheck->empty()) {
+        if (cmNonempty(cppcheck)) {
           run_iwyu += " --cppcheck=";
           run_iwyu += this->LocalGenerator->EscapeForShell(*cppcheck);
         }
-        if ((tidy && !tidy->empty()) || (cpplint && !cpplint->empty()) ||
-            (cppcheck && !cppcheck->empty())) {
+        if (cmNonempty(tidy) || (cmNonempty(cpplint)) ||
+            (cmNonempty(cppcheck))) {
           run_iwyu += " --source=";
           run_iwyu += sourceFile;
         }
@@ -882,7 +882,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     {
       const char* val = this->LocalGenerator->GetRuleLauncher(
         this->GeneratorTarget, "RULE_LAUNCH_COMPILE");
-      if (val && *val) {
+      if (cmNonempty(val)) {
         launcher = cmStrCat(val, ' ');
       }
     }

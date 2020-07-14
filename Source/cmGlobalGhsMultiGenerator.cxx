@@ -635,7 +635,7 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
   std::string tgt;
   const char* t =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_PRIMARY_TARGET");
-  if (t && *t != '\0') {
+  if (cmNonempty(t)) {
     tgt = t;
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_PRIMARY_TARGET");
   } else {

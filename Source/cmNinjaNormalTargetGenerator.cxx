@@ -239,7 +239,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(
     std::string launcher;
     const char* val = this->GetLocalGenerator()->GetRuleLauncher(
       this->GetGeneratorTarget(), "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 
@@ -376,7 +376,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     std::string launcher;
     const char* val = this->GetLocalGenerator()->GetRuleLauncher(
       this->GetGeneratorTarget(), "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 

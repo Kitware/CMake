@@ -662,7 +662,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   std::string launcher;
   const char* val = this->GetLocalGenerator()->GetRuleLauncher(
     this->GetGeneratorTarget(), "RULE_LAUNCH_COMPILE");
-  if (val && *val) {
+  if (cmNonempty(val)) {
     launcher = cmStrCat(val, ' ');
   }
 
@@ -813,7 +813,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
        lang == "OBJC" || lang == "OBJCXX")) {
     std::string const clauncher_prop = cmStrCat(lang, "_COMPILER_LAUNCHER");
     cmProp clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
-    if (clauncher && !clauncher->empty()) {
+    if (cmNonempty(clauncher)) {
       compilerLauncher = *clauncher;
     }
   }
@@ -828,8 +828,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     cmProp cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
     std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
     cmProp cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
-    if ((iwyu && !iwyu->empty()) || (tidy && !tidy->empty()) ||
-        (cpplint && !cpplint->empty()) || (cppcheck && !cppcheck->empty())) {
+    if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
+        cmNonempty(cppcheck)) {
       std::string run_iwyu = cmStrCat(cmakeCmd, " -E __run_co_compile");
       if (!compilerLauncher.empty()) {
         // In __run_co_compile case the launcher command is supplied
@@ -839,11 +839,11 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                    this->LocalGenerator->EscapeForShell(compilerLauncher));
         compilerLauncher.clear();
       }
-      if (iwyu && !iwyu->empty()) {
+      if (cmNonempty(iwyu)) {
         run_iwyu += cmStrCat(" --iwyu=",
                              this->GetLocalGenerator()->EscapeForShell(*iwyu));
       }
-      if (tidy && !tidy->empty()) {
+      if (cmNonempty(tidy)) {
         run_iwyu += " --tidy=";
         const char* driverMode = this->Makefile->GetDefinition(
           cmStrCat("CMAKE_", lang, "_CLANG_TIDY_DRIVER_MODE"));
@@ -853,17 +853,16 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(
           cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode));
       }
-      if (cpplint && !cpplint->empty()) {
+      if (cmNonempty(cpplint)) {
         run_iwyu += cmStrCat(
           " --cpplint=", this->GetLocalGenerator()->EscapeForShell(*cpplint));
       }
-      if (cppcheck && !cppcheck->empty()) {
+      if (cmNonempty(cppcheck)) {
         run_iwyu +=
           cmStrCat(" --cppcheck=",
                    this->GetLocalGenerator()->EscapeForShell(*cppcheck));
       }
-      if ((tidy && !tidy->empty()) || (cpplint && !cpplint->empty()) ||
-          (cppcheck && !cppcheck->empty())) {
+      if (cmNonempty(tidy) || cmNonempty(cpplint) || cmNonempty(cppcheck)) {
         run_iwyu += " --source=$in";
       }
       run_iwyu += " -- ";

@@ -18,6 +18,7 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -235,9 +236,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   this->SrcFileSignature = true;
 
   cmStateEnums::TargetType targetType = cmStateEnums::EXECUTABLE;
-  const std::string* tt =
-    this->Makefile->GetDef("CMAKE_TRY_COMPILE_TARGET_TYPE");
-  if (!isTryRun && tt && !tt->empty()) {
+  cmProp tt = this->Makefile->GetDef("CMAKE_TRY_COMPILE_TARGET_TYPE");
+  if (!isTryRun && cmNonempty(tt)) {
     if (*tt == cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE)) {
       targetType = cmStateEnums::EXECUTABLE;
     } else if (*tt ==

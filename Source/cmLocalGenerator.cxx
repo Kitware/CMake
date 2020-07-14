@@ -1972,7 +1972,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   // of a default selection whether or not it is overridden by a property.
   cmProp msvcRuntimeLibraryDefault =
     this->Makefile->GetDef("CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT");
-  if (msvcRuntimeLibraryDefault && !msvcRuntimeLibraryDefault->empty()) {
+  if (cmNonempty(msvcRuntimeLibraryDefault)) {
     cmProp msvcRuntimeLibraryValue =
       target->GetProperty("MSVC_RUNTIME_LIBRARY");
     if (!msvcRuntimeLibraryValue) {
@@ -3807,8 +3807,7 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
 {
   // Find the Info.plist template.
   cmProp in = target->GetProperty("MACOSX_BUNDLE_INFO_PLIST");
-  std::string inFile =
-    (in && !in->empty()) ? *in : "MacOSXBundleInfo.plist.in";
+  std::string inFile = cmNonempty(in) ? *in : "MacOSXBundleInfo.plist.in";
   if (!cmSystemTools::FileIsFullPath(inFile)) {
     std::string inMod = this->Makefile->GetModulesFile(inFile);
     if (!inMod.empty()) {
@@ -3847,8 +3846,7 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(
 {
   // Find the Info.plist template.
   cmProp in = target->GetProperty("MACOSX_FRAMEWORK_INFO_PLIST");
-  std::string inFile =
-    (in && !in->empty()) ? *in : "MacOSXFrameworkInfo.plist.in";
+  std::string inFile = cmNonempty(in) ? *in : "MacOSXFrameworkInfo.plist.in";
   if (!cmSystemTools::FileIsFullPath(inFile)) {
     std::string inMod = this->Makefile->GetModulesFile(inFile);
     if (!inMod.empty()) {
