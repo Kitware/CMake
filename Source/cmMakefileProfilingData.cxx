@@ -58,7 +58,7 @@ void cmMakefileProfilingData::StartEntry(const cmListFileFunction& lff,
     cmsys::SystemInformation info;
     Json::Value v;
     v["ph"] = "B";
-    v["name"] = lff.Name.Original;
+    v["name"] = lff.Name.Lower;
     v["cat"] = "cmake";
     v["ts"] = Json::Value::UInt64(
       std::chrono::duration_cast<std::chrono::microseconds>(
