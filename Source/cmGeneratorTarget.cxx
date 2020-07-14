@@ -2467,6 +2467,12 @@ private:
 cmGeneratorTarget::LinkClosure const* cmGeneratorTarget::GetLinkClosure(
   const std::string& config) const
 {
+  // There is no link implementation for targets that cannot compile sources.
+  if (!this->CanCompileSources()) {
+    static LinkClosure const empty = { {}, {} };
+    return &empty;
+  }
+
   std::string key(cmSystemTools::UpperCase(config));
   auto i = this->LinkClosureMap.find(key);
   if (i == this->LinkClosureMap.end()) {
@@ -2783,6 +2789,12 @@ const std::vector<const cmGeneratorTarget*>&
 cmGeneratorTarget::GetLinkImplementationClosure(
   const std::string& config) const
 {
+  // There is no link implementation for targets that cannot compile sources.
+  if (!this->CanCompileSources()) {
+    static std::vector<const cmGeneratorTarget*> const empty;
+    return empty;
+  }
+
   LinkImplClosure& tgts = this->LinkImplClosureMap[config];
   if (!tgts.Done) {
     tgts.Done = true;
@@ -6856,8 +6868,8 @@ const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
 const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
   const std::string& config, bool secondPass) const
 {
-  // There is no link implementation for imported targets.
-  if (this->IsImported()) {
+  // There is no link implementation for targets that cannot compile sources.
+  if (!this->CanCompileSources()) {
     return nullptr;
   }
 
@@ -7120,8 +7132,8 @@ cmLinkImplementationLibraries const*
 cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
   const std::string& config, cmGeneratorTarget const* head) const
 {
-  // There is no link implementation for imported targets.
-  if (this->IsImported()) {
+  // There is no link implementation for targets that cannot compile sources.
+  if (!this->CanCompileSources()) {
     return nullptr;
   }
 
