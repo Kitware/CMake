@@ -126,6 +126,7 @@ void CMakeCommandUsage(const char* program)
     << "  touch <file>...           - touch a <file>.\n"
     << "  touch_nocreate <file>...  - touch a <file> but do not create it.\n"
     << "  create_symlink old new    - create a symbolic link new -> old\n"
+    << "  create_hardlink old new   - create a hard link new -> old\n"
     << "  true                      - do nothing with an exit code of 0\n"
     << "  false                     - do nothing with an exit code of 1\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -1029,6 +1030,34 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         return 1;
       }
       if (!cmSystemTools::CreateSymlink(args[2], args[3])) {
+        return 1;
+      }
+      return 0;
+    }
+
+    // Command to create a hard link.  Fails on platforms not
+    // supporting them.
+    if (args[1] == "create_hardlink" && args.size() == 4) {
+      const char* SouceFileName = args[2].c_str();
+      const char* destinationFileName = args[3].c_str();
+
+      if (!cmSystemTools::FileExists(SouceFileName)) {
+        std::cerr << "failed to create hard link because source path '"
+                  << SouceFileName << "' does not exist \n";
+        return 1;
+      }
+
+      if ((cmSystemTools::FileExists(destinationFileName) ||
+           cmSystemTools::FileIsSymlink(destinationFileName)) &&
+          !cmSystemTools::RemoveFile(destinationFileName)) {
+        std::string emsg = cmSystemTools::GetLastSystemError();
+        std::cerr << "failed to create hard link '" << destinationFileName
+                  << "' because existing path cannot be removed: " << emsg
+                  << "\n";
+        return 1;
+      }
+
+      if (!cmSystemTools::CreateLink(args[2], args[3])) {
         return 1;
       }
       return 0;
