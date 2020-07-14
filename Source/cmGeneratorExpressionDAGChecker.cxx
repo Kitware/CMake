@@ -154,6 +154,14 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingPICExpression() const
   return this->Top()->Property == "INTERFACE_POSITION_INDEPENDENT_CODE";
 }
 
+bool cmGeneratorExpressionDAGChecker::EvaluatingCompileExpression() const
+{
+  cm::string_view property(this->Top()->Property);
+
+  return property == "INCLUDE_DIRECTORIES"_s ||
+    property == "COMPILE_DEFINITIONS"_s || property == "COMPILE_OPTIONS"_s;
+}
+
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkExpression() const
 {
   cm::string_view property(this->Top()->Property);

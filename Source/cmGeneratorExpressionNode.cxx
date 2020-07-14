@@ -967,9 +967,10 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
     const std::vector<std::string>& parameters,
     cmGeneratorExpressionContext* context,
     const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
-    if (context->Language.empty()) {
+    if (context->Language.empty() &&
+        (!dagChecker || !dagChecker->EvaluatingCompileExpression())) {
       reportError(
         context, content->GetOriginalExpression(),
         "$<COMPILE_LANGUAGE:...> may only be used to specify include "
@@ -1014,7 +1015,9 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
-    if (!context->HeadTarget || context->Language.empty()) {
+    if (!context->HeadTarget ||
+        (context->Language.empty() &&
+         (!dagChecker || !dagChecker->EvaluatingCompileExpression()))) {
       // reportError(context, content->GetOriginalExpression(), "");
       reportError(
         context, content->GetOriginalExpression(),
