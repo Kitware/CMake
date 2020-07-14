@@ -470,8 +470,7 @@ void cmGlobalGhsMultiGenerator::WriteAllTarget(
     if (t->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    cmProp p = t->GetProperty("EXCLUDE_FROM_ALL");
-    if (!(p && cmIsOn(*p))) {
+    if (!cmIsOn(t->GetProperty("EXCLUDE_FROM_ALL"))) {
       defaultTargets.push_back(t);
     }
   }

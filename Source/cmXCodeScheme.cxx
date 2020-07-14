@@ -324,8 +324,7 @@ bool cmXCodeScheme::WriteLaunchActionBooleanAttribute(
   bool defaultValue)
 {
   cmProp property = Target->GetTarget()->GetProperty(varName);
-  bool isOn =
-    (property == nullptr && defaultValue) || (property && cmIsOn(*property));
+  bool isOn = (property == nullptr && defaultValue) || cmIsOn(property);
 
   if (isOn) {
     xout.Attribute(attrName.c_str(), "YES");

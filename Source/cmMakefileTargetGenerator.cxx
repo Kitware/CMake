@@ -197,8 +197,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   }
 
   // add custom commands to the clean rules?
-  cmProp clean_no_custom = this->Makefile->GetProperty("CLEAN_NO_CUSTOM");
-  bool clean = clean_no_custom ? cmIsOff(*clean_no_custom) : true;
+  bool clean = cmIsOff(this->Makefile->GetProperty("CLEAN_NO_CUSTOM"));
 
   // First generate the object rule files.  Save a list of all object
   // files for this target.

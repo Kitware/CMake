@@ -578,10 +578,7 @@ cmProp cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
 bool cmCacheManager::CacheEntry::GetPropertyAsBool(
   const std::string& prop) const
 {
-  if (cmProp value = this->GetProperty(prop)) {
-    return cmIsOn(*value);
-  }
-  return false;
+  return cmIsOn(this->GetProperty(prop));
 }
 
 void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,

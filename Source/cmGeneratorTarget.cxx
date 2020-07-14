@@ -854,9 +854,8 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
                                      std::string const& config) const
 {
   cmProp feature = this->GetFeature("INTERPROCEDURAL_OPTIMIZATION", config);
-  const bool result = feature && cmIsOn(*feature);
 
-  if (!result) {
+  if (!cmIsOn(feature)) {
     // 'INTERPROCEDURAL_OPTIMIZATION' is off, no need to check policies
     return false;
   }
@@ -1001,7 +1000,7 @@ bool cmGeneratorTarget::GetLanguageStandardRequired(
 {
   cmProp p =
     this->GetPropertyWithPairedLanguageSupport(lang, "_STANDARD_REQUIRED");
-  return p && cmIsOn(*p);
+  return cmIsOn(p);
 }
 
 void cmGeneratorTarget::GetModuleDefinitionSources(

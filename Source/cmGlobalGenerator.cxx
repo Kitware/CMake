@@ -304,13 +304,9 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
     for (const auto& target : localGen->GetGeneratorTargets()) {
       if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
           target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
-          target->GetType() == cmStateEnums::TargetType::UTILITY) {
+          target->GetType() == cmStateEnums::TargetType::UTILITY ||
+          cmIsOn(target->GetProperty("ghs_integrity_app"))) {
         continue;
-      }
-      if (cmProp p = target->GetProperty("ghs_integrity_app")) {
-        if (cmIsOn(*p)) {
-          continue;
-        }
       }
 
       std::vector<std::string> configs =
@@ -374,13 +370,9 @@ bool cmGlobalGenerator::CheckTargetsForPchCompilePdb() const
     for (const auto& target : generator->GetGeneratorTargets()) {
       if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
           target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
-          target->GetType() == cmStateEnums::TargetType::UTILITY) {
+          target->GetType() == cmStateEnums::TargetType::UTILITY ||
+          cmIsOn(target->GetProperty("ghs_integrity_app"))) {
         continue;
-      }
-      if (cmProp p = target->GetProperty("ghs_integrity_app")) {
-        if (cmIsOn(*p)) {
-          continue;
-        }
       }
 
       std::string const& reuseFrom =
