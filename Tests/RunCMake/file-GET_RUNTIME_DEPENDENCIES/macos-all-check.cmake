@@ -16,7 +16,15 @@ in file:
   endif()
 endfunction()
 
-set(_check
+function(set_with_libsystem var)
+  set(_tmp "${ARGN}")
+  if(EXISTS "/usr/lib/libSystem.B.dylib")
+    list(APPEND _tmp [[/usr/lib/libSystem\.B\.dylib]])
+  endif()
+  set("${var}" "${_tmp}" PARENT_SCOPE)
+endfunction()
+
+set_with_libsystem(_check
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/bin/../lib/executable_path/libexecutable_path\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/bin/../lib/rpath_executable_path/librpath_executable_path\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/libtestlib\.dylib]]
@@ -24,7 +32,6 @@ set(_check
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/../rpath/librpath\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/libnormal\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/rpath_loader_path/librpath_loader_path\.dylib]]
-  [[/usr/lib/libSystem\.B\.dylib]]
   )
 check_contents(deps/deps1.txt "^${_check}$")
 
@@ -37,13 +44,12 @@ set(_check
   )
 check_contents(deps/udeps1.txt "^${_check}$")
 
-set(_check
+set_with_libsystem(_check
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/libtestlib\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/loader_path/libloader_path\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/../rpath/librpath\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/libnormal\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/rpath_loader_path/librpath_loader_path\.dylib]]
-  [[/usr/lib/libSystem\.B\.dylib]]
   )
 check_contents(deps/deps2.txt "^${_check}$")
 
@@ -60,13 +66,12 @@ set(_check
   )
 check_contents(deps/udeps2.txt "^${_check}$")
 
-set(_check
+set_with_libsystem(_check
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/libtestlib\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/loader_path/libloader_path\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/../rpath/librpath\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/libnormal\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/rpath_loader_path/librpath_loader_path\.dylib]]
-  [[/usr/lib/libSystem\.B\.dylib]]
   )
 check_contents(deps/deps3.txt "^${_check}$")
 
@@ -83,7 +88,7 @@ set(_check
   )
 check_contents(deps/udeps3.txt "^${_check}$")
 
-set(_check
+set_with_libsystem(_check
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/bin/../lib/executable_path/libexecutable_path\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/bin/../lib/rpath_executable_path/librpath_executable_path\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/libtestlib\.dylib]]
@@ -91,7 +96,6 @@ set(_check
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/../rpath/librpath\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/libnormal\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/rpath_loader_path/librpath_loader_path\.dylib]]
-  [[/usr/lib/libSystem\.B\.dylib]]
   )
 check_contents(deps/deps4.txt "^${_check}$")
 
@@ -104,14 +108,13 @@ set(_check
   )
 check_contents(deps/udeps4.txt "^${_check}$")
 
-set(_check
+set_with_libsystem(_check
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/bundle_executable/bin/../lib/executable_path_bundle/libexecutable_path_bundle\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/libtestlib\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/loader_path/libloader_path\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/../rpath/librpath\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/libnormal\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/rpath_loader_path/librpath_loader_path\.dylib]]
-  [[/usr/lib/libSystem\.B\.dylib]]
   )
 check_contents(deps/deps5.txt "^${_check}$")
 
@@ -125,14 +128,13 @@ set(_check
   )
 check_contents(deps/udeps5.txt "^${_check}$")
 
-set(_check
+set_with_libsystem(_check
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/bundle_executable/bin/../lib/executable_path_bundle/libexecutable_path_bundle\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/libtestlib\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/loader_path/libloader_path\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/../rpath/librpath\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/normal/libnormal\.dylib]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/macos-build/root-all/executable/lib/rpath_loader_path/librpath_loader_path\.dylib]]
-  [[/usr/lib/libSystem\.B\.dylib]]
   )
 check_contents(deps/deps6.txt "^${_check}$")
 
