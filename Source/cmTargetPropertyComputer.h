@@ -35,12 +35,6 @@ public:
     return nullptr;
   }
 
-  static bool WhiteListedInterfaceProperty(const std::string& prop);
-
-  static bool PassesWhitelist(cmStateEnums::TargetType tgtType,
-                              std::string const& prop, cmMessenger* messenger,
-                              cmListFileBacktrace const& context);
-
 private:
   static bool HandleLocationPropertyPolicy(std::string const& tgtName,
                                            cmMessenger* messenger,

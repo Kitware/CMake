@@ -1144,11 +1144,6 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
 
 void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
-  if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, impl->Makefile->GetMessenger(),
-        impl->Makefile->GetBacktrace())) {
-    return;
-  }
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(C_STANDARD);
   MAKE_STATIC_PROP(CXX_STANDARD);
@@ -1355,11 +1350,6 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
 void cmTarget::AppendProperty(const std::string& prop,
                               const std::string& value, bool asString)
 {
-  if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, impl->Makefile->GetMessenger(),
-        impl->Makefile->GetBacktrace())) {
-    return;
-  }
   if (prop == "NAME") {
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  "NAME property is read-only\n");

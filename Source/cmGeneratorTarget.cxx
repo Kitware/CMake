@@ -380,11 +380,6 @@ std::string cmGeneratorTarget::GetExportName() const
 
 cmProp cmGeneratorTarget::GetProperty(const std::string& prop) const
 {
-  if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, this->Makefile->GetMessenger(),
-        this->GetBacktrace())) {
-    return nullptr;
-  }
   if (cmProp result = cmTargetPropertyComputer::GetProperty(
         this, prop, this->Makefile->GetMessenger(), this->GetBacktrace())) {
     return result;

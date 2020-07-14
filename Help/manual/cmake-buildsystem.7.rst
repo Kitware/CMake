@@ -975,19 +975,6 @@ This way, the build specification of ``exe1`` is expressed entirely as linked
 targets, and the complexity of compiler-specific flags is encapsulated in an
 ``INTERFACE`` library target.
 
-The properties permitted to be set on or read from an ``INTERFACE`` library
-are:
-
-* Properties matching ``INTERFACE_*``
-* Built-in properties matching ``COMPATIBLE_INTERFACE_*``
-* ``EXPORT_NAME``
-* ``EXPORT_PROPERTIES``
-* ``IMPORTED``
-* ``MANUALLY_ADDED_DEPENDENCIES``
-* ``NAME``
-* Properties matching ``IMPORTED_LIBNAME_*``
-* Properties matching ``MAP_IMPORTED_CONFIG_*``
-
 ``INTERFACE`` libraries may be installed and exported.  Any content they refer
 to must be installed separately:
 
