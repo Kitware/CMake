@@ -261,6 +261,25 @@ function(check_get_property_value expected)
     endif()
 endfunction()
 
+# Check that source file directory scopes are deduplicated.
+set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/src32.cpp"
+    DIRECTORY SubDir2 SubDir2 SubDir2
+    TARGET_DIRECTORY set_prop_lib_3 set_prop_lib_3 set_prop_lib_3
+    APPEND
+    PROPERTY NON_DUPLICATED_CUSTOM_PROP 1
+)
+
+get_property(actual
+             SOURCE "${CMAKE_CURRENT_BINARY_DIR}/src32.cpp"
+             DIRECTORY SubDir2
+             PROPERTY NON_DUPLICATED_CUSTOM_PROP)
+check_get_property_value("1")
+
+get_source_file_property(actual "${CMAKE_CURRENT_BINARY_DIR}/src32.cpp"
+                         TARGET_DIRECTORY set_prop_lib_3
+                         NON_DUPLICATED_CUSTOM_PROP)
+check_get_property_value("1")
+
 # Get property + target directory
 get_property(actual
              SOURCE "${src_prefix}/src1.cpp"

@@ -4,6 +4,7 @@
 
 #include <set>
 #include <sstream>
+#include <unordered_set>
 
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
@@ -82,6 +83,8 @@ bool HandleSourceFileDirectoryScopes(
   std::vector<std::string>& source_file_target_directories,
   std::vector<cmMakefile*>& directory_makefiles)
 {
+  std::unordered_set<cmMakefile*> directory_makefiles_set;
+
   cmMakefile* current_dir_mf = &status.GetMakefile();
   if (!source_file_directories.empty()) {
     for (const std::string& dir_path : source_file_directories) {
@@ -94,7 +97,11 @@ bool HandleSourceFileDirectoryScopes(
         status.SetError(cmStrCat("given non-existent DIRECTORY ", dir_path));
         return false;
       }
-      directory_makefiles.push_back(dir_mf);
+      if (directory_makefiles_set.find(dir_mf) ==
+          directory_makefiles_set.end()) {
+        directory_makefiles.push_back(dir_mf);
+        directory_makefiles_set.insert(dir_mf);
+      }
     }
   }
 
@@ -110,7 +117,12 @@ bool HandleSourceFileDirectoryScopes(
       cmMakefile* target_dir_mf =
         status.GetMakefile().GetGlobalGenerator()->FindMakefile(
           *target_source_dir);
-      directory_makefiles.push_back(target_dir_mf);
+
+      if (directory_makefiles_set.find(target_dir_mf) ==
+          directory_makefiles_set.end()) {
+        directory_makefiles.push_back(target_dir_mf);
+        directory_makefiles_set.insert(target_dir_mf);
+      }
     }
   }
 
