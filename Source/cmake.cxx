@@ -1390,8 +1390,13 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     save.key = *i;
     warning << *i << "= ";
     i++;
-    save.value = *i;
-    warning << *i << "\n";
+    if (i != argsSplit.end()) {
+      save.value = *i;
+      warning << *i << "\n";
+    } else {
+      warning << "\n";
+      i -= 1;
+    }
     cmProp existingValue = this->State->GetCacheEntryValue(save.key);
     if (existingValue) {
       save.type = this->State->GetCacheEntryType(save.key);
