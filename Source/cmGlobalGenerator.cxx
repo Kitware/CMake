@@ -235,6 +235,14 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
   }
   cmProp cname =
     this->GetCMakeInstance()->GetState()->GetInitializedCacheValue(langComp);
+
+  // Split compiler from arguments
+  std::vector<std::string> cnameArgVec;
+  if (cname && !cname->empty()) {
+    cmExpandList(*cname, cnameArgVec);
+    cname = &cnameArgVec.front();
+  }
+
   std::string changeVars;
   if (cname && !optional) {
     std::string cnameString;
