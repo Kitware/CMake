@@ -41,7 +41,7 @@ else()
       if($ENV{${var}} MATCHES ".+")
         get_filename_component(CMAKE_OBJCXX_COMPILER_INIT $ENV{${var}} PROGRAM PROGRAM_ARGS CMAKE_OBJCXX_FLAGS_ENV_INIT)
         if(CMAKE_OBJCXX_FLAGS_ENV_INIT)
-          set(CMAKE_OBJCXX_COMPILER_ARG1 "${CMAKE_OBJCXX_FLAGS_ENV_INIT}" CACHE STRING "First argument to Objective-C++ compiler")
+          set(CMAKE_OBJCXX_COMPILER_ARG1 "${CMAKE_OBJCXX_FLAGS_ENV_INIT}" CACHE STRING "Arguments to Objective-C++ compiler")
         endif()
         if(NOT EXISTS ${CMAKE_OBJCXX_COMPILER_INIT})
           message(FATAL_ERROR "Could not find compiler set in environment variable ${var}:\n  $ENV{${var}}")
@@ -67,14 +67,11 @@ else()
   else()
     # we only get here if CMAKE_OBJCXX_COMPILER was specified using -D or a pre-made CMakeCache.txt
     # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
-    # if CMAKE_OBJCXX_COMPILER is a list of length 2, use the first item as
-    # CMAKE_OBJCXX_COMPILER and the 2nd one as CMAKE_OBJCXX_COMPILER_ARG1
-
-    list(LENGTH CMAKE_OBJCXX_COMPILER _CMAKE_OBJCXX_COMPILER_LIST_LENGTH)
-    if("${_CMAKE_OBJCXX_COMPILER_LIST_LENGTH}" EQUAL 2)
-      list(GET CMAKE_OBJCXX_COMPILER 1 CMAKE_OBJCXX_COMPILER_ARG1)
-      list(GET CMAKE_OBJCXX_COMPILER 0 CMAKE_OBJCXX_COMPILER)
-    endif()
+    # if CMAKE_OBJCXX_COMPILER is a list, use the first item as
+    # CMAKE_OBJCXX_COMPILER and the rest as CMAKE_OBJCXX_COMPILER_ARG1
+    set(CMAKE_OBJCXX_COMPILER_ARG1 "${CMAKE_OBJCXX_COMPILER}")
+    list(POP_FRONT CMAKE_OBJCXX_COMPILER_ARG1 CMAKE_OBJCXX_COMPILER)
+    list(JOIN CMAKE_OBJCXX_COMPILER_ARG1 " " CMAKE_OBJCXX_COMPILER_ARG1)
 
     # if a compiler was specified by the user but without path,
     # now try to find it with the full path

@@ -107,14 +107,11 @@ macro(_cmake_find_compiler_path lang)
   if(CMAKE_${lang}_COMPILER)
     # we only get here if CMAKE_${lang}_COMPILER was specified using -D or a pre-made CMakeCache.txt
     # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
-    # if CMAKE_${lang}_COMPILER is a list of length 2, use the first item as
-    # CMAKE_${lang}_COMPILER and the 2nd one as CMAKE_${lang}_COMPILER_ARG1
-    list(LENGTH CMAKE_${lang}_COMPILER _CMAKE_${lang}_COMPILER_LIST_LENGTH)
-    if("${_CMAKE_${lang}_COMPILER_LIST_LENGTH}" EQUAL 2)
-      list(GET CMAKE_${lang}_COMPILER 1 CMAKE_${lang}_COMPILER_ARG1)
-      list(GET CMAKE_${lang}_COMPILER 0 CMAKE_${lang}_COMPILER)
-    endif()
-    unset(_CMAKE_${lang}_COMPILER_LIST_LENGTH)
+    # if CMAKE_${lang}_COMPILER is a list, use the first item as
+    # CMAKE_${lang}_COMPILER and the rest as CMAKE_${lang}_COMPILER_ARG1
+    set(CMAKE_${lang}_COMPILER_ARG1 "${CMAKE_${lang}_COMPILER}")
+    list(POP_FRONT CMAKE_${lang}_COMPILER_ARG1 CMAKE_${lang}_COMPILER)
+    list(JOIN CMAKE_${lang}_COMPILER_ARG1 " " CMAKE_${lang}_COMPILER_ARG1)
 
     # find the compiler in the PATH if necessary
     get_filename_component(_CMAKE_USER_${lang}_COMPILER_PATH "${CMAKE_${lang}_COMPILER}" PATH)
