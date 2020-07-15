@@ -70,7 +70,7 @@ struct StanardLevelComputer
     if (existingStandard == nullptr) {
       cmProp defaultStandard = makefile->GetDef(
         cmStrCat("CMAKE_", this->Language, "_STANDARD_DEFAULT"));
-      if (defaultStandard && !defaultStandard->empty()) {
+      if (cmNonempty(defaultStandard)) {
         existingStandard = defaultStandard;
       }
     }

@@ -1610,7 +1610,7 @@ void cmQtAutoGenInitializer::AddToSourceGroup(std::string const& fileName,
       };
       for (std::string const& prop : props) {
         cmProp propName = this->Makefile->GetState()->GetGlobalProperty(prop);
-        if (propName && !propName->empty()) {
+        if (cmNonempty(propName)) {
           groupName = *propName;
           property = prop;
           break;

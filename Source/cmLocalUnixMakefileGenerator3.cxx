@@ -950,7 +950,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       std::string launcher;
       // Short-circuit if there is no launcher.
       const char* val = this->GetRuleLauncher(target, "RULE_LAUNCH_CUSTOM");
-      if (val && *val) {
+      if (cmNonempty(val)) {
         // Expand rule variables referenced in the given launcher command.
         cmRulePlaceholderExpander::RuleVariables vars;
         vars.CMTargetName = target->GetName().c_str();

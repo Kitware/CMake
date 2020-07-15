@@ -20,6 +20,20 @@
 /** String range type.  */
 using cmStringRange = cmRange<std::vector<std::string>::const_iterator>;
 
+/** Check for non-empty string.  */
+inline bool cmNonempty(const char* str)
+{
+  return str && *str;
+}
+inline bool cmNonempty(cm::string_view str)
+{
+  return !str.empty();
+}
+inline bool cmNonempty(std::string const* str)
+{
+  return str && !str->empty();
+}
+
 /** Callable string comparison struct.  */
 struct cmStrCmp
 {

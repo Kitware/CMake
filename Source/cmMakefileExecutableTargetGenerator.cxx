@@ -218,7 +218,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 
@@ -583,7 +583,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 
