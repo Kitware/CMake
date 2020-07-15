@@ -380,8 +380,7 @@ const char* cmSourceFile::GetSafeProperty(const std::string& prop) const
 
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 {
-  cmProp p = this->GetProperty(prop);
-  return p && cmIsOn(*p);
+  return cmIsOn(this->GetProperty(prop));
 }
 
 void cmSourceFile::SetProperties(cmPropertyMap properties)

@@ -130,7 +130,7 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
     this->LinkerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
   }
 
-  if (std::string const* appleArchSysroots =
+  if (cmProp appleArchSysroots =
         this->Makefile->GetDef("CMAKE_APPLE_ARCH_SYSROOTS")) {
     std::string const& appleArchs =
       this->Makefile->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES");
@@ -1543,9 +1543,8 @@ void cmLocalGenerator::GetTargetFlags(
                                   frameworkPath, linkPath);
       }
 
-      if (cmIsOn(this->Makefile->GetDefinition("BUILD_SHARED_LIBS"))) {
-        std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") +
-          linkLanguage + std::string("_FLAGS");
+      if (this->Makefile->IsOn("BUILD_SHARED_LIBS")) {
+        std::string sFlagVar = "CMAKE_SHARED_BUILD_" + linkLanguage + "_FLAGS";
         exeFlags += this->Makefile->GetSafeDefinition(sFlagVar);
         exeFlags += " ";
       }

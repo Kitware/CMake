@@ -1166,9 +1166,9 @@ void cmFindPackageCommand::AppendSuccessInformation()
   std::string found = cmStrCat(this->Name, "_FOUND");
   std::string upperFound = cmSystemTools::UpperCase(found);
 
-  const char* upperResult = this->Makefile->GetDefinition(upperFound);
-  const char* result = this->Makefile->GetDefinition(found);
-  bool packageFound = ((cmIsOn(result)) || (cmIsOn(upperResult)));
+  bool upperResult = this->Makefile->IsOn(upperFound);
+  bool result = this->Makefile->IsOn(found);
+  bool packageFound = (result || upperResult);
 
   this->AppendToFoundProperty(packageFound);
 
