@@ -14,8 +14,10 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # Make sure user-specified compiler flags are used.
   if(CMAKE_${lang}_FLAGS)
     set(CMAKE_${lang}_COMPILER_ID_FLAGS ${CMAKE_${lang}_FLAGS})
-  else()
+  elseif(DEFINED ENV{${flagvar}})
     set(CMAKE_${lang}_COMPILER_ID_FLAGS $ENV{${flagvar}})
+  else(CMAKE_${lang}_FLAGS_INIT)
+    set(CMAKE_${lang}_COMPILER_ID_FLAGS ${CMAKE_${lang}_FLAGS_INIT})
   endif()
   string(REPLACE " " ";" CMAKE_${lang}_COMPILER_ID_FLAGS_LIST "${CMAKE_${lang}_COMPILER_ID_FLAGS}")
 
