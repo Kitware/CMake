@@ -318,3 +318,17 @@ Other Changes
 
 * The :manual:`cmake-file-api(7)` "codemodel" version 2 "target" object gained
   a new ``precompileHeaders`` field in the ``compileGroups`` objects.
+
+Updates
+=======
+
+Changes made since CMake 3.18.0 include the following.
+
+3.18.1
+------
+
+* The :generator:`Xcode` generator, when :variable:`CMAKE_OSX_ARCHITECTURES`
+  is not defined, now selects ``$(NATIVE_ARCH_ACTUAL)`` as the default
+  architecture (the Xcode ``ARCHS`` setting).  This is needed for Xcode 12
+  to select the host's architecture, which older versions of Xcode did
+  by default.
