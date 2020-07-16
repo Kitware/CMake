@@ -3158,6 +3158,12 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   std::string symroot = cmStrCat(root->GetCurrentBinaryDirectory(), "/build");
   buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot));
 
+  // Inside a try_compile project, do not require signing on any platform.
+  if (this->CMakeInstance->GetIsInTryCompile()) {
+    buildSettings->AddAttribute("CODE_SIGNING_ALLOWED",
+                                this->CreateString("NO"));
+  }
+
   for (auto& config : configs) {
     cmXCodeObject* buildSettingsForCfg = this->CreateFlatClone(buildSettings);
 
