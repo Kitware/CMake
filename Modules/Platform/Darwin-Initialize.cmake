@@ -72,35 +72,26 @@ elseif("${CMAKE_GENERATOR}" MATCHES Xcode
   endif()
 
   if(_CMAKE_OSX_SDKS_DIR)
-    # Select SDK for current OSX version accounting for the known
-    # specially named SDKs.
-    set(_CMAKE_OSX_SDKS_VER_SUFFIX_10.4 "u")
-    set(_CMAKE_OSX_SDKS_VER_SUFFIX_10.3 ".9")
-
-    # find the latest SDK
+    # Find the latest SDK as recommended by Apple (Technical Q&A QA1806)
     set(_CMAKE_OSX_LATEST_SDK_VERSION "0.0")
     file(GLOB _CMAKE_OSX_SDKS RELATIVE "${_CMAKE_OSX_SDKS_DIR}" "${_CMAKE_OSX_SDKS_DIR}/MacOSX*.sdk")
     foreach(_SDK ${_CMAKE_OSX_SDKS})
-      if(_SDK MATCHES "MacOSX([0-9]+\\.[0-9]+)[^/]*\\.sdk" AND CMAKE_MATCH_1 VERSION_GREATER ${_CMAKE_OSX_LATEST_SDK_VERSION})
+      if(IS_DIRECTORY "${_CMAKE_OSX_SDKS_DIR}/${_SDK}"
+         AND _SDK MATCHES "MacOSX([0-9]+\\.[0-9]+)[^/]*\\.sdk"
+         AND CMAKE_MATCH_1 VERSION_GREATER ${_CMAKE_OSX_LATEST_SDK_VERSION})
         set(_CMAKE_OSX_LATEST_SDK_VERSION "${CMAKE_MATCH_1}")
       endif()
     endforeach()
 
-    # pick an SDK that works
-    set(_CMAKE_OSX_SYSROOT_DEFAULT)
-    foreach(_ver ${CMAKE_OSX_DEPLOYMENT_TARGET}
-                 ${_CURRENT_OSX_VERSION}
-                 ${_CMAKE_OSX_LATEST_SDK_VERSION})
-      set(_CMAKE_OSX_DEPLOYMENT_TARGET ${_ver})
-      set(_CMAKE_OSX_SDKS_VER ${_CMAKE_OSX_DEPLOYMENT_TARGET}${_CMAKE_OSX_SDKS_VER_SUFFIX_${_CMAKE_OSX_DEPLOYMENT_TARGET}})
-      set(_CMAKE_OSX_SYSROOT_CHECK "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_SDKS_VER}.sdk")
-      if(IS_DIRECTORY "${_CMAKE_OSX_SYSROOT_CHECK}")
-        set(_CMAKE_OSX_SYSROOT_DEFAULT "${_CMAKE_OSX_SYSROOT_CHECK}")
-        break()
-      endif()
-    endforeach()
+    if(NOT _CMAKE_OSX_LATEST_SDK_VERSION STREQUAL "0.0")
+      set(_CMAKE_OSX_SYSROOT_DEFAULT "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_LATEST_SDK_VERSION}.sdk")
+    else()
+      message(WARNING "Could not find any valid SDKs in ${_CMAKE_OSX_SDKS_DIR}")
+    endif()
 
-    if(NOT CMAKE_CROSSCOMPILING AND NOT CMAKE_OSX_DEPLOYMENT_TARGET AND _CURRENT_OSX_VERSION VERSION_LESS _CMAKE_OSX_DEPLOYMENT_TARGET)
+    if(NOT CMAKE_CROSSCOMPILING AND NOT CMAKE_OSX_DEPLOYMENT_TARGET
+       AND (_CURRENT_OSX_VERSION VERSION_LESS _CMAKE_OSX_LATEST_SDK_VERSION
+            OR _CMAKE_OSX_LATEST_SDK_VERSION STREQUAL "0.0"))
       set(CMAKE_OSX_DEPLOYMENT_TARGET ${_CURRENT_OSX_VERSION} CACHE STRING
         "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value." FORCE)
     endif()
