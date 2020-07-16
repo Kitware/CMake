@@ -109,6 +109,7 @@ public:
 
   bool ShouldStripResourcePath(cmMakefile*) const override;
 
+  bool SetSystemName(std::string const& s, cmMakefile* mf) override;
   bool SetGeneratorToolset(std::string const& ts, bool build,
                            cmMakefile* mf) override;
   void AppendFlag(std::string& flags, std::string const& flag) const;
@@ -298,6 +299,7 @@ private:
   std::vector<std::string> Architectures;
   std::string ObjectDirArchDefault;
   std::string ObjectDirArch;
+  std::string SystemName;
   std::string GeneratorToolset;
   std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
 };

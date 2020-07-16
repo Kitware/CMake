@@ -271,6 +271,13 @@ std::string cmGlobalXCodeGenerator::FindXcodeBuildCommand()
   return makeProgram;
 }
 
+bool cmGlobalXCodeGenerator::SetSystemName(std::string const& s,
+                                           cmMakefile* mf)
+{
+  this->SystemName = s;
+  return this->cmGlobalGenerator::SetSystemName(s, mf);
+}
+
 bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
                                                  bool build, cmMakefile* mf)
 {
