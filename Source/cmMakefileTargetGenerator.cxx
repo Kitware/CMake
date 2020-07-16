@@ -734,7 +734,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   // ability to export compile commands
   bool lang_has_preprocessor =
     ((lang == "C") || (lang == "CXX") || (lang == "OBJC") ||
-     (lang == "OBJCXX") || (lang == "Fortran") || (lang == "CUDA"));
+     (lang == "OBJCXX") || (lang == "Fortran") || (lang == "CUDA") ||
+     lang == "ISPC");
   bool const lang_has_assembly = lang_has_preprocessor;
   bool const lang_can_export_cmds = lang_has_preprocessor;
 

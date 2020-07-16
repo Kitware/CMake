@@ -192,6 +192,8 @@ SETUP_LANGUAGE(objc_properties, OBJC);
 // NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
 SETUP_LANGUAGE(objcxx_properties, OBJCXX);
 // NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
+SETUP_LANGUAGE(ispc_properties, ISPC);
+// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
 SETUP_LANGUAGE(swift_properties, Swift);
 #undef SETUP_LANGUAGE
 
@@ -499,6 +501,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       }
     }
 
+    // when the only language is ISPC we know that the output
+    // type must by a static library
+    if (testLangs.size() == 1 && testLangs.count("ISPC") == 1) {
+      targetType = cmStateEnums::STATIC_LIBRARY;
+    }
+
     std::string const tcConfig =
       this->Makefile->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
 
@@ -702,6 +710,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(
         &objcxx_properties[lang_property_start],
         &objcxx_properties[lang_property_start + lang_property_size]);
+      vars.insert(&ispc_properties[lang_property_start],
+                  &ispc_properties[lang_property_start + lang_property_size]);
       vars.insert(&swift_properties[lang_property_start],
                   &swift_properties[lang_property_start + lang_property_size]);
       vars.insert(kCMAKE_CUDA_ARCHITECTURES);
@@ -744,6 +754,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         vars.insert(
           &objcxx_properties[pie_property_start],
           &objcxx_properties[pie_property_start + pie_property_size]);
+        vars.insert(&ispc_properties[pie_property_start],
+                    &ispc_properties[pie_property_start + pie_property_size]);
         vars.insert(&swift_properties[pie_property_start],
                     &swift_properties[pie_property_start + pie_property_size]);
       }

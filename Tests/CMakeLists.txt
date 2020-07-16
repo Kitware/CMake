@@ -1479,6 +1479,10 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     add_subdirectory(CudaOnly)
   endif()
 
+  if(CMake_TEST_ISPC)
+    add_subdirectory(ISPC)
+  endif()
+
   if(CMake_TEST_FindGTest)
     add_subdirectory(FindGTest)
     add_subdirectory(GoogleTest)
