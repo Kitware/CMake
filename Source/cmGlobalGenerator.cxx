@@ -2173,13 +2173,38 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 }
 
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
-                                   cmGeneratorTarget* target) const
+                                   const cmGeneratorTarget* target) const
 {
   if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     return true;
   }
-  if (cmProp exclude = target->GetProperty("EXCLUDE_FROM_ALL")) {
-    return cmIsOn(*exclude);
+  cmMakefile* mf = root->GetMakefile();
+  const std::string EXCLUDE_FROM_ALL = "EXCLUDE_FROM_ALL";
+  if (cmProp exclude = target->GetProperty(EXCLUDE_FROM_ALL)) {
+    // Expand the property value per configuration.
+    unsigned int trueCount = 0;
+    unsigned int falseCount = 0;
+    const std::vector<std::string>& configs =
+      mf->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+    for (const std::string& config : configs) {
+      cmGeneratorExpressionInterpreter genexInterpreter(root, config, target);
+      if (cmIsOn(genexInterpreter.Evaluate(*exclude, EXCLUDE_FROM_ALL))) {
+        ++trueCount;
+      } else {
+        ++falseCount;
+      }
+    }
+
+    // Check whether the genex expansion of the property agrees in all
+    // configurations.
+    if (trueCount && falseCount) {
+      std::ostringstream e;
+      e << "The EXCLUDED_FROM_ALL property of target \"" << target->GetName()
+        << "\" varies by configuration. This is not supported by the \""
+        << root->GetGlobalGenerator()->GetName() << "\" generator.";
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    }
+    return trueCount;
   }
   // This target is included in its directory.  Check whether the
   // directory is excluded.

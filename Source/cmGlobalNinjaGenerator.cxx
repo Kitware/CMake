@@ -1357,7 +1357,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       build.Outputs.front() = this->BuildAlias(buildDirAllTarget, config);
       configDeps.emplace_back(build.Outputs.front());
       for (DirectoryTarget::Target const& t : dt.Targets) {
-        if (!t.ExcludeFromAll) {
+        if (!IsExcludedFromAllInConfig(t, config)) {
           this->AppendTargetOutputs(t.GT, build.ExplicitDeps, config);
         }
       }

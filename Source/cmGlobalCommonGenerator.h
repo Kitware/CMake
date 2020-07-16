@@ -30,7 +30,7 @@ public:
     struct Target
     {
       cmGeneratorTarget const* GT = nullptr;
-      bool ExcludeFromAll = false;
+      std::vector<std::string> ExcludedFromAllInConfigs;
     };
     std::vector<Target> Targets;
     struct Dir
@@ -41,6 +41,8 @@ public:
     std::vector<Dir> Children;
   };
   std::map<std::string, DirectoryTarget> ComputeDirectoryTargets() const;
+  bool IsExcludedFromAllInConfig(const DirectoryTarget::Target& t,
+                                 const std::string& config);
 };
 
 #endif
