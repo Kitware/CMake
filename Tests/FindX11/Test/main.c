@@ -308,6 +308,24 @@ static int test_Xv(void)
 }
 #endif
 
+#ifdef HAVE_X11_Xaw
+#  include <X11/Intrinsic.h>
+#  include <X11/Xaw/Box.h>
+
+static void test_Xaw(void)
+{
+  XrmOptionDescRec opt_table[] = { { NULL } };
+
+  Widget toplevel;
+  toplevel =
+    XtInitialize("test", "test", opt_table, XtNumber(opt_table), NULL, NULL);
+  Widget box =
+    XtCreateManagedWidget("testbox", boxWidgetClass, toplevel, NULL, 0);
+  return;
+}
+
+#endif
+
 #include <stddef.h>
 
 int main(int argc, char* argv[])
@@ -391,6 +409,9 @@ int main(int argc, char* argv[])
 #endif
 #ifdef HAVE_X11_Xv
     test_Xv,
+#endif
+#ifdef HAVE_X11_Xaw
+    test_Xaw,
 #endif
     NULL,
   };
