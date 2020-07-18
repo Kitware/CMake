@@ -1476,8 +1476,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     }
 
     if (isInterfaceProperty) {
-      return target->EvaluateInterfaceProperty(propertyName, context,
-                                               dagCheckerParent);
+      return cmGeneratorExpression::StripEmptyListElements(
+        target->EvaluateInterfaceProperty(propertyName, context,
+                                          dagCheckerParent));
     }
 
     cmGeneratorExpressionDAGChecker dagChecker(
@@ -1563,8 +1564,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     }
 
     if (!interfacePropertyName.empty()) {
-      result = this->EvaluateDependentExpression(result, context->LG, context,
-                                                 target, &dagChecker, target);
+      result = cmGeneratorExpression::StripEmptyListElements(
+        this->EvaluateDependentExpression(result, context->LG, context, target,
+                                          &dagChecker, target));
       std::string linkedTargetsContent = getLinkedTargetsContent(
         target, interfacePropertyName, context, &dagChecker);
       if (!linkedTargetsContent.empty()) {
