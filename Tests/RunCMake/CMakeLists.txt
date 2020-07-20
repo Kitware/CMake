@@ -624,6 +624,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   set_property(TEST RunCMake.CompilerLauncher APPEND
     PROPERTY LABELS "CUDA")
   add_RunCMake_test(ctest_labels_for_subprojects)
+  add_RunCMake_test(CompilerArgs)
 endif()
 
 set(cpack_tests
