@@ -13,8 +13,10 @@
 #  include <string>
 #  include <utility>
 #  include <vector>
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
 #    include <cctype>
+#  endif
+#  if defined(_WIN32) || defined(__CYGWIN__)
 #    include <iterator>
 #  endif
 
@@ -396,7 +398,7 @@ private:
   pointer consume_root_name(pointer ptr, pointer end,
                             bool check_only = false) noexcept
   {
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
     if (ptr < end) {
       if ((end - ptr) >= 2 && this->is_drive_name(ptr)) {
         // Drive letter (X:) is a root name
@@ -409,7 +411,8 @@ private:
           (ptr[1] == '/' || ptr[1] == '\\') &&
           (ptr[2] != '/' && ptr[2] != '\\')) {
         // server name (//server) is a root name
-        auto pos = std::find(ptr + 2, end, '/');
+        auto pos = std::find_if(ptr + 2, end,
+                                [](char c) { return c == '/' || c == '\\'; });
         if (!check_only) {
           this->Entry = cm::string_view(ptr, pos - ptr);
         }
@@ -430,6 +433,31 @@ private:
                                 [](char c) { return c == '/' || c == '\\'; });
         pointer pos = res.base() - 1;
         if ((pos - 1) > end && (pos[-1] == '/' || pos[-1] == '\\')) {
+          // server name (//server) is a root name
+          if (!check_only) {
+            this->Entry = cm::string_view(pos - 1, ptr - pos + 2);
+          }
+          return pos - 2;
+        }
+      }
+    }
+#  elif defined(__CYGWIN__)
+    if (ptr < end) {
+      if ((end - ptr) > 2 && ptr[0] == '/' && ptr[1] == '/' && ptr[2] != '/') {
+        // server name (//server) is a root name
+        auto pos = std::find(ptr + 2, end, '/');
+        if (!check_only) {
+          this->Entry = cm::string_view(ptr, pos - ptr);
+        }
+        return pos;
+      }
+    } else {
+      if ((ptr - end) > 2 && ptr[0] != '/') {
+        std::reverse_iterator<pointer> start(ptr);
+        std::reverse_iterator<pointer> stop(end);
+        auto res = std::find(start, stop, '/');
+        pointer pos = res.base() - 1;
+        if ((pos - 1) > end && pos[-1] == '/') {
           // server name (//server) is a root name
           if (!check_only) {
             this->Entry = cm::string_view(pos - 1, ptr - pos + 2);
@@ -514,13 +542,25 @@ path& path::operator/=(const path& p)
     this->path_ += static_cast<std::string>(p.get_root_directory());
   } else if (this->has_filename()) {
     this->path_ += this->preferred_separator;
-#  if defined(_WIN32)
+#  if defined(_WIN32) || defined(__CYGWIN__)
     // special case: "//host" / "b" => "//host/b"
   } else if (this->has_root_name() && !this->has_root_directory()) {
     if (this->path_.length() >= 3 &&
-        (this->path_[0] == '/' || this->path_[0] == '\\') &&
-        (this->path_[1] == '/' || this->path_[1] == '\\') &&
-        (this->path_[2] != '/' || this->path_[2] != '\\')) {
+        (this->path_[0] == '/'
+#    if defined(_WIN32) && !defined(__CYGWIN__)
+         || this->path_[0] == '\\'
+#    endif
+         ) &&
+        (this->path_[1] == '/'
+#    if defined(_WIN32) && !defined(__CYGWIN__)
+         || this->path_[1] == '\\'
+#    endif
+         ) &&
+        (this->path_[2] != '/'
+#    if defined(_WIN32) && !defined(__CYGWIN__)
+         && this->path_[2] != '\\'
+#    endif
+         )) {
       this->path_ += this->preferred_separator;
     }
 #  endif
@@ -644,7 +684,7 @@ path path::lexically_relative(const path& base) const
   }
 
   auto is_path_absolute = [](cm::string_view rn, cm::string_view rd) -> bool {
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
     return !rn.empty() && !rd.empty();
 #  else
     (void)rn;
@@ -659,7 +699,7 @@ path path::lexically_relative(const path& base) const
     return path();
   }
 
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
   // LWG3070 handle special case: filename can also be a root-name
   auto is_drive_name = [](cm::string_view item) -> bool {
     return item.length() == 2 && item[1] == ':';
@@ -724,7 +764,7 @@ path::path_type path::get_generic() const
 {
   auto gen_path = this->path_;
   auto start = gen_path.begin();
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
   std::replace(gen_path.begin(), gen_path.end(), '\\', '/');
   // preserve special syntax for root_name ('//server' or '//?')
   if (gen_path.length() > 2 && gen_path[2] != '/') {
