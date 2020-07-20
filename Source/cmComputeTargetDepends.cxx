@@ -184,7 +184,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 {
   // Get the depender.
   cmGeneratorTarget const* depender = this->Targets[depender_index];
-  if (depender->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!depender->IsInBuildSystem()) {
     return;
   }
 
@@ -356,10 +356,9 @@ void cmComputeTargetDepends::AddTargetDepend(
   int depender_index, cmGeneratorTarget const* dependee,
   cmListFileBacktrace const& dependee_backtrace, bool linking, bool cross)
 {
-  if (dependee->IsImported() ||
-      dependee->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-    // Skip IMPORTED and INTERFACE targets but follow their utility
-    // dependencies.
+  if (!dependee->IsInBuildSystem()) {
+    // Skip targets that are not in the buildsystem but follow their
+    // utility dependencies.
     std::set<cmLinkItem> const& utils = dependee->GetUtilityItems();
     for (cmLinkItem const& i : utils) {
       if (cmGeneratorTarget const* transitive_dependee = i.Target) {

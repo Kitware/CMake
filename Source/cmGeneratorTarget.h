@@ -45,6 +45,7 @@ public:
 
   cmGlobalGenerator* GetGlobalGenerator() const;
 
+  bool IsInBuildSystem() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   const std::string& GetLocation(const std::string& config) const;

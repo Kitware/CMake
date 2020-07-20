@@ -2165,7 +2165,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    const cmGeneratorTarget* target) const
 {
-  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!target->IsInBuildSystem()) {
     return true;
   }
   cmMakefile* mf = root->GetMakefile();
@@ -3054,7 +3054,7 @@ void cmGlobalGenerator::WriteSummary()
 
   for (const auto& lg : this->LocalGenerators) {
     for (const auto& tgt : lg->GetGeneratorTargets()) {
-      if (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      if (!tgt->IsInBuildSystem()) {
         continue;
       }
       this->WriteSummary(tgt.get());

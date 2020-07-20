@@ -1199,7 +1199,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     return true;
   }
 
-  if (gtgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!gtgt->IsInBuildSystem()) {
     return true;
   }
 
@@ -1845,7 +1845,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                                  cmXCodeObject* buildSettings,
                                                  const std::string& configName)
 {
-  if (gtgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!gtgt->IsInBuildSystem()) {
     return;
   }
 
@@ -2678,7 +2678,7 @@ const char* cmGlobalXCodeGenerator::GetTargetProductType(
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeTarget(
   cmGeneratorTarget* gtgt, cmXCodeObject* buildPhases)
 {
-  if (gtgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!gtgt->IsInBuildSystem()) {
     return nullptr;
   }
   cmXCodeObject* target = this->CreateObject(cmXCodeObject::PBXNativeTarget);
@@ -2821,7 +2821,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     cmSystemTools::Error("Error no target on xobject\n");
     return;
   }
-  if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!gt->IsInBuildSystem()) {
     return;
   }
 
@@ -3113,13 +3113,9 @@ bool cmGlobalXCodeGenerator::CreateGroups(
       // end up with (empty anyhow) ZERO_CHECK, install, or test source
       // groups:
       //
-      if (gtgt->GetType() == cmStateEnums::GLOBAL_TARGET) {
-        continue;
-      }
-      if (gtgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-        continue;
-      }
-      if (gtgt->GetName() == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
+      if (!gtgt->IsInBuildSystem() ||
+          gtgt->GetType() == cmStateEnums::GLOBAL_TARGET ||
+          gtgt->GetName() == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
         continue;
       }
 

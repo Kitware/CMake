@@ -339,7 +339,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   // loop over again and write out configurations for each target
   // in the solution
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     cmProp expath = target->GetProperty("EXTERNAL_MSPROJECT");
@@ -369,7 +369,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 
   std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     bool written = false;
@@ -436,7 +436,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
   std::ostream& fout, OrderedTargetDependSet const& projectTargets)
 {
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     cmProp vcprojName = target->GetProperty("GENERATOR_FILE_NAME");

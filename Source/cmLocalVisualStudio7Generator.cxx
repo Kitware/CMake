@@ -66,7 +66,7 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
   // Now create GUIDs for targets
   const auto& tgts = this->GetGeneratorTargets();
   for (const auto& l : tgts) {
-    if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!l->IsInBuildSystem()) {
       continue;
     }
     cmProp path = l->GetProperty("EXTERNAL_MSPROJECT");
@@ -129,7 +129,7 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
 
   // Create the project file for each target.
   for (const auto& l : tgts) {
-    if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!l->IsInBuildSystem()) {
       continue;
     }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace

@@ -284,7 +284,7 @@ void cmLocalGenerator::TraceDependencies()
   // Generate the rule files for each target.
   const auto& targets = this->GetGeneratorTargets();
   for (const auto& target : targets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     target->TraceDependencies();
@@ -760,7 +760,7 @@ void cmLocalGenerator::ComputeTargetManifest()
   // Add our targets to the manifest for each configuration.
   const auto& targets = this->GetGeneratorTargets();
   for (const auto& target : targets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     for (std::string const& c : configNames) {

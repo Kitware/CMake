@@ -101,7 +101,7 @@ void cmLocalUnixMakefileGenerator3::Generate()
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   for (const auto& target : this->GetGeneratorTargets()) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     std::unique_ptr<cmMakefileTargetGenerator> tg(
