@@ -1105,8 +1105,9 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
       break;
     }
 
-    default:
-      return;
+    case cmStateEnums::INTERFACE_LIBRARY:
+    case cmStateEnums::UNKNOWN_LIBRARY:
+      break;
   }
 }
 
