@@ -12,6 +12,9 @@ set_property(TARGET define_iface PROPERTY
 add_executable(headeronlytest_bld headeronlytest.cpp)
 target_link_libraries(headeronlytest_bld bld::headeronly)
 
+add_executable(headergentest_bld headergentest.cpp)
+target_link_libraries(headergentest_bld bld::headergen)
+
 set_property(TARGET bld::sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES define_iface)
 
 add_executable(interfacetest_bld interfacetest.cpp)
@@ -92,6 +95,9 @@ target_compile_definitions(source_target_test_exp PRIVATE USE_FROM_INSTALL_DIR)
 
 add_executable(headeronlytest_exp headeronlytest.cpp)
 target_link_libraries(headeronlytest_exp exp::headeronly)
+
+add_executable(headergentest_exp headergentest.cpp)
+target_link_libraries(headergentest_exp exp::headergen)
 
 set_property(TARGET exp::sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES define_iface)
 

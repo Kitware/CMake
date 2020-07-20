@@ -922,8 +922,8 @@ property from it:
 Interface Libraries
 -------------------
 
-An ``INTERFACE`` target has no :prop_tgt:`LOCATION` and is mutable, but is
-otherwise similar to an :prop_tgt:`IMPORTED` target.
+An ``INTERFACE`` library target does not compile sources and does not
+produce a library artifact on disk, so it has no :prop_tgt:`LOCATION`.
 
 It may specify usage requirements such as
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
@@ -937,11 +937,22 @@ Only the ``INTERFACE`` modes of the :command:`target_include_directories`,
 :command:`target_sources`, and :command:`target_link_libraries` commands
 may be used with ``INTERFACE`` libraries.
 
+Since CMake 3.19, an ``INTERFACE`` library target may optionally contain
+source files.  An interface library that contains source files will be
+included as a build target in the generated buildsystem.  It does not
+compile sources, but may contain custom commands to generate other sources.
+Additionally, IDEs will show the source files as part of the target for
+interactive reading and editing.
+
 A primary use-case for ``INTERFACE`` libraries is header-only libraries.
 
 .. code-block:: cmake
 
-  add_library(Eigen INTERFACE)
+  add_library(Eigen INTERFACE
+    src/eigen.h
+    src/vector.h
+    src/matrix.h
+    )
   target_include_directories(Eigen INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include/Eigen>
@@ -980,7 +991,12 @@ to must be installed separately:
 
 .. code-block:: cmake
 
-  add_library(Eigen INTERFACE)
+  set(Eigen_headers
+    src/eigen.h
+    src/vector.h
+    src/matrix.h
+    )
+  add_library(Eigen INTERFACE ${Eigen_headers})
   target_include_directories(Eigen INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include/Eigen>
@@ -990,9 +1006,6 @@ to must be installed separately:
   install(EXPORT eigenExport NAMESPACE Upstream::
     DESTINATION lib/cmake/Eigen
   )
-  install(FILES
-      ${CMAKE_CURRENT_SOURCE_DIR}/src/eigen.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/src/vector.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/src/matrix.h
+  install(FILES ${Eigen_headers}
     DESTINATION include/Eigen
   )

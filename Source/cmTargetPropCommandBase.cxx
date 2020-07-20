@@ -123,7 +123,7 @@ bool cmTargetPropCommandBase::ProcessContentArgs(
   }
   if (!content.empty()) {
     if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
-        scope != "INTERFACE") {
+        scope != "INTERFACE" && this->Property != "SOURCES") {
       this->SetError("may only set INTERFACE properties on INTERFACE targets");
       return false;
     }

@@ -1204,6 +1204,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
   }
 
   if (gtgt->GetType() == cmStateEnums::UTILITY ||
+      gtgt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
       gtgt->GetType() == cmStateEnums::GLOBAL_TARGET) {
     cmXCodeObject* t = this->CreateUtilityTarget(gtgt);
     if (!t) {
@@ -2536,7 +2537,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
   this->XCodeObjectMap[gtgt] = target;
 
   // Add source files without build rules for editing convenience.
-  if (gtgt->GetType() == cmStateEnums::UTILITY &&
+  if (gtgt->GetType() != cmStateEnums::GLOBAL_TARGET &&
       gtgt->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
     std::vector<cmSourceFile*> sources;
     if (!gtgt->GetConfigCommonSourceFiles(sources)) {

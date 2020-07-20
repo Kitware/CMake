@@ -71,6 +71,7 @@ std::unique_ptr<cmMakefileTargetGenerator> cmMakefileTargetGenerator::New(
     case cmStateEnums::OBJECT_LIBRARY:
       result = cm::make_unique<cmMakefileLibraryTargetGenerator>(tgt);
       break;
+    case cmStateEnums::INTERFACE_LIBRARY:
     case cmStateEnums::UTILITY:
       result = cm::make_unique<cmMakefileUtilityTargetGenerator>(tgt);
       break;
