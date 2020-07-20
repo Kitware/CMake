@@ -1365,6 +1365,9 @@ void AddSwiftImplicitIncludeDirectories(
 
     for (const cmLinkImplItem& library : libraries->Libraries) {
       if (const cmGeneratorTarget* dependency = library.Target) {
+        if (dependency->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+          continue;
+        }
         if (cm::contains(dependency->GetAllConfigCompileLanguages(),
                          "Swift")) {
           EvaluatedTargetPropertyEntry entry{ library, library.Backtrace };

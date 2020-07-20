@@ -35,3 +35,4 @@ target_link_libraries(N PUBLIC
 
 # Dummy to make sure generation works with such targets.
 add_library(SwiftIface INTERFACE)
+target_link_libraries(SwiftOnly PRIVATE SwiftIface)
