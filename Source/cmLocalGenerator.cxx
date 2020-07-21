@@ -1938,6 +1938,9 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   this->AddConfigVariableFlags(flags, cmStrCat("CMAKE_", lang, "_FLAGS"),
                                config);
 
+  std::string const& compiler = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
+
   if (lang == "Swift") {
     if (cmProp v = target->GetProperty("Swift_LANGUAGE_VERSION")) {
       if (cmSystemTools::VersionCompare(
@@ -1951,9 +1954,6 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     target->AddCUDAArchitectureFlags(flags);
     target->AddCUDAToolkitFlags(flags);
 
-    std::string const& compiler =
-      this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
-
     if (compiler == "Clang") {
       bool separable = target->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION");
 
@@ -1965,7 +1965,24 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       }
     }
   }
-
+  // Add VFS Overlay for Clang compiliers
+  if (compiler == "Clang") {
+    if (const char* vfsOverlay =
+          this->Makefile->GetDefinition("CMAKE_CLANG_VFS_OVERLAY")) {
+      std::string const& compilerSimulateId =
+        this->Makefile->GetSafeDefinition(
+          cmStrCat("CMAKE_", lang, "_SIMULATE_ID"));
+      if (compilerSimulateId == "MSVC") {
+        this->AppendCompileOptions(
+          flags,
+          std::vector<std::string>{ "-Xclang", "-ivfsoverlay", "-Xclang",
+                                    vfsOverlay });
+      } else {
+        this->AppendCompileOptions(
+          flags, std::vector<std::string>{ "-ivfsoverlay", vfsOverlay });
+      }
+    }
+  }
   // Add MSVC runtime library flags.  This is activated by the presence
   // of a default selection whether or not it is overridden by a property.
   cmProp msvcRuntimeLibraryDefault =
