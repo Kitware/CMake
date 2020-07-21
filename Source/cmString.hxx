@@ -383,7 +383,7 @@ public:
       instance is mutated or destroyed.  */
   std::string const* str_if_stable() const;
 
-  /** Get a refernce to a normal std::string.  The reference
+  /** Get a reference to a normal std::string.  The reference
       is valid until this instance is mutated or destroyed.  */
   std::string const& str();
 

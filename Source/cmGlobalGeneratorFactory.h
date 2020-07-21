@@ -44,7 +44,7 @@ public:
   /** Get the list of supported platforms name for this generator */
   virtual std::vector<std::string> GetKnownPlatforms() const = 0;
 
-  /** If the generator suports platforms, get its default.  */
+  /** If the generator supports platforms, get its default.  */
   virtual std::string GetDefaultPlatformName() const = 0;
 };
 

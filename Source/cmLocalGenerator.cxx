@@ -1273,7 +1273,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     }
   }
 
-  // Emit remaining non implicit user direcories.
+  // Emit remaining non implicit user directories.
   for (BT<std::string> const& udr : userDirs) {
     if (notExcluded(udr.Value)) {
       emitBT(udr);

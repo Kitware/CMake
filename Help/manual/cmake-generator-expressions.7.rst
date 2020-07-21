@@ -106,7 +106,7 @@ Variable Queries
 ``$<TARGET_EXISTS:target>``
   ``1`` if ``target`` exists, else ``0``.
 ``$<CONFIG:cfgs>``
-  ``1`` if config is any one of the entires in ``cfgs``, else ``0``. This is a
+  ``1`` if config is any one of the entries in ``cfgs``, else ``0``. This is a
   case-insensitive comparison. The mapping in
   :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by this
   expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`

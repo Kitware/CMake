@@ -1744,7 +1744,7 @@ public:
       return false;
     }
     // If it's an absolute path, check if it starts with the source
-    // direcotory:
+    // directory:
     return (
       !(IsInDirectory(SourceDir, path) || IsInDirectory(BinaryDir, path)));
   }

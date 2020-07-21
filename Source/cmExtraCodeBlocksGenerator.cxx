@@ -95,7 +95,7 @@ struct Tree
   std::string path; // only one component of the path
   std::vector<Tree> folders;
   std::set<std::string> files;
-  void InsertPath(const std::vector<std::string>& splitted,
+  void InsertPath(const std::vector<std::string>& split,
                   std::vector<std::string>::size_type start,
                   const std::string& fileName);
   void BuildVirtualFolder(cmXMLWriter& xml) const;
@@ -106,34 +106,34 @@ struct Tree
                      const std::string& fsPath) const;
 };
 
-void Tree::InsertPath(const std::vector<std::string>& splitted,
+void Tree::InsertPath(const std::vector<std::string>& split,
                       std::vector<std::string>::size_type start,
                       const std::string& fileName)
 {
-  if (start == splitted.size()) {
+  if (start == split.size()) {
     files.insert(fileName);
     return;
   }
   for (Tree& folder : folders) {
-    if (folder.path == splitted[start]) {
-      if (start + 1 < splitted.size()) {
-        folder.InsertPath(splitted, start + 1, fileName);
+    if (folder.path == split[start]) {
+      if (start + 1 < split.size()) {
+        folder.InsertPath(split, start + 1, fileName);
         return;
       }
-      // last part of splitted
+      // last part of split
       folder.files.insert(fileName);
       return;
     }
   }
   // Not found in folders, thus insert
   Tree newFolder;
-  newFolder.path = splitted[start];
-  if (start + 1 < splitted.size()) {
-    newFolder.InsertPath(splitted, start + 1, fileName);
+  newFolder.path = split[start];
+  if (start + 1 < split.size()) {
+    newFolder.InsertPath(split, start + 1, fileName);
     folders.push_back(newFolder);
     return;
   }
-  // last part of splitted
+  // last part of split
   newFolder.files.insert(fileName);
   folders.push_back(newFolder);
 }
@@ -224,11 +224,11 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
 
       const std::string& relative = cmSystemTools::RelativePath(
         it.second[0]->GetSourceDirectory(), listFile);
-      std::vector<std::string> splitted;
-      cmSystemTools::SplitPath(relative, splitted, false);
+      std::vector<std::string> split;
+      cmSystemTools::SplitPath(relative, split, false);
       // Split filename from path
-      std::string fileName = *(splitted.end() - 1);
-      splitted.erase(splitted.end() - 1, splitted.end());
+      std::string fileName = *(split.end() - 1);
+      split.erase(split.end() - 1, split.end());
 
       // We don't want paths with CMakeFiles in them
       // or do we?
@@ -238,10 +238,10 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
       // CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES variable.
       const bool excludeExternal = it.second[0]->GetMakefile()->IsOn(
         "CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES");
-      if (!splitted.empty() &&
+      if (!split.empty() &&
           (!excludeExternal || (relative.find("..") == std::string::npos)) &&
           relative.find("CMakeFiles") == std::string::npos) {
-        tree.InsertPath(splitted, 1, fileName);
+        tree.InsertPath(split, 1, fileName);
       }
     }
   }

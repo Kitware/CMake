@@ -3164,7 +3164,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
         } else {
           this->Makefile->IssueMessage(
             MessageType::FATAL_ERROR,
-            "Uknown CUDA architecture specifier \"" + std::string(specifier) +
+            "Unknown CUDA architecture specifier \"" + std::string(specifier) +
               "\".");
         }
       }
@@ -3880,7 +3880,7 @@ std::string cmGeneratorTarget::GetPchSource(const std::string& config,
       cmStrCat(generatorTarget->LocalGenerator->GetCurrentBinaryDirectory(),
                "/CMakeFiles/", generatorTarget->GetName(), ".dir/cmake_pch");
 
-    // For GCC the source extension will be tranformed into .h[xx].gch
+    // For GCC the source extension will be transformed into .h[xx].gch
     if (!this->Makefile->IsOn("CMAKE_LINK_PCH")) {
       const std::map<std::string, std::string> languageToExtension = {
         { "C", ".h.c" },

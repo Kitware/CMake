@@ -11,7 +11,7 @@ class cmExecutionStatus;
 struct cmListFileArgument;
 
 /**
- * \brief Calls a scripted or build-in command
+ * \brief Calls a scripted or built-in command
  *
  */
 bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,

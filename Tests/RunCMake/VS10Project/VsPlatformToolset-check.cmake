@@ -31,6 +31,6 @@ if (NOT "${OVERRIDEN_TOOLSET}" STREQUAL "MyCustomToolset")
 endif()
 
 if ("${NORMAL_TOOLSET}" STREQUAL "MyCustomToolset")
-  set(RunCMake_TEST_FAILED "Main toolset was overriden (it shouldn't)")
+  set(RunCMake_TEST_FAILED "Main toolset was overridden (it shouldn't)")
   return()
 endif()

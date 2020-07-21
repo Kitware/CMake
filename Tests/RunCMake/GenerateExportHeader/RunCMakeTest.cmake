@@ -26,7 +26,7 @@ function(run_GEH)
   endforeach()
 endfunction()
 
-# remove these flags from the enviornment if they have been set
+# remove these flags from the environment if they have been set
 # so the tests run the correct env
 set(env_cxx_flags $ENV{CXXFLAGS})
 if(env_cxx_flags)

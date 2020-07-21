@@ -143,7 +143,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
     total += pmi.second.NumberOfActions;
   }
 
-  // write each target's progress.make this loop is done twice. Bascially the
+  // write each target's progress.make this loop is done twice. Basically the
   // Generate pass counts all the actions, the first loop below determines
   // how many actions have progress updates for each target and writes to
   // corrrect variable values for everything except the all targets. The

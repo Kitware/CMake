@@ -11,7 +11,7 @@ endif()
 
 include(CMakeTestCompilerCommon)
 
-# work around enforced code signing and / or missing exectuable target type
+# work around enforced code signing and / or missing executable target type
 set(__CMAKE_SAVED_TRY_COMPILE_TARGET_TYPE ${CMAKE_TRY_COMPILE_TARGET_TYPE})
 if(_CMAKE_FEATURE_DETECTION_TARGET_TYPE)
   set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_CMAKE_FEATURE_DETECTION_TARGET_TYPE})

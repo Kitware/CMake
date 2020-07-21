@@ -17,7 +17,7 @@ static std::string const empty_string_;
 void String::internally_mutate_to_stable_string()
 {
   // We assume that only one thread mutates this instance at
-  // a time even if we point to a shared string buffer refernced
+  // a time even if we point to a shared string buffer referenced
   // by other threads.
   *this = String(data(), size());
 }

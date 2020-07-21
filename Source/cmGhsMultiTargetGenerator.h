@@ -43,7 +43,7 @@ private:
   void SetCompilerFlags(std::string const& config,
                         const std::string& language);
 
-  std::string GetDefines(const std::string& langugae,
+  std::string GetDefines(const std::string& language,
                          std::string const& config);
 
   void WriteIncludes(std::ostream& fout, const std::string& config,

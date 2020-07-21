@@ -862,7 +862,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
             if (sf != nullptr) {
               auto eMuf = makeMUFile(sf, fullPath, true);
-              // Ony process moc/uic when the parent is processed as well
+              // Only process moc/uic when the parent is processed as well
               if (!muf.MocIt) {
                 eMuf->MocIt = false;
               }
