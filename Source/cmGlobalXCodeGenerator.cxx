@@ -12,6 +12,7 @@
 
 #include <cm/memory>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -270,6 +271,13 @@ std::string cmGlobalXCodeGenerator::FindXcodeBuildCommand()
     makeProgram = "xcodebuild";
   }
   return makeProgram;
+}
+
+bool cmGlobalXCodeGenerator::SetSystemName(std::string const& s,
+                                           cmMakefile* mf)
+{
+  this->SystemName = s;
+  return this->cmGlobalGenerator::SetSystemName(s, mf);
 }
 
 bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
@@ -3375,6 +3383,14 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   if (archs.empty()) {
     // Tell Xcode to use NATIVE_ARCH instead of ARCHS.
     buildSettings->AddAttribute("ONLY_ACTIVE_ARCH", this->CreateString("YES"));
+    // When targeting macOS, use only the host architecture.
+    if (this->SystemName == "Darwin"_s &&
+        (!sysroot || !*sysroot ||
+         cmSystemTools::LowerCase(sysroot).find("macos") !=
+           std::string::npos)) {
+      buildSettings->AddAttribute("ARCHS",
+                                  this->CreateString("$(NATIVE_ARCH_ACTUAL)"));
+    }
   } else {
     // Tell Xcode to use ARCHS (ONLY_ACTIVE_ARCH defaults to NO).
     buildSettings->AddAttribute("ARCHS", this->CreateString(archs));
@@ -3480,7 +3496,8 @@ void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
   }
 
   if (this->Architectures.empty()) {
-    // With no ARCHS we use ONLY_ACTIVE_ARCH.
+    // With no ARCHS we use ONLY_ACTIVE_ARCH and possibly a
+    // platform-specific default ARCHS placeholder value.
     // Look up the arch that Xcode chooses in this case.
     if (const char* arch = mf->GetDefinition("CMAKE_XCODE_ARCHS")) {
       this->ObjectDirArchDefault = arch;

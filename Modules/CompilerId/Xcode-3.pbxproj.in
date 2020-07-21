@@ -84,6 +84,7 @@
 				CODE_SIGNING_REQUIRED = NO;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				SYMROOT = .;
+				@id_archs@
 				@id_toolset@
 				@id_lang_version@
 				@id_clang_cxx_library@
