@@ -67,6 +67,36 @@ const char* getShapeForTarget(const cmLinkItem& item)
       return GRAPHVIZ_NODE_SHAPE_LIBRARY_UNKNOWN;
   }
 }
+
+struct DependeesDir
+{
+  template <typename T>
+  static const cmLinkItem& src(const T& con)
+  {
+    return con.src;
+  }
+
+  template <typename T>
+  static const cmLinkItem& dst(const T& con)
+  {
+    return con.dst;
+  }
+};
+
+struct DependersDir
+{
+  template <typename T>
+  static const cmLinkItem& src(const T& con)
+  {
+    return con.dst;
+  }
+
+  template <typename T>
+  static const cmLinkItem& dst(const T& con)
+  {
+    return con.src;
+  }
+};
 }
 
 cmGraphVizWriter::cmGraphVizWriter(std::string const& fileName,
@@ -173,18 +203,16 @@ void cmGraphVizWriter::VisitLink(cmLinkItem const& depender,
     return;
   }
 
+  // write global data directly
   this->WriteConnection(this->GlobalFileStream, depender, dependee, scopeType);
 
   if (this->GeneratePerTarget) {
-    auto fileStream = PerTargetFileStreams[depender.AsStr()].get();
-    this->WriteNode(*fileStream, dependee);
-    this->WriteConnection(*fileStream, depender, dependee, scopeType);
+    PerTargetConnections[depender].emplace_back(depender, dependee, scopeType);
   }
 
   if (this->GenerateDependers) {
-    auto fileStream = TargetDependersFileStreams[dependee.AsStr()].get();
-    this->WriteNode(*fileStream, depender);
-    this->WriteConnection(*fileStream, depender, dependee, scopeType);
+    TargetDependersConnections[dependee].emplace_back(dependee, depender,
+                                                      scopeType);
   }
 }
 
@@ -288,9 +316,85 @@ void cmGraphVizWriter::Write()
     }
   }
 
+  // write global data and collect all connection data for per target graphs
   for (auto const gt : sortedGeneratorTargets) {
     auto item = cmLinkItem(gt, false, gt->GetBacktrace());
     this->VisitItem(item);
+  }
+
+  if (this->GeneratePerTarget) {
+    WritePerTargetConnections<DependeesDir>(PerTargetConnections,
+                                            PerTargetFileStreams);
+  }
+
+  if (this->GenerateDependers) {
+    WritePerTargetConnections<DependersDir>(TargetDependersConnections,
+                                            TargetDependersFileStreams);
+  }
+}
+
+void cmGraphVizWriter::FindAllConnections(const ConnectionsMap& connectionMap,
+                                          const cmLinkItem& rootItem,
+                                          Connections& extendedCons,
+                                          std::set<cmLinkItem>& visitedItems)
+{
+  // some "targets" are not in map, e.g. linker flags as -lm or
+  // targets without dependency.
+  // in both cases we are finished with traversing the graph
+  if (connectionMap.find(rootItem) == connectionMap.cend()) {
+    return;
+  }
+
+  const Connections& origCons = connectionMap.at(rootItem);
+
+  for (const Connection& con : origCons) {
+    extendedCons.emplace_back(con);
+    const cmLinkItem& dstItem = con.dst;
+    bool const visited = visitedItems.find(dstItem) != visitedItems.cend();
+    if (!visited) {
+      visitedItems.insert(dstItem);
+      FindAllConnections(connectionMap, dstItem, extendedCons, visitedItems);
+    }
+  }
+}
+
+void cmGraphVizWriter::FindAllConnections(const ConnectionsMap& connectionMap,
+                                          const cmLinkItem& rootItem,
+                                          Connections& extendedCons)
+{
+  std::set<cmLinkItem> visitedItems = { rootItem };
+  FindAllConnections(connectionMap, rootItem, extendedCons, visitedItems);
+}
+
+template <typename DirFunc>
+void cmGraphVizWriter::WritePerTargetConnections(
+  const ConnectionsMap& connections, const FileStreamMap& streams)
+{
+  // the per target connections must be extended by indirect dependencies
+  ConnectionsMap extendedConnections;
+  for (auto const& conPerTarget : connections) {
+    const cmLinkItem& rootItem = conPerTarget.first;
+    Connections& extendedCons = extendedConnections[conPerTarget.first];
+    FindAllConnections(connections, rootItem, extendedCons);
+  }
+
+  for (auto const& conPerTarget : extendedConnections) {
+    const cmLinkItem& rootItem = conPerTarget.first;
+
+    // some of the nodes are excluded completely and are not written
+    if (this->ItemExcluded(rootItem)) {
+      continue;
+    }
+
+    const Connections& cons = conPerTarget.second;
+    auto fileStream = streams.at(rootItem.AsStr()).get();
+
+    for (const Connection& con : cons) {
+      const cmLinkItem& src = DirFunc::src(con);
+      const cmLinkItem& dst = DirFunc::dst(con);
+      this->WriteNode(*fileStream, con.dst);
+      this->WriteConnection(*fileStream, src, dst, con.scopeType);
+    }
   }
 }
 
