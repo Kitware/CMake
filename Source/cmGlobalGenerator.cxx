@@ -302,9 +302,7 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
   bool failed = false;
   for (const auto& localGen : this->LocalGenerators) {
     for (const auto& target : localGen->GetGeneratorTargets()) {
-      if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
-          target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
-          target->GetType() == cmStateEnums::TargetType::UTILITY ||
+      if (!target->CanCompileSources() ||
           cmIsOn(target->GetProperty("ghs_integrity_app"))) {
         continue;
       }
@@ -358,9 +356,7 @@ bool cmGlobalGenerator::CheckTargetsForPchCompilePdb() const
   bool failed = false;
   for (const auto& generator : this->LocalGenerators) {
     for (const auto& target : generator->GetGeneratorTargets()) {
-      if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
-          target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
-          target->GetType() == cmStateEnums::TargetType::UTILITY ||
+      if (!target->CanCompileSources() ||
           cmIsOn(target->GetProperty("ghs_integrity_app"))) {
         continue;
       }
@@ -1595,9 +1591,7 @@ bool cmGlobalGenerator::AddAutomaticSources()
   for (const auto& lg : this->LocalGenerators) {
     lg->CreateEvaluationFileOutputs();
     for (const auto& gt : lg->GetGeneratorTargets()) {
-      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-          gt->GetType() == cmStateEnums::UTILITY ||
-          gt->GetType() == cmStateEnums::GLOBAL_TARGET) {
+      if (!gt->CanCompileSources()) {
         continue;
       }
       lg->AddUnityBuild(gt.get());
@@ -1609,9 +1603,7 @@ bool cmGlobalGenerator::AddAutomaticSources()
   }
   for (const auto& lg : this->LocalGenerators) {
     for (const auto& gt : lg->GetGeneratorTargets()) {
-      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-          gt->GetType() == cmStateEnums::UTILITY ||
-          gt->GetType() == cmStateEnums::GLOBAL_TARGET) {
+      if (!gt->CanCompileSources()) {
         continue;
       }
       // Handle targets that re-use a PCH from an above-handled target.

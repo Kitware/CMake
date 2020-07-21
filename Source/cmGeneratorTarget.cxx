@@ -1120,6 +1120,11 @@ bool cmGeneratorTarget::IsImportedGloballyVisible() const
   return this->Target->IsImportedGloballyVisible();
 }
 
+bool cmGeneratorTarget::CanCompileSources() const
+{
+  return this->Target->CanCompileSources();
+}
+
 const std::string& cmGeneratorTarget::GetLocationForBuild() const
 {
   static std::string location;

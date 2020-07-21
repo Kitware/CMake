@@ -137,8 +137,7 @@ void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
   std::map<std::string, LocalObjectInfo>& localObjectFiles)
 {
   for (const auto& gt : this->GetGeneratorTargets()) {
-    if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-        gt->GetType() == cmStateEnums::UTILITY) {
+    if (!gt->CanCompileSources()) {
       continue;
     }
     std::vector<cmSourceFile const*> objectSources;
