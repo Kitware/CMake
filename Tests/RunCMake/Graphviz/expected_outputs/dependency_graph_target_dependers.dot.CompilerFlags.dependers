@@ -1,0 +1,26 @@
+digraph "CompilerFlags" {
+node [
+  fontsize = "12"
+];
+    "node0" [ label = "CompilerFlags", shape = pentagon ];
+    "node2" [ label = "CoreLibrary", shape = octagon ];
+    "node2" -> "node0"  // CoreLibrary -> CompilerFlags
+    "node1" [ label = "ConsoleApplication", shape = egg ];
+    "node1" -> "node2" [ style = dotted ] // ConsoleApplication -> CoreLibrary
+    "node5" [ label = "GraphicApplication", shape = egg ];
+    "node5" -> "node2" [ style = dotted ] // GraphicApplication -> CoreLibrary
+    "node6" [ label = "GraphicLibrary", shape = doubleoctagon ];
+    "node6" -> "node2" [ style = dotted ] // GraphicLibrary -> CoreLibrary
+    "node5" [ label = "GraphicApplication", shape = egg ];
+    "node5" -> "node6" [ style = dotted ] // GraphicApplication -> GraphicLibrary
+    "node9" [ label = "GraphicDriverOpenGL", shape = tripleoctagon ];
+    "node9" -> "node2" [ style = dotted ] // GraphicDriverOpenGL -> CoreLibrary
+    "node10" [ label = "GraphicDriverVulkan", shape = tripleoctagon ];
+    "node10" -> "node2" [ style = dotted ] // GraphicDriverVulkan -> CoreLibrary
+    "node6" [ label = "GraphicLibrary", shape = doubleoctagon ];
+    "node6" -> "node0"  // GraphicLibrary -> CompilerFlags
+    "node9" [ label = "GraphicDriverOpenGL", shape = tripleoctagon ];
+    "node9" -> "node0" [ style = dotted ] // GraphicDriverOpenGL -> CompilerFlags
+    "node10" [ label = "GraphicDriverVulkan", shape = tripleoctagon ];
+    "node10" -> "node0" [ style = dotted ] // GraphicDriverVulkan -> CompilerFlags
+}
