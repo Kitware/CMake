@@ -27,7 +27,7 @@
 #  include <cm/type_traits>
 #  include <cmext/iterator>
 
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
 #    include <algorithm>
 #  endif
 
@@ -616,7 +616,7 @@ class path
   };
 
 public:
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
   using value_type = wchar_t;
 #  else
   using value_type = char;
@@ -633,7 +633,7 @@ public:
     generic_format
   };
 
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
   static constexpr value_type preferred_separator = L'\\';
 #  else
   static constexpr value_type preferred_separator = '/';
@@ -800,7 +800,7 @@ public:
 
   path& make_preferred()
   {
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
     std::replace(
       this->path_.begin(), this->path_.end(), '/',
       static_cast<path_type::value_type>(this->preferred_separator));
@@ -845,7 +845,7 @@ public:
   // ================
   const string_type& native() const noexcept
   {
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
     this->native_path_ = internals::string_converter<
       path_type::value_type>::to<string_type::value_type>(this->path_);
     return this->native_path_;
@@ -990,9 +990,11 @@ public:
 
   bool is_absolute() const
   {
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
     return this->has_root_name() && this->has_root_directory();
 #  else
+    // For CYGWIN, root_name (i.e. //host or /cygdrive/x) is not considered.
+    // Same as current GNU g++ implementation (9.3).
     return this->has_root_directory();
 #  endif
   }
@@ -1085,7 +1087,7 @@ private:
   int compare_path(cm::string_view str) const;
 
   path_type path_;
-#  if defined(_WIN32)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
   mutable string_type native_path_;
 #  endif
 };
