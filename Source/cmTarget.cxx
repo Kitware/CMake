@@ -419,7 +419,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
 
   // Setup per-configuration property default values.
-  if (this->GetType() != cmStateEnums::UTILITY) {
+  if (this->GetType() != cmStateEnums::UTILITY &&
+      this->GetType() != cmStateEnums::GLOBAL_TARGET) {
     static const auto configProps = {
       /* clang-format needs this comment to break after the opening brace */
       "ARCHIVE_OUTPUT_DIRECTORY_",     "LIBRARY_OUTPUT_DIRECTORY_",
