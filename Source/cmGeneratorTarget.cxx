@@ -7013,6 +7013,11 @@ std::string cmGeneratorTarget::GetDeprecation() const
 void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
                                      const std::string& config) const
 {
+  // Targets that do not compile anything have no languages.
+  if (!this->CanCompileSources()) {
+    return;
+  }
+
   std::vector<cmSourceFile*> sourceFiles;
   this->GetSourceFiles(sourceFiles, config);
   for (cmSourceFile* src : sourceFiles) {
