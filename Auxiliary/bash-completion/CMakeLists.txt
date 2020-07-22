@@ -6,11 +6,16 @@
 # with) as well as a simple installation by a local user into their home
 # directory *if* the prefix is `$HOME/.local` since `.local/share/` is part of
 # the bash-completion search path too.
-# For more complex installations, packagers can set CMAKE_BASH_COMP_DIR to
-# another system location.
+# For more complex installations, packagers can set CMake_INSTALL_BASH_COMP_DIR
+# to another system location.
 
-set(CMAKE_BASH_COMP_DIR_DEFAULT ${CMAKE_XDGDATA_DIR}/bash-completion/completions)
-if (NOT CMAKE_BASH_COMP_DIR)
-  set(CMAKE_BASH_COMP_DIR "${CMAKE_BASH_COMP_DIR_DEFAULT}")
+if(NOT CMake_INSTALL_BASH_COMP_DIR)
+  if(CMAKE_BASH_COMP_DIR)
+    # Honor previous customization option.
+    set(CMake_INSTALL_BASH_COMP_DIR "${CMAKE_BASH_COMP_DIR}")
+  else()
+    # Default.
+    set(CMake_INSTALL_BASH_COMP_DIR ${CMAKE_XDGDATA_DIR}/bash-completion/completions)
+  endif()
 endif()
-install(FILES cmake cpack ctest DESTINATION ${CMAKE_BASH_COMP_DIR})
+install(FILES cmake cpack ctest DESTINATION ${CMake_INSTALL_BASH_COMP_DIR})
