@@ -416,7 +416,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
   std::vector<std::string> depends;
   for (DirectoryTarget::Target const& t : dt.Targets) {
     // Add this to the list of depends rules in this directory.
-    if ((!check_all || !t.ExcludeFromAll) &&
+    if ((!check_all || t.ExcludedFromAllInConfigs.empty()) &&
         (!check_relink ||
          t.GT->NeedRelinkBeforeInstall(lg->GetConfigName()))) {
       // The target may be from a different directory; use its local gen.
@@ -846,7 +846,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
       cmLocalGenerator* tlg = gt->GetLocalGenerator();
 
       if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-          gt->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+          IsExcluded(lg.get(), gt.get())) {
         continue;
       }
 

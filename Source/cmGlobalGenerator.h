@@ -542,7 +542,8 @@ protected:
   bool IsExcluded(cmStateSnapshot const& root,
                   cmStateSnapshot const& snp) const;
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
-  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
+  bool IsExcluded(cmLocalGenerator* root,
+                  const cmGeneratorTarget* target) const;
   virtual void InitializeProgressMarks() {}
 
   struct GlobalTargetInfo
