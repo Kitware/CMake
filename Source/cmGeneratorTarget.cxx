@@ -2790,6 +2790,7 @@ cmGeneratorTarget::GetLinkImplementationClosure(
 
     cmLinkImplementationLibraries const* impl =
       this->GetLinkImplementationLibraries(config);
+    assert(impl);
 
     for (cmLinkImplItem const& lib : impl->Libraries) {
       processILibs(config, this, lib,
@@ -3436,23 +3437,24 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
                       &dagChecker, entries);
 
   if (this->Makefile->IsOn("APPLE")) {
-    cmLinkImplementationLibraries const* impl =
-      this->GetLinkImplementationLibraries(config);
-    for (cmLinkImplItem const& lib : impl->Libraries) {
-      std::string libDir = cmSystemTools::CollapseFullPath(
-        lib.AsStr(), this->Makefile->GetHomeOutputDirectory());
+    if (cmLinkImplementationLibraries const* impl =
+          this->GetLinkImplementationLibraries(config)) {
+      for (cmLinkImplItem const& lib : impl->Libraries) {
+        std::string libDir = cmSystemTools::CollapseFullPath(
+          lib.AsStr(), this->Makefile->GetHomeOutputDirectory());
 
-      static cmsys::RegularExpression frameworkCheck(
-        "(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
-      if (!frameworkCheck.find(libDir)) {
-        continue;
+        static cmsys::RegularExpression frameworkCheck(
+          "(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
+        if (!frameworkCheck.find(libDir)) {
+          continue;
+        }
+
+        libDir = frameworkCheck.match(1);
+
+        EvaluatedTargetPropertyEntry ee(lib, cmListFileBacktrace());
+        ee.Values.emplace_back(std::move(libDir));
+        entries.Entries.emplace_back(std::move(ee));
       }
-
-      libDir = frameworkCheck.match(1);
-
-      EvaluatedTargetPropertyEntry ee(lib, cmListFileBacktrace());
-      ee.Values.emplace_back(std::move(libDir));
-      entries.Entries.emplace_back(std::move(ee));
     }
   }
 
