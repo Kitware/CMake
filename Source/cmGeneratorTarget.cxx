@@ -6549,15 +6549,20 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
                           iface.HadHeadSensitiveCondition,
                           iface.HadContextSensitiveCondition,
                           iface.HadLinkLanguageSensitiveCondition);
-  } else if (!cmp0022NEW)
+    return;
+  }
+
   // If CMP0022 is NEW then the plain tll signature sets the
   // INTERFACE_LINK_LIBRARIES, so if we get here then the project
   // cleared the property explicitly and we should not fall back
   // to the link implementation.
-  {
-    // The link implementation is the default link interface.
-    cmLinkImplementationLibraries const* impl =
-      this->GetLinkImplementationLibrariesInternal(config, headTarget);
+  if (cmp0022NEW) {
+    return;
+  }
+
+  // The link implementation is the default link interface.
+  if (cmLinkImplementationLibraries const* impl =
+        this->GetLinkImplementationLibrariesInternal(config, headTarget)) {
     iface.Libraries.insert(iface.Libraries.end(), impl->Libraries.begin(),
                            impl->Libraries.end());
     if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
