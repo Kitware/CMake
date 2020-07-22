@@ -552,6 +552,7 @@ We also have to add the current binary directory to the list of include
 directories so that ``Table.h`` can be found and included by ``mysqrt.cxx``.
 
 .. literalinclude:: Step7/MathFunctions/CMakeLists.txt
+  :language: cmake
   :start-after: # state that we depend on our bin
   :end-before: # install rules
 
