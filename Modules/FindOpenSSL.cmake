@@ -27,11 +27,11 @@ This module defines the following :prop_tgt:`IMPORTED` targets:
   projects under MSVC. This target is available only if found OpenSSL version
   is not less than 0.9.8. By linking this target the above OpenSSL targets can
   be linked even if the project has different MSVC runtime configurations with
-  the above OpenSSL targets. This target has no effect on plaforms other than
+  the above OpenSSL targets. This target has no effect on platforms other than
   MSVC.
 
 NOTE: Due to how ``INTERFACE_SOURCES`` are consumed by the consuming target,
-unless you certainly know what you are doing, it is always prefered to link
+unless you certainly know what you are doing, it is always preferred to link
 ``OpenSSL::applink`` target as ``PRIVATE`` and to make sure that this target is
 linked at most once for the whole dependency graph of any library or
 executable:

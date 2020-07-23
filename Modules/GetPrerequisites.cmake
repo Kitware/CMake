@@ -61,7 +61,7 @@ is the name of a CMake variable to contain the results.
 exclude "system" prerequisites.  If <recurse> is set to 1 all
 prerequisites will be found recursively, if set to 0 only direct
 prerequisites are listed.  <exepath> is the path to the top level
-executable used for @executable_path replacment on the Mac.  <dirs> is
+executable used for @executable_path replacement on the Mac.  <dirs> is
 a list of paths where libraries might be found: these paths are
 searched first when a target without any path info is given.  Then
 standard system locations are also searched: PATH, Framework

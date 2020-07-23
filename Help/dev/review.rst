@@ -260,7 +260,7 @@ This may be generated with
 If the commit is a fix for the mentioned commit, consider using a ``Fixes:``
 trailer in the commit message with the specified format. This trailer should
 not be word-wrapped. Note that if there is also an issue for what is being
-fixed, it is preferrable to link to the issue instead.
+fixed, it is preferable to link to the issue instead.
 
 If relevant, add the first release tag of CMake containing the commit after
 the ``<date>``, i.e., ``commit <shorthash> (<subject>, <date>, <tag>)``.

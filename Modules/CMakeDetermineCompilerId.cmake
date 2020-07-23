@@ -723,7 +723,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     foreach(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
       # The IAR-AVR compiler uses a binary format that places a '6'
       # character (0x34) before each character in the string.  Strip
-      # out these characters without removing any legitamate characters.
+      # out these characters without removing any legitimate characters.
       if("${info}" MATCHES "(.)I.N.F.O.:.")
         string(REGEX REPLACE "${CMAKE_MATCH_1}(.)" "\\1" info "${info}")
       endif()

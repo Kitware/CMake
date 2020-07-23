@@ -2293,7 +2293,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
           e2.Attribute("UnityFilesDirectory", unityDir);
         } else {
           // Visual Studio versions prior to 2017 15.8 do not know about unity
-          // builds, thus we exclude the files alredy part of unity sources.
+          // builds, thus we exclude the files already part of unity sources.
           if (!si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION")) {
             exclude_configs = si.Configs;
           }

@@ -9,6 +9,6 @@ foreach (command IN ITEMS "function" "ENDFUNCTION"
     OUTPUT_QUIET ERROR_QUIET
     RESULT_VARIABLE result)
   if (NOT result)
-    message (SEND_ERROR "cmake_language(CALL ${command}) unexpectedly successfull.")
+    message (SEND_ERROR "cmake_language(CALL ${command}) unexpectedly successful.")
   endif()
 endforeach()

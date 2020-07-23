@@ -760,7 +760,7 @@ function (_MPI_interrogate_compiler LANG)
   # Save the explicitly given link directories
   set(MPI_LINK_DIRECTORIES_LEFTOVER "${MPI_LINK_DIRECTORIES_WORK}")
 
-  # An MPI compiler wrapper could have its MPI libraries in the implictly
+  # An MPI compiler wrapper could have its MPI libraries in the implicitly
   # linked directories of the compiler itself.
   if(DEFINED CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES)
     list(APPEND MPI_LINK_DIRECTORIES_WORK "${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}")

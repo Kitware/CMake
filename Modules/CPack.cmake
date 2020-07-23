@@ -439,7 +439,7 @@ endmacro()
 # find any variable that starts with CPACK and create a variable
 # _CPACK_OTHER_VARIABLES_ that contains SET commands for
 # each cpack variable.  _CPACK_OTHER_VARIABLES_ is then
-# used as an @ replacment in configure_file for the CPackConfig.
+# used as an @ replacement in configure_file for the CPackConfig.
 function(cpack_encode_variables)
   set(commands "")
   get_cmake_property(res VARIABLES)

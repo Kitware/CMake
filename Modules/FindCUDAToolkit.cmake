@@ -433,7 +433,7 @@ Result variables
 
 ``CUDAToolkit_TARGET_DIR``
     The path to the CUDA Toolkit directory including the target architecture
-    when cross-compiling. When not cross-compiling this will be equivalant to
+    when cross-compiling. When not cross-compiling this will be equivalent to
     ``CUDAToolkit_ROOT_DIR``.
 
 ``CUDAToolkit_NVCC_EXECUTABLE``

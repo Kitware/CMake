@@ -1333,7 +1333,7 @@ Resource Allocation
 ===================
 
 CTest provides a mechanism for tests to specify the resources that they need
-in a fine-grained way, and for users to specify the resources availiable on
+in a fine-grained way, and for users to specify the resources available on
 the running machine. This allows CTest to internally keep track of which
 resources are in use and which are free, scheduling tests in a way that
 prevents them from trying to claim resources that are not available.

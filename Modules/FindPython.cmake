@@ -46,7 +46,7 @@ To manage concurrent versions 3 and 2 of Python, use :module:`FindPython3` and
   If components ``Interpreter`` and ``Development`` (or one of its
   sub-components) are both specified, this module search only for interpreter
   with same platform architecture as the one defined by ``CMake``
-  configuration. This contraint does not apply if only ``Interpreter``
+  configuration. This constraint does not apply if only ``Interpreter``
   component is specified.
 
 Imported Targets
@@ -157,7 +157,7 @@ This module will set the following variables in your project
 ``Python_NumPy_FOUND``
   System has the NumPy.
 ``Python_NumPy_INCLUDE_DIRS``
-  The NumPy include directries.
+  The NumPy include directories.
 ``Python_NumPy_VERSION``
   The NumPy version.
 
@@ -191,7 +191,7 @@ Hints
 
   * ``ON``: Corresponding flag is selected.
   * ``OFF``: Corresponding flag is not selected.
-  * ``ANY``: The two posibilties (``ON`` and ``OFF``) will be searched.
+  * ``ANY``: The two possibilities (``ON`` and ``OFF``) will be searched.
 
   From this 3-tuple, various ABIs will be searched starting from the most
   specialized to the most general. Moreover, ``debug`` versions will be
@@ -349,7 +349,7 @@ setting the following variables:
   When an artifact is specified, all ``HINTS`` will be ignored and no search
   will be performed for this artifact.
 
-  If more than one artifact is specified, it is the user's responsability to
+  If more than one artifact is specified, it is the user's responsibility to
   ensure the consistency of the various artifacts.
 
 By default, this module supports multiple calls in different directories of a
@@ -357,7 +357,7 @@ project with different version/component requirements while providing correct
 and consistent results for each call. To support this behavior, ``CMake`` cache
 is not used in the traditional way which can be problematic for interactive
 specification. So, to enable also interactive specification, module behavior
-can be controled with the following variable:
+can be controlled with the following variable:
 
 ``Python_ARTIFACTS_INTERACTIVE``
   Selects the behavior of the module. This is a boolean variable:

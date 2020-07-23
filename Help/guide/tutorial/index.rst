@@ -359,7 +359,7 @@ executables. For example:
 
 The CMake variable :variable:`CMAKE_INSTALL_PREFIX` is used to determine the
 root of where the files will be installed. If using the ``cmake --install``
-command, the installation prefix can be overidden via the ``--prefix``
+command, the installation prefix can be overridden via the ``--prefix``
 argument. For example:
 
 .. code-block:: console

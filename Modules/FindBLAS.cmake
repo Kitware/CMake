@@ -446,7 +446,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
               "${BLAS_mkl_START_GROUP} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core ${BLAS_mkl_END_GROUP}")
           endif()
 
-          #older vesions of intel mkl libs
+          #older versions of intel mkl libs
           if(BLA_VENDOR STREQUAL "Intel" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
               "mkl")

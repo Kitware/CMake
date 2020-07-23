@@ -12,7 +12,7 @@ Command :cmake:command:`some_cmd` explicit cmake domain.
 Command :command:`some_cmd` without target.
 Command :command:`some_cmd <some_cmd>` with target.
 Command :command:`some_cmd_<cmd>` placeholder without target.
-Command :command:`some_cmd_<cmd> <some_cmd>` placholder with target.
+Command :command:`some_cmd_<cmd> <some_cmd>` placeholder with target.
 Command :command:`some_cmd()` with parens.
 Command :command:`some_cmd(SUB)` with subcommand.
 Command :command:`some_cmd(SUB) <some_cmd>` with subcommand and target.

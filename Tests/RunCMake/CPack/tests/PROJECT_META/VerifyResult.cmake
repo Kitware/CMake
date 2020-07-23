@@ -13,7 +13,7 @@ function(checkPackageURL FILE TAG EXPECTED_URL)
     endif()
   endforeach()
   if(NOT _seen_url)
-    message(FATAL_ERROR "The packge `${FILE}` do not have URL as expected")
+    message(FATAL_ERROR "The package `${FILE}` do not have URL as expected")
   endif()
 endfunction()
 

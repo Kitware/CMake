@@ -305,7 +305,7 @@ function(_boost_get_canonical_target_name component target_var)
 endfunction()
 
 macro(_boost_set_in_parent_scope name value)
-  # Set a variable in parent scope and make it visibile in current scope
+  # Set a variable in parent scope and make it visible in current scope
   set(${name} "${value}" PARENT_SCOPE)
   set(${name} "${value}")
 endmacro()

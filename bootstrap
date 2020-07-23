@@ -636,7 +636,7 @@ Configuration:
   --system-libuv          use system-installed libuv library
   --no-system-libuv       use cmake-provided libuv library (default)
 
-  --bootstrap-system-libuv use system-installed libuv library for boostrap
+  --bootstrap-system-libuv use system-installed libuv library for bootstrap
 
   --qt-gui                build the Qt-based GUI (requires Qt >= 4.2)
   --no-qt-gui             do not build the Qt-based GUI (default)

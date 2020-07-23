@@ -232,7 +232,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags}")
 
   # We perform compiler identification for a second time to extract implicit linking info and host compiler for NVCC.
-  # We also use it to verify that CMAKE_CUDA_ARCHITECTURES and additionaly on Clang that CUDA toolkit path works.
+  # We also use it to verify that CMAKE_CUDA_ARCHITECTURES and additionally on Clang that CUDA toolkit path works.
   # The latter could be done during compiler testing in the future to avoid doing this for Clang.
   # We need to unset the compiler ID otherwise CMAKE_DETERMINE_COMPILER_ID() doesn't work.
   set(CMAKE_CUDA_COMPILER_ID)
