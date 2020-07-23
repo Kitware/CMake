@@ -9,6 +9,13 @@ set_source_files_properties(foo.c bar.c PROPERTIES LANGUAGE CXX)
 target_link_libraries(SetLang foo)
 set_target_properties(SetLang PROPERTIES LINKER_LANGUAGE CXX)
 
+# VS generators historically tolerated target-wide -TP flags added
+# by project code, so cover that case to preserve the behavior.
+if(CMAKE_GENERATOR MATCHES "^Visual Studio" AND "x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC")
+  add_library(stay stay_c.c stay_cxx.cxx)
+  set_property(TARGET stay PROPERTY COMPILE_OPTIONS "-TP")
+endif()
+
 if((CMAKE_C_COMPILER_ID MATCHES "(GNU|Clang|MSVC|Borland|Embarcadero|Intel|TI|XL)"))
   add_library(zoom zoom.zzz)
   set_source_files_properties(zoom.zzz PROPERTIES LANGUAGE CXX)
