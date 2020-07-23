@@ -1,0 +1,2 @@
+CMake Error at CONVERT-wrong-operator.cmake:[0-9]+ \(cmake_path\):
+  cmake_path CONVERT called with an unknown action: FOO.
