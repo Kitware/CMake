@@ -250,8 +250,8 @@ be resolved. See below for a full description of how they work.
   List of post-exclude regexes through which to filter the names of resolved
   dependencies.
 
-These arguments can be used to blacklist unwanted system libraries when
-resolving the dependencies, or to whitelist libraries from a specific
+These arguments can be used to exclude unwanted system libraries when
+resolving the dependencies, or to include libraries from a specific
 directory. The filtering works as follows:
 
 1. If the not-yet-resolved dependency matches any of the
