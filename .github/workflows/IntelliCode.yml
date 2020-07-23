@@ -10,6 +10,8 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     # Runs CMake generation for VS2019 to generate .vcxproj files (Optional, currently recommended if CMake uses any complex configurations)
     - name: run-cmake
