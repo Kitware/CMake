@@ -182,6 +182,8 @@ set(SRCS
   cmCheckCustomOutputs.cxx
   cmCLocaleEnvironmentScope.h
   cmCLocaleEnvironmentScope.cxx
+  cmCMakePath.h
+  cmCMakePath.cxx
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
