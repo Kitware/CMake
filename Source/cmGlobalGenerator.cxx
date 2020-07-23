@@ -2199,7 +2199,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
     // configurations.
     if (trueCount && falseCount) {
       std::ostringstream e;
-      e << "The EXCLUDED_FROM_ALL property of target \"" << target->GetName()
+      e << "The EXCLUDE_FROM_ALL property of target \"" << target->GetName()
         << "\" varies by configuration. This is not supported by the \""
         << root->GetGlobalGenerator()->GetName() << "\" generator.";
       mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
