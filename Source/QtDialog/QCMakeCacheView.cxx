@@ -220,8 +220,9 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     QSet<QCMakeProperty> oldProps = this->properties().toSet();
 #else
-    QSet<QCMakeProperty> oldProps = QSet<QCMakeProperty>(
-      this->properties().begin(), this->properties().end());
+    QCMakePropertyList const& oldPropsList = this->properties();
+    QSet<QCMakeProperty> oldProps =
+      QSet<QCMakeProperty>(oldPropsList.begin(), oldPropsList.end());
 #endif
     oldProps.intersect(newProps);
     newProps.subtract(oldProps);
