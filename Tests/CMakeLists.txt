@@ -2906,7 +2906,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
       PASS_REGULAR_EXPRESSION "Failed")
   else()
     set_tests_properties(CTestTestCrash PROPERTIES
-      PASS_REGULAR_EXPRESSION "(Illegal|SegFault|Child aborted)")
+      PASS_REGULAR_EXPRESSION "(Illegal|SegFault|Subprocess aborted)")
   endif()
 
   configure_file(
