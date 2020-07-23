@@ -9,7 +9,7 @@ function(run_single_config_test label config exclude_from_all_value expectation)
         -DCMAKE_BUILD_TYPE=${config}
         -DTOOL_EXCLUDE_FROM_ALL=${exclude_from_all_value})
     set(RunCMake_TEST_NO_CLEAN 1)
-    include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
+    include(${RunCMake_TEST_BINARY_DIR}/target_files_${config}.cmake)
     run_cmake_command(${case}-build ${CMAKE_COMMAND} --build . --config ${config})
 endfunction()
 

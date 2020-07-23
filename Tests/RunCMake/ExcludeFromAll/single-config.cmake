@@ -2,10 +2,6 @@ enable_language(C)
 add_executable(tool main.c)
 set_property(TARGET tool PROPERTY EXCLUDE_FROM_ALL "${TOOL_EXCLUDE_FROM_ALL}")
 
-include(../NinjaMultiConfig/Common.cmake)
-set(orig_CMAKE_CONFIGURATION_TYPES ${CMAKE_CONFIGURATION_TYPES})
-if("${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
-    set(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE})
-endif()
-generate_output_files(tool)
-set(CMAKE_CONFIGURATION_TYPES ${orig_CMAKE_CONFIGURATION_TYPES})
+file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/target_files_$<CONFIG>.cmake" CONTENT [[
+set(TARGET_FILE_tool_$<CONFIG> [==[$<TARGET_FILE:tool>]==])
+]])
