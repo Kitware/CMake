@@ -2813,29 +2813,26 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
   this->CurrentEntry = nullptr;
 
   // Queue all the source files already specified for the target.
-  if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-    std::set<cmSourceFile*> emitted;
-    std::vector<std::string> const& configs =
-      this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
-    for (std::string const& c : configs) {
-      std::vector<cmSourceFile*> sources;
-      this->GeneratorTarget->GetSourceFiles(sources, c);
-      for (cmSourceFile* sf : sources) {
-        const std::set<cmGeneratorTarget const*> tgts =
-          this->GlobalGenerator->GetFilenameTargetDepends(sf);
-        if (cm::contains(tgts, this->GeneratorTarget)) {
-          std::ostringstream e;
-          e << "Evaluation output file\n  \"" << sf->ResolveFullPath()
-            << "\"\ndepends on the sources of a target it is used in.  This "
-               "is a dependency loop and is not allowed.";
-          this->GeneratorTarget->LocalGenerator->IssueMessage(
-            MessageType::FATAL_ERROR, e.str());
-          return;
-        }
-        if (emitted.insert(sf).second &&
-            this->SourcesQueued.insert(sf).second) {
-          this->SourceQueue.push(sf);
-        }
+  std::set<cmSourceFile*> emitted;
+  std::vector<std::string> const& configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+  for (std::string const& c : configs) {
+    std::vector<cmSourceFile*> sources;
+    this->GeneratorTarget->GetSourceFiles(sources, c);
+    for (cmSourceFile* sf : sources) {
+      const std::set<cmGeneratorTarget const*> tgts =
+        this->GlobalGenerator->GetFilenameTargetDepends(sf);
+      if (cm::contains(tgts, this->GeneratorTarget)) {
+        std::ostringstream e;
+        e << "Evaluation output file\n  \"" << sf->ResolveFullPath()
+          << "\"\ndepends on the sources of a target it is used in.  This "
+             "is a dependency loop and is not allowed.";
+        this->GeneratorTarget->LocalGenerator->IssueMessage(
+          MessageType::FATAL_ERROR, e.str());
+        return;
+      }
+      if (emitted.insert(sf).second && this->SourcesQueued.insert(sf).second) {
+        this->SourceQueue.push(sf);
       }
     }
   }
