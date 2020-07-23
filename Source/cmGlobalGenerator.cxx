@@ -309,17 +309,7 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
         continue;
       }
 
-      std::vector<std::string> configs =
-        target->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
-      std::vector<cmSourceFile*> srcs;
-      for (std::string const& config : configs) {
-        target->GetSourceFiles(srcs, config);
-        if (!srcs.empty()) {
-          break;
-        }
-      }
-
-      if (srcs.empty()) {
+      if (target->GetAllConfigSources().empty()) {
         std::ostringstream e;
         e << "No SOURCES given to target: " << target->GetName();
         this->GetCMakeInstance()->IssueMessage(
