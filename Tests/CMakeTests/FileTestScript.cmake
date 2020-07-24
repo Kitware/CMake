@@ -10,7 +10,7 @@ elseif(testname STREQUAL different_not_enough_args) # fail
   file(DIFFERENT ffff)
 
 elseif(testname STREQUAL download_not_enough_args) # fail
-  file(DOWNLOAD ffff)
+  file(DOWNLOAD)
 
 elseif(testname STREQUAL read_not_enough_args) # fail
   file(READ ffff)
@@ -181,7 +181,7 @@ elseif(testname STREQUAL to_native_path) # pass
   message("v='${v}'")
 
 elseif(testname STREQUAL download_wrong_number_of_args) # fail
-  file(DOWNLOAD zzzz://bogus/ffff)
+  file(DOWNLOAD)
 
 elseif(testname STREQUAL download_file_with_no_path) # pass
   file(DOWNLOAD zzzz://bogus/ffff ffff)
