@@ -1453,7 +1453,7 @@ bool SystemTools::PathCygwinToWin32(const char* path, char* win32_path)
 
 bool SystemTools::Touch(const std::string& filename, bool create)
 {
-  if (!SystemTools::PathExists(filename)) {
+  if (!SystemTools::FileExists(filename)) {
     if (create) {
       FILE* file = Fopen(filename, "a+b");
       if (file) {
