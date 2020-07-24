@@ -422,6 +422,28 @@ static bool CheckFileOperations()
     res = false;
   }
 
+#if !defined(_WIN32)
+  std::string const testBadSymlink(testNewDir + "/badSymlink.txt");
+  std::string const testBadSymlinkTgt(testNewDir + "/missing/symlinkTgt.txt");
+  if (!kwsys::SystemTools::CreateSymlink(testBadSymlinkTgt, testBadSymlink)) {
+    std::cerr << "Problem with CreateSymlink for: " << testBadSymlink << " -> "
+              << testBadSymlinkTgt << std::endl;
+    res = false;
+  }
+
+  if (!kwsys::SystemTools::Touch(testBadSymlink, false)) {
+    std::cerr << "Problem with Touch (no create) for: " << testBadSymlink
+              << std::endl;
+    res = false;
+  }
+#endif
+
+  if (!kwsys::SystemTools::Touch(testNewDir, false)) {
+    std::cerr << "Problem with Touch (no create) for: " << testNewDir
+              << std::endl;
+    res = false;
+  }
+
   kwsys::SystemTools::Touch(testNewFile, true);
   if (!kwsys::SystemTools::RemoveADirectory(testNewDir)) {
     std::cerr << "Problem with RemoveADirectory for: " << testNewDir

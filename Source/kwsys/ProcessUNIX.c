@@ -2128,17 +2128,17 @@ static void kwsysProcessSetExitExceptionByIndex(kwsysProcess* cp, int sig,
 #endif
 #ifdef SIGABRT
     case SIGABRT:
-      KWSYSPE_CASE(Other, "Child aborted");
+      KWSYSPE_CASE(Other, "Subprocess aborted");
       break;
 #endif
 #ifdef SIGKILL
     case SIGKILL:
-      KWSYSPE_CASE(Other, "Child killed");
+      KWSYSPE_CASE(Other, "Subprocess killed");
       break;
 #endif
 #ifdef SIGTERM
     case SIGTERM:
-      KWSYSPE_CASE(Other, "Child terminated");
+      KWSYSPE_CASE(Other, "Subprocess terminated");
       break;
 #endif
 #ifdef SIGHUP
