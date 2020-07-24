@@ -101,7 +101,8 @@ void cmNinjaUtilityTargetGenerator::Generate(const std::string& config)
     lg->AppendTargetOutputs(genTarget, gg->GetByproductsForCleanTarget(),
                             config);
   }
-  lg->AppendTargetDepends(genTarget, deps, config, config);
+  lg->AppendTargetDepends(genTarget, deps, config, config,
+                          DependOnTargetArtifact);
 
   if (commands.empty()) {
     phonyBuild.Comment = "Utility command for " + this->GetTargetName();
