@@ -331,7 +331,7 @@ private:
     while (ptr != end &&
            (*ptr == '/'
 #  if defined(_WIN32)
-            || *ptr == ' \\'
+            || *ptr == '\\'
 #  endif
             )) {
       ptr += step;
