@@ -66,10 +66,10 @@ public:
 
   void AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs,
                            const std::string& config);
-  void AppendTargetDepends(
-    cmGeneratorTarget* target, cmNinjaDeps& outputs, const std::string& config,
-    const std::string& fileConfig,
-    cmNinjaTargetDepends depends = DependOnTargetArtifact);
+  void AppendTargetDepends(cmGeneratorTarget* target, cmNinjaDeps& outputs,
+                           const std::string& config,
+                           const std::string& fileConfig,
+                           cmNinjaTargetDepends depends);
 
   void AddCustomCommandTarget(cmCustomCommand const* cc,
                               cmGeneratorTarget* target);

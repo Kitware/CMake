@@ -318,14 +318,13 @@ public:
   virtual std::string OrderDependsTargetForTarget(
     cmGeneratorTarget const* target, const std::string& config) const;
 
-  void AppendTargetOutputs(
-    cmGeneratorTarget const* target, cmNinjaDeps& outputs,
-    const std::string& config,
-    cmNinjaTargetDepends depends = DependOnTargetArtifact);
-  void AppendTargetDepends(
-    cmGeneratorTarget const* target, cmNinjaDeps& outputs,
-    const std::string& config, const std::string& fileConfig,
-    cmNinjaTargetDepends depends = DependOnTargetArtifact);
+  void AppendTargetOutputs(cmGeneratorTarget const* target,
+                           cmNinjaDeps& outputs, const std::string& config,
+                           cmNinjaTargetDepends depends);
+  void AppendTargetDepends(cmGeneratorTarget const* target,
+                           cmNinjaDeps& outputs, const std::string& config,
+                           const std::string& fileConfig,
+                           cmNinjaTargetDepends depends);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaDeps& outputs,
                                   const std::string& config);

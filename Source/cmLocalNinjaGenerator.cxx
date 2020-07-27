@@ -102,9 +102,10 @@ void cmLocalNinjaGenerator::Generate()
               this->GetGlobalGenerator()->IsMultiConfig()) {
             cmNinjaBuild phonyAlias("phony");
             this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-              target.get(), phonyAlias.Outputs, "");
+              target.get(), phonyAlias.Outputs, "", DependOnTargetArtifact);
             this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-              target.get(), phonyAlias.ExplicitDeps, config);
+              target.get(), phonyAlias.ExplicitDeps, config,
+              DependOnTargetArtifact);
             this->GetGlobalNinjaGenerator()->WriteBuild(
               *this->GetGlobalNinjaGenerator()->GetConfigFileStream(config),
               phonyAlias);
@@ -115,11 +116,12 @@ void cmLocalNinjaGenerator::Generate()
           if (!this->GetGlobalNinjaGenerator()->GetDefaultConfigs().empty()) {
             cmNinjaBuild phonyAlias("phony");
             this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-              target.get(), phonyAlias.Outputs, "");
+              target.get(), phonyAlias.Outputs, "", DependOnTargetArtifact);
             for (auto const& config :
                  this->GetGlobalNinjaGenerator()->GetDefaultConfigs()) {
               this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-                target.get(), phonyAlias.ExplicitDeps, config);
+                target.get(), phonyAlias.ExplicitDeps, config,
+                DependOnTargetArtifact);
             }
             this->GetGlobalNinjaGenerator()->WriteBuild(
               *this->GetGlobalNinjaGenerator()->GetDefaultFileStream(),
@@ -127,10 +129,11 @@ void cmLocalNinjaGenerator::Generate()
           }
           cmNinjaBuild phonyAlias("phony");
           this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-            target.get(), phonyAlias.Outputs, "all");
+            target.get(), phonyAlias.Outputs, "all", DependOnTargetArtifact);
           for (auto const& config : this->GetConfigNames()) {
             this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-              target.get(), phonyAlias.ExplicitDeps, config);
+              target.get(), phonyAlias.ExplicitDeps, config,
+              DependOnTargetArtifact);
           }
           this->GetGlobalNinjaGenerator()->WriteBuild(
             *this->GetGlobalNinjaGenerator()->GetDefaultFileStream(),
@@ -355,8 +358,8 @@ void cmLocalNinjaGenerator::AppendTargetOutputs(cmGeneratorTarget* target,
                                                 cmNinjaDeps& outputs,
                                                 const std::string& config)
 {
-  this->GetGlobalNinjaGenerator()->AppendTargetOutputs(target, outputs,
-                                                       config);
+  this->GetGlobalNinjaGenerator()->AppendTargetOutputs(target, outputs, config,
+                                                       DependOnTargetArtifact);
 }
 
 void cmLocalNinjaGenerator::AppendTargetDepends(cmGeneratorTarget* target,

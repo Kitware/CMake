@@ -1189,7 +1189,7 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
   // finally generate the outputs of the target itself, if applicable
   cmNinjaDeps outs;
   if (!omit_self) {
-    this->AppendTargetOutputs(target, outs, config);
+    this->AppendTargetOutputs(target, outs, config, DependOnTargetArtifact);
   }
   outputs.insert(outs.begin(), outs.end());
 }
@@ -1201,7 +1201,7 @@ void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
   std::string outputPath = this->NinjaOutputPath(alias);
   std::string buildAlias = this->BuildAlias(outputPath, config);
   cmNinjaDeps outputs;
-  this->AppendTargetOutputs(target, outputs, config);
+  this->AppendTargetOutputs(target, outputs, config, DependOnTargetArtifact);
   // Mark the target's outputs as ambiguous to ensure that no other target
   // uses the output as an alias.
   for (std::string const& output : outputs) {
@@ -1267,11 +1267,12 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
     if (ta.second.Config == "all") {
       for (auto const& config : this->CrossConfigs) {
         this->AppendTargetOutputs(ta.second.GeneratorTarget,
-                                  build.ExplicitDeps, config);
+                                  build.ExplicitDeps, config,
+                                  DependOnTargetArtifact);
       }
     } else {
       this->AppendTargetOutputs(ta.second.GeneratorTarget, build.ExplicitDeps,
-                                ta.second.Config);
+                                ta.second.Config, DependOnTargetArtifact);
     }
     this->WriteBuild(this->EnableCrossConfigBuild() &&
                          (ta.second.Config == "all" ||
@@ -1299,7 +1300,8 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
         build.Outputs.front() = ta.first;
         build.ExplicitDeps.clear();
         this->AppendTargetOutputs(ta.second.GeneratorTarget,
-                                  build.ExplicitDeps, config);
+                                  build.ExplicitDeps, config,
+                                  DependOnTargetArtifact);
         this->WriteBuild(*this->GetConfigFileStream(config), build);
       }
     }
@@ -1321,7 +1323,8 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
         build.ExplicitDeps.clear();
         for (auto const& config : this->DefaultConfigs) {
           this->AppendTargetOutputs(ta.second.GeneratorTarget,
-                                    build.ExplicitDeps, config);
+                                    build.ExplicitDeps, config,
+                                    DependOnTargetArtifact);
         }
         this->WriteBuild(*this->GetDefaultFileStream(), build);
       }
@@ -1358,7 +1361,8 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       configDeps.emplace_back(build.Outputs.front());
       for (DirectoryTarget::Target const& t : dt.Targets) {
         if (!IsExcludedFromAllInConfig(t, config)) {
-          this->AppendTargetOutputs(t.GT, build.ExplicitDeps, config);
+          this->AppendTargetOutputs(t.GT, build.ExplicitDeps, config,
+                                    DependOnTargetArtifact);
         }
       }
       for (DirectoryTarget::Dir const& d : dt.Children) {

@@ -743,7 +743,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
 
   // Gather order-only dependencies.
   this->GetLocalGenerator()->AppendTargetDepends(
-    this->GetGeneratorTarget(), build.OrderOnlyDeps, config, config);
+    this->GetGeneratorTarget(), build.OrderOnlyDeps, config, config,
+    DependOnTargetArtifact);
 
   // Write the build statement for this target.
   bool usedResponseFile = false;
@@ -1168,8 +1169,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
              globalGen->IsMultiConfig() ? cmStrCat('.', config) : "", ".rsp"));
 
   // Gather order-only dependencies.
-  this->GetLocalGenerator()->AppendTargetDepends(gt, linkBuild.OrderOnlyDeps,
-                                                 config, fileConfig);
+  this->GetLocalGenerator()->AppendTargetDepends(
+    gt, linkBuild.OrderOnlyDeps, config, fileConfig, DependOnTargetArtifact);
 
   // Add order-only dependencies on versioning symlinks of shared libs we link.
   if (!this->GeneratorTarget->IsDLLPlatform()) {
