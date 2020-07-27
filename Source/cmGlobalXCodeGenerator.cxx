@@ -3753,6 +3753,8 @@ void cmGlobalXCodeGenerator::OutputXCodeWorkspaceSettings(
   if (this->XcodeVersion >= 100) {
     xout.Element("key", "BuildSystemType");
     xout.Element("string", "Original");
+    xout.Element("key", "DisableBuildSystemDeprecationWarning");
+    xout.Element("true");
   }
   if (hasGeneratedSchemes) {
     xout.Element("key",
