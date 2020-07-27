@@ -1188,7 +1188,7 @@ int check_cxx14()
 }
 #endif
 
-#if (__cplusplus >= 201703L || defined(__INTEL_COMPILER) && defined(__cpp_if_constexpr))
+#if (__cplusplus >= 201703L || defined(__INTEL_COMPILER) && defined(__cpp_deduction_guides))
 #include <optional>
 template <typename T,
           typename std::invoke_result<decltype(&T::get), T>::type = nullptr>
