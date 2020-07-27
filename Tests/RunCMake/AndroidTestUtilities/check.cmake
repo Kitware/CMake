@@ -13,7 +13,7 @@ function(compare_build_to_expected)
 endfunction()
 
 function(check_for_setup_test)
-  file(STRINGS "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" output_var REGEX "add_test\\(\"setup_test\".*")
+  file(STRINGS "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" output_var REGEX "add_test\\(setup_test.*")
   if(NOT output_var)
     set(RunCMake_TEST_FAILED "Could not find the test: setup_test" PARENT_SCOPE)
   endif()

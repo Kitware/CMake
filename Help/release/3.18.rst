@@ -332,3 +332,10 @@ Changes made since CMake 3.18.0 include the following.
   architecture (the Xcode ``ARCHS`` setting).  This is needed for Xcode 12
   to select the host's architecture, which older versions of Xcode did
   by default.
+
+* In CMake 3.18.0 the :command:`add_test` command learned to support
+  special characters in test names.  This was accidentally left out of
+  its release notes.  Unfortunately the fix breaks existing projects
+  that were using manual quoting or escaping to work around the prior
+  limitation.  This fix has been reverted in 3.18.1, but may be
+  re-introduced in future versions of CMake with a policy for compatibility.
