@@ -12,7 +12,7 @@
 .run_automatically:
     rules:
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
-          when: always
+          when: on_success
         - if: '$CI_MERGE_REQUEST_ID'
-          when: always
+          when: on_success
         - when: never
