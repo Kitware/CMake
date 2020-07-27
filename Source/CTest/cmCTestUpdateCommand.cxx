@@ -11,14 +11,13 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
 {
   if (!this->Source.empty()) {
     this->CTest->SetCTestConfiguration(
-      "SourceDirectory", cmSystemTools::CollapseFullPath(this->Source).c_str(),
+      "SourceDirectory", cmSystemTools::CollapseFullPath(this->Source),
       this->Quiet);
   } else {
     this->CTest->SetCTestConfiguration(
       "SourceDirectory",
       cmSystemTools::CollapseFullPath(
-        this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY"))
-        .c_str(),
+        this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY")),
       this->Quiet);
   }
   std::string source_dir =

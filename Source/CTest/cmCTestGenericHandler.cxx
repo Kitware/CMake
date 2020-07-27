@@ -100,7 +100,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
                                                     << std::endl);
     return false;
   }
-  this->CTest->AddSubmitFile(part, ostr.str().c_str());
+  this->CTest->AddSubmitFile(part, ostr.str());
   return true;
 }
 

@@ -12,6 +12,7 @@
 #include "cmCTestConfigureHandler.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -38,12 +39,12 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
     return nullptr;
   }
 
-  const char* ctestConfigureCommand =
-    this->Makefile->GetDefinition("CTEST_CONFIGURE_COMMAND");
+  cmProp ctestConfigureCommand =
+    this->Makefile->GetDef("CTEST_CONFIGURE_COMMAND");
 
-  if (ctestConfigureCommand && *ctestConfigureCommand) {
+  if (cmNonempty(ctestConfigureCommand)) {
     this->CTest->SetCTestConfiguration("ConfigureCommand",
-                                       ctestConfigureCommand, this->Quiet);
+                                       *ctestConfigureCommand, this->Quiet);
   } else {
     const char* cmakeGeneratorName =
       this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
@@ -125,8 +126,8 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       cmakeConfigureCommand += source_dir;
       cmakeConfigureCommand += "\"";
 
-      this->CTest->SetCTestConfiguration(
-        "ConfigureCommand", cmakeConfigureCommand.c_str(), this->Quiet);
+      this->CTest->SetCTestConfiguration("ConfigureCommand",
+                                         cmakeConfigureCommand, this->Quiet);
     } else {
       this->SetError(
         "Configure command is not specified. If this is a "
@@ -136,10 +137,10 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
     }
   }
 
-  if (const char* labelsForSubprojects =
-        this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
+  if (cmProp labelsForSubprojects =
+        this->Makefile->GetDef("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
-                                       labelsForSubprojects, this->Quiet);
+                                       *labelsForSubprojects, this->Quiet);
   }
 
   cmCTestConfigureHandler* handler = this->CTest->GetConfigureHandler();

@@ -94,10 +94,9 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   std::string sourceDir = cmSystemTools::CollapseFullPath(src_dir);
   std::string binaryDir = cmSystemTools::CollapseFullPath(bld_dir);
-  this->CTest->SetCTestConfiguration("SourceDirectory", sourceDir.c_str(),
+  this->CTest->SetCTestConfiguration("SourceDirectory", sourceDir,
                                      this->Quiet);
-  this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir.c_str(),
-                                     this->Quiet);
+  this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir, this->Quiet);
 
   if (smodel) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,

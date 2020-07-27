@@ -1374,7 +1374,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
   xml.StartElement("TestList");
   for (cmCTestTestResult const& result : this->TestResults) {
     std::string testPath = result.Path + "/" + result.Name;
-    xml.Element("Test", this->CTest->GetShortPathToFile(testPath.c_str()));
+    xml.Element("Test", this->CTest->GetShortPathToFile(testPath));
   }
   xml.EndElement(); // TestList
   for (cmCTestTestResult& result : this->TestResults) {
@@ -1483,8 +1483,8 @@ void cmCTestTestHandler::WriteTestResultHeader(cmXMLWriter& xml,
   }
   std::string testPath = result.Path + "/" + result.Name;
   xml.Element("Name", result.Name);
-  xml.Element("Path", this->CTest->GetShortPathToFile(result.Path.c_str()));
-  xml.Element("FullName", this->CTest->GetShortPathToFile(testPath.c_str()));
+  xml.Element("Path", this->CTest->GetShortPathToFile(result.Path));
+  xml.Element("FullName", this->CTest->GetShortPathToFile(testPath));
   xml.Element("FullCommandLine", result.FullCommandLine);
 }
 
@@ -1546,12 +1546,12 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
 }
 
 // Find the appropriate executable to run for a test
-std::string cmCTestTestHandler::FindTheExecutable(const char* exe)
+std::string cmCTestTestHandler::FindTheExecutable(const std::string& exe)
 {
   std::string resConfig;
   std::vector<std::string> extraPaths;
   std::vector<std::string> failedPaths;
-  if (strcmp(exe, "NOT_AVAILABLE") == 0) {
+  if (exe == "NOT_AVAILABLE") {
     return exe;
   }
   return cmCTestTestHandler::FindExecutable(this->CTest, exe, resConfig,
@@ -1607,7 +1607,7 @@ void cmCTestTestHandler::AddConfigurations(
 
 // Find the appropriate executable to run for a test
 std::string cmCTestTestHandler::FindExecutable(
-  cmCTest* ctest, const char* testCommand, std::string& resultingConfig,
+  cmCTest* ctest, const std::string& testCommand, std::string& resultingConfig,
   std::vector<std::string>& extraPaths, std::vector<std::string>& failed)
 {
   // now run the compiled test if we can find it
