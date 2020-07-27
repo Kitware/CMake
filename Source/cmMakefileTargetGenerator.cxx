@@ -839,7 +839,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
           run_iwyu += " --tidy=";
           const char* driverMode = this->Makefile->GetDefinition(
             "CMAKE_" + lang + "_CLANG_TIDY_DRIVER_MODE");
-          if (!(driverMode && *driverMode)) {
+          if (!cmNonempty(driverMode)) {
             driverMode = lang == "C" ? "gcc" : "g++";
           }
           run_iwyu += this->LocalGenerator->EscapeForShell(
@@ -1857,7 +1857,7 @@ void cmMakefileTargetGenerator::GenDefFile(
       this->LocalGenerator->GetCurrentBinaryDirectory(), objlist_file),
     cmOutputConverter::SHELL);
   const char* nm_executable = this->Makefile->GetDefinition("CMAKE_NM");
-  if (nm_executable && *nm_executable) {
+  if (cmNonempty(nm_executable)) {
     cmd += " --nm=";
     cmd += this->LocalCommonGenerator->ConvertToOutputFormat(
       nm_executable, cmOutputConverter::SHELL);

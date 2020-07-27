@@ -221,7 +221,7 @@ void cmLocalGenerator::ComputeObjectMaxPath()
   this->ObjectPathMax = 1000;
 #endif
   const char* plen = this->Makefile->GetDefinition("CMAKE_OBJECT_PATH_MAX");
-  if (plen && *plen) {
+  if (cmNonempty(plen)) {
     unsigned int pmax;
     if (sscanf(plen, "%u", &pmax) == 1) {
       if (pmax >= 128) {
@@ -434,7 +434,7 @@ void cmLocalGenerator::GenerateInstallRules()
       prefix_win32 = "C:";
     }
     const char* project_name = this->Makefile->GetDefinition("PROJECT_NAME");
-    if (project_name && project_name[0]) {
+    if (cmNonempty(project_name)) {
       prefix_win32 += "/Program Files/";
       prefix_win32 += project_name;
     } else {
@@ -893,7 +893,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
   emitted.insert("/System/Library/Frameworks");
 #endif
   for (std::string const& i : includes) {
-    if (fwSearchFlag && *fwSearchFlag && this->Makefile->IsOn("APPLE") &&
+    if (cmNonempty(fwSearchFlag) && this->Makefile->IsOn("APPLE") &&
         cmSystemTools::IsPathToFramework(i)) {
       std::string const frameworkDir =
         cmSystemTools::CollapseFullPath(cmStrCat(i, "/../"));
@@ -1653,7 +1653,7 @@ static std::string GetFrameworkFlags(const std::string& lang,
 
   std::string fwSearchFlagVar = "CMAKE_" + lang + "_FRAMEWORK_SEARCH_FLAG";
   const char* fwSearchFlag = mf->GetDefinition(fwSearchFlagVar);
-  if (!(fwSearchFlag && *fwSearchFlag)) {
+  if (!cmNonempty(fwSearchFlag)) {
     return std::string();
   }
 
@@ -1892,7 +1892,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     std::string sysrootFlagVar =
       std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
     const char* sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
-    if (sysrootFlag && *sysrootFlag) {
+    if (cmNonempty(sysrootFlag)) {
       if (!this->AppleArchSysroots.empty() &&
           !this->AllAppleArchSysrootsAreTheSame(archs, sysroot)) {
         for (std::string const& arch : archs) {
@@ -1921,8 +1921,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
     const char* deploymentTargetFlag =
       this->Makefile->GetDefinition(deploymentTargetFlagVar);
-    if (deploymentTargetFlag && *deploymentTargetFlag && deploymentTarget &&
-        *deploymentTarget) {
+    if (cmNonempty(deploymentTargetFlag) && cmNonempty(deploymentTarget)) {
       flags += " ";
       flags += deploymentTargetFlag;
       flags += deploymentTarget;
@@ -3062,7 +3061,7 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
   if (!lang.empty()) {
     const char* df =
       this->Makefile->GetDefinition(cmStrCat("CMAKE_", lang, "_DEFINE_FLAG"));
-    if (df && *df) {
+    if (cmNonempty(df)) {
       dflag = df;
     }
   }

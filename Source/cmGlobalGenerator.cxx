@@ -775,7 +775,7 @@ void cmGlobalGenerator::EnableLanguage(
     std::string compilerEnv = cmStrCat("CMAKE_", lang, "_COMPILER_ENV_VAR");
     std::ostringstream noCompiler;
     const char* compilerFile = mf->GetDefinition(compilerName);
-    if (!compilerFile || !*compilerFile || cmIsNOTFOUND(compilerFile)) {
+    if (!cmNonempty(compilerFile) || cmIsNOTFOUND(compilerFile)) {
       /* clang-format off */
       noCompiler <<
         "No " << compilerName << " could be found.\n"
@@ -2446,7 +2446,7 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
   gti.WorkingDir = mf->GetCurrentBinaryDirectory();
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCPackCommand());
-  if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
+  if (cmNonempty(cmakeCfgIntDir) && cmakeCfgIntDir[0] != '.') {
     singleLine.push_back("-C");
     singleLine.push_back(cmakeCfgIntDir);
   }
@@ -2531,7 +2531,7 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
       singleLine.push_back(arg);
     }
   }
-  if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
+  if (cmNonempty(cmakeCfgIntDir) && cmakeCfgIntDir[0] != '.') {
     singleLine.push_back("-C");
     singleLine.push_back(cmakeCfgIntDir);
   } else // TODO: This is a hack. Should be something to do with the
@@ -2612,7 +2612,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
       "installation rules have been specified",
       mf->GetBacktrace());
   } else if (this->InstallTargetEnabled && !skipInstallRules) {
-    if (!cmakeCfgIntDir || !*cmakeCfgIntDir || cmakeCfgIntDir[0] == '.') {
+    if (!(cmNonempty(cmakeCfgIntDir) && cmakeCfgIntDir[0] != '.')) {
       std::set<std::string>* componentsSet = &this->InstallComponents;
       std::ostringstream ostr;
       if (!componentsSet->empty()) {
@@ -2651,7 +2651,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
       cmd = "cmake";
     }
     singleLine.push_back(cmd);
-    if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
+    if (cmNonempty(cmakeCfgIntDir) && cmakeCfgIntDir[0] != '.') {
       std::string cfgArg = "-DBUILD_TYPE=";
       bool useEPN = this->UseEffectivePlatformName(mf.get());
       if (useEPN) {

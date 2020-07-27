@@ -65,7 +65,7 @@ struct StanardLevelComputer
 
     const char* defaultStd = makefile->GetDefinition(
       cmStrCat("CMAKE_", this->Language, "_STANDARD_DEFAULT"));
-    if (!defaultStd || !*defaultStd) {
+    if (!cmNonempty(defaultStd)) {
       // this compiler has no notion of language standard levels
       return std::string{};
     }
@@ -472,7 +472,7 @@ const char* cmStandardLevelResolver::CompileFeaturesAvailable(
   const char* featuresKnown =
     this->Makefile->GetDefinition("CMAKE_" + lang + "_COMPILE_FEATURES");
 
-  if (!featuresKnown || !*featuresKnown) {
+  if (!cmNonempty(featuresKnown)) {
     std::ostringstream e;
     if (error) {
       e << "no";

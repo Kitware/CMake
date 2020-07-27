@@ -48,7 +48,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
   } else {
     const char* cmakeGeneratorName =
       this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
-    if (cmakeGeneratorName && *cmakeGeneratorName) {
+    if (cmNonempty(cmakeGeneratorName)) {
       const std::string& source_dir =
         this->CTest->GetCTestConfiguration("SourceDirectory");
       if (source_dir.empty()) {
@@ -108,7 +108,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
 
       const char* cmakeGeneratorPlatform =
         this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
-      if (cmakeGeneratorPlatform && *cmakeGeneratorPlatform) {
+      if (cmNonempty(cmakeGeneratorPlatform)) {
         cmakeConfigureCommand += " \"-A";
         cmakeConfigureCommand += cmakeGeneratorPlatform;
         cmakeConfigureCommand += "\"";
@@ -116,7 +116,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
 
       const char* cmakeGeneratorToolset =
         this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
-      if (cmakeGeneratorToolset && *cmakeGeneratorToolset) {
+      if (cmNonempty(cmakeGeneratorToolset)) {
         cmakeConfigureCommand += " \"-T";
         cmakeConfigureCommand += cmakeGeneratorToolset;
         cmakeConfigureCommand += "\"";

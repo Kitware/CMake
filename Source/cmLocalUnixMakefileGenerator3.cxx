@@ -1807,7 +1807,7 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     std::string cidVar =
       cmStrCat("CMAKE_", implicitLang.first, "_COMPILER_ID");
     const char* cid = this->Makefile->GetDefinition(cidVar);
-    if (cid && *cid) {
+    if (cmNonempty(cid)) {
       cmakefileStream << "set(CMAKE_" << implicitLang.first
                       << "_COMPILER_ID \"" << cid << "\")\n";
     }
