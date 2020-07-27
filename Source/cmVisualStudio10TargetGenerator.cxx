@@ -2884,6 +2884,12 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     clOptions.RemoveFlag("SpectreMitigation");
   }
 
+  // Remove any target-wide -TC or -TP flag added by the project.
+  // Such flags are unnecessary and break our model of language selection.
+  if (langForClCompile == "C" || langForClCompile == "CXX") {
+    clOptions.RemoveFlag("CompileAs");
+  }
+
   this->ClOptions[configName] = std::move(pOptions);
   return true;
 }
