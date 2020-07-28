@@ -4144,7 +4144,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
   Elem e1(e0, "ItemGroup");
   e1.SetHasElements();
   for (cmGeneratorTarget const* dt : depends) {
-    if (dt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!dt->IsInBuildSystem()) {
       continue;
     }
     // skip fortran targets as they can not be processed by MSBuild

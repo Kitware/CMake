@@ -196,6 +196,7 @@ public:
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   bool IsPerConfig() const;
+  bool CanCompileSources() const;
 
   bool GetMappedConfig(std::string const& desired_config, cmProp& loc,
                        cmProp& imp, std::string& suffix) const;

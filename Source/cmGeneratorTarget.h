@@ -45,8 +45,10 @@ public:
 
   cmGlobalGenerator* GetGlobalGenerator() const;
 
+  bool IsInBuildSystem() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
+  bool CanCompileSources() const;
   const std::string& GetLocation(const std::string& config) const;
 
   std::vector<cmCustomCommand> const& GetPreBuildCommands() const;

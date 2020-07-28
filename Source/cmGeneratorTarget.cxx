@@ -1089,6 +1089,27 @@ std::vector<cmCustomCommand> const& cmGeneratorTarget::GetPostBuildCommands()
   return this->Target->GetPostBuildCommands();
 }
 
+bool cmGeneratorTarget::IsInBuildSystem() const
+{
+  if (this->IsImported()) {
+    return false;
+  }
+  switch (this->Target->GetType()) {
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY:
+    case cmStateEnums::UTILITY:
+    case cmStateEnums::GLOBAL_TARGET:
+      return true;
+    case cmStateEnums::INTERFACE_LIBRARY:
+    case cmStateEnums::UNKNOWN_LIBRARY:
+      break;
+  }
+  return false;
+}
+
 bool cmGeneratorTarget::IsImported() const
 {
   return this->Target->IsImported();
@@ -1097,6 +1118,11 @@ bool cmGeneratorTarget::IsImported() const
 bool cmGeneratorTarget::IsImportedGloballyVisible() const
 {
   return this->Target->IsImportedGloballyVisible();
+}
+
+bool cmGeneratorTarget::CanCompileSources() const
+{
+  return this->Target->CanCompileSources();
 }
 
 const std::string& cmGeneratorTarget::GetLocationForBuild() const
@@ -1365,7 +1391,7 @@ void AddSwiftImplicitIncludeDirectories(
 
     for (const cmLinkImplItem& library : libraries->Libraries) {
       if (const cmGeneratorTarget* dependency = library.Target) {
-        if (dependency->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+        if (!dependency->IsInBuildSystem()) {
           continue;
         }
         if (cm::contains(dependency->GetAllConfigCompileLanguages(),
@@ -2441,6 +2467,12 @@ private:
 cmGeneratorTarget::LinkClosure const* cmGeneratorTarget::GetLinkClosure(
   const std::string& config) const
 {
+  // There is no link implementation for targets that cannot compile sources.
+  if (!this->CanCompileSources()) {
+    static LinkClosure const empty = { {}, {} };
+    return &empty;
+  }
+
   std::string key(cmSystemTools::UpperCase(config));
   auto i = this->LinkClosureMap.find(key);
   if (i == this->LinkClosureMap.end()) {
@@ -2757,6 +2789,12 @@ const std::vector<const cmGeneratorTarget*>&
 cmGeneratorTarget::GetLinkImplementationClosure(
   const std::string& config) const
 {
+  // There is no link implementation for targets that cannot compile sources.
+  if (!this->CanCompileSources()) {
+    static std::vector<const cmGeneratorTarget*> const empty;
+    return empty;
+  }
+
   LinkImplClosure& tgts = this->LinkImplClosureMap[config];
   if (!tgts.Done) {
     tgts.Done = true;
@@ -2764,6 +2802,7 @@ cmGeneratorTarget::GetLinkImplementationClosure(
 
     cmLinkImplementationLibraries const* impl =
       this->GetLinkImplementationLibraries(config);
+    assert(impl);
 
     for (cmLinkImplItem const& lib : impl->Libraries) {
       processILibs(config, this, lib,
@@ -2813,29 +2852,26 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
   this->CurrentEntry = nullptr;
 
   // Queue all the source files already specified for the target.
-  if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-    std::set<cmSourceFile*> emitted;
-    std::vector<std::string> const& configs =
-      this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
-    for (std::string const& c : configs) {
-      std::vector<cmSourceFile*> sources;
-      this->GeneratorTarget->GetSourceFiles(sources, c);
-      for (cmSourceFile* sf : sources) {
-        const std::set<cmGeneratorTarget const*> tgts =
-          this->GlobalGenerator->GetFilenameTargetDepends(sf);
-        if (cm::contains(tgts, this->GeneratorTarget)) {
-          std::ostringstream e;
-          e << "Evaluation output file\n  \"" << sf->ResolveFullPath()
-            << "\"\ndepends on the sources of a target it is used in.  This "
-               "is a dependency loop and is not allowed.";
-          this->GeneratorTarget->LocalGenerator->IssueMessage(
-            MessageType::FATAL_ERROR, e.str());
-          return;
-        }
-        if (emitted.insert(sf).second &&
-            this->SourcesQueued.insert(sf).second) {
-          this->SourceQueue.push(sf);
-        }
+  std::set<cmSourceFile*> emitted;
+  std::vector<std::string> const& configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+  for (std::string const& c : configs) {
+    std::vector<cmSourceFile*> sources;
+    this->GeneratorTarget->GetSourceFiles(sources, c);
+    for (cmSourceFile* sf : sources) {
+      const std::set<cmGeneratorTarget const*> tgts =
+        this->GlobalGenerator->GetFilenameTargetDepends(sf);
+      if (cm::contains(tgts, this->GeneratorTarget)) {
+        std::ostringstream e;
+        e << "Evaluation output file\n  \"" << sf->ResolveFullPath()
+          << "\"\ndepends on the sources of a target it is used in.  This "
+             "is a dependency loop and is not allowed.";
+        this->GeneratorTarget->LocalGenerator->IssueMessage(
+          MessageType::FATAL_ERROR, e.str());
+        return;
+      }
+      if (emitted.insert(sf).second && this->SourcesQueued.insert(sf).second) {
+        this->SourceQueue.push(sf);
       }
     }
   }
@@ -3413,23 +3449,24 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
                       &dagChecker, entries);
 
   if (this->Makefile->IsOn("APPLE")) {
-    cmLinkImplementationLibraries const* impl =
-      this->GetLinkImplementationLibraries(config);
-    for (cmLinkImplItem const& lib : impl->Libraries) {
-      std::string libDir = cmSystemTools::CollapseFullPath(
-        lib.AsStr(), this->Makefile->GetHomeOutputDirectory());
+    if (cmLinkImplementationLibraries const* impl =
+          this->GetLinkImplementationLibraries(config)) {
+      for (cmLinkImplItem const& lib : impl->Libraries) {
+        std::string libDir = cmSystemTools::CollapseFullPath(
+          lib.AsStr(), this->Makefile->GetHomeOutputDirectory());
 
-      static cmsys::RegularExpression frameworkCheck(
-        "(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
-      if (!frameworkCheck.find(libDir)) {
-        continue;
+        static cmsys::RegularExpression frameworkCheck(
+          "(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
+        if (!frameworkCheck.find(libDir)) {
+          continue;
+        }
+
+        libDir = frameworkCheck.match(1);
+
+        EvaluatedTargetPropertyEntry ee(lib, cmListFileBacktrace());
+        ee.Values.emplace_back(std::move(libDir));
+        entries.Entries.emplace_back(std::move(ee));
       }
-
-      libDir = frameworkCheck.match(1);
-
-      EvaluatedTargetPropertyEntry ee(lib, cmListFileBacktrace());
-      ee.Values.emplace_back(std::move(libDir));
-      entries.Entries.emplace_back(std::move(ee));
     }
   }
 
@@ -6524,15 +6561,20 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
                           iface.HadHeadSensitiveCondition,
                           iface.HadContextSensitiveCondition,
                           iface.HadLinkLanguageSensitiveCondition);
-  } else if (!cmp0022NEW)
+    return;
+  }
+
   // If CMP0022 is NEW then the plain tll signature sets the
   // INTERFACE_LINK_LIBRARIES, so if we get here then the project
   // cleared the property explicitly and we should not fall back
   // to the link implementation.
-  {
-    // The link implementation is the default link interface.
-    cmLinkImplementationLibraries const* impl =
-      this->GetLinkImplementationLibrariesInternal(config, headTarget);
+  if (cmp0022NEW) {
+    return;
+  }
+
+  // The link implementation is the default link interface.
+  if (cmLinkImplementationLibraries const* impl =
+        this->GetLinkImplementationLibrariesInternal(config, headTarget)) {
     iface.Libraries.insert(iface.Libraries.end(), impl->Libraries.begin(),
                            impl->Libraries.end());
     if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
@@ -6826,8 +6868,8 @@ const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
 const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
   const std::string& config, bool secondPass) const
 {
-  // There is no link implementation for imported targets.
-  if (this->IsImported()) {
+  // There is no link implementation for targets that cannot compile sources.
+  if (!this->CanCompileSources()) {
     return nullptr;
   }
 
@@ -6990,6 +7032,11 @@ std::string cmGeneratorTarget::GetDeprecation() const
 void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
                                      const std::string& config) const
 {
+  // Targets that do not compile anything have no languages.
+  if (!this->CanCompileSources()) {
+    return;
+  }
+
   std::vector<cmSourceFile*> sourceFiles;
   this->GetSourceFiles(sourceFiles, config);
   for (cmSourceFile* src : sourceFiles) {
@@ -7085,8 +7132,8 @@ cmLinkImplementationLibraries const*
 cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
   const std::string& config, cmGeneratorTarget const* head) const
 {
-  // There is no link implementation for imported targets.
-  if (this->IsImported()) {
+  // There is no link implementation for targets that cannot compile sources.
+  if (!this->CanCompileSources()) {
     return nullptr;
   }
 

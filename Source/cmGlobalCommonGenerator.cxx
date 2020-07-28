@@ -42,12 +42,7 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
     // for all targets in the directory.
     for (const auto& gt : lg->GetGeneratorTargets()) {
       cmStateEnums::TargetType const type = gt->GetType();
-      if (type != cmStateEnums::EXECUTABLE &&
-          type != cmStateEnums::STATIC_LIBRARY &&
-          type != cmStateEnums::SHARED_LIBRARY &&
-          type != cmStateEnums::MODULE_LIBRARY &&
-          type != cmStateEnums::OBJECT_LIBRARY &&
-          type != cmStateEnums::UTILITY) {
+      if (type == cmStateEnums::GLOBAL_TARGET || !gt->IsInBuildSystem()) {
         continue;
       }
       DirectoryTarget::Target t;

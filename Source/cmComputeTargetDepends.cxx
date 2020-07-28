@@ -184,7 +184,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 {
   // Get the depender.
   cmGeneratorTarget const* depender = this->Targets[depender_index];
-  if (depender->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!depender->IsInBuildSystem()) {
     return;
   }
 
@@ -198,16 +198,18 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     std::vector<std::string> const& configs =
       depender->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
     for (std::string const& it : configs) {
-      cmLinkImplementation const* impl = depender->GetLinkImplementation(it);
-
       // A target should not depend on itself.
       emitted.insert(cmLinkItem(depender, false, cmListFileBacktrace()));
       emitted.insert(cmLinkItem(depender, true, cmListFileBacktrace()));
-      for (cmLinkImplItem const& lib : impl->Libraries) {
-        // Don't emit the same library twice for this target.
-        if (emitted.insert(lib).second) {
-          this->AddTargetDepend(depender_index, lib, true, false);
-          this->AddInterfaceDepends(depender_index, lib, it, emitted);
+
+      if (cmLinkImplementation const* impl =
+            depender->GetLinkImplementation(it)) {
+        for (cmLinkImplItem const& lib : impl->Libraries) {
+          // Don't emit the same library twice for this target.
+          if (emitted.insert(lib).second) {
+            this->AddTargetDepend(depender_index, lib, true, false);
+            this->AddInterfaceDepends(depender_index, lib, it, emitted);
+          }
         }
       }
 
@@ -356,10 +358,9 @@ void cmComputeTargetDepends::AddTargetDepend(
   int depender_index, cmGeneratorTarget const* dependee,
   cmListFileBacktrace const& dependee_backtrace, bool linking, bool cross)
 {
-  if (dependee->IsImported() ||
-      dependee->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-    // Skip IMPORTED and INTERFACE targets but follow their utility
-    // dependencies.
+  if (!dependee->IsInBuildSystem()) {
+    // Skip targets that are not in the buildsystem but follow their
+    // utility dependencies.
     std::set<cmLinkItem> const& utils = dependee->GetUtilityItems();
     for (cmLinkItem const& i : utils) {
       if (cmGeneratorTarget const* transitive_dependee = i.Target) {

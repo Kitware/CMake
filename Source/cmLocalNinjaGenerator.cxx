@@ -90,7 +90,7 @@ void cmLocalNinjaGenerator::Generate()
   }
 
   for (const auto& target : this->GetGeneratorTargets()) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     auto tg = cmNinjaTargetGenerator::New(target.get());

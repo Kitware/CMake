@@ -11,7 +11,6 @@
 #include "cmGhsMultiTargetGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
-#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -33,7 +32,7 @@ std::string cmLocalGhsMultiGenerator::GetTargetDirectory(
 void cmLocalGhsMultiGenerator::GenerateTargetsDepthFirst(
   cmGeneratorTarget* target, std::vector<cmGeneratorTarget*>& remaining)
 {
-  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!target->IsInBuildSystem()) {
     return;
   }
   // Find this target in the list of remaining targets.

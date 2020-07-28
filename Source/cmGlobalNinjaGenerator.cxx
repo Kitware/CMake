@@ -1105,8 +1105,9 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
       break;
     }
 
-    default:
-      return;
+    case cmStateEnums::INTERFACE_LIBRARY:
+    case cmStateEnums::UNKNOWN_LIBRARY:
+      break;
   }
 }
 
@@ -1128,7 +1129,7 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
     cmNinjaDeps outs;
     for (cmTargetDepend const& targetDep :
          this->GetTargetDirectDepends(target)) {
-      if (targetDep->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      if (!targetDep->IsInBuildSystem()) {
         continue;
       }
       if (targetDep.IsCross()) {
@@ -1170,7 +1171,7 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
     cmNinjaOuts this_outs; // this will be the new cache entry
 
     for (auto const& dep_target : this->GetTargetDirectDepends(target)) {
-      if (dep_target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+      if (!dep_target->IsInBuildSystem() ||
           (this->EnableCrossConfigBuild() && !dep_target.IsCross())) {
         continue;
       }

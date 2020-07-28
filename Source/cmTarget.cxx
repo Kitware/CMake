@@ -272,8 +272,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   };
 
   // Setup default property values.
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetType() != cmStateEnums::UTILITY) {
+  if (this->CanCompileSources()) {
     initProp("ANDROID_API");
     initProp("ANDROID_API_MIN");
     initProp("ANDROID_ARCH");
@@ -343,10 +342,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("C_STANDARD");
     initProp("C_STANDARD_REQUIRED");
     initProp("C_EXTENSIONS");
+    initProp("C_VISIBILITY_PRESET");
     initProp("OBJC_COMPILER_LAUNCHER");
     initProp("OBJC_STANDARD");
     initProp("OBJC_STANDARD_REQUIRED");
     initProp("OBJC_EXTENSIONS");
+    initProp("OBJC_VISIBILITY_PRESET");
     initProp("CXX_CLANG_TIDY");
     initProp("CXX_COMPILER_LAUNCHER");
     initProp("CXX_CPPLINT");
@@ -355,10 +356,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("CXX_STANDARD");
     initProp("CXX_STANDARD_REQUIRED");
     initProp("CXX_EXTENSIONS");
+    initProp("CXX_VISIBILITY_PRESET");
     initProp("OBJCXX_COMPILER_LAUNCHER");
     initProp("OBJCXX_STANDARD");
     initProp("OBJCXX_STANDARD_REQUIRED");
     initProp("OBJCXX_EXTENSIONS");
+    initProp("OBJCXX_VISIBILITY_PRESET");
     initProp("CUDA_STANDARD");
     initProp("CUDA_STANDARD_REQUIRED");
     initProp("CUDA_EXTENSIONS");
@@ -367,6 +370,11 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
     initProp("CUDA_RUNTIME_LIBRARY");
     initProp("CUDA_ARCHITECTURES");
+    initProp("CUDA_VISIBILITY_PRESET");
+    initProp("VISIBILITY_INLINES_HIDDEN");
+    initProp("JOB_POOL_COMPILE");
+    initProp("JOB_POOL_LINK");
+    initProp("JOB_POOL_PRECOMPILE_HEADER");
     initProp("LINK_SEARCH_START_STATIC");
     initProp("LINK_SEARCH_END_STATIC");
     initProp("Swift_LANGUAGE_VERSION");
@@ -410,7 +418,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
 
   // Setup per-configuration property default values.
-  if (this->GetType() != cmStateEnums::UTILITY) {
+  if (this->GetType() != cmStateEnums::UTILITY &&
+      this->GetType() != cmStateEnums::GLOBAL_TARGET) {
     static const auto configProps = {
       /* clang-format needs this comment to break after the opening brace */
       "ARCHIVE_OUTPUT_DIRECTORY_",     "LIBRARY_OUTPUT_DIRECTORY_",
@@ -487,16 +496,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                impl->Makefile->GetLinkDirectoriesBacktraces());
   }
 
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetType() != cmStateEnums::UTILITY) {
-    initProp("C_VISIBILITY_PRESET");
-    initProp("CXX_VISIBILITY_PRESET");
-    initProp("OBJC_VISIBILITY_PRESET");
-    initProp("OBJCXX_VISIBILITY_PRESET");
-    initProp("CUDA_VISIBILITY_PRESET");
-    initProp("VISIBILITY_INLINES_HIDDEN");
-  }
-
   if (impl->TargetType == cmStateEnums::EXECUTABLE) {
     initProp("ANDROID_GUI");
     initProp("CROSSCOMPILING_EMULATOR");
@@ -505,16 +504,13 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
       impl->TargetType == cmStateEnums::MODULE_LIBRARY) {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
+  } else if (this->CanCompileSources()) {
+    initProp("POSITION_INDEPENDENT_CODE");
   }
   if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
       impl->TargetType == cmStateEnums::EXECUTABLE) {
     initProp("AIX_EXPORT_ALL_SYMBOLS");
     initProp("WINDOWS_EXPORT_ALL_SYMBOLS");
-  }
-
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetType() != cmStateEnums::UTILITY) {
-    initProp("POSITION_INDEPENDENT_CODE");
   }
 
   // Record current policies for later use.
@@ -526,13 +522,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     // targets,
     // so ensure that the conditions don't lead to nonsense.
     impl->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
-  }
-
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetType() != cmStateEnums::UTILITY) {
-    initProp("JOB_POOL_COMPILE");
-    initProp("JOB_POOL_LINK");
-    initProp("JOB_POOL_PRECOMPILE_HEADER");
   }
 
   if (impl->TargetType <= cmStateEnums::GLOBAL_TARGET) {
@@ -1915,6 +1904,27 @@ bool cmTarget::IsImportedGloballyVisible() const
 bool cmTarget::IsPerConfig() const
 {
   return impl->PerConfig;
+}
+
+bool cmTarget::CanCompileSources() const
+{
+  if (this->IsImported()) {
+    return false;
+  }
+  switch (this->GetType()) {
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY:
+      return true;
+    case cmStateEnums::UTILITY:
+    case cmStateEnums::INTERFACE_LIBRARY:
+    case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::UNKNOWN_LIBRARY:
+      break;
+  }
+  return false;
 }
 
 const char* cmTarget::GetSuffixVariableInternal(

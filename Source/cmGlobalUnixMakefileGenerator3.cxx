@@ -845,8 +845,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
     for (const auto& gt : lg->GetGeneratorTargets()) {
       cmLocalGenerator* tlg = gt->GetLocalGenerator();
 
-      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-          IsExcluded(lg.get(), gt.get())) {
+      if (!gt->IsInBuildSystem() || IsExcluded(lg.get(), gt.get())) {
         continue;
       }
 
@@ -881,7 +880,7 @@ size_t cmGlobalUnixMakefileGenerator3::CountProgressMarksInTarget(
   if (emitted.insert(target).second) {
     count = this->ProgressMap[target].Marks.size();
     for (cmTargetDepend const& depend : this->GetTargetDirectDepends(target)) {
-      if (depend->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      if (!depend->IsInBuildSystem()) {
         continue;
       }
       count += this->CountProgressMarksInTarget(depend, emitted);
@@ -938,7 +937,7 @@ void cmGlobalUnixMakefileGenerator3::AppendGlobalTargetDepends(
   for (cmTargetDepend const& i : this->GetTargetDirectDepends(target)) {
     // Create the target-level dependency.
     cmGeneratorTarget const* dep = i;
-    if (dep->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!dep->IsInBuildSystem()) {
       continue;
     }
     cmLocalUnixMakefileGenerator3* lg3 =

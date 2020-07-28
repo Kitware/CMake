@@ -467,7 +467,7 @@ void cmGlobalGhsMultiGenerator::WriteAllTarget(
     this->ProjectTargets.push_back(t);
   }
   for (cmGeneratorTarget const* t : sortedProjectTargets) {
-    if (t->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!t->IsInBuildSystem()) {
       continue;
     }
     if (!IsExcluded(t->GetLocalGenerator(), t)) {
