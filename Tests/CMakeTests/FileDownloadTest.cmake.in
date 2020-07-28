@@ -163,3 +163,16 @@ __reportIfWrongStatus("${status}" 0)
 if(NOT EXISTS file12.png)
   message(SEND_ERROR "file12.png not downloaded: ${status}")
 endif()
+
+message(STATUS "FileDownload:13")
+file(DOWNLOAD
+  ${url}
+  TIMEOUT ${timeout}
+  STATUS status
+  )
+__reportIfWrongStatus("${status}" 0)
+if(EXISTS TIMEOUT)
+  file(REMOVE TIMEOUT)
+  message(SEND_ERROR "TIMEOUT argument was incorrectly interpreted as a filename")
+endif()
+message(STATUS "${status}")

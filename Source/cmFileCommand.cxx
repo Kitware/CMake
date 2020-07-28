@@ -1394,8 +1394,10 @@ size_t cmWriteToFileCallback(void* ptr, size_t size, size_t nmemb, void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
   cmsys::ofstream* fout = static_cast<cmsys::ofstream*>(data);
-  const char* chPtr = static_cast<char*>(ptr);
-  fout->write(chPtr, realsize);
+  if (fout) {
+    const char* chPtr = static_cast<char*>(ptr);
+    fout->write(chPtr, realsize);
+  }
   return realsize;
 }
 
@@ -1551,15 +1553,14 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
 {
 #if !defined(CMAKE_BOOTSTRAP)
   auto i = args.begin();
-  if (args.size() < 3) {
-    status.SetError("DOWNLOAD must be called with at least three arguments.");
+  if (args.size() < 2) {
+    status.SetError("DOWNLOAD must be called with at least two arguments.");
     return false;
   }
   ++i; // Get rid of subcommand
   std::string url = *i;
   ++i;
-  std::string file = *i;
-  ++i;
+  std::string file;
 
   long timeout = 0;
   long inactivity_timeout = 0;
@@ -1690,6 +1691,8 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
         return false;
       }
       curl_headers.push_back(*i);
+    } else if (file.empty()) {
+      file = *i;
     } else {
       // Do not return error for compatibility reason.
       std::string err = cmStrCat("Unexpected argument: ", *i);
@@ -1697,11 +1700,18 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     }
     ++i;
   }
+  // Can't calculate hash if we don't save the file.
+  // TODO Incrementally calculate hash in the write callback as the file is
+  // being downloaded so this check can be relaxed.
+  if (file.empty() && hash) {
+    status.SetError("DOWNLOAD cannot calculate hash if file is not saved.");
+    return false;
+  }
   // If file exists already, and caller specified an expected md5 or sha,
   // and the existing file already has the expected hash, then simply
   // return.
   //
-  if (cmSystemTools::FileExists(file) && hash.get()) {
+  if (!file.empty() && cmSystemTools::FileExists(file) && hash.get()) {
     std::string msg;
     std::string actualHash = hash->HashFile(file);
     if (actualHash == expectedHash) {
@@ -1716,20 +1726,26 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   // Make sure parent directory exists so we can write to the file
   // as we receive downloaded bits from curl...
   //
-  std::string dir = cmSystemTools::GetFilenamePath(file);
-  if (!dir.empty() && !cmSystemTools::FileExists(dir) &&
-      !cmSystemTools::MakeDirectory(dir)) {
-    std::string errstring = "DOWNLOAD error: cannot create directory '" + dir +
-      "' - Specify file by full path name and verify that you "
-      "have directory creation and file write privileges.";
-    status.SetError(errstring);
-    return false;
+  if (!file.empty()) {
+    std::string dir = cmSystemTools::GetFilenamePath(file);
+    if (!dir.empty() && !cmSystemTools::FileExists(dir) &&
+        !cmSystemTools::MakeDirectory(dir)) {
+      std::string errstring = "DOWNLOAD error: cannot create directory '" +
+        dir +
+        "' - Specify file by full path name and verify that you "
+        "have directory creation and file write privileges.";
+      status.SetError(errstring);
+      return false;
+    }
   }
 
-  cmsys::ofstream fout(file.c_str(), std::ios::binary);
-  if (!fout) {
-    status.SetError("DOWNLOAD cannot open file for write.");
-    return false;
+  cmsys::ofstream fout;
+  if (!file.empty()) {
+    fout.open(file.c_str(), std::ios::binary);
+    if (!fout) {
+      status.SetError("DOWNLOAD cannot open file for write.");
+      return false;
+    }
   }
 
 #  if defined(_WIN32)
@@ -1791,7 +1807,8 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
 
   cmFileCommandVectorOfChar chunkDebug;
 
-  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, &fout);
+  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA,
+                           file.empty() ? nullptr : &fout);
   check_curl_result(res, "DOWNLOAD cannot set write data: ");
 
   res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
@@ -1865,8 +1882,10 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
 
   // Explicitly flush/close so we can measure the md5 accurately.
   //
-  fout.flush();
-  fout.close();
+  if (!file.empty()) {
+    fout.flush();
+    fout.close();
+  }
 
   // Verify MD5 sum if requested:
   //

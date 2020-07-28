@@ -776,11 +776,14 @@ Transfer
 
 .. code-block:: cmake
 
-  file(DOWNLOAD <url> <file> [<options>...])
+  file(DOWNLOAD <url> [<file>] [<options>...])
   file(UPLOAD   <file> <url> [<options>...])
 
-The ``DOWNLOAD`` mode downloads the given ``<url>`` to a local ``<file>``.
-The ``UPLOAD`` mode uploads a local ``<file>`` to a given ``<url>``.
+The ``DOWNLOAD`` mode downloads the given ``<url>`` to a local ``<file>``. If
+``<file>`` is not specified for ``file(DOWNLOAD)``, the file is not saved. This
+can be useful if you want to know if a file can be downloaded (for example, to
+check that it exists) without actually saving it anywhere. The ``UPLOAD`` mode
+uploads a local ``<file>`` to a given ``<url>``.
 
 Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 
@@ -853,10 +856,12 @@ Additional options to ``DOWNLOAD`` are:
 
   Verify that the downloaded content hash matches the expected value, where
   ``ALGO`` is one of the algorithms supported by ``file(<HASH>)``.
-  If it does not match, the operation fails with an error.
+  If it does not match, the operation fails with an error. It is an error to
+  specify this if ``DOWNLOAD`` is not given a ``<file>``.
 
 ``EXPECTED_MD5 <value>``
-  Historical short-hand for ``EXPECTED_HASH MD5=<value>``.
+  Historical short-hand for ``EXPECTED_HASH MD5=<value>``. It is an error to
+  specify this if ``DOWNLOAD`` is not given a ``<file>``.
 
 Locking
 ^^^^^^^

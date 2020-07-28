@@ -35,7 +35,7 @@ AddCMakeTest(CMakeHostSystemInformation "")
 AddCMakeTest(FileDownload "")
 set_tests_properties(CMake.FileDownload PROPERTIES
   PASS_REGULAR_EXPRESSION "file already exists with expected MD5 sum"
-  FAIL_REGULAR_EXPRESSION "Unexpected status"
+  FAIL_REGULAR_EXPRESSION "Unexpected status|incorrectly interpreted"
   )
 AddCMakeTest(FileDownloadBadHash "")
 set_property(TEST CMake.FileDownloadBadHash PROPERTY
