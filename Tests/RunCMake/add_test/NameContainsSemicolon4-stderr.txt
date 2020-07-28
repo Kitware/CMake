@@ -1,2 +1,0 @@
-Error\(s\) when configuring the project
-No tests were found!!!
