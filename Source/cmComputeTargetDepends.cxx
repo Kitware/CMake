@@ -118,6 +118,7 @@ bool cmComputeTargetDepends::Compute()
 
   // Identify components.
   cmComputeComponentGraph ccg(this->InitialGraph);
+  ccg.Compute();
   if (this->DebugMode) {
     this->DisplayComponents(ccg);
   }

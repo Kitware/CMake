@@ -31,6 +31,9 @@ public:
   cmComputeComponentGraph(Graph const& input);
   ~cmComputeComponentGraph();
 
+  /** Run the computation.  */
+  void Compute();
+
   /** Get the adjacency list of the component graph.  */
   Graph const& GetComponentGraph() const { return this->ComponentGraph; }
   EdgeList const& GetComponentGraphEdges(int c) const
