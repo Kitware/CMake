@@ -216,6 +216,15 @@ public:
   std::string ProcessSourceItemCMP0049(const std::string& s);
 };
 
+namespace {
+#define SETUP_COMMON_LANGUAGE_PROPERTIES(lang)                                \
+  initProp(#lang "_COMPILER_LAUNCHER");                                       \
+  initProp(#lang "_STANDARD");                                                \
+  initProp(#lang "_STANDARD_REQUIRED");                                       \
+  initProp(#lang "_EXTENSIONS");                                              \
+  initProp(#lang "_VISIBILITY_PRESET")
+}
+
 cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                    Visibility vis, cmMakefile* mf, PerConfig perConfig)
   : impl(cm::make_unique<cmTargetInternals>())
@@ -273,6 +282,13 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   // Setup default property values.
   if (this->CanCompileSources()) {
+
+    SETUP_COMMON_LANGUAGE_PROPERTIES(C);
+    SETUP_COMMON_LANGUAGE_PROPERTIES(OBJC);
+    SETUP_COMMON_LANGUAGE_PROPERTIES(CXX);
+    SETUP_COMMON_LANGUAGE_PROPERTIES(OBJCXX);
+    SETUP_COMMON_LANGUAGE_PROPERTIES(CUDA);
+
     initProp("ANDROID_API");
     initProp("ANDROID_API_MIN");
     initProp("ANDROID_ARCH");
@@ -334,43 +350,18 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("NO_SYSTEM_FROM_IMPORTED");
     initProp("BUILD_WITH_INSTALL_NAME_DIR");
     initProp("C_CLANG_TIDY");
-    initProp("C_COMPILER_LAUNCHER");
     initProp("C_CPPLINT");
     initProp("C_CPPCHECK");
     initProp("C_INCLUDE_WHAT_YOU_USE");
     initProp("LINK_WHAT_YOU_USE");
-    initProp("C_STANDARD");
-    initProp("C_STANDARD_REQUIRED");
-    initProp("C_EXTENSIONS");
-    initProp("C_VISIBILITY_PRESET");
-    initProp("OBJC_COMPILER_LAUNCHER");
-    initProp("OBJC_STANDARD");
-    initProp("OBJC_STANDARD_REQUIRED");
-    initProp("OBJC_EXTENSIONS");
-    initProp("OBJC_VISIBILITY_PRESET");
     initProp("CXX_CLANG_TIDY");
-    initProp("CXX_COMPILER_LAUNCHER");
     initProp("CXX_CPPLINT");
     initProp("CXX_CPPCHECK");
     initProp("CXX_INCLUDE_WHAT_YOU_USE");
-    initProp("CXX_STANDARD");
-    initProp("CXX_STANDARD_REQUIRED");
-    initProp("CXX_EXTENSIONS");
-    initProp("CXX_VISIBILITY_PRESET");
-    initProp("OBJCXX_COMPILER_LAUNCHER");
-    initProp("OBJCXX_STANDARD");
-    initProp("OBJCXX_STANDARD_REQUIRED");
-    initProp("OBJCXX_EXTENSIONS");
-    initProp("OBJCXX_VISIBILITY_PRESET");
-    initProp("CUDA_STANDARD");
-    initProp("CUDA_STANDARD_REQUIRED");
-    initProp("CUDA_EXTENSIONS");
-    initProp("CUDA_COMPILER_LAUNCHER");
     initProp("CUDA_SEPARABLE_COMPILATION");
     initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
     initProp("CUDA_RUNTIME_LIBRARY");
     initProp("CUDA_ARCHITECTURES");
-    initProp("CUDA_VISIBILITY_PRESET");
     initProp("VISIBILITY_INLINES_HIDDEN");
     initProp("JOB_POOL_COMPILE");
     initProp("JOB_POOL_LINK");
@@ -385,6 +376,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
     initPropValue("UNITY_BUILD_MODE", "BATCH");
     initPropValue("PCH_WARN_INVALID", "ON");
+
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
       initProp("XCODE_SCHEME_ADDRESS_SANITIZER");
