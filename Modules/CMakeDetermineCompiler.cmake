@@ -140,7 +140,9 @@ function(_cmake_find_compiler_sysroot lang)
       OUTPUT_VARIABLE _cmake_sysroot_run_out
       ERROR_VARIABLE _cmake_sysroot_run_err)
 
-    if(_cmake_sysroot_run_out AND NOT _cmake_sysroot_run_err AND IS_DIRECTORY "${_cmake_sysroot_run_out}/usr")
+    if(_cmake_sysroot_run_out AND NOT _cmake_sysroot_run_err
+        AND NOT _cmake_sysroot_run_out STREQUAL "/"
+        AND IS_DIRECTORY "${_cmake_sysroot_run_out}/usr")
       file(TO_CMAKE_PATH "${_cmake_sysroot_run_out}/usr" _cmake_sysroot_run_out_usr)
       set(CMAKE_${lang}_COMPILER_SYSROOT "${_cmake_sysroot_run_out_usr}" PARENT_SCOPE)
     else()
