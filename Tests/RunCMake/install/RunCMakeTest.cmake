@@ -96,6 +96,11 @@ if(NOT RunCMake_GENERATOR STREQUAL "Xcode" OR NOT "$ENV{CMAKE_OSX_ARCHITECTURES}
   run_install_test(FILES-TARGET_OBJECTS)
 endif()
 
+if(CMake_TEST_ISPC)
+  run_install_test(FILES-EXTRA_ISPC_TARGET_OBJECTS)
+endif()
+
+
 run_install_test(TARGETS-InstallFromSubDir)
 run_install_test(TARGETS-OPTIONAL)
 run_install_test(FILES-OPTIONAL)

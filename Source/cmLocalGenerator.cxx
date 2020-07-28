@@ -1966,6 +1966,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
           "See CMake issue #20726.");
       }
     }
+  } else if (lang == "ISPC") {
+    target->AddISPCTargetFlags(flags);
   }
   // Add VFS Overlay for Clang compiliers
   if (compiler == "Clang") {
@@ -2428,7 +2430,17 @@ void cmLocalGenerator::AppendFlagEscape(std::string& flags,
 
 void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
 {
-  //
+  std::vector<std::string> enabledLanguages =
+    this->GetState()->GetEnabledLanguages();
+  if (std::find(enabledLanguages.begin(), enabledLanguages.end(), "ISPC") ==
+      enabledLanguages.end()) {
+    return;
+  }
+
+  std::vector<std::string> ispcSuffixes =
+    detail::ComputeISPCObjectSuffixes(target);
+  const bool extra_objects = (ispcSuffixes.size() > 1);
+
   std::vector<std::string> configsList =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   for (std::string const& config : configsList) {
@@ -2442,7 +2454,8 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
     std::vector<cmSourceFile*> sources;
     target->GetSourceFiles(sources, config);
 
-    // build up the list of ispc headers that this target is generating
+    // build up the list of ispc headers and extra objects that this target is
+    // generating
     for (cmSourceFile const* sf : sources) {
       // Generate this object file's rule file.
       const std::string& lang = sf->GetLanguage();
@@ -2453,6 +2466,11 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
 
         auto headerPath = cmStrCat(perConfigDir, '/', ispcSource, ".h");
         target->AddISPCGeneratedHeader(headerPath, config);
+        if (extra_objects) {
+          std::vector<std::string> objs = detail::ComputeISPCExtraObjects(
+            objectName, perConfigDir, ispcSuffixes);
+          target->AddISPCGeneratedObject(std::move(objs), config);
+        }
       }
     }
   }
@@ -4027,5 +4045,45 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
   if (!force.NameCMP0049.empty()) {
     target->AddSource(force.NameCMP0049);
   }
+}
+
+std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target)
+{
+  const std::string& targetProperty =
+    target->GetSafeProperty("ISPC_INSTRUCTION_SETS");
+  std::vector<std::string> ispcTargets;
+
+  if (!cmIsOff(targetProperty)) {
+    cmExpandList(targetProperty, ispcTargets);
+    for (auto& ispcTarget : ispcTargets) {
+      // transform targets into the suffixes
+      auto pos = ispcTarget.find('-');
+      auto target_suffix = ispcTarget.substr(0, pos);
+      if (target_suffix ==
+          "avx1") { // when targetting avx1 ISPC uses the 'avx' output string
+        target_suffix = "avx";
+      }
+      ispcTarget = target_suffix;
+    }
+  }
+  return ispcTargets;
+}
+
+std::vector<std::string> ComputeISPCExtraObjects(
+  std::string const& objectName, std::string const& buildDirectory,
+  std::vector<std::string> const& ispcSuffixes)
+{
+  std::vector<std::string> computedObjects;
+  computedObjects.reserve(ispcSuffixes.size());
+
+  auto extension = cmSystemTools::GetFilenameLastExtension(objectName);
+  auto objNameNoExt =
+    cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+  for (const auto& ispcTarget : ispcSuffixes) {
+    computedObjects.emplace_back(
+      cmStrCat(buildDirectory, "/", objNameNoExt, "_", ispcTarget, extension));
+  }
+
+  return computedObjects;
 }
 }

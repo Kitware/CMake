@@ -449,6 +449,8 @@ public:
   void AddCUDAArchitectureFlags(std::string& flags) const;
   void AddCUDAToolkitFlags(std::string& flags) const;
 
+  void AddISPCTargetFlags(std::string& flags) const;
+
   std::string GetFeatureSpecificLinkRuleVariable(
     std::string const& var, std::string const& lang,
     std::string const& config) const;
@@ -821,6 +823,11 @@ public:
   std::vector<std::string> GetGeneratedISPCHeaders(
     std::string const& config) const;
 
+  void AddISPCGeneratedObject(std::vector<std::string>&& objs,
+                              std::string const& config);
+  std::vector<std::string> GetGeneratedISPCObjects(
+    std::string const& config) const;
+
 private:
   void AddSourceCommon(const std::string& src, bool before = false);
 
@@ -1001,6 +1008,8 @@ private:
 
   std::unordered_map<std::string, std::vector<std::string>>
     ISPCGeneratedHeaders;
+  std::unordered_map<std::string, std::vector<std::string>>
+    ISPCGeneratedObjects;
 
   bool IsLinkLookupScope(std::string const& n,
                          cmLocalGenerator const*& lg) const;

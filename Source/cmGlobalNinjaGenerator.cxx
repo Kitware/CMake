@@ -1165,6 +1165,12 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
                          gg->MapToNinjaPath());
           outputDeps.insert(outputDeps.end(), headers.begin(), headers.end());
         }
+        auto objs = depTarget->GetGeneratedISPCObjects(targetConfig);
+        if (!objs.empty()) {
+          std::transform(objs.begin(), objs.end(), objs.begin(),
+                         gg->MapToNinjaPath());
+          outputDeps.insert(outputDeps.end(), objs.begin(), objs.end());
+        }
       }
     };
 

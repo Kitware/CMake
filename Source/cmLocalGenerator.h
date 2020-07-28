@@ -595,6 +595,11 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        bool escapeOldStyle, const char* comment,
                        bool uses_terminal, bool command_expand_lists,
                        const std::string& job_pool, bool stdPipesUTF8);
+
+std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target);
+std::vector<std::string> ComputeISPCExtraObjects(
+  std::string const& objectName, std::string const& buildDirectory,
+  std::vector<std::string> const& ispcSuffixes);
 }
 
 #endif

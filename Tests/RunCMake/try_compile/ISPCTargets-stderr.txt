@@ -1,0 +1,1 @@
+.*Linking ISPC static library*

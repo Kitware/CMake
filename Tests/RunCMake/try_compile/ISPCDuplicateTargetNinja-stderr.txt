@@ -1,0 +1,1 @@
+.*ninja: error: .* multiple rules generate.*src.ispc_avx512skx.o.*
