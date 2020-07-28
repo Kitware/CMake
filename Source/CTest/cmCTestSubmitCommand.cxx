@@ -35,12 +35,12 @@ std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
 
 cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {
-  const char* submitURL = !this->SubmitURL.empty()
-    ? this->SubmitURL.c_str()
-    : this->Makefile->GetDefinition("CTEST_SUBMIT_URL");
+  const std::string* submitURL = !this->SubmitURL.empty()
+    ? &this->SubmitURL
+    : this->Makefile->GetDef("CTEST_SUBMIT_URL");
 
   if (submitURL) {
-    this->CTest->SetCTestConfiguration("SubmitURL", submitURL, this->Quiet);
+    this->CTest->SetCTestConfiguration("SubmitURL", *submitURL, this->Quiet);
   } else {
     this->CTest->SetCTestConfigurationFromCMakeVariable(
       this->Makefile, "DropMethod", "CTEST_DROP_METHOD", this->Quiet);
@@ -108,7 +108,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   if (this->PartsMentioned) {
     auto parts =
       cmMakeRange(this->Parts).transform([this](std::string const& arg) {
-        return this->CTest->GetPartFromName(arg.c_str());
+        return this->CTest->GetPartFromName(arg);
       });
     handler->SelectParts(std::set<cmCTest::Part>(parts.begin(), parts.end()));
   }
@@ -177,7 +177,7 @@ void cmCTestSubmitCommand::CheckArguments(
     !this->Files.empty() || cm::contains(keywords, "FILES");
 
   cm::erase_if(this->Parts, [this](std::string const& arg) -> bool {
-    cmCTest::Part p = this->CTest->GetPartFromName(arg.c_str());
+    cmCTest::Part p = this->CTest->GetPartFromName(arg);
     if (p == cmCTest::PartCount) {
       std::ostringstream e;
       e << "Part name \"" << arg << "\" is invalid.";

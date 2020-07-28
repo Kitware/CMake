@@ -15,7 +15,7 @@ bool cmCTestReadCustomFilesCommand::InitialPass(
   }
 
   for (std::string const& arg : args) {
-    this->CTest->ReadCustomConfigurationFileTree(arg.c_str(), this->Makefile);
+    this->CTest->ReadCustomConfigurationFileTree(arg, this->Makefile);
   }
 
   return true;

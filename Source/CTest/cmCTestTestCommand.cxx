@@ -13,6 +13,7 @@
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 
 void cmCTestTestCommand::BindArguments()
@@ -134,10 +135,10 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
   handler->SetTestLoad(testLoad);
 
-  if (const char* labelsForSubprojects =
-        this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
+  if (cmProp labelsForSubprojects =
+        this->Makefile->GetDef("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
-                                       labelsForSubprojects, this->Quiet);
+                                       *labelsForSubprojects, this->Quiet);
   }
 
   handler->SetQuiet(this->Quiet);

@@ -354,7 +354,7 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
   cmCTestMemCheckHandler::TestResultsVector::size_type cc;
   for (cmCTestTestResult const& result : this->TestResults) {
     std::string testPath = result.Path + "/" + result.Name;
-    xml.Element("Test", this->CTest->GetShortPathToFile(testPath.c_str()));
+    xml.Element("Test", this->CTest->GetShortPathToFile(testPath));
   }
   xml.EndElement(); // TestList
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
