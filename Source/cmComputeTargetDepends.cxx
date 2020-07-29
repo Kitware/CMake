@@ -17,10 +17,12 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
@@ -115,19 +117,32 @@ bool cmComputeTargetDepends::Compute()
   if (this->DebugMode) {
     this->DisplayGraph(this->InitialGraph, "initial");
   }
+  cmComputeComponentGraph ccg1(this->InitialGraph);
+  ccg1.Compute();
+  if (!this->CheckComponents(ccg1)) {
+    return false;
+  }
+
+  // Compute the intermediate graph.
+  this->CollectSideEffects();
+  this->ComputeIntermediateGraph();
+  if (this->DebugMode) {
+    this->DisplaySideEffects();
+    this->DisplayGraph(this->IntermediateGraph, "intermediate");
+  }
 
   // Identify components.
-  cmComputeComponentGraph ccg(this->InitialGraph);
-  ccg.Compute();
+  cmComputeComponentGraph ccg2(this->IntermediateGraph);
+  ccg2.Compute();
   if (this->DebugMode) {
-    this->DisplayComponents(ccg);
+    this->DisplayComponents(ccg2, "intermediate");
   }
-  if (!this->CheckComponents(ccg)) {
+  if (!this->CheckComponents(ccg2)) {
     return false;
   }
 
   // Compute the final dependency graph.
-  if (!this->ComputeFinalDepends(ccg)) {
+  if (!this->ComputeFinalDepends(ccg2)) {
     return false;
   }
   if (this->DebugMode) {
@@ -382,6 +397,111 @@ void cmComputeTargetDepends::AddTargetDepend(
   }
 }
 
+void cmComputeTargetDepends::CollectSideEffects()
+{
+  this->SideEffects.resize(0);
+  this->SideEffects.resize(this->InitialGraph.size());
+
+  int n = static_cast<int>(this->InitialGraph.size());
+  std::set<int> visited;
+  for (int i = 0; i < n; ++i) {
+    this->CollectSideEffectsForTarget(visited, i);
+  }
+}
+
+void cmComputeTargetDepends::CollectSideEffectsForTarget(
+  std::set<int>& visited, int depender_index)
+{
+  if (!visited.count(depender_index)) {
+    auto& se = this->SideEffects[depender_index];
+    visited.insert(depender_index);
+    this->Targets[depender_index]->AppendCustomCommandSideEffects(
+      se.CustomCommandSideEffects);
+    this->Targets[depender_index]->AppendLanguageSideEffects(
+      se.LanguageSideEffects);
+
+    for (auto const& edge : this->InitialGraph[depender_index]) {
+      this->CollectSideEffectsForTarget(visited, edge);
+      auto const& dse = this->SideEffects[edge];
+      se.CustomCommandSideEffects.insert(dse.CustomCommandSideEffects.cbegin(),
+                                         dse.CustomCommandSideEffects.cend());
+      for (auto const& it : dse.LanguageSideEffects) {
+        se.LanguageSideEffects[it.first].insert(it.second.cbegin(),
+                                                it.second.cend());
+      }
+    }
+  }
+}
+
+void cmComputeTargetDepends::ComputeIntermediateGraph()
+{
+  this->IntermediateGraph.resize(0);
+  this->IntermediateGraph.resize(this->InitialGraph.size());
+
+  int n = static_cast<int>(this->InitialGraph.size());
+  for (int i = 0; i < n; ++i) {
+    auto const& initialEdges = this->InitialGraph[i];
+    auto& intermediateEdges = this->IntermediateGraph[i];
+    cmGeneratorTarget const* gt = this->Targets[i];
+    if (gt->GetType() != cmStateEnums::STATIC_LIBRARY &&
+        gt->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+      intermediateEdges = initialEdges;
+    } else {
+      if (cmProp optimizeDependencies =
+            gt->GetProperty("OPTIMIZE_DEPENDENCIES")) {
+        if (cmIsOn(optimizeDependencies)) {
+          this->OptimizeLinkDependencies(gt, intermediateEdges, initialEdges);
+        } else {
+          intermediateEdges = initialEdges;
+        }
+      } else {
+        intermediateEdges = initialEdges;
+      }
+    }
+  }
+}
+
+void cmComputeTargetDepends::OptimizeLinkDependencies(
+  cmGeneratorTarget const* gt, cmGraphEdgeList& outputEdges,
+  cmGraphEdgeList const& inputEdges)
+{
+  std::set<int> emitted;
+  for (auto const& edge : inputEdges) {
+    if (edge.IsStrong()) {
+      // Preserve strong edges
+      outputEdges.push_back(edge);
+    } else {
+      auto const& dse = this->SideEffects[edge];
+
+      // Add edges that have custom command side effects
+      for (cmGeneratorTarget const* dep : dse.CustomCommandSideEffects) {
+        auto index = this->TargetIndex[dep];
+        if (!emitted.count(index)) {
+          emitted.insert(index);
+          outputEdges.push_back(
+            cmGraphEdge(index, false, edge.IsCross(), edge.GetBacktrace()));
+        }
+      }
+
+      // Add edges that have language side effects for languages we
+      // care about
+      for (auto const& lang : gt->GetAllConfigCompileLanguages()) {
+        auto it = dse.LanguageSideEffects.find(lang);
+        if (it != dse.LanguageSideEffects.end()) {
+          for (cmGeneratorTarget const* dep : it->second) {
+            auto index = this->TargetIndex[dep];
+            if (!emitted.count(index)) {
+              emitted.insert(index);
+              outputEdges.push_back(cmGraphEdge(index, false, edge.IsCross(),
+                                                edge.GetBacktrace()));
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 void cmComputeTargetDepends::DisplayGraph(Graph const& graph,
                                           const std::string& name)
 {
@@ -402,10 +522,39 @@ void cmComputeTargetDepends::DisplayGraph(Graph const& graph,
   fprintf(stderr, "\n");
 }
 
-void cmComputeTargetDepends::DisplayComponents(
-  cmComputeComponentGraph const& ccg)
+void cmComputeTargetDepends::DisplaySideEffects()
 {
-  fprintf(stderr, "The strongly connected components are:\n");
+  fprintf(stderr, "The side effects are:\n");
+  int n = static_cast<int>(SideEffects.size());
+  for (int depender_index = 0; depender_index < n; ++depender_index) {
+    cmGeneratorTarget const* depender = this->Targets[depender_index];
+    fprintf(stderr, "target %d is [%s]\n", depender_index,
+            depender->GetName().c_str());
+    if (!this->SideEffects[depender_index].CustomCommandSideEffects.empty()) {
+      fprintf(stderr, "  custom commands\n");
+      for (auto const* gt :
+           this->SideEffects[depender_index].CustomCommandSideEffects) {
+        fprintf(stderr, "    from target %d [%s]\n", this->TargetIndex[gt],
+                gt->GetName().c_str());
+      }
+    }
+    for (auto const& it :
+         this->SideEffects[depender_index].LanguageSideEffects) {
+      fprintf(stderr, "  language %s\n", it.first.c_str());
+      for (auto const* gt : it.second) {
+        fprintf(stderr, "    from target %d [%s]\n", this->TargetIndex[gt],
+                gt->GetName().c_str());
+      }
+    }
+  }
+  fprintf(stderr, "\n");
+}
+
+void cmComputeTargetDepends::DisplayComponents(
+  cmComputeComponentGraph const& ccg, const std::string& name)
+{
+  fprintf(stderr, "The strongly connected components for the %s graph are:\n",
+          name.c_str());
   std::vector<NodeList> const& components = ccg.GetComponents();
   int n = static_cast<int>(components.size());
   for (int c = 0; c < n; ++c) {

@@ -401,6 +401,7 @@ add_RunCMake_test(no_install_prefix)
 add_RunCMake_test(configure_file)
 add_RunCMake_test(CTestTimeout -DTIMEOUT=${CTestTestTimeout_TIME})
 add_RunCMake_test(CTestTimeoutAfterMatch)
+add_RunCMake_test(DependencyGraph -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER})
 
 # ctresalloc links against CMakeLib and CTestLib, which means it can't be built
 # if CMake_TEST_EXTERNAL_CMAKE is activated (the compiler might be different.)
