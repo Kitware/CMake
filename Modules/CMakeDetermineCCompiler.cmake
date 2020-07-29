@@ -87,7 +87,9 @@ else()
     "--target=arm-arm-none-eabi -mcpu=cortex-m3"
     )
 endif()
-
+if(CMAKE_C_COMPILER_TARGET)
+  list(PREPEND CMAKE_C_COMPILER_ID_TEST_FLAGS "-c --target=${CMAKE_C_COMPILER_TARGET}")
+endif()
 # Build a small source file to identify the compiler.
 if(NOT CMAKE_C_COMPILER_ID_RUN)
   set(CMAKE_C_COMPILER_ID_RUN 1)
