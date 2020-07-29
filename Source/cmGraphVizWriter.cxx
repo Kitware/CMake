@@ -260,7 +260,7 @@ void cmGraphVizWriter::ReadSettings(
   do {                                                                        \
     const char* value = mf.GetDefinition(cmakeDefinition);                    \
     if (value) {                                                              \
-      (var) = mf.IsOn(cmakeDefinition);                                       \
+      (var) = cmIsOn(value);                                                  \
     }                                                                         \
   } while (false)
 
