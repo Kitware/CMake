@@ -56,7 +56,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
     const char* cmakeBuildConfiguration = !this->Configuration.empty()
       ? this->Configuration.c_str()
-      : ((ctestBuildConfiguration && *ctestBuildConfiguration)
+      : (cmNonempty(ctestBuildConfiguration)
            ? ctestBuildConfiguration
            : this->CTest->GetConfigType().c_str());
 
@@ -67,7 +67,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       ? this->Target.c_str()
       : this->Makefile->GetDefinition("CTEST_BUILD_TARGET");
 
-    if (cmakeGeneratorName && *cmakeGeneratorName) {
+    if (cmNonempty(cmakeGeneratorName)) {
       if (!cmakeBuildConfiguration) {
         cmakeBuildConfiguration = "Release";
       }

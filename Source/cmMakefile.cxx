@@ -196,7 +196,7 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
   std::string env;
   cmSystemTools::GetEnv(varName, env);
 
-  bool const haveVar = var && *var;
+  bool const haveVar = cmNonempty(var);
   bool const haveEnv = !env.empty();
   if ((haveVar || haveEnv) && this->WarnedCMP0074.insert(varName).second) {
     std::ostringstream w;

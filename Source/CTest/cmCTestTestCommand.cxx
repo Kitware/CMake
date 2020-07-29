@@ -117,13 +117,13 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   unsigned long testLoad;
   const char* ctestTestLoad = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
   if (!this->TestLoad.empty()) {
-    if (!cmStrToULong(this->TestLoad.c_str(), &testLoad)) {
+    if (!cmStrToULong(this->TestLoad, &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,
                  "Invalid value for 'TEST_LOAD' : " << this->TestLoad
                                                     << std::endl);
     }
-  } else if (ctestTestLoad && *ctestTestLoad) {
+  } else if (cmNonempty(ctestTestLoad)) {
     if (!cmStrToULong(ctestTestLoad, &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,

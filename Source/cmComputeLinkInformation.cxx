@@ -832,8 +832,7 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
 
   // We can support link type switching only if all needed flags are
   // known.
-  if (static_link_type_flag && *static_link_type_flag &&
-      shared_link_type_flag && *shared_link_type_flag) {
+  if (cmNonempty(static_link_type_flag) && cmNonempty(shared_link_type_flag)) {
     this->LinkTypeEnabled = true;
     this->StaticLinkTypeFlag = static_link_type_flag;
     this->SharedLinkTypeFlag = shared_link_type_flag;
@@ -1768,7 +1767,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
         std::string d = ri;
         if (!rootPath.empty() && cmHasPrefix(d, rootPath)) {
           d.erase(0, rootPath.size());
-        } else if (stagePath && *stagePath && cmHasPrefix(d, stagePath)) {
+        } else if (cmNonempty(stagePath) && cmHasPrefix(d, stagePath)) {
           d.erase(0, strlen(stagePath));
           d = cmStrCat(installPrefix, '/', d);
           cmSystemTools::ConvertToUnixSlashes(d);
@@ -1799,7 +1798,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
           std::string d = ri;
           if (!rootPath.empty() && cmHasPrefix(d, rootPath)) {
             d.erase(0, rootPath.size());
-          } else if (stagePath && *stagePath && cmHasPrefix(d, stagePath)) {
+          } else if (cmNonempty(stagePath) && cmHasPrefix(d, stagePath)) {
             d.erase(0, strlen(stagePath));
             d = cmStrCat(installPrefix, '/', d);
             cmSystemTools::ConvertToUnixSlashes(d);

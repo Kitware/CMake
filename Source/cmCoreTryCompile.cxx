@@ -1045,14 +1045,14 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   const char* config =
     this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   // if a config was specified try that first
-  if (config && config[0]) {
+  if (cmNonempty(config)) {
     std::string tmp = cmStrCat('/', config);
     searchDirs.push_back(std::move(tmp));
   }
   searchDirs.emplace_back("/Debug");
 #if defined(__APPLE__)
   std::string app = "/" + targetName + ".app";
-  if (config && config[0]) {
+  if (cmNonempty(config)) {
     std::string tmp = cmStrCat('/', config, app);
     searchDirs.push_back(std::move(tmp));
   }

@@ -395,7 +395,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
                   << ' ' << stampFileForShell;
       cmMakefile* mf = this->LocalGenerator->GetMakefile();
       const char* cid = mf->GetDefinition("CMAKE_Fortran_COMPILER_ID");
-      if (cid && *cid) {
+      if (cmNonempty(cid)) {
         makeDepends << ' ' << cid;
       }
       makeDepends << '\n';

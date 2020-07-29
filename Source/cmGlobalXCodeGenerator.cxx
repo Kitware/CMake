@@ -3381,7 +3381,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     buildSettings->AddAttribute("ONLY_ACTIVE_ARCH", this->CreateString("YES"));
     // When targeting macOS, use only the host architecture.
     if (this->SystemName == "Darwin"_s &&
-        (!sysroot || !*sysroot ||
+        (!cmNonempty(sysroot) ||
          cmSystemTools::LowerCase(sysroot).find("macos") !=
            std::string::npos)) {
       buildSettings->AddAttribute("ARCHS",
@@ -3391,7 +3391,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     // Tell Xcode to use ARCHS (ONLY_ACTIVE_ARCH defaults to NO).
     buildSettings->AddAttribute("ARCHS", this->CreateString(archs));
   }
-  if (deploymentTarget && *deploymentTarget) {
+  if (cmNonempty(deploymentTarget)) {
     buildSettings->AddAttribute(GetDeploymentPlatform(root->GetMakefile()),
                                 this->CreateString(deploymentTarget));
   }

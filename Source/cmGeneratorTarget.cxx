@@ -2021,7 +2021,7 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
     std::string sepVar =
       cmStrCat("CMAKE_SHARED_LIBRARY_RUNTIME_", ll, "_FLAG_SEP");
     const char* sep = this->Makefile->GetDefinition(sepVar);
-    if (sep && *sep) {
+    if (cmNonempty(sep)) {
       // TODO: Add ELF check to ABI detection and get rid of
       // CMAKE_EXECUTABLE_FORMAT.
       if (const char* fmt =

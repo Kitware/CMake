@@ -847,7 +847,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
         run_iwyu += " --tidy=";
         const char* driverMode = this->Makefile->GetDefinition(
           cmStrCat("CMAKE_", lang, "_CLANG_TIDY_DRIVER_MODE"));
-        if (!(driverMode && *driverMode)) {
+        if (!cmNonempty(driverMode)) {
           driverMode = lang == "C" ? "gcc" : "g++";
         }
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(
