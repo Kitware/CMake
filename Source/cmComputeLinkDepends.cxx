@@ -626,6 +626,7 @@ void cmComputeLinkDepends::OrderLinkEntires()
   // constraints disallow it.
   this->CCG =
     cm::make_unique<cmComputeComponentGraph>(this->EntryConstraintGraph);
+  this->CCG->Compute();
 
   // The component graph is guaranteed to be acyclic.  Start a DFS
   // from every entry to compute a topological order for the
