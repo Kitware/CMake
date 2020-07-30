@@ -2672,7 +2672,6 @@ inline void RegisterUnitySources(cmGeneratorTarget* target, cmSourceFile* sf,
 {
   target->AddSourceFileToUnityBatch(sf->ResolveFullPath());
   sf->SetProperty("UNITY_SOURCE_FILE", filename.c_str());
-  sf->SetProperty("SKIP_AUTOGEN", "ON");
 }
 
 inline void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
