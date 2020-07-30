@@ -222,11 +222,11 @@ macro(__compiler_clang_cxx_standards lang)
     # can be attempted.
     macro(cmake_record_${lang}_compile_features)
       list(APPEND CMAKE_${lang}_COMPILE_FEATURES
-        ${lang}_std_98
-        ${lang}_std_11
-        ${lang}_std_14
-        ${lang}_std_17
-        ${lang}_std_20
+        cxx_std_98
+        cxx_std_11
+        cxx_std_14
+        cxx_std_17
+        cxx_std_20
         )
       _record_compiler_features(${lang} "" CMAKE_${lang}_COMPILE_FEATURES)
     endmacro()
