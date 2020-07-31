@@ -100,11 +100,12 @@ Interface Libraries
 
   add_library(<name> INTERFACE)
 
-Creates an :ref:`Interface Library <Interface Libraries>`.  An ``INTERFACE``
-library target does not directly create build output, though it may
-have properties set on it and it may be installed, exported and
-imported. Typically the ``INTERFACE_*`` properties are populated on
-the interface target using the commands:
+Creates an :ref:`Interface Library <Interface Libraries>`.
+An ``INTERFACE`` library target does not compile sources and does
+not produce a library artifact on disk.  However, it may have
+properties set on it and it may be installed and exported.
+Typically, ``INTERFACE_*`` properties are populated on an interface
+target using the commands:
 
 * :command:`set_property`,
 * :command:`target_link_libraries(INTERFACE)`,
@@ -116,6 +117,9 @@ the interface target using the commands:
 
 and then it is used as an argument to :command:`target_link_libraries`
 like any other target.
+
+An interface library has no source files itself and is not included
+as a target in the generated buildsystem.
 
 Imported Libraries
 ^^^^^^^^^^^^^^^^^^
