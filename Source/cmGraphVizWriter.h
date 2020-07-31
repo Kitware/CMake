@@ -46,9 +46,6 @@ public:
   void Write();
 
 private:
-  using FileStreamMap =
-    std::map<std::string, std::unique_ptr<cmGeneratedFileStream>>;
-
   struct Connection
   {
     Connection(cmLinkItem s, cmLinkItem d, std::string scope)
@@ -76,8 +73,8 @@ private:
 
   void WriteNode(cmGeneratedFileStream& fs, cmLinkItem const& item);
 
-  void CreateTargetFile(FileStreamMap& fileStreamMap, cmLinkItem const& target,
-                        std::string const& fileNameSuffix = "");
+  std::unique_ptr<cmGeneratedFileStream> CreateTargetFile(
+    cmLinkItem const& target, std::string const& fileNameSuffix = "");
 
   void WriteConnection(cmGeneratedFileStream& fs,
                        cmLinkItem const& dependerTargetName,
@@ -95,7 +92,7 @@ private:
 
   template <typename DirFunc>
   void WritePerTargetConnections(const ConnectionsMap& connections,
-                                 const FileStreamMap& streams);
+                                 const std::string& fileNameSuffix = "");
 
   bool ItemExcluded(cmLinkItem const& item);
   bool ItemNameFilteredOut(std::string const& itemName);
@@ -111,8 +108,6 @@ private:
 
   std::string FileName;
   cmGeneratedFileStream GlobalFileStream;
-  FileStreamMap PerTargetFileStreams;
-  FileStreamMap TargetDependersFileStreams;
 
   ConnectionsMap PerTargetConnections;
   ConnectionsMap TargetDependersConnections;
