@@ -2163,7 +2163,9 @@ std::string escapeDependencyPath(cm::string_view path)
 void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
 {
   if (Log().Verbose()) {
-    Log().Info(GenT::MOC, "Merging MOC dependencies");
+    Log().Info(GenT::MOC,
+               cmStrCat("Merging MOC dependencies into ",
+                        MessagePath(BaseConst().DepFile.c_str())));
   }
   auto processDepFile =
     [](const std::string& mocOutputFile) -> std::vector<std::string> {
