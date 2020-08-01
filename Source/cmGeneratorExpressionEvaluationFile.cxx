@@ -94,8 +94,7 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
   gg->GetEnabledLanguages(enabledLanguages);
 
   for (std::string const& le : enabledLanguages) {
-    std::string name = this->OutputFileExpr->Evaluate(lg, config, nullptr,
-                                                      nullptr, nullptr, le);
+    std::string const name = this->GetOutputFileName(lg, config, le);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(
       name, false, cmSourceFileLocationKind::Known);
     // Tell TraceDependencies that the file is not expected to exist
