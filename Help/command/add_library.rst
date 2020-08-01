@@ -64,42 +64,6 @@ See also :prop_sf:`HEADER_FILE_ONLY` on what to do if some sources are
 pre-processed, and you want to have the original sources reachable from
 within IDE.
 
-Imported Libraries
-^^^^^^^^^^^^^^^^^^
-
-.. code-block:: cmake
-
-  add_library(<name> <SHARED|STATIC|MODULE|OBJECT|UNKNOWN> IMPORTED
-              [GLOBAL])
-
-An :ref:`IMPORTED library target <Imported Targets>` references a library
-file located outside the project.  No rules are generated to build it, and
-the :prop_tgt:`IMPORTED` target property is ``True``.  The target name has
-scope in the directory in which it is created and below, but the ``GLOBAL``
-option extends visibility.  It may be referenced like any target built
-within the project.  ``IMPORTED`` libraries are useful for convenient
-reference from commands like :command:`target_link_libraries`.  Details
-about the imported library are specified by setting properties whose names
-begin in ``IMPORTED_`` and ``INTERFACE_``.
-
-The most important properties are:
-
-* :prop_tgt:`IMPORTED_LOCATION` (and its per-configuration
-  variant :prop_tgt:`IMPORTED_LOCATION_<CONFIG>`) which specifies the
-  location of the main library file on disk.
-* :prop_tgt:`IMPORTED_OBJECTS` (and :prop_tgt:`IMPORTED_OBJECTS_<CONFIG>`)
-  for object libraries, specifies the locations of object files on disk.
-* :prop_tgt:`PUBLIC_HEADER` files to be installed during :command:`install` invocation
-
-See documentation of the ``IMPORTED_*`` and ``INTERFACE_*`` properties
-for more information.
-
-An ``UNKNOWN`` library type is typically only used in the implementation of
-:ref:`Find Modules`.  It allows the path to an imported library (often found
-using the :command:`find_library` command) to be used without having to know
-what type of library it is.  This is especially useful on Windows where a
-static library and a DLL's import library both have the same file extension.
-
 Object Libraries
 ^^^^^^^^^^^^^^^^
 
@@ -129,6 +93,80 @@ systems (such as Xcode) may not like targets that have only object files, so
 consider adding at least one real source file to any target that references
 ``$<TARGET_OBJECTS:objlib>``.
 
+Interface Libraries
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: cmake
+
+  add_library(<name> INTERFACE)
+
+Creates an :ref:`Interface Library <Interface Libraries>`.
+An ``INTERFACE`` library target does not compile sources and does
+not produce a library artifact on disk.  However, it may have
+properties set on it and it may be installed and exported.
+Typically, ``INTERFACE_*`` properties are populated on an interface
+target using the commands:
+
+* :command:`set_property`,
+* :command:`target_link_libraries(INTERFACE)`,
+* :command:`target_link_options(INTERFACE)`,
+* :command:`target_include_directories(INTERFACE)`,
+* :command:`target_compile_options(INTERFACE)`,
+* :command:`target_compile_definitions(INTERFACE)`, and
+* :command:`target_sources(INTERFACE)`,
+
+and then it is used as an argument to :command:`target_link_libraries`
+like any other target.
+
+An interface library has no source files itself and is not included
+as a target in the generated buildsystem.
+
+Imported Libraries
+^^^^^^^^^^^^^^^^^^
+
+.. code-block:: cmake
+
+  add_library(<name> <type> IMPORTED [GLOBAL])
+
+Creates an :ref:`IMPORTED library target <Imported Targets>` called ``<name>``.
+No rules are generated to build it, and the :prop_tgt:`IMPORTED` target
+property is ``True``.  The target name has scope in the directory in which
+it is created and below, but the ``GLOBAL`` option extends visibility.
+It may be referenced like any target built within the project.
+``IMPORTED`` libraries are useful for convenient reference from commands
+like :command:`target_link_libraries`.  Details about the imported library
+are specified by setting properties whose names begin in ``IMPORTED_`` and
+``INTERFACE_``.
+
+The ``<type>`` must be one of:
+
+``STATIC``, ``SHARED``, ``MODULE``, ``UNKNOWN``
+  References a library file located outside the project.  The
+  :prop_tgt:`IMPORTED_LOCATION` target property (or its per-configuration
+  variant :prop_tgt:`IMPORTED_LOCATION_<CONFIG>`) specifies the
+  location of the main library file on disk.
+  Additional usage requirements may be specified in ``INTERFACE_*`` properties.
+
+  An ``UNKNOWN`` library type is typically only used in the implementation of
+  :ref:`Find Modules`.  It allows the path to an imported library (often found
+  using the :command:`find_library` command) to be used without having to know
+  what type of library it is.  This is especially useful on Windows where a
+  static library and a DLL's import library both have the same file extension.
+
+``OBJECT``
+  References a set of object files located outside the project.
+  The :prop_tgt:`IMPORTED_OBJECTS` target property (or its per-configuration
+  variant :prop_tgt:`IMPORTED_OBJECTS_<CONFIG>`) specifies the locations of
+  object files on disk.
+  Additional usage requirements may be specified in ``INTERFACE_*`` properties.
+
+``INTERFACE``
+  Does not reference any library or object files on disk, but may
+  specify usage requirements in ``INTERFACE_*`` properties.
+
+See documentation of the ``IMPORTED_*`` and ``INTERFACE_*`` properties
+for more information.
+
 Alias Libraries
 ^^^^^^^^^^^^^^^
 
@@ -153,35 +191,3 @@ to modify properties of ``<target>``, that is, it may not be used as the
 operand of :command:`set_property`, :command:`set_target_properties`,
 :command:`target_link_libraries` etc.  An ``ALIAS`` target may not be
 installed or exported.
-
-Interface Libraries
-^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: cmake
-
-  add_library(<name> INTERFACE [IMPORTED [GLOBAL]])
-
-Creates an :ref:`Interface Library <Interface Libraries>`.  An ``INTERFACE``
-library target does not directly create build output, though it may
-have properties set on it and it may be installed, exported and
-imported. Typically the ``INTERFACE_*`` properties are populated on
-the interface target using the commands:
-
-* :command:`set_property`,
-* :command:`target_link_libraries(INTERFACE)`,
-* :command:`target_link_options(INTERFACE)`,
-* :command:`target_include_directories(INTERFACE)`,
-* :command:`target_compile_options(INTERFACE)`,
-* :command:`target_compile_definitions(INTERFACE)`, and
-* :command:`target_sources(INTERFACE)`,
-
-and then it is used as an argument to :command:`target_link_libraries`
-like any other target.
-
-An ``INTERFACE`` :ref:`Imported Target <Imported Targets>` may also be
-created with this signature.  An ``IMPORTED`` library target references a
-library defined outside the project.  The target name has scope in the
-directory in which it is created and below, but the ``GLOBAL`` option
-extends visibility.  It may be referenced like any target built within
-the project.  ``IMPORTED`` libraries are useful for convenient reference
-from commands like :command:`target_link_libraries`.
