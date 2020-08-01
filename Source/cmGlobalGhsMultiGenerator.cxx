@@ -100,13 +100,13 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
   /* set the build tool to use */
   std::string gbuild(tsp + ((tsp.back() == '/') ? "" : "/") +
                      DEFAULT_BUILD_PROGRAM);
-  const char* prevTool = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
+  cmProp prevTool = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
 
   /* check if the toolset changed from last generate */
-  if (prevTool != nullptr && (gbuild != prevTool)) {
+  if (prevTool && (gbuild != *prevTool)) {
     std::string message =
       cmStrCat("toolset build tool: ", gbuild,
-               "\nDoes not match the previously used build tool: ", prevTool,
+               "\nDoes not match the previously used build tool: ", *prevTool,
                "\nEither remove the CMakeCache.txt file and CMakeFiles "
                "directory or choose a different binary directory.");
     cmSystemTools::Error(message);
@@ -187,7 +187,8 @@ void cmGlobalGhsMultiGenerator::EnableLanguage(
 
   mf->AddDefinition("GHSMULTI", "1"); // identifier for user CMake files
 
-  const char* tgtPlatform = mf->GetDefinition("GHS_TARGET_PLATFORM");
+  const char* tgtPlatform =
+    cmToCStrSafe(mf->GetDefinition("GHS_TARGET_PLATFORM"));
   if (!tgtPlatform) {
     cmSystemTools::Message("Green Hills MULTI: GHS_TARGET_PLATFORM not "
                            "specified; defaulting to \"integrity\"");
@@ -216,10 +217,10 @@ bool cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* /*mf*/)
 void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsd,
                                            const std::string& ts)
 {
-  const char* ghsRoot = mf->GetDefinition("GHS_TOOLSET_ROOT");
+  cmProp ghsRoot = mf->GetDefinition("GHS_TOOLSET_ROOT");
 
   if (cmNonempty(ghsRoot)) {
-    tsd = ghsRoot;
+    tsd = *ghsRoot;
   } else {
     tsd = DEFAULT_TOOLSET_ROOT;
   }

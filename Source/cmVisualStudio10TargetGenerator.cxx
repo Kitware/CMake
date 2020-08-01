@@ -1226,9 +1226,9 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   Elem& e1, std::string const& config)
 {
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-  const char* mfcFlag = this->Makefile->GetDefinition("CMAKE_MFC_FLAG");
+  cmProp mfcFlag = this->Makefile->GetDefinition("CMAKE_MFC_FLAG");
   if (mfcFlag) {
-    std::string const mfcFlagValue = mfcFlag;
+    std::string const mfcFlagValue = *mfcFlag;
 
     std::string useOfMfcValue = "false";
     if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
@@ -2603,42 +2603,42 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
 
       e1.WritePlatformConfigTag("IntDir", cond, intermediateDir);
 
-      if (const char* sdkExecutableDirectories = this->Makefile->GetDefinition(
+      if (cmProp sdkExecutableDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_EXECUTABLE_DIRECTORIES")) {
         e1.WritePlatformConfigTag("ExecutablePath", cond,
-                                  sdkExecutableDirectories);
+                                  *sdkExecutableDirectories);
       }
 
-      if (const char* sdkIncludeDirectories = this->Makefile->GetDefinition(
+      if (cmProp sdkIncludeDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_INCLUDE_DIRECTORIES")) {
-        e1.WritePlatformConfigTag("IncludePath", cond, sdkIncludeDirectories);
+        e1.WritePlatformConfigTag("IncludePath", cond, *sdkIncludeDirectories);
       }
 
-      if (const char* sdkReferenceDirectories = this->Makefile->GetDefinition(
+      if (cmProp sdkReferenceDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_REFERENCE_DIRECTORIES")) {
         e1.WritePlatformConfigTag("ReferencePath", cond,
-                                  sdkReferenceDirectories);
+                                  *sdkReferenceDirectories);
       }
 
-      if (const char* sdkLibraryDirectories = this->Makefile->GetDefinition(
+      if (cmProp sdkLibraryDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_LIBRARY_DIRECTORIES")) {
-        e1.WritePlatformConfigTag("LibraryPath", cond, sdkLibraryDirectories);
+        e1.WritePlatformConfigTag("LibraryPath", cond, *sdkLibraryDirectories);
       }
 
-      if (const char* sdkLibraryWDirectories = this->Makefile->GetDefinition(
+      if (cmProp sdkLibraryWDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_LIBRARY_WINRT_DIRECTORIES")) {
         e1.WritePlatformConfigTag("LibraryWPath", cond,
-                                  sdkLibraryWDirectories);
+                                  *sdkLibraryWDirectories);
       }
 
-      if (const char* sdkSourceDirectories =
+      if (cmProp sdkSourceDirectories =
             this->Makefile->GetDefinition("CMAKE_VS_SDK_SOURCE_DIRECTORIES")) {
-        e1.WritePlatformConfigTag("SourcePath", cond, sdkSourceDirectories);
+        e1.WritePlatformConfigTag("SourcePath", cond, *sdkSourceDirectories);
       }
 
-      if (const char* sdkExcludeDirectories = this->Makefile->GetDefinition(
+      if (cmProp sdkExcludeDirectories = this->Makefile->GetDefinition(
             "CMAKE_VS_SDK_EXCLUDE_DIRECTORIES")) {
-        e1.WritePlatformConfigTag("ExcludePath", cond, sdkExcludeDirectories);
+        e1.WritePlatformConfigTag("ExcludePath", cond, *sdkExcludeDirectories);
       }
 
       std::string name =
@@ -3769,9 +3769,9 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
       };
     }
 
-    if (const char* stackVal = this->Makefile->GetDefinition(
+    if (cmProp stackVal = this->Makefile->GetDefinition(
           "CMAKE_" + linkLanguage + "_STACK_SIZE")) {
-      linkOptions.AddFlag("StackReserveSize", stackVal);
+      linkOptions.AddFlag("StackReserveSize", *stackVal);
     }
 
     linkOptions.AddFlag("GenerateDebugInformation", "false");

@@ -762,9 +762,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     if (!mf->GetIsSourceFileTryCompile()) {
       rule.DepType = "gcc";
       rule.DepFile = "$DEP_FILE";
-      auto d = mf->GetDefinition("CMAKE_C_COMPILER");
+      cmProp d = mf->GetDefinition("CMAKE_C_COMPILER");
       const std::string cl =
-        d ? d : mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
+        d ? *d : mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
       cldeps = cmStrCat('"', cmSystemTools::GetCMClDepsCommand(), "\" ", lang,
                         ' ', vars.Source, " $DEP_FILE $out \"",
                         mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX"),
@@ -778,8 +778,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     if (!depfileFlags.empty()) {
       cmSystemTools::ReplaceString(depfileFlags, "<DEPFILE>", "$DEP_FILE");
       cmSystemTools::ReplaceString(depfileFlags, "<OBJECT>", "$out");
-      cmSystemTools::ReplaceString(depfileFlags, "<CMAKE_C_COMPILER>",
-                                   mf->GetDefinition("CMAKE_C_COMPILER"));
+      cmSystemTools::ReplaceString(
+        depfileFlags, "<CMAKE_C_COMPILER>",
+        cmToCStr(mf->GetDefinition("CMAKE_C_COMPILER")));
       flags += cmStrCat(' ', depfileFlags);
     }
   }
@@ -847,9 +848,12 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       }
       if (cmNonempty(tidy)) {
         run_iwyu += " --tidy=";
-        const char* driverMode = this->Makefile->GetDefinition(
+        cmProp p = this->Makefile->GetDefinition(
           cmStrCat("CMAKE_", lang, "_CLANG_TIDY_DRIVER_MODE"));
-        if (!cmNonempty(driverMode)) {
+        std::string driverMode;
+        if (cmNonempty(p)) {
+          driverMode = *p;
+        } else {
           driverMode = lang == "C" ? "gcc" : "g++";
         }
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(
@@ -942,15 +946,15 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       config);
   }
   if (firstForConfig) {
-    const char* pchExtension =
-      GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
+    cmProp pchExtension = GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
 
     std::vector<cmSourceFile const*> externalObjects;
     this->GeneratorTarget->GetExternalObjects(externalObjects, config);
     for (cmSourceFile const* sf : externalObjects) {
       auto objectFileName = this->GetGlobalGenerator()->ExpandCFGIntDir(
         this->GetSourceFilePath(sf), config);
-      if (!cmSystemTools::StringEndsWith(objectFileName, pchExtension)) {
+      if (!cmSystemTools::StringEndsWith(objectFileName,
+                                         cmToCStr(pchExtension))) {
         this->Configs[config].Objects.push_back(objectFileName);
       }
     }
@@ -1159,7 +1163,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // build response file name
   std::string cmakeLinkVar = cmStrCat(cmakeVarLang, "_RESPONSE_FILE_FLAG");
 
-  const char* flag = GetMakefile()->GetDefinition(cmakeLinkVar);
+  cmProp flag = GetMakefile()->GetDefinition(cmakeLinkVar);
 
   bool const lang_supports_response =
     !(language == "RC" || (language == "CUDA" && !flag));
@@ -1200,9 +1204,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   objBuild.Outputs.push_back(objectFileName);
   if (firstForConfig) {
-    const char* pchExtension =
+    cmProp pchExtension =
       this->GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
-    if (!cmSystemTools::StringEndsWith(objectFileName, pchExtension)) {
+    if (!cmSystemTools::StringEndsWith(objectFileName,
+                                       cmToCStr(pchExtension))) {
       // Add this object to the list of object files.
       this->Configs[config].Objects.push_back(objectFileName);
     }

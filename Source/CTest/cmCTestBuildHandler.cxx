@@ -19,6 +19,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
@@ -248,13 +249,14 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile* mf)
   }
 
   // Record the user-specified custom warning rules.
-  if (const char* customWarningMatchers =
+  if (cmProp customWarningMatchers =
         mf->GetDefinition("CTEST_CUSTOM_WARNING_MATCH")) {
-    cmExpandList(customWarningMatchers, this->ReallyCustomWarningMatches);
+    cmExpandList(*customWarningMatchers, this->ReallyCustomWarningMatches);
   }
-  if (const char* customWarningExceptions =
+  if (cmProp customWarningExceptions =
         mf->GetDefinition("CTEST_CUSTOM_WARNING_EXCEPTION")) {
-    cmExpandList(customWarningExceptions, this->ReallyCustomWarningExceptions);
+    cmExpandList(*customWarningExceptions,
+                 this->ReallyCustomWarningExceptions);
   }
 }
 

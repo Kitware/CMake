@@ -515,8 +515,7 @@ public:
    * If the variable is not found in this makefile instance, the
    * cache is then queried.
    */
-  const char* GetDefinition(const std::string&) const;
-  const std::string* GetDef(const std::string&) const;
+  cmProp GetDefinition(const std::string&) const;
   const std::string& GetSafeDefinition(const std::string&) const;
   const std::string& GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;

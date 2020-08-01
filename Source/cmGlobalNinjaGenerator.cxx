@@ -32,6 +32,7 @@
 #include "cmMessageType.h"
 #include "cmNinjaLinkLineComputer.h"
 #include "cmOutputConverter.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -614,8 +615,8 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
   if (!this->cmGlobalGenerator::FindMakeProgram(mf)) {
     return false;
   }
-  if (const char* ninjaCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
-    this->NinjaCommand = ninjaCommand;
+  if (cmProp ninjaCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
+    this->NinjaCommand = *ninjaCommand;
     std::vector<std::string> command;
     command.push_back(this->NinjaCommand);
     command.emplace_back("--version");

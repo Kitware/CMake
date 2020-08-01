@@ -36,10 +36,7 @@ bool cmAuxSourceDirectoryCommand(std::vector<std::string> const& args,
   }
 
   // was the list already populated
-  const char* def = mf.GetDefinition(args[1]);
-  if (def) {
-    sourceListValue = def;
-  }
+  sourceListValue = mf.GetSafeDefinition(args[1]);
 
   std::vector<std::string> files;
 

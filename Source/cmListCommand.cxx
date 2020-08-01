@@ -27,6 +27,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
@@ -44,11 +45,11 @@ bool GetListString(std::string& listString, const std::string& var,
                    const cmMakefile& makefile)
 {
   // get the old value
-  const char* cacheValue = makefile.GetDefinition(var);
+  cmProp cacheValue = makefile.GetDefinition(var);
   if (!cacheValue) {
     return false;
   }
-  listString = cacheValue;
+  listString = *cacheValue;
   return true;
 }
 

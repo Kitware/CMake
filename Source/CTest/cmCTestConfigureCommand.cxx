@@ -40,13 +40,13 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
   }
 
   cmProp ctestConfigureCommand =
-    this->Makefile->GetDef("CTEST_CONFIGURE_COMMAND");
+    this->Makefile->GetDefinition("CTEST_CONFIGURE_COMMAND");
 
   if (cmNonempty(ctestConfigureCommand)) {
     this->CTest->SetCTestConfiguration("ConfigureCommand",
                                        *ctestConfigureCommand, this->Quiet);
   } else {
-    const char* cmakeGeneratorName =
+    cmProp cmakeGeneratorName =
       this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
     if (cmNonempty(cmakeGeneratorName)) {
       const std::string& source_dir =
@@ -71,7 +71,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       bool cmakeBuildTypeInOptions = false;
 
       auto gg = this->Makefile->GetCMakeInstance()->CreateGlobalGenerator(
-        cmakeGeneratorName);
+        *cmakeGeneratorName);
       if (gg) {
         multiConfig = gg->IsMultiConfig();
         gg.reset();
@@ -103,22 +103,22 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       }
 
       cmakeConfigureCommand += " \"-G";
-      cmakeConfigureCommand += cmakeGeneratorName;
+      cmakeConfigureCommand += *cmakeGeneratorName;
       cmakeConfigureCommand += "\"";
 
-      const char* cmakeGeneratorPlatform =
+      cmProp cmakeGeneratorPlatform =
         this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
       if (cmNonempty(cmakeGeneratorPlatform)) {
         cmakeConfigureCommand += " \"-A";
-        cmakeConfigureCommand += cmakeGeneratorPlatform;
+        cmakeConfigureCommand += *cmakeGeneratorPlatform;
         cmakeConfigureCommand += "\"";
       }
 
-      const char* cmakeGeneratorToolset =
+      cmProp cmakeGeneratorToolset =
         this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
       if (cmNonempty(cmakeGeneratorToolset)) {
         cmakeConfigureCommand += " \"-T";
-        cmakeConfigureCommand += cmakeGeneratorToolset;
+        cmakeConfigureCommand += *cmakeGeneratorToolset;
         cmakeConfigureCommand += "\"";
       }
 
@@ -138,7 +138,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
   }
 
   if (cmProp labelsForSubprojects =
-        this->Makefile->GetDef("CTEST_LABELS_FOR_SUBPROJECTS")) {
+        this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
                                        *labelsForSubprojects, this->Quiet);
   }

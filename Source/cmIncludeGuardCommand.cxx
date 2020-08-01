@@ -75,7 +75,7 @@ bool cmIncludeGuardCommand(std::vector<std::string> const& args,
   }
 
   std::string includeGuardVar = GetIncludeGuardVariableName(
-    status.GetMakefile().GetDefinition("CMAKE_CURRENT_LIST_FILE"));
+    *status.GetMakefile().GetDefinition("CMAKE_CURRENT_LIST_FILE"));
 
   cmMakefile* const mf = &status.GetMakefile();
 

@@ -194,7 +194,7 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
 {
   // Warn if a <pkg>_ROOT variable we may use is set.
   std::string const varName = pkg + "_ROOT";
-  const char* var = this->GetDefinition(varName);
+  cmProp var = this->GetDefinition(varName);
   std::string env;
   cmSystemTools::GetEnv(varName, env);
 
@@ -205,7 +205,7 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
     w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0074) << "\n";
     if (haveVar) {
       w << "CMake variable " << varName << " is set to:\n"
-        << "  " << var << "\n";
+        << "  " << *var << "\n";
     }
     if (haveEnv) {
       w << "Environment variable " << varName << " is set to:\n"
@@ -441,9 +441,9 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
 
   // Check for maximum recursion depth.
   int depth = CMake_DEFAULT_RECURSION_LIMIT;
-  const char* depthStr = this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
+  cmProp depthStr = this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
   if (depthStr) {
-    std::istringstream s(depthStr);
+    std::istringstream s(*depthStr);
     int d;
     if (s >> d) {
       depth = d;
@@ -627,8 +627,8 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
 bool cmMakefile::ReadDependentFile(const std::string& filename,
                                    bool noPolicyScope)
 {
-  if (const char* def = this->GetDefinition("CMAKE_CURRENT_LIST_FILE")) {
-    this->AddDefinition("CMAKE_PARENT_LIST_FILE", def);
+  if (cmProp def = this->GetDefinition("CMAKE_CURRENT_LIST_FILE")) {
+    this->AddDefinition("CMAKE_PARENT_LIST_FILE", *def);
   }
   std::string filenametoread = cmSystemTools::CollapseFullPath(
     filename, this->GetCurrentSourceDirectory());
@@ -891,9 +891,10 @@ void cmMakefile::DoGenerate(cmLocalGenerator& lg)
 void cmMakefile::Generate(cmLocalGenerator& lg)
 {
   this->DoGenerate(lg);
-  const char* oldValue = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  cmProp oldValue = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
   if (oldValue &&
-      cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, oldValue, "2.4")) {
+      cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, oldValue->c_str(),
+                                    "2.4")) {
     this->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       "You have set CMAKE_BACKWARDS_COMPATIBILITY to a CMake version less "
@@ -2378,8 +2379,10 @@ cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(
 
 cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(const std::string& name)
 {
-  const char* delimiters = this->GetDefinition("SOURCE_GROUP_DELIMITER");
-  if (delimiters == nullptr) {
+  std::string delimiters;
+  if (cmProp p = this->GetDefinition("SOURCE_GROUP_DELIMITER")) {
+    delimiters = *p;
+  } else {
     delimiters = "/\\";
   }
   return this->GetOrCreateSourceGroup(cmTokenize(name, delimiters));
@@ -2523,21 +2526,21 @@ void cmMakefile::ExpandVariablesCMP0019()
 
 bool cmMakefile::IsOn(const std::string& name) const
 {
-  return cmIsOn(this->GetDef(name));
+  return cmIsOn(this->GetDefinition(name));
 }
 
 bool cmMakefile::IsSet(const std::string& name) const
 {
-  const char* value = this->GetDefinition(name);
+  cmProp value = this->GetDefinition(name);
   if (!value) {
     return false;
   }
 
-  if (!*value) {
+  if (value->empty()) {
     return false;
   }
 
-  if (cmIsNOTFOUND(value)) {
+  if (cmIsNOTFOUND(*value)) {
     return false;
   }
 
@@ -2546,31 +2549,29 @@ bool cmMakefile::IsSet(const std::string& name) const
 
 bool cmMakefile::PlatformIs32Bit() const
 {
-  if (const char* plat_abi =
-        this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
-    if (strcmp(plat_abi, "ELF X32") == 0) {
+  if (cmProp plat_abi = this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
+    if (*plat_abi == "ELF X32") {
       return false;
     }
   }
-  if (const char* sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
-    return atoi(sizeof_dptr) == 4;
+  if (cmProp sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
+    return atoi(sizeof_dptr->c_str()) == 4;
   }
   return false;
 }
 
 bool cmMakefile::PlatformIs64Bit() const
 {
-  if (const char* sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
-    return atoi(sizeof_dptr) == 8;
+  if (cmProp sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P")) {
+    return atoi(sizeof_dptr->c_str()) == 8;
   }
   return false;
 }
 
 bool cmMakefile::PlatformIsx32() const
 {
-  if (const char* plat_abi =
-        this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
-    if (strcmp(plat_abi, "ELF X32") == 0) {
+  if (cmProp plat_abi = this->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI")) {
+    if (*plat_abi == "ELF X32") {
       return true;
     }
   }
@@ -2619,7 +2620,7 @@ const char* cmMakefile::GetSONameFlag(const std::string& language) const
     name += language;
   }
   name += "_FLAG";
-  return GetDefinition(name);
+  return cmToCStr(GetDefinition(name));
 }
 
 bool cmMakefile::CanIWriteThisFile(std::string const& fileName) const
@@ -2642,7 +2643,7 @@ const std::string& cmMakefile::GetRequiredDefinition(
   const std::string& name) const
 {
   static std::string const empty;
-  const std::string* def = GetDef(name);
+  const std::string* def = GetDefinition(name);
   if (!def) {
     cmSystemTools::Error("Error required internal CMake variable not "
                          "set, cmake may not be built correctly.\n"
@@ -2670,7 +2671,7 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
   return def != nullptr;
 }
 
-const std::string* cmMakefile::GetDef(const std::string& name) const
+cmProp cmMakefile::GetDefinition(const std::string& name) const
 {
   cmProp def = this->StateSnapshot.GetDefinition(name);
   if (!def) {
@@ -2699,19 +2700,10 @@ const std::string* cmMakefile::GetDef(const std::string& name) const
   return def;
 }
 
-const char* cmMakefile::GetDefinition(const std::string& name) const
-{
-  const std::string* def = GetDef(name);
-  if (!def) {
-    return nullptr;
-  }
-  return def->c_str();
-}
-
 const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
 {
   static std::string const empty;
-  const std::string* def = GetDef(name);
+  const std::string* def = GetDefinition(name);
   if (!def) {
     return empty;
   }
@@ -2722,7 +2714,7 @@ bool cmMakefile::GetDefExpandList(const std::string& name,
                                   std::vector<std::string>& out,
                                   bool emptyArgs) const
 {
-  cmProp def = this->GetDef(name);
+  cmProp def = this->GetDefinition(name);
   if (!def) {
     return false;
   }
@@ -2875,12 +2867,12 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
 
       // Lookup the definition of VAR.
       std::string var(first + 1, last - first - 2);
-      if (const char* val = this->GetDefinition(var)) {
+      if (cmProp val = this->GetDefinition(var)) {
         // Store the value in the output escaping as requested.
         if (escapeQuotes) {
-          source.append(cmEscapeQuotes(val));
+          source.append(cmEscapeQuotes(*val));
         } else {
-          source.append(val);
+          source.append(*val);
         }
       }
 
@@ -3026,7 +3018,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
               if (filename && lookup == lineVar) {
                 varresult = std::to_string(line);
               } else {
-                value = this->GetDef(lookup);
+                value = this->GetDefinition(lookup);
               }
               break;
             case ENVIRONMENT:
@@ -3158,7 +3150,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
             if (filename && variable == lineVar) {
               varresult = std::to_string(line);
             } else {
-              const std::string* def = this->GetDef(variable);
+              const std::string* def = this->GetDefinition(variable);
               if (def) {
                 varresult = *def;
               } else if (!this->SuppressSideEffects) {
@@ -3676,19 +3668,18 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   cm.SetGeneratorToolset(this->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET"));
   cm.LoadCache();
   if (!cm.GetGlobalGenerator()->IsMultiConfig()) {
-    if (const char* config =
+    if (cmProp config =
           this->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION")) {
       // Tell the single-configuration generator which one to use.
       // Add this before the user-provided CMake arguments in case
       // one of the arguments is -DCMAKE_BUILD_TYPE=...
-      cm.AddCacheEntry("CMAKE_BUILD_TYPE", config, "Build configuration",
-                       cmStateEnums::STRING);
+      cm.AddCacheEntry("CMAKE_BUILD_TYPE", config->c_str(),
+                       "Build configuration", cmStateEnums::STRING);
     }
   }
-  const char* recursionDepth =
-    this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
+  cmProp recursionDepth = this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
   if (recursionDepth) {
-    cm.AddCacheEntry("CMAKE_MAXIMUM_RECURSION_DEPTH", recursionDepth,
+    cm.AddCacheEntry("CMAKE_MAXIMUM_RECURSION_DEPTH", recursionDepth->c_str(),
                      "Maximum recursion depth", cmStateEnums::STRING);
   }
   // if cmake args were provided then pass them in
@@ -3821,9 +3812,9 @@ std::string cmMakefile::GetModulesFile(const std::string& filename,
   std::string moduleInCMakeModulePath;
 
   // Always search in CMAKE_MODULE_PATH:
-  const char* cmakeModulePath = this->GetDefinition("CMAKE_MODULE_PATH");
+  cmProp cmakeModulePath = this->GetDefinition("CMAKE_MODULE_PATH");
   if (cmakeModulePath) {
-    std::vector<std::string> modulePath = cmExpandedList(cmakeModulePath);
+    std::vector<std::string> modulePath = cmExpandedList(*cmakeModulePath);
 
     // Look through the possible module directories.
     for (std::string itempl : modulePath) {
@@ -3862,14 +3853,14 @@ std::string cmMakefile::GetModulesFile(const std::string& filename,
   }
 
   if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty()) {
-    const char* currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
+    cmProp currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
     std::string mods = cmSystemTools::GetCMakeRoot() + "/Modules/";
-    if (currentFile && cmSystemTools::IsSubDirectory(currentFile, mods)) {
+    if (currentFile && cmSystemTools::IsSubDirectory(*currentFile, mods)) {
       switch (this->GetPolicyStatus(cmPolicies::CMP0017)) {
         case cmPolicies::WARN: {
           std::ostringstream e;
           /* clang-format off */
-          e << "File " << currentFile << " includes "
+          e << "File " << *currentFile << " includes "
             << moduleInCMakeModulePath
             << " (found via CMAKE_MODULE_PATH) which shadows "
             << moduleInCMakeRoot  << ". This may cause errors later on .\n"
@@ -3919,7 +3910,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
 
     // Replace #cmakedefine instances.
     if (this->cmDefineRegex.find(line)) {
-      const char* def = this->GetDefinition(this->cmDefineRegex.match(2));
+      cmProp def = this->GetDefinition(this->cmDefineRegex.match(2));
       if (!cmIsOff(def)) {
         const std::string indentation = this->cmDefineRegex.match(1);
         cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine",
@@ -3932,7 +3923,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
       }
     } else if (this->cmDefine01Regex.find(line)) {
       const std::string indentation = this->cmDefine01Regex.match(1);
-      const char* def = this->GetDefinition(this->cmDefine01Regex.match(2));
+      cmProp def = this->GetDefinition(this->cmDefine01Regex.match(2));
       cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine01",
                                    "#" + indentation + "define");
       output += line;
@@ -4457,11 +4448,11 @@ static std::string const nMatchesVariable = "CMAKE_MATCH_COUNT";
 
 void cmMakefile::ClearMatches()
 {
-  const char* nMatchesStr = this->GetDefinition(nMatchesVariable);
+  cmProp nMatchesStr = this->GetDefinition(nMatchesVariable);
   if (!nMatchesStr) {
     return;
   }
-  int nMatches = atoi(nMatchesStr);
+  int nMatches = atoi(nMatchesStr->c_str());
   for (int i = 0; i <= nMatches; i++) {
     std::string const& var = matchVariables[i];
     std::string const& s = this->GetSafeDefinition(var);
@@ -4510,7 +4501,7 @@ cmPolicies::PolicyStatus cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id,
 bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var)
 {
   // Check for an explicit CMAKE_POLICY_WARNING_CMP<NNNN> setting.
-  if (const char* val = this->GetDefinition(var)) {
+  if (cmProp val = this->GetDefinition(var)) {
     return cmIsOn(val);
   }
   // Enable optional policy warnings with --debug-output, --trace,

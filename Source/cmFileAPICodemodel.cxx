@@ -852,12 +852,12 @@ void Target::ProcessLanguage(std::string const& lang)
 {
   CompileData& cd = this->CompileDataMap[lang];
   cd.Language = lang;
-  if (const char* sysrootCompile =
+  if (cmProp sysrootCompile =
         this->GT->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
-    cd.Sysroot = sysrootCompile;
-  } else if (const char* sysroot =
+    cd.Sysroot = *sysrootCompile;
+  } else if (cmProp sysroot =
                this->GT->Makefile->GetDefinition("CMAKE_SYSROOT")) {
-    cd.Sysroot = sysroot;
+    cd.Sysroot = *sysroot;
   }
   cmLocalGenerator* lg = this->GT->GetLocalGenerator();
   {
@@ -1404,12 +1404,12 @@ Json::Value Target::DumpLink()
       link["commandFragments"] = std::move(commandFragments);
     }
   }
-  if (const char* sysrootLink =
+  if (cmProp sysrootLink =
         this->GT->Makefile->GetDefinition("CMAKE_SYSROOT_LINK")) {
-    link["sysroot"] = this->DumpSysroot(sysrootLink);
-  } else if (const char* sysroot =
+    link["sysroot"] = this->DumpSysroot(*sysrootLink);
+  } else if (cmProp sysroot =
                this->GT->Makefile->GetDefinition("CMAKE_SYSROOT")) {
-    link["sysroot"] = this->DumpSysroot(sysroot);
+    link["sysroot"] = this->DumpSysroot(*sysroot);
   }
   if (this->GT->IsIPOEnabled(lang, this->Config)) {
     link["lto"] = true;

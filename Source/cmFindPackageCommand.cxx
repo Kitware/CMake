@@ -154,10 +154,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   }
 
   // Lookup required version of CMake.
-  if (const char* rv =
+  if (cmProp rv =
         this->Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
     unsigned int v[3] = { 0, 0, 0 };
-    sscanf(rv, "%u.%u.%u", &v[0], &v[1], &v[2]);
+    sscanf(rv->c_str(), "%u.%u.%u", &v[0], &v[1], &v[2]);
     this->RequiredCMakeVersion = CMake_VERSION_ENCODE(v[0], v[1], v[2]);
   }
 
@@ -165,9 +165,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   this->DebugBuffer.clear();
 
   // Lookup target architecture, if any.
-  if (const char* arch =
+  if (cmProp arch =
         this->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE")) {
-    this->LibraryArchitecture = arch;
+    this->LibraryArchitecture = *arch;
   }
 
   // Lookup whether lib32 paths should be used.
@@ -194,9 +194,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // Check if User Package Registry should be disabled
   // The `CMAKE_FIND_USE_PACKAGE_REGISTRY` has
   // priority over the deprecated CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
-  if (const char* def =
+  if (cmProp def =
         this->Makefile->GetDefinition("CMAKE_FIND_USE_PACKAGE_REGISTRY")) {
-    this->NoUserRegistry = !cmIsOn(def);
+    this->NoUserRegistry = !cmIsOn(*def);
   } else if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY")) {
     this->NoUserRegistry = true;
   }
@@ -204,9 +204,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // Check if System Package Registry should be disabled
   // The `CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY` has
   // priority over the deprecated CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
-  if (const char* def = this->Makefile->GetDefinition(
+  if (cmProp def = this->Makefile->GetDefinition(
         "CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY")) {
-    this->NoSystemRegistry = !cmIsOn(def);
+    this->NoSystemRegistry = !cmIsOn(*def);
   } else if (this->Makefile->IsOn(
                "CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY")) {
     this->NoSystemRegistry = true;
@@ -218,20 +218,20 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   }
 
   // Check if Sorting should be enabled
-  if (const char* so =
+  if (cmProp so =
         this->Makefile->GetDefinition("CMAKE_FIND_PACKAGE_SORT_ORDER")) {
 
-    if (strcmp(so, "NAME") == 0) {
+    if (*so == "NAME") {
       this->SortOrder = Name_order;
-    } else if (strcmp(so, "NATURAL") == 0) {
+    } else if (*so == "NATURAL") {
       this->SortOrder = Natural;
     } else {
       this->SortOrder = None;
     }
   }
-  if (const char* sd =
+  if (cmProp sd =
         this->Makefile->GetDefinition("CMAKE_FIND_PACKAGE_SORT_DIRECTION")) {
-    this->SortDirection = strcmp(sd, "ASC") == 0 ? Asc : Dec;
+    this->SortDirection = (*sd == "ASC") ? Asc : Dec;
   }
 
   // Find what search path locations have been enabled/disable
@@ -675,9 +675,9 @@ void cmFindPackageCommand::SetModuleVariables(const std::string& components)
 void cmFindPackageCommand::AddFindDefinition(const std::string& var,
                                              const char* val)
 {
-  if (const char* old = this->Makefile->GetDefinition(var)) {
+  if (cmProp old = this->Makefile->GetDefinition(var)) {
     this->OriginalDefs[var].exists = true;
-    this->OriginalDefs[var].value = old;
+    this->OriginalDefs[var].value = *old;
   } else {
     this->OriginalDefs[var].exists = false;
   }
@@ -759,14 +759,14 @@ bool cmFindPackageCommand::HandlePackageMode(
   this->ConsideredConfigs.clear();
 
   // Try to find the config file.
-  const char* def = this->Makefile->GetDefinition(this->Variable);
+  cmProp def = this->Makefile->GetDefinition(this->Variable);
 
   // Try to load the config file if the directory is known
   bool fileFound = false;
   if (this->UseConfigFiles) {
     if (!cmIsOff(def)) {
       // Get the directory from the variable value.
-      std::string dir = def;
+      std::string dir = *def;
       cmSystemTools::ConvertToUnixSlashes(dir);
 
       // Treat relative paths with respect to the current source dir.

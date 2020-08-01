@@ -17,6 +17,7 @@
 #include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
@@ -229,9 +230,9 @@ void cmGraphVizWriter::ReadSettings(
 
 #define __set_if_set(var, cmakeDefinition)                                    \
   do {                                                                        \
-    const char* value = mf.GetDefinition(cmakeDefinition);                    \
+    cmProp value = mf.GetDefinition(cmakeDefinition);                         \
     if (value) {                                                              \
-      (var) = value;                                                          \
+      (var) = *value;                                                         \
     }                                                                         \
   } while (false)
 
@@ -241,9 +242,9 @@ void cmGraphVizWriter::ReadSettings(
 
 #define __set_bool_if_set(var, cmakeDefinition)                               \
   do {                                                                        \
-    const char* value = mf.GetDefinition(cmakeDefinition);                    \
+    cmProp value = mf.GetDefinition(cmakeDefinition);                         \
     if (value) {                                                              \
-      (var) = cmIsOn(value);                                                  \
+      (var) = cmIsOn(*value);                                                 \
     }                                                                         \
   } while (false)
 

@@ -116,22 +116,22 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   std::vector<std::string> enabledLanguages =
     this->GetState()->GetEnabledLanguages();
 
-  if (const char* sysrootCompile =
+  if (cmProp sysrootCompile =
         this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
-    this->CompilerSysroot = sysrootCompile;
+    this->CompilerSysroot = *sysrootCompile;
   } else {
     this->CompilerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
   }
 
-  if (const char* sysrootLink =
+  if (cmProp sysrootLink =
         this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK")) {
-    this->LinkerSysroot = sysrootLink;
+    this->LinkerSysroot = *sysrootLink;
   } else {
     this->LinkerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
   }
 
   if (cmProp appleArchSysroots =
-        this->Makefile->GetDef("CMAKE_APPLE_ARCH_SYSROOTS")) {
+        this->Makefile->GetDefinition("CMAKE_APPLE_ARCH_SYSROOTS")) {
     std::string const& appleArchs =
       this->Makefile->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES");
     std::vector<std::string> archs;
@@ -220,10 +220,10 @@ void cmLocalGenerator::ComputeObjectMaxPath()
 #else
   this->ObjectPathMax = 1000;
 #endif
-  const char* plen = this->Makefile->GetDefinition("CMAKE_OBJECT_PATH_MAX");
+  cmProp plen = this->Makefile->GetDefinition("CMAKE_OBJECT_PATH_MAX");
   if (cmNonempty(plen)) {
     unsigned int pmax;
-    if (sscanf(plen, "%u", &pmax) == 1) {
+    if (sscanf(plen->c_str(), "%u", &pmax) == 1) {
       if (pmax >= 128) {
         this->ObjectPathMax = pmax;
       } else {
@@ -235,7 +235,7 @@ void cmLocalGenerator::ComputeObjectMaxPath()
       }
     } else {
       std::ostringstream w;
-      w << "CMAKE_OBJECT_PATH_MAX is set to \"" << plen
+      w << "CMAKE_OBJECT_PATH_MAX is set to \"" << *plen
         << "\", which fails to parse as a positive integer.  "
         << "The value will be ignored.";
       this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
@@ -358,7 +358,7 @@ void cmLocalGenerator::GenerateTestFiles()
   }
 
   // Add directory labels property
-  const char* directoryLabels =
+  cmProp directoryLabels =
     this->Makefile->GetDefinition("CMAKE_DIRECTORY_LABELS");
   cmProp labels = this->Makefile->GetProperty("LABELS");
 
@@ -371,7 +371,7 @@ void cmLocalGenerator::GenerateTestFiles()
       fout << ";";
     }
     if (directoryLabels) {
-      fout << cmOutputConverter::EscapeForCMake(directoryLabels);
+      fout << cmOutputConverter::EscapeForCMake(*directoryLabels);
     }
     fout << ")\n";
   }
@@ -425,7 +425,8 @@ void cmLocalGenerator::ProcessEvaluationFiles(
 void cmLocalGenerator::GenerateInstallRules()
 {
   // Compute the install prefix.
-  const char* prefix = this->Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
+  const char* prefix =
+    cmToCStr(this->Makefile->GetDefinition("CMAKE_INSTALL_PREFIX"));
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   std::string prefix_win32;
@@ -433,10 +434,10 @@ void cmLocalGenerator::GenerateInstallRules()
     if (!cmSystemTools::GetEnv("SystemDrive", prefix_win32)) {
       prefix_win32 = "C:";
     }
-    const char* project_name = this->Makefile->GetDefinition("PROJECT_NAME");
+    cmProp project_name = this->Makefile->GetDefinition("PROJECT_NAME");
     if (cmNonempty(project_name)) {
       prefix_win32 += "/Program Files/";
-      prefix_win32 += project_name;
+      prefix_win32 += *project_name;
     } else {
       prefix_win32 += "/InstalledCMakeProject";
     }
@@ -457,9 +458,9 @@ void cmLocalGenerator::GenerateInstallRules()
     prefix = "/usr/local";
   }
 #endif
-  if (const char* stagingPrefix =
+  if (cmProp stagingPrefix =
         this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX")) {
-    prefix = stagingPrefix;
+    prefix = stagingPrefix->c_str();
   }
 
   // Compute the set of configurations.
@@ -539,40 +540,40 @@ void cmLocalGenerator::GenerateInstallRules()
   /* clang-format on */
 
   // Copy user-specified install options to the install code.
-  if (const char* so_no_exe =
+  if (cmProp so_no_exe =
         this->Makefile->GetDefinition("CMAKE_INSTALL_SO_NO_EXE")) {
     /* clang-format off */
     fout <<
       "# Install shared libraries without execute permission?\n"
       "if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)\n"
-      "  set(CMAKE_INSTALL_SO_NO_EXE \"" << so_no_exe << "\")\n"
+      "  set(CMAKE_INSTALL_SO_NO_EXE \"" << *so_no_exe << "\")\n"
       "endif()\n"
       "\n";
     /* clang-format on */
   }
 
   // Copy cmake cross compile state to install code.
-  if (const char* crosscompiling =
+  if (cmProp crosscompiling =
         this->Makefile->GetDefinition("CMAKE_CROSSCOMPILING")) {
     /* clang-format off */
     fout <<
       "# Is this installation the result of a crosscompile?\n"
       "if(NOT DEFINED CMAKE_CROSSCOMPILING)\n"
-      "  set(CMAKE_CROSSCOMPILING \"" << crosscompiling << "\")\n"
+      "  set(CMAKE_CROSSCOMPILING \"" << *crosscompiling << "\")\n"
       "endif()\n"
       "\n";
     /* clang-format on */
   }
 
   // Write default directory permissions.
-  if (const char* defaultDirPermissions = this->Makefile->GetDefinition(
+  if (cmProp defaultDirPermissions = this->Makefile->GetDefinition(
         "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS")) {
     /* clang-format off */
     fout <<
       "# Set default install directory permissions.\n"
       "if(NOT DEFINED CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS)\n"
       "  set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS \""
-         << defaultDirPermissions << "\")\n"
+         << *defaultDirPermissions << "\")\n"
       "endif()\n"
       "\n";
     /* clang-format on */
@@ -581,14 +582,14 @@ void cmLocalGenerator::GenerateInstallRules()
   // Write out CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM so that
   // installed code that uses `file(GET_RUNTIME_DEPENDENCIES)`
   // has same platform variable as when running cmake
-  if (const char* platform = this->Makefile->GetDefinition(
+  if (cmProp platform = this->Makefile->GetDefinition(
         "CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM")) {
     /* clang-format off */
     fout <<
       "# Set default install directory permissions.\n"
       "if(NOT DEFINED CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM)\n"
       "  set(CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM \""
-         << platform << "\")\n"
+         << *platform << "\")\n"
       "endif()\n"
       "\n";
     /* clang-format on */
@@ -597,14 +598,14 @@ void cmLocalGenerator::GenerateInstallRules()
   // Write out CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL so that
   // installed code that uses `file(GET_RUNTIME_DEPENDENCIES)`
   // has same tool selected as when running cmake
-  if (const char* command =
+  if (cmProp command =
         this->Makefile->GetDefinition("CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL")) {
     /* clang-format off */
     fout <<
       "# Set default install directory permissions.\n"
       "if(NOT DEFINED CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL)\n"
       "  set(CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL \""
-         << command << "\")\n"
+         << *command << "\")\n"
       "endif()\n"
       "\n";
     /* clang-format on */
@@ -613,14 +614,14 @@ void cmLocalGenerator::GenerateInstallRules()
   // Write out CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND so that
   // installed code that uses `file(GET_RUNTIME_DEPENDENCIES)`
   // has same path to the tool as when running cmake
-  if (const char* command = this->Makefile->GetDefinition(
+  if (cmProp command = this->Makefile->GetDefinition(
         "CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND")) {
     /* clang-format off */
     fout <<
       "# Set default install directory permissions.\n"
       "if(NOT DEFINED CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND)\n"
       "  set(CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND \""
-         << command << "\")\n"
+         << *command << "\")\n"
       "endif()\n"
       "\n";
     /* clang-format on */
@@ -631,13 +632,13 @@ void cmLocalGenerator::GenerateInstallRules()
   // CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND has consistent
   // logic to fallback to CMAKE_OBJDUMP when `objdump` is
   // not on the path
-  if (const char* command = this->Makefile->GetDefinition("CMAKE_OBJDUMP")) {
+  if (cmProp command = this->Makefile->GetDefinition("CMAKE_OBJDUMP")) {
     /* clang-format off */
     fout <<
       "# Set default install directory permissions.\n"
       "if(NOT DEFINED CMAKE_OBJDUMP)\n"
       "  set(CMAKE_OBJDUMP \""
-         << command << "\")\n"
+         << *command << "\")\n"
       "endif()\n"
       "\n";
     /* clang-format on */
@@ -858,8 +859,8 @@ std::string cmLocalGenerator::GetIncludeFlags(
 
   std::string const& includeFlag =
     this->Makefile->GetSafeDefinition(cmStrCat("CMAKE_INCLUDE_FLAG_", lang));
-  const char* sep =
-    this->Makefile->GetDefinition(cmStrCat("CMAKE_INCLUDE_FLAG_SEP_", lang));
+  const char* sep = cmToCStr(
+    this->Makefile->GetDefinition(cmStrCat("CMAKE_INCLUDE_FLAG_SEP_", lang)));
   bool quotePaths = false;
   if (this->Makefile->GetDefinition("CMAKE_QUOTE_INCLUDE_PATHS")) {
     quotePaths = true;
@@ -876,15 +877,15 @@ std::string cmLocalGenerator::GetIncludeFlags(
 
   // Support special system include flag if it is available and the
   // normal flag is repeated for each directory.
-  const char* sysIncludeFlag = nullptr;
+  cmProp sysIncludeFlag = nullptr;
   if (repeatFlag) {
     sysIncludeFlag = this->Makefile->GetDefinition(
       cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", lang));
   }
 
-  const char* fwSearchFlag = this->Makefile->GetDefinition(
+  cmProp fwSearchFlag = this->Makefile->GetDefinition(
     cmStrCat("CMAKE_", lang, "_FRAMEWORK_SEARCH_FLAG"));
-  const char* sysFwSearchFlag = this->Makefile->GetDefinition(
+  cmProp sysFwSearchFlag = this->Makefile->GetDefinition(
     cmStrCat("CMAKE_", lang, "_SYSTEM_FRAMEWORK_SEARCH_FLAG"));
 
   bool flagUsed = false;
@@ -900,9 +901,9 @@ std::string cmLocalGenerator::GetIncludeFlags(
       if (emitted.insert(frameworkDir).second) {
         if (sysFwSearchFlag && target &&
             target->IsSystemIncludeDirectory(i, config, lang)) {
-          includeFlags << sysFwSearchFlag;
+          includeFlags << *sysFwSearchFlag;
         } else {
-          includeFlags << fwSearchFlag;
+          includeFlags << *fwSearchFlag;
         }
         includeFlags << this->ConvertToOutputFormat(frameworkDir, shellFormat)
                      << " ";
@@ -913,7 +914,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
     if (!flagUsed || repeatFlag) {
       if (sysIncludeFlag && target &&
           target->IsSystemIncludeDirectory(i, config, lang)) {
-        includeFlags << sysIncludeFlag;
+        includeFlags << *sysIncludeFlag;
       } else {
         includeFlags << includeFlag;
       }
@@ -953,9 +954,9 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
                                          const std::string& lang,
                                          const std::string& config)
 {
-  std::string langFlagRegexVar = std::string("CMAKE_") + lang + "_FLAG_REGEX";
+  std::string langFlagRegexVar = cmStrCat("CMAKE_", lang, "_FLAG_REGEX");
 
-  if (const char* langFlagRegexStr =
+  if (cmProp langFlagRegexStr =
         this->Makefile->GetDefinition(langFlagRegexVar)) {
     // Filter flags acceptable to this language.
     if (cmProp targetFlags = target->GetProperty("COMPILE_FLAGS")) {
@@ -964,7 +965,7 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
       // Re-escape these flags since COMPILE_FLAGS were already parsed
       // as a command line above.
       std::string compileOpts;
-      this->AppendCompileOptions(compileOpts, opts, langFlagRegexStr);
+      this->AppendCompileOptions(compileOpts, opts, langFlagRegexStr->c_str());
       if (!compileOpts.empty()) {
         flags.emplace_back(std::move(compileOpts));
       }
@@ -972,7 +973,8 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
     std::vector<BT<std::string>> targetCompileOpts =
       target->GetCompileOptions(config, lang);
     // COMPILE_OPTIONS are escaped.
-    this->AppendCompileOptions(flags, targetCompileOpts, langFlagRegexStr);
+    this->AppendCompileOptions(flags, targetCompileOpts,
+                               langFlagRegexStr->c_str());
   } else {
     // Use all flags.
     if (cmProp targetFlags = target->GetProperty("COMPILE_FLAGS")) {
@@ -1022,7 +1024,7 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
 
   // Add compile flag for the MSVC compiler only.
   cmMakefile* mf = this->GetMakefile();
-  if (const char* jmc =
+  if (cmProp jmc =
         mf->GetDefinition("CMAKE_" + lang + "_COMPILE_OPTIONS_JMC")) {
 
     // Handle Just My Code debugging flags, /JMC.
@@ -1036,7 +1038,7 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
         std::string isJMCEnabled =
           cmGeneratorExpression::Evaluate(*jmcExprGen, this, config);
         if (cmIsOn(isJMCEnabled)) {
-          std::vector<std::string> optVec = cmExpandedList(jmc);
+          std::vector<std::string> optVec = cmExpandedList(*jmc);
           std::string jmcFlags;
           this->AppendCompileOptions(jmcFlags, optVec);
           if (!jmcFlags.empty()) {
@@ -1652,7 +1654,7 @@ static std::string GetFrameworkFlags(const std::string& lang,
   }
 
   std::string fwSearchFlagVar = "CMAKE_" + lang + "_FRAMEWORK_SEARCH_FLAG";
-  const char* fwSearchFlag = mf->GetDefinition(fwSearchFlagVar);
+  cmProp fwSearchFlag = mf->GetDefinition(fwSearchFlagVar);
   if (!cmNonempty(fwSearchFlag)) {
     return std::string();
   }
@@ -1679,7 +1681,7 @@ static std::string GetFrameworkFlags(const std::string& lang,
     std::vector<std::string> const& frameworks = cli->GetFrameworkPaths();
     for (std::string const& framework : frameworks) {
       if (emitted.insert(framework).second) {
-        flags += fwSearchFlag;
+        flags += *fwSearchFlag;
         flags +=
           lg->ConvertToOutputFormat(framework, cmOutputConverter::SHELL);
         flags += " ";
@@ -1761,18 +1763,18 @@ void cmLocalGenerator::OutputLinkLibraries(
   std::string linkLanguage = cli.GetLinkLanguage();
 
   std::string libPathFlag;
-  if (const char* value = this->Makefile->GetDefinition(
+  if (cmProp value = this->Makefile->GetDefinition(
         "CMAKE_" + cli.GetLinkLanguage() + "_LIBRARY_PATH_FLAG")) {
-    libPathFlag = value;
+    libPathFlag = *value;
   } else {
     libPathFlag =
       this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
   }
 
   std::string libPathTerminator;
-  if (const char* value = this->Makefile->GetDefinition(
+  if (cmProp value = this->Makefile->GetDefinition(
         "CMAKE_" + cli.GetLinkLanguage() + "_LIBRARY_PATH_TERMINATOR")) {
-    libPathTerminator = value;
+    libPathTerminator = *value;
   } else {
     libPathTerminator =
       this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
@@ -1886,16 +1888,15 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       }
     }
 
-    const char* sysroot = this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
-    if (sysroot && sysroot[0] == '/' && !sysroot[1]) {
+    cmProp sysroot = this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
+    if (sysroot && *sysroot == "/") {
       sysroot = nullptr;
     }
-    std::string sysrootFlagVar =
-      std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
-    const char* sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
+    std::string sysrootFlagVar = "CMAKE_" + lang + "_SYSROOT_FLAG";
+    cmProp sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
     if (cmNonempty(sysrootFlag)) {
       if (!this->AppleArchSysroots.empty() &&
-          !this->AllAppleArchSysrootsAreTheSame(archs, sysroot)) {
+          !this->AllAppleArchSysrootsAreTheSame(archs, cmToCStr(sysroot))) {
         for (std::string const& arch : archs) {
           std::string const& archSysroot = this->AppleArchSysroots[arch];
           if (cmIsOff(archSysroot)) {
@@ -1904,28 +1905,28 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
           if (filterArch.empty() || filterArch == arch) {
             flags += " -Xarch_" + arch + " ";
             // Combine sysroot flag and path to work with -Xarch
-            std::string arch_sysroot = sysrootFlag + archSysroot;
+            std::string arch_sysroot = *sysrootFlag + archSysroot;
             flags += this->ConvertToOutputFormat(arch_sysroot, SHELL);
           }
         }
-      } else if (sysroot && *sysroot) {
+      } else if (cmNonempty(sysroot)) {
         flags += " ";
-        flags += sysrootFlag;
+        flags += *sysrootFlag;
         flags += " ";
-        flags += this->ConvertToOutputFormat(sysroot, SHELL);
+        flags += this->ConvertToOutputFormat(*sysroot, SHELL);
       }
     }
 
-    const char* deploymentTarget =
+    cmProp deploymentTarget =
       this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
     std::string deploymentTargetFlagVar =
-      std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
-    const char* deploymentTargetFlag =
+      "CMAKE_" + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
+    cmProp deploymentTargetFlag =
       this->Makefile->GetDefinition(deploymentTargetFlagVar);
     if (cmNonempty(deploymentTargetFlag) && cmNonempty(deploymentTarget)) {
       flags += " ";
-      flags += deploymentTargetFlag;
-      flags += deploymentTarget;
+      flags += *deploymentTargetFlag;
+      flags += *deploymentTarget;
     }
   }
 }
@@ -1944,10 +1945,10 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
 
   if (lang == "Swift") {
     if (cmProp v = target->GetProperty("Swift_LANGUAGE_VERSION")) {
-      if (cmSystemTools::VersionCompare(
-            cmSystemTools::OP_GREATER_EQUAL,
-            this->Makefile->GetDefinition("CMAKE_Swift_COMPILER_VERSION"),
-            "4.2")) {
+      if (cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
+                                        cmToCStr(this->Makefile->GetDefinition(
+                                          "CMAKE_Swift_COMPILER_VERSION")),
+                                        "4.2")) {
         this->AppendFlags(flags, "-swift-version " + *v);
       }
     }
@@ -1968,7 +1969,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   }
   // Add VFS Overlay for Clang compiliers
   if (compiler == "Clang") {
-    if (const char* vfsOverlay =
+    if (cmProp vfsOverlay =
           this->Makefile->GetDefinition("CMAKE_CLANG_VFS_OVERLAY")) {
       std::string const& compilerSimulateId =
         this->Makefile->GetSafeDefinition(
@@ -1977,17 +1978,17 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
         this->AppendCompileOptions(
           flags,
           std::vector<std::string>{ "-Xclang", "-ivfsoverlay", "-Xclang",
-                                    vfsOverlay });
+                                    *vfsOverlay });
       } else {
         this->AppendCompileOptions(
-          flags, std::vector<std::string>{ "-ivfsoverlay", vfsOverlay });
+          flags, std::vector<std::string>{ "-ivfsoverlay", *vfsOverlay });
       }
     }
   }
   // Add MSVC runtime library flags.  This is activated by the presence
   // of a default selection whether or not it is overridden by a property.
   cmProp msvcRuntimeLibraryDefault =
-    this->Makefile->GetDef("CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT");
+    this->Makefile->GetDefinition("CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT");
   if (cmNonempty(msvcRuntimeLibraryDefault)) {
     cmProp msvcRuntimeLibraryValue =
       target->GetProperty("MSVC_RUNTIME_LIBRARY");
@@ -1997,11 +1998,10 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     std::string const msvcRuntimeLibrary = cmGeneratorExpression::Evaluate(
       *msvcRuntimeLibraryValue, this, config, target);
     if (!msvcRuntimeLibrary.empty()) {
-      if (const char* msvcRuntimeLibraryOptions =
-            this->Makefile->GetDefinition(
-              "CMAKE_" + lang + "_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_" +
-              msvcRuntimeLibrary)) {
-        this->AppendCompileOptions(flags, msvcRuntimeLibraryOptions);
+      if (cmProp msvcRuntimeLibraryOptions = this->Makefile->GetDefinition(
+            "CMAKE_" + lang + "_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_" +
+            msvcRuntimeLibrary)) {
+        this->AppendCompileOptions(flags, *msvcRuntimeLibraryOptions);
       } else if ((this->Makefile->GetSafeDefinition(
                     "CMAKE_" + lang + "_COMPILER_ID") == "MSVC" ||
                   this->Makefile->GetSafeDefinition(
@@ -2178,9 +2178,9 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
   std::string const& optionFlagDef =
     standardResolver.GetCompileOptionDef(target, lang, config);
   if (!optionFlagDef.empty()) {
-    auto opt = target->Target->GetMakefile()->GetDefinition(optionFlagDef);
+    cmProp opt = target->Target->GetMakefile()->GetDefinition(optionFlagDef);
     if (opt) {
-      std::vector<std::string> optVec = cmExpandedList(opt);
+      std::vector<std::string> optVec = cmExpandedList(*opt);
       for (std::string const& i : optVec) {
         this->AppendFlagEscape(flags, i);
       }
@@ -2195,7 +2195,7 @@ static void AddVisibilityCompileOption(std::string& flags,
                                        std::string* warnCMP0063)
 {
   std::string compileOption = "CMAKE_" + lang + "_COMPILE_OPTIONS_VISIBILITY";
-  const char* opt = lg->GetMakefile()->GetDefinition(compileOption);
+  cmProp opt = lg->GetMakefile()->GetDefinition(compileOption);
   if (!opt) {
     return;
   }
@@ -2219,7 +2219,7 @@ static void AddVisibilityCompileOption(std::string& flags,
     cmSystemTools::Error(e.str());
     return;
   }
-  std::string option = opt + *prop;
+  std::string option = *opt + *prop;
   lg->AppendFlags(flags, option);
 }
 
@@ -2231,7 +2231,7 @@ static void AddInlineVisibilityCompileOption(std::string& flags,
 {
   std::string compileOption =
     cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN");
-  const char* opt = lg->GetMakefile()->GetDefinition(compileOption);
+  cmProp opt = lg->GetMakefile()->GetDefinition(compileOption);
   if (!opt) {
     return;
   }
@@ -2244,7 +2244,7 @@ static void AddInlineVisibilityCompileOption(std::string& flags,
     *warnCMP0063 += "  VISIBILITY_INLINES_HIDDEN\n";
     return;
   }
-  lg->AppendFlags(flags, opt);
+  lg->AppendFlags(flags, *opt);
 }
 
 void cmLocalGenerator::AddVisibilityPresetFlags(
@@ -2917,12 +2917,12 @@ void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
   }
 
   const std::string name = "CMAKE_" + lang + "_LINK_OPTIONS_IPO";
-  const char* rawFlagsList = this->Makefile->GetDefinition(name);
+  cmProp rawFlagsList = this->Makefile->GetDefinition(name);
   if (rawFlagsList == nullptr) {
     return;
   }
 
-  std::vector<std::string> flagsList = cmExpandedList(rawFlagsList);
+  std::vector<std::string> flagsList = cmExpandedList(*rawFlagsList);
   for (std::string const& o : flagsList) {
     this->AppendFlagEscape(flags, o);
   }
@@ -3108,10 +3108,10 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
   // Lookup the define flag for the current language.
   std::string dflag = "-D";
   if (!lang.empty()) {
-    const char* df =
+    cmProp df =
       this->Makefile->GetDefinition(cmStrCat("CMAKE_", lang, "_DEFINE_FLAG"));
     if (cmNonempty(df)) {
-      dflag = df;
+      dflag = *df;
     }
   }
   const char* itemSeparator = definesString.empty() ? "" : " ";
@@ -3155,10 +3155,10 @@ void cmLocalGenerator::AppendFeatureOptions(std::string& flags,
                                             const std::string& lang,
                                             const char* feature)
 {
-  const char* optionList = this->Makefile->GetDefinition(
+  cmProp optionList = this->Makefile->GetDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_", feature));
   if (optionList != nullptr) {
-    std::vector<std::string> options = cmExpandedList(optionList);
+    std::vector<std::string> options = cmExpandedList(*optionList);
     for (std::string const& o : options) {
       this->AppendFlagEscape(flags, o);
     }
@@ -3613,9 +3613,9 @@ KWIML_INT_uint64_t cmLocalGenerator::GetBackwardsCompatibility()
     unsigned int major = 0;
     unsigned int minor = 0;
     unsigned int patch = 0;
-    if (const char* value =
+    if (cmProp value =
           this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY")) {
-      switch (sscanf(value, "%u.%u.%u", &major, &minor, &patch)) {
+      switch (sscanf(value->c_str(), "%u.%u.%u", &major, &minor, &patch)) {
         case 2:
           patch = 0;
           break;

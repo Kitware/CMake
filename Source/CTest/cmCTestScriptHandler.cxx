@@ -35,6 +35,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -372,8 +373,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 int cmCTestScriptHandler::ExtractVariables()
 {
   // Temporary variables
-  const char* minInterval;
-  const char* contDuration;
+  cmProp minInterval;
+  cmProp contDuration;
 
   this->SourceDir =
     this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
@@ -412,7 +413,7 @@ int cmCTestScriptHandler::ExtractVariables()
   int i;
   for (i = 1; i < 10; ++i) {
     sprintf(updateVar, "CTEST_EXTRA_UPDATES_%i", i);
-    const char* updateVal = this->Makefile->GetDefinition(updateVar);
+    cmProp updateVal = this->Makefile->GetDefinition(updateVar);
     if (updateVal) {
       if (this->UpdateCmd.empty()) {
         cmSystemTools::Error(
@@ -420,7 +421,7 @@ int cmCTestScriptHandler::ExtractVariables()
           " specified without specifying CTEST_CVS_COMMAND.");
         return 12;
       }
-      this->ExtraUpdates.emplace_back(updateVal);
+      this->ExtraUpdates.emplace_back(*updateVal);
     }
   }
 
@@ -455,10 +456,10 @@ int cmCTestScriptHandler::ExtractVariables()
 
   // the script may override the minimum continuous interval
   if (minInterval) {
-    this->MinimumInterval = 60 * atof(minInterval);
+    this->MinimumInterval = 60 * atof(minInterval->c_str());
   }
   if (contDuration) {
-    this->ContinuousDuration = 60.0 * atof(contDuration);
+    this->ContinuousDuration = 60.0 * atof(contDuration->c_str());
   }
 
   this->UpdateElapsedTime();
@@ -932,13 +933,13 @@ cmDuration cmCTestScriptHandler::GetRemainingTimeAllowed()
     return cmCTest::MaxDuration();
   }
 
-  const char* timelimitS = this->Makefile->GetDefinition("CTEST_TIME_LIMIT");
+  cmProp timelimitS = this->Makefile->GetDefinition("CTEST_TIME_LIMIT");
 
   if (!timelimitS) {
     return cmCTest::MaxDuration();
   }
 
-  auto timelimit = cmDuration(atof(timelimitS));
+  auto timelimit = cmDuration(atof(timelimitS->c_str()));
 
   auto duration = std::chrono::duration_cast<cmDuration>(
     std::chrono::steady_clock::now() - this->ScriptStartTime);

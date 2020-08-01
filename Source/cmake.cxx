@@ -2286,7 +2286,8 @@ int cmake::CheckBuildSystem()
 
   if (this->ClearBuildSystem) {
     // Get the generator used for this build system.
-    const char* genName = mf.GetDefinition("CMAKE_DEPENDS_GENERATOR");
+    const char* genName =
+      cmToCStr(mf.GetDefinition("CMAKE_DEPENDS_GENERATOR"));
     if (!cmNonempty(genName)) {
       genName = "Unix Makefiles";
     }

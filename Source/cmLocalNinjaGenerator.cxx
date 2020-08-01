@@ -312,7 +312,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
   cmProp jobpools =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("JOB_POOLS");
   if (!jobpools) {
-    jobpools = this->GetMakefile()->GetDef("CMAKE_JOB_POOLS");
+    jobpools = this->GetMakefile()->GetDefinition("CMAKE_JOB_POOLS");
   }
   if (jobpools) {
     cmGlobalNinjaGenerator::WriteComment(
@@ -363,7 +363,8 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Write statements declared in CMakeLists.txt:\n"
-     << "# " << this->Makefile->GetDefinition("CMAKE_CURRENT_LIST_FILE")
+     << "# "
+     << cmToCStr(this->Makefile->GetDefinition("CMAKE_CURRENT_LIST_FILE"))
      << '\n';
   if (this->IsRootMakefile()) {
     os << "# Which is the root file.\n";

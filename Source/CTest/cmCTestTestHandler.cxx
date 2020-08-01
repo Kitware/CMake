@@ -37,6 +37,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
@@ -1764,9 +1765,9 @@ bool cmCTestTestHandler::GetListOfTests()
     // SEND_ERROR or FATAL_ERROR in CTestTestfile or TEST_INCLUDE_FILES
     return false;
   }
-  const char* specFile = mf.GetDefinition("CTEST_RESOURCE_SPEC_FILE");
+  cmProp specFile = mf.GetDefinition("CTEST_RESOURCE_SPEC_FILE");
   if (this->ResourceSpecFile.empty() && specFile) {
-    this->ResourceSpecFile = specFile;
+    this->ResourceSpecFile = *specFile;
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Done constructing a list of tests" << std::endl,

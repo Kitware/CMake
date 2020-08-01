@@ -3539,12 +3539,11 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
                            this->CreateString(defaultConfigName));
   cmXCodeObject* buildSettings =
     this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  const char* sysroot =
-    this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
-  const char* deploymentTarget =
+  cmProp sysroot = this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
+  cmProp deploymentTarget =
     this->CurrentMakefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
   if (sysroot) {
-    buildSettings->AddAttribute("SDKROOT", this->CreateString(sysroot));
+    buildSettings->AddAttribute("SDKROOT", this->CreateString(*sysroot));
   }
   // recompute this as it may have been changed since enable language
   this->ComputeArchitectures(this->CurrentMakefile);
@@ -3555,7 +3554,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     // When targeting macOS, use only the host architecture.
     if (this->SystemName == "Darwin"_s &&
         (!cmNonempty(sysroot) ||
-         cmSystemTools::LowerCase(sysroot).find("macos") !=
+         cmSystemTools::LowerCase(*sysroot).find("macos") !=
            std::string::npos)) {
       buildSettings->AddAttribute("ARCHS",
                                   this->CreateString("$(NATIVE_ARCH_ACTUAL)"));
@@ -3566,7 +3565,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   }
   if (cmNonempty(deploymentTarget)) {
     buildSettings->AddAttribute(GetDeploymentPlatform(root->GetMakefile()),
-                                this->CreateString(deploymentTarget));
+                                this->CreateString(*deploymentTarget));
   }
   if (!this->GeneratorToolset.empty()) {
     buildSettings->AddAttribute("GCC_VERSION",
@@ -3574,9 +3573,9 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   }
   if (this->GetLanguageEnabled("Swift")) {
     std::string swiftVersion;
-    if (const char* vers = this->CurrentMakefile->GetDefinition(
+    if (cmProp vers = this->CurrentMakefile->GetDefinition(
           "CMAKE_Swift_LANGUAGE_VERSION")) {
-      swiftVersion = vers;
+      swiftVersion = *vers;
     } else if (this->XcodeVersion >= 102) {
       swiftVersion = "4.0";
     } else if (this->XcodeVersion >= 83) {
@@ -3659,7 +3658,7 @@ std::string cmGlobalXCodeGenerator::GetObjectsDirectory(
 void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
 {
   this->Architectures.clear();
-  const char* sysroot = mf->GetDefinition("CMAKE_OSX_SYSROOT");
+  cmProp sysroot = mf->GetDefinition("CMAKE_OSX_SYSROOT");
   if (sysroot) {
     mf->GetDefExpandList("CMAKE_OSX_ARCHITECTURES", this->Architectures);
   }
@@ -3668,8 +3667,8 @@ void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
     // With no ARCHS we use ONLY_ACTIVE_ARCH and possibly a
     // platform-specific default ARCHS placeholder value.
     // Look up the arch that Xcode chooses in this case.
-    if (const char* arch = mf->GetDefinition("CMAKE_XCODE_ARCHS")) {
-      this->ObjectDirArchDefault = arch;
+    if (cmProp arch = mf->GetDefinition("CMAKE_XCODE_ARCHS")) {
+      this->ObjectDirArchDefault = *arch;
       // We expect only one arch but choose the first just in case.
       std::string::size_type pos = this->ObjectDirArchDefault.find(';');
       if (pos != std::string::npos) {
@@ -4035,9 +4034,9 @@ std::string cmGlobalXCodeGenerator::LookupFlags(
 {
   if (!varNameLang.empty()) {
     std::string varName = cmStrCat(varNamePrefix, varNameLang, varNameSuffix);
-    if (const char* varValue = this->CurrentMakefile->GetDefinition(varName)) {
-      if (*varValue) {
-        return varValue;
+    if (cmProp varValue = this->CurrentMakefile->GetDefinition(varName)) {
+      if (!varValue->empty()) {
+        return *varValue;
       }
     }
   }

@@ -63,7 +63,7 @@ struct StanardLevelComputer
     const auto& stds = this->Levels;
     const auto& stdsStrings = this->LevelsAsStrings;
 
-    const char* defaultStd = makefile->GetDefinition(
+    cmProp defaultStd = makefile->GetDefinition(
       cmStrCat("CMAKE_", this->Language, "_STANDARD_DEFAULT"));
     if (!cmNonempty(defaultStd)) {
       // this compiler has no notion of language standard levels
@@ -93,8 +93,7 @@ struct StanardLevelComputer
       std::string option_flag = cmStrCat(
         "CMAKE_", this->Language, *standardProp, "_", type, "_COMPILE_OPTION");
 
-      const char* opt =
-        target->Target->GetMakefile()->GetDefinition(option_flag);
+      cmProp opt = target->Target->GetMakefile()->GetDefinition(option_flag);
       if (!opt) {
         std::ostringstream e;
         e << "Target \"" << target->GetName()
@@ -118,7 +117,7 @@ struct StanardLevelComputer
     int defaultValue = -1;
     try {
       standardValue = std::stoi(standardStr);
-      defaultValue = std::stoi(defaultStd);
+      defaultValue = std::stoi(*defaultStd);
     } catch (std::invalid_argument&) {
       // fall through as we want an error
       // when we can't find the bad value in the `stds` vector
@@ -139,7 +138,7 @@ struct StanardLevelComputer
     if (defaultStdIt == cm::cend(stds)) {
       std::string e = cmStrCat("CMAKE_", this->Language,
                                "_STANDARD_DEFAULT is set to invalid value '",
-                               defaultStd, "'");
+                               *defaultStd, "'");
       makefile->IssueMessage(MessageType::INTERNAL_ERROR, e);
       return std::string{};
     }
@@ -185,7 +184,7 @@ struct StanardLevelComputer
 
     cmProp existingStandard = currentLangStandardValue;
     if (existingStandard == nullptr) {
-      cmProp defaultStandard = makefile->GetDef(
+      cmProp defaultStandard = makefile->GetDefinition(
         cmStrCat("CMAKE_", this->Language, "_STANDARD_DEFAULT"));
       if (cmNonempty(defaultStandard)) {
         existingStandard = defaultStandard;
@@ -228,7 +227,7 @@ struct StanardLevelComputer
                              std::string const& config,
                              std::string const& feature) const
   {
-    cmProp defaultStandard = makefile->GetDef(
+    cmProp defaultStandard = makefile->GetDefinition(
       cmStrCat("CMAKE_", this->Language, "_STANDARD_DEFAULT"));
     if (!defaultStandard) {
       makefile->IssueMessage(
@@ -280,9 +279,9 @@ struct StanardLevelComputer
     std::string prefix = cmStrCat("CMAKE_", this->Language);
     StandardNeeded maxLevel = { -1, -1 };
     for (size_t i = 0; i < this->Levels.size(); ++i) {
-      if (const char* prop = makefile->GetDefinition(
+      if (cmProp prop = makefile->GetDefinition(
             cmStrCat(prefix, this->LevelsAsStrings[i], "_COMPILE_FEATURES"))) {
-        std::vector<std::string> props = cmExpandedList(prop);
+        std::vector<std::string> props = cmExpandedList(*prop);
         if (cm::contains(props, feature)) {
           maxLevel = { static_cast<int>(i), this->Levels[i] };
         }
@@ -390,9 +389,10 @@ bool cmStandardLevelResolver::CheckCompileFeaturesAvailable(
     std::ostringstream e;
     e << "The compiler feature \"" << feature << "\" is not known to " << lang
       << " compiler\n\""
-      << this->Makefile->GetDefinition("CMAKE_" + lang + "_COMPILER_ID")
+      << this->Makefile->GetSafeDefinition("CMAKE_" + lang + "_COMPILER_ID")
       << "\"\nversion "
-      << this->Makefile->GetDefinition("CMAKE_" + lang + "_COMPILER_VERSION")
+      << this->Makefile->GetSafeDefinition("CMAKE_" + lang +
+                                           "_COMPILER_VERSION")
       << ".";
     if (error) {
       *error = e.str();
@@ -469,7 +469,7 @@ const char* cmStandardLevelResolver::CompileFeaturesAvailable(
     return nullptr;
   }
 
-  const char* featuresKnown =
+  cmProp featuresKnown =
     this->Makefile->GetDefinition("CMAKE_" + lang + "_COMPILE_FEATURES");
 
   if (!cmNonempty(featuresKnown)) {
@@ -492,7 +492,7 @@ const char* cmStandardLevelResolver::CompileFeaturesAvailable(
     }
     return nullptr;
   }
-  return featuresKnown;
+  return cmToCStr(featuresKnown);
 }
 
 bool cmStandardLevelResolver::GetNewRequiredStandard(

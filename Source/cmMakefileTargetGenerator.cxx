@@ -257,14 +257,14 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   this->GeneratorTarget->GetExtraSources(extraSources, this->GetConfigName());
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     extraSources, this->MacOSXContentGenerator.get(), this->GetConfigName());
-  const char* pchExtension =
-    this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
+  cmProp pchExtension = this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
   std::vector<cmSourceFile const*> externalObjects;
   this->GeneratorTarget->GetExternalObjects(externalObjects,
                                             this->GetConfigName());
   for (cmSourceFile const* sf : externalObjects) {
     auto const& objectFileName = sf->GetFullPath();
-    if (!cmSystemTools::StringEndsWith(objectFileName, pchExtension)) {
+    if (!cmSystemTools::StringEndsWith(objectFileName,
+                                       cmToCStr(pchExtension))) {
       this->ExternalObjects.push_back(objectFileName);
     }
   }
@@ -814,13 +814,13 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
                              langIncludes.size(),
                              this->GetIncludes(lang, this->GetConfigName()));
 
-      const char* eliminate[] = {
+      cmProp eliminate[] = {
         this->Makefile->GetDefinition("CMAKE_START_TEMP_FILE"),
         this->Makefile->GetDefinition("CMAKE_END_TEMP_FILE")
       };
-      for (const char* el : eliminate) {
+      for (cmProp el : eliminate) {
         if (el) {
-          cmSystemTools::ReplaceString(compileCommand, el, "");
+          cmSystemTools::ReplaceString(compileCommand, *el, "");
         }
       }
 
@@ -866,9 +866,12 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         }
         if (cmNonempty(tidy)) {
           run_iwyu += " --tidy=";
-          const char* driverMode = this->Makefile->GetDefinition(
-            "CMAKE_" + lang + "_CLANG_TIDY_DRIVER_MODE");
-          if (!cmNonempty(driverMode)) {
+          cmProp p = this->Makefile->GetDefinition("CMAKE_" + lang +
+                                                   "_CLANG_TIDY_DRIVER_MODE");
+          std::string driverMode;
+          if (cmNonempty(p)) {
+            driverMode = *p;
+          } else {
             driverMode = lang == "C" ? "gcc" : "g++";
           }
           run_iwyu += this->LocalGenerator->EscapeForShell(
@@ -977,10 +980,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
       std::string preprocessRuleVar =
         cmStrCat("CMAKE_", lang, "_CREATE_PREPROCESSED_SOURCE");
-      if (const char* preprocessRule =
+      if (cmProp preprocessRule =
             this->Makefile->GetDefinition(preprocessRuleVar)) {
         std::vector<std::string> preprocessCommands =
-          cmExpandedList(preprocessRule);
+          cmExpandedList(*preprocessRule);
 
         std::string shellObjI = this->LocalGenerator->ConvertToOutputFormat(
           objI, cmOutputConverter::SHELL);
@@ -1022,10 +1025,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
       std::string assemblyRuleVar =
         cmStrCat("CMAKE_", lang, "_CREATE_ASSEMBLY_SOURCE");
-      if (const char* assemblyRule =
+      if (cmProp assemblyRule =
             this->Makefile->GetDefinition(assemblyRuleVar)) {
         std::vector<std::string> assemblyCommands =
-          cmExpandedList(assemblyRule);
+          cmExpandedList(*assemblyRule);
 
         std::string shellObjS = this->LocalGenerator->ConvertToOutputFormat(
           objS, cmOutputConverter::SHELL);
@@ -1372,17 +1375,17 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
                          << this->GeneratorTarget->GetName() << "\n"
                          << variableName << " =";
   std::string object;
-  const char* lineContinue =
-    this->Makefile->GetDefinition("CMAKE_MAKE_LINE_CONTINUE");
-  if (!lineContinue) {
+  std::string lineContinue;
+  if (cmProp p = this->Makefile->GetDefinition("CMAKE_MAKE_LINE_CONTINUE")) {
+    lineContinue = *p;
+  } else {
     lineContinue = "\\";
   }
 
-  const char* pchExtension =
-    this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
+  cmProp pchExtension = this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
 
   for (std::string const& obj : this->Objects) {
-    if (cmSystemTools::StringEndsWith(obj, pchExtension)) {
+    if (cmSystemTools::StringEndsWith(obj, cmToCStr(pchExtension))) {
       continue;
     }
     *this->BuildFileStream << " " << lineContinue << "\n";
@@ -1477,14 +1480,13 @@ private:
 void cmMakefileTargetGenerator::WriteObjectsStrings(
   std::vector<std::string>& objStrings, std::string::size_type limit)
 {
-  const char* pchExtension =
-    this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
+  cmProp pchExtension = this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
 
   cmMakefileTargetGeneratorObjectStrings helper(
     objStrings, this->LocalGenerator,
     this->LocalGenerator->GetStateSnapshot().GetDirectory(), limit);
   for (std::string const& obj : this->Objects) {
-    if (cmSystemTools::StringEndsWith(obj, pchExtension)) {
+    if (cmSystemTools::StringEndsWith(obj, cmToCStr(pchExtension))) {
       continue;
     }
     helper.Feed(obj);
@@ -1607,8 +1609,8 @@ std::string cmMakefileTargetGenerator::GetLinkRule(
       cmStrCat("CMAKE_",
                this->GeneratorTarget->GetLinkerLanguage(this->GetConfigName()),
                "_GNUtoMS_RULE");
-    if (const char* rule = this->Makefile->GetDefinition(ruleVar)) {
-      linkRule += rule;
+    if (cmProp rule = this->Makefile->GetDefinition(ruleVar)) {
+      linkRule += *rule;
     }
   }
   return linkRule;
@@ -1657,8 +1659,8 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
   // Check for an explicit setting one way or the other.
   std::string const responseVar =
     "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_OBJECTS";
-  if (const char* val = this->Makefile->GetDefinition(responseVar)) {
-    if (*val) {
+  if (cmProp val = this->Makefile->GetDefinition(responseVar)) {
+    if (!val->empty()) {
       return cmIsOn(val);
     }
   }
@@ -1696,8 +1698,8 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForLibraries(
   // Check for an explicit setting one way or the other.
   std::string const responseVar =
     "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_LIBRARIES";
-  if (const char* val = this->Makefile->GetDefinition(responseVar)) {
-    if (*val) {
+  if (cmProp val = this->Makefile->GetDefinition(responseVar)) {
+    if (!val->empty()) {
       return cmIsOn(val);
     }
   }
@@ -1758,8 +1760,10 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
       cmStrCat("CMAKE_",
                this->GeneratorTarget->GetLinkerLanguage(this->GetConfigName()),
                "_RESPONSE_FILE_LINK_FLAG");
-    const char* responseFlag = this->Makefile->GetDefinition(responseFlagVar);
-    if (!responseFlag) {
+    std::string responseFlag;
+    if (cmProp p = this->Makefile->GetDefinition(responseFlagVar)) {
+      responseFlag = *p;
+    } else {
       responseFlag = "@";
     }
 
@@ -1796,8 +1800,10 @@ void cmMakefileTargetGenerator::CreateObjectLists(
       cmStrCat("CMAKE_",
                this->GeneratorTarget->GetLinkerLanguage(this->GetConfigName()),
                "_RESPONSE_FILE_LINK_FLAG");
-    const char* responseFlag = this->Makefile->GetDefinition(responseFlagVar);
-    if (!responseFlag) {
+    std::string responseFlag;
+    if (cmProp p = this->Makefile->GetDefinition(responseFlagVar)) {
+      responseFlag = *p;
+    } else {
       responseFlag = "@";
     }
 
@@ -1892,11 +1898,11 @@ void cmMakefileTargetGenerator::GenDefFile(
     this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(), objlist_file),
     cmOutputConverter::SHELL);
-  const char* nm_executable = this->Makefile->GetDefinition("CMAKE_NM");
+  cmProp nm_executable = this->Makefile->GetDefinition("CMAKE_NM");
   if (cmNonempty(nm_executable)) {
     cmd += " --nm=";
     cmd += this->LocalCommonGenerator->ConvertToOutputFormat(
-      nm_executable, cmOutputConverter::SHELL);
+      *nm_executable, cmOutputConverter::SHELL);
   }
   real_link_commands.insert(real_link_commands.begin(), cmd);
   // create a list of obj files for the -E __create_def to read

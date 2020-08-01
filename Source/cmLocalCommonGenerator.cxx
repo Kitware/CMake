@@ -8,6 +8,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 
 class cmGlobalGenerator;
@@ -62,13 +63,13 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   // If there is a separate module path flag then duplicate the
   // include path with it.  This compiler does not search the include
   // path for modules.
-  if (const char* modpath_flag =
+  if (cmProp modpath_flag =
         this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG")) {
     std::vector<std::string> includes;
     this->GetIncludeDirectories(includes, target, "C", config);
     for (std::string const& id : includes) {
       std::string flg =
-        cmStrCat(modpath_flag,
+        cmStrCat(*modpath_flag,
                  this->ConvertToOutputFormat(id, cmOutputConverter::SHELL));
       this->AppendFlags(flags, flg);
     }

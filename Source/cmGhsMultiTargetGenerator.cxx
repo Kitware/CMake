@@ -43,9 +43,9 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
 #endif
 {
   // Store the configuration name that is being used
-  if (const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
+  if (cmProp config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
     // Use the build type given by the user.
-    this->ConfigName = config;
+    this->ConfigName = *config;
   } else {
     // No configuration type given.
     this->ConfigName.clear();

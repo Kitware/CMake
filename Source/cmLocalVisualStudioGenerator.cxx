@@ -172,13 +172,12 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
   // for visual studio IDE add extra stuff to the PATH
   // if CMAKE_MSVCIDE_RUN_PATH is set.
   if (this->Makefile->GetDefinition("MSVC_IDE")) {
-    const char* extraPath =
-      this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
+    cmProp extraPath = this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
     if (extraPath) {
       script += newline;
       newline = newline_text;
       script += "set PATH=";
-      script += extraPath;
+      script += *extraPath;
       script += ";%PATH%";
     }
   }

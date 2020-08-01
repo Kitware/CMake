@@ -2620,14 +2620,14 @@ int cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
 void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
                                    std::vector<std::string>& vec)
 {
-  const char* dval = mf->GetDefinition(def);
+  cmProp dval = mf->GetDefinition(def);
   if (!dval) {
     return;
   }
   cmCTestLog(this, DEBUG, "PopulateCustomVector: " << def << std::endl);
 
   vec.clear();
-  cmExpandList(dval, vec);
+  cmExpandList(*dval, vec);
 
   for (std::string const& it : vec) {
     cmCTestLog(this, DEBUG, "  -- " << it << std::endl);
@@ -2637,11 +2637,11 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
 void cmCTest::PopulateCustomInteger(cmMakefile* mf, const std::string& def,
                                     int& val)
 {
-  const char* dval = mf->GetDefinition(def);
+  cmProp dval = mf->GetDefinition(def);
   if (!dval) {
     return;
   }
-  val = atoi(dval);
+  val = atoi(dval->c_str());
 }
 
 std::string cmCTest::GetShortPathToFile(const std::string& cfname)
@@ -2971,7 +2971,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
   cmMakefile* mf, const char* dconfig, const std::string& cmake_var,
   bool suppress)
 {
-  cmProp ctvar = mf->GetDef(cmake_var);
+  cmProp ctvar = mf->GetDefinition(cmake_var);
   if (!ctvar) {
     return false;
   }
