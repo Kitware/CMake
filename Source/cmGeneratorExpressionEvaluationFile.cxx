@@ -54,16 +54,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     }
   }
 
-  std::string outputFileName = this->OutputFileExpr->Evaluate(
-    lg, config, nullptr, nullptr, nullptr, lang);
+  const std::string outputFileName = this->GetOutputFileName(lg, config, lang);
   const std::string& outputContent =
     inputExpression->Evaluate(lg, config, nullptr, nullptr, nullptr, lang);
-
-  if (cmSystemTools::FileIsFullPath(outputFileName)) {
-    outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
-  } else {
-    outputFileName = this->FixRelativePath(outputFileName, PathForOutput, lg);
-  }
 
   auto it = outputFiles.find(outputFileName);
 
@@ -181,6 +174,21 @@ std::string cmGeneratorExpressionEvaluationFile::GetInputFileName(
   }
 
   return inputFileName;
+}
+
+std::string cmGeneratorExpressionEvaluationFile::GetOutputFileName(
+  cmLocalGenerator* lg, const std::string& config, const std::string& lang)
+{
+  std::string outputFileName = this->OutputFileExpr->Evaluate(
+    lg, config, nullptr, nullptr, nullptr, lang);
+
+  if (cmSystemTools::FileIsFullPath(outputFileName)) {
+    outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
+  } else {
+    outputFileName = this->FixRelativePath(outputFileName, PathForOutput, lg);
+  }
+
+  return outputFileName;
 }
 
 std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(

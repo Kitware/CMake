@@ -39,6 +39,9 @@ private:
                 std::map<std::string, std::string>& outputFiles, mode_t perm);
 
   std::string GetInputFileName(cmLocalGenerator* lg);
+  std::string GetOutputFileName(cmLocalGenerator* lg,
+                                const std::string& config,
+                                const std::string& lang);
   enum PathRole
   {
     PathForInput,
