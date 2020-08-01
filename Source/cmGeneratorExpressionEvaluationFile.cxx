@@ -125,12 +125,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
   if (this->InputIsContent) {
     inputContent = this->Input;
   } else {
-    std::string inputFileName = this->Input;
-    if (cmSystemTools::FileIsFullPath(inputFileName)) {
-      inputFileName = cmSystemTools::CollapseFullPath(inputFileName);
-    } else {
-      inputFileName = this->FixRelativePath(inputFileName, PathForInput, lg);
-    }
+    const std::string inputFileName = this->GetInputFileName(lg);
     lg->GetMakefile()->AddCMakeDependFile(inputFileName);
     cmSystemTools::GetPermissions(inputFileName.c_str(), perm);
     cmsys::ifstream fin(inputFileName.c_str());
@@ -172,6 +167,20 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
       }
     }
   }
+}
+
+std::string cmGeneratorExpressionEvaluationFile::GetInputFileName(
+  cmLocalGenerator* lg)
+{
+  std::string inputFileName = this->Input;
+
+  if (cmSystemTools::FileIsFullPath(inputFileName)) {
+    inputFileName = cmSystemTools::CollapseFullPath(inputFileName);
+  } else {
+    inputFileName = this->FixRelativePath(inputFileName, PathForInput, lg);
+  }
+
+  return inputFileName;
 }
 
 std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(

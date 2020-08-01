@@ -38,6 +38,7 @@ private:
                 cmCompiledGeneratorExpression* inputExpression,
                 std::map<std::string, std::string>& outputFiles, mode_t perm);
 
+  std::string GetInputFileName(cmLocalGenerator* lg);
   enum PathRole
   {
     PathForInput,
