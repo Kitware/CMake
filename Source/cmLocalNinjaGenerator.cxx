@@ -84,8 +84,26 @@ void cmLocalNinjaGenerator::Generate()
     if (!showIncludesPrefix.empty()) {
       cmGlobalNinjaGenerator::WriteComment(this->GetRulesFileStream(),
                                            "localized /showIncludes string");
-      this->GetRulesFileStream()
-        << "msvc_deps_prefix = " << showIncludesPrefix << "\n\n";
+      this->GetRulesFileStream() << "msvc_deps_prefix = ";
+#ifdef WIN32
+      // Ninja uses the ANSI Windows APIs, so strings in the rules file
+      // typically need to be ANSI encoded. However, in this case the compiler
+      // is being invoked using the UTF-8 codepage so the /showIncludes prefix
+      // will be UTF-8 encoded on stdout. Ninja can't successfully compare this
+      // UTF-8 encoded prefix to the ANSI encoded msvc_deps_prefix if it
+      // contains any non-ASCII characters and dependency checking will fail.
+      // As a workaround, leave the msvc_deps_prefix UTF-8 encoded even though
+      // the rest of the file is ANSI encoded.
+      if (GetConsoleOutputCP() == CP_UTF8 && GetACP() != CP_UTF8) {
+        this->GetRulesFileStream().WriteRaw(showIncludesPrefix);
+      } else {
+        this->GetRulesFileStream() << showIncludesPrefix;
+      }
+#else
+      // It's safe to use the standard encoding on other platforms.
+      this->GetRulesFileStream() << showIncludesPrefix;
+#endif
+      this->GetRulesFileStream() << "\n\n";
     }
   }
 
