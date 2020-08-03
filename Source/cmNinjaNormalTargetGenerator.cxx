@@ -748,12 +748,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
     static_cast<int>(cmSystemTools::CalculateCommandLineLengthLimit()) -
     globalGen->GetRuleCmdLength(this->LanguageLinkerDeviceRule(config));
 
-  std::string path = localGen.GetHomeRelativeOutputPath();
-  if (!path.empty()) {
-    path += '/';
-  }
   build.RspFile = this->ConvertToNinjaPath(
-    cmStrCat(path, "CMakeFiles/", genTarget->GetName(),
+    cmStrCat("CMakeFiles/", genTarget->GetName(),
              globalGen->IsMultiConfig() ? cmStrCat('.', config) : "", ".rsp"));
 
   // Gather order-only dependencies.
@@ -1162,12 +1158,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       globalGen->GetRuleCmdLength(linkBuild.Rule);
   }
 
-  std::string path = localGen.GetHomeRelativeOutputPath();
-  if (!path.empty()) {
-    path += '/';
-  }
   linkBuild.RspFile = this->ConvertToNinjaPath(
-    cmStrCat(path, "CMakeFiles/", gt->GetName(),
+    cmStrCat("CMakeFiles/", gt->GetName(),
              globalGen->IsMultiConfig() ? cmStrCat('.', config) : "", ".rsp"));
 
   // Gather order-only dependencies.
