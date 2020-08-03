@@ -19,6 +19,12 @@ jobs:
       with:
         cmakeGenerator: VS16Win64
         buildDirectory: ${{ github.workspace }}\build
+        
+        
+    - name: Azure PowerShell Action
+      uses: Azure/powershell@v1
+      with:
+        inlineScript: dir ${{ github.workspace }}\build
 
     # Trains an IntelliCode model
     - name: IntelliCode Team Completions
