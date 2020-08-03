@@ -21,10 +21,8 @@ jobs:
         buildDirectory: ${{ github.workspace }}\build
         
         
-    - name: Azure PowerShell Action
-      uses: Azure/powershell@v1
-      with:
-        inlineScript: dir ${{ github.workspace }}\build
+    - name: Check CMake output 
+      run: dir ${{ github.workspace }}\build
 
     # Trains an IntelliCode model
     - name: IntelliCode Team Completions
