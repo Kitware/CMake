@@ -23,6 +23,12 @@ jobs:
         
     - name: Check CMake output 
       run: dir ${{ github.workspace }}\build
+      
+    - name: Check CMake output
+      run: dir ${{ github.workspace }}\build\Source
+    
+    - name: Check CMake output
+      run: dir ${{ github.workspace }}\build\Utilities
 
     # Trains an IntelliCode model
     - name: IntelliCode Team Completions
