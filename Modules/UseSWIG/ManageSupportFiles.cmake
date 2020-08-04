@@ -4,7 +4,7 @@
 
 if (ACTION STREQUAL "CLEAN")
   # Collect current list of generated files
-  file (GLOB files LIST_DIRECTORIES FALSE RELATIVE "${SUPPORT_FILES_WORKING_DIRECTORY}" "${SUPPORT_FILES_WORKING_DIRECTORY}/*")
+  file (GLOB_RECURSE files LIST_DIRECTORIES TRUE RELATIVE "${SUPPORT_FILES_WORKING_DIRECTORY}" "${SUPPORT_FILES_WORKING_DIRECTORY}/*")
 
   if (files)
     # clean-up the output directory
@@ -22,7 +22,7 @@ endif()
 
 if (ACTION STREQUAL "COPY")
   # Collect current list of generated files
-  file (GLOB files LIST_DIRECTORIES FALSE "${SUPPORT_FILES_WORKING_DIRECTORY}/*")
+  file (GLOB files LIST_DIRECTORIES TRUE "${SUPPORT_FILES_WORKING_DIRECTORY}/*")
 
   if (files)
     # copy files to the output directory
