@@ -71,7 +71,7 @@ const char* cmDocumentationOptions[][2] = {
   { "--open <dir>", "Open generated project in the associated application." },
   { "-N", "View mode only." },
   { "-P <file>", "Process script mode." },
-  { "--find-package", "Run in pkg-config like mode." },
+  { "--find-package", "Legacy pkg-config like mode.  Do not use." },
   { "--graphviz=[file]",
     "Generate graphviz of dependencies, see "
     "CMakeGraphVizOptions.cmake for more." },
