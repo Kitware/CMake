@@ -27,7 +27,7 @@
 #include <cstdio>
 #include <cstring>
 namespace KWSYS_NAMESPACE {
-#if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__APPLE__)
 // On Windows and Apple, no difference between lower and upper case
 #  define KWSYS_GLOB_CASE_INDEPENDENT
 #endif
