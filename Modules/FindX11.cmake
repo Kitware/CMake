@@ -404,9 +404,17 @@ if (UNIX)
   endif ()
 
   include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+  if (CMAKE_FIND_PACKAGE_NAME STREQUAL "FLTK")
+    # FindFLTK include()'s this module. It's an old pattern, but rather than
+    # trying to suppress this from outside the module (which is then sensitive
+    # to the contents, detect the case in this module and suppress it
+    # explicitly.
+    set(FPHSA_NAME_MISMATCHED 1)
+  endif ()
   find_package_handle_standard_args(X11
     REQUIRED_VARS X11_X11_INCLUDE_PATH X11_X11_LIB
     HANDLE_COMPONENTS)
+  unset(FPHSA_NAME_MISMATCHED)
 
   if(X11_FOUND)
     include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
