@@ -138,6 +138,7 @@ ${ninja_stderr}
     message(FATAL_ERROR
       "top ninja build failed exited with status ${ninja_result}")
   endif()
+  set(ninja_stdout "${ninja_stdout}" PARENT_SCOPE)
 endfunction(run_ninja)
 
 function (run_LooseObjectDepends)
@@ -322,3 +323,23 @@ function (run_ChangeBuildType)
   run_ninja("${RunCMake_TEST_BINARY_DIR}" -w dupbuild=err)
 endfunction()
 run_ChangeBuildType()
+
+function(run_Qt5AutoMocDeps)
+  if(CMake_TEST_Qt5 AND CMAKE_TEST_Qt5Core_Version VERSION_GREATER_EQUAL 5.15.0)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Qt5AutoMocDeps-build)
+    run_cmake(Qt5AutoMocDeps)
+    unset(RunCMake_TEST_OPTIONS)
+    # Build the project.
+    run_ninja("${RunCMake_TEST_BINARY_DIR}")
+    # Touch just the library source file, which shouldn't cause a rerun of AUTOMOC
+    # for app_with_qt target.
+    touch("${RunCMake_SOURCE_DIR}/simple_lib.cpp")
+    # Build and assert that AUTOMOC was not run for app_with_qt.
+    run_ninja("${RunCMake_TEST_BINARY_DIR}")
+    if(ninja_stdout MATCHES "Automatic MOC for target app_with_qt")
+        message(FATAL_ERROR
+               "AUTOMOC should not have executed for 'app_with_qt' target:\nstdout:\n${ninja_stdout}")
+    endif()
+  endif()
+endfunction()
+run_Qt5AutoMocDeps()
