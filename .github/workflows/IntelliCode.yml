@@ -12,6 +12,9 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+    
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.0.1
 
     # Runs CMake generation for VS2019 to generate .vcxproj files (Optional, currently recommended if CMake uses any complex configurations)
     - name: run-cmake
