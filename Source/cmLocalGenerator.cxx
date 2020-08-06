@@ -2613,7 +2613,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
     }
     file << "      break()\n"
          << "    endif()\n";
-    file << "  else()\n"
+    file << "  elseif(NOT EXISTS \"" << from_file << "\")\n"
          << "    execute_process(COMMAND ${CMAKE_COMMAND}"
          << " -E sleep 1)\n"
          << "  endif()\n";
