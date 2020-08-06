@@ -144,7 +144,12 @@ The ``<type>`` must be one of:
   References a library file located outside the project.  The
   :prop_tgt:`IMPORTED_LOCATION` target property (or its per-configuration
   variant :prop_tgt:`IMPORTED_LOCATION_<CONFIG>`) specifies the
-  location of the main library file on disk.
+  location of the main library file on disk.  In the case of a ``SHARED``
+  library on Windows, the :prop_tgt:`IMPORTED_IMPLIB` target property
+  (or its per-configuration variant :prop_tgt:`IMPORTED_IMPLIB_<CONFIG>`)
+  specifies the location of the DLL import library file (``.lib`` or
+  ``.dll.a``) on disk, and the ``IMPORTED_LOCATION`` is the location of
+  the ``.dll`` runtime library (and is optional).
   Additional usage requirements may be specified in ``INTERFACE_*`` properties.
 
   An ``UNKNOWN`` library type is typically only used in the implementation of
