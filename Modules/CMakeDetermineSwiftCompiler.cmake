@@ -27,7 +27,7 @@ elseif("${CMAKE_GENERATOR}" MATCHES "^Ninja")
         PROGRAM_ARGS CMAKE_Swift_FLAGS_ENV_INIT)
       if(CMAKE_Swift_FLAGS_ENV_INIT)
         set(CMAKE_Swift_COMPILER_ARG1 "${CMAKE_Swift_FLAGS_ENV_INIT}" CACHE
-          STRING "First argument to the Swift compiler")
+          STRING "Arguments to the Swift compiler")
       endif()
       if(NOT EXISTS ${CMAKE_Swift_COMPILER_INIT})
         message(FATAL_ERROR "Could not find compiler set in environment variable SWIFTC\n$ENV{SWIFTC}.\n${CMAKE_Swift_COMPILER_INIT}")

@@ -261,7 +261,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       this->VariableMappings["CMAKE_" + compIt->second +
                              "_COMPILE_OPTIONS_SYSROOT"];
 
-    // if there is a required first argument to the compiler add it
+    // if there are required arguments to the compiler add it
     // to the compiler string
     if (!compilerArg1.empty()) {
       ret += " ";
