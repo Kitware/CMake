@@ -1,1 +1,1 @@
-Defect count: 20
+Defect count: 23

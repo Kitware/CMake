@@ -1164,13 +1164,14 @@ bool cmCTestMemCheckHandler::ProcessMemCheckCudaOutput(
     "== Program hit error ([^ ]*).* on CUDA API call to",
     "== Program hit ([^ ]*).* on CUDA API call to",
     // memcheck
-    "== (Invalid .*) of size [0-9,]+",
+    "== (Invalid .*) of size [0-9,]+", "== (Fatal UVM [CG]PU fault)",
     // racecheck
     "== .* (Potential .* hazard detected)", "== .* (Race reported)",
     // synccheck
     "== (Barrier error)",
     // initcheck
     "== (Uninitialized .* memory read)", "== (Unused memory)",
+    "== (Host API memory access error)",
     // generic error: ignore ERROR SUMMARY, CUDA-MEMCHECK and others
     "== ([A-Z][a-z].*)"
   };

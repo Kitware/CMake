@@ -37,6 +37,15 @@ file(APPEND "${LOG_FILE}"
 =========     Host Frame:/lib64/libc.so.6 (__libc_start_main + 0xf5) [0x22505]
 =========     Host Frame:./uninit-read [0x31e2]
 =========
+========= Host API memory access error at host access to 0x1303fd1400 of size 25600 bytes
+=========     Uninitialized access at 0x1303fd4600 on access by cudaMemcopy source.
+=========     Saved host backtrace up to driver entry point at error
+=========     Host Frame:/usr/lib/x86_64-linux-gnu/libcuda.so.1 (cuMemcpyDtoH_v2 + 0x1ec) [0x29200c]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.10.1 [0x38aaa]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.10.1 [0x18946]
+=========     Host Frame:/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.10.1 (cudaMemcpy + 0x1a2) [0x3b8c2]
+=========     Host Frame:/something/somewhere [0xcafe]
+=========
 ========= ERROR SUMMARY: 2 errors
 ")
 
@@ -107,6 +116,12 @@ file(APPEND "${LOG_FILE}"
 =========     Host Frame:./invalid-read [0x3150]
 =========     Host Frame:/lib64/libc.so.6 (__libc_start_main + 0xf5) [0x22505]
 =========     Host Frame:./invalid-read [0x31e2]
+=========
+========= Fatal UVM GPU fault of type invalid pde due to invalid address
+=========     during atomic access to address 0x20be00000
+=========
+========= Fatal UVM CPU fault due to invalid operation
+=========     during read access to address 0x1357c92000
 =========
 ========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
 ========= ERROR SUMMARY: 3 errors
