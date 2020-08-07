@@ -832,7 +832,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     std::string compilerLauncher;
     if (!compileCommands.empty() &&
         (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
-         lang == "OBJC" || lang == "OBJCXX")) {
+         lang == "ISPC" || lang == "OBJC" || lang == "OBJCXX")) {
       std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
       cmProp clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
       if (cmNonempty(clauncher)) {
