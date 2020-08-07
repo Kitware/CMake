@@ -50,7 +50,7 @@ This module will set the following variables in your project:
 
 Also:
 
-``Ruby_INCLUDE_PATH``
+``RUBY_INCLUDE_PATH``
   same as Ruby_INCLUDE_DIRS, only provided for compatibility reasons, don't use it
 
 Hints
@@ -493,7 +493,6 @@ foreach(Camel
     Ruby_VERSION_MAJOR
     Ruby_VERSION_MINOR
     Ruby_VERSION_PATCH
-    Ruby_INCLUDE_PATH
 
     Ruby_ARCH_DIR
     Ruby_ARCH
