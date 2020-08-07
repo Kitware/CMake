@@ -22,6 +22,8 @@ jobs:
       with:
         cmakeGenerator: VS16Win64
         buildDirectory: ${{ github.workspace }}\build
+        
+    - run: msbuild ${{ github.workspace }}\build\ALL_BUILD.vcxproj
 
     # Trains an IntelliCode model
     - name: IntelliCode Team Completions
