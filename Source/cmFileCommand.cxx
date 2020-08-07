@@ -2937,7 +2937,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
   }
   fout.SetCopyIfDifferent(true);
 
-  // copy intput to output and expand variables from input at the same time
+  // copy input to output and expand variables from input at the same time
   std::stringstream sin(input, std::ios::in);
   std::string inLine;
   std::string outLine;
