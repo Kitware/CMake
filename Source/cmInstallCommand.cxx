@@ -1157,7 +1157,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
     } else if (doing == DoingRegex) {
       literal_args += " REGEX \"";
 // Match rules are case-insensitive on some platforms.
-#if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__APPLE__)
       std::string regex = cmSystemTools::LowerCase(args[i]);
 #else
       std::string regex = args[i];
