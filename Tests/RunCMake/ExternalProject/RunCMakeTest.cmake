@@ -38,6 +38,7 @@ set(RunCMake_TEST_OUTPUT_MERGE 0)
 if(NOT RunCMake_GENERATOR MATCHES "Visual Studio")
   __ep_test_with_build(LogOutputOnFailure)
   __ep_test_with_build(LogOutputOnFailureMerged)
+  __ep_test_with_build(DownloadTimeout)
 endif()
 
 # We can't test the substitution when using the old MSYS due to
