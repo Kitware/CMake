@@ -105,7 +105,8 @@ set(retry_number 5)
 
 message(STATUS "Downloading...
    dst='@LOCAL@'
-   timeout='@TIMEOUT_MSG@'"
+   timeout='@TIMEOUT_MSG@'
+   inactivity timeout='@INACTIVITY_TIMEOUT_MSG@'"
 )
 set(download_retry_codes 7 6 8 15)
 set(skip_url_list)
@@ -128,6 +129,7 @@ foreach(i RANGE ${retry_number})
         "${url}" "@LOCAL@"
         @SHOW_PROGRESS@
         @TIMEOUT_ARGS@
+        @INACTIVITY_TIMEOUT_ARGS@
         STATUS status
         LOG log
         @USERPWD_ARGS@
