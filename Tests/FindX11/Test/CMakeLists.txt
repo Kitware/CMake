@@ -33,6 +33,8 @@ test_x11_component(x11_components Xaw)
 test_x11_component(x11_components xcb)
 test_x11_component(x11_components X11_xcb)
 test_x11_component(x11_components xcb_icccm)
+test_x11_component(x11_components xcb_util)
+test_x11_component(x11_components xcb_xfixes)
 test_x11_component(x11_components xcb_xkb)
 test_x11_component(x11_components Xcomposite)
 test_x11_component(x11_components Xdamage)
@@ -72,6 +74,8 @@ foreach(lib
     xcb
     X11_xcb
     xcb_icccm
+    xcb_util
+    xcb_xfixes
     Xcomposite
     Xdamage
     Xdmcp
