@@ -5,17 +5,13 @@
 # This file is a "template" file used by various FindPython modules.
 #
 
-cmake_policy (GET CMP0094 _${_PYTHON_PREFIX}_LOOKUP_POLICY)
-
-cmake_policy (VERSION 3.7)
-
-if (_${_PYTHON_PREFIX}_LOOKUP_POLICY)
-  cmake_policy (SET CMP0094 ${_${_PYTHON_PREFIX}_LOOKUP_POLICY})
-endif()
-
 #
 # Initial configuration
 #
+
+# IN_LIST operator
+cmake_policy (SET CMP0057 NEW)
+
 if (NOT DEFINED _PYTHON_PREFIX)
   message (FATAL_ERROR "FindPython: INTERNAL ERROR")
 endif()
@@ -1097,6 +1093,7 @@ endif()
 unset (${_PYTHON_PREFIX}_SOABI)
 
 # Define lookup strategy
+cmake_policy (GET CMP0094 _${_PYTHON_PREFIX}_LOOKUP_POLICY)
 if (_${_PYTHON_PREFIX}_LOOKUP_POLICY STREQUAL "NEW")
   set (_${_PYTHON_PREFIX}_FIND_STRATEGY "LOCATION")
 else()
