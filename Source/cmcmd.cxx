@@ -1772,7 +1772,7 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
   //   args[2] == source_file_path
   //   args[3] == intermediate_file
   //   args[4..n] == preprocess+args
-  //   args[n+1] == --
+  //   args[n+1] == ++
   //   args[n+2...] == llvm-rc+args
   if (args.size() < 3) {
     std::cerr << "Invalid cmake_llvm_rc arguments";
@@ -1784,7 +1784,11 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
   std::vector<std::string> resource_compile;
   std::vector<std::string>* pArgTgt = &preprocess;
   for (std::string const& arg : cmMakeRange(args).advance(4)) {
-    if (arg == "--") {
+    // We use ++ as seperator between the preprocessing step definition and the
+    // rc compilation step becase we need to prepend a -- to seperate the
+    // source file properly from other options when using clang-cl for
+    // preprocessing.
+    if (arg == "++") {
       pArgTgt = &resource_compile;
     } else {
       if (arg.find("SOURCE_DIR") != std::string::npos) {
