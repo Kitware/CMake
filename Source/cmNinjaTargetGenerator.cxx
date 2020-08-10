@@ -51,6 +51,7 @@ std::unique_ptr<cmNinjaTargetGenerator> cmNinjaTargetGenerator::New(
       return cm::make_unique<cmNinjaNormalTargetGenerator>(target);
 
     case cmStateEnums::UTILITY:
+    case cmStateEnums::INTERFACE_LIBRARY:
     case cmStateEnums::GLOBAL_TARGET:
       return cm::make_unique<cmNinjaUtilityTargetGenerator>(target);
 

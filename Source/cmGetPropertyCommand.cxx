@@ -17,7 +17,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmTargetPropertyComputer.h"
 #include "cmTest.h"
 #include "cmake.h"
 
@@ -364,12 +363,9 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
     cmProp prop_cstr = nullptr;
     cmListFileBacktrace bt = status.GetMakefile().GetBacktrace();
     cmMessenger* messenger = status.GetMakefile().GetMessenger();
-    if (cmTargetPropertyComputer::PassesWhitelist(
-          target->GetType(), propertyName, messenger, bt)) {
-      prop_cstr = target->GetComputedProperty(propertyName, messenger, bt);
-      if (!prop_cstr) {
-        prop_cstr = target->GetProperty(propertyName);
-      }
+    prop_cstr = target->GetComputedProperty(propertyName, messenger, bt);
+    if (!prop_cstr) {
+      prop_cstr = target->GetProperty(propertyName);
     }
     return StoreResult(infoType, status.GetMakefile(), variable,
                        prop_cstr ? prop_cstr->c_str() : nullptr);

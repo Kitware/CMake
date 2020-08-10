@@ -629,9 +629,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
       break;
     case cmStateEnums::UTILITY:
     case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::INTERFACE_LIBRARY:
       configType = "10";
       CM_FALLTHROUGH;
-    default:
+    case cmStateEnums::UNKNOWN_LIBRARY:
       targetBuilds = false;
       break;
   }
@@ -1638,7 +1639,8 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
     std::string source = sf->GetFullPath();
 
     if (source != libName || target->GetType() == cmStateEnums::UTILITY ||
-        target->GetType() == cmStateEnums::GLOBAL_TARGET) {
+        target->GetType() == cmStateEnums::GLOBAL_TARGET ||
+        target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Look up the source kind and configs.
       std::map<cmSourceFile const*, size_t>::const_iterator map_it =
         sources.Index.find(sf);
@@ -1937,6 +1939,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
   const char* keyword = p ? p->c_str() : "Console Application";
   const char* projectType = 0;
   switch (target->GetType()) {
+    case cmStateEnums::OBJECT_LIBRARY:
     case cmStateEnums::STATIC_LIBRARY:
       projectType = "typeStaticLibrary";
       if (keyword) {
@@ -1958,7 +1961,8 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
       break;
     case cmStateEnums::UTILITY:
     case cmStateEnums::GLOBAL_TARGET:
-    default:
+    case cmStateEnums::INTERFACE_LIBRARY:
+    case cmStateEnums::UNKNOWN_LIBRARY:
       break;
   }
   if (projectType) {

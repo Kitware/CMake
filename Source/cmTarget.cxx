@@ -401,12 +401,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 #endif
   }
 
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-    initProp("FOLDER");
+  initProp("FOLDER");
 
-    if (this->GetGlobalGenerator()->IsXcode()) {
-      initProp("XCODE_GENERATE_SCHEME");
-    }
+  if (this->GetGlobalGenerator()->IsXcode()) {
+    initProp("XCODE_GENERATE_SCHEME");
   }
 
   // Setup per-configuration property default values.
@@ -521,24 +519,21 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("DOTNET_TARGET_FRAMEWORK_VERSION");
   }
 
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-
-    // check for "CMAKE_VS_GLOBALS" variable and set up target properties
-    // if any
-    const char* globals = mf->GetDefinition("CMAKE_VS_GLOBALS");
-    if (globals) {
-      const std::string genName = mf->GetGlobalGenerator()->GetName();
-      if (cmHasLiteralPrefix(genName, "Visual Studio")) {
-        std::vector<std::string> props = cmExpandedList(globals);
-        const std::string vsGlobal = "VS_GLOBAL_";
-        for (const std::string& i : props) {
-          // split NAME=VALUE
-          const std::string::size_type assignment = i.find('=');
-          if (assignment != std::string::npos) {
-            const std::string propName = vsGlobal + i.substr(0, assignment);
-            const std::string propValue = i.substr(assignment + 1);
-            initPropValue(propName, propValue.c_str());
-          }
+  // check for "CMAKE_VS_GLOBALS" variable and set up target properties
+  // if any
+  const char* globals = mf->GetDefinition("CMAKE_VS_GLOBALS");
+  if (globals) {
+    const std::string genName = mf->GetGlobalGenerator()->GetName();
+    if (cmHasLiteralPrefix(genName, "Visual Studio")) {
+      std::vector<std::string> props = cmExpandedList(globals);
+      const std::string vsGlobal = "VS_GLOBAL_";
+      for (const std::string& i : props) {
+        // split NAME=VALUE
+        const std::string::size_type assignment = i.find('=');
+        if (assignment != std::string::npos) {
+          const std::string propName = vsGlobal + i.substr(0, assignment);
+          const std::string propValue = i.substr(assignment + 1);
+          initPropValue(propName, propValue.c_str());
         }
       }
     }
@@ -1144,11 +1139,6 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
 
 void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
-  if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, impl->Makefile->GetMessenger(),
-        impl->Makefile->GetBacktrace())) {
-    return;
-  }
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(C_STANDARD);
   MAKE_STATIC_PROP(CXX_STANDARD);
@@ -1355,11 +1345,6 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
 void cmTarget::AppendProperty(const std::string& prop,
                               const std::string& value, bool asString)
 {
-  if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, impl->Makefile->GetMessenger(),
-        impl->Makefile->GetBacktrace())) {
-    return;
-  }
   if (prop == "NAME") {
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  "NAME property is read-only\n");

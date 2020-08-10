@@ -1,5 +1,5 @@
 
-add_library(iface1 INTERFACE empty.cpp)
+
 add_library(iface3 STATIC INTERFACE)
 add_library(iface4 STATIC INTERFACE empty.cpp)
 add_library(iface5 SHARED INTERFACE)
@@ -14,7 +14,7 @@ add_library(iface13 INTERFACE UNKNOWN)
 add_library(iface14 INTERFACE ALIAS)
 add_library(iface15 ALIAS INTERFACE)
 add_library(iface16 INTERFACE INTERFACE)
-add_library(iface17 INTERFACE EXCLUDE_FROM_ALL)
-add_library(iface18 EXCLUDE_FROM_ALL INTERFACE)
+
+
 # add_library(iface19 GLOBAL INTERFACE) Tested separately
 add_library(iface20 INTERFACE GLOBAL)

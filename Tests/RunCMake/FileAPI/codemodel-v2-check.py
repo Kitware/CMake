@@ -522,6 +522,7 @@ def gen_check_directories(c, g):
         read_codemodel_json_data("directories/custom.json"),
         read_codemodel_json_data("directories/cxx.json"),
         read_codemodel_json_data("directories/imported.json"),
+        read_codemodel_json_data("directories/interface.json"),
         read_codemodel_json_data("directories/object.json"),
         read_codemodel_json_data("directories/dir.json"),
         read_codemodel_json_data("directories/dir_dir.json"),
@@ -593,6 +594,10 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/link_imported_static_exe.json"),
         read_codemodel_json_data("targets/link_imported_object_exe.json"),
         read_codemodel_json_data("targets/link_imported_interface_exe.json"),
+
+        read_codemodel_json_data("targets/all_build_interface.json"),
+        read_codemodel_json_data("targets/zero_check_interface.json"),
+        read_codemodel_json_data("targets/iface_srcs.json"),
 
         read_codemodel_json_data("targets/all_build_custom.json"),
         read_codemodel_json_data("targets/zero_check_custom.json"),
@@ -722,6 +727,7 @@ def gen_check_projects(c, g):
         read_codemodel_json_data("projects/alias.json"),
         read_codemodel_json_data("projects/object.json"),
         read_codemodel_json_data("projects/imported.json"),
+        read_codemodel_json_data("projects/interface.json"),
         read_codemodel_json_data("projects/custom.json"),
         read_codemodel_json_data("projects/external.json"),
     ]

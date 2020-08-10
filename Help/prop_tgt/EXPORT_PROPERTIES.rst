@@ -14,3 +14,11 @@ Properties starting with ``INTERFACE_`` or ``IMPORTED_`` are not allowed as
 they are reserved for internal CMake use.
 
 Properties containing generator expressions are also not allowed.
+
+.. note::
+
+  Since CMake 3.19, :ref:`Interface Libraries` may have arbitrary
+  target properties.  If a project exports an interface library
+  with custom properties, the resulting package may not work with
+  dependents configured by older versions of CMake that reject the
+  custom properties.

@@ -2,6 +2,7 @@ include(RunCMake)
 
 run_cmake(ExplicitCMakeLists)
 run_cmake(ImplicitCMakeLists)
+run_cmake(InterfaceLibSources)
 
 run_cmake(XcodeFileType)
 run_cmake(XcodeAttributeLocation)

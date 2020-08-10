@@ -650,7 +650,8 @@ with members:
 ``type``
   A string specifying the type of the target.  The value is one of
   ``EXECUTABLE``, ``STATIC_LIBRARY``, ``SHARED_LIBRARY``,
-  ``MODULE_LIBRARY``, ``OBJECT_LIBRARY``, or ``UTILITY``.
+  ``MODULE_LIBRARY``, ``OBJECT_LIBRARY``, ``INTERFACE_LIBRARY``,
+  or ``UTILITY``.
 
 ``backtrace``
   Optional member that is present when a CMake language backtrace to

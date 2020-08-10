@@ -118,8 +118,35 @@ target using the commands:
 and then it is used as an argument to :command:`target_link_libraries`
 like any other target.
 
-An interface library has no source files itself and is not included
-as a target in the generated buildsystem.
+An interface library created with the above signature has no source files
+itself and is not included as a target in the generated buildsystem.
+
+Since CMake 3.19, an interface library target may be created with
+source files:
+
+.. code-block:: cmake
+
+  add_library(<name> INTERFACE [<source>...] [EXCLUDE_FROM_ALL])
+
+Source files may be listed directly in the ``add_library`` call or added
+later by calls to :command:`target_sources` with the ``PRIVATE`` or
+``PUBLIC`` keywords.
+
+If an interface library has source files (i.e. the :prop_tgt:`SOURCES`
+target property is set), it will appear in the generated buildsystem
+as a build target much like a target defined by the
+:command:`add_custom_target` command.  It does not compile any sources,
+but does contain build rules for custom commands created by the
+:command:`add_custom_command` command.
+
+.. note::
+  In most command signatures where the ``INTERFACE`` keyword appears,
+  the items listed after it only become part of that target's usage
+  requirements and are not part of the target's own settings.  However,
+  in this signature of ``add_library``, the ``INTERFACE`` keyword refers
+  to the library type only.  Sources listed after it in the ``add_library``
+  call are ``PRIVATE`` to the interface library and do not appear in its
+  :prop_tgt:`INTERFACE_SOURCES` target property.
 
 Imported Libraries
 ^^^^^^^^^^^^^^^^^^

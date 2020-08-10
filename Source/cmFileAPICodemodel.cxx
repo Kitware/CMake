@@ -625,7 +625,7 @@ Json::Value CodemodelConfig::DumpTargets()
 
   for (cmGeneratorTarget* gt : targetList) {
     if (gt->GetType() == cmStateEnums::GLOBAL_TARGET ||
-        gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+        !gt->IsInBuildSystem()) {
       continue;
     }
 

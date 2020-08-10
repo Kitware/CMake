@@ -44,6 +44,7 @@ add_executable(InterfaceLibrary definetestexe.cpp)
 target_link_libraries(InterfaceLibrary
   iface_nodepends
   headeriface
+  iface_genheader
   subiface
   intermediate
 

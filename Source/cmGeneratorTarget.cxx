@@ -380,11 +380,6 @@ std::string cmGeneratorTarget::GetExportName() const
 
 cmProp cmGeneratorTarget::GetProperty(const std::string& prop) const
 {
-  if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, this->Makefile->GetMessenger(),
-        this->GetBacktrace())) {
-    return nullptr;
-  }
   if (cmProp result = cmTargetPropertyComputer::GetProperty(
         this, prop, this->Makefile->GetMessenger(), this->GetBacktrace())) {
     return result;
@@ -1104,6 +1099,10 @@ bool cmGeneratorTarget::IsInBuildSystem() const
     case cmStateEnums::GLOBAL_TARGET:
       return true;
     case cmStateEnums::INTERFACE_LIBRARY:
+      // An INTERFACE library is in the build system if it has SOURCES.
+      if (!this->SourceEntries.empty()) {
+        return true;
+      }
     case cmStateEnums::UNKNOWN_LIBRARY:
       break;
   }
@@ -1548,7 +1547,6 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   std::string const& config) const
 {
   std::vector<BT<std::string>> files;
-  assert(this->GetType() != cmStateEnums::INTERFACE_LIBRARY);
 
   if (!this->LocalGenerator->GetGlobalGenerator()->GetConfigureDoneCMP0026()) {
     // At configure-time, this method can be called as part of getting the
@@ -1740,9 +1738,11 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
     if (sf->GetCustomCommand()) {
       kind = SourceKindCustomCommand;
-      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
-      // NOLINTNEXTLINE(bugprone-branch-clone)
-    } else if (this->Target->GetType() == cmStateEnums::UTILITY) {
+    } else if (this->Target->GetType() == cmStateEnums::UTILITY ||
+               this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY
+               // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+               // NOLINTNEXTLINE(bugprone-branch-clone)
+    ) {
       kind = SourceKindExtra;
     } else if (this->IsSourceFilePartOfUnityBatch(sf->ResolveFullPath())) {
       kind = SourceKindUnityBatched;

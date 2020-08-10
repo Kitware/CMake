@@ -1093,6 +1093,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
     }
     // FALLTHROUGH
     case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::INTERFACE_LIBRARY:
     case cmStateEnums::UTILITY: {
       std::string path =
         cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
@@ -1105,7 +1106,6 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
       break;
     }
 
-    case cmStateEnums::INTERFACE_LIBRARY:
     case cmStateEnums::UNKNOWN_LIBRARY:
       break;
   }
