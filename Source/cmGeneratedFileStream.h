@@ -147,6 +147,16 @@ public:
    * This does not work if the file was opened by the constructor.
    */
   void SetTempExt(std::string const& ext);
+
+  /**
+   * Writes the given string directly to the file without changing the
+   * encoding.
+   */
+  void WriteRaw(std::string const& data);
+
+private:
+  // The original locale of the stream (performs no encoding conversion).
+  std::locale OriginalLocale;
 };
 
 #endif
