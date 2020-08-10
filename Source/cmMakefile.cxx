@@ -20,8 +20,10 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#include <cm3p/json/value.h>
-#include <cm3p/json/writer.h>
+#ifndef CMAKE_BOOTSTRAP
+#  include <cm3p/json/value.h>
+#  include <cm3p/json/writer.h>
+#endif
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"

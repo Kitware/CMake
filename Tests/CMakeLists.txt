@@ -3240,6 +3240,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
       COMMAND ${CMAKE_CMAKE_COMMAND}
         -D "bootstrap=${bootstrap}"
         -D "bin_dir=${CMake_BINARY_DIR}/Tests/BootstrapTest"
+        -D "generator=${CMAKE_GENERATOR}"
         -P ${CMAKE_CURRENT_SOURCE_DIR}/BootstrapTest.cmake
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BootstrapTest")
