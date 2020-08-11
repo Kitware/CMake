@@ -38,11 +38,6 @@ CONFIGURE_FILE(${CMZLIB_SOURCE_DIR}/.NoDartCoverage
 CONFIGURE_FILE(${CMZLIB_SOURCE_DIR}/zlibDllConfig.h.in
   ${CMZLIB_BINARY_DIR}/zlibDllConfig.h)
 
-FOREACH(name zlib zconf cm_zlib_mangle)
-  CONFIGURE_FILE(${CMZLIB_SOURCE_DIR}/${name}.h
-    ${CMZLIB_BINARY_DIR}/${name}.h COPYONLY)
-ENDFOREACH(name)
-
 
 ADD_LIBRARY(cmzlib ${ZLIB_SRCS})
 

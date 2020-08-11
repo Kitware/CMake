@@ -112,6 +112,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
 {
   char utf8bom[] = { char(0xEF), char(0xBB), char(0xBF) };
   fout.write(utf8bom, 3);
+  fout << '\n';
 
   switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VS9:
@@ -166,7 +167,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
       if (this->ExpressEdition) {
         fout << "# Visual Studio Express 16 for Windows Desktop\n";
       } else {
-        fout << "# Visual Studio 16\n";
+        fout << "# Visual Studio Version 16\n";
       }
       break;
   }
@@ -507,9 +508,9 @@ std::string cmGlobalVisualStudioGenerator::GetUtilityDepend(
 std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
   cmLocalGenerator const* root) const
 {
-  const char* n = root->GetMakefile()->GetProperty("VS_STARTUP_PROJECT");
-  if (n && *n) {
-    std::string startup = n;
+  cmProp n = root->GetMakefile()->GetProperty("VS_STARTUP_PROJECT");
+  if (n && !n->empty()) {
+    std::string startup = *n;
     if (this->FindTarget(startup)) {
       return startup;
     } else {
@@ -808,9 +809,9 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   // This allows the project to control the language choice in
   // a target with none of its own sources, e.g. when also using
   // object libraries.
-  const char* linkLang = gt->GetProperty("LINKER_LANGUAGE");
-  if (linkLang && *linkLang) {
-    languages.insert(linkLang);
+  cmProp linkLang = gt->GetProperty("LINKER_LANGUAGE");
+  if (linkLang && !linkLang->empty()) {
+    languages.insert(*linkLang);
   }
 
   // Intel Fortran .vfproj files do support the resource compiler.
@@ -932,7 +933,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
     { cmakeCommand, "-E", "__create_def", mdi->DefFile, objs_file });
   cmCustomCommand command(outputs, empty, empty, commandLines,
                           gt->Target->GetMakefile()->GetBacktrace(),
-                          "Auto build dll exports", ".");
+                          "Auto build dll exports", ".", true);
   commands.push_back(std::move(command));
 }
 

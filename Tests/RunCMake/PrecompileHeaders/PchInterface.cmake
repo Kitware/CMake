@@ -9,6 +9,9 @@ target_precompile_headers(foo PUBLIC
   <stdio.h>
   \"string.h\"
 )
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+  set_property(SOURCE foo.c APPEND PROPERTY COMPILE_OPTIONS "-WX-")
+endif()
 
 add_library(bar INTERFACE)
 target_include_directories(bar INTERFACE include)

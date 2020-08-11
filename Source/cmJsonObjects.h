@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_jsoncpp_value.h"
+#include <cm3p/json/value.h>
 
 class cmake;
 class cmGlobalGenerator;

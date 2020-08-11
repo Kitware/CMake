@@ -46,6 +46,11 @@ endif()
 run_BuildDepends(Custom-Symbolic-and-Byproduct)
 run_BuildDepends(Custom-Always)
 
+set(RunCMake_TEST_OUTPUT_MERGE_save "${RunCMake_TEST_OUTPUT_MERGE}")
+set(RunCMake_TEST_OUTPUT_MERGE 1)
+run_BuildDepends(ExternalProjectCacheArgs)
+set(RunCMake_TEST_OUTPUT_MERGE "${RunCMake_TEST_OUTPUT_MERGE_save}")
+
 # Test header dependencies with a build tree underneath a source tree.
 set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/BuildUnderSource")
 set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/BuildUnderSource/build")
@@ -102,4 +107,9 @@ endfunction()
 
 if(RunCMake_GENERATOR STREQUAL "Xcode")
   run_ReGeneration(regenerate-project)
+endif()
+
+if(CMake_TEST_BuildDepends_GNU_AS)
+  set(ENV{ASM} "${CMake_TEST_BuildDepends_GNU_AS}")
+  run_BuildDepends(GNU-AS)
 endif()

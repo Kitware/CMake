@@ -1,0 +1,4 @@
+^WARNING: No nightly start time found please set in CTestConfig\.cmake or DartConfig\.cmake
+CMake Error at [^
+]*/Tests/RunCMake/ctest_start/NoStartTimeNightly/test\.cmake:[0-9]+ \(ctest_start\):
+  ctest_start unknown error\.$

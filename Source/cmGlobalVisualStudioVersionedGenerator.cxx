@@ -366,6 +366,12 @@ bool cmGlobalVisualStudioVersionedGenerator::GetVSInstance(
   return vsSetupAPIHelper.GetVSInstanceInfo(dir);
 }
 
+bool cmGlobalVisualStudioVersionedGenerator::GetVSInstanceVersion(
+  unsigned long long& vsInstanceVersion) const
+{
+  return vsSetupAPIHelper.GetVSInstanceVersion(vsInstanceVersion);
+}
+
 bool cmGlobalVisualStudioVersionedGenerator::IsDefaultToolset(
   const std::string& version) const
 {
@@ -385,6 +391,21 @@ bool cmGlobalVisualStudioVersionedGenerator::IsDefaultToolset(
   }
 
   return false;
+}
+
+bool cmGlobalVisualStudioVersionedGenerator::IsStdOutEncodingSupported() const
+{
+  // Supported from Visual Studio 16.7 Preview 3.
+  if (this->Version > cmGlobalVisualStudioGenerator::VSVersion::VS16) {
+    return true;
+  }
+  if (this->Version < cmGlobalVisualStudioGenerator::VSVersion::VS16) {
+    return false;
+  }
+  unsigned long long const vsInstanceVersion16_7_P2 = 4503631666610212;
+  unsigned long long vsInstanceVersion;
+  return (this->GetVSInstanceVersion(vsInstanceVersion) &&
+          vsInstanceVersion > vsInstanceVersion16_7_P2);
 }
 
 std::string cmGlobalVisualStudioVersionedGenerator::GetAuxiliaryToolset() const

@@ -12,6 +12,7 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -75,15 +76,22 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
   std::string const library = this->FindLibrary();
   if (!library.empty()) {
     // Save the value in the cache
-    this->Makefile->AddCacheDefinition(this->VariableName, library.c_str(),
+    this->Makefile->AddCacheDefinition(this->VariableName, library,
                                        this->VariableDocumentation.c_str(),
                                        cmStateEnums::FILEPATH);
     return true;
   }
   std::string notfound = this->VariableName + "-NOTFOUND";
-  this->Makefile->AddCacheDefinition(this->VariableName, notfound.c_str(),
+  this->Makefile->AddCacheDefinition(this->VariableName, notfound,
                                      this->VariableDocumentation.c_str(),
                                      cmStateEnums::FILEPATH);
+  if (this->Required) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "Could not find " + this->VariableName +
+        " using the following names: " + cmJoin(this->Names, ", "));
+    cmSystemTools::SetFatalErrorOccured();
+  }
   return true;
 }
 
@@ -425,7 +433,8 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
 #endif
     if (name.Regex.find(testName)) {
       this->TestPath = cmStrCat(path, origName);
-      if (!cmSystemTools::FileIsDirectory(this->TestPath)) {
+      // Make sure the path is readable and is not a directory.
+      if (cmSystemTools::FileExists(this->TestPath, true)) {
         this->DebugLibraryFound(name.Raw, dir);
 
         // This is a matching file.  Check if it is better than the

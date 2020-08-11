@@ -7,6 +7,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/memory>
+
 #ifndef CMAKE_BOOTSTRAP
 #  include "cmExportInstallAndroidMKGenerator.h"
 #endif
@@ -33,18 +35,15 @@ cmInstallExportGenerator::cmInstallExportGenerator(
 {
   if (android) {
 #ifndef CMAKE_BOOTSTRAP
-    this->EFGen = new cmExportInstallAndroidMKGenerator(this);
+    this->EFGen = cm::make_unique<cmExportInstallAndroidMKGenerator>(this);
 #endif
   } else {
-    this->EFGen = new cmExportInstallFileGenerator(this);
+    this->EFGen = cm::make_unique<cmExportInstallFileGenerator>(this);
   }
   exportSet->AddInstallation(this);
 }
 
-cmInstallExportGenerator::~cmInstallExportGenerator()
-{
-  delete this->EFGen;
-}
+cmInstallExportGenerator::~cmInstallExportGenerator() = default;
 
 bool cmInstallExportGenerator::Compute(cmLocalGenerator* lg)
 {

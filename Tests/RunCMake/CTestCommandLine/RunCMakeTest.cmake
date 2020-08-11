@@ -242,6 +242,20 @@ function(run_TestOutputSize)
 endfunction()
 run_TestOutputSize()
 
+# Test --stop-on-failure
+function(run_stop_on_failure)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/stop-on-failure)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E false)
+add_test(test2 \"${CMAKE_COMMAND}\" -E echo \"not running\")
+")
+  run_cmake_command(stop-on-failure ${CMAKE_CTEST_COMMAND} --stop-on-failure)
+endfunction()
+run_stop_on_failure()
+
 function(run_TestAffinity)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestAffinity)
   set(RunCMake_TEST_NO_CLEAN 1)
@@ -345,3 +359,24 @@ run_NoTests()
 
 # Check the configuration type variable is passed
 run_ctest(check-configuration-type)
+
+function(run_MemCheckSan case opts)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/MemCheckSan${case}-build)
+  set(RunCMake_TEST_OPTIONS
+    "-DMEMORYCHECK_TYPE=${case}Sanitizer"
+    "-DMEMORYCHECK_SANITIZER_OPTIONS=${opts}"
+    )
+  run_cmake(MemCheckSan)
+  unset(RunCMake_TEST_OPTIONS)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake-stdout-file "../ctest_memcheck/Dummy${case}Sanitizer-stdout.txt")
+  run_cmake_command(MemCheckSan${case}-ctest
+    ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T MemCheck -V
+    )
+endfunction()
+run_MemCheckSan(Address "simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55")
+run_MemCheckSan(Leak "simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55")
+run_MemCheckSan(Memory "simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55")
+run_MemCheckSan(Thread "report_bugs=1:history_size=5:exitcode=55")
+run_MemCheckSan(UndefinedBehavior "simulate_sanitizer=1")

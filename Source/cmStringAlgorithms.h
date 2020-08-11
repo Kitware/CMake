@@ -87,7 +87,7 @@ void cmExpandLists(InputIt first, InputIt last,
                    std::vector<std::string>& argsOut)
 {
   for (; first != last; ++first) {
-    ExpandList(*first, argsOut);
+    cmExpandList(*first, argsOut);
   }
 }
 

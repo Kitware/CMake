@@ -31,13 +31,13 @@ __FBSDID("$FreeBSD$");
 #endif
 #include <stdlib.h>
 #ifdef HAVE_BZLIB_H
-#include <cm_bzlib.h>
+#include <cm3p/bzlib.h>
 #endif
 #if HAVE_LZMA_H
-#include <cm_lzma.h>
+#include <cm3p/lzma.h>
 #endif
 #ifdef HAVE_ZLIB_H
-#include <cm_zlib.h>
+#include <cm3p/zlib.h>
 #endif
 
 #include "archive.h"
@@ -52,6 +52,7 @@ __FBSDID("$FreeBSD$");
 #include "archive_rb.h"
 #include "archive_string.h"
 #include "archive_write_private.h"
+#include "archive_write_set_format_private.h"
 
 /*
  * Codec ID
@@ -164,7 +165,7 @@ struct file {
 	mode_t			 mode;
 	uint32_t		 crc32;
 
-	int			 dir:1;
+	signed int		 dir:1;
 };
 
 struct _7zip {
@@ -439,7 +440,8 @@ _7z_write_header(struct archive_write *a, struct archive_entry *entry)
 
 	r = file_new(a, entry, &file);
 	if (r < ARCHIVE_WARN) {
-		file_free(file);
+		if (file != NULL)
+			file_free(file);
 		return (r);
 	}
 	if (file->size == 0 && file->dir) {

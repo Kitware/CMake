@@ -3,6 +3,7 @@ CMAKE_FIND_DEBUG_MODE
 
 Print extra find call information for the following commands to standard
 error:
+
 * :command:`find_program`
 * :command:`find_library`
 * :command:`find_file`

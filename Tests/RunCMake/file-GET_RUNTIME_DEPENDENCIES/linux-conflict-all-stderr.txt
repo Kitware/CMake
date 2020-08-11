@@ -1,0 +1,7 @@
+^CMake Error at cmake_install\.cmake:[0-9]+ \(file\):
+  file Multiple conflicting paths found for librpath\.so:
+
+    [^
+]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/linux-conflict-build/root-all/lib/rpath1/librpath\.so
+    [^
+]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/linux-conflict-build/root-all/lib/rpath2/librpath\.so$

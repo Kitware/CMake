@@ -92,8 +92,17 @@ if(TCL_TCLSH)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+if (CMAKE_FIND_PACKAGE_NAME STREQUAL "TCL" OR
+    CMAKE_FIND_PACKAGE_NAME STREQUAL "TclStub")
+  # FindTCL include()'s this module. It's an old pattern, but rather than
+  # trying to suppress this from outside the module (which is then sensitive to
+  # the contents, detect the case in this module and suppress it explicitly.
+  # Transitively, FindTclStub includes FindTCL.
+  set(FPHSA_NAME_MISMATCHED 1)
+endif ()
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Tclsh
                                   REQUIRED_VARS TCL_TCLSH
                                   VERSION_VAR TCLSH_VERSION_STRING)
+unset(FPHSA_NAME_MISMATCHED)
 
 mark_as_advanced(TCL_TCLSH)

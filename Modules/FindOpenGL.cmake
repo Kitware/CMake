@@ -424,8 +424,15 @@ if(OPENGL_EGL_INCLUDE_DIR)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+if (CMAKE_FIND_PACKAGE_NAME STREQUAL "GLU")
+  # FindGLU include()'s this module. It's an old pattern, but rather than
+  # trying to suppress this from outside the module (which is then sensitive to
+  # the contents, detect the case in this module and suppress it explicitly.
+  set(FPHSA_NAME_MISMATCHED 1)
+endif ()
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL REQUIRED_VARS ${_OpenGL_REQUIRED_VARS}
                                   HANDLE_COMPONENTS)
+unset(FPHSA_NAME_MISMATCHED)
 unset(_OpenGL_REQUIRED_VARS)
 
 # OpenGL:: targets

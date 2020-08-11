@@ -26,7 +26,7 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   // already exists, we can use a short-path to reference it without a
   // space.
   if (this->GetState()->UseWindowsShell() &&
-      remote.find(' ') != std::string::npos &&
+      remote.find_first_of(" #") != std::string::npos &&
       cmSystemTools::FileExists(remote)) {
     std::string tmp;
     if (cmSystemTools::GetShortPath(remote, tmp)) {
@@ -170,13 +170,15 @@ cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
   return format;
 }
 
-cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
-  const char* value)
+cmOutputConverter::FortranPreprocess cmOutputConverter::GetFortranPreprocess(
+  cm::string_view value)
 {
-  if (!value) {
-    return FortranFormatNone;
+  if (value.empty()) {
+    return FortranPreprocess::Unset;
   }
-  return GetFortranFormat(cm::string_view(value));
+
+  return cmIsOn(value) ? FortranPreprocess::Needed
+                       : FortranPreprocess::NotNeeded;
 }
 
 void cmOutputConverter::SetLinkScriptShell(bool linkScriptShell)

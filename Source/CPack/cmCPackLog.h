@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <ostream>
 #include <string>
 
@@ -97,13 +98,13 @@ public:
   void SetErrorPrefix(std::string const& pfx) { this->ErrorPrefix = pfx; }
 
 private:
-  bool Verbose;
-  bool Debug;
-  bool Quiet;
+  bool Verbose = false;
+  bool Debug = false;
+  bool Quiet = false;
 
-  bool NewLine;
+  bool NewLine = true;
 
-  int LastTag;
+  int LastTag = cmCPackLog::NOTAG;
 
   std::string Prefix;
   std::string OutputPrefix;
@@ -112,13 +113,11 @@ private:
   std::string WarningPrefix;
   std::string ErrorPrefix;
 
-  std::ostream* DefaultOutput;
-  std::ostream* DefaultError;
+  std::ostream* DefaultOutput = nullptr;
+  std::ostream* DefaultError = nullptr;
 
-  std::string LogOutputFileName;
-  std::ostream* LogOutput;
-  // Do we need to cleanup log output stream
-  bool LogOutputCleanup;
+  std::ostream* LogOutput = nullptr;
+  std::unique_ptr<std::ostream> LogOutputStream;
 };
 
 class cmCPackLogWrite

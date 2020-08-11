@@ -72,6 +72,9 @@ Options
  This option can also be enabled by setting the
  :envvar:`CTEST_OUTPUT_ON_FAILURE` environment variable
 
+``--stop-on-failure``
+ Stop running the tests when the first failure happens.
+
 ``-F``
  Enable failover.
 
@@ -994,8 +997,12 @@ Configuration settings include:
 
 ``ResourceSpecFile``
   Specify a
-  :ref:`resource specification file <ctest-resource-specification-file>`. See
-  :ref:`ctest-resource-allocation` for more information.
+  :ref:`resource specification file <ctest-resource-specification-file>`.
+
+  * `CTest Script`_ variable: :variable:`CTEST_RESOURCE_SPEC_FILE`
+  * :module:`CTest` module variable: ``CTEST_RESOURCE_SPEC_FILE``
+
+  See :ref:`ctest-resource-allocation` for more information.
 
 ``LabelsForSubprojects``
   Specify a semicolon-separated list of labels that will be treated as
@@ -1403,9 +1410,16 @@ Resource Specification File
 
 The resource specification file is a JSON file which is passed to CTest, either
 on the :manual:`ctest(1)` command line as ``--resource-spec-file``, or as the
-``RESOURCE_SPEC_FILE`` argument of :command:`ctest_test`. The resource
-specification file must be a JSON object. All examples in this document assume
-the following resource specification file:
+``RESOURCE_SPEC_FILE`` argument of :command:`ctest_test`. If a dashboard script
+is used and ``RESOURCE_SPEC_FILE`` is not specified, the value of
+:variable:`CTEST_RESOURCE_SPEC_FILE` in the dashboard script is used instead.
+If ``--resource-spec-file``, ``RESOURCE_SPEC_FILE``, and
+:variable:`CTEST_RESOURCE_SPEC_FILE` in the dashboard script are not specified,
+the value of :variable:`CTEST_RESOURCE_SPEC_FILE` in the CMake build is used
+instead. If none of these are specified, no resource spec file is used.
+
+The resource specification file must be a JSON object. All examples in this
+document assume the following resource specification file:
 
 .. code-block:: json
 

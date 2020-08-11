@@ -99,6 +99,7 @@ file(WRITE ${fakePkgDir}/lib/pkgconfig/${pname}.pc
 Description: Dummy package for FindPkgConfig IMPORTED_TARGET INTERFACE_LINK_OPTIONS test
 Version: 1.2.3
 Libs: -e dummy_main
+Cflags: -I/special -isystem /other -isystem/more -DA-isystem/foo
 ")
 
 set(expected_link_options -e dummy_main)
@@ -109,7 +110,26 @@ endif()
 get_target_property(link_options PkgConfig::FakeLinkOptionsPackage INTERFACE_LINK_OPTIONS)
 if (NOT link_options STREQUAL expected_link_options)
   message(FATAL_ERROR
-    "Additional link options not present in INTERFACE_LINK_OPTIONS property"
+    "Additional link options not present in INTERFACE_LINK_OPTIONS property\n"
     "expected: \"${expected_link_options}\", but got \"${link_options}\""
   )
 endif()
+
+get_target_property(inc_dirs PkgConfig::FakeLinkOptionsPackage INTERFACE_INCLUDE_DIRECTORIES)
+set(expected_inc_dirs "/special" "/other" "/more")
+
+if (NOT inc_dirs STREQUAL expected_inc_dirs)
+  message(FATAL_ERROR
+    "Additional include directories not correctly present in INTERFACE_INCLUDE_DIRECTORIES property\n"
+    "expected: \"${expected_inc_dirs}\", got \"${inc_dirs}\""
+  )
+endif ()
+
+get_target_property(c_opts PkgConfig::FakeLinkOptionsPackage INTERFACE_COMPILE_OPTIONS)
+set(expected_c_opts "-DA-isystem/foo") # this is an invalid option, but a good testcase
+if (NOT c_opts STREQUAL expected_c_opts)
+    message(FATAL_ERROR
+      "Additional compile options not present in INTERFACE_COMPILE_OPTIONS property\n"
+      "expected: \"${expected_c_opts}\", got \"${c_opts}\""
+    )
+endif ()

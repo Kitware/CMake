@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWCommon.h"
 
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <sstream>
 #include <utility>
 #include <vector>

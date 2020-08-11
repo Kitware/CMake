@@ -13,9 +13,11 @@ modernize-*,\
 -modernize-avoid-c-arrays,\
 -modernize-use-nodiscard,\
 -modernize-use-noexcept,\
+-modernize-use-trailing-return-type,\
 -modernize-use-transparent-functors,\
 performance-*,\
 readability-*,\
+-readability-convert-member-functions-to-static,\
 -readability-function-size,\
 -readability-identifier-naming,\
 -readability-implicit-bool-conversion,\

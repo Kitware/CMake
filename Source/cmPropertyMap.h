@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#include "cmProperty.h"
+
 /** \class cmPropertyMap
  * \brief String property map.
  */
@@ -31,7 +33,7 @@ public:
                       bool asString = false);
 
   //! Get the property value
-  const char* GetPropertyValue(const std::string& name) const;
+  cmProp GetPropertyValue(const std::string& name) const;
 
   //! Remove the property @a name from the map
   void RemoveProperty(const std::string& name);

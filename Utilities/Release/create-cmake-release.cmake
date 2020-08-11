@@ -46,13 +46,9 @@ endfunction()
 
 write_docs_shell_script("create-${CMAKE_CREATE_VERSION}-docs.sh")
 write_rel_shell_script("create-${CMAKE_CREATE_VERSION}-macos.sh"   osx_release    ) # macOS x86_64
-write_rel_shell_script("create-${CMAKE_CREATE_VERSION}-win64.sh"   win64_release  ) # Windows x64
-write_rel_shell_script("create-${CMAKE_CREATE_VERSION}-win32.sh"   win32_release  ) # Windows x86
 
 message("Build docs first and then build for each platform:
  ./create-${CMAKE_CREATE_VERSION}-docs.sh    &&
  ./create-${CMAKE_CREATE_VERSION}-macos.sh   &&
- ./create-${CMAKE_CREATE_VERSION}-win64.sh   &&
- ./create-${CMAKE_CREATE_VERSION}-win32.sh   &&
  echo done
 ")

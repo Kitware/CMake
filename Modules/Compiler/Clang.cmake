@@ -105,3 +105,130 @@ else()
     set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER>)
   endmacro()
 endif()
+
+macro(__compiler_clang_cxx_standards lang)
+  if("x${CMAKE_${lang}_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 2.1)
+      set(CMAKE_${lang}98_STANDARD_COMPILE_OPTION "-std=c++98")
+      set(CMAKE_${lang}98_EXTENSION_COMPILE_OPTION "-std=gnu++98")
+    endif()
+
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.1)
+      set(CMAKE_${lang}98_STANDARD__HAS_FULL_SUPPORT ON)
+      set(CMAKE_${lang}11_STANDARD_COMPILE_OPTION "-std=c++11")
+      set(CMAKE_${lang}11_EXTENSION_COMPILE_OPTION "-std=gnu++11")
+      set(CMAKE_${lang}11_STANDARD__HAS_FULL_SUPPORT ON)
+    elseif(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 2.1)
+      set(CMAKE_${lang}11_STANDARD_COMPILE_OPTION "-std=c++0x")
+      set(CMAKE_${lang}11_EXTENSION_COMPILE_OPTION "-std=gnu++0x")
+    endif()
+
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.5)
+      set(CMAKE_${lang}14_STANDARD_COMPILE_OPTION "-std=c++14")
+      set(CMAKE_${lang}14_EXTENSION_COMPILE_OPTION "-std=gnu++14")
+      set(CMAKE_${lang}14_STANDARD__HAS_FULL_SUPPORT ON)
+    elseif(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.4)
+      set(CMAKE_${lang}14_STANDARD_COMPILE_OPTION "-std=c++1y")
+      set(CMAKE_${lang}14_EXTENSION_COMPILE_OPTION "-std=gnu++1y")
+      set(CMAKE_${lang}14_STANDARD__HAS_FULL_SUPPORT ON)
+    endif()
+
+    set(_clang_version_std17 5.0)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+      set(_clang_version_std17 6.0)
+    endif()
+
+    if (NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS "${_clang_version_std17}")
+      set(CMAKE_${lang}17_STANDARD_COMPILE_OPTION "-std=c++17")
+      set(CMAKE_${lang}17_EXTENSION_COMPILE_OPTION "-std=gnu++17")
+    elseif (NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.5)
+      set(CMAKE_${lang}17_STANDARD_COMPILE_OPTION "-std=c++1z")
+      set(CMAKE_${lang}17_EXTENSION_COMPILE_OPTION "-std=gnu++1z")
+    endif()
+
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 6.0)
+      set(CMAKE_${lang}17_STANDARD__HAS_FULL_SUPPORT ON)
+    endif()
+
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 11.0)
+      set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "-std=c++20")
+      set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "-std=gnu++20")
+    elseif(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS "${_clang_version_std17}")
+      set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "-std=c++2a")
+      set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "-std=gnu++2a")
+    endif()
+
+    unset(_clang_version_std17)
+
+    if("x${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "xMSVC")
+      # The MSVC standard library requires C++14, and MSVC itself has no
+      # notion of operating in a mode not aware of at least that standard.
+      set(CMAKE_${lang}98_STANDARD_COMPILE_OPTION "-std=c++14")
+      set(CMAKE_${lang}98_EXTENSION_COMPILE_OPTION "-std=gnu++14")
+      set(CMAKE_${lang}11_STANDARD_COMPILE_OPTION "-std=c++14")
+      set(CMAKE_${lang}11_EXTENSION_COMPILE_OPTION "-std=gnu++14")
+
+      # This clang++ is missing some features because of MSVC compatibility.
+      unset(CMAKE_${lang}11_STANDARD__HAS_FULL_SUPPORT)
+      unset(CMAKE_${lang}14_STANDARD__HAS_FULL_SUPPORT)
+      unset(CMAKE_${lang}17_STANDARD__HAS_FULL_SUPPORT)
+      unset(CMAKE_${lang}20_STANDARD__HAS_FULL_SUPPORT)
+    endif()
+
+    __compiler_check_default_language_standard(${lang} 2.1 98)
+  elseif(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 3.9
+      AND CMAKE_${lang}_SIMULATE_VERSION VERSION_GREATER_EQUAL 19.0)
+    # This version of clang-cl and the MSVC version it simulates have
+    # support for -std: flags.
+    set(CMAKE_${lang}98_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_${lang}98_EXTENSION_COMPILE_OPTION "")
+    set(CMAKE_${lang}98_STANDARD__HAS_FULL_SUPPORT ON)
+    set(CMAKE_${lang}11_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_${lang}11_EXTENSION_COMPILE_OPTION "")
+    set(CMAKE_${lang}14_STANDARD_COMPILE_OPTION "-std:c++14")
+    set(CMAKE_${lang}14_EXTENSION_COMPILE_OPTION "-std:c++14")
+    if (CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0)
+      set(CMAKE_${lang}17_STANDARD_COMPILE_OPTION "-std:c++17")
+      set(CMAKE_${lang}17_EXTENSION_COMPILE_OPTION "-std:c++17")
+      set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "-std:c++latest")
+      set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "-std:c++latest")
+    else()
+      set(CMAKE_${lang}17_STANDARD_COMPILE_OPTION "-std:c++latest")
+      set(CMAKE_${lang}17_EXTENSION_COMPILE_OPTION "-std:c++latest")
+    endif()
+
+    __compiler_check_default_language_standard(${lang} 3.9 14)
+  else()
+    # This version of clang-cl, or the MSVC version it simulates, does not have
+    # language standards.  Set these options as empty strings so the feature
+    # test infrastructure can at least check to see if they are defined.
+    set(CMAKE_${lang}98_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_${lang}98_EXTENSION_COMPILE_OPTION "")
+    set(CMAKE_${lang}11_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_${lang}11_EXTENSION_COMPILE_OPTION "")
+    set(CMAKE_${lang}14_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_${lang}14_EXTENSION_COMPILE_OPTION "")
+    set(CMAKE_${lang}17_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_${lang}17_EXTENSION_COMPILE_OPTION "")
+    set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "")
+
+    # There is no meaningful default for this
+    set(CMAKE_${lang}_STANDARD_DEFAULT "")
+
+    # There are no compiler modes so we only need to test features once.
+    # Override the default macro for this special case.  Pretend that
+    # all language standards are available so that at least compilation
+    # can be attempted.
+    macro(cmake_record_${lang}_compile_features)
+      list(APPEND CMAKE_${lang}_COMPILE_FEATURES
+        cxx_std_98
+        cxx_std_11
+        cxx_std_14
+        cxx_std_17
+        cxx_std_20
+        )
+      _record_compiler_features(${lang} "" CMAKE_${lang}_COMPILE_FEATURES)
+    endmacro()
+  endif()
+endmacro()

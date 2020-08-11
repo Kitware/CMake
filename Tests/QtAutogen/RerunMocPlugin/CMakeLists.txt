@@ -104,7 +104,7 @@ require_change_not(B)
 require_change(C)
 require_change(D)
 # There's a bug in Ninja on Windows:
-# https://gitlab.kitware.com/cmake/cmake/issues/16776
+# https://gitlab.kitware.com/cmake/cmake/-/issues/16776
 if(NOT ("${CMAKE_GENERATOR}" MATCHES "Ninja"))
   require_change(E)
 endif()
@@ -128,7 +128,7 @@ require_change_not(B)
 require_change(C)
 require_change(D)
 # There's a bug in Ninja on Windows
-# https://gitlab.kitware.com/cmake/cmake/issues/16776
+# https://gitlab.kitware.com/cmake/cmake/-/issues/16776
 if(NOT ("${CMAKE_GENERATOR}" MATCHES "Ninja"))
   require_change(E)
 endif()

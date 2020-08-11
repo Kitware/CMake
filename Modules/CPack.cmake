@@ -5,7 +5,7 @@
 CPack
 -----
 
-Configure the binary and source package installers.
+Configure generators for binary installers and source packages.
 
 Introduction
 ^^^^^^^^^^^^
@@ -19,13 +19,17 @@ Depending on the CMake generator, the CPack module may also add two new build
 targets, ``package`` and ``package_source``. See the `packaging targets`_
 section below for details.
 
-The generated binary installers contain everything installed via CMake's
-:command:`install` command (and the deprecated commands :command:`install_files`,
-:command:`install_programs`, and :command:`install_targets`).
-For certain kinds of binary installers (including the graphical
-installers on macOS and Windows), CPack generates installers that
-allow users to select individual application components to install.
-See :module:`CPackComponent` module for further details.
+The generated binary installers will contain all files that have been installed
+via CMake's :command:`install` command (and the deprecated commands
+:command:`install_files`, :command:`install_programs`, and
+:command:`install_targets`).  Certain kinds of binary installers can be
+configured such that users can select individual application components to
+install.  See the :module:`CPackComponent` module for further details.
+
+Source packages (configured through ``CPackSourceConfig.cmake`` and generated
+by the :cpack_gen:`CPack Archive Generator`) will contain all source files in
+the project directory except those specified in
+:variable:`CPACK_SOURCE_IGNORE_FILES`.
 
 CPack Generators
 ^^^^^^^^^^^^^^^^
@@ -38,10 +42,6 @@ generator.  In a :variable:`CPACK_PROJECT_CONFIG_FILE`,
 :variable:`CPACK_GENERATOR` is a *string naming a single generator*.  If you
 need per-cpack-generator logic to control *other* cpack settings, then you
 need a :variable:`CPACK_PROJECT_CONFIG_FILE`.
-
-The CMake source tree itself contains a :variable:`CPACK_PROJECT_CONFIG_FILE`.
-See the top level file ``CMakeCPackOptions.cmake.in`` for an example.
-
 If set, the :variable:`CPACK_PROJECT_CONFIG_FILE` is included automatically
 on a per-generator basis.  It only need contain overrides.
 
@@ -79,7 +79,7 @@ one may call ``cmake --build . --target package`` or ``make package`` or
 
 If CMake is run with the Makefile or Ninja generator, then ``include(CPack)``
 also generates a target ``package_source``. To build a source package,
-instead of ``cpack -G TGZ --config CPackConfig.cmake`` one may call
+instead of ``cpack -G TGZ --config CPackSourceConfig.cmake`` one may call
 ``cmake --build . --target package_source``, ``make package_source``,
 or ``ninja package_source``.
 

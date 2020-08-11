@@ -97,7 +97,7 @@
 
 #include <stddef.h> /* size_t */
 
-#include <cm_kwiml.h>
+#include <cm3p/kwiml/int.h>
 
 #ifndef KWIML_INT_HAVE_UINT64_T
 # define uint64_t KWIML_INT_uint64_t

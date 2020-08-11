@@ -1,6 +1,3 @@
 cmake_minimum_required(VERSION 3.4)
-if(RunCMake_TEST MATCHES "^file-GET_RUNTIME_DEPENDENCIES")
-  cmake_policy(SET CMP0087 NEW)
-endif()
 project(${RunCMake_TEST} NONE)
 include(${RunCMake_TEST}.cmake)

@@ -21,7 +21,7 @@ end module parent
 submodule ( parent ) child
 contains
   module procedure id
-    f = x
+    id = x
   end procedure id
 end submodule child
 program main

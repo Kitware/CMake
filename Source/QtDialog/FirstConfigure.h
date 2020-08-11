@@ -29,7 +29,8 @@ class StartCompilerSetup : public QWizardPage
 {
   Q_OBJECT
 public:
-  StartCompilerSetup(QWidget* p);
+  StartCompilerSetup(QString defaultGeneratorPlatform,
+                     QString defaultGeneratorToolset, QWidget* p);
   ~StartCompilerSetup();
   void setGenerators(std::vector<cmake::GeneratorInfo> const& gens);
   void setCurrentGenerator(const QString& gen);
@@ -64,6 +65,7 @@ protected:
   QStringList GeneratorsSupportingPlatform;
   QMultiMap<QString, QString> GeneratorSupportedPlatforms;
   QMap<QString, QString> GeneratorDefaultPlatform;
+  QString DefaultGeneratorPlatform, DefaultGeneratorToolset;
 
 private:
   QFrame* CreateToolsetWidgets();
@@ -197,6 +199,7 @@ protected:
   NativeCompilerSetup* mNativeCompilerSetupPage;
   CrossCompilerSetup* mCrossCompilerSetupPage;
   ToolchainCompilerSetup* mToolchainCompilerSetupPage;
+  QString mDefaultGenerator;
 };
 
 #endif // FirstConfigure_h

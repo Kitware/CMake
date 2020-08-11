@@ -105,12 +105,10 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
     if (!this->InEdit && (key != 10 && key != KEY_ENTER && key != 'i')) {
       return false;
     }
-    // enter edit with return and i (vim binding)
-    if (!this->InEdit && (key == 10 || key == KEY_ENTER || key == 'i')) {
-      this->OnReturn(fm, w);
-    }
-    // leave edit with return (but not i -- not a toggle)
-    else if (this->InEdit && (key == 10 || key == KEY_ENTER)) {
+    // toggle edit with return
+    if ((key == 10 || key == KEY_ENTER)
+        // enter edit with i (and not-edit mode)
+        || (!this->InEdit && key == 'i')) {
       this->OnReturn(fm, w);
     } else if (key == KEY_DOWN || key == ctrl('n') || key == KEY_UP ||
                key == ctrl('p') || key == KEY_NPAGE || key == ctrl('d') ||

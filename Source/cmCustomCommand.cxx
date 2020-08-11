@@ -11,7 +11,8 @@ cmCustomCommand::cmCustomCommand(std::vector<std::string> outputs,
                                  std::vector<std::string> depends,
                                  cmCustomCommandLines commandLines,
                                  cmListFileBacktrace lfbt, const char* comment,
-                                 const char* workingDirectory)
+                                 const char* workingDirectory,
+                                 bool stdPipesUTF8)
   : Outputs(std::move(outputs))
   , Byproducts(std::move(byproducts))
   , Depends(std::move(depends))
@@ -20,6 +21,7 @@ cmCustomCommand::cmCustomCommand(std::vector<std::string> outputs,
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
   , HaveComment(comment != nullptr)
+  , StdPipesUTF8(stdPipesUTF8)
 {
 }
 

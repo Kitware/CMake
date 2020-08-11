@@ -13,13 +13,24 @@ The following components are supported:
 * ``Interpreter``: search for Python interpreter.
 * ``Compiler``: search for Python compiler. Only offered by IronPython.
 * ``Development``: search for development artifacts (include directories and
-  libraries).
+  libraries). This component includes two sub-components which can be specified
+  independently:
+
+  * ``Development.Module``: search for artifacts for Python module
+    developments.
+  * ``Development.Embed``: search for artifacts for Python embedding
+    developments.
+
 * ``NumPy``: search for NumPy include directories.
 
 If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
+If component ``Development`` is specified, it implies sub-components
+``Development.Module`` and ``Development.Embed``.
+
 To ensure consistent versions between components ``Interpreter``, ``Compiler``,
-``Development`` and ``NumPy``, specify all components at the same time::
+``Development`` (or one of its sub-components) and ``NumPy``, specify all
+components at the same time::
 
   find_package (Python COMPONENTS Interpreter Development)
 
@@ -30,10 +41,11 @@ To manage concurrent versions 3 and 2 of Python, use :module:`FindPython3` and
 
 .. note::
 
-  If components ``Interpreter`` and ``Development`` are both specified, this
-  module search only for interpreter with same platform architecture as the one
-  defined by ``CMake`` configuration. This contraint does not apply if only
-  ``Interpreter`` component is specified.
+  If components ``Interpreter`` and ``Development`` (or one of its
+  sub-components) are both specified, this module search only for interpreter
+  with same platform architecture as the one defined by ``CMake``
+  configuration. This contraint does not apply if only ``Interpreter``
+  component is specified.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -45,12 +57,12 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`
   Python interpreter. Target defined if component ``Interpreter`` is found.
 ``Python::Compiler``
   Python compiler. Target defined if component ``Compiler`` is found.
+``Python::Module``
+  Python library for Python module. Target defined if component
+  ``Development.Module`` is found.
 ``Python::Python``
   Python library for Python embedding. Target defined if component
-  ``Development`` is found.
-``Python::Module``
-  Python library for Python module. Target defined if component ``Development``
-  is found.
+  ``Development.Embed`` is found.
 ``Python::NumPy``
   NumPy Python library. Target defined if component ``NumPy`` is found.
 
@@ -73,33 +85,40 @@ This module will set the following variables in your project
     * Anaconda
     * Canopy
     * IronPython
+    * PyPy
 ``Python_STDLIB``
   Standard platform independent installation directory.
 
   Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=True)``.
+  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=True)``
+  or else ``sysconfig.get_path('stdlib')``.
 ``Python_STDARCH``
   Standard platform dependent installation directory.
 
   Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=True)``.
+  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=True)``
+  or else ``sysconfig.get_path('platstdlib')``.
 ``Python_SITELIB``
   Third-party platform independent installation directory.
 
   Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=False)``.
+  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=False)``
+  or else ``sysconfig.get_path('purelib')``.
 ``Python_SITEARCH``
   Third-party platform dependent installation directory.
 
   Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``.
+  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``
+  or else ``sysconfig.get_path('platlib')``.
 ``Python_SOABI``
   Extension suffix for modules.
 
   Information returned by
-  ``distutils.sysconfig.get_config_flag('SOABI')`` or computed from
-  ``distutils.sysconfig.get_config_flag('EXT_SUFFIX')`` or
-  ``python-config --extension-suffix``.
+  ``distutils.sysconfig.get_config_var('SOABI')`` or computed from
+  ``distutils.sysconfig.get_config_var('EXT_SUFFIX')`` or
+  ``python-config --extension-suffix``. If package ``distutils.sysconfig`` is
+  not available, ``sysconfig.get_config_var('SOABI')`` or
+  ``sysconfig.get_config_var('EXT_SUFFIX')`` are used.
 ``Python_Compiler_FOUND``
   System has the Python compiler.
 ``Python_COMPILER``
@@ -107,8 +126,14 @@ This module will set the following variables in your project
 ``Python_COMPILER_ID``
   A short string unique to the compiler. Possible values include:
     * IronPython
+``Python_DOTNET_LAUNCHER``
+  The ``.Net`` interpreter. Only used by ``IronPython`` implementation.
 ``Python_Development_FOUND``
   System has the Python development artifacts.
+``Python_Development.Module_FOUND``
+  System has the Python development artifacts for Python module.
+``Python_Development.Embed_FOUND``
+  System has the Python development artifacts for Python embedding.
 ``Python_INCLUDE_DIRS``
   The Python include directories.
 ``Python_LIBRARIES``
@@ -125,6 +150,8 @@ This module will set the following variables in your project
   Python minor version.
 ``Python_VERSION_PATCH``
   Python patch version.
+``Python_PyPy_VERSION``
+  Python PyPy version.
 ``Python_NumPy_FOUND``
   System has the NumPy.
 ``Python_NumPy_INCLUDE_DIRS``
@@ -237,8 +264,9 @@ Hints
   * ``ONLY``: Only the virtual environment is used to look-up for the
     interpreter.
   * ``STANDARD``: The virtual environment is not used to look-up for the
-    interpreter. In this case, variable ``Python_FIND_REGISTRY`` (Windows)
-    or ``CMAKE_FIND_FRAMEWORK`` (macOS) can be set with value ``LAST`` or
+    interpreter but environment variable ``PATH`` is always considered.
+    In this case, variable ``Python_FIND_REGISTRY`` (Windows) or
+    ``CMAKE_FIND_FRAMEWORK`` (macOS) can be set with value ``LAST`` or
     ``NEVER`` to select preferably the interpreter from the virtual
     environment.
 
@@ -247,6 +275,39 @@ Hints
     If the component ``Development`` is requested, it is **strongly**
     recommended to also include the component ``Interpreter`` to get expected
     result.
+
+``Python_FIND_IMPLEMENTATIONS``
+  This variable defines, in an ordered list, the different implementations
+  which will be searched. The ``Python_FIND_IMPLEMENTATIONS`` variable can
+  hold the following values:
+
+  * ``CPython``: this is the standard implementation. Various products, like
+    ``Anaconda`` or ``ActivePython``, rely on this implementation.
+  * ``IronPython``: This implementation use the ``CSharp`` language for
+    ``.NET Framework`` on top of the `Dynamic Language Runtime` (``DLR``).
+    See `IronPython <http://ironpython.net>`_.
+  * ``PyPy``: This implementation use ``RPython`` language and
+    ``RPython translation toolchain`` to produce the python interpreter.
+    See `PyPy <https://www.pypy.org>`_.
+
+  The default value is:
+
+  * Windows platform: ``CPython``, ``IronPython``
+  * Other platforms: ``CPython``
+
+  .. note::
+
+    This hint has the lowest priority of all hints, so even if, for example,
+    you specify ``IronPython`` first and ``CPython`` in second, a python
+    product based on ``CPython`` can be selected because, for example with
+    ``Python_FIND_STRATEGY=LOCATION``, each location will be search first for
+    ``IronPython`` and second for ``CPython``.
+
+  .. note::
+
+    When ``IronPython`` is specified, on platforms other than ``Windows``, the
+    ``.Net`` interpreter (i.e. ``mono`` command) is expected to be available
+    through the ``PATH`` variable.
 
 Artifacts Specification
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -259,6 +320,9 @@ setting the following variables:
 
 ``Python_COMPILER``
   The path to the compiler.
+
+``Python_DOTNET_LAUNCHER``
+  The ``.Net`` interpreter. Only used by ``IronPython`` implementation.
 
 ``Python_LIBRARY``
   The path to the library. It will be used to compute the
@@ -285,6 +349,22 @@ setting the following variables:
 
   If more than one artifact is specified, it is the user's responsability to
   ensure the consistency of the various artifacts.
+
+By default, this module supports multiple calls in different directories of a
+project with different version/component requirements while providing correct
+and consistent results for each call. To support this behavior, ``CMake`` cache
+is not used in the traditional way which can be problematic for interactive
+specification. So, to enable also interactive specification, module behavior
+can be controled with the following variable:
+
+``Python_ARTIFACTS_INTERACTIVE``
+  Selects the behavior of the module. This is a boolean variable:
+
+  * If set to ``TRUE``: Create CMake cache entries for the above artifact
+    specification variables so that users can edit them interactively.
+    This disables support for multiple version/component requirements.
+  * If set to ``FALSE`` or undefined: Enable multiple version/component
+    requirements.
 
 Commands
 ^^^^^^^^

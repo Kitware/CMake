@@ -6,13 +6,13 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
+#include <cm3p/uv.h>
 #include <stddef.h>
-
-#include "cm_uv.h"
 
 #include "cmCTest.h"
 #include "cmCTestResourceAllocator.h"
@@ -124,7 +124,7 @@ protected:
   // Removes the checkpoint file
   void MarkFinished();
   void EraseTest(int index);
-  void FinishTestProcess(cmCTestRunTest* runner, bool started);
+  void FinishTestProcess(std::unique_ptr<cmCTestRunTest> runner, bool started);
 
   static void OnTestLoadRetryCB(uv_timer_t* timer);
 
@@ -136,6 +136,8 @@ protected:
   int FindMaxIndex();
   inline size_t GetProcessorsUsed(int index);
   std::string GetName(int index);
+
+  bool CheckStopOnFailure();
 
   bool CheckStopTimePassed();
   void SetStopTimePassed();

@@ -1,0 +1,5 @@
+CMake Error at CMP0108-self-link.cmake:[0-9]+ \(add_library\):
+  Target "foo" links to itself.
+Call Stack \(most recent call first\):
+  CMP0108-NEW-self-link.cmake:[0-9]+ \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

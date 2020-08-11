@@ -67,6 +67,36 @@ const char* getShapeForTarget(const cmLinkItem& item)
       return GRAPHVIZ_NODE_SHAPE_LIBRARY_UNKNOWN;
   }
 }
+
+struct DependeesDir
+{
+  template <typename T>
+  static const cmLinkItem& src(const T& con)
+  {
+    return con.src;
+  }
+
+  template <typename T>
+  static const cmLinkItem& dst(const T& con)
+  {
+    return con.dst;
+  }
+};
+
+struct DependersDir
+{
+  template <typename T>
+  static const cmLinkItem& src(const T& con)
+  {
+    return con.dst;
+  }
+
+  template <typename T>
+  static const cmLinkItem& dst(const T& con)
+  {
+    return con.src;
+  }
+};
 }
 
 cmGraphVizWriter::cmGraphVizWriter(std::string const& fileName,
@@ -173,18 +203,16 @@ void cmGraphVizWriter::VisitLink(cmLinkItem const& depender,
     return;
   }
 
+  // write global data directly
   this->WriteConnection(this->GlobalFileStream, depender, dependee, scopeType);
 
   if (this->GeneratePerTarget) {
-    auto fileStream = PerTargetFileStreams[depender.AsStr()].get();
-    this->WriteNode(*fileStream, dependee);
-    this->WriteConnection(*fileStream, depender, dependee, scopeType);
+    PerTargetConnections[depender].emplace_back(depender, dependee, scopeType);
   }
 
   if (this->GenerateDependers) {
-    auto fileStream = TargetDependersFileStreams[dependee.AsStr()].get();
-    this->WriteNode(*fileStream, depender);
-    this->WriteConnection(*fileStream, depender, dependee, scopeType);
+    TargetDependersConnections[dependee].emplace_back(dependee, depender,
+                                                      scopeType);
   }
 }
 
@@ -288,9 +316,85 @@ void cmGraphVizWriter::Write()
     }
   }
 
+  // write global data and collect all connection data for per target graphs
   for (auto const gt : sortedGeneratorTargets) {
     auto item = cmLinkItem(gt, false, gt->GetBacktrace());
     this->VisitItem(item);
+  }
+
+  if (this->GeneratePerTarget) {
+    WritePerTargetConnections<DependeesDir>(PerTargetConnections,
+                                            PerTargetFileStreams);
+  }
+
+  if (this->GenerateDependers) {
+    WritePerTargetConnections<DependersDir>(TargetDependersConnections,
+                                            TargetDependersFileStreams);
+  }
+}
+
+void cmGraphVizWriter::FindAllConnections(const ConnectionsMap& connectionMap,
+                                          const cmLinkItem& rootItem,
+                                          Connections& extendedCons,
+                                          std::set<cmLinkItem>& visitedItems)
+{
+  // some "targets" are not in map, e.g. linker flags as -lm or
+  // targets without dependency.
+  // in both cases we are finished with traversing the graph
+  if (connectionMap.find(rootItem) == connectionMap.cend()) {
+    return;
+  }
+
+  const Connections& origCons = connectionMap.at(rootItem);
+
+  for (const Connection& con : origCons) {
+    extendedCons.emplace_back(con);
+    const cmLinkItem& dstItem = con.dst;
+    bool const visited = visitedItems.find(dstItem) != visitedItems.cend();
+    if (!visited) {
+      visitedItems.insert(dstItem);
+      FindAllConnections(connectionMap, dstItem, extendedCons, visitedItems);
+    }
+  }
+}
+
+void cmGraphVizWriter::FindAllConnections(const ConnectionsMap& connectionMap,
+                                          const cmLinkItem& rootItem,
+                                          Connections& extendedCons)
+{
+  std::set<cmLinkItem> visitedItems = { rootItem };
+  FindAllConnections(connectionMap, rootItem, extendedCons, visitedItems);
+}
+
+template <typename DirFunc>
+void cmGraphVizWriter::WritePerTargetConnections(
+  const ConnectionsMap& connections, const FileStreamMap& streams)
+{
+  // the per target connections must be extended by indirect dependencies
+  ConnectionsMap extendedConnections;
+  for (auto const& conPerTarget : connections) {
+    const cmLinkItem& rootItem = conPerTarget.first;
+    Connections& extendedCons = extendedConnections[conPerTarget.first];
+    FindAllConnections(connections, rootItem, extendedCons);
+  }
+
+  for (auto const& conPerTarget : extendedConnections) {
+    const cmLinkItem& rootItem = conPerTarget.first;
+
+    // some of the nodes are excluded completely and are not written
+    if (this->ItemExcluded(rootItem)) {
+      continue;
+    }
+
+    const Connections& cons = conPerTarget.second;
+    auto fileStream = streams.at(rootItem.AsStr()).get();
+
+    for (const Connection& con : cons) {
+      const cmLinkItem& src = DirFunc::src(con);
+      const cmLinkItem& dst = DirFunc::dst(con);
+      this->WriteNode(*fileStream, con.dst);
+      this->WriteConnection(*fileStream, src, dst, con.scopeType);
+    }
   }
 }
 
@@ -298,13 +402,13 @@ void cmGraphVizWriter::WriteHeader(cmGeneratedFileStream& fs,
                                    const std::string& name)
 {
   auto const escapedGraphName = EscapeForDotFile(name);
-  fs << "digraph \"" << escapedGraphName << "\" {" << std::endl;
-  fs << this->GraphHeader << std::endl;
+  fs << "digraph \"" << escapedGraphName << "\" {\n"
+     << this->GraphHeader << '\n';
 }
 
 void cmGraphVizWriter::WriteFooter(cmGeneratedFileStream& fs)
 {
-  fs << "}" << std::endl;
+  fs << "}\n";
 }
 
 void cmGraphVizWriter::WriteLegend(cmGeneratedFileStream& fs)
@@ -312,52 +416,46 @@ void cmGraphVizWriter::WriteLegend(cmGeneratedFileStream& fs)
   // Note that the subgraph name must start with "cluster", as done here, to
   // make Graphviz layout engines do the right thing and keep the nodes
   // together.
-  fs << "subgraph clusterLegend {" << std::endl;
-  fs << "  label = \"Legend\";" << std::endl;
-  // Set the color of the box surrounding the legend.
-  fs << "  color = black;" << std::endl;
-  // We use invisible edges just to enforce the layout.
-  fs << "  edge [ style = invis ];" << std::endl;
-
-  // Nodes.
-  fs << "  legendNode0 [ label = \"Executable\", shape = "
-     << GRAPHVIZ_NODE_SHAPE_EXECUTABLE << " ];" << std::endl;
-
-  fs << "  legendNode1 [ label = \"Static Library\", shape = "
-     << GRAPHVIZ_NODE_SHAPE_LIBRARY_STATIC << " ];" << std::endl;
-  fs << "  legendNode2 [ label = \"Shared Library\", shape = "
-     << GRAPHVIZ_NODE_SHAPE_LIBRARY_SHARED << " ];" << std::endl;
-  fs << "  legendNode3 [ label = \"Module Library\", shape = "
-     << GRAPHVIZ_NODE_SHAPE_LIBRARY_MODULE << " ];" << std::endl;
-
-  fs << "  legendNode4 [ label = \"Interface Library\", shape = "
-     << GRAPHVIZ_NODE_SHAPE_LIBRARY_INTERFACE << " ];" << std::endl;
-  fs << "  legendNode5 [ label = \"Object Library\", shape = "
-     << GRAPHVIZ_NODE_SHAPE_LIBRARY_OBJECT << " ];" << std::endl;
-  fs << "  legendNode6 [ label = \"Unknown Library\", shape = "
-     << GRAPHVIZ_NODE_SHAPE_LIBRARY_UNKNOWN << " ];" << std::endl;
-
-  fs << "  legendNode7 [ label = \"Custom Target\", shape = "
-     << GRAPHVIZ_NODE_SHAPE_UTILITY << " ];" << std::endl;
-
-  // Edges.
-  // Some of those are dummy (invisible) edges to enforce a layout.
-  fs << "  legendNode0 -> legendNode1 [ style = " << GRAPHVIZ_EDGE_STYLE_PUBLIC
-     << " ];" << std::endl;
-  fs << "  legendNode0 -> legendNode2 [ style = " << GRAPHVIZ_EDGE_STYLE_PUBLIC
-     << " ];" << std::endl;
-  fs << "  legendNode0 -> legendNode3;" << std::endl;
-
-  fs << "  legendNode1 -> legendNode4 [ label = \"Interface\", style = "
-     << GRAPHVIZ_EDGE_STYLE_INTERFACE << " ];" << std::endl;
-  fs << "  legendNode2 -> legendNode5 [ label = \"Private\", style = "
-     << GRAPHVIZ_EDGE_STYLE_PRIVATE << " ];" << std::endl;
-  fs << "  legendNode3 -> legendNode6 [ style = " << GRAPHVIZ_EDGE_STYLE_PUBLIC
-     << " ];" << std::endl;
-
-  fs << "  legendNode0 -> legendNode7;" << std::endl;
-
-  fs << "}" << std::endl;
+  /* clang-format off */
+  fs << "subgraph clusterLegend {\n"
+        "  label = \"Legend\";\n"
+        // Set the color of the box surrounding the legend.
+        "  color = black;\n"
+        // We use invisible edges just to enforce the layout.
+        "  edge [ style = invis ];\n"
+        // Nodes.
+        "  legendNode0 [ label = \"Executable\", shape = "
+     << GRAPHVIZ_NODE_SHAPE_EXECUTABLE << " ];\n"
+        "  legendNode1 [ label = \"Static Library\", shape = "
+     << GRAPHVIZ_NODE_SHAPE_LIBRARY_STATIC << " ];\n"
+        "  legendNode2 [ label = \"Shared Library\", shape = "
+     << GRAPHVIZ_NODE_SHAPE_LIBRARY_SHARED << " ];\n"
+        "  legendNode3 [ label = \"Module Library\", shape = "
+     << GRAPHVIZ_NODE_SHAPE_LIBRARY_MODULE << " ];\n"
+        "  legendNode4 [ label = \"Interface Library\", shape = "
+     << GRAPHVIZ_NODE_SHAPE_LIBRARY_INTERFACE << " ];\n"
+        "  legendNode5 [ label = \"Object Library\", shape = "
+     << GRAPHVIZ_NODE_SHAPE_LIBRARY_OBJECT << " ];\n"
+        "  legendNode6 [ label = \"Unknown Library\", shape = "
+     << GRAPHVIZ_NODE_SHAPE_LIBRARY_UNKNOWN << " ];\n"
+        "  legendNode7 [ label = \"Custom Target\", shape = "
+     << GRAPHVIZ_NODE_SHAPE_UTILITY << " ];\n"
+        // Edges.
+        // Some of those are dummy (invisible) edges to enforce a layout.
+        "  legendNode0 -> legendNode1 [ style = "
+     << GRAPHVIZ_EDGE_STYLE_PUBLIC << " ];\n"
+        "  legendNode0 -> legendNode2 [ style = "
+     << GRAPHVIZ_EDGE_STYLE_PUBLIC << " ];\n"
+        "  legendNode0 -> legendNode3;\n"
+        "  legendNode1 -> legendNode4 [ label = \"Interface\", style = "
+     << GRAPHVIZ_EDGE_STYLE_INTERFACE << " ];\n"
+        "  legendNode2 -> legendNode5 [ label = \"Private\", style = "
+     << GRAPHVIZ_EDGE_STYLE_PRIVATE << " ];\n"
+        "  legendNode3 -> legendNode6 [ style = "
+     << GRAPHVIZ_EDGE_STYLE_PUBLIC << " ];\n"
+        "  legendNode0 -> legendNode7;\n"
+        "}\n";
+  /* clang-format off */
 }
 
 void cmGraphVizWriter::WriteNode(cmGeneratedFileStream& fs,
@@ -370,7 +468,7 @@ void cmGraphVizWriter::WriteNode(cmGeneratedFileStream& fs,
   auto const escapedLabel = EscapeForDotFile(itemNameWithAliases);
 
   fs << "    \"" << nodeName << "\" [ label = \"" << escapedLabel
-     << "\", shape = " << getShapeForTarget(item) << " ];" << std::endl;
+     << "\", shape = " << getShapeForTarget(item) << " ];\n";
 }
 
 void cmGraphVizWriter::WriteConnection(cmGeneratedFileStream& fs,
@@ -382,11 +480,9 @@ void cmGraphVizWriter::WriteConnection(cmGeneratedFileStream& fs,
   auto const& dependeeName = dependee.AsStr();
 
   fs << "    \"" << this->NodeNames[dependerName] << "\" -> \""
-     << this->NodeNames[dependeeName] << "\" ";
-
-  fs << edgeStyle;
-
-  fs << " // " << dependerName << " -> " << dependeeName << std::endl;
+     << this->NodeNames[dependeeName] << "\" "
+     << edgeStyle
+     << " // " << dependerName << " -> " << dependeeName << '\n';
 }
 
 bool cmGraphVizWriter::ItemExcluded(cmLinkItem const& item)
@@ -402,9 +498,9 @@ bool cmGraphVizWriter::ItemExcluded(cmLinkItem const& item)
   }
 
   if (item.Target->GetType() == cmStateEnums::UTILITY) {
-    if ((itemName.find("Nightly") == 0) ||
-        (itemName.find("Continuous") == 0) ||
-        (itemName.find("Experimental") == 0)) {
+    if (cmHasLiteralPrefix(itemName, "Nightly") ||
+        cmHasLiteralPrefix(itemName, "Continuous") ||
+        cmHasLiteralPrefix(itemName, "Experimental")) {
       return true;
     }
   }

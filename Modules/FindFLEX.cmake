@@ -99,7 +99,7 @@ respectively ``FLEX_TARGET`` and ``BISON_TARGET`` macros.
   ====================================================================
 #]=======================================================================]
 
-find_program(FLEX_EXECUTABLE NAMES flex win_flex DOC "path to the flex executable")
+find_program(FLEX_EXECUTABLE NAMES flex win-flex win_flex DOC "path to the flex executable")
 mark_as_advanced(FLEX_EXECUTABLE)
 
 find_library(FL_LIBRARY NAMES fl

@@ -3,7 +3,6 @@
 #include "cmArgumentParser.h"
 
 #include <algorithm>
-#include <type_traits>
 
 namespace ArgumentParser {
 

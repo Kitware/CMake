@@ -1,0 +1,6 @@
+-- Found SWIG: [^ ]+ \(found version "[0-9.]+"\) found components: java python missing components: PERL
+-- SWIG_VERSION='[0-9.]+'
+-- SWIG_java_FOUND=TRUE
+-- SWIG_python_FOUND=TRUE
+-- SWIG_PERL_FOUND=
+-- Configuring done

@@ -28,7 +28,7 @@ request is accepted" option when creating the MR or by editing it.
 This will cause the MR topic branch to be automatically removed from
 the user's fork during the `Merge`_ step.
 
-.. _`CMake Merge Requests Page`: https://gitlab.kitware.com/cmake/cmake/merge_requests
+.. _`CMake Merge Requests Page`: https://gitlab.kitware.com/cmake/cmake/-/merge_requests
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 
 Workflow Status
@@ -60,7 +60,7 @@ in GitLab to track the state of a MR:
 The workflow status labels are intended to be mutually exclusive,
 so please remove any existing workflow label when adding one.
 
-.. _`CMake GitLab Project Developers`: https://gitlab.kitware.com/cmake/cmake/settings/members
+.. _`CMake GitLab Project Developers`: https://gitlab.kitware.com/cmake/cmake/-/settings/members
 
 Robot Review
 ============
@@ -278,42 +278,52 @@ merging.
 Topic Testing
 =============
 
-CMake has a `buildbot`_ instance watching for merge requests to test.
-`CMake GitLab Project Developers`_ may activate buildbot on a MR by
-adding a comment with a command among the `comment trailing lines`_::
+CMake uses `GitLab CI`_ to test merge requests, configured by the top-level
+``.gitlab-ci.yml`` file.  Results may be seen both on the merge request's
+pipeline page and on the `CMake CDash Page`_.  Filtered CDash results
+showing just the pipeline's jobs can be reached by selecting the ``cdash``
+job in the ``External`` stage of the pipeline.
 
-  Do: test
+Lint and documentation build jobs run automatically after every push.
+Heavier jobs require a manual trigger to run:
 
-``@kwrobot`` will add an award emoji to the comment to indicate that it
-was processed and also inform buildbot about the request.  The buildbot
-user (``@buildbot``) will schedule builds and respond with a comment
-linking to the `CMake CDash Page`_ with a filter for results associated
-with the topic test request.  If the MR topic branch is updated by a
-push a new ``Do: test`` command is needed to activate testing again.
+* Merge request authors may visit their merge request's pipeline and click the
+  "Play" button on one or more jobs manually.  If the merge request has the
+  "Allow commits from members who can merge to the target branch" check box
+  enabled, CMake maintainers may use the "Play" button too.
 
-The ``Do: test`` command accepts the following arguments:
+* `CMake GitLab Project Developers`_ may trigger CI on a merge request by
+  adding a comment with a command among the `comment trailing lines`_::
 
-* ``--stop``: clear the list of commands for the merge request
-* ``--clear``: clear previous commands before adding this command
-* ``--regex-include <arg>`` or ``-i <arg>``: only build on builders
-  matching ``<arg>`` (a Python regular expression)
-* ``--regex-exclude <arg>`` or ``-e <arg>``: exclude builds on builders
-  matching ``<arg>`` (a Python regular expression)
+    Do: test
 
-Builder names follow the pattern ``project-host-os-buildtype-generator``:
+  ``@kwrobot`` will add an award emoji to the comment to indicate that it
+  was processed and also trigger all manual jobs in the merge request's
+  pipeline.
 
-* ``project``: always ``cmake`` for CMake builds
-* ``host``: the buildbot host
-* ``os``: one of ``windows``, ``osx``, or ``linux``
-* ``buildtype``: ``release`` or ``debug``
-* ``generator``: ``ninja``, ``makefiles``, ``vs<year>``,
-  or ``lint-iwyu-tidy``
+  The ``Do: test`` command accepts the following arguments:
 
-The special ``lint-<tools>`` generator name is a builder that builds
-CMake using lint tools but does not run the test suite (so the actual
-generator does not matter).
+  * ``--named <regex>``, ``-n <regex>``: Trigger jobs matching ``<regex>``
+    anywhere in their name.  Job names may be seen on the merge request's
+    pipeline page.
+  * ``--stage <stage>``, ``-s <stage>``: Only affect jobs in a given stage.
+    Stage names may be seen on the merge request's pipeline page.  Note that
+    the names are determined by what is in the ``.gitlab-ci.yml`` file and may
+    be capitalized in the web page, so lowercasing the webpage's display name
+    for stages may be required.
+  * ``--action <action>``, ``-a <action>``: The action to perform on the jobs.
+    Possible actions:
 
-.. _`buildbot`: http://buildbot.net
+    * ``manual`` (the default): Start jobs awaiting manual interaction.
+    * ``unsuccessful``: Start or restart jobs which have not completed
+      successfully.
+    * ``failed``: Restart jobs which have completed, but without success.
+    * ``completed``: Restart all completed jobs.
+
+If the merge request topic branch is updated by a push, a new manual trigger
+using one of the above methods is needed to start CI again.
+
+.. _`GitLab CI`: https://gitlab.kitware.com/help/ci/README.md
 .. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
 
 Integration Testing
@@ -454,8 +464,8 @@ comment instead):
   The ``-t`` option to a ``Do: merge`` command overrides any topic
   rename set in the MR description.
 
-.. _`CMake GitLab Project Masters`: https://gitlab.kitware.com/cmake/cmake/settings/members
-.. _`backport instructions`: https://gitlab.kitware.com/utils/git-workflow/wikis/Backport-topics
+.. _`CMake GitLab Project Masters`: https://gitlab.kitware.com/cmake/cmake/-/settings/members
+.. _`backport instructions`: https://gitlab.kitware.com/utils/git-workflow/-/wikis/Backport-topics
 .. _`git rev-parse`: https://git-scm.com/docs/git-rev-parse
 
 Close

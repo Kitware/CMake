@@ -1,0 +1,2 @@
+CMake Error: Evaluation of \$<LINK_LANGUAGE:...> or \$<LINK_LAND_AND_ID:...> changes
+the linker language for target "LinkLibraries_bad_mix_languages" \(from 'C' to 'CXX'\) which is invalid.

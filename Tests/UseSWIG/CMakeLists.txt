@@ -55,6 +55,21 @@ add_test(NAME UseSWIG.BasicPerl COMMAND
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
 
+if (CMake_TEST_UseSWIG_Fortran)
+  check_language(Fortran)
+  if (CMAKE_Fortran_COMPILER)
+    add_test(NAME UseSWIG.BasicFortran COMMAND
+      ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/UseSWIG/BasicFortran"
+      "${CMake_BINARY_DIR}/Tests/UseSWIG/BasicFortran"
+      ${build_generator_args}
+      --build-project TestBasicFortran
+      --build-options ${build_options}
+      --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+      )
+  endif()
+endif()
 
 add_test(NAME UseSWIG.MultipleModules COMMAND
   ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>

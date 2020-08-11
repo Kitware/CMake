@@ -1,9 +1,16 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+# To ensure maximum portability across various compilers and platforms
+# deactivate any compiler extensions
+set(CMAKE_C_EXTENSIONS FALSE)
+set(CMAKE_CXX_EXTENSIONS FALSE)
+
 include(CheckIncludeFile)
 # Check if we can build support for ELF parsing.
-if(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
+if(WIN32)
+  set(HAVE_ELF_H 0)
+elseif(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
   CHECK_INCLUDE_FILES("stdint.h;elf_abi.h" HAVE_ELF_H)
 else()
   CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
@@ -354,6 +361,7 @@ set(SRCS
   cmMakefileTargetGenerator.cxx
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
+  cmMakefileProfilingData.cxx
   cmMakefileUtilityTargetGenerator.cxx
   cmMessageType.h
   cmMessenger.cxx
@@ -377,8 +385,6 @@ set(SRCS
   cmProperty.h
   cmPropertyDefinition.cxx
   cmPropertyDefinition.h
-  cmPropertyDefinitionMap.cxx
-  cmPropertyDefinitionMap.h
   cmPropertyMap.cxx
   cmPropertyMap.h
   cmQtAutoGen.cxx
@@ -486,6 +492,8 @@ set(SRCS
   cmBuildNameCommand.h
   cmCMakeHostSystemInformationCommand.cxx
   cmCMakeHostSystemInformationCommand.h
+  cmCMakeLanguageCommand.cxx
+  cmCMakeLanguageCommand.h
   cmCMakeMinimumRequired.cxx
   cmCMakeMinimumRequired.h
   cmCMakePolicyCommand.cxx
@@ -690,7 +698,6 @@ set(SRCS
   cmWriteFileCommand.cxx
   cmWriteFileCommand.h
 
-  cm_static_string_view.hxx
   cm_get_date.h
   cm_get_date.c
   cm_utf8.h

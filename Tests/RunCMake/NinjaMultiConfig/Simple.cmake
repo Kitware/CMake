@@ -1,5 +1,7 @@
 enable_language(C)
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 file(TOUCH ${CMAKE_BINARY_DIR}/empty.cmake)
 include(${CMAKE_BINARY_DIR}/empty.cmake)
 

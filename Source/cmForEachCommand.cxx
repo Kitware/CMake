@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 // NOTE The declaration of `std::abs` has moved to `cmath` since C++17
 // See https://en.cppreference.com/w/cpp/numeric/math/abs
 // ALERT But IWYU used to lint `#include`s do not "understand"
@@ -18,8 +18,7 @@
 
 #include <cm/memory>
 #include <cm/string_view>
-
-#include "cm_static_string_view.hxx"
+#include <cmext/string_view>
 
 #include "cmExecutionStatus.h"
 #include "cmFunctionBlocker.h"
@@ -114,8 +113,8 @@ bool cmForEachFunctionBlocker::ReplayItems(
   // At end of for each execute recorded commands
   // store the old value
   std::string oldDef;
-  if (mf.GetDefinition(this->Args.front())) {
-    oldDef = mf.GetDefinition(this->Args.front());
+  if (auto d = mf.GetDefinition(this->Args.front())) {
+    oldDef = d;
   }
 
   auto restore = false;
@@ -187,8 +186,8 @@ bool cmForEachFunctionBlocker::ReplayZipLists(
   // Store old values for iteration variables
   std::map<std::string, std::string> oldDefs;
   for (auto i = 0u; i < values.size(); ++i) {
-    if (mf.GetDefinition(iterationVars[i])) {
-      oldDefs.emplace(iterationVars[i], mf.GetDefinition(iterationVars[i]));
+    if (auto d = mf.GetDefinition(iterationVars[i])) {
+      oldDefs.emplace(iterationVars[i], d);
     }
   }
 

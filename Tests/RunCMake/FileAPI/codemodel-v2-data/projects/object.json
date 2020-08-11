@@ -1,0 +1,16 @@
+{
+    "name": "Object",
+    "parentName": "codemodel-v2",
+    "childNames": null,
+    "directorySources": [
+        "^object$"
+    ],
+    "targetIds": [
+        "^ALL_BUILD::@5ed5358f70faf8d8af7a$",
+        "^ZERO_CHECK::@5ed5358f70faf8d8af7a$",
+        "^c_object_lib::@5ed5358f70faf8d8af7a$",
+        "^c_object_exe::@5ed5358f70faf8d8af7a$",
+        "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
+        "^cxx_object_exe::@5ed5358f70faf8d8af7a$"
+    ]
+}

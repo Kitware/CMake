@@ -7,16 +7,18 @@
 
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmGeneratedFileStream.h"
+#include "cmLinkItem.h"
 #include "cmLinkItemGraphVisitor.h"
 #include "cmStateTypes.h"
 
-class cmLinkItem;
 class cmGlobalGenerator;
 
 /** This class implements writing files for graphviz (dot) for graphs
@@ -47,6 +49,22 @@ private:
   using FileStreamMap =
     std::map<std::string, std::unique_ptr<cmGeneratedFileStream>>;
 
+  struct Connection
+  {
+    Connection(cmLinkItem s, cmLinkItem d, std::string scope)
+      : src(std::move(s))
+      , dst(std::move(d))
+      , scopeType(std::move(scope))
+    {
+    }
+
+    cmLinkItem src;
+    cmLinkItem dst;
+    std::string scopeType;
+  };
+  using Connections = std::vector<Connection>;
+  using ConnectionsMap = std::map<cmLinkItem, Connections>;
+
   void VisitLink(cmLinkItem const& depender, cmLinkItem const& dependee,
                  bool isDirectLink, std::string const& scopeType = "");
 
@@ -66,6 +84,19 @@ private:
                        cmLinkItem const& dependeeTargetName,
                        std::string const& edgeStyle);
 
+  void FindAllConnections(const ConnectionsMap& connectionMap,
+                          const cmLinkItem& rootItem,
+                          Connections& extendedCons,
+                          std::set<cmLinkItem>& visitedItems);
+
+  void FindAllConnections(const ConnectionsMap& connectionMap,
+                          const cmLinkItem& rootItem,
+                          Connections& extendedCons);
+
+  template <typename DirFunc>
+  void WritePerTargetConnections(const ConnectionsMap& connections,
+                                 const FileStreamMap& streams);
+
   bool ItemExcluded(cmLinkItem const& item);
   bool ItemNameFilteredOut(std::string const& itemName);
   bool TargetTypeEnabled(cmStateEnums::TargetType targetType) const;
@@ -82,6 +113,9 @@ private:
   cmGeneratedFileStream GlobalFileStream;
   FileStreamMap PerTargetFileStreams;
   FileStreamMap TargetDependersFileStreams;
+
+  ConnectionsMap PerTargetConnections;
+  ConnectionsMap TargetDependersConnections;
 
   std::string GraphName;
   std::string GraphHeader;

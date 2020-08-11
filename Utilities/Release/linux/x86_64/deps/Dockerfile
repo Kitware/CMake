@@ -129,10 +129,10 @@ COPY openssl-source.patch /opt/openssl/src/
 RUN : \
  && mkdir -p /opt/openssl/src \
  && cd /opt/openssl/src \
- && curl -O https://www.openssl.org/source/openssl-1.1.1c.tar.gz \
- && sha512sum openssl-1.1.1c.tar.gz | grep -q 8e2c5cc11c120efbb7d7850980cb6eaa782d29b4996b3f3378d37613c1679f852d7cc08a90d62e78fcec3439f06bdbee70064579a8c2adaffd91532a97f646ff \
- && tar xzf openssl-1.1.1c.tar.gz \
- && cd openssl-1.1.1c \
+ && curl -O https://www.openssl.org/source/openssl-1.1.1f.tar.gz \
+ && sha512sum openssl-1.1.1f.tar.gz | grep -q b00bd9b5ad5298fbceeec6bb19c1ab0c106ca5cfb31178497c58bf7e0e0cf30fcc19c20f84e23af31cc126bf2447d3e4f8461db97bafa7bd78f69561932f000c \
+ && tar xzf openssl-1.1.1f.tar.gz \
+ && cd openssl-1.1.1f \
  && patch -p1 -i ../openssl-source.patch \
  && source /opt/rh/devtoolset-6/enable \
  && ./Configure --prefix=/opt/openssl linux-elf no-asm no-shared -D_POSIX_C_SOURCE=199506L -D_POSIX_SOURCE=1 -D_SVID_SOURCE=1 -D_BSD_SOURCE=1 \

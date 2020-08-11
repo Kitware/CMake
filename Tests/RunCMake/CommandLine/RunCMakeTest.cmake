@@ -46,6 +46,7 @@ run_cmake_command(G_no-arg ${CMAKE_COMMAND} -B DummyBuildDir -G)
 run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -B DummyBuildDir -G NoSuchGenerator)
 run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
 run_cmake_command(P_no-file ${CMAKE_COMMAND} -P nosuchscriptfile.cmake)
+run_cmake_command(P_arbitrary_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_arbitrary_args.cmake" -- -DFOO)
 
 run_cmake_command(build-no-dir
   ${CMAKE_COMMAND} --build)
@@ -459,6 +460,44 @@ if(NOT WIN32 AND NOT CYGWIN)
 endif()
 unset(out)
 
+# cat tests
+set(out ${RunCMake_BINARY_DIR}/cat_tests)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+run_cmake_command(E_cat_non_existing_file
+  ${CMAKE_COMMAND} -E cat ${out}/non-existing-file.txt)
+
+if(UNIX)
+  # test non readable file only if not root
+  execute_process(
+    COMMAND id -u $ENV{USER}
+    OUTPUT_VARIABLE uid
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  if(NOT "${uid}" STREQUAL "0")
+    # Create non readable file
+    set(inside_folder "${out}/in")
+    file(MAKE_DIRECTORY ${inside_folder})
+    file(WRITE "${inside_folder}/non_readable_file.txt" "first file to append\n")
+    file(COPY "${inside_folder}/non_readable_file.txt" DESTINATION "${out}" FILE_PERMISSIONS OWNER_WRITE)
+    run_cmake_command(E_cat_non_readable_file
+      ${CMAKE_COMMAND} -E cat "${out}/non_readable_file.txt")
+  endif()
+endif()
+
+run_cmake_command(E_cat_option_not_handled
+  ${CMAKE_COMMAND} -E cat -f)
+
+run_cmake_command(E_cat_directory
+  ${CMAKE_COMMAND} -E cat ${out})
+
+file(WRITE "${out}/first_file.txt" "first file to append\n")
+file(WRITE "${out}/second_file.txt" "second file to append\n")
+file(WRITE "${out}/unicode_file.txt" "àéùç - 한국어") # Korean in Korean
+run_cmake_command(E_cat_good_cat
+  ${CMAKE_COMMAND} -E cat "${out}/first_file.txt" "${out}/second_file.txt" "${out}/unicode_file.txt")
+unset(out)
+
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)
 run_cmake_command(E_env-bad-arg1 ${CMAKE_COMMAND} -E env -bad-arg1)
@@ -673,27 +712,48 @@ function(run_llvm_rc)
   set(RunCMake_TEST_NO_CLEAN 1)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-
   run_cmake_command(llvm_rc_no_args ${CMAKE_COMMAND} -E cmake_llvm_rc)
-  run_cmake_command(llvm_rc_no_-- ${CMAKE_COMMAND} -E cmake_llvm_rc test.tmp ${CMAKE_COMMAND} -E echo "This is a test")
-  run_cmake_command(llvm_rc_empty_preprocessor ${CMAKE_COMMAND} -E cmake_llvm_rc test.tmp -- ${CMAKE_COMMAND} -E echo "This is a test")
-  run_cmake_command(llvm_rc_failing_first_command ${CMAKE_COMMAND} -E cmake_llvm_rc test.tmp ${CMAKE_COMMAND} -E false -- ${CMAKE_COMMAND} -E echo "This is a test")
-  run_cmake_command(llvm_rc_failing_second_command ${CMAKE_COMMAND} -E cmake_llvm_rc test.tmp ${CMAKE_COMMAND} -E echo "This is a test" -- ${CMAKE_COMMAND} -E false )
+  run_cmake_command(llvm_rc_no_-- ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/source_file test.tmp ${CMAKE_COMMAND} -E echo "This is a test")
+  run_cmake_command(llvm_rc_empty_preprocessor ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/source_file test.tmp -- ${CMAKE_COMMAND} -E echo "This is a test")
+  run_cmake_command(llvm_rc_failing_first_command ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/source_file test.tmp ${CMAKE_COMMAND} -P FailedProgram.cmake -- ${CMAKE_COMMAND} -E echo "This is a test")
+  run_cmake_command(llvm_rc_failing_second_command ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/source_file test.tmp ${CMAKE_COMMAND} -E echo "This is a test" -- ${CMAKE_COMMAND} -P FailedProgram.cmake )
   if(EXISTS ${RunCMake_TEST_BINARY_DIR}/test.tmp)
       message(SEND_ERROR "${test} - FAILED:\n"
         "test.tmp was not deleted")
   endif()
-  run_cmake_command(llvm_rc_full_run ${CMAKE_COMMAND} -E cmake_llvm_rc test.tmp ${CMAKE_COMMAND} -E echo "This is a test" -- ${CMAKE_COMMAND} -E copy test.tmp llvmrc.result )
-  if(EXISTS ${RunCMake_TEST_BINARY_DIR}/test.tmp)
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir")
+  run_cmake_command(llvm_rc_full_run ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/source_file test.tmp ${CMAKE_COMMAND} -E echo "This is a test" -- ${CMAKE_COMMAND} -E copy test.tmp SOURCE_DIR/llvmrc.result )
+  if(EXISTS ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/test.tmp)
       message(SEND_ERROR "${test} - FAILED:\n"
         "test.tmp was not deleted")
   endif()
-  file(READ ${RunCMake_TEST_BINARY_DIR}/llvmrc.result LLVMRC_RESULT)
+  file(READ ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/llvmrc.result LLVMRC_RESULT)
   if(NOT "${LLVMRC_RESULT}" STREQUAL "This is a test\n")
     message(SEND_ERROR "${test} - FAILED:\n"
         "llvmrc.result was not created")
   endif()
-  #  file(REMOVE ${RunCMake_TEST_BINARY_DIR}/llvmrc.result)
   unset(LLVMRC_RESULT)
 endfunction()
 run_llvm_rc()
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt --profiling-format=google-trace)
+run_cmake(profiling-all-params)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt --profiling-format=invalid-format)
+run_cmake(profiling-invalid-format)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt)
+run_cmake(profiling-missing-format)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-format=google-trace)
+run_cmake(profiling-missing-output)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/profiling-test")
+set(ProfilingTestOutput ${RunCMake_TEST_BINARY_DIR}/output.json)
+set(RunCMake_TEST_OPTIONS --profiling-format=google-trace --profiling-output=${ProfilingTestOutput})
+run_cmake(ProfilingTest)
+unset(RunCMake_TEST_OPTIONS)

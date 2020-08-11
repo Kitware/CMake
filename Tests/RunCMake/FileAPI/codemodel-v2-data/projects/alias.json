@@ -1,0 +1,14 @@
+{
+    "name": "Alias",
+    "parentName": "codemodel-v2",
+    "childNames": null,
+    "directorySources": [
+        "^alias$"
+    ],
+    "targetIds": [
+        "^ALL_BUILD::@53632cba2752272bb008$",
+        "^ZERO_CHECK::@53632cba2752272bb008$",
+        "^c_alias_exe::@53632cba2752272bb008$",
+        "^cxx_alias_exe::@53632cba2752272bb008$"
+    ]
+}

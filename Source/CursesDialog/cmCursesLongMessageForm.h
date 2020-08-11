@@ -27,6 +27,8 @@ public:
   cmCursesLongMessageForm(cmCursesLongMessageForm const&) = delete;
   cmCursesLongMessageForm& operator=(cmCursesLongMessageForm const&) = delete;
 
+  void UpdateContent(std::string const& output, std::string const& title);
+
   // Description:
   // Handle user input.
   void HandleInput() override;
@@ -47,6 +49,10 @@ public:
   void UpdateStatusBar() override;
 
 protected:
+  static constexpr int MAX_CONTENT_SIZE = 60000;
+
+  void DrawMessage(const char* msg) const;
+
   std::string Messages;
   std::string Title;
   ScrollBehavior Scrolling;

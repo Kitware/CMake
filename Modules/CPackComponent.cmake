@@ -5,29 +5,34 @@
 CPackComponent
 --------------
 
-Build binary and source package installers
+Configure components for binary installers and source packages.
 
-Variables concerning CPack Components
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. only:: html
 
-The CPackComponent module is the module which handles the component
-part of CPack.  See CPack module for general information about CPack.
+  .. contents::
 
-For certain kinds of binary installers (including the graphical
-installers on macOS and Windows), CPack generates installers that
-allow users to select individual application components to install.
-The contents of each of the components are identified by the COMPONENT
-argument of CMake's INSTALL command.  These components can be
+Introduction
+^^^^^^^^^^^^
+
+This module is automatically included by :module:`CPack`.
+
+Certain binary installers (especially the graphical installers) generated
+by CPack allow users to select individual application *components* to install.
+This module allows developers to configure the packaging of such components.
+
+Contents is assigned to components by the ``COMPONENT``
+argument of CMake's :command:`install` command.  Components can be
 annotated with user-friendly names and descriptions, inter-component
 dependencies, etc., and grouped in various ways to customize the
-resulting installer.  See the cpack_add_* commands, described below,
-for more information about component-specific installations.
+resulting installer, using the commands described below.
 
-Component-specific installation allows users to select specific sets
-of components to install during the install process.  Installation
-components are identified by the COMPONENT argument of CMake's INSTALL
-commands, and should be further described by the following CPack
-commands:
+To specify different groupings for different CPack generators use
+a CPACK_PROJECT_CONFIG_FILE.
+
+Variables
+^^^^^^^^^
+
+The following variables influence the component-specific packaging:
 
 .. variable:: CPACK_COMPONENTS_ALL
 
@@ -61,16 +66,14 @@ commands:
  Specify how components are grouped for multi-package component-aware CPack
  generators.
 
- Some generators like RPM or ARCHIVE family (TGZ, ZIP, ...) generates
- several packages files when asked for component packaging.  They group
- the component differently depending on the value of this variable:
+ Some generators like RPM or ARCHIVE (TGZ, ZIP, ...) may generate
+ several packages files when there are components, depending
+ on the value of this variable:
 
- * ONE_PER_GROUP (default): creates one package file per component group
- * ALL_COMPONENTS_IN_ONE : creates a single package with all (requested) components
- * IGNORE : creates one package per component, i.e. IGNORE component group
-
- One can specify different grouping for different CPack generator by
- using a CPACK_PROJECT_CONFIG_FILE.
+ * ONE_PER_GROUP (default): create one package per component group
+ * IGNORE : create one package per component (ignore the groups)
+ * ALL_COMPONENTS_IN_ONE : create a single package with all requested
+   components
 
 .. variable:: CPACK_COMPONENT_<compName>_DISPLAY_NAME
 
@@ -100,10 +103,15 @@ commands:
 
  True if this component is not selected to be installed by default.
 
+Commands
+^^^^^^^^
+
+Add component
+"""""""""""""
+
 .. command:: cpack_add_component
 
-Describes a CPack installation
-component named by the COMPONENT argument to a CMake INSTALL command.
+Describe an installation component.
 
 ::
 
@@ -118,13 +126,11 @@ component named by the COMPONENT argument to a CMake INSTALL command.
                       [ARCHIVE_FILE filename]
                       [PLIST filename])
 
-
-
-The cmake_add_component command describes an installation component,
-which the user can opt to install or remove as part of the graphical
-installation process.  compname is the name of the component, as
-provided to the COMPONENT argument of one or more CMake INSTALL
-commands.
+``compname`` is the name of an installation component, as defined by the
+``COMPONENT`` argument of one or more CMake :command:`install` commands.
+With the ``cpack_add_component`` command one can set a name, a description,
+and other attributes of an installation component.
+One can also assign a component to a component group.
 
 DISPLAY_NAME is the displayed name of the component, used in graphical
 installers to display the component name.  This value can be any
@@ -177,6 +183,9 @@ the component.  See cpack_configure_downloads for more information.
 PLIST gives a filename that is passed to pkgbuild with the
 ``--component-plist`` argument when using the productbuild generator.
 
+Add component group
+"""""""""""""""""""
+
 .. command:: cpack_add_component_group
 
 Describes a group of related CPack installation components.
@@ -225,6 +234,9 @@ single entry.
 BOLD_TITLE indicates that the group title should appear in bold, to
 call the user's attention to the group.
 
+Add installation type
+"""""""""""""""""""""
+
 .. command:: cpack_add_install_type
 
 Add a new installation type containing
@@ -248,6 +260,9 @@ argument to cpack_add_component.
 DISPLAY_NAME is the displayed name of the install type, which will
 typically show up in a drop-down box within a graphical installer.
 This value can be any string.
+
+Configure downloads
+"""""""""""""""""""
 
 .. command:: cpack_configure_downloads
 
@@ -280,8 +295,6 @@ requires the ZipDLL plug-in for NSIS, available at:
 ::
 
   http://nsis.sourceforge.net/ZipDLL_plug-in
-
-
 
 On macOS, installers that download components on-the-fly can only
 be built and installed on system using macOS 10.5 or later.

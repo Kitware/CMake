@@ -9,6 +9,7 @@
 #include "cmDuration.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -242,8 +243,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
                                        comment.c_str(), cmStateEnums::STRING);
 
     cmState* state = this->Makefile->GetState();
-    const char* existingValue =
-      state->GetCacheEntryValue(this->RunResultVariable);
+    cmProp existingValue = state->GetCacheEntryValue(this->RunResultVariable);
     if (existingValue) {
       state->SetCacheEntryProperty(this->RunResultVariable, "ADVANCED", "1");
     }
@@ -265,7 +265,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
         internalRunOutputName, "PLEASE_FILL_OUT-NOTFOUND", comment.c_str(),
         cmStateEnums::STRING);
       cmState* state = this->Makefile->GetState();
-      const char* existing = state->GetCacheEntryValue(internalRunOutputName);
+      cmProp existing = state->GetCacheEntryValue(internalRunOutputName);
       if (existing) {
         state->SetCacheEntryProperty(internalRunOutputName, "ADVANCED", "1");
       }

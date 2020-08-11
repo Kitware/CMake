@@ -121,6 +121,8 @@ public:
 
   bool IsIPOSupported() const override { return true; }
 
+  virtual bool IsStdOutEncodingSupported() const { return false; }
+
   static std::string GetInstalledNsightTegraVersion();
 
   /** Return the first two components of CMAKE_SYSTEM_VERSION.  */

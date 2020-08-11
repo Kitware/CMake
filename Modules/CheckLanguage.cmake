@@ -43,11 +43,11 @@ macro(check_language lang)
     file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang})
 
     set(extra_compiler_variables)
-    if(lang STREQUAL CUDA)
+    if(${lang} STREQUAL CUDA)
       set(extra_compiler_variables "set(CMAKE_CUDA_HOST_COMPILER \\\"\${CMAKE_CUDA_HOST_COMPILER}\\\")")
     endif()
 
-    set(content
+    set(_cl_content
       "cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(Check${lang} ${lang})
 file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
@@ -57,7 +57,7 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
     )
 
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang}/CMakeLists.txt"
-      "${content}")
+      "${_cl_content}")
     if(CMAKE_GENERATOR_INSTANCE)
       set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${CMAKE_GENERATOR_INSTANCE}")
     else()
@@ -75,22 +75,22 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
                                  -T "${CMAKE_GENERATOR_TOOLSET}"
                                  ${_D_CMAKE_GENERATOR_INSTANCE}
                                  ${_D_CMAKE_MAKE_PROGRAM}
-      OUTPUT_VARIABLE output
-      ERROR_VARIABLE output
-      RESULT_VARIABLE result
+      OUTPUT_VARIABLE _cl_output
+      ERROR_VARIABLE _cl_output
+      RESULT_VARIABLE _cl_result
       )
     include(${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang}/result.cmake OPTIONAL)
-    if(CMAKE_${lang}_COMPILER AND "${result}" STREQUAL "0")
+    if(CMAKE_${lang}_COMPILER AND "${_cl_result}" STREQUAL "0")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "${_desc} passed with the following output:\n"
-        "${output}\n")
+        "${_cl_output}\n")
       set(_CHECK_COMPILER_STATUS CHECK_PASS)
     else()
       set(CMAKE_${lang}_COMPILER NOTFOUND)
       set(_CHECK_COMPILER_STATUS CHECK_FAIL)
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "${_desc} failed with the following output:\n"
-        "${output}\n")
+        "${_cl_output}\n")
     endif()
     message(${_CHECK_COMPILER_STATUS} "${CMAKE_${lang}_COMPILER}")
     set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER}" CACHE FILEPATH "${lang} compiler")

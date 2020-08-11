@@ -52,14 +52,6 @@ public:
   }
 }; // End Class: String
 
-#if defined(__WATCOMC__)
-inline bool operator<(String const& l, String const& r)
-{
-  return (static_cast<std::string const&>(l) <
-          static_cast<std::string const&>(r));
-}
-#endif
-
 } // namespace @KWSYS_NAMESPACE@
 
 #endif

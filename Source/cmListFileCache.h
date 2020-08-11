@@ -184,6 +184,9 @@ struct cmListFile
   bool ParseFile(const char* path, cmMessenger* messenger,
                  cmListFileBacktrace const& lfbt);
 
+  bool ParseString(const char* str, const char* virtual_filename,
+                   cmMessenger* messenger, cmListFileBacktrace const& lfbt);
+
   std::vector<cmListFileFunction> Functions;
 };
 

@@ -1,0 +1,23 @@
+^CMake Warning \(dev\) at badargs2\.cmake:[0-9]+ \(file\):
+  You have used file\(GET_RUNTIME_DEPENDENCIES\) in project mode\.  This is
+  probably not what you intended to do\.  Instead, please consider using it in
+  an install\(CODE\) or install\(SCRIPT\) command\.  For example:
+
+    install\(CODE \[\[
+      file\(GET_RUNTIME_DEPENDENCIES
+        # \.\.\.
+        \)
+      ]]\)
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Error at badargs2\.cmake:[0-9]+ \(file\):
+  file Keywords missing values:
+
+    RESOLVED_DEPENDENCIES_VAR
+    UNRESOLVED_DEPENDENCIES_VAR
+    CONFLICTING_DEPENDENCIES_PREFIX
+    BUNDLE_EXECUTABLE
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

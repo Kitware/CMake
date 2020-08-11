@@ -26,6 +26,7 @@
 #include "cmMessageType.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
@@ -117,6 +118,9 @@ public:
 
   bool ReadListFile(const std::string& filename);
 
+  bool ReadListFileAsString(const std::string& content,
+                            const std::string& virtualFileName);
+
   bool ReadDependentFile(const std::string& filename,
                          bool noPolicyScope = true);
 
@@ -183,7 +187,8 @@ public:
     const cmCustomCommandLines& commandLines, cmCustomCommandType type,
     const char* comment, const char* workingDir, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
-    const std::string& job_pool = "", bool command_expand_lists = false);
+    const std::string& job_pool = "", bool command_expand_lists = false,
+    bool stdPipesUTF8 = false);
 
   /**
    * Called for each file with custom command.
@@ -200,7 +205,8 @@ public:
     const char* workingDir, const CommandSourceCallback& callback = nullptr,
     bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "");
+    const std::string& depfile = "", const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
   void AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,
@@ -211,7 +217,8 @@ public:
     const char* workingDir, const CommandSourceCallback& callback = nullptr,
     bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "");
+    const std::string& depfile = "", const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
@@ -279,7 +286,8 @@ public:
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false, const std::string& job_pool = "");
+    bool command_expand_lists = false, const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
 
   /**
    * Add a subdirectory to the build.
@@ -314,6 +322,12 @@ public:
   void AddCacheDefinition(const std::string& name, const char* value,
                           const char* doc, cmStateEnums::CacheEntryType type,
                           bool force = false);
+  void AddCacheDefinition(const std::string& name, const std::string& value,
+                          const char* doc, cmStateEnums::CacheEntryType type,
+                          bool force = false)
+  {
+    AddCacheDefinition(name, value.c_str(), doc, type, force);
+  }
 
   /**
    * Remove a variable definition from the build.  This is not valid
@@ -342,7 +356,8 @@ public:
                        cmStateEnums::TargetType type,
                        const std::vector<std::string>& srcs,
                        bool excludeFromAll = false);
-  void AddAlias(const std::string& libname, const std::string& tgt);
+  void AddAlias(const std::string& libname, const std::string& tgt,
+                bool globallyVisible = true);
 
   //@{
   /**
@@ -408,7 +423,8 @@ public:
   }
   const char* GetIncludeRegularExpression() const
   {
-    return this->GetProperty("INCLUDE_REGULAR_EXPRESSION");
+    cmProp p = this->GetProperty("INCLUDE_REGULAR_EXPRESSION");
+    return p ? p->c_str() : nullptr;
   }
 
   /**
@@ -497,6 +513,8 @@ public:
   const std::string& GetSafeDefinition(const std::string&) const;
   const std::string& GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
+  bool GetDefExpandList(const std::string& name, std::vector<std::string>& out,
+                        bool emptyArgs = false) const;
   /**
    * Get the list of all variables in the current space. If argument
    * cacheonly is specified and is greater than 0, then only cache
@@ -786,8 +804,8 @@ public:
   void SetProperty(const std::string& prop, const char* value);
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
-  const char* GetProperty(const std::string& prop) const;
-  const char* GetProperty(const std::string& prop, bool chain) const;
+  cmProp GetProperty(const std::string& prop) const;
+  cmProp GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
 

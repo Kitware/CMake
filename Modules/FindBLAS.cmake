@@ -48,6 +48,10 @@ The following variables may be set to influence this module's behavior:
   * ``ACML_GPU``
   * ``Apple``
   * ``NAS``
+  * ``Arm``
+  * ``Arm_mp``
+  * ``Arm_ilp64``
+  * ``Arm_ilp64_mp``
   * ``Generic``
 
 ``BLA_F95``
@@ -56,6 +60,15 @@ The following variables may be set to influence this module's behavior:
 ``BLA_PREFER_PKGCONFIG``
   if set ``pkg-config`` will be used to search for a BLAS library first
   and if one is found that is preferred
+
+Imported targets
+^^^^^^^^^^^^^^^^
+
+This module defines the following :prop_tgt:`IMPORTED` target:
+
+``BLAS::BLAS``
+  The libraries to use for BLAS, if found.
+
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -107,6 +120,17 @@ if(NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_CO
   endif()
 endif()
 
+function(_add_blas_target)
+  if(NOT TARGET BLAS::BLAS)
+    add_library(BLAS::BLAS INTERFACE IMPORTED)
+    if(BLAS_LIBRARIES)
+      set_target_properties(BLAS::BLAS PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${BLAS_LIBRARIES}"
+      )
+    endif()
+  endif()
+endfunction()
+
 if(CMAKE_Fortran_COMPILER_LOADED)
   include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
 else()
@@ -123,6 +147,7 @@ if(BLA_PREFER_PKGCONFIG)
   if(PKGC_BLAS_FOUND)
     set(BLAS_FOUND ${PKGC_BLAS_FOUND})
     set(BLAS_LIBRARIES "${PKGC_BLAS_LINK_LIBRARIES}")
+    _add_blas_target()
     return()
   endif()
 endif()
@@ -448,7 +473,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         set(BLAS_mkl_OS_NAME "lin")
       endif()
       if(DEFINED ENV{MKLROOT})
-        set(BLAS_mkl_MKLROOT "$ENV{MKLROOT}")
+        file(TO_CMAKE_PATH "$ENV{MKLROOT}" BLAS_mkl_MKLROOT)
         # If MKLROOT points to the subdirectory 'mkl', use the parent directory instead
         # so we can better detect other relevant libraries in 'compiler' or 'tbb':
         get_filename_component(BLAS_mkl_MKLROOT_LAST_DIR "${BLAS_mkl_MKLROOT}" NAME)
@@ -548,6 +573,36 @@ if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
       ""
       )
   endif()
+endif()
+
+# ArmPL blas library? (https://developer.arm.com/tools-and-software/server-and-hpc/compile/arm-compiler-for-linux/arm-performance-libraries)
+if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
+
+   # Check for 64bit Integer support
+   if(BLA_VENDOR MATCHES "_ilp64")
+     set(BLAS_armpl_LIB "armpl_ilp64")
+   else()
+     set(BLAS_armpl_LIB "armpl_lp64")
+   endif()
+
+   # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
+   if(BLA_VENDOR MATCHES "_mp")
+     set(BLAS_armpl_LIB "${BLAS_armpl_LIB}_mp")
+   endif()
+
+   if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${BLAS_armpl_LIB}"
+      ""
+      ""
+      ""
+      )
+  endif()
+
 endif()
 
 # FLAME's blis library? (https://github.com/flame/blis)
@@ -892,11 +947,13 @@ if(NOT BLA_F95)
   find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS_LIBRARIES)
 endif()
 
+
 # On compilers that implicitly link BLAS (such as ftn, cc, and CC on Cray HPC machines)
 # we used a placeholder for empty BLAS_LIBRARIES to get through our logic above.
 if(BLAS_LIBRARIES STREQUAL "BLAS_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
   set(BLAS_LIBRARIES "")
 endif()
 
+_add_blas_target()
 cmake_pop_check_state()
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})

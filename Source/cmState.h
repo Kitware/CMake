@@ -17,7 +17,7 @@
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
-#include "cmPropertyDefinitionMap.h"
+#include "cmPropertyDefinition.h"
 #include "cmPropertyMap.h"
 #include "cmStatePrivate.h"
 #include "cmStateTypes.h"
@@ -25,7 +25,6 @@
 class cmCacheManager;
 class cmCommand;
 class cmGlobVerificationManager;
-class cmPropertyDefinition;
 class cmStateSnapshot;
 class cmMessenger;
 class cmExecutionStatus;
@@ -51,7 +50,8 @@ public:
     CPack,
   };
 
-  static const char* GetTargetTypeName(cmStateEnums::TargetType targetType);
+  static const std::string& GetTargetTypeName(
+    cmStateEnums::TargetType targetType);
 
   cmStateSnapshot CreateBaseSnapshot();
   cmStateSnapshot CreateBuildsystemDirectorySnapshot(
@@ -87,12 +87,11 @@ public:
   bool DeleteCache(const std::string& path);
 
   std::vector<std::string> GetCacheEntryKeys() const;
-  const char* GetCacheEntryValue(std::string const& key) const;
+  cmProp GetCacheEntryValue(std::string const& key) const;
   std::string GetSafeCacheEntryValue(std::string const& key) const;
-  const std::string* GetInitializedCacheValue(std::string const& key) const;
+  cmProp GetInitializedCacheValue(std::string const& key) const;
   cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const;
   void SetCacheEntryValue(std::string const& key, std::string const& value);
-  void SetCacheValue(std::string const& key, std::string const& value);
 
   void RemoveCacheEntry(std::string const& key);
 
@@ -102,8 +101,8 @@ public:
   void SetCacheEntryBoolProperty(std::string const& key,
                                  std::string const& propertyName, bool value);
   std::vector<std::string> GetCacheEntryPropertyList(std::string const& key);
-  const char* GetCacheEntryProperty(std::string const& key,
-                                    std::string const& propertyName);
+  cmProp GetCacheEntryProperty(std::string const& key,
+                               std::string const& propertyName);
   bool GetCacheEntryPropertyAsBool(std::string const& key,
                                    std::string const& propertyName);
   void AppendCacheEntryProperty(std::string const& key,
@@ -121,16 +120,13 @@ public:
   cmStateSnapshot Reset();
   // Define a property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const char* ShortDescription,
-                      const char* FullDescription, bool chain = false);
+                      const std::string& ShortDescription,
+                      const std::string& FullDescription, bool chain = false);
 
   // get property definition
   cmPropertyDefinition const* GetPropertyDefinition(
     const std::string& name, cmProperty::ScopeType scope) const;
 
-  // Is a property defined?
-  bool IsPropertyDefined(const std::string& name,
-                         cmProperty::ScopeType scope) const;
   bool IsPropertyChained(const std::string& name,
                          cmProperty::ScopeType scope) const;
 
@@ -171,7 +167,7 @@ public:
   void SetGlobalProperty(const std::string& prop, const char* value);
   void AppendGlobalProperty(const std::string& prop, const std::string& value,
                             bool asString = false);
-  const char* GetGlobalProperty(const std::string& prop);
+  cmProp GetGlobalProperty(const std::string& prop);
   bool GetGlobalPropertyAsBool(const std::string& prop);
 
   std::string const& GetSourceDirectory() const;
@@ -222,7 +218,7 @@ private:
                          const std::string& variable,
                          cmListFileBacktrace const& bt);
 
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
+  cmPropertyDefinitionMap PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
   std::map<std::string, Command> BuiltinCommands;
   std::map<std::string, Command> ScriptedCommands;

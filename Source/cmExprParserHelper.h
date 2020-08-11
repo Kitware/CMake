@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_kwiml.h"
+#include <cm3p/kwiml/int.h>
 
 class cmExprParserHelper
 {

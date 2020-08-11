@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "cm_kwiml.h"
+#include <cm3p/kwiml/int.h>
 
 #include "cmCustomCommandTypes.h"
 #include "cmListFileCache.h"
@@ -105,8 +105,8 @@ public:
 
   void AddArchitectureFlags(std::string& flags,
                             cmGeneratorTarget const* target,
-                            const std::string& lang,
-                            const std::string& config);
+                            const std::string& lang, const std::string& config,
+                            const std::string& filterArch = std::string());
 
   void AddLanguageFlags(std::string& flags, cmGeneratorTarget const* target,
                         const std::string& lang, const std::string& config);
@@ -297,7 +297,8 @@ public:
     const char* comment, const char* workingDir, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
     const std::string& job_pool = "", bool command_expand_lists = false,
-    cmObjectLibraryCommands objLibCommands = cmObjectLibraryCommands::Reject);
+    cmObjectLibraryCommands objLibCommands = cmObjectLibraryCommands::Reject,
+    bool stdPipesUTF8 = false);
 
   /**
    * Add a custom command to a source file.
@@ -308,7 +309,8 @@ public:
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "");
+    const std::string& depfile = "", const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,
@@ -318,7 +320,8 @@ public:
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "");
+    const std::string& depfile = "", const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
 
   /**
    * Add a utility to the build.  A utility target is a command that is run
@@ -330,7 +333,8 @@ public:
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false, const std::string& job_pool = "");
+    bool command_expand_lists = false, const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
 
   std::string GetProjectName() const;
 
@@ -417,6 +421,11 @@ public:
 
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
+  void GetDeviceLinkFlags(cmLinkLineComputer* linkLineComputer,
+                          const std::string& config, std::string& linkLibs,
+                          std::string& linkFlags, std::string& frameworkPath,
+                          std::string& linkPath, cmGeneratorTarget* target);
+
   void GetTargetFlags(cmLinkLineComputer* linkLineComputer,
                       const std::string& config, std::string& linkLibs,
                       std::string& flags, std::string& linkFlags,
@@ -435,10 +444,11 @@ public:
                                              std::string const& lang) const;
   void GetTargetCompileFlags(cmGeneratorTarget* target,
                              std::string const& config,
-                             std::string const& lang, std::string& flags);
-  std::vector<BT<std::string>> GetTargetCompileFlags(cmGeneratorTarget* target,
-                                                     std::string const& config,
-                                                     std::string const& lang);
+                             std::string const& lang, std::string& flags,
+                             std::string const& arch = std::string());
+  std::vector<BT<std::string>> GetTargetCompileFlags(
+    cmGeneratorTarget* target, std::string const& config,
+    std::string const& lang, std::string const& arch = std::string());
 
   std::string GetFrameworkFlags(std::string const& l,
                                 std::string const& config,
@@ -513,6 +523,7 @@ protected:
   std::map<std::string, std::string> VariableMappings;
   std::string CompilerSysroot;
   std::string LinkerSysroot;
+  std::unordered_map<std::string, std::string> AppleArchSysroots;
 
   bool EmitUniversalBinaryFlags;
 
@@ -527,6 +538,13 @@ private:
                                    int targetType);
 
   void ComputeObjectMaxPath();
+  bool AllAppleArchSysrootsAreTheSame(const std::vector<std::string>& archs,
+                                      const char* sysroot);
+
+  void CopyPchCompilePdb(const std::string& config, cmGeneratorTarget* target,
+                         const std::string& ReuseFrom,
+                         cmGeneratorTarget* reuseTarget,
+                         std::vector<std::string> const& extensions);
 };
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -546,7 +564,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
                               const char* workingDir, bool escapeOldStyle,
                               bool uses_terminal, const std::string& depfile,
                               const std::string& job_pool,
-                              bool command_expand_lists);
+                              bool command_expand_lists, bool stdPipesUTF8);
 
 cmSourceFile* AddCustomCommandToOutput(
   cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
@@ -557,7 +575,7 @@ cmSourceFile* AddCustomCommandToOutput(
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool);
+  const std::string& job_pool, bool stdPipesUTF8);
 
 void AppendCustomCommandToOutput(cmLocalGenerator& lg,
                                  const cmListFileBacktrace& lfbt,
@@ -574,7 +592,7 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        const cmCustomCommandLines& commandLines,
                        bool escapeOldStyle, const char* comment,
                        bool uses_terminal, bool command_expand_lists,
-                       const std::string& job_pool);
+                       const std::string& job_pool, bool stdPipesUTF8);
 }
 
 #endif

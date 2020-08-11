@@ -1,0 +1,10 @@
+include(RunCMake)
+
+run_cmake(COMPILE_LANGUAGE-add_custom_target)
+run_cmake(COMPILE_LANGUAGE-add_custom_command)
+run_cmake(COMPILE_LANGUAGE-install)
+run_cmake(COMPILE_LANGUAGE-target_sources)
+run_cmake(COMPILE_LANGUAGE-add_executable)
+run_cmake(COMPILE_LANGUAGE-add_library)
+run_cmake(COMPILE_LANGUAGE-add_test)
+run_cmake(COMPILE_LANGUAGE-unknown-lang)

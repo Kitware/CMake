@@ -37,4 +37,4 @@ include_directories(
 
 add_library(cmlibrhash ${librhash_sources})
 
-install(FILES COPYING README DESTINATION ${CMAKE_DOC_DIR}/cmlibrhash)
+install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmlibrhash)

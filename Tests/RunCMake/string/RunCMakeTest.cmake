@@ -37,3 +37,7 @@ run_cmake(UTF-32LE)
 run_cmake(Repeat)
 run_cmake(RepeatNoArgs)
 run_cmake(RepeatNegativeCount)
+
+run_cmake(Hex)
+run_cmake(HexTooManyArgs)
+run_cmake(HexNotEnoughArgs)

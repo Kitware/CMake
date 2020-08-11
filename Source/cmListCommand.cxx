@@ -16,10 +16,10 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
-
-#include "cm_static_string_view.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
@@ -66,7 +66,7 @@ bool GetList(std::vector<std::string>& list, const std::string& var,
   // expand the variable into a list
   cmExpandList(listString, list, true);
   // if no empty elements then just return
-  if (!cmContains(list, std::string())) {
+  if (!cm::contains(list, std::string())) {
     return true;
   }
   // if we have empty elements we need to check policy CMP0007
@@ -1051,6 +1051,7 @@ public:
     UNINITIALIZED,
     STRING,
     FILE_BASENAME,
+    NATURAL,
   };
   enum class CaseSensitivity
   {
@@ -1074,10 +1075,25 @@ protected:
       : nullptr;
   }
 
+  using ComparisonFunction =
+    std::function<bool(const std::string&, const std::string&)>;
+  ComparisonFunction GetComparisonFunction(Compare compare)
+  {
+    if (compare == Compare::NATURAL) {
+      return std::function<bool(const std::string&, const std::string&)>(
+        [](const std::string& x, const std::string& y) {
+          return cmSystemTools::strverscmp(x, y) < 0;
+        });
+    }
+    return std::function<bool(const std::string&, const std::string&)>(
+      [](const std::string& x, const std::string& y) { return x < y; });
+  }
+
 public:
   cmStringSorter(Compare compare, CaseSensitivity caseSensitivity,
                  Order desc = Order::ASCENDING)
     : filters{ GetCompareFilter(compare), GetCaseFilter(caseSensitivity) }
+    , sortMethod(GetComparisonFunction(compare))
     , descending(desc == Order::DESCENDING)
   {
   }
@@ -1099,15 +1115,16 @@ public:
     std::string bf = ApplyFilter(b);
     bool result;
     if (descending) {
-      result = bf < af;
+      result = sortMethod(bf, af);
     } else {
-      result = af < bf;
+      result = sortMethod(af, bf);
     }
     return result;
   }
 
 protected:
   StringFilter filters[2] = { nullptr, nullptr };
+  ComparisonFunction sortMethod;
   bool descending;
 };
 
@@ -1142,6 +1159,8 @@ bool HandleSortCommand(std::vector<std::string> const& args,
           sortCompare = cmStringSorter::Compare::STRING;
         } else if (argument == "FILE_BASENAME") {
           sortCompare = cmStringSorter::Compare::FILE_BASENAME;
+        } else if (argument == "NATURAL") {
+          sortCompare = cmStringSorter::Compare::NATURAL;
         } else {
           std::string error =
             cmStrCat(messageHint, "value \"", argument, "\" for option \"",

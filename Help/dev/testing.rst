@@ -33,7 +33,7 @@ CTest script with local settings and include ``cmake_common.cmake``.
 .. _`CMake Review Process`: review.rst
 .. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
 .. _`CMake Dashboard Scripts Repository`: https://gitlab.kitware.com/cmake/dashboard-scripts
-.. _`cmake_common.cmake`: https://gitlab.kitware.com/cmake/dashboard-scripts/blob/master/cmake_common.cmake
+.. _`cmake_common.cmake`: https://gitlab.kitware.com/cmake/dashboard-scripts/-/blob/master/cmake_common.cmake
 
 Nightly Start Time
 ------------------

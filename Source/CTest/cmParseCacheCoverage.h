@@ -6,7 +6,6 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
-#include <vector>
 
 #include "cmParseMumpsCoverage.h"
 
@@ -26,13 +25,11 @@ public:
 
 protected:
   // implement virtual from parent
-  bool LoadCoverageData(const char* dir) override;
+  bool LoadCoverageData(std::string const& dir) override;
   // remove files with no coverage
   void RemoveUnCoveredFiles();
   // Read a single mcov file
   bool ReadCMCovFile(const char* f);
-  // split a string based on ,
-  bool SplitString(std::vector<std::string>& args, std::string const& line);
 };
 
 #endif

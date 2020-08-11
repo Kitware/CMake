@@ -129,7 +129,7 @@ protected:
   void ResetOutputs();
 
   // Display the current progress and output
-  void DisplayOutputs();
+  void DisplayOutputs(std::string const& newOutput);
 
   // Copies of cache entries stored in the user interface
   std::vector<cmCursesCacheEntryComposite> Entries;

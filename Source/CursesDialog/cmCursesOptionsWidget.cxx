@@ -17,8 +17,8 @@ cmCursesOptionsWidget::cmCursesOptionsWidget(int width, int height, int left,
   // the widget into a string widget at some point.  BOOL is safe for
   // now.
   if (cmCursesColor::HasColors()) {
-    set_field_fore(this->Field, COLOR_PAIR(cmCursesColor::Options));
-    set_field_back(this->Field, COLOR_PAIR(cmCursesColor::Options));
+    set_field_fore(this->Field, COLOR_PAIR(cmCursesColor::Choice));
+    set_field_back(this->Field, COLOR_PAIR(cmCursesColor::Choice));
   } else {
     set_field_fore(this->Field, A_NORMAL);
     set_field_back(this->Field, A_STANDOUT);

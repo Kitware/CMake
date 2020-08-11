@@ -1,0 +1,45 @@
+cmake_minimum_required(VERSION 3.4)
+project(TestFindLibXslt C)
+include(CTest)
+
+find_package(Iconv)
+find_package(LibXml2 REQUIRED)
+find_package(LibXslt REQUIRED)
+
+add_definitions(-DCMAKE_EXPECTED_LibXslt_VERSION="${LIBXSLT_VERSION_STRING}")
+
+add_executable(libxslt_tgt libxslt.c)
+if(Iconv_FOUND)
+  target_link_libraries(libxslt_tgt Iconv::Iconv)
+endif()
+target_link_libraries(libxslt_tgt LibXml2::LibXml2 LibXslt::LibXslt)
+add_test(NAME libxslt_tgt COMMAND libxslt_tgt)
+
+add_executable(libxslt_var libxslt.c)
+if(Iconv_FOUND)
+  target_include_directories(libxslt_var PRIVATE ${Iconv_INCLUDE_DIRS})
+  target_link_libraries(libxslt_var PRIVATE ${Iconv_LIBRARIES})
+endif()
+target_include_directories(libxslt_var PRIVATE ${LIBXML2_INCLUDE_DIRS} ${LIBXSLT_INCLUDE_DIR})
+target_link_libraries(libxslt_var PRIVATE ${LIBXML2_LIBRARIES} ${LIBXSLT_LIBRARIES})
+add_test(NAME libxslt_var COMMAND libxslt_var)
+
+add_executable(libexslt_tgt libexslt.c)
+if(Iconv_FOUND)
+  target_link_libraries(libexslt_tgt Iconv::Iconv)
+endif()
+target_link_libraries(libexslt_tgt LibXml2::LibXml2 LibXslt::LibXslt LibXslt::LibExslt)
+add_test(NAME libexslt_tgt COMMAND libexslt_tgt)
+
+add_executable(libexslt_var libexslt.c)
+if(Iconv_FOUND)
+  target_include_directories(libexslt_var PRIVATE ${Iconv_INCLUDE_DIRS})
+  target_link_libraries(libexslt_var PRIVATE ${Iconv_LIBRARIES})
+endif()
+target_include_directories(libexslt_var PRIVATE ${LIBXML2_INCLUDE_DIRS} ${LIBXSLT_INCLUDE_DIR} ${LIBXSLT_EXSLT_INCLUDE_DIR})
+target_link_libraries(libexslt_var PRIVATE ${LIBXML2_LIBRARIES} ${LIBXSLT_LIBRARIES} ${LIBXSLT_EXSLT_LIBRARIES})
+add_test(NAME libexslt_var COMMAND libexslt_var)
+
+add_test(NAME xsltproc_tgt COMMAND LibXslt::xsltproc --version)
+
+add_test(NAME xsltproc_var COMMAND ${LIBXSLT_XSLTPROC_EXECUTABLE} --version)

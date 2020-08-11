@@ -20,10 +20,10 @@ typedef struct sha512_ctx
 	unsigned digest_length; /* length of the algorithm digest in bytes */
 } sha512_ctx;
 
-void rhash_sha384_init(sha512_ctx *ctx);
-void rhash_sha512_init(sha512_ctx *ctx);
-void rhash_sha512_update(sha512_ctx *ctx, const unsigned char* data, size_t length);
-void rhash_sha512_final(sha512_ctx *ctx, unsigned char* result);
+void rhash_sha384_init(sha512_ctx* ctx);
+void rhash_sha512_init(sha512_ctx* ctx);
+void rhash_sha512_update(sha512_ctx* ctx, const unsigned char* data, size_t length);
+void rhash_sha512_final(sha512_ctx* ctx, unsigned char* result);
 
 #ifdef __cplusplus
 } /* extern "C" */

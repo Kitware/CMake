@@ -108,7 +108,7 @@ bool TwoArgsSignature(std::vector<std::string> const& args,
   if (cacheValue) {
     return true;
   }
-  mf.AddCacheDefinition(define, makecommand.c_str(),
+  mf.AddCacheDefinition(define, makecommand,
                         "Command used to build entire project "
                         "from the command line.",
                         cmStateEnums::STRING);

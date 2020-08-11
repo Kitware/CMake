@@ -86,6 +86,7 @@ populated.  It is always advised to use different
 directories for the source and the build.
 
 .. image:: /guide/user-interaction/GUI-Source-Binary.png
+   :alt: Choosing source and binary directories
 
 Generating a Buildsystem
 ========================
@@ -246,16 +247,19 @@ The "Configure" button triggers a new dialog to
 select the CMake generator to use.
 
 .. image:: /guide/user-interaction/GUI-Configure-Dialog.png
+   :alt: Configuring a generator
 
 All generators available on the command line are also
 available in :manual:`cmake-gui(1)`.
 
 .. image:: /guide/user-interaction/GUI-Choose-Generator.png
+   :alt: Choosing a generator
 
 When choosing a Visual Studio generator, further options
 are available to set an architecture to generate for.
 
 .. image:: /manual/VS-Choose-Arch.png
+   :alt: Choosing an architecture for Visual Studio generators
 
 .. _`Setting Build Variables`:
 
@@ -356,6 +360,7 @@ button.  This triggers a new dialog to set the value of
 the variable.
 
 .. image:: /guide/user-interaction/GUI-Add-Entry.png
+   :alt: Editing a cache entry
 
 The main view of the :manual:`cmake-gui(1)` user interface
 can be used to edit existing variables.

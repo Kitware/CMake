@@ -8,10 +8,9 @@
 
 #include <cm/memory>
 #include <cm/vector>
+#include <cmext/algorithm>
+#include <cmext/string_view>
 
-#include "cm_static_string_view.hxx"
-
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestSubmitHandler.h"
 #include "cmCommand.h"
@@ -172,8 +171,10 @@ void cmCTestSubmitCommand::BindArguments()
 void cmCTestSubmitCommand::CheckArguments(
   std::vector<std::string> const& keywords)
 {
-  this->PartsMentioned = !this->Parts.empty() || cmContains(keywords, "PARTS");
-  this->FilesMentioned = !this->Files.empty() || cmContains(keywords, "FILES");
+  this->PartsMentioned =
+    !this->Parts.empty() || cm::contains(keywords, "PARTS");
+  this->FilesMentioned =
+    !this->Files.empty() || cm::contains(keywords, "FILES");
 
   cm::erase_if(this->Parts, [this](std::string const& arg) -> bool {
     cmCTest::Part p = this->CTest->GetPartFromName(arg.c_str());

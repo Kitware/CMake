@@ -4,6 +4,7 @@
 #define cmCPackWIXPatchParser_h
 
 #include <map>
+#include <memory>
 #include <vector>
 
 #include "cmCPackLog.h"
@@ -33,9 +34,14 @@ struct cmWIXPatchElement : cmWIXPatchNode
 {
   virtual Type type();
 
+  cmWIXPatchElement();
+
+  cmWIXPatchElement(const cmWIXPatchElement&) = delete;
+  const cmWIXPatchElement& operator=(const cmWIXPatchElement&) = delete;
+
   ~cmWIXPatchElement();
 
-  using child_list_t = std::vector<cmWIXPatchNode*>;
+  using child_list_t = std::vector<std::unique_ptr<cmWIXPatchNode>>;
   using attributes_t = std::map<std::string, std::string>;
 
   std::string name;

@@ -4,14 +4,14 @@
 #define cmUVProcessChain_h
 
 #include <array>
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <cstdint>
 #include <iosfwd>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 class cmUVProcessChain;
 

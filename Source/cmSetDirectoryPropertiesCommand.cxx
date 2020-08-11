@@ -5,12 +5,6 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
-namespace {
-bool RunCommand(cmMakefile& mf, std::vector<std::string>::const_iterator ait,
-                std::vector<std::string>::const_iterator aitend,
-                std::string& errors);
-}
-
 // cmSetDirectoryPropertiesCommand
 bool cmSetDirectoryPropertiesCommand(std::vector<std::string> const& args,
                                      cmExecutionStatus& status)
@@ -20,38 +14,26 @@ bool cmSetDirectoryPropertiesCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::string errors;
-  bool ret =
-    RunCommand(status.GetMakefile(), args.begin() + 1, args.end(), errors);
-  if (!ret) {
-    status.SetError(errors);
+  // PROPERTIES followed by prop value pairs
+  if (args.size() % 2 != 1) {
+    status.SetError("Wrong number of arguments");
+    return false;
   }
-  return ret;
-}
 
-namespace {
-bool RunCommand(cmMakefile& mf, std::vector<std::string>::const_iterator ait,
-                std::vector<std::string>::const_iterator aitend,
-                std::string& errors)
-{
-  for (; ait != aitend; ait += 2) {
-    if (ait + 1 == aitend) {
-      errors = "Wrong number of arguments";
-      return false;
-    }
-    const std::string& prop = *ait;
-    const std::string& value = *(ait + 1);
+  for (auto iter = args.begin() + 1; iter != args.end(); iter += 2) {
+    const std::string& prop = *iter;
     if (prop == "VARIABLES") {
-      errors = "Variables and cache variables should be set using SET command";
+      status.SetError(
+        "Variables and cache variables should be set using SET command");
       return false;
     }
     if (prop == "MACROS") {
-      errors = "Commands and macros cannot be set using SET_CMAKE_PROPERTIES";
+      status.SetError(
+        "Commands and macros cannot be set using SET_CMAKE_PROPERTIES");
       return false;
     }
-    mf.SetProperty(prop, value.c_str());
+    status.GetMakefile().SetProperty(prop, (iter + 1)->c_str());
   }
 
   return true;
-}
 }

@@ -25,8 +25,8 @@ or a component GROUP name.
 Here are some CPack DEB generator wiki resources that are here for historic
 reasons and are no longer maintained but may still prove useful:
 
- - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/Configuration
- - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators#deb-unix-only
+ - https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/Configuration
+ - https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators#deb-unix-only
 
 List of CPack DEB generator specific variables:
 
@@ -282,7 +282,7 @@ List of CPack DEB generator specific variables:
    You may need set :variable:`CMAKE_INSTALL_RPATH` to an appropriate value
    if you use this feature, because if you don't ``dpkg-shlibdeps``
    may fail to find your own shared libs.
-   See https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
+   See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 
 .. variable:: CPACK_DEBIAN_PACKAGE_DEBUG
 

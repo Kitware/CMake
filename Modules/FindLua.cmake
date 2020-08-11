@@ -48,7 +48,7 @@ unset(_lua_append_versions)
 
 # this is a function only to have all the variables inside go away automatically
 function(_lua_get_versions)
-    set(LUA_VERSIONS5 5.3 5.2 5.1 5.0)
+    set(LUA_VERSIONS5 5.4 5.3 5.2 5.1 5.0)
 
     if (Lua_FIND_VERSION_EXACT)
         if (Lua_FIND_VERSION_COUNT GREATER 1)

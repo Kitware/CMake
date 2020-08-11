@@ -105,6 +105,7 @@ Properties on Targets
 
    /prop_tgt/ADDITIONAL_CLEAN_FILES
    /prop_tgt/AIX_EXPORT_ALL_SYMBOLS
+   /prop_tgt/ALIAS_GLOBAL
    /prop_tgt/ALIASED_TARGET
    /prop_tgt/ANDROID_ANT_ADDITIONAL_OPTIONS
    /prop_tgt/ANDROID_API
@@ -171,6 +172,7 @@ Properties on Targets
    /prop_tgt/CONFIG_OUTPUT_NAME
    /prop_tgt/CONFIG_POSTFIX
    /prop_tgt/CROSSCOMPILING_EMULATOR
+   /prop_tgt/CUDA_ARCHITECTURES
    /prop_tgt/CUDA_PTX_COMPILATION
    /prop_tgt/CUDA_SEPARABLE_COMPILATION
    /prop_tgt/CUDA_RESOLVE_DEVICE_SYMBOLS
@@ -199,7 +201,9 @@ Properties on Targets
    /prop_tgt/FOLDER
    /prop_tgt/Fortran_FORMAT
    /prop_tgt/Fortran_MODULE_DIRECTORY
+   /prop_tgt/Fortran_PREPROCESS
    /prop_tgt/FRAMEWORK
+   /prop_tgt/FRAMEWORK_MULTI_CONFIG_POSTFIX_CONFIG
    /prop_tgt/FRAMEWORK_VERSION
    /prop_tgt/GENERATOR_FILE_NAME
    /prop_tgt/GHS_INTEGRITY_APP
@@ -307,6 +311,7 @@ Properties on Targets
    /prop_tgt/OSX_ARCHITECTURES
    /prop_tgt/OUTPUT_NAME_CONFIG
    /prop_tgt/OUTPUT_NAME
+   /prop_tgt/PCH_WARN_INVALID
    /prop_tgt/PDB_NAME_CONFIG
    /prop_tgt/PDB_NAME
    /prop_tgt/PDB_OUTPUT_DIRECTORY_CONFIG
@@ -343,6 +348,7 @@ Properties on Targets
    /prop_tgt/UNITY_BUILD_BATCH_SIZE
    /prop_tgt/UNITY_BUILD_CODE_AFTER_INCLUDE
    /prop_tgt/UNITY_BUILD_CODE_BEFORE_INCLUDE
+   /prop_tgt/UNITY_BUILD_MODE
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
    /prop_tgt/VS_CONFIGURATION_TYPE
@@ -369,12 +375,15 @@ Properties on Targets
    /prop_tgt/VS_MOBILE_EXTENSIONS_VERSION
    /prop_tgt/VS_NO_SOLUTION_DEPLOY
    /prop_tgt/VS_PACKAGE_REFERENCES
+   /prop_tgt/VS_PLATFORM_TOOLSET
    /prop_tgt/VS_PROJECT_IMPORT
    /prop_tgt/VS_SCC_AUXPATH
    /prop_tgt/VS_SCC_LOCALPATH
    /prop_tgt/VS_SCC_PROJECTNAME
    /prop_tgt/VS_SCC_PROVIDER
    /prop_tgt/VS_SDK_REFERENCES
+   /prop_tgt/VS_SOLUTION_DEPLOY
+   /prop_tgt/VS_SOURCE_SETTINGS_tool
    /prop_tgt/VS_USER_PROPS
    /prop_tgt/VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION
    /prop_tgt/VS_WINRT_COMPONENT
@@ -459,6 +468,7 @@ Properties on Source Files
    /prop_sf/COMPILE_OPTIONS
    /prop_sf/EXTERNAL_OBJECT
    /prop_sf/Fortran_FORMAT
+   /prop_sf/Fortran_PREPROCESS
    /prop_sf/GENERATED
    /prop_sf/HEADER_FILE_ONLY
    /prop_sf/INCLUDE_DIRECTORIES
@@ -478,12 +488,14 @@ Properties on Source Files
    /prop_sf/Swift_DEPENDENCIES_FILE
    /prop_sf/Swift_DIAGNOSTICS_FILE
    /prop_sf/SYMBOLIC
+   /prop_sf/UNITY_GROUP
    /prop_sf/VS_COPY_TO_OUT_DIR
    /prop_sf/VS_CSHARP_tagname
    /prop_sf/VS_DEPLOYMENT_CONTENT
    /prop_sf/VS_DEPLOYMENT_LOCATION
    /prop_sf/VS_INCLUDE_IN_VSIX
    /prop_sf/VS_RESOURCE_GENERATOR
+   /prop_sf/VS_SETTINGS
    /prop_sf/VS_SHADER_DISABLE_OPTIMIZATIONS
    /prop_sf/VS_SHADER_ENABLE_DEBUG
    /prop_sf/VS_SHADER_ENTRYPOINT

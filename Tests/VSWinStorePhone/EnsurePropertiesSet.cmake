@@ -1,0 +1,45 @@
+macro(ensure_props_set projectFile)
+  if(NOT EXISTS "${projectFile}")
+    message(FATAL_ERROR "Project file ${projectFile} does not exist.")
+    return()
+  endif()
+
+  set(SourcePropertyFound FALSE)
+  set(DebugTargetPropertyFound FALSE)
+  set(ReleaseTargetPropertyFound FALSE)
+
+  file(STRINGS "${projectFile}" lines)
+  foreach(line IN LISTS lines)
+    if(line MATCHES "<SourceProperty1.*Debug.*>SourceProperty1Value</SourceProperty1>")
+      message("SourceProperty1 setting found")
+      set(SourcePropertyFound TRUE)
+    endif()
+
+    if(line MATCHES "<TargetProperty1.*Debug.*>TargetProperty1ValueDebug</TargetProperty1>")
+      message("Debug TargetProperty1 setting found")
+      set(DebugTargetPropertyFound TRUE)
+    endif()
+
+    if(line MATCHES "<TargetProperty1.*Release.*>TargetProperty1ValueRelease</TargetProperty1>")
+      message("Release TargetProperty1 setting found")
+      set(ReleaseTargetPropertyFound TRUE)
+    endif()
+  endforeach()
+
+  if (NOT SourcePropertyFound)
+    message(FATAL_ERROR "SourceProperty1 setting not found")
+    return()
+  endif()
+
+  if (NOT DebugTargetPropertyFound)
+    message(FATAL_ERROR "Debug TargetProperty1 setting not found")
+    return()
+  endif()
+
+  if (NOT ReleaseTargetPropertyFound)
+    message(FATAL_ERROR "Release TargetProperty1 setting not found")
+    return()
+  endif()
+endmacro()
+
+ensure_props_set("${vcxproj}")

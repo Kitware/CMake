@@ -390,6 +390,9 @@ public:
   static std::string const& GetCMClDepsCommand();
   static std::string const& GetCMakeRoot();
 
+  /** Get the CWD mapped through the KWSys translation map.  */
+  static std::string GetCurrentWorkingDirectory();
+
   /** Echo a message in color using KWSys's Terminal cprintf.  */
   static void MakefileColorEcho(int color, const char* message, bool newLine,
                                 bool enabled);

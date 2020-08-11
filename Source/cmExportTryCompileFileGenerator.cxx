@@ -12,6 +12,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
@@ -58,7 +59,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
   const std::string& propName, cmGeneratorTarget const* tgt,
   std::string const& language, std::set<cmGeneratorTarget const*>& emitted)
 {
-  const char* prop = tgt->GetProperty(propName);
+  cmProp prop = tgt->GetProperty(propName);
   if (!prop) {
     return std::string();
   }
@@ -67,11 +68,11 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 
   cmGeneratorExpressionDAGChecker dagChecker(tgt, propName, nullptr, nullptr);
 
-  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*prop);
 
   cmTarget dummyHead("try_compile_dummy_exe", cmStateEnums::EXECUTABLE,
                      cmTarget::VisibilityNormal, tgt->Target->GetMakefile(),
-                     true);
+                     cmTarget::PerConfig::Yes);
 
   cmGeneratorTarget gDummyHead(&dummyHead, tgt->GetLocalGenerator());
 
@@ -95,11 +96,11 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
   std::vector<std::string> props = target->GetPropertyKeys();
   for (std::string const& p : props) {
 
-    properties[p] = target->GetProperty(p);
+    properties[p] = *target->GetProperty(p);
 
-    if (p.find("IMPORTED_LINK_INTERFACE_LIBRARIES") == 0 ||
-        p.find("IMPORTED_LINK_DEPENDENT_LIBRARIES") == 0 ||
-        p.find("INTERFACE_LINK_LIBRARIES") == 0) {
+    if (cmHasLiteralPrefix(p, "IMPORTED_LINK_INTERFACE_LIBRARIES") ||
+        cmHasLiteralPrefix(p, "IMPORTED_LINK_DEPENDENT_LIBRARIES") ||
+        cmHasLiteralPrefix(p, "INTERFACE_LINK_LIBRARIES")) {
       std::string evalResult =
         this->FindTargets(p, target, std::string(), emitted);
 

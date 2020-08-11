@@ -100,6 +100,15 @@ ExternalProject_Add(${proj}
   INSTALL_COMMAND ""
 )
 
+set(proj NoExtractBool)
+ExternalProject_Add(${proj}
+  URL ${CMAKE_CURRENT_SOURCE_DIR}/gitrepo.tgz
+  DOWNLOAD_NO_EXTRACT 0
+  LOG_DOWNLOAD 1
+  BUILD_COMMAND ""
+  CONFIGURE_COMMAND ""
+  INSTALL_COMMAND ""
+)
 
 # CVS-based tests:
 #

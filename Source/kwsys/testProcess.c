@@ -24,10 +24,6 @@
 #  include <unistd.h>
 #endif
 
-#if defined(__BORLANDC__)
-#  pragma warn - 8060 /* possibly incorrect assignment */
-#endif
-
 /* Platform-specific sleep functions. */
 
 #if defined(__BEOS__) && !defined(__ZETA__)
@@ -631,7 +627,8 @@ int main(int argc, const char* argv[])
     }
     fprintf(stderr, "Invalid test number %d.\n", n);
     return 1;
-  } else if (n >= 1 && n <= 10) {
+  }
+  if (n >= 1 && n <= 10) {
     /* This is the parent process for a requested test number.  */
     int states[10] = {
       kwsysProcess_State_Exited,   kwsysProcess_State_Exited,
@@ -709,7 +706,8 @@ int main(int argc, const char* argv[])
     free(argv0);
 #endif
     return r;
-  } else if (argc > 2 && strcmp(argv[1], "0") == 0) {
+  }
+  if (argc > 2 && strcmp(argv[1], "0") == 0) {
     /* This is the special debugging test to run a given command
        line.  */
     const char** cmd = argv + 2;
@@ -720,9 +718,8 @@ int main(int argc, const char* argv[])
     int r =
       runChild(cmd, state, exception, value, 0, 1, 0, timeout, 0, 1, 0, 0, 0);
     return r;
-  } else {
-    /* Improper usage.  */
-    fprintf(stdout, "Usage: %s <test number>\n", argv[0]);
-    return 1;
   }
+  /* Improper usage.  */
+  fprintf(stdout, "Usage: %s <test number>\n", argv[0]);
+  return 1;
 }

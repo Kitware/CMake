@@ -170,6 +170,7 @@ syn keyword cmakeProperty contained
             \ FRAMEWORK_VERSION
             \ Fortran_FORMAT
             \ Fortran_MODULE_DIRECTORY
+            \ Fortran_PREPROCESS
             \ GENERATED
             \ GENERATOR_FILE_NAME
             \ GENERATOR_IS_MULTI_CONFIG
@@ -1019,6 +1020,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_Fortran_MODULE_DIRECTORY
             \ CMAKE_Fortran_OUTPUT_EXTENSION
             \ CMAKE_Fortran_PLATFORM_ID
+            \ CMAKE_Fortran_PREPROCESS
             \ CMAKE_Fortran_SIMULATE_ID
             \ CMAKE_Fortran_SIMULATE_VERSION
             \ CMAKE_Fortran_SIZEOF_DATA_PTR

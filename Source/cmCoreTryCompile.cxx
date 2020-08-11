@@ -8,9 +8,9 @@
 #include <sstream>
 #include <utility>
 
-#include "cmsys/Directory.hxx"
+#include <cmext/string_view>
 
-#include "cm_static_string_view.hxx"
+#include "cmsys/Directory.hxx"
 
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
@@ -40,6 +40,12 @@ static std::string const kCMAKE_CXX_LINK_NO_PIE_SUPPORTED =
   "CMAKE_CXX_LINK_NO_PIE_SUPPORTED";
 static std::string const kCMAKE_CXX_LINK_PIE_SUPPORTED =
   "CMAKE_CXX_LINK_PIE_SUPPORTED";
+static std::string const kCMAKE_CUDA_ARCHITECTURES =
+  "CMAKE_CUDA_ARCHITECTURES";
+static std::string const kCMAKE_CUDA_COMPILER_TARGET =
+  "CMAKE_CUDA_COMPILER_TARGET";
+static std::string const kCMAKE_CUDA_RUNTIME_LIBRARY =
+  "CMAKE_CUDA_RUNTIME_LIBRARY";
 static std::string const kCMAKE_ENABLE_EXPORTS = "CMAKE_ENABLE_EXPORTS";
 static std::string const kCMAKE_LINK_SEARCH_END_STATIC =
   "CMAKE_LINK_SEARCH_END_STATIC";
@@ -101,29 +107,23 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   this->SrcFileSignature = true;
 
   cmStateEnums::TargetType targetType = cmStateEnums::EXECUTABLE;
-  const char* tt =
-    this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_TARGET_TYPE");
-  if (!isTryRun && tt && *tt) {
-    if (strcmp(tt, cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE)) ==
-        0) {
+  const std::string* tt =
+    this->Makefile->GetDef("CMAKE_TRY_COMPILE_TARGET_TYPE");
+  if (!isTryRun && tt && !tt->empty()) {
+    if (*tt == cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE)) {
       targetType = cmStateEnums::EXECUTABLE;
-    } else if (strcmp(tt,
-                      cmState::GetTargetTypeName(
-                        cmStateEnums::STATIC_LIBRARY)) == 0) {
+    } else if (*tt ==
+               cmState::GetTargetTypeName(cmStateEnums::STATIC_LIBRARY)) {
       targetType = cmStateEnums::STATIC_LIBRARY;
     } else {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        std::string("Invalid value '") + tt +
-          "' for "
-          "CMAKE_TRY_COMPILE_TARGET_TYPE.  Only "
-          "'" +
-          cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE) +
-          "' and "
-          "'" +
-          cmState::GetTargetTypeName(cmStateEnums::STATIC_LIBRARY) +
-          "' "
-          "are allowed.");
+        cmStrCat("Invalid value '", *tt,
+                 "' for CMAKE_TRY_COMPILE_TARGET_TYPE.  Only '",
+                 cmState::GetTargetTypeName(cmStateEnums::EXECUTABLE),
+                 "' and '",
+                 cmState::GetTargetTypeName(cmStateEnums::STATIC_LIBRARY),
+                 "' are allowed."));
       return -1;
     }
   }
@@ -296,12 +296,10 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           default:
             this->Makefile->IssueMessage(
               MessageType::FATAL_ERROR,
-              "Only libraries may be used as try_compile or try_run IMPORTED "
-              "LINK_LIBRARIES.  Got " +
-                std::string(tgt->GetName()) +
-                " of "
-                "type " +
-                cmState::GetTargetTypeName(tgt->GetType()) + ".");
+              cmStrCat("Only libraries may be used as try_compile or try_run "
+                       "IMPORTED LINK_LIBRARIES.  Got ",
+                       tgt->GetName(), " of type ",
+                       cmState::GetTargetTypeName(tgt->GetType()), "."));
             return -1;
         }
         if (tgt->IsImported()) {
@@ -569,6 +567,14 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               *msvcRuntimeLibraryDefault ? "NEW" : "OLD");
     }
 
+    /* Set CUDA architectures policy to match outer project.  */
+    if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0104) !=
+          cmPolicies::NEW &&
+        testLangs.find("CUDA") != testLangs.end() &&
+        this->Makefile->GetSafeDefinition(kCMAKE_CUDA_ARCHITECTURES).empty()) {
+      fprintf(fout, "cmake_policy(SET CMP0104 OLD)\n");
+    }
+
     std::string projectLangs;
     for (std::string const& li : testLangs) {
       projectLangs += " " + li;
@@ -719,6 +725,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_C_COMPILER_TARGET);
       vars.insert(kCMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN);
       vars.insert(kCMAKE_CXX_COMPILER_TARGET);
+      vars.insert(kCMAKE_CUDA_ARCHITECTURES);
+      vars.insert(kCMAKE_CUDA_COMPILER_TARGET);
+      vars.insert(kCMAKE_CUDA_RUNTIME_LIBRARY);
       vars.insert(kCMAKE_ENABLE_EXPORTS);
       vars.insert(kCMAKE_LINK_SEARCH_END_STATIC);
       vars.insert(kCMAKE_LINK_SEARCH_START_STATIC);
@@ -1041,7 +1050,9 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
   std::set<std::string> deletedFiles;
   for (unsigned long i = 0; i < dir.GetNumberOfFiles(); ++i) {
     const char* fileName = dir.GetFile(i);
-    if (strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0) {
+    if (strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0 &&
+        // Do not delete NFS temporary files.
+        !cmHasPrefix(fileName, ".nfs")) {
       if (deletedFiles.insert(fileName).second) {
         std::string const fullPath =
           std::string(binDir).append("/").append(fileName);

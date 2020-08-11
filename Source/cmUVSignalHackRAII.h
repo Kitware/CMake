@@ -3,7 +3,7 @@
 #pragma once
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #if defined(CMAKE_USE_SYSTEM_LIBUV) && !defined(_WIN32) &&                    \
   UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR < 19

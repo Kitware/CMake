@@ -24,6 +24,10 @@ set(__WINDOWS_PATHS_INCLUDED 1)
 #   ENV{ProgramFiles(x86)} = [C:\Program Files (x86)]
 #   ENV{ProgramFiles} = [C:\Program Files (x86)]
 #   ENV{ProgramW6432} = [C:\Program Files]
+#
+# Reminder when adding new locations computed from environment variables
+# please make sure to keep Help/variable/CMAKE_SYSTEM_PREFIX_PATH.rst
+# synchronized
 set(_programfiles "")
 foreach(v "ProgramW6432" "ProgramFiles" "ProgramFiles(x86)")
   if(DEFINED "ENV{${v}}")

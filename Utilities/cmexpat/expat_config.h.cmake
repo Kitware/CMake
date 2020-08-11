@@ -86,9 +86,3 @@
 #ifdef _MSC_VER
 #  define __func__ __FUNCTION__
 #endif
-
-/* Define to `long' if <sys/types.h> does not define. */
-#cmakedefine off_t @OFF_T@
-
-/* Define to `unsigned' if <sys/types.h> does not define. */
-#cmakedefine size_t @SIZE_T@

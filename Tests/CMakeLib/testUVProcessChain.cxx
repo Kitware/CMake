@@ -8,7 +8,7 @@
 
 #include <cm/memory>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #include "cmGetPipes.h"
 #include "cmUVHandlePtr.h"

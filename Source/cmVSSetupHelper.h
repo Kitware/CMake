@@ -8,12 +8,11 @@
 #endif
 
 // Published by Visual Studio Setup team
+#include <cm3p/Setup.Configuration.h>
 #include <string>
 #include <vector>
 
 #include <windows.h>
-
-#include "cmvssetup/Setup.Configuration.h"
 
 template <class T>
 class SmartCOMPtr
@@ -107,6 +106,7 @@ public:
 
   bool IsVSInstalled();
   bool GetVSInstanceInfo(std::string& vsInstallLocation);
+  bool GetVSInstanceVersion(unsigned long long& vsInstanceVersion);
   bool GetVCToolsetVersion(std::string& vsToolsetVersion);
   bool IsWin10SDKInstalled();
   bool IsWin81SDKInstalled();

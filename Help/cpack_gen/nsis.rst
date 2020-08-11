@@ -1,7 +1,9 @@
 CPack NSIS Generator
 --------------------
 
-CPack Nullsoft Scriptable Install System (NSIS) generator specific options
+CPack Nullsoft Scriptable Install System (NSIS) generator specific options.
+
+The NSIS generator requires NSIS 3.0 or newer.
 
 Variables specific to CPack NSIS generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -153,3 +155,7 @@ on Windows Nullsoft Scriptable Install System.
 .. variable:: CPACK_NSIS_MUI_HEADERIMAGE
 
  The image to display on the header of installers pages.
+
+.. variable:: CPACK_NSIS_MANIFEST_DPI_AWARE
+
+ If set, declares that the installer is DPI-aware.

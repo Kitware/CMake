@@ -16,7 +16,7 @@
 
 #include "cmDepends.h"
 
-class cmLocalGenerator;
+class cmLocalUnixMakefileGenerator3;
 
 /** \class cmDependsC
  * \brief Dependency scanner for C and C++ object files.
@@ -27,7 +27,7 @@ public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
   cmDependsC();
-  cmDependsC(cmLocalGenerator* lg, const std::string& targetDir,
+  cmDependsC(cmLocalUnixMakefileGenerator3* lg, const std::string& targetDir,
              const std::string& lang, const DependencyMap* validDeps);
 
   /** Virtual destructor to cleanup subclasses properly.  */

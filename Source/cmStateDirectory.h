@@ -12,6 +12,7 @@
 #include "cmAlgorithms.h"
 #include "cmLinkedTree.h"
 #include "cmListFileCache.h"
+#include "cmProperty.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
@@ -86,8 +87,8 @@ public:
                    cmListFileBacktrace const& lfbt);
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString, cmListFileBacktrace const& lfbt);
-  const char* GetProperty(const std::string& prop) const;
-  const char* GetProperty(const std::string& prop, bool chain) const;
+  cmProp GetProperty(const std::string& prop) const;
+  cmProp GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
 

@@ -218,7 +218,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
     // Convert
     for (std::string const& listFile : listFiles) {
       // don't put cmake's own files into the project (#12110):
-      if (listFile.find(cmSystemTools::GetCMakeRoot()) == 0) {
+      if (cmHasPrefix(listFile, cmSystemTools::GetCMakeRoot())) {
         continue;
       }
 
@@ -301,11 +301,11 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
         case cmStateEnums::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
-          if (((targetName.find("Nightly") == 0) &&
+          if ((cmHasLiteralPrefix(targetName, "Nightly") &&
                (targetName != "Nightly")) ||
-              ((targetName.find("Continuous") == 0) &&
+              (cmHasLiteralPrefix(targetName, "Continuous") &&
                (targetName != "Continuous")) ||
-              ((targetName.find("Experimental") == 0) &&
+              (cmHasLiteralPrefix(targetName, "Experimental") &&
                (targetName != "Experimental"))) {
             break;
           }
@@ -723,7 +723,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
   if (generator == "NMake Makefiles" || generator == "NMake Makefiles JOM") {
     // For Windows ConvertToOutputPath already adds quotes when required.
     // These need to be escaped, see
-    // https://gitlab.kitware.com/cmake/cmake/issues/13952
+    // https://gitlab.kitware.com/cmake/cmake/-/issues/13952
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += " /NOLOGO /f ";
     command += makefileName;
@@ -731,7 +731,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += target;
   } else if (generator == "MinGW Makefiles") {
     // no escaping of spaces in this case, see
-    // https://gitlab.kitware.com/cmake/cmake/issues/10014
+    // https://gitlab.kitware.com/cmake/cmake/-/issues/10014
     std::string const& makefileName = makefile;
     command += " -f \"";
     command += makefileName;

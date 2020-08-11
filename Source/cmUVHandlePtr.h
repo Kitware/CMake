@@ -8,7 +8,7 @@
 #include <memory>
 #include <type_traits>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #if defined(__SUNPRO_CC)
 

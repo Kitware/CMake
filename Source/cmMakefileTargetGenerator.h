@@ -60,6 +60,8 @@ public:
   std::string GetConfigName();
 
 protected:
+  void GetDeviceLinkFlags(std::string& linkFlags,
+                          const std::string& linkLanguage);
   void GetTargetLinkFlags(std::string& flags, const std::string& linkLanguage);
 
   // create the file and directory etc

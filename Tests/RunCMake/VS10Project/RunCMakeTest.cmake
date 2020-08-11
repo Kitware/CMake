@@ -3,12 +3,12 @@ cmake_policy(SET CMP0057 NEW)
 include(RunCMake)
 cmake_policy(SET CMP0054 NEW)
 
+run_cmake(VsCsharpSourceGroup)
 run_cmake(VsCSharpCompilerOpts)
 run_cmake(ExplicitCMakeLists)
 run_cmake(RuntimeLibrary)
 run_cmake(SourceGroupCMakeLists)
 run_cmake(SourceGroupTreeCMakeLists)
-
 run_cmake(VsConfigurationType)
 run_cmake(VsTargetsFileReferences)
 run_cmake(VsCustomProps)
@@ -30,6 +30,10 @@ run_cmake(VsDpiAware)
 run_cmake(VsDpiAwareBadParam)
 run_cmake(VsPrecompileHeaders)
 run_cmake(VsPrecompileHeadersReuseFromCompilePDBName)
+run_cmake(VsDeployEnabled)
+run_cmake(VsSettings)
+run_cmake(VsSourceSettingsTool)
+run_cmake(VsPlatformToolset)
 
 run_cmake(VsWinRTByDefault)
 
@@ -52,6 +56,7 @@ if (RunCMake_GENERATOR MATCHES "Visual Studio 1[0-4] 201[0-5]" OR
   run_cmake(UnityBuildPre2017)
 else()
   run_cmake(UnityBuildNative)
+  run_cmake(UnityBuildNativeGrouped)
 endif()
 
 run_cmake(VsDotnetTargetFramework)

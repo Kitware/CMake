@@ -7,11 +7,11 @@
 #include <utility>
 #include <vector>
 
+#include <cm3p/json/reader.h>
+#include <cm3p/json/value.h>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
-
-#include "cm_jsoncpp_reader.h"
-#include "cm_jsoncpp_value.h"
 
 static const cmsys::RegularExpression IdentifierRegex{ "^[a-z_][a-z0-9_]*$" };
 static const cmsys::RegularExpression IdRegex{ "^[a-z0-9_]+$" };

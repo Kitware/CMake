@@ -3,17 +3,7 @@ cmake_minimum_required(VERSION 3.7)
 project (WithDefs CUDA)
 
 #verify that we can pass explicit cuda arch flags
-string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
-if(CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 9)
-  set(debug_compile_flags --generate-code arch=compute_32,code=sm_32)
-else()
-  set(debug_compile_flags --generate-code arch=compute_20,code=sm_20)
-endif()
-if(CMAKE_CUDA_SIMULATE_ID STREQUAL "MSVC")
-  list(APPEND debug_compile_flags -Xcompiler=-WX)
-else()
-  list(APPEND debug_compile_flags -Xcompiler=-Werror)
-endif()
+set(CMAKE_CUDA_ARCHITECTURES 30)
 set(release_compile_defs DEFREL)
 
 #Goal for this example:
@@ -28,8 +18,7 @@ target_compile_options(CudaOnlyWithDefs
   PRIVATE
     -DFLAG_COMPILE_LANG_$<COMPILE_LANGUAGE>
     -DFLAG_LANG_IS_CUDA=$<COMPILE_LANGUAGE:CUDA>
-    --compiler-options=-DHOST_DEFINE
-    $<$<CONFIG:DEBUG>:$<BUILD_INTERFACE:${debug_compile_flags}>>
+    $<$<CUDA_COMPILER_ID:NVIDIA>:--compiler-options=-DHOST_DEFINE> # Host-only defines are possible only on NVCC.
   )
 
 target_compile_definitions(CudaOnlyWithDefs

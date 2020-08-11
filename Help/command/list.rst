@@ -308,6 +308,13 @@ The ``<compare>`` option should be one of:
 * ``STRING``: Sorts a list of strings alphabetically.  This is the
   default behavior if the ``COMPARE`` option is not given.
 * ``FILE_BASENAME``: Sorts a list of pathnames of files by their basenames.
+* ``NATURAL``: Sorts a list of strings using natural order
+  (see ``strverscmp(3)`` manual), i.e. such that contiguous digits
+  are compared as whole numbers.
+  For example: the following list `10.0 1.1 2.1 8.0 2.0 3.1`
+  will be sorted as `1.1 2.0 2.1 3.1 8.0 10.0` if the ``NATURAL``
+  comparison is selected where it will be sorted as
+  `1.1 10.0 2.0 2.1 3.1 8.0` with the ``STRING`` comparison.
 
 Use the ``CASE`` keyword to select a case sensitive or case insensitive
 sort mode.  The ``<case>`` option should be one of:

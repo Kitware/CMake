@@ -84,8 +84,8 @@ bool cmUtilitySourceCommand(std::vector<std::string> const& args,
   std::string utilityDirectory =
     status.GetMakefile().GetCurrentBinaryDirectory();
   std::string exePath;
-  if (status.GetMakefile().GetDefinition("EXECUTABLE_OUTPUT_PATH")) {
-    exePath = status.GetMakefile().GetDefinition("EXECUTABLE_OUTPUT_PATH");
+  if (auto d = status.GetMakefile().GetDefinition("EXECUTABLE_OUTPUT_PATH")) {
+    exePath = d;
   }
   if (!exePath.empty()) {
     utilityDirectory = exePath;
@@ -102,15 +102,15 @@ bool cmUtilitySourceCommand(std::vector<std::string> const& args,
   cmSystemTools::ReplaceString(utilityExecutable, "/./", "/");
 
   // Enter the value into the cache.
-  status.GetMakefile().AddCacheDefinition(
-    cacheEntry, utilityExecutable.c_str(), "Path to an internal program.",
-    cmStateEnums::FILEPATH);
+  status.GetMakefile().AddCacheDefinition(cacheEntry, utilityExecutable,
+                                          "Path to an internal program.",
+                                          cmStateEnums::FILEPATH);
   // add a value into the cache that maps from the
   // full path to the name of the project
   cmSystemTools::ConvertToUnixSlashes(utilityExecutable);
-  status.GetMakefile().AddCacheDefinition(
-    utilityExecutable, utilityName.c_str(), "Executable to project name.",
-    cmStateEnums::INTERNAL);
+  status.GetMakefile().AddCacheDefinition(utilityExecutable, utilityName,
+                                          "Executable to project name.",
+                                          cmStateEnums::INTERNAL);
 
   return true;
 }

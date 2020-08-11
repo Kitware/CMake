@@ -67,7 +67,7 @@ static SystemToolsManager SystemToolsManagerInstance;
 // combined using the | operator.
 typedef int TestFilePermissions;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-// On Windows (VC and Borland), no system header defines these constants...
+// On Windows (VC), no system header defines these constants...
 static const TestFilePermissions TEST_FILE_OK = 0;
 static const TestFilePermissions TEST_FILE_READ = 4;
 static const TestFilePermissions TEST_FILE_WRITE = 2;
@@ -317,11 +317,7 @@ public:
  * Cross platform wrapper for stat struct
  */
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#  if defined(__BORLANDC__)
-  typedef struct stati64 Stat_t;
-#  else
   typedef struct _stat64 Stat_t;
-#  endif
 #else
   typedef struct stat Stat_t;
 #endif
@@ -411,11 +407,11 @@ public:
    * (which defaults to the current working directory).  The full path
    * is returned.
    */
-  static std::string CollapseFullPath(const std::string& in_relative);
-  static std::string CollapseFullPath(const std::string& in_relative,
+  static std::string CollapseFullPath(std::string const& in_path);
+  static std::string CollapseFullPath(std::string const& in_path,
                                       const char* in_base);
-  static std::string CollapseFullPath(const std::string& in_relative,
-                                      const std::string& in_base);
+  static std::string CollapseFullPath(std::string const& in_path,
+                                      std::string const& in_base);
 
   /**
    * Get the real path for a given path, removing all symlinks.  In
@@ -549,12 +545,13 @@ public:
    */
 
   /**
-   * Open a file considering unicode.
+   * Open a file considering unicode. On Windows, if 'e' is present in
+   * mode it is first discarded.
    */
   static FILE* Fopen(const std::string& file, const char* mode);
 
 /**
- * Visual C++ does not define mode_t (note that Borland does, however).
+ * Visual C++ does not define mode_t.
  */
 #if defined(_MSC_VER)
   typedef unsigned short mode_t;
@@ -675,6 +672,11 @@ public:
    * Return true if the file is a directory
    */
   static bool FileIsDirectory(const std::string& name);
+
+  /**
+   * Return true if the file is an executable
+   */
+  static bool FileIsExecutable(const std::string& name);
 
   /**
    * Return true if the file is a symlink
@@ -869,7 +871,7 @@ public:
   /**
    * Get current working directory CWD
    */
-  static std::string GetCurrentWorkingDirectory(bool collapse = true);
+  static std::string GetCurrentWorkingDirectory();
 
   /**
    * Change directory to the directory specified
@@ -935,22 +937,32 @@ public:
    * Parse a character string :
    *       protocol://dataglom
    * and fill protocol as appropriate.
+   * decode the dataglom using DecodeURL if set to true.
    * Return false if the URL does not have the required form, true otherwise.
    */
   static bool ParseURLProtocol(const std::string& URL, std::string& protocol,
-                               std::string& dataglom);
+                               std::string& dataglom, bool decode = false);
 
   /**
    * Parse a string (a URL without protocol prefix) with the form:
    *  protocol://[[username[':'password]'@']hostname[':'dataport]]'/'[datapath]
    * and fill protocol, username, password, hostname, dataport, and datapath
    * when values are found.
+   * decode all string except the protocol using DecodeUrl if set to true.
    * Return true if the string matches the format; false otherwise.
    */
   static bool ParseURL(const std::string& URL, std::string& protocol,
                        std::string& username, std::string& password,
                        std::string& hostname, std::string& dataport,
-                       std::string& datapath);
+                       std::string& datapath, bool decode = false);
+
+  /**
+   * Decode the percent-encoded string from an URL or an URI
+   * into their correct char values.
+   * Does not perform any other sort of validation.
+   * Return the decoded string
+   */
+  static std::string DecodeURL(const std::string& url);
 
 private:
   /**
@@ -971,7 +983,6 @@ private:
     return &SystemToolsManagerInstance;
   }
 
-  static SystemToolsStatic* Statics;
   friend class SystemToolsStatic;
   friend class SystemToolsManager;
 };

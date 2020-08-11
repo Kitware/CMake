@@ -83,6 +83,16 @@ function(cpack_deb_format_package_description TEXT OUTPUT_VAR)
   string(REPLACE "\n" ";" _lines "${_text}")
   list(POP_FRONT _lines _summary)
 
+  # If the description ends with a newline (e.g. typically if it was read
+  # from a file) the last line will be empty. We drop it here, otherwise
+  # it would be replaced by a `.` which would lead to the package violating
+  # the extended-description-contains-empty-paragraph debian policy
+  list(POP_BACK _lines _last_line)
+  string(STRIP "${_last_line}" _last_line_strip)
+  if(_last_line_strip)
+    list(APPEND _lines "${_last_line_strip}")
+  endif()
+
   # Check if reformatting required
   cpack_deb_check_description("${_summary}" "${_lines}" _result)
   if(_result)

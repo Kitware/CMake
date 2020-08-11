@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_jsoncpp_value.h"
+#include <cm3p/json/value.h>
 
 #include "cmFileAPI.h"
 #include "cmGlobalGenerator.h"

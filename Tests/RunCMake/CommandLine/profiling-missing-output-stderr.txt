@@ -1,0 +1,1 @@
+^.*--profiling-format specified but no --profiling-output!$

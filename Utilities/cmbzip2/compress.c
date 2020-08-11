@@ -8,8 +8,8 @@
    This file is part of bzip2/libbzip2, a program and library for
    lossless, block-sorting data compression.
 
-   bzip2/libbzip2 version 1.0.5 of 10 December 2007
-   Copyright (C) 1996-2007 Julian Seward <jseward@bzip.org>
+   bzip2/libbzip2 version 1.0.8 of 13 July 2019
+   Copyright (C) 1996-2019 Julian Seward <jseward@acm.org>
 
    Please read the WARNING, DISCLAIMER and PATENTS sections in the 
    README file.
@@ -239,7 +239,7 @@ static
 void sendMTFValues ( EState* s )
 {
    Int32 v, t, i, j, gs, ge, totc, bt, bc, iter;
-   Int32 nSelectors = 0, alphaSize, minLen, maxLen, selCtr;
+   Int32 nSelectors, alphaSize, minLen, maxLen, selCtr;
    Int32 nGroups, nBytes;
 
    /*--
@@ -329,14 +329,14 @@ void sendMTFValues ( EState* s )
 
       /*---
         Set up an auxiliary length table which is used to fast-track
-    the common case (nGroups == 6). 
+	the common case (nGroups == 6). 
       ---*/
       if (nGroups == 6) {
          for (v = 0; v < alphaSize; v++) {
             s->len_pack[v][0] = (s->len[1][v] << 16) | s->len[0][v];
             s->len_pack[v][1] = (s->len[3][v] << 16) | s->len[2][v];
             s->len_pack[v][2] = (s->len[5][v] << 16) | s->len[4][v];
-     }
+	 }
       }
 
       nSelectors = 0;
@@ -385,7 +385,7 @@ void sendMTFValues ( EState* s )
             cost[4] = cost45 & 0xffff; cost[5] = cost45 >> 16;
 
          } else {
-        /*--- slow version which correctly handles all situations ---*/
+	    /*--- slow version which correctly handles all situations ---*/
             for (i = gs; i <= ge; i++) { 
                UInt16 icv = mtfv[i];
                for (t = 0; t < nGroups; t++) cost[t] += s->len[t][icv];
@@ -426,7 +426,7 @@ void sendMTFValues ( EState* s )
 #           undef BZ_ITUR
 
          } else {
-        /*--- slow version which correctly handles all situations ---*/
+	    /*--- slow version which correctly handles all situations ---*/
             for (i = gs; i <= ge; i++)
                s->rfreq[bt][ mtfv[i] ]++;
          }
@@ -454,7 +454,7 @@ void sendMTFValues ( EState* s )
 
    AssertH( nGroups < 8, 3002 );
    AssertH( nSelectors < 32768 &&
-            nSelectors <= (2 + (900000 / BZ_G_SIZE)),
+            nSelectors <= BZ_MAX_SELECTORS,
             3003 );
 
 
@@ -579,7 +579,7 @@ void sendMTFValues ( EState* s )
 #           undef BZ_ITAH
 
       } else {
-     /*--- slow version which correctly handles all situations ---*/
+	 /*--- slow version which correctly handles all situations ---*/
          for (i = gs; i <= ge; i++) {
             bsW ( s, 
                   s->len  [s->selector[selCtr]] [mtfv[i]],

@@ -57,7 +57,8 @@ valid filepaths.
     These may be named in the generated failure message asking the
     user to set the missing variable values.  Therefore these should
     typically be cache entries such as ``FOO_LIBRARY`` and not output
-    variables like ``FOO_LIBRARIES``.
+    variables like ``FOO_LIBRARIES``. This option is mandatory if
+    ``HANDLE_COMPONENTS`` is not specified.
 
   ``VERSION_VAR <version-var>``
     Specify the name of a variable that holds the version of the package
@@ -257,7 +258,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       set(FPHSA_VERSION_VAR ${_NAME}_VERSION)
     endif()
 
-    if(NOT FPHSA_REQUIRED_VARS)
+    if(NOT FPHSA_REQUIRED_VARS AND NOT FPHSA_HANDLE_COMPONENTS)
       message(FATAL_ERROR "No REQUIRED_VARS specified for FIND_PACKAGE_HANDLE_STANDARD_ARGS()")
     endif()
   endif()
@@ -283,7 +284,9 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     set(FPHSA_FAIL_MESSAGE "Could NOT find ${_NAME}")
   endif()
 
-  list(GET FPHSA_REQUIRED_VARS 0 _FIRST_REQUIRED_VAR)
+  if (FPHSA_REQUIRED_VARS)
+    list(GET FPHSA_REQUIRED_VARS 0 _FIRST_REQUIRED_VAR)
+  endif()
 
   string(TOUPPER ${_NAME} _NAME_UPPER)
   string(TOLOWER ${_NAME} _NAME_LOWER)
@@ -440,7 +443,17 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       _FPHSA_HANDLE_FAILURE_CONFIG_MODE()
     else()
       if(NOT VERSION_OK)
-        _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG} (found ${${_FIRST_REQUIRED_VAR}})")
+        set(RESULT_MSG)
+        if (_FIRST_REQUIRED_VAR)
+          string (APPEND RESULT_MSG "found ${${_FIRST_REQUIRED_VAR}}")
+        endif()
+        if (COMPONENT_MSG)
+          if (RESULT_MSG)
+            string (APPEND RESULT_MSG ", ")
+          endif()
+          string (APPEND RESULT_MSG "${FOUND_COMPONENTS_MSG}")
+        endif()
+        _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG} (${RESULT_MSG})")
       else()
         _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} (missing:${MISSING_VARS}) ${VERSION_MSG}")
       endif()

@@ -3,7 +3,7 @@
 #ifndef cmVersion_h
 #define cmVersion_h
 
-#include "cm_kwiml.h"
+#include <cm3p/kwiml/int.h>
 
 /** \class cmVersion
  * \brief Helper class for providing CMake and CTest version information.

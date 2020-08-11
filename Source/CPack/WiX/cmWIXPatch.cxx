@@ -41,7 +41,7 @@ void cmWIXPatch::ApplyFragment(std::string const& id,
 void cmWIXPatch::ApplyElementChildren(const cmWIXPatchElement& element,
                                       cmWIXSourceWriter& writer)
 {
-  for (cmWIXPatchNode* node : element.children) {
+  for (const auto& node : element.children) {
     switch (node->type()) {
       case cmWIXPatchNode::ELEMENT:
         ApplyElement(dynamic_cast<const cmWIXPatchElement&>(*node), writer);

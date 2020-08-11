@@ -59,7 +59,7 @@ for finding the package, checking the version, and producing any needed
 messages.  Some find-modules provide limited or no support for versioning;
 check the module documentation.
 
-If the ``MODULE`` option is not specfied in the above signature,
+If the ``MODULE`` option is not specified in the above signature,
 CMake first searches for the package using Module mode. Then, if the
 package is not found, it searches again using Config mode. A user
 may set the variable :variable:`CMAKE_FIND_PACKAGE_PREFER_CONFIG` to
@@ -302,23 +302,23 @@ enabled.
    are intended to be used on the command line with a ``-DVAR=value``.
    The values are interpreted as :ref:`semicolon-separated lists <CMake Language Lists>`.
    This can be skipped if ``NO_CMAKE_PATH`` is passed or by setting the
-   :variable:`CMAKE_FIND_USE_CMAKE_PATH` to ``FALSE``::
+   :variable:`CMAKE_FIND_USE_CMAKE_PATH` to ``FALSE``:
 
-     CMAKE_PREFIX_PATH
-     CMAKE_FRAMEWORK_PATH
-     CMAKE_APPBUNDLE_PATH
+   * :variable:`CMAKE_PREFIX_PATH`
+   * :variable:`CMAKE_FRAMEWORK_PATH`
+   * :variable:`CMAKE_APPBUNDLE_PATH`
 
 3. Search paths specified in cmake-specific environment variables.
    These are intended to be set in the user's shell configuration,
    and therefore use the host's native path separator
    (``;`` on Windows and ``:`` on UNIX).
    This can be skipped if ``NO_CMAKE_ENVIRONMENT_PATH`` is passed or by setting
-   the :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH` to ``FALSE``::
+   the :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH` to ``FALSE``:
 
-     <PackageName>_DIR
-     CMAKE_PREFIX_PATH
-     CMAKE_FRAMEWORK_PATH
-     CMAKE_APPBUNDLE_PATH
+   * ``<PackageName>_DIR``
+   * :envvar:`CMAKE_PREFIX_PATH`
+   * ``CMAKE_FRAMEWORK_PATH``
+   * ``CMAKE_APPBUNDLE_PATH``
 
 4. Search paths specified by the ``HINTS`` option.  These should be paths
    computed by system introspection, such as a hint provided by the
@@ -329,9 +329,9 @@ enabled.
    skipped if ``NO_SYSTEM_ENVIRONMENT_PATH`` is passed  or by setting the
    :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH` to ``FALSE``. Path entries
    ending in ``/bin`` or ``/sbin`` are automatically converted to their
-   parent directories::
+   parent directories:
 
-     PATH
+   * ``PATH``
 
 6. Search paths stored in the CMake :ref:`User Package Registry`.
    This can be skipped if ``NO_CMAKE_PACKAGE_REGISTRY`` is passed or by
@@ -345,11 +345,15 @@ enabled.
 7. Search cmake variables defined in the Platform files for the
    current system.  This can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is
    passed or by setting the :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`
-   to ``FALSE``::
+   to ``FALSE``:
 
-     CMAKE_SYSTEM_PREFIX_PATH
-     CMAKE_SYSTEM_FRAMEWORK_PATH
-     CMAKE_SYSTEM_APPBUNDLE_PATH
+   * :variable:`CMAKE_SYSTEM_PREFIX_PATH`
+   * :variable:`CMAKE_SYSTEM_FRAMEWORK_PATH`
+   * :variable:`CMAKE_SYSTEM_APPBUNDLE_PATH`
+
+   The platform paths that these variables contain are locations that
+   typically include installed software. An example being ``/usr/local`` for
+   UNIX based platforms.
 
 8. Search paths stored in the CMake :ref:`System Package Registry`.
    This can be skipped if ``NO_CMAKE_SYSTEM_PACKAGE_REGISTRY`` is passed

@@ -27,3 +27,9 @@ set_target_properties(MixedToolkit PROPERTIES CUDA_RUNTIME_LIBRARY Static)
 
 add_executable(CudaOnlyStaticRuntimePlusToolkit main.cu)
 target_link_libraries(CudaOnlyStaticRuntimePlusToolkit PRIVATE SharedToolkit StaticToolkit MixedToolkit)
+
+if(UNIX)
+  # Help the shared cuda runtime find libcurand and libnppif when they are not located
+  # in a default system searched location
+  set_property(TARGET CudaOnlyStaticRuntimePlusToolkit PROPERTY BUILD_RPATH ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
+endif()

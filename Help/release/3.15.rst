@@ -332,6 +332,15 @@ Deprecated and Removed Features
 Other Changes
 =============
 
+* If a feature specified by :command:`target_compile_features` is available
+  in the compiler's default standard level, CMake 3.14 and below incorrectly
+  added unnecessary ``-std=`` flags that could lower the standard level.
+  This bug has been fixed in CMake 3.15.  This behavior change may expose
+  bugs in existing projects that were relying on undocumented implementation
+  details.  Specifying compile features only ensures that the compiler runs
+  in a mode that has those features, not that any specific standard level is
+  used or explicit ``-std=`` flag passed.
+
 * CMake learned how to compile C++14 with the IBM AIX XL compiler
   and the SunPro compiler and to compile C++20 with the AppleClang compiler.
 

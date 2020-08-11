@@ -316,7 +316,7 @@ macro(__windows_compiler_msvc lang)
     "${_CMAKE_VS_LINK_DLL}<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <LINK_FLAGS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")
 
   set(CMAKE_${lang}_CREATE_SHARED_MODULE ${CMAKE_${lang}_CREATE_SHARED_LIBRARY})
-  set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "<CMAKE_LINKER> /lib ${CMAKE_CL_NOLOGO} <LINK_FLAGS> /out:<TARGET> <OBJECTS> ")
+  set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "<CMAKE_AR> ${CMAKE_CL_NOLOGO} <LINK_FLAGS> /out:<TARGET> <OBJECTS> ")
 
   set(CMAKE_${lang}_COMPILE_OBJECT
     "<CMAKE_${lang}_COMPILER> ${CMAKE_START_TEMP_FILE} ${CMAKE_CL_NOLOGO}${_COMPILE_${lang}} <DEFINES> <INCLUDES> <FLAGS> /Fo<OBJECT> /Fd<TARGET_COMPILE_PDB>${_FS_${lang}} -c <SOURCE>${CMAKE_END_TEMP_FILE}")
@@ -331,13 +331,11 @@ macro(__windows_compiler_msvc lang)
 
   set(CMAKE_PCH_EXTENSION .pch)
   set(CMAKE_LINK_PCH ON)
-  if(MSVC_VERSION GREATER_EQUAL 1910)
-    # VS 2017 or greater
-    if (NOT ${CMAKE_${lang}_COMPILER_ID} STREQUAL "Clang")
-        set(CMAKE_PCH_PROLOGUE "#pragma system_header")
-    else()
-        set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
-    endif()
+  if (CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
+  elseif(MSVC_VERSION GREATER_EQUAL 1913)
+    # At least MSVC toolet 14.13 from VS 2017 15.6
+    set(CMAKE_PCH_PROLOGUE "#pragma system_header")
   endif()
   if (NOT ${CMAKE_${lang}_COMPILER_ID} STREQUAL "Clang")
     set(CMAKE_PCH_COPY_COMPILE_PDB ON)

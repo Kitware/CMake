@@ -4,7 +4,7 @@
 
 #include <utility>
 
-#include "cm_static_string_view.hxx"
+#include <cmext/string_view>
 
 #include "cmRange.h"
 #include "cmSystemTools.h"

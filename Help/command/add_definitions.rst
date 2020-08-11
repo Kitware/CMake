@@ -8,9 +8,9 @@ Add -D define flags to the compilation of source files.
   add_definitions(-DFOO -DBAR ...)
 
 Adds definitions to the compiler command line for targets in the current
-directory and below (whether added before or after this command is invoked).
-This command can be used to add any flags, but it is intended to add
-preprocessor definitions.
+directory, whether added before or after this command is invoked, and for
+the ones in sub-directories added after. This command can be used to add any
+flags, but it is intended to add preprocessor definitions.
 
 .. note::
 

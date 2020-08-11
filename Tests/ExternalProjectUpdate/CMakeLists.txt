@@ -78,6 +78,8 @@ if(do_git_tests)
   ExternalProject_Add(${proj}
     GIT_REPOSITORY "${local_git_repo}"
     GIT_TAG ${TEST_GIT_TAG}
+    GIT_CONFIG "user.email=testauthor@cmake.org"
+               "user.name=testauthor"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""

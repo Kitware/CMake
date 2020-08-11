@@ -47,3 +47,11 @@ run_cmake(custom_message_1)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" "-DCONFIG_MODE=TRUE")
 run_cmake(custom_message_2)
 run_cmake(custom_message_3)
+
+# check handling of components
+set(RunCMake_TEST_OPTIONS "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" "-DUseComponents_VERSION=1.2.3.4")
+run_cmake(required_components)
+run_cmake(required_and_optional_components)
+run_cmake(all_optional_components)
+list(APPEND RunCMake_TEST_OPTIONS "-DUseComponents_REQUIRE_VARS=TRUE")
+run_cmake(required_components_with_vars)

@@ -37,7 +37,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
     message(FATAL_ERROR
       "CMake no longer compiles on HP-UX.  See\n"
-      "  https://gitlab.kitware.com/cmake/cmake/issues/17137\n"
+      "  https://gitlab.kitware.com/cmake/cmake/-/issues/17137\n"
       "Use CMake 3.9 or lower instead."
       )
   endif()
@@ -154,7 +154,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Allow the user to enable/disable all system utility library options by
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
-  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV ZLIB ZSTD)
+  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV NGHTTP2 ZLIB ZSTD)
   foreach(util ${UTILITIES})
     if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
         AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
@@ -192,6 +192,8 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
     "${CMAKE_USE_SYSTEM_LIBRARY_ZSTD}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_LIBLZMA "Use system-installed liblzma"
     "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_NGHTTP2 "Use system-installed nghttp2"
+    "${CMAKE_USE_SYSTEM_LIBRARY_NGHTTP2}" "NOT CMAKE_USE_SYSTEM_CURL" ON)
   option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
   option(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp" "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}")
   option(CMAKE_USE_SYSTEM_LIBRHASH "Use system-installed librhash" "${CMAKE_USE_SYSTEM_LIBRARY_LIBRHASH}")
@@ -335,6 +337,9 @@ endmacro()
 macro (CMAKE_BUILD_UTILITIES)
   find_package(Threads)
 
+  # Suppress unnecessary checks in third-party code.
+  include(Utilities/cmThirdPartyChecks.cmake)
+
   #---------------------------------------------------------------------
   # Create the kwsys library for CMake.
   set(KWSYS_NAMESPACE cmsys)
@@ -350,6 +355,21 @@ macro (CMAKE_BUILD_UTILITIES)
   set(KWSYS_INSTALL_DOC_DIR "${CMAKE_DOC_DIR}")
   if(CMake_NO_CXX_STANDARD)
     set(KWSYS_CXX_STANDARD "")
+  endif()
+  if(WIN32)
+    # FIXME: Teach KWSys to hard-code these checks on Windows.
+    set(KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC_COMPILED 0)
+    set(KWSYS_C_HAS_PTRDIFF_T_COMPILED 1)
+    set(KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H_COMPILED 1)
+    set(KWSYS_CXX_HAS_RLIMIT64_COMPILED 0)
+    set(KWSYS_CXX_HAS_SETENV_COMPILED 0)
+    set(KWSYS_CXX_HAS_UNSETENV_COMPILED 0)
+    set(KWSYS_CXX_HAS_UTIMENSAT_COMPILED 0)
+    set(KWSYS_CXX_HAS_UTIMES_COMPILED 0)
+    set(KWSYS_CXX_STAT_HAS_ST_MTIM_COMPILED 0)
+    set(KWSYS_CXX_STAT_HAS_ST_MTIMESPEC_COMPILED 0)
+    set(KWSYS_STL_HAS_WSTRING_COMPILED 1)
+    set(KWSYS_SYS_HAS_IFADDRS_H 0)
   endif()
   add_subdirectory(Source/kwsys)
   set(kwsys_folder "Utilities/KWSys")
@@ -374,10 +394,13 @@ macro (CMAKE_BUILD_UTILITIES)
     include_directories(SYSTEM "${CMake_SOURCE_DIR}/Utilities/std")
   endif()
 
-  include_directories(
-    ${CMake_BINARY_DIR}/Utilities
-    ${CMake_SOURCE_DIR}/Utilities
-    )
+  include_directories("${CMake_BINARY_DIR}/Utilities")
+  if ((CMAKE_SYSTEM_NAME STREQUAL "AIX" OR CMAKE_SYSTEM_NAME STREQUAL "OS400") AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # using -isystem option generate error "template with C linkage"
+    include_directories("${CMake_SOURCE_DIR}/Utilities")
+  else()
+    include_directories(SYSTEM "${CMake_SOURCE_DIR}/Utilities")
+  endif()
 
   #---------------------------------------------------------------------
   # Build CMake std library for CMake and CTest.
@@ -430,6 +453,13 @@ macro (CMAKE_BUILD_UTILITIES)
   else()
     set(CMAKE_ZLIB_INCLUDES ${CMake_SOURCE_DIR}/Utilities)
     set(CMAKE_ZLIB_LIBRARIES cmzlib)
+    set(WITHOUT_ZLIB_DLL "")
+    set(WITHOUT_ZLIB_DLL_WITH_LIB cmzlib)
+    set(ZLIB_DLL "")
+    set(ZLIB_DLL_WITH_LIB cmzlib)
+    set(ZLIB_WINAPI "")
+    set(ZLIB_WINAPI_COMPILED 0)
+    set(ZLIB_WINAPI_WITH_LIB cmzlib)
     add_subdirectory(Utilities/cmzlib)
     CMAKE_SET_TARGET_FOLDER(cmzlib "Utilities/3rdParty")
   endif()
@@ -465,9 +495,19 @@ macro (CMAKE_BUILD_UTILITIES)
       set(CURL_CA_PATH "" CACHE PATH "Path to SSL CA Certificate Directory")
       mark_as_advanced(CURL_CA_BUNDLE CURL_CA_PATH)
     endif()
+    if(NOT CMAKE_USE_SYSTEM_NGHTTP2)
+      # Tell curl's FindNGHTTP2 module to use our library.
+      set(NGHTTP2_LIBRARY cmnghttp2)
+      set(NGHTTP2_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmnghttp2/lib/includes)
+    endif()
     add_subdirectory(Utilities/cmcurl)
     CMAKE_SET_TARGET_FOLDER(cmcurl "Utilities/3rdParty")
     CMAKE_SET_TARGET_FOLDER(LIBCURL "Utilities/3rdParty")
+    if(NOT CMAKE_USE_SYSTEM_NGHTTP2)
+      # Configure after curl to re-use some check results.
+      add_subdirectory(Utilities/cmnghttp2)
+      CMAKE_SET_TARGET_FOLDER(cmnghttp2 "Utilities/3rdParty")
+    endif()
   endif()
 
   #---------------------------------------------------------------------
@@ -496,6 +536,11 @@ macro (CMAKE_BUILD_UTILITIES)
       set(BZIP2_INCLUDE_DIR
         "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmbzip2")
       set(BZIP2_LIBRARIES cmbzip2)
+      set(BZIP2_NEED_PREFIX "")
+      set(USE_BZIP2_DLL "")
+      set(USE_BZIP2_DLL_WITH_LIB cmbzip2)
+      set(USE_BZIP2_STATIC "")
+      set(USE_BZIP2_STATIC_WITH_LIB cmbzip2)
       add_subdirectory(Utilities/cmbzip2)
       CMAKE_SET_TARGET_FOLDER(cmbzip2 "Utilities/3rdParty")
     endif()
@@ -547,21 +592,25 @@ macro (CMAKE_BUILD_UTILITIES)
     set(ZLIB_INCLUDE_DIR ${CMAKE_ZLIB_INCLUDES})
     set(ZLIB_LIBRARY ${CMAKE_ZLIB_LIBRARIES})
     add_definitions(-DLIBARCHIVE_STATIC)
+    set(ENABLE_MBEDTLS OFF CACHE INTERNAL "Enable use of mbed TLS")
     set(ENABLE_NETTLE OFF CACHE INTERNAL "Enable use of Nettle")
     set(ENABLE_OPENSSL ${CMAKE_USE_OPENSSL} CACHE INTERNAL "Enable use of OpenSSL")
+    set(ENABLE_LIBB2 OFF CACHE INTERNAL "Enable the use of the system LIBB2 library if found")
     set(ENABLE_LZMA ON CACHE INTERNAL "Enable the use of the system LZMA library if found")
     set(ENABLE_LZ4 OFF CACHE INTERNAL "Enable the use of the system LZ4 library if found")
     set(ENABLE_LZO OFF CACHE INTERNAL "Enable the use of the system LZO library if found")
     set(ENABLE_ZLIB ON CACHE INTERNAL "Enable the use of the system ZLIB library if found")
     set(ENABLE_BZip2 ON CACHE INTERNAL "Enable the use of the system BZip2 library if found")
+    set(ENABLE_ZSTD ON CACHE INTERNAL "Enable the use of the system zstd library if found")
     set(ENABLE_LIBXML2 OFF CACHE INTERNAL "Enable the use of the system libxml2 library if found")
-    set(ENABLE_EXPAT ON CACHE INTERNAL "Enable the use of the system EXPAT library if found")
+    set(ENABLE_EXPAT OFF CACHE INTERNAL "Enable the use of the system EXPAT library if found")
     set(ENABLE_PCREPOSIX OFF CACHE INTERNAL "Enable the use of the system PCREPOSIX library if found")
     set(ENABLE_LibGCC OFF CACHE INTERNAL "Enable the use of the system LibGCC library if found")
     set(ENABLE_XATTR OFF CACHE INTERNAL "Enable extended attribute support")
     set(ENABLE_ACL OFF CACHE INTERNAL "Enable ACL support")
     set(ENABLE_ICONV OFF CACHE INTERNAL "Enable iconv support")
     set(ENABLE_CNG OFF CACHE INTERNAL "Enable the use of CNG(Crypto Next Generation)")
+    SET(POSIX_REGEX_LIB "" CACHE INTERNAL "Choose what library should provide POSIX regular expression support")
     add_subdirectory(Utilities/cmlibarchive)
     CMAKE_SET_TARGET_FOLDER(cmlibarchive "Utilities/3rdParty")
     set(CMAKE_TAR_LIBRARIES cmlibarchive ${BZIP2_LIBRARIES})
@@ -677,10 +726,15 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     include(${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake)
   endif()
 
-  # no clue why we are testing for this here
-  include(CheckSymbolExists)
-  CHECK_SYMBOL_EXISTS(unsetenv "stdlib.h" HAVE_UNSETENV)
-  CHECK_SYMBOL_EXISTS(environ "stdlib.h" HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
+  # Checks for cmSystemTools.
+  if(WIN32)
+    set(HAVE_UNSETENV 0)
+    set(HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE 1)
+  else()
+    include(CheckSymbolExists)
+    CHECK_SYMBOL_EXISTS(unsetenv "stdlib.h" HAVE_UNSETENV)
+    CHECK_SYMBOL_EXISTS(environ "stdlib.h" HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
+  endif()
 endif()
 
 # CMAKE_TESTS_CDASH_SERVER: CDash server used by CMake/Tests.
@@ -810,6 +864,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     PATTERN "*.sh*" PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE
                                 WORLD_READ WORLD_EXECUTE
+    REGEX "/(ExportImportList|cpp)$"
+      PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
+                  GROUP_READ GROUP_EXECUTE
+                  WORLD_READ WORLD_EXECUTE
     REGEX "Help/(dev|guide)($|/)" EXCLUDE
     )
 

@@ -5,6 +5,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -135,7 +136,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
 
   // see if this is already in the cache
   cmState* state = status.GetMakefile().GetState();
-  const char* existingValue = state->GetCacheEntryValue(variable);
+  cmProp existingValue = state->GetCacheEntryValue(variable);
   if (existingValue &&
       (state->GetCacheEntryType(variable) != cmStateEnums::UNINITIALIZED)) {
     // if the set is trying to CACHE the value but the value
@@ -149,8 +150,8 @@ bool cmSetCommand(std::vector<std::string> const& args,
 
   // if it is meant to be in the cache then define it in the cache
   if (cache) {
-    status.GetMakefile().AddCacheDefinition(variable, value.c_str(), docstring,
-                                            type, force);
+    status.GetMakefile().AddCacheDefinition(variable, value, docstring, type,
+                                            force);
   } else {
     // add the definition
     status.GetMakefile().AddDefinition(variable, value);

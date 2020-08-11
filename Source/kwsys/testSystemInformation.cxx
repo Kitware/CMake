@@ -11,29 +11,13 @@
 
 #include <iostream>
 
-#if defined(KWSYS_USE_LONG_LONG)
-#  if defined(KWSYS_IOS_HAS_OSTREAM_LONG_LONG)
-#    define iostreamLongLong(x) (x)
-#  else
-#    define iostreamLongLong(x) ((long)x)
-#  endif
-#elif defined(KWSYS_USE___INT64)
-#  if defined(KWSYS_IOS_HAS_OSTREAM___INT64)
-#    define iostreamLongLong(x) (x)
-#  else
-#    define iostreamLongLong(x) ((long)x)
-#  endif
-#else
-#  error "No Long Long"
-#endif
-
 #define printMethod(info, m) std::cout << #m << ": " << info.m() << "\n"
 
 #define printMethod2(info, m, unit)                                           \
   std::cout << #m << ": " << info.m() << " " << unit << "\n"
 
 #define printMethod3(info, m, unit)                                           \
-  std::cout << #m << ": " << iostreamLongLong(info.m) << " " << unit << "\n"
+  std::cout << #m << ": " << info.m << " " << unit << "\n"
 
 int testSystemInformation(int, char* [])
 {

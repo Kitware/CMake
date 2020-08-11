@@ -1,0 +1,79 @@
+{
+    "name": "ALL_BUILD",
+    "id": "^ALL_BUILD::@[0-9a-f]+$",
+    "directorySource": "^.*/Tests/RunCMake/FileAPIExternalSource$",
+    "projectName": "External",
+    "type": "UTILITY",
+    "isGeneratorProvided": true,
+    "sources": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/CMakeFiles/ALL_BUILD$",
+            "isGenerated": true,
+            "sourceGroupName": "",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/CMakeFiles/ALL_BUILD\\.rule$",
+            "isGenerated": true,
+            "sourceGroupName": "CMake Rules",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/CMakeFiles/ALL_BUILD$"
+            ]
+        },
+        {
+            "name": "CMake Rules",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/CMakeFiles/ALL_BUILD\\.rule$"
+            ]
+        }
+    ],
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": null,
+    "build": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild$",
+    "source": "^.*/Tests/RunCMake/FileAPIExternalSource$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@[0-9a-f]+$",
+            "backtrace": null
+        },
+        {
+            "id": "^generated_exe::@[0-9a-f]+$",
+            "backtrace": null
+        }
+    ]
+}

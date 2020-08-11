@@ -55,8 +55,7 @@ cmCPackIFWPackage::DependenceStruct::DependenceStruct(
   if (dashPos != std::string::npos) {
     pos = dashPos;
   }
-  this->Name =
-    pos == std::string::npos ? dependence : dependence.substr(0, pos);
+  this->Name = dependence.substr(0, pos);
 }
 
 std::string cmCPackIFWPackage::DependenceStruct::NameWithCompare() const

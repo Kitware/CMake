@@ -26,12 +26,6 @@
 
 #include <string>
 
-/* Disable useless Borland warnings.  KWSys tries not to force things
-   on its includers, but there is no choice here.  */
-#if defined(__BORLANDC__)
-#  pragma warn - 8027 /* function not inlined.  */
-#endif
-
 namespace @KWSYS_NAMESPACE@ {
 
 // Forward declaration

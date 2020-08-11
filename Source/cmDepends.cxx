@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDepends.h"
 
-#include <sstream>
 #include <utility>
 
 #include "cmsys/FStream.hxx"
@@ -10,12 +9,12 @@
 #include "cmFileTime.h"
 #include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
-#include "cmLocalGenerator.h"
+#include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-cmDepends::cmDepends(cmLocalGenerator* lg, std::string targetDir)
+cmDepends::cmDepends(cmLocalUnixMakefileGenerator3* lg, std::string targetDir)
   : LocalGenerator(lg)
   , TargetDirectory(std::move(targetDir))
 {
@@ -81,16 +80,14 @@ void cmDepends::Clear(const std::string& file)
 {
   // Print verbose output.
   if (this->Verbose) {
-    std::ostringstream msg;
-    msg << "Clearing dependencies in \"" << file << "\"." << std::endl;
-    cmSystemTools::Stdout(msg.str());
+    cmSystemTools::Stdout(
+      cmStrCat("Clearing dependencies in \"", file, "\".\n"));
   }
 
   // Write an empty dependency file.
   cmGeneratedFileStream depFileStream(file);
   depFileStream << "# Empty dependencies file\n"
-                << "# This may be replaced when dependencies are built."
-                << std::endl;
+                   "# This may be replaced when dependencies are built.\n";
 }
 
 bool cmDepends::WriteDependencies(const std::set<std::string>& /*unused*/,
@@ -172,10 +169,9 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
 
       // Print verbose output.
       if (this->Verbose) {
-        std::ostringstream msg;
-        msg << "Dependee \"" << dependee << "\" does not exist for depender \""
-            << depender << "\"." << std::endl;
-        cmSystemTools::Stdout(msg.str());
+        cmSystemTools::Stdout(cmStrCat("Dependee \"", dependee,
+                                       "\" does not exist for depender \"",
+                                       depender, "\".\n"));
       }
     } else if (dependerExists) {
       // The dependee and depender both exist.  Compare file times.
@@ -185,10 +181,9 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
 
         // Print verbose output.
         if (this->Verbose) {
-          std::ostringstream msg;
-          msg << "Dependee \"" << dependee << "\" is newer than depender \""
-              << depender << "\"." << std::endl;
-          cmSystemTools::Stdout(msg.str());
+          cmSystemTools::Stdout(cmStrCat("Dependee \"", dependee,
+                                         "\" is newer than depender \"",
+                                         depender, "\".\n"));
         }
       }
     } else {
@@ -200,11 +195,9 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
 
         // Print verbose output.
         if (this->Verbose) {
-          std::ostringstream msg;
-          msg << "Dependee \"" << dependee
-              << "\" is newer than depends file \"" << internalDependsFileName
-              << "\"." << std::endl;
-          cmSystemTools::Stdout(msg.str());
+          cmSystemTools::Stdout(cmStrCat("Dependee \"", dependee,
+                                         "\" is newer than depends file \"",
+                                         internalDependsFileName, "\".\n"));
         }
       }
     }

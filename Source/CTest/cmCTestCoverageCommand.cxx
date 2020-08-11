@@ -4,9 +4,9 @@
 
 #include <set>
 
-#include "cm_static_string_view.hxx"
+#include <cmext/algorithm>
+#include <cmext/string_view>
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 
@@ -22,7 +22,7 @@ void cmCTestCoverageCommand::CheckArguments(
   std::vector<std::string> const& keywords)
 {
   this->LabelsMentioned =
-    !this->Labels.empty() || cmContains(keywords, "LABELS");
+    !this->Labels.empty() || cm::contains(keywords, "LABELS");
 }
 
 cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()

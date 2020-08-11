@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,13 +36,14 @@
 #include "sendf.h"
 #include "connect.h"
 #include "vtls/vtls.h"
-#include "ssh.h"
+#include "vssh/ssh.h"
 #include "easyif.h"
 #include "multiif.h"
 #include "non-ascii.h"
 #include "strerror.h"
 #include "select.h"
 #include "strdup.h"
+#include "http2.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -224,7 +225,7 @@ bool Curl_recv_has_postponed_data(struct connectdata *conn, int sockindex)
   (void)sockindex;
   return false;
 }
-#define pre_receive_plain(c,n) do {} WHILE_FALSE
+#define pre_receive_plain(c,n) do {} while(0)
 #define get_pre_recved(c,n,b,l) 0
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
@@ -266,7 +267,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     size_t len;
     char error[CURL_ERROR_SIZE + 2];
     va_start(ap, fmt);
-    mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
+    (void)mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
     len = strlen(error);
 
     if(data->set.errorbuffer && !data->state.errorbuf) {
@@ -497,9 +498,11 @@ static CURLcode pausewrite(struct Curl_easy *data,
      is again enabled */
   struct SingleRequest *k = &data->req;
   struct UrlState *s = &data->state;
-  char *dupl;
   unsigned int i;
   bool newtype = TRUE;
+
+  /* If this transfers over HTTP/2, pause the stream! */
+  Curl_http2_stream_pause(data, TRUE);
 
   if(s->tempcount) {
     for(i = 0; i< s->tempcount; i++) {
@@ -514,41 +517,20 @@ static CURLcode pausewrite(struct Curl_easy *data,
   else
     i = 0;
 
-  if(!newtype) {
-    /* append new data to old data */
-
-    /* figure out the new size of the data to save */
-    size_t newlen = len + s->tempwrite[i].len;
-    /* allocate the new memory area */
-    char *newptr = realloc(s->tempwrite[i].buf, newlen);
-    if(!newptr)
-      return CURLE_OUT_OF_MEMORY;
-    /* copy the new data to the end of the new area */
-    memcpy(newptr + s->tempwrite[i].len, ptr, len);
-
-    /* update the pointer and the size */
-    s->tempwrite[i].buf = newptr;
-    s->tempwrite[i].len = newlen;
-  }
-  else {
-    dupl = Curl_memdup(ptr, len);
-    if(!dupl)
-      return CURLE_OUT_OF_MEMORY;
-
+  if(newtype) {
     /* store this information in the state struct for later use */
-    s->tempwrite[i].buf = dupl;
-    s->tempwrite[i].len = len;
+    Curl_dyn_init(&s->tempwrite[i].b, DYN_PAUSE_BUFFER);
     s->tempwrite[i].type = type;
 
     if(newtype)
       s->tempcount++;
   }
 
+  if(Curl_dyn_addn(&s->tempwrite[i].b, (unsigned char *)ptr, len))
+    return CURLE_OUT_OF_MEMORY;
+
   /* mark the connection as RECV paused */
   k->keepon |= KEEP_RECV_PAUSE;
-
-  DEBUGF(infof(data, "Paused %zu bytes in buffer for type %02x\n",
-               len, type));
 
   return CURLE_OK;
 }
@@ -611,7 +593,7 @@ static CURLcode chop_write(struct connectdata *conn,
         return pausewrite(data, type, ptr, len);
       }
       if(wrote != chunklen) {
-        failf(data, "Failed writing body (%zu != %zu)", wrote, chunklen);
+        failf(data, "Failure writing output to destination");
         return CURLE_WRITE_ERROR;
       }
     }
@@ -692,19 +674,20 @@ CURLcode Curl_read_plain(curl_socket_t sockfd,
   ssize_t nread = sread(sockfd, buf, bytesfromsocket);
 
   if(-1 == nread) {
-    int err = SOCKERRNO;
-    int return_error;
+    const int err = SOCKERRNO;
+    const bool return_error =
 #ifdef USE_WINSOCK
-    return_error = WSAEWOULDBLOCK == err;
+      WSAEWOULDBLOCK == err
 #else
-    return_error = EWOULDBLOCK == err || EAGAIN == err || EINTR == err;
+      EWOULDBLOCK == err || EAGAIN == err || EINTR == err
 #endif
+      ;
+    *n = 0; /* no data returned */
     if(return_error)
       return CURLE_AGAIN;
     return CURLE_RECV_ERROR;
   }
 
-  /* we only return number of bytes read when we return OK */
   *n = nread;
   return CURLE_OK;
 }

@@ -1,3 +1,3 @@
-void nothing()
+void nothing(void)
 {
 }
