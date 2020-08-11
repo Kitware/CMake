@@ -99,12 +99,14 @@
 
 .linux_builder_tags:
     tags:
+        - cmake
         - build
         - docker
         - linux
 
 .linux_builder_tags_qt:
     tags:
+        - cmake
         - build
         - docker
         - linux
@@ -112,6 +114,7 @@
 
 .linux_builder_tags_cuda:
     tags:
+        - cmake
         - cuda-rt
         - docker
         - linux
