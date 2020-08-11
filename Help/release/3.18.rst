@@ -339,3 +339,11 @@ Changes made since CMake 3.18.0 include the following.
   that were using manual quoting or escaping to work around the prior
   limitation.  This fix has been reverted in 3.18.1, but may be
   re-introduced in future versions of CMake with a policy for compatibility.
+
+3.18.2
+------
+
+* The default value of :variable:`CMAKE_AUTOMOC_PATH_PREFIX` was changed to
+  ``OFF`` because this feature can break existing projects that have
+  identically named header files in different include directories.
+  This restores compatibility with behavior of CMake 3.15 and below.
