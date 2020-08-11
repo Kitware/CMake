@@ -208,7 +208,6 @@ function(_HDF5_test_regular_compiler_C success version is_parallel)
     set(test_file ${scratch_directory}/cmake_hdf5_test.c)
     file(WRITE ${test_file}
       "#include <hdf5.h>\n"
-      "#include <hdf5_hl.h>\n"
       "const char* info_ver = \"INFO\" \":\" H5_VERSION;\n"
       "#ifdef H5_HAVE_PARALLEL\n"
       "const char* info_parallel = \"INFO\" \":\" \"PARALLEL\";\n"
