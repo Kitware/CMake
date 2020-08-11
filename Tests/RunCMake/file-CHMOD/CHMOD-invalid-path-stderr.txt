@@ -1,0 +1,6 @@
+CMake Error at CHMOD-invalid-path\.cmake:[0-9]+ \(file\):
+  file does not exist:
+
+  .*/chmod-tests/I_dont_exist
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

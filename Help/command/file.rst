@@ -30,6 +30,8 @@ Synopsis
     file(`SIZE`_ <filename> <out-var>)
     file(`READ_SYMLINK`_ <linkname> <out-var>)
     file(`CREATE_LINK`_ <original> <linkname> [...])
+    file(`CHMOD`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
+    file(`CHMOD_RECURSE`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
 
   `Path Conversion`_
     file(`RELATIVE_PATH`_ <out-var> <directory> <file>)
@@ -740,6 +742,51 @@ Specifying ``COPY_ON_ERROR`` enables copying the file as a fallback if
 creating the link fails.  It can be useful for handling situations such as
 ``<original>`` and ``<linkname>`` being on different drives or mount points,
 which would make them unable to support a hard link.
+
+.. _CHMOD:
+
+.. code-block:: cmake
+
+  file(CHMOD <files>... <directories>... [PERMISSIONS <permissions>...]
+      [FILE_PERMISSIONS <permissions>...]
+      [DIRECTORY_PERMISSIONS <permissions>...])
+
+Set the permissions for the ``<files>...`` and ``<directories>...`` specified.
+Valid permissions are  ``OWNER_READ``, ``OWNER_WRITE``, ``OWNER_EXECUTE``,
+``GROUP_READ``, ``GROUP_WRITE``, ``GROUP_EXECUTE``, ``WORLD_READ``,
+``WORLD_WRITE``, ``WORLD_EXECUTE``.
+
+Valid combination of keywords are:
+
+``PERMISSIONS``
+  all items are changed
+
+``FILE_PERMISSIONS``
+  only files are changed
+
+``DIRECTORY_PERMISSIONS``
+  only directories are changed
+
+``PERMISSIONS`` and ``FILE_PERMISSIONS``
+  ``FILE_PERMISSIONS`` overrides ``PERMISSIONS`` for files
+
+``PERMISSIONS`` and ``DIRECTORY_PERMISSIONS``
+  ``DIRECTORY_PERMISSIONS`` overrides ``PERMISSIONS`` for directories
+
+``FILE_PERMISSIONS`` and ``DIRECTORY_PERMISSIONS``
+  use ``FILE_PERMISSIONS`` for files and ``DIRECTORY_PERMISSIONS`` for
+  directories
+
+
+.. _CHMOD_RECURSE:
+
+.. code-block:: cmake
+
+  file(CHMOD_RECURSE <files>... <directories>... PERMISSIONS <permissions>...
+       FILE_PERMISSIONS <permissions>... DIRECTORY_PERMISSIONS <permissions>...)
+
+Same as `CHMOD`_, but change the permissions of files and directories present in
+the ``<directories>..`` recursively.
 
 Path Conversion
 ^^^^^^^^^^^^^^^
