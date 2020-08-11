@@ -16,7 +16,7 @@ set(CPACK_COMPONENTS_IGNORE_GROUPS 1)
 
 # overriding previous descriptions
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "main description") # This become a summary line (the first one) of all descriptions
-set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION "applications_description")
+set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION "applications_description\n")
 set(CPACK_COMPONENT_HEADERS_DESCRIPTION "headers_description")
 # libraries does not have any description and should inherit from CPACK_PACKAGE_DESCRIPTION_SUMMARY
 # plus content of the `CPACK_PACKAGE_DESCRIPTION_FILE`.

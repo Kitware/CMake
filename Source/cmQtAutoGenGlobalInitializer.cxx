@@ -13,6 +13,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmProcessOutput.h"
+#include "cmProperty.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenInitializer.h"
 #include "cmState.h"
@@ -95,11 +96,11 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
       bool const uic = target->GetPropertyAsBool(kw().AUTOUIC);
       bool const rcc = target->GetPropertyAsBool(kw().AUTORCC);
       if (moc || uic || rcc) {
-        std::string const mocExec =
+        std::string const& mocExec =
           target->GetSafeProperty(kw().AUTOMOC_EXECUTABLE);
-        std::string const uicExec =
+        std::string const& uicExec =
           target->GetSafeProperty(kw().AUTOUIC_EXECUTABLE);
-        std::string const rccExec =
+        std::string const& rccExec =
           target->GetSafeProperty(kw().AUTORCC_EXECUTABLE);
 
         // We support Qt4, Qt5 and Qt6
@@ -164,10 +165,10 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
 
     // Set FOLDER property in the target
     {
-      char const* folder =
+      cmProp folder =
         makefile->GetState()->GetGlobalProperty("AUTOGEN_TARGETS_FOLDER");
       if (folder != nullptr) {
-        target->SetProperty("FOLDER", folder);
+        target->SetProperty("FOLDER", *folder);
       }
     }
   }

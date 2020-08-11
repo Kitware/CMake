@@ -12,25 +12,26 @@ int check_defines_CXX()
 {
   int result = 1;
   if (strcmp(FILE_STRING, STRING_VALUE) != 0) {
-    fprintf(stderr, "FILE_STRING has wrong value in CXX [%s]\n", FILE_STRING);
+    fprintf(stderr, "FILE_STRING has wrong value in CXX [%s] vs [%s]\n",
+            FILE_STRING, STRING_VALUE);
     result = 0;
   }
   if (strcmp(TARGET_STRING, STRING_VALUE) != 0) {
-    fprintf(stderr, "TARGET_STRING has wrong value in CXX [%s]\n",
-            TARGET_STRING);
+    fprintf(stderr, "TARGET_STRING has wrong value in CXX [%s] vs [%s]\n",
+            TARGET_STRING, STRING_VALUE);
     result = 0;
   }
   {
     int x = 2;
     int y = 3;
     if ((FILE_EXPR) != (EXPR)) {
-      fprintf(stderr, "FILE_EXPR did not work in CXX [%s]\n",
-              TO_STRING(FILE_EXPR));
+      fprintf(stderr, "FILE_EXPR did not work in CXX [%s] vs [%s]\n",
+              TO_STRING(FILE_EXPR), TO_STRING(EXPR));
       result = 0;
     }
     if ((TARGET_EXPR) != (EXPR)) {
-      fprintf(stderr, "TARGET_EXPR did not work in CXX [%s]\n",
-              TO_STRING(FILE_EXPR));
+      fprintf(stderr, "TARGET_EXPR did not work in CXX [%s] vs [%s]\n",
+              TO_STRING(TARGET_EXPR), TO_STRING(EXPR));
       result = 0;
     }
   }

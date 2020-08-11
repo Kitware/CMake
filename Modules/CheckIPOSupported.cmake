@@ -113,7 +113,7 @@ macro(_ipo_run_language_check language)
   endforeach()
 
   try_compile(
-      result
+      _IPO_LANGUAGE_CHECK_RESULT
       "${bindir}"
       "${srcdir}"
       "${TRY_COMPILE_PROJECT_NAME}"
@@ -122,8 +122,10 @@ macro(_ipo_run_language_check language)
       "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON"
       OUTPUT_VARIABLE output
   )
+  set(_IPO_LANGUAGE_CHECK_RESULT "${_IPO_LANGUAGE_CHECK_RESULT}")
+  unset(_IPO_LANGUAGE_CHECK_RESULT CACHE)
 
-  if(NOT result)
+  if(NOT _IPO_LANGUAGE_CHECK_RESULT)
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
       "${language} compiler IPO check failed with the following output:\n"
       "${output}\n")

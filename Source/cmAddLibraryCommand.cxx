@@ -9,6 +9,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -181,6 +182,16 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       return false;
     }
 
+    if (mf.GetPolicyStatus(cmPolicies::CMP0107) == cmPolicies::NEW) {
+      // Make sure the target does not already exist.
+      if (mf.FindTargetToUse(libName)) {
+        status.SetError(cmStrCat(
+          "cannot create ALIAS target \"", libName,
+          "\" because another target with the same name already exists."));
+        return false;
+      }
+    }
+
     std::string const& aliasedName = *s;
     if (mf.IsAlias(aliasedName)) {
       status.SetError(cmStrCat("cannot create ALIAS target \"", libName,
@@ -208,14 +219,9 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
                                "\" is not a library."));
       return false;
     }
-    if (aliasedTarget->IsImported() &&
-        !aliasedTarget->IsImportedGloballyVisible()) {
-      status.SetError(cmStrCat("cannot create ALIAS target \"", libName,
-                               "\" because target \"", aliasedName,
-                               "\" is imported but not globally visible."));
-      return false;
-    }
-    mf.AddAlias(libName, aliasedName);
+    mf.AddAlias(libName, aliasedName,
+                !aliasedTarget->IsImported() ||
+                  aliasedTarget->IsImportedGloballyVisible());
     return true;
   }
 

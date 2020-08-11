@@ -242,10 +242,12 @@ Options
  :command:`message(SEND_ERROR)` calls.
 
 ``--debug-find``
- Put cmake find in a debug mode.
+ Put cmake find commands in a debug mode.
 
  Print extra find call information during the cmake run to standard
  error. Output is designed for human consumption and not for parsing.
+ See also the :variable:`CMAKE_FIND_DEBUG_MODE` variable for debugging
+ a more local part of the project.
 
 ``--trace``
  Put cmake in trace mode.
@@ -356,6 +358,20 @@ Options
  in :variable:`CMAKE_SOURCE_DIR` and :variable:`CMAKE_BINARY_DIR`.
  This flag tells CMake to warn about other files as well.
 
+``--profiling-output=<path>``
+ Used in conjuction with ``--profiling-format`` to output to a given path.
+
+``--profiling-format=<file>``
+ Enable the output of profiling data of CMake script in the given format.
+
+ This can aid performance analysis of CMake scripts executed. Third party
+ applications should be used to process the output into human readable format.
+
+ Currently supported values are:
+ ``google-trace`` Outputs in Google Trace Format, which can be parsed by the
+ about:tracing tab of Google Chrome or using a plugin for a tool like Trace
+ Compass.
+
 .. _`Build Tool Mode`:
 
 Build a Project
@@ -465,12 +481,16 @@ Run a Script
 
 .. code-block:: shell
 
-  cmake [{-D <var>=<value>}...] -P <cmake-script-file>
+  cmake [{-D <var>=<value>}...] -P <cmake-script-file> [-- <unparsed-options>...]
 
 Process the given cmake file as a script written in the CMake
 language.  No configure or generate step is performed and the cache
 is not modified.  If variables are defined using ``-D``, this must be
 done before the ``-P`` argument.
+
+Any options after ``--`` are not parsed by CMake, but they are still included
+in the set of :variable:`CMAKE_ARGV<n> <CMAKE_ARGV0>` variables passed to the
+script (including the ``--`` itself).
 
 
 Run a Command-Line Tool
@@ -537,6 +557,9 @@ Available commands are:
 
   ``serverMode``
     ``true`` if cmake supports server-mode and ``false`` otherwise.
+
+``cat <files>...``
+  Concatenate files and print on the standard output.
 
 ``chdir <dir> <cmd> [<arg>...]``
   Change the current working directory and run a command.

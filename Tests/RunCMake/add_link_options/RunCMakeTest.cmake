@@ -23,6 +23,21 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
   run_cmake_target(LINK_OPTIONS mod LinkOptions_mod --config Release)
   run_cmake_target(LINK_OPTIONS exe LinkOptions_exe --config Release)
 
+
+  run_cmake(genex_LINK_LANGUAGE)
+
+  run_cmake_target(genex_LINK_LANGUAGE shared_c LinkOptions_shared_c --config Release)
+  run_cmake_target(genex_LINK_LANGUAGE shared_cxx LinkOptions_shared_cxx --config Release)
+  run_cmake_target(genex_LINK_LANGUAGE mod LinkOptions_mod --config Release)
+  run_cmake_target(genex_LINK_LANGUAGE exe LinkOptions_exe --config Release)
+
+  run_cmake(genex_LINK_LANG_AND_ID)
+
+  run_cmake_target(genex_LINK_LANG_AND_ID shared_c LinkOptions_shared_c --config Release)
+  run_cmake_target(genex_LINK_LANG_AND_ID shared_cxx LinkOptions_shared_cxx --config Release)
+  run_cmake_target(genex_LINK_LANG_AND_ID mod LinkOptions_mod --config Release)
+  run_cmake_target(genex_LINK_LANG_AND_ID exe LinkOptions_exe --config Release)
+
   unset(RunCMake_TEST_OPTIONS)
   unset(RunCMake_TEST_OUTPUT_MERGE)
 endif()

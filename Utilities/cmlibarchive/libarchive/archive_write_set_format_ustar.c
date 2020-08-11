@@ -44,6 +44,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_write_set_format_ustar.c 191579 
 #include "archive_entry_locale.h"
 #include "archive_private.h"
 #include "archive_write_private.h"
+#include "archive_write_set_format_private.h"
 
 struct ustar {
 	uint64_t	entry_bytes_remaining;
@@ -352,14 +353,12 @@ archive_write_ustar_header(struct archive_write *a, struct archive_entry *entry)
 #endif
 	ret = __archive_write_format_header_ustar(a, buff, entry, -1, 1, sconv);
 	if (ret < ARCHIVE_WARN) {
-		if (entry_main)
-			archive_entry_free(entry_main);
+		archive_entry_free(entry_main);
 		return (ret);
 	}
 	ret2 = __archive_write_output(a, buff, 512);
 	if (ret2 < ARCHIVE_WARN) {
-		if (entry_main)
-			archive_entry_free(entry_main);
+		archive_entry_free(entry_main);
 		return (ret2);
 	}
 	if (ret2 < ret)
@@ -367,8 +366,7 @@ archive_write_ustar_header(struct archive_write *a, struct archive_entry *entry)
 
 	ustar->entry_bytes_remaining = archive_entry_size(entry);
 	ustar->entry_padding = 0x1ff & (-(int64_t)ustar->entry_bytes_remaining);
-	if (entry_main)
-		archive_entry_free(entry_main);
+	archive_entry_free(entry_main);
 	return (ret);
 }
 
@@ -515,9 +513,11 @@ __archive_write_format_header_ustar(struct archive_write *a, char h[512],
 	}
 	if (copy_length > 0) {
 		if (copy_length > USTAR_uname_size) {
-			archive_set_error(&a->archive, ARCHIVE_ERRNO_MISC,
-			    "Username too long");
-			ret = ARCHIVE_FAILED;
+			if (tartype != 'x') {
+				archive_set_error(&a->archive,
+				    ARCHIVE_ERRNO_MISC, "Username too long");
+				ret = ARCHIVE_FAILED;
+			}
 			copy_length = USTAR_uname_size;
 		}
 		memcpy(h + USTAR_uname_offset, p, copy_length);
@@ -538,9 +538,11 @@ __archive_write_format_header_ustar(struct archive_write *a, char h[512],
 	}
 	if (copy_length > 0) {
 		if (strlen(p) > USTAR_gname_size) {
-			archive_set_error(&a->archive, ARCHIVE_ERRNO_MISC,
-			    "Group name too long");
-			ret = ARCHIVE_FAILED;
+			if (tartype != 'x') {
+				archive_set_error(&a->archive,
+				    ARCHIVE_ERRNO_MISC, "Group name too long");
+				ret = ARCHIVE_FAILED;
+			}
 			copy_length = USTAR_gname_size;
 		}
 		memcpy(h + USTAR_gname_offset, p, copy_length);
@@ -612,16 +614,9 @@ __archive_write_format_header_ustar(struct archive_write *a, char h[512],
 		case AE_IFBLK: h[USTAR_typeflag_offset] = '4' ; break;
 		case AE_IFDIR: h[USTAR_typeflag_offset] = '5' ; break;
 		case AE_IFIFO: h[USTAR_typeflag_offset] = '6' ; break;
-		case AE_IFSOCK:
-			archive_set_error(&a->archive,
-			    ARCHIVE_ERRNO_FILE_FORMAT,
-			    "tar format cannot archive socket");
-			return (ARCHIVE_FAILED);
-		default:
-			archive_set_error(&a->archive,
-			    ARCHIVE_ERRNO_FILE_FORMAT,
-			    "tar format cannot archive this (mode=0%lo)",
-			    (unsigned long)archive_entry_mode(entry));
+		default: /* AE_IFSOCK and unknown */
+			__archive_write_entry_filetype_unsupported(
+			    &a->archive, entry, "ustar");
 			ret = ARCHIVE_FAILED;
 		}
 	}

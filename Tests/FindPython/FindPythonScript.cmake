@@ -1,4 +1,4 @@
-
+cmake_minimum_required(VERSION 3.12)
 if (PYTHON_MUST_NOT_BE_FOUND)
   find_package(${PYTHON_PACKAGE_NAME} QUIET)
   if (${PYTHON_PACKAGE_NAME}_FOUND)

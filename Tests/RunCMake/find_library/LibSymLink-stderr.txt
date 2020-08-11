@@ -1,0 +1,2 @@
+^SYMLINK_LIBRARY='SYMLINK_LIBRARY-NOTFOUND'
+SYMLINK_LIBRARY='[^']*/Tests/RunCMake/find_library/LibSymLink-build/lib/libsymlink.a'$

@@ -1,25 +1,35 @@
+macro (add_cuda_test_macro name)
+  add_test_macro("${name}" ${ARGN})
+  set_property(TEST "${name}" APPEND
+    PROPERTY LABELS "CUDA")
+endmacro ()
 
-ADD_TEST_MACRO(Cuda.Complex CudaComplex)
-ADD_TEST_MACRO(Cuda.ConsumeCompileFeatures CudaConsumeCompileFeatures)
-ADD_TEST_MACRO(Cuda.CXXStandardSetTwice CXXStandardSetTwice)
-ADD_TEST_MACRO(Cuda.ObjectLibrary CudaObjectLibrary)
-ADD_TEST_MACRO(Cuda.MixedStandardLevels1 MixedStandardLevels1)
-ADD_TEST_MACRO(Cuda.MixedStandardLevels2 MixedStandardLevels2)
-ADD_TEST_MACRO(Cuda.MixedStandardLevels3 MixedStandardLevels3)
-ADD_TEST_MACRO(Cuda.MixedStandardLevels4 MixedStandardLevels4)
-ADD_TEST_MACRO(Cuda.MixedStandardLevels5 MixedStandardLevels5)
-ADD_TEST_MACRO(Cuda.NotEnabled CudaNotEnabled)
-ADD_TEST_MACRO(Cuda.SeparableCompCXXOnly SeparableCompCXXOnly)
-ADD_TEST_MACRO(Cuda.Toolkit Toolkit)
-ADD_TEST_MACRO(Cuda.IncludePathNoToolkit IncludePathNoToolkit)
-ADD_TEST_MACRO(Cuda.ProperDeviceLibraries ProperDeviceLibraries)
-ADD_TEST_MACRO(Cuda.ProperLinkFlags ProperLinkFlags)
-ADD_TEST_MACRO(Cuda.SharedRuntimePlusToolkit SharedRuntimePlusToolkit)
+add_cuda_test_macro(Cuda.ConsumeCompileFeatures CudaConsumeCompileFeatures)
+add_cuda_test_macro(Cuda.CXXStandardSetTwice CXXStandardSetTwice)
+add_cuda_test_macro(Cuda.ObjectLibrary CudaObjectLibrary)
+add_cuda_test_macro(Cuda.MixedStandardLevels1 MixedStandardLevels1)
+add_cuda_test_macro(Cuda.MixedStandardLevels2 MixedStandardLevels2)
+add_cuda_test_macro(Cuda.MixedStandardLevels3 MixedStandardLevels3)
+add_cuda_test_macro(Cuda.MixedStandardLevels4 MixedStandardLevels4)
+add_cuda_test_macro(Cuda.MixedStandardLevels5 MixedStandardLevels5)
+add_cuda_test_macro(Cuda.NotEnabled CudaNotEnabled)
+add_cuda_test_macro(Cuda.SeparableCompCXXOnly SeparableCompCXXOnly)
+add_cuda_test_macro(Cuda.Toolkit Toolkit)
+add_cuda_test_macro(Cuda.IncludePathNoToolkit IncludePathNoToolkit)
+add_cuda_test_macro(Cuda.SharedRuntimePlusToolkit SharedRuntimePlusToolkit)
+
+# Separable compilation is currently only supported on NVCC. Disable tests
+# using it for other compilers.
+if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
+  add_cuda_test_macro(Cuda.Complex CudaComplex)
+  add_cuda_test_macro(Cuda.ProperDeviceLibraries ProperDeviceLibraries)
+  add_cuda_test_macro(Cuda.ProperLinkFlags ProperLinkFlags)
+endif()
 
 # The CUDA only ships the shared version of the toolkit libraries
 # on windows
 if(NOT WIN32)
-  ADD_TEST_MACRO(Cuda.StaticRuntimePlusToolkit StaticRuntimePlusToolkit)
+  add_cuda_test_macro(Cuda.StaticRuntimePlusToolkit StaticRuntimePlusToolkit)
 endif()
 
-ADD_TEST_MACRO(Cuda.WithC CudaWithC)
+add_cuda_test_macro(Cuda.WithC CudaWithC)

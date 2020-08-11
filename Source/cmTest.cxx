@@ -34,15 +34,18 @@ void cmTest::SetCommand(std::vector<std::string> const& command)
 
 const char* cmTest::GetProperty(const std::string& prop) const
 {
-  const char* retVal = this->Properties.GetPropertyValue(prop);
+  cmProp retVal = this->Properties.GetPropertyValue(prop);
   if (!retVal) {
     const bool chain =
       this->Makefile->GetState()->IsPropertyChained(prop, cmProperty::TEST);
     if (chain) {
-      return this->Makefile->GetProperty(prop, chain);
+      if (cmProp p = this->Makefile->GetProperty(prop, chain)) {
+        return p->c_str();
+      }
     }
+    return nullptr;
   }
-  return retVal;
+  return retVal->c_str();
 }
 
 bool cmTest::GetPropertyAsBool(const std::string& prop) const

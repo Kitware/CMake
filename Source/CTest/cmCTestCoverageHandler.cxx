@@ -680,8 +680,9 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile* mf)
 //
 #ifdef _WIN32
 #  define fnc(s) cmSystemTools::LowerCase(s)
+#  define fnc_prefix(s, t) fnc(s.substr(0, t.size())) == fnc(t)
 #else
-#  define fnc(s) s
+#  define fnc_prefix(s, t) cmHasPrefix(s, t)
 #endif
 
 bool IsFileInDir(const std::string& infile, const std::string& indir)
@@ -689,8 +690,8 @@ bool IsFileInDir(const std::string& infile, const std::string& indir)
   std::string file = cmSystemTools::CollapseFullPath(infile);
   std::string dir = cmSystemTools::CollapseFullPath(indir);
 
-  return file.size() > dir.size() &&
-    fnc(file.substr(0, dir.size())) == fnc(dir) && file[dir.size()] == '/';
+  return file.size() > dir.size() && fnc_prefix(file, dir) &&
+    file[dir.size()] == '/';
 }
 
 int cmCTestCoverageHandler::HandlePHPCoverage(
@@ -1214,8 +1215,6 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           while (cmSystemTools::GetLineFromStream(ifile, nl)) {
             cnt++;
 
-            // TODO: Handle gcov 3.0 non-coverage lines
-
             // Skip empty lines
             if (nl.empty()) {
               continue;
@@ -1223,6 +1222,14 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
             // Skip unused lines
             if (nl.size() < 12) {
+              continue;
+            }
+
+            // Handle gcov 3.0 non-coverage lines
+            // non-coverage lines seem to always start with something not
+            // a space and don't have a ':' in the 9th position
+            // TODO: Verify that this is actually a robust metric
+            if (nl[0] != ' ' && nl[9] != ':') {
               continue;
             }
 
@@ -1709,29 +1716,26 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
 
         // Read the coverage count from the beginning of the Trace.py output
         // line
-        std::string prefix = nl.substr(0, 6);
-        if (prefix[5] != ' ' && prefix[5] != ':') {
-          // This is a hack. We should really do something more elaborate
-          prefix = nl.substr(0, 7);
-          if (prefix[6] != ' ' && prefix[6] != ':') {
-            prefix = nl.substr(0, 8);
-            if (prefix[7] != ' ' && prefix[7] != ':') {
-              cmCTestLog(this->CTest, ERROR_MESSAGE,
-                         "Currently the limit is maximum coverage of 999999"
-                           << std::endl);
-            }
+        std::string::size_type pos;
+        int cov = 0;
+        // This is a hack. We should really do something more elaborate
+        for (pos = 5; pos < 8; pos++) {
+          if (nl[pos] == ' ') {
+            // This line does not have ':' so no coverage here. That said,
+            // Trace.py does not handle not covered lines versus comments etc.
+            // So, this will be set to 0.
+            break;
+          }
+          if (nl[pos] == ':') {
+            cov = atoi(nl.substr(0, pos - 1).c_str());
+            break;
           }
         }
-        int cov = atoi(prefix.c_str());
-        if (prefix[prefix.size() - 1] != ':') {
-          // This line does not have ':' so no coverage here. That said,
-          // Trace.py does not handle not covered lines versus comments etc.
-          // So, this will be set to 0.
-          cov = 0;
+        if (pos == 8) {
+          cmCTestLog(this->CTest, ERROR_MESSAGE,
+                     "Currently the limit is maximum coverage of 999999"
+                       << std::endl);
         }
-        cmCTestOptionalLog(
-          this->CTest, DEBUG,
-          "Prefix: " << prefix << " cov: " << cov << std::endl, this->Quiet);
         // Read the line number starting at the 10th character of the gcov
         // output line
         long lineIdx = cnt;

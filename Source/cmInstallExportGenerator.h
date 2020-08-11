@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <iosfwd>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -30,7 +31,11 @@ public:
                            bool exclude_from_all, std::string filename,
                            std::string name_space, bool exportOld,
                            bool android);
+  cmInstallExportGenerator(const cmInstallExportGenerator&) = delete;
   ~cmInstallExportGenerator() override;
+
+  cmInstallExportGenerator& operator=(const cmInstallExportGenerator&) =
+    delete;
 
   cmExportSet* GetExportSet() { return this->ExportSet; }
 
@@ -61,7 +66,7 @@ protected:
 
   std::string TempDir;
   std::string MainImportFile;
-  cmExportInstallFileGenerator* EFGen;
+  std::unique_ptr<cmExportInstallFileGenerator> EFGen;
 };
 
 #endif

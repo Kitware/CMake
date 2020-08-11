@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #include "cmConnection.h"
 #include "cmUVHandlePtr.h"

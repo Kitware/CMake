@@ -1,0 +1,11 @@
+set(unitybuild_a_c "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/tgt.dir/Unity/unity_a_c.c")
+if(NOT EXISTS "${unitybuild_a_c}")
+  set(RunCMake_TEST_FAILED "Generated unity source files ${unitybuild_a_c} does not exist.")
+  return()
+endif()
+
+set(unitybuild_b_c "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/tgt.dir/Unity/unity_b_c.c")
+if(NOT EXISTS "${unitybuild_b_c}")
+  set(RunCMake_TEST_FAILED "Generated unity source files ${unitybuild_b_c} does not exist.")
+  return()
+endif()

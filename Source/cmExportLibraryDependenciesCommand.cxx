@@ -14,6 +14,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -95,8 +96,8 @@ static void FinalAction(cmMakefile& makefile, std::string const& filename,
           // Handle simple output name changes.  This command is
           // deprecated so we do not support full target name
           // translation (which requires per-configuration info).
-          if (const char* outname = libtgt->GetProperty("OUTPUT_NAME")) {
-            lib = outname;
+          if (cmProp outname = libtgt->GetProperty("OUTPUT_NAME")) {
+            lib = *outname;
           }
         }
         valueOld += lib;

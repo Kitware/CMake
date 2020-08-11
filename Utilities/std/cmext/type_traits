@@ -6,6 +6,8 @@
 #ifndef cmext_type_traits
 #define cmext_type_traits
 
+#include <memory>
+
 #include <cm/type_traits>
 
 namespace cm {

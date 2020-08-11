@@ -42,7 +42,7 @@ void cmVariableWatchCommandVariableAccessed(const std::string& variable,
   /// Ultra bad!!
   cmMakefile* makefile = const_cast<cmMakefile*>(mf);
 
-  std::string stack = makefile->GetProperty("LISTFILE_STACK");
+  std::string stack = *mf->GetProperty("LISTFILE_STACK");
   if (!data->Command.empty()) {
     cmListFileFunction newLFF;
     const char* const currentListFile =

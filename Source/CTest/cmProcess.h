@@ -6,13 +6,14 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <chrono>
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <cm3p/uv.h>
 #include <stddef.h>
 #include <stdint.h>
-
-#include "cm_uv.h"
 
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
@@ -28,7 +29,7 @@ class cmCTestRunTest;
 class cmProcess
 {
 public:
-  explicit cmProcess(cmCTestRunTest& runner);
+  explicit cmProcess(std::unique_ptr<cmCTestRunTest> runner);
   ~cmProcess();
   void SetCommand(std::string const& command);
   void SetCommandArguments(std::vector<std::string> const& arg);
@@ -70,6 +71,11 @@ public:
   Exception GetExitException();
   std::string GetExitExceptionString();
 
+  std::unique_ptr<cmCTestRunTest> GetRunner()
+  {
+    return std::move(this->Runner);
+  }
+
 private:
   cmDuration Timeout;
   std::chrono::steady_clock::time_point StartTime;
@@ -82,7 +88,7 @@ private:
   cm::uv_timer_ptr Timer;
   std::vector<char> Buf;
 
-  cmCTestRunTest& Runner;
+  std::unique_ptr<cmCTestRunTest> Runner;
   cmProcessOutput Conv;
   int Signal = 0;
   cmProcess::State ProcessState = cmProcess::State::Starting;
@@ -101,6 +107,7 @@ private:
   void OnAllocate(size_t suggested_size, uv_buf_t* buf);
 
   void StartTimer();
+  void Finish();
 
   class Buffer : public std::vector<char>
   {

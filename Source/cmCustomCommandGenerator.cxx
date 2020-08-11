@@ -14,6 +14,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -111,13 +112,13 @@ void cmCustomCommandGenerator::FillEmulatorsWithArguments()
     if (target && target->GetType() == cmStateEnums::EXECUTABLE &&
         !target->IsImported()) {
 
-      const char* emulator_property =
+      cmProp emulator_property =
         target->GetProperty("CROSSCOMPILING_EMULATOR");
       if (!emulator_property) {
         continue;
       }
 
-      cmExpandList(emulator_property, this->EmulatorsWithArguments[c]);
+      cmExpandList(*emulator_property, this->EmulatorsWithArguments[c]);
     }
   }
 }

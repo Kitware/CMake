@@ -135,16 +135,17 @@ void DebGenerator::generateDebianBinaryFile() const
 {
   // debian-binary file
   const std::string dbfilename = WorkDir + "/debian-binary";
-  cmGeneratedFileStream out(dbfilename);
-  out << "2.0";
-  out << std::endl; // required for valid debian package
+  cmGeneratedFileStream out;
+  out.Open(dbfilename, false, true);
+  out << "2.0\n"; // required for valid debian package
 }
 
 void DebGenerator::generateControlFile() const
 {
   std::string ctlfilename = WorkDir + "/control";
 
-  cmGeneratedFileStream out(ctlfilename);
+  cmGeneratedFileStream out;
+  out.Open(ctlfilename, false, true);
   for (auto const& kv : ControlValues) {
     out << kv.first << ": " << kv.second << "\n";
   }
@@ -156,8 +157,7 @@ void DebGenerator::generateControlFile() const
       totalSize += cmSystemTools::FileLength(file);
     }
   }
-  out << "Installed-Size: " << (totalSize + 1023) / 1024 << "\n";
-  out << std::endl;
+  out << "Installed-Size: " << (totalSize + 1023) / 1024 << "\n\n";
 }
 
 bool DebGenerator::generateDataTar() const
@@ -173,6 +173,7 @@ bool DebGenerator::generateDataTar() const
   }
   cmArchiveWrite data_tar(fileStream_data_tar, TarCompressionType,
                           DebianArchiveType);
+  data_tar.Open();
 
   // uid/gid should be the one of the root user, and this root user has
   // always uid/gid equal to 0.
@@ -247,7 +248,8 @@ std::string DebGenerator::generateMD5File() const
 {
   std::string md5filename = WorkDir + "/md5sums";
 
-  cmGeneratedFileStream out(md5filename);
+  cmGeneratedFileStream out;
+  out.Open(md5filename, false, true);
 
   std::string topLevelWithTrailingSlash = cmStrCat(TemporaryDir, '/');
   for (std::string const& file : PackageFiles) {
@@ -291,6 +293,7 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
   }
   cmArchiveWrite control_tar(fileStream_control_tar,
                              cmArchiveWrite::CompressGZip, DebianArchiveType);
+  control_tar.Open();
 
   // sets permissions and uid/gid for the files
   control_tar.SetUIDAndGID(0u, 0u);
@@ -410,6 +413,7 @@ bool DebGenerator::generateDeb() const
   cmGeneratedFileStream debStream;
   debStream.Open(outputPath, false, true);
   cmArchiveWrite deb(debStream, cmArchiveWrite::CompressNone, "arbsd");
+  deb.Open();
 
   // uid/gid should be the one of the root user, and this root user has
   // always uid/gid equal to 0.
@@ -484,6 +488,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     findExpr += "/*";
     gl.RecurseOn();
     gl.SetRecurseListDirs(true);
+    gl.SetRecurseThroughSymlinks(false);
     if (!gl.FindFiles(findExpr)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Cannot find any files in the installed directory"
@@ -508,6 +513,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     findExpr += "/*";
     gl.RecurseOn();
     gl.SetRecurseListDirs(true);
+    gl.SetRecurseThroughSymlinks(false);
     if (!gl.FindFiles(findExpr)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Cannot find any files in the installed directory"
@@ -627,6 +633,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   findExpr += "/*";
   gl.RecurseOn();
   gl.SetRecurseListDirs(true);
+  gl.SetRecurseThroughSymlinks(false);
   if (!gl.FindFiles(findExpr)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find any files in the installed directory"
@@ -751,15 +758,17 @@ int cmCPackDebGenerator::createDeb()
   const bool gen_shibs = this->IsOn("CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS") &&
     debian_pkg_shlibs && *debian_pkg_shlibs;
   if (gen_shibs) {
-    cmGeneratedFileStream out(shlibsfilename);
+    cmGeneratedFileStream out;
+    out.Open(shlibsfilename, false, true);
     out << debian_pkg_shlibs;
-    out << std::endl;
+    out << '\n';
   }
 
   const std::string postinst = strGenWDIR + "/postinst";
   const std::string postrm = strGenWDIR + "/postrm";
   if (this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST")) {
-    cmGeneratedFileStream out(postinst);
+    cmGeneratedFileStream out;
+    out.Open(postinst, false, true);
     out << "#!/bin/sh\n\n"
            "set -e\n\n"
            "if [ \"$1\" = \"configure\" ]; then\n"
@@ -767,7 +776,8 @@ int cmCPackDebGenerator::createDeb()
            "fi\n";
   }
   if (this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM")) {
-    cmGeneratedFileStream out(postrm);
+    cmGeneratedFileStream out;
+    out.Open(postrm, false, true);
     out << "#!/bin/sh\n\n"
            "set -e\n\n"
            "if [ \"$1\" = \"remove\" ]; then\n"

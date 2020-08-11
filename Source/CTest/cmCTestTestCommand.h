@@ -60,6 +60,7 @@ protected:
   std::string StopTime;
   std::string TestLoad;
   std::string ResourceSpecFile;
+  bool StopOnFailure = false;
 };
 
 #endif

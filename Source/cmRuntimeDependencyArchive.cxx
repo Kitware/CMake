@@ -39,7 +39,7 @@ static void AddVisualStudioPath(std::vector<std::string>& paths,
   std::string vsloc;
   bool found = false;
 #  ifndef CMAKE_BOOTSTRAP
-  if (gg->GetName().find(prefix) == 0) {
+  if (cmHasPrefix(gg->GetName(), prefix)) {
     cmGlobalVisualStudioVersionedGenerator* vsgen =
       static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
     if (vsgen->GetVSInstance(vsloc)) {
@@ -218,6 +218,9 @@ bool cmRuntimeDependencyArchive::GetGetRuntimeDependenciesCommand(
   // First see if it was supplied by the user
   std::string toolCommand = this->GetMakefile()->GetSafeDefinition(
     "CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND");
+  if (toolCommand.empty() && search == "objdump") {
+    toolCommand = this->GetMakefile()->GetSafeDefinition("CMAKE_OBJDUMP");
+  }
   if (!toolCommand.empty()) {
     cmExpandList(toolCommand, command);
     return true;

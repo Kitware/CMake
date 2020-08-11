@@ -6,30 +6,29 @@
 #include <cassert>
 #include <chrono>
 #include <cmath>
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <list>
-#include <memory>
 #include <sstream>
 #include <stack>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cmext/algorithm>
+
+#include <cm3p/json/value.h>
+#include <cm3p/json/writer.h>
+#include <cm3p/uv.h>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
 
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
-#include "cm_uv.h"
-
 #include "cmAffinity.h"
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestBinPacker.h"
 #include "cmCTestRunTest.h"
@@ -138,7 +137,7 @@ void cmCTestMultiProcessHandler::RunTests()
   uv_run(&this->Loop, UV_RUN_DEFAULT);
   uv_loop_close(&this->Loop);
 
-  if (!this->StopTimePassed) {
+  if (!this->StopTimePassed && !this->CheckStopOnFailure()) {
     assert(this->Completed == this->Total);
     assert(this->Tests.empty());
   }
@@ -172,7 +171,8 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->EraseTest(test);
   this->RunningCount += GetProcessorsUsed(test);
 
-  cmCTestRunTest* testRun = new cmCTestRunTest(*this);
+  auto testRun = cm::make_unique<cmCTestRunTest>(*this);
+
   if (this->RepeatMode != cmCTest::Repeat::Never) {
     testRun->SetRepeatMode(this->RepeatMode);
     testRun->SetNumberOfRuns(this->RepeatCount);
@@ -187,7 +187,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   // Find any failed dependencies for this test. We assume the more common
   // scenario has no failed tests, so make it the outer loop.
   for (std::string const& f : *this->Failed) {
-    if (cmContains(this->Properties[test]->RequireSuccessDepends, f)) {
+    if (cm::contains(this->Properties[test]->RequireSuccessDepends, f)) {
       testRun->AddFailedDependency(f);
     }
   }
@@ -229,28 +229,25 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
       e << "\n";
     }
     e << "Resource spec file:\n\n  " << this->TestHandler->ResourceSpecFile;
-    testRun->StartFailure(e.str(), "Insufficient resources");
-    this->FinishTestProcess(testRun, false);
+    cmCTestRunTest::StartFailure(std::move(testRun), e.str(),
+                                 "Insufficient resources");
     return false;
   }
 
   cmWorkingDirectory workdir(this->Properties[test]->Directory);
   if (workdir.Failed()) {
-    testRun->StartFailure("Failed to change working directory to " +
-                            this->Properties[test]->Directory + " : " +
-                            std::strerror(workdir.GetLastResult()),
-                          "Failed to change working directory");
-  } else {
-    if (testRun->StartTest(this->Completed, this->Total)) {
-      // Ownership of 'testRun' has moved to another structure.
-      // When the test finishes, FinishTestProcess will be called.
-      return true;
-    }
+    cmCTestRunTest::StartFailure(std::move(testRun),
+                                 "Failed to change working directory to " +
+                                   this->Properties[test]->Directory + " : " +
+                                   std::strerror(workdir.GetLastResult()),
+                                 "Failed to change working directory");
+    return false;
   }
 
-  // Pass ownership of 'testRun'.
-  this->FinishTestProcess(testRun, false);
-  return false;
+  // Ownership of 'testRun' has moved to another structure.
+  // When the test finishes, FinishTestProcess will be called.
+  return cmCTestRunTest::StartTest(std::move(testRun), this->Completed,
+                                   this->Total);
 }
 
 bool cmCTestMultiProcessHandler::AllocateResources(int index)
@@ -370,6 +367,11 @@ void cmCTestMultiProcessHandler::CheckResourcesAvailable()
   }
 }
 
+bool cmCTestMultiProcessHandler::CheckStopOnFailure()
+{
+  return this->CTest->GetStopOnFailure();
+}
+
 bool cmCTestMultiProcessHandler::CheckStopTimePassed()
 {
   if (!this->StopTimePassed) {
@@ -447,7 +449,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
 {
   // Check for locked resources
   for (std::string const& i : this->Properties[test]->LockedResources) {
-    if (cmContains(this->LockedResources, i)) {
+    if (cm::contains(this->LockedResources, i)) {
       return false;
     }
   }
@@ -483,6 +485,10 @@ void cmCTestMultiProcessHandler::StartNextTests()
   }
 
   if (this->CheckStopTimePassed()) {
+    return;
+  }
+
+  if (this->CheckStopOnFailure() && !this->Failed->empty()) {
     return;
   }
 
@@ -540,7 +546,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
     if (this->SerialTestRunning) {
       break;
     }
-    // We can only start a RUN_SERIAL test if no other tests are also running.
+    // We can only start a RUN_SERIAL test if no other tests are also
+    // running.
     if (this->Properties[test]->RunSerial && this->RunningCount > 0) {
       continue;
     }
@@ -618,8 +625,8 @@ void cmCTestMultiProcessHandler::OnTestLoadRetryCB(uv_timer_t* timer)
   self->StartNextTests();
 }
 
-void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
-                                                   bool started)
+void cmCTestMultiProcessHandler::FinishTestProcess(
+  std::unique_ptr<cmCTestRunTest> runner, bool started)
 {
   this->Completed++;
 
@@ -631,7 +638,8 @@ void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
     this->SetStopTimePassed();
   }
   if (started) {
-    if (!this->StopTimePassed && runner->StartAgain(this->Completed)) {
+    if (!this->StopTimePassed &&
+        cmCTestRunTest::StartAgain(std::move(runner), this->Completed)) {
       this->Completed--; // remove the completed test because run again
       return;
     }
@@ -659,7 +667,7 @@ void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
   }
   properties->Affinity.clear();
 
-  delete runner;
+  runner.reset();
   if (started) {
     this->StartNextTests();
   }
@@ -802,7 +810,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
   // In parallel test runs add previously failed tests to the front
   // of the cost list and queue other tests for further sorting
   for (auto const& t : this->Tests) {
-    if (cmContains(this->LastTestsFailed, this->Properties[t.first]->Name)) {
+    if (cm::contains(this->LastTestsFailed, this->Properties[t.first]->Name)) {
       // If the test failed last time, it should be run first.
       this->SortedTests.push_back(t.first);
       alreadySortedTests.insert(t.first);
@@ -841,7 +849,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
                      TestComparator(this));
 
     for (auto const& j : sortedCopy) {
-      if (!cmContains(alreadySortedTests, j)) {
+      if (!cm::contains(alreadySortedTests, j)) {
         this->SortedTests.push_back(j);
         alreadySortedTests.insert(j);
       }
@@ -873,7 +881,7 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
   TestSet alreadySortedTests;
 
   for (int test : presortedList) {
-    if (cmContains(alreadySortedTests, test)) {
+    if (cm::contains(alreadySortedTests, test)) {
       continue;
     }
 
@@ -881,7 +889,7 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
     GetAllTestDependencies(test, dependencies);
 
     for (int testDependency : dependencies) {
-      if (!cmContains(alreadySortedTests, testDependency)) {
+      if (!cm::contains(alreadySortedTests, testDependency)) {
         alreadySortedTests.insert(testDependency);
         this->SortedTests.push_back(testDependency);
       }

@@ -3,6 +3,23 @@
 #ifndef cmStandardLexer_h
 #define cmStandardLexer_h
 
+#if defined(__linux)
+/* Needed for glibc < 2.12 */
+#  define _XOPEN_SOURCE 600
+#endif
+#if !defined(_WIN32) && !defined(__sun)
+/* POSIX APIs are needed */
+#  define _POSIX_C_SOURCE 200809L
+#endif
+#if defined(__sun) && defined(__GNUC__) && !defined(__cplusplus)
+/* C sources: for fileno and strdup */
+#  define _XOPEN_SOURCE 600
+#endif
+#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
+/* For isascii */
+#  define _XOPEN_SOURCE 700
+#endif
+
 #include "cmsys/Configure.h" // IWYU pragma: keep
 
 /* Disable some warnings.  */
@@ -50,7 +67,7 @@
 #define YY_NO_UNPUT 1
 #define ECHO
 
-#include "cm_kwiml.h"
+#include <cm3p/kwiml/int.h>
 typedef KWIML_INT_int8_t flex_int8_t;
 typedef KWIML_INT_uint8_t flex_uint8_t;
 typedef KWIML_INT_int16_t flex_int16_t;

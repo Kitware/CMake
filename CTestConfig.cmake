@@ -1,6 +1,8 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+# If changing this file, also update Utilities/Sphinx/CTestConfig.cmake
+
 set(CTEST_PROJECT_NAME "CMake")
 set(CTEST_NIGHTLY_START_TIME "1:00:00 UTC")
 

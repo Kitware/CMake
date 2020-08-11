@@ -63,7 +63,6 @@ public:
   bool UsingSBCS() const;
 
   void FixCudaCodeGeneration();
-  void FixCudaRuntime(cmGeneratorTarget* target);
 
   void FixManifestUACFlags();
 

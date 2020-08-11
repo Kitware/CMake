@@ -1,0 +1,45 @@
+CMAKE_BUILD_TYPE:STRING=Release
+
+# Use APIs from at most Windows 7
+CMAKE_C_FLAGS:STRING=-D_WIN32_WINNT=0x601 -DNTDDI_VERSION=0x06010000
+CMAKE_CXX_FLAGS:STRING=-GR -EHsc -D_WIN32_WINNT=0x601 -DNTDDI_VERSION=0x06010000
+CMAKE_EXE_LINKER_FLAGS:STRING=-machine:x86 -subsystem:console,6.01
+
+# Link C/C++ runtime library statically.
+CMAKE_MSVC_RUNTIME_LIBRARY:STRING=MultiThreaded$<$<CONFIG:Debug>:Debug>
+
+# No ssl support in curl: use native Windows APIs.
+CMAKE_USE_OPENSSL:BOOL=OFF
+
+# Enable cmake-gui with static qt plugins
+BUILD_QtDialog:BOOL=TRUE
+CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL:STRING=3
+CMAKE_PREFIX_PATH:STRING=C:/qt-i386
+CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES:STRING=c:/qt-i386/plugins/platforms/qwindows.lib;c:/qt-i386/plugins/styles/qwindowsvistastyle.lib;c:/qt-i386/lib/Qt5EventDispatcherSupport.lib;c:/qt-i386/lib/Qt5FontDatabaseSupport.lib;c:/qt-i386/lib/Qt5ThemeSupport.lib;c:/qt-i386/lib/qtfreetype.lib;c:/qt-i386/lib/qtlibpng.lib;imm32.lib;wtsapi32.lib
+
+# Build documentation.
+CMAKE_DOC_DIR:STRING=doc/cmake
+PYTHON_EXECUTABLE:FILEPATH=C:/python3/python.exe
+SPHINX_EXECUTABLE:FILEPATH=C:/python3/Scripts/sphinx-build.exe
+SPHINX_HTML:BOOL=ON
+SPHINX_MAN:BOOL=ON
+SPHINX_QTHELP:BOOL=ON
+QCOLLECTIONGENERATOR_EXECUTABLE:PATH=C:/qt-i386/bin/qhelpgenerator.exe
+
+# No bootstrap with MSVC tools.
+CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
+
+# No MFC in base image.
+CTEST_RUN_MFC:BOOL=OFF
+
+# No Fortran compiler.
+CMAKE_Fortran_COMPILER:FILEPATH=FALSE
+
+# No Swift compiler.
+CMAKE_Swift_COMPILER:FILEPATH=FALSE
+
+# Skip Qt5 tests because our Qt is static.
+CMake_TEST_Qt5:BOOL=FALSE
+
+# CPack package file name component for this platform.
+CPACK_SYSTEM_NAME:STRING=win32-x86

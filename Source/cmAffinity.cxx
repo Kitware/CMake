@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAffinity.h"
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #ifndef CMAKE_USE_SYSTEM_LIBUV
 #  ifdef _WIN32

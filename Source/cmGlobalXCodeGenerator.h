@@ -37,6 +37,10 @@ public:
                          unsigned int version_number);
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
+  cmGlobalXCodeGenerator(const cmGlobalXCodeGenerator&) = delete;
+  const cmGlobalXCodeGenerator& operator=(const cmGlobalXCodeGenerator&) =
+    delete;
+
   //! Get the name for the generator.
   std::string GetName() const override
   {
@@ -105,6 +109,7 @@ public:
 
   bool ShouldStripResourcePath(cmMakefile*) const override;
 
+  bool SetSystemName(std::string const& s, cmMakefile* mf) override;
   bool SetGeneratorToolset(std::string const& ts, bool build,
                            cmMakefile* mf) override;
   void AppendFlag(std::string& flags, std::string const& flag) const;
@@ -249,7 +254,7 @@ protected:
   unsigned int XcodeVersion;
   std::string VersionString;
   std::set<std::string> XCodeObjectIDs;
-  std::vector<cmXCodeObject*> XCodeObjects;
+  std::vector<std::unique_ptr<cmXCodeObject>> XCodeObjects;
   cmXCodeObject* RootObject;
 
 private:
@@ -273,7 +278,7 @@ private:
   void ComputeArchitectures(cmMakefile* mf);
   void ComputeObjectDirArch(cmMakefile* mf);
 
-  void addObject(cmXCodeObject* obj);
+  void addObject(std::unique_ptr<cmXCodeObject> obj);
   std::string PostBuildMakeTarget(std::string const& tName,
                                   std::string const& configName);
   cmXCodeObject* MainGroupChildren;
@@ -294,6 +299,7 @@ private:
   std::vector<std::string> Architectures;
   std::string ObjectDirArchDefault;
   std::string ObjectDirArch;
+  std::string SystemName;
   std::string GeneratorToolset;
   std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
 };

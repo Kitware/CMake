@@ -298,9 +298,9 @@ else()
 endif()
 
 # PGI compiler names
-set(_MPI_PGI_C_COMPILER_NAMES              mpipgcc mppgcc)
-set(_MPI_PGI_CXX_COMPILER_NAMES            mpipgCC mppgCC)
-set(_MPI_PGI_Fortran_COMPILER_NAMES        mpipgf95 mpipgf90 mppgf95 mppgf90 mpipgf77 mppgf77)
+set(_MPI_PGI_C_COMPILER_NAMES              mpipgicc mpipgcc mppgcc)
+set(_MPI_PGI_CXX_COMPILER_NAMES            mpipgic++ mpipgCC mppgCC)
+set(_MPI_PGI_Fortran_COMPILER_NAMES        mpipgifort mpipgf95 mpipgf90 mppgf95 mppgf90 mpipgf77 mppgf77)
 
 # XLC MPI Compiler names
 set(_MPI_XL_C_COMPILER_NAMES               mpxlc      mpxlc_r    mpixlc     mpixlc_r)
@@ -867,11 +867,11 @@ function(_MPI_guess_settings LANG)
       # We first attempt to locate the msmpi.lib. Should be find it, we'll assume that the MPI present is indeed
       # Microsoft MPI.
       if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-        set(MPI_MSMPI_LIB_PATH "$ENV{MSMPI_LIB64}")
-        set(MPI_MSMPI_INC_PATH_EXTRA "$ENV{MSMPI_INC}/x64")
+        file(TO_CMAKE_PATH "$ENV{MSMPI_LIB64}" MPI_MSMPI_LIB_PATH)
+        file(TO_CMAKE_PATH "$ENV{MSMPI_INC}/x64" MPI_MSMPI_INC_PATH_EXTRA)
       else()
-        set(MPI_MSMPI_LIB_PATH "$ENV{MSMPI_LIB32}")
-        set(MPI_MSMPI_INC_PATH_EXTRA "$ENV{MSMPI_INC}/x86")
+        file(TO_CMAKE_PATH "$ENV{MSMPI_LIB32}" MPI_MSMPI_LIB_PATH)
+        file(TO_CMAKE_PATH "$ENV{MSMPI_INC}/x86" MPI_MSMPI_INC_PATH_EXTRA)
       endif()
 
       find_library(MPI_msmpi_LIBRARY
@@ -1153,8 +1153,10 @@ macro(_MPI_create_imported_target LANG)
     add_library(MPI::MPI_${LANG} INTERFACE IMPORTED)
   endif()
 
-  # When this is consumed for compiling CUDA, use '-Xcompiler' to wrap '-pthread'.
-  string(REPLACE "-pthread" "$<$<COMPILE_LANGUAGE:CUDA>:SHELL:-Xcompiler >-pthread"
+  # When this is consumed for compiling CUDA, use '-Xcompiler' to wrap '-pthread' and '-fexceptions'.
+  string(REPLACE "-pthread" "$<$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>:SHELL:-Xcompiler >-pthread"
+    _MPI_${LANG}_COMPILE_OPTIONS "${MPI_${LANG}_COMPILE_OPTIONS}")
+  string(REPLACE "-fexceptions" "$<$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>:SHELL:-Xcompiler >-fexceptions"
     _MPI_${LANG}_COMPILE_OPTIONS "${MPI_${LANG}_COMPILE_OPTIONS}")
   set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_COMPILE_OPTIONS "${_MPI_${LANG}_COMPILE_OPTIONS}")
   unset(_MPI_${LANG}_COMPILE_OPTIONS)
@@ -1162,6 +1164,8 @@ macro(_MPI_create_imported_target LANG)
   set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_COMPILE_DEFINITIONS "${MPI_${LANG}_COMPILE_DEFINITIONS}")
 
   if(MPI_${LANG}_LINK_FLAGS)
+    string(REPLACE "-pthread" "$<$<LINK_LANG_AND_ID:CUDA,NVIDIA>:-Xlinker >-pthread"
+      _MPI_${LANG}_LINK_FLAGS "${MPI_${LANG}_LINK_FLAGS}")
     set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_LINK_OPTIONS "SHELL:${MPI_${LANG}_LINK_FLAGS}")
   endif()
   # If the compiler links MPI implicitly, no libraries will be found as they're contained within

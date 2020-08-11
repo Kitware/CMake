@@ -128,7 +128,7 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
   // does not know about.
   std::string extraPath;
   if (cmSystemTools::GetEnv("CMAKE_MSVCIDE_RUN_PATH", extraPath)) {
-    mf->AddCacheDefinition("CMAKE_MSVCIDE_RUN_PATH", extraPath.c_str(),
+    mf->AddCacheDefinition("CMAKE_MSVCIDE_RUN_PATH", extraPath,
                            "Saved environment variable CMAKE_MSVCIDE_RUN_PATH",
                            cmStateEnums::STATIC);
   }
@@ -342,19 +342,19 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
+    cmProp expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if (expath) {
       std::set<std::string> allConfigurations(configs.begin(), configs.end());
-      const char* mapping = target->GetProperty("VS_PLATFORM_MAPPING");
+      cmProp mapping = target->GetProperty("VS_PLATFORM_MAPPING");
       this->WriteProjectConfigurations(fout, target->GetName(), *target,
                                        configs, allConfigurations,
-                                       mapping ? mapping : "");
+                                       mapping ? *mapping : "");
     } else {
       const std::set<std::string>& configsPartOfDefaultBuild =
         this->IsPartOfDefaultBuild(configs, projectTargets, target);
-      const char* vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
+      cmProp vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName) {
-        this->WriteProjectConfigurations(fout, vcprojName, *target, configs,
+        this->WriteProjectConfigurations(fout, *vcprojName, *target, configs,
                                          configsPartOfDefaultBuild);
       }
     }
@@ -375,17 +375,18 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     bool written = false;
 
     // handle external vc project files
-    const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
+    cmProp expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if (expath) {
       std::string project = target->GetName();
-      std::string location = expath;
+      std::string location = *expath;
 
+      cmProp p = target->GetProperty("VS_PROJECT_TYPE");
       this->WriteExternalProject(fout, project, location,
-                                 target->GetProperty("VS_PROJECT_TYPE"),
+                                 p ? p->c_str() : nullptr,
                                  target->GetUtilities());
       written = true;
     } else {
-      const char* vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
+      cmProp vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName) {
         cmLocalGenerator* lg = target->GetLocalGenerator();
         std::string dir = lg->GetCurrentBinaryDirectory();
@@ -393,7 +394,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         if (dir == ".") {
           dir.clear(); // msbuild cannot handle ".\" prefix
         }
-        this->WriteProject(fout, vcprojName, dir, target);
+        this->WriteProject(fout, *vcprojName, dir, target);
         written = true;
       }
     }
@@ -438,11 +439,11 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    const char* vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
+    cmProp vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
     if (vcprojName) {
       std::string dir =
         target->GetLocalGenerator()->GetCurrentSourceDirectory();
-      this->WriteProjectDepends(fout, vcprojName, dir.c_str(), target);
+      this->WriteProjectDepends(fout, *vcprojName, dir, target);
     }
   }
 }
@@ -505,13 +506,13 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
   const std::vector<std::string> propKeys =
     root->GetMakefile()->GetPropertyKeys();
   for (std::string const& it : propKeys) {
-    if (it.find("VS_GLOBAL_SECTION_") == 0) {
+    if (cmHasLiteralPrefix(it, "VS_GLOBAL_SECTION_")) {
       std::string sectionType;
       std::string name = it.substr(18);
-      if (name.find("PRE_") == 0) {
+      if (cmHasLiteralPrefix(name, "PRE_")) {
         name = name.substr(4);
         sectionType = "preSolution";
-      } else if (name.find("POST_") == 0) {
+      } else if (cmHasLiteralPrefix(name, "POST_")) {
         name = name.substr(5);
         sectionType = "postSolution";
       } else
@@ -526,8 +527,8 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
           extensibilityAddInsOverridden = true;
         }
         fout << "\tGlobalSection(" << name << ") = " << sectionType << "\n";
-        std::vector<std::string> keyValuePairs =
-          cmExpandedList(root->GetMakefile()->GetProperty(it));
+        cmProp p = root->GetMakefile()->GetProperty(it);
+        std::vector<std::string> keyValuePairs = cmExpandedList(p ? *p : "");
         for (std::string const& itPair : keyValuePairs) {
           const std::string::size_type posEqual = itPair.find('=');
           if (posEqual != std::string::npos) {
@@ -676,7 +677,8 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
         for (std::string const& i : configs) {
           const char* propertyValue =
             target->Target->GetMakefile()->GetDefinition(propertyName);
-          if (cmIsOn(cmGeneratorExpression::Evaluate(
+          if (propertyValue &&
+              cmIsOn(cmGeneratorExpression::Evaluate(
                 propertyValue, target->GetLocalGenerator(), i))) {
             activeConfigs.insert(i);
           }

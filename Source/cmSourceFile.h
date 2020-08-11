@@ -11,6 +11,7 @@
 
 #include "cmCustomCommand.h"
 #include "cmListFileCache.h"
+#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
@@ -45,7 +46,7 @@ public:
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
   //! Might return a nullptr if the property is not set or invalid
-  const char* GetProperty(const std::string& prop) const;
+  cmProp GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer
   const char* GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
@@ -157,7 +158,7 @@ private:
   "\\.(C|F|M|c|c\\+\\+|cc|cpp|cxx|cu|f|f90|for|fpp|ftn|m|mm|"                 \
   "rc|def|r|odl|idl|hpj|bat)$"
 
-#define CM_PCH_REGEX "cmake_pch\\.(h|hxx)$"
+#define CM_PCH_REGEX "cmake_pch(_[^.]+)?\\.(h|hxx)$"
 
 #define CM_RESOURCE_REGEX "\\.(pdf|plist|png|jpeg|jpg|storyboard|xcassets)$"
 

@@ -7,7 +7,8 @@
 #include <set>
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSourceGroup.h"
@@ -28,18 +29,6 @@ const std::string kSourceGroupOptionName = "<sg_name>";
 std::vector<std::string> tokenizePath(const std::string& path)
 {
   return cmTokenize(path, "\\/");
-}
-
-std::string getFullFilePath(const std::string& currentPath,
-                            const std::string& path)
-{
-  std::string fullPath = path;
-
-  if (!cmSystemTools::FileIsFullPath(path)) {
-    fullPath = cmStrCat(currentPath, '/', path);
-  }
-
-  return cmSystemTools::CollapseFullPath(fullPath);
 }
 
 std::set<std::string> getSourceGroupFilesPaths(
@@ -124,7 +113,8 @@ bool addFilesToItsSourceGroups(const std::string& root,
         errorMsg = "Could not create source group for file: " + sgFilesPath;
         return false;
       }
-      const std::string fullPath = getFullFilePath(root, sgFilesPath);
+      const std::string fullPath =
+        cmSystemTools::CollapseFullPath(sgFilesPath, root);
       sg->AddGroupFile(fullPath);
     }
   }
@@ -147,7 +137,7 @@ ExpectedOptions getExpectedOptions()
 bool isExpectedOption(const std::string& argument,
                       const ExpectedOptions& expectedOptions)
 {
-  return cmContains(expectedOptions, argument);
+  return cm::contains(expectedOptions, argument);
 }
 
 void parseArguments(const std::vector<std::string>& args,
@@ -255,10 +245,8 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
       parsedArguments[kFilesOptionName];
     for (auto const& filesArg : filesArguments) {
       std::string src = filesArg;
-      if (!cmSystemTools::FileIsFullPath(src)) {
-        src = cmStrCat(mf.GetCurrentSourceDirectory(), '/', filesArg);
-      }
-      src = cmSystemTools::CollapseFullPath(src);
+      src =
+        cmSystemTools::CollapseFullPath(src, mf.GetCurrentSourceDirectory());
       sg->AddGroupFile(src);
     }
   }

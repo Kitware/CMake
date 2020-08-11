@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <sstream>
 
-#include "cm_static_string_view.hxx"
+#include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
@@ -34,6 +34,7 @@ void cmCTestTestCommand::BindArguments()
   this->Bind("STOP_TIME"_s, this->StopTime);
   this->Bind("TEST_LOAD"_s, this->TestLoad);
   this->Bind("RESOURCE_SPEC_FILE"_s, this->ResourceSpecFile);
+  this->Bind("STOP_ON_FAILURE"_s, this->StopOnFailure);
 }
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
@@ -52,6 +53,13 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     }
   }
   this->CTest->SetTimeOut(timeout);
+
+  const char* resourceSpecFile =
+    this->Makefile->GetDefinition("CTEST_RESOURCE_SPEC_FILE");
+  if (this->ResourceSpecFile.empty() && resourceSpecFile) {
+    this->ResourceSpecFile = resourceSpecFile;
+  }
+
   cmCTestGenericHandler* handler = this->InitializeActualHandler();
   if (!this->Start.empty() || !this->End.empty() || !this->Stride.empty()) {
     handler->SetOption(
@@ -82,6 +90,9 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   if (!this->ExcludeFixtureCleanup.empty()) {
     handler->SetOption("ExcludeFixtureCleanupRegularExpression",
                        this->ExcludeFixtureCleanup.c_str());
+  }
+  if (this->StopOnFailure) {
+    handler->SetOption("StopOnFailure", "ON");
   }
   if (!this->ParallelLevel.empty()) {
     handler->SetOption("ParallelLevel", this->ParallelLevel.c_str());

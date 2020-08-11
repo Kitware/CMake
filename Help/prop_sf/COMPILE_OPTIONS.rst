@@ -5,9 +5,7 @@ List of additional options to pass to the compiler.
 
 This property holds a :ref:`semicolon-separated list <CMake Language Lists>` of options
 and will be added to the list of compile flags when this
-source file builds.  Use :prop_sf:`COMPILE_DEFINITIONS` to pass
-additional preprocessor definitions and :prop_sf:`INCLUDE_DIRECTORIES` to pass
-additional include directories.
+source file builds.
 
 Contents of ``COMPILE_OPTIONS`` may use "generator expressions" with the
 syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual
@@ -16,6 +14,19 @@ does not support per-config per-source settings, so expressions
 that depend on the build configuration are not allowed with that
 generator.
 
-.. note::
+Usage example:
 
-  This property should be preferred over the :prop_sf:`COMPILE_FLAGS` property.
+.. code-block:: cmake
+
+  set_source_files_properties(foo.cpp PROPERTIES COMPILE_OPTIONS "-Wno-unused-parameter;-Wno-missing-field-initializer")
+
+Related properties:
+
+* Prefer this property over :prop_sf:`COMPILE_FLAGS`.
+* Use :prop_sf:`COMPILE_DEFINITIONS` to pass additional preprocessor definitions.
+* Use :prop_sf:`INCLUDE_DIRECTORIES` to pass additional include directories.
+
+Related commands:
+
+* :command:`add_compile_options` for directory-wide settings
+* :command:`target_compile_options` for target-specific settings

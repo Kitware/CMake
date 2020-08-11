@@ -1,0 +1,17 @@
+{
+    "source": "^object$",
+    "build": "^object$",
+    "parentSource": "^\\.$",
+    "childSources": null,
+    "targetIds": [
+        "^ALL_BUILD::@5ed5358f70faf8d8af7a$",
+        "^ZERO_CHECK::@5ed5358f70faf8d8af7a$",
+        "^c_object_exe::@5ed5358f70faf8d8af7a$",
+        "^c_object_lib::@5ed5358f70faf8d8af7a$",
+        "^cxx_object_exe::@5ed5358f70faf8d8af7a$",
+        "^cxx_object_lib::@5ed5358f70faf8d8af7a$"
+    ],
+    "projectName": "Object",
+    "minimumCMakeVersion": "3.13",
+    "hasInstallRule": true
+}

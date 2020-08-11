@@ -1,0 +1,5 @@
+CMake Error at roundtrip.cmake:38 \(file\):
+  file archive format zip does not support COMPRESSION arguments
+Call Stack \(most recent call first\):
+  zip-with-bad-compression.cmake:6 \(include\)
+  CMakeLists.txt:3 \(include\)

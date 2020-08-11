@@ -36,16 +36,19 @@ else()
   if(NOT CMAKE_OBJCXX_COMPILER)
     set(CMAKE_OBJCXX_COMPILER_INIT NOTFOUND)
 
-    # prefer the environment variable OBJCXX
-    if($ENV{OBJCXX} MATCHES ".+")
-      get_filename_component(CMAKE_OBJCXX_COMPILER_INIT $ENV{OBJCXX} PROGRAM PROGRAM_ARGS CMAKE_OBJCXX_FLAGS_ENV_INIT)
-      if(CMAKE_OBJCXX_FLAGS_ENV_INIT)
-        set(CMAKE_OBJCXX_COMPILER_ARG1 "${CMAKE_OBJCXX_FLAGS_ENV_INIT}" CACHE STRING "First argument to Objective-C++ compiler")
+    # prefer the environment variable OBJCXX or CXX
+    foreach(var OBJCXX CXX)
+      if($ENV{${var}} MATCHES ".+")
+        get_filename_component(CMAKE_OBJCXX_COMPILER_INIT $ENV{${var}} PROGRAM PROGRAM_ARGS CMAKE_OBJCXX_FLAGS_ENV_INIT)
+        if(CMAKE_OBJCXX_FLAGS_ENV_INIT)
+          set(CMAKE_OBJCXX_COMPILER_ARG1 "${CMAKE_OBJCXX_FLAGS_ENV_INIT}" CACHE STRING "First argument to Objective-C++ compiler")
+        endif()
+        if(NOT EXISTS ${CMAKE_OBJCXX_COMPILER_INIT})
+          message(FATAL_ERROR "Could not find compiler set in environment variable ${var}:\n  $ENV{${var}}")
+        endif()
+        break()
       endif()
-      if(NOT EXISTS ${CMAKE_OBJCXX_COMPILER_INIT})
-        message(FATAL_ERROR "Could not find compiler set in environment variable OBJCXX:\n$ENV{OBJCXX}.\n${CMAKE_OBJCXX_COMPILER_INIT}")
-      endif()
-    endif()
+    endforeach()
 
     # next prefer the generator specified compiler
     if(CMAKE_GENERATOR_OBJCXX)
@@ -145,7 +148,7 @@ endif ()
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
 
 
-if (CMAKE_CROSSCOMPILING  AND NOT  _CMAKE_TOOLCHAIN_PREFIX)
+if (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
   if("${CMAKE_OBJCXX_COMPILER_ID}" MATCHES "GNU|Clang|QCC")
     get_filename_component(COMPILER_BASENAME "${CMAKE_OBJCXX_COMPILER}" NAME)

@@ -12,8 +12,8 @@
 #include <iostream>
 #include <vector>
 
-#include <stddef.h> /* size_t */
-#include <string.h> /* strcmp */
+#include <cstddef> /* size_t */
+#include <cstring> /* strcmp */
 
 static void* random_ptr = reinterpret_cast<void*>(0x123);
 
@@ -98,7 +98,7 @@ int testCommandLineArguments(int argc, char* argv[])
   std::vector<std::string> stl_strings_argument;
   std::string valid_stl_strings[] = { "ken", "brad", "bill", "andy" };
 
-  typedef kwsys::CommandLineArguments argT;
+  using argT = kwsys::CommandLineArguments;
 
   arg.AddArgument("--some-int-variable", argT::SPACE_ARGUMENT,
                   &some_int_variable, "Set some random int variable");

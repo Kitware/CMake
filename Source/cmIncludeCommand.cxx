@@ -2,7 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIncludeCommand.h"
 
+#include <map>
 #include <sstream>
+#include <utility>
 
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
@@ -16,6 +18,11 @@
 bool cmIncludeCommand(std::vector<std::string> const& args,
                       cmExecutionStatus& status)
 {
+  static std::map<std::string, cmPolicies::PolicyID> DeprecatedModules;
+  if (DeprecatedModules.empty()) {
+    DeprecatedModules["Documentation"] = cmPolicies::CMP0106;
+  }
+
   if (args.empty() || args.size() > 4) {
     status.SetError("called with wrong number of arguments.  "
                     "include() only takes one file.");
@@ -65,9 +72,35 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
   }
 
   if (!cmSystemTools::FileIsFullPath(fname)) {
+    bool system = false;
     // Not a path. Maybe module.
     std::string module = cmStrCat(fname, ".cmake");
-    std::string mfile = status.GetMakefile().GetModulesFile(module);
+    std::string mfile = status.GetMakefile().GetModulesFile(module, system);
+
+    if (system) {
+      auto ModulePolicy = DeprecatedModules.find(fname);
+      if (ModulePolicy != DeprecatedModules.end()) {
+        cmPolicies::PolicyStatus PolicyStatus =
+          status.GetMakefile().GetPolicyStatus(ModulePolicy->second);
+        switch (PolicyStatus) {
+          case cmPolicies::WARN: {
+            status.GetMakefile().IssueMessage(
+              MessageType::AUTHOR_WARNING,
+              cmStrCat(cmPolicies::GetPolicyWarning(ModulePolicy->second),
+                       "\n"));
+            CM_FALLTHROUGH;
+          }
+          case cmPolicies::OLD:
+            break;
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::NEW:
+            mfile = "";
+            break;
+        }
+      }
+    }
+
     if (!mfile.empty()) {
       fname = mfile;
     }

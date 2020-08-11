@@ -83,13 +83,17 @@ if(RunCMake_GENERATOR MATCHES "Make|Ninja")
 
   message(STATUS "RerunCMake: first configuration...")
   run_cmake(RerunCMake)
-  run_cmake_command(RerunCMake-nowork${ninja} ${CMAKE_COMMAND} --build .)
+  if(NOT CMake_TEST_FILESYSTEM_1S)
+    run_cmake_command(RerunCMake-nowork${ninja} ${CMAKE_COMMAND} --build .)
+  endif()
 
   execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1) # handle 1s resolution
   message(STATUS "RerunCMake: modify try_compile input...")
   file(WRITE "${in_tc}" "does-not-compile\n")
   run_cmake_command(RerunCMake-rerun${ninja} ${CMAKE_COMMAND} --build .)
-  run_cmake_command(RerunCMake-nowork${ninja} ${CMAKE_COMMAND} --build .)
+  if(NOT CMake_TEST_FILESYSTEM_1S)
+    run_cmake_command(RerunCMake-nowork${ninja} ${CMAKE_COMMAND} --build .)
+  endif()
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)

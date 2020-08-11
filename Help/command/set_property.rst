@@ -8,12 +8,14 @@ Set a named property in a given scope.
   set_property(<GLOBAL                      |
                 DIRECTORY [<dir>]           |
                 TARGET    [<target1> ...]   |
-                SOURCE    [<src1> ...]      |
+                SOURCE    [<src1> ...]
+                          [DIRECTORY <dirs> ...] |
+                          [TARGET_DIRECTORY <targets> ...]
                 INSTALL   [<file1> ...]     |
                 TEST      [<test1> ...]     |
                 CACHE     [<entry1> ...]    >
                [APPEND] [APPEND_STRING]
-               PROPERTY <name> [value1 ...])
+               PROPERTY <name> [<value1> ...])
 
 Sets one property on zero or more objects of a scope.
 
@@ -33,9 +35,23 @@ It must be one of the following:
   See also the :command:`set_target_properties` command.
 
 ``SOURCE``
-  Scope may name zero or more source files.  Note that source
-  file properties are visible only to targets added in the same
-  directory (``CMakeLists.txt``).
+  Scope may name zero or more source files.  By default, source file properties
+  are only visible to targets added in the same directory (``CMakeLists.txt``).
+  Visibility can be set in other directory scopes using one or both of the
+  following sub-options:
+
+  ``DIRECTORY <dirs>...``
+    The source file property will be set in each of the ``<dirs>``
+    directories' scopes.  CMake must already know about each of these
+    source directories, either by having added them through a call to
+    :command:`add_subdirectory` or it being the top level source directory.
+    Relative paths are treated as relative to the current source directory.
+
+  ``TARGET_DIRECTORY <targets>...``
+    The source file property will be set in each of the directory scopes
+    where any of the specified ``<targets>`` were created (the ``<targets>``
+    must therefore already exist).
+
   See also the :command:`set_source_files_properties` command.
 
 ``INSTALL``
@@ -66,7 +82,8 @@ the property to set.  Remaining arguments are used to compose the
 property value in the form of a semicolon-separated list.
 
 If the ``APPEND`` option is given the list is appended to any existing
-property value.  If the ``APPEND_STRING`` option is given the string is
+property value (except that empty values are ignored and not appended).
+If the ``APPEND_STRING`` option is given the string is
 appended to any existing property value as string, i.e. it results in a
 longer string and not a list of strings.  When using ``APPEND`` or
 ``APPEND_STRING`` with a property defined to support ``INHERITED``

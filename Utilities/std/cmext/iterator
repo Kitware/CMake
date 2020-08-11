@@ -23,25 +23,27 @@ using is_input_iterator =
   std::is_base_of<std::input_iterator_tag,
                   typename std::iterator_traits<I>::iterator_category>;
 
-// checks if a type is a range type: must have a difference_type type
+// checks if a type is a range type: std::begin() and std::end() are supported
 template <typename Range>
 using is_range = cm::bool_constant<
-  cm::is_iterator<decltype(std::declval<const Range>().begin())>::value &&
-  cm::is_iterator<decltype(std::declval<const Range>().end())>::value>;
+  cm::is_iterator<decltype(std::begin(std::declval<const Range>()))>::value &&
+  cm::is_iterator<decltype(std::end(std::declval<const Range>()))>::value>;
 
-// checks if a type is an input range type: must have methods begin() and end()
+// checks if a type is an input range type: std::begin() and std::end() are
 // returning an input iterator
 template <typename Range>
 using is_input_range =
 #if defined(_MSC_VER) && _MSC_VER < 1920
   // MS C++ is not able to evaluate complex type introspection,
   // so use a simplified version
-  cm::is_input_iterator<typename Range::const_iterator>;
+  cm::bool_constant<std::is_class<Range>::value ||
+                    std::is_pointer<Range>::value ||
+                    std::is_array<Range>::value>;
 #else
-  cm::bool_constant<
-    cm::is_input_iterator<decltype(
-      std::declval<const Range>().begin())>::value &&
-    cm::is_input_iterator<decltype(std::declval<const Range>().end())>::value>;
+  cm::bool_constant<cm::is_input_iterator<decltype(
+                      std::begin(std::declval<const Range>()))>::value &&
+                    cm::is_input_iterator<decltype(
+                      std::end(std::declval<const Range>()))>::value>;
 #endif
 
 } // namespace cm

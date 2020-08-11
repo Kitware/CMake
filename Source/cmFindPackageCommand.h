@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_kwiml.h"
+#include <cm3p/kwiml/int.h>
 
 #include "cmFindCommon.h"
 #include "cmPolicies.h"

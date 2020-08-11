@@ -19,6 +19,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
@@ -187,10 +188,10 @@ void cmExtraEclipseCDT4Generator::CreateSettingsResourcePrefsFile()
     return;
   }
 
-  fout << "eclipse.preferences.version=1" << std::endl;
+  fout << "eclipse.preferences.version=1\n";
   const char* encoding = mf->GetDefinition("CMAKE_ECLIPSE_RESOURCE_ENCODING");
   if (encoding) {
-    fout << "encoding/<project>=" << encoding << std::endl;
+    fout << "encoding/<project>=" << encoding << '\n';
   }
 }
 
@@ -243,8 +244,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
   const bool envVarSet = cmSystemTools::GetEnv(envVar, envVarValue);
 
   std::string cacheEntryName = cmStrCat("CMAKE_ECLIPSE_ENVVAR_", envVar);
-  const std::string* cacheValue =
-    lg.GetState()->GetInitializedCacheValue(cacheEntryName);
+  cmProp cacheValue = lg.GetState()->GetInitializedCacheValue(cacheEntryName);
 
   // now we have both, decide which one to use
   std::string valueToUse;
@@ -255,8 +255,8 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
     // The variable is in the env, but not in the cache. Use it and put it
     // in the cache
     valueToUse = envVarValue;
-    mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
-                           cacheEntryName.c_str(), cmStateEnums::STRING, true);
+    mf->AddCacheDefinition(cacheEntryName, valueToUse, cacheEntryName.c_str(),
+                           cmStateEnums::STRING, true);
     mf->GetCMakeInstance()->SaveCache(lg.GetBinaryDirectory());
   } else if (!envVarSet && cacheValue != nullptr) {
     // It is already in the cache, but not in the env, so use it from the cache
@@ -270,7 +270,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
     valueToUse = *cacheValue;
     if (valueToUse.find(envVarValue) == std::string::npos) {
       valueToUse = envVarValue;
-      mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
+      mf->AddCacheDefinition(cacheEntryName, valueToUse,
                              cacheEntryName.c_str(), cmStateEnums::STRING,
                              true);
       mf->GetCMakeInstance()->SaveCache(lg.GetBinaryDirectory());
@@ -415,9 +415,9 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     xml.Element("nature", n);
   }
 
-  if (const char* extraNaturesProp =
+  if (cmProp extraNaturesProp =
         mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_NATURES")) {
-    std::vector<std::string> extraNatures = cmExpandedList(extraNaturesProp);
+    std::vector<std::string> extraNatures = cmExpandedList(*extraNaturesProp);
     for (std::string const& n : extraNatures) {
       xml.Element("nature", n);
     }
@@ -430,7 +430,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   if (this->IsOutOfSourceBuild) {
     // create a linked resource to CMAKE_SOURCE_DIR
     // (this is not done anymore for each project because of
-    // https://gitlab.kitware.com/cmake/cmake/issues/9978 and because I found
+    // https://gitlab.kitware.com/cmake/cmake/-/issues/9978 and because I found
     // it actually quite confusing in bigger projects with many directories and
     // projects, Alex
 
@@ -754,11 +754,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   emmited.clear();
   for (const auto& lgen : this->GlobalGenerator->GetLocalGenerators()) {
 
-    if (const char* cdefs =
+    if (cmProp cdefs =
           lgen->GetMakefile()->GetProperty("COMPILE_DEFINITIONS")) {
       // Expand the list.
       std::vector<std::string> defs;
-      cmGeneratorExpression::Split(cdefs, defs);
+      cmGeneratorExpression::Split(*cdefs, defs);
 
       for (std::string const& d : defs) {
         if (cmGeneratorExpression::Find(d) != std::string::npos) {
@@ -936,11 +936,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         case cmStateEnums::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
-          if (((targetName.find("Nightly") == 0) &&
+          if ((cmHasLiteralPrefix(targetName, "Nightly") &&
                (targetName != "Nightly")) ||
-              ((targetName.find("Continuous") == 0) &&
+              (cmHasLiteralPrefix(targetName, "Continuous") &&
                (targetName != "Continuous")) ||
-              ((targetName.find("Experimental") == 0) &&
+              (cmHasLiteralPrefix(targetName, "Experimental") &&
                (targetName != "Experimental"))) {
             break;
           }
@@ -981,7 +981,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           }
         } break;
         case cmStateEnums::INTERFACE_LIBRARY:
-          break;
         default:
           break;
       }
@@ -1033,9 +1032,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   xml.EndElement(); // storageModule
 
   // Append additional cproject contents without applying any XML formatting
-  if (const char* extraCProjectContents =
+  if (cmProp extraCProjectContents =
         mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_CPROJECT_CONTENTS")) {
-    fout << extraCProjectContents;
+    fout << *extraCProjectContents;
   }
 
   xml.EndElement(); // cproject

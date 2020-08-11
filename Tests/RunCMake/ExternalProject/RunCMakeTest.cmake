@@ -29,6 +29,10 @@ endfunction()
 
 __ep_test_with_build(MultiCommand)
 
+set(RunCMake_TEST_OUTPUT_MERGE 1)
+__ep_test_with_build(PreserveEmptyArgs)
+set(RunCMake_TEST_OUTPUT_MERGE 0)
+
 # Output is not predictable enough to be able to verify it reliably
 # when using the various different Visual Studio generators
 if(NOT RunCMake_GENERATOR MATCHES "Visual Studio")

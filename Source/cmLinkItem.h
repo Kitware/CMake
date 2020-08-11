@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
 #include "cmTargetLinkLibraryType.h"
@@ -53,6 +54,9 @@ struct cmLinkImplementationLibraries
   // Libraries linked directly in other configurations.
   // Needed only for OLD behavior of CMP0003.
   std::vector<cmLinkItem> WrongConfigLibraries;
+
+  // Whether the list depends on a genex referencing the configuration.
+  bool HadContextSensitiveCondition = false;
 };
 
 struct cmLinkInterfaceLibraries
@@ -62,6 +66,9 @@ struct cmLinkInterfaceLibraries
 
   // Whether the list depends on a genex referencing the head target.
   bool HadHeadSensitiveCondition = false;
+
+  // Whether the list depends on a genex referencing the configuration.
+  bool HadContextSensitiveCondition = false;
 };
 
 struct cmLinkInterface : public cmLinkInterfaceLibraries
@@ -81,6 +88,9 @@ struct cmLinkInterface : public cmLinkInterfaceLibraries
   std::vector<cmLinkItem> WrongConfigLibraries;
 
   bool ImplementationIsInterface = false;
+
+  // Whether the list depends on a link language genex.
+  bool HadLinkLanguageSensitiveCondition = false;
 };
 
 struct cmOptionalLinkInterface : public cmLinkInterface
@@ -100,6 +110,9 @@ struct cmLinkImplementation : public cmLinkImplementationLibraries
 {
   // Languages whose runtime libraries must be linked.
   std::vector<std::string> Languages;
+
+  // Whether the list depends on a link language genex.
+  bool HadLinkLanguageSensitiveCondition = false;
 };
 
 // Cache link implementation computation from each configuration.
@@ -121,7 +134,7 @@ inline cmTargetLinkLibraryType CMP0003_ComputeLinkType(
 
   // Check if any entry in the list matches this configuration.
   std::string configUpper = cmSystemTools::UpperCase(config);
-  if (cmContains(debugConfigs, configUpper)) {
+  if (cm::contains(debugConfigs, configUpper)) {
     return DEBUG_LibraryType;
   }
   // The current configuration is not a debug configuration.

@@ -315,8 +315,8 @@ public:
     ASD.insert(deps.begin(), deps.end());
   }
 
-  static std::string OrderDependsTargetForTarget(
-    cmGeneratorTarget const* target, const std::string& config);
+  virtual std::string OrderDependsTargetForTarget(
+    cmGeneratorTarget const* target, const std::string& config) const;
 
   void AppendTargetOutputs(
     cmGeneratorTarget const* target, cmNinjaDeps& outputs,
@@ -414,6 +414,11 @@ public:
   bool EnableCrossConfigBuild() const;
 
   std::set<std::string> GetCrossConfigs(const std::string& config) const;
+
+  const std::set<std::string>& GetDefaultConfigs() const
+  {
+    return this->DefaultConfigs;
+  }
 
 protected:
   void Generate() override;
@@ -643,6 +648,9 @@ public:
   bool SupportsDefaultBuildType() const override { return true; }
   bool SupportsCrossConfigs() const override { return true; }
   bool SupportsDefaultConfigs() const override { return true; }
+
+  std::string OrderDependsTargetForTarget(
+    cmGeneratorTarget const* target, const std::string& config) const override;
 
 protected:
   bool OpenBuildFileStreams() override;

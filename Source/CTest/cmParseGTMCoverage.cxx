@@ -19,7 +19,7 @@ cmParseGTMCoverage::cmParseGTMCoverage(cmCTestCoverageHandlerContainer& cont,
 {
 }
 
-bool cmParseGTMCoverage::LoadCoverageData(const char* d)
+bool cmParseGTMCoverage::LoadCoverageData(std::string const& d)
 {
   // load all the .mcov files in the specified directory
   cmsys::Directory dir;

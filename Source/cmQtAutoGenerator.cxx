@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenerator.h"
 
-#include "cmsys/FStream.hxx"
+#include <cm3p/json/reader.h>
 
-#include "cm_jsoncpp_reader.h"
+#include "cmsys/FStream.hxx"
 
 #include "cmQtAutoGen.h"
 #include "cmStringAlgorithms.h"

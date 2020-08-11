@@ -46,6 +46,7 @@ public:
 
   bool AllowNotParallel() const override { return false; }
   bool AllowDeleteOnError() const override { return false; }
+  bool CanEscapeOctothorpe() const override { return true; }
 
 protected:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(

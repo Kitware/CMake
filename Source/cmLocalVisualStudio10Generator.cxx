@@ -4,7 +4,7 @@
 
 #include <cmext/algorithm>
 
-#include "cm_expat.h"
+#include <cm3p/expat.h>
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorTarget.h"

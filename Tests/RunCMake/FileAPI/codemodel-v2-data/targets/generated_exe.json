@@ -1,0 +1,303 @@
+{
+    "name": "generated_exe",
+    "id": "^generated_exe::@[0-9a-f]+$",
+    "directorySource": "^.*/Tests/RunCMake/FileAPIExternalSource$",
+    "projectName": "External",
+    "type": "EXECUTABLE",
+    "isGeneratorProvided": null,
+    "sources": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPIExternalSource/empty\\.c$",
+            "isGenerated": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "C",
+            "backtrace": [
+                {
+                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                    "line": 5,
+                    "command": "add_executable",
+                    "hasParent": true
+                },
+                {
+                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/generated\\.cxx$",
+            "isGenerated": true,
+            "sourceGroupName": "Generated Source Files",
+            "compileGroupLanguage": "CXX",
+            "backtrace": [
+                {
+                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                    "line": 6,
+                    "command": "target_sources",
+                    "hasParent": true
+                },
+                {
+                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPIExternalSource/empty\\.c$"
+            ]
+        },
+        {
+            "name": "Generated Source Files",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/generated\\.cxx$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "C",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPIExternalSource/empty\\.c$"
+            ],
+            "includes": [
+                {
+                    "path": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild$",
+                    "isSystem": null,
+                    "backtrace": [
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": 10,
+                            "command": "set_property",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                },
+                {
+                    "path": "^.*/Tests/RunCMake/FileAPIExternalSource$",
+                    "isSystem": true,
+                    "backtrace": [
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": 11,
+                            "command": "target_include_directories",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                }
+            ],
+            "defines": [
+                {
+                    "define": "EMPTY_C=1",
+                    "backtrace": [
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": 9,
+                            "command": "set_property",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                },
+                {
+                    "define": "SRC_DUMMY",
+                    "backtrace": [
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": 9,
+                            "command": "set_property",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                },
+                {
+                    "define": "GENERATED_EXE=1",
+                    "backtrace": [
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": 12,
+                            "command": "target_compile_definitions",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                },
+                {
+                    "define": "TGT_DUMMY",
+                    "backtrace": [
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": 12,
+                            "command": "target_compile_definitions",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                }
+            ],
+            "compileCommandFragments": [
+                {
+                    "fragment" : "SRC_COMPILE_OPTIONS_DUMMY",
+                    "backtrace": [
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": 13,
+                            "command": "set_source_files_properties",
+                            "hasParent": true
+                        },
+                        {
+                            "file" : "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "CXX",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/generated\\.cxx$"
+            ],
+            "includes": [
+                {
+                    "path": "^.*/Tests/RunCMake/FileAPIExternalSource$",
+                    "isSystem": true,
+                    "backtrace": [
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": 11,
+                            "command": "target_include_directories",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                }
+            ],
+            "defines": [
+                {
+                    "define": "GENERATED_EXE=1",
+                    "backtrace": [
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": 12,
+                            "command": "target_compile_definitions",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                },
+                {
+                    "define": "TGT_DUMMY",
+                    "backtrace": [
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": 12,
+                            "command": "target_compile_definitions",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                }
+            ],
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+            "line": 5,
+            "command": "add_executable",
+            "hasParent": true
+        },
+        {
+            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^generated_exe(\\.exe)?$",
+    "artifacts": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?generated_exe(\\.exe)?$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?generated_exe\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild$",
+    "source": "^.*/Tests/RunCMake/FileAPIExternalSource$",
+    "install": null,
+    "link": {
+        "language": "CXX",
+        "lto": null,
+        "commandFragments": null
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@[0-9a-f]+$",
+            "backtrace": null
+        }
+    ]
+}

@@ -4109,7 +4109,7 @@
 #endif
 
 /* from winternl.h */
-#if !defined(__UNICODE_STRING_DEFINED) && defined(__MINGW32_)
+#if !defined(__UNICODE_STRING_DEFINED) && defined(__MINGW32__)
 #define __UNICODE_STRING_DEFINED
 #endif
 typedef struct _UNICODE_STRING {
@@ -4160,6 +4160,10 @@ typedef const UNICODE_STRING *PCUNICODE_STRING;
       struct {
         UCHAR  DataBuffer[1];
       } GenericReparseBuffer;
+      struct {
+        ULONG StringCount;
+        WCHAR StringList[1];
+      } AppExecLinkReparseBuffer;
     };
   } REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
 #endif
@@ -4444,6 +4448,10 @@ typedef struct _SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION {
 # define SystemProcessorPerformanceInformation 8
 #endif
 
+#ifndef ProcessConsoleHostProcess
+# define ProcessConsoleHostProcess 49
+#endif
+
 #ifndef FILE_DEVICE_FILE_SYSTEM
 # define FILE_DEVICE_FILE_SYSTEM 0x00000009
 #endif
@@ -4521,6 +4529,9 @@ typedef struct _SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION {
 #ifndef IO_REPARSE_TAG_SYMLINK
 # define IO_REPARSE_TAG_SYMLINK (0xA000000CL)
 #endif
+#ifndef IO_REPARSE_TAG_APPEXECLINK
+# define IO_REPARSE_TAG_APPEXECLINK (0x8000001BL)
+#endif
 
 typedef VOID (NTAPI *PIO_APC_ROUTINE)
              (PVOID ApcContext,
@@ -4585,6 +4596,13 @@ typedef NTSTATUS (NTAPI *sNtQueryDirectoryFile)
                   PUNICODE_STRING FileName,
                   BOOLEAN RestartScan
                 );
+
+typedef NTSTATUS (NTAPI *sNtQueryInformationProcess)
+                 (HANDLE ProcessHandle,
+                  UINT ProcessInformationClass,
+                  PVOID ProcessInformation,
+                  ULONG Length,
+                  PULONG ReturnLength);
 
 /*
  * Kernel32 headers
@@ -4727,6 +4745,7 @@ extern sNtSetInformationFile pNtSetInformationFile;
 extern sNtQueryVolumeInformationFile pNtQueryVolumeInformationFile;
 extern sNtQueryDirectoryFile pNtQueryDirectoryFile;
 extern sNtQuerySystemInformation pNtQuerySystemInformation;
+extern sNtQueryInformationProcess pNtQueryInformationProcess;
 
 /* Kernel32 function pointers */
 extern sGetQueuedCompletionStatusEx pGetQueuedCompletionStatusEx;

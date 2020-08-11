@@ -85,6 +85,9 @@ set(result ken bill andy brad)
 list(SORT result)
 TEST("SORT result" "andy;bill;brad;ken")
 
+list(SORT result COMPARE NATURAL)
+TEST("SORT result COMPARE NATURAL" "andy;bill;brad;ken")
+
 set(result andy bill brad ken)
 list(REVERSE result)
 TEST("REVERSE result" "ken;brad;bill;andy")
@@ -103,6 +106,26 @@ TEST("REVERSE empty result" "")
 
 list(SORT result)
 TEST("SORT empty result" "")
+
+list(SORT result COMPARE NATURAL)
+TEST("SORT result COMPARE NATURAL" "")
+
+set(result 1.1 10.0 11.0 12.0 12.1 2.0 2.1 3.0 3.1 3.2 8.0 9.0)
+
+list(SORT result COMPARE NATURAL)
+TEST("SORT result COMPARE NATURAL" "1.1;2.0;2.1;3.0;3.1;3.2;8.0;9.0;10.0;11.0;12.0;12.1")
+
+list(SORT result)
+TEST("SORT result" "1.1;10.0;11.0;12.0;12.1;2.0;2.1;3.0;3.1;3.2;8.0;9.0")
+
+list(SORT result COMPARE NATURAL ORDER DESCENDING)
+TEST("SORT result COMPARE NATURAL ORDER DESCENDING" "12.1;12.0;11.0;10.0;9.0;8.0;3.2;3.1;3.0;2.1;2.0;1.1")
+
+set(result b-1.1 a-10.0 c-2.0 d 1 00 0)
+
+list(SORT result COMPARE NATURAL)
+TEST("SORT result COMPARE NATURAL" "00;0;1;a-10.0;b-1.1;c-2.0;d")
+
 
 # these trigger top-level condition
 foreach(cmd IN ITEMS Append Find Get Insert Length Reverse Remove_At Remove_Duplicates Remove_Item Sort)

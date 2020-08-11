@@ -18,6 +18,7 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -133,8 +134,10 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
         cmMakefile const* mf = this->Target->Target->GetMakefile();
 
         // Get App Bundle Extension
-        const char* ext = this->Target->GetProperty("BUNDLE_EXTENSION");
-        if (!ext) {
+        std::string ext;
+        if (cmProp p = this->Target->GetProperty("BUNDLE_EXTENSION")) {
+          ext = *p;
+        } else {
           ext = "app";
         }
 

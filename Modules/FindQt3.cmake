@@ -201,9 +201,16 @@ endif()
 
 # if the include a library are found then we have it
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+if (CMAKE_FIND_PACKAGE_NAME STREQUAL "Qt")
+  # FindQt include()'s this module. It's an old pattern, but rather than trying
+  # to suppress this from outside the module (which is then sensitive to the
+  # contents, detect the case in this module and suppress it explicitly.
+  set(FPHSA_NAME_MISMATCHED 1)
+endif ()
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Qt3
                                   REQUIRED_VARS QT_QT_LIBRARY QT_INCLUDE_DIR QT_MOC_EXECUTABLE
                                   VERSION_VAR QT_VERSION_STRING)
+unset(FPHSA_NAME_MISMATCHED)
 set(QT_FOUND ${QT3_FOUND} )
 
 if(QT_FOUND)

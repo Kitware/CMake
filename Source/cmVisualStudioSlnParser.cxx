@@ -517,7 +517,7 @@ bool cmVisualStudioSlnParser::ParseMultiValueTag(const std::string& line,
                                                  State& state)
 {
   size_t idxEqualSign = line.find('=');
-  const std::string& fullTag = line.substr(0, idxEqualSign);
+  auto fullTag = cm::string_view(line).substr(0, idxEqualSign);
   if (!this->ParseTag(fullTag, parsedLine, state))
     return false;
   if (idxEqualSign != line.npos) {
@@ -560,7 +560,7 @@ bool cmVisualStudioSlnParser::ParseSingleValueTag(const std::string& line,
                                                   State& state)
 {
   size_t idxEqualSign = line.find('=');
-  const std::string& fullTag = line.substr(0, idxEqualSign);
+  auto fullTag = cm::string_view(line).substr(0, idxEqualSign);
   if (!this->ParseTag(fullTag, parsedLine, state))
     return false;
   if (idxEqualSign != line.npos) {
@@ -586,17 +586,17 @@ bool cmVisualStudioSlnParser::ParseKeyValuePair(const std::string& line,
   return true;
 }
 
-bool cmVisualStudioSlnParser::ParseTag(const std::string& fullTag,
+bool cmVisualStudioSlnParser::ParseTag(cm::string_view fullTag,
                                        ParsedLine& parsedLine, State& state)
 {
   size_t idxLeftParen = fullTag.find('(');
-  if (idxLeftParen == fullTag.npos) {
+  if (idxLeftParen == cm::string_view::npos) {
     parsedLine.SetTag(cmTrimWhitespace(fullTag));
     return true;
   }
   parsedLine.SetTag(cmTrimWhitespace(fullTag.substr(0, idxLeftParen)));
   size_t idxRightParen = fullTag.rfind(')');
-  if (idxRightParen == fullTag.npos) {
+  if (idxRightParen == cm::string_view::npos) {
     this->LastResult.SetError(ResultErrorInputStructure,
                               state.GetCurrentLine());
     return false;

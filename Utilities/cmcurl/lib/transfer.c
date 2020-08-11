@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,6 +48,8 @@
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#elif defined(HAVE_UNISTD_H)
+#include <unistd.h>
 #endif
 
 #ifndef HAVE_SOCKET
@@ -126,12 +128,13 @@ static size_t Curl_trailers_read(char *buffer, size_t size, size_t nitems,
                                  void *raw)
 {
   struct Curl_easy *data = (struct Curl_easy *)raw;
-  Curl_send_buffer *trailers_buf = data->state.trailers_buf;
-  size_t bytes_left = trailers_buf->size_used-data->state.trailers_bytes_sent;
+  struct dynbuf *trailers_buf = &data->state.trailers_buf;
+  size_t bytes_left = Curl_dyn_len(trailers_buf) -
+    data->state.trailers_bytes_sent;
   size_t to_copy = (size*nitems < bytes_left) ? size*nitems : bytes_left;
   if(to_copy) {
     memcpy(buffer,
-           &trailers_buf->buffer[data->state.trailers_bytes_sent],
+           Curl_dyn_ptr(trailers_buf) + data->state.trailers_bytes_sent,
            to_copy);
     data->state.trailers_bytes_sent += to_copy;
   }
@@ -141,8 +144,8 @@ static size_t Curl_trailers_read(char *buffer, size_t size, size_t nitems,
 static size_t Curl_trailers_left(void *raw)
 {
   struct Curl_easy *data = (struct Curl_easy *)raw;
-  Curl_send_buffer *trailers_buf = data->state.trailers_buf;
-  return trailers_buf->size_used - data->state.trailers_bytes_sent;
+  struct dynbuf *trailers_buf = &data->state.trailers_buf;
+  return Curl_dyn_len(trailers_buf) - data->state.trailers_bytes_sent;
 }
 #endif
 
@@ -176,7 +179,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
 #ifndef CURL_DISABLE_HTTP
   if(data->state.trailers_state == TRAILERS_INITIALIZED) {
     struct curl_slist *trailers = NULL;
-    CURLcode c;
+    CURLcode result;
     int trailers_ret_code;
 
     /* at this point we already verified that the callback exists
@@ -184,28 +187,26 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
     infof(data,
           "Moving trailers state machine from initialized to sending.\n");
     data->state.trailers_state = TRAILERS_SENDING;
-    data->state.trailers_buf = Curl_add_buffer_init();
-    if(!data->state.trailers_buf) {
-      failf(data, "Unable to allocate trailing headers buffer !");
-      return CURLE_OUT_OF_MEMORY;
-    }
+    Curl_dyn_init(&data->state.trailers_buf, DYN_TRAILERS);
+
     data->state.trailers_bytes_sent = 0;
     Curl_set_in_callback(data, true);
     trailers_ret_code = data->set.trailer_callback(&trailers,
                                                    data->set.trailer_data);
     Curl_set_in_callback(data, false);
     if(trailers_ret_code == CURL_TRAILERFUNC_OK) {
-      c = Curl_http_compile_trailers(trailers, data->state.trailers_buf, data);
+      result = Curl_http_compile_trailers(trailers, &data->state.trailers_buf,
+                                          data);
     }
     else {
       failf(data, "operation aborted by trailing headers callback");
       *nreadp = 0;
-      c = CURLE_ABORTED_BY_CALLBACK;
+      result = CURLE_ABORTED_BY_CALLBACK;
     }
-    if(c != CURLE_OK) {
-      Curl_add_buffer_free(&data->state.trailers_buf);
+    if(result) {
+      Curl_dyn_free(&data->state.trailers_buf);
       curl_slist_free_all(trailers);
-      return c;
+      return result;
     }
     infof(data, "Successfully compiled trailers.\r\n");
     curl_slist_free_all(trailers);
@@ -225,7 +226,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
   if(data->state.trailers_state == TRAILERS_SENDING) {
     /* if we're here then that means that we already sent the last empty chunk
        but we didn't send a final CR LF, so we sent 0 CR LF. We then start
-       pulling trailing data until we ²have no more at which point we
+       pulling trailing data until we have no more at which point we
        simply return to the previous point in the state machine as if
        nothing happened.
        */
@@ -366,7 +367,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
 #ifndef CURL_DISABLE_HTTP
     if(data->state.trailers_state == TRAILERS_SENDING &&
        !Curl_trailers_left(data)) {
-      Curl_add_buffer_free(&data->state.trailers_buf);
+      Curl_dyn_free(&data->state.trailers_buf);
       data->state.trailers_state = TRAILERS_DONE;
       data->set.trailer_data = NULL;
       data->set.trailer_callback = NULL;
@@ -432,8 +433,8 @@ CURLcode Curl_readrewind(struct connectdata *conn)
   }
   if(data->set.postfields)
     ; /* do nothing */
-  else if(data->set.httpreq == HTTPREQ_POST_MIME ||
-          data->set.httpreq == HTTPREQ_POST_FORM) {
+  else if(data->state.httpreq == HTTPREQ_POST_MIME ||
+          data->state.httpreq == HTTPREQ_POST_FORM) {
     if(Curl_mime_rewind(mimepart)) {
       failf(data, "Cannot rewind mime/post data");
       return CURLE_SEND_FAIL_REWIND;
@@ -483,8 +484,9 @@ CURLcode Curl_readrewind(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static int data_pending(const struct connectdata *conn)
+static int data_pending(const struct Curl_easy *data)
 {
+  struct connectdata *conn = data->conn;
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
@@ -497,7 +499,9 @@ static int data_pending(const struct connectdata *conn)
        TRUE. The thing is if we read everything, then http2_recv won't
        be called and we cannot signal the HTTP/2 stream has closed. As
        a workaround, we return nonzero here to call http2_recv. */
-    ((conn->handler->protocol&PROTO_FAMILY_HTTP) && conn->httpversion == 20);
+    ((conn->handler->protocol&PROTO_FAMILY_HTTP) && conn->httpversion >= 20);
+#elif defined(ENABLE_QUIC)
+    Curl_ssl_data_pending(conn, FIRSTSOCKET) || Curl_quic_data_pending(data);
 #else
     Curl_ssl_data_pending(conn, FIRSTSOCKET);
 #endif
@@ -554,6 +558,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   size_t excess = 0; /* excess bytes read */
   bool readmore = FALSE; /* used by RTP to signal for more data */
   int maxloops = 100;
+  char *buf = data->state.buffer;
+  DEBUGASSERT(buf);
 
   *done = FALSE;
   *comeback = FALSE;
@@ -564,17 +570,20 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     bool is_empty_data = FALSE;
     size_t buffersize = data->set.buffer_size;
     size_t bytestoread = buffersize;
+#ifdef USE_NGHTTP2
+    bool is_http2 = ((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+                     (conn->httpversion == 20));
+#endif
 
     if(
-#if defined(USE_NGHTTP2)
+#ifdef USE_NGHTTP2
        /* For HTTP/2, read data without caring about the content
           length. This is safe because body in HTTP/2 is always
           segmented thanks to its framing layer. Meanwhile, we have to
           call Curl_read to ensure that http2_handle_stream_close is
           called when we read all incoming bytes for a particular
           stream. */
-       !((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-         conn->httpversion == 20) &&
+       !is_http2 &&
 #endif
        k->size != -1 && !k->header) {
       /* make sure we don't read too much */
@@ -585,7 +594,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
     if(bytestoread) {
       /* receive data from the network! */
-      result = Curl_read(conn, conn->sockfd, k->buf, bytestoread, &nread);
+      result = Curl_read(conn, conn->sockfd, buf, bytestoread, &nread);
 
       /* read would've blocked */
       if(CURLE_AGAIN == result)
@@ -601,7 +610,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       nread = 0;
     }
 
-    if((k->bytecount == 0) && (k->writebytecount == 0)) {
+    if(!k->bytecount) {
       Curl_pgrsTime(data, TIMER_STARTTRANSFER);
       if(k->exp100 > EXP100_SEND_DATA)
         /* set time stamp to compare with when waiting for the 100 */
@@ -612,21 +621,25 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     /* indicates data of zero size, i.e. empty file */
     is_empty_data = ((nread == 0) && (k->bodywrites == 0)) ? TRUE : FALSE;
 
-    /* NUL terminate, allowing string ops to be used */
     if(0 < nread || is_empty_data) {
-      k->buf[nread] = 0;
+      buf[nread] = 0;
     }
     else {
-      /* if we receive 0 or less here, the server closed the connection
-         and we bail out from this! */
-      DEBUGF(infof(data, "nread <= 0, server closed connection, bailing\n"));
+      /* if we receive 0 or less here, either the http2 stream is closed or the
+         server closed the connection and we bail out from this! */
+#ifdef USE_NGHTTP2
+      if(is_http2 && !nread)
+        DEBUGF(infof(data, "nread == 0, stream closed, bailing\n"));
+      else
+#endif
+        DEBUGF(infof(data, "nread <= 0, server closed connection, bailing\n"));
       k->keepon &= ~KEEP_RECV;
       break;
     }
 
     /* Default buffer to use when we write the buffer, it may be changed
        in the flow below before the actual storing is done. */
-    k->str = k->buf;
+    k->str = buf;
 
     if(conn->handler->readwrite) {
       result = conn->handler->readwrite(data, conn, &nread, &readmore);
@@ -675,7 +688,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     /* This is not an 'else if' since it may be a rest from the header
        parsing, where the beginning of the buffer is headers and the end
        is non-headers. */
-    if(k->str && !k->header && (nread > 0 || is_empty_data)) {
+    if(!k->header && (nread > 0 || is_empty_data)) {
 
       if(data->set.opt_no_body) {
         /* data arrives although we want none, bail out */
@@ -706,7 +719,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
             infof(data, "Ignoring the response-body\n");
           }
           if(data->state.resume_from && !k->content_range &&
-             (data->set.httpreq == HTTPREQ_GET) &&
+             (data->state.httpreq == HTTPREQ_GET) &&
              !k->ignorebody) {
 
             if(k->size == data->state.resume_from) {
@@ -756,8 +769,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       /* pass data to the debug function before it gets "dechunked" */
       if(data->set.verbose) {
         if(k->badheader) {
-          Curl_debug(data, CURLINFO_DATA_IN, data->state.headerbuff,
-                     (size_t)k->hbuflen);
+          Curl_debug(data, CURLINFO_DATA_IN,
+                     Curl_dyn_ptr(&data->state.headerb),
+                     Curl_dyn_len(&data->state.headerb));
           if(k->badheader == HEADER_PARTHEADER)
             Curl_debug(data, CURLINFO_DATA_IN,
                        k->str, (size_t)nread);
@@ -775,14 +789,14 @@ static CURLcode readwrite_data(struct Curl_easy *data,
          * and writes away the data. The returned 'nread' holds the number
          * of actual data it wrote to the client.
          */
-
+        CURLcode extra;
         CHUNKcode res =
-          Curl_httpchunk_read(conn, k->str, nread, &nread);
+          Curl_httpchunk_read(conn, k->str, nread, &nread, &extra);
 
         if(CHUNKE_OK < res) {
-          if(CHUNKE_WRITE_ERROR == res) {
-            failf(data, "Failed writing data");
-            return CURLE_WRITE_ERROR;
+          if(CHUNKE_PASSTHRU_ERROR == res) {
+            failf(data, "Failed reading the chunked-encoded stream");
+            return extra;
           }
           failf(data, "%s in chunked-encoding", Curl_chunked_strerror(res));
           return CURLE_RECV_ERROR;
@@ -808,9 +822,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
       /* Account for body content stored in the header buffer */
       if((k->badheader == HEADER_PARTHEADER) && !k->ignorebody) {
-        DEBUGF(infof(data, "Increasing bytecount by %zu from hbuflen\n",
-                     k->hbuflen));
-        k->bytecount += k->hbuflen;
+        size_t headlen = Curl_dyn_len(&data->state.headerb);
+        DEBUGF(infof(data, "Increasing bytecount by %zu\n", headlen));
+        k->bytecount += headlen;
       }
 
       if((-1 != k->maxdownload) &&
@@ -825,6 +839,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                 ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
                 ", bytecount = %" CURL_FORMAT_CURL_OFF_T "\n",
                 excess, k->size, k->maxdownload, k->bytecount);
+          connclose(conn, "excess found in a read");
         }
 
         nread = (ssize_t) (k->maxdownload - k->bytecount);
@@ -844,15 +859,16 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         if(k->badheader && !k->ignorebody) {
           /* we parsed a piece of data wrongly assuming it was a header
              and now we output it as body instead */
+          size_t headlen = Curl_dyn_len(&data->state.headerb);
 
           /* Don't let excess data pollute body writes */
-          if(k->maxdownload == -1 || (curl_off_t)k->hbuflen <= k->maxdownload)
+          if(k->maxdownload == -1 || (curl_off_t)headlen <= k->maxdownload)
             result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                                       data->state.headerbuff,
-                                       k->hbuflen);
+                                       Curl_dyn_ptr(&data->state.headerb),
+                                       headlen);
           else
             result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                                       data->state.headerbuff,
+                                       Curl_dyn_ptr(&data->state.headerb),
                                        (size_t)k->maxdownload);
 
           if(result)
@@ -886,14 +902,14 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
     } /* if(!header and data to read) */
 
-    if(conn->handler->readwrite && excess && !conn->bits.stream_was_rewound) {
+    if(conn->handler->readwrite && excess) {
       /* Parse the excess data */
       k->str += nread;
 
-      if(&k->str[excess] > &k->buf[data->set.buffer_size]) {
+      if(&k->str[excess] > &buf[data->set.buffer_size]) {
         /* the excess amount was too excessive(!), make sure
            it doesn't read out of buffer */
-        excess = &k->buf[data->set.buffer_size] - k->str;
+        excess = &buf[data->set.buffer_size] - k->str;
       }
       nread = (ssize_t)excess;
 
@@ -917,7 +933,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       break;
     }
 
-  } while(data_pending(conn) && maxloops--);
+  } while(data_pending(data) && maxloops--);
 
   if(maxloops <= 0) {
     /* we mark it as read-again-please */
@@ -937,12 +953,14 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode done_sending(struct connectdata *conn,
-                             struct SingleRequest *k)
+CURLcode Curl_done_sending(struct connectdata *conn,
+                           struct SingleRequest *k)
 {
   k->keepon &= ~KEEP_SEND; /* we're done writing */
 
+  /* These functions should be moved into the handler struct! */
   Curl_http2_done_sending(conn);
+  Curl_quic_done_sending(conn);
 
   if(conn->bits.rewindaftersend) {
     CURLcode result = Curl_readrewind(conn);
@@ -1046,7 +1064,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
         break;
       }
       if(nread <= 0) {
-        result = done_sending(conn, k);
+        result = Curl_done_sending(conn, k);
         if(result)
           return result;
         break;
@@ -1164,14 +1182,14 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
       k->upload_present = 0; /* no more bytes left */
 
       if(k->upload_done) {
-        result = done_sending(conn, k);
+        result = Curl_done_sending(conn, k);
         if(result)
           return result;
       }
     }
 
 
-  } WHILE_FALSE; /* just to break out from! */
+  } while(0); /* just to break out from! */
 
   return CURLE_OK;
 }
@@ -1228,9 +1246,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   /* We go ahead and do a read if we have a readable socket or if
      the stream was rewound (in which case we have data in a
      buffer) */
-  if((k->keepon & KEEP_RECV) &&
-     ((select_res & CURL_CSELECT_IN) || conn->bits.stream_was_rewound)) {
-
+  if((k->keepon & KEEP_RECV) && (select_res & CURL_CSELECT_IN)) {
     result = readwrite_data(data, conn, k, &didwhat, done, comeback);
     if(result || *done)
       return result;
@@ -1354,20 +1370,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
  * in the proper state to have this information available.
  */
 int Curl_single_getsock(const struct connectdata *conn,
-                        curl_socket_t *sock, /* points to numsocks number
-                                                of sockets */
-                        int numsocks)
+                        curl_socket_t *sock)
 {
   const struct Curl_easy *data = conn->data;
   int bitmap = GETSOCK_BLANK;
   unsigned sockindex = 0;
 
   if(conn->handler->perform_getsock)
-    return conn->handler->perform_getsock(conn, sock, numsocks);
-
-  if(numsocks < 2)
-    /* simple check but we might need two slots */
-    return GETSOCK_BLANK;
+    return conn->handler->perform_getsock(conn, sock);
 
   /* don't include HOLD and PAUSE connections */
   if((data->req.keepon & KEEP_RECVBITS) == KEEP_RECV) {
@@ -1439,6 +1449,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     }
   }
 
+  data->state.httpreq = data->set.method;
   data->change.url = data->set.str[STRING_SET_URL];
 
   /* Init the SSL session ID cache here. We do it here since we want to do it
@@ -1458,12 +1469,11 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
   Curl_safefree(data->info.wouldredirect);
-  data->info.wouldredirect = NULL;
 
-  if(data->set.httpreq == HTTPREQ_PUT)
+  if(data->state.httpreq == HTTPREQ_PUT)
     data->state.infilesize = data->set.filesize;
-  else if((data->set.httpreq != HTTPREQ_GET) &&
-          (data->set.httpreq != HTTPREQ_HEAD)) {
+  else if((data->state.httpreq != HTTPREQ_GET) &&
+          (data->state.httpreq != HTTPREQ_HEAD)) {
     data->state.infilesize = data->set.postfieldsize;
     if(data->set.postfields && (data->state.infilesize == -1))
       data->state.infilesize = (curl_off_t)strlen(data->set.postfields);
@@ -1513,6 +1523,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
       }
     }
 #endif
+    Curl_http2_init_state(&data->state);
   }
 
   return result;
@@ -1594,7 +1605,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
   DEBUGASSERT(data->state.uh);
   uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl,
-                    (type == FOLLOW_FAKE) ? CURLU_NON_SUPPORT_SCHEME : 0);
+                    (type == FOLLOW_FAKE) ? CURLU_NON_SUPPORT_SCHEME :
+                    ((type == FOLLOW_REDIR) ? CURLU_URLENCODE : 0) );
   if(uc) {
     if(type != FOLLOW_FAKE)
       return Curl_uc_to_curlcode(uc);
@@ -1672,12 +1684,12 @@ CURLcode Curl_follow(struct Curl_easy *data,
      * This behaviour is forbidden by RFC1945 and the obsolete RFC2616, and
      * can be overridden with CURLOPT_POSTREDIR.
      */
-    if((data->set.httpreq == HTTPREQ_POST
-        || data->set.httpreq == HTTPREQ_POST_FORM
-        || data->set.httpreq == HTTPREQ_POST_MIME)
+    if((data->state.httpreq == HTTPREQ_POST
+        || data->state.httpreq == HTTPREQ_POST_FORM
+        || data->state.httpreq == HTTPREQ_POST_MIME)
        && !(data->set.keep_post & CURL_REDIR_POST_301)) {
       infof(data, "Switch from POST to GET\n");
-      data->set.httpreq = HTTPREQ_GET;
+      data->state.httpreq = HTTPREQ_GET;
     }
     break;
   case 302: /* Found */
@@ -1697,22 +1709,29 @@ CURLcode Curl_follow(struct Curl_easy *data,
      * This behaviour is forbidden by RFC1945 and the obsolete RFC2616, and
      * can be overridden with CURLOPT_POSTREDIR.
      */
-    if((data->set.httpreq == HTTPREQ_POST
-        || data->set.httpreq == HTTPREQ_POST_FORM
-        || data->set.httpreq == HTTPREQ_POST_MIME)
+    if((data->state.httpreq == HTTPREQ_POST
+        || data->state.httpreq == HTTPREQ_POST_FORM
+        || data->state.httpreq == HTTPREQ_POST_MIME)
        && !(data->set.keep_post & CURL_REDIR_POST_302)) {
       infof(data, "Switch from POST to GET\n");
-      data->set.httpreq = HTTPREQ_GET;
+      data->state.httpreq = HTTPREQ_GET;
     }
     break;
 
   case 303: /* See Other */
-    /* Disable both types of POSTs, unless the user explicitly
-       asks for POST after POST */
-    if(data->set.httpreq != HTTPREQ_GET
-      && !(data->set.keep_post & CURL_REDIR_POST_303)) {
-      data->set.httpreq = HTTPREQ_GET; /* enforce GET request */
-      infof(data, "Disables POST, goes with %s\n",
+    /* 'See Other' location is not the resource but a substitute for the
+     * resource. In this case we switch the method to GET/HEAD, unless the
+     * method is POST and the user specified to keep it as POST.
+     * https://github.com/curl/curl/issues/5237#issuecomment-614641049
+     */
+    if(data->state.httpreq != HTTPREQ_GET &&
+       ((data->state.httpreq != HTTPREQ_POST &&
+         data->state.httpreq != HTTPREQ_POST_FORM &&
+         data->state.httpreq != HTTPREQ_POST_MIME) ||
+        !(data->set.keep_post & CURL_REDIR_POST_303))) {
+      data->state.httpreq = HTTPREQ_GET;
+      data->set.upload = false;
+      infof(data, "Switch to %s\n",
             data->set.opt_no_body?"HEAD":"GET");
     }
     break;
@@ -1779,6 +1798,12 @@ CURLcode Curl_retry_request(struct connectdata *conn,
     retry = TRUE;
   }
   if(retry) {
+#define CONN_MAX_RETRIES 5
+    if(conn->retrycount++ >= CONN_MAX_RETRIES) {
+      failf(data, "Connection died, tried %d times before giving up",
+            CONN_MAX_RETRIES);
+      return CURLE_SEND_ERROR;
+    }
     infof(conn->data, "Connection died, retrying a fresh connect\n");
     *url = strdup(conn->data->change.url);
     if(!*url)
@@ -1821,15 +1846,21 @@ Curl_setup_transfer(
 {
   struct SingleRequest *k = &data->req;
   struct connectdata *conn = data->conn;
+  struct HTTP *http = data->req.protop;
+  bool httpsending = ((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
+                      (http->sending == HTTPSEND_REQUEST));
   DEBUGASSERT(conn != NULL);
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
 
-  if(conn->bits.multiplex || conn->httpversion == 20) {
+  if(conn->bits.multiplex || conn->httpversion == 20 || httpsending) {
     /* when multiplexing, the read/write sockets need to be the same! */
     conn->sockfd = sockindex == -1 ?
       ((writesockindex == -1 ? CURL_SOCKET_BAD : conn->sock[writesockindex])) :
       conn->sock[sockindex];
     conn->writesockfd = conn->sockfd;
+    if(httpsending)
+      /* special and very HTTP-specific */
+      writesockindex = FIRSTSOCKET;
   }
   else {
     conn->sockfd = sockindex == -1 ?
@@ -1857,7 +1888,6 @@ Curl_setup_transfer(
       k->keepon |= KEEP_RECV;
 
     if(writesockindex != -1) {
-      struct HTTP *http = data->req.protop;
       /* HTTP 1.1 magic:
 
          Even if we require a 100-return code before uploading data, we might

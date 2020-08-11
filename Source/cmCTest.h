@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 
@@ -140,7 +142,8 @@ public:
 
   std::string GetTestModelString();
   static int GetTestModelFromString(const char* str);
-  static std::string CleanString(const std::string& str);
+  static std::string CleanString(const std::string& str,
+                                 std::string::size_type spos = 0);
   std::string GetCTestConfiguration(const std::string& name);
   void SetCTestConfiguration(const char* name, const char* value,
                              bool suppress = false);
@@ -200,6 +203,9 @@ public:
 
   bool ShouldCompressTestOutput();
   bool CompressString(std::string& str);
+
+  bool GetStopOnFailure() const;
+  void SetStopOnFailure(bool stop);
 
   std::chrono::system_clock::time_point GetStopTime() const;
   void SetStopTime(std::string const& time);
@@ -506,8 +512,8 @@ private:
                                std::vector<std::string> const& files);
 
   /** Check if the argument is the one specified */
-  bool CheckArgument(const std::string& arg, const char* varg1,
-                     const char* varg2 = nullptr);
+  static bool CheckArgument(const std::string& arg, cm::string_view varg1,
+                            const char* varg2 = nullptr);
 
   /** Output errors from a test */
   void OutputTestErrors(std::vector<char> const& process_output);

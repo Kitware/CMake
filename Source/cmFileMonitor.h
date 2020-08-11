@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 class cmRootWatcher;
 

@@ -89,9 +89,8 @@ function(compiler_id_detection outvar lang)
       )
     endif()
 
-    #Currently the only CUDA compilers are NVIDIA
     if(lang STREQUAL CUDA)
-      set(ordered_compilers NVIDIA)
+      set(ordered_compilers NVIDIA Clang)
     endif()
 
     if(CID_ID_DEFINE)

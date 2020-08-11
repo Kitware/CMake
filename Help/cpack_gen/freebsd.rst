@@ -3,6 +3,11 @@ CPack FreeBSD Generator
 
 The built in (binary) CPack FreeBSD (pkg) generator (Unix only)
 
+Variables affecting the CPack FreeBSD (pkg) generator
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  - :variable:`CPACK_ARCHIVE_THREADS`
+
 Variables specific to CPack FreeBSD (pkg) generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

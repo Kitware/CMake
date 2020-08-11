@@ -55,13 +55,13 @@ macro(__windows_compiler_clang_gnu lang)
 
   # Create archiving rules to support large object file lists for static libraries.
   set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>")
-  set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> q  <TARGET> <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY
     "<CMAKE_${lang}_COMPILER> -fuse-ld=lld-link -nostartfiles -nostdlib <CMAKE_SHARED_LIBRARY_${lang}_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> -o <TARGET> ${CMAKE_GNULD_IMAGE_VERSION} -Xlinker /implib:<TARGET_IMPLIB> -Xlinker /pdb:<TARGET_PDB> -Xlinker /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <OBJECTS> <LINK_LIBRARIES>")
   set(CMAKE_${lang}_CREATE_SHARED_MODULE ${CMAKE_${lang}_CREATE_SHARED_LIBRARY})
   set(CMAKE_${lang}_LINK_EXECUTABLE
-    "<CMAKE_${lang}_COMPILER> -fuse-ld=lld-link -nostartfiles -nostdlib <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> -Xlinker /implib:<TARGET_IMPLIB> -Xlinker /pdb:<TARGET_PDB> -Xlinker /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
+    "<CMAKE_${lang}_COMPILER> -fuse-ld=lld-link -nostartfiles -nostdlib <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> -Xlinker /implib:<TARGET_IMPLIB> -Xlinker /pdb:<TARGET_PDB> -Xlinker /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
 
   if(NOT "${lang}" STREQUAL "ASM")
     set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         -Xclang -flto-visibility-public-std -D_MT -Xclang --dependent-lib=libcmt)
@@ -134,14 +134,15 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     include(Platform/Windows-MSVC)
 
     # Feed the preprocessed rc file to llvm-rc
-    if(CMAKE_RC_COMPILER_INIT STREQUAL "llvm-rc")
-      if(DEFINED CMAKE_C_COMPILER)
+    if(CMAKE_RC_COMPILER_INIT MATCHES "llvm-rc")
+      if(DEFINED CMAKE_C_COMPILER_ID)
         set(CMAKE_RC_PREPROCESSOR CMAKE_C_COMPILER)
-      elseif(DEFINED CMAKE_CXX_COMPILER)
+      elseif(DEFINED CMAKE_CXX_COMPILER_ID)
         set(CMAKE_RC_PREPROCESSOR CMAKE_CXX_COMPILER)
       endif()
       if(DEFINED CMAKE_RC_PREPROCESSOR)
-        set(CMAKE_RC_COMPILE_OBJECT "${CMAKE_COMMAND} -E cmake_llvm_rc <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> -clang:-MD -clang:-MF -clang:<SOURCE>.d -E <SOURCE> -- <CMAKE_RC_COMPILER> <DEFINES> /fo <OBJECT> <OBJECT>.pp")
+        set(CMAKE_DEPFILE_FLAGS_RC "-clang:-MD -clang:-MF -clang:<DEPFILE>")
+        set(CMAKE_RC_COMPILE_OBJECT "${CMAKE_COMMAND} -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> -E <SOURCE> -- <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> /fo <OBJECT> <OBJECT>.pp")
         if(CMAKE_GENERATOR STREQUAL "Ninja")
           set(CMAKE_NINJA_CMCLDEPS_RC 0)
           set(CMAKE_NINJA_DEP_TYPE_RC gcc)

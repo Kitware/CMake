@@ -44,3 +44,14 @@ if(TARGET alias-test-lib)
 else()
     message("'alias-test-lib' does not exist!?")
 endif()
+
+add_subdirectory (imported-target-subdir1)
+add_subdirectory (imported-target-subdir2)
+
+foreach (alias IN ITEMS exe-local lib-local
+                        exe-subdir1 lib-subdir1
+                        exe-subdir2 lib-subdir2)
+  if (TARGET alias-test-${alias})
+    message (SEND_ERROR "ALIAS 'alias-test-${alias}' unexpectedly defined.")
+  endif()
+endforeach()

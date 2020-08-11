@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "cm_jsoncpp_value.h"
+#include <cm3p/json/value.h>
 
 #include "cmCommonTargetGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
@@ -69,6 +69,8 @@ protected:
   std::string LanguageCompilerRule(const std::string& lang,
                                    const std::string& config) const;
   std::string LanguagePreprocessRule(std::string const& lang,
+                                     const std::string& config) const;
+  std::string LanguageDependencyRule(std::string const& lang,
                                      const std::string& config) const;
   bool NeedExplicitPreprocessing(std::string const& lang) const;
   std::string LanguageDyndepRule(std::string const& lang,

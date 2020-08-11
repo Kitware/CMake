@@ -6,11 +6,11 @@
 
 #include <cm/memory>
 
+#include <cm3p/json/reader.h>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
-
-#include "cm_jsoncpp_reader.h"
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
@@ -19,6 +19,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmVersion.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
@@ -313,7 +314,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
       version.clear();
     }
 
-    if (version.find(this->GetPlatformToolsetString()) != 0) {
+    if (!cmHasPrefix(version, this->GetPlatformToolsetString())) {
       std::ostringstream e;
       /* clang-format off */
       e <<

@@ -21,6 +21,7 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -125,9 +126,9 @@ void cmExportFileGenerator::PopulateInterfaceProperty(
   const std::string& propName, cmGeneratorTarget* target,
   ImportPropertyMap& properties)
 {
-  const char* input = target->GetProperty(propName);
+  cmProp input = target->GetProperty(propName);
   if (input) {
-    properties[propName] = input;
+    properties[propName] = *input;
   }
 }
 
@@ -137,16 +138,16 @@ void cmExportFileGenerator::PopulateInterfaceProperty(
   cmGeneratorExpression::PreprocessContext preprocessRule,
   ImportPropertyMap& properties, std::vector<std::string>& missingTargets)
 {
-  const char* input = target->GetProperty(propName);
+  cmProp input = target->GetProperty(propName);
   if (input) {
-    if (!*input) {
+    if (input->empty()) {
       // Set to empty
       properties[outputName].clear();
       return;
     }
 
     std::string prepro =
-      cmGeneratorExpression::Preprocess(input, preprocessRule);
+      cmGeneratorExpression::Preprocess(*input, preprocessRule);
     if (!prepro.empty()) {
       this->ResolveTargetsInGeneratorExpressions(prepro, target,
                                                  missingTargets);
@@ -174,10 +175,10 @@ bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
   if (!target->IsLinkable()) {
     return false;
   }
-  const char* input = target->GetProperty("INTERFACE_LINK_LIBRARIES");
+  cmProp input = target->GetProperty("INTERFACE_LINK_LIBRARIES");
   if (input) {
     std::string prepro =
-      cmGeneratorExpression::Preprocess(input, preprocessRule);
+      cmGeneratorExpression::Preprocess(*input, preprocessRule);
     if (!prepro.empty()) {
       this->ResolveTargetsInGeneratorExpressions(
         prepro, target, missingTargets, ReplaceFreeTargets);
@@ -276,8 +277,7 @@ static bool checkInterfaceDirs(const std::string& prepro,
                 << "\"\nhowever it is also "
                    "a subdirectory of the "
                 << (inBinary ? "build" : "source") << " tree:\n    \""
-                << (inBinary ? topBinaryDir : topSourceDir) << "\""
-                << std::endl;
+                << (inBinary ? topBinaryDir : topSourceDir) << "\"\n";
               target->GetLocalGenerator()->IssueMessage(
                 MessageType::AUTHOR_WARNING, s.str());
               CM_FALLTHROUGH;
@@ -342,19 +342,19 @@ void cmExportFileGenerator::PopulateSourcesInterface(
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
   const char* propName = "INTERFACE_SOURCES";
-  const char* input = gt->GetProperty(propName);
+  cmProp input = gt->GetProperty(propName);
 
   if (!input) {
     return;
   }
 
-  if (!*input) {
+  if (input->empty()) {
     properties[propName].clear();
     return;
   }
 
   std::string prepro =
-    cmGeneratorExpression::Preprocess(input, preprocessRule, true);
+    cmGeneratorExpression::Preprocess(*input, preprocessRule, true);
   if (!prepro.empty()) {
     this->ResolveTargetsInGeneratorExpressions(prepro, gt, missingTargets);
 
@@ -373,7 +373,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
   const char* propName = "INTERFACE_INCLUDE_DIRECTORIES";
-  const char* input = target->GetProperty(propName);
+  cmProp input = target->GetProperty(propName);
 
   cmGeneratorExpression ge;
 
@@ -400,7 +400,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   if (!input && exportDirs.empty()) {
     return;
   }
-  if ((input && !*input) && exportDirs.empty()) {
+  if ((input && input->empty()) && exportDirs.empty()) {
     // Set to empty
     properties[propName].clear();
     return;
@@ -408,7 +408,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
 
   prefixItems(exportDirs);
 
-  std::string includes = (input ? input : "");
+  std::string includes = (input ? *input : "");
   const char* sep = input ? ";" : "";
   includes += sep + exportDirs;
   std::string prepro =
@@ -431,19 +431,19 @@ void cmExportFileGenerator::PopulateLinkDependsInterface(
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
   const char* propName = "INTERFACE_LINK_DEPENDS";
-  const char* input = gt->GetProperty(propName);
+  cmProp input = gt->GetProperty(propName);
 
   if (!input) {
     return;
   }
 
-  if (!*input) {
+  if (input->empty()) {
     properties[propName].clear();
     return;
   }
 
   std::string prepro =
-    cmGeneratorExpression::Preprocess(input, preprocessRule, true);
+    cmGeneratorExpression::Preprocess(*input, preprocessRule, true);
   if (!prepro.empty()) {
     this->ResolveTargetsInGeneratorExpressions(prepro, gt, missingTargets);
 
@@ -462,19 +462,19 @@ void cmExportFileGenerator::PopulateLinkDirectoriesInterface(
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
   const char* propName = "INTERFACE_LINK_DIRECTORIES";
-  const char* input = gt->GetProperty(propName);
+  cmProp input = gt->GetProperty(propName);
 
   if (!input) {
     return;
   }
 
-  if (!*input) {
+  if (input->empty()) {
     properties[propName].clear();
     return;
   }
 
   std::string prepro =
-    cmGeneratorExpression::Preprocess(input, preprocessRule, true);
+    cmGeneratorExpression::Preprocess(*input, preprocessRule, true);
   if (!prepro.empty()) {
     this->ResolveTargetsInGeneratorExpressions(prepro, gt, missingTargets);
 
@@ -497,11 +497,11 @@ void cmExportFileGenerator::PopulateInterfaceProperty(
 void getPropertyContents(cmGeneratorTarget const* tgt, const std::string& prop,
                          std::set<std::string>& ifaceProperties)
 {
-  const char* p = tgt->GetProperty(prop);
+  cmProp p = tgt->GetProperty(prop);
   if (!p) {
     return;
   }
-  std::vector<std::string> content = cmExpandedList(p);
+  std::vector<std::string> content = cmExpandedList(*p);
   ifaceProperties.insert(content.begin(), content.end());
 }
 
@@ -762,13 +762,12 @@ void cmExportFileGenerator::SetImportLinkInterface(
     return;
   }
 
-  const char* propContent;
+  cmProp propContent;
 
-  if (const char* prop_suffixed =
+  if (cmProp prop_suffixed =
         target->GetProperty("LINK_INTERFACE_LIBRARIES" + suffix)) {
     propContent = prop_suffixed;
-  } else if (const char* prop =
-               target->GetProperty("LINK_INTERFACE_LIBRARIES")) {
+  } else if (cmProp prop = target->GetProperty("LINK_INTERFACE_LIBRARIES")) {
     propContent = prop;
   } else {
     return;
@@ -790,13 +789,13 @@ void cmExportFileGenerator::SetImportLinkInterface(
     return;
   }
 
-  if (!*propContent) {
+  if (propContent->empty()) {
     properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix].clear();
     return;
   }
 
   std::string prepro =
-    cmGeneratorExpression::Preprocess(propContent, preprocessRule);
+    cmGeneratorExpression::Preprocess(*propContent, preprocessRule);
   if (!prepro.empty()) {
     this->ResolveTargetsInGeneratorExpressions(prepro, target, missingTargets,
                                                ReplaceFreeTargets);
@@ -856,8 +855,8 @@ void cmExportFileGenerator::SetImportDetailProperties(
       cmGeneratorTarget::ManagedType::Native) {
     std::string prop = cmStrCat("IMPORTED_COMMON_LANGUAGE_RUNTIME", suffix);
     std::string propval;
-    if (auto* p = target->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
-      propval = p;
+    if (cmProp p = target->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
+      propval = *p;
     } else if (target->IsCSharpOnly()) {
       // C# projects do not have the /clr flag, so we set the property
       // here to mark the target as (only) managed (i.e. no .lib file
@@ -925,12 +924,14 @@ void cmExportFileGenerator::GeneratePolicyHeaderCode(std::ostream& os)
   /* clang-format on */
 
   // Isolate the file policy level.
-  // We use 2.6 here instead of the current version because newer
-  // versions of CMake should be able to export files imported by 2.6
-  // until the import format changes.
+  // Support CMake versions as far back as 2.6 but also support using NEW
+  // policy settings for up to CMake 3.17 (this upper limit may be reviewed
+  // and increased from time to time). This reduces the opportunity for CMake
+  // warnings when an older export file is later used with newer CMake
+  // versions.
   /* clang-format off */
   os << "cmake_policy(PUSH)\n"
-     << "cmake_policy(VERSION 2.6)\n";
+     << "cmake_policy(VERSION 2.6...3.17)\n";
   /* clang-format on */
 }
 
@@ -1116,7 +1117,7 @@ void cmExportFileGenerator::GenerateMissingTargetsCheckCode(
     return;
   }
   /* clang-format off */
-  os << "# Make sure the targets which have been exported in some other \n"
+  os << "# Make sure the targets which have been exported in some other\n"
         "# export set exist.\n"
         "unset(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE_targets)\n"
         "foreach(_target ";
@@ -1215,9 +1216,9 @@ bool cmExportFileGenerator::PopulateExportProperties(
   std::string& errorMessage)
 {
   auto& targetProperties = gte->Target->GetProperties();
-  if (const char* exportProperties =
+  if (cmProp exportProperties =
         targetProperties.GetPropertyValue("EXPORT_PROPERTIES")) {
-    for (auto& prop : cmExpandedList(exportProperties)) {
+    for (auto& prop : cmExpandedList(*exportProperties)) {
       /* Black list reserved properties */
       if (cmHasLiteralPrefix(prop, "IMPORTED_") ||
           cmHasLiteralPrefix(prop, "INTERFACE_")) {
@@ -1228,15 +1229,15 @@ bool cmExportFileGenerator::PopulateExportProperties(
         errorMessage = e.str();
         return false;
       }
-      auto propertyValue = targetProperties.GetPropertyValue(prop);
+      cmProp propertyValue = targetProperties.GetPropertyValue(prop);
       if (propertyValue == nullptr) {
         // Asked to export a property that isn't defined on the target. Do not
         // consider this an error, there's just nothing to export.
         continue;
       }
       std::string evaluatedValue = cmGeneratorExpression::Preprocess(
-        propertyValue, cmGeneratorExpression::StripAllGeneratorExpressions);
-      if (evaluatedValue != propertyValue) {
+        *propertyValue, cmGeneratorExpression::StripAllGeneratorExpressions);
+      if (evaluatedValue != *propertyValue) {
         std::ostringstream e;
         e << "Target \"" << gte->Target->GetName() << "\" contains property \""
           << prop << "\" in EXPORT_PROPERTIES but this property contains a "
@@ -1244,7 +1245,7 @@ bool cmExportFileGenerator::PopulateExportProperties(
         errorMessage = e.str();
         return false;
       }
-      properties[prop] = propertyValue;
+      properties[prop] = *propertyValue;
     }
   }
   return true;

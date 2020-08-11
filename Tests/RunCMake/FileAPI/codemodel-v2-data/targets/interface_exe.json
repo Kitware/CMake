@@ -1,0 +1,152 @@
+{
+    "name": "interface_exe",
+    "id": "^interface_exe::@6890427a1f51a3e7e1df$",
+    "directorySource": "^\\.$",
+    "projectName": "codemodel-v2",
+    "type": "EXECUTABLE",
+    "isGeneratorProvided": null,
+    "sources": [
+        {
+            "path": "^empty\\.c$",
+            "isGenerated": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "C",
+            "backtrace": [
+                {
+                    "file": "^include_test\\.cmake$",
+                    "line": 3,
+                    "command": "add_executable",
+                    "hasParent": true
+                },
+                {
+                    "file": "^include_test\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "C",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ],
+            "includes": null,
+            "defines": [
+                {
+                    "define": "interface_exe_EXPORTS",
+                    "backtrace": null
+                }
+            ],
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^include_test\\.cmake$",
+            "line": 3,
+            "command": "add_executable",
+            "hasParent": true
+        },
+        {
+            "file": "^include_test\\.cmake$",
+            "line": null,
+            "command": null,
+            "hasParent": true
+        },
+        {
+            "file": "^codemodel-v2\\.cmake$",
+            "line": 3,
+            "command": "include",
+            "hasParent": true
+        },
+        {
+            "file": "^codemodel-v2\\.cmake$",
+            "line": null,
+            "command": null,
+            "hasParent": true
+        },
+        {
+            "file": "^CMakeLists\\.txt$",
+            "line": 3,
+            "command": "include",
+            "hasParent": true
+        },
+        {
+            "file": "^CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^my_interface_exe\\.myexe$",
+    "artifacts": [
+        {
+            "path": "^bin/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?my_interface_exe\\.myexe$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^lib/my_interface_exe\\.imp$",
+            "_aixExtra": true,
+            "_dllExtra": false
+        },
+        {
+            "path": "^lib/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?my_interface_exe\\.(dll\\.a|lib)$",
+            "_dllExtra": true
+        },
+        {
+            "path": "^bin/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?my_interface_exe\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^\\.$",
+    "source": "^\\.$",
+    "install": null,
+    "link": {
+        "language": "C",
+        "lto": null,
+        "commandFragments": null
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        }
+    ]
+}

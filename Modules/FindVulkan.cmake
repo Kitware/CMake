@@ -28,40 +28,46 @@ The module will also define two cache variables::
   Vulkan_INCLUDE_DIR    - the Vulkan include directory
   Vulkan_LIBRARY        - the path to the Vulkan library
 
+Hints
+^^^^^
+
+The ``VULKAN_SDK`` environment variable optionally specifies the
+location of the Vulkan SDK root directory for the given
+architecture. It is typically set by sourcing the toplevel
+``setup-env.sh`` script of the Vulkan SDK directory into the shell
+environment.
+
 #]=======================================================================]
 
 if(WIN32)
   find_path(Vulkan_INCLUDE_DIR
     NAMES vulkan/vulkan.h
-    PATHS
+    HINTS
       "$ENV{VULKAN_SDK}/Include"
     )
 
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     find_library(Vulkan_LIBRARY
       NAMES vulkan-1
-      PATHS
+      HINTS
         "$ENV{VULKAN_SDK}/Lib"
         "$ENV{VULKAN_SDK}/Bin"
-        )
+      )
   elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
     find_library(Vulkan_LIBRARY
       NAMES vulkan-1
-      PATHS
+      HINTS
         "$ENV{VULKAN_SDK}/Lib32"
         "$ENV{VULKAN_SDK}/Bin32"
-        NO_SYSTEM_ENVIRONMENT_PATH
-        )
+      )
   endif()
 else()
-    find_path(Vulkan_INCLUDE_DIR
-      NAMES vulkan/vulkan.h
-      PATHS
-        "$ENV{VULKAN_SDK}/include")
-    find_library(Vulkan_LIBRARY
-      NAMES vulkan
-      PATHS
-        "$ENV{VULKAN_SDK}/lib")
+  find_path(Vulkan_INCLUDE_DIR
+    NAMES vulkan/vulkan.h
+    HINTS "$ENV{VULKAN_SDK}/include")
+  find_library(Vulkan_LIBRARY
+    NAMES vulkan
+    HINTS "$ENV{VULKAN_SDK}/lib")
 endif()
 
 set(Vulkan_LIBRARIES ${Vulkan_LIBRARY})

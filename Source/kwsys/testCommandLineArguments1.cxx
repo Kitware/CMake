@@ -12,8 +12,8 @@
 #include <iostream>
 #include <vector>
 
-#include <assert.h> /* assert */
-#include <string.h> /* strcmp */
+#include <cassert> /* assert */
+#include <cstring> /* strcmp */
 
 int testCommandLineArguments1(int argc, char* argv[])
 {
@@ -25,7 +25,7 @@ int testCommandLineArguments1(int argc, char* argv[])
   std::string p;
   int res = 0;
 
-  typedef kwsys::CommandLineArguments argT;
+  using argT = kwsys::CommandLineArguments;
   arg.AddArgument("-n", argT::SPACE_ARGUMENT, &n, "Argument N");
   arg.AddArgument("-m", argT::EQUAL_ARGUMENT, &m, "Argument M");
   arg.AddBooleanArgument("-p", &p, "Argument P");
@@ -51,9 +51,7 @@ int testCommandLineArguments1(int argc, char* argv[])
   std::cout << "Value of N: " << n << std::endl;
   std::cout << "Value of M: " << m << std::endl;
   std::cout << "Value of P: " << p << std::endl;
-  if (m) {
-    delete[] m;
-  }
+  delete[] m;
 
   char** newArgv = nullptr;
   int newArgc = 0;

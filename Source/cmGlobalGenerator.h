@@ -28,7 +28,7 @@
 #include "cmTargetDepend.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
-#  include "cm_jsoncpp_value.h"
+#  include <cm3p/json/value.h>
 
 #  include "cmFileLockPool.h"
 #endif
@@ -553,7 +553,8 @@ protected:
     std::vector<std::string> Depends;
     std::string WorkingDir;
     bool UsesTerminal = false;
-    bool PerConfig = true;
+    cmTarget::PerConfig PerConfig = cmTarget::PerConfig::Yes;
+    bool StdPipesUTF8 = false;
   };
 
   void CreateDefaultGlobalTargets(std::vector<GlobalTargetInfo>& targets);
@@ -588,7 +589,7 @@ protected:
 
   cmGeneratorTarget* FindGeneratorTargetImpl(std::string const& name) const;
 
-  const char* GetPredefinedTargetsFolder();
+  std::string GetPredefinedTargetsFolder();
 
 private:
   using TargetMap = std::unordered_map<std::string, cmTarget*>;

@@ -7,12 +7,14 @@
 #include <iostream>
 #include <sstream>
 
+#include <cm3p/archive.h>
+#include <cm3p/archive_entry.h>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 
 #include "cm_get_date.h"
-#include "cm_libarchive.h"
 
 #include "cmLocale.h"
 #include "cmStringAlgorithms.h"
@@ -170,15 +172,19 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
                            cm_archive_error_string(this->Archive));
     return;
   }
+}
 
+bool cmArchiveWrite::Open()
+{
   if (archive_write_open(
         this->Archive, this, nullptr,
         reinterpret_cast<archive_write_callback*>(&Callback::Write),
         nullptr) != ARCHIVE_OK) {
     this->Error =
       cmStrCat("archive_write_open: ", cm_archive_error_string(this->Archive));
-    return;
+    return false;
   }
+  return true;
 }
 
 cmArchiveWrite::~cmArchiveWrite()
@@ -276,7 +282,12 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
       time_t epochTime;
       iss >> epochTime;
       if (iss.eof() && !iss.fail()) {
+        // Set all of the file times to the epoch time to handle archive
+        // formats that include creation/access time.
         archive_entry_set_mtime(e, epochTime, 0);
+        archive_entry_set_atime(e, epochTime, 0);
+        archive_entry_set_ctime(e, epochTime, 0);
+        archive_entry_set_birthtime(e, epochTime, 0);
       }
     }
   }
@@ -363,5 +374,18 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
                            "\": ", cmSystemTools::GetLastSystemError());
     return false;
   }
+  return true;
+}
+
+bool cmArchiveWrite::SetFilterOption(const char* module, const char* key,
+                                     const char* value)
+{
+  if (archive_write_set_filter_option(this->Archive, module, key, value) !=
+      ARCHIVE_OK) {
+    this->Error = "archive_write_set_filter_option: ";
+    this->Error += cm_archive_error_string(this->Archive);
+    return false;
+  }
+
   return true;
 }

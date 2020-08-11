@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.7)
 project(MixedStandardLevels1 CXX CUDA)
 
-string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=compute_30")
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CUDA_STANDARD 11)
+set(CMAKE_CUDA_ARCHITECTURES 30)
 
 add_executable(MixedStandardLevels1 main.cu lib.cpp)
 

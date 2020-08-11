@@ -8,10 +8,10 @@
 
 #include <cm/memory>
 
-#include "cmsys/FStream.hxx"
+#include <cm3p/json/value.h>
+#include <cm3p/json/writer.h>
 
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
+#include "cmsys/FStream.hxx"
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"

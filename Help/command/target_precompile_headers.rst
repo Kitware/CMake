@@ -56,35 +56,34 @@ e.g. ``[["other_header.h"]]``) will be treated as is, and include directories
 must be available for the compiler to find them.  Other header file names
 (e.g. ``project_header.h``) are interpreted as being relative to the current
 source directory (e.g. :variable:`CMAKE_CURRENT_SOURCE_DIR`) and will be
-included by absolute path.
-
-Arguments to ``target_precompile_headers()`` may use "generator expressions"
-with the syntax ``$<...>``.
-See the :manual:`cmake-generator-expressions(7)` manual for available
-expressions.  See the :manual:`cmake-compile-features(7)` manual for
-information on compile features and a list of supported compilers.
-The ``$<COMPILE_LANGUAGE:...>`` generator expression is particularly
-useful for specifying a language-specific header to precompile for
-only one language (e.g. ``CXX`` and not ``C``).  For example:
+included by absolute path.  For example:
 
 .. code-block:: cmake
 
   target_precompile_headers(myTarget
     PUBLIC
       project_header.h
-      "$<$<COMPILE_LANGUAGE:CXX>:cxx_only.h>"
     PRIVATE
       [["other_header.h"]]
       <unordered_map>
   )
 
-When specifying angle brackets inside a :manual:`generator expression
-<cmake-generator-expressions(7)>`, be sure to encode the closing ``>``
-as ``$<ANGLE-R>``.  For example:
+Arguments to ``target_precompile_headers()`` may use "generator expressions"
+with the syntax ``$<...>``.
+See the :manual:`cmake-generator-expressions(7)` manual for available
+expressions.
+The ``$<COMPILE_LANGUAGE:...>`` generator expression is particularly
+useful for specifying a language-specific header to precompile for
+only one language (e.g. ``CXX`` and not ``C``).  In this case, header
+file names that are not explicitly in double quotes or angle brackets
+must be specified by absolute path.  Also, when specifying angle brackets
+inside a generator expression, be sure to encode the closing ``>`` as
+``$<ANGLE-R>``.  For example:
 
 .. code-block:: cmake
 
   target_precompile_headers(mylib PRIVATE
+    "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/cxx_only.h>"
     "$<$<COMPILE_LANGUAGE:C>:<stddef.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<cstddef$<ANGLE-R>>"
   )
@@ -94,7 +93,7 @@ Reusing Precompile Headers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The command also supports a second signature which can be used to specify that
-one target re-uses a precompiled header file artefact from another target
+one target re-uses a precompiled header file artifact from another target
 instead of generating its own:
 
 .. code-block:: cmake

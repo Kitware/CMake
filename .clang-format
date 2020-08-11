@@ -32,16 +32,18 @@ IncludeCategories:
     Priority:        5
   - Regex:           '^(<|")Qt?[A-Z]'
     Priority:        6
-  - Regex:           '^(<|")cmsys/'
+  - Regex:           '^<cmtp/'
     Priority:        7
-  - Regex:           '^(<|")cm_'
+  - Regex:           '^(<|")cmsys/'
     Priority:        8
-  - Regex:           '^(<|")cm[A-Z][^.]+\.h'
+  - Regex:           '^(<|")cm_'
     Priority:        9
+  - Regex:           '^(<|")cm[A-Z][^.]+\.h'
+    Priority:        10
   - Regex:           '^<[^.]+\.h'
     Priority:        4
   - Regex:           '^<'
     Priority:        1
   - Regex:           '.*'
-    Priority:        10
+    Priority:        11
 ...

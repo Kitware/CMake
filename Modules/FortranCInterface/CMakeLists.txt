@@ -101,3 +101,7 @@ set_property(TARGET symbols PROPERTY POSITION_INDEPENDENT_CODE 1)
 # Require symbols through Fortran.
 add_executable(FortranCInterface main.F call_sub.f ${call_mod})
 target_link_libraries(FortranCInterface PUBLIC symbols)
+
+file(GENERATE OUTPUT exe-$<CONFIG>.cmake CONTENT [[
+set(FortranCInterface_EXE "$<TARGET_FILE:FortranCInterface>")
+]])

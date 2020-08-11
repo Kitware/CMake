@@ -38,10 +38,22 @@ The following variables may be set to influence this module's behavior:
   * ``ACML``
   * ``Apple``
   * ``NAS``
+  * ``Arm``
+  * ``Arm_mp``
+  * ``Arm_ilp64``
+  * ``Arm_ilp64_mp``
   * ``Generic``
 
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95/LAPACK95 interfaces
+
+Imported targets
+^^^^^^^^^^^^^^^^
+
+This module defines the following :prop_tgt:`IMPORTED` target:
+
+``LAPACK::LAPACK``
+  The libraries to use for LAPACK, if found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -267,7 +279,7 @@ if(BLAS_FOUND)
           set(LAPACK_mkl_OS_NAME "lin")
         endif()
         if(DEFINED ENV{MKLROOT})
-          set(LAPACK_mkl_MKLROOT "$ENV{MKLROOT}")
+          file(TO_CMAKE_PATH "$ENV{MKLROOT}" LAPACK_mkl_MKLROOT)
           # If MKLROOT points to the subdirectory 'mkl', use the parent directory instead
           # so we can better detect other relevant libraries in 'compiler' or 'tbb':
           get_filename_component(LAPACK_mkl_MKLROOT_LAST_DIR "${LAPACK_mkl_MKLROOT}" NAME)
@@ -351,6 +363,36 @@ if(BLAS_FOUND)
         cheev
         ""
         "openblas"
+        ""
+        ""
+        ""
+        "${BLAS_LIBRARIES}"
+      )
+    endif()
+  endif()
+
+  # ArmPL? (https://developer.arm.com/tools-and-software/server-and-hpc/compile/arm-compiler-for-linux/arm-performance-libraries)
+  if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
+
+    # Check for 64bit Integer support
+    if(BLA_VENDOR MATCHES "_ilp64")
+      set(LAPACK_armpl_LIB "armpl_ilp64")
+    else()
+      set(LAPACK_armpl_LIB "armpl_lp64")
+    endif()
+
+    # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
+    if(BLA_VENDOR MATCHES "_mp")
+     set(LAPACK_armpl_LIB "${LAPACK_armpl_LIB}_mp")
+    endif()
+
+    if(NOT LAPACK_LIBRARIES)
+      check_lapack_libraries(
+        LAPACK_LIBRARIES
+        LAPACK
+        cheev
+        ""
+        "${LAPACK_armpl_LIB}"
         ""
         ""
         ""
@@ -490,6 +532,23 @@ endif()
 # we used a placeholder for empty LAPACK_LIBRARIES to get through our logic above.
 if(LAPACK_LIBRARIES STREQUAL "LAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
   set(LAPACK_LIBRARIES "")
+endif()
+
+if(NOT TARGET LAPACK::LAPACK)
+  add_library(LAPACK::LAPACK INTERFACE IMPORTED)
+  set(_lapack_libs "${LAPACK_LIBRARIES}")
+  if(_lapack_libs AND TARGET BLAS::BLAS)
+    # remove the ${BLAS_LIBRARIES} from the interface and replace it
+    # with the BLAS::BLAS target
+    list(REMOVE_ITEM _lapack_libs "${BLAS_LIBRARIES}")
+  endif()
+
+  if(_lapack_libs)
+    set_target_properties(LAPACK::LAPACK PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${_lapack_libs}"
+    )
+  endif()
+  unset(_lapack_libs)
 endif()
 
 cmake_pop_check_state()

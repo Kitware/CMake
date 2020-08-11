@@ -11,6 +11,7 @@
 
 #include "cmDefinitions.h"
 #include "cmListFileCache.h"
+#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -411,11 +412,12 @@ void cmStateSnapshot::InitializeFromParent()
     this->Position->BuildSystemDirectory->LinkDirectoriesBacktraces,
     this->Position->LinkDirectoriesPosition);
 
-  const char* include_regex =
+  cmProp include_regex =
     parent->BuildSystemDirectory->Properties.GetPropertyValue(
       "INCLUDE_REGULAR_EXPRESSION");
   this->Position->BuildSystemDirectory->Properties.SetProperty(
-    "INCLUDE_REGULAR_EXPRESSION", include_regex);
+    "INCLUDE_REGULAR_EXPRESSION",
+    include_regex ? include_regex->c_str() : nullptr);
 }
 
 cmState* cmStateSnapshot::GetState() const

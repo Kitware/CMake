@@ -6,7 +6,6 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <initializer_list>
 #include <iterator>
 #include <sstream>
@@ -20,7 +19,6 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
@@ -35,8 +33,8 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
-#include "cmLinkLineDeviceComputer.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
@@ -129,6 +127,28 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
     this->LinkerSysroot = sysrootLink;
   } else {
     this->LinkerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  }
+
+  if (std::string const* appleArchSysroots =
+        this->Makefile->GetDef("CMAKE_APPLE_ARCH_SYSROOTS")) {
+    std::string const& appleArchs =
+      this->Makefile->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES");
+    std::vector<std::string> archs;
+    std::vector<std::string> sysroots;
+    cmExpandList(appleArchs, archs);
+    cmExpandList(*appleArchSysroots, sysroots, true);
+    if (archs.size() == sysroots.size()) {
+      for (size_t i = 0; i < archs.size(); ++i) {
+        this->AppleArchSysroots[archs[i]] = sysroots[i];
+      }
+    } else {
+      std::string const e =
+        cmStrCat("CMAKE_APPLE_ARCH_SYSROOTS:\n  ", *appleArchSysroots,
+                 "\n"
+                 "is not the same length as CMAKE_OSX_ARCHITECTURES:\n  ",
+                 appleArchs);
+      this->IssueMessage(MessageType::FATAL_ERROR, e);
+    }
   }
 
   for (std::string const& lang : enabledLanguages) {
@@ -288,29 +308,35 @@ void cmLocalGenerator::GenerateTestFiles()
   cmGeneratedFileStream fout(file);
   fout.SetCopyIfDifferent(true);
 
-  fout << "# CMake generated Testfile for " << std::endl
-       << "# Source directory: "
-       << this->StateSnapshot.GetDirectory().GetCurrentSource() << std::endl
-       << "# Build directory: "
-       << this->StateSnapshot.GetDirectory().GetCurrentBinary() << std::endl
-       << "# " << std::endl
-       << "# This file includes the relevant testing commands "
-       << "required for " << std::endl
-       << "# testing this directory and lists subdirectories to "
-       << "be tested as well." << std::endl;
+  fout << "# CMake generated Testfile for \n"
+          "# Source directory: "
+       << this->StateSnapshot.GetDirectory().GetCurrentSource()
+       << "\n"
+          "# Build directory: "
+       << this->StateSnapshot.GetDirectory().GetCurrentBinary()
+       << "\n"
+          "# \n"
+          "# This file includes the relevant testing commands "
+          "required for \n"
+          "# testing this directory and lists subdirectories to "
+          "be tested as well.\n";
 
-  const char* testIncludeFile =
-    this->Makefile->GetProperty("TEST_INCLUDE_FILE");
-  if (testIncludeFile) {
-    fout << "include(\"" << testIncludeFile << "\")" << std::endl;
+  std::string resourceSpecFile =
+    this->Makefile->GetSafeDefinition("CTEST_RESOURCE_SPEC_FILE");
+  if (!resourceSpecFile.empty()) {
+    fout << "set(CTEST_RESOURCE_SPEC_FILE \"" << resourceSpecFile << "\")\n";
   }
 
-  const char* testIncludeFiles =
-    this->Makefile->GetProperty("TEST_INCLUDE_FILES");
+  cmProp testIncludeFile = this->Makefile->GetProperty("TEST_INCLUDE_FILE");
+  if (testIncludeFile) {
+    fout << "include(\"" << *testIncludeFile << "\")\n";
+  }
+
+  cmProp testIncludeFiles = this->Makefile->GetProperty("TEST_INCLUDE_FILES");
   if (testIncludeFiles) {
-    std::vector<std::string> includesList = cmExpandedList(testIncludeFiles);
+    std::vector<std::string> includesList = cmExpandedList(*testIncludeFiles);
     for (std::string const& i : includesList) {
-      fout << "include(\"" << i << "\")" << std::endl;
+      fout << "include(\"" << i << "\")\n";
     }
   }
 
@@ -327,18 +353,18 @@ void cmLocalGenerator::GenerateTestFiles()
     std::string outP = i.GetDirectory().GetCurrentBinary();
     outP = this->MaybeConvertToRelativePath(parentBinDir, outP);
     outP = cmOutputConverter::EscapeForCMake(outP);
-    fout << "subdirs(" << outP << ")" << std::endl;
+    fout << "subdirs(" << outP << ")\n";
   }
 
   // Add directory labels property
   const char* directoryLabels =
     this->Makefile->GetDefinition("CMAKE_DIRECTORY_LABELS");
-  const char* labels = this->Makefile->GetProperty("LABELS");
+  cmProp labels = this->Makefile->GetProperty("LABELS");
 
   if (labels || directoryLabels) {
     fout << "set_directory_properties(PROPERTIES LABELS ";
     if (labels) {
-      fout << cmOutputConverter::EscapeForCMake(labels);
+      fout << cmOutputConverter::EscapeForCMake(*labels);
     }
     if (labels && directoryLabels) {
       fout << ";";
@@ -346,7 +372,7 @@ void cmLocalGenerator::GenerateTestFiles()
     if (directoryLabels) {
       fout << cmOutputConverter::EscapeForCMake(directoryLabels);
     }
-    fout << ")" << std::endl;
+    fout << ")\n";
   }
 }
 
@@ -467,16 +493,17 @@ void cmLocalGenerator::GenerateInstallRules()
   fout.SetCopyIfDifferent(true);
 
   // Write the header.
+  /* clang-format off */
   fout << "# Install script for directory: "
-       << this->StateSnapshot.GetDirectory().GetCurrentSource() << std::endl
-       << std::endl;
-  fout << "# Set the install prefix" << std::endl
-       << "if(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
-       << "  set(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
-       << "endif()" << std::endl
+       << this->StateSnapshot.GetDirectory().GetCurrentSource()
+       << "\n\n"
+          "# Set the install prefix\n"
+          "if(NOT DEFINED CMAKE_INSTALL_PREFIX)\n"
+          "  set(CMAKE_INSTALL_PREFIX \"" << prefix << "\")\n"
+          "endif()\n"
        << R"(string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX )"
-       << "\"${CMAKE_INSTALL_PREFIX}\")" << std::endl
-       << std::endl;
+       << "\"${CMAKE_INSTALL_PREFIX}\")\n\n";
+  /* clang-format on */
 
   // Write support code for generating per-configuration install rules.
   /* clang-format off */
@@ -550,6 +577,71 @@ void cmLocalGenerator::GenerateInstallRules()
     /* clang-format on */
   }
 
+  // Write out CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM so that
+  // installed code that uses `file(GET_RUNTIME_DEPENDENCIES)`
+  // has same platform variable as when running cmake
+  if (const char* platform = this->Makefile->GetDefinition(
+        "CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM")) {
+    /* clang-format off */
+    fout <<
+      "# Set default install directory permissions.\n"
+      "if(NOT DEFINED CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM)\n"
+      "  set(CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM \""
+         << platform << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
+  // Write out CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL so that
+  // installed code that uses `file(GET_RUNTIME_DEPENDENCIES)`
+  // has same tool selected as when running cmake
+  if (const char* command =
+        this->Makefile->GetDefinition("CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL")) {
+    /* clang-format off */
+    fout <<
+      "# Set default install directory permissions.\n"
+      "if(NOT DEFINED CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL)\n"
+      "  set(CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL \""
+         << command << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
+  // Write out CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND so that
+  // installed code that uses `file(GET_RUNTIME_DEPENDENCIES)`
+  // has same path to the tool as when running cmake
+  if (const char* command = this->Makefile->GetDefinition(
+        "CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND")) {
+    /* clang-format off */
+    fout <<
+      "# Set default install directory permissions.\n"
+      "if(NOT DEFINED CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND)\n"
+      "  set(CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND \""
+         << command << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
+  // Write out CMAKE_OBJDUMP so that installed code that uses
+  // `file(GET_RUNTIME_DEPENDENCIES)` and hasn't specified
+  // CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND has consistent
+  // logic to fallback to CMAKE_OBJDUMP when `objdump` is
+  // not on the path
+  if (const char* command = this->Makefile->GetDefinition("CMAKE_OBJDUMP")) {
+    /* clang-format off */
+    fout <<
+      "# Set default install directory permissions.\n"
+      "if(NOT DEFINED CMAKE_OBJDUMP)\n"
+      "  set(CMAKE_OBJDUMP \""
+         << command << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
   // Ask each install generator to write its code.
   cmPolicies::PolicyStatus status = this->GetPolicyStatus(cmPolicies::CMP0082);
   auto const& installers = this->Makefile->GetInstallGenerators();
@@ -591,8 +683,7 @@ void cmLocalGenerator::GenerateInstallRules()
           if (!c.GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
             std::string odir = c.GetDirectory().GetCurrentBinary();
             cmSystemTools::ConvertToUnixSlashes(odir);
-            fout << "  include(\"" << odir << "/cmake_install.cmake\")"
-                 << std::endl;
+            fout << "  include(\"" << odir << "/cmake_install.cmake\")\n";
           }
         }
         fout << "\n";
@@ -714,14 +805,14 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
     if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
       auto copyStandardToObjLang = [&](LanguagePair const& lang) -> bool {
         if (!target->GetProperty(cmStrCat(lang.first, "_STANDARD"))) {
-          auto* standard =
+          cmProp standard =
             target->GetProperty(cmStrCat(lang.second, "_STANDARD"));
           if (!standard) {
-            standard = this->Makefile->GetDefinition(
+            standard = this->Makefile->GetDef(
               cmStrCat("CMAKE_", lang.second, "_STANDARD_DEFAULT"));
           }
           target->Target->SetProperty(cmStrCat(lang.first, "_STANDARD"),
-                                      standard);
+                                      standard ? standard->c_str() : nullptr);
           return true;
         }
         return false;
@@ -730,9 +821,9 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
                                        const char* property) {
         if (!target->GetProperty(cmStrCat(lang.first, property)) &&
             target->GetProperty(cmStrCat(lang.second, property))) {
-          target->Target->SetProperty(
-            cmStrCat(lang.first, property),
-            target->GetProperty(cmStrCat(lang.second, property)));
+          cmProp p = target->GetProperty(cmStrCat(lang.second, property));
+          target->Target->SetProperty(cmStrCat(lang.first, property),
+                                      p ? p->c_str() : nullptr);
         }
       };
       for (auto const& lang : pairedLanguages) {
@@ -741,8 +832,8 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
           copyPropertyToObjLang(lang, "_EXTENSIONS");
         }
       }
-      if (const char* standard = target->GetProperty("CUDA_STANDARD")) {
-        if (std::string{ standard } == "98") {
+      if (cmProp standard = target->GetProperty("CUDA_STANDARD")) {
+        if (*standard == "98") {
           target->Target->SetProperty("CUDA_STANDARD", "03");
         }
       }
@@ -770,10 +861,13 @@ cmStateSnapshot cmLocalGenerator::GetStateSnapshot() const
 const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
                                               const std::string& prop)
 {
+  cmProp p;
   if (target) {
-    return target->GetProperty(prop);
+    p = target->GetProperty(prop);
+  } else {
+    p = this->Makefile->GetProperty(prop);
   }
-  return this->Makefile->GetProperty(prop);
+  return p ? p->c_str() : nullptr;
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(
@@ -877,7 +971,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
   if ((sep[0] != ' ') && !flags.empty() && flags.back() == sep[0]) {
     flags.back() = ' ';
   }
-  return flags;
+  return cmTrimWhitespace(flags);
 }
 
 void cmLocalGenerator::AddCompileOptions(std::string& flags,
@@ -900,9 +994,9 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
   if (const char* langFlagRegexStr =
         this->Makefile->GetDefinition(langFlagRegexVar)) {
     // Filter flags acceptable to this language.
-    if (const char* targetFlags = target->GetProperty("COMPILE_FLAGS")) {
+    if (cmProp targetFlags = target->GetProperty("COMPILE_FLAGS")) {
       std::vector<std::string> opts;
-      cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
+      cmSystemTools::ParseWindowsCommandLine(targetFlags->c_str(), opts);
       // Re-escape these flags since COMPILE_FLAGS were already parsed
       // as a command line above.
       std::string compileOpts;
@@ -917,10 +1011,10 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
     this->AppendCompileOptions(flags, targetCompileOpts, langFlagRegexStr);
   } else {
     // Use all flags.
-    if (const char* targetFlags = target->GetProperty("COMPILE_FLAGS")) {
+    if (cmProp targetFlags = target->GetProperty("COMPILE_FLAGS")) {
       // COMPILE_FLAGS are not escaped for historical reasons.
       std::string compileFlags;
-      this->AppendFlags(compileFlags, targetFlags);
+      this->AppendFlags(compileFlags, *targetFlags);
       if (!compileFlags.empty()) {
         flags.emplace_back(std::move(compileFlags));
       }
@@ -932,11 +1026,11 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
   }
 
   for (auto const& it : target->GetMaxLanguageStandards()) {
-    const char* standard = target->GetProperty(it.first + "_STANDARD");
+    cmProp standard = target->GetProperty(it.first + "_STANDARD");
     if (!standard) {
       continue;
     }
-    if (this->Makefile->IsLaterStandard(it.first, standard, it.second)) {
+    if (this->Makefile->IsLaterStandard(it.first, *standard, it.second)) {
       std::ostringstream e;
       e << "The COMPILE_FEATURES property of target \"" << target->GetName()
         << "\" was evaluated when computing the link "
@@ -945,12 +1039,11 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
         << "\" for that computation.  Computing the "
            "COMPILE_FEATURES based on the link implementation resulted in a "
            "higher \""
-        << it.first << "_STANDARD\" \"" << standard
+        << it.first << "_STANDARD\" \"" << *standard
         << "\".  "
            "This is not permitted. The COMPILE_FEATURES may not both depend "
            "on "
-           "and be depended on by the link implementation."
-        << std::endl;
+           "and be depended on by the link implementation.\n";
       this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return;
     }
@@ -973,10 +1066,10 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
         cmGeneratorTarget::ManagedType::Managed) {
       // add /JMC flags if target property VS_JUST_MY_CODE_DEBUGGING is set
       // to ON
-      if (char const* jmcExprGen =
+      if (cmProp jmcExprGen =
             target->GetProperty("VS_JUST_MY_CODE_DEBUGGING")) {
         std::string isJMCEnabled =
-          cmGeneratorExpression::Evaluate(jmcExprGen, this, config);
+          cmGeneratorExpression::Evaluate(*jmcExprGen, this, config);
         if (cmIsOn(isJMCEnabled)) {
           std::vector<std::string> optVec = cmExpandedList(jmc);
           std::string jmcFlags;
@@ -996,7 +1089,8 @@ cmTarget* cmLocalGenerator::AddCustomCommandToTarget(
   const cmCustomCommandLines& commandLines, cmCustomCommandType type,
   const char* comment, const char* workingDir, bool escapeOldStyle,
   bool uses_terminal, const std::string& depfile, const std::string& job_pool,
-  bool command_expand_lists, cmObjectLibraryCommands objLibCommands)
+  bool command_expand_lists, cmObjectLibraryCommands objLibCommands,
+  bool stdPipesUTF8)
 {
   cmTarget* t = this->Makefile->GetCustomCommandTarget(
     target, objLibCommands, this->DirectoryBacktrace);
@@ -1007,7 +1101,7 @@ cmTarget* cmLocalGenerator::AddCustomCommandToTarget(
   detail::AddCustomCommandToTarget(
     *this, this->DirectoryBacktrace, cmCommandOrigin::Generator, t, byproducts,
     depends, commandLines, type, comment, workingDir, escapeOldStyle,
-    uses_terminal, depfile, job_pool, command_expand_lists);
+    uses_terminal, depfile, job_pool, command_expand_lists, stdPipesUTF8);
 
   return t;
 }
@@ -1017,14 +1111,14 @@ cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
   const std::string& main_dependency, const cmCustomCommandLines& commandLines,
   const char* comment, const char* workingDir, bool replace,
   bool escapeOldStyle, bool uses_terminal, bool command_expand_lists,
-  const std::string& depfile, const std::string& job_pool)
+  const std::string& depfile, const std::string& job_pool, bool stdPipesUTF8)
 {
   std::vector<std::string> no_byproducts;
   cmImplicitDependsList no_implicit_depends;
   return this->AddCustomCommandToOutput(
     { output }, no_byproducts, depends, main_dependency, no_implicit_depends,
     commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
-    command_expand_lists, depfile, job_pool);
+    command_expand_lists, depfile, job_pool, stdPipesUTF8);
 }
 
 cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
@@ -1035,7 +1129,7 @@ cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool)
+  const std::string& job_pool, bool stdPipesUTF8)
 {
   // Make sure there is at least one output.
   if (outputs.empty()) {
@@ -1047,7 +1141,7 @@ cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
     *this, this->DirectoryBacktrace, cmCommandOrigin::Generator, outputs,
     byproducts, depends, main_dependency, implicit_depends, commandLines,
     comment, workingDir, replace, escapeOldStyle, uses_terminal,
-    command_expand_lists, depfile, job_pool);
+    command_expand_lists, depfile, job_pool, stdPipesUTF8);
 }
 
 cmTarget* cmLocalGenerator::AddUtilityCommand(
@@ -1056,7 +1150,7 @@ cmTarget* cmLocalGenerator::AddUtilityCommand(
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, bool escapeOldStyle,
   const char* comment, bool uses_terminal, bool command_expand_lists,
-  const std::string& job_pool)
+  const std::string& job_pool, bool stdPipesUTF8)
 {
   cmTarget* target =
     this->Makefile->AddNewUtilityTarget(utilityName, excludeFromAll);
@@ -1070,7 +1164,7 @@ cmTarget* cmLocalGenerator::AddUtilityCommand(
     *this, this->DirectoryBacktrace, cmCommandOrigin::Generator, target,
     this->Makefile->GetUtilityOutput(target), workingDir, byproducts, depends,
     commandLines, escapeOldStyle, comment, uses_terminal, command_expand_lists,
-    job_pool);
+    job_pool, stdPipesUTF8);
 
   return target;
 }
@@ -1142,11 +1236,10 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     // * Compilers like gfortran do not search their own implicit include
     //   directories for modules ('.mod' files).
     if (lang != "Fortran") {
-      const char* value = this->Makefile->GetDefinition(
-        cmStrCat("CMAKE_", lang, "_IMPLICIT_INCLUDE_DIRECTORIES"));
-      if (value != nullptr) {
-        size_t const impDirVecOldSize = impDirVec.size();
-        cmExpandList(value, impDirVec);
+      size_t const impDirVecOldSize = impDirVec.size();
+      if (this->Makefile->GetDefExpandList(
+            cmStrCat("CMAKE_", lang, "_IMPLICIT_INCLUDE_DIRECTORIES"),
+            impDirVec)) {
         // FIXME: Use cmRange with 'advance()' when it supports non-const.
         for (size_t i = impDirVecOldSize; i < impDirVec.size(); ++i) {
           cmSystemTools::ConvertToUnixSlashes(impDirVec[i]);
@@ -1161,7 +1254,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     // directly.  In this case adding -I/usr/include can hide SDK headers so we
     // must still exclude it.
     if ((lang == "C" || lang == "CXX" || lang == "CUDA") &&
-        !cmContains(impDirVec, "/usr/include") &&
+        !cm::contains(impDirVec, "/usr/include") &&
         std::find_if(impDirVec.begin(), impDirVec.end(),
                      [](std::string const& d) {
                        return cmHasLiteralSuffix(d, "/usr/include");
@@ -1182,13 +1275,14 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
                       &lang](std::string const& dir) {
     return (
       // Do not exclude directories that are not in an excluded set.
-      ((!cmContains(implicitSet, this->GlobalGenerator->GetRealPath(dir))) &&
-       (!cmContains(implicitExclude, dir)))
+      ((!cm::contains(implicitSet, this->GlobalGenerator->GetRealPath(dir))) &&
+       (!cm::contains(implicitExclude, dir)))
       // Do not exclude entries of the CPATH environment variable even though
       // they are implicitly searched by the compiler.  They are meant to be
       // user-specified directories that can be re-ordered or converted to
       // -isystem without breaking real compiler builtin headers.
-      || ((lang == "C" || lang == "CXX") && cmContains(this->EnvCPATH, dir)));
+      ||
+      ((lang == "C" || lang == "CXX") && cm::contains(this->EnvCPATH, dir)));
   };
 
   // Get the target-specific include directories.
@@ -1235,7 +1329,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   if (!stripImplicitDirs) {
     // Append implicit directories that were requested by the user only
     for (BT<std::string> const& udr : userDirs) {
-      if (cmContains(implicitSet, cmSystemTools::GetRealPath(udr.Value))) {
+      if (cm::contains(implicitSet, cmSystemTools::GetRealPath(udr.Value))) {
         emitBT(udr);
       }
     }
@@ -1292,14 +1386,15 @@ std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
   std::string const& config, std::string const& linkLanguage,
   cmGeneratorTarget* target)
 {
+  const std::string configUpper = cmSystemTools::UpperCase(config);
   std::vector<BT<std::string>> flags;
   if (linkLanguage != "Swift") {
     std::string staticLibFlags;
     this->AppendFlags(
       staticLibFlags,
       this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS"));
-    if (!config.empty()) {
-      std::string name = "CMAKE_STATIC_LINKER_FLAGS_" + config;
+    if (!configUpper.empty()) {
+      std::string name = "CMAKE_STATIC_LINKER_FLAGS_" + configUpper;
       this->AppendFlags(staticLibFlags,
                         this->Makefile->GetSafeDefinition(name));
     }
@@ -1311,8 +1406,8 @@ std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
   std::string staticLibFlags;
   this->AppendFlags(staticLibFlags,
                     target->GetSafeProperty("STATIC_LIBRARY_FLAGS"));
-  if (!config.empty()) {
-    std::string name = "STATIC_LIBRARY_FLAGS_" + config;
+  if (!configUpper.empty()) {
+    std::string name = "STATIC_LIBRARY_FLAGS_" + configUpper;
     this->AppendFlags(staticLibFlags, target->GetSafeProperty(name));
   }
 
@@ -1326,6 +1421,30 @@ std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
   this->AppendCompileOptions(flags, staticLibOpts);
 
   return flags;
+}
+
+void cmLocalGenerator::GetDeviceLinkFlags(
+  cmLinkLineComputer* linkLineComputer, const std::string& config,
+  std::string& linkLibs, std::string& linkFlags, std::string& frameworkPath,
+  std::string& linkPath, cmGeneratorTarget* target)
+{
+  cmGeneratorTarget::DeviceLinkSetter setter(*target);
+
+  cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
+  const std::string linkLanguage =
+    linkLineComputer->GetLinkerLanguage(target, config);
+
+  if (pcli) {
+    // Compute the required cuda device link libraries when
+    // resolving cuda device symbols
+    this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs, frameworkPath,
+                              linkPath);
+  }
+
+  std::vector<std::string> linkOpts;
+  target->GetLinkOptions(linkOpts, config, linkLanguage);
+  // LINK_OPTIONS are escaped.
+  this->AppendCompileOptions(linkFlags, linkOpts);
 }
 
 void cmLocalGenerator::GetTargetFlags(
@@ -1349,23 +1468,17 @@ void cmLocalGenerator::GetTargetFlags(
   std::vector<BT<std::string>>& linkFlags, std::string& frameworkPath,
   std::vector<BT<std::string>>& linkPath, cmGeneratorTarget* target)
 {
-  const std::string buildType = cmSystemTools::UpperCase(config);
+  const std::string configUpper = cmSystemTools::UpperCase(config);
   cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
   const char* libraryLinkVariable =
     "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
   const std::string linkLanguage =
-    linkLineComputer->GetLinkerLanguage(target, buildType);
+    linkLineComputer->GetLinkerLanguage(target, config);
 
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
-      linkFlags = this->GetStaticLibraryFlags(buildType, linkLanguage, target);
-      if (pcli && dynamic_cast<cmLinkLineDeviceComputer*>(linkLineComputer)) {
-        // Compute the required cuda device link libraries when
-        // resolving cuda device symbols
-        this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
-                                  frameworkPath, linkPath);
-      }
+      linkFlags = this->GetStaticLibraryFlags(config, linkLanguage, target);
       break;
     case cmStateEnums::MODULE_LIBRARY:
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
@@ -1375,8 +1488,8 @@ void cmLocalGenerator::GetTargetFlags(
       if (linkLanguage != "Swift") {
         sharedLibFlags = cmStrCat(
           this->Makefile->GetSafeDefinition(libraryLinkVariable), ' ');
-        if (!buildType.empty()) {
-          std::string build = cmStrCat(libraryLinkVariable, '_', buildType);
+        if (!configUpper.empty()) {
+          std::string build = cmStrCat(libraryLinkVariable, '_', configUpper);
           sharedLibFlags += this->Makefile->GetSafeDefinition(build);
           sharedLibFlags += " ";
         }
@@ -1384,30 +1497,30 @@ void cmLocalGenerator::GetTargetFlags(
             !(this->Makefile->IsOn("CYGWIN") ||
               this->Makefile->IsOn("MINGW"))) {
           std::vector<cmSourceFile*> sources;
-          target->GetSourceFiles(sources, buildType);
+          target->GetSourceFiles(sources, config);
           std::string defFlag =
             this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
           for (cmSourceFile* sf : sources) {
             if (sf->GetExtension() == "def") {
               sharedLibFlags += defFlag;
-              sharedLibFlags += this->ConvertToOutputFormat(
-                cmSystemTools::CollapseFullPath(sf->ResolveFullPath()), SHELL);
+              sharedLibFlags +=
+                this->ConvertToOutputFormat(sf->ResolveFullPath(), SHELL);
               sharedLibFlags += " ";
             }
           }
         }
       }
 
-      const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");
+      cmProp targetLinkFlags = target->GetProperty("LINK_FLAGS");
       if (targetLinkFlags) {
-        sharedLibFlags += targetLinkFlags;
+        sharedLibFlags += *targetLinkFlags;
         sharedLibFlags += " ";
       }
-      if (!buildType.empty()) {
+      if (!configUpper.empty()) {
         targetLinkFlags =
-          target->GetProperty(cmStrCat("LINK_FLAGS_", buildType));
+          target->GetProperty(cmStrCat("LINK_FLAGS_", configUpper));
         if (targetLinkFlags) {
-          sharedLibFlags += targetLinkFlags;
+          sharedLibFlags += *targetLinkFlags;
           sharedLibFlags += " ";
         }
       }
@@ -1430,9 +1543,9 @@ void cmLocalGenerator::GetTargetFlags(
       if (linkLanguage != "Swift") {
         exeFlags = this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
         exeFlags += " ";
-        if (!buildType.empty()) {
+        if (!configUpper.empty()) {
           exeFlags += this->Makefile->GetSafeDefinition(
-            cmStrCat("CMAKE_EXE_LINKER_FLAGS_", buildType));
+            cmStrCat("CMAKE_EXE_LINKER_FLAGS_", configUpper));
           exeFlags += " ";
         }
         if (linkLanguage.empty()) {
@@ -1459,7 +1572,7 @@ void cmLocalGenerator::GetTargetFlags(
         }
       }
 
-      this->AddLanguageFlagsForLinking(flags, target, linkLanguage, buildType);
+      this->AddLanguageFlagsForLinking(flags, target, linkLanguage, config);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
@@ -1479,16 +1592,16 @@ void cmLocalGenerator::GetTargetFlags(
         exeFlags += " ";
       }
 
-      const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");
+      cmProp targetLinkFlags = target->GetProperty("LINK_FLAGS");
       if (targetLinkFlags) {
-        exeFlags += targetLinkFlags;
+        exeFlags += *targetLinkFlags;
         exeFlags += " ";
       }
-      if (!buildType.empty()) {
+      if (!configUpper.empty()) {
         targetLinkFlags =
-          target->GetProperty(cmStrCat("LINK_FLAGS_", buildType));
+          target->GetProperty(cmStrCat("LINK_FLAGS_", configUpper));
         if (targetLinkFlags) {
-          exeFlags += targetLinkFlags;
+          exeFlags += *targetLinkFlags;
           exeFlags += " ";
         }
       }
@@ -1519,16 +1632,17 @@ void cmLocalGenerator::GetTargetFlags(
 void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
                                              std::string const& config,
                                              std::string const& lang,
-                                             std::string& flags)
+                                             std::string& flags,
+                                             std::string const& arch)
 {
   std::vector<BT<std::string>> tmpFlags =
-    this->GetTargetCompileFlags(target, config, lang);
+    this->GetTargetCompileFlags(target, config, lang, arch);
   this->AppendFlags(flags, tmpFlags);
 }
 
 std::vector<BT<std::string>> cmLocalGenerator::GetTargetCompileFlags(
   cmGeneratorTarget* target, std::string const& config,
-  std::string const& lang)
+  std::string const& lang, std::string const& arch)
 {
   std::vector<BT<std::string>> flags;
   std::string compileFlags;
@@ -1542,7 +1656,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetTargetCompileFlags(
     this->AppendFeatureOptions(compileFlags, lang, "IPO");
   }
 
-  this->AddArchitectureFlags(compileFlags, target, lang, config);
+  this->AddArchitectureFlags(compileFlags, target, lang, config, arch);
 
   if (lang == "Fortran") {
     this->AppendFlags(compileFlags,
@@ -1731,10 +1845,10 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
               "CMAKE_POLICY_WARNING_CMP0065")) {
           std::ostringstream w;
           /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
-            "For compatibility with older versions of CMake, "
-            "additional flags may be added to export symbols on all "
-            "executables regardless of their ENABLE_EXPORTS property.";
+            w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
+              "For compatibility with older versions of CMake, "
+              "additional flags may be added to export symbols on all "
+              "executables regardless of their ENABLE_EXPORTS property.";
           /* clang-format on */
           this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
         }
@@ -1767,10 +1881,31 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
   return linkFlags;
 }
 
+bool cmLocalGenerator::AllAppleArchSysrootsAreTheSame(
+  const std::vector<std::string>& archs, const char* sysroot)
+{
+  if (!sysroot) {
+    return false;
+  }
+
+  for (std::string const& arch : archs) {
+    std::string const& archSysroot = this->AppleArchSysroots[arch];
+    if (cmIsOff(archSysroot)) {
+      continue;
+    }
+    if (archSysroot != sysroot) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
                                             cmGeneratorTarget const* target,
                                             const std::string& lang,
-                                            const std::string& config)
+                                            const std::string& config,
+                                            const std::string& filterArch)
 {
   // Only add Apple specific flags on Apple platforms
   if (this->Makefile->IsOn("APPLE") && this->EmitUniversalBinaryFlags) {
@@ -1779,8 +1914,10 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     if (!archs.empty() && !lang.empty() &&
         (lang[0] == 'C' || lang[0] == 'F' || lang[0] == 'O')) {
       for (std::string const& arch : archs) {
-        flags += " -arch ";
-        flags += arch;
+        if (filterArch.empty() || filterArch == arch) {
+          flags += " -arch ";
+          flags += arch;
+        }
       }
     }
 
@@ -1792,21 +1929,19 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
     const char* sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
     if (sysrootFlag && *sysrootFlag) {
-      std::vector<std::string> arch_sysroots;
-      if (const char* arch_sysroots_str =
-            this->Makefile->GetDefinition("CMAKE_APPLE_ARCH_SYSROOTS")) {
-        cmExpandList(std::string(arch_sysroots_str), arch_sysroots, true);
-      }
-      if (!arch_sysroots.empty()) {
-        assert(arch_sysroots.size() == archs.size());
-        for (size_t i = 0; i < archs.size(); ++i) {
-          if (arch_sysroots[i].empty()) {
+      if (!this->AppleArchSysroots.empty() &&
+          !this->AllAppleArchSysrootsAreTheSame(archs, sysroot)) {
+        for (std::string const& arch : archs) {
+          std::string const& archSysroot = this->AppleArchSysroots[arch];
+          if (cmIsOff(archSysroot)) {
             continue;
           }
-          flags += " -Xarch_" + archs[i] + " ";
-          // Combine sysroot flag and path to work with -Xarch
-          std::string arch_sysroot = sysrootFlag + arch_sysroots[i];
-          flags += this->ConvertToOutputFormat(arch_sysroot, SHELL);
+          if (filterArch.empty() || filterArch == arch) {
+            flags += " -Xarch_" + arch + " ";
+            // Combine sysroot flag and path to work with -Xarch
+            std::string arch_sysroot = sysrootFlag + archSysroot;
+            flags += this->ConvertToOutputFormat(arch_sysroot, SHELL);
+          }
         }
       } else if (sysroot && *sysroot) {
         flags += " ";
@@ -1841,28 +1976,45 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                                config);
 
   if (lang == "Swift") {
-    if (const char* v = target->GetProperty("Swift_LANGUAGE_VERSION")) {
+    if (cmProp v = target->GetProperty("Swift_LANGUAGE_VERSION")) {
       if (cmSystemTools::VersionCompare(
             cmSystemTools::OP_GREATER_EQUAL,
             this->Makefile->GetDefinition("CMAKE_Swift_COMPILER_VERSION"),
             "4.2")) {
-        this->AppendFlags(flags, "-swift-version " + std::string(v));
+        this->AppendFlags(flags, "-swift-version " + *v);
+      }
+    }
+  } else if (lang == "CUDA") {
+    target->AddCUDAArchitectureFlags(flags);
+    target->AddCUDAToolkitFlags(flags);
+
+    std::string const& compiler =
+      this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
+
+    if (compiler == "Clang") {
+      bool separable = target->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION");
+
+      if (separable) {
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          "CUDA_SEPARABLE_COMPILATION isn't supported on Clang. "
+          "See CMake issue #20726.");
       }
     }
   }
 
   // Add MSVC runtime library flags.  This is activated by the presence
   // of a default selection whether or not it is overridden by a property.
-  const char* msvcRuntimeLibraryDefault =
-    this->Makefile->GetDefinition("CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT");
-  if (msvcRuntimeLibraryDefault && *msvcRuntimeLibraryDefault) {
-    const char* msvcRuntimeLibraryValue =
+  cmProp msvcRuntimeLibraryDefault =
+    this->Makefile->GetDef("CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT");
+  if (msvcRuntimeLibraryDefault && !msvcRuntimeLibraryDefault->empty()) {
+    cmProp msvcRuntimeLibraryValue =
       target->GetProperty("MSVC_RUNTIME_LIBRARY");
     if (!msvcRuntimeLibraryValue) {
       msvcRuntimeLibraryValue = msvcRuntimeLibraryDefault;
     }
     std::string const msvcRuntimeLibrary = cmGeneratorExpression::Evaluate(
-      msvcRuntimeLibraryValue, this, config, target);
+      *msvcRuntimeLibraryValue, this, config, target);
     if (!msvcRuntimeLibrary.empty()) {
       if (const char* msvcRuntimeLibraryOptions =
             this->Makefile->GetDefinition(
@@ -1912,6 +2064,15 @@ cmGeneratorTarget* cmLocalGenerator::FindGeneratorTargetToUse(
     return imported->second;
   }
 
+  // find local alias to imported target
+  auto aliased = this->AliasTargets.find(name);
+  if (aliased != this->AliasTargets.end()) {
+    imported = this->ImportedGeneratorTargets.find(aliased->second);
+    if (imported != this->ImportedGeneratorTargets.end()) {
+      return imported->second;
+    }
+  }
+
   if (cmGeneratorTarget* t = this->FindLocalNonAliasGeneratorTarget(name)) {
     return t;
   }
@@ -1935,7 +2096,6 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
   if (name.empty()) {
     return false;
   }
-
   if (cmSystemTools::GetFilenameLastExtension(name) == ".exe") {
     name = cmSystemTools::GetFilenameWithoutLastExtension(name);
   }
@@ -1975,11 +2135,9 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
       case cmStateEnums::OBJECT_LIBRARY:
         // An object library has no single file on which to depend.
         // This was listed to get the target-level dependency.
-        return false;
       case cmStateEnums::INTERFACE_LIBRARY:
         // An interface library has no file on which to depend.
         // This was listed to get the target-level dependency.
-        return false;
       case cmStateEnums::UTILITY:
       case cmStateEnums::GLOBAL_TARGET:
         // A utility target has no file on which to depend.  This was listed
@@ -2044,13 +2202,13 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
   }
   std::string extProp = lang + "_EXTENSIONS";
   bool ext = true;
-  if (const char* extPropValue = target->GetProperty(extProp)) {
-    if (cmIsOff(extPropValue)) {
+  if (cmProp extPropValue = target->GetProperty(extProp)) {
+    if (cmIsOff(*extPropValue)) {
       ext = false;
     }
   }
   std::string stdProp = lang + "_STANDARD";
-  const char* standardProp = target->GetProperty(stdProp);
+  cmProp standardProp = target->GetProperty(stdProp);
   if (!standardProp) {
     if (ext) {
       // No language standard is specified and extensions are not disabled.
@@ -2072,7 +2230,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
 
   if (target->GetPropertyAsBool(lang + "_STANDARD_REQUIRED")) {
     std::string option_flag =
-      "CMAKE_" + lang + standardProp + "_" + type + "_COMPILE_OPTION";
+      "CMAKE_" + lang + *standardProp + "_" + type + "_COMPILE_OPTION";
 
     const char* opt =
       target->Target->GetMakefile()->GetDefinition(option_flag);
@@ -2081,7 +2239,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
       e << "Target \"" << target->GetName()
         << "\" requires the language "
            "dialect \""
-        << lang << standardProp << "\" "
+        << lang << *standardProp << "\" "
         << (ext ? "(with compiler extensions)" : "")
         << ", but CMake "
            "does not know the compile flags to use to enable it.";
@@ -2125,7 +2283,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     langStdMap["CUDA"].emplace_back("03");
   }
 
-  std::string standard(standardProp);
+  std::string standard(*standardProp);
   if (lang == "CUDA" && standard == "98") {
     standard = "03";
   }
@@ -2198,7 +2356,7 @@ static void AddVisibilityCompileOption(std::string& flags,
   }
   std::string flagDefine = lang + "_VISIBILITY_PRESET";
 
-  const char* prop = target->GetProperty(flagDefine);
+  cmProp prop = target->GetProperty(flagDefine);
   if (!prop) {
     return;
   }
@@ -2206,17 +2364,17 @@ static void AddVisibilityCompileOption(std::string& flags,
     *warnCMP0063 += "  " + flagDefine + "\n";
     return;
   }
-  if (strcmp(prop, "hidden") != 0 && strcmp(prop, "default") != 0 &&
-      strcmp(prop, "protected") != 0 && strcmp(prop, "internal") != 0) {
+  if ((*prop != "hidden") && (*prop != "default") && (*prop != "protected") &&
+      (*prop != "internal")) {
     std::ostringstream e;
-    e << "Target " << target->GetName() << " uses unsupported value \"" << prop
-      << "\" for " << flagDefine << "."
+    e << "Target " << target->GetName() << " uses unsupported value \""
+      << *prop << "\" for " << flagDefine << "."
       << " The supported values are: default, hidden, protected, and "
          "internal.";
     cmSystemTools::Error(e.str());
     return;
   }
-  std::string option = std::string(opt) + prop;
+  std::string option = opt + *prop;
   lg->AppendFlags(flags, option);
 }
 
@@ -2334,7 +2492,8 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
           std::ostringstream e;
           e << "Variable " << flagsVar
             << " has been modified. CMake "
-               "will ignore the POSITION_INDEPENDENT_CODE target property for "
+               "will ignore the POSITION_INDEPENDENT_CODE target property "
+               "for "
                "shared libraries and will use the "
             << flagsVar
             << " variable "
@@ -2396,7 +2555,9 @@ void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
 void cmLocalGenerator::AppendFlags(std::string& flags,
                                    const std::string& newFlags) const
 {
-  if (!newFlags.empty()) {
+  bool allSpaces = std::all_of(newFlags.begin(), newFlags.end(), cmIsSpace);
+
+  if (!newFlags.empty() && !allSpaces) {
     if (!flags.empty()) {
       flags += " ";
     }
@@ -2429,11 +2590,12 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
   }
 
   for (std::string const& config : configsList) {
-    const std::string buildType = cmSystemTools::UpperCase(config);
-
-    // FIXME: Refactor collection of sources to not evaluate object libraries.
+    // FIXME: Refactor collection of sources to not evaluate object
+    // libraries.
     std::vector<cmSourceFile*> sources;
-    target->GetSourceFiles(sources, buildType);
+    target->GetSourceFiles(sources, config);
+
+    const std::string configUpper = cmSystemTools::UpperCase(config);
 
     for (const std::string& lang : { "C", "CXX", "OBJC", "OBJCXX" }) {
       auto langSources = std::count_if(
@@ -2445,149 +2607,352 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         continue;
       }
 
-      const std::string pchSource = target->GetPchSource(config, lang);
-      const std::string pchHeader = target->GetPchHeader(config, lang);
-
-      if (pchSource.empty() || pchHeader.empty()) {
-        continue;
-      }
-
-      const std::string pchExtension =
-        this->Makefile->GetSafeDefinition("CMAKE_PCH_EXTENSION");
-
-      if (pchExtension.empty()) {
-        continue;
-      }
-
-      const char* pchReuseFrom =
-        target->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
-
-      auto pch_sf = this->Makefile->GetOrCreateSource(
-        pchSource, false, cmSourceFileLocationKind::Known);
-
+      std::vector<std::string> architectures;
       if (!this->GetGlobalGenerator()->IsXcode()) {
-        if (!pchReuseFrom) {
-          target->AddSource(pchSource, true);
-        }
-
-        const std::string pchFile = target->GetPchFile(config, lang);
-
-        // Exclude the pch files from linking
-        if (this->Makefile->IsOn("CMAKE_LINK_PCH")) {
-          if (!pchReuseFrom) {
-            pch_sf->SetProperty("OBJECT_OUTPUTS", pchFile.c_str());
-          } else {
-            auto reuseTarget =
-              this->GlobalGenerator->FindGeneratorTarget(pchReuseFrom);
-
-            if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
-
-              const std::string pdb_prefix =
-                this->GetGlobalGenerator()->IsMultiConfig()
-                ? cmStrCat(this->GlobalGenerator->GetCMakeCFGIntDir(), "/")
-                : "";
-
-              const std::string target_compile_pdb_dir = cmStrCat(
-                target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
-                target->GetName(), ".dir/");
-
-              const std::string copy_script =
-                cmStrCat(target_compile_pdb_dir, "copy_idb_pdb.cmake");
-              cmGeneratedFileStream file(copy_script);
-
-              file << "# CMake generated file\n";
-              for (auto extension : { ".pdb", ".idb" }) {
-                const std::string from_file =
-                  cmStrCat(reuseTarget->GetLocalGenerator()
-                             ->GetCurrentBinaryDirectory(),
-                           "/", pchReuseFrom, ".dir/${PDB_PREFIX}",
-                           pchReuseFrom, extension);
-
-                const std::string to_dir = cmStrCat(
-                  target->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-                  "/", target->GetName(), ".dir/${PDB_PREFIX}");
-
-                const std::string to_file =
-                  cmStrCat(to_dir, pchReuseFrom, extension);
-
-                std::string dest_file = to_file;
-
-                const std::string prefix = target->GetSafeProperty("PREFIX");
-                if (!prefix.empty()) {
-                  dest_file =
-                    cmStrCat(to_dir, prefix, pchReuseFrom, extension);
-                }
-
-                file << "if (EXISTS \"" << from_file << "\" AND \""
-                     << from_file << "\" IS_NEWER_THAN \"" << dest_file
-                     << "\")\n";
-                file << "  file(COPY \"" << from_file << "\""
-                     << " DESTINATION \"" << to_dir << "\")\n";
-                if (!prefix.empty()) {
-                  file << "  file(REMOVE \"" << dest_file << "\")\n";
-                  file << "  file(RENAME \"" << to_file << "\" \"" << dest_file
-                       << "\")\n";
-                }
-                file << "endif()\n";
-              }
-
-              cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
-                { cmSystemTools::GetCMakeCommand(),
-                  cmStrCat("-DPDB_PREFIX=", pdb_prefix), "-P", copy_script });
-
-              const std::string no_main_dependency;
-              const std::vector<std::string> no_deps;
-              const char* no_message = "";
-              const char* no_current_dir = nullptr;
-              std::vector<std::string> no_byproducts;
-
-              std::vector<std::string> outputs;
-              outputs.push_back(cmStrCat(target_compile_pdb_dir, pdb_prefix,
-                                         pchReuseFrom, ".pdb"));
-
-              if (this->GetGlobalGenerator()->IsVisualStudio()) {
-                this->AddCustomCommandToTarget(
-                  target->GetName(), outputs, no_deps, commandLines,
-                  cmCustomCommandType::PRE_BUILD, no_message, no_current_dir);
-              } else {
-                cmImplicitDependsList no_implicit_depends;
-                cmSourceFile* copy_rule = this->AddCustomCommandToOutput(
-                  outputs, no_byproducts, no_deps, no_main_dependency,
-                  no_implicit_depends, commandLines, no_message,
-                  no_current_dir);
-
-                if (copy_rule) {
-                  target->AddSource(copy_rule->ResolveFullPath());
-                }
-              }
-
-              target->Target->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
-                                          target_compile_pdb_dir);
-            }
-
-            std::string pchSourceObj =
-              reuseTarget->GetPchFileObject(config, lang);
-
-            // Link to the pch object file
-            target->Target->AppendProperty(
-              "LINK_FLAGS",
-              cmStrCat(" ", this->ConvertToOutputFormat(pchSourceObj, SHELL)),
-              true);
+        target->GetAppleArchs(config, architectures);
+      }
+      if (architectures.empty()) {
+        architectures.emplace_back();
+      } else {
+        std::string useMultiArchPch;
+        for (const std::string& arch : architectures) {
+          const std::string pchHeader =
+            target->GetPchHeader(config, lang, arch);
+          if (!pchHeader.empty()) {
+            useMultiArchPch = cmStrCat(useMultiArchPch, ";-Xarch_", arch,
+                                       ";-include", pchHeader);
           }
-        } else {
-          pch_sf->SetProperty("PCH_EXTENSION", pchExtension.c_str());
         }
 
-        // Add pchHeader to source files, which will
-        // be grouped as "Precompile Header File"
-        auto pchHeader_sf = this->Makefile->GetOrCreateSource(
-          pchHeader, false, cmSourceFileLocationKind::Known);
-        std::string err;
-        pchHeader_sf->ResolveFullPath(&err);
-        target->AddSource(pchHeader);
+        if (!useMultiArchPch.empty()) {
+          target->Target->SetProperty(
+            cmStrCat(lang, "_COMPILE_OPTIONS_USE_PCH"), useMultiArchPch);
+        }
+      }
+
+      for (const std::string& arch : architectures) {
+        const std::string pchSource = target->GetPchSource(config, lang, arch);
+        const std::string pchHeader = target->GetPchHeader(config, lang, arch);
+
+        if (pchSource.empty() || pchHeader.empty()) {
+          continue;
+        }
+
+        const std::string pchExtension =
+          this->Makefile->GetSafeDefinition("CMAKE_PCH_EXTENSION");
+
+        if (pchExtension.empty()) {
+          continue;
+        }
+
+        cmProp ReuseFrom =
+          target->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+
+        auto pch_sf = this->Makefile->GetOrCreateSource(
+          pchSource, false, cmSourceFileLocationKind::Known);
+
+        if (!this->GetGlobalGenerator()->IsXcode()) {
+          if (!ReuseFrom) {
+            target->AddSource(pchSource, true);
+          }
+
+          const std::string pchFile = target->GetPchFile(config, lang, arch);
+
+          // Exclude the pch files from linking
+          if (this->Makefile->IsOn("CMAKE_LINK_PCH")) {
+            if (!ReuseFrom) {
+              pch_sf->AppendProperty(
+                "OBJECT_OUTPUTS",
+                cmStrCat("$<$<CONFIG:", config, ">:", pchFile, ">"));
+            } else {
+              auto reuseTarget =
+                this->GlobalGenerator->FindGeneratorTarget(*ReuseFrom);
+
+              if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
+
+                const std::string compilerId =
+                  this->Makefile->GetSafeDefinition(
+                    cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
+
+                const std::string compilerVersion =
+                  this->Makefile->GetSafeDefinition(
+                    cmStrCat("CMAKE_", lang, "_COMPILER_VERSION"));
+
+                const std::string langFlags =
+                  this->Makefile->GetSafeDefinition(
+                    cmStrCat("CMAKE_", lang, "_FLAGS_", configUpper));
+
+                // MSVC 2008 is producing both .pdb and .idb files with /Zi.
+                if ((langFlags.find("/ZI") != std::string::npos ||
+                     langFlags.find("-ZI") != std::string::npos) ||
+                    (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                                   compilerVersion.c_str(),
+                                                   "16.0") &&
+                     compilerId == "MSVC")) {
+                  CopyPchCompilePdb(config, target, *ReuseFrom, reuseTarget,
+                                    { ".pdb", ".idb" });
+                } else if ((langFlags.find("/Zi") != std::string::npos ||
+                            langFlags.find("-Zi") != std::string::npos)) {
+                  CopyPchCompilePdb(config, target, *ReuseFrom, reuseTarget,
+                                    { ".pdb" });
+                }
+              }
+
+              if (reuseTarget->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+                std::string pchSourceObj =
+                  reuseTarget->GetPchFileObject(config, lang, arch);
+
+                // Link to the pch object file
+                target->Target->AppendProperty(
+                  cmStrCat("LINK_FLAGS_", configUpper),
+                  cmStrCat(" ",
+                           this->ConvertToOutputFormat(pchSourceObj, SHELL)),
+                  true);
+              }
+            }
+          } else {
+            pch_sf->SetProperty("PCH_EXTENSION", pchExtension.c_str());
+          }
+
+          // Add pchHeader to source files, which will
+          // be grouped as "Precompile Header File"
+          auto pchHeader_sf = this->Makefile->GetOrCreateSource(
+            pchHeader, true, cmSourceFileLocationKind::Known);
+          std::string err;
+          pchHeader_sf->ResolveFullPath(&err);
+
+          // The pch file is generated, but mark it as not generated
+          // so that a clean operation will not remove it from disk
+          pchHeader_sf->SetProperty("GENERATED", "0");
+
+          target->AddSource(pchHeader);
+        }
       }
     }
   }
+}
+
+void cmLocalGenerator::CopyPchCompilePdb(
+  const std::string& config, cmGeneratorTarget* target,
+  const std::string& ReuseFrom, cmGeneratorTarget* reuseTarget,
+  const std::vector<std::string>& extensions)
+{
+  const std::string pdb_prefix =
+    this->GetGlobalGenerator()->IsMultiConfig() ? cmStrCat(config, "/") : "";
+
+  const std::string target_compile_pdb_dir =
+    cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
+             target->GetName(), ".dir/");
+
+  const std::string copy_script =
+    cmStrCat(target_compile_pdb_dir, "copy_idb_pdb.cmake");
+  cmGeneratedFileStream file(copy_script);
+
+  file << "# CMake generated file\n";
+
+  file << "# The compiler generated pdb file needs to be written to disk\n"
+       << "# by mspdbsrv. The foreach retry loop is needed to make sure\n"
+       << "# the pdb file is ready to be copied.\n\n";
+
+  for (auto const& extension : extensions) {
+    const std::string from_file =
+      cmStrCat(reuseTarget->GetLocalGenerator()->GetCurrentBinaryDirectory(),
+               "/", ReuseFrom, ".dir/${PDB_PREFIX}", ReuseFrom, extension);
+
+    const std::string to_dir =
+      cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
+               target->GetName(), ".dir/${PDB_PREFIX}");
+
+    const std::string to_file = cmStrCat(to_dir, ReuseFrom, extension);
+
+    std::string dest_file = to_file;
+
+    std::string const& prefix = target->GetSafeProperty("PREFIX");
+    if (!prefix.empty()) {
+      dest_file = cmStrCat(to_dir, prefix, ReuseFrom, extension);
+    }
+
+    file << "foreach(retry RANGE 1 30)\n";
+    file << "  if (EXISTS \"" << from_file << "\" AND \"" << from_file
+         << "  \" IS_NEWER_THAN \"" << dest_file << "\")\n";
+    file << "    execute_process(COMMAND ${CMAKE_COMMAND} -E copy";
+    file << " \"" << from_file << "\""
+         << " \"" << to_dir << "\" RESULT_VARIABLE result "
+         << " ERROR_QUIET)\n";
+    file << "    if (NOT result EQUAL 0)\n"
+         << "      execute_process(COMMAND ${CMAKE_COMMAND}"
+         << " -E sleep 1)\n"
+         << "    else()\n";
+    if (!prefix.empty()) {
+      file << "  file(REMOVE \"" << dest_file << "\")\n";
+      file << "  file(RENAME \"" << to_file << "\" \"" << dest_file << "\")\n";
+    }
+    file << "      break()\n"
+         << "    endif()\n";
+    file << "  elseif(NOT EXISTS \"" << from_file << "\")\n"
+         << "    execute_process(COMMAND ${CMAKE_COMMAND}"
+         << " -E sleep 1)\n"
+         << "  endif()\n";
+    file << "endforeach()\n";
+  }
+
+  bool stdPipesUTF8 = true;
+
+  auto configGenex = [&](cm::string_view expr) -> std::string {
+    if (this->GetGlobalGenerator()->IsVisualStudio()) {
+      return cmStrCat("$<$<CONFIG:", config, ">:", expr, ">");
+    }
+    return std::string(expr);
+  };
+
+  cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
+    { configGenex(cmSystemTools::GetCMakeCommand()),
+      configGenex(cmStrCat("-DPDB_PREFIX=", pdb_prefix)), configGenex("-P"),
+      configGenex(copy_script) });
+
+  const std::string no_main_dependency;
+  const std::vector<std::string> no_deps;
+  const char* no_message = "";
+  const char* no_current_dir = nullptr;
+  std::vector<std::string> no_byproducts;
+
+  std::vector<std::string> outputs;
+  outputs.push_back(
+    cmStrCat(target_compile_pdb_dir, pdb_prefix, ReuseFrom, ".pdb"));
+
+  if (this->GetGlobalGenerator()->IsVisualStudio()) {
+    this->AddCustomCommandToTarget(
+      target->GetName(), outputs, no_deps, commandLines,
+      cmCustomCommandType::PRE_BUILD, no_message, no_current_dir, true, false,
+      "", "", false, cmObjectLibraryCommands::Reject, stdPipesUTF8);
+  } else {
+    cmImplicitDependsList no_implicit_depends;
+    cmSourceFile* copy_rule = this->AddCustomCommandToOutput(
+      outputs, no_byproducts, no_deps, no_main_dependency, no_implicit_depends,
+      commandLines, no_message, no_current_dir, false, true, false, false, "",
+      "", stdPipesUTF8);
+
+    if (copy_rule) {
+      target->AddSource(copy_rule->ResolveFullPath());
+    }
+  }
+
+  target->Target->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
+                              target_compile_pdb_dir);
+}
+
+namespace {
+
+inline void RegisterUnitySources(cmGeneratorTarget* target, cmSourceFile* sf,
+                                 std::string const& filename)
+{
+  target->AddSourceFileToUnityBatch(sf->ResolveFullPath());
+  sf->SetProperty("UNITY_SOURCE_FILE", filename.c_str());
+}
+
+inline void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
+                                      std::string const& sf_full_path,
+                                      cmProp beforeInclude,
+                                      cmProp afterInclude)
+{
+  if (beforeInclude) {
+    unity_file << *beforeInclude << "\n";
+  }
+
+  unity_file << "#include \"" << sf_full_path << "\"\n";
+
+  if (afterInclude) {
+    unity_file << *afterInclude << "\n";
+  }
+}
+
+std::vector<std::string> AddUnityFilesModeAuto(
+  cmGeneratorTarget* target, std::string const& lang,
+  std::vector<cmSourceFile*> const& filtered_sources, cmProp beforeInclude,
+  cmProp afterInclude, std::string const& filename_base, size_t batchSize)
+{
+  if (batchSize == 0) {
+    batchSize = filtered_sources.size();
+  }
+
+  std::vector<std::string> unity_files;
+  for (size_t itemsLeft = filtered_sources.size(), chunk, batch = 0;
+       itemsLeft > 0; itemsLeft -= chunk, ++batch) {
+
+    chunk = std::min(itemsLeft, batchSize);
+
+    std::string filename = cmStrCat(filename_base, "unity_", batch,
+                                    (lang == "C") ? "_c.c" : "_cxx.cxx");
+
+    const std::string filename_tmp = cmStrCat(filename, ".tmp");
+    {
+      size_t begin = batch * batchSize;
+      size_t end = begin + chunk;
+
+      cmGeneratedFileStream file(
+        filename_tmp, false,
+        target->GetGlobalGenerator()->GetMakefileEncoding());
+      file << "/* generated by CMake */\n\n";
+
+      for (; begin != end; ++begin) {
+        cmSourceFile* sf = filtered_sources[begin];
+        RegisterUnitySources(target, sf, filename);
+        IncludeFileInUnitySources(file, sf->ResolveFullPath(), beforeInclude,
+                                  afterInclude);
+      }
+    }
+    cmSystemTools::MoveFileIfDifferent(filename_tmp, filename);
+    unity_files.emplace_back(std::move(filename));
+  }
+  return unity_files;
+}
+
+std::vector<std::string> AddUnityFilesModeGroup(
+  cmGeneratorTarget* target, std::string const& lang,
+  std::vector<cmSourceFile*> const& filtered_sources, cmProp beforeInclude,
+  cmProp afterInclude, std::string const& filename_base)
+{
+  std::vector<std::string> unity_files;
+
+  // sources organized by group name. Drop any source
+  // without a group
+  std::unordered_map<std::string, std::vector<cmSourceFile*>> explicit_mapping;
+  for (cmSourceFile* sf : filtered_sources) {
+    if (cmProp value = sf->GetProperty("UNITY_GROUP")) {
+      auto i = explicit_mapping.find(*value);
+      if (i == explicit_mapping.end()) {
+        std::vector<cmSourceFile*> sources{ sf };
+        explicit_mapping.emplace(*value, sources);
+      } else {
+        i->second.emplace_back(sf);
+      }
+    }
+  }
+
+  for (auto const& item : explicit_mapping) {
+    auto const& name = item.first;
+    std::string filename = cmStrCat(filename_base, "unity_", name,
+                                    (lang == "C") ? "_c.c" : "_cxx.cxx");
+
+    const std::string filename_tmp = cmStrCat(filename, ".tmp");
+    {
+      cmGeneratedFileStream file(
+        filename_tmp, false,
+        target->GetGlobalGenerator()->GetMakefileEncoding());
+      file << "/* generated by CMake */\n\n";
+
+      for (cmSourceFile* sf : item.second) {
+        RegisterUnitySources(target, sf, filename);
+        IncludeFileInUnitySources(file, sf->ResolveFullPath(), beforeInclude,
+                                  afterInclude);
+      }
+    }
+    cmSystemTools::MoveFileIfDifferent(filename_tmp, filename);
+    unity_files.emplace_back(std::move(filename));
+  }
+
+  return unity_files;
+}
 }
 
 void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
@@ -2602,22 +2967,23 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
     config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   }
 
-  const std::string buildType = cmSystemTools::UpperCase(config);
-
   std::string filename_base =
     cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/",
              target->GetName(), ".dir/Unity/");
 
   // FIXME: Refactor collection of sources to not evaluate object libraries.
   std::vector<cmSourceFile*> sources;
-  target->GetSourceFiles(sources, buildType);
+  target->GetSourceFiles(sources, config);
 
-  auto batchSizeString = target->GetProperty("UNITY_BUILD_BATCH_SIZE");
-  const size_t unityBatchSize =
-    static_cast<size_t>(std::atoi(batchSizeString));
+  cmProp batchSizeString = target->GetProperty("UNITY_BUILD_BATCH_SIZE");
+  const size_t unityBatchSize = batchSizeString
+    ? static_cast<size_t>(std::atoi(batchSizeString->c_str()))
+    : 0;
 
-  auto beforeInclude = target->GetProperty("UNITY_BUILD_CODE_BEFORE_INCLUDE");
-  auto afterInclude = target->GetProperty("UNITY_BUILD_CODE_AFTER_INCLUDE");
+  cmProp beforeInclude =
+    target->GetProperty("UNITY_BUILD_CODE_BEFORE_INCLUDE");
+  cmProp afterInclude = target->GetProperty("UNITY_BUILD_CODE_AFTER_INCLUDE");
+  cmProp unityMode = target->GetProperty("UNITY_BUILD_MODE");
 
   for (std::string lang : { "C", "CXX" }) {
     std::vector<cmSourceFile*> filtered_sources;
@@ -2632,53 +2998,28 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
                      !sf->GetProperty("INCLUDE_DIRECTORIES");
                  });
 
-    size_t batchSize = unityBatchSize;
-    if (unityBatchSize == 0) {
-      batchSize = filtered_sources.size();
+    std::vector<std::string> unity_files;
+    if (!unityMode || *unityMode == "BATCH") {
+      unity_files =
+        AddUnityFilesModeAuto(target, lang, filtered_sources, beforeInclude,
+                              afterInclude, filename_base, unityBatchSize);
+    } else if (unityMode && *unityMode == "GROUP") {
+      unity_files =
+        AddUnityFilesModeGroup(target, lang, filtered_sources, beforeInclude,
+                               afterInclude, filename_base);
+    } else {
+      // unity mode is set to an unsupported value
+      std::string e("Invalid UNITY_BUILD_MODE value of " + *unityMode +
+                    " assigned to target " + target->GetName() +
+                    ". Acceptable values are BATCH and GROUP.");
+      this->IssueMessage(MessageType::FATAL_ERROR, e);
     }
 
-    for (size_t itemsLeft = filtered_sources.size(), chunk, batch = 0;
-         itemsLeft > 0; itemsLeft -= chunk, ++batch) {
-
-      chunk = std::min(itemsLeft, batchSize);
-
-      std::string filename = cmStrCat(filename_base, "unity_", batch,
-                                      (lang == "C") ? "_c.c" : "_cxx.cxx");
-
-      const std::string filename_tmp = cmStrCat(filename, ".tmp");
-      {
-        size_t begin = batch * batchSize;
-        size_t end = begin + chunk;
-
-        cmGeneratedFileStream file(
-          filename_tmp, false,
-          this->GetGlobalGenerator()->GetMakefileEncoding());
-        file << "/* generated by CMake */\n\n";
-
-        for (; begin != end; ++begin) {
-          cmSourceFile* sf = filtered_sources[begin];
-
-          target->AddSourceFileToUnityBatch(sf->ResolveFullPath());
-          sf->SetProperty("UNITY_SOURCE_FILE", filename.c_str());
-
-          if (beforeInclude) {
-            file << beforeInclude << "\n";
-          }
-
-          file << "#include \"" << sf->ResolveFullPath() << "\"\n";
-
-          if (afterInclude) {
-            file << afterInclude << "\n";
-          }
-        }
-      }
-      cmSystemTools::MoveFileIfDifferent(filename_tmp, filename);
-
-      target->AddSource(filename, true);
-
-      auto unity = this->Makefile->GetOrCreateSource(filename);
+    for (auto const& file : unity_files) {
+      auto unity = this->GetMakefile()->GetOrCreateSource(file);
+      target->AddSource(file, true);
       unity->SetProperty("SKIP_UNITY_BUILD_INCLUSION", "ON");
-      unity->SetProperty("UNITY_SOURCE_FILE", filename.c_str());
+      unity->SetProperty("UNITY_SOURCE_FILE", file.c_str());
     }
   }
 }
@@ -2914,11 +3255,11 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
       // command line without any escapes.  However we still have to
       // get the '$' and '#' characters through WMake as '$$' and
       // '$#'.
-      for (const char* c = define.c_str(); *c; ++c) {
-        if (*c == '$' || *c == '#') {
+      for (char c : define) {
+        if (c == '$' || c == '#') {
           def += '$';
         }
-        def += *c;
+        def += c;
       }
     } else {
       // Make the definition appear properly on the command line.  Use
@@ -2954,16 +3295,16 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
                                          const std::string& config)
 {
   std::string featureName = feature;
-  // TODO: Define accumulation policy for features (prepend, append, replace).
-  // Currently we always replace.
+  // TODO: Define accumulation policy for features (prepend, append,
+  // replace). Currently we always replace.
   if (!config.empty()) {
     featureName += "_";
     featureName += cmSystemTools::UpperCase(config);
   }
   cmStateSnapshot snp = this->StateSnapshot;
   while (snp.IsValid()) {
-    if (const char* value = snp.GetDirectory().GetProperty(featureName)) {
-      return value;
+    if (cmProp value = snp.GetDirectory().GetProperty(featureName)) {
+      return value->c_str();
     }
     snp = snp.GetBuildsystemDirectoryParent();
   }
@@ -3028,8 +3369,8 @@ void cmLocalGenerator::GenerateTargetInstallRules(
     }
 
     // Include the user-specified pre-install script for this target.
-    if (const char* preinstall = l->GetProperty("PRE_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(preinstall, false, "", false);
+    if (cmProp preinstall = l->GetProperty("PRE_INSTALL_SCRIPT")) {
+      cmInstallScriptGenerator g(*preinstall, false, "", false);
       g.Generate(os, config, configurationTypes);
     }
 
@@ -3081,8 +3422,8 @@ void cmLocalGenerator::GenerateTargetInstallRules(
     }
 
     // Include the user-specified post-install script for this target.
-    if (const char* postinstall = l->GetProperty("POST_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(postinstall, false, "", false);
+    if (cmProp postinstall = l->GetProperty("POST_INSTALL_SCRIPT")) {
+      cmInstallScriptGenerator g(*postinstall, false, "", false);
       g.Generate(os, config, configurationTypes);
     }
   }
@@ -3268,11 +3609,12 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   // Select a nice-looking reference to the source file to construct
   // the object file name.
   std::string objectName;
+  // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+  // NOLINTNEXTLINE(bugprone-branch-clone)
   if ((relSource && !relBinary) || (subSource && !subBinary)) {
     objectName = relFromSource;
-  } else if ((relBinary && !relSource) || (subBinary && !subSource)) {
-    objectName = relFromBinary;
-  } else if (relFromBinary.length() < relFromSource.length()) {
+  } else if ((relBinary && !relSource) || (subBinary && !subSource) ||
+             relFromBinary.length() < relFromSource.length()) {
     objectName = relFromBinary;
   } else {
     objectName = relFromSource;
@@ -3290,12 +3632,12 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   // Ensure that for the CMakeFiles/<target>.dir/generated_source_file
   // we don't end up having:
   // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/generated_source_file.obj
-  const char* unitySourceFile = source.GetProperty("UNITY_SOURCE_FILE");
-  const char* pchExtension = source.GetProperty("PCH_EXTENSION");
+  cmProp unitySourceFile = source.GetProperty("UNITY_SOURCE_FILE");
+  cmProp psExtension = source.GetProperty("PCH_EXTENSION");
   const bool isPchObject = objectName.find("cmake_pch") != std::string::npos;
-  if (unitySourceFile || pchExtension || isPchObject) {
-    if (pchExtension) {
-      customOutputExtension = pchExtension;
+  if (unitySourceFile || psExtension || isPchObject) {
+    if (psExtension) {
+      customOutputExtension = psExtension->c_str();
     }
 
     cmsys::RegularExpression var("(CMakeFiles/[^/]+.dir/)");
@@ -3431,7 +3773,6 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
       break;
     case cmPolicies::NEW:
       // New behavior is to ignore the variable.
-      return false;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
       // This will never be the case because the only way to require
@@ -3493,8 +3834,8 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
 static void cmLGInfoProp(cmMakefile* mf, cmGeneratorTarget* target,
                          const std::string& prop)
 {
-  if (const char* val = target->GetProperty(prop)) {
-    mf->AddDefinition(prop, val);
+  if (cmProp val = target->GetProperty(prop)) {
+    mf->AddDefinition(prop, *val);
   }
 }
 
@@ -3503,8 +3844,9 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
                                               const std::string& fname)
 {
   // Find the Info.plist template.
-  const char* in = target->GetProperty("MACOSX_BUNDLE_INFO_PLIST");
-  std::string inFile = (in && *in) ? in : "MacOSXBundleInfo.plist.in";
+  cmProp in = target->GetProperty("MACOSX_BUNDLE_INFO_PLIST");
+  std::string inFile =
+    (in && !in->empty()) ? *in : "MacOSXBundleInfo.plist.in";
   if (!cmSystemTools::FileIsFullPath(inFile)) {
     std::string inMod = this->Makefile->GetModulesFile(inFile);
     if (!inMod.empty()) {
@@ -3542,8 +3884,9 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(
   const std::string& fname)
 {
   // Find the Info.plist template.
-  const char* in = target->GetProperty("MACOSX_FRAMEWORK_INFO_PLIST");
-  std::string inFile = (in && *in) ? in : "MacOSXFrameworkInfo.plist.in";
+  cmProp in = target->GetProperty("MACOSX_FRAMEWORK_INFO_PLIST");
+  std::string inFile =
+    (in && !in->empty()) ? *in : "MacOSXFrameworkInfo.plist.in";
   if (!cmSystemTools::FileIsFullPath(inFile)) {
     std::string inMod = this->Makefile->GetModulesFile(inFile);
     if (!inMod.empty()) {
@@ -3611,7 +3954,7 @@ cmSourceFile* AddCustomCommand(
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool)
+  const std::string& job_pool, bool stdPipesUTF8)
 {
   cmMakefile* mf = lg.GetMakefile();
 
@@ -3673,7 +4016,8 @@ cmSourceFile* AddCustomCommand(
     }
 
     std::unique_ptr<cmCustomCommand> cc = cm::make_unique<cmCustomCommand>(
-      outputs, byproducts, depends2, commandLines, lfbt, comment, workingDir);
+      outputs, byproducts, depends2, commandLines, lfbt, comment, workingDir,
+      stdPipesUTF8);
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
     cc->SetImplicitDepends(implicit_depends);
@@ -3700,7 +4044,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
                               const char* workingDir, bool escapeOldStyle,
                               bool uses_terminal, const std::string& depfile,
                               const std::string& job_pool,
-                              bool command_expand_lists)
+                              bool command_expand_lists, bool stdPipesUTF8)
 {
   cmMakefile* mf = lg.GetMakefile();
 
@@ -3710,7 +4054,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
   cmCustomCommand cc(no_output, byproducts, depends, commandLines, lfbt,
-                     comment, workingDir);
+                     comment, workingDir, stdPipesUTF8);
   cc.SetEscapeOldStyle(escapeOldStyle);
   cc.SetEscapeAllowMakeVars(true);
   cc.SetUsesTerminal(uses_terminal);
@@ -3741,7 +4085,7 @@ cmSourceFile* AddCustomCommandToOutput(
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool)
+  const std::string& job_pool, bool stdPipesUTF8)
 {
   // Always create the output sources and mark them generated.
   CreateGeneratedSources(lg, outputs, origin, lfbt);
@@ -3750,7 +4094,7 @@ cmSourceFile* AddCustomCommandToOutput(
   return AddCustomCommand(
     lg, lfbt, outputs, byproducts, depends, main_dependency, implicit_depends,
     commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
-    command_expand_lists, depfile, job_pool);
+    command_expand_lists, depfile, job_pool, stdPipesUTF8);
 }
 
 void AppendCustomCommandToOutput(cmLocalGenerator& lg,
@@ -3786,7 +4130,7 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        const cmCustomCommandLines& commandLines,
                        bool escapeOldStyle, const char* comment,
                        bool uses_terminal, bool command_expand_lists,
-                       const std::string& job_pool)
+                       const std::string& job_pool, bool stdPipesUTF8)
 {
   // Always create the byproduct sources and mark them generated.
   CreateGeneratedSource(lg, force.Name, origin, lfbt);
@@ -3801,9 +4145,9 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
   cmImplicitDependsList no_implicit_depends;
   cmSourceFile* rule = AddCustomCommand(
     lg, lfbt, { force.Name }, byproducts, depends, no_main_dependency,
-    no_implicit_depends, commandLines, comment, workingDir, /*replace=*/false,
-    escapeOldStyle, uses_terminal, command_expand_lists, /*depfile=*/"",
-    job_pool);
+    no_implicit_depends, commandLines, comment, workingDir,
+    /*replace=*/false, escapeOldStyle, uses_terminal, command_expand_lists,
+    /*depfile=*/"", job_pool, stdPipesUTF8);
   if (rule) {
     lg.GetMakefile()->AddTargetByproducts(target, byproducts);
   }

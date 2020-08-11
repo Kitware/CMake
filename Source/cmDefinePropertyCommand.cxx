@@ -95,7 +95,7 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
 
   // Actually define the property.
   status.GetMakefile().GetState()->DefineProperty(
-    PropertyName, scope, BriefDocs.c_str(), FullDocs.c_str(), inherited);
+    PropertyName, scope, BriefDocs, FullDocs, inherited);
 
   return true;
 }

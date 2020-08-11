@@ -53,6 +53,20 @@ macro(_cmake_find_compiler lang)
       NO_DEFAULT_PATH
       DOC "${lang} compiler")
   endif()
+  if(CMAKE_HOST_WIN32 AND CMAKE_GENERATOR MATCHES "Ninja")
+    # On Windows command-line builds, the Makefile generators each imply
+    # a preferred compiler tool.  The Ninja generator does not imply a
+    # compiler tool, so use the compiler that occurs first in PATH.
+    find_program(CMAKE_${lang}_COMPILER
+      NAMES ${CMAKE_${lang}_COMPILER_LIST}
+      NAMES_PER_DIR
+      DOC "${lang} compiler"
+      NO_PACKAGE_ROOT_PATH
+      NO_CMAKE_PATH
+      NO_CMAKE_ENVIRONMENT_PATH
+      NO_CMAKE_SYSTEM_PATH
+      )
+  endif()
   find_program(CMAKE_${lang}_COMPILER NAMES ${CMAKE_${lang}_COMPILER_LIST} DOC "${lang} compiler")
   if(CMAKE_${lang}_COMPILER_INIT AND NOT CMAKE_${lang}_COMPILER)
     set_property(CACHE CMAKE_${lang}_COMPILER PROPERTY VALUE "${CMAKE_${lang}_COMPILER_INIT}")
@@ -118,3 +132,21 @@ macro(_cmake_find_compiler_path lang)
     endif()
   endif()
 endmacro()
+
+function(_cmake_find_compiler_sysroot lang)
+  if(CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
+    execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" -print-sysroot
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      OUTPUT_VARIABLE _cmake_sysroot_run_out
+      ERROR_VARIABLE _cmake_sysroot_run_err)
+
+    if(_cmake_sysroot_run_out AND NOT _cmake_sysroot_run_err
+        AND NOT _cmake_sysroot_run_out STREQUAL "/"
+        AND IS_DIRECTORY "${_cmake_sysroot_run_out}/usr")
+      file(TO_CMAKE_PATH "${_cmake_sysroot_run_out}/usr" _cmake_sysroot_run_out_usr)
+      set(CMAKE_${lang}_COMPILER_SYSROOT "${_cmake_sysroot_run_out_usr}" PARENT_SCOPE)
+    else()
+      set(CMAKE_${lang}_COMPILER_SYSROOT "" PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()

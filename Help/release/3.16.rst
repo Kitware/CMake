@@ -303,3 +303,16 @@ Changes made since CMake 3.16.0 include the following.
   Additionally, the modules no longer expose their internal ``_Python*``
   cache entries publicly.  CMake 3.16.0 through 3.16.4 accidentally
   made them visible as advanced cache entries.
+
+3.16.7
+------
+
+* Selection of the Objective C or C++ compiler now considers the
+  :envvar:`CC` or :envvar:`CXX` environment variable if the
+  :envvar:`OBJC` or :envvar:`OBJCXX` environment variable is not set.
+
+* The :module:`FindPkgConfig` module now extracts include directories
+  prefixed with ``-isystem`` into the ``*_INCLUDE_DIRS`` variables and
+  :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target properties.
+  Previously they would be places in ``*_CFLAGS_OTHER`` variables and
+  :prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties.

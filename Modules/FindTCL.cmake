@@ -223,6 +223,12 @@ find_path(TK_INCLUDE_PATH
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
+if (CMAKE_FIND_PACKAGE_NAME STREQUAL "TclStub")
+  # FindTclStub include()'s this module. It's an old pattern, but rather than
+  # trying to suppress this from outside the module (which is then sensitive to
+  # the contents, detect the case in this module and suppress it explicitly.
+  set(FPHSA_NAME_MISMATCHED 1)
+endif ()
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(TCL DEFAULT_MSG TCL_LIBRARY TCL_INCLUDE_PATH)
 set(FPHSA_NAME_MISMATCHED 1)
 set(TCLTK_FIND_REQUIRED ${TCL_FIND_REQUIRED})

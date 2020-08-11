@@ -33,53 +33,19 @@ below for how to enable cross-config mode.
 The ``Ninja Multi-Config`` generator recognizes the following variables:
 
 :variable:`CMAKE_CONFIGURATION_TYPES`
-  Specifies the total set of configurations to build. See the variable's
-  documentation for more information.
+  Specifies the total set of configurations to build.
 
 :variable:`CMAKE_CROSS_CONFIGS`
   Specifies a :ref:`semicolon-separated list <CMake Language Lists>` of
   configurations available from all ``build-<Config>.ninja`` files.
-  This variable activates cross-config mode.
-  Targets from each config specified in this variable can be built from any
-  ``build-<Config>.ninja`` file. Custom commands will use the configuration
-  native to ``build-<Config>.ninja``. If it is set to ``all``, all
-  configurations from :variable:`CMAKE_CONFIGURATION_TYPES` are cross-configs.
-  If it is not specified, or empty, each ``build-<Config>.ninja`` file will
-  only contain build rules for its own configuration.
-
-  The value of this variable must be a subset of
-  :variable:`CMAKE_CONFIGURATION_TYPES`.
 
 :variable:`CMAKE_DEFAULT_BUILD_TYPE`
-  Specifies the configuration to use by default in a ``build.ninja`` file. If
-  this variable is specified, ``build.ninja`` uses build rules from
-  ``build-<Config>.ninja`` by default. All custom commands are executed with
-  this configuration. If the variable is not specified, the first item from
-  :variable:`CMAKE_CONFIGURATION_TYPES` is used instead.
-
-  The value of this variable must be one of the items from
-  :variable:`CMAKE_CONFIGURATION_TYPES`.
+  Specifies the configuration to use by default in a ``build.ninja`` file.
 
 :variable:`CMAKE_DEFAULT_CONFIGS`
   Specifies a :ref:`semicolon-separated list <CMake Language Lists>` of
   configurations to build for a target in ``build.ninja``
-  if no ``:<Config>`` suffix is specified. If it is set to ``all``, all
-  configurations from :variable:`CMAKE_CROSS_CONFIGS` are used. If
-  it is not specified, it defaults to
-  :variable:`CMAKE_DEFAULT_BUILD_TYPE`.
-
-  For example, if you set
-  :variable:`CMAKE_DEFAULT_BUILD_TYPE` to ``Release``, but
-  set :variable:`CMAKE_DEFAULT_CONFIGS` to ``Debug`` or ``all``,
-  all ``<target>`` aliases in ``build.ninja`` will resolve to
-  ``<target>:Debug`` or ``<target>:all``, but custom commands will still use
-  the ``Release`` configuration.
-
-  The value of this variable must be a subset of
-  :variable:`CMAKE_CROSS_CONFIGS` or be the same as
-  :variable:`CMAKE_DEFAULT_BUILD_TYPE`. It must not be
-  specified if :variable:`CMAKE_DEFAULT_BUILD_TYPE` or
-  :variable:`CMAKE_CROSS_CONFIGS` is not used.
+  if no ``:<Config>`` suffix is specified.
 
 Consider the following example:
 

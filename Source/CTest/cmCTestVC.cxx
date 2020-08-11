@@ -38,7 +38,7 @@ void cmCTestVC::SetSourceDirectory(std::string const& dir)
   this->SourceDirectory = dir;
 }
 
-bool cmCTestVC::InitialCheckout(const char* command)
+bool cmCTestVC::InitialCheckout(const std::string& command)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   First perform the initial checkout: " << command << "\n");

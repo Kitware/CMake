@@ -24,9 +24,9 @@ endif()
 # Don't resolve the device symbols in the static library
 # Don't resolve the device symbols in the executable library
 # Verify that we can't use those device symbols from anything
-string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=[compute_30] -gencode arch=compute_50,code=\\\"compute_50\\\"")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
+set(CMAKE_CUDA_ARCHITECTURES 30 50)
 set(CMAKE_CUDA_RESOLVE_DEVICE_SYMBOLS OFF)
 
 add_library(CUDANoDeviceResolve SHARED file1.cu)

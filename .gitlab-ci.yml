@@ -1,0 +1,201 @@
+include:
+    # Metadata shared my many jobs
+    - local: .gitlab/rules.yml
+    - local: .gitlab/artifacts.yml
+
+    # OS builds.
+    - local: .gitlab/os-linux.yml
+    - local: .gitlab/os-macos.yml
+    - local: .gitlab/os-windows.yml
+
+stages:
+    - build
+    - test
+    - test-ext
+
+################################################################################
+# Job declarations
+#
+# Each job must pull in each of the following keys:
+#
+#   - a "base image"
+#   - a build script
+#   - tags for the jobs
+#   - rules for when to run the job
+#
+# Additionally, jobs may also contain:
+#
+#   - artifacts
+#   - dependency/needs jobs for required jobs
+################################################################################
+
+# Lint builds
+
+build:debian10-iwyu:
+    extends:
+        - .debian10_iwyu
+        - .cmake_build_linux
+        - .linux_builder_tags
+        - .run_automatically
+
+build:fedora31-tidy:
+    extends:
+        - .fedora31_tidy
+        - .cmake_build_linux
+        - .linux_builder_tags_qt
+        - .run_automatically
+
+build:fedora31-sphinx:
+    extends:
+        - .fedora31_sphinx
+        - .cmake_build_linux
+        - .linux_builder_tags_qt
+        - .run_automatically
+
+# Linux builds
+
+build:centos6-release:
+    extends:
+        - .release_linux
+        - .cmake_build_release_linux
+        - .cmake_release_artifacts
+        - .linux_builder_tags
+        - .run_manually
+
+test:fedora31-makefiles:
+    extends:
+        - .fedora31_makefiles
+        - .cmake_test_linux_package
+        - .linux_builder_tags_qt
+        - .run_automatically
+    dependencies:
+        - build:centos6-release
+    needs:
+        - build:centos6-release
+
+test:cuda10.2-nvidia:
+    extends:
+        - .cuda10.2_nvidia
+        - .cmake_test_linux_package
+        - .linux_builder_tags_cuda
+        - .run_automatically
+    dependencies:
+        - build:centos6-release
+    needs:
+        - build:centos6-release
+
+build:fedora31-ninja:
+    extends:
+        - .fedora31_ninja
+        - .cmake_build_linux
+        - .cmake_build_artifacts
+        - .linux_builder_tags_qt
+        - .run_manually
+
+test:fedora31-ninja:
+    extends:
+        - .fedora31_ninja
+        - .cmake_test_linux
+        - .linux_builder_tags_qt
+        - .cmake_test_artifacts
+        - .run_automatically
+    dependencies:
+        - build:fedora31-ninja
+    needs:
+        - build:fedora31-ninja
+
+test:fedora31-ninja-multi:
+    extends:
+        - .fedora31_ninja_multi
+        - .cmake_test_linux_external
+        - .linux_builder_tags_qt
+        - .run_automatically
+    dependencies:
+        - test:fedora31-ninja
+    needs:
+        - test:fedora31-ninja
+
+# macOS builds
+
+build:macos-ninja:
+    extends:
+        - .macos_ninja
+        - .cmake_build_macos
+        - .cmake_build_artifacts
+        - .macos_builder_tags
+        - .run_manually
+
+test:macos-ninja:
+    extends:
+        - .macos_ninja
+        - .cmake_test_macos
+        - .cmake_test_artifacts
+        - .macos_builder_tags
+        - .run_automatically
+    dependencies:
+        - build:macos-ninja
+    needs:
+        - build:macos-ninja
+
+build:macos-makefiles:
+    extends:
+        - .macos_makefiles
+        - .cmake_build_macos
+        - .cmake_build_artifacts
+        - .macos_builder_tags
+        - .run_manually
+
+test:macos-makefiles:
+    extends:
+        - .macos_makefiles
+        - .cmake_test_macos
+        - .macos_builder_tags
+        - .run_automatically
+    dependencies:
+        - build:macos-makefiles
+    needs:
+        - build:macos-makefiles
+
+test:macos-xcode:
+    extends:
+        - .macos_xcode
+        - .cmake_test_macos_external
+        - .macos_builder_ext_tags
+        - .run_automatically
+    dependencies:
+        - test:macos-ninja
+    needs:
+        - test:macos-ninja
+
+# Windows builds
+
+build:windows-vs2019-x64-ninja:
+    extends:
+        - .windows_vs2019_x64_ninja
+        - .cmake_build_windows
+        - .cmake_build_artifacts
+        - .windows_builder_tags
+        - .run_manually
+
+test:windows-vs2019-x64-ninja:
+    extends:
+        - .windows_vs2019_x64_ninja
+        - .cmake_test_windows
+        - .windows_builder_tags
+        - .cmake_test_artifacts
+        - .run_automatically
+    dependencies:
+        - build:windows-vs2019-x64-ninja
+    needs:
+        - build:windows-vs2019-x64-ninja
+
+test:windows-vs2019-x64:
+    extends:
+        - .windows_vs2019_x64
+        - .cmake_test_windows_external
+        - .windows_builder_ext_tags
+        - .run_automatically
+    dependencies:
+        - test:windows-vs2019-x64-ninja
+    needs:
+        - test:windows-vs2019-x64-ninja

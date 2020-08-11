@@ -65,6 +65,15 @@ public:
   // Read and store output.  Returns true if it must be called again.
   void CheckOutput(std::string const& line);
 
+  static bool StartTest(std::unique_ptr<cmCTestRunTest> runner,
+                        size_t completed, size_t total);
+  static bool StartAgain(std::unique_ptr<cmCTestRunTest> runner,
+                         size_t completed);
+
+  static void StartFailure(std::unique_ptr<cmCTestRunTest> runner,
+                           std::string const& output,
+                           std::string const& detail);
+
   // launch the test process, return whether it started correctly
   bool StartTest(size_t completed, size_t total);
   // capture and report the test results
@@ -74,8 +83,6 @@ public:
 
   void ComputeWeightedCost();
 
-  bool StartAgain(size_t completed);
-
   void StartFailure(std::string const& output, std::string const& detail);
 
   cmCTest* GetCTest() const { return this->CTest; }
@@ -84,7 +91,7 @@ public:
 
   const std::vector<std::string>& GetArguments() { return this->Arguments; }
 
-  void FinalizeTest();
+  void FinalizeTest(bool started = true);
 
   bool TimedOutForStopTime() const { return this->TimeoutIsForStopTime; }
 
@@ -112,7 +119,7 @@ private:
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
 
-  void SetupResourcesEnvironment();
+  void SetupResourcesEnvironment(std::vector<std::string>* log = nullptr);
 
   // Returns "completed/total Test #Index: "
   std::string GetTestPrefix(size_t completed, size_t total) const;

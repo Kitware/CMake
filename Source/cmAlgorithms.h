@@ -13,19 +13,9 @@
 #include <utility>
 #include <vector>
 
-#include "cm_kwiml.h"
+#include <cmext/algorithm>
 
 #include "cmRange.h"
-
-template <std::size_t N>
-struct cmOverloadPriority : cmOverloadPriority<N - 1>
-{
-};
-
-template <>
-struct cmOverloadPriority<0>
-{
-};
 
 template <typename FwdIt>
 FwdIt cmRotate(FwdIt first, FwdIt middle, FwdIt last)
@@ -35,34 +25,6 @@ FwdIt cmRotate(FwdIt first, FwdIt middle, FwdIt last)
   std::rotate(first, middle, last);
   std::advance(first, dist);
   return first;
-}
-
-template <typename Range, typename Key>
-auto cmContainsImpl(Range const& range, Key const& key, cmOverloadPriority<2>)
-  -> decltype(range.exists(key))
-{
-  return range.exists(key);
-}
-
-template <typename Range, typename Key>
-auto cmContainsImpl(Range const& range, Key const& key, cmOverloadPriority<1>)
-  -> decltype(range.find(key) != range.end())
-{
-  return range.find(key) != range.end();
-}
-
-template <typename Range, typename Key>
-bool cmContainsImpl(Range const& range, Key const& key, cmOverloadPriority<0>)
-{
-  using std::begin;
-  using std::end;
-  return std::find(begin(range), end(range), key) != end(range);
-}
-
-template <typename Range, typename Key>
-bool cmContains(Range const& range, Key const& key)
-{
-  return cmContainsImpl(range, key, cmOverloadPriority<2>{});
 }
 
 namespace ContainerAlgorithms {
@@ -158,7 +120,7 @@ ForwardIterator cmRemoveDuplicates(ForwardIterator first, ForwardIterator last)
 
   ForwardIterator result = first;
   while (first != last) {
-    if (!cmContains(uniq, first)) {
+    if (!cm::contains(uniq, first)) {
       if (result != first) {
         *result = std::move(*first);
       }

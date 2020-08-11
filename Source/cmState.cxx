@@ -34,30 +34,44 @@ cmState::cmState()
 
 cmState::~cmState() = default;
 
-const char* cmState::GetTargetTypeName(cmStateEnums::TargetType targetType)
+const std::string& cmState::GetTargetTypeName(
+  cmStateEnums::TargetType targetType)
 {
+#define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
+  MAKE_STATIC_PROP(STATIC_LIBRARY);
+  MAKE_STATIC_PROP(MODULE_LIBRARY);
+  MAKE_STATIC_PROP(SHARED_LIBRARY);
+  MAKE_STATIC_PROP(OBJECT_LIBRARY);
+  MAKE_STATIC_PROP(EXECUTABLE);
+  MAKE_STATIC_PROP(UTILITY);
+  MAKE_STATIC_PROP(GLOBAL_TARGET);
+  MAKE_STATIC_PROP(INTERFACE_LIBRARY);
+  MAKE_STATIC_PROP(UNKNOWN_LIBRARY);
+  static const std::string propEmpty;
+#undef MAKE_STATIC_PROP
+
   switch (targetType) {
     case cmStateEnums::STATIC_LIBRARY:
-      return "STATIC_LIBRARY";
+      return propSTATIC_LIBRARY;
     case cmStateEnums::MODULE_LIBRARY:
-      return "MODULE_LIBRARY";
+      return propMODULE_LIBRARY;
     case cmStateEnums::SHARED_LIBRARY:
-      return "SHARED_LIBRARY";
+      return propSHARED_LIBRARY;
     case cmStateEnums::OBJECT_LIBRARY:
-      return "OBJECT_LIBRARY";
+      return propOBJECT_LIBRARY;
     case cmStateEnums::EXECUTABLE:
-      return "EXECUTABLE";
+      return propEXECUTABLE;
     case cmStateEnums::UTILITY:
-      return "UTILITY";
+      return propUTILITY;
     case cmStateEnums::GLOBAL_TARGET:
-      return "GLOBAL_TARGET";
+      return propGLOBAL_TARGET;
     case cmStateEnums::INTERFACE_LIBRARY:
-      return "INTERFACE_LIBRARY";
+      return propINTERFACE_LIBRARY;
     case cmStateEnums::UNKNOWN_LIBRARY:
-      return "UNKNOWN_LIBRARY";
+      return propUNKNOWN_LIBRARY;
   }
   assert(false && "Unexpected target type");
-  return nullptr;
+  return propEmpty;
 }
 
 static const std::array<std::string, 7> cmCacheEntryTypes = {
@@ -123,36 +137,23 @@ bool cmState::DeleteCache(const std::string& path)
 
 std::vector<std::string> cmState::GetCacheEntryKeys() const
 {
-  std::vector<std::string> definitions;
-  definitions.reserve(this->CacheManager->GetSize());
-  cmCacheManager::CacheIterator cit = this->CacheManager->GetCacheIterator();
-  for (cit.Begin(); !cit.IsAtEnd(); cit.Next()) {
-    definitions.push_back(cit.GetName());
-  }
-  return definitions;
+  return this->CacheManager->GetCacheEntryKeys();
 }
 
-const char* cmState::GetCacheEntryValue(std::string const& key) const
+cmProp cmState::GetCacheEntryValue(std::string const& key) const
 {
-  cmCacheManager::CacheEntry* e = this->CacheManager->GetCacheEntry(key);
-  if (!e) {
-    return nullptr;
-  }
-  return e->Value.c_str();
+  return this->CacheManager->GetCacheEntryValue(key);
 }
 
 std::string cmState::GetSafeCacheEntryValue(std::string const& key) const
 {
-  std::string retval;
-  auto val = this->GetCacheEntryValue(key);
-  if (val) {
-    retval = val;
+  if (cmProp val = this->GetCacheEntryValue(key)) {
+    return *val;
   }
-  return retval;
+  return std::string();
 }
 
-const std::string* cmState::GetInitializedCacheValue(
-  std::string const& key) const
+cmProp cmState::GetInitializedCacheValue(std::string const& key) const
 {
   return this->CacheManager->GetInitializedCacheValue(key);
 }
@@ -160,8 +161,7 @@ const std::string* cmState::GetInitializedCacheValue(
 cmStateEnums::CacheEntryType cmState::GetCacheEntryType(
   std::string const& key) const
 {
-  cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
-  return it.GetType();
+  return this->CacheManager->GetCacheEntryType(key);
 }
 
 void cmState::SetCacheEntryValue(std::string const& key,
@@ -174,40 +174,32 @@ void cmState::SetCacheEntryProperty(std::string const& key,
                                     std::string const& propertyName,
                                     std::string const& value)
 {
-  cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
-  it.SetProperty(propertyName, value.c_str());
+  this->CacheManager->SetCacheEntryProperty(key, propertyName, value);
 }
 
 void cmState::SetCacheEntryBoolProperty(std::string const& key,
                                         std::string const& propertyName,
                                         bool value)
 {
-  cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
-  it.SetProperty(propertyName, value);
+  this->CacheManager->SetCacheEntryBoolProperty(key, propertyName, value);
 }
 
 std::vector<std::string> cmState::GetCacheEntryPropertyList(
   const std::string& key)
 {
-  cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
-  return it.GetPropertyList();
+  return this->CacheManager->GetCacheEntryPropertyList(key);
 }
 
-const char* cmState::GetCacheEntryProperty(std::string const& key,
-                                           std::string const& propertyName)
+cmProp cmState::GetCacheEntryProperty(std::string const& key,
+                                      std::string const& propertyName)
 {
-  cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
-  if (!it.PropertyExists(propertyName)) {
-    return nullptr;
-  }
-  return it.GetProperty(propertyName);
+  return this->CacheManager->GetCacheEntryProperty(key, propertyName);
 }
 
 bool cmState::GetCacheEntryPropertyAsBool(std::string const& key,
                                           std::string const& propertyName)
 {
-  return this->CacheManager->GetCacheIterator(key).GetPropertyAsBool(
-    propertyName);
+  return this->CacheManager->GetCacheEntryPropertyAsBool(key, propertyName);
 }
 
 void cmState::AddCacheEntry(const std::string& key, const char* value,
@@ -259,20 +251,19 @@ void cmState::AppendCacheEntryProperty(const std::string& key,
                                        const std::string& property,
                                        const std::string& value, bool asString)
 {
-  this->CacheManager->GetCacheIterator(key).AppendProperty(property, value,
-                                                           asString);
+  this->CacheManager->AppendCacheEntryProperty(key, property, value, asString);
 }
 
 void cmState::RemoveCacheEntryProperty(std::string const& key,
                                        std::string const& propertyName)
 {
-  this->CacheManager->GetCacheIterator(key).SetProperty(propertyName, nullptr);
+  this->CacheManager->RemoveCacheEntryProperty(key, propertyName);
 }
 
 cmStateSnapshot cmState::Reset()
 {
   this->GlobalProperties.Clear();
-  this->PropertyDefinitions.clear();
+  this->PropertyDefinitions = {};
   this->GlobVerificationManager->Reset();
 
   cmStateDetail::PositionType pos = this->SnapshotData.Truncate();
@@ -335,42 +326,26 @@ cmStateSnapshot cmState::Reset()
 
 void cmState::DefineProperty(const std::string& name,
                              cmProperty::ScopeType scope,
-                             const char* ShortDescription,
-                             const char* FullDescription, bool chained)
+                             const std::string& ShortDescription,
+                             const std::string& FullDescription, bool chained)
 {
-  this->PropertyDefinitions[scope].DefineProperty(
-    name, scope, ShortDescription, FullDescription, chained);
+  this->PropertyDefinitions.DefineProperty(name, scope, ShortDescription,
+                                           FullDescription, chained);
 }
 
 cmPropertyDefinition const* cmState::GetPropertyDefinition(
   const std::string& name, cmProperty::ScopeType scope) const
 {
-  if (this->IsPropertyDefined(name, scope)) {
-    cmPropertyDefinitionMap const& defs =
-      this->PropertyDefinitions.find(scope)->second;
-    return &defs.find(name)->second;
-  }
-  return nullptr;
-}
-
-bool cmState::IsPropertyDefined(const std::string& name,
-                                cmProperty::ScopeType scope) const
-{
-  auto it = this->PropertyDefinitions.find(scope);
-  if (it == this->PropertyDefinitions.end()) {
-    return false;
-  }
-  return it->second.IsPropertyDefined(name);
+  return this->PropertyDefinitions.GetPropertyDefinition(name, scope);
 }
 
 bool cmState::IsPropertyChained(const std::string& name,
                                 cmProperty::ScopeType scope) const
 {
-  auto it = this->PropertyDefinitions.find(scope);
-  if (it == this->PropertyDefinitions.end()) {
-    return false;
+  if (auto def = this->GetPropertyDefinition(name, scope)) {
+    return def->IsChained();
   }
-  return it->second.IsPropertyChained(name);
+  return false;
 }
 
 void cmState::SetLanguageEnabled(std::string const& l)
@@ -573,7 +548,7 @@ void cmState::AppendGlobalProperty(const std::string& prop,
   this->GlobalProperties.AppendProperty(prop, value, asString);
 }
 
-const char* cmState::GetGlobalProperty(const std::string& prop)
+cmProp cmState::GetGlobalProperty(const std::string& prop)
 {
   if (prop == "CACHE_VARIABLES") {
     std::vector<std::string> cacheKeys = this->GetCacheEntryKeys();
@@ -597,31 +572,49 @@ const char* cmState::GetGlobalProperty(const std::string& prop)
   }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES") {
-    return &FOR_EACH_C_FEATURE(STRING_LIST_ELEMENT)[1];
+    static const std::string s_out(
+      &FOR_EACH_C_FEATURE(STRING_LIST_ELEMENT)[1]);
+    return &s_out;
   }
   if (prop == "CMAKE_C90_KNOWN_FEATURES") {
-    return &FOR_EACH_C90_FEATURE(STRING_LIST_ELEMENT)[1];
+    static const std::string s_out(
+      &FOR_EACH_C90_FEATURE(STRING_LIST_ELEMENT)[1]);
+    return &s_out;
   }
   if (prop == "CMAKE_C99_KNOWN_FEATURES") {
-    return &FOR_EACH_C99_FEATURE(STRING_LIST_ELEMENT)[1];
+    static const std::string s_out(
+      &FOR_EACH_C99_FEATURE(STRING_LIST_ELEMENT)[1]);
+    return &s_out;
   }
   if (prop == "CMAKE_C11_KNOWN_FEATURES") {
-    return &FOR_EACH_C11_FEATURE(STRING_LIST_ELEMENT)[1];
+    static const std::string s_out(
+      &FOR_EACH_C11_FEATURE(STRING_LIST_ELEMENT)[1]);
+    return &s_out;
   }
   if (prop == "CMAKE_CXX_KNOWN_FEATURES") {
-    return &FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT)[1];
+    static const std::string s_out(
+      &FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT)[1]);
+    return &s_out;
   }
   if (prop == "CMAKE_CXX98_KNOWN_FEATURES") {
-    return &FOR_EACH_CXX98_FEATURE(STRING_LIST_ELEMENT)[1];
+    static const std::string s_out(
+      &FOR_EACH_CXX98_FEATURE(STRING_LIST_ELEMENT)[1]);
+    return &s_out;
   }
   if (prop == "CMAKE_CXX11_KNOWN_FEATURES") {
-    return &FOR_EACH_CXX11_FEATURE(STRING_LIST_ELEMENT)[1];
+    static const std::string s_out(
+      &FOR_EACH_CXX11_FEATURE(STRING_LIST_ELEMENT)[1]);
+    return &s_out;
   }
   if (prop == "CMAKE_CXX14_KNOWN_FEATURES") {
-    return &FOR_EACH_CXX14_FEATURE(STRING_LIST_ELEMENT)[1];
+    static const std::string s_out(
+      &FOR_EACH_CXX14_FEATURE(STRING_LIST_ELEMENT)[1]);
+    return &s_out;
   }
   if (prop == "CMAKE_CUDA_KNOWN_FEATURES") {
-    return &FOR_EACH_CUDA_FEATURE(STRING_LIST_ELEMENT)[1];
+    static const std::string s_out(
+      &FOR_EACH_CUDA_FEATURE(STRING_LIST_ELEMENT)[1]);
+    return &s_out;
   }
 
 #undef STRING_LIST_ELEMENT
@@ -630,7 +623,8 @@ const char* cmState::GetGlobalProperty(const std::string& prop)
 
 bool cmState::GetGlobalPropertyAsBool(const std::string& prop)
 {
-  return cmIsOn(this->GetGlobalProperty(prop));
+  cmProp p = this->GetGlobalProperty(prop);
+  return p && cmIsOn(*p);
 }
 
 void cmState::SetSourceDirectory(std::string const& sourceDirectory)

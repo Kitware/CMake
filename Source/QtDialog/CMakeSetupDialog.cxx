@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "CMakeSetupDialog.h"
 
+#include <cm/memory>
+
 #include <QCloseEvent>
 #include <QCoreApplication>
 #include <QDesktopServices>
@@ -39,23 +41,21 @@
 
 QCMakeThread::QCMakeThread(QObject* p)
   : QThread(p)
-  , CMakeInstance(nullptr)
 {
 }
 
 QCMake* QCMakeThread::cmakeInstance() const
 {
-  return this->CMakeInstance;
+  return this->CMakeInstance.get();
 }
 
 void QCMakeThread::run()
 {
-  this->CMakeInstance = new QCMake;
+  this->CMakeInstance = cm::make_unique<QCMake>();
   // emit that this cmake thread is ready for use
   emit this->cmakeInitialized();
   this->exec();
-  delete this->CMakeInstance;
-  this->CMakeInstance = nullptr;
+  this->CMakeInstance.reset();
 }
 
 CMakeSetupDialog::CMakeSetupDialog()
@@ -595,7 +595,11 @@ void CMakeSetupDialog::doHelp()
 
   QDialog dialog;
   QFontMetrics met(this->font());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+  int msgWidth = met.horizontalAdvance(msg);
+#else
   int msgWidth = met.width(msg);
+#endif
   dialog.setMinimumSize(msgWidth / 15, 20);
   dialog.setWindowTitle(tr("Help"));
   QVBoxLayout* l = new QVBoxLayout(&dialog);
@@ -804,12 +808,19 @@ bool CMakeSetupDialog::setupFirstConfigure()
       QString systemVersion = dialog.getSystemVersion();
       m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_VERSION",
                         tr("CMake System Version"), systemVersion, false);
+      QString systemProcessor = dialog.getSystemProcessor();
+      m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_PROCESSOR",
+                        tr("CMake System Processor"), systemProcessor, false);
       QString cxxCompiler = dialog.getCXXCompiler();
-      m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER",
-                        tr("CXX compiler."), cxxCompiler, false);
+      if (!cxxCompiler.isEmpty()) {
+        m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER",
+                          tr("CXX compiler."), cxxCompiler, false);
+      }
       QString cCompiler = dialog.getCCompiler();
-      m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_C_COMPILER",
-                        tr("C compiler."), cCompiler, false);
+      if (!cCompiler.isEmpty()) {
+        m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_C_COMPILER",
+                          tr("C compiler."), cCompiler, false);
+      }
     } else if (dialog.crossCompilerToolChainFile()) {
       QString toolchainFile = dialog.getCrossCompilerToolChainFile();
       m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_TOOLCHAIN_FILE",
@@ -1049,14 +1060,7 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->GenerateAction->setEnabled(false);
     this->OpenProjectButton->setEnabled(false);
     this->GenerateButton->setText(tr("&Stop"));
-  } else if (s == ReadyConfigure) {
-    this->setEnabledState(true);
-    this->GenerateButton->setEnabled(true);
-    this->GenerateAction->setEnabled(true);
-    this->ConfigureButton->setEnabled(true);
-    this->ConfigureButton->setText(tr("&Configure"));
-    this->GenerateButton->setText(tr("&Generate"));
-  } else if (s == ReadyGenerate) {
+  } else if (s == ReadyConfigure || s == ReadyGenerate) {
     this->setEnabledState(true);
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);
@@ -1206,7 +1210,7 @@ void CMakeSetupDialog::setSearchFilter(const QString& str)
 
 void CMakeSetupDialog::doOutputContextMenu(QPoint pt)
 {
-  QMenu* menu = this->Output->createStandardContextMenu();
+  std::unique_ptr<QMenu> menu(this->Output->createStandardContextMenu());
 
   menu->addSeparator();
   menu->addAction(tr("Find..."), this, SLOT(doOutputFindDialog()),
@@ -1220,7 +1224,6 @@ void CMakeSetupDialog::doOutputContextMenu(QPoint pt)
                   QKeySequence(Qt::Key_F8));
 
   menu->exec(this->Output->mapToGlobal(pt));
-  delete menu;
 }
 
 void CMakeSetupDialog::doOutputFindDialog()

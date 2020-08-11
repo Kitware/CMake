@@ -19,7 +19,7 @@ They are specified by the ``<mode>`` argument which must
 be one of the following keywords:
 
 ``UNIX_COMMAND``
-  Arguments are separated by by unquoted whitespace.
+  Arguments are separated by unquoted whitespace.
   Both single-quote and double-quote pairs are respected.
   A backslash escapes the next literal character (``\"`` is ``"``);
   there are no special escapes (``\n`` is just ``n``).

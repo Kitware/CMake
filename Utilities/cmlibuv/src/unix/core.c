@@ -30,7 +30,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <fcntl.h>  /* O_CLOEXEC */
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -50,36 +50,35 @@
 # include <sys/wait.h>
 #endif
 
-#ifdef __APPLE__
-# include <mach-o/dyld.h> /* _NSGetExecutablePath */
+#if defined(__APPLE__)
 # include <sys/filio.h>
-# if defined(O_CLOEXEC)
-#  define UV__O_CLOEXEC O_CLOEXEC
-# endif
-#endif
+# endif /* defined(__APPLE__) */
+
+
+#if defined(__APPLE__) && !TARGET_OS_IPHONE
+# include <crt_externs.h>
+# include <mach-o/dyld.h> /* _NSGetExecutablePath */
+# define environ (*_NSGetEnviron())
+#else /* defined(__APPLE__) && !TARGET_OS_IPHONE */
+extern char** environ;
+#endif /* !(defined(__APPLE__) && !TARGET_OS_IPHONE) */
+
 
 #if defined(__DragonFly__)      || \
     defined(__FreeBSD__)        || \
     defined(__FreeBSD_kernel__) || \
-    defined(__NetBSD__)
+    defined(__NetBSD__)         || \
+    defined(__OpenBSD__)
 # include <sys/sysctl.h>
 # include <sys/filio.h>
 # include <sys/wait.h>
 # include <sys/param.h>
 # include <sys/cpuset.h>
-# define UV__O_CLOEXEC O_CLOEXEC
-# if defined(__FreeBSD__) && __FreeBSD__ >= 10
+# if defined(__FreeBSD__)
 #  define uv__accept4 accept4
 # endif
 # if defined(__NetBSD__)
 #  define uv__accept4(a, b, c, d) paccept((a), (b), (c), NULL, (d))
-# endif
-# if (defined(__FreeBSD__) && __FreeBSD__ >= 10) || defined(__NetBSD__)
-#  define UV__SOCK_NONBLOCK SOCK_NONBLOCK
-#  define UV__SOCK_CLOEXEC  SOCK_CLOEXEC
-# endif
-# if !defined(F_DUP2FD_CLOEXEC) && defined(_F_DUP2FD_CLOEXEC)
-#  define F_DUP2FD_CLOEXEC  _F_DUP2FD_CLOEXEC
 # endif
 #endif
 
@@ -92,7 +91,8 @@
 #endif
 
 #if defined(__linux__)
-#include <sys/syscall.h>
+# include <sys/syscall.h>
+# define uv__accept4 accept4
 #endif
 
 static int uv__run_pending(uv_loop_t* loop);
@@ -175,9 +175,7 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
 
   case UV_SIGNAL:
     uv__signal_close((uv_signal_t*) handle);
-    /* Signal handles may not be closed immediately. The signal code will
-     * itself close uv__make_close_pending whenever appropriate. */
-    return;
+    break;
 
   default:
     assert(0);
@@ -242,6 +240,8 @@ int uv__getiovmax(void) {
 
 
 static void uv__finish_close(uv_handle_t* handle) {
+  uv_signal_t* sh;
+
   /* Note: while the handle is in the UV_HANDLE_CLOSING state now, it's still
    * possible for it to be active in the sense that uv__is_active() returns
    * true.
@@ -264,7 +264,20 @@ static void uv__finish_close(uv_handle_t* handle) {
     case UV_FS_EVENT:
     case UV_FS_POLL:
     case UV_POLL:
+      break;
+
     case UV_SIGNAL:
+      /* If there are any caught signals "trapped" in the signal pipe,
+       * we can't call the close callback yet. Reinserting the handle
+       * into the closing queue makes the event loop spin but that's
+       * okay because we only need to deliver the pending events.
+       */
+      sh = (uv_signal_t*) handle;
+      if (sh->caught_signals > sh->dispatched_signals) {
+        handle->flags ^= UV_HANDLE_CLOSED;
+        uv__make_close_pending(handle);  /* Back into the queue. */
+        return;
+      }
       break;
 
     case UV_NAMED_PIPE:
@@ -468,52 +481,32 @@ int uv__accept(int sockfd) {
   int peerfd;
   int err;
 
+  (void) &err;
   assert(sockfd >= 0);
 
-  while (1) {
-#if defined(__linux__)                          || \
-    (defined(__FreeBSD__) && __FreeBSD__ >= 10) || \
-    defined(__NetBSD__)
-    static int no_accept4;
+  do
+#ifdef uv__accept4
+    peerfd = uv__accept4(sockfd, NULL, NULL, SOCK_NONBLOCK|SOCK_CLOEXEC);
+#else
+    peerfd = accept(sockfd, NULL, NULL);
+#endif
+  while (peerfd == -1 && errno == EINTR);
 
-    if (no_accept4)
-      goto skip;
+  if (peerfd == -1)
+    return UV__ERR(errno);
 
-    peerfd = uv__accept4(sockfd,
-                         NULL,
-                         NULL,
-                         UV__SOCK_NONBLOCK|UV__SOCK_CLOEXEC);
-    if (peerfd != -1)
-      return peerfd;
+#ifndef uv__accept4
+  err = uv__cloexec(peerfd, 1);
+  if (err == 0)
+    err = uv__nonblock(peerfd, 1);
 
-    if (errno == EINTR)
-      continue;
-
-    if (errno != ENOSYS)
-      return UV__ERR(errno);
-
-    no_accept4 = 1;
-skip:
+  if (err != 0) {
+    uv__close(peerfd);
+    return err;
+  }
 #endif
 
-    peerfd = accept(sockfd, NULL, NULL);
-    if (peerfd == -1) {
-      if (errno == EINTR)
-        continue;
-      return UV__ERR(errno);
-    }
-
-    err = uv__cloexec(peerfd, 1);
-    if (err == 0)
-      err = uv__nonblock(peerfd, 1);
-
-    if (err) {
-      uv__close(peerfd);
-      return err;
-    }
-
-    return peerfd;
-  }
+  return peerfd;
 }
 
 
@@ -529,7 +522,7 @@ int uv__close_nocancel(int fd) {
 #if defined(__APPLE__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdollar-in-identifier-extension"
-#if defined(__LP64__)
+#if defined(__LP64__) || TARGET_OS_IPHONE
   extern int close$NOCANCEL(int);
   return close$NOCANCEL(fd);
 #else
@@ -704,16 +697,38 @@ ssize_t uv__recvmsg(int fd, struct msghdr* msg, int flags) {
 
 
 int uv_cwd(char* buffer, size_t* size) {
+  char scratch[1 + UV__PATH_MAX];
+
   if (buffer == NULL || size == NULL)
     return UV_EINVAL;
 
-  if (getcwd(buffer, *size) == NULL)
+  /* Try to read directly into the user's buffer first... */
+  if (getcwd(buffer, *size) != NULL)
+    goto fixup;
+
+  if (errno != ERANGE)
     return UV__ERR(errno);
 
+  /* ...or into scratch space if the user's buffer is too small
+   * so we can report how much space to provide on the next try.
+   */
+  if (getcwd(scratch, sizeof(scratch)) == NULL)
+    return UV__ERR(errno);
+
+  buffer = scratch;
+
+fixup:
+
   *size = strlen(buffer);
+
   if (*size > 1 && buffer[*size - 1] == '/') {
-    buffer[*size-1] = '\0';
-    (*size)--;
+    *size -= 1;
+    buffer[*size] = '\0';
+  }
+
+  if (buffer == scratch) {
+    *size += 1;
+    return UV_ENOBUFS;
   }
 
   return 0;
@@ -823,8 +838,8 @@ static void maybe_resize(uv_loop_t* loop, unsigned int len) {
   }
 
   nwatchers = next_power_of_two(len + 2) - 2;
-  watchers = uv__realloc(loop->watchers,
-                         (nwatchers + 2) * sizeof(loop->watchers[0]));
+  watchers = uv__reallocf(loop->watchers,
+                          (nwatchers + 2) * sizeof(loop->watchers[0]));
 
   if (watchers == NULL)
     abort();
@@ -977,24 +992,17 @@ int uv_getrusage(uv_rusage_t* rusage) {
 
 
 int uv__open_cloexec(const char* path, int flags) {
-  int err;
+#if defined(O_CLOEXEC)
   int fd;
 
-#if defined(UV__O_CLOEXEC)
-  static int no_cloexec;
+  fd = open(path, flags | O_CLOEXEC);
+  if (fd == -1)
+    return UV__ERR(errno);
 
-  if (!no_cloexec) {
-    fd = open(path, flags | UV__O_CLOEXEC);
-    if (fd != -1)
-      return fd;
-
-    if (errno != EINVAL)
-      return UV__ERR(errno);
-
-    /* O_CLOEXEC not supported. */
-    no_cloexec = 1;
-  }
-#endif
+  return fd;
+#else  /* O_CLOEXEC */
+  int err;
+  int fd;
 
   fd = open(path, flags);
   if (fd == -1)
@@ -1007,58 +1015,35 @@ int uv__open_cloexec(const char* path, int flags) {
   }
 
   return fd;
+#endif  /* O_CLOEXEC */
 }
 
 
 int uv__dup2_cloexec(int oldfd, int newfd) {
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__linux__)
   int r;
-#if (defined(__FreeBSD__) && __FreeBSD__ >= 10) || defined(__NetBSD__)
+
   r = dup3(oldfd, newfd, O_CLOEXEC);
   if (r == -1)
     return UV__ERR(errno);
+
   return r;
-#elif defined(__FreeBSD__) && defined(F_DUP2FD_CLOEXEC)
-  r = fcntl(oldfd, F_DUP2FD_CLOEXEC, newfd);
-  if (r != -1)
-    return r;
-  if (errno != EINVAL)
-    return UV__ERR(errno);
-  /* Fall through. */
-#elif defined(__linux__)
-  static int no_dup3;
-  if (!no_dup3) {
-    do
-      r = uv__dup3(oldfd, newfd, UV__O_CLOEXEC);
-    while (r == -1 && errno == EBUSY);
-    if (r != -1)
-      return r;
-    if (errno != ENOSYS)
-      return UV__ERR(errno);
-    /* Fall through. */
-    no_dup3 = 1;
-  }
-#endif
-  {
-    int err;
-    do
-      r = dup2(oldfd, newfd);
-#if defined(__linux__)
-    while (r == -1 && errno == EBUSY);
 #else
-    while (0);  /* Never retry. */
-#endif
+  int err;
+  int r;
 
-    if (r == -1)
-      return UV__ERR(errno);
+  r = dup2(oldfd, newfd);  /* Never retry. */
+  if (r == -1)
+    return UV__ERR(errno);
 
-    err = uv__cloexec(newfd, 1);
-    if (err) {
-      uv__close(newfd);
-      return err;
-    }
-
-    return r;
+  err = uv__cloexec(newfd, 1);
+  if (err != 0) {
+    uv__close(newfd);
+    return err;
   }
+
+  return r;
+#endif
 }
 
 
@@ -1262,6 +1247,62 @@ int uv_os_get_passwd(uv_passwd_t* pwd) {
 int uv_translate_sys_error(int sys_errno) {
   /* If < 0 then it's already a libuv error. */
   return sys_errno <= 0 ? sys_errno : -sys_errno;
+}
+
+
+int uv_os_environ(uv_env_item_t** envitems, int* count) {
+  int i, j, cnt;
+  uv_env_item_t* envitem;
+
+  *envitems = NULL;
+  *count = 0;
+
+  for (i = 0; environ[i] != NULL; i++);
+
+  *envitems = uv__calloc(i, sizeof(**envitems));
+
+  if (*envitems == NULL)
+    return UV_ENOMEM;
+
+  for (j = 0, cnt = 0; j < i; j++) {
+    char* buf;
+    char* ptr;
+
+    if (environ[j] == NULL)
+      break;
+
+    buf = uv__strdup(environ[j]);
+    if (buf == NULL)
+      goto fail;
+
+    ptr = strchr(buf, '=');
+    if (ptr == NULL) {
+      uv__free(buf);
+      continue;
+    }
+
+    *ptr = '\0';
+
+    envitem = &(*envitems)[cnt];
+    envitem->name = buf;
+    envitem->value = ptr + 1;
+
+    cnt++;
+  }
+
+  *count = cnt;
+  return 0;
+
+fail:
+  for (i = 0; i < cnt; i++) {
+    envitem = &(*envitems)[cnt];
+    uv__free(envitem->name);
+  }
+  uv__free(*envitems);
+
+  *envitems = NULL;
+  *count = 0;
+  return UV_ENOMEM;
 }
 
 
@@ -1487,4 +1528,18 @@ int uv_gettimeofday(uv_timeval64_t* tv) {
   tv->tv_sec = (int64_t) time.tv_sec;
   tv->tv_usec = (int32_t) time.tv_usec;
   return 0;
+}
+
+void uv_sleep(unsigned int msec) {
+  struct timespec timeout;
+  int rc;
+
+  timeout.tv_sec = msec / 1000;
+  timeout.tv_nsec = (msec % 1000) * 1000 * 1000;
+
+  do
+    rc = nanosleep(&timeout, &timeout);
+  while (rc == -1 && errno == EINTR);
+
+  assert(rc == 0);
 }

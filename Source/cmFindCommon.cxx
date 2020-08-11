@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cstring>
 #include <utility>
 
 #include <cmext/algorithm>
@@ -280,12 +279,7 @@ void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
   // Construct the list of path roots with no trailing slashes.
   for (const char** pathName = paths; *pathName; ++pathName) {
     // Get the list of paths to ignore from the variable.
-    const char* ignorePath = this->Makefile->GetDefinition(*pathName);
-    if ((ignorePath == nullptr) || (strlen(ignorePath) == 0)) {
-      continue;
-    }
-
-    cmExpandList(ignorePath, ignore);
+    this->Makefile->GetDefExpandList(*pathName, ignore);
   }
 
   for (std::string& i : ignore) {

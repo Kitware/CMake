@@ -24,6 +24,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
@@ -279,9 +280,13 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     } else if (args[i] == "MODULE") {
       moduleArgs.insert(i);
       doing = DoingNone;
+      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+      // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (args[i] == "CONFIG") {
       configArgs.insert(i);
       doing = DoingNone;
+      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+      // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (args[i] == "NO_MODULE") {
       configArgs.insert(i);
       doing = DoingNone;
@@ -318,6 +323,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->NoSystemRegistry = true;
       configArgs.insert(i);
       doing = DoingNone;
+      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+      // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (args[i] == "NO_CMAKE_BUILDS_PATH") {
       // Ignore legacy option.
       configArgs.insert(i);
@@ -498,9 +505,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       case cmPolicies::NEW: {
         // NEW behavior is to honor the <pkg>_ROOT variables.
         std::string const rootVar = this->Name + "_ROOT";
-        if (const char* pkgRoot = this->Makefile->GetDefinition(rootVar)) {
-          cmExpandList(pkgRoot, rootPaths, false);
-        }
+        this->Makefile->GetDefExpandList(rootVar, rootPaths, false);
         cmSystemTools::GetPath(rootPaths, rootVar.c_str());
       } break;
     }
@@ -1060,8 +1065,8 @@ bool cmFindPackageCommand::FindConfig()
     cmStrCat("The directory containing a CMake configuration file for ",
              this->Name, '.');
   // We force the value since we do not get here if it was already set.
-  this->Makefile->AddCacheDefinition(this->Variable, init.c_str(),
-                                     help.c_str(), cmStateEnums::PATH, true);
+  this->Makefile->AddCacheDefinition(this->Variable, init, help.c_str(),
+                                     cmStateEnums::PATH, true);
 
   return found;
 }
@@ -1114,12 +1119,10 @@ bool cmFindPackageCommand::ReadListFile(const std::string& f,
 void cmFindPackageCommand::AppendToFoundProperty(bool found)
 {
   std::vector<std::string> foundContents;
-  const char* foundProp =
+  cmProp foundProp =
     this->Makefile->GetState()->GetGlobalProperty("PACKAGES_FOUND");
-  if (foundProp && *foundProp) {
-    std::string tmp = foundProp;
-
-    cmExpandList(tmp, foundContents, false);
+  if (foundProp && !foundProp->empty()) {
+    cmExpandList(*foundProp, foundContents, false);
     auto nameIt =
       std::find(foundContents.begin(), foundContents.end(), this->Name);
     if (nameIt != foundContents.end()) {
@@ -1128,12 +1131,10 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
   }
 
   std::vector<std::string> notFoundContents;
-  const char* notFoundProp =
+  cmProp notFoundProp =
     this->Makefile->GetState()->GetGlobalProperty("PACKAGES_NOT_FOUND");
-  if (notFoundProp && *notFoundProp) {
-    std::string tmp = notFoundProp;
-
-    cmExpandList(tmp, notFoundContents, false);
+  if (notFoundProp && !notFoundProp->empty()) {
+    cmExpandList(*notFoundProp, notFoundContents, false);
     auto nameIt =
       std::find(notFoundContents.begin(), notFoundContents.end(), this->Name);
     if (nameIt != notFoundContents.end()) {

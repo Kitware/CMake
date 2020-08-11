@@ -46,6 +46,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_write_set_format_gnu_tar.c 19157
 #include "archive_entry_locale.h"
 #include "archive_private.h"
 #include "archive_write_private.h"
+#include "archive_write_set_format_private.h"
 
 struct gnutar {
 	uint64_t	entry_bytes_remaining;
@@ -339,7 +340,7 @@ archive_write_gnutar_header(struct archive_write *a,
 		 * case getting WCS failed. On POSIX, this is a
 		 * normal operation.
 		 */
-		if (p != NULL && p[strlen(p) - 1] != '/') {
+		if (p != NULL && p[0] != '\0' && p[strlen(p) - 1] != '/') {
 			struct archive_string as;
 
 			archive_string_init(&as);
@@ -534,17 +535,9 @@ archive_write_gnutar_header(struct archive_write *a,
 		case AE_IFBLK: tartype = '4' ; break;
 		case AE_IFDIR: tartype = '5' ; break;
 		case AE_IFIFO: tartype = '6' ; break;
-		case AE_IFSOCK:
-			archive_set_error(&a->archive,
-			    ARCHIVE_ERRNO_FILE_FORMAT,
-			    "tar format cannot archive socket");
-			ret = ARCHIVE_FAILED;
-			goto exit_write_header;
-		default:
-			archive_set_error(&a->archive,
-			    ARCHIVE_ERRNO_FILE_FORMAT,
-			    "tar format cannot archive this (mode=0%lo)",
-			    (unsigned long)archive_entry_mode(entry));
+		default: /* AE_IFSOCK and unknown */
+			__archive_write_entry_filetype_unsupported(
+                            &a->archive, entry, "gnutar");
 			ret = ARCHIVE_FAILED;
 			goto exit_write_header;
 		}
@@ -565,8 +558,7 @@ archive_write_gnutar_header(struct archive_write *a,
 	gnutar->entry_bytes_remaining = archive_entry_size(entry);
 	gnutar->entry_padding = 0x1ff & (-(int64_t)gnutar->entry_bytes_remaining);
 exit_write_header:
-	if (entry_main)
-		archive_entry_free(entry_main);
+	archive_entry_free(entry_main);
 	return (ret);
 }
 

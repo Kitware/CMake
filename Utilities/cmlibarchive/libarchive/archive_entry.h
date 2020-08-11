@@ -30,7 +30,7 @@
 #define	ARCHIVE_ENTRY_H_INCLUDED
 
 /* Note: Compiler will complain if this does not match archive.h! */
-#define	ARCHIVE_VERSION_NUMBER 3003003
+#define	ARCHIVE_VERSION_NUMBER 3004002
 
 /*
  * Note: archive_entry.h is for use outside of libarchive; the
@@ -188,6 +188,13 @@ struct archive_entry;
 #define AE_IFIFO	((__LA_MODE_T)0010000)
 
 /*
+ * Symlink types
+ */
+#define AE_SYMLINK_TYPE_UNDEFINED	0
+#define AE_SYMLINK_TYPE_FILE		1
+#define AE_SYMLINK_TYPE_DIRECTORY	2
+
+/*
  * Basic object manipulation
  */
 
@@ -272,6 +279,7 @@ __LA_DECL int		 archive_entry_size_is_set(struct archive_entry *);
 __LA_DECL const char	*archive_entry_strmode(struct archive_entry *);
 __LA_DECL const char	*archive_entry_symlink(struct archive_entry *);
 __LA_DECL const char	*archive_entry_symlink_utf8(struct archive_entry *);
+__LA_DECL int		 archive_entry_symlink_type(struct archive_entry *);
 __LA_DECL const wchar_t	*archive_entry_symlink_w(struct archive_entry *);
 __LA_DECL la_int64_t	 archive_entry_uid(struct archive_entry *);
 __LA_DECL const char	*archive_entry_uname(struct archive_entry *);
@@ -347,6 +355,7 @@ __LA_DECL void	archive_entry_unset_size(struct archive_entry *);
 __LA_DECL void	archive_entry_copy_sourcepath(struct archive_entry *, const char *);
 __LA_DECL void	archive_entry_copy_sourcepath_w(struct archive_entry *, const wchar_t *);
 __LA_DECL void	archive_entry_set_symlink(struct archive_entry *, const char *);
+__LA_DECL void	archive_entry_set_symlink_type(struct archive_entry *, int);
 __LA_DECL void	archive_entry_set_symlink_utf8(struct archive_entry *, const char *);
 __LA_DECL void	archive_entry_copy_symlink(struct archive_entry *, const char *);
 __LA_DECL void	archive_entry_copy_symlink_w(struct archive_entry *, const wchar_t *);
@@ -512,9 +521,6 @@ __LA_DECL int	 archive_entry_acl_reset(struct archive_entry *, int /* want_type 
 __LA_DECL int	 archive_entry_acl_next(struct archive_entry *, int /* want_type */,
 	    int * /* type */, int * /* permset */, int * /* tag */,
 	    int * /* qual */, const char ** /* name */);
-__LA_DECL int	 archive_entry_acl_next_w(struct archive_entry *, int /* want_type */,
-	    int * /* type */, int * /* permset */, int * /* tag */,
-	    int * /* qual */, const wchar_t ** /* name */);
 
 /*
  * Construct a text-format ACL.  The flags argument is a bitmask that
@@ -689,7 +695,6 @@ __LA_DECL void archive_entry_linkify(struct archive_entry_linkresolver *,
     struct archive_entry **, struct archive_entry **);
 __LA_DECL struct archive_entry *archive_entry_partial_links(
     struct archive_entry_linkresolver *res, unsigned int *links);
-
 #ifdef __cplusplus
 }
 #endif

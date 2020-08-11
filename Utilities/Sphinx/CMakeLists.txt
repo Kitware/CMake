@@ -89,7 +89,7 @@ if(SPHINX_QTHELP)
   find_package(PythonInterp REQUIRED)
 
   find_program(QCOLLECTIONGENERATOR_EXECUTABLE
-    NAMES qcollectiongenerator
+    NAMES qcollectiongenerator-qt5 qcollectiongenerator
     DOC "qcollectiongenerator tool"
     )
   if (NOT QCOLLECTIONGENERATOR_EXECUTABLE)

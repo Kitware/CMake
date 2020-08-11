@@ -8,6 +8,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 
 // Needed for ::open() and ::stat()
 #include <algorithm>
@@ -285,8 +286,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
   }
 
   std::vector<std::string>::const_iterator fileIt;
-  std::string dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(toplevel);
+  cmWorkingDirectory wd(toplevel);
 
   files.erase(std::remove_if(files.begin(), files.end(), ignore_file),
               files.end());
@@ -332,6 +332,5 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     }
   }
 
-  cmSystemTools::ChangeDirectory(dir);
   return 1;
 }

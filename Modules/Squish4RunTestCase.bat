@@ -4,7 +4,6 @@ set TESTSUITE=%3
 set TESTCASE=%4
 set AUT=%5
 set AUTDIR=%6
-set SETTINGSGROUP=%7
 
 %SQUISHSERVER% --stop
 
@@ -12,9 +11,9 @@ echo "Adding AUT... %SQUISHSERVER% --config addAUT %AUT% %AUTDIR%"
 %SQUISHSERVER% --config addAUT "%AUT%" "%AUTDIR%"
 
 echo "Starting the squish server... %SQUISHSERVER%"
-start /B %SQUISHSERVER%
+start /B "Squish Server" %SQUISHSERVER%
 
-echo "Running the test case...%SQUISHRUNNER% --testsuite %TESTSUITE% --testcase %TESTCASE%"
+echo "Running the test case... %SQUISHRUNNER% --testsuite %TESTSUITE% --testcase %TESTCASE%"
 %SQUISHRUNNER% --testsuite "%TESTSUITE%" --testcase "%TESTCASE%"
 set returnValue=%ERRORLEVEL%
 

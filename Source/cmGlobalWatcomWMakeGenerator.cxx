@@ -19,7 +19,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator(cmake* cm)
 #endif
   this->ToolSupportsColor = true;
   this->NeedSymbolicMark = true;
-  this->EmptyRuleHackCommand = "@cd .";
+  this->EmptyRuleHackCommand = "@%null";
 #ifdef _WIN32
   cm->GetState()->SetWindowsShell(true);
 #endif
@@ -42,6 +42,16 @@ void cmGlobalWatcomWMakeGenerator::EnableLanguage(
   mf->AddDefinition("CMAKE_GENERATOR_CC", "wcl386");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "wcl386");
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
+}
+
+bool cmGlobalWatcomWMakeGenerator::SetSystemName(std::string const& s,
+                                                 cmMakefile* mf)
+{
+  if (mf->GetSafeDefinition("CMAKE_SYSTEM_PROCESSOR") == "I86") {
+    mf->AddDefinition("CMAKE_GENERATOR_CC", "wcl");
+    mf->AddDefinition("CMAKE_GENERATOR_CXX", "wcl");
+  }
+  return this->cmGlobalUnixMakefileGenerator3::SetSystemName(s, mf);
 }
 
 void cmGlobalWatcomWMakeGenerator::GetDocumentation(

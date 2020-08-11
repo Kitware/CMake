@@ -11,8 +11,6 @@ Synopsis
   `Search and Replace`_
     string(`FIND`_ <string> <substring> <out-var> [...])
     string(`REPLACE`_ <match-string> <replace-string> <out-var> <input>...)
-
-  `Regular Expressions`_
     string(`REGEX MATCH`_ <match-regex> <out-var> <input>...)
     string(`REGEX MATCHALL`_ <match-regex> <out-var> <input>...)
     string(`REGEX REPLACE`_ <match-regex> <replace-expr> <out-var> <input>...)
@@ -38,6 +36,7 @@ Synopsis
 
   `Generation`_
     string(`ASCII`_ <number>... <out-var>)
+    string(`HEX`_ <string> <out-var>)
     string(`CONFIGURE`_ <string> <out-var> [...])
     string(`MAKE_C_IDENTIFIER`_ <string> <out-var>)
     string(`RANDOM`_ [<option>...] <out-var>)
@@ -46,6 +45,9 @@ Synopsis
 
 Search and Replace
 ^^^^^^^^^^^^^^^^^^
+
+Search and Replace With Plain Strings
+"""""""""""""""""""""""""""""""""""""
 
 .. _FIND:
 
@@ -74,8 +76,8 @@ so strings containing multi-byte characters may lead to unexpected results.
 Replace all occurrences of ``<match_string>`` in the ``<input>``
 with ``<replace_string>`` and store the result in the ``<output_variable>``.
 
-Regular Expressions
-^^^^^^^^^^^^^^^^^^^
+Search and Replace With Regular Expressions
+"""""""""""""""""""""""""""""""""""""""""""
 
 .. _`REGEX MATCH`:
 
@@ -87,6 +89,7 @@ Regular Expressions
 Match the ``<regular_expression>`` once and store the match in the
 ``<output_variable>``.
 All ``<input>`` arguments are concatenated before matching.
+Regular expressions are specified in the subsection just below.
 
 .. _`REGEX MATCHALL`:
 
@@ -352,6 +355,16 @@ Generation
   string(ASCII <number> [<number> ...] <output_variable>)
 
 Convert all numbers into corresponding ASCII characters.
+
+.. _HEX:
+
+.. code-block:: cmake
+
+  string(HEX <string> <output_variable>)
+
+Convert each byte in the input ``<string>`` to its hexadecimal representation
+and store the concatenated hex digits in the ``<output_variable>``. Letters in
+the output (``a`` through ``f``) are in lowercase.
 
 .. _CONFIGURE:
 

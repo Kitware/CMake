@@ -32,7 +32,7 @@ target_link_libraries(GraphicLibrary PRIVATE CoreLibrary)
 
 # Test target labels with quotes in them; they should be escaped in the dot
 # file.
-# See https://gitlab.kitware.com/cmake/cmake/issues/19746
+# See https://gitlab.kitware.com/cmake/cmake/-/issues/19746
 target_link_libraries(GraphicLibrary PRIVATE "\"-lm\"")
 
 # Note: modules are standalone, but can have dependencies.

@@ -6,7 +6,8 @@
 #include <set>
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -14,6 +15,7 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
@@ -176,11 +178,11 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
     return false;
   }
 
-  if (const char* resolveDeviceSymbols =
+  if (cmProp resolveDeviceSymbols =
         target.GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
     // If CUDA_RESOLVE_DEVICE_SYMBOLS has been explicitly set we need
     // to honor the value no matter what it is.
-    return cmIsOn(resolveDeviceSymbols);
+    return cmIsOn(*resolveDeviceSymbols);
   }
 
   // Determine if we have any dependencies that require
@@ -188,10 +190,10 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
   cmGeneratorTarget::LinkClosure const* closure =
     target.GetLinkClosure(config);
 
-  if (cmContains(closure->Languages, "CUDA")) {
-    if (const char* separableCompilation =
+  if (cm::contains(closure->Languages, "CUDA")) {
+    if (cmProp separableCompilation =
           target.GetProperty("CUDA_SEPARABLE_COMPILATION")) {
-      if (cmIsOn(separableCompilation)) {
+      if (cmIsOn(*separableCompilation)) {
         bool doDeviceLinking = false;
         switch (target.GetType()) {
           case cmStateEnums::SHARED_LIBRARY:

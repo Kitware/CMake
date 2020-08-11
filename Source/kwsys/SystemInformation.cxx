@@ -64,9 +64,9 @@ typedef int siginfo_t;
 #else
 #  include <sys/types.h>
 
-#  include <errno.h> // extern int errno;
+#  include <cerrno> // extern int errno;
+#  include <csignal>
 #  include <fcntl.h>
-#  include <signal.h>
 #  include <sys/resource.h> // getrlimit
 #  include <sys/time.h>
 #  include <sys/utsname.h> // int uname(struct utsname *buf);
@@ -132,7 +132,7 @@ typedef int siginfo_t;
 #    endif
 #  endif
 #  if defined(KWSYS_CXX_HAS_RLIMIT64)
-typedef struct rlimit64 ResourceLimitType;
+using ResourceLimitType = struct rlimit64;
 #    define GetResourceLimit getrlimit64
 #  else
 typedef struct rlimit ResourceLimitType;
@@ -163,39 +163,11 @@ typedef struct rlimit ResourceLimitType;
 #  undef KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP
 #endif
 
-#include <ctype.h> // int isdigit(int c);
+#include <cctype> // int isdigit(int c);
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#if defined(KWSYS_USE_LONG_LONG)
-#  if defined(KWSYS_IOS_HAS_OSTREAM_LONG_LONG)
-#    define iostreamLongLong(x) (x)
-#  else
-#    define iostreamLongLong(x) ((long)(x))
-#  endif
-#elif defined(KWSYS_USE___INT64)
-#  if defined(KWSYS_IOS_HAS_OSTREAM___INT64)
-#    define iostreamLongLong(x) (x)
-#  else
-#    define iostreamLongLong(x) ((long)(x))
-#  endif
-#else
-#  error "No Long Long"
-#endif
-
-#if defined(KWSYS_CXX_HAS_ATOLL)
-#  define atoLongLong atoll
-#else
-#  if defined(KWSYS_CXX_HAS__ATOI64)
-#    define atoLongLong _atoi64
-#  elif defined(KWSYS_CXX_HAS_ATOL)
-#    define atoLongLong atol
-#  else
-#    define atoLongLong atoi
-#  endif
-#endif
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1300) && !defined(_WIN64) &&            \
   !defined(__clang__)
@@ -204,15 +176,15 @@ typedef struct rlimit ResourceLimitType;
 #  define USE_ASM_INSTRUCTIONS 0
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1400) && !defined(__clang__)
+#if defined(_MSC_VER) && (_MSC_VER >= 1400) && !defined(__clang__) &&         \
+  !defined(_M_ARM64)
 #  include <intrin.h>
 #  define USE_CPUID_INTRINSICS 1
 #else
 #  define USE_CPUID_INTRINSICS 0
 #endif
 
-#if USE_ASM_INSTRUCTIONS || USE_CPUID_INTRINSICS ||                           \
-  defined(KWSYS_CXX_HAS_BORLAND_ASM_CPUID)
+#if USE_ASM_INSTRUCTIONS || USE_CPUID_INTRINSICS
 #  define USE_CPUID 1
 #else
 #  define USE_CPUID 0
@@ -272,21 +244,6 @@ static bool call_cpuid(int select, int result[4])
   }
 
   memcpy(result, tmp, sizeof(tmp));
-#    elif defined(KWSYS_CXX_HAS_BORLAND_ASM_CPUID)
-  unsigned int a, b, c, d;
-  __asm {
-    mov EAX, select;
-    cpuid
-    mov a, EAX;
-    mov b, EBX;
-    mov c, ECX;
-    mov d, EDX;
-  }
-
-  result[0] = a;
-  result[1] = b;
-  result[2] = c;
-  result[3] = d;
 #    endif
 
   // The cpuid instruction succeeded.
@@ -303,34 +260,33 @@ T min(T a, T b)
 }
 
 extern "C" {
-typedef void (*SigAction)(int, siginfo_t*, void*);
+using SigAction = void (*)(int, siginfo_t*, void*);
 }
 
 //  Define SystemInformationImplementation class
-typedef void (*DELAY_FUNC)(unsigned int uiMS);
+using DELAY_FUNC = void (*)(unsigned int);
 
 class SystemInformationImplementation
 {
 public:
-  typedef SystemInformation::LongLong LongLong;
   SystemInformationImplementation();
-  ~SystemInformationImplementation();
+  ~SystemInformationImplementation() = default;
 
-  const char* GetVendorString();
+  const char* GetVendorString() const;
   const char* GetVendorID();
-  std::string GetTypeID();
-  std::string GetFamilyID();
-  std::string GetModelID();
-  std::string GetModelName();
-  std::string GetSteppingCode();
-  const char* GetExtendedProcessorName();
-  const char* GetProcessorSerialNumber();
-  int GetProcessorCacheSize();
-  unsigned int GetLogicalProcessorsPerPhysical();
-  float GetProcessorClockFrequency();
-  int GetProcessorAPICID();
-  int GetProcessorCacheXSize(long int);
-  bool DoesCPUSupportFeature(long int);
+  std::string GetTypeID() const;
+  std::string GetFamilyID() const;
+  std::string GetModelID() const;
+  std::string GetModelName() const;
+  std::string GetSteppingCode() const;
+  const char* GetExtendedProcessorName() const;
+  const char* GetProcessorSerialNumber() const;
+  int GetProcessorCacheSize() const;
+  unsigned int GetLogicalProcessorsPerPhysical() const;
+  float GetProcessorClockFrequency() const;
+  int GetProcessorAPICID() const;
+  int GetProcessorCacheXSize(long int) const;
+  bool DoesCPUSupportFeature(long int) const;
 
   const char* GetOSName();
   const char* GetHostname();
@@ -339,29 +295,29 @@ public:
   const char* GetOSVersion();
   const char* GetOSPlatform();
 
-  bool Is64Bits();
+  bool Is64Bits() const;
 
-  unsigned int GetNumberOfLogicalCPU(); // per physical cpu
-  unsigned int GetNumberOfPhysicalCPU();
+  unsigned int GetNumberOfLogicalCPU() const; // per physical cpu
+  unsigned int GetNumberOfPhysicalCPU() const;
 
   bool DoesCPUSupportCPUID();
 
   // Retrieve memory information in MiB.
-  size_t GetTotalVirtualMemory();
-  size_t GetAvailableVirtualMemory();
-  size_t GetTotalPhysicalMemory();
-  size_t GetAvailablePhysicalMemory();
+  size_t GetTotalVirtualMemory() const;
+  size_t GetAvailableVirtualMemory() const;
+  size_t GetTotalPhysicalMemory() const;
+  size_t GetAvailablePhysicalMemory() const;
 
-  LongLong GetProcessId();
+  long long GetProcessId();
 
   // Retrieve memory information in KiB.
-  LongLong GetHostMemoryTotal();
-  LongLong GetHostMemoryAvailable(const char* envVarName);
-  LongLong GetHostMemoryUsed();
+  long long GetHostMemoryTotal();
+  long long GetHostMemoryAvailable(const char* hostLimitEnvVarName);
+  long long GetHostMemoryUsed();
 
-  LongLong GetProcMemoryAvailable(const char* hostLimitEnvVarName,
-                                  const char* procLimitEnvVarName);
-  LongLong GetProcMemoryUsed();
+  long long GetProcMemoryAvailable(const char* hostLimitEnvVarName,
+                                   const char* procLimitEnvVarName);
+  long long GetProcMemoryUsed();
 
   double GetLoadAverage();
 
@@ -377,60 +333,103 @@ public:
   void RunMemoryCheck();
 
 public:
-  typedef struct tagID
+  using ID = struct tagID
+
   {
+
     int Type;
+
     int Family;
+
     int Model;
+
     int Revision;
+
     int ExtendedFamily;
+
     int ExtendedModel;
+
     std::string ProcessorName;
+
     std::string Vendor;
+
     std::string SerialNumber;
+
     std::string ModelName;
-  } ID;
+  };
 
-  typedef struct tagCPUPowerManagement
+  using CPUPowerManagement = struct tagCPUPowerManagement
+
   {
+
     bool HasVoltageID;
+
     bool HasFrequencyID;
+
     bool HasTempSenseDiode;
-  } CPUPowerManagement;
+  };
 
-  typedef struct tagCPUExtendedFeatures
+  using CPUExtendedFeatures = struct tagCPUExtendedFeatures
+
   {
+
     bool Has3DNow;
-    bool Has3DNowPlus;
-    bool SupportsMP;
-    bool HasMMXPlus;
-    bool HasSSEMMX;
-    unsigned int LogicalProcessorsPerPhysical;
-    int APIC_ID;
-    CPUPowerManagement PowerManagement;
-  } CPUExtendedFeatures;
 
-  typedef struct CPUtagFeatures
+    bool Has3DNowPlus;
+
+    bool SupportsMP;
+
+    bool HasMMXPlus;
+
+    bool HasSSEMMX;
+
+    unsigned int LogicalProcessorsPerPhysical;
+
+    int APIC_ID;
+
+    CPUPowerManagement PowerManagement;
+  };
+
+  using CPUFeatures = struct CPUtagFeatures
+
   {
+
     bool HasFPU;
+
     bool HasTSC;
+
     bool HasMMX;
+
     bool HasSSE;
+
     bool HasSSEFP;
+
     bool HasSSE2;
+
     bool HasIA64;
+
     bool HasAPIC;
+
     bool HasCMOV;
+
     bool HasMTRR;
+
     bool HasACPI;
+
     bool HasSerial;
+
     bool HasThermal;
+
     int CPUSpeed;
+
     int L1CacheSize;
+
     int L2CacheSize;
+
     int L3CacheSize;
+
     CPUExtendedFeatures ExtendedFeatures;
-  } CPUFeatures;
+  };
 
   enum Manufacturer
   {
@@ -476,8 +475,9 @@ protected:
 
   void CPUCountWindows();    // For windows
   unsigned char GetAPICId(); // For windows
-  bool IsSMTSupported();
-  static LongLong GetCyclesDifference(DELAY_FUNC, unsigned int); // For windows
+  bool IsSMTSupported() const;
+  static long long GetCyclesDifference(DELAY_FUNC,
+                                       unsigned int); // For windows
 
   // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
   bool RetreiveInformationFromCpuInfoFile();
@@ -768,42 +768,41 @@ std::string SystemInformation::GetMemoryDescription(
   const char* hostLimitEnvVarName, const char* procLimitEnvVarName)
 {
   std::ostringstream oss;
-  oss << "Host Total: " << iostreamLongLong(this->GetHostMemoryTotal())
+  oss << "Host Total: " << this->GetHostMemoryTotal()
       << " KiB, Host Available: "
-      << iostreamLongLong(this->GetHostMemoryAvailable(hostLimitEnvVarName))
+      << this->GetHostMemoryAvailable(hostLimitEnvVarName)
       << " KiB, Process Available: "
-      << iostreamLongLong(this->GetProcMemoryAvailable(hostLimitEnvVarName,
-                                                       procLimitEnvVarName))
+      << this->GetProcMemoryAvailable(hostLimitEnvVarName, procLimitEnvVarName)
       << " KiB";
   return oss.str();
 }
 
 // host memory info in units of KiB.
-SystemInformation::LongLong SystemInformation::GetHostMemoryTotal()
+long long SystemInformation::GetHostMemoryTotal()
 {
   return this->Implementation->GetHostMemoryTotal();
 }
 
-SystemInformation::LongLong SystemInformation::GetHostMemoryAvailable(
+long long SystemInformation::GetHostMemoryAvailable(
   const char* hostLimitEnvVarName)
 {
   return this->Implementation->GetHostMemoryAvailable(hostLimitEnvVarName);
 }
 
-SystemInformation::LongLong SystemInformation::GetHostMemoryUsed()
+long long SystemInformation::GetHostMemoryUsed()
 {
   return this->Implementation->GetHostMemoryUsed();
 }
 
 // process memory info in units of KiB.
-SystemInformation::LongLong SystemInformation::GetProcMemoryAvailable(
+long long SystemInformation::GetProcMemoryAvailable(
   const char* hostLimitEnvVarName, const char* procLimitEnvVarName)
 {
   return this->Implementation->GetProcMemoryAvailable(hostLimitEnvVarName,
                                                       procLimitEnvVarName);
 }
 
-SystemInformation::LongLong SystemInformation::GetProcMemoryUsed()
+long long SystemInformation::GetProcMemoryUsed()
 {
   return this->Implementation->GetProcMemoryUsed();
 }
@@ -813,7 +812,7 @@ double SystemInformation::GetLoadAverage()
   return this->Implementation->GetLoadAverage();
 }
 
-SystemInformation::LongLong SystemInformation::GetProcessId()
+long long SystemInformation::GetProcessId()
 {
   return this->Implementation->GetProcessId();
 }
@@ -885,7 +884,7 @@ int LoadLines(FILE* file, std::vector<std::string>& lines)
         *pBuf = '\0';
       pBuf += 1;
     }
-    lines.push_back(buf);
+    lines.emplace_back(buf);
     ++nRead;
   }
   if (ferror(file)) {
@@ -899,7 +898,7 @@ int LoadLines(FILE* file, std::vector<std::string>& lines)
 int LoadLines(const char* fileName, std::vector<std::string>& lines)
 {
   FILE* file = fopen(fileName, "r");
-  if (file == 0) {
+  if (file == nullptr) {
     return 0;
   }
   int nRead = LoadLines(file, lines);
@@ -1322,9 +1321,9 @@ std::string SymbolProperties::GetFileName(const std::string& path) const
 {
   std::string file(path);
   if (!this->ReportPath) {
-    size_t at = file.rfind("/");
+    size_t at = file.rfind('/');
     if (at != std::string::npos) {
-      file = file.substr(at + 1);
+      file.erase(0, at + 1);
     }
   }
   return file;
@@ -1464,10 +1463,6 @@ SystemInformationImplementation::SystemInformationImplementation()
   this->OSIs64Bit = (sizeof(void*) == 8);
 }
 
-SystemInformationImplementation::~SystemInformationImplementation()
-{
-}
-
 void SystemInformationImplementation::RunCPUCheck()
 {
 #ifdef _WIN32
@@ -1564,7 +1559,7 @@ void SystemInformationImplementation::RunMemoryCheck()
 }
 
 /** Get the vendor string */
-const char* SystemInformationImplementation::GetVendorString()
+const char* SystemInformationImplementation::GetVendorString() const
 {
   return this->ChipID.Vendor.c_str();
 }
@@ -1760,7 +1755,7 @@ const char* SystemInformationImplementation::GetVendorID()
 }
 
 /** Return the type ID of the CPU */
-std::string SystemInformationImplementation::GetTypeID()
+std::string SystemInformationImplementation::GetTypeID() const
 {
   std::ostringstream str;
   str << this->ChipID.Type;
@@ -1768,7 +1763,7 @@ std::string SystemInformationImplementation::GetTypeID()
 }
 
 /** Return the family of the CPU present */
-std::string SystemInformationImplementation::GetFamilyID()
+std::string SystemInformationImplementation::GetFamilyID() const
 {
   std::ostringstream str;
   str << this->ChipID.Family;
@@ -1776,7 +1771,7 @@ std::string SystemInformationImplementation::GetFamilyID()
 }
 
 // Return the model of CPU present */
-std::string SystemInformationImplementation::GetModelID()
+std::string SystemInformationImplementation::GetModelID() const
 {
   std::ostringstream str;
   str << this->ChipID.Model;
@@ -1784,13 +1779,13 @@ std::string SystemInformationImplementation::GetModelID()
 }
 
 // Return the model name of CPU present */
-std::string SystemInformationImplementation::GetModelName()
+std::string SystemInformationImplementation::GetModelName() const
 {
   return this->ChipID.ModelName;
 }
 
 /** Return the stepping code of the CPU present. */
-std::string SystemInformationImplementation::GetSteppingCode()
+std::string SystemInformationImplementation::GetSteppingCode() const
 {
   std::ostringstream str;
   str << this->ChipID.Revision;
@@ -1798,44 +1793,46 @@ std::string SystemInformationImplementation::GetSteppingCode()
 }
 
 /** Return the stepping code of the CPU present. */
-const char* SystemInformationImplementation::GetExtendedProcessorName()
+const char* SystemInformationImplementation::GetExtendedProcessorName() const
 {
   return this->ChipID.ProcessorName.c_str();
 }
 
 /** Return the serial number of the processor
  *  in hexadecimal: xxxx-xxxx-xxxx-xxxx-xxxx-xxxx. */
-const char* SystemInformationImplementation::GetProcessorSerialNumber()
+const char* SystemInformationImplementation::GetProcessorSerialNumber() const
 {
   return this->ChipID.SerialNumber.c_str();
 }
 
 /** Return the logical processors per physical */
 unsigned int SystemInformationImplementation::GetLogicalProcessorsPerPhysical()
+  const
 {
   return this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical;
 }
 
 /** Return the processor clock frequency. */
-float SystemInformationImplementation::GetProcessorClockFrequency()
+float SystemInformationImplementation::GetProcessorClockFrequency() const
 {
   return this->CPUSpeedInMHz;
 }
 
 /**  Return the APIC ID. */
-int SystemInformationImplementation::GetProcessorAPICID()
+int SystemInformationImplementation::GetProcessorAPICID() const
 {
   return this->Features.ExtendedFeatures.APIC_ID;
 }
 
 /** Return the L1 cache size. */
-int SystemInformationImplementation::GetProcessorCacheSize()
+int SystemInformationImplementation::GetProcessorCacheSize() const
 {
   return this->Features.L1CacheSize;
 }
 
 /** Return the chosen cache size. */
-int SystemInformationImplementation::GetProcessorCacheXSize(long int dwCacheID)
+int SystemInformationImplementation::GetProcessorCacheXSize(
+  long int dwCacheID) const
 {
   switch (dwCacheID) {
     case SystemInformation::CPU_FEATURE_L1CACHE:
@@ -1848,7 +1845,8 @@ int SystemInformationImplementation::GetProcessorCacheXSize(long int dwCacheID)
   return -1;
 }
 
-bool SystemInformationImplementation::DoesCPUSupportFeature(long int dwFeature)
+bool SystemInformationImplementation::DoesCPUSupportFeature(
+  long int dwFeature) const
 {
   bool bHasFeature = false;
 
@@ -2128,7 +2126,7 @@ void SystemInformationImplementation::FindManufacturer(
     this->ChipManufacturer = HP; // Hewlett-Packard
   else if (this->ChipID.Vendor == "Motorola")
     this->ChipManufacturer = Motorola; // Motorola Microelectronics
-  else if (family.substr(0, 7) == "PA-RISC")
+  else if (family.compare(0, 7, "PA-RISC") == 0)
     this->ChipManufacturer = HP; // Hewlett-Packard
   else
     this->ChipManufacturer = UnknownManufacturer; // Unknown manufacturer
@@ -2843,7 +2841,7 @@ static void SystemInformationStripLeadingSpace(std::string& str)
   // post-process the name.
   std::string::size_type pos = str.find_first_not_of(" ");
   if (pos != std::string::npos) {
-    str = str.substr(pos);
+    str.erase(0, pos);
   }
 }
 #endif
@@ -3344,8 +3342,8 @@ std::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(
   size_t pos = buffer.find(word, init);
   if (pos != std::string::npos) {
     this->CurrentPositionInFile = pos;
-    pos = buffer.find(":", pos);
-    size_t pos2 = buffer.find("\n", pos);
+    pos = buffer.find(':', pos);
+    size_t pos2 = buffer.find('\n', pos);
     if (pos != std::string::npos && pos2 != std::string::npos) {
       // It may happen that the beginning matches, but this is still not the
       // requested key.
@@ -3358,7 +3356,9 @@ std::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(
           return this->ExtractValueFromCpuInfoFile(buffer, word, pos2);
         }
       }
-      return buffer.substr(pos + 2, pos2 - pos - 2);
+      buffer.erase(0, pos + 2);
+      buffer.resize(pos2 - pos - 2);
+      return buffer;
     }
   }
   this->CurrentPositionInFile = std::string::npos;
@@ -3409,7 +3409,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   // We want to record the total number of cores in this->NumberOfPhysicalCPU
   // (checking only the first proc)
   std::string Cores = this->ExtractValueFromCpuInfoFile(buffer, "cpu cores");
-  unsigned int NumberOfCoresPerSocket = (unsigned int)atoi(Cores.c_str());
+  auto NumberOfCoresPerSocket = (unsigned int)atoi(Cores.c_str());
   NumberOfCoresPerSocket = std::max(NumberOfCoresPerSocket, 1u);
   this->NumberOfPhysicalCPU =
     NumberOfCoresPerSocket * (unsigned int)NumberOfSockets;
@@ -3441,7 +3441,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     // Linux Sparc: CPU speed is in Hz and encoded in hexadecimal
     CPUSpeed = this->ExtractValueFromCpuInfoFile(buffer, "Cpu0ClkTck");
     this->CPUSpeedInMHz =
-      static_cast<float>(strtoull(CPUSpeed.c_str(), 0, 16)) / 1000000.0f;
+      static_cast<float>(strtoull(CPUSpeed.c_str(), nullptr, 16)) / 1000000.0f;
   }
 #endif
 
@@ -3502,13 +3502,12 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   cachename.push_back("D-cache");    // e.g. PA-RISC
 
   this->Features.L1CacheSize = 0;
-  for (size_t index = 0; index < cachename.size(); index++) {
-    std::string cacheSize =
-      this->ExtractValueFromCpuInfoFile(buffer, cachename[index]);
+  for (auto& index : cachename) {
+    std::string cacheSize = this->ExtractValueFromCpuInfoFile(buffer, index);
     if (!cacheSize.empty()) {
       pos = cacheSize.find(" KB");
       if (pos != std::string::npos) {
-        cacheSize = cacheSize.substr(0, pos);
+        cacheSize.resize(pos);
       }
       this->Features.L1CacheSize += atoi(cacheSize.c_str());
     }
@@ -3584,8 +3583,7 @@ bool SystemInformationImplementation::QueryProcessor()
 /**
 Get total system RAM in units of KiB.
 */
-SystemInformation::LongLong
-SystemInformationImplementation::GetHostMemoryTotal()
+long long SystemInformationImplementation::GetHostMemoryTotal()
 {
 #if defined(_WIN32)
 #  if defined(_MSC_VER) && _MSC_VER < 1300
@@ -3600,7 +3598,7 @@ SystemInformationImplementation::GetHostMemoryTotal()
   return statex.ullTotalPhys / 1024;
 #  endif
 #elif defined(__linux)
-  SystemInformation::LongLong memTotal = 0;
+  long long memTotal = 0;
   int ierr = GetFieldFromFile("/proc/meminfo", "MemTotal:", memTotal);
   if (ierr) {
     return -1;
@@ -3623,11 +3621,10 @@ SystemInformationImplementation::GetHostMemoryTotal()
 Get total system RAM in units of KiB. This may differ from the
 host total if a host-wide resource limit is applied.
 */
-SystemInformation::LongLong
-SystemInformationImplementation::GetHostMemoryAvailable(
+long long SystemInformationImplementation::GetHostMemoryAvailable(
   const char* hostLimitEnvVarName)
 {
-  SystemInformation::LongLong memTotal = this->GetHostMemoryTotal();
+  long long memTotal = this->GetHostMemoryTotal();
 
   // the following mechanism is provided for systems that
   // apply resource limits across groups of processes.
@@ -3638,8 +3635,7 @@ SystemInformationImplementation::GetHostMemoryAvailable(
   if (hostLimitEnvVarName) {
     const char* hostLimitEnvVarValue = getenv(hostLimitEnvVarName);
     if (hostLimitEnvVarValue) {
-      SystemInformation::LongLong hostLimit =
-        atoLongLong(hostLimitEnvVarValue);
+      long long hostLimit = std::atoll(hostLimitEnvVarValue);
       if (hostLimit > 0) {
         memTotal = min(hostLimit, memTotal);
       }
@@ -3653,20 +3649,17 @@ SystemInformationImplementation::GetHostMemoryAvailable(
 Get total system RAM in units of KiB. This may differ from the
 host total if a per-process resource limit is applied.
 */
-SystemInformation::LongLong
-SystemInformationImplementation::GetProcMemoryAvailable(
+long long SystemInformationImplementation::GetProcMemoryAvailable(
   const char* hostLimitEnvVarName, const char* procLimitEnvVarName)
 {
-  SystemInformation::LongLong memAvail =
-    this->GetHostMemoryAvailable(hostLimitEnvVarName);
+  long long memAvail = this->GetHostMemoryAvailable(hostLimitEnvVarName);
 
   // the following mechanism is provide for systems where rlimits
   // are not employed. Units are in KiB.
   if (procLimitEnvVarName) {
     const char* procLimitEnvVarValue = getenv(procLimitEnvVarName);
     if (procLimitEnvVarValue) {
-      SystemInformation::LongLong procLimit =
-        atoLongLong(procLimitEnvVarValue);
+      long long procLimit = std::atoll(procLimitEnvVarValue);
       if (procLimit > 0) {
         memAvail = min(procLimit, memAvail);
       }
@@ -3678,28 +3671,24 @@ SystemInformationImplementation::GetProcMemoryAvailable(
   ResourceLimitType rlim;
   ierr = GetResourceLimit(RLIMIT_DATA, &rlim);
   if ((ierr == 0) && (rlim.rlim_cur != RLIM_INFINITY)) {
-    memAvail =
-      min((SystemInformation::LongLong)rlim.rlim_cur / 1024, memAvail);
+    memAvail = min((long long)rlim.rlim_cur / 1024, memAvail);
   }
 
   ierr = GetResourceLimit(RLIMIT_AS, &rlim);
   if ((ierr == 0) && (rlim.rlim_cur != RLIM_INFINITY)) {
-    memAvail =
-      min((SystemInformation::LongLong)rlim.rlim_cur / 1024, memAvail);
+    memAvail = min((long long)rlim.rlim_cur / 1024, memAvail);
   }
 #elif defined(__APPLE__)
   struct rlimit rlim;
   int ierr;
   ierr = getrlimit(RLIMIT_DATA, &rlim);
   if ((ierr == 0) && (rlim.rlim_cur != RLIM_INFINITY)) {
-    memAvail =
-      min((SystemInformation::LongLong)rlim.rlim_cur / 1024, memAvail);
+    memAvail = min((long long)rlim.rlim_cur / 1024, memAvail);
   }
 
   ierr = getrlimit(RLIMIT_RSS, &rlim);
   if ((ierr == 0) && (rlim.rlim_cur != RLIM_INFINITY)) {
-    memAvail =
-      min((SystemInformation::LongLong)rlim.rlim_cur / 1024, memAvail);
+    memAvail = min((long long)rlim.rlim_cur / 1024, memAvail);
   }
 #endif
 
@@ -3709,8 +3698,7 @@ SystemInformationImplementation::GetProcMemoryAvailable(
 /**
 Get RAM used by all processes in the host, in units of KiB.
 */
-SystemInformation::LongLong
-SystemInformationImplementation::GetHostMemoryUsed()
+long long SystemInformationImplementation::GetHostMemoryUsed()
 {
 #if defined(_WIN32)
 #  if defined(_MSC_VER) && _MSC_VER < 1300
@@ -3727,39 +3715,38 @@ SystemInformationImplementation::GetHostMemoryUsed()
 #elif defined(__linux)
   // First try to use MemAvailable, but it only works on newer kernels
   const char* names2[3] = { "MemTotal:", "MemAvailable:", nullptr };
-  SystemInformation::LongLong values2[2] = { SystemInformation::LongLong(0) };
+  long long values2[2] = { 0 };
   int ierr = GetFieldsFromFile("/proc/meminfo", names2, values2);
   if (ierr) {
     const char* names4[5] = { "MemTotal:", "MemFree:", "Buffers:", "Cached:",
                               nullptr };
-    SystemInformation::LongLong values4[4] = { SystemInformation::LongLong(
-      0) };
+    long long values4[4] = { 0 };
     ierr = GetFieldsFromFile("/proc/meminfo", names4, values4);
     if (ierr) {
       return ierr;
     }
-    SystemInformation::LongLong& memTotal = values4[0];
-    SystemInformation::LongLong& memFree = values4[1];
-    SystemInformation::LongLong& memBuffers = values4[2];
-    SystemInformation::LongLong& memCached = values4[3];
+    long long& memTotal = values4[0];
+    long long& memFree = values4[1];
+    long long& memBuffers = values4[2];
+    long long& memCached = values4[3];
     return memTotal - memFree - memBuffers - memCached;
   }
-  SystemInformation::LongLong& memTotal = values2[0];
-  SystemInformation::LongLong& memAvail = values2[1];
+  long long& memTotal = values2[0];
+  long long& memAvail = values2[1];
   return memTotal - memAvail;
 #elif defined(__APPLE__)
-  SystemInformation::LongLong psz = getpagesize();
+  long long psz = getpagesize();
   if (psz < 1) {
     return -1;
   }
   const char* names[3] = { "Pages wired down:", "Pages active:", nullptr };
-  SystemInformation::LongLong values[2] = { SystemInformation::LongLong(0) };
+  long long values[2] = { 0 };
   int ierr = GetFieldsFromCommand("vm_stat", names, values);
   if (ierr) {
     return -1;
   }
-  SystemInformation::LongLong& vmWired = values[0];
-  SystemInformation::LongLong& vmActive = values[1];
+  long long& vmWired = values[0];
+  long long& vmActive = values[1];
   return ((vmActive + vmWired) * psz) / 1024;
 #else
   return 0;
@@ -3770,8 +3757,7 @@ SystemInformationImplementation::GetHostMemoryUsed()
 Get system RAM used by the process associated with the given
 process id in units of KiB.
 */
-SystemInformation::LongLong
-SystemInformationImplementation::GetProcMemoryUsed()
+long long SystemInformationImplementation::GetProcMemoryUsed()
 {
 #if defined(_WIN32) && defined(KWSYS_SYS_HAS_PSAPI)
   long pid = GetCurrentProcessId();
@@ -3788,14 +3774,14 @@ SystemInformationImplementation::GetProcMemoryUsed()
   }
   return pmc.WorkingSetSize / 1024;
 #elif defined(__linux)
-  SystemInformation::LongLong memUsed = 0;
+  long long memUsed = 0;
   int ierr = GetFieldFromFile("/proc/self/status", "VmRSS:", memUsed);
   if (ierr) {
     return -1;
   }
   return memUsed;
 #elif defined(__APPLE__)
-  SystemInformation::LongLong memUsed = 0;
+  long long memUsed = 0;
   pid_t pid = getpid();
   std::ostringstream oss;
   oss << "ps -o rss= -p " << pid;
@@ -3859,7 +3845,7 @@ double SystemInformationImplementation::GetLoadAverage()
 /**
 Get the process id of the running process.
 */
-SystemInformation::LongLong SystemInformationImplementation::GetProcessId()
+long long SystemInformationImplementation::GetProcessId()
 {
 #if defined(_WIN32)
   return GetCurrentProcessId();
@@ -3893,7 +3879,7 @@ std::string SystemInformationImplementation::GetProgramStack(int firstFrame,
                                                              int wholePath)
 {
   std::ostringstream oss;
-  std::string programStack = "";
+  std::string programStack;
 
 #ifdef KWSYS_SYSTEMINFORMATION_HAS_DBGHELP
   (void)wholePath;
@@ -4249,39 +4235,44 @@ bool SystemInformationImplementation::QueryMemory()
 }
 
 /** */
-size_t SystemInformationImplementation::GetTotalVirtualMemory()
+size_t SystemInformationImplementation::GetTotalVirtualMemory() const
 {
   return this->TotalVirtualMemory;
 }
 
 /** */
-size_t SystemInformationImplementation::GetAvailableVirtualMemory()
+size_t SystemInformationImplementation::GetAvailableVirtualMemory() const
 {
   return this->AvailableVirtualMemory;
 }
 
-size_t SystemInformationImplementation::GetTotalPhysicalMemory()
+size_t SystemInformationImplementation::GetTotalPhysicalMemory() const
 {
   return this->TotalPhysicalMemory;
 }
 
 /** */
-size_t SystemInformationImplementation::GetAvailablePhysicalMemory()
+size_t SystemInformationImplementation::GetAvailablePhysicalMemory() const
 {
   return this->AvailablePhysicalMemory;
 }
 
 /** Get Cycle differences */
-SystemInformation::LongLong
-SystemInformationImplementation::GetCyclesDifference(DELAY_FUNC DelayFunction,
-                                                     unsigned int uiParameter)
+long long SystemInformationImplementation::GetCyclesDifference(
+  DELAY_FUNC DelayFunction, unsigned int uiParameter)
 {
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
   unsigned __int64 stamp1, stamp2;
 
+#  ifdef _M_ARM64
+  stamp1 = _ReadStatusReg(ARM64_PMCCNTR_EL0);
+  DelayFunction(uiParameter);
+  stamp2 = _ReadStatusReg(ARM64_PMCCNTR_EL0);
+#  else
   stamp1 = __rdtsc();
   DelayFunction(uiParameter);
   stamp2 = __rdtsc();
+#  endif
 
   return stamp2 - stamp1;
 #elif USE_ASM_INSTRUCTIONS
@@ -4350,7 +4341,7 @@ void SystemInformationImplementation::DelayOverhead(unsigned int uiMS)
 }
 
 /** Works only for windows */
-bool SystemInformationImplementation::IsSMTSupported()
+bool SystemInformationImplementation::IsSMTSupported() const
 {
   return this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical > 1;
 }
@@ -4399,12 +4390,12 @@ void SystemInformationImplementation::CPUCountWindows()
     DWORD Length = 0;
     DWORD rc = pGetLogicalProcessorInformation(nullptr, &Length);
     assert(FALSE == rc);
-    (void)rc; // Silence unused variable warning in Borland C++ 5.81
+    (void)rc; // Silence unused variable warning
     assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER);
     ProcInfo.resize(Length / sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
     rc = pGetLogicalProcessorInformation(&ProcInfo[0], &Length);
     assert(rc != FALSE);
-    (void)rc; // Silence unused variable warning in Borland C++ 5.81
+    (void)rc; // Silence unused variable warning
   }
 
   typedef std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION>::iterator
@@ -4432,13 +4423,13 @@ void SystemInformationImplementation::CPUCountWindows()
 }
 
 /** Return the number of logical CPUs on the system */
-unsigned int SystemInformationImplementation::GetNumberOfLogicalCPU()
+unsigned int SystemInformationImplementation::GetNumberOfLogicalCPU() const
 {
   return this->NumberOfLogicalCPU;
 }
 
 /** Return the number of physical CPUs on the system */
-unsigned int SystemInformationImplementation::GetNumberOfPhysicalCPU()
+unsigned int SystemInformationImplementation::GetNumberOfPhysicalCPU() const
 {
   return this->NumberOfPhysicalCPU;
 }
@@ -4638,7 +4629,7 @@ std::string SystemInformationImplementation::ExtractValueFromSysCtl(
   size_t pos = this->SysCtlBuffer.find(word);
   if (pos != std::string::npos) {
     pos = this->SysCtlBuffer.find(": ", pos);
-    size_t pos2 = this->SysCtlBuffer.find("\n", pos);
+    size_t pos2 = this->SysCtlBuffer.find('\n', pos);
     if (pos != std::string::npos && pos2 != std::string::npos) {
       return this->SysCtlBuffer.substr(pos + 2, pos2 - pos - 2);
     }
@@ -4733,14 +4724,15 @@ std::string SystemInformationImplementation::ParseValueFromKStat(
     }
     pos = command.find(' ', pos + 1);
   }
-  args_string.push_back(command.substr(start + 1, command.size() - start - 1));
+  command.erase(0, start + 1);
+  args_string.push_back(command);
 
   std::vector<const char*> args;
   args.reserve(3 + args_string.size());
   args.push_back("kstat");
   args.push_back("-p");
-  for (size_t i = 0; i < args_string.size(); ++i) {
-    args.push_back(args_string[i].c_str());
+  for (auto& i : args_string) {
+    args.push_back(i.c_str());
   }
   args.push_back(nullptr);
 
@@ -4922,7 +4914,9 @@ bool SystemInformationImplementation::QueryQNXMemory()
   while (buffer[pos] == ' ')
     pos++;
 
-  this->TotalPhysicalMemory = atoi(buffer.substr(pos, pos2 - pos).c_str());
+  buffer.erase(0, pos);
+  buffer.resize(pos2);
+  this->TotalPhysicalMemory = atoi(buffer.c_str());
   return true;
 #endif
   return false;
@@ -5447,19 +5441,19 @@ void SystemInformationImplementation::TrimNewline(std::string& output)
 {
   // remove \r
   std::string::size_type pos = 0;
-  while ((pos = output.find("\r", pos)) != std::string::npos) {
+  while ((pos = output.find('\r', pos)) != std::string::npos) {
     output.erase(pos);
   }
 
   // remove \n
   pos = 0;
-  while ((pos = output.find("\n", pos)) != std::string::npos) {
+  while ((pos = output.find('\n', pos)) != std::string::npos) {
     output.erase(pos);
   }
 }
 
 /** Return true if the machine is 64 bits */
-bool SystemInformationImplementation::Is64Bits()
+bool SystemInformationImplementation::Is64Bits() const
 {
   return this->OSIs64Bit;
 }

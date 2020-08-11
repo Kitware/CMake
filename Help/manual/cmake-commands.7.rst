@@ -17,6 +17,7 @@ These commands are always available.
 
    /command/break
    /command/cmake_host_system_information
+   /command/cmake_language
    /command/cmake_minimum_required
    /command/cmake_parse_arguments
    /command/cmake_policy

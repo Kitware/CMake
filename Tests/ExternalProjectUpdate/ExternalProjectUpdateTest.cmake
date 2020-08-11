@@ -2,7 +2,7 @@
 # resulting checked out version is resulting_sha and rebuild.
 # This check's the correct behavior of the ExternalProject UPDATE_COMMAND.
 # Also verify that a fetch only occurs when fetch_expected is 1.
-macro(check_a_tag desired_tag resulting_sha fetch_expected)
+macro(check_a_tag desired_tag resulting_sha fetch_expected update_strategy)
   message( STATUS "Checking ExternalProjectUpdate to tag: ${desired_tag}" )
 
   # Remove the FETCH_HEAD file, so we can check if it gets replaced with a 'git
@@ -10,11 +10,16 @@ macro(check_a_tag desired_tag resulting_sha fetch_expected)
   set( FETCH_HEAD_file ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT/.git/FETCH_HEAD )
   file( REMOVE ${FETCH_HEAD_file} )
 
+  # Give ourselves a marker in the output. It is difficult to tell where we
+  # are up to without this
+  message(STATUS "===> check_a_tag ${desired_tag} ${resulting_sha} ${fetch_expected} ${update_strategy}")
+
   # Configure
   execute_process(COMMAND ${CMAKE_COMMAND}
     -G ${CMAKE_GENERATOR} -T "${CMAKE_GENERATOR_TOOLSET}"
     -A "${CMAKE_GENERATOR_PLATFORM}"
     -DTEST_GIT_TAG:STRING=${desired_tag}
+    -DCMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY:STRING=${update_strategy}
     ${ExternalProjectUpdate_SOURCE_DIR}
     WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}
     RESULT_VARIABLE error_code
@@ -176,16 +181,55 @@ if(GIT_EXECUTABLE)
   endif()
 endif()
 
+# When re-running tests locally, this ensures we always start afresh
+file(REMOVE_RECURSE ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals)
+
 if(do_git_tests)
-  check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1)
-  check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 1)
+  check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
+  check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 1 REBASE)
   # With the Git UPDATE_COMMAND performance patch, this will not required a
   # 'git fetch'
-  check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 0)
-  check_a_tag(tag2          5842b503ba4113976d9bb28d57b5aee1ad2736b7 1)
-  check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 1)
-  check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 0)
-  check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1)
+  check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 0 REBASE)
+  check_a_tag(tag2          5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
+  check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 1 REBASE)
+  check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 0 REBASE)
+  check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
   # This is a remote symbolic ref, so it will always trigger a 'git fetch'
-  check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1)
+  check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
+
+  foreach(strategy IN ITEMS CHECKOUT REBASE_CHECKOUT)
+    # Move local master back, then apply a change that will cause a conflict
+    # during rebase
+    execute_process(COMMAND ${GIT_EXECUTABLE} checkout master
+      WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT
+      RESULT_VARIABLE error_code
+      )
+    if(error_code)
+      message(FATAL_ERROR "Could not reset local master back to tag1.")
+    endif()
+    execute_process(COMMAND ${GIT_EXECUTABLE} reset --hard tag1
+      WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT
+      RESULT_VARIABLE error_code
+      )
+    if(error_code)
+      message(FATAL_ERROR "Could not reset local master back to tag1.")
+    endif()
+
+    set(cmlFile ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT/CMakeLists.txt)
+    file(READ ${cmlFile} contents)
+    string(REPLACE "find TutorialConfig.h" "find TutorialConfig.h (conflict here)"
+      conflictingContent "${contents}"
+      )
+    file(WRITE ${cmlFile} "${conflictingContent}")
+    execute_process(COMMAND ${GIT_EXECUTABLE} commit -a -m "This should cause a conflict"
+      WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT
+      RESULT_VARIABLE error_code
+      )
+    if(error_code)
+      message(FATAL_ERROR "Could not commit conflicting change.")
+    endif()
+    # This should discard our commit but leave behind an annotated tag
+    check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 ${strategy})
+  endforeach()
+
 endif()

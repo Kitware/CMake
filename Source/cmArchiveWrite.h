@@ -62,6 +62,8 @@ public:
   cmArchiveWrite(const cmArchiveWrite&) = delete;
   cmArchiveWrite& operator=(const cmArchiveWrite&) = delete;
 
+  bool Open();
+
   /**
    * Add a path (file or directory) to the archive.  Directories are
    * added recursively.  The "path" must be readable on disk, either
@@ -138,6 +140,9 @@ public:
     this->Uname = "";
     this->Gname = "";
   }
+
+  //! Set an option on a filter;
+  bool SetFilterOption(const char* module, const char* key, const char* value);
 
 private:
   bool Okay() const { return this->Error.empty(); }

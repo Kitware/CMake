@@ -20,6 +20,7 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [RESOURCE_SPEC_FILE <file>]
              [TEST_LOAD <threshold>]
              [SCHEDULE_RANDOM <ON|OFF>]
+             [STOP_ON_FAILURE]
              [STOP_TIME <time-of-day>]
              [RETURN_VALUE <result-var>]
              [CAPTURE_CMAKE_ERROR <result-var>]
@@ -118,6 +119,9 @@ The options are:
 ``SCHEDULE_RANDOM <ON|OFF>``
   Launch tests in a random order.  This may be useful for detecting
   implicit test dependencies.
+
+``STOP_ON_FAILURE``
+  Stop the execution of the tests once one has failed.
 
 ``STOP_TIME <time-of-day>``
   Specify a time of day at which the tests should all stop running.

@@ -1,6 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
+#include "cmConfigure.h" // IWYU pragma: keep
+
 #include <cassert>
 #include <cctype>
 #include <climits>
@@ -11,9 +13,12 @@
 
 #include <cmext/algorithm>
 
+#include <cm3p/uv.h>
+
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -27,8 +32,6 @@
 #endif
 
 #include "cmsys/Encoding.hxx"
-
-#include "cm_uv.h"
 #if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
 #  include "cmsys/ConsoleBuf.hxx"
 #endif
@@ -93,6 +96,14 @@ const char* cmDocumentationOptions[][2] = {
   { "--check-system-vars",
     "Find problems with variable usage in system "
     "files." },
+#  if !defined(CMAKE_BOOTSTRAP)
+  { "--profiling-format=<fmt>",
+    "Output data for profiling CMake scripts. Supported formats: "
+    "google-trace" },
+  { "--profiling-output=<file>",
+    "Select an output path for the profiling data enabled through "
+    "--profiling-format." },
+#  endif
   { nullptr, nullptr }
 };
 
@@ -286,16 +297,16 @@ int do_cmake(int ac, char const* const* av)
       cmStateEnums::CacheEntryType t = cm.GetState()->GetCacheEntryType(k);
       if (t != cmStateEnums::INTERNAL && t != cmStateEnums::STATIC &&
           t != cmStateEnums::UNINITIALIZED) {
-        const char* advancedProp =
+        cmProp advancedProp =
           cm.GetState()->GetCacheEntryProperty(k, "ADVANCED");
         if (list_all_cached || !advancedProp) {
           if (list_help) {
-            std::cout << "// "
-                      << cm.GetState()->GetCacheEntryProperty(k, "HELPSTRING")
-                      << std::endl;
+            cmProp help =
+              cm.GetState()->GetCacheEntryProperty(k, "HELPSTRING");
+            std::cout << "// " << (help ? *help : "") << std::endl;
           }
           std::cout << k << ":" << cmState::CacheEntryTypeToString(t) << "="
-                    << cm.GetState()->GetCacheEntryValue(k) << std::endl;
+                    << cm.GetState()->GetSafeCacheEntryValue(k) << std::endl;
           if (list_help) {
             std::cout << std::endl;
           }
@@ -312,6 +323,7 @@ int do_cmake(int ac, char const* const* av)
   return 0;
 }
 
+#ifndef CMAKE_BOOTSTRAP
 int extract_job_number(int& index, char const* current, char const* next,
                        int len_of_flag)
 {
@@ -341,6 +353,7 @@ int extract_job_number(int& index, char const* current, char const* next,
   }
   return jobs;
 }
+#endif
 
 int do_build(int ac, char const* const* av)
 {
@@ -721,6 +734,8 @@ int main(int ac, char const* const* av)
 #ifndef CMAKE_BOOTSTRAP
   cmDynamicLoader::FlushCache();
 #endif
-  uv_loop_close(uv_default_loop());
+  if (uv_loop_t* loop = uv_default_loop()) {
+    uv_loop_close(loop);
+  }
   return ret;
 }

@@ -72,8 +72,7 @@ bool cmSiteNameCommand(std::vector<std::string> const& args,
   }
 #endif
   status.GetMakefile().AddCacheDefinition(
-    args[0], siteName.c_str(),
-    "Name of the computer/site where compile is being run",
+    args[0], siteName, "Name of the computer/site where compile is being run",
     cmStateEnums::STRING);
 
   return true;

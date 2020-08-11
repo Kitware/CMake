@@ -4,8 +4,9 @@
 #  include <unistd.h>
 #endif
 
-#include <iostream>
 #include <string>
+
+#include <stdio.h>
 
 void sleepFor(unsigned seconds)
 {
@@ -23,8 +24,8 @@ int main(int argc, char** argv)
   // invoked with --gtest_list_tests. Thus, we fake that here. This allows us
   // to test the module without actually needing Google Test.
   if (argc > 1 && std::string(argv[1]) == "--gtest_list_tests") {
-    std::cout << "timeout." << std::endl;
-    std::cout << "  case" << std::endl;
+    printf("timeout.\n  case\n");
+    fflush(stdout);
 #ifdef discoverySleepSec
     sleepFor(discoverySleepSec);
 #endif

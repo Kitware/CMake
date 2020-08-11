@@ -160,9 +160,8 @@ if(Java_JAVA_EXECUTABLE)
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_STRIP_TRAILING_WHITESPACE)
     if( res )
-      if(var MATCHES "No Java runtime present, requesting install")
-        set_property(CACHE Java_JAVA_EXECUTABLE
-          PROPERTY VALUE "Java_JAVA_EXECUTABLE-NOTFOUND")
+      if(var MATCHES "Unable to locate a Java Runtime to invoke|No Java runtime present, requesting install")
+        set(Java_JAVA_EXECUTABLE Java_JAVA_EXECUTABLE-NOTFOUND)
       elseif(${Java_FIND_REQUIRED})
         message( FATAL_ERROR "Error executing java -version" )
       else()
