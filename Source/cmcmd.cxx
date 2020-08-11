@@ -1161,7 +1161,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return cmcmd::ExecuteLinkScript(args);
     }
 
-#ifndef CMAKE_BOOTSTRAP
+#if !defined(CMAKE_BOOTSTRAP) || defined(CMAKE_BOOTSTRAP_NINJA)
     // Internal CMake ninja dependency scanning support.
     if (args[1] == "cmake_ninja_depends") {
       return cmcmd_cmake_ninja_depends(args.begin() + 2, args.end());
