@@ -3124,6 +3124,9 @@ std::string cmGeneratorTarget::GetCompilePDBDirectory(
 void cmGeneratorTarget::GetAppleArchs(const std::string& config,
                                       std::vector<std::string>& archVec) const
 {
+  if (!this->Makefile->IsOn("APPLE")) {
+    return;
+  }
   cmProp archs = nullptr;
   if (!config.empty()) {
     std::string defVarName =
