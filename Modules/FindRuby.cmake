@@ -48,10 +48,21 @@ This module will set the following variables in your project:
   Ruby patch version.
 
 
-Also:
+The following variables are also provided for compatibility reasons,
+don't use them in new code:
 
+``RUBY_EXECUTABLE``
+  same as Ruby_EXECUTABLE.
+``RUBY_INCLUDE_DIRS``
+  same as Ruby_INCLUDE_DIRS.
 ``RUBY_INCLUDE_PATH``
-  same as Ruby_INCLUDE_DIRS, only provided for compatibility reasons, don't use it
+  same as Ruby_INCLUDE_DIRS.
+``RUBY_LIBRARY``
+  same as Ruby_LIBRARY.
+``RUBY_VERSION``
+  same as Ruby_VERSION.
+``RUBY_FOUND``
+  same as Ruby_FOUND.
 
 Hints
 ^^^^^
