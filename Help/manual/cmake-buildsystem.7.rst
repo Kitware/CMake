@@ -96,6 +96,9 @@ Apple Frameworks
 
 A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
 target property to create an macOS or iOS Framework Bundle.
+A library with the ``FRAMEWORK`` target property should also set the
+:prop_tgt:`FRAMEWORK_VERSION` target property.  This property is typically
+set to the value of "A" by macOS conventions.
 The ``MACOSX_FRAMEWORK_IDENTIFIER`` sets ``CFBundleIdentifier`` key
 and it uniquely identifies the bundle.
 
@@ -104,7 +107,7 @@ and it uniquely identifies the bundle.
   add_library(MyFramework SHARED MyFramework.cpp)
   set_target_properties(MyFramework PROPERTIES
     FRAMEWORK TRUE
-    FRAMEWORK_VERSION A
+    FRAMEWORK_VERSION A # Version "A" is macOS convention
     MACOSX_FRAMEWORK_IDENTIFIER org.cmake.MyFramework
   )
 
@@ -115,7 +118,10 @@ Object Libraries
 
 The ``OBJECT`` library type defines a non-archival collection of object files
 resulting from compiling the given source files.  The object files collection
-may be used as source inputs to other targets:
+may be used as source inputs to other targets by using the syntax
+``$<TARGET_OBJECTS:name>``.  This is a
+:manual:`generator expression <cmake-generator-expressions(7)>` that can be
+used to supply the ``OBJECT`` library content to other targets:
 
 .. code-block:: cmake
 
@@ -373,8 +379,12 @@ position-independent-code, so a diagnostic is issued.
 The ``lib1`` and ``lib2`` requirements are not "compatible".  One of them
 requires that consumers are built as position-independent-code, while
 the other requires that consumers are not built as position-independent-code.
-Because ``exe2`` links to both and they are in conflict, a diagnostic is
-issued.
+Because ``exe2`` links to both and they are in conflict, a CMake error message
+is issued::
+
+  CMake Error: The INTERFACE_POSITION_INDEPENDENT_CODE property of "lib2" does
+  not agree with the value of POSITION_INDEPENDENT_CODE already determined
+  for "exe2".
 
 To be "compatible", the :prop_tgt:`POSITION_INDEPENDENT_CODE` property,
 if set must be either the same, in a boolean sense, as the
@@ -732,7 +742,7 @@ As the value of the :prop_tgt:`POSITION_INDEPENDENT_CODE` property of
 the ``exe1`` target is dependent on the linked libraries (``lib3``), and the
 edge of linking ``exe1`` is determined by the same
 :prop_tgt:`POSITION_INDEPENDENT_CODE` property, the dependency graph above
-contains a cycle.  :manual:`cmake(1)` issues a diagnostic in this case.
+contains a cycle.  :manual:`cmake(1)` issues an error message.
 
 .. _`Output Artifacts`:
 
