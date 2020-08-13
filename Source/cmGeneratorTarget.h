@@ -55,6 +55,12 @@ public:
   std::vector<cmCustomCommand> const& GetPreLinkCommands() const;
   std::vector<cmCustomCommand> const& GetPostBuildCommands() const;
 
+  void AppendCustomCommandSideEffects(
+    std::set<cmGeneratorTarget const*>& sideEffects) const;
+  void AppendLanguageSideEffects(
+    std::map<std::string, std::set<cmGeneratorTarget const*>>& sideEffects)
+    const;
+
 #define DECLARE_TARGET_POLICY(POLICY)                                         \
   cmPolicies::PolicyStatus GetPolicyStatus##POLICY() const                    \
   {                                                                           \

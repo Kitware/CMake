@@ -307,6 +307,7 @@ Properties on Targets
    /prop_tgt/OBJCXX_EXTENSIONS
    /prop_tgt/OBJCXX_STANDARD
    /prop_tgt/OBJCXX_STANDARD_REQUIRED
+   /prop_tgt/OPTIMIZE_DEPENDENCIES
    /prop_tgt/OSX_ARCHITECTURES_CONFIG
    /prop_tgt/OSX_ARCHITECTURES
    /prop_tgt/OUTPUT_NAME_CONFIG

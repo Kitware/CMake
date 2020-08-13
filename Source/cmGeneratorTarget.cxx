@@ -1084,6 +1084,37 @@ std::vector<cmCustomCommand> const& cmGeneratorTarget::GetPostBuildCommands()
   return this->Target->GetPostBuildCommands();
 }
 
+void cmGeneratorTarget::AppendCustomCommandSideEffects(
+  std::set<cmGeneratorTarget const*>& sideEffects) const
+{
+  if (!this->GetPreBuildCommands().empty() ||
+      !this->GetPreLinkCommands().empty() ||
+      !this->GetPostBuildCommands().empty()) {
+    sideEffects.insert(this);
+  } else {
+    for (auto const& source : this->GetAllConfigSources()) {
+      if (source.Source->GetCustomCommand() != nullptr) {
+        sideEffects.insert(this);
+        break;
+      }
+    }
+  }
+}
+
+void cmGeneratorTarget::AppendLanguageSideEffects(
+  std::map<std::string, std::set<cmGeneratorTarget const*>>& sideEffects) const
+{
+  static const std::set<cm::string_view> LANGS_WITH_NO_SIDE_EFFECTS = {
+    "C"_s, "CXX"_s, "OBJC"_s, "OBJCXX"_s, "ASM"_s, "CUDA"_s,
+  };
+
+  for (auto const& lang : this->GetAllConfigCompileLanguages()) {
+    if (!LANGS_WITH_NO_SIDE_EFFECTS.count(lang)) {
+      sideEffects[lang].insert(this);
+    }
+  }
+}
+
 bool cmGeneratorTarget::IsInBuildSystem() const
 {
   if (this->IsImported()) {
