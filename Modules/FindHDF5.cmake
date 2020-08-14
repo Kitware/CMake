@@ -997,7 +997,6 @@ if (HDF5_FOUND)
     unset(_hdf5_definitions)
   endif ()
 
-  include(vtkDetectLibraryType)
   foreach (hdf5_lang IN LISTS HDF5_LANGUAGE_BINDINGS)
     if (hdf5_lang STREQUAL "C")
       set(hdf5_target_name "hdf5")
@@ -1029,8 +1028,7 @@ if (HDF5_FOUND)
             "HDF5 was found, but a different variable was set which contains "
             "its location.")
         endif ()
-        vtk_detect_library_type(_hdf5_libtype PATH "${_hdf5_location}")
-        add_library("hdf5::${hdf5_target_name}" "${_hdf5_libtype}" IMPORTED)
+        add_library("hdf5::${hdf5_target_name}" UNKNOWN IMPORTED)
         string(REPLACE "-D" "" _hdf5_definitions "${HDF5_${hdf5_lang}_DEFINITIONS}")
         if (NOT HDF5_${hdf5_lang}_INCLUDE_DIRS)
          set(HDF5_${hdf5_lang}_INCLUDE_DIRS ${HDF5_INCLUDE_DIRS})
@@ -1089,8 +1087,7 @@ if (HDF5_FOUND)
             "HDF5 was found, but a different variable was set which contains "
             "its location.")
         endif ()
-        vtk_detect_library_type(_hdf5_libtype PATH "${_hdf5_location}")
-        add_library("hdf5::${hdf5_target_name}" "${_hdf5_libtype}" IMPORTED)
+        add_library("hdf5::${hdf5_target_name}" UNKNOWN IMPORTED)
         string(REPLACE "-D" "" _hdf5_definitions "${HDF5_${hdf5_lang}_HL_DEFINITIONS}")
         set_target_properties("hdf5::${hdf5_target_name}" PROPERTIES
           IMPORTED_LOCATION "${_hdf5_location}"
