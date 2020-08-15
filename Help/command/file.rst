@@ -449,7 +449,7 @@ modified.
 
   file(GENERATE OUTPUT output-file
        <INPUT input-file|CONTENT content>
-       [CONDITION expression])
+       [CONDITION expression] [TARGET target])
 
 Generate an output file for each build configuration supported by the current
 :manual:`CMake Generator <cmake-generators(7)>`.  Evaluate
@@ -478,6 +478,10 @@ from the input content to produce the output content.  The options are:
   A relative path (after evaluating generator expressions) is treated
   with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
   See policy :policy:`CMP0070`.
+
+``TARGET <target>``
+  Specify target which to use when evaluating generator expressions.  Enables
+  use of generator expressions requiring a target.
 
 Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
 ``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.

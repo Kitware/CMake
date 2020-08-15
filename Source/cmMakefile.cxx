@@ -801,15 +801,15 @@ void cmMakefile::EnforceDirectoryLevelRules() const
 }
 
 void cmMakefile::AddEvaluationFile(
-  const std::string& inputFile,
+  const std::string& inputFile, const std::string& targetName,
   std::unique_ptr<cmCompiledGeneratorExpression> outputName,
   std::unique_ptr<cmCompiledGeneratorExpression> condition,
   bool inputIsContent)
 {
   this->EvaluationFiles.push_back(
     cm::make_unique<cmGeneratorExpressionEvaluationFile>(
-      inputFile, std::move(outputName), std::move(condition), inputIsContent,
-      this->GetPolicyStatus(cmPolicies::CMP0070)));
+      inputFile, targetName, std::move(outputName), std::move(condition),
+      inputIsContent, this->GetPolicyStatus(cmPolicies::CMP0070)));
 }
 
 const std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>&
