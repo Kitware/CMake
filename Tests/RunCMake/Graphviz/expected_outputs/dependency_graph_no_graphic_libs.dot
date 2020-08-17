@@ -35,4 +35,5 @@ subgraph clusterLegend {
     "node5" [ label = "CryptoCurrencyMiningLibrary", shape = septagon ];
     "node1" -> "node5" [ style = dotted ] // ConsoleApplication -> CryptoCurrencyMiningLibrary
     "node6" [ label = "\"-lm\"", shape = septagon ];
+    "node7" [ label = "SubDirectoryTarget", shape = egg ];
 }

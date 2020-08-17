@@ -39,4 +39,5 @@ subgraph clusterLegend {
     "node8" -> "node0" [ style = dotted ] // GraphicDriverOpenGL -> CompilerFlags
     "node9" [ label = "GraphicDriverVulkan", shape = tripleoctagon ];
     "node9" -> "node0" [ style = dotted ] // GraphicDriverVulkan -> CompilerFlags
+    "node10" [ label = "SubDirectoryTarget", shape = egg ];
 }
