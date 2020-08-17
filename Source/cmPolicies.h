@@ -323,7 +323,10 @@ class cmMakefile;
          3, 18, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0109,                                                     \
          "find_program() requires permission to execute but not to read.", 3, \
-         19, 0, cmPolicies::WARN)
+         19, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0110,                                                     \
+         "add_test() supports arbitrary characters in test names.", 3, 19, 0, \
+         cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

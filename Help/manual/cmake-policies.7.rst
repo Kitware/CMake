@@ -51,12 +51,13 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
-Policies Introduced by CMake 3.18
+Policies Introduced by CMake 3.19
 =================================
 
 .. toctree::
    :maxdepth: 1
 
+   CMP0110: add_test() supports arbitrary characters in test names. </policy/CMP0110>
    CMP0109: find_program() requires permission to execute but not to read. </policy/CMP0109>
 
 Policies Introduced by CMake 3.18
