@@ -44,4 +44,5 @@ subgraph clusterLegend {
     "node9" [ label = "GraphicLibraryObjects", shape = hexagon ];
     "node7" -> "node9" [ style = dotted ] // GraphicLibrary -> GraphicLibraryObjects
     "node6" -> "node7" [ style = dotted ] // GraphicApplication -> GraphicLibrary
+    "node10" [ label = "SubDirectoryTarget", shape = egg ];
 }

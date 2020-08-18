@@ -64,3 +64,5 @@ target_link_libraries(ConsoleApplication CryptoCurrencyMiningLibrary)
 
 add_custom_target(GenerateManPage COMMAND ${CMAKE_COMMAND} --version)
 add_dependencies(ConsoleApplication GenerateManPage)
+
+add_subdirectory(sub_directory_target)

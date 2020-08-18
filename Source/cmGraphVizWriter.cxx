@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGraphVizWriter.h"
 
+#include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <memory>
@@ -552,14 +553,21 @@ bool cmGraphVizWriter::TargetTypeEnabled(
 std::string cmGraphVizWriter::ItemNameWithAliases(
   std::string const& itemName) const
 {
-  auto nameWithAliases = itemName;
-
+  std::vector<std::string> items;
   for (auto const& lg : this->GlobalGenerator->GetLocalGenerators()) {
     for (auto const& aliasTargets : lg->GetMakefile()->GetAliasTargets()) {
       if (aliasTargets.second == itemName) {
-        nameWithAliases += "\\n(" + aliasTargets.first + ")";
+        items.push_back(aliasTargets.first);
       }
     }
+  }
+
+  std::sort(items.begin(), items.end());
+  items.erase(std::unique(items.begin(), items.end()), items.end());
+
+  auto nameWithAliases = itemName;
+  for(auto const& item : items) {
+    nameWithAliases += "\\n(" + item + ")";
   }
 
   return nameWithAliases;
