@@ -2801,9 +2801,9 @@ function(_ep_add_patch_command name)
 
   _ep_get_update_disconnected(update_disconnected ${name})
   if(update_disconnected)
-    set(update_dep skip-update)
+    set(patch_dep download)
   else()
-    set(update_dep update)
+    set(patch_dep update)
   endif()
 
   set(__cmdQuoted)
@@ -2814,7 +2814,7 @@ function(_ep_add_patch_command name)
     ExternalProject_Add_Step(${name} patch
       COMMAND ${__cmdQuoted}
       WORKING_DIRECTORY \${work_dir}
-      DEPENDEES download \${update_dep}
+      DEPENDEES \${patch_dep}
       ${log}
       )"
   )
