@@ -30,7 +30,7 @@
 ### Fedora
 
 .fedora31:
-    image: "kitware/cmake:ci-fedora31-x86_64-2020-06-01"
+    image: "kitware/cmake:ci-fedora31-x86_64-2020-08-18"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
