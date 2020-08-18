@@ -3,6 +3,14 @@
 
 project(CMAKE_FORM)
 
+# Disable warnings to avoid changing 3rd party code.
+if(CMAKE_C_COMPILER_ID MATCHES
+    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel)$")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+elseif(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
+endif()
+
 configure_file(cmFormConfigure.h.in "${CMAKE_CURRENT_BINARY_DIR}/cmFormConfigure.h")
 
 add_library(cmForm
