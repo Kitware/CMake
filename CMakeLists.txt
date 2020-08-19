@@ -82,12 +82,15 @@ if(WIN32)
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
     add_definitions(-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION})
+    set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
   elseif(ENABLE_INET_PTON)
     # _WIN32_WINNT_VISTA (0x0600)
     add_definitions(-D_WIN32_WINNT=0x0600)
+    set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WIN32_WINNT=0x0600")
   else()
     # _WIN32_WINNT_WINXP (0x0501)
     add_definitions(-D_WIN32_WINNT=0x0501)
+    set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WIN32_WINNT=0x0501")
   endif()
 endif()
 option(CURL_LTO "Turn on compiler Link Time Optimizations" OFF)
@@ -101,13 +104,22 @@ option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OF
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
   if(PICKY_COMPILER)
-    foreach(_CCOPT -pedantic -Wall -W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wno-long-long -Wfloat-equal -Wno-multichar -Wsign-compare -Wundef -Wno-format-nonliteral -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wstrict-aliasing=3 -Wcast-align -Wtype-limits -Wold-style-declaration -Wmissing-parameter-type -Wempty-body -Wclobbered -Wignored-qualifiers -Wconversion -Wno-sign-conversion -Wvla -Wdouble-promotion -Wno-system-headers -Wno-pedantic-ms-format)
+    foreach(_CCOPT -pedantic -Wall -W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wfloat-equal -Wsign-compare -Wundef -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wstrict-aliasing=3 -Wcast-align -Wtype-limits -Wold-style-declaration -Wmissing-parameter-type -Wempty-body -Wclobbered -Wignored-qualifiers -Wconversion -Wvla -Wdouble-promotion)
       # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
       # test result in.
       string(MAKE_C_IDENTIFIER "OPT${_CCOPT}" _optvarname)
       check_c_compiler_flag(${_CCOPT} ${_optvarname})
       if(${_optvarname})
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_CCOPT}")
+      endif()
+    endforeach()
+    foreach(_CCOPT long-long multichar format-nonliteral sign-conversion system-headers pedantic-ms-format)
+      # GCC only warns about unknown -Wno- options if there are also other diagnostic messages,
+      # so test for the positive form instead
+      string(MAKE_C_IDENTIFIER "OPT${_CCOPT}" _optvarname)
+      check_c_compiler_flag("-W${_CCOPT}" ${_optvarname})
+      if(${_optvarname})
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-${_CCOPT}")
       endif()
     endforeach()
   endif()
@@ -213,7 +225,10 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 endif()
 
-curl_nroff_check()
+if(USE_MANUAL)
+    #nroff is currently only used when USE_MANUAL is set, so we can prevent the warning of no *NROFF if USE_MANUAL is OFF (or not defined), by not even looking for NROFF..
+    curl_nroff_check()
+endif()
 find_package(Perl)
 
 cmake_dependent_option(ENABLE_MANUAL "to provide the built-in manual"
@@ -297,14 +312,17 @@ endif()
 
 # check SSL libraries
 # TODO support GnuTLS
+if(CMAKE_USE_WINSSL)
+  message(FATAL_ERROR "The cmake option CMAKE_USE_WINSSL was renamed to CMAKE_USE_SCHANNEL.")
+endif()
 
 if(APPLE)
   option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF)
 endif()
 if(WIN32)
-  option(CMAKE_USE_WINSSL "enable Windows native SSL/TLS" OFF)
+  option(CMAKE_USE_SCHANNEL "enable Windows native SSL/TLS" OFF)
   cmake_dependent_option(CURL_WINDOWS_SSPI "Use windows libraries to allow NTLM authentication without openssl" ON
-    CMAKE_USE_WINSSL OFF)
+    CMAKE_USE_SCHANNEL OFF)
 endif()
 option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
 option(CMAKE_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF)
@@ -312,13 +330,13 @@ option(CMAKE_USE_NSS "Enable NSS for SSL/TLS" OFF)
 option(CMAKE_USE_WOLFSSL "enable wolfSSL for SSL/TLS" OFF)
 
 set(openssl_default ON)
-if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS OR CMAKE_USE_NSS OR CMAKE_USE_WOLFSSL)
+if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_SCHANNEL OR CMAKE_USE_MBEDTLS OR CMAKE_USE_NSS OR CMAKE_USE_WOLFSSL)
   set(openssl_default OFF)
 endif()
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
 
 count_true(enabled_ssl_options_count
-  CMAKE_USE_WINSSL
+  CMAKE_USE_SCHANNEL
   CMAKE_USE_SECTRANSP
   CMAKE_USE_OPENSSL
   CMAKE_USE_MBEDTLS
@@ -330,10 +348,10 @@ if(enabled_ssl_options_count GREATER "1")
   set(CURL_WITH_MULTI_SSL ON)
 endif()
 
-if(CMAKE_USE_WINSSL)
+if(CMAKE_USE_SCHANNEL)
   set(SSL_ENABLED ON)
   set(USE_SCHANNEL ON) # Windows native SSL/TLS support
-  set(USE_WINDOWS_SSPI ON) # CMAKE_USE_WINSSL implies CURL_WINDOWS_SSPI
+  set(USE_WINDOWS_SSPI ON) # CMAKE_USE_SCHANNEL implies CURL_WINDOWS_SSPI
   list(APPEND CURL_LIBS "crypt32")
 endif()
 if(CURL_WINDOWS_SSPI)
@@ -635,6 +653,22 @@ if(CURL_BROTLI)
     list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
     include_directories(${BROTLI_INCLUDE_DIRS})
     list(APPEND CMAKE_REQUIRED_INCLUDES ${BROTLI_INCLUDE_DIRS})
+  endif()
+endif()
+
+option(CURL_ZSTD "Set to ON to enable building curl with zstd support." OFF)
+set(HAVE_ZSTD OFF)
+if(CURL_ZSTD)
+  find_package(Zstd REQUIRED)
+  cmake_push_check_state()
+  set(CMAKE_REQUIRED_INCLUDES ${Zstd_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES ${Zstd_LIBRARIES})
+  check_symbol_exists(ZSTD_createDStream "zstd.h" HAVE_ZSTD_CREATEDSTREAM)
+  cmake_pop_check_state()
+  if(Zstd_FOUND AND HAVE_ZSTD_CREATEDSTREAM)
+    set(HAVE_ZSTD ON)
+    list(APPEND CURL_LIBS ${Zstd_LIBRARIES})
+    include_directories(${Zstd_INCLUDE_DIRS})
   endif()
 endif()
 
@@ -1319,11 +1353,13 @@ _add_if("SSL"           SSL_ENABLED)
 _add_if("IPv6"          ENABLE_IPV6)
 _add_if("unix-sockets"  USE_UNIX_SOCKETS)
 _add_if("libz"          HAVE_LIBZ)
+_add_if("brotli"        HAVE_BROTLI)
+_add_if("zstd"          HAVE_ZSTD)
 _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
 _add_if("IDN"           HAVE_LIBIDN2)
 _add_if("Largefile"     (CURL_SIZEOF_CURL_OFF_T GREATER 4) AND
                         ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
-# TODO SSP1 (WinSSL) check is missing
+# TODO SSP1 (Schannel) check is missing
 _add_if("SSPI"          USE_WINDOWS_SSPI)
 _add_if("GSS-API"       HAVE_GSSAPI)
 _add_if("alt-svc"       ENABLE_ALT_SVC)
@@ -1385,7 +1421,7 @@ message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
 
 # Clear list and collect SSL backends
 set(_items)
-_add_if("WinSSL"           SSL_ENABLED AND USE_WINDOWS_SSPI)
+_add_if("Schannel"         SSL_ENABLED AND USE_WINDOWS_SSPI)
 _add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
 _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
 _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
