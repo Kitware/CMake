@@ -84,7 +84,7 @@ else()
 endif()
 
 if(CMAKE_CXX_COMPILER_TARGET)
-  list(PREPEND CMAKE_CXX_COPMILER_ID_TEST_FLAGS "-c --target=${CMAKE_CXX_COMPILER_TARGET}")
+  list(PREPEND CMAKE_CXX_COMPILER_ID_TEST_FLAGS "-c --target=${CMAKE_CXX_COMPILER_TARGET}")
 endif()
 
 # Build a small source file to identify the compiler.
