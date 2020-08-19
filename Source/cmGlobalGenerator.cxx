@@ -335,13 +335,13 @@ bool cmGlobalGenerator::CheckTargetsForType() const
   bool failed = false;
   for (const auto& generator : this->LocalGenerators) {
     for (const auto& target : generator->GetGeneratorTargets()) {
-      if (target->GetType() == cmStateEnums::EXECUTABLE &&
-          target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
+      if (target->GetType() == cmStateEnums::EXECUTABLE) {
         std::vector<std::string> const& configs =
           target->Makefile->GetGeneratorConfigs(
             cmMakefile::IncludeEmptyConfig);
         for (std::string const& config : configs) {
-          if (target->GetLinkerLanguage(config) == "Swift") {
+          if (target->IsWin32Executable(config) &&
+              target->GetLinkerLanguage(config) == "Swift") {
             this->GetCMakeInstance()->IssueMessage(
               MessageType::FATAL_ERROR,
               "WIN32_EXECUTABLE property is not supported on Swift "

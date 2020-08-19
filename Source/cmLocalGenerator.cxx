@@ -1520,7 +1520,7 @@ void cmLocalGenerator::GetTargetFlags(
           return;
         }
 
-        if (target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
+        if (target->IsWin32Executable(config)) {
           exeFlags +=
             this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
           exeFlags += " ";

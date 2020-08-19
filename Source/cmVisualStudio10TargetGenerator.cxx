@@ -595,14 +595,24 @@ void cmVisualStudio10TargetGenerator::Generate()
           case cmStateEnums::MODULE_LIBRARY:
             outputType = "Module";
             break;
-          case cmStateEnums::EXECUTABLE:
-            if (this->GeneratorTarget->Target->GetPropertyAsBool(
-                  "WIN32_EXECUTABLE")) {
+          case cmStateEnums::EXECUTABLE: {
+            auto const win32 =
+              this->GeneratorTarget->GetSafeProperty("WIN32_EXECUTABLE");
+            if (win32.find("$<") != std::string::npos) {
+              this->Makefile->IssueMessage(
+                MessageType::FATAL_ERROR,
+                cmStrCat(
+                  "Target \"", this->GeneratorTarget->GetName(),
+                  "\" has a generator expression in its WIN32_EXECUTABLE "
+                  "property. This is not supported on managed executables."));
+              return;
+            }
+            if (cmIsOn(win32)) {
               outputType = "WinExe";
             } else {
               outputType = "Exe";
             }
-            break;
+          } break;
           case cmStateEnums::UTILITY:
           case cmStateEnums::INTERFACE_LIBRARY:
           case cmStateEnums::GLOBAL_TARGET:
@@ -3731,7 +3741,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   }
 
   if (this->MSTools) {
-    if (this->GeneratorTarget->GetPropertyAsBool("WIN32_EXECUTABLE")) {
+    if (this->GeneratorTarget->IsWin32Executable(config)) {
       if (this->GlobalGenerator->TargetsWindowsCE()) {
         linkOptions.AddFlag("SubSystem", "WindowsCE");
         if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {

@@ -1113,7 +1113,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       cmComputeLinkInformation& cli = *pcli;
       std::string linkLanguage = cli.GetLinkLanguage();
 
-      bool isWin32Executable = target->GetPropertyAsBool("WIN32_EXECUTABLE");
+      bool isWin32Executable = target->IsWin32Executable(configName);
 
       // Compute the variable name to lookup standard libraries for this
       // language.

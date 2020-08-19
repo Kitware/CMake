@@ -284,6 +284,9 @@ public:
       or CFBundle on Apple.  */
   bool IsBundleOnApple() const;
 
+  /** Return whether this target is a Win32 executable */
+  bool IsWin32Executable(const std::string& config) const;
+
   /** Get the full name of the target according to the settings in its
       makefile.  */
   std::string GetFullName(const std::string& config,
