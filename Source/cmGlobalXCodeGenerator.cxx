@@ -1020,6 +1020,9 @@ std::string GetSourcecodeValueFromFileExtension(
   } else if (ext == "dylib") {
     keepLastKnownFileType = true;
     sourcecode = "compiled.mach-o.dylib";
+  } else if (ext == "xcassets") {
+    keepLastKnownFileType = true;
+    sourcecode = "folder.assetcatalog";
   }
   // else
   //  {
