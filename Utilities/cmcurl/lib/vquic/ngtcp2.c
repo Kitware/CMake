@@ -150,9 +150,11 @@ quic_from_gtls_level(gnutls_record_encryption_level_t gtls_level)
 }
 #endif
 
-static void qlog_callback(void *user_data, const void *data, size_t datalen)
+static void qlog_callback(void *user_data, uint32_t flags,
+                          const void *data, size_t datalen)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
+  (void)flags;
   if(qs->qlogfd != -1) {
     ssize_t rc = write(qs->qlogfd, data, datalen);
     if(rc == -1) {
@@ -826,9 +828,8 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   if(rv == -1)
     return CURLE_QUIC_CONNECT_ERROR;
 
-  ngtcp2_addr_init(&path.local, (uint8_t *)&qs->local_addr, qs->local_addrlen,
-                   NULL);
-  ngtcp2_addr_init(&path.remote, (uint8_t*)addr, addrlen, NULL);
+  ngtcp2_addr_init(&path.local, &qs->local_addr, qs->local_addrlen, NULL);
+  ngtcp2_addr_init(&path.remote, addr, addrlen, NULL);
 
 #ifdef NGTCP2_PROTO_VER
 #define QUICVER NGTCP2_PROTO_VER
@@ -1744,10 +1745,10 @@ static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
       return CURLE_RECV_ERROR;
     }
 
-    ngtcp2_addr_init(&path.local, (uint8_t *)&qs->local_addr,
+    ngtcp2_addr_init(&path.local, &qs->local_addr,
                      qs->local_addrlen, NULL);
-    ngtcp2_addr_init(&path.remote, (uint8_t *)&remote_addr, remote_addrlen,
-                     NULL);
+    ngtcp2_addr_init(&path.remote, (struct sockaddr *)&remote_addr,
+                     remote_addrlen, NULL);
 
     rv = ngtcp2_conn_read_pkt(qs->qconn, &path, buf, recvd, ts);
     if(rv != 0) {
@@ -1778,7 +1779,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
   nghttp3_vec vec[16];
   ssize_t ndatalen;
 
-  switch(qs->local_addr.ss_family) {
+  switch(qs->local_addr.sa_family) {
   case AF_INET:
     pktlen = NGTCP2_MAX_PKTLEN_IPV4;
     break;
@@ -1834,7 +1835,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
             }
             continue;
           }
-          else if(outlen == NGTCP2_ERR_WRITE_STREAM_MORE) {
+          else if(outlen == NGTCP2_ERR_WRITE_MORE) {
             assert(ndatalen > 0);
             rv = nghttp3_conn_add_write_offset(qs->h3conn, stream_id,
                                                ndatalen);

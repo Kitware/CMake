@@ -2634,10 +2634,6 @@ typedef enum {
   CURLINFO_PROXY_SSL_VERIFYRESULT = CURLINFO_LONG + 47,
   CURLINFO_PROTOCOL         = CURLINFO_LONG   + 48,
   CURLINFO_SCHEME           = CURLINFO_STRING + 49,
-  /* Fill in new entries below here! */
-
-  /* Preferably these would be defined conditionally based on the
-     sizeof curl_off_t being 64-bits */
   CURLINFO_TOTAL_TIME_T     = CURLINFO_OFF_T + 50,
   CURLINFO_NAMELOOKUP_TIME_T = CURLINFO_OFF_T + 51,
   CURLINFO_CONNECT_TIME_T   = CURLINFO_OFF_T + 52,
@@ -2646,8 +2642,9 @@ typedef enum {
   CURLINFO_REDIRECT_TIME_T  = CURLINFO_OFF_T + 55,
   CURLINFO_APPCONNECT_TIME_T = CURLINFO_OFF_T + 56,
   CURLINFO_RETRY_AFTER      = CURLINFO_OFF_T + 57,
+  CURLINFO_EFFECTIVE_METHOD = CURLINFO_STRING + 58,
 
-  CURLINFO_LASTONE          = 57
+  CURLINFO_LASTONE          = 58
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
@@ -2748,6 +2745,7 @@ typedef enum {
   CURLVERSION_FIFTH,
   CURLVERSION_SIXTH,
   CURLVERSION_SEVENTH,
+  CURLVERSION_EIGHTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -2756,7 +2754,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_SEVENTH
+#define CURLVERSION_NOW CURLVERSION_EIGHTH
 
 struct curl_version_info_data {
   CURLversion age;          /* age of the returned struct */
@@ -2802,6 +2800,11 @@ struct curl_version_info_data {
   const char *capath;          /* the built-in default CURLOPT_CAPATH, might
                                   be NULL */
 
+  /* These fields were added in CURLVERSION_EIGHTH */
+  unsigned int zstd_ver_num; /* Numeric Zstd version
+                                  (MAJOR << 24) | (MINOR << 12) | PATCH */
+  const char *zstd_version; /* human readable string. */
+
 };
 typedef struct curl_version_info_data curl_version_info_data;
 
@@ -2836,6 +2839,8 @@ typedef struct curl_version_info_data curl_version_info_data;
 #define CURL_VERSION_BROTLI       (1<<23) /* Brotli features are present. */
 #define CURL_VERSION_ALTSVC       (1<<24) /* Alt-Svc handling built-in */
 #define CURL_VERSION_HTTP3        (1<<25) /* HTTP3 support built-in */
+#define CURL_VERSION_ZSTD         (1<<26) /* zstd features are present */
+#define CURL_VERSION_UNICODE      (1<<27) /* Unicode support on Windows */
 
  /*
  * NAME curl_version_info()
