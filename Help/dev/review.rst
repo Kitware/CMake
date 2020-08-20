@@ -264,6 +264,7 @@ fixed, it is preferable to link to the issue instead.
 
 If relevant, add the first release tag of CMake containing the commit after
 the ``<date>``, i.e., ``commit <shorthash> (<subject>, <date>, <tag>)``.
+Or, use the output of ``git describe --contains <commit>`` as the ``<tag>``.
 
 Alternatively, the full commit ``<hash>`` may be used.
 
