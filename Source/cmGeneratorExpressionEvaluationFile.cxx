@@ -54,16 +54,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     }
   }
 
-  std::string outputFileName = this->OutputFileExpr->Evaluate(
-    lg, config, nullptr, nullptr, nullptr, lang);
+  const std::string outputFileName = this->GetOutputFileName(lg, config, lang);
   const std::string& outputContent =
     inputExpression->Evaluate(lg, config, nullptr, nullptr, nullptr, lang);
-
-  if (cmSystemTools::FileIsFullPath(outputFileName)) {
-    outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
-  } else {
-    outputFileName = this->FixRelativePath(outputFileName, PathForOutput, lg);
-  }
 
   auto it = outputFiles.find(outputFileName);
 
@@ -101,8 +94,7 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
   gg->GetEnabledLanguages(enabledLanguages);
 
   for (std::string const& le : enabledLanguages) {
-    std::string name = this->OutputFileExpr->Evaluate(lg, config, nullptr,
-                                                      nullptr, nullptr, le);
+    std::string const name = this->GetOutputFileName(lg, config, le);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(
       name, false, cmSourceFileLocationKind::Known);
     // Tell TraceDependencies that the file is not expected to exist
@@ -125,12 +117,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
   if (this->InputIsContent) {
     inputContent = this->Input;
   } else {
-    std::string inputFileName = this->Input;
-    if (cmSystemTools::FileIsFullPath(inputFileName)) {
-      inputFileName = cmSystemTools::CollapseFullPath(inputFileName);
-    } else {
-      inputFileName = this->FixRelativePath(inputFileName, PathForInput, lg);
-    }
+    const std::string inputFileName = this->GetInputFileName(lg);
     lg->GetMakefile()->AddCMakeDependFile(inputFileName);
     cmSystemTools::GetPermissions(inputFileName.c_str(), perm);
     cmsys::ifstream fin(inputFileName.c_str());
@@ -172,6 +159,35 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
       }
     }
   }
+}
+
+std::string cmGeneratorExpressionEvaluationFile::GetInputFileName(
+  cmLocalGenerator* lg)
+{
+  std::string inputFileName = this->Input;
+
+  if (cmSystemTools::FileIsFullPath(inputFileName)) {
+    inputFileName = cmSystemTools::CollapseFullPath(inputFileName);
+  } else {
+    inputFileName = this->FixRelativePath(inputFileName, PathForInput, lg);
+  }
+
+  return inputFileName;
+}
+
+std::string cmGeneratorExpressionEvaluationFile::GetOutputFileName(
+  cmLocalGenerator* lg, const std::string& config, const std::string& lang)
+{
+  std::string outputFileName = this->OutputFileExpr->Evaluate(
+    lg, config, nullptr, nullptr, nullptr, lang);
+
+  if (cmSystemTools::FileIsFullPath(outputFileName)) {
+    outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
+  } else {
+    outputFileName = this->FixRelativePath(outputFileName, PathForOutput, lg);
+  }
+
+  return outputFileName;
 }
 
 std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(
