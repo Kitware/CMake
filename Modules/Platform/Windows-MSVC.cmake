@@ -364,11 +364,6 @@ macro(__windows_compiler_msvc lang)
     set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
     set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
 
-    if(CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.4.0)
-      set(CMAKE_${lang}_COMPILE_OPTIONS_TARGET "-target ")
-    else()
-      set(CMAKE_${lang}_COMPILE_OPTIONS_TARGET "--target=")
-    endif()
     # '-flto=thin' available since Clang 3.9 and Xcode 8
     # * http://clang.llvm.org/docs/ThinLTO.html#clang-llvm
     # * https://trac.macports.org/wiki/XcodeVersionInfo
