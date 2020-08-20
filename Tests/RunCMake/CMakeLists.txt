@@ -366,6 +366,15 @@ function(add_RunCMake_test_try_compile)
       unset(CMAKE_CXX_STANDARD_DEFAULT)
     endif()
   endif()
+  if(CMAKE_VERSION VERSION_LESS 3.18.20200813 AND "x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC")
+    # Older CMake versions do not know about MSVC language standards.
+    # Approximate our logic from MSVC-C.cmake.
+    if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 19.27)
+      set(CMAKE_C_STANDARD_DEFAULT 99)
+    else()
+      set(CMAKE_C_STANDARD_DEFAULT "")
+    endif()
+  endif()
   foreach(var
       CMAKE_SYSTEM_NAME
       CMAKE_C_COMPILER_ID
