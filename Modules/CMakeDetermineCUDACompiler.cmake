@@ -189,6 +189,10 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     set(nvcc_test_flags "--keep --keep-dir tmp")
     if(CMAKE_CUDA_HOST_COMPILER)
       string(APPEND nvcc_test_flags " -ccbin=\"${CMAKE_CUDA_HOST_COMPILER}\"")
+
+      # If the user has specified a host compiler we should fail instead of trying without.
+      # Succeeding detection without may result in confusing errors later on, see #21076.
+      set(CMAKE_CUDA_COMPILER_ID_REQUIRE_SUCCESS ON)
     endif()
   elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     if(WIN32)
