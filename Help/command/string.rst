@@ -43,6 +43,19 @@ Synopsis
     string(`TIMESTAMP`_ <out-var> [<format string>] [UTC])
     string(`UUID`_ <out-var> ...)
 
+  `JSON`_
+    string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+           {`GET`_ | `TYPE`_ | :ref:`LENGTH <JSONLENGTH>` | `REMOVE`_}
+           <json-string> <member|index> [<member|index> ...])
+    string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+           `MEMBER`_ <json-string>
+           [<member|index> ...] <index>)
+    string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+           `SET`_ <json-string>
+           <member|index> [<member|index> ...] <value>)
+    string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+           `EQUAL`_ <json-string1> <json-string2>)
+
 Search and Replace
 ^^^^^^^^^^^^^^^^^^
 
@@ -470,3 +483,93 @@ A UUID has the format ``xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx``
 where each ``x`` represents a lower case hexadecimal character.
 Where required, an uppercase representation can be requested
 with the optional ``UPPER`` flag.
+
+JSON
+^^^^
+
+.. _JSON:
+
+Functionality for querying a JSON string
+
+.. _GET:
+.. code-block:: cmake
+
+  string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
+         GET <json-string> <member|index> [<member|index> ...])
+
+Get an element from ``<json-string>`` at the location given
+by the list of ``<member|index>`` arguments.
+Array and object elements will be returned as a JSON string.
+Boolean elements will be returned as ``ON`` or ``OFF``.
+Null elements will be returned as an empty string.
+Number and string types will be returned as strings.
+
+.. _TYPE:
+.. code-block:: cmake
+
+  string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
+         TYPE <json-string> <member|index> [<member|index> ...])
+
+Get the type of an element in ``<json-string>`` at the location
+given by the list of ``<member|index>`` arguments. The ``<out-var>``
+will be set to one of ``NULL``, ``NUMBER``, ``STRING``, ``BOOLEAN``,
+``ARRAY``, or ``OBJECT``.
+
+.. _MEMBER:
+.. code-block:: cmake
+
+  string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+         MEMBER <json-string>
+         [<member|index> ...] <index>)
+
+Get the name of the ``<index>``:th member in ``<json-string>`` at the location
+given by the list of ``<member|index>`` arguments.
+Requires an element of object type.
+
+.. _JSONLENGTH:
+.. code-block:: cmake
+
+  string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
+         LENGTH <json-string> <member|index> [<member|index> ...])
+
+Get the length of an element in ``<json-string>`` at the location
+given by the list of ``<member|index>`` arguments.
+Required an element of array or object type.
+
+.. _REMOVE:
+.. code-block:: cmake
+
+  string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
+         REMOVE <json-string> <member|index> [<member|index> ...])
+
+Remove an element from ``<json-string>`` at the location
+given by the list of ``<member|index>`` arguments. The JSON string
+without the removed element will we written in ``<out-var>``.
+
+.. _SET:
+.. code-block:: cmake
+
+  string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
+         SET <json-string> <member|index> [<member|index> ...] <value>)
+
+Set an element in ``<json-string>`` at the location
+given by the list of ``<member|index>`` arguments to ``<value>``.
+The contents of ``<value>`` should be valid JSON.
+
+.. _EQUAL:
+.. code-block:: cmake
+
+  string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+         EQUAL <json-string1> <json-string2>)
+
+Compare the two JSON objects given by ``<json-string1>`` and ``<json-string2>``
+for equality
+
+
+If the optional ``ERROR_VARIABLE`` argument is given errors will be
+reported in ``<error-variable>``. If no error occurs the ``<error-variable>``
+will be set to ``NOTFOUND``. If ``ERROR_VARIABLE`` is not set a CMake error
+will be issued.
+When an error occurs the ``<out-var>`` will be set to
+``<member|index>-[<member|index>...]-NOTFOUND`` with the path elements up to
+the point where the error occurred.
