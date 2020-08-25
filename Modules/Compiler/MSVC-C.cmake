@@ -51,6 +51,10 @@ macro(cmake_record_c_compile_features)
     list(APPEND CMAKE_C_COMPILE_FEATURES c_restrict)
     list(APPEND CMAKE_C99_COMPILE_FEATURES c_restrict)
   endif()
+  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.28)
+    list(APPEND CMAKE_C_COMPILE_FEATURES c_static_assert)
+    list(APPEND CMAKE_C11_COMPILE_FEATURES c_static_assert)
+  endif()
   set(_result 0) # expected by cmake_determine_compile_features
 endmacro()
 
