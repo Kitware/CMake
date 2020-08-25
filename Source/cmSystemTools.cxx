@@ -885,8 +885,10 @@ void cmSystemTools::InitializeLibUV()
 namespace {
 bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname)
 {
+  // Use MOVEFILE_REPLACE_EXISTING to replace an existing destination file.
+  // Use MOVEFILE_WRITE_THROUGH to flush the change to disk before returning.
   return MoveFileExW(oldname.c_str(), newname.c_str(),
-                     MOVEFILE_REPLACE_EXISTING);
+                     MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
 }
 }
 #endif
