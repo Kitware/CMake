@@ -1875,8 +1875,9 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
   if (this->Makefile->IsOn("APPLE") && this->EmitUniversalBinaryFlags) {
     std::vector<std::string> archs;
     target->GetAppleArchs(config, archs);
-    if (!archs.empty() && !lang.empty() &&
-        (lang[0] == 'C' || lang[0] == 'F' || lang[0] == 'O')) {
+    if (!archs.empty() &&
+        (lang == "C" || lang == "CXX" || lang == "OBJ" || lang == "OBJCXX" ||
+         cmHasLiteralPrefix(lang, "ASM"))) {
       for (std::string const& arch : archs) {
         if (filterArch.empty() || filterArch == arch) {
           flags += " -arch ";
