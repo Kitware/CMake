@@ -689,7 +689,8 @@ int cmExtraCodeBlocksGenerator::GetCBTargetType(cmGeneratorTarget* target)
 {
   switch (target->GetType()) {
     case cmStateEnums::EXECUTABLE:
-      if ((target->GetPropertyAsBool("WIN32_EXECUTABLE")) ||
+      if ((target->IsWin32Executable(
+            target->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"))) ||
           (target->GetPropertyAsBool("MACOSX_BUNDLE"))) {
         return 0;
       }

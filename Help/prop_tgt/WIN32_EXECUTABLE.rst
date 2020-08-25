@@ -11,3 +11,7 @@ configure use of the Microsoft Foundation Classes (MFC) for WinMain
 executables.  This property is initialized by the value of the
 :variable:`CMAKE_WIN32_EXECUTABLE` variable if it is set when
 a target is created.
+
+This property supports
+:manual:`generator expressions <cmake-generator-expressions(7)>`, except if the
+target is managed (contains C# code.)

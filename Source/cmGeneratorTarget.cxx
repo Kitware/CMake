@@ -2266,6 +2266,12 @@ bool cmGeneratorTarget::IsBundleOnApple() const
     this->IsCFBundleOnApple();
 }
 
+bool cmGeneratorTarget::IsWin32Executable(const std::string& config) const
+{
+  return cmIsOn(cmGeneratorExpression::Evaluate(
+    this->GetSafeProperty("WIN32_EXECUTABLE"), this->LocalGenerator, config));
+}
+
 std::string cmGeneratorTarget::GetCFBundleDirectory(
   const std::string& config, BundleDirectoryLevel level) const
 {
