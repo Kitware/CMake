@@ -15,13 +15,14 @@
 #include "cmGeneratorExpression.h"
 #include "cmPolicies.h"
 
+class cmGeneratorTarget;
 class cmLocalGenerator;
 
 class cmGeneratorExpressionEvaluationFile
 {
 public:
   cmGeneratorExpressionEvaluationFile(
-    std::string input,
+    std::string input, std::string target,
     std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
     std::unique_ptr<cmCompiledGeneratorExpression> condition,
     bool inputIsContent, cmPolicies::PolicyStatus policyStatusCMP0070);
@@ -40,6 +41,7 @@ private:
 
   std::string GetInputFileName(cmLocalGenerator* lg);
   std::string GetOutputFileName(cmLocalGenerator* lg,
+                                cmGeneratorTarget* target,
                                 const std::string& config,
                                 const std::string& lang);
   enum PathRole
@@ -52,6 +54,7 @@ private:
 
 private:
   const std::string Input;
+  const std::string Target;
   const std::unique_ptr<cmCompiledGeneratorExpression> OutputFileExpr;
   const std::unique_ptr<cmCompiledGeneratorExpression> Condition;
   std::vector<std::string> Files;

@@ -2240,6 +2240,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
 }
 
 void AddEvaluationFile(const std::string& inputName,
+                       const std::string& targetName,
                        const std::string& outputExpr,
                        const std::string& condition, bool inputIsContent,
                        cmExecutionStatus& status)
@@ -2255,7 +2256,8 @@ void AddEvaluationFile(const std::string& inputName,
     conditionGe.Parse(condition);
 
   status.GetMakefile().AddEvaluationFile(
-    inputName, std::move(outputCge), std::move(conditionCge), inputIsContent);
+    inputName, targetName, std::move(outputCge), std::move(conditionCge),
+    inputIsContent);
 }
 
 bool HandleGenerateCommand(std::vector<std::string> const& args,
@@ -2269,23 +2271,36 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     status.SetError("Incorrect arguments to GENERATE subcommand.");
     return false;
   }
+
   std::string condition;
-  if (args.size() > 5) {
-    if (args[5] != "CONDITION") {
+  std::string target;
+
+  for (std::size_t i = 5; i < args.size();) {
+    const std::string& arg = args[i++];
+
+    if (args.size() - i == 0) {
       status.SetError("Incorrect arguments to GENERATE subcommand.");
       return false;
     }
-    if (args.size() != 7) {
-      status.SetError("Incorrect arguments to GENERATE subcommand.");
+
+    const std::string& value = args[i++];
+
+    if (value.empty()) {
+      status.SetError(
+        arg + " of sub-command GENERATE must not be empty if specified.");
       return false;
     }
-    condition = args[6];
-    if (condition.empty()) {
-      status.SetError("CONDITION of sub-command GENERATE must not be empty if "
-                      "specified.");
+
+    if (arg == "CONDITION") {
+      condition = value;
+    } else if (arg == "TARGET") {
+      target = value;
+    } else {
+      status.SetError("Unknown argument to GENERATE subcommand.");
       return false;
     }
   }
+
   std::string output = args[2];
   const bool inputIsContent = args[3] != "INPUT";
   if (inputIsContent && args[3] != "CONTENT") {
@@ -2294,7 +2309,7 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
   }
   std::string input = args[4];
 
-  AddEvaluationFile(input, output, condition, inputIsContent, status);
+  AddEvaluationFile(input, target, output, condition, inputIsContent, status);
   return true;
 }
 

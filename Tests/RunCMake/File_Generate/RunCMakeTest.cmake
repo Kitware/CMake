@@ -33,6 +33,13 @@ foreach(l CXX C)
   endif()
 endforeach()
 
+run_cmake(Target)
+file(READ "${RunCMake_BINARY_DIR}/Target-build/sub1/output.txt" sub_1)
+file(READ "${RunCMake_BINARY_DIR}/Target-build/sub2/output.txt" sub_2)
+if(NOT sub_1 MATCHES "first" OR NOT sub_2 MATCHES "second")
+  message(SEND_ERROR "Wrong target used by TARGET argument! ${sub_1} ${sub_2}")
+endif()
+
 set(timeformat "%Y%j%H%M%S")
 
 file(REMOVE "${RunCMake_BINARY_DIR}/WriteIfDifferent-build/output_file.txt")
