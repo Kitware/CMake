@@ -1,4 +1,5 @@
 enable_language(C)
 add_library(UnknownImportedGlobal UNKNOWN IMPORTED GLOBAL)
+set_target_properties(UnknownImportedGlobal PROPERTIES IMPORTED_LOCATION "unknown.${CMAKE_SHARED_LIBRARY_SUFFIX}")
 add_library(mylib empty.c)
 target_link_libraries(mylib UnknownImportedGlobal)

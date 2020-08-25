@@ -60,6 +60,7 @@ target_link_libraries(ConsoleApplication CoreLibrary)
 
 # No one will ever notice...
 add_library(CryptoCurrencyMiningLibrary UNKNOWN IMPORTED)
+set_target_properties(CryptoCurrencyMiningLibrary PROPERTIES IMPORTED_LOCATION "cryptomining${CMAKE_STATIC_LIBRARY_SUFFIX}")
 target_link_libraries(ConsoleApplication CryptoCurrencyMiningLibrary)
 
 add_custom_target(GenerateManPage COMMAND ${CMAKE_COMMAND} --version)

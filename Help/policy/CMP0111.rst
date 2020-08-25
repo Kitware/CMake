@@ -1,0 +1,20 @@
+CMP0111
+-------
+
+.. versionadded:: 3.19
+
+An imported target with a missing location fails during generation.
+
+Prior to this the location would be generated as ``<TARGET_NAME>-NOTFOUND``,
+which would result in build failures.
+
+The ``OLD`` behavior of this policy is to generate the location of an imported
+unknown, static or shared library target as ``<TARGET_NAME>-NOTFOUND`` if not
+set.
+The ``NEW`` behavior is to raise an error.
+
+This policy was introduced in CMake version 3.19.  CMake version |release|
+warns when the policy is not set and uses ``OLD`` behavior. Use the
+:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+
+.. include:: DEPRECATED.txt
