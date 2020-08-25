@@ -885,6 +885,9 @@ void cmSystemTools::InitializeLibUV()
 namespace {
 bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname)
 {
+  // Not only ignore any previous error, but clear any memory of it.
+  SetLastError(0);
+
   // Use MOVEFILE_REPLACE_EXISTING to replace an existing destination file.
   // Use MOVEFILE_WRITE_THROUGH to flush the change to disk before returning.
   return MoveFileExW(oldname.c_str(), newname.c_str(),
@@ -910,16 +913,31 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
      Try multiple times since we may be racing against another process
      creating/opening the destination file just before our MoveFileEx.  */
   WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
+  DWORD move_last_error = 0;
   while (!cmMoveFile(oldname_wstr, newname_wstr) && --retry.Count) {
-    DWORD last_error = GetLastError();
+    move_last_error = GetLastError();
+
+    // There was no error ==> the operation is not yet complete.
+    if (move_last_error == NO_ERROR) {
+      break;
+    }
+
     // Try again only if failure was due to access/sharing permissions.
-    if (last_error != ERROR_ACCESS_DENIED &&
-        last_error != ERROR_SHARING_VIOLATION) {
+    // Most often ERROR_ACCESS_DENIED (a.k.a. I/O error) for a directory, and
+    // ERROR_SHARING_VIOLATION for a file, are caused by one of the following:
+    // 1) Anti-Virus Software
+    // 2) Windows Search Indexer
+    // 3) Windows Explorer has an associated directory already opened.
+    if (move_last_error != ERROR_ACCESS_DENIED &&
+        move_last_error != ERROR_SHARING_VIOLATION) {
       return false;
     }
+
     DWORD const attrs = GetFileAttributesW(newname_wstr.c_str());
     if ((attrs != INVALID_FILE_ATTRIBUTES) &&
-        (attrs & FILE_ATTRIBUTE_READONLY)) {
+        (attrs & FILE_ATTRIBUTE_READONLY) &&
+        // FILE_ATTRIBUTE_READONLY is not honored on directories.
+        !(attrs & FILE_ATTRIBUTE_DIRECTORY)) {
       // Remove the read-only attribute from the destination file.
       SetFileAttributesW(newname_wstr.c_str(),
                          attrs & ~FILE_ATTRIBUTE_READONLY);
@@ -928,6 +946,12 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
       cmSystemTools::Delay(retry.Delay);
     }
   }
+
+  // If we were successful, then there was no error.
+  if (retry.Count > 0) {
+    move_last_error = 0;
+  }
+  SetLastError(move_last_error);
   return retry.Count > 0;
 #else
   /* On UNIX we have an OS-provided call to do this atomically.  */
