@@ -265,8 +265,9 @@ Other
   environment variable to customize colors.
 
 * The :manual:`Compile Features <cmake-compile-features(7)>` functionality
-  is now aware of the availability of C11 features in MSVC 19.27 and above,
-  including support for the ``c_restrict`` feature and the ``-std:c11`` flag.
+  is now aware of the availability of C11 features in MSVC 19.27 and 19.28,
+  including support for the ``c_restrict``, ``c_static_assert`` features and
+  the ``-std:c11`` flag.
 
 Deprecated and Removed Features
 ===============================
@@ -353,4 +354,10 @@ Changes made since CMake 3.18.0 include the following.
   This restores compatibility with behavior of CMake 3.15 and below.
 
 * The :manual:`Compile Features <cmake-compile-features(7)>` functionality
-  was updated for MSVC 19.27 as mentioned above.
+  was updated for MSVC 19.27 as mentioned above (``c_restrict``).
+
+3.18.3
+------
+
+* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
+  was updated for MSVC 19.28 as mentioned above (``c_static_assert``).
