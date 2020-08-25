@@ -455,6 +455,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->state.conn_cache = &data->share->conn_cache;
   else
     data->state.conn_cache = &multi->conn_cache;
+  data->state.lastconnect_id = -1;
 
 #ifdef USE_LIBPSL
   /* Do the same for PSL. */
@@ -677,16 +678,36 @@ static CURLcode multi_done(struct Curl_easy *data,
     CONNCACHE_UNLOCK(data);
     if(Curl_conncache_return_conn(data, conn)) {
       /* remember the most recently used connection */
-      data->state.lastconnect = conn;
+      data->state.lastconnect_id = conn->connection_id;
       infof(data, "%s\n", buffer);
     }
     else
-      data->state.lastconnect = NULL;
+      data->state.lastconnect_id = -1;
   }
 
   Curl_safefree(data->state.buffer);
   Curl_free_request_state(data);
   return result;
+}
+
+static int close_connect_only(struct connectdata *conn, void *param)
+{
+  struct Curl_easy *data = param;
+
+  if(data->state.lastconnect_id != conn->connection_id)
+    return 0;
+
+  if(conn->data != data)
+    return 1;
+  conn->data = NULL;
+
+  if(!conn->bits.connect_only)
+    return 1;
+
+  connclose(conn, "Removing connect-only easy handle");
+  conn->bits.connect_only = FALSE;
+
+  return 1;
 }
 
 CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
@@ -776,10 +797,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
      multi_done() as that may actually call Curl_expire that uses this */
   Curl_llist_destroy(&data->state.timeoutlist, NULL);
 
-  /* as this was using a shared connection cache we clear the pointer to that
-     since we're not part of that multi handle anymore */
-  data->state.conn_cache = NULL;
-
   /* change state without using multistate(), only to make singlesocket() do
      what we want */
   data->mstate = CURLM_STATE_COMPLETED;
@@ -789,11 +806,21 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   /* Remove the association between the connection and the handle */
   Curl_detach_connnection(data);
 
+  if(data->state.lastconnect_id != -1) {
+    /* Mark any connect-only connection for closure */
+    Curl_conncache_foreach(data, data->state.conn_cache,
+                           data, &close_connect_only);
+  }
+
 #ifdef USE_LIBPSL
   /* Remove the PSL association. */
   if(data->psl == &multi->psl)
     data->psl = NULL;
 #endif
+
+  /* as this was using a shared connection cache we clear the pointer to that
+     since we're not part of that multi handle anymore */
+  data->state.conn_cache = NULL;
 
   data->multi = NULL; /* clear the association to this multi handle */
 
@@ -958,19 +985,6 @@ static int multi_getsock(struct Curl_easy *data,
 
   switch(data->mstate) {
   default:
-#if 0 /* switch back on these cases to get the compiler to check for all enums
-         to be present */
-  case CURLM_STATE_TOOFAST:  /* returns 0, so will not select. */
-  case CURLM_STATE_COMPLETED:
-  case CURLM_STATE_MSGSENT:
-  case CURLM_STATE_INIT:
-  case CURLM_STATE_CONNECT:
-  case CURLM_STATE_WAITDO:
-  case CURLM_STATE_DONE:
-  case CURLM_STATE_LAST:
-    /* this will get called with CURLM_STATE_COMPLETED when a handle is
-       removed */
-#endif
     return 0;
 
   case CURLM_STATE_WAITRESOLVE:
@@ -1255,7 +1269,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
         sleep_ms = timeout_ms;
       /* when there are no easy handles in the multi, this holds a -1
          timeout */
-      else if((sleep_ms < 0) && extrawait)
+      else if(sleep_ms < 0)
         sleep_ms = timeout_ms;
       Curl_wait_ms(sleep_ms);
     }
@@ -1808,7 +1822,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             multistate(data, CURLM_STATE_SENDPROTOCONNECT);
           }
         }
-      else if(result)
+      else
         stream_error = TRUE;
       break;
 #endif
@@ -1858,7 +1872,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(data, CURLM_STATE_DO);
         rc = CURLM_CALL_MULTI_PERFORM;
       }
-      else if(result) {
+      else {
         /* failure detected */
         Curl_posttransfer(data);
         multi_done(data, result, TRUE);
@@ -2962,9 +2976,7 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
       long streams = va_arg(param, long);
       if(streams < 1)
         streams = 100;
-      multi->max_concurrent_streams =
-        (streams > (long)INITIAL_MAX_CONCURRENT_STREAMS)?
-        INITIAL_MAX_CONCURRENT_STREAMS : (unsigned int)streams;
+      multi->max_concurrent_streams = curlx_sltoui(streams);
     }
     break;
   default:
