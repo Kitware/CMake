@@ -1223,9 +1223,13 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
 
       if (this->Moc.ExecutableTarget != nullptr) {
         dependencies.push_back(this->Moc.ExecutableTarget->Target->GetName());
+      } else if (!this->Moc.Executable.empty()) {
+        dependencies.push_back(this->Moc.Executable);
       }
       if (this->Uic.ExecutableTarget != nullptr) {
         dependencies.push_back(this->Uic.ExecutableTarget->Target->GetName());
+      } else if (!this->Uic.Executable.empty()) {
+        dependencies.push_back(this->Uic.Executable);
       }
 
       // Create the custom command that outputs the timestamp file.
