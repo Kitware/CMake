@@ -898,28 +898,29 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
 #  ifndef INVALID_FILE_ATTRIBUTES
 #    define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
 #  endif
+  std::wstring const oldname_wstr =
+    SystemTools::ConvertToWindowsExtendedPath(oldname);
+  std::wstring const newname_wstr =
+    SystemTools::ConvertToWindowsExtendedPath(newname);
+
   /* Windows MoveFileEx may not replace read-only or in-use files.  If it
      fails then remove the read-only attribute from any existing destination.
      Try multiple times since we may be racing against another process
      creating/opening the destination file just before our MoveFileEx.  */
   WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
-  while (!cmMoveFile(SystemTools::ConvertToWindowsExtendedPath(oldname),
-                     SystemTools::ConvertToWindowsExtendedPath(newname)) &&
-         --retry.Count) {
+  while (!cmMoveFile(oldname_wstr, newname_wstr) && --retry.Count) {
     DWORD last_error = GetLastError();
     // Try again only if failure was due to access/sharing permissions.
     if (last_error != ERROR_ACCESS_DENIED &&
         last_error != ERROR_SHARING_VIOLATION) {
       return false;
     }
-    DWORD attrs = GetFileAttributesW(
-      SystemTools::ConvertToWindowsExtendedPath(newname).c_str());
+    DWORD const attrs = GetFileAttributesW(newname_wstr.c_str());
     if ((attrs != INVALID_FILE_ATTRIBUTES) &&
         (attrs & FILE_ATTRIBUTE_READONLY)) {
       // Remove the read-only attribute from the destination file.
-      SetFileAttributesW(
-        SystemTools::ConvertToWindowsExtendedPath(newname).c_str(),
-        attrs & ~FILE_ATTRIBUTE_READONLY);
+      SetFileAttributesW(newname_wstr.c_str(),
+                         attrs & ~FILE_ATTRIBUTE_READONLY);
     } else {
       // The file may be temporarily in use so wait a bit.
       cmSystemTools::Delay(retry.Delay);
