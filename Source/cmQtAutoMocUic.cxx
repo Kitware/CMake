@@ -184,6 +184,7 @@ public:
     std::string DepFile;
     std::string DepFileRuleName;
     std::vector<std::string> HeaderExtensions;
+    std::vector<std::string> ListFiles;
   };
 
   /** Shared common variables.  */
@@ -2176,7 +2177,7 @@ void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
     return dependenciesFromDepFile(f.c_str());
   };
 
-  std::vector<std::string> dependencies;
+  std::vector<std::string> dependencies = BaseConst().ListFiles;
   ParseCacheT& parseCache = BaseEval().ParseCache;
   auto processMappingEntry = [&](const MappingMapT::value_type& m) {
     auto cacheEntry = parseCache.GetOrInsert(m.first);
@@ -2258,6 +2259,7 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
       !info.GetString("DEP_FILE_RULE_NAME", BaseConst_.DepFileRuleName,
                       false) ||
       !info.GetStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
+      !info.GetArray("CMAKE_LIST_FILES", BaseConst_.ListFiles, true) ||
       !info.GetArray("HEADER_EXTENSIONS", BaseConst_.HeaderExtensions, true) ||
       !info.GetString("QT_MOC_EXECUTABLE", MocConst_.Executable, false) ||
       !info.GetString("QT_UIC_EXECUTABLE", UicConst_.Executable, false)) {
