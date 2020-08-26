@@ -28,6 +28,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
+#include "cmCMakePath.h"
 #include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
 #include "cmFSPermissions.h"
@@ -1232,6 +1233,50 @@ bool HandleInstallCommand(std::vector<std::string> const& args,
 {
   cmFileInstaller installer(status);
   return installer.Run(args);
+}
+
+bool HandleRealPathCommand(std::vector<std::string> const& args,
+                           cmExecutionStatus& status)
+{
+  if (args.size() < 3) {
+    status.SetError("REAL_PATH requires a path and an output variable");
+    return false;
+  }
+
+  struct Arguments
+  {
+    std::string BaseDirectory;
+  };
+  static auto const parser = cmArgumentParser<Arguments>{}.Bind(
+    "BASE_DIRECTORY"_s, &Arguments::BaseDirectory);
+
+  std::vector<std::string> unparsedArguments;
+  std::vector<std::string> keywordsMissingValue;
+  std::vector<std::string> parsedKeywords;
+  auto arguments =
+    parser.Parse(cmMakeRange(args).advance(3), &unparsedArguments,
+                 &keywordsMissingValue, &parsedKeywords);
+
+  if (!unparsedArguments.empty()) {
+    status.SetError("REAL_PATH called with unexpected arguments");
+    return false;
+  }
+  if (!keywordsMissingValue.empty()) {
+    status.SetError("BASE_DIRECTORY requires a value");
+    return false;
+  }
+
+  if (parsedKeywords.empty()) {
+    arguments.BaseDirectory = status.GetMakefile().GetCurrentSourceDirectory();
+  }
+
+  cmCMakePath path(args[1]);
+  path = path.Absolute(arguments.BaseDirectory).Normal();
+  auto realPath = cmSystemTools::GetRealPath(path.GenericString());
+
+  status.GetMakefile().AddDefinition(args[2], realPath);
+
+  return true;
 }
 
 bool HandleRelativePathCommand(std::vector<std::string> const& args,
@@ -3360,6 +3405,7 @@ bool cmFileCommand(std::vector<std::string> const& args,
     { "RPATH_CHECK"_s, HandleRPathCheckCommand },
     { "RPATH_REMOVE"_s, HandleRPathRemoveCommand },
     { "READ_ELF"_s, HandleReadElfCommand },
+    { "REAL_PATH"_s, HandleRealPathCommand },
     { "RELATIVE_PATH"_s, HandleRelativePathCommand },
     { "TO_CMAKE_PATH"_s, HandleCMakePathCommand },
     { "TO_NATIVE_PATH"_s, HandleNativePathCommand },

@@ -1,0 +1,2 @@
+CMake Error at REAL_PATH-no-base-dir.cmake:[0-9]+ \(file\):
+  file BASE_DIRECTORY requires a value
