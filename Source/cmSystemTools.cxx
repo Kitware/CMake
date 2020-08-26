@@ -751,6 +751,57 @@ std::string cmSystemTools::FileExistsInParentDirectories(
 #ifdef _WIN32
 namespace {
 
+/* Helper class to save and restore the specified file (or directory)
+   attribute bits. Instantiate this class as an automatic variable on the
+   stack. Its constructor saves a copy of the file attributes, and then its
+   destructor restores the original attribute settings.  */
+class SaveRestoreFileAttributes
+{
+public:
+  SaveRestoreFileAttributes(std::wstring const& path,
+                            uint32_t file_attrs_to_set);
+  ~SaveRestoreFileAttributes();
+
+  SaveRestoreFileAttributes(SaveRestoreFileAttributes const&) = delete;
+  SaveRestoreFileAttributes& operator=(SaveRestoreFileAttributes const&) =
+    delete;
+
+  void SetPath(std::wstring const& path) { path_ = path; }
+
+private:
+  std::wstring path_;
+  uint32_t original_attr_bits_;
+};
+
+SaveRestoreFileAttributes::SaveRestoreFileAttributes(
+  std::wstring const& path, uint32_t file_attrs_to_set)
+  : path_(path)
+  , original_attr_bits_(0)
+{
+  // Set the specified attributes for the source file/directory.
+  original_attr_bits_ = GetFileAttributesW(path_.c_str());
+  if ((INVALID_FILE_ATTRIBUTES != original_attr_bits_) &&
+      ((file_attrs_to_set & original_attr_bits_) != file_attrs_to_set)) {
+    SetFileAttributesW(path_.c_str(), original_attr_bits_ | file_attrs_to_set);
+  }
+}
+
+// We set attribute bits.  Now we need to restore their original state.
+SaveRestoreFileAttributes::~SaveRestoreFileAttributes()
+{
+  DWORD last_error = GetLastError();
+  // Verify or restore the original attributes.
+  const DWORD source_attr_bits = GetFileAttributesW(path_.c_str());
+  if (INVALID_FILE_ATTRIBUTES != source_attr_bits) {
+    if (original_attr_bits_ != source_attr_bits) {
+      // The file still exists, and its attributes aren't our saved values.
+      // Time to restore them.
+      SetFileAttributesW(path_.c_str(), original_attr_bits_);
+    }
+  }
+  SetLastError(last_error);
+}
+
 struct WindowsFileRetryInit
 {
   cmSystemTools::WindowsFileRetry Retry;
@@ -924,6 +975,12 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
      Try multiple times since we may be racing against another process
      creating/opening the destination file just before our MoveFileEx.  */
   WindowsFileRetry retry = GetWindowsRetry(oldname_wstr);
+
+  // Use RAII to set the attribute bit blocking Microsoft Search Indexing,
+  // and restore the previous value upon return.
+  SaveRestoreFileAttributes save_restore_file_attributes(
+    oldname_wstr, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
+
   DWORD move_last_error = 0;
   while (!cmMoveFile(oldname_wstr, newname_wstr) && --retry.Count) {
     move_last_error = GetLastError();
@@ -961,6 +1018,8 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
   // If we were successful, then there was no error.
   if (retry.Count > 0) {
     move_last_error = 0;
+    // Restore the attributes on the new name.
+    save_restore_file_attributes.SetPath(newname_wstr);
   }
   SetLastError(move_last_error);
   return retry.Count > 0;
