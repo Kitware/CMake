@@ -809,6 +809,17 @@ WindowsFileRetryInit InitWindowsDirectoryRetry()
   return dirInit;
 }
 
+cmSystemTools::WindowsFileRetry GetWindowsRetry(std::wstring const& path)
+{
+  // If we are performing a directory operation, then try and get the
+  // appropriate timing info.
+  DWORD const attrs = GetFileAttributesW(path.c_str());
+  if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY)) {
+    return cmSystemTools::GetWindowsDirectoryRetry();
+  }
+  return cmSystemTools::GetWindowsFileRetry();
+}
+
 } // end of anonymous namespace
 
 cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsFileRetry()
@@ -912,7 +923,7 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
      fails then remove the read-only attribute from any existing destination.
      Try multiple times since we may be racing against another process
      creating/opening the destination file just before our MoveFileEx.  */
-  WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
+  WindowsFileRetry retry = GetWindowsRetry(oldname_wstr);
   DWORD move_last_error = 0;
   while (!cmMoveFile(oldname_wstr, newname_wstr) && --retry.Count) {
     move_last_error = GetLastError();
