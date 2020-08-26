@@ -20,10 +20,6 @@ ExternalProject_Add(multiCommand
           COMMAND   "${CMAKE_COMMAND}" -E echo "install 2"
 )
 
-# Workaround for issue 17229 (missing dependency between update and patch steps)
-ExternalProject_Add_StepTargets(multiCommand NO_DEPENDS update)
-ExternalProject_Add_StepDependencies(multiCommand patch multiCommand-update)
-
 # Force all steps to be re-run by removing timestamps from any previous run
 ExternalProject_Get_Property(multiCommand STAMP_DIR)
 file(REMOVE_RECURSE "${STAMP_DIR}")
