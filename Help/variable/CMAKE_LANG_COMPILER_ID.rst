@@ -26,6 +26,7 @@ include:
   IAR = IAR Systems (iar.com)
   Intel = Intel Compiler (intel.com)
   MSVC = Microsoft Visual Studio (microsoft.com)
+  NVHPC = NVIDIA HPC SDK Compiler (nvidia.com)
   NVIDIA = NVIDIA CUDA Compiler (nvidia.com)
   OpenWatcom = Open Watcom (openwatcom.org)
   PGI = The Portland Group (pgroup.com)
