@@ -173,6 +173,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
 
     set(CMAKE_BUILD_TYPE_INIT Debug)
 
+    __enable_llvm_rc_preprocessing("")
     macro(__windows_compiler_clang lang)
       __windows_compiler_clang_gnu(${lang})
     endmacro()
@@ -180,6 +181,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
 
 else()
   include(Platform/Windows-GNU)
+  __enable_llvm_rc_preprocessing("")
   macro(__windows_compiler_clang lang)
     __windows_compiler_gnu(${lang})
   endmacro()
