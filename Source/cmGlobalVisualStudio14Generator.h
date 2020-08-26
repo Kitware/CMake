@@ -43,7 +43,7 @@ protected:
 
   // Used to make sure that the Windows 10 SDK selected can work with the
   // version of the toolset.
-  virtual std::string GetWindows10SDKMaxVersion() const;
+  virtual std::string GetWindows10SDKMaxVersion(cmMakefile* mf) const;
 
   virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
 
@@ -54,7 +54,7 @@ protected:
   // installed on the machine.
   bool IsWindowsDesktopToolsetInstalled() const override;
 
-  std::string GetWindows10SDKVersion();
+  std::string GetWindows10SDKVersion(cmMakefile* mf);
 
 private:
   class Factory;

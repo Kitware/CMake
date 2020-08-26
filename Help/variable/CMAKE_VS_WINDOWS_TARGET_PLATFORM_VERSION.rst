@@ -17,3 +17,5 @@ One may set a ``CMAKE_WINDOWS_KITS_10_DIR`` *environment variable*
 to an absolute path to tell CMake to look for Windows 10 SDKs in
 a custom location.  The specified directory is expected to contain
 ``Include/10.0.*`` directories.
+
+See also :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION_MAXIMUM`.
