@@ -881,6 +881,16 @@ void cmSystemTools::InitializeLibUV()
 #endif
 }
 
+#ifdef _WIN32
+namespace {
+bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname)
+{
+  return MoveFileExW(oldname.c_str(), newname.c_str(),
+                     MOVEFILE_REPLACE_EXISTING);
+}
+}
+#endif
+
 bool cmSystemTools::RenameFile(const std::string& oldname,
                                const std::string& newname)
 {
@@ -893,11 +903,9 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
      Try multiple times since we may be racing against another process
      creating/opening the destination file just before our MoveFileEx.  */
   WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
-  while (
-    !MoveFileExW(SystemTools::ConvertToWindowsExtendedPath(oldname).c_str(),
-                 SystemTools::ConvertToWindowsExtendedPath(newname).c_str(),
-                 MOVEFILE_REPLACE_EXISTING) &&
-    --retry.Count) {
+  while (!cmMoveFile(SystemTools::ConvertToWindowsExtendedPath(oldname),
+                     SystemTools::ConvertToWindowsExtendedPath(newname)) &&
+         --retry.Count) {
     DWORD last_error = GetLastError();
     // Try again only if failure was due to access/sharing permissions.
     if (last_error != ERROR_ACCESS_DENIED &&
