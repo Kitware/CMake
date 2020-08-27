@@ -704,8 +704,7 @@ bool cmCTest::UpdateCTestConfiguration()
   if (!cmSystemTools::FileExists(fileName)) {
     // No need to exit if we are not producing XML
     if (this->Impl->ProduceXML) {
-      cmCTestLog(this, ERROR_MESSAGE,
-                 "Cannot find file: " << fileName << std::endl);
+      cmCTestLog(this, WARNING, "Cannot find file: " << fileName << std::endl);
       return false;
     }
   } else {
