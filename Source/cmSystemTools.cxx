@@ -749,33 +749,78 @@ std::string cmSystemTools::FileExistsInParentDirectories(
 }
 
 #ifdef _WIN32
+namespace {
+
+struct WindowsFileRetryInit
+{
+  cmSystemTools::WindowsFileRetry Retry;
+  bool Explicit;
+};
+
+WindowsFileRetryInit InitWindowsFileRetry(wchar_t const* const values[2],
+                                          unsigned int const defaults[2])
+{
+  unsigned int data[2] = { 0, 0 };
+  HKEY const keys[2] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
+  for (int k = 0; k < 2; ++k) {
+    HKEY hKey;
+    if (RegOpenKeyExW(keys[k], L"Software\\Kitware\\CMake\\Config", 0,
+                      KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS) {
+      for (int v = 0; v < 2; ++v) {
+        DWORD dwData, dwType, dwSize = 4;
+        if (!data[v] &&
+            RegQueryValueExW(hKey, values[v], 0, &dwType, (BYTE*)&dwData,
+                             &dwSize) == ERROR_SUCCESS &&
+            dwType == REG_DWORD && dwSize == 4) {
+          data[v] = static_cast<unsigned int>(dwData);
+        }
+      }
+      RegCloseKey(hKey);
+    }
+  }
+  WindowsFileRetryInit init;
+  init.Explicit = data[0] || data[1];
+  init.Retry.Count = data[0] ? data[0] : defaults[0];
+  init.Retry.Delay = data[1] ? data[1] : defaults[1];
+  return init;
+}
+
+WindowsFileRetryInit InitWindowsFileRetry()
+{
+  static wchar_t const* const values[2] = { L"FilesystemRetryCount",
+                                            L"FilesystemRetryDelay" };
+  static unsigned int const defaults[2] = { 5, 500 };
+  return InitWindowsFileRetry(values, defaults);
+}
+
+WindowsFileRetryInit InitWindowsDirectoryRetry()
+{
+  static wchar_t const* const values[2] = { L"FilesystemDirectoryRetryCount",
+                                            L"FilesystemDirectoryRetryDelay" };
+  static unsigned int const defaults[2] = { 120, 500 };
+  WindowsFileRetryInit dirInit = InitWindowsFileRetry(values, defaults);
+  if (dirInit.Explicit) {
+    return dirInit;
+  }
+  WindowsFileRetryInit fileInit = InitWindowsFileRetry();
+  if (fileInit.Explicit) {
+    return fileInit;
+  }
+  return dirInit;
+}
+
+} // end of anonymous namespace
+
 cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsFileRetry()
 {
-  static WindowsFileRetry retry = { 0, 0 };
-  if (!retry.Count) {
-    unsigned int data[2] = { 0, 0 };
-    HKEY const keys[2] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
-    wchar_t const* const values[2] = { L"FilesystemRetryCount",
-                                       L"FilesystemRetryDelay" };
-    for (int k = 0; k < 2; ++k) {
-      HKEY hKey;
-      if (RegOpenKeyExW(keys[k], L"Software\\Kitware\\CMake\\Config", 0,
-                        KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS) {
-        for (int v = 0; v < 2; ++v) {
-          DWORD dwData, dwType, dwSize = 4;
-          if (!data[v] &&
-              RegQueryValueExW(hKey, values[v], 0, &dwType, (BYTE*)&dwData,
-                               &dwSize) == ERROR_SUCCESS &&
-              dwType == REG_DWORD && dwSize == 4) {
-            data[v] = static_cast<unsigned int>(dwData);
-          }
-        }
-        RegCloseKey(hKey);
-      }
-    }
-    retry.Count = data[0] ? data[0] : 5;
-    retry.Delay = data[1] ? data[1] : 500;
-  }
+  static WindowsFileRetry retry = InitWindowsFileRetry().Retry;
+  return retry;
+}
+
+cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsDirectoryRetry()
+{
+  static cmSystemTools::WindowsFileRetry retry =
+    InitWindowsDirectoryRetry().Retry;
   return retry;
 }
 #endif

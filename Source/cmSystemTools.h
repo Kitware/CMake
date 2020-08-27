@@ -434,6 +434,7 @@ public:
     unsigned int Delay;
   };
   static WindowsFileRetry GetWindowsFileRetry();
+  static WindowsFileRetry GetWindowsDirectoryRetry();
 #endif
 
   /** Get the real path for a given path, removing all symlinks.
