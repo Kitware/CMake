@@ -150,7 +150,6 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   endif()
 
-
   if (COMPILER_QNXNTO AND CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
     execute_process(
       COMMAND "${CMAKE_${lang}_COMPILER}"

@@ -384,6 +384,7 @@ elseif(_WCDH_policy STREQUAL "")
     )
 endif()
 
+set(__skip_rocmclang TRUE)
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeCompilerIdDetection.cmake)
 
 function(_load_compiler_variables CompilerId lang)
