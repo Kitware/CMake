@@ -297,7 +297,7 @@ public:
     return this->CLikeSourceFileExtensions.Test(ext) ||
       this->CudaFileExtensions.Test(ext) ||
       this->FortranFileExtensions.Test(ext) ||
-      this->ISPCFileExtensions.Test(ext);
+      this->HipFileExtensions.Test(ext) || this->ISPCFileExtensions.Test(ext);
   }
 
   bool IsACLikeSourceExtension(cm::string_view ext) const
@@ -662,6 +662,7 @@ private:
   FileExtensions CudaFileExtensions;
   FileExtensions ISPCFileExtensions;
   FileExtensions FortranFileExtensions;
+  FileExtensions HipFileExtensions;
   bool ClearBuildSystem = false;
   bool DebugTryCompile = false;
   bool RegenerateDuringBuild = false;
@@ -838,3 +839,11 @@ private:
   F(cuda_std_17)                                                              \
   F(cuda_std_20)                                                              \
   F(cuda_std_23)
+
+#define FOR_EACH_HIP_FEATURE(F)                                               \
+  F(hip_std_98)                                                               \
+  F(hip_std_11)                                                               \
+  F(hip_std_14)                                                               \
+  F(hip_std_17)                                                               \
+  F(hip_std_20)                                                               \
+  F(hip_std_23)

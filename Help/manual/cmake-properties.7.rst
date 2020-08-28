@@ -212,6 +212,7 @@ Properties on Targets
    /prop_tgt/GHS_NO_SOURCE_GROUP_FILE
    /prop_tgt/GNUtoMS
    /prop_tgt/HAS_CXX
+   /prop_tgt/HIP_ARCHITECTURES
    /prop_tgt/IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
    /prop_tgt/IMPORTED
    /prop_tgt/IMPORTED_COMMON_LANGUAGE_RUNTIME

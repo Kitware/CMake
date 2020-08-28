@@ -833,7 +833,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   std::string compilerLauncher;
   if (!compileCmds.empty() &&
       (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
-       lang == "ISPC" || lang == "OBJC" || lang == "OBJCXX")) {
+       lang == "HIP" || lang == "ISPC" || lang == "OBJC" ||
+       lang == "OBJCXX")) {
     std::string const clauncher_prop = cmStrCat(lang, "_COMPILER_LAUNCHER");
     cmProp clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
     if (cmNonempty(clauncher)) {

@@ -289,9 +289,9 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
     for (LocalObjectEntry const& entry : localObjectFile.second) {
       if (entry.Language == "C" || entry.Language == "CXX" ||
           entry.Language == "CUDA" || entry.Language == "Fortran" ||
-          entry.Language == "ISPC") {
-        // Right now, C, C++, Fortran and CUDA have both a preprocessor and the
-        // ability to generate assembly code
+          entry.Language == "HIP" || entry.Language == "ISPC") {
+        // Right now, C, C++, CUDA, Fortran, HIP and ISPC have both a
+        // preprocessor and the ability to generate assembly code
         lang_has_preprocessor = true;
         lang_has_assembly = true;
         break;
@@ -1550,7 +1550,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
     std::unique_ptr<cmDepends> scanner;
     if (lang == "C" || lang == "CXX" || lang == "RC" || lang == "ASM" ||
         lang == "OBJC" || lang == "OBJCXX" || lang == "CUDA" ||
-        lang == "ISPC") {
+        lang == "HIP" || lang == "ISPC") {
       // TODO: Handle RC (resource files) dependencies correctly.
       scanner = cm::make_unique<cmDependsC>(this, targetDir, lang, &validDeps);
     }

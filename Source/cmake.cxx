@@ -218,6 +218,7 @@ cmake::cmake(Role role, cmState::Mode mode)
     setupExts(this->CudaFileExtensions, { "cu" });
     setupExts(this->FortranFileExtensions,
               { "f", "F", "for", "f77", "f90", "f95", "f03" });
+    setupExts(this->HipFileExtensions, { "hip" });
     setupExts(this->ISPCFileExtensions, { "ispc" });
   }
 }
@@ -2462,6 +2463,8 @@ std::vector<std::string> cmake::GetAllExtensions() const
   // cuda extensions are also in SourceFileExtensions so we ignore it here
   allExt.insert(allExt.end(), this->FortranFileExtensions.ordered.begin(),
                 this->FortranFileExtensions.ordered.end());
+  allExt.insert(allExt.end(), this->HipFileExtensions.ordered.begin(),
+                this->HipFileExtensions.ordered.end());
   allExt.insert(allExt.end(), this->ISPCFileExtensions.ordered.begin(),
                 this->ISPCFileExtensions.ordered.end());
   return allExt;

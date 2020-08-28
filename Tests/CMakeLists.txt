@@ -1479,6 +1479,10 @@ if(BUILD_TESTING)
     add_subdirectory(CudaOnly)
   endif()
 
+  if(CMake_TEST_HIP)
+    add_subdirectory(HIP)
+  endif()
+
   if(CMake_TEST_ISPC)
     add_subdirectory(ISPC)
   endif()
