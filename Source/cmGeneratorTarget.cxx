@@ -4078,6 +4078,16 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
         cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_INVALID_PCH"));
     }
 
+    if (this->GetPropertyAsBool("PCH_INSTANTIATE_TEMPLATES")) {
+      std::string varName = cmStrCat(
+        "CMAKE_", language, "_COMPILE_OPTIONS_INSTANTIATE_TEMPLATES_PCH");
+      std::string instantiateOption =
+        this->Makefile->GetSafeDefinition(varName);
+      if (!instantiateOption.empty()) {
+        createOptionList = cmStrCat(createOptionList, ";", instantiateOption);
+      }
+    }
+
     const std::string createOptVar =
       cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_CREATE_PCH");
 
