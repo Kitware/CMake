@@ -29,6 +29,13 @@ public:
     CONST_RVALUE_REFERENCE,
 
     SWAP,
+
+    COMPARE_EE_EQ,
+    COMPARE_EE_NE,
+    COMPARE_EE_LT,
+    COMPARE_EE_LE,
+    COMPARE_EE_GT,
+    COMPARE_EE_GE,
   };
 
   EventType Type;
@@ -159,6 +166,42 @@ EventLogger& EventLogger::operator=(int value)
   events.push_back({ Event::VALUE_ASSIGN, this, nullptr, value });
   this->Value = value;
   return *this;
+}
+
+bool operator==(const EventLogger& lhs, const EventLogger& rhs)
+{
+  events.push_back({ Event::COMPARE_EE_EQ, &lhs, &rhs, lhs.Value });
+  return lhs.Value == rhs.Value;
+}
+
+bool operator!=(const EventLogger& lhs, const EventLogger& rhs)
+{
+  events.push_back({ Event::COMPARE_EE_NE, &lhs, &rhs, lhs.Value });
+  return lhs.Value != rhs.Value;
+}
+
+bool operator<(const EventLogger& lhs, const EventLogger& rhs)
+{
+  events.push_back({ Event::COMPARE_EE_LT, &lhs, &rhs, lhs.Value });
+  return lhs.Value < rhs.Value;
+}
+
+bool operator<=(const EventLogger& lhs, const EventLogger& rhs)
+{
+  events.push_back({ Event::COMPARE_EE_LE, &lhs, &rhs, lhs.Value });
+  return lhs.Value <= rhs.Value;
+}
+
+bool operator>(const EventLogger& lhs, const EventLogger& rhs)
+{
+  events.push_back({ Event::COMPARE_EE_GT, &lhs, &rhs, lhs.Value });
+  return lhs.Value > rhs.Value;
+}
+
+bool operator>=(const EventLogger& lhs, const EventLogger& rhs)
+{
+  events.push_back({ Event::COMPARE_EE_GE, &lhs, &rhs, lhs.Value });
+  return lhs.Value >= rhs.Value;
 }
 
 void EventLogger::Reference() &
@@ -452,6 +495,120 @@ static bool testValueOr()
   return true;
 }
 
+static bool testComparison(std::vector<Event>& expected)
+{
+  const cm::optional<EventLogger> o1{ 1 };
+  const cm::optional<EventLogger> o2{ 2 };
+  const cm::optional<EventLogger> o3{ 2 };
+  const cm::optional<EventLogger> o4{};
+  const cm::optional<EventLogger> o5{};
+  const EventLogger e1{ 2 };
+
+  ASSERT_TRUE(!(o1 == o2) && o1 != o2);
+  ASSERT_TRUE(o1 < o2 && !(o1 >= o2));
+  ASSERT_TRUE(!(o1 > o2) && o1 <= o2);
+
+  ASSERT_TRUE(o2 == o3 && !(o2 != o3));
+  ASSERT_TRUE(!(o2 < o3) && o2 >= o3);
+  ASSERT_TRUE(!(o2 > o3) && o2 <= o3);
+
+  ASSERT_TRUE(!(o3 == o4) && o3 != o4);
+  ASSERT_TRUE(!(o3 < o4) && o3 >= o4);
+  ASSERT_TRUE(o3 > o4 && !(o3 <= o4));
+
+  ASSERT_TRUE(o4 == o5 && !(o4 != o5));
+  ASSERT_TRUE(!(o4 < o5) && o4 >= o5);
+  ASSERT_TRUE(!(o4 > o5) && o4 <= o5);
+
+  ASSERT_TRUE(!(o1 == cm::nullopt) && o1 != cm::nullopt);
+  ASSERT_TRUE(!(o1 < cm::nullopt) && o1 >= cm::nullopt);
+  ASSERT_TRUE(o1 > cm::nullopt && !(o1 <= cm::nullopt));
+
+  ASSERT_TRUE(!(cm::nullopt == o1) && cm::nullopt != o1);
+  ASSERT_TRUE(cm::nullopt < o1 && !(cm::nullopt >= o1));
+  ASSERT_TRUE(!(cm::nullopt > o1) && cm::nullopt <= o1);
+
+  ASSERT_TRUE(o4 == cm::nullopt && !(o4 != cm::nullopt));
+  ASSERT_TRUE(!(o4 < cm::nullopt) && o4 >= cm::nullopt);
+  ASSERT_TRUE(!(o4 > cm::nullopt) && o4 <= cm::nullopt);
+
+  ASSERT_TRUE(cm::nullopt == o4 && !(cm::nullopt != o4));
+  ASSERT_TRUE(!(cm::nullopt < o4) && cm::nullopt >= o4);
+  ASSERT_TRUE(!(cm::nullopt > o4) && cm::nullopt <= o4);
+
+  ASSERT_TRUE(!(o1 == e1) && o1 != e1);
+  ASSERT_TRUE(o1 < e1 && !(o1 >= e1));
+  ASSERT_TRUE(!(o1 > e1) && o1 <= e1);
+
+  ASSERT_TRUE(o2 == e1 && !(o2 != e1));
+  ASSERT_TRUE(!(o2 < e1) && o2 >= e1);
+  ASSERT_TRUE(!(o2 > e1) && o2 <= e1);
+
+  ASSERT_TRUE(!(o4 == e1) && o4 != e1);
+  ASSERT_TRUE(o4 < e1 && !(o4 >= e1));
+  ASSERT_TRUE(!(o4 > e1) && o4 <= e1);
+
+  ASSERT_TRUE(!(e1 == o1) && e1 != o1);
+  ASSERT_TRUE(!(e1 < o1) && e1 >= o1);
+  ASSERT_TRUE(e1 > o1 && !(e1 <= o1));
+
+  ASSERT_TRUE(e1 == o2 && !(e1 != o2));
+  ASSERT_TRUE(!(e1 < o2) && e1 >= o2);
+  ASSERT_TRUE(!(e1 > o2) && e1 <= o2);
+
+  ASSERT_TRUE(!(e1 == o4) && e1 != o4);
+  ASSERT_TRUE(!(e1 < o4) && e1 >= o4);
+  ASSERT_TRUE(e1 > o4 && !(e1 <= o4));
+
+  expected = {
+    { Event::VALUE_CONSTRUCT, &*o1, nullptr, 1 },
+    { Event::VALUE_CONSTRUCT, &*o2, nullptr, 2 },
+    { Event::VALUE_CONSTRUCT, &*o3, nullptr, 2 },
+    { Event::VALUE_CONSTRUCT, &e1, nullptr, 2 },
+    { Event::COMPARE_EE_EQ, &*o1, &*o2, 1 },
+    { Event::COMPARE_EE_NE, &*o1, &*o2, 1 },
+    { Event::COMPARE_EE_LT, &*o1, &*o2, 1 },
+    { Event::COMPARE_EE_GE, &*o1, &*o2, 1 },
+    { Event::COMPARE_EE_GT, &*o1, &*o2, 1 },
+    { Event::COMPARE_EE_LE, &*o1, &*o2, 1 },
+    { Event::COMPARE_EE_EQ, &*o2, &*o3, 2 },
+    { Event::COMPARE_EE_NE, &*o2, &*o3, 2 },
+    { Event::COMPARE_EE_LT, &*o2, &*o3, 2 },
+    { Event::COMPARE_EE_GE, &*o2, &*o3, 2 },
+    { Event::COMPARE_EE_GT, &*o2, &*o3, 2 },
+    { Event::COMPARE_EE_LE, &*o2, &*o3, 2 },
+    { Event::COMPARE_EE_EQ, &*o1, &e1, 1 },
+    { Event::COMPARE_EE_NE, &*o1, &e1, 1 },
+    { Event::COMPARE_EE_LT, &*o1, &e1, 1 },
+    { Event::COMPARE_EE_GE, &*o1, &e1, 1 },
+    { Event::COMPARE_EE_GT, &*o1, &e1, 1 },
+    { Event::COMPARE_EE_LE, &*o1, &e1, 1 },
+    { Event::COMPARE_EE_EQ, &*o2, &e1, 2 },
+    { Event::COMPARE_EE_NE, &*o2, &e1, 2 },
+    { Event::COMPARE_EE_LT, &*o2, &e1, 2 },
+    { Event::COMPARE_EE_GE, &*o2, &e1, 2 },
+    { Event::COMPARE_EE_GT, &*o2, &e1, 2 },
+    { Event::COMPARE_EE_LE, &*o2, &e1, 2 },
+    { Event::COMPARE_EE_EQ, &e1, &*o1, 2 },
+    { Event::COMPARE_EE_NE, &e1, &*o1, 2 },
+    { Event::COMPARE_EE_LT, &e1, &*o1, 2 },
+    { Event::COMPARE_EE_GE, &e1, &*o1, 2 },
+    { Event::COMPARE_EE_GT, &e1, &*o1, 2 },
+    { Event::COMPARE_EE_LE, &e1, &*o1, 2 },
+    { Event::COMPARE_EE_EQ, &e1, &*o2, 2 },
+    { Event::COMPARE_EE_NE, &e1, &*o2, 2 },
+    { Event::COMPARE_EE_LT, &e1, &*o2, 2 },
+    { Event::COMPARE_EE_GE, &e1, &*o2, 2 },
+    { Event::COMPARE_EE_GT, &e1, &*o2, 2 },
+    { Event::COMPARE_EE_LE, &e1, &*o2, 2 },
+    { Event::DESTRUCT, &e1, nullptr, 2 },
+    { Event::DESTRUCT, &*o3, nullptr, 2 },
+    { Event::DESTRUCT, &*o2, nullptr, 2 },
+    { Event::DESTRUCT, &*o1, nullptr, 1 },
+  };
+  return true;
+}
+
 static bool testSwap(std::vector<Event>& expected)
 {
   cm::optional<EventLogger> o1{ 4 };
@@ -612,6 +769,7 @@ int testOptional(int /*unused*/, char* /*unused*/ [])
   DO_EVENT_TEST(testHasValue);
   DO_EVENT_TEST(testValue);
   DO_TEST(testValueOr);
+  DO_EVENT_TEST(testComparison);
   DO_EVENT_TEST(testSwap);
   DO_EVENT_TEST(testReset);
   DO_EVENT_TEST(testEmplace);
