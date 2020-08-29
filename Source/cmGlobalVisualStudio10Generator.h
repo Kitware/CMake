@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalVisualStudio10Generator_h
-#define cmGlobalVisualStudio10Generator_h
+#pragma once
 
 #include <memory>
 #include <set>
@@ -244,4 +243,3 @@ private:
   // We do not use the reload macros for VS >= 10.
   std::string GetUserMacrosDirectory() override { return ""; }
 };
-#endif

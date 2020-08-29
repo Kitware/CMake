@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalNMakeMakefileGenerator_h
-#define cmGlobalNMakeMakefileGenerator_h
+#pragma once
 
 #include <iosfwd>
 #include <memory>
@@ -59,5 +58,3 @@ private:
   void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
                            const char* envVar) const override;
 };
-
-#endif

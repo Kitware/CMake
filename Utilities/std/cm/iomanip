@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_iomanip
-#define cm_iomanip
+#pragma once
 
 #include <iomanip> // IWYU pragma: export
 #if __cplusplus < 201402L || defined(_MSVC_LANG) && _MSVC_LANG < 201402L
@@ -179,5 +178,3 @@ inline internals::quoted_string<cm::string_view, char> quoted(
 #endif
 
 } // namespace cm
-
-#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmLinkItem_h
-#define cmLinkItem_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -140,5 +139,3 @@ inline cmTargetLinkLibraryType CMP0003_ComputeLinkType(
   // The current configuration is not a debug configuration.
   return OPTIMIZED_LibraryType;
 }
-
-#endif

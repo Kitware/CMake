@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_map
-#define cm_map
+#pragma once
 
 #include <map> // IWYU pragma: export
 
@@ -40,5 +39,3 @@ inline void erase_if(std::multimap<Key, T, Compare, Allocator>& cont,
 #endif
 
 } // namespace cm
-
-#endif

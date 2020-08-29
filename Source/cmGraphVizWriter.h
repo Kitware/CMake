@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef CMGRAPHVIZWRITER_H
-#define CMGRAPHVIZWRITER_H
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -136,5 +135,3 @@ private:
   bool GeneratePerTarget;
   bool GenerateDependers;
 };
-
-#endif

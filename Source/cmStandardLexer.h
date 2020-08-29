@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmStandardLexer_h
-#define cmStandardLexer_h
+#pragma once
 
 #if defined(__linux)
 /* Needed for glibc < 2.12 */
@@ -74,5 +73,3 @@ typedef KWIML_INT_int16_t flex_int16_t;
 typedef KWIML_INT_uint16_t flex_uint16_t;
 typedef KWIML_INT_int32_t flex_int32_t;
 typedef KWIML_INT_uint32_t flex_uint32_t;
-
-#endif

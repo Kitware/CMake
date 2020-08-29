@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmInstallType_h
-#define cmInstallType_h
+#pragma once
 
 /**
  * Enumerate types known to file(INSTALL).
@@ -16,5 +15,3 @@ enum cmInstallType
   cmInstallType_PROGRAMS,
   cmInstallType_DIRECTORY
 };
-
-#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmUtils_hxx
-#define cmUtils_hxx
+#pragma once
 
 #include "cmsys/SystemTools.hxx"
 
@@ -13,5 +12,3 @@ inline bool isCMakeVerbose()
   return (cmSystemTools::HasEnv("VERBOSE") &&
           !cmSystemTools::HasEnv("CMAKE_NO_VERBOSE"));
 }
-
-#endif

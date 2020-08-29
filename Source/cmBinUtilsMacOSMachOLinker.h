@@ -1,8 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#ifndef cmBinUtilsMacOSMachOLinker_h
-#define cmBinUtilsMacOSMachOLinker_h
+#pragma once
 
 #include <memory>
 #include <string>
@@ -55,5 +54,3 @@ private:
                               std::vector<std::string> const& rpaths,
                               std::string& path, bool& resolved);
 };
-
-#endif // cmBinUtilsMacOSMachOLinker_h

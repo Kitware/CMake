@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmComputeTargetDepends_h
-#define cmComputeTargetDepends_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -105,5 +104,3 @@ private:
   bool IntraComponent(std::vector<int> const& cmap, int c, int i, int* head,
                       std::set<int>& emitted, std::set<int>& visited);
 };
-
-#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFortranParser_h
-#define cmFortranParser_h
+#pragma once
 
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
 #  include "cmConfigure.h" // IWYU pragma: keep
@@ -180,6 +179,4 @@ struct cmFortranParser_s
   // Information about the parsed source.
   cmFortranSourceInfo& Info;
 };
-#endif
-
 #endif

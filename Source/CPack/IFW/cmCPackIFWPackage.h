@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackIFWPackage_h
-#define cmCPackIFWPackage_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -149,5 +148,3 @@ public:
   // Patch to package directory
   std::string Directory;
 };
-
-#endif // cmCPackIFWPackage_h

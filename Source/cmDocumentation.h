@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef _cmDocumentation_h
-#define _cmDocumentation_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -125,5 +124,3 @@ private:
 
   static void WarnFormFromFilename(RequestedHelpItem& request, bool& result);
 };
-
-#endif

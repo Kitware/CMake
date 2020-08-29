@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmSourceFile_h
-#define cmSourceFile_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -161,5 +160,3 @@ private:
 #define CM_PCH_REGEX "cmake_pch(_[^.]+)?\\.(h|hxx)$"
 
 #define CM_RESOURCE_REGEX "\\.(pdf|plist|png|jpeg|jpg|storyboard|xcassets)$"
-
-#endif

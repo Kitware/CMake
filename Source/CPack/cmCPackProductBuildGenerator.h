@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackProductBuildGenerator_h
-#define cmCPackProductBuildGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -49,5 +48,3 @@ protected:
   const char* GetComponentScript(const char* script,
                                  const char* script_component);
 };
-
-#endif

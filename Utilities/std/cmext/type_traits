@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmext_type_traits
-#define cmext_type_traits
+#pragma once
 
 #include <memory>
 
@@ -84,5 +83,3 @@ using is_sequence_container =
                     !cm::is_unordered_associative_container<T>::value>;
 
 } // namespace cm
-
-#endif

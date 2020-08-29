@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCommandArgumentParserHelper_h
-#define cmCommandArgumentParserHelper_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -89,5 +88,3 @@ private:
 #define YY_EXTRA_TYPE cmCommandArgumentParserHelper*
 #define YY_DECL                                                               \
   int cmCommandArgument_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
-
-#endif

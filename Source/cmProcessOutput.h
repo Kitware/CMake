@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmProcessOutput_h
-#define cmProcessOutput_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -84,5 +83,3 @@ private:
   bool DoDecodeText(std::string raw, std::string& decoded, wchar_t* lastChar);
 #endif
 };
-
-#endif

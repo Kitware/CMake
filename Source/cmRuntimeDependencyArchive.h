@@ -1,8 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#ifndef cmRuntimeDependencyArchive_h
-#define cmRuntimeDependencyArchive_h
+#pragma once
 
 #include <map>
 #include <memory>
@@ -66,5 +65,3 @@ private:
   std::map<std::string, std::set<std::string>> ResolvedPaths;
   std::set<std::string> UnresolvedPaths;
 };
-
-#endif // cmRuntimeDependencyArchive_h
