@@ -398,6 +398,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       initProp("XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE");
       initProp("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS");
       initProp("XCODE_SCHEME_ENVIRONMENT");
+      initPropValue("XCODE_LINK_BUILD_PHASE_MODE", "NONE");
     }
 #endif
   }

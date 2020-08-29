@@ -19,6 +19,19 @@ endfunction()
 
 XcodeGenerateTopLevelProjectOnlyWithObjectLibrary()
 
+function(LinkBinariesBuildPhase mode)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LinkBinariesBuildPhase_${mode}-build)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_XCODE_LINK_BUILD_PHASE_MODE=${mode}")
+  run_cmake(LinkBinariesBuildPhase_${mode})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(LinkBinariesBuildPhase_${mode}-build ${CMAKE_COMMAND} --build .)
+endfunction()
+
+LinkBinariesBuildPhase(NONE)
+LinkBinariesBuildPhase(BUILT_ONLY)
+LinkBinariesBuildPhase(KNOWN_LOCATION)
+run_cmake(LinkBinariesBuildPhase_INVALID)
+
 run_cmake(XcodeObjectNeedsEscape)
 run_cmake(XcodeObjectNeedsQuote)
 run_cmake(XcodeOptimizationFlags)
