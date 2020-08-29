@@ -158,6 +158,9 @@ These are:
   * ``cm::is_unique_ptr``:
     Checks if a type is a ``std::unique_ptr`` type.
 
+CMake assumes the compiler supports ``#pragma once``. Use this for all
+hand-written header files.
+
 Dynamic Memory Management
 =========================
 
