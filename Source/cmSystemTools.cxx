@@ -749,33 +749,140 @@ std::string cmSystemTools::FileExistsInParentDirectories(
 }
 
 #ifdef _WIN32
+namespace {
+
+/* Helper class to save and restore the specified file (or directory)
+   attribute bits. Instantiate this class as an automatic variable on the
+   stack. Its constructor saves a copy of the file attributes, and then its
+   destructor restores the original attribute settings.  */
+class SaveRestoreFileAttributes
+{
+public:
+  SaveRestoreFileAttributes(std::wstring const& path,
+                            uint32_t file_attrs_to_set);
+  ~SaveRestoreFileAttributes();
+
+  SaveRestoreFileAttributes(SaveRestoreFileAttributes const&) = delete;
+  SaveRestoreFileAttributes& operator=(SaveRestoreFileAttributes const&) =
+    delete;
+
+  void SetPath(std::wstring const& path) { path_ = path; }
+
+private:
+  std::wstring path_;
+  uint32_t original_attr_bits_;
+};
+
+SaveRestoreFileAttributes::SaveRestoreFileAttributes(
+  std::wstring const& path, uint32_t file_attrs_to_set)
+  : path_(path)
+  , original_attr_bits_(0)
+{
+  // Set the specified attributes for the source file/directory.
+  original_attr_bits_ = GetFileAttributesW(path_.c_str());
+  if ((INVALID_FILE_ATTRIBUTES != original_attr_bits_) &&
+      ((file_attrs_to_set & original_attr_bits_) != file_attrs_to_set)) {
+    SetFileAttributesW(path_.c_str(), original_attr_bits_ | file_attrs_to_set);
+  }
+}
+
+// We set attribute bits.  Now we need to restore their original state.
+SaveRestoreFileAttributes::~SaveRestoreFileAttributes()
+{
+  DWORD last_error = GetLastError();
+  // Verify or restore the original attributes.
+  const DWORD source_attr_bits = GetFileAttributesW(path_.c_str());
+  if (INVALID_FILE_ATTRIBUTES != source_attr_bits) {
+    if (original_attr_bits_ != source_attr_bits) {
+      // The file still exists, and its attributes aren't our saved values.
+      // Time to restore them.
+      SetFileAttributesW(path_.c_str(), original_attr_bits_);
+    }
+  }
+  SetLastError(last_error);
+}
+
+struct WindowsFileRetryInit
+{
+  cmSystemTools::WindowsFileRetry Retry;
+  bool Explicit;
+};
+
+WindowsFileRetryInit InitWindowsFileRetry(wchar_t const* const values[2],
+                                          unsigned int const defaults[2])
+{
+  unsigned int data[2] = { 0, 0 };
+  HKEY const keys[2] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
+  for (int k = 0; k < 2; ++k) {
+    HKEY hKey;
+    if (RegOpenKeyExW(keys[k], L"Software\\Kitware\\CMake\\Config", 0,
+                      KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS) {
+      for (int v = 0; v < 2; ++v) {
+        DWORD dwData, dwType, dwSize = 4;
+        if (!data[v] &&
+            RegQueryValueExW(hKey, values[v], 0, &dwType, (BYTE*)&dwData,
+                             &dwSize) == ERROR_SUCCESS &&
+            dwType == REG_DWORD && dwSize == 4) {
+          data[v] = static_cast<unsigned int>(dwData);
+        }
+      }
+      RegCloseKey(hKey);
+    }
+  }
+  WindowsFileRetryInit init;
+  init.Explicit = data[0] || data[1];
+  init.Retry.Count = data[0] ? data[0] : defaults[0];
+  init.Retry.Delay = data[1] ? data[1] : defaults[1];
+  return init;
+}
+
+WindowsFileRetryInit InitWindowsFileRetry()
+{
+  static wchar_t const* const values[2] = { L"FilesystemRetryCount",
+                                            L"FilesystemRetryDelay" };
+  static unsigned int const defaults[2] = { 5, 500 };
+  return InitWindowsFileRetry(values, defaults);
+}
+
+WindowsFileRetryInit InitWindowsDirectoryRetry()
+{
+  static wchar_t const* const values[2] = { L"FilesystemDirectoryRetryCount",
+                                            L"FilesystemDirectoryRetryDelay" };
+  static unsigned int const defaults[2] = { 120, 500 };
+  WindowsFileRetryInit dirInit = InitWindowsFileRetry(values, defaults);
+  if (dirInit.Explicit) {
+    return dirInit;
+  }
+  WindowsFileRetryInit fileInit = InitWindowsFileRetry();
+  if (fileInit.Explicit) {
+    return fileInit;
+  }
+  return dirInit;
+}
+
+cmSystemTools::WindowsFileRetry GetWindowsRetry(std::wstring const& path)
+{
+  // If we are performing a directory operation, then try and get the
+  // appropriate timing info.
+  DWORD const attrs = GetFileAttributesW(path.c_str());
+  if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY)) {
+    return cmSystemTools::GetWindowsDirectoryRetry();
+  }
+  return cmSystemTools::GetWindowsFileRetry();
+}
+
+} // end of anonymous namespace
+
 cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsFileRetry()
 {
-  static WindowsFileRetry retry = { 0, 0 };
-  if (!retry.Count) {
-    unsigned int data[2] = { 0, 0 };
-    HKEY const keys[2] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
-    wchar_t const* const values[2] = { L"FilesystemRetryCount",
-                                       L"FilesystemRetryDelay" };
-    for (int k = 0; k < 2; ++k) {
-      HKEY hKey;
-      if (RegOpenKeyExW(keys[k], L"Software\\Kitware\\CMake\\Config", 0,
-                        KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS) {
-        for (int v = 0; v < 2; ++v) {
-          DWORD dwData, dwType, dwSize = 4;
-          if (!data[v] &&
-              RegQueryValueExW(hKey, values[v], 0, &dwType, (BYTE*)&dwData,
-                               &dwSize) == ERROR_SUCCESS &&
-              dwType == REG_DWORD && dwSize == 4) {
-            data[v] = static_cast<unsigned int>(dwData);
-          }
-        }
-        RegCloseKey(hKey);
-      }
-    }
-    retry.Count = data[0] ? data[0] : 5;
-    retry.Delay = data[1] ? data[1] : 500;
-  }
+  static WindowsFileRetry retry = InitWindowsFileRetry().Retry;
+  return retry;
+}
+
+cmSystemTools::WindowsFileRetry cmSystemTools::GetWindowsDirectoryRetry()
+{
+  static cmSystemTools::WindowsFileRetry retry =
+    InitWindowsDirectoryRetry().Retry;
   return retry;
 }
 #endif
@@ -836,6 +943,21 @@ void cmSystemTools::InitializeLibUV()
 #endif
 }
 
+#ifdef _WIN32
+namespace {
+bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname)
+{
+  // Not only ignore any previous error, but clear any memory of it.
+  SetLastError(0);
+
+  // Use MOVEFILE_REPLACE_EXISTING to replace an existing destination file.
+  // Use MOVEFILE_WRITE_THROUGH to flush the change to disk before returning.
+  return MoveFileExW(oldname.c_str(), newname.c_str(),
+                     MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
+}
+}
+#endif
+
 bool cmSystemTools::RenameFile(const std::string& oldname,
                                const std::string& newname)
 {
@@ -843,35 +965,63 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
 #  ifndef INVALID_FILE_ATTRIBUTES
 #    define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
 #  endif
+  std::wstring const oldname_wstr =
+    SystemTools::ConvertToWindowsExtendedPath(oldname);
+  std::wstring const newname_wstr =
+    SystemTools::ConvertToWindowsExtendedPath(newname);
+
   /* Windows MoveFileEx may not replace read-only or in-use files.  If it
      fails then remove the read-only attribute from any existing destination.
      Try multiple times since we may be racing against another process
      creating/opening the destination file just before our MoveFileEx.  */
-  WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
-  while (
-    !MoveFileExW(SystemTools::ConvertToWindowsExtendedPath(oldname).c_str(),
-                 SystemTools::ConvertToWindowsExtendedPath(newname).c_str(),
-                 MOVEFILE_REPLACE_EXISTING) &&
-    --retry.Count) {
-    DWORD last_error = GetLastError();
+  WindowsFileRetry retry = GetWindowsRetry(oldname_wstr);
+
+  // Use RAII to set the attribute bit blocking Microsoft Search Indexing,
+  // and restore the previous value upon return.
+  SaveRestoreFileAttributes save_restore_file_attributes(
+    oldname_wstr, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
+
+  DWORD move_last_error = 0;
+  while (!cmMoveFile(oldname_wstr, newname_wstr) && --retry.Count) {
+    move_last_error = GetLastError();
+
+    // There was no error ==> the operation is not yet complete.
+    if (move_last_error == NO_ERROR) {
+      break;
+    }
+
     // Try again only if failure was due to access/sharing permissions.
-    if (last_error != ERROR_ACCESS_DENIED &&
-        last_error != ERROR_SHARING_VIOLATION) {
+    // Most often ERROR_ACCESS_DENIED (a.k.a. I/O error) for a directory, and
+    // ERROR_SHARING_VIOLATION for a file, are caused by one of the following:
+    // 1) Anti-Virus Software
+    // 2) Windows Search Indexer
+    // 3) Windows Explorer has an associated directory already opened.
+    if (move_last_error != ERROR_ACCESS_DENIED &&
+        move_last_error != ERROR_SHARING_VIOLATION) {
       return false;
     }
-    DWORD attrs = GetFileAttributesW(
-      SystemTools::ConvertToWindowsExtendedPath(newname).c_str());
+
+    DWORD const attrs = GetFileAttributesW(newname_wstr.c_str());
     if ((attrs != INVALID_FILE_ATTRIBUTES) &&
-        (attrs & FILE_ATTRIBUTE_READONLY)) {
+        (attrs & FILE_ATTRIBUTE_READONLY) &&
+        // FILE_ATTRIBUTE_READONLY is not honored on directories.
+        !(attrs & FILE_ATTRIBUTE_DIRECTORY)) {
       // Remove the read-only attribute from the destination file.
-      SetFileAttributesW(
-        SystemTools::ConvertToWindowsExtendedPath(newname).c_str(),
-        attrs & ~FILE_ATTRIBUTE_READONLY);
+      SetFileAttributesW(newname_wstr.c_str(),
+                         attrs & ~FILE_ATTRIBUTE_READONLY);
     } else {
       // The file may be temporarily in use so wait a bit.
       cmSystemTools::Delay(retry.Delay);
     }
   }
+
+  // If we were successful, then there was no error.
+  if (retry.Count > 0) {
+    move_last_error = 0;
+    // Restore the attributes on the new name.
+    save_restore_file_attributes.SetPath(newname_wstr);
+  }
+  SetLastError(move_last_error);
   return retry.Count > 0;
 #else
   /* On UNIX we have an OS-provided call to do this atomically.  */
