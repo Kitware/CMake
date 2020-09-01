@@ -628,9 +628,12 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
 ")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log "${MSG}")
-    #if(NOT CMAKE_${lang}_COMPILER_ID_ALLOW_FAIL)
-    #  message(FATAL_ERROR "${MSG}")
-    #endif()
+
+    # Some languages may know the correct/desired set of flags and want to fail right away if they don't work.
+    # This is currently only used by CUDA.
+    if(CMAKE_${lang}_COMPILER_ID_REQUIRE_SUCCESS)
+      message(FATAL_ERROR "${MSG}")
+    endif()
 
     # No output files should be inspected.
     set(COMPILER_${lang}_PRODUCED_FILES)
