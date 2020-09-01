@@ -678,6 +678,7 @@ void cmGlobalXCodeGenerator::ClearXCodeObjects()
   this->TargetGroup.clear();
   this->FileRefs.clear();
   this->ExternalLibRefs.clear();
+  this->FileRefToBuildFileMap.clear();
 }
 
 void cmGlobalXCodeGenerator::addObject(std::unique_ptr<cmXCodeObject> obj)
@@ -751,16 +752,23 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeBuildFileFromPath(
   const std::string& lang, cmSourceFile* sf)
 {
   // Using a map and the full path guarantees that we will always get the same
-  // fileRef object for any given full path.
-  //
+  // fileRef object for any given full path. Same goes for the buildFile
+  // object.
   cmXCodeObject* fileRef =
     this->CreateXCodeFileReferenceFromPath(fullpath, target, lang, sf);
-
-  cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
-  buildFile->SetComment(fileRef->GetComment());
-  buildFile->AddAttribute("fileRef", this->CreateObjectReference(fileRef));
-
-  return buildFile;
+  if (fileRef) {
+    auto it = this->FileRefToBuildFileMap.find(fileRef);
+    if (it == this->FileRefToBuildFileMap.end()) {
+      cmXCodeObject* buildFile =
+        this->CreateObject(cmXCodeObject::PBXBuildFile);
+      buildFile->SetComment(fileRef->GetComment());
+      buildFile->AddAttribute("fileRef", this->CreateObjectReference(fileRef));
+      this->FileRefToBuildFileMap[fileRef] = buildFile;
+      return buildFile;
+    }
+    return it->second;
+  }
+  return nullptr;
 }
 
 class XCodeGeneratorExpressionInterpreter
@@ -918,7 +926,9 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
 
   settings->AddAttributeIfNotEmpty("ATTRIBUTES", attrs);
 
-  buildFile->AddAttributeIfNotEmpty("settings", settings);
+  if (buildFile) {
+    buildFile->AddAttributeIfNotEmpty("settings", settings);
+  }
   return buildFile;
 }
 
@@ -935,16 +945,21 @@ void cmGlobalXCodeGenerator::AddXCodeProjBuildRule(
   }
 }
 
-bool IsLibraryExtension(const std::string& fileExt)
+namespace {
+
+bool IsLinkPhaseLibraryExtension(const std::string& fileExt)
 {
+  // Empty file extension is a special case for paths to framework's
+  // internal binary which could be MyFw.framework/Versions/*/MyFw
   return (fileExt == ".framework" || fileExt == ".a" || fileExt == ".o" ||
-          fileExt == ".dylib" || fileExt == ".tbd");
+          fileExt == ".dylib" || fileExt == ".tbd" || fileExt.empty());
 }
 bool IsLibraryType(const std::string& fileType)
 {
   return (fileType == "wrapper.framework" || fileType == "archive.ar" ||
           fileType == "compiled.mach-o.objfile" ||
           fileType == "compiled.mach-o.dylib" ||
+          fileType == "compiled.mach-o.executable" ||
           fileType == "sourcecode.text-based-dylib-definition");
 }
 
@@ -1020,6 +1035,12 @@ std::string GetSourcecodeValueFromFileExtension(
   } else if (ext == "dylib") {
     keepLastKnownFileType = true;
     sourcecode = "compiled.mach-o.dylib";
+  } else if (ext == "framework") {
+    keepLastKnownFileType = true;
+    sourcecode = "wrapper.framework";
+  } else if (ext == "xcassets") {
+    keepLastKnownFileType = true;
+    sourcecode = "folder.assetcatalog";
   }
   // else
   //  {
@@ -1031,6 +1052,47 @@ std::string GetSourcecodeValueFromFileExtension(
 
   return sourcecode;
 }
+
+// If the file has no extension it's either a raw executable or might
+// be a direct reference to a binary within a framework (bad practice!).
+// This is where we change the path to point to the framework directory.
+// .tbd files also can be located in SDK frameworks (they are
+// placeholders for actual libraries shipped with the OS)
+std::string GetLibraryOrFrameworkPath(const std::string& path)
+{
+  auto ext = cmSystemTools::GetFilenameLastExtension(path);
+  if (ext.empty() || ext == ".tbd") {
+    auto name = cmSystemTools::GetFilenameWithoutExtension(path);
+    // Check for iOS framework structure:
+    //    FwName.framework/FwName (and also on macOS where FwName lib is a
+    //    symlink)
+    auto parentDir = cmSystemTools::GetParentDirectory(path);
+    auto parentName = cmSystemTools::GetFilenameWithoutExtension(parentDir);
+    ext = cmSystemTools::GetFilenameLastExtension(parentDir);
+    if (ext == ".framework" && name == parentName) {
+      return parentDir;
+    }
+    // Check for macOS framework structure:
+    //    FwName.framework/Versions/*/FwName
+    std::vector<std::string> components;
+    cmSystemTools::SplitPath(path, components);
+    if (components.size() > 3 &&
+        components[components.size() - 3] == "Versions") {
+      ext = cmSystemTools::GetFilenameLastExtension(
+        components[components.size() - 4]);
+      parentName = cmSystemTools::GetFilenameWithoutExtension(
+        components[components.size() - 4]);
+      if (ext == ".framework" && name == parentName) {
+        components.erase(components.begin() + components.size() - 3,
+                         components.end());
+        return cmSystemTools::JoinPath(components);
+      }
+    }
+  }
+  return path;
+}
+
+} // anonymous
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   const std::string& fullpath, cmGeneratorTarget* target,
@@ -1054,17 +1116,10 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     ext = ext.substr(1);
   }
   if (fileType.empty()) {
-    // If file has no extension it's either a raw executable or might
-    // be a direct reference to binary within a framework (bad practice!)
-    // so this is where we change the path to the point to framework
-    // directory.
-    if (ext.empty()) {
-      auto parentDir = cmSystemTools::GetParentDirectory(path);
-      auto parentExt = cmSystemTools::GetFilenameLastExtension(parentDir);
-      if (parentExt == ".framework") {
-        path = parentDir;
-        ext = parentExt.substr(1);
-      }
+    path = GetLibraryOrFrameworkPath(path);
+    ext = cmSystemTools::GetFilenameLastExtension(path);
+    if (!ext.empty()) {
+      ext = ext.substr(1);
     }
     // If fullpath references a directory, then we need to specify
     // lastKnownFileType as folder in order for Xcode to be able to
@@ -1074,8 +1129,17 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
       fileType = GetDirectoryValueFromFileExtension(ext);
       useLastKnownFileType = true;
     } else {
-      fileType = GetSourcecodeValueFromFileExtension(
-        ext, lang, useLastKnownFileType, this->EnabledLangs);
+      if (ext.empty() && !sf) {
+        // Special case for executable or library without extension
+        // that is not a source file. We can't tell which without reading
+        // its Mach-O header, but the file might not exist yet, so we
+        // have to pick one here.
+        useLastKnownFileType = true;
+        fileType = "compiled.mach-o.executable";
+      } else {
+        fileType = GetSourcecodeValueFromFileExtension(
+          ext, lang, useLastKnownFileType, this->EnabledLangs);
+      }
     }
   }
 
@@ -1106,7 +1170,11 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     group = this->FrameworkGroup;
     this->GroupMap[key] = group;
   }
-  cmXCodeObject* children = group->GetObject("children");
+  if (!group) {
+    cmSystemTools::Error("Could not find a PBX group for " + key);
+    return nullptr;
+  }
+  cmXCodeObject* children = group->GetAttribute("children");
   if (!children->HasObject(fileRef)) {
     children->AddObject(fileRef);
   }
@@ -1243,10 +1311,11 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
   for (auto sourceFile : commonSourceFiles) {
     cmXCodeObject* xsf = this->CreateXCodeSourceFile(
       this->CurrentLocalGenerator, sourceFile, gtgt);
-    cmXCodeObject* fr = xsf->GetObject("fileRef");
-    cmXCodeObject* filetype = fr->GetObject()->GetObject("explicitFileType");
+    cmXCodeObject* fr = xsf->GetAttribute("fileRef");
+    cmXCodeObject* filetype =
+      fr->GetObject()->GetAttribute("explicitFileType");
     if (!filetype) {
-      filetype = fr->GetObject()->GetObject("lastKnownFileType");
+      filetype = fr->GetObject()->GetAttribute("lastKnownFileType");
     }
 
     cmGeneratorTarget::SourceFileFlags tsFlags =
@@ -2321,7 +2390,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     if (stdlib.size() > 8) {
       const auto cxxLibrary = stdlib.substr(8);
       if (language == "CXX" ||
-          !buildSettings->GetObject("CLANG_CXX_LIBRARY")) {
+          !buildSettings->GetAttribute("CLANG_CXX_LIBRARY")) {
         buildSettings->AddAttribute("CLANG_CXX_LIBRARY",
                                     this->CreateString(cxxLibrary));
       }
@@ -2343,7 +2412,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     std::string flags = cflags[language] + " " + defFlags;
     if (language == "CXX" || language == "OBJCXX") {
       if (language == "CXX" ||
-          !buildSettings->GetObject("OTHER_CPLUSPLUSFLAGS")) {
+          !buildSettings->GetAttribute("OTHER_CPLUSPLUSFLAGS")) {
         buildSettings->AddAttribute("OTHER_CPLUSPLUSFLAGS",
                                     this->CreateString(flags));
       }
@@ -2351,7 +2420,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       buildSettings->AddAttribute("IFORT_OTHER_FLAGS",
                                   this->CreateString(flags));
     } else if (language == "C" || language == "OBJC") {
-      if (language == "C" || !buildSettings->GetObject("OTHER_CFLAGS")) {
+      if (language == "C" || !buildSettings->GetAttribute("OTHER_CFLAGS")) {
         buildSettings->AddAttribute("OTHER_CFLAGS", this->CreateString(flags));
       }
     } else if (language == "Swift") {
@@ -2771,7 +2840,7 @@ void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
   targetdep->AddAttribute("targetProxy",
                           this->CreateObjectReference(container));
 
-  cmXCodeObject* depends = target->GetObject("dependencies");
+  cmXCodeObject* depends = target->GetAttribute("dependencies");
   if (!depends) {
     cmSystemTools::Error(
       "target does not have dependencies attribute error..");
@@ -2783,33 +2852,60 @@ void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
 
 void cmGlobalXCodeGenerator::AppendOrAddBuildSetting(cmXCodeObject* settings,
                                                      const char* attribute,
-                                                     const char* value)
+                                                     cmXCodeObject* value)
 {
   if (settings) {
-    cmXCodeObject* attr = settings->GetObject(attribute);
+    cmXCodeObject* attr = settings->GetAttribute(attribute);
     if (!attr) {
-      settings->AddAttribute(attribute, this->CreateString(value));
+      settings->AddAttribute(attribute, value);
     } else {
-      std::string oldValue = cmStrCat(attr->GetString(), ' ', value);
-      attr->SetString(oldValue);
+      if (value->GetType() != cmXCodeObject::OBJECT_LIST &&
+          value->GetType() != cmXCodeObject::STRING) {
+        cmSystemTools::Error("Unsupported value type for appending: " +
+                             std::string(attribute));
+        return;
+      }
+      if (attr->GetType() == cmXCodeObject::OBJECT_LIST) {
+        if (value->GetType() == cmXCodeObject::OBJECT_LIST) {
+          for (auto* obj : value->GetObjectList()) {
+            attr->AddObject(obj);
+          }
+        } else {
+          attr->AddObject(value);
+        }
+      } else if (attr->GetType() == cmXCodeObject::STRING) {
+        if (value->GetType() == cmXCodeObject::OBJECT_LIST) {
+          // Add old value as a list item to new object list
+          // and replace the attribute with the new list
+          value->PrependObject(attr);
+          settings->AddAttribute(attribute, value);
+        } else {
+          std::string newValue =
+            cmStrCat(attr->GetString(), ' ', value->GetString());
+          attr->SetString(newValue);
+        }
+      } else {
+        cmSystemTools::Error("Unsupported attribute type for appending: " +
+                             std::string(attribute));
+      }
     }
   }
 }
 
 void cmGlobalXCodeGenerator::AppendBuildSettingAttribute(
-  cmXCodeObject* target, const char* attribute, const char* value,
+  cmXCodeObject* target, const char* attribute, cmXCodeObject* value,
   const std::string& configName)
 {
   // There are multiple configurations.  Add the setting to the
   // buildSettings of the configuration name given.
   cmXCodeObject* configurationList =
-    target->GetObject("buildConfigurationList")->GetObject();
+    target->GetAttribute("buildConfigurationList")->GetObject();
   cmXCodeObject* buildConfigs =
-    configurationList->GetObject("buildConfigurations");
+    configurationList->GetAttribute("buildConfigurations");
   for (auto obj : buildConfigs->GetObjectList()) {
     if (configName.empty() ||
-        obj->GetObject("name")->GetString() == configName) {
-      cmXCodeObject* settings = obj->GetObject("buildSettings");
+        obj->GetAttribute("name")->GetString() == configName) {
+      cmXCodeObject* settings = obj->GetAttribute("buildSettings");
       this->AppendOrAddBuildSetting(settings, attribute, value);
     }
   }
@@ -2835,9 +2931,9 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 
   // Separate libraries into ones that can be linked using "Link Binary With
   // Libraries" build phase and the ones that can't. Only targets that build
-  // Apple bundles (.app, .framework, .bundle) can use this feature and only
-  // targets that represent actual libraries (static or dynamic, local or
-  // imported) not objects and not executables will be used. These are
+  // Apple bundles (.app, .framework, .bundle), executables and dylibs can use
+  // this feature and only targets that represent actual libraries (object,
+  // static, dynamic or bundle, excluding executables) will be used. These are
   // limitations imposed by CMake use-cases - otherwise a lot of things break.
   // The rest will be linked using linker flags (OTHER_LDFLAGS setting in Xcode
   // project).
@@ -2860,55 +2956,92 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     std::pair<std::string, cmComputeLinkInformation::Item const*>;
   std::map<std::string, std::vector<ConfigItemPair>> targetItemMap;
   std::map<std::string, std::vector<std::string>> targetProductNameMap;
+  bool useLinkPhase = false;
+  bool forceLinkPhase = false;
+  cmProp prop =
+    target->GetTarget()->GetProperty("XCODE_LINK_BUILD_PHASE_MODE");
+  if (prop) {
+    if (*prop == "BUILT_ONLY") {
+      useLinkPhase = true;
+    } else if (*prop == "KNOWN_LOCATION") {
+      useLinkPhase = true;
+      forceLinkPhase = true;
+    } else if (*prop != "NONE") {
+      cmSystemTools::Error("Invalid value for XCODE_LINK_BUILD_PHASE_MODE: " +
+                           *prop);
+      return;
+    }
+  }
   for (auto const& configName : this->CurrentConfigurationTypes) {
     cmComputeLinkInformation* cli = gt->GetLinkInformation(configName);
     if (!cli) {
       continue;
     }
     for (auto const& libItem : cli->GetItems()) {
-      if (gt->IsBundleOnApple() &&
+      // We want to put only static libraries, dynamic libraries, frameworks
+      // and bundles that are built from targets that are not imported in "Link
+      // Binary With Libraries" build phase. Except if the target property
+      // XCODE_LINK_BUILD_PHASE_MODE is KNOWN_LOCATION then all imported and
+      // non-target libraries will be added as well.
+      if (useLinkPhase &&
           (gt->GetType() == cmStateEnums::EXECUTABLE ||
            gt->GetType() == cmStateEnums::SHARED_LIBRARY ||
-           gt->GetType() == cmStateEnums::MODULE_LIBRARY ||
-           gt->GetType() == cmStateEnums::UNKNOWN_LIBRARY) &&
+           gt->GetType() == cmStateEnums::MODULE_LIBRARY) &&
           ((libItem.Target &&
+            (!libItem.Target->IsImported() || forceLinkPhase) &&
             (libItem.Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
              libItem.Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
-             libItem.Target->GetType() == cmStateEnums::MODULE_LIBRARY)) ||
-           (!libItem.Target && libItem.IsPath))) {
-        // Add unique configuration name to target-config map for later
-        // checks
+             libItem.Target->GetType() == cmStateEnums::MODULE_LIBRARY ||
+             libItem.Target->GetType() == cmStateEnums::UNKNOWN_LIBRARY)) ||
+           (!libItem.Target && libItem.IsPath && forceLinkPhase))) {
         std::string libName;
+        bool canUseLinkPhase = true;
         if (libItem.Target) {
+          if (libItem.Target->GetType() == cmStateEnums::UNKNOWN_LIBRARY) {
+            canUseLinkPhase = canUseLinkPhase && forceLinkPhase;
+          } else {
+            // If a library target uses custom build output directory Xcode
+            // won't pick it up so we have to resort back to linker flags, but
+            // that's OK as long as the custom output dir is absolute path.
+            for (auto const& libConfigName : this->CurrentConfigurationTypes) {
+              canUseLinkPhase = canUseLinkPhase &&
+                libItem.Target->UsesDefaultOutputDir(
+                  libConfigName, cmStateEnums::RuntimeBinaryArtifact);
+            }
+          }
           libName = libItem.Target->GetName();
         } else {
           libName = cmSystemTools::GetFilenameName(libItem.Value.Value);
+          // We don't want all the possible files here, just standard libraries
           const auto libExt = cmSystemTools::GetFilenameExtension(libName);
-          if (!IsLibraryExtension(libExt)) {
-            // Add this library item to a regular linker flag list
-            addToLinkerArguments(configName, &libItem);
-            continue;
+          if (!IsLinkPhaseLibraryExtension(libExt)) {
+            canUseLinkPhase = false;
           }
         }
-        auto& configVector = targetConfigMap[libName];
-        if (std::find(configVector.begin(), configVector.end(), configName) ==
-            configVector.end()) {
-          configVector.push_back(configName);
+        if (canUseLinkPhase) {
+          // Add unique configuration name to target-config map for later
+          // checks
+          auto& configVector = targetConfigMap[libName];
+          if (std::find(configVector.begin(), configVector.end(),
+                        configName) == configVector.end()) {
+            configVector.push_back(configName);
+          }
+          // Add a pair of config and item to target-item map
+          auto& itemVector = targetItemMap[libName];
+          itemVector.emplace_back(ConfigItemPair(configName, &libItem));
+          // Add product file-name to a lib-product map
+          auto productName =
+            cmSystemTools::GetFilenameName(libItem.Value.Value);
+          auto& productVector = targetProductNameMap[libName];
+          if (std::find(productVector.begin(), productVector.end(),
+                        productName) == productVector.end()) {
+            productVector.push_back(productName);
+          }
+          continue;
         }
-        // Add a pair of config and item to target-item map
-        auto& itemVector = targetItemMap[libName];
-        itemVector.emplace_back(ConfigItemPair(configName, &libItem));
-        // Add product file-name to a lib-product map
-        auto productName = cmSystemTools::GetFilenameName(libItem.Value.Value);
-        auto& productVector = targetProductNameMap[libName];
-        if (std::find(productVector.begin(), productVector.end(),
-                      productName) == productVector.end()) {
-          productVector.push_back(productName);
-        }
-      } else {
-        // Add this library item to a regular linker flag list
-        addToLinkerArguments(configName, &libItem);
       }
+      // Add this library item to a regular linker flag list
+      addToLinkerArguments(configName, &libItem);
     }
   }
 
@@ -2938,18 +3071,28 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
   // in this build phase so we don't have to do this for each configuration
   // separately.
   std::vector<std::string> linkSearchPaths;
+  std::vector<std::string> frameworkSearchPaths;
   for (auto const& libItem : linkPhaseTargetVector) {
     // Add target output directory as a library search path
     std::string linkDir;
     if (libItem->Target) {
-      linkDir = cmSystemTools::GetParentDirectory(
-        libItem->Target->GetLocationForBuild());
+      linkDir = libItem->Target->GetLocationForBuild();
     } else {
-      linkDir = cmSystemTools::GetParentDirectory(libItem->Value.Value);
+      linkDir = libItem->Value.Value;
     }
-    if (std::find(linkSearchPaths.begin(), linkSearchPaths.end(), linkDir) ==
-        linkSearchPaths.end()) {
-      linkSearchPaths.push_back(linkDir);
+    linkDir = GetLibraryOrFrameworkPath(linkDir);
+    bool isFramework = cmSystemTools::IsPathToFramework(linkDir);
+    linkDir = cmSystemTools::GetParentDirectory(linkDir);
+    if (isFramework) {
+      if (std::find(frameworkSearchPaths.begin(), frameworkSearchPaths.end(),
+                    linkDir) == frameworkSearchPaths.end()) {
+        frameworkSearchPaths.push_back(linkDir);
+      }
+    } else {
+      if (std::find(linkSearchPaths.begin(), linkSearchPaths.end(), linkDir) ==
+          linkSearchPaths.end()) {
+        linkSearchPaths.push_back(linkDir);
+      }
     }
     // Add target dependency
     if (libItem->Target && !libItem->Target->IsImported()) {
@@ -2967,6 +3110,13 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
         if (it == this->ExternalLibRefs.end()) {
           buildFile = CreateXCodeBuildFileFromPath(libItem->Value.Value, gt,
                                                    "", nullptr);
+          if (!buildFile) {
+            // Add this library item back to a regular linker flag list
+            for (const auto& conf : configItemMap) {
+              addToLinkerArguments(conf.first, libItem);
+            }
+            continue;
+          }
           this->ExternalLibRefs.emplace(libItem->Value.Value, buildFile);
         } else {
           buildFile = it->second;
@@ -2981,7 +3131,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     } else {
       // Add the target output file as a build reference for other targets
       // to link against
-      auto* fileRefObject = libTarget->GetObject("productReference");
+      auto* fileRefObject = libTarget->GetAttribute("productReference");
       if (!fileRefObject) {
         // Add this library item back to a regular linker flag list
         for (const auto& conf : configItemMap) {
@@ -2999,20 +3149,23 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       }
     }
     // Add this reference to current target
-    auto* buildPhases = target->GetObject("buildPhases");
+    auto* buildPhases = target->GetAttribute("buildPhases");
     if (!buildPhases) {
+      cmSystemTools::Error("Missing buildPhase of target");
       continue;
     }
     auto* frameworkBuildPhase =
       buildPhases->GetObject(cmXCodeObject::PBXFrameworksBuildPhase);
     if (!frameworkBuildPhase) {
+      cmSystemTools::Error("Missing PBXFrameworksBuildPhase of buildPhase");
       continue;
     }
-    auto* buildFiles = frameworkBuildPhase->GetObject("files");
+    auto* buildFiles = frameworkBuildPhase->GetAttribute("files");
     if (!buildFiles) {
+      cmSystemTools::Error("Missing files of PBXFrameworksBuildPhase");
       continue;
     }
-    if (!buildFiles->HasObject(buildFile)) {
+    if (buildFile && !buildFiles->HasObject(buildFile)) {
       buildFiles->AddObject(buildFile);
     }
   }
@@ -3021,20 +3174,18 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
   for (auto const& configName : this->CurrentConfigurationTypes) {
     {
       // Add object library contents as link flags.
-      std::string linkObjs;
-      const char* sep = "";
+      BuildObjectListOrString libSearchPaths(this, true);
       std::vector<cmSourceFile const*> objs;
       gt->GetExternalObjects(objs, configName);
       for (auto sourceFile : objs) {
         if (sourceFile->GetObjectLibrary().empty()) {
           continue;
         }
-        linkObjs += sep;
-        sep = " ";
-        linkObjs += this->XCodeEscapePath(sourceFile->GetFullPath());
+        libSearchPaths.Add(this->XCodeEscapePath(sourceFile->GetFullPath()));
       }
       this->AppendBuildSettingAttribute(
-        target, this->GetTargetLinkFlagsVar(gt), linkObjs.c_str(), configName);
+        target, this->GetTargetLinkFlagsVar(gt), libSearchPaths.CreateList(),
+        configName);
     }
 
     // Skip link information for object libraries.
@@ -3056,49 +3207,70 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 
     // add the library search paths
     {
+      BuildObjectListOrString libSearchPaths(this, true);
       std::string linkDirs;
       for (auto const& libDir : cli->GetDirectories()) {
         if (!libDir.empty() && libDir != "/usr/lib") {
-          // Now add the same one but append
-          // $(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) to it:
-          linkDirs += " ";
-          linkDirs += this->XCodeEscapePath(
-            libDir + "/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)");
-          linkDirs += " ";
-          linkDirs += this->XCodeEscapePath(libDir);
+          libSearchPaths.Add(this->XCodeEscapePath(
+            libDir + "/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)"));
+          libSearchPaths.Add(this->XCodeEscapePath(libDir));
         }
       }
       // Add previously collected paths where to look for libraries
       // that were added to "Link Binary With Libraries"
-      for (auto& linkDir : linkSearchPaths) {
-        linkDirs += " ";
-        linkDirs += this->XCodeEscapePath(linkDir);
+      for (auto& libDir : linkSearchPaths) {
+        libSearchPaths.Add(this->XCodeEscapePath(libDir));
       }
       this->AppendBuildSettingAttribute(target, "LIBRARY_SEARCH_PATHS",
-                                        linkDirs.c_str(), configName);
+                                        libSearchPaths.CreateList(),
+                                        configName);
+    }
+
+    // add framework search paths
+    {
+      BuildObjectListOrString fwSearchPaths(this, true);
+      // Add previously collected paths where to look for frameworks
+      // that were added to "Link Binary With Libraries"
+      for (auto& fwDir : frameworkSearchPaths) {
+        fwSearchPaths.Add(this->XCodeEscapePath(fwDir));
+      }
+      this->AppendBuildSettingAttribute(target, "FRAMEWORK_SEARCH_PATHS",
+                                        fwSearchPaths.CreateList(),
+                                        configName);
     }
 
     // now add the left-over link libraries
     {
-      std::string linkLibs;
-      const char* sep = "";
+      BuildObjectListOrString libPaths(this, true);
       for (auto const& libItem : configItemMap[configName]) {
         auto const& libName = *libItem;
-        linkLibs += sep;
-        sep = " ";
         if (libName.IsPath) {
-          linkLibs += this->XCodeEscapePath(libName.Value.Value);
+          libPaths.Add(this->XCodeEscapePath(libName.Value.Value));
+          const auto libPath = GetLibraryOrFrameworkPath(libName.Value.Value);
+          if ((!libName.Target || libName.Target->IsImported()) &&
+              IsLinkPhaseLibraryExtension(libPath)) {
+            // Create file reference for embedding
+            auto it = this->ExternalLibRefs.find(libName.Value.Value);
+            if (it == this->ExternalLibRefs.end()) {
+              auto* buildFile = this->CreateXCodeBuildFileFromPath(
+                libName.Value.Value, gt, "", nullptr);
+              if (buildFile) {
+                this->ExternalLibRefs.emplace(libName.Value.Value, buildFile);
+              }
+            }
+          }
         } else if (!libName.Target ||
                    libName.Target->GetType() !=
                      cmStateEnums::INTERFACE_LIBRARY) {
-          linkLibs += libName.Value.Value;
+          libPaths.Add(libName.Value.Value);
         }
         if (libName.Target && !libName.Target->IsImported()) {
           target->AddDependTarget(configName, libName.Target->GetName());
         }
       }
-      this->AppendBuildSettingAttribute(
-        target, this->GetTargetLinkFlagsVar(gt), linkLibs.c_str(), configName);
+      this->AppendBuildSettingAttribute(target,
+                                        this->GetTargetLinkFlagsVar(gt),
+                                        libPaths.CreateList(), configName);
     }
   }
 }
@@ -3166,7 +3338,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreatePBXGroup(cmXCodeObject* parent,
 {
   cmXCodeObject* parentChildren = nullptr;
   if (parent) {
-    parentChildren = parent->GetObject("children");
+    parentChildren = parent->GetAttribute("children");
   }
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::PBXGroup);
   cmXCodeObject* groupChildren =
@@ -3465,7 +3637,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   cmXCodeObject* allTargets = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   for (auto t : targets) {
     allTargets->AddObject(t);
-    cmXCodeObject* productRef = t->GetObject("productReference");
+    cmXCodeObject* productRef = t->GetAttribute("productReference");
     if (productRef) {
       productGroupChildren->AddObject(productRef->GetObject());
     }

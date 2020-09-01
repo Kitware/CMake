@@ -168,9 +168,9 @@ private:
   std::string AddConfigurations(cmXCodeObject* target,
                                 cmGeneratorTarget* gtgt);
   void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr,
-                               const char* value);
+                               cmXCodeObject* value);
   void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr,
-                                   const char* value,
+                                   cmXCodeObject* value,
                                    const std::string& configName);
   cmXCodeObject* CreateUtilityTarget(cmGeneratorTarget* gtgt);
   void AddDependAndLinkInformation(cmXCodeObject* target);
