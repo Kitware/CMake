@@ -1902,6 +1902,70 @@ class ArtifactSonameTag;
 class ArtifactBundleDirTag;
 class ArtifactBundleContentDirTag;
 
+template <typename ArtifactT, typename ComponentT>
+struct TargetFilesystemArtifactDependency
+{
+  static void AddDependency(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context)
+  {
+    context->DependTargets.insert(target);
+    context->AllTargets.insert(target);
+  }
+};
+
+struct TargetFilesystemArtifactDependencyCMP0112
+{
+  static void AddDependency(cmGeneratorTarget* target,
+                            cmGeneratorExpressionContext* context)
+  {
+    context->AllTargets.insert(target);
+    cmLocalGenerator* lg = context->LG;
+    switch (target->GetPolicyStatusCMP0112()) {
+      case cmPolicies::WARN:
+        if (lg->GetMakefile()->PolicyOptionalWarningEnabled(
+              "CMAKE_POLICY_WARNING_CMP0112")) {
+          std::string err =
+            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0112),
+                     "\nDependency being added to target:\n  \"",
+                     target->GetName(), "\"\n");
+          lg->GetCMakeInstance()->IssueMessage(MessageType ::AUTHOR_WARNING,
+                                               err, context->Backtrace);
+        }
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        context->DependTargets.insert(target);
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::NEW:
+        break;
+    }
+  }
+};
+
+template <typename ArtifactT>
+struct TargetFilesystemArtifactDependency<ArtifactT, ArtifactNameTag>
+  : TargetFilesystemArtifactDependencyCMP0112
+{
+};
+template <typename ArtifactT>
+struct TargetFilesystemArtifactDependency<ArtifactT, ArtifactDirTag>
+  : TargetFilesystemArtifactDependencyCMP0112
+{
+};
+template <>
+struct TargetFilesystemArtifactDependency<ArtifactBundleDirTag,
+                                          ArtifactPathTag>
+  : TargetFilesystemArtifactDependencyCMP0112
+{
+};
+template <>
+struct TargetFilesystemArtifactDependency<ArtifactBundleContentDirTag,
+                                          ArtifactPathTag>
+  : TargetFilesystemArtifactDependencyCMP0112
+{
+};
+
 template <typename ArtifactT>
 struct TargetFilesystemArtifactResultCreator
 {
@@ -2154,8 +2218,10 @@ struct TargetFilesystemArtifact : public TargetArtifactBase
     if (!target) {
       return std::string();
     }
-    context->DependTargets.insert(target);
-    context->AllTargets.insert(target);
+    // Not a dependent target if we are querying for ArtifactDirTag,
+    // ArtifactNameTag, ArtifactBundleDirTag, and ArtifactBundleContentDirTag
+    TargetFilesystemArtifactDependency<ArtifactT, ComponentT>::AddDependency(
+      target, context);
 
     std::string result =
       TargetFilesystemArtifactResultCreator<ArtifactT>::Create(target, context,

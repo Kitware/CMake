@@ -610,6 +610,9 @@ which is just the string ``tgt``.
 
 ``$<TARGET_NAME_IF_EXISTS:tgt>``
   The target name ``tgt`` if the target exists, an empty string otherwise.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
 ``$<TARGET_FILE:tgt>``
   Full path to the ``tgt`` binary file.
 ``$<TARGET_FILE_BASE_NAME:tgt>``
@@ -647,6 +650,9 @@ which is just the string ``tgt``.
   The ``tgt`` filename.
 ``$<TARGET_FILE_DIR:tgt>``
   Directory of the ``tgt`` binary file.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_LINKER_FILE:tgt>``
   File used when linking to the ``tgt`` target.  This will usually
   be the library that ``tgt`` represents (``.a``, ``.lib``, ``.so``),
@@ -688,14 +694,26 @@ which is just the string ``tgt``.
   expression is evaluated on.
 ``$<TARGET_LINKER_FILE_NAME:tgt>``
   Name of file used to link target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_LINKER_FILE_DIR:tgt>``
   Directory of file used to link target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_SONAME_FILE:tgt>``
   File with soname (``.so.3``) where ``tgt`` is the name of a target.
 ``$<TARGET_SONAME_FILE_NAME:tgt>``
   Name of file with soname (``.so.3``).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_SONAME_FILE_DIR:tgt>``
   Directory of with soname (``.so.3``).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_PDB_FILE:tgt>``
   Full path to the linker generated program database file (.pdb)
   where ``tgt`` is the name of a target.
@@ -721,17 +739,29 @@ which is just the string ``tgt``.
   expression is evaluated on.
 ``$<TARGET_PDB_FILE_NAME:tgt>``
   Name of the linker generated program database file (.pdb).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_PDB_FILE_DIR:tgt>``
   Directory of the linker generated program database file (.pdb).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_BUNDLE_DIR:tgt>``
   Full path to the bundle directory (``my.app``, ``my.framework``, or
   ``my.bundle``) where ``tgt`` is the name of a target.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_BUNDLE_CONTENT_DIR:tgt>``
   Full path to the bundle content directory where ``tgt`` is the name of a
   target. For the macOS SDK it leads to ``my.app/Contents``, ``my.framework``,
   or ``my.bundle/Contents``. For all other SDKs (e.g. iOS) it leads to
   ``my.app``, ``my.framework``, or ``my.bundle`` due to the flat bundle
   structure.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_PROPERTY:tgt,prop>``
   Value of the property ``prop`` on the target ``tgt``.
 

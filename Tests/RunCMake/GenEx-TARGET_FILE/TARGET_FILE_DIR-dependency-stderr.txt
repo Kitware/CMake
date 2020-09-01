@@ -1,0 +1,6 @@
+.*Policy CMP0112 is not set.*
+.*Dependency being added to target.*
+.*exec1.*
+CMake Error: The inter-target dependency graph.*
+.*"exec1" of type EXECUTABLE
+    depends on "copyFile" \(strong\)

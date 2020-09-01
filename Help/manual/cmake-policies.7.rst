@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.19
 .. toctree::
    :maxdepth: 1
 
+   CMP0112: Target file component generator expressions do not add target dependencies. </policy/CMP0112>
    CMP0111: An imported target with a missing location fails during generation. </policy/CMP0111>
    CMP0110: add_test() supports arbitrary characters in test names. </policy/CMP0110>
    CMP0109: find_program() requires permission to execute but not to read. </policy/CMP0109>
