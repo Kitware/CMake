@@ -91,6 +91,15 @@ add_test(NAME UseSWIG.MultiplePython COMMAND
   --build-options ${build_options}
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+add_test(NAME UseSWIG.MultipleFiles COMMAND
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  --build-and-test
+  "${CMake_SOURCE_DIR}/Tests/UseSWIG/MultipleFiles"
+  "${CMake_BINARY_DIR}/Tests/UseSWIG/MultipleFiles"
+  ${build_generator_args}
+  --build-project TestMultipleFiles
+  --build-options ${build_options}
+  )
 
 
 add_test(NAME UseSWIG.ModuleVersion2 COMMAND
