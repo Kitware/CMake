@@ -30,6 +30,7 @@
 #include "cmArgumentParser.h"
 #include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
+#include "cmFSPermissions.h"
 #include "cmFileCopier.h"
 #include "cmFileInstaller.h"
 #include "cmFileLockPool.h"
@@ -3160,6 +3161,163 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
   return true;
 }
 
+bool ValidateAndConvertPermissions(const std::vector<std::string>& permissions,
+                                   mode_t& perms, cmExecutionStatus& status)
+{
+  for (const auto& i : permissions) {
+    if (!cmFSPermissions::stringToModeT(i, perms)) {
+      status.SetError(i + " is an invalid permission specifier");
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SetPermissions(const std::string& filename, const mode_t& perms,
+                    cmExecutionStatus& status)
+{
+  if (!cmSystemTools::SetPermissions(filename, perms)) {
+    status.SetError("Failed to set permissions for " + filename);
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+  return true;
+}
+
+bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
+                            cmExecutionStatus& status)
+{
+  mode_t perms = 0;
+  mode_t fperms = 0;
+  mode_t dperms = 0;
+  cmsys::Glob globber;
+
+  globber.SetRecurse(recurse);
+  globber.SetRecurseListDirs(recurse);
+
+  struct Arguments
+  {
+    std::vector<std::string> Permissions;
+    std::vector<std::string> FilePermissions;
+    std::vector<std::string> DirectoryPermissions;
+  };
+
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("PERMISSIONS"_s, &Arguments::Permissions)
+      .Bind("FILE_PERMISSIONS"_s, &Arguments::FilePermissions)
+      .Bind("DIRECTORY_PERMISSIONS"_s, &Arguments::DirectoryPermissions);
+
+  std::vector<std::string> pathEntries;
+  std::vector<std::string> keywordsMissingValues;
+  Arguments parsedArgs = parser.Parse(cmMakeRange(args).advance(1),
+                                      &pathEntries, &keywordsMissingValues);
+
+  // check validity of arguments
+  if (parsedArgs.Permissions.empty() && parsedArgs.FilePermissions.empty() &&
+      parsedArgs.DirectoryPermissions.empty()) // no permissions given
+  {
+    status.SetError("No permissions given");
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  if (!parsedArgs.Permissions.empty() && !parsedArgs.FilePermissions.empty() &&
+      !parsedArgs.DirectoryPermissions.empty()) // all keywords are used
+  {
+    status.SetError("Remove either PERMISSIONS or FILE_PERMISSIONS or "
+                    "DIRECTORY_PERMISSIONS from the invocation");
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  if (!keywordsMissingValues.empty()) {
+    for (const auto& i : keywordsMissingValues) {
+      status.SetError(i + " is not given any arguments");
+      cmSystemTools::SetFatalErrorOccured();
+    }
+    return false;
+  }
+
+  // validate permissions
+  bool validatePermissions =
+    ValidateAndConvertPermissions(parsedArgs.Permissions, perms, status) &&
+    ValidateAndConvertPermissions(parsedArgs.FilePermissions, fperms,
+                                  status) &&
+    ValidateAndConvertPermissions(parsedArgs.DirectoryPermissions, dperms,
+                                  status);
+  if (!validatePermissions) {
+    return false;
+  }
+
+  std::vector<std::string> allPathEntries;
+
+  if (recurse) {
+    std::vector<std::string> tempPathEntries;
+    for (const auto& i : pathEntries) {
+      if (cmSystemTools::FileIsDirectory(i)) {
+        globber.FindFiles(i + "/*");
+        tempPathEntries = globber.GetFiles();
+        allPathEntries.insert(allPathEntries.end(), tempPathEntries.begin(),
+                              tempPathEntries.end());
+        allPathEntries.emplace_back(i);
+      } else {
+        allPathEntries.emplace_back(i); // We validate path entries below
+      }
+    }
+  } else {
+    allPathEntries = std::move(pathEntries);
+  }
+
+  // chmod
+  for (const auto& i : allPathEntries) {
+    if (!(cmSystemTools::FileExists(i) || cmSystemTools::FileIsDirectory(i))) {
+      status.SetError(cmStrCat("does not exist:\n  ", i));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+
+    if (cmSystemTools::FileExists(i, true)) {
+      bool success = true;
+      const mode_t& filePermissions =
+        parsedArgs.FilePermissions.empty() ? perms : fperms;
+      if (filePermissions) {
+        success = SetPermissions(i, filePermissions, status);
+      }
+      if (!success) {
+        return false;
+      }
+    }
+
+    else if (cmSystemTools::FileIsDirectory(i)) {
+      bool success = true;
+      const mode_t& directoryPermissions =
+        parsedArgs.DirectoryPermissions.empty() ? perms : dperms;
+      if (directoryPermissions) {
+        success = SetPermissions(i, directoryPermissions, status);
+      }
+      if (!success) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+bool HandleChmodCommand(std::vector<std::string> const& args,
+                        cmExecutionStatus& status)
+{
+  return HandleChmodCommandImpl(args, false, status);
+}
+
+bool HandleChmodRecurseCommand(std::vector<std::string> const& args,
+                               cmExecutionStatus& status)
+{
+  return HandleChmodCommandImpl(args, true, status);
+}
+
 } // namespace
 
 bool cmFileCommand(std::vector<std::string> const& args,
@@ -3216,6 +3374,8 @@ bool cmFileCommand(std::vector<std::string> const& args,
     { "CONFIGURE"_s, HandleConfigureCommand },
     { "ARCHIVE_CREATE"_s, HandleArchiveCreateCommand },
     { "ARCHIVE_EXTRACT"_s, HandleArchiveExtractCommand },
+    { "CHMOD"_s, HandleChmodCommand },
+    { "CHMOD_RECURSE"_s, HandleChmodRecurseCommand },
   };
 
   return subcommand(args[0], args, status);
