@@ -496,7 +496,8 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     endif()
   endif()
   if (SWIG_MODULE_${name}_LANGUAGE STREQUAL "PYTHON" AND NOT SWIG_MODULE_${name}_NOPROXY)
-    if(NOT ("-interface" IN_LIST swig_source_file_flags OR "-interface" IN_LIST SWIG_MODULE_${name}_EXTRA_FLAGS))
+    if(SWIG_USE_INTERFACE AND
+        NOT ("-interface" IN_LIST swig_source_file_flags OR "-interface" IN_LIST SWIG_MODULE_${name}_EXTRA_FLAGS))
       # This makes sure that the name used in the proxy code
       # matches the library name created by CMake
       list (APPEND SWIG_MODULE_${name}_EXTRA_FLAGS "-interface" "$<TARGET_FILE_PREFIX:${target_name}>$<TARGET_FILE_BASE_NAME:${target_name}>")
@@ -724,6 +725,13 @@ function(SWIG_ADD_LIBRARY name)
 
   set(swig_generated_sources)
   set(swig_generated_timestamps)
+  list(LENGTH swig_dot_i_sources swig_sources_count)
+  if (swig_sources_count GREATER "1")
+    # option -interface cannot be used
+    set(SWIG_USE_INTERFACE FALSE)
+  else()
+    set(SWIG_USE_INTERFACE TRUE)
+  endif()
   foreach(swig_it IN LISTS swig_dot_i_sources)
     SWIG_ADD_SOURCE_TO_MODULE(${name} swig_generated_source "${swig_it}")
     list (APPEND swig_generated_sources "${swig_generated_source}")
