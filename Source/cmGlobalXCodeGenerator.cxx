@@ -1839,6 +1839,15 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
   for (auto const& command : commands) {
     cmCustomCommandGenerator ccg(command, configName,
                                  this->CurrentLocalGenerator);
+    std::vector<std::string> realDepends;
+    realDepends.reserve(ccg.GetDepends().size());
+    for (auto const& d : ccg.GetDepends()) {
+      std::string dep;
+      if (this->CurrentLocalGenerator->GetRealDependency(d, configName, dep)) {
+        realDepends.emplace_back(std::move(dep));
+      }
+    }
+
     if (ccg.GetNumberOfCommands() > 0) {
       makefileStream << "\n";
       const std::vector<std::string>& outputs = ccg.GetOutputs();
@@ -1854,12 +1863,8 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         // There are no outputs.  Use the generated force rule name.
         makefileStream << tname[&ccg.GetCC()] << ": ";
       }
-      for (auto const& d : ccg.GetDepends()) {
-        std::string dep;
-        if (this->CurrentLocalGenerator->GetRealDependency(d, configName,
-                                                           dep)) {
-          makefileStream << "\\\n" << this->ConvertToRelativeForMake(dep);
-        }
+      for (auto const& dep : realDepends) {
+        makefileStream << "\\\n" << this->ConvertToRelativeForMake(dep);
       }
       makefileStream << "\n";
 
