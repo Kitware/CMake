@@ -133,6 +133,7 @@ public:
                            const std::vector<BT<std::string>>& newFlags) const;
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag) const;
+  void AddISPCDependencies(cmGeneratorTarget* target);
   void AddPchDependencies(cmGeneratorTarget* target);
   void AddUnityBuild(cmGeneratorTarget* target);
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,

@@ -268,6 +268,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
       this->ExternalObjects.push_back(objectFileName);
     }
   }
+
   std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources,
                                           this->GetConfigName());
@@ -525,6 +526,14 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     }
   }
 
+  if (lang != "ISPC") {
+    auto const& headers =
+      this->GeneratorTarget->GetGeneratedISPCHeaders(config);
+    if (!headers.empty()) {
+      depends.insert(depends.end(), headers.begin(), headers.end());
+    }
+  }
+
   std::string relativeObj =
     cmStrCat(this->LocalGenerator->GetHomeRelativeOutputPath(), obj);
   // Write the build rule.
@@ -550,6 +559,23 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   if (lang == "Fortran") {
     this->AppendFortranFormatFlags(flags, source);
     this->AppendFortranPreprocessFlags(flags, source);
+  }
+
+  std::string ispcHeaderRelative;
+  std::string ispcHeaderForShell;
+  if (lang == "ISPC") {
+    std::string ispcSource =
+      cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+
+    std::string directory = this->GeneratorTarget->GetObjectDirectory(config);
+    if (cmProp prop =
+          this->GeneratorTarget->GetProperty("ISPC_HEADER_DIRECTORY")) {
+      directory =
+        cmStrCat(this->LocalGenerator->GetBinaryDirectory(), '/', *prop);
+    }
+    ispcHeaderRelative = cmStrCat(directory, '/', ispcSource, ".h");
+    ispcHeaderForShell = this->LocalGenerator->ConvertToOutputFormat(
+      ispcHeaderRelative, cmOutputConverter::SHELL);
   }
 
   // Add flags from source file properties.
@@ -717,6 +743,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     cmOutputConverter::SHELL);
   vars.ObjectFileDir = objectFileDir.c_str();
   vars.Flags = flags.c_str();
+  vars.ISPCHeader = ispcHeaderForShell.c_str();
 
   std::string definesString = cmStrCat("$(", lang, "_DEFINES)");
 
@@ -735,7 +762,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   // ability to export compile commands
   bool lang_has_preprocessor =
     ((lang == "C") || (lang == "CXX") || (lang == "OBJC") ||
-     (lang == "OBJCXX") || (lang == "Fortran") || (lang == "CUDA"));
+     (lang == "OBJCXX") || (lang == "Fortran") || (lang == "CUDA") ||
+     lang == "ISPC");
   bool const lang_has_assembly = lang_has_preprocessor;
   bool const lang_can_export_cmds = lang_has_preprocessor;
 
@@ -910,8 +938,15 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     if (!evaluated_outputs.empty()) {
       // Register these as extra files to clean.
       cmExpandList(evaluated_outputs, outputs);
-      this->CleanFiles.insert(outputs.begin() + 1, outputs.end());
     }
+  }
+  if (!ispcHeaderRelative
+         .empty()) { // can't move ispcHeader as vars is using it
+    outputs.emplace_back(ispcHeaderRelative);
+  }
+
+  if (outputs.size() > 1) {
+    this->CleanFiles.insert(outputs.begin() + 1, outputs.end());
   }
 
   // Write the rule.

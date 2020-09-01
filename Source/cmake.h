@@ -268,7 +268,8 @@ public:
   {
     return this->CLikeSourceFileExtensions.Test(ext) ||
       this->CudaFileExtensions.Test(ext) ||
-      this->FortranFileExtensions.Test(ext);
+      this->FortranFileExtensions.Test(ext) ||
+      this->ISPCFileExtensions.Test(ext);
   }
 
   bool IsACLikeSourceExtension(cm::string_view ext) const
@@ -617,6 +618,7 @@ private:
   FileExtensions CLikeSourceFileExtensions;
   FileExtensions HeaderFileExtensions;
   FileExtensions CudaFileExtensions;
+  FileExtensions ISPCFileExtensions;
   FileExtensions FortranFileExtensions;
   bool ClearBuildSystem = false;
   bool DebugTryCompile = false;

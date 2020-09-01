@@ -715,7 +715,8 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 
 static const CompilerIdNode cCompilerIdNode("C"), cxxCompilerIdNode("CXX"),
   cudaCompilerIdNode("CUDA"), objcCompilerIdNode("OBJC"),
-  objcxxCompilerIdNode("OBJCXX"), fortranCompilerIdNode("Fortran");
+  objcxxCompilerIdNode("OBJCXX"), fortranCompilerIdNode("Fortran"),
+  ispcCompilerIdNode("ISPC");
 
 struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
@@ -780,7 +781,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
 static const CompilerVersionNode cCompilerVersionNode("C"),
   cxxCompilerVersionNode("CXX"), cudaCompilerVersionNode("CUDA"),
   objcCompilerVersionNode("OBJC"), objcxxCompilerVersionNode("OBJCXX"),
-  fortranCompilerVersionNode("Fortran");
+  fortranCompilerVersionNode("Fortran"), ispcCompilerVersionNode("ISPC");
 
 struct PlatformIdNode : public cmGeneratorExpressionNode
 {

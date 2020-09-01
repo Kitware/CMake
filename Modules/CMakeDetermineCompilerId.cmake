@@ -110,6 +110,28 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   endif()
 
+  # For ISPC we need to explicitly query the version.
+  if(lang STREQUAL "ISPC"
+     AND CMAKE_${lang}_COMPILER
+     AND NOT CMAKE_${lang}_COMPILER_VERSION)
+    execute_process(
+      COMMAND "${CMAKE_${lang}_COMPILER}"
+      --version
+      OUTPUT_VARIABLE output ERROR_VARIABLE output
+      RESULT_VARIABLE result
+      TIMEOUT 10
+    )
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+      "Running the ${lang} compiler: \"${CMAKE_${lang}_COMPILER}\" -version\n"
+      "${output}\n"
+      )
+
+    if(output MATCHES [[ISPC\), ([0-9]+\.[0-9]+(\.[0-9]+)?)]])
+      set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_MATCH_1}")
+    endif()
+  endif()
+
+
   if (COMPILER_QNXNTO AND CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
     execute_process(
       COMMAND "${CMAKE_${lang}_COMPILER}"
