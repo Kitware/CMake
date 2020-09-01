@@ -306,6 +306,8 @@ private:
   std::string GeneratorToolset;
   std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
   std::vector<std::string> EnabledLangs;
+  std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
+    CommandsVisited;
 };
 
 #endif

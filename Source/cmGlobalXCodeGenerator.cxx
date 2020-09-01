@@ -679,6 +679,7 @@ void cmGlobalXCodeGenerator::ClearXCodeObjects()
   this->FileRefs.clear();
   this->ExternalLibRefs.clear();
   this->FileRefToBuildFileMap.clear();
+  this->CommandsVisited.clear();
 }
 
 void cmGlobalXCodeGenerator::addObject(std::unique_ptr<cmXCodeObject> obj)
@@ -1271,6 +1272,16 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     return true;
   }
 
+  auto& gtgt_visited = this->CommandsVisited[gtgt];
+  auto& deps = this->GetTargetDirectDepends(gtgt);
+  for (auto& d : deps) {
+    // Take the union of visited source files of custom commands so far.
+    // ComputeTargetOrder ensures our dependencies already visited their
+    // custom commands and updated CommandsVisited.
+    auto& dep_visited = this->CommandsVisited[d];
+    gtgt_visited.insert(dep_visited.begin(), dep_visited.end());
+  }
+
   if (gtgt->GetType() == cmStateEnums::UTILITY ||
       gtgt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
       gtgt->GetType() == cmStateEnums::GLOBAL_TARGET) {
@@ -1628,8 +1639,9 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
   }
   // add all the sources
   std::vector<cmCustomCommand> commands;
+  auto& visited = this->CommandsVisited[gtgt];
   for (auto sourceFile : classes) {
-    if (sourceFile->GetCustomCommand()) {
+    if (sourceFile->GetCustomCommand() && visited.insert(sourceFile).second) {
       commands.push_back(*sourceFile->GetCustomCommand());
     }
   }
@@ -1892,6 +1904,17 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         cmd += cmd2;
         ccg.AppendArguments(c, cmd);
         makefileStream << "\t" << cmd << "\n";
+      }
+
+      // Symbolic inputs are not expected to exist, so add dummy rules.
+      for (auto const& dep : realDepends) {
+        if (cmSourceFile* dsf =
+              target->GetLocalGenerator()->GetMakefile()->GetSource(
+                dep, cmSourceFileLocationKind::Known)) {
+          if (dsf->GetPropertyAsBool("SYMBOLIC")) {
+            makefileStream << this->ConvertToRelativeForMake(dep) << ":\n";
+          }
+        }
       }
     }
   }
