@@ -1517,6 +1517,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
   info.SetConfig("PARSE_CACHE_FILE", this->AutogenTarget.ParseCacheFile);
   info.Set("DEP_FILE", this->AutogenTarget.DepFile);
   info.Set("DEP_FILE_RULE_NAME", this->AutogenTarget.DepFileRuleName);
+  info.SetArray("CMAKE_LIST_FILES", this->Makefile->GetListFiles());
   info.SetArray("HEADER_EXTENSIONS",
                 this->Makefile->GetCMakeInstance()->GetHeaderExtensions());
   info.SetArrayArray(
