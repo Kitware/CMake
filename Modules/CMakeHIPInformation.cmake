@@ -130,3 +130,10 @@ if(NOT CMAKE_HIP_LINK_EXECUTABLE)
 endif()
 
 set(CMAKE_HIP_INFORMATION_LOADED 1)
+
+# Load the file and find the relevant HIP runtime.
+# This file will only exist after all compiler detection has finished
+include(${CMAKE_PLATFORM_INFO_DIR}/CMakeHIPRuntime.cmake OPTIONAL)
+if(COMMAND _CMAKE_FIND_HIP_RUNTIME)
+  _CMAKE_FIND_HIP_RUNTIME()
+endif()

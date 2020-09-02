@@ -1235,6 +1235,20 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
                               &dagChecker, result, excludeImported, language);
     }
 
+    cmLinkImplementation const* impl = this->GetLinkImplementation(config);
+    if (impl != nullptr) {
+      auto runtimeEntries = impl->LanguageRuntimeLibraries.find(language);
+      if (runtimeEntries != impl->LanguageRuntimeLibraries.end()) {
+        for (auto const& lib : runtimeEntries->second) {
+          if (lib.Target) {
+            handleSystemIncludesDep(this->LocalGenerator, lib.Target, config,
+                                    this, &dagChecker, result, excludeImported,
+                                    language);
+          }
+        }
+      }
+    }
+
     std::for_each(result.begin(), result.end(),
                   cmSystemTools::ConvertToUnixSlashes);
     std::sort(result.begin(), result.end());
@@ -1474,31 +1488,80 @@ void AddLangSpecificImplicitIncludeDirectories(
   }
 }
 
+void addInterfaceEntry(cmGeneratorTarget const* headTarget,
+                       std::string const& config, std::string const& prop,
+                       std::string const& lang,
+                       cmGeneratorExpressionDAGChecker* dagChecker,
+                       EvaluatedTargetPropertyEntries& entries,
+                       bool usage_requirements_only,
+                       std::vector<cmLinkImplItem> const& libraries)
+{
+  for (cmLinkImplItem const& lib : libraries) {
+    if (lib.Target) {
+      EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
+      // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
+      // caller's property and hand-evaluate it as if it were compiled.
+      // Create a context as cmCompiledGeneratorExpression::Evaluate does.
+      cmGeneratorExpressionContext context(
+        headTarget->GetLocalGenerator(), config, false, headTarget, headTarget,
+        true, lib.Backtrace, lang);
+      cmExpandList(lib.Target->EvaluateInterfaceProperty(
+                     prop, &context, dagChecker, usage_requirements_only),
+                   ee.Values);
+      ee.ContextDependent = context.HadContextSensitiveCondition;
+      entries.Entries.emplace_back(std::move(ee));
+    }
+  }
+}
+
+// IncludeRuntimeInterface is used to break the cycle in computing
+// the necessary transitive dependencies of targets that can occur
+// now that we have implicit language runtime targets.
+//
+// To determine the set of languages that a target has we need to iterate
+// all the sources which includes transitive INTERFACE sources.
+// Therefore we can't determine what language runtimes are needed
+// for a target until after all sources are computed.
+//
+// Therefore while computing the applicable INTERFACE_SOURCES we
+// must ignore anything in LanguageRuntimeLibraries or we would
+// create a cycle ( INTERFACE_SOURCES requires LanguageRuntimeLibraries,
+// LanguageRuntimeLibraries requires INTERFACE_SOURCES).
+//
+enum class IncludeRuntimeInterface
+{
+  Yes,
+  No
+};
 void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
                          std::string const& config, std::string const& prop,
                          std::string const& lang,
                          cmGeneratorExpressionDAGChecker* dagChecker,
                          EvaluatedTargetPropertyEntries& entries,
+                         IncludeRuntimeInterface searchRuntime,
                          bool usage_requirements_only = true)
 {
-  if (cmLinkImplementationLibraries const* impl =
-        headTarget->GetLinkImplementationLibraries(config)) {
-    entries.HadContextSensitiveCondition = impl->HadContextSensitiveCondition;
-    for (cmLinkImplItem const& lib : impl->Libraries) {
-      if (lib.Target) {
-        EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
-        // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
-        // caller's property and hand-evaluate it as if it were compiled.
-        // Create a context as cmCompiledGeneratorExpression::Evaluate does.
-        cmGeneratorExpressionContext context(
-          headTarget->GetLocalGenerator(), config, false, headTarget,
-          headTarget, true, lib.Backtrace, lang);
-        cmExpandList(lib.Target->EvaluateInterfaceProperty(
-                       prop, &context, dagChecker, usage_requirements_only),
-                     ee.Values);
-        ee.ContextDependent = context.HadContextSensitiveCondition;
-        entries.Entries.emplace_back(std::move(ee));
+  if (searchRuntime == IncludeRuntimeInterface::Yes) {
+    if (cmLinkImplementation const* impl =
+          headTarget->GetLinkImplementation(config)) {
+      entries.HadContextSensitiveCondition =
+        impl->HadContextSensitiveCondition;
+
+      auto runtimeLibIt = impl->LanguageRuntimeLibraries.find(lang);
+      if (runtimeLibIt != impl->LanguageRuntimeLibraries.end()) {
+        addInterfaceEntry(headTarget, config, prop, lang, dagChecker, entries,
+                          usage_requirements_only, runtimeLibIt->second);
       }
+      addInterfaceEntry(headTarget, config, prop, lang, dagChecker, entries,
+                        usage_requirements_only, impl->Libraries);
+    }
+  } else {
+    if (cmLinkImplementationLibraries const* impl =
+          headTarget->GetLinkImplementationLibraries(config)) {
+      entries.HadContextSensitiveCondition =
+        impl->HadContextSensitiveCondition;
+      addInterfaceEntry(headTarget, config, prop, lang, dagChecker, entries,
+                        usage_requirements_only, impl->Libraries);
     }
   }
 }
@@ -1656,7 +1719,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   // Collect INTERFACE_SOURCES of all direct link-dependencies.
   EvaluatedTargetPropertyEntries linkInterfaceSourcesEntries;
   AddInterfaceEntries(this, config, "INTERFACE_SOURCES", std::string(),
-                      &dagChecker, linkInterfaceSourcesEntries);
+                      &dagChecker, linkInterfaceSourcesEntries,
+                      IncludeRuntimeInterface::No, true);
   std::vector<std::string>::size_type numFilesBefore = files.size();
   bool contextDependentInterfaceSources = processSources(
     this, linkInterfaceSourcesEntries, files, uniqueSrcs, debugSources);
@@ -3587,7 +3651,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   }
 
   AddInterfaceEntries(this, config, "INTERFACE_INCLUDE_DIRECTORIES", lang,
-                      &dagChecker, entries);
+                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
   if (this->Makefile->IsOn("APPLE")) {
     if (cmLinkImplementationLibraries const* impl =
@@ -3812,7 +3876,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
     this, config, language, &dagChecker, this->CompileOptionsEntries);
 
   AddInterfaceEntries(this, config, "INTERFACE_COMPILE_OPTIONS", language,
-                      &dagChecker, entries);
+                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
   processOptions(this, entries, result, uniqueOptions, debugOptions,
                  "compile options", OptionsParse::Shell);
@@ -3854,7 +3918,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
     this, config, std::string(), &dagChecker, this->CompileFeaturesEntries);
 
   AddInterfaceEntries(this, config, "INTERFACE_COMPILE_FEATURES",
-                      std::string(), &dagChecker, entries);
+                      std::string(), &dagChecker, entries,
+                      IncludeRuntimeInterface::Yes);
 
   processOptions(this, entries, result, uniqueFeatures, debugFeatures,
                  "compile features", OptionsParse::None);
@@ -3898,7 +3963,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
     this, config, language, &dagChecker, this->CompileDefinitionsEntries);
 
   AddInterfaceEntries(this, config, "INTERFACE_COMPILE_DEFINITIONS", language,
-                      &dagChecker, entries);
+                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
   if (!config.empty()) {
     std::string configPropName =
@@ -3956,7 +4021,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
     this, config, language, &dagChecker, this->PrecompileHeadersEntries);
 
   AddInterfaceEntries(this, config, "INTERFACE_PRECOMPILE_HEADERS", language,
-                      &dagChecker, entries);
+                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
   std::vector<BT<std::string>> list;
   processOptions(this, entries, list, uniqueOptions, debugDefines,
@@ -4341,7 +4406,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
     this, config, language, &dagChecker, this->LinkOptionsEntries);
 
   AddInterfaceEntries(this, config, "INTERFACE_LINK_OPTIONS", language,
-                      &dagChecker, entries,
+                      &dagChecker, entries, IncludeRuntimeInterface::Yes,
                       this->GetPolicyStatusCMP0099() != cmPolicies::NEW);
 
   processOptions(this, entries, result, uniqueOptions, debugOptions,
@@ -4600,7 +4665,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
     this, config, language, &dagChecker, this->LinkDirectoriesEntries);
 
   AddInterfaceEntries(this, config, "INTERFACE_LINK_DIRECTORIES", language,
-                      &dagChecker, entries,
+                      &dagChecker, entries, IncludeRuntimeInterface::Yes,
                       this->GetPolicyStatusCMP0099() != cmPolicies::NEW);
 
   processLinkDirectories(this, entries, result, uniqueDirectories,
@@ -4639,7 +4704,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
     }
   }
   AddInterfaceEntries(this, config, "INTERFACE_LINK_DEPENDS", language,
-                      &dagChecker, entries,
+                      &dagChecker, entries, IncludeRuntimeInterface::Yes,
                       this->GetPolicyStatusCMP0099() != cmPolicies::NEW);
 
   processOptions(this, entries, result, uniqueOptions, false, "link depends",
@@ -6382,6 +6447,7 @@ cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
     iface.AllDone = true;
     if (iface.Exists) {
       this->ComputeLinkInterface(config, iface, head, secondPass);
+      this->ComputeLinkInterfaceRuntimeLibraries(config, iface);
     }
   }
 
@@ -6905,6 +6971,83 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   }
 }
 
+namespace {
+
+template <typename ReturnType>
+ReturnType constructItem(cmGeneratorTarget* target,
+                         cmListFileBacktrace const& bt);
+
+template <>
+inline cmLinkImplItem constructItem(cmGeneratorTarget* target,
+                                    cmListFileBacktrace const& bt)
+{
+  return cmLinkImplItem(cmLinkItem(target, false, bt), false);
+}
+
+template <>
+inline cmLinkItem constructItem(cmGeneratorTarget* target,
+                                cmListFileBacktrace const& bt)
+{
+  return cmLinkItem(target, false, bt);
+}
+
+template <typename ValueType>
+std::vector<ValueType> computeImplicitLanguageTargets(
+  std::string const& lang, std::string const& config,
+  cmGeneratorTarget const* currentTarget)
+{
+  cmListFileBacktrace bt;
+  std::vector<ValueType> result;
+  cmLocalGenerator* lg = currentTarget->GetLocalGenerator();
+
+  std::string const& runtimeLibrary =
+    currentTarget->GetRuntimeLinkLibrary(lang, config);
+  if (cmProp runtimeLinkOptions = currentTarget->Makefile->GetDefinition(
+        "CMAKE_" + lang + "_RUNTIME_LIBRARIES_" + runtimeLibrary)) {
+    std::vector<std::string> libsVec = cmExpandedList(*runtimeLinkOptions);
+    result.reserve(libsVec.size());
+
+    for (std::string const& i : libsVec) {
+      cmGeneratorTarget::TargetOrString resolved =
+        currentTarget->ResolveTargetReference(i, lg);
+      if (resolved.Target) {
+        result.emplace_back(constructItem<ValueType>(resolved.Target, bt));
+      }
+    }
+  }
+
+  return result;
+}
+}
+
+void cmGeneratorTarget::ComputeLinkInterfaceRuntimeLibraries(
+  const std::string& config, cmOptionalLinkInterface& iface) const
+{
+  for (std::string const& lang : iface.Languages) {
+    if ((lang == "CUDA" || lang == "HIP") &&
+        iface.LanguageRuntimeLibraries.find(lang) ==
+          iface.LanguageRuntimeLibraries.end()) {
+      auto implicitTargets =
+        computeImplicitLanguageTargets<cmLinkItem>(lang, config, this);
+      iface.LanguageRuntimeLibraries[lang] = std::move(implicitTargets);
+    }
+  }
+}
+
+void cmGeneratorTarget::ComputeLinkImplementationRuntimeLibraries(
+  const std::string& config, cmOptionalLinkImplementation& impl) const
+{
+  for (std::string const& lang : impl.Languages) {
+    if ((lang == "CUDA" || lang == "HIP") &&
+        impl.LanguageRuntimeLibraries.find(lang) ==
+          impl.LanguageRuntimeLibraries.end()) {
+      auto implicitTargets =
+        computeImplicitLanguageTargets<cmLinkImplItem>(lang, config, this);
+      impl.LanguageRuntimeLibraries[lang] = std::move(implicitTargets);
+    }
+  }
+}
+
 const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
   const std::string& config, cmGeneratorTarget const* headTarget,
   bool usage_requirements_only, bool secondPass) const
@@ -7169,6 +7312,7 @@ const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
   if (!impl.LanguagesDone) {
     impl.LanguagesDone = true;
     this->ComputeLinkImplementationLanguages(config, impl);
+    this->ComputeLinkImplementationRuntimeLibraries(config, impl);
   }
   return &impl;
 }

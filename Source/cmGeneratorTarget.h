@@ -1111,6 +1111,12 @@ private:
   cmProp GetPropertyWithPairedLanguageSupport(std::string const& lang,
                                               const char* suffix) const;
 
+  void ComputeLinkImplementationRuntimeLibraries(
+    const std::string& config, cmOptionalLinkImplementation& impl) const;
+
+  void ComputeLinkInterfaceRuntimeLibraries(
+    const std::string& config, cmOptionalLinkInterface& iface) const;
+
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(
     const std::string& config) const;
