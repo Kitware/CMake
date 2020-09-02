@@ -356,7 +356,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     std::string launcher;
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 
@@ -809,7 +809,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     std::string launcher;
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 

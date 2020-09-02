@@ -1,6 +1,8 @@
 CMAKE_FRAMEWORK_MULTI_CONFIG_POSTFIX_<CONFIG>
 ---------------------------------------------
 
+.. versionadded:: 3.18
+
 Default framework filename postfix under configuration ``<CONFIG>`` when
 using a multi-config generator.
 

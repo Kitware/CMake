@@ -5,7 +5,7 @@ Command ``some_cmd()`` explicit cmake domain.
 Command ``some_cmd()`` without target.
 Command ``some_cmd`` with target.
 Command ``some_cmd_<cmd>()`` placeholder without target.
-Command ``some_cmd_<cmd>`` placholder with target.
+Command ``some_cmd_<cmd>`` placeholder with target.
 Command ``some_cmd()`` with parens.
 Command ``some_cmd(SUB)`` with subcommand.
 Command ``some_cmd(SUB)`` with subcommand and target.

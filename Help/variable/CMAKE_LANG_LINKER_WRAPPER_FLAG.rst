@@ -1,6 +1,8 @@
 CMAKE_<LANG>_LINKER_WRAPPER_FLAG
 --------------------------------
 
+.. versionadded:: 3.13
+
 Defines the syntax of compiler driver option to pass options to the linker
 tool. It will be used to translate the ``LINKER:`` prefix in the link options
 (see :command:`add_link_options` and :command:`target_link_options`).

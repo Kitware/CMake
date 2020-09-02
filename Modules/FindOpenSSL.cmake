@@ -27,11 +27,11 @@ This module defines the following :prop_tgt:`IMPORTED` targets:
   projects under MSVC. This target is available only if found OpenSSL version
   is not less than 0.9.8. By linking this target the above OpenSSL targets can
   be linked even if the project has different MSVC runtime configurations with
-  the above OpenSSL targets. This target has no effect on plaforms other than
+  the above OpenSSL targets. This target has no effect on platforms other than
   MSVC.
 
 NOTE: Due to how ``INTERFACE_SOURCES`` are consumed by the consuming target,
-unless you certainly know what you are doing, it is always prefered to link
+unless you certainly know what you are doing, it is always preferred to link
 ``OpenSSL::applink`` target as ``PRIVATE`` and to make sure that this target is
 linked at most once for the whole dependency graph of any library or
 executable:
@@ -193,12 +193,18 @@ if(WIN32 AND NOT CYGWIN)
     endif()
 
     if(OPENSSL_USE_STATIC_LIBS)
+      set(_OPENSSL_STATIC_SUFFIX
+        "_static"
+      )
       set(_OPENSSL_PATH_SUFFIXES
         "lib/VC/static"
         "VC/static"
         "lib"
         )
     else()
+      set(_OPENSSL_STATIC_SUFFIX
+        ""
+      )
       set(_OPENSSL_PATH_SUFFIXES
         "lib/VC"
         "VC"
@@ -208,6 +214,17 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(LIB_EAY_DEBUG
       NAMES
+        # When OpenSSL is built with default options, the static library name is suffixed with "_static".
+        # Looking the "libcrypto_static.lib" with a higher priority than "libcrypto.lib" which is the
+        # import library of "libcrypto.dll".
+        libcrypto${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libcrypto${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libcrypto${_OPENSSL_STATIC_SUFFIX}d
+        libeay32${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libeay32${_OPENSSL_STATIC_SUFFIX}d
+        crypto${_OPENSSL_STATIC_SUFFIX}d
+        # When OpenSSL is built with the "-static" option, only the static build is produced,
+        # and it is not suffixed with "_static".
         libcrypto${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
         libcrypto${_OPENSSL_MSVC_RT_MODE}d
         libcryptod
@@ -222,6 +239,17 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(LIB_EAY_RELEASE
       NAMES
+        # When OpenSSL is built with default options, the static library name is suffixed with "_static".
+        # Looking the "libcrypto_static.lib" with a higher priority than "libcrypto.lib" which is the
+        # import library of "libcrypto.dll".
+        libcrypto${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libcrypto${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libcrypto${_OPENSSL_STATIC_SUFFIX}
+        libeay32${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libeay32${_OPENSSL_STATIC_SUFFIX}
+        crypto${_OPENSSL_STATIC_SUFFIX}
+        # When OpenSSL is built with the "-static" option, only the static build is produced,
+        # and it is not suffixed with "_static".
         libcrypto${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
         libcrypto${_OPENSSL_MSVC_RT_MODE}
         libcrypto
@@ -236,6 +264,17 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(SSL_EAY_DEBUG
       NAMES
+        # When OpenSSL is built with default options, the static library name is suffixed with "_static".
+        # Looking the "libssl_static.lib" with a higher priority than "libssl.lib" which is the
+        # import library of "libssl.dll".
+        libssl${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libssl${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        libssl${_OPENSSL_STATIC_SUFFIX}d
+        ssleay32${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
+        ssleay32${_OPENSSL_STATIC_SUFFIX}d
+        ssl${_OPENSSL_STATIC_SUFFIX}d
+        # When OpenSSL is built with the "-static" option, only the static build is produced,
+        # and it is not suffixed with "_static".
         libssl${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
         libssl${_OPENSSL_MSVC_RT_MODE}d
         libssld
@@ -250,6 +289,17 @@ if(WIN32 AND NOT CYGWIN)
 
     find_library(SSL_EAY_RELEASE
       NAMES
+        # When OpenSSL is built with default options, the static library name is suffixed with "_static".
+        # Looking the "libssl_static.lib" with a higher priority than "libssl.lib" which is the
+        # import library of "libssl.dll".
+        libssl${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libssl${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        libssl${_OPENSSL_STATIC_SUFFIX}
+        ssleay32${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
+        ssleay32${_OPENSSL_STATIC_SUFFIX}
+        ssl${_OPENSSL_STATIC_SUFFIX}
+        # When OpenSSL is built with the "-static" option, only the static build is produced,
+        # and it is not suffixed with "_static".
         libssl${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}
         libssl${_OPENSSL_MSVC_RT_MODE}
         libssl

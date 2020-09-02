@@ -1,6 +1,8 @@
 <LANG>_INCLUDE_WHAT_YOU_USE
 ---------------------------
 
+.. versionadded:: 3.3
+
 This property is implemented only when ``<LANG>`` is ``C`` or ``CXX``.
 
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a command

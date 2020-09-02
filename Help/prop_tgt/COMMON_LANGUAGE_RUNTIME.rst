@@ -1,6 +1,8 @@
 COMMON_LANGUAGE_RUNTIME
 -----------------------
 
+.. versionadded:: 3.12
+
 By setting this target property, the target is configured to build with
 ``C++/CLI`` support.
 

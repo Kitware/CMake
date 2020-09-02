@@ -1,6 +1,8 @@
 XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS
 ----------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Dynamic Library Loads``
 in the Diagnostics section of the generated Xcode scheme.
 

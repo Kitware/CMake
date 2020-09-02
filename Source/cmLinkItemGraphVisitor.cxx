@@ -24,15 +24,12 @@ void cmLinkItemGraphVisitor::VisitItem(cmLinkItem const& item)
 void cmLinkItemGraphVisitor::VisitLinks(cmLinkItem const& item,
                                         cmLinkItem const& rootItem)
 {
-  if (this->LinkVisited(item, rootItem)) {
-    return;
-  }
-
   if (item.Target == nullptr) {
     return;
   }
 
-  for (auto const& config : item.Target->Makefile->GetGeneratorConfigs()) {
+  for (auto const& config : item.Target->Makefile->GetGeneratorConfigs(
+         cmMakefile::IncludeEmptyConfig)) {
     this->VisitLinks(item, rootItem, config);
   }
 }

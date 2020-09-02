@@ -1,6 +1,8 @@
 <LANG>_COMPILER_LAUNCHER
 ------------------------
 
+.. versionadded:: 3.4
+
 This property is implemented only when ``<LANG>`` is ``C``, ``CXX``,
 ``Fortran``, ``OBJC``, ``OBJCXX``, or ``CUDA``.
 

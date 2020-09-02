@@ -88,12 +88,14 @@ if(CPackGen MATCHES "DragNDrop")
     set(expected_file_mask "${CPackComponentsForAll_BINARY_DIR}/MyLib-*.dmg")
     if(${CPackComponentWay} STREQUAL "default")
         set(expected_count 1)
+        set(expect_dmg_sla 1)
     elseif(${CPackComponentWay} STREQUAL "OnePackPerGroup")
         set(expected_count 3)
     elseif(${CPackComponentWay} STREQUAL "IgnoreGroup")
         set(expected_count 4)
     elseif(${CPackComponentWay} STREQUAL "AllInOne")
         set(expected_count 1)
+        set(expect_dmg_sla 1)
     endif()
 endif()
 
@@ -137,6 +139,36 @@ if(expected_file_mask)
   message(STATUS "actual_count='${actual_count}'")
   if(NOT actual_count EQUAL expected_count)
     message(FATAL_ERROR "error: expected_count=${expected_count} does not match actual_count=${actual_count}: CPackComponents test fails. (CPack_output=${CPack_output}, CPack_error=${CPack_error})")
+  endif()
+
+  if(expect_dmg_sla)
+    execute_process(COMMAND hdiutil udifderez -xml "${expected_file}" OUTPUT_VARIABLE out ERROR_VARIABLE err RESULT_VARIABLE res)
+    if(NOT res EQUAL 0)
+      string(REPLACE "\n" "\n  " err "  ${err}")
+      message(FATAL_ERROR "error: running 'hdiutil udifderez -xml' on\n  ${expected_file}\nfailed with:\n${err}")
+    endif()
+    foreach(key "LPic" "STR#" "TEXT")
+      if(NOT out MATCHES "<key>${key}</key>")
+        string(REPLACE "\n" "\n  " out "  ${out}")
+        message(FATAL_ERROR "error: running 'hdiutil udifderez -xml' on\n  ${expected_file}\ndid not show '${key}' key:\n${out}")
+      endif()
+    endforeach()
+    foreach(line
+        # LPic first and last base64 lines
+        "\tAAIAEQADAAEAAAAAAAIAAAAIAAMAAAABAAQAAAAEAAUAAAAOAAYA\n"
+        "\tAA0AAABbAAQAAAAzAA8AAQAMABAAAAALAA4AAA==\n"
+        # STR# first and last base64 lines
+        "\tAAkHRW5nbGlzaAVBZ3JlZQhEaXNhZ3JlZQVQcmludAdTYXZlLi4u\n"
+        "\tdGVkIGEgcHJpbnRlci4=\n"
+        # TEXT first and last base64 lines
+        "\tTElDRU5TRQ0tLS0tLS0tDVRoaXMgaXMgYW4gaW5zdGFsbGVyIGNy\n"
+        "\tTm8gbGljZW5zZSBwcm92aWRlZC4NDQ==\n"
+        )
+      if(NOT out MATCHES "${line}")
+        string(REPLACE "\n" "\n  " out "  ${out}")
+        message(FATAL_ERROR "error: running 'hdiutil udifderez -xml' on\n  ${expected_file}\ndid not show '${line}':\n${out}")
+      endif()
+    endforeach()
   endif()
 endif()
 

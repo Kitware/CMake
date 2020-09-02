@@ -92,6 +92,7 @@ if(NOT CURL_LIBRARY)
       curllib_static
     # Windows older "Win32 - MSVC" prebuilts (libcurl.lib, e.g. libcurl-7.15.5-win32-msvc.zip):
       libcurl
+      NAMES_PER_DIR
       HINTS ${PC_CURL_LIBRARY_DIRS}
   )
   mark_as_advanced(CURL_LIBRARY_RELEASE)
@@ -100,6 +101,7 @@ if(NOT CURL_LIBRARY)
     # Windows MSVC CMake builds in debug configuration on vcpkg:
       libcurl-d_imp
       libcurl-d
+      NAMES_PER_DIR
       HINTS ${PC_CURL_LIBRARY_DIRS}
   )
   mark_as_advanced(CURL_LIBRARY_DEBUG)

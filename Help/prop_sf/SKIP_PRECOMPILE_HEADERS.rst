@@ -1,6 +1,8 @@
 SKIP_PRECOMPILE_HEADERS
 -----------------------
 
+.. versionadded:: 3.16
+
 Is this source file skipped by :prop_tgt:`PRECOMPILE_HEADERS` feature.
 
 This property helps with build problems that one would run into

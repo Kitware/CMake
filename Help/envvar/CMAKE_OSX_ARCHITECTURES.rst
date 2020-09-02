@@ -1,6 +1,8 @@
 CMAKE_OSX_ARCHITECTURES
 -----------------------
 
+.. versionadded:: 3.10
+
 .. include:: ENV_VAR.txt
 
 Target specific architectures for macOS.

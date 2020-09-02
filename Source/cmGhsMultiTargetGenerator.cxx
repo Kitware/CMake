@@ -550,10 +550,9 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
    */
   for (auto& sg : groupFilesList) {
     std::ostream* fout;
-    cmProp noSourceGroupFile =
-      this->GeneratorTarget->GetProperty("GHS_NO_SOURCE_GROUP_FILE");
-    bool useProjectFile = (noSourceGroupFile && cmIsOn(*noSourceGroupFile)) ||
-      cmIsOn(this->Makefile->GetDefinition("CMAKE_GHS_NO_SOURCE_GROUP_FILE"));
+    bool useProjectFile =
+      cmIsOn(this->GeneratorTarget->GetProperty("GHS_NO_SOURCE_GROUP_FILE")) ||
+      this->Makefile->IsOn("CMAKE_GHS_NO_SOURCE_GROUP_FILE");
     if (useProjectFile || sg.empty()) {
       fout = &fout_proj;
     } else {

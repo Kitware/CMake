@@ -50,7 +50,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
     {
       cmMakefile* makefile = localGen->GetMakefile();
       // Detect global autogen target name
-      if (cmIsOn(makefile->GetSafeDefinition("CMAKE_GLOBAL_AUTOGEN_TARGET"))) {
+      if (makefile->IsOn("CMAKE_GLOBAL_AUTOGEN_TARGET")) {
         std::string targetName =
           makefile->GetSafeDefinition("CMAKE_GLOBAL_AUTOGEN_TARGET_NAME");
         if (targetName.empty()) {
@@ -61,7 +61,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
       }
 
       // Detect global autorcc target name
-      if (cmIsOn(makefile->GetSafeDefinition("CMAKE_GLOBAL_AUTORCC_TARGET"))) {
+      if (makefile->IsOn("CMAKE_GLOBAL_AUTORCC_TARGET")) {
         std::string targetName =
           makefile->GetSafeDefinition("CMAKE_GLOBAL_AUTORCC_TARGET_NAME");
         if (targetName.empty()) {

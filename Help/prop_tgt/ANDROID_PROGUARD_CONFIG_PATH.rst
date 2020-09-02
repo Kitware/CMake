@@ -1,6 +1,8 @@
 ANDROID_PROGUARD_CONFIG_PATH
 ----------------------------
 
+.. versionadded:: 3.4
+
 Set the Android property that specifies the location of the ProGuard
 config file. Leave empty to use the default one.
 This a string property that contains the path to ProGuard config file.

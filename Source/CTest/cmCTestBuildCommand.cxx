@@ -12,6 +12,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -38,10 +39,9 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
 
   this->Handler = handler;
 
-  const char* ctestBuildCommand =
-    this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");
-  if (ctestBuildCommand && *ctestBuildCommand) {
-    this->CTest->SetCTestConfiguration("MakeCommand", ctestBuildCommand,
+  cmProp ctestBuildCommand = this->Makefile->GetDef("CTEST_BUILD_COMMAND");
+  if (cmNonempty(ctestBuildCommand)) {
+    this->CTest->SetCTestConfiguration("MakeCommand", *ctestBuildCommand,
                                        this->Quiet);
   } else {
     const char* cmakeGeneratorName =
@@ -56,7 +56,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
     const char* cmakeBuildConfiguration = !this->Configuration.empty()
       ? this->Configuration.c_str()
-      : ((ctestBuildConfiguration && *ctestBuildConfiguration)
+      : (cmNonempty(ctestBuildConfiguration)
            ? ctestBuildConfiguration
            : this->CTest->GetConfigType().c_str());
 
@@ -67,7 +67,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       ? this->Target.c_str()
       : this->Makefile->GetDefinition("CTEST_BUILD_TARGET");
 
-    if (cmakeGeneratorName && *cmakeGeneratorName) {
+    if (cmNonempty(cmakeGeneratorName)) {
       if (!cmakeBuildConfiguration) {
         cmakeBuildConfiguration = "Release";
       }
@@ -108,7 +108,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          "SetMakeCommand:" << buildCommand << "\n",
                          this->Quiet);
-      this->CTest->SetCTestConfiguration("MakeCommand", buildCommand.c_str(),
+      this->CTest->SetCTestConfiguration("MakeCommand", buildCommand,
                                          this->Quiet);
     } else {
       std::ostringstream ostr;
@@ -123,16 +123,15 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
     }
   }
 
-  if (const char* useLaunchers =
-        this->Makefile->GetDefinition("CTEST_USE_LAUNCHERS")) {
-    this->CTest->SetCTestConfiguration("UseLaunchers", useLaunchers,
+  if (cmProp useLaunchers = this->Makefile->GetDef("CTEST_USE_LAUNCHERS")) {
+    this->CTest->SetCTestConfiguration("UseLaunchers", *useLaunchers,
                                        this->Quiet);
   }
 
-  if (const char* labelsForSubprojects =
-        this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
+  if (cmProp labelsForSubprojects =
+        this->Makefile->GetDef("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
-                                       labelsForSubprojects, this->Quiet);
+                                       *labelsForSubprojects, this->Quiet);
   }
 
   handler->SetQuiet(this->Quiet);

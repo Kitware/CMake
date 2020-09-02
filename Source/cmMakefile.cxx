@@ -20,8 +20,10 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#include <cm3p/json/value.h>
-#include <cm3p/json/writer.h>
+#ifndef CMAKE_BOOTSTRAP
+#  include <cm3p/json/value.h>
+#  include <cm3p/json/writer.h>
+#endif
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -34,6 +36,7 @@
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h" // IWYU pragma: keep
 #include "cmExportBuildFileGenerator.h"
+#include "cmFSPermissions.h"
 #include "cmFileLockPool.h"
 #include "cmFunctionBlocker.h"
 #include "cmGeneratedFileStream.h"
@@ -68,6 +71,8 @@
 
 class cmMessenger;
 
+using namespace cmFSPermissions;
+
 cmDirectoryId::cmDirectoryId(std::string s)
   : String(std::move(s))
 {
@@ -82,7 +87,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 {
   this->IsSourceFileTryCompile = false;
 
-  this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 
   this->SuppressSideEffects = false;
@@ -194,7 +198,7 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
   std::string env;
   cmSystemTools::GetEnv(varName, env);
 
-  bool const haveVar = var && *var;
+  bool const haveVar = cmNonempty(var);
   bool const haveEnv = !env.empty();
   if ((haveVar || haveEnv) && this->WarnedCMP0074.insert(varName).second) {
     std::ostringstream w;
@@ -750,7 +754,6 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
       break;
     }
   }
-  this->CheckForUnusedVariables();
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile);
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile);
@@ -798,15 +801,15 @@ void cmMakefile::EnforceDirectoryLevelRules() const
 }
 
 void cmMakefile::AddEvaluationFile(
-  const std::string& inputFile,
+  const std::string& inputFile, const std::string& targetName,
   std::unique_ptr<cmCompiledGeneratorExpression> outputName,
   std::unique_ptr<cmCompiledGeneratorExpression> condition,
   bool inputIsContent)
 {
   this->EvaluationFiles.push_back(
     cm::make_unique<cmGeneratorExpressionEvaluationFile>(
-      inputFile, std::move(outputName), std::move(condition), inputIsContent,
-      this->GetPolicyStatus(cmPolicies::CMP0070)));
+      inputFile, targetName, std::move(outputName), std::move(condition),
+      inputIsContent, this->GetPolicyStatus(cmPolicies::CMP0070)));
 }
 
 const std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>&
@@ -1434,8 +1437,8 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
     cmProp p = parent->GetProperty("COMPILE_DEFINITIONS");
     this->SetProperty("COMPILE_DEFINITIONS", p ? p->c_str() : nullptr);
-    std::vector<std::string> configs;
-    this->GetConfigurations(configs);
+    std::vector<std::string> configs =
+      this->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
     for (std::string const& config : configs) {
       std::string defPropName =
         cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
@@ -1513,8 +1516,6 @@ void cmMakefile::PopFunctionScope(bool reportError)
 #endif
 
   this->PopLoopBlockBarrier();
-
-  this->CheckForUnusedVariables();
 }
 
 void cmMakefile::PushMacroScope(std::string const& fileName,
@@ -1661,7 +1662,8 @@ void cmMakefile::Configure()
         this->SetCheckCMP0000(true);
 
         // Implicitly set the version for the user.
-        this->SetPolicyVersion("2.4", std::string());
+        cmPolicies::ApplyPolicyVersion(this, 2, 4, 0,
+                                       cmPolicies::WarnCompat::Off);
       }
     }
     bool hasProject = false;
@@ -1860,9 +1862,6 @@ void cmMakefile::AddSystemIncludeDirectories(const std::set<std::string>& incs)
 
 void cmMakefile::AddDefinition(const std::string& name, cm::string_view value)
 {
-  if (this->VariableInitialized(name)) {
-    this->LogUnused("changing definition", name);
-  }
   this->StateSnapshot.SetDefinition(name, value);
 
 #ifndef CMAKE_BOOTSTRAP
@@ -1923,16 +1922,6 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
   this->StateSnapshot.RemoveDefinition(name);
 }
 
-void cmMakefile::CheckForUnusedVariables() const
-{
-  if (!this->WarnUnused) {
-    return;
-  }
-  for (const std::string& key : this->StateSnapshot.UnusedKeys()) {
-    this->LogUnused("out of scope", key);
-  }
-}
-
 void cmMakefile::MarkVariableAsUsed(const std::string& var)
 {
   this->StateSnapshot.GetDefinition(var);
@@ -1960,29 +1949,8 @@ void cmMakefile::MaybeWarnUninitialized(std::string const& variable,
   }
 }
 
-void cmMakefile::LogUnused(const char* reason, const std::string& name) const
-{
-  if (this->WarnUnused) {
-    std::string path;
-    if (!this->ExecutionStatusStack.empty()) {
-      path = this->GetExecutionContext().FilePath;
-    } else {
-      path = cmStrCat(this->GetCurrentSourceDirectory(), "/CMakeLists.txt");
-    }
-
-    if (this->CheckSystemVars || this->IsProjectFile(path.c_str())) {
-      std::ostringstream msg;
-      msg << "unused variable (" << reason << ") \'" << name << "\'";
-      this->IssueMessage(MessageType::AUTHOR_WARNING, msg.str());
-    }
-  }
-}
-
 void cmMakefile::RemoveDefinition(const std::string& name)
 {
-  if (this->VariableInitialized(name)) {
-    this->LogUnused("unsetting", name);
-  }
   this->StateSnapshot.RemoveDefinition(name);
 #ifndef CMAKE_BOOTSTRAP
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -2555,8 +2523,7 @@ void cmMakefile::ExpandVariablesCMP0019()
 
 bool cmMakefile::IsOn(const std::string& name) const
 {
-  const char* value = this->GetDefinition(name);
-  return cmIsOn(value);
+  return cmIsOn(this->GetDef(name));
 }
 
 bool cmMakefile::IsSet(const std::string& name) const
@@ -3287,25 +3254,28 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
   }
 }
 
-std::string cmMakefile::GetConfigurations(std::vector<std::string>& configs,
-                                          bool singleConfig) const
+std::string cmMakefile::GetDefaultConfiguration() const
 {
   if (this->GetGlobalGenerator()->IsMultiConfig()) {
-    this->GetDefExpandList("CMAKE_CONFIGURATION_TYPES", configs);
-    return "";
+    return std::string{};
   }
-  const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  if (singleConfig && !buildType.empty()) {
-    configs.push_back(buildType);
-  }
-  return buildType;
+  return this->GetSafeDefinition("CMAKE_BUILD_TYPE");
 }
 
-std::vector<std::string> cmMakefile::GetGeneratorConfigs() const
+std::vector<std::string> cmMakefile::GetGeneratorConfigs(
+  GeneratorConfigQuery mode) const
 {
   std::vector<std::string> configs;
-  GetConfigurations(configs);
-  if (configs.empty()) {
+  if (this->GetGlobalGenerator()->IsMultiConfig() ||
+      mode == cmMakefile::OnlyMultiConfig) {
+    this->GetDefExpandList("CMAKE_CONFIGURATION_TYPES", configs);
+  } else {
+    const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+    if (!buildType.empty()) {
+      configs.emplace_back(buildType);
+    }
+  }
+  if (mode == cmMakefile::IncludeEmptyConfig && configs.empty()) {
     configs.emplace_back();
   }
   return configs;
@@ -3725,7 +3695,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   if (cmakeArgs) {
     // FIXME: Workaround to ignore unused CLI variables in try-compile.
     //
-    // Ideally we should use SetArgs to honor options like --warn-unused-vars.
+    // Ideally we should use SetArgs for options like --no-warn-unused-cli.
     // However, there is a subtle problem when certain arguments are passed to
     // a macro wrapping around try_compile or try_run that does not escape
     // semicolons in its parameters but just passes ${ARGV} or ${ARGN}.  In
@@ -3744,7 +3714,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     // the value VAR=a is sufficient for the try_compile or try_run to get the
     // correct result.  Calling SetArgs here would break such projects that
     // previously built.  Instead we work around the issue by never reporting
-    // unused arguments and ignoring options such as --warn-unused-vars.
+    // unused arguments and ignoring options such as --no-warn-unused-cli.
     cm.SetWarnUnusedCli(false);
     // cm.SetArgs(*cmakeArgs, true);
 
@@ -3998,6 +3968,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
 int cmMakefile::ConfigureFile(const std::string& infile,
                               const std::string& outfile, bool copyonly,
                               bool atOnly, bool escapeQuotes,
+                              bool use_source_permissions,
                               cmNewLineStyle newLine)
 {
   int res = 1;
@@ -4021,7 +3992,13 @@ int cmMakefile::ConfigureFile(const std::string& infile,
   this->AddCMakeOutputFile(soutfile);
 
   mode_t perm = 0;
-  cmSystemTools::GetPermissions(sinfile, perm);
+  if (!use_source_permissions) {
+    perm = perm | mode_owner_read | mode_owner_write | mode_group_read |
+      mode_world_read;
+  } else {
+    cmSystemTools::GetPermissions(sinfile, perm);
+  }
+
   std::string::size_type pos = soutfile.rfind('/');
   if (pos != std::string::npos) {
     std::string path = soutfile.substr(0, pos);
@@ -4030,6 +4007,13 @@ int cmMakefile::ConfigureFile(const std::string& infile,
 
   if (copyonly) {
     if (!cmSystemTools::CopyFileIfDifferent(sinfile, soutfile)) {
+      this->IssueMessage(MessageType::FATAL_ERROR,
+                         cmSystemTools::GetLastSystemError());
+      return 0;
+    }
+    if (!cmSystemTools::SetPermissions(soutfile, perm)) {
+      this->IssueMessage(MessageType::FATAL_ERROR,
+                         cmSystemTools::GetLastSystemError());
       return 0;
     }
   } else {
@@ -4080,9 +4064,15 @@ int cmMakefile::ConfigureFile(const std::string& infile,
     fin.close();
     fout.close();
     if (!cmSystemTools::CopyFileIfDifferent(tempOutputFile, soutfile)) {
+      this->IssueMessage(MessageType::FATAL_ERROR,
+                         cmSystemTools::GetLastSystemError());
       res = 0;
     } else {
-      cmSystemTools::SetPermissions(soutfile, perm);
+      if (!cmSystemTools::SetPermissions(soutfile, perm)) {
+        this->IssueMessage(MessageType::FATAL_ERROR,
+                           cmSystemTools::GetLastSystemError());
+        res = 0;
+      }
     }
     cmSystemTools::RemoveFile(tempOutputFile);
   }
@@ -4127,8 +4117,7 @@ cmProp cmMakefile::GetProperty(const std::string& prop, bool chain) const
 
 bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 {
-  cmProp p = this->GetProperty(prop);
-  return p && cmIsOn(*p);
+  return cmIsOn(this->GetProperty(prop));
 }
 
 std::vector<std::string> cmMakefile::GetPropertyKeys() const
@@ -4239,8 +4228,6 @@ void cmMakefile::PopScope()
 #endif
 
   this->PopLoopBlockBarrier();
-
-  this->CheckForUnusedVariables();
 
   this->PopSnapshot();
 }
@@ -4557,7 +4544,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 
   // Deprecate old policies, especially those that require a lot
   // of code to maintain the old behavior.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0071 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0072 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
@@ -4599,7 +4586,7 @@ void cmMakefile::PopSnapshot(bool reportError)
   // cmStateSnapshot manages nested policy scopes within it.
   // Since the scope corresponding to the snapshot is closing,
   // reject any still-open nested policy scopes with an error.
-  while (!this->StateSnapshot.CanPopPolicyScope()) {
+  while (this->StateSnapshot.CanPopPolicyScope()) {
     if (reportError) {
       this->IssueMessage(MessageType::FATAL_ERROR,
                          "cmake_policy PUSH without matching POP");
@@ -4615,7 +4602,8 @@ void cmMakefile::PopSnapshot(bool reportError)
 bool cmMakefile::SetPolicyVersion(std::string const& version_min,
                                   std::string const& version_max)
 {
-  return cmPolicies::ApplyPolicyVersion(this, version_min, version_max);
+  return cmPolicies::ApplyPolicyVersion(this, version_min, version_max,
+                                        cmPolicies::WarnCompat::On);
 }
 
 bool cmMakefile::HasCMP0054AlreadyBeenReported(
@@ -4649,674 +4637,6 @@ bool cmMakefile::IgnoreErrorsCMP0061() const
       break;
   }
   return ignoreErrors;
-}
-
-#define FEATURE_STRING(F) , #F
-static const char* const C_FEATURES[] = { nullptr FOR_EACH_C_FEATURE(
-  FEATURE_STRING) };
-
-static const char* const CXX_FEATURES[] = { nullptr FOR_EACH_CXX_FEATURE(
-  FEATURE_STRING) };
-
-static const char* const CUDA_FEATURES[] = { nullptr FOR_EACH_CUDA_FEATURE(
-  FEATURE_STRING) };
-#undef FEATURE_STRING
-
-static const char* const C_STANDARDS[] = { "90", "99", "11" };
-static const char* const CXX_STANDARDS[] = { "98", "11", "14", "17", "20" };
-static const char* const CUDA_STANDARDS[] = { "03", "11", "14", "17", "20" };
-
-bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
-                                          const std::string& feature,
-                                          std::string* error) const
-{
-  if (cmGeneratorExpression::Find(feature) != std::string::npos) {
-    target->AppendProperty("COMPILE_FEATURES", feature);
-    return true;
-  }
-
-  std::string lang;
-  if (!this->CompileFeatureKnown(target, feature, lang, error)) {
-    return false;
-  }
-
-  const char* features = this->CompileFeaturesAvailable(lang, error);
-  if (!features) {
-    return false;
-  }
-
-  std::vector<std::string> availableFeatures = cmExpandedList(features);
-  if (!cm::contains(availableFeatures, feature)) {
-    std::ostringstream e;
-    e << "The compiler feature \"" << feature << "\" is not known to " << lang
-      << " compiler\n\""
-      << this->GetDefinition("CMAKE_" + lang + "_COMPILER_ID")
-      << "\"\nversion "
-      << this->GetDefinition("CMAKE_" + lang + "_COMPILER_VERSION") << ".";
-    if (error) {
-      *error = e.str();
-    } else {
-      this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                                             this->Backtrace);
-    }
-    return false;
-  }
-
-  target->AppendProperty("COMPILE_FEATURES", feature);
-
-  if (lang == "C" || lang == "OBJC") {
-    return this->AddRequiredTargetCFeature(target, feature, lang, error);
-  }
-  if (lang == "CUDA") {
-    return this->AddRequiredTargetCudaFeature(target, feature, lang, error);
-  }
-  return this->AddRequiredTargetCxxFeature(target, feature, lang, error);
-}
-
-bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
-                                     const std::string& feature,
-                                     std::string& lang,
-                                     std::string* error) const
-{
-  assert(cmGeneratorExpression::Find(feature) == std::string::npos);
-
-  bool isCFeature =
-    std::find_if(cm::cbegin(C_FEATURES) + 1, cm::cend(C_FEATURES),
-                 cmStrCmp(feature)) != cm::cend(C_FEATURES);
-  if (isCFeature) {
-    lang = "C";
-    return true;
-  }
-  bool isCxxFeature =
-    std::find_if(cm::cbegin(CXX_FEATURES) + 1, cm::cend(CXX_FEATURES),
-                 cmStrCmp(feature)) != cm::cend(CXX_FEATURES);
-  if (isCxxFeature) {
-    lang = "CXX";
-    return true;
-  }
-  bool isCudaFeature =
-    std::find_if(cm::cbegin(CUDA_FEATURES) + 1, cm::cend(CUDA_FEATURES),
-                 cmStrCmp(feature)) != cm::cend(CUDA_FEATURES);
-  if (isCudaFeature) {
-    lang = "CUDA";
-    return true;
-  }
-  std::ostringstream e;
-  if (error) {
-    e << "specified";
-  } else {
-    e << "Specified";
-  }
-  e << " unknown feature \"" << feature
-    << "\" for "
-       "target \""
-    << target->GetName() << "\".";
-  if (error) {
-    *error = e.str();
-  } else {
-    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                                           this->Backtrace);
-  }
-  return false;
-}
-
-const char* cmMakefile::CompileFeaturesAvailable(const std::string& lang,
-                                                 std::string* error) const
-{
-  if (!this->GlobalGenerator->GetLanguageEnabled(lang)) {
-    std::ostringstream e;
-    if (error) {
-      e << "cannot";
-    } else {
-      e << "Cannot";
-    }
-    e << " use features from non-enabled language " << lang;
-    if (error) {
-      *error = e.str();
-    } else {
-      this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                                             this->Backtrace);
-    }
-    return nullptr;
-  }
-
-  const char* featuresKnown =
-    this->GetDefinition("CMAKE_" + lang + "_COMPILE_FEATURES");
-
-  if (!featuresKnown || !*featuresKnown) {
-    std::ostringstream e;
-    if (error) {
-      e << "no";
-    } else {
-      e << "No";
-    }
-    e << " known features for " << lang << " compiler\n\""
-      << this->GetSafeDefinition("CMAKE_" + lang + "_COMPILER_ID")
-      << "\"\nversion "
-      << this->GetSafeDefinition("CMAKE_" + lang + "_COMPILER_VERSION") << ".";
-    if (error) {
-      *error = e.str();
-    } else {
-      this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                                             this->Backtrace);
-    }
-    return nullptr;
-  }
-  return featuresKnown;
-}
-
-bool cmMakefile::HaveStandardAvailable(cmTarget const* target,
-                                       std::string const& lang,
-                                       const std::string& feature) const
-{
-  if (lang == "C" || lang == "OBJC") {
-    return this->HaveCStandardAvailable(target, feature, lang);
-  }
-  if (lang == "CUDA") {
-    return this->HaveCudaStandardAvailable(target, feature, lang);
-  }
-  return this->HaveCxxStandardAvailable(target, feature, lang);
-}
-
-bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
-                                        const std::string& feature,
-                                        std::string const& lang) const
-{
-  cmProp defaultCStandard =
-    this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
-  if (!defaultCStandard) {
-    this->IssueMessage(
-      MessageType::INTERNAL_ERROR,
-      cmStrCat("CMAKE_", lang,
-               "_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
-               "not fully configured for this compiler."));
-    // Return true so the caller does not try to lookup the default standard.
-    return true;
-  }
-  if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
-                   cmStrCmp(*defaultCStandard)) == cm::cend(C_STANDARDS)) {
-    const std::string e = cmStrCat("The CMAKE_", lang,
-                                   "_STANDARD_DEFAULT variable contains an "
-                                   "invalid value: \"",
-                                   *defaultCStandard, "\".");
-    this->IssueMessage(MessageType::INTERNAL_ERROR, e);
-    return false;
-  }
-
-  bool needC90 = false;
-  bool needC99 = false;
-  bool needC11 = false;
-
-  this->CheckNeededCLanguage(feature, lang, needC90, needC99, needC11);
-
-  cmProp existingCStandard = target->GetProperty(cmStrCat(lang, "_STANDARD"));
-  if (!existingCStandard) {
-    existingCStandard = defaultCStandard;
-  }
-
-  if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
-                   cmStrCmp(*existingCStandard)) == cm::cend(C_STANDARDS)) {
-    const std::string e = cmStrCat(
-      "The ", lang, "_STANDARD property on target \"", target->GetName(),
-      "\" contained an invalid value: \"", *existingCStandard, "\".");
-    this->IssueMessage(MessageType::FATAL_ERROR, e);
-    return false;
-  }
-
-  const char* const* existingCIt = existingCStandard
-    ? std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
-                   cmStrCmp(*existingCStandard))
-    : cm::cend(C_STANDARDS);
-
-  if (needC11 && existingCStandard &&
-      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
-                                 cm::cend(C_STANDARDS), cmStrCmp("11"))) {
-    return false;
-  }
-  if (needC99 && existingCStandard &&
-      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
-                                 cm::cend(C_STANDARDS), cmStrCmp("99"))) {
-    return false;
-  }
-  if (needC90 && existingCStandard &&
-      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
-                                 cm::cend(C_STANDARDS), cmStrCmp("90"))) {
-    return false;
-  }
-  return true;
-}
-
-bool cmMakefile::IsLaterStandard(std::string const& lang,
-                                 std::string const& lhs,
-                                 std::string const& rhs)
-{
-  if (lang == "C" || lang == "OBJC") {
-    const char* const* rhsIt = std::find_if(
-      cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS), cmStrCmp(rhs));
-
-    return std::find_if(rhsIt, cm::cend(C_STANDARDS), cmStrCmp(lhs)) !=
-      cm::cend(C_STANDARDS);
-  }
-  if (lang == "CUDA") {
-    const char* const* rhsIt = std::find_if(
-      cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS), cmStrCmp(rhs));
-
-    return std::find_if(rhsIt, cm::cend(CUDA_STANDARDS), cmStrCmp(lhs)) !=
-      cm::cend(CUDA_STANDARDS);
-  }
-
-  const char* const* rhsIt = std::find_if(
-    cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS), cmStrCmp(rhs));
-
-  return std::find_if(rhsIt, cm::cend(CXX_STANDARDS), cmStrCmp(lhs)) !=
-    cm::cend(CXX_STANDARDS);
-}
-
-bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
-                                          const std::string& feature,
-                                          std::string const& lang) const
-{
-  cmProp defaultCxxStandard =
-    this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
-  if (!defaultCxxStandard) {
-    this->IssueMessage(
-      MessageType::INTERNAL_ERROR,
-      cmStrCat("CMAKE_", lang,
-               "_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
-               "not fully configured for this compiler."));
-    // Return true so the caller does not try to lookup the default standard.
-    return true;
-  }
-  if (std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
-                   cmStrCmp(*defaultCxxStandard)) == cm::cend(CXX_STANDARDS)) {
-    const std::string e =
-      cmStrCat("The CMAKE_", lang, "_STANDARD_DEFAULT variable contains an ",
-               "invalid value: \"", *defaultCxxStandard, "\".");
-    this->IssueMessage(MessageType::INTERNAL_ERROR, e);
-    return false;
-  }
-
-  bool needCxx98 = false;
-  bool needCxx11 = false;
-  bool needCxx14 = false;
-  bool needCxx17 = false;
-  bool needCxx20 = false;
-  this->CheckNeededCxxLanguage(feature, lang, needCxx98, needCxx11, needCxx14,
-                               needCxx17, needCxx20);
-
-  cmProp existingCxxStandard =
-    target->GetProperty(cmStrCat(lang, "_STANDARD"));
-  if (!existingCxxStandard) {
-    existingCxxStandard = defaultCxxStandard;
-  }
-
-  const char* const* existingCxxLevel =
-    std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
-                 cmStrCmp(*existingCxxStandard));
-  if (existingCxxLevel == cm::cend(CXX_STANDARDS)) {
-    const std::string e = cmStrCat(
-      "The ", lang, "_STANDARD property on target \"", target->GetName(),
-      "\" contained an invalid value: \"", *existingCxxStandard, "\".");
-    this->IssueMessage(MessageType::FATAL_ERROR, e);
-    return false;
-  }
-
-  /* clang-format off */
-  const char* const* needCxxLevel =
-    needCxx20 ? &CXX_STANDARDS[4]
-    : needCxx17 ? &CXX_STANDARDS[3]
-    : needCxx14 ? &CXX_STANDARDS[2]
-    : needCxx11 ? &CXX_STANDARDS[1]
-    : needCxx98 ? &CXX_STANDARDS[0]
-    : nullptr;
-  /* clang-format on */
-
-  return !needCxxLevel || needCxxLevel <= existingCxxLevel;
-}
-
-void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
-                                        std::string const& lang,
-                                        bool& needCxx98, bool& needCxx11,
-                                        bool& needCxx14, bool& needCxx17,
-                                        bool& needCxx20) const
-{
-  if (const char* propCxx98 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "98_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propCxx98);
-    needCxx98 = cm::contains(props, feature);
-  }
-  if (const char* propCxx11 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "11_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propCxx11);
-    needCxx11 = cm::contains(props, feature);
-  }
-  if (const char* propCxx14 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "14_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propCxx14);
-    needCxx14 = cm::contains(props, feature);
-  }
-  if (const char* propCxx17 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "17_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propCxx17);
-    needCxx17 = cm::contains(props, feature);
-  }
-  if (const char* propCxx20 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "20_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propCxx20);
-    needCxx20 = cm::contains(props, feature);
-  }
-}
-
-bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
-                                             const std::string& feature,
-                                             std::string const& lang,
-                                             std::string* error) const
-{
-  bool needCxx98 = false;
-  bool needCxx11 = false;
-  bool needCxx14 = false;
-  bool needCxx17 = false;
-  bool needCxx20 = false;
-
-  this->CheckNeededCxxLanguage(feature, lang, needCxx98, needCxx11, needCxx14,
-                               needCxx17, needCxx20);
-
-  cmProp existingCxxStandard =
-    target->GetProperty(cmStrCat(lang, "_STANDARD"));
-  if (existingCxxStandard == nullptr) {
-    cmProp defaultCxxStandard =
-      this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
-    if (defaultCxxStandard && !defaultCxxStandard->empty()) {
-      existingCxxStandard = defaultCxxStandard;
-    }
-  }
-  const char* const* existingCxxLevel = nullptr;
-  if (existingCxxStandard) {
-    existingCxxLevel =
-      std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
-                   cmStrCmp(*existingCxxStandard));
-    if (existingCxxLevel == cm::cend(CXX_STANDARDS)) {
-      const std::string e = cmStrCat(
-        "The ", lang, "_STANDARD property on target \"", target->GetName(),
-        "\" contained an invalid value: \"", *existingCxxStandard, "\".");
-      if (error) {
-        *error = e;
-      } else {
-        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
-                                               this->Backtrace);
-      }
-      return false;
-    }
-  }
-
-  /* clang-format off */
-  const char* const* needCxxLevel =
-    needCxx20 ? &CXX_STANDARDS[4]
-    : needCxx17 ? &CXX_STANDARDS[3]
-    : needCxx14 ? &CXX_STANDARDS[2]
-    : needCxx11 ? &CXX_STANDARDS[1]
-    : needCxx98 ? &CXX_STANDARDS[0]
-    : nullptr;
-  /* clang-format on */
-
-  if (needCxxLevel) {
-    // Ensure the C++ language level is high enough to support
-    // the needed C++ features.
-    if (!existingCxxLevel || existingCxxLevel < needCxxLevel) {
-      target->SetProperty(cmStrCat(lang, "_STANDARD"), *needCxxLevel);
-    }
-  }
-
-  return true;
-}
-
-bool cmMakefile::HaveCudaStandardAvailable(cmTarget const* target,
-                                           const std::string& feature,
-                                           std::string const& lang) const
-{
-  cmProp defaultCudaStandard =
-    this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
-  if (!defaultCudaStandard) {
-    this->IssueMessage(
-      MessageType::INTERNAL_ERROR,
-      cmStrCat("CMAKE_", lang,
-               "_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
-               "not fully configured for this compiler."));
-    // Return true so the caller does not try to lookup the default standard.
-    return true;
-  }
-  if (std::find_if(cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS),
-                   cmStrCmp(*defaultCudaStandard)) ==
-      cm::cend(CUDA_STANDARDS)) {
-    const std::string e =
-      cmStrCat("The CMAKE_", lang, "_STANDARD_DEFAULT variable contains an ",
-               "invalid value: \"", *defaultCudaStandard, "\".");
-    this->IssueMessage(MessageType::INTERNAL_ERROR, e);
-    return false;
-  }
-
-  bool needCuda03 = false;
-  bool needCuda11 = false;
-  bool needCuda14 = false;
-  bool needCuda17 = false;
-  bool needCuda20 = false;
-  this->CheckNeededCudaLanguage(feature, lang, needCuda03, needCuda11,
-                                needCuda14, needCuda17, needCuda20);
-
-  cmProp existingCudaStandard =
-    target->GetProperty(cmStrCat(lang, "_STANDARD"));
-  if (!existingCudaStandard) {
-    existingCudaStandard = defaultCudaStandard;
-  }
-
-  const char* const* existingCudaLevel =
-    std::find_if(cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS),
-                 cmStrCmp(*existingCudaStandard));
-  if (existingCudaLevel == cm::cend(CUDA_STANDARDS)) {
-    const std::string e = cmStrCat(
-      "The ", lang, "_STANDARD property on target \"", target->GetName(),
-      "\" contained an invalid value: \"", *existingCudaStandard, "\".");
-    this->IssueMessage(MessageType::FATAL_ERROR, e);
-    return false;
-  }
-
-  /* clang-format off */
-  const char* const* needCudaLevel =
-    needCuda20 ? &CUDA_STANDARDS[4]
-    : needCuda17 ? &CUDA_STANDARDS[3]
-    : needCuda14 ? &CUDA_STANDARDS[2]
-    : needCuda11 ? &CUDA_STANDARDS[1]
-    : needCuda03 ? &CUDA_STANDARDS[0]
-    : nullptr;
-  /* clang-format on */
-
-  return !needCudaLevel || needCudaLevel <= existingCudaLevel;
-}
-
-void cmMakefile::CheckNeededCudaLanguage(const std::string& feature,
-                                         std::string const& lang,
-                                         bool& needCuda03, bool& needCuda11,
-                                         bool& needCuda14, bool& needCuda17,
-                                         bool& needCuda20) const
-{
-  if (const char* propCuda03 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "03_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propCuda03);
-    needCuda03 = cm::contains(props, feature);
-  }
-  if (const char* propCuda11 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "11_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propCuda11);
-    needCuda11 = cm::contains(props, feature);
-  }
-  if (const char* propCuda14 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "14_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propCuda14);
-    needCuda14 = cm::contains(props, feature);
-  }
-  if (const char* propCuda17 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "17_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propCuda17);
-    needCuda17 = cm::contains(props, feature);
-  }
-  if (const char* propCuda20 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "20_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propCuda20);
-    needCuda20 = cm::contains(props, feature);
-  }
-}
-
-bool cmMakefile::AddRequiredTargetCudaFeature(cmTarget* target,
-                                              const std::string& feature,
-                                              std::string const& lang,
-                                              std::string* error) const
-{
-  bool needCuda03 = false;
-  bool needCuda11 = false;
-  bool needCuda14 = false;
-  bool needCuda17 = false;
-  bool needCuda20 = false;
-
-  this->CheckNeededCudaLanguage(feature, lang, needCuda03, needCuda11,
-                                needCuda14, needCuda17, needCuda20);
-
-  cmProp existingCudaStandard =
-    target->GetProperty(cmStrCat(lang, "_STANDARD"));
-  if (existingCudaStandard == nullptr) {
-    cmProp defaultCudaStandard =
-      this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
-    if (defaultCudaStandard && !defaultCudaStandard->empty()) {
-      existingCudaStandard = defaultCudaStandard;
-    }
-  }
-  const char* const* existingCudaLevel = nullptr;
-  if (existingCudaStandard) {
-    existingCudaLevel =
-      std::find_if(cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS),
-                   cmStrCmp(*existingCudaStandard));
-    if (existingCudaLevel == cm::cend(CUDA_STANDARDS)) {
-      const std::string e = cmStrCat(
-        "The ", lang, "_STANDARD property on target \"", target->GetName(),
-        "\" contained an invalid value: \"", *existingCudaStandard, "\".");
-      if (error) {
-        *error = e;
-      } else {
-        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
-                                               this->Backtrace);
-      }
-      return false;
-    }
-  }
-
-  /* clang-format off */
-  const char* const* needCudaLevel =
-    needCuda20 ? &CUDA_STANDARDS[4]
-    : needCuda17 ? &CUDA_STANDARDS[3]
-    : needCuda14 ? &CUDA_STANDARDS[2]
-    : needCuda11 ? &CUDA_STANDARDS[1]
-    : needCuda03 ? &CUDA_STANDARDS[0]
-    : nullptr;
-  /* clang-format on */
-
-  if (needCudaLevel) {
-    // Ensure the CUDA language level is high enough to support
-    // the needed CUDA features.
-    if (!existingCudaLevel || existingCudaLevel < needCudaLevel) {
-      target->SetProperty("CUDA_STANDARD", *needCudaLevel);
-    }
-  }
-
-  return true;
-}
-
-void cmMakefile::CheckNeededCLanguage(const std::string& feature,
-                                      std::string const& lang, bool& needC90,
-                                      bool& needC99, bool& needC11) const
-{
-  if (const char* propC90 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "90_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propC90);
-    needC90 = cm::contains(props, feature);
-  }
-  if (const char* propC99 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "99_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propC99);
-    needC99 = cm::contains(props, feature);
-  }
-  if (const char* propC11 =
-        this->GetDefinition(cmStrCat("CMAKE_", lang, "11_COMPILE_FEATURES"))) {
-    std::vector<std::string> props = cmExpandedList(propC11);
-    needC11 = cm::contains(props, feature);
-  }
-}
-
-bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
-                                           const std::string& feature,
-                                           std::string const& lang,
-                                           std::string* error) const
-{
-  bool needC90 = false;
-  bool needC99 = false;
-  bool needC11 = false;
-
-  this->CheckNeededCLanguage(feature, lang, needC90, needC99, needC11);
-
-  cmProp existingCStandard = target->GetProperty(cmStrCat(lang, "_STANDARD"));
-  if (existingCStandard == nullptr) {
-    cmProp defaultCStandard =
-      this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
-    if (defaultCStandard && !defaultCStandard->empty()) {
-      existingCStandard = defaultCStandard;
-    }
-  }
-  if (existingCStandard) {
-    if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
-                     cmStrCmp(*existingCStandard)) == cm::cend(C_STANDARDS)) {
-      const std::string e = cmStrCat(
-        "The ", lang, "_STANDARD property on target \"", target->GetName(),
-        "\" contained an invalid value: \"", *existingCStandard, "\".");
-      if (error) {
-        *error = e;
-      } else {
-        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
-                                               this->Backtrace);
-      }
-      return false;
-    }
-  }
-  const char* const* existingCIt = existingCStandard
-    ? std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
-                   cmStrCmp(*existingCStandard))
-    : cm::cend(C_STANDARDS);
-
-  bool setC90 = needC90 && !existingCStandard;
-  bool setC99 = needC99 && !existingCStandard;
-  bool setC11 = needC11 && !existingCStandard;
-
-  if (needC11 && existingCStandard &&
-      existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
-                                 cm::cend(C_STANDARDS), cmStrCmp("11"))) {
-    setC11 = true;
-  } else if (needC99 && existingCStandard &&
-             existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
-                                        cm::cend(C_STANDARDS),
-                                        cmStrCmp("99"))) {
-    setC99 = true;
-  } else if (needC90 && existingCStandard &&
-             existingCIt < std::find_if(cm::cbegin(C_STANDARDS),
-                                        cm::cend(C_STANDARDS),
-                                        cmStrCmp("90"))) {
-    setC90 = true;
-  }
-
-  if (setC11) {
-    target->SetProperty(cmStrCat(lang, "_STANDARD"), "11");
-  } else if (setC99) {
-    target->SetProperty(cmStrCat(lang, "_STANDARD"), "99");
-  } else if (setC90) {
-    target->SetProperty(cmStrCat(lang, "_STANDARD"), "90");
-  }
-  return true;
 }
 
 cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,

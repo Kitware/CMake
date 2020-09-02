@@ -1,6 +1,8 @@
 CMP0086
 -------
 
+.. versionadded:: 3.14
+
 :module:`UseSWIG` honors ``SWIG_MODULE_NAME`` via ``-module`` flag.
 
 Starting with CMake 3.14, :module:`UseSWIG` passes option

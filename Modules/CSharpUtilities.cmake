@@ -5,6 +5,8 @@
 CSharpUtilities
 ---------------
 
+.. versionadded:: 3.8
+
 Functions to make configuration of CSharp/.NET targets easier.
 
 A collection of CMake utility functions useful for dealing with CSharp

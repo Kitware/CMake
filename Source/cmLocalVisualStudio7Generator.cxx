@@ -66,7 +66,7 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
   // Now create GUIDs for targets
   const auto& tgts = this->GetGeneratorTargets();
   for (const auto& l : tgts) {
-    if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!l->IsInBuildSystem()) {
       continue;
     }
     cmProp path = l->GetProperty("EXTERNAL_MSPROJECT");
@@ -129,7 +129,7 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
 
   // Create the project file for each target.
   for (const auto& l : tgts) {
-    if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!l->IsInBuildSystem()) {
       continue;
     }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
@@ -629,9 +629,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
       break;
     case cmStateEnums::UTILITY:
     case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::INTERFACE_LIBRARY:
       configType = "10";
       CM_FALLTHROUGH;
-    default:
+    case cmStateEnums::UNKNOWN_LIBRARY:
       targetBuilds = false;
       break;
   }
@@ -1112,7 +1113,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       cmComputeLinkInformation& cli = *pcli;
       std::string linkLanguage = cli.GetLinkLanguage();
 
-      bool isWin32Executable = target->GetPropertyAsBool("WIN32_EXECUTABLE");
+      bool isWin32Executable = target->IsWin32Executable(configName);
 
       // Compute the variable name to lookup standard libraries for this
       // language.
@@ -1331,8 +1332,8 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
                                                     const std::string& libName,
                                                     cmGeneratorTarget* target)
 {
-  std::vector<std::string> configs;
-  this->Makefile->GetConfigurations(configs);
+  std::vector<std::string> configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
 
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
@@ -1580,8 +1581,9 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
 std::string cmLocalVisualStudio7Generator::ComputeLongestObjectDirectory(
   cmGeneratorTarget const* target) const
 {
-  std::vector<std::string> configs;
-  target->Target->GetMakefile()->GetConfigurations(configs);
+  std::vector<std::string> configs =
+    target->Target->GetMakefile()->GetGeneratorConfigs(
+      cmMakefile::ExcludeEmptyConfig);
 
   // Compute the maximum length configuration name.
   std::string config_max;
@@ -1637,7 +1639,8 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
     std::string source = sf->GetFullPath();
 
     if (source != libName || target->GetType() == cmStateEnums::UTILITY ||
-        target->GetType() == cmStateEnums::GLOBAL_TARGET) {
+        target->GetType() == cmStateEnums::GLOBAL_TARGET ||
+        target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Look up the source kind and configs.
       std::map<cmSourceFile const*, size_t>::const_iterator map_it =
         sources.Index.find(sf);
@@ -1936,6 +1939,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
   const char* keyword = p ? p->c_str() : "Console Application";
   const char* projectType = 0;
   switch (target->GetType()) {
+    case cmStateEnums::OBJECT_LIBRARY:
     case cmStateEnums::STATIC_LIBRARY:
       projectType = "typeStaticLibrary";
       if (keyword) {
@@ -1957,7 +1961,8 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
       break;
     case cmStateEnums::UTILITY:
     case cmStateEnums::GLOBAL_TARGET:
-    default:
+    case cmStateEnums::INTERFACE_LIBRARY:
+    case cmStateEnums::UNKNOWN_LIBRARY:
       break;
   }
   if (projectType) {

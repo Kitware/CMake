@@ -515,7 +515,7 @@ bool cmComputeLinkInformation::Compute()
   // Restore the target link type so the correct system runtime
   // libraries are found.
   cmProp lss = this->Target->GetProperty("LINK_SEARCH_END_STATIC");
-  if (lss && cmIsOn(*lss)) {
+  if (cmIsOn(lss)) {
     this->SetCurrentLinkType(LinkStatic);
   } else {
     this->SetCurrentLinkType(this->StartLinkType);
@@ -832,8 +832,7 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
 
   // We can support link type switching only if all needed flags are
   // known.
-  if (static_link_type_flag && *static_link_type_flag &&
-      shared_link_type_flag && *shared_link_type_flag) {
+  if (cmNonempty(static_link_type_flag) && cmNonempty(shared_link_type_flag)) {
     this->LinkTypeEnabled = true;
     this->StaticLinkTypeFlag = static_link_type_flag;
     this->SharedLinkTypeFlag = shared_link_type_flag;
@@ -841,7 +840,7 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
 
   // Lookup the starting link type from the target (linked statically?).
   cmProp lss = this->Target->GetProperty("LINK_SEARCH_START_STATIC");
-  this->StartLinkType = (lss && cmIsOn(*lss)) ? LinkStatic : LinkShared;
+  this->StartLinkType = cmIsOn(lss) ? LinkStatic : LinkShared;
   this->CurrentLinkType = this->StartLinkType;
 }
 
@@ -849,31 +848,31 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
 {
   // Get possible library name prefixes.
   cmMakefile* mf = this->Makefile;
-  this->AddLinkPrefix(mf->GetDefinition("CMAKE_STATIC_LIBRARY_PREFIX"));
-  this->AddLinkPrefix(mf->GetDefinition("CMAKE_SHARED_LIBRARY_PREFIX"));
+  this->AddLinkPrefix(mf->GetSafeDefinition("CMAKE_STATIC_LIBRARY_PREFIX"));
+  this->AddLinkPrefix(mf->GetSafeDefinition("CMAKE_SHARED_LIBRARY_PREFIX"));
 
   // Import library names should be matched and treated as shared
   // libraries for the purposes of linking.
-  this->AddLinkExtension(mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
+  this->AddLinkExtension(mf->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
                          LinkShared);
-  this->AddLinkExtension(mf->GetDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"),
+  this->AddLinkExtension(mf->GetSafeDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"),
                          LinkStatic);
-  this->AddLinkExtension(mf->GetDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"),
+  this->AddLinkExtension(mf->GetSafeDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"),
                          LinkShared);
-  this->AddLinkExtension(mf->GetDefinition("CMAKE_LINK_LIBRARY_SUFFIX"),
+  this->AddLinkExtension(mf->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX"),
                          LinkUnknown);
   if (const char* linkSuffixes =
         mf->GetDefinition("CMAKE_EXTRA_LINK_EXTENSIONS")) {
     std::vector<std::string> linkSuffixVec = cmExpandedList(linkSuffixes);
     for (std::string const& i : linkSuffixVec) {
-      this->AddLinkExtension(i.c_str(), LinkUnknown);
+      this->AddLinkExtension(i, LinkUnknown);
     }
   }
   if (const char* sharedSuffixes =
         mf->GetDefinition("CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES")) {
     std::vector<std::string> sharedSuffixVec = cmExpandedList(sharedSuffixes);
     for (std::string const& i : sharedSuffixVec) {
-      this->AddLinkExtension(i.c_str(), LinkShared);
+      this->AddLinkExtension(i, LinkShared);
     }
   }
 
@@ -903,7 +902,7 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
 #ifdef CM_COMPUTE_LINK_INFO_DEBUG
   fprintf(stderr, "any regex [%s]\n", reg_any.c_str());
 #endif
-  this->ExtractAnyLibraryName.compile(reg_any.c_str());
+  this->ExtractAnyLibraryName.compile(reg_any);
 
   // Create a regex to match static library names.
   if (!this->StaticLinkExtensions.empty()) {
@@ -912,7 +911,7 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
 #ifdef CM_COMPUTE_LINK_INFO_DEBUG
     fprintf(stderr, "static regex [%s]\n", reg_static.c_str());
 #endif
-    this->ExtractStaticLibraryName.compile(reg_static.c_str());
+    this->ExtractStaticLibraryName.compile(reg_static);
   }
 
   // Create a regex to match shared library names.
@@ -924,20 +923,21 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
 #ifdef CM_COMPUTE_LINK_INFO_DEBUG
     fprintf(stderr, "shared regex [%s]\n", reg_shared.c_str());
 #endif
-    this->ExtractSharedLibraryName.compile(reg_shared.c_str());
+    this->ExtractSharedLibraryName.compile(reg_shared);
   }
 }
 
-void cmComputeLinkInformation::AddLinkPrefix(const char* p)
+void cmComputeLinkInformation::AddLinkPrefix(std::string const& p)
 {
-  if (p && *p) {
+  if (!p.empty()) {
     this->LinkPrefixes.insert(p);
   }
 }
 
-void cmComputeLinkInformation::AddLinkExtension(const char* e, LinkType type)
+void cmComputeLinkInformation::AddLinkExtension(std::string const& e,
+                                                LinkType type)
 {
-  if (e && *e) {
+  if (!e.empty()) {
     if (type == LinkStatic) {
       this->StaticLinkExtensions.emplace_back(e);
     }
@@ -962,7 +962,7 @@ std::string cmComputeLinkInformation::CreateExtensionRegex(
     // Store this extension choice with the "." escaped.
     libext += "\\";
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    libext += this->NoCaseExpression(i.c_str());
+    libext += this->NoCaseExpression(i);
 #else
     libext += i;
 #endif
@@ -980,21 +980,19 @@ std::string cmComputeLinkInformation::CreateExtensionRegex(
   return libext;
 }
 
-std::string cmComputeLinkInformation::NoCaseExpression(const char* str)
+std::string cmComputeLinkInformation::NoCaseExpression(std::string const& str)
 {
   std::string ret;
-  ret.reserve(strlen(str) * 4);
-  const char* s = str;
-  while (*s) {
-    if (*s == '.') {
-      ret += *s;
+  ret.reserve(str.size() * 4);
+  for (char c : str) {
+    if (c == '.') {
+      ret += c;
     } else {
       ret += '[';
-      ret += static_cast<char>(tolower(*s));
-      ret += static_cast<char>(toupper(*s));
+      ret += static_cast<char>(tolower(c));
+      ret += static_cast<char>(toupper(c));
       ret += ']';
     }
-    s++;
   }
   return ret;
 }
@@ -1688,7 +1686,7 @@ void cmComputeLinkInformation::AddLibraryRuntimeInfo(
   }
 }
 
-static void cmCLI_ExpandListUnique(const char* str,
+static void cmCLI_ExpandListUnique(std::string const& str,
                                    std::vector<std::string>& out,
                                    std::set<std::string>& emitted)
 {
@@ -1735,7 +1733,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   if (use_install_rpath) {
     std::string install_rpath;
     this->Target->GetInstallRPATH(this->Config, install_rpath);
-    cmCLI_ExpandListUnique(install_rpath.c_str(), runtimeDirs, emitted);
+    cmCLI_ExpandListUnique(install_rpath, runtimeDirs, emitted);
   }
   if (use_build_rpath) {
     // Add directories explicitly specified by user
@@ -1743,7 +1741,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     if (this->Target->GetBuildRPATH(this->Config, build_rpath)) {
       // This will not resolve entries to use $ORIGIN, the user is expected to
       // do that if necessary.
-      cmCLI_ExpandListUnique(build_rpath.c_str(), runtimeDirs, emitted);
+      cmCLI_ExpandListUnique(build_rpath, runtimeDirs, emitted);
     }
   }
   if (use_build_rpath || use_link_rpath) {
@@ -1769,7 +1767,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
         std::string d = ri;
         if (!rootPath.empty() && cmHasPrefix(d, rootPath)) {
           d.erase(0, rootPath.size());
-        } else if (stagePath && *stagePath && cmHasPrefix(d, stagePath)) {
+        } else if (cmNonempty(stagePath) && cmHasPrefix(d, stagePath)) {
           d.erase(0, strlen(stagePath));
           d = cmStrCat(installPrefix, '/', d);
           cmSystemTools::ConvertToUnixSlashes(d);
@@ -1800,7 +1798,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
           std::string d = ri;
           if (!rootPath.empty() && cmHasPrefix(d, rootPath)) {
             d.erase(0, rootPath.size());
-          } else if (stagePath && *stagePath && cmHasPrefix(d, stagePath)) {
+          } else if (cmNonempty(stagePath) && cmHasPrefix(d, stagePath)) {
             d.erase(0, strlen(stagePath));
             d = cmStrCat(installPrefix, '/', d);
             cmSystemTools::ConvertToUnixSlashes(d);
@@ -1823,8 +1821,8 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
         "CMAKE_" + li + "_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH";
       if (this->Makefile->IsOn(useVar)) {
         std::string dirVar = "CMAKE_" + li + "_IMPLICIT_LINK_DIRECTORIES";
-        if (const char* dirs = this->Makefile->GetDefinition(dirVar)) {
-          cmCLI_ExpandListUnique(dirs, runtimeDirs, emitted);
+        if (cmProp dirs = this->Makefile->GetDef(dirVar)) {
+          cmCLI_ExpandListUnique(*dirs, runtimeDirs, emitted);
         }
       }
     }
@@ -1832,7 +1830,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
 
   // Add runtime paths required by the platform to always be
   // present.  This is done even when skipping rpath support.
-  cmCLI_ExpandListUnique(this->RuntimeAlways.c_str(), runtimeDirs, emitted);
+  cmCLI_ExpandListUnique(this->RuntimeAlways, runtimeDirs, emitted);
 }
 
 std::string cmComputeLinkInformation::GetRPathString(bool for_install) const

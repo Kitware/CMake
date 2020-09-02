@@ -1,6 +1,8 @@
 CMAKE_LIBRARY_OUTPUT_DIRECTORY_<CONFIG>
 ---------------------------------------
 
+.. versionadded:: 3.3
+
 Where to put all the :ref:`LIBRARY <Library Output Artifacts>`
 target files when built for a specific configuration.
 

@@ -136,6 +136,7 @@ bool cmServerProtocol::Activate(cmServer* server,
   this->m_Server = server;
   this->m_CMakeInstance =
     cm::make_unique<cmake>(cmake::RoleProject, cmState::Project);
+  this->m_WarnUnused = false;
   const bool result = this->DoActivate(request, errorMessage);
   if (!result) {
     this->m_CMakeInstance = nullptr;
@@ -636,7 +637,7 @@ cmServerResponse cmServerProtocol1::ProcessGlobalSettings(
   obj[kTRACE_KEY] = cm->GetTrace();
   obj[kTRACE_EXPAND_KEY] = cm->GetTraceExpand();
   obj[kWARN_UNINITIALIZED_KEY] = cm->GetWarnUninitialized();
-  obj[kWARN_UNUSED_KEY] = cm->GetWarnUnused();
+  obj[kWARN_UNUSED_KEY] = m_WarnUnused;
   obj[kWARN_UNUSED_CLI_KEY] = cm->GetWarnUnusedCli();
   obj[kCHECK_SYSTEM_VARS_KEY] = cm->GetCheckSystemVars();
 
@@ -682,7 +683,7 @@ cmServerResponse cmServerProtocol1::ProcessSetGlobalSettings(
   setBool(request, kTRACE_EXPAND_KEY, [cm](bool e) { cm->SetTraceExpand(e); });
   setBool(request, kWARN_UNINITIALIZED_KEY,
           [cm](bool e) { cm->SetWarnUninitialized(e); });
-  setBool(request, kWARN_UNUSED_KEY, [cm](bool e) { cm->SetWarnUnused(e); });
+  setBool(request, kWARN_UNUSED_KEY, [this](bool e) { m_WarnUnused = e; });
   setBool(request, kWARN_UNUSED_CLI_KEY,
           [cm](bool e) { cm->SetWarnUnusedCli(e); });
   setBool(request, kCHECK_SYSTEM_VARS_KEY,

@@ -191,21 +191,18 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
     target.GetLinkClosure(config);
 
   if (cm::contains(closure->Languages, "CUDA")) {
-    if (cmProp separableCompilation =
-          target.GetProperty("CUDA_SEPARABLE_COMPILATION")) {
-      if (cmIsOn(*separableCompilation)) {
-        bool doDeviceLinking = false;
-        switch (target.GetType()) {
-          case cmStateEnums::SHARED_LIBRARY:
-          case cmStateEnums::MODULE_LIBRARY:
-          case cmStateEnums::EXECUTABLE:
-            doDeviceLinking = true;
-            break;
-          default:
-            break;
-        }
-        return doDeviceLinking;
+    if (cmIsOn(target.GetProperty("CUDA_SEPARABLE_COMPILATION"))) {
+      bool doDeviceLinking = false;
+      switch (target.GetType()) {
+        case cmStateEnums::SHARED_LIBRARY:
+        case cmStateEnums::MODULE_LIBRARY:
+        case cmStateEnums::EXECUTABLE:
+          doDeviceLinking = true;
+          break;
+        default:
+          break;
       }
+      return doDeviceLinking;
     }
 
     cmComputeLinkInformation* pcli = target.GetLinkInformation(config);

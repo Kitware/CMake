@@ -5,6 +5,8 @@
 CheckOBJCXXSourceRuns
 ---------------------
 
+.. versionadded:: 3.16
+
 Check if given Objective-C++ source compiles and links into an executable and can
 subsequently be run.
 

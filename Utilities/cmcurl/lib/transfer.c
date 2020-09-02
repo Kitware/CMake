@@ -487,6 +487,12 @@ CURLcode Curl_readrewind(struct connectdata *conn)
 static int data_pending(const struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
+
+#ifdef ENABLE_QUIC
+  if(conn->transport == TRNSPRT_QUIC)
+    return Curl_quic_data_pending(data);
+#endif
+
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
@@ -500,8 +506,6 @@ static int data_pending(const struct Curl_easy *data)
        be called and we cannot signal the HTTP/2 stream has closed. As
        a workaround, we return nonzero here to call http2_recv. */
     ((conn->handler->protocol&PROTO_FAMILY_HTTP) && conn->httpversion >= 20);
-#elif defined(ENABLE_QUIC)
-    Curl_ssl_data_pending(conn, FIRSTSOCKET) || Curl_quic_data_pending(data);
 #else
     Curl_ssl_data_pending(conn, FIRSTSOCKET);
 #endif
@@ -1441,8 +1445,9 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
   if(!data->change.url && data->set.uh) {
     CURLUcode uc;
+    free(data->set.str[STRING_SET_URL]);
     uc = curl_url_get(data->set.uh,
-                        CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
+                      CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
     if(uc) {
       failf(data, "No URL set!");
       return CURLE_URL_MALFORMAT;
@@ -1799,12 +1804,14 @@ CURLcode Curl_retry_request(struct connectdata *conn,
   }
   if(retry) {
 #define CONN_MAX_RETRIES 5
-    if(conn->retrycount++ >= CONN_MAX_RETRIES) {
+    if(data->state.retrycount++ >= CONN_MAX_RETRIES) {
       failf(data, "Connection died, tried %d times before giving up",
             CONN_MAX_RETRIES);
+      data->state.retrycount = 0;
       return CURLE_SEND_ERROR;
     }
-    infof(conn->data, "Connection died, retrying a fresh connect\n");
+    infof(conn->data, "Connection died, retrying a fresh connect\
+(retry count: %d)\n", data->state.retrycount);
     *url = strdup(conn->data->change.url);
     if(!*url)
       return CURLE_OUT_OF_MEMORY;

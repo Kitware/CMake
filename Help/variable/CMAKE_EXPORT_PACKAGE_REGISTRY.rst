@@ -1,6 +1,8 @@
 CMAKE_EXPORT_PACKAGE_REGISTRY
 -----------------------------
 
+.. versionadded:: 3.15
+
 Enables the :command:`export(PACKAGE)` command when :policy:`CMP0090`
 is set to ``NEW``.
 

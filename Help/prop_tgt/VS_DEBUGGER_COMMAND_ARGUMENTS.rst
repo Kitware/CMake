@@ -1,6 +1,8 @@
 VS_DEBUGGER_COMMAND_ARGUMENTS
 -----------------------------
 
+.. versionadded:: 3.13
+
 Sets the local debugger command line arguments for Visual Studio C++ targets.
 The property value may use
 :manual:`generator expressions <cmake-generator-expressions(7)>`.

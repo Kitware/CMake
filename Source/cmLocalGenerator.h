@@ -20,6 +20,7 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmStateSnapshot.h"
 
 class cmComputeLinkInformation;
@@ -123,7 +124,8 @@ public:
                               const std::string& config);
   void AddCompilerRequirementFlag(std::string& flags,
                                   cmGeneratorTarget const* target,
-                                  const std::string& lang);
+                                  const std::string& lang,
+                                  const std::string& config);
   //! Append flags to a string.
   virtual void AppendFlags(std::string& flags,
                            const std::string& newFlags) const;
@@ -131,6 +133,7 @@ public:
                            const std::vector<BT<std::string>>& newFlags) const;
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag) const;
+  void AddISPCDependencies(cmGeneratorTarget* target);
   void AddPchDependencies(cmGeneratorTarget* target);
   void AddUnityBuild(cmGeneratorTarget* target);
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
@@ -208,8 +211,7 @@ public:
   void AppendFeatureOptions(std::string& flags, const std::string& lang,
                             const char* feature);
 
-  const char* GetFeature(const std::string& feature,
-                         const std::string& config);
+  cmProp GetFeature(const std::string& feature, const std::string& config);
 
   /** \brief Get absolute path to dependency \a name
    *

@@ -154,6 +154,7 @@ function(run_cmake test)
 
     "|[^\n]*xcodebuild[^\n]*warning: file type[^\n]*is based on missing file type"
     "|[^\n]*is a member of multiple groups"
+    "|[^\n]*offset in archive not a multiple of 8"
     "|[^\n]*from Time Machine by path"
     "|[^\n]*Bullseye Testing Technology"
     ")[^\n]*\n)+"

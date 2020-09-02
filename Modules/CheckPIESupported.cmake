@@ -5,6 +5,8 @@
 CheckPIESupported
 -----------------
 
+.. versionadded:: 3.14
+
 Check whether the linker supports Position Independent Code (PIE) or No
 Position Independent Code (NO_PIE) for executables.
 Use this to ensure that the :prop_tgt:`POSITION_INDEPENDENT_CODE` target

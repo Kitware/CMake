@@ -23,12 +23,18 @@ public:
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
+  const char* GetAndroidApplicationTypeRevision() const override
+  {
+    return "2.0";
+  }
+
 protected:
   cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name,
                                   std::string const& platformInGeneratorName);
 
   bool InitializeWindows(cmMakefile* mf) override;
   bool InitializeWindowsStore(cmMakefile* mf) override;
+  bool InitializeAndroid(cmMakefile* mf) override;
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
 
   // These aren't virtual because we need to check if the selected version
@@ -37,7 +43,7 @@ protected:
 
   // Used to make sure that the Windows 10 SDK selected can work with the
   // version of the toolset.
-  virtual std::string GetWindows10SDKMaxVersion() const;
+  virtual std::string GetWindows10SDKMaxVersion(cmMakefile* mf) const;
 
   virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
 
@@ -48,7 +54,7 @@ protected:
   // installed on the machine.
   bool IsWindowsDesktopToolsetInstalled() const override;
 
-  std::string GetWindows10SDKVersion();
+  std::string GetWindows10SDKVersion(cmMakefile* mf);
 
 private:
   class Factory;

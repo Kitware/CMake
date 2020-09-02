@@ -680,7 +680,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
 
     if (createInstallGeneratorsForTargetFileSets && !namelinkOnly) {
       cmProp files = target.GetProperty("PRIVATE_HEADER");
-      if (files && !files->empty()) {
+      if (cmNonempty(files)) {
         std::vector<std::string> relFiles = cmExpandedList(*files);
         std::vector<std::string> absFiles;
         if (!helper.MakeFilesFullPath("PRIVATE_HEADER", relFiles, absFiles)) {
@@ -702,7 +702,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       }
 
       files = target.GetProperty("PUBLIC_HEADER");
-      if (files && !files->empty()) {
+      if (cmNonempty(files)) {
         std::vector<std::string> relFiles = cmExpandedList(*files);
         std::vector<std::string> absFiles;
         if (!helper.MakeFilesFullPath("PUBLIC_HEADER", relFiles, absFiles)) {
@@ -724,7 +724,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       }
 
       files = target.GetProperty("RESOURCE");
-      if (files && !files->empty()) {
+      if (cmNonempty(files)) {
         std::vector<std::string> relFiles = cmExpandedList(*files);
         std::vector<std::string> absFiles;
         if (!helper.MakeFilesFullPath("RESOURCE", relFiles, absFiles)) {
@@ -1157,7 +1157,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
     } else if (doing == DoingRegex) {
       literal_args += " REGEX \"";
 // Match rules are case-insensitive on some platforms.
-#if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__APPLE__)
       std::string regex = cmSystemTools::LowerCase(args[i]);
 #else
       std::string regex = args[i];

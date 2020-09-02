@@ -1,6 +1,8 @@
 XCODE_SCHEME_MALLOC_SCRIBBLE
 ------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Malloc Scribble``
 in the Diagnostics section of the generated Xcode scheme.
 

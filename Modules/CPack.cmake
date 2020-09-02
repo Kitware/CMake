@@ -22,9 +22,13 @@ section below for details.
 The generated binary installers will contain all files that have been installed
 via CMake's :command:`install` command (and the deprecated commands
 :command:`install_files`, :command:`install_programs`, and
-:command:`install_targets`).  Certain kinds of binary installers can be
-configured such that users can select individual application components to
-install.  See the :module:`CPackComponent` module for further details.
+:command:`install_targets`). Note that the ``DESTINATION`` option of the
+:command:`install` command must be a relative path; otherwise installed files
+are ignored by CPack.
+
+Certain kinds of binary installers can be configured such that users can select
+individual application components to install.  See the :module:`CPackComponent`
+module for further details.
 
 Source packages (configured through ``CPackSourceConfig.cmake`` and generated
 by the :cpack_gen:`CPack Archive Generator`) will contain all source files in
@@ -386,6 +390,21 @@ The following variables are for advanced uses of CPack:
   select the CPack generator(s) to be used when building the ``package``
   target or when running :manual:`cpack <cpack(1)>` without the ``-G`` option.
 
+.. variable:: CPACK_PRE_BUILD_SCRIPTS
+
+  List of CMake scripts to execute after CPack has installed the files to
+  be packed into a staging directory and before producing the result
+  packages.
+
+.. variable:: CPACK_POST_BUILD_SCRIPTS
+
+  List of CMake scripts to execute after CPack has produced the result
+  packages and before copying them back to a build directory.
+
+.. variable:: CPACK_PACKAGE_FILES
+
+  List of resulting package files passed to the ``CPACK_POST_BUILD_SCRIPTS``.
+
 #]=======================================================================]
 
 # Define this var in order to avoid (or warn) concerning multiple inclusion
@@ -420,7 +439,7 @@ endmacro()
 # find any variable that starts with CPACK and create a variable
 # _CPACK_OTHER_VARIABLES_ that contains SET commands for
 # each cpack variable.  _CPACK_OTHER_VARIABLES_ is then
-# used as an @ replacment in configure_file for the CPackConfig.
+# used as an @ replacement in configure_file for the CPackConfig.
 function(cpack_encode_variables)
   set(commands "")
   get_cmake_property(res VARIABLES)

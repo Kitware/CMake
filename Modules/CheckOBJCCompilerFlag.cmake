@@ -5,6 +5,8 @@
 CheckOBJCCompilerFlag
 ---------------------
 
+.. versionadded:: 3.16
+
 Check whether the Objective-C compiler supports a given flag.
 
 .. command:: check_objc_compiler_flag

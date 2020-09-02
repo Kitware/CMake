@@ -180,7 +180,7 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
     if (subdir == "include" || subdir == "lib") {
       const char* arch =
         this->FC->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE");
-      if (arch && *arch) {
+      if (cmNonempty(arch)) {
         if (this->FC->Makefile->IsDefinitionSet("CMAKE_SYSROOT") &&
             this->FC->Makefile->IsDefinitionSet(
               "CMAKE_PREFIX_LIBRARY_ARCHITECTURE")) {

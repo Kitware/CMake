@@ -5,6 +5,8 @@
 CTestCoverageCollectGCOV
 ------------------------
 
+.. versionadded:: 3.2
+
 This module provides the ``ctest_coverage_collect_gcov`` function.
 
 This function runs gcov on all .gcda files found in the binary tree

@@ -1,6 +1,8 @@
 CMP0074
 -------
 
+.. versionadded:: 3.12
+
 :command:`find_package` uses ``<PackageName>_ROOT`` variables.
 
 In CMake 3.12 and above the :command:`find_package(<PackageName>)` command now

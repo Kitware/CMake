@@ -1,0 +1,9 @@
+English
+Agree
+Disagree
+Print
+Save...
+You agree to the License Agreement terms when you click the "Agree" button.
+Software License Agreement
+This text cannot be saved. This disk may be full or locked or the file may be locked.
+Unable to print.  Make sure you have selected a printer.

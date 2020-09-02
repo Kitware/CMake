@@ -264,44 +264,34 @@ public:
     this->GeneratorToolsetSet = true;
   }
 
-  const std::vector<std::string>& GetSourceExtensions() const
+  bool IsAKnownSourceExtension(cm::string_view ext) const
   {
-    return this->SourceFileExtensions.ordered;
+    return this->CLikeSourceFileExtensions.Test(ext) ||
+      this->CudaFileExtensions.Test(ext) ||
+      this->FortranFileExtensions.Test(ext) ||
+      this->ISPCFileExtensions.Test(ext);
   }
 
-  bool IsSourceExtension(cm::string_view ext) const
+  bool IsACLikeSourceExtension(cm::string_view ext) const
   {
-    return this->SourceFileExtensions.Test(ext);
+    return this->CLikeSourceFileExtensions.Test(ext);
   }
+
+  bool IsAKnownExtension(cm::string_view ext) const
+  {
+    return this->IsAKnownSourceExtension(ext) || this->IsAHeaderExtension(ext);
+  }
+
+  std::vector<std::string> GetAllExtensions() const;
 
   const std::vector<std::string>& GetHeaderExtensions() const
   {
     return this->HeaderFileExtensions.ordered;
   }
 
-  bool IsHeaderExtension(cm::string_view ext) const
+  bool IsAHeaderExtension(cm::string_view ext) const
   {
     return this->HeaderFileExtensions.Test(ext);
-  }
-
-  const std::vector<std::string>& GetCudaExtensions() const
-  {
-    return this->CudaFileExtensions.ordered;
-  }
-
-  bool IsCudaExtension(cm::string_view ext) const
-  {
-    return this->CudaFileExtensions.Test(ext);
-  }
-
-  const std::vector<std::string>& GetFortranExtensions() const
-  {
-    return this->FortranFileExtensions.ordered;
-  }
-
-  bool IsFortranExtension(cm::string_view ext) const
-  {
-    return this->FortranFileExtensions.Test(ext);
   }
 
   // Strips the extension (if present and known) from a filename
@@ -461,8 +451,6 @@ public:
 
   bool GetWarnUninitialized() { return this->WarnUninitialized; }
   void SetWarnUninitialized(bool b) { this->WarnUninitialized = b; }
-  bool GetWarnUnused() { return this->WarnUnused; }
-  void SetWarnUnused(bool b) { this->WarnUnused = b; }
   bool GetWarnUnusedCli() { return this->WarnUnusedCli; }
   void SetWarnUnusedCli(bool b) { this->WarnUnusedCli = b; }
   bool GetCheckSystemVars() { return this->CheckSystemVars; }
@@ -616,7 +604,6 @@ private:
   TraceFormat TraceFormatVar = TRACE_HUMAN;
   cmGeneratedFileStream TraceFile;
   bool WarnUninitialized = false;
-  bool WarnUnused = false;
   bool WarnUnusedCli = true;
   bool CheckSystemVars = false;
   std::map<std::string, bool> UsedCliVariables;
@@ -628,9 +615,10 @@ private:
   std::string CheckStampList;
   std::string VSSolutionFile;
   std::string EnvironmentGenerator;
-  FileExtensions SourceFileExtensions;
+  FileExtensions CLikeSourceFileExtensions;
   FileExtensions HeaderFileExtensions;
   FileExtensions CudaFileExtensions;
+  FileExtensions ISPCFileExtensions;
   FileExtensions FortranFileExtensions;
   bool ClearBuildSystem = false;
   bool DebugTryCompile = false;

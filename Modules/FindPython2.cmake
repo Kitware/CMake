@@ -5,6 +5,8 @@
 FindPython2
 -----------
 
+.. versionadded:: 3.12
+
 Find Python 2 interpreter, compiler and development environment (include
 directories and libraries).
 
@@ -45,7 +47,7 @@ for you.
   If components ``Interpreter`` and ``Development`` (or one of its
   sub-components) are both specified, this module search only for interpreter
   with same platform architecture as the one defined by ``CMake``
-  configuration. This contraint does not apply if only ``Interpreter``
+  configuration. This constraint does not apply if only ``Interpreter``
   component is specified.
 
 Imported Targets
@@ -147,7 +149,7 @@ This module will set the following variables in your project
 ``Python2_NumPy_FOUND``
   System has the NumPy.
 ``Python2_NumPy_INCLUDE_DIRS``
-  The NumPy include directries.
+  The NumPy include directories.
 ``Python2_NumPy_VERSION``
   The NumPy version.
 
@@ -294,7 +296,7 @@ setting the following variables:
   When an artifact is specified, all ``HINTS`` will be ignored and no search
   will be performed for this artifact.
 
-  If more than one artifact is specified, it is the user's responsability to
+  If more than one artifact is specified, it is the user's responsibility to
   ensure the consistency of the various artifacts.
 
 By default, this module supports multiple calls in different directories of a
@@ -302,7 +304,7 @@ project with different version/component requirements while providing correct
 and consistent results for each call. To support this behavior, ``CMake`` cache
 is not used in the traditional way which can be problematic for interactive
 specification. So, to enable also interactive specification, module behavior
-can be controled with the following variable:
+can be controlled with the following variable:
 
 ``Python2_ARTIFACTS_INTERACTIVE``
   Selects the behavior of the module. This is a boolean variable:

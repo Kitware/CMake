@@ -49,6 +49,7 @@ private:
   using id_map_t = std::map<std::string, std::string>;
   using ambiguity_map_t = std::map<std::string, size_t>;
   using extension_set_t = std::set<std::string>;
+  using xmlns_map_t = std::map<std::string, std::string>;
 
   enum class DefinitionType
   {
@@ -147,9 +148,14 @@ private:
   void CollectExtensions(std::string const& variableName,
                          extension_set_t& extensions);
 
+  void CollectXmlNamespaces(std::string const& variableName,
+                            xmlns_map_t& namespaces);
+
   void AddCustomFlags(std::string const& variableName, std::ostream& stream);
 
   std::string RelativePathWithoutComponentPrefix(std::string const& path);
+
+  void InjectXmlNamespaces(cmWIXSourceWriter& sourceWriter);
 
   std::vector<std::string> WixSources;
   id_map_t PathToIdMap;
@@ -157,6 +163,7 @@ private:
 
   extension_set_t CandleExtensions;
   extension_set_t LightExtensions;
+  xmlns_map_t CustomXmlNamespaces;
 
   std::string CPackTopLevel;
 

@@ -1,6 +1,8 @@
 VS_SETTINGS
 -----------
 
+.. versionadded:: 3.18
+
 Set any item metadata on a non-built file.
 
 Takes a list of ``Key=Value`` pairs. Tells the Visual Studio generator to set

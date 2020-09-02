@@ -5,6 +5,8 @@
 CheckFortranCompilerFlag
 ------------------------
 
+.. versionadded:: 3.3
+
 Check whether the Fortran compiler supports a given flag.
 
 .. command:: check_fortran_compiler_flag

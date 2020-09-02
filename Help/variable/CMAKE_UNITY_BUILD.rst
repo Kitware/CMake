@@ -1,6 +1,8 @@
 CMAKE_UNITY_BUILD
 -----------------
 
+.. versionadded:: 3.16
+
 This variable is used to initialize the :prop_tgt:`UNITY_BUILD`
 property of targets when they are created.  Setting it to true
 enables batch compilation of multiple sources within each target.

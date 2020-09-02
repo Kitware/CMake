@@ -46,6 +46,7 @@ private:
     DRMEMORY,
     BOUNDS_CHECKER,
     // checkers after here do not use the standard error list
+    CUDA_MEMCHECK,
     ADDRESS_SANITIZER,
     LEAK_SANITIZER,
     THREAD_SANITIZER,
@@ -137,6 +138,8 @@ private:
                                      std::vector<int>& results);
   bool ProcessMemCheckPurifyOutput(const std::string& str, std::string& log,
                                    std::vector<int>& results);
+  bool ProcessMemCheckCudaOutput(const std::string& str, std::string& log,
+                                 std::vector<int>& results);
   bool ProcessMemCheckSanitizerOutput(const std::string& str, std::string& log,
                                       std::vector<int>& results);
   bool ProcessMemCheckBoundsCheckerOutput(const std::string& str,

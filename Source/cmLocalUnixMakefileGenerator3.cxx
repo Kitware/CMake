@@ -101,7 +101,7 @@ void cmLocalUnixMakefileGenerator3::Generate()
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   for (const auto& target : this->GetGeneratorTargets()) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     std::unique_ptr<cmMakefileTargetGenerator> tg(
@@ -137,7 +137,7 @@ void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
   std::map<std::string, LocalObjectInfo>& localObjectFiles)
 {
   for (const auto& gt : this->GetGeneratorTargets()) {
-    if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!gt->CanCompileSources()) {
       continue;
     }
     std::vector<cmSourceFile const*> objectSources;
@@ -235,7 +235,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 
     for (LocalObjectEntry const& entry : localObjectFile.second) {
       if (entry.Language == "C" || entry.Language == "CXX" ||
-          entry.Language == "CUDA" || entry.Language == "Fortran") {
+          entry.Language == "CUDA" || entry.Language == "Fortran" ||
+          entry.Language == "ISPC") {
         // Right now, C, C++, Fortran and CUDA have both a preprocessor and the
         // ability to generate assembly code
         lang_has_preprocessor = true;
@@ -950,7 +951,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       std::string launcher;
       // Short-circuit if there is no launcher.
       const char* val = this->GetRuleLauncher(target, "RULE_LAUNCH_CUSTOM");
-      if (val && *val) {
+      if (cmNonempty(val)) {
         // Expand rule variables referenced in the given launcher command.
         cmRulePlaceholderExpander::RuleVariables vars;
         vars.CMTargetName = target->GetName().c_str();
@@ -1444,7 +1445,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
     // Create the scanner for this language
     std::unique_ptr<cmDepends> scanner;
     if (lang == "C" || lang == "CXX" || lang == "RC" || lang == "ASM" ||
-        lang == "OBJC" || lang == "OBJCXX" || lang == "CUDA") {
+        lang == "OBJC" || lang == "OBJCXX" || lang == "CUDA" ||
+        lang == "ISPC") {
       // TODO: Handle RC (resource files) dependencies correctly.
       scanner = cm::make_unique<cmDependsC>(this, targetDir, lang, &validDeps);
     }
@@ -1744,7 +1746,7 @@ public:
       return false;
     }
     // If it's an absolute path, check if it starts with the source
-    // direcotory:
+    // directory:
     return (
       !(IsInDirectory(SourceDir, path) || IsInDirectory(BinaryDir, path)));
   }
@@ -1807,7 +1809,7 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     std::string cidVar =
       cmStrCat("CMAKE_", implicitLang.first, "_COMPILER_ID");
     const char* cid = this->Makefile->GetDefinition(cidVar);
-    if (cid && *cid) {
+    if (cmNonempty(cid)) {
       cmakefileStream << "set(CMAKE_" << implicitLang.first
                       << "_COMPILER_ID \"" << cid << "\")\n";
     }

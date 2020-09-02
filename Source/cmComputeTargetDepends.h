@@ -42,6 +42,13 @@ public:
                               cmTargetDependSet& deps);
 
 private:
+  struct TargetSideEffects
+  {
+    std::set<cmGeneratorTarget const*> CustomCommandSideEffects;
+    std::map<std::string, std::set<cmGeneratorTarget const*>>
+      LanguageSideEffects;
+  };
+
   void CollectTargets();
   void CollectDepends();
   void CollectTargetDepends(int depender_index);
@@ -50,6 +57,12 @@ private:
   void AddTargetDepend(int depender_index, cmGeneratorTarget const* dependee,
                        cmListFileBacktrace const& dependee_backtrace,
                        bool linking, bool cross);
+  void CollectSideEffects();
+  void CollectSideEffectsForTarget(std::set<int>& visited, int depender_index);
+  void ComputeIntermediateGraph();
+  void OptimizeLinkDependencies(cmGeneratorTarget const* gt,
+                                cmGraphEdgeList& outputEdges,
+                                cmGraphEdgeList const& inputEdges);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
   void AddInterfaceDepends(int depender_index, cmLinkItem const& dependee_name,
                            const std::string& config,
@@ -74,11 +87,15 @@ private:
   using EdgeList = cmGraphEdgeList;
   using Graph = cmGraphAdjacencyList;
   Graph InitialGraph;
+  Graph IntermediateGraph;
   Graph FinalGraph;
+  std::vector<TargetSideEffects> SideEffects;
   void DisplayGraph(Graph const& graph, const std::string& name);
+  void DisplaySideEffects();
 
   // Deal with connected components.
-  void DisplayComponents(cmComputeComponentGraph const& ccg);
+  void DisplayComponents(cmComputeComponentGraph const& ccg,
+                         const std::string& name);
   bool CheckComponents(cmComputeComponentGraph const& ccg);
   void ComplainAboutBadComponent(cmComputeComponentGraph const& ccg, int c,
                                  bool strong = false);

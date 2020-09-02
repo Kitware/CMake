@@ -19,7 +19,7 @@ else()
       if(NOT $ENV{CUDACXX} STREQUAL "")
         get_filename_component(CMAKE_CUDA_COMPILER_INIT $ENV{CUDACXX} PROGRAM PROGRAM_ARGS CMAKE_CUDA_FLAGS_ENV_INIT)
         if(CMAKE_CUDA_FLAGS_ENV_INIT)
-          set(CMAKE_CUDA_COMPILER_ARG1 "${CMAKE_CUDA_FLAGS_ENV_INIT}" CACHE STRING "First argument to CXX compiler")
+          set(CMAKE_CUDA_COMPILER_ARG1 "${CMAKE_CUDA_FLAGS_ENV_INIT}" CACHE STRING "Arguments to CXX compiler")
         endif()
         if(NOT EXISTS ${CMAKE_CUDA_COMPILER_INIT})
           message(FATAL_ERROR "Could not find compiler set in environment variable CUDACXX:\n$ENV{CUDACXX}.\n${CMAKE_CUDA_COMPILER_INIT}")
@@ -189,6 +189,10 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     set(nvcc_test_flags "--keep --keep-dir tmp")
     if(CMAKE_CUDA_HOST_COMPILER)
       string(APPEND nvcc_test_flags " -ccbin=\"${CMAKE_CUDA_HOST_COMPILER}\"")
+
+      # If the user has specified a host compiler we should fail instead of trying without.
+      # Succeeding detection without may result in confusing errors later on, see #21076.
+      set(CMAKE_CUDA_COMPILER_ID_REQUIRE_SUCCESS ON)
     endif()
   elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     if(WIN32)
@@ -202,37 +206,38 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     endif()
   endif()
 
-  # First try with the user-specified architectures.
+  # Append user-specified architectures.
   if(CMAKE_CUDA_ARCHITECTURES)
-    set(clang_archs "${clang_test_flags}")
-    set(nvcc_archs "${nvcc_test_flags}")
-
     foreach(arch ${CMAKE_CUDA_ARCHITECTURES})
       # Strip specifiers as PTX vs binary doesn't matter.
       string(REGEX MATCH "[0-9]+" arch_name "${arch}")
-      string(APPEND clang_archs " --cuda-gpu-arch=sm_${arch_name}")
-      string(APPEND nvcc_archs " -gencode=arch=compute_${arch_name},code=sm_${arch_name}")
+      string(APPEND clang_test_flags " --cuda-gpu-arch=sm_${arch_name}")
+      string(APPEND nvcc_test_flags " -gencode=arch=compute_${arch_name},code=sm_${arch_name}")
       list(APPEND tested_architectures "${arch_name}")
     endforeach()
 
-    list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_archs}")
-    list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${nvcc_archs}")
+    # If the user has specified architectures we'll want to fail during compiler detection if they don't work.
+    set(CMAKE_CUDA_COMPILER_ID_REQUIRE_SUCCESS ON)
   endif()
 
-  # Fallback default NVCC flags.
-  list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST ${nvcc_test_flags})
+  if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
+    if(NOT CMAKE_CUDA_ARCHITECTURES)
+      # Clang doesn't automatically select an architecture supported by the SDK.
+      # Try in reverse order of deprecation with the most recent at front (i.e. the most likely to work for new setups).
+      foreach(arch "20" "30" "52")
+        list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags} --cuda-gpu-arch=sm_${arch}")
+      endforeach()
+    endif()
 
-  # Clang doesn't automatically select an architecture supported by the SDK.
-  # Try in reverse order of deprecation with the most recent at front (i.e. the most likely to work for new setups).
-  foreach(arch "20" "30" "52")
-    list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags} --cuda-gpu-arch=sm_${arch}")
-  endforeach()
-
-  # Finally also try the default.
-  list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags}")
+    # If the user specified CMAKE_CUDA_ARCHITECTURES this will include all the architecture flags.
+    # Otherwise this won't include any architecture flags and we'll fallback to Clang's defaults.
+    list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags}")
+  elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+    list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${nvcc_test_flags}")
+  endif()
 
   # We perform compiler identification for a second time to extract implicit linking info and host compiler for NVCC.
-  # We also use it to verify that CMAKE_CUDA_ARCHITECTURES and additionaly on Clang that CUDA toolkit path works.
+  # We also use it to verify that CMAKE_CUDA_ARCHITECTURES and additionally on Clang that CUDA toolkit path works.
   # The latter could be done during compiler testing in the future to avoid doing this for Clang.
   # We need to unset the compiler ID otherwise CMAKE_DETERMINE_COMPILER_ID() doesn't work.
   set(CMAKE_CUDA_COMPILER_ID)

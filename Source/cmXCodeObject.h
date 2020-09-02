@@ -82,6 +82,10 @@ public:
   void SetObject(cmXCodeObject* value) { this->Object = value; }
   cmXCodeObject* GetObject() { return this->Object; }
   void AddObject(cmXCodeObject* value) { this->List.push_back(value); }
+  void PrependObject(cmXCodeObject* value)
+  {
+    this->List.insert(this->List.begin(), value);
+  }
   bool HasObject(cmXCodeObject* o) const
   {
     return cm::contains(this->List, o);
@@ -107,7 +111,7 @@ public:
   void SetTarget(cmGeneratorTarget* t) { this->Target = t; }
   const std::string& GetComment() const { return this->Comment; }
   bool HasComment() const { return (!this->Comment.empty()); }
-  cmXCodeObject* GetObject(const char* name) const
+  cmXCodeObject* GetAttribute(const char* name) const
   {
     auto const i = this->ObjectAttributes.find(name);
     if (i != this->ObjectAttributes.end()) {

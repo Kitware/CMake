@@ -29,3 +29,11 @@ expect_file(${CPACK_TEMPORARY_DIRECTORY}/f3/share/cpack-test/f3.txt)
 expect_file(${CPACK_TEMPORARY_DIRECTORY}/f4/share/cpack-test/f4.txt)
 
 message(STATUS "This status message is expected to be visible")
+
+set(
+    CPACK_EXTERNAL_BUILT_PACKAGES
+    ${CPACK_TEMPORARY_DIRECTORY}/f1/share/cpack-test/f1.txt
+    ${CPACK_TEMPORARY_DIRECTORY}/f2/share/cpack-test/f2.txt
+    ${CPACK_TEMPORARY_DIRECTORY}/f3/share/cpack-test/f3.txt
+    ${CPACK_TEMPORARY_DIRECTORY}/f4/share/cpack-test/f4.txt
+  )

@@ -1,6 +1,8 @@
 VS_DEPLOYMENT_LOCATION
 ----------------------
 
+.. versionadded:: 3.1
+
 Specifies the deployment location for a content source file with a Windows
 Phone or Windows Store application when built
 with a :manual:`Visual Studio generators <cmake-generators(7)>`.

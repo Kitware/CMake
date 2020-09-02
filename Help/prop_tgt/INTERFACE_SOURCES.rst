@@ -1,6 +1,8 @@
 INTERFACE_SOURCES
 -----------------
 
+.. versionadded:: 3.1
+
 List of interface sources to compile into consuming targets.
 
 Targets may populate this property to publish the sources

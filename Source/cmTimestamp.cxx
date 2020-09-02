@@ -164,7 +164,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
       break;
     case 's': // Seconds since UNIX epoch (midnight 1-jan-1970)
     {
-      // Build a time_t for UNIX epoch and substract from the input "timeT":
+      // Build a time_t for UNIX epoch and subtract from the input "timeT":
       struct tm tmUnixEpoch;
       memset(&tmUnixEpoch, 0, sizeof(tmUnixEpoch));
       tmUnixEpoch.tm_mday = 1;

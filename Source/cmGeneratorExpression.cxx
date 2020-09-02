@@ -406,9 +406,3 @@ const std::string& cmGeneratorExpressionInterpreter::Evaluate(
     this->LocalGenerator, this->Config, this->HeadTarget, &dagChecker, nullptr,
     this->Language);
 }
-
-const std::string& cmGeneratorExpressionInterpreter::Evaluate(
-  const char* expression, const std::string& property)
-{
-  return this->Evaluate(std::string(expression ? expression : ""), property);
-}

@@ -1,6 +1,8 @@
 CMP0069
 -------
 
+.. versionadded:: 3.9
+
 :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION` is enforced when enabled.
 
 CMake 3.9 and newer prefer to add IPO flags whenever the

@@ -1,6 +1,8 @@
 ANDROID_ARCH
 ------------
 
+.. versionadded:: 3.4
+
 When :ref:`Cross Compiling for Android with NVIDIA Nsight Tegra Visual Studio
 Edition`, this property sets the Android target architecture.
 

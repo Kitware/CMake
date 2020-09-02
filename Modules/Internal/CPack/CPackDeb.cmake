@@ -547,8 +547,8 @@ function(cpack_deb_prepare_package_vars)
       message(FATAL_ERROR _description_failure_message)
     endif()
 
-  # Ok, description has set. According to the `Debian Policy Manual`_ the frist
-  # line is a pacakge summary.  Try to get it as well...
+  # Ok, description has set. According to the `Debian Policy Manual`_ the first
+  # line is a package summary.  Try to get it as well...
   # See also: https://www.debian.org/doc/debian-policy/ch-controlfields.html#description
   elseif(CPACK_PACKAGE_DESCRIPTION_SUMMARY AND
          NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY STREQUAL CPACK_DEFAULT_PACKAGE_DESCRIPTION_SUMMARY)

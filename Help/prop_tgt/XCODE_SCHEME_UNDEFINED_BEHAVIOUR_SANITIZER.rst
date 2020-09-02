@@ -1,6 +1,8 @@
 XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER
 ------------------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Undefined Behavior Sanitizer``
 in the Diagnostics section of the generated Xcode scheme.
 

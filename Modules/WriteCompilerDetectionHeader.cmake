@@ -5,6 +5,8 @@
 WriteCompilerDetectionHeader
 ----------------------------
 
+.. versionadded:: 3.1
+
 This module provides the function ``write_compiler_detection_header()``.
 
 This function can be used to generate a file suitable for preprocessor

@@ -5,6 +5,8 @@
 CheckOBJCSourceCompiles
 -----------------------
 
+.. versionadded:: 3.16
+
 Check if given Objective-C source compiles and links into an executable.
 
 .. command:: check_objc_source_compiles

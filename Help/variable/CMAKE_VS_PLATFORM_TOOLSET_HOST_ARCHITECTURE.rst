@@ -1,6 +1,8 @@
 CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE
 -------------------------------------------
 
+.. versionadded:: 3.8
+
 Visual Studio preferred tool architecture.
 
 The :ref:`Visual Studio Generators` for VS 2013 and above support using

@@ -1,6 +1,8 @@
 CMP0077
 -------
 
+.. versionadded:: 3.13
+
 :command:`option` honors normal variables.
 
 The :command:`option` command is typically used to create a cache entry

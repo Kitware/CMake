@@ -83,7 +83,7 @@ Defines the following command for use with ``SWIG``:
   ``SOURCES``
     List of sources for the library. Files with extension ``.i`` will be
     identified as sources for the ``SWIG`` tool. Other files will be handled in
-    the standard way. This behavior can be overriden by specifying the variable
+    the standard way. This behavior can be overridden by specifying the variable
     ``SWIG_SOURCE_FILE_EXTENSIONS``.
 
   .. note::

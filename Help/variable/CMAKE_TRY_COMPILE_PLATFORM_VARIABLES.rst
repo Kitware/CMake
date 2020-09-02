@@ -1,6 +1,8 @@
 CMAKE_TRY_COMPILE_PLATFORM_VARIABLES
 ------------------------------------
 
+.. versionadded:: 3.6
+
 List of variables that the :command:`try_compile` command source file signature
 must propagate into the test project in order to target the same platform as
 the host project.

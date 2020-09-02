@@ -5,6 +5,8 @@
 FindEnvModules
 --------------
 
+.. versionadded:: 3.15
+
 Locate an environment module implementation and make commands available to
 CMake scripts to use them.  This is compatible with both Lua-based Lmod
 and TCL-based EnvironmentModules.

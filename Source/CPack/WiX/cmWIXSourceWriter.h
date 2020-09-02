@@ -50,6 +50,8 @@ public:
 
   std::string CreateGuidFromComponentId(std::string const& componentId);
 
+  static std::string EscapeAttributeValue(std::string const& value);
+
 protected:
   cmCPackLog* Logger;
 
@@ -63,8 +65,6 @@ private:
   void WriteXMLDeclaration();
 
   void Indent(size_t count);
-
-  static std::string EscapeAttributeValue(std::string const& value);
 
   cmsys::ofstream File;
 

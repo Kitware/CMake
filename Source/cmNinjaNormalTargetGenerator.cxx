@@ -239,7 +239,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(
     std::string launcher;
     const char* val = this->GetLocalGenerator()->GetRuleLauncher(
       this->GetGeneratorTarget(), "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 
@@ -376,7 +376,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     std::string launcher;
     const char* val = this->GetLocalGenerator()->GetRuleLauncher(
       this->GetGeneratorTarget(), "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 
@@ -739,7 +739,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
 
   // Gather order-only dependencies.
   this->GetLocalGenerator()->AppendTargetDepends(
-    this->GetGeneratorTarget(), build.OrderOnlyDeps, config, config);
+    this->GetGeneratorTarget(), build.OrderOnlyDeps, config, config,
+    DependOnTargetArtifact);
 
   // Write the build statement for this target.
   bool usedResponseFile = false;
@@ -1091,7 +1092,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       obj_list_file, cmOutputConverter::SHELL);
 
     const char* nm_executable = GetMakefile()->GetDefinition("CMAKE_NM");
-    if (nm_executable && *nm_executable) {
+    if (cmNonempty(nm_executable)) {
       cmd += " --nm=";
       cmd += this->LocalCommonGenerator->ConvertToOutputFormat(
         nm_executable, cmOutputConverter::SHELL);
@@ -1160,8 +1161,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
              globalGen->IsMultiConfig() ? cmStrCat('.', config) : "", ".rsp"));
 
   // Gather order-only dependencies.
-  this->GetLocalGenerator()->AppendTargetDepends(gt, linkBuild.OrderOnlyDeps,
-                                                 config, fileConfig);
+  this->GetLocalGenerator()->AppendTargetDepends(
+    gt, linkBuild.OrderOnlyDeps, config, fileConfig, DependOnTargetArtifact);
 
   // Add order-only dependencies on versioning symlinks of shared libs we link.
   if (!this->GeneratorTarget->IsDLLPlatform()) {

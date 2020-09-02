@@ -1,0 +1,36 @@
+{
+    "languageStandard" :
+    {
+      "backtraces": [
+          [
+              {
+                  "file": "^cxx/CMakeLists\\.txt$",
+                  "line": 29,
+                  "command": "target_compile_features",
+                  "hasParent": true
+              },
+              {
+                  "file": "^cxx/CMakeLists\\.txt$",
+                  "line": null,
+                  "command": null,
+                  "hasParent": false
+              }
+          ],
+          [
+              {
+                  "file": "^cxx/CMakeLists\\.txt$",
+                  "line": 30,
+                  "command": "target_compile_features",
+                  "hasParent": true
+              },
+              {
+                  "file": "^cxx/CMakeLists\\.txt$",
+                  "line": null,
+                  "command": null,
+                  "hasParent": false
+              }
+          ]
+      ],
+      "standard" : "11"
+    }
+}

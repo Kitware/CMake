@@ -5,6 +5,8 @@
 FindGSL
 --------
 
+.. versionadded:: 3.2
+
 Find the native GNU Scientific Library (GSL) includes and libraries.
 
 The GNU Scientific Library (GSL) is a numerical library for C and C++

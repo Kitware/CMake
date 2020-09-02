@@ -5,6 +5,8 @@
 FindIce
 -------
 
+.. versionadded:: 3.1
+
 Find the ZeroC Internet Communication Engine (ICE) programs,
 libraries and datafiles.
 

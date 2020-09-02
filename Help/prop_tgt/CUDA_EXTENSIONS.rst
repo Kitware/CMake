@@ -1,6 +1,8 @@
 CUDA_EXTENSIONS
 ---------------
 
+.. versionadded:: 3.8
+
 Boolean specifying whether compiler specific extensions are requested.
 
 This property specifies whether compiler specific extensions should be

@@ -152,9 +152,6 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->WarnUninitializedAction =
     OptionsMenu->addAction(tr("&Warn Uninitialized (--warn-uninitialized)"));
   this->WarnUninitializedAction->setCheckable(true);
-  this->WarnUnusedAction =
-    OptionsMenu->addAction(tr("&Warn Unused (--warn-unused-vars)"));
-  this->WarnUnusedAction->setCheckable(true);
 
   QAction* debugAction = OptionsMenu->addAction(tr("&Debug Output"));
   debugAction->setCheckable(true);
@@ -290,9 +287,6 @@ void CMakeSetupDialog::initialize()
   QObject::connect(this->WarnUninitializedAction, SIGNAL(triggered(bool)),
                    this->CMakeThread->cmakeInstance(),
                    SLOT(setWarnUninitializedMode(bool)));
-  QObject::connect(this->WarnUnusedAction, SIGNAL(triggered(bool)),
-                   this->CMakeThread->cmakeInstance(),
-                   SLOT(setWarnUnusedMode(bool)));
 
   if (!this->SourceDirectory->text().isEmpty() ||
       !this->BinaryDirectory->lineEdit()->text().isEmpty()) {

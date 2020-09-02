@@ -1,6 +1,8 @@
 Visual Studio 15 2017
 ---------------------
 
+.. versionadded:: 3.7.1
+
 Generates Visual Studio 15 (VS 2017) project files.
 
 Project Types

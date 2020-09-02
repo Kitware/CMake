@@ -1,6 +1,8 @@
 GHS_INTEGRITY_APP
 -----------------
 
+.. versionadded:: 3.14
+
 ``ON`` / ``OFF`` boolean to determine if an executable target should
 be treated as an `Integrity Application`.
 

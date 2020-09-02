@@ -5,8 +5,12 @@
 #include <memory>
 #include <utility>
 
+#include <cmext/algorithm>
+
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 #include "cmProperty.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -31,26 +35,30 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
       lg->GetStateSnapshot().GetDirectory().GetCurrentBinary());
     DirectoryTarget& dirTarget = dirTargets[currentBinaryDir];
     dirTarget.LG = lg.get();
+    const std::vector<std::string>& configs =
+      lg->GetMakefile()->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
     // The directory-level rule should depend on the target-level rules
     // for all targets in the directory.
     for (const auto& gt : lg->GetGeneratorTargets()) {
       cmStateEnums::TargetType const type = gt->GetType();
-      if (type != cmStateEnums::EXECUTABLE &&
-          type != cmStateEnums::STATIC_LIBRARY &&
-          type != cmStateEnums::SHARED_LIBRARY &&
-          type != cmStateEnums::MODULE_LIBRARY &&
-          type != cmStateEnums::OBJECT_LIBRARY &&
-          type != cmStateEnums::UTILITY) {
+      if (type == cmStateEnums::GLOBAL_TARGET || !gt->IsInBuildSystem()) {
         continue;
       }
       DirectoryTarget::Target t;
       t.GT = gt.get();
-      if (cmProp exclude = gt->GetProperty("EXCLUDE_FROM_ALL")) {
-        if (cmIsOn(*exclude)) {
-          // This target has been explicitly excluded.
-          t.ExcludeFromAll = true;
-        } else {
+      const std::string EXCLUDE_FROM_ALL("EXCLUDE_FROM_ALL");
+      if (cmProp exclude = gt->GetProperty(EXCLUDE_FROM_ALL)) {
+        for (const std::string& config : configs) {
+          cmGeneratorExpressionInterpreter genexInterpreter(lg.get(), config,
+                                                            gt.get());
+          if (cmIsOn(genexInterpreter.Evaluate(*exclude, EXCLUDE_FROM_ALL))) {
+            // This target has been explicitly excluded.
+            t.ExcludedFromAllInConfigs.push_back(config);
+          }
+        }
+
+        if (t.ExcludedFromAllInConfigs.empty()) {
           // This target has been explicitly un-excluded.  The directory-level
           // rule for every directory between this and the root should depend
           // on the target-level rule for this target.
@@ -77,4 +85,13 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
   }
 
   return dirTargets;
+}
+
+bool cmGlobalCommonGenerator::IsExcludedFromAllInConfig(
+  const DirectoryTarget::Target& t, const std::string& config)
+{
+  if (this->IsMultiConfig()) {
+    return cm::contains(t.ExcludedFromAllInConfigs, config);
+  }
+  return !t.ExcludedFromAllInConfigs.empty();
 }

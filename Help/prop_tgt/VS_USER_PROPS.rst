@@ -1,6 +1,8 @@
 VS_USER_PROPS
 -------------
 
+.. versionadded:: 3.8
+
 Sets the user props file to be included in the visual studio
 C++ project file. The standard path is
 ``$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props``, which is

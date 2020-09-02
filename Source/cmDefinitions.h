@@ -48,9 +48,6 @@ public:
   /** Unset a definition.  */
   void Unset(const std::string& key);
 
-  /** List of unused keys.  */
-  std::vector<std::string> UnusedKeys() const;
-
 private:
   /** String with existence boolean.  */
   struct Def
@@ -62,7 +59,6 @@ private:
     {
     }
     cm::String Value;
-    bool Used = false;
   };
   static Def NoDef;
 

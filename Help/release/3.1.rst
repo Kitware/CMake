@@ -83,7 +83,7 @@ Commands
   :manual:`generator expression <cmake-generator-expressions(7)>`.
 
 * The :command:`string` command learned a new ``UUID`` subcommand
-  to generate a univerally unique identifier.
+  to generate a universally unique identifier.
 
 * New :command:`target_compile_features` command allows populating the
   :prop_tgt:`COMPILE_FEATURES` target property, just like any other

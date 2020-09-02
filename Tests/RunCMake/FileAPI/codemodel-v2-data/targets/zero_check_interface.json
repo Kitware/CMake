@@ -1,0 +1,70 @@
+{
+    "name": "ZERO_CHECK",
+    "id": "^ZERO_CHECK::@25b7fa8ea00134654b85$",
+    "directorySource": "^interface$",
+    "projectName": "Interface",
+    "type": "UTILITY",
+    "isGeneratorProvided": true,
+    "sources": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/interface/CMakeFiles/ZERO_CHECK$",
+            "isGenerated": true,
+            "sourceGroupName": "",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^interface/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/interface/CMakeFiles/ZERO_CHECK\\.rule$",
+            "isGenerated": true,
+            "sourceGroupName": "CMake Rules",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^interface/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/interface/CMakeFiles/ZERO_CHECK$"
+            ]
+        },
+        {
+            "name": "CMake Rules",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/interface/CMakeFiles/ZERO_CHECK\\.rule$"
+            ]
+        }
+    ],
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^interface/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": null,
+    "build": "^interface$",
+    "source": "^interface$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": null
+}

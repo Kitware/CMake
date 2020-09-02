@@ -1,6 +1,8 @@
 CTEST_CHANGE_ID
 ---------------
 
+.. versionadded:: 3.4
+
 Specify the CTest ``ChangeId`` setting
 in a :manual:`ctest(1)` dashboard client script.
 

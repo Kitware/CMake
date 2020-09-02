@@ -28,7 +28,7 @@ struct cmDocumentationEntry;
 /** \class cmGlobalXCodeGenerator
  * \brief Write a Unix makefiles.
  *
- * cmGlobalXCodeGenerator manages UNIX build process for a tree
+ * cmGlobalXCodeGenerator manages Xcode build process for a tree
  */
 class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
@@ -168,9 +168,9 @@ private:
   std::string AddConfigurations(cmXCodeObject* target,
                                 cmGeneratorTarget* gtgt);
   void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr,
-                               const char* value);
+                               cmXCodeObject* value);
   void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr,
-                                   const char* value,
+                                   cmXCodeObject* value,
                                    const std::string& configName);
   cmXCodeObject* CreateUtilityTarget(cmGeneratorTarget* gtgt);
   void AddDependAndLinkInformation(cmXCodeObject* target);
@@ -204,10 +204,10 @@ private:
                                                   cmGeneratorTarget* target,
                                                   const std::string& lang,
                                                   cmSourceFile* sf);
-  cmXCodeObject* CreateXCodeSourceFileFromPath(const std::string& fullpath,
-                                               cmGeneratorTarget* target,
-                                               const std::string& lang,
-                                               cmSourceFile* sf);
+  cmXCodeObject* CreateXCodeBuildFileFromPath(const std::string& fullpath,
+                                              cmGeneratorTarget* target,
+                                              const std::string& lang,
+                                              cmSourceFile* sf);
   cmXCodeObject* CreateXCodeFileReference(cmSourceFile* sf,
                                           cmGeneratorTarget* target);
   cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, cmSourceFile* sf,
@@ -282,6 +282,7 @@ private:
   std::string PostBuildMakeTarget(std::string const& tName,
                                   std::string const& configName);
   cmXCodeObject* MainGroupChildren;
+  cmXCodeObject* FrameworkGroup;
   cmMakefile* CurrentMakefile;
   cmLocalGenerator* CurrentLocalGenerator;
   std::vector<std::string> CurrentConfigurationTypes;
@@ -295,13 +296,18 @@ private:
   std::map<std::string, cmXCodeObject*> GroupNameMap;
   std::map<std::string, cmXCodeObject*> TargetGroup;
   std::map<std::string, cmXCodeObject*> FileRefs;
+  std::map<std::string, cmXCodeObject*> ExternalLibRefs;
   std::map<cmGeneratorTarget const*, cmXCodeObject*> XCodeObjectMap;
+  std::map<cmXCodeObject*, cmXCodeObject*> FileRefToBuildFileMap;
   std::vector<std::string> Architectures;
   std::string ObjectDirArchDefault;
   std::string ObjectDirArch;
   std::string SystemName;
   std::string GeneratorToolset;
   std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
+  std::vector<std::string> EnabledLangs;
+  std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
+    CommandsVisited;
 };
 
 #endif

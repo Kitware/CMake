@@ -1,6 +1,8 @@
 CMP0076
 -------
 
+.. versionadded:: 3.13
+
 The :command:`target_sources` command converts relative paths to absolute.
 
 In CMake 3.13 and above, the :command:`target_sources` command now converts

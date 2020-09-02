@@ -368,7 +368,7 @@ cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmGeneratorTarget* target)
 void cmGlobalVisualStudioGenerator::FollowLinkDepends(
   const cmGeneratorTarget* target, std::set<const cmGeneratorTarget*>& linked)
 {
-  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!target->IsInBuildSystem()) {
     return;
   }
   if (linked.insert(target).second &&
@@ -509,7 +509,7 @@ std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
   cmLocalGenerator const* root) const
 {
   cmProp n = root->GetMakefile()->GetProperty("VS_STARTUP_PROJECT");
-  if (n && !n->empty()) {
+  if (cmNonempty(n)) {
     std::string startup = *n;
     if (this->FindTarget(startup)) {
       return startup;
@@ -810,7 +810,7 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   // a target with none of its own sources, e.g. when also using
   // object libraries.
   cmProp linkLang = gt->GetProperty("LINKER_LANGUAGE");
-  if (linkLang && !linkLang->empty()) {
+  if (cmNonempty(linkLang)) {
     languages.insert(*linkLang);
   }
 

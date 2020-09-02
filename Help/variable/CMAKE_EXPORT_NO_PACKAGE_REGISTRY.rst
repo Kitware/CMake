@@ -1,6 +1,8 @@
 CMAKE_EXPORT_NO_PACKAGE_REGISTRY
 --------------------------------
 
+.. versionadded:: 3.1
+
 Disable the :command:`export(PACKAGE)` command when :policy:`CMP0090`
 is not set to ``NEW``.
 

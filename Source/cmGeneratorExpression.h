@@ -199,8 +199,6 @@ public:
 
   const std::string& Evaluate(std::string expression,
                               const std::string& property);
-  const std::string& Evaluate(const char* expression,
-                              const std::string& property);
 
 protected:
   cmGeneratorExpression GeneratorExpression;

@@ -1,6 +1,8 @@
 AIX_EXPORT_ALL_SYMBOLS
 ----------------------
 
+.. versionadded:: 3.17
+
 On AIX, CMake automatically exports all symbols from shared libraries, and
 from executables with the :prop_tgt:`ENABLE_EXPORTS` target property set.
 Explicitly disable this boolean property to suppress the behavior and

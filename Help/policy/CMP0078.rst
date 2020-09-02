@@ -1,6 +1,8 @@
 CMP0078
 -------
 
+.. versionadded:: 3.13
+
 :module:`UseSWIG` generates standard target names.
 
 Starting with CMake 3.13, :module:`UseSWIG` generates now standard target

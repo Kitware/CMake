@@ -155,11 +155,7 @@ QModelIndex QCMakeCacheView::moveCursor(CursorAction act,
 
 void QCMakeCacheView::setShowAdvanced(bool s)
 {
-#if QT_VERSION >= 040300
-  // new 4.3 API that needs to be called.  what about an older Qt?
   this->SearchFilter->invalidate();
-#endif
-
   this->AdvancedFilter->setShowAdvanced(s);
 }
 
@@ -209,9 +205,7 @@ void QCMakeCacheModel::clear()
 
 void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
   this->beginResetModel();
-#endif
 
   QSet<QCMakeProperty> newProps;
   QSet<QCMakeProperty> newProps2;
@@ -335,11 +329,7 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
   }
 
   this->blockSignals(b);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
   this->endResetModel();
-#else
-  this->reset();
-#endif
 }
 
 QCMakeCacheModel::ViewType QCMakeCacheModel::viewType() const
@@ -349,9 +339,7 @@ QCMakeCacheModel::ViewType QCMakeCacheModel::viewType() const
 
 void QCMakeCacheModel::setViewType(QCMakeCacheModel::ViewType t)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
   this->beginResetModel();
-#endif
 
   this->View = t;
 
@@ -368,11 +356,7 @@ void QCMakeCacheModel::setViewType(QCMakeCacheModel::ViewType t)
   this->setProperties(oldProps);
   this->setProperties(props);
   this->blockSignals(b);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
   this->endResetModel();
-#else
-  this->reset();
-#endif
 }
 
 void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1,
@@ -498,8 +482,7 @@ QCMakePropertyList QCMakeCacheModel::properties() const
       // go to the next in the tree
       while (!idxs.isEmpty() &&
              (
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) &&                                \
-  QT_VERSION < QT_VERSION_CHECK(5, 1, 0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 1, 0)
                (idxs.last().row() + 1) >= rowCount(idxs.last().parent()) ||
 #endif
                !idxs.last().sibling(idxs.last().row() + 1, 0).isValid())) {
@@ -657,20 +640,6 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e,
     this->recordChange(model, index);
   }
   return success;
-}
-
-// Issue 205903 fixed in Qt 4.5.0.
-// Can remove this function and FileDialogFlag when minimum Qt version is 4.5
-bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* evt)
-{
-  // workaround for what looks like a bug in Qt on macOS
-  // where it doesn't create a QWidget wrapper for the native file dialog
-  // so the Qt library ends up assuming the focus was lost to something else
-
-  if (evt->type() == QEvent::FocusOut && this->FileDialogFlag) {
-    return false;
-  }
-  return QItemDelegate::eventFilter(object, evt);
 }
 
 void QCMakeCacheModelDelegate::setModelData(QWidget* editor,

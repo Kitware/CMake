@@ -40,9 +40,9 @@ add_custom_target(check-part1 ALL
     -Dtest_and_0_invalidcontent=$<AND:0,invalidcontent>
     -Dtest_config_0=$<CONFIG:$<CONFIGURATION>x>
     -Dtest_config_1=$<CONFIG:$<CONFIGURATION>>
-    -Dtest_config_debug=$<CONFIG:Debug>$<CONFIG:DEBUG>$<CONFIG:DeBuG>
-    -Dtest_config_release=$<CONFIG:Release>$<CONFIG:RELEASE>$<CONFIG:ReLeAsE>
-    -Dtest_config_relwithdebinfo=$<CONFIG:RelWithDebInfo>$<CONFIG:RELWITHDEBINFO>$<CONFIG:relwithdebinfo>
+    -Dtest_config_debug=$<CONFIG:Debug,DEBUG,DeBuG>
+    -Dtest_config_release=$<CONFIG:Release>$<CONFIG:RELEASE,ReLeAsE>
+    -Dtest_config_relwithdebinfo=$<CONFIG:RelWithDebInfo,RELWITHDEBINFO>$<CONFIG:relwithdebinfo>
     -Dtest_config_minsizerel=$<CONFIG:MinSizeRel>$<CONFIG:MINSIZEREL>$<CONFIG:minsizerel>
     -Dtest_not_0=$<NOT:0>
     -Dtest_not_1=$<NOT:1>
@@ -180,9 +180,7 @@ set_property(TARGET imported3 PROPERTY IMPORTED_LOCATION_DEBUG debug_loc)
 set_property(TARGET imported3 APPEND PROPERTY
   INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:DEBUG>:$<TARGET_PROPERTY:imported1,INTERFACE_INCLUDE_DIRECTORIES>>)
 set_property(TARGET imported3 APPEND PROPERTY
-  INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:RELEASE>:$<TARGET_PROPERTY:imported2,INTERFACE_INCLUDE_DIRECTORIES>>)
-set_property(TARGET imported3 APPEND PROPERTY
-  INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:RELWITHDEBINFO>:$<TARGET_PROPERTY:imported2,INTERFACE_INCLUDE_DIRECTORIES>>)
+  INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:RELEASE,RELWITHDEBINFO>:$<TARGET_PROPERTY:imported2,INTERFACE_INCLUDE_DIRECTORIES>>)
 set_property(TARGET imported3 APPEND PROPERTY
   INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:MINSIZEREL>:$<TARGET_PROPERTY:imported2,INTERFACE_INCLUDE_DIRECTORIES>>)
 

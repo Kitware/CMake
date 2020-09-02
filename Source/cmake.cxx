@@ -64,10 +64,6 @@
 #  include "cmVariableWatch.h"
 #endif
 
-#if !defined(CMAKE_BOOTSTRAP)
-#  define CMAKE_USE_ECLIPSE
-#endif
-
 #if defined(__MINGW32__) && defined(CMAKE_BOOTSTRAP)
 #  define CMAKE_BOOT_MINGW
 #endif
@@ -97,20 +93,21 @@
 #if defined(CMAKE_USE_WMAKE)
 #  include "cmGlobalWatcomWMakeGenerator.h"
 #endif
-#include "cmGlobalUnixMakefileGenerator3.h"
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmGlobalNinjaGenerator.h"
+#  include "cmGlobalUnixMakefileGenerator3.h"
+#elif defined(CMAKE_BOOTSTRAP_MAKEFILES)
+#  include "cmGlobalUnixMakefileGenerator3.h"
+#elif defined(CMAKE_BOOTSTRAP_NINJA)
+#  include "cmGlobalNinjaGenerator.h"
 #endif
-#include "cmExtraCodeLiteGenerator.h"
 
-#if !defined(CMAKE_BOOT_MINGW)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmExtraCodeBlocksGenerator.h"
-#endif
-#include "cmExtraKateGenerator.h"
-#include "cmExtraSublimeTextGenerator.h"
-
-#ifdef CMAKE_USE_ECLIPSE
+#  include "cmExtraCodeLiteGenerator.h"
 #  include "cmExtraEclipseCDT4Generator.h"
+#  include "cmExtraKateGenerator.h"
+#  include "cmExtraSublimeTextGenerator.h"
 #endif
 
 #if defined(__linux__) || defined(_WIN32)
@@ -201,13 +198,14 @@ cmake::cmake(Role role, cmState::Mode mode)
     };
 
     // The "c" extension MUST precede the "C" extension.
-    setupExts(this->SourceFileExtensions,
+    setupExts(this->CLikeSourceFileExtensions,
               { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "m", "M", "mm" });
     setupExts(this->HeaderFileExtensions,
               { "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" });
     setupExts(this->CudaFileExtensions, { "cu" });
     setupExts(this->FortranFileExtensions,
               { "f", "F", "for", "f77", "f90", "f95", "f03" });
+    setupExts(this->ISPCFileExtensions, { "ispc" });
   }
 }
 
@@ -780,8 +778,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       std::cout << "Warn about uninitialized values.\n";
       this->SetWarnUninitialized(true);
     } else if (cmHasLiteralPrefix(arg, "--warn-unused-vars")) {
-      std::cout << "Finding unused variables.\n";
-      this->SetWarnUnused(true);
+      // Option was removed.
     } else if (cmHasLiteralPrefix(arg, "--no-warn-unused-cli")) {
       std::cout << "Not searching for unused variables given on the "
                 << "command line.\n";
@@ -1137,13 +1134,9 @@ void cmake::AddDefaultExtraGenerators()
 #if !defined(CMAKE_BOOTSTRAP)
   this->ExtraGenerators.push_back(cmExtraCodeBlocksGenerator::GetFactory());
   this->ExtraGenerators.push_back(cmExtraCodeLiteGenerator::GetFactory());
-  this->ExtraGenerators.push_back(cmExtraSublimeTextGenerator::GetFactory());
-  this->ExtraGenerators.push_back(cmExtraKateGenerator::GetFactory());
-
-#  ifdef CMAKE_USE_ECLIPSE
   this->ExtraGenerators.push_back(cmExtraEclipseCDT4Generator::GetFactory());
-#  endif
-
+  this->ExtraGenerators.push_back(cmExtraKateGenerator::GetFactory());
+  this->ExtraGenerators.push_back(cmExtraSublimeTextGenerator::GetFactory());
 #endif
 }
 
@@ -1383,7 +1376,7 @@ struct SaveCacheEntry
 
 int cmake::HandleDeleteCacheVariables(const std::string& var)
 {
-  std::vector<std::string> argsSplit = cmExpandedList(std::string(var), true);
+  std::vector<std::string> argsSplit = cmExpandedList(var, true);
   // erase the property to avoid infinite recursion
   this->State->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
   if (this->State->GetIsInTryCompile()) {
@@ -1402,8 +1395,13 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     save.key = *i;
     warning << *i << "= ";
     i++;
-    save.value = *i;
-    warning << *i << "\n";
+    if (i != argsSplit.end()) {
+      save.value = *i;
+      warning << *i << "\n";
+    } else {
+      warning << "\n";
+      i -= 1;
+    }
     cmProp existingValue = this->State->GetCacheEntryValue(save.key);
     if (existingValue) {
       save.type = this->State->GetCacheEntryType(save.key);
@@ -1499,10 +1497,10 @@ int cmake::Configure()
   this->Messenger->SetSuppressDeprecatedWarnings(value && cmIsOff(*value));
 
   value = this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
-  this->Messenger->SetDeprecatedWarningsAsErrors(value && cmIsOn(*value));
+  this->Messenger->SetDeprecatedWarningsAsErrors(cmIsOn(value));
 
   value = this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-  this->Messenger->SetSuppressDevWarnings(value && cmIsOn(*value));
+  this->Messenger->SetSuppressDevWarnings(cmIsOn(value));
 
   value = this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_ERRORS");
   this->Messenger->SetDevWarningsAsErrors(value && cmIsOff(*value));
@@ -1757,6 +1755,9 @@ std::unique_ptr<cmGlobalGenerator> cmake::EvaluateDefaultGlobalGenerator()
     gen = cm::make_unique<cmGlobalNMakeMakefileGenerator>(this);
   }
   return std::unique_ptr<cmGlobalGenerator>(std::move(gen));
+#elif defined(CMAKE_BOOTSTRAP_NINJA)
+  return std::unique_ptr<cmGlobalGenerator>(
+    cm::make_unique<cmGlobalNinjaGenerator>(this));
 #else
   return std::unique_ptr<cmGlobalGenerator>(
     cm::make_unique<cmGlobalUnixMakefileGenerator3>(this));
@@ -1970,6 +1971,19 @@ void cmake::AddGlobCacheEntry(bool recurse, bool listDirectories,
                                  backtrace);
 }
 
+std::vector<std::string> cmake::GetAllExtensions() const
+{
+  std::vector<std::string> allExt = this->CLikeSourceFileExtensions.ordered;
+  allExt.insert(allExt.end(), this->HeaderFileExtensions.ordered.begin(),
+                this->HeaderFileExtensions.ordered.end());
+  // cuda extensions are also in SourceFileExtensions so we ignore it here
+  allExt.insert(allExt.end(), this->FortranFileExtensions.ordered.begin(),
+                this->FortranFileExtensions.ordered.end());
+  allExt.insert(allExt.end(), this->ISPCFileExtensions.ordered.begin(),
+                this->ISPCFileExtensions.ordered.end());
+  return allExt;
+}
+
 std::string cmake::StripExtension(const std::string& file) const
 {
   auto dotpos = file.rfind('.');
@@ -1979,7 +1993,7 @@ std::string cmake::StripExtension(const std::string& file) const
 #else
     auto ext = cm::string_view(file).substr(dotpos + 1);
 #endif
-    if (this->IsSourceExtension(ext) || this->IsHeaderExtension(ext)) {
+    if (this->IsAKnownExtension(ext)) {
       return file.substr(0, dotpos);
     }
   }
@@ -2022,13 +2036,17 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(cmGlobalMSYSMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalMinGWMakefileGenerator::NewFactory());
 #endif
-  this->Generators.push_back(cmGlobalUnixMakefileGenerator3::NewFactory());
 #if !defined(CMAKE_BOOTSTRAP)
 #  if defined(__linux__) || defined(_WIN32)
   this->Generators.push_back(cmGlobalGhsMultiGenerator::NewFactory());
 #  endif
+  this->Generators.push_back(cmGlobalUnixMakefileGenerator3::NewFactory());
   this->Generators.push_back(cmGlobalNinjaGenerator::NewFactory());
   this->Generators.push_back(cmGlobalNinjaMultiGenerator::NewFactory());
+#elif defined(CMAKE_BOOTSTRAP_NINJA)
+  this->Generators.push_back(cmGlobalNinjaGenerator::NewFactory());
+#elif defined(CMAKE_BOOTSTRAP_MAKEFILES)
+  this->Generators.push_back(cmGlobalUnixMakefileGenerator3::NewFactory());
 #endif
 #if defined(CMAKE_USE_WMAKE)
   this->Generators.push_back(cmGlobalWatcomWMakeGenerator::NewFactory());
@@ -2269,7 +2287,7 @@ int cmake::CheckBuildSystem()
   if (this->ClearBuildSystem) {
     // Get the generator used for this build system.
     const char* genName = mf.GetDefinition("CMAKE_DEPENDS_GENERATOR");
-    if (!genName || genName[0] == '\0') {
+    if (!cmNonempty(genName)) {
       genName = "Unix Makefiles";
     }
 
@@ -2743,9 +2761,7 @@ int cmake::Build(int jobs, const std::string& dir,
   }
   projName = *cachedProjectName;
 
-  cmProp cachedVerbose =
-    this->State->GetCacheEntryValue("CMAKE_VERBOSE_MAKEFILE");
-  if (cachedVerbose && cmIsOn(*cachedVerbose)) {
+  if (cmIsOn(this->State->GetCacheEntryValue("CMAKE_VERBOSE_MAKEFILE"))) {
     verbose = true;
   }
 

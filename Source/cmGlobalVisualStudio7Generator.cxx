@@ -339,7 +339,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   // loop over again and write out configurations for each target
   // in the solution
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     cmProp expath = target->GetProperty("EXTERNAL_MSPROJECT");
@@ -369,7 +369,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 
   std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     bool written = false;
@@ -436,7 +436,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
   std::ostream& fout, OrderedTargetDependSet const& projectTargets)
 {
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     cmProp vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
@@ -568,8 +568,9 @@ void cmGlobalVisualStudio7Generator::WriteSLNFooter(std::ostream& fout)
 std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
   cmGeneratorTarget const* target)
 {
-  std::vector<std::string> configs;
-  target->Target->GetMakefile()->GetConfigurations(configs);
+  std::vector<std::string> configs =
+    target->Target->GetMakefile()->GetGeneratorConfigs(
+      cmMakefile::ExcludeEmptyConfig);
   std::string pname = cmStrCat(target->GetName(), "_UTILITY");
   std::string fname =
     cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
@@ -693,9 +694,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   }
   // inspect EXCLUDE_FROM_DEFAULT_BUILD[_<CONFIG>] properties
   for (std::string const& i : configs) {
-    const char* propertyValue =
-      target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i);
-    if (cmIsOff(propertyValue)) {
+    if (cmIsOff(target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i))) {
       activeConfigs.insert(i);
     }
   }

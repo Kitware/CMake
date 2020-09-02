@@ -232,15 +232,17 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   , LocalGenerator(
       (cmLocalVisualStudio10Generator*)target->GetLocalGenerator())
 {
-  this->Makefile->GetConfigurations(this->Configurations);
+  this->Configurations =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
   this->NsightTegra = gg->IsNsightTegra();
+  this->Android = gg->TargetsAndroid();
   for (int i = 0; i < 4; ++i) {
     this->NsightTegraVersion[i] = 0;
   }
   sscanf(gg->GetNsightTegraVersion().c_str(), "%u.%u.%u.%u",
          &this->NsightTegraVersion[0], &this->NsightTegraVersion[1],
          &this->NsightTegraVersion[2], &this->NsightTegraVersion[3]);
-  this->MSTools = !this->NsightTegra;
+  this->MSTools = !this->NsightTegra && !this->Android;
   this->Managed = false;
   this->TargetCompileAsWinRT = false;
   this->IsMissingFiles = false;
@@ -313,8 +315,7 @@ std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
 void cmVisualStudio10TargetGenerator::Generate()
 {
   // do not generate external ms projects
-  if (this->GeneratorTarget->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-      this->GeneratorTarget->GetProperty("EXTERNAL_MSPROJECT")) {
+  if (this->GeneratorTarget->GetProperty("EXTERNAL_MSPROJECT")) {
     return;
   }
   const std::string ProjectFileExtension =
@@ -333,6 +334,13 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->ProjectType = csproj;
     this->Managed = true;
   }
+
+  if (this->Android &&
+      this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE &&
+      !this->GeneratorTarget->Target->IsAndroidGuiExecutable()) {
+    this->GlobalGenerator->AddAndroidExecutableWarning(this->Name);
+  }
+
   // Tell the global generator the name of the project file
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME",
                                              this->Name);
@@ -427,8 +435,8 @@ void cmVisualStudio10TargetGenerator::Generate()
       e1.Attribute("Label", "Globals");
       e1.Element("ProjectGuid", "{" + this->GUID + "}");
 
-      if (this->MSTools &&
-          this->GeneratorTarget->GetType() <= cmStateEnums::GLOBAL_TARGET) {
+      if ((this->MSTools || this->Android) &&
+          this->GeneratorTarget->IsInBuildSystem()) {
         this->WriteApplicationTypeSettings(e1);
         this->VerifyNecessaryFiles();
       }
@@ -469,7 +477,11 @@ void cmVisualStudio10TargetGenerator::Generate()
       cmProp vsGlobalKeyword =
         this->GeneratorTarget->GetProperty("VS_GLOBAL_KEYWORD");
       if (!vsGlobalKeyword) {
-        e1.Element("Keyword", "Win32Proj");
+        if (this->GlobalGenerator->TargetsAndroid()) {
+          e1.Element("Keyword", "Android");
+        } else {
+          e1.Element("Keyword", "Win32Proj");
+        }
       } else {
         e1.Element("Keyword", *vsGlobalKeyword);
       }
@@ -583,20 +595,30 @@ void cmVisualStudio10TargetGenerator::Generate()
           case cmStateEnums::MODULE_LIBRARY:
             outputType = "Module";
             break;
-          case cmStateEnums::EXECUTABLE:
-            if (this->GeneratorTarget->Target->GetPropertyAsBool(
-                  "WIN32_EXECUTABLE")) {
+          case cmStateEnums::EXECUTABLE: {
+            auto const win32 =
+              this->GeneratorTarget->GetSafeProperty("WIN32_EXECUTABLE");
+            if (win32.find("$<") != std::string::npos) {
+              this->Makefile->IssueMessage(
+                MessageType::FATAL_ERROR,
+                cmStrCat(
+                  "Target \"", this->GeneratorTarget->GetName(),
+                  "\" has a generator expression in its WIN32_EXECUTABLE "
+                  "property. This is not supported on managed executables."));
+              return;
+            }
+            if (cmIsOn(win32)) {
               outputType = "WinExe";
             } else {
               outputType = "Exe";
             }
-            break;
+          } break;
           case cmStateEnums::UTILITY:
+          case cmStateEnums::INTERFACE_LIBRARY:
           case cmStateEnums::GLOBAL_TARGET:
             outputType = "Utility";
             break;
           case cmStateEnums::UNKNOWN_LIBRARY:
-          case cmStateEnums::INTERFACE_LIBRARY:
             break;
         }
         e1.Element("OutputType", outputType);
@@ -658,7 +680,7 @@ void cmVisualStudio10TargetGenerator::Generate()
           cmStrCat(this->DefaultArtifactDir, "\\nasm.props");
         ConvertToWindowsSlash(propsLocal);
         this->Makefile->ConfigureFile(propsTemplate, propsLocal, false, true,
-                                      true);
+                                      true, true);
         Elem(e1, "Import").Attribute("Project", propsLocal);
       }
     }
@@ -1134,14 +1156,17 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
             break;
           case cmStateEnums::EXECUTABLE:
             if (this->NsightTegra &&
-                !this->GeneratorTarget->GetPropertyAsBool("ANDROID_GUI")) {
+                !this->GeneratorTarget->Target->IsAndroidGuiExecutable()) {
               // Android executables are .so too.
+              configType = "DynamicLibrary";
+            } else if (this->Android) {
               configType = "DynamicLibrary";
             } else {
               configType = "Application";
             }
             break;
           case cmStateEnums::UTILITY:
+          case cmStateEnums::INTERFACE_LIBRARY:
           case cmStateEnums::GLOBAL_TARGET:
             if (this->NsightTegra) {
               // Tegra-Android platform does not understand "Utility".
@@ -1151,7 +1176,6 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
             }
             break;
           case cmStateEnums::UNKNOWN_LIBRARY:
-          case cmStateEnums::INTERFACE_LIBRARY:
             break;
         }
       }
@@ -1166,6 +1190,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
       }
     } else if (this->NsightTegra) {
       this->WriteNsightTegraConfigurationValues(e1, c);
+    } else if (this->Android) {
+      this->WriteAndroidConfigurationValues(e1, c);
     }
   }
 }
@@ -1321,6 +1347,24 @@ void cmVisualStudio10TargetGenerator::WriteNsightTegraConfigurationValues(
   if (cmProp stlType =
         this->GeneratorTarget->GetProperty("ANDROID_STL_TYPE")) {
     e1.Element("AndroidStlType", *stlType);
+  }
+}
+
+void cmVisualStudio10TargetGenerator::WriteAndroidConfigurationValues(
+  Elem& e1, std::string const&)
+{
+  cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
+  if (cmProp projectToolsetOverride =
+        this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
+    e1.Element("PlatformToolset", *projectToolsetOverride);
+  } else if (const char* toolset = gg->GetPlatformToolset()) {
+    e1.Element("PlatformToolset", toolset);
+  }
+  if (cmProp stlType =
+        this->GeneratorTarget->GetProperty("ANDROID_STL_TYPE")) {
+    if (*stlType != "none") {
+      e1.Element("UseOfStl", *stlType);
+    }
   }
 }
 
@@ -1941,7 +1985,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
   }
 
   cmProp toolOverride = sf->GetProperty("VS_TOOL_OVERRIDE");
-  if (toolOverride && !toolOverride->empty()) {
+  if (cmNonempty(toolOverride)) {
     tool = toolOverride->c_str();
   }
 
@@ -1950,12 +1994,12 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
   if (this->GlobalGenerator->TargetsWindowsPhone() ||
       this->GlobalGenerator->TargetsWindowsStore()) {
     cmProp content = sf->GetProperty("VS_DEPLOYMENT_CONTENT");
-    if (content && !content->empty()) {
+    if (cmNonempty(content)) {
       toolHasSettings = true;
       deployContent = *content;
 
       cmProp location = sf->GetProperty("VS_DEPLOYMENT_LOCATION");
-      if (location && !location->empty()) {
+      if (cmNonempty(location)) {
         deployLocation = *location;
       }
     }
@@ -2117,7 +2161,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(Elem& e2,
 
 void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
 {
-  if (this->GeneratorTarget->GetType() > cmStateEnums::UTILITY) {
+  if (this->GeneratorTarget->GetType() == cmStateEnums::GLOBAL_TARGET) {
     return;
   }
 
@@ -2258,7 +2302,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
           e2.Attribute("UnityFilesDirectory", unityDir);
         } else {
           // Visual Studio versions prior to 2017 15.8 do not know about unity
-          // builds, thus we exclude the files alredy part of unity sources.
+          // builds, thus we exclude the files already part of unity sources.
           if (!si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION")) {
             exclude_configs = si.Configs;
           }
@@ -2915,7 +2959,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     }
   }
 
-  if (this->MSTools) {
+  if (this->Android) {
+    e2.Element("ObjectFileName", "$(IntDir)%(filename).o");
+  } else if (this->MSTools) {
     cmsys::RegularExpression clangToolset("v[0-9]+_clang_.*");
     const char* toolset = this->GlobalGenerator->GetPlatformToolset();
     if (toolset && clangToolset.find(toolset)) {
@@ -3695,7 +3741,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   }
 
   if (this->MSTools) {
-    if (this->GeneratorTarget->GetPropertyAsBool("WIN32_EXECUTABLE")) {
+    if (this->GeneratorTarget->IsWin32Executable(config)) {
       if (this->GlobalGenerator->TargetsWindowsCE()) {
         linkOptions.AddFlag("SubSystem", "WindowsCE");
         if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
@@ -4021,8 +4067,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups(Elem& e0)
     //    output manifest flags  <Manifest></Manifest>
     this->WriteManifestOptions(e1, c);
     if (this->NsightTegra &&
-        this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE &&
-        this->GeneratorTarget->GetPropertyAsBool("ANDROID_GUI")) {
+        this->GeneratorTarget->Target->IsAndroidGuiExecutable()) {
       this->WriteAntBuildOptions(e1, c);
     }
   }
@@ -4108,7 +4153,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
   Elem e1(e0, "ItemGroup");
   e1.SetHasElements();
   for (cmGeneratorTarget const* dt : depends) {
-    if (dt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!dt->IsInBuildSystem()) {
       continue;
     }
     // skip fortran targets as they can not be processed by MSBuild
@@ -4137,8 +4182,9 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
     }
 
     // Don't reference targets that don't produce any output.
-    if (dt->GetManagedType(this->Configurations[0]) ==
-        cmGeneratorTarget::ManagedType::Undefined) {
+    if (this->Configurations.empty() ||
+        dt->GetManagedType(this->Configurations[0]) ==
+          cmGeneratorTarget::ManagedType::Undefined) {
       e2.Element("ReferenceOutputAssembly", "false");
       e2.Element("CopyToOutputDirectory", "Never");
     }
@@ -4354,6 +4400,7 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings(Elem& e1)
   bool isAppContainer = false;
   bool const isWindowsPhone = this->GlobalGenerator->TargetsWindowsPhone();
   bool const isWindowsStore = this->GlobalGenerator->TargetsWindowsStore();
+  bool const isAndroid = this->GlobalGenerator->TargetsAndroid();
   std::string const& rev = this->GlobalGenerator->GetApplicationTypeRevision();
   if (isWindowsPhone || isWindowsStore) {
     e1.Element("ApplicationType",
@@ -4391,13 +4438,19 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings(Elem& e1)
                    this->Name + "_$(Configuration)_$(Platform).xap");
       }
     }
+  } else if (isAndroid) {
+    e1.Element("ApplicationType", "Android");
+    e1.Element("ApplicationTypeRevision",
+               gg->GetAndroidApplicationTypeRevision());
   }
   if (isAppContainer) {
     e1.Element("AppContainerApplication", "true");
-  } else if (this->Platform == "ARM64") {
-    e1.Element("WindowsSDKDesktopARM64Support", "true");
-  } else if (this->Platform == "ARM") {
-    e1.Element("WindowsSDKDesktopARMSupport", "true");
+  } else if (!isAndroid) {
+    if (this->Platform == "ARM64") {
+      e1.Element("WindowsSDKDesktopARM64Support", "true");
+    } else if (this->Platform == "ARM") {
+      e1.Element("WindowsSDKDesktopARMSupport", "true");
+    }
   }
   std::string const& targetPlatformVersion =
     gg->GetWindowsTargetPlatformVersion();

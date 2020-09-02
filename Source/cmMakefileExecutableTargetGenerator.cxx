@@ -218,7 +218,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 
@@ -371,7 +371,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->LocalGenerator->AddConfigVariableFlags(
     linkFlags, "CMAKE_EXE_LINKER_FLAGS", this->GetConfigName());
 
-  if (this->GeneratorTarget->GetPropertyAsBool("WIN32_EXECUTABLE")) {
+  if (this->GeneratorTarget->IsWin32Executable(
+        this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"))) {
     this->LocalGenerator->AppendFlags(
       linkFlags, this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE"));
   } else {
@@ -583,7 +584,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 

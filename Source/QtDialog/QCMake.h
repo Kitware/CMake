@@ -114,8 +114,6 @@ public slots:
   void setDeprecatedWarningsAsErrors(bool value);
   /// set whether to run cmake with warnings about uninitialized variables
   void setWarnUninitializedMode(bool value);
-  /// set whether to run cmake with warnings about unused variables
-  void setWarnUnusedMode(bool value);
   /// check if project IDE open is possible and emit openPossible signal
   void checkOpenPossible();
 
@@ -175,8 +173,6 @@ protected:
   void stderrCallback(std::string const& msg);
 
   bool WarnUninitializedMode;
-  bool WarnUnusedMode;
-  bool WarnUnusedAllMode;
   QString SourceDirectory;
   QString BinaryDirectory;
   QString Generator;

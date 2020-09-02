@@ -1,0 +1,16 @@
+function(write_targets)
+  set(_input "")
+
+  get_property(_targets DIRECTORY . PROPERTY BUILDSYSTEM_TARGETS)
+  foreach(_t IN LISTS _targets)
+    get_property(_type TARGET "${_t}" PROPERTY TYPE)
+    if(_type STREQUAL "SHARED_LIBRARY")
+      string(APPEND _input "set(${_t}_TARGET_FILE [==[$<TARGET_FILE:${_t}>]==])\n")
+      string(APPEND _input "set(${_t}_TARGET_LINKER_FILE [==[$<TARGET_LINKER_FILE:${_t}>]==])\n")
+    elseif(_type STREQUAL "STATIC_LIBRARY")
+      string(APPEND _input "set(${_t}_TARGET_FILE [==[$<TARGET_FILE:${_t}>]==])\n")
+    endif()
+  endforeach()
+
+  file(GENERATE OUTPUT target_files.cmake CONTENT "${_input}" CONDITION $<CONFIG:Release>)
+endfunction()

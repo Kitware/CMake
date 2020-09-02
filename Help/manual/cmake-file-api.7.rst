@@ -425,7 +425,7 @@ Version 1 does not exist to avoid confusion with that from
 
   {
     "kind": "codemodel",
-    "version": { "major": 2, "minor": 1 },
+    "version": { "major": 2, "minor": 2 },
     "paths": {
       "source": "/path/to/top-level-source-dir",
       "build": "/path/to/top-level-build-dir"
@@ -650,7 +650,8 @@ with members:
 ``type``
   A string specifying the type of the target.  The value is one of
   ``EXECUTABLE``, ``STATIC_LIBRARY``, ``SHARED_LIBRARY``,
-  ``MODULE_LIBRARY``, ``OBJECT_LIBRARY``, or ``UTILITY``.
+  ``MODULE_LIBRARY``, ``OBJECT_LIBRARY``, ``INTERFACE_LIBRARY``,
+  or ``UTILITY``.
 
 ``backtrace``
   Optional member that is present when a CMake language backtrace to
@@ -868,6 +869,26 @@ with members:
   ``language``
     A string specifying the language (e.g. ``C``, ``CXX``, ``Fortran``)
     of the toolchain is used to compile the source file.
+
+  ``languageStandard``
+    Optional member that is present when the language standard is set
+    explicitly (e.g. via :prop_tgt:`CXX_STANDARD`) or implicitly by
+    compile features.  Each entry is a JSON object with two members:
+
+    ``backtraces``
+      Optional member that is present when a CMake language backtrace to
+      the ``<LANG>_STANDARD`` setting is available.  If the language
+      standard was set implicitly by compile features those are used as
+      the backtrace(s).  It's possible for multiple compile features to
+      require the same language standard so there could be multiple
+      backtraces. The value is a JSON array with each entry being an
+      unsigned integer 0-based index into the ``backtraceGraph``
+      member's ``nodes`` array.
+
+    ``standard``
+      String representing the language standard.
+
+    This field was added in codemodel version 2.2.
 
   ``compileCommandFragments``
     Optional member that is present when fragments of the compiler command

@@ -71,6 +71,7 @@ std::unique_ptr<cmMakefileTargetGenerator> cmMakefileTargetGenerator::New(
     case cmStateEnums::OBJECT_LIBRARY:
       result = cm::make_unique<cmMakefileLibraryTargetGenerator>(tgt);
       break;
+    case cmStateEnums::INTERFACE_LIBRARY:
     case cmStateEnums::UTILITY:
       result = cm::make_unique<cmMakefileUtilityTargetGenerator>(tgt);
       break;
@@ -197,8 +198,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   }
 
   // add custom commands to the clean rules?
-  cmProp clean_no_custom = this->Makefile->GetProperty("CLEAN_NO_CUSTOM");
-  bool clean = clean_no_custom ? cmIsOff(*clean_no_custom) : true;
+  bool clean = cmIsOff(this->Makefile->GetProperty("CLEAN_NO_CUSTOM"));
 
   // First generate the object rule files.  Save a list of all object
   // files for this target.
@@ -268,6 +268,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
       this->ExternalObjects.push_back(objectFileName);
     }
   }
+
   std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources,
                                           this->GetConfigName());
@@ -525,12 +526,27 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     }
   }
 
+  if (lang != "ISPC") {
+    auto const& headers =
+      this->GeneratorTarget->GetGeneratedISPCHeaders(config);
+    if (!headers.empty()) {
+      depends.insert(depends.end(), headers.begin(), headers.end());
+    }
+  }
+
   std::string relativeObj =
     cmStrCat(this->LocalGenerator->GetHomeRelativeOutputPath(), obj);
   // Write the build rule.
 
   // Build the set of compiler flags.
   std::string flags;
+
+  // explicitly add the explicit language flag before any other flag
+  // this way backwards compatibility with user flags is maintained
+  if (source.GetProperty("LANGUAGE")) {
+    this->LocalGenerator->AppendFeatureOptions(flags, lang,
+                                               "EXPLICIT_LANGUAGE");
+  }
 
   // Add language-specific flags.
   std::string langFlags = cmStrCat("$(", lang, "_FLAGS", filterArch, ")");
@@ -543,6 +559,23 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   if (lang == "Fortran") {
     this->AppendFortranFormatFlags(flags, source);
     this->AppendFortranPreprocessFlags(flags, source);
+  }
+
+  std::string ispcHeaderRelative;
+  std::string ispcHeaderForShell;
+  if (lang == "ISPC") {
+    std::string ispcSource =
+      cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+
+    std::string directory = this->GeneratorTarget->GetObjectDirectory(config);
+    if (cmProp prop =
+          this->GeneratorTarget->GetProperty("ISPC_HEADER_DIRECTORY")) {
+      directory =
+        cmStrCat(this->LocalGenerator->GetBinaryDirectory(), '/', *prop);
+    }
+    ispcHeaderRelative = cmStrCat(directory, '/', ispcSource, ".h");
+    ispcHeaderForShell = this->LocalGenerator->ConvertToOutputFormat(
+      ispcHeaderRelative, cmOutputConverter::SHELL);
   }
 
   // Add flags from source file properties.
@@ -710,6 +743,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     cmOutputConverter::SHELL);
   vars.ObjectFileDir = objectFileDir.c_str();
   vars.Flags = flags.c_str();
+  vars.ISPCHeader = ispcHeaderForShell.c_str();
 
   std::string definesString = cmStrCat("$(", lang, "_DEFINES)");
 
@@ -728,7 +762,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   // ability to export compile commands
   bool lang_has_preprocessor =
     ((lang == "C") || (lang == "CXX") || (lang == "OBJC") ||
-     (lang == "OBJCXX") || (lang == "Fortran") || (lang == "CUDA"));
+     (lang == "OBJCXX") || (lang == "Fortran") || (lang == "CUDA") ||
+     lang == "ISPC");
   bool const lang_has_assembly = lang_has_preprocessor;
   bool const lang_can_export_cmds = lang_has_preprocessor;
 
@@ -800,7 +835,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
          lang == "OBJC" || lang == "OBJCXX")) {
       std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
       cmProp clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
-      if (clauncher && !clauncher->empty()) {
+      if (cmNonempty(clauncher)) {
         compilerLauncher = *clauncher;
       }
     }
@@ -815,8 +850,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       cmProp cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
       std::string const cppcheck_prop = lang + "_CPPCHECK";
       cmProp cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
-      if ((iwyu && !iwyu->empty()) || (tidy && !tidy->empty()) ||
-          (cpplint && !cpplint->empty()) || (cppcheck && !cppcheck->empty())) {
+      if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
+          cmNonempty(cppcheck)) {
         std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_co_compile";
         if (!compilerLauncher.empty()) {
           // In __run_co_compile case the launcher command is supplied
@@ -825,30 +860,30 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
           run_iwyu += this->LocalGenerator->EscapeForShell(compilerLauncher);
           compilerLauncher.clear();
         }
-        if (iwyu && !iwyu->empty()) {
+        if (cmNonempty(iwyu)) {
           run_iwyu += " --iwyu=";
           run_iwyu += this->LocalGenerator->EscapeForShell(*iwyu);
         }
-        if (tidy && !tidy->empty()) {
+        if (cmNonempty(tidy)) {
           run_iwyu += " --tidy=";
           const char* driverMode = this->Makefile->GetDefinition(
             "CMAKE_" + lang + "_CLANG_TIDY_DRIVER_MODE");
-          if (!(driverMode && *driverMode)) {
+          if (!cmNonempty(driverMode)) {
             driverMode = lang == "C" ? "gcc" : "g++";
           }
           run_iwyu += this->LocalGenerator->EscapeForShell(
             cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode));
         }
-        if (cpplint && !cpplint->empty()) {
+        if (cmNonempty(cpplint)) {
           run_iwyu += " --cpplint=";
           run_iwyu += this->LocalGenerator->EscapeForShell(*cpplint);
         }
-        if (cppcheck && !cppcheck->empty()) {
+        if (cmNonempty(cppcheck)) {
           run_iwyu += " --cppcheck=";
           run_iwyu += this->LocalGenerator->EscapeForShell(*cppcheck);
         }
-        if ((tidy && !tidy->empty()) || (cpplint && !cpplint->empty()) ||
-            (cppcheck && !cppcheck->empty())) {
+        if (cmNonempty(tidy) || (cmNonempty(cpplint)) ||
+            (cmNonempty(cppcheck))) {
           run_iwyu += " --source=";
           run_iwyu += sourceFile;
         }
@@ -875,7 +910,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     {
       const char* val = this->LocalGenerator->GetRuleLauncher(
         this->GeneratorTarget, "RULE_LAUNCH_COMPILE");
-      if (val && *val) {
+      if (cmNonempty(val)) {
         launcher = cmStrCat(val, ' ');
       }
     }
@@ -903,8 +938,15 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     if (!evaluated_outputs.empty()) {
       // Register these as extra files to clean.
       cmExpandList(evaluated_outputs, outputs);
-      this->CleanFiles.insert(outputs.begin() + 1, outputs.end());
     }
+  }
+  if (!ispcHeaderRelative
+         .empty()) { // can't move ispcHeader as vars is using it
+    outputs.emplace_back(ispcHeaderRelative);
+  }
+
+  if (outputs.size() > 1) {
+    this->CleanFiles.insert(outputs.begin() + 1, outputs.end());
   }
 
   // Write the rule.
@@ -1851,7 +1893,7 @@ void cmMakefileTargetGenerator::GenDefFile(
       this->LocalGenerator->GetCurrentBinaryDirectory(), objlist_file),
     cmOutputConverter::SHELL);
   const char* nm_executable = this->Makefile->GetDefinition("CMAKE_NM");
-  if (nm_executable && *nm_executable) {
+  if (cmNonempty(nm_executable)) {
     cmd += " --nm=";
     cmd += this->LocalCommonGenerator->ConvertToOutputFormat(
       nm_executable, cmOutputConverter::SHELL);

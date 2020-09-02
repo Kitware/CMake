@@ -1,6 +1,8 @@
 CMAKE_CXX_EXTENSIONS
 --------------------
 
+.. versionadded:: 3.1
+
 Default value for :prop_tgt:`CXX_EXTENSIONS` property of targets.
 
 This variable is used to initialize the :prop_tgt:`CXX_EXTENSIONS`

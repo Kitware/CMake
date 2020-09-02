@@ -60,6 +60,7 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
   }
   bool copyOnly = false;
   bool escapeQuotes = false;
+  bool use_source_permissions = true;
 
   static std::set<cm::string_view> noopOptions = {
     /* Legacy.  */
@@ -87,6 +88,8 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
       escapeQuotes = true;
     } else if (args[i] == "@ONLY") {
       atOnly = true;
+    } else if (args[i] == "NO_SOURCE_PERMISSIONS") {
+      use_source_permissions = false;
     } else if (noopOptions.find(args[i]) != noopOptions.end()) {
       /* Ignore no-op options.  */
     } else {
@@ -102,7 +105,8 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
   }
 
   if (!status.GetMakefile().ConfigureFile(
-        inputFile, outputFile, copyOnly, atOnly, escapeQuotes, newLineStyle)) {
+        inputFile, outputFile, copyOnly, atOnly, escapeQuotes,
+        use_source_permissions, newLineStyle)) {
     status.SetError("Problem configuring file");
     return false;
   }

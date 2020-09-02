@@ -126,8 +126,8 @@ protected:
   bool RecurseListDirs;
 
 private:
-  Glob(const Glob&);           // Not implemented.
-  void operator=(const Glob&); // Not implemented.
+  Glob(const Glob&) = delete;
+  void operator=(const Glob&) = delete;
 };
 
 } // namespace @KWSYS_NAMESPACE@

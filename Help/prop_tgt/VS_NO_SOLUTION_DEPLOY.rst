@@ -1,6 +1,8 @@
 VS_NO_SOLUTION_DEPLOY
 ---------------------
 
+.. versionadded:: 3.15
+
 Specify that the target should not be marked for deployment to a Windows CE
 or Windows Phone device in the generated Visual Studio solution.
 

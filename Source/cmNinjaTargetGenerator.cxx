@@ -51,6 +51,7 @@ std::unique_ptr<cmNinjaTargetGenerator> cmNinjaTargetGenerator::New(
       return cm::make_unique<cmNinjaNormalTargetGenerator>(target);
 
     case cmStateEnums::UTILITY:
+    case cmStateEnums::INTERFACE_LIBRARY:
     case cmStateEnums::GLOBAL_TARGET:
       return cm::make_unique<cmNinjaUtilityTargetGenerator>(target);
 
@@ -65,7 +66,8 @@ cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
   , LocalGenerator(
       static_cast<cmLocalNinjaGenerator*>(target->GetLocalGenerator()))
 {
-  for (auto const& fileConfig : target->Makefile->GetGeneratorConfigs()) {
+  for (auto const& fileConfig :
+       target->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig)) {
     this->Configs[fileConfig].MacOSXContentGenerator =
       cm::make_unique<MacOSXContentGeneratorType>(this, fileConfig);
   }
@@ -188,7 +190,16 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
     }
   }
 
-  std::string flags = this->GetFlags(language, config, filterArch);
+  std::string flags;
+  // explicitly add the explicit language flag before any other flag
+  // this way backwards compatibility with user flags is maintained
+  if (source->GetProperty("LANGUAGE")) {
+    this->LocalGenerator->AppendFeatureOptions(flags, language,
+                                               "EXPLICIT_LANGUAGE");
+    flags += " ";
+  }
+
+  flags += this->GetFlags(language, config, filterArch);
 
   // Add Fortran format flags.
   if (language == "Fortran") {
@@ -620,6 +631,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
+  vars.ISPCHeader = "$ISPC_HEADER_FILE";
 
   cmMakefile* mf = this->GetMakefile();
 
@@ -652,7 +664,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   std::string launcher;
   const char* val = this->GetLocalGenerator()->GetRuleLauncher(
     this->GetGeneratorTarget(), "RULE_LAUNCH_COMPILE");
-  if (val && *val) {
+  if (cmNonempty(val)) {
     launcher = cmStrCat(val, ' ');
   }
 
@@ -803,7 +815,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
        lang == "OBJC" || lang == "OBJCXX")) {
     std::string const clauncher_prop = cmStrCat(lang, "_COMPILER_LAUNCHER");
     cmProp clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
-    if (clauncher && !clauncher->empty()) {
+    if (cmNonempty(clauncher)) {
       compilerLauncher = *clauncher;
     }
   }
@@ -818,8 +830,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     cmProp cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
     std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
     cmProp cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
-    if ((iwyu && !iwyu->empty()) || (tidy && !tidy->empty()) ||
-        (cpplint && !cpplint->empty()) || (cppcheck && !cppcheck->empty())) {
+    if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
+        cmNonempty(cppcheck)) {
       std::string run_iwyu = cmStrCat(cmakeCmd, " -E __run_co_compile");
       if (!compilerLauncher.empty()) {
         // In __run_co_compile case the launcher command is supplied
@@ -829,31 +841,30 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                    this->LocalGenerator->EscapeForShell(compilerLauncher));
         compilerLauncher.clear();
       }
-      if (iwyu && !iwyu->empty()) {
+      if (cmNonempty(iwyu)) {
         run_iwyu += cmStrCat(" --iwyu=",
                              this->GetLocalGenerator()->EscapeForShell(*iwyu));
       }
-      if (tidy && !tidy->empty()) {
+      if (cmNonempty(tidy)) {
         run_iwyu += " --tidy=";
         const char* driverMode = this->Makefile->GetDefinition(
           cmStrCat("CMAKE_", lang, "_CLANG_TIDY_DRIVER_MODE"));
-        if (!(driverMode && *driverMode)) {
+        if (!cmNonempty(driverMode)) {
           driverMode = lang == "C" ? "gcc" : "g++";
         }
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(
           cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode));
       }
-      if (cpplint && !cpplint->empty()) {
+      if (cmNonempty(cpplint)) {
         run_iwyu += cmStrCat(
           " --cpplint=", this->GetLocalGenerator()->EscapeForShell(*cpplint));
       }
-      if (cppcheck && !cppcheck->empty()) {
+      if (cmNonempty(cppcheck)) {
         run_iwyu +=
           cmStrCat(" --cppcheck=",
                    this->GetLocalGenerator()->EscapeForShell(*cppcheck));
       }
-      if ((tidy && !tidy->empty()) || (cpplint && !cpplint->empty()) ||
-          (cppcheck && !cppcheck->empty())) {
+      if (cmNonempty(tidy) || cmNonempty(cpplint) || cmNonempty(cppcheck)) {
         run_iwyu += " --source=$in";
       }
       run_iwyu += " -- ";
@@ -1358,6 +1369,42 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   this->SetMsvcTargetPdbVariable(vars, config);
 
   objBuild.RspFile = cmStrCat(objectFileName, ".rsp");
+
+  if (language == "ISPC") {
+    std::string const& objectName =
+      this->GeneratorTarget->GetObjectName(source);
+    std::string ispcSource =
+      cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+
+    std::string ispcDirectory = objectFileDir;
+    if (cmProp prop =
+          this->GeneratorTarget->GetProperty("ISPC_HEADER_DIRECTORY")) {
+      ispcDirectory = *prop;
+    }
+    ispcDirectory =
+      cmStrCat(this->LocalGenerator->GetBinaryDirectory(), '/', ispcDirectory);
+
+    std::string ispcHeader = cmStrCat(ispcDirectory, '/', ispcSource, ".h");
+    ispcHeader = this->ConvertToNinjaPath(ispcHeader);
+
+    // Make sure ninja knows what command generates the header
+    objBuild.ImplicitOuts.push_back(ispcHeader);
+
+    // Make sure ninja knows how to clean the generated header
+    this->GetGlobalGenerator()->AddAdditionalCleanFile(ispcHeader, config);
+
+    vars["ISPC_HEADER_FILE"] =
+      this->GetLocalGenerator()->ConvertToOutputFormat(
+        ispcHeader, cmOutputConverter::SHELL);
+  } else {
+    auto headers = this->GeneratorTarget->GetGeneratedISPCHeaders(config);
+    if (!headers.empty()) {
+      std::transform(headers.begin(), headers.end(), headers.begin(),
+                     MapToNinjaPath());
+      objBuild.OrderOnlyDeps.insert(objBuild.OrderOnlyDeps.end(),
+                                    headers.begin(), headers.end());
+    }
+  }
 
   if (language == "Swift") {
     this->EmitSwiftDependencyInfo(source, config);

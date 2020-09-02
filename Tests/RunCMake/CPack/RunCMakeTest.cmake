@@ -10,6 +10,7 @@ run_cpack_test(DEBUGINFO "RPM.DEBUGINFO;DEB.DEBUGINFO" true "COMPONENT")
 run_cpack_test_subtests(DEFAULT_PERMISSIONS "CMAKE_var_set;CPACK_var_set;both_set;invalid_CMAKE_var;invalid_CPACK_var" "RPM.DEFAULT_PERMISSIONS;DEB.DEFAULT_PERMISSIONS" false "MONOLITHIC;COMPONENT")
 run_cpack_test(DEPENDENCIES "RPM.DEPENDENCIES;DEB.DEPENDENCIES" true "COMPONENT")
 run_cpack_test(DIST "RPM.DIST" false "MONOLITHIC")
+run_cpack_test(DMG_SLA "DragNDrop" false "MONOLITHIC")
 run_cpack_test(EMPTY_DIR "RPM.EMPTY_DIR;DEB.EMPTY_DIR;TGZ" true "MONOLITHIC;COMPONENT")
 run_cpack_test(VERSION "RPM.VERSION;DEB.VERSION" false "MONOLITHIC;COMPONENT")
 run_cpack_test(EXTRA "DEB.EXTRA" false "COMPONENT")
@@ -46,3 +47,4 @@ run_cpack_test_subtests(
   "MONOLITHIC;COMPONENT"
 )
 run_cpack_test(PROJECT_META "RPM.PROJECT_META;DEB.PROJECT_META" false "MONOLITHIC;COMPONENT")
+run_cpack_test_package_target(PRE_POST_SCRIPTS "ZIP" false "MONOLITHIC;COMPONENT")

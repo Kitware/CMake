@@ -30,6 +30,8 @@ Synopsis
     file(`SIZE`_ <filename> <out-var>)
     file(`READ_SYMLINK`_ <linkname> <out-var>)
     file(`CREATE_LINK`_ <original> <linkname> [...])
+    file(`CHMOD`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
+    file(`CHMOD_RECURSE`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
 
   `Path Conversion`_
     file(`RELATIVE_PATH`_ <out-var> <directory> <file>)
@@ -449,7 +451,7 @@ modified.
 
   file(GENERATE OUTPUT output-file
        <INPUT input-file|CONTENT content>
-       [CONDITION expression])
+       [CONDITION expression] [TARGET target])
 
 Generate an output file for each build configuration supported by the current
 :manual:`CMake Generator <cmake-generators(7)>`.  Evaluate
@@ -478,6 +480,10 @@ from the input content to produce the output content.  The options are:
   A relative path (after evaluating generator expressions) is treated
   with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
   See policy :policy:`CMP0070`.
+
+``TARGET <target>``
+  Specify target which to use when evaluating generator expressions.  Enables
+  use of generator expressions requiring a target.
 
 Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
 ``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.
@@ -737,6 +743,51 @@ creating the link fails.  It can be useful for handling situations such as
 ``<original>`` and ``<linkname>`` being on different drives or mount points,
 which would make them unable to support a hard link.
 
+.. _CHMOD:
+
+.. code-block:: cmake
+
+  file(CHMOD <files>... <directories>... [PERMISSIONS <permissions>...]
+      [FILE_PERMISSIONS <permissions>...]
+      [DIRECTORY_PERMISSIONS <permissions>...])
+
+Set the permissions for the ``<files>...`` and ``<directories>...`` specified.
+Valid permissions are  ``OWNER_READ``, ``OWNER_WRITE``, ``OWNER_EXECUTE``,
+``GROUP_READ``, ``GROUP_WRITE``, ``GROUP_EXECUTE``, ``WORLD_READ``,
+``WORLD_WRITE``, ``WORLD_EXECUTE``.
+
+Valid combination of keywords are:
+
+``PERMISSIONS``
+  all items are changed
+
+``FILE_PERMISSIONS``
+  only files are changed
+
+``DIRECTORY_PERMISSIONS``
+  only directories are changed
+
+``PERMISSIONS`` and ``FILE_PERMISSIONS``
+  ``FILE_PERMISSIONS`` overrides ``PERMISSIONS`` for files
+
+``PERMISSIONS`` and ``DIRECTORY_PERMISSIONS``
+  ``DIRECTORY_PERMISSIONS`` overrides ``PERMISSIONS`` for directories
+
+``FILE_PERMISSIONS`` and ``DIRECTORY_PERMISSIONS``
+  use ``FILE_PERMISSIONS`` for files and ``DIRECTORY_PERMISSIONS`` for
+  directories
+
+
+.. _CHMOD_RECURSE:
+
+.. code-block:: cmake
+
+  file(CHMOD_RECURSE <files>... <directories>... PERMISSIONS <permissions>...
+       FILE_PERMISSIONS <permissions>... DIRECTORY_PERMISSIONS <permissions>...)
+
+Same as `CHMOD`_, but change the permissions of files and directories present in
+the ``<directories>..`` recursively.
+
 Path Conversion
 ^^^^^^^^^^^^^^^
 
@@ -776,11 +827,14 @@ Transfer
 
 .. code-block:: cmake
 
-  file(DOWNLOAD <url> <file> [<options>...])
+  file(DOWNLOAD <url> [<file>] [<options>...])
   file(UPLOAD   <file> <url> [<options>...])
 
-The ``DOWNLOAD`` mode downloads the given ``<url>`` to a local ``<file>``.
-The ``UPLOAD`` mode uploads a local ``<file>`` to a given ``<url>``.
+The ``DOWNLOAD`` mode downloads the given ``<url>`` to a local ``<file>``. If
+``<file>`` is not specified for ``file(DOWNLOAD)``, the file is not saved. This
+can be useful if you want to know if a file can be downloaded (for example, to
+check that it exists) without actually saving it anywhere. The ``UPLOAD`` mode
+uploads a local ``<file>`` to a given ``<url>``.
 
 Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 
@@ -853,10 +907,12 @@ Additional options to ``DOWNLOAD`` are:
 
   Verify that the downloaded content hash matches the expected value, where
   ``ALGO`` is one of the algorithms supported by ``file(<HASH>)``.
-  If it does not match, the operation fails with an error.
+  If it does not match, the operation fails with an error. It is an error to
+  specify this if ``DOWNLOAD`` is not given a ``<file>``.
 
 ``EXPECTED_MD5 <value>``
-  Historical short-hand for ``EXPECTED_HASH MD5=<value>``.
+  Historical short-hand for ``EXPECTED_HASH MD5=<value>``. It is an error to
+  specify this if ``DOWNLOAD`` is not given a ``<file>``.
 
 Locking
 ^^^^^^^

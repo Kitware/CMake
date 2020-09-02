@@ -1,6 +1,8 @@
 CMAKE_VS_WINRT_BY_DEFAULT
 -------------------------
 
+.. versionadded:: 3.13
+
 Inform :ref:`Visual Studio Generators` for VS 2010 and above that the
 target platform enables WinRT compilation by default and it needs to
 be explicitly disabled if ``/ZW`` or :prop_tgt:`VS_WINRT_COMPONENT` is

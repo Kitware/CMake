@@ -1,6 +1,8 @@
 CMP0101
 -------
 
+.. versionadded:: 3.17
+
 :command:`target_compile_options` now honors ``BEFORE`` keyword in all scopes.
 
 In CMake 3.16 and below the :command:`target_compile_options` ignores the

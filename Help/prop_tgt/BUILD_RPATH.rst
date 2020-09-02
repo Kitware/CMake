@@ -1,6 +1,8 @@
 BUILD_RPATH
 -----------
 
+.. versionadded:: 3.8
+
 A :ref:`semicolon-separated list <CMake Language Lists>` specifying runtime path (``RPATH``)
 entries to add to binaries linked in the build tree (for platforms that
 support it).  The entries will *not* be used for binaries in the install

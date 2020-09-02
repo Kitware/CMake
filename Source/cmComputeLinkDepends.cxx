@@ -253,13 +253,13 @@ cmComputeLinkDepends::Compute()
   // Compute the final set of link entries.
   // Iterate in reverse order so we can keep only the last occurrence
   // of a shared library.
-  std::set<int> emmitted;
+  std::set<int> emitted;
   for (int i : cmReverseRange(this->FinalLinkOrder)) {
     LinkEntry const& e = this->EntryList[i];
     cmGeneratorTarget const* t = e.Target;
     // Entries that we know the linker will re-use do not need to be repeated.
     bool uniquify = t && t->GetType() == cmStateEnums::SHARED_LIBRARY;
-    if (!uniquify || emmitted.insert(i).second) {
+    if (!uniquify || emitted.insert(i).second) {
       this->FinalLinkEntries.push_back(e);
     }
   }
@@ -626,6 +626,7 @@ void cmComputeLinkDepends::OrderLinkEntires()
   // constraints disallow it.
   this->CCG =
     cm::make_unique<cmComputeComponentGraph>(this->EntryConstraintGraph);
+  this->CCG->Compute();
 
   // The component graph is guaranteed to be acyclic.  Start a DFS
   // from every entry to compute a topological order for the

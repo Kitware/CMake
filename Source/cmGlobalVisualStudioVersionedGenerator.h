@@ -36,6 +36,8 @@ public:
 
   bool IsStdOutEncodingSupported() const override;
 
+  const char* GetAndroidApplicationTypeRevision() const override;
+
 protected:
   cmGlobalVisualStudioVersionedGenerator(
     VSVersion version, cmake* cm, const std::string& name,
@@ -55,7 +57,7 @@ protected:
   // Check for a Win 8 SDK known to the registry or VS installer tool.
   bool IsWin81SDKInstalled() const;
 
-  std::string GetWindows10SDKMaxVersion() const override;
+  std::string GetWindows10SDKMaxVersion(cmMakefile*) const override;
 
   std::string FindMSBuildCommand() override;
   std::string FindDevEnvCommand() override;

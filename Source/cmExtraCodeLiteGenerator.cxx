@@ -227,8 +227,7 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
           cmSystemTools::LowerCase(s->GetExtension());
         // check whether it is a source or a include file
         // then put it accordingly into one of the two containers
-        if (cm->IsSourceExtension(extLower) || cm->IsCudaExtension(extLower) ||
-            cm->IsFortranExtension(extLower)) {
+        if (cm->IsAKnownSourceExtension(extLower)) {
           cFiles[fullPath] = s;
         } else {
           otherFiles.insert(fullPath);

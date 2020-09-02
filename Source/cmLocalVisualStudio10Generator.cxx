@@ -69,7 +69,7 @@ cmLocalVisualStudio10Generator::~cmLocalVisualStudio10Generator()
 void cmLocalVisualStudio10Generator::GenerateTargetsDepthFirst(
   cmGeneratorTarget* target, std::vector<cmGeneratorTarget*>& remaining)
 {
-  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!target->IsInBuildSystem()) {
     return;
   }
   // Find this target in the list of remaining targets.

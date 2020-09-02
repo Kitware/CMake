@@ -20,7 +20,7 @@ test project.  The result is cached in :variable:`CMAKE_<LANG>_COMPILER`
 as the compiler that was found, or ``NOTFOUND`` if the language cannot be
 enabled. For CUDA which can have an explicit host compiler, the cache
 :variable:`CMAKE_CUDA_HOST_COMPILER` variable will be set if it was required
-for compilation.
+for compilation (and cleared if it was not).
 
 Example:
 

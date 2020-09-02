@@ -108,6 +108,11 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   endif()
 endif()
 
+# Inform STL library header wrappers whether to use system versions.
+configure_file(${CMake_SOURCE_DIR}/Utilities/std/cmSTL.hxx.in
+  ${CMake_BINARY_DIR}/Utilities/cmSTL.hxx
+  @ONLY)
+
 # set the internal encoding of CMake to UTF-8
 set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)
 

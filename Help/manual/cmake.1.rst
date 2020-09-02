@@ -341,9 +341,9 @@ Options
  Print a warning when an uninitialized variable is used.
 
 ``--warn-unused-vars``
- Warn about unused variables.
-
- Find variables that are declared or set, but not used.
+ Does nothing.  In CMake versions 3.2 and below this enabled warnings about
+ unused variables.  In CMake versions 3.3 through 3.18 the option was broken.
+ In CMake 3.19 and above the option has been removed.
 
 ``--no-warn-unused-cli``
  Don't warn about command line options.
@@ -359,7 +359,7 @@ Options
  This flag tells CMake to warn about other files as well.
 
 ``--profiling-output=<path>``
- Used in conjuction with ``--profiling-format`` to output to a given path.
+ Used in conjunction with ``--profiling-format`` to output to a given path.
 
 ``--profiling-format=<file>``
  Enable the output of profiling data of CMake script in the given format.
@@ -449,6 +449,9 @@ The options are:
 
 ``--component <comp>``
   Component-based install. Only install component ``<comp>``.
+
+``--default-directory-permissions <permissions>``
+  Default directory install permissions. Permissions in format ``<u=rwx,g=rx,o=rx>``.
 
 ``--prefix <prefix>``
   Override the installation prefix, :variable:`CMAKE_INSTALL_PREFIX`.
@@ -566,7 +569,8 @@ Available commands are:
 
 ``compare_files [--ignore-eol] <file1> <file2>``
   Check if ``<file1>`` is same as ``<file2>``. If files are the same,
-  then returns ``0``, if not it returns ``1``.  The ``--ignore-eol`` option
+  then returns ``0``, if not it returns ``1``.  In case of invalid
+  arguments, it returns 2. The ``--ignore-eol`` option
   implies line-wise comparison and ignores LF/CRLF differences.
 
 ``copy <file>... <destination>``
@@ -593,6 +597,13 @@ Available commands are:
 
   .. note::
     Path to where ``<new>`` symbolic link will be created has to exist beforehand.
+
+``create_hardlink <old> <new>``
+  Create a hard link ``<new>`` naming ``<old>``.
+
+  .. note::
+    Path to where ``<new>`` hard link will be created has to exist beforehand.
+    ``<old>`` has to exist beforehand.
 
 ``echo [<string>...]``
   Displays arguments as text.

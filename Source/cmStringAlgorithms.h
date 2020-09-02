@@ -20,6 +20,20 @@
 /** String range type.  */
 using cmStringRange = cmRange<std::vector<std::string>::const_iterator>;
 
+/** Check for non-empty string.  */
+inline bool cmNonempty(const char* str)
+{
+  return str && *str;
+}
+inline bool cmNonempty(cm::string_view str)
+{
+  return !str.empty();
+}
+inline bool cmNonempty(std::string const* str)
+{
+  return str && !str->empty();
+}
+
 /** Callable string comparison struct.  */
 struct cmStrCmp
 {
@@ -205,10 +219,11 @@ bool cmIsNOTFOUND(cm::string_view val);
 bool cmIsOn(cm::string_view val);
 inline bool cmIsOn(const char* val)
 {
-  if (!val) {
-    return false;
-  }
-  return cmIsOn(cm::string_view(val));
+  return val && cmIsOn(cm::string_view(val));
+}
+inline bool cmIsOn(std::string const* val)
+{
+  return val && cmIsOn(*val);
 }
 
 /**
@@ -221,10 +236,11 @@ inline bool cmIsOn(const char* val)
 bool cmIsOff(cm::string_view val);
 inline bool cmIsOff(const char* val)
 {
-  if (!val) {
-    return true;
-  }
-  return cmIsOff(cm::string_view(val));
+  return !val || cmIsOff(cm::string_view(val));
+}
+inline bool cmIsOff(std::string const* val)
+{
+  return !val || cmIsOff(*val);
 }
 
 /** Returns true if string @a str starts with the character @a prefix.  */

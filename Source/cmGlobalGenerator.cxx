@@ -235,6 +235,14 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
   }
   cmProp cname =
     this->GetCMakeInstance()->GetState()->GetInitializedCacheValue(langComp);
+
+  // Split compiler from arguments
+  std::vector<std::string> cnameArgVec;
+  if (cname && !cname->empty()) {
+    cmExpandList(*cname, cnameArgVec);
+    cname = &cnameArgVec.front();
+  }
+
   std::string changeVars;
   if (cname && !optional) {
     std::string cnameString;
@@ -302,31 +310,12 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
   bool failed = false;
   for (const auto& localGen : this->LocalGenerators) {
     for (const auto& target : localGen->GetGeneratorTargets()) {
-      if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
-          target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
-          target->GetType() == cmStateEnums::TargetType::UTILITY) {
+      if (!target->CanCompileSources() ||
+          cmIsOn(target->GetProperty("ghs_integrity_app"))) {
         continue;
       }
-      if (cmProp p = target->GetProperty("ghs_integrity_app")) {
-        if (cmIsOn(*p)) {
-          continue;
-        }
-      }
 
-      std::vector<std::string> configs;
-      target->Makefile->GetConfigurations(configs);
-      std::vector<cmSourceFile*> srcs;
-      if (configs.empty()) {
-        target->GetSourceFiles(srcs, "");
-      } else {
-        for (std::string const& config : configs) {
-          target->GetSourceFiles(srcs, config);
-          if (!srcs.empty()) {
-            break;
-          }
-        }
-      }
-      if (srcs.empty()) {
+      if (target->GetAllConfigSources().empty()) {
         std::ostringstream e;
         e << "No SOURCES given to target: " << target->GetName();
         this->GetCMakeInstance()->IssueMessage(
@@ -346,12 +335,13 @@ bool cmGlobalGenerator::CheckTargetsForType() const
   bool failed = false;
   for (const auto& generator : this->LocalGenerators) {
     for (const auto& target : generator->GetGeneratorTargets()) {
-      if (target->GetType() == cmStateEnums::EXECUTABLE &&
-          target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
+      if (target->GetType() == cmStateEnums::EXECUTABLE) {
         std::vector<std::string> const& configs =
-          target->Makefile->GetGeneratorConfigs();
+          target->Makefile->GetGeneratorConfigs(
+            cmMakefile::IncludeEmptyConfig);
         for (std::string const& config : configs) {
-          if (target->GetLinkerLanguage(config) == "Swift") {
+          if (target->IsWin32Executable(config) &&
+              target->GetLinkerLanguage(config) == "Swift") {
             this->GetCMakeInstance()->IssueMessage(
               MessageType::FATAL_ERROR,
               "WIN32_EXECUTABLE property is not supported on Swift "
@@ -374,15 +364,9 @@ bool cmGlobalGenerator::CheckTargetsForPchCompilePdb() const
   bool failed = false;
   for (const auto& generator : this->LocalGenerators) {
     for (const auto& target : generator->GetGeneratorTargets()) {
-      if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
-          target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
-          target->GetType() == cmStateEnums::TargetType::UTILITY) {
+      if (!target->CanCompileSources() ||
+          cmIsOn(target->GetProperty("ghs_integrity_app"))) {
         continue;
-      }
-      if (cmProp p = target->GetProperty("ghs_integrity_app")) {
-        if (cmIsOn(*p)) {
-          continue;
-        }
       }
 
       std::string const& reuseFrom =
@@ -425,15 +409,13 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
       "all generators must specify this->FindMakeProgramFile");
     return false;
   }
-  if (!mf->GetDefinition("CMAKE_MAKE_PROGRAM") ||
-      cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
+  if (cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
     std::string setMakeProgram = mf->GetModulesFile(this->FindMakeProgramFile);
     if (!setMakeProgram.empty()) {
       mf->ReadListFile(setMakeProgram);
     }
   }
-  if (!mf->GetDefinition("CMAKE_MAKE_PROGRAM") ||
-      cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
+  if (cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
     std::ostringstream err;
     err << "CMake was unable to find a build program corresponding to \""
         << this->GetName() << "\".  CMAKE_MAKE_PROGRAM is not set.  You "
@@ -596,6 +578,16 @@ void cmGlobalGenerator::EnableLanguage(
       mf->ReadListFile(fpath);
     }
   }
+
+  if (readCMakeSystem) {
+    // Find the native build tool for this generator.
+    // This has to be done early so that MSBuild can be used to examine the
+    // cross-compilation environment.
+    if (!this->FindMakeProgram(mf)) {
+      return;
+    }
+  }
+
   //  Load the CMakeDetermineSystem.cmake file and find out
   // what platform we are running on
   if (!mf->GetDefinition("CMAKE_SYSTEM")) {
@@ -665,11 +657,6 @@ void cmGlobalGenerator::EnableLanguage(
     std::string toolset = mf->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET");
     if (!this->SetGeneratorToolset(toolset, false, mf)) {
       cmSystemTools::SetFatalErrorOccured();
-      return;
-    }
-
-    // Find the native build tool for this generator.
-    if (!this->FindMakeProgram(mf)) {
       return;
     }
   }
@@ -794,7 +781,7 @@ void cmGlobalGenerator::EnableLanguage(
     std::string compilerEnv = cmStrCat("CMAKE_", lang, "_COMPILER_ENV_VAR");
     std::ostringstream noCompiler;
     const char* compilerFile = mf->GetDefinition(compilerName);
-    if (!compilerFile || !*compilerFile || cmIsNOTFOUND(compilerFile)) {
+    if (!cmNonempty(compilerFile) || cmIsNOTFOUND(compilerFile)) {
       /* clang-format off */
       noCompiler <<
         "No " << compilerName << " could be found.\n"
@@ -1442,12 +1429,10 @@ bool cmGlobalGenerator::Compute()
     localGen->AddHelperCommands();
   }
 
-  // Finalize the set of compile features for each target.
-  // FIXME: This turns into calls to cmMakefile::AddRequiredTargetFeature
-  // which actually modifies the <lang>_STANDARD target property
-  // on the original cmTarget instance.  It accumulates features
-  // across all configurations.  Some refactoring is needed to
-  // compute a per-config resulta purely during generation.
+  // Perform up-front computation in order to handle errors (such as unknown
+  // features) at this point. While processing the compile features we also
+  // calculate and cache the language standard required by the compile
+  // features.
   for (const auto& localGen : this->LocalGenerators) {
     if (!localGen->ComputeTargetCompileFeatures()) {
       return false;
@@ -1612,12 +1597,11 @@ bool cmGlobalGenerator::AddAutomaticSources()
   for (const auto& lg : this->LocalGenerators) {
     lg->CreateEvaluationFileOutputs();
     for (const auto& gt : lg->GetGeneratorTargets()) {
-      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-          gt->GetType() == cmStateEnums::UTILITY ||
-          gt->GetType() == cmStateEnums::GLOBAL_TARGET) {
+      if (!gt->CanCompileSources()) {
         continue;
       }
       lg->AddUnityBuild(gt.get());
+      lg->AddISPCDependencies(gt.get());
       // Targets that re-use a PCH are handled below.
       if (!gt->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
         lg->AddPchDependencies(gt.get());
@@ -1626,9 +1610,7 @@ bool cmGlobalGenerator::AddAutomaticSources()
   }
   for (const auto& lg : this->LocalGenerators) {
     for (const auto& gt : lg->GetGeneratorTargets()) {
-      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-          gt->GetType() == cmStateEnums::UTILITY ||
-          gt->GetType() == cmStateEnums::GLOBAL_TARGET) {
+      if (!gt->CanCompileSources()) {
         continue;
       }
       // Handle targets that re-use a PCH from an above-handled target.
@@ -1698,8 +1680,8 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
       cmPolicies::PolicyStatus polSt =
         mf->GetPolicyStatus(cmPolicies::CMP0043);
       if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-        std::vector<std::string> configs;
-        mf->GetConfigurations(configs);
+        std::vector<std::string> configs =
+          mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
 
         for (std::string const& c : configs) {
           std::string defPropName =
@@ -1988,8 +1970,9 @@ int cmGlobalGenerator::Build(
   std::string makeCommandStr;
   output += "\nRun Build Command(s):";
 
-  for (auto command = makeCommand.begin(); command != makeCommand.end();
-       ++command) {
+  retVal = 0;
+  for (auto command = makeCommand.begin();
+       command != makeCommand.end() && retVal == 0; ++command) {
     makeCommandStr = command->Printable();
     if (command != makeCommand.end()) {
       makeCommandStr += " && ";
@@ -2179,13 +2162,38 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 }
 
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
-                                   cmGeneratorTarget* target) const
+                                   const cmGeneratorTarget* target) const
 {
-  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (!target->IsInBuildSystem()) {
     return true;
   }
-  if (cmProp exclude = target->GetProperty("EXCLUDE_FROM_ALL")) {
-    return cmIsOn(*exclude);
+  cmMakefile* mf = root->GetMakefile();
+  const std::string EXCLUDE_FROM_ALL = "EXCLUDE_FROM_ALL";
+  if (cmProp exclude = target->GetProperty(EXCLUDE_FROM_ALL)) {
+    // Expand the property value per configuration.
+    unsigned int trueCount = 0;
+    unsigned int falseCount = 0;
+    const std::vector<std::string>& configs =
+      mf->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+    for (const std::string& config : configs) {
+      cmGeneratorExpressionInterpreter genexInterpreter(root, config, target);
+      if (cmIsOn(genexInterpreter.Evaluate(*exclude, EXCLUDE_FROM_ALL))) {
+        ++trueCount;
+      } else {
+        ++falseCount;
+      }
+    }
+
+    // Check whether the genex expansion of the property agrees in all
+    // configurations.
+    if (trueCount && falseCount) {
+      std::ostringstream e;
+      e << "The EXCLUDE_FROM_ALL property of target \"" << target->GetName()
+        << "\" varies by configuration. This is not supported by the \""
+        << root->GetGlobalGenerator()->GetName() << "\" generator.";
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    }
+    return trueCount;
   }
   // This target is included in its directory.  Check whether the
   // directory is excluded.
@@ -2445,7 +2453,7 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
   gti.WorkingDir = mf->GetCurrentBinaryDirectory();
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCPackCommand());
-  if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
+  if (cmNonempty(cmakeCfgIntDir) && cmakeCfgIntDir[0] != '.') {
     singleLine.push_back("-C");
     singleLine.push_back(cmakeCfgIntDir);
   }
@@ -2530,7 +2538,7 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
       singleLine.push_back(arg);
     }
   }
-  if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
+  if (cmNonempty(cmakeCfgIntDir) && cmakeCfgIntDir[0] != '.') {
     singleLine.push_back("-C");
     singleLine.push_back(cmakeCfgIntDir);
   } else // TODO: This is a hack. Should be something to do with the
@@ -2611,7 +2619,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
       "installation rules have been specified",
       mf->GetBacktrace());
   } else if (this->InstallTargetEnabled && !skipInstallRules) {
-    if (!cmakeCfgIntDir || !*cmakeCfgIntDir || cmakeCfgIntDir[0] == '.') {
+    if (!(cmNonempty(cmakeCfgIntDir) && cmakeCfgIntDir[0] != '.')) {
       std::set<std::string>* componentsSet = &this->InstallComponents;
       std::ostringstream ostr;
       if (!componentsSet->empty()) {
@@ -2650,7 +2658,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
       cmd = "cmake";
     }
     singleLine.push_back(cmd);
-    if (cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.') {
+    if (cmNonempty(cmakeCfgIntDir) && cmakeCfgIntDir[0] != '.') {
       std::string cfgArg = "-DBUILD_TYPE=";
       bool useEPN = this->UseEffectivePlatformName(mf.get());
       if (useEPN) {
@@ -3045,7 +3053,7 @@ void cmGlobalGenerator::WriteSummary()
 
   for (const auto& lg : this->LocalGenerators) {
     for (const auto& tgt : lg->GetGeneratorTargets()) {
-      if (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      if (!tgt->IsInBuildSystem()) {
         continue;
       }
       this->WriteSummary(tgt.get());
@@ -3123,7 +3131,8 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     fout << "# Source files and their labels\n";
     std::vector<cmSourceFile*> sources;
     std::vector<std::string> const& configs =
-      target->Target->GetMakefile()->GetGeneratorConfigs();
+      target->Target->GetMakefile()->GetGeneratorConfigs(
+        cmMakefile::IncludeEmptyConfig);
     for (std::string const& c : configs) {
       target->GetSourceFiles(sources, c);
     }
@@ -3222,8 +3231,9 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
   const auto& lg = this->LocalGenerators[0];
   cmMakefile* mf = lg->GetMakefile();
 
-  std::vector<std::string> configs;
-  std::string config = mf->GetConfigurations(configs, false);
+  std::vector<std::string> configs =
+    mf->GetGeneratorConfigs(cmMakefile::OnlyMultiConfig);
+  std::string config = mf->GetDefaultConfiguration();
 
   std::string path = cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(),
                               "/CPackProperties.cmake");

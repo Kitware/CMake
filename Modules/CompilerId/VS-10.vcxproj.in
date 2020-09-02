@@ -9,7 +9,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CAE07175-D007-4FC3-BFE8-47B392814159}</ProjectGuid>
     <RootNamespace>CompilerId@id_lang@</RootNamespace>
-    <Keyword>Win32Proj</Keyword>
+    <Keyword>@id_keyword@</Keyword>
     @id_system@
     @id_system_version@
     @id_WindowsTargetPlatformVersion@
@@ -24,7 +24,7 @@
     @id_PreferredToolArchitecture@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|@id_platform@'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>@id_config_type@</ConfigurationType>
     @id_toolset@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>

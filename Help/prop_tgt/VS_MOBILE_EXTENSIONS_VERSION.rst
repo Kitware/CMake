@@ -1,6 +1,8 @@
 VS_MOBILE_EXTENSIONS_VERSION
 ----------------------------
 
+.. versionadded:: 3.4
+
 Visual Studio Windows 10 Mobile Extensions Version
 
 Specifies the version of the Mobile Extensions that should be included in the

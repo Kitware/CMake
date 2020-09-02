@@ -305,7 +305,7 @@ function(_boost_get_canonical_target_name component target_var)
 endfunction()
 
 macro(_boost_set_in_parent_scope name value)
-  # Set a variable in parent scope and make it visibile in current scope
+  # Set a variable in parent scope and make it visible in current scope
   set(${name} "${value}" PARENT_SCOPE)
   set(${name} "${value}")
 endmacro()
@@ -1270,10 +1270,8 @@ function(_Boost_COMPONENT_HEADERS component _hdrs)
   set(_Boost_UNIT_TEST_FRAMEWORK_HEADERS "boost/test/framework.hpp")
   set(_Boost_WAVE_HEADERS                "boost/wave.hpp")
   set(_Boost_WSERIALIZATION_HEADERS      "boost/archive/text_wiarchive.hpp")
-  if(WIN32)
-    set(_Boost_BZIP2_HEADERS             "boost/iostreams/filter/bzip2.hpp")
-    set(_Boost_ZLIB_HEADERS              "boost/iostreams/filter/zlib.hpp")
-  endif()
+  set(_Boost_BZIP2_HEADERS               "boost/iostreams/filter/bzip2.hpp")
+  set(_Boost_ZLIB_HEADERS                "boost/iostreams/filter/zlib.hpp")
 
   string(TOUPPER ${component} uppercomponent)
   set(${_hdrs} ${_Boost_${uppercomponent}_HEADERS} PARENT_SCOPE)

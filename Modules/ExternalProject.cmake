@@ -179,6 +179,9 @@ External Project Definition
       ``TIMEOUT <seconds>``
         Maximum time allowed for file download operations.
 
+      ``INACTIVITY_TIMEOUT <seconds>``
+        Terminate the operation after a period of inactivity.
+
       ``HTTP_USERNAME <username>``
         Username for the download operation if authentication is required.
 
@@ -1300,7 +1303,7 @@ function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_r
   )
 endfunction()
 
-function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo userpwd http_headers netrc netrc_file)
+function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout inactivity_timeout no_progress hash tls_verify tls_cainfo userpwd http_headers netrc netrc_file)
   if(timeout)
     set(TIMEOUT_ARGS TIMEOUT ${timeout})
     set(TIMEOUT_MSG "${timeout} seconds")
@@ -1308,6 +1311,14 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
     set(TIMEOUT_ARGS "# no TIMEOUT")
     set(TIMEOUT_MSG "none")
   endif()
+  if(inactivity_timeout)
+    set(INACTIVITY_TIMEOUT_ARGS INACTIVITY_TIMEOUT ${inactivity_timeout})
+    set(INACTIVITY_TIMEOUT_MSG "${inactivity_timeout} seconds")
+  else()
+    set(INACTIVITY_TIMEOUT_ARGS "# no INACTIVITY_TIMEOUT")
+    set(INACTIVITY_TIMEOUT_MSG "none")
+  endif()
+
 
   if(no_progress)
     set(SHOW_PROGRESS "")
@@ -2512,6 +2523,7 @@ function(_ep_add_download_command name)
         string(REPLACE ";" "-" fname "${fname}")
         set(file ${download_dir}/${fname})
         get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
+        get_property(inactivity_timeout TARGET ${name} PROPERTY _EP_INACTIVITY_TIMEOUT)
         get_property(no_progress TARGET ${name} PROPERTY _EP_DOWNLOAD_NO_PROGRESS)
         get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
         get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
@@ -2521,7 +2533,7 @@ function(_ep_add_download_command name)
         get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
         get_property(http_headers TARGET ${name} PROPERTY _EP_HTTP_HEADER)
         set(download_script "${stamp_dir}/download-${name}.cmake")
-        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}" "${http_headers}" "${netrc}" "${netrc_file}")
+        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${inactivity_timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}" "${http_headers}" "${netrc}" "${netrc_file}")
         set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
         if (no_extract)

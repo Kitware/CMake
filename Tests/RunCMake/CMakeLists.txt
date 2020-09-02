@@ -124,6 +124,7 @@ if(CMake_TEST_CUDA)
     PROPERTY LABELS "CUDA")
 endif()
 add_RunCMake_test(CMP0106)
+add_RunCMake_test(CMP0111)
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -166,6 +167,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     -DPSEUDO_BC=$<TARGET_FILE:pseudo_BC>
     -DPSEUDO_PURIFY=$<TARGET_FILE:pseudo_purify>
     -DPSEUDO_VALGRIND=$<TARGET_FILE:pseudo_valgrind>
+    -DPSEUDO_CUDA_MEMCHECK=$<TARGET_FILE:pseudo_cuda-memcheck>
     -DPSEUDO_BC_NOLOG=$<TARGET_FILE:pseudonl_BC>
     -DPSEUDO_PURIFY_NOLOG=$<TARGET_FILE:pseudonl_purify>
     -DPSEUDO_VALGRIND_NOLOG=$<TARGET_FILE:pseudonl_valgrind>
@@ -209,6 +211,7 @@ add_RunCMake_test(DisallowedCommands)
 if("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
   add_RunCMake_test(ExportCompileCommands)
 endif()
+add_RunCMake_test(ExcludeFromAll)
 add_RunCMake_test(ExternalData)
 add_RunCMake_test(FeatureSummary)
 add_RunCMake_test(FPHSA)
@@ -290,6 +293,7 @@ add_RunCMake_test(add_dependencies)
 add_RunCMake_test(add_executable)
 add_RunCMake_test(add_library)
 add_RunCMake_test(add_subdirectory)
+add_RunCMake_test(add_test)
 add_RunCMake_test(build_command)
 add_executable(exit_code exit_code.c)
 set(execute_process_ARGS -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>)
@@ -318,6 +322,7 @@ add_RunCMake_test(ctest_update)
 add_RunCMake_test(ctest_upload)
 add_RunCMake_test(ctest_fixtures)
 add_RunCMake_test(file)
+add_RunCMake_test(file-CHMOD)
 add_RunCMake_test(find_file)
 add_RunCMake_test(find_library -DCYGWIN=${CYGWIN})
 add_RunCMake_test(find_package)
@@ -403,11 +408,12 @@ add_RunCMake_test(while)
 add_RunCMake_test(CMP0004)
 add_RunCMake_test(TargetPolicies)
 add_RunCMake_test(alias_targets)
-add_RunCMake_test(interface_library)
+add_RunCMake_test(InterfaceLibrary)
 add_RunCMake_test(no_install_prefix)
 add_RunCMake_test(configure_file)
 add_RunCMake_test(CTestTimeout -DTIMEOUT=${CTestTestTimeout_TIME})
 add_RunCMake_test(CTestTimeoutAfterMatch)
+add_RunCMake_test(DependencyGraph -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER})
 
 # ctresalloc links against CMakeLib and CTestLib, which means it can't be built
 # if CMake_TEST_EXTERNAL_CMAKE is activated (the compiler might be different.)
@@ -633,6 +639,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   set_property(TEST RunCMake.CompilerLauncher APPEND
     PROPERTY LABELS "CUDA")
   add_RunCMake_test(ctest_labels_for_subprojects)
+  add_RunCMake_test(CompilerArgs)
 endif()
 
 set(cpack_tests
@@ -698,8 +705,8 @@ add_RunCMake_test(AutoExportDll
 add_RunCMake_test(AndroidMK)
 
 if(CMake_TEST_ANDROID_NDK OR CMake_TEST_ANDROID_STANDALONE_TOOLCHAIN)
-  if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
-    message(FATAL_ERROR "Android tests supported only by Makefile and Ninja generators")
+  if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja|Visual Studio 1[456]")
+    message(FATAL_ERROR "Android tests supported only by Makefile, Ninja, and Visual Studio >= 14 generators")
   endif()
   foreach(v TEST_ANDROID_NDK TEST_ANDROID_STANDALONE_TOOLCHAIN)
     if(CMake_${v})
@@ -727,3 +734,7 @@ add_RunCMake_test("CTestCommandExpandLists")
 
 add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 add_RunCMake_test("UnityBuild")
+
+if(WIN32)
+  add_RunCMake_test(Win32GenEx)
+endif()

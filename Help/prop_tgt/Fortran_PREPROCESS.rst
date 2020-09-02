@@ -1,6 +1,8 @@
 Fortran_PREPROCESS
 ------------------
 
+.. versionadded:: 3.18
+
 Control whether the Fortran source file should be unconditionally
 preprocessed.
 
