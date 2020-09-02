@@ -1863,6 +1863,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
         byproducts.push_back(
           this->BuildAlias(GetByproductsForCleanTargetName(), config));
       }
+      byproducts.emplace_back(GetByproductsForCleanTargetName());
       build.Variables["TARGETS"] = cmJoin(byproducts, " ");
 
       for (auto const& fileConfig : configs) {
