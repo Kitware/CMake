@@ -8,8 +8,11 @@ import threading
 args = None
 outerthread = None
 
+barrier = threading.Barrier(2)
+
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        barrier.wait()
         self.send_response(200)
         self.end_headers()
         data = b'D'
@@ -46,4 +49,5 @@ if __name__ == "__main__":
         serverThread = threading.Thread(target=runServer,args=(args.file,))
         serverThread.daemon = True
         serverThread.start()
-        serverThread.join(15)
+        barrier.wait(60)
+        serverThread.join(20)
