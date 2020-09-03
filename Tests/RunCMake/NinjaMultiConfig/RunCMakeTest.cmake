@@ -235,6 +235,10 @@ run_cmake_build(CustomCommandsAndTargets debug-in-release-graph-postbuild Releas
 run_ninja(CustomCommandsAndTargets release-postbuild build-Release.ninja SubdirPostBuild)
 run_cmake_build(CustomCommandsAndTargets debug-targetpostbuild Debug TopTargetPostBuild)
 run_ninja(CustomCommandsAndTargets release-targetpostbuild build-Release.ninja SubdirTargetPostBuild)
+run_cmake_build(CustomCommandsAndTargets release-clean Release clean:all)
+run_ninja(CustomCommandsAndTargets release-leaf-custom build-Release.ninja Leaf.txt)
+run_cmake_build(CustomCommandsAndTargets release-clean Release clean:all)
+run_ninja(CustomCommandsAndTargets release-leaf-exe build-Release.ninja LeafExe)
 
 unset(RunCMake_TEST_BINARY_DIR)
 
@@ -305,7 +309,7 @@ endif()
 
 if(CMake_TEST_Qt5)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Qt5-build)
-  set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all" "-DQt5Core_DIR=${Qt5Core_DIR}")
   run_cmake_configure(Qt5)
   unset(RunCMake_TEST_OPTIONS)
   include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
