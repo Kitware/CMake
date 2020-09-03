@@ -226,5 +226,15 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
               "cmStrToULong rejects trailing content.");
   }
 
+  // ----------------------------------------------------------------------
+  // Test cmStrLen
+  {
+    constexpr auto len = cmStrLen("Hello world!");
+    assert_ok(len == 12,
+              "cmStrLen returns length of non-empty literal string");
+    assert_ok(cmStrLen("") == 0,
+              "cmStrLen returns length of empty literal string");
+  }
+
   return failed;
 }
