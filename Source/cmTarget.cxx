@@ -265,16 +265,16 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   auto initProp = [this, mf, &defKey](const std::string& property) {
     // Replace everything after "CMAKE_"
     defKey.replace(defKey.begin() + 6, defKey.end(), property);
-    if (const char* value = mf->GetDefinition(defKey)) {
-      this->SetProperty(property, value);
+    if (cmProp value = mf->GetDefinition(defKey)) {
+      this->SetProperty(property, *value);
     }
   };
   auto initPropValue = [this, mf, &defKey](const std::string& property,
                                            const char* default_value) {
     // Replace everything after "CMAKE_"
     defKey.replace(defKey.begin() + 6, defKey.end(), property);
-    if (const char* value = mf->GetDefinition(defKey)) {
-      this->SetProperty(property, value);
+    if (cmProp value = mf->GetDefinition(defKey)) {
+      this->SetProperty(property, *value);
     } else if (default_value) {
       this->SetProperty(property, default_value);
     }
@@ -525,11 +525,11 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   // check for "CMAKE_VS_GLOBALS" variable and set up target properties
   // if any
-  const char* globals = mf->GetDefinition("CMAKE_VS_GLOBALS");
+  cmProp globals = mf->GetDefinition("CMAKE_VS_GLOBALS");
   if (globals) {
     const std::string genName = mf->GetGlobalGenerator()->GetName();
     if (cmHasLiteralPrefix(genName, "Visual Studio")) {
-      std::vector<std::string> props = cmExpandedList(globals);
+      std::vector<std::string> props = cmExpandedList(*globals);
       const std::string vsGlobal = "VS_GLOBAL_";
       for (const std::string& i : props) {
         // split NAME=VALUE
@@ -1018,9 +1018,9 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
        this->GetPolicyStatusCMP0073() == cmPolicies::WARN)) {
     std::string targetEntry = cmStrCat(impl->Name, "_LIB_DEPENDS");
     std::string dependencies;
-    const char* old_val = mf.GetDefinition(targetEntry);
+    cmProp old_val = mf.GetDefinition(targetEntry);
     if (old_val) {
-      dependencies += old_val;
+      dependencies += *old_val;
     }
     switch (llt) {
       case GENERAL_LibraryType:

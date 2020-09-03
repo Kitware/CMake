@@ -5,6 +5,7 @@
 #include "cmCTest.h"
 #include "cmCTestUpdateHandler.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmSystemTools.h"
 
 cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
@@ -17,7 +18,7 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
     this->CTest->SetCTestConfiguration(
       "SourceDirectory",
       cmSystemTools::CollapseFullPath(
-        this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY")),
+        cmToCStrSafe(this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY"))),
       this->Quiet);
   }
   std::string source_dir =

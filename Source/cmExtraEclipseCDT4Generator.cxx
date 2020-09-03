@@ -189,9 +189,9 @@ void cmExtraEclipseCDT4Generator::CreateSettingsResourcePrefsFile()
   }
 
   fout << "eclipse.preferences.version=1\n";
-  const char* encoding = mf->GetDefinition("CMAKE_ECLIPSE_RESOURCE_ENCODING");
+  cmProp encoding = mf->GetDefinition("CMAKE_ECLIPSE_RESOURCE_ENCODING");
   if (encoding) {
-    fout << "encoding/<project>=" << encoding << '\n';
+    fout << "encoding/<project>=" << *encoding << '\n';
   }
 }
 
@@ -793,11 +793,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     }
   }
   // add system defined c macros
-  const char* cDefs =
+  cmProp cDefs =
     mf->GetDefinition("CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS");
   if (this->CEnabled && cDefs) {
     // Expand the list.
-    std::vector<std::string> defs = cmExpandedList(cDefs, true);
+    std::vector<std::string> defs = cmExpandedList(*cDefs, true);
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
@@ -825,11 +825,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     }
   }
   // add system defined c++ macros
-  const char* cxxDefs =
+  cmProp cxxDefs =
     mf->GetDefinition("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_DEFINED_MACROS");
   if (this->CXXEnabled && cxxDefs) {
     // Expand the list.
-    std::vector<std::string> defs = cmExpandedList(cxxDefs, true);
+    std::vector<std::string> defs = cmExpandedList(*cxxDefs, true);
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {

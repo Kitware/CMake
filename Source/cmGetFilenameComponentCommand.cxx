@@ -4,6 +4,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -21,8 +22,8 @@ bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
   // Check and see if the value has been stored in the cache
   // already, if so use that value
   if (args.size() >= 4 && args.back() == "CACHE") {
-    const char* cacheValue = status.GetMakefile().GetDefinition(args.front());
-    if (cacheValue && !cmIsNOTFOUND(cacheValue)) {
+    cmProp cacheValue = status.GetMakefile().GetDefinition(args.front());
+    if (cacheValue && !cmIsNOTFOUND(*cacheValue)) {
       return true;
     }
   }

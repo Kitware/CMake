@@ -20,6 +20,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
@@ -905,8 +906,8 @@ int cmCPackGenerator::InstallCMakeProject(
   // forward definition of CMAKE_ABSOLUTE_DESTINATION_FILES
   // to CPack (may be used by generators like CPack RPM or DEB)
   // in order to transparently handle ABSOLUTE PATH
-  if (const char* def = mf.GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES")) {
-    mf.AddDefinition("CPACK_ABSOLUTE_DESTINATION_FILES", def);
+  if (cmProp def = mf.GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES")) {
+    mf.AddDefinition("CPACK_ABSOLUTE_DESTINATION_FILES", *def);
   }
 
   // Now rebuild the list of files after installation
@@ -939,11 +940,11 @@ int cmCPackGenerator::InstallCMakeProject(
     }
   }
 
-  if (auto d = mf.GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
+  if (cmProp d = mf.GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
     if (!absoluteDestFiles.empty()) {
       absoluteDestFiles += ";";
     }
-    absoluteDestFiles += d;
+    absoluteDestFiles += *d;
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "Got some ABSOLUTE DESTINATION FILES: " << absoluteDestFiles
                                                           << std::endl);
@@ -954,12 +955,13 @@ int cmCPackGenerator::InstallCMakeProject(
         GetComponentInstallDirNameSuffix(component);
       if (nullptr != this->GetOption(absoluteDestFileComponent)) {
         std::string absoluteDestFilesListComponent =
-          cmStrCat(this->GetOption(absoluteDestFileComponent), ';', d);
+          cmStrCat(this->GetOption(absoluteDestFileComponent), ';', *d);
         this->SetOption(absoluteDestFileComponent,
                         absoluteDestFilesListComponent.c_str());
       } else {
-        this->SetOption(absoluteDestFileComponent,
-                        mf.GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES"));
+        this->SetOption(
+          absoluteDestFileComponent,
+          cmToCStr(mf.GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")));
       }
     }
   }
@@ -982,7 +984,7 @@ bool cmCPackGenerator::ReadListFile(const char* moduleName)
 void cmCPackGenerator::SetOptionIfNotSet(const std::string& op,
                                          const char* value)
 {
-  const char* def = this->MakefileMap->GetDefinition(op);
+  cmProp def = this->MakefileMap->GetDefinition(op);
   if (cmNonempty(def)) {
     return;
   }
@@ -1214,30 +1216,31 @@ bool cmCPackGenerator::IsOn(const std::string& name) const
 
 bool cmCPackGenerator::IsSetToOff(const std::string& op) const
 {
-  const char* ret = this->MakefileMap->GetDefinition(op);
+  cmProp ret = this->MakefileMap->GetDefinition(op);
   if (cmNonempty(ret)) {
-    return cmIsOff(ret);
+    return cmIsOff(*ret);
   }
   return false;
 }
 
 bool cmCPackGenerator::IsSetToEmpty(const std::string& op) const
 {
-  const char* ret = this->MakefileMap->GetDefinition(op);
+  cmProp ret = this->MakefileMap->GetDefinition(op);
   if (ret) {
-    return !*ret;
+    return ret->empty();
   }
   return false;
 }
 
 const char* cmCPackGenerator::GetOption(const std::string& op) const
 {
-  const char* ret = this->MakefileMap->GetDefinition(op);
+  cmProp ret = this->MakefileMap->GetDefinition(op);
   if (!ret) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "Warning, GetOption return NULL for: " << op << std::endl);
+    return nullptr;
   }
-  return ret;
+  return ret->c_str();
 }
 
 std::vector<std::string> cmCPackGenerator::GetOptions() const

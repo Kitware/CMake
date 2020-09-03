@@ -140,7 +140,7 @@ const char* CCONV cmGetCurrentOutputDirectory(void* arg)
 const char* CCONV cmGetDefinition(void* arg, const char* def)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  return mf->GetDefinition(def);
+  return cmToCStr(mf->GetDefinition(def));
 }
 
 int CCONV cmIsOn(void* arg, const char* name)

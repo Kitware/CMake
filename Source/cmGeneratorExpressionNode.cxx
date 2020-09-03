@@ -1741,7 +1741,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
     for (auto const& lit : testedFeatures) {
       std::vector<std::string> const& langAvailable =
         availableFeatures[lit.first];
-      cmProp standardDefault = context->LG->GetMakefile()->GetDef(
+      cmProp standardDefault = context->LG->GetMakefile()->GetDefinition(
         "CMAKE_" + lit.first + "_STANDARD_DEFAULT");
       for (std::string const& it : lit.second) {
         if (!cm::contains(langAvailable, it)) {

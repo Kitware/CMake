@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetLinkLibrariesCommand.h"
 
-#include <cstring>
 #include <memory>
 #include <sstream>
 #include <unordered_set>
@@ -14,6 +13,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -277,12 +277,12 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
       // with old versions of CMake and new)
       llt = GENERAL_LibraryType;
       std::string linkType = cmStrCat(args[0], "_LINK_TYPE");
-      const char* linkTypeString = mf.GetDefinition(linkType);
+      cmProp linkTypeString = mf.GetDefinition(linkType);
       if (linkTypeString) {
-        if (strcmp(linkTypeString, "debug") == 0) {
+        if (*linkTypeString == "debug") {
           llt = DEBUG_LibraryType;
         }
-        if (strcmp(linkTypeString, "optimized") == 0) {
+        if (*linkTypeString == "optimized") {
           llt = OPTIMIZED_LibraryType;
         }
       }

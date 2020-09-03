@@ -469,9 +469,10 @@ void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
     name,
     [name, error](std::vector<cmListFileArgument> const&,
                   cmExecutionStatus& status) -> bool {
-      const char* versionValue =
+      cmProp versionValue =
         status.GetMakefile().GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-      if (name == "endif" && (!versionValue || atof(versionValue) <= 1.4)) {
+      if (name == "endif" &&
+          (!versionValue || atof(versionValue->c_str()) <= 1.4)) {
         return true;
       }
       status.SetError(error);

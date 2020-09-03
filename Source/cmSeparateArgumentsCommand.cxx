@@ -6,6 +6,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -65,8 +66,8 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
 
   if (mode == ModeOld) {
     // Original space-replacement version of command.
-    if (const char* def = status.GetMakefile().GetDefinition(var)) {
-      std::string value = def;
+    if (cmProp def = status.GetMakefile().GetDefinition(var)) {
+      std::string value = *def;
       std::replace(value.begin(), value.end(), ' ', ';');
       status.GetMakefile().AddDefinition(var, value);
     }

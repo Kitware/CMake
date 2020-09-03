@@ -12,6 +12,7 @@
 #include "cmDocumentationFormatter.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
@@ -324,21 +325,22 @@ int main(int argc, char const* const* argv)
     }
 
     // Force CPACK_PACKAGE_DIRECTORY as absolute path
-    cpackProjectDirectory = globalMF.GetDefinition("CPACK_PACKAGE_DIRECTORY");
+    cpackProjectDirectory =
+      globalMF.GetSafeDefinition("CPACK_PACKAGE_DIRECTORY");
     cpackProjectDirectory =
       cmSystemTools::CollapseFullPath(cpackProjectDirectory);
     globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY", cpackProjectDirectory);
 
-    const char* cpackModulesPath = globalMF.GetDefinition("CPACK_MODULE_PATH");
+    cmProp cpackModulesPath = globalMF.GetDefinition("CPACK_MODULE_PATH");
     if (cpackModulesPath) {
-      globalMF.AddDefinition("CMAKE_MODULE_PATH", cpackModulesPath);
+      globalMF.AddDefinition("CMAKE_MODULE_PATH", *cpackModulesPath);
     }
-    const char* genList = globalMF.GetDefinition("CPACK_GENERATOR");
+    cmProp genList = globalMF.GetDefinition("CPACK_GENERATOR");
     if (!genList) {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                   "CPack generator not specified" << std::endl);
     } else {
-      std::vector<std::string> generatorsVector = cmExpandedList(genList);
+      std::vector<std::string> generatorsVector = cmExpandedList(*genList);
       for (std::string const& gen : generatorsVector) {
         cmMakefile::ScopePushPop raii(&globalMF);
         cmMakefile* mf = &globalMF;
@@ -411,32 +413,31 @@ int main(int argc, char const* const* argv)
             parsed = 0;
           }
           if (parsed) {
-            const char* projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
+            cmProp projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
             cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
                         "Use generator: " << cpackGenerator->GetNameOfClass()
                                           << std::endl);
             cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
-                        "For project: " << projName << std::endl);
+                        "For project: " << *projName << std::endl);
 
-            const char* projVersion =
-              mf->GetDefinition("CPACK_PACKAGE_VERSION");
+            cmProp projVersion = mf->GetDefinition("CPACK_PACKAGE_VERSION");
             if (!projVersion) {
-              const char* projVersionMajor =
+              cmProp projVersionMajor =
                 mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR");
-              const char* projVersionMinor =
+              cmProp projVersionMinor =
                 mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR");
-              const char* projVersionPatch =
+              cmProp projVersionPatch =
                 mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
               std::ostringstream ostr;
-              ostr << projVersionMajor << "." << projVersionMinor << "."
-                   << projVersionPatch;
+              ostr << *projVersionMajor << "." << *projVersionMinor << "."
+                   << *projVersionPatch;
               mf->AddDefinition("CPACK_PACKAGE_VERSION", ostr.str());
             }
 
             int res = cpackGenerator->DoPackage();
             if (!res) {
               cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-                          "Error when generating package: " << projName
+                          "Error when generating package: " << *projName
                                                             << std::endl);
               return 1;
             }

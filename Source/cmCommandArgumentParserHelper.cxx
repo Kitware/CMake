@@ -93,7 +93,7 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
   if (this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0) {
     return this->AddString(std::to_string(this->FileLine));
   }
-  const char* value = this->Makefile->GetDefinition(var);
+  cmProp value = this->Makefile->GetDefinition(var);
   if (!value) {
     this->Makefile->MaybeWarnUninitialized(var, this->FileName);
     if (!this->RemoveEmpty) {
@@ -101,9 +101,9 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     }
   }
   if (this->EscapeQuotes && value) {
-    return this->AddString(cmEscapeQuotes(value));
+    return this->AddString(cmEscapeQuotes(*value));
   }
-  return this->AddString(value ? value : "");
+  return this->AddString(cmToCStrSafe(value));
 }
 
 const char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)

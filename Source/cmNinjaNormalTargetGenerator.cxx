@@ -307,10 +307,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
 
     // build response file name
     std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
-    const char* flag = GetMakefile()->GetDefinition(cmakeLinkVar);
+    cmProp flag = GetMakefile()->GetDefinition(cmakeLinkVar);
 
     if (flag) {
-      responseFlag = flag;
+      responseFlag = *flag;
     } else {
       responseFlag = "@";
     }
@@ -478,15 +478,15 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
     // CMAKE_<lang>_CREATE_STATIC_LIBRARY_IPO define instead.
     std::string linkCmdVar = this->GetGeneratorTarget()->GetCreateRuleVariable(
       this->TargetLinkLanguage(config), config);
-    const char* linkCmd = mf->GetDefinition(linkCmdVar);
+    cmProp linkCmd = mf->GetDefinition(linkCmdVar);
     if (linkCmd) {
-      std::string linkCmdStr = linkCmd;
+      std::string linkCmdStr = *linkCmd;
       if (this->GetGeneratorTarget()->HasImplibGNUtoMS(config)) {
         std::string ruleVar =
           cmStrCat("CMAKE_", this->GeneratorTarget->GetLinkerLanguage(config),
                    "_GNUtoMS_RULE");
-        if (const char* rule = this->Makefile->GetDefinition(ruleVar)) {
-          linkCmdStr += rule;
+        if (cmProp rule = this->Makefile->GetDefinition(ruleVar)) {
+          linkCmdStr += *rule;
         }
       }
       cmExpandList(linkCmdStr, linkCmds);
@@ -1027,8 +1027,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     gt->GetFullNameComponents(prefix, base, suffix, config);
     std::string dbg_suffix = ".dbg";
     // TODO: Where to document?
-    if (auto d = mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX")) {
-      dbg_suffix = d;
+    if (cmProp d = mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX")) {
+      dbg_suffix = *d;
     }
     vars["TARGET_PDB"] = base + suffix + dbg_suffix;
   }
@@ -1091,11 +1091,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     cmd += this->GetLocalGenerator()->ConvertToOutputFormat(
       obj_list_file, cmOutputConverter::SHELL);
 
-    const char* nm_executable = GetMakefile()->GetDefinition("CMAKE_NM");
+    cmProp nm_executable = GetMakefile()->GetDefinition("CMAKE_NM");
     if (cmNonempty(nm_executable)) {
       cmd += " --nm=";
       cmd += this->LocalCommonGenerator->ConvertToOutputFormat(
-        nm_executable, cmOutputConverter::SHELL);
+        *nm_executable, cmOutputConverter::SHELL);
     }
     preLinkCmdLines.push_back(std::move(cmd));
 
@@ -1144,7 +1144,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   // build response file name
   std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
 
-  const char* flag = GetMakefile()->GetDefinition(cmakeLinkVar);
+  cmProp flag = GetMakefile()->GetDefinition(cmakeLinkVar);
 
   bool const lang_supports_response =
     !(this->TargetLinkLanguage(config) == "RC" ||

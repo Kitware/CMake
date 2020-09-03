@@ -1758,8 +1758,8 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target)
 
     // Read versions from variables
     for (auto const& keyPair : keys) {
-      addVersion(target->Makefile->GetDef(std::string(keyPair.first)),
-                 target->Makefile->GetDef(std::string(keyPair.second)));
+      addVersion(target->Makefile->GetDefinition(std::string(keyPair.first)),
+                 target->Makefile->GetDefinition(std::string(keyPair.second)));
     }
 
     // Read versions from directory properties

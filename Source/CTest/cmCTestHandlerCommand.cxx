@@ -126,7 +126,8 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   // CTEST_CONFIGURATION_TYPE script variable if it is defined.
   // The current script value trumps the -C argument on the command
   // line.
-  cmProp ctestConfigType = this->Makefile->GetDef("CTEST_CONFIGURATION_TYPE");
+  cmProp ctestConfigType =
+    this->Makefile->GetDefinition("CTEST_CONFIGURATION_TYPE");
   if (ctestConfigType) {
     this->CTest->SetConfigType(*ctestConfigType);
   }
@@ -160,7 +161,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
       this->Quiet);
   }
 
-  if (cmProp changeId = this->Makefile->GetDef("CTEST_CHANGE_ID")) {
+  if (cmProp changeId = this->Makefile->GetDefinition("CTEST_CHANGE_ID")) {
     this->CTest->SetCTestConfiguration("ChangeId", *changeId, this->Quiet);
   }
 

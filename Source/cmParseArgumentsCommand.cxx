@@ -13,6 +13,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -195,7 +196,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
     for (unsigned long i = argvStart; i < count; ++i) {
       std::ostringstream argName;
       argName << "ARGV" << i;
-      const char* arg = status.GetMakefile().GetDefinition(argName.str());
+      cmProp arg = status.GetMakefile().GetDefinition(argName.str());
       if (!arg) {
         status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR,
                                           "PARSE_ARGV called with " +
@@ -203,7 +204,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
         cmSystemTools::SetFatalErrorOccured();
         return true;
       }
-      list.emplace_back(arg);
+      list.emplace_back(*arg);
     }
   }
 

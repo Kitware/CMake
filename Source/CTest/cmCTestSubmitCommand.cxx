@@ -16,6 +16,7 @@
 #include "cmCommand.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -37,7 +38,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {
   const std::string* submitURL = !this->SubmitURL.empty()
     ? &this->SubmitURL
-    : this->Makefile->GetDef("CTEST_SUBMIT_URL");
+    : this->Makefile->GetDefinition("CTEST_SUBMIT_URL");
 
   if (submitURL) {
     this->CTest->SetCTestConfiguration("SubmitURL", *submitURL, this->Quiet);
@@ -58,17 +59,17 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", this->Quiet);
 
-  const char* notesFilesVariable =
+  cmProp notesFilesVariable =
     this->Makefile->GetDefinition("CTEST_NOTES_FILES");
   if (notesFilesVariable) {
-    std::vector<std::string> notesFiles = cmExpandedList(notesFilesVariable);
+    std::vector<std::string> notesFiles = cmExpandedList(*notesFilesVariable);
     this->CTest->GenerateNotesFile(notesFiles);
   }
 
-  const char* extraFilesVariable =
+  cmProp extraFilesVariable =
     this->Makefile->GetDefinition("CTEST_EXTRA_SUBMIT_FILES");
   if (extraFilesVariable) {
-    std::vector<std::string> extraFiles = cmExpandedList(extraFilesVariable);
+    std::vector<std::string> extraFiles = cmExpandedList(*extraFilesVariable);
     if (!this->CTest->SubmitExtraFiles(extraFiles)) {
       this->SetError("problem submitting extra files.");
       return nullptr;

@@ -593,8 +593,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   std::ostream& fout, const std::string& configName,
   const std::string& libName, cmGeneratorTarget* target)
 {
-  const char* mfcFlag = this->Makefile->GetDefinition("CMAKE_MFC_FLAG");
-  if (!mfcFlag) {
+  std::string mfcFlag;
+  if (cmProp p = this->Makefile->GetDefinition("CMAKE_MFC_FLAG")) {
+    mfcFlag = *p;
+  } else {
     mfcFlag = "0";
   }
   cmGlobalVisualStudio7Generator* gg =
@@ -1087,9 +1089,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         }
       }
       std::string stackVar = cmStrCat("CMAKE_", linkLanguage, "_STACK_SIZE");
-      const char* stackVal = this->Makefile->GetDefinition(stackVar);
+      cmProp stackVal = this->Makefile->GetDefinition(stackVar);
       if (stackVal) {
-        fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"\n";
+        fout << "\t\t\t\tStackReserveSize=\"" << *stackVal << "\"\n";
       }
       temp = cmStrCat(
         target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact),
@@ -1176,9 +1178,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
              << "\"\n";
       }
       std::string stackVar = cmStrCat("CMAKE_", linkLanguage, "_STACK_SIZE");
-      const char* stackVal = this->Makefile->GetDefinition(stackVar);
+      cmProp stackVal = this->Makefile->GetDefinition(stackVar);
       if (stackVal) {
-        fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"";
+        fout << "\t\t\t\tStackReserveSize=\"" << *stackVal << "\"";
       }
       temp = cmStrCat(
         target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact),
