@@ -25,10 +25,6 @@ public:
 
   virtual ~cmLocalVisualStudio10Generator();
 
-  /**
-   * Generate the makefile for this directory.
-   */
-  void Generate() override;
   void ReadAndStoreExternalGUID(const std::string& name,
                                 const char* path) override;
 
@@ -43,7 +39,7 @@ protected:
   bool CustomCommandUseLocal() const override { return true; }
 
 private:
-  void GenerateTarget(cmGeneratorTarget* target);
+  void GenerateTarget(cmGeneratorTarget* target) override;
 
   std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
     SourcesVisited;

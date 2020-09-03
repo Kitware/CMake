@@ -314,10 +314,6 @@ std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
 
 void cmVisualStudio10TargetGenerator::Generate()
 {
-  // do not generate external ms projects
-  if (this->GeneratorTarget->GetProperty("EXTERNAL_MSPROJECT")) {
-    return;
-  }
   const std::string ProjectFileExtension =
     computeProjectFileExtension(this->GeneratorTarget);
   if (ProjectFileExtension == ".vcxproj") {

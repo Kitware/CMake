@@ -68,9 +68,6 @@ cmLocalVisualStudio10Generator::~cmLocalVisualStudio10Generator()
 
 void cmLocalVisualStudio10Generator::GenerateTarget(cmGeneratorTarget* target)
 {
-  if (!target->IsInBuildSystem()) {
-    return;
-  }
   auto& targetVisited = this->GetSourcesVisited(target);
   auto& deps = this->GlobalGenerator->GetTargetDirectDepends(target);
   for (auto& d : deps) {
@@ -80,7 +77,7 @@ void cmLocalVisualStudio10Generator::GenerateTarget(cmGeneratorTarget* target)
   }
   if (static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
         ->TargetIsFortranOnly(target)) {
-    this->CreateSingleVCProj(target->GetName(), target);
+    this->cmLocalVisualStudio7Generator::GenerateTarget(target);
   } else {
     cmVisualStudio10TargetGenerator tg(
       target,
@@ -88,15 +85,6 @@ void cmLocalVisualStudio10Generator::GenerateTarget(cmGeneratorTarget* target)
         this->GetGlobalGenerator()));
     tg.Generate();
   }
-}
-
-void cmLocalVisualStudio10Generator::Generate()
-{
-  for (cmGeneratorTarget* gt :
-       this->GlobalGenerator->GetLocalGeneratorTargetsInOrder(this)) {
-    this->GenerateTarget(gt);
-  }
-  this->WriteStampFiles();
 }
 
 void cmLocalVisualStudio10Generator::ReadAndStoreExternalGUID(
