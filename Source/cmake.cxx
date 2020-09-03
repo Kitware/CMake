@@ -1217,7 +1217,7 @@ createExtraGenerator(
 }
 
 std::unique_ptr<cmGlobalGenerator> cmake::CreateGlobalGenerator(
-  const std::string& gname)
+  const std::string& gname, bool allowArch)
 {
   std::pair<std::unique_ptr<cmExternalMakefileProjectGenerator>, std::string>
     extra = createExtraGenerator(this->ExtraGenerators, gname);
@@ -1227,7 +1227,7 @@ std::unique_ptr<cmGlobalGenerator> cmake::CreateGlobalGenerator(
 
   std::unique_ptr<cmGlobalGenerator> generator;
   for (const auto& g : this->Generators) {
-    generator = g->CreateGlobalGenerator(name, this);
+    generator = g->CreateGlobalGenerator(name, allowArch, this);
     if (generator) {
       break;
     }

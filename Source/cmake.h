@@ -219,7 +219,7 @@ public:
 
   //! Create a GlobalGenerator
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name);
+    const std::string& name, bool allowArch = true);
 
   //! Return the global generator assigned to this instance of cmake
   cmGlobalGenerator* GetGlobalGenerator()
