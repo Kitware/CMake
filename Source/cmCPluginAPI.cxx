@@ -581,13 +581,13 @@ const char* CCONV cmSourceFileGetProperty(void* arg, const char* prop)
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
     cmProp p = rsf->GetProperty(prop);
-    return p ? p->c_str() : nullptr;
+    return cmToCStr(p);
   }
   if (!strcmp(prop, "LOCATION")) {
     return sf->FullPath.c_str();
   }
   cmProp retVal = sf->Properties.GetPropertyValue(prop);
-  return retVal ? retVal->c_str() : nullptr;
+  return cmToCStr(retVal);
 }
 
 int CCONV cmSourceFileGetPropertyAsBool(void* arg, const char* prop)

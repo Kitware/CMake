@@ -281,8 +281,7 @@ bool HandleGlobalMode(cmExecutionStatus& status, const std::string& name,
   // Get the property.
   cmake* cm = status.GetMakefile().GetCMakeInstance();
   cmProp p = cm->GetState()->GetGlobalProperty(propertyName);
-  return StoreResult(infoType, status.GetMakefile(), variable,
-                     p ? p->c_str() : nullptr);
+  return StoreResult(infoType, status.GetMakefile(), variable, cmToCStr(p));
 }
 
 bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
@@ -329,8 +328,7 @@ bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
 
   // Get the property.
   cmProp p = mf->GetProperty(propertyName);
-  return StoreResult(infoType, status.GetMakefile(), variable,
-                     p ? p->c_str() : nullptr);
+  return StoreResult(infoType, status.GetMakefile(), variable, cmToCStr(p));
 }
 
 bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
@@ -449,8 +447,7 @@ bool HandleCacheMode(cmExecutionStatus& status, const std::string& name,
     value = status.GetMakefile().GetState()->GetCacheEntryProperty(
       name, propertyName);
   }
-  StoreResult(infoType, status.GetMakefile(), variable,
-              value ? value->c_str() : nullptr);
+  StoreResult(infoType, status.GetMakefile(), variable, cmToCStr(value));
   return true;
 }
 

@@ -363,8 +363,7 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Write statements declared in CMakeLists.txt:\n"
-     << "# "
-     << cmToCStr(this->Makefile->GetDefinition("CMAKE_CURRENT_LIST_FILE"))
+     << "# " << this->Makefile->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE")
      << '\n';
   if (this->IsRootMakefile()) {
     os << "# Which is the root file.\n";

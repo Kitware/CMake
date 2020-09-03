@@ -4775,12 +4775,11 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
     // The library's soname.
     this->ComputeVersionedName(targetNames.SharedObject, prefix,
                                targetNames.Base, suffix, targetNames.Output,
-                               (soversion ? soversion->c_str() : nullptr));
+                               cmToCStr(soversion));
 
     // The library's real name on disk.
     this->ComputeVersionedName(targetNames.Real, prefix, targetNames.Base,
-                               suffix, targetNames.Output,
-                               (version ? version->c_str() : nullptr));
+                               suffix, targetNames.Output, cmToCStr(version));
   }
 
   // The import library name.
@@ -4816,10 +4815,7 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
   const char* version = nullptr;
 #else
   // Check for executable version properties.
-  const char* version = nullptr;
-  if (cmProp p = this->GetProperty("VERSION")) {
-    version = p->c_str();
-  }
+  const char* version = cmToCStr(this->GetProperty("VERSION"));
   if (this->GetType() != cmStateEnums::EXECUTABLE ||
       this->Makefile->IsOn("XCODE")) {
     version = nullptr;
@@ -5536,7 +5532,7 @@ const char* getTypedProperty<const char*>(
   cmProp value = tgt->GetProperty(prop);
 
   if (genexInterpreter == nullptr) {
-    return value ? value->c_str() : nullptr;
+    return cmToCStr(value);
   }
 
   return genexInterpreter->Evaluate(value ? *value : "", prop).c_str();
@@ -5550,7 +5546,7 @@ std::string getTypedProperty<std::string>(
   cmProp value = tgt->GetProperty(prop);
 
   if (genexInterpreter == nullptr) {
-    return valueAsString(value ? value->c_str() : nullptr);
+    return valueAsString(cmToCStr(value));
   }
 
   return genexInterpreter->Evaluate(value ? *value : "", prop);

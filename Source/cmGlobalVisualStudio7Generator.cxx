@@ -381,8 +381,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       std::string location = *expath;
 
       cmProp p = target->GetProperty("VS_PROJECT_TYPE");
-      this->WriteExternalProject(fout, project, location,
-                                 p ? p->c_str() : nullptr,
+      this->WriteExternalProject(fout, project, location, cmToCStr(p),
                                  target->GetUtilities());
       written = true;
     } else {

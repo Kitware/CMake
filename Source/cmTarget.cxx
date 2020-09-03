@@ -1330,7 +1330,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
                               cmStrCat(reusedFrom, ".dir/"));
 
     cmProp tmp = reusedTarget->GetProperty("COMPILE_PDB_NAME");
-    this->SetProperty("COMPILE_PDB_NAME", tmp ? tmp->c_str() : nullptr);
+    this->SetProperty("COMPILE_PDB_NAME", cmToCStr(tmp));
     this->AddUtility(reusedFrom, false, impl->Makefile);
   } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
              prop == propCUDA_STANDARD || prop == propOBJC_STANDARD ||

@@ -1430,31 +1430,31 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   {
     const char* prop = "IMPLICIT_DEPENDS_INCLUDE_TRANSFORM";
     cmProp p = parent->GetProperty(prop);
-    this->SetProperty(prop, p ? p->c_str() : nullptr);
+    this->SetProperty(prop, cmToCStr(p));
   }
 
   // compile definitions property and per-config versions
   cmPolicies::PolicyStatus polSt = this->GetPolicyStatus(cmPolicies::CMP0043);
   if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
     cmProp p = parent->GetProperty("COMPILE_DEFINITIONS");
-    this->SetProperty("COMPILE_DEFINITIONS", p ? p->c_str() : nullptr);
+    this->SetProperty("COMPILE_DEFINITIONS", cmToCStr(p));
     std::vector<std::string> configs =
       this->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
     for (std::string const& config : configs) {
       std::string defPropName =
         cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
       cmProp prop = parent->GetProperty(defPropName);
-      this->SetProperty(defPropName, prop ? prop->c_str() : nullptr);
+      this->SetProperty(defPropName, cmToCStr(prop));
     }
   }
 
   // labels
   cmProp p = parent->GetProperty("LABELS");
-  this->SetProperty("LABELS", p ? p->c_str() : nullptr);
+  this->SetProperty("LABELS", cmToCStr(p));
 
   // link libraries
   p = parent->GetProperty("LINK_LIBRARIES");
-  this->SetProperty("LINK_LIBRARIES", p ? p->c_str() : nullptr);
+  this->SetProperty("LINK_LIBRARIES", cmToCStr(p));
 
   // the initial project name
   this->StateSnapshot.SetProjectName(parent->StateSnapshot.GetProjectName());
@@ -2684,7 +2684,7 @@ cmProp cmMakefile::GetDefinition(const std::string& name) const
       vv->VariableAccessed(name,
                            def ? cmVariableWatch::VARIABLE_READ_ACCESS
                                : cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS,
-                           (def ? def->c_str() : nullptr), this);
+                           cmToCStr(def), this);
 
     if (watch_function_executed) {
       // A callback was executed and may have caused re-allocation of the
