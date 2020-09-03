@@ -32,7 +32,8 @@ public:
   void ReadAndStoreExternalGUID(const std::string& name,
                                 const char* path) override;
 
-  std::set<cmSourceFile const*>& GetSourcesVisited(cmGeneratorTarget* target)
+  std::set<cmSourceFile const*>& GetSourcesVisited(
+    cmGeneratorTarget const* target)
   {
     return SourcesVisited[target];
   };
@@ -42,8 +43,8 @@ protected:
   bool CustomCommandUseLocal() const override { return true; }
 
 private:
-  void GenerateTargetsDepthFirst(cmGeneratorTarget* target,
-                                 std::vector<cmGeneratorTarget*>& remaining);
+  void GenerateTarget(cmGeneratorTarget* target);
 
-  std::map<cmGeneratorTarget*, std::set<cmSourceFile const*>> SourcesVisited;
+  std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
+    SourcesVisited;
 };
