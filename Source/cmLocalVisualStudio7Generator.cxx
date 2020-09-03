@@ -86,6 +86,15 @@ void cmLocalVisualStudio7Generator::Generate()
     if (!gt->IsInBuildSystem() || gt->GetProperty("EXTERNAL_MSPROJECT")) {
       continue;
     }
+
+    auto& gtVisited = this->GetSourcesVisited(gt);
+    auto& deps = this->GlobalGenerator->GetTargetDirectDepends(gt);
+    for (auto& d : deps) {
+      // Take the union of visited source files of custom commands
+      auto depVisited = this->GetSourcesVisited(d);
+      gtVisited.insert(depVisited.begin(), depVisited.end());
+    }
+
     this->GenerateTarget(gt);
   }
 

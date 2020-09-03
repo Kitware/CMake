@@ -68,13 +68,6 @@ cmLocalVisualStudio10Generator::~cmLocalVisualStudio10Generator()
 
 void cmLocalVisualStudio10Generator::GenerateTarget(cmGeneratorTarget* target)
 {
-  auto& targetVisited = this->GetSourcesVisited(target);
-  auto& deps = this->GlobalGenerator->GetTargetDirectDepends(target);
-  for (auto& d : deps) {
-    // Take the union of visited source files of custom commands
-    auto depVisited = this->GetSourcesVisited(d);
-    targetVisited.insert(depVisited.begin(), depVisited.end());
-  }
   if (static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
         ->TargetIsFortranOnly(target)) {
     this->cmLocalVisualStudio7Generator::GenerateTarget(target);

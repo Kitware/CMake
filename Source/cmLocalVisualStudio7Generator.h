@@ -83,6 +83,12 @@ public:
   virtual void ReadAndStoreExternalGUID(const std::string& name,
                                         const char* path);
 
+  std::set<cmSourceFile const*>& GetSourcesVisited(
+    cmGeneratorTarget const* target)
+  {
+    return this->SourcesVisited[target];
+  };
+
 protected:
   virtual void GenerateTarget(cmGeneratorTarget* target);
 
@@ -148,4 +154,7 @@ private:
   bool FortranProject;
   bool WindowsCEProject;
   std::unique_ptr<cmLocalVisualStudio7GeneratorInternals> Internal;
+
+  std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
+    SourcesVisited;
 };
