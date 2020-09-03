@@ -125,7 +125,8 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
   }
 
   // Get the set of targets in this directory.
-  const auto& tgts = this->GetGeneratorTargets();
+  const auto& tgts =
+    this->GlobalGenerator->GetLocalGeneratorTargetsInOrder(this);
 
   // Create the project file for each target.
   for (const auto& l : tgts) {
@@ -135,7 +136,7 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
     if (!l->GetProperty("EXTERNAL_MSPROJECT")) {
-      this->CreateSingleVCProj(l->GetName(), l.get());
+      this->CreateSingleVCProj(l->GetName(), l);
     }
   }
 }
