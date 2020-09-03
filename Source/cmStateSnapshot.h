@@ -33,7 +33,7 @@ public:
 
   void SetListFile(std::string const& listfile);
 
-  std::string GetExecutionListFile() const;
+  std::string const& GetExecutionListFile() const;
 
   std::vector<cmStateSnapshot> GetChildren();
 

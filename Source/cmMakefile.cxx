@@ -3347,7 +3347,7 @@ bool cmMakefile::IsLoopBlock() const
   return !this->LoopBlockCounter.empty() && this->LoopBlockCounter.top() > 0;
 }
 
-std::string cmMakefile::GetExecutionFilePath() const
+std::string const& cmMakefile::GetExecutionFilePath() const
 {
   assert(this->StateSnapshot.IsValid());
   return this->StateSnapshot.GetExecutionListFile();
@@ -3357,8 +3357,8 @@ bool cmMakefile::ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
                                  std::vector<std::string>& outArgs,
                                  const char* filename) const
 {
-  std::string efp = this->GetExecutionFilePath();
   if (!filename) {
+    auto const& efp = this->GetExecutionFilePath();
     filename = efp.c_str();
   }
   std::string value;
@@ -3389,8 +3389,8 @@ bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
   std::vector<cmExpandedCommandArgument>& outArgs, const char* filename) const
 {
-  std::string efp = this->GetExecutionFilePath();
   if (!filename) {
+    auto const& efp = this->GetExecutionFilePath();
     filename = efp.c_str();
   }
   std::string value;

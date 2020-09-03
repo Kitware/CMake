@@ -53,7 +53,7 @@ void cmStateSnapshot::SetListFile(const std::string& listfile)
   *this->Position->ExecutionListFile = listfile;
 }
 
-std::string cmStateSnapshot::GetExecutionListFile() const
+std::string const& cmStateSnapshot::GetExecutionListFile() const
 {
   return *this->Position->ExecutionListFile;
 }
