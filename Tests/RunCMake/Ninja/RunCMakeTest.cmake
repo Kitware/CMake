@@ -327,6 +327,7 @@ run_ChangeBuildType()
 function(run_Qt5AutoMocDeps)
   if(CMake_TEST_Qt5 AND CMAKE_TEST_Qt5Core_Version VERSION_GREATER_EQUAL 5.15.0)
     set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Qt5AutoMocDeps-build)
+    set(RunCMake_TEST_OPTIONS "-DQt5Core_DIR=${Qt5Core_DIR}")
     run_cmake(Qt5AutoMocDeps)
     unset(RunCMake_TEST_OPTIONS)
     # Build the project.

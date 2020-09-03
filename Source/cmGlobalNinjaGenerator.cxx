@@ -1170,7 +1170,8 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
 
     for (auto const& dep_target : this->GetTargetDirectDepends(target)) {
       if (dep_target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-          (this->EnableCrossConfigBuild() && !dep_target.IsCross())) {
+          (target->GetType() != cmStateEnums::UTILITY &&
+           this->EnableCrossConfigBuild() && !dep_target.IsCross())) {
         continue;
       }
 
@@ -1863,6 +1864,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
         byproducts.push_back(
           this->BuildAlias(GetByproductsForCleanTargetName(), config));
       }
+      byproducts.emplace_back(GetByproductsForCleanTargetName());
       build.Variables["TARGETS"] = cmJoin(byproducts, " ");
 
       for (auto const& fileConfig : configs) {
