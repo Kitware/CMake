@@ -535,9 +535,10 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       this->IncrementArguments(newArgs, argP1, argP2);
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           IsKeyword(keyMATCHES, *argP1)) {
-        def = this->GetVariableOrString(*arg);
-        if (def != arg->c_str() // yes, we compare the pointer value
-            && cmHasLiteralPrefix(arg->GetValue(), "CMAKE_MATCH_")) {
+        def = this->GetDefinitionIfUnquoted(*arg);
+        if (!def) {
+          def = arg->c_str();
+        } else if (cmHasLiteralPrefix(arg->GetValue(), "CMAKE_MATCH_")) {
           // The string to match is owned by our match result variables.
           // Move it to our own buffer before clearing them.
           def_buf = def;
