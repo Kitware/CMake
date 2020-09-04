@@ -515,7 +515,7 @@ void cmVisualStudio10TargetGenerator::Generate()
             p = this->GeneratorTarget->GetProperty(
               "DOTNET_TARGET_FRAMEWORK_VERSION");
           }
-          const char* targetFrameworkVersion = p ? p->c_str() : nullptr;
+          const char* targetFrameworkVersion = cmToCStr(p);
           if (!targetFrameworkVersion && this->ProjectType == csproj &&
               this->GlobalGenerator->TargetsWindowsCE() &&
               this->GlobalGenerator->GetVersion() ==

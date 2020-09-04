@@ -411,8 +411,7 @@ void cmStateSnapshot::InitializeFromParent()
     parent->BuildSystemDirectory->Properties.GetPropertyValue(
       "INCLUDE_REGULAR_EXPRESSION");
   this->Position->BuildSystemDirectory->Properties.SetProperty(
-    "INCLUDE_REGULAR_EXPRESSION",
-    include_regex ? include_regex->c_str() : nullptr);
+    "INCLUDE_REGULAR_EXPRESSION", cmToCStr(include_regex));
 }
 
 cmState* cmStateSnapshot::GetState() const
