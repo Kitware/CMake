@@ -13,6 +13,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
@@ -91,32 +92,7 @@ cmFindPackageCommand::cmFindPackageCommand(cmExecutionStatus& status)
   : cmFindCommon(status)
 {
   this->CMakePathName = "PACKAGE";
-  this->Quiet = false;
-  this->Required = false;
-  this->NoUserRegistry = false;
-  this->NoSystemRegistry = false;
-  this->UseConfigFiles = true;
-  this->UseFindModules = true;
   this->DebugMode = false;
-  this->UseLib32Paths = false;
-  this->UseLib64Paths = false;
-  this->UseLibx32Paths = false;
-  this->UseRealPath = false;
-  this->PolicyScope = true;
-  this->VersionMajor = 0;
-  this->VersionMinor = 0;
-  this->VersionPatch = 0;
-  this->VersionTweak = 0;
-  this->VersionCount = 0;
-  this->VersionExact = false;
-  this->VersionFoundMajor = 0;
-  this->VersionFoundMinor = 0;
-  this->VersionFoundPatch = 0;
-  this->VersionFoundTweak = 0;
-  this->VersionFoundCount = 0;
-  this->RequiredCMakeVersion = 0;
-  this->SortOrder = None;
-  this->SortDirection = Asc;
   this->AppendSearchPathGroups();
 
   this->DeprecatedFindModules["Qt"] = cmPolicies::CMP0084;
@@ -627,53 +603,71 @@ bool cmFindPackageCommand::FindPackageUsingConfigMode()
   return this->HandlePackageMode(HandlePackageModeType::Config);
 }
 
+void cmFindPackageCommand::SetVersionVariables(
+  const std::function<void(const std::string&, cm::string_view)>&
+    addDefinition,
+  const std::string& prefix, const std::string& version, unsigned int count,
+  unsigned int major, unsigned int minor, unsigned int patch,
+  unsigned int tweak)
+{
+  addDefinition(prefix, version);
+
+  char buf[64];
+  sprintf(buf, "%u", major);
+  addDefinition(prefix + "_MAJOR", buf);
+  sprintf(buf, "%u", minor);
+  addDefinition(prefix + "_MINOR", buf);
+  sprintf(buf, "%u", patch);
+  addDefinition(prefix + "_PATCH", buf);
+  sprintf(buf, "%u", tweak);
+  addDefinition(prefix + "_TWEAK", buf);
+  sprintf(buf, "%u", count);
+  addDefinition(prefix + "_COUNT", buf);
+}
+
 void cmFindPackageCommand::SetModuleVariables(const std::string& components)
 {
-  this->AddFindDefinition("CMAKE_FIND_PACKAGE_NAME", this->Name.c_str());
+  this->AddFindDefinition("CMAKE_FIND_PACKAGE_NAME", this->Name);
 
   // Store the list of components.
   std::string components_var = this->Name + "_FIND_COMPONENTS";
-  this->AddFindDefinition(components_var, components.c_str());
+  this->AddFindDefinition(components_var, components);
 
   if (this->Quiet) {
     // Tell the module that is about to be read that it should find
     // quietly.
     std::string quietly = cmStrCat(this->Name, "_FIND_QUIETLY");
-    this->AddFindDefinition(quietly, "1");
+    this->AddFindDefinition(quietly, "1"_s);
   }
 
   if (this->Required) {
     // Tell the module that is about to be read that it should report
     // a fatal error if the package is not found.
     std::string req = cmStrCat(this->Name, "_FIND_REQUIRED");
-    this->AddFindDefinition(req, "1");
+    this->AddFindDefinition(req, "1"_s);
   }
 
   if (!this->Version.empty()) {
     // Tell the module that is about to be read what version of the
     // package has been requested.
+    auto addDefinition = [this](const std::string& variable,
+                                cm::string_view value) {
+      this->AddFindDefinition(variable, value);
+    };
     std::string ver = cmStrCat(this->Name, "_FIND_VERSION");
-    this->AddFindDefinition(ver, this->Version.c_str());
-    char buf[64];
-    sprintf(buf, "%u", this->VersionMajor);
-    this->AddFindDefinition(ver + "_MAJOR", buf);
-    sprintf(buf, "%u", this->VersionMinor);
-    this->AddFindDefinition(ver + "_MINOR", buf);
-    sprintf(buf, "%u", this->VersionPatch);
-    this->AddFindDefinition(ver + "_PATCH", buf);
-    sprintf(buf, "%u", this->VersionTweak);
-    this->AddFindDefinition(ver + "_TWEAK", buf);
-    sprintf(buf, "%u", this->VersionCount);
-    this->AddFindDefinition(ver + "_COUNT", buf);
+    this->SetVersionVariables(addDefinition, ver, this->Version,
+                              this->VersionCount, this->VersionMajor,
+                              this->VersionMinor, this->VersionPatch,
+                              this->VersionTweak);
 
     // Tell the module whether an exact version has been requested.
     std::string exact = cmStrCat(this->Name, "_FIND_VERSION_EXACT");
-    this->AddFindDefinition(exact, this->VersionExact ? "1" : "0");
+    this->AddFindDefinition(exact, this->VersionExact ? "1"_s : "0"_s);
   }
 }
 
 void cmFindPackageCommand::AddFindDefinition(const std::string& var,
-                                             const char* val)
+                                             cm::string_view value)
 {
   if (cmProp old = this->Makefile->GetDefinition(var)) {
     this->OriginalDefs[var].exists = true;
@@ -681,9 +675,7 @@ void cmFindPackageCommand::AddFindDefinition(const std::string& var,
   } else {
     this->OriginalDefs[var].exists = false;
   }
-  if (val) {
-    this->Makefile->AddDefinition(var, val);
-  }
+  this->Makefile->AddDefinition(var, value);
 }
 
 void cmFindPackageCommand::RestoreFindDefinitions()
@@ -1725,18 +1717,15 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file,
 
   // Set the input variables.
   this->Makefile->AddDefinition("PACKAGE_FIND_NAME", this->Name);
-  this->Makefile->AddDefinition("PACKAGE_FIND_VERSION", this->Version);
-  char buf[64];
-  sprintf(buf, "%u", this->VersionMajor);
-  this->Makefile->AddDefinition("PACKAGE_FIND_VERSION_MAJOR", buf);
-  sprintf(buf, "%u", this->VersionMinor);
-  this->Makefile->AddDefinition("PACKAGE_FIND_VERSION_MINOR", buf);
-  sprintf(buf, "%u", this->VersionPatch);
-  this->Makefile->AddDefinition("PACKAGE_FIND_VERSION_PATCH", buf);
-  sprintf(buf, "%u", this->VersionTweak);
-  this->Makefile->AddDefinition("PACKAGE_FIND_VERSION_TWEAK", buf);
-  sprintf(buf, "%u", this->VersionCount);
-  this->Makefile->AddDefinition("PACKAGE_FIND_VERSION_COUNT", buf);
+
+  auto addDefinition = [this](const std::string& variable,
+                              cm::string_view value) {
+    this->Makefile->AddDefinition(variable, value);
+  };
+  this->SetVersionVariables(addDefinition, "PACKAGE_FIND_VERSION",
+                            this->Version, this->VersionCount,
+                            this->VersionMajor, this->VersionMinor,
+                            this->VersionPatch, this->VersionTweak);
 
   // Load the version check file.  Pass NoPolicyScope because we do
   // our own policy push/pop independent of CMP0011.
@@ -1798,24 +1787,19 @@ void cmFindPackageCommand::StoreVersionFound()
 {
   // Store the whole version string.
   std::string ver = cmStrCat(this->Name, "_VERSION");
+  auto addDefinition = [this](const std::string& variable,
+                              cm::string_view value) {
+    this->Makefile->AddDefinition(variable, value);
+  };
+
+  this->SetVersionVariables(addDefinition, ver, this->VersionFound,
+                            this->VersionFoundCount, this->VersionFoundMajor,
+                            this->VersionFoundMinor, this->VersionFoundPatch,
+                            this->VersionFoundTweak);
+
   if (this->VersionFound.empty()) {
     this->Makefile->RemoveDefinition(ver);
-  } else {
-    this->Makefile->AddDefinition(ver, this->VersionFound);
   }
-
-  // Store the version components.
-  char buf[64];
-  sprintf(buf, "%u", this->VersionFoundMajor);
-  this->Makefile->AddDefinition(ver + "_MAJOR", buf);
-  sprintf(buf, "%u", this->VersionFoundMinor);
-  this->Makefile->AddDefinition(ver + "_MINOR", buf);
-  sprintf(buf, "%u", this->VersionFoundPatch);
-  this->Makefile->AddDefinition(ver + "_PATCH", buf);
-  sprintf(buf, "%u", this->VersionFoundTweak);
-  this->Makefile->AddDefinition(ver + "_TWEAK", buf);
-  sprintf(buf, "%u", this->VersionFoundCount);
-  this->Makefile->AddDefinition(ver + "_COUNT", buf);
 }
 
 class cmFileListGeneratorBase
