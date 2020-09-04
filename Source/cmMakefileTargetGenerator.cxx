@@ -1290,16 +1290,7 @@ void cmMakefileTargetGenerator::DriveCustomCommands(
   std::vector<std::string>& depends)
 {
   // Depend on all custom command outputs.
-  std::vector<cmSourceFile*> sources;
-  this->GeneratorTarget->GetSourceFiles(
-    sources, this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
-  for (cmSourceFile* source : sources) {
-    if (cmCustomCommand* cc = source->GetCustomCommand()) {
-      cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
-                                   this->LocalGenerator);
-      cm::append(depends, ccg.GetOutputs());
-    }
-  }
+  cm::append(depends, this->CustomCommandOutputs);
 }
 
 void cmMakefileTargetGenerator::WriteObjectDependRules(
@@ -1360,6 +1351,8 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
     this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, idi.first,
                                              objFullPath, srcFullPath);
   }
+
+  this->CustomCommandOutputs.insert(outputs.begin(), outputs.end());
 }
 
 void cmMakefileTargetGenerator::MakeEchoProgress(

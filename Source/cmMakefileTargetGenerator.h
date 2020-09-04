@@ -228,6 +228,9 @@ protected:
   // Set of extra output files to be driven by the build.
   std::set<std::string> ExtraFiles;
 
+  // Set of custom command output files to be driven by the build.
+  std::set<std::string> CustomCommandOutputs;
+
   using MultipleOutputPairsType = std::map<std::string, std::string>;
   MultipleOutputPairsType MultipleOutputPairs;
   bool WriteMakeRule(std::ostream& os, const char* comment,
