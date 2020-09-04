@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGeneratedFileStream_h
-#define cmGeneratedFileStream_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -158,5 +157,3 @@ private:
   // The original locale of the stream (performs no encoding conversion).
   std::locale OriginalLocale;
 };
-
-#endif

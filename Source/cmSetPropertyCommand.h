@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmSetsPropertiesCommand_h
-#define cmSetsPropertiesCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -41,5 +40,3 @@ void MakeSourceFilePathsAbsoluteIfNeeded(
   std::vector<std::string>::const_iterator files_it_begin,
   std::vector<std::string>::const_iterator files_it_end, bool needed);
 }
-
-#endif

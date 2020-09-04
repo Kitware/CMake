@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCustomCommand_h
-#define cmCustomCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -114,5 +113,3 @@ private:
   bool CommandExpandLists = false;
   bool StdPipesUTF8 = false;
 };
-
-#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalNinjaGenerator_h
-#define cmGlobalNinjaGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -669,5 +668,3 @@ private:
   std::unique_ptr<cmGeneratedFileStream> CommonFileStream;
   std::unique_ptr<cmGeneratedFileStream> DefaultFileStream;
 };
-
-#endif // ! cmGlobalNinjaGenerator_h

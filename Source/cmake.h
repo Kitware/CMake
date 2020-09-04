@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmake_h
-#define cmake_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -782,5 +781,3 @@ private:
   F(cuda_std_14)                                                              \
   F(cuda_std_17)                                                              \
   F(cuda_std_20)
-
-#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmWIXPatch_h
-#define cmWIXPatch_h
+#pragma once
 
 #include <string>
 
@@ -33,5 +32,3 @@ private:
 
   cmWIXPatchParser::fragment_map_t Fragments;
 };
-
-#endif

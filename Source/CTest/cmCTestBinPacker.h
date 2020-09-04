@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestBinPacker_h
-#define cmCTestBinPacker_h
+#pragma once
 
 #include <cstddef>
 #include <map>
@@ -27,5 +26,3 @@ bool cmAllocateCTestResourcesRoundRobin(
 bool cmAllocateCTestResourcesBlock(
   const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations);
-
-#endif

@@ -1,8 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#ifndef cmStatePrivate_h
-#define cmStatePrivate_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -99,5 +98,3 @@ struct cmStateDetail::BuildsystemDirectoryStateType
 
   std::vector<cmStateSnapshot> Children;
 };
-
-#endif

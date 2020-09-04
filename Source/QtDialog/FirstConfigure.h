@@ -1,6 +1,5 @@
 
-#ifndef FirstConfigure_h
-#define FirstConfigure_h
+#pragma once
 
 #include <QWizard>
 #include <QWizardPage>
@@ -201,5 +200,3 @@ protected:
   ToolchainCompilerSetup* mToolchainCompilerSetupPage;
   QString mDefaultGenerator;
 };
-
-#endif // FirstConfigure_h

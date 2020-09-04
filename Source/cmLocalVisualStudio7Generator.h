@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmLocalVisualStudio7Generator_h
-#define cmLocalVisualStudio7Generator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -151,5 +150,3 @@ private:
   bool WindowsCEProject;
   std::unique_ptr<cmLocalVisualStudio7GeneratorInternals> Internal;
 };
-
-#endif

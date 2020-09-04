@@ -1594,8 +1594,7 @@ for a in ${KWSYS_FILES}; do
   cmsys_header_files="${cmsys_header_files} cmsys/${a}"
 done
 
-echo "#ifndef cmThirdParty_h" > "${cmake_bootstrap_dir}/cmThirdParty.h.tmp"
-echo "#define cmThirdParty_h" >> "${cmake_bootstrap_dir}/cmThirdParty.h.tmp"
+echo "#pragma once" > "${cmake_bootstrap_dir}/cmThirdParty.h.tmp"
 if test "x${bootstrap_system_libuv}" != "x"; then
   echo "#define CMAKE_USE_SYSTEM_LIBUV" >> "${cmake_bootstrap_dir}/cmThirdParty.h.tmp"
 fi
@@ -1605,7 +1604,6 @@ fi
 if test "x${bootstrap_system_librhash}" != "x"; then
   echo "#define CMAKE_USE_SYSTEM_LIBRHASH" >> "${cmake_bootstrap_dir}/cmThirdParty.h.tmp"
 fi
-echo "#endif" >> "${cmake_bootstrap_dir}/cmThirdParty.h.tmp"
 cmake_generate_file_tmp "${cmake_bootstrap_dir}/cmThirdParty.h" "${cmake_bootstrap_dir}/cmThirdParty.h.tmp"
 
 # Generate Makefile

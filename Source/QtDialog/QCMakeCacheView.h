@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef QCMakeCacheView_h
-#define QCMakeCacheView_h
+#pragma once
 
 #include "QCMake.h"
 #include <QItemDelegate>
@@ -164,5 +163,3 @@ protected:
   // properties changed by user via this delegate
   QSet<QCMakeProperty> mChanges;
 };
-
-#endif

@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_type_traits
-#define cm_type_traits
+#pragma once
 
 #include <type_traits> // IWYU pragma: export
 
@@ -59,5 +58,3 @@ using void_t = typename make_void<ArgTypes...>::type;
 #endif
 
 } // namespace cm
-
-#endif

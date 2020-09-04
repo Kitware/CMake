@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_codecvt_hxx
-#define cm_codecvt_hxx
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -62,5 +61,3 @@ private:
 
 #endif
 };
-
-#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmWIXShortcut_h
-#define cmWIXShortcut_h
+#pragma once
 
 #include <map>
 #include <set>
@@ -56,5 +55,3 @@ private:
   shortcut_type_map_t Shortcuts;
   shortcut_id_map_t EmptyIdMap;
 };
-
-#endif

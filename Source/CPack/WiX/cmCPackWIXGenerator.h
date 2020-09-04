@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackWIXGenerator_h
-#define cmCPackWIXGenerator_h
+#pragma once
 
 #include <map>
 #include <memory>
@@ -171,5 +170,3 @@ private:
 
   cmWIXSourceWriter::GuidType ComponentGuidType;
 };
-
-#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestResourceSpec_h
-#define cmCTestResourceSpec_h
+#pragma once
 
 #include <map>
 #include <string>
@@ -51,5 +50,3 @@ public:
   bool operator==(const cmCTestResourceSpec& other) const;
   bool operator!=(const cmCTestResourceSpec& other) const;
 };
-
-#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestSubmitHandler_h
-#define cmCTestSubmitHandler_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -77,5 +76,3 @@ private:
   std::set<std::string> Files;
   std::vector<std::string> HttpHeaders;
 };
-
-#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTest_h
-#define cmCTest_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -571,5 +570,3 @@ inline std::ostream& operator<<(std::ostream& os, const cmCTestLogWrite& c)
     (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
                   cmCTestLog_msg.str().c_str(), suppress);                    \
   } while (false)
-
-#endif

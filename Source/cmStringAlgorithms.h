@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmStringAlgorithms_h
-#define cmStringAlgorithms_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -306,5 +305,3 @@ bool cmStrToLong(std::string const& str, long* value);
  * integer */
 bool cmStrToULong(const char* str, unsigned long* value);
 bool cmStrToULong(std::string const& str, unsigned long* value);
-
-#endif

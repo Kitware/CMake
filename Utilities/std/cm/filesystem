@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_filesystem
-#define cm_filesystem
+#pragma once
 
 #include "cmSTL.hxx" // IWYU pragma: keep
 
@@ -1171,5 +1170,3 @@ std::size_t hash_value(const path& p) noexcept;
 
 } // namespace filesystem
 } // namespace cm
-
-#endif

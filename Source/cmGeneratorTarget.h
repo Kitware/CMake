@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGeneratorTarget_h
-#define cmGeneratorTarget_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -1093,5 +1092,3 @@ public:
                     cmGeneratorTarget const* t2) const;
   };
 };
-
-#endif

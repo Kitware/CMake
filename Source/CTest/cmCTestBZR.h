@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestBZR_h
-#define cmCTestBZR_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -50,5 +49,3 @@ private:
   friend class UpdateParser;
   friend class StatusParser;
 };
-
-#endif
