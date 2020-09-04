@@ -26,10 +26,12 @@
 #include "cmMakefileLibraryTargetGenerator.h"
 #include "cmMakefileUtilityTargetGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocationKind.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -50,6 +52,17 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
   this->NoRuleMessages = false;
   if (cmProp ruleStatus = cm->GetState()->GetGlobalProperty("RULE_MESSAGES")) {
     this->NoRuleMessages = cmIsOff(*ruleStatus);
+  }
+  switch (this->GeneratorTarget->GetPolicyStatusCMP0113()) {
+    case cmPolicies::WARN:
+    case cmPolicies::OLD:
+      this->CMP0113New = false;
+      break;
+    case cmPolicies::NEW:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      this->CMP0113New = true;
+      break;
   }
   MacOSXContentGenerator = cm::make_unique<MacOSXContentGeneratorType>(this);
 }
@@ -217,6 +230,12 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   this->GeneratorTarget->GetCustomCommands(customCommands,
                                            this->GetConfigName());
   for (cmSourceFile const* sf : customCommands) {
+    if (this->CMP0113New &&
+        !this->LocalGenerator->GetCommandsVisited(this->GeneratorTarget)
+           .insert(sf)
+           .second) {
+      continue;
+    }
     cmCustomCommandGenerator ccg(*sf->GetCustomCommand(),
                                  this->GetConfigName(), this->LocalGenerator);
     this->GenerateCustomRuleFile(ccg);
@@ -1336,6 +1355,22 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
   const std::vector<std::string>& outputs = ccg.GetOutputs();
   bool symbolic = this->WriteMakeRule(*this->BuildFileStream, nullptr, outputs,
                                       depends, commands);
+
+  // Symbolic inputs are not expected to exist, so add dummy rules.
+  if (this->CMP0113New && !depends.empty()) {
+    std::vector<std::string> no_depends;
+    std::vector<std::string> no_commands;
+    for (std::string const& dep : depends) {
+      if (cmSourceFile* dsf =
+            this->Makefile->GetSource(dep, cmSourceFileLocationKind::Known)) {
+        if (dsf->GetPropertyAsBool("SYMBOLIC")) {
+          this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
+                                              dep, no_depends, no_commands,
+                                              true);
+        }
+      }
+    }
+  }
 
   // If the rule has changed make sure the output is rebuilt.
   if (!symbolic) {

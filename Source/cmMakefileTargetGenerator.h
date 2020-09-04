@@ -196,6 +196,8 @@ protected:
   unsigned long NumberOfProgressActions;
   bool NoRuleMessages;
 
+  bool CMP0113New = false;
+
   // the path to the directory the build file is in
   std::string TargetBuildDirectory;
   std::string TargetBuildDirectoryFull;
