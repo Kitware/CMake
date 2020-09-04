@@ -10,6 +10,11 @@ set(__WINDOWS_EMBARCADERO 1)
 
 set(BORLAND 1)
 
+set(__pch_header_C "c-header")
+set(__pch_header_CXX "c++-header")
+set(__pch_header_OBJC "objective-c-header")
+set(__pch_header_OBJCXX "objective-c++-header")
+
 if("${CMAKE_${_lang}_COMPILER_VERSION}" VERSION_LESS 6.30)
   # Borland target type flags (bcc32 -h -t):
   set(_tW "-tW")       # -tW  GUI App         (implies -U__CONSOLE__)
@@ -123,7 +128,7 @@ macro(__embarcadero_language lang)
   if (EMBARCADERO)
     set(CMAKE_PCH_EXTENSION .pch)
     set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE> -Xclang -include -Xclang <PCH_HEADER>)
-    set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER>)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER> -x ${__pch_header_${lang}})
   endif()
 
   # Initial configuration flags.
