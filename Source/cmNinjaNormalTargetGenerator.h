@@ -21,18 +21,31 @@ public:
 private:
   std::string LanguageLinkerRule(const std::string& config) const;
   std::string LanguageLinkerDeviceRule(const std::string& config) const;
+  std::string LanguageLinkerCudaDeviceRule(const std::string& config) const;
+  std::string LanguageLinkerCudaDeviceCompileRule(
+    const std::string& config) const;
+  std::string LanguageLinkerCudaFatbinaryRule(const std::string& config) const;
 
   const char* GetVisibleTypeName() const;
   void WriteLanguagesRules(const std::string& config);
 
   void WriteLinkRule(bool useResponseFile, const std::string& config);
-  void WriteDeviceLinkRule(bool useResponseFile, const std::string& config);
+  void WriteDeviceLinkRules(const std::string& config);
+  void WriteNvidiaDeviceLinkRule(bool useResponseFile,
+                                 const std::string& config);
 
   void WriteLinkStatement(const std::string& config,
                           const std::string& fileConfig, bool firstForConfig);
   void WriteDeviceLinkStatement(const std::string& config,
                                 const std::string& fileConfig,
                                 bool firstForConfig);
+  void WriteDeviceLinkStatements(const std::string& config,
+                                 const std::vector<std::string>& architectures,
+                                 const std::string& output);
+  void WriteNvidiaDeviceLinkStatement(const std::string& config,
+                                      const std::string& fileConfig,
+                                      const std::string& outputDir,
+                                      const std::string& output);
 
   void WriteObjectLibStatement(const std::string& config);
 

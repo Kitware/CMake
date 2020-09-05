@@ -17,13 +17,12 @@ add_cuda_test_macro(Cuda.SeparableCompCXXOnly SeparableCompCXXOnly)
 add_cuda_test_macro(Cuda.Toolkit Toolkit)
 add_cuda_test_macro(Cuda.IncludePathNoToolkit IncludePathNoToolkit)
 add_cuda_test_macro(Cuda.SharedRuntimePlusToolkit SharedRuntimePlusToolkit)
+add_cuda_test_macro(Cuda.Complex CudaComplex)
+add_cuda_test_macro(Cuda.ProperLinkFlags ProperLinkFlags)
 
-# Separable compilation is currently only supported on NVCC. Disable tests
-# using it for other compilers.
 if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
-  add_cuda_test_macro(Cuda.Complex CudaComplex)
+  # Clang lacks __CUDACC_VER*__ defines.
   add_cuda_test_macro(Cuda.ProperDeviceLibraries ProperDeviceLibraries)
-  add_cuda_test_macro(Cuda.ProperLinkFlags ProperLinkFlags)
 endif()
 
 # The CUDA only ships the shared version of the toolkit libraries

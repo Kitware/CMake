@@ -141,6 +141,16 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       return replaceValues.DependencyFile;
     }
   }
+  if (replaceValues.Fatbinary) {
+    if (variable == "FATBINARY") {
+      return replaceValues.Fatbinary;
+    }
+  }
+  if (replaceValues.RegisterFile) {
+    if (variable == "REGISTER_FILE") {
+      return replaceValues.RegisterFile;
+    }
+  }
 
   if (replaceValues.Target) {
     if (variable == "TARGET_QUOTED") {

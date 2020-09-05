@@ -2,10 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileTargetGenerator.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdio>
+#include <iterator>
 #include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include <cm/memory>
@@ -25,6 +28,7 @@
 #include "cmMakefileExecutableTargetGenerator.h"
 #include "cmMakefileLibraryTargetGenerator.h"
 #include "cmMakefileUtilityTargetGenerator.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
@@ -1323,6 +1327,130 @@ void cmMakefileTargetGenerator::WriteObjectDependRules(
   }
 }
 
+void cmMakefileTargetGenerator::WriteDeviceLinkRule(
+  std::vector<std::string>& commands, const std::string& output)
+{
+  std::string architecturesStr =
+    this->GeneratorTarget->GetSafeProperty("CUDA_ARCHITECTURES");
+
+  if (cmIsOff(architecturesStr)) {
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 "CUDA_SEPARABLE_COMPILATION on Clang "
+                                 "requires CUDA_ARCHITECTURES to be set.");
+    return;
+  }
+
+  std::vector<std::string> architectures = cmExpandedList(architecturesStr);
+
+  // Ensure there are no duplicates.
+  const std::vector<std::string> linkDeps = [&]() -> std::vector<std::string> {
+    std::vector<std::string> deps;
+    this->AppendTargetDepends(deps, true);
+    this->GeneratorTarget->GetLinkDepends(deps, this->GetConfigName(), "CUDA");
+    std::copy(this->Objects.begin(), this->Objects.end(),
+              std::back_inserter(deps));
+
+    std::unordered_set<std::string> depsSet(deps.begin(), deps.end());
+    deps.clear();
+    std::copy(depsSet.begin(), depsSet.end(), std::back_inserter(deps));
+    return deps;
+  }();
+
+  const std::string objectDir = this->GeneratorTarget->ObjectDirectory;
+  const std::string relObjectDir =
+    this->LocalGenerator->MaybeConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), objectDir);
+
+  // Construct a list of files associated with this executable that
+  // may need to be cleaned.
+  std::vector<std::string> cleanFiles;
+  cleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+    this->LocalGenerator->GetCurrentBinaryDirectory(), output));
+
+  std::string profiles;
+  std::vector<std::string> fatbinaryDepends;
+  std::string registerFile = cmStrCat(objectDir, "cmake_cuda_register.h");
+
+  // Link device code for each architecture.
+  for (const std::string& architectureKind : architectures) {
+    // Clang always generates real code, so strip the specifier.
+    const std::string architecture =
+      architectureKind.substr(0, architectureKind.find('-'));
+    const std::string cubin =
+      cmStrCat(relObjectDir, "sm_", architecture, ".cubin");
+
+    profiles += cmStrCat(" -im=profile=sm_", architecture, ",file=", cubin);
+    fatbinaryDepends.emplace_back(cubin);
+
+    std::string registerFileCmd;
+
+    // The generated register file contains macros that when expanded register
+    // the device routines. Because the routines are the same for all
+    // architectures the register file will be the same too. Thus generate it
+    // only on the first invocation to reduce overhead.
+    if (fatbinaryDepends.size() == 1) {
+      std::string registerFileRel =
+        this->LocalGenerator->MaybeConvertToRelativePath(
+          this->LocalGenerator->GetCurrentBinaryDirectory(), registerFile);
+      registerFileCmd =
+        cmStrCat(" --register-link-binaries=", registerFileRel);
+      cleanFiles.push_back(registerFileRel);
+    }
+
+    std::string command = cmStrCat(
+      this->Makefile->GetRequiredDefinition("CMAKE_CUDA_DEVICE_LINKER"),
+      " -arch=sm_", architecture, registerFileCmd, " -o=$@ ",
+      cmJoin(linkDeps, " "));
+
+    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr, cubin,
+                                        linkDeps, { command }, false);
+  }
+
+  // Combine all architectures into a single fatbinary.
+  const std::string fatbinaryCommand =
+    cmStrCat(this->Makefile->GetRequiredDefinition("CMAKE_CUDA_FATBINARY"),
+             " -64 -cmdline=--compile-only -compress-all -link "
+             "--embedded-fatbin=$@",
+             profiles);
+  const std::string fatbinaryOutput =
+    cmStrCat(objectDir, "cmake_cuda_fatbin.h");
+  const std::string fatbinaryOutputRel =
+    this->LocalGenerator->MaybeConvertToRelativePath(
+      this->LocalGenerator->GetCurrentBinaryDirectory(), fatbinaryOutput);
+
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
+                                      fatbinaryOutputRel, fatbinaryDepends,
+                                      { fatbinaryCommand }, false);
+
+  // Compile the stub that registers the kernels and contains the fatbinaries.
+  cmRulePlaceholderExpander::RuleVariables vars;
+  vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
+  vars.CMTargetType =
+    cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()).c_str();
+
+  vars.Language = "CUDA";
+  vars.Object = output.c_str();
+  vars.Fatbinary = fatbinaryOutput.c_str();
+  vars.RegisterFile = registerFile.c_str();
+
+  std::string flags = this->GetFlags("CUDA", this->GetConfigName());
+  vars.Flags = flags.c_str();
+
+  std::string compileCmd = this->GetLinkRule("CMAKE_CUDA_DEVICE_LINK_COMPILE");
+  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
+    this->LocalGenerator->CreateRulePlaceholderExpander());
+  rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
+                                               compileCmd, vars);
+
+  commands.emplace_back(compileCmd);
+  this->LocalGenerator->WriteMakeRule(
+    *this->BuildFileStream, nullptr, output,
+    { cmStrCat(relObjectDir, "cmake_cuda_fatbin.h") }, commands, false);
+
+  // Clean all the possible executable names and symlinks.
+  this->CleanFiles.insert(cleanFiles.begin(), cleanFiles.end());
+}
+
 void cmMakefileTargetGenerator::GenerateCustomRuleFile(
   cmCustomCommandGenerator const& ccg)
 {
@@ -1579,10 +1707,11 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
 }
 
 void cmMakefileTargetGenerator::AppendTargetDepends(
-  std::vector<std::string>& depends)
+  std::vector<std::string>& depends, bool ignoreType)
 {
   // Static libraries never depend on anything for linking.
-  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY &&
+      !ignoreType) {
     return;
   }
 

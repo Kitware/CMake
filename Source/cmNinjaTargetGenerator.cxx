@@ -346,11 +346,13 @@ std::string cmNinjaTargetGenerator::ComputeIncludes(
 }
 
 cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps(
-  const std::string& linkLanguage, const std::string& config) const
+  const std::string& linkLanguage, const std::string& config,
+  bool ignoreType) const
 {
   // Static libraries never depend on other targets for linking.
-  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
-      this->GeneratorTarget->GetType() == cmStateEnums::OBJECT_LIBRARY) {
+  if (!ignoreType &&
+      (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
+       this->GeneratorTarget->GetType() == cmStateEnums::OBJECT_LIBRARY)) {
     return cmNinjaDeps();
   }
 
@@ -1009,6 +1011,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
   {
     std::vector<cmSourceFile const*> objectSources;
     this->GeneratorTarget->GetObjectSources(objectSources, config);
+
     for (cmSourceFile const* sf : objectSources) {
       this->WriteObjectBuildStatement(sf, config, fileConfig, firstForConfig);
     }

@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <vector>
 
 #include "cmMakefileTargetGenerator.h"
 
@@ -27,6 +28,10 @@ protected:
   void WriteModuleLibraryRules(bool relink);
 
   void WriteDeviceLibraryRules(const std::string& linkRule, bool relink);
+  void WriteNvidiaDeviceLibraryRules(const std::string& linkRuleVar,
+                                     bool relink,
+                                     std::vector<std::string>& commands,
+                                     const std::string& targetOutput);
   void WriteLibraryRules(const std::string& linkRule,
                          const std::string& extraFlags, bool relink);
   // MacOSX Framework support methods

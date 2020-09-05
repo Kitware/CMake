@@ -446,7 +446,7 @@ public:
   void GetTargetCompileFlags(cmGeneratorTarget* target,
                              std::string const& config,
                              std::string const& lang, std::string& flags,
-                             std::string const& arch = std::string());
+                             std::string const& arch);
   std::vector<BT<std::string>> GetTargetCompileFlags(
     cmGeneratorTarget* target, std::string const& config,
     std::string const& lang, std::string const& arch = std::string());

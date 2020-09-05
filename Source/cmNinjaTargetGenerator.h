@@ -113,7 +113,8 @@ protected:
 
   /// @return the list of link dependency for the given target @a target.
   cmNinjaDeps ComputeLinkDeps(const std::string& linkLanguage,
-                              const std::string& config) const;
+                              const std::string& config,
+                              bool ignoreType = false) const;
 
   /// @return the source file path for the given @a source.
   std::string GetSourceFilePath(cmSourceFile const* source) const;
