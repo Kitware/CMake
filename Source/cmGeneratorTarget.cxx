@@ -6472,21 +6472,16 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
   // Look for a target property defining the target output directory
   // based on the target type.
   std::string targetTypeName = this->GetOutputTargetType(artifact);
-  const char* propertyName = nullptr;
-  std::string propertyNameStr = targetTypeName;
-  if (!propertyNameStr.empty()) {
-    propertyNameStr += "_OUTPUT_DIRECTORY";
-    propertyName = propertyNameStr.c_str();
+  std::string propertyName;
+  if (!targetTypeName.empty()) {
+    propertyName = cmStrCat(targetTypeName, "_OUTPUT_DIRECTORY");
   }
 
   // Check for a per-configuration output directory target property.
   std::string configUpper = cmSystemTools::UpperCase(conf);
-  const char* configProp = nullptr;
-  std::string configPropStr = targetTypeName;
-  if (!configPropStr.empty()) {
-    configPropStr += "_OUTPUT_DIRECTORY_";
-    configPropStr += configUpper;
-    configProp = configPropStr.c_str();
+  std::string configProp;
+  if (!targetTypeName.empty()) {
+    configProp = cmStrCat(targetTypeName, "_OUTPUT_DIRECTORY_", configUpper);
   }
 
   // Select an output directory.
@@ -6547,22 +6542,17 @@ bool cmGeneratorTarget::ComputePDBOutputDir(const std::string& kind,
 {
   // Look for a target property defining the target output directory
   // based on the target type.
-  const char* propertyName = nullptr;
-  std::string propertyNameStr = kind;
-  if (!propertyNameStr.empty()) {
-    propertyNameStr += "_OUTPUT_DIRECTORY";
-    propertyName = propertyNameStr.c_str();
+  std::string propertyName;
+  if (!kind.empty()) {
+    propertyName = cmStrCat(kind, "_OUTPUT_DIRECTORY");
   }
   std::string conf = config;
 
   // Check for a per-configuration output directory target property.
   std::string configUpper = cmSystemTools::UpperCase(conf);
-  const char* configProp = nullptr;
-  std::string configPropStr = kind;
-  if (!configPropStr.empty()) {
-    configPropStr += "_OUTPUT_DIRECTORY_";
-    configPropStr += configUpper;
-    configProp = configPropStr.c_str();
+  std::string configProp;
+  if (!kind.empty()) {
+    configProp = cmStrCat(kind, "_OUTPUT_DIRECTORY_", configUpper);
   }
 
   // Select an output directory.
