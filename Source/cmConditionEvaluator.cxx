@@ -4,7 +4,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <functional>
 #include <sstream>
 #include <utility>
@@ -135,7 +134,7 @@ bool cmConditionEvaluator::IsTrue(
 }
 
 //=========================================================================
-const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
+cmProp cmConditionEvaluator::GetDefinitionIfUnquoted(
   cmExpandedCommandArgument const& argument) const
 {
   if ((this->Policy54Status != cmPolicies::WARN &&
@@ -162,17 +161,17 @@ const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
     }
   }
 
-  return cmToCStr(def);
+  return def;
 }
 
 //=========================================================================
-const char* cmConditionEvaluator::GetVariableOrString(
+cmProp cmConditionEvaluator::GetVariableOrString(
   const cmExpandedCommandArgument& argument) const
 {
-  const char* def = this->GetDefinitionIfUnquoted(argument);
+  cmProp def = this->GetDefinitionIfUnquoted(argument);
 
   if (!def) {
-    def = argument.c_str();
+    def = &argument.GetValue();
   }
 
   return def;
@@ -232,7 +231,7 @@ bool cmConditionEvaluator::GetBooleanValue(
   // Check for numbers.
   if (!arg.empty()) {
     char* end;
-    double d = strtod(arg.c_str(), &end);
+    double d = strtod(arg.GetValue().c_str(), &end);
     if (*end == '\0') {
       // The whole string is a number.  Use C conversion to bool.
       return static_cast<bool>(d);
@@ -240,7 +239,7 @@ bool cmConditionEvaluator::GetBooleanValue(
   }
 
   // Check definition.
-  const char* def = this->GetDefinitionIfUnquoted(arg);
+  cmProp def = this->GetDefinitionIfUnquoted(arg);
   return !cmIsOff(def);
 }
 
@@ -257,13 +256,13 @@ bool cmConditionEvaluator::GetBooleanValueOld(
     if (arg == "1") {
       return true;
     }
-    const char* def = this->GetDefinitionIfUnquoted(arg);
+    cmProp def = this->GetDefinitionIfUnquoted(arg);
     return !cmIsOff(def);
   }
   // Old GetVariableOrNumber behavior.
-  const char* def = this->GetDefinitionIfUnquoted(arg);
-  if (!def && atoi(arg.c_str())) {
-    def = arg.c_str();
+  cmProp def = this->GetDefinitionIfUnquoted(arg);
+  if (!def && atoi(arg.GetValue().c_str())) {
+    def = &arg.GetValue();
   }
   return !cmIsOff(def);
 }
@@ -435,36 +434,38 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       this->IncrementArguments(newArgs, argP1, argP2);
       // does a file exist
       if (this->IsKeyword(keyEXISTS, *arg) && argP1 != newArgs.end()) {
-        this->HandlePredicate(cmSystemTools::FileExists(argP1->c_str()),
+        this->HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()),
                               reducible, arg, newArgs, argP1, argP2);
       }
       // does a directory with this name exist
       if (this->IsKeyword(keyIS_DIRECTORY, *arg) && argP1 != newArgs.end()) {
-        this->HandlePredicate(cmSystemTools::FileIsDirectory(argP1->c_str()),
-                              reducible, arg, newArgs, argP1, argP2);
+        this->HandlePredicate(
+          cmSystemTools::FileIsDirectory(argP1->GetValue()), reducible, arg,
+          newArgs, argP1, argP2);
       }
       // does a symlink with this name exist
       if (this->IsKeyword(keyIS_SYMLINK, *arg) && argP1 != newArgs.end()) {
-        this->HandlePredicate(cmSystemTools::FileIsSymlink(argP1->c_str()),
+        this->HandlePredicate(cmSystemTools::FileIsSymlink(argP1->GetValue()),
                               reducible, arg, newArgs, argP1, argP2);
       }
       // is the given path an absolute path ?
       if (this->IsKeyword(keyIS_ABSOLUTE, *arg) && argP1 != newArgs.end()) {
-        this->HandlePredicate(cmSystemTools::FileIsFullPath(argP1->c_str()),
+        this->HandlePredicate(cmSystemTools::FileIsFullPath(argP1->GetValue()),
                               reducible, arg, newArgs, argP1, argP2);
       }
       // does a command exist
       if (this->IsKeyword(keyCOMMAND, *arg) && argP1 != newArgs.end()) {
         cmState::Command command =
-          this->Makefile.GetState()->GetCommand(argP1->c_str());
+          this->Makefile.GetState()->GetCommand(argP1->GetValue());
         this->HandlePredicate(command != nullptr, reducible, arg, newArgs,
                               argP1, argP2);
       }
       // does a policy exist
       if (this->IsKeyword(keyPOLICY, *arg) && argP1 != newArgs.end()) {
         cmPolicies::PolicyID pid;
-        this->HandlePredicate(cmPolicies::GetPolicyID(argP1->c_str(), pid),
-                              reducible, arg, newArgs, argP1, argP2);
+        this->HandlePredicate(
+          cmPolicies::GetPolicyID(argP1->GetValue().c_str(), pid), reducible,
+          arg, newArgs, argP1, argP2);
       }
       // does a target exist
       if (this->IsKeyword(keyTARGET, *arg) && argP1 != newArgs.end()) {
@@ -476,7 +477,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       if (this->Policy64Status != cmPolicies::OLD &&
           this->Policy64Status != cmPolicies::WARN) {
         if (this->IsKeyword(keyTEST, *arg) && argP1 != newArgs.end()) {
-          const cmTest* haveTest = this->Makefile.GetTest(argP1->c_str());
+          const cmTest* haveTest = this->Makefile.GetTest(argP1->GetValue());
           this->HandlePredicate(haveTest != nullptr, reducible, arg, newArgs,
                                 argP1, argP2);
         }
@@ -523,8 +524,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 {
   int reducible;
   std::string def_buf;
-  const char* def;
-  const char* def2;
+  cmProp def;
+  cmProp def2;
   do {
     reducible = 0;
     auto arg = newArgs.begin();
@@ -537,14 +538,14 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           IsKeyword(keyMATCHES, *argP1)) {
         def = this->GetDefinitionIfUnquoted(*arg);
         if (!def) {
-          def = arg->c_str();
+          def = &arg->GetValue();
         } else if (cmHasLiteralPrefix(arg->GetValue(), "CMAKE_MATCH_")) {
           // The string to match is owned by our match result variables.
           // Move it to our own buffer before clearing them.
-          def_buf = def;
-          def = def_buf.c_str();
+          def_buf = *def;
+          def = &def_buf;
         }
-        const char* rex = argP2->c_str();
+        const std::string& rex = argP2->GetValue();
         this->Makefile.ClearMatches();
         cmsys::RegularExpression regEntry;
         if (!regEntry.compile(rex)) {
@@ -554,7 +555,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           status = MessageType::FATAL_ERROR;
           return false;
         }
-        if (regEntry.find(def)) {
+        if (regEntry.find(*def)) {
           this->Makefile.StoreMatches(regEntry);
           *arg = cmExpandedCommandArgument("1", true);
         } else {
@@ -586,7 +587,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         double lhs;
         double rhs;
         bool result;
-        if (sscanf(def, "%lg", &lhs) != 1 || sscanf(def2, "%lg", &rhs) != 1) {
+        if (sscanf(def->c_str(), "%lg", &lhs) != 1 ||
+            sscanf(def2->c_str(), "%lg", &rhs) != 1) {
           result = false;
         } else if (*(argP1) == keyLESS) {
           result = (lhs < rhs);
@@ -610,7 +612,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
            this->IsKeyword(keySTREQUAL, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
-        int val = strcmp(def, def2);
+        int val = (*def).compare(*def2);
         bool result;
         if (*(argP1) == keySTRLESS) {
           result = (val < 0);
@@ -647,7 +649,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         } else { // version_equal
           op = cmSystemTools::OP_EQUAL;
         }
-        bool result = cmSystemTools::VersionCompare(op, def, def2);
+        bool result =
+          cmSystemTools::VersionCompare(op, def->c_str(), def2->c_str());
         this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
       }
 
@@ -669,12 +672,11 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           bool result = false;
 
           def = this->GetVariableOrString(*arg);
-          def2 = cmToCStr(this->Makefile.GetDefinition(argP2->GetValue()));
+          def2 = this->Makefile.GetDefinition(argP2->GetValue());
 
           if (def2) {
-            std::vector<std::string> list = cmExpandedList(def2, true);
-
-            result = cm::contains(list, def);
+            std::vector<std::string> list = cmExpandedList(*def2, true);
+            result = cm::contains(list, *def);
           }
 
           this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
