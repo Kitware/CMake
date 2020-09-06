@@ -75,6 +75,14 @@ public:
   int Value = 0;
 };
 
+#define ASSERT_TRUE(x)                                                        \
+  do {                                                                        \
+    if (!(x)) {                                                               \
+      std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << "\n"; \
+      return false;                                                           \
+    }                                                                         \
+  } while (false)
+
 // Certain builds of GCC generate false -Wmaybe-uninitialized warnings when
 // doing a release build with the system version of std::optional. These
 // warnings do not manifest when using our own cm::optional implementation.
@@ -368,42 +376,23 @@ static bool testDereference(std::vector<Event>& expected)
 
 static bool testHasValue(std::vector<Event>& expected)
 {
-  bool retval = true;
-
   const cm::optional<EventLogger> o1{ 4 };
   const cm::optional<EventLogger> o2{};
 
-  if (!o1.has_value()) {
-    std::cout << "o1 should have a value" << std::endl;
-    retval = false;
-  }
-
-  if (!o1) {
-    std::cout << "(bool)o1 should be true" << std::endl;
-    retval = false;
-  }
-
-  if (o2.has_value()) {
-    std::cout << "o2 should not have a value" << std::endl;
-    retval = false;
-  }
-
-  if (o2) {
-    std::cout << "(bool)o2 should be false" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(o1.has_value());
+  ASSERT_TRUE(o1);
+  ASSERT_TRUE(!o2.has_value());
+  ASSERT_TRUE(!o2);
 
   expected = {
     { Event::VALUE_CONSTRUCT, &*o1, nullptr, 4 },
     { Event::DESTRUCT, &*o1, nullptr, 4 },
   };
-  return retval;
+  return true;
 }
 
 static bool testValue(std::vector<Event>& expected)
 {
-  bool retval = true;
-
   cm::optional<EventLogger> o1{ 4 };
   const cm::optional<EventLogger> o2{ 5 };
   cm::optional<EventLogger> o3{};
@@ -418,10 +407,7 @@ static bool testValue(std::vector<Event>& expected)
   } catch (cm::bad_optional_access&) {
     thrown = true;
   }
-  if (!thrown) {
-    std::cout << "o3.value() did not throw" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(thrown);
 
   thrown = false;
   try {
@@ -429,10 +415,7 @@ static bool testValue(std::vector<Event>& expected)
   } catch (cm::bad_optional_access&) {
     thrown = true;
   }
-  if (!thrown) {
-    std::cout << "o4.value() did not throw" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(thrown);
 
   expected = {
     { Event::VALUE_CONSTRUCT, &*o1, nullptr, 4 },
@@ -442,13 +425,11 @@ static bool testValue(std::vector<Event>& expected)
     { Event::DESTRUCT, &*o2, nullptr, 5 },
     { Event::DESTRUCT, &*o1, nullptr, 4 },
   };
-  return retval;
+  return true;
 }
 
 static bool testValueOr()
 {
-  bool retval = true;
-
   const cm::optional<EventLogger> o1{ 4 };
   cm::optional<EventLogger> o2{ 5 };
   const cm::optional<EventLogger> o3{};
@@ -460,33 +441,19 @@ static bool testValueOr()
   EventLogger e4{ 9 };
 
   EventLogger r1 = o1.value_or(e1);
-  if (r1.Value != 4) {
-    std::cout << "r1.Value should be 4" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(r1.Value == 4);
   EventLogger r2 = std::move(o2).value_or(e2);
-  if (r2.Value != 5) {
-    std::cout << "r2.Value should be 5" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(r2.Value == 5);
   EventLogger r3 = o3.value_or(e3);
-  if (r3.Value != 8) {
-    std::cout << "r3.Value should be 8" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(r3.Value == 8);
   EventLogger r4 = std::move(o4).value_or(e4);
-  if (r4.Value != 9) {
-    std::cout << "r4.Value should be 9" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(r4.Value == 9);
 
-  return retval;
+  return true;
 }
 
 static bool testSwap(std::vector<Event>& expected)
 {
-  bool retval = true;
-
   cm::optional<EventLogger> o1{ 4 };
   auto const* v1 = &*o1;
   cm::optional<EventLogger> o2{};
@@ -494,66 +461,30 @@ static bool testSwap(std::vector<Event>& expected)
   o1.swap(o2);
   auto const* v2 = &*o2;
 
-  if (o1.has_value()) {
-    std::cout << "o1 should not have value" << std::endl;
-    retval = false;
-  }
-  if (!o2.has_value()) {
-    std::cout << "o2 should have value" << std::endl;
-    retval = false;
-  }
-  if (o2.value().Value != 4) {
-    std::cout << "value of o2 should be 4" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(!o1.has_value());
+  ASSERT_TRUE(o2.has_value());
+  ASSERT_TRUE(o2.value().Value == 4);
 
   o1.swap(o2);
 
-  if (!o1.has_value()) {
-    std::cout << "o1 should have value" << std::endl;
-    retval = false;
-  }
-  if (o1.value().Value != 4) {
-    std::cout << "value of o1 should be 4" << std::endl;
-    retval = false;
-  }
-  if (o2.has_value()) {
-    std::cout << "o2 should not have value" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(o1.has_value());
+  ASSERT_TRUE(o1.value().Value == 4);
+  ASSERT_TRUE(!o2.has_value());
 
   o2.emplace(5);
   o1.swap(o2);
 
-  if (!o1.has_value()) {
-    std::cout << "o1 should have value" << std::endl;
-    retval = false;
-  }
-  if (o1.value().Value != 5) {
-    std::cout << "value of o1 should be 5" << std::endl;
-    retval = false;
-  }
-  if (!o2.has_value()) {
-    std::cout << "o2 should not have value" << std::endl;
-    retval = false;
-  }
-  if (o2.value().Value != 4) {
-    std::cout << "value of o2 should be 4" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(o1.has_value());
+  ASSERT_TRUE(o1.value().Value == 5);
+  ASSERT_TRUE(o2.has_value());
+  ASSERT_TRUE(o2.value().Value == 4);
 
   o1.reset();
   o2.reset();
   o1.swap(o2);
 
-  if (o1.has_value()) {
-    std::cout << "o1 should not have value" << std::endl;
-    retval = false;
-  }
-  if (o2.has_value()) {
-    std::cout << "o2 should not have value" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(!o1.has_value());
+  ASSERT_TRUE(!o2.has_value());
 
   expected = {
     { Event::VALUE_CONSTRUCT, v1, nullptr, 4 },
@@ -566,22 +497,17 @@ static bool testSwap(std::vector<Event>& expected)
     { Event::DESTRUCT, v1, nullptr, 5 },
     { Event::DESTRUCT, v2, nullptr, 4 },
   };
-  return retval;
+  return true;
 }
 
 static bool testReset(std::vector<Event>& expected)
 {
-  bool retval = true;
-
   cm::optional<EventLogger> o{ 4 };
   auto const* v = &*o;
 
   o.reset();
 
-  if (o.has_value()) {
-    std::cout << "o should not have value" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(!o.has_value());
 
   o.reset();
 
@@ -589,7 +515,7 @@ static bool testReset(std::vector<Event>& expected)
     { Event::VALUE_CONSTRUCT, v, nullptr, 4 },
     { Event::DESTRUCT, v, nullptr, 4 },
   };
-  return retval;
+  return true;
 }
 
 static bool testEmplace(std::vector<Event>& expected)
@@ -630,8 +556,6 @@ static bool testMakeOptional(std::vector<Event>& expected)
 
 static bool testMemoryRange(std::vector<Event>& expected)
 {
-  bool retval = true;
-
   cm::optional<EventLogger> o{ 4 };
 
   auto* ostart = &o;
@@ -639,17 +563,14 @@ static bool testMemoryRange(std::vector<Event>& expected)
   auto* estart = &o.value();
   auto* eend = estart + 1;
 
-  if (static_cast<void*>(estart) < static_cast<void*>(ostart) ||
-      static_cast<void*>(eend) > static_cast<void*>(oend)) {
-    std::cout << "value is not within memory range of optional" << std::endl;
-    retval = false;
-  }
+  ASSERT_TRUE(static_cast<void*>(estart) >= static_cast<void*>(ostart) &&
+              static_cast<void*>(eend) <= static_cast<void*>(oend));
 
   expected = {
     { Event::VALUE_CONSTRUCT, &*o, nullptr, 4 },
     { Event::DESTRUCT, &*o, nullptr, 4 },
   };
-  return retval;
+  return true;
 }
 
 int testOptional(int /*unused*/, char* /*unused*/ [])
