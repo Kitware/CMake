@@ -13,6 +13,7 @@ set(CMakeLib_TESTS
   testCTestResourceGroups.cxx
   testGccDepfileReader.cxx
   testGeneratedFileStream.cxx
+  testJSONHelpers.cxx
   testRST.cxx
   testRange.cxx
   testOptional.cxx
