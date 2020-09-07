@@ -179,7 +179,7 @@ calling any of the functions provided by this module.
 
 .. variable:: ExternalData_URL_TEMPLATES
 
-  The ``ExternalData_URL_TEMPLATES`` may be set to provide a list of
+  The ``ExternalData_URL_TEMPLATES`` may be set to provide a list
   of URL templates using the placeholders ``%(algo)`` and ``%(hash)``
   in each template.  Data fetch rules try each URL template in order
   by substituting the hash algorithm name for ``%(algo)`` and the hash
