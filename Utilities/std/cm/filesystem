@@ -1150,6 +1150,8 @@ inline path::iterator path::end() const
   return iterator(this, true);
 }
 
+// Non-member functions
+// ====================
 bool operator==(const path::iterator& lhs, const path::iterator& rhs);
 
 inline bool operator!=(const path::iterator& lhs, const path::iterator& rhs)
@@ -1157,8 +1159,6 @@ inline bool operator!=(const path::iterator& lhs, const path::iterator& rhs)
   return !(lhs == rhs);
 }
 
-// Non-member functions
-// ====================
 inline void swap(path& lhs, path& rhs) noexcept
 {
   lhs.swap(rhs);

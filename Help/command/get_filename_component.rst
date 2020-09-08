@@ -44,6 +44,11 @@ Paths are returned with forward slashes and have no trailing slashes.  If the
 optional ``CACHE`` argument is specified, the result variable is added to the
 cache.
 
+.. note::
+
+  All previous sub-commands, except ``REALPATH``, has been superseded by
+  :command:`cmake_path` command.
+
 .. code-block:: cmake
 
   get_filename_component(<var> <FileName> PROGRAM [PROGRAM_ARGS <arg_var>] [CACHE])

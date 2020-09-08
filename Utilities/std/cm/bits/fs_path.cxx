@@ -847,7 +847,7 @@ cm::string_view path::get_filename_fragment(filename_fragment fragment) const
 {
   auto file = this->get_filename();
 
-  if (file == "." || file == ".." || file.empty()) {
+  if (file.empty() || file == "." || file == "..") {
     return fragment == filename_fragment::stem ? file : cm::string_view{};
   }
 

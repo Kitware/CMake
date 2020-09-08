@@ -1,0 +1,46 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set (path "a/./b/..")
+cmake_path(NORMAL_PATH path)
+if (NOT path STREQUAL "a/")
+  list (APPEND errors "'${path}' instead of 'a/'")
+endif()
+
+set (path "a/.///b/../")
+cmake_path(NORMAL_PATH path)
+if (NOT path STREQUAL "a/")
+  list (APPEND errors "'${path}' instead of 'a/'")
+endif()
+
+set (path "a/.///b/../")
+cmake_path(NORMAL_PATH path OUTPUT_VARIABLE output)
+if (NOT path STREQUAL "a/.///b/../")
+  list (APPEND errors "input changed unexpectedly")
+endif()
+if (NOT output STREQUAL "a/")
+  list (APPEND errors "'${output}' instead of 'a/'")
+endif()
+
+if (WIN32)
+  set (path "//host/./b/..")
+  cmake_path(NORMAL_PATH path)
+  if (NOT path STREQUAL "//host/")
+    list (APPEND errors "'${path}' instead of '//host/'")
+  endif()
+
+  set (path "//host/./b/../")
+  cmake_path(NORMAL_PATH path)
+  if (NOT path STREQUAL "//host/")
+    list (APPEND errors "'${path}' instead of '//host/'")
+  endif()
+
+  set (path "c://a/.///b/../")
+  cmake_path(NORMAL_PATH path)
+  if (NOT path STREQUAL "c:/a/")
+    list (APPEND errors "'${path}' instead of 'c:/a/'")
+  endif()
+endif()
+
+check_errors (NORMAL_PATH ${errors})

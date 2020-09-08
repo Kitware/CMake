@@ -3,6 +3,21 @@ file
 
 File manipulation command.
 
+This command is dedicated to file and path manipulation requiring access to the
+filesystem.
+
+For other path manipulation, handling only syntactic aspects, have a look at
+:command:`cmake_path` command.
+
+.. note::
+
+  The sub-commands `RELATIVE_PATH`_, `TO_CMAKE_PATH`_ and `TO_NATIVE_PATH`_ has
+  been superseded, respectively, by sub-commands
+  :ref:`RELATIVE_PATH <cmake_path-RELATIVE_PATH>`,
+  :ref:`CONVERT ... TO_CMAKE_PATH_LIST <cmake_path-TO_CMAKE_PATH_LIST>` and
+  :ref:`CONVERT ... TO_NATIVE_PATH_LIST <cmake_path-TO_NATIVE_PATH_LIST>` of
+  :command:`cmake_path` command.
+
 Synopsis
 ^^^^^^^^
 

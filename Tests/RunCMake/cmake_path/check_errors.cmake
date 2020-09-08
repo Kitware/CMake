@@ -1,0 +1,12 @@
+
+function (CHECK_ERRORS command)
+  set (errors ${ARGN})
+  if (errors)
+    string (LENGTH "${command}" length)
+    math (EXPR count "${length} + 2")
+    string (REPEAT " " ${count} shift)
+    list (TRANSFORM errors PREPEND "${shift}")
+    list (JOIN errors "\n" msg)
+    message (FATAL_ERROR "${command}: ${msg}")
+  endif()
+endfunction()

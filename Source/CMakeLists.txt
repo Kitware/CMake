@@ -182,6 +182,8 @@ set(SRCS
   cmCheckCustomOutputs.cxx
   cmCLocaleEnvironmentScope.h
   cmCLocaleEnvironmentScope.cxx
+  cmCMakePath.h
+  cmCMakePath.cxx
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
@@ -498,6 +500,8 @@ set(SRCS
   cmCMakeLanguageCommand.h
   cmCMakeMinimumRequired.cxx
   cmCMakeMinimumRequired.h
+  cmCMakePathCommand.h
+  cmCMakePathCommand.cxx
   cmCMakePolicyCommand.cxx
   cmCMakePolicyCommand.h
   cmConditionEvaluator.cxx
