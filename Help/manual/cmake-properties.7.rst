@@ -259,6 +259,7 @@ Properties on Targets
    /prop_tgt/INTERPROCEDURAL_OPTIMIZATION
    /prop_tgt/IOS_INSTALL_COMBINED
    /prop_tgt/ISPC_HEADER_DIRECTORY
+   /prop_tgt/ISPC_INSTRUCTION_SETS
    /prop_tgt/JOB_POOL_COMPILE
    /prop_tgt/JOB_POOL_LINK
    /prop_tgt/JOB_POOL_PRECOMPILE_HEADER

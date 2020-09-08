@@ -813,7 +813,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   std::string compilerLauncher;
   if (!compileCmds.empty() &&
       (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
-       lang == "OBJC" || lang == "OBJCXX")) {
+       lang == "ISPC" || lang == "OBJC" || lang == "OBJCXX")) {
     std::string const clauncher_prop = cmStrCat(lang, "_COMPILER_LAUNCHER");
     cmProp clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
     if (cmNonempty(clauncher)) {
@@ -1397,6 +1397,19 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     // Make sure ninja knows how to clean the generated header
     this->GetGlobalGenerator()->AddAdditionalCleanFile(ispcHeader, config);
+
+    auto ispcSuffixes =
+      detail::ComputeISPCObjectSuffixes(this->GeneratorTarget);
+    if (ispcSuffixes.size() > 1) {
+      auto ispcSideEfffectObjects = detail::ComputeISPCExtraObjects(
+        objectName, ispcDirectory, ispcSuffixes);
+
+      for (auto sideEffect : ispcSideEfffectObjects) {
+        sideEffect = this->ConvertToNinjaPath(sideEffect);
+        objBuild.ImplicitOuts.emplace_back(sideEffect);
+        this->GetGlobalGenerator()->AddAdditionalCleanFile(sideEffect, config);
+      }
+    }
 
     vars["ISPC_HEADER_FILE"] =
       this->GetLocalGenerator()->ConvertToOutputFormat(

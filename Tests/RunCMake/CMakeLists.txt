@@ -387,6 +387,7 @@ function(add_RunCMake_test_try_compile)
       CMAKE_CXX_COMPILER_VERSION
       CMAKE_CXX_STANDARD_DEFAULT
       CMake_TEST_CUDA
+      CMake_TEST_ISPC
       CMake_TEST_FILESYSTEM_1S
       CMAKE_OBJC_STANDARD_DEFAULT
       CMAKE_OBJCXX_STANDARD_DEFAULT
@@ -397,7 +398,7 @@ function(add_RunCMake_test_try_compile)
   endforeach()
   add_RunCMake_test(try_compile)
   set_property(TEST RunCMake.try_compile APPEND
-    PROPERTY LABELS "CUDA")
+    PROPERTY LABELS "CUDA;ISPC")
 endfunction()
 add_RunCMake_test_try_compile()
 
@@ -552,7 +553,10 @@ add_RunCMake_test(install -DNO_NAMELINK=${NO_NAMELINK} -DCYGWIN=${CYGWIN}
   -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
   -DCMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG=${CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG}
   -DCMAKE_EXECUTABLE_FORMAT=${CMAKE_EXECUTABLE_FORMAT}
+  -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
   )
+set_property(TEST RunCMake.install APPEND
+  PROPERTY LABELS "ISPC")
 
 add_RunCMake_test(file-GET_RUNTIME_DEPENDENCIES
   -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
@@ -630,6 +634,9 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   if(DEFINED CMake_TEST_CUDA)
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
   endif()
+  if(DEFINED CMake_TEST_ISPC)
+    list(APPEND CompilerLauncher_ARGS -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
+  endif()
   if(CMAKE_Fortran_COMPILER)
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_Fortran=1)
   endif()
@@ -638,7 +645,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   endif()
   add_RunCMake_test(CompilerLauncher)
   set_property(TEST RunCMake.CompilerLauncher APPEND
-    PROPERTY LABELS "CUDA")
+    PROPERTY LABELS "CUDA;ISPC")
   add_RunCMake_test(ctest_labels_for_subprojects)
   add_RunCMake_test(CompilerArgs)
 endif()

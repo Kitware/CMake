@@ -3302,6 +3302,27 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
   }
 }
 
+void cmGeneratorTarget::AddISPCTargetFlags(std::string& flags) const
+{
+  const std::string& property = this->GetSafeProperty("ISPC_INSTRUCTION_SETS");
+
+  // If ISPC_TARGET is false we don't add any architectures.
+  if (cmIsOff(property)) {
+    return;
+  }
+
+  std::string const& compiler =
+    this->Makefile->GetSafeDefinition("CMAKE_ISPC_COMPILER_ID");
+
+  if (compiler == "Intel") {
+    std::vector<std::string> targets;
+    cmExpandList(property, targets);
+    if (!targets.empty()) {
+      flags += cmStrCat(" --target=", cmWrap("", targets, "", ","));
+    }
+  }
+}
+
 void cmGeneratorTarget::AddCUDAToolkitFlags(std::string& flags) const
 {
   std::string const& compiler =
@@ -5067,6 +5088,11 @@ void cmGeneratorTarget::GetTargetObjectNames(
     assert(!map_it->second.empty());
     objects.push_back(map_it->second);
   }
+
+  auto ispcObjects = this->GetGeneratedISPCObjects(config);
+  for (std::string const& output : ispcObjects) {
+    objects.push_back(cmSystemTools::GetFilenameName(output));
+  }
 }
 
 bool cmGeneratorTarget::StrictTargetComparison::operator()(
@@ -6033,6 +6059,35 @@ std::vector<std::string> cmGeneratorTarget::GetGeneratedISPCHeaders(
   }
   auto iter = this->ISPCGeneratedHeaders.find(config_upper);
   if (iter == this->ISPCGeneratedHeaders.end()) {
+    return std::vector<std::string>{};
+  }
+  return iter->second;
+}
+
+void cmGeneratorTarget::AddISPCGeneratedObject(std::vector<std::string>&& objs,
+                                               std::string const& config)
+{
+  std::string config_upper;
+  if (!config.empty()) {
+    config_upper = cmSystemTools::UpperCase(config);
+  }
+  auto iter = this->ISPCGeneratedObjects.find(config_upper);
+  if (iter == this->ISPCGeneratedObjects.end()) {
+    this->ISPCGeneratedObjects.insert({ config_upper, objs });
+  } else {
+    iter->second.insert(iter->second.end(), objs.begin(), objs.end());
+  }
+}
+
+std::vector<std::string> cmGeneratorTarget::GetGeneratedISPCObjects(
+  std::string const& config) const
+{
+  std::string config_upper;
+  if (!config.empty()) {
+    config_upper = cmSystemTools::UpperCase(config);
+  }
+  auto iter = this->ISPCGeneratedObjects.find(config_upper);
+  if (iter == this->ISPCGeneratedObjects.end()) {
     return std::vector<std::string>{};
   }
   return iter->second;

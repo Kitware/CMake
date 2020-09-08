@@ -911,11 +911,16 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       linkBuild.ExplicitDeps.push_back(
         this->ConvertToNinjaPath(this->GetSourceFilePath(source)));
     }
-
     linkBuild.Outputs.push_back(vars["SWIFT_MODULE"]);
   } else {
     linkBuild.ExplicitDeps = this->GetObjects(config);
   }
+
+  std::vector<std::string> extraISPCObjects =
+    this->GetGeneratorTarget()->GetGeneratedISPCObjects(config);
+  std::transform(extraISPCObjects.begin(), extraISPCObjects.end(),
+                 std::back_inserter(linkBuild.ExplicitDeps), MapToNinjaPath());
+
   linkBuild.ImplicitDeps =
     this->ComputeLinkDeps(this->TargetLinkLanguage(config), config);
 
