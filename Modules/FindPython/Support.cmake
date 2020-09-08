@@ -9,6 +9,9 @@
 # Initial configuration
 #
 
+cmake_policy(PUSH)
+# numbers and boolean constants
+cmake_policy (SET CMP0012 NEW)
 # IN_LIST operator
 cmake_policy (SET CMP0057 NEW)
 
@@ -44,7 +47,6 @@ macro (_PYTHON_DISPLAY_FAILURE _PYTHON_MSG)
   set (${_PYTHON_PREFIX}_FOUND FALSE)
   string (TOUPPER "${_PYTHON_PREFIX}" _${_PYTHON_PREFIX}_UPPER_PREFIX)
   set (${_PYTHON_UPPER_PREFIX}_FOUND FALSE)
-  return()
 endmacro()
 
 
@@ -1022,6 +1024,9 @@ endfunction()
 if (DEFINED ${_PYTHON_PREFIX}_FIND_VERSION_MAJOR
     AND NOT ${_PYTHON_PREFIX}_FIND_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
   _python_display_failure ("Could NOT find ${_PYTHON_PREFIX}: Wrong major version specified is \"${${_PYTHON_PREFIX}_FIND_VERSION_MAJOR}\", but expected major version is \"${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}\"")
+
+  cmake_policy(POP)
+  return()
 endif()
 
 
@@ -2962,6 +2967,9 @@ endif()
 if (${_PYTHON_PREFIX}_VERSION_MAJOR AND
     NOT ${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
   _python_display_failure ("Could NOT find ${_PYTHON_PREFIX}: Found unsuitable major version \"${${_PYTHON_PREFIX}_VERSION_MAJOR}\", but required major version is exact version \"${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}\"")
+
+  cmake_policy(POP)
+  return()
 endif()
 
 unset (_${_PYTHON_PREFIX}_REASON_FAILURE)
@@ -3170,3 +3178,5 @@ if (DEFINED _${_PYTHON_PREFIX}_CMAKE_FIND_FRAMEWORK)
 else()
   unset (CMAKE_FIND_FRAMEWORK)
 endif()
+
+cmake_policy(POP)
