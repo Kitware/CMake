@@ -80,7 +80,15 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
 
 void cmLocalVisualStudio7Generator::Generate()
 {
-  this->WriteProjectFiles();
+  // Create the project file for each target.
+  for (cmGeneratorTarget* gt :
+       this->GlobalGenerator->GetLocalGeneratorTargetsInOrder(this)) {
+    if (!gt->IsInBuildSystem() || gt->GetProperty("EXTERNAL_MSPROJECT")) {
+      continue;
+    }
+    this->GenerateTarget(gt);
+  }
+
   this->WriteStampFiles();
 }
 
@@ -107,35 +115,6 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
             nullptr, true)) {
         l->AddSource(file->ResolveFullPath());
       }
-    }
-  }
-}
-
-// TODO
-// for CommandLine= need to repleace quotes with &quot
-// write out configurations
-void cmLocalVisualStudio7Generator::WriteProjectFiles()
-{
-  // If not an in source build, then create the output directory
-  if (this->GetCurrentBinaryDirectory() != this->GetSourceDirectory()) {
-    if (!cmSystemTools::MakeDirectory(this->GetCurrentBinaryDirectory())) {
-      cmSystemTools::Error("Error creating directory " +
-                           this->GetCurrentBinaryDirectory());
-    }
-  }
-
-  // Get the set of targets in this directory.
-  const auto& tgts = this->GetGeneratorTargets();
-
-  // Create the project file for each target.
-  for (const auto& l : tgts) {
-    if (!l->IsInBuildSystem()) {
-      continue;
-    }
-    // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
-    // so don't build a projectfile for it
-    if (!l->GetProperty("EXTERNAL_MSPROJECT")) {
-      this->CreateSingleVCProj(l->GetName(), l.get());
     }
   }
 }
@@ -178,9 +157,9 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
   }
 }
 
-void cmLocalVisualStudio7Generator::CreateSingleVCProj(
-  const std::string& lname, cmGeneratorTarget* target)
+void cmLocalVisualStudio7Generator::GenerateTarget(cmGeneratorTarget* target)
 {
+  std::string const& lname = target->GetName();
   cmGlobalVisualStudioGenerator* gg =
     static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
   this->FortranProject = gg->TargetIsFortranOnly(target);

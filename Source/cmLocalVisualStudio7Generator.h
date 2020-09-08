@@ -84,7 +84,7 @@ public:
                                         const char* path);
 
 protected:
-  void CreateSingleVCProj(const std::string& lname, cmGeneratorTarget* tgt);
+  virtual void GenerateTarget(cmGeneratorTarget* target);
 
 private:
   using Options = cmVS7GeneratorOptions;
@@ -92,7 +92,6 @@ private:
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const std::string& configName);
   void FixGlobalTargets();
-  void WriteProjectFiles();
   void WriteVCProjHeader(std::ostream& fout, const std::string& libName,
                          cmGeneratorTarget* tgt,
                          std::vector<cmSourceGroup>& sgs);

@@ -424,45 +424,12 @@ void cmGlobalXCodeGenerator::AddExtraIDETargets()
   }
 }
 
-void cmGlobalXCodeGenerator::ComputeTargetOrder()
-{
-  size_t index = 0;
-  auto const& lgens = this->GetLocalGenerators();
-  for (auto const& lgen : lgens) {
-    const auto& targets = lgen->GetGeneratorTargets();
-    for (const auto& gt : targets) {
-      this->ComputeTargetOrder(gt.get(), index);
-    }
-  }
-  assert(index == this->TargetOrderIndex.size());
-}
-
-void cmGlobalXCodeGenerator::ComputeTargetOrder(cmGeneratorTarget const* gt,
-                                                size_t& index)
-{
-  std::map<cmGeneratorTarget const*, size_t>::value_type value(gt, 0);
-  auto insertion = this->TargetOrderIndex.insert(value);
-  if (!insertion.second) {
-    return;
-  }
-  auto entry = insertion.first;
-
-  auto& deps = this->GetTargetDirectDepends(gt);
-  for (auto& d : deps) {
-    this->ComputeTargetOrder(d, index);
-  }
-
-  entry->second = index++;
-}
-
 void cmGlobalXCodeGenerator::Generate()
 {
   this->cmGlobalGenerator::Generate();
   if (cmSystemTools::GetErrorOccuredFlag()) {
     return;
   }
-
-  this->ComputeTargetOrder();
 
   for (auto keyVal : this->ProjectMap) {
     cmLocalGenerator* root = keyVal.second[0];
@@ -1243,12 +1210,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
   cmLocalGenerator* gen, std::vector<cmXCodeObject*>& targets)
 {
   this->SetCurrentLocalGenerator(gen);
-  std::vector<cmGeneratorTarget*> gts;
-  cm::append(gts, this->CurrentLocalGenerator->GetGeneratorTargets());
-  std::sort(gts.begin(), gts.end(),
-            [this](cmGeneratorTarget const* l, cmGeneratorTarget const* r) {
-              return this->TargetOrderIndex[l] < this->TargetOrderIndex[r];
-            });
+  std::vector<cmGeneratorTarget*> gts =
+    this->GetLocalGeneratorTargetsInOrder(gen);
   for (auto gtgt : gts) {
     if (!this->CreateXCodeTarget(gtgt, targets)) {
       return false;

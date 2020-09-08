@@ -100,12 +100,13 @@ void cmLocalUnixMakefileGenerator3::Generate()
   // Generate the rule files for each target.
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  for (const auto& target : this->GetGeneratorTargets()) {
-    if (!target->IsInBuildSystem()) {
+  for (cmGeneratorTarget* gt :
+       this->GlobalGenerator->GetLocalGeneratorTargetsInOrder(this)) {
+    if (!gt->IsInBuildSystem()) {
       continue;
     }
     std::unique_ptr<cmMakefileTargetGenerator> tg(
-      cmMakefileTargetGenerator::New(target.get()));
+      cmMakefileTargetGenerator::New(gt));
     if (tg) {
       tg->WriteRuleFiles();
       gg->RecordTargetProgress(tg.get());

@@ -115,8 +115,6 @@ public:
 
 protected:
   void AddExtraIDETargets() override;
-  void ComputeTargetOrder();
-  void ComputeTargetOrder(cmGeneratorTarget const* gt, size_t& index);
   void Generate() override;
 
 private:
@@ -303,7 +301,6 @@ private:
   std::string ObjectDirArch;
   std::string SystemName;
   std::string GeneratorToolset;
-  std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
   std::vector<std::string> EnabledLangs;
   std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
     CommandsVisited;

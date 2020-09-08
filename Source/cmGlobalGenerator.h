@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <iosfwd>
 #include <map>
 #include <memory>
@@ -263,6 +264,9 @@ public:
   {
     return this->LocalGenerators;
   }
+
+  std::vector<cmGeneratorTarget*> GetLocalGeneratorTargetsInOrder(
+    cmLocalGenerator* lg) const;
 
   cmMakefile* GetCurrentMakefile() const
   {
@@ -612,6 +616,10 @@ private:
   // Do not use this structure for looping over all directories.
   // Its order is not deterministic.
   LocalGeneratorMap LocalGeneratorSearchIndex;
+
+  void ComputeTargetOrder();
+  void ComputeTargetOrder(cmGeneratorTarget const* gt, size_t& index);
+  std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
 
   cmMakefile* TryCompileOuterMakefile;
   // If you add a new map here, make sure it is copied

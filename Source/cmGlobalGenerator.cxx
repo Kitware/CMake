@@ -1471,6 +1471,7 @@ bool cmGlobalGenerator::Compute()
   if (!this->ComputeTargetDepends()) {
     return false;
   }
+  this->ComputeTargetOrder();
 
   if (this->CheckTargetsForType()) {
     return false;
@@ -1579,6 +1580,50 @@ bool cmGlobalGenerator::ComputeTargetDepends()
     ctd.GetTargetDirectDepends(target, this->TargetDependencies[target]);
   }
   return true;
+}
+
+std::vector<cmGeneratorTarget*>
+cmGlobalGenerator::GetLocalGeneratorTargetsInOrder(cmLocalGenerator* lg) const
+{
+  std::vector<cmGeneratorTarget*> gts;
+  cm::append(gts, lg->GetGeneratorTargets());
+  std::sort(gts.begin(), gts.end(),
+            [this](cmGeneratorTarget const* l, cmGeneratorTarget const* r) {
+              return this->TargetOrderIndex.at(l) <
+                this->TargetOrderIndex.at(r);
+            });
+  return gts;
+}
+
+void cmGlobalGenerator::ComputeTargetOrder()
+{
+  size_t index = 0;
+  auto const& lgens = this->GetLocalGenerators();
+  for (auto const& lgen : lgens) {
+    const auto& targets = lgen->GetGeneratorTargets();
+    for (const auto& gt : targets) {
+      this->ComputeTargetOrder(gt.get(), index);
+    }
+  }
+  assert(index == this->TargetOrderIndex.size());
+}
+
+void cmGlobalGenerator::ComputeTargetOrder(cmGeneratorTarget const* gt,
+                                           size_t& index)
+{
+  std::map<cmGeneratorTarget const*, size_t>::value_type value(gt, 0);
+  auto insertion = this->TargetOrderIndex.insert(value);
+  if (!insertion.second) {
+    return;
+  }
+  auto entry = insertion.first;
+
+  auto& deps = this->GetTargetDirectDepends(gt);
+  for (auto& d : deps) {
+    this->ComputeTargetOrder(d, index);
+  }
+
+  entry->second = index++;
 }
 
 bool cmGlobalGenerator::QtAutoGen()
@@ -1760,6 +1805,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->GeneratorTargetSearchIndex.clear();
   this->MakefileSearchIndex.clear();
   this->LocalGeneratorSearchIndex.clear();
+  this->TargetOrderIndex.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
