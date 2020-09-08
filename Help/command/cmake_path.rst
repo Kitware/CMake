@@ -443,7 +443,7 @@ Conversion
 
 .. code-block:: cmake
 
-    cmake_path(CMAKE_PATH <path> [NORMALIZE] <input>])
+    cmake_path(CMAKE_PATH <path> [NORMALIZE] <input>)
 
 Converts a native ``<input>`` path into cmake-style path with forward-slashes
 (``/``). On Windows, the long filename marker is taken into account.
