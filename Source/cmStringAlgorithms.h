@@ -80,6 +80,17 @@ std::string cmJoin(Range const& rng, cm::string_view separator)
   return os.str();
 }
 
+/**
+ * Faster overloads for std::string ranges.
+ * If @a initial is provided, it prepends the resulted string without
+ * @a separator between them.
+ */
+std::string cmJoin(std::vector<std::string> const& rng,
+                   cm::string_view separator, cm::string_view initial = {});
+
+std::string cmJoin(cmStringRange const& rng, cm::string_view separator,
+                   cm::string_view initial = {});
+
 /** Extract tokens that are separated by any of the characters in @a sep.  */
 std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
 

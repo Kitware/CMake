@@ -11,6 +11,7 @@
 #include <memory>
 
 #include <cm/iterator>
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
@@ -534,11 +535,14 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  const std::string& variable = args[1];
+  auto const& variableName = args[1];
 
-  std::string value = status.GetMakefile().GetSafeDefinition(variable);
-  value += cmJoin(cmMakeRange(args).advance(2), std::string());
-  status.GetMakefile().AddDefinition(variable, value);
+  cm::string_view oldView{ status.GetMakefile().GetSafeDefinition(
+    variableName) };
+
+  auto const newValue = cmJoin(cmMakeRange(args).advance(2), {}, oldView);
+  status.GetMakefile().AddDefinition(variableName, newValue);
+
   return true;
 }
 
