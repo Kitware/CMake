@@ -46,8 +46,9 @@ cache.
 
 .. note::
 
-  All previous sub-commands, except ``REALPATH``, has been superseded by
-  :command:`cmake_path` command.
+  All previous sub-commands has been superseded by
+  :command:`cmake_path` command, except ``REALPATH`` now offered by
+  :ref:`file(REAL_PATH) <REAL_PATH>` command.
 
 .. code-block:: cmake
 

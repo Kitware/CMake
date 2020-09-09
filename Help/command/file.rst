@@ -49,6 +49,7 @@ Synopsis
     file(`CHMOD_RECURSE`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
 
   `Path Conversion`_
+    file(`REAL_PATH`_ <path> <out-var> [BASE_DIRECTORY <dir>])
     file(`RELATIVE_PATH`_ <out-var> <directory> <file>)
     file({`TO_CMAKE_PATH`_ | `TO_NATIVE_PATH`_} <path> <out-var>)
 
@@ -805,6 +806,19 @@ the ``<directories>..`` recursively.
 
 Path Conversion
 ^^^^^^^^^^^^^^^
+
+.. _REAL_PATH:
+
+.. code-block:: cmake
+
+  file(REAL_PATH <path> <out-var> [BASE_DIRECTORY <dir>])
+
+Compute the absolute path to an existing file or directory with symlinks
+resolved.
+
+If the provided ``<path>`` is a relative path, it is evaluated relative to the
+given base directory ``<dir>``. If no base directory is provided, the default
+base directory will be :variable:`CMAKE_CURRENT_SOURCE_DIR`.
 
 .. _RELATIVE_PATH:
 
