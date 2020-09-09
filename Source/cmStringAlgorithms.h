@@ -33,6 +33,13 @@ inline bool cmNonempty(std::string const* str)
   return str && !str->empty();
 }
 
+/** Returns length of a literal string.  */
+template <size_t N>
+constexpr size_t cmStrLen(const char (&/*str*/)[N])
+{
+  return N - 1;
+}
+
 /** Callable string comparison struct.  */
 struct cmStrCmp
 {
