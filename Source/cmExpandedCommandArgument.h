@@ -28,8 +28,6 @@ public:
 
   bool empty() const;
 
-  const char* c_str() const;
-
 private:
   std::string Value;
   bool Quoted = false;
