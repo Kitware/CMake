@@ -2682,17 +2682,29 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                   this->Makefile->GetSafeDefinition(
                     cmStrCat("CMAKE_", lang, "_FLAGS_", configUpper));
 
+                bool editAndContinueDebugInfo =
+                  langFlags.find("/ZI") != std::string::npos ||
+                  langFlags.find("-ZI") != std::string::npos;
+
+                bool enableDebuggingInformation =
+                  langFlags.find("/Zi") != std::string::npos ||
+                  langFlags.find("-Zi") != std::string::npos;
+
                 // MSVC 2008 is producing both .pdb and .idb files with /Zi.
-                if ((langFlags.find("/ZI") != std::string::npos ||
-                     langFlags.find("-ZI") != std::string::npos) ||
-                    (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                                   compilerVersion.c_str(),
-                                                   "16.0") &&
-                     compilerId == "MSVC")) {
+                bool msvc2008OrLess =
+                  cmSystemTools::VersionCompare(
+                    cmSystemTools::OP_LESS, compilerVersion.c_str(), "16.0") &&
+                  compilerId == "MSVC";
+                // but not when used via toolset -Tv90
+                if (this->Makefile->GetSafeDefinition(
+                      "CMAKE_VS_PLATFORM_TOOLSET") == "v90") {
+                  msvc2008OrLess = false;
+                }
+
+                if (editAndContinueDebugInfo || msvc2008OrLess) {
                   CopyPchCompilePdb(config, target, *ReuseFrom, reuseTarget,
                                     { ".pdb", ".idb" });
-                } else if ((langFlags.find("/Zi") != std::string::npos ||
-                            langFlags.find("-Zi") != std::string::npos)) {
+                } else if (enableDebuggingInformation) {
                   CopyPchCompilePdb(config, target, *ReuseFrom, reuseTarget,
                                     { ".pdb" });
                 }
