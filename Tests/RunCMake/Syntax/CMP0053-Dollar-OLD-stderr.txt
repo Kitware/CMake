@@ -19,6 +19,6 @@ CMake Error at CMP0053-Dollar-OLD.cmake:6 \(message\):
 
     -->\${\$}<--
 
-  syntax error, unexpected \$, expecting } \(7\)
+  syntax error, unexpected \$, expecting } \(6\)
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)$

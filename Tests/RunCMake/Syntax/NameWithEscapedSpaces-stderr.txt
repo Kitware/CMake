@@ -7,6 +7,6 @@
 
     \${var\\ with\\ escaped\\ space}
 
-  syntax error, unexpected cal_SYMBOL, expecting } \(7\)
+  syntax error, unexpected cal_SYMBOL, expecting } \(6\)
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)$

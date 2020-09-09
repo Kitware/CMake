@@ -205,23 +205,24 @@ bool cmCommandArgumentParserHelper::HandleEscapeSymbol(
 
 void cmCommandArgument_SetupEscapes(yyscan_t yyscanner, bool noEscapes);
 
-int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
+int cmCommandArgumentParserHelper::ParseString(std::string const& str,
+                                               int verb)
 {
-  if (!str) {
+  if (str.empty()) {
     return 0;
   }
+  this->InputSize = str.size();
   this->Verbose = verb;
-  this->InputBuffer = str;
-  this->InputBufferPos = 0;
-  this->CurrentLine = 0;
 
   this->Result.clear();
 
   yyscan_t yyscanner;
   cmCommandArgument_yylex_init(&yyscanner);
+  auto scanBuf = cmCommandArgument_yy_scan_string(str.c_str(), yyscanner);
   cmCommandArgument_yyset_extra(this, yyscanner);
   cmCommandArgument_SetupEscapes(yyscanner, this->NoEscapeMode);
   int res = cmCommandArgument_yyparse(yyscanner);
+  cmCommandArgument_yy_delete_buffer(scanBuf, yyscanner);
   cmCommandArgument_yylex_destroy(yyscanner);
   if (res != 0) {
     return 0;
@@ -241,25 +242,14 @@ void cmCommandArgumentParserHelper::CleanupParser()
   this->Variables.clear();
 }
 
-int cmCommandArgumentParserHelper::LexInput(char* buf, int maxlen)
-{
-  if (maxlen < 1) {
-    return 0;
-  }
-  if (this->InputBufferPos < this->InputBuffer.size()) {
-    buf[0] = this->InputBuffer[this->InputBufferPos++];
-    if (buf[0] == '\n') {
-      this->CurrentLine++;
-    }
-    return (1);
-  }
-  buf[0] = '\n';
-  return (0);
-}
-
 void cmCommandArgumentParserHelper::Error(const char* str)
 {
-  unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
+  auto pos = this->InputBufferPos;
+  auto const isEof = (this->InputSize < this->InputBufferPos);
+  if (!isEof) {
+    pos -= this->LastTokenLength;
+  }
+
   std::ostringstream ostr;
   ostr << str << " (" << pos << ")";
   this->SetError(ostr.str());
@@ -285,4 +275,10 @@ void cmCommandArgumentParserHelper::SetError(std::string const& msg)
   if (this->ErrorString.empty()) {
     this->ErrorString = msg;
   }
+}
+
+void cmCommandArgumentParserHelper::UpdateInputPosition(int const tokenLength)
+{
+  this->InputBufferPos += tokenLength;
+  this->LastTokenLength = tokenLength;
 }

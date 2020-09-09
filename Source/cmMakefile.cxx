@@ -2898,7 +2898,7 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
   parser.SetNoEscapeMode(noEscapes);
   parser.SetReplaceAtSyntax(replaceAt);
   parser.SetRemoveEmpty(removeEmpty);
-  int res = parser.ParseString(source.c_str(), 0);
+  int res = parser.ParseString(source, 0);
   const char* emsg = parser.GetError();
   MessageType mtype = MessageType::LOG;
   if (res && !emsg[0]) {
