@@ -86,6 +86,15 @@ void cmLocalVisualStudio7Generator::Generate()
     if (!gt->IsInBuildSystem() || gt->GetProperty("EXTERNAL_MSPROJECT")) {
       continue;
     }
+
+    auto& gtVisited = this->GetSourcesVisited(gt);
+    auto& deps = this->GlobalGenerator->GetTargetDirectDepends(gt);
+    for (auto& d : deps) {
+      // Take the union of visited source files of custom commands
+      auto depVisited = this->GetSourcesVisited(d);
+      gtVisited.insert(depVisited.begin(), depVisited.end());
+    }
+
     this->GenerateTarget(gt);
   }
 
@@ -1615,6 +1624,8 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
     this->WriteVCProjBeginGroup(fout, name.c_str(), "");
   }
 
+  auto& sourcesVisited = this->GetSourcesVisited(target);
+
   // Loop through each source in the source group.
   for (const cmSourceFile* sf : sourceFiles) {
     std::string source = sf->GetFullPath();
@@ -1638,7 +1649,10 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
       // build it, then it will.
       fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
       if (cmCustomCommand const* command = sf->GetCustomCommand()) {
-        this->WriteCustomRule(fout, configs, source.c_str(), *command, fcinfo);
+        if (sourcesVisited.insert(sf).second) {
+          this->WriteCustomRule(fout, configs, source.c_str(), *command,
+                                fcinfo);
+        }
       } else if (!fcinfo.FileConfigMap.empty()) {
         const char* aCompilerTool = "VCCLCompilerTool";
         std::string ppLang = "CXX";

@@ -28,19 +28,10 @@ public:
   void ReadAndStoreExternalGUID(const std::string& name,
                                 const char* path) override;
 
-  std::set<cmSourceFile const*>& GetSourcesVisited(
-    cmGeneratorTarget const* target)
-  {
-    return SourcesVisited[target];
-  };
-
 protected:
   const char* ReportErrorLabel() const override;
   bool CustomCommandUseLocal() const override { return true; }
 
 private:
   void GenerateTarget(cmGeneratorTarget* target) override;
-
-  std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
-    SourcesVisited;
 };
