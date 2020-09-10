@@ -1,7 +1,11 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-set(CMAKE_ISPC_OUTPUT_EXTENSION .o)
+if(UNIX)
+  set(CMAKE_ISPC_OUTPUT_EXTENSION .o)
+else()
+  set(CMAKE_ISPC_OUTPUT_EXTENSION .obj)
+endif()
 set(CMAKE_INCLUDE_FLAG_ISPC "-I")
 
 # Load compiler-specific information.
