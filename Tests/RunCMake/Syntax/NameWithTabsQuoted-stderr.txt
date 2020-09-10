@@ -7,6 +7,6 @@
 
     \${var	with	tab}
 
-  syntax error, unexpected cal_SYMBOL, expecting } \(15\)
+  syntax error, unexpected cal_SYMBOL, expecting } \(3\)
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)$

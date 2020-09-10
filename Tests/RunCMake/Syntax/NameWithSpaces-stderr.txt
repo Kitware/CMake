@@ -7,6 +7,6 @@
 
     \${var
 
-  syntax error, unexpected \$end, expecting } \(5\)
+  syntax error, unexpected \$end, expecting } \(6\)
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)$
