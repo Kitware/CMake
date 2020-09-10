@@ -333,6 +333,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0112,                                                     \
          "Target file component generator expressions do not add target "     \
          "dependencies.",                                                     \
+         3, 19, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0113,                                                     \
+         "Makefile generators do not repeat custom commands from target "     \
+         "dependencies.",                                                     \
          3, 19, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -367,7 +371,8 @@ class cmMakefile;
   F(CMP0104)                                                                  \
   F(CMP0105)                                                                  \
   F(CMP0108)                                                                  \
-  F(CMP0112)
+  F(CMP0112)                                                                  \
+  F(CMP0113)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

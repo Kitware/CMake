@@ -38,6 +38,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTargetDepend.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
@@ -105,6 +106,15 @@ void cmLocalUnixMakefileGenerator3::Generate()
     if (!gt->IsInBuildSystem()) {
       continue;
     }
+
+    auto& gtVisited = this->GetCommandsVisited(gt);
+    auto& deps = this->GlobalGenerator->GetTargetDirectDepends(gt);
+    for (auto& d : deps) {
+      // Take the union of visited source files of custom commands
+      auto depVisited = this->GetCommandsVisited(d);
+      gtVisited.insert(depVisited.begin(), depVisited.end());
+    }
+
     std::unique_ptr<cmMakefileTargetGenerator> tg(
       cmMakefileTargetGenerator::New(gt));
     if (tg) {
