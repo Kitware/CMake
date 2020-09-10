@@ -192,7 +192,7 @@ public:
   {
   public:
     // -- Parse Cache
-    bool ParseCacheChanged = false;
+    std::atomic<bool> ParseCacheChanged = ATOMIC_VAR_INIT(false);
     cmFileTime ParseCacheTime;
     ParseCacheT ParseCache;
 
@@ -1777,16 +1777,24 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
   {
     // Check dependency timestamps
     std::string const sourceDir = SubDirPrefix(sourceFile);
-    for (std::string const& dep : mapping.SourceFile->ParseData->Moc.Depends) {
+    auto& dependencies = mapping.SourceFile->ParseData->Moc.Depends;
+    for (auto it = dependencies.begin(); it != dependencies.end(); ++it) {
+      auto& dep = *it;
+
       // Find dependency file
       auto const depMatch = FindDependency(sourceDir, dep);
       if (depMatch.first.empty()) {
-        Log().Warning(GenT::MOC,
-                      cmStrCat(MessagePath(sourceFile), " depends on ",
-                               MessagePath(dep),
-                               " but the file does not exist."));
-        continue;
+        if (reason != nullptr) {
+          *reason =
+            cmStrCat("Generating ", MessagePath(outputFile), " from ",
+                     MessagePath(sourceFile), ", because its dependency ",
+                     MessagePath(dep), " vanished.");
+        }
+        dependencies.erase(it);
+        BaseEval().ParseCacheChanged = true;
+        return true;
       }
+
       // Test if dependency file is older
       if (outputFileTime.Older(depMatch.second)) {
         if (reason != nullptr) {
