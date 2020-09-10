@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "extra.ispc.h"
+#include "simple.ispc.h"
 
 #ifdef _WIN32
 #  define EXPORT __declspec(dllexport)
@@ -8,13 +8,13 @@
 #  define EXPORT
 #endif
 
-EXPORT int extra()
+EXPORT int simple()
 {
   float vin[16], vout[16];
   for (int i = 0; i < 16; ++i)
     vin[i] = i;
 
-  ispc::extra(vin, vout, 16);
+  ispc::simple(vin, vout, 16);
 
   for (int i = 0; i < 16; ++i)
     printf("%d: extra(%f) = %f\n", i, vin[i], vout[i]);

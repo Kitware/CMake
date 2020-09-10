@@ -1,15 +1,17 @@
-#include <stdio.h>
 
-#include "simple.ispc.h"
+
+#ifdef _WIN32
+#  define IMPORT __declspec(dllimport)
+#else
+#  define IMPORT
+#endif
+
+IMPORT int simple();
+int extra();
 
 int main()
 {
-  float vin[16], vout[16];
-  for (int i = 0; i < 16; ++i)
-    vin[i] = i;
-
-  ispc::simple(vin, vout, 16);
-
-  for (int i = 0; i < 16; ++i)
-    printf("%d: simple(%f) = %f\n", i, vin[i], vout[i]);
+  extra();
+  simple();
+  return 0;
 }

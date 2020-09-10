@@ -9,12 +9,14 @@ endif()
 
 add_library(ispc_objects1 STATIC extra.ispc extra.cxx)
 add_library(ispc_objects2 SHARED simple.ispc)
+target_sources(ispc_objects2 PRIVATE simple.cxx)
 
 set_target_properties(ispc_objects1 PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 set_target_properties(ispc_objects1 PROPERTIES ISPC_INSTRUCTION_SETS "sse2-i32x4;avx1-i32x16;avx2-i32x4")
 set_target_properties(ispc_objects2 PROPERTIES ISPC_INSTRUCTION_SETS "sse2-i32x4")
 
-target_link_libraries(ispc_objects2 PRIVATE ispc_objects1)
+target_link_libraries(ispc_objects2 PUBLIC ispc_objects1)
 
 add_executable(ISPCDynamicLibrary main.cxx)
 target_link_libraries(ISPCDynamicLibrary PUBLIC ispc_objects2)
