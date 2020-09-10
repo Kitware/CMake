@@ -14,7 +14,7 @@ Normal Libraries
 
   add_library(<name> [STATIC | SHARED | MODULE]
               [EXCLUDE_FROM_ALL]
-              [source1] [source2 ...])
+              [<source>...])
 
 Adds a library target called ``<name>`` to be built from the source files
 listed in the command invocation.  (The source files can be omitted here
@@ -69,7 +69,7 @@ Object Libraries
 
 .. code-block:: cmake
 
-  add_library(<name> OBJECT <src>...)
+  add_library(<name> OBJECT [<source>...])
 
 Creates an :ref:`Object Library <Object Libraries>`.  An object library
 compiles source files but does not archive or link their object files into a
