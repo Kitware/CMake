@@ -2,17 +2,17 @@
 
 .run_manually:
     rules:
+        - if: '$CI_MERGE_REQUEST_ID'
+          when: manual
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
           when: delayed
           start_in: 5 minutes
-        - if: '$CI_MERGE_REQUEST_ID'
-          when: manual
         - when: never
 
 .run_automatically:
     rules:
-        - if: '$CI_PROJECT_PATH == "cmake/cmake"'
-          when: on_success
         - if: '$CI_MERGE_REQUEST_ID'
+          when: on_success
+        - if: '$CI_PROJECT_PATH == "cmake/cmake"'
           when: on_success
         - when: never
