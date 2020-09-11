@@ -275,7 +275,7 @@ setting the following variables:
 
 ``Python2_LIBRARY``
   The path to the library. It will be used to compute the
-  variables ``Python2_LIBRARIES``, ``Python2_LIBRAY_DIRS`` and
+  variables ``Python2_LIBRARIES``, ``Python2_LIBRARY_DIRS`` and
   ``Python2_RUNTIME_LIBRARY_DIRS``.
 
 ``Python2_INCLUDE_DIR``

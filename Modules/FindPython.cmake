@@ -328,7 +328,7 @@ setting the following variables:
 
 ``Python_LIBRARY``
   The path to the library. It will be used to compute the
-  variables ``Python_LIBRARIES``, ``Python_LIBRAY_DIRS`` and
+  variables ``Python_LIBRARIES``, ``Python_LIBRARY_DIRS`` and
   ``Python_RUNTIME_LIBRARY_DIRS``.
 
 ``Python_INCLUDE_DIR``
