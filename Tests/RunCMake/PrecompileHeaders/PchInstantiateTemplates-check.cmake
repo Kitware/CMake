@@ -1,7 +1,7 @@
 file(STRINGS ${RunCMake_TEST_BINARY_DIR}/compile_commands.json empty_dir_commands
-     REGEX "command.*-fpch-instantiate-templates.*empty.dir/cmake_pch.h")
+     REGEX "command.*-fpch-instantiate-templates.*empty.dir/cmake_pch[A-Za-z0-9_.]*.h")
 file(STRINGS ${RunCMake_TEST_BINARY_DIR}/compile_commands.json foo_dir_commands
-     REGEX "command.*-fpch-instantiate-templates.*foo.dir/cmake_pch.h")
+     REGEX "command.*-fpch-instantiate-templates.*foo.dir/cmake_pch[A-Za-z0-9_.]*.h")
 
 list(LENGTH empty_dir_commands empty_dir_commands_size)
 list(LENGTH foo_dir_commands foo_dir_commands_size)
