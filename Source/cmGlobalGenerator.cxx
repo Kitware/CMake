@@ -1611,6 +1611,8 @@ bool cmGlobalGenerator::AddAutomaticSources()
 {
   for (const auto& lg : this->LocalGenerators) {
     lg->CreateEvaluationFileOutputs();
+  }
+  for (const auto& lg : this->LocalGenerators) {
     for (const auto& gt : lg->GetGeneratorTargets()) {
       if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
           gt->GetType() == cmStateEnums::UTILITY ||
