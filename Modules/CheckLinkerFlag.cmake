@@ -51,7 +51,7 @@ function(CHECK_LINKER_FLAG _lang _flag _var)
     return()
   endif()
 
-  include (Check${_lang}SourceCompiles)
+  include (CheckSourceCompiles)
 
   set(CMAKE_REQUIRED_LINK_OPTIONS "${_flag}")
 
@@ -74,7 +74,7 @@ function(CHECK_LINKER_FLAG _lang _flag _var)
   endif()
   check_compiler_flag_common_patterns(_common_patterns)
 
-  cmake_language (CALL check_${_lang}_source_compiles "${_source}" ${_var} ${_common_patterns})
+  check_source_compiles(${_lang} "${_source}" ${_var} ${_common_patterns})
 
   foreach(v IN LISTS _locale_vars)
     set(ENV{${v}} ${_locale_vars_saved_${v}})
