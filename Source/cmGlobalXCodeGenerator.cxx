@@ -8,6 +8,7 @@
 #include <cstring>
 #include <iomanip>
 #include <sstream>
+#include <unordered_set>
 #include <utility>
 
 #include <cm/memory>
@@ -280,30 +281,120 @@ bool cmGlobalXCodeGenerator::SetSystemName(std::string const& s,
   return this->cmGlobalGenerator::SetSystemName(s, mf);
 }
 
+namespace {
+cm::string_view cmXcodeBuildSystemString(cmGlobalXCodeGenerator::BuildSystem b)
+{
+  switch (b) {
+    case cmGlobalXCodeGenerator::BuildSystem::One:
+      return "1"_s;
+  }
+  return {};
+}
+}
+
 bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
                                                  bool build, cmMakefile* mf)
 {
-  if (ts.find_first_of(",=") != std::string::npos) {
-    std::ostringstream e;
-    /* clang-format off */
-    e <<
-      "Generator\n"
-      "  " << this->GetName() << "\n"
-      "does not recognize the toolset\n"
-      "  " << ts << "\n"
-      "that was specified.";
-    /* clang-format on */
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  if (!this->ParseGeneratorToolset(ts, mf)) {
     return false;
   }
-  this->GeneratorToolset = ts;
   if (build) {
     return true;
   }
   if (!this->GeneratorToolset.empty()) {
     mf->AddDefinition("CMAKE_XCODE_PLATFORM_TOOLSET", this->GeneratorToolset);
   }
+  mf->AddDefinition("CMAKE_XCODE_BUILD_SYSTEM",
+                    cmXcodeBuildSystemString(this->XcodeBuildSystem));
   return true;
+}
+
+bool cmGlobalXCodeGenerator::ParseGeneratorToolset(std::string const& ts,
+                                                   cmMakefile* mf)
+{
+  std::vector<std::string> const fields = cmTokenize(ts, ",");
+  auto fi = fields.cbegin();
+  if (fi == fields.cend()) {
+    return true;
+  }
+
+  // The first field may be the Xcode GCC_VERSION.
+  if (fi->find('=') == fi->npos) {
+    this->GeneratorToolset = *fi;
+    ++fi;
+  }
+
+  std::unordered_set<std::string> handled;
+
+  // The rest of the fields must be key=value pairs.
+  for (; fi != fields.cend(); ++fi) {
+    std::string::size_type pos = fi->find('=');
+    if (pos == fi->npos) {
+      /* clang-format off */
+      std::string const& e = cmStrCat(
+        "Generator\n"
+        "  ", this->GetName(), "\n"
+        "given toolset specification\n"
+        "  ", ts, "\n"
+        "that contains a field after the first ',' with no '='."
+        );
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e);
+      return false;
+    }
+    std::string const key = fi->substr(0, pos);
+    std::string const value = fi->substr(pos + 1);
+    if (!handled.insert(key).second) {
+      /* clang-format off */
+      std::string const& e = cmStrCat(
+        "Generator\n"
+        "  ", this->GetName(), "\n"
+        "given toolset specification\n"
+        "  ", ts, "\n"
+        "that contains duplicate field key '", key, "'."
+        );
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e);
+      return false;
+    }
+    if (!this->ProcessGeneratorToolsetField(key, value, mf)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool cmGlobalXCodeGenerator::ProcessGeneratorToolsetField(
+  std::string const& key, std::string const& value, cmMakefile* mf)
+{
+  if (key == "buildsystem") {
+    if (value == "1"_s) {
+      this->XcodeBuildSystem = BuildSystem::One;
+    } else {
+      /* clang-format off */
+      std::string const& e = cmStrCat(
+        "Generator\n"
+        "  ",  this->GetName(), "\n"
+        "toolset specification field\n"
+        "  buildsystem=", value, "\n"
+        "value is unkonwn.  It must be '1'."
+        );
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e);
+      return false;
+    }
+    return true;
+  }
+  /* clang-format off */
+  std::string const& e = cmStrCat(
+    "Generator\n"
+    "  ", this->GetName(), "\n"
+    "given toolset specification that contains invalid field '", key, "'."
+    );
+  /* clang-format on */
+  mf->IssueMessage(MessageType::FATAL_ERROR, e);
+  return false;
 }
 
 void cmGlobalXCodeGenerator::EnableLanguage(

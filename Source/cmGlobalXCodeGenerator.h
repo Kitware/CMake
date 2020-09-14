@@ -113,11 +113,20 @@ public:
                            cmMakefile* mf) override;
   void AppendFlag(std::string& flags, std::string const& flag) const;
 
+  enum class BuildSystem
+  {
+    One = 1,
+  };
+
 protected:
   void AddExtraIDETargets() override;
   void Generate() override;
 
 private:
+  bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
+  bool ProcessGeneratorToolsetField(std::string const& key,
+                                    std::string const& value, cmMakefile* mf);
+
   cmXCodeObject* CreateOrGetPBXGroup(cmGeneratorTarget* gtgt,
                                      cmSourceGroup* sg);
   cmXCodeObject* CreatePBXGroup(cmXCodeObject* parent,
@@ -253,6 +262,8 @@ protected:
   std::set<std::string> XCodeObjectIDs;
   std::vector<std::unique_ptr<cmXCodeObject>> XCodeObjects;
   cmXCodeObject* RootObject;
+
+  BuildSystem XcodeBuildSystem = BuildSystem::One;
 
 private:
   std::string const& GetXcodeBuildCommand();
