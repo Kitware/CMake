@@ -27,6 +27,7 @@ The following variables may be set to influence this module's behavior:
   possibilities.  List of vendors valid in this module:
 
   * ``Goto``
+  * ``FlexiBLAS``
   * ``OpenBLAS``
   * ``FLAME``
   * ``ATLAS PhiPACK``
@@ -542,6 +543,22 @@ if(BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
       sgemm
       ""
       "goto2"
+      ""
+      ""
+      ""
+      )
+  endif()
+endif()
+
+# FlexiBLAS? (http://www.mpi-magdeburg.mpg.de/mpcsc/software/FlexiBLAS/)
+if(BLA_VENDOR STREQUAL "FlexiBLAS" OR BLA_VENDOR STREQUAL "All")
+  if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "flexiblas"
       ""
       ""
       ""
