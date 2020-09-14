@@ -221,9 +221,9 @@ private:
   void SetGenerationRoot(cmLocalGenerator* root);
   void AddExtraTargets(cmLocalGenerator* root,
                        std::vector<cmLocalGenerator*>& gens);
-  cmXCodeObject* CreateBuildPhase(const char* name, const char* name2,
-                                  cmGeneratorTarget* target,
-                                  const std::vector<cmCustomCommand>&);
+  cmXCodeObject* CreateLegacyRunScriptBuildPhase(
+    const char* name, const char* name2, cmGeneratorTarget* target,
+    const std::vector<cmCustomCommand>&);
   void CreateReRunCMakeFile(cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*> const& gens);
 
