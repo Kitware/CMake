@@ -535,6 +535,7 @@ add_RunCMake_test(target_compile_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILE
 add_RunCMake_test(target_include_directories)
 add_RunCMake_test(target_sources)
 add_RunCMake_test(CheckSourceCompiles)
+add_RunCMake_test(CheckSourceRuns)
 add_RunCMake_test(CheckModules)
 add_RunCMake_test(CheckIPOSupported)
 if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)"

@@ -46,6 +46,7 @@ These modules are loaded using the :command:`include` command.
    /module/CheckPIESupported
    /module/CheckPrototypeDefinition
    /module/CheckSourceCompiles
+   /module/CheckSourceRuns
    /module/CheckStructHasMember
    /module/CheckSymbolExists
    /module/CheckTypeSize
