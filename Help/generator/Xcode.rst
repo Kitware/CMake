@@ -30,3 +30,6 @@ Supported pairs are:
 ``buildsystem=<variant>``
   Specify the buildsystem variant to use.
   See the :variable:`CMAKE_XCODE_BUILD_SYSTEM` variable for allowed values.
+
+  For example, to select the original build system under Xcode 12,
+  run :manual:`cmake(1)` with the option ``-T buildsystem=1``.

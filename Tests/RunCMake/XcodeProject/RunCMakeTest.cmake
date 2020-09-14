@@ -10,6 +10,10 @@ run_cmake(XcodeAttributeGenex)
 run_cmake(XcodeAttributeGenexError)
 run_cmake(XcodeGenerateTopLevelProjectOnly)
 
+if(XCODE_VERSION VERSION_GREATER_EQUAL 12)
+  run_cmake(XcodeDuplicateCustomCommand)
+endif()
+
 function(XcodeGenerateTopLevelProjectOnlyWithObjectLibrary)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeGenerateTopLevelProjectOnlyWithObjectLibrary-build)
   run_cmake(XcodeGenerateTopLevelProjectOnlyWithObjectLibrary)

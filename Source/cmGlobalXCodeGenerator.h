@@ -15,6 +15,7 @@
 #include "cmXCodeObject.h"
 
 class cmCustomCommand;
+class cmCustomCommandGenerator;
 class cmGeneratorTarget;
 class cmGlobalGeneratorFactory;
 class cmLocalGenerator;
@@ -116,6 +117,7 @@ public:
   enum class BuildSystem
   {
     One = 1,
+    Twelve = 12,
   };
 
 protected:
@@ -233,6 +235,18 @@ private:
   cmXCodeObject* CreateLegacyRunScriptBuildPhase(
     const char* name, const char* name2, cmGeneratorTarget* target,
     const std::vector<cmCustomCommand>&);
+  void CreateRunScriptBuildPhases(cmXCodeObject* buildPhases,
+                                  cmGeneratorTarget const* gt);
+  void CreateRunScriptBuildPhases(cmXCodeObject* buildPhases,
+                                  cmSourceFile const* sf,
+                                  cmGeneratorTarget const* gt,
+                                  std::set<cmSourceFile const*>& visited);
+  cmXCodeObject* CreateRunScriptBuildPhase(cmSourceFile const* sf,
+                                           cmGeneratorTarget const* gt,
+                                           cmCustomCommand const& cc);
+  cmXCodeObject* CreateRunScriptBuildPhase(
+    std::string const& name, std::vector<cmCustomCommand> const& commands);
+  std::string ConstructScript(cmCustomCommandGenerator const& ccg);
   void CreateReRunCMakeFile(cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*> const& gens);
 
@@ -315,4 +329,6 @@ private:
   std::vector<std::string> EnabledLangs;
   std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
     CommandsVisited;
+  std::map<cmSourceFile const*, std::set<cmGeneratorTarget const*>>
+    CustomCommandRoots;
 };

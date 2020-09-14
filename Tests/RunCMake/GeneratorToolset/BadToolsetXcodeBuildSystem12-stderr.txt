@@ -5,6 +5,6 @@ CMake Error at CMakeLists.txt:[0-9]+ \(project\):
 
   toolset specification field
 
-    buildsystem=bad
+    buildsystem=12
 
-  value is unkonwn.  It must be '1' or '12'\.$
+  is not allowed with Xcode [0-9.]+\.$
