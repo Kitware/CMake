@@ -3532,6 +3532,10 @@ if(BUILD_TESTING)
     add_subdirectory(CMakeTests)
   endif()
 
+  if(BUILD_QtDialog AND CMake_TEST_GUI AND NOT CMake_TEST_EXTERNAL_CMAKE)
+    add_subdirectory(CMakeGUI)
+  endif()
+
   # If this is not an in-source build, provide a target to wipe out
   # all the test build directories. This must come at the end after
   # all the above logic has finished adding to TEST_BUILD_DIRS
