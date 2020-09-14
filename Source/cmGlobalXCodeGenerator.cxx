@@ -1596,6 +1596,11 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
     postbuild.push_back(std::move(command));
   }
 
+  cmXCodeObject* legacyCustomCommandsBuildPhase = nullptr;
+  cmXCodeObject* preBuildPhase = nullptr;
+  cmXCodeObject* preLinkPhase = nullptr;
+  cmXCodeObject* postBuildPhase = nullptr;
+
   std::vector<cmSourceFile*> classes;
   if (!gtgt->GetConfigCommonSourceFiles(classes)) {
     return;
@@ -1608,17 +1613,17 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
       commands.push_back(*sourceFile->GetCustomCommand());
     }
   }
-  // create prebuild phase
-  cmXCodeObject* cmakeRulesBuildPhase = this->CreateLegacyRunScriptBuildPhase(
+  // create custom commands phase
+  legacyCustomCommandsBuildPhase = this->CreateLegacyRunScriptBuildPhase(
     "CMake Rules", "cmakeRulesBuildPhase", gtgt, commands);
   // create prebuild phase
-  cmXCodeObject* preBuildPhase = this->CreateLegacyRunScriptBuildPhase(
+  preBuildPhase = this->CreateLegacyRunScriptBuildPhase(
     "CMake PreBuild Rules", "preBuildCommands", gtgt, prebuild);
   // create prelink phase
-  cmXCodeObject* preLinkPhase = this->CreateLegacyRunScriptBuildPhase(
+  preLinkPhase = this->CreateLegacyRunScriptBuildPhase(
     "CMake PreLink Rules", "preLinkCommands", gtgt, prelink);
   // create postbuild phase
-  cmXCodeObject* postBuildPhase = this->CreateLegacyRunScriptBuildPhase(
+  postBuildPhase = this->CreateLegacyRunScriptBuildPhase(
     "CMake PostBuild Rules", "postBuildPhase", gtgt, postbuild);
 
   // The order here is the order they will be built in.
@@ -1628,8 +1633,8 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
   if (preBuildPhase) {
     buildPhases->AddObject(preBuildPhase);
   }
-  if (cmakeRulesBuildPhase) {
-    buildPhases->AddObject(cmakeRulesBuildPhase);
+  if (legacyCustomCommandsBuildPhase) {
+    buildPhases->AddObject(legacyCustomCommandsBuildPhase);
   }
   if (headerBuildPhase) {
     buildPhases->AddObject(headerBuildPhase);
