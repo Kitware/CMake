@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
+cmake_policy(SET CMP0114 OLD) # Test deprecated behavior.
 
 include(ExternalProject)
 
