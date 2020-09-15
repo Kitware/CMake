@@ -1,0 +1,7 @@
+^CMake Error at [^
+]*/Modules/ExternalProject.cmake:[0-9]+ \(message\):
+  ExternalProject 'proj' step 'update' is marked INDEPENDENT but depends on
+  step 'custom' that is not marked INDEPENDENT.
+Call Stack \(most recent call first\):
+  BadIndependentStep2.cmake:[0-9]+ \(ExternalProject_Add_Step\)
+  CMakeLists.txt:[0-9]+ \(include\)$
