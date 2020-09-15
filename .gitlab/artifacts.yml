@@ -60,6 +60,7 @@
             - build/Tests/RunCMake/
             - build/Tests/CMakeOnly/
             - build/Tests/CMakeTests/
+            - build/Tests/CMakeGUI/
 
             # CTest/CDash information.
             - build/Testing/
