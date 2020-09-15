@@ -79,3 +79,10 @@
         paths:
             # Take the install tree.
             - build/install/
+
+.cmake_doc_artifacts:
+    artifacts:
+        expire_in: 1d
+        paths:
+            # Take the install tree.
+            - build/install-doc/
