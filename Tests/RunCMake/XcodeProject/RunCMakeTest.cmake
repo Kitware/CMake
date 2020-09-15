@@ -108,6 +108,11 @@ XcodeRemoveExcessiveISystem()
 # Isolate device tests from host architecture selection.
 unset(ENV{CMAKE_OSX_ARCHITECTURES})
 
+if(XCODE_VERSION VERSION_GREATER_EQUAL 12)
+  # FIXME: Restore device tests and fix them for the Xcode "new build system"
+  return()
+endif()
+
 # Use a single build tree for a few tests without cleaning.
 
 if(NOT XCODE_VERSION VERSION_LESS 5)
