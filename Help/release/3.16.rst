@@ -178,16 +178,14 @@ Modules
 Autogen
 -------
 
-* When using :prop_tgt:`AUTOMOC`, CMake now generates the ``-p`` path prefix
+* When using :prop_tgt:`AUTOMOC`, the new :variable:`CMAKE_AUTOMOC_PATH_PREFIX`
+  variable or :prop_tgt:`AUTOMOC_PATH_PREFIX` target property may be enabled
+  to generate the ``-p`` path prefix
   option for ``moc``.  This ensures that ``moc`` output files are identical
   on different build setups (given, that the headers compiled by ``moc`` are
   in an :command:`include directory <target_include_directories>`).
   Also it ensures that ``moc`` output files will compile correctly when the
   source and/or build directory is a symbolic link.
-
-  The ``moc`` path prefix generation behavior can be configured by setting
-  the new :variable:`CMAKE_AUTOMOC_PATH_PREFIX` variable and/or
-  :prop_tgt:`AUTOMOC_PATH_PREFIX` target property.
 
 CTest
 -----
@@ -316,3 +314,11 @@ Changes made since CMake 3.16.0 include the following.
   :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target properties.
   Previously they would be places in ``*_CFLAGS_OTHER`` variables and
   :prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties.
+
+3.16.9
+------
+
+* The default value of :variable:`CMAKE_AUTOMOC_PATH_PREFIX` was changed to
+  ``OFF`` because this feature can break existing projects that have
+  identically named header files in different include directories.
+  This restores compatibility with behavior of CMake 3.15 and below.
