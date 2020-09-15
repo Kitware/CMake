@@ -72,6 +72,7 @@
         paths:
             # Any packages made.
             - build/cmake-*-Linux-x86_64.*
+            - build/cmake-*-Darwin-x86_64.*
 
 .cmake_test_artifacts:
     artifacts:
