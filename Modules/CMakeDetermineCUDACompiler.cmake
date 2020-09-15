@@ -300,7 +300,7 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     endforeach()
   endif()
 
-  # Find target directory. Account for crosscompiling.
+  # Find target directory when crosscompiling.
   if(CMAKE_CROSSCOMPILING)
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
       # Support for NVPACK
@@ -320,7 +320,10 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     if(EXISTS "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/targets/${_CUDA_TARGET_NAME}")
       set(_CUDA_TARGET_DIR "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/targets/${_CUDA_TARGET_NAME}")
     endif()
-  else()
+  endif()
+
+  # If not already set we can simply use the toolkit root or it's a scattered installation.
+  if(NOT _CUDA_TARGET_DIR)
     set(_CUDA_TARGET_DIR "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}")
   endif()
 
