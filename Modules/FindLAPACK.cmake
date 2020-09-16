@@ -26,6 +26,7 @@ The following variables may be set to influence this module's behavior:
   If set, checks only the specified vendor, if not set checks all the
   possibilities.  List of vendors valid in this module:
 
+  * ``FlexiBLAS``
   * ``OpenBLAS``
   * ``FLAME``
   * ``Intel10_32`` (intel mkl v10 32 bit, threaded code)
@@ -371,6 +372,22 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       cheev
       ""
       "goto2"
+      ""
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
+  endif()
+
+  # FlexiBLAS? (http://www.mpi-magdeburg.mpg.de/mpcsc/software/FlexiBLAS/)
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR STREQUAL "FlexiBLAS" OR BLA_VENDOR STREQUAL "All"))
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "flexiblas"
       ""
       ""
       ""
