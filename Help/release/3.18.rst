@@ -352,6 +352,7 @@ Changes made since CMake 3.18.0 include the following.
   ``OFF`` because this feature can break existing projects that have
   identically named header files in different include directories.
   This restores compatibility with behavior of CMake 3.15 and below.
+  The default was also changed to ``OFF`` in 3.16.9 and 3.17.5.
 
 * The :manual:`Compile Features <cmake-compile-features(7)>` functionality
   was updated for MSVC 19.27 as mentioned above (``c_restrict``).
