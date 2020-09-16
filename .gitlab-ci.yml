@@ -8,11 +8,15 @@ include:
     - local: .gitlab/os-macos.yml
     - local: .gitlab/os-windows.yml
 
+    # Post-build steps
+    - local: .gitlab/upload.yml
+
 stages:
     - build
     - test
     - package
     - test-ext
+    - upload
 
 ################################################################################
 # Job declarations
@@ -187,6 +191,17 @@ package:macos:
         - build:fedora31-sphinx-package
     needs:
         - build:fedora31-sphinx-package
+
+upload:macos:
+    extends:
+        - .rsync_upload
+        - .run_only_for_package
+    dependencies:
+        - package:macos
+    needs:
+        - package:macos
+    variables:
+        RSYNC_DESTINATION: dev
 
 # Windows builds
 
