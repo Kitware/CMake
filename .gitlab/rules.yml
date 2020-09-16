@@ -16,3 +16,9 @@
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
           when: on_success
         - when: never
+
+.run_only_for_package:
+    rules:
+        - if: '$CMAKE_PACKAGE == "true"'
+          when: on_success
+        - when: never

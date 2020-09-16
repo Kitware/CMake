@@ -72,6 +72,7 @@
         paths:
             # Any packages made.
             - build/cmake-*-Linux-x86_64.*
+            - build/cmake-*-Darwin-x86_64.*
 
 .cmake_test_artifacts:
     artifacts:
@@ -79,3 +80,10 @@
         paths:
             # Take the install tree.
             - build/install/
+
+.cmake_doc_artifacts:
+    artifacts:
+        expire_in: 1d
+        paths:
+            # Take the install tree.
+            - build/install-doc/

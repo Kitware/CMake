@@ -45,10 +45,8 @@ echo 'Failed to create \${name}.tar.gz'
 endfunction()
 
 write_docs_shell_script("create-${CMAKE_CREATE_VERSION}-docs.sh")
-write_rel_shell_script("create-${CMAKE_CREATE_VERSION}-macos.sh"   osx_release    ) # macOS x86_64
 
 message("Build docs first and then build for each platform:
  ./create-${CMAKE_CREATE_VERSION}-docs.sh    &&
- ./create-${CMAKE_CREATE_VERSION}-macos.sh   &&
  echo done
 ")

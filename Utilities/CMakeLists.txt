@@ -21,6 +21,11 @@ if(CMAKE_DOC_TARBALL)
   add_custom_target(documentation ALL DEPENDS ${dir}.stamp)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${dir}/
           DESTINATION . USE_SOURCE_PERMISSIONS)
+elseif (CMake_DOC_ARTIFACT_PREFIX)
+  # Undocumented option for CI usage to reuse already
+  # built documentation.
+  install(DIRECTORY ${CMake_DOC_ARTIFACT_PREFIX}/
+          DESTINATION . USE_SOURCE_PERMISSIONS)
 else()
   # Normal documentation build.
   add_subdirectory(Sphinx)

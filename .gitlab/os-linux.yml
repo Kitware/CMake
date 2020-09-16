@@ -54,6 +54,13 @@
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
         CMake_SKIP_INSTALL: 1
 
+.fedora31_sphinx_package:
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_sphinx_package
+        CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
+
 #### Build and test
 
 .fedora31_ninja:
