@@ -709,8 +709,8 @@ if(TARGET Doxygen::doxygen)
     set(_doxyfile_in       "${CMAKE_BINARY_DIR}/CMakeDoxyfile.in")
     set(_doxyfile_defaults "${CMAKE_BINARY_DIR}/CMakeDoxygenDefaults.cmake")
 
-    file(WRITE "${_doxyfile_in}"       ${_Doxygen_dne_header})
-    file(WRITE "${_doxyfile_defaults}" ${_Doxygen_dne_header})
+    set(_doxyfile_in_contents "")
+    set(_doxyfile_defaults_contents "")
 
     # Get strings containing a configuration key from the template Doxyfile
     # we obtained from this version of Doxygen. Because some options are split
@@ -742,19 +742,19 @@ if(TARGET Doxygen::doxygen)
         if(_Doxygen_param MATCHES "([A-Z][A-Z0-9_]+)( *)=( (.*))?")
             # Ok, this is a config key with a value
             if(CMAKE_MATCH_COUNT EQUAL 4)
-                file(APPEND "${_doxyfile_in}"
-                    "${CMAKE_MATCH_1}${CMAKE_MATCH_2}= @DOXYGEN_${CMAKE_MATCH_1}@\n")
+                string(APPEND _doxyfile_in_contents
+                       "${CMAKE_MATCH_1}${CMAKE_MATCH_2}= @DOXYGEN_${CMAKE_MATCH_1}@\n")
                 # Remove the backslashes we had to preserve to handle newlines
                 string(REPLACE "\\\n" "\n" _value "${CMAKE_MATCH_4}")
-                file(APPEND "${_doxyfile_defaults}"
+                string(APPEND _doxyfile_defaults_contents
 "if(NOT DEFINED DOXYGEN_${CMAKE_MATCH_1})
     set(DOXYGEN_${CMAKE_MATCH_1} ${_value})
 endif()
 ")
             # Ok, this is a config key with empty default value
             elseif(CMAKE_MATCH_COUNT EQUAL 2)
-                file(APPEND "${_doxyfile_in}"
-                    "${CMAKE_MATCH_1}${CMAKE_MATCH_2}= @DOXYGEN_${CMAKE_MATCH_1}@\n")
+                string(APPEND _doxyfile_in_contents
+                       "${CMAKE_MATCH_1}${CMAKE_MATCH_2}= @DOXYGEN_${CMAKE_MATCH_1}@\n")
             else()
                 message(AUTHOR_WARNING
 "Unexpected line format! Code review required!\nFault line: ${_Doxygen_param}")
@@ -764,6 +764,10 @@ endif()
 "Unexpected line format! Code review required!\nFault line: ${_Doxygen_param}")
         endif()
     endforeach()
+    file(WRITE "${_doxyfile_defaults}" "${_Doxygen_dne_header}"
+                                       "${_doxyfile_defaults_contents}")
+    file(WRITE "${_doxyfile_in}"       "${_Doxygen_dne_header}"
+                                       "${_doxyfile_in_contents}")
 
     # Ok, dumped defaults are not needed anymore...
     file(REMOVE "${_Doxygen_tpl}")
