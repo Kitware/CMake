@@ -1442,7 +1442,7 @@ bool cmSystemTools::CreateTar(const std::string& outFileName,
                               const std::vector<std::string>& files,
                               cmTarCompression compressType, bool verbose,
                               std::string const& mtime,
-                              std::string const& format)
+                              std::string const& format, int compressionLevel)
 {
 #if !defined(CMAKE_BOOTSTRAP)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
@@ -1472,7 +1472,8 @@ bool cmSystemTools::CreateTar(const std::string& outFileName,
       break;
   }
 
-  cmArchiveWrite a(fout, compress, format.empty() ? "paxr" : format);
+  cmArchiveWrite a(fout, compress, format.empty() ? "paxr" : format,
+                   compressionLevel);
 
   a.Open();
   a.SetMTime(mtime);

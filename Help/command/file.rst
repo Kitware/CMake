@@ -987,6 +987,7 @@ Archiving
     PATHS <paths>...
     [FORMAT <format>]
     [COMPRESSION <compression>]
+    [COMPRESSION_LEVEL <compression level>]
     [MTIME <mtime>]
     [VERBOSE])
 
@@ -1003,6 +1004,10 @@ The ``7zip`` and ``zip`` archive formats already imply a specific type of
 compression.  The other formats use no compression by default, but can be
 directed to do so with the ``COMPRESSION`` option.  Valid values for
 ``<compression>`` are ``None``, ``BZip2``, ``GZip``, ``XZ``, and ``Zstd``.
+
+Compression level can be specied by using ``COMPRESSION_LEVEL`` option.
+Compression level should be between 0-9. 0 is the default compression.
+``COMPRESSION`` option must be specified for ``COMPRESSION_LEVEL``.
 
 .. note::
   With ``FORMAT`` set to ``raw`` only one file will be compressed with the

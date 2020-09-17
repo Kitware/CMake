@@ -54,7 +54,7 @@ public:
 
   /** Construct with output stream to which to write archive.  */
   cmArchiveWrite(std::ostream& os, Compress c = CompressNone,
-                 std::string const& format = "paxr");
+                 std::string const& format = "paxr", int compressionLevel = 0);
 
   ~cmArchiveWrite();
 
