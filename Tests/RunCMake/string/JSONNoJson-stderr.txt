@@ -1,0 +1,4 @@
+CMake Error at JSONNoJson.cmake:1 \(string\):
+  string sub-command JSON missing json string argument.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
