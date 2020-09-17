@@ -7,7 +7,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
         # TODO: Factor this out so that each job selects the Xcode version to
         # use so that different versions can be tested in a single pipeline.
-        DEVELOPER_DIR: "/Applications/Xcode-11.5.app/Contents/Developer"
+        DEVELOPER_DIR: "/Applications/Xcode-11.7.app/Contents/Developer"
 
 ### Build and test
 
@@ -53,7 +53,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos
         - shell
-        - xcode-11.5
+        - xcode-11.7
         - nonconcurrent
 
 .macos_builder_ext_tags:
@@ -61,7 +61,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos
         - shell
-        - xcode-11.5
+        - xcode-11.7
         - concurrent
 
 ## macOS-specific scripts
