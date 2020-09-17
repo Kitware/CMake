@@ -788,23 +788,6 @@ if(BUILD_TESTING)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SubProject")
   endif()
 
-  # macro to add a test that will build a nightly release
-  # of CMake for given platform using the release scripts
-  macro(ADD_NIGHTLY_BUILD_TEST name script)
-    set(_TEST_DIR "${CMake_BINARY_DIR}/Tests/${name}")
-    file(MAKE_DIRECTORY "${_TEST_DIR}")
-    file(WRITE "${_TEST_DIR}/nightly-cmake.sh"
-      "set -e
-cd ${_TEST_DIR}
-${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=nightly -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
-${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGHTLY_RELEASES}'
-    ")
-    add_test(${name} /bin/sh ${_TEST_DIR}/nightly-cmake.sh)
-    if(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
-      set_tests_properties (${name} PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
-    endif()
-  endmacro()
-
   # add tests with more complex invocations
   add_test(Framework ${CMAKE_CTEST_COMMAND}
     --build-and-test

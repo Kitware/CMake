@@ -3,25 +3,7 @@
 
 subdirs(Doxygen)
 
-if(CMAKE_DOC_TARBALL)
-  # Undocumented option to extract and install pre-built documentation.
-  # This is intended for use during packaging of CMake itself.
-  if(CMAKE_DOC_TARBALL MATCHES "/([^/]+)\\.tar\\.gz$")
-    set(dir "${CMAKE_MATCH_1}")
-  else()
-    message(FATAL_ERROR "CMAKE_DOC_TARBALL must end in .tar.gz")
-  endif()
-  add_custom_command(
-    OUTPUT ${dir}.stamp
-    COMMAND cmake -E rm -rf ${dir}
-    COMMAND cmake -E tar xf ${CMAKE_DOC_TARBALL}
-    COMMAND cmake -E touch ${dir}.stamp
-    DEPENDS ${CMAKE_DOC_TARBALL}
-    )
-  add_custom_target(documentation ALL DEPENDS ${dir}.stamp)
-  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${dir}/
-          DESTINATION . USE_SOURCE_PERMISSIONS)
-elseif (CMake_DOC_ARTIFACT_PREFIX)
+if (CMake_DOC_ARTIFACT_PREFIX)
   # Undocumented option for CI usage to reuse already
   # built documentation.
   install(DIRECTORY ${CMake_DOC_ARTIFACT_PREFIX}/
