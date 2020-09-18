@@ -669,3 +669,18 @@ endif()
 # IMPORTED_LINK_INTERFACE_LANGUAGES entries should not be targets.
 add_library(C INTERFACE)
 add_library(CXX INTERFACE)
+
+#------------------------------------------------------------------------------
+# test export of targets built from sources named using $<CONFIG> generator-expression
+# FIXME: Enable test on Xcode generator when it supports per-config sources.
+if(NOT XCODE)
+  file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/Generated_$<CONFIG>.cpp" CONTENT "// content")
+  add_library(testStaticFromGeneratedSource STATIC)
+  target_sources(testStaticFromGeneratedSource PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Generated_$<CONFIG>.cpp")
+
+  add_library(testLibFromGeneratedSource SHARED empty.cpp)
+  target_link_libraries(testLibFromGeneratedSource PRIVATE testStaticFromGeneratedSource)
+
+  install(TARGETS testLibFromGeneratedSource EXPORT testLibFromGeneratedSource_Export)
+  install(EXPORT testLibFromGeneratedSource_Export DESTINATION lib)
+endif()
