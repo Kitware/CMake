@@ -2,6 +2,8 @@
 
 .run_manually:
     rules:
+        - if: '$CMAKE_CI_PACKAGE == "true"'
+          when: never
         - if: '$CI_MERGE_REQUEST_ID'
           when: manual
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
@@ -11,6 +13,8 @@
 
 .run_automatically:
     rules:
+        - if: '$CMAKE_CI_PACKAGE == "true"'
+          when: never
         - if: '$CI_MERGE_REQUEST_ID'
           when: on_success
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
@@ -19,6 +23,6 @@
 
 .run_only_for_package:
     rules:
-        - if: '$CMAKE_PACKAGE == "true"'
+        - if: '$CMAKE_CI_PACKAGE == "true"'
           when: on_success
         - when: never
