@@ -365,6 +365,12 @@ bool TryParseInteger(cmExecutionStatus& status, const std::string& str, int& i)
     status.SetError(e.str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
+  } catch (std::out_of_range&) {
+    std::ostringstream e;
+    e << "Integer out of range: '" << str << "'";
+    status.SetError(e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
   }
 
   return true;
