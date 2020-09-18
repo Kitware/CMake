@@ -1,0 +1,7 @@
+  input: CUSTOM_COMMAND(
+    [^
+]*)*
+    \|\| exe_autogen_timestamp_deps:Debug(
+    [^
+]*)*
+  outputs:

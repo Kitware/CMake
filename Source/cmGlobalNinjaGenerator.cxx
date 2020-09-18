@@ -1222,6 +1222,7 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
     for (auto const& dep_target : this->GetTargetDirectDepends(target)) {
       if (!dep_target->IsInBuildSystem() ||
           (target->GetType() != cmStateEnums::UTILITY &&
+           dep_target->GetType() != cmStateEnums::UTILITY &&
            this->EnableCrossConfigBuild() && !dep_target.IsCross())) {
         continue;
       }
