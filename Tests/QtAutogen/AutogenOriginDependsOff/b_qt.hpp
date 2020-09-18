@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <config.hpp>
+#include <config_b.hpp>
 
 #include <QObject>
 
