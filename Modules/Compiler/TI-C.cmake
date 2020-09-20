@@ -37,3 +37,20 @@ else()
   set(CMAKE_C90_EXTENSION_COMPILE_OPTION "--relaxed_ansi")
 
 endif()
+
+
+# Architecture specific
+
+if("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
+  __compiler_check_default_language_standard(C 2.0 90)
+
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "MSP430")
+  __compiler_check_default_language_standard(C 3.0 90)
+
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "TMS320C28x")
+  __compiler_check_default_language_standard(C 4.1 90)
+
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "TMS320C6x")
+  __compiler_check_default_language_standard(C 4.45 90)
+
+endif()

@@ -8,6 +8,8 @@ if(__COMPILER_TI)
 endif()
 set(__COMPILER_TI 1)
 
+include(Compiler/CMakeCommonCompilerMacros)
+
 set(__COMPILER_TI_SOURCE_FLAG_C   "--c_file")
 set(__COMPILER_TI_SOURCE_FLAG_CXX "--cpp_file")
 set(__COMPILER_TI_SOURCE_FLAG_ASM "--asm_file")
