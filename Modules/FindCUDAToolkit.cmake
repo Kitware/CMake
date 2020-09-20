@@ -668,16 +668,14 @@ else()
   unset(_CUDAToolkit_version_file)
 endif()
 
-# Handle cross compilation
+# Find target directory when crosscompiling.
 if(CMAKE_CROSSCOMPILING)
   if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
     # Support for NVPACK
     set(CUDAToolkit_TARGET_NAME "armv7-linux-androideabi")
   elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-    # Support for arm cross compilation
     set(CUDAToolkit_TARGET_NAME "armv7-linux-gnueabihf")
   elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-    # Support for aarch64 cross compilation
     if(ANDROID_ARCH_NAME STREQUAL "arm64")
       set(CUDAToolkit_TARGET_NAME "aarch64-linux-androideabi")
     else()
@@ -698,7 +696,10 @@ if(CMAKE_CROSSCOMPILING)
     # PATh
     set(_CUDAToolkit_Pop_ROOT_PATH True)
   endif()
-else()
+endif()
+
+# If not already set we can simply use the toolkit root or it's a scattered installation.
+if(NOT CUDAToolkit_TARGET_DIR)
   # Not cross compiling
   set(CUDAToolkit_TARGET_DIR "${CUDAToolkit_ROOT_DIR}")
   # Now that we have the real ROOT_DIR, find components inside it.
