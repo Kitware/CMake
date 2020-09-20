@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.18)
 project(ProperDeviceLibraries CXX CUDA)
 
 set(CMAKE_CUDA_STANDARD 11)
-set(CMAKE_CUDA_ARCHITECTURES 35)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)

@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.13)
-project (DontResolveDeviceSymbols CUDA)
+cmake_minimum_required(VERSION 3.18)
+project(DontResolveDeviceSymbols CUDA)
 
 # Find nm and dumpbin
 if(CMAKE_NM)
@@ -26,7 +26,6 @@ endif()
 # Verify that we can't use those device symbols from anything
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
-set(CMAKE_CUDA_ARCHITECTURES 30 50)
 set(CMAKE_CUDA_RESOLVE_DEVICE_SYMBOLS OFF)
 
 add_library(CUDANoDeviceResolve SHARED file1.cu)
