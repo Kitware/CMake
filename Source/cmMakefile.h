@@ -1028,8 +1028,8 @@ private:
 
   void DoGenerate(cmLocalGenerator& lg);
 
-  void ReadListFile(cmListFile const& listFile,
-                    const std::string& filenametoread);
+  void RunListFile(cmListFile const& listFile,
+                   const std::string& filenametoread);
 
   bool ParseDefineFlag(std::string const& definition, bool remove);
 
