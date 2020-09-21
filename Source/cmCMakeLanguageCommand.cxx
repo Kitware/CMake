@@ -28,6 +28,37 @@ std::array<cm::static_string_view, 12> InvalidCommands{
   "foreach"_s, "endforeach"_s
   } // clang-format on
 };
+
+bool cmCMakeLanguageCommandEVAL(std::vector<cmListFileArgument> const& args,
+                                cmExecutionStatus& status)
+{
+  cmMakefile& makefile = status.GetMakefile();
+  cmListFileContext context = makefile.GetBacktrace().Top();
+  std::vector<std::string> expandedArgs;
+  makefile.ExpandArguments(args, expandedArgs);
+
+  if (expandedArgs.size() < 2) {
+    status.SetError("called with incorrect number of arguments");
+    return false;
+  }
+
+  if (expandedArgs[1] != "CODE") {
+    auto code_iter =
+      std::find(expandedArgs.begin() + 2, expandedArgs.end(), "CODE");
+    if (code_iter == expandedArgs.end()) {
+      status.SetError("called without CODE argument");
+    } else {
+      status.SetError(
+        "called with unsupported arguments between EVAL and CODE arguments");
+    }
+    return false;
+  }
+
+  const std::string code =
+    cmJoin(cmMakeRange(expandedArgs.begin() + 2, expandedArgs.end()), " ");
+  return makefile.ReadListFileAsString(
+    code, cmStrCat(context.FilePath, ":", context.Line, ":EVAL"));
+}
 }
 
 bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
@@ -105,30 +136,7 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
 
     result = makefile.ExecuteCommand(func, status);
   } else if (dispatchExpandedArgs[0] == "EVAL") {
-    std::vector<std::string> expandedArgs;
-    makefile.ExpandArguments(args, expandedArgs);
-
-    if (expandedArgs.size() < 2) {
-      status.SetError("called with incorrect number of arguments");
-      return false;
-    }
-
-    if (expandedArgs[1] != "CODE") {
-      auto code_iter =
-        std::find(expandedArgs.begin() + 2, expandedArgs.end(), "CODE");
-      if (code_iter == expandedArgs.end()) {
-        status.SetError("called without CODE argument");
-      } else {
-        status.SetError(
-          "called with unsupported arguments between EVAL and CODE arguments");
-      }
-      return false;
-    }
-
-    const std::string code =
-      cmJoin(cmMakeRange(expandedArgs.begin() + 2, expandedArgs.end()), " ");
-    result = makefile.ReadListFileAsString(
-      code, cmStrCat(context.FilePath, ":", context.Line, ":EVAL"));
+    return cmCMakeLanguageCommandEVAL(args, status);
   } else {
     status.SetError("called with unknown meta-operation");
   }
