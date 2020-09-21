@@ -1,0 +1,4 @@
+^CMake Error at foreach-RANGE-out-of-range-test\.cmake:[0-9]+ \(foreach\):
+  foreach Integer out of range: '10000000000000000000'
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$
