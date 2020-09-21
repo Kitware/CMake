@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9)
-
 include(ExternalProject)
 
 # Verify COMMAND keyword is recognised after various *_COMMAND options

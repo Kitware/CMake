@@ -3342,6 +3342,18 @@ function(ExternalProject_Add name)
   cmake_policy(GET CMP0114 cmp0114
     PARENT_SCOPE # undocumented, do not use outside of CMake
     )
+  if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12 AND NOT cmp0114 STREQUAL "NEW")
+    message(AUTHOR_WARNING
+      "Policy CMP0114 is not set to NEW.  "
+      "In order to support the Xcode \"new build system\", "
+      "this project must be updated to set policy CMP0114 to NEW."
+      "\n"
+      "Since CMake is generating for the Xcode \"new build system\", "
+      "ExternalProject_Add will use policy CMP0114's NEW behavior anyway, "
+      "but the generated build system may not match what the project intends."
+      )
+    set(cmp0114 "NEW")
+  endif()
 
   _ep_get_configuration_subdir_suffix(cfgdir)
 

@@ -15,6 +15,7 @@
 #include "cmXCodeObject.h"
 
 class cmCustomCommand;
+class cmCustomCommandGenerator;
 class cmGeneratorTarget;
 class cmGlobalGeneratorFactory;
 class cmLocalGenerator;
@@ -113,11 +114,21 @@ public:
                            cmMakefile* mf) override;
   void AppendFlag(std::string& flags, std::string const& flag) const;
 
+  enum class BuildSystem
+  {
+    One = 1,
+    Twelve = 12,
+  };
+
 protected:
   void AddExtraIDETargets() override;
   void Generate() override;
 
 private:
+  bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
+  bool ProcessGeneratorToolsetField(std::string const& key,
+                                    std::string const& value, cmMakefile* mf);
+
   cmXCodeObject* CreateOrGetPBXGroup(cmGeneratorTarget* gtgt,
                                      cmSourceGroup* sg);
   cmXCodeObject* CreatePBXGroup(cmXCodeObject* parent,
@@ -221,9 +232,21 @@ private:
   void SetGenerationRoot(cmLocalGenerator* root);
   void AddExtraTargets(cmLocalGenerator* root,
                        std::vector<cmLocalGenerator*>& gens);
-  cmXCodeObject* CreateBuildPhase(const char* name, const char* name2,
-                                  cmGeneratorTarget* target,
-                                  const std::vector<cmCustomCommand>&);
+  cmXCodeObject* CreateLegacyRunScriptBuildPhase(
+    const char* name, const char* name2, cmGeneratorTarget* target,
+    const std::vector<cmCustomCommand>&);
+  void CreateRunScriptBuildPhases(cmXCodeObject* buildPhases,
+                                  cmGeneratorTarget const* gt);
+  void CreateRunScriptBuildPhases(cmXCodeObject* buildPhases,
+                                  cmSourceFile const* sf,
+                                  cmGeneratorTarget const* gt,
+                                  std::set<cmSourceFile const*>& visited);
+  cmXCodeObject* CreateRunScriptBuildPhase(cmSourceFile const* sf,
+                                           cmGeneratorTarget const* gt,
+                                           cmCustomCommand const& cc);
+  cmXCodeObject* CreateRunScriptBuildPhase(
+    std::string const& name, std::vector<cmCustomCommand> const& commands);
+  std::string ConstructScript(cmCustomCommandGenerator const& ccg);
   void CreateReRunCMakeFile(cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*> const& gens);
 
@@ -253,6 +276,8 @@ protected:
   std::set<std::string> XCodeObjectIDs;
   std::vector<std::unique_ptr<cmXCodeObject>> XCodeObjects;
   cmXCodeObject* RootObject;
+
+  BuildSystem XcodeBuildSystem = BuildSystem::One;
 
 private:
   std::string const& GetXcodeBuildCommand();
@@ -304,4 +329,6 @@ private:
   std::vector<std::string> EnabledLangs;
   std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
     CommandsVisited;
+  std::map<cmSourceFile const*, std::set<cmGeneratorTarget const*>>
+    CustomCommandRoots;
 };

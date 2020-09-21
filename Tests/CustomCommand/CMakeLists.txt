@@ -514,6 +514,14 @@ add_custom_target(UseConsoleTarget ALL
   USES_TERMINAL
 )
 
+if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12)
+  # Xcode's "new build system" does not support multiple targets
+  # producing the same custom command output.
+  add_custom_target(GenPath DEPENDS "${gen_path}")
+  add_dependencies(NormDepends GenPath)
+  add_dependencies(UseConsole GenPath)
+endif()
+
 # Test COMMAND_EXPAND_LISTS
 set(cmp_args "1ARG=COMMAND_EXPAND_LISTS" "2ARG=test" "3ARG=outfile"
   "4ARG=content")

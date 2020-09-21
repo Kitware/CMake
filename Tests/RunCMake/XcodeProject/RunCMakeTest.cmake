@@ -10,6 +10,10 @@ run_cmake(XcodeAttributeGenex)
 run_cmake(XcodeAttributeGenexError)
 run_cmake(XcodeGenerateTopLevelProjectOnly)
 
+if(XCODE_VERSION VERSION_GREATER_EQUAL 12)
+  run_cmake(XcodeDuplicateCustomCommand)
+endif()
+
 function(XcodeGenerateTopLevelProjectOnlyWithObjectLibrary)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeGenerateTopLevelProjectOnlyWithObjectLibrary-build)
   run_cmake(XcodeGenerateTopLevelProjectOnlyWithObjectLibrary)
@@ -103,6 +107,11 @@ XcodeRemoveExcessiveISystem()
 
 # Isolate device tests from host architecture selection.
 unset(ENV{CMAKE_OSX_ARCHITECTURES})
+
+if(XCODE_VERSION VERSION_GREATER_EQUAL 12)
+  # FIXME: Restore device tests and fix them for the Xcode "new build system"
+  return()
+endif()
 
 # Use a single build tree for a few tests without cleaning.
 
