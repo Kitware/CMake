@@ -7,11 +7,14 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <utility>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmExecutionStatus.h"
+#include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
@@ -37,15 +40,36 @@ std::array<cm::static_string_view, 12> InvalidCommands{
   } // clang-format on
 };
 
+std::array<cm::static_string_view, 1> InvalidDeferCommands{
+  {
+    // clang-format off
+  "return"_s,
+  } // clang-format on
+};
+
+struct Defer
+{
+  std::string Id;
+  std::string IdVar;
+  cmMakefile* Directory = nullptr;
+};
+
 bool cmCMakeLanguageCommandCALL(std::vector<cmListFileArgument> const& args,
                                 std::string const& callCommand,
-                                size_t startArg, cmExecutionStatus& status)
+                                size_t startArg, cm::optional<Defer> defer,
+                                cmExecutionStatus& status)
 {
   // ensure specified command is valid
   // start/end flow control commands are not allowed
   auto cmd = cmSystemTools::LowerCase(callCommand);
   if (std::find(InvalidCommands.cbegin(), InvalidCommands.cend(), cmd) !=
       InvalidCommands.cend()) {
+    return FatalError(status,
+                      cmStrCat("invalid command specified: "_s, callCommand));
+  }
+  if (defer &&
+      std::find(InvalidDeferCommands.cbegin(), InvalidDeferCommands.cend(),
+                cmd) != InvalidDeferCommands.cend()) {
     return FatalError(status,
                       cmStrCat("invalid command specified: "_s, callCommand));
   }
@@ -66,7 +90,104 @@ bool cmCMakeLanguageCommandCALL(std::vector<cmListFileArgument> const& args,
     func.Arguments.emplace_back(lfarg);
   }
 
+  if (defer) {
+    if (defer->Id.empty()) {
+      defer->Id = makefile.NewDeferId();
+    }
+    if (!defer->IdVar.empty()) {
+      makefile.AddDefinition(defer->IdVar, defer->Id);
+    }
+    cmMakefile* deferMakefile =
+      defer->Directory ? defer->Directory : &makefile;
+    if (!deferMakefile->DeferCall(defer->Id, context.FilePath, func)) {
+      return FatalError(
+        status,
+        cmStrCat("DEFER CALL may not be scheduled in directory:\n  "_s,
+                 deferMakefile->GetCurrentBinaryDirectory(),
+                 "\nat this time."_s));
+    }
+    return true;
+  }
   return makefile.ExecuteCommand(func, status);
+}
+
+bool cmCMakeLanguageCommandDEFER(Defer const& defer,
+                                 std::vector<std::string> const& args,
+                                 size_t arg, cmExecutionStatus& status)
+{
+  cmMakefile* deferMakefile =
+    defer.Directory ? defer.Directory : &status.GetMakefile();
+  if (args[arg] == "CANCEL_CALL"_s) {
+    ++arg; // Consume CANCEL_CALL.
+    auto ids = cmMakeRange(args).advance(arg);
+    for (std::string const& id : ids) {
+      if (id[0] >= 'A' && id[0] <= 'Z') {
+        return FatalError(
+          status, cmStrCat("DEFER CANCEL_CALL unknown argument:\n  "_s, id));
+      }
+      if (!deferMakefile->DeferCancelCall(id)) {
+        return FatalError(
+          status,
+          cmStrCat("DEFER CANCEL_CALL may not update directory:\n  "_s,
+                   deferMakefile->GetCurrentBinaryDirectory(),
+                   "\nat this time."_s));
+      }
+    }
+    return true;
+  }
+  if (args[arg] == "GET_CALL_IDS"_s) {
+    ++arg; // Consume GET_CALL_IDS.
+    if (arg == args.size()) {
+      return FatalError(status, "DEFER GET_CALL_IDS missing output variable");
+    }
+    std::string const& var = args[arg++];
+    if (arg != args.size()) {
+      return FatalError(status, "DEFER GET_CALL_IDS given too many arguments");
+    }
+    cm::optional<std::string> ids = deferMakefile->DeferGetCallIds();
+    if (!ids) {
+      return FatalError(
+        status,
+        cmStrCat("DEFER GET_CALL_IDS may not access directory:\n  "_s,
+                 deferMakefile->GetCurrentBinaryDirectory(),
+                 "\nat this time."_s));
+    }
+    status.GetMakefile().AddDefinition(var, *ids);
+    return true;
+  }
+  if (args[arg] == "GET_CALL"_s) {
+    ++arg; // Consume GET_CALL.
+    if (arg == args.size()) {
+      return FatalError(status, "DEFER GET_CALL missing id");
+    }
+    std::string const& id = args[arg++];
+    if (arg == args.size()) {
+      return FatalError(status, "DEFER GET_CALL missing output variable");
+    }
+    std::string const& var = args[arg++];
+    if (arg != args.size()) {
+      return FatalError(status, "DEFER GET_CALL given too many arguments");
+    }
+    if (id.empty()) {
+      return FatalError(status, "DEFER GET_CALL id may not be empty");
+    }
+    if (id[0] >= 'A' && id[0] <= 'Z') {
+      return FatalError(status,
+                        cmStrCat("DEFER GET_CALL unknown argument:\n "_s, id));
+    }
+    cm::optional<std::string> call = deferMakefile->DeferGetCall(id);
+    if (!call) {
+      return FatalError(
+        status,
+        cmStrCat("DEFER GET_CALL may not access directory:\n  "_s,
+                 deferMakefile->GetCurrentBinaryDirectory(),
+                 "\nat this time."_s));
+    }
+    status.GetMakefile().AddDefinition(var, *call);
+    return true;
+  }
+  return FatalError(status,
+                    cmStrCat("DEFER operation unknown: "_s, args[arg]));
 }
 
 bool cmCMakeLanguageCommandEVAL(std::vector<cmListFileArgument> const& args,
@@ -118,9 +239,103 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
     }
     return true;
   };
+  auto finishArgs = [&]() {
+    std::vector<cmListFileArgument> tmpArgs(args.begin() + rawArg, args.end());
+    status.GetMakefile().ExpandArguments(tmpArgs, expArgs);
+    rawArg = args.size();
+  };
 
   if (!moreArgs()) {
     return FatalError(status, "called with incorrect number of arguments");
+  }
+
+  cm::optional<Defer> maybeDefer;
+  if (expArgs[expArg] == "DEFER"_s) {
+    ++expArg; // Consume "DEFER".
+
+    if (!moreArgs()) {
+      return FatalError(status, "DEFER requires at least one argument");
+    }
+
+    Defer defer;
+
+    // Process optional arguments.
+    while (moreArgs()) {
+      if (expArgs[expArg] == "CALL"_s) {
+        break;
+      }
+      if (expArgs[expArg] == "CANCEL_CALL"_s ||
+          expArgs[expArg] == "GET_CALL_IDS"_s ||
+          expArgs[expArg] == "GET_CALL"_s) {
+        if (!defer.Id.empty() || !defer.IdVar.empty()) {
+          return FatalError(status,
+                            cmStrCat("DEFER "_s, expArgs[expArg],
+                                     " does not accept ID or ID_VAR."_s));
+        }
+        finishArgs();
+        return cmCMakeLanguageCommandDEFER(defer, expArgs, expArg, status);
+      }
+      if (expArgs[expArg] == "DIRECTORY"_s) {
+        ++expArg; // Consume "DIRECTORY".
+        if (defer.Directory) {
+          return FatalError(status,
+                            "DEFER given multiple DIRECTORY arguments");
+        }
+        if (!moreArgs()) {
+          return FatalError(status, "DEFER DIRECTORY missing value");
+        }
+        std::string dir = expArgs[expArg++];
+        if (dir.empty()) {
+          return FatalError(status, "DEFER DIRECTORY may not be empty");
+        }
+        dir = cmSystemTools::CollapseFullPath(
+          dir, status.GetMakefile().GetCurrentSourceDirectory());
+        defer.Directory =
+          status.GetMakefile().GetGlobalGenerator()->FindMakefile(dir);
+        if (!defer.Directory) {
+          return FatalError(status,
+                            cmStrCat("DEFER DIRECTORY:\n  "_s, dir,
+                                     "\nis not known.  "_s,
+                                     "It may not have been processed yet."_s));
+        }
+      } else if (expArgs[expArg] == "ID"_s) {
+        ++expArg; // Consume "ID".
+        if (!defer.Id.empty()) {
+          return FatalError(status, "DEFER given multiple ID arguments");
+        }
+        if (!moreArgs()) {
+          return FatalError(status, "DEFER ID missing value");
+        }
+        defer.Id = expArgs[expArg++];
+        if (defer.Id.empty()) {
+          return FatalError(status, "DEFER ID may not be empty");
+        }
+        if (defer.Id[0] >= 'A' && defer.Id[0] <= 'Z') {
+          return FatalError(status, "DEFER ID may not start in A-Z.");
+        }
+      } else if (expArgs[expArg] == "ID_VAR"_s) {
+        ++expArg; // Consume "ID_VAR".
+        if (!defer.IdVar.empty()) {
+          return FatalError(status, "DEFER given multiple ID_VAR arguments");
+        }
+        if (!moreArgs()) {
+          return FatalError(status, "DEFER ID_VAR missing variable name");
+        }
+        defer.IdVar = expArgs[expArg++];
+        if (defer.IdVar.empty()) {
+          return FatalError(status, "DEFER ID_VAR may not be empty");
+        }
+      } else {
+        return FatalError(
+          status, cmStrCat("DEFER unknown option:\n  "_s, expArgs[expArg]));
+      }
+    }
+
+    if (!(moreArgs() && expArgs[expArg] == "CALL"_s)) {
+      return FatalError(status, "DEFER must be followed by a CALL argument");
+    }
+
+    maybeDefer = std::move(defer);
   }
 
   if (expArgs[expArg] == "CALL") {
@@ -138,7 +353,8 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
     }
 
     // Run the CALL.
-    return cmCMakeLanguageCommandCALL(args, callCommand, rawArg, status);
+    return cmCMakeLanguageCommandCALL(args, callCommand, rawArg,
+                                      std::move(maybeDefer), status);
   }
 
   if (expArgs[expArg] == "EVAL") {

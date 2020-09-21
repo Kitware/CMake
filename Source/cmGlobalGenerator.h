@@ -508,6 +508,8 @@ public:
 
   std::string const& GetRealPath(std::string const& dir);
 
+  std::string NewDeferId();
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -632,6 +634,9 @@ private:
   std::map<std::string, std::string> ExtensionToLanguage;
   std::map<std::string, int> LanguageToLinkerPreference;
   std::map<std::string, std::string> LanguageToOriginalSharedLibFlags;
+
+  // Deferral id generation.
+  size_t NextDeferId = 0;
 
   // Record hashes for rules and outputs.
   struct RuleHash

@@ -18,6 +18,7 @@ enum SnapshotType
 {
   BaseType,
   BuildsystemDirectoryType,
+  DeferCallType,
   FunctionCallType,
   MacroCallType,
   IncludeFileType,

@@ -446,7 +446,8 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
   cmStateSnapshot bottom = this->GetBottom();
   for (Entry const* cur = this->TopEntry->Parent.get(); !cur->IsBottom();
        cur = cur->Parent.get()) {
-    if (cur->Context.Name.empty()) {
+    if (cur->Context.Name.empty() &&
+        cur->Context.Line != cmListFileContext::DeferPlaceholderLine) {
       // Skip this whole-file scope.  When we get here we already will
       // have printed a more-specific context within the file.
       continue;
@@ -483,11 +484,13 @@ bool cmListFileBacktrace::Empty() const
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
 {
   os << lfc.FilePath;
-  if (lfc.Line) {
+  if (lfc.Line > 0) {
     os << ":" << lfc.Line;
     if (!lfc.Name.empty()) {
       os << " (" << lfc.Name << ")";
     }
+  } else if (lfc.Line == cmListFileContext::DeferPlaceholderLine) {
+    os << ":DEFERRED";
   }
   return os;
 }

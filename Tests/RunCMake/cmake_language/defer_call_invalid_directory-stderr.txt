@@ -1,0 +1,9 @@
+^CMake Error at defer_call_invalid_directory.cmake:2 \(cmake_language\):
+  cmake_language DEFER CALL may not be scheduled in directory:
+
+    [^
+]*/Tests/RunCMake/cmake_language/defer_call_invalid_directory-build/defer_call_invalid_directory
+
+  at this time.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)$

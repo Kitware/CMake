@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmsys/RegularExpression.hxx"
@@ -695,7 +696,8 @@ public:
   /**
    * Print a command's invocation
    */
-  void PrintCommandTrace(const cmListFileFunction& lff) const;
+  void PrintCommandTrace(cmListFileFunction const& lff,
+                         cm::optional<std::string> const& deferId = {}) const;
 
   /**
    * Set a callback that is invoked whenever ExecuteCommand is called.
@@ -706,8 +708,8 @@ public:
    * Execute a single CMake command.  Returns true if the command
    * succeeded or false if it failed.
    */
-  bool ExecuteCommand(const cmListFileFunction& lff,
-                      cmExecutionStatus& status);
+  bool ExecuteCommand(const cmListFileFunction& lff, cmExecutionStatus& status,
+                      cm::optional<std::string> deferId = {});
 
   //! Enable support for named language, if nil then all languages are
   /// enabled.
@@ -965,6 +967,12 @@ public:
   int GetRecursionDepth() const;
   void SetRecursionDepth(int recursionDepth);
 
+  std::string NewDeferId();
+  bool DeferCall(std::string id, std::string fileName, cmListFileFunction lff);
+  bool DeferCancelCall(std::string const& id);
+  cm::optional<std::string> DeferGetCallIds() const;
+  cm::optional<std::string> DeferGetCall(std::string const& id) const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(cmTarget& target);
@@ -1026,10 +1034,25 @@ private:
   cmListFileBacktrace Backtrace;
   int RecursionDepth;
 
+  struct DeferCommand
+  {
+    // Id is empty for an already-executed or cancelled operation.
+    std::string Id;
+    std::string FilePath;
+    cmListFileFunction Command;
+  };
+  struct DeferCommands
+  {
+    std::vector<DeferCommand> Commands;
+  };
+  std::unique_ptr<DeferCommands> Defer;
+  bool DeferRunning = false;
+
   void DoGenerate(cmLocalGenerator& lg);
 
   void RunListFile(cmListFile const& listFile,
-                   const std::string& filenametoread);
+                   const std::string& filenametoread,
+                   DeferCommands* defer = nullptr);
 
   bool ParseDefineFlag(std::string const& definition, bool remove);
 
@@ -1079,6 +1102,12 @@ private:
 
   class ListFileScope;
   friend class ListFileScope;
+
+  class DeferScope;
+  friend class DeferScope;
+
+  class DeferCallScope;
+  friend class DeferCallScope;
 
   class BuildsystemFileScope;
   friend class BuildsystemFileScope;

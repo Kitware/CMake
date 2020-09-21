@@ -983,7 +983,7 @@ void cmake::PrintTraceFormatVersion()
       Json::StreamWriterBuilder builder;
       builder["indentation"] = "";
       version["major"] = 1;
-      version["minor"] = 0;
+      version["minor"] = 1;
       val["version"] = version;
       msg = Json::writeString(builder, val);
 #endif
