@@ -41,13 +41,17 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
     bool UnixCommand = false;
     bool WindowsCommand = false;
     bool NativeCommand = false;
+    bool Program = false;
+    bool SeparateArgs = false;
   };
 
   static auto const parser =
     cmArgumentParser<Arguments>{}
       .Bind("UNIX_COMMAND"_s, &Arguments::UnixCommand)
       .Bind("WINDOWS_COMMAND"_s, &Arguments::WindowsCommand)
-      .Bind("NATIVE_COMMAND"_s, &Arguments::NativeCommand);
+      .Bind("NATIVE_COMMAND"_s, &Arguments::NativeCommand)
+      .Bind("PROGRAM"_s, &Arguments::Program)
+      .Bind("SEPARATE_ARGS"_s, &Arguments::SeparateArgs);
 
   std::vector<std::string> unparsedArguments;
   Arguments arguments =
@@ -66,6 +70,10 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
                     "are mutually exclusive");
     return false;
   }
+  if (arguments.SeparateArgs && !arguments.Program) {
+    status.SetError("`SEPARATE_ARGS` option requires `PROGRAM' option");
+    return false;
+  }
 
   if (unparsedArguments.size() > 1) {
     status.SetError("given unexpected argument(s)");
@@ -76,6 +84,35 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
 
   if (command.empty()) {
     status.GetMakefile().AddDefinition(var, command);
+    return true;
+  }
+
+  if (arguments.Program && !arguments.SeparateArgs) {
+    std::string program;
+    std::string programArgs;
+
+    // First assume the path to the program was specified with no
+    // arguments and with no quoting or escaping for spaces.
+    // Only bother doing this if there is non-whitespace.
+    if (!cmTrimWhitespace(command).empty()) {
+      program = cmSystemTools::FindProgram(command);
+    }
+
+    // If that failed then assume a command-line string was given
+    // and split the program part from the rest of the arguments.
+    if (program.empty()) {
+      if (cmSystemTools::SplitProgramFromArgs(command, program, programArgs)) {
+        if (!cmSystemTools::FileExists(program)) {
+          program = cmSystemTools::FindProgram(program);
+        }
+      }
+    }
+
+    if (!program.empty()) {
+      program += cmStrCat(';', programArgs);
+    }
+
+    status.GetMakefile().AddDefinition(var, program);
     return true;
   }
 
@@ -94,6 +131,18 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
     cmSystemTools::ParseUnixCommandLine(command.c_str(), values);
   } else {
     cmSystemTools::ParseWindowsCommandLine(command.c_str(), values);
+  }
+
+  if (arguments.Program) {
+    // check program exist
+    if (!cmSystemTools::FileExists(values.front())) {
+      auto result = cmSystemTools::FindProgram(values.front());
+      if (result.empty()) {
+        values.clear();
+      } else {
+        values.front() = result;
+      }
+    }
   }
 
   // preserve semicolons in arguments
