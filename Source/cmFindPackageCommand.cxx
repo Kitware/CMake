@@ -578,6 +578,11 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         loadedPackage = true;
       }
     }
+
+    if (this->DebugMode) {
+      this->DebugMessage(this->DebugBuffer);
+      this->DebugBuffer.clear();
+    }
   }
 
   this->AppendSuccessInformation();
