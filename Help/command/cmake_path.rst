@@ -20,30 +20,44 @@ The path name has the following syntax:
 
 2. ``root-directory`` (optional): a directory separator that, if present, marks
    this path as absolute. If it is missing (and the first element other than
-   the root name is a file name), then the path is relative.
+   the ``root-name`` is a ``item-name``), then the path is relative.
 
 Zero or more of the following:
 
-3. ``file-name``: sequence of characters that aren't directory separators. This
+3. ``item-name``: sequence of characters that aren't directory separators. This
    name may identify a file, a hard link, a symbolic link, or a directory. Two
-   special file-names are recognized:
+   special ``item-names`` are recognized:
 
-     * ``dot``: the file name consisting of a single dot character ``.`` is a
+     * ``dot``: the item name consisting of a single dot character ``.`` is a
        directory name that refers to the current directory.
 
-     * ``dot-dot``: the file name consisting of two dot characters ``..`` is a
+     * ``dot-dot``: the item name consisting of two dot characters ``..`` is a
        directory name that refers to the parent directory.
 
 4. ``directory-separator``: the forward slash character ``/``. If this
    character is repeated, it is treated as a single directory separator:
    ``/usr///////lib`` is the same as ``/usr/lib``.
 
+.. _FILENAME_DEF:
+
+A path has a filename if it does not ends with a ``directory-separator``. The
+filename is the last ``item-name`` of the path.
+
 .. _EXTENSION_DEF:
 
-A ``file-name`` can have an extension. By default, the extension is defined as
-the sub-string beginning at the leftmost period (including the period) and
-until the end of the pathname. When the option ``LAST_ONLY`` is specified, the
-extension is the sub-string beginning at the rightmost period.
+A :ref:`filename <FILENAME_DEF>` can have an extension. By default, the
+extension is defined as the sub-string beginning at the leftmost period
+(including the period) and until the end of the pathname. When the option
+``LAST_ONLY`` is specified, the extension is the sub-string beginning at the
+rightmost period.
+
+The following exceptions apply:
+
+  * If the first character in the :ref:`filename <FILENAME_DEF>` is a period,
+    that period is ignored (a filename like ``".profile"`` is not treated as an
+    extension).
+
+  * If the pathname is either ``.`` or ``..``.
 
 .. note::
 
@@ -159,6 +173,23 @@ Decomposition
 Returns the root name of the path. If the path does not include a root name,
 returns an empty path.
 
+.. note::
+
+  Only ``Windows`` system has the concept of ``root-name``, so on all other
+  systems, it is always an empty path.
+
+For example:
+
+  .. code-block:: cmake
+
+    set (path "c:/a")
+    cmake_path (GET path ROOT_NAME output)
+    message ("Root name is \"${output}\"")
+
+  Will display::
+
+    Root name is "c:"
+
 .. _GET_ROOT_DIRECTORY:
 
 .. code-block:: cmake
@@ -167,6 +198,18 @@ returns an empty path.
 
 Returns the root directory of the path. If the path does not include a root
 directory, returns an empty path.
+
+For example:
+
+  .. code-block:: cmake
+
+    set (path "c:/a")
+    cmake_path (GET path ROOT_DIRECTORY output)
+    message ("Root directory is \"${output}\"")
+
+  Will display::
+
+    Root directory is "/"
 
 .. _GET_ROOT_PATH:
 
@@ -177,7 +220,19 @@ directory, returns an empty path.
 Returns the root path of the path. If the path does not include a root path,
 returns an empty path.
 
-Effectively, returns the following: ``root-name / root-directory``.
+Effectively, returns the following: ``root-name root-directory``.
+
+For example:
+
+  .. code-block:: cmake
+
+    set (path "c:/a")
+    cmake_path (GET path ROOT_PATH output)
+    message ("Root path is \"${output}\"")
+
+  Will display::
+
+    Root path is "c:/"
 
 .. _GET_FILENAME:
 
@@ -185,8 +240,26 @@ Effectively, returns the following: ``root-name / root-directory``.
 
   cmake_path(GET <path> FILENAME <output>)
 
-Returns the filename component of the path. If the path ends with a
-``directory-separator``, there is no filename, so returns an empty path.
+Returns the :ref:`filename <FILENAME_DEF>` component of the path. If the path
+ends with a ``directory-separator``, there is no filename, so returns an empty
+path.
+
+For example:
+
+  .. code-block:: cmake
+
+    set (path "/a")
+    cmake_path (GET path FILENAME output)
+    message ("First filename is \"${output}\"")
+
+    set (path "/a/")
+    cmake_path (GET path FILENAME output)
+    message ("Second filename is \"${output}\"")
+
+  Will display::
+
+    First filename is "a"
+    Second filename is ""
 
 .. _GET_EXTENSION:
 
@@ -196,26 +269,33 @@ Returns the filename component of the path. If the path ends with a
 
 Returns the :ref:`extension <EXTENSION_DEF>` of the filename component.
 
-If the ``FILENAME`` component of the path contains a period (``.``), and is not
-one of the special filesystem elements ``dot`` or ``dot-dot``, then the
-:ref:`extension <EXTENSION_DEF>` is returned.
+If the :ref:`filename <FILENAME_DEF>` component of the path contains a period
+(``.``), and is not one of the special filesystem elements ``dot`` or
+``dot-dot``, then the :ref:`extension <EXTENSION_DEF>` is returned.
+
+For example:
 
   .. code-block:: cmake
 
     set (path "name.ext1.ext2")
     cmake_path (GET path EXTENSION result)
+    message ("Full extension is \"${result}\"")
     cmake_path (GET path EXTENSION LAST_ONLY result)
+    message ("Last extension is \"${result}\"")
 
-First extension extraction will return ``.ex1.ext2``, while the second one will
-return only ``.ext2``.
+  Will display::
+
+    Full extension is ".ext1.ext2"
+    Last extension is ".ext2"
 
 The following exceptions apply:
 
   * If the first character in the filename is a period, that period is ignored
     (a filename like ``".profile"`` is not treated as an extension).
 
-  * If the pathname is either ``.`` or ``..``, or if ``FILENAME`` component
-    does not contain the ``.`` character, then an empty path is returned.
+  * If the pathname is either ``.`` or ``..``, or if
+    :ref:`filename <FILENAME_DEF>` component does not contain the ``.``
+    character, then an empty path is returned.
 
 .. _GET_STEM:
 
@@ -223,17 +303,23 @@ The following exceptions apply:
 
   cmake_path(GET <path> STEM [LAST_ONLY] <output>)
 
-Returns the ``FILENAME`` component of the path stripped of its
-:ref:`extension <EXTENSION_DEF>`.
+Returns the :ref:`filename <FILENAME_DEF>` component of the path stripped of
+its :ref:`extension <EXTENSION_DEF>`.
+
+For Example:
 
   .. code-block:: cmake
 
     set (path "name.ext1.ext2")
     cmake_path (GET path STEM result)
+    message ("Filename without the extension is \"${result}\"")
     cmake_path (GET path STEM LAST_ONLY result)
+    message ("Filename whiteout the last extension is \"${result}\"")
 
-First stem extraction will return only ``name``, while the second one will
-return ``name.ext1``.
+  Will display::
+
+    Filename without the extension is "name"
+    Filename without the last extension is "name.ext1"
 
 The following exceptions apply:
 
@@ -242,7 +328,7 @@ The following exceptions apply:
 
   * If the filename is one of the special filesystem components ``dot`` or
     ``dot-dot``, or if it has no periods, the function returns the entire
-    ``FILENAME`` component.
+    :ref:`filename <FILENAME_DEF>` component.
 
 .. _GET_RELATIVE_PATH:
 
@@ -254,6 +340,23 @@ Returns path relative to ``root-path``, that is, a pathname composed of
 every component of ``<path>`` after ``root-path``. If ``<path>`` is an empty
 path, returns an empty path.
 
+For Example:
+
+  .. code-block:: cmake
+
+    set (path "/a/b")
+    cmake_path (GET path RELATIVE_PATH result)
+    message ("Relative path is \"${result}\"")
+
+    set (path "/")
+    cmake_path (GET path RELATIVE_PATH result)
+    message ("Relative path is \"${result}\"")
+
+  Will display::
+
+    Relative path is "a/b"
+    Relative path is ""
+
 .. _GET_PARENT_PATH:
 
 .. code-block:: cmake
@@ -264,6 +367,23 @@ Returns the path to the parent directory.
 
 If `HAS_RELATIVE_PATH`_ sub-command returns false, the result is a copy of
 ``<path>``. Otherwise, the result is ``<path>`` with one fewer element.
+
+For Example:
+
+  .. code-block:: cmake
+
+    set (path "c:/a/b")
+    cmake_path (GET path PARENT_PATH result)
+    message ("Parent path is \"${result}\"")
+
+    set (path "c:/")
+    cmake_path (GET path PARENT_PATH result)
+    message ("Parent path is \"${result}\"")
+
+  Will display::
+
+    Parent path is "c:/a"
+    Relative path is "c:/"
 
 Modification
 ^^^^^^^^^^^^
@@ -312,11 +432,27 @@ Concatenates all the ``<input>`` arguments to the ``<path>`` without
 
     cmake_path(REMOVE_FILENAME <path> [OUTPUT_VARIABLE <output>])
 
-Removes a single filename component (as returned by
+Removes the :ref:`filename <FILENAME_DEF>` component (as returned by
 :ref:`GET ... FILENAME <GET_FILENAME>`) from ``<path>``.
 
 After this function returns, if change is done in-place, `HAS_FILENAME`_
 returns false for ``<path>``.
+
+For Example:
+
+  .. code-block:: cmake
+
+    set (path "/a/b")
+    cmake_path (REMOVE_FILENAME path)
+    message ("First path is \"${path}\"")
+
+    cmake_path (REMOVE_FILENAME path)
+    message ("Second path is \"${result}\"")
+
+  Will display::
+
+    First path is "/a/"
+    Second path is "/a/"
 
 .. _REPLACE_FILENAME:
 
@@ -324,17 +460,21 @@ returns false for ``<path>``.
 
     cmake_path(REPLACE_FILENAME <path> <input> [OUTPUT_VARIABLE <output>])
 
-Replaces a single filename component from ``<path>`` with ``<input>``.
+Replaces the :ref:`filename <FILENAME_DEF>` component from ``<path>`` with
+``<input>``.
+
+If ``<path>`` has no filename component (`HAS_FILENAME`_ returns false), the
+path is unchanged.
 
 Equivalent to the following:
 
   .. code-block:: cmake
 
-    cmake_path(REMOVE_FILENAME path)
-    cmake_path(APPEND path "replacement");
-
-If ``<path>`` has no filename component (`HAS_FILENAME`_ returns false), the
-path is unchanged.
+    cmake_path(HAS_FILENAME path has_filename)
+    if (has_filename)
+      cmake_path(REMOVE_FILENAME path)
+      cmake_path(APPEND path "replacement");
+    endif()
 
 .. _REMOVE_EXTENSION:
 
@@ -353,11 +493,22 @@ Removes the :ref:`extension <EXTENSION_DEF>`, if any, from ``<path>``.
 
 Replaces the :ref:`extension <EXTENSION_DEF>` with ``<input>``.
 
-First, if ``<path>`` has an :ref:`extension <EXTENSION_DEF>` (`HAS_EXTENSION`_
-is true), it is removed. Then, a ``dot`` character is appended to ``<path>``,
-if ``<input>`` is not empty or does not begin with a ``dot`` character.
+  1. If ``<path>`` has an :ref:`extension <EXTENSION_DEF>`
+     (`HAS_EXTENSION`_ is true), it is removed.
+  2. A ``dot`` character is appended to ``<path>``, if ``<input>`` is not empty
+     or does not begin with a ``dot`` character.
+  3. ``<input>`` is appended as if `CONCAT`_ was used.
 
-Then ``<input>`` is appended as if `CONCAT`_ was used.
+
+Equivalent to the following:
+
+  .. code-block:: cmake
+
+    cmake_path(REMOVE_EXTENSION path)
+    if (NOT "input" MATCHES "^\\.")
+      cmake_path(CONCAT path ".")
+    endif()
+    cmake_path(CONCAT path "input");
 
 Generation
 ^^^^^^^^^^
@@ -423,17 +574,18 @@ If ``BASE_DIRECTORY`` is not specified, the default base directory will be
     cmake_path(ABSOLUTE_PATH <path> [BASE_DIRECTORY <path>] [NORMALIZE]
                              [OUTPUT_VARIABLE <output>])
 
-If ``<path>`` is a relative path, it is evaluated relative to the given base
-directory specified by ``BASE_DIRECTORY`` option. If no base directory is
-provided, the default base directory will be
+If ``<path>`` is a relative path (`IS_RELATIVE`_ is true), it is evaluated
+relative to the given base directory specified by ``BASE_DIRECTORY`` option.
+
+If ``BASE_DIRECTORY`` is not specifired, the default base directory will be
 :variable:`CMAKE_CURRENT_SOURCE_DIR`.
 
 When ``NORMALIZE`` option is specified, the path is :ref:`normalized
 <NORMAL_PATH>` after the path computation.
 
 Because ``cmake_path`` does not access to the filesystem, symbolic links are
-not resolved. To compute a real path, use :command:`get_filename_component`
-command with ``REALPATH`` sub-command.
+not resolved. To compute a real path, use :command:`file(REAL_PATH)`
+command.
 
 Conversion
 ^^^^^^^^^^
@@ -450,6 +602,22 @@ Converts a native ``<input>`` path into cmake-style path with forward-slashes
 
 When ``NORMALIZE`` option is specified, the path is :ref:`normalized
 <NORMAL_PATH>` before the conversion.
+
+For Example:
+
+  .. code-block:: cmake
+
+    set (native_path "c:\\a\\b/..\\c")
+    cmake_path (CMAKE_PATH path "${native_path}")
+    message ("CMake path is \"${path}\"")
+
+    cmake_path (CMAKE_PATH path NORMALIZE "${native_path}")
+    message ("Normalized CMake path is \"${path}\"")
+
+  Will display::
+
+    CMake path is "c:/a/b/../c"
+    Normalized CMake path is "c:/a/c"
 
 .. _cmake_path-NATIVE_PATH:
 .. _NATIVE_PATH:
@@ -496,6 +664,22 @@ variable.
 
 When ``NORMALIZE`` option is specified, the path is :ref:`normalized
 <NORMAL_PATH>` before the conversion.
+
+For Example:
+
+  .. code-block:: cmake
+
+    set (paths "/a/b/c" "/x/y/z")
+    cmake_path (CONVERT "${paths}" TO_NATIVE_PATH_LIST native_paths)
+    message ("Native path list is \"${native_paths}\"")
+
+  Will display, on Windows::
+
+    Native path list is "\a\b\c;\x\y\z"
+
+  And on the all other systems::
+
+    Native path list is "/a/b/c:/x/y/z"
 
 Comparison
 ^^^^^^^^^^
@@ -550,7 +734,7 @@ Checks if ``<path>`` has ``root-directory``.
 
 Checks if ``<path>`` has root path.
 
-Effectively, checks the following: ``root-name / root-directory``.
+Effectively, checks if ``<path>`` has ``root-name`` and ``root-directory``.
 
 .. _HAS_FILENAME:
 
@@ -558,7 +742,7 @@ Effectively, checks the following: ``root-name / root-directory``.
 
     cmake_path(HAS_FILENAME <path> <output>)
 
-Checks if ``<path>`` has ``file-name``.
+Checks if ``<path>`` has a :ref:`filename <FILENAME_DEF>`.
 
 .. _HAS_EXTENSION:
 
@@ -566,7 +750,7 @@ Checks if ``<path>`` has ``file-name``.
 
     cmake_path(HAS_EXTENSION <path> <output>)
 
-Checks if ``<path>`` has an :ref:`<extension <EXTENSION_DEF>`. If the first
+Checks if ``<path>`` has an :ref:`extension <EXTENSION_DEF>`. If the first
 character in the filename is a period, it is not treated as an extension (for
 example ".profile").
 
@@ -576,7 +760,8 @@ example ".profile").
 
     cmake_path(HAS_STEM <path> <output>)
 
-Checks if ``<path>`` has stem.
+Checks if ``<path>`` has stem (:ref:`GET ... STEM <GET_STEM>` returns a non
+empty path).
 
 .. _HAS_RELATIVE_PATH:
 
@@ -584,7 +769,8 @@ Checks if ``<path>`` has stem.
 
     cmake_path(HAS_RELATIVE_PATH <path> <output>)
 
-Checks if ``<path>`` has relative path.
+Checks if ``<path>`` has relative path (`GET_RELATIVE_PATH`_ returns a
+non-empty path).
 
 .. _HAS_PARENT_PATH:
 
@@ -592,7 +778,8 @@ Checks if ``<path>`` has relative path.
 
     cmake_path(HAS_PARENT_PATH <path> <output>)
 
-Checks if ``<path>`` has parent path.
+Checks if ``<path>`` has parent path. The result is true except if the path is
+only composed of a :ref:`filename <FILENAME_DEF>`.
 
 .. _IS_ABSOLUTE:
 
@@ -611,7 +798,7 @@ without reference to an additional starting location.
 
     cmake_path(IS_RELATIVE <path> <output>)
 
-Checks if path is relative.
+Checks if path is relative (i.e. not :ref:`absolute <IS_ABSOLUTE>`).
 
 .. _IS_PREFIX:
 

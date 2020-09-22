@@ -606,6 +606,9 @@ bool testDecomposition()
     if (fs::path("c:/a/b").parent_path() != "c:/a") {
       result = false;
     }
+    if (fs::path("c:a").parent_path() != "c:") {
+      result = false;
+    }
     if (fs::path("c:/").parent_path() != "c:/") {
       result = false;
     }
