@@ -3023,18 +3023,21 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     std::string Output;
     std::string Format;
     std::string Compression;
+    std::string CompressionLevel;
     std::string MTime;
     bool Verbose = false;
     std::vector<std::string> Paths;
   };
 
-  static auto const parser = cmArgumentParser<Arguments>{}
-                               .Bind("OUTPUT"_s, &Arguments::Output)
-                               .Bind("FORMAT"_s, &Arguments::Format)
-                               .Bind("COMPRESSION"_s, &Arguments::Compression)
-                               .Bind("MTIME"_s, &Arguments::MTime)
-                               .Bind("VERBOSE"_s, &Arguments::Verbose)
-                               .Bind("PATHS"_s, &Arguments::Paths);
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("OUTPUT"_s, &Arguments::Output)
+      .Bind("FORMAT"_s, &Arguments::Format)
+      .Bind("COMPRESSION"_s, &Arguments::Compression)
+      .Bind("COMPRESSION_LEVEL"_s, &Arguments::CompressionLevel)
+      .Bind("MTIME"_s, &Arguments::MTime)
+      .Bind("VERBOSE"_s, &Arguments::Verbose)
+      .Bind("PATHS"_s, &Arguments::Paths);
 
   std::vector<std::string> unrecognizedArguments;
   std::vector<std::string> keywordsMissingValues;
@@ -3048,9 +3051,9 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::vector<std::string> LIST_ARGS = { "OUTPUT", "FORMAT",
-                                               "COMPRESSION", "MTIME",
-                                               "PATHS" };
+  const std::vector<std::string> LIST_ARGS = {
+    "OUTPUT", "FORMAT", "COMPRESSION", "COMPRESSION_LEVEL", "MTIME", "PATHS"
+  };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
   if (kwend != kwbegin) {
@@ -3099,6 +3102,33 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  int compressionLevel = 0;
+  if (!parsedArgs.CompressionLevel.empty()) {
+    if (parsedArgs.CompressionLevel.size() != 1 &&
+        !std::isdigit(parsedArgs.CompressionLevel[0])) {
+      status.SetError(cmStrCat("compression level ",
+                               parsedArgs.CompressionLevel,
+                               " should be in range 0 to 9"));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+    compressionLevel = std::stoi(parsedArgs.CompressionLevel);
+    if (compressionLevel < 0 || compressionLevel > 9) {
+      status.SetError(cmStrCat("compression level ",
+                               parsedArgs.CompressionLevel,
+                               " should be in range 0 to 9"));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+    if (compress == cmSystemTools::TarCompressNone) {
+      status.SetError(cmStrCat("compression level is not supported for "
+                               "compression \"None\"",
+                               parsedArgs.Compression));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+  }
+
   if (parsedArgs.Paths.empty()) {
     status.SetError("ARCHIVE_CREATE requires a non-empty list of PATHS");
     cmSystemTools::SetFatalErrorOccured();
@@ -3107,7 +3137,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
 
   if (!cmSystemTools::CreateTar(parsedArgs.Output, parsedArgs.Paths, compress,
                                 parsedArgs.Verbose, parsedArgs.MTime,
-                                parsedArgs.Format)) {
+                                parsedArgs.Format, compressionLevel)) {
     status.SetError(cmStrCat("failed to compress: ", parsedArgs.Output));
     cmSystemTools::SetFatalErrorOccured();
     return false;

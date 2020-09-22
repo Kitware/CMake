@@ -362,7 +362,8 @@ public:
                         const std::vector<std::string>& files,
                         cmTarCompression compressType, bool verbose,
                         std::string const& mtime = std::string(),
-                        std::string const& format = std::string());
+                        std::string const& format = std::string(),
+                        int compressionLevel = 0);
   static bool ExtractTar(const std::string& inFileName,
                          const std::vector<std::string>& files, bool verbose);
   // This should be called first thing in main
