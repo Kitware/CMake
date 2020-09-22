@@ -8,21 +8,22 @@ if(__COMPILER_TI)
 endif()
 set(__COMPILER_TI 1)
 
-macro(__compiler_ti lang)
-  string(TOLOWER ${lang} prefix)
-  if("x${lang}" STREQUAL "xCXX")
-    set(prefix "cpp")
-  endif()
+include(Compiler/CMakeCommonCompilerMacros)
 
+set(__COMPILER_TI_SOURCE_FLAG_C   "--c_file")
+set(__COMPILER_TI_SOURCE_FLAG_CXX "--cpp_file")
+set(__COMPILER_TI_SOURCE_FLAG_ASM "--asm_file")
+
+macro(__compiler_ti lang)
   set(CMAKE_${lang}_RESPONSE_FILE_FLAG "--cmd_file=")
 
   set(CMAKE_INCLUDE_FLAG_${lang} "--include_path=")
   set(CMAKE_DEPFILE_FLAGS_${lang} "--preproc_with_compile --preproc_dependency=<DEPFILE>")
 
-  set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> --preproc_only --${prefix}_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<PREPROCESSED_SOURCE>")
-  set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> --compile_only --skip_assembler --${prefix}_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<ASSEMBLY_SOURCE>")
+  set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> --preproc_only ${__COMPILER_TI_SOURCE_FLAG_${lang}}=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<PREPROCESSED_SOURCE>")
+  set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> --compile_only --skip_assembler ${__COMPILER_TI_SOURCE_FLAG_${lang}}=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<ASSEMBLY_SOURCE>")
 
-  set(CMAKE_${lang}_COMPILE_OBJECT  "<CMAKE_${lang}_COMPILER> --compile_only --${prefix}_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<OBJECT>")
+  set(CMAKE_${lang}_COMPILE_OBJECT  "<CMAKE_${lang}_COMPILER> --compile_only ${__COMPILER_TI_SOURCE_FLAG_${lang}}=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<OBJECT>")
 
   set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> qr <TARGET> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> qa <TARGET> <OBJECTS>")

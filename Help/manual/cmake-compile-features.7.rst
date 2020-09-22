@@ -358,6 +358,7 @@ versions specified for each:
 
 * ``Cray``: Cray Compiler Environment version 8.1+.
 * ``PGI``: PGI version 12.10+.
+* ``TI``: Texas Instruments compiler.
 * ``XL``: IBM XL version 10.1+.
 
 CMake is currently aware of the :prop_tgt:`C standards <C_STANDARD>` and
@@ -366,7 +367,6 @@ following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
 versions specified for each:
 
 * all compilers and versions listed above with only meta-features for C++.
-* ``TI``: Texas Instruments compiler.
 
 CMake is currently aware of the :prop_tgt:`CUDA standards <CUDA_STANDARD>` and
 their associated meta-features (e.g. ``cuda_std_11``) available from the
