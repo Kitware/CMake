@@ -276,7 +276,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   , DebugLinkDirectoriesDone(false)
   , DebugPrecompileHeadersDone(false)
   , DebugSourcesDone(false)
-  , LinkImplementationLanguageIsContextDependent(true)
+  , SourcesAreContextDependent(true)
   , UtilityItemsDone(false)
 {
   this->Makefile = this->Target->GetMakefile();
@@ -692,7 +692,7 @@ void cmGeneratorTarget::ClearSourcesCache()
 {
   this->AllConfigSources.clear();
   this->KindedSourcesMap.clear();
-  this->LinkImplementationLanguageIsContextDependent = true;
+  this->SourcesAreContextDependent = true;
   this->Objects.clear();
   this->VisitedConfigsForObjects.clear();
 }
@@ -1656,7 +1656,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   if (!contextDependentDirectSources &&
       !(contextDependentInterfaceSources && numFilesBefore < files.size()) &&
       !(contextDependentObjects && numFilesBefore2 < files.size())) {
-    this->LinkImplementationLanguageIsContextDependent = false;
+    this->SourcesAreContextDependent = false;
   }
 
   return files;
@@ -1733,7 +1733,7 @@ cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
 {
   // If we already processed one configuration and found no dependenc
   // on configuration then always use the one result.
-  if (!this->LinkImplementationLanguageIsContextDependent) {
+  if (!this->SourcesAreContextDependent) {
     return this->KindedSourcesMap.begin()->second;
   }
 

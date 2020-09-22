@@ -1069,7 +1069,7 @@ private:
   mutable bool DebugLinkDirectoriesDone;
   mutable bool DebugPrecompileHeadersDone;
   mutable bool DebugSourcesDone;
-  mutable bool LinkImplementationLanguageIsContextDependent;
+  mutable bool SourcesAreContextDependent;
   mutable bool UtilityItemsDone;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
