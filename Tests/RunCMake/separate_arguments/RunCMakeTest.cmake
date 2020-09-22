@@ -1,5 +1,8 @@
 include(RunCMake)
 
+run_cmake(MultipleCommands)
+run_cmake(MultipleArguments)
+
 run_cmake(EmptyCommand)
 run_cmake(PlainCommand)
 run_cmake(UnixCommand)
