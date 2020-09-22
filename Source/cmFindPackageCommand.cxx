@@ -753,6 +753,17 @@ bool cmFindPackageCommand::FindModule(bool& found)
     this->Makefile->AddDefinition(var, "1");
     bool result = this->ReadListFile(mfile, DoPolicyScope);
     this->Makefile->RemoveDefinition(var);
+
+    if (this->DebugMode) {
+      std::string foundVar = cmStrCat(this->Name, "_FOUND");
+      if (this->Makefile->IsDefinitionSet(foundVar) &&
+          !this->Makefile->IsOn(foundVar)) {
+
+        this->DebugBuffer = cmStrCat(
+          this->DebugBuffer, "The module is considered not found due to ",
+          foundVar, " being FALSE.");
+      }
+    }
     return result;
   }
   return true;
