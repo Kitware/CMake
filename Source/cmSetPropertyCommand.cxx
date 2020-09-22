@@ -113,7 +113,7 @@ bool HandleSourceFileDirectoryScopes(
           "given non-existent target for TARGET_DIRECTORY ", target_name));
         return false;
       }
-      cmProp target_source_dir = target->GetProperty("SOURCE_DIR");
+      cmProp target_source_dir = target->GetProperty("BINARY_DIR");
       cmMakefile* target_dir_mf =
         status.GetMakefile().GetGlobalGenerator()->FindMakefile(
           *target_source_dir);
