@@ -29,6 +29,9 @@ public:
   template <typename M, typename F>
   cmJSONObjectHelper& Bind(const cm::string_view& name, std::nullptr_t, F func,
                            bool required = true);
+  template <typename F>
+  cmJSONObjectHelper& Bind(const cm::string_view& name, F func,
+                           bool required = true);
 
   E operator()(T& out, const Json::Value* value) const;
 
@@ -84,6 +87,14 @@ cmJSONObjectHelper<T, E>& cmJSONObjectHelper<T, E>::Bind(
                              return func(dummy, value);
                            },
                            required);
+}
+
+template <typename T, typename E>
+template <typename F>
+cmJSONObjectHelper<T, E>& cmJSONObjectHelper<T, E>::Bind(
+  const cm::string_view& name, F func, bool required)
+{
+  return this->BindPrivate(name, MemberFunction(func), required);
 }
 
 template <typename T, typename E>

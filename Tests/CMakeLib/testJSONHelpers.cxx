@@ -37,6 +37,7 @@ enum class ErrorCode
   InvalidInt,
   InvalidBool,
   InvalidString,
+  InvalidSubObject,
   InvalidObject,
   InvalidArray,
   MissingRequired,
@@ -148,15 +149,20 @@ bool testString()
 
 bool testObject()
 {
+  auto const subhelper =
+    cmJSONObjectHelper<ObjectStruct, ErrorCode>(ErrorCode::Success,
+                                                ErrorCode::InvalidSubObject)
+      .Bind("subfield"_s, &ObjectStruct::Field2, IntHelper);
   auto const helper = cmJSONObjectHelper<ObjectStruct, ErrorCode>(
                         ErrorCode::Success, ErrorCode::InvalidObject)
                         .Bind("field1"_s, &ObjectStruct::Field1, StringHelper)
-                        .Bind("field2"_s, &ObjectStruct::Field2, IntHelper)
+                        .Bind("field2"_s, subhelper)
                         .Bind<std::string>("field3"_s, nullptr, StringHelper);
 
   Json::Value v(Json::objectValue);
   v["field1"] = "Hello";
-  v["field2"] = 2;
+  v["field2"] = Json::objectValue;
+  v["field2"]["subfield"] = 2;
   v["field3"] = "world!";
   v["extra"] = "extra";
 
@@ -165,29 +171,34 @@ bool testObject()
   ASSERT_TRUE(s1.Field1 == "Hello");
   ASSERT_TRUE(s1.Field2 == 2);
 
-  v["field2"] = "wrong";
+  v["field2"]["subfield"] = "wrong";
   ObjectStruct s2;
   ASSERT_TRUE(helper(s2, &v) == ErrorCode::InvalidInt);
 
-  v.removeMember("field2");
+  v["field2"].removeMember("subfield");
   ObjectStruct s3;
-  ASSERT_TRUE(helper(s3, &v) == ErrorCode::InvalidObject);
+  ASSERT_TRUE(helper(s3, &v) == ErrorCode::InvalidSubObject);
 
-  v["field2"] = 2;
-  v["field3"] = 3;
+  v.removeMember("field2");
   ObjectStruct s4;
-  ASSERT_TRUE(helper(s4, &v) == ErrorCode::InvalidString);
+  ASSERT_TRUE(helper(s4, &v) == ErrorCode::InvalidObject);
+
+  v["field2"] = Json::objectValue;
+  v["field2"]["subfield"] = 2;
+  v["field3"] = 3;
+  ObjectStruct s5;
+  ASSERT_TRUE(helper(s5, &v) == ErrorCode::InvalidString);
 
   v.removeMember("field3");
-  ObjectStruct s5;
-  ASSERT_TRUE(helper(s5, &v) == ErrorCode::InvalidObject);
-
-  v = "Hello";
   ObjectStruct s6;
   ASSERT_TRUE(helper(s6, &v) == ErrorCode::InvalidObject);
 
+  v = "Hello";
   ObjectStruct s7;
-  ASSERT_TRUE(helper(s7, nullptr) == ErrorCode::InvalidObject);
+  ASSERT_TRUE(helper(s7, &v) == ErrorCode::InvalidObject);
+
+  ObjectStruct s8;
+  ASSERT_TRUE(helper(s8, nullptr) == ErrorCode::InvalidObject);
 
   return true;
 }
