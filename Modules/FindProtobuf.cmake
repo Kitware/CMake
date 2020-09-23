@@ -388,7 +388,7 @@ function(_protobuf_find_libraries name filename)
 
     select_library_configurations(${name})
 
-    if(UNIX AND Threads_FOUND)
+    if(UNIX AND Threads_FOUND AND ${name}_LIBRARY)
       list(APPEND ${name}_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
     endif()
 
