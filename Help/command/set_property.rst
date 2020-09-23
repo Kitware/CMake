@@ -26,8 +26,11 @@ It must be one of the following:
   Scope is unique and does not accept a name.
 
 ``DIRECTORY``
-  Scope defaults to the current directory but another directory
+  Scope defaults to the current directory but other directories
   (already processed by CMake) may be named by full or relative path.
+  Each path may reference either a source directory, or since CMake 3.19,
+  a binary directory.
+  Relative paths are treated as relative to the current source directory.
   See also the :command:`set_directory_properties` command.
 
 ``TARGET``
@@ -42,8 +45,9 @@ It must be one of the following:
 
   ``DIRECTORY <dirs>...``
     The source file property will be set in each of the ``<dirs>``
-    directories' scopes.  CMake must already know about each of these
-    source directories, either by having added them through a call to
+    directories' scopes.  Each path may reference either a source directory,
+    or since CMake 3.19, a binary directory.  CMake must already know about
+    each of these directories, either by having added them through a call to
     :command:`add_subdirectory` or it being the top level source directory.
     Relative paths are treated as relative to the current source directory.
 

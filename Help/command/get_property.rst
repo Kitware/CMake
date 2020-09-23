@@ -30,7 +30,9 @@ It must be one of the following:
 ``DIRECTORY``
   Scope defaults to the current directory but another
   directory (already processed by CMake) may be named by the
-  full or relative path ``<dir>``.
+  full or relative path ``<dir>``.  The ``<dir>`` may reference either a
+  source directory, or since CMake 3.19, a binary directory.
+  Relative paths are treated as relative to the current source directory.
   See also the :command:`get_directory_property` command.
 
 ``TARGET``
@@ -44,10 +46,11 @@ It must be one of the following:
 
   ``DIRECTORY <dir>``
     The source file property will be read from the ``<dir>`` directory's
-    scope.  CMake must already know about that source directory, either by
-    having added it through a call to :command:`add_subdirectory` or ``<dir>``
-    being the top level source directory.  Relative paths are treated as
-    relative to the current source directory.
+    scope.  The ``<dir>`` may reference either a source directory, or
+    since CMake 3.19, a binary directory.  CMake must already know about
+    the directory, either by having added it through a call
+    to :command:`add_subdirectory` or ``<dir>`` being the top level directory.
+    Relative paths are treated as relative to the current source directory.
 
   ``TARGET_DIRECTORY <target>``
     The source file property will be read from the directory scope in which

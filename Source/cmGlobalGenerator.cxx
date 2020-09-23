@@ -2353,13 +2353,13 @@ std::string cmGlobalGenerator::IndexGeneratorTargetUniquely(
 
 void cmGlobalGenerator::IndexMakefile(cmMakefile* mf)
 {
-  // FIXME: add_subdirectory supports multiple build directories
-  // sharing the same source directory.  We currently index only the
-  // first one, because that is what FindMakefile has always returned.
-  // All of its callers will need to be modified to support looking
-  // up directories by build directory path.
+  // We index by both source and binary directory.  add_subdirectory
+  // supports multiple build directories sharing the same source directory.
+  // The source directory index will reference only the first time it is used.
   this->MakefileSearchIndex.insert(
     MakefileMap::value_type(mf->GetCurrentSourceDirectory(), mf));
+  this->MakefileSearchIndex.insert(
+    MakefileMap::value_type(mf->GetCurrentBinaryDirectory(), mf));
 }
 
 void cmGlobalGenerator::IndexLocalGenerator(cmLocalGenerator* lg)
