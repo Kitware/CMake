@@ -1,6 +1,5 @@
-
-cmake_minimum_required(VERSION 3.7)
-project (Complex CXX CUDA)
+cmake_minimum_required(VERSION 3.18)
+project(Complex CXX CUDA)
 #Goal for this example:
 
 #build a cpp dynamic library base
@@ -14,8 +13,6 @@ project (Complex CXX CUDA)
 #this tests that we can properly handle linking cuda and cpp together
 #and also building cpp targets that need cuda implicit libraries
 
-#verify that we can pass explicit cuda arch flags
-set(CMAKE_CUDA_ARCHITECTURES 30)
 set(CMAKE_CUDA_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)

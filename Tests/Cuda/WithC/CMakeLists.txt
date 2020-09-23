@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.18)
 project(WithC CUDA C)
-
-set(CMAKE_CUDA_ARCHITECTURES 30)
 
 add_executable(CudaWithC main.c cuda.cu)
 

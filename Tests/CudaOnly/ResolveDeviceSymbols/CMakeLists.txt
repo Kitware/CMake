@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.18)
 project (ResolveDeviceSymbols CUDA)
 
 # Find nm and dumpbin
@@ -21,8 +21,6 @@ endif()
 # confirming that the first static library is on the device link line
 # 3. Verify that we can't use those device symbols from anything that links
 # to the static library
-set(CMAKE_CUDA_ARCHITECTURES 30 50)
-
 add_library(CUDAResolveDeviceDepsA STATIC file1.cu)
 add_library(CUDAResolveDeviceDepsB STATIC file2.cu)
 target_compile_features(CUDAResolveDeviceDepsA PUBLIC cuda_std_11)

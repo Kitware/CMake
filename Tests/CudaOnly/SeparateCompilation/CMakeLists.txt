@@ -1,6 +1,5 @@
-
-cmake_minimum_required(VERSION 3.7)
-project (SeparateCompilation CUDA)
+cmake_minimum_required(VERSION 3.18)
+project(SeparateCompilation CUDA)
 
 #Goal for this example:
 #Build a static library that defines multiple methods and kernels that
@@ -9,7 +8,6 @@ project (SeparateCompilation CUDA)
 #and executables.
 #We complicate the matter by also testing that multiple static libraries
 #all containing cuda separable compilation code links properly
-set(CMAKE_CUDA_ARCHITECTURES 30 35 50 52)
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 add_library(CUDASeparateLibA STATIC file1.cu file2.cu file3.cu)
 target_compile_features(CUDASeparateLibA PRIVATE cuda_std_11)
