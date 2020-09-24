@@ -1284,9 +1284,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReference(
 
 bool cmGlobalXCodeGenerator::SpecialTargetEmitted(std::string const& tname)
 {
-  if (tname == "ALL_BUILD" || tname == "XCODE_DEPEND_HELPER" ||
-      tname == "install" || tname == "package" || tname == "RUN_TESTS" ||
-      tname == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
+  if (tname == "ALL_BUILD" || tname == "install" || tname == "package" ||
+      tname == "RUN_TESTS" || tname == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
     if (this->TargetDoneSet.find(tname) != this->TargetDoneSet.end()) {
       return true;
     }
@@ -3986,7 +3985,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   for (auto t : targets) {
     this->AddDependAndLinkInformation(t);
   }
-  this->CreateXCodeDependHackTarget(targets);
+  this->CreateXCodeDependHackMakefile(targets);
   // now add all targets to the root object
   cmXCodeObject* allTargets = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   for (auto t : targets) {
@@ -4046,7 +4045,7 @@ void cmGlobalXCodeGenerator::ComputeObjectDirArch(cmMakefile* mf)
   }
 }
 
-void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
+void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
   std::vector<cmXCodeObject*>& targets)
 {
   cmGeneratedFileStream makefileStream(this->CurrentXCodeHackMakefile);
