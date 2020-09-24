@@ -100,6 +100,7 @@ protected:
   cmCTest* CTest;
   t_StringToString Options;
   t_StringToString PersistentOptions;
+  t_StringToString LogFileNames;
 
   cmCTestCommand* Command;
   int SubmitIndex;
