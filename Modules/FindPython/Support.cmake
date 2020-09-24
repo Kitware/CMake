@@ -612,7 +612,7 @@ function (_PYTHON_GET_VERSION)
           if (NOT config)
             # pyconfig.h can be a wrapper to a platform specific pyconfig.h
             # In this case, try to identify ABI from include directory
-            if (_${_PYTHON_PREFIX}_INCLUDE_DIR MATCHES "python${version_major}\.${version_minor}+([dmu]*)")
+            if (_${_PYTHON_PREFIX}_INCLUDE_DIR MATCHES "python${version_major}\\.${version_minor}+([dmu]*)")
               set (abi "${CMAKE_MATCH_1}")
             else()
               set (abi "")
