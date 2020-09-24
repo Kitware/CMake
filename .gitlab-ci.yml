@@ -109,7 +109,7 @@ test:fedora31-ninja:
     extends:
         - .fedora31_ninja
         - .cmake_test_linux
-        - .linux_builder_tags_qt
+        - .linux_builder_tags_x11
         - .cmake_test_artifacts
         - .run_automatically
     dependencies:

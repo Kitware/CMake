@@ -48,7 +48,7 @@ class QCMakeCacheModel : public QStandardItemModel
 {
   Q_OBJECT
 public:
-  QCMakeCacheModel(QObject* parent);
+  QCMakeCacheModel(QObject* parent = nullptr);
   ~QCMakeCacheModel();
 
   // roles used to retrieve extra data such has help strings, types of

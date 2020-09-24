@@ -119,6 +119,14 @@
         - linux
         - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
 
+.linux_builder_tags_x11:
+    tags:
+        - cmake
+        - docker
+        - linux
+        - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
+        - x11
+
 .linux_builder_tags_cuda:
     tags:
         - cmake

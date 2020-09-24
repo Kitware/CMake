@@ -81,7 +81,6 @@ endif()
 set(SRCS
   AddCacheEntry.cxx
   AddCacheEntry.h
-  CMakeSetup.cxx
   CMakeSetupDialog.cxx
   CMakeSetupDialog.h
   Compilers.h
@@ -150,11 +149,18 @@ endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_executable(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS} ${MANIFEST_FILE})
-target_link_libraries(cmake-gui CMakeLib Qt5::Core Qt5::Widgets ${CMake_QT_EXTRA_LIBRARIES})
+add_library(CMakeGUILib STATIC ${SRCS})
+# CMake_QT_EXTRA_LIBRARIES have to come before the main libraries on the link line
+target_link_libraries(CMakeGUILib PUBLIC CMakeLib ${CMake_QT_EXTRA_LIBRARIES} Qt5::Core Qt5::Widgets)
+
+add_library(CMakeGUIMainLib STATIC CMakeSetup.cxx)
+target_link_libraries(CMakeGUIMainLib PUBLIC CMakeGUILib)
+
+add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx ${MANIFEST_FILE})
+target_link_libraries(cmake-gui CMakeGUIMainLib Qt5::Core)
 
 if(WIN32)
-  target_sources(cmake-gui PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
+  target_sources(CMakeGUILib INTERFACE $<TARGET_OBJECTS:CMakeVersion>)
 endif()
 
 if(CMake_JOB_POOL_LINK_BIN)
@@ -163,7 +169,7 @@ endif()
 
 # cmake-gui has not been updated for `include-what-you-use`.
 # Block the tool until this is done.
-set_target_properties(cmake-gui PROPERTIES
+set_target_properties(CMakeGUILib CMakeGUIMainLib cmake-gui PROPERTIES
   CXX_INCLUDE_WHAT_YOU_USE ""
   )
 
