@@ -22,4 +22,5 @@ private slots:
   void sourceBinaryArgs_data();
   void simpleConfigure();
   void simpleConfigure_data();
+  void environment();
 };

@@ -65,6 +65,7 @@ protected slots:
   void setCacheModified();
   void removeSelectedCacheEntries();
   void selectionChanged();
+  void editEnvironment();
   void addCacheEntry();
   void startSearch();
   void setDebugOutput(bool);

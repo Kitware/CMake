@@ -58,6 +58,13 @@ add_cmake_gui_lib_test(CatchShow
   MOC_SOURCES
     CatchShowTest.h
   )
+add_cmake_gui_lib_test(EnvironmentDialog
+  SOURCES
+    EnvironmentDialogTest.cxx
+    EnvironmentDialogTest.h
+  MOC_SOURCES
+    EnvironmentDialogTest.h
+  )
 add_cmake_gui_lib_test(QCMakeCacheModel
   SOURCES
     QCMakeCacheModelTest.cxx

@@ -143,6 +143,35 @@ void CMakeGUITest::simpleConfigure_data()
                         << -1;
 }
 
+void CMakeGUITest::environment()
+{
+  auto* cmake = this->m_window->findChild<QCMakeThread*>()->cmakeInstance();
+
+  this->m_window->SourceDirectory->setText(CMakeGUITest_BINARY_DIR
+                                           "/environment/src");
+  this->m_window->BinaryDirectory->setCurrentText(CMakeGUITest_BINARY_DIR
+                                                  "/environment/build");
+
+  // We are already testing EnvironmentDialog, so just trust that it's
+  // connected correctly and modify the environment directly.
+  auto env = cmake->environment();
+  env.insert("ADDED_VARIABLE", "Added variable");
+  env.insert("CHANGED_VARIABLE", "Changed variable");
+  env.remove("REMOVED_VARIABLE");
+  cmake->setEnvironment(env);
+
+  // Wait a bit for everything to update
+  loopSleep();
+
+  this->tryConfigure();
+
+  auto penv = QProcessEnvironment::systemEnvironment();
+  QVERIFY(!penv.contains("ADDED_VARIABLE"));
+  QCOMPARE(penv.value("KEPT_VARIABLE"), "Kept variable");
+  QCOMPARE(penv.value("CHANGED_VARIABLE"), "This variable will be changed");
+  QCOMPARE(penv.value("REMOVED_VARIABLE"), "Removed variable");
+}
+
 void SetupDefaultQSettings()
 {
   QSettings::setDefaultFormat(QSettings::IniFormat);

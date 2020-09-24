@@ -112,3 +112,9 @@ run_cmake_gui_test(sourceBinaryArgs:noExistConfigExists
 
 run_cmake_gui_test(simpleConfigure:success)
 run_cmake_gui_test(simpleConfigure:fail)
+
+unset(ENV{ADDED_VARIABLE})
+set(ENV{KEPT_VARIABLE} "Kept variable")
+set(ENV{CHANGED_VARIABLE} "This variable will be changed")
+set(ENV{REMOVED_VARIABLE} "Removed variable")
+run_cmake_gui_test(environment)

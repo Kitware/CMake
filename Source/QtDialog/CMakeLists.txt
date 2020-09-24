@@ -84,6 +84,8 @@ set(SRCS
   CMakeSetupDialog.cxx
   CMakeSetupDialog.h
   Compilers.h
+  EnvironmentDialog.cxx
+  EnvironmentDialog.h
   FirstConfigure.cxx
   FirstConfigure.h
   QCMake.cxx
@@ -102,6 +104,7 @@ qt5_wrap_ui(UI_SRCS
   Compilers.ui
   CrossCompiler.ui
   AddCacheEntry.ui
+  EnvironmentDialog.ui
   RegexExplorer.ui
   WarningMessagesDialog.ui
   )
@@ -109,6 +112,7 @@ qt5_wrap_cpp(MOC_SRCS
   AddCacheEntry.h
   Compilers.h
   CMakeSetupDialog.h
+  EnvironmentDialog.h
   FirstConfigure.h
   QCMake.h
   QCMakeCacheView.h
