@@ -1,0 +1,2 @@
+CMake Error at VersionRangeWithEXACT.cmake:[0-9]+ \(find_package\):
+  find_package EXACT cannot be specified with a version range.
