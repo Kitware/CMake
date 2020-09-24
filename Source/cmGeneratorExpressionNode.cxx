@@ -1664,9 +1664,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       if (context->EvaluateForBuildsystem) {
         // Use object file directory with buildsystem placeholder.
         obj_dir = gt->ObjectDirectory;
-        // Here we assume that the set of object files produced
-        // by an object library does not vary with configuration
-        // and do not set HadContextSensitiveCondition to true.
+        context->HadContextSensitiveCondition =
+          gt->HasContextDependentSources();
       } else {
         // Use object file directory with per-config location.
         obj_dir = gt->GetObjectDirectory(context->Config);

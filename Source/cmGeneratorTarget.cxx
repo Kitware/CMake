@@ -276,8 +276,8 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   , DebugLinkDirectoriesDone(false)
   , DebugPrecompileHeadersDone(false)
   , DebugSourcesDone(false)
-  , LinkImplementationLanguageIsContextDependent(true)
   , UtilityItemsDone(false)
+  , SourcesAreContextDependent(Tribool::Indeterminate)
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = lg;
@@ -692,7 +692,7 @@ void cmGeneratorTarget::ClearSourcesCache()
 {
   this->AllConfigSources.clear();
   this->KindedSourcesMap.clear();
-  this->LinkImplementationLanguageIsContextDependent = true;
+  this->SourcesAreContextDependent = Tribool::Indeterminate;
   this->Objects.clear();
   this->VisitedConfigsForObjects.clear();
 }
@@ -1653,10 +1653,13 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
                                              uniqueSrcs, debugSources);
   }
 
+  // Determine if sources are context-dependent or not.
   if (!contextDependentDirectSources &&
       !(contextDependentInterfaceSources && numFilesBefore < files.size()) &&
       !(contextDependentObjects && numFilesBefore2 < files.size())) {
-    this->LinkImplementationLanguageIsContextDependent = false;
+    this->SourcesAreContextDependent = Tribool::False;
+  } else {
+    this->SourcesAreContextDependent = Tribool::True;
   }
 
   return files;
@@ -1731,9 +1734,9 @@ cmGeneratorTarget::GetSourceFilesWithoutObjectLibraries(
 cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
   std::string const& config) const
 {
-  // If we already processed one configuration and found no dependenc
+  // If we already processed one configuration and found no dependency
   // on configuration then always use the one result.
-  if (!this->LinkImplementationLanguageIsContextDependent) {
+  if (this->SourcesAreContextDependent == Tribool::False) {
     return this->KindedSourcesMap.begin()->second;
   }
 
@@ -7516,6 +7519,11 @@ bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& config,
     return true;
   }
   return false;
+}
+
+bool cmGeneratorTarget::HasContextDependentSources() const
+{
+  return this->SourcesAreContextDependent == Tribool::True;
 }
 
 bool cmGeneratorTarget::IsExecutableWithExports() const

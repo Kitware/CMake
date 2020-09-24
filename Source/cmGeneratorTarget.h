@@ -713,6 +713,10 @@ public:
   bool GetImplibGNUtoMS(std::string const& config, std::string const& gnuName,
                         std::string& out, const char* newExt = nullptr) const;
 
+  /** Can only ever return true if GetSourceFilePaths() was called before.
+      Otherwise, this is indeterminate and false will be assumed/returned!  */
+  bool HasContextDependentSources() const;
+
   bool IsExecutableWithExports() const;
 
   /** Return whether or not the target has a DLL import library.  */
@@ -1069,8 +1073,14 @@ private:
   mutable bool DebugLinkDirectoriesDone;
   mutable bool DebugPrecompileHeadersDone;
   mutable bool DebugSourcesDone;
-  mutable bool LinkImplementationLanguageIsContextDependent;
   mutable bool UtilityItemsDone;
+  enum class Tribool
+  {
+    False = 0x0,
+    True = 0x1,
+    Indeterminate = 0x2
+  };
+  mutable Tribool SourcesAreContextDependent;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;
