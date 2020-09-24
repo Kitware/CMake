@@ -76,6 +76,8 @@
 # include "posix.h"
 #elif defined(__HAIKU__)
 # include "posix.h"
+#elif defined(__QNX__)
+# include "posix.h"
 #endif
 
 #ifndef NI_MAXHOST
