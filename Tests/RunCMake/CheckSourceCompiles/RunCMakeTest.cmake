@@ -14,3 +14,7 @@ endif()
 if (CMAKE_Fortran_COMPILER_ID)
   run_cmake(CheckFortranSourceCompiles)
 endif()
+
+if(CMake_TEST_ISPC)
+  run_cmake(CheckISPCSourceCompiles)
+endif()
