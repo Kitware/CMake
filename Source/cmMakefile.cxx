@@ -285,12 +285,7 @@ cmListFileBacktrace cmMakefile::GetBacktrace(cmCommandContext const& cc) const
 
 cmListFileContext cmMakefile::GetExecutionContext() const
 {
-  cmListFileContext const& cur = this->Backtrace.Top();
-  cmListFileContext lfc;
-  lfc.Name = cur.Name;
-  lfc.Line = cur.Line;
-  lfc.FilePath = this->StateSnapshot.GetExecutionListFile();
-  return lfc;
+  return this->Backtrace.Top();
 }
 
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
