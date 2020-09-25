@@ -227,7 +227,7 @@ private:
                          std::vector<cmXCodeObject*>&);
   bool IsHeaderFile(cmSourceFile*);
   void AddDependTarget(cmXCodeObject* target, cmXCodeObject* dependTarget);
-  void CreateXCodeDependHackTarget(std::vector<cmXCodeObject*>& targets);
+  void CreateXCodeDependHackMakefile(std::vector<cmXCodeObject*>& targets);
   bool SpecialTargetEmitted(std::string const& tname);
   void SetGenerationRoot(cmLocalGenerator* root);
   void AddExtraTargets(cmLocalGenerator* root,

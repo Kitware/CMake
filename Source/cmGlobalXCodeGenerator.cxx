@@ -621,10 +621,14 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   root->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(allbuild, root));
 
   // Add XCODE depend helper
-  std::string dir = root->GetCurrentBinaryDirectory();
-  cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
-    { "make", "-C", dir, "-f", this->CurrentXCodeHackMakefile,
-      "OBJDIR=$(OBJDIR)", /* placeholder, see below */ "" });
+  std::string legacyDependHelperDir = root->GetCurrentBinaryDirectory();
+  cmCustomCommandLines legacyDependHelperCommandLines;
+  if (this->XcodeBuildSystem == BuildSystem::One) {
+    legacyDependHelperCommandLines = cmMakeSingleCommandLine(
+      { "make", "-C", legacyDependHelperDir, "-f",
+        this->CurrentXCodeHackMakefile, "OBJDIR=$(OBJDIR)",
+        /* placeholder, see below */ "" });
+  }
 
   // Add ZERO_CHECK
   bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
@@ -663,15 +667,15 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       // run the depend check makefile as a post build rule
       // this will make sure that when the next target is built
       // things are up-to-date
-      if (isGenerateProject &&
+      if (this->XcodeBuildSystem == BuildSystem::One && isGenerateProject &&
           target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        commandLines.front().back() = // fill placeholder
+        legacyDependHelperCommandLines.front().back() = // fill placeholder
           this->PostBuildMakeTarget(target->GetName(), "$(CONFIGURATION)");
         gen->AddCustomCommandToTarget(
-          target->GetName(), no_byproducts, no_depends, commandLines,
-          cmCustomCommandType::POST_BUILD, "Depend check for xcode",
-          dir.c_str(), true, false, "", "", false,
-          cmObjectLibraryCommands::Accept);
+          target->GetName(), no_byproducts, no_depends,
+          legacyDependHelperCommandLines, cmCustomCommandType::POST_BUILD,
+          "Depend check for xcode", legacyDependHelperDir.c_str(), true, false,
+          "", "", false, cmObjectLibraryCommands::Accept);
       }
 
       if (!this->IsExcluded(gens[0], target.get())) {
@@ -1284,9 +1288,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReference(
 
 bool cmGlobalXCodeGenerator::SpecialTargetEmitted(std::string const& tname)
 {
-  if (tname == "ALL_BUILD" || tname == "XCODE_DEPEND_HELPER" ||
-      tname == "install" || tname == "package" || tname == "RUN_TESTS" ||
-      tname == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
+  if (tname == "ALL_BUILD" || tname == "install" || tname == "package" ||
+      tname == "RUN_TESTS" || tname == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
     if (this->TargetDoneSet.find(tname) != this->TargetDoneSet.end()) {
       return true;
     }
@@ -3986,7 +3989,9 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   for (auto t : targets) {
     this->AddDependAndLinkInformation(t);
   }
-  this->CreateXCodeDependHackTarget(targets);
+  if (this->XcodeBuildSystem == BuildSystem::One) {
+    this->CreateXCodeDependHackMakefile(targets);
+  }
   // now add all targets to the root object
   cmXCodeObject* allTargets = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   for (auto t : targets) {
@@ -4046,7 +4051,7 @@ void cmGlobalXCodeGenerator::ComputeObjectDirArch(cmMakefile* mf)
   }
 }
 
-void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
+void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
   std::vector<cmXCodeObject*>& targets)
 {
   cmGeneratedFileStream makefileStream(this->CurrentXCodeHackMakefile);
