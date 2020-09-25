@@ -283,11 +283,6 @@ cmListFileBacktrace cmMakefile::GetBacktrace(cmCommandContext const& cc) const
   return this->Backtrace.Push(lfc);
 }
 
-cmListFileContext cmMakefile::GetExecutionContext() const
-{
-  return this->Backtrace.Top();
-}
-
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
   // Check if current file in the list of requested to trace...
@@ -3419,7 +3414,7 @@ void cmMakefile::AddFunctionBlocker(std::unique_ptr<cmFunctionBlocker> fb)
 {
   if (!this->ExecutionStatusStack.empty()) {
     // Record the context in which the blocker is created.
-    fb->SetStartingContext(this->GetExecutionContext());
+    fb->SetStartingContext(this->Backtrace.Top());
   }
 
   this->FunctionBlockers.push(std::move(fb));

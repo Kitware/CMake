@@ -641,7 +641,6 @@ public:
    */
   cmListFileBacktrace GetBacktrace() const;
   cmListFileBacktrace GetBacktrace(cmCommandContext const& lfc) const;
-  cmListFileContext GetExecutionContext() const;
 
   /**
    * Get the vector of  files created by this makefile

@@ -179,7 +179,7 @@ bool cmIfCommand(std::vector<cmListFileArgument> const& args,
   MessageType status;
 
   cmConditionEvaluator conditionEvaluator(
-    makefile, makefile.GetExecutionContext(), makefile.GetBacktrace());
+    makefile, makefile.GetBacktrace().Top(), makefile.GetBacktrace());
 
   bool isTrue =
     conditionEvaluator.IsTrue(expandedArguments, errorString, status);
