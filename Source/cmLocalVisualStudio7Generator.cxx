@@ -1081,11 +1081,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       if (stackVal) {
         fout << "\t\t\t\tStackReserveSize=\"" << *stackVal << "\"\n";
       }
-      temp = cmStrCat(
-        target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact),
-        '/', targetNames.ImportLibrary);
-      fout << "\t\t\t\tImportLibrary=\""
-           << this->ConvertToXMLOutputPathSingle(temp) << "\"";
+      if (!targetNames.ImportLibrary.empty()) {
+        temp = cmStrCat(target->GetDirectory(
+                          configName, cmStateEnums::ImportLibraryArtifact),
+                        '/', targetNames.ImportLibrary);
+        fout << "\t\t\t\tImportLibrary=\""
+             << this->ConvertToXMLOutputPathSingle(temp) << "\"";
+      }
       if (this->FortranProject) {
         fout << "\n\t\t\t\tLinkDLL=\"true\"";
       }
