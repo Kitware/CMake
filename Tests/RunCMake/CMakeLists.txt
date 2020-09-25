@@ -129,6 +129,7 @@ add_RunCMake_test(CMP0115)
 if(CMAKE_GENERATOR MATCHES "Ninja")
   add_RunCMake_test(CMP0116)
 endif()
+add_RunCMake_test(CMP0118)
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
