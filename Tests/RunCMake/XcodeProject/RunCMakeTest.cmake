@@ -142,8 +142,8 @@ if(NOT XCODE_VERSION VERSION_LESS 5)
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
   run_cmake(XcodeBundles)
-  run_cmake_command(XcodeBundles-build ${CMAKE_COMMAND} --build .)
-  run_cmake_command(XcodeBundles-install ${CMAKE_COMMAND} --build . --target install)
+  run_cmake_command(XcodeBundles-build-macOS ${CMAKE_COMMAND} --build .)
+  run_cmake_command(XcodeBundles-install-macOS ${CMAKE_COMMAND} --build . --target install)
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
@@ -159,8 +159,8 @@ if(NOT XCODE_VERSION VERSION_LESS 5)
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
   run_cmake(XcodeBundles)
-  run_cmake_command(XcodeBundles-build ${CMAKE_COMMAND} --build .)
-  run_cmake_command(XcodeBundles-install ${CMAKE_COMMAND} --build . --target install)
+  run_cmake_command(XcodeBundles-build-iOS ${CMAKE_COMMAND} --build .)
+  run_cmake_command(XcodeBundles-install-iOS ${CMAKE_COMMAND} --build . --target install)
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
@@ -178,8 +178,8 @@ if(NOT XCODE_VERSION VERSION_LESS 7)
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
   run_cmake(XcodeBundles)
-  run_cmake_command(XcodeBundles-build ${CMAKE_COMMAND} --build .)
-  run_cmake_command(XcodeBundles-install ${CMAKE_COMMAND} --build . --target install)
+  run_cmake_command(XcodeBundles-build-watchOS ${CMAKE_COMMAND} --build .)
+  run_cmake_command(XcodeBundles-install-watchOS ${CMAKE_COMMAND} --build . --target install)
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
@@ -197,8 +197,8 @@ if(NOT XCODE_VERSION VERSION_LESS 7.1)
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
   run_cmake(XcodeBundles)
-  run_cmake_command(XcodeBundles-build ${CMAKE_COMMAND} --build .)
-  run_cmake_command(XcodeBundles-install ${CMAKE_COMMAND} --build . --target install)
+  run_cmake_command(XcodeBundles-build-tvOS ${CMAKE_COMMAND} --build .)
+  run_cmake_command(XcodeBundles-install-tvOS ${CMAKE_COMMAND} --build . --target install)
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
