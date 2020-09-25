@@ -13,6 +13,7 @@ __compiler_clang_cxx_standards(CUDA)
 set(CMAKE_CUDA_COMPILER_HAS_DEVICE_LINK_PHASE TRUE)
 set(_CMAKE_COMPILE_AS_CUDA_FLAG "-x cuda")
 set(_CMAKE_CUDA_PTX_FLAG "--cuda-device-only -S")
+set(_CMAKE_CUDA_DEVICE_CODE "-fgpu-rdc -c")
 
 # RulePlaceholderExpander expands crosscompile variables like sysroot and target only for CMAKE_<LANG>_COMPILER. Override the default.
 set(CMAKE_CUDA_LINK_EXECUTABLE "<CMAKE_CUDA_COMPILER> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>${__IMPLICT_LINKS}")

@@ -64,6 +64,8 @@ public:
     const char* SwiftOutputFileMap;
     const char* SwiftSources;
     const char* ISPCHeader;
+    const char* Fatbinary;
+    const char* RegisterFile;
   };
 
   // Expand rule variables in CMake of the type found in language rules

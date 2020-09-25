@@ -1955,17 +1955,6 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   } else if (lang == "CUDA") {
     target->AddCUDAArchitectureFlags(flags);
     target->AddCUDAToolkitFlags(flags);
-
-    if (compiler == "Clang") {
-      bool separable = target->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION");
-
-      if (separable) {
-        this->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          "CUDA_SEPARABLE_COMPILATION isn't supported on Clang. "
-          "See CMake issue #20726.");
-      }
-    }
   } else if (lang == "ISPC") {
     target->AddISPCTargetFlags(flags);
   }
