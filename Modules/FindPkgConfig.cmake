@@ -31,7 +31,13 @@ set(PKG_CONFIG_VERSION 1)
 if((NOT PKG_CONFIG_EXECUTABLE) AND (NOT "$ENV{PKG_CONFIG}" STREQUAL ""))
   set(PKG_CONFIG_EXECUTABLE "$ENV{PKG_CONFIG}" CACHE FILEPATH "pkg-config executable")
 endif()
-find_program(PKG_CONFIG_EXECUTABLE NAMES pkg-config DOC "pkg-config executable")
+
+set(PKG_CONFIG_NAMES "pkg-config")
+if(CMAKE_HOST_WIN32)
+  list(PREPEND PKG_CONFIG_NAMES "pkg-config.bat")
+endif()
+
+find_program(PKG_CONFIG_EXECUTABLE NAMES ${PKG_CONFIG_NAMES} DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
 set(_PKG_CONFIG_FAILURE_MESSAGE "")
