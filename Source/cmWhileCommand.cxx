@@ -69,8 +69,7 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
 
   cmListFileBacktrace whileBT =
     mf.GetBacktrace().Push(this->GetStartingContext());
-  cmConditionEvaluator conditionEvaluator(mf, this->GetStartingContext(),
-                                          whileBT);
+  cmConditionEvaluator conditionEvaluator(mf, whileBT);
 
   bool isTrue =
     conditionEvaluator.IsTrue(expandedArguments, errorString, messageType);

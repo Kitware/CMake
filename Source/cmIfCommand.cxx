@@ -120,12 +120,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
 
         MessageType messType;
 
-        cmListFileContext conditionContext =
-          cmListFileContext::FromCommandContext(
-            func, this->GetStartingContext().FilePath);
-
-        cmConditionEvaluator conditionEvaluator(mf, conditionContext,
-                                                elseifBT);
+        cmConditionEvaluator conditionEvaluator(mf, elseifBT);
 
         bool isTrue =
           conditionEvaluator.IsTrue(expandedArguments, errorString, messType);
@@ -180,8 +175,7 @@ bool cmIfCommand(std::vector<cmListFileArgument> const& args,
 
   MessageType status;
 
-  cmConditionEvaluator conditionEvaluator(
-    makefile, makefile.GetBacktrace().Top(), makefile.GetBacktrace());
+  cmConditionEvaluator conditionEvaluator(makefile, makefile.GetBacktrace());
 
   bool isTrue =
     conditionEvaluator.IsTrue(expandedArguments, errorString, status);
