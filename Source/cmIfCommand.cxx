@@ -75,10 +75,12 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     if (scopeDepth == 0 && func.Name.Lower == "else") {
 
       if (this->ElseSeen) {
-        cmListFileBacktrace bt = mf.GetBacktrace(func);
+        cmListFileBacktrace elseBT = mf.GetBacktrace().Push(
+          cmListFileContext{ func.Name.Original,
+                             this->GetStartingContext().FilePath, func.Line });
         mf.GetCMakeInstance()->IssueMessage(
           MessageType::FATAL_ERROR,
-          "A duplicate ELSE command was found inside an IF block.", bt);
+          "A duplicate ELSE command was found inside an IF block.", elseBT);
         cmSystemTools::SetFatalErrorOccured();
         return true;
       }
@@ -93,11 +95,12 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         mf.PrintCommandTrace(func);
       }
     } else if (scopeDepth == 0 && func.Name.Lower == "elseif") {
+      cmListFileBacktrace elseifBT = mf.GetBacktrace().Push(cmListFileContext{
+        func.Name.Original, this->GetStartingContext().FilePath, func.Line });
       if (this->ElseSeen) {
-        cmListFileBacktrace bt = mf.GetBacktrace(func);
         mf.GetCMakeInstance()->IssueMessage(
           MessageType::FATAL_ERROR,
-          "An ELSEIF command was found after an ELSE command.", bt);
+          "An ELSEIF command was found after an ELSE command.", elseifBT);
         cmSystemTools::SetFatalErrorOccured();
         return true;
       }
@@ -122,7 +125,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
             func, this->GetStartingContext().FilePath);
 
         cmConditionEvaluator conditionEvaluator(mf, conditionContext,
-                                                mf.GetBacktrace(func));
+                                                elseifBT);
 
         bool isTrue =
           conditionEvaluator.IsTrue(expandedArguments, errorString, messType);
@@ -130,8 +133,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         if (!errorString.empty()) {
           std::string err =
             cmStrCat(cmIfCommandError(expandedArguments), errorString);
-          cmListFileBacktrace bt = mf.GetBacktrace(func);
-          mf.GetCMakeInstance()->IssueMessage(messType, err, bt);
+          mf.GetCMakeInstance()->IssueMessage(messType, err, elseifBT);
           if (messType == MessageType::FATAL_ERROR) {
             cmSystemTools::SetFatalErrorOccured();
             return true;
