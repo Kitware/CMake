@@ -1195,8 +1195,8 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
     config_upper = cmSystemTools::UpperCase(config);
   }
 
-  using IncludeCacheType = std::map<std::string, std::vector<std::string>>;
-  auto iter = this->SystemIncludesCache.find(config_upper);
+  std::string key = cmStrCat(config_upper, "/", language);
+  auto iter = this->SystemIncludesCache.find(key);
 
   if (iter == this->SystemIncludesCache.end()) {
     cmGeneratorExpressionDAGChecker dagChecker(
@@ -1224,8 +1224,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
     std::sort(result.begin(), result.end());
     result.erase(std::unique(result.begin(), result.end()), result.end());
 
-    IncludeCacheType::value_type entry(config_upper, result);
-    iter = this->SystemIncludesCache.insert(entry).first;
+    iter = this->SystemIncludesCache.emplace(key, result).first;
   }
 
   return std::binary_search(iter->second.begin(), iter->second.end(), dir);
