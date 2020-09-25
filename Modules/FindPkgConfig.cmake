@@ -47,7 +47,9 @@ if (PKG_CONFIG_EXECUTABLE)
     string(APPEND _PKG_CONFIG_FAILURE_MESSAGE
       "The command\n"
       "      \"${PKG_CONFIG_EXECUTABLE}\" --version\n"
-      "    failed with output\n${_PKG_CONFIG_VERSION_ERROR}"
+      "    failed with output:\n${PKG_CONFIG_VERSION_STRING}\n"
+      "    stderr: \n${_PKG_CONFIG_VERSION_ERROR}\n"
+      "    result: \n${_PKG_CONFIG_VERSION_RESULT}"
       )
     set(PKG_CONFIG_EXECUTABLE "")
     unset(PKG_CONFIG_VERSION_STRING)
