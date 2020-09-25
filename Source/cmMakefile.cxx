@@ -274,15 +274,6 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
   return this->Backtrace;
 }
 
-cmListFileBacktrace cmMakefile::GetBacktrace(cmCommandContext const& cc) const
-{
-  cmListFileContext lfc;
-  lfc.Name = cc.Name.Original;
-  lfc.Line = cc.Line;
-  lfc.FilePath = this->StateSnapshot.GetExecutionListFile();
-  return this->Backtrace.Push(lfc);
-}
-
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
   // Check if current file in the list of requested to trace...
