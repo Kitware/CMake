@@ -47,17 +47,18 @@ StartCompilerSetup::StartCompilerSetup(QString defaultGeneratorPlatform,
 
   this->CompilerSetupOptions[0]->setChecked(true);
 
-  QObject::connect(this->CompilerSetupOptions[0], SIGNAL(toggled(bool)), this,
-                   SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->CompilerSetupOptions[1], SIGNAL(toggled(bool)), this,
-                   SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->CompilerSetupOptions[2], SIGNAL(toggled(bool)), this,
-                   SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->CompilerSetupOptions[3], SIGNAL(toggled(bool)), this,
-                   SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->GeneratorOptions,
-                   SIGNAL(currentIndexChanged(QString const&)), this,
-                   SLOT(onGeneratorChanged(QString const&)));
+  QObject::connect(this->CompilerSetupOptions[0], &QRadioButton::toggled, this,
+                   &StartCompilerSetup::onSelectionChanged);
+  QObject::connect(this->CompilerSetupOptions[1], &QRadioButton::toggled, this,
+                   &StartCompilerSetup::onSelectionChanged);
+  QObject::connect(this->CompilerSetupOptions[2], &QRadioButton::toggled, this,
+                   &StartCompilerSetup::onSelectionChanged);
+  QObject::connect(this->CompilerSetupOptions[3], &QRadioButton::toggled, this,
+                   &StartCompilerSetup::onSelectionChanged);
+  QObject::connect(
+    this->GeneratorOptions,
+    static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+    this, &StartCompilerSetup::onGeneratorChanged);
 }
 
 QFrame* StartCompilerSetup::CreateToolsetWidgets()
@@ -186,8 +187,10 @@ void StartCompilerSetup::onSelectionChanged(bool on)
   }
 }
 
-void StartCompilerSetup::onGeneratorChanged(QString const& name)
+void StartCompilerSetup::onGeneratorChanged(int index)
 {
+  QString name = this->GeneratorOptions->itemText(index);
+
   // Display the generator platform for the generators supporting it
   if (GeneratorsSupportingPlatform.contains(name)) {
 
@@ -458,9 +461,9 @@ FirstConfigure::FirstConfigure()
   this->mStartCompilerSetupPage = new StartCompilerSetup(
     env_generator_platform, env_generator_toolset, this);
   this->setPage(Start, this->mStartCompilerSetupPage);
-  QObject::connect(this->mStartCompilerSetupPage, SIGNAL(selectionChanged()),
-                   this, SLOT(restart()));
-
+  QObject::connect(this->mStartCompilerSetupPage,
+                   &StartCompilerSetup::selectionChanged, this,
+                   &FirstConfigure::restart);
   this->mNativeCompilerSetupPage = new NativeCompilerSetup(this);
   this->setPage(NativeSetup, this->mNativeCompilerSetupPage);
 

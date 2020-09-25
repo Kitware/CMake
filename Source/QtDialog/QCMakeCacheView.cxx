@@ -576,15 +576,15 @@ QWidget* QCMakeCacheModelDelegate::createEditor(
   if (type == QCMakeProperty::PATH) {
     QCMakePathEditor* editor =
       new QCMakePathEditor(p, var.data(Qt::DisplayRole).toString());
-    QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
-                     SLOT(setFileDialogFlag(bool)));
+    QObject::connect(editor, &QCMakePathEditor::fileDialogExists, this,
+                     &QCMakeCacheModelDelegate::setFileDialogFlag);
     return editor;
   }
   if (type == QCMakeProperty::FILEPATH) {
     QCMakeFilePathEditor* editor =
       new QCMakeFilePathEditor(p, var.data(Qt::DisplayRole).toString());
-    QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
-                     SLOT(setFileDialogFlag(bool)));
+    QObject::connect(editor, &QCMakePathEditor::fileDialogExists, this,
+                     &QCMakeCacheModelDelegate::setFileDialogFlag);
     return editor;
   }
   if (type == QCMakeProperty::STRING &&
