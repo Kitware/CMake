@@ -10,10 +10,20 @@ include_directories(
 
 set(MOC_SRCS)
 qt5_wrap_cpp(MOC_SRCS
+  CatchShow.h
+  )
+add_library(CMakeGUITestLib STATIC ${MOC_SRCS}
+  CatchShow.cxx
+  CatchShow.h
+  )
+target_link_libraries(CMakeGUITestLib Qt5::Core Qt5::Gui Qt5::Widgets)
+
+set(MOC_SRCS)
+qt5_wrap_cpp(MOC_SRCS
   CMakeGUITest.h
   )
 add_executable(CMakeGUITest CMakeGUITest.cxx ${MOC_SRCS})
-target_link_libraries(CMakeGUITest CMakeGUIMainLib Qt5::Core Qt5::Test Qt5::Widgets)
+target_link_libraries(CMakeGUITest CMakeGUIMainLib CMakeGUITestLib Qt5::Core Qt5::Test Qt5::Widgets)
 target_compile_definitions(CMakeGUITest PRIVATE
   "CMakeGUITest_SOURCE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\""
   "CMakeGUITest_BINARY_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\""
@@ -35,11 +45,18 @@ function(add_cmake_gui_lib_test name)
     ${_t_MOC_SOURCES}
     )
   add_executable(${name} ${_t_SOURCES} ${MOC_SRCS})
-  target_link_libraries(${name} CMakeGUILib Qt5::Core Qt5::Test Qt5::Widgets)
+  target_link_libraries(${name} CMakeGUILib CMakeGUITestLib Qt5::Core Qt5::Test Qt5::Widgets)
 
   add_test(NAME "CMakeGUILib.${name}" COMMAND ${name})
 endfunction()
 
+add_cmake_gui_lib_test(CatchShow
+  SOURCES
+    CatchShowTest.cxx
+    CatchShowTest.h
+  MOC_SOURCES
+    CatchShowTest.h
+  )
 add_cmake_gui_lib_test(QCMakeCacheModel
   SOURCES
     QCMakeCacheModelTest.cxx
