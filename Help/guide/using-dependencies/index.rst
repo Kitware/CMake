@@ -31,7 +31,7 @@ See the :guide:`User Interaction Guide` for
 more about setting cache entries.
 
 Libraries providing Config-file packages
-----------------------------------------
+========================================
 
 The most convenient way for a third-party to provide library
 binaries for use with CMake is to provide
@@ -115,7 +115,7 @@ file, such as ``/opt/somepackage/lib/cmake/SomePackage/`` in
 the above example.
 
 Imported Targets from Packages
-------------------------------
+==============================
 
 A third-party package which provides config-file packages may
 also provide :ref:`Imported targets`. These will be
