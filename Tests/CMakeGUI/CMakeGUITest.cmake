@@ -109,3 +109,6 @@ run_cmake_gui_test(sourceBinaryArgs:noExistConfigExists
   ARGS
     "${CMakeGUITest_BINARY_DIR}/sourceBinaryArgs-noExistConfigExists/noexist"
   )
+
+run_cmake_gui_test(simpleConfigure:success)
+run_cmake_gui_test(simpleConfigure:fail)

@@ -15,7 +15,11 @@ public:
 private:
   CMakeSetupDialog* m_window = nullptr;
 
+  void tryConfigure(int expectedResult = 0, int timeout = 60000);
+
 private slots:
   void sourceBinaryArgs();
   void sourceBinaryArgs_data();
+  void simpleConfigure();
+  void simpleConfigure_data();
 };

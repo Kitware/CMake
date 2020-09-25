@@ -27,6 +27,7 @@ target_link_libraries(CMakeGUITest CMakeGUIMainLib CMakeGUITestLib Qt5::Core Qt5
 target_compile_definitions(CMakeGUITest PRIVATE
   "CMakeGUITest_SOURCE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\""
   "CMakeGUITest_BINARY_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\""
+  "CMAKE_GENERATOR=\"${CMAKE_GENERATOR}\""
   )
 
 add_test(NAME CMakeGUI COMMAND ${CMAKE_CMAKE_COMMAND}
