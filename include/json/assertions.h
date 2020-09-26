@@ -3,10 +3,10 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#ifndef CPPTL_JSON_ASSERTIONS_H_INCLUDED
-#define CPPTL_JSON_ASSERTIONS_H_INCLUDED
+#ifndef JSON_ASSERTIONS_H_INCLUDED
+#define JSON_ASSERTIONS_H_INCLUDED
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <sstream>
 
 #if !defined(JSON_IS_AMALGAMATION)
@@ -20,35 +20,42 @@
 #if JSON_USE_EXCEPTION
 
 // @todo <= add detail about condition in exception
-# define JSON_ASSERT(condition)                                                \
-  {if (!(condition)) {Json::throwLogicError( "assert json failed" );}}
+#define JSON_ASSERT(condition)                                                 \
+  do {                                                                         \
+    if (!(condition)) {                                                        \
+      Json::throwLogicError("assert json failed");                             \
+    }                                                                          \
+  } while (0)
 
-# define JSON_FAIL_MESSAGE(message)                                            \
-  {                                                                            \
-    JSONCPP_OSTRINGSTREAM oss; oss << message;                                    \
+#define JSON_FAIL_MESSAGE(message)                                             \
+  do {                                                                         \
+    OStringStream oss;                                                         \
+    oss << message;                                                            \
     Json::throwLogicError(oss.str());                                          \
     abort();                                                                   \
-  }
+  } while (0)
 
 #else // JSON_USE_EXCEPTION
 
-# define JSON_ASSERT(condition) assert(condition)
+#define JSON_ASSERT(condition) assert(condition)
 
 // The call to assert() will show the failure message in debug builds. In
 // release builds we abort, for a core-dump or debugger.
-# define JSON_FAIL_MESSAGE(message)                                            \
+#define JSON_FAIL_MESSAGE(message)                                             \
   {                                                                            \
-    JSONCPP_OSTRINGSTREAM oss; oss << message;                                    \
+    OStringStream oss;                                                         \
+    oss << message;                                                            \
     assert(false && oss.str().c_str());                                        \
     abort();                                                                   \
   }
 
-
 #endif
 
 #define JSON_ASSERT_MESSAGE(condition, message)                                \
-  if (!(condition)) {                                                          \
-    JSON_FAIL_MESSAGE(message);                                                \
-  }
+  do {                                                                         \
+    if (!(condition)) {                                                        \
+      JSON_FAIL_MESSAGE(message);                                              \
+    }                                                                          \
+  } while (0)
 
-#endif // CPPTL_JSON_ASSERTIONS_H_INCLUDED
+#endif // JSON_ASSERTIONS_H_INCLUDED
