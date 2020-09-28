@@ -531,7 +531,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       else()
         set(FPCV_HANDLE_VERSION_RANGE NO_AUTHOR_WARNING_VERSION_RANGE)
       endif()
-      find_package_check_version (${_FOUND_VERSION} VERSION_OK RESULT_MESSAGE_VARIABLE VERSION_MSG
+      find_package_check_version ("${_FOUND_VERSION}" VERSION_OK RESULT_MESSAGE_VARIABLE VERSION_MSG
         ${FPCV_HANDLE_VERSION_RANGE})
     else()
       # if the package was not found, but a version was given, add that to the output:
