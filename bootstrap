@@ -1675,6 +1675,10 @@ else
       uv_c_flags="${uv_c_flags} -D__EXTENSIONS__ -D_XOPEN_SOURCE=600"
       libs="${libs} -lkstat -lnsl -lsendfile -lsocket -lrt"
       ;;
+    *QNX*)
+      uv_c_flags="${uv_c_flags} -D_XOPEN_SOURCE=700"
+      libs="${libs} -lsocket"
+      ;;
   esac
 fi
 if test "x${bootstrap_system_libuv}" = "x"; then
