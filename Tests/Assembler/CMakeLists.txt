@@ -18,6 +18,8 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile|Xcode|Ninja" AND
     endif()
     if(CMAKE_OSX_ARCHITECTURES)
       list(APPEND C_FLAGS -arch ${CMAKE_OSX_ARCHITECTURES})
+    elseif("${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+      list(APPEND C_FLAGS -arch arm64)
     endif()
     # Clang on OS X, and perhaps other compilers, do not support -g
     # for both generating and assembling, so drop it from generating.
