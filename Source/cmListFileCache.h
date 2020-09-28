@@ -73,6 +73,14 @@ public:
   std::string FilePath;
   long Line = 0;
 
+  cmListFileContext() = default;
+  cmListFileContext(std::string name, std::string filePath, long line)
+    : Name(std::move(name))
+    , FilePath(std::move(filePath))
+    , Line(line)
+  {
+  }
+
   static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
                                               std::string const& fileName)
   {
