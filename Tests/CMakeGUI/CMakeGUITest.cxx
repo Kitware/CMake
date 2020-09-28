@@ -19,7 +19,7 @@
 #include "FirstConfigure.h"
 
 namespace {
-void loopSleep(int msecs = 100)
+void loopSleep(int msecs = 500)
 {
   QEventLoop loop;
   QTimer::singleShot(msecs, &loop, &QEventLoop::quit);
