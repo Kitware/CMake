@@ -197,12 +197,12 @@ std::string cmGlobalGenerator::SelectMakeProgram(
 {
   std::string makeProgram = inMakeProgram;
   if (cmIsOff(makeProgram)) {
-    const char* makeProgramCSTR =
+    cmProp makeProgramCSTR =
       this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
     if (cmIsOff(makeProgramCSTR)) {
       makeProgram = makeDefault;
     } else {
-      makeProgram = makeProgramCSTR;
+      makeProgram = *makeProgramCSTR;
     }
     if (cmIsOff(makeProgram) && !makeProgram.empty()) {
       makeProgram = "CMAKE_MAKE_PROGRAM-NOTFOUND";
@@ -2153,10 +2153,11 @@ void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator* gen,
 {
   this->SetConfiguredFilesPath(gen);
   this->TryCompileOuterMakefile = mf;
-  const char* make =
+  cmProp make =
     gen->GetCMakeInstance()->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
-  this->GetCMakeInstance()->AddCacheEntry(
-    "CMAKE_MAKE_PROGRAM", make, "make program", cmStateEnums::FILEPATH);
+  this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", cmToCStr(make),
+                                          "make program",
+                                          cmStateEnums::FILEPATH);
   // copy the enabled languages
   this->GetCMakeInstance()->GetState()->SetEnabledLanguages(
     gen->GetCMakeInstance()->GetState()->GetEnabledLanguages());

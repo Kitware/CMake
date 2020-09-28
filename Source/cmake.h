@@ -299,7 +299,7 @@ public:
   /**
    * Given a variable name, return its value (as a string).
    */
-  const char* GetCacheDefinition(const std::string&) const;
+  cmProp GetCacheDefinition(const std::string&) const;
   //! Add an entry into the cache
   void AddCacheEntry(const std::string& key, const char* value,
                      const char* helpString, int type);

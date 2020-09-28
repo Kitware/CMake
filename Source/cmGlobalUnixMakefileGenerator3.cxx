@@ -104,8 +104,8 @@ std::string cmGlobalUnixMakefileGenerator3::GetEditCacheCommand() const
                         cmStateEnums::INTERNAL);
     }
   }
-  const char* edit_cmd = cm->GetCacheDefinition("CMAKE_EDIT_COMMAND");
-  return edit_cmd ? edit_cmd : "";
+  cmProp edit_cmd = cm->GetCacheDefinition("CMAKE_EDIT_COMMAND");
+  return edit_cmd ? *edit_cmd : std::string();
 }
 
 void cmGlobalUnixMakefileGenerator3::ComputeTargetObjectDirectory(

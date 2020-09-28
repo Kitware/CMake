@@ -625,9 +625,9 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
 std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
 {
   std::string const& guidStoreName = name + "_GUID_CMAKE";
-  if (const char* storedGUID =
+  if (cmProp storedGUID =
         this->CMakeInstance->GetCacheDefinition(guidStoreName)) {
-    return std::string(storedGUID);
+    return *storedGUID;
   }
   // Compute a GUID that is deterministic but unique to the build tree.
   std::string input =
