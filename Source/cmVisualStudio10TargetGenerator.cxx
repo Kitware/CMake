@@ -2868,6 +2868,23 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
   }
 
+  // Add C-specific flags expressible in a ClCompile meant for C++.
+  if (langForClCompile == "CXX") {
+    std::set<std::string> languages;
+    this->GeneratorTarget->GetLanguages(languages, configName);
+    if (languages.count("C")) {
+      std::string flagsC;
+      this->LocalGenerator->AddCompileOptions(flagsC, this->GeneratorTarget,
+                                              "C", configName);
+      Options optC(this->LocalGenerator, Options::Compiler,
+                   gg->GetClFlagTable());
+      optC.Parse(flagsC);
+      if (const char* stdC = optC.GetFlag("LanguageStandard_C")) {
+        clOptions.AddFlag("LanguageStandard_C", stdC);
+      }
+    }
+  }
+
   // Add a definition for the configuration name.
   std::string configDefine = cmStrCat("CMAKE_INTDIR=\"", configName, '"');
   clOptions.AddDefine(configDefine);
