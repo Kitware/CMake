@@ -49,7 +49,7 @@ signals:
 
 protected slots:
   void onSelectionChanged(bool);
-  void onGeneratorChanged(QString const& name);
+  void onGeneratorChanged(int index);
 
 protected:
   QComboBox* GeneratorOptions;
