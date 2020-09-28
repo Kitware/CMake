@@ -516,9 +516,8 @@ std::string cmGeneratorTarget::GetFilePrefix(
   const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   if (this->IsImported()) {
-    const char* prefix = this->GetFilePrefixInternal(config, artifact);
-
-    return prefix ? prefix : std::string();
+    cmProp prefix = this->GetFilePrefixInternal(config, artifact);
+    return prefix ? *prefix : std::string();
   }
 
   std::string prefix;
@@ -531,9 +530,8 @@ std::string cmGeneratorTarget::GetFileSuffix(
   const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   if (this->IsImported()) {
-    const char* suffix = this->GetFileSuffixInternal(config, artifact);
-
-    return suffix ? suffix : std::string();
+    cmProp suffix = this->GetFileSuffixInternal(config, artifact);
+    return suffix ? *suffix : std::string();
   }
 
   std::string prefix;
@@ -587,7 +585,7 @@ std::string cmGeneratorTarget::GetFrameworkMultiConfigPostfix(
   return postfix ? *postfix : std::string();
 }
 
-const char* cmGeneratorTarget::GetFilePrefixInternal(
+cmProp cmGeneratorTarget::GetFilePrefixInternal(
   std::string const& config, cmStateEnums::ArtifactType artifact,
   const std::string& language) const
 {
@@ -623,8 +621,8 @@ const char* cmGeneratorTarget::GetFilePrefixInternal(
 
   if (!targetPrefix) {
     const char* prefixVar = this->Target->GetPrefixVariableInternal(artifact);
-    if (!language.empty() && prefixVar && *prefixVar) {
-      std::string langPrefix = prefixVar + std::string("_") + language;
+    if (!language.empty() && cmNonempty(prefixVar)) {
+      std::string langPrefix = cmStrCat(prefixVar, "_", language);
       targetPrefix = this->Makefile->GetDefinition(langPrefix);
     }
 
@@ -635,9 +633,10 @@ const char* cmGeneratorTarget::GetFilePrefixInternal(
     }
   }
 
-  return targetPrefix ? targetPrefix->c_str() : nullptr;
+  return targetPrefix;
 }
-const char* cmGeneratorTarget::GetFileSuffixInternal(
+
+cmProp cmGeneratorTarget::GetFileSuffixInternal(
   std::string const& config, cmStateEnums::ArtifactType artifact,
   const std::string& language) const
 {
@@ -673,8 +672,8 @@ const char* cmGeneratorTarget::GetFileSuffixInternal(
 
   if (!targetSuffix) {
     const char* suffixVar = this->Target->GetSuffixVariableInternal(artifact);
-    if (!language.empty() && suffixVar && *suffixVar) {
-      std::string langSuffix = suffixVar + std::string("_") + language;
+    if (!language.empty() && cmNonempty(suffixVar)) {
+      std::string langSuffix = cmStrCat(suffixVar, "_", language);
       targetSuffix = this->Makefile->GetDefinition(langSuffix);
     }
 
@@ -685,7 +684,7 @@ const char* cmGeneratorTarget::GetFileSuffixInternal(
     }
   }
 
-  return targetSuffix ? targetSuffix->c_str() : nullptr;
+  return targetSuffix;
 }
 
 void cmGeneratorTarget::ClearSourcesCache()
@@ -1248,8 +1247,7 @@ bool cmGeneratorTarget::MaybeHaveInterfaceProperty(
     bool& maybeInterfaceProp = i->second;
 
     // If this target itself has a non-empty property value, we are done.
-    cmProp p = this->GetProperty(prop);
-    maybeInterfaceProp = cmNonempty(p);
+    maybeInterfaceProp = cmNonempty(this->GetProperty(prop));
 
     // Otherwise, recurse to interface dependencies.
     if (!maybeInterfaceProp) {
@@ -4943,8 +4941,8 @@ void cmGeneratorTarget::GetFullNameInternal(
 
   // retrieve prefix and suffix
   std::string ll = this->GetLinkerLanguage(config);
-  const char* targetPrefix = this->GetFilePrefixInternal(config, artifact, ll);
-  const char* targetSuffix = this->GetFileSuffixInternal(config, artifact, ll);
+  cmProp targetPrefix = this->GetFilePrefixInternal(config, artifact, ll);
+  cmProp targetSuffix = this->GetFileSuffixInternal(config, artifact, ll);
 
   // The implib option is only allowed for shared libraries, module
   // libraries, and executables.
@@ -4962,18 +4960,18 @@ void cmGeneratorTarget::GetFullNameInternal(
   if (this->IsFrameworkOnApple()) {
     fw_prefix =
       cmStrCat(this->GetFrameworkDirectory(config, ContentLevel), '/');
-    targetPrefix = fw_prefix.c_str();
+    targetPrefix = &fw_prefix;
     targetSuffix = nullptr;
   }
 
   if (this->IsCFBundleOnApple()) {
     fw_prefix = cmStrCat(this->GetCFBundleDirectory(config, FullLevel), '/');
-    targetPrefix = fw_prefix.c_str();
+    targetPrefix = &fw_prefix;
     targetSuffix = nullptr;
   }
 
   // Begin the final name with the prefix.
-  outPrefix = targetPrefix ? targetPrefix : "";
+  outPrefix = targetPrefix ? *targetPrefix : "";
 
   // Append the target name or property-specified name.
   outBase += this->GetOutputName(config, artifact);
@@ -4984,7 +4982,7 @@ void cmGeneratorTarget::GetFullNameInternal(
   // EXECUTABLE_SUFFIX attribute.
   if (this->IsFrameworkOnApple() &&
       GetGlobalGenerator()->GetName() == "Xcode") {
-    targetSuffix = configPostfix.c_str();
+    targetSuffix = &configPostfix;
   } else {
     outBase += configPostfix;
   }
@@ -5000,7 +4998,7 @@ void cmGeneratorTarget::GetFullNameInternal(
   }
 
   // Append the suffix.
-  outSuffix = targetSuffix ? targetSuffix : "";
+  outSuffix = targetSuffix ? *targetSuffix : "";
 }
 
 std::string cmGeneratorTarget::GetLinkerLanguage(

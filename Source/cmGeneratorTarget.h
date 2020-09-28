@@ -861,12 +861,12 @@ private:
 
   bool NeedImportLibraryName(std::string const& config) const;
 
-  const char* GetFilePrefixInternal(std::string const& config,
-                                    cmStateEnums::ArtifactType artifact,
-                                    const std::string& language = "") const;
-  const char* GetFileSuffixInternal(std::string const& config,
-                                    cmStateEnums::ArtifactType artifact,
-                                    const std::string& language = "") const;
+  cmProp GetFilePrefixInternal(std::string const& config,
+                               cmStateEnums::ArtifactType artifact,
+                               const std::string& language = "") const;
+  cmProp GetFileSuffixInternal(std::string const& config,
+                               cmStateEnums::ArtifactType artifact,
+                               const std::string& language = "") const;
 
   std::string GetFullNameInternal(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;
