@@ -7,13 +7,13 @@ include(${RunCMake_TEST_BINARY_DIR}/foundLibs.cmake)
 foreach(mainTarget IN ITEMS app1 shared1 module1 sharedFramework1)
   checkFlags(OTHER_LDFLAGS ${mainTarget}
     "obj2"
-    "static2;shared2;staticFramework2;sharedFramework2;${libz};${libresolv}"
+    "static2;shared2;staticFramework2;sharedFramework2;${libz};${libresolv};CoreFoundation;sharedFrameworkExt;staticFrameworkExt"
   )
 endforeach()
 
 foreach(mainTarget IN ITEMS static1 staticFramework1)
   checkFlags(OTHER_LIBTOOLFLAGS ${mainTarget}
     "obj2"
-    "static2;shared2;staticFramework2;sharedFramework2;${libz};${libresolv}"
+    "static2;shared2;staticFramework2;sharedFramework2;${libz};${libresolv};CoreFoundation;sharedFrameworkExt;staticFrameworkExt"
   )
 endforeach()

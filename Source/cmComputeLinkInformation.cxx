@@ -1293,11 +1293,17 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
   // add runtime information
   this->AddLibraryRuntimeInfo(full_fw);
 
-  // Add the item using the -framework option.
-  this->Items.emplace_back(std::string("-framework"), false);
-  cmOutputConverter converter(this->Makefile->GetStateSnapshot());
-  fw = converter.EscapeForShell(fw);
-  this->Items.emplace_back(fw, false);
+  if (this->GlobalGenerator->IsXcode()) {
+    // Add framework path - it will be handled by Xcode after it's added to
+    // "Link Binary With Libraries" build phase
+    this->Items.emplace_back(item, true);
+  } else {
+    // Add the item using the -framework option.
+    this->Items.emplace_back(std::string("-framework"), false);
+    cmOutputConverter converter(this->Makefile->GetStateSnapshot());
+    fw = converter.EscapeForShell(fw);
+    this->Items.emplace_back(fw, false);
+  }
 }
 
 void cmComputeLinkInformation::AddDirectoryItem(std::string const& item)

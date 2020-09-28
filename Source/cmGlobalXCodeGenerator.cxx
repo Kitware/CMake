@@ -3579,8 +3579,16 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       for (auto const& libItem : configItemMap[configName]) {
         auto const& libName = *libItem;
         if (libName.IsPath) {
-          libPaths.Add(this->XCodeEscapePath(libName.Value.Value));
           const auto libPath = GetLibraryOrFrameworkPath(libName.Value.Value);
+          if (cmSystemTools::StringEndsWith(libPath.c_str(), ".framework")) {
+            const auto fwName =
+              cmSystemTools::GetFilenameWithoutExtension(libPath);
+            const auto fwDir = cmSystemTools::GetParentDirectory(libPath);
+            libPaths.Add("-F " + this->XCodeEscapePath(fwDir));
+            libPaths.Add("-framework " + fwName);
+          } else {
+            libPaths.Add(this->XCodeEscapePath(libName.Value.Value));
+          }
           if ((!libName.Target || libName.Target->IsImported()) &&
               IsLinkPhaseLibraryExtension(libPath)) {
             // Create file reference for embedding

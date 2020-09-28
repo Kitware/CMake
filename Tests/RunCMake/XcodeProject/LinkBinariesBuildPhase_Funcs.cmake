@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.18...3.19)
+
 macro(returnOnError errorMsg)
   if(NOT "${errorMsg}" STREQUAL "")
     set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}\n${errorMsg}" PARENT_SCOPE)
