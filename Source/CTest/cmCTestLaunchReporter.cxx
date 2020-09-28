@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestLaunchReporter.h"
 
-#include <cstdlib>
-
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
@@ -48,8 +46,8 @@ void cmCTestLaunchReporter::ComputeFileNames()
 {
   // We just passthru the behavior of the real command unless the
   // CTEST_LAUNCH_LOGS environment variable is set.
-  const char* d = getenv("CTEST_LAUNCH_LOGS");
-  if (!(d && *d)) {
+  std::string d;
+  if (!cmSystemTools::GetEnv("CTEST_LAUNCH_LOGS", d) || d.empty()) {
     return;
   }
   this->Passthru = false;
