@@ -19,6 +19,14 @@
 #include "cmSystemTools.h"
 
 namespace {
+
+bool FatalError(cmExecutionStatus& status, std::string const& error)
+{
+  status.SetError(error);
+  cmSystemTools::SetFatalErrorOccured();
+  return false;
+}
+
 std::array<cm::static_string_view, 12> InvalidCommands{
   { // clang-format off
   "function"_s, "endfunction"_s,
@@ -38,8 +46,8 @@ bool cmCMakeLanguageCommandCALL(std::vector<cmListFileArgument> const& args,
   auto cmd = cmSystemTools::LowerCase(callCommand);
   if (std::find(InvalidCommands.cbegin(), InvalidCommands.cend(), cmd) !=
       InvalidCommands.cend()) {
-    status.SetError(cmStrCat("invalid command specified: "_s, callCommand));
-    return false;
+    return FatalError(status,
+                      cmStrCat("invalid command specified: "_s, callCommand));
   }
 
   cmMakefile& makefile = status.GetMakefile();
@@ -70,20 +78,18 @@ bool cmCMakeLanguageCommandEVAL(std::vector<cmListFileArgument> const& args,
   makefile.ExpandArguments(args, expandedArgs);
 
   if (expandedArgs.size() < 2) {
-    status.SetError("called with incorrect number of arguments");
-    return false;
+    return FatalError(status, "called with incorrect number of arguments");
   }
 
   if (expandedArgs[1] != "CODE") {
     auto code_iter =
       std::find(expandedArgs.begin() + 2, expandedArgs.end(), "CODE");
     if (code_iter == expandedArgs.end()) {
-      status.SetError("called without CODE argument");
-    } else {
-      status.SetError(
-        "called with unsupported arguments between EVAL and CODE arguments");
+      return FatalError(status, "called without CODE argument");
     }
-    return false;
+    return FatalError(
+      status,
+      "called with unsupported arguments between EVAL and CODE arguments");
   }
 
   const std::string code =
@@ -114,8 +120,7 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
   };
 
   if (!moreArgs()) {
-    status.SetError("called with incorrect number of arguments");
-    return false;
+    return FatalError(status, "called with incorrect number of arguments");
   }
 
   if (expArgs[expArg] == "CALL") {
@@ -123,15 +128,13 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
 
     // CALL requires a command name.
     if (!moreArgs()) {
-      status.SetError("CALL missing command name");
-      return false;
+      return FatalError(status, "CALL missing command name");
     }
     std::string const& callCommand = expArgs[expArg++];
 
     // CALL accepts no further expanded arguments.
     if (expArg != expArgs.size()) {
-      status.SetError("CALL command's arguments must be literal");
-      return false;
+      return FatalError(status, "CALL command's arguments must be literal");
     }
 
     // Run the CALL.
@@ -142,6 +145,5 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
     return cmCMakeLanguageCommandEVAL(args, status);
   }
 
-  status.SetError("called with unknown meta-operation");
-  return false;
+  return FatalError(status, "called with unknown meta-operation");
 }
