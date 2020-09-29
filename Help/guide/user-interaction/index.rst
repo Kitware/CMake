@@ -85,7 +85,7 @@ The source and binary directories must first be
 populated.  It is always advised to use different
 directories for the source and the build.
 
-.. image:: /guide/user-interaction/GUI-Source-Binary.png
+.. image:: GUI-Source-Binary.png
    :alt: Choosing source and binary directories
 
 Generating a Buildsystem
@@ -246,19 +246,19 @@ Choosing a generator in cmake-gui
 The "Configure" button triggers a new dialog to
 select the CMake generator to use.
 
-.. image:: /guide/user-interaction/GUI-Configure-Dialog.png
+.. image:: GUI-Configure-Dialog.png
    :alt: Configuring a generator
 
 All generators available on the command line are also
 available in :manual:`cmake-gui(1)`.
 
-.. image:: /guide/user-interaction/GUI-Choose-Generator.png
+.. image:: GUI-Choose-Generator.png
    :alt: Choosing a generator
 
 When choosing a Visual Studio generator, further options
 are available to set an architecture to generate for.
 
-.. image:: /manual/VS-Choose-Arch.png
+.. image:: VS-Choose-Arch.png
    :alt: Choosing an architecture for Visual Studio generators
 
 .. _`Setting Build Variables`:
@@ -359,7 +359,7 @@ Variables may be set in the cmake-gui using the "Add Entry"
 button.  This triggers a new dialog to set the value of
 the variable.
 
-.. image:: /guide/user-interaction/GUI-Add-Entry.png
+.. image:: GUI-Add-Entry.png
    :alt: Editing a cache entry
 
 The main view of the :manual:`cmake-gui(1)` user interface
