@@ -849,6 +849,8 @@ private:
   mutable std::set<std::string> VisitedConfigsForObjects;
   mutable std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
+
+  // "config/language" is the key
   mutable std::map<std::string, std::vector<std::string>> SystemIncludesCache;
 
   mutable std::string ExportMacro;

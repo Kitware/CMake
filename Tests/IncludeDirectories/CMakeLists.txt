@@ -17,6 +17,7 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
   endif()
   if (run_sys_includes_test)
     add_subdirectory(SystemIncludeDirectories)
+    add_subdirectory(SystemIncludeDirectoriesPerLang)
   endif()
 endif()
 
