@@ -61,8 +61,6 @@ set(RunCMake_TEST_OPTIONS "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" "-DPse
 run_cmake(range_ignored)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" "-DPseudoRange_VERSION=2.0")
 run_cmake(range_no-range)
-run_cmake(range_empty-1)
-run_cmake(range_empty-2)
 run_cmake(range_1-3)
 run_cmake(range_1-2-include)
 run_cmake(range_1-2-exclude)

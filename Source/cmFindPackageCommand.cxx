@@ -426,7 +426,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // fill various parts of version specification
   if (!this->VersionComplete.empty()) {
     if (!versionRegex.find(this->VersionComplete)) {
-      this->SetError("called with invalid version specification");
+      this->SetError("called with invalid version specification.");
       return false;
     }
 
@@ -437,6 +437,19 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
     if (!this->VersionMax.empty()) {
       this->VersionRange = this->VersionComplete;
+    }
+  }
+
+  if (!this->VersionRange.empty()) {
+    // version range must not be empty
+    if ((this->VersionRangeMax == VERSION_ENDPOINT_INCLUDED &&
+         cmSystemTools::VersionCompareGreater(this->Version,
+                                              this->VersionMax)) ||
+        (this->VersionRangeMax == VERSION_ENDPOINT_EXCLUDED &&
+         cmSystemTools::VersionCompareGreaterEq(this->Version,
+                                                this->VersionMax))) {
+      this->SetError("specified version range is empty.");
+      return false;
     }
   }
 

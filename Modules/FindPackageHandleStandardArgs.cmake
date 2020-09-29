@@ -294,16 +294,12 @@ function(FIND_PACKAGE_CHECK_VERSION version result)
   unset (version_msg)
 
   if (FPCV_HANDLE_VERSION_RANGE AND ${package}_FIND_VERSION_RANGE)
-    if (${package}_FIND_VERSION_MIN VERSION_GREATER ${package}_FIND_VERSION_MAX
-        OR (${package}_FIND_VERSION_MIN VERSION_EQUAL ${package}_FIND_VERSION_MAX
-          AND ${package}_FIND_VERSION_RANGE_MAX STREQUAL "EXCLUDE"))
-      set (version_msg "Found unsuitable version \"${version}\", required range is empty (\"${${package}_FIND_VERSION_RANGE}\")")
-    elseif ((${package}_FIND_VERSION_RANGE_MIN STREQUAL "INCLUDE"
-            AND version VERSION_GREATER_EQUAL ${package}_FIND_VERSION_MIN)
+    if ((${package}_FIND_VERSION_RANGE_MIN STREQUAL "INCLUDE"
+          AND version VERSION_GREATER_EQUAL ${package}_FIND_VERSION_MIN)
         AND ((${package}_FIND_VERSION_RANGE_MAX STREQUAL "INCLUDE"
             AND version VERSION_LESS_EQUAL ${package}_FIND_VERSION_MAX)
           OR (${package}_FIND_VERSION_RANGE_MAX STREQUAL "EXCLUDE"
-              AND version VERSION_LESS ${package}_FIND_VERSION_MAX)))
+            AND version VERSION_LESS ${package}_FIND_VERSION_MAX)))
       set (version_ok TRUE)
       set(version_msg "(found suitable version \"${version}\", required range is \"${${package}_FIND_VERSION_RANGE}\")")
     else()
