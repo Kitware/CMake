@@ -11,6 +11,7 @@ Synopsis
  cmake-gui [<options>]
  cmake-gui [<options>] {<path-to-source> | <path-to-existing-build>}
  cmake-gui [<options>] -S <path-to-source> -B <path-to-build>
+ cmake-gui [<options>] -S <path-to-source> --preset=<preset-name>
 
 Description
 ===========
@@ -35,6 +36,10 @@ Options
  Path to directory which CMake will use as the root of build directory.
 
  If the directory doesn't already exist CMake will make it.
+
+``--preset=<preset-name>``
+ Name of the preset to use from the project's ``CMakePresets.json`` file, if it
+ has one.
 
 .. include:: OPTIONS_HELP.txt
 
