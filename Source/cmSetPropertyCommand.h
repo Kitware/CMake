@@ -25,7 +25,7 @@ bool HandleSourceFileDirectoryScopeValidation(
   std::vector<std::string>& source_file_directories,
   std::vector<std::string>& source_file_target_directories);
 
-bool HandleAndValidateSourceFileDirectortoryScopes(
+bool HandleAndValidateSourceFileDirectoryScopes(
   cmExecutionStatus& status, bool source_directories_option_encountered,
   bool source_target_directories_option_encountered,
   std::vector<std::string>& source_directories,
