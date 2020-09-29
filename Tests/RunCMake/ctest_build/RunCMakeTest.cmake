@@ -48,8 +48,12 @@ function(run_BuildChangeId)
 endfunction()
 run_BuildChangeId()
 
-set(RunCMake_USE_LAUNCHERS FALSE)
 set(RunCMake_USE_CUSTOM_BUILD_COMMAND TRUE)
+set(RunCMake_BUILD_COMMAND "${FAKE_BUILD_COMMAND_EXE}")
+run_ctest(BuildCommandFailure)
+unset(RunCMake_BUILD_COMMAND)
+
+set(RunCMake_USE_LAUNCHERS FALSE)
 set(RunCMake_BUILD_COMMAND "${COLOR_WARNING}")
 run_ctest(IgnoreColor)
 unset(RunCMake_BUILD_COMMAND)

@@ -311,7 +311,11 @@ add_RunCMake_test(cmake_parse_arguments)
 add_RunCMake_test(cmake_path)
 add_RunCMake_test(continue)
 add_executable(color_warning color_warning.c)
-add_RunCMake_test(ctest_build -DCOLOR_WARNING=$<TARGET_FILE:color_warning>)
+add_executable(fake_build_command fake_build_command.c)
+add_RunCMake_test(ctest_build
+  -DCOLOR_WARNING=$<TARGET_FILE:color_warning>
+  -DFAKE_BUILD_COMMAND_EXE=$<TARGET_FILE:fake_build_command>
+)
 add_RunCMake_test(ctest_cmake_error)
 add_RunCMake_test(ctest_configure)
 if(COVERAGE_COMMAND)

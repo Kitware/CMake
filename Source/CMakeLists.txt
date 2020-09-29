@@ -946,6 +946,7 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestResourceAllocator.cxx
   CTest/cmCTestResourceSpec.cxx
   CTest/cmCTestLaunch.cxx
+  CTest/cmCTestLaunchReporter.cxx
   CTest/cmCTestMemCheckCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx
   CTest/cmCTestMultiProcessHandler.cxx
