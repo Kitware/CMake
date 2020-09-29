@@ -2,7 +2,16 @@ include(RunCMake)
 
 run_cmake(no_parameters)
 run_cmake(unknown_meta_operation)
-run_cmake(call_invalid_command)
+foreach(command IN ITEMS
+    "function" "ENDFUNCTION"
+    "macro" "endMACRO"
+    "if" "elseif" "else" "endif"
+    "while" "endwhile"
+    "foreach" "endforeach"
+    )
+  message(STATUS "Running call_invalid_command for ${command}...")
+  run_cmake_with_options(call_invalid_command -Dcommand=${command})
+endforeach()
 run_cmake(call_valid_command)
 run_cmake(call_double_evaluation)
 run_cmake(call_expanded_command)
