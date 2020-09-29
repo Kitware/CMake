@@ -36,6 +36,14 @@ stages:
 
 # Prep jobs
 
+prep:source:
+    extends:
+        - .linux_prep_source
+        - .cmake_prep_source_linux
+        - .linux_builder_tags
+        - .cmake_release_artifacts
+        - .run_only_for_package
+
 prep:doc:
     extends:
         - .fedora31_sphinx_package
