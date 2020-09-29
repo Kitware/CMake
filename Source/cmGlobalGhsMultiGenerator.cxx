@@ -3,7 +3,6 @@
 #include "cmGlobalGhsMultiGenerator.h"
 
 #include <algorithm>
-#include <cstring>
 #include <map>
 #include <ostream>
 #include <utility>
@@ -335,23 +334,23 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
   fout << "# Top Level Project File\n";
 
   // Specify BSP option if supplied by user
-  const char* bspName =
+  cmProp bspName =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_BSP_NAME");
   if (!cmIsOff(bspName)) {
-    fout << "    -bsp " << bspName << '\n';
+    fout << "    -bsp " << *bspName << '\n';
   }
 
   // Specify OS DIR if supplied by user
   // -- not all platforms require this entry in the project file
   if (!cmIsOff(this->OsDir)) {
-    const char* osDirOption =
+    cmProp osDirOption =
       this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR_OPTION");
     std::replace(this->OsDir.begin(), this->OsDir.end(), '\\', '/');
     fout << "    ";
     if (cmIsOff(osDirOption)) {
       fout << "";
     } else {
-      fout << osDirOption;
+      fout << *osDirOption;
     }
     fout << "\"" << this->OsDir << "\"\n";
   }
@@ -565,9 +564,9 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
 {
   GeneratedMakeCommand makeCommand = {};
   std::string gbuild;
-  if (const char* gbuildCached =
+  if (cmProp gbuildCached =
         this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM")) {
-    gbuild = gbuildCached;
+    gbuild = *gbuildCached;
   }
   makeCommand.Add(this->SelectMakeProgram(makeProgram, gbuild));
 
@@ -618,11 +617,10 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
                                             cmLocalGenerator* root)
 {
   fout << "macro PROJ_NAME=" << root->GetProjectName() << '\n';
-  char const* ghsGpjMacros =
+  cmProp ghsGpjMacros =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_GPJ_MACROS");
-  if (nullptr != ghsGpjMacros) {
-    std::vector<std::string> expandedList =
-      cmExpandedList(std::string(ghsGpjMacros));
+  if (ghsGpjMacros) {
+    std::vector<std::string> expandedList = cmExpandedList(*ghsGpjMacros);
     for (std::string const& arg : expandedList) {
       fout << "macro " << arg << '\n';
     }
@@ -634,17 +632,17 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
 {
   /* set primary target */
   std::string tgt;
-  const char* t =
+  cmProp t =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_PRIMARY_TARGET");
   if (cmNonempty(t)) {
-    tgt = t;
+    tgt = *t;
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_PRIMARY_TARGET");
   } else {
-    const char* a =
+    cmProp a =
       this->GetCMakeInstance()->GetCacheDefinition("CMAKE_GENERATOR_PLATFORM");
-    const char* p =
+    cmProp p =
       this->GetCMakeInstance()->GetCacheDefinition("GHS_TARGET_PLATFORM");
-    tgt = cmStrCat((a ? a : ""), '_', (p ? p : ""), ".tgt");
+    tgt = cmStrCat((a ? *a : ""), '_', (p ? *p : ""), ".tgt");
   }
 
   /* clang-format off */
@@ -655,11 +653,11 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
        << "/CMakeFiles/custom_target.bod" << '\n';
   /* clang-format on */
 
-  char const* const customization =
+  cmProp const customization =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");
-  if (nullptr != customization && strlen(customization) > 0) {
+  if (cmNonempty(customization)) {
     fout << "customization="
-         << cmGlobalGhsMultiGenerator::TrimQuotes(customization) << '\n';
+         << cmGlobalGhsMultiGenerator::TrimQuotes(*customization) << '\n';
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_CUSTOMIZATION");
   }
 }

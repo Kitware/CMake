@@ -3140,11 +3140,10 @@ std::string cmGlobalXCodeGenerator::GetOrCreateId(const std::string& name,
                                                   const std::string& id)
 {
   std::string guidStoreName = cmStrCat(name, "_GUID_CMAKE");
-  const char* storedGUID =
-    this->CMakeInstance->GetCacheDefinition(guidStoreName);
+  cmProp storedGUID = this->CMakeInstance->GetCacheDefinition(guidStoreName);
 
   if (storedGUID) {
-    return storedGUID;
+    return *storedGUID;
   }
 
   this->CMakeInstance->AddCacheEntry(guidStoreName, id.c_str(),

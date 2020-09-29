@@ -2000,10 +2000,9 @@ std::string cmake::StripExtension(const std::string& file) const
   return file;
 }
 
-const char* cmake::GetCacheDefinition(const std::string& name) const
+cmProp cmake::GetCacheDefinition(const std::string& name) const
 {
-  cmProp p = this->State->GetInitializedCacheValue(name);
-  return p ? p->c_str() : nullptr;
+  return this->State->GetInitializedCacheValue(name);
 }
 
 void cmake::AddScriptingCommands()
