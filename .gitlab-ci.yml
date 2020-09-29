@@ -52,6 +52,17 @@ prep:doc:
         - .cmake_doc_artifacts
         - .run_only_for_package
 
+upload:source:
+    extends:
+        - .rsync_upload
+        - .run_only_for_package
+    dependencies:
+        - prep:source
+    needs:
+        - prep:source
+    variables:
+        RSYNC_DESTINATION: dev
+
 # Lint builds
 
 build:debian10-iwyu:
