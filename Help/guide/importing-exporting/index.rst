@@ -1,9 +1,12 @@
-Importing and Exporting Targets
-*******************************
+Importing and Exporting Guide
+*****************************
 
 .. only:: html
 
    .. contents::
+
+Introduction
+============
 
 In this guide, we will present the concept of :prop_tgt:`IMPORTED` targets
 and demonstrate how to import existing executable or library files from disk
