@@ -39,7 +39,7 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
   }
 
   cmMakefile& makefile = status.GetMakefile();
-  cmListFileContext context = makefile.GetExecutionContext();
+  cmListFileContext context = makefile.GetBacktrace().Top();
 
   bool result = false;
 

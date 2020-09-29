@@ -274,31 +274,12 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
   return this->Backtrace;
 }
 
-cmListFileBacktrace cmMakefile::GetBacktrace(cmCommandContext const& cc) const
-{
-  cmListFileContext lfc;
-  lfc.Name = cc.Name.Original;
-  lfc.Line = cc.Line;
-  lfc.FilePath = this->StateSnapshot.GetExecutionListFile();
-  return this->Backtrace.Push(lfc);
-}
-
-cmListFileContext cmMakefile::GetExecutionContext() const
-{
-  cmListFileContext const& cur = this->Backtrace.Top();
-  cmListFileContext lfc;
-  lfc.Name = cur.Name;
-  lfc.Line = cur.Line;
-  lfc.FilePath = this->StateSnapshot.GetExecutionListFile();
-  return lfc;
-}
-
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
   // Check if current file in the list of requested to trace...
   std::vector<std::string> const& trace_only_this_files =
     this->GetCMakeInstance()->GetTraceSources();
-  std::string const& full_path = this->GetExecutionFilePath();
+  std::string const& full_path = this->GetBacktrace().Top().FilePath;
   std::string const& only_filename = cmSystemTools::GetFilenameName(full_path);
   bool trace = trace_only_this_files.empty();
   if (!trace) {
@@ -597,7 +578,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
         std::ostringstream w;
         w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0011) << "\n"
           << "The included script\n  "
-          << this->Makefile->GetExecutionFilePath() << "\n"
+          << this->Makefile->GetBacktrace().Top().FilePath << "\n"
           << "affects policy settings.  "
           << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
           << "so the effects are applied to the including context.";
@@ -610,7 +591,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       /* clang-format off */
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
         << "The included script\n  "
-        << this->Makefile->GetExecutionFilePath() << "\n"
+        << this->Makefile->GetBacktrace().Top().FilePath << "\n"
         << "affects policy settings, so it requires this policy to be set.";
       /* clang-format on */
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
@@ -3347,20 +3328,10 @@ bool cmMakefile::IsLoopBlock() const
   return !this->LoopBlockCounter.empty() && this->LoopBlockCounter.top() > 0;
 }
 
-std::string const& cmMakefile::GetExecutionFilePath() const
-{
-  assert(this->StateSnapshot.IsValid());
-  return this->StateSnapshot.GetExecutionListFile();
-}
-
 bool cmMakefile::ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
-                                 std::vector<std::string>& outArgs,
-                                 const char* filename) const
+                                 std::vector<std::string>& outArgs) const
 {
-  if (!filename) {
-    auto const& efp = this->GetExecutionFilePath();
-    filename = efp.c_str();
-  }
+  std::string const& filename = this->GetBacktrace().Top().FilePath;
   std::string value;
   outArgs.reserve(inArgs.size());
   for (cmListFileArgument const& i : inArgs) {
@@ -3371,8 +3342,8 @@ bool cmMakefile::ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
     }
     // Expand the variables in the argument.
     value = i.Value;
-    this->ExpandVariablesInString(value, false, false, false, filename, i.Line,
-                                  false, false);
+    this->ExpandVariablesInString(value, false, false, false, filename.c_str(),
+                                  i.Line, false, false);
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
@@ -3387,12 +3358,9 @@ bool cmMakefile::ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
 
 bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
-  std::vector<cmExpandedCommandArgument>& outArgs, const char* filename) const
+  std::vector<cmExpandedCommandArgument>& outArgs) const
 {
-  if (!filename) {
-    auto const& efp = this->GetExecutionFilePath();
-    filename = efp.c_str();
-  }
+  std::string const& filename = this->GetBacktrace().Top().FilePath;
   std::string value;
   outArgs.reserve(inArgs.size());
   for (cmListFileArgument const& i : inArgs) {
@@ -3403,8 +3371,8 @@ bool cmMakefile::ExpandArguments(
     }
     // Expand the variables in the argument.
     value = i.Value;
-    this->ExpandVariablesInString(value, false, false, false, filename, i.Line,
-                                  false, false);
+    this->ExpandVariablesInString(value, false, false, false, filename.c_str(),
+                                  i.Line, false, false);
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
@@ -3424,7 +3392,7 @@ void cmMakefile::AddFunctionBlocker(std::unique_ptr<cmFunctionBlocker> fb)
 {
   if (!this->ExecutionStatusStack.empty()) {
     // Record the context in which the blocker is created.
-    fb->SetStartingContext(this->GetExecutionContext());
+    fb->SetStartingContext(this->Backtrace.Top());
   }
 
   this->FunctionBlockers.push(std::move(fb));

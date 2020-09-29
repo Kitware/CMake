@@ -10,6 +10,7 @@
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -386,7 +387,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
     ? cmTarget::KeywordTLLSignature
     : cmTarget::PlainTLLSignature;
   if (!this->Target->PushTLLCommandTrace(
-        sig, this->Makefile.GetExecutionContext())) {
+        sig, this->Makefile.GetBacktrace().Top())) {
     std::ostringstream e;
     const char* modal = nullptr;
     MessageType messageType = MessageType::AUTHOR_WARNING;

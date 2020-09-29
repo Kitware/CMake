@@ -56,10 +56,8 @@ static std::string const keyVERSION_LESS = "VERSION_LESS";
 static std::string const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL";
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
-                                           cmListFileContext context,
                                            cmListFileBacktrace bt)
   : Makefile(makefile)
-  , ExecutionContext(std::move(context))
   , Backtrace(std::move(bt))
   , Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012))
   , Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054))
@@ -147,8 +145,7 @@ cmProp cmConditionEvaluator::GetDefinitionIfUnquoted(
 
   if (def && argument.WasQuoted() &&
       this->Policy54Status == cmPolicies::WARN) {
-    if (!this->Makefile.HasCMP0054AlreadyBeenReported(
-          this->ExecutionContext)) {
+    if (!this->Makefile.HasCMP0054AlreadyBeenReported(this->Backtrace.Top())) {
       std::ostringstream e;
       e << (cmPolicies::GetPolicyWarning(cmPolicies::CMP0054)) << "\n";
       e << "Quoted variables like \"" << argument.GetValue()
@@ -191,8 +188,7 @@ bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
 
   if (isKeyword && argument.WasQuoted() &&
       this->Policy54Status == cmPolicies::WARN) {
-    if (!this->Makefile.HasCMP0054AlreadyBeenReported(
-          this->ExecutionContext)) {
+    if (!this->Makefile.HasCMP0054AlreadyBeenReported(this->Backtrace.Top())) {
       std::ostringstream e;
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0054) << "\n";
       e << "Quoted keywords like \"" << argument.GetValue()

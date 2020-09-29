@@ -21,8 +21,7 @@ class cmConditionEvaluator
 public:
   using cmArgumentList = std::list<cmExpandedCommandArgument>;
 
-  cmConditionEvaluator(cmMakefile& makefile, cmListFileContext context,
-                       cmListFileBacktrace bt);
+  cmConditionEvaluator(cmMakefile& makefile, cmListFileBacktrace bt);
 
   // this is a shared function for both If and Else to determine if the
   // arguments were valid, and if so, was the response true. If there is
@@ -79,7 +78,6 @@ private:
                     MessageType& status);
 
   cmMakefile& Makefile;
-  cmListFileContext ExecutionContext;
   cmListFileBacktrace Backtrace;
   cmPolicies::PolicyStatus Policy12Status;
   cmPolicies::PolicyStatus Policy54Status;

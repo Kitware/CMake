@@ -640,8 +640,6 @@ public:
    * Get the current context backtrace.
    */
   cmListFileBacktrace GetBacktrace() const;
-  cmListFileBacktrace GetBacktrace(cmCommandContext const& lfc) const;
-  cmListFileContext GetExecutionContext() const;
 
   /**
    * Get the vector of  files created by this makefile
@@ -734,12 +732,9 @@ public:
    * variable replacement and list expansion.
    */
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
-                       std::vector<std::string>& outArgs,
-                       const char* filename = nullptr) const;
-
+                       std::vector<std::string>& outArgs) const;
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
-                       std::vector<cmExpandedCommandArgument>& outArgs,
-                       const char* filename = nullptr) const;
+                       std::vector<cmExpandedCommandArgument>& outArgs) const;
 
   /**
    * Get the instance
@@ -941,8 +936,6 @@ public:
   cmStateSnapshot GetStateSnapshot() const;
 
   const char* GetDefineFlagsCMP0059() const;
-
-  std::string const& GetExecutionFilePath() const;
 
   void EnforceDirectoryLevelRules() const;
 
