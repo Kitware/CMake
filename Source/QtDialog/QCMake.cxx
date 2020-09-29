@@ -19,10 +19,12 @@
 
 QCMake::QCMake(QObject* p)
   : QObject(p)
+  , Environment(QProcessEnvironment::systemEnvironment())
 {
   this->WarnUninitializedMode = false;
   qRegisterMetaType<QCMakeProperty>();
   qRegisterMetaType<QCMakePropertyList>();
+  qRegisterMetaType<QProcessEnvironment>();
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
@@ -151,34 +153,46 @@ void QCMake::setToolset(const QString& toolset)
   }
 }
 
+void QCMake::setEnvironment(const QProcessEnvironment& environment)
+{
+  this->Environment = environment;
+}
+
 void QCMake::configure()
 {
-#ifdef Q_OS_WIN
-  UINT lastErrorMode = SetErrorMode(0);
-#endif
-
-  this->CMakeInstance->SetHomeDirectory(
-    this->SourceDirectory.toLocal8Bit().data());
-  this->CMakeInstance->SetHomeOutputDirectory(
-    this->BinaryDirectory.toLocal8Bit().data());
-  this->CMakeInstance->SetGlobalGenerator(
-    this->CMakeInstance->CreateGlobalGenerator(
-      this->Generator.toLocal8Bit().data()));
-  this->CMakeInstance->SetGeneratorPlatform(
-    this->Platform.toLocal8Bit().data());
-  this->CMakeInstance->SetGeneratorToolset(this->Toolset.toLocal8Bit().data());
-  this->CMakeInstance->LoadCache();
-  this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
-  this->CMakeInstance->PreLoadCMakeFiles();
-
-  InterruptFlag = 0;
-  cmSystemTools::ResetErrorOccuredFlag();
-
-  int err = this->CMakeInstance->Configure();
+  int err;
+  {
+    cmSystemTools::SaveRestoreEnvironment restoreEnv;
+    this->setUpEnvironment();
 
 #ifdef Q_OS_WIN
-  SetErrorMode(lastErrorMode);
+    UINT lastErrorMode = SetErrorMode(0);
 #endif
+
+    this->CMakeInstance->SetHomeDirectory(
+      this->SourceDirectory.toLocal8Bit().data());
+    this->CMakeInstance->SetHomeOutputDirectory(
+      this->BinaryDirectory.toLocal8Bit().data());
+    this->CMakeInstance->SetGlobalGenerator(
+      this->CMakeInstance->CreateGlobalGenerator(
+        this->Generator.toLocal8Bit().data()));
+    this->CMakeInstance->SetGeneratorPlatform(
+      this->Platform.toLocal8Bit().data());
+    this->CMakeInstance->SetGeneratorToolset(
+      this->Toolset.toLocal8Bit().data());
+    this->CMakeInstance->LoadCache();
+    this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
+    this->CMakeInstance->PreLoadCMakeFiles();
+
+    InterruptFlag = 0;
+    cmSystemTools::ResetErrorOccuredFlag();
+
+    err = this->CMakeInstance->Configure();
+
+#ifdef Q_OS_WIN
+    SetErrorMode(lastErrorMode);
+#endif
+  }
 
   emit this->propertiesChanged(this->properties());
   emit this->configureDone(err);
@@ -186,18 +200,24 @@ void QCMake::configure()
 
 void QCMake::generate()
 {
-#ifdef Q_OS_WIN
-  UINT lastErrorMode = SetErrorMode(0);
-#endif
-
-  InterruptFlag = 0;
-  cmSystemTools::ResetErrorOccuredFlag();
-
-  int err = this->CMakeInstance->Generate();
+  int err;
+  {
+    cmSystemTools::SaveRestoreEnvironment restoreEnv;
+    this->setUpEnvironment();
 
 #ifdef Q_OS_WIN
-  SetErrorMode(lastErrorMode);
+    UINT lastErrorMode = SetErrorMode(0);
 #endif
+
+    InterruptFlag = 0;
+    cmSystemTools::ResetErrorOccuredFlag();
+
+    err = this->CMakeInstance->Generate();
+
+#ifdef Q_OS_WIN
+    SetErrorMode(lastErrorMode);
+#endif
+  }
 
   emit this->generateDone(err);
   checkOpenPossible();
@@ -373,6 +393,18 @@ void QCMake::stderrCallback(std::string const& msg)
   QCoreApplication::processEvents();
 }
 
+void QCMake::setUpEnvironment() const
+{
+  auto env = QProcessEnvironment::systemEnvironment();
+  for (auto const& key : env.keys()) {
+    cmSystemTools::UnsetEnv(key.toLocal8Bit().data());
+  }
+
+  for (auto const& var : this->Environment.toStringList()) {
+    cmSystemTools::PutEnv(var.toLocal8Bit().data());
+  }
+}
+
 QString QCMake::binaryDirectory() const
 {
   return this->BinaryDirectory;
@@ -386,6 +418,11 @@ QString QCMake::sourceDirectory() const
 QString QCMake::generator() const
 {
   return this->Generator;
+}
+
+QProcessEnvironment QCMake::environment() const
+{
+  return this->Environment;
 }
 
 std::vector<cmake::GeneratorInfo> const& QCMake::availableGenerators() const

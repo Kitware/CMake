@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.18)
+project(simpleConfigure-fail NONE)
+
+message(STATUS "This is a failed configure")
+message(FATAL_ERROR "Error")

@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.18)
+project(environment NONE)
+
+if(NOT "$ENV{KEPT_VARIABLE}" STREQUAL "Kept variable")
+  message(SEND_ERROR "KEPT_VARIABLE is \"$ENV{KEPT_VARIABLE}\", should be \"Kept variable\"")
+endif()
+
+if(NOT "$ENV{ADDED_VARIABLE}" STREQUAL "Added variable")
+  message(SEND_ERROR "ADDED_VARIABLE is \"$ENV{ADDED_VARIABLE}\", should be \"Added variable\"")
+endif()
+
+if(NOT "$ENV{CHANGED_VARIABLE}" STREQUAL "Changed variable")
+  message(SEND_ERROR "CHANGED_VARIABLE is \"$ENV{CHANGED_VARIABLE}\", should be \"Changed variable\"")
+endif()
+
+if(DEFINED ENV{REMOVED_VARIABLE})
+  message(SEND_ERROR "REMOVED_VARIABLE should not be defined")
+endif()
