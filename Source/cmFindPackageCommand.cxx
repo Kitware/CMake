@@ -1971,6 +1971,9 @@ cmFileListGeneratorBase* cmFileListGeneratorBase::SetNext(
 bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
                                        cmFileList& listing)
 {
+  if (!cmSystemTools::FileIsDirectory(fullPath)) {
+    return false;
+  }
   if (this->Next) {
     return this->Next->Search(fullPath + "/", listing);
   }
@@ -2225,10 +2228,8 @@ private:
 
     // Look for directories among the matches.
     for (std::string const& f : files) {
-      if (cmSystemTools::FileIsDirectory(f)) {
-        if (this->Consider(f, lister)) {
-          return true;
-        }
+      if (this->Consider(f, lister)) {
+        return true;
       }
     }
     return false;
