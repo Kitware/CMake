@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "InvalidVariableValue",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "VAR": {
+          "value": []
+        }
+      }
+    }
+  ]
+}

@@ -49,7 +49,8 @@ const char* cmDocumentationUsage[][2] = {
   { nullptr,
     "  cmake [options] <path-to-source>\n"
     "  cmake [options] <path-to-existing-build>\n"
-    "  cmake [options] -S <path-to-source> -B <path-to-build>" },
+    "  cmake [options] -S <path-to-source> -B <path-to-build>\n"
+    "  cmake [options] -S <path-to-source> --preset=<preset-name>" },
   { nullptr,
     "Specify a source directory to (re-)generate a build system for "
     "it in the current working directory.  Specify an existing build "
@@ -253,6 +254,9 @@ int do_cmake(int ac, char const* const* av)
     } else if (cmHasLiteralPrefix(av[i], "--find-package")) {
       workingMode = cmake::FIND_PACKAGE_MODE;
       args.emplace_back(av[i]);
+    } else if (strcmp(av[i], "--list-presets") == 0) {
+      workingMode = cmake::HELP_MODE;
+      args.emplace_back(av[i]);
     } else {
       args.emplace_back(av[i]);
     }
@@ -269,6 +273,7 @@ int do_cmake(int ac, char const* const* av)
   cmState::Mode mode = cmState::Unknown;
   switch (workingMode) {
     case cmake::NORMAL_MODE:
+    case cmake::HELP_MODE:
       mode = cmState::Project;
       break;
     case cmake::SCRIPT_MODE:

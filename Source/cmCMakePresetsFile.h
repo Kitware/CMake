@@ -30,16 +30,16 @@ public:
   public:
 #if __cplusplus < 201703L && (!defined(_MSVC_LANG) || _MSVC_LANG < 201703L)
     Preset() = default;
-    Preset(const Preset& other) = default;
-    Preset(Preset&& other) = default;
+    Preset(const Preset& /*other*/) = default;
+    Preset(Preset&& /*other*/) = default;
 
-    Preset& operator=(const Preset& other) = default;
+    Preset& operator=(const Preset& /*other*/) = default;
 
     // The move assignment operators for several STL classes did not become
     // noexcept until C++17, which causes some tools to warn about this move
     // assignment operator throwing an exception when it shouldn't. Disable the
     // move assignment operator until C++17 is enabled.
-    Preset& operator=(Preset&& other) = delete;
+    Preset& operator=(Preset&& /*other*/) = delete;
 #endif
 
     std::string Name;

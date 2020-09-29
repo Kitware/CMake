@@ -94,7 +94,7 @@ ReadFileResult VariableHelper(cm::optional<CacheVariable>& out,
     return ReadFileResult::READ_OK;
   }
   if (value->isObject()) {
-    out = CacheVariable{};
+    out.emplace();
     return VariableObjectHelper(*out, value);
   }
   if (value->isNull()) {
@@ -701,7 +701,7 @@ cmCMakePresetsFile::ExpandMacros(const UnexpandedPreset& preset) const
     }
   }
 
-  return retval;
+  return cm::make_optional(retval);
 }
 
 cmCMakePresetsFile::ReadFileResult cmCMakePresetsFile::ReadJSONFile(

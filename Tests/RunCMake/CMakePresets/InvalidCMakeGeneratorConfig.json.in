@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "InvalidCMakeGeneratorConfig",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cmakeGeneratorConfig": {}
+    }
+  ]
+}

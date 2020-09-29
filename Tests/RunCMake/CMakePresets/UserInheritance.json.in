@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "UserInheritance",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "inherits": [
+        "UserInheritanceUser"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "cmakeMinimumRequired": "3.18",
+  "configurePresets": [
+    {
+      "name": "MinimumRequiredInvalid",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

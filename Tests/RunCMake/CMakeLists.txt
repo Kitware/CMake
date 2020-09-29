@@ -757,6 +757,7 @@ add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
   -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
 
 add_RunCMake_test("UnityBuild")
+add_RunCMake_test(CMakePresets)
 
 if(WIN32)
   add_RunCMake_test(Win32GenEx)

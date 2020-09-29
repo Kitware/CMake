@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "DuplicatePresets",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "DuplicatePresets",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}
