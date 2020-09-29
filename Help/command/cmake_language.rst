@@ -10,7 +10,7 @@ Synopsis
 
 .. parsed-literal::
 
-  cmake_language(`CALL`_ <command> [<args>...])
+  cmake_language(`CALL`_ <command> [<arg>...])
   cmake_language(`EVAL`_ CODE <code>...)
 
 Introduction
@@ -28,7 +28,7 @@ Calling Commands
 
 .. code-block:: cmake
 
-  cmake_language(CALL <command> [<args>...])
+  cmake_language(CALL <command> [<arg>...])
 
 Calls the named ``<command>`` with the given arguments (if any).
 For example, the code:
