@@ -32,7 +32,8 @@ static const char* cmDocumentationUsage[][2] = {
     "  cmake-gui [options]\n"
     "  cmake-gui [options] <path-to-source>\n"
     "  cmake-gui [options] <path-to-existing-build>\n"
-    "  cmake-gui [options] -S <path-to-source> -B <path-to-build>\n" },
+    "  cmake-gui [options] -S <path-to-source> -B <path-to-build>\n"
+    "  cmake-gui [options] -S <path-to-source> --preset=<preset-name>\n" },
   { nullptr, nullptr }
 };
 
@@ -147,6 +148,7 @@ int main(int argc, char** argv)
   QStringList args = QApplication::arguments();
   std::string binaryDirectory;
   std::string sourceDirectory;
+  std::string presetName;
   for (int i = 1; i < args.size(); ++i) {
     const QString& arg = args[i];
     if (arg.startsWith("-S")) {
@@ -185,11 +187,28 @@ int main(int argc, char** argv)
       binaryDirectory =
         cmSystemTools::CollapseFullPath(path.toLocal8Bit().data());
       cmSystemTools::ConvertToUnixSlashes(binaryDirectory);
+    } else if (arg.startsWith("--preset=")) {
+      QString preset = arg.mid(cmStrLen("--preset="));
+      if (preset.isEmpty()) {
+        std::cerr << "No preset specified for --preset" << std::endl;
+        return 1;
+      }
+      presetName = preset.toLocal8Bit().data();
     }
   }
-  if (!sourceDirectory.empty() && !binaryDirectory.empty()) {
+  if (!sourceDirectory.empty() &&
+      (!binaryDirectory.empty() || !presetName.empty())) {
     dialog.setSourceDirectory(QString::fromLocal8Bit(sourceDirectory.c_str()));
-    dialog.setBinaryDirectory(QString::fromLocal8Bit(binaryDirectory.c_str()));
+    if (!binaryDirectory.empty()) {
+      dialog.setBinaryDirectory(
+        QString::fromLocal8Bit(binaryDirectory.c_str()));
+      if (!presetName.empty()) {
+        dialog.setStartupBinaryDirectory(true);
+      }
+    }
+    if (!presetName.empty()) {
+      dialog.setDeferredPreset(QString::fromLocal8Bit(presetName.c_str()));
+    }
   } else {
     if (args.count() == 2) {
       std::string filePath =

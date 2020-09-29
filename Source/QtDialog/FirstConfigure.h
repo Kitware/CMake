@@ -22,6 +22,14 @@ enum FirstConfigurePages
   Done
 };
 
+enum class CompilerOption
+{
+  DefaultNative,
+  SpecifyNative,
+  ToolchainFile,
+  Options,
+};
+
 //! the first page that gives basic options for what compilers setup to choose
 //! from
 class StartCompilerSetup : public QWizardPage
@@ -33,6 +41,9 @@ public:
   ~StartCompilerSetup();
   void setGenerators(std::vector<cmake::GeneratorInfo> const& gens);
   void setCurrentGenerator(const QString& gen);
+  void setToolset(const QString& toolset);
+  void setPlatform(const QString& platform);
+  void setCompilerOption(CompilerOption option);
   QString getGenerator() const;
   QString getToolset() const;
   QString getPlatform() const;
@@ -167,6 +178,10 @@ public:
   ~FirstConfigure();
 
   void setGenerators(std::vector<cmake::GeneratorInfo> const& gens);
+  void setCurrentGenerator(const QString& gen);
+  void setToolset(const QString& toolset);
+  void setPlatform(const QString& platform);
+  void setCompilerOption(CompilerOption option);
   QString getGenerator() const;
   QString getPlatform() const;
   QString getToolset() const;

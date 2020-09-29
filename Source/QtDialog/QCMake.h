@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmCMakePresetsFile.h"
 #include "cmake.h"
 
 #ifdef _MSC_VER
@@ -14,6 +15,7 @@
 #include <memory>
 #include <vector>
 
+#include "QCMakePreset.h"
 #include <QAtomicInt>
 #include <QList>
 #include <QMetaType>
@@ -21,6 +23,7 @@
 #include <QProcessEnvironment>
 #include <QString>
 #include <QStringList>
+#include <QTimer>
 #include <QVariant>
 
 /// struct to represent cmake properties in Qt
@@ -57,6 +60,7 @@ using QCMakePropertyList = QList<QCMakeProperty>;
 Q_DECLARE_METATYPE(QCMakeProperty)
 Q_DECLARE_METATYPE(QCMakePropertyList)
 Q_DECLARE_METATYPE(QProcessEnvironment)
+Q_DECLARE_METATYPE(cmCMakePresetsFile::ReadFileResult)
 
 /// Qt API for CMake library.
 /// Wrapper like class allows for easier integration with
@@ -74,6 +78,8 @@ public slots:
   void setSourceDirectory(const QString& dir);
   /// set the binary directory to build in
   void setBinaryDirectory(const QString& dir);
+  /// set the preset name to use
+  void setPreset(const QString& name, bool setBinary = true);
   /// set the desired generator to use
   void setGenerator(const QString& generator);
   /// set the desired generator to use
@@ -147,6 +153,15 @@ signals:
   void sourceDirChanged(const QString& dir);
   /// signal when the binary directory changes
   void binaryDirChanged(const QString& dir);
+  /// signal when the preset list changes
+  void presetsChanged(const QVector<QCMakePreset>& presets);
+  /// signal when the selected preset changes
+  void presetChanged(const QString& name);
+  /// signal when there's an error reading the presets files
+  void presetLoadError(const QString& dir,
+                       cmCMakePresetsFile::ReadFileResult error);
+  /// signal when uninitialized warning changes
+  void warnUninitializedModeChanged(bool value);
   /// signal for progress events
   void progressChanged(const QString& msg, float percent);
   /// signal when configure is done
@@ -178,6 +193,8 @@ protected:
   void stderrCallback(std::string const& msg);
   void setUpEnvironment() const;
 
+  void loadPresets();
+
   bool WarnUninitializedMode;
   QString SourceDirectory;
   QString BinaryDirectory;
@@ -185,7 +202,13 @@ protected:
   QString Platform;
   QString Toolset;
   std::vector<cmake::GeneratorInfo> AvailableGenerators;
+  cmCMakePresetsFile CMakePresetsFile;
+  cmCMakePresetsFile::ReadFileResult LastLoadPresetsResult =
+    cmCMakePresetsFile::ReadFileResult::READ_OK;
+  QString PresetName;
   QString CMakeExecutable;
   QAtomicInt InterruptFlag;
+  QProcessEnvironment StartEnvironment;
   QProcessEnvironment Environment;
+  QTimer LoadPresetsTimer;
 };
