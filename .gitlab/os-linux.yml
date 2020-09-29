@@ -143,6 +143,16 @@
     - cmake --version
     - ninja --version
 
+.cmake_prep_doc_linux:
+    stage: prep
+
+    script:
+        - *before_script_linux
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
+
+    interruptible: true
+
 .cmake_build_linux:
     stage: build
 
