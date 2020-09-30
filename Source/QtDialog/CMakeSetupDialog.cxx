@@ -181,11 +181,25 @@ CMakeSetupDialog::CMakeSetupDialog()
                    &QCMakeCacheView::collapseAll);
 
   QMenu* HelpMenu = this->menuBar()->addMenu(tr("&Help"));
-  a = HelpMenu->addAction(tr("About"));
-  QObject::connect(a, &QAction::triggered, this, &CMakeSetupDialog::doAbout);
   a = HelpMenu->addAction(tr("Help"));
   QObject::connect(a, &QAction::triggered, this, &CMakeSetupDialog::doHelp);
   a->setShortcut(QKeySequence::HelpContents);
+  a = HelpMenu->addAction(tr("CMake Reference Manual"));
+  QObject::connect(a, &QAction::triggered, this, []() {
+    QString urlFormat("https://cmake.org/cmake/help/v%1.%2/");
+    QUrl url(urlFormat.arg(QString::number(cmVersion::GetMajorVersion()),
+                           QString::number(cmVersion::GetMinorVersion())));
+
+    if (!cmSystemTools::GetHTMLDoc().empty()) {
+      url = QUrl::fromLocalFile(
+        QDir(QString::fromLocal8Bit(cmSystemTools::GetHTMLDoc().data()))
+          .filePath("index.html"));
+    }
+
+    QDesktopServices::openUrl(url);
+  });
+  a = HelpMenu->addAction(tr("About"));
+  QObject::connect(a, &QAction::triggered, this, &CMakeSetupDialog::doAbout);
 
   this->setAcceptDrops(true);
 
