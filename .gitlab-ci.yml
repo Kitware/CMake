@@ -12,9 +12,9 @@ include:
     - local: .gitlab/upload.yml
 
 stages:
+    - prep
     - build
     - test
-    - package
     - test-ext
     - upload
 
@@ -33,6 +33,35 @@ stages:
 #   - artifacts
 #   - dependency/needs jobs for required jobs
 ################################################################################
+
+# Prep jobs
+
+prep:source:
+    extends:
+        - .linux_prep_source
+        - .cmake_prep_source_linux
+        - .linux_builder_tags
+        - .cmake_release_artifacts
+        - .run_only_for_package
+
+prep:doc:
+    extends:
+        - .fedora31_sphinx_package
+        - .cmake_prep_doc_linux
+        - .linux_builder_tags_qt
+        - .cmake_doc_artifacts
+        - .run_only_for_package
+
+upload:source:
+    extends:
+        - .rsync_upload
+        - .run_only_for_package
+    dependencies:
+        - prep:source
+    needs:
+        - prep:source
+    variables:
+        RSYNC_DESTINATION: dev
 
 # Lint builds
 
@@ -56,14 +85,6 @@ build:fedora31-sphinx:
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
-
-build:fedora31-sphinx-package:
-    extends:
-        - .fedora31_sphinx_package
-        - .cmake_build_linux
-        - .linux_builder_tags_qt
-        - .cmake_doc_artifacts
-        - .run_only_for_package
 
 # Linux builds
 
@@ -180,7 +201,7 @@ test:macos-xcode:
     needs:
         - test:macos-ninja
 
-package:macos:
+build:macos-package:
     extends:
         - .macos_package
         - .cmake_build_macos_package
@@ -188,18 +209,18 @@ package:macos:
         - .macos_builder_tags_package
         - .run_only_for_package
     dependencies:
-        - build:fedora31-sphinx-package
+        - prep:doc
     needs:
-        - build:fedora31-sphinx-package
+        - prep:doc
 
 upload:macos:
     extends:
         - .rsync_upload
         - .run_only_for_package
     dependencies:
-        - package:macos
+        - build:macos-package
     needs:
-        - package:macos
+        - build:macos-package
     variables:
         RSYNC_DESTINATION: dev
 

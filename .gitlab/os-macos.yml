@@ -111,7 +111,7 @@
     interruptible: true
 
 .cmake_build_macos_package:
-    stage: package
+    stage: build
 
     script:
         - *before_script_macos

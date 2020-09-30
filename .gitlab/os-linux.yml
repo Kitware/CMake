@@ -11,6 +11,12 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
         LAUNCHER: "scl enable devtoolset-6 rh-python36 --"
 
+.linux_prep_source:
+    image: "fedora:32"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+
 ### Debian
 
 .debian10:
@@ -142,6 +148,29 @@
     - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
     - cmake --version
     - ninja --version
+
+.cmake_prep_source_linux:
+    stage: prep
+
+    script:
+        - *before_script_linux
+        - dnf install --setopt=install_weak_deps=False -y git-core
+        - v="$(.gitlab/ci/cmake_version.sh)"
+        - mkdir -p build/
+        - git archive --format=tgz "--prefix=cmake-$v/" -o "build/cmake-$v.tar.gz" HEAD
+        - git -c core.autocrlf=true -c core.eol=crlf archive --format=zip --prefix="cmake-$v/" -o "build/cmake-$v.zip" HEAD
+
+    interruptible: true
+
+.cmake_prep_doc_linux:
+    stage: prep
+
+    script:
+        - *before_script_linux
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
+
+    interruptible: true
 
 .cmake_build_linux:
     stage: build

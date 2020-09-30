@@ -74,6 +74,9 @@
             # Any packages made.
             - build/cmake-*-Linux-x86_64.*
             - build/cmake-*-Darwin-x86_64.*
+            # Any source packages made.
+            - build/cmake-*.tar.gz
+            - build/cmake-*.zip
 
 .cmake_test_artifacts:
     artifacts:
