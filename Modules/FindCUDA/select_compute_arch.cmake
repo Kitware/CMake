@@ -7,7 +7,7 @@
 #      ARCH_AND_PTX : NAME | NUM.NUM | NUM.NUM(NUM.NUM) | NUM.NUM+PTX
 #      NAME: Fermi Kepler Maxwell Kepler+Tegra Kepler+Tesla Maxwell+Tegra Pascal Volta Turing Ampere
 #      NUM: Any number. Only those pairs are currently accepted by NVCC though:
-#            2.0 2.1 3.0 3.2 3.5 3.7 5.0 5.2 5.3 6.0 6.2 7.0 7.2 7.5 8.0
+#            2.0 2.1 3.0 3.2 3.5 3.7 5.0 5.2 5.3 6.0 6.2 7.0 7.2 7.5 8.0 8.6
 #      Returns LIST of flags to be added to CUDA_NVCC_FLAGS in ${out_variable}
 #      Additionally, sets ${out_variable}_readable to the resulting numeric list
 #      Example:
@@ -82,15 +82,25 @@ if(CUDA_VERSION VERSION_GREATER_EQUAL "10.0")
   list(APPEND CUDA_ALL_GPU_ARCHITECTURES "7.5")
 
   if(CUDA_VERSION VERSION_LESS "11.0")
-    set(CUDA_LIMIT_GPU_ARCHITECTURE "8.0")
     list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "7.5+PTX")
+    set(CUDA_LIMIT_GPU_ARCHITECTURE "8.0")
   endif()
 endif()
 
 if(CUDA_VERSION VERSION_GREATER_EQUAL "11.0")
   list(APPEND CUDA_KNOWN_GPU_ARCHITECTURES "Ampere")
-  list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "8.0" "8.0+PTX")
+  list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "8.0")
   list(APPEND CUDA_ALL_GPU_ARCHITECTURES "8.0")
+
+  if(CUDA_VERSION VERSION_LESS "11.1")
+    list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "8.0+PTX")
+    set(CUDA_LIMIT_GPU_ARCHITECTURE "8.6")
+  endif()
+endif()
+
+if(CUDA_VERSION VERSION_GREATER_EQUAL "11.1")
+  list(APPEND CUDA_COMMON_GPU_ARCHITECTURES "8.6" "8.6+PTX")
+  list(APPEND CUDA_ALL_GPU_ARCHITECTURES "8.6")
 
   if(CUDA_VERSION VERSION_LESS "12.0")
     set(CUDA_LIMIT_GPU_ARCHITECTURE "9.0")
