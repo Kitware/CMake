@@ -1,0 +1,5 @@
+{"args":\["DEFER","CALL","message","Deferred Message"\],"cmd":"cmake_language","file":"[^"]*/Tests/RunCMake/cmake_language/defer_call_trace_json.cmake","frame":2,"line":2,"time":[0-9.]+}
+{"args":\["Immediate Message"\],"cmd":"message","file":"[^"]*/Tests/RunCMake/cmake_language/defer_call_trace_json.cmake","frame":2,"line":3,"time":[0-9.]+}
+Immediate Message
+{"args":\["Deferred Message"],"cmd":"message","defer":"__0","file":"[^"]*/Tests/RunCMake/cmake_language/defer_call_trace_json.cmake","frame":1,"line":2,"time":[0-9.]+}
+Deferred Message$

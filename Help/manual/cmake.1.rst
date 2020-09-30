@@ -295,6 +295,11 @@ Options
      ``line``
        The line in ``file`` of the function call.
 
+     ``defer``
+       Optional member that is present when the function call was deferred
+       by :command:`cmake_language(DEFER)`.  If present, its value is a
+       string containing the deferred call ``<id>``.
+
      ``cmd``
        The name of the function that was called.
 
@@ -317,7 +322,7 @@ Options
        {
          "version": {
            "major": 1,
-           "minor": 0
+           "minor": 1
          }
        }
 

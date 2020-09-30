@@ -1,0 +1,9 @@
+^CMake Error at defer_call_error.cmake:2 \(message\):
+  Deferred Error
+Call Stack \(most recent call first\):
+  CMakeLists.txt:DEFERRED
++
+CMake Error at defer_call_error/CMakeLists.txt:2 \(message\):
+  Deferred Error from Subdirectory
+Call Stack \(most recent call first\):
+  CMakeLists.txt:DEFERRED$

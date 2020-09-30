@@ -1,0 +1,9 @@
+^CMake Error at defer_call_enable_language.cmake:1 \(enable_language\):
+  Languages may not be enabled during deferred execution.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:DEFERRED
++
+CMake Error at defer_call_enable_language.cmake:2 \(project\):
+  Languages may not be enabled during deferred execution.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:DEFERRED$

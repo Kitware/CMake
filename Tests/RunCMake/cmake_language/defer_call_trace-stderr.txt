@@ -1,0 +1,8 @@
+[^
+]*/Tests/RunCMake/cmake_language/defer_call_trace.cmake\(2\):  cmake_language\(DEFER CALL message Deferred Message \)
+[^
+]*/Tests/RunCMake/cmake_language/defer_call_trace.cmake\(3\):  message\(Immediate Message \)
+Immediate Message
+[^
+]*/Tests/RunCMake/cmake_language/defer_call_trace.cmake\(2\):DEFERRED:__0:  message\(Deferred Message \)
+Deferred Message$

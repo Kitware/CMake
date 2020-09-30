@@ -8,8 +8,11 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmCommandArgumentLexer.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmProperty.h"
 #include "cmState.h"
@@ -91,7 +94,14 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     return nullptr;
   }
   if (this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0) {
-    return this->AddString(std::to_string(this->FileLine));
+    std::string line;
+    cmListFileContext const& top = this->Makefile->GetBacktrace().Top();
+    if (top.DeferId) {
+      line = cmStrCat("DEFERRED:"_s, *top.DeferId);
+    } else {
+      line = std::to_string(this->FileLine);
+    }
+    return this->AddString(line);
   }
   cmProp value = this->Makefile->GetDefinition(var);
   if (!value) {

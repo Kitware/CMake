@@ -1,0 +1,4 @@
+^CMake Error at defer_cancel_call_id_var.cmake:1 \(cmake_language\):
+  cmake_language DEFER CANCEL_CALL does not accept ID or ID_VAR.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)$

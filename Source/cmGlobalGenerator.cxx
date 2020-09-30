@@ -15,6 +15,7 @@
 
 #include <cm/memory>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
@@ -1211,6 +1212,7 @@ void cmGlobalGenerator::Configure()
 {
   this->FirstTimeProgress = 0.0f;
   this->ClearGeneratorMembers();
+  this->NextDeferId = 0;
 
   cmStateSnapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
 
@@ -3254,6 +3256,11 @@ const std::string& cmGlobalGenerator::GetRealPath(const std::string& dir)
     i = this->RealPaths.emplace_hint(i, dir, cmSystemTools::GetRealPath(dir));
   }
   return i->second;
+}
+
+std::string cmGlobalGenerator::NewDeferId()
+{
+  return cmStrCat("__"_s, std::to_string(this->NextDeferId++));
 }
 
 void cmGlobalGenerator::ProcessEvaluationFiles()

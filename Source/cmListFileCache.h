@@ -11,6 +11,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmStateSnapshot.h"
 
 /** \class cmListFileCache
@@ -72,6 +74,8 @@ public:
   std::string Name;
   std::string FilePath;
   long Line = 0;
+  static long const DeferPlaceholderLine = -1;
+  cm::optional<std::string> DeferId;
 
   cmListFileContext() = default;
   cmListFileContext(std::string name, std::string filePath, long line)
@@ -81,13 +85,15 @@ public:
   {
   }
 
-  static cmListFileContext FromCommandContext(cmCommandContext const& lfcc,
-                                              std::string const& fileName)
+  static cmListFileContext FromCommandContext(
+    cmCommandContext const& lfcc, std::string const& fileName,
+    cm::optional<std::string> deferId = {})
   {
     cmListFileContext lfc;
     lfc.FilePath = fileName;
     lfc.Line = lfcc.Line;
     lfc.Name = lfcc.Name.Original;
+    lfc.DeferId = std::move(deferId);
     return lfc;
   }
 };

@@ -1,0 +1,9 @@
+^CMake Error at defer_cancel_call_invalid_directory.cmake:2 \(cmake_language\):
+  cmake_language DEFER CANCEL_CALL may not update directory:
+
+    [^
+]*/Tests/RunCMake/cmake_language/defer_cancel_call_invalid_directory-build/defer_cancel_call_invalid_directory
+
+  at this time.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
