@@ -1,0 +1,219 @@
+^Generated_with_full_path1\.cpp: # 1a # GENERATED = `tRue`
+Generated_with_full_path1\.cpp: # 1b # GENERATED = `tRue`
+Generated_with_full_path1\.cpp: # 2a # GENERATED = `tRue`
+Generated_with_full_path1\.cpp: # 2b # GENERATED = `tRue`
+Generated_with_full_path1\.cpp: # 3a # GENERATED = ``
+Generated_with_full_path1\.cpp: # 3b # GENERATED = `NOTFOUND`
+CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
+  Policy CMP0118 is not set: The GENERATED source file property is now
+  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+
+  Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
+
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+Generated_with_full_path2\.cpp: # 1a # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_full_path2\.cpp: # 1b # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_full_path2\.cpp: # 2a # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_full_path2\.cpp: # 2b # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_full_path2\.cpp: # 3a # GENERATED = ``
+Generated_with_full_path2\.cpp: # 3b # GENERATED = `NOTFOUND`
+CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
+  Policy CMP0118 is not set: The GENERATED source file property is now
+  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+
+  Attempt to set property 'GENERATED' with the following non-boolean value
+  \(which will be interpreted as "0"\):
+
+  Junk-value
+
+  That exact value will not be retrievable\.  A value of "0" will be returned
+  instead\.
+
+  This will be an error under policy CMP0118\.
+
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+Generated_with_full_path3\.cpp: # 1a # GENERATED = `Junk-value`
+Generated_with_full_path3\.cpp: # 1b # GENERATED = `Junk-value`
+Generated_with_full_path3\.cpp: # 2a # GENERATED = `Junk-value`
+Generated_with_full_path3\.cpp: # 2b # GENERATED = `Junk-value`
+Generated_with_full_path3\.cpp: # 3a # GENERATED = ``
+Generated_with_full_path3\.cpp: # 3b # GENERATED = `NOTFOUND`
+Generated_with_relative_path1\.cpp: # 1a # GENERATED = `tRue`
+Generated_with_relative_path1\.cpp: # 1b # GENERATED = `tRue`
+Generated_with_relative_path1\.cpp: # 2a # GENERATED = `tRue`
+Generated_with_relative_path1\.cpp: # 2b # GENERATED = `tRue`
+Generated_with_relative_path1\.cpp: # 3a # GENERATED = ``
+Generated_with_relative_path1\.cpp: # 3b # GENERATED = `NOTFOUND`
+CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
+  Policy CMP0118 is not set: The GENERATED source file property is now
+  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+
+  Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
+
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+Generated_with_relative_path2\.cpp: # 1a # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_relative_path2\.cpp: # 1b # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_relative_path2\.cpp: # 2a # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_relative_path2\.cpp: # 2b # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_relative_path2\.cpp: # 3a # GENERATED = ``
+Generated_with_relative_path2\.cpp: # 3b # GENERATED = `NOTFOUND`
+CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
+  Policy CMP0118 is not set: The GENERATED source file property is now
+  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+
+  Attempt to set property 'GENERATED' with the following non-boolean value
+  \(which will be interpreted as "0"\):
+
+  Junk-value
+
+  That exact value will not be retrievable\.  A value of "0" will be returned
+  instead\.
+
+  This will be an error under policy CMP0118\.
+
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+Generated_with_relative_path3\.cpp: # 1a # GENERATED = `Junk-value`
+Generated_with_relative_path3\.cpp: # 1b # GENERATED = `Junk-value`
+Generated_with_relative_path3\.cpp: # 2a # GENERATED = `Junk-value`
+Generated_with_relative_path3\.cpp: # 2b # GENERATED = `Junk-value`
+Generated_with_relative_path3\.cpp: # 3a # GENERATED = ``
+Generated_with_relative_path3\.cpp: # 3b # GENERATED = `NOTFOUND`
+Generated_with_full_source_path1\.cpp: # 1a # GENERATED = `tRue`
+Generated_with_full_source_path1\.cpp: # 1b # GENERATED = `tRue`
+Generated_with_full_source_path1\.cpp: # 2a # GENERATED = `tRue`
+Generated_with_full_source_path1\.cpp: # 2b # GENERATED = `tRue`
+Generated_with_full_source_path1\.cpp: # 3a # GENERATED = ``
+Generated_with_full_source_path1\.cpp: # 3b # GENERATED = `NOTFOUND`
+CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
+  Policy CMP0118 is not set: The GENERATED source file property is now
+  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+
+  Unsetting property 'GENERATED' will not be allowed under policy CMP0118!
+
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+Generated_with_full_source_path2\.cpp: # 1a # GENERATED = ``
+Generated_with_full_source_path2\.cpp: # 1b # GENERATED = `NOTFOUND`
+Generated_with_full_source_path2\.cpp: # 2a # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_full_source_path2\.cpp: # 2b # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_full_source_path2\.cpp: # 3a # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_full_source_path2\.cpp: # 3b # GENERATED = `SomeVar-NOTFOUND`
+CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
+  Policy CMP0118 is not set: The GENERATED source file property is now
+  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+
+  Attempt to set property 'GENERATED' with the following non-boolean value
+  \(which will be interpreted as "0"\):
+
+  Junk-value
+
+  That exact value will not be retrievable\.  A value of "0" will be returned
+  instead\.
+
+  This will be an error under policy CMP0118\.
+
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+Generated_with_full_source_path3\.cpp: # 1a # GENERATED = ``
+Generated_with_full_source_path3\.cpp: # 1b # GENERATED = `NOTFOUND`
+Generated_with_full_source_path3\.cpp: # 2a # GENERATED = ``
+Generated_with_full_source_path3\.cpp: # 2b # GENERATED = `NOTFOUND`
+Generated_with_full_source_path3\.cpp: # 3a # GENERATED = ``
+Generated_with_full_source_path3\.cpp: # 3b # GENERATED = `NOTFOUND`
+CMake Error at CMP0118-Common-Test5\.cmake:[0-9]+ \(add_executable\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_relative_path[2-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_full_path[2-3]\.cpp)
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test5\.cmake:[0-9]+ \(add_executable\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_relative_path[2-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_full_path[2-3]\.cpp)
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test5\.cmake:[0-9]+ \(add_executable\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_relative_path[2-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_full_path[2-3]\.cpp)
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test5\.cmake:[0-9]+ \(add_executable\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_relative_path[2-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_full_path[2-3]\.cpp)
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test5\.cmake:[0-9]+ \(add_executable\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_relative_path[2-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_full_path[2-3]\.cpp)
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test5\.cmake:[0-9]+ \(add_executable\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_relative_path[2-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_full_path[2-3]\.cpp)
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test5\.cmake:[0-9]+ \(add_executable\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_relative_path[2-3]\.cpp|CMP0118-WARN-Test5-build/Generated_with_full_path[2-3]\.cpp)
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+(CMake Error at CMP0118-Common-Test5\.cmake:[0-9]+ \(add_executable\):
+  No SOURCES given to target: executable[235-9]
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test5\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++)+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$
