@@ -3,6 +3,10 @@ cmake_policy(SET CMP0057 NEW)
 include(RunCMake)
 cmake_policy(SET CMP0054 NEW)
 
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.27)
+  run_cmake(LanguageStandard)
+endif()
+
 run_cmake(VsCsharpSourceGroup)
 run_cmake(VsCSharpCompilerOpts)
 run_cmake(ExplicitCMakeLists)
