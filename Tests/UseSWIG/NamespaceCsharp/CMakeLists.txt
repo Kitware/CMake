@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12...3.13)
 
-project(TestNamsespaceCsharp CXX)
+project(TestNamespaceCsharp CXX)
 
 include(CTest)
 
