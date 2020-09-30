@@ -21,6 +21,16 @@
           when: on_success
         - when: never
 
+.run_dependent:
+    rules:
+        - if: '$CMAKE_CI_PACKAGE == "true"'
+          when: never
+        - if: '$CI_MERGE_REQUEST_ID'
+          when: on_success
+        - if: '$CI_PROJECT_PATH == "cmake/cmake"'
+          when: on_success
+        - when: never
+
 .run_only_for_package:
     rules:
         - if: '$CMAKE_CI_PACKAGE == "true"'
