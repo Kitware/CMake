@@ -1,18 +1,20 @@
 
+# show the effect of the exclusion or inclusion of the upper endpoint
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set (VersionRange_SPECIFIED_VERSION_COMPLETE 1.2.3.4...5.6.7.8)
-set (VersionRange_SPECIFIED_VERSION_RANGE 1.2.3.4...5.6.7.8)
-set (VersionRange_SPECIFIED_VERSION_MIN 1.2.3.4)
-set (VersionRange_SPECIFIED_VERSION_MIN_MAJOR 1)
-set (VersionRange_SPECIFIED_VERSION_MIN_MINOR 2)
-set (VersionRange_SPECIFIED_VERSION_MIN_PATCH 3)
-set (VersionRange_SPECIFIED_VERSION_MIN_TWEAK 4)
-set (VersionRange_SPECIFIED_VERSION_MAX 5.6.7.8)
-set (VersionRange_SPECIFIED_VERSION_MAX_MAJOR 5)
-set (VersionRange_SPECIFIED_VERSION_MAX_MINOR 6)
-set (VersionRange_SPECIFIED_VERSION_MAX_PATCH 7)
-set (VersionRange_SPECIFIED_VERSION_MAX_TWEAK 8)
+set (VersionRange_SPECIFIED_VERSION_COMPLETE 2.3.4.5...2.3.4.5)
+set (VersionRange_SPECIFIED_VERSION_RANGE 2.3.4.5...2.3.4.5)
+set (VersionRange_SPECIFIED_VERSION_MIN 2.3.4.5)
+set (VersionRange_SPECIFIED_VERSION_MIN_MAJOR 2)
+set (VersionRange_SPECIFIED_VERSION_MIN_MINOR 3)
+set (VersionRange_SPECIFIED_VERSION_MIN_PATCH 4)
+set (VersionRange_SPECIFIED_VERSION_MIN_TWEAK 5)
+set (VersionRange_SPECIFIED_VERSION_MAX 2.3.4.5)
+set (VersionRange_SPECIFIED_VERSION_MAX_MAJOR 2)
+set (VersionRange_SPECIFIED_VERSION_MAX_MINOR 3)
+set (VersionRange_SPECIFIED_VERSION_MAX_PATCH 4)
+set (VersionRange_SPECIFIED_VERSION_MAX_TWEAK 5)
 
 find_package (VersionRange ${VersionRange_SPECIFIED_VERSION_RANGE})
 

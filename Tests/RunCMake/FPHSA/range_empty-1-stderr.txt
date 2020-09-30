@@ -1,6 +1,0 @@
-CMake Error at .+FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
-  Could NOT find PseudoRange: Found unsuitable version "2\.0", required range
-  is empty \("3\.0\.\.\.2\.0"\) \(found TRUE\)
-Call Stack \(most recent call first\):
-  .+FindPackageHandleStandardArgs.cmake:[0-9]+ \(_FPHSA_FAILURE_MESSAGE\)
-  FindPseudoRange.cmake:[0-9]+ \(find_package_handle_standard_args\)
