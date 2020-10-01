@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestRequiredArtifacts.Check LANGUAGES C)
+project(TestRequiredArtifacts.Check LANGUAGES NONE)
 
 set (components)
 if (CHECK_INTERPRETER)
@@ -29,13 +29,13 @@ endif()
 
 
 if (CHECK_INTERPRETER AND NOT Python3_EXECUTABLE STREQUAL required_interpreter)
-  message (FATAL_ERROR "Fail to use input variable Python3_EXECUTABLE")
+  message (FATAL_ERROR "Failed to use input variable Python3_EXECUTABLE")
 endif()
 
 if (CHECK_LIBRARY AND NOT Python3_LIBRARY_RELEASE STREQUAL required_library)
-  message (FATAL_ERROR "Fail to use input variable Python3_LIBRARY")
+  message (FATAL_ERROR "Failed to use input variable Python3_LIBRARY")
 endif()
 
 if (CHECK_INCLUDE AND NOT Python3_INCLUDE_DIRS STREQUAL required_include)
-  message (FATAL_ERROR "Fail to use input variable Python3_INCLUDE_DIR")
+  message (FATAL_ERROR "Failed to use input variable Python3_INCLUDE_DIR")
 endif()
