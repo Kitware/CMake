@@ -10,6 +10,10 @@ FindPython3
 Find Python 3 interpreter, compiler and development environment (include
 directories and libraries).
 
+When a version is requested, it can be specified as a simple value or as a
+range. For a detailed description of version range usage and capabilities,
+refer to the :command:`find_package` command.
+
 The following components are supported:
 
 * ``Interpreter``: search for Python 3 interpreter
