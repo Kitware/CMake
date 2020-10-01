@@ -3190,6 +3190,9 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
   if (archs) {
     cmExpandList(*archs, archVec);
   }
+  if (archVec.empty()) {
+    this->Makefile->GetDefExpandList("_CMAKE_APPLE_ARCHS_DEFAULT", archVec);
+  }
 }
 
 void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const

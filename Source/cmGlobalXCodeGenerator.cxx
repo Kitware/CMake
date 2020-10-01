@@ -4023,6 +4023,10 @@ void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
   }
 
   if (this->Architectures.empty()) {
+    mf->GetDefExpandList("_CMAKE_APPLE_ARCHS_DEFAULT", this->Architectures);
+  }
+
+  if (this->Architectures.empty()) {
     // With no ARCHS we use ONLY_ACTIVE_ARCH and possibly a
     // platform-specific default ARCHS placeholder value.
     // Look up the arch that Xcode chooses in this case.
