@@ -3791,12 +3791,14 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
 
     std::string pdb = cmStrCat(this->GeneratorTarget->GetPDBDirectory(config),
                                '/', targetNames.PDB);
-    std::string imLib =
-      cmStrCat(this->GeneratorTarget->GetDirectory(
-                 config, cmStateEnums::ImportLibraryArtifact),
-               '/', targetNames.ImportLibrary);
+    if (!targetNames.ImportLibrary.empty()) {
+      std::string imLib =
+        cmStrCat(this->GeneratorTarget->GetDirectory(
+                   config, cmStateEnums::ImportLibraryArtifact),
+                 '/', targetNames.ImportLibrary);
 
-    linkOptions.AddFlag("ImportLibrary", imLib);
+      linkOptions.AddFlag("ImportLibrary", imLib);
+    }
     linkOptions.AddFlag("ProgramDataBaseFile", pdb);
 
     // A Windows Runtime component uses internal .NET metadata,
