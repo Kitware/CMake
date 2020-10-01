@@ -36,7 +36,7 @@ stages:
 
 # Prep jobs
 
-prep:source:
+prep:source-package:
     extends:
         - .linux_prep_source
         - .cmake_prep_source_linux
@@ -44,7 +44,7 @@ prep:source:
         - .cmake_release_artifacts
         - .run_only_for_package
 
-prep:doc:
+prep:doc-package:
     extends:
         - .fedora31_sphinx_package
         - .cmake_prep_doc_linux
@@ -52,14 +52,14 @@ prep:doc:
         - .cmake_doc_artifacts
         - .run_only_for_package
 
-upload:source:
+upload:source-package:
     extends:
         - .rsync_upload
         - .run_only_for_package
     dependencies:
-        - prep:source
+        - prep:source-package
     needs:
-        - prep:source
+        - prep:source-package
     variables:
         RSYNC_DESTINATION: dev
 
@@ -152,6 +152,29 @@ test:fedora31-ninja-multi:
     needs:
         - test:fedora31-ninja
 
+build:linux-x86_64-package:
+    extends:
+        - .linux_package_x86_64
+        - .cmake_build_linux_package
+        - .cmake_release_artifacts
+        - .linux_builder_tags
+        - .run_only_for_package
+    dependencies:
+        - prep:doc-package
+    needs:
+        - prep:doc-package
+
+upload:linux-x86_64-package:
+    extends:
+        - .rsync_upload
+        - .run_only_for_package
+    dependencies:
+        - build:linux-x86_64-package
+    needs:
+        - build:linux-x86_64-package
+    variables:
+        RSYNC_DESTINATION: dev
+
 # macOS builds
 
 build:macos-ninja:
@@ -212,11 +235,11 @@ build:macos-package:
         - .macos_builder_tags_package
         - .run_only_for_package
     dependencies:
-        - prep:doc
+        - prep:doc-package
     needs:
-        - prep:doc
+        - prep:doc-package
 
-upload:macos:
+upload:macos-package:
     extends:
         - .rsync_upload
         - .run_only_for_package
