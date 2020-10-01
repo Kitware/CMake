@@ -11,7 +11,7 @@ class StreamWriter;
 }
 
 class cmListFileContext;
-struct cmListFileFunction;
+class cmListFileFunction;
 
 class cmMakefileProfilingData
 {

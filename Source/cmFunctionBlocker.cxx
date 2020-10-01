@@ -15,9 +15,9 @@
 bool cmFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
                                           cmExecutionStatus& status)
 {
-  if (lff.Name.Lower == this->StartCommandName()) {
+  if (lff.LowerCaseName() == this->StartCommandName()) {
     this->ScopeDepth++;
-  } else if (lff.Name.Lower == this->EndCommandName()) {
+  } else if (lff.LowerCaseName() == this->EndCommandName()) {
     this->ScopeDepth--;
     if (this->ScopeDepth == 0U) {
       cmMakefile& mf = status.GetMakefile();

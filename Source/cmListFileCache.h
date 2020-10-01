@@ -14,6 +14,7 @@
 #include <cm/optional>
 
 #include "cmStateSnapshot.h"
+#include "cmSystemTools.h"
 
 /** \class cmListFileCache
  * \brief A class to cache list file contents.
@@ -28,16 +29,19 @@ struct cmCommandContext
 {
   struct cmCommandName
   {
-    std::string Lower;
     std::string Original;
+    std::string Lower;
     cmCommandName() = default;
-    cmCommandName(std::string const& name) { *this = name; }
-    cmCommandName& operator=(std::string const& name);
+    cmCommandName(std::string name)
+      : Original(std::move(name))
+      , Lower(cmSystemTools::LowerCase(this->Original))
+    {
+    }
   } Name;
   long Line = 0;
   cmCommandContext() = default;
-  cmCommandContext(const char* name, int line)
-    : Name(name)
+  cmCommandContext(std::string name, long line)
+    : Name(std::move(name))
     , Line(line)
   {
   }
@@ -103,9 +107,48 @@ bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
 bool operator==(cmListFileContext const& lhs, cmListFileContext const& rhs);
 bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
 
-struct cmListFileFunction : public cmCommandContext
+class cmListFileFunction
 {
-  std::vector<cmListFileArgument> Arguments;
+public:
+  cmListFileFunction(std::string name, long line,
+                     std::vector<cmListFileArgument> args)
+    : Impl{ std::make_shared<Implementation>(std::move(name), line,
+                                             std::move(args)) }
+  {
+  }
+
+  std::string const& OriginalName() const noexcept
+  {
+    return this->Impl->Name.Original;
+  }
+
+  std::string const& LowerCaseName() const noexcept
+  {
+    return this->Impl->Name.Lower;
+  }
+
+  long Line() const noexcept { return this->Impl->Line; }
+
+  std::vector<cmListFileArgument> const& Arguments() const noexcept
+  {
+    return this->Impl->Arguments;
+  }
+
+  operator cmCommandContext const&() const noexcept { return *this->Impl; }
+
+private:
+  struct Implementation : public cmCommandContext
+  {
+    Implementation(std::string name, long line,
+                   std::vector<cmListFileArgument> args)
+      : cmCommandContext{ std::move(name), line }
+      , Arguments{ std::move(args) }
+    {
+    }
+    std::vector<cmListFileArgument> Arguments;
+  };
+
+  std::shared_ptr<Implementation const> Impl;
 };
 
 // Represent a backtrace (call stack).  Provide value semantics

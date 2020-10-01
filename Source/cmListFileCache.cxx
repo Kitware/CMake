@@ -15,14 +15,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-cmCommandContext::cmCommandName& cmCommandContext::cmCommandName::operator=(
-  std::string const& name)
-{
-  this->Original = name;
-  this->Lower = cmSystemTools::LowerCase(name);
-  return *this;
-}
-
 struct cmListFileParser
 {
   cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
@@ -43,7 +35,9 @@ struct cmListFileParser
   cmMessenger* Messenger;
   const char* FileName;
   cmListFileLexer* Lexer;
-  cmListFileFunction Function;
+  std::string FunctionName;
+  long FunctionLine;
+  std::vector<cmListFileArgument> FunctionArguments;
   enum
   {
     SeparationOkay,
@@ -141,7 +135,9 @@ bool cmListFileParser::Parse()
       if (haveNewline) {
         haveNewline = false;
         if (this->ParseFunction(token->text, token->line)) {
-          this->ListFile->Functions.push_back(this->Function);
+          this->ListFile->Functions.emplace_back(
+            std::move(this->FunctionName), this->FunctionLine,
+            std::move(this->FunctionArguments));
         } else {
           return false;
         }
@@ -200,9 +196,8 @@ bool cmListFile::ParseString(const char* str, const char* virtual_filename,
 bool cmListFileParser::ParseFunction(const char* name, long line)
 {
   // Ininitialize a new function call.
-  this->Function = cmListFileFunction();
-  this->Function.Name = name;
-  this->Function.Line = line;
+  this->FunctionName = name;
+  this->FunctionLine = line;
 
   // Command name has already been parsed.  Read the left paren.
   cmListFileLexer_Token* token;
@@ -297,7 +292,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
 bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
                                    cmListFileArgument::Delimiter delim)
 {
-  this->Function.Arguments.emplace_back(token->text, delim, token->line);
+  this->FunctionArguments.emplace_back(token->text, delim, token->line);
   if (this->Separation == SeparationOkay) {
     return true;
   }
