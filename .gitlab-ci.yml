@@ -85,6 +85,9 @@ build:fedora31-sphinx:
         - .cmake_build_linux
         - .linux_builder_tags_qt
         - .run_automatically
+    variables:
+        CMAKE_CI_JOB_CONTINUOUS: "true"
+        CMAKE_CI_JOB_HELP: "true"
 
 # Linux builds
 
@@ -101,7 +104,7 @@ test:fedora31-makefiles:
         - .fedora31_makefiles
         - .cmake_test_linux_package
         - .linux_builder_tags_qt
-        - .run_automatically
+        - .run_dependent
     dependencies:
         - build:centos6-release
     needs:
@@ -112,7 +115,7 @@ test:cuda10.2-nvidia:
         - .cuda10.2_nvidia
         - .cmake_test_linux_package
         - .linux_builder_tags_cuda
-        - .run_automatically
+        - .run_dependent
     dependencies:
         - build:centos6-release
     needs:
@@ -132,7 +135,7 @@ test:fedora31-ninja:
         - .cmake_test_linux
         - .linux_builder_tags_x11
         - .cmake_test_artifacts
-        - .run_automatically
+        - .run_dependent
     dependencies:
         - build:fedora31-ninja
     needs:
@@ -143,7 +146,7 @@ test:fedora31-ninja-multi:
         - .fedora31_ninja_multi
         - .cmake_test_linux_external
         - .linux_builder_tags_qt
-        - .run_automatically
+        - .run_dependent
     dependencies:
         - test:fedora31-ninja
     needs:
@@ -165,7 +168,7 @@ test:macos-ninja:
         - .cmake_test_macos
         - .cmake_test_artifacts
         - .macos_builder_tags
-        - .run_automatically
+        - .run_dependent
     dependencies:
         - build:macos-ninja
     needs:
@@ -184,7 +187,7 @@ test:macos-makefiles:
         - .macos_makefiles
         - .cmake_test_macos
         - .macos_builder_tags
-        - .run_automatically
+        - .run_dependent
     dependencies:
         - build:macos-makefiles
     needs:
@@ -195,7 +198,7 @@ test:macos-xcode:
         - .macos_xcode
         - .cmake_test_macos_external
         - .macos_builder_ext_tags
-        - .run_automatically
+        - .run_dependent
     dependencies:
         - test:macos-ninja
     needs:
@@ -240,7 +243,7 @@ test:windows-vs2019-x64-ninja:
         - .cmake_test_windows
         - .windows_builder_tags
         - .cmake_test_artifacts
-        - .run_automatically
+        - .run_dependent
     dependencies:
         - build:windows-vs2019-x64-ninja
     needs:
@@ -251,7 +254,7 @@ test:windows-vs2019-x64:
         - .windows_vs2019_x64
         - .cmake_test_windows_external
         - .windows_builder_ext_tags
-        - .run_automatically
+        - .run_dependent
     dependencies:
         - test:windows-vs2019-x64-ninja
     needs:
