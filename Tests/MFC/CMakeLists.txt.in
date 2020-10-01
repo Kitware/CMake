@@ -65,3 +65,6 @@ if("${CMAKE_MFC_FLAG}" STREQUAL "2")
   set(CMAKE_INSTALL_MFC_LIBRARIES ON)
   include(InstallRequiredSystemLibraries)
 endif()
+
+# Encode the value inside a generator expression to test evaluation.
+set(CMAKE_MFC_FLAG "$<1:${CMAKE_MFC_FLAG}>")

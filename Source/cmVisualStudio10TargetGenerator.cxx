@@ -1224,7 +1224,8 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
   cmProp mfcFlag = this->Makefile->GetDefinition("CMAKE_MFC_FLAG");
   if (mfcFlag) {
-    std::string const mfcFlagValue = *mfcFlag;
+    std::string const mfcFlagValue =
+      cmGeneratorExpression::Evaluate(*mfcFlag, this->LocalGenerator, config);
 
     std::string useOfMfcValue = "false";
     if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {

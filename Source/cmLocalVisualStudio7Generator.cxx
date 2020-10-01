@@ -583,7 +583,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
 {
   std::string mfcFlag;
   if (cmProp p = this->Makefile->GetDefinition("CMAKE_MFC_FLAG")) {
-    mfcFlag = *p;
+    mfcFlag = cmGeneratorExpression::Evaluate(*p, this, configName);
   } else {
     mfcFlag = "0";
   }
