@@ -169,3 +169,15 @@ add_test(NAME UseSWIG.AlternateLibraryName COMMAND
   --build-options ${build_options}
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+
+
+add_test(NAME UseSWIG.SwigSrcOUTPUT_DIR COMMAND
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  --build-and-test
+  "${CMake_SOURCE_DIR}/Tests/UseSWIG/SwigSrcOUTPUT_DIR"
+  "${CMake_BINARY_DIR}/Tests/UseSWIG/SwigSrcOUTPUT_DIR"
+  ${build_generator_args}
+  --build-project TestSwigSrcOUTPUT_DIR
+  --build-options ${build_options}
+  --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+  )
