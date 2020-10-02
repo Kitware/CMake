@@ -56,8 +56,8 @@ optional Fortran support:
 #]=======================================================================]
 
 # compute list of possible names
+unset (_SWIG_NAMES)
 if (SWIG_FIND_VERSION_RANGE)
-  set (_SWIG_NAMES)
   foreach (_SWIG_MAJOR IN ITEMS 4 3 2)
     if (_SWIG_MAJOR VERSION_GREATER_EQUAL SWIG_FIND_VERSION_MIN_MAJOR
         AND ((SWIG_FIND_VERSION_RANGE_MAX STREQUAL "INCLUDE" AND _SWIG_MAJOR VERSION_LESS_EQUAL SWIG_FIND_VERSION_MAX)
@@ -73,8 +73,13 @@ elseif(SWIG_FIND_VERSION)
       if (_SWIG_MAJOR VERSION_GREATER_EQUAL SWIG_FIND_VERSION_MAJOR)
         list (APPEND _SWIG_NAMES swig${_SWIG_MAJOR}.0)
       endif()
+    endforeach()
   endif()
 else()
+  set (_SWIG_NAMES swig4.0 swig3.0 swig2.0)
+endif()
+if (NOT _SWIG_NAMES)
+  # try to find any version
   set (_SWIG_NAMES swig4.0 swig3.0 swig2.0)
 endif()
 
