@@ -412,6 +412,8 @@ CMAKE_CXX_SOURCES="\
   cmProjectCommand \
   cmPropertyDefinition \
   cmPropertyMap \
+  cmGccDepfileLexerHelper \
+  cmGccDepfileReader \
   cmReturnCommand \
   cmRulePlaceholderExpander \
   cmRuntimeDependencyArchive \
@@ -452,6 +454,7 @@ CMAKE_CXX_SOURCES="\
   cmTest \
   cmTestGenerator \
   cmTimestamp \
+  cmTransformDepfile \
   cmTryCompileCommand \
   cmTryRunCommand \
   cmUnsetCommand \
@@ -491,6 +494,7 @@ LexerParser_CXX_SOURCES="\
   cmCommandArgumentParser \
   cmExprLexer \
   cmExprParser \
+  cmGccDepfileLexer \
 "
 
 LexerParser_C_SOURCES="\

@@ -19,6 +19,7 @@
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTransformDepfile.h"
 #include "cmUVProcessChain.h"
 #include "cmUtils.hxx"
 #include "cmVersion.h"
@@ -1426,6 +1427,23 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return cmcmd::WindowsCEEnvironment("9.0", args[2]);
     }
 #endif
+
+    // Internal depfile transformation
+    if (args[1] == "cmake_transform_depfile" && args.size() == 6) {
+      auto format = cmDepfileFormat::GccDepfile;
+      if (args[2] == "gccdepfile") {
+        format = cmDepfileFormat::GccDepfile;
+      } else if (args[2] == "vstlog") {
+        format = cmDepfileFormat::VsTlog;
+      } else {
+        return 1;
+      }
+      std::string prefix = args[3];
+      if (prefix == "./") {
+        prefix.clear();
+      }
+      return cmTransformDepfile(format, prefix, args[4], args[5]) ? 0 : 1;
+    }
   }
 
   ::CMakeCommandUsage(args[0].c_str());

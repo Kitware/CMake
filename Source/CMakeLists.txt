@@ -439,6 +439,8 @@ set(SRCS
   cmTest.h
   cmTestGenerator.cxx
   cmTestGenerator.h
+  cmTransformDepfile.cxx
+  cmTransformDepfile.h
   cmUuid.cxx
   cmUVHandlePtr.cxx
   cmUVHandlePtr.h
