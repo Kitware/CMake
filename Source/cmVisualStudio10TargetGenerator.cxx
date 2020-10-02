@@ -4927,6 +4927,7 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
   // for this file exists, otherwise we check if the path relative to current
   // source- or binary-dir is used within the link and return that
   std::string link;
+  std::string sourceGroupedFile;
   std::string const& fullFileName = source->GetFullPath();
   std::string const& srcDir = this->Makefile->GetCurrentSourceDirectory();
   std::string const& binDir = this->Makefile->GetCurrentBinaryDirectory();
@@ -4936,8 +4937,14 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
   cmSourceGroup* sourceGroup =
     this->Makefile->FindSourceGroup(fullFileName, sourceGroups);
   if (sourceGroup && !sourceGroup->GetFullName().empty()) {
-    link = sourceGroup->GetFullName() + "/" +
+    sourceGroupedFile = sourceGroup->GetFullName() + "/" +
       cmsys::SystemTools::GetFilenameName(fullFileName);
+    cmsys::SystemTools::ConvertToUnixSlashes(sourceGroupedFile);
+  }
+
+  if (!sourceGroupedFile.empty() &&
+      cmHasSuffix(fullFileName, sourceGroupedFile)) {
+    link = sourceGroupedFile;
   } else if (cmHasPrefix(fullFileName, srcDir)) {
     link = fullFileName.substr(srcDir.length() + 1);
   } else if (cmHasPrefix(fullFileName, binDir)) {

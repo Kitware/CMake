@@ -9,12 +9,13 @@ file(STRINGS "${csProjFile}" lines)
 include(${RunCMake_TEST_SOURCE_DIR}/VsCsharpSourceGroupHelpers.cmake)
 
 set(SOURCE_GROUPS_TO_FIND
-  "CSharpSourceGroup"
-  "CSharpSourceGroup/nested"
-  "Images"
+  "CSharpSourceGroup\\\\foo\\.cs"
+  "CSharpSourceGroup\\\\nested\\\\baz\\.cs"
+  "CSharpSourceGroup\\\\images\\\\empty\\.bmp"
+  "VsCsharpSourceGroup\\.png"
 )
 
-foreach(GROUP_NAME IN LISTS ${SOURCE_GROUPS_TO_FIND})
+foreach(GROUP_NAME IN LISTS SOURCE_GROUPS_TO_FIND)
   find_source_group("${lines}" ${GROUP_NAME})
   if(NOT ${SOURCE_GROUP_FOUND})
     return()
