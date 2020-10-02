@@ -6,7 +6,7 @@ include(CTest)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 if (NOT Python3_FOUND)
-  message (FATAL_ERROR "Fail to found Python 3")
+  message (FATAL_ERROR "Failed to find Python 3")
 endif()
 
 set (Python3_VIRTUAL_ENV "${CMAKE_CURRENT_BINARY_DIR}/py3venv")

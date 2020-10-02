@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestRequiredArtifacts LANGUAGES C)
+project(TestRequiredArtifacts LANGUAGES NONE)
 
 include(CTest)
 
 find_package(Python2 REQUIRED COMPONENTS Interpreter Development)
 if (NOT Python2_FOUND)
-  message (FATAL_ERROR "Fail to found Python 2")
+  message (FATAL_ERROR "Failed to find Python 2")
 endif()
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 if (NOT Python3_FOUND)
-  message (FATAL_ERROR "Fail to found Python 3")
+  message (FATAL_ERROR "Failed to find Python 3")
 endif()
 
 
