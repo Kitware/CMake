@@ -468,7 +468,8 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterStyle = cmCTestMemCheckHandler::PURIFY;
     } else if (testerName.find("BC") != std::string::npos) {
       this->MemoryTesterStyle = cmCTestMemCheckHandler::BOUNDS_CHECKER;
-    } else if (testerName.find("cuda-memcheck") != std::string::npos) {
+    } else if (testerName.find("cuda-memcheck") != std::string::npos ||
+               testerName.find("compute-sanitizer") != std::string::npos) {
       this->MemoryTesterStyle = cmCTestMemCheckHandler::CUDA_MEMCHECK;
     } else {
       this->MemoryTesterStyle = cmCTestMemCheckHandler::UNKNOWN;
