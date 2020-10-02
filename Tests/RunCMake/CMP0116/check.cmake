@@ -1,0 +1,18 @@
+function(check_exists file)
+  if(NOT EXISTS "${file}")
+    string(APPEND RunCMake_TEST_FAILED "${file} does not exist\n")
+  endif()
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+endfunction()
+
+function(check_not_exists file)
+  if(EXISTS "${file}")
+    string(APPEND RunCMake_TEST_FAILED "${file} exists\n")
+  endif()
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+endfunction()
+
+if(cmp0116_step EQUAL 3)
+  check_not_exists("${RunCMake_TEST_BINARY_DIR}/topstamp.txt")
+  check_not_exists("${RunCMake_TEST_BINARY_DIR}/Subdirectory/substamp.txt")
+endif()
