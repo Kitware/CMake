@@ -419,12 +419,15 @@ int CCONV cmExecuteCommand(void* arg, const char* name, int numArgs,
                            const char** args)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  cmListFileFunction lff;
-  lff.Name = name;
+
+  std::vector<cmListFileArgument> lffArgs;
+  lffArgs.reserve(numArgs);
   for (int i = 0; i < numArgs; ++i) {
     // Assume all arguments are quoted.
-    lff.Arguments.emplace_back(args[i], cmListFileArgument::Quoted, 0);
+    lffArgs.emplace_back(args[i], cmListFileArgument::Quoted, 0);
   }
+
+  cmListFileFunction lff{ name, 0, std::move(lffArgs) };
   cmExecutionStatus status(*mf);
   return mf->ExecuteCommand(lff, status);
 }

@@ -54,7 +54,7 @@ cmWhileFunctionBlocker::~cmWhileFunctionBlocker()
 bool cmWhileFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
                                             cmMakefile&) const
 {
-  return lff.Arguments.empty() || lff.Arguments == this->Args;
+  return lff.Arguments().empty() || lff.Arguments() == this->Args;
 }
 
 bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,

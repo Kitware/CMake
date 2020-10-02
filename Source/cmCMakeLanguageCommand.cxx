@@ -77,18 +77,14 @@ bool cmCMakeLanguageCommandCALL(std::vector<cmListFileArgument> const& args,
   cmMakefile& makefile = status.GetMakefile();
   cmListFileContext context = makefile.GetBacktrace().Top();
 
-  cmListFileFunction func;
-  func.Name = callCommand;
-  func.Line = context.Line;
+  std::vector<cmListFileArgument> funcArgs;
+  funcArgs.reserve(args.size() - startArg);
 
   // The rest of the arguments are passed to the function call above
   for (size_t i = startArg; i < args.size(); ++i) {
-    cmListFileArgument lfarg;
-    lfarg.Delim = args[i].Delim;
-    lfarg.Line = context.Line;
-    lfarg.Value = args[i].Value;
-    func.Arguments.emplace_back(lfarg);
+    funcArgs.emplace_back(args[i].Value, args[i].Delim, context.Line);
   }
+  cmListFileFunction func{ callCommand, context.Line, std::move(funcArgs) };
 
   if (defer) {
     if (defer->Id.empty()) {

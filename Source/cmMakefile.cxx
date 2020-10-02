@@ -306,8 +306,8 @@ void cmMakefile::PrintCommandTrace(
   std::string temp;
   bool expand = this->GetCMakeInstance()->GetTraceExpand();
 
-  args.reserve(lff.Arguments.size());
-  for (cmListFileArgument const& arg : lff.Arguments) {
+  args.reserve(lff.Arguments().size());
+  for (cmListFileArgument const& arg : lff.Arguments()) {
     if (expand) {
       temp = arg.Value;
       this->ExpandVariablesInString(temp);
@@ -324,11 +324,11 @@ void cmMakefile::PrintCommandTrace(
       Json::StreamWriterBuilder builder;
       builder["indentation"] = "";
       val["file"] = full_path;
-      val["line"] = static_cast<Json::Value::Int64>(lff.Line);
+      val["line"] = static_cast<Json::Value::Int64>(lff.Line());
       if (deferId) {
         val["defer"] = *deferId;
       }
-      val["cmd"] = lff.Name.Original;
+      val["cmd"] = lff.OriginalName();
       val["args"] = Json::Value(Json::arrayValue);
       for (std::string const& arg : args) {
         val["args"].append(arg);
@@ -341,11 +341,11 @@ void cmMakefile::PrintCommandTrace(
       break;
     }
     case cmake::TraceFormat::TRACE_HUMAN:
-      msg << full_path << "(" << lff.Line << "):";
+      msg << full_path << "(" << lff.Line() << "):";
       if (deferId) {
         msg << "DEFERRED:" << *deferId << ":";
       }
-      msg << "  " << lff.Name.Original << "(";
+      msg << "  " << lff.OriginalName() << "(";
 
       for (std::string const& arg : args) {
         msg << arg << " ";
@@ -451,7 +451,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
 
   // Lookup the command prototype.
   if (cmState::Command command =
-        this->GetState()->GetCommandByExactName(lff.Name.Lower)) {
+        this->GetState()->GetCommandByExactName(lff.LowerCaseName())) {
     // Decide whether to invoke the command.
     if (!cmSystemTools::GetFatalErrorOccured()) {
       // if trace is enabled, print out invoke information
@@ -459,13 +459,13 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         this->PrintCommandTrace(lff, this->Backtrace.Top().DeferId);
       }
       // Try invoking the command.
-      bool invokeSucceeded = command(lff.Arguments, status);
+      bool invokeSucceeded = command(lff.Arguments(), status);
       bool hadNestedError = status.GetNestedError();
       if (!invokeSucceeded || hadNestedError) {
         if (!hadNestedError) {
           // The command invocation requested that we report an error.
           std::string const error =
-            std::string(lff.Name.Original) + " " + status.GetError();
+            std::string(lff.OriginalName()) + " " + status.GetError();
           this->IssueMessage(MessageType::FATAL_ERROR, error);
         }
         result = false;
@@ -477,7 +477,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   } else {
     if (!cmSystemTools::GetFatalErrorOccured()) {
       std::string error =
-        cmStrCat("Unknown CMake command \"", lff.Name.Original, "\".");
+        cmStrCat("Unknown CMake command \"", lff.OriginalName(), "\".");
       this->IssueMessage(MessageType::FATAL_ERROR, error);
       result = false;
       cmSystemTools::SetFatalErrorOccured();
@@ -1690,7 +1690,7 @@ void cmMakefile::Configure()
     bool hasVersion = false;
     // search for the right policy command
     for (cmListFileFunction const& func : listFile.Functions) {
-      if (func.Name.Lower == "cmake_minimum_required") {
+      if (func.LowerCaseName() == "cmake_minimum_required") {
         hasVersion = true;
         break;
       }
@@ -1717,7 +1717,7 @@ void cmMakefile::Configure()
         allowedCommands.insert("message");
         isProblem = false;
         for (cmListFileFunction const& func : listFile.Functions) {
-          if (!cm::contains(allowedCommands, func.Name.Lower)) {
+          if (!cm::contains(allowedCommands, func.LowerCaseName())) {
             isProblem = true;
             break;
           }
@@ -1737,7 +1737,7 @@ void cmMakefile::Configure()
     bool hasProject = false;
     // search for a project command
     for (cmListFileFunction const& func : listFile.Functions) {
-      if (func.Name.Lower == "project") {
+      if (func.LowerCaseName() == "project") {
         hasProject = true;
         break;
       }
@@ -1754,12 +1754,12 @@ void cmMakefile::Configure()
         "CMake is pretending there is a \"project(Project)\" command on "
         "the first line.",
         this->Backtrace);
-      cmListFileFunction project;
-      project.Name.Lower = "project";
-      project.Arguments.emplace_back("Project", cmListFileArgument::Unquoted,
-                                     0);
-      project.Arguments.emplace_back("__CMAKE_INJECTED_PROJECT_COMMAND__",
-                                     cmListFileArgument::Unquoted, 0);
+      cmListFileFunction project{ "project",
+                                  0,
+                                  { { "Project", cmListFileArgument::Unquoted,
+                                      0 },
+                                    { "__CMAKE_INJECTED_PROJECT_COMMAND__",
+                                      cmListFileArgument::Unquoted, 0 } } };
       listFile.Functions.insert(listFile.Functions.begin(), project);
     }
   }
@@ -3105,8 +3105,8 @@ cm::optional<std::string> cmMakefile::DeferGetCall(std::string const& id) const
     std::string tmp;
     for (DeferCommand const& dc : this->Defer->Commands) {
       if (dc.Id == id) {
-        tmp = dc.Command.Name.Original;
-        for (cmListFileArgument const& arg : dc.Command.Arguments) {
+        tmp = dc.Command.OriginalName();
+        for (cmListFileArgument const& arg : dc.Command.Arguments()) {
           tmp = cmStrCat(tmp, ';', arg.Value);
         }
         break;
