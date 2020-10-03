@@ -15,6 +15,13 @@ run_cmake(MakeAvailable)
 run_cmake(MakeAvailableTwice)
 run_cmake(MakeAvailableUndeclared)
 
+run_cmake_with_options(ManualSourceDirectory
+  -D "FETCHCONTENT_SOURCE_DIR_WITHPROJECT=${CMAKE_CURRENT_LIST_DIR}/WithProject"
+)
+run_cmake_with_options(ManualSourceDirectoryMissing
+  -D "FETCHCONTENT_SOURCE_DIR_WITHPROJECT=${CMAKE_CURRENT_LIST_DIR}/ADirThatDoesNotExist"
+)
+
 function(run_FetchContent_DirOverrides)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/DirOverrides-build)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
