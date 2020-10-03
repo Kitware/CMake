@@ -57,6 +57,7 @@ set(CMake_TEST_FindX11 "ON" CACHE BOOL "")
 set(CMake_TEST_FindXalanC "ON" CACHE BOOL "")
 set(CMake_TEST_FindXercesC "ON" CACHE BOOL "")
 set(CMake_TEST_ISPC "ON" CACHE STRING "")
+set(CMake_TEST_Qt5 "ON" CACHE BOOL "")
 set(CMake_TEST_UseSWIG "ON" CACHE BOOL "")
 
 include("${CMAKE_CURRENT_LIST_DIR}/configure_external_test.cmake")
