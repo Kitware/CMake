@@ -1052,6 +1052,12 @@ function(FetchContent_Populate contentName)
     # The source directory has been explicitly provided in the cache,
     # so no population is required. The build directory may still be specified
     # by the declared details though.
+
+    if(NOT EXISTS "${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
+      message(FATAL_ERROR "Manually specified source directory is missing:\n"
+        "  FETCHCONTENT_SOURCE_DIR_${contentNameUpper} --> ${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
+    endif()
+
     set(${contentNameLower}_SOURCE_DIR "${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
 
     cmake_parse_arguments(savedDetails "" "BINARY_DIR" "" ${contentDetails})
