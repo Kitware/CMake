@@ -31,7 +31,7 @@ class cmCustomCommandGenerator
 
 public:
   cmCustomCommandGenerator(cmCustomCommand const& cc, std::string config,
-                           cmLocalGenerator* lg);
+                           cmLocalGenerator* lg, bool transformDepfile = true);
   cmCustomCommandGenerator(const cmCustomCommandGenerator&) = delete;
   cmCustomCommandGenerator& operator=(const cmCustomCommandGenerator&) =
     delete;
@@ -45,4 +45,6 @@ public:
   std::vector<std::string> const& GetByproducts() const;
   std::vector<std::string> const& GetDepends() const;
   bool HasOnlyEmptyCommandLines() const;
+  std::string GetFullDepfile() const;
+  std::string GetInternalDepfile() const;
 };
