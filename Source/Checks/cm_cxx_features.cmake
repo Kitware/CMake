@@ -36,6 +36,8 @@ function(cm_check_cxx_feature name)
     set(check_output "${OUTPUT}")
     # Filter out MSBuild output that looks like a warning.
     string(REGEX REPLACE " +0 Warning\\(s\\)" "" check_output "${check_output}")
+    # Filter out MSBuild output that looks like a warning.
+    string(REGEX REPLACE "[^\n]*warning MSB[0-9][0-9][0-9][0-9][^\n]*" "" check_output "${check_output}")
     # Filter out warnings caused by user flags.
     string(REGEX REPLACE "[^\n]*warning:[^\n]*-Winvalid-command-line-argument[^\n]*" "" check_output "${check_output}")
     # Filter out warnings caused by local configuration.
