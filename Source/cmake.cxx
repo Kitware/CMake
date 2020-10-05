@@ -1409,6 +1409,8 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
             this->State->GetCacheEntryProperty(save.key, "HELPSTRING")) {
         save.help = *help;
       }
+    } else {
+      save.type = cmStateEnums::CacheEntryType::UNINITIALIZED;
     }
     saved.push_back(std::move(save));
   }
