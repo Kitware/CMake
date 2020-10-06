@@ -85,6 +85,7 @@ Reference Manuals
     /guide/user-interaction/index
     /guide/using-dependencies/index
     /guide/importing-exporting/index
+    /guide/ide-integration/index
 
 .. only:: html or text
 
