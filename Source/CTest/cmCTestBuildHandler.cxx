@@ -901,6 +901,7 @@ int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
           reporter.WriteXML();
         } else {
           cmCTestBuildErrorWarning errorwarning;
+          errorwarning.LineNumber = 0;
           errorwarning.LogLine = 1;
           errorwarning.Text = cmStrCat(
             "*** WARNING non-zero return value in ctest from: ", argv[0]);
@@ -925,6 +926,7 @@ int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
   } else if (result == cmsysProcess_State_Error) {
     // If there was an error running command, report that on the dashboard.
     cmCTestBuildErrorWarning errorwarning;
+    errorwarning.LineNumber = 0;
     errorwarning.LogLine = 1;
     errorwarning.Text =
       cmStrCat("*** ERROR executing: ", cmsysProcess_GetErrorString(cp));
