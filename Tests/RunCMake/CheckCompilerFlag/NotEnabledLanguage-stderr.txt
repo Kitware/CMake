@@ -1,0 +1,2 @@
+CMake Error at .*CheckCompilerFlag\.cmake:[0-9]+ \(message\):
+  check_compiler_flag: C: needs to be enabled before use.
