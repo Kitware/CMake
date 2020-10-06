@@ -44,7 +44,7 @@
       <number>6</number>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="SourceLabel">
        <property name="text">
         <string>Where is the source code:</string>
        </property>
@@ -61,13 +61,23 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="PresetLabel">
+       <property name="text">
+        <string>Preset:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCMakePresetComboBox" name="Preset"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="BinaryLabel">
        <property name="text">
         <string>Where to build the binaries:</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="2" column="1">
       <widget class="QComboBox" name="BinaryDirectory">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
@@ -83,7 +93,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
+     <item row="2" column="2">
       <widget class="QPushButton" name="BrowseBinaryDirectoryButton">
        <property name="text">
         <string>Browse &amp;Build...</string>
@@ -366,6 +376,11 @@
    <class>QCMakeCacheView</class>
    <extends>QTreeView</extends>
    <header>QCMakeCacheView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QCMakePresetComboBox</class>
+   <extends>QComboBox</extends>
+   <header>QCMakePresetComboBox.h</header>
   </customwidget>
  </customwidgets>
  <resources>

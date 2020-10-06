@@ -72,3 +72,24 @@ add_cmake_gui_lib_test(QCMakeCacheModel
   MOC_SOURCES
     QCMakeCacheModelTest.h
   )
+add_cmake_gui_lib_test(QCMakePreset
+  SOURCES
+    QCMakePresetTest.cxx
+    QCMakePresetTest.h
+  MOC_SOURCES
+    QCMakePresetTest.h
+  )
+add_cmake_gui_lib_test(QCMakePresetItemModel
+  SOURCES
+    QCMakePresetItemModelTest.cxx
+    QCMakePresetItemModelTest.h
+  MOC_SOURCES
+    QCMakePresetItemModelTest.h
+  )
+add_cmake_gui_lib_test(QCMakePresetComboBox
+  SOURCES
+    QCMakePresetComboBoxTest.cxx
+    QCMakePresetComboBoxTest.h
+  MOC_SOURCES
+    QCMakePresetComboBoxTest.h
+  )

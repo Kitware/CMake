@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "ExtraRootField",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ],
+  "invalid": true
+}

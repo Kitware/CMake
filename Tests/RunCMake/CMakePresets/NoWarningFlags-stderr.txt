@@ -1,0 +1,23 @@
+^CMake Warning \(dev\) at [^
+]*/Tests/RunCMake/CMakePresets/WarningsBase\.cmake:[0-9]+ \(message\):
+  Dev warning
+Call Stack \(most recent call first\):
+  [^
+]*/Tests/RunCMake/CMakePresets/NoWarningFlags\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Deprecation Warning at [^
+]*/Tests/RunCMake/CMakePresets/WarningsBase\.cmake:[0-9]+ \(message\):
+  Deprecation warning
+Call Stack \(most recent call first\):
+  [^
+]*/Tests/RunCMake/CMakePresets/NoWarningFlags\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    RunCMake_GENERATOR
+    UNUSED_VARIABLE$

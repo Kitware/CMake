@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "GoodUserOnly",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

@@ -145,6 +145,36 @@ void StartCompilerSetup::setCurrentGenerator(const QString& gen)
   }
 }
 
+void StartCompilerSetup::setPlatform(const QString& platform)
+{
+  this->PlatformOptions->setCurrentText(platform);
+}
+
+void StartCompilerSetup::setToolset(const QString& toolset)
+{
+  this->Toolset->setText(toolset);
+}
+
+void StartCompilerSetup::setCompilerOption(CompilerOption option)
+{
+  std::size_t index = 0;
+  switch (option) {
+    case CompilerOption::DefaultNative:
+      index = 0;
+      break;
+    case CompilerOption::SpecifyNative:
+      index = 1;
+      break;
+    case CompilerOption::ToolchainFile:
+      index = 2;
+      break;
+    case CompilerOption::Options:
+      index = 3;
+      break;
+  }
+  this->CompilerSetupOptions[index]->setChecked(true);
+}
+
 QString StartCompilerSetup::getGenerator() const
 {
   return this->GeneratorOptions->currentText();
@@ -482,6 +512,26 @@ void FirstConfigure::setGenerators(
   this->mStartCompilerSetupPage->setGenerators(gens);
 }
 
+void FirstConfigure::setCurrentGenerator(const QString& gen)
+{
+  this->mStartCompilerSetupPage->setCurrentGenerator(gen);
+}
+
+void FirstConfigure::setPlatform(const QString& platform)
+{
+  this->mStartCompilerSetupPage->setPlatform(platform);
+}
+
+void FirstConfigure::setToolset(const QString& toolset)
+{
+  this->mStartCompilerSetupPage->setToolset(toolset);
+}
+
+void FirstConfigure::setCompilerOption(CompilerOption option)
+{
+  this->mStartCompilerSetupPage->setCompilerOption(option);
+}
+
 QString FirstConfigure::getGenerator() const
 {
   return this->mStartCompilerSetupPage->getGenerator();
@@ -503,7 +553,7 @@ void FirstConfigure::loadFromSettings()
   // restore generator
   settings.beginGroup("Settings/StartPath");
   QString lastGen = settings.value("LastGenerator").toString();
-  this->mStartCompilerSetupPage->setCurrentGenerator(lastGen);
+  this->setCurrentGenerator(lastGen);
   settings.endGroup();
 
   // restore compiler setup
@@ -550,7 +600,7 @@ void FirstConfigure::loadFromSettings()
   //     this prevents them from being taken from environment, while the
   //     generator is taken from application settings
   if (!mDefaultGenerator.isEmpty()) {
-    this->mStartCompilerSetupPage->setCurrentGenerator(mDefaultGenerator);
+    this->setCurrentGenerator(mDefaultGenerator);
   }
 }
 

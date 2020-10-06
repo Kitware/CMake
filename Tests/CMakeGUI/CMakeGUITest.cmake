@@ -27,6 +27,10 @@ function(run_cmake_gui_test name)
   if(EXISTS "${_cmakelists_in}")
     configure_file("${_cmakelists_in}" "${_workdir}/src/CMakeLists.txt" @ONLY)
   endif()
+  set(_cmakepresets_in "${_srcdir}/CMakePresets.json.in")
+  if(EXISTS "${_cmakepresets_in}")
+    configure_file("${_cmakepresets_in}" "${_workdir}/src/CMakePresets.json" @ONLY)
+  endif()
   if(_rcgt_DO_CONFIGURE)
     if(NOT _rcgt_GENERATOR)
       set(_rcgt_GENERATOR "${CMakeGUITest_GENERATOR}")
@@ -118,3 +122,37 @@ set(ENV{KEPT_VARIABLE} "Kept variable")
 set(ENV{CHANGED_VARIABLE} "This variable will be changed")
 set(ENV{REMOVED_VARIABLE} "Removed variable")
 run_cmake_gui_test(environment)
+
+run_cmake_gui_test(presetArg:preset
+  ARGS
+    -S "${CMakeGUITest_BINARY_DIR}/presetArg-preset/src"
+    "--preset=ninja"
+  )
+run_cmake_gui_test(presetArg:presetBinary
+  ARGS
+    -S "${CMakeGUITest_BINARY_DIR}/presetArg-presetBinary/src"
+    -B "${CMakeGUITest_BINARY_DIR}/presetArg-presetBinary/build"
+    "--preset=ninja"
+  )
+run_cmake_gui_test(presetArg:presetBinaryChange
+  ARGS
+    -S "${CMakeGUITest_BINARY_DIR}/presetArg-presetBinaryChange/src"
+    -B "${CMakeGUITest_BINARY_DIR}/presetArg-presetBinaryChange/build"
+    "--preset=ninja"
+  )
+run_cmake_gui_test(presetArg:noPresetBinaryChange
+  ARGS
+    -S "${CMakeGUITest_BINARY_DIR}/presetArg-noPresetBinaryChange/src"
+    -B "${CMakeGUITest_BINARY_DIR}/presetArg-noPresetBinaryChange/build"
+  )
+run_cmake_gui_test(presetArg:presetConfigExists
+  ARGS
+    -S "${CMakeGUITest_BINARY_DIR}/presetArg-presetConfigExists/src"
+    "--preset=ninja"
+  )
+run_cmake_gui_test(presetArg:noExist
+  ARGS
+    -S "${CMakeGUITest_BINARY_DIR}/presetArg-noExist/src"
+    "--preset=noExist"
+  )
+run_cmake_gui_test(changingPresets)

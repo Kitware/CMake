@@ -25,7 +25,7 @@ public:
 
   /** Create a GlobalGenerator */
   virtual std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& n, cmake* cm) const = 0;
+    const std::string& n, bool allowArch, cmake* cm) const = 0;
 
   /** Get the documentation entry for this factory */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const = 0;
@@ -53,7 +53,7 @@ class cmGlobalGeneratorSimpleFactory : public cmGlobalGeneratorFactory
 public:
   /** Create a GlobalGenerator */
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, cmake* cm) const override
+    const std::string& name, bool /*allowArch*/, cmake* cm) const override
   {
     if (name != T::GetActualName()) {
       return std::unique_ptr<cmGlobalGenerator>();

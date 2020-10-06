@@ -2,10 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "QCMake.h"
 
+#include <algorithm>
+
 #include <cm/memory>
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QString>
+#include <QVector>
 
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmGlobalGenerator.h"
@@ -19,12 +23,15 @@
 
 QCMake::QCMake(QObject* p)
   : QObject(p)
+  , StartEnvironment(QProcessEnvironment::systemEnvironment())
   , Environment(QProcessEnvironment::systemEnvironment())
 {
   this->WarnUninitializedMode = false;
   qRegisterMetaType<QCMakeProperty>();
   qRegisterMetaType<QCMakePropertyList>();
   qRegisterMetaType<QProcessEnvironment>();
+  qRegisterMetaType<QVector<QCMakePreset>>();
+  qRegisterMetaType<cmCMakePresetsFile::ReadFileResult>();
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
@@ -57,6 +64,17 @@ QCMake::QCMake(QObject* p)
   for (cmake::GeneratorInfo const& gen : generators) {
     this->AvailableGenerators.push_back(gen);
   }
+
+  connect(&this->LoadPresetsTimer, &QTimer::timeout, this, [this]() {
+    this->loadPresets();
+    if (!this->PresetName.isEmpty() &&
+        this->CMakePresetsFile.Presets.find(
+          std::string(this->PresetName.toLocal8Bit())) ==
+          this->CMakePresetsFile.Presets.end()) {
+      this->setPreset(QString{});
+    }
+  });
+  this->LoadPresetsTimer.start(1000);
 }
 
 QCMake::~QCMake() = default;
@@ -73,6 +91,8 @@ void QCMake::setSourceDirectory(const QString& _dir)
   if (this->SourceDirectory != dir) {
     this->SourceDirectory = QDir::fromNativeSeparators(dir);
     emit this->sourceDirChanged(this->SourceDirectory);
+    this->loadPresets();
+    this->setPreset(QString{});
   }
 }
 
@@ -126,6 +146,56 @@ void QCMake::setBinaryDirectory(const QString& _dir)
     }
 
     checkOpenPossible();
+  }
+}
+
+void QCMake::setPreset(const QString& name, bool setBinary)
+{
+  if (this->PresetName != name) {
+    this->PresetName = name;
+    emit this->presetChanged(this->PresetName);
+
+    if (!name.isNull()) {
+      std::string presetName(name.toLocal8Bit());
+      auto const& preset = this->CMakePresetsFile.Presets[presetName];
+      auto expandedPreset = this->CMakePresetsFile.ExpandMacros(preset);
+      if (expandedPreset) {
+        if (setBinary) {
+          QString binaryDir =
+            QString::fromLocal8Bit(expandedPreset->BinaryDir.data());
+          this->setBinaryDirectory(binaryDir);
+        }
+        if (expandedPreset->WarnDev) {
+          this->CMakeInstance->SetSuppressDevWarnings(
+            !*expandedPreset->WarnDev);
+        }
+        if (expandedPreset->ErrorDev) {
+          this->CMakeInstance->SetDevWarningsAsErrors(
+            *expandedPreset->ErrorDev);
+        }
+        if (expandedPreset->WarnDeprecated) {
+          this->CMakeInstance->SetSuppressDeprecatedWarnings(
+            !*expandedPreset->WarnDeprecated);
+        }
+        if (expandedPreset->ErrorDeprecated) {
+          this->CMakeInstance->SetDeprecatedWarningsAsErrors(
+            *expandedPreset->ErrorDeprecated);
+        }
+        if (expandedPreset->WarnUninitialized) {
+          this->WarnUninitializedMode = *expandedPreset->WarnUninitialized;
+          emit this->warnUninitializedModeChanged(
+            *expandedPreset->WarnUninitialized);
+        }
+        this->Environment = this->StartEnvironment;
+        for (auto const& v : expandedPreset->Environment) {
+          if (v.second) {
+            this->Environment.insert(QString::fromLocal8Bit(v.first.data()),
+                                     QString::fromLocal8Bit(v.second->data()));
+          }
+        }
+      }
+    }
+    emit this->propertiesChanged(this->properties());
   }
 }
 
@@ -348,6 +418,56 @@ QCMakePropertyList QCMake::properties() const
     ret.append(prop);
   }
 
+  if (!this->PresetName.isNull()) {
+    std::string presetName(this->PresetName.toLocal8Bit());
+    auto p = this->CMakePresetsFile.ExpandMacros(
+      this->CMakePresetsFile.Presets.at(presetName));
+    if (p) {
+      for (auto const& v : p->CacheVariables) {
+        if (!v.second) {
+          continue;
+        }
+        QCMakeProperty prop;
+        prop.Key = QString::fromLocal8Bit(v.first.data());
+        prop.Value = QString::fromLocal8Bit(v.second->Value.data());
+        prop.Type = QCMakeProperty::STRING;
+        if (!v.second->Type.empty()) {
+          auto type = cmState::StringToCacheEntryType(v.second->Type);
+          switch (type) {
+            case cmStateEnums::BOOL:
+              prop.Type = QCMakeProperty::BOOL;
+              prop.Value = cmIsOn(v.second->Value);
+              break;
+            case cmStateEnums::PATH:
+              prop.Type = QCMakeProperty::PATH;
+              break;
+            case cmStateEnums::FILEPATH:
+              prop.Type = QCMakeProperty::FILEPATH;
+              break;
+            default:
+              prop.Type = QCMakeProperty::STRING;
+              break;
+          }
+        }
+
+        // QCMakeCacheModel prefers variables earlier in the list rather than
+        // later, so overwrite them if they already exist rather than simply
+        // appending
+        bool found = false;
+        for (auto& orig : ret) {
+          if (orig.Key == prop.Key) {
+            orig = prop;
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          ret.append(prop);
+        }
+      }
+    }
+  }
+
   return ret;
 }
 
@@ -403,6 +523,46 @@ void QCMake::setUpEnvironment() const
   for (auto const& var : this->Environment.toStringList()) {
     cmSystemTools::PutEnv(var.toLocal8Bit().data());
   }
+}
+
+void QCMake::loadPresets()
+{
+  auto result = this->CMakePresetsFile.ReadProjectPresets(
+    this->SourceDirectory.toLocal8Bit().data(), true);
+  if (result != this->LastLoadPresetsResult &&
+      result != cmCMakePresetsFile::ReadFileResult::READ_OK) {
+    emit this->presetLoadError(this->SourceDirectory, result);
+  }
+  this->LastLoadPresetsResult = result;
+
+  QVector<QCMakePreset> presets;
+  for (auto const& name : this->CMakePresetsFile.PresetOrder) {
+    auto const& p = this->CMakePresetsFile.Presets[name];
+    if (p.Hidden) {
+      continue;
+    }
+
+    QCMakePreset preset;
+    preset.name = std::move(QString::fromLocal8Bit(p.Name.data()));
+    preset.displayName =
+      std::move(QString::fromLocal8Bit(p.DisplayName.data()));
+    preset.description =
+      std::move(QString::fromLocal8Bit(p.Description.data()));
+    preset.generator = std::move(QString::fromLocal8Bit(p.Generator.data()));
+    preset.architecture =
+      std::move(QString::fromLocal8Bit(p.Architecture.data()));
+    preset.toolset = std::move(QString::fromLocal8Bit(p.Toolset.data()));
+    preset.setGenConfig = !p.GeneratorConfig ||
+      p.GeneratorConfig == cmCMakePresetsFile::CMakeGeneratorConfig::Default;
+    preset.enabled = std::find_if(this->AvailableGenerators.begin(),
+                                  this->AvailableGenerators.end(),
+                                  [&p](const cmake::GeneratorInfo& g) {
+                                    return g.name == p.Generator;
+                                  }) != this->AvailableGenerators.end() &&
+      this->CMakePresetsFile.ExpandMacros(p);
+    presets.push_back(preset);
+  }
+  emit this->presetsChanged(presets);
 }
 
 QString QCMake::binaryDirectory() const

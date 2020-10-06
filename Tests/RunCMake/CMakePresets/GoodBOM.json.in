@@ -1,0 +1,10 @@
+﻿{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "GoodBOM",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

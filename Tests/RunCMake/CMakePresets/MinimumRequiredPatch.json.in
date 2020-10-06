@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "cmakeMinimumRequired": {
+    "major": @CMAKE_MAJOR_VERSION@,
+    "minor": @CMAKE_MINOR_VERSION@,
+    "patch": 50000000
+  },
+  "configurePresets": [
+    {
+      "name": "MinimumRequiredPatch",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

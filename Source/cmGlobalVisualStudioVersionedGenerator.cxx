@@ -140,7 +140,7 @@ class cmGlobalVisualStudioVersionedGenerator::Factory15
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, cmake* cm) const override
+    const std::string& name, bool allowArch, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS15GenName(name, genName);
@@ -152,7 +152,7 @@ public:
         new cmGlobalVisualStudioVersionedGenerator(
           cmGlobalVisualStudioGenerator::VS15, cm, genName, ""));
     }
-    if (*p++ != ' ') {
+    if (!allowArch || *p++ != ' ') {
       return std::unique_ptr<cmGlobalGenerator>();
     }
     if (strcmp(p, "Win64") == 0) {
@@ -234,7 +234,7 @@ class cmGlobalVisualStudioVersionedGenerator::Factory16
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, cmake* cm) const override
+    const std::string& name, bool /*allowArch*/, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS16GenName(name, genName);

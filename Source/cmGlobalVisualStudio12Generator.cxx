@@ -29,7 +29,7 @@ class cmGlobalVisualStudio12Generator::Factory
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, cmake* cm) const override
+    const std::string& name, bool allowArch, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS12GenName(name, genName);
@@ -40,7 +40,7 @@ public:
       return std::unique_ptr<cmGlobalGenerator>(
         new cmGlobalVisualStudio12Generator(cm, genName, ""));
     }
-    if (*p++ != ' ') {
+    if (!allowArch || *p++ != ' ') {
       return std::unique_ptr<cmGlobalGenerator>();
     }
     if (strcmp(p, "Win64") == 0) {

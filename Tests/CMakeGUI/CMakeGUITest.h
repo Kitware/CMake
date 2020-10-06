@@ -23,4 +23,7 @@ private slots:
   void simpleConfigure();
   void simpleConfigure_data();
   void environment();
+  void presetArg();
+  void presetArg_data();
+  void changingPresets();
 };

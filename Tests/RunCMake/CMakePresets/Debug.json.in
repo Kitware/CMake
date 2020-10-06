@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "NoDebug",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "Debug",
+      "inherits": "NoDebug",
+      "debug": {
+        "output": true,
+        "find": true,
+        "tryCompile": true
+      }
+    }
+  ]
+}
