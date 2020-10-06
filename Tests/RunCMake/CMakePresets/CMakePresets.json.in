@@ -335,6 +335,22 @@
       }
     },
     {
+      "name": "EmptyEnv",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "MY_VAR": "$env{}"
+      }
+    },
+    {
+      "name": "EmptyPenv",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "MY_VAR": "$penv{}"
+      }
+    },
+    {
       "name": "UseHiddenPreset",
       "generator": "@RunCMake_GENERATOR@",
       "binaryDir": "${sourceDir}/build",

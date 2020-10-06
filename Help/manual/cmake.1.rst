@@ -354,9 +354,10 @@ source and build trees and generate a buildsystem:
 
     ``cacheVariables``
 
-      An optional map of cache variables. The key is the variable name, and the
-      value is either ``null``, a string representing the value of the variable
-      (which supports macro expansion), or an object with the following fields:
+      An optional map of cache variables. The key is the variable name (which
+      may not be an empty string), and the value is either ``null``, a string
+      representing the value of the variable (which supports macro expansion),
+      or an object with the following fields:
 
       ``type``
 
@@ -376,14 +377,14 @@ source and build trees and generate a buildsystem:
 
     ``environment``
 
-      An optional map of environment variables. The key is the variable name,
-      and the value is either ``null`` or a string representing the value of
-      the variable. Each variable is set regardless of whether or not a value
-      was given to it by the process's environment. This field supports macro
-      expansion, and environment variables in this map may reference each
-      other, and may be listed in any order, as long as such references do not
-      cause a cycle (for example, if ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2``
-      may not be ``$env{ENV_1}``.)
+      An optional map of environment variables. The key is the variable name
+      (which may not be an empty string), and the value is either ``null`` or
+      a string representing the value of the variable. Each variable is set
+      regardless of whether or not a value was given to it by the process's
+      environment. This field supports macro expansion, and environment
+      variables in this map may reference each other, and may be listed in any
+      order, as long as such references do not cause a cycle (for example,
+      if ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
 
       Environment variables are inherited through the ``inherits`` field, and
       the preset's environment will be the union of its own ``environment`` and
@@ -478,10 +479,11 @@ source and build trees and generate a buildsystem:
 
   ``$env{<variable-name>}``
 
-    Environment variable with name ``<variable-name>``. If the variable is
-    defined in the ``environment`` field, that value is used instead of the
-    value from the parent environment. If the environment variable is not
-    defined, this evaluates as an empty string.
+    Environment variable with name ``<variable-name>``. The variable name may
+    not be an empty string. If the variable is defined in the ``environment``
+    field, that value is used instead of the value from the parent environment.
+    If the environment variable is not defined, this evaluates as an empty
+    string.
 
     Note that while Windows environment variable names are case-insensitive,
     variable names within a preset are still case-sensitive. This may lead to
