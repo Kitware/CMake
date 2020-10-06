@@ -61,6 +61,7 @@
             - build/Tests/CMakeOnly/
             - build/Tests/CMakeTests/
             - build/Tests/CMakeGUI/
+            - build/Tests/FortranC/
 
             # CTest/CDash information.
             - build/Testing/
