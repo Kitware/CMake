@@ -36,6 +36,24 @@ class cmState;
 class cmTarget;
 class cmake;
 
+/** Flag if byproducts shall also be considered.  */
+enum class cmSourceOutputKind
+{
+  OutputOnly,
+  OutputOrByproduct
+};
+
+/** Target and source file which have a specific output.  */
+struct cmSourcesWithOutput
+{
+  /** Target with byproduct.  */
+  cmTarget* Target = nullptr;
+
+  /** Source file with output or byproduct.  */
+  cmSourceFile* Source = nullptr;
+  bool SourceIsByproduct = false;
+};
+
 /** \class cmLocalGenerator
  * \brief Create required build files for a directory.
  *
@@ -337,6 +355,34 @@ public:
     bool command_expand_lists = false, const std::string& job_pool = "",
     bool stdPipesUTF8 = false);
 
+  /**
+   * Add target byproducts.
+   */
+  void AddTargetByproducts(cmTarget* target,
+                           const std::vector<std::string>& byproducts);
+
+  /**
+   * Add source file outputs.
+   */
+  void AddSourceOutputs(cmSourceFile* source,
+                        const std::vector<std::string>& outputs,
+                        const std::vector<std::string>& byproducts);
+
+  /**
+   * Return the target if the provided source name is a byproduct of a utility
+   * target or a PRE_BUILD, PRE_LINK, or POST_BUILD command.
+   * Return the source file which has the provided source name as output.
+   */
+  cmSourcesWithOutput GetSourcesWithOutput(const std::string& name) const;
+
+  /**
+   * Is there a source file that has the provided source name as an output?
+   * If so then return it.
+   */
+  cmSourceFile* GetSourceFileWithOutput(
+    const std::string& name,
+    cmSourceOutputKind kind = cmSourceOutputKind::OutputOnly) const;
+
   std::string GetProjectName() const;
 
   /** Compute the language used to compile the given source file.  */
@@ -532,6 +578,33 @@ protected:
   bool BackwardsCompatibilityFinal;
 
 private:
+  /**
+   * See LinearGetSourceFileWithOutput for background information
+   */
+  cmTarget* LinearGetTargetWithOutput(const std::string& name) const;
+
+  /**
+   * Generalized old version of GetSourceFileWithOutput kept for
+   * backward-compatibility. It implements a linear search and supports
+   * relative file paths. It is used as a fall back by GetSourceFileWithOutput
+   * and GetSourcesWithOutput.
+   */
+  cmSourceFile* LinearGetSourceFileWithOutput(const std::string& name,
+                                              cmSourceOutputKind kind,
+                                              bool& byproduct) const;
+  struct SourceEntry
+  {
+    cmSourcesWithOutput Sources;
+  };
+
+  // A map for fast output to input look up.
+  using OutputToSourceMap = std::unordered_map<std::string, SourceEntry>;
+  OutputToSourceMap OutputToSource;
+
+  void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target);
+  void UpdateOutputToSourceMap(std::string const& output, cmSourceFile* source,
+                               bool byproduct);
+
   void AddSharedFlags(std::string& flags, const std::string& lang,
                       bool shared);
   bool GetShouldUseOldFlags(bool shared, const std::string& lang) const;
