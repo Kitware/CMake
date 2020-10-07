@@ -1539,10 +1539,14 @@ bool processSources(cmGeneratorTarget const* tgt,
     for (std::string& src : entry.Values) {
       cmSourceFile* sf = mf->GetOrCreateSource(src);
       std::string e;
-      std::string fullPath = sf->ResolveFullPath(&e);
+      std::string w;
+      std::string fullPath = sf->ResolveFullPath(&e, &w);
+      cmake* cm = tgt->GetLocalGenerator()->GetCMakeInstance();
+      if (!w.empty()) {
+        cm->IssueMessage(MessageType::AUTHOR_WARNING, w, tgt->GetBacktrace());
+      }
       if (fullPath.empty()) {
         if (!e.empty()) {
-          cmake* cm = tgt->GetLocalGenerator()->GetCMakeInstance();
           cm->IssueMessage(MessageType::FATAL_ERROR, e, tgt->GetBacktrace());
         }
         return contextDependent;
