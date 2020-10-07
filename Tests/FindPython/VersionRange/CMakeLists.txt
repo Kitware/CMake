@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.18...3.19)
 
-project (TestVersionRange LANGUAGES NONE)
+project (TestVersionRange LANGUAGES C)
 
 
 find_package (${Python} ${Python_REQUESTED_VERSION} EXACT COMPONENTS Interpreter)
