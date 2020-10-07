@@ -142,6 +142,9 @@ methods are:
   ``DEVELOPER_DIR`` environment variable when running
   CMake and the build tool.
 
+For convenience, :manual:`cmake-gui(1)` provides an
+environment variable editor.
+
 Command line ``-G`` option
 --------------------------
 
@@ -407,6 +410,79 @@ typically specific to the provided software and affect
 the configuration of the build, such as whether tests
 and examples are built, whether to build with exceptions
 enabled etc.
+
+Presets
+=======
+
+CMake understands a file, ``CMakePresets.json``, and its
+user-specific counterpart, ``CMakeUserPresets.json``, for
+saving presets for commonly-used configure settings. These
+presets can set the build directory, generator, cache
+variables, environment variables, and other command-line
+options. All of these options can be overridden by the
+user. The full details of the ``CMakePresets.json`` format
+are listed in the :manual:`cmake(1)` manual.
+
+Using presets on the command-line
+---------------------------------
+
+When using the :manual:`cmake(1)` command line tool, a
+preset can be invoked by using the ``--preset`` option. If
+``--preset`` is specified, the generator and build
+directory are not required, but can be specified to
+override them. For example, if you have the following
+``CMakePresets.json`` file:
+
+.. code-block:: json
+
+  {
+    "version": 1,
+    "configurePresets": [
+      {
+        "name": "ninja-release",
+        "binaryDir": "${sourceDir}/build/${presetName}",
+        "generator": "Ninja",
+        "cacheVariables": {
+          "CMAKE_BUILD_TYPE": "Release"
+        }
+      }
+    ]
+  }
+
+and you run the following:
+
+.. code-block:: console
+
+  cmake -S /path/to/source --preset=ninja-release
+
+This will generate a build directory in
+``/path/to/source/build/ninja-release`` with the
+:generator:`Ninja` generator, and with
+:variable:`CMAKE_BUILD_TYPE` set to ``Release``.
+
+If you want to see the list of available presets, you can
+run:
+
+.. code-block:: console
+
+  cmake -S /path/to/source --list-presets
+
+This will list the presets available in
+``/path/to/source/CMakePresets.json`` and
+``/path/to/source/CMakeUsersPresets.json`` without
+generating a build tree.
+
+Using presets in cmake-gui
+--------------------------
+
+If a project has presets available, either through
+``CMakePresets.json`` or ``CMakeUserPresets.json``, the
+list of presets will appear in a drop-down menu in
+:manual:`cmake-gui(1)` between the source directory and
+the binary directory. Choosing a preset sets the binary
+directory, generator, environment variables, and cache
+variables, but all of these options can be overridden after
+a preset is selected.
 
 Invoking the Buildsystem
 ========================
