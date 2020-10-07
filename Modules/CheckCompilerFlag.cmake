@@ -45,20 +45,20 @@ function(CHECK_COMPILER_FLAG _lang _flag _var)
 
   if(_lang STREQUAL C)
     set(_lang_src "int main(void) { return 0; }")
-    set(_lang_fail_regex FAIL_REGEX "command line option .* is valid for .* but not for C")
+    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C")
   elseif(_lang STREQUAL CXX)
     set(_lang_src "int main() { return 0; }")
-    set(_lang_fail_regex FAIL_REGEX "command line option .* is valid for .* but not for C\\+\\+")
+    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+")
   elseif(_lang STREQUAL Fortran)
     set(_lang_src "       program test\n       stop\n       end program")
-    set(_lang_fail_regex FAIL_REGEX "command line option .* is valid for .* but not for Fortran")
+    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for Fortran")
   elseif(_lang STREQUAL OBJC)
     set(_lang_src [=[
 #ifndef __OBJC__
 #  error "Not an Objective-C compiler"
 #endif
 int main(void) { return 0; }]=])
-    set(_lang_fail_regex FAIL_REGEX "command line option .* is valid for .* but not for Objective-C" # GNU
+    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for Objective-C" # GNU
                          FAIL_REGEX "argument unused during compilation: .*") # Clang
   elseif(_lang STREQUAL OBJCXX)
     set(_lang_src [=[
@@ -66,7 +66,7 @@ int main(void) { return 0; }]=])
 #  error "Not an Objective-C++ compiler"
 #endif
 int main(void) { return 0; }]=])
-    set(_lang_fail_regex FAIL_REGEX "command line option .* is valid for .* but not for Objective-C\\+\\+" # GNU
+    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for Objective-C\\+\\+" # GNU
                          FAIL_REGEX "argument unused during compilation: .*") # Clang
   else()
     message (SEND_ERROR "check_compiler_flag: ${_lang}: unknown language.")

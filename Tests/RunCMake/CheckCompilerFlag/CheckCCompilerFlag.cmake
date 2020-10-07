@@ -13,3 +13,10 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang" AND NOT "x${CMAKE_C_SIMULATE_ID}" STR
     message(SEND_ERROR "${CMAKE_C_COMPILER_ID} compiler flag '-x c' check failed")
   endif()
 endif()
+
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  check_compiler_flag(C "-frtti" SHOULD_FAIL_RTTI)
+  if(SHOULD_FAIL_RTTI)
+    message(SEND_ERROR "${CMAKE_C_COMPILER_ID} compiler flag '-frtti' check passed but should have failed")
+  endif()
+endif()
