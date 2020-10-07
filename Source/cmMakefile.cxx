@@ -939,8 +939,6 @@ void cmMakefile::DoGenerate(cmLocalGenerator& lg)
     action.Value(lg, action.Backtrace);
   }
   this->GeneratorActionsInvoked = true;
-  this->DelayedOutputFiles.clear();
-  this->DelayedOutputFilesHaveGenex = false;
 
   // go through all configured files and see which ones still exist.
   // we don't want cmake to re-run if a configured file is created and deleted
@@ -1247,16 +1245,11 @@ void cmMakefile::AddCustomCommandOldStyle(
   }
 }
 
-bool cmMakefile::AppendCustomCommandToOutput(
+void cmMakefile::AppendCustomCommandToOutput(
   const std::string& output, const std::vector<std::string>& depends,
   const cmImplicitDependsList& implicit_depends,
   const cmCustomCommandLines& commandLines)
 {
-  // Check as good as we can if there will be a command for this output.
-  if (!this->MightHaveCustomCommand(output)) {
-    return false;
-  }
-
   // Validate custom commands.
   if (this->ValidateCustomCommand(commandLines)) {
     // Dispatch command creation to allow generator expressions in outputs.
@@ -1267,8 +1260,6 @@ bool cmMakefile::AppendCustomCommandToOutput(
                                             implicit_depends, commandLines);
       });
   }
-
-  return true;
 }
 
 cmUtilityOutput cmMakefile::GetUtilityOutput(cmTarget* target)
@@ -2271,26 +2262,6 @@ cmSourceFile* cmMakefile::GetSourceFileWithOutput(
   return nullptr;
 }
 
-bool cmMakefile::MightHaveCustomCommand(const std::string& name) const
-{
-  if (this->DelayedOutputFilesHaveGenex ||
-      cmGeneratorExpression::Find(name) != std::string::npos) {
-    // Could be more restrictive, but for now we assume that there could always
-    // be a match when generator expressions are involved.
-    return true;
-  }
-  // Also see LinearGetSourceFileWithOutput.
-  if (!cmSystemTools::FileIsFullPath(name)) {
-    return AnyOutputMatches(name, this->DelayedOutputFiles);
-  }
-  // Otherwise we use an efficient lookup map.
-  auto o = this->OutputToSource.find(name);
-  if (o != this->OutputToSource.end()) {
-    return o->second.SourceMightBeOutput;
-  }
-  return false;
-}
-
 void cmMakefile::AddTargetByproducts(
   cmTarget* target, const std::vector<std::string>& byproducts)
 {
@@ -2339,7 +2310,6 @@ void cmMakefile::UpdateOutputToSourceMap(std::string const& output,
   SourceEntry entry;
   entry.Sources.Source = source;
   entry.Sources.SourceIsByproduct = byproduct;
-  entry.SourceMightBeOutput = !byproduct;
 
   auto pr = this->OutputToSource.emplace(output, entry);
   if (!pr.second) {
@@ -2349,7 +2319,6 @@ void cmMakefile::UpdateOutputToSourceMap(std::string const& output,
         (current.Sources.SourceIsByproduct && !byproduct)) {
       current.Sources.Source = source;
       current.Sources.SourceIsByproduct = false;
-      current.SourceMightBeOutput = true;
     } else {
       // Multiple custom commands produce the same output but may
       // be attached to a different source file (MAIN_DEPENDENCY).
@@ -3676,9 +3645,6 @@ void cmMakefile::CreateGeneratedOutputs(
   for (std::string const& o : outputs) {
     if (cmGeneratorExpression::Find(o) == std::string::npos) {
       this->GetOrCreateGeneratedSource(o);
-      this->AddDelayedOutput(o);
-    } else {
-      this->DelayedOutputFilesHaveGenex = true;
     }
   }
 }
@@ -3690,21 +3656,6 @@ void cmMakefile::CreateGeneratedByproducts(
     if (cmGeneratorExpression::Find(o) == std::string::npos) {
       this->GetOrCreateGeneratedSource(o);
     }
-  }
-}
-
-void cmMakefile::AddDelayedOutput(std::string const& output)
-{
-  // Note that this vector might contain the output names in a different order
-  // than in source file iteration order.
-  this->DelayedOutputFiles.push_back(output);
-
-  SourceEntry entry;
-  entry.SourceMightBeOutput = true;
-
-  auto pr = this->OutputToSource.emplace(output, entry);
-  if (!pr.second) {
-    pr.first->second.SourceMightBeOutput = true;
   }
 }
 

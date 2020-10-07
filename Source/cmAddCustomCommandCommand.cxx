@@ -314,16 +314,9 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
 
   // Check for an append request.
   if (append) {
-    if (mf.AppendCustomCommandToOutput(output[0], depends, implicit_depends,
-                                       commandLines)) {
-      return true;
-    }
-
-    // No command for this output exists.
-    status.SetError(
-      cmStrCat("given APPEND option with output\n  ", output[0],
-               "\nwhich is not already a custom command output."));
-    return false;
+    mf.AppendCustomCommandToOutput(output[0], depends, implicit_depends,
+                                   commandLines);
+    return true;
   }
 
   if (uses_terminal && !job_pool.empty()) {

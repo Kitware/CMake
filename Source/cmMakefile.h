@@ -225,7 +225,7 @@ public:
                                 const std::string& source,
                                 const cmCustomCommandLines& commandLines,
                                 const char* comment);
-  bool AppendCustomCommandToOutput(
+  void AppendCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const cmImplicitDependsList& implicit_depends,
     const cmCustomCommandLines& commandLines);
@@ -1133,10 +1133,6 @@ private:
 
   std::vector<BT<GeneratorAction>> GeneratorActions;
   bool GeneratorActionsInvoked = false;
-  bool DelayedOutputFilesHaveGenex = false;
-  std::vector<std::string> DelayedOutputFiles;
-
-  void AddDelayedOutput(std::string const& output);
 
   /**
    * See LinearGetSourceFileWithOutput for background information
@@ -1156,7 +1152,6 @@ private:
   struct SourceEntry
   {
     cmSourcesWithOutput Sources;
-    bool SourceMightBeOutput = false;
   };
 
   // A map for fast output to input look up.
@@ -1166,11 +1161,6 @@ private:
   void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target);
   void UpdateOutputToSourceMap(std::string const& output, cmSourceFile* source,
                                bool byproduct);
-
-  /**
-   * Return if the provided source file might have a custom command.
-   */
-  bool MightHaveCustomCommand(const std::string& name) const;
 
   bool CheckSystemVars;
   bool CheckCMP0000;

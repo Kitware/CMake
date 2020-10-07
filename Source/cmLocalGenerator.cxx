@@ -4008,7 +4008,7 @@ void AppendCustomCommandToOutput(cmLocalGenerator& lg,
   // No existing command found.
   lg.GetCMakeInstance()->IssueMessage(
     MessageType::FATAL_ERROR,
-    cmStrCat("Attempt to append to output\n  ", output,
+    cmStrCat("Attempt to APPEND to custom command with output\n  ", output,
              "\nwhich is not already a custom command output."),
     lfbt);
 }
