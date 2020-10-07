@@ -52,6 +52,8 @@ Makefile Generators
    /generator/Unix Makefiles
    /generator/Watcom WMake
 
+.. _`Ninja Generators`:
+
 Ninja Generators
 ^^^^^^^^^^^^^^^^
 
