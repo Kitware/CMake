@@ -202,6 +202,12 @@ if(NOT CMAKE_ANDROID_NDK AND NOT CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
 endif()
 
 if(CMAKE_ANDROID_NDK)
+  # NDK >= 18 has abis.cmake and platforms.cmake.
+  include("${CMAKE_ANDROID_NDK}/build/cmake/platforms.cmake" OPTIONAL RESULT_VARIABLE _INCLUDED_PLATFORMS)
+  include("${CMAKE_ANDROID_NDK}/build/cmake/abis.cmake" OPTIONAL RESULT_VARIABLE _INCLUDED_ABIS)
+endif()
+
+if(CMAKE_ANDROID_NDK)
   # Identify the host platform.
   if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
     if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
@@ -298,6 +304,19 @@ if(NOT CMAKE_ANDROID_ARCH_ABI)
     set(CMAKE_ANDROID_ARCH_ABI "${_ANDROID_PROC_${CMAKE_SYSTEM_PROCESSOR}_ARCH_ABI}")
   elseif(_ANDROID_SYSROOT_ARCH)
     set(CMAKE_ANDROID_ARCH_ABI "${_ANDROID_ARCH_${_ANDROID_SYSROOT_ARCH}_ABI}")
+  elseif(_INCLUDED_ABIS)
+    # Default to the oldest ARM ABI.
+    foreach(abi armeabi armeabi-v7a arm64-v8a)
+      if("${abi}" IN_LIST NDK_DEFAULT_ABIS)
+        set(CMAKE_ANDROID_ARCH_ABI "${abi}")
+        break()
+      endif()
+    endforeach()
+    if(NOT CMAKE_ANDROID_ARCH_ABI)
+      message(FATAL_ERROR
+        "Android: Can not determine the default ABI. Please set CMAKE_ANDROID_ARCH_ABI."
+      )
+    endif()
   else()
     # https://developer.android.com/ndk/guides/application_mk.html
     # Default is the oldest ARM ABI.
@@ -382,33 +401,54 @@ if(CMAKE_SYSTEM_VERSION)
       endif()
     endforeach()
   endif()
-  if(CMAKE_ANDROID_NDK AND NOT IS_DIRECTORY "${CMAKE_ANDROID_NDK}/platforms/android-${CMAKE_SYSTEM_VERSION}")
-    message(FATAL_ERROR
-      "Android: The API specified by ${_ANDROID_API_VAR}='${${_ANDROID_API_VAR}}' does not exist in the NDK.  "
-      "The directory:\n"
-      "  ${CMAKE_ANDROID_NDK}/platforms/android-${CMAKE_SYSTEM_VERSION}\n"
-      "does not exist."
-      )
+  if(CMAKE_ANDROID_NDK)
+    if (_INCLUDED_PLATFORMS)
+      if(CMAKE_SYSTEM_VERSION GREATER NDK_MAX_PLATFORM_LEVEL OR
+         CMAKE_SYSTEM_VERSION LESS NDK_MIN_PLATFORM_LEVEL)
+        message(FATAL_ERROR
+          "Android: The API level ${CMAKE_SYSTEM_VERSION} is not supported by the NDK."
+        )
+      endif()
+    else()
+      if(NOT IS_DIRECTORY "${CMAKE_ANDROID_NDK}/platforms/android-${CMAKE_SYSTEM_VERSION}")
+        message(FATAL_ERROR
+          "Android: The API specified by ${_ANDROID_API_VAR}='${${_ANDROID_API_VAR}}' does not exist in the NDK.  "
+          "The directory:\n"
+          "  ${CMAKE_ANDROID_NDK}/platforms/android-${CMAKE_SYSTEM_VERSION}\n"
+          "does not exist."
+          )
+      endif()
+    endif()
   endif()
 elseif(CMAKE_ANDROID_NDK)
-  file(GLOB _ANDROID_APIS_1 RELATIVE "${CMAKE_ANDROID_NDK}/platforms" "${CMAKE_ANDROID_NDK}/platforms/android-[0-9]")
-  file(GLOB _ANDROID_APIS_2 RELATIVE "${CMAKE_ANDROID_NDK}/platforms" "${CMAKE_ANDROID_NDK}/platforms/android-[0-9][0-9]")
-  list(SORT _ANDROID_APIS_1)
-  list(SORT _ANDROID_APIS_2)
-  set(_ANDROID_APIS ${_ANDROID_APIS_1} ${_ANDROID_APIS_2})
-  unset(_ANDROID_APIS_1)
-  unset(_ANDROID_APIS_2)
-  if(_ANDROID_APIS STREQUAL "")
-    message(FATAL_ERROR
-      "Android: No APIs found in the NDK.  No\n"
-      "  ${CMAKE_ANDROID_NDK}/platforms/android-*\n"
-      "directories exist."
-      )
+  if (_INCLUDED_PLATFORMS)
+    set(CMAKE_SYSTEM_VERSION ${NDK_MIN_PLATFORM_LEVEL})
+    # And for LP64 we need to pull up to 21. No diagnostic is provided here because
+    # minSdkVersion < 21 is valid for the project even though it may not be for this
+    # ABI.
+    if(CMAKE_ANDROID_ARCH_ABI MATCHES "64(-v8a)?$" AND CMAKE_SYSTEM_VERSION LESS 21)
+      set(CMAKE_SYSTEM_VERSION 21)
+    endif()
+  else()
+    file(GLOB _ANDROID_APIS_1 RELATIVE "${CMAKE_ANDROID_NDK}/platforms" "${CMAKE_ANDROID_NDK}/platforms/android-[0-9]")
+    file(GLOB _ANDROID_APIS_2 RELATIVE "${CMAKE_ANDROID_NDK}/platforms" "${CMAKE_ANDROID_NDK}/platforms/android-[0-9][0-9]")
+    list(SORT _ANDROID_APIS_1)
+    list(SORT _ANDROID_APIS_2)
+    set(_ANDROID_APIS ${_ANDROID_APIS_1} ${_ANDROID_APIS_2})
+    unset(_ANDROID_APIS_1)
+    unset(_ANDROID_APIS_2)
+    if(_ANDROID_APIS STREQUAL "")
+      message(FATAL_ERROR
+        "Android: No APIs found in the NDK.  No\n"
+        "  ${CMAKE_ANDROID_NDK}/platforms/android-*\n"
+        "directories exist."
+        )
+    endif()
+    string(REPLACE "android-" "" _ANDROID_APIS "${_ANDROID_APIS}")
+    list(REVERSE _ANDROID_APIS)
+    list(GET _ANDROID_APIS 0 CMAKE_SYSTEM_VERSION)
+    unset(_ANDROID_APIS)
   endif()
-  string(REPLACE "android-" "" _ANDROID_APIS "${_ANDROID_APIS}")
-  list(REVERSE _ANDROID_APIS)
-  list(GET _ANDROID_APIS 0 CMAKE_SYSTEM_VERSION)
-  unset(_ANDROID_APIS)
 endif()
 if(NOT CMAKE_SYSTEM_VERSION MATCHES "^[0-9]+$")
   message(FATAL_ERROR "Android: The API specified by CMAKE_SYSTEM_VERSION='${CMAKE_SYSTEM_VERSION}' is not an integer.")
