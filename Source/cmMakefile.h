@@ -1087,7 +1087,6 @@ private:
   bool ValidateCustomCommand(const cmCustomCommandLines& commandLines) const;
 
   void CreateGeneratedOutputs(const std::vector<std::string>& outputs);
-  void CreateGeneratedByproducts(const std::vector<std::string>& byproducts);
 
   std::vector<BT<GeneratorAction>> GeneratorActions;
   bool GeneratorActionsInvoked = false;

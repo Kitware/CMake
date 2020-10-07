@@ -1102,7 +1102,7 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
   }
 
   // Always create the byproduct sources and mark them generated.
-  this->CreateGeneratedByproducts(byproducts);
+  this->CreateGeneratedOutputs(byproducts);
 
   // Strings could be moved into the callback function with C++14.
   cm::optional<std::string> commentStr = MakeOptionalString(comment);
@@ -1161,7 +1161,7 @@ void cmMakefile::AddCustomCommandToOutput(
 
   // Always create the output sources and mark them generated.
   this->CreateGeneratedOutputs(outputs);
-  this->CreateGeneratedByproducts(byproducts);
+  this->CreateGeneratedOutputs(byproducts);
 
   // Strings could be moved into the callback function with C++14.
   cm::optional<std::string> commentStr = MakeOptionalString(comment);
@@ -1304,7 +1304,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
   this->GetOrCreateGeneratedSource(force.Name);
 
   // Always create the byproduct sources and mark them generated.
-  this->CreateGeneratedByproducts(byproducts);
+  this->CreateGeneratedOutputs(byproducts);
 
   // Strings could be moved into the callback function with C++14.
   cm::optional<std::string> commentStr = MakeOptionalString(comment);
@@ -3458,16 +3458,6 @@ void cmMakefile::CreateGeneratedOutputs(
   const std::vector<std::string>& outputs)
 {
   for (std::string const& o : outputs) {
-    if (cmGeneratorExpression::Find(o) == std::string::npos) {
-      this->GetOrCreateGeneratedSource(o);
-    }
-  }
-}
-
-void cmMakefile::CreateGeneratedByproducts(
-  const std::vector<std::string>& byproducts)
-{
-  for (std::string const& o : byproducts) {
     if (cmGeneratorExpression::Find(o) == std::string::npos) {
       this->GetOrCreateGeneratedSource(o);
     }
