@@ -1,6 +1,8 @@
 XCODE_LINK_BUILD_PHASE_MODE
 ---------------------------
 
+.. versionadded:: 3.19
+
 When using the :generator:`Xcode` generator, libraries to be linked will be
 specified in the Xcode project file using either the "Link Binary With
 Libraries" build phase or directly as linker flags.  The former allows Xcode

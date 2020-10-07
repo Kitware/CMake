@@ -1,6 +1,8 @@
 OPTIMIZE_DEPENDENCIES
 ---------------------
 
+.. versionadded:: 3.19
+
 Activates dependency optimization of static and object libraries.
 
 When this property is set to true, some dependencies for a static or object

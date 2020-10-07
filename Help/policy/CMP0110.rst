@@ -1,6 +1,8 @@
 CMP0110
 -------
 
+.. versionadded:: 3.19
+
 :command:`add_test` supports arbitrary characters in test names.
 
 :command:`add_test` can now (officially) create tests with whitespace and
