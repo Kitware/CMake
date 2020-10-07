@@ -539,8 +539,11 @@ add_RunCMake_test(target_compile_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILE
 add_RunCMake_test(target_include_directories)
 add_RunCMake_test(target_sources)
 add_RunCMake_test(CheckCompilerFlag)
-add_RunCMake_test(CheckSourceCompiles)
+add_RunCMake_test(CheckSourceCompiles -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
 add_RunCMake_test(CheckSourceRuns)
+set_property(TEST RunCMake.CheckSourceCompiles
+                  RunCMake.CheckCompilerFlag
+    APPEND PROPERTY LABELS "ISPC")
 add_RunCMake_test(CheckModules)
 add_RunCMake_test(CheckIPOSupported)
 if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)"

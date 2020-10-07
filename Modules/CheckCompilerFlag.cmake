@@ -68,6 +68,8 @@ int main(void) { return 0; }]=])
 int main(void) { return 0; }]=])
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for Objective-C\\+\\+" # GNU
                          FAIL_REGEX "argument unused during compilation: .*") # Clang
+  elseif(_lang STREQUAL ISPC)
+    set(_lang_src "float func(uniform int32, float a) { return a / 2.25; }")
   else()
     message (SEND_ERROR "check_compiler_flag: ${_lang}: unknown language.")
     return()
