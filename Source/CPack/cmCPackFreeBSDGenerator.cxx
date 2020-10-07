@@ -35,6 +35,56 @@ int cmCPackFreeBSDGenerator::InitializeInternal()
 
 cmCPackFreeBSDGenerator::~cmCPackFreeBSDGenerator() = default;
 
+// This is a wrapper for struct pkg_create and pkg_create()
+//
+// Instantiate this class with suitable parameters, then
+// check isValid() to check if it's ok. Afterwards, call
+// Create() to do the actual work. This will leave a package
+// in the given `output_dir`.
+//
+// This wrapper cleans up the struct pkg_create.
+class PkgCreate
+{
+public:
+  PkgCreate()
+    : d(nullptr)
+  {
+  }
+  PkgCreate(const std::string& output_dir, const std::string& toplevel_dir,
+            const std::string& manifest_name)
+    : d(pkg_create_new())
+    , manifest(manifest_name)
+
+  {
+    if (d) {
+      pkg_create_set_format(d, "txz");
+      pkg_create_set_compression_level(d, 0); // Explicitly set default
+      pkg_create_set_overwrite(d, false);
+      pkg_create_set_rootdir(d, toplevel_dir.c_str());
+      pkg_create_set_output_dir(d, output_dir.c_str());
+    }
+  }
+  ~PkgCreate()
+  {
+    if (d)
+      pkg_create_free(d);
+  }
+
+  bool isValid() const { return d; }
+
+  bool Create()
+  {
+    if (!isValid())
+      return false;
+    int r = pkg_create(d, manifest.c_str(), nullptr, false);
+    return r == 0;
+  }
+
+private:
+  struct pkg_create* d;
+  std::string manifest;
+};
+
 // This is a wrapper, for use only in stream-based output,
 // that will output a string in UCL escaped fashion (in particular,
 // quotes and backslashes are escaped). The list of characters
@@ -281,7 +331,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
 {
   if (!this->ReadListFile("Internal/CPack/CPackFreeBSD.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Error while execution CPackFreeBSD.cmake" << std::endl);
+                  "Error while executing CPackFreeBSD.cmake" << std::endl);
     return 0;
   }
 
@@ -317,9 +367,25 @@ int cmCPackFreeBSDGenerator::PackageFiles()
                              ONE_PACKAGE_PER_COMPONENT);
   }
 
+  if (!pkg_initialized() && pkg_init(NULL, NULL) != EPKG_OK) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Can not initialize FreeBSD libpkg." << std::endl);
+    return 0;
+  }
+
   std::string output_dir = cmSystemTools::CollapseFullPath("../", toplevel);
-  pkg_create_from_manifest(output_dir.c_str(), ::TXZ, toplevel.c_str(),
-                           manifestname.c_str(), nullptr);
+  PkgCreate package(output_dir, toplevel, manifestname);
+  if (package.isValid()) {
+    if (!package.Create()) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error during pkg_create()" << std::endl);
+      return 0;
+    }
+  } else {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Error before pkg_create()" << std::endl);
+    return 0;
+  }
 
   std::string broken_suffix =
     cmStrCat('-', var_lookup("CPACK_TOPLEVEL_TAG"), ".txz");
