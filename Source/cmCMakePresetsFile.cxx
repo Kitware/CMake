@@ -305,6 +305,13 @@ ReadFileResult VisitPreset(std::map<std::string, UnexpandedPreset>& presets,
 
   cycleStatus[preset.Name] = CycleStatus::InProgress;
 
+  if (preset.CacheVariables.count("") != 0) {
+    return ReadFileResult::INVALID_PRESET;
+  }
+  if (preset.Environment.count("") != 0) {
+    return ReadFileResult::INVALID_PRESET;
+  }
+
   for (auto const& i : preset.Inherits) {
     auto parent = presets.find(i);
     if (parent == presets.end()) {
@@ -550,7 +557,7 @@ bool ExpandMacro(const cmCMakePresetsFile& file,
     }
   }
 
-  if (macroNamespace == "env") {
+  if (macroNamespace == "env" && !macroName.empty()) {
     auto v = preset.Environment.find(macroName);
     if (v != preset.Environment.end() && v->second) {
       if (!VisitEnv(file, preset, envCycles, *v->second,
@@ -563,6 +570,9 @@ bool ExpandMacro(const cmCMakePresetsFile& file,
   }
 
   if (macroNamespace == "env" || macroNamespace == "penv") {
+    if (macroName.empty()) {
+      return false;
+    }
     const char* value = std::getenv(macroName.c_str());
     if (value) {
       out += value;
