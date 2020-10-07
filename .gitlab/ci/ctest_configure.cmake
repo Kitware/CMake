@@ -6,7 +6,7 @@ set(cmake_args
   -C "${CMAKE_CURRENT_LIST_DIR}/configure_$ENV{CMAKE_CONFIGURATION}.cmake")
 
 # Create an entry in CDash.
-ctest_start(Experimental TRACK "${ctest_track}")
+ctest_start("${ctest_model}" GROUP "${ctest_group}")
 
 # Gather update information.
 find_package(Git)

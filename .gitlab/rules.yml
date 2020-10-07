@@ -4,6 +4,8 @@
     rules:
         - if: '$CMAKE_CI_PACKAGE == "true"'
           when: never
+        - if: '$CMAKE_CI_NIGHTLY == "true"'
+          when: on_success
         - if: '($CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != "" && $CI_COMMIT_BRANCH == $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true")'
           when: delayed
           start_in: 5 minutes
@@ -18,6 +20,8 @@
     rules:
         - if: '$CMAKE_CI_PACKAGE == "true"'
           when: never
+        - if: '$CMAKE_CI_NIGHTLY == "true"'
+          when: on_success
         - if: '($CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != "" && $CI_COMMIT_BRANCH == $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true")'
           when: on_success
         - if: '$CI_MERGE_REQUEST_ID'
@@ -30,6 +34,8 @@
     rules:
         - if: '$CMAKE_CI_PACKAGE == "true"'
           when: never
+        - if: '$CMAKE_CI_NIGHTLY == "true"'
+          when: on_success
         - if: '$CI_MERGE_REQUEST_ID'
           when: on_success
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
