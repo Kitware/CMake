@@ -19,6 +19,7 @@ endif ()
 # Set the build metadata.
 set(CTEST_BUILD_NAME "$ENV{CI_PROJECT_NAME}-$ENV{CMAKE_CONFIGURATION}")
 set(CTEST_SITE "gitlab-ci")
+set(ctest_model "Experimental")
 
 # Default to Release builds.
 if (NOT "$ENV{CMAKE_BUILD_TYPE}" STREQUAL "")
