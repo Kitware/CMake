@@ -2,7 +2,6 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
-cmake_policy(SET CMP0114 NEW)
 
 # We name the project and the target for the ExternalProject_Add() call
 # to something that will highlight to the user what we are working on if
