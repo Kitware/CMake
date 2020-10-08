@@ -215,6 +215,14 @@ set(_JNI_JAVA_DIRECTORIES_BASE
   /usr/local/jre-1.7.0
   /usr/local/jdk-1.6.0
   /usr/local/jre-1.6.0
+  # FreeBSD specific paths for default JVM
+  /usr/local/openjdk15
+  /usr/local/openjdk14
+  /usr/local/openjdk13
+  /usr/local/openjdk12
+  /usr/local/openjdk11
+  /usr/local/openjdk8
+  /usr/local/openjdk7
   # SuSE specific paths for default JVM
   /usr/lib64/jvm/java
   /usr/lib64/jvm/jre
