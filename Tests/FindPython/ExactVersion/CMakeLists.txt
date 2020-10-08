@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestExactVersion LANGUAGES NONE)
+project(TestExactVersion LANGUAGES C)
 
 find_package(Python${Python_MAJOR_VERSION} ${Python_REQUESTED_VERSION} COMPONENTS Interpreter Development)
 if(NOT Python${Python_MAJOR_VERSION}_FOUND)

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestArtifactsInteractive LANGUAGES NONE)
+project(TestArtifactsInteractive LANGUAGES C)
 
 set (components Interpreter Development)
 if (CMake_TEST_FindPython_NumPy)

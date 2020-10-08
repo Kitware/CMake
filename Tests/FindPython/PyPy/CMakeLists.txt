@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestPyPy LANGUAGES NONE)
+project(TestPyPy LANGUAGES C)
 
 set (Python_FIND_IMPLEMENTATIONS PyPy)
 

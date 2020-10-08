@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestRequiredArtifacts.Check LANGUAGES NONE)
+project(TestRequiredArtifacts.Check LANGUAGES C)
 
 set (components)
 if (CHECK_INTERPRETER)

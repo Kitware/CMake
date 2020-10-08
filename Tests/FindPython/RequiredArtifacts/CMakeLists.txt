@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestRequiredArtifacts LANGUAGES NONE)
+project(TestRequiredArtifacts LANGUAGES C)
 
 include(CTest)
 
