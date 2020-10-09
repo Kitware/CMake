@@ -27,7 +27,7 @@
   { include: [ "<bits/std_abs.h>", private, "<stdlib.h>", public ] },
   { include: [ "<bits/stdint-intn.h>", private, "<stdint.h>", public ] },
   { include: [ "<bits/stdint-uintn.h>", private, "<stdint.h>", public ] },
-  { include: [ "<bits/string_view.tcc>", private, "<string_view>", public ] },
+  { include: [ "<bits/string_view.tcc>", private, "<string_view>", private ] },
   { include: [ "<bits/time.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/clock_t.h>", private, "<time.h>", public ] },
   { include: [ "<bits/types/mbstate_t.h>", private, "<wchar.h>", public ] },
@@ -115,6 +115,11 @@
   { include: [ "<istream>", public, "\"cmsys/FStream.hxx\"", public ] },
   { include: [ "<ostream>", public, "\"cmsys/FStream.hxx\"", public ] },
   { include: [ "<fstream>", public, "\"cmsys/FStream.hxx\"", public ] },
+
+  { include: [ "<filesystem>", private, "<cm/filesystem>", public ] },
+  { include: [ "<optional>", private, "<cm/optional>", public ] },
+  { include: [ "<shared_mutex>", private, "<cm/shared_mutex>", public ] },
+  { include: [ "<string_view>", private, "<cm/string_view>", public ] },
 
   # major and minor are used as macro arguments. Those are false matches.
   { symbol: [ "major", private, "\"cmVersion.h\"", public ] },
