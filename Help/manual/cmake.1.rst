@@ -190,13 +190,12 @@ source and build trees and generate a buildsystem:
           "description": "Default build using Ninja generator",
           "generator": "Ninja",
           "binaryDir": "${sourceDir}/build/default",
-          "cacheVariables": [
-            {
-              "name": "MY_CACHE_VARIABLE",
+          "cacheVariables": {
+            "MY_CACHE_VARIABLE": {
               "type": "BOOL",
               "value": "OFF"
             }
-          ]
+          }
         }
       ]
     }
