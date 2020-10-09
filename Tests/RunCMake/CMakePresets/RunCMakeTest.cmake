@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.19) # CMP0053
+
 include(RunCMake)
 
 # Fix Visual Studio generator name
@@ -214,3 +216,10 @@ unset(CMakePresets_WARN_UNUSED_CLI)
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Debug.json.in")
 run_cmake_presets(NoDebug)
 run_cmake_presets(Debug)
+
+# Test the example from the documentation
+file(READ "${RunCMake_SOURCE_DIR}/../../../Help/manual/presets/example.json" _example)
+string(REPLACE "\"generator\": \"Ninja\"" "\"generator\": \"@RunCMake_GENERATOR@\"" _example "${_example}")
+file(WRITE "${RunCMake_BINARY_DIR}/example.json.in" "${_example}")
+set(CMakePresets_FILE "${RunCMake_BINARY_DIR}/example.json.in")
+run_cmake_presets(DocumentationExample --preset=default)
