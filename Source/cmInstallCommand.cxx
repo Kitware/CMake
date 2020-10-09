@@ -461,6 +461,28 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     std::unique_ptr<cmInstallFilesGenerator> publicHeaderGenerator;
     std::unique_ptr<cmInstallFilesGenerator> resourceGenerator;
 
+    auto addTargetExport = [&]() {
+      // Add this install rule to an export if one was specified.
+      // (If this is a namelink-only rule no export file will be generated.)
+      if (!exports.empty()) {
+        auto te = cm::make_unique<cmTargetExport>();
+        te->TargetName = target.GetName();
+        te->ArchiveGenerator = archiveGenerator.get();
+        te->BundleGenerator = bundleGenerator.get();
+        te->FrameworkGenerator = frameworkGenerator.get();
+        te->HeaderGenerator = publicHeaderGenerator.get();
+        te->LibraryGenerator = libraryGenerator.get();
+        te->RuntimeGenerator = runtimeGenerator.get();
+        te->ObjectsGenerator = objectGenerator.get();
+        te->InterfaceIncludeDirectories =
+          cmJoin(includesArgs.GetIncludeDirs(), ";");
+
+        helper.Makefile->GetGlobalGenerator()
+          ->GetExportSets()[exports]
+          .AddTargetExport(std::move(te));
+      }
+    };
+
     // Avoid selecting default destinations for PUBLIC_HEADER and
     // PRIVATE_HEADER if any artifacts are specified.
     bool artifactsSpecified = false;
@@ -476,6 +498,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         if (target.IsDLLPlatform()) {
           // When in namelink only mode skip all libraries on Windows.
           if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+            addTargetExport();
             continue;
           }
 
@@ -507,6 +530,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           if (target.IsFrameworkOnApple()) {
             // When in namelink only mode skip frameworks.
             if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+              addTargetExport();
               continue;
             }
 
@@ -551,6 +575,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         if (target.IsFrameworkOnApple()) {
           // When in namelink only mode skip frameworks.
           if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+            addTargetExport();
             continue;
           }
 
@@ -744,25 +769,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       }
     }
 
-    // Add this install rule to an export if one was specified and
-    // this is not a namelink-only rule.
-    if (!exports.empty() && !namelinkOnly) {
-      auto te = cm::make_unique<cmTargetExport>();
-      te->TargetName = target.GetName();
-      te->ArchiveGenerator = archiveGenerator.get();
-      te->BundleGenerator = bundleGenerator.get();
-      te->FrameworkGenerator = frameworkGenerator.get();
-      te->HeaderGenerator = publicHeaderGenerator.get();
-      te->LibraryGenerator = libraryGenerator.get();
-      te->RuntimeGenerator = runtimeGenerator.get();
-      te->ObjectsGenerator = objectGenerator.get();
-      te->InterfaceIncludeDirectories =
-        cmJoin(includesArgs.GetIncludeDirs(), ";");
-
-      helper.Makefile->GetGlobalGenerator()
-        ->GetExportSets()[exports]
-        .AddTargetExport(std::move(te));
-    }
+    // Add this install rule to an export if one was specified.
+    addTargetExport();
 
     // Keep track of whether we're installing anything in each category
     installsArchive = installsArchive || archiveGenerator;
