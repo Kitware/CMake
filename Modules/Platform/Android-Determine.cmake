@@ -412,7 +412,8 @@ if(CMAKE_SYSTEM_VERSION)
       if(CMAKE_SYSTEM_VERSION GREATER NDK_MAX_PLATFORM_LEVEL OR
          CMAKE_SYSTEM_VERSION LESS NDK_MIN_PLATFORM_LEVEL)
         message(FATAL_ERROR
-          "Android: The API level ${CMAKE_SYSTEM_VERSION} is not supported by the NDK."
+          "Android: The API level ${CMAKE_SYSTEM_VERSION} is not supported by the NDK.\n"
+          "Choose one in the range of [${NDK_MIN_PLATFORM_LEVEL}, ${NDK_MAX_PLATFORM_LEVEL}]."
         )
       endif()
     else()
