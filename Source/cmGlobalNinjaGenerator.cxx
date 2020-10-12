@@ -2532,14 +2532,14 @@ bool cmGlobalNinjaMultiGenerator::OpenBuildFileStreams()
     return false;
   }
 
-  if (!this->DefaultFileConfig.empty()) {
-    if (!this->OpenFileStream(this->DefaultFileStream, NINJA_BUILD_FILE)) {
-      return false;
-    }
-    *this->DefaultFileStream
-      << "# Build using rules for '" << this->DefaultFileConfig << "'.\n\n"
-      << "include " << GetNinjaImplFilename(this->DefaultFileConfig) << "\n\n";
+  if (!this->OpenFileStream(this->DefaultFileStream, NINJA_BUILD_FILE)) {
+    return false;
   }
+  *this->DefaultFileStream << "# Build using rules for '"
+                           << this->DefaultFileConfig << "'.\n\n"
+                           << "include "
+                           << GetNinjaImplFilename(this->DefaultFileConfig)
+                           << "\n\n";
 
   // Write a comment about this file.
   *this->CommonFileStream
