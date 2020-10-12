@@ -134,6 +134,9 @@ This module will set the following variables in your project
   System has the Python 2 development artifacts for Python embedding.
 ``Python2_INCLUDE_DIRS``
   The Python 2 include directories.
+``Python2_LINK_OPTIONS``
+  The Python 2 link options. Some configurations require specific link options
+  for a correct build and execution.
 ``Python2_LIBRARIES``
   The Python 2 libraries.
 ``Python2_LIBRARY_DIRS``
