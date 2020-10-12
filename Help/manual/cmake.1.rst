@@ -174,32 +174,8 @@ source and build trees and generate a buildsystem:
 
   The files are a JSON document with an object as the root:
 
-  .. code-block:: json
-
-    {
-      "version": 1,
-      "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 19,
-        "patch": 0
-      },
-      "configurePresets": [
-        {
-          "name": "default",
-          "displayName": "Default Config",
-          "description": "Default build using Ninja generator",
-          "generator": "Ninja",
-          "binaryDir": "${sourceDir}/build/default",
-          "cacheVariables": [
-            {
-              "name": "MY_CACHE_VARIABLE",
-              "type": "BOOL",
-              "value": "OFF"
-            }
-          ]
-        }
-      ]
-    }
+  .. literalinclude:: presets/example.json
+    :language: json
 
   The root object recognizes the following fields:
 
