@@ -21,8 +21,7 @@ are intended to be run with ``ninja -f build-<Config>.ninja``. A
 
 ``cmake --build . --config <Config>`` will always use ``build-<Config>.ninja``
 to build. If no ``--config`` argument is specified, ``cmake --build .`` will
-default to ``build-Debug.ninja``, unless a ``build.ninja`` is generated (see
-below), in which case that will be used instead.
+use ``build.ninja``.
 
 Each ``build-<Config>.ninja`` file contains ``<target>`` targets as well as
 ``<target>:<Config>`` targets, where ``<Config>`` is the same as the
