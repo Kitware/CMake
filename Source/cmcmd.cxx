@@ -48,6 +48,12 @@
 #include <sstream>
 #include <utility>
 
+#ifdef _WIN32
+#  include <fcntl.h> // for _O_BINARY
+#  include <io.h>    // for _setmode
+#  include <stdio.h> // for std{out,err} and fileno
+#endif
+
 #include <cm/string_view>
 
 #include "cmsys/Directory.hxx"
@@ -178,6 +184,9 @@ static bool cmTarFilesFrom(std::string const& file,
 
 static void cmCatFile(const std::string& fileToAppend)
 {
+#ifdef _WIN32
+  _setmode(fileno(stdout), _O_BINARY);
+#endif
   cmsys::ifstream source(fileToAppend.c_str(),
                          (std::ios::binary | std::ios::in));
   std::cout << source.rdbuf();
@@ -497,7 +506,8 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
   return ret;
 }
 
-int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
+int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
+                               std::unique_ptr<cmConsoleBuf> consoleBuf)
 {
   // IF YOU ADD A NEW COMMAND, DOCUMENT IT ABOVE and in cmakemain.cxx
   if (args.size() > 1) {
@@ -951,6 +961,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
           cmSystemTools::Error(arg + ": no such file or directory (ignoring)");
           return_value = 1;
         } else {
+          // Destroy console buffers to drop cout/cerr encoding transform.
+          consoleBuf.reset();
           cmCatFile(arg);
         }
       }

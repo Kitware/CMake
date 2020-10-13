@@ -9,8 +9,10 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cmext/algorithm>
 
 #include <cm3p/uv.h>
@@ -107,13 +109,14 @@ const char* cmDocumentationOptions[][2] = {
 
 #endif
 
-int do_command(int ac, char const* const* av)
+int do_command(int ac, char const* const* av,
+               std::unique_ptr<cmConsoleBuf> consoleBuf)
 {
   std::vector<std::string> args;
   args.reserve(ac - 1);
   args.emplace_back(av[0]);
   cm::append(args, av + 2, av + ac);
-  return cmcmd::ExecuteCMakeCommand(args);
+  return cmcmd::ExecuteCMakeCommand(args, std::move(consoleBuf));
 }
 
 cmMakefile* cmakemainGetMakefile(cmake* cm)
@@ -687,8 +690,8 @@ int main(int ac, char const* const* av)
   cmSystemTools::EnsureStdPipes();
 
   // Replace streambuf so we can output Unicode to console
-  cmConsoleBuf consoleBuf;
-  consoleBuf.SetUTF8Pipes();
+  auto consoleBuf = cm::make_unique<cmConsoleBuf>();
+  consoleBuf->SetUTF8Pipes();
 
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
@@ -708,7 +711,7 @@ int main(int ac, char const* const* av)
       return do_open(ac, av);
     }
     if (strcmp(av[1], "-E") == 0) {
-      return do_command(ac, av);
+      return do_command(ac, av, std::move(consoleBuf));
     }
   }
   int ret = do_cmake(ac, av);
