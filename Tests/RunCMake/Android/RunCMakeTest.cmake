@@ -157,7 +157,7 @@ foreach(ndk IN LISTS TEST_ANDROID_NDK)
 
   # Find a sysroot to test.
   file(GLOB _sysroots "${ndk}/platforms/android-[0-9][0-9]/arch-arm")
-  if(_sysroots)
+  if(_sysroots AND "armeabi" IN_LIST _abis_)
     list(GET _sysroots 0 _sysroot)
     set(RunCMake_TEST_OPTIONS
       -DCMAKE_SYSTEM_NAME=Android
