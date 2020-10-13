@@ -141,10 +141,6 @@ else ()
     ${RC_SRCS})
 endif ()
 
-if(WIN32)
-  list(APPEND SRCS CMakeSetup.rc)
-endif()
-
 if(USE_LGPL)
   install(FILES ${CMake_SOURCE_DIR}/Licenses/LGPLv${USE_LGPL}.txt
     DESTINATION ${CMAKE_DATA_DIR}/Licenses
@@ -166,7 +162,7 @@ add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx ${MANIFEST_FILE})
 target_link_libraries(cmake-gui CMakeGUIMainLib Qt5::Core)
 
 if(WIN32)
-  target_sources(CMakeGUILib INTERFACE $<TARGET_OBJECTS:CMakeVersion>)
+  target_sources(CMakeGUILib INTERFACE $<TARGET_OBJECTS:CMakeVersion> CMakeSetup.rc)
 endif()
 if(APPLE)
   target_sources(CMakeGUILib INTERFACE CMakeSetup.icns)
