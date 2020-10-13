@@ -77,7 +77,8 @@ public:
    * Resolves the full path to the file.  Attempts to locate the file on disk
    * and finalizes its location.
    */
-  std::string const& ResolveFullPath(std::string* error = nullptr);
+  std::string const& ResolveFullPath(std::string* error = nullptr,
+                                     std::string* cmp0115Warning = nullptr);
 
   /**
    * The resolved full path to the file.  The returned file name might be empty
@@ -138,7 +139,7 @@ private:
   bool FindFullPathFailed = false;
   bool IsGenerated = false;
 
-  bool FindFullPath(std::string* error);
+  bool FindFullPath(std::string* error, std::string* cmp0115Warning);
   void CheckExtension();
   void CheckLanguage(std::string const& ext);
 
