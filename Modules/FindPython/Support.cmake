@@ -2990,6 +2990,29 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                 ${_PYTHON_PREFIX}_PyPy_VERSION "${${_PYTHON_PREFIX}_PyPy_VERSION}")
   endif()
 
+  unset(${_PYTHON_PREFIX}_LINK_OPTIONS)
+  if (${_PYTHON_PREFIX}_Development.Embed_FOUND AND APPLE
+      AND ${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$")
+    # rpath must be specified if python is part of a framework
+    unset(_${_PYTHON_PREFIX}_is_prefix)
+    foreach (_${_PYTHON_PREFIX}_implementation IN LISTS _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
+      foreach (_${_PYTHON_PREFIX}_framework IN LISTS _${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_implementation}_FRAMEWORKS)
+        cmake_path (IS_PREFIX _${_PYTHON_PREFIX}_framework "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}" _${_PYTHON_PREFIX}_is_prefix)
+        if (_${_PYTHON_PREFIX}_is_prefix)
+          cmake_path (GET _${_PYTHON_PREFIX}_framework PARENT_PATH _${_PYTHON_PREFIX}_framework)
+          set (${_PYTHON_PREFIX}_LINK_OPTIONS "LINKER:-rpath,${_${_PYTHON_PREFIX}_framework}")
+          break()
+        endif()
+      endforeach()
+      if (_${_PYTHON_PREFIX}_is_prefix)
+        break()
+      endif()
+    endforeach()
+    unset(_${_PYTHON_PREFIX}_implementation)
+    unset(_${_PYTHON_PREFIX}_framework)
+    unset(_${_PYTHON_PREFIX}_is_prefix)
+  endif()
+
   if (NOT DEFINED ${_PYTHON_PREFIX}_SOABI)
     _python_get_config_var (${_PYTHON_PREFIX}_SOABI SOABI)
   endif()
@@ -3201,6 +3224,11 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
           set_property (TARGET ${__name}
                         PROPERTY INTERFACE_LINK_LIBRARIES ${_${_PYTHON_PREFIX}_LINK_LIBRARIES})
         endif()
+      endif()
+
+      if (${_PYTHON_PREFIX}_LINK_OPTIONS
+          AND _${_PYTHON_PREFIX}_LIBRARY_TYPE STREQUAL "SHARED")
+        set_property (TARGET ${__name} PROPERTY INTERFACE_LINK_OPTIONS "${${_PYTHON_PREFIX}_LINK_OPTIONS}")
       endif()
     endmacro()
 

@@ -189,6 +189,10 @@ Modules
 * The :module:`FindPython3`, :module:`FindPython2` and :module:`FindPython`
   modules gained the capability to manage a version range.
 
+* The :module:`FindPython3`, :module:`FindPython2` and :module:`FindPython`
+  modules provide, respectively, the variable ``Python3_LINK_OPTIONS``,
+  ``Python2_LINK_OPTIONS`` and ``Python_LINK_OPTIONS`` for link options.
+
 * The :module:`FindSDL` module now provides:
 
   * imported target ``SDL::SDL``,
