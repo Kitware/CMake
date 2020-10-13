@@ -463,7 +463,6 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
 
     auto addTargetExport = [&]() {
       // Add this install rule to an export if one was specified.
-      // (If this is a namelink-only rule no export file will be generated.)
       if (!exports.empty()) {
         auto te = cm::make_unique<cmTargetExport>();
         te->TargetName = target.GetName();
