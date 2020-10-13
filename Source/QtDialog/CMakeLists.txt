@@ -144,12 +144,6 @@ endif ()
 if(WIN32)
   list(APPEND SRCS CMakeSetup.rc)
 endif()
-if(APPLE)
-  list(APPEND SRCS CMakeSetup.icns)
-  set(MACOSX_BUNDLE_ICON_FILE CMakeSetup.icns)
-  set_source_files_properties(CMakeSetup.icns PROPERTIES
-    MACOSX_PACKAGE_LOCATION Resources)
-endif()
 
 if(USE_LGPL)
   install(FILES ${CMake_SOURCE_DIR}/Licenses/LGPLv${USE_LGPL}.txt
@@ -173,6 +167,12 @@ target_link_libraries(cmake-gui CMakeGUIMainLib Qt5::Core)
 
 if(WIN32)
   target_sources(CMakeGUILib INTERFACE $<TARGET_OBJECTS:CMakeVersion>)
+endif()
+if(APPLE)
+  target_sources(CMakeGUILib INTERFACE CMakeSetup.icns)
+  set(MACOSX_BUNDLE_ICON_FILE CMakeSetup.icns)
+  set_source_files_properties(CMakeSetup.icns PROPERTIES
+    MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
 if(CMake_JOB_POOL_LINK_BIN)
