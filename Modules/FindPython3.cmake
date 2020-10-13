@@ -143,6 +143,9 @@ This module will set the following variables in your project
   System has the Python 3 development artifacts for Python embedding.
 ``Python3_INCLUDE_DIRS``
   The Python 3 include directories.
+``Python3_LINK_OPTIONS``
+  The Python 3 link options. Some configurations require specific link options
+  for a correct build and execution.
 ``Python3_LIBRARIES``
   The Python 3 libraries.
 ``Python3_LIBRARY_DIRS``

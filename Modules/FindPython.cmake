@@ -142,6 +142,9 @@ This module will set the following variables in your project
   System has the Python development artifacts for Python embedding.
 ``Python_INCLUDE_DIRS``
   The Python include directories.
+``Python_LINK_OPTIONS``
+  The Python link options. Some configurations require specific link options
+  for a correct build and execution.
 ``Python_LIBRARIES``
   The Python libraries.
 ``Python_LIBRARY_DIRS``
