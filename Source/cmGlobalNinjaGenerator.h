@@ -31,7 +31,6 @@ class cmLinkLineComputer;
 class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
-class cmState;
 class cmStateDirectory;
 class cmake;
 struct cmDocumentationEntry;
@@ -646,8 +645,6 @@ public:
   bool InspectConfigTypeVariables() override;
 
   std::string GetDefaultBuildConfig() const override;
-
-  bool ReadCacheEntriesForBuild(const cmState& state) override;
 
   bool SupportsDefaultBuildType() const override { return true; }
   bool SupportsCrossConfigs() const override { return true; }
