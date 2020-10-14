@@ -7,6 +7,7 @@
 #include <cm3p/uv.h>
 #include <fcntl.h>
 
+#include "cmConsoleBuf.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -31,10 +32,6 @@
 #  include "cmServerConnection.h"
 
 #  include "bindexplib.h"
-#endif
-
-#if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
-#  include "cmsys/ConsoleBuf.hxx"
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32) && !defined(__CYGWIN__)
@@ -1863,14 +1860,11 @@ private:
 // still works.
 int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
 {
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
   // Replace streambuf so we output in the system codepage. CMake is set up
   // to output in Unicode (see SetUTF8Pipes) but the Visual Studio linker
   // outputs using the system codepage so we need to change behavior when
   // we run the link command.
-  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
-  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-#endif
+  cmConsoleBuf consoleBuf;
 
   if (args.size() < 2) {
     return -1;

@@ -15,6 +15,7 @@
 
 #include <cm3p/uv.h>
 
+#include "cmConsoleBuf.h"
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -32,9 +33,6 @@
 #endif
 
 #include "cmsys/Encoding.hxx"
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
-#  include "cmsys/ConsoleBuf.hxx"
-#endif
 
 namespace {
 #ifndef CMAKE_BOOTSTRAP
@@ -687,13 +685,11 @@ int do_open(int ac, char const* const* av)
 int main(int ac, char const* const* av)
 {
   cmSystemTools::EnsureStdPipes();
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
+
   // Replace streambuf so we can output Unicode to console
-  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
-  consoleOut.SetUTF8Pipes();
-  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-  consoleErr.SetUTF8Pipes();
-#endif
+  cmConsoleBuf consoleBuf;
+  consoleBuf.SetUTF8Pipes();
+
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
   ac = args.argc();

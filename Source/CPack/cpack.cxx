@@ -16,6 +16,7 @@
 #include "cmCPackGenerator.h"
 #include "cmCPackGeneratorFactory.h"
 #include "cmCPackLog.h"
+#include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationFormatter.h"
@@ -26,10 +27,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
-#  include "cmsys/ConsoleBuf.hxx"
-#endif
 
 namespace {
 const char* cmDocumentationName[][2] = {
@@ -103,13 +100,11 @@ void cpackProgressCallback(const std::string& message, float /*unused*/)
 int main(int argc, char const* const* argv)
 {
   cmSystemTools::EnsureStdPipes();
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
+
   // Replace streambuf so we can output Unicode to console
-  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
-  consoleOut.SetUTF8Pipes();
-  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-  consoleErr.SetUTF8Pipes();
-#endif
+  cmConsoleBuf consoleBuf;
+  consoleBuf.SetUTF8Pipes();
+
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = args.argc();
