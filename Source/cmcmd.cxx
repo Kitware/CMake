@@ -28,8 +28,6 @@
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
 #  include "cmFileTime.h"
-#  include "cmServer.h"
-#  include "cmServerConnection.h"
 
 #  include "bindexplib.h"
 #endif
@@ -58,8 +56,6 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"
 #include "cmsys/Terminal.h"
-
-class cmConnection;
 
 int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
                               std::vector<std::string>::const_iterator argEnd);
@@ -119,7 +115,6 @@ void CMakeCommandUsage(const char* program)
        "(on one volume)\n"
     << "  rm [-rRf] <file/dir>...    - remove files or directories, use -f to "
        "force it, r or R to remove directories and their contents recursively\n"
-    << "  server                    - start cmake in server mode\n"
     << "  sleep <number>...         - sleep for given number of seconds\n"
     << "  tar [cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]\n"
     << "                            - create or extract a tar or zip archive\n"
@@ -1351,47 +1346,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
     }
 
     if (args[1] == "server") {
-      const std::string pipePrefix = "--pipe=";
-      bool supportExperimental = false;
-      bool isDebug = false;
-      std::string pipe;
-
-      for (auto const& arg : cmMakeRange(args).advance(2)) {
-        if (arg == "--experimental") {
-          supportExperimental = true;
-        } else if (arg == "--debug") {
-          pipe.clear();
-          isDebug = true;
-        } else if (cmHasPrefix(arg, pipePrefix)) {
-          isDebug = false;
-          pipe = arg.substr(pipePrefix.size());
-          if (pipe.empty()) {
-            cmSystemTools::Error("No pipe given after --pipe=");
-            return 2;
-          }
-        } else {
-          cmSystemTools::Error("Unknown argument for server mode");
-          return 1;
-        }
-      }
-#if !defined(CMAKE_BOOTSTRAP)
-      cmConnection* conn;
-      if (isDebug) {
-        conn = new cmServerStdIoConnection;
-      } else {
-        conn = new cmServerPipeConnection(pipe);
-      }
-      cmServer server(conn, supportExperimental);
-      std::string errorMessage;
-      if (server.Serve(&errorMessage)) {
-        return 0;
-      }
-      cmSystemTools::Error(errorMessage);
-#else
-      static_cast<void>(supportExperimental);
-      static_cast<void>(isDebug);
-      cmSystemTools::Error("CMake was not built with server mode enabled");
-#endif
+      cmSystemTools::Error(
+        "CMake server mode has been removed in favor of the file-api.");
       return 1;
     }
 
