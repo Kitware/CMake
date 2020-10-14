@@ -263,6 +263,26 @@ Format
         ``-Wno-error=deprecated`` on the command line. This may not be set to
         ``true`` if ``warnings.deprecated`` is set to ``false``.
 
+    ``debug``
+
+      An optional object specifying debug options. The object may contain the
+      following fields:
+
+      ``output``
+
+        An optional boolean. Setting this to ``true`` is equivalent to passing
+        ``--debug-output`` on the command line.
+
+      ``tryCompile``
+
+        An optional boolean. Setting this to ``true`` is equivalent to passing
+        ``--debug-trycompile`` on the command line.
+
+      ``find``
+
+        An optional boolean. Setting this to ``true`` is equivalent to passing
+        ``--debug-find`` on the command line.
+
   As mentioned above, some fields support macro expansion. Macros are
   recognized in the form ``$<macro-namespace>{<macro-name>}``. All macros are
   evaluated in the context of the preset being used, even if the macro is in a
