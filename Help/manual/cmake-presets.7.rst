@@ -248,7 +248,7 @@ Format
         An optional boolean. Setting this to ``true`` is equivalent to passing
         ``--warn-uninitialized`` on the command line.
 
-      ``unusedVars``
+      ``unusedCli``
 
         An optional boolean. Setting this to ``false`` is equivalent to passing
         ``--no-warn-unused-cli`` on the command line.
