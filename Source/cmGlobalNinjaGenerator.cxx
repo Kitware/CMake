@@ -2650,30 +2650,17 @@ void cmGlobalNinjaMultiGenerator::GetQtAutoGenConfigs(
 
 bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
 {
-  this->GetCMakeInstance()->MarkCliAsUsed("CMAKE_DEFAULT_BUILD_TYPE");
-  this->GetCMakeInstance()->MarkCliAsUsed("CMAKE_CROSS_CONFIGS");
-  this->GetCMakeInstance()->MarkCliAsUsed("CMAKE_DEFAULT_CONFIGS");
-  return this->ReadCacheEntriesForBuild(*this->Makefiles.front()->GetState());
-}
-
-std::string cmGlobalNinjaMultiGenerator::GetDefaultBuildConfig() const
-{
-  return "";
-}
-
-bool cmGlobalNinjaMultiGenerator::ReadCacheEntriesForBuild(
-  const cmState& state)
-{
   std::vector<std::string> configsVec;
-  cmExpandList(state.GetSafeCacheEntryValue("CMAKE_CONFIGURATION_TYPES"),
-               configsVec);
+  cmExpandList(
+    this->Makefiles.front()->GetSafeDefinition("CMAKE_CONFIGURATION_TYPES"),
+    configsVec);
   if (configsVec.empty()) {
     configsVec.emplace_back();
   }
   std::set<std::string> configs(configsVec.cbegin(), configsVec.cend());
 
   this->DefaultFileConfig =
-    state.GetSafeCacheEntryValue("CMAKE_DEFAULT_BUILD_TYPE");
+    this->Makefiles.front()->GetSafeDefinition("CMAKE_DEFAULT_BUILD_TYPE");
   if (this->DefaultFileConfig.empty()) {
     this->DefaultFileConfig = configsVec.front();
   }
@@ -2688,8 +2675,9 @@ bool cmGlobalNinjaMultiGenerator::ReadCacheEntriesForBuild(
   }
 
   std::vector<std::string> crossConfigsVec;
-  cmExpandList(state.GetSafeCacheEntryValue("CMAKE_CROSS_CONFIGS"),
-               crossConfigsVec);
+  cmExpandList(
+    this->Makefiles.front()->GetSafeDefinition("CMAKE_CROSS_CONFIGS"),
+    crossConfigsVec);
   auto crossConfigs = ListSubsetWithAll(configs, configs, crossConfigsVec);
   if (!crossConfigs) {
     std::ostringstream msg;
@@ -2702,7 +2690,7 @@ bool cmGlobalNinjaMultiGenerator::ReadCacheEntriesForBuild(
   this->CrossConfigs = *crossConfigs;
 
   auto defaultConfigsString =
-    state.GetSafeCacheEntryValue("CMAKE_DEFAULT_CONFIGS");
+    this->Makefiles.front()->GetSafeDefinition("CMAKE_DEFAULT_CONFIGS");
   if (defaultConfigsString.empty()) {
     defaultConfigsString = this->DefaultFileConfig;
   }
@@ -2734,6 +2722,11 @@ bool cmGlobalNinjaMultiGenerator::ReadCacheEntriesForBuild(
   }
 
   return true;
+}
+
+std::string cmGlobalNinjaMultiGenerator::GetDefaultBuildConfig() const
+{
+  return "";
 }
 
 std::string cmGlobalNinjaMultiGenerator::OrderDependsTargetForTarget(
