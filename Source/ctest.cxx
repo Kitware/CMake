@@ -1,6 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
+#include <cstring>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "cmsys/Encoding.hxx"
 
 #include "cmCTest.h"
@@ -12,10 +17,6 @@
 #if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
 #  include "cmsys/ConsoleBuf.hxx"
 #endif
-#include <cstring>
-#include <iostream>
-#include <string>
-#include <vector>
 
 static const char* cmDocumentationName[][2] = {
   { nullptr, "  ctest - Testing driver provided by CMake." },
