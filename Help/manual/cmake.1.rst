@@ -1156,7 +1156,7 @@ with one of the following options:
 
 To view the presets available for a project, use
 
-.. code-block::shell
+.. code-block:: shell
 
   cmake <source-dir> --list-presets
 
