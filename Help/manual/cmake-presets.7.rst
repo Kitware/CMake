@@ -65,19 +65,7 @@ Format
     it does exist. However, the keys should be a vendor-specific domain name
     followed by a ``/``-separated path. For example, the Example IDE 1.0 could
     use ``example.com/ExampleIDE/1.0``. The value of each field can be anything
-    desired by the vendor, though will typically be a map. For example:
-
-    .. code-block:: json
-
-      {
-        "version": 1,
-        "vendor": {
-          "example.com/ExampleIDE/1.0": {
-            "autoFormat": true
-          }
-        },
-        "configurePresets": []
-      }
+    desired by the vendor, though will typically be a map.
 
   ``configurePresets``
 

@@ -17,7 +17,17 @@
           "type": "BOOL",
           "value": "OFF"
         }
+      },
+      "vendor": {
+        "example.com/ExampleIDE/1.0": {
+          "autoFormat": true
+        }
       }
     }
-  ]
+  ],
+  "vendor": {
+    "example.com/ExampleIDE/1.0": {
+      "autoFormat": false
+    }
+  }
 }
