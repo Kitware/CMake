@@ -19,6 +19,10 @@
         },
         "SECOND_CACHE_VARIABLE": "ON"
       },
+      "environment": {
+        "MY_ENVIRONMENT_VARIABLE": "Test",
+        "PATH": "$env{HOME}/ninja/bin:$penv{PATH}"
+      },
       "vendor": {
         "example.com/ExampleIDE/1.0": {
           "autoFormat": true
