@@ -59,4 +59,40 @@ if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
   if(NOT DEFINED CMAKE_FIND_ROOT_PATH_MODE_PACKAGE)
     set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
   endif()
+
+  # find_library's default search paths below a prefix do not match the Android
+  # sysroot layout, so we need to give the direct path to the libraries
+  # via CMAKE_SYSTEM_*_PATH.
+  #
+  # Ideally we'd set CMAKE_SYSTEM_PREFIX_PATH. But that causes the
+  # non-api-level-specific path to be searched first for find_library, which will
+  # cause libdl.a to be found before libdl.so.
+  # https://github.com/android/ndk/issues/929
+
+  # Clears the paths set by UnixPaths.cmake.
+  set(CMAKE_SYSTEM_PREFIX_PATH)
+  set(CMAKE_SYSTEM_INCLUDE_PATH)
+  set(CMAKE_SYSTEM_LIBRARY_PATH)
+
+  # Don't search paths in PATH environment variable.
+  if(NOT DEFINED CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH)
+    set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH OFF)
+  endif()
+
+  # Allows CMake to find headers in the architecture-specific include directories.
+  set(CMAKE_LIBRARY_ARCHITECTURE "${CMAKE_ANDROID_ARCH_TRIPLE}")
+
+  set(_ANDROID_SYSROOT_PREFIX "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/sysroot/usr")
+
+  list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
+    "${_ANDROID_SYSROOT_PREFIX}/include/${CMAKE_LIBRARY_ARCHITECTURE}")
+  list(APPEND CMAKE_SYSTEM_INCLUDE_PATH "${_ANDROID_SYSROOT_PREFIX}/include")
+
+  # Instructs CMake to search the correct API level for libraries.
+  list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
+    "${_ANDROID_SYSROOT_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/${CMAKE_SYSTEM_VERSION}")
+  list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
+    "${_ANDROID_SYSROOT_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}")
+
+  list(APPEND CMAKE_SYSTEM_PROGRAM_PATH "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/bin")
 endif()
