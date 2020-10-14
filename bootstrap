@@ -236,7 +236,7 @@ cmake_xdgdata_dir_default="`cmake_install_dest_default XDGDATA ${cmake_xdgdata_d
 CMAKE_KNOWN_C_COMPILERS="cc gcc clang xlc icc tcc"
 CMAKE_KNOWN_CXX_COMPILERS="aCC xlC CC g++ clang++ c++ icc como "
 CMAKE_KNOWN_MAKE_PROCESSORS="gmake make"
-CMAKE_KNOWN_NINJA_PROCESSORS="ninja-build ninja"
+CMAKE_KNOWN_NINJA_PROCESSORS="ninja-build ninja samu"
 
 CMAKE_PROBLEMATIC_FILES="\
   CMakeCache.txt \
