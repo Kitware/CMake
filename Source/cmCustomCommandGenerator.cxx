@@ -6,18 +6,22 @@
 #include <memory>
 #include <utility>
 
+#include <cm/optional>
 #include <cmext/algorithm>
 
+#include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTransformDepfile.h"
 
 namespace {
 void AppendPaths(const std::vector<std::string>& inputs,
@@ -42,7 +46,8 @@ void AppendPaths(const std::vector<std::string>& inputs,
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
                                                    std::string config,
-                                                   cmLocalGenerator* lg)
+                                                   cmLocalGenerator* lg,
+                                                   bool transformDepfile)
   : CC(cc)
   , Config(std::move(config))
   , LG(lg)
@@ -75,6 +80,36 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     this->CommandLines.push_back(std::move(argv));
   }
 
+  if (transformDepfile && !this->CommandLines.empty() &&
+      !cc.GetDepfile().empty() &&
+      this->LG->GetGlobalGenerator()->DepfileFormat()) {
+    cmCustomCommandLine argv;
+    argv.push_back(cmSystemTools::GetCMakeCommand());
+    argv.emplace_back("-E");
+    argv.emplace_back("cmake_transform_depfile");
+    switch (*this->LG->GetGlobalGenerator()->DepfileFormat()) {
+      case cmDepfileFormat::GccDepfile:
+        argv.emplace_back("gccdepfile");
+        break;
+      case cmDepfileFormat::VsTlog:
+        argv.emplace_back("vstlog");
+        break;
+    }
+    if (this->LG->GetCurrentBinaryDirectory() ==
+        this->LG->GetBinaryDirectory()) {
+      argv.emplace_back("./");
+    } else {
+      argv.push_back(cmStrCat(this->LG->MaybeConvertToRelativePath(
+                                this->LG->GetBinaryDirectory(),
+                                this->LG->GetCurrentBinaryDirectory()),
+                              '/'));
+    }
+    argv.push_back(this->GetFullDepfile());
+    argv.push_back(this->GetInternalDepfile());
+
+    this->CommandLines.push_back(std::move(argv));
+  }
+
   AppendPaths(cc.GetByproducts(), ge, this->LG, this->Config,
               this->Byproducts);
   AppendPaths(cc.GetDepends(), ge, this->LG, this->Config, this->Depends);
@@ -97,7 +132,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
 
 unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
 {
-  return static_cast<unsigned int>(this->CC.GetCommandLines().size());
+  return static_cast<unsigned int>(this->CommandLines.size());
 }
 
 void cmCustomCommandGenerator::FillEmulatorsWithArguments()
@@ -232,6 +267,40 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
                                  this->MakeVars && this->LG->IsNinjaMulti());
     }
   }
+}
+
+std::string cmCustomCommandGenerator::GetFullDepfile() const
+{
+  std::string depfile = this->CC.GetDepfile();
+  if (depfile.empty()) {
+    return "";
+  }
+
+  if (!cmSystemTools::FileIsFullPath(depfile)) {
+    depfile = cmStrCat(this->LG->GetCurrentBinaryDirectory(), '/', depfile);
+  }
+  return cmSystemTools::CollapseFullPath(depfile);
+}
+
+std::string cmCustomCommandGenerator::GetInternalDepfile() const
+{
+  std::string depfile = this->GetFullDepfile();
+  if (depfile.empty()) {
+    return "";
+  }
+
+  cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
+  std::string extension;
+  switch (*this->LG->GetGlobalGenerator()->DepfileFormat()) {
+    case cmDepfileFormat::GccDepfile:
+      extension = ".d";
+      break;
+    case cmDepfileFormat::VsTlog:
+      extension = ".tlog";
+      break;
+  }
+  return cmStrCat(this->LG->GetBinaryDirectory(), "/CMakeFiles/d/",
+                  hash.HashString(depfile), extension);
 }
 
 const char* cmCustomCommandGenerator::GetComment() const

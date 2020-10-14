@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include "cm_codecvt.hxx"
@@ -26,6 +27,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
+#include "cmTransformDepfile.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <cm3p/json/value.h>
@@ -452,6 +454,10 @@ public:
   virtual bool ShouldStripResourcePath(cmMakefile*) const;
 
   virtual bool SupportsCustomCommandDepfile() const { return false; }
+  virtual cm::optional<cmDepfileFormat> DepfileFormat() const
+  {
+    return cm::nullopt;
+  }
 
   std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 
