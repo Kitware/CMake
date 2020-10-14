@@ -1422,6 +1422,7 @@ if(BUILD_TESTING)
             GTK2
             Iconv
             ICU
+            Intl
             JPEG
             JsonCpp
             LAPACK
