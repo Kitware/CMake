@@ -13,10 +13,11 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/default",
       "cacheVariables": {
-        "MY_CACHE_VARIABLE": {
+        "FIRST_CACHE_VARIABLE": {
           "type": "BOOL",
           "value": "OFF"
-        }
+        },
+        "SECOND_CACHE_VARIABLE": "ON"
       },
       "vendor": {
         "example.com/ExampleIDE/1.0": {
