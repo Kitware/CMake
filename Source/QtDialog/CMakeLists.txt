@@ -162,10 +162,10 @@ add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx ${MANIFEST_FILE})
 target_link_libraries(cmake-gui CMakeGUIMainLib Qt5::Core)
 
 if(WIN32)
-  target_sources(CMakeGUILib INTERFACE $<TARGET_OBJECTS:CMakeVersion> CMakeSetup.rc)
+  target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeVersion> CMakeSetup.rc)
 endif()
 if(APPLE)
-  target_sources(CMakeGUILib INTERFACE CMakeSetup.icns)
+  target_sources(CMakeGUIMainLib INTERFACE CMakeSetup.icns)
   set(MACOSX_BUNDLE_ICON_FILE CMakeSetup.icns)
   set_source_files_properties(CMakeSetup.icns PROPERTIES
     MACOSX_PACKAGE_LOCATION Resources)
