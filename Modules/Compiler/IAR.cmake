@@ -42,6 +42,7 @@ include_guard()
 
 macro(__compiler_iar_ilink lang)
   set(CMAKE_EXECUTABLE_SUFFIX ".elf")
+  set(CMAKE_${lang}_OUTPUT_EXTENSION ".o")
   if (${lang} STREQUAL "C" OR ${lang} STREQUAL "CXX")
     set(CMAKE_${lang}_COMPILE_OBJECT             "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT>")
     set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> --preprocess=cnl <PREPROCESSED_SOURCE>")
