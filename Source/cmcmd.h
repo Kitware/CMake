@@ -4,10 +4,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "cmCryptoHash.h"
+
+class cmConsoleBuf;
 
 class cmcmd
 {
@@ -16,7 +19,8 @@ public:
    * Execute commands during the build process. Supports options such
    * as echo, remove file etc.
    */
-  static int ExecuteCMakeCommand(std::vector<std::string> const&);
+  static int ExecuteCMakeCommand(std::vector<std::string> const&,
+                                 std::unique_ptr<cmConsoleBuf> consoleBuf);
 
 protected:
   static int HandleCoCompileCommands(std::vector<std::string> const& args);

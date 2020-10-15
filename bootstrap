@@ -302,6 +302,7 @@ CMAKE_CXX_SOURCES="\
   cmComputeLinkDepends \
   cmComputeLinkInformation \
   cmComputeTargetDepends \
+  cmConsoleBuf \
   cmConditionEvaluator \
   cmConfigureFileCommand \
   cmContinueCommand \

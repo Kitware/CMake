@@ -7,6 +7,7 @@
 #include <cm3p/uv.h>
 #include <fcntl.h>
 
+#include "cmConsoleBuf.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -33,10 +34,6 @@
 #  include "bindexplib.h"
 #endif
 
-#if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
-#  include "cmsys/ConsoleBuf.hxx"
-#endif
-
 #if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32) && !defined(__CYGWIN__)
 #  include "cmVisualStudioWCEPlatformParser.h"
 #endif
@@ -50,6 +47,12 @@
 #include <memory>
 #include <sstream>
 #include <utility>
+
+#ifdef _WIN32
+#  include <fcntl.h> // for _O_BINARY
+#  include <io.h>    // for _setmode
+#  include <stdio.h> // for std{out,err} and fileno
+#endif
 
 #include <cm/string_view>
 
@@ -182,6 +185,9 @@ static bool cmTarFilesFrom(std::string const& file,
 
 static void cmCatFile(const std::string& fileToAppend)
 {
+#ifdef _WIN32
+  _setmode(fileno(stdout), _O_BINARY);
+#endif
   cmsys::ifstream source(fileToAppend.c_str(),
                          (std::ios::binary | std::ios::in));
   std::cout << source.rdbuf();
@@ -501,7 +507,8 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
   return ret;
 }
 
-int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
+int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
+                               std::unique_ptr<cmConsoleBuf> consoleBuf)
 {
   // IF YOU ADD A NEW COMMAND, DOCUMENT IT ABOVE and in cmakemain.cxx
   if (args.size() > 1) {
@@ -951,6 +958,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
           cmSystemTools::Error(arg + ": no such file or directory (ignoring)");
           return_value = 1;
         } else {
+          // Destroy console buffers to drop cout/cerr encoding transform.
+          consoleBuf.reset();
           cmCatFile(arg);
         }
       }
@@ -1889,14 +1898,11 @@ private:
 // still works.
 int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
 {
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
   // Replace streambuf so we output in the system codepage. CMake is set up
   // to output in Unicode (see SetUTF8Pipes) but the Visual Studio linker
   // outputs using the system codepage so we need to change behavior when
   // we run the link command.
-  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
-  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-#endif
+  cmConsoleBuf consoleBuf;
 
   if (args.size() < 2) {
     return -1;
