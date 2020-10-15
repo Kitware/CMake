@@ -563,6 +563,9 @@ run_cmake_command(E_cat_good_cat
   ${CMAKE_COMMAND} -E cat "${out}/first_file.txt" "${out}/second_file.txt" "${out}/unicode_file.txt")
 unset(out)
 
+run_cmake_command(E_cat_good_binary_cat
+  ${CMAKE_COMMAND} -E cat "${RunCMake_SOURCE_DIR}/E_cat_binary_files/binary.obj" "${RunCMake_SOURCE_DIR}/E_cat_binary_files/binary.obj")
+
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)
 run_cmake_command(E_env-bad-arg1 ${CMAKE_COMMAND} -E env -bad-arg1)
