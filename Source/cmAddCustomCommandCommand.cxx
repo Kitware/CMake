@@ -190,15 +190,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         case doing_byproducts:
           if (!cmSystemTools::FileIsFullPath(copy)) {
             // This is an output to be generated, so it should be
-            // under the build tree.  CMake 2.4 placed this under the
-            // source tree.  However the only case that this change
-            // will break is when someone writes
-            //
-            //   add_custom_command(OUTPUT out.txt ...)
-            //
-            // and later references "${CMAKE_CURRENT_SOURCE_DIR}/out.txt".
-            // This is fairly obscure so we can wait for someone to
-            // complain.
+            // under the build tree.
             filename = cmStrCat(mf.GetCurrentBinaryDirectory(), '/');
           }
           filename += copy;
