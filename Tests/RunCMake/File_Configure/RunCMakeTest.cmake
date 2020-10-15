@@ -1,7 +1,7 @@
 include(RunCMake)
 
+run_cmake(AngleBracketsContent)
 run_cmake(BadArg)
-run_cmake(BadArgGeneratorExpressionContent)
 run_cmake(BadArgGeneratorExpressionOutput)
 run_cmake(DirOutput)
 run_cmake(NewLineStyle-NoArg)
