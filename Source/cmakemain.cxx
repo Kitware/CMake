@@ -9,12 +9,15 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cmext/algorithm>
 
 #include <cm3p/uv.h>
 
+#include "cmConsoleBuf.h"
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -32,9 +35,6 @@
 #endif
 
 #include "cmsys/Encoding.hxx"
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
-#  include "cmsys/ConsoleBuf.hxx"
-#endif
 
 namespace {
 #ifndef CMAKE_BOOTSTRAP
@@ -109,13 +109,14 @@ const char* cmDocumentationOptions[][2] = {
 
 #endif
 
-int do_command(int ac, char const* const* av)
+int do_command(int ac, char const* const* av,
+               std::unique_ptr<cmConsoleBuf> consoleBuf)
 {
   std::vector<std::string> args;
   args.reserve(ac - 1);
   args.emplace_back(av[0]);
   cm::append(args, av + 2, av + ac);
-  return cmcmd::ExecuteCMakeCommand(args);
+  return cmcmd::ExecuteCMakeCommand(args, std::move(consoleBuf));
 }
 
 cmMakefile* cmakemainGetMakefile(cmake* cm)
@@ -687,13 +688,11 @@ int do_open(int ac, char const* const* av)
 int main(int ac, char const* const* av)
 {
   cmSystemTools::EnsureStdPipes();
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
+
   // Replace streambuf so we can output Unicode to console
-  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
-  consoleOut.SetUTF8Pipes();
-  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-  consoleErr.SetUTF8Pipes();
-#endif
+  auto consoleBuf = cm::make_unique<cmConsoleBuf>();
+  consoleBuf->SetUTF8Pipes();
+
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
   ac = args.argc();
@@ -712,7 +711,7 @@ int main(int ac, char const* const* av)
       return do_open(ac, av);
     }
     if (strcmp(av[1], "-E") == 0) {
-      return do_command(ac, av);
+      return do_command(ac, av, std::move(consoleBuf));
     }
   }
   int ret = do_cmake(ac, av);
