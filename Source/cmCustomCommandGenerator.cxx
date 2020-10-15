@@ -35,8 +35,7 @@ void AppendPaths(const std::vector<std::string>& inputs,
     for (std::string& it : result) {
       cmSystemTools::ConvertToUnixSlashes(it);
       if (cmSystemTools::FileIsFullPath(it)) {
-        it = cmSystemTools::CollapseFullPath(
-          it, lg->GetMakefile()->GetHomeOutputDirectory());
+        it = cmSystemTools::CollapseFullPath(it);
       }
     }
     cm::append(output, result);
