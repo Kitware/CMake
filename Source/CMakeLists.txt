@@ -1158,20 +1158,6 @@ add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE})
 list(APPEND _tools cmake)
 target_link_libraries(cmake CMakeLib)
 
-add_library(CMakeServerLib
-  cmConnection.h cmConnection.cxx
-  cmFileMonitor.cxx cmFileMonitor.h
-  cmJsonObjectDictionary.h
-  cmJsonObjects.h
-  cmJsonObjects.cxx
-  cmPipeConnection.cxx cmPipeConnection.h
-  cmServer.cxx cmServer.h
-  cmServerConnection.cxx cmServerConnection.h
-  cmServerProtocol.cxx cmServerProtocol.h
-  )
-target_link_libraries(CMakeServerLib CMakeLib)
-target_link_libraries(cmake CMakeServerLib)
-
 # Build CTest executable
 add_executable(ctest ctest.cxx ${MANIFEST_FILE})
 list(APPEND _tools ctest)
