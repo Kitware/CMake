@@ -365,6 +365,8 @@ public:
 
   std::vector<std::string> ExpandCustomCommandOutputPaths(
     cmCompiledGeneratorExpression const& cge, std::string const& config);
+  std::vector<std::string> ExpandCustomCommandOutputGenex(
+    std::string const& o, cmListFileBacktrace const& bt);
 
   /**
    * Add target byproducts.
