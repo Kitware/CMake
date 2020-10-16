@@ -4169,6 +4169,16 @@ cmSourceFile* cmLocalGenerator::GetSourceFileWithOutput(
   return nullptr;
 }
 
+std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputPaths(
+  cmCompiledGeneratorExpression const& cge, std::string const& config)
+{
+  std::vector<std::string> paths = cmExpandedList(cge.Evaluate(this, config));
+  for (std::string& p : paths) {
+    p = cmSystemTools::CollapseFullPath(p, this->GetCurrentBinaryDirectory());
+  }
+  return paths;
+}
+
 void cmLocalGenerator::AddTargetByproducts(
   cmTarget* target, const std::vector<std::string>& byproducts)
 {

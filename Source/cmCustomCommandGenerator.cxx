@@ -53,11 +53,7 @@ std::vector<std::string> EvaluateOutputs(std::vector<std::string> const& paths,
   std::vector<std::string> outputs;
   for (std::string const& p : paths) {
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(p);
-    std::string const& ep = cge->Evaluate(lg, config);
-    cm::append(outputs, cmExpandedList(ep));
-  }
-  for (std::string& p : outputs) {
-    p = cmSystemTools::CollapseFullPath(p, lg->GetCurrentBinaryDirectory());
+    cm::append(outputs, lg->ExpandCustomCommandOutputPaths(*cge, config));
   }
   return outputs;
 }

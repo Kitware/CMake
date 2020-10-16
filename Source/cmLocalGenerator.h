@@ -22,6 +22,7 @@
 #include "cmProperty.h"
 #include "cmStateSnapshot.h"
 
+class cmCompiledGeneratorExpression;
 class cmComputeLinkInformation;
 class cmCustomCommandGenerator;
 class cmCustomCommandLines;
@@ -361,6 +362,9 @@ public:
     const char* comment = nullptr, bool uses_terminal = false,
     bool command_expand_lists = false, const std::string& job_pool = "",
     bool stdPipesUTF8 = false);
+
+  std::vector<std::string> ExpandCustomCommandOutputPaths(
+    cmCompiledGeneratorExpression const& cge, std::string const& config);
 
   /**
    * Add target byproducts.
