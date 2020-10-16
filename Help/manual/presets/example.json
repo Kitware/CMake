@@ -28,6 +28,13 @@
           "autoFormat": true
         }
       }
+    },
+    {
+      "name": "ninja-multi",
+      "inherits": "default",
+      "displayName": "Ninja Multi-Config",
+      "description": "Default build using Ninja Multi-Config generator",
+      "generator": "Ninja Multi-Config"
     }
   ],
   "vendor": {
