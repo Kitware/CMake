@@ -3401,10 +3401,9 @@ std::vector<std::string> cmMakefile::GetGeneratorConfigs(
   GeneratorConfigQuery mode) const
 {
   std::vector<std::string> configs;
-  if (this->GetGlobalGenerator()->IsMultiConfig() ||
-      mode == cmMakefile::OnlyMultiConfig) {
+  if (this->GetGlobalGenerator()->IsMultiConfig()) {
     this->GetDefExpandList("CMAKE_CONFIGURATION_TYPES", configs);
-  } else {
+  } else if (mode != cmMakefile::OnlyMultiConfig) {
     const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");
     if (!buildType.empty()) {
       configs.emplace_back(buildType);
