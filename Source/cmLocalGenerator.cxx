@@ -3832,19 +3832,9 @@ void CreateGeneratedSource(cmLocalGenerator& lg, const std::string& output,
   }
 }
 
-void CreateGeneratedSources(cmLocalGenerator& lg,
-                            const std::vector<std::string>& outputs,
-                            cmCommandOrigin origin,
-                            const cmListFileBacktrace& lfbt)
-{
-  for (std::string const& o : outputs) {
-    CreateGeneratedSource(lg, o, origin, lfbt);
-  }
-}
-
 cmSourceFile* AddCustomCommand(
   cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
-  const std::vector<std::string>& outputs,
+  cmCommandOrigin origin, const std::vector<std::string>& outputs,
   const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends, const std::string& main_dependency,
   const cmImplicitDependsList& implicit_depends,
@@ -3924,9 +3914,10 @@ cmSourceFile* AddCustomCommand(
     cc->SetJobPool(job_pool);
     file->SetCustomCommand(std::move(cc));
 
-    lg.AddSourceOutputs(file, outputs, cmLocalGenerator::OutputRole::Primary);
+    lg.AddSourceOutputs(file, outputs, cmLocalGenerator::OutputRole::Primary,
+                        lfbt, origin);
     lg.AddSourceOutputs(file, byproducts,
-                        cmLocalGenerator::OutputRole::Byproduct);
+                        cmLocalGenerator::OutputRole::Byproduct, lfbt, origin);
   }
   return file;
 }
@@ -3970,9 +3961,6 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
                               const std::string& job_pool,
                               bool command_expand_lists, bool stdPipesUTF8)
 {
-  // Always create the byproduct sources and mark them generated.
-  CreateGeneratedSources(lg, byproducts, origin, lfbt);
-
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
   cmCustomCommand cc(no_output, byproducts, depends, commandLines, lfbt,
@@ -3995,7 +3983,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
       break;
   }
 
-  lg.AddTargetByproducts(target, byproducts);
+  lg.AddTargetByproducts(target, byproducts, lfbt, origin);
 }
 
 cmSourceFile* AddCustomCommandToOutput(
@@ -4009,14 +3997,11 @@ cmSourceFile* AddCustomCommandToOutput(
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
   const std::string& job_pool, bool stdPipesUTF8)
 {
-  // Always create the output sources and mark them generated.
-  CreateGeneratedSources(lg, outputs, origin, lfbt);
-  CreateGeneratedSources(lg, byproducts, origin, lfbt);
-
-  return AddCustomCommand(
-    lg, lfbt, outputs, byproducts, depends, main_dependency, implicit_depends,
-    commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
-    command_expand_lists, depfile, job_pool, stdPipesUTF8);
+  return AddCustomCommand(lg, lfbt, origin, outputs, byproducts, depends,
+                          main_dependency, implicit_depends, commandLines,
+                          comment, workingDir, replace, escapeOldStyle,
+                          uses_terminal, command_expand_lists, depfile,
+                          job_pool, stdPipesUTF8);
 }
 
 void AppendCustomCommandToOutput(cmLocalGenerator& lg,
@@ -4054,10 +4039,6 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        bool uses_terminal, bool command_expand_lists,
                        const std::string& job_pool, bool stdPipesUTF8)
 {
-  // Always create the byproduct sources and mark them generated.
-  CreateGeneratedSource(lg, force.Name, origin, lfbt);
-  CreateGeneratedSources(lg, byproducts, origin, lfbt);
-
   // Use an empty comment to avoid generation of default comment.
   if (!comment) {
     comment = "";
@@ -4066,12 +4047,12 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
   std::string no_main_dependency;
   cmImplicitDependsList no_implicit_depends;
   cmSourceFile* rule = AddCustomCommand(
-    lg, lfbt, { force.Name }, byproducts, depends, no_main_dependency,
+    lg, lfbt, origin, { force.Name }, byproducts, depends, no_main_dependency,
     no_implicit_depends, commandLines, comment, workingDir,
     /*replace=*/false, escapeOldStyle, uses_terminal, command_expand_lists,
     /*depfile=*/"", job_pool, stdPipesUTF8);
   if (rule) {
-    lg.AddTargetByproducts(target, byproducts);
+    lg.AddTargetByproducts(target, byproducts, lfbt, origin);
   }
 
   if (!force.NameCMP0049.empty()) {
@@ -4180,30 +4161,35 @@ std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputPaths(
 }
 
 void cmLocalGenerator::AddTargetByproducts(
-  cmTarget* target, const std::vector<std::string>& byproducts)
+  cmTarget* target, const std::vector<std::string>& byproducts,
+  cmListFileBacktrace const& bt, cmCommandOrigin origin)
 {
   for (std::string const& o : byproducts) {
-    this->UpdateOutputToSourceMap(o, target);
+    this->UpdateOutputToSourceMap(o, target, bt, origin);
   }
 }
 
 void cmLocalGenerator::AddSourceOutputs(
   cmSourceFile* source, const std::vector<std::string>& outputs,
-  OutputRole role)
+  OutputRole role, cmListFileBacktrace const& bt, cmCommandOrigin origin)
 {
   for (std::string const& o : outputs) {
-    this->UpdateOutputToSourceMap(o, source, role);
+    this->UpdateOutputToSourceMap(o, source, role, bt, origin);
   }
 }
 
 void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& byproduct,
-                                               cmTarget* target)
+                                               cmTarget* target,
+                                               cmListFileBacktrace const& bt,
+                                               cmCommandOrigin origin)
 {
   SourceEntry entry;
   entry.Sources.Target = target;
 
   auto pr = this->OutputToSource.emplace(byproduct, entry);
-  if (!pr.second) {
+  if (pr.second) {
+    CreateGeneratedSource(*this, byproduct, origin, bt);
+  } else {
     SourceEntry& current = pr.first->second;
     // Has the target already been set?
     if (!current.Sources.Target) {
@@ -4220,14 +4206,18 @@ void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& byproduct,
 
 void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& output,
                                                cmSourceFile* source,
-                                               OutputRole role)
+                                               OutputRole role,
+                                               cmListFileBacktrace const& bt,
+                                               cmCommandOrigin origin)
 {
   SourceEntry entry;
   entry.Sources.Source = source;
   entry.Sources.SourceIsByproduct = role == OutputRole::Byproduct;
 
   auto pr = this->OutputToSource.emplace(output, entry);
-  if (!pr.second) {
+  if (pr.second) {
+    CreateGeneratedSource(*this, output, origin, bt);
+  } else {
     SourceEntry& current = pr.first->second;
     // Outputs take precedence over byproducts
     if (!current.Sources.Source ||

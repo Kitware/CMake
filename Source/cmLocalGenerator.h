@@ -370,7 +370,9 @@ public:
    * Add target byproducts.
    */
   void AddTargetByproducts(cmTarget* target,
-                           const std::vector<std::string>& byproducts);
+                           const std::vector<std::string>& byproducts,
+                           cmListFileBacktrace const& bt,
+                           cmCommandOrigin origin);
 
   enum class OutputRole
   {
@@ -383,7 +385,8 @@ public:
    */
   void AddSourceOutputs(cmSourceFile* source,
                         std::vector<std::string> const& outputs,
-                        OutputRole role);
+                        OutputRole role, cmListFileBacktrace const& bt,
+                        cmCommandOrigin origin);
 
   /**
    * Return the target if the provided source name is a byproduct of a utility
@@ -617,9 +620,12 @@ private:
   using OutputToSourceMap = std::unordered_map<std::string, SourceEntry>;
   OutputToSourceMap OutputToSource;
 
-  void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target);
+  void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target,
+                               cmListFileBacktrace const& bt,
+                               cmCommandOrigin origin);
   void UpdateOutputToSourceMap(std::string const& output, cmSourceFile* source,
-                               OutputRole role);
+                               OutputRole role, cmListFileBacktrace const& bt,
+                               cmCommandOrigin origin);
 
   void AddSharedFlags(std::string& flags, const std::string& lang,
                       bool shared);
