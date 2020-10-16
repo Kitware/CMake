@@ -216,8 +216,8 @@ Format
 
     ``warnings``
 
-      An optional object specifying warnings. The object may contain the
-      following fields:
+      An optional object specifying the warnings to enable. The object may
+      contain the following fields:
 
       ``dev``
 
@@ -248,8 +248,8 @@ Format
 
     ``errors``
 
-      An optional object specifying errors. The object may contain the
-      following fields:
+      An optional object specifying the errors to enable. The object may
+      contain the following fields:
 
       ``dev``
 
