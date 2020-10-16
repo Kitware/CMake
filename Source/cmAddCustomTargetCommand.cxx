@@ -120,12 +120,16 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
           break;
         case doing_byproducts: {
           std::string filename;
-          if (!cmSystemTools::FileIsFullPath(copy)) {
+          if (!cmSystemTools::FileIsFullPath(copy) &&
+              cmGeneratorExpression::Find(copy) != 0) {
             filename = cmStrCat(mf.GetCurrentBinaryDirectory(), '/');
           }
           filename += copy;
           cmSystemTools::ConvertToUnixSlashes(filename);
-          byproducts.push_back(cmSystemTools::CollapseFullPath(filename));
+          if (cmSystemTools::FileIsFullPath(filename)) {
+            filename = cmSystemTools::CollapseFullPath(filename);
+          }
+          byproducts.push_back(filename);
         } break;
         case doing_depends: {
           std::string dep = copy;

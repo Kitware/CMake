@@ -10,6 +10,7 @@
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
 #include "cmExecutionStatus.h"
+#include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -188,7 +189,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         case doing_output:
         case doing_outputs:
         case doing_byproducts:
-          if (!cmSystemTools::FileIsFullPath(copy)) {
+          if (!cmSystemTools::FileIsFullPath(copy) &&
+              cmGeneratorExpression::Find(copy) != 0) {
             // This is an output to be generated, so it should be
             // under the build tree.
             filename = cmStrCat(mf.GetCurrentBinaryDirectory(), '/');
