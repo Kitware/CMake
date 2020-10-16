@@ -2989,15 +2989,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
   std::string outputFile = cmSystemTools::CollapseFullPath(
     args[2], status.GetMakefile().GetCurrentBinaryDirectory());
 
-  std::string::size_type pos = input.find_first_of("<>");
-  if (pos != std::string::npos) {
-    status.SetError(cmStrCat("CONFIGURE called with CONTENT containing a \"",
-                             input[pos],
-                             "\".  This character is not allowed."));
-    return false;
-  }
-
-  pos = outputFile.find_first_of("<>");
+  std::string::size_type pos = outputFile.find_first_of("<>");
   if (pos != std::string::npos) {
     status.SetError(cmStrCat("CONFIGURE called with OUTPUT containing a \"",
                              outputFile[pos],
