@@ -2,6 +2,7 @@ include(RunCMake)
 
 run_cmake(NotEnabledLanguage)
 run_cmake(NonExistentLanguage)
+run_cmake(UnknownArgument)
 
 run_cmake(CheckCSourceCompiles)
 run_cmake(CheckCXXSourceCompiles)
