@@ -3924,7 +3924,9 @@ cmSourceFile* AddCustomCommand(
     cc->SetJobPool(job_pool);
     file->SetCustomCommand(std::move(cc));
 
-    lg.AddSourceOutputs(file, outputs, byproducts);
+    lg.AddSourceOutputs(file, outputs, cmLocalGenerator::OutputRole::Primary);
+    lg.AddSourceOutputs(file, byproducts,
+                        cmLocalGenerator::OutputRole::Byproduct);
   }
   return file;
 }
@@ -4177,13 +4179,10 @@ void cmLocalGenerator::AddTargetByproducts(
 
 void cmLocalGenerator::AddSourceOutputs(
   cmSourceFile* source, const std::vector<std::string>& outputs,
-  const std::vector<std::string>& byproducts)
+  OutputRole role)
 {
   for (std::string const& o : outputs) {
-    this->UpdateOutputToSourceMap(o, source, false);
-  }
-  for (std::string const& o : byproducts) {
-    this->UpdateOutputToSourceMap(o, source, true);
+    this->UpdateOutputToSourceMap(o, source, role);
   }
 }
 
@@ -4211,18 +4210,18 @@ void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& byproduct,
 
 void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& output,
                                                cmSourceFile* source,
-                                               bool byproduct)
+                                               OutputRole role)
 {
   SourceEntry entry;
   entry.Sources.Source = source;
-  entry.Sources.SourceIsByproduct = byproduct;
+  entry.Sources.SourceIsByproduct = role == OutputRole::Byproduct;
 
   auto pr = this->OutputToSource.emplace(output, entry);
   if (!pr.second) {
     SourceEntry& current = pr.first->second;
     // Outputs take precedence over byproducts
     if (!current.Sources.Source ||
-        (current.Sources.SourceIsByproduct && !byproduct)) {
+        (current.Sources.SourceIsByproduct && role == OutputRole::Primary)) {
       current.Sources.Source = source;
       current.Sources.SourceIsByproduct = false;
     } else {
