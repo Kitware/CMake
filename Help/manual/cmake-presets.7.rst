@@ -131,13 +131,13 @@ Format
 
     ``architecture``
 
-      An optional string representing the platform name to use for Visual
-      Studio generators.
+      An optional string representing the platform name to use for generators
+      that support platforms.
 
     ``toolset``
 
-      An optional string representing the toolset name to use for Visual Studio
-      generators.
+      An optional string representing the toolset name to use for generators
+      that support toolsets.
 
     ``cmakeGeneratorConfig``
 
