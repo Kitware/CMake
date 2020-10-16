@@ -327,7 +327,7 @@ class cmMakefile;
          "add_test() supports arbitrary characters in test names.", 3, 19, 0, \
          cmPolicies::WARN)                                                    \
   SELECT(POLICY, CMP0111,                                                     \
-         "An imported target with a missing location fails during "           \
+         "An imported target missing its location property fails during "     \
          "generation.",                                                       \
          3, 19, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0112,                                                     \
