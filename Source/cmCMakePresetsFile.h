@@ -12,10 +12,10 @@
 class cmCMakePresetsFile
 {
 public:
-  enum class CMakeGeneratorConfig
+  enum class ArchToolsetStrategy
   {
-    Default,
-    Ignore,
+    Set,
+    External,
   };
 
   class CacheVariable
@@ -50,8 +50,9 @@ public:
     std::string Description;
     std::string Generator;
     std::string Architecture;
+    cm::optional<ArchToolsetStrategy> ArchitectureStrategy;
     std::string Toolset;
-    cm::optional<CMakeGeneratorConfig> GeneratorConfig;
+    cm::optional<ArchToolsetStrategy> ToolsetStrategy;
     std::string BinaryDir;
 
     std::map<std::string, cm::optional<CacheVariable>> CacheVariables;

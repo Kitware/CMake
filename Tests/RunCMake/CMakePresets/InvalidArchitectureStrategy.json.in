@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "InvalidArchitectureStrategy",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": {
+        "strategy": {}
+      }
+    }
+  ]
+}

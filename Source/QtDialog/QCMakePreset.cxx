@@ -6,8 +6,9 @@ bool operator==(const QCMakePreset& lhs, const QCMakePreset& rhs)
 {
   return lhs.name == rhs.name && lhs.displayName == rhs.displayName &&
     lhs.description == rhs.description && lhs.generator == rhs.generator &&
-    lhs.architecture == rhs.architecture && lhs.toolset == rhs.toolset &&
-    lhs.setGenConfig == rhs.setGenConfig && lhs.enabled == rhs.enabled;
+    lhs.architecture == rhs.architecture &&
+    lhs.setArchitecture == rhs.setArchitecture && lhs.toolset == rhs.toolset &&
+    lhs.setToolset == rhs.setToolset && lhs.enabled == rhs.enabled;
 }
 
 bool operator!=(const QCMakePreset& lhs, const QCMakePreset& rhs)
@@ -27,11 +28,13 @@ bool operator<(const QCMakePreset& lhs, const QCMakePreset& rhs)
           (lhs.generator == rhs.generator &&
            (lhs.architecture < rhs.architecture ||
             (lhs.architecture == rhs.architecture &&
-             (lhs.toolset < rhs.toolset ||
-              (lhs.toolset == rhs.toolset &&
-               (lhs.setGenConfig < rhs.setGenConfig ||
-                (lhs.setGenConfig == rhs.setGenConfig &&
-                 (lhs.enabled < rhs.enabled))))))))))))));
+             (lhs.setArchitecture < rhs.setArchitecture ||
+              (lhs.setArchitecture == rhs.setArchitecture &&
+               (lhs.toolset < rhs.toolset ||
+                (lhs.toolset == rhs.toolset &&
+                 (lhs.setToolset < rhs.setToolset ||
+                  (lhs.setToolset == rhs.setToolset &&
+                   (lhs.enabled < rhs.enabled))))))))))))))));
 }
 
 bool operator<=(const QCMakePreset& lhs, const QCMakePreset& rhs)

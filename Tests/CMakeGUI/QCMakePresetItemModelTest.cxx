@@ -32,8 +32,9 @@ void QCMakePresetItemModelTest::initTestCase_data()
       /*description=*/"",
       /*generator=*/"",
       /*architecture=*/"",
+      /*setArchitecture=*/true,
       /*toolset=*/"",
-      /*setGenConfig=*/true,
+      /*setToolset=*/true,
       /*enabled=*/true,
     },
     QCMakePreset{
@@ -42,8 +43,9 @@ void QCMakePresetItemModelTest::initTestCase_data()
       /*description=*/"",
       /*generator=*/"",
       /*architecture=*/"",
+      /*setArchitecture=*/true,
       /*toolset=*/"",
-      /*setGenConfig=*/true,
+      /*setToolset=*/true,
       /*enabled=*/true,
     },
     QCMakePreset{
@@ -52,8 +54,9 @@ void QCMakePresetItemModelTest::initTestCase_data()
       /*description=*/"Long Description",
       /*generator=*/"",
       /*architecture=*/"",
+      /*setArchitecture=*/true,
       /*toolset=*/"",
-      /*setGenConfig=*/true,
+      /*setToolset=*/true,
       /*enabled=*/true,
     },
     QCMakePreset{
@@ -62,8 +65,9 @@ void QCMakePresetItemModelTest::initTestCase_data()
       /*description=*/"",
       /*generator=*/"",
       /*architecture=*/"",
+      /*setArchitecture=*/true,
       /*toolset=*/"",
-      /*setGenConfig=*/true,
+      /*setToolset=*/true,
       /*enabled=*/false,
     },
   };

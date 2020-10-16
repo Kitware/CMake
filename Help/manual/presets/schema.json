@@ -85,19 +85,57 @@
             "description": "An optional string representing the generator to use for the preset. If generator is not specified, it must be inherited from the inherits preset (unless this preset is hidden). Note that for Visual Studio generators, unlike in the command line -G argument, you cannot include the platform name in the generator name. Use the architecture field instead."
           },
           "architecture": {
-            "type": "string",
-            "description": "An optional string representing the platform name to use for Visual Studio generators."
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "An optional string representing the platform for generators that support it."
+              },
+              {
+                "type": "object",
+                "description": "An optional object representing the platform for generators that support it.",
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "description": "An optional string representing the value."
+                  },
+                  "strategy": {
+                    "type": "string",
+                    "description": "An optional string telling CMake how to handle the field. Valid values are: \"set\" Set the respective value. This will result in an error for generators that do not support the respective field. \"external\" Do not set the value, even if the generator supports it. This is useful if, for example, a preset uses the Ninja generator, and an IDE knows how to set up the Visual C++ environment from the architecture and toolset fields. In that case, CMake will ignore the field, but the IDE can use them to set up the environment before invoking CMake.",
+                    "enum": [
+                      "set",
+                      "external"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
           },
           "toolset": {
-            "type": "string",
-            "description": "An optional string representing the toolset name to use for Visual Studio generators."
-          },
-          "cmakeGeneratorConfig": {
-            "type": "string",
-            "description": "An optional string telling CMake how to handle the architecture and toolset fields. Valid values are: \"default\": Set the platform and toolset using the architecture and toolset fields respectively. On non-Visual Studio generators, this will result in an error if architecture or toolset are set. \"ignore\": Do not set the platform or toolset at all, even on Visual Studio generators. This is useful if, for example, a preset uses the Ninja generator, and an IDE knows how to set up the Visual C++ environment from the architecture and toolset fields. In that case, CMake will ignore architecture and toolset, but the IDE can use them to set up the environment before invoking CMake.",
-            "enum": [
-              "default",
-              "ignore"
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "An optional string representing the toolset for generators that support it."
+              },
+              {
+                "type": "object",
+                "description": "An optional object representing the toolset for generators that support it.",
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "description": "An optional string representing the value."
+                  },
+                  "strategy": {
+                    "type": "string",
+                    "description": "An optional string telling CMake how to handle the field. Valid values are: \"set\" Set the respective value. This will result in an error for generators that do not support the respective field. \"external\" Do not set the value, even if the generator supports it. This is useful if, for example, a preset uses the Ninja generator, and an IDE knows how to set up the Visual C++ environment from the architecture and toolset fields. In that case, CMake will ignore the field, but the IDE can use them to set up the environment before invoking CMake.",
+                    "enum": [
+                      "set",
+                      "external"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
             ]
           },
           "binaryDir": {

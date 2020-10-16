@@ -30,7 +30,7 @@ using ReadFileResult = cmCMakePresetsFile::ReadFileResult;
 using CacheVariable = cmCMakePresetsFile::CacheVariable;
 using UnexpandedPreset = cmCMakePresetsFile::UnexpandedPreset;
 using ExpandedPreset = cmCMakePresetsFile::ExpandedPreset;
-using CMakeGeneratorConfig = cmCMakePresetsFile::CMakeGeneratorConfig;
+using ArchToolsetStrategy = cmCMakePresetsFile::ArchToolsetStrategy;
 
 constexpr int MIN_VERSION = 1;
 constexpr int MAX_VERSION = 1;
@@ -212,8 +212,8 @@ auto const PresetDebugHelper =
     .Bind("find"_s, &UnexpandedPreset::DebugFind, PresetOptionalBoolHelper,
           false);
 
-ReadFileResult CMakeGeneratorConfigHelper(
-  cm::optional<CMakeGeneratorConfig>& out, const Json::Value* value)
+ReadFileResult ArchToolsetStrategyHelper(
+  cm::optional<ArchToolsetStrategy>& out, const Json::Value* value)
 {
   if (!value) {
     out = cm::nullopt;
@@ -224,18 +224,55 @@ ReadFileResult CMakeGeneratorConfigHelper(
     return ReadFileResult::INVALID_PRESET;
   }
 
-  if (value->asString() == "default") {
-    out = CMakeGeneratorConfig::Default;
+  if (value->asString() == "set") {
+    out = ArchToolsetStrategy::Set;
     return ReadFileResult::READ_OK;
   }
 
-  if (value->asString() == "ignore") {
-    out = CMakeGeneratorConfig::Ignore;
+  if (value->asString() == "external") {
+    out = ArchToolsetStrategy::External;
     return ReadFileResult::READ_OK;
   }
 
   return ReadFileResult::INVALID_PRESET;
 }
+
+std::function<ReadFileResult(UnexpandedPreset&, const Json::Value*)>
+ArchToolsetHelper(
+  std::string UnexpandedPreset::*valueField,
+  cm::optional<ArchToolsetStrategy> UnexpandedPreset::*strategyField)
+{
+  auto const objectHelper =
+    cmJSONObjectHelper<UnexpandedPreset, ReadFileResult>(
+      ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+      .Bind("value", valueField, PresetStringHelper, false)
+      .Bind("strategy", strategyField, ArchToolsetStrategyHelper, false);
+  return [valueField, strategyField, objectHelper](
+           UnexpandedPreset& out, const Json::Value* value) -> ReadFileResult {
+    if (!value) {
+      (out.*valueField).clear();
+      out.*strategyField = cm::nullopt;
+      return ReadFileResult::READ_OK;
+    }
+
+    if (value->isString()) {
+      out.*valueField = value->asString();
+      out.*strategyField = cm::nullopt;
+      return ReadFileResult::READ_OK;
+    }
+
+    if (value->isObject()) {
+      return objectHelper(out, value);
+    }
+
+    return ReadFileResult::INVALID_PRESET;
+  };
+}
+
+auto const ArchitectureHelper = ArchToolsetHelper(
+  &UnexpandedPreset::Architecture, &UnexpandedPreset::ArchitectureStrategy);
+auto const ToolsetHelper = ArchToolsetHelper(
+  &UnexpandedPreset::Toolset, &UnexpandedPreset::ToolsetStrategy);
 
 auto const PresetHelper =
   cmJSONObjectHelper<UnexpandedPreset, ReadFileResult>(
@@ -252,11 +289,8 @@ auto const PresetHelper =
           false)
     .Bind("generator"_s, &UnexpandedPreset::Generator, PresetStringHelper,
           false)
-    .Bind("architecture"_s, &UnexpandedPreset::Architecture,
-          PresetStringHelper, false)
-    .Bind("toolset"_s, &UnexpandedPreset::Toolset, PresetStringHelper, false)
-    .Bind("cmakeGeneratorConfig"_s, &UnexpandedPreset::GeneratorConfig,
-          CMakeGeneratorConfigHelper, false)
+    .Bind("architecture"_s, ArchitectureHelper, false)
+    .Bind("toolset"_s, ToolsetHelper, false)
     .Bind("binaryDir"_s, &UnexpandedPreset::BinaryDir, PresetStringHelper,
           false)
     .Bind<std::string>("cmakeExecutable"_s, nullptr, PresetStringHelper, false)
@@ -353,8 +387,12 @@ ReadFileResult VisitPreset(
     InheritString(preset.Generator, parent->second.Unexpanded.Generator);
     InheritString(preset.Architecture, parent->second.Unexpanded.Architecture);
     InheritString(preset.Toolset, parent->second.Unexpanded.Toolset);
-    if (!preset.GeneratorConfig) {
-      preset.GeneratorConfig = parent->second.Unexpanded.GeneratorConfig;
+    if (!preset.ArchitectureStrategy) {
+      preset.ArchitectureStrategy =
+        parent->second.Unexpanded.ArchitectureStrategy;
+    }
+    if (!preset.ToolsetStrategy) {
+      preset.ToolsetStrategy = parent->second.Unexpanded.ToolsetStrategy;
     }
     InheritString(preset.BinaryDir, parent->second.Unexpanded.BinaryDir);
     InheritOptionalBool(preset.WarnDev, parent->second.Unexpanded.WarnDev);
