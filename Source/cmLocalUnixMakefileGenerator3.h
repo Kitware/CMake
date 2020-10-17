@@ -178,11 +178,11 @@ public:
   /** Get whether to create rules to generate preprocessed and
       assembly sources.  This could be converted to a variable lookup
       later.  */
-  bool GetCreatePreprocessedSourceRules()
+  bool GetCreatePreprocessedSourceRules() const
   {
     return !this->SkipPreprocessedSourceRules;
   }
-  bool GetCreateAssemblySourceRules()
+  bool GetCreateAssemblySourceRules() const
   {
     return !this->SkipAssemblySourceRules;
   }

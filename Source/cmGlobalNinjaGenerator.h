@@ -252,7 +252,7 @@ public:
       : GG(gg)
     {
     }
-    std::string operator()(std::string const& path)
+    std::string operator()(std::string const& path) const
     {
       return this->GG->ConvertToNinjaPath(path);
     }
@@ -323,7 +323,7 @@ public:
 
   void AppendTargetOutputs(cmGeneratorTarget const* target,
                            cmNinjaDeps& outputs, const std::string& config,
-                           cmNinjaTargetDepends depends);
+                           cmNinjaTargetDepends depends) const;
   void AppendTargetDepends(cmGeneratorTarget const* target,
                            cmNinjaDeps& outputs, const std::string& config,
                            const std::string& fileConfig,
@@ -463,7 +463,7 @@ private:
   void CleanMetaData();
 
   /// Write the common disclaimer text at the top of each build file.
-  void WriteDisclaimer(std::ostream& os);
+  void WriteDisclaimer(std::ostream& os) const;
 
   void WriteAssumedSourceDependencies();
 

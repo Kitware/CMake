@@ -29,13 +29,13 @@ public:
     {
     }
 
-    bool operator>(IntegerVersion const version)
+    bool operator>(IntegerVersion const version) const
     {
       return (this->Major > version.Major) ||
         ((this->Major == version.Major) && (this->Minor > version.Minor));
     }
 
-    bool operator>=(IntegerVersion const version)
+    bool operator>=(IntegerVersion const version) const
     {
       return (this->Major > version.Major) ||
         ((this->Major == version.Major) && (this->Minor >= version.Minor));

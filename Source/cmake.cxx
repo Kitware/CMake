@@ -1938,7 +1938,7 @@ int cmake::ActualConfigure()
     }
   }
 
-  auto& mf = this->GlobalGenerator->GetMakefiles()[0];
+  const auto& mf = this->GlobalGenerator->GetMakefiles()[0];
   if (mf->IsOn("CTEST_USE_LAUNCHERS") &&
       !this->State->GetGlobalProperty("RULE_LAUNCH_COMPILE")) {
     cmSystemTools::Error(
@@ -2280,12 +2280,12 @@ cmProp cmake::GetCacheDefinition(const std::string& name) const
   return this->State->GetInitializedCacheValue(name);
 }
 
-void cmake::AddScriptingCommands()
+void cmake::AddScriptingCommands() const
 {
   GetScriptingCommands(this->GetState());
 }
 
-void cmake::AddProjectCommands()
+void cmake::AddProjectCommands() const
 {
   GetProjectCommands(this->GetState());
 }

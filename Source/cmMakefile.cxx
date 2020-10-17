@@ -2029,7 +2029,7 @@ void cmMakefile::RemoveDefinition(const std::string& name)
 #endif
 }
 
-void cmMakefile::RemoveCacheDefinition(const std::string& name)
+void cmMakefile::RemoveCacheDefinition(const std::string& name) const
 {
   this->GetState()->RemoveCacheEntry(name);
 }
@@ -2839,7 +2839,7 @@ void cmMakefile::SetRecursionDepth(int recursionDepth)
   this->RecursionDepth = recursionDepth;
 }
 
-std::string cmMakefile::NewDeferId()
+std::string cmMakefile::NewDeferId() const
 {
   return this->GetGlobalGenerator()->NewDeferId();
 }
@@ -4039,7 +4039,7 @@ cmTest* cmMakefile::GetTest(const std::string& testName) const
 }
 
 void cmMakefile::GetTests(const std::string& config,
-                          std::vector<cmTest*>& tests)
+                          std::vector<cmTest*>& tests) const
 {
   for (const auto& generator : this->GetTestGenerators()) {
     if (generator->TestsForConfig(config)) {
@@ -4389,7 +4389,7 @@ cmPolicies::PolicyStatus cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id,
   return this->StateSnapshot.GetPolicy(id, parent_scope);
 }
 
-bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var)
+bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var) const
 {
   // Check for an explicit CMAKE_POLICY_WARNING_CMP<NNNN> setting.
   if (cmProp val = this->GetDefinition(var)) {
@@ -4494,7 +4494,7 @@ bool cmMakefile::HasCMP0054AlreadyBeenReported(
   return !this->CMP0054ReportedIds.insert(context).second;
 }
 
-void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
+void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm) const
 {
   /* Record the setting of every policy.  */
   using PolicyID = cmPolicies::PolicyID;

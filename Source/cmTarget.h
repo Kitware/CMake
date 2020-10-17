@@ -114,7 +114,7 @@ public:
   LinkLibraryVectorType const& GetOriginalLinkLibraries() const;
 
   //! Clear the dependency information recorded for this target, if any.
-  void ClearDependencyInformation(cmMakefile& mf);
+  void ClearDependencyInformation(cmMakefile& mf) const;
 
   void AddLinkLibrary(cmMakefile& mf, std::string const& lib,
                       cmTargetLinkLibraryType llt);

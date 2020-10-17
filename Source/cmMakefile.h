@@ -304,7 +304,7 @@ public:
    */
   void RemoveDefinition(const std::string& name);
   //! Remove a definition from the cache.
-  void RemoveCacheDefinition(const std::string& name);
+  void RemoveCacheDefinition(const std::string& name) const;
 
   /**
    * Specify the name of the project for this build.
@@ -345,7 +345,7 @@ public:
                                            bool parent_scope = false) const;
   bool SetPolicyVersion(std::string const& version_min,
                         std::string const& version_max);
-  void RecordPolicies(cmPolicies::PolicyMap& pm);
+  void RecordPolicies(cmPolicies::PolicyMap& pm) const;
   //@}
 
   /** Helper class to push and pop policies automatically.  */
@@ -738,7 +738,7 @@ public:
   /**
    * Get all tests that run under the given configuration.
    */
-  void GetTests(const std::string& config, std::vector<cmTest*>& tests);
+  void GetTests(const std::string& config, std::vector<cmTest*>& tests) const;
 
   /**
    * Return a location of a file in cmake or custom modules directory
@@ -885,7 +885,7 @@ public:
     return this->SystemIncludeDirectories;
   }
 
-  bool PolicyOptionalWarningEnabled(std::string const& var);
+  bool PolicyOptionalWarningEnabled(std::string const& var) const;
 
   void PushLoopBlock();
   void PopLoopBlock();
@@ -926,7 +926,7 @@ public:
   int GetRecursionDepth() const;
   void SetRecursionDepth(int recursionDepth);
 
-  std::string NewDeferId();
+  std::string NewDeferId() const;
   bool DeferCall(std::string id, std::string fileName, cmListFileFunction lff);
   bool DeferCancelCall(std::string const& id);
   cm::optional<std::string> DeferGetCallIds() const;

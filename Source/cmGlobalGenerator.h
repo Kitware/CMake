@@ -574,8 +574,9 @@ protected:
   void AddGlobalTarget_Package(std::vector<GlobalTargetInfo>& targets);
   void AddGlobalTarget_PackageSource(std::vector<GlobalTargetInfo>& targets);
   void AddGlobalTarget_Test(std::vector<GlobalTargetInfo>& targets);
-  void AddGlobalTarget_EditCache(std::vector<GlobalTargetInfo>& targets);
-  void AddGlobalTarget_RebuildCache(std::vector<GlobalTargetInfo>& targets);
+  void AddGlobalTarget_EditCache(std::vector<GlobalTargetInfo>& targets) const;
+  void AddGlobalTarget_RebuildCache(
+    std::vector<GlobalTargetInfo>& targets) const;
   void AddGlobalTarget_Install(std::vector<GlobalTargetInfo>& targets);
   cmTarget CreateGlobalTarget(GlobalTargetInfo const& gti, cmMakefile* mf);
 
@@ -601,7 +602,7 @@ protected:
 
   cmGeneratorTarget* FindGeneratorTargetImpl(std::string const& name) const;
 
-  std::string GetPredefinedTargetsFolder();
+  std::string GetPredefinedTargetsFolder() const;
 
 private:
   using TargetMap = std::unordered_map<std::string, cmTarget*>;
