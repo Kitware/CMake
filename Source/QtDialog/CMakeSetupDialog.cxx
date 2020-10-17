@@ -43,6 +43,12 @@
 #include "RegexExplorer.h"
 #include "WarningMessagesDialog.h"
 
+namespace {
+const QString PRESETS_DISABLED_TOOLTIP =
+  "This option is disabled because there are no available presets in "
+  "CMakePresets.json or CMakeUserPresets.json.";
+}
+
 QCMakeThread::QCMakeThread(QObject* p)
   : QThread(p)
 {
@@ -92,6 +98,7 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->ProgressBar->reset();
   this->RemoveEntry->setEnabled(false);
   this->AddEntry->setEnabled(false);
+  this->Preset->setStatusTip(PRESETS_DISABLED_TOOLTIP);
 
   QByteArray p = settings.value("SplitterSizes").toByteArray();
   this->Splitter->restoreState(p);
@@ -696,8 +703,8 @@ void CMakeSetupDialog::updatePresets(const QVector<QCMakePreset>& presets)
     this->Preset->blockSignals(false);
   }
 
-  this->Preset->setHidden(presets.isEmpty());
-  this->PresetLabel->setHidden(presets.isEmpty());
+  this->Preset->setDisabled(presets.isEmpty());
+  this->Preset->setToolTip(presets.isEmpty() ? PRESETS_DISABLED_TOOLTIP : "");
 
   if (!this->DeferredPreset.isNull()) {
     this->Preset->setPresetName(this->DeferredPreset);
@@ -823,7 +830,7 @@ void CMakeSetupDialog::setEnabledState(bool enabled)
   this->CacheValues->cacheModel()->setEditEnabled(enabled);
   this->SourceDirectory->setEnabled(enabled);
   this->BrowseSourceDirectoryButton->setEnabled(enabled);
-  this->Preset->setEnabled(enabled);
+  this->Preset->setEnabled(enabled && !this->Preset->presets().isEmpty());
   this->BinaryDirectory->setEnabled(enabled);
   this->BrowseBinaryDirectoryButton->setEnabled(enabled);
   this->ReloadCacheAction->setEnabled(enabled);

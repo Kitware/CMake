@@ -356,16 +356,14 @@ void CMakeGUITest::changingPresets()
   QCOMPARE(this->m_window->Preset->presetName(), QString{});
   QCOMPARE(this->m_window->Preset->presets().size(), 0);
   QCOMPARE(this->m_window->BinaryDirectory->currentText(), "");
-  QCOMPARE(this->m_window->Preset->isHidden(), true);
-  QCOMPARE(this->m_window->PresetLabel->isHidden(), true);
+  QCOMPARE(this->m_window->Preset->isEnabled(), false);
 
   writePresets("build1", { "preset" });
   loopSleep(1500);
   QCOMPARE(this->m_window->Preset->presetName(), QString{});
   QCOMPARE(this->m_window->Preset->presets().size(), 1);
   QCOMPARE(this->m_window->BinaryDirectory->currentText(), "");
-  QCOMPARE(this->m_window->Preset->isHidden(), false);
-  QCOMPARE(this->m_window->PresetLabel->isHidden(), false);
+  QCOMPARE(this->m_window->Preset->isEnabled(), true);
 
   this->m_window->Preset->setPresetName("preset");
   loopSleep();
@@ -373,8 +371,7 @@ void CMakeGUITest::changingPresets()
   QCOMPARE(this->m_window->Preset->presets().size(), 1);
   QCOMPARE(this->m_window->BinaryDirectory->currentText(),
            CMakeGUITest_BINARY_DIR "/changingPresets/src/build1/preset");
-  QCOMPARE(this->m_window->Preset->isHidden(), false);
-  QCOMPARE(this->m_window->PresetLabel->isHidden(), false);
+  QCOMPARE(this->m_window->Preset->isEnabled(), true);
 
   writePresets("build2", { "preset2", "preset" });
   loopSleep(1500);
@@ -382,8 +379,7 @@ void CMakeGUITest::changingPresets()
   QCOMPARE(this->m_window->Preset->presets().size(), 2);
   QCOMPARE(this->m_window->BinaryDirectory->currentText(),
            CMakeGUITest_BINARY_DIR "/changingPresets/src/build1/preset");
-  QCOMPARE(this->m_window->Preset->isHidden(), false);
-  QCOMPARE(this->m_window->PresetLabel->isHidden(), false);
+  QCOMPARE(this->m_window->Preset->isEnabled(), true);
 
   writePresets("build3", { "preset2" });
   loopSleep(1500);
@@ -391,8 +387,7 @@ void CMakeGUITest::changingPresets()
   QCOMPARE(this->m_window->Preset->presets().size(), 1);
   QCOMPARE(this->m_window->BinaryDirectory->currentText(),
            CMakeGUITest_BINARY_DIR "/changingPresets/src/build1/preset");
-  QCOMPARE(this->m_window->Preset->isHidden(), false);
-  QCOMPARE(this->m_window->PresetLabel->isHidden(), false);
+  QCOMPARE(this->m_window->Preset->isEnabled(), true);
 
   this->m_window->Preset->setPresetName("preset2");
   loopSleep();
@@ -400,8 +395,7 @@ void CMakeGUITest::changingPresets()
   QCOMPARE(this->m_window->Preset->presets().size(), 1);
   QCOMPARE(this->m_window->BinaryDirectory->currentText(),
            CMakeGUITest_BINARY_DIR "/changingPresets/src/build3/preset2");
-  QCOMPARE(this->m_window->Preset->isHidden(), false);
-  QCOMPARE(this->m_window->PresetLabel->isHidden(), false);
+  QCOMPARE(this->m_window->Preset->isEnabled(), true);
 
   QDir::root().mkpath(CMakeGUITest_BINARY_DIR "/changingPresets/src2");
   QFile::copy(CMakeGUITest_BINARY_DIR "/changingPresets/src/CMakePresets.json",
@@ -414,8 +408,7 @@ void CMakeGUITest::changingPresets()
   QCOMPARE(this->m_window->Preset->presets().size(), 1);
   QCOMPARE(this->m_window->BinaryDirectory->currentText(),
            CMakeGUITest_BINARY_DIR "/changingPresets/src/build3/preset2");
-  QCOMPARE(this->m_window->Preset->isHidden(), false);
-  QCOMPARE(this->m_window->PresetLabel->isHidden(), false);
+  QCOMPARE(this->m_window->Preset->isEnabled(), true);
 
   this->m_window->Preset->setPresetName("preset2");
   loopSleep();
@@ -423,8 +416,7 @@ void CMakeGUITest::changingPresets()
   QCOMPARE(this->m_window->Preset->presets().size(), 1);
   QCOMPARE(this->m_window->BinaryDirectory->currentText(),
            CMakeGUITest_BINARY_DIR "/changingPresets/src2/build3/preset2");
-  QCOMPARE(this->m_window->Preset->isHidden(), false);
-  QCOMPARE(this->m_window->PresetLabel->isHidden(), false);
+  QCOMPARE(this->m_window->Preset->isEnabled(), true);
 
   QFile(CMakeGUITest_BINARY_DIR "/changingPresets/src2/CMakePresets.json")
     .remove();
@@ -433,8 +425,7 @@ void CMakeGUITest::changingPresets()
   QCOMPARE(this->m_window->Preset->presets().size(), 0);
   QCOMPARE(this->m_window->BinaryDirectory->currentText(),
            CMakeGUITest_BINARY_DIR "/changingPresets/src2/build3/preset2");
-  QCOMPARE(this->m_window->Preset->isHidden(), true);
-  QCOMPARE(this->m_window->PresetLabel->isHidden(), true);
+  QCOMPARE(this->m_window->Preset->isEnabled(), false);
 }
 
 void SetupDefaultQSettings()
