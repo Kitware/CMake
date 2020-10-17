@@ -185,17 +185,17 @@ endif()
 file(REMOVE_RECURSE ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals)
 
 if(do_git_tests)
-  check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
+  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 REBASE)
   check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 1 REBASE)
-  # With the Git UPDATE_COMMAND performance patch, this will not required a
+  # With the Git UPDATE_COMMAND performance patch, this will not require a
   # 'git fetch'
   check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 0 REBASE)
   check_a_tag(tag2          5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
   check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 1 REBASE)
   check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 0 REBASE)
-  check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
+  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 REBASE)
   # This is a remote symbolic ref, so it will always trigger a 'git fetch'
-  check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
+  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 REBASE)
 
   foreach(strategy IN ITEMS CHECKOUT REBASE_CHECKOUT)
     # Move local master back, then apply a change that will cause a conflict
@@ -229,7 +229,19 @@ if(do_git_tests)
       message(FATAL_ERROR "Could not commit conflicting change.")
     endif()
     # This should discard our commit but leave behind an annotated tag
-    check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 ${strategy})
+    check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 ${strategy})
   endforeach()
+
+  # This file matches a .gitignore rule that the last commit defines. We can't
+  # directly check that updates don't stash ignored contents because the stash
+  # and pop are both done within the update step. We don't have an opportunity
+  # to check things in between, but we can at least check that the update step
+  # doesn't choke on it.
+  set(ignoredFile ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT/ignored_item)
+  file(TOUCH ${ignoredFile})
+  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 REBASE)
+  if(NOT EXISTS ${ignoredFile})
+    message(FATAL_ERROR "Ignored file is missing")
+  endif()
 
 endif()
