@@ -185,7 +185,6 @@ if(do_git_tests)
   # 'git fetch'
   check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 0 REBASE)
   check_a_tag(tag2          5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
-  check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 1 REBASE)
   check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 0 REBASE)
   check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 REBASE)
   # This is a remote symbolic ref, so it will always trigger a 'git fetch'
