@@ -68,7 +68,11 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QCMakePresetComboBox" name="Preset"/>
+      <widget class="QCMakePresetComboBox" name="Preset">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="BinaryLabel">
