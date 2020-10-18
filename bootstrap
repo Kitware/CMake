@@ -1054,12 +1054,14 @@ else
   CMAKE_CXX_SOURCES="${CMAKE_CXX_SOURCES} \
     cmDepends \
     cmDependsC \
+    cmDependsCompiler \
     cmGlobalUnixMakefileGenerator3 \
     cmLocalUnixMakefileGenerator3 \
     cmMakefileExecutableTargetGenerator \
     cmMakefileLibraryTargetGenerator \
     cmMakefileTargetGenerator \
     cmMakefileUtilityTargetGenerator \
+    cmProcessTools \
     "
 
   JSONCPP_CXX_SOURCES=

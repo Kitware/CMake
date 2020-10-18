@@ -224,6 +224,8 @@ set(SRCS
   cmDependsJava.h
   cmDependsJavaParserHelper.cxx
   cmDependsJavaParserHelper.h
+  cmDependsCompiler.cxx
+  cmDependsCompiler.h
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
   cmDocumentationSection.cxx
