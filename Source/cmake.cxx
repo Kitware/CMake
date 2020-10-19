@@ -1042,17 +1042,17 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       this->PrintPresetList(settingsFile);
       return;
     }
-    if (preset->second.Hidden) {
+    if (preset->second.Unexpanded.Hidden) {
       cmSystemTools::Error(cmStrCat("Cannot use hidden preset in ",
                                     this->GetHomeDirectory(), ": \"",
                                     presetName, '"'));
       this->PrintPresetList(settingsFile);
       return;
     }
-    auto expandedPreset = settingsFile.ExpandMacros(preset->second);
+    auto const& expandedPreset = preset->second.Expanded;
     if (!expandedPreset) {
       cmSystemTools::Error(cmStrCat("Could not evaluate preset \"",
-                                    preset->second.Name,
+                                    preset->second.Unexpanded.Name,
                                     "\": Invalid macro expansion"));
       return;
     }
@@ -1464,13 +1464,12 @@ void cmake::PrintPresetList(const cmCMakePresetsFile& file) const
   std::vector<cmCMakePresetsFile::UnexpandedPreset> presets;
   for (auto const& p : file.PresetOrder) {
     auto const& preset = file.Presets.at(p);
-    if (!preset.Hidden &&
+    if (!preset.Unexpanded.Hidden && preset.Expanded &&
         std::find_if(generators.begin(), generators.end(),
                      [&preset](const GeneratorInfo& info) {
-                       return info.name == preset.Generator;
-                     }) != generators.end() &&
-        file.ExpandMacros(preset)) {
-      presets.push_back(preset);
+                       return info.name == preset.Unexpanded.Generator;
+                     }) != generators.end()) {
+      presets.push_back(preset.Unexpanded);
     }
   }
 

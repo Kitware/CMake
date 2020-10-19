@@ -1,1 +1,2 @@
-^CMake Error: Could not evaluate preset "EmptyPenv": Invalid macro expansion$
+^CMake Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresets/EmptyPenv: Invalid macro expansion$

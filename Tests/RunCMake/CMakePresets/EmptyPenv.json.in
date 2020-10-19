@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "EmptyPenv",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "MY_VAR": "$penv{}"
+      }
+    }
+  ]
+}

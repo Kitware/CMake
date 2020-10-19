@@ -306,16 +306,6 @@
       "binaryDir": "${sourceDir}/build"
     },
     {
-      "name": "UnclosedMacro",
-      "generator": "@RunCMake_GENERATOR@",
-      "binaryDir": "${sourceDir"
-    },
-    {
-      "name": "NoSuchMacro",
-      "generator": "@RunCMake_GENERATOR@",
-      "binaryDir": "${noexist}"
-    },
-    {
       "name": "VendorMacro",
       "generator": "@RunCMake_GENERATOR@",
       "binaryDir": "$vendor{unknown.unknownMacro}"
@@ -324,31 +314,6 @@
       "name": "InvalidGenerator",
       "generator": "Invalid Generator",
       "binaryDir": "${sourceDir}/build"
-    },
-    {
-      "name": "EnvCycle",
-      "generator": "@RunCMake_GENERATOR@",
-      "binaryDir": "${sourceDir}/build",
-      "environment": {
-        "ENV_1": "$env{ENV_2}",
-        "ENV_2": "$env{ENV_1}"
-      }
-    },
-    {
-      "name": "EmptyEnv",
-      "generator": "@RunCMake_GENERATOR@",
-      "binaryDir": "${sourceDir}/build",
-      "cacheVariables": {
-        "MY_VAR": "$env{}"
-      }
-    },
-    {
-      "name": "EmptyPenv",
-      "generator": "@RunCMake_GENERATOR@",
-      "binaryDir": "${sourceDir}/build",
-      "cacheVariables": {
-        "MY_VAR": "$penv{}"
-      }
     },
     {
       "name": "UseHiddenPreset",
