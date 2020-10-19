@@ -17,3 +17,8 @@ if(NOT "${native_out}" STREQUAL "${native_exp}")
   message(FATAL_ERROR "separate_arguments native-style failed.  "
     "Expected\n  [${native_exp}]\nbut got\n  [${native_out}]\n")
 endif()
+
+separate_arguments(empty_out NATIVE_COMMAND)
+if(NOT empty_out STREQUAL "")
+  message(FATAL_ERROR "separate_arguments native-style failed on no arguments")
+endif()

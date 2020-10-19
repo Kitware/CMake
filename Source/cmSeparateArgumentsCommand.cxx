@@ -80,6 +80,11 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  if (unparsedArguments.empty()) {
+    status.GetMakefile().AddDefinition(var, {});
+    return true;
+  }
+
   std::string& command = unparsedArguments.front();
 
   if (command.empty()) {
