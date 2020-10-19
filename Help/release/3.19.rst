@@ -293,7 +293,7 @@ Other Changes
 * The :command:`find_program` command now requires permission to execute
   but not to read the file found.  See policy :policy:`CMP0109`.
 
-* An imported target with a missing location now fails during generation
+* An imported target missing its location property fails during generation
   if the location is used.  See policy :policy:`CMP0111`.
 
 * The following target-based generator expressions that query for directory or
