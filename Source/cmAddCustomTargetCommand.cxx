@@ -4,7 +4,6 @@
 
 #include <utility>
 
-#include "cmCheckCustomOutputs.h"
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -207,11 +206,6 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
 
   if (uses_terminal && !job_pool.empty()) {
     status.SetError("JOB_POOL is shadowed by USES_TERMINAL.");
-    return false;
-  }
-
-  // Make sure the byproduct names and locations are safe.
-  if (!cmCheckCustomOutputs(byproducts, "BYPRODUCTS", status)) {
     return false;
   }
 

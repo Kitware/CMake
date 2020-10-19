@@ -5,7 +5,6 @@
 #include <sstream>
 #include <unordered_set>
 
-#include "cmCheckCustomOutputs.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
@@ -295,13 +294,6 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   }
   if (append && output.empty()) {
     status.SetError("given APPEND option with no OUTPUT.");
-    return false;
-  }
-
-  // Make sure the output names and locations are safe.
-  if (!cmCheckCustomOutputs(output, "OUTPUT", status) ||
-      !cmCheckCustomOutputs(outputs, "OUTPUTS", status) ||
-      !cmCheckCustomOutputs(byproducts, "BYPRODUCTS", status)) {
     return false;
   }
 

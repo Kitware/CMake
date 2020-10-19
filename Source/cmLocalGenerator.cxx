@@ -17,6 +17,7 @@
 #include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -3813,7 +3814,14 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(
 }
 
 namespace {
+cm::string_view CustomOutputRoleKeyword(cmLocalGenerator::OutputRole role)
+{
+  return (role == cmLocalGenerator::OutputRole::Primary ? "OUTPUT"_s
+                                                        : "BYPRODUCTS"_s);
+}
+
 void CreateGeneratedSource(cmLocalGenerator& lg, const std::string& output,
+                           cmLocalGenerator::OutputRole role,
                            cmCommandOrigin origin,
                            const cmListFileBacktrace& lfbt)
 {
@@ -3821,6 +3829,28 @@ void CreateGeneratedSource(cmLocalGenerator& lg, const std::string& output,
     lg.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       "Generator expressions in custom command outputs are not implemented!",
+      lfbt);
+    return;
+  }
+
+  // Make sure the file will not be generated into the source
+  // directory during an out of source build.
+  if (!lg.GetMakefile()->CanIWriteThisFile(output)) {
+    lg.GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(CustomOutputRoleKeyword(role), " path\n  ", output,
+               "\nin a source directory as an output of custom command."),
+      lfbt);
+    return;
+  }
+
+  // Make sure the output file name has no invalid characters.
+  std::string::size_type pos = output.find_first_of("#<>");
+  if (pos != std::string::npos) {
+    lg.GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(CustomOutputRoleKeyword(role), " containing a \"", output[pos],
+               "\" is not allowed."),
       lfbt);
     return;
   }
@@ -4283,7 +4313,7 @@ void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& byproduct,
 
   auto pr = this->OutputToSource.emplace(byproduct, entry);
   if (pr.second) {
-    CreateGeneratedSource(*this, byproduct, origin, bt);
+    CreateGeneratedSource(*this, byproduct, OutputRole::Byproduct, origin, bt);
   } else {
     SourceEntry& current = pr.first->second;
     // Has the target already been set?
@@ -4311,7 +4341,7 @@ void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& output,
 
   auto pr = this->OutputToSource.emplace(output, entry);
   if (pr.second) {
-    CreateGeneratedSource(*this, output, origin, bt);
+    CreateGeneratedSource(*this, output, role, origin, bt);
   } else {
     SourceEntry& current = pr.first->second;
     // Outputs take precedence over byproducts
