@@ -1,5 +1,7 @@
 Preset CMake variables:
 
+  TEST_BOOL_FALSE:BOOL="FALSE"
+  TEST_BOOL_TRUE:BOOL="TRUE"
   TEST_DOLLAR="\$"
   TEST_D_ENV_REF="xEnvironment variablex"
   TEST_D_ENV_REF_P=""
@@ -32,6 +34,10 @@ Preset CMake variables:
   TEST_TRAILING_DOLLAR="a \$"
   TEST_TRAILING_UNKNOWN_NAMESPACE="\$unknown{namespace"
   TEST_TRUE:BOOL="TRUE"
+  TEST_TYPED_BOOL_FALSE:STRING="FALSE"
+  TEST_TYPED_BOOL_TRUE:STRING="TRUE"
+  TEST_UNTYPED_BOOL_FALSE="FALSE"
+  TEST_UNTYPED_BOOL_TRUE="TRUE"
 
 Preset environment variables:
 
