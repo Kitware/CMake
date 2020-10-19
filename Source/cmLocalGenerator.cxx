@@ -3816,18 +3816,19 @@ void CreateGeneratedSource(cmLocalGenerator& lg, const std::string& output,
                            cmCommandOrigin origin,
                            const cmListFileBacktrace& lfbt)
 {
-  if (cmGeneratorExpression::Find(output) == std::string::npos) {
-    // Outputs without generator expressions from the project are already
-    // created and marked as generated.  Do not mark them again, because
-    // other commands might have overwritten the property.
-    if (origin == cmCommandOrigin::Generator) {
-      lg.GetMakefile()->GetOrCreateGeneratedSource(output);
-    }
-  } else {
+  if (cmGeneratorExpression::Find(output) != std::string::npos) {
     lg.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       "Generator expressions in custom command outputs are not implemented!",
       lfbt);
+    return;
+  }
+
+  // Outputs without generator expressions from the project are already
+  // created and marked as generated.  Do not mark them again, because
+  // other commands might have overwritten the property.
+  if (origin == cmCommandOrigin::Generator) {
+    lg.GetMakefile()->GetOrCreateGeneratedSource(output);
   }
 }
 
