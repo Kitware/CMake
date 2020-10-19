@@ -1984,7 +1984,7 @@ cmFileListGeneratorBase* cmFileListGeneratorBase::SetNext(
 bool cmFileListGeneratorBase::Consider(std::string const& fullPath,
                                        cmFileList& listing)
 {
-  if (!cmSystemTools::FileIsDirectory(fullPath)) {
+  if (!fullPath.empty() && !cmSystemTools::FileIsDirectory(fullPath)) {
     return false;
   }
   if (this->Next) {
