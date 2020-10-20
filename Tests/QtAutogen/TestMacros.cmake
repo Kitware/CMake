@@ -9,6 +9,11 @@ list(APPEND Autogen_BUILD_OPTIONS
     "-DCMAKE_AUTOGEN_VERBOSE=1"
     "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
 )
+# XXX(xcode-per-cfg-src): Drop the NO_PER_CONFIG_SOURCES exclusion
+# when the Xcode generator supports per-config sources.
+if(CMAKE_GENERATOR STREQUAL "Xcode")
+  list(APPEND Autogen_BUILD_OPTIONS -DNO_PER_CONFIG_SOURCES=1)
+endif()
 
 # A macro to add a QtAutogen test
 macro(ADD_AUTOGEN_TEST NAME)

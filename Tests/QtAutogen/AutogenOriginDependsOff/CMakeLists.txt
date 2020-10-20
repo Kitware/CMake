@@ -2,6 +2,15 @@ cmake_minimum_required(VERSION 3.11)
 project(AutogenOriginDependsOff)
 include("../AutogenCoreTest.cmake")
 
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+# XXX(xcode-per-cfg-src): Enable multi-config code path for Xcode
+# when the Xcode generator supports per-config sources.
+if(_isMultiConfig AND NOT CMAKE_GENERATOR STREQUAL "Xcode")
+  set(mocs_compilation_cpp "mocs_compilation_$<CONFIG>.cpp")
+else()
+  set(mocs_compilation_cpp "mocs_compilation.cpp")
+endif()
+
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
 set(CBD ${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CSD})
@@ -19,7 +28,7 @@ add_custom_command (
 add_custom_target ( a_mc
     COMMAND ${CMAKE_COMMAND} -E sleep 2
     COMMAND ${CMAKE_COMMAND}
-        "-DMCF=${CBD}/a_qt_autogen/mocs_compilation.cpp"
+        "-DMCF=${CBD}/a_qt_autogen/${mocs_compilation_cpp}"
         "-DCF_IN=${CSD}/a_mc.hpp.in"
         "-DCF_OUT=${CBD}/a_mc.hpp"
         -P ${CSD}/configure_content.cmake
@@ -51,7 +60,7 @@ add_custom_command (
     DEPENDS b_qt_autogen
     COMMAND ${CMAKE_COMMAND} -E sleep 2
     COMMAND ${CMAKE_COMMAND}
-        "-DMCF=${CBD}/b_qt_autogen/mocs_compilation.cpp"
+        "-DMCF=${CBD}/b_qt_autogen/${mocs_compilation_cpp}"
         "-DCF_IN=${CSD}/b_mc.cpp.in"
         "-DCF_OUT=${CBD}/b_mc.cpp"
         -P ${CSD}/configure_content.cmake

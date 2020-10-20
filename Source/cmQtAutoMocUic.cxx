@@ -2452,17 +2452,20 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
 
       Json::Value const& entry = val[ii];
       if (testEntry(entry.isArray(), "JSON value is not an array.") ||
-          testEntry(entry.size() == 3, "JSON array size invalid.")) {
+          testEntry(entry.size() == 4, "JSON array size invalid.")) {
         return false;
       }
 
       Json::Value const& entryName = entry[0u];
       Json::Value const& entryFlags = entry[1u];
-      Json::Value const& entryBuild = entry[2u];
+      Json::Value const& entryConfigs = entry[2u];
+      Json::Value const& entryBuild = entry[3u];
       if (testEntry(entryName.isString(),
                     "JSON value for name is not a string.") ||
           testEntry(entryFlags.isString(),
                     "JSON value for flags is not a string.") ||
+          testEntry(entryConfigs.isNull() || entryConfigs.isArray(),
+                    "JSON value for configs is not null or array.") ||
           testEntry(entryBuild.isString(),
                     "JSON value for build path is not a string.")) {
         return false;
@@ -2473,6 +2476,22 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
       std::string build = entryBuild.asString();
       if (testEntry(flags.size() == 2, "Invalid flags string size")) {
         return false;
+      }
+
+      if (entryConfigs.isArray()) {
+        bool configFound = false;
+        Json::ArrayIndex const configArraySize = entryConfigs.size();
+        for (Json::ArrayIndex ci = 0; ci != configArraySize; ++ci) {
+          Json::Value const& config = entryConfigs[ci];
+          if (testEntry(config.isString(),
+                        "JSON value in config array is not a string.")) {
+            return false;
+          }
+          configFound = configFound || config.asString() == this->InfoConfig();
+        }
+        if (!configFound) {
+          continue;
+        }
       }
 
       cmFileTime fileTime;
@@ -2515,16 +2534,19 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
 
       Json::Value const& entry = val[ii];
       if (testEntry(entry.isArray(), "JSON value is not an array.") ||
-          testEntry(entry.size() == 2, "JSON array size invalid.")) {
+          testEntry(entry.size() == 3, "JSON array size invalid.")) {
         return false;
       }
 
       Json::Value const& entryName = entry[0u];
       Json::Value const& entryFlags = entry[1u];
+      Json::Value const& entryConfigs = entry[2u];
       if (testEntry(entryName.isString(),
                     "JSON value for name is not a string.") ||
           testEntry(entryFlags.isString(),
-                    "JSON value for flags is not a string.")) {
+                    "JSON value for flags is not a string.") ||
+          testEntry(entryConfigs.isNull() || entryConfigs.isArray(),
+                    "JSON value for configs is not null or array.")) {
         return false;
       }
 
@@ -2532,6 +2554,22 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
       std::string flags = entryFlags.asString();
       if (testEntry(flags.size() == 2, "Invalid flags string size")) {
         return false;
+      }
+
+      if (entryConfigs.isArray()) {
+        bool configFound = false;
+        Json::ArrayIndex const configArraySize = entryConfigs.size();
+        for (Json::ArrayIndex ci = 0; ci != configArraySize; ++ci) {
+          Json::Value const& config = entryConfigs[ci];
+          if (testEntry(config.isString(),
+                        "JSON value in config array is not a string.")) {
+            return false;
+          }
+          configFound = configFound || config.asString() == this->InfoConfig();
+        }
+        if (!configFound) {
+          continue;
+        }
       }
 
       cmFileTime fileTime;
