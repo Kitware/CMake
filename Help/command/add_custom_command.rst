@@ -239,6 +239,11 @@ The options are:
   command itself.
   Using ``DEPFILE`` with other generators than Ninja is an error.
 
+  If the ``DEPFILE`` argument is relative, it should be relative to
+  :variable:`CMAKE_CURRENT_BINARY_DIR`, and any relative paths inside the
+  ``DEPFILE`` should also be relative to :variable:`CMAKE_CURRENT_BINARY_DIR`
+  (see policy :policy:`CMP0116`.)
+
 Build Events
 ^^^^^^^^^^^^
 

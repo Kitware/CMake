@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -2314,49 +2315,92 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     status.SetError("Incorrect arguments to GENERATE subcommand.");
     return false;
   }
-  if (args[1] != "OUTPUT") {
+
+  struct Arguments
+  {
+    std::string Output;
+    std::string Input;
+    std::string Content;
+    std::string Condition;
+    std::string Target;
+  };
+
+  static auto const parser = cmArgumentParser<Arguments>{}
+                               .Bind("OUTPUT"_s, &Arguments::Output)
+                               .Bind("INPUT"_s, &Arguments::Input)
+                               .Bind("CONTENT"_s, &Arguments::Content)
+                               .Bind("CONDITION"_s, &Arguments::Condition)
+                               .Bind("TARGET"_s, &Arguments::Target);
+
+  std::vector<std::string> unparsedArguments;
+  std::vector<std::string> keywordsMissingValues;
+  std::vector<std::string> parsedKeywords;
+  Arguments const arguments =
+    parser.Parse(cmMakeRange(args).advance(1), &unparsedArguments,
+                 &keywordsMissingValues, &parsedKeywords);
+
+  if (!keywordsMissingValues.empty()) {
     status.SetError("Incorrect arguments to GENERATE subcommand.");
     return false;
   }
 
-  std::string condition;
-  std::string target;
-
-  for (std::size_t i = 5; i < args.size();) {
-    const std::string& arg = args[i++];
-
-    if (args.size() - i == 0) {
-      status.SetError("Incorrect arguments to GENERATE subcommand.");
-      return false;
-    }
-
-    const std::string& value = args[i++];
-
-    if (value.empty()) {
-      status.SetError(
-        arg + " of sub-command GENERATE must not be empty if specified.");
-      return false;
-    }
-
-    if (arg == "CONDITION") {
-      condition = value;
-    } else if (arg == "TARGET") {
-      target = value;
-    } else {
-      status.SetError("Unknown argument to GENERATE subcommand.");
-      return false;
-    }
+  if (!unparsedArguments.empty()) {
+    status.SetError("Unknown argument to GENERATE subcommand.");
+    return false;
   }
 
-  std::string output = args[2];
-  const bool inputIsContent = args[3] != "INPUT";
-  if (inputIsContent && args[3] != "CONTENT") {
+  bool mandatoryOptionsSpecified = false;
+  if (parsedKeywords.size() > 1) {
+    const bool outputOprionSpecified = parsedKeywords[0] == "OUTPUT"_s;
+    const bool inputOrContentSpecified =
+      parsedKeywords[1] == "INPUT"_s || parsedKeywords[1] == "CONTENT"_s;
+    if (outputOprionSpecified && inputOrContentSpecified) {
+      mandatoryOptionsSpecified = true;
+    }
+  }
+  if (!mandatoryOptionsSpecified) {
     status.SetError("Incorrect arguments to GENERATE subcommand.");
     return false;
   }
-  std::string input = args[4];
 
-  AddEvaluationFile(input, target, output, condition, inputIsContent, status);
+  const bool conditionOptionSpecified =
+    std::find(parsedKeywords.begin(), parsedKeywords.end(), "CONDITION"_s) !=
+    parsedKeywords.end();
+  if (conditionOptionSpecified && arguments.Condition.empty()) {
+    status.SetError("CONDITION of sub-command GENERATE must not be empty "
+                    "if specified.");
+    return false;
+  }
+
+  const bool targetOptionSpecified =
+    std::find(parsedKeywords.begin(), parsedKeywords.end(), "TARGET"_s) !=
+    parsedKeywords.end();
+  if (targetOptionSpecified && arguments.Target.empty()) {
+    status.SetError("TARGET of sub-command GENERATE must not be empty "
+                    "if specified.");
+    return false;
+  }
+
+  const bool outputOptionSpecified =
+    std::find(parsedKeywords.begin(), parsedKeywords.end(), "OUTPUT"_s) !=
+    parsedKeywords.end();
+  if (outputOptionSpecified && parsedKeywords[0] != "OUTPUT"_s) {
+    status.SetError("Incorrect arguments to GENERATE subcommand.");
+    return false;
+  }
+
+  const bool inputIsContent = parsedKeywords[1] != "INPUT"_s;
+  if (inputIsContent && parsedKeywords[1] != "CONTENT") {
+    status.SetError("Unknown argument to GENERATE subcommand.");
+  }
+
+  std::string input = arguments.Input;
+  if (inputIsContent) {
+    input = arguments.Content;
+  }
+
+  AddEvaluationFile(input, arguments.Target, arguments.Output,
+                    arguments.Condition, inputIsContent, status);
   return true;
 }
 

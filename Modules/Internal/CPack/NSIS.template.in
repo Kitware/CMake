@@ -1,4 +1,4 @@
-; CPack install script designed for a nmake build
+﻿; CPack install script designed for a nmake build
 
 ;--------------------------------
 ; You must define these values

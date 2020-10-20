@@ -59,24 +59,6 @@ class cmTestGenerator;
 class cmVariableWatch;
 class cmake;
 
-/** Flag if byproducts shall also be considered.  */
-enum class cmSourceOutputKind
-{
-  OutputOnly,
-  OutputOrByproduct
-};
-
-/** Target and source file which have a specific output.  */
-struct cmSourcesWithOutput
-{
-  /** Target with byproduct.  */
-  cmTarget* Target = nullptr;
-
-  /** Source file with output or byproduct.  */
-  cmSourceFile* Source = nullptr;
-  bool SourceIsByproduct = false;
-};
-
 /** A type-safe wrapper for a string representing a directory id.  */
 class cmDirectoryId
 {
@@ -225,23 +207,10 @@ public:
                                 const std::string& source,
                                 const cmCustomCommandLines& commandLines,
                                 const char* comment);
-  bool AppendCustomCommandToOutput(
+  void AppendCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const cmImplicitDependsList& implicit_depends,
     const cmCustomCommandLines& commandLines);
-
-  /**
-   * Add target byproducts.
-   */
-  void AddTargetByproducts(cmTarget* target,
-                           const std::vector<std::string>& byproducts);
-
-  /**
-   * Add source file outputs.
-   */
-  void AddSourceOutputs(cmSourceFile* source,
-                        const std::vector<std::string>& outputs,
-                        const std::vector<std::string>& byproducts);
 
   /**
    * Add a define flag to the build.
@@ -753,20 +722,10 @@ public:
     return this->SourceFiles;
   }
 
-  /**
-   * Return the target if the provided source name is a byproduct of a utility
-   * target or a PRE_BUILD, PRE_LINK, or POST_BUILD command.
-   * Return the source file which has the provided source name as output.
-   */
-  cmSourcesWithOutput GetSourcesWithOutput(const std::string& name) const;
-
-  /**
-   * Is there a source file that has the provided source name as an output?
-   * If so then return it.
-   */
-  cmSourceFile* GetSourceFileWithOutput(
-    const std::string& name,
-    cmSourceOutputKind kind = cmSourceOutputKind::OutputOnly) const;
+  std::vector<cmTarget*> const& GetOrderedTargets() const
+  {
+    return this->OrderedTargets;
+  }
 
   //! Add a new cmTest to the list of tests for this makefile.
   cmTest* CreateTest(const std::string& testName);
@@ -983,8 +942,7 @@ protected:
   mutable cmTargetMap Targets;
   std::map<std::string, std::string> AliasTargets;
 
-  using TargetsVec = std::vector<cmTarget*>;
-  TargetsVec OrderedTargets;
+  std::vector<cmTarget*> OrderedTargets;
 
   std::vector<std::unique_ptr<cmSourceFile>> SourceFiles;
 
@@ -1129,48 +1087,9 @@ private:
   bool ValidateCustomCommand(const cmCustomCommandLines& commandLines) const;
 
   void CreateGeneratedOutputs(const std::vector<std::string>& outputs);
-  void CreateGeneratedByproducts(const std::vector<std::string>& byproducts);
 
   std::vector<BT<GeneratorAction>> GeneratorActions;
   bool GeneratorActionsInvoked = false;
-  bool DelayedOutputFilesHaveGenex = false;
-  std::vector<std::string> DelayedOutputFiles;
-
-  void AddDelayedOutput(std::string const& output);
-
-  /**
-   * See LinearGetSourceFileWithOutput for background information
-   */
-  cmTarget* LinearGetTargetWithOutput(const std::string& name) const;
-
-  /**
-   * Generalized old version of GetSourceFileWithOutput kept for
-   * backward-compatibility. It implements a linear search and supports
-   * relative file paths. It is used as a fall back by GetSourceFileWithOutput
-   * and GetSourcesWithOutput.
-   */
-  cmSourceFile* LinearGetSourceFileWithOutput(const std::string& name,
-                                              cmSourceOutputKind kind,
-                                              bool& byproduct) const;
-
-  struct SourceEntry
-  {
-    cmSourcesWithOutput Sources;
-    bool SourceMightBeOutput = false;
-  };
-
-  // A map for fast output to input look up.
-  using OutputToSourceMap = std::unordered_map<std::string, SourceEntry>;
-  OutputToSourceMap OutputToSource;
-
-  void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target);
-  void UpdateOutputToSourceMap(std::string const& output, cmSourceFile* source,
-                               bool byproduct);
-
-  /**
-   * Return if the provided source file might have a custom command.
-   */
-  bool MightHaveCustomCommand(const std::string& name) const;
 
   bool CheckSystemVars;
   bool CheckCMP0000;

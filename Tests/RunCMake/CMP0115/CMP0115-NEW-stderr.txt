@@ -1,0 +1,17 @@
+^CMake Error at CMP0115\.cmake:[0-9]+ \(add_executable\):
+  Cannot find source file:
+
+    main
+Call Stack \(most recent call first\):
+  CMP0115-NEW\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at CMP0115\.cmake:[0-9]+ \(add_executable\):
+  No SOURCES given to target: exe
+Call Stack \(most recent call first\):
+  CMP0115-NEW\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

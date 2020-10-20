@@ -5,14 +5,15 @@
 #include <type_traits>
 #include <utility>
 
+#include <cm/optional>
+
 #include "cmGccDepfileLexerHelper.h"
 
-cmGccDepfileContent cmReadGccDepfile(const char* filePath)
+cm::optional<cmGccDepfileContent> cmReadGccDepfile(const char* filePath)
 {
-  cmGccDepfileContent result;
   cmGccDepfileLexerHelper helper;
   if (helper.readFile(filePath)) {
-    result = std::move(helper).extractContent();
+    return cm::make_optional(std::move(helper).extractContent());
   }
-  return result;
+  return cm::nullopt;
 }

@@ -357,3 +357,13 @@ policies added for that version.  Commit with a message such as::
   The files generatd by `install(EXPORT)` and `export()` commands
   are known to work with policies as of CMake $prev, so enable them
   in sufficiently new CMake versions.
+
+Update the ``cmake_minimum_required`` version range in CMake itself:
+
+* ``CMakeLists.txt``
+* ``Utilities/Doxygen/CMakeLists.txt``
+* ``Utilities/Sphinx/CMakeLists.txt``
+
+to end in the previous release.  Commit with a message such as::
+
+  Configure CMake itself with policies through CMake $prev

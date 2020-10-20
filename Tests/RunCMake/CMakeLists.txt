@@ -125,6 +125,10 @@ if(CMake_TEST_CUDA)
 endif()
 add_RunCMake_test(CMP0106)
 add_RunCMake_test(CMP0111)
+add_RunCMake_test(CMP0115)
+if(CMAKE_GENERATOR MATCHES "Ninja")
+  add_RunCMake_test(CMP0116)
+endif()
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -770,6 +774,7 @@ add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
 
 add_RunCMake_test("UnityBuild")
 add_RunCMake_test(CMakePresets -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
+add_RunCMake_test(TransformDepfile)
 
 if(WIN32)
   add_RunCMake_test(Win32GenEx)
