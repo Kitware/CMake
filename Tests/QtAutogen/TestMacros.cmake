@@ -1,6 +1,8 @@
 # Autogen build options
 set(Autogen_BUILD_OPTIONS "-DQT_TEST_VERSION=${QT_TEST_VERSION}")
-if(NOT _isMultiConfig)   # Set in Tests/CMakeLists.txt
+if(_isMultiConfig)   # Set in Tests/CMakeLists.txt
+  list(APPEND Autogen_CTEST_OPTIONS --build-config $<CONFIGURATION>)
+else()
   list(APPEND Autogen_BUILD_OPTIONS "-DCMAKE_BUILD_TYPE=$<CONFIGURATION>")
 endif()
 list(APPEND Autogen_BUILD_OPTIONS
@@ -30,6 +32,7 @@ macro(ADD_AUTOGEN_TEST NAME)
     "${_BuildDir}"
     ${build_generator_args}
     --build-project ${NAME}
+    ${Autogen_CTEST_OPTIONS}
     --build-exe-dir "${_BuildDir}"
     --force-new-ctest-process
     --build-options ${build_options} ${Autogen_BUILD_OPTIONS}
