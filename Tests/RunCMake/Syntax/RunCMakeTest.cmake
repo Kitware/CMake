@@ -72,6 +72,7 @@ run_cmake(UnterminatedBrace2)
 run_cmake(UnterminatedBracket0)
 run_cmake(UnterminatedBracket1)
 run_cmake(UnterminatedBracketComment)
+run_cmake(ImproperNesting)
 
 # Variable expansion tests
 run_cmake(ExpandInAt)

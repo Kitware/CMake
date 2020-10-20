@@ -1,4 +1,11 @@
-^CMake Error at MissingArgument.cmake:1 \(while\):
+^CMake Error at MissingArgument\.cmake:[0-9]+ \(while\):
   while called with incorrect number of arguments
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at MissingArgument\.cmake:[0-9]+ \(endwhile\):
+  endwhile An ENDWHILE command was found outside of a proper WHILE ENDWHILE
+  structure\.  Or its arguments did not match the opening WHILE command\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

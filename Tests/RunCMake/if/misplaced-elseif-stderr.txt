@@ -1,4 +1,4 @@
-CMake Error at misplaced-elseif.cmake:[0-9]+ \(elseif\):
-  An ELSEIF command was found after an ELSE command.
+CMake Error at misplaced-elseif\.cmake:[0-9]+ \(elseif\):
+  Flow control statements are not properly nested\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
