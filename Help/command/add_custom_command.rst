@@ -259,6 +259,26 @@ The options are:
   ``DEPFILE`` should also be relative to :variable:`CMAKE_CURRENT_BINARY_DIR`
   (see policy :policy:`CMP0116`.)
 
+Examples: Generating Files
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Custom commands may be used to generate source files.
+For example, the code:
+
+.. code-block:: cmake
+
+  add_custom_command(
+    OUTPUT out.c
+    COMMAND someTool -i ${CMAKE_CURRENT_SOURCE_DIR}/in.txt
+                     -o out.c
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/in.txt
+    VERBATIM)
+  add_library(myLib out.c)
+
+adds a custom command to run ``someTool`` to generate ``out.c`` and then
+compile the generated source as part of a library.  The generation rule
+will re-run whenever ``in.txt`` changes.
+
 Build Events
 ^^^^^^^^^^^^
 
@@ -308,3 +328,21 @@ of the following is specified:
   configuration and no "empty-string-command" will be added.
 
   This allows to add individual build events for every configuration.
+
+Examples: Build Events
+^^^^^^^^^^^^^^^^^^^^^^
+
+A ``POST_BUILD`` event may be used to post-process a binary after linking.
+For example, the code:
+
+.. code-block:: cmake
+
+  add_executable(myExe myExe.c)
+  add_custom_command(
+    TARGET myExe POST_BUILD
+    COMMAND someHasher -i "$<TARGET_FILE:myExe>"
+                       -o "$<TARGET_FILE:myExe>.hash"
+    VERBATIM)
+
+will run ``someHasher`` to produce a ``.hash`` file next to the executable
+after linking.
