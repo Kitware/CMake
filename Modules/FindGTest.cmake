@@ -33,7 +33,7 @@ Result variables
 
 This module will set the following variables in your project:
 
-``GTEST_FOUND``
+``GTest_FOUND``
   Found the Google Testing framework
 ``GTEST_INCLUDE_DIRS``
   the directory containing the Google Test headers
@@ -176,9 +176,40 @@ function(__gtest_import_library _target _var _config)
     endif()
 endfunction()
 
+function(__gtest_define_backwards_compatible_library_targets)
+    set(GTEST_BOTH_LIBRARIES ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} PARENT_SCOPE)
+
+    # Add targets mapping the same library names as defined in
+    # older versions of CMake's FindGTest
+    if(NOT TARGET GTest::GTest)
+        add_library(GTest::GTest INTERFACE IMPORTED)
+        target_link_libraries(GTest::GTest INTERFACE GTest::gtest)
+    endif()
+    if(NOT TARGET GTest::Main)
+        add_library(GTest::Main INTERFACE IMPORTED)
+        target_link_libraries(GTest::Main INTERFACE GTest::gtest_main)
+    endif()
+endfunction()
+
 #
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
+# first specifically look for the CMake version of GTest
+find_package(GTest QUIET NO_MODULE)
+
+# if we found the GTest cmake package then we are done, and
+# can print what we found and return.
+if(GTest_FOUND)
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTest HANDLE_COMPONENTS CONFIG_MODE)
+
+    set(GTEST_LIBRARIES      GTest::gtest)
+    set(GTEST_MAIN_LIBRARIES GTest::gtest_main)
+
+    __gtest_define_backwards_compatible_library_targets()
+
+    return()
+endif()
 
 if(NOT DEFINED GTEST_MSVC_SEARCH)
     set(GTEST_MSVC_SEARCH MD)
@@ -219,8 +250,6 @@ find_path(GTEST_INCLUDE_DIR gtest/gtest.h
 )
 mark_as_advanced(GTEST_INCLUDE_DIR)
 
-# Allow GTEST_LIBRARY and GTEST_MAIN_LIBRARY to be set manually, as the
-# locations of the gtest and gtest_main libraries, respectively.
 if(NOT GTEST_LIBRARY)
     __gtest_find_and_select_library_configurations(GTEST gtest)
 endif()
@@ -230,11 +259,10 @@ endif()
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTest DEFAULT_MSG GTEST_LIBRARY GTEST_INCLUDE_DIR GTEST_MAIN_LIBRARY)
 
-if(GTEST_FOUND)
+if(GTest_FOUND)
     set(GTEST_INCLUDE_DIRS ${GTEST_INCLUDE_DIR})
     __gtest_append_debugs(GTEST_LIBRARIES      GTEST_LIBRARY)
     __gtest_append_debugs(GTEST_MAIN_LIBRARIES GTEST_MAIN_LIBRARY)
-    set(GTEST_BOTH_LIBRARIES ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
 
     find_package(Threads QUIET)
 
@@ -267,14 +295,5 @@ if(GTEST_FOUND)
         __gtest_import_library(GTest::gtest_main GTEST_MAIN_LIBRARY "DEBUG")
     endif()
 
-    # Add targets mapping the same library names as defined in
-    # older versions of CMake's FindGTest
-    if(NOT TARGET GTest::GTest)
-        add_library(GTest::GTest INTERFACE IMPORTED)
-        target_link_libraries(GTest::GTest INTERFACE GTest::gtest)
-    endif()
-    if(NOT TARGET GTest::Main)
-        add_library(GTest::Main INTERFACE IMPORTED)
-        target_link_libraries(GTest::Main INTERFACE GTest::gtest_main)
-    endif()
+    __gtest_define_backwards_compatible_library_targets()
 endif()
