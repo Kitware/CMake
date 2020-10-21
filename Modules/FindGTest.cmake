@@ -12,6 +12,15 @@ Imported targets
 
 This module defines the following :prop_tgt:`IMPORTED` targets:
 
+``GTest::gtest``
+  The Google Test ``gtest`` library, if found; adds Thread::Thread
+  automatically
+``GTest::gtest_main``
+  The Google Test ``gtest_main`` library, if found
+
+For backwards compatibility, this module defines additionally the
+following deprecated :prop_tgt:`IMPORTED` targets:
+
 ``GTest::GTest``
   The Google Test ``gtest`` library, if found; adds Thread::Thread
   automatically
@@ -62,7 +71,7 @@ Example usage
     find_package(GTest REQUIRED)
 
     add_executable(foo foo.cc)
-    target_link_libraries(foo GTest::GTest GTest::Main)
+    target_link_libraries(foo GTest::gtest GTest::gtest_main)
 
     add_test(AllTestsInFoo foo)
 
@@ -228,43 +237,43 @@ if(GTEST_FOUND)
 
     find_package(Threads QUIET)
 
-    if(NOT TARGET GTest::GTest)
+    if(NOT TARGET GTest::gtest)
         __gtest_determine_library_type(GTEST_LIBRARY)
-        add_library(GTest::GTest ${GTEST_LIBRARY_TYPE} IMPORTED)
+        add_library(GTest::gtest ${GTEST_LIBRARY_TYPE} IMPORTED)
         if(TARGET Threads::Threads)
-            set_target_properties(GTest::GTest PROPERTIES
+            set_target_properties(GTest::gtest PROPERTIES
                 INTERFACE_LINK_LIBRARIES Threads::Threads)
         endif()
         if(GTEST_LIBRARY_TYPE STREQUAL "SHARED")
-            set_target_properties(GTest::GTest PROPERTIES
+            set_target_properties(GTest::gtest PROPERTIES
                 INTERFACE_COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
         endif()
         if(GTEST_INCLUDE_DIRS)
-            set_target_properties(GTest::GTest PROPERTIES
+            set_target_properties(GTest::gtest PROPERTIES
                 INTERFACE_INCLUDE_DIRECTORIES "${GTEST_INCLUDE_DIRS}")
         endif()
-        __gtest_import_library(GTest::GTest GTEST_LIBRARY "")
-        __gtest_import_library(GTest::GTest GTEST_LIBRARY "RELEASE")
-        __gtest_import_library(GTest::GTest GTEST_LIBRARY "DEBUG")
+        __gtest_import_library(GTest::gtest GTEST_LIBRARY "")
+        __gtest_import_library(GTest::gtest GTEST_LIBRARY "RELEASE")
+        __gtest_import_library(GTest::gtest GTEST_LIBRARY "DEBUG")
     endif()
-    if(NOT TARGET GTest::Main)
+    if(NOT TARGET GTest::gtest_main)
         __gtest_determine_library_type(GTEST_MAIN_LIBRARY)
-        add_library(GTest::Main ${GTEST_MAIN_LIBRARY_TYPE} IMPORTED)
-        set_target_properties(GTest::Main PROPERTIES
-            INTERFACE_LINK_LIBRARIES "GTest::GTest")
-        __gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "")
-        __gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "RELEASE")
-        __gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "DEBUG")
+        add_library(GTest::gtest_main ${GTEST_MAIN_LIBRARY_TYPE} IMPORTED)
+        set_target_properties(GTest::gtest_main PROPERTIES
+            INTERFACE_LINK_LIBRARIES "GTest::gtest")
+        __gtest_import_library(GTest::gtest_main GTEST_MAIN_LIBRARY "")
+        __gtest_import_library(GTest::gtest_main GTEST_MAIN_LIBRARY "RELEASE")
+        __gtest_import_library(GTest::gtest_main GTEST_MAIN_LIBRARY "DEBUG")
     endif()
 
     # Add targets mapping the same library names as defined in
-    # GTest's CMake package config.
-    if(NOT TARGET GTest::gtest)
-        add_library(GTest::gtest INTERFACE IMPORTED)
-        target_link_libraries(GTest::gtest INTERFACE GTest::GTest)
+    # older versions of CMake's FindGTest
+    if(NOT TARGET GTest::GTest)
+        add_library(GTest::GTest INTERFACE IMPORTED)
+        target_link_libraries(GTest::GTest INTERFACE GTest::gtest)
     endif()
-    if(NOT TARGET GTest::gtest_main)
-        add_library(GTest::gtest_main INTERFACE IMPORTED)
-        target_link_libraries(GTest::gtest_main INTERFACE GTest::Main)
+    if(NOT TARGET GTest::Main)
+        add_library(GTest::Main INTERFACE IMPORTED)
+        target_link_libraries(GTest::Main INTERFACE GTest::gtest_main)
     endif()
 endif()
