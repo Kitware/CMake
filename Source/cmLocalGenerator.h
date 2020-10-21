@@ -77,7 +77,7 @@ public:
   /**
    * Calls TraceVSDependencies() on all targets of this generator.
    */
-  void TraceDependencies();
+  void TraceDependencies() const;
 
   virtual void AddHelperCommands() {}
 
@@ -451,7 +451,7 @@ public:
                                   const std::string& fname);
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(cmCustomCommandGenerator const& ccg,
-                               const char* default_comment = "");
+                               const char* default_comment = "") const;
   // Compute object file names.
   std::string GetObjectFileNameWithoutTarget(
     const cmSourceFile& source, std::string const& dir_max,

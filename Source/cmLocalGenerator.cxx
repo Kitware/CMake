@@ -279,7 +279,7 @@ static void MoveSystemIncludesToEnd(std::vector<BT<std::string>>& includeDirs,
                    });
 }
 
-void cmLocalGenerator::TraceDependencies()
+void cmLocalGenerator::TraceDependencies() const
 {
   // Generate the rule files for each target.
   const auto& targets = this->GetGeneratorTargets();
@@ -3210,7 +3210,7 @@ std::string cmLocalGenerator::GetProjectName() const
 }
 
 std::string cmLocalGenerator::ConstructComment(
-  cmCustomCommandGenerator const& ccg, const char* default_comment)
+  cmCustomCommandGenerator const& ccg, const char* default_comment) const
 {
   // Check for a comment provided with the command.
   if (ccg.GetComment()) {

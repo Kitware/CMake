@@ -704,7 +704,7 @@ bool cmGlobalGhsMultiGenerator::ComputeTargetBuildOrder(
   std::set<cmGeneratorTarget const*> temp;
   std::set<cmGeneratorTarget const*> perm;
 
-  for (auto ti : tgt) {
+  for (auto const ti : tgt) {
     bool r = VisitTarget(temp, perm, build, ti);
     if (r) {
       return r;
@@ -726,7 +726,7 @@ bool cmGlobalGhsMultiGenerator::VisitTarget(
        * in the same order */
       OrderedTargetDependSet sortedTargets(this->GetTargetDirectDepends(ti),
                                            "");
-      for (auto& di : sortedTargets) {
+      for (auto const& di : sortedTargets) {
         if (this->VisitTarget(temp, perm, order, di)) {
           return true;
         }

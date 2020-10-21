@@ -2601,7 +2601,7 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
 }
 
 void cmGlobalGenerator::AddGlobalTarget_EditCache(
-  std::vector<GlobalTargetInfo>& targets)
+  std::vector<GlobalTargetInfo>& targets) const
 {
   const char* editCacheTargetName = this->GetEditCacheTargetName();
   if (!editCacheTargetName) {
@@ -2635,7 +2635,7 @@ void cmGlobalGenerator::AddGlobalTarget_EditCache(
 }
 
 void cmGlobalGenerator::AddGlobalTarget_RebuildCache(
-  std::vector<GlobalTargetInfo>& targets)
+  std::vector<GlobalTargetInfo>& targets) const
 {
   const char* rebuildCacheTargetName = this->GetRebuildCacheTargetName();
   if (!rebuildCacheTargetName) {
@@ -2758,7 +2758,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
   }
 }
 
-std::string cmGlobalGenerator::GetPredefinedTargetsFolder()
+std::string cmGlobalGenerator::GetPredefinedTargetsFolder() const
 {
   cmProp prop = this->GetCMakeInstance()->GetState()->GetGlobalProperty(
     "PREDEFINED_TARGETS_FOLDER");

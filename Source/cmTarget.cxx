@@ -213,7 +213,7 @@ public:
   bool CheckImportedLibName(std::string const& prop,
                             std::string const& value) const;
 
-  std::string ProcessSourceItemCMP0049(const std::string& s);
+  std::string ProcessSourceItemCMP0049(const std::string& s) const;
 };
 
 namespace {
@@ -740,7 +740,8 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
   }
 }
 
-std::string cmTargetInternals::ProcessSourceItemCMP0049(const std::string& s)
+std::string cmTargetInternals::ProcessSourceItemCMP0049(
+  const std::string& s) const
 {
   std::string src = s;
 
@@ -791,7 +792,7 @@ struct CreateLocation
   {
   }
 
-  cmSourceFileLocation operator()(const std::string& filename)
+  cmSourceFileLocation operator()(const std::string& filename) const
   {
     return cmSourceFileLocation(this->Makefile, filename);
   }
@@ -857,7 +858,7 @@ cmSourceFile* cmTarget::AddSource(const std::string& src, bool before)
                                            cmSourceFileLocationKind::Known);
 }
 
-void cmTarget::ClearDependencyInformation(cmMakefile& mf)
+void cmTarget::ClearDependencyInformation(cmMakefile& mf) const
 {
   std::string depname = cmStrCat(this->GetName(), "_LIB_DEPENDS");
   mf.RemoveCacheDefinition(depname);

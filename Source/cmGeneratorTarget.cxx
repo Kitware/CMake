@@ -254,7 +254,7 @@ EvaluatedTargetPropertyEntries EvaluateTargetPropertyEntries(
 {
   EvaluatedTargetPropertyEntries out;
   out.Entries.reserve(in.size());
-  for (auto& entry : in) {
+  for (auto const& entry : in) {
     out.Entries.emplace_back(EvaluateTargetPropertyEntry(
       thisTarget, config, lang, dagChecker, *entry));
   }
@@ -332,7 +332,7 @@ cmGeneratorTarget::~cmGeneratorTarget() = default;
 const std::string& cmGeneratorTarget::GetSourcesProperty() const
 {
   std::vector<std::string> values;
-  for (auto& se : this->SourceEntries) {
+  for (auto const& se : this->SourceEntries) {
     values.push_back(se->GetInput());
   }
   static std::string value;
@@ -2504,7 +2504,7 @@ public:
     }
   }
 
-  bool GetHadLinkLanguageSensitiveCondition()
+  bool GetHadLinkLanguageSensitiveCondition() const
   {
     return HadLinkLanguageSensitiveCondition;
   }
