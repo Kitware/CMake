@@ -178,6 +178,8 @@ endfunction()
 
 #
 
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
 if(NOT DEFINED GTEST_MSVC_SEARCH)
     set(GTEST_MSVC_SEARCH MD)
 endif()
@@ -226,7 +228,6 @@ if(NOT GTEST_MAIN_LIBRARY)
     __gtest_find_and_select_library_configurations(GTEST_MAIN gtest_main)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTest DEFAULT_MSG GTEST_LIBRARY GTEST_INCLUDE_DIR GTEST_MAIN_LIBRARY)
 
 if(GTEST_FOUND)
