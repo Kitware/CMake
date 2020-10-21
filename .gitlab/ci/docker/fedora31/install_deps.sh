@@ -65,6 +65,7 @@ dnf install --setopt=install_weak_deps=False -y \
     pypy3 pypy3-devel \
     python2 python2-devel python2-numpy \
     python3 python3-devel python3-numpy \
+    python3-jsmin python3-jsonschema \
     ruby rubygems ruby-devel \
     SDL-devel \
     sqlite-devel \

@@ -769,7 +769,7 @@ add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
   -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
 
 add_RunCMake_test("UnityBuild")
-add_RunCMake_test(CMakePresets)
+add_RunCMake_test(CMakePresets -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
 
 if(WIN32)
   add_RunCMake_test(Win32GenEx)

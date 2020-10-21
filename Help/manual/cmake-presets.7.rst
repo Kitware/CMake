@@ -353,3 +353,9 @@ Format
     ``<macro-name>`` with a very short (preferably <= 4 characters) vendor
     identifier prefix, followed by a ``.``, followed by the macro name. For
     example, the Example IDE could have ``$vendor{xide.ideInstallDir}``.
+
+Schema
+======
+
+:download:`This file </manual/presets/schema.json>` provides a machine-readable
+JSON schema for the ``CMakePresets.json`` format.
