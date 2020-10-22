@@ -3079,15 +3079,16 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
   std::set<std::string> depends;
   for (std::string const& config :
        this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig)) {
-    cmCustomCommandGenerator ccg(cc, config, this->LocalGenerator);
+    for (cmCustomCommandGenerator const& ccg :
+         this->LocalGenerator->MakeCustomCommandGenerators(cc, config)) {
+      // Collect target-level dependencies referenced in command lines.
+      for (auto const& util : ccg.GetUtilities()) {
+        this->GeneratorTarget->Target->AddUtility(util);
+      }
 
-    // Collect target-level dependencies referenced in command lines.
-    for (auto const& util : ccg.GetUtilities()) {
-      this->GeneratorTarget->Target->AddUtility(util);
+      // Collect file-level dependencies referenced in DEPENDS.
+      depends.insert(ccg.GetDepends().begin(), ccg.GetDepends().end());
     }
-
-    // Collect file-level dependencies referenced in DEPENDS.
-    depends.insert(ccg.GetDepends().begin(), ccg.GetDepends().end());
   }
 
   // Queue file-level dependencies.

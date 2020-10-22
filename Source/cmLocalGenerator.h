@@ -24,6 +24,7 @@
 
 class cmCompiledGeneratorExpression;
 class cmComputeLinkInformation;
+class cmCustomCommand;
 class cmCustomCommandGenerator;
 class cmCustomCommandLines;
 class cmGeneratorTarget;
@@ -362,6 +363,9 @@ public:
     const char* comment = nullptr, bool uses_terminal = false,
     bool command_expand_lists = false, const std::string& job_pool = "",
     bool stdPipesUTF8 = false);
+
+  virtual std::vector<cmCustomCommandGenerator> MakeCustomCommandGenerators(
+    cmCustomCommand const& cc, std::string const& config);
 
   std::vector<std::string> ExpandCustomCommandOutputPaths(
     cmCompiledGeneratorExpression const& cge, std::string const& config);

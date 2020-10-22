@@ -575,9 +575,95 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     return;
   }
 
+  for (cmCustomCommandGenerator const& ccg :
+       this->MakeCustomCommandGenerators(*cc, config)) {
+
+    const std::vector<std::string>& outputs = ccg.GetOutputs();
+    const std::vector<std::string>& byproducts = ccg.GetByproducts();
+
+    bool symbolic = false;
+    for (std::string const& output : outputs) {
+      if (cmSourceFile* sf = this->Makefile->GetSource(output)) {
+        if (sf->GetPropertyAsBool("SYMBOLIC")) {
+          symbolic = true;
+          break;
+        }
+      }
+    }
+
+    cmNinjaDeps ninjaOutputs(outputs.size() + byproducts.size());
+    std::transform(outputs.begin(), outputs.end(), ninjaOutputs.begin(),
+                   gg->MapToNinjaPath());
+    std::transform(byproducts.begin(), byproducts.end(),
+                   ninjaOutputs.begin() + outputs.size(),
+                   gg->MapToNinjaPath());
+
+    for (std::string const& ninjaOutput : ninjaOutputs) {
+      gg->SeenCustomCommandOutput(ninjaOutput);
+    }
+
+    cmNinjaDeps ninjaDeps;
+    this->AppendCustomCommandDeps(ccg, ninjaDeps, config);
+
+    std::vector<std::string> cmdLines;
+    this->AppendCustomCommandLines(ccg, cmdLines);
+
+    if (cmdLines.empty()) {
+      cmNinjaBuild build("phony");
+      build.Comment = "Phony custom command for " + ninjaOutputs[0];
+      build.Outputs = std::move(ninjaOutputs);
+      build.ExplicitDeps = std::move(ninjaDeps);
+      build.OrderOnlyDeps = orderOnlyDeps;
+      gg->WriteBuild(this->GetImplFileStream(config), build);
+    } else {
+      std::string customStep = cmSystemTools::GetFilenameName(ninjaOutputs[0]);
+      // Hash full path to make unique.
+      customStep += '-';
+      cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
+      customStep += hash.HashString(ninjaOutputs[0]).substr(0, 7);
+
+      std::string depfile = cc->GetDepfile();
+      if (!depfile.empty()) {
+        switch (this->GetPolicyStatus(cmPolicies::CMP0116)) {
+          case cmPolicies::WARN:
+            if (this->GetCurrentBinaryDirectory() !=
+                  this->GetBinaryDirectory() ||
+                this->Makefile->PolicyOptionalWarningEnabled(
+                  "CMAKE_POLICY_WARNING_CMP0116")) {
+              this->GetCMakeInstance()->IssueMessage(
+                MessageType::AUTHOR_WARNING,
+                cmPolicies::GetPolicyWarning(cmPolicies::CMP0116),
+                cc->GetBacktrace());
+            }
+            CM_FALLTHROUGH;
+          case cmPolicies::OLD:
+            break;
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::NEW:
+            cmSystemTools::MakeDirectory(
+              cmStrCat(this->GetBinaryDirectory(), "/CMakeFiles/d"));
+            depfile = ccg.GetInternalDepfile();
+            break;
+        }
+      }
+
+      gg->WriteCustomCommandBuild(
+        this->BuildCommandLine(cmdLines, customStep),
+        this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
+        depfile, cc->GetJobPool(), cc->GetUsesTerminal(),
+        /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, config,
+        ninjaDeps, orderOnlyDeps);
+    }
+  }
+}
+
+std::vector<cmCustomCommandGenerator>
+cmLocalNinjaGenerator::MakeCustomCommandGenerators(cmCustomCommand const& cc,
+                                                   std::string const& config)
+{
   bool transformDepfile = false;
-  auto cmp0116 = this->GetPolicyStatus(cmPolicies::CMP0116);
-  switch (cmp0116) {
+  switch (this->GetPolicyStatus(cmPolicies::CMP0116)) {
     case cmPolicies::OLD:
     case cmPolicies::WARN:
       break;
@@ -588,84 +674,9 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       break;
   }
 
-  cmCustomCommandGenerator ccg(*cc, config, this, transformDepfile);
-
-  const std::vector<std::string>& outputs = ccg.GetOutputs();
-  const std::vector<std::string>& byproducts = ccg.GetByproducts();
-
-  bool symbolic = false;
-  for (std::string const& output : outputs) {
-    if (cmSourceFile* sf = this->Makefile->GetSource(output)) {
-      if (sf->GetPropertyAsBool("SYMBOLIC")) {
-        symbolic = true;
-        break;
-      }
-    }
-  }
-
-  cmNinjaDeps ninjaOutputs(outputs.size() + byproducts.size());
-  std::transform(outputs.begin(), outputs.end(), ninjaOutputs.begin(),
-                 gg->MapToNinjaPath());
-  std::transform(byproducts.begin(), byproducts.end(),
-                 ninjaOutputs.begin() + outputs.size(), gg->MapToNinjaPath());
-
-  for (std::string const& ninjaOutput : ninjaOutputs) {
-    gg->SeenCustomCommandOutput(ninjaOutput);
-  }
-
-  cmNinjaDeps ninjaDeps;
-  this->AppendCustomCommandDeps(ccg, ninjaDeps, config);
-
-  std::vector<std::string> cmdLines;
-  this->AppendCustomCommandLines(ccg, cmdLines);
-
-  if (cmdLines.empty()) {
-    cmNinjaBuild build("phony");
-    build.Comment = "Phony custom command for " + ninjaOutputs[0];
-    build.Outputs = std::move(ninjaOutputs);
-    build.ExplicitDeps = std::move(ninjaDeps);
-    build.OrderOnlyDeps = orderOnlyDeps;
-    gg->WriteBuild(this->GetImplFileStream(config), build);
-  } else {
-    std::string customStep = cmSystemTools::GetFilenameName(ninjaOutputs[0]);
-    // Hash full path to make unique.
-    customStep += '-';
-    cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
-    customStep += hash.HashString(ninjaOutputs[0]).substr(0, 7);
-
-    std::string depfile = cc->GetDepfile();
-    if (!depfile.empty()) {
-      switch (cmp0116) {
-        case cmPolicies::WARN:
-          if (this->GetCurrentBinaryDirectory() !=
-                this->GetBinaryDirectory() ||
-              this->Makefile->PolicyOptionalWarningEnabled(
-                "CMAKE_POLICY_WARNING_CMP0116")) {
-            this->GetCMakeInstance()->IssueMessage(
-              MessageType::AUTHOR_WARNING,
-              cmPolicies::GetPolicyWarning(cmPolicies::CMP0116),
-              cc->GetBacktrace());
-          }
-          CM_FALLTHROUGH;
-        case cmPolicies::OLD:
-          break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::NEW:
-          cmSystemTools::MakeDirectory(
-            cmStrCat(this->GetBinaryDirectory(), "/CMakeFiles/d"));
-          depfile = ccg.GetInternalDepfile();
-          break;
-      }
-    }
-
-    gg->WriteCustomCommandBuild(
-      this->BuildCommandLine(cmdLines, customStep),
-      this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
-      depfile, cc->GetJobPool(), cc->GetUsesTerminal(),
-      /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, config,
-      ninjaDeps, orderOnlyDeps);
-  }
+  std::vector<cmCustomCommandGenerator> ccgs;
+  ccgs.emplace_back(cc, config, this, transformDepfile);
+  return ccgs;
 }
 
 void cmLocalNinjaGenerator::AddCustomCommandTarget(cmCustomCommand const* cc,

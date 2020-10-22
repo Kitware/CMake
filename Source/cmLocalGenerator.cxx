@@ -4232,6 +4232,15 @@ cmSourceFile* cmLocalGenerator::GetSourceFileWithOutput(
   return nullptr;
 }
 
+std::vector<cmCustomCommandGenerator>
+cmLocalGenerator::MakeCustomCommandGenerators(cmCustomCommand const& cc,
+                                              std::string const& config)
+{
+  std::vector<cmCustomCommandGenerator> ccgs;
+  ccgs.emplace_back(cc, config, this);
+  return ccgs;
+}
+
 std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputPaths(
   cmCompiledGeneratorExpression const& cge, std::string const& config)
 {

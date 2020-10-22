@@ -70,6 +70,9 @@ public:
                            const std::string& fileConfig,
                            cmNinjaTargetDepends depends);
 
+  std::vector<cmCustomCommandGenerator> MakeCustomCommandGenerators(
+    cmCustomCommand const& cc, std::string const& config) override;
+
   void AddCustomCommandTarget(cmCustomCommand const* cc,
                               cmGeneratorTarget* target);
   void AppendCustomCommandLines(cmCustomCommandGenerator const& ccg,
