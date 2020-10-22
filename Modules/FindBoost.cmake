@@ -442,10 +442,15 @@ if (NOT Boost_NO_BOOST_CMAKE)
     endif()
   endif()
 
+  set(_boost_FIND_PACKAGE_ARGS "")
+  if(Boost_NO_SYSTEM_PATHS)
+    list(APPEND _boost_FIND_PACKAGE_ARGS NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
+  endif()
+
   # Do the same find_package call but look specifically for the CMake version.
   # Note that args are passed in the Boost_FIND_xxxxx variables, so there is no
   # need to delegate them to this find_package call.
-  find_package(Boost QUIET NO_MODULE)
+  find_package(Boost QUIET NO_MODULE ${_boost_FIND_PACKAGE_ARGS})
   if (DEFINED Boost_DIR)
     mark_as_advanced(Boost_DIR)
   endif ()
