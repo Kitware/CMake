@@ -140,6 +140,7 @@ optional<T> make_optional(Args&&... args)
 
 template <typename T>
 optional<T>::optional(nullopt_t) noexcept
+  : optional()
 {
 }
 
