@@ -13,6 +13,7 @@
 
 #include "cmDepends.h"
 #include "cmLocalCommonGenerator.h"
+#include "cmLocalGenerator.h"
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;
@@ -152,23 +153,21 @@ public:
 
   // File pairs for implicit dependency scanning.  The key of the map
   // is the depender and the value is the explicit dependee.
-  struct ImplicitDependFileMap : public cmDepends::DependencyMap
-  {
-  };
-  struct ImplicitDependLanguageMap
-    : public std::map<std::string, ImplicitDependFileMap>
-  {
-  };
-  struct ImplicitDependTargetMap
-    : public std::map<std::string, ImplicitDependLanguageMap>
-  {
-  };
+  using ImplicitDependFileMap = cmDepends::DependencyMap;
+  using ImplicitDependLanguageMap =
+    std::map<std::string, ImplicitDependFileMap>;
+  using ImplicitDependScannerMap =
+    std::map<cmDependencyScannerKind, ImplicitDependLanguageMap>;
+  using ImplicitDependTargetMap =
+    std::map<std::string, ImplicitDependScannerMap>;
   ImplicitDependLanguageMap const& GetImplicitDepends(
-    cmGeneratorTarget const* tgt);
+    cmGeneratorTarget const* tgt,
+    cmDependencyScannerKind scanner = cmDependencyScannerKind::CMake);
 
-  void AddImplicitDepends(cmGeneratorTarget const* tgt,
-                          const std::string& lang, const std::string& obj,
-                          const std::string& src);
+  void AddImplicitDepends(
+    cmGeneratorTarget const* tgt, const std::string& lang,
+    const std::string& obj, const std::string& src,
+    cmDependencyScannerKind scanner = cmDependencyScannerKind::CMake);
 
   // write the target rules for the local Makefile into the stream
   void WriteLocalAllRules(std::ostream& ruleFileStream);

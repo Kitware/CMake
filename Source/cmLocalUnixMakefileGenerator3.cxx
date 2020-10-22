@@ -2049,16 +2049,18 @@ std::string cmLocalUnixMakefileGenerator3::GetTargetDirectory(
 }
 
 cmLocalUnixMakefileGenerator3::ImplicitDependLanguageMap const&
-cmLocalUnixMakefileGenerator3::GetImplicitDepends(const cmGeneratorTarget* tgt)
+cmLocalUnixMakefileGenerator3::GetImplicitDepends(
+  const cmGeneratorTarget* tgt, cmDependencyScannerKind scanner)
 {
-  return this->ImplicitDepends[tgt->GetName()];
+  return this->ImplicitDepends[tgt->GetName()][scanner];
 }
 
 void cmLocalUnixMakefileGenerator3::AddImplicitDepends(
   const cmGeneratorTarget* tgt, const std::string& lang,
-  const std::string& obj, const std::string& src)
+  const std::string& obj, const std::string& src,
+  cmDependencyScannerKind scanner)
 {
-  this->ImplicitDepends[tgt->GetName()][lang][obj].push_back(src);
+  this->ImplicitDepends[tgt->GetName()][scanner][lang][obj].push_back(src);
 }
 
 void cmLocalUnixMakefileGenerator3::CreateCDCommand(

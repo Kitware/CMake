@@ -23,6 +23,7 @@
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h" // IWYU pragma: keep
 #include "cmLocalCommonGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmMakefileExecutableTargetGenerator.h"
