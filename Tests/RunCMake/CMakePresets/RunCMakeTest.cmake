@@ -121,6 +121,13 @@ run_cmake_presets(InvalidCMakeGeneratorConfig)
 run_cmake_presets(UnknownCMakeGeneratorConfig)
 run_cmake_presets(EmptyCacheKey)
 run_cmake_presets(EmptyEnvKey)
+set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
+run_cmake_presets(UnclosedMacro)
+run_cmake_presets(NoSuchMacro)
+run_cmake_presets(EnvCycle)
+run_cmake_presets(EmptyEnv)
+run_cmake_presets(EmptyPenv)
+set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 
 # Test cmakeMinimumRequired field
 run_cmake_presets(MinimumRequiredInvalid)
@@ -170,13 +177,8 @@ run_cmake_presets(GoodInheritanceMultiSecond)
 run_cmake_presets(GoodInheritanceMacro)
 
 # Test bad preset arguments
-run_cmake_presets(UnclosedMacro)
-run_cmake_presets(NoSuchMacro)
 run_cmake_presets(VendorMacro)
 run_cmake_presets(InvalidGenerator)
-run_cmake_presets(EnvCycle)
-run_cmake_presets(EmptyEnv)
-run_cmake_presets(EmptyPenv)
 
 # Test Visual Studio-specific stuff
 if(RunCMake_GENERATOR MATCHES "^Visual Studio ")
