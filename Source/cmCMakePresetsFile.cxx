@@ -77,15 +77,37 @@ auto const RootVersionHelper =
 auto const VariableStringHelper = cmJSONStringHelper<ReadFileResult>(
   ReadFileResult::READ_OK, ReadFileResult::INVALID_VARIABLE);
 
+ReadFileResult VariableValueHelper(std::string& out, const Json::Value* value)
+{
+  if (!value) {
+    out.clear();
+    return ReadFileResult::READ_OK;
+  }
+
+  if (value->isBool()) {
+    out = value->asBool() ? "TRUE" : "FALSE";
+    return ReadFileResult::READ_OK;
+  }
+
+  return VariableStringHelper(out, value);
+}
+
 auto const VariableObjectHelper =
   cmJSONObjectHelper<CacheVariable, ReadFileResult>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_VARIABLE, false)
     .Bind("type"_s, &CacheVariable::Type, VariableStringHelper, false)
-    .Bind("value"_s, &CacheVariable::Value, VariableStringHelper);
+    .Bind("value"_s, &CacheVariable::Value, VariableValueHelper);
 
 ReadFileResult VariableHelper(cm::optional<CacheVariable>& out,
                               const Json::Value* value)
 {
+  if (value->isBool()) {
+    out = CacheVariable{
+      /*Type=*/"BOOL",
+      /*Value=*/value->asBool() ? "TRUE" : "FALSE",
+    };
+    return ReadFileResult::READ_OK;
+  }
   if (value->isString()) {
     out = CacheVariable{
       /*Type=*/"",
