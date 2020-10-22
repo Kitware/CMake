@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "NoSuchMacro",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${noexist}"
+    }
+  ]
+}

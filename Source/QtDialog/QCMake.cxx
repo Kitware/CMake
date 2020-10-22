@@ -157,8 +157,8 @@ void QCMake::setPreset(const QString& name, bool setBinary)
 
     if (!name.isNull()) {
       std::string presetName(name.toLocal8Bit());
-      auto const& preset = this->CMakePresetsFile.Presets[presetName];
-      auto expandedPreset = this->CMakePresetsFile.ExpandMacros(preset);
+      auto const& expandedPreset =
+        this->CMakePresetsFile.Presets[presetName].Expanded;
       if (expandedPreset) {
         if (setBinary) {
           QString binaryDir =
@@ -420,8 +420,7 @@ QCMakePropertyList QCMake::properties() const
 
   if (!this->PresetName.isNull()) {
     std::string presetName(this->PresetName.toLocal8Bit());
-    auto p = this->CMakePresetsFile.ExpandMacros(
-      this->CMakePresetsFile.Presets.at(presetName));
+    auto const& p = this->CMakePresetsFile.Presets.at(presetName).Expanded;
     if (p) {
       for (auto const& v : p->CacheVariables) {
         if (!v.second) {
@@ -537,7 +536,8 @@ void QCMake::loadPresets()
 
   QVector<QCMakePreset> presets;
   for (auto const& name : this->CMakePresetsFile.PresetOrder) {
-    auto const& p = this->CMakePresetsFile.Presets[name];
+    auto const& it = this->CMakePresetsFile.Presets[name];
+    auto const& p = it.Unexpanded;
     if (p.Hidden) {
       continue;
     }
@@ -554,12 +554,12 @@ void QCMake::loadPresets()
     preset.toolset = std::move(QString::fromLocal8Bit(p.Toolset.data()));
     preset.setGenConfig = !p.GeneratorConfig ||
       p.GeneratorConfig == cmCMakePresetsFile::CMakeGeneratorConfig::Default;
-    preset.enabled = std::find_if(this->AvailableGenerators.begin(),
-                                  this->AvailableGenerators.end(),
-                                  [&p](const cmake::GeneratorInfo& g) {
-                                    return g.name == p.Generator;
-                                  }) != this->AvailableGenerators.end() &&
-      this->CMakePresetsFile.ExpandMacros(p);
+    preset.enabled = it.Expanded &&
+      std::find_if(this->AvailableGenerators.begin(),
+                   this->AvailableGenerators.end(),
+                   [&p](const cmake::GeneratorInfo& g) {
+                     return g.name == p.Generator;
+                   }) != this->AvailableGenerators.end();
     presets.push_back(preset);
   }
   emit this->presetsChanged(presets);
