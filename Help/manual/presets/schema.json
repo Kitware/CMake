@@ -119,6 +119,10 @@
                   "description": "Setting a variable to null causes it to not be set, even if a value was inherited from another preset."
                 },
                 {
+                  "type": "boolean",
+                  "description": "A boolean representing the value of the variable. Equivalent to \"TRUE\" or \"FALSE\"."
+                },
+                {
                   "type": "string",
                   "description": "A string representing the value of the variable (which supports macro expansion)."
                 },
@@ -131,8 +135,16 @@
                       "description": "An optional string representing the type of the variable. It should be BOOL, FILEPATH, PATH, STRING, or INTERNAL."
                     },
                     "value": {
-                      "type": "string",
-                      "description": "A required string representing the value of the variable. This field supports macro expansion."
+                      "anyOf": [
+                        {
+                          "type": "boolean",
+                          "description": "A required boolean representing the value of the variable. Equivalent to \"TRUE\" or \"FALSE\"."
+                        },
+                        {
+                          "type": "string",
+                          "description": "A required string representing the value of the variable. This field supports macro expansion."
+                        }
+                      ]
                     }
                   },
                   "required": [

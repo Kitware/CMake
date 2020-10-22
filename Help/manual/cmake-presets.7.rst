@@ -176,9 +176,10 @@ Format
     ``cacheVariables``
 
       An optional map of cache variables. The key is the variable name (which
-      may not be an empty string), and the value is either ``null``, a string
-      representing the value of the variable (which supports macro expansion),
-      or an object with the following fields:
+      may not be an empty string), and the value is either ``null``, a boolean
+      (which is equivalent to a value of ``"TRUE"`` or ``"FALSE"`` and a type
+      of ``BOOL``), a string representing the value of the variable (which
+      supports macro expansion), or an object with the following fields:
 
       ``type``
 
@@ -186,7 +187,8 @@ Format
 
       ``value``
 
-        A required string representing the value of the variable. This field
+        A required string or boolean representing the value of the variable.
+        A boolean is equivalent to ``"TRUE"`` or ``"FALSE"``. This field
         supports macro expansion.
 
       Cache variables are inherited through the ``inherits`` field, and the

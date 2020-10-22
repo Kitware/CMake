@@ -46,6 +46,22 @@
           "type": "BOOL",
           "value": "OFF"
         },
+        "TEST_BOOL_TRUE": true,
+        "TEST_BOOL_FALSE": false,
+        "TEST_TYPED_BOOL_TRUE": {
+          "type": "STRING",
+          "value": true
+        },
+        "TEST_TYPED_BOOL_FALSE": {
+          "type": "STRING",
+          "value": false
+        },
+        "TEST_UNTYPED_BOOL_TRUE": {
+          "value": true
+        },
+        "TEST_UNTYPED_BOOL_FALSE": {
+          "value": false
+        },
         "TEST_PRESET_NAME": {
           "type": "STRING",
           "value": "x${presetName}x"
