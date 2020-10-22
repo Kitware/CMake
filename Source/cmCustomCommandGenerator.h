@@ -14,7 +14,7 @@ class cmLocalGenerator;
 
 class cmCustomCommandGenerator
 {
-  cmCustomCommand const& CC;
+  cmCustomCommand const* CC;
   std::string Config;
   cmLocalGenerator* LG;
   bool OldStyle;
@@ -33,9 +33,11 @@ public:
   cmCustomCommandGenerator(cmCustomCommand const& cc, std::string config,
                            cmLocalGenerator* lg, bool transformDepfile = true);
   cmCustomCommandGenerator(const cmCustomCommandGenerator&) = delete;
+  cmCustomCommandGenerator(cmCustomCommandGenerator&&) = default;
   cmCustomCommandGenerator& operator=(const cmCustomCommandGenerator&) =
     delete;
-  cmCustomCommand const& GetCC() const { return this->CC; }
+  cmCustomCommandGenerator& operator=(cmCustomCommandGenerator&&) = default;
+  cmCustomCommand const& GetCC() const { return *(this->CC); }
   unsigned int GetNumberOfCommands() const;
   std::string GetCommand(unsigned int c) const;
   void AppendArguments(unsigned int c, std::string& cmd) const;

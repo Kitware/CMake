@@ -47,7 +47,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
                                                    std::string config,
                                                    cmLocalGenerator* lg,
                                                    bool transformDepfile)
-  : CC(cc)
+  : CC(&cc)
   , Config(std::move(config))
   , LG(lg)
   , OldStyle(cc.GetEscapeOldStyle())
@@ -56,13 +56,13 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
 {
   cmGeneratorExpression ge(cc.GetBacktrace());
 
-  const cmCustomCommandLines& cmdlines = this->CC.GetCommandLines();
+  const cmCustomCommandLines& cmdlines = this->CC->GetCommandLines();
   for (cmCustomCommandLine const& cmdline : cmdlines) {
     cmCustomCommandLine argv;
     for (std::string const& clarg : cmdline) {
       std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(clarg);
       std::string parsed_arg = cge->Evaluate(this->LG, this->Config);
-      if (this->CC.GetCommandExpandLists()) {
+      if (this->CC->GetCommandExpandLists()) {
         cm::append(argv, cmExpandedList(parsed_arg));
       } else {
         argv.push_back(std::move(parsed_arg));
@@ -113,7 +113,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
               this->Byproducts);
   AppendPaths(cc.GetDepends(), ge, this->LG, this->Config, this->Depends);
 
-  const std::string& workingdirectory = this->CC.GetWorkingDirectory();
+  const std::string& workingdirectory = this->CC->GetWorkingDirectory();
   if (!workingdirectory.empty()) {
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(workingdirectory);
@@ -270,7 +270,7 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
 
 std::string cmCustomCommandGenerator::GetFullDepfile() const
 {
-  std::string depfile = this->CC.GetDepfile();
+  std::string depfile = this->CC->GetDepfile();
   if (depfile.empty()) {
     return "";
   }
@@ -304,7 +304,7 @@ std::string cmCustomCommandGenerator::GetInternalDepfile() const
 
 const char* cmCustomCommandGenerator::GetComment() const
 {
-  return this->CC.GetComment();
+  return this->CC->GetComment();
 }
 
 std::string cmCustomCommandGenerator::GetWorkingDirectory() const
@@ -314,7 +314,7 @@ std::string cmCustomCommandGenerator::GetWorkingDirectory() const
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const
 {
-  return this->CC.GetOutputs();
+  return this->CC->GetOutputs();
 }
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
