@@ -603,11 +603,6 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     }
   }
 
-#if 0
-#  error TODO: Once CC in an ExternalProject target must provide the \
-    file of each imported target that has an add_dependencies pointing \
-    at us.  How to know which ExternalProject step actually provides it?
-#endif
   cmNinjaDeps ninjaOutputs(outputs.size() + byproducts.size());
   std::transform(outputs.begin(), outputs.end(), ninjaOutputs.begin(),
                  gg->MapToNinjaPath());
