@@ -789,7 +789,7 @@ function(run_llvm_rc)
         "test.tmp was not deleted")
   endif()
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir")
-  run_cmake_command(llvm_rc_full_run ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/source_file test.tmp ${CMAKE_COMMAND} -E echo "This is a test" ++ ${CMAKE_COMMAND} -E copy test.tmp SOURCE_DIR/llvmrc.result )
+  run_cmake_command(llvm_rc_full_run ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/source_file test.tmp ${CMAKE_COMMAND} -E echo "This is a test" ++ ${LLVM_RC} -bad /FO SOURCE_DIR/llvmrc.result test.tmp )
   if(EXISTS ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/test.tmp)
       message(SEND_ERROR "${test} - FAILED:\n"
         "test.tmp was not deleted")
