@@ -450,7 +450,13 @@ if (NOT Boost_NO_BOOST_CMAKE)
   # Do the same find_package call but look specifically for the CMake version.
   # Note that args are passed in the Boost_FIND_xxxxx variables, so there is no
   # need to delegate them to this find_package call.
+  cmake_policy(PUSH)
+  if(BOOST_ROOT AND NOT Boost_ROOT)
+    cmake_policy(SET CMP0074 NEW)
+    set(Boost_ROOT "${BOOST_ROOT}")
+  endif()
   find_package(Boost QUIET NO_MODULE ${_boost_FIND_PACKAGE_ARGS})
+  cmake_policy(POP)
   if (DEFINED Boost_DIR)
     mark_as_advanced(Boost_DIR)
   endif ()
