@@ -12,6 +12,15 @@ Imported targets
 
 This module defines the following :prop_tgt:`IMPORTED` targets:
 
+``GTest::gtest``
+  The Google Test ``gtest`` library, if found; adds Thread::Thread
+  automatically
+``GTest::gtest_main``
+  The Google Test ``gtest_main`` library, if found
+
+For backwards compatibility, this module defines additionally the
+following deprecated :prop_tgt:`IMPORTED` targets:
+
 ``GTest::GTest``
   The Google Test ``gtest`` library, if found; adds Thread::Thread
   automatically
@@ -24,7 +33,7 @@ Result variables
 
 This module will set the following variables in your project:
 
-``GTEST_FOUND``
+``GTest_FOUND``
   Found the Google Testing framework
 ``GTEST_INCLUDE_DIRS``
   the directory containing the Google Test headers
@@ -62,7 +71,7 @@ Example usage
     find_package(GTest REQUIRED)
 
     add_executable(foo foo.cc)
-    target_link_libraries(foo GTest::GTest GTest::Main)
+    target_link_libraries(foo GTest::gtest GTest::gtest_main)
 
     add_test(AllTestsInFoo foo)
 
@@ -167,7 +176,40 @@ function(__gtest_import_library _target _var _config)
     endif()
 endfunction()
 
+function(__gtest_define_backwards_compatible_library_targets)
+    set(GTEST_BOTH_LIBRARIES ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} PARENT_SCOPE)
+
+    # Add targets mapping the same library names as defined in
+    # older versions of CMake's FindGTest
+    if(NOT TARGET GTest::GTest)
+        add_library(GTest::GTest INTERFACE IMPORTED)
+        target_link_libraries(GTest::GTest INTERFACE GTest::gtest)
+    endif()
+    if(NOT TARGET GTest::Main)
+        add_library(GTest::Main INTERFACE IMPORTED)
+        target_link_libraries(GTest::Main INTERFACE GTest::gtest_main)
+    endif()
+endfunction()
+
 #
+
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
+# first specifically look for the CMake version of GTest
+find_package(GTest QUIET NO_MODULE)
+
+# if we found the GTest cmake package then we are done, and
+# can print what we found and return.
+if(GTest_FOUND)
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTest HANDLE_COMPONENTS CONFIG_MODE)
+
+    set(GTEST_LIBRARIES      GTest::gtest)
+    set(GTEST_MAIN_LIBRARIES GTest::gtest_main)
+
+    __gtest_define_backwards_compatible_library_targets()
+
+    return()
+endif()
 
 if(NOT DEFINED GTEST_MSVC_SEARCH)
     set(GTEST_MSVC_SEARCH MD)
@@ -208,8 +250,6 @@ find_path(GTEST_INCLUDE_DIR gtest/gtest.h
 )
 mark_as_advanced(GTEST_INCLUDE_DIR)
 
-# Allow GTEST_LIBRARY and GTEST_MAIN_LIBRARY to be set manually, as the
-# locations of the gtest and gtest_main libraries, respectively.
 if(NOT GTEST_LIBRARY)
     __gtest_find_and_select_library_configurations(GTEST gtest)
 endif()
@@ -217,54 +257,43 @@ if(NOT GTEST_MAIN_LIBRARY)
     __gtest_find_and_select_library_configurations(GTEST_MAIN gtest_main)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTest DEFAULT_MSG GTEST_LIBRARY GTEST_INCLUDE_DIR GTEST_MAIN_LIBRARY)
 
-if(GTEST_FOUND)
+if(GTest_FOUND)
     set(GTEST_INCLUDE_DIRS ${GTEST_INCLUDE_DIR})
     __gtest_append_debugs(GTEST_LIBRARIES      GTEST_LIBRARY)
     __gtest_append_debugs(GTEST_MAIN_LIBRARIES GTEST_MAIN_LIBRARY)
-    set(GTEST_BOTH_LIBRARIES ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
 
     find_package(Threads QUIET)
 
-    if(NOT TARGET GTest::GTest)
+    if(NOT TARGET GTest::gtest)
         __gtest_determine_library_type(GTEST_LIBRARY)
-        add_library(GTest::GTest ${GTEST_LIBRARY_TYPE} IMPORTED)
+        add_library(GTest::gtest ${GTEST_LIBRARY_TYPE} IMPORTED)
         if(TARGET Threads::Threads)
-            set_target_properties(GTest::GTest PROPERTIES
+            set_target_properties(GTest::gtest PROPERTIES
                 INTERFACE_LINK_LIBRARIES Threads::Threads)
         endif()
         if(GTEST_LIBRARY_TYPE STREQUAL "SHARED")
-            set_target_properties(GTest::GTest PROPERTIES
+            set_target_properties(GTest::gtest PROPERTIES
                 INTERFACE_COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
         endif()
         if(GTEST_INCLUDE_DIRS)
-            set_target_properties(GTest::GTest PROPERTIES
+            set_target_properties(GTest::gtest PROPERTIES
                 INTERFACE_INCLUDE_DIRECTORIES "${GTEST_INCLUDE_DIRS}")
         endif()
-        __gtest_import_library(GTest::GTest GTEST_LIBRARY "")
-        __gtest_import_library(GTest::GTest GTEST_LIBRARY "RELEASE")
-        __gtest_import_library(GTest::GTest GTEST_LIBRARY "DEBUG")
-    endif()
-    if(NOT TARGET GTest::Main)
-        __gtest_determine_library_type(GTEST_MAIN_LIBRARY)
-        add_library(GTest::Main ${GTEST_MAIN_LIBRARY_TYPE} IMPORTED)
-        set_target_properties(GTest::Main PROPERTIES
-            INTERFACE_LINK_LIBRARIES "GTest::GTest")
-        __gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "")
-        __gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "RELEASE")
-        __gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "DEBUG")
-    endif()
-
-    # Add targets mapping the same library names as defined in
-    # GTest's CMake package config.
-    if(NOT TARGET GTest::gtest)
-        add_library(GTest::gtest INTERFACE IMPORTED)
-        target_link_libraries(GTest::gtest INTERFACE GTest::GTest)
+        __gtest_import_library(GTest::gtest GTEST_LIBRARY "")
+        __gtest_import_library(GTest::gtest GTEST_LIBRARY "RELEASE")
+        __gtest_import_library(GTest::gtest GTEST_LIBRARY "DEBUG")
     endif()
     if(NOT TARGET GTest::gtest_main)
-        add_library(GTest::gtest_main INTERFACE IMPORTED)
-        target_link_libraries(GTest::gtest_main INTERFACE GTest::Main)
+        __gtest_determine_library_type(GTEST_MAIN_LIBRARY)
+        add_library(GTest::gtest_main ${GTEST_MAIN_LIBRARY_TYPE} IMPORTED)
+        set_target_properties(GTest::gtest_main PROPERTIES
+            INTERFACE_LINK_LIBRARIES "GTest::gtest")
+        __gtest_import_library(GTest::gtest_main GTEST_MAIN_LIBRARY "")
+        __gtest_import_library(GTest::gtest_main GTEST_MAIN_LIBRARY "RELEASE")
+        __gtest_import_library(GTest::gtest_main GTEST_MAIN_LIBRARY "DEBUG")
     endif()
+
+    __gtest_define_backwards_compatible_library_targets()
 endif()

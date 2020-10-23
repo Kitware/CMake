@@ -39,8 +39,10 @@ dnf install --setopt=install_weak_deps=False -y \
     fontconfig-devel \
     freetype-devel \
     gdal-devel \
+    gettext \
     giflib-devel \
     glew-devel \
+    gmock \
     gnutls-devel \
     gsl-devel \
     gtest-devel \
