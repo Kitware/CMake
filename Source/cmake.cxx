@@ -941,19 +941,19 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         return;
       }
 #if !defined(CMAKE_BOOTSTRAP)
-    } else if (cmHasLiteralPrefix(arg, "--profiling-format")) {
+    } else if (cmHasLiteralPrefix(arg, "--profiling-format=")) {
       profilingFormat = arg.substr(strlen("--profiling-format="));
       if (profilingFormat.empty()) {
         cmSystemTools::Error("No format specified for --profiling-format");
       }
-    } else if (cmHasLiteralPrefix(arg, "--profiling-output")) {
+    } else if (cmHasLiteralPrefix(arg, "--profiling-output=")) {
       profilingOutput = arg.substr(strlen("--profiling-output="));
       profilingOutput = cmSystemTools::CollapseFullPath(profilingOutput);
       cmSystemTools::ConvertToUnixSlashes(profilingOutput);
       if (profilingOutput.empty()) {
         cmSystemTools::Error("No path specified for --profiling-output");
       }
-    } else if (cmHasLiteralPrefix(arg, "--preset")) {
+    } else if (cmHasLiteralPrefix(arg, "--preset=")) {
       presetName = arg.substr(strlen("--preset="));
       if (presetName.empty()) {
         cmSystemTools::Error("No preset specified for --preset");
