@@ -551,9 +551,11 @@ void QCMake::loadPresets()
     preset.generator = std::move(QString::fromLocal8Bit(p.Generator.data()));
     preset.architecture =
       std::move(QString::fromLocal8Bit(p.Architecture.data()));
+    preset.setArchitecture = !p.ArchitectureStrategy ||
+      p.ArchitectureStrategy == cmCMakePresetsFile::ArchToolsetStrategy::Set;
     preset.toolset = std::move(QString::fromLocal8Bit(p.Toolset.data()));
-    preset.setGenConfig = !p.GeneratorConfig ||
-      p.GeneratorConfig == cmCMakePresetsFile::CMakeGeneratorConfig::Default;
+    preset.setToolset = !p.ToolsetStrategy ||
+      p.ToolsetStrategy == cmCMakePresetsFile::ArchToolsetStrategy::Set;
     preset.enabled = it.Expanded &&
       std::find_if(this->AvailableGenerators.begin(),
                    this->AvailableGenerators.end(),

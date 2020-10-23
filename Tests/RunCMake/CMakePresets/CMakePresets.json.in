@@ -452,28 +452,38 @@
       "binaryDir": "${sourceDir}/build"
     },
     {
-      "name": "CMakeGeneratorConfigNone",
+      "name": "ArchToolsetStrategyNone",
       "generator": "@RunCMake_GENERATOR@",
       "architecture": "a",
       "toolset": "a",
       "binaryDir": "${sourceDir}/build"
     },
     {
-      "name": "CMakeGeneratorConfigBase",
+      "name": "ArchToolsetStrategyBase",
       "generator": "@RunCMake_GENERATOR@",
-      "architecture": "a",
-      "toolset": "a",
-      "cmakeGeneratorConfig": "ignore",
+      "architecture": {
+        "value": "a",
+        "strategy": "external"
+      },
+      "toolset": {
+        "value": "a",
+        "strategy": "external"
+      },
       "binaryDir": "${sourceDir}/build"
     },
     {
-      "name": "CMakeGeneratorConfigDefault",
-      "inherits": "CMakeGeneratorConfigBase",
-      "cmakeGeneratorConfig": "default"
+      "name": "ArchToolsetStrategyDefault",
+      "inherits": "ArchToolsetStrategyBase",
+      "architecture": {
+        "strategy": "set"
+      },
+      "toolset": {
+        "strategy": "set"
+      }
     },
     {
-      "name": "CMakeGeneratorConfigIgnore",
-      "inherits": "CMakeGeneratorConfigBase"
+      "name": "ArchToolsetStrategyIgnore",
+      "inherits": "ArchToolsetStrategyBase"
     }
   ]
 }

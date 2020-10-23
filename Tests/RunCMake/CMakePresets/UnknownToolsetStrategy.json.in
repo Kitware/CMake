@@ -2,10 +2,12 @@
   "version": 1,
   "configurePresets": [
     {
-      "name": "InvalidCMakeGeneratorConfig",
+      "name": "UnknownToolsetStrategy",
       "generator": "@RunCMake_GENERATOR@",
       "binaryDir": "${sourceDir}/build",
-      "cmakeGeneratorConfig": {}
+      "toolset": {
+        "strategy": "unknown"
+      }
     }
   ]
 }

@@ -130,34 +130,34 @@ Format
       the ``architecture`` field instead.
 
     ``architecture``
-
-      An optional string representing the platform name to use for generators
-      that support platforms.
-
     ``toolset``
 
-      An optional string representing the toolset name to use for generators
-      that support toolsets.
+      Optional fields representing the platform and toolset, respectively, for
+      generators that support them. Each may be either a string or an object
+      with the following fields:
 
-    ``cmakeGeneratorConfig``
+      ``value``
 
-      An optional string telling CMake how to handle the ``architecture`` and
-      ``toolset`` fields. Valid values are:
+        An optional string representing the value.
 
-      ``"default"``
+      ``strategy``
 
-        Set the platform and toolset using the ``architecture`` and ``toolset``
-        fields respectively. On non-Visual Studio generators, this will result
-        in an error if ``architecture`` or ``toolset`` are set.
+        An optional string telling CMake how to handle the ``architecture`` or
+        ``toolset`` field. Valid values are:
 
-      ``"ignore"``
+        ``"set"``
 
-        Do not set the platform or toolset at all, even on Visual Studio
-        generators. This is useful if, for example, a preset uses the Ninja
-        generator, and an IDE knows how to set up the Visual C++ environment
-        from the ``architecture`` and ``toolset`` fields. In that case, CMake
-        will ignore ``architecture`` and ``toolset``, but the IDE can use them
-        to set up the environment before invoking CMake.
+          Set the respective value. This will result in an error for generators
+          that do not support the respective field.
+
+        ``"external"``
+
+          Do not set the value, even if the generator supports it. This is
+          useful if, for example, a preset uses the Ninja generator, and an IDE
+          knows how to set up the Visual C++ environment from the
+          ``architecture`` and ``toolset`` fields. In that case, CMake will
+          ignore the field, but the IDE can use them to set up the environment
+          before invoking CMake.
 
     ``binaryDir``
 
