@@ -72,6 +72,7 @@
         "TEST_DOLLAR": {
           "value": "${dollar}"
         },
+        "TEST_SOURCE_DIR_NAME": "${sourceDirName}",
         "TEST_ENV_REF": "$env{TEST_ENV_REF}",
         "TEST_ENV": "$env{TEST_ENV}",
         "TEST_D_ENV_REF": "$env{TEST_D_ENV_REF}",
