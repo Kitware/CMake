@@ -135,6 +135,11 @@ bool cmState::DeleteCache(const std::string& path)
   return this->CacheManager->DeleteCache(path);
 }
 
+bool cmState::IsCacheLoaded() const
+{
+  return this->CacheManager->IsCacheLoaded();
+}
+
 std::vector<std::string> cmState::GetCacheEntryKeys() const
 {
   return this->CacheManager->GetCacheEntryKeys();

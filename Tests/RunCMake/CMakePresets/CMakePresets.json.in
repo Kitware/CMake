@@ -160,6 +160,16 @@
       "binaryDir": "${sourceDir}/build"
     },
     {
+      "name": "GoodNoSCachePrep",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceParentDir}/GoodNoSCachePrep-build"
+    },
+    {
+      "name": "GoodNoSCache",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
       "name": "GoodInheritanceParentBase",
       "hidden": true,
       "generator": "@RunCMake_GENERATOR@",

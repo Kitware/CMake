@@ -3,7 +3,6 @@
   cmake \[options\] <path-to-source>
   cmake \[options\] <path-to-existing-build>
   cmake \[options\] -S <path-to-source> -B <path-to-build>
-  cmake \[options\] -S <path-to-source> --preset=<preset-name>
 
 Specify a source directory to \(re-\)generate a build system for it in the
 current working directory.  Specify an existing build directory to

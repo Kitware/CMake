@@ -162,6 +162,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
       cmSystemTools::Error(message.str());
     }
   }
+  this->CacheLoaded = true;
   return true;
 }
 
