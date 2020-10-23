@@ -43,6 +43,21 @@
 #include "RegexExplorer.h"
 #include "WarningMessagesDialog.h"
 
+void OpenReferenceManual()
+{
+  QString urlFormat("https://cmake.org/cmake/help/v%1.%2/");
+  QUrl url(urlFormat.arg(QString::number(cmVersion::GetMajorVersion()),
+                         QString::number(cmVersion::GetMinorVersion())));
+
+  if (!cmSystemTools::GetHTMLDoc().empty()) {
+    url = QUrl::fromLocalFile(
+      QDir(QString::fromLocal8Bit(cmSystemTools::GetHTMLDoc().data()))
+        .filePath("index.html"));
+  }
+
+  QDesktopServices::openUrl(url);
+}
+
 namespace {
 const QString PRESETS_DISABLED_TOOLTIP =
   "This option is disabled because there are no available presets in "
@@ -194,19 +209,7 @@ CMakeSetupDialog::CMakeSetupDialog()
   QObject::connect(a, &QAction::triggered, this, &CMakeSetupDialog::doHelp);
   a->setShortcut(QKeySequence::HelpContents);
   a = HelpMenu->addAction(tr("CMake Reference Manual"));
-  QObject::connect(a, &QAction::triggered, this, []() {
-    QString urlFormat("https://cmake.org/cmake/help/v%1.%2/");
-    QUrl url(urlFormat.arg(QString::number(cmVersion::GetMajorVersion()),
-                           QString::number(cmVersion::GetMinorVersion())));
-
-    if (!cmSystemTools::GetHTMLDoc().empty()) {
-      url = QUrl::fromLocalFile(
-        QDir(QString::fromLocal8Bit(cmSystemTools::GetHTMLDoc().data()))
-          .filePath("index.html"));
-    }
-
-    QDesktopServices::openUrl(url);
-  });
+  QObject::connect(a, &QAction::triggered, this, OpenReferenceManual);
   a = HelpMenu->addAction(tr("About"));
   QObject::connect(a, &QAction::triggered, this, &CMakeSetupDialog::doAbout);
 
