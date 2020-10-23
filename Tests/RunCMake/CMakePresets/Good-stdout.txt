@@ -26,6 +26,7 @@ Preset CMake variables:
   TEST_PRESET_NAME:STRING="xGoodx"
   TEST_SOURCE_DIR:PATH="[^
 ]*/Tests/RunCMake/CMakePresets/Good"
+  TEST_SOURCE_DIR_NAME="Good"
   TEST_SOURCE_LIST:FILEPATH="[^
 ]*/Tests/RunCMake/CMakePresets/Good/CMakeLists\.txt"
   TEST_SOURCE_PARENT_DIR:PATH="[^

@@ -308,6 +308,11 @@ Format
 
     Path to the project source directory's parent directory.
 
+  ``${sourceDirName}``
+
+    The last filename component of ``${sourceDir}``. For example, if
+    ``${sourceDir}`` is ``/path/to/source``, this would be ``source``.
+
   ``${presetName}``
 
     Name specified in the preset's ``name`` field.
