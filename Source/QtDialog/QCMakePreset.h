@@ -15,8 +15,9 @@ public:
   QString description;
   QString generator;
   QString architecture;
+  bool setArchitecture;
   QString toolset;
-  bool setGenConfig;
+  bool setToolset;
   bool enabled;
 };
 

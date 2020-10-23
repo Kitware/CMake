@@ -859,8 +859,10 @@ bool CMakeSetupDialog::setupFirstConfigure()
   if (presetData.isValid()) {
     auto preset = presetData.value<QCMakePreset>();
     dialog.setCurrentGenerator(preset.generator);
-    if (preset.setGenConfig) {
+    if (preset.setArchitecture) {
       dialog.setPlatform(preset.architecture);
+    }
+    if (preset.setToolset) {
       dialog.setToolset(preset.toolset);
     }
     dialog.setCompilerOption(CompilerOption::DefaultNative);

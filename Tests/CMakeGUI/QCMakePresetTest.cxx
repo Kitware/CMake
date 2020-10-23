@@ -16,8 +16,9 @@ QCMakePreset makePreset()
     /*description=*/"description",
     /*generator=*/"generator",
     /*architecture=*/"architecture",
+    /*setArchitecture=*/true,
     /*toolset=*/"toolset",
-    /*setGenConfig=*/true,
+    /*setToolset=*/true,
     /*enabled=*/true,
   };
 }
@@ -69,12 +70,14 @@ void QCMakePresetTest::equality_data()
   QTest::newRow("architecture")
     << makePreset(&QCMakePreset::architecture, "other-architecture") << false
     << true << false;
+  QTest::newRow("setArchitecture")
+    << makePreset(&QCMakePreset::setArchitecture, false) << false << false
+    << true;
   QTest::newRow("toolset") << makePreset(&QCMakePreset::toolset,
                                          "other-toolset")
                            << false << false << true;
-  QTest::newRow("setGenConfig")
-    << makePreset(&QCMakePreset::setGenConfig, false) << false << false
-    << true;
+  QTest::newRow("setToolset")
+    << makePreset(&QCMakePreset::setToolset, false) << false << false << true;
   QTest::newRow("enabled") << makePreset(&QCMakePreset::enabled, false)
                            << false << false << true;
 }

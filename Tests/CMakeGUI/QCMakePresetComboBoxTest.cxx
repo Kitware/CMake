@@ -24,8 +24,9 @@ void QCMakePresetComboBoxTest::changePresets()
       /*description=*/"",
       /*generator=*/"Ninja",
       /*architecture=*/"",
+      /*setArchitecture=*/true,
       /*toolset=*/"",
-      /*setGenConfig=*/true,
+      /*setToolset=*/true,
       /*enabled=*/true,
     },
   });
@@ -48,8 +49,9 @@ void QCMakePresetComboBoxTest::changePresets()
       /*description=*/"",
       /*generator=*/"Ninja Multi-Config",
       /*architecture=*/"",
+      /*setArchitecture=*/true,
       /*toolset=*/"",
-      /*setGenConfig=*/true,
+      /*setToolset=*/true,
       /*enabled=*/true,
     },
   });
