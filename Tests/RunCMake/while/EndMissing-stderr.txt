@@ -1,8 +1,4 @@
-^CMake Error in EndMissing.cmake:
-  A logical block opening on the line
-
-    .*/Tests/RunCMake/while/EndMissing.cmake:1 \(while\)
-
-  is not closed.
+^CMake Error at EndMissing\.cmake:[0-9]+ \(while\):
+  Flow control statements are not properly nested\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$
