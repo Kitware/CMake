@@ -78,7 +78,8 @@ Module Functions
   manage local instances of data files stored externally::
 
     ExternalData_Add_Target(
-      <target>   # Name of data management target
+      <target>                  # Name of data management target
+      [SHOW_PROGRESS <ON|OFF>]  # Show progress during the download
       )
 
   It creates custom commands in the target as necessary to make data
@@ -88,6 +89,11 @@ Module Functions
   the ``ExternalData_URL_TEMPLATES`` variable, or may be found locally
   in one of the paths specified in the ``ExternalData_OBJECT_STORES``
   variable.
+
+  The ``SHOW_PROGRESS`` argument may be passed to suppress progress information
+  during the download of objects. If not provided, it defaults to ``OFF`` for
+  :generator:`Ninja` and :generator:`Ninja Multi-Config` generators and ``ON``
+  otherwise.
 
   Typically only one target is needed to manage all external data within
   a project.  Call this function once at the end of configuration after
@@ -344,6 +350,30 @@ function(ExternalData_add_target target)
   endif()
   set(_ExternalData_CONFIG_CODE "")
 
+  cmake_parse_arguments(PARSE_ARGV 1 _ExternalData_add_target
+    ""
+    "SHOW_PROGRESS"
+    "")
+  if (_ExternalData_add_target_UNPARSED_ARGUMENTS)
+    message(AUTHOR_WARNING
+      "Ignoring unrecognized arguments passed to ExternalData_add_target: "
+      "`${_ExternalData_add_target_UNPARSED_ARGUMENTS}`")
+  endif ()
+
+  # Turn `SHOW_PROGRESS` into a boolean
+  if (NOT DEFINED _ExternalData_add_target_SHOW_PROGRESS)
+    # The default setting
+    if (CMAKE_GENERATOR MATCHES "Ninja")
+      set(_ExternalData_add_target_SHOW_PROGRESS OFF)
+    else ()
+      set(_ExternalData_add_target_SHOW_PROGRESS ON)
+    endif ()
+  elseif (_ExternalData_add_target_SHOW_PROGRESS)
+    set(_ExternalData_add_target_SHOW_PROGRESS ON)
+  else ()
+    set(_ExternalData_add_target_SHOW_PROGRESS OFF)
+  endif ()
+
   # Store custom script configuration.
   foreach(url_template IN LISTS ExternalData_URL_TEMPLATES)
     if("${url_template}" MATCHES "^ExternalDataCustomScript://([^/]*)/(.*)$")
@@ -423,6 +453,7 @@ function(ExternalData_add_target target)
           COMMAND ${CMAKE_COMMAND} -Drelative_top=${CMAKE_BINARY_DIR}
                                    -Dfile=${file} -Dname=${name}
                                    -DExternalData_ACTION=local
+                                   -DExternalData_SHOW_PROGRESS=${_ExternalData_add_target_SHOW_PROGRESS}
                                    -DExternalData_CONFIG=${config}
                                    -P ${_ExternalData_SELF}
           MAIN_DEPENDENCY "${name}"
@@ -459,6 +490,7 @@ function(ExternalData_add_target target)
           COMMAND ${CMAKE_COMMAND} -Drelative_top=${CMAKE_BINARY_DIR}
                                    -Dfile=${file} -Dname=${name} -Dexts=${exts}
                                    -DExternalData_ACTION=fetch
+                                   -DExternalData_SHOW_PROGRESS=${_ExternalData_add_target_SHOW_PROGRESS}
                                    -DExternalData_CONFIG=${config}
                                    -P ${_ExternalData_SELF}
           # Update whenever the object hash changes.
@@ -925,7 +957,11 @@ function(_ExternalData_download_file url file err_var msg_var)
     else()
       set(absolute_timeout "")
     endif()
-    file(DOWNLOAD "${url}" "${file}" STATUS status LOG log ${inactivity_timeout} ${absolute_timeout} SHOW_PROGRESS)
+    set(show_progress_args)
+    if (ExternalData_SHOW_PROGRESS)
+      list(APPEND show_progress_args SHOW_PROGRESS)
+    endif ()
+    file(DOWNLOAD "${url}" "${file}" STATUS status LOG log ${inactivity_timeout} ${absolute_timeout} ${show_progress_args})
     list(GET status 0 err)
     list(GET status 1 msg)
     if(err)
