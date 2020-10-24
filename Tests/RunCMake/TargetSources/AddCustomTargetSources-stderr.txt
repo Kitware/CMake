@@ -1,0 +1,4 @@
+CMake Error at AddCustomTargetSources.cmake:2 \(target_sources\):
+  target_sources called with invalid arguments
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
