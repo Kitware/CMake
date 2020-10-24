@@ -19,15 +19,12 @@ Check that the link ``<flag>`` is accepted by the ``<lang>`` compiler without
 a diagnostic.  Stores the result in an internal cache entry named ``<var>``.
 
 This command temporarily sets the ``CMAKE_REQUIRED_LINK_OPTIONS`` variable
-and calls the ``check_<lang>_source_compiles`` macro from the
-``Check<lang>SourceCompiles`` module (:module:`CheckCSourceCompiles`,
-:module:`CheckCSourceCompiles`, :module:`CheckCXXSourceCompiles`,
-:module:`CheckOBJCSourceCompiles`, :module:`CheckOBJCXXSourceCompiles` or
-:module:`CheckFortranSourceCompiles`).  See documentation of these
-modules for a listing of variables that can otherwise modify the build.
+and calls the :command:`check_source_compiles` command from the
+:module:`CheckSourceCompiles` module.  See that module's documentation
+for a listing of variables that can otherwise modify the build.
 
-The underlying implementation rely on :prop_tgt:`LINK_OPTIONS` property to
-check the specified flag. The ``LINKER:`` prefix, as described in
+The underlying implementation relies on the :prop_tgt:`LINK_OPTIONS` property
+to check the specified flag. The ``LINKER:`` prefix, as described in the
 :command:`target_link_options` command, can be used as well.
 
 A positive result from this check indicates only that the compiler did not

@@ -118,9 +118,17 @@ Options:
   This is analogous to the ``tee`` Unix command.
 
 ``COMMAND_ERROR_IS_FATAL <ANY|LAST>``
-  ``COMMAND_ERROR_IS_FATAL ANY`` option stops processing if any command fails.
-  ``COMMAND_ERROR_IS_FATAL LAST`` option stops processing if the last command
-  in the command list fails.
+  The option following ``COMMAND_ERROR_IS_FATAL`` determines the behavior when
+  an error is encountered:
+
+    ``ANY``
+    If any of the commands in the list of commands fail, the
+    ``execute_process()`` command halts with an error.
+
+    ``LAST``
+    If the last command in the list of commands fails, the
+    ``execute_process()`` command halts with an error.  Commands earlier in the
+    list will not cause a fatal error.
 
 If more than one ``OUTPUT_*`` or ``ERROR_*`` option is given for the
 same pipe the precedence is not specified.

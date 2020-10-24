@@ -19,7 +19,7 @@ Check that the ``<flag>`` is accepted by the compiler without a diagnostic.
 Stores the result in an internal cache entry named ``<var>``.
 
 This command temporarily sets the ``CMAKE_REQUIRED_DEFINITIONS`` variable
-and calls the ``check_source_compiles(<LANG>`` function from the
+and calls the ``check_source_compiles(<LANG>)`` function from the
 :module:`CheckSourceCompiles` module.  See documentation of that
 module for a listing of variables that can otherwise modify the build.
 
