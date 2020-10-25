@@ -34,8 +34,8 @@ effect or even a specific one is beyond the scope of this module.
 
 include_guard(GLOBAL)
 include(CheckCSourceCompiles)
-include(CheckCompilerFlag)
+include(Internal/CheckCompilerFlag)
 
 macro (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
-  check_compiler_flag(C "${_FLAG}" ${_RESULT})
+  cmake_check_compiler_flag(C "${_FLAG}" ${_RESULT})
 endmacro ()
