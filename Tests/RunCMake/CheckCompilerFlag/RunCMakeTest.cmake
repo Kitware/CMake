@@ -22,3 +22,7 @@ endif()
 if(CMake_TEST_ISPC)
   run_cmake(CheckISPCCompilerFlag)
 endif()
+
+if(CMake_TEST_HIP)
+  run_cmake(CheckHIPCompilerFlag)
+endif()

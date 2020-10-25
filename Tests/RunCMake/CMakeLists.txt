@@ -452,6 +452,7 @@ function(add_RunCMake_test_try_compile)
       CMAKE_CXX_STANDARD_DEFAULT
       CMake_TEST_CUDA
       CMake_TEST_ISPC
+      CMake_TEST_HIP
       CMake_TEST_FILESYSTEM_1S
       CMAKE_OBJC_STANDARD_DEFAULT
       CMAKE_OBJCXX_STANDARD_DEFAULT
@@ -600,12 +601,15 @@ add_RunCMake_test(target_include_directories)
 add_RunCMake_test(target_sources)
 add_RunCMake_test(CheckCompilerFlag   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
                                       -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
-                                      -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID})
+                                      -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
+                                      -DCMake_TEST_HIP=${CMake_TEST_HIP})
 add_RunCMake_test(CheckSourceCompiles -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
                                       -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
-                                      -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID})
+                                      -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
+                                      -DCMake_TEST_HIP=${CMake_TEST_HIP})
 add_RunCMake_test(CheckSourceRuns     -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
-                                      -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID})
+                                      -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
+                                      -DCMake_TEST_HIP=${CMake_TEST_HIP})
 set_property(TEST RunCMake.CheckCompilerFlag
                   RunCMake.CheckSourceCompiles
                   RunCMake.CheckSourceRuns
@@ -613,14 +617,20 @@ set_property(TEST RunCMake.CheckCompilerFlag
 set_property(TEST RunCMake.CheckSourceCompiles
                   RunCMake.CheckCompilerFlag
     APPEND PROPERTY LABELS "ISPC")
+set_property(TEST RunCMake.CheckCompilerFlag
+                  RunCMake.CheckSourceCompiles
+                  RunCMake.CheckSourceRuns
+    APPEND PROPERTY LABELS "HIP")
 add_RunCMake_test(CheckModules)
 add_RunCMake_test(CheckIPOSupported)
 if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)"
     AND (CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_Fortran_COMPILER_ID MATCHES "GNU"))
   add_RunCMake_test(CheckLinkerFlag -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
                                     -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
-                                    -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+                                    -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+                                    -DCMake_TEST_HIP=${CMake_TEST_HIP})
   set_property(TEST RunCMake.CheckLinkerFlag APPEND PROPERTY LABELS "CUDA")
+  set_property(TEST RunCMake.CheckLinkerFlag APPEND PROPERTY LABELS "HIP")
 endif()
 
 

@@ -24,6 +24,9 @@ function(CMAKE_CHECK_COMPILER_FLAG _lang _flag _var)
   elseif(_lang STREQUAL "Fortran")
     set(_lang_src "       program test\n       stop\n       end program")
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for Fortran")
+  elseif(_lang STREQUAL "HIP")
+    set(_lang_src "__host__ int main() { return 0; }")
+    set(_lang_fail_regex FAIL_REGEX "argument unused during compilation: .*") # Clang
   elseif(_lang STREQUAL "OBJC")
     set(_lang_src [=[
 #ifndef __OBJC__
