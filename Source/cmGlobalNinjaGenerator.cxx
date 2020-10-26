@@ -1202,7 +1202,9 @@ void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
   std::string outputPath = this->NinjaOutputPath(alias);
   std::string buildAlias = this->BuildAlias(outputPath, config);
   cmNinjaDeps outputs;
-  this->AppendTargetOutputs(target, outputs, config);
+  if (config != "all") {
+    this->AppendTargetOutputs(target, outputs, config);
+  }
   // Mark the target's outputs as ambiguous to ensure that no other target
   // uses the output as an alias.
   for (std::string const& output : outputs) {
