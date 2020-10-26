@@ -28,7 +28,7 @@ if (CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 10.2.89)
   # The -MD flag was only added to nvcc in 10.2 so
   # before that we had to invoke the compiler twice
   # to get header dependency information
-  set(CMAKE_DEPFILE_FLAGS_CUDA "-MD -MT <OBJECT> -MF <DEPFILE>")
+  set(CMAKE_DEPFILE_FLAGS_CUDA "-MD -MT <DEP_TARGET> -MF <DEP_FILE>")
 endif()
 
 if(NOT "x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")

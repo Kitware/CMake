@@ -3,7 +3,7 @@ include(Compiler/CMakeCommonCompilerMacros)
 # Not aware of any verbose flag for ISPC
 #set(CMAKE_ISPC_VERBOSE_FLAG )
 
-set(CMAKE_DEPFILE_FLAGS_ISPC "-M -MT <OBJECT> -MF <DEPFILE>")
+set(CMAKE_DEPFILE_FLAGS_ISPC "-M -MT <DEP_TARGET> -MF <DEP_FILE>")
 
 string(APPEND CMAKE_ISPC_FLAGS_INIT " ")
 string(APPEND CMAKE_ISPC_FLAGS_DEBUG_INIT "-O0 -g")

@@ -3,7 +3,6 @@
 #include "cmRulePlaceholderExpander.h"
 
 #include <cctype>
-#include <cstring>
 #include <utility>
 
 #include "cmOutputConverter.h"
@@ -18,11 +17,6 @@ cmRulePlaceholderExpander::cmRulePlaceholderExpander(
   , CompilerSysroot(std::move(compilerSysroot))
   , LinkerSysroot(std::move(linkerSysroot))
 {
-}
-
-cmRulePlaceholderExpander::RuleVariables::RuleVariables()
-{
-  memset(this, 0, sizeof(*this));
 }
 
 std::string cmRulePlaceholderExpander::ExpandRuleVariable(
@@ -139,6 +133,11 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   if (replaceValues.DependencyFile) {
     if (variable == "DEP_FILE") {
       return replaceValues.DependencyFile;
+    }
+  }
+  if (replaceValues.DependencyTarget) {
+    if (variable == "DEP_TARGET") {
+      return replaceValues.DependencyTarget;
     }
   }
   if (replaceValues.Fatbinary) {
