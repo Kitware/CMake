@@ -91,3 +91,16 @@ target_compile_definitions(ObjLibFromGeneratedSources PRIVATE OBJ_SHARED)
 target_sources(ObjLibFromGeneratedSources PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/config_$<CONFIG>.cpp)
 add_library(SharedLibFromObjLibFromGeneratedSources SHARED shared.cpp)
 target_link_libraries(SharedLibFromObjLibFromGeneratedSources PRIVATE ObjLibFromGeneratedSources)
+
+
+# ---------------------------------------------------------------------------
+# Make sure that additional build-events do not confuse CMake when using generated files.
+add_library(SharedLibFromGeneratedSources SHARED)
+set_property(TARGET SharedLibFromGeneratedSources PROPERTY POSITION_INDEPENDENT_CODE 1)
+target_sources(SharedLibFromGeneratedSources PRIVATE
+  shared.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/config_$<CONFIG>.cpp
+  )
+add_custom_command(TARGET SharedLibFromGeneratedSources POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" "-E" "echo" "$<TARGET_FILE:SharedLibFromGeneratedSources>"
+  )
