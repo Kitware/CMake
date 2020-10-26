@@ -484,12 +484,12 @@ where each ``x`` represents a lower case hexadecimal character.
 Where required, an uppercase representation can be requested
 with the optional ``UPPER`` flag.
 
+.. _JSON:
+
 JSON
 ^^^^
 
-.. _JSON:
-
-Functionality for querying a JSON string
+Functionality for querying a JSON string.
 
 .. _GET:
 .. code-block:: cmake
@@ -522,7 +522,7 @@ will be set to one of ``NULL``, ``NUMBER``, ``STRING``, ``BOOLEAN``,
          MEMBER <json-string>
          [<member|index> ...] <index>)
 
-Get the name of the ``<index>``:th member in ``<json-string>`` at the location
+Get the name of the ``<index>``-th member in ``<json-string>`` at the location
 given by the list of ``<member|index>`` arguments.
 Requires an element of object type.
 
@@ -534,7 +534,7 @@ Requires an element of object type.
 
 Get the length of an element in ``<json-string>`` at the location
 given by the list of ``<member|index>`` arguments.
-Required an element of array or object type.
+Requires an element of array or object type.
 
 .. _REMOVE:
 .. code-block:: cmake
@@ -544,7 +544,7 @@ Required an element of array or object type.
 
 Remove an element from ``<json-string>`` at the location
 given by the list of ``<member|index>`` arguments. The JSON string
-without the removed element will we written in ``<out-var>``.
+without the removed element will be stored in ``<out-var>``.
 
 .. _SET:
 .. code-block:: cmake
@@ -566,8 +566,8 @@ Compare the two JSON objects given by ``<json-string1>`` and ``<json-string2>``
 for equality
 
 
-If the optional ``ERROR_VARIABLE`` argument is given errors will be
-reported in ``<error-variable>``. If no error occurs the ``<error-variable>``
+If the optional ``ERROR_VARIABLE`` argument is given, errors will be
+reported in ``<error-variable>``. If no error occurs, the ``<error-variable>``
 will be set to ``NOTFOUND``. If ``ERROR_VARIABLE`` is not set a CMake error
 will be issued.
 When an error occurs the ``<out-var>`` will be set to

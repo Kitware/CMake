@@ -44,7 +44,8 @@ specified:
   * A version range with the format ``versionMin...[<]versionMax`` where
     ``versionMin`` and ``versionMax`` have the same format as the single
     version.  By default, both end points are included.  By specifying ``<``,
-    the upper end point will be excluded.
+    the upper end point will be excluded.  Version ranges are only supported
+    with CMake 3.19 or later.
 
 The ``EXACT`` option requests that the version be matched exactly. This option
 is incompatible with the specification of a version range.

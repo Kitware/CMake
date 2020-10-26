@@ -83,7 +83,7 @@ The arguments are:
   Restrict variable replacement to references of the form ``@VAR@``.
   This is useful for configuring scripts that use ``${VAR}`` syntax.
 
- ``NO_SOURCE_PERMISSIONS``
+``NO_SOURCE_PERMISSIONS``
   Does not transfer the file permissions of the original file to the copy.
   The copied file permissions default to the standard 644 value
   (-rw-r--r--).

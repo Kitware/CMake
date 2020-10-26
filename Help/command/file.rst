@@ -54,7 +54,7 @@ Synopsis
     file({`TO_CMAKE_PATH`_ | `TO_NATIVE_PATH`_} <path> <out-var>)
 
   `Transfer`_
-    file(`DOWNLOAD`_ <url> <file> [...])
+    file(`DOWNLOAD`_ <url> [<file>] [...])
     file(`UPLOAD`_ <file> <url> [...])
 
   `Locking`_
@@ -498,8 +498,9 @@ from the input content to produce the output content.  The options are:
   See policy :policy:`CMP0070`.
 
 ``TARGET <target>``
-  Specify target which to use when evaluating generator expressions.  Enables
-  use of generator expressions requiring a target.
+  Specify which target to use when evaluating generator expressions that
+  require a target for evaluation (e.g. ``$<COMPILE_FEATURES:...>``,
+  ``$<TARGET_PROPERTY:prop>``).
 
 Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
 ``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.
@@ -763,7 +764,8 @@ which would make them unable to support a hard link.
 
 .. code-block:: cmake
 
-  file(CHMOD <files>... <directories>... [PERMISSIONS <permissions>...]
+  file(CHMOD <files>... <directories>...
+      [PERMISSIONS <permissions>...]
       [FILE_PERMISSIONS <permissions>...]
       [DIRECTORY_PERMISSIONS <permissions>...])
 
@@ -775,34 +777,36 @@ Valid permissions are  ``OWNER_READ``, ``OWNER_WRITE``, ``OWNER_EXECUTE``,
 Valid combination of keywords are:
 
 ``PERMISSIONS``
-  all items are changed
+  All items are changed.
 
 ``FILE_PERMISSIONS``
-  only files are changed
+  Only files are changed.
 
 ``DIRECTORY_PERMISSIONS``
-  only directories are changed
+  Only directories are changed.
 
 ``PERMISSIONS`` and ``FILE_PERMISSIONS``
-  ``FILE_PERMISSIONS`` overrides ``PERMISSIONS`` for files
+  ``FILE_PERMISSIONS`` overrides ``PERMISSIONS`` for files.
 
 ``PERMISSIONS`` and ``DIRECTORY_PERMISSIONS``
-  ``DIRECTORY_PERMISSIONS`` overrides ``PERMISSIONS`` for directories
+  ``DIRECTORY_PERMISSIONS`` overrides ``PERMISSIONS`` for directories.
 
 ``FILE_PERMISSIONS`` and ``DIRECTORY_PERMISSIONS``
-  use ``FILE_PERMISSIONS`` for files and ``DIRECTORY_PERMISSIONS`` for
-  directories
+  Use ``FILE_PERMISSIONS`` for files and ``DIRECTORY_PERMISSIONS`` for
+  directories.
 
 
 .. _CHMOD_RECURSE:
 
 .. code-block:: cmake
 
-  file(CHMOD_RECURSE <files>... <directories>... PERMISSIONS <permissions>...
-       FILE_PERMISSIONS <permissions>... DIRECTORY_PERMISSIONS <permissions>...)
+  file(CHMOD_RECURSE <files>... <directories>...
+       [PERMISSIONS <permissions>...]
+       [FILE_PERMISSIONS <permissions>...]
+       [DIRECTORY_PERMISSIONS <permissions>...])
 
 Same as `CHMOD`_, but change the permissions of files and directories present in
-the ``<directories>..`` recursively.
+the ``<directories>...`` recursively.
 
 Path Conversion
 ^^^^^^^^^^^^^^^
@@ -859,11 +863,11 @@ Transfer
   file(DOWNLOAD <url> [<file>] [<options>...])
   file(UPLOAD   <file> <url> [<options>...])
 
-The ``DOWNLOAD`` mode downloads the given ``<url>`` to a local ``<file>``. If
-``<file>`` is not specified for ``file(DOWNLOAD)``, the file is not saved. This
-can be useful if you want to know if a file can be downloaded (for example, to
-check that it exists) without actually saving it anywhere. The ``UPLOAD`` mode
-uploads a local ``<file>`` to a given ``<url>``.
+The ``DOWNLOAD`` subcommand downloads the given ``<url>`` to a local ``<file>``.
+If ``<file>`` is not specified for ``file(DOWNLOAD)``, the file is not saved.
+This can be useful if you want to know if a file can be downloaded (for example,
+to check that it exists) without actually saving it anywhere. The ``UPLOAD``
+mode uploads a local ``<file>`` to a given ``<url>``.
 
 Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 
@@ -986,8 +990,7 @@ Archiving
   file(ARCHIVE_CREATE OUTPUT <archive>
     PATHS <paths>...
     [FORMAT <format>]
-    [COMPRESSION <compression>]
-    [COMPRESSION_LEVEL <compression level>]
+    [COMPRESSION <compression> [COMPRESSION_LEVEL <compression-level>]]
     [MTIME <mtime>]
     [VERBOSE])
 
@@ -1005,9 +1008,9 @@ compression.  The other formats use no compression by default, but can be
 directed to do so with the ``COMPRESSION`` option.  Valid values for
 ``<compression>`` are ``None``, ``BZip2``, ``GZip``, ``XZ``, and ``Zstd``.
 
-Compression level can be specied by using ``COMPRESSION_LEVEL`` option.
-Compression level should be between 0-9. 0 is the default compression.
-``COMPRESSION`` option must be specified for ``COMPRESSION_LEVEL``.
+The compression level can be specified with the ``COMPRESSION_LEVEL`` option.
+The ``<compression-level>`` should be between 0-9, with the default being 0.
+The ``COMPRESSION`` option must be present when ``COMPRESSION_LEVEL`` is given.
 
 .. note::
   With ``FORMAT`` set to ``raw`` only one file will be compressed with the

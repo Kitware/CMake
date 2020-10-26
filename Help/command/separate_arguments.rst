@@ -37,7 +37,7 @@ be one of the following keywords:
 
 ``PROGRAM``
   The first item in ``<args>`` is assumed to be an executable and will be
-  search in the system search path or left as a full path. If not found,
+  searched in the system search path or left as a full path. If not found,
   ``<variable>`` will be empty. Otherwise, ``<variable>`` is a list of 2
   elements:
 

@@ -14,7 +14,8 @@ Presets
 -------
 
 * :manual:`cmake(1)` and :manual:`cmake-gui(1)` now recognize
-  ``CMakePresets.json`` and ``CMakeUserPresets.json`` files.
+  ``CMakePresets.json`` and ``CMakeUserPresets.json`` files (see
+  :manual:`cmake-presets(7)`).
 
 Generators
 ----------
@@ -105,21 +106,22 @@ Commands
 * The :command:`file(GENERATE)` command gained a new ``TARGET`` keyword to
   support resolving target-dependent generator expressions.
 
-* The :command:`file` gained sub-command `REAL_PATH` to compute a path with
-  symlinks resolved.
+* The :command:`file` command gained a new ``REAL_PATH`` sub-command to
+  compute a path with symlinks resolved.
 
 * The :command:`find_package` command learned to handle a version range.
 
-* The :command:`separate_arguments` command gained new ``PROGRAM`` option to
-  search program.
+* The :command:`separate_arguments` command gained a new ``PROGRAM`` option.
+  It allows the arguments to be treated as a program invocation and will
+  resolve the executable to a full path if it can be found.
 
-* The :command:`set_property`, :command:`get_property`,
-  and :command:`get_directory_property` commands' ``DIRECTORY``
-  options now accept references to binary directory paths,
-  such as the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
+* The ``DIRECTORY`` option of the :command:`set_property`,
+  :command:`get_property`, and :command:`get_directory_property` commands
+  now accepts references to binary directory paths, such as the value of
+  :variable:`CMAKE_CURRENT_BINARY_DIR`.
 
-* The :command:`string` command gained set of new ``JSON`` sub commands
-  to provide JSON parsing capabilities.
+* The :command:`string` command gained a set of new ``JSON`` sub commands
+  that provide JSON parsing capabilities.
 
 Variables
 ---------
@@ -133,6 +135,9 @@ Variables
 * The :variable:`CMAKE_OPTIMIZE_DEPENDENCIES` variable was added to
   initialize the new :prop_tgt:`OPTIMIZE_DEPENDENCIES` target property and
   avoid unnecessarily building dependencies for a static library.
+
+* The :variable:`CMAKE_PCH_INSTANTIATE_TEMPLATES` variable was added to
+  initialize the new :prop_tgt:`PCH_INSTANTIATE_TEMPLATES` target property.
 
 * The :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION_MAXIMUM` variable
   was added to tell the :ref:`Visual Studio Generators` what maximum
@@ -149,8 +154,8 @@ Properties
 
 * The :prop_tgt:`PCH_INSTANTIATE_TEMPLATES` target property was added to enable
   template instantiation in the precompiled header. This is enabled by default
-  and offers a roughly 20% compile time improvement. Currently only supported
-  by Clang 11.
+  and may significantly improve compile times. Currently only supported for
+  Clang (version 11 or later).
 
 * The :prop_tgt:`WIN32_EXECUTABLE` target property now supports
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
@@ -175,19 +180,20 @@ Modules
   :module:`CheckCXXSourceRuns` to more languages.
   It also supports the ``CUDA`` language.
 
-* :module:`CMakePackageConfigHelpers` module learned to manage version range.
+* The :module:`CMakePackageConfigHelpers` module gained support for version
+  ranges.
 
 * The :module:`FindCUDAToolkit` module gained support for finding CUDA
   toolkits that do not contain ``nvcc``, as well as for finding scattered
   toolkit installations when cross-compiling.
 
 * The :module:`FindPackageHandleStandardArgs` module learned to handle
-  version range. It also gained the ``find_package_check_version()`` command to
-  check the validity of a version against version-related arguments of
+  version ranges. It also gained the ``find_package_check_version()`` command
+  to check the validity of a version against version-related arguments of
   :command:`find_package` command.
 
 * The :module:`FindPython3`, :module:`FindPython2` and :module:`FindPython`
-  modules gained the capability to manage a version range.
+  modules gained the ability to handle a version range.
 
 * The :module:`FindPython3`, :module:`FindPython2` and :module:`FindPython`
   modules provide, respectively, the variable ``Python3_LINK_OPTIONS``,
@@ -195,14 +201,14 @@ Modules
 
 * The :module:`FindSDL` module now provides:
 
-  * imported target ``SDL::SDL``,
+  * An imported target ``SDL::SDL``.
 
-  * result variables ``SDL_LIBRARIES`` and ``SDL_INCLUDE_DIRS``,
+  * Result variables ``SDL_LIBRARIES`` and ``SDL_INCLUDE_DIRS``.
 
-  * version variables ``SDL_VERSION``, ``SDL_VERSION_MAJOR``
+  * Version variables ``SDL_VERSION``, ``SDL_VERSION_MAJOR``,
     ``SDL_VERSION_MINOR``, and ``SDL_VERSION_PATCH``.
 
-* :module:`FindSWIG` module gains the capability to manage a version range.
+* The :module:`FindSWIG` module gained the ability to handle a version range.
 
 * The :module:`FindTIFF` module gained a ``CXX`` component to
   find the ``tiffxx`` library containing C++ bindings.
@@ -211,15 +217,17 @@ Modules
   target and associated ``Vulkan_GLSLC_EXECUTABLE`` variable which contain
   the path to the GLSL SPIR-V compiler.
 
-* :module:`UseSWIG` module gains new source file properties ``OUTPUT_DIR`` and
-  ``OUTFILE_DIR`` to manage output directories on per source basis.
+* The :module:`UseSWIG` module gained support for new source file properties
+  ``OUTPUT_DIR`` and ``OUTFILE_DIR`` to manage output directories on a
+  per-source basis.
 
 CTest
 -----
 
-* :manual:`ctest(1)` now supports ``compute-sanitizer`` (``cuda-memcheck``) as
-  ``CTEST_MEMORYCHECK_COMMAND``.  The different tools (memcheck, racecheck,
-  synccheck, initcheck) supplied by ``compute-sanitizer`` can be selected by
+* :manual:`ctest(1)` now supports the CUDA ``compute-sanitizer`` checker
+  (previously known as ``cuda-memcheck``) as the ``CTEST_MEMORYCHECK_COMMAND``.
+  The different tools (``memcheck``, ``racecheck``, ``synccheck`` and
+  ``initcheck``) supported by ``compute-sanitizer`` can be selected by
   adding appropriate flags to the ``CTEST_MEMORYCHECK_COMMAND_OPTIONS``
   variable.  The default flags are ``--tool memcheck --leak-check full``.
 
