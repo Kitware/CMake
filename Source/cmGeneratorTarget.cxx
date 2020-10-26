@@ -3098,12 +3098,17 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
     }
 
     // Check for target references in generator expressions.
-    for (std::string const& cl : cCmdLine) {
-      const std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(cl);
-      cge->SetQuiet(true);
-      cge->Evaluate(this->GeneratorTarget->GetLocalGenerator(), "");
-      std::set<cmGeneratorTarget*> geTargets = cge->GetTargets();
-      targets.insert(geTargets.begin(), geTargets.end());
+    std::vector<std::string> const& configs =
+      this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+    for (std::string const& c : configs) {
+      for (std::string const& cl : cCmdLine) {
+        const std::unique_ptr<cmCompiledGeneratorExpression> cge =
+          ge.Parse(cl);
+        cge->SetQuiet(true);
+        cge->Evaluate(this->GeneratorTarget->GetLocalGenerator(), c);
+        std::set<cmGeneratorTarget*> geTargets = cge->GetTargets();
+        targets.insert(geTargets.begin(), geTargets.end());
+      }
     }
   }
 
