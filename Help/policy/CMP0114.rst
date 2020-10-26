@@ -47,7 +47,7 @@ a revised design to address these problems:
   * The ``download``, ``update``, and ``patch`` steps are independent.
   * The ``configure``, ``build``, ``test``, and ``install`` steps are not.
 
-  For custom steps, the :command:`ExternalProject_Add_Step` command provies
+  For custom steps, the :command:`ExternalProject_Add_Step` command provides
   an ``INDEPENDENT`` option to mark them as independent.  It is an error to
   mark a step as independent if it depends on other steps that are not.  Note
   that this use of the term "independent" refers only to independence from

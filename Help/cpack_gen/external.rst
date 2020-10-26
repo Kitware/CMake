@@ -285,6 +285,6 @@ Variables specific to CPack External generator
 .. variable:: CPACK_EXTERNAL_BUILT_PACKAGES
 
   The ``CPACK_EXTERNAL_PACKAGE_SCRIPT`` script may set this list variable to the
-  full paths of generated package files.  CPack copy these files from the stage
-  directory back to the top build directory and possibly produce checksum files
-  if the :variable:`CPACK_PACKAGE_CHECKSUM` is set.
+  full paths of generated package files.  CPack will copy these files from the
+  staging directory back to the top build directory and possibly produce
+  checksum files if the :variable:`CPACK_PACKAGE_CHECKSUM` is set.
