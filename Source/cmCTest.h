@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTest_h
-#define cmCTest_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -64,7 +63,7 @@ public:
 
   /** Get a testing part id from its string name.  Returns PartCount
       if the string does not name a valid part.  */
-  Part GetPartFromName(const char* name);
+  Part GetPartFromName(const std::string& name);
 
   /** Process Command line arguments */
   int Run(std::vector<std::string>&, std::string* output = nullptr);
@@ -127,12 +126,12 @@ public:
    * Check if CTest file exists
    */
   bool CTestFileExists(const std::string& filename);
-  bool AddIfExists(Part part, const char* file);
+  bool AddIfExists(Part part, const std::string& file);
 
   /**
    * Set the cmake test
    */
-  bool SetTest(const char*, bool report = true);
+  bool SetTest(const std::string&, bool report = true);
 
   /**
    * Set the cmake test mode (experimental, nightly, continuous).
@@ -141,11 +140,11 @@ public:
   int GetTestModel() const;
 
   std::string GetTestModelString();
-  static int GetTestModelFromString(const char* str);
+  static int GetTestModelFromString(const std::string& str);
   static std::string CleanString(const std::string& str,
                                  std::string::size_type spos = 0);
   std::string GetCTestConfiguration(const std::string& name);
-  void SetCTestConfiguration(const char* name, const char* value,
+  void SetCTestConfiguration(const char* name, const std::string& value,
                              bool suppress = false);
   void EmptyCTestConfiguration();
 
@@ -161,7 +160,7 @@ public:
   cmCTest& operator=(const cmCTest&) = delete;
 
   /** Set the notes files to be created. */
-  void SetNotesFiles(const char* notes);
+  void SetNotesFiles(const std::string& notes);
 
   void PopulateCustomVector(cmMakefile* mf, const std::string& definition,
                             std::vector<std::string>& vec);
@@ -272,7 +271,7 @@ public:
    * This means if the file is in binary or
    * source directory, it will become /.../relative/path/to/file
    */
-  std::string GetShortPathToFile(const char* fname);
+  std::string GetShortPathToFile(const std::string& fname);
 
   enum
   {
@@ -354,14 +353,14 @@ public:
   int GenerateDoneFile();
 
   /** Submit extra files to the server */
-  bool SubmitExtraFiles(const char* files);
+  bool SubmitExtraFiles(const std::string& files);
   bool SubmitExtraFiles(std::vector<std::string> const& files);
 
   /** Set the output log file name */
-  void SetOutputLogFileName(const char* name);
+  void SetOutputLogFileName(const std::string& name);
 
   /** Set the visual studio or Xcode config type */
-  void SetConfigType(const char* ct);
+  void SetConfigType(const std::string& ct);
 
   /** Various log types */
   enum
@@ -399,14 +398,14 @@ public:
   std::string GetBuildID() const;
 
   /** Add file to be submitted */
-  void AddSubmitFile(Part part, const char* name);
+  void AddSubmitFile(Part part, const std::string& name);
   std::vector<std::string> const& GetSubmitFiles(Part part) const;
   void ClearSubmitFiles(Part part);
 
   /**
    * Read the custom configuration files and apply them to the current ctest
    */
-  int ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf);
+  int ReadCustomConfigurationFileTree(const std::string& dir, cmMakefile* mf);
 
   std::vector<std::string>& GetInitialCommandLineArguments();
 
@@ -462,7 +461,7 @@ public:
   void SetRunCurrentScript(bool value);
 
 private:
-  int GenerateNotesFile(const char* files);
+  int GenerateNotesFile(const std::string& files);
 
   void BlockTestErrorDiagnostics();
 
@@ -571,5 +570,3 @@ inline std::ostream& operator<<(std::ostream& os, const cmCTestLogWrite& c)
     (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
                   cmCTestLog_msg.str().c_str(), suppress);                    \
   } while (false)
-
-#endif

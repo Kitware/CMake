@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "NoPresetGenerator",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalVisualStudio8Generator_h
-#define cmGlobalVisualStudio8Generator_h
+#pragma once
 
 #include "cmGlobalVisualStudio71Generator.h"
 
@@ -78,4 +77,3 @@ protected:
   std::string Name;
   std::string WindowsCEVersion;
 };
-#endif

@@ -14,6 +14,6 @@
 --     | one, satu, raz
 --     | two, dua, dva
 --     | three, tiga, tri
---     | \[undefiend\], empat, \[undefiend\]
+--     | \[undefined\], empat, \[undefined\]
 --     End output
 --   <<< test variable value restored -- PASSED >>>

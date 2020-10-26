@@ -1,6 +1,8 @@
 CMAKE_CUDA_RUNTIME_LIBRARY
 --------------------------
 
+.. versionadded:: 3.17
+
 Select the CUDA runtime library for use when compiling and linking CUDA.
 This variable is used to initialize the :prop_tgt:`CUDA_RUNTIME_LIBRARY`
 property on all targets as they are created.

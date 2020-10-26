@@ -1,6 +1,8 @@
 XCODE_SCHEME_MALLOC_GUARD_EDGES
 -------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Malloc Guard Edges``
 in the Diagnostics section of the generated Xcode scheme.
 

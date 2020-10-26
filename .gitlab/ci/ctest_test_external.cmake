@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.8)
 
 include("${CMAKE_CURRENT_LIST_DIR}/gitlab_ci.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/env_$ENV{CMAKE_CONFIGURATION}.cmake" OPTIONAL)
 
 set(cmake_args
   -C "${CMAKE_CURRENT_LIST_DIR}/configure_$ENV{CMAKE_CONFIGURATION}.cmake")
 
 # Create an entry in CDash.
-ctest_start(Experimental TRACK "${ctest_track}")
+ctest_start("${ctest_model}" GROUP "${ctest_group}")
 
 # Gather update information.
 find_package(Git)
@@ -33,6 +34,11 @@ endif ()
 
 include(ProcessorCount)
 ProcessorCount(nproc)
+if (NOT "$ENV{CTEST_MAX_PARALLELISM}" STREQUAL "")
+  if (nproc GREATER "$ENV{CTEST_MAX_PARALLELISM}")
+    set(nproc "$ENV{CTEST_MAX_PARALLELISM}")
+  endif ()
+endif ()
 
 if (CTEST_CMAKE_GENERATOR STREQUAL "Unix Makefiles")
   set(CTEST_BUILD_FLAGS "-j${nproc}")

@@ -102,13 +102,22 @@ The options are:
   a target later in the command line (i.e. as a command argument rather
   than as the command to execute).
 
-  Whenever a target is used as a command to execute or is mentioned in a
-  generator expression as a command argument, a target-level dependency
-  will be added automatically so that the mentioned target will be built
-  before any target using this custom command.  However this does NOT add
-  a file-level dependency that would cause the custom command to re-run
-  whenever the executable is recompiled.  List target names with
-  the ``DEPENDS`` option to add such file-level dependencies.
+  Whenever one of the following target based generator expressions are used as
+  a command to execute or is mentioned in a command argument, a target-level
+  dependency will be added automatically so that the mentioned target will be
+  built before any target using this custom command
+  (see policy :policy:`CMP0112`).
+
+    * ``TARGET_FILE``
+    * ``TARGET_LINKER_FILE``
+    * ``TARGET_SONAME_FILE``
+    * ``TARGET_PDB_FILE``
+
+  This target-level dependency does NOT add a file-level dependency that would
+  cause the custom command to re-run whenever the executable is recompiled.
+  List target names with the ``DEPENDS`` option to add such file-level
+  dependencies.
+
 
 ``COMMENT``
   Display the given message before the commands are executed at

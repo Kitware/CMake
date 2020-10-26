@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmext_string_view
-#define cmext_string_view
+#pragma once
 
 #include <cstddef>
 
@@ -38,5 +37,3 @@ inline static_string_view operator"" _s(const char* data, size_t size)
 } // namespace cm
 
 using cm::operator"" _s;
-
-#endif

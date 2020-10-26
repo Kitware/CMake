@@ -5,6 +5,8 @@
 FindIntl
 --------
 
+.. versionadded:: 3.2
+
 Find the Gettext libintl headers and libraries.
 
 This module reports information about the Gettext libintl
@@ -40,7 +42,7 @@ find_path(Intl_INCLUDE_DIR
 mark_as_advanced(Intl_INCLUDE_DIR)
 
 # Find all Intl libraries
-find_library(Intl_LIBRARY "intl"
+find_library(Intl_LIBRARY "intl" NAMES_PER_DIR
   DOC "libintl libraries (if not in the C library)")
 mark_as_advanced(Intl_LIBRARY)
 

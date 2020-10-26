@@ -5,6 +5,8 @@
 FindXalanC
 -----------
 
+.. versionadded:: 3.5
+
 Find the Apache Xalan-C++ XSL transform processor headers and libraries.
 
 Imported targets

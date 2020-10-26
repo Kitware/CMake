@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "EmptyCacheKey",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "": "value"
+      }
+    }
+  ]
+}

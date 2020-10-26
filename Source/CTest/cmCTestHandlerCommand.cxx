@@ -14,6 +14,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
@@ -125,23 +126,22 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   // CTEST_CONFIGURATION_TYPE script variable if it is defined.
   // The current script value trumps the -C argument on the command
   // line.
-  const char* ctestConfigType =
+  cmProp ctestConfigType =
     this->Makefile->GetDefinition("CTEST_CONFIGURATION_TYPE");
   if (ctestConfigType) {
-    this->CTest->SetConfigType(ctestConfigType);
+    this->CTest->SetConfigType(*ctestConfigType);
   }
 
   if (!this->Build.empty()) {
     this->CTest->SetCTestConfiguration(
-      "BuildDirectory", cmSystemTools::CollapseFullPath(this->Build).c_str(),
+      "BuildDirectory", cmSystemTools::CollapseFullPath(this->Build),
       this->Quiet);
   } else {
     std::string const& bdir =
       this->Makefile->GetSafeDefinition("CTEST_BINARY_DIRECTORY");
     if (!bdir.empty()) {
       this->CTest->SetCTestConfiguration(
-        "BuildDirectory", cmSystemTools::CollapseFullPath(bdir).c_str(),
-        this->Quiet);
+        "BuildDirectory", cmSystemTools::CollapseFullPath(bdir), this->Quiet);
     } else {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "CTEST_BINARY_DIRECTORY not set" << std::endl;);
@@ -151,20 +151,18 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     cmCTestLog(this->CTest, DEBUG,
                "Set source directory to: " << this->Source << std::endl);
     this->CTest->SetCTestConfiguration(
-      "SourceDirectory", cmSystemTools::CollapseFullPath(this->Source).c_str(),
+      "SourceDirectory", cmSystemTools::CollapseFullPath(this->Source),
       this->Quiet);
   } else {
     this->CTest->SetCTestConfiguration(
       "SourceDirectory",
       cmSystemTools::CollapseFullPath(
-        this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY"))
-        .c_str(),
+        this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY")),
       this->Quiet);
   }
 
-  if (const char* changeId =
-        this->Makefile->GetDefinition("CTEST_CHANGE_ID")) {
-    this->CTest->SetCTestConfiguration("ChangeId", changeId, this->Quiet);
+  if (cmProp changeId = this->Makefile->GetDefinition("CTEST_CHANGE_ID")) {
+    this->CTest->SetCTestConfiguration("ChangeId", *changeId, this->Quiet);
   }
 
   cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl;);

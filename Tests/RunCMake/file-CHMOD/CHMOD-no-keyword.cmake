@@ -1,0 +1,5 @@
+file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/chmod-tests)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/chmod-tests)
+
+file(TOUCH ${CMAKE_CURRENT_BINARY_DIR}/chmod-tests/a)
+file(CHMOD ${CMAKE_CURRENT_BINARY_DIR}/chmod-tests/a)

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestResourceAllocator_h
-#define cmCTestResourceAllocator_h
+#pragma once
 
 #include <map>
 #include <string>
@@ -35,5 +34,3 @@ public:
 private:
   std::map<std::string, std::map<std::string, Resource>> Resources;
 };
-
-#endif

@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestPython2Embedded C)
+project(TestPython2Embedded LANGUAGES C)
 
 include(CTest)
 
 find_package(Python2 REQUIRED COMPONENTS Development.Embed)
 if (NOT Python2_FOUND)
-  message (FATAL_ERROR "Fail to found Python 2")
+  message (FATAL_ERROR "Failed to find Python 2")
 endif()
 if (Python2_Development_FOUND)
   message (FATAL_ERROR "Python 2, COMPONENT 'Development' unexpectedly found")

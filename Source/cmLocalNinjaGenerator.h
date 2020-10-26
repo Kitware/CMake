@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmLocalNinjaGenerator_h
-#define cmLocalNinjaGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -66,10 +65,10 @@ public:
 
   void AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs,
                            const std::string& config);
-  void AppendTargetDepends(
-    cmGeneratorTarget* target, cmNinjaDeps& outputs, const std::string& config,
-    const std::string& fileConfig,
-    cmNinjaTargetDepends depends = DependOnTargetArtifact);
+  void AppendTargetDepends(cmGeneratorTarget* target, cmNinjaDeps& outputs,
+                           const std::string& config,
+                           const std::string& fileConfig,
+                           cmNinjaTargetDepends depends);
 
   void AddCustomCommandTarget(cmCustomCommand const* cc,
                               cmGeneratorTarget* target);
@@ -121,5 +120,3 @@ private:
   CustomCommandTargetMap CustomCommandTargets;
   std::vector<cmCustomCommand const*> CustomCommands;
 };
-
-#endif // ! cmLocalNinjaGenerator_h

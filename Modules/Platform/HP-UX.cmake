@@ -22,7 +22,7 @@ set(CMAKE_PLATFORM_USES_PATH_WHEN_NO_SONAME 1)
 # set flags for gcc support
 include(Platform/UnixPaths)
 
-# Look in both 32-bit and 64-bit implict link directories, but tell
+# Look in both 32-bit and 64-bit implicit link directories, but tell
 # CMake not to pass the paths to the linker.  The linker will find the
 # library for the proper architecture.  In the future we should detect
 # which path will be used by the linker.  Since the pointer type size

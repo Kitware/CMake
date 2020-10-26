@@ -1,6 +1,8 @@
 CMAKE_MESSAGE_LOG_LEVEL
 -----------------------
 
+.. versionadded:: 3.17
+
 When set, this variable specifies the logging level used by the
 :command:`message` command.  Valid values are the same as those for the
 ``--log-level`` command line option of the :manual:`cmake(1)` program.

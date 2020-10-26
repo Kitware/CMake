@@ -1,0 +1,11 @@
+^CMake Error at SourceProperty-CMP0070-NEW.cmake:[0-9]+ \(add_library\):
+  Cannot find source file:
+
+.*\/relative-output-NEW\.c
+
+  Tried extensions \.c \.C.*
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.$

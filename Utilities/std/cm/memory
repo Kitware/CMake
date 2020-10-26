@@ -3,10 +3,12 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_memory
-#define cm_memory
+#pragma once
+
+#include "cmSTL.hxx" // IWYU pragma: keep
 
 #include <memory> // IWYU pragma: export
+
 #if !defined(CMake_HAVE_CXX_MAKE_UNIQUE)
 #  include <cstddef>
 #  include <type_traits>
@@ -63,5 +65,3 @@ typename internals::make_unique_if<T>::bound_array make_unique(Args&&...) =
 #endif
 
 } // namespace cm
-
-#endif

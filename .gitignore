@@ -5,6 +5,7 @@
 
 *.pyc
 Testing
+CMakeUserPresets.json
 
 # Visual Studio work directory
 .vs/

@@ -1,0 +1,19 @@
+CMake Error at MultipleCommands.cmake:[0-9]+ \(separate_arguments\):
+  separate_arguments 'UNIX_COMMAND', 'WINDOWS_COMMAND' and 'NATIVE_COMMAND'
+  are mutually exclusive
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at MultipleCommands.cmake:[0-9]+ \(separate_arguments\):
+  separate_arguments 'UNIX_COMMAND', 'WINDOWS_COMMAND' and 'NATIVE_COMMAND'
+  are mutually exclusive
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at MultipleCommands.cmake:[0-9]+ \(separate_arguments\):
+  separate_arguments 'UNIX_COMMAND', 'WINDOWS_COMMAND' and 'NATIVE_COMMAND'
+  are mutually exclusive
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

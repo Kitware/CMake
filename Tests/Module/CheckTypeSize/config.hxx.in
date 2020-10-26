@@ -1,10 +1,20 @@
 #cmakedefine HAVE_SYS_TYPES_H
 #cmakedefine HAVE_STDINT_H
 #cmakedefine HAVE_STDDEF_H
+#cmakedefine HAVE_CSTDINT
+#cmakedefine HAVE_CSTDDEF
 
 /* bool */
 #cmakedefine HAVE_SIZEOF_BOOL
 @SIZEOF_BOOL_CODE@
+
+/* uint8_t */
+#cmakedefine HAVE_SIZEOF_UINT8_T
+@SIZEOF_UINT8_T_CODE@
+
+/* std::uint8_t */
+#cmakedefine HAVE_SIZEOF_STD_UINT8_T
+@SIZEOF_STD_UINT8_T_CODE@
 
 /* struct ns::somestruct::someint */
 #cmakedefine HAVE_SIZEOF_NS_STRUCTMEMBER_INT

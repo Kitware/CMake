@@ -1,6 +1,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/cm_message_checks_compat.cmake)
 
 function(cm_check_cxx_feature name)
+  set(TRY_RUN_FEATURE "${ARGN}")
   string(TOUPPER ${name} FEATURE)
   if(NOT DEFINED CMake_HAVE_CXX_${FEATURE})
     cm_message_checks_compat(
@@ -12,15 +13,31 @@ function(cm_check_cxx_feature name)
     else()
       set(maybe_cxx_standard "")
     endif()
-    try_compile(CMake_HAVE_CXX_${FEATURE}
-      ${CMAKE_CURRENT_BINARY_DIR}
-      ${CMAKE_CURRENT_LIST_DIR}/cm_cxx_${name}.cxx
-      CMAKE_FLAGS ${maybe_cxx_standard}
-      OUTPUT_VARIABLE OUTPUT
-      )
+    if (TRY_RUN_FEATURE)
+      try_run(CMake_RUN_CXX_${FEATURE} CMake_COMPILE_CXX_${FEATURE}
+        ${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/cm_cxx_${name}.cxx
+        CMAKE_FLAGS ${maybe_cxx_standard}
+        OUTPUT_VARIABLE OUTPUT
+        )
+      if (CMake_RUN_CXX_${FEATURE} EQUAL "0" AND CMake_COMPILE_CXX_${FEATURE})
+        set(CMake_HAVE_CXX_${FEATURE} ON CACHE INTERNAL "TRY_RUN" FORCE)
+      else()
+        set(CMake_HAVE_CXX_${FEATURE} OFF CACHE INTERNAL "TRY_RUN" FORCE)
+      endif()
+    else()
+      try_compile(CMake_HAVE_CXX_${FEATURE}
+        ${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/cm_cxx_${name}.cxx
+        CMAKE_FLAGS ${maybe_cxx_standard}
+        OUTPUT_VARIABLE OUTPUT
+        )
+    endif()
     set(check_output "${OUTPUT}")
     # Filter out MSBuild output that looks like a warning.
     string(REGEX REPLACE " +0 Warning\\(s\\)" "" check_output "${check_output}")
+    # Filter out MSBuild output that looks like a warning.
+    string(REGEX REPLACE "[^\n]*warning MSB[0-9][0-9][0-9][0-9][^\n]*" "" check_output "${check_output}")
     # Filter out warnings caused by user flags.
     string(REGEX REPLACE "[^\n]*warning:[^\n]*-Winvalid-command-line-argument[^\n]*" "" check_output "${check_output}")
     # Filter out warnings caused by local configuration.
@@ -63,3 +80,8 @@ if(CMake_HAVE_CXX_MAKE_UNIQUE)
   set(CMake_HAVE_CXX_UNIQUE_PTR 1)
 endif()
 cm_check_cxx_feature(unique_ptr)
+if (NOT CMAKE_CXX_STANDARD LESS "17")
+  cm_check_cxx_feature(filesystem TRY_RUN)
+else()
+  set(CMake_HAVE_CXX_FILESYSTEM FALSE)
+endif()

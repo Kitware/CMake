@@ -1,6 +1,8 @@
 VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION
 --------------------------------------
 
+.. versionadded:: 3.4
+
 Visual Studio Windows Target Platform Minimum Version
 
 For Windows 10. Specifies the minimum version of the OS that is being

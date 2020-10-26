@@ -1,6 +1,8 @@
 VS_DPI_AWARE
 ------------
 
+.. versionadded:: 3.16
+
 Set the Manifest Tool -> Input and Output -> DPI Awareness in the Visual Studio
 target project properties.
 

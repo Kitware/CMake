@@ -1,0 +1,9 @@
+^CMake Error at [^
+]*/Modules/CheckSourceCompiles.cmake:[0-9]+ \(message\):
+  Unknown argument:
+
+    BAD
+
+Call Stack \(most recent call first\):
+  UnknownArgument.cmake:[0-9]+ \(check_source_compiles\)
+  CMakeLists.txt:[0-9]+ \(include\)$

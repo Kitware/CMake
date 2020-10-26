@@ -96,6 +96,9 @@ Apple Frameworks
 
 A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
 target property to create an macOS or iOS Framework Bundle.
+A library with the ``FRAMEWORK`` target property should also set the
+:prop_tgt:`FRAMEWORK_VERSION` target property.  This property is typically
+set to the value of "A" by macOS conventions.
 The ``MACOSX_FRAMEWORK_IDENTIFIER`` sets ``CFBundleIdentifier`` key
 and it uniquely identifies the bundle.
 
@@ -104,7 +107,7 @@ and it uniquely identifies the bundle.
   add_library(MyFramework SHARED MyFramework.cpp)
   set_target_properties(MyFramework PROPERTIES
     FRAMEWORK TRUE
-    FRAMEWORK_VERSION A
+    FRAMEWORK_VERSION A # Version "A" is macOS convention
     MACOSX_FRAMEWORK_IDENTIFIER org.cmake.MyFramework
   )
 
@@ -115,7 +118,10 @@ Object Libraries
 
 The ``OBJECT`` library type defines a non-archival collection of object files
 resulting from compiling the given source files.  The object files collection
-may be used as source inputs to other targets:
+may be used as source inputs to other targets by using the syntax
+``$<TARGET_OBJECTS:name>``.  This is a
+:manual:`generator expression <cmake-generator-expressions(7)>` that can be
+used to supply the ``OBJECT`` library content to other targets:
 
 .. code-block:: cmake
 
@@ -373,8 +379,12 @@ position-independent-code, so a diagnostic is issued.
 The ``lib1`` and ``lib2`` requirements are not "compatible".  One of them
 requires that consumers are built as position-independent-code, while
 the other requires that consumers are not built as position-independent-code.
-Because ``exe2`` links to both and they are in conflict, a diagnostic is
-issued.
+Because ``exe2`` links to both and they are in conflict, a CMake error message
+is issued::
+
+  CMake Error: The INTERFACE_POSITION_INDEPENDENT_CODE property of "lib2" does
+  not agree with the value of POSITION_INDEPENDENT_CODE already determined
+  for "exe2".
 
 To be "compatible", the :prop_tgt:`POSITION_INDEPENDENT_CODE` property,
 if set must be either the same, in a boolean sense, as the
@@ -732,7 +742,7 @@ As the value of the :prop_tgt:`POSITION_INDEPENDENT_CODE` property of
 the ``exe1`` target is dependent on the linked libraries (``lib3``), and the
 edge of linking ``exe1`` is determined by the same
 :prop_tgt:`POSITION_INDEPENDENT_CODE` property, the dependency graph above
-contains a cycle.  :manual:`cmake(1)` issues a diagnostic in this case.
+contains a cycle.  :manual:`cmake(1)` issues an error message.
 
 .. _`Output Artifacts`:
 
@@ -922,8 +932,8 @@ property from it:
 Interface Libraries
 -------------------
 
-An ``INTERFACE`` target has no :prop_tgt:`LOCATION` and is mutable, but is
-otherwise similar to an :prop_tgt:`IMPORTED` target.
+An ``INTERFACE`` library target does not compile sources and does not
+produce a library artifact on disk, so it has no :prop_tgt:`LOCATION`.
 
 It may specify usage requirements such as
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
@@ -937,11 +947,22 @@ Only the ``INTERFACE`` modes of the :command:`target_include_directories`,
 :command:`target_sources`, and :command:`target_link_libraries` commands
 may be used with ``INTERFACE`` libraries.
 
+Since CMake 3.19, an ``INTERFACE`` library target may optionally contain
+source files.  An interface library that contains source files will be
+included as a build target in the generated buildsystem.  It does not
+compile sources, but may contain custom commands to generate other sources.
+Additionally, IDEs will show the source files as part of the target for
+interactive reading and editing.
+
 A primary use-case for ``INTERFACE`` libraries is header-only libraries.
 
 .. code-block:: cmake
 
-  add_library(Eigen INTERFACE)
+  add_library(Eigen INTERFACE
+    src/eigen.h
+    src/vector.h
+    src/matrix.h
+    )
   target_include_directories(Eigen INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include/Eigen>
@@ -975,25 +996,17 @@ This way, the build specification of ``exe1`` is expressed entirely as linked
 targets, and the complexity of compiler-specific flags is encapsulated in an
 ``INTERFACE`` library target.
 
-The properties permitted to be set on or read from an ``INTERFACE`` library
-are:
-
-* Properties matching ``INTERFACE_*``
-* Built-in properties matching ``COMPATIBLE_INTERFACE_*``
-* ``EXPORT_NAME``
-* ``EXPORT_PROPERTIES``
-* ``IMPORTED``
-* ``MANUALLY_ADDED_DEPENDENCIES``
-* ``NAME``
-* Properties matching ``IMPORTED_LIBNAME_*``
-* Properties matching ``MAP_IMPORTED_CONFIG_*``
-
 ``INTERFACE`` libraries may be installed and exported.  Any content they refer
 to must be installed separately:
 
 .. code-block:: cmake
 
-  add_library(Eigen INTERFACE)
+  set(Eigen_headers
+    src/eigen.h
+    src/vector.h
+    src/matrix.h
+    )
+  add_library(Eigen INTERFACE ${Eigen_headers})
   target_include_directories(Eigen INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include/Eigen>
@@ -1003,9 +1016,6 @@ to must be installed separately:
   install(EXPORT eigenExport NAMESPACE Upstream::
     DESTINATION lib/cmake/Eigen
   )
-  install(FILES
-      ${CMAKE_CURRENT_SOURCE_DIR}/src/eigen.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/src/vector.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/src/matrix.h
+  install(FILES ${Eigen_headers}
     DESTINATION include/Eigen
   )

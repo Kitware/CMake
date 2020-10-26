@@ -284,6 +284,11 @@ run_ninja(Install default-install build.ninja install)
 file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}/install")
 run_ninja(Install all-install build.ninja install:all)
 
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ExcludeFromAll-build)
+run_cmake_configure(ExcludeFromAll)
+include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
+run_cmake_build(ExcludeFromAll all "" all:all)
+
 # FIXME Get this working
 #set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/AutoMocExecutable-build)
 #run_cmake_configure(AutoMocExecutable)

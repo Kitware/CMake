@@ -1,6 +1,8 @@
 IMPORTED_GLOBAL
 ---------------
 
+.. versionadded:: 3.11
+
 Indication of whether an :ref:`IMPORTED target <Imported Targets>` is
 globally visible.
 

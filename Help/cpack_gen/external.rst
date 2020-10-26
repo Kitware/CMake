@@ -281,3 +281,10 @@ Variables specific to CPack External generator
   It is invoked after (optional) staging took place and may
   run an external packaging tool. The script has access to
   the variables defined by the CPack config file.
+
+.. variable:: CPACK_EXTERNAL_BUILT_PACKAGES
+
+  The ``CPACK_EXTERNAL_PACKAGE_SCRIPT`` script may set this list variable to the
+  full paths of generated package files.  CPack will copy these files from the
+  staging directory back to the top build directory and possibly produce
+  checksum files if the :variable:`CPACK_PACKAGE_CHECKSUM` is set.

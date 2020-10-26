@@ -20,7 +20,7 @@ endif()
 
 unset(FOO_MODULE_NAME)
 
-# verify variable get's also set on subsequent run
+# verify variable gets also set on subsequent run
 pkg_search_module(FOO REQUIRED foo bletch bar)
 
 if(NOT FOO_MODULE_NAME STREQUAL "bletch")

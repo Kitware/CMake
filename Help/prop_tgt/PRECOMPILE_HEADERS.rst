@@ -1,6 +1,8 @@
 PRECOMPILE_HEADERS
 ------------------
 
+.. versionadded:: 3.16
+
 List of header files to precompile.
 
 This property holds a :ref:`semicolon-separated list <CMake Language Lists>`

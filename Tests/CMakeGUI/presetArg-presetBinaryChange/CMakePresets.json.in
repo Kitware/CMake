@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "ninja",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "STRING_VARIABLE": {
+          "type": "STRING",
+          "value": "String value"
+        },
+        "PATH_VARIABLE": {
+          "type": "PATH",
+          "value": "${sourceDir}"
+        },
+        "FILEPATH_VARIABLE": {
+          "type": "FILEPATH",
+          "value": "${sourceDir}/CMakeLists.txt"
+        },
+        "ON_VARIABLE": {
+          "type": "BOOL",
+          "value": "ON"
+        },
+        "FALSE_VARIABLE": {
+          "type": "BOOL",
+          "value": "FALSE"
+        },
+        "UNINITIALIZED_VARIABLE": "Uninitialized value"
+      }
+    },
+    {
+      "name": "ninja2",
+      "inherits": [
+        "ninja"
+      ]
+    }
+  ]
+}

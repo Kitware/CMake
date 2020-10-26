@@ -51,6 +51,19 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.19
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0114: ExternalProject step targets fully adopt their steps. </policy/CMP0114>
+   CMP0113: Makefile generators do not repeat custom commands from target dependencies. </policy/CMP0113>
+   CMP0112: Target file component generator expressions do not add target dependencies. </policy/CMP0112>
+   CMP0111: An imported target missing its location property fails during generation. </policy/CMP0111>
+   CMP0110: add_test() supports arbitrary characters in test names. </policy/CMP0110>
+   CMP0109: find_program() requires permission to execute but not to read. </policy/CMP0109>
+
 Policies Introduced by CMake 3.18
 =================================
 

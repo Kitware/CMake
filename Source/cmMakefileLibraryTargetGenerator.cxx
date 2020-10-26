@@ -129,8 +129,7 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
   const bool requiresDeviceLinking = requireDeviceLinking(
     *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
   if (requiresDeviceLinking) {
-    std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
-    this->WriteDeviceLibraryRules(linkRuleVar, false);
+    this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", false);
   }
 
   std::string linkLanguage =
@@ -156,8 +155,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
     const bool requiresDeviceLinking = requireDeviceLinking(
       *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
     if (requiresDeviceLinking) {
-      std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
-      this->WriteDeviceLibraryRules(linkRuleVar, relink);
+      this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", relink);
     }
   }
 
@@ -191,8 +189,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
     const bool requiresDeviceLinking = requireDeviceLinking(
       *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
     if (requiresDeviceLinking) {
-      std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
-      this->WriteDeviceLibraryRules(linkRuleVar, relink);
+      this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", relink);
     }
   }
 
@@ -239,11 +236,46 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
   std::vector<std::string> commands;
-
-  // Get the language to use for linking this library.
-  std::string linkLanguage = "CUDA";
   std::string const objExt =
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
+
+  // Get the name of the device object to generate.
+  std::string const targetOutput =
+    this->GeneratorTarget->ObjectDirectory + "cmake_device_link" + objExt;
+  this->DeviceLinkObject = targetOutput;
+
+  this->NumberOfProgressActions++;
+  if (!this->NoRuleMessages) {
+    cmLocalUnixMakefileGenerator3::EchoProgress progress;
+    this->MakeEchoProgress(progress);
+    // Add the link message.
+    std::string buildEcho =
+      cmStrCat("Linking CUDA device code ",
+               this->LocalGenerator->ConvertToOutputFormat(
+                 this->LocalGenerator->MaybeConvertToRelativePath(
+                   this->LocalGenerator->GetCurrentBinaryDirectory(),
+                   this->DeviceLinkObject),
+                 cmOutputConverter::SHELL));
+    this->LocalGenerator->AppendEcho(
+      commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
+  }
+
+  if (this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID") == "Clang") {
+    this->WriteDeviceLinkRule(commands, targetOutput);
+  } else {
+    this->WriteNvidiaDeviceLibraryRules(linkRuleVar, relink, commands,
+                                        targetOutput);
+  }
+
+  // Write the main driver rule to build everything in this target.
+  this->WriteTargetDriverRule(targetOutput, relink);
+}
+
+void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
+  const std::string& linkRuleVar, bool relink,
+  std::vector<std::string>& commands, const std::string& targetOutput)
+{
+  std::string linkLanguage = "CUDA";
 
   // Build list of dependencies.
   std::vector<std::string> depends;
@@ -258,30 +290,10 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   std::string linkFlags;
   this->GetDeviceLinkFlags(linkFlags, linkLanguage);
 
-  // Get the name of the device object to generate.
-  std::string const targetOutputReal =
-    this->GeneratorTarget->ObjectDirectory + "cmake_device_link" + objExt;
-  this->DeviceLinkObject = targetOutputReal;
-
-  this->NumberOfProgressActions++;
-  if (!this->NoRuleMessages) {
-    cmLocalUnixMakefileGenerator3::EchoProgress progress;
-    this->MakeEchoProgress(progress);
-    // Add the link message.
-    std::string buildEcho =
-      cmStrCat("Linking ", linkLanguage, " device code ",
-               this->LocalGenerator->ConvertToOutputFormat(
-                 this->LocalGenerator->MaybeConvertToRelativePath(
-                   this->LocalGenerator->GetCurrentBinaryDirectory(),
-                   this->DeviceLinkObject),
-                 cmOutputConverter::SHELL));
-    this->LocalGenerator->AppendEcho(
-      commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
-  }
   // Clean files associated with this library.
   std::set<std::string> libCleanFiles;
   libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal));
+    this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutput));
 
   // Determine whether a link script will be used.
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
@@ -335,7 +347,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
       this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal),
+        this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutput),
       output);
 
     std::string targetFullPathCompilePDB =
@@ -356,7 +368,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     std::string launcher;
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 
@@ -364,7 +376,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
       this->LocalGenerator->CreateRulePlaceholderExpander());
 
     // Construct the main link rule and expand placeholders.
-    rulePlaceholderExpander->SetTargetImpLib(targetOutputReal);
+    rulePlaceholderExpander->SetTargetImpLib(targetOutput);
     std::string linkRule = this->GetLinkRule(linkRuleVar);
     cmExpandList(linkRule, real_link_commands);
 
@@ -399,14 +411,11 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   commands1.clear();
 
   // Compute the list of outputs.
-  std::vector<std::string> outputs(1, targetOutputReal);
+  std::vector<std::string> outputs(1, targetOutput);
 
   // Write the build rule.
   this->WriteMakeRule(*this->BuildFileStream, nullptr, outputs, depends,
                       commands, false);
-
-  // Write the main driver rule to build everything in this target.
-  this->WriteTargetDriverRule(targetOutputReal, relink);
 #else
   static_cast<void>(linkRuleVar);
   static_cast<void>(relink);
@@ -809,7 +818,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     std::string launcher;
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 

@@ -47,17 +47,18 @@ StartCompilerSetup::StartCompilerSetup(QString defaultGeneratorPlatform,
 
   this->CompilerSetupOptions[0]->setChecked(true);
 
-  QObject::connect(this->CompilerSetupOptions[0], SIGNAL(toggled(bool)), this,
-                   SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->CompilerSetupOptions[1], SIGNAL(toggled(bool)), this,
-                   SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->CompilerSetupOptions[2], SIGNAL(toggled(bool)), this,
-                   SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->CompilerSetupOptions[3], SIGNAL(toggled(bool)), this,
-                   SLOT(onSelectionChanged(bool)));
-  QObject::connect(this->GeneratorOptions,
-                   SIGNAL(currentIndexChanged(QString const&)), this,
-                   SLOT(onGeneratorChanged(QString const&)));
+  QObject::connect(this->CompilerSetupOptions[0], &QRadioButton::toggled, this,
+                   &StartCompilerSetup::onSelectionChanged);
+  QObject::connect(this->CompilerSetupOptions[1], &QRadioButton::toggled, this,
+                   &StartCompilerSetup::onSelectionChanged);
+  QObject::connect(this->CompilerSetupOptions[2], &QRadioButton::toggled, this,
+                   &StartCompilerSetup::onSelectionChanged);
+  QObject::connect(this->CompilerSetupOptions[3], &QRadioButton::toggled, this,
+                   &StartCompilerSetup::onSelectionChanged);
+  QObject::connect(
+    this->GeneratorOptions,
+    static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+    this, &StartCompilerSetup::onGeneratorChanged);
 }
 
 QFrame* StartCompilerSetup::CreateToolsetWidgets()
@@ -144,6 +145,36 @@ void StartCompilerSetup::setCurrentGenerator(const QString& gen)
   }
 }
 
+void StartCompilerSetup::setPlatform(const QString& platform)
+{
+  this->PlatformOptions->setCurrentText(platform);
+}
+
+void StartCompilerSetup::setToolset(const QString& toolset)
+{
+  this->Toolset->setText(toolset);
+}
+
+void StartCompilerSetup::setCompilerOption(CompilerOption option)
+{
+  std::size_t index = 0;
+  switch (option) {
+    case CompilerOption::DefaultNative:
+      index = 0;
+      break;
+    case CompilerOption::SpecifyNative:
+      index = 1;
+      break;
+    case CompilerOption::ToolchainFile:
+      index = 2;
+      break;
+    case CompilerOption::Options:
+      index = 3;
+      break;
+  }
+  this->CompilerSetupOptions[index]->setChecked(true);
+}
+
 QString StartCompilerSetup::getGenerator() const
 {
   return this->GeneratorOptions->currentText();
@@ -186,8 +217,10 @@ void StartCompilerSetup::onSelectionChanged(bool on)
   }
 }
 
-void StartCompilerSetup::onGeneratorChanged(QString const& name)
+void StartCompilerSetup::onGeneratorChanged(int index)
 {
+  QString name = this->GeneratorOptions->itemText(index);
+
   // Display the generator platform for the generators supporting it
   if (GeneratorsSupportingPlatform.contains(name)) {
 
@@ -458,9 +491,9 @@ FirstConfigure::FirstConfigure()
   this->mStartCompilerSetupPage = new StartCompilerSetup(
     env_generator_platform, env_generator_toolset, this);
   this->setPage(Start, this->mStartCompilerSetupPage);
-  QObject::connect(this->mStartCompilerSetupPage, SIGNAL(selectionChanged()),
-                   this, SLOT(restart()));
-
+  QObject::connect(this->mStartCompilerSetupPage,
+                   &StartCompilerSetup::selectionChanged, this,
+                   &FirstConfigure::restart);
   this->mNativeCompilerSetupPage = new NativeCompilerSetup(this);
   this->setPage(NativeSetup, this->mNativeCompilerSetupPage);
 
@@ -477,6 +510,26 @@ void FirstConfigure::setGenerators(
   std::vector<cmake::GeneratorInfo> const& gens)
 {
   this->mStartCompilerSetupPage->setGenerators(gens);
+}
+
+void FirstConfigure::setCurrentGenerator(const QString& gen)
+{
+  this->mStartCompilerSetupPage->setCurrentGenerator(gen);
+}
+
+void FirstConfigure::setPlatform(const QString& platform)
+{
+  this->mStartCompilerSetupPage->setPlatform(platform);
+}
+
+void FirstConfigure::setToolset(const QString& toolset)
+{
+  this->mStartCompilerSetupPage->setToolset(toolset);
+}
+
+void FirstConfigure::setCompilerOption(CompilerOption option)
+{
+  this->mStartCompilerSetupPage->setCompilerOption(option);
 }
 
 QString FirstConfigure::getGenerator() const
@@ -500,7 +553,7 @@ void FirstConfigure::loadFromSettings()
   // restore generator
   settings.beginGroup("Settings/StartPath");
   QString lastGen = settings.value("LastGenerator").toString();
-  this->mStartCompilerSetupPage->setCurrentGenerator(lastGen);
+  this->setCurrentGenerator(lastGen);
   settings.endGroup();
 
   // restore compiler setup
@@ -547,7 +600,7 @@ void FirstConfigure::loadFromSettings()
   //     this prevents them from being taken from environment, while the
   //     generator is taken from application settings
   if (!mDefaultGenerator.isEmpty()) {
-    this->mStartCompilerSetupPage->setCurrentGenerator(mDefaultGenerator);
+    this->setCurrentGenerator(mDefaultGenerator);
   }
 }
 

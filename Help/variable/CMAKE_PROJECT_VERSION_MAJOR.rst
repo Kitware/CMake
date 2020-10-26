@@ -1,6 +1,8 @@
 CMAKE_PROJECT_VERSION_MAJOR
 ---------------------------
 
+.. versionadded:: 3.12
+
 The major version of the top level project.
 
 This variable holds the major version of the project as specified in the top

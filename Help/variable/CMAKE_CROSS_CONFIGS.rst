@@ -1,6 +1,8 @@
 CMAKE_CROSS_CONFIGS
 -------------------
 
+.. versionadded:: 3.17
+
 Specifies a :ref:`semicolon-separated list <CMake Language Lists>` of
 configurations available from all ``build-<Config>.ninja`` files in the
 :generator:`Ninja Multi-Config` generator.  This variable activates

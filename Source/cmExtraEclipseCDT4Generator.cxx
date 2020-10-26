@@ -189,9 +189,9 @@ void cmExtraEclipseCDT4Generator::CreateSettingsResourcePrefsFile()
   }
 
   fout << "eclipse.preferences.version=1\n";
-  const char* encoding = mf->GetDefinition("CMAKE_ECLIPSE_RESOURCE_ENCODING");
+  cmProp encoding = mf->GetDefinition("CMAKE_ECLIPSE_RESOURCE_ENCODING");
   if (encoding) {
-    fout << "encoding/<project>=" << encoding << '\n';
+    fout << "encoding/<project>=" << *encoding << '\n';
   }
 }
 
@@ -604,7 +604,7 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
 
 void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 {
-  std::set<std::string> emmited;
+  std::set<std::string> emitted;
 
   const auto& lg = this->GlobalGenerator->GetLocalGenerators()[0];
   const cmMakefile* mf = lg->GetMakefile();
@@ -751,7 +751,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   xml.EndElement();
 
   // add pre-processor definitions to allow eclipse to gray out sections
-  emmited.clear();
+  emitted.clear();
   for (const auto& lgen : this->GlobalGenerator->GetLocalGenerators()) {
 
     if (cmProp cdefs =
@@ -780,8 +780,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         }
 
         // insert the definition if not already added.
-        if (emmited.find(def) == emmited.end()) {
-          emmited.insert(def);
+        if (emitted.find(def) == emitted.end()) {
+          emitted.insert(def);
           xml.StartElement("pathentry");
           xml.Attribute("kind", "mac");
           xml.Attribute("name", def);
@@ -793,11 +793,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     }
   }
   // add system defined c macros
-  const char* cDefs =
+  cmProp cDefs =
     mf->GetDefinition("CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS");
   if (this->CEnabled && cDefs) {
     // Expand the list.
-    std::vector<std::string> defs = cmExpandedList(cDefs, true);
+    std::vector<std::string> defs = cmExpandedList(*cDefs, true);
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
@@ -812,8 +812,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         }
 
         // insert the definition if not already added.
-        if (emmited.find(def) == emmited.end()) {
-          emmited.insert(def);
+        if (emitted.find(def) == emitted.end()) {
+          emitted.insert(def);
           xml.StartElement("pathentry");
           xml.Attribute("kind", "mac");
           xml.Attribute("name", def);
@@ -825,11 +825,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     }
   }
   // add system defined c++ macros
-  const char* cxxDefs =
+  cmProp cxxDefs =
     mf->GetDefinition("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_DEFINED_MACROS");
   if (this->CXXEnabled && cxxDefs) {
     // Expand the list.
-    std::vector<std::string> defs = cmExpandedList(cxxDefs, true);
+    std::vector<std::string> defs = cmExpandedList(*cxxDefs, true);
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
@@ -844,8 +844,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         }
 
         // insert the definition if not already added.
-        if (emmited.find(def) == emmited.end()) {
-          emmited.insert(def);
+        if (emitted.find(def) == emitted.end()) {
+          emitted.insert(def);
           xml.StartElement("pathentry");
           xml.Attribute("kind", "mac");
           xml.Attribute("name", def);
@@ -858,7 +858,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   }
 
   // include dirs
-  emmited.clear();
+  emitted.clear();
   for (const auto& lgen : this->GlobalGenerator->GetLocalGenerators()) {
     const auto& targets = lgen->GetGeneratorTargets();
     for (const auto& target : targets) {
@@ -868,7 +868,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       std::vector<std::string> includeDirs;
       std::string config = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
       lgen->GetIncludeDirectories(includeDirs, target.get(), "C", config);
-      this->AppendIncludeDirectories(xml, includeDirs, emmited);
+      this->AppendIncludeDirectories(xml, includeDirs, emitted);
     }
   }
   // now also the system include directories, in case we found them in
@@ -879,14 +879,14 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     std::string systemIncludeDirs =
       mf->GetSafeDefinition("CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs = cmExpandedList(systemIncludeDirs);
-    this->AppendIncludeDirectories(xml, dirs, emmited);
+    this->AppendIncludeDirectories(xml, dirs, emitted);
   }
   compiler = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
   if (this->CXXEnabled && !compiler.empty()) {
     std::string systemIncludeDirs =
       mf->GetSafeDefinition("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs = cmExpandedList(systemIncludeDirs);
-    this->AppendIncludeDirectories(xml, dirs, emmited);
+    this->AppendIncludeDirectories(xml, dirs, emitted);
   }
 
   xml.EndElement(); // storageModule
@@ -895,7 +895,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   xml.StartElement("storageModule");
   xml.Attribute("moduleId", "org.eclipse.cdt.make.core.buildtargets");
   xml.StartElement("buildTargets");
-  emmited.clear();
+  emitted.clear();
   const std::string& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   const std::string& makeArgs =
     mf->GetSafeDefinition("CMAKE_ECLIPSE_MAKE_ARGUMENTS");

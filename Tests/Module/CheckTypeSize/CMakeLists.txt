@@ -21,6 +21,8 @@ check_type_size("((struct somestruct*)0)->somechar" SIZEOF_STRUCTMEMBER_CHAR)
 
 # Check CXX types
 check_type_size(bool        SIZEOF_BOOL LANGUAGE CXX)
+check_type_size(uint8_t     SIZEOF_UINT8_T LANGUAGE CXX)
+check_type_size(std::uint8_t SIZEOF_STD_UINT8_T LANGUAGE CXX)
 
 set(CMAKE_EXTRA_INCLUDE_FILES someclass.hxx)
 check_type_size("((ns::someclass*)0)->someint" SIZEOF_NS_CLASSMEMBER_INT LANGUAGE CXX)

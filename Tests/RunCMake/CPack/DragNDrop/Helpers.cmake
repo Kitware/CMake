@@ -5,6 +5,7 @@ function(getPackageContent FILE RESULT_VAR)
   file(REMOVE_RECURSE "${path_}/content")
   file(MAKE_DIRECTORY "${path_}/content")
   execute_process(COMMAND ${HDIUTIL_EXECUTABLE} attach -mountroot ${path_}/content -nobrowse ${FILE}
+          INPUT_FILE "${src_dir}/DragNDrop/Accept.txt"
           RESULT_VARIABLE attach_result_
           ERROR_VARIABLE attach_error_
           OUTPUT_STRIP_TRAILING_WHITESPACE)

@@ -8,13 +8,18 @@ set(SRCS)
 # (at least) the following toolchains can process assembler files directly
 # and also generate assembler files from C:
 if("${CMAKE_GENERATOR}" MATCHES "Makefile|Xcode|Ninja" AND
-    NOT CMAKE_OSX_ARCHITECTURES)
+    NOT CMAKE_OSX_ARCHITECTURES MATCHES ";")
   if((CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang|HP|SunPro|XL)$") OR (CMAKE_C_COMPILER_ID STREQUAL "Intel"  AND  UNIX)
      AND NOT (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC"))
     set(C_FLAGS "${CMAKE_C_FLAGS}")
     separate_arguments(C_FLAGS)
     if(CMAKE_OSX_SYSROOT AND CMAKE_C_SYSROOT_FLAG AND NOT ";${C_FLAGS};" MATCHES ";${CMAKE_C_SYSROOT_FLAG};")
       list(APPEND C_FLAGS ${CMAKE_C_SYSROOT_FLAG} ${CMAKE_OSX_SYSROOT})
+    endif()
+    if(CMAKE_OSX_ARCHITECTURES)
+      list(APPEND C_FLAGS -arch ${CMAKE_OSX_ARCHITECTURES})
+    elseif("${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+      list(APPEND C_FLAGS -arch arm64)
     endif()
     # Clang on OS X, and perhaps other compilers, do not support -g
     # for both generating and assembling, so drop it from generating.

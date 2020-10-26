@@ -1,0 +1,11 @@
+^CMake Warning \(dev\) at .*/Modules/ExternalProject.cmake:[0-9]+ \(message\):
+  Policy CMP0114 is not set to NEW.  In order to support the Xcode "new build
+  system", this project must be updated to set policy CMP0114 to NEW.
+
+  Since CMake is generating for the Xcode "new build system",
+  ExternalProject_Add will use policy CMP0114's NEW behavior anyway, but the
+  generated build system may not match what the project intends.
+Call Stack \(most recent call first\):
+  Xcode-CMP0114.cmake:[0-9]+ \(ExternalProject_Add\)
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

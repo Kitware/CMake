@@ -1,6 +1,8 @@
 CMP0098
 -------
 
+.. versionadded:: 3.17
+
 :module:`FindFLEX` runs ``flex`` in directory
 :variable:`CMAKE_CURRENT_BINARY_DIR` when executing.
 

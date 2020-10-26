@@ -1,6 +1,8 @@
 target_precompile_headers
 -------------------------
 
+.. versionadded:: 3.16
+
 Add a list of header files to precompile.
 
 Precompiling header files can speed up compilation by creating a partially

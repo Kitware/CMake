@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmTarget_h
-#define cmTarget_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -196,6 +195,7 @@ public:
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   bool IsPerConfig() const;
+  bool CanCompileSources() const;
 
   bool GetMappedConfig(std::string const& desired_config, cmProp& loc,
                        cmProp& imp, std::string& suffix) const;
@@ -208,6 +208,9 @@ public:
 
   //! Return whether this target is an executable Bundle on Apple.
   bool IsAppBundleOnApple() const;
+
+  //! Return whether this target is a GUI executable on Android.
+  bool IsAndroidGuiExecutable() const;
 
   //! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
@@ -232,6 +235,13 @@ public:
 
   void AddSystemIncludeDirectories(std::set<std::string> const& incs);
   std::set<std::string> const& GetSystemIncludeDirectories() const;
+
+  BTs<std::string> const* GetLanguageStandardProperty(
+    const std::string& propertyName) const;
+
+  void SetLanguageStandardProperty(std::string const& lang,
+                                   std::string const& value,
+                                   const std::string& feature);
 
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
@@ -280,5 +290,3 @@ private:
 private:
   std::unique_ptr<cmTargetInternals> impl;
 };
-
-#endif

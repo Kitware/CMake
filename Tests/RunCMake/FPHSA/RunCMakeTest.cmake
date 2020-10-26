@@ -55,3 +55,13 @@ run_cmake(required_and_optional_components)
 run_cmake(all_optional_components)
 list(APPEND RunCMake_TEST_OPTIONS "-DUseComponents_REQUIRE_VARS=TRUE")
 run_cmake(required_components_with_vars)
+
+# check handling of version range
+set(RunCMake_TEST_OPTIONS "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" "-DPseudo_VERSION=2.3.4.5")
+run_cmake(range_ignored)
+set(RunCMake_TEST_OPTIONS "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" "-DPseudoRange_VERSION=2.0")
+run_cmake(range_no-range)
+run_cmake(range_1-3)
+run_cmake(range_1-2-include)
+run_cmake(range_1-2-exclude)
+run_cmake(range_3-4)

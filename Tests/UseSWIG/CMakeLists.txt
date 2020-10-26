@@ -33,6 +33,16 @@ if (CMAKE_CSharp_COMPILER)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 endif()
+add_test(NAME UseSWIG.NamespaceCsharp COMMAND
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  --build-and-test
+  "${CMake_SOURCE_DIR}/Tests/UseSWIG/NamespaceCsharp"
+  "${CMake_BINARY_DIR}/Tests/UseSWIG/NamespaceCsharp"
+  ${build_generator_args}
+  --build-project TestNamespaceCsharp
+  --build-options ${build_options}
+  --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+  )
 
 add_test(NAME UseSWIG.BasicPython COMMAND
   ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
@@ -156,6 +166,18 @@ add_test(NAME UseSWIG.AlternateLibraryName COMMAND
   "${CMake_BINARY_DIR}/Tests/UseSWIG/AlternateLibraryName"
   ${build_generator_args}
   --build-project TestAlternateLibraryName
+  --build-options ${build_options}
+  --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+  )
+
+
+add_test(NAME UseSWIG.SwigSrcOUTPUT_DIR COMMAND
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  --build-and-test
+  "${CMake_SOURCE_DIR}/Tests/UseSWIG/SwigSrcOUTPUT_DIR"
+  "${CMake_BINARY_DIR}/Tests/UseSWIG/SwigSrcOUTPUT_DIR"
+  ${build_generator_args}
+  --build-project TestSwigSrcOUTPUT_DIR
   --build-options ${build_options}
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )

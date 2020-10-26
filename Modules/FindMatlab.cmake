@@ -993,7 +993,10 @@ function(matlab_add_mex)
     endif()
   endif()
 
-  if(NOT Matlab_VERSION_STRING VERSION_LESS "9.4") # For 9.4 (R2018a) and newer, add API macro
+  # For 9.4 (R2018a) and newer, add API macro.
+  # Add it for unknown versions too, just in case.
+  if(NOT Matlab_VERSION_STRING VERSION_LESS "9.4"
+      OR Matlab_VERSION_STRING STREQUAL "unknown")
     if(${${prefix}_R2018a})
       set(MEX_API_MACRO "MATLAB_DEFAULT_RELEASE=R2018a")
     else()

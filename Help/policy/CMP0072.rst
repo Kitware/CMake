@@ -1,6 +1,8 @@
 CMP0072
 -------
 
+.. versionadded:: 3.11
+
 :module:`FindOpenGL` prefers GLVND by default when available.
 
 The :module:`FindOpenGL` module provides an ``OpenGL::GL`` target and an

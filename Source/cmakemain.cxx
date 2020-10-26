@@ -3,18 +3,23 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <climits>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cmext/algorithm>
 
 #include <cm3p/uv.h>
 
+#include "cmConsoleBuf.h"
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -32,9 +37,6 @@
 #endif
 
 #include "cmsys/Encoding.hxx"
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
-#  include "cmsys/ConsoleBuf.hxx"
-#endif
 
 namespace {
 #ifndef CMAKE_BOOTSTRAP
@@ -47,7 +49,8 @@ const char* cmDocumentationUsage[][2] = {
   { nullptr,
     "  cmake [options] <path-to-source>\n"
     "  cmake [options] <path-to-existing-build>\n"
-    "  cmake [options] -S <path-to-source> -B <path-to-build>" },
+    "  cmake [options] -S <path-to-source> -B <path-to-build>\n"
+    "  cmake [options] -S <path-to-source> --preset=<preset-name>" },
   { nullptr,
     "Specify a source directory to (re-)generate a build system for "
     "it in the current working directory.  Specify an existing build "
@@ -69,7 +72,7 @@ const char* cmDocumentationOptions[][2] = {
   { "--open <dir>", "Open generated project in the associated application." },
   { "-N", "View mode only." },
   { "-P <file>", "Process script mode." },
-  { "--find-package", "Run in pkg-config like mode." },
+  { "--find-package", "Legacy pkg-config like mode.  Do not use." },
   { "--graphviz=[file]",
     "Generate graphviz of dependencies, see "
     "CMakeGraphVizOptions.cmake for more." },
@@ -91,7 +94,6 @@ const char* cmDocumentationOptions[][2] = {
   { "--trace-redirect=<file>",
     "Redirect trace output to a file instead of stderr." },
   { "--warn-uninitialized", "Warn about uninitialized values." },
-  { "--warn-unused-vars", "Warn about unused variables." },
   { "--no-warn-unused-cli", "Don't warn about command line options." },
   { "--check-system-vars",
     "Find problems with variable usage in system "
@@ -109,13 +111,14 @@ const char* cmDocumentationOptions[][2] = {
 
 #endif
 
-int do_command(int ac, char const* const* av)
+int do_command(int ac, char const* const* av,
+               std::unique_ptr<cmConsoleBuf> consoleBuf)
 {
   std::vector<std::string> args;
   args.reserve(ac - 1);
   args.emplace_back(av[0]);
   cm::append(args, av + 2, av + ac);
-  return cmcmd::ExecuteCMakeCommand(args);
+  return cmcmd::ExecuteCMakeCommand(args, std::move(consoleBuf));
 }
 
 cmMakefile* cmakemainGetMakefile(cmake* cm)
@@ -252,6 +255,9 @@ int do_cmake(int ac, char const* const* av)
     } else if (cmHasLiteralPrefix(av[i], "--find-package")) {
       workingMode = cmake::FIND_PACKAGE_MODE;
       args.emplace_back(av[i]);
+    } else if (strcmp(av[i], "--list-presets") == 0) {
+      workingMode = cmake::HELP_MODE;
+      args.emplace_back(av[i]);
     } else {
       args.emplace_back(av[i]);
     }
@@ -268,6 +274,7 @@ int do_cmake(int ac, char const* const* av)
   cmState::Mode mode = cmState::Unknown;
   switch (workingMode) {
     case cmake::NORMAL_MODE:
+    case cmake::HELP_MODE:
       mode = cmState::Project;
       break;
     case cmake::SCRIPT_MODE:
@@ -519,6 +526,121 @@ int do_build(int ac, char const* const* av)
 #endif
 }
 
+bool parse_default_directory_permissions(const std::string& permissions,
+                                         std::string& parsedPermissionsVar)
+{
+  std::vector<std::string> parsedPermissions;
+  enum Doing
+  {
+    DoingNone,
+    DoingOwner,
+    DoingGroup,
+    DoingWorld,
+    DoingOwnerAssignment,
+    DoingGroupAssignment,
+    DoingWorldAssignment,
+  };
+  Doing doing = DoingNone;
+
+  auto uniquePushBack = [&parsedPermissions](const std::string& e) {
+    if (std::find(parsedPermissions.begin(), parsedPermissions.end(), e) ==
+        parsedPermissions.end()) {
+      parsedPermissions.push_back(e);
+    }
+  };
+
+  for (auto const& e : permissions) {
+    switch (doing) {
+      case DoingNone:
+        if (e == 'u') {
+          doing = DoingOwner;
+        } else if (e == 'g') {
+          doing = DoingGroup;
+        } else if (e == 'o') {
+          doing = DoingWorld;
+        } else {
+          return false;
+        }
+        break;
+      case DoingOwner:
+        if (e == '=') {
+          doing = DoingOwnerAssignment;
+        } else {
+          return false;
+        }
+        break;
+      case DoingGroup:
+        if (e == '=') {
+          doing = DoingGroupAssignment;
+        } else {
+          return false;
+        }
+        break;
+      case DoingWorld:
+        if (e == '=') {
+          doing = DoingWorldAssignment;
+        } else {
+          return false;
+        }
+        break;
+      case DoingOwnerAssignment:
+        if (e == 'r') {
+          uniquePushBack("OWNER_READ");
+        } else if (e == 'w') {
+          uniquePushBack("OWNER_WRITE");
+        } else if (e == 'x') {
+          uniquePushBack("OWNER_EXECUTE");
+        } else if (e == ',') {
+          doing = DoingNone;
+        } else {
+          return false;
+        }
+        break;
+      case DoingGroupAssignment:
+        if (e == 'r') {
+          uniquePushBack("GROUP_READ");
+        } else if (e == 'w') {
+          uniquePushBack("GROUP_WRITE");
+        } else if (e == 'x') {
+          uniquePushBack("GROUP_EXECUTE");
+        } else if (e == ',') {
+          doing = DoingNone;
+        } else {
+          return false;
+        }
+        break;
+      case DoingWorldAssignment:
+        if (e == 'r') {
+          uniquePushBack("WORLD_READ");
+        } else if (e == 'w') {
+          uniquePushBack("WORLD_WRITE");
+        } else if (e == 'x') {
+          uniquePushBack("WORLD_EXECUTE");
+        } else if (e == ',') {
+          doing = DoingNone;
+        } else {
+          return false;
+        }
+        break;
+    }
+  }
+  if (doing != DoingOwnerAssignment && doing != DoingGroupAssignment &&
+      doing != DoingWorldAssignment) {
+    return false;
+  }
+
+  std::ostringstream oss;
+  for (auto i = 0u; i < parsedPermissions.size(); i++) {
+    if (i != 0) {
+      oss << ";";
+    }
+    oss << parsedPermissions[i];
+  }
+
+  parsedPermissionsVar = oss.str();
+  return true;
+}
+
 int do_install(int ac, char const* const* av)
 {
 #ifdef CMAKE_BOOTSTRAP
@@ -529,6 +651,7 @@ int do_install(int ac, char const* const* av)
 
   std::string config;
   std::string component;
+  std::string defaultDirectoryPermissions;
   std::string prefix;
   std::string dir;
   bool strip = false;
@@ -541,6 +664,7 @@ int do_install(int ac, char const* const* av)
     DoingConfig,
     DoingComponent,
     DoingPrefix,
+    DoingDefaultDirectoryPermissions,
   };
 
   Doing doing = DoingDir;
@@ -559,6 +683,8 @@ int do_install(int ac, char const* const* av)
                (strcmp(av[i], "-v") == 0)) {
       verbose = true;
       doing = DoingNone;
+    } else if (strcmp(av[i], "--default-directory-permissions") == 0) {
+      doing = DoingDefaultDirectoryPermissions;
     } else {
       switch (doing) {
         case DoingDir:
@@ -577,6 +703,10 @@ int do_install(int ac, char const* const* av)
           prefix = av[i];
           doing = DoingNone;
           break;
+        case DoingDefaultDirectoryPermissions:
+          defaultDirectoryPermissions = av[i];
+          doing = DoingNone;
+          break;
         default:
           std::cerr << "Unknown argument " << av[i] << std::endl;
           dir.clear();
@@ -593,6 +723,8 @@ int do_install(int ac, char const* const* av)
       "  <dir>              = Project binary directory to install.\n"
       "  --config <cfg>     = For multi-configuration tools, choose <cfg>.\n"
       "  --component <comp> = Component-based install. Only install <comp>.\n"
+      "  --default-directory-permissions <permission> \n"
+      "     Default install permission. Use default permission <permission>.\n"
       "  --prefix <prefix>  = The installation prefix CMAKE_INSTALL_PREFIX.\n"
       "  --strip            = Performing install/strip.\n"
       "  -v --verbose       = Enable verbose output.\n"
@@ -631,6 +763,18 @@ int do_install(int ac, char const* const* av)
 
   if (!config.empty()) {
     args.emplace_back("-DCMAKE_INSTALL_CONFIG_NAME=" + config);
+  }
+
+  if (!defaultDirectoryPermissions.empty()) {
+    std::string parsedPermissionsVar;
+    if (!parse_default_directory_permissions(defaultDirectoryPermissions,
+                                             parsedPermissionsVar)) {
+      std::cerr << "--default-directory-permissions is in incorrect format"
+                << std::endl;
+      return 1;
+    }
+    args.emplace_back("-DCMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS=" +
+                      parsedPermissionsVar);
   }
 
   args.emplace_back("-P");
@@ -687,13 +831,11 @@ int do_open(int ac, char const* const* av)
 int main(int ac, char const* const* av)
 {
   cmSystemTools::EnsureStdPipes();
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
+
   // Replace streambuf so we can output Unicode to console
-  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
-  consoleOut.SetUTF8Pipes();
-  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-  consoleErr.SetUTF8Pipes();
-#endif
+  auto consoleBuf = cm::make_unique<cmConsoleBuf>();
+  consoleBuf->SetUTF8Pipes();
+
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
   ac = args.argc();
@@ -712,7 +854,7 @@ int main(int ac, char const* const* av)
       return do_open(ac, av);
     }
     if (strcmp(av[1], "-E") == 0) {
-      return do_command(ac, av);
+      return do_command(ac, av, std::move(consoleBuf));
     }
   }
   int ret = do_cmake(ac, av);

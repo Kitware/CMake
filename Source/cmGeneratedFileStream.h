@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGeneratedFileStream_h
-#define cmGeneratedFileStream_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -42,6 +41,9 @@ protected:
 
   // The name of the final destination file for the output.
   std::string Name;
+
+  // The extension of the temporary file.
+  std::string TempExt;
 
   // The name of the temporary file.
   std::string TempName;
@@ -138,6 +140,20 @@ public:
    * the output file to be changed during the use of cmGeneratedFileStream.
    */
   void SetName(const std::string& fname);
-};
 
-#endif
+  /**
+   * Set set a custom temporary file extension used with 'Open'.
+   * This does not work if the file was opened by the constructor.
+   */
+  void SetTempExt(std::string const& ext);
+
+  /**
+   * Writes the given string directly to the file without changing the
+   * encoding.
+   */
+  void WriteRaw(std::string const& data);
+
+private:
+  // The original locale of the stream (performs no encoding conversion).
+  std::locale OriginalLocale;
+};

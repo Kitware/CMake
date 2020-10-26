@@ -1,6 +1,8 @@
 CMP0067
 -------
 
+.. versionadded:: 3.8
+
 Honor language standard in :command:`try_compile` source-file signature.
 
 The :command:`try_compile` source file signature is intended to allow

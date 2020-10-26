@@ -91,19 +91,12 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
   std::vector<std::string> commands;
 
-  // Get the language to use for linking this library.
-  std::string linkLanguage = "CUDA";
+  // Get the name of the device object to generate.
   std::string const& objExt =
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
-
-  // Build list of dependencies.
-  std::vector<std::string> depends;
-  this->AppendLinkDepends(depends, linkLanguage);
-
-  // Get the name of the device object to generate.
-  std::string const targetOutputReal =
+  std::string const targetOutput =
     this->GeneratorTarget->ObjectDirectory + "cmake_device_link" + objExt;
-  this->DeviceLinkObject = targetOutputReal;
+  this->DeviceLinkObject = targetOutput;
 
   this->NumberOfProgressActions++;
   if (!this->NoRuleMessages) {
@@ -111,7 +104,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     this->MakeEchoProgress(progress);
     // Add the link message.
     std::string buildEcho =
-      cmStrCat("Linking ", linkLanguage, " device code ",
+      cmStrCat("Linking CUDA device code ",
                this->LocalGenerator->ConvertToOutputFormat(
                  this->LocalGenerator->MaybeConvertToRelativePath(
                    this->LocalGenerator->GetCurrentBinaryDirectory(),
@@ -120,6 +113,29 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     this->LocalGenerator->AppendEcho(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
+
+  if (this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID") == "Clang") {
+    this->WriteDeviceLinkRule(commands, targetOutput);
+  } else {
+    this->WriteNvidiaDeviceExecutableRule(relink, commands, targetOutput);
+  }
+
+  // Write the main driver rule to build everything in this target.
+  this->WriteTargetDriverRule(targetOutput, relink);
+#else
+  static_cast<void>(relink);
+#endif
+}
+
+void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
+  bool relink, std::vector<std::string>& commands,
+  const std::string& targetOutput)
+{
+  const std::string linkLanguage = "CUDA";
+
+  // Build list of dependencies.
+  std::vector<std::string> depends;
+  this->AppendLinkDepends(depends, linkLanguage);
 
   // Build a list of compiler flags and linker flags.
   std::string langFlags;
@@ -136,7 +152,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;
   exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal));
+    this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutput));
 
   // Determine whether a link script will be used.
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
@@ -195,7 +211,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
       : cmOutputConverter::SHELL;
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
       this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal),
+        this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutput),
       output);
 
     std::string targetFullPathCompilePDB =
@@ -218,7 +234,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 
@@ -226,7 +242,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
       this->LocalGenerator->CreateRulePlaceholderExpander());
 
     // Expand placeholders in the commands.
-    rulePlaceholderExpander->SetTargetImpLib(targetOutputReal);
+    rulePlaceholderExpander->SetTargetImpLib(targetOutput);
     for (std::string& real_link_command : real_link_commands) {
       real_link_command = cmStrCat(launcher, real_link_command);
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
@@ -255,17 +271,10 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
   // Write the build rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
-                                      targetOutputReal, depends, commands,
-                                      false);
-
-  // Write the main driver rule to build everything in this target.
-  this->WriteTargetDriverRule(targetOutputReal, relink);
+                                      targetOutput, depends, commands, false);
 
   // Clean all the possible executable names and symlinks.
   this->CleanFiles.insert(exeCleanFiles.begin(), exeCleanFiles.end());
-#else
-  static_cast<void>(relink);
-#endif
 }
 
 void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
@@ -371,7 +380,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->LocalGenerator->AddConfigVariableFlags(
     linkFlags, "CMAKE_EXE_LINKER_FLAGS", this->GetConfigName());
 
-  if (this->GeneratorTarget->GetPropertyAsBool("WIN32_EXECUTABLE")) {
+  if (this->GeneratorTarget->IsWin32Executable(
+        this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"))) {
     this->LocalGenerator->AppendFlags(
       linkFlags, this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE"));
   } else {
@@ -583,7 +593,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
-    if (val && *val) {
+    if (cmNonempty(val)) {
       launcher = cmStrCat(val, ' ');
     }
 

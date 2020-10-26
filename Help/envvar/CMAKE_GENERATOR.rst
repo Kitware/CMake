@@ -1,6 +1,8 @@
 CMAKE_GENERATOR
 ---------------
 
+.. versionadded:: 3.15
+
 .. include:: ENV_VAR.txt
 
 Specifies the CMake default generator to use when no generator is supplied

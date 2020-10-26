@@ -105,10 +105,11 @@ Variable Queries
 
 ``$<TARGET_EXISTS:target>``
   ``1`` if ``target`` exists, else ``0``.
-``$<CONFIG:cfg>``
-  ``1`` if config is ``cfg``, else ``0``. This is a case-insensitive comparison.
-  The mapping in :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by
-  this expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
+``$<CONFIG:cfgs>``
+  ``1`` if config is any one of the entries in ``cfgs``, else ``0``. This is a
+  case-insensitive comparison. The mapping in
+  :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by this
+  expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
   target.
 ``$<PLATFORM_ID:platform_ids>``
   where ``platform_ids`` is a comma-separated list.
@@ -145,6 +146,11 @@ Variable Queries
   ``1`` if the CMake's compiler id of the Fortran compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<ISPC_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the ISPC compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION:version>``
   ``1`` if the version of the C compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
@@ -162,6 +168,9 @@ Variable Queries
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<Fortran_COMPILER_VERSION:version>``
   ``1`` if the version of the Fortran compiler matches ``version``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<ISPC_COMPILER_VERSION:version>``
+  ``1`` if the version of the ISPC compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<TARGET_POLICY:policy>``
   ``1`` if the ``policy`` was NEW when the 'head' target was created,
@@ -542,6 +551,9 @@ Variable Queries
 ``$<Fortran_COMPILER_ID>``
   The CMake's compiler id of the Fortran compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<ISPC_COMPILER_ID>``
+  The CMake's compiler id of the ISPC compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION>``
   The version of the C compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
@@ -559,6 +571,9 @@ Variable Queries
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<Fortran_COMPILER_VERSION>``
   The version of the Fortran compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<ISPC_COMPILER_VERSION>``
+  The version of the ISPC compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<COMPILE_LANGUAGE>``
   The compile language of source files when evaluating compile options.
@@ -595,6 +610,9 @@ which is just the string ``tgt``.
 
 ``$<TARGET_NAME_IF_EXISTS:tgt>``
   The target name ``tgt`` if the target exists, an empty string otherwise.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
 ``$<TARGET_FILE:tgt>``
   Full path to the ``tgt`` binary file.
 ``$<TARGET_FILE_BASE_NAME:tgt>``
@@ -632,6 +650,9 @@ which is just the string ``tgt``.
   The ``tgt`` filename.
 ``$<TARGET_FILE_DIR:tgt>``
   Directory of the ``tgt`` binary file.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_LINKER_FILE:tgt>``
   File used when linking to the ``tgt`` target.  This will usually
   be the library that ``tgt`` represents (``.a``, ``.lib``, ``.so``),
@@ -673,14 +694,26 @@ which is just the string ``tgt``.
   expression is evaluated on.
 ``$<TARGET_LINKER_FILE_NAME:tgt>``
   Name of file used to link target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_LINKER_FILE_DIR:tgt>``
   Directory of file used to link target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_SONAME_FILE:tgt>``
   File with soname (``.so.3``) where ``tgt`` is the name of a target.
 ``$<TARGET_SONAME_FILE_NAME:tgt>``
   Name of file with soname (``.so.3``).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_SONAME_FILE_DIR:tgt>``
   Directory of with soname (``.so.3``).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_PDB_FILE:tgt>``
   Full path to the linker generated program database file (.pdb)
   where ``tgt`` is the name of a target.
@@ -706,17 +739,29 @@ which is just the string ``tgt``.
   expression is evaluated on.
 ``$<TARGET_PDB_FILE_NAME:tgt>``
   Name of the linker generated program database file (.pdb).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_PDB_FILE_DIR:tgt>``
   Directory of the linker generated program database file (.pdb).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_BUNDLE_DIR:tgt>``
   Full path to the bundle directory (``my.app``, ``my.framework``, or
   ``my.bundle``) where ``tgt`` is the name of a target.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_BUNDLE_CONTENT_DIR:tgt>``
   Full path to the bundle content directory where ``tgt`` is the name of a
   target. For the macOS SDK it leads to ``my.app/Contents``, ``my.framework``,
   or ``my.bundle/Contents``. For all other SDKs (e.g. iOS) it leads to
   ``my.app``, ``my.framework``, or ``my.bundle`` due to the flat bundle
   structure.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_PROPERTY:tgt,prop>``
   Value of the property ``prop`` on the target ``tgt``.
 

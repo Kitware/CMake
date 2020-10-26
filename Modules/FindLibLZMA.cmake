@@ -43,8 +43,8 @@ This module will set the following variables in your project:
 
 find_path(LIBLZMA_INCLUDE_DIR lzma.h )
 if(NOT LIBLZMA_LIBRARY)
-  find_library(LIBLZMA_LIBRARY_RELEASE NAMES lzma liblzma PATH_SUFFIXES lib)
-  find_library(LIBLZMA_LIBRARY_DEBUG NAMES lzmad liblzmad PATH_SUFFIXES lib)
+  find_library(LIBLZMA_LIBRARY_RELEASE NAMES lzma liblzma NAMES_PER_DIR PATH_SUFFIXES lib)
+  find_library(LIBLZMA_LIBRARY_DEBUG NAMES lzmad liblzmad NAMES_PER_DIR PATH_SUFFIXES lib)
   include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
   select_library_configurations(LIBLZMA)
 else()

@@ -4,8 +4,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#ifndef cm_bits_erase_if_hxx
-#define cm_bits_erase_if_hxx
+#pragma once
 
 namespace cm {
 namespace internals {
@@ -25,5 +24,3 @@ void erase_if(Container& cont, Predicate pred)
 
 } // namespace internals
 } // namespace cm
-
-#endif

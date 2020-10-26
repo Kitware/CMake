@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGraphVizWriter.h"
 
+#include <algorithm>
 #include <cctype>
 #include <iostream>
 #include <memory>
@@ -16,6 +17,7 @@
 #include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
@@ -125,14 +127,6 @@ cmGraphVizWriter::cmGraphVizWriter(std::string const& fileName,
 cmGraphVizWriter::~cmGraphVizWriter()
 {
   this->WriteFooter(this->GlobalFileStream);
-
-  for (auto& fileStream : this->PerTargetFileStreams) {
-    this->WriteFooter(*fileStream.second);
-  }
-
-  for (auto& fileStream : this->TargetDependersFileStreams) {
-    this->WriteFooter(*fileStream.second);
-  }
 }
 
 void cmGraphVizWriter::VisitGraph(std::string const&)
@@ -151,20 +145,10 @@ void cmGraphVizWriter::OnItem(cmLinkItem const& item)
   ++NextNodeId;
 
   this->WriteNode(this->GlobalFileStream, item);
-
-  if (this->GeneratePerTarget) {
-    this->CreateTargetFile(this->PerTargetFileStreams, item);
-  }
-
-  if (this->GenerateDependers) {
-    this->CreateTargetFile(this->TargetDependersFileStreams, item,
-                           ".dependers");
-  }
 }
 
-void cmGraphVizWriter::CreateTargetFile(FileStreamMap& fileStreamMap,
-                                        cmLinkItem const& item,
-                                        std::string const& fileNameSuffix)
+std::unique_ptr<cmGeneratedFileStream> cmGraphVizWriter::CreateTargetFile(
+  cmLinkItem const& item, std::string const& fileNameSuffix)
 {
   auto const pathSafeItemName = PathSafeString(item.AsStr());
   auto const perTargetFileName =
@@ -175,7 +159,7 @@ void cmGraphVizWriter::CreateTargetFile(FileStreamMap& fileStreamMap,
   this->WriteHeader(*perTargetFileStream, item.AsStr());
   this->WriteNode(*perTargetFileStream, item);
 
-  fileStreamMap.emplace(item.AsStr(), std::move(perTargetFileStream));
+  return perTargetFileStream;
 }
 
 void cmGraphVizWriter::OnDirectLink(cmLinkItem const& depender,
@@ -246,9 +230,9 @@ void cmGraphVizWriter::ReadSettings(
 
 #define __set_if_set(var, cmakeDefinition)                                    \
   do {                                                                        \
-    const char* value = mf.GetDefinition(cmakeDefinition);                    \
+    cmProp value = mf.GetDefinition(cmakeDefinition);                         \
     if (value) {                                                              \
-      (var) = value;                                                          \
+      (var) = *value;                                                         \
     }                                                                         \
   } while (false)
 
@@ -258,9 +242,9 @@ void cmGraphVizWriter::ReadSettings(
 
 #define __set_bool_if_set(var, cmakeDefinition)                               \
   do {                                                                        \
-    const char* value = mf.GetDefinition(cmakeDefinition);                    \
+    cmProp value = mf.GetDefinition(cmakeDefinition);                         \
     if (value) {                                                              \
-      (var) = mf.IsOn(cmakeDefinition);                                       \
+      (var) = cmIsOn(*value);                                                 \
     }                                                                         \
   } while (false)
 
@@ -323,13 +307,12 @@ void cmGraphVizWriter::Write()
   }
 
   if (this->GeneratePerTarget) {
-    WritePerTargetConnections<DependeesDir>(PerTargetConnections,
-                                            PerTargetFileStreams);
+    WritePerTargetConnections<DependeesDir>(PerTargetConnections);
   }
 
   if (this->GenerateDependers) {
     WritePerTargetConnections<DependersDir>(TargetDependersConnections,
-                                            TargetDependersFileStreams);
+                                            ".dependers");
   }
 }
 
@@ -368,7 +351,7 @@ void cmGraphVizWriter::FindAllConnections(const ConnectionsMap& connectionMap,
 
 template <typename DirFunc>
 void cmGraphVizWriter::WritePerTargetConnections(
-  const ConnectionsMap& connections, const FileStreamMap& streams)
+  const ConnectionsMap& connections, const std::string& fileNameSuffix)
 {
   // the per target connections must be extended by indirect dependencies
   ConnectionsMap extendedConnections;
@@ -387,7 +370,9 @@ void cmGraphVizWriter::WritePerTargetConnections(
     }
 
     const Connections& cons = conPerTarget.second;
-    auto fileStream = streams.at(rootItem.AsStr()).get();
+
+    std::unique_ptr<cmGeneratedFileStream> fileStream =
+      this->CreateTargetFile(rootItem, fileNameSuffix);
 
     for (const Connection& con : cons) {
       const cmLinkItem& src = DirFunc::src(con);
@@ -395,6 +380,8 @@ void cmGraphVizWriter::WritePerTargetConnections(
       this->WriteNode(*fileStream, con.dst);
       this->WriteConnection(*fileStream, src, dst, con.scopeType);
     }
+
+    this->WriteFooter(*fileStream);
   }
 }
 
@@ -567,14 +554,21 @@ bool cmGraphVizWriter::TargetTypeEnabled(
 std::string cmGraphVizWriter::ItemNameWithAliases(
   std::string const& itemName) const
 {
-  auto nameWithAliases = itemName;
-
+  std::vector<std::string> items;
   for (auto const& lg : this->GlobalGenerator->GetLocalGenerators()) {
     for (auto const& aliasTargets : lg->GetMakefile()->GetAliasTargets()) {
       if (aliasTargets.second == itemName) {
-        nameWithAliases += "\\n(" + aliasTargets.first + ")";
+        items.push_back(aliasTargets.first);
       }
     }
+  }
+
+  std::sort(items.begin(), items.end());
+  items.erase(std::unique(items.begin(), items.end()), items.end());
+
+  auto nameWithAliases = itemName;
+  for(auto const& item : items) {
+    nameWithAliases += "\\n(" + item + ")";
   }
 
   return nameWithAliases;

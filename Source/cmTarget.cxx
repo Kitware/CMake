@@ -7,6 +7,7 @@
 #include <cstring>
 #include <initializer_list>
 #include <iterator>
+#include <map>
 #include <set>
 #include <sstream>
 #include <unordered_set>
@@ -185,6 +186,7 @@ public:
   std::vector<cmInstallTargetGenerator*> InstallGenerators;
   std::set<std::string> SystemIncludeDirectories;
   cmTarget::LinkLibraryVectorType OriginalLinkLibraries;
+  std::map<std::string, BTs<std::string>> LanguageStandardProperties;
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
   std::vector<std::string> CompileOptionsEntries;
@@ -213,6 +215,15 @@ public:
 
   std::string ProcessSourceItemCMP0049(const std::string& s);
 };
+
+namespace {
+#define SETUP_COMMON_LANGUAGE_PROPERTIES(lang)                                \
+  initProp(#lang "_COMPILER_LAUNCHER");                                       \
+  initProp(#lang "_STANDARD");                                                \
+  initProp(#lang "_STANDARD_REQUIRED");                                       \
+  initProp(#lang "_EXTENSIONS");                                              \
+  initProp(#lang "_VISIBILITY_PRESET")
+}
 
 cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                    Visibility vis, cmMakefile* mf, PerConfig perConfig)
@@ -254,24 +265,30 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   auto initProp = [this, mf, &defKey](const std::string& property) {
     // Replace everything after "CMAKE_"
     defKey.replace(defKey.begin() + 6, defKey.end(), property);
-    if (const char* value = mf->GetDefinition(defKey)) {
-      this->SetProperty(property, value);
+    if (cmProp value = mf->GetDefinition(defKey)) {
+      this->SetProperty(property, *value);
     }
   };
   auto initPropValue = [this, mf, &defKey](const std::string& property,
                                            const char* default_value) {
     // Replace everything after "CMAKE_"
     defKey.replace(defKey.begin() + 6, defKey.end(), property);
-    if (const char* value = mf->GetDefinition(defKey)) {
-      this->SetProperty(property, value);
+    if (cmProp value = mf->GetDefinition(defKey)) {
+      this->SetProperty(property, *value);
     } else if (default_value) {
       this->SetProperty(property, default_value);
     }
   };
 
   // Setup default property values.
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetType() != cmStateEnums::UTILITY) {
+  if (this->CanCompileSources()) {
+
+    SETUP_COMMON_LANGUAGE_PROPERTIES(C);
+    SETUP_COMMON_LANGUAGE_PROPERTIES(OBJC);
+    SETUP_COMMON_LANGUAGE_PROPERTIES(CXX);
+    SETUP_COMMON_LANGUAGE_PROPERTIES(OBJCXX);
+    SETUP_COMMON_LANGUAGE_PROPERTIES(CUDA);
+
     initProp("ANDROID_API");
     initProp("ANDROID_API_MIN");
     initProp("ANDROID_ARCH");
@@ -308,6 +325,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("Fortran_MODULE_DIRECTORY");
     initProp("Fortran_COMPILER_LAUNCHER");
     initProp("Fortran_PREPROCESS");
+    initProp("Fortran_VISIBILITY_PRESET");
     initProp("GNUtoMS");
     initProp("OSX_ARCHITECTURES");
     initProp("IOS_INSTALL_COMBINED");
@@ -333,38 +351,25 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("NO_SYSTEM_FROM_IMPORTED");
     initProp("BUILD_WITH_INSTALL_NAME_DIR");
     initProp("C_CLANG_TIDY");
-    initProp("C_COMPILER_LAUNCHER");
     initProp("C_CPPLINT");
     initProp("C_CPPCHECK");
     initProp("C_INCLUDE_WHAT_YOU_USE");
     initProp("LINK_WHAT_YOU_USE");
-    initProp("C_STANDARD");
-    initProp("C_STANDARD_REQUIRED");
-    initProp("C_EXTENSIONS");
-    initProp("OBJC_COMPILER_LAUNCHER");
-    initProp("OBJC_STANDARD");
-    initProp("OBJC_STANDARD_REQUIRED");
-    initProp("OBJC_EXTENSIONS");
     initProp("CXX_CLANG_TIDY");
-    initProp("CXX_COMPILER_LAUNCHER");
     initProp("CXX_CPPLINT");
     initProp("CXX_CPPCHECK");
     initProp("CXX_INCLUDE_WHAT_YOU_USE");
-    initProp("CXX_STANDARD");
-    initProp("CXX_STANDARD_REQUIRED");
-    initProp("CXX_EXTENSIONS");
-    initProp("OBJCXX_COMPILER_LAUNCHER");
-    initProp("OBJCXX_STANDARD");
-    initProp("OBJCXX_STANDARD_REQUIRED");
-    initProp("OBJCXX_EXTENSIONS");
-    initProp("CUDA_STANDARD");
-    initProp("CUDA_STANDARD_REQUIRED");
-    initProp("CUDA_EXTENSIONS");
-    initProp("CUDA_COMPILER_LAUNCHER");
     initProp("CUDA_SEPARABLE_COMPILATION");
     initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
     initProp("CUDA_RUNTIME_LIBRARY");
     initProp("CUDA_ARCHITECTURES");
+    initProp("VISIBILITY_INLINES_HIDDEN");
+    initProp("JOB_POOL_COMPILE");
+    initProp("JOB_POOL_LINK");
+    initProp("JOB_POOL_PRECOMPILE_HEADER");
+    initProp("ISPC_COMPILER_LAUNCHER");
+    initProp("ISPC_HEADER_DIRECTORY");
+    initProp("ISPC_INSTRUCTION_SETS");
     initProp("LINK_SEARCH_START_STATIC");
     initProp("LINK_SEARCH_END_STATIC");
     initProp("Swift_LANGUAGE_VERSION");
@@ -372,9 +377,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("VS_JUST_MY_CODE_DEBUGGING");
     initProp("DISABLE_PRECOMPILE_HEADERS");
     initProp("UNITY_BUILD");
+    initProp("OPTIMIZE_DEPENDENCIES");
     initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
     initPropValue("UNITY_BUILD_MODE", "BATCH");
     initPropValue("PCH_WARN_INVALID", "ON");
+    initPropValue("PCH_INSTANTIATE_TEMPLATES", "ON");
+
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
       initProp("XCODE_SCHEME_ADDRESS_SANITIZER");
@@ -395,20 +403,20 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       initProp("XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE");
       initProp("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS");
       initProp("XCODE_SCHEME_ENVIRONMENT");
+      initPropValue("XCODE_LINK_BUILD_PHASE_MODE", "NONE");
     }
 #endif
   }
 
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-    initProp("FOLDER");
+  initProp("FOLDER");
 
-    if (this->GetGlobalGenerator()->IsXcode()) {
-      initProp("XCODE_GENERATE_SCHEME");
-    }
+  if (this->GetGlobalGenerator()->IsXcode()) {
+    initProp("XCODE_GENERATE_SCHEME");
   }
 
   // Setup per-configuration property default values.
-  if (this->GetType() != cmStateEnums::UTILITY) {
+  if (this->GetType() != cmStateEnums::UTILITY &&
+      this->GetType() != cmStateEnums::GLOBAL_TARGET) {
     static const auto configProps = {
       /* clang-format needs this comment to break after the opening brace */
       "ARCHIVE_OUTPUT_DIRECTORY_",     "LIBRARY_OUTPUT_DIRECTORY_",
@@ -417,8 +425,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       "INTERPROCEDURAL_OPTIMIZATION_"
     };
     // Collect the set of configuration types.
-    std::vector<std::string> configNames;
-    mf->GetConfigurations(configNames);
+    std::vector<std::string> configNames =
+      mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
     for (std::string const& configName : configNames) {
       std::string configUpper = cmSystemTools::UpperCase(configName);
       for (auto const& prop : configProps) {
@@ -485,16 +493,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
                impl->Makefile->GetLinkDirectoriesBacktraces());
   }
 
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetType() != cmStateEnums::UTILITY) {
-    initProp("C_VISIBILITY_PRESET");
-    initProp("CXX_VISIBILITY_PRESET");
-    initProp("OBJC_VISIBILITY_PRESET");
-    initProp("OBJCXX_VISIBILITY_PRESET");
-    initProp("CUDA_VISIBILITY_PRESET");
-    initProp("VISIBILITY_INLINES_HIDDEN");
-  }
-
   if (impl->TargetType == cmStateEnums::EXECUTABLE) {
     initProp("ANDROID_GUI");
     initProp("CROSSCOMPILING_EMULATOR");
@@ -503,16 +501,13 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
       impl->TargetType == cmStateEnums::MODULE_LIBRARY) {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
+  } else if (this->CanCompileSources()) {
+    initProp("POSITION_INDEPENDENT_CODE");
   }
   if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
       impl->TargetType == cmStateEnums::EXECUTABLE) {
     initProp("AIX_EXPORT_ALL_SYMBOLS");
     initProp("WINDOWS_EXPORT_ALL_SYMBOLS");
-  }
-
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetType() != cmStateEnums::UTILITY) {
-    initProp("POSITION_INDEPENDENT_CODE");
   }
 
   // Record current policies for later use.
@@ -526,36 +521,26 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     impl->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
   }
 
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetType() != cmStateEnums::UTILITY) {
-    initProp("JOB_POOL_COMPILE");
-    initProp("JOB_POOL_LINK");
-    initProp("JOB_POOL_PRECOMPILE_HEADER");
-  }
-
   if (impl->TargetType <= cmStateEnums::GLOBAL_TARGET) {
     initProp("DOTNET_TARGET_FRAMEWORK");
     initProp("DOTNET_TARGET_FRAMEWORK_VERSION");
   }
 
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-
-    // check for "CMAKE_VS_GLOBALS" variable and set up target properties
-    // if any
-    const char* globals = mf->GetDefinition("CMAKE_VS_GLOBALS");
-    if (globals) {
-      const std::string genName = mf->GetGlobalGenerator()->GetName();
-      if (cmHasLiteralPrefix(genName, "Visual Studio")) {
-        std::vector<std::string> props = cmExpandedList(globals);
-        const std::string vsGlobal = "VS_GLOBAL_";
-        for (const std::string& i : props) {
-          // split NAME=VALUE
-          const std::string::size_type assignment = i.find('=');
-          if (assignment != std::string::npos) {
-            const std::string propName = vsGlobal + i.substr(0, assignment);
-            const std::string propValue = i.substr(assignment + 1);
-            initPropValue(propName, propValue.c_str());
-          }
+  // check for "CMAKE_VS_GLOBALS" variable and set up target properties
+  // if any
+  cmProp globals = mf->GetDefinition("CMAKE_VS_GLOBALS");
+  if (globals) {
+    const std::string genName = mf->GetGlobalGenerator()->GetName();
+    if (cmHasLiteralPrefix(genName, "Visual Studio")) {
+      std::vector<std::string> props = cmExpandedList(*globals);
+      const std::string vsGlobal = "VS_GLOBAL_";
+      for (const std::string& i : props) {
+        // split NAME=VALUE
+        const std::string::size_type assignment = i.find('=');
+        if (assignment != std::string::npos) {
+          const std::string propName = vsGlobal + i.substr(0, assignment);
+          const std::string propValue = i.substr(assignment + 1);
+          initPropValue(propName, propValue.c_str());
         }
       }
     }
@@ -598,6 +583,40 @@ cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
   return impl->Makefile->GetGlobalGenerator();
 }
 
+BTs<std::string> const* cmTarget::GetLanguageStandardProperty(
+  const std::string& propertyName) const
+{
+  auto entry = impl->LanguageStandardProperties.find(propertyName);
+  if (entry != impl->LanguageStandardProperties.end()) {
+    return &entry->second;
+  }
+
+  return nullptr;
+}
+
+void cmTarget::SetLanguageStandardProperty(std::string const& lang,
+                                           std::string const& value,
+                                           const std::string& feature)
+{
+  cmListFileBacktrace featureBacktrace;
+  for (size_t i = 0; i < impl->CompileFeaturesEntries.size(); i++) {
+    if (impl->CompileFeaturesEntries[i] == feature) {
+      if (i < impl->CompileFeaturesBacktraces.size()) {
+        featureBacktrace = impl->CompileFeaturesBacktraces[i];
+      }
+      break;
+    }
+  }
+
+  BTs<std::string>& languageStandardProperty =
+    impl->LanguageStandardProperties[cmStrCat(lang, "_STANDARD")];
+  if (languageStandardProperty.Value != value) {
+    languageStandardProperty.Value = value;
+    languageStandardProperty.Backtraces.clear();
+  }
+  languageStandardProperty.Backtraces.emplace_back(featureBacktrace);
+}
+
 void cmTarget::AddUtility(std::string const& name, bool cross, cmMakefile* mf)
 {
   impl->Utilities.insert(BT<std::pair<std::string, bool>>(
@@ -634,6 +653,12 @@ bool cmTarget::IsAppBundleOnApple() const
   return (this->GetType() == cmStateEnums::EXECUTABLE &&
           impl->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
+}
+
+bool cmTarget::IsAndroidGuiExecutable() const
+{
+  return (this->GetType() == cmStateEnums::EXECUTABLE && impl->IsAndroid &&
+          this->GetPropertyAsBool("ANDROID_GUI"));
 }
 
 std::vector<cmCustomCommand> const& cmTarget::GetPreBuildCommands() const
@@ -996,9 +1021,9 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
        this->GetPolicyStatusCMP0073() == cmPolicies::WARN)) {
     std::string targetEntry = cmStrCat(impl->Name, "_LIB_DEPENDS");
     std::string dependencies;
-    const char* old_val = mf.GetDefinition(targetEntry);
+    cmProp old_val = mf.GetDefinition(targetEntry);
     if (old_val) {
-      dependencies += old_val;
+      dependencies += *old_val;
     }
     switch (llt) {
       case GENERAL_LibraryType:
@@ -1121,12 +1146,12 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
 
 void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
-  if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, impl->Makefile->GetMessenger(),
-        impl->Makefile->GetBacktrace())) {
-    return;
-  }
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
+  MAKE_STATIC_PROP(C_STANDARD);
+  MAKE_STATIC_PROP(CXX_STANDARD);
+  MAKE_STATIC_PROP(CUDA_STANDARD);
+  MAKE_STATIC_PROP(OBJC_STANDARD);
+  MAKE_STATIC_PROP(OBJCXX_STANDARD);
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
   MAKE_STATIC_PROP(COMPILE_FEATURES);
   MAKE_STATIC_PROP(COMPILE_OPTIONS);
@@ -1308,8 +1333,17 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
                               cmStrCat(reusedFrom, ".dir/"));
 
     cmProp tmp = reusedTarget->GetProperty("COMPILE_PDB_NAME");
-    this->SetProperty("COMPILE_PDB_NAME", tmp ? tmp->c_str() : nullptr);
+    this->SetProperty("COMPILE_PDB_NAME", cmToCStr(tmp));
     this->AddUtility(reusedFrom, false, impl->Makefile);
+  } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
+             prop == propCUDA_STANDARD || prop == propOBJC_STANDARD ||
+             prop == propOBJCXX_STANDARD) {
+    if (value) {
+      impl->LanguageStandardProperties[prop] =
+        BTs<std::string>(value, impl->Makefile->GetBacktrace());
+    } else {
+      impl->LanguageStandardProperties.erase(prop);
+    }
   } else {
     impl->Properties.SetProperty(prop, value);
   }
@@ -1318,11 +1352,6 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
 void cmTarget::AppendProperty(const std::string& prop,
                               const std::string& value, bool asString)
 {
-  if (!cmTargetPropertyComputer::PassesWhitelist(
-        this->GetType(), prop, impl->Makefile->GetMessenger(),
-        impl->Makefile->GetBacktrace())) {
-    return;
-  }
   if (prop == "NAME") {
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  "NAME property is read-only\n");
@@ -1413,6 +1442,11 @@ void cmTarget::AppendProperty(const std::string& prop,
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME")) {
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  prop + " property may not be APPENDed.");
+  } else if (prop == "C_STANDARD" || prop == "CXX_STANDARD" ||
+             prop == "CUDA_STANDARD" || prop == "OBJC_STANDARD" ||
+             prop == "OBJCXX_STANDARD") {
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 prop + " property may not be appended.");
   } else {
     impl->Properties.AppendProperty(prop, value, asString);
   }
@@ -1626,6 +1660,11 @@ cmProp cmTarget::GetComputedProperty(const std::string& prop,
 cmProp cmTarget::GetProperty(const std::string& prop) const
 {
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
+  MAKE_STATIC_PROP(C_STANDARD);
+  MAKE_STATIC_PROP(CXX_STANDARD);
+  MAKE_STATIC_PROP(CUDA_STANDARD);
+  MAKE_STATIC_PROP(OBJC_STANDARD);
+  MAKE_STATIC_PROP(OBJCXX_STANDARD);
   MAKE_STATIC_PROP(LINK_LIBRARIES);
   MAKE_STATIC_PROP(TYPE);
   MAKE_STATIC_PROP(INCLUDE_DIRECTORIES);
@@ -1646,6 +1685,11 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(TRUE);
 #undef MAKE_STATIC_PROP
   static std::unordered_set<std::string> const specialProps{
+    propC_STANDARD,
+    propCXX_STANDARD,
+    propCUDA_STANDARD,
+    propOBJC_STANDARD,
+    propOBJCXX_STANDARD,
     propLINK_LIBRARIES,
     propTYPE,
     propINCLUDE_DIRECTORIES,
@@ -1664,6 +1708,15 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
     propSOURCES
   };
   if (specialProps.count(prop)) {
+    if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
+        prop == propCUDA_STANDARD || prop == propOBJC_STANDARD ||
+        prop == propOBJCXX_STANDARD) {
+      auto propertyIter = impl->LanguageStandardProperties.find(prop);
+      if (propertyIter == impl->LanguageStandardProperties.end()) {
+        return nullptr;
+      }
+      return &(propertyIter->second.Value);
+    }
     if (prop == propLINK_LIBRARIES) {
       if (impl->LinkImplementationPropertyEntries.empty()) {
         return nullptr;
@@ -1804,8 +1857,7 @@ std::string const& cmTarget::GetSafeProperty(std::string const& prop) const
 
 bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 {
-  cmProp p = this->GetProperty(prop);
-  return p && cmIsOn(*p);
+  return cmIsOn(this->GetProperty(prop));
 }
 
 cmPropertyMap const& cmTarget::GetProperties() const
@@ -1838,6 +1890,27 @@ bool cmTarget::IsPerConfig() const
   return impl->PerConfig;
 }
 
+bool cmTarget::CanCompileSources() const
+{
+  if (this->IsImported()) {
+    return false;
+  }
+  switch (this->GetType()) {
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::STATIC_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
+    case cmStateEnums::OBJECT_LIBRARY:
+      return true;
+    case cmStateEnums::UTILITY:
+    case cmStateEnums::INTERFACE_LIBRARY:
+    case cmStateEnums::GLOBAL_TARGET:
+    case cmStateEnums::UNKNOWN_LIBRARY:
+      break;
+  }
+  return false;
+}
+
 const char* cmTarget::GetSuffixVariableInternal(
   cmStateEnums::ArtifactType artifact) const
 {
@@ -1865,7 +1938,7 @@ const char* cmTarget::GetSuffixVariableInternal(
         case cmStateEnums::RuntimeBinaryArtifact:
           // Android GUI application packages store the native
           // binary as a shared library.
-          return (impl->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+          return (this->IsAndroidGuiExecutable()
                     ? "CMAKE_SHARED_LIBRARY_SUFFIX"
                     : "CMAKE_EXECUTABLE_SUFFIX");
         case cmStateEnums::ImportLibraryArtifact:
@@ -1906,7 +1979,7 @@ const char* cmTarget::GetPrefixVariableInternal(
         case cmStateEnums::RuntimeBinaryArtifact:
           // Android GUI application packages store the native
           // binary as a shared library.
-          return (impl->IsAndroid && this->GetPropertyAsBool("ANDROID_GUI")
+          return (this->IsAndroidGuiExecutable()
                     ? "CMAKE_SHARED_LIBRARY_PREFIX"
                     : "");
         case cmStateEnums::ImportLibraryArtifact:
@@ -1972,6 +2045,37 @@ std::string cmTarget::ImportedGetFullPath(
   }
 
   if (result.empty()) {
+    auto message = [&]() -> std::string {
+      std::string unset;
+      std::string configuration;
+
+      if (artifact == cmStateEnums::RuntimeBinaryArtifact) {
+        unset = "IMPORTED_LOCATION";
+      } else if (artifact == cmStateEnums::ImportLibraryArtifact) {
+        unset = "IMPORTED_IMPLIB";
+      }
+
+      if (!config.empty()) {
+        configuration = cmStrCat(" configuration \"", config, "\"");
+      }
+
+      return cmStrCat(unset, " not set for imported target \"",
+                      this->GetName(), "\"", configuration, ".");
+    };
+
+    switch (this->GetPolicyStatus(cmPolicies::CMP0111)) {
+      case cmPolicies::WARN:
+        impl->Makefile->IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmPolicies::GetPolicyWarning(cmPolicies::CMP0111) + "\n" +
+            message());
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        break;
+      default:
+        impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, message());
+    }
+
     result = cmStrCat(this->GetName(), "-NOTFOUND");
   }
   return result;

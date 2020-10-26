@@ -1,6 +1,8 @@
 AUTOGEN_PARALLEL
 ----------------
 
+.. versionadded:: 3.11
+
 Number of parallel ``moc`` or ``uic`` processes to start when using
 :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC`.
 

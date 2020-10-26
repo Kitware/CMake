@@ -66,7 +66,7 @@ endif()
 set(PTHREAD_C_CXX_TEST_SOURCE [====[
 #include <pthread.h>
 
-void* test_func(void* data)
+static void* test_func(void* data)
 {
   return data;
 }

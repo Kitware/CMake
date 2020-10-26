@@ -1,6 +1,8 @@
 CMAKE_PROJECT_VERSION_MINOR
 ---------------------------
 
+.. versionadded:: 3.12
+
 The minor version of the top level project.
 
 This variable holds the minor version of the project as specified in the top

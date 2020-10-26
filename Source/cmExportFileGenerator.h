@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmExportFileGenerator_h
-#define cmExportFileGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -223,5 +222,3 @@ private:
   virtual std::string InstallNameDir(cmGeneratorTarget* target,
                                      const std::string& config) = 0;
 };
-
-#endif

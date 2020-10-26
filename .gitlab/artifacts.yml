@@ -34,10 +34,12 @@
             - build/Tests/CMake*/PseudoMemcheck/purify
             - build/Tests/CMake*/PseudoMemcheck/memcheck_fail
             - build/Tests/CMake*/PseudoMemcheck/BC
+            - build/Tests/CMake*/PseudoMemcheck/cuda-memcheck
             - build/Tests/CMake*/PseudoMemcheck/valgrind.exe
             - build/Tests/CMake*/PseudoMemcheck/purify.exe
             - build/Tests/CMake*/PseudoMemcheck/memcheck_fail.exe
             - build/Tests/CMake*/PseudoMemcheck/BC.exe
+            - build/Tests/CMake*/PseudoMemcheck/cuda-memcheck.exe
             - build/Tests/CMake*/PseudoMemcheck/NoLog
             - build/Tests/CMake*Lib/*LibTests
             - build/Tests/CMake*Lib/*LibTests.exe
@@ -58,6 +60,8 @@
             - build/Tests/RunCMake/
             - build/Tests/CMakeOnly/
             - build/Tests/CMakeTests/
+            - build/Tests/CMakeGUI/
+            - build/Tests/FortranC/
 
             # CTest/CDash information.
             - build/Testing/
@@ -70,6 +74,10 @@
         paths:
             # Any packages made.
             - build/cmake-*-Linux-x86_64.*
+            - build/cmake-*-Darwin-x86_64.*
+            # Any source packages made.
+            - build/cmake-*.tar.gz
+            - build/cmake-*.zip
 
 .cmake_test_artifacts:
     artifacts:
@@ -77,3 +85,10 @@
         paths:
             # Take the install tree.
             - build/install/
+
+.cmake_doc_artifacts:
+    artifacts:
+        expire_in: 1d
+        paths:
+            # Take the install tree.
+            - build/install-doc/

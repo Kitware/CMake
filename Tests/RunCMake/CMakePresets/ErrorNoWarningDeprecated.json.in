@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "ErrorNoWarningDeprecated",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "warnings": {
+        "deprecated": false
+      },
+      "errors": {
+        "deprecated": true
+      }
+    }
+  ]
+}

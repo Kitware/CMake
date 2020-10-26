@@ -630,7 +630,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
     Curl_initinfo(data);
 
     /* most recent connection is not yet defined */
-    data->state.lastconnect = NULL;
+    data->state.lastconnect_id = -1;
 
     data->progress.flags |= PGRS_HIDE;
     data->state.current_speed = -1; /* init to negative == impossible */
@@ -1836,11 +1836,12 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   CURLU *uh;
   CURLUcode uc;
   char *hostname;
+  bool use_set_uh = (data->set.uh && !data->state.this_is_a_follow);
 
   up_free(data); /* cleanup previous leftovers first */
 
   /* parse the URL */
-  if(data->set.uh) {
+  if(use_set_uh) {
     uh = data->state.uh = curl_url_dup(data->set.uh);
   }
   else {
@@ -1863,7 +1864,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     data->change.url_alloc = TRUE;
   }
 
-  if(!data->set.uh) {
+  if(!use_set_uh) {
     char *newurl;
     uc = curl_url_set(uh, CURLUPART_URL, data->change.url,
                     CURLU_GUESS_SCHEME |
@@ -3170,7 +3171,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
   else {
     /* this is a fresh connect */
     int rc;
-    struct Curl_dns_entry *hostaddr;
+    struct Curl_dns_entry *hostaddr = NULL;
 
 #ifdef USE_UNIX_SOCKETS
     if(conn->unix_domain_socket) {

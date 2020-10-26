@@ -1,0 +1,2 @@
+set(CMAKE_ISPC_COMPILER_LAUNCHER "${CMAKE_COMMAND};-E;env;USED_LAUNCHER=1")
+include(ISPC-common.cmake)

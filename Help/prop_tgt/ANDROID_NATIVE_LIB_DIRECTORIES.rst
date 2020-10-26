@@ -1,6 +1,8 @@
 ANDROID_NATIVE_LIB_DIRECTORIES
 ------------------------------
 
+.. versionadded:: 3.4
+
 Set the Android property that specifies directories to search for the ``.so``
 libraries.
 

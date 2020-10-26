@@ -1,0 +1,2 @@
+CMake Error at .*CheckSourceCompiles\.cmake:[0-9]+ \(message\):
+  check_source_compiles: C: needs to be enabled before use.

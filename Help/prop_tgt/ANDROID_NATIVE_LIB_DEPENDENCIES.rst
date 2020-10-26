@@ -1,6 +1,8 @@
 ANDROID_NATIVE_LIB_DEPENDENCIES
 -------------------------------
 
+.. versionadded:: 3.4
+
 Set the Android property that specifies the .so dependencies.
 This is a string property.
 

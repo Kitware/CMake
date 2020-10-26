@@ -8,7 +8,9 @@
 #include <map>
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <cm3p/kwiml/abi.h>
 
+#include "cmsys/Base64.h"
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
@@ -18,6 +20,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmXMLWriter.h"
 
 #ifdef HAVE_CoreServices
 // For the old LocaleStringToLangAndRegionCodes() function, to convert
@@ -26,36 +29,28 @@
 #  include <CoreServices/CoreServices.h>
 #endif
 
-static const char* SLAHeader =
-  "data 'LPic' (5000) {\n"
-  "    $\"0002 0011 0003 0001 0000 0000 0002 0000\"\n"
-  "    $\"0008 0003 0000 0001 0004 0000 0004 0005\"\n"
-  "    $\"0000 000E 0006 0001 0005 0007 0000 0007\"\n"
-  "    $\"0008 0000 0047 0009 0000 0034 000A 0001\"\n"
-  "    $\"0035 000B 0001 0020 000C 0000 0011 000D\"\n"
-  "    $\"0000 005B 0004 0000 0033 000F 0001 000C\"\n"
-  "    $\"0010 0000 000B 000E 0000\"\n"
-  "};\n"
-  "\n";
+static const uint16_t DefaultLpic[] = {
+  /* clang-format off */
+  0x0002, 0x0011, 0x0003, 0x0001, 0x0000, 0x0000, 0x0002, 0x0000,
+  0x0008, 0x0003, 0x0000, 0x0001, 0x0004, 0x0000, 0x0004, 0x0005,
+  0x0000, 0x000E, 0x0006, 0x0001, 0x0005, 0x0007, 0x0000, 0x0007,
+  0x0008, 0x0000, 0x0047, 0x0009, 0x0000, 0x0034, 0x000A, 0x0001,
+  0x0035, 0x000B, 0x0001, 0x0020, 0x000C, 0x0000, 0x0011, 0x000D,
+  0x0000, 0x005B, 0x0004, 0x0000, 0x0033, 0x000F, 0x0001, 0x000C,
+  0x0010, 0x0000, 0x000B, 0x000E, 0x0000
+  /* clang-format on */
+};
 
-static const char* SLASTREnglish =
-  "resource 'STR#' (5002, \"English\") {\n"
-  "    {\n"
-  "        \"English\",\n"
-  "        \"Agree\",\n"
-  "        \"Disagree\",\n"
-  "        \"Print\",\n"
-  "        \"Save...\",\n"
-  "        \"You agree to the License Agreement terms when you click \"\n"
-  "        \"the \\\"Agree\\\" button.\",\n"
-  "        \"Software License Agreement\",\n"
-  "        \"This text cannot be saved.  This disk may be full or locked, "
-  "or the \"\n"
-  "        \"file may be locked.\",\n"
-  "        \"Unable to print.  Make sure you have selected a printer.\"\n"
-  "    }\n"
-  "};\n"
-  "\n";
+static const std::vector<std::string> DefaultMenu = {
+  { "English", "Agree", "Disagree", "Print", "Save...",
+    // NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
+    "You agree to the License Agreement terms when "
+    "you click the \"Agree\" button.",
+    "Software License Agreement",
+    "This text cannot be saved.  "
+    "This disk may be full or locked, or the file may be locked.",
+    "Unable to print.  Make sure you have selected a printer." }
+};
 
 cmCPackDragNDropGenerator::cmCPackDragNDropGenerator()
   : singleLicense(false)
@@ -523,22 +518,43 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     }
   }
 
+  // Create the final compressed read-only disk image ...
+  std::ostringstream final_image_command;
+  final_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
+  final_image_command << " convert \"" << temp_image << "\"";
+  final_image_command << " -format ";
+  final_image_command << cpack_dmg_format;
+  final_image_command << " -imagekey";
+  final_image_command << " zlib-level=9";
+  final_image_command << " -o \"" << output_file << "\"";
+
+  std::string convert_error;
+
+  if (!this->RunCommand(final_image_command, &convert_error)) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Error compressing disk image." << std::endl
+                                                  << convert_error
+                                                  << std::endl);
+
+    return 0;
+  }
+
   if (!cpack_license_file.empty() || !slaDirectory.empty()) {
     // Use old hardcoded style if sla_dir is not set
     bool oldStyle = slaDirectory.empty();
-    std::string sla_r =
-      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), "/sla.r");
+    std::string sla_xml =
+      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), "/sla.xml");
 
     std::vector<std::string> languages;
     if (!oldStyle) {
       cmExpandList(cpack_dmg_languages, languages);
     }
 
-    cmGeneratedFileStream ofs(sla_r);
-    ofs << "#include <CoreServices/CoreServices.r>\n\n";
+    std::vector<uint16_t> header_data;
     if (oldStyle) {
-      ofs << SLAHeader;
-      ofs << "\n";
+      header_data = std::vector<uint16_t>(
+        DefaultLpic,
+        DefaultLpic + (sizeof(DefaultLpic) / sizeof(*DefaultLpic)));
     } else {
       /*
        * LPic Layout
@@ -558,8 +574,6 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
        * }
        */
 
-      // Create vector first for readability, then iterate to write to ofs
-      std::vector<uint16_t> header_data;
       header_data.push_back(0);
       header_data.push_back(languages.size());
       for (size_t i = 0; i < languages.size(); ++i) {
@@ -596,51 +610,49 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
         header_data.push_back(0);
 #endif
       }
-      ofs << "data 'LPic' (5000) {\n";
-      ofs << std::hex << std::uppercase << std::setfill('0');
+    }
 
-      for (size_t i = 0; i < header_data.size(); ++i) {
-        if (i % 8 == 0) {
-          ofs << "    $\"";
-        }
+    RezDoc rez;
 
-        ofs << std::setw(4) << header_data[i];
-
-        if (i % 8 == 7 || i == header_data.size() - 1) {
-          ofs << "\"\n";
-        } else {
-          ofs << " ";
-        }
+    {
+      RezDict lpic = { {}, 5000, {} };
+      lpic.Data.reserve(header_data.size() * sizeof(header_data[0]));
+      for (uint16_t x : header_data) {
+        // LPic header is big-endian.
+        char* d = reinterpret_cast<char*>(&x);
+#if KWIML_ABI_ENDIAN_ID == KWIML_ABI_ENDIAN_ID_LITTLE
+        lpic.Data.push_back(d[1]);
+        lpic.Data.push_back(d[0]);
+#else
+        lpic.Data.push_back(d[0]);
+        lpic.Data.push_back(d[1]);
+#endif
       }
-      ofs << "};\n\n";
-      // Reset ofs options
-      ofs << std::dec << std::nouppercase << std::setfill(' ');
+      rez.LPic.Entries.emplace_back(std::move(lpic));
     }
 
     bool have_write_license_error = false;
     std::string error;
 
     if (oldStyle) {
-      if (!this->WriteLicense(ofs, 0, "", cpack_license_file, &error)) {
+      if (!this->WriteLicense(rez, 0, "", cpack_license_file, &error)) {
         have_write_license_error = true;
       }
     } else {
       for (size_t i = 0; i < languages.size() && !have_write_license_error;
            ++i) {
         if (singleLicense) {
-          if (!this->WriteLicense(ofs, i + 5000, languages[i],
+          if (!this->WriteLicense(rez, i + 5000, languages[i],
                                   cpack_license_file, &error)) {
             have_write_license_error = true;
           }
         } else {
-          if (!this->WriteLicense(ofs, i + 5000, languages[i], "", &error)) {
+          if (!this->WriteLicense(rez, i + 5000, languages[i], "", &error)) {
             have_write_license_error = true;
           }
         }
       }
     }
-
-    ofs.Close();
 
     if (have_write_license_error) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -650,94 +662,25 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       return 0;
     }
 
-    if (temp_image_format != "UDZO") {
-      temp_image_format = "UDZO";
-      // convert to UDZO to enable unflatten/flatten
-      std::string temp_udzo = cmStrCat(
-        this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), "/temp-udzo.dmg");
+    this->WriteRezXML(sla_xml, rez);
 
-      std::ostringstream udco_image_command;
-      udco_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
-      udco_image_command << " convert \"" << temp_image << "\"";
-      udco_image_command << " -format UDZO";
-      udco_image_command << " -ov -o \"" << temp_udzo << "\"";
-
-      if (!this->RunCommand(udco_image_command, &error)) {
-        cmCPackLogger(cmCPackLog::LOG_ERROR,
-                      "Error converting to UDCO dmg for adding SLA."
-                        << std::endl
-                        << error << std::endl);
-        return 0;
-      }
-      temp_image = temp_udzo;
-    }
-
-    // unflatten dmg
-    std::ostringstream unflatten_command;
-    unflatten_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
-    unflatten_command << " unflatten ";
-    unflatten_command << "\"" << temp_image << "\"";
-
-    if (!this->RunCommand(unflatten_command, &error)) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error unflattening dmg for adding SLA." << std::endl
-                                                             << error
-                                                             << std::endl);
-      return 0;
-    }
-
-    // Rez the SLA
+    // Create the final compressed read-only disk image ...
     std::ostringstream embed_sla_command;
-    embed_sla_command << this->GetOption("CPACK_COMMAND_REZ");
-    const char* sysroot = this->GetOption("CPACK_OSX_SYSROOT");
-    if (sysroot && sysroot[0] != '\0') {
-      embed_sla_command << " -isysroot \"" << sysroot << "\"";
-    }
-    embed_sla_command << " \"" << sla_r << "\"";
-    embed_sla_command << " -a -o ";
-    embed_sla_command << "\"" << temp_image << "\"";
-
-    if (!this->RunCommand(embed_sla_command, &error)) {
+    embed_sla_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
+    embed_sla_command << " udifrez";
+    embed_sla_command << " -xml";
+    embed_sla_command << " \"" << sla_xml << "\"";
+    embed_sla_command << " FIXME_WHY_IS_THIS_ARGUMENT_NEEDED";
+    embed_sla_command << " \"" << output_file << "\"";
+    std::string embed_error;
+    if (!this->RunCommand(embed_sla_command, &embed_error)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error adding SLA." << std::endl
-                                        << error << std::endl);
+                    "Error compressing disk image." << std::endl
+                                                    << embed_error
+                                                    << std::endl);
+
       return 0;
     }
-
-    // flatten dmg
-    std::ostringstream flatten_command;
-    flatten_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
-    flatten_command << " flatten ";
-    flatten_command << "\"" << temp_image << "\"";
-
-    if (!this->RunCommand(flatten_command, &error)) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error flattening dmg for adding SLA." << std::endl
-                                                           << error
-                                                           << std::endl);
-      return 0;
-    }
-  }
-
-  // Create the final compressed read-only disk image ...
-  std::ostringstream final_image_command;
-  final_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
-  final_image_command << " convert \"" << temp_image << "\"";
-  final_image_command << " -format ";
-  final_image_command << cpack_dmg_format;
-  final_image_command << " -imagekey";
-  final_image_command << " zlib-level=9";
-  final_image_command << " -o \"" << output_file << "\"";
-
-  std::string convert_error;
-
-  if (!this->RunCommand(final_image_command, &convert_error)) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Error compressing disk image." << std::endl
-                                                  << convert_error
-                                                  << std::endl);
-
-    return 0;
   }
 
   return 1;
@@ -788,10 +731,67 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
   return GetComponentPackageFileName(package_file_name, componentName, false);
 }
 
-bool cmCPackDragNDropGenerator::WriteLicense(
-  cmGeneratedFileStream& outputStream, int licenseNumber,
-  std::string licenseLanguage, const std::string& licenseFile,
-  std::string* error)
+void cmCPackDragNDropGenerator::WriteRezXML(std::string const& file,
+                                            RezDoc const& rez)
+{
+  cmGeneratedFileStream fxml(file);
+  cmXMLWriter xml(fxml);
+  xml.StartDocument();
+  xml.StartElement("plist");
+  xml.Attribute("version", "1.0");
+  xml.StartElement("dict");
+  this->WriteRezArray(xml, rez.LPic);
+  this->WriteRezArray(xml, rez.Menu);
+  this->WriteRezArray(xml, rez.Text);
+  this->WriteRezArray(xml, rez.RTF);
+  xml.EndElement(); // dict
+  xml.EndElement(); // plist
+  xml.EndDocument();
+  fxml.Close();
+}
+
+void cmCPackDragNDropGenerator::WriteRezArray(cmXMLWriter& xml,
+                                              RezArray const& array)
+{
+  if (array.Entries.empty()) {
+    return;
+  }
+  xml.StartElement("key");
+  xml.Content(array.Key);
+  xml.EndElement(); // key
+  xml.StartElement("array");
+  for (RezDict const& dict : array.Entries) {
+    this->WriteRezDict(xml, dict);
+  }
+  xml.EndElement(); // array
+}
+
+void cmCPackDragNDropGenerator::WriteRezDict(cmXMLWriter& xml,
+                                             RezDict const& dict)
+{
+  std::vector<char> base64buf(dict.Data.size() * 3 / 2 + 5);
+  size_t base64len =
+    cmsysBase64_Encode(dict.Data.data(), dict.Data.size(),
+                       reinterpret_cast<unsigned char*>(base64buf.data()), 0);
+  std::string base64data(base64buf.data(), base64len);
+  /* clang-format off */
+  xml.StartElement("dict");
+  xml.StartElement("key");    xml.Content("Attributes"); xml.EndElement();
+  xml.StartElement("string"); xml.Content("0x0000");     xml.EndElement();
+  xml.StartElement("key");    xml.Content("Data");       xml.EndElement();
+  xml.StartElement("data");   xml.Content(base64data);   xml.EndElement();
+  xml.StartElement("key");    xml.Content("ID");         xml.EndElement();
+  xml.StartElement("string"); xml.Content(dict.ID);      xml.EndElement();
+  xml.StartElement("key");    xml.Content("Name");       xml.EndElement();
+  xml.StartElement("string"); xml.Content(dict.Name);    xml.EndElement();
+  xml.EndElement(); // dict
+  /* clang-format on */
+}
+
+bool cmCPackDragNDropGenerator::WriteLicense(RezDoc& rez, size_t licenseNumber,
+                                             std::string licenseLanguage,
+                                             const std::string& licenseFile,
+                                             std::string* error)
 {
   if (!licenseFile.empty() && !singleLicense) {
     licenseNumber = 5002;
@@ -799,11 +799,11 @@ bool cmCPackDragNDropGenerator::WriteLicense(
   }
 
   // License file
-  std::string license_format = "TEXT";
+  RezArray* licenseArray = &rez.Text;
   std::string actual_license;
   if (!licenseFile.empty()) {
     if (cmHasLiteralSuffix(licenseFile, ".rtf")) {
-      license_format = "RTF ";
+      licenseArray = &rez.RTF;
     }
     actual_license = licenseFile;
   } else {
@@ -812,85 +812,86 @@ bool cmCPackDragNDropGenerator::WriteLicense(
     if (cmSystemTools::FileExists(license_wo_ext + ".txt")) {
       actual_license = license_wo_ext + ".txt";
     } else {
-      license_format = "RTF ";
+      licenseArray = &rez.RTF;
       actual_license = license_wo_ext + ".rtf";
     }
   }
 
-  // License header
-  outputStream << "data '" << license_format << "' (" << licenseNumber
-               << ", \"" << licenseLanguage << "\") {\n";
   // License body
-  cmsys::ifstream license_ifs;
-  license_ifs.open(actual_license.c_str());
-  if (license_ifs.is_open()) {
-    while (license_ifs.good()) {
-      std::string line;
-      std::getline(license_ifs, line);
-      if (!line.empty()) {
-        EscapeQuotesAndBackslashes(line);
-        std::vector<std::string> lines;
-        if (!this->BreakLongLine(line, lines, error)) {
-          return false;
-        }
-        for (auto const& l : lines) {
-          outputStream << "        \"" << l << "\"\n";
-        }
-      }
-      outputStream << "        \"\\n\"\n";
+  {
+    RezDict license = { licenseLanguage, licenseNumber, {} };
+    std::vector<std::string> lines;
+    if (!this->ReadFile(actual_license, lines, error)) {
+      return false;
     }
-    license_ifs.close();
+    this->EncodeLicense(license, lines);
+    licenseArray->Entries.emplace_back(std::move(license));
   }
 
-  // End of License
-  outputStream << "};\n\n";
-  if (!licenseFile.empty() && !singleLicense) {
-    outputStream << SLASTREnglish;
-  } else {
-    // Menu header
-    outputStream << "resource 'STR#' (" << licenseNumber << ", \""
-                 << licenseLanguage << "\") {\n";
-    outputStream << "    {\n";
-
-    // Menu body
-    cmsys::ifstream menu_ifs;
-    menu_ifs.open(
-      (slaDirectory + "/" + licenseLanguage + ".menu.txt").c_str());
-    if (menu_ifs.is_open()) {
-      size_t lines_written = 0;
-      while (menu_ifs.good()) {
-        // Lines written from original file, not from broken up lines
-        std::string line;
-        std::getline(menu_ifs, line);
-        if (!line.empty()) {
-          EscapeQuotesAndBackslashes(line);
-          std::vector<std::string> lines;
-          if (!this->BreakLongLine(line, lines, error)) {
-            return false;
-          }
-          for (size_t i = 0; i < lines.size(); ++i) {
-            std::string comma;
-            // We need a comma after every complete string,
-            // but not on the very last line
-            if (lines_written != 8 && i == lines.size() - 1) {
-              comma = ",";
-            } else {
-              comma = "";
-            }
-            outputStream << "        \"" << lines[i] << "\"" << comma << "\n";
-          }
-          ++lines_written;
-        }
+  // Menu body
+  {
+    RezDict menu = { licenseLanguage, licenseNumber, {} };
+    if (!licenseFile.empty() && !singleLicense) {
+      this->EncodeMenu(menu, DefaultMenu);
+    } else {
+      std::vector<std::string> lines;
+      std::string actual_menu =
+        slaDirectory + "/" + licenseLanguage + ".menu.txt";
+      if (!this->ReadFile(actual_menu, lines, error)) {
+        return false;
       }
-      menu_ifs.close();
+      this->EncodeMenu(menu, lines);
     }
-
-    // End of menu
-    outputStream << "    }\n";
-    outputStream << "};\n";
-    outputStream << "\n";
+    rez.Menu.Entries.emplace_back(std::move(menu));
   }
 
+  return true;
+}
+
+void cmCPackDragNDropGenerator::EncodeLicense(
+  RezDict& dict, std::vector<std::string> const& lines)
+{
+  // License text uses CR newlines.
+  for (std::string const& l : lines) {
+    dict.Data.insert(dict.Data.end(), l.begin(), l.end());
+    dict.Data.push_back('\r');
+  }
+  dict.Data.push_back('\r');
+}
+
+void cmCPackDragNDropGenerator::EncodeMenu(
+  RezDict& dict, std::vector<std::string> const& lines)
+{
+  // Menu resources start with a big-endian uint16_t for number of lines:
+  {
+    uint16_t numLines = static_cast<uint16_t>(lines.size());
+    char* d = reinterpret_cast<char*>(&numLines);
+#if KWIML_ABI_ENDIAN_ID == KWIML_ABI_ENDIAN_ID_LITTLE
+    dict.Data.push_back(d[1]);
+    dict.Data.push_back(d[0]);
+#else
+    dict.Data.push_back(d[0]);
+    dict.Data.push_back(d[1]);
+#endif
+  }
+  // Each line starts with a uint8_t length, plus the bytes themselves:
+  for (std::string const& l : lines) {
+    dict.Data.push_back(static_cast<unsigned char>(l.length()));
+    dict.Data.insert(dict.Data.end(), l.begin(), l.end());
+  }
+}
+
+bool cmCPackDragNDropGenerator::ReadFile(std::string const& file,
+                                         std::vector<std::string>& lines,
+                                         std::string* error)
+{
+  cmsys::ifstream ifs(file);
+  std::string line;
+  while (std::getline(ifs, line)) {
+    if (!this->BreakLongLine(line, lines, error)) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -898,7 +899,7 @@ bool cmCPackDragNDropGenerator::BreakLongLine(const std::string& line,
                                               std::vector<std::string>& lines,
                                               std::string* error)
 {
-  const size_t max_line_length = 512;
+  const size_t max_line_length = 255;
   size_t line_length = max_line_length;
   for (size_t i = 0; i < line.size(); i += line_length) {
     line_length = max_line_length;
@@ -913,25 +914,10 @@ bool cmCPackDragNDropGenerator::BreakLongLine(const std::string& line,
     if (line_length == 0) {
       *error = "Please make sure there are no words "
                "(or character sequences not broken up by spaces or newlines) "
-               "in your license file which are more than 512 characters long.";
+               "in your license file which are more than 255 characters long.";
       return false;
     }
     lines.push_back(line.substr(i, line_length));
   }
   return true;
-}
-
-void cmCPackDragNDropGenerator::EscapeQuotesAndBackslashes(std::string& line)
-{
-  std::string::size_type backslash_pos = line.find('\\');
-  while (backslash_pos != std::string::npos) {
-    line.replace(backslash_pos, 1, "\\\\");
-    backslash_pos = line.find('\\', backslash_pos + 2);
-  }
-
-  std::string::size_type quote_pos = line.find('\"');
-  while (quote_pos != std::string::npos) {
-    line.replace(quote_pos, 1, "\\\"");
-    quote_pos = line.find('\"', quote_pos + 2);
-  }
 }

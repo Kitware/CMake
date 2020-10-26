@@ -1,6 +1,8 @@
 XCODE_SCHEME_ADDRESS_SANITIZER
 ------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Address Sanitizer`` in the Diagnostics
 section of the generated Xcode scheme.
 

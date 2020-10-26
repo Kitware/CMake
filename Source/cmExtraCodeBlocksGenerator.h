@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmExtraCodeBlocksGenerator_h
-#define cmExtraCodeBlocksGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -51,5 +50,3 @@ private:
                     const cmLocalGenerator* lg, const std::string& compiler,
                     const std::string& makeFlags);
 };
-
-#endif

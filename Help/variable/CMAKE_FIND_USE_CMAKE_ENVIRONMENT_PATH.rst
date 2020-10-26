@@ -1,6 +1,8 @@
 CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH
 -------------------------------------
 
+.. versionadded:: 3.16
+
 Controls the default behavior of the following commands for whether or not to
 search paths provided by cmake-specific environment variables:
 

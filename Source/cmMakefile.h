@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmMakefile_h
-#define cmMakefile_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -16,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmsys/RegularExpression.hxx"
@@ -342,12 +342,19 @@ public:
    */
   void SetProjectName(std::string const& name);
 
-  /** Get the configurations to be generated.  */
-  std::string GetConfigurations(std::vector<std::string>& configs,
-                                bool single = true) const;
+  /* Get the default configuration */
+  std::string GetDefaultConfiguration() const;
+
+  enum GeneratorConfigQuery
+  {
+    IncludeEmptyConfig, // Include "" aka noconfig
+    ExcludeEmptyConfig, // Exclude "" aka noconfig
+    OnlyMultiConfig,
+  };
 
   /** Get the configurations for dependency checking.  */
-  std::vector<std::string> GetGeneratorConfigs() const;
+  std::vector<std::string> GetGeneratorConfigs(
+    GeneratorConfigQuery mode) const;
 
   /**
    * Set the name of the library.
@@ -508,8 +515,7 @@ public:
    * If the variable is not found in this makefile instance, the
    * cache is then queried.
    */
-  const char* GetDefinition(const std::string&) const;
-  const std::string* GetDef(const std::string&) const;
+  cmProp GetDefinition(const std::string&) const;
   const std::string& GetSafeDefinition(const std::string&) const;
   const std::string& GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
@@ -635,8 +641,6 @@ public:
    * Get the current context backtrace.
    */
   cmListFileBacktrace GetBacktrace() const;
-  cmListFileBacktrace GetBacktrace(cmCommandContext const& lfc) const;
-  cmListFileContext GetExecutionContext() const;
 
   /**
    * Get the vector of  files created by this makefile
@@ -686,12 +690,14 @@ public:
    */
   int ConfigureFile(const std::string& infile, const std::string& outfile,
                     bool copyonly, bool atOnly, bool escapeQuotes,
+                    bool use_source_permissions,
                     cmNewLineStyle = cmNewLineStyle());
 
   /**
    * Print a command's invocation
    */
-  void PrintCommandTrace(const cmListFileFunction& lff) const;
+  void PrintCommandTrace(cmListFileFunction const& lff,
+                         cm::optional<std::string> const& deferId = {}) const;
 
   /**
    * Set a callback that is invoked whenever ExecuteCommand is called.
@@ -702,8 +708,8 @@ public:
    * Execute a single CMake command.  Returns true if the command
    * succeeded or false if it failed.
    */
-  bool ExecuteCommand(const cmListFileFunction& lff,
-                      cmExecutionStatus& status);
+  bool ExecuteCommand(const cmListFileFunction& lff, cmExecutionStatus& status,
+                      cm::optional<std::string> deferId = {});
 
   //! Enable support for named language, if nil then all languages are
   /// enabled.
@@ -728,12 +734,9 @@ public:
    * variable replacement and list expansion.
    */
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
-                       std::vector<std::string>& outArgs,
-                       const char* filename = nullptr) const;
-
+                       std::vector<std::string>& outArgs) const;
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
-                       std::vector<cmExpandedCommandArgument>& outArgs,
-                       const char* filename = nullptr) const;
+                       std::vector<cmExpandedCommandArgument>& outArgs) const;
 
   /**
    * Get the instance
@@ -925,21 +928,6 @@ public:
 
   bool PolicyOptionalWarningEnabled(std::string const& var);
 
-  bool AddRequiredTargetFeature(cmTarget* target, const std::string& feature,
-                                std::string* error = nullptr) const;
-
-  bool CompileFeatureKnown(cmTarget const* target, const std::string& feature,
-                           std::string& lang, std::string* error) const;
-
-  const char* CompileFeaturesAvailable(const std::string& lang,
-                                       std::string* error) const;
-
-  bool HaveStandardAvailable(cmTarget const* target, std::string const& lang,
-                             const std::string& feature) const;
-
-  bool IsLaterStandard(std::string const& lang, std::string const& lhs,
-                       std::string const& rhs);
-
   void PushLoopBlock();
   void PopLoopBlock();
   bool IsLoopBlock() const;
@@ -951,12 +939,10 @@ public:
 
   const char* GetDefineFlagsCMP0059() const;
 
-  std::string GetExecutionFilePath() const;
-
   void EnforceDirectoryLevelRules() const;
 
   void AddEvaluationFile(
-    const std::string& inputFile,
+    const std::string& inputFile, const std::string& targetName,
     std::unique_ptr<cmCompiledGeneratorExpression> outputName,
     std::unique_ptr<cmCompiledGeneratorExpression> condition,
     bool inputIsContent);
@@ -981,12 +967,15 @@ public:
   int GetRecursionDepth() const;
   void SetRecursionDepth(int recursionDepth);
 
+  std::string NewDeferId();
+  bool DeferCall(std::string id, std::string fileName, cmListFileFunction lff);
+  bool DeferCancelCall(std::string const& id);
+  cm::optional<std::string> DeferGetCallIds() const;
+  cm::optional<std::string> DeferGetCall(std::string const& id) const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(cmTarget& target);
-
-  // Check for a an unused variable
-  void LogUnused(const char* reason, const std::string& name) const;
 
   mutable std::set<cmListFileContext> CMP0054ReportedIds;
 
@@ -1045,10 +1034,25 @@ private:
   cmListFileBacktrace Backtrace;
   int RecursionDepth;
 
+  struct DeferCommand
+  {
+    // Id is empty for an already-executed or cancelled operation.
+    std::string Id;
+    std::string FilePath;
+    cmListFileFunction Command;
+  };
+  struct DeferCommands
+  {
+    std::vector<DeferCommand> Commands;
+  };
+  std::unique_ptr<DeferCommands> Defer;
+  bool DeferRunning = false;
+
   void DoGenerate(cmLocalGenerator& lg);
 
-  void ReadListFile(cmListFile const& listFile,
-                    const std::string& filenametoread);
+  void RunListFile(cmListFile const& listFile,
+                   const std::string& filenametoread,
+                   DeferCommands* defer = nullptr);
 
   bool ParseDefineFlag(std::string const& definition, bool remove);
 
@@ -1098,6 +1102,12 @@ private:
 
   class ListFileScope;
   friend class ListFileScope;
+
+  class DeferScope;
+  friend class DeferScope;
+
+  class DeferCallScope;
+  friend class DeferCallScope;
 
   class BuildsystemFileScope;
   friend class BuildsystemFileScope;
@@ -1162,49 +1172,9 @@ private:
    */
   bool MightHaveCustomCommand(const std::string& name) const;
 
-  bool AddRequiredTargetCFeature(cmTarget* target, const std::string& feature,
-                                 std::string const& lang,
-                                 std::string* error = nullptr) const;
-  bool AddRequiredTargetCxxFeature(cmTarget* target,
-                                   const std::string& feature,
-                                   std::string const& lang,
-                                   std::string* error = nullptr) const;
-  bool AddRequiredTargetCudaFeature(cmTarget* target,
-                                    const std::string& feature,
-                                    std::string const& lang,
-                                    std::string* error = nullptr) const;
-
-  void CheckNeededCLanguage(const std::string& feature,
-                            std::string const& lang, bool& needC90,
-                            bool& needC99, bool& needC11) const;
-  void CheckNeededCxxLanguage(const std::string& feature,
-                              std::string const& lang, bool& needCxx98,
-                              bool& needCxx11, bool& needCxx14,
-                              bool& needCxx17, bool& needCxx20) const;
-  void CheckNeededCudaLanguage(const std::string& feature,
-                               std::string const& lang, bool& needCuda03,
-                               bool& needCuda11, bool& needCuda14,
-                               bool& needCuda17, bool& needCuda20) const;
-
-  bool HaveCStandardAvailable(cmTarget const* target,
-                              const std::string& feature,
-                              std::string const& lang) const;
-  bool HaveCxxStandardAvailable(cmTarget const* target,
-                                const std::string& feature,
-                                std::string const& lang) const;
-  bool HaveCudaStandardAvailable(cmTarget const* target,
-                                 const std::string& feature,
-                                 std::string const& lang) const;
-
-  void CheckForUnusedVariables() const;
-
-  // Unused variable flags
-  bool WarnUnused;
   bool CheckSystemVars;
   bool CheckCMP0000;
   std::set<std::string> WarnedCMP0074;
   bool IsSourceFileTryCompile;
   mutable bool SuppressSideEffects;
 };
-
-#endif

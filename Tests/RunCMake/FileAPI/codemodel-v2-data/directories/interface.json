@@ -1,0 +1,14 @@
+{
+    "source": "^interface$",
+    "build": "^interface$",
+    "parentSource": "^\\.$",
+    "childSources": null,
+    "targetIds": [
+        "^ALL_BUILD::@25b7fa8ea00134654b85$",
+        "^ZERO_CHECK::@25b7fa8ea00134654b85$",
+        "^iface_srcs::@25b7fa8ea00134654b85$"
+    ],
+    "projectName": "Interface",
+    "minimumCMakeVersion": "3.12",
+    "hasInstallRule": null
+}

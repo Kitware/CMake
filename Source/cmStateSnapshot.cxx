@@ -53,7 +53,7 @@ void cmStateSnapshot::SetListFile(const std::string& listfile)
   *this->Position->ExecutionListFile = listfile;
 }
 
-std::string cmStateSnapshot::GetExecutionListFile() const
+std::string const& cmStateSnapshot::GetExecutionListFile() const
 {
   return *this->Position->ExecutionListFile;
 }
@@ -148,7 +148,7 @@ bool cmStateSnapshot::PopPolicy()
 
 bool cmStateSnapshot::CanPopPolicyScope()
 {
-  return this->Position->Policies == this->Position->PolicyScope;
+  return this->Position->Policies != this->Position->PolicyScope;
 }
 
 void cmStateSnapshot::SetPolicy(cmPolicies::PolicyID id,
@@ -230,11 +230,6 @@ void cmStateSnapshot::SetDefinition(std::string const& name,
 void cmStateSnapshot::RemoveDefinition(std::string const& name)
 {
   this->Position->Vars->Unset(name);
-}
-
-std::vector<std::string> cmStateSnapshot::UnusedKeys() const
-{
-  return this->Position->Vars->UnusedKeys();
 }
 
 std::vector<std::string> cmStateSnapshot::ClosureKeys() const
@@ -328,7 +323,7 @@ void cmStateSnapshot::SetDefaultDefinitions()
 #if defined(__CYGWIN__)
   std::string legacy;
   if (cmSystemTools::GetEnv("CMAKE_LEGACY_CYGWIN_WIN32", legacy) &&
-      cmIsOn(legacy.c_str())) {
+      cmIsOn(legacy)) {
     this->SetDefinition("WIN32", "1");
     this->SetDefinition("CMAKE_HOST_WIN32", "1");
   }
@@ -416,8 +411,7 @@ void cmStateSnapshot::InitializeFromParent()
     parent->BuildSystemDirectory->Properties.GetPropertyValue(
       "INCLUDE_REGULAR_EXPRESSION");
   this->Position->BuildSystemDirectory->Properties.SetProperty(
-    "INCLUDE_REGULAR_EXPRESSION",
-    include_regex ? include_regex->c_str() : nullptr);
+    "INCLUDE_REGULAR_EXPRESSION", cmToCStr(include_regex));
 }
 
 cmState* cmStateSnapshot::GetState() const

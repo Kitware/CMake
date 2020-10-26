@@ -47,6 +47,9 @@
 
 #ifdef CMAKE_BOOTSTRAP
 # include "posix.h"
+# if defined(__APPLE__)
+#  include <TargetConditionals.h>
+# endif
 #elif defined(__linux__)
 # include "linux.h"
 #elif defined (__MVS__)
@@ -72,6 +75,8 @@
       defined(__GNU__)
 # include "posix.h"
 #elif defined(__HAIKU__)
+# include "posix.h"
+#elif defined(__QNX__)
 # include "posix.h"
 #endif
 

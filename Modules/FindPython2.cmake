@@ -5,8 +5,14 @@
 FindPython2
 -----------
 
+.. versionadded:: 3.12
+
 Find Python 2 interpreter, compiler and development environment (include
 directories and libraries).
+
+When a version is requested, it can be specified as a simple value or as a
+range. For a detailed description of version range usage and capabilities,
+refer to the :command:`find_package` command.
 
 The following components are supported:
 
@@ -45,7 +51,7 @@ for you.
   If components ``Interpreter`` and ``Development`` (or one of its
   sub-components) are both specified, this module search only for interpreter
   with same platform architecture as the one defined by ``CMake``
-  configuration. This contraint does not apply if only ``Interpreter``
+  configuration. This constraint does not apply if only ``Interpreter``
   component is specified.
 
 Imported Targets
@@ -128,6 +134,9 @@ This module will set the following variables in your project
   System has the Python 2 development artifacts for Python embedding.
 ``Python2_INCLUDE_DIRS``
   The Python 2 include directories.
+``Python2_LINK_OPTIONS``
+  The Python 2 link options. Some configurations require specific link options
+  for a correct build and execution.
 ``Python2_LIBRARIES``
   The Python 2 libraries.
 ``Python2_LIBRARY_DIRS``
@@ -147,7 +156,7 @@ This module will set the following variables in your project
 ``Python2_NumPy_FOUND``
   System has the NumPy.
 ``Python2_NumPy_INCLUDE_DIRS``
-  The NumPy include directries.
+  The NumPy include directories.
 ``Python2_NumPy_VERSION``
   The NumPy version.
 
@@ -273,7 +282,7 @@ setting the following variables:
 
 ``Python2_LIBRARY``
   The path to the library. It will be used to compute the
-  variables ``Python2_LIBRARIES``, ``Python2_LIBRAY_DIRS`` and
+  variables ``Python2_LIBRARIES``, ``Python2_LIBRARY_DIRS`` and
   ``Python2_RUNTIME_LIBRARY_DIRS``.
 
 ``Python2_INCLUDE_DIR``
@@ -294,7 +303,7 @@ setting the following variables:
   When an artifact is specified, all ``HINTS`` will be ignored and no search
   will be performed for this artifact.
 
-  If more than one artifact is specified, it is the user's responsability to
+  If more than one artifact is specified, it is the user's responsibility to
   ensure the consistency of the various artifacts.
 
 By default, this module supports multiple calls in different directories of a
@@ -302,7 +311,7 @@ project with different version/component requirements while providing correct
 and consistent results for each call. To support this behavior, ``CMake`` cache
 is not used in the traditional way which can be problematic for interactive
 specification. So, to enable also interactive specification, module behavior
-can be controled with the following variable:
+can be controlled with the following variable:
 
 ``Python2_ARTIFACTS_INTERACTIVE``
   Selects the behavior of the module. This is a boolean variable:

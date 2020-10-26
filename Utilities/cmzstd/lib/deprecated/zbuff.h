@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-present, Yann Collet, Facebook, Inc.
+ * Copyright (c) 2016-2020, Yann Collet, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -28,7 +28,7 @@ extern "C" {
 *  Dependencies
 ***************************************/
 #include <stddef.h>      /* size_t */
-#include "zstd.h"        /* ZSTD_CStream, ZSTD_DStream, ZSTDLIB_API */
+#include "../zstd.h"        /* ZSTD_CStream, ZSTD_DStream, ZSTDLIB_API */
 
 
 /* ***************************************************************
@@ -36,16 +36,17 @@ extern "C" {
 *****************************************************************/
 /* Deprecation warnings */
 /* Should these warnings be a problem,
-   it is generally possible to disable them,
-   typically with -Wno-deprecated-declarations for gcc
-   or _CRT_SECURE_NO_WARNINGS in Visual.
-   Otherwise, it's also possible to define ZBUFF_DISABLE_DEPRECATE_WARNINGS */
+ * it is generally possible to disable them,
+ * typically with -Wno-deprecated-declarations for gcc
+ * or _CRT_SECURE_NO_WARNINGS in Visual.
+ * Otherwise, it's also possible to define ZBUFF_DISABLE_DEPRECATE_WARNINGS
+ */
 #ifdef ZBUFF_DISABLE_DEPRECATE_WARNINGS
 #  define ZBUFF_DEPRECATED(message) ZSTDLIB_API  /* disable deprecation warnings */
 #else
 #  if defined (__cplusplus) && (__cplusplus >= 201402) /* C++14 or greater */
 #    define ZBUFF_DEPRECATED(message) [[deprecated(message)]] ZSTDLIB_API
-#  elif (defined(__GNUC__) && (__GNUC__ >= 5)) || defined(__clang__)
+#  elif (defined(GNUC) && (GNUC > 4 || (GNUC == 4 && GNUC_MINOR >= 5))) || defined(__clang__)
 #    define ZBUFF_DEPRECATED(message) ZSTDLIB_API __attribute__((deprecated(message)))
 #  elif defined(__GNUC__) && (__GNUC__ >= 3)
 #    define ZBUFF_DEPRECATED(message) ZSTDLIB_API __attribute__((deprecated))
@@ -185,7 +186,7 @@ ZBUFF_DEPRECATED("use ZSTD_DStreamOutSize") size_t ZBUFF_recommendedDOutSize(voi
 
 /*--- Dependency ---*/
 #define ZSTD_STATIC_LINKING_ONLY   /* ZSTD_parameters, ZSTD_customMem */
-#include "zstd.h"
+#include "../zstd.h"
 
 
 /*--- Custom memory allocator ---*/

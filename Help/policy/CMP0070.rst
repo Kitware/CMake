@@ -1,6 +1,8 @@
 CMP0070
 -------
 
+.. versionadded:: 3.10
+
 Define :command:`file(GENERATE)` behavior for relative paths.
 
 CMake 3.10 and newer define that relative paths given to ``INPUT`` and

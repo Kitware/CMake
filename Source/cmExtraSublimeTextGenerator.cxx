@@ -349,6 +349,13 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
   if (language.empty()) {
     language = "C";
   }
+
+  // explicitly add the explicit language flag before any other flag
+  // this way backwards compatibility with user flags is maintained
+  if (source->GetProperty("LANGUAGE")) {
+    lg->AppendFeatureOptions(flags, language, "EXPLICIT_LANGUAGE");
+  }
+
   std::string const& config =
     lg->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
 
@@ -439,13 +446,13 @@ bool cmExtraSublimeTextGenerator::Open(const std::string& bindir,
                                        const std::string& projectName,
                                        bool dryRun)
 {
-  const char* sublExecutable =
+  cmProp sublExecutable =
     this->GlobalGenerator->GetCMakeInstance()->GetCacheDefinition(
       "CMAKE_SUBLIMETEXT_EXECUTABLE");
   if (!sublExecutable) {
     return false;
   }
-  if (cmIsNOTFOUND(sublExecutable)) {
+  if (cmIsNOTFOUND(*sublExecutable)) {
     return false;
   }
 
@@ -455,5 +462,5 @@ bool cmExtraSublimeTextGenerator::Open(const std::string& bindir,
   }
 
   return cmSystemTools::RunSingleCommand(
-    { sublExecutable, "--project", filename });
+    { *sublExecutable, "--project", filename });
 }

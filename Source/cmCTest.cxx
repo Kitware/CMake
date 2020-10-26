@@ -394,7 +394,7 @@ bool cmCTest::ShouldCompressTestOutput()
   return this->Impl->CompressTestOutput;
 }
 
-cmCTest::Part cmCTest::GetPartFromName(const char* name)
+cmCTest::Part cmCTest::GetPartFromName(const std::string& name)
 {
   // Look up by lower-case to make names case-insensitive.
   std::string lower_name = cmSystemTools::LowerCase(name);
@@ -458,8 +458,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
-  if (!this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir.c_str(),
-                                             &mf)) {
+  if (!this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf)) {
     cmCTestOptionalLog(
       this, DEBUG, "Cannot find custom configuration file tree" << std::endl,
       quiet);
@@ -523,7 +522,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         std::string model;
         if (cmSystemTools::GetLineFromStream(tfin, model) &&
             !this->Impl->Parts[PartStart] && !command) {
-          this->Impl->TestModel = GetTestModelFromString(model.c_str());
+          this->Impl->TestModel = GetTestModelFromString(model);
         }
         tfin.close();
       }
@@ -579,7 +578,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         cmSystemTools::GetLineFromStream(tfin, tag);
         cmSystemTools::GetLineFromStream(tfin, group);
         if (cmSystemTools::GetLineFromStream(tfin, modelStr)) {
-          model = GetTestModelFromString(modelStr.c_str());
+          model = GetTestModelFromString(modelStr);
         }
         tfin.close();
       }
@@ -705,8 +704,7 @@ bool cmCTest::UpdateCTestConfiguration()
   if (!cmSystemTools::FileExists(fileName)) {
     // No need to exit if we are not producing XML
     if (this->Impl->ProduceXML) {
-      cmCTestLog(this, ERROR_MESSAGE,
-                 "Cannot find file: " << fileName << std::endl);
+      cmCTestLog(this, WARNING, "Cannot find file: " << fileName << std::endl);
       return false;
     }
   } else {
@@ -793,7 +791,7 @@ int cmCTest::GetTestModel() const
   return this->Impl->TestModel;
 }
 
-bool cmCTest::SetTest(const char* ttype, bool report)
+bool cmCTest::SetTest(const std::string& ttype, bool report)
 {
   if (cmSystemTools::LowerCase(ttype) == "all") {
     for (Part p = PartStart; p != PartCount; p = Part(p + 1)) {
@@ -841,6 +839,7 @@ bool cmCTest::OpenOutputFile(const std::string& path, const std::string& name,
     }
   }
   std::string filename = testingDir + "/" + name;
+  stream.SetTempExt("tmp");
   stream.Open(filename);
   if (!stream) {
     cmCTestLog(this, ERROR_MESSAGE,
@@ -855,7 +854,7 @@ bool cmCTest::OpenOutputFile(const std::string& path, const std::string& name,
   return true;
 }
 
-bool cmCTest::AddIfExists(Part part, const char* file)
+bool cmCTest::AddIfExists(Part part, const std::string& file)
 {
   if (this->CTestFileExists(file)) {
     this->AddSubmitFile(part, file);
@@ -1007,7 +1006,7 @@ int cmCTest::ProcessSteps()
   if (this->Impl->Parts[PartNotes]) {
     this->UpdateCTestConfiguration();
     if (!this->Impl->NotesFiles.empty()) {
-      this->GenerateNotesFile(this->Impl->NotesFiles.c_str());
+      this->GenerateNotesFile(this->Impl->NotesFiles);
     }
   }
   if (this->Impl->Parts[PartSubmit]) {
@@ -1036,9 +1035,9 @@ std::string cmCTest::GetTestModelString()
   return "Experimental";
 }
 
-int cmCTest::GetTestModelFromString(const char* str)
+int cmCTest::GetTestModelFromString(const std::string& str)
 {
-  if (!str) {
+  if (str.empty()) {
     return cmCTest::EXPERIMENTAL;
   }
   std::string rstr = cmSystemTools::LowerCase(str);
@@ -1564,9 +1563,9 @@ int cmCTest::GenerateNotesFile(std::vector<std::string> const& files)
   return 0;
 }
 
-int cmCTest::GenerateNotesFile(const char* cfiles)
+int cmCTest::GenerateNotesFile(const std::string& cfiles)
 {
-  if (!cfiles) {
+  if (cfiles.empty()) {
     return 1;
   }
 
@@ -1649,14 +1648,14 @@ bool cmCTest::SubmitExtraFiles(std::vector<std::string> const& files)
                                             << std::endl;);
       return false;
     }
-    this->AddSubmitFile(PartExtraFiles, file.c_str());
+    this->AddSubmitFile(PartExtraFiles, file);
   }
   return true;
 }
 
-bool cmCTest::SubmitExtraFiles(const char* cfiles)
+bool cmCTest::SubmitExtraFiles(const std::string& cfiles)
 {
-  if (!cfiles) {
+  if (cfiles.empty()) {
     return true;
   }
 
@@ -1940,7 +1939,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   else if (this->CheckArgument(arg, "-C"_s, "--build-config") &&
            i < args.size() - 1) {
     i++;
-    this->SetConfigType(args[i].c_str());
+    this->SetConfigType(args[i]);
   }
 
   else if (this->CheckArgument(arg, "--debug"_s)) {
@@ -2015,7 +2014,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   else if (this->CheckArgument(arg, "-O"_s, "--output-log") &&
            i < args.size() - 1) {
     i++;
-    this->SetOutputLogFileName(args[i].c_str());
+    this->SetOutputLogFileName(args[i]);
   }
 
   else if (this->CheckArgument(arg, "--tomorrow-tag"_s)) {
@@ -2047,7 +2046,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     this->Impl->ProduceXML = true;
     this->SetTest("Notes");
     i++;
-    this->SetNotesFiles(args[i].c_str());
+    this->SetNotesFiles(args[i]);
     return true;
   }
 
@@ -2304,7 +2303,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       this->Impl->ProduceXML = true;
       this->SetTest("Submit");
       i++;
-      if (!this->SubmitExtraFiles(args[i].c_str())) {
+      if (!this->SubmitExtraFiles(args[i])) {
         return 0;
       }
     }
@@ -2375,7 +2374,7 @@ bool cmCTest::HandleTestActionArgument(const char* ctestExec, size_t& i,
       (i < args.size() - 1)) {
     this->Impl->ProduceXML = true;
     i++;
-    if (!this->SetTest(args[i].c_str(), false)) {
+    if (!this->SetTest(args[i], false)) {
       success = false;
       cmCTestLog(this, ERROR_MESSAGE,
                  "CTest -T called with incorrect option: " << args[i]
@@ -2490,11 +2489,8 @@ int cmCTest::RunCMakeAndTest(std::string* output)
   return retv;
 }
 
-void cmCTest::SetNotesFiles(const char* notes)
+void cmCTest::SetNotesFiles(const std::string& notes)
 {
-  if (!notes) {
-    return;
-  }
   this->Impl->NotesFiles = notes;
 }
 
@@ -2560,7 +2556,8 @@ void cmCTest::SetScheduleType(std::string const& type)
   this->Impl->ScheduleType = type;
 }
 
-int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
+int cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
+                                             cmMakefile* mf)
 {
   bool found = false;
   cmCTestLog(this, DEBUG,
@@ -2623,14 +2620,14 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
 void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
                                    std::vector<std::string>& vec)
 {
-  const char* dval = mf->GetDefinition(def);
+  cmProp dval = mf->GetDefinition(def);
   if (!dval) {
     return;
   }
   cmCTestLog(this, DEBUG, "PopulateCustomVector: " << def << std::endl);
 
   vec.clear();
-  cmExpandList(dval, vec);
+  cmExpandList(*dval, vec);
 
   for (std::string const& it : vec) {
     cmCTestLog(this, DEBUG, "  -- " << it << std::endl);
@@ -2640,14 +2637,14 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
 void cmCTest::PopulateCustomInteger(cmMakefile* mf, const std::string& def,
                                     int& val)
 {
-  const char* dval = mf->GetDefinition(def);
+  cmProp dval = mf->GetDefinition(def);
   if (!dval) {
     return;
   }
-  val = atoi(dval);
+  val = atoi(dval->c_str());
 }
 
-std::string cmCTest::GetShortPathToFile(const char* cfname)
+std::string cmCTest::GetShortPathToFile(const std::string& cfname)
 {
   const std::string& sourceDir = cmSystemTools::CollapseFullPath(
     this->GetCTestConfiguration("SourceDirectory"));
@@ -2711,18 +2708,17 @@ void cmCTest::EmptyCTestConfiguration()
   this->Impl->CTestConfiguration.clear();
 }
 
-void cmCTest::SetCTestConfiguration(const char* name, const char* value,
+void cmCTest::SetCTestConfiguration(const char* name, const std::string& value,
                                     bool suppress)
 {
   cmCTestOptionalLog(this, HANDLER_VERBOSE_OUTPUT,
-                     "SetCTestConfiguration:"
-                       << name << ":" << (value ? value : "(null)") << "\n",
+                     "SetCTestConfiguration:" << name << ":" << value << "\n",
                      suppress);
 
   if (!name) {
     return;
   }
-  if (!value) {
+  if (value.empty()) {
     this->Impl->CTestConfiguration.erase(name);
     return;
   }
@@ -2927,7 +2923,7 @@ std::string cmCTest::GetBuildID() const
   return this->Impl->BuildID;
 }
 
-void cmCTest::AddSubmitFile(Part part, const char* name)
+void cmCTest::AddSubmitFile(Part part, const std::string& name)
 {
   this->Impl->Parts[part].SubmitFiles.emplace_back(name);
 }
@@ -2963,9 +2959,9 @@ void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)
   this->Impl->CTestConfigurationOverwrites[key] = value;
 }
 
-void cmCTest::SetConfigType(const char* ct)
+void cmCTest::SetConfigType(const std::string& ct)
 {
-  this->Impl->ConfigType = ct ? ct : "";
+  this->Impl->ConfigType = ct;
   cmSystemTools::ReplaceString(this->Impl->ConfigType, ".\\", "");
   std::string confTypeEnv = "CMAKE_CONFIG_TYPE=" + this->Impl->ConfigType;
   cmSystemTools::PutEnv(confTypeEnv);
@@ -2975,8 +2971,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
   cmMakefile* mf, const char* dconfig, const std::string& cmake_var,
   bool suppress)
 {
-  const char* ctvar;
-  ctvar = mf->GetDefinition(cmake_var);
+  cmProp ctvar = mf->GetDefinition(cmake_var);
   if (!ctvar) {
     return false;
   }
@@ -2984,7 +2979,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
                      "SetCTestConfigurationFromCMakeVariable:"
                        << dconfig << ":" << cmake_var << std::endl,
                      suppress);
-  this->SetCTestConfiguration(dconfig, ctvar, suppress);
+  this->SetCTestConfiguration(dconfig, *ctvar, suppress);
   return true;
 }
 
@@ -3085,9 +3080,9 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
   return result;
 }
 
-void cmCTest::SetOutputLogFileName(const char* name)
+void cmCTest::SetOutputLogFileName(const std::string& name)
 {
-  if (name) {
+  if (!name.empty()) {
     this->Impl->OutputLogFile = cm::make_unique<cmGeneratedFileStream>(name);
   } else {
     this->Impl->OutputLogFile.reset();

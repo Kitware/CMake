@@ -8,6 +8,8 @@
         # TODO: Factor this out so that each job selects the Xcode version to
         # use so that different versions can be tested in a single pipeline.
         DEVELOPER_DIR: "/Applications/Xcode-11.7.app/Contents/Developer"
+        # Avoid conflicting with other projects running on the same machine.
+        SCCACHE_SERVER_PORT: 4227
 
 ### Build and test
 
@@ -37,6 +39,14 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
+.macos_package:
+    extends: .macos_build
+
+    variables:
+        CMAKE_CONFIGURATION: macos_package
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMake_SKIP_INSTALL: 1
+
 ### External testing
 
 .macos_xcode:
@@ -55,6 +65,15 @@
         - shell
         - xcode-11.7
         - nonconcurrent
+
+.macos_builder_tags_package:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - macos
+        - shell
+        - xcode-11.7
+        - nonconcurrent
+        - finder
 
 .macos_builder_ext_tags:
     tags:
@@ -88,6 +107,24 @@
         - ctest -VV -S .gitlab/ci/ctest_configure.cmake
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
         - sccache --show-stats
+
+    interruptible: true
+
+.cmake_build_macos_package:
+    stage: build
+
+    script:
+        - *before_script_macos
+        - .gitlab/ci/sccache.sh
+        # Allow the server to already be running.
+        - "sccache --start-server || :"
+        - sccache --show-stats
+        - ctest -VV -S .gitlab/ci/ctest_configure.cmake
+        - ctest -VV -S .gitlab/ci/ctest_build.cmake
+        - sccache --show-stats
+        - cd build
+        - cpack -G TGZ
+        - cpack -G DragNDrop
 
     interruptible: true
 

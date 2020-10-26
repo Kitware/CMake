@@ -1,0 +1,1 @@
+set(@__test_compiler_var@ "@__test_compiler@" -DFOO1 -DFOO2)

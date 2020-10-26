@@ -1,6 +1,8 @@
 XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER
 ----------------------------------------
 
+.. versionadded:: 3.13
+
 Whether to disable the ``Main Thread Checker``
 in the Diagnostics section of the generated Xcode scheme.
 

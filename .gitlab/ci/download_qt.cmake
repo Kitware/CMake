@@ -6,7 +6,11 @@ set(qt_version_minor "15")
 set(qt_version_patch "0")
 # This URL is only visible inside of Kitware's network. Please use your own Qt
 # Account to obtain these files.
-set(qt_url_root "https://paraview.org/files/dependencies/internal/qt")
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "package")
+  set(qt_url_root "https://cmake.org/files/dependencies")
+else ()
+  set(qt_url_root "https://paraview.org/files/dependencies/internal/qt")
+endif ()
 
 # Determine the ABI to fetch for Qt.
 if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "vs2015")
@@ -51,15 +55,21 @@ if (qt_platform STREQUAL "windows_x86")
 
   set(qt_subdir "${qt_version}/msvc${msvc_year}_64")
 elseif (qt_platform STREQUAL "mac_x64")
-  set(qt_build_stamp "202005140805")
-  set(qt_file_name_prefix "${qt_version}-0-${qt_build_stamp}")
-
-  foreach (qt_component IN ITEMS qtbase)
+  if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "package")
     list(APPEND qt_files
-      "${qt_file_name_prefix}${qt_component}-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64.7z")
-  endforeach ()
+      "qt-5.6.2-macosx10.7-x86_64.tar.xz")
+    set(qt_subdir "qt-5.6.2-macosx10.7-x86_64")
+  else ()
+    set(qt_build_stamp "202005140805")
+    set(qt_file_name_prefix "${qt_version}-0-${qt_build_stamp}")
 
-  set(qt_subdir "${qt_version}/clang_64")
+    foreach (qt_component IN ITEMS qtbase)
+      list(APPEND qt_files
+        "${qt_file_name_prefix}${qt_component}-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64.7z")
+    endforeach ()
+
+    set(qt_subdir "${qt_version}/clang_64")
+  endif ()
 else ()
   message(FATAL_ERROR
     "Unknown files for ${qt_platform}")
@@ -72,7 +82,11 @@ if (NOT qt_subdir)
 endif ()
 
 # Build up the path to the file to download.
-set(qt_url_path "${qt_platform}/desktop/qt5_${qt_version_nodot}/qt.qt5.${qt_version_nodot}.${qt_abi}")
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "package")
+  set(qt_url_path "")
+else ()
+  set(qt_url_path "${qt_platform}/desktop/qt5_${qt_version_nodot}/qt.qt5.${qt_version_nodot}.${qt_abi}")
+endif ()
 set(qt_url_prefix "${qt_url_root}/${qt_url_path}")
 
 # Include the file containing the hashes of the files that matter.

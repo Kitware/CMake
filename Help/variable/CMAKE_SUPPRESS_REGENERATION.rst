@@ -1,6 +1,8 @@
 CMAKE_SUPPRESS_REGENERATION
 ---------------------------
 
+.. versionadded:: 3.12
+
 If ``CMAKE_SUPPRESS_REGENERATION`` is ``OFF``, which is default, then CMake
 adds a special target on which all other targets depend that checks the build
 system and optionally re-runs CMake to regenerate the build system when

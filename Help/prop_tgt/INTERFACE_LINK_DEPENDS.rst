@@ -1,6 +1,8 @@
 INTERFACE_LINK_DEPENDS
 ----------------------
 
+.. versionadded:: 3.13
+
 Additional public interface files on which a target binary depends for linking.
 
 This property is supported only by :generator:`Ninja` and

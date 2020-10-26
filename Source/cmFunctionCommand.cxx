@@ -147,8 +147,7 @@ bool cmFunctionFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
                                                cmMakefile& mf) const
 {
   std::vector<std::string> expandedArguments;
-  mf.ExpandArguments(lff.Arguments, expandedArguments,
-                     this->GetStartingContext().FilePath.c_str());
+  mf.ExpandArguments(lff.Arguments(), expandedArguments);
   return expandedArguments.empty() ||
     expandedArguments.front() == this->Args.front();
 }

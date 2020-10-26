@@ -15,6 +15,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -302,8 +303,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     }
     std::string vw;
     for (std::string const& i : vv) {
-      const char* const v = mf.GetDefinition(i);
-      if (v && *v) {
+      cmProp v = mf.GetDefinition(i);
+      if (cmNonempty(v)) {
         if (cmp0048 == cmPolicies::WARN) {
           if (!injectedProjectCommand) {
             vw += "\n  ";
@@ -352,12 +353,12 @@ static bool IncludeByVariable(cmExecutionStatus& status,
                               const std::string& variable)
 {
   cmMakefile& mf = status.GetMakefile();
-  const char* const include = mf.GetDefinition(variable);
+  cmProp include = mf.GetDefinition(variable);
   if (!include) {
     return true;
   }
 
-  const bool readit = mf.ReadDependentFile(include);
+  const bool readit = mf.ReadDependentFile(*include);
   if (readit) {
     return true;
   }
@@ -366,7 +367,7 @@ static bool IncludeByVariable(cmExecutionStatus& status,
     return true;
   }
 
-  status.SetError(cmStrCat("could not find file:\n  ", include));
+  status.SetError(cmStrCat("could not find file:\n  ", *include));
   return false;
 }
 

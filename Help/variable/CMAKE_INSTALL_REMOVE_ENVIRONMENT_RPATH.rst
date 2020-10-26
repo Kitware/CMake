@@ -1,6 +1,8 @@
 CMAKE_INSTALL_REMOVE_ENVIRONMENT_RPATH
 --------------------------------------
 
+.. versionadded:: 3.16
+
 Sets the default for whether toolchain-defined rpaths should be removed during
 installation.
 

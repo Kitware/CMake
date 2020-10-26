@@ -1,6 +1,8 @@
 CUDA_ARCHITECTURES
 ------------------
 
+.. versionadded:: 3.18
+
 List of architectures to generate device code for.
 
 An architecture can be suffixed by either ``-real`` or ``-virtual`` to specify

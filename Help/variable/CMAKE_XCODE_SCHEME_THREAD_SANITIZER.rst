@@ -1,6 +1,8 @@
 CMAKE_XCODE_SCHEME_THREAD_SANITIZER
 -----------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Thread Sanitizer`` in the Diagnostics
 section of the generated Xcode scheme.
 

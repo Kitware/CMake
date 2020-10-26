@@ -61,7 +61,7 @@ int file1_launch_kernel()
   err = cudaGetLastError();
   std::cout << err << " " << cudaGetErrorString(err) << std::endl;
   if (err == cudaSuccess) {
-    // This kernel launch should failed as the device linking never occured
+    // This kernel launch should failed as the device linking never occurred
     std::cerr << "file1_kernel: kernel launch should have failed" << std::endl;
     return 1;
   }

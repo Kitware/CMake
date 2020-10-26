@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmUVProcessChain_h
-#define cmUVProcessChain_h
+#pragma once
 
 #include <array>
 #include <cstddef> // IWYU pragma: keep
@@ -96,5 +95,3 @@ private:
   struct InternalData;
   std::unique_ptr<InternalData> Data;
 };
-
-#endif

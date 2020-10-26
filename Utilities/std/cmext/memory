@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmext_memory
-#define cmext_memory
+#pragma once
 
 #include <typeinfo>
 
@@ -37,5 +36,3 @@ T& dynamic_reference_cast(O& item)
 }
 
 } // namespace cm
-
-#endif

@@ -469,9 +469,10 @@ void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
     name,
     [name, error](std::vector<cmListFileArgument> const&,
                   cmExecutionStatus& status) -> bool {
-      const char* versionValue =
+      cmProp versionValue =
         status.GetMakefile().GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-      if (name == "endif" && (!versionValue || atof(versionValue) <= 1.4)) {
+      if (name == "endif" &&
+          (!versionValue || atof(versionValue->c_str()) <= 1.4)) {
         return true;
       }
       status.SetError(error);
@@ -623,8 +624,7 @@ cmProp cmState::GetGlobalProperty(const std::string& prop)
 
 bool cmState::GetGlobalPropertyAsBool(const std::string& prop)
 {
-  cmProp p = this->GetGlobalProperty(prop);
-  return p && cmIsOn(*p);
+  return cmIsOn(this->GetGlobalProperty(prop));
 }
 
 void cmState::SetSourceDirectory(std::string const& sourceDirectory)
@@ -835,6 +835,21 @@ cmStateSnapshot cmState::CreateBuildsystemDirectorySnapshot(
   snapshot.InitializeFromParent();
   snapshot.SetDirectoryDefinitions();
   return snapshot;
+}
+
+cmStateSnapshot cmState::CreateDeferCallSnapshot(
+  cmStateSnapshot const& originSnapshot, std::string const& fileName)
+{
+  cmStateDetail::PositionType pos =
+    this->SnapshotData.Push(originSnapshot.Position, *originSnapshot.Position);
+  pos->SnapshotType = cmStateEnums::DeferCallType;
+  pos->Keep = false;
+  pos->ExecutionListFile = this->ExecutionListFiles.Push(
+    originSnapshot.Position->ExecutionListFile, fileName);
+  assert(originSnapshot.Position->Vars.IsValid());
+  pos->BuildSystemDirectory->DirectoryEnd = pos;
+  pos->PolicyScope = originSnapshot.Position->Policies;
+  return { this, pos };
 }
 
 cmStateSnapshot cmState::CreateFunctionCallSnapshot(

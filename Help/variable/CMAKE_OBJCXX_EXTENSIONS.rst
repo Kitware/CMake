@@ -1,6 +1,8 @@
 CMAKE_OBJCXX_EXTENSIONS
 -----------------------
 
+.. versionadded:: 3.16
+
 Default value for :prop_tgt:`OBJCXX_EXTENSIONS` property of targets.
 
 This variable is used to initialize the :prop_tgt:`OBJCXX_EXTENSIONS`

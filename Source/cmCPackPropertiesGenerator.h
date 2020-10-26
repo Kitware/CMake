@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackPropertiesGenerator_h
-#define cmCPackPropertiesGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -36,5 +35,3 @@ protected:
   cmLocalGenerator* LG;
   cmInstalledFile const& InstalledFile;
 };
-
-#endif

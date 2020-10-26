@@ -4,6 +4,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 
 // cmRemoveCommand
@@ -16,7 +17,7 @@ bool cmRemoveCommand(std::vector<std::string> const& args,
 
   std::string const& variable = args[0]; // VAR is always first
   // get the old value
-  const char* cacheValue = status.GetMakefile().GetDefinition(variable);
+  cmProp cacheValue = status.GetMakefile().GetDefinition(variable);
 
   // if there is no old value then return
   if (!cacheValue) {
@@ -24,7 +25,7 @@ bool cmRemoveCommand(std::vector<std::string> const& args,
   }
 
   // expand the variable
-  std::vector<std::string> const varArgsExpanded = cmExpandedList(cacheValue);
+  std::vector<std::string> const varArgsExpanded = cmExpandedList(*cacheValue);
 
   // expand the args
   // check for REMOVE(VAR v1 v2 ... vn)

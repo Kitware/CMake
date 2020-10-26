@@ -1,6 +1,8 @@
 CMAKE_CODEBLOCKS_COMPILER_ID
 ----------------------------
 
+.. versionadded:: 3.11
+
 Change the compiler id in the generated CodeBlocks project files.
 
 CodeBlocks uses its own compiler id string which differs from

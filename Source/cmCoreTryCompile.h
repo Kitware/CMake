@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCoreTryCompile_h
-#define cmCoreTryCompile_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -47,10 +46,4 @@ protected:
   std::string OutputFile;
   std::string FindErrorMessage;
   bool SrcFileSignature = false;
-
-private:
-  std::vector<std::string> WarnCMP0067;
-  std::string LookupStdVar(std::string const& var, bool warnCMP0067);
 };
-
-#endif

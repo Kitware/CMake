@@ -17,6 +17,7 @@
 #include "cmBreakCommand.h"
 #include "cmBuildCommand.h"
 #include "cmCMakeMinimumRequired.h"
+#include "cmCMakePathCommand.h"
 #include "cmCMakePolicyCommand.h"
 #include "cmCommand.h"
 #include "cmConfigureFileCommand.h"
@@ -120,6 +121,7 @@ void GetScriptingCommands(cmState* state)
 {
   state->AddBuiltinCommand("break", cmBreakCommand);
   state->AddBuiltinCommand("cmake_minimum_required", cmCMakeMinimumRequired);
+  state->AddBuiltinCommand("cmake_path", cmCMakePathCommand);
   state->AddBuiltinCommand("cmake_policy", cmCMakePolicyCommand);
   state->AddBuiltinCommand("configure_file", cmConfigureFileCommand);
   state->AddBuiltinCommand("continue", cmContinueCommand);

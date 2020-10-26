@@ -1,6 +1,8 @@
 CMP0081
 -------
 
+.. versionadded:: 3.13
+
 Relative paths not allowed in :prop_tgt:`LINK_DIRECTORIES` target property.
 
 CMake 3.12 and lower allowed the :prop_dir:`LINK_DIRECTORIES` directory

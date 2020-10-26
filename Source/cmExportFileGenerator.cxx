@@ -565,10 +565,9 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
                       ifaceProperties);
 
   if (gtarget->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-    getCompatibleInterfaceProperties(gtarget, ifaceProperties, "");
-
-    std::vector<std::string> configNames;
-    gtarget->Target->GetMakefile()->GetConfigurations(configNames);
+    std::vector<std::string> configNames =
+      gtarget->Target->GetMakefile()->GetGeneratorConfigs(
+        cmMakefile::IncludeEmptyConfig);
 
     for (std::string const& cn : configNames) {
       getCompatibleInterfaceProperties(gtarget, ifaceProperties, cn);

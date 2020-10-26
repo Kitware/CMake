@@ -1,6 +1,8 @@
 CMAKE_<LANG>_CLANG_TIDY
 -----------------------
 
+.. versionadded:: 3.6
+
 Default value for :prop_tgt:`<LANG>_CLANG_TIDY` target property
 when ``<LANG>`` is ``C`` or ``CXX``.
 

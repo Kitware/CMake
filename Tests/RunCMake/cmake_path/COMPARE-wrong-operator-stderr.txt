@@ -1,0 +1,2 @@
+CMake Error at COMPARE-wrong-operator.cmake:[0-9]+ \(cmake_path\):
+  cmake_path COMPARE called with an unknown comparison operator: FOO.

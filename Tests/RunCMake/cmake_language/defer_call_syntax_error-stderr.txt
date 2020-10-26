@@ -1,0 +1,13 @@
+^CMake Error at defer_call_syntax_error.cmake:2 \(message\):
+  Syntax error in cmake code at
+
+    [^
+]*/Tests/RunCMake/cmake_language/defer_call_syntax_error.cmake:2
+
+  when parsing string
+
+    Deferred \\X Error
+
+  Invalid character escape '\\X'.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:DEFERRED$

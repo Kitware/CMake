@@ -1,0 +1,2 @@
+CMake Error at .*CommandError.cmake:1 \(execute_process\):
+  execute_process COMMAND_ERROR_IS_FATAL option can be ANY or LAST

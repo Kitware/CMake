@@ -29,7 +29,7 @@ macOS using PackageMaker:
 
 .. variable:: CPACK_PACKAGEMAKER_BACKGROUND
 
- Adds a background to Distribtion XML if specified. The value contains the
+ Adds a background to Distribution XML if specified. The value contains the
  path to image in ``Resources`` directory.
 
 .. variable:: CPACK_PACKAGEMAKER_BACKGROUND_ALIGNMENT

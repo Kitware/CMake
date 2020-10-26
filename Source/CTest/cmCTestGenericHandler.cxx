@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "cmCTest.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmCTestGenericHandler::cmCTestGenericHandler()
@@ -100,7 +101,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
                                                     << std::endl);
     return false;
   }
-  this->CTest->AddSubmitFile(part, ostr.str().c_str());
+  this->CTest->AddSubmitFile(part, ostr.str());
   return true;
 }
 
@@ -122,6 +123,8 @@ bool cmCTestGenericHandler::StartLogFile(const char* name,
     ostr << "_" << this->CTest->GetCurrentTag();
   }
   ostr << ".log";
+  this->LogFileNames[name] =
+    cmStrCat(this->CTest->GetBinaryDir(), "/Testing/Temporary/", ostr.str());
   if (!this->CTest->OpenOutputFile("Temporary", ostr.str(), xofs)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create log file: " << ostr.str() << std::endl);

@@ -98,7 +98,7 @@ macro(__compiler_armclang lang)
       set(__mcpu_flag_set TRUE)
     endif()
     if(NOT __march_flag_set AND NOT __mcpu_flag_set)
-      message(FATAL_ERROR "Atleast one of the variables CMAKE_SYSTEM_PROCESSOR or CMAKE_SYSTEM_ARCH must be set for ARMClang\n"
+      message(FATAL_ERROR "At least one of the variables CMAKE_SYSTEM_PROCESSOR or CMAKE_SYSTEM_ARCH must be set for ARMClang\n"
                           "Supported processor: ${CMAKE_${lang}_COMPILER_PROCESSOR_LIST}\n"
                           "  Supported Architecture: ${CMAKE_${lang}_COMPILER_ARCH_LIST}")
     endif()

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackIFWCommon_h
-#define cmCPackIFWCommon_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -77,5 +76,3 @@ protected:
                              cmCPackLog_msg.str().c_str());                   \
     }                                                                         \
   } while (false)
-
-#endif // cmCPackIFWCommon_h

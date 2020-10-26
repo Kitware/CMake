@@ -2,6 +2,13 @@
 
 .run_manually:
     rules:
+        - if: '$CMAKE_CI_PACKAGE == "true"'
+          when: never
+        - if: '$CMAKE_CI_NIGHTLY == "true"'
+          when: on_success
+        - if: '($CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != "" && $CI_COMMIT_BRANCH == $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true")'
+          when: delayed
+          start_in: 5 minutes
         - if: '$CI_MERGE_REQUEST_ID'
           when: manual
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
@@ -11,8 +18,32 @@
 
 .run_automatically:
     rules:
+        - if: '$CMAKE_CI_PACKAGE == "true"'
+          when: never
+        - if: '$CMAKE_CI_NIGHTLY == "true"'
+          when: on_success
+        - if: '($CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != "" && $CI_COMMIT_BRANCH == $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true")'
+          when: on_success
         - if: '$CI_MERGE_REQUEST_ID'
           when: on_success
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
+          when: on_success
+        - when: never
+
+.run_dependent:
+    rules:
+        - if: '$CMAKE_CI_PACKAGE == "true"'
+          when: never
+        - if: '$CMAKE_CI_NIGHTLY == "true"'
+          when: on_success
+        - if: '$CI_MERGE_REQUEST_ID'
+          when: on_success
+        - if: '$CI_PROJECT_PATH == "cmake/cmake"'
+          when: on_success
+        - when: never
+
+.run_only_for_package:
+    rules:
+        - if: '$CMAKE_CI_PACKAGE == "true"'
           when: on_success
         - when: never

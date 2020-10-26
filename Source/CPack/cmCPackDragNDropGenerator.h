@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackDragNDropGenerator_h
-#define cmCPackDragNDropGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -14,6 +13,7 @@
 #include "cmCPackGenerator.h"
 
 class cmGeneratedFileStream;
+class cmXMLWriter;
 
 /** \class cmCPackDragNDropGenerator
  * \brief A generator for OSX drag-n-drop installs
@@ -45,12 +45,38 @@ private:
   std::string slaDirectory;
   bool singleLicense;
 
-  bool WriteLicense(cmGeneratedFileStream& outputStream, int licenseNumber,
+  struct RezDict
+  {
+    std::string Name;
+    size_t ID;
+    std::vector<unsigned char> Data;
+  };
+
+  struct RezArray
+  {
+    std::string Key;
+    std::vector<RezDict> Entries;
+  };
+
+  struct RezDoc
+  {
+    RezArray LPic = { "LPic", {} };
+    RezArray Menu = { "STR#", {} };
+    RezArray Text = { "TEXT", {} };
+    RezArray RTF = { "RTF ", {} };
+  };
+
+  void WriteRezXML(std::string const& file, RezDoc const& rez);
+  void WriteRezArray(cmXMLWriter& xml, RezArray const& array);
+  void WriteRezDict(cmXMLWriter& xml, RezDict const& dict);
+
+  bool WriteLicense(RezDoc& rez, size_t licenseNumber,
                     std::string licenseLanguage,
                     const std::string& licenseFile, std::string* error);
+  void EncodeLicense(RezDict& dict, std::vector<std::string> const& lines);
+  void EncodeMenu(RezDict& dict, std::vector<std::string> const& lines);
+  bool ReadFile(std::string const& file, std::vector<std::string>& lines,
+                std::string* error);
   bool BreakLongLine(const std::string& line, std::vector<std::string>& lines,
                      std::string* error);
-  void EscapeQuotesAndBackslashes(std::string& line);
 };
-
-#endif

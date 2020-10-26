@@ -1,6 +1,8 @@
 LINK_OPTIONS
 ------------
 
+.. versionadded:: 3.13
+
 List of options to use for the link step of shared library, module
 and executable targets as well as the device link step.
 

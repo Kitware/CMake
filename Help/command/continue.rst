@@ -1,6 +1,8 @@
 continue
 --------
 
+.. versionadded:: 3.2
+
 Continue to the top of enclosing foreach or while loop.
 
 .. code-block:: cmake

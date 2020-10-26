@@ -1,3 +1,6 @@
-cmake_minimum_required(VERSION ${CMAKE_VERSION})
+cmake_minimum_required(VERSION 3.18)
 project(${RunCMake_TEST} NONE)
+if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12 AND NOT RunCMake_TEST STREQUAL "Xcode-CMP0114")
+  cmake_policy(SET CMP0114 NEW)
+endif()
 include(${RunCMake_TEST}.cmake)

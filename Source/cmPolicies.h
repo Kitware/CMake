@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmPolicies_h
-#define cmPolicies_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -320,7 +319,28 @@ class cmMakefile;
   SELECT(POLICY, CMP0107, "An ALIAS target cannot overwrite another target.", \
          3, 18, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0108, "A target cannot link to itself through an alias.", \
-         3, 18, 0, cmPolicies::WARN)
+         3, 18, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0109,                                                     \
+         "find_program() requires permission to execute but not to read.", 3, \
+         19, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0110,                                                     \
+         "add_test() supports arbitrary characters in test names.", 3, 19, 0, \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0111,                                                     \
+         "An imported target missing its location property fails during "     \
+         "generation.",                                                       \
+         3, 19, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0112,                                                     \
+         "Target file component generator expressions do not add target "     \
+         "dependencies.",                                                     \
+         3, 19, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0113,                                                     \
+         "Makefile generators do not repeat custom commands from target "     \
+         "dependencies.",                                                     \
+         3, 19, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0114,                                                     \
+         "ExternalProject step targets fully adopt their steps.", 3, 19, 0,   \
+         cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -353,7 +373,9 @@ class cmMakefile;
   F(CMP0099)                                                                  \
   F(CMP0104)                                                                  \
   F(CMP0105)                                                                  \
-  F(CMP0108)
+  F(CMP0108)                                                                  \
+  F(CMP0112)                                                                  \
+  F(CMP0113)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies
@@ -396,12 +418,20 @@ public:
   //! Get the default status for a policy
   static cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
 
+  enum class WarnCompat
+  {
+    Off,
+    On
+  };
+
   //! Set a policy level for this listfile
   static bool ApplyPolicyVersion(cmMakefile* mf,
                                  std::string const& version_min,
-                                 std::string const& version_max);
+                                 std::string const& version_max,
+                                 WarnCompat warnCompat);
   static bool ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
-                                 unsigned int minorVer, unsigned int patchVer);
+                                 unsigned int minorVer, unsigned int patchVer,
+                                 WarnCompat warnCompat);
 
   //! return a warning string for a given policy
   static std::string GetPolicyWarning(cmPolicies::PolicyID id);
@@ -426,5 +456,3 @@ public:
     std::bitset<cmPolicies::CMPCOUNT * POLICY_STATUS_COUNT> Status;
   };
 };
-
-#endif

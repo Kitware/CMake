@@ -1,6 +1,8 @@
 TESTS
 -----
 
+.. versionadded:: 3.12
+
 List of tests.
 
 This read-only property holds a

@@ -5,6 +5,8 @@
 FindLTTngUST
 ------------
 
+.. versionadded:: 3.6
+
 Find
 `Linux Trace Toolkit Next Generation (LTTng-UST) <http://lttng.org/>`__ library.
 

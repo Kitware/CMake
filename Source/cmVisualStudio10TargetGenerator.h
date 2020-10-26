@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmVisualStudioTargetGenerator_h
-#define cmVisualStudioTargetGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -70,6 +69,7 @@ private:
   void WriteExtraSource(Elem& e1, cmSourceFile const* sf);
   void WriteNsightTegraConfigurationValues(Elem& e1,
                                            std::string const& config);
+  void WriteAndroidConfigurationValues(Elem& e1, std::string const& config);
   void WriteSource(Elem& e2, cmSourceFile const* sf);
   void WriteExcludeFromBuild(Elem& e2,
                              std::vector<size_t> const& exclude_configs);
@@ -215,6 +215,7 @@ private:
   bool MSTools;
   bool Managed;
   bool NsightTegra;
+  bool Android;
   unsigned int NsightTegraVersion[4];
   bool TargetCompileAsWinRT;
   std::set<std::string> IPOEnabledConfigurations;
@@ -257,5 +258,3 @@ private:
                              ConfigToSettings& toolSettings);
   std::string GetCMakeFilePath(const char* name) const;
 };
-
-#endif

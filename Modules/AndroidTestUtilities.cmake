@@ -5,6 +5,8 @@
 AndroidTestUtilities
 ------------------------
 
+.. versionadded:: 3.7
+
 Create a test that automatically loads specified data onto an Android device.
 
 Introduction

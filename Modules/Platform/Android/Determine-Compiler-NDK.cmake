@@ -184,7 +184,7 @@ foreach(line IN LISTS _ANDROID_TOOL_SETUP)
       # We just matched the gcc toolchain name without version number.  Save it for later.
       set(_ANDROID_TOOL_NAME_ONLY "${CMAKE_MATCH_1}")
     elseif(line MATCHES [[^TOOLCHAIN_PREFIX +:= +.*/bin/(\$\(TOOLCHAIN_NAME\)-) *$]])
-      # We just matched the toolchain prefix with a name placholder, so substitute it.
+      # We just matched the toolchain prefix with a name placeholder, so substitute it.
       # The gcc toolchain name will have already been extracted without version number from a TOOLCHAIN_NAME line.
       string(REPLACE "$(TOOLCHAIN_NAME)" "${_ANDROID_TOOL_NAME_ONLY}" _ANDROID_TOOL_PREFIX "${CMAKE_MATCH_1}")
     elseif(line MATCHES [[^LLVM_VERSION +:= +([0-9.]+)$]])

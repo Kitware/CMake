@@ -1,6 +1,8 @@
 CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS
 -----------------------------------
 
+.. versionadded:: 3.14
+
 Set to ``TRUE`` to tell :command:`find_package` calls to resolve symbolic
 links in the value of ``<PackageName>_DIR``.
 

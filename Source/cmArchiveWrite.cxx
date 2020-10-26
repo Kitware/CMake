@@ -81,7 +81,7 @@ struct cmArchiveWrite::Callback
 };
 
 cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
-                               std::string const& format)
+                               std::string const& format, int compressionLevel)
   : Stream(os)
   , Archive(archive_write_new())
   , Disk(archive_read_disk_new())
@@ -151,6 +151,41 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
       }
       break;
   }
+
+  if (compressionLevel != 0) {
+    std::string compressionLevelStr = std::to_string(compressionLevel);
+    std::string archiveFilterName;
+    switch (c) {
+      case CompressNone:
+      case CompressCompress:
+        break;
+      case CompressGZip:
+        archiveFilterName = "gzip";
+        break;
+      case CompressBZip2:
+        archiveFilterName = "bzip2";
+        break;
+      case CompressLZMA:
+        archiveFilterName = "lzma";
+        break;
+      case CompressXZ:
+        archiveFilterName = "xz";
+        break;
+      case CompressZstd:
+        archiveFilterName = "zstd";
+        break;
+    }
+    if (!archiveFilterName.empty()) {
+      if (archive_write_set_filter_option(
+            this->Archive, archiveFilterName.c_str(), "compression-level",
+            compressionLevelStr.c_str()) != ARCHIVE_OK) {
+        this->Error = cmStrCat("archive_write_set_filter_option: ",
+                               cm_archive_error_string(this->Archive));
+        return;
+      }
+    }
+  }
+
 #if !defined(_WIN32) || defined(__CYGWIN__)
   if (archive_read_disk_set_standard_lookup(this->Disk) != ARCHIVE_OK) {
     this->Error = cmStrCat("archive_read_disk_set_standard_lookup: ",

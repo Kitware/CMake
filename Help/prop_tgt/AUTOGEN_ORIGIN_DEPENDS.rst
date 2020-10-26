@@ -1,6 +1,8 @@
 AUTOGEN_ORIGIN_DEPENDS
 ----------------------
 
+.. versionadded:: 3.14
+
 Switch for forwarding origin target dependencies to the corresponding
 ``_autogen`` target.
 

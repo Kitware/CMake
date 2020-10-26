@@ -2,8 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTestGenerator.h"
 
+#include <algorithm>
+#include <cstddef> // IWYU pragma: keep
+#include <iterator>
 #include <memory>
 #include <ostream>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -11,7 +15,10 @@
 #include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmRange.h"
@@ -19,6 +26,52 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
+
+namespace /* anonymous */
+{
+
+bool needToQuoteTestName(const cmMakefile& mf, const std::string& name)
+{
+  // Determine if policy CMP0110 is set to NEW.
+  switch (mf.GetPolicyStatus(cmPolicies::CMP0110)) {
+    case cmPolicies::WARN:
+      // Only warn if a forbidden character is used in the name.
+      if (name.find_first_of("$[] #;\t\n\"\\") != std::string::npos) {
+        mf.IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0110),
+                   "\nThe following name given to add_test() is invalid if "
+                   "CMP0110 is not set or set to OLD:\n  `",
+                   name, "´\n"));
+      }
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      // OLD behavior is to not quote the test's name.
+      return false;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+    default:
+      // NEW behavior is to quote the test's name.
+      return true;
+  }
+}
+
+std::size_t countMaxConsecutiveEqualSigns(const std::string& name)
+{
+  std::size_t max = 0;
+  auto startIt = find(name.begin(), name.end(), '=');
+  auto endIt = startIt;
+  for (; startIt != name.end(); startIt = find(endIt, name.end(), '=')) {
+    endIt =
+      find_if_not(startIt + 1, name.end(), [](char c) { return c == '='; });
+    max =
+      std::max(max, static_cast<std::size_t>(std::distance(startIt, endIt)));
+  }
+  return max;
+}
+
+} // End: anonymous namespace
 
 cmTestGenerator::cmTestGenerator(
   cmTest* test, std::vector<std::string> const& configurations)
@@ -76,8 +129,21 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   // Set up generator expression evaluation context.
   cmGeneratorExpression ge(this->Test->GetBacktrace());
 
+  // Determine if policy CMP0110 is set to NEW.
+  const bool quote_test_name =
+    needToQuoteTestName(*this->Test->GetMakefile(), this->Test->GetName());
+  // Determine the number of equal-signs needed for quoting test name with
+  // [==[...]==] syntax.
+  const std::string equalSigns(
+    1 + countMaxConsecutiveEqualSigns(this->Test->GetName()), '=');
+
   // Start the test command.
-  os << indent << "add_test(" << this->Test->GetName() << " ";
+  if (quote_test_name) {
+    os << indent << "add_test([" << equalSigns << "[" << this->Test->GetName()
+       << "]" << equalSigns << "] ";
+  } else {
+    os << indent << "add_test(" << this->Test->GetName() << " ";
+  }
 
   // Evaluate command line arguments
   std::vector<std::string> argv =
@@ -102,7 +168,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
     // Prepend with the emulator when cross compiling if required.
     cmProp emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
-    if (emulator != nullptr && !emulator->empty()) {
+    if (cmNonempty(emulator)) {
       std::vector<std::string> emulatorWithArgs = cmExpandedList(*emulator);
       std::string emulatorExe(emulatorWithArgs[0]);
       cmSystemTools::ConvertToUnixSlashes(emulatorExe);
@@ -127,8 +193,13 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   os << ")\n";
 
   // Output properties for the test.
-  os << indent << "set_tests_properties(" << this->Test->GetName()
-     << " PROPERTIES ";
+  if (quote_test_name) {
+    os << indent << "set_tests_properties([" << equalSigns << "["
+       << this->Test->GetName() << "]" << equalSigns << "] PROPERTIES ";
+  } else {
+    os << indent << "set_tests_properties(" << this->Test->GetName()
+       << " PROPERTIES ";
+  }
   for (auto const& i : this->Test->GetProperties().GetList()) {
     os << " " << i.first << " "
        << cmOutputConverter::EscapeForCMake(
@@ -140,7 +211,21 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
 void cmTestGenerator::GenerateScriptNoConfig(std::ostream& os, Indent indent)
 {
-  os << indent << "add_test(" << this->Test->GetName() << " NOT_AVAILABLE)\n";
+  // Determine if policy CMP0110 is set to NEW.
+  const bool quote_test_name =
+    needToQuoteTestName(*this->Test->GetMakefile(), this->Test->GetName());
+  // Determine the number of equal-signs needed for quoting test name with
+  // [==[...]==] syntax.
+  const std::string equalSigns(
+    1 + countMaxConsecutiveEqualSigns(this->Test->GetName()), '=');
+
+  if (quote_test_name) {
+    os << indent << "add_test([" << equalSigns << "[" << this->Test->GetName()
+       << "]" << equalSigns << "] NOT_AVAILABLE)\n";
+  } else {
+    os << indent << "add_test(" << this->Test->GetName()
+       << " NOT_AVAILABLE)\n";
+  }
 }
 
 bool cmTestGenerator::NeedsScriptNoConfig() const
@@ -155,14 +240,27 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
 {
   this->TestGenerated = true;
 
+  // Determine if policy CMP0110 is set to NEW.
+  const bool quote_test_name =
+    needToQuoteTestName(*this->Test->GetMakefile(), this->Test->GetName());
+  // Determine the number of equal-signs needed for quoting test name with
+  // [==[...]==] syntax.
+  const std::string equalSigns(
+    1 + countMaxConsecutiveEqualSigns(this->Test->GetName()), '=');
+
   // Get the test command line to be executed.
   std::vector<std::string> const& command = this->Test->GetCommand();
 
   std::string exe = command[0];
   cmSystemTools::ConvertToUnixSlashes(exe);
-  fout << indent;
-  fout << "add_test(";
-  fout << this->Test->GetName() << " \"" << exe << "\"";
+  if (quote_test_name) {
+    fout << indent << "add_test([" << equalSigns << "["
+         << this->Test->GetName() << "]" << equalSigns << "] \"" << exe
+         << "\"";
+  } else {
+    fout << indent << "add_test(" << this->Test->GetName() << " \"" << exe
+         << "\"";
+  }
 
   for (std::string const& arg : cmMakeRange(command).advance(1)) {
     // Just double-quote all arguments so they are re-parsed
@@ -182,8 +280,13 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
   fout << ")\n";
 
   // Output properties for the test.
-  fout << indent << "set_tests_properties(" << this->Test->GetName()
-       << " PROPERTIES ";
+  if (quote_test_name) {
+    fout << indent << "set_tests_properties([" << equalSigns << "["
+         << this->Test->GetName() << "]" << equalSigns << "] PROPERTIES ";
+  } else {
+    fout << indent << "set_tests_properties(" << this->Test->GetName()
+         << " PROPERTIES ";
+  }
   for (auto const& i : this->Test->GetProperties().GetList()) {
     fout << " " << i.first << " "
          << cmOutputConverter::EscapeForCMake(i.second);

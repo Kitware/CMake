@@ -17,6 +17,7 @@ elseif(RunCMake_SUBTEST_SUFFIX STREQUAL "invalid_bad")
 elseif(RunCMake_SUBTEST_SUFFIX STREQUAL "stage_and_package")
   set(CPACK_EXTERNAL_ENABLE_STAGING 1)
   set(CPACK_EXTERNAL_PACKAGE_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/create_package.cmake")
+  set(CPACK_PACKAGE_CHECKSUM SHA1)
 endif()
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/f1.txt" test1)

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackExternalGenerator_h
-#define cmCPackExternalGenerator_h
+#pragma once
 
 #include <memory>
 #include <string>
@@ -86,5 +85,3 @@ private:
 
   std::unique_ptr<cmCPackExternalVersionGenerator> Generator;
 };
-
-#endif

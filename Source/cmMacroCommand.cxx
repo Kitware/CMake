@@ -81,17 +81,14 @@ bool cmMacroHelperCommand::operator()(
     argVs.emplace_back(argvName);
   }
   // Invoke all the functions that were collected in the block.
-  cmListFileFunction newLFF;
   // for each function
   for (cmListFileFunction const& func : this->Functions) {
     // Replace the formal arguments and then invoke the command.
-    newLFF.Arguments.clear();
-    newLFF.Arguments.reserve(func.Arguments.size());
-    newLFF.Name = func.Name;
-    newLFF.Line = func.Line;
+    std::vector<cmListFileArgument> newLFFArgs;
+    newLFFArgs.reserve(func.Arguments().size());
 
     // for each argument of the current function
-    for (cmListFileArgument const& k : func.Arguments) {
+    for (cmListFileArgument const& k : func.Arguments()) {
       cmListFileArgument arg;
       arg.Value = k.Value;
       if (k.Delim != cmListFileArgument::Bracket) {
@@ -116,8 +113,10 @@ bool cmMacroHelperCommand::operator()(
       }
       arg.Delim = k.Delim;
       arg.Line = k.Line;
-      newLFF.Arguments.push_back(std::move(arg));
+      newLFFArgs.push_back(std::move(arg));
     }
+    cmListFileFunction newLFF{ func.OriginalName(), func.Line(),
+                               std::move(newLFFArgs) };
     cmExecutionStatus status(makefile);
     if (!makefile.ExecuteCommand(newLFF, status) || status.GetNestedError()) {
       // The error message should have already included the call stack
@@ -157,8 +156,7 @@ bool cmMacroFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
                                             cmMakefile& mf) const
 {
   std::vector<std::string> expandedArguments;
-  mf.ExpandArguments(lff.Arguments, expandedArguments,
-                     this->GetStartingContext().FilePath.c_str());
+  mf.ExpandArguments(lff.Arguments(), expandedArguments);
   return expandedArguments.empty() || expandedArguments[0] == this->Args[0];
 }
 

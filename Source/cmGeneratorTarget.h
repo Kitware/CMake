@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGeneratorTarget_h
-#define cmGeneratorTarget_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -45,13 +44,21 @@ public:
 
   cmGlobalGenerator* GetGlobalGenerator() const;
 
+  bool IsInBuildSystem() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
+  bool CanCompileSources() const;
   const std::string& GetLocation(const std::string& config) const;
 
   std::vector<cmCustomCommand> const& GetPreBuildCommands() const;
   std::vector<cmCustomCommand> const& GetPreLinkCommands() const;
   std::vector<cmCustomCommand> const& GetPostBuildCommands() const;
+
+  void AppendCustomCommandSideEffects(
+    std::set<cmGeneratorTarget const*>& sideEffects) const;
+  void AppendLanguageSideEffects(
+    std::map<std::string, std::set<cmGeneratorTarget const*>>& sideEffects)
+    const;
 
 #define DECLARE_TARGET_POLICY(POLICY)                                         \
   cmPolicies::PolicyStatus GetPolicyStatus##POLICY() const                    \
@@ -148,6 +155,16 @@ public:
   bool HasExplicitObjectName(cmSourceFile const* file) const;
   void AddExplicitObjectName(cmSourceFile const* sf);
 
+  BTs<std::string> const* GetLanguageStandardProperty(
+    std::string const& lang, std::string const& config) const;
+
+  cmProp GetLanguageStandard(std::string const& lang,
+                             std::string const& config) const;
+
+  cmProp GetLanguageExtensions(std::string const& lang) const;
+
+  bool GetLanguageStandardRequired(std::string const& lang) const;
+
   void GetModuleDefinitionSources(std::vector<cmSourceFile const*>&,
                                   const std::string& config) const;
   void GetExternalObjects(std::vector<cmSourceFile const*>&,
@@ -165,8 +182,8 @@ public:
 
   void ComputeObjectMapping();
 
-  const char* GetFeature(const std::string& feature,
-                         const std::string& config) const;
+  cmProp GetFeature(const std::string& feature,
+                    const std::string& config) const;
 
   const char* GetLinkPIEProperty(const std::string& config) const;
 
@@ -265,6 +282,9 @@ public:
   /** Return whether this target is an executable Bundle, a framework
       or CFBundle on Apple.  */
   bool IsBundleOnApple() const;
+
+  /** Return whether this target is a Win32 executable */
+  bool IsWin32Executable(const std::string& config) const;
 
   /** Get the full name of the target according to the settings in its
       makefile.  */
@@ -428,6 +448,8 @@ public:
   void AddCUDAArchitectureFlags(std::string& flags) const;
   void AddCUDAToolkitFlags(std::string& flags) const;
 
+  void AddISPCTargetFlags(std::string& flags) const;
+
   std::string GetFeatureSpecificLinkRuleVariable(
     std::string const& var, std::string const& lang,
     std::string const& config) const;
@@ -514,6 +536,11 @@ public:
   void ComputeTargetManifest(const std::string& config) const;
 
   bool ComputeCompileFeatures(std::string const& config) const;
+
+  using LanguagePair = std::pair<std::string, std::string>;
+  bool ComputeCompileFeatures(
+    std::string const& config,
+    std::set<LanguagePair> const& languagePairs) const;
 
   /**
    * Trace through the source files in this target and add al source files
@@ -686,6 +713,10 @@ public:
   bool GetImplibGNUtoMS(std::string const& config, std::string const& gnuName,
                         std::string& out, const char* newExt = nullptr) const;
 
+  /** Can only ever return true if GetSourceFilePaths() was called before.
+      Otherwise, this is indeterminate and false will be assumed/returned!  */
+  bool HasContextDependentSources() const;
+
   bool IsExecutableWithExports() const;
 
   /** Return whether or not the target has a DLL import library.  */
@@ -790,6 +821,16 @@ public:
 
   const std::string& GetSourcesProperty() const;
 
+  void AddISPCGeneratedHeader(std::string const& header,
+                              std::string const& config);
+  std::vector<std::string> GetGeneratedISPCHeaders(
+    std::string const& config) const;
+
+  void AddISPCGeneratedObject(std::vector<std::string>&& objs,
+                              std::string const& config);
+  std::vector<std::string> GetGeneratedISPCObjects(
+    std::string const& config) const;
+
 private:
   void AddSourceCommon(const std::string& src, bool before = false);
 
@@ -808,6 +849,8 @@ private:
   mutable std::set<std::string> VisitedConfigsForObjects;
   mutable std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
+
+  // "config/language" is the key
   mutable std::map<std::string, std::vector<std::string>> SystemIncludesCache;
 
   mutable std::string ExportMacro;
@@ -820,12 +863,12 @@ private:
 
   bool NeedImportLibraryName(std::string const& config) const;
 
-  const char* GetFilePrefixInternal(std::string const& config,
-                                    cmStateEnums::ArtifactType artifact,
-                                    const std::string& language = "") const;
-  const char* GetFileSuffixInternal(std::string const& config,
-                                    cmStateEnums::ArtifactType artifact,
-                                    const std::string& language = "") const;
+  cmProp GetFilePrefixInternal(std::string const& config,
+                               cmStateEnums::ArtifactType artifact,
+                               const std::string& language = "") const;
+  cmProp GetFileSuffixInternal(std::string const& config,
+                               cmStateEnums::ArtifactType artifact,
+                               const std::string& language = "") const;
 
   std::string GetFullNameInternal(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;
@@ -968,6 +1011,11 @@ private:
 
   std::unordered_set<std::string> UnityBatchedSourceFiles;
 
+  std::unordered_map<std::string, std::vector<std::string>>
+    ISPCGeneratedHeaders;
+  std::unordered_map<std::string, std::vector<std::string>>
+    ISPCGeneratedObjects;
+
   bool IsLinkLookupScope(std::string const& n,
                          cmLocalGenerator const*& lg) const;
 
@@ -1027,8 +1075,14 @@ private:
   mutable bool DebugLinkDirectoriesDone;
   mutable bool DebugPrecompileHeadersDone;
   mutable bool DebugSourcesDone;
-  mutable bool LinkImplementationLanguageIsContextDependent;
   mutable bool UtilityItemsDone;
+  enum class Tribool
+  {
+    False = 0x0,
+    True = 0x1,
+    Indeterminate = 0x2
+  };
+  mutable Tribool SourcesAreContextDependent;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;
@@ -1037,6 +1091,11 @@ private:
 
   bool GetRPATH(const std::string& config, const std::string& prop,
                 std::string& rpath) const;
+
+  mutable std::map<std::string, BTs<std::string>> LanguageStandardMap;
+
+  cmProp GetPropertyWithPairedLanguageSupport(std::string const& lang,
+                                              const char* suffix) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(
@@ -1054,5 +1113,3 @@ public:
                     cmGeneratorTarget const* t2) const;
   };
 };
-
-#endif

@@ -1,0 +1,2 @@
+^CMake Error: No such preset in [^
+]*/Tests/RunCMake/CMakePresets/ListPresetsNoSuchPreset: "ListPresetsNoSuchPreset"$

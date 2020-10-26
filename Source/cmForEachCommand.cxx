@@ -25,6 +25,7 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -89,7 +90,7 @@ bool cmForEachFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
                                               cmMakefile& mf) const
 {
   std::vector<std::string> expandedArguments;
-  mf.ExpandArguments(lff.Arguments, expandedArguments);
+  mf.ExpandArguments(lff.Arguments(), expandedArguments);
   return expandedArguments.empty() ||
     expandedArguments.front() == this->Args.front();
 }
@@ -113,8 +114,8 @@ bool cmForEachFunctionBlocker::ReplayItems(
   // At end of for each execute recorded commands
   // store the old value
   std::string oldDef;
-  if (auto d = mf.GetDefinition(this->Args.front())) {
-    oldDef = d;
+  if (cmProp d = mf.GetDefinition(this->Args.front())) {
+    oldDef = *d;
   }
 
   auto restore = false;
@@ -186,8 +187,8 @@ bool cmForEachFunctionBlocker::ReplayZipLists(
   // Store old values for iteration variables
   std::map<std::string, std::string> oldDefs;
   for (auto i = 0u; i < values.size(); ++i) {
-    if (auto d = mf.GetDefinition(iterationVars[i])) {
-      oldDefs.emplace(iterationVars[i], d);
+    if (cmProp d = mf.GetDefinition(iterationVars[i])) {
+      oldDefs.emplace(iterationVars[i], *d);
     }
   }
 

@@ -1,29 +1,29 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestPyPy2 C)
+project(TestPyPy2 LANGUAGES C)
 
 set (Python2_FIND_IMPLEMENTATIONS "PyPy")
 
 find_package(Python2 COMPONENTS Interpreter Development)
 if (NOT Python2_FOUND)
-  message (FATAL_ERROR "Fail to found Python PyPy 2")
+  message (FATAL_ERROR "Failed to find Python PyPy 2")
 endif()
 
 if (NOT Python2_Interpreter_FOUND)
-  message (FATAL_ERROR "Fail to found Python PyPy 2 Interpreter")
+  message (FATAL_ERROR "Failed to find Python PyPy 2 Interpreter")
 endif()
 if (NOT Python2_INTERPRETER_ID STREQUAL "PyPy")
   message (FATAL_ERROR "Erroneous interpreter ID (${Python2_INTERPRETER_ID})")
 endif()
 
 if (NOT Python2_Development.Module_FOUND)
-  message (FATAL_ERROR "Fail to found Python PyPy 2 Development.Module")
+  message (FATAL_ERROR "Failed to find Python PyPy 2 Development.Module")
 endif()
 if (NOT Python2_Development.Embed_FOUND)
-  message (FATAL_ERROR "Fail to found Python PyPy 2 Development.Embed")
+  message (FATAL_ERROR "Failed to find Python PyPy 2 Development.Embed")
 endif()
 if (NOT Python2_Development_FOUND)
-  message (FATAL_ERROR "Fail to found Python PyPy 2 Development")
+  message (FATAL_ERROR "Failed to find Python PyPy 2 Development")
 endif()
 
 if(NOT TARGET Python2::Interpreter)

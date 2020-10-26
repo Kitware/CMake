@@ -66,6 +66,7 @@ Reference Manuals
    /manual/cmake-modules.7
    /manual/cmake-packages.7
    /manual/cmake-policies.7
+   /manual/cmake-presets.7
    /manual/cmake-properties.7
    /manual/cmake-qt.7
    /manual/cmake-server.7
@@ -84,6 +85,8 @@ Reference Manuals
     /guide/tutorial/index
     /guide/user-interaction/index
     /guide/using-dependencies/index
+    /guide/importing-exporting/index
+    /guide/ide-integration/index
 
 .. only:: html or text
 

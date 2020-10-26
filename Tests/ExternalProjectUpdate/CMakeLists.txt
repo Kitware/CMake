@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 project(ExternalProjectUpdateTest NONE)
+if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12)
+  cmake_policy(SET CMP0114 NEW)
+endif()
+cmake_policy(GET CMP0114 cmp0114)
 
 include(ExternalProject)
 
@@ -18,8 +22,16 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER
 set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
 set(binary_base "${base}/Build")
 set_property(DIRECTORY PROPERTY EP_BASE ${base})
-set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
-set_property(DIRECTORY PROPERTY EP_INDEPENDENT_STEP_TARGETS update)
+if(cmp0114 STREQUAL "NEW")
+  set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test update)
+  set(TestUpdateCommand_STEP_TARGETS STEP_TARGETS update)
+  set(TestUpdateCommand_INDEPENDENT_STEP_TARGETS)
+else()
+  set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
+  set_property(DIRECTORY PROPERTY EP_INDEPENDENT_STEP_TARGETS update)
+  set(TestUpdateCommand_STEP_TARGETS)
+  set(TestUpdateCommand_INDEPENDENT_STEP_TARGETS INDEPENDENT_STEP_TARGETS update)
+endif()
 
 ExternalProject_Add(TestUpdateCommand
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
@@ -28,7 +40,8 @@ ExternalProject_Add(TestUpdateCommand
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
-  INDEPENDENT_STEP_TARGETS update
+  ${TestUpdateCommand_STEP_TARGETS}
+  ${TestUpdateCommand_INDEPENDENT_STEP_TARGETS}
   )
 add_custom_target(TestUpdateCommandDriver ALL)
 add_dependencies(TestUpdateCommandDriver TestUpdateCommand-update)

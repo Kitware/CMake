@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmLocalGenerator_h
-#define cmLocalGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -20,6 +19,7 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmStateSnapshot.h"
 
 class cmComputeLinkInformation;
@@ -123,7 +123,8 @@ public:
                               const std::string& config);
   void AddCompilerRequirementFlag(std::string& flags,
                                   cmGeneratorTarget const* target,
-                                  const std::string& lang);
+                                  const std::string& lang,
+                                  const std::string& config);
   //! Append flags to a string.
   virtual void AppendFlags(std::string& flags,
                            const std::string& newFlags) const;
@@ -131,6 +132,7 @@ public:
                            const std::vector<BT<std::string>>& newFlags) const;
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag) const;
+  void AddISPCDependencies(cmGeneratorTarget* target);
   void AddPchDependencies(cmGeneratorTarget* target);
   void AddUnityBuild(cmGeneratorTarget* target);
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
@@ -208,8 +210,7 @@ public:
   void AppendFeatureOptions(std::string& flags, const std::string& lang,
                             const char* feature);
 
-  const char* GetFeature(const std::string& feature,
-                         const std::string& config);
+  cmProp GetFeature(const std::string& feature, const std::string& config);
 
   /** \brief Get absolute path to dependency \a name
    *
@@ -445,7 +446,7 @@ public:
   void GetTargetCompileFlags(cmGeneratorTarget* target,
                              std::string const& config,
                              std::string const& lang, std::string& flags,
-                             std::string const& arch = std::string());
+                             std::string const& arch);
   std::vector<BT<std::string>> GetTargetCompileFlags(
     cmGeneratorTarget* target, std::string const& config,
     std::string const& lang, std::string const& arch = std::string());
@@ -593,6 +594,9 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        bool escapeOldStyle, const char* comment,
                        bool uses_terminal, bool command_expand_lists,
                        const std::string& job_pool, bool stdPipesUTF8);
-}
 
-#endif
+std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target);
+std::vector<std::string> ComputeISPCExtraObjects(
+  std::string const& objectName, std::string const& buildDirectory,
+  std::vector<std::string> const& ispcSuffixes);
+}

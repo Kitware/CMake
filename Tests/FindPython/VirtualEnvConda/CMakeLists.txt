@@ -6,7 +6,7 @@ include(CTest)
 
 find_program(CONDA_EXECUTABLE conda)
 if (CONDA_EXECUTABLE EQUAL NOTFOUND)
-  message (FATAL_ERROR "Fail to found Conda")
+  message (FATAL_ERROR "Failed to find Conda")
 endif()
 
 set (Python3_VIRTUAL_ENV "${CMAKE_CURRENT_BINARY_DIR}/condaenv")

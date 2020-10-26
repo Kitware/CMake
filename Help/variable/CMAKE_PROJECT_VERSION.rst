@@ -1,6 +1,8 @@
 CMAKE_PROJECT_VERSION
 ---------------------
 
+.. versionadded:: 3.12
+
 The version of the top level project.
 
 This variable holds the version of the project as specified in the top

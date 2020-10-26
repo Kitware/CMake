@@ -1,6 +1,8 @@
 CMAKE_PREFIX_PATH
 -----------------
 
+.. versionadded:: 3.18
+
 .. include:: ENV_VAR.txt
 
 The ``CMAKE_PREFIX_PATH`` environment variable may be set to a list of

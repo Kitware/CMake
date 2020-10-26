@@ -1,6 +1,8 @@
 VS_SOURCE_SETTINGS_<tool>
 -------------------------
 
+.. versionadded:: 3.18
+
 Set any item metadata on all non-built files that use <tool>.
 
 Takes a list of ``Key=Value`` pairs. Tells the Visual Studio generator

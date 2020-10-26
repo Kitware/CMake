@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_get_date_h
-#define cm_get_date_h
+#pragma once
 
 #include <time.h> /* NOLINT(modernize-deprecated-headers) */
 
@@ -14,6 +13,4 @@ time_t cm_get_date(time_t now, const char* str);
 
 #ifdef __cplusplus
 } /* extern "C" */
-#endif
-
 #endif

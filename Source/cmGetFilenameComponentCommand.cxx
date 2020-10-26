@@ -4,6 +4,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -14,14 +15,15 @@ bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
 {
   if (args.size() < 3) {
     status.SetError("called with incorrect number of arguments");
+    cmSystemTools::SetFatalErrorOccured();
     return false;
   }
 
   // Check and see if the value has been stored in the cache
   // already, if so use that value
   if (args.size() >= 4 && args.back() == "CACHE") {
-    const char* cacheValue = status.GetMakefile().GetDefinition(args.front());
-    if (cacheValue && !cmIsNOTFOUND(cacheValue)) {
+    cmProp cacheValue = status.GetMakefile().GetDefinition(args.front());
+    if (cacheValue && !cmIsNOTFOUND(*cacheValue)) {
       return true;
     }
   }
@@ -114,6 +116,7 @@ bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
   } else {
     std::string err = "unknown component " + args[2];
     status.SetError(err);
+    cmSystemTools::SetFatalErrorOccured();
     return false;
   }
 

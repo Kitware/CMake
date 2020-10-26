@@ -15,3 +15,6 @@ Usage example:
   add_definitions(-D_AFXDLL)
   set(CMAKE_MFC_FLAG 2)
   add_executable(CMakeSetup WIN32 ${SRCS})
+
+Contents of ``CMAKE_MFC_FLAG`` may use
+:manual:`generator expressions <cmake-generator-expressions(7)>`.

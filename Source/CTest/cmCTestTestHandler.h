@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestTestHandler_h
-#define cmCTestTestHandler_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -198,7 +197,8 @@ public:
                                 std::string filepath, std::string& filename);
 
   // full signature static method to find an executable
-  static std::string FindExecutable(cmCTest* ctest, const char* testCommand,
+  static std::string FindExecutable(cmCTest* ctest,
+                                    const std::string& testCommand,
                                     std::string& resultingConfig,
                                     std::vector<std::string>& extraPaths,
                                     std::vector<std::string>& failed);
@@ -285,10 +285,10 @@ private:
   /**
    * Get the list of tests in directory and subdirectories.
    */
-  void GetListOfTests();
+  bool GetListOfTests();
   // compute the lists of tests that will actually run
   // based on union regex and -I stuff
-  void ComputeTestList();
+  bool ComputeTestList();
 
   // compute the lists of tests that will actually run
   // based on LastTestFailed.log
@@ -309,7 +309,7 @@ private:
   /**
    * Find the executable for a test
    */
-  std::string FindTheExecutable(const char* exe);
+  std::string FindTheExecutable(const std::string& exe);
 
   std::string GetTestStatus(cmCTestTestResult const&);
   void ExpandTestsToRunInformation(size_t numPossibleTests);
@@ -359,5 +359,3 @@ private:
   int RepeatCount = 1;
   bool RerunFailed;
 };
-
-#endif
