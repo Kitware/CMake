@@ -17,6 +17,7 @@ target_compile_features(HIPOnlyWithDefs PRIVATE hip_std_17)
 
 target_compile_options(HIPOnlyWithDefs
   PRIVATE
+    --offload-arch=gfx900
     -DFLAG_COMPILE_LANG_$<COMPILE_LANGUAGE>
     $<$<HIP_COMPILER_ID:ROCMClang>:-DFLAG_LANG_IS_HIP=$<COMPILE_LANGUAGE:HIP>> # Host-only defines are possible only on NVCC.
   )

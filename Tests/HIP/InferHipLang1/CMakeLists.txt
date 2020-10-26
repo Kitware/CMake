@@ -10,3 +10,4 @@ target_compile_features(InterfaceWithHIP INTERFACE cxx_std_11)
 
 add_executable(HIPInferHipLang1 )
 target_link_libraries(HIPInferHipLang1 PRIVATE InterfaceWithHIP)
+set_property(TARGET HIPInferHipLang1 PROPERTY HIP_ARCHITECTURES gfx900)

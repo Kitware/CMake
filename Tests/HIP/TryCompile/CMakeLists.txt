@@ -4,6 +4,7 @@ project (TryCompile HIP)
 #Goal for this example:
 # Verify try_compile with HIP language works
 set(CMAKE_HIP_STANDARD 14)
+set(CMAKE_HIP_ARCHITECTURES gfx803 gfx900)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 try_compile(result "${CMAKE_CURRENT_BINARY_DIR}"
