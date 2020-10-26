@@ -503,16 +503,15 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
     }
   }
 
-  if (this->XcodeBuildSystem >= BuildSystem::Twelve) {
+  if ((this->XcodeBuildSystem >= BuildSystem::Twelve) ||
+      (jobs != cmake::NO_BUILD_PARALLEL_LEVEL)) {
     makeCommand.Add("-parallelizeTargets");
   }
   makeCommand.Add("-configuration", (config.empty() ? "Debug" : config));
 
-  if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.Add("-jobs");
-    if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.Add(std::to_string(jobs));
-    }
+  if ((jobs != cmake::NO_BUILD_PARALLEL_LEVEL) &&
+      (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL)) {
+    makeCommand.Add("-jobs", std::to_string(jobs));
   }
 
   if (this->XcodeVersion >= 70) {
