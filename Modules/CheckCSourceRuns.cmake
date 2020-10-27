@@ -65,8 +65,8 @@ subsequently be run.
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckSourceRuns)
+include(Internal/CheckSourceRuns)
 
 macro(CHECK_C_SOURCE_RUNS SOURCE VAR)
-  check_source_runs(C "${SOURCE}" ${VAR} ${ARGN})
+  cmake_check_source_runs(C "${SOURCE}" ${VAR} ${ARGN})
 endmacro()

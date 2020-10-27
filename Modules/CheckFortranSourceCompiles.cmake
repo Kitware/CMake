@@ -87,10 +87,10 @@ Check if given Fortran source compiles and links into an executable.
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckSourceCompiles)
+include(Internal/CheckSourceCompiles)
 
 macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
   # Pass the SRC_EXT we used by default historically.
   # A user-provided SRC_EXT argument in ARGN will override ours.
-  check_source_compiles(Fortran "${SOURCE}" ${VAR} SRC_EXT "F" ${ARGN})
+  cmake_check_source_compiles(Fortran "${SOURCE}" ${VAR} SRC_EXT "F" ${ARGN})
 endmacro()
