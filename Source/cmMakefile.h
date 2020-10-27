@@ -20,6 +20,8 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cm_sys_stat.h"
+
 #include "cmAlgorithms.h"
 #include "cmCustomCommandTypes.h"
 #include "cmListFileCache.h"
@@ -659,8 +661,7 @@ public:
    */
   int ConfigureFile(const std::string& infile, const std::string& outfile,
                     bool copyonly, bool atOnly, bool escapeQuotes,
-                    bool use_source_permissions,
-                    cmNewLineStyle = cmNewLineStyle());
+                    mode_t permissions = 0, cmNewLineStyle = cmNewLineStyle());
 
   /**
    * Print a command's invocation
