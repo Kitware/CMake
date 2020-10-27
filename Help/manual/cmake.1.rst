@@ -12,7 +12,6 @@ Synopsis
   cmake [<options>] <path-to-source>
   cmake [<options>] <path-to-existing-build>
   cmake [<options>] -S <path-to-source> -B <path-to-build>
-  cmake [<options>] -S <path-to-source> --preset=<preset-name>
 
  `Build a Project`_
   cmake --build <dir> [<options>] [-- <build-tool-options>]
@@ -148,22 +147,6 @@ source and build trees and generate a buildsystem:
   .. code-block:: console
 
     $ cmake -S src -B build
-
-``cmake [<options>] -S <path-to-source> --preset=<preset-name>``
-  Uses ``<path-to-source>`` as the source tree and reads a
-  :manual:`preset <cmake-presets(7)>` from
-  ``<path-to-source>/CMakePresets.json`` and
-  ``<path-to-source>/CMakeUserPresets.json``. The preset specifies the
-  generator and the build directory, and optionally a list of variables and
-  other arguments to pass to CMake. The :manual:`CMake GUI <cmake-gui(1)>` can
-  also recognize ``CMakePresets.json`` and ``CMakeUserPresets.json`` files. For
-  full details on these files, see :manual:`cmake-presets(7)`.
-
-  The presets are read before all other command line options. The options
-  specified by the preset (variables, generator, etc.) can all be overridden by
-  manually specifying them on the command line. For example, if the preset sets
-  a variable called ``MYVAR`` to ``1``, but the user sets it to ``2`` with a
-  ``-D`` argument, the value ``2`` is preferred.
 
 In all cases the ``<options>`` may be zero or more of the `Options`_ below.
 
@@ -393,6 +376,21 @@ Options
  ``google-trace`` Outputs in Google Trace Format, which can be parsed by the
  about:tracing tab of Google Chrome or using a plugin for a tool like Trace
  Compass.
+
+``--preset=<preset>``
+ Reads a :manual:`preset <cmake-presets(7)>` from
+ ``<path-to-source>/CMakePresets.json`` and
+ ``<path-to-source>/CMakeUserPresets.json``. The preset specifies the
+ generator and the build directory, and optionally a list of variables and
+ other arguments to pass to CMake. The :manual:`CMake GUI <cmake-gui(1)>` can
+ also recognize ``CMakePresets.json`` and ``CMakeUserPresets.json`` files. For
+ full details on these files, see :manual:`cmake-presets(7)`.
+
+ The presets are read before all other command line options. The options
+ specified by the preset (variables, generator, etc.) can all be overridden by
+ manually specifying them on the command line. For example, if the preset sets
+ a variable called ``MYVAR`` to ``1``, but the user sets it to ``2`` with a
+ ``-D`` argument, the value ``2`` is preferred.
 
 .. _`Build Tool Mode`:
 

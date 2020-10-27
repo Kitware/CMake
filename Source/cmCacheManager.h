@@ -66,6 +66,9 @@ public:
   //! Print the cache to a stream
   void PrintCache(std::ostream&) const;
 
+  //! Get whether or not cache is loaded
+  bool IsCacheLoaded() const { return this->CacheLoaded; }
+
   //! Get a value from the cache given a key
   cmProp GetInitializedCacheValue(const std::string& key) const;
 
@@ -204,6 +207,7 @@ private:
                             const CacheEntry& e, cmMessenger* messenger) const;
 
   std::map<std::string, CacheEntry> Cache;
+  bool CacheLoaded = false;
 
   // Cache version info
   unsigned int CacheMajorVersion = 0;

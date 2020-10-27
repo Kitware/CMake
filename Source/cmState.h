@@ -87,6 +87,8 @@ public:
 
   bool DeleteCache(const std::string& path);
 
+  bool IsCacheLoaded() const;
+
   std::vector<std::string> GetCacheEntryKeys() const;
   cmProp GetCacheEntryValue(std::string const& key) const;
   std::string GetSafeCacheEntryValue(std::string const& key) const;

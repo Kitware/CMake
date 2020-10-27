@@ -32,8 +32,7 @@ static const char* cmDocumentationUsage[][2] = {
     "  cmake-gui [options]\n"
     "  cmake-gui [options] <path-to-source>\n"
     "  cmake-gui [options] <path-to-existing-build>\n"
-    "  cmake-gui [options] -S <path-to-source> -B <path-to-build>\n"
-    "  cmake-gui [options] -S <path-to-source> --preset=<preset-name>\n" },
+    "  cmake-gui [options] -S <path-to-source> -B <path-to-build>\n" },
   { nullptr, nullptr }
 };
 
