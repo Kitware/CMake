@@ -727,6 +727,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 {
   bool haveToolset = false;
   bool havePlatform = false;
+  bool haveBArg = false;
 #if !defined(CMAKE_BOOTSTRAP)
   std::string profilingFormat;
   std::string profilingOutput;
@@ -775,6 +776,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       path = cmSystemTools::CollapseFullPath(path);
       cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeOutputDirectory(path);
+      haveBArg = true;
     } else if ((i < args.size() - 2) &&
                cmHasLiteralPrefix(arg, "--check-build-system")) {
       this->CheckBuildSystemArgument = args[++i];
@@ -1057,7 +1059,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       return;
     }
 
-    if (!haveBinaryDir) {
+    if (!this->State->IsCacheLoaded() && !haveBArg) {
       this->SetHomeOutputDirectory(expandedPreset->BinaryDir);
     }
     if (!this->GlobalGenerator) {
