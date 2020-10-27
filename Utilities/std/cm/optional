@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_optional
-#define cm_optional
+#pragma once
 
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
 #  define CMake_HAVE_CXX_OPTIONAL
@@ -219,6 +218,210 @@ optional<T>& optional<T>::operator=(U&& v)
   return *this;
 }
 
+template <typename T, typename U>
+bool operator==(const optional<T>& lhs, const optional<U>& rhs)
+{
+  if (lhs.has_value()) {
+    return rhs.has_value() && *lhs == *rhs;
+  }
+  return !rhs.has_value();
+}
+
+template <typename T, typename U>
+bool operator!=(const optional<T>& lhs, const optional<U>& rhs)
+{
+  if (lhs.has_value()) {
+    return !rhs.has_value() || *lhs != *rhs;
+  }
+  return rhs.has_value();
+}
+
+template <typename T, typename U>
+bool operator<(const optional<T>& lhs, const optional<U>& rhs)
+{
+  if (rhs.has_value()) {
+    return !lhs.has_value() || *lhs < *rhs;
+  }
+  return false;
+}
+
+template <typename T, typename U>
+bool operator<=(const optional<T>& lhs, const optional<U>& rhs)
+{
+  if (!lhs.has_value()) {
+    return true;
+  }
+  if (rhs.has_value()) {
+    return *lhs <= *rhs;
+  }
+  return false;
+}
+
+template <typename T, typename U>
+bool operator>(const optional<T>& lhs, const optional<U>& rhs)
+{
+  if (lhs.has_value()) {
+    return !rhs.has_value() || *lhs > *rhs;
+  }
+  return false;
+}
+
+template <typename T, typename U>
+bool operator>=(const optional<T>& lhs, const optional<U>& rhs)
+{
+  if (!rhs.has_value()) {
+    return true;
+  }
+  if (lhs.has_value()) {
+    return *lhs >= *rhs;
+  }
+  return false;
+}
+
+template <typename T>
+bool operator==(const optional<T>& opt, nullopt_t) noexcept
+{
+  return !opt.has_value();
+}
+
+template <typename T>
+bool operator!=(const optional<T>& opt, nullopt_t) noexcept
+{
+  return opt.has_value();
+}
+
+template <typename T>
+bool operator<(const optional<T>& opt, nullopt_t) noexcept
+{
+  return false;
+}
+
+template <typename T>
+bool operator<=(const optional<T>& opt, nullopt_t) noexcept
+{
+  return !opt.has_value();
+}
+
+template <typename T>
+bool operator>(const optional<T>& opt, nullopt_t) noexcept
+{
+  return opt.has_value();
+}
+
+template <typename T>
+bool operator>=(const optional<T>& opt, nullopt_t) noexcept
+{
+  return true;
+}
+
+template <typename T>
+bool operator==(nullopt_t, const optional<T>& opt) noexcept
+{
+  return !opt.has_value();
+}
+
+template <typename T>
+bool operator!=(nullopt_t, const optional<T>& opt) noexcept
+{
+  return opt.has_value();
+}
+
+template <typename T>
+bool operator<(nullopt_t, const optional<T>& opt) noexcept
+{
+  return opt.has_value();
+}
+
+template <typename T>
+bool operator<=(nullopt_t, const optional<T>& opt) noexcept
+{
+  return true;
+}
+
+template <typename T>
+bool operator>(nullopt_t, const optional<T>& opt) noexcept
+{
+  return false;
+}
+
+template <typename T>
+bool operator>=(nullopt_t, const optional<T>& opt) noexcept
+{
+  return !opt.has_value();
+}
+
+template <typename T, typename U>
+bool operator==(const optional<T>& opt, const U& value)
+{
+  return opt.has_value() && *opt == value;
+}
+
+template <typename T, typename U>
+bool operator!=(const optional<T>& opt, const U& value)
+{
+  return !opt.has_value() || *opt != value;
+}
+
+template <typename T, typename U>
+bool operator<(const optional<T>& opt, const U& value)
+{
+  return !opt.has_value() || *opt < value;
+}
+
+template <typename T, typename U>
+bool operator<=(const optional<T>& opt, const U& value)
+{
+  return !opt.has_value() || *opt <= value;
+}
+
+template <typename T, typename U>
+bool operator>(const optional<T>& opt, const U& value)
+{
+  return opt.has_value() && *opt > value;
+}
+
+template <typename T, typename U>
+bool operator>=(const optional<T>& opt, const U& value)
+{
+  return opt.has_value() && *opt >= value;
+}
+
+template <typename T, typename U>
+bool operator==(const T& value, const optional<U>& opt)
+{
+  return opt.has_value() && value == *opt;
+}
+
+template <typename T, typename U>
+bool operator!=(const T& value, const optional<U>& opt)
+{
+  return !opt.has_value() || value != *opt;
+}
+
+template <typename T, typename U>
+bool operator<(const T& value, const optional<U>& opt)
+{
+  return opt.has_value() && value < *opt;
+}
+
+template <typename T, typename U>
+bool operator<=(const T& value, const optional<U>& opt)
+{
+  return opt.has_value() && value <= *opt;
+}
+
+template <typename T, typename U>
+bool operator>(const T& value, const optional<U>& opt)
+{
+  return !opt.has_value() || value > *opt;
+}
+
+template <typename T, typename U>
+bool operator>=(const T& value, const optional<U>& opt)
+{
+  return !opt.has_value() || value >= *opt;
+}
+
 template <typename T>
 const T* optional<T>::operator->() const
 {
@@ -340,5 +543,3 @@ T& optional<T>::emplace(Args&&... args)
 
 #endif
 }
-
-#endif

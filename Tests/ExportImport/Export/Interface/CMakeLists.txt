@@ -1,10 +1,25 @@
-
-add_library(headeronly INTERFACE)
+set(headeronly_headers headeronly/headeronly.h)
+add_library(headeronly INTERFACE ${headeronly_headers})
 set_property(TARGET headeronly PROPERTY INTERFACE_INCLUDE_DIRECTORIES
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/headeronly>"
   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/headeronly>"
 )
 set_property(TARGET headeronly PROPERTY INTERFACE_COMPILE_DEFINITIONS "HEADERONLY_DEFINE")
+
+add_custom_command(OUTPUT headergen/headergen.h
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/headergen.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/headergen/headergen.h
+  DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/headergen.h.in
+  VERBATIM)
+
+add_library(headergen INTERFACE headergen/headergen.h)
+set_property(TARGET headergen PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/headergen>"
+)
+set_property(TARGET headergen PROPERTY PUBLIC_HEADER
+  ${CMAKE_CURRENT_BINARY_DIR}/headergen/headergen.h)
 
 add_library(pch_iface INTERFACE)
 target_precompile_headers(pch_iface INTERFACE
@@ -54,6 +69,11 @@ install(TARGETS headeronly sharediface use_auto_type use_c_restrict source_targe
                 pch_iface cmakeonly
   EXPORT expInterface
 )
+install(TARGETS headergen
+  EXPORT expInterface
+  PUBLIC_HEADER DESTINATION include/headergen
+  INCLUDES DESTINATION include/headergen
+)
 install(TARGETS sharedlib
   EXPORT expInterface
   RUNTIME DESTINATION bin
@@ -63,7 +83,7 @@ install(TARGETS sharedlib
   BUNDLE DESTINATION Applications
 )
 install(FILES
-  headeronly/headeronly.h
+  ${headeronly_headers}
   DESTINATION include/headeronly
 )
 install(FILES

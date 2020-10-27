@@ -7,6 +7,6 @@ CMake Error at UnterminatedBrace0.cmake:2 \(set\):
 
     \${
 
-  syntax error, unexpected \$end, expecting } \(2\)
+  syntax error, unexpected \$end, expecting } \(3\)
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

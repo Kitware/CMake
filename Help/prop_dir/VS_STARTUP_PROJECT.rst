@@ -1,6 +1,8 @@
 VS_STARTUP_PROJECT
 ------------------
 
+.. versionadded:: 3.6
+
 Specify the default startup project in a Visual Studio solution.
 
 The :ref:`Visual Studio Generators` create a ``.sln`` file for each directory

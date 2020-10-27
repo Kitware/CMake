@@ -1048,6 +1048,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_HOST_UNIX
             \ CMAKE_HOST_WIN32
             \ CMAKE_IGNORE_PATH
+            \ CMAKE_ISPC_HEADER_DIRECTORY
             \ CMAKE_IMPORT_LIBRARY_PREFIX
             \ CMAKE_IMPORT_LIBRARY_SUFFIX
             \ CMAKE_INCLUDE_CURRENT_DIR

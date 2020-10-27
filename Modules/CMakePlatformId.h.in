@@ -206,6 +206,24 @@
 # else /* unknown architecture */
 #  define ARCHITECTURE_ID ""
 # endif
+
+#elif defined(__TI_COMPILER_VERSION__)
+# if defined(__TI_ARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__MSP430__)
+#  define ARCHITECTURE_ID "MSP430"
+
+# elif defined(__TMS320C28XX__)
+#  define ARCHITECTURE_ID "TMS320C28x"
+
+# elif defined(__TMS320C6X__) || defined(_TMS320C6X)
+#  define ARCHITECTURE_ID "TMS320C6x"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
 #else
 #  define ARCHITECTURE_ID
 #endif
@@ -283,4 +301,3 @@ char const info_simulate_version[] = {
    array rather than assigning a pointer to a static array.  */
 char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
 char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
-

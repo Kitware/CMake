@@ -1,0 +1,4 @@
+^CMake Error at defer_id_var_empty.cmake:1 \(cmake_language\):
+  cmake_language DEFER ID_VAR may not be empty
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)$

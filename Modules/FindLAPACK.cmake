@@ -26,9 +26,10 @@ The following variables may be set to influence this module's behavior:
   If set, checks only the specified vendor, if not set checks all the
   possibilities.  List of vendors valid in this module:
 
+  * ``FlexiBLAS``
   * ``OpenBLAS``
   * ``FLAME``
-  * ``Intel10_32`` (intel mkl v10 32 bit)
+  * ``Intel10_32`` (intel mkl v10 32 bit, threaded code)
   * ``Intel10_64lp`` (intel mkl v10+ 64 bit, threaded code, lp64 model)
   * ``Intel10_64lp_seq`` (intel mkl v10+ 64 bit, sequential code, lp64 model)
   * ``Intel10_64ilp`` (intel mkl v10+ 64 bit, threaded code, ilp64 model)
@@ -86,42 +87,38 @@ This module defines the following variables:
     find_package(LAPACK)
 #]=======================================================================]
 
-# Check the language being used
-if(NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_COMPILER_LOADED))
-  if(LAPACK_FIND_REQUIRED)
-    message(FATAL_ERROR "FindLAPACK requires Fortran, C, or C++ to be enabled.")
-  else()
-    message(STATUS "Looking for LAPACK... - NOT found (Unsupported languages)")
-    return()
-  endif()
-endif()
-
 if(CMAKE_Fortran_COMPILER_LOADED)
   include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
 else()
   include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 endif()
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
-cmake_push_check_state()
-set(CMAKE_REQUIRED_QUIET ${LAPACK_FIND_QUIETLY})
+macro(_lapack_find_library_setup)
+  cmake_push_check_state()
+  set(CMAKE_REQUIRED_QUIET ${LAPACK_FIND_QUIETLY})
 
-set(LAPACK_FOUND FALSE)
-set(LAPACK95_FOUND FALSE)
-
-set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-if(BLA_STATIC)
-  if(WIN32)
-    set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  if(BLA_STATIC)
+    if(WIN32)
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    else()
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    endif()
   else()
-    set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      # for ubuntu's libblas3gf and liblapack3gf packages
+      set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
+    endif()
   endif()
-else()
-  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    # for ubuntu's libblas3gf and liblapack3gf packages
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
-  endif()
-endif()
+endmacro()
+
+macro(_lapack_find_library_teardown)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
+  unset(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES)
+  cmake_pop_check_state()
+endmacro()
 
 # TODO: move this stuff to a separate module
 
@@ -162,6 +159,7 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
       if(_libraries_work)
         find_library(${_prefix}_${_library}_LIBRARY
           NAMES ${_library}
+          NAMES_PER_DIR
           PATHS ${_extaddlibdir}
           PATH_SUFFIXES ${_subdirs}
         )
@@ -172,6 +170,7 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
       endif()
     endif()
   endforeach()
+  unset(_library)
 
   if(_libraries_work)
     # Test this combination of libraries.
@@ -195,185 +194,226 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
   else()
     set(${LIBRARIES} FALSE)
   endif()
+
+  unset(_extaddlibdir)
+  unset(_libraries_work)
+  unset(_combined_name)
   #message("DEBUG: ${LIBRARIES} = ${${LIBRARIES}}")
 endmacro()
+
+macro(_lapack_find_dependency dep)
+  set(_lapack_quiet_arg)
+  if(LAPACK_FIND_QUIETLY)
+    set(_lapack_quiet_arg QUIET)
+  endif()
+  set(_lapack_required_arg)
+  if(LAPACK_FIND_REQUIRED)
+    set(_lapack_required_arg REQUIRED)
+  endif()
+  find_package(${dep} ${ARGN}
+    ${_lapack_quiet_arg}
+    ${_lapack_required_arg}
+  )
+  if (NOT ${dep}_FOUND)
+    set(LAPACK_NOT_FOUND_MESSAGE "LAPACK could not be found because dependency ${dep} could not be found.")
+  endif()
+
+  set(_lapack_required_arg)
+  set(_lapack_quiet_arg)
+endmacro()
+
+_lapack_find_library_setup()
 
 set(LAPACK_LINKER_FLAGS)
 set(LAPACK_LIBRARIES)
 set(LAPACK95_LIBRARIES)
 
-if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-  find_package(BLAS)
-else()
-  find_package(BLAS REQUIRED)
+# Check the language being used
+if(NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_COMPILER_LOADED))
+  set(LAPACK_NOT_FOUND_MESSAGE
+    "FindLAPACK requires Fortran, C, or C++ to be enabled.")
 endif()
 
-if(BLAS_FOUND)
+# Load BLAS
+if(NOT LAPACK_NOT_FOUND_MESSAGE)
+  _lapack_find_dependency(BLAS)
+endif()
+
+# Search for different LAPACK distributions if BLAS is found
+if(NOT LAPACK_NOT_FOUND_MESSAGE)
   set(LAPACK_LINKER_FLAGS ${BLAS_LINKER_FLAGS})
   if(NOT $ENV{BLA_VENDOR} STREQUAL "")
     set(BLA_VENDOR $ENV{BLA_VENDOR})
-  else()
-    if(NOT BLA_VENDOR)
-      set(BLA_VENDOR "All")
-    endif()
+  elseif(NOT BLA_VENDOR)
+    set(BLA_VENDOR "All")
   endif()
 
   # LAPACK in the Intel MKL 10+ library?
-  if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
-    if(NOT LAPACK_LIBRARIES)
-      if(CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED)
-        # System-specific settings
-        if(NOT WIN32)
-          set(LAPACK_mkl_LM "-lm")
-          set(LAPACK_mkl_LDL "-ldl")
-        endif()
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
+      AND (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED))
+    # System-specific settings
+    if(NOT WIN32)
+      set(LAPACK_mkl_LM "-lm")
+      set(LAPACK_mkl_LDL "-ldl")
+    endif()
 
-        if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-          find_package(Threads)
-        else()
-          find_package(Threads REQUIRED)
-        endif()
+    _lapack_find_dependency(Threads)
 
-        if(BLA_VENDOR MATCHES "_64ilp")
-          set(LAPACK_mkl_ILP_MODE "ilp64")
-        else()
-          set(LAPACK_mkl_ILP_MODE "lp64")
-        endif()
+    if(BLA_VENDOR MATCHES "_64ilp")
+      set(LAPACK_mkl_ILP_MODE "ilp64")
+    else()
+      set(LAPACK_mkl_ILP_MODE "lp64")
+    endif()
 
-        set(LAPACK_SEARCH_LIBS "")
+    set(LAPACK_SEARCH_LIBS "")
 
-        if(BLA_F95)
-          set(LAPACK_mkl_SEARCH_SYMBOL "cheev_f95")
-          set(_LIBRARIES LAPACK95_LIBRARIES)
-          set(_BLAS_LIBRARIES ${BLAS95_LIBRARIES})
+    if(BLA_F95)
+      set(LAPACK_mkl_SEARCH_SYMBOL "cheev_f95")
+      set(_LIBRARIES LAPACK95_LIBRARIES)
+      set(_BLAS_LIBRARIES ${BLAS95_LIBRARIES})
 
-          # old
-          list(APPEND LAPACK_SEARCH_LIBS
-            "mkl_lapack95")
-          # new >= 10.3
-          list(APPEND LAPACK_SEARCH_LIBS
-            "mkl_intel_c")
-          list(APPEND LAPACK_SEARCH_LIBS
-            "mkl_lapack95_${LAPACK_mkl_ILP_MODE}")
-        else()
-          set(LAPACK_mkl_SEARCH_SYMBOL "cheev")
-          set(_LIBRARIES LAPACK_LIBRARIES)
-          set(_BLAS_LIBRARIES ${BLAS_LIBRARIES})
+      # old
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_lapack95")
+      # new >= 10.3
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_intel_c")
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_lapack95_${LAPACK_mkl_ILP_MODE}")
+    else()
+      set(LAPACK_mkl_SEARCH_SYMBOL "cheev")
+      set(_LIBRARIES LAPACK_LIBRARIES)
+      set(_BLAS_LIBRARIES ${BLAS_LIBRARIES})
 
-          # old and new >= 10.3
-          list(APPEND LAPACK_SEARCH_LIBS
-            "mkl_lapack")
-        endif()
+      # old and new >= 10.3
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_lapack")
+    endif()
 
-        # MKL uses a multitude of partially platform-specific subdirectories:
-        if(BLA_VENDOR STREQUAL "Intel10_32")
-          set(LAPACK_mkl_ARCH_NAME "ia32")
-        else()
-          set(LAPACK_mkl_ARCH_NAME "intel64")
-        endif()
-        if(WIN32)
-          set(LAPACK_mkl_OS_NAME "win")
-        elseif(APPLE)
-          set(LAPACK_mkl_OS_NAME "mac")
-        else()
-          set(LAPACK_mkl_OS_NAME "lin")
-        endif()
-        if(DEFINED ENV{MKLROOT})
-          file(TO_CMAKE_PATH "$ENV{MKLROOT}" LAPACK_mkl_MKLROOT)
-          # If MKLROOT points to the subdirectory 'mkl', use the parent directory instead
-          # so we can better detect other relevant libraries in 'compiler' or 'tbb':
-          get_filename_component(LAPACK_mkl_MKLROOT_LAST_DIR "${LAPACK_mkl_MKLROOT}" NAME)
-          if(LAPACK_mkl_MKLROOT_LAST_DIR STREQUAL "mkl")
-              get_filename_component(LAPACK_mkl_MKLROOT "${LAPACK_mkl_MKLROOT}" DIRECTORY)
-          endif()
-        endif()
-        set(LAPACK_mkl_LIB_PATH_SUFFIXES
-            "compiler/lib" "compiler/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
-            "mkl/lib" "mkl/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
-            "lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}")
-
-        # First try empty lapack libs
-        if(NOT ${_LIBRARIES})
-          check_lapack_libraries(
-            ${_LIBRARIES}
-            LAPACK
-            ${LAPACK_mkl_SEARCH_SYMBOL}
-            ""
-            ""
-            "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM};${LAPACK_mkl_LDL}"
-            "${LAPACK_mkl_MKLROOT}"
-            "${LAPACK_mkl_LIB_PATH_SUFFIXES}"
-            "${_BLAS_LIBRARIES}"
-          )
-        endif()
-
-        # Then try the search libs
-        foreach(IT ${LAPACK_SEARCH_LIBS})
-          string(REPLACE " " ";" SEARCH_LIBS ${IT})
-          if(NOT ${_LIBRARIES})
-            check_lapack_libraries(
-              ${_LIBRARIES}
-              LAPACK
-              ${LAPACK_mkl_SEARCH_SYMBOL}
-              ""
-              "${SEARCH_LIBS}"
-              "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM};${LAPACK_mkl_LDL}"
-              "${LAPACK_mkl_MKLROOT}"
-              "${LAPACK_mkl_LIB_PATH_SUFFIXES}"
-              "${_BLAS_LIBRARIES}"
-            )
-          endif()
-        endforeach()
-
-        unset(LAPACK_mkl_ILP_MODE)
-        unset(LAPACK_mkl_SEARCH_SYMBOL)
-        unset(LAPACK_mkl_LM)
-        unset(LAPACK_mkl_LDL)
-        unset(LAPACK_mkl_MKLROOT)
-        unset(LAPACK_mkl_ARCH_NAME)
-        unset(LAPACK_mkl_OS_NAME)
-        unset(LAPACK_mkl_LIB_PATH_SUFFIXES)
+    # MKL uses a multitude of partially platform-specific subdirectories:
+    if(BLA_VENDOR STREQUAL "Intel10_32")
+      set(LAPACK_mkl_ARCH_NAME "ia32")
+    else()
+      set(LAPACK_mkl_ARCH_NAME "intel64")
+    endif()
+    if(WIN32)
+      set(LAPACK_mkl_OS_NAME "win")
+    elseif(APPLE)
+      set(LAPACK_mkl_OS_NAME "mac")
+    else()
+      set(LAPACK_mkl_OS_NAME "lin")
+    endif()
+    if(DEFINED ENV{MKLROOT})
+      file(TO_CMAKE_PATH "$ENV{MKLROOT}" LAPACK_mkl_MKLROOT)
+      # If MKLROOT points to the subdirectory 'mkl', use the parent directory instead
+      # so we can better detect other relevant libraries in 'compiler' or 'tbb':
+      get_filename_component(LAPACK_mkl_MKLROOT_LAST_DIR "${LAPACK_mkl_MKLROOT}" NAME)
+      if(LAPACK_mkl_MKLROOT_LAST_DIR STREQUAL "mkl")
+          get_filename_component(LAPACK_mkl_MKLROOT "${LAPACK_mkl_MKLROOT}" DIRECTORY)
       endif()
     endif()
+    set(LAPACK_mkl_LIB_PATH_SUFFIXES
+        "compiler/lib" "compiler/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
+        "compiler/lib/${LAPACK_mkl_ARCH_NAME}"
+        "mkl/lib" "mkl/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
+        "mkl/lib/${LAPACK_mkl_ARCH_NAME}"
+        "lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}")
+
+    # First try empty lapack libs
+    if(NOT ${_LIBRARIES})
+      check_lapack_libraries(
+        ${_LIBRARIES}
+        LAPACK
+        ${LAPACK_mkl_SEARCH_SYMBOL}
+        ""
+        ""
+        "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM};${LAPACK_mkl_LDL}"
+        "${LAPACK_mkl_MKLROOT}"
+        "${LAPACK_mkl_LIB_PATH_SUFFIXES}"
+        "${_BLAS_LIBRARIES}"
+      )
+    endif()
+
+    # Then try the search libs
+    foreach(IT ${LAPACK_SEARCH_LIBS})
+      string(REPLACE " " ";" SEARCH_LIBS ${IT})
+      if(NOT ${_LIBRARIES})
+        check_lapack_libraries(
+          ${_LIBRARIES}
+          LAPACK
+          ${LAPACK_mkl_SEARCH_SYMBOL}
+          ""
+          "${SEARCH_LIBS}"
+          "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM};${LAPACK_mkl_LDL}"
+          "${LAPACK_mkl_MKLROOT}"
+          "${LAPACK_mkl_LIB_PATH_SUFFIXES}"
+          "${_BLAS_LIBRARIES}"
+        )
+      endif()
+    endforeach()
+
+    unset(LAPACK_mkl_ILP_MODE)
+    unset(LAPACK_mkl_SEARCH_SYMBOL)
+    unset(LAPACK_mkl_LM)
+    unset(LAPACK_mkl_LDL)
+    unset(LAPACK_mkl_MKLROOT)
+    unset(LAPACK_mkl_ARCH_NAME)
+    unset(LAPACK_mkl_OS_NAME)
+    unset(LAPACK_mkl_LIB_PATH_SUFFIXES)
   endif()
 
   # gotoblas? (http://www.tacc.utexas.edu/tacc-projects/gotoblas2)
-  if(BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
-    if(NOT LAPACK_LIBRARIES)
-      check_lapack_libraries(
-        LAPACK_LIBRARIES
-        LAPACK
-        cheev
-        ""
-        "goto2"
-        ""
-        ""
-        ""
-        "${BLAS_LIBRARIES}"
-      )
-    endif()
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All"))
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "goto2"
+      ""
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
+  endif()
+
+  # FlexiBLAS? (http://www.mpi-magdeburg.mpg.de/mpcsc/software/FlexiBLAS/)
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR STREQUAL "FlexiBLAS" OR BLA_VENDOR STREQUAL "All"))
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "flexiblas"
+      ""
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
   endif()
 
   # OpenBLAS? (http://www.openblas.net)
-  if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
-    if(NOT LAPACK_LIBRARIES)
-      check_lapack_libraries(
-        LAPACK_LIBRARIES
-        LAPACK
-        cheev
-        ""
-        "openblas"
-        ""
-        ""
-        ""
-        "${BLAS_LIBRARIES}"
-      )
-    endif()
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All"))
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "openblas"
+      ""
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
   endif()
 
   # ArmPL? (https://developer.arm.com/tools-and-software/server-and-hpc/compile/arm-compiler-for-linux/arm-performance-libraries)
-  if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
-
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All"))
     # Check for 64bit Integer support
     if(BLA_VENDOR MATCHES "_ilp64")
       set(LAPACK_armpl_LIB "armpl_ilp64")
@@ -386,36 +426,33 @@ if(BLAS_FOUND)
      set(LAPACK_armpl_LIB "${LAPACK_armpl_LIB}_mp")
     endif()
 
-    if(NOT LAPACK_LIBRARIES)
-      check_lapack_libraries(
-        LAPACK_LIBRARIES
-        LAPACK
-        cheev
-        ""
-        "${LAPACK_armpl_LIB}"
-        ""
-        ""
-        ""
-        "${BLAS_LIBRARIES}"
-      )
-    endif()
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "${LAPACK_armpl_LIB}"
+      ""
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
   endif()
 
   # FLAME's blis library? (https://github.com/flame/blis)
-  if(BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All")
-    if(NOT LAPACK_LIBRARIES)
-      check_lapack_libraries(
-        LAPACK_LIBRARIES
-        LAPACK
-        cheev
-        ""
-        "flame"
-        ""
-        ""
-        ""
-        "${BLAS_LIBRARIES}"
-      )
-    endif()
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All"))
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "flame"
+      ""
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
   endif()
 
   # BLAS in acml library?
@@ -426,106 +463,70 @@ if(BLAS_FOUND)
   endif()
 
   # Apple LAPACK library?
-  if(BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All")
-    if(NOT LAPACK_LIBRARIES)
-      check_lapack_libraries(
-        LAPACK_LIBRARIES
-        LAPACK
-        cheev
-        ""
-        "Accelerate"
-        ""
-        ""
-        ""
-        "${BLAS_LIBRARIES}"
-      )
-    endif()
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All"))
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "Accelerate"
+      ""
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
   endif()
 
   # Apple NAS (vecLib) library?
-  if(BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
-    if(NOT LAPACK_LIBRARIES)
-      check_lapack_libraries(
-        LAPACK_LIBRARIES
-        LAPACK
-        cheev
-        ""
-        "vecLib"
-        ""
-        ""
-        ""
-        "${BLAS_LIBRARIES}"
-      )
-    endif()
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All"))
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "vecLib"
+      ""
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
   endif()
 
   # Generic LAPACK library?
-  if(BLA_VENDOR STREQUAL "Generic" OR
-      BLA_VENDOR STREQUAL "ATLAS" OR
-      BLA_VENDOR STREQUAL "All")
-    if(NOT LAPACK_LIBRARIES)
-      check_lapack_libraries(
-        LAPACK_LIBRARIES
-        LAPACK
-        cheev
-        ""
-        "lapack"
-        ""
-        ""
-        ""
-        "${BLAS_LIBRARIES}"
-      )
-    endif()
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR STREQUAL "Generic"
+           OR BLA_VENDOR STREQUAL "ATLAS"
+           OR BLA_VENDOR STREQUAL "All"))
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "lapack"
+      ""
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
   endif()
-else()
-  message(STATUS "LAPACK requires BLAS")
 endif()
 
 if(BLA_F95)
-  if(LAPACK95_LIBRARIES)
-    set(LAPACK95_FOUND TRUE)
-  else()
-    set(LAPACK95_FOUND FALSE)
-  endif()
-  if(NOT LAPACK_FIND_QUIETLY)
-    if(LAPACK95_FOUND)
-      message(STATUS "A library with LAPACK95 API found.")
-    else()
-      if(LAPACK_FIND_REQUIRED)
-        message(FATAL_ERROR
-          "A required library with LAPACK95 API not found. Please specify library location."
-        )
-      else()
-        message(STATUS
-          "A library with LAPACK95 API not found. Please specify library location."
-        )
-      endif()
-    endif()
-  endif()
-  set(LAPACK_FOUND "${LAPACK95_FOUND}")
   set(LAPACK_LIBRARIES "${LAPACK95_LIBRARIES}")
-else()
-  if(LAPACK_LIBRARIES)
-    set(LAPACK_FOUND TRUE)
-  else()
-    set(LAPACK_FOUND FALSE)
-  endif()
+endif()
 
-  if(NOT LAPACK_FIND_QUIETLY)
-    if(LAPACK_FOUND)
-      message(STATUS "A library with LAPACK API found.")
-    else()
-      if(LAPACK_FIND_REQUIRED)
-        message(FATAL_ERROR
-          "A required library with LAPACK API not found. Please specify library location."
-        )
-      else()
-        message(STATUS
-          "A library with LAPACK API not found. Please specify library location."
-        )
-      endif()
-    endif()
-  endif()
+if(LAPACK_NOT_FOUND_MESSAGE)
+  set(LAPACK_NOT_FOUND_MESSAGE
+    REASON_FAILURE_MESSAGE ${LAPACK_NOT_FOUND_MESSAGE})
+endif()
+find_package_handle_standard_args(LAPACK REQUIRED_VARS LAPACK_LIBRARIES
+  ${LAPACK_NOT_FOUND_MESSAGE})
+unset(LAPACK_NOT_FOUND_MESSAGE)
+
+if(BLA_F95)
+  set(LAPACK95_FOUND ${LAPACK_FOUND})
 endif()
 
 # On compilers that implicitly link LAPACK (such as ftn, cc, and CC on Cray HPC machines)
@@ -534,7 +535,7 @@ if(LAPACK_LIBRARIES STREQUAL "LAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
   set(LAPACK_LIBRARIES "")
 endif()
 
-if(NOT TARGET LAPACK::LAPACK)
+if(LAPACK_FOUND AND NOT TARGET LAPACK::LAPACK)
   add_library(LAPACK::LAPACK INTERFACE IMPORTED)
   set(_lapack_libs "${LAPACK_LIBRARIES}")
   if(_lapack_libs AND TARGET BLAS::BLAS)
@@ -551,5 +552,4 @@ if(NOT TARGET LAPACK::LAPACK)
   unset(_lapack_libs)
 endif()
 
-cmake_pop_check_state()
-set(CMAKE_FIND_LIBRARY_SUFFIXES ${_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
+_lapack_find_library_teardown()

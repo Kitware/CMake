@@ -34,24 +34,8 @@ effect or even a specific one is beyond the scope of this module.
 
 include_guard(GLOBAL)
 include(CheckCSourceCompiles)
-include(CMakeCheckCompilerFlagCommonPatterns)
+include(Internal/CheckCompilerFlag)
 
-function(check_c_compiler_flag _flag _var)
-  set(CMAKE_REQUIRED_DEFINITIONS "${_flag}")
-
-  # Normalize locale during test compilation.
-  set(_locale_vars LC_ALL LC_MESSAGES LANG)
-  foreach(v IN LISTS _locale_vars)
-    set(_locale_vars_saved_${v} "$ENV{${v}}")
-    set(ENV{${v}} C)
-  endforeach()
-  check_compiler_flag_common_patterns(_common_patterns)
-  check_c_source_compiles("int main(void) { return 0; }" ${_var}
-    # Some compilers do not fail with a bad flag
-    FAIL_REGEX "command line option .* is valid for .* but not for C" # GNU
-    ${_common_patterns}
-    )
-  foreach(v IN LISTS _locale_vars)
-    set(ENV{${v}} ${_locale_vars_saved_${v}})
-  endforeach()
-endfunction()
+macro (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
+  cmake_check_compiler_flag(C "${_FLAG}" ${_RESULT})
+endmacro ()

@@ -336,6 +336,24 @@ if(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
     )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  list(APPEND uv_headers
+    include/uv/posix.h
+    )
+  list(APPEND uv_defines
+    _XOPEN_SOURCE=700
+    )
+  list(APPEND uv_sources
+    src/unix/posix-hrtime.c
+    src/unix/posix-poll.c
+    src/unix/no-fsevents.c
+    src/unix/no-proctitle.c
+    )
+  list(APPEND uv_libraries
+    socket
+    )
+endif()
+
 include_directories(
   ${uv_includes}
   ${KWSYS_HEADER_ROOT}

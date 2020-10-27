@@ -53,6 +53,12 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "^parisc")
   endif()
 endif()
 
+# Use 64-bit off_t on 32-bit Linux
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+  # ensure 64bit offsets are used for filesystem accesses for 32bit compilation
+  add_definitions(-D_FILE_OFFSET_BITS=64)
+endif()
+
 # Workaround for TOC Overflow on ppc64
 set(bigTocFlag "")
 if(CMAKE_SYSTEM_NAME STREQUAL "AIX" AND

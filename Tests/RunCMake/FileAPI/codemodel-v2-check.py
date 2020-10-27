@@ -12,7 +12,7 @@ def read_codemodel_json_data(filename):
 def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
-    check_index_object(o[0], "codemodel", 2, 1, check_object_codemodel(g))
+    check_index_object(o[0], "codemodel", 2, 2, check_object_codemodel(g))
 
 def check_backtrace(t, b, backtrace):
     btg = t["backtraceGraph"]
@@ -41,6 +41,16 @@ def check_backtrace(t, b, backtrace):
         assert sorted(node.keys()) == sorted(expected_keys)
 
     assert b is None
+
+def check_backtraces(t, actual, expected):
+    assert is_list(actual)
+    assert is_list(expected)
+    assert len(actual) == len(expected)
+
+    i = 0
+    while i < len(actual):
+        check_backtrace(t, actual[i], expected[i])
+        i += 1
 
 def check_directory(c):
     def _check(actual, expected):
@@ -421,6 +431,19 @@ def check_target(c):
                                      missing_exception=lambda e: "Precompile header: %s" % e["header"],
                                      extra_exception=lambda a: "Precompile header: %s" % a["header"])
 
+                if "languageStandard" in expected:
+                    expected_keys.append("languageStandard")
+
+                    def check_language_standard(actual, expected):
+                        assert is_dict(actual)
+                        expected_keys = ["backtraces", "standard"]
+                        assert actual["standard"] == expected["standard"]
+                        check_backtraces(obj, actual["backtraces"], expected["backtraces"])
+
+                        assert sorted(actual.keys()) == sorted(expected_keys)
+
+                    check_language_standard(actual["languageStandard"], expected["languageStandard"])
+
                 if expected["defines"] is not None:
                     expected_keys.append("defines")
 
@@ -499,6 +522,7 @@ def gen_check_directories(c, g):
         read_codemodel_json_data("directories/custom.json"),
         read_codemodel_json_data("directories/cxx.json"),
         read_codemodel_json_data("directories/imported.json"),
+        read_codemodel_json_data("directories/interface.json"),
         read_codemodel_json_data("directories/object.json"),
         read_codemodel_json_data("directories/dir.json"),
         read_codemodel_json_data("directories/dir_dir.json"),
@@ -544,6 +568,8 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/zero_check_cxx.json"),
         read_codemodel_json_data("targets/cxx_lib.json"),
         read_codemodel_json_data("targets/cxx_exe.json"),
+        read_codemodel_json_data("targets/cxx_standard_compile_feature_exe.json"),
+        read_codemodel_json_data("targets/cxx_standard_exe.json"),
         read_codemodel_json_data("targets/cxx_shared_lib.json"),
         read_codemodel_json_data("targets/cxx_shared_exe.json"),
         read_codemodel_json_data("targets/cxx_static_lib.json"),
@@ -569,6 +595,10 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/link_imported_object_exe.json"),
         read_codemodel_json_data("targets/link_imported_interface_exe.json"),
 
+        read_codemodel_json_data("targets/all_build_interface.json"),
+        read_codemodel_json_data("targets/zero_check_interface.json"),
+        read_codemodel_json_data("targets/iface_srcs.json"),
+
         read_codemodel_json_data("targets/all_build_custom.json"),
         read_codemodel_json_data("targets/zero_check_custom.json"),
         read_codemodel_json_data("targets/custom_tgt.json"),
@@ -591,6 +621,12 @@ def gen_check_targets(c, g, inSource):
                 e["compileGroups"] = precompile_header_data["compileGroups"]
                 e["sources"] = precompile_header_data["sources"]
                 e["sourceGroups"] = precompile_header_data["sourceGroups"]
+
+    if os.path.exists(os.path.join(reply_dir, "..", "..", "..", "..", "cxx", "cxx_std_11.txt")):
+        for e in expected:
+            if e["name"] == "cxx_standard_compile_feature_exe":
+                language_standard_data = read_codemodel_json_data("targets/cxx_standard_compile_feature_exe_languagestandard.json")
+                e["compileGroups"][0]["languageStandard"] = language_standard_data["languageStandard"]
 
     if not os.path.exists(os.path.join(reply_dir, "..", "..", "..", "..", "ipo_enabled.txt")):
         for e in expected:
@@ -691,6 +727,7 @@ def gen_check_projects(c, g):
         read_codemodel_json_data("projects/alias.json"),
         read_codemodel_json_data("projects/object.json"),
         read_codemodel_json_data("projects/imported.json"),
+        read_codemodel_json_data("projects/interface.json"),
         read_codemodel_json_data("projects/custom.json"),
         read_codemodel_json_data("projects/external.json"),
     ]

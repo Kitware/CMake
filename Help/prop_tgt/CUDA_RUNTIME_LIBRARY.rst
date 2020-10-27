@@ -1,6 +1,8 @@
 CUDA_RUNTIME_LIBRARY
 --------------------
 
+.. versionadded:: 3.17
+
 Select the CUDA runtime library for use by compilers targeting the CUDA language.
 
 The allowed case insensitive values are:

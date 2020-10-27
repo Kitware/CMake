@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmComputeLinkInformation_h
-#define cmComputeLinkInformation_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -144,11 +143,11 @@ private:
   cmsys::RegularExpression ExtractSharedLibraryName;
   cmsys::RegularExpression ExtractAnyLibraryName;
   std::string SharedRegexString;
-  void AddLinkPrefix(const char* p);
-  void AddLinkExtension(const char* e, LinkType type);
+  void AddLinkPrefix(std::string const& p);
+  void AddLinkExtension(std::string const& e, LinkType type);
   std::string CreateExtensionRegex(std::vector<std::string> const& exts,
                                    LinkType type);
-  std::string NoCaseExpression(const char* str);
+  std::string NoCaseExpression(std::string const& str);
 
   // Handling of link items.
   void AddTargetItem(BT<std::string> const& item,
@@ -209,5 +208,3 @@ private:
                              const cmGeneratorTarget* target);
   void AddLibraryRuntimeInfo(std::string const& fullPath);
 };
-
-#endif

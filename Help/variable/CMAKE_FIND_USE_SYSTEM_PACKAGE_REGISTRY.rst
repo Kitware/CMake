@@ -1,6 +1,8 @@
 CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY
 --------------------------------------
 
+.. versionadded:: 3.16
+
 Controls searching the :ref:`System Package Registry` by the
 :command:`find_package` command.
 

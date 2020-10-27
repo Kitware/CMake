@@ -1,6 +1,8 @@
 BUILD_RPATH_USE_ORIGIN
 ----------------------
 
+.. versionadded:: 3.14
+
 Whether to use relative paths for the build ``RPATH``.
 
 This property is initialized by the value of the variable

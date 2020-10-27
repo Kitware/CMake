@@ -182,6 +182,10 @@ set(SRCS
   cmCheckCustomOutputs.cxx
   cmCLocaleEnvironmentScope.h
   cmCLocaleEnvironmentScope.cxx
+  cmCMakePath.h
+  cmCMakePath.cxx
+  cmCMakePresetsFile.cxx
+  cmCMakePresetsFile.h
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
@@ -193,6 +197,8 @@ set(SRCS
   cmComputeLinkInformation.h
   cmComputeTargetDepends.h
   cmComputeTargetDepends.cxx
+  cmConsoleBuf.h
+  cmConsoleBuf.cxx
   cmCPackPropertiesGenerator.h
   cmCPackPropertiesGenerator.cxx
   cmCryptoHash.cxx
@@ -334,6 +340,7 @@ set(SRCS
   cmInstallTargetGenerator.cxx
   cmInstallDirectoryGenerator.h
   cmInstallDirectoryGenerator.cxx
+  cmJSONHelpers.h
   cmLDConfigLDConfigTool.cxx
   cmLDConfigLDConfigTool.h
   cmLDConfigTool.cxx
@@ -412,6 +419,8 @@ set(SRCS
   cmSourceFileLocationKind.h
   cmSourceGroup.cxx
   cmSourceGroup.h
+  cmStandardLevelResolver.cxx
+  cmStandardLevelResolver.h
   cmState.cxx
   cmState.h
   cmStateDirectory.cxx
@@ -496,6 +505,8 @@ set(SRCS
   cmCMakeLanguageCommand.h
   cmCMakeMinimumRequired.cxx
   cmCMakeMinimumRequired.h
+  cmCMakePathCommand.h
+  cmCMakePathCommand.cxx
   cmCMakePolicyCommand.cxx
   cmCMakePolicyCommand.h
   cmConditionEvaluator.cxx
@@ -939,6 +950,7 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestResourceAllocator.cxx
   CTest/cmCTestResourceSpec.cxx
   CTest/cmCTestLaunch.cxx
+  CTest/cmCTestLaunchReporter.cxx
   CTest/cmCTestMemCheckCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx
   CTest/cmCTestMultiProcessHandler.cxx

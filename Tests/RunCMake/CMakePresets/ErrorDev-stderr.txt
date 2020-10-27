@@ -1,0 +1,8 @@
+^CMake Error \(dev\) at [^
+]*/Tests/RunCMake/CMakePresets/WarningsBase\.cmake:[0-9]+ \(message\):
+  Dev warning
+Call Stack \(most recent call first\):
+  [^
+]*/Tests/RunCMake/CMakePresets/ErrorDev\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This error is for project developers\. Use -Wno-error=dev to suppress it\.$

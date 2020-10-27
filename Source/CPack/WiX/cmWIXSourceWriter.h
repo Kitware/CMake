@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmWIXSourceWriter_h
-#define cmWIXSourceWriter_h
+#pragma once
 
 #include <string>
 #include <vector>
@@ -50,6 +49,8 @@ public:
 
   std::string CreateGuidFromComponentId(std::string const& componentId);
 
+  static std::string EscapeAttributeValue(std::string const& value);
+
 protected:
   cmCPackLog* Logger;
 
@@ -64,8 +65,6 @@ private:
 
   void Indent(size_t count);
 
-  static std::string EscapeAttributeValue(std::string const& value);
-
   cmsys::ofstream File;
 
   State State;
@@ -76,5 +75,3 @@ private:
 
   GuidType ComponentGuidType;
 };
-
-#endif

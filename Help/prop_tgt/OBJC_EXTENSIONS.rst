@@ -1,6 +1,8 @@
 OBJC_EXTENSIONS
 ---------------
 
+.. versionadded:: 3.16
+
 Boolean specifying whether compiler specific extensions are requested.
 
 This property specifies whether compiler specific extensions should be

@@ -1,6 +1,8 @@
 AUTOGEN_BUILD_DIR
 -----------------
 
+.. versionadded:: 3.9
+
 Directory where :prop_tgt:`AUTOMOC`, :prop_tgt:`AUTOUIC` and :prop_tgt:`AUTORCC`
 generate files for the target.
 

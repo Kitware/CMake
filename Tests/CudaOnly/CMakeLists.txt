@@ -12,32 +12,30 @@ add_cuda_test_macro(CudaOnly.SharedRuntimePlusToolkit CudaOnlySharedRuntimePlusT
 add_cuda_test_macro(CudaOnly.Standard98 CudaOnlyStandard98)
 add_cuda_test_macro(CudaOnly.Toolkit CudaOnlyToolkit)
 add_cuda_test_macro(CudaOnly.WithDefs CudaOnlyWithDefs)
+add_cuda_test_macro(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)
+add_cuda_test_macro(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
+add_cuda_test_macro(CudaOnly.SeparateCompilation CudaOnlySeparateCompilation)
 
 if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
+  # Clang doesn't have flags for selecting the runtime.
   add_cuda_test_macro(CudaOnly.SharedRuntimeViaCUDAFlags CudaOnlySharedRuntimeViaCUDAFlags)
-
-  # Separable compilation is currently only supported on NVCC. Disable tests
-  # using it for other compilers.
-  add_cuda_test_macro(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)
-  add_cuda_test_macro(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
-  add_cuda_test_macro(CudaOnly.SeparateCompilation CudaOnlySeparateCompilation)
-
-  add_test(NAME CudaOnly.DontResolveDeviceSymbols COMMAND
-    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
-    --build-and-test
-    "${CMAKE_CURRENT_SOURCE_DIR}/DontResolveDeviceSymbols/"
-    "${CMAKE_CURRENT_BINARY_DIR}/DontResolveDeviceSymbols/"
-    ${build_generator_args}
-    --build-project DontResolveDeviceSymbols
-    --build-options ${build_options}
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
-  )
-  set_property(TEST "CudaOnly.DontResolveDeviceSymbols" APPEND
-    PROPERTY LABELS "CUDA")
 
   # Only NVCC defines __CUDACC_DEBUG__ when compiling in debug mode.
   add_cuda_test_macro(CudaOnly.GPUDebugFlag CudaOnlyGPUDebugFlag)
 endif()
+
+add_test(NAME CudaOnly.DontResolveDeviceSymbols COMMAND
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  --build-and-test
+  "${CMAKE_CURRENT_SOURCE_DIR}/DontResolveDeviceSymbols/"
+  "${CMAKE_CURRENT_BINARY_DIR}/DontResolveDeviceSymbols/"
+  ${build_generator_args}
+  --build-project DontResolveDeviceSymbols
+  --build-options ${build_options}
+  --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+)
+set_property(TEST "CudaOnly.DontResolveDeviceSymbols" APPEND
+  PROPERTY LABELS "CUDA")
 
 # The CUDA only ships the shared version of the toolkit libraries
 # on windows

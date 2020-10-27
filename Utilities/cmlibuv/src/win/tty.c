@@ -517,6 +517,7 @@ static DWORD CALLBACK uv_tty_line_read_thread(void* data) {
   status = InterlockedExchange(&uv__read_console_status, IN_PROGRESS);
   if (status == TRAP_REQUESTED) {
     SET_REQ_SUCCESS(req);
+    InterlockedExchange(&uv__read_console_status, COMPLETED);
     req->u.io.overlapped.InternalHigh = 0;
     POST_COMPLETION_FOR_REQ(loop, req);
     return 0;
@@ -2121,13 +2122,6 @@ static int uv_tty_write_bufs(uv_tty_t* handle,
         abort();
       }
 
-      /* We wouldn't mind emitting utf-16 surrogate pairs. Too bad, the windows
-       * console doesn't really support UTF-16, so just emit the replacement
-       * character. */
-      if (utf8_codepoint > 0xffff) {
-        utf8_codepoint = UNICODE_REPLACEMENT_CHARACTER;
-      }
-
       if (utf8_codepoint == 0x0a || utf8_codepoint == 0x0d) {
         /* EOL conversion - emit \r\n when we see \n. */
 
@@ -2153,6 +2147,12 @@ static int uv_tty_write_bufs(uv_tty_t* handle,
         /* Encode character into utf-16 buffer. */
         ENSURE_BUFFER_SPACE(1);
         utf16_buf[utf16_buf_used++] = (WCHAR) utf8_codepoint;
+        previous_eol = 0;
+      } else {
+        ENSURE_BUFFER_SPACE(2);
+        utf8_codepoint -= 0x10000;
+        utf16_buf[utf16_buf_used++] = (WCHAR) (utf8_codepoint / 0x400 + 0xD800);
+        utf16_buf[utf16_buf_used++] = (WCHAR) (utf8_codepoint % 0x400 + 0xDC00);
         previous_eol = 0;
       }
     }
@@ -2412,6 +2412,7 @@ static DWORD WINAPI uv__tty_console_resize_watcher_thread(void* param) {
     uv__tty_console_signal_resize();
     ResetEvent(uv__tty_console_resized);
   }
+  return 0;
 }
 
 static void uv__tty_console_signal_resize(void) {

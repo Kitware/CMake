@@ -5,7 +5,7 @@ Parse command-line arguments into a semicolon-separated list.
 
 .. code-block:: cmake
 
-  separate_arguments(<variable> <mode> <args>)
+  separate_arguments(<variable> <mode> [PROGRAM [SEPARATE_ARGS]] <args>)
 
 Parses a space-separated string ``<args>`` into a list of items,
 and stores this list in semicolon-separated standard form in ``<variable>``.
@@ -34,6 +34,36 @@ be one of the following keywords:
 ``NATIVE_COMMAND``
   Proceeds as in ``WINDOWS_COMMAND`` mode if the host system is Windows.
   Otherwise proceeds as in ``UNIX_COMMAND`` mode.
+
+``PROGRAM``
+  The first item in ``<args>`` is assumed to be an executable and will be
+  searched in the system search path or left as a full path. If not found,
+  ``<variable>`` will be empty. Otherwise, ``<variable>`` is a list of 2
+  elements:
+
+    0. Absolute path of the program
+    1. Any command-line arguments present in ``<args>`` as a string
+
+  For example:
+
+  .. code-block:: cmake
+
+    separate_arguments (out UNIX_COMMAND PROGRAM "cc -c main.c")
+
+  * First element of the list: ``/path/to/cc``
+  * Second element of the list: ``" -c main.c"``
+
+``SEPARATE_ARGS``
+  When this sub-option of ``PROGRAM`` option is specified, command-line
+  arguments will be split as well and stored in ``<variable>``.
+
+  For example:
+
+  .. code-block:: cmake
+
+    separate_arguments (out UNIX_COMMAND PROGRAM SEPARATE_ARGS "cc -c main.c")
+
+  The contents of ``out`` will be: ``/path/to/cc;-c;main.c``
 
 .. _`Parsing C Command-Line Arguments`: https://msdn.microsoft.com/library/a1y7w461.aspx
 

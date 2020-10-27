@@ -5,6 +5,8 @@
 FetchContent
 ------------------
 
+.. versionadded:: 3.11
+
 .. only:: html
 
   .. contents::
@@ -1036,6 +1038,11 @@ function(FetchContent_Populate contentName)
     message(FATAL_ERROR "Content ${contentName} already populated in ${${contentNameLower}_SOURCE_DIR}")
   endif()
 
+  __FetchContent_getSavedDetails(${contentName} contentDetails)
+  if("${contentDetails}" STREQUAL "")
+    message(FATAL_ERROR "No details have been set for content: ${contentName}")
+  endif()
+
   string(TOUPPER ${contentName} contentNameUpper)
   set(FETCHCONTENT_SOURCE_DIR_${contentNameUpper}
       "${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}"
@@ -1043,14 +1050,41 @@ function(FetchContent_Populate contentName)
 
   if(FETCHCONTENT_SOURCE_DIR_${contentNameUpper})
     # The source directory has been explicitly provided in the cache,
-    # so no population is required
+    # so no population is required. The build directory may still be specified
+    # by the declared details though.
+
+    if(NOT EXISTS "${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
+      message(FATAL_ERROR "Manually specified source directory is missing:\n"
+        "  FETCHCONTENT_SOURCE_DIR_${contentNameUpper} --> ${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
+    endif()
+
     set(${contentNameLower}_SOURCE_DIR "${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
-    set(${contentNameLower}_BINARY_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build")
+
+    cmake_parse_arguments(savedDetails "" "BINARY_DIR" "" ${contentDetails})
+
+    if(savedDetails_BINARY_DIR)
+      set(${contentNameLower}_BINARY_DIR ${savedDetails_BINARY_DIR})
+    else()
+      set(${contentNameLower}_BINARY_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build")
+    endif()
 
   elseif(FETCHCONTENT_FULLY_DISCONNECTED)
-    # Bypass population and assume source is already there from a previous run
-    set(${contentNameLower}_SOURCE_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src")
-    set(${contentNameLower}_BINARY_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build")
+    # Bypass population and assume source is already there from a previous run.
+    # Declared details may override the default source or build directories.
+
+    cmake_parse_arguments(savedDetails "" "SOURCE_DIR;BINARY_DIR" "" ${contentDetails})
+
+    if(savedDetails_SOURCE_DIR)
+      set(${contentNameLower}_SOURCE_DIR ${savedDetails_SOURCE_DIR})
+    else()
+      set(${contentNameLower}_SOURCE_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src")
+    endif()
+
+    if(savedDetails_BINARY_DIR)
+      set(${contentNameLower}_BINARY_DIR ${savedDetails_BINARY_DIR})
+    else()
+      set(${contentNameLower}_BINARY_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build")
+    endif()
 
   else()
     # Support both a global "disconnect all updates" and a per-content
@@ -1068,11 +1102,6 @@ function(FetchContent_Populate contentName)
       set(quietFlag QUIET)
     else()
       unset(quietFlag)
-    endif()
-
-    __FetchContent_getSavedDetails(${contentName} contentDetails)
-    if("${contentDetails}" STREQUAL "")
-      message(FATAL_ERROR "No details have been set for content: ${contentName}")
     endif()
 
     set(__detailsQuoted)

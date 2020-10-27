@@ -1,6 +1,8 @@
 CMAKE_FIND_USE_CMAKE_SYSTEM_PATH
 --------------------------------
 
+.. versionadded:: 3.16
+
 Controls the default behavior of the following commands for whether or not to
 search paths provided by platform-specific cmake variables:
 

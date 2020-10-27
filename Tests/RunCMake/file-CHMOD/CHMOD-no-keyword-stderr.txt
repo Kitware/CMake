@@ -1,0 +1,4 @@
+CMake Error at CHMOD-no-keyword\.cmake:[0-9]+ \(file\):
+  file No permissions given
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

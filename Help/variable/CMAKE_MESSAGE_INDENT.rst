@@ -1,6 +1,8 @@
 CMAKE_MESSAGE_INDENT
 --------------------
 
+.. versionadded:: 3.16
+
 The :command:`message` command joins the strings from this list and for
 log levels of ``NOTICE`` and below, it prepends the resultant string to
 each line of the message.

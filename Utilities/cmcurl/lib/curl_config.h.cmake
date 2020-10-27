@@ -430,6 +430,9 @@
 /* if brotli is available */
 #cmakedefine HAVE_BROTLI 1
 
+/* if zstd is available */
+#cmakedefine HAVE_ZSTD 1
+
 /* Define to 1 if you have the <locale.h> header file. */
 #cmakedefine HAVE_LOCALE_H 1
 

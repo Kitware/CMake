@@ -116,6 +116,14 @@
             "backtrace": null
         },
         {
+            "id": "^cxx_standard_compile_feature_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_standard_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
             "id": "^cxx_shared_lib::@a56b12a3f5c0529fb296$",
             "backtrace": null
         },
@@ -165,6 +173,10 @@
         },
         {
             "id": "^link_imported_interface_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^iface_srcs::@25b7fa8ea00134654b85$",
             "backtrace": null
         },
         {

@@ -1,6 +1,8 @@
 CMAKE_Swift_MODULE_DIRECTORY
 ----------------------------
 
+.. versionadded:: 3.15
+
 Swift module output directory.
 
 This variable is used to initialise the :prop_tgt:`Swift_MODULE_DIRECTORY`

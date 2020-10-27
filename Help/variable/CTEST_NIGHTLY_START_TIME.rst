@@ -1,6 +1,8 @@
 CTEST_NIGHTLY_START_TIME
 ------------------------
 
+.. versionadded:: 3.1
+
 Specify the CTest ``NightlyStartTime`` setting in a :manual:`ctest(1)`
 dashboard client script.
 

@@ -1,6 +1,8 @@
 VS_DOTNET_REFERENCE_<refname>
 -----------------------------
 
+.. versionadded:: 3.8
+
 Visual Studio managed project .NET reference with name ``<refname>``
 and hint path.
 

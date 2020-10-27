@@ -12,3 +12,7 @@ endif()
 if (CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
   run_cmake(CheckFortranLinkerFlag)
 endif()
+
+if (CMake_TEST_CUDA)
+  run_cmake(CheckCUDALinkerFlag)
+endif()

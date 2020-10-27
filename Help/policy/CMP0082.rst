@@ -1,6 +1,8 @@
 CMP0082
 -------
 
+.. versionadded:: 3.14
+
 Install rules from :command:`add_subdirectory` calls are interleaved with
 those in caller.
 

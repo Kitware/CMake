@@ -5,6 +5,8 @@
 FindIconv
 ---------
 
+.. versionadded:: 3.11
+
 This module finds the ``iconv()`` POSIX.1 functions on the system.
 These functions might be provided in the regular C library or externally
 in the form of an additional library.
@@ -110,6 +112,7 @@ endif()
 
 find_library(Iconv_LIBRARY
   NAMES ${Iconv_LIBRARY_NAMES}
+  NAMES_PER_DIR
   DOC "iconv library (potentially the C library)")
 
 mark_as_advanced(Iconv_INCLUDE_DIR)

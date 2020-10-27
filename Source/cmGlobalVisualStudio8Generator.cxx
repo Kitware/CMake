@@ -325,7 +325,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectDepends(
   TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);
   OrderedTargetDependSet depends(unordered, std::string());
   for (cmTargetDepend const& i : depends) {
-    if (i->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!i->IsInBuildSystem()) {
       continue;
     }
     std::string guid = this->GetGUID(i->GetName());
@@ -341,7 +341,7 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
     if (cmGeneratorTarget* depTarget =
           target->GetLocalGenerator()->FindGeneratorTargetToUse(
             ui.Value.first)) {
-      if (depTarget->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+      if (depTarget->IsInBuildSystem() &&
           depTarget->GetProperty("EXTERNAL_MSPROJECT")) {
         // This utility dependency names an external .vcproj target.
         // We use LinkLibraryDependencies="true" to link to it without

@@ -1,8 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#ifndef cmBinUtilsWindowsPEGetRuntimeDependenciesTool_h
-#define cmBinUtilsWindowsPEGetRuntimeDependenciesTool_h
+#pragma once
 
 #include <string>
 #include <vector>
@@ -24,5 +23,3 @@ protected:
 
   void SetError(const std::string& error);
 };
-
-#endif // cmBinUtilsWindowsPEGetRuntimeDependenciesTool_h

@@ -1,6 +1,8 @@
 CMAKE_PROJECT_INCLUDE
 ---------------------
 
+.. versionadded:: 3.15
+
 A CMake language file or module to be included as the last step of all
 :command:`project` command calls.  This is intended for injecting custom code
 into project builds without modifying their source.

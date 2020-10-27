@@ -1,0 +1,4 @@
+CMake Error at MultipleArguments.cmake:[0-9]+ \(separate_arguments\):
+  separate_arguments given unexpected argument\(s\)
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

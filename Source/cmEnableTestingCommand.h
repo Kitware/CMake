@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmEnableTestingCommand_h
-#define cmEnableTestingCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -25,5 +24,3 @@ class cmExecutionStatus;
  */
 bool cmEnableTestingCommand(std::vector<std::string> const&,
                             cmExecutionStatus&);
-
-#endif

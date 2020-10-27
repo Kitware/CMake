@@ -1,6 +1,8 @@
 CMAKE_XCODE_SCHEME_ZOMBIE_OBJECTS
 ---------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Zombie Objects``
 in the Diagnostics section of the generated Xcode scheme.
 

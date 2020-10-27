@@ -23,7 +23,7 @@ if (result)
   message (FATAL_ERROR "Unable to detect RVM ruby version from `${MY_RUBY_HOME}/bin/ruby`: ${RVM_RUBY_VERSION}")
 endif()
 
-execute_process(COMMAND "${CMAKE_COMMAND}" -E env --unset=MY_RUBY_HOME --unset=PATH
+execute_process(COMMAND "${CMAKE_COMMAND}" -E env --unset=MY_RUBY_HOME PATH=/usr/bin:/bin
                         "which" "ruby"
                  RESULT_VARIABLE result
                  OUTPUT_VARIABLE SYSTEM_RUBY

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestHandlerCommand_h
-#define cmCTestHandlerCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -58,5 +57,3 @@ protected:
   "The APPEND option marks results for append to those previously "           \
   "submitted to a dashboard server since the last ctest_start.  "             \
   "Append semantics are defined by the dashboard server in use."
-
-#endif

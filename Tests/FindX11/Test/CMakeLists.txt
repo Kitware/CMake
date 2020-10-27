@@ -29,9 +29,12 @@ test_x11_component(x11_components SM)
 set(X11_X11_FOUND ${X11_FOUND})
 test_x11_component(x11_components X11)
 test_x11_component(x11_components Xau)
+test_x11_component(x11_components Xaw)
 test_x11_component(x11_components xcb)
 test_x11_component(x11_components X11_xcb)
 test_x11_component(x11_components xcb_icccm)
+test_x11_component(x11_components xcb_util)
+test_x11_component(x11_components xcb_xfixes)
 test_x11_component(x11_components xcb_xkb)
 test_x11_component(x11_components Xcomposite)
 test_x11_component(x11_components Xdamage)
@@ -67,9 +70,12 @@ target_link_libraries(test_var PRIVATE ${X11_LIBRARIES})
 # Not included in X11_LIBRARIES.
 foreach(lib
     Xau
+    Xaw
     xcb
     X11_xcb
     xcb_icccm
+    xcb_util
+    xcb_xfixes
     Xcomposite
     Xdamage
     Xdmcp

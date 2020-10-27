@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmStringAlgorithms_h
-#define cmStringAlgorithms_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -19,6 +18,27 @@
 
 /** String range type.  */
 using cmStringRange = cmRange<std::vector<std::string>::const_iterator>;
+
+/** Check for non-empty string.  */
+inline bool cmNonempty(const char* str)
+{
+  return str && *str;
+}
+inline bool cmNonempty(cm::string_view str)
+{
+  return !str.empty();
+}
+inline bool cmNonempty(std::string const* str)
+{
+  return str && !str->empty();
+}
+
+/** Returns length of a literal string.  */
+template <size_t N>
+constexpr size_t cmStrLen(const char (&/*str*/)[N])
+{
+  return N - 1;
+}
 
 /** Callable string comparison struct.  */
 struct cmStrCmp
@@ -66,6 +86,17 @@ std::string cmJoin(Range const& rng, cm::string_view separator)
   }
   return os.str();
 }
+
+/**
+ * Faster overloads for std::string ranges.
+ * If @a initial is provided, it prepends the resulted string without
+ * @a separator between them.
+ */
+std::string cmJoin(std::vector<std::string> const& rng,
+                   cm::string_view separator, cm::string_view initial = {});
+
+std::string cmJoin(cmStringRange const& rng, cm::string_view separator,
+                   cm::string_view initial = {});
 
 /** Extract tokens that are separated by any of the characters in @a sep.  */
 std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
@@ -205,10 +236,11 @@ bool cmIsNOTFOUND(cm::string_view val);
 bool cmIsOn(cm::string_view val);
 inline bool cmIsOn(const char* val)
 {
-  if (!val) {
-    return false;
-  }
-  return cmIsOn(cm::string_view(val));
+  return val && cmIsOn(cm::string_view(val));
+}
+inline bool cmIsOn(std::string const* val)
+{
+  return val && cmIsOn(*val);
 }
 
 /**
@@ -221,10 +253,11 @@ inline bool cmIsOn(const char* val)
 bool cmIsOff(cm::string_view val);
 inline bool cmIsOff(const char* val)
 {
-  if (!val) {
-    return true;
-  }
-  return cmIsOff(cm::string_view(val));
+  return !val || cmIsOff(cm::string_view(val));
+}
+inline bool cmIsOff(std::string const* val)
+{
+  return !val || cmIsOff(*val);
 }
 
 /** Returns true if string @a str starts with the character @a prefix.  */
@@ -290,5 +323,3 @@ bool cmStrToLong(std::string const& str, long* value);
  * integer */
 bool cmStrToULong(const char* str, unsigned long* value);
 bool cmStrToULong(std::string const& str, unsigned long* value);
-
-#endif

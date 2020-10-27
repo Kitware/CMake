@@ -1,6 +1,8 @@
 BUILD_WITH_INSTALL_NAME_DIR
 ---------------------------
 
+.. versionadded:: 3.9
+
 ``BUILD_WITH_INSTALL_NAME_DIR`` is a boolean specifying whether the macOS
 ``install_name`` of a target in the build tree uses the directory given by
 :prop_tgt:`INSTALL_NAME_DIR`.  This setting only applies to targets on macOS.

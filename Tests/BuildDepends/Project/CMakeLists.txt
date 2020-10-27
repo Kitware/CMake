@@ -59,6 +59,10 @@ add_executable(bar bar.cxx
   ${CMAKE_CURRENT_BINARY_DIR}/noregen.h
   )
 
+if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12)
+  target_compile_definitions(bar PRIVATE XCODE_NEW_BUILD_SYSTEM)
+endif()
+
 #-----------------------------------------------------------------------------
 if("${CMAKE_GENERATOR}" MATCHES "Make")
   # Test the IMPLICIT_DEPENDS feature.

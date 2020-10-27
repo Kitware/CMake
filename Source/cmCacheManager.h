@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCacheManager_h
-#define cmCacheManager_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -66,6 +65,9 @@ public:
 
   //! Print the cache to a stream
   void PrintCache(std::ostream&) const;
+
+  //! Get whether or not cache is loaded
+  bool IsCacheLoaded() const { return this->CacheLoaded; }
 
   //! Get a value from the cache given a key
   cmProp GetInitializedCacheValue(const std::string& key) const;
@@ -205,10 +207,9 @@ private:
                             const CacheEntry& e, cmMessenger* messenger) const;
 
   std::map<std::string, CacheEntry> Cache;
+  bool CacheLoaded = false;
 
   // Cache version info
   unsigned int CacheMajorVersion = 0;
   unsigned int CacheMinorVersion = 0;
 };
-
-#endif

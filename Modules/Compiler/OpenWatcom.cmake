@@ -86,7 +86,7 @@ set(CMAKE_C_CREATE_STATIC_LIBRARY
 set(CMAKE_CXX_CREATE_STATIC_LIBRARY ${CMAKE_C_CREATE_STATIC_LIBRARY})
 
 
-# old CMake internaly used OpenWatcom version macros
+# old CMake internally used OpenWatcom version macros
 # for backward compatibility
 if(NOT _CMAKE_WATCOM_VERSION)
   set(_CMAKE_WATCOM_VERSION 1)

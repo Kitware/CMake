@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFilePathChecksum_h
-#define cmFilePathChecksum_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -60,5 +59,3 @@ private:
   /// List of (directory name, seed name) pairs
   std::array<std::pair<std::string, std::string>, 4> parentDirs;
 };
-
-#endif

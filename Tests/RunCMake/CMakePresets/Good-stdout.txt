@@ -1,0 +1,53 @@
+Preset CMake variables:
+
+  TEST_BOOL_FALSE:BOOL="FALSE"
+  TEST_BOOL_TRUE:BOOL="TRUE"
+  TEST_DOLLAR="\$"
+  TEST_D_ENV_REF="xEnvironment variablex"
+  TEST_D_ENV_REF_P=""
+  TEST_ENV="Environment variable"
+  TEST_ENV_OVERRIDE="Overridden environment variable"
+  TEST_ENV_OVERRIDE_P="This environment variable will be overridden"
+  TEST_ENV_P=""
+  TEST_ENV_REF="Environment variable"
+  TEST_ENV_REF_P=""
+  TEST_ENV_REF_PENV="prefix\+suffix"
+  TEST_ENV_REF_PENV_P="suffix"
+  TEST_EXPANSION="\\Good \${dollar} \$unknown{namespace} \$en{NOT_ENV} \$enve{NOT_ENV} \$ \\\$ \$a"
+  TEST_GENERATOR="x[^
+]*x"
+  TEST_MULTIPLE_MACROS="Good [^
+]*"
+  TEST_OFF:BOOL="OFF"
+  TEST_OVERRIDE_3:STRING="Default value"
+  TEST_OVERRIDE_4:STRING="Default value"
+  TEST_PENV="Process environment variable"
+  TEST_PENV_P="Process environment variable"
+  TEST_PRESET_NAME:STRING="xGoodx"
+  TEST_SOURCE_DIR:PATH="[^
+]*/Tests/RunCMake/CMakePresets/Good"
+  TEST_SOURCE_DIR_NAME="Good"
+  TEST_SOURCE_LIST:FILEPATH="[^
+]*/Tests/RunCMake/CMakePresets/Good/CMakeLists\.txt"
+  TEST_SOURCE_PARENT_DIR:PATH="[^
+]*/Tests/RunCMake/CMakePresets"
+  TEST_TRAILING_BACKSLASH="a \\"
+  TEST_TRAILING_DOLLAR="a \$"
+  TEST_TRAILING_UNKNOWN_NAMESPACE="\$unknown{namespace"
+  TEST_TRUE:BOOL="TRUE"
+  TEST_TYPED_BOOL_FALSE:STRING="FALSE"
+  TEST_TYPED_BOOL_TRUE:STRING="TRUE"
+  TEST_UNTYPED_BOOL_FALSE="FALSE"
+  TEST_UNTYPED_BOOL_TRUE="TRUE"
+
+Preset environment variables:
+
+  TEST_D_ENV_REF="xEnvironment variablex"
+  TEST_ENV="Environment variable"
+  TEST_ENV_OVERRIDE="Overridden environment variable"
+  TEST_ENV_REF="Environment variable"
+  TEST_ENV_REF_PENV="prefix\+suffix"
+
+(-- Selecting Windows SDK version [^
+]*
+)?-- Configuring done

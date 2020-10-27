@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "NoVariableValue",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "VAR": {}
+      }
+    }
+  ]
+}

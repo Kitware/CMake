@@ -61,7 +61,7 @@ int cmCPackExternalGenerator::PackageFiles()
   }
 
   const char* packageScript = this->GetOption("CPACK_EXTERNAL_PACKAGE_SCRIPT");
-  if (packageScript && *packageScript) {
+  if (cmNonempty(packageScript)) {
     if (!cmSystemTools::FileIsFullPath(packageScript)) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
@@ -74,6 +74,12 @@ int cmCPackExternalGenerator::PackageFiles()
 
     if (cmSystemTools::GetErrorOccuredFlag() || !res) {
       return 0;
+    }
+
+    const char* builtPackagesStr =
+      this->GetOption("CPACK_EXTERNAL_BUILT_PACKAGES");
+    if (builtPackagesStr) {
+      cmExpandList(builtPackagesStr, this->packageFileNames, false);
     }
   }
 
@@ -205,7 +211,7 @@ int cmCPackExternalGenerator::cmCPackExternalVersionGenerator::WriteToJSON(
 
   const char* defaultDirectoryPermissions =
     this->Parent->GetOption("CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
-  if (defaultDirectoryPermissions && *defaultDirectoryPermissions) {
+  if (cmNonempty(defaultDirectoryPermissions)) {
     root["defaultDirectoryPermissions"] = defaultDirectoryPermissions;
   }
   if (cmIsInternallyOn(this->Parent->GetOption("CPACK_SET_DESTDIR"))) {

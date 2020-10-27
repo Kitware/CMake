@@ -42,7 +42,7 @@ else()
     if(NOT $ENV{CXX} STREQUAL "")
       get_filename_component(CMAKE_CXX_COMPILER_INIT $ENV{CXX} PROGRAM PROGRAM_ARGS CMAKE_CXX_FLAGS_ENV_INIT)
       if(CMAKE_CXX_FLAGS_ENV_INIT)
-        set(CMAKE_CXX_COMPILER_ARG1 "${CMAKE_CXX_FLAGS_ENV_INIT}" CACHE STRING "First argument to CXX compiler")
+        set(CMAKE_CXX_COMPILER_ARG1 "${CMAKE_CXX_FLAGS_ENV_INIT}" CACHE STRING "Arguments to CXX compiler")
       endif()
       if(NOT EXISTS ${CMAKE_CXX_COMPILER_INIT})
         message(FATAL_ERROR "Could not find compiler set in environment variable CXX:\n$ENV{CXX}.\n${CMAKE_CXX_COMPILER_INIT}")
@@ -81,6 +81,10 @@ else()
     # ARMClang need target options
     "--target=arm-arm-none-eabi -mcpu=cortex-m3"
     )
+endif()
+
+if(CMAKE_CXX_COMPILER_TARGET)
+  set(CMAKE_CXX_COMPILER_ID_TEST_FLAGS_FIRST "-c --target=${CMAKE_CXX_COMPILER_TARGET}")
 endif()
 
 # Build a small source file to identify the compiler.

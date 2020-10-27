@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCursesColor_h
-#define cmCursesColor_h
+#pragma once
 
 class cmCursesColor
 {
@@ -23,5 +22,3 @@ public:
 protected:
   static short GetColor(char id, short fallback);
 };
-
-#endif // cmCursesColor_h

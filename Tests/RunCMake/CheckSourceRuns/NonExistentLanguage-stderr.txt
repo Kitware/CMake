@@ -1,0 +1,2 @@
+CMake Error at .*CheckSourceRuns\.cmake:[0-9]+ \(message\):
+  check_source_runs: FAKE_LANG: unknown language.

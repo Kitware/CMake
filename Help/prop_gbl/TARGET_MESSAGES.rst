@@ -1,6 +1,8 @@
 TARGET_MESSAGES
 ---------------
 
+.. versionadded:: 3.4
+
 Specify whether to report the completion of each target.
 
 This property specifies whether :ref:`Makefile Generators` should

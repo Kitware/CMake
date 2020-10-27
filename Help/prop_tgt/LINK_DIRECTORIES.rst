@@ -1,6 +1,8 @@
 LINK_DIRECTORIES
 ----------------
 
+.. versionadded:: 3.13
+
 List of directories to use for the link step of shared library, module
 and executable targets.
 

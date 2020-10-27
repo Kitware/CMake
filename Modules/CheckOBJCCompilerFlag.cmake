@@ -5,6 +5,8 @@
 CheckOBJCCompilerFlag
 ---------------------
 
+.. versionadded:: 3.16
+
 Check whether the Objective-C compiler supports a given flag.
 
 .. command:: check_objc_compiler_flag
@@ -34,31 +36,8 @@ effect or even a specific one is beyond the scope of this module.
 
 include_guard(GLOBAL)
 include(CheckOBJCSourceCompiles)
-include(CMakeCheckCompilerFlagCommonPatterns)
+include(Internal/CheckCompilerFlag)
 
 macro (CHECK_OBJC_COMPILER_FLAG _FLAG _RESULT)
-  set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
-  set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
-
-   # Normalize locale during test compilation.
-  set(_CheckOBJCCompilerFlag_LOCALE_VARS LC_ALL LC_MESSAGES LANG)
-  foreach(v ${_CheckOBJCCompilerFlag_LOCALE_VARS})
-    set(_CheckOBJCCompilerFlag_SAVED_${v} "$ENV{${v}}")
-    set(ENV{${v}} OBJC)
-  endforeach()
-  CHECK_COMPILER_FLAG_COMMON_PATTERNS(_CheckOBJCCompilerFlag_COMMON_PATTERNS)
-  CHECK_OBJC_SOURCE_COMPILES("#ifndef __OBJC__\n#  error \"Not an Objective-C compiler\"\n#endif\nint main(void) { return 0; }" ${_RESULT}
-    # Some compilers do not fail with a bad flag
-    FAIL_REGEX "command line option .* is valid for .* but not for Objective-C" # GNU
-    FAIL_REGEX "argument unused during compilation: .*" # Clang
-    ${_CheckOBJCCompilerFlag_COMMON_PATTERNS}
-    )
-  foreach(v ${_CheckOBJCCompilerFlag_LOCALE_VARS})
-    set(ENV{${v}} ${_CheckOBJCCompilerFlag_SAVED_${v}})
-    unset(_CheckOBJCCompilerFlag_SAVED_${v})
-  endforeach()
-  unset(_CheckOBJCCompilerFlag_LOCALE_VARS)
-  unset(_CheckOBJCCompilerFlag_COMMON_PATTERNS)
-
-  set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
+  cmake_check_compiler_flag(OBJC "${_FLAG}" ${_RESULT})
 endmacro ()

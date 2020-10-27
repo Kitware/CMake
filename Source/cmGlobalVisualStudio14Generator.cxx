@@ -30,7 +30,7 @@ class cmGlobalVisualStudio14Generator::Factory
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, cmake* cm) const override
+    const std::string& name, bool allowArch, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS14GenName(name, genName);
@@ -41,7 +41,7 @@ public:
       return std::unique_ptr<cmGlobalGenerator>(
         new cmGlobalVisualStudio14Generator(cm, genName, ""));
     }
-    if (*p++ != ' ') {
+    if (!allowArch || *p++ != ' ') {
       return std::unique_ptr<cmGlobalGenerator>();
     }
     if (strcmp(p, "Win64") == 0) {
@@ -109,6 +109,7 @@ cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
     "ProductDir",
     vc14Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v140";
+  this->DefaultAndroidToolset = "Clang_3_8";
   this->DefaultCLFlagTableName = "v140";
   this->DefaultCSharpFlagTableName = "v140";
   this->DefaultLibFlagTableName = "v14";
@@ -159,11 +160,17 @@ bool cmGlobalVisualStudio14Generator::InitializeWindowsStore(cmMakefile* mf)
   return true;
 }
 
+bool cmGlobalVisualStudio14Generator::InitializeAndroid(cmMakefile*)
+{
+  return true;
+}
+
 bool cmGlobalVisualStudio14Generator::SelectWindows10SDK(cmMakefile* mf,
                                                          bool required)
 {
   // Find the default version of the Windows 10 SDK.
-  std::string const version = this->GetWindows10SDKVersion();
+  std::string const version = this->GetWindows10SDKVersion(mf);
+
   if (required && version.empty()) {
     std::ostringstream e;
     e << "Could not find an appropriate version of the Windows 10 SDK"
@@ -227,8 +234,25 @@ bool cmGlobalVisualStudio14Generator::IsWindowsStoreToolsetInstalled() const
                                           cmSystemTools::KeyWOW64_32);
 }
 
-std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersion() const
+std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersion(
+  cmMakefile* mf) const
 {
+  // if the given value is set, it can either be OFF/FALSE or a valid SDK
+  // string
+  if (cmProp value = mf->GetDefinition(
+        "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION_MAXIMUM")) {
+
+    // If the value is some off/false value, then there is NO maximum set.
+    if (cmIsOff(value)) {
+      return std::string();
+    }
+    // If the value is something else, trust that it is a valid SDK value.
+    else if (value) {
+      return *value;
+    }
+    // If value is an invalid pointer, leave result unchanged.
+  }
+
   // The last Windows 10 SDK version that VS 2015 can target is 10.0.14393.0.
   //
   // "VS 2015 Users: The Windows 10 SDK (15063, 16299, 17134, 17763) is
@@ -261,7 +285,8 @@ public:
 };
 #endif
 
-std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
+std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
+  cmMakefile* mf)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   std::vector<std::string> win10Roots;
@@ -311,8 +336,10 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
     i = cmSystemTools::GetFilenameName(i);
   }
 
-  // Skip SDKs that cannot be used with our toolset.
-  std::string maxVersion = this->GetWindows10SDKMaxVersion();
+  // Skip SDKs that cannot be used with our toolset, unless the user does not
+  // want to limit the highest supported SDK according to the Microsoft
+  // documentation.
+  std::string maxVersion = this->GetWindows10SDKMaxVersion(mf);
   if (!maxVersion.empty()) {
     cm::erase_if(sdks, WindowsSDKTooRecent(maxVersion));
   }

@@ -1,6 +1,8 @@
 CMAKE_FIND_DEBUG_MODE
 ---------------------
 
+.. versionadded:: 3.17
+
 Print extra find call information for the following commands to standard
 error:
 

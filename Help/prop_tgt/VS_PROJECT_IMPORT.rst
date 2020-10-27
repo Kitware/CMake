@@ -1,6 +1,8 @@
 VS_PROJECT_IMPORT
 -----------------
 
+.. versionadded:: 3.15
+
 Visual Studio managed project imports
 
 Adds to a generated Visual Studio project one or more semicolon-delimited paths

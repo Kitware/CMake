@@ -9,6 +9,7 @@
 #include "cmFileTime.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -38,13 +39,13 @@ cmDependsC::cmDependsC(cmLocalUnixMakefileGenerator3* lg,
   std::string complainRegex = "^$";
   {
     std::string scanRegexVar = cmStrCat("CMAKE_", lang, "_INCLUDE_REGEX_SCAN");
-    if (const char* sr = mf->GetDefinition(scanRegexVar)) {
-      scanRegex = sr;
+    if (cmProp sr = mf->GetDefinition(scanRegexVar)) {
+      scanRegex = *sr;
     }
     std::string complainRegexVar =
       cmStrCat("CMAKE_", lang, "_INCLUDE_REGEX_COMPLAIN");
-    if (const char* cr = mf->GetDefinition(complainRegexVar)) {
-      complainRegex = cr;
+    if (cmProp cr = mf->GetDefinition(complainRegexVar)) {
+      complainRegex = *cr;
     }
   }
 

@@ -34,14 +34,30 @@ Additional optional components may be listed after
 whether a package is considered to be found are defined by the target
 package.
 
+.. _FIND_PACKAGE_VERSION_FORMAT:
+
 The ``[version]`` argument requests a version with which the package found
-should be compatible (format is ``major[.minor[.patch[.tweak]]]``).  The
-``EXACT`` option requests that the version be matched exactly.  If no
-``[version]`` and/or component list is given to a recursive invocation
+should be compatible. There are two possible forms in which it may be
+specified:
+
+  * A single version with the format ``major[.minor[.patch[.tweak]]]``.
+  * A version range with the format ``versionMin...[<]versionMax`` where
+    ``versionMin`` and ``versionMax`` have the same format as the single
+    version.  By default, both end points are included.  By specifying ``<``,
+    the upper end point will be excluded.  Version ranges are only supported
+    with CMake 3.19 or later.
+
+The ``EXACT`` option requests that the version be matched exactly. This option
+is incompatible with the specification of a version range.
+
+If no ``[version]`` and/or component list is given to a recursive invocation
 inside a find-module, the corresponding arguments are forwarded
 automatically from the outer call (including the ``EXACT`` flag for
 ``[version]``).  Version support is currently provided only on a
 package-by-package basis (see the `Version Selection`_ section below).
+When a version range is specified but the package is only designed to expect
+a single version, the package will ignore the upper end point of the range and
+only take the single version at the lower end of the range into account.
 
 See the :command:`cmake_policy` command documentation for discussion
 of the ``NO_POLICY_SCOPE`` option.
@@ -140,10 +156,10 @@ outlined below will find them without requiring use of additional options.
 Version Selection
 ^^^^^^^^^^^^^^^^^
 
-When the ``[version]`` argument is given Config mode will only find a
+When the ``[version]`` argument is given, Config mode will only find a
 version of the package that claims compatibility with the requested
-version (format is ``major[.minor[.patch[.tweak]]]``).  If the ``EXACT``
-option is given only a version of the package claiming an exact match
+version (see :ref:`format specification <FIND_PACKAGE_VERSION_FORMAT>`). If the
+``EXACT`` option is given, only a version of the package claiming an exact match
 of the requested version may be found.  CMake does not establish any
 convention for the meaning of version numbers.  Package version
 numbers are checked by "version" files provided by the packages
@@ -160,31 +176,78 @@ version file is loaded in a nested scope in which the following
 variables have been defined:
 
 ``PACKAGE_FIND_NAME``
-  the ``<PackageName>``
+  The ``<PackageName>``
 ``PACKAGE_FIND_VERSION``
-  full requested version string
+  Full requested version string
 ``PACKAGE_FIND_VERSION_MAJOR``
-  major version if requested, else 0
+  Major version if requested, else 0
 ``PACKAGE_FIND_VERSION_MINOR``
-  minor version if requested, else 0
+  Minor version if requested, else 0
 ``PACKAGE_FIND_VERSION_PATCH``
-  patch version if requested, else 0
+  Patch version if requested, else 0
 ``PACKAGE_FIND_VERSION_TWEAK``
-  tweak version if requested, else 0
+  Tweak version if requested, else 0
 ``PACKAGE_FIND_VERSION_COUNT``
-  number of version components, 0 to 4
+  Number of version components, 0 to 4
+
+When a version range is specified, the above version variables will hold
+values based on the lower end of the version range.  This is to preserve
+compatibility with packages that have not been implemented to expect version
+ranges.  In addition, the version range will be described by the following
+variables:
+
+``PACKAGE_FIND_VERSION_RANGE``
+  Full requested version range string
+``PACKAGE_FIND_VERSION_RANGE_MIN``
+  This specifies whether the lower end point of the version range should be
+  included or excluded.  Currently, the only supported value for this variable
+  is ``INCLUDE``.
+``PACKAGE_FIND_VERSION_RANGE_MAX``
+  This specifies whether the upper end point of the version range should be
+  included or excluded.  The supported values for this variable are
+  ``INCLUDE`` and ``EXCLUDE``.
+
+``PACKAGE_FIND_VERSION_MIN``
+  Full requested version string of the lower end point of the range
+``PACKAGE_FIND_VERSION_MIN_MAJOR``
+  Major version of the lower end point if requested, else 0
+``PACKAGE_FIND_VERSION_MIN_MINOR``
+  Minor version of the lower end point if requested, else 0
+``PACKAGE_FIND_VERSION_MIN_PATCH``
+  Patch version of the lower end point if requested, else 0
+``PACKAGE_FIND_VERSION_MIN_TWEAK``
+  Tweak version of the lower end point if requested, else 0
+``PACKAGE_FIND_VERSION_MIN_COUNT``
+  Number of version components of the lower end point, 0 to 4
+
+``PACKAGE_FIND_VERSION_MAX``
+  Full requested version string of the upper end point of the range
+``PACKAGE_FIND_VERSION_MAX_MAJOR``
+  Major version of the upper end point if requested, else 0
+``PACKAGE_FIND_VERSION_MAX_MINOR``
+  Minor version of the upper end point if requested, else 0
+``PACKAGE_FIND_VERSION_MAX_PATCH``
+  Patch version of the upper end point if requested, else 0
+``PACKAGE_FIND_VERSION_MAX_TWEAK``
+  Tweak version of the upper end point if requested, else 0
+``PACKAGE_FIND_VERSION_MAX_COUNT``
+  Number of version components of the upper end point, 0 to 4
+
+Regardless of whether a single version or a version range is specified, the
+variable ``PACKAGE_FIND_VERSION_COMPLETE`` will be defined and will hold
+the full requested version string as specified.
 
 The version file checks whether it satisfies the requested version and
 sets these variables:
 
 ``PACKAGE_VERSION``
-  full provided version string
+  Full provided version string
 ``PACKAGE_VERSION_EXACT``
-  true if version is exact match
+  True if version is exact match
 ``PACKAGE_VERSION_COMPATIBLE``
-  true if version is compatible
+  True if version is compatible
 ``PACKAGE_VERSION_UNSUITABLE``
-  true if unsuitable as any version
+  True if unsuitable as any version
 
 These variables are checked by the ``find_package`` command to determine
 whether the configuration file provides an acceptable version.  They
@@ -192,17 +255,17 @@ are not available after the ``find_package`` call returns.  If the version
 is acceptable the following variables are set:
 
 ``<PackageName>_VERSION``
-  full provided version string
+  Full provided version string
 ``<PackageName>_VERSION_MAJOR``
-  major version if provided, else 0
+  Major version if provided, else 0
 ``<PackageName>_VERSION_MINOR``
-  minor version if provided, else 0
+  Minor version if provided, else 0
 ``<PackageName>_VERSION_PATCH``
-  patch version if provided, else 0
+  Patch version if provided, else 0
 ``<PackageName>_VERSION_TWEAK``
-  tweak version if provided, else 0
+  Tweak version if provided, else 0
 ``<PackageName>_VERSION_COUNT``
-  number of version components, 0 to 4
+  Number of version components, 0 to 4
 
 and the corresponding package configuration file is loaded.
 When multiple package configuration files are available whose version files
@@ -391,30 +454,76 @@ defines variables to provide information about the call arguments (and
 restores their original state before returning):
 
 ``CMAKE_FIND_PACKAGE_NAME``
-  the ``<PackageName>`` which is searched for
+  The ``<PackageName>`` which is searched for
 ``<PackageName>_FIND_REQUIRED``
-  true if ``REQUIRED`` option was given
+  True if ``REQUIRED`` option was given
 ``<PackageName>_FIND_QUIETLY``
-  true if ``QUIET`` option was given
+  True if ``QUIET`` option was given
 ``<PackageName>_FIND_VERSION``
-  full requested version string
+  Full requested version string
 ``<PackageName>_FIND_VERSION_MAJOR``
-  major version if requested, else 0
+  Major version if requested, else 0
 ``<PackageName>_FIND_VERSION_MINOR``
-  minor version if requested, else 0
+  Minor version if requested, else 0
 ``<PackageName>_FIND_VERSION_PATCH``
-  patch version if requested, else 0
+  Patch version if requested, else 0
 ``<PackageName>_FIND_VERSION_TWEAK``
-  tweak version if requested, else 0
+  Tweak version if requested, else 0
 ``<PackageName>_FIND_VERSION_COUNT``
-  number of version components, 0 to 4
+  Number of version components, 0 to 4
 ``<PackageName>_FIND_VERSION_EXACT``
-  true if ``EXACT`` option was given
+  True if ``EXACT`` option was given
 ``<PackageName>_FIND_COMPONENTS``
-  list of requested components
+  List of requested components
 ``<PackageName>_FIND_REQUIRED_<c>``
-  true if component ``<c>`` is required,
+  True if component ``<c>`` is required,
   false if component ``<c>`` is optional
+
+When a version range is specified, the above version variables will hold
+values based on the lower end of the version range.  This is to preserve
+compatibility with packages that have not been implemented to expect version
+ranges.  In addition, the version range will be described by the following
+variables:
+
+``<PackageName>_FIND_VERSION_RANGE``
+  Full requested version range string
+``<PackageName>_FIND_VERSION_RANGE_MIN``
+  This specifies whether the lower end point of the version range is
+  included or excluded.  Currently, ``INCLUDE`` is the only supported value.
+``<PackageName>_FIND_VERSION_RANGE_MAX``
+  This specifies whether the upper end point of the version range is
+  included or excluded.  The possible values for this variable are
+  ``INCLUDE`` or ``EXCLUDE``.
+
+``<PackageName>_FIND_VERSION_MIN``
+  Full requested version string of the lower end point of the range
+``<PackageName>_FIND_VERSION_MIN_MAJOR``
+  Major version of the lower end point if requested, else 0
+``<PackageName>_FIND_VERSION_MIN_MINOR``
+  Minor version of the lower end point if requested, else 0
+``<PackageName>_FIND_VERSION_MIN_PATCH``
+  Patch version of the lower end point if requested, else 0
+``<PackageName>_FIND_VERSION_MIN_TWEAK``
+  Tweak version of the lower end point if requested, else 0
+``<PackageName>_FIND_VERSION_MIN_COUNT``
+  Number of version components of the lower end point, 0 to 4
+
+``<PackageName>_FIND_VERSION_MAX``
+  Full requested version string of the upper end point of the range
+``<PackageName>_FIND_VERSION_MAX_MAJOR``
+  Major version of the upper end point if requested, else 0
+``<PackageName>_FIND_VERSION_MAX_MINOR``
+  Minor version of the upper end point if requested, else 0
+``<PackageName>_FIND_VERSION_MAX_PATCH``
+  Patch version of the upper end point if requested, else 0
+``<PackageName>_FIND_VERSION_MAX_TWEAK``
+  Tweak version of the upper end point if requested, else 0
+``<PackageName>_FIND_VERSION_MAX_COUNT``
+  Number of version components of the upper end point, 0 to 4
+
+Regardless of whether a single version or a version range is specified, the
+variable ``<PackageName>_FIND_VERSION_COMPLETE`` will be defined and will hold
+the full requested version string as specified.
 
 In Module mode the loaded find module is responsible to honor the
 request detailed by these variables; see the find module for details.

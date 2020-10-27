@@ -1,0 +1,7 @@
+CMake Error in CMakeLists.txt:
+  IMPORTED_LOCATION not set for imported target "static_lib"( configuration
+  ".+")?.
++
+CMake Error in CMakeLists.txt:
+  IMPORTED_IMPLIB not set for imported target "shared_lib"( configuration
+  ".+")?.

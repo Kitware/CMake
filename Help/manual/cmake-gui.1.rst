@@ -36,6 +36,10 @@ Options
 
  If the directory doesn't already exist CMake will make it.
 
+``--preset=<preset-name>``
+ Name of the preset to use from the project's
+ :manual:`presets <cmake-presets(7)>` files, if it has them.
+
 .. include:: OPTIONS_HELP.txt
 
 See Also

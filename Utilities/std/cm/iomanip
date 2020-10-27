@@ -1,0 +1,180 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#pragma once
+
+#include <iomanip> // IWYU pragma: export
+#if __cplusplus < 201402L || defined(_MSVC_LANG) && _MSVC_LANG < 201402L
+#  include <ios>
+#  include <iostream>
+#  include <sstream>
+#  include <string>
+#  include <type_traits>
+#endif
+#if __cplusplus < 201703L || defined(_MSVC_LANG) && _MSVC_LANG < 201703L
+#  include <cm/string_view>
+#endif
+
+namespace cm {
+
+#if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
+
+using std::quoted;
+
+#  if __cplusplus < 201703L || defined(_MSVC_LANG) && _MSVC_LANG < 201703L
+
+inline auto quoted(cm::string_view str, char delim = '"', char escape = '\\')
+{
+  return std::quoted(static_cast<std::string>(str), delim, escape);
+}
+
+#  endif
+
+#else
+
+namespace internals {
+
+// Struct for delimited strings.
+template <typename String, typename Char>
+struct quoted_string
+{
+  static_assert(std::is_reference<String>::value ||
+                  std::is_pointer<String>::value,
+                "String type must be pointer or reference");
+
+  quoted_string(String str, Char del, Char esc)
+    : string_(str)
+    , delim_{ del }
+    , escape_{ esc }
+  {
+  }
+
+  quoted_string& operator=(quoted_string&) = delete;
+
+  String string_;
+  Char delim_;
+  Char escape_;
+};
+
+template <>
+struct quoted_string<cm::string_view, char>
+{
+  quoted_string(cm::string_view str, char del, char esc)
+    : string_(str)
+    , delim_{ del }
+    , escape_{ esc }
+  {
+  }
+
+  quoted_string& operator=(quoted_string&) = delete;
+
+  cm::string_view string_;
+  char delim_;
+  char escape_;
+};
+
+template <typename Char, typename Traits>
+std::basic_ostream<Char, Traits>& operator<<(
+  std::basic_ostream<Char, Traits>& os,
+  const quoted_string<const Char*, Char>& str)
+{
+  std::basic_ostringstream<Char, Traits> ostr;
+  ostr << str.delim_;
+  for (const Char* c = str.string_; *c; ++c) {
+    if (*c == str.delim_ || *c == str.escape_)
+      ostr << str.escape_;
+    ostr << *c;
+  }
+  ostr << str.delim_;
+
+  return os << ostr.str();
+}
+
+template <typename Char, typename Traits, typename String>
+std::basic_ostream<Char, Traits>& operator<<(
+  std::basic_ostream<Char, Traits>& os, const quoted_string<String, Char>& str)
+{
+  std::basic_ostringstream<Char, Traits> ostr;
+  ostr << str.delim_;
+  for (auto c : str.string_) {
+    if (c == str.delim_ || c == str.escape_)
+      ostr << str.escape_;
+    ostr << c;
+  }
+  ostr << str.delim_;
+
+  return os << ostr.str();
+}
+
+template <typename Char, typename Traits, typename Alloc>
+std::basic_istream<Char, Traits>& operator>>(
+  std::basic_istream<Char, Traits>& is,
+  const quoted_string<std::basic_string<Char, Traits, Alloc>&, Char>& str)
+{
+  Char c;
+  is >> c;
+  if (!is.good())
+    return is;
+  if (c != str.delim_) {
+    is.unget();
+    is >> str.string_;
+    return is;
+  }
+  str.string_.clear();
+  std::ios_base::fmtflags flags =
+    is.flags(is.flags() & ~std::ios_base::skipws);
+  do {
+    is >> c;
+    if (!is.good())
+      break;
+    if (c == str.escape_) {
+      is >> c;
+      if (!is.good())
+        break;
+    } else if (c == str.delim_)
+      break;
+    str.string_ += c;
+  } while (true);
+  is.setf(flags);
+
+  return is;
+}
+}
+
+template <typename Char>
+inline internals::quoted_string<const Char*, Char> quoted(
+  const Char* str, Char delim = Char('"'), Char escape = Char('\\'))
+{
+  return internals::quoted_string<const Char*, Char>(str, delim, escape);
+}
+
+template <typename Char, typename Traits, typename Alloc>
+inline internals::quoted_string<const std::basic_string<Char, Traits, Alloc>&,
+                                Char>
+quoted(const std::basic_string<Char, Traits, Alloc>& str,
+       Char delim = Char('"'), Char escape = Char('\\'))
+{
+  return internals::quoted_string<
+    const std::basic_string<Char, Traits, Alloc>&, Char>(str, delim, escape);
+}
+
+template <typename Char, typename Traits, typename Alloc>
+inline internals::quoted_string<std::basic_string<Char, Traits, Alloc>&, Char>
+quoted(std::basic_string<Char, Traits, Alloc>& str, Char delim = Char('"'),
+       Char escape = Char('\\'))
+{
+  return internals::quoted_string<std::basic_string<Char, Traits, Alloc>&,
+                                  Char>(str, delim, escape);
+}
+
+inline internals::quoted_string<cm::string_view, char> quoted(
+  cm::string_view str, char delim = '"', char escape = '\\')
+{
+  return internals::quoted_string<cm::string_view, char>(str, delim, escape);
+}
+
+#endif
+
+} // namespace cm

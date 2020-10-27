@@ -1,6 +1,8 @@
 CMAKE_CROSSCOMPILING_EMULATOR
 -----------------------------
 
+.. versionadded:: 3.3
+
 This variable is only used when :variable:`CMAKE_CROSSCOMPILING` is on. It
 should point to a command on the host system that can run executable built
 for the target system.

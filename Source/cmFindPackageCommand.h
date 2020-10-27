@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFindPackageCommand_h
-#define cmFindPackageCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -11,6 +10,8 @@
 #include <set>
 #include <string>
 #include <vector>
+
+#include <cm/string_view>
 
 #include <cm3p/kwiml/int.h>
 
@@ -89,9 +90,15 @@ private:
 
   void AppendSuccessInformation();
   void AppendToFoundProperty(bool found);
+  void SetVersionVariables(
+    const std::function<void(const std::string&, cm::string_view)>&
+      addDefinition,
+    const std::string& prefix, const std::string& version, unsigned int count,
+    unsigned int major, unsigned int minor, unsigned int patch,
+    unsigned int tweak);
   void SetModuleVariables(const std::string& components);
   bool FindModule(bool& found);
-  void AddFindDefinition(const std::string& var, const char* val);
+  void AddFindDefinition(const std::string& var, cm::string_view value);
   void RestoreFindDefinitions();
 
   enum /*class*/ HandlePackageModeType
@@ -151,34 +158,47 @@ private:
 
   std::map<std::string, cmPolicies::PolicyID> DeprecatedFindModules;
 
+  static const cm::string_view VERSION_ENDPOINT_INCLUDED;
+  static const cm::string_view VERSION_ENDPOINT_EXCLUDED;
+
   std::string Name;
   std::string Variable;
+  std::string VersionComplete;
+  std::string VersionRange;
+  cm::string_view VersionRangeMin;
+  cm::string_view VersionRangeMax;
   std::string Version;
-  unsigned int VersionMajor;
-  unsigned int VersionMinor;
-  unsigned int VersionPatch;
-  unsigned int VersionTweak;
-  unsigned int VersionCount;
-  bool VersionExact;
+  unsigned int VersionMajor = 0;
+  unsigned int VersionMinor = 0;
+  unsigned int VersionPatch = 0;
+  unsigned int VersionTweak = 0;
+  unsigned int VersionCount = 0;
+  std::string VersionMax;
+  unsigned int VersionMaxMajor = 0;
+  unsigned int VersionMaxMinor = 0;
+  unsigned int VersionMaxPatch = 0;
+  unsigned int VersionMaxTweak = 0;
+  unsigned int VersionMaxCount = 0;
+  bool VersionExact = false;
   std::string FileFound;
   std::string VersionFound;
-  unsigned int VersionFoundMajor;
-  unsigned int VersionFoundMinor;
-  unsigned int VersionFoundPatch;
-  unsigned int VersionFoundTweak;
-  unsigned int VersionFoundCount;
-  KWIML_INT_uint64_t RequiredCMakeVersion;
-  bool Quiet;
-  bool Required;
-  bool UseConfigFiles;
-  bool UseFindModules;
-  bool NoUserRegistry;
-  bool NoSystemRegistry;
-  bool UseLib32Paths;
-  bool UseLib64Paths;
-  bool UseLibx32Paths;
-  bool UseRealPath;
-  bool PolicyScope;
+  unsigned int VersionFoundMajor = 0;
+  unsigned int VersionFoundMinor = 0;
+  unsigned int VersionFoundPatch = 0;
+  unsigned int VersionFoundTweak = 0;
+  unsigned int VersionFoundCount = 0;
+  KWIML_INT_uint64_t RequiredCMakeVersion = 0;
+  bool Quiet = false;
+  bool Required = false;
+  bool UseConfigFiles = true;
+  bool UseFindModules = true;
+  bool NoUserRegistry = false;
+  bool NoSystemRegistry = false;
+  bool UseLib32Paths = false;
+  bool UseLib64Paths = false;
+  bool UseLibx32Paths = false;
+  bool UseRealPath = false;
+  bool PolicyScope = true;
   std::string LibraryArchitecture;
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
@@ -186,9 +206,9 @@ private:
   std::string DebugBuffer;
 
   /*! the selected sortOrder (None by default)*/
-  SortOrderType SortOrder;
+  SortOrderType SortOrder = None;
   /*! the selected sortDirection (Asc by default)*/
-  SortDirectionType SortDirection;
+  SortDirectionType SortDirection = Asc;
 
   struct ConfigFileInfo
   {
@@ -233,5 +253,3 @@ struct hash<cmFindPackageCommand::ConfigFileInfo>
 
 bool cmFindPackage(std::vector<std::string> const& args,
                    cmExecutionStatus& status);
-
-#endif

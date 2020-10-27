@@ -56,7 +56,7 @@ with open(trace_file, 'r') as fp:
     assert sorted(vers.keys()) == ['version']
     assert sorted(vers['version'].keys()) == ['major', 'minor']
     assert vers['version']['major'] == 1
-    assert vers['version']['minor'] == 0
+    assert vers['version']['minor'] == 1
 
     for i in fp.readlines():
         line = json.loads(i)

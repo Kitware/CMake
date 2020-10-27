@@ -1,6 +1,8 @@
 cmake_parse_arguments
 ---------------------
 
+.. versionadded:: 3.5
+
 Parse function or macro arguments.
 
 .. code-block:: cmake

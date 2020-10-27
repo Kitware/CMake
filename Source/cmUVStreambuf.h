@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmUVStreambuf_h
-#define cmUVStreambuf_h
+#pragma once
 
 #include <algorithm>
 #include <cstring>
@@ -215,5 +214,3 @@ void cmBasicUVStreambuf<CharT, Traits>::StreamRead(ssize_t nread)
 }
 
 using cmUVStreambuf = cmBasicUVStreambuf<char>;
-
-#endif

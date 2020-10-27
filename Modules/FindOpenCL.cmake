@@ -5,6 +5,8 @@
 FindOpenCL
 ----------
 
+.. versionadded:: 3.1
+
 Finds Open Computing Language (OpenCL)
 
 IMPORTED Targets

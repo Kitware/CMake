@@ -20,4 +20,9 @@ run_test(PchReuseFromSubdir)
 run_cmake(PchMultilanguage)
 if(RunCMake_GENERATOR MATCHES "Make|Ninja")
   run_cmake(PchWarnInvalid)
+
+  if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
+     CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0.0)
+    run_cmake(PchInstantiateTemplates)
+  endif()
 endif()

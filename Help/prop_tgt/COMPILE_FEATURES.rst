@@ -1,6 +1,8 @@
 COMPILE_FEATURES
 ----------------
 
+.. versionadded:: 3.1
+
 Compiler features enabled for this target.
 
 The list of features in this property are a subset of the features listed

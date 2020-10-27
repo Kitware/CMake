@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmext_algorithm
-#define cmext_algorithm
+#pragma once
 
 #include <algorithm>
 #include <iterator>
@@ -247,5 +246,3 @@ bool contains(Range const& range, Key const& key)
 #endif
 
 } // namespace cm
-
-#endif

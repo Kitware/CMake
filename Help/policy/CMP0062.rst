@@ -1,6 +1,8 @@
 CMP0062
 -------
 
+.. versionadded:: 3.3
+
 Disallow :command:`install` of :command:`export` result.
 
 The :command:`export()` command generates a file containing

@@ -1,6 +1,8 @@
 SKIP_UNITY_BUILD_INCLUSION
 --------------------------
 
+.. versionadded:: 3.16
+
 Setting this property to true ensures the source file will be skipped by
 unity builds when its associated target has its :prop_tgt:`UNITY_BUILD`
 property set to true.  The source file will instead be compiled on its own

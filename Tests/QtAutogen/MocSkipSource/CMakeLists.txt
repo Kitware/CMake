@@ -29,6 +29,13 @@ set_property(SOURCE qItemD.hpp PROPERTY SKIP_AUTOGEN ON)
 add_executable(skipMocA ${skipMocSources} ${skipMocWrapMoc})
 set_property(TARGET skipMocA PROPERTY AUTOMOC ON)
 target_link_libraries(skipMocA ${QT_LIBRARIES})
+
+if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12)
+  # FIXME: Fix AUTOMOC for the Xcode "new build system" to avoid
+  # duplicating custom commands in multiple _autogen targets.
+  return()
+endif()
+
 # AUTOMOC and AUTOUIC enabled
 add_executable(skipMocB ${skipMocSources} ${skipMocWrapMoc})
 set_property(TARGET skipMocB PROPERTY AUTOMOC ON)

@@ -53,3 +53,9 @@ left as a full path.  If ``PROGRAM_ARGS`` is present with ``PROGRAM``, then
 any command-line arguments present in the ``<FileName>`` string are split
 from the program name and stored in ``<arg_var>``.  This is used to
 separate a program name from its arguments in a command line string.
+
+.. note::
+
+  This command been superseded by :command:`cmake_path` command, except
+  ``REALPATH`` now offered by :ref:`file(REAL_PATH) <REAL_PATH>` command and
+  ``PROGRAM`` now available in :command:`separate_arguments(PROGRAM)` command.

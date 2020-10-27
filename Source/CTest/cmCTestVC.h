@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestVC_h
-#define cmCTestVC_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -150,5 +149,3 @@ protected:
   // Count paths reported with each PathStatus value.
   int PathCount[3];
 };
-
-#endif

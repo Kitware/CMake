@@ -339,7 +339,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   // loop over again and write out configurations for each target
   // in the solution
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     cmProp expath = target->GetProperty("EXTERNAL_MSPROJECT");
@@ -369,7 +369,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 
   std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     bool written = false;
@@ -381,8 +381,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       std::string location = *expath;
 
       cmProp p = target->GetProperty("VS_PROJECT_TYPE");
-      this->WriteExternalProject(fout, project, location,
-                                 p ? p->c_str() : nullptr,
+      this->WriteExternalProject(fout, project, location, cmToCStr(p),
                                  target->GetUtilities());
       written = true;
     } else {
@@ -436,7 +435,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
   std::ostream& fout, OrderedTargetDependSet const& projectTargets)
 {
   for (cmGeneratorTarget const* target : projectTargets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     cmProp vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
@@ -568,8 +567,9 @@ void cmGlobalVisualStudio7Generator::WriteSLNFooter(std::ostream& fout)
 std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
   cmGeneratorTarget const* target)
 {
-  std::vector<std::string> configs;
-  target->Target->GetMakefile()->GetConfigurations(configs);
+  std::vector<std::string> configs =
+    target->Target->GetMakefile()->GetGeneratorConfigs(
+      cmMakefile::ExcludeEmptyConfig);
   std::string pname = cmStrCat(target->GetName(), "_UTILITY");
   std::string fname =
     cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
@@ -625,9 +625,9 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
 std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
 {
   std::string const& guidStoreName = name + "_GUID_CMAKE";
-  if (const char* storedGUID =
+  if (cmProp storedGUID =
         this->CMakeInstance->GetCacheDefinition(guidStoreName)) {
-    return std::string(storedGUID);
+    return *storedGUID;
   }
   // Compute a GUID that is deterministic but unique to the build tree.
   std::string input =
@@ -675,11 +675,11 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
           "CMAKE_VS_INCLUDE_" + t + "_TO_DEFAULT_BUILD";
         // inspect CMAKE_VS_INCLUDE_<t>_TO_DEFAULT_BUILD properties
         for (std::string const& i : configs) {
-          const char* propertyValue =
+          cmProp propertyValue =
             target->Target->GetMakefile()->GetDefinition(propertyName);
           if (propertyValue &&
               cmIsOn(cmGeneratorExpression::Evaluate(
-                propertyValue, target->GetLocalGenerator(), i))) {
+                *propertyValue, target->GetLocalGenerator(), i))) {
             activeConfigs.insert(i);
           }
         }
@@ -693,9 +693,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   }
   // inspect EXCLUDE_FROM_DEFAULT_BUILD[_<CONFIG>] properties
   for (std::string const& i : configs) {
-    const char* propertyValue =
-      target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i);
-    if (cmIsOff(propertyValue)) {
+    if (cmIsOff(target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i))) {
       activeConfigs.insert(i);
     }
   }

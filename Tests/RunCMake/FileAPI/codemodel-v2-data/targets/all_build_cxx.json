@@ -80,6 +80,14 @@
             "backtrace": null
         },
         {
+            "id": "^cxx_standard_compile_feature_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_standard_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
             "id": "^cxx_shared_lib::@a56b12a3f5c0529fb296$",
             "backtrace": null
         },

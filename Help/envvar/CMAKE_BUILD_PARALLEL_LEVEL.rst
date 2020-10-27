@@ -1,6 +1,8 @@
 CMAKE_BUILD_PARALLEL_LEVEL
 --------------------------
 
+.. versionadded:: 3.12
+
 .. include:: ENV_VAR.txt
 
 Specifies the maximum number of concurrent processes to use when building

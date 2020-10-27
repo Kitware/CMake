@@ -1,0 +1,9 @@
+^CMake Error at defer_call_add_subdirectory.cmake:1 \(add_subdirectory\):
+  Subdirectories may not be created during deferred execution.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:DEFERRED
++
+CMake Error at defer_call_add_subdirectory.cmake:2 \(subdirs\):
+  Subdirectories may not be created during deferred execution.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:DEFERRED$

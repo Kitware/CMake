@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmTargetPropertyComputer_h
-#define cmTargetPropertyComputer_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -34,12 +33,6 @@ public:
     }
     return nullptr;
   }
-
-  static bool WhiteListedInterfaceProperty(const std::string& prop);
-
-  static bool PassesWhitelist(cmStateEnums::TargetType tgtType,
-                              std::string const& prop, cmMessenger* messenger,
-                              cmListFileBacktrace const& context);
 
 private:
   static bool HandleLocationPropertyPolicy(std::string const& tgtName,
@@ -107,5 +100,3 @@ private:
   static cmProp GetSources(Target const* tgt, cmMessenger* messenger,
                            cmListFileBacktrace const& context);
 };
-
-#endif

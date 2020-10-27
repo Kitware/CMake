@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFileAPI_h
-#define cmFileAPI_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -205,5 +204,3 @@ private:
     ClientRequest& r, std::vector<RequestVersion> const& versions);
   Json::Value BuildInternalTest(Object const& object);
 };
-
-#endif

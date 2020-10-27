@@ -1,6 +1,8 @@
 CMAKE_VS_PLATFORM_NAME
 ----------------------
 
+.. versionadded:: 3.1
+
 Visual Studio target platform name used by the current generator.
 
 VS 8 and above allow project files to specify a target platform.

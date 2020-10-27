@@ -80,6 +80,17 @@ function(_ios_install_combined_get_valid_archs sdk resultvar)
   cmake_policy(POP)
 endfunction()
 
+# Make both arch lists a disjoint set by preferring the current SDK
+# (starting with Xcode 12 arm64 is available as device and simulator arch on iOS)
+function(_ios_install_combined_prune_common_archs corr_sdk corr_archs_var this_archs_var)
+  list(REMOVE_ITEM ${corr_archs_var} ${${this_archs_var}})
+
+  string(REPLACE ";" " " printable "${${corr_archs_var}}")
+  _ios_install_combined_message("Architectures (${corr_sdk}) after pruning: ${printable}")
+
+  set("${corr_archs_var}" "${${corr_archs_var}}" PARENT_SCOPE)
+endfunction()
+
 # Final target can contain more architectures that specified by SDK. This
 # function will run 'lipo -info' and parse output. Result will be returned
 # as a CMake list.
@@ -266,8 +277,9 @@ function(ios_install_combined target destination)
   _ios_install_combined_detect_sdks(this_sdk corr_sdk)
 
   # Get architectures of the target
-  _ios_install_combined_get_valid_archs("${corr_sdk}" corr_valid_archs)
   _ios_install_combined_get_valid_archs("${this_sdk}" this_valid_archs)
+  _ios_install_combined_get_valid_archs("${corr_sdk}" corr_valid_archs)
+  _ios_install_combined_prune_common_archs("${corr_sdk}" corr_valid_archs this_valid_archs)
 
   # Return if there are no valid architectures for the SDK.
   # (note that library already installed)

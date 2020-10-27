@@ -1,6 +1,8 @@
 CUDA_PTX_COMPILATION
 --------------------
 
+.. versionadded:: 3.9
+
 Compile CUDA sources to ``.ptx`` files instead of ``.obj`` files
 within :ref:`Object Libraries`.
 

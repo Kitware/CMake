@@ -1,6 +1,8 @@
 CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION
 -----------------------------------
 
+.. versionadded:: 3.7
+
 When :ref:`Cross Compiling for Android with the NDK`, this variable
 may be set to specify the version of the toolchain to be used
 as the compiler.

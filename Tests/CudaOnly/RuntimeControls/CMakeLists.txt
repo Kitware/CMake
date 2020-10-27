@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.18)
 project (RuntimeControls CUDA)
 
 # Find nm and dumpbin
@@ -16,7 +16,6 @@ else()
 endif()
 
 set(CMAKE_CUDA_STANDARD 11)
-set(CMAKE_CUDA_ARCHITECTURES 30)
 set(CMAKE_CUDA_RUNTIME_LIBRARY static)
 
 if(NOT "x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")

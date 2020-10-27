@@ -1,6 +1,8 @@
 CMP0096
 -------
 
+.. versionadded:: 3.16
+
 The :command:`project` command preserves leading zeros in version components.
 
 When a ``VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]`` argument is given

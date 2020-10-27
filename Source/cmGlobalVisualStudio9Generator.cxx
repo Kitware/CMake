@@ -16,7 +16,7 @@ class cmGlobalVisualStudio9Generator::Factory : public cmGlobalGeneratorFactory
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, cmake* cm) const override
+    const std::string& name, bool allowArch, cmake* cm) const override
   {
     if (strncmp(name.c_str(), vs9generatorName,
                 sizeof(vs9generatorName) - 1) != 0) {
@@ -29,7 +29,7 @@ public:
         new cmGlobalVisualStudio9Generator(cm, name, ""));
     }
 
-    if (p[0] != ' ') {
+    if (!allowArch || p[0] != ' ') {
       return std::unique_ptr<cmGlobalGenerator>();
     }
 

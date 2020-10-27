@@ -23,3 +23,6 @@ add_subdirectory(try_compile)
 
 # Test package INTERFACE controls
 add_subdirectory(Interface)
+
+# Test package version range
+add_subdirectory(version_range)

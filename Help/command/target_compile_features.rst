@@ -1,6 +1,8 @@
 target_compile_features
 -----------------------
 
+.. versionadded:: 3.1
+
 Add expected compiler features to a target.
 
 .. code-block:: cmake

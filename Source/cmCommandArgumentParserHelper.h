@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCommandArgumentParserHelper_h
-#define cmCommandArgumentParserHelper_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -26,7 +25,7 @@ public:
   cmCommandArgumentParserHelper& operator=(
     cmCommandArgumentParserHelper const&) = delete;
 
-  int ParseString(const char* str, int verb);
+  int ParseString(std::string const& str, int verb);
 
   // For the lexer:
   void AllocateParserType(cmCommandArgumentParserHelper::ParserType* pt,
@@ -34,7 +33,6 @@ public:
   bool HandleEscapeSymbol(cmCommandArgumentParserHelper::ParserType* pt,
                           char symbol);
 
-  int LexInput(char* buf, int maxlen);
   void Error(const char* str);
 
   // For yacc
@@ -47,6 +45,8 @@ public:
 
   void SetMakefile(const cmMakefile* mf);
 
+  void UpdateInputPosition(int tokenLength);
+
   std::string& GetResult() { return this->Result; }
 
   void SetLineFile(long line, const char* file);
@@ -58,8 +58,9 @@ public:
   const char* GetError() { return this->ErrorString.c_str(); }
 
 private:
-  std::string::size_type InputBufferPos;
-  std::string InputBuffer;
+  std::string::size_type InputBufferPos{ 1 };
+  std::string::size_type LastTokenLength{};
+  std::string::size_type InputSize{};
   std::vector<char> OutputBuffer;
 
   void Print(const char* place, const char* str);
@@ -76,7 +77,6 @@ private:
   std::string ErrorString;
   const char* FileName;
   long FileLine;
-  int CurrentLine;
   int Verbose;
   bool EscapeQuotes;
   bool NoEscapeMode;
@@ -89,5 +89,3 @@ private:
 #define YY_EXTRA_TYPE cmCommandArgumentParserHelper*
 #define YY_DECL                                                               \
   int cmCommandArgument_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
-
-#endif

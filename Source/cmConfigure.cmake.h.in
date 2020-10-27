@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmConfigure_h
-#define cmConfigure_h
+#pragma once
 
 #include "cmsys/Configure.hxx" // IWYU pragma: export
 
@@ -19,15 +18,13 @@
 #cmakedefine HAVE_UNSETENV
 #cmakedefine CMAKE_USE_ELF_PARSER
 #cmakedefine CMAKE_USE_MACH_PARSER
-#cmakedefine CMake_HAVE_CXX_MAKE_UNIQUE
 #define CMake_DEFAULT_RECURSION_LIMIT @CMake_DEFAULT_RECURSION_LIMIT@
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"
+#define CMAKE_DOC_DIR "/@CMAKE_DOC_DIR@"
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
 
 #if defined(_WIN32) && !defined(NOMINMAX)
 #  define NOMINMAX
-#endif
-
 #endif

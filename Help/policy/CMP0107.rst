@@ -1,6 +1,8 @@
 CMP0107
 -------
 
+.. versionadded:: 3.18
+
 It is not allowed to create an ``ALIAS`` target with the same name as an
 another target.
 

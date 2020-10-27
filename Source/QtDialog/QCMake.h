@@ -1,10 +1,10 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef QCMake_h
-#define QCMake_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmCMakePresetsFile.h"
 #include "cmake.h"
 
 #ifdef _MSC_VER
@@ -15,12 +15,15 @@
 #include <memory>
 #include <vector>
 
+#include "QCMakePreset.h"
 #include <QAtomicInt>
 #include <QList>
 #include <QMetaType>
 #include <QObject>
+#include <QProcessEnvironment>
 #include <QString>
 #include <QStringList>
+#include <QTimer>
 #include <QVariant>
 
 /// struct to represent cmake properties in Qt
@@ -56,6 +59,8 @@ using QCMakePropertyList = QList<QCMakeProperty>;
 // allow QVariant to be a property or list of properties
 Q_DECLARE_METATYPE(QCMakeProperty)
 Q_DECLARE_METATYPE(QCMakePropertyList)
+Q_DECLARE_METATYPE(QProcessEnvironment)
+Q_DECLARE_METATYPE(cmCMakePresetsFile::ReadFileResult)
 
 /// Qt API for CMake library.
 /// Wrapper like class allows for easier integration with
@@ -73,12 +78,16 @@ public slots:
   void setSourceDirectory(const QString& dir);
   /// set the binary directory to build in
   void setBinaryDirectory(const QString& dir);
+  /// set the preset name to use
+  void setPreset(const QString& name, bool setBinary = true);
   /// set the desired generator to use
   void setGenerator(const QString& generator);
   /// set the desired generator to use
   void setPlatform(const QString& platform);
   /// set the desired generator to use
   void setToolset(const QString& toolset);
+  /// set the configure and generate environment
+  void setEnvironment(const QProcessEnvironment& environment);
   /// do the configure step
   void configure();
   /// generate the files
@@ -114,8 +123,6 @@ public slots:
   void setDeprecatedWarningsAsErrors(bool value);
   /// set whether to run cmake with warnings about uninitialized variables
   void setWarnUninitializedMode(bool value);
-  /// set whether to run cmake with warnings about unused variables
-  void setWarnUnusedMode(bool value);
   /// check if project IDE open is possible and emit openPossible signal
   void checkOpenPossible();
 
@@ -128,6 +135,8 @@ public:
   QString sourceDirectory() const;
   /// get the current generator
   QString generator() const;
+  /// get the configure and generate environment
+  QProcessEnvironment environment() const;
   /// get the available generators
   std::vector<cmake::GeneratorInfo> const& availableGenerators() const;
   /// get whether to do debug output
@@ -144,6 +153,15 @@ signals:
   void sourceDirChanged(const QString& dir);
   /// signal when the binary directory changes
   void binaryDirChanged(const QString& dir);
+  /// signal when the preset list changes
+  void presetsChanged(const QVector<QCMakePreset>& presets);
+  /// signal when the selected preset changes
+  void presetChanged(const QString& name);
+  /// signal when there's an error reading the presets files
+  void presetLoadError(const QString& dir,
+                       cmCMakePresetsFile::ReadFileResult error);
+  /// signal when uninitialized warning changes
+  void warnUninitializedModeChanged(bool value);
   /// signal for progress events
   void progressChanged(const QString& msg, float percent);
   /// signal when configure is done
@@ -173,18 +191,24 @@ protected:
   void messageCallback(std::string const& msg, const char* title);
   void stdoutCallback(std::string const& msg);
   void stderrCallback(std::string const& msg);
+  void setUpEnvironment() const;
+
+  void loadPresets();
 
   bool WarnUninitializedMode;
-  bool WarnUnusedMode;
-  bool WarnUnusedAllMode;
   QString SourceDirectory;
   QString BinaryDirectory;
   QString Generator;
   QString Platform;
   QString Toolset;
   std::vector<cmake::GeneratorInfo> AvailableGenerators;
+  cmCMakePresetsFile CMakePresetsFile;
+  cmCMakePresetsFile::ReadFileResult LastLoadPresetsResult =
+    cmCMakePresetsFile::ReadFileResult::READ_OK;
+  QString PresetName;
   QString CMakeExecutable;
   QAtomicInt InterruptFlag;
+  QProcessEnvironment StartEnvironment;
+  QProcessEnvironment Environment;
+  QTimer LoadPresetsTimer;
 };
-
-#endif // QCMake_h

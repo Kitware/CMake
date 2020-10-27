@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmProcess_h
-#define cmProcess_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -132,5 +131,3 @@ private:
   int Id;
   int64_t ExitValue;
 };
-
-#endif

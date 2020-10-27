@@ -140,7 +140,7 @@ const char* CCONV cmGetCurrentOutputDirectory(void* arg)
 const char* CCONV cmGetDefinition(void* arg, const char* def)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  return mf->GetDefinition(def);
+  return cmToCStr(mf->GetDefinition(def));
 }
 
 int CCONV cmIsOn(void* arg, const char* name)
@@ -419,12 +419,15 @@ int CCONV cmExecuteCommand(void* arg, const char* name, int numArgs,
                            const char** args)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  cmListFileFunction lff;
-  lff.Name = name;
+
+  std::vector<cmListFileArgument> lffArgs;
+  lffArgs.reserve(numArgs);
   for (int i = 0; i < numArgs; ++i) {
     // Assume all arguments are quoted.
-    lff.Arguments.emplace_back(args[i], cmListFileArgument::Quoted, 0);
+    lffArgs.emplace_back(args[i], cmListFileArgument::Quoted, 0);
   }
+
+  cmListFileFunction lff{ name, 0, std::move(lffArgs) };
   cmExecutionStatus status(*mf);
   return mf->ExecuteCommand(lff, status);
 }
@@ -581,13 +584,13 @@ const char* CCONV cmSourceFileGetProperty(void* arg, const char* prop)
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
     cmProp p = rsf->GetProperty(prop);
-    return p ? p->c_str() : nullptr;
+    return cmToCStr(p);
   }
   if (!strcmp(prop, "LOCATION")) {
     return sf->FullPath.c_str();
   }
   cmProp retVal = sf->Properties.GetPropertyValue(prop);
-  return retVal ? retVal->c_str() : nullptr;
+  return cmToCStr(retVal);
 }
 
 int CCONV cmSourceFileGetPropertyAsBool(void* arg, const char* prop)

@@ -1,6 +1,8 @@
 CMAKE_MATCH_COUNT
 -----------------
 
+.. versionadded:: 3.2
+
 The number of matches with the last regular expression.
 
 When a regular expression match is used, CMake fills in

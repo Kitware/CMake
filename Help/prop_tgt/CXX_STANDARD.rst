@@ -1,6 +1,8 @@
 CXX_STANDARD
 ------------
 
+.. versionadded:: 3.1
+
 The C++ standard whose features are requested to build this target.
 
 This property specifies the C++ standard whose features are requested

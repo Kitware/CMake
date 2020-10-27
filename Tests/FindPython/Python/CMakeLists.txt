@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestPython C)
+project(TestPython LANGUAGES C)
 
 include(CTest)
 
 find_package(Python ${Python_REQUESTED_VERSION} REQUIRED COMPONENTS Interpreter Development)
 if (NOT Python_FOUND)
-  message (FATAL_ERROR "Fail to found Python ${Python_REQUESTED_VERSION}")
+  message (FATAL_ERROR "Failed to find Python ${Python_REQUESTED_VERSION}")
 endif()
 if (NOT Python_Development.Module_FOUND)
-  message (FATAL_ERROR "Fail to found Python ${Python_REQUESTED_VERSION}, COMPONENT 'Development.Module'")
+  message (FATAL_ERROR "Failed to find Python ${Python_REQUESTED_VERSION}, COMPONENT 'Development.Module'")
 endif()
 if (NOT Python_Development.Embed_FOUND)
-  message (FATAL_ERROR "Fail to found Python ${Python_REQUESTED_VERSION}, COMPOENENT 'Development.Embed'")
+  message (FATAL_ERROR "Failed to find Python ${Python_REQUESTED_VERSION}, COMPOENENT 'Development.Embed'")
 endif()
 
 if(NOT TARGET Python::Interpreter)

@@ -1,6 +1,8 @@
 CMP0059
 -------
 
+.. versionadded:: 3.3
+
 Do not treat ``DEFINITIONS`` as a built-in directory property.
 
 CMake 3.3 and above no longer make a list of definitions available through

@@ -11,3 +11,12 @@ add_custom_target(headeriface_gen
   VERBATIM
   )
 add_dependencies(headeriface headeriface_gen)
+
+add_custom_command(OUTPUT iface_genheader.h
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/iface_genheader.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/iface_genheader.h
+  DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/iface_genheader.h.in
+  VERBATIM)
+add_library(iface_genheader INTERFACE iface_genheader.h)

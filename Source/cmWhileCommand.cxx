@@ -17,6 +17,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {
@@ -53,7 +54,7 @@ cmWhileFunctionBlocker::~cmWhileFunctionBlocker()
 bool cmWhileFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
                                             cmMakefile&) const
 {
-  return lff.Arguments.empty() || lff.Arguments == this->Args;
+  return lff.Arguments().empty() || lff.Arguments() == this->Args;
 }
 
 bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
@@ -66,14 +67,9 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
   mf.ExpandArguments(this->Args, expandedArguments);
   MessageType messageType;
 
-  cmListFileContext execContext = this->GetStartingContext();
-
-  cmCommandContext commandContext;
-  commandContext.Line = execContext.Line;
-  commandContext.Name = execContext.Name;
-
-  cmConditionEvaluator conditionEvaluator(mf, this->GetStartingContext(),
-                                          mf.GetBacktrace(commandContext));
+  cmListFileBacktrace whileBT =
+    mf.GetBacktrace().Push(this->GetStartingContext());
+  cmConditionEvaluator conditionEvaluator(mf, whileBT);
 
   bool isTrue =
     conditionEvaluator.IsTrue(expandedArguments, errorString, messageType);
@@ -90,7 +86,7 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       err += "(";
       err += errorString;
       err += ").";
-      mf.IssueMessage(messageType, err);
+      mf.GetCMakeInstance()->IssueMessage(messageType, err, whileBT);
       if (messageType == MessageType::FATAL_ERROR) {
         cmSystemTools::SetFatalErrorOccured();
         return true;

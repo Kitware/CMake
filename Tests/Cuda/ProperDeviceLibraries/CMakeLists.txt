@@ -1,11 +1,15 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.18)
 project(ProperDeviceLibraries CXX CUDA)
 
 set(CMAKE_CUDA_STANDARD 11)
-set(CMAKE_CUDA_ARCHITECTURES 35)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
+
+if(CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 10.0.0)
+  # cublas_device requires at least sm_35.
+  set(CMAKE_CUDA_ARCHITECTURES 35)
+endif()
 
 add_executable(ProperDeviceLibraries main.cu)
 set_target_properties(ProperDeviceLibraries

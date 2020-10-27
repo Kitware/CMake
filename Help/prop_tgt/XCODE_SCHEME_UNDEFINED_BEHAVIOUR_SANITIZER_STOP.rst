@@ -1,6 +1,8 @@
 XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP
 -----------------------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Undefined Behavior Sanitizer`` option
 ``Pause on issues``
 in the Diagnostics section of the generated Xcode scheme.

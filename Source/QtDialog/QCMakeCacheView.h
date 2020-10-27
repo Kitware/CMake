@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef QCMakeCacheView_h
-#define QCMakeCacheView_h
+#pragma once
 
 #include "QCMake.h"
 #include <QItemDelegate>
@@ -49,7 +48,7 @@ class QCMakeCacheModel : public QStandardItemModel
 {
   Q_OBJECT
 public:
-  QCMakeCacheModel(QObject* parent);
+  QCMakeCacheModel(QObject* parent = nullptr);
   ~QCMakeCacheModel();
 
   // roles used to retrieve extra data such has help strings, types of
@@ -144,7 +143,6 @@ public:
   bool editorEvent(QEvent* event, QAbstractItemModel* model,
                    const QStyleOptionViewItem& option,
                    const QModelIndex& index);
-  bool eventFilter(QObject* object, QEvent* event);
   void setModelData(QWidget* editor, QAbstractItemModel* model,
                     const QModelIndex& index) const;
   QSize sizeHint(const QStyleOptionViewItem& option,
@@ -165,5 +163,3 @@ protected:
   // properties changed by user via this delegate
   QSet<QCMakeProperty> mChanges;
 };
-
-#endif

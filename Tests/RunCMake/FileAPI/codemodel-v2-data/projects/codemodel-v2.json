@@ -6,6 +6,7 @@
         "Custom",
         "Cxx",
         "Imported",
+        "Interface",
         "Object",
         "External"
     ],

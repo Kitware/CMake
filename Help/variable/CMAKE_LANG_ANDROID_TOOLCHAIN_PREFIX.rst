@@ -1,6 +1,8 @@
 CMAKE_<LANG>_ANDROID_TOOLCHAIN_PREFIX
 -------------------------------------
 
+.. versionadded:: 3.7
+
 When :ref:`Cross Compiling for Android` this variable contains the absolute
 path prefixing the toolchain GNU compiler and its binutils.
 

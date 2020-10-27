@@ -1,6 +1,8 @@
 CMAKE_GENERATOR_INSTANCE
 ------------------------
 
+.. versionadded:: 3.11
+
 Generator-specific instance specification provided by user.
 
 Some CMake generators support selection of an instance of the native build

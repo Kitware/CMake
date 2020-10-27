@@ -1,6 +1,8 @@
 CMAKE_SUBLIME_TEXT_2_ENV_SETTINGS
 ---------------------------------
 
+.. versionadded:: 3.8
+
 This variable contains a list of env vars as a list of tokens with the
 syntax ``var=value``.
 

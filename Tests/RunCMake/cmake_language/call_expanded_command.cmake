@@ -3,4 +3,4 @@ function (itsok)
 endfunction()
 
 set (cmd CALL itsok)
-cmake_language (${cmd})
+cmake_language (${empty} ${cmd})

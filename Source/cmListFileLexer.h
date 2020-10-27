@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmListFileLexer_h
-#define cmListFileLexer_h
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +65,4 @@ void cmListFileLexer_Delete(cmListFileLexer*);
 
 #ifdef __cplusplus
 } /* extern "C" */
-#endif
-
 #endif

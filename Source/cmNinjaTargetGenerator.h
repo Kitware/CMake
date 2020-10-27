@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmNinjaTargetGenerator_h
-#define cmNinjaTargetGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -114,7 +113,8 @@ protected:
 
   /// @return the list of link dependency for the given target @a target.
   cmNinjaDeps ComputeLinkDeps(const std::string& linkLanguage,
-                              const std::string& config) const;
+                              const std::string& config,
+                              bool ignoreType = false) const;
 
   /// @return the source file path for the given @a source.
   std::string GetSourceFilePath(cmSourceFile const* source) const;
@@ -219,5 +219,3 @@ private:
 
   std::map<std::string, ByConfig> Configs;
 };
-
-#endif // ! cmNinjaTargetGenerator_h
