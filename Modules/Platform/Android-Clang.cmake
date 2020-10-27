@@ -7,6 +7,12 @@ if(__ANDROID_COMPILER_CLANG)
 endif()
 set(__ANDROID_COMPILER_CLANG 1)
 
+# Include the NDK hook.
+# It can be used by NDK to inject necessary fixes for an earlier cmake.
+if(CMAKE_ANDROID_NDK)
+  include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/pre/Android-Clang.cmake OPTIONAL)
+endif()
+
 # Support for NVIDIA Nsight Tegra Visual Studio Edition was previously
 # implemented in the CMake VS IDE generators.  Avoid interfering with
 # that functionality for now.  Later we may try to integrate this.
@@ -57,3 +63,9 @@ macro(__android_compiler_clang lang)
     set(_ANDROID_STL_NOSTDLIBXX 1)
   endif()
 endmacro()
+
+# Include the NDK hook.
+# It can be used by NDK to inject necessary fixes for an earlier cmake.
+if(CMAKE_ANDROID_NDK)
+  include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/post/Android-Clang.cmake OPTIONAL)
+endif()

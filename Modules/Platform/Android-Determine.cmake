@@ -5,6 +5,12 @@
 # This module detects platform-wide information about the Android target
 # in order to store it in "CMakeSystem.cmake".
 
+# Include the NDK hook.
+# It can be used by NDK to inject necessary fixes for an earlier cmake.
+if(CMAKE_ANDROID_NDK)
+  include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/pre/Android-Determine.cmake OPTIONAL)
+endif()
+
 # Support for NVIDIA Nsight Tegra Visual Studio Edition was previously
 # implemented in the CMake VS IDE generators.  Avoid interfering with
 # that functionality for now.
@@ -519,3 +525,9 @@ endif()
 message(STATUS "Android: Targeting API '${CMAKE_SYSTEM_VERSION}' with architecture '${CMAKE_ANDROID_ARCH}', ABI '${CMAKE_ANDROID_ARCH_ABI}', and processor '${CMAKE_SYSTEM_PROCESSOR}'")
 
 cmake_policy(POP)
+
+# Include the NDK hook.
+# It can be used by NDK to inject necessary fixes for an earlier cmake.
+if(CMAKE_ANDROID_NDK)
+  include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/post/Android-Determine.cmake OPTIONAL)
+endif()
