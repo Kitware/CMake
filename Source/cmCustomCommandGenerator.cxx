@@ -62,6 +62,10 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     for (std::string const& clarg : cmdline) {
       std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(clarg);
       std::string parsed_arg = cge->Evaluate(this->LG, this->Config);
+      for (cmGeneratorTarget* gt : cge->GetTargets()) {
+        this->Utilities.emplace(BT<std::pair<std::string, bool>>(
+          { gt->GetName(), true }, cge->GetBacktrace()));
+      }
       if (this->CC->GetCommandExpandLists()) {
         cm::append(argv, cmExpandedList(parsed_arg));
       } else {
@@ -69,10 +73,18 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
       }
     }
 
-    // Later code assumes at least one entry exists, but expanding
-    // lists on an empty command may have left this empty.
-    // FIXME: Should we define behavior for removing empty commands?
-    if (argv.empty()) {
+    if (!argv.empty()) {
+      // If the command references an executable target by name,
+      // collect the target to add a target-level dependency on it.
+      cmGeneratorTarget* gt = this->LG->FindGeneratorTargetToUse(argv.front());
+      if (gt && gt->GetType() == cmStateEnums::EXECUTABLE) {
+        this->Utilities.emplace(BT<std::pair<std::string, bool>>(
+          { gt->GetName(), true }, cc.GetBacktrace()));
+      }
+    } else {
+      // Later code assumes at least one entry exists, but expanding
+      // lists on an empty command may have left this empty.
+      // FIXME: Should we define behavior for removing empty commands?
       argv.emplace_back();
     }
 
@@ -325,4 +337,10 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
 std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
 {
   return this->Depends;
+}
+
+std::set<BT<std::pair<std::string, bool>>> const&
+cmCustomCommandGenerator::GetUtilities() const
+{
+  return this->Utilities;
 }
