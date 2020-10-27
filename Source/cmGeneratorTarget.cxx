@@ -7245,6 +7245,14 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
   }
 }
 
+bool cmGeneratorTarget::IsLanguageUsed(std::string const& language,
+                                       std::string const& config) const
+{
+  std::set<std::string> languages;
+  this->GetLanguages(languages, config);
+  return languages.count(language);
+}
+
 bool cmGeneratorTarget::IsCSharpOnly() const
 {
   // Only certain target types may compile CSharp.

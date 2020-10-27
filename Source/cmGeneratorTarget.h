@@ -417,6 +417,8 @@ public:
   // until we have per-target object file properties.
   void GetLanguages(std::set<std::string>& languages,
                     std::string const& config) const;
+  bool IsLanguageUsed(std::string const& language,
+                      std::string const& config) const;
 
   bool IsCSharpOnly() const;
 
