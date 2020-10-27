@@ -83,10 +83,10 @@ subsequently be run.
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckSourceRuns)
+include(Internal/CheckSourceRuns)
 
 macro(CHECK_Fortran_SOURCE_RUNS SOURCE VAR)
   # Pass the SRC_EXT we used by default historically.
   # A user-provided SRC_EXT argument in ARGN will override ours.
-  check_source_runs(Fortran "${SOURCE}" ${VAR} SRC_EXT "F90" ${ARGN})
+  cmake_check_source_runs(Fortran "${SOURCE}" ${VAR} SRC_EXT "F90" ${ARGN})
 endmacro()

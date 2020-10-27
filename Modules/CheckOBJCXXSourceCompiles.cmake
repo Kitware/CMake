@@ -68,8 +68,8 @@ Check if given Objective-C++ source compiles and links into an executable.
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckSourceCompiles)
+include(Internal/CheckSourceCompiles)
 
 macro(CHECK_OBJCXX_SOURCE_COMPILES SOURCE VAR)
-  check_source_compiles(OBJCXX "${SOURCE}" ${VAR} ${ARGN})
+  cmake_check_source_compiles(OBJCXX "${SOURCE}" ${VAR} ${ARGN})
 endmacro()

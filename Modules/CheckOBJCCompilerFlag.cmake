@@ -36,8 +36,8 @@ effect or even a specific one is beyond the scope of this module.
 
 include_guard(GLOBAL)
 include(CheckOBJCSourceCompiles)
-include(CheckCompilerFlag)
+include(Internal/CheckCompilerFlag)
 
 macro (CHECK_OBJC_COMPILER_FLAG _FLAG _RESULT)
-  check_compiler_flag(OBJC "${_FLAG}" ${_RESULT})
+  cmake_check_compiler_flag(OBJC "${_FLAG}" ${_RESULT})
 endmacro ()

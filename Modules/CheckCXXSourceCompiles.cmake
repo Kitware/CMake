@@ -66,8 +66,8 @@ Check if given C++ source compiles and links into an executable.
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckSourceCompiles)
+include(Internal/CheckSourceCompiles)
 
 macro(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
-  check_source_compiles(CXX "${SOURCE}" ${VAR} ${ARGN})
+  cmake_check_source_compiles(CXX "${SOURCE}" ${VAR} ${ARGN})
 endmacro()
