@@ -246,6 +246,10 @@ unset(RunCMake_TEST_BINARY_DIR)
 
 run_cmake(CustomCommandDepfile)
 
+set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
+run_cmake(PerConfigSources)
+unset(RunCMake_TEST_OPTIONS)
+
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/PostfixAndLocation-build)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release;-DCMAKE_CROSS_CONFIGS=all")
 run_cmake_configure(PostfixAndLocation)
