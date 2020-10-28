@@ -515,6 +515,7 @@ foreach(Camel
     Ruby_SITELIB_DIR
     Ruby_HAS_VENDOR_RUBY
     Ruby_VENDORARCH_DIR
+    Ruby_VENDORLIB_DIR
 
     )
     string(TOUPPER ${Camel} UPPER)
