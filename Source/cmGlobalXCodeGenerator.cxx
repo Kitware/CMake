@@ -1423,7 +1423,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     cmGeneratorTarget::SourceFileFlags tsFlags =
       gtgt->GetTargetSourceFileFlags(sourceFile);
 
-    if (filetype && IsLibraryType(filetype->GetString())) {
+    if (filetype && filetype->GetString() == "compiled.mach-o.objfile") {
       if (sourceFile->GetObjectLibrary().empty()) {
         externalObjFiles.push_back(xsf);
       }
@@ -1591,7 +1591,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     }
   }
 
-  // always create framework build phase
+  // Always create Link Binary With Libraries build phase
   cmXCodeObject* frameworkBuildPhase = nullptr;
   frameworkBuildPhase =
     this->CreateObject(cmXCodeObject::PBXFrameworksBuildPhase);
@@ -1600,6 +1600,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
                                     this->CreateString("2147483647"));
   buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   frameworkBuildPhase->AddAttribute("files", buildFiles);
+  // Add all collected .o files to this build phase
   for (auto& externalObjFile : externalObjFiles) {
     buildFiles->AddObject(externalObjFile);
   }
