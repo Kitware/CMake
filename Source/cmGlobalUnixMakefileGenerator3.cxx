@@ -590,9 +590,10 @@ cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
   makeCommand.Add(this->SelectMakeProgram(makeProgram));
 
   if (jobs != cmake::NO_BUILD_PARALLEL_LEVEL) {
-    makeCommand.Add("-j");
-    if (jobs != cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
-      makeCommand.Add(std::to_string(jobs));
+    if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
+      makeCommand.Add("-j");
+    } else {
+      makeCommand.Add("-j" + std::to_string(jobs));
     }
   }
 
