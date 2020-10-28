@@ -37,7 +37,12 @@ static const char* cmDocumentationUsage[][2] = {
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationOptions[][2] = { { nullptr, nullptr } };
+static const char* cmDocumentationOptions[][2] = {
+  { "-S <path-to-source>", "Explicitly specify a source directory." },
+  { "-B <path-to-build>", "Explicitly specify a build directory." },
+  { "--preset=<preset>", "Specify a configure preset." },
+  { nullptr, nullptr }
+};
 
 #if defined(Q_OS_MAC)
 static int cmOSXInstall(std::string dir);

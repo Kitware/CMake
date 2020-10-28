@@ -704,8 +704,6 @@ private:
 #define CMAKE_STANDARD_OPTIONS_TABLE                                          \
   { "-S <path-to-source>", "Explicitly specify a source directory." },        \
     { "-B <path-to-build>", "Explicitly specify a build directory." },        \
-    { "--preset=<preset-name>", "Explicitly specify a preset." },             \
-    { "--list-presets", "List available presets." },                          \
     { "-C <initial-cache>", "Pre-load a script to populate the cache." },     \
     { "-D <var>[:<type>]=<value>", "Create or update a cmake cache entry." }, \
     { "-U <globbing_expr>", "Remove matching entries from CMake cache." },    \
