@@ -21,13 +21,15 @@ cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
   std::string input, std::string target,
   std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
   std::unique_ptr<cmCompiledGeneratorExpression> condition,
-  bool inputIsContent, cmPolicies::PolicyStatus policyStatusCMP0070)
+  bool inputIsContent, mode_t permissions,
+  cmPolicies::PolicyStatus policyStatusCMP0070)
   : Input(std::move(input))
   , Target(std::move(target))
   , OutputFileExpr(std::move(outputFileExpr))
   , Condition(std::move(condition))
   , InputIsContent(inputIsContent)
   , PolicyStatusCMP0070(policyStatusCMP0070)
+  , Permissions(permissions)
 {
 }
 
@@ -111,14 +113,15 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
 
 void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
 {
-  mode_t perm = 0;
   std::string inputContent;
   if (this->InputIsContent) {
     inputContent = this->Input;
   } else {
     const std::string inputFileName = this->GetInputFileName(lg);
     lg->GetMakefile()->AddCMakeDependFile(inputFileName);
-    cmSystemTools::GetPermissions(inputFileName.c_str(), perm);
+    if (!this->Permissions) {
+      cmSystemTools::GetPermissions(inputFileName.c_str(), this->Permissions);
+    }
     cmsys::ifstream fin(inputFileName.c_str());
     if (!fin) {
       std::ostringstream e;
@@ -152,7 +155,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
 
   for (std::string const& le : enabledLanguages) {
     for (std::string const& li : allConfigs) {
-      this->Generate(lg, li, le, inputExpression.get(), outputFiles, perm);
+      this->Generate(lg, li, le, inputExpression.get(), outputFiles,
+                     this->Permissions);
       if (cmSystemTools::GetFatalErrorOccured()) {
         return;
       }
