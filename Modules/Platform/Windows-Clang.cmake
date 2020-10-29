@@ -112,7 +112,9 @@ macro(__enable_llvm_rc_preprocessing clang_option_prefix)
     endif()
     if(DEFINED CMAKE_RC_PREPROCESSOR)
       set(CMAKE_DEPFILE_FLAGS_RC "${clang_option_prefix}-MD ${clang_option_prefix}-MF ${clang_option_prefix}<DEPFILE>")
-      set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_COMMAND> -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> -E -- <SOURCE> ++ <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> /fo <OBJECT> <OBJECT>.pp")
+      # The <FLAGS> are passed to the preprocess and the resource compiler to pick
+      # up the eventual -D / -C options passed through the CMAKE_RC_FLAGS.
+      set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_COMMAND> -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> -E -- <SOURCE> ++ <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> <FLAGS> /fo <OBJECT> <OBJECT>.pp")
       if(CMAKE_GENERATOR MATCHES "Ninja")
         set(CMAKE_NINJA_CMCLDEPS_RC 0)
         set(CMAKE_NINJA_DEP_TYPE_RC gcc)
