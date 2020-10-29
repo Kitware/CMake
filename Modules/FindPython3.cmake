@@ -315,6 +315,22 @@ Hints
     ``.Net`` interpreter (i.e. ``mono`` command) is expected to be available
     through the ``PATH`` variable.
 
+``Python3_FIND_UNVERSIONED_NAMES``
+
+  .. versionadded:: 3.20
+
+  This variable defines how the generic names will be searched. Currently, it
+  only applies to the generic names of the interpreter, namely, ``python3`` and
+  ``python``.
+  The ``Python3_FIND_UNVERSIONED_NAMES`` variable can be set to one of the
+  following values:
+
+  * ``FIRST``: The generic names are searched before the more specialized ones
+    (such as ``python3.5`` for example).
+  * ``LAST``: The generic names are searched after the more specialized ones.
+    This is the default.
+  * ``NEVER``: The generic name are not searched at all.
+
 Artifacts Specification
 ^^^^^^^^^^^^^^^^^^^^^^^
 
