@@ -51,6 +51,8 @@ Languages
   - separable compilation (:prop_tgt:`CUDA_SEPARABLE_COMPILATION`), and
   - finding scattered toolkit installations when cross-compiling.
 
+* ``CUDA`` language support now works on QNX.
+
 File-Based API
 --------------
 
