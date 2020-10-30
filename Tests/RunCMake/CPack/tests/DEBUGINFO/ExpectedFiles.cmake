@@ -1,6 +1,6 @@
 set(whitespaces_ "[\t\n\r ]*")
 
-set(EXPECTED_FILES_COUNT "5")
+set(EXPECTED_FILES_COUNT "6")
 set(EXPECTED_FILES_NAME_GENERATOR_SPECIFIC_FORMAT TRUE)
 
 if(GENERATOR_TYPE STREQUAL "RPM")
@@ -39,3 +39,6 @@ elseif(GENERATOR_TYPE STREQUAL "DEB")
   set(EXPECTED_FILE_5 "TestDinfo-pkg-libs-dbgsym.ddeb")
   set(EXPECTED_FILE_CONTENT_5 ".*/usr/lib/debug/.build-id/.*\.debug.*")
 endif()
+
+set(EXPECTED_FILE_6 "TestDinfo-pkg*-appheaders.${PKG}")
+set(EXPECTED_FILE_CONTENT_6_LIST "/include;/include/test_lib.hpp")
