@@ -81,6 +81,12 @@ if(CMAKE_ANDROID_STL_TYPE)
         "Android: STL '${CMAKE_ANDROID_STL_TYPE}' not supported by this NDK."
         )
     endif()
+    if(DEFINED CMAKE_ANDROID_RTTI)
+      set(_ANDROID_STL_RTTI ${CMAKE_ANDROID_RTTI})
+    endif()
+    if(DEFINED CMAKE_ANDROID_EXCEPTIONS)
+      set(_ANDROID_STL_EXCEPTIONS ${CMAKE_ANDROID_EXCEPTIONS})
+    endif()
   elseif(CMAKE_ANDROID_NDK)
 
     macro(__android_stl_inc lang dir req)
