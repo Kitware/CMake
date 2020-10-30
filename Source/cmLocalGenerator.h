@@ -364,6 +364,8 @@ public:
     bool command_expand_lists = false, const std::string& job_pool = "",
     bool stdPipesUTF8 = false);
 
+  std::string CreateUtilityOutput(std::string const& targetName);
+
   virtual std::vector<cmCustomCommandGenerator> MakeCustomCommandGenerators(
     cmCustomCommand const& cc, std::string const& config);
 
@@ -688,7 +690,7 @@ void AppendCustomCommandToOutput(cmLocalGenerator& lg,
 
 void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        cmCommandOrigin origin, cmTarget* target,
-                       std::string const& force, const char* workingDir,
+                       const char* workingDir,
                        const std::vector<std::string>& byproducts,
                        const std::vector<std::string>& depends,
                        const cmCustomCommandLines& commandLines,

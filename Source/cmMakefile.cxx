@@ -1257,20 +1257,6 @@ void cmMakefile::AppendCustomCommandToOutput(
   }
 }
 
-std::string cmMakefile::GetUtilityOutput(cmTarget* target)
-{
-  std::string force = cmStrCat(this->GetCurrentBinaryDirectory(),
-                               "/CMakeFiles/", target->GetName());
-  // The output is not actually created so mark it symbolic.
-  if (cmSourceFile* sf = this->GetOrCreateSource(
-        force, false, cmSourceFileLocationKind::Known)) {
-    sf->SetProperty("SYMBOLIC", "1");
-  } else {
-    cmSystemTools::Error("Could not get source file entry for " + force);
-  }
-  return force;
-}
-
 cmTarget* cmMakefile::AddUtilityCommand(
   const std::string& utilityName, bool excludeFromAll, const char* workingDir,
   const std::vector<std::string>& byproducts,
@@ -1287,10 +1273,6 @@ cmTarget* cmMakefile::AddUtilityCommand(
     return target;
   }
 
-  // Get the output name of the utility target and mark it generated.
-  std::string force = this->GetUtilityOutput(target);
-  this->GetOrCreateGeneratedSource(force);
-
   // Always create the byproduct sources and mark them generated.
   this->CreateGeneratedOutputs(byproducts);
 
@@ -1303,8 +1285,8 @@ cmTarget* cmMakefile::AddUtilityCommand(
     [=](cmLocalGenerator& lg, const cmListFileBacktrace& lfbt) {
       BacktraceGuard guard(this->Backtrace, lfbt);
       detail::AddUtilityCommand(lg, lfbt, cmCommandOrigin::Project, target,
-                                force, GetCStrOrNull(workingStr), byproducts,
-                                depends, commandLines, escapeOldStyle,
+                                GetCStrOrNull(workingStr), byproducts, depends,
+                                commandLines, escapeOldStyle,
                                 GetCStrOrNull(commentStr), uses_terminal,
                                 command_expand_lists, job_pool, stdPipesUTF8);
     });
