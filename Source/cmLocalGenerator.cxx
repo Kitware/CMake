@@ -4115,7 +4115,7 @@ void AppendCustomCommandToOutput(cmLocalGenerator& lg,
 
 void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        cmCommandOrigin origin, cmTarget* target,
-                       const cmUtilityOutput& force, const char* workingDir,
+                       std::string const& force, const char* workingDir,
                        const std::vector<std::string>& byproducts,
                        const std::vector<std::string>& depends,
                        const cmCustomCommandLines& commandLines,
@@ -4131,7 +4131,7 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
   std::string no_main_dependency;
   cmImplicitDependsList no_implicit_depends;
   cmSourceFile* rule = AddCustomCommand(
-    lg, lfbt, origin, { force.Name }, byproducts, depends, no_main_dependency,
+    lg, lfbt, origin, { force }, byproducts, depends, no_main_dependency,
     no_implicit_depends, commandLines, comment, workingDir,
     /*replace=*/false, escapeOldStyle, uses_terminal, command_expand_lists,
     /*depfile=*/"", job_pool, stdPipesUTF8);
@@ -4139,9 +4139,7 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
     lg.AddTargetByproducts(target, byproducts, lfbt, origin);
   }
 
-  if (!force.NameCMP0049.empty()) {
-    target->AddSource(force.NameCMP0049);
-  }
+  target->AddSource(force);
 }
 
 std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target)

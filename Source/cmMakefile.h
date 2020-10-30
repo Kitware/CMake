@@ -243,9 +243,9 @@ public:
                           bool excludeFromAll = false);
 
   /**
-   * Return the utility target output source file name and the CMP0049 name.
+   * Return the utility target output source file name.
    */
-  cmUtilityOutput GetUtilityOutput(cmTarget* target);
+  std::string GetUtilityOutput(cmTarget* target);
 
   /**
    * Dispatch adding a utility to the build.  A utility target is a command

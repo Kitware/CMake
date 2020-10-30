@@ -1257,25 +1257,18 @@ void cmMakefile::AppendCustomCommandToOutput(
   }
 }
 
-cmUtilityOutput cmMakefile::GetUtilityOutput(cmTarget* target)
+std::string cmMakefile::GetUtilityOutput(cmTarget* target)
 {
   std::string force = cmStrCat(this->GetCurrentBinaryDirectory(),
                                "/CMakeFiles/", target->GetName());
-  std::string forceCMP0049 = target->GetSourceCMP0049(force);
-  {
-    cmSourceFile* sf = nullptr;
-    if (!forceCMP0049.empty()) {
-      sf = this->GetOrCreateSource(forceCMP0049, false,
-                                   cmSourceFileLocationKind::Known);
-    }
-    // The output is not actually created so mark it symbolic.
-    if (sf) {
-      sf->SetProperty("SYMBOLIC", "1");
-    } else {
-      cmSystemTools::Error("Could not get source file entry for " + force);
-    }
+  // The output is not actually created so mark it symbolic.
+  if (cmSourceFile* sf = this->GetOrCreateSource(
+        force, false, cmSourceFileLocationKind::Known)) {
+    sf->SetProperty("SYMBOLIC", "1");
+  } else {
+    cmSystemTools::Error("Could not get source file entry for " + force);
   }
-  return { std::move(force), std::move(forceCMP0049) };
+  return force;
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
@@ -1295,8 +1288,8 @@ cmTarget* cmMakefile::AddUtilityCommand(
   }
 
   // Get the output name of the utility target and mark it generated.
-  cmUtilityOutput force = this->GetUtilityOutput(target);
-  this->GetOrCreateGeneratedSource(force.Name);
+  std::string force = this->GetUtilityOutput(target);
+  this->GetOrCreateGeneratedSource(force);
 
   // Always create the byproduct sources and mark them generated.
   this->CreateGeneratedOutputs(byproducts);
