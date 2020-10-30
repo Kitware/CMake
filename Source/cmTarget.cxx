@@ -623,6 +623,11 @@ void cmTarget::AddUtility(std::string const& name, bool cross, cmMakefile* mf)
     { name, cross }, mf ? mf->GetBacktrace() : cmListFileBacktrace()));
 }
 
+void cmTarget::AddUtility(BT<std::pair<std::string, bool>> util)
+{
+  impl->Utilities.emplace(std::move(util));
+}
+
 std::set<BT<std::pair<std::string, bool>>> const& cmTarget::GetUtilities()
   const
 {

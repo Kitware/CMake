@@ -35,8 +35,7 @@ void AppendPaths(const std::vector<std::string>& inputs,
     for (std::string& it : result) {
       cmSystemTools::ConvertToUnixSlashes(it);
       if (cmSystemTools::FileIsFullPath(it)) {
-        it = cmSystemTools::CollapseFullPath(
-          it, lg->GetMakefile()->GetHomeOutputDirectory());
+        it = cmSystemTools::CollapseFullPath(it);
       }
     }
     cm::append(output, result);
@@ -48,7 +47,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
                                                    std::string config,
                                                    cmLocalGenerator* lg,
                                                    bool transformDepfile)
-  : CC(cc)
+  : CC(&cc)
   , Config(std::move(config))
   , LG(lg)
   , OldStyle(cc.GetEscapeOldStyle())
@@ -57,23 +56,35 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
 {
   cmGeneratorExpression ge(cc.GetBacktrace());
 
-  const cmCustomCommandLines& cmdlines = this->CC.GetCommandLines();
+  const cmCustomCommandLines& cmdlines = this->CC->GetCommandLines();
   for (cmCustomCommandLine const& cmdline : cmdlines) {
     cmCustomCommandLine argv;
     for (std::string const& clarg : cmdline) {
       std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(clarg);
       std::string parsed_arg = cge->Evaluate(this->LG, this->Config);
-      if (this->CC.GetCommandExpandLists()) {
+      for (cmGeneratorTarget* gt : cge->GetTargets()) {
+        this->Utilities.emplace(BT<std::pair<std::string, bool>>(
+          { gt->GetName(), true }, cge->GetBacktrace()));
+      }
+      if (this->CC->GetCommandExpandLists()) {
         cm::append(argv, cmExpandedList(parsed_arg));
       } else {
         argv.push_back(std::move(parsed_arg));
       }
     }
 
-    // Later code assumes at least one entry exists, but expanding
-    // lists on an empty command may have left this empty.
-    // FIXME: Should we define behavior for removing empty commands?
-    if (argv.empty()) {
+    if (!argv.empty()) {
+      // If the command references an executable target by name,
+      // collect the target to add a target-level dependency on it.
+      cmGeneratorTarget* gt = this->LG->FindGeneratorTargetToUse(argv.front());
+      if (gt && gt->GetType() == cmStateEnums::EXECUTABLE) {
+        this->Utilities.emplace(BT<std::pair<std::string, bool>>(
+          { gt->GetName(), true }, cc.GetBacktrace()));
+      }
+    } else {
+      // Later code assumes at least one entry exists, but expanding
+      // lists on an empty command may have left this empty.
+      // FIXME: Should we define behavior for removing empty commands?
       argv.emplace_back();
     }
 
@@ -114,7 +125,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
               this->Byproducts);
   AppendPaths(cc.GetDepends(), ge, this->LG, this->Config, this->Depends);
 
-  const std::string& workingdirectory = this->CC.GetWorkingDirectory();
+  const std::string& workingdirectory = this->CC->GetWorkingDirectory();
   if (!workingdirectory.empty()) {
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(workingdirectory);
@@ -271,7 +282,7 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
 
 std::string cmCustomCommandGenerator::GetFullDepfile() const
 {
-  std::string depfile = this->CC.GetDepfile();
+  std::string depfile = this->CC->GetDepfile();
   if (depfile.empty()) {
     return "";
   }
@@ -305,7 +316,7 @@ std::string cmCustomCommandGenerator::GetInternalDepfile() const
 
 const char* cmCustomCommandGenerator::GetComment() const
 {
-  return this->CC.GetComment();
+  return this->CC->GetComment();
 }
 
 std::string cmCustomCommandGenerator::GetWorkingDirectory() const
@@ -315,7 +326,7 @@ std::string cmCustomCommandGenerator::GetWorkingDirectory() const
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const
 {
-  return this->CC.GetOutputs();
+  return this->CC->GetOutputs();
 }
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
@@ -326,4 +337,10 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
 std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
 {
   return this->Depends;
+}
+
+std::set<BT<std::pair<std::string, bool>>> const&
+cmCustomCommandGenerator::GetUtilities() const
+{
+  return this->Utilities;
 }

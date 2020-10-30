@@ -164,6 +164,7 @@ public:
    */
   void AddUtility(std::string const& name, bool cross,
                   cmMakefile* mf = nullptr);
+  void AddUtility(BT<std::pair<std::string, bool>> util);
   //! Get the utilities used by this target
   std::set<BT<std::pair<std::string, bool>>> const& GetUtilities() const;
 
