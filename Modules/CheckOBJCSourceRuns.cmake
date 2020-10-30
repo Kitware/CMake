@@ -70,5 +70,7 @@ include_guard(GLOBAL)
 include(Internal/CheckSourceRuns)
 
 macro(CHECK_OBJC_SOURCE_RUNS SOURCE VAR)
+  set(_CheckSourceRuns_old_signature 1)
   cmake_check_source_runs(OBJC "${SOURCE}" ${VAR} ${ARGN})
+  unset(_CheckSourceRuns_old_signature)
 endmacro()
