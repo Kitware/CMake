@@ -5,15 +5,14 @@
 CPackIFW
 --------
 
-The documentation for the CPack IFW generator has moved here: :cpack_gen:`CPack IFW Generator`
+.. versionadded:: 3.1
 
-.. _QtIFW: http://doc.qt.io/qtinstallerframework/index.html
-
-This module looks for the location of the command line utilities supplied
-with the Qt Installer Framework (QtIFW_).
+This module looks for the location of the command-line utilities supplied with the
+`Qt Installer Framework <http://doc.qt.io/qtinstallerframework/index.html>`_
+(QtIFW).
 
 The module also defines several commands to control the behavior of the
-CPack ``IFW`` generator.
+:cpack_gen:`CPack IFW Generator`.
 
 Commands
 ^^^^^^^^
@@ -62,7 +61,7 @@ The module defines the following commands:
 
   ``FORCED_INSTALLATION``
     if set, then the component must always be installed.
-    It is a equivalent of the ``REQUARED`` option from the
+    It is a equivalent of the ``REQUIRED`` option from the
     :command:`cpack_add_component` command.
 
   ``REQUIRES_ADMIN_RIGHTS``
@@ -102,10 +101,10 @@ The module defines the following commands:
 
   ``DEPENDS`` | ``DEPENDENCIES``
     list of dependency component or component group identifiers in
-    QtIFW_ style.
+    QtIFW style.
 
   ``AUTO_DEPEND_ON``
-    list of identifiers of component or component group in QtIFW_ style
+    list of identifiers of component or component group in QtIFW style
     that this component has an automatic dependency on.
 
   ``LICENSES``
@@ -207,10 +206,10 @@ The module defines the following commands:
 
   ``DEPENDS`` | ``DEPENDENCIES``
     list of dependency component or component group identifiers in
-    QtIFW_ style.
+    QtIFW style.
 
   ``AUTO_DEPEND_ON``
-    list of identifiers of component or component group in QtIFW_ style
+    list of identifiers of component or component group in QtIFW style
     that this component group has an automatic dependency on.
 
   ``LICENSES``
@@ -242,7 +241,7 @@ The module defines the following commands:
 
 .. command:: cpack_ifw_add_repository
 
-  Add QtIFW_ specific remote repository to binary installer.
+  Add QtIFW specific remote repository to binary installer.
 
   ::
 
@@ -273,7 +272,7 @@ The module defines the following commands:
 
 .. command:: cpack_ifw_update_repository
 
-  Update QtIFW_ specific repository from remote repository.
+  Update QtIFW specific repository from remote repository.
 
   ::
 
@@ -362,6 +361,8 @@ set(_CPACK_IFW_PREFIXES
   "QtIFW-")
 
 set(_CPACK_IFW_VERSIONS
+  "3.2"
+  "3.2.0"
   "3.1"
   "3.1.0"
   "3.0"

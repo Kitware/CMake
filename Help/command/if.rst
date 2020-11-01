@@ -29,6 +29,8 @@ If used, it must be a verbatim
 repeat of the argument of the opening
 ``if`` command.
 
+.. _`Condition Syntax`:
+
 Condition Syntax
 ^^^^^^^^^^^^^^^^
 

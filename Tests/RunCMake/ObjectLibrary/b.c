@@ -5,7 +5,7 @@
 #endif
 
 extern int a(void);
-EXPORT int b()
+EXPORT int b(void)
 {
   return a();
 }

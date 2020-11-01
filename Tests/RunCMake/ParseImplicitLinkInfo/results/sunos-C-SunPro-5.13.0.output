@@ -1,0 +1,2 @@
+libs=c
+dirs=/opt/solarisstudio12.4/lib/compilers/staticlib;/opt/solarisstudio12.4/lib/compilers/sparc;/opt/solarisstudio12.4/lib/compilers;/usr/ccs/lib;/lib;/usr/lib

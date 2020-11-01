@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmRulePlaceholderExpander.h"
 
-#include <ctype.h>
-#include <string.h>
+#include <cctype>
+#include <cstring>
 #include <utility>
 
 #include "cmOutputConverter.h"
@@ -85,6 +85,16 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       return replaceValues.ObjectsQuoted;
     }
   }
+  if (replaceValues.AIXExports) {
+    if (variable == "AIX_EXPORTS") {
+      return replaceValues.AIXExports;
+    }
+  }
+  if (replaceValues.ISPCHeader) {
+    if (variable == "ISPC_HEADER") {
+      return replaceValues.ISPCHeader;
+    }
+  }
   if (replaceValues.Defines && variable == "DEFINES") {
     return replaceValues.Defines;
   }
@@ -129,6 +139,16 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   if (replaceValues.DependencyFile) {
     if (variable == "DEP_FILE") {
       return replaceValues.DependencyFile;
+    }
+  }
+  if (replaceValues.Fatbinary) {
+    if (variable == "FATBINARY") {
+      return replaceValues.Fatbinary;
+    }
+  }
+  if (replaceValues.RegisterFile) {
+    if (variable == "REGISTER_FILE") {
+      return replaceValues.RegisterFile;
     }
   }
 
@@ -231,12 +251,10 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   }
   if (variable == "CMAKE_COMMAND") {
     return outputConverter->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(cmSystemTools::GetCMakeCommand()),
-      cmOutputConverter::SHELL);
+      cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
   }
 
-  std::map<std::string, std::string>::iterator compIt =
-    this->Compilers.find(variable);
+  auto compIt = this->Compilers.find(variable);
 
   if (compIt != this->Compilers.end()) {
     std::string ret = outputConverter->ConvertToOutputForExisting(
@@ -258,7 +276,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       this->VariableMappings["CMAKE_" + compIt->second +
                              "_COMPILE_OPTIONS_SYSROOT"];
 
-    // if there is a required first argument to the compiler add it
+    // if there are required arguments to the compiler add it
     // to the compiler string
     if (!compilerArg1.empty()) {
       ret += " ";
@@ -292,8 +310,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
     return ret;
   }
 
-  std::map<std::string, std::string>::iterator mapIt =
-    this->VariableMappings.find(variable);
+  auto mapIt = this->VariableMappings.find(variable);
   if (mapIt != this->VariableMappings.end()) {
     if (variable.find("_FLAG") == std::string::npos) {
       return outputConverter->ConvertToOutputForExisting(mapIt->second);
@@ -331,7 +348,17 @@ void cmRulePlaceholderExpander::ExpandRuleVariables(
       std::string replace =
         this->ExpandRuleVariable(outputConverter, var, replaceValues);
       expandedInput += s.substr(pos, start - pos);
+
+      // Prevent consecutive whitespace in the output if the rule variable
+      // expands to an empty string.
+      bool consecutive = replace.empty() && start > 0 && s[start - 1] == ' ' &&
+        end + 1 < s.size() && s[end + 1] == ' ';
+      if (consecutive) {
+        expandedInput.pop_back();
+      }
+
       expandedInput += replace;
+
       // move to next one
       start = s.find('<', start + var.size() + 2);
       pos = end + 1;

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalVisualStudio8Generator_h
-#define cmGlobalVisualStudio8Generator_h
+#pragma once
 
 #include "cmGlobalVisualStudio71Generator.h"
 
@@ -57,10 +56,6 @@ protected:
   virtual bool NeedsDeploy(cmGeneratorTarget const& target,
                            const char* config) const;
 
-  /** Returns true if deployment has been disabled in cmake file. */
-  bool DeployInhibited(cmGeneratorTarget const& target,
-                       const char* config) const;
-
   /** Returns true if the target system support debugging deployment. */
   virtual bool TargetSystemSupportsDeployment() const;
 
@@ -74,7 +69,7 @@ protected:
     const std::string& platformMapping = "") override;
   bool ComputeTargetDepends() override;
   void WriteProjectDepends(std::ostream& fout, const std::string& name,
-                           const char* path,
+                           const std::string& path,
                            const cmGeneratorTarget* t) override;
 
   bool UseFolderProperty() const override;
@@ -82,4 +77,3 @@ protected:
   std::string Name;
   std::string WindowsCEVersion;
 };
-#endif

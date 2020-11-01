@@ -1,18 +1,20 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestBuildCommand_h
-#define cmCTestBuildCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestHandlerCommand.h"
-
 #include <string>
+#include <utility>
 #include <vector>
+
+#include <cm/memory>
+
+#include "cmCTestHandlerCommand.h"
+#include "cmCommand.h"
 
 class cmCTestBuildHandler;
 class cmCTestGenericHandler;
-class cmCommand;
 class cmExecutionStatus;
 class cmGlobalGenerator;
 
@@ -24,18 +26,17 @@ class cmGlobalGenerator;
 class cmCTestBuildCommand : public cmCTestHandlerCommand
 {
 public:
-  cmCTestBuildCommand();
   ~cmCTestBuildCommand() override;
 
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestBuildCommand* ni = new cmCTestBuildCommand;
+    auto ni = cm::make_unique<cmCTestBuildCommand>();
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
-    return ni;
+    return std::unique_ptr<cmCommand>(std::move(ni));
   }
 
   /**
@@ -46,23 +47,17 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
 
-  cmGlobalGenerator* GlobalGenerator;
+  std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
 
 protected:
   cmCTestBuildHandler* Handler;
-  enum
-  {
-    ctb_BUILD = ct_LAST,
-    ctb_NUMBER_ERRORS,
-    ctb_NUMBER_WARNINGS,
-    ctb_TARGET,
-    ctb_CONFIGURATION,
-    ctb_FLAGS,
-    ctb_PROJECT_NAME,
-    ctb_LAST
-  };
-
+  void BindArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
-};
 
-#endif
+  std::string NumberErrors;
+  std::string NumberWarnings;
+  std::string Target;
+  std::string Configuration;
+  std::string Flags;
+  std::string ProjectName;
+};

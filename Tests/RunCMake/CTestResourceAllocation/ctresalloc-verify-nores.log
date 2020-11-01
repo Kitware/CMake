@@ -1,0 +1,2 @@
+alloc gpus 0 1
+dealloc gpus 0 1

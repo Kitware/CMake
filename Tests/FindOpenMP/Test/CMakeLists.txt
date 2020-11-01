@@ -42,6 +42,7 @@ foreach(c C CXX Fortran)
   separate_arguments(_OpenMP_${c}_OPTIONS NATIVE_COMMAND "${OpenMP_${c}_FLAGS}")
   target_compile_options(test_var_${c} PRIVATE "${_OpenMP_${c}_OPTIONS}")
   target_link_libraries(test_var_${c} PRIVATE "${OpenMP_${c}_FLAGS}")
+  target_include_directories(test_var_${c} PRIVATE ${OpenMP_${c}_INCLUDE_DIRS})
   set_property(TARGET test_var_${c} PROPERTY LINKER_LANGUAGE ${c})
   add_test(NAME test_var_${c} COMMAND test_var_${c})
 

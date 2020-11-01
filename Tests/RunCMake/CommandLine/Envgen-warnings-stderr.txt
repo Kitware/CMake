@@ -1,0 +1,7 @@
+^Warning: Environment variable CMAKE_GENERATOR_INSTANCE will be ignored, because CMAKE_GENERATOR is not set.
+Warning: Environment variable CMAKE_GENERATOR_PLATFORM will be ignored, because CMAKE_GENERATOR is not set.
+Warning: Environment variable CMAKE_GENERATOR_TOOLSET will be ignored, because CMAKE_GENERATOR is not set.
+CMake Error: No generator specified for -G
+
+Generators.*
+\* (Unix Makefiles|Visual Studio).*

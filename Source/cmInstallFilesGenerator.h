@@ -1,16 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmInstallFilesGenerator_h
-#define cmInstallFilesGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-
-#include "cmInstallGenerator.h"
-#include "cmScriptGenerator.h"
 
 #include <iosfwd>
 #include <string>
 #include <vector>
+
+#include "cmInstallGenerator.h"
+#include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
 
@@ -21,11 +20,11 @@ class cmInstallFilesGenerator : public cmInstallGenerator
 {
 public:
   cmInstallFilesGenerator(std::vector<std::string> const& files,
-                          const char* dest, bool programs,
-                          const char* file_permissions,
+                          std::string const& dest, bool programs,
+                          std::string file_permissions,
                           std::vector<std::string> const& configurations,
-                          const char* component, MessageLevel message,
-                          bool exclude_from_all, const char* rename,
+                          std::string const& component, MessageLevel message,
+                          bool exclude_from_all, std::string rename,
                           bool optional = false);
   ~cmInstallFilesGenerator() override;
 
@@ -42,11 +41,9 @@ protected:
                            std::vector<std::string> const& files);
 
   cmLocalGenerator* LocalGenerator;
-  std::vector<std::string> Files;
-  std::string FilePermissions;
-  std::string Rename;
-  bool Programs;
-  bool Optional;
+  std::vector<std::string> const Files;
+  std::string const FilePermissions;
+  std::string const Rename;
+  bool const Programs;
+  bool const Optional;
 };
-
-#endif

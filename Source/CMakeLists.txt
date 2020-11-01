@@ -1,9 +1,16 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+# To ensure maximum portability across various compilers and platforms
+# deactivate any compiler extensions
+set(CMAKE_C_EXTENSIONS FALSE)
+set(CMAKE_CXX_EXTENSIONS FALSE)
+
 include(CheckIncludeFile)
 # Check if we can build support for ELF parsing.
-if(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
+if(WIN32)
+  set(HAVE_ELF_H 0)
+elseif(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
   CHECK_INCLUDE_FILES("stdint.h;elf_abi.h" HAVE_ELF_H)
 else()
   CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
@@ -95,9 +102,6 @@ include_directories(
   ${CMake_HAIKU_INCLUDE_DIRS}
   )
 
-# let cmake know it is supposed to use it
-add_definitions(-DCMAKE_BUILD_WITH_CMAKE)
-
 # Check if we can build the ELF parser.
 if(CMAKE_USE_ELF_PARSER)
   set(ELF_SRCS cmELF.h cmELF.cxx)
@@ -137,19 +141,51 @@ set(SRCS
   LexerParser/cmFortranParser.cxx
   LexerParser/cmFortranParserTokens.h
   LexerParser/cmFortranParser.y
+  LexerParser/cmGccDepfileLexer.cxx
+  LexerParser/cmGccDepfileLexer.h
+  LexerParser/cmGccDepfileLexer.in.l
   LexerParser/cmListFileLexer.c
   LexerParser/cmListFileLexer.in.l
 
   cmAffinity.cxx
   cmAffinity.h
+  cmAlgorithms.h
   cmArchiveWrite.cxx
   cmArgumentParser.cxx
   cmArgumentParser.h
   cmBase32.cxx
+  cmBinUtilsLinker.cxx
+  cmBinUtilsLinker.h
+  cmBinUtilsLinuxELFGetRuntimeDependenciesTool.cxx
+  cmBinUtilsLinuxELFGetRuntimeDependenciesTool.h
+  cmBinUtilsLinuxELFLinker.cxx
+  cmBinUtilsLinuxELFLinker.h
+  cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool.cxx
+  cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool.h
+  cmBinUtilsMacOSMachOGetRuntimeDependenciesTool.cxx
+  cmBinUtilsMacOSMachOGetRuntimeDependenciesTool.h
+  cmBinUtilsMacOSMachOLinker.cxx
+  cmBinUtilsMacOSMachOLinker.h
+  cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.cxx
+  cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.h
+  cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.cxx
+  cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h
+  cmBinUtilsWindowsPEGetRuntimeDependenciesTool.cxx
+  cmBinUtilsWindowsPEGetRuntimeDependenciesTool.h
+  cmBinUtilsWindowsPELinker.cxx
+  cmBinUtilsWindowsPELinker.h
+  cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.cxx
+  cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h
   cmCacheManager.cxx
   cmCacheManager.h
+  cmCheckCustomOutputs.h
+  cmCheckCustomOutputs.cxx
   cmCLocaleEnvironmentScope.h
   cmCLocaleEnvironmentScope.cxx
+  cmCMakePath.h
+  cmCMakePath.cxx
+  cmCMakePresetsFile.cxx
+  cmCMakePresetsFile.h
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
@@ -161,6 +197,8 @@ set(SRCS
   cmComputeLinkInformation.h
   cmComputeTargetDepends.h
   cmComputeTargetDepends.cxx
+  cmConsoleBuf.h
+  cmConsoleBuf.cxx
   cmCPackPropertiesGenerator.h
   cmCPackPropertiesGenerator.cxx
   cmCryptoHash.cxx
@@ -171,6 +209,9 @@ set(SRCS
   cmCustomCommand.h
   cmCustomCommandGenerator.cxx
   cmCustomCommandGenerator.h
+  cmCustomCommandLines.cxx
+  cmCustomCommandLines.h
+  cmCustomCommandTypes.h
   cmDefinitions.cxx
   cmDefinitions.h
   cmDepends.cxx
@@ -204,8 +245,6 @@ set(SRCS
   cmExportTryCompileFileGenerator.cxx
   cmExportSet.h
   cmExportSet.cxx
-  cmExportSetMap.h
-  cmExportSetMap.cxx
   cmExternalMakefileProjectGenerator.cxx
   cmExternalMakefileProjectGenerator.h
   cmExtraCodeBlocksGenerator.cxx
@@ -242,9 +281,15 @@ set(SRCS
   cmFileTime.h
   cmFileTimeCache.cxx
   cmFileTimeCache.h
+  cmFileTimes.cxx
+  cmFileTimes.h
   cmFortranParserImpl.cxx
   cmFSPermissions.cxx
   cmFSPermissions.h
+  cmGccDepfileLexerHelper.cxx
+  cmGccDepfileLexerHelper.h
+  cmGccDepfileReader.cxx
+  cmGccDepfileReader.h
   cmGeneratedFileStream.cxx
   cmGeneratorExpressionContext.cxx
   cmGeneratorExpressionContext.h
@@ -264,6 +309,8 @@ set(SRCS
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmLinkItemGraphVisitor.cxx
+  cmLinkItemGraphVisitor.h
   cmGetPipes.cxx
   cmGetPipes.h
   cmGlobalCommonGenerator.cxx
@@ -293,6 +340,11 @@ set(SRCS
   cmInstallTargetGenerator.cxx
   cmInstallDirectoryGenerator.h
   cmInstallDirectoryGenerator.cxx
+  cmJSONHelpers.h
+  cmLDConfigLDConfigTool.cxx
+  cmLDConfigLDConfigTool.h
+  cmLDConfigTool.cxx
+  cmLDConfigTool.h
   cmLinkedTree.h
   cmLinkItem.cxx
   cmLinkItem.h
@@ -316,6 +368,7 @@ set(SRCS
   cmMakefileTargetGenerator.cxx
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
+  cmMakefileProfilingData.cxx
   cmMakefileUtilityTargetGenerator.cxx
   cmMessageType.h
   cmMessenger.cxx
@@ -336,12 +389,9 @@ set(SRCS
   cmProcessOutput.h
   cmProcessTools.cxx
   cmProcessTools.h
-  cmProperty.cxx
   cmProperty.h
   cmPropertyDefinition.cxx
   cmPropertyDefinition.h
-  cmPropertyDefinitionMap.cxx
-  cmPropertyDefinitionMap.h
   cmPropertyMap.cxx
   cmPropertyMap.h
   cmQtAutoGen.cxx
@@ -358,6 +408,8 @@ set(SRCS
   cmQtAutoRcc.h
   cmRST.cxx
   cmRST.h
+  cmRuntimeDependencyArchive.cxx
+  cmRuntimeDependencyArchive.h
   cmScriptGenerator.h
   cmScriptGenerator.cxx
   cmSourceFile.cxx
@@ -367,6 +419,8 @@ set(SRCS
   cmSourceFileLocationKind.h
   cmSourceGroup.cxx
   cmSourceGroup.h
+  cmStandardLevelResolver.cxx
+  cmStandardLevelResolver.h
   cmState.cxx
   cmState.h
   cmStateDirectory.cxx
@@ -374,6 +428,8 @@ set(SRCS
   cmStateSnapshot.cxx
   cmStateSnapshot.h
   cmStateTypes.h
+  cmStringAlgorithms.cxx
+  cmStringAlgorithms.h
   cmSystemTools.cxx
   cmSystemTools.h
   cmTarget.cxx
@@ -385,6 +441,8 @@ set(SRCS
   cmTest.h
   cmTestGenerator.cxx
   cmTestGenerator.h
+  cmTransformDepfile.cxx
+  cmTransformDepfile.h
   cmUuid.cxx
   cmUVHandlePtr.cxx
   cmUVHandlePtr.h
@@ -408,9 +466,6 @@ set(SRCS
   cmXMLWriter.h
   cmake.cxx
   cmake.h
-  cm_string_view.cxx
-  cm_string_view.hxx
-  cm_static_string_view.hxx
 
   cmCommand.cxx
   cmCommand.h
@@ -448,8 +503,12 @@ set(SRCS
   cmBuildNameCommand.h
   cmCMakeHostSystemInformationCommand.cxx
   cmCMakeHostSystemInformationCommand.h
+  cmCMakeLanguageCommand.cxx
+  cmCMakeLanguageCommand.h
   cmCMakeMinimumRequired.cxx
   cmCMakeMinimumRequired.h
+  cmCMakePathCommand.h
+  cmCMakePathCommand.cxx
   cmCMakePolicyCommand.cxx
   cmCMakePolicyCommand.h
   cmConditionEvaluator.cxx
@@ -464,8 +523,6 @@ set(SRCS
   cmCreateTestSourceList.h
   cmDefinePropertyCommand.cxx
   cmDefinePropertyCommand.h
-  cmDisallowedCommand.cxx
-  cmDisallowedCommand.h
   cmEnableLanguageCommand.cxx
   cmEnableLanguageCommand.h
   cmEnableTestingCommand.cxx
@@ -500,6 +557,8 @@ set(SRCS
   cmFindProgramCommand.h
   cmForEachCommand.cxx
   cmForEachCommand.h
+  cmFunctionBlocker.cxx
+  cmFunctionBlocker.h
   cmFunctionCommand.cxx
   cmFunctionCommand.h
   cmGetCMakePropertyCommand.cxx
@@ -605,6 +664,8 @@ set(SRCS
   cmStringReplaceHelper.cxx
   cmStringCommand.cxx
   cmStringCommand.h
+  cmSubcommandTable.cxx
+  cmSubcommandTable.h
   cmSubdirCommand.cxx
   cmSubdirCommand.h
   cmSubdirDependsCommand.cxx
@@ -623,6 +684,8 @@ set(SRCS
   cmTargetLinkDirectoriesCommand.h
   cmTargetLinkLibrariesCommand.cxx
   cmTargetLinkLibrariesCommand.h
+  cmTargetPrecompileHeadersCommand.cxx
+  cmTargetPrecompileHeadersCommand.h
   cmTargetPropCommandBase.cxx
   cmTargetPropCommandBase.h
   cmTargetSourcesCommand.cxx
@@ -633,8 +696,6 @@ set(SRCS
   cmTryCompileCommand.h
   cmTryRunCommand.cxx
   cmTryRunCommand.h
-  cmUnexpectedCommand.cxx
-  cmUnexpectedCommand.h
   cmUnsetCommand.cxx
   cmUnsetCommand.h
   cmUseMangledMesaCommand.cxx
@@ -656,10 +717,11 @@ set(SRCS
   cm_utf8.c
   cm_codecvt.hxx
   cm_codecvt.cxx
-  cm_thread.hxx
 
   cmDuration.h
   cmDuration.cxx
+
+  bindexplib.cxx
   )
 
 SET_PROPERTY(SOURCE cmProcessOutput.cxx APPEND PROPERTY COMPILE_DEFINITIONS
@@ -682,7 +744,6 @@ if (WIN32)
   set(SRCS ${SRCS}
     cmCallVisualStudioMacro.cxx
     cmCallVisualStudioMacro.h
-    bindexplib.cxx
     )
 
   if(NOT UNIX)
@@ -786,6 +847,8 @@ set(SRCS ${SRCS}
   cmNinjaUtilityTargetGenerator.h
   cmNinjaLinkLineComputer.cxx
   cmNinjaLinkLineComputer.h
+  cmNinjaLinkLineDeviceComputer.cxx
+  cmNinjaLinkLineDeviceComputer.h
   )
 
 # Temporary variable for tools targets
@@ -820,6 +883,7 @@ endforeach()
 # create a library used by the command line and the GUI
 add_library(CMakeLib ${SRCS})
 target_link_libraries(CMakeLib cmsys
+  ${CMAKE_STD_LIBRARY}
   ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
   ${CMAKE_TAR_LIBRARIES}
   ${CMAKE_CURL_LIBRARIES}
@@ -865,6 +929,7 @@ include_directories(
 #
 set(CTEST_SRCS cmCTest.cxx
   CTest/cmProcess.cxx
+  CTest/cmCTestBinPacker.cxx
   CTest/cmCTestBuildAndTestHandler.cxx
   CTest/cmCTestBuildCommand.cxx
   CTest/cmCTestBuildHandler.cxx
@@ -884,11 +949,15 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx
   CTest/cmCTestHandlerCommand.cxx
+  CTest/cmCTestResourceAllocator.cxx
+  CTest/cmCTestResourceSpec.cxx
   CTest/cmCTestLaunch.cxx
+  CTest/cmCTestLaunchReporter.cxx
   CTest/cmCTestMemCheckCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx
   CTest/cmCTestMultiProcessHandler.cxx
   CTest/cmCTestReadCustomFilesCommand.cxx
+  CTest/cmCTestResourceGroupsLexerHelper.cxx
   CTest/cmCTestRunScriptCommand.cxx
   CTest/cmCTestRunTest.cxx
   CTest/cmCTestScriptHandler.cxx
@@ -919,6 +988,10 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestHG.h
   CTest/cmCTestP4.cxx
   CTest/cmCTestP4.h
+
+  LexerParser/cmCTestResourceGroupsLexer.cxx
+  LexerParser/cmCTestResourceGroupsLexer.h
+  LexerParser/cmCTestResourceGroupsLexer.in.l
   )
 
 # Build CTestLib
@@ -945,12 +1018,6 @@ set(CPACK_SRCS
   CPack/cmCPackNSISGenerator.cxx
   CPack/cmCPackNuGetGenerator.cxx
   CPack/cmCPackSTGZGenerator.cxx
-  CPack/cmCPackTGZGenerator.cxx
-  CPack/cmCPackTXZGenerator.cxx
-  CPack/cmCPackTarBZip2Generator.cxx
-  CPack/cmCPackTarCompressGenerator.cxx
-  CPack/cmCPackZIPGenerator.cxx
-  CPack/cmCPack7zGenerator.cxx
   )
 # CPack IFW generator
 set(CPACK_SRCS ${CPACK_SRCS}
@@ -1091,20 +1158,6 @@ add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE})
 list(APPEND _tools cmake)
 target_link_libraries(cmake CMakeLib)
 
-add_library(CMakeServerLib
-  cmConnection.h cmConnection.cxx
-  cmFileMonitor.cxx cmFileMonitor.h
-  cmJsonObjectDictionary.h
-  cmJsonObjects.h
-  cmJsonObjects.cxx
-  cmPipeConnection.cxx cmPipeConnection.h
-  cmServer.cxx cmServer.h
-  cmServerConnection.cxx cmServerConnection.h
-  cmServerProtocol.cxx cmServerProtocol.h
-  )
-target_link_libraries(CMakeServerLib CMakeLib)
-target_link_libraries(cmake CMakeServerLib)
-
 # Build CTest executable
 add_executable(ctest ctest.cxx ${MANIFEST_FILE})
 list(APPEND _tools ctest)
@@ -1117,7 +1170,7 @@ target_link_libraries(cpack CPackLib)
 
 # Curses GUI
 if(BUILD_CursesDialog)
-  include(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
+  add_subdirectory(CursesDialog)
 endif()
 
 # Qt GUI
@@ -1130,6 +1183,21 @@ include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 include (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
 if(WIN32)
+  # Compute the binary version that appears in the RC file. Version
+  # components in the RC file are 16-bit integers so we may have to
+  # split the patch component.
+  if(CMake_VERSION_PATCH MATCHES "^([0-9]+)([0-9][0-9][0-9][0-9])$")
+    set(CMake_RCVERSION_YEAR "${CMAKE_MATCH_1}")
+    set(CMake_RCVERSION_MONTH_DAY "${CMAKE_MATCH_2}")
+    string(REGEX REPLACE "^0+" "" CMake_RCVERSION_MONTH_DAY "${CMake_RCVERSION_MONTH_DAY}")
+    set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMake_RCVERSION_YEAR},${CMake_RCVERSION_MONTH_DAY})
+    unset(CMake_RCVERSION_MONTH_DAY)
+    unset(CMake_RCVERSION_YEAR)
+  else()
+    set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMake_VERSION_PATCH},0)
+  endif()
+  set(CMake_RCVERSION_STR ${CMake_VERSION})
+
   # Add Windows executable version information.
   configure_file("CMakeVersion.rc.in" "CMakeVersion.rc" @ONLY)
 
@@ -1140,6 +1208,11 @@ if(WIN32)
   foreach(_tool ${_tools})
     target_sources(${_tool} PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
   endforeach()
+endif()
+
+if(CMake_JOB_POOL_LINK_BIN)
+  set_property(TARGET ${_tools} PROPERTY JOB_POOL_LINK "link-bin")
+  set_property(GLOBAL APPEND PROPERTY JOB_POOLS "link-bin=${CMake_JOB_POOL_LINK_BIN}")
 endif()
 
 # Install tools

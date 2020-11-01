@@ -2,7 +2,7 @@
 # options
 
 message("TSAN_OPTIONS = [$ENV{TSAN_OPTIONS}]")
-string(REGEX REPLACE ".*log_path=\'([^\']*)\'.*" "\\1" LOG_FILE "$ENV{TSAN_OPTIONS}")
+string(REGEX REPLACE ".*log_path='([^']*)'.*" "\\1" LOG_FILE "$ENV{TSAN_OPTIONS}")
 message("LOG_FILE=[${LOG_FILE}]")
 
 set(error_types

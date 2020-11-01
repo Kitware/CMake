@@ -1,16 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef _cmRST_h
-#define _cmRST_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
 
 /** \class cmRST
  * \brief Perform basic .rst processing for command-line help
@@ -96,5 +96,3 @@ private:
   std::set<std::string> Replaced;
   std::string ReplaceName;
 };
-
-#endif

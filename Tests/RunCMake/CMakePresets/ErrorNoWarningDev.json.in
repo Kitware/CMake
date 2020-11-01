@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "ErrorNoWarningDev",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "warnings": {
+        "dev": false
+      },
+      "errors": {
+        "dev": true
+      }
+    }
+  ]
+}

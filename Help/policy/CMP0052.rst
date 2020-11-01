@@ -1,6 +1,8 @@
 CMP0052
 -------
 
+.. versionadded:: 3.1
+
 Reject source and build dirs in installed
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`.
 

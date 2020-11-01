@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFindLibraryCommand_h
-#define cmFindLibraryCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -10,7 +9,6 @@
 
 #include "cmFindBase.h"
 
-class cmCommand;
 class cmExecutionStatus;
 
 /** \class cmFindLibraryCommand
@@ -23,18 +21,9 @@ class cmExecutionStatus;
 class cmFindLibraryCommand : public cmFindBase
 {
 public:
-  cmFindLibraryCommand();
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmFindLibraryCommand; }
+  cmFindLibraryCommand(cmExecutionStatus& status);
 
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  bool InitialPass(std::vector<std::string> const& args);
 
 protected:
   void AddArchitecturePaths(const char* suffix);
@@ -52,4 +41,5 @@ private:
   std::string FindFrameworkLibraryDirsPerName();
 };
 
-#endif
+bool cmFindLibrary(std::vector<std::string> const& args,
+                   cmExecutionStatus& status);

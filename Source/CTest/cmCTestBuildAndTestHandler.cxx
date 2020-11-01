@@ -2,20 +2,22 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestBuildAndTestHandler.h"
 
+#include <chrono>
+#include <cstdlib>
+#include <cstring>
+#include <ratio>
+
+#include "cmsys/Process.h"
+
 #include "cmCTest.h"
 #include "cmCTestTestHandler.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
-
-#include "cmsys/Process.h"
-#include <chrono>
-#include <cstring>
-#include <ratio>
-#include <stdlib.h>
 
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 {
@@ -75,6 +77,11 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
 
   if (config) {
     args.push_back("-DCMAKE_BUILD_TYPE:STRING=" + std::string(config));
+  }
+  if (!this->BuildMakeProgram.empty() &&
+      (this->BuildGenerator.find("Make") != std::string::npos ||
+       this->BuildGenerator.find("Ninja") != std::string::npos)) {
+    args.push_back("-DCMAKE_MAKE_PROGRAM:FILEPATH=" + this->BuildMakeProgram);
   }
 
   for (std::string const& opt : this->BuildOptions) {
@@ -175,10 +182,9 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     std::vector<std::string> extraPaths;
     std::vector<std::string> failed;
     fullPath = cmCTestTestHandler::FindExecutable(
-      this->CTest, this->ConfigSample.c_str(), resultingConfig, extraPaths,
-      failed);
+      this->CTest, this->ConfigSample, resultingConfig, extraPaths, failed);
     if (!fullPath.empty() && !resultingConfig.empty()) {
-      this->CTest->SetConfigType(resultingConfig.c_str());
+      this->CTest->SetConfigType(resultingConfig);
     }
     out << "Using config sample with results: " << fullPath << " and "
         << resultingConfig << std::endl;
@@ -208,11 +214,11 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   if (this->BuildNoCMake) {
     // Make the generator available for the Build call below.
-    cmGlobalGenerator* gen = cm.CreateGlobalGenerator(this->BuildGenerator);
-    cm.SetGlobalGenerator(gen);
+    cm.SetGlobalGenerator(cm.CreateGlobalGenerator(this->BuildGenerator));
     if (!this->BuildGeneratorPlatform.empty()) {
-      cmMakefile mf(gen, cm.GetCurrentSnapshot());
-      if (!gen->SetGeneratorPlatform(this->BuildGeneratorPlatform, &mf)) {
+      cmMakefile mf(cm.GetGlobalGenerator(), cm.GetCurrentSnapshot());
+      if (!cm.GetGlobalGenerator()->SetGeneratorPlatform(
+            this->BuildGeneratorPlatform, &mf)) {
         return 1;
       }
     }
@@ -284,15 +290,13 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   std::vector<std::string> extraPaths;
   // if this->ExecutableDirectory is set try that as well
   if (!this->ExecutableDirectory.empty()) {
-    std::string tempPath = this->ExecutableDirectory;
-    tempPath += "/";
-    tempPath += this->TestCommand;
+    std::string tempPath =
+      cmStrCat(this->ExecutableDirectory, '/', this->TestCommand);
     extraPaths.push_back(tempPath);
   }
   std::vector<std::string> failed;
-  fullPath =
-    cmCTestTestHandler::FindExecutable(this->CTest, this->TestCommand.c_str(),
-                                       resultingConfig, extraPaths, failed);
+  fullPath = cmCTestTestHandler::FindExecutable(
+    this->CTest, this->TestCommand, resultingConfig, extraPaths, failed);
 
   if (!cmSystemTools::FileExists(fullPath)) {
     out << "Could not find path to executable, perhaps it was not built: "
@@ -373,7 +377,7 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
   const std::vector<std::string>& allArgs)
 {
   // --build-and-test options
-  if (currentArg.find("--build-and-test", 0) == 0 &&
+  if (cmHasLiteralPrefix(currentArg, "--build-and-test") &&
       idx < allArgs.size() - 1) {
     if (idx + 2 < allArgs.size()) {
       idx++;
@@ -391,25 +395,29 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
       return 0;
     }
   }
-  if (currentArg.find("--build-target", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--build-target") &&
+      idx < allArgs.size() - 1) {
     idx++;
     this->BuildTargets.push_back(allArgs[idx]);
   }
-  if (currentArg.find("--build-nocmake", 0) == 0) {
+  if (cmHasLiteralPrefix(currentArg, "--build-nocmake")) {
     this->BuildNoCMake = true;
   }
-  if (currentArg.find("--build-run-dir", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--build-run-dir") &&
+      idx < allArgs.size() - 1) {
     idx++;
     this->BuildRunDir = allArgs[idx];
   }
-  if (currentArg.find("--build-two-config", 0) == 0) {
+  if (cmHasLiteralPrefix(currentArg, "--build-two-config")) {
     this->BuildTwoConfig = true;
   }
-  if (currentArg.find("--build-exe-dir", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--build-exe-dir") &&
+      idx < allArgs.size() - 1) {
     idx++;
     this->ExecutableDirectory = allArgs[idx];
   }
-  if (currentArg.find("--test-timeout", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--test-timeout") &&
+      idx < allArgs.size() - 1) {
     idx++;
     this->Timeout = cmDuration(atof(allArgs[idx].c_str()));
   }
@@ -425,31 +433,33 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
     idx++;
     this->BuildGeneratorToolset = allArgs[idx];
   }
-  if (currentArg.find("--build-project", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--build-project") &&
+      idx < allArgs.size() - 1) {
     idx++;
     this->BuildProject = allArgs[idx];
   }
-  if (currentArg.find("--build-makeprogram", 0) == 0 &&
+  if (cmHasLiteralPrefix(currentArg, "--build-makeprogram") &&
       idx < allArgs.size() - 1) {
     idx++;
     this->BuildMakeProgram = allArgs[idx];
   }
-  if (currentArg.find("--build-config-sample", 0) == 0 &&
+  if (cmHasLiteralPrefix(currentArg, "--build-config-sample") &&
       idx < allArgs.size() - 1) {
     idx++;
     this->ConfigSample = allArgs[idx];
   }
-  if (currentArg.find("--build-noclean", 0) == 0) {
+  if (cmHasLiteralPrefix(currentArg, "--build-noclean")) {
     this->BuildNoClean = true;
   }
-  if (currentArg.find("--build-options", 0) == 0) {
+  if (cmHasLiteralPrefix(currentArg, "--build-options")) {
     while (idx + 1 < allArgs.size() && allArgs[idx + 1] != "--build-target" &&
            allArgs[idx + 1] != "--test-command") {
       ++idx;
       this->BuildOptions.push_back(allArgs[idx]);
     }
   }
-  if (currentArg.find("--test-command", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--test-command") &&
+      idx < allArgs.size() - 1) {
     ++idx;
     this->TestCommand = allArgs[idx];
     while (idx + 1 < allArgs.size()) {

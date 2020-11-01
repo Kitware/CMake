@@ -1,10 +1,10 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmDependsJavaParserHelper_h
-#define cmDependsJavaParserHelper_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -81,7 +81,7 @@ private:
   int CurrentDepth;
   int Verbose;
 
-  std::vector<char*> Allocates;
+  std::vector<std::unique_ptr<char[]>> Allocates;
 
   void PrintClasses();
 
@@ -96,5 +96,3 @@ private:
 #define YYSTYPE_IS_DECLARED
 #define YY_EXTRA_TYPE cmDependsJavaParserHelper*
 #define YY_DECL int cmDependsJava_yylex(YYSTYPE* yylvalp, yyscan_t yyscanner)
-
-#endif

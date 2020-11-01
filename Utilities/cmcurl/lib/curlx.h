@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,6 +53,19 @@
   curlx_uztosi()
 */
 
+#include "curl_multibyte.h"
+/* "curl_multibyte.h" provides these functions and macros:
+
+  curlx_convert_UTF8_to_wchar()
+  curlx_convert_wchar_to_UTF8()
+  curlx_convert_UTF8_to_tchar()
+  curlx_convert_tchar_to_UTF8()
+  curlx_unicodefree()
+*/
+
+#include "version_win32.h"
+/* "version_win32.h" provides curlx_verify_windows_version() */
+
 /* Now setup curlx_ * names for the functions that are to become curlx_ and
    be removed from a future libcurl official API:
    curlx_getenv
@@ -81,22 +94,21 @@
 # undef printf
 # undef fprintf
 # undef sprintf
-# undef snprintf
+# undef msnprintf
 # undef vprintf
 # undef vfprintf
 # undef vsprintf
-# undef vsnprintf
+# undef mvsnprintf
 # undef aprintf
 # undef vaprintf
 
 # define printf curlx_mprintf
 # define fprintf curlx_mfprintf
 # define sprintf curlx_msprintf
-# define snprintf curlx_msnprintf
+# define msnprintf curlx_msnprintf
 # define vprintf curlx_mvprintf
 # define vfprintf curlx_mvfprintf
-# define vsprintf curlx_mvsprintf
-# define vsnprintf curlx_mvsnprintf
+# define mvsnprintf curlx_mvsnprintf
 # define aprintf curlx_maprintf
 # define vaprintf curlx_mvaprintf
 #endif /* ENABLE_CURLX_PRINTF */

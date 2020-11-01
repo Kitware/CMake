@@ -1,14 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFindBase_h
-#define cmFindBase_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmFindCommon.h"
+
+class cmExecutionStatus;
 
 /** \class cmFindBase
  * \brief Base class for most FIND_XXX commands.
@@ -19,7 +21,9 @@
 class cmFindBase : public cmFindCommon
 {
 public:
-  cmFindBase();
+  cmFindBase(cmExecutionStatus& status);
+  virtual ~cmFindBase() = default;
+
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
@@ -27,7 +31,7 @@ public:
   virtual bool ParseArguments(std::vector<std::string> const& args);
 
 protected:
-  void PrintFindStuff();
+  friend class cmFindBaseDebugState;
   void ExpandPaths();
 
   // see if the VariableName is already set in the cache,
@@ -39,14 +43,16 @@ protected:
   std::string VariableDocumentation;
   std::string VariableName;
   std::vector<std::string> Names;
-  bool NamesPerDir;
-  bool NamesPerDirAllowed;
+  bool NamesPerDir = false;
+  bool NamesPerDirAllowed = false;
 
   // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
   std::string EnvironmentPath; // LIB,INCLUDE
 
-  bool AlreadyInCache;
-  bool AlreadyInCacheWithoutMetaInfo;
+  bool AlreadyInCache = false;
+  bool AlreadyInCacheWithoutMetaInfo = false;
+
+  bool Required = false;
 
 private:
   // Add pieces of the search.
@@ -59,4 +65,31 @@ private:
   void FillUserGuessPath();
 };
 
-#endif
+class cmFindBaseDebugState
+{
+public:
+  explicit cmFindBaseDebugState(std::string name, cmFindBase const* findBase);
+  ~cmFindBaseDebugState();
+
+  void FoundAt(std::string const& path, std::string regexName = std::string());
+  void FailedAt(std::string const& path,
+                std::string regexName = std::string());
+
+private:
+  struct DebugLibState
+  {
+    DebugLibState() = default;
+    DebugLibState(std::string&& n, std::string p)
+      : regexName(n)
+      , path(std::move(p))
+    {
+    }
+    std::string regexName;
+    std::string path;
+  };
+
+  cmFindBase const* FindCommand;
+  std::string CommandName;
+  std::vector<DebugLibState> FailedSearchLocations;
+  DebugLibState FoundSearchLocation;
+};

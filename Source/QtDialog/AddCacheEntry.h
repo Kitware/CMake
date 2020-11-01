@@ -1,10 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef AddCacheEntry_h
-#define AddCacheEntry_h
+#pragma once
 
 #include "QCMake.h"
-
 #include <QCheckBox>
 #include <QStringList>
 #include <QWidget>
@@ -33,5 +31,3 @@ private:
   const QStringList& VarNames;
   const QStringList& VarTypes;
 };
-
-#endif

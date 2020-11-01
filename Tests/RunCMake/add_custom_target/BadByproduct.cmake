@@ -1,0 +1,6 @@
+set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+add_custom_target(a BYPRODUCTS "a#" COMMAND b)
+add_custom_target(c BYPRODUCTS "a<" COMMAND d)
+add_custom_target(e BYPRODUCTS "a>" COMMAND f)
+add_custom_target(g BYPRODUCTS "$<CONFIG>/#" COMMAND h)
+add_custom_target(i BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/j COMMAND k)

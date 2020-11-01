@@ -1,17 +1,17 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestBuildAndTestHandler_h
-#define cmCTestBuildAndTestHandler_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestGenericHandler.h"
-#include "cmDuration.h"
-
 #include <sstream>
-#include <stddef.h>
 #include <string>
 #include <vector>
+
+#include <stddef.h>
+
+#include "cmCTestGenericHandler.h"
+#include "cmDuration.h"
 
 class cmake;
 
@@ -22,7 +22,7 @@ class cmake;
 class cmCTestBuildAndTestHandler : public cmCTestGenericHandler
 {
 public:
-  typedef cmCTestGenericHandler Superclass;
+  using Superclass = cmCTestGenericHandler;
 
   /*
    * The main entry point for this class
@@ -70,5 +70,3 @@ protected:
   bool BuildNoCMake;
   cmDuration Timeout;
 };
-
-#endif

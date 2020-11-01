@@ -31,14 +31,6 @@ Further variables are set by the optional arguments described in the following.
 If any of these arguments is not used, then the corresponding variables are
 set to the empty string.
 
-If the variable :variable:`CMAKE_PROJECT_INCLUDE_BEFORE` exists, the file
-pointed to by that variable will be included as the first step of the project
-command.
-
-If the variable :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`
-or :variable:`CMAKE_PROJECT_INCLUDE` exists, the file pointed to by that
-variable will be included as the last step of the project command.
-
 Options
 ^^^^^^^
 
@@ -63,7 +55,7 @@ The options are:
   * :variable:`PROJECT_VERSION_TWEAK`,
     :variable:`<PROJECT-NAME>_VERSION_TWEAK`.
 
-  When the :command:`project()` command is called from the top-level ``CMakeLists.txt``,
+  When the ``project()`` command is called from the top-level ``CMakeLists.txt``,
   then the version is also stored in the variable :variable:`CMAKE_PROJECT_VERSION`.
 
 ``DESCRIPTION <project-description-string>``
@@ -76,7 +68,7 @@ The options are:
   It is recommended that this description is a relatively short string,
   usually no more than a few words.
 
-  When the :command:`project()` command is called from the top-level ``CMakeLists.txt``,
+  When the ``project()`` command is called from the top-level ``CMakeLists.txt``,
   then the description is also stored in the variable :variable:`CMAKE_PROJECT_DESCRIPTION`.
 
 ``HOMEPAGE_URL <url-string>``
@@ -87,7 +79,7 @@ The options are:
 
   to ``<url-string>``, which should be the canonical home URL for the project.
 
-  When the :command:`project()` command is called from the top-level ``CMakeLists.txt``,
+  When the ``project()`` command is called from the top-level ``CMakeLists.txt``,
   then the URL also is stored in the variable :variable:`CMAKE_PROJECT_HOMEPAGE_URL`.
 
 ``LANGUAGES <language-name>...``
@@ -95,7 +87,8 @@ The options are:
   Can also be specified without ``LANGUAGES`` keyword per the first, short signature.
 
   Selects which programming languages are needed to build the project.
-  Supported languages include ``C``, ``CXX`` (i.e.  C++), ``CUDA``, ``Fortran``, and ``ASM``.
+  Supported languages include ``C``, ``CXX`` (i.e.  C++), ``CUDA``,
+  ``OBJC`` (i.e. Objective-C), ``OBJCXX``, ``Fortran``, ``ISPC``, and ``ASM``.
   By default ``C`` and ``CXX`` are enabled if no language options are given.
   Specify language ``NONE``, or use the ``LANGUAGES`` keyword and list no languages,
   to skip enabling any languages.
@@ -106,18 +99,34 @@ The options are:
 The variables set through the ``VERSION``, ``DESCRIPTION`` and ``HOMEPAGE_URL``
 options are intended for use as default values in package metadata and documentation.
 
+Code Injection
+^^^^^^^^^^^^^^
+
+If the :variable:`CMAKE_PROJECT_INCLUDE_BEFORE` or
+:variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE` variables are set,
+the files they point to will be included as the first step of the
+``project()`` command.
+If both are set, then :variable:`CMAKE_PROJECT_INCLUDE_BEFORE` will be
+included before :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`.
+
+If the :variable:`CMAKE_PROJECT_INCLUDE` or
+:variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE` variables are set, the files
+they point to will be included as the last step of the ``project()`` command.
+If both are set, then :variable:`CMAKE_PROJECT_INCLUDE` will be included before
+:variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`.
+
 Usage
 ^^^^^
 
 The top-level ``CMakeLists.txt`` file for a project must contain a
-literal, direct call to the :command:`project` command; loading one
+literal, direct call to the ``project()`` command; loading one
 through the :command:`include` command is not sufficient.  If no such
 call exists, CMake will issue a warning and pretend there is a
 ``project(Project)`` at the top to enable the default languages
 (``C`` and ``CXX``).
 
 .. note::
-  Call the :command:`project()` command near the top of the top-level
+  Call the ``project()`` command near the top of the top-level
   ``CMakeLists.txt``, but *after* calling :command:`cmake_minimum_required`.
   It is important to establish version and policy settings before invoking
   other commands whose behavior they may affect.

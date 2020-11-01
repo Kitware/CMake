@@ -1,11 +1,12 @@
-#include "MathFunctions.h"
-#include "TutorialConfig.h"
 #include <stdio.h>
 
-// include the generated table
-#include "Table.h"
+#include "MathFunctions.h"
+#include "TutorialConfig.h"
 
+// include the generated table
 #include <math.h>
+
+#include "Table.h"
 
 // a hack square root calculation using simple operations
 double mysqrt(double x)

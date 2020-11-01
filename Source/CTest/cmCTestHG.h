@@ -1,14 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestHG_h
-#define cmCTestHG_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestGlobalVC.h"
-
 #include <iosfwd>
 #include <string>
+
+#include "cmCTestGlobalVC.h"
 
 class cmCTest;
 
@@ -42,5 +41,3 @@ private:
   friend class LogParser;
   friend class StatusParser;
 };
-
-#endif

@@ -1,18 +1,18 @@
 /* sha512.c - an implementation of SHA-384/512 hash functions
  * based on FIPS 180-3 (Federal Information Processing Standart).
  *
- * Copyright: 2010-2012 Aleksey Kravchenko <rhash.admin@gmail.com>
+ * Copyright (c) 2010, Aleksey Kravchenko <rhash.admin@gmail.com>
  *
- * Permission is hereby granted,  free of charge,  to any person  obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction,  including without limitation
- * the rights to  use, copy, modify,  merge, publish, distribute, sublicense,
- * and/or sell copies  of  the Software,  and to permit  persons  to whom the
- * Software is furnished to do so.
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted.
  *
- * This program  is  distributed  in  the  hope  that it will be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  Use this program  at  your own risk!
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOFTWARE  INCLUDING ALL IMPLIED WARRANTIES OF  MERCHANTABILITY
+ * AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT,  OR CONSEQUENTIAL DAMAGES  OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ * LOSS OF USE,  DATA OR PROFITS,  WHETHER IN AN ACTION OF CONTRACT,  NEGLIGENCE
+ * OR OTHER TORTIOUS ACTION,  ARISING OUT OF  OR IN CONNECTION  WITH THE USE  OR
+ * PERFORMANCE OF THIS SOFTWARE.
  */
 
 #include <string.h>
@@ -81,7 +81,7 @@ static const uint64_t rhash_k512[80] = {
  *
  * @param ctx context to initialize
  */
-void rhash_sha512_init(sha512_ctx *ctx)
+void rhash_sha512_init(sha512_ctx* ctx)
 {
 	/* Initial values. These words were obtained by taking the first 32
 	 * bits of the fractional parts of the square roots of the first
@@ -104,7 +104,7 @@ void rhash_sha512_init(sha512_ctx *ctx)
  *
  * @param ctx context to initialize
  */
-void rhash_sha384_init(struct sha512_ctx *ctx)
+void rhash_sha384_init(struct sha512_ctx* ctx)
 {
 	/* Initial values from FIPS 180-3. These words were obtained by taking
 	 * the first sixty-four bits of the fractional parts of the square
@@ -131,7 +131,7 @@ static void rhash_sha512_process_block(uint64_t hash[8], uint64_t block[16])
 {
 	uint64_t A, B, C, D, E, F, G, H;
 	uint64_t W[16];
-	const uint64_t *k;
+	const uint64_t* k;
 	int i;
 
 	A = hash[0], B = hash[1], C = hash[2], D = hash[3];
@@ -186,7 +186,7 @@ static void rhash_sha512_process_block(uint64_t hash[8], uint64_t block[16])
  * @param msg message chunk
  * @param size length of the message chunk
  */
-void rhash_sha512_update(sha512_ctx *ctx, const unsigned char *msg, size_t size)
+void rhash_sha512_update(sha512_ctx* ctx, const unsigned char* msg, size_t size)
 {
 	size_t index = (size_t)ctx->length & 127;
 	ctx->length += size;
@@ -228,7 +228,7 @@ void rhash_sha512_update(sha512_ctx *ctx, const unsigned char *msg, size_t size)
  * @param ctx the algorithm context containing current hashing state
  * @param result calculated hash in binary form
  */
-void rhash_sha512_final(sha512_ctx *ctx, unsigned char* result)
+void rhash_sha512_final(sha512_ctx* ctx, unsigned char* result)
 {
 	size_t index = ((unsigned)ctx->length & 127) >> 3;
 	unsigned shift = ((unsigned)ctx->length & 7) * 8;

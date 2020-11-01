@@ -87,6 +87,9 @@
 # elif defined(__WINDOWS__)
 #  define PLATFORM_ID "Windows3x"
 
+# elif defined(__VXWORKS__)
+#  define PLATFORM_ID "VxWorks"
+
 # else /* unknown platform */
 #  define PLATFORM_ID
 # endif
@@ -165,11 +168,20 @@
 # elif defined(__ICCRL78__)
 #  define ARCHITECTURE_ID "RL78"
 
+# elif defined(__ICCRISCV__)
+#  define ARCHITECTURE_ID "RISCV"
+
 # elif defined(__ICCAVR__)
 #  define ARCHITECTURE_ID "AVR"
 
 # elif defined(__ICC430__)
 #  define ARCHITECTURE_ID "MSP430"
+
+# elif defined(__ICCV850__)
+#  define ARCHITECTURE_ID "V850"
+
+# elif defined(__ICC8051__)
+#  define ARCHITECTURE_ID "8051"
 
 # else /* unknown architecture */
 #  define ARCHITECTURE_ID ""
@@ -194,6 +206,24 @@
 # else /* unknown architecture */
 #  define ARCHITECTURE_ID ""
 # endif
+
+#elif defined(__TI_COMPILER_VERSION__)
+# if defined(__TI_ARM__)
+#  define ARCHITECTURE_ID "ARM"
+
+# elif defined(__MSP430__)
+#  define ARCHITECTURE_ID "MSP430"
+
+# elif defined(__TMS320C28XX__)
+#  define ARCHITECTURE_ID "TMS320C28x"
+
+# elif defined(__TMS320C6X__) || defined(_TMS320C6X)
+#  define ARCHITECTURE_ID "TMS320C6x"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
 #else
 #  define ARCHITECTURE_ID
 #endif
@@ -271,4 +301,3 @@ char const info_simulate_version[] = {
    array rather than assigning a pointer to a static array.  */
 char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
 char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
-

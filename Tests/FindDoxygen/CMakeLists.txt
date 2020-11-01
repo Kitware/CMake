@@ -28,6 +28,16 @@ add_test(NAME FindDoxygen.AllTarget COMMAND
   --test-command ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
 )
 
+add_test(NAME FindDoxygen.StampFile COMMAND
+  ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+  --build-and-test
+  "${CMake_SOURCE_DIR}/Tests/FindDoxygen/StampFile"
+  "${CMake_BINARY_DIR}/Tests/FindDoxygen/StampFile"
+  --build-target allDocTargets
+  ${build_generator_args}
+  --build-options ${build_options}
+)
+
 if(CMake_TEST_FindDoxygen_Dot)
   add_test(NAME FindDoxygen.DotComponentTest COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>

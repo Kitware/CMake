@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -82,20 +82,6 @@
 #include "warnless.h"
 #include "parsedate.h"
 
-const char * const Curl_wkday[] =
-{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-static const char * const weekday[] =
-{ "Monday", "Tuesday", "Wednesday", "Thursday",
-  "Friday", "Saturday", "Sunday" };
-const char * const Curl_month[]=
-{ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-
-struct tzinfo {
-  char name[5];
-  int offset; /* +/- in minutes */
-};
-
 /*
  * parsedate()
  *
@@ -113,6 +99,26 @@ static int parsedate(const char *date, time_t *output);
 #define PARSEDATE_FAIL   -1
 #define PARSEDATE_LATER  1
 #define PARSEDATE_SOONER 2
+
+#if !defined(CURL_DISABLE_PARSEDATE) || !defined(CURL_DISABLE_FTP) || \
+  !defined(CURL_DISABLE_FILE)
+/* These names are also used by FTP and FILE code */
+const char * const Curl_wkday[] =
+{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+const char * const Curl_month[]=
+{ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+#endif
+
+#ifndef CURL_DISABLE_PARSEDATE
+static const char * const weekday[] =
+{ "Monday", "Tuesday", "Wednesday", "Thursday",
+  "Friday", "Saturday", "Sunday" };
+
+struct tzinfo {
+  char name[5];
+  int offset; /* +/- in minutes */
+};
 
 /* Here's a bunch of frequently used time zone names. These were supported
    by the old getdate parser. */
@@ -555,6 +561,15 @@ static int parsedate(const char *date, time_t *output)
 
   return PARSEDATE_OK;
 }
+#else
+/* disabled */
+static int parsedate(const char *date, time_t *output)
+{
+  (void)date;
+  *output = 0;
+  return PARSEDATE_OK; /* a lie */
+}
+#endif
 
 time_t curl_getdate(const char *p, const time_t *now)
 {
@@ -572,6 +587,30 @@ time_t curl_getdate(const char *p, const time_t *now)
   return -1;
 }
 
+/* Curl_getdate_capped() differs from curl_getdate() in that this will return
+   TIME_T_MAX in case the parsed time value was too big, instead of an
+   error. */
+
+time_t Curl_getdate_capped(const char *p)
+{
+  time_t parsed = -1;
+  int rc = parsedate(p, &parsed);
+
+  switch(rc) {
+  case PARSEDATE_OK:
+    if(parsed == -1)
+      /* avoid returning -1 for a working scenario */
+      parsed++;
+    return parsed;
+  case PARSEDATE_LATER:
+    /* this returns the maximum time value */
+    return parsed;
+  default:
+    return -1; /* everything else is fail */
+  }
+  /* UNREACHABLE */
+}
+
 /*
  * Curl_gmtime() is a gmtime() replacement for portability. Do not use the
  * gmtime_r() or gmtime() functions anywhere else but here.
@@ -585,6 +624,7 @@ CURLcode Curl_gmtime(time_t intime, struct tm *store)
   /* thread-safe version */
   tm = (struct tm *)gmtime_r(&intime, store);
 #else
+  /* !checksrc! disable BANNEDFUNC 1 */
   tm = gmtime(&intime);
   if(tm)
     *store = *tm; /* copy the pointed struct to the local copy */

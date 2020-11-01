@@ -1,0 +1,1 @@
+CPack Warning: Both CPACK_INSTALL_SCRIPTS and CPACK_INSTALL_SCRIPT are set, the latter will be ignored.

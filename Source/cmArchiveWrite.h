@@ -1,15 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmArchiveWrite_h
-#define cmArchiveWrite_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <iosfwd>
-#include <stddef.h>
 #include <string>
 
-#if !defined(CMAKE_BUILD_WITH_CMAKE)
+#if defined(CMAKE_BOOTSTRAP)
 #  error "cmArchiveWrite not allowed during bootstrap build!"
 #endif
 
@@ -49,17 +48,20 @@ public:
     CompressGZip,
     CompressBZip2,
     CompressLZMA,
-    CompressXZ
+    CompressXZ,
+    CompressZstd
   };
 
   /** Construct with output stream to which to write archive.  */
   cmArchiveWrite(std::ostream& os, Compress c = CompressNone,
-                 std::string const& format = "paxr");
+                 std::string const& format = "paxr", int compressionLevel = 0);
 
   ~cmArchiveWrite();
 
   cmArchiveWrite(const cmArchiveWrite&) = delete;
   cmArchiveWrite& operator=(const cmArchiveWrite&) = delete;
+
+  bool Open();
 
   /**
    * Add a path (file or directory) to the archive.  Directories are
@@ -138,6 +140,9 @@ public:
     this->Gname = "";
   }
 
+  //! Set an option on a filter;
+  bool SetFilterOption(const char* module, const char* key, const char* value);
+
 private:
   bool Okay() const { return this->Error.empty(); }
   bool AddPath(const char* path, size_t skip, const char* prefix,
@@ -174,5 +179,3 @@ private:
   cmArchiveWriteOptional<int> Permissions;
   cmArchiveWriteOptional<int> PermissionsMask;
 };
-
-#endif

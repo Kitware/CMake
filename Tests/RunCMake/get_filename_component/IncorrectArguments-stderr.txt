@@ -1,0 +1,4 @@
+^CMake Error at IncorrectArguments.cmake:1 \(get_filename_component\):
+  get_filename_component called with incorrect number of arguments
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

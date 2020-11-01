@@ -1,16 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestCVS_h
-#define cmCTestCVS_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-
-#include "cmCTestVC.h"
 
 #include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
+
+#include "cmCTestVC.h"
 
 class cmCTest;
 class cmXMLWriter;
@@ -51,5 +50,3 @@ private:
   friend class LogParser;
   friend class UpdateParser;
 };
-
-#endif

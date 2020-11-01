@@ -5,10 +5,14 @@
 # define KEY '_','_','i','3','8','6'
 #elif defined(__x86_64)
 # define KEY '_','_','x','8','6','_','6','4'
-#elif defined(__ppc__)
-# define KEY '_','_','p','p','c','_','_'
+#elif defined(__PPC64__)
+# define KEY '_','_','P','P','C','6','4','_','_'
 #elif defined(__ppc64__)
 # define KEY '_','_','p','p','c','6','4','_','_'
+#elif defined(__PPC__)
+# define KEY '_','_','P','P','C','_','_'
+#elif defined(__ppc__)
+# define KEY '_','_','p','p','c','_','_'
 #elif defined(__aarch64__)
 # define KEY '_','_','a','a','r','c','h','6','4','_','_'
 #elif defined(__ARM_ARCH_7A__)

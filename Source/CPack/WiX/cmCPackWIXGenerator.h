@@ -1,15 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackWIXGenerator_h
-#define cmCPackWIXGenerator_h
-
-#include "cmCPackGenerator.h"
-
-#include "cmWIXPatch.h"
-#include "cmWIXShortcut.h"
+#pragma once
 
 #include <map>
+#include <memory>
 #include <string>
+
+#include "cmCPackGenerator.h"
+#include "cmWIXPatch.h"
+#include "cmWIXShortcut.h"
 
 class cmWIXSourceWriter;
 class cmWIXDirectoriesSourceWriter;
@@ -25,6 +24,8 @@ public:
   cmCPackTypeMacro(cmCPackWIXGenerator, cmCPackGenerator);
 
   cmCPackWIXGenerator();
+  cmCPackWIXGenerator(const cmCPackWIXGenerator&) = delete;
+  const cmCPackWIXGenerator& operator=(const cmCPackWIXGenerator&) = delete;
   ~cmCPackWIXGenerator();
 
 protected:
@@ -44,9 +45,10 @@ protected:
   bool SupportsComponentInstallation() const override { return true; }
 
 private:
-  typedef std::map<std::string, std::string> id_map_t;
-  typedef std::map<std::string, size_t> ambiguity_map_t;
-  typedef std::set<std::string> extension_set_t;
+  using id_map_t = std::map<std::string, std::string>;
+  using ambiguity_map_t = std::map<std::string, size_t>;
+  using extension_set_t = std::set<std::string>;
+  using xmlns_map_t = std::map<std::string, std::string>;
 
   enum class DefinitionType
   {
@@ -145,9 +147,14 @@ private:
   void CollectExtensions(std::string const& variableName,
                          extension_set_t& extensions);
 
+  void CollectXmlNamespaces(std::string const& variableName,
+                            xmlns_map_t& namespaces);
+
   void AddCustomFlags(std::string const& variableName, std::ostream& stream);
 
   std::string RelativePathWithoutComponentPrefix(std::string const& path);
+
+  void InjectXmlNamespaces(cmWIXSourceWriter& sourceWriter);
 
   std::vector<std::string> WixSources;
   id_map_t PathToIdMap;
@@ -155,12 +162,11 @@ private:
 
   extension_set_t CandleExtensions;
   extension_set_t LightExtensions;
+  xmlns_map_t CustomXmlNamespaces;
 
   std::string CPackTopLevel;
 
-  cmWIXPatch* Patch;
+  std::unique_ptr<cmWIXPatch> Patch;
 
   cmWIXSourceWriter::GuidType ComponentGuidType;
 };
-
-#endif

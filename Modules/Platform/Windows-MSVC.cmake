@@ -217,7 +217,7 @@ elseif(WINDOWS_PHONE OR WINDOWS_STORE)
 else()
   set(_PLATFORM_DEFINES "/DWIN32")
 
-  if(_MSVC_C_ARCHITECTURE_FAMILY STREQUAL "ARM" OR _MSVC_CXX_ARCHITECTURE_FAMILY STREQUAL "ARM" OR _MSVC_C_ARCHITECTURE_FAMILY STREQUAL "ARM64" OR _MSVC_CXX_ARCHITECTURE_FAMILY STREQUAL "ARM64")
+  if(_MSVC_C_ARCHITECTURE_FAMILY STREQUAL "ARM" OR _MSVC_CXX_ARCHITECTURE_FAMILY STREQUAL "ARM")
     set(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib")
   elseif(MSVC_VERSION GREATER 1310)
     if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v[0-9]+_clang_.*")
@@ -316,7 +316,7 @@ macro(__windows_compiler_msvc lang)
     "${_CMAKE_VS_LINK_DLL}<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <LINK_FLAGS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")
 
   set(CMAKE_${lang}_CREATE_SHARED_MODULE ${CMAKE_${lang}_CREATE_SHARED_LIBRARY})
-  set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "<CMAKE_LINKER> /lib ${CMAKE_CL_NOLOGO} <LINK_FLAGS> /out:<TARGET> <OBJECTS> ")
+  set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "<CMAKE_AR> ${CMAKE_CL_NOLOGO} <LINK_FLAGS> /out:<TARGET> <OBJECTS> ")
 
   set(CMAKE_${lang}_COMPILE_OBJECT
     "<CMAKE_${lang}_COMPILER> ${CMAKE_START_TEMP_FILE} ${CMAKE_CL_NOLOGO}${_COMPILE_${lang}} <DEFINES> <INCLUDES> <FLAGS> /Fo<OBJECT> /Fd<TARGET_COMPILE_PDB>${_FS_${lang}} -c <SOURCE>${CMAKE_END_TEMP_FILE}")
@@ -328,6 +328,28 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS 1)
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES>${CMAKE_END_TEMP_FILE}")
+
+  set(CMAKE_PCH_EXTENSION .pch)
+  set(CMAKE_LINK_PCH ON)
+  if (CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
+
+    # macOS paths usually start with /Users/*. Unfortunately, clang-cl interprets
+    # paths starting with /U as macro undefines, so we need to put a -- before the
+    # input file path to force it to be treated as a path.
+    string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_COMPILE_OBJECT "${CMAKE_${lang}_COMPILE_OBJECT}")
+    string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "${CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE}")
+    string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE "${CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE}")
+
+  elseif(MSVC_VERSION GREATER_EQUAL 1913)
+    # At least MSVC toolet 14.13 from VS 2017 15.6
+    set(CMAKE_PCH_PROLOGUE "#pragma system_header")
+  endif()
+  if (NOT ${CMAKE_${lang}_COMPILER_ID} STREQUAL "Clang")
+    set(CMAKE_PCH_COPY_COMPILE_PDB ON)
+  endif()
+  set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH /Yu<PCH_HEADER> /Fp<PCH_FILE> /FI<PCH_HEADER>)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH /Yc<PCH_HEADER> /Fp<PCH_FILE> /FI<PCH_HEADER>)
 
   if("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
     set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
@@ -421,5 +443,7 @@ macro(__windows_compiler_msvc_enable_rc flags)
   endif()
 
   enable_language(RC)
-  set(CMAKE_NINJA_CMCLDEPS_RC 1)
+  if(NOT DEFINED CMAKE_NINJA_CMCLDEPS_RC)
+    set(CMAKE_NINJA_CMCLDEPS_RC 1)
+  endif()
 endmacro()

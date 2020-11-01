@@ -20,9 +20,9 @@
 #include <sstream>
 #include <vector>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef _MSC_VER
 #  pragma warning(disable : 4786)
@@ -66,26 +66,21 @@ class CommandLineArgumentsMapOfStrucs
 class CommandLineArgumentsInternal
 {
 public:
-  CommandLineArgumentsInternal()
-  {
-    this->UnknownArgumentCallback = KWSYS_NULLPTR;
-    this->ClientData = KWSYS_NULLPTR;
-    this->LastArgument = 0;
-  }
+  CommandLineArgumentsInternal() = default;
 
-  typedef CommandLineArgumentsVectorOfStrings VectorOfStrings;
-  typedef CommandLineArgumentsMapOfStrucs CallbacksMap;
-  typedef kwsys::String String;
-  typedef CommandLineArgumentsSetOfStrings SetOfStrings;
+  using VectorOfStrings = CommandLineArgumentsVectorOfStrings;
+  using CallbacksMap = CommandLineArgumentsMapOfStrucs;
+  using String = kwsys::String;
+  using SetOfStrings = CommandLineArgumentsSetOfStrings;
 
   VectorOfStrings Argv;
   String Argv0;
   CallbacksMap Callbacks;
 
-  CommandLineArguments::ErrorCallbackType UnknownArgumentCallback;
-  void* ClientData;
+  CommandLineArguments::ErrorCallbackType UnknownArgumentCallback{ nullptr };
+  void* ClientData{ nullptr };
 
-  VectorOfStrings::size_type LastArgument;
+  VectorOfStrings::size_type LastArgument{ 0 };
 
   VectorOfStrings UnusedArguments;
 };
@@ -187,7 +182,7 @@ int CommandLineArguments::Parse()
       switch (cs->ArgumentType) {
         case NO_ARGUMENT:
           // No value
-          if (!this->PopulateVariable(cs, KWSYS_NULLPTR)) {
+          if (!this->PopulateVariable(cs, nullptr)) {
             return 0;
           }
           break;
@@ -340,7 +335,7 @@ void CommandLineArguments::AddCallback(const char* argument,
   s.Callback = callback;
   s.CallData = call_data;
   s.VariableType = CommandLineArguments::NO_VARIABLE_TYPE;
-  s.Variable = KWSYS_NULLPTR;
+  s.Variable = nullptr;
   s.Help = help;
 
   this->Internals->Callbacks[argument] = s;
@@ -355,8 +350,8 @@ void CommandLineArguments::AddArgument(const char* argument,
   CommandLineArgumentsCallbackStructure s;
   s.Argument = argument;
   s.ArgumentType = type;
-  s.Callback = KWSYS_NULLPTR;
-  s.CallData = KWSYS_NULLPTR;
+  s.Callback = nullptr;
+  s.CallData = nullptr;
   s.VariableType = vtype;
   s.Variable = variable;
   s.Help = help;
@@ -424,18 +419,16 @@ void CommandLineArguments::SetUnknownArgumentCallback(
 
 const char* CommandLineArguments::GetHelp(const char* arg)
 {
-  CommandLineArguments::Internal::CallbacksMap::iterator it =
-    this->Internals->Callbacks.find(arg);
+  auto it = this->Internals->Callbacks.find(arg);
   if (it == this->Internals->Callbacks.end()) {
-    return KWSYS_NULLPTR;
+    return nullptr;
   }
 
   // Since several arguments may point to the same argument, find the one this
   // one point to if this one is pointing to another argument.
   CommandLineArgumentsCallbackStructure* cs = &(it->second);
   for (;;) {
-    CommandLineArguments::Internal::CallbacksMap::iterator hit =
-      this->Internals->Callbacks.find(cs->Help);
+    auto hit = this->Internals->Callbacks.find(cs->Help);
     if (hit == this->Internals->Callbacks.end()) {
       break;
     }
@@ -470,9 +463,8 @@ void CommandLineArguments::GenerateHelp()
   // Collapse all arguments into the map of vectors of all arguments that do
   // the same thing.
   CommandLineArguments::Internal::CallbacksMap::iterator it;
-  typedef std::map<CommandLineArguments::Internal::String,
-                   CommandLineArguments::Internal::SetOfStrings>
-    MapArgs;
+  using MapArgs = std::map<CommandLineArguments::Internal::String,
+                           CommandLineArguments::Internal::SetOfStrings>;
   MapArgs mp;
   MapArgs::iterator mpit, smpit;
   for (it = this->Internals->Callbacks.begin();
@@ -621,7 +613,7 @@ void CommandLineArguments::PopulateVariable(bool* variable,
 void CommandLineArguments::PopulateVariable(int* variable,
                                             const std::string& value)
 {
-  char* res = KWSYS_NULLPTR;
+  char* res = nullptr;
   *variable = static_cast<int>(strtol(value.c_str(), &res, 10));
   // if ( res && *res )
   //  {
@@ -632,7 +624,7 @@ void CommandLineArguments::PopulateVariable(int* variable,
 void CommandLineArguments::PopulateVariable(double* variable,
                                             const std::string& value)
 {
-  char* res = KWSYS_NULLPTR;
+  char* res = nullptr;
   *variable = strtod(value.c_str(), &res);
   // if ( res && *res )
   //  {
@@ -669,7 +661,7 @@ void CommandLineArguments::PopulateVariable(std::vector<bool>* variable,
 void CommandLineArguments::PopulateVariable(std::vector<int>* variable,
                                             const std::string& value)
 {
-  char* res = KWSYS_NULLPTR;
+  char* res = nullptr;
   variable->push_back(static_cast<int>(strtol(value.c_str(), &res, 10)));
   // if ( res && *res )
   //  {
@@ -680,7 +672,7 @@ void CommandLineArguments::PopulateVariable(std::vector<int>* variable,
 void CommandLineArguments::PopulateVariable(std::vector<double>* variable,
                                             const std::string& value)
 {
-  char* res = KWSYS_NULLPTR;
+  char* res = nullptr;
   variable->push_back(strtod(value.c_str(), &res));
   // if ( res && *res )
   //  {
@@ -709,7 +701,7 @@ bool CommandLineArguments::PopulateVariable(
   if (cs->Callback) {
     if (!cs->Callback(cs->Argument, value, cs->CallData)) {
       this->Internals->LastArgument--;
-      return 0;
+      return false;
     }
   }
   CommandLineArguments_DEBUG("Set argument: " << cs->Argument << " to "
@@ -759,10 +751,10 @@ bool CommandLineArguments::PopulateVariable(
         std::cerr << "Got unknown variable type: \"" << cs->VariableType
                   << "\"" << std::endl;
         this->Internals->LastArgument--;
-        return 0;
+        return false;
     }
   }
-  return 1;
+  return true;
 }
 
 } // namespace KWSYS_NAMESPACE

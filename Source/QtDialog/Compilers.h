@@ -1,13 +1,12 @@
 
 
-#ifndef COMPILERS_HPP
-#define COMPILERS_HPP
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <QWidget>
-
 #include <ui_Compilers.h>
+
+#include <QWidget>
 
 class Compilers
   : public QWidget
@@ -21,5 +20,3 @@ public:
     this->setupUi(this);
   }
 };
-
-#endif

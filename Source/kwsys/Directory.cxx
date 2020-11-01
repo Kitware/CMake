@@ -35,6 +35,18 @@ Directory::Directory()
   this->Internal = new DirectoryInternals;
 }
 
+Directory::Directory(Directory&& other)
+{
+  this->Internal = other.Internal;
+  other.Internal = nullptr;
+}
+
+Directory& Directory::operator=(Directory&& other)
+{
+  std::swap(this->Internal, other.Internal);
+  return *this;
+}
+
 Directory::~Directory()
 {
   delete this->Internal;
@@ -48,7 +60,7 @@ unsigned long Directory::GetNumberOfFiles() const
 const char* Directory::GetFile(unsigned long dindex) const
 {
   if (dindex >= this->Internal->Files.size()) {
-    return KWSYS_NULLPTR;
+    return nullptr;
   }
   return this->Internal->Files[dindex].c_str();
 }
@@ -80,26 +92,12 @@ void Directory::Clear()
 #  include <sys/stat.h>
 #  include <sys/types.h>
 
-// Wide function names can vary depending on compiler:
-#  ifdef __BORLANDC__
-#    define _wfindfirst_func __wfindfirst
-#    define _wfindnext_func __wfindnext
-#  else
-#    define _wfindfirst_func _wfindfirst
-#    define _wfindnext_func _wfindnext
-#  endif
-
 namespace KWSYS_NAMESPACE {
 
-bool Directory::Load(const std::string& name)
+bool Directory::Load(const std::string& name, std::string* errorMessage)
 {
   this->Clear();
-#  if (defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__)
-  // Older Visual C++ and Embarcadero compilers.
-  long srchHandle;
-#  else // Newer Visual C++
   intptr_t srchHandle;
-#  endif
   char* buf;
   size_t n = name.size();
   if (name.back() == '/' || name.back() == '\\') {
@@ -118,8 +116,8 @@ bool Directory::Load(const std::string& name)
   struct _wfinddata_t data; // data of current file
 
   // Now put them into the file array
-  srchHandle = _wfindfirst_func(
-    (wchar_t*)Encoding::ToWindowsExtendedPath(buf).c_str(), &data);
+  srchHandle =
+    _wfindfirst((wchar_t*)Encoding::ToWindowsExtendedPath(buf).c_str(), &data);
   delete[] buf;
 
   if (srchHandle == -1) {
@@ -129,19 +127,15 @@ bool Directory::Load(const std::string& name)
   // Loop through names
   do {
     this->Internal->Files.push_back(Encoding::ToNarrow(data.name));
-  } while (_wfindnext_func(srchHandle, &data) != -1);
+  } while (_wfindnext(srchHandle, &data) != -1);
   this->Internal->Path = name;
   return _findclose(srchHandle) != -1;
 }
 
-unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
+unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
+                                                     std::string* errorMessage)
 {
-#  if (defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__)
-  // Older Visual C++ and Embarcadero compilers.
-  long srchHandle;
-#  else // Newer Visual C++
   intptr_t srchHandle;
-#  endif
   char* buf;
   size_t n = name.size();
   if (name.back() == '/') {
@@ -154,8 +148,7 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
   struct _wfinddata_t data; // data of current file
 
   // Now put them into the file array
-  srchHandle =
-    _wfindfirst_func((wchar_t*)Encoding::ToWide(buf).c_str(), &data);
+  srchHandle = _wfindfirst((wchar_t*)Encoding::ToWide(buf).c_str(), &data);
   delete[] buf;
 
   if (srchHandle == -1) {
@@ -166,7 +159,7 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
   unsigned long count = 0;
   do {
     count++;
-  } while (_wfindnext_func(srchHandle, &data) != -1);
+  } while (_wfindnext(srchHandle, &data) != -1);
   _findclose(srchHandle);
   return count;
 }
@@ -180,6 +173,8 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
 #  include <sys/types.h>
 
 #  include <dirent.h>
+#  include <errno.h>
+#  include <string.h>
 
 // PGI with glibc has trouble with dirent and large file support:
 //  http://www.pgroup.com/userforum/viewtopic.php?
@@ -197,29 +192,46 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
 
 namespace KWSYS_NAMESPACE {
 
-bool Directory::Load(const std::string& name)
+bool Directory::Load(const std::string& name, std::string* errorMessage)
 {
   this->Clear();
 
+  errno = 0;
   DIR* dir = opendir(name.c_str());
 
   if (!dir) {
-    return 0;
+    if (errorMessage != nullptr) {
+      *errorMessage = std::string(strerror(errno));
+    }
+    return false;
   }
 
+  errno = 0;
   for (kwsys_dirent* d = readdir(dir); d; d = readdir(dir)) {
-    this->Internal->Files.push_back(d->d_name);
+    this->Internal->Files.emplace_back(d->d_name);
   }
+  if (errno != 0) {
+    if (errorMessage != nullptr) {
+      *errorMessage = std::string(strerror(errno));
+    }
+    return false;
+  }
+
   this->Internal->Path = name;
   closedir(dir);
-  return 1;
+  return true;
 }
 
-unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
+unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
+                                                     std::string* errorMessage)
 {
+  errno = 0;
   DIR* dir = opendir(name.c_str());
 
   if (!dir) {
+    if (errorMessage != nullptr) {
+      *errorMessage = std::string(strerror(errno));
+    }
     return 0;
   }
 
@@ -227,6 +239,13 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
   for (kwsys_dirent* d = readdir(dir); d; d = readdir(dir)) {
     count++;
   }
+  if (errno != 0) {
+    if (errorMessage != nullptr) {
+      *errorMessage = std::string(strerror(errno));
+    }
+    return false;
+  }
+
   closedir(dir);
   return count;
 }

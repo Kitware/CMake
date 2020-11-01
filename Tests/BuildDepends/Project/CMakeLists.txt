@@ -59,6 +59,10 @@ add_executable(bar bar.cxx
   ${CMAKE_CURRENT_BINARY_DIR}/noregen.h
   )
 
+if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12)
+  target_compile_definitions(bar PRIVATE XCODE_NEW_BUILD_SYSTEM)
+endif()
+
 #-----------------------------------------------------------------------------
 if("${CMAKE_GENERATOR}" MATCHES "Make")
   # Test the IMPLICIT_DEPENDS feature.
@@ -93,6 +97,12 @@ add_executable(zot zot.cxx ${CMAKE_CURRENT_BINARY_DIR}/zot.hxx
   zot_macro_dir.cxx zot_macro_tgt.cxx)
 add_dependencies(zot zot_custom)
 
+add_library(zot_pch zot_pch.cxx)
+target_link_libraries(zot zot_pch)
+if(NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;$]")
+  target_precompile_headers(zot_pch PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/zot_pch.hxx)
+endif()
+
 # Test the #include line macro transformation rule support.
 set_property(
   TARGET zot
@@ -112,6 +122,14 @@ if(TEST_LINK_DEPENDS)
   set_property(TARGET foo_interface PROPERTY INTERFACE_LINK_DEPENDS $<1:${TEST_LINK_DEPENDS}>)
   add_executable(linkdep2 linkdep.cxx)
   target_link_libraries(linkdep2 PRIVATE foo_interface)
+
+  add_executable(linkdep3 linkdep.cxx)
+  set_property(TARGET linkdep3 PROPERTY LINK_DEPENDS $<$<LINK_LANGUAGE:CXX>:${TEST_LINK_DEPENDS}>)
+
+  add_library(foo_interface2 INTERFACE)
+  set_property(TARGET foo_interface2 PROPERTY INTERFACE_LINK_DEPENDS $<$<LINK_LANGUAGE:CXX>:${TEST_LINK_DEPENDS}>)
+  add_executable(linkdep4 linkdep.cxx)
+  target_link_libraries(linkdep4 PRIVATE foo_interface2)
 endif()
 
 add_library(link_depends_no_shared_lib SHARED link_depends_no_shared_lib.c

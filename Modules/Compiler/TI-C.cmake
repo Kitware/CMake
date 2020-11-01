@@ -1,18 +1,67 @@
-set(CMAKE_LIBRARY_PATH_FLAG "--search_path=")
-set(CMAKE_LINK_LIBRARY_FLAG "--library=")
-set(CMAKE_INCLUDE_FLAG_C "--include_path=")
+include(Compiler/TI)
+__compiler_ti(C)
 
-set(CMAKE_C90_STANDARD_COMPILE_OPTION "--c89")
-set(CMAKE_C90_EXTENSION_COMPILE_OPTION "--c89 --relaxed_ansi")
+# Architecture specific
+# C99 versions: https://processors.wiki.ti.com/index.php/C99_Support_in_TI_Compilers
 
-set(CMAKE_C99_STANDARD_COMPILE_OPTION "--c99")
-set(CMAKE_C99_EXTENSION_COMPILE_OPTION "--c99 --relaxed_ansi")
+if("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
+  set(__COMPILER_TI_C99_VERSION_ARM 5.2)
+  set(__COMPILER_TI_C11_VERSION_ARM 18.12)
 
-set(CMAKE_DEPFILE_FLAGS_C "--preproc_with_compile --preproc_dependency=<DEPFILE>")
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "MSP430")
+  set(__COMPILER_TI_C99_VERSION_MSP430 4.3)
+  set(__COMPILER_TI_C11_VERSION_MSP430 18.12)
 
-set(CMAKE_C_CREATE_ASSEMBLY_SOURCE "<CMAKE_C_COMPILER> --compile_only --skip_assembler --c_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<ASSEMBLY_SOURCE>")
-set(CMAKE_C_CREATE_PREPROCESSED_SOURCE "<CMAKE_C_COMPILER> --preproc_only --c_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<PREPROCESSED_SOURCE>")
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "TMS320C28x")
+  set(__COMPILER_TI_C99_VERSION_TMS320C28x 6.3)
+  set(__COMPILER_TI_C11_VERSION_TMS320C28x 18.9)
 
-set(CMAKE_C_COMPILE_OBJECT  "<CMAKE_C_COMPILER> --compile_only --c_file=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<OBJECT>")
-set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> -r <TARGET> <OBJECTS>")
-set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_C_COMPILER> --run_linker --output_file=<TARGET> --map_file=<TARGET>.map <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES>")
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "TMS320C6x")
+  set(__COMPILER_TI_C99_VERSION_TMS320C6x 7.5)
+
+else()
+  # architecture not handled
+  return()
+
+endif()
+
+
+if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "${__COMPILER_TI_C99_VERSION_${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}}")
+
+  set(CMAKE_C90_STANDARD_COMPILE_OPTION "--c89" "--strict_ansi")
+  set(CMAKE_C90_EXTENSION_COMPILE_OPTION "--c89" "--relaxed_ansi")
+
+  set(CMAKE_C99_STANDARD_COMPILE_OPTION "--c99" "--strict_ansi")
+  set(CMAKE_C99_EXTENSION_COMPILE_OPTION "--c99" "--relaxed_ansi")
+
+  if(DEFINED __COMPILER_TI_C11_VERSION_${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} AND
+     CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "${__COMPILER_TI_C11_VERSION_${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}}")
+
+    set(CMAKE_C11_STANDARD_COMPILE_OPTION "--c11" "--strict_ansi")
+    set(CMAKE_C11_EXTENSION_COMPILE_OPTION "--c11" "--relaxed_ansi")
+
+  endif()
+
+else()
+
+  set(CMAKE_C90_STANDARD_COMPILE_OPTION "--strict_ansi")
+  set(CMAKE_C90_EXTENSION_COMPILE_OPTION "--relaxed_ansi")
+
+endif()
+
+
+# Architecture specific
+
+if("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
+  __compiler_check_default_language_standard(C 2.0 90)
+
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "MSP430")
+  __compiler_check_default_language_standard(C 3.0 90)
+
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "TMS320C28x")
+  __compiler_check_default_language_standard(C 4.1 90)
+
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "TMS320C6x")
+  __compiler_check_default_language_standard(C 4.45 90)
+
+endif()

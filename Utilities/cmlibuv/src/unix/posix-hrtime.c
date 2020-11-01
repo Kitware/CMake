@@ -43,6 +43,20 @@ uint64_t uv__hrtime(uv_clocktype_t type) {
   return mach_absolute_time() * info.numer / info.denom;
 }
 
+#elif defined(__hpux)
+/* Special case for CMake bootstrap: no CLOCK_MONOTONIC on HP-UX */
+
+#ifndef CMAKE_BOOTSTRAP
+#error "This code path meant only for use during CMake bootstrap."
+#endif
+
+#include <stdint.h>
+#include <time.h>
+
+uint64_t uv__hrtime(uv_clocktype_t type) {
+  return (uint64_t) gethrtime();
+}
+
 #else
 
 #include <stdint.h>

@@ -1,0 +1,13 @@
+-- COUNTING:
+--    COUNTING_ENGLISH:
+--       one
+--       two
+--       three
+--       four
+--       five
+--    COUNTING_BAHASA:
+--       satu
+--       dua
+--       tiga
+--       empat
+--       lima

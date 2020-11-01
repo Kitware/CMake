@@ -1,0 +1,6 @@
+^CMake Error:
+  The configuration specified by CMAKE_DEFAULT_BUILD_TYPE \(RelWithDebInfo\) is
+  not present in CMAKE_CONFIGURATION_TYPES
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

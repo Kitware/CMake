@@ -1,13 +1,12 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGeneratorExpressionContext_h
-#define cmGeneratorExpressionContext_h
-
-#include "cmListFileCache.h"
+#pragma once
 
 #include <map>
 #include <set>
 #include <string>
+
+#include "cmListFileCache.h"
 
 class cmGeneratorTarget;
 class cmLocalGenerator;
@@ -40,7 +39,6 @@ struct cmGeneratorExpressionContext
   bool HadError;
   bool HadContextSensitiveCondition;
   bool HadHeadSensitiveCondition;
+  bool HadLinkLanguageSensitiveCondition;
   bool EvaluateForBuildsystem;
 };
-
-#endif

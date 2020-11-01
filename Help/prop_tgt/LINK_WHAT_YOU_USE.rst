@@ -1,6 +1,8 @@
 LINK_WHAT_YOU_USE
 ---------------------------
 
+.. versionadded:: 3.7
+
 This is a boolean option that when set to ``TRUE`` will automatically run
 ``ldd -r -u`` on the target after it is linked. In addition, the linker flag
 ``-Wl,--no-as-needed`` will be passed to the target with the link command so

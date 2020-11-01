@@ -1,0 +1,11 @@
+find_package(UseComponents COMPONENTS Comp1 Comp2)
+
+if (NOT UseComponents_FOUND)
+  message (FATAL_ERROR "package UseComponents Not Found.")
+endif()
+if (NOT UseComponents_Comp1_FOUND)
+  message (FATAL_ERROR "package UseComponents, component Comp1 Not Found.")
+endif()
+if (NOT UseComponents_Comp2_FOUND)
+  message (FATAL_ERROR "package UseComponents, component Comp2 Not Found.")
+endif()

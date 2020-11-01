@@ -1,0 +1,2 @@
+^CMake Error at CMakeLists.+
+  No CMAKE_C_COMPILER could be found.

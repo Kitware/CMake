@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmXCodeScheme_h
-#define cmXCodeScheme_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -18,9 +17,9 @@
 class cmXCodeScheme
 {
 public:
-  typedef std::vector<const cmXCodeObject*> TestObjects;
+  using TestObjects = std::vector<const cmXCodeObject*>;
 
-  cmXCodeScheme(cmXCodeObject* xcObj, TestObjects tests,
+  cmXCodeScheme(cmLocalGenerator* lg, cmXCodeObject* xcObj, TestObjects tests,
                 const std::vector<std::string>& configList,
                 unsigned int xcVersion);
 
@@ -28,6 +27,7 @@ public:
                               const std::string& container);
 
 private:
+  cmLocalGenerator* const LocalGenerator;
   const cmXCodeObject* const Target;
   const TestObjects Tests;
   const std::string& TargetName;
@@ -46,6 +46,11 @@ private:
                                   const std::string& attrName,
                                   const std::string& varName);
 
+  bool WriteLaunchActionBooleanAttribute(cmXMLWriter& xout,
+                                         const std::string& attrName,
+                                         const std::string& varName,
+                                         bool defaultValue);
+
   bool WriteLaunchActionAdditionalOption(cmXMLWriter& xout,
                                          const std::string& attrName,
                                          const std::string& value,
@@ -58,6 +63,9 @@ private:
   void WriteBuildableReference(cmXMLWriter& xout, const cmXCodeObject* xcObj,
                                const std::string& container);
 
+  void WriteCustomWorkingDirectory(cmXMLWriter& xout,
+                                   const std::string& configuration);
+
   std::string WriteVersionString();
   std::string FindConfiguration(const std::string& name);
 
@@ -65,5 +73,3 @@ private:
 
   static bool IsExecutable(const cmXCodeObject* target);
 };
-
-#endif

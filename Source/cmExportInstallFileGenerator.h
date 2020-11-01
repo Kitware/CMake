@@ -1,18 +1,18 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmExportInstallFileGenerator_h
-#define cmExportInstallFileGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-
-#include "cmExportFileGenerator.h"
-#include "cmStateTypes.h"
 
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include "cmExportFileGenerator.h"
+#include "cmStateTypes.h"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;
@@ -70,10 +70,10 @@ protected:
 
   void ComplainAboutMissingTarget(cmGeneratorTarget* depender,
                                   cmGeneratorTarget* dependee,
-                                  int occurrences);
+                                  std::vector<std::string> const& exportFiles);
 
-  std::vector<std::string> FindNamespaces(cmGlobalGenerator* gg,
-                                          const std::string& name);
+  std::pair<std::vector<std::string>, std::string> FindNamespaces(
+    cmGlobalGenerator* gg, const std::string& name);
 
   /** Generate the relative import prefix.  */
   virtual void GenerateImportPrefix(std::ostream&);
@@ -102,5 +102,3 @@ protected:
   // The import file generated for each configuration.
   std::map<std::string, std::string> ConfigImportFiles;
 };
-
-#endif

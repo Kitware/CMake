@@ -1,0 +1,34 @@
+-- Found Boost: [^
+]* \(found suitable version "1\.70\.42", minimum required is "1\.70"\) found components: date_time python37 mpi_python2 *
+-- Boost_FOUND: TRUE
+-- Boost_INCLUDE_DIRS: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/include
+-- Boost_LIBRARY_DIRS: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib
+-- Boost_LIBRARIES: Boost::date_time;Boost::python;Boost::mpi_python
+-- Boost_DATE_TIME_FOUND: 1
+-- Boost_DATE_TIME_LIBRARY: Boost::date_time
+-- Boost_PYTHON37_FOUND: 1
+-- Boost_PYTHON37_LIBRARY: Boost::python
+-- Boost_MPI_PYTHON2_FOUND: 1
+-- Boost_MPI_PYTHON2_LIBRARY: Boost::mpi_python
+-- Boost_VERSION_MACRO: 1070042
+-- Boost_VERSION_STRING: 1.70.42
+-- Boost_VERSION: 1.70.42
+-- Boost_LIB_VERSION: 1_70_42
+-- Boost_MAJOR_VERSION: 1
+-- Boost_MINOR_VERSION: 70
+-- Boost_SUBMINOR_VERSION: 42
+-- Boost_INCLUDE_DIR: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/include
+-- Boost_DATE_TIME_LIBRARY_DEBUG: *
+-- Boost_DATE_TIME_LIBRARY_RELEASE: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_date_time.a
+-- Boost_PYTHON37_LIBRARY_DEBUG: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_python.a
+-- Boost_PYTHON37_LIBRARY_RELEASE: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_python_release.a
+-- Boost_MPI_PYTHON2_LIBRARY_DEBUG: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_mpi_python.a
+-- Boost_MPI_PYTHON2_LIBRARY_RELEASE: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_mpi_python.a

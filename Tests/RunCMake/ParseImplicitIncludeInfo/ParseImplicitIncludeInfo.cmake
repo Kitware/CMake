@@ -12,6 +12,7 @@ set(targets
   aix-C-XL-13.1.3 aix-CXX-XL-13.1.3
   aix-C-XLClang-16.1.0.1 aix-CXX-XLClang-16.1.0.1
   craype-C-Cray-8.7 craype-CXX-Cray-8.7 craype-Fortran-Cray-8.7
+  craype-C-Cray-9.0-hlist-ad craype-CXX-Cray-9.0-hlist-ad craype-Fortran-Cray-9.0-hlist-ad
   craype-C-GNU-7.3.0 craype-CXX-GNU-7.3.0 craype-Fortran-GNU-7.3.0
   craype-C-Intel-18.0.2.20180210 craype-CXX-Intel-18.0.2.20180210
     craype-Fortran-Intel-18.0.2.20180210
@@ -31,7 +32,8 @@ set(targets
     linux_nostdinc-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
     linux_nostdinc_i-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
   linux-C-XL-16.1.0.0 linux-CXX-XL-16.1.0.0
-  linux-CUDA-NVIDIA-9.2.148
+  linux-CUDA-NVIDIA-10.1.168-CLANG linux-CUDA-NVIDIA-10.1.168-XLClang-v-empty
+    linux-CUDA-NVIDIA-9.2.148-GCC
   mingw.org-C-GNU-4.9.3 mingw.org-CXX-GNU-4.9.3
   netbsd-C-GNU-4.8.5 netbsd-CXX-GNU-4.8.5
     netbsd_nostdinc-C-GNU-4.8.5 netbsd_nostdinc-CXX-GNU-4.8.5
@@ -96,22 +98,30 @@ endfunction()
 # main test loop
 #
 foreach(t ${targets})
-  set(infile "${CMAKE_SOURCE_DIR}/data/${t}.input")
-  set(outfile "${CMAKE_SOURCE_DIR}/data/${t}.output")
-  if (NOT EXISTS ${infile} OR NOT EXISTS ${outfile})
-    message("missing files for target ${t} in ${CMAKE_SOURCE_DIR}/data")
+  set(infile "${CMAKE_SOURCE_DIR}/../ParseImplicitData/${t}.input")
+  set(outfile "${CMAKE_SOURCE_DIR}/results/${t}.output")
+  if (NOT EXISTS ${infile})
+    string(REPLACE  "-empty" "" infile "${infile}")
+    if (NOT EXISTS ${infile})
+      message("missing input file for target ${t} in ${CMAKE_SOURCE_DIR}/../ParseImplicitData/")
+      continue()
+    endif()
+  elseif(NOT EXISTS ${outfile})
+    message("missing files for target ${t} in ${CMAKE_SOURCE_DIR}/results/")
     continue()
   endif()
+
   load_compiler_info(${infile} lang cmvars input)
   file(READ ${outfile} output)
   string(STRIP "${output}" output)
   cmake_parse_implicit_include_info("${input}" "${lang}" idirs log state)
+
   if(t MATCHES "-empty$")          # empty isn't supposed to parse
     if("${state}" STREQUAL "done")
       message("empty parse failed: ${idirs}, log=${log}")
     endif()
   elseif(NOT "${state}" STREQUAL "done" OR NOT "${idirs}" MATCHES "^${output}$")
-    message("parse failed: state=${state}, '${idirs}' does not match '^${output}$', log=${log}")
+    message("${t} parse failed: state=${state}, '${idirs}' does not match '^${output}$', log=${log}")
   endif()
   unload_compiler_info("${cmvars}")
 endforeach(t)

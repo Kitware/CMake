@@ -2,12 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestCurl.h"
 
+#include <cstdio>
+#include <ostream>
+
+#include <cmext/algorithm>
+
 #include "cmCTest.h"
 #include "cmCurl.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <ostream>
-#include <stdio.h>
 
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
 {
@@ -43,20 +46,16 @@ size_t curlWriteMemoryCallback(void* ptr, size_t size, size_t nmemb,
                                void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
-
-  std::vector<char>* vec = static_cast<std::vector<char>*>(data);
   const char* chPtr = static_cast<char*>(ptr);
-  vec->insert(vec->end(), chPtr, chPtr + realsize);
+  cm::append(*static_cast<std::vector<char>*>(data), chPtr, chPtr + realsize);
   return realsize;
 }
 
 size_t curlDebugCallback(CURL* /*unused*/, curl_infotype /*unused*/,
                          char* chPtr, size_t size, void* data)
 {
-  std::vector<char>* vec = static_cast<std::vector<char>*>(data);
-  vec->insert(vec->end(), chPtr, chPtr + size);
-
-  return size;
+  cm::append(*static_cast<std::vector<char>*>(data), chPtr, chPtr + size);
+  return 0;
 }
 }
 
@@ -130,9 +129,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
     return false;
   }
   // set the url
-  std::string upload_url = url;
-  upload_url += "?";
-  upload_url += fields;
+  std::string upload_url = cmStrCat(url, '?', fields);
   ::curl_easy_setopt(this->Curl, CURLOPT_URL, upload_url.c_str());
   // now specify which file to upload
   ::curl_easy_setopt(this->Curl, CURLOPT_INFILE, ftpfile);

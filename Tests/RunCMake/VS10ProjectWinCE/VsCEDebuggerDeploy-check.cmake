@@ -14,6 +14,9 @@ endif()
 set(FoundCEAdditionalFiles FALSE)
 set(FoundRemoteDirectory FALSE)
 set(FoundToolsVersion4 FALSE)
+set(FoundEnableRedirectPlatform FALSE)
+set(FoundRedirectPlatformValue FALSE)
+
 
 file(STRINGS "${vcProjectFile}" lines)
 foreach(line IN LISTS lines)
@@ -23,6 +26,10 @@ foreach(line IN LISTS lines)
     set(FoundRemoteDirectory TRUE)
   elseif(line MATCHES " *<Project +.*ToolsVersion=\"4.0\".*> *$")
     set(FoundToolsVersion4 TRUE)
+  elseif(line MATCHES "^ *<EnableRedirectPlatform>true</EnableRedirectPlatform> *$")
+    set(FoundEnableRedirectPlatform TRUE)
+  elseif(line MATCHES "^ *<RedirectPlatformValue>.+</RedirectPlatformValue> *$")
+    set(FoundRedirectPlatformValue TRUE)
   endif()
 endforeach()
 
@@ -38,6 +45,16 @@ endif()
 
 if(NOT FoundToolsVersion4)
   set(RunCMake_TEST_FAILED "Failed to find correct ToolsVersion=\"4.0\" .")
+  return()
+endif()
+
+if(NOT FoundEnableRedirectPlatform)
+  set(RunCMake_TEST_FAILED "Failed to find EnableRedirectPlatform true property.")
+  return()
+endif()
+
+if(NOT FoundRedirectPlatformValue)
+  set(RunCMake_TEST_FAILED "Failed to find RedirectPlatformValue property.")
   return()
 endif()
 

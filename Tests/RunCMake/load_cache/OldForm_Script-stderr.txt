@@ -1,0 +1,2 @@
+^CMake Error at.*/Tests/RunCMake/load_cache/OldForm_Script.cmake:1 \(load_cache\):
+  load_cache Only load_cache\(READ_WITH_PREFIX\) may be used in script mode$

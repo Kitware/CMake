@@ -4,6 +4,8 @@
 
 #include <utility>
 
+#include "cmStringAlgorithms.h"
+
 class cmMakefile;
 
 void cmExternalMakefileProjectGenerator::EnableLanguage(
@@ -18,8 +20,7 @@ std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
   std::string fullName;
   if (!globalGenerator.empty()) {
     if (!extraGenerator.empty()) {
-      fullName = extraGenerator;
-      fullName += " - ";
+      fullName = cmStrCat(extraGenerator, " - ");
     }
     fullName += globalGenerator;
   }

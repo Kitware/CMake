@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestPython2 C)
+project(TestPython2 LANGUAGES C)
 
 include(CTest)
 
@@ -11,7 +11,16 @@ endif()
 
 find_package(Python2 REQUIRED COMPONENTS Interpreter Development)
 if (NOT Python2_FOUND)
-  message (FATAL_ERROR "Fail to found Python 2")
+  message (FATAL_ERROR "Failed to find Python 2")
+endif()
+if (NOT Python2_Development_FOUND)
+  message (FATAL_ERROR "Failed to find Python 2 'Development' component")
+endif()
+if (NOT Python2_Development.Module_FOUND)
+  message (FATAL_ERROR "Failed to find Python 2 'Development.Module' component")
+endif()
+if (NOT Python2_Development.Embed_FOUND)
+  message (FATAL_ERROR "Failed to find Python 2 'Development.Embed' component")
 endif()
 
 if(NOT TARGET Python2::Interpreter)
@@ -34,4 +43,5 @@ add_test (NAME python2_spam2
 
 add_test(NAME findpython2_script
          COMMAND "${CMAKE_COMMAND}" -DPYTHON_PACKAGE_NAME=Python2
+         -DPython2_FIND_STRATEGY=${Python2_FIND_STRATEGY}
          -P "${CMAKE_CURRENT_LIST_DIR}/../FindPythonScript.cmake")

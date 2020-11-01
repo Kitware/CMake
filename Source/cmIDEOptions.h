@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmIDEOptions_h
-#define cmIDEOptions_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -51,7 +50,7 @@ protected:
   // and overwrite or add new values to this map
   class FlagValue : public std::vector<std::string>
   {
-    typedef std::vector<std::string> derived;
+    using derived = std::vector<std::string>;
 
   public:
     FlagValue& operator=(std::string const& r)
@@ -112,5 +111,3 @@ protected:
                      std::string const& new_value);
   virtual void StoreUnknownFlag(std::string const& flag) = 0;
 };
-
-#endif

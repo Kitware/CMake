@@ -1,0 +1,123 @@
+{
+    "name": "c_shared_lib",
+    "id": "^c_shared_lib::@6890427a1f51a3e7e1df$",
+    "directorySource": "^\\.$",
+    "projectName": "codemodel-v2",
+    "type": "SHARED_LIBRARY",
+    "isGeneratorProvided": null,
+    "sources": [
+        {
+            "path": "^empty\\.c$",
+            "isGenerated": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "C",
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 9,
+                    "command": "add_library",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "C",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ],
+            "includes": null,
+            "defines": [
+                {
+                    "define": "c_shared_lib_EXPORTS",
+                    "backtrace": null
+                }
+            ],
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^codemodel-v2\\.cmake$",
+            "line": 9,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^codemodel-v2\\.cmake$",
+            "line": null,
+            "command": null,
+            "hasParent": true
+        },
+        {
+            "file": "^CMakeLists\\.txt$",
+            "line": 3,
+            "command": "include",
+            "hasParent": true
+        },
+        {
+            "file": "^CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^(lib|cyg)?c_shared_lib\\.(so|dylib|dll)$",
+    "artifacts": [
+        {
+            "path": "^lib/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg)?c_shared_lib\\.(so|dylib|dll)$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_shared_lib\\.(dll\\.a|lib)$",
+            "_dllExtra": true
+        },
+        {
+            "path": "^lib/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg)?c_shared_lib\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^\\.$",
+    "source": "^\\.$",
+    "install": null,
+    "link": {
+        "language": "C",
+        "lto": true,
+        "commandFragments": null
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        }
+    ]
+}

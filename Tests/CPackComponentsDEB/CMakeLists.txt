@@ -4,8 +4,8 @@
 # application (mylibapp). We create a binary installer (a CPack Generator)
 # which supports CPack components.
 
-cmake_minimum_required(VERSION 2.8.3.20101130 FATAL_ERROR)
-project(CPackComponentsDEB)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+project(CPackComponentsDEB VERSION 1.0.3)
 
 # Use GNUInstallDirs in order to enforce lib64 if needed
 include(GNUInstallDirs)
@@ -44,10 +44,6 @@ set(CPACK_PACKAGE_NAME "MyLib")
 set(CPACK_PACKAGE_CONTACT "None")
 set(CPACK_PACKAGE_VENDOR "CMake.org")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MyLib - CPack Component Installation Example")
-set(CPACK_PACKAGE_VERSION "1.0.2")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH "2")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "CPack Component Example")
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/license.txt)
 
@@ -108,7 +104,7 @@ install(FILES ${CPackComponentsDEB_BINARY_DIR}/symtest
         COMPONENT applications)
 
 if(EXISTS "./dirtest")
-  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ./dirtest)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E rm -rf ./dirtest)
 endif()
 # NOTE: directory left empty on purpose
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ./dirtest)

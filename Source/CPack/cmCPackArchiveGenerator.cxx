@@ -2,24 +2,70 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackArchiveGenerator.h"
 
-#include "cmCPackComponentGroup.h"
-#include "cmCPackGenerator.h"
-#include "cmCPackLog.h"
-#include "cmGeneratedFileStream.h"
-#include "cmSystemTools.h"
-#include "cmWorkingDirectory.h"
-
 #include <cstring>
 #include <map>
 #include <ostream>
 #include <utility>
 #include <vector>
 
-cmCPackArchiveGenerator::cmCPackArchiveGenerator(cmArchiveWrite::Compress t,
-                                                 std::string const& format)
+#include <cm3p/archive.h>
+
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
+#include "cmCPackLog.h"
+#include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
+
+cmCPackGenerator* cmCPackArchiveGenerator::Create7ZGenerator()
 {
-  this->Compress = t;
-  this->ArchiveFormat = format;
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "7zip",
+                                     ".7z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTBZ2Generator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2, "paxr",
+                                     ".tar.bz2");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTGZGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip, "paxr",
+                                     ".tar.gz");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTXZGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr",
+                                     ".tar.xz");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTZGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressCompress, "paxr",
+                                     ".tar.Z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTZSTGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressZstd, "paxr",
+                                     ".tar.zst");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateZIPGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "zip",
+                                     ".zip");
+}
+
+cmCPackArchiveGenerator::cmCPackArchiveGenerator(
+  cmArchiveWrite::Compress compress, std::string format, std::string extension)
+  : Compress(compress)
+  , ArchiveFormat(std::move(format))
+  , OutputExtension(std::move(extension))
+{
 }
 
 cmCPackArchiveGenerator::~cmCPackArchiveGenerator() = default;
@@ -71,8 +117,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   }
   std::string filePrefix;
   if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY")) {
-    filePrefix = this->GetOption("CPACK_PACKAGE_FILE_NAME");
-    filePrefix += "/";
+    filePrefix = cmStrCat(this->GetOption("CPACK_PACKAGE_FILE_NAME"), '/');
   }
   const char* installPrefix =
     this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
@@ -111,6 +156,20 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   }                                                                           \
   cmArchiveWrite archive(gf, this->Compress, this->ArchiveFormat);            \
   do {                                                                        \
+    if (!this->SetArchiveOptions(&archive)) {                                 \
+      cmCPackLogger(cmCPackLog::LOG_ERROR,                                    \
+                    "Problem to set archive options <"                        \
+                      << (filename) << ">, ERROR = " << (archive).GetError()  \
+                      << std::endl);                                          \
+      return 0;                                                               \
+    }                                                                         \
+    if (!archive.Open()) {                                                    \
+      cmCPackLogger(cmCPackLog::LOG_ERROR,                                    \
+                    "Problem to open archive <"                               \
+                      << (filename) << ">, ERROR = " << (archive).GetError()  \
+                      << std::endl);                                          \
+      return 0;                                                               \
+    }                                                                         \
     if (!(archive)) {                                                         \
       cmCPackLogger(cmCPackLog::LOG_ERROR,                                    \
                     "Problem to create archive <"                             \
@@ -284,4 +343,24 @@ bool cmCPackArchiveGenerator::SupportsComponentInstallation() const
   // be activated if explicitly requested by the user
   // (for backward compatibility reason)
   return IsOn("CPACK_ARCHIVE_COMPONENT_INSTALL");
+}
+
+bool cmCPackArchiveGenerator::SetArchiveOptions(cmArchiveWrite* archive)
+{
+#if ARCHIVE_VERSION_NUMBER >= 3004000
+  // Upstream fixed an issue with their integer parsing in 3.4.0 which would
+  // cause spurious errors to be raised from `strtoull`.
+  if (this->Compress == cmArchiveWrite::CompressXZ) {
+    const char* threads = "1";
+    if (this->IsSet("CPACK_ARCHIVE_THREADS")) {
+      threads = this->GetOption("CPACK_ARCHIVE_THREADS");
+    }
+
+    if (!archive->SetFilterOption("xz", "threads", threads)) {
+      return false;
+    }
+  }
+#endif
+
+  return true;
 }

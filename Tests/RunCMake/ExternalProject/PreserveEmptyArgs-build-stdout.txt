@@ -1,0 +1,21 @@
+.*-- Number of arguments for download: 6
+.*-- download argument 4: ''
+.*-- download argument 5: 'after'
+.*-- Number of arguments for update: 6
+.*-- update argument 4: ''
+.*-- update argument 5: 'after'
+.*-- Number of arguments for patch: 6
+.*-- patch argument 4: ''
+.*-- patch argument 5: 'after'
+.*-- Number of arguments for configure: 6
+.*-- configure argument 4: ''
+.*-- configure argument 5: 'after'
+.*-- Number of arguments for build: 6
+.*-- build argument 4: ''
+.*-- build argument 5: 'after'
+.*-- Number of arguments for install: 6
+.*-- install argument 4: ''
+.*-- install argument 5: 'after'
+.*-- Number of arguments for test: 6
+.*-- test argument 4: ''
+.*-- test argument 5: 'after'

@@ -1,0 +1,5 @@
+message(STATUS "Number of arguments: ${CMAKE_ARGC}")
+math(EXPR last "${CMAKE_ARGC} - 1")
+foreach(n RANGE 3 ${last})
+  message(STATUS "Argument ${n}: '${CMAKE_ARGV${n}}'")
+endforeach()

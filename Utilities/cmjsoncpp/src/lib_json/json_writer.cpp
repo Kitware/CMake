@@ -30,7 +30,7 @@
 #define isfinite finite
 #endif
 #elif defined(__hpux)
-#if !defined(isfinite)
+#if !defined(isfinite) && !defined(__GNUC__)
 #if defined(__ia64) && !defined(finite)
 #define isfinite(x) ((sizeof(x) == sizeof(float) ? \
                      _Isfinitef(x) : _IsFinite(x)))
@@ -86,10 +86,11 @@
 // HP-UX
 #if defined(__hpux)
 # if !defined(isfinite)
-#  if defined(__ia64) && !defined(finite)
+#  if defined(__ia64) && !defined(finite) && !defined(__GNUC__)
 #   define isfinite(x) ((sizeof(x) == sizeof(float) ? \
                         _Isfinitef(x) : _Isfinite(x)))
 #  else
+#   include <math.h>
 #   define isfinite finite
 #  endif
 # endif

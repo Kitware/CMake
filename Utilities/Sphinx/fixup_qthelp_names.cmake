@@ -10,15 +10,6 @@ string(REPLACE
   QHCP_CONTENT "${QHCP_CONTENT}"
 )
 
-string(REPLACE
-  "<output>CMake.qch" "<output>CMake-${CMake_VERSION}.qch"
-  QHCP_CONTENT "${QHCP_CONTENT}"
-)
-string(REPLACE
-  "<file>CMake.qch" "<file>CMake-${CMake_VERSION}.qch"
-  QHCP_CONTENT "${QHCP_CONTENT}"
-)
-
 file(WRITE "${QTHELP_DIR}/CMake.qhcp" "${QHCP_CONTENT}")
 
 

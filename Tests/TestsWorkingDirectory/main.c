@@ -37,8 +37,9 @@ static const char* Getcwd(char* buf, unsigned int len)
 
 #else
 #  include <fcntl.h>
-#  include <sys/types.h>
 #  include <unistd.h>
+
+#  include <sys/types.h>
 
 static const char* Getcwd(char* buf, unsigned int len)
 {

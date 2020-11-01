@@ -1,18 +1,17 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGhsMultiGenerator_h
-#define cmGhsMultiGenerator_h
-
-#include "cmGlobalGenerator.h"
-
-#include "cmGlobalGeneratorFactory.h"
-#include "cmTargetDepend.h"
+#pragma once
 
 #include <iosfwd>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmTargetDepend.h"
 
 class cmGeneratorTarget;
 class cmLocalGenerator;
@@ -29,13 +28,15 @@ public:
   cmGlobalGhsMultiGenerator(cmake* cm);
   ~cmGlobalGhsMultiGenerator() override;
 
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<cmGlobalGhsMultiGenerator>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalGhsMultiGenerator>());
   }
 
   //! create the correct local generator
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
   /// @return the name of this generator.
   static std::string GetActualName() { return "Green Hills MULTI"; }
@@ -59,7 +60,8 @@ public:
   static bool SupportsPlatform() { return true; }
 
   // Toolset / Platform Support
-  bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) override;
+  bool SetGeneratorToolset(std::string const& ts, bool build,
+                           cmMakefile* mf) override;
   bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
 
   /**
@@ -108,7 +110,7 @@ private:
                       std::vector<cmLocalGenerator*>& generators,
                       std::string& all_target);
 
-  std::string TrimQuotes(std::string const& str);
+  static std::string TrimQuotes(std::string str);
 
   std::string OsDir;
   static const char* DEFAULT_BUILD_PROGRAM;
@@ -148,13 +150,10 @@ class cmGlobalGhsMultiGenerator::OrderedTargetDependSet
   : public std::multiset<cmTargetDepend,
                          cmGlobalGhsMultiGenerator::TargetCompare>
 {
-  typedef std::multiset<cmTargetDepend,
-                        cmGlobalGhsMultiGenerator::TargetCompare>
-    derived;
+  using derived =
+    std::multiset<cmTargetDepend, cmGlobalGhsMultiGenerator::TargetCompare>;
 
 public:
-  typedef cmGlobalGenerator::TargetDependSet TargetDependSet;
+  using TargetDependSet = cmGlobalGenerator::TargetDependSet;
   OrderedTargetDependSet(TargetDependSet const&, std::string const& first);
 };
-
-#endif

@@ -1,0 +1,19 @@
+-- foreach\(IN ZIP_LISTS\):
+--   <<< empty lists case >>>
+--     Begin output
+--     --> empty-output <--
+--     End output
+--   <<< same lengths lists case >>>
+--     Begin output
+--     | one, satu, raz
+--     | two, dua, dva
+--     | three, tiga, tri
+--     End output
+--   <<< different lengths lists case >>>
+--     Begin output
+--     | one, satu, raz
+--     | two, dua, dva
+--     | three, tiga, tri
+--     | \[undefined\], empat, \[undefined\]
+--     End output
+--   <<< test variable value restored -- PASSED >>>

@@ -1,0 +1,2 @@
+CMake Error at multipleExpandOptions\.cmake:3 \(add_test\):
+ +add_test may be given at most one COMMAND_EXPAND_LISTS\.

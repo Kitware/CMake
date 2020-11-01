@@ -1,6 +1,8 @@
 CMP0093
 -------
 
+.. versionadded:: 3.15
+
 :module:`FindBoost` reports ``Boost_VERSION`` in ``x.y.z`` format.
 
 In CMake 3.14 and below the module would report the Boost version

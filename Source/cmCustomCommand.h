@@ -1,18 +1,20 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCustomCommand_h
-#define cmCustomCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-
-#include "cmCustomCommandLines.h"
-#include "cmListFileCache.h"
 
 #include <string>
 #include <utility>
 #include <vector>
 
-class cmMakefile;
+#include "cmCustomCommandLines.h"
+#include "cmListFileCache.h"
+
+class cmImplicitDependsList
+  : public std::vector<std::pair<std::string, std::string>>
+{
+};
 
 /** \class cmCustomCommand
  * \brief A class to encapsulate a custom command
@@ -23,11 +25,12 @@ class cmCustomCommand
 {
 public:
   /** Main constructor specifies all information for the command.  */
-  cmCustomCommand(cmMakefile const* mf, std::vector<std::string> outputs,
+  cmCustomCommand(std::vector<std::string> outputs,
                   std::vector<std::string> byproducts,
                   std::vector<std::string> depends,
-                  cmCustomCommandLines commandLines, const char* comment,
-                  const char* workingDirectory);
+                  cmCustomCommandLines commandLines, cmListFileBacktrace lfbt,
+                  const char* comment, const char* workingDirectory,
+                  bool stdPipesUTF8);
 
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;
@@ -50,6 +53,9 @@ public:
   /** Get the comment string for the command.  */
   const char* GetComment() const;
 
+  /** Get a value indicating if the command uses UTF-8 output pipes. */
+  bool GetStdPipesUTF8() const { return this->StdPipesUTF8; }
+
   /** Append to the list of command lines.  */
   void AppendCommands(const cmCustomCommandLines& commandLines);
 
@@ -68,13 +74,9 @@ public:
   /** Backtrace of the command that created this custom command.  */
   cmListFileBacktrace const& GetBacktrace() const;
 
-  typedef std::pair<std::string, std::string> ImplicitDependsPair;
-  class ImplicitDependsList : public std::vector<ImplicitDependsPair>
-  {
-  };
-  void SetImplicitDepends(ImplicitDependsList const&);
-  void AppendImplicitDepends(ImplicitDependsList const&);
-  ImplicitDependsList const& GetImplicitDepends() const;
+  void SetImplicitDepends(cmImplicitDependsList const&);
+  void AppendImplicitDepends(cmImplicitDependsList const&);
+  cmImplicitDependsList const& GetImplicitDepends() const;
 
   /** Set/Get whether this custom command should be given access to the
       real console (if possible).  */
@@ -99,7 +101,7 @@ private:
   std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
   cmListFileBacktrace Backtrace;
-  ImplicitDependsList ImplicitDepends;
+  cmImplicitDependsList ImplicitDepends;
   std::string Comment;
   std::string WorkingDirectory;
   std::string Depfile;
@@ -109,6 +111,5 @@ private:
   bool EscapeOldStyle = true;
   bool UsesTerminal = false;
   bool CommandExpandLists = false;
+  bool StdPipesUTF8 = false;
 };
-
-#endif

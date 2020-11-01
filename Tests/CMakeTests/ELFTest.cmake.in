@@ -25,11 +25,36 @@ foreach(f ${files})
   # Change the RPATH.
   file(RPATH_CHANGE FILE "${f}"
     OLD_RPATH "/sample/rpath"
-    NEW_RPATH "/rpath/sample")
+    NEW_RPATH "/path1:/path2")
+  set(rpath)
+  file(STRINGS "${f}" rpath REGEX "/path1:/path2" LIMIT_COUNT 1)
+  if(NOT rpath)
+    message(FATAL_ERROR "RPATH not changed in ${f}")
+  endif()
+
+  # Change the RPATH without compiler defined rpath removed
+  file(RPATH_CHANGE FILE "${f}"
+    OLD_RPATH "/path2"
+    NEW_RPATH "/path3")
+  set(rpath)
+  file(STRINGS "${f}" rpath REGEX "/path1:/path3" LIMIT_COUNT 1)
+  if(NOT rpath)
+    message(FATAL_ERROR "RPATH not updated in ${f}")
+  endif()
+
+  # Change the RPATH with compiler defined rpath removed
+  file(RPATH_CHANGE FILE "${f}"
+    OLD_RPATH "/path3"
+    NEW_RPATH "/rpath/sample"
+    INSTALL_REMOVE_ENVIRONMENT_RPATH)
   set(rpath)
   file(STRINGS "${f}" rpath REGEX "/rpath/sample" LIMIT_COUNT 1)
   if(NOT rpath)
-    message(FATAL_ERROR "RPATH not changed in ${f}")
+    message(FATAL_ERROR "RPATH not updated in ${f}")
+  endif()
+  file(STRINGS "${f}" rpath REGEX "/path1" LIMIT_COUNT 1)
+  if(rpath)
+    message(FATAL_ERROR "RPATH not removed in ${f}")
   endif()
 
   # Remove the RPATH.

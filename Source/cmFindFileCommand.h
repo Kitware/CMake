@@ -1,13 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFindFileCommand_h
-#define cmFindFileCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+#include <vector>
+
 #include "cmFindPathCommand.h"
 
-class cmCommand;
+class cmExecutionStatus;
 
 /** \class cmFindFileCommand
  * \brief Define a command to search for an executable program.
@@ -20,11 +22,8 @@ class cmCommand;
 class cmFindFileCommand : public cmFindPathCommand
 {
 public:
-  cmFindFileCommand();
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmFindFileCommand; }
+  cmFindFileCommand(cmExecutionStatus& status);
 };
 
-#endif
+bool cmFindFile(std::vector<std::string> const& args,
+                cmExecutionStatus& status);

@@ -1,8 +1,10 @@
 #pragma once
 
+// clang-format off
 #include "pch.h"
 
 #include "CubeRenderer.h"
+// clang-format on
 
 ref class Direct3DApp1 sealed
   : public Windows::ApplicationModel::Core::IFrameworkView

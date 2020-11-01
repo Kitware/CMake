@@ -1,16 +1,17 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmOrderDirectories_h
-#define cmOrderDirectories_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmsys/RegularExpression.hxx"
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;
@@ -45,8 +46,9 @@ private:
 
   std::vector<std::string> OrderedDirectories;
 
-  std::vector<cmOrderDirectoriesConstraint*> ConstraintEntries;
-  std::vector<cmOrderDirectoriesConstraint*> ImplicitDirEntries;
+  std::vector<std::unique_ptr<cmOrderDirectoriesConstraint>> ConstraintEntries;
+  std::vector<std::unique_ptr<cmOrderDirectoriesConstraint>>
+    ImplicitDirEntries;
   std::vector<std::string> UserDirectories;
   std::vector<std::string> LanguageDirectories;
   cmsys::RegularExpression RemoveLibraryExtension;
@@ -75,7 +77,7 @@ private:
   // the index of the directory that must come first.  The second
   // element is the index of the runtime library that added the
   // constraint.
-  typedef std::pair<int, int> ConflictPair;
+  using ConflictPair = std::pair<int, int>;
   struct ConflictList : public std::vector<ConflictPair>
   {
   };
@@ -92,5 +94,3 @@ private:
   friend class cmOrderDirectoriesConstraint;
   friend class cmOrderDirectoriesConstraintLibrary;
 };
-
-#endif

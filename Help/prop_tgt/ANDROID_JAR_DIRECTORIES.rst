@@ -1,6 +1,8 @@
 ANDROID_JAR_DIRECTORIES
 -----------------------
 
+.. versionadded:: 3.4
+
 Set the Android property that specifies directories to search for
 the JAR libraries.
 

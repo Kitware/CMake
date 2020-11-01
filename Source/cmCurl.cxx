@@ -7,6 +7,7 @@
 #  define CMAKE_FIND_CAFILE
 #  include "cmSystemTools.h"
 #endif
+#include "cmStringAlgorithms.h"
 
 // curl versions before 7.21.5 did not provide this error code
 #if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM < 0x071505
@@ -72,8 +73,8 @@ std::string cmCurlSetNETRCOption(::CURL* curl, const std::string& netrc_level,
     } else if (netrc_level == "IGNORED") {
       curl_netrc_level = CURL_NETRC_IGNORED;
     } else {
-      e = "NETRC accepts OPTIONAL, IGNORED or REQUIRED but got: ";
-      e += netrc_level;
+      e = cmStrCat("NETRC accepts OPTIONAL, IGNORED or REQUIRED but got: ",
+                   netrc_level);
       return e;
     }
   }

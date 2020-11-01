@@ -1,6 +1,8 @@
 CMAKE_AUTOMOC_RELAXED_MODE
 --------------------------
 
+.. deprecated:: 3.15
+
 Switch between strict and relaxed automoc mode.
 
 By default, :prop_tgt:`AUTOMOC` behaves exactly as described in the

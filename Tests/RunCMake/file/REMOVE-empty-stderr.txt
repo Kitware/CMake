@@ -1,0 +1,11 @@
+^CMake Warning \(dev\) at REMOVE-empty.cmake:1 \(file\):
+  Ignoring empty file name in REMOVE.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9] \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at REMOVE-empty.cmake:2 \(file\):
+  Ignoring empty file name in REMOVE_RECURSE.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9] \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

@@ -1,11 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFortran_h
-#define cmFortran_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -14,7 +14,7 @@
 
 class cmDependsFortranInternals;
 class cmFortranSourceInfo;
-class cmLocalGenerator;
+class cmLocalUnixMakefileGenerator3;
 
 /** \class cmDependsFortran
  * \brief Dependency scanner for Fortran object files.
@@ -30,7 +30,7 @@ public:
       path from the build directory to the target file, the source
       file from which to start scanning, the include file search
       path, and the target directory.  */
-  cmDependsFortran(cmLocalGenerator* lg);
+  cmDependsFortran(cmLocalUnixMakefileGenerator3* lg);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   ~cmDependsFortran() override;
@@ -84,11 +84,9 @@ protected:
   std::set<std::string> PPDefinitions;
 
   // Internal implementation details.
-  cmDependsFortranInternals* Internal = nullptr;
+  std::unique_ptr<cmDependsFortranInternals> Internal;
 
 private:
   std::string MaybeConvertToRelativePath(std::string const& base,
                                          std::string const& path);
 };
-
-#endif

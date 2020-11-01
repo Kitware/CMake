@@ -1,0 +1,48 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#pragma once
+
+#include <iterator>
+
+#include <cm/type_traits>
+
+namespace cm {
+
+// checks if a type is an iterator type
+template <typename I>
+using is_iterator =
+  std::is_integral<typename std::iterator_traits<I>::difference_type>;
+
+// checks if a type is an input iterator type
+template <typename I>
+using is_input_iterator =
+  std::is_base_of<std::input_iterator_tag,
+                  typename std::iterator_traits<I>::iterator_category>;
+
+// checks if a type is a range type: std::begin() and std::end() are supported
+template <typename Range>
+using is_range = cm::bool_constant<
+  cm::is_iterator<decltype(std::begin(std::declval<const Range>()))>::value &&
+  cm::is_iterator<decltype(std::end(std::declval<const Range>()))>::value>;
+
+// checks if a type is an input range type: std::begin() and std::end() are
+// returning an input iterator
+template <typename Range>
+using is_input_range =
+#if defined(_MSC_VER) && _MSC_VER < 1920
+  // MS C++ is not able to evaluate complex type introspection,
+  // so use a simplified version
+  cm::bool_constant<std::is_class<Range>::value ||
+                    std::is_pointer<Range>::value ||
+                    std::is_array<Range>::value>;
+#else
+  cm::bool_constant<cm::is_input_iterator<decltype(
+                      std::begin(std::declval<const Range>()))>::value &&
+                    cm::is_input_iterator<decltype(
+                      std::end(std::declval<const Range>()))>::value>;
+#endif
+
+} // namespace cm

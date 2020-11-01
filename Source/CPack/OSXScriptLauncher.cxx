@@ -1,14 +1,17 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmsys/FStream.hxx"
-#include "cmsys/Process.h"
-#include "cmsys/SystemTools.hxx"
+#include <cstddef>
 #include <iostream>
-#include <stddef.h>
 #include <string>
 #include <vector>
 
+#include <cm/memory>
+
 #include <CoreFoundation/CoreFoundation.h>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
+#include "cmsys/SystemTools.hxx"
 
 // For the PATH_MAX constant
 #include <sys/syslimits.h>
@@ -25,7 +28,6 @@ int main(int argc, char* argv[])
   CFStringRef fileName;
   CFBundleRef appBundle;
   CFURLRef scriptFileURL;
-  UInt8* path;
 
   // get CF URL for script
   if (!(appBundle = CFBundleGetMainBundle())) {
@@ -40,13 +42,15 @@ int main(int argc, char* argv[])
   }
 
   // create path string
-  if (!(path = new UInt8[PATH_MAX])) {
+  auto path = cm::make_unique<UInt8[]>(PATH_MAX);
+  if (!path) {
     return 1;
   }
 
   // get the file system path of the url as a cstring
   // in an encoding suitable for posix apis
-  if (!CFURLGetFileSystemRepresentation(scriptFileURL, true, path, PATH_MAX)) {
+  if (!CFURLGetFileSystemRepresentation(scriptFileURL, true, path.get(),
+                                        PATH_MAX)) {
     DebugError("CFURLGetFileSystemRepresentation failed");
     return 1;
   }
@@ -54,10 +58,10 @@ int main(int argc, char* argv[])
   // dispose of the CF variable
   CFRelease(scriptFileURL);
 
-  std::string fullScriptPath = reinterpret_cast<char*>(path);
-  delete[] path;
+  std::string fullScriptPath = reinterpret_cast<char*>(path.get());
+  path.reset();
 
-  if (!cmsys::SystemTools::FileExists(fullScriptPath.c_str())) {
+  if (!cmsys::SystemTools::FileExists(fullScriptPath)) {
     return 1;
   }
 
@@ -79,7 +83,6 @@ int main(int argc, char* argv[])
   cmsysProcess_SetTimeout(cp, 0);
   cmsysProcess_Execute(cp);
 
-  std::vector<char> tempOutput;
   char* data;
   int length;
   while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {

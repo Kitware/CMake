@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmNewLineStyle_h
-#define cmNewLineStyle_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -30,10 +29,8 @@ public:
   bool ReadFromArguments(const std::vector<std::string>& args,
                          std::string& errorString);
 
-  const std::string GetCharacters() const;
+  std::string GetCharacters() const;
 
 private:
   Style NewLineStyle = Invalid;
 };
-
-#endif

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "ExtraVariableField",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "EXTRA": {
+          "value": "",
+          "invalid": true
+        }
+      }
+    }
+  ]
+}

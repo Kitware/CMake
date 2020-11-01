@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,12 +44,12 @@
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
    triggered */
-time_t Curl_pp_state_timeout(struct pingpong *pp)
+timediff_t Curl_pp_state_timeout(struct pingpong *pp, bool disconnecting)
 {
   struct connectdata *conn = pp->conn;
   struct Curl_easy *data = conn->data;
-  time_t timeout_ms; /* in milliseconds */
-  long response_time = (data->set.server_response_timeout)?
+  timediff_t timeout_ms; /* in milliseconds */
+  timediff_t response_time = (data->set.server_response_timeout)?
     data->set.server_response_timeout: pp->response_time;
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
@@ -62,9 +62,9 @@ time_t Curl_pp_state_timeout(struct pingpong *pp)
   timeout_ms = response_time -
     Curl_timediff(Curl_now(), pp->response); /* spent time */
 
-  if(data->set.timeout) {
+  if(data->set.timeout && !disconnecting) {
     /* if timeout is requested, find out how much remaining time we have */
-    time_t timeout2_ms = data->set.timeout - /* timeout time */
+    timediff_t timeout2_ms = data->set.timeout - /* timeout time */
       Curl_timediff(Curl_now(), conn->now); /* spent time */
 
     /* pick the lowest number */
@@ -77,13 +77,14 @@ time_t Curl_pp_state_timeout(struct pingpong *pp)
 /*
  * Curl_pp_statemach()
  */
-CURLcode Curl_pp_statemach(struct pingpong *pp, bool block)
+CURLcode Curl_pp_statemach(struct pingpong *pp, bool block,
+                           bool disconnecting)
 {
   struct connectdata *conn = pp->conn;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
-  time_t interval_ms;
-  time_t timeout_ms = Curl_pp_state_timeout(pp);
+  timediff_t interval_ms;
+  timediff_t timeout_ms = Curl_pp_state_timeout(pp, disconnecting);
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
 
@@ -383,10 +384,10 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
 
           if(pp->endofresp(conn, pp->linestart_resp, perline, code)) {
             /* This is the end of the last line, copy the last line to the
-               start of the buffer and zero terminate, for old times sake */
+               start of the buffer and null-terminate, for old times sake */
             size_t n = ptr - pp->linestart_resp;
             memmove(buf, pp->linestart_resp, n);
-            buf[n] = 0; /* zero terminate */
+            buf[n] = 0; /* null-terminate */
             keepon = FALSE;
             pp->linestart_resp = ptr + 1; /* advance pointer */
             i++; /* skip this before getting out */
@@ -462,14 +463,9 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
 }
 
 int Curl_pp_getsock(struct pingpong *pp,
-                    curl_socket_t *socks,
-                    int numsocks)
+                    curl_socket_t *socks)
 {
   struct connectdata *conn = pp->conn;
-
-  if(!numsocks)
-    return GETSOCK_BLANK;
-
   socks[0] = conn->sock[FIRSTSOCKET];
 
   if(pp->sendleft) {

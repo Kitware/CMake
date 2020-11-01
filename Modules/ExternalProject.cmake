@@ -9,8 +9,11 @@ ExternalProject
 
    .. contents::
 
+Commands
+^^^^^^^^
+
 External Project Definition
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""
 
 .. command:: ExternalProject_Add
 
@@ -49,7 +52,7 @@ External Project Definition
 
     ``STAMP_DIR <dir>``
       Directory in which to store the timestamps of each step. Log files from
-      individual steps are also created in here unless overriden by LOG_DIR
+      individual steps are also created in here unless overridden by LOG_DIR
       (see *Logging Options* below).
 
     ``LOG_DIR <dir>``
@@ -176,6 +179,9 @@ External Project Definition
       ``TIMEOUT <seconds>``
         Maximum time allowed for file download operations.
 
+      ``INACTIVITY_TIMEOUT <seconds>``
+        Terminate the operation after a period of inactivity.
+
       ``HTTP_USERNAME <username>``
         Username for the download operation if authentication is required.
 
@@ -261,7 +267,14 @@ External Project Definition
 
       ``GIT_SUBMODULES <module>...``
         Specific git submodules that should also be updated. If this option is
-        not provided, all git submodules will be updated.
+        not provided, all git submodules will be updated. When :policy:`CMP0097`
+        is set to ``NEW`` if this value is set to an empty string then no submodules
+        are initialized or updated.
+
+      ``GIT_SUBMODULES_RECURSE <bool>``
+        Specify whether git submodules (if any) should update recursively by
+        passing the ``--recursive`` flag to ``git submodule update``.
+        If not specified, the default is on.
 
       ``GIT_SHALLOW <bool>``
         When this option is enabled, the ``git clone`` operation will be given
@@ -283,6 +296,42 @@ External Project Definition
         listed will be transformed into its own ``--config <option>`` on the
         ``git clone`` command line, with each option required to be in the
         form ``key=value``.
+
+      ``GIT_REMOTE_UPDATE_STRATEGY <strategy>``
+        When ``GIT_TAG`` refers to a remote branch, this option can be used to
+        specify how the update step behaves.  The ``<strategy>`` must be one of
+        the following:
+
+        ``CHECKOUT``
+          Ignore the local branch and always checkout the branch specified by
+          ``GIT_TAG``.
+
+        ``REBASE``
+          Try to rebase the current branch to the one specified by ``GIT_TAG``.
+          If there are local uncommitted changes, they will be stashed first
+          and popped again after rebasing.  If rebasing or popping stashed
+          changes fail, abort the rebase and halt with an error.
+          When ``GIT_REMOTE_UPDATE_STRATEGY`` is not present, this is the
+          default strategy unless the default has been overridden with
+          ``CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY`` (see below).
+
+        ``REBASE_CHECKOUT``
+          Same as ``REBASE`` except if the rebase fails, an annotated tag will
+          be created at the original ``HEAD`` position from before the rebase
+          and then checkout ``GIT_TAG`` just like the ``CHECKOUT`` strategy.
+          The message stored on the annotated tag will give information about
+          what was attempted and the tag name will include a timestamp so that
+          each failed run will add a new tag.  This strategy ensures no changes
+          will be lost, but updates should always succeed if ``GIT_TAG`` refers
+          to a valid ref unless there are uncommitted changes that cannot be
+          popped successfully.
+
+        The variable ``CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY`` can be set to
+        override the default strategy.  This variable should not be set by a
+        project, it is intended for the user to set.  It is primarily intended
+        for use in continuous integration scripts to ensure that when history
+        is rewritten on a remote branch, the build doesn't end up with unintended
+        changes or failed builds resulting from conflicts during rebase operations.
 
     *Subversion*
       ``SVN_REPOSITORY <url>``
@@ -348,6 +397,9 @@ External Project Definition
       developers control over whether or not to perform updates (assuming the
       project also provides a cache variable or some other convenient method
       for setting the directory property).
+
+      This may cause a step target to be created automatically for the
+      ``download`` step.  See policy :policy:`CMP0114`.
 
     ``PATCH_COMMAND <cmd>...``
       Specifies a custom command to patch the sources after an update. By
@@ -423,7 +475,7 @@ External Project Definition
       build directory or re-uses previous build contents.
 
       If the CMake generator is the ``Green Hills MULTI`` and not overridden then
-      the orginal projects settings for the GHS toolset and target system
+      the original project's settings for the GHS toolset and target system
       customization cache variables are propagated into the external project.
 
     ``SOURCE_SUBDIR <dir>``
@@ -529,6 +581,8 @@ External Project Definition
       If enabled, the main build's default ALL target will not depend on the
       test step. This can be a useful way of ensuring the test step is defined
       but only gets invoked when manually requested.
+      This may cause a step target to be created automatically for either
+      the ``install`` or ``build`` step.  See policy :policy:`CMP0114`.
 
   **Output Logging Options:**
     Each of the following ``LOG_...`` options can be used to wrap the relevant
@@ -615,19 +669,21 @@ External Project Definition
       steps need to be triggered manually or if they need to be used as
       dependencies of other targets. If this option is not specified, the
       default value is taken from the ``EP_STEP_TARGETS`` directory property.
-      See :command:`ExternalProject_Add_Step` below for further discussion of
-      the effects of this option.
+      See :command:`ExternalProject_Add_StepTargets` below for further
+      discussion of the effects of this option.
 
     ``INDEPENDENT_STEP_TARGETS <step-target>...``
-      Generate custom targets for the specified steps and prevent these targets
+      Deprecated.  This is allowed only if policy :policy:`CMP0114` is not set
+      to ``NEW``.
+      Generates custom targets for the specified steps and prevent these targets
       from having the usual dependencies applied to them. If this option is not
       specified, the default value is taken from the
       ``EP_INDEPENDENT_STEP_TARGETS`` directory property. This option is mostly
       useful for allowing individual steps to be driven independently, such as
       for a CDash setup where each step should be initiated and reported
       individually rather than as one whole build. See
-      :command:`ExternalProject_Add_Step` below for further discussion of the
-      effects of this option.
+      :command:`ExternalProject_Add_StepTargets` below for further discussion
+      of the effects of this option.
 
   **Miscellaneous Options:**
     ``LIST_SEPARATOR <sep>``
@@ -658,7 +714,7 @@ External Project Definition
   automatic substitutions that are supported for some options.
 
 Obtaining Project Properties
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""
 
 .. command:: ExternalProject_Get_Property
 
@@ -679,7 +735,7 @@ Obtaining Project Properties
     message("Source dir of myExtProj = ${SOURCE_DIR}")
 
 Explicit Step Management
-^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""
 
 The ``ExternalProject_Add()`` function on its own is often sufficient for
 incorporating an external project into the main build. Certain scenarios
@@ -701,7 +757,7 @@ control needed to implement such step-level capabilities.
 
   ``<name>`` is the same as the name passed to the original call to
   :command:`ExternalProject_Add`. The specified ``<step>`` must not be one of
-  the pre-defined steps (``mkdir``, ``download``, ``update``, ``skip-update``,
+  the pre-defined steps (``mkdir``, ``download``, ``update``,
   ``patch``, ``configure``, ``build``, ``install`` or ``test``). The supported
   options are:
 
@@ -723,6 +779,21 @@ control needed to implement such step-level capabilities.
   ``DEPENDS <file>...``
     Files on which this custom step depends.
 
+  ``INDEPENDENT <bool>``
+    Specifies whether this step is independent of the external dependencies
+    specified by the :command:`ExternalProject_Add`'s ``DEPENDS`` option.
+    The default is ``FALSE``.  Steps marked as independent may depend only
+    on other steps marked independent.  See policy :policy:`CMP0114`.
+
+    Note that this use of the term "independent" refers only to independence
+    from external targets specified by the ``DEPENDS`` option and is
+    orthogonal to a step's dependencies on other steps.
+
+    If a step target is created for an independent step by the
+    :command:`ExternalProject_Add` ``STEP_TARGETS`` option or by the
+    :command:`ExternalProject_Add_StepTargets` function, it will not depend
+    on the external targets, but may depend on targets for other steps.
+
   ``BYPRODUCTS <file>...``
     Files that will be generated by this custom step but which might or might
     not have their modification time updated by subsequent builds. This list of
@@ -736,6 +807,8 @@ control needed to implement such step-level capabilities.
   ``EXCLUDE_FROM_MAIN <bool>``
     When enabled, this option specifies that the external project's main target
     does not depend on the custom step.
+    This may cause step targets to be created automatically for the steps on
+    which this step depends.  See policy :policy:`CMP0114`.
 
   ``WORKING_DIRECTORY <dir>``
     Specifies the working directory to set before running the custom step's
@@ -766,7 +839,7 @@ control needed to implement such step-level capabilities.
 
   .. code-block:: cmake
 
-    ExternalProject_Add_StepTargets(<name> [NO_DEPENDS] <step1> [<step2>...])
+    ExternalProject_Add_StepTargets(<name> <step1> [<step2>...])
 
   Creating a target for a step allows it to be used as a dependency of another
   target or to be triggered manually. Having targets for specific steps also
@@ -778,37 +851,53 @@ control needed to implement such step-level capabilities.
   through the step dependency chain, then all the previous steps will also run
   to ensure everything is up to date.
 
-  If the ``NO_DEPENDS`` option is specified, the step target will not depend on
-  the dependencies of the external project (i.e. on any dependencies of the
-  ``<name>`` custom target created by :command:`ExternalProject_Add`). This is
-  usually safe for the ``download``, ``update`` and ``patch`` steps, since they
-  do not typically require that the dependencies are updated and built. Using
-  ``NO_DEPENDS`` for any of the other pre-defined steps, however, may break
-  parallel builds. Only use ``NO_DEPENDS`` where it is certain that the named
-  steps genuinely do not have dependencies. For custom steps, consider whether
-  or not the custom commands require the dependencies to be configured, built
-  and installed.
-
   Internally, :command:`ExternalProject_Add` calls
   :command:`ExternalProject_Add_Step` to create each step. If any
-  ``STEP_TARGETS`` or ``INDEPENDENT_STEP_TARGETS`` were specified, then
-  ``ExternalProject_Add_StepTargets()`` will also be called after
-  :command:`ExternalProject_Add_Step`. ``INDEPENDENT_STEP_TARGETS`` have the
-  ``NO_DEPENDS`` option set, whereas ``STEP_TARGETS`` do not. Other than that,
-  the two options result in ``ExternalProject_Add_StepTargets()`` being called
-  in the same way. Even if a step is not mentioned in either of those two
-  options, ``ExternalProject_Add_StepTargets()`` can still be called later to
-  manually define a target for the step.
+  ``STEP_TARGETS`` were specified, then ``ExternalProject_Add_StepTargets()``
+  will also be called after :command:`ExternalProject_Add_Step`.  Even if a
+  step is not mentioned in the ``STEP_TARGETS`` option,
+  ``ExternalProject_Add_StepTargets()`` can still be called later to manually
+  define a target for the step.
 
-  The ``STEP_TARGETS`` and ``INDEPENDENT_STEP_TARGETS`` options for
-  :command:`ExternalProject_Add` are generally the easiest way to ensure
-  targets are created for specific steps of interest. For custom steps,
-  ``ExternalProject_Add_StepTargets()`` must be called explicitly if a target
-  should also be created for that custom step. An alternative to these two
-  options is to populate the ``EP_STEP_TARGETS`` and
-  ``EP_INDEPENDENT_STEP_TARGETS`` directory properties. These act as defaults
-  for the step target options and can save having to repeatedly specify the
-  same set of step targets when multiple external projects are being defined.
+  The ``STEP_TARGETS`` option for :command:`ExternalProject_Add` is generally
+  the easiest way to ensure targets are created for specific steps of interest.
+  For custom steps, ``ExternalProject_Add_StepTargets()`` must be called
+  explicitly if a target should also be created for that custom step.
+  An alternative to these two options is to populate the ``EP_STEP_TARGETS``
+  directory property.  It acts as a default for the step target options and
+  can save having to repeatedly specify the same set of step targets when
+  multiple external projects are being defined.
+
+  If :policy:`CMP0114` is set to ``NEW``, step targets are fully responsible
+  for holding the custom commands implementing their steps.  The primary target
+  created by ``ExternalProject_Add`` depends on the step targets, and the
+  step targets depend on each other.  The target-level dependencies match
+  the file-level dependencies used by the custom commands for each step.
+  The targets for steps created with :command:`ExternalProject_Add_Step`'s
+  ``INDEPENDENT`` option do not depend on the external targets specified
+  by :command:`ExternalProject_Add`'s ``DEPENDS`` option.  The predefined
+  steps ``mkdir``, ``download``, ``update``, and ``patch`` are independent.
+
+  If :policy:`CMP0114` is not ``NEW``, the following deprecated behavior
+  is available:
+
+  * A deprecated ``NO_DEPENDS`` option may be specified immediately after the
+    ``<name>`` and before the first step.
+    If the ``NO_DEPENDS`` option is specified, the step target will not depend on
+    the dependencies of the external project (i.e. on any dependencies of the
+    ``<name>`` custom target created by :command:`ExternalProject_Add`). This is
+    usually safe for the ``download``, ``update`` and ``patch`` steps, since they
+    do not typically require that the dependencies are updated and built. Using
+    ``NO_DEPENDS`` for any of the other pre-defined steps, however, may break
+    parallel builds. Only use ``NO_DEPENDS`` where it is certain that the named
+    steps genuinely do not have dependencies. For custom steps, consider whether
+    or not the custom commands require the dependencies to be configured, built
+    and installed.
+
+  * The ``INDEPENDENT_STEP_TARGETS`` option for :command:`ExternalProject_Add`,
+    or the ``EP_INDEPENDENT_STEP_TARGETS`` directory property, tells the
+    function to call ``ExternalProject_Add_StepTargets()`` internally
+    using the ``NO_DEPENDS`` option for the specified steps.
 
 .. command:: ExternalProject_Add_StepDependencies
 
@@ -928,6 +1017,7 @@ The custom step could then be triggered from the main build like so::
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
 
 # Pre-compute a regex to match documented keywords for each command.
 math(EXPR _ep_documentation_line_count "${CMAKE_CURRENT_LIST_LINE} - 4")
@@ -1016,6 +1106,9 @@ function(_ep_parse_arguments f name ns args)
       endif()
     else()
       set(key "${arg}")
+      if(key MATCHES GIT)
+       get_property(have_key TARGET ${name} PROPERTY ${ns}${key} SET)
+      endif()
     endif()
   endforeach()
 endfunction()
@@ -1060,7 +1153,7 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   "ExternalProject module."
   )
 
-function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
     # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
     set(git_checkout_explicit-- "--")
@@ -1074,7 +1167,11 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
 
-  set(git_clone_options)
+  if(GIT_VERSION_STRING VERSION_LESS 2.20 OR 2.21 VERSION_LESS_EQUAL GIT_VERSION_STRING)
+    set(git_clone_options "--no-checkout")
+  else()
+    set(git_clone_options)
+  endif()
   if(git_shallow)
     if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
       list(APPEND git_clone_options "--depth 1 --no-single-branch")
@@ -1086,7 +1183,7 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
     list(APPEND git_clone_options --progress)
   endif()
   foreach(config IN LISTS git_config)
-    list(APPEND git_clone_options --config ${config})
+    list(APPEND git_clone_options --config \"${config}\")
   endforeach()
   if(NOT ${git_remote_name} STREQUAL "origin")
     list(APPEND git_clone_options --origin \"${git_remote_name}\")
@@ -1110,7 +1207,7 @@ if(NOT \"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
 endif()
 
 execute_process(
-  COMMAND \${CMAKE_COMMAND} -E remove_directory \"${source_dir}\"
+  COMMAND \${CMAKE_COMMAND} -E rm -rf \"${source_dir}\"
   RESULT_VARIABLE error_code
   )
 if(error_code)
@@ -1145,11 +1242,14 @@ if(error_code)
   message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
 endif()
 
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update --recursive --init ${git_submodules}
-  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
-  RESULT_VARIABLE error_code
-  )
+set(init_submodules ${init_submodules})
+if(init_submodules)
+  execute_process(
+    COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update ${git_submodules_recurse} --init ${git_submodules}
+    WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+    RESULT_VARIABLE error_code
+    )
+endif()
 if(error_code)
   message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
 endif()
@@ -1183,7 +1283,7 @@ if(NOT \"${hgclone_infofile}\" IS_NEWER_THAN \"${hgclone_stampfile}\")
 endif()
 
 execute_process(
-  COMMAND \${CMAKE_COMMAND} -E remove_directory \"${source_dir}\"
+  COMMAND \${CMAKE_COMMAND} -E rm -rf \"${source_dir}\"
   RESULT_VARIABLE error_code
   )
 if(error_code)
@@ -1226,7 +1326,7 @@ endif()
 endfunction()
 
 
-function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name git_submodules git_repository work_dir)
+function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_repository work_dir git_update_strategy)
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
@@ -1235,170 +1335,15 @@ function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_r
   else()
     set(git_stash_save_options --quiet)
   endif()
-  file(WRITE ${script_filename}
-"
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" rev-list --max-count=1 HEAD
-  WORKING_DIRECTORY \"${work_dir}\"
-  RESULT_VARIABLE error_code
-  OUTPUT_VARIABLE head_sha
-  OUTPUT_STRIP_TRAILING_WHITESPACE
+
+  configure_file(
+      "${_ExternalProject_SELF_DIR}/ExternalProject-gitupdate.cmake.in"
+      "${script_filename}"
+      @ONLY
   )
-if(error_code)
-  message(FATAL_ERROR \"Failed to get the hash for HEAD\")
-endif()
+endfunction()
 
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" show-ref ${git_tag}
-  WORKING_DIRECTORY \"${work_dir}\"
-  OUTPUT_VARIABLE show_ref_output
-  )
-# If a remote ref is asked for, which can possibly move around,
-# we must always do a fetch and checkout.
-if(\"\${show_ref_output}\" MATCHES \"remotes\")
-  set(is_remote_ref 1)
-else()
-  set(is_remote_ref 0)
-endif()
-
-# Tag is in the form <remote>/<tag> (i.e. origin/master) we must strip
-# the remote from the tag.
-if(\"\${show_ref_output}\" MATCHES \"refs/remotes/${git_tag}\")
-  string(REGEX MATCH \"^([^/]+)/(.+)$\" _unused \"${git_tag}\")
-  set(git_remote \"\${CMAKE_MATCH_1}\")
-  set(git_tag \"\${CMAKE_MATCH_2}\")
-else()
-  set(git_remote \"${git_remote_name}\")
-  set(git_tag \"${git_tag}\")
-endif()
-
-# This will fail if the tag does not exist (it probably has not been fetched
-# yet).
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" rev-list --max-count=1 ${git_tag}
-  WORKING_DIRECTORY \"${work_dir}\"
-  RESULT_VARIABLE error_code
-  OUTPUT_VARIABLE tag_sha
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-
-# Is the hash checkout out that we want?
-if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"))
-  execute_process(
-    COMMAND \"${git_EXECUTABLE}\" fetch
-    WORKING_DIRECTORY \"${work_dir}\"
-    RESULT_VARIABLE error_code
-    )
-  if(error_code)
-    message(FATAL_ERROR \"Failed to fetch repository '${git_repository}'\")
-  endif()
-
-  if(is_remote_ref)
-    # Check if stash is needed
-    execute_process(
-      COMMAND \"${git_EXECUTABLE}\" status --porcelain
-      WORKING_DIRECTORY \"${work_dir}\"
-      RESULT_VARIABLE error_code
-      OUTPUT_VARIABLE repo_status
-      )
-    if(error_code)
-      message(FATAL_ERROR \"Failed to get the status\")
-    endif()
-    string(LENGTH \"\${repo_status}\" need_stash)
-
-    # If not in clean state, stash changes in order to be able to be able to
-    # perform git pull --rebase
-    if(need_stash)
-      execute_process(
-        COMMAND \"${git_EXECUTABLE}\" stash save ${git_stash_save_options}
-        WORKING_DIRECTORY \"${work_dir}\"
-        RESULT_VARIABLE error_code
-        )
-      if(error_code)
-        message(FATAL_ERROR \"Failed to stash changes\")
-      endif()
-    endif()
-
-    # Pull changes from the remote branch
-    execute_process(
-      COMMAND \"${git_EXECUTABLE}\" rebase \${git_remote}/\${git_tag}
-      WORKING_DIRECTORY \"${work_dir}\"
-      RESULT_VARIABLE error_code
-      )
-    if(error_code)
-      # Rebase failed: Restore previous state.
-      execute_process(
-        COMMAND \"${git_EXECUTABLE}\" rebase --abort
-        WORKING_DIRECTORY \"${work_dir}\"
-      )
-      if(need_stash)
-        execute_process(
-          COMMAND \"${git_EXECUTABLE}\" stash pop --index --quiet
-          WORKING_DIRECTORY \"${work_dir}\"
-          )
-      endif()
-      message(FATAL_ERROR \"\\nFailed to rebase in: '${work_dir}/${src_name}'.\\nYou will have to resolve the conflicts manually\")
-    endif()
-
-    if(need_stash)
-      execute_process(
-        COMMAND \"${git_EXECUTABLE}\" stash pop --index --quiet
-        WORKING_DIRECTORY \"${work_dir}\"
-        RESULT_VARIABLE error_code
-        )
-      if(error_code)
-        # Stash pop --index failed: Try again dropping the index
-        execute_process(
-          COMMAND \"${git_EXECUTABLE}\" reset --hard --quiet
-          WORKING_DIRECTORY \"${work_dir}\"
-          RESULT_VARIABLE error_code
-          )
-        execute_process(
-          COMMAND \"${git_EXECUTABLE}\" stash pop --quiet
-          WORKING_DIRECTORY \"${work_dir}\"
-          RESULT_VARIABLE error_code
-          )
-        if(error_code)
-          # Stash pop failed: Restore previous state.
-          execute_process(
-            COMMAND \"${git_EXECUTABLE}\" reset --hard --quiet \${head_sha}
-            WORKING_DIRECTORY \"${work_dir}\"
-          )
-          execute_process(
-            COMMAND \"${git_EXECUTABLE}\" stash pop --index --quiet
-            WORKING_DIRECTORY \"${work_dir}\"
-          )
-          message(FATAL_ERROR \"\\nFailed to unstash changes in: '${work_dir}/${src_name}'.\\nYou will have to resolve the conflicts manually\")
-        endif()
-      endif()
-    endif()
-  else()
-    execute_process(
-      COMMAND \"${git_EXECUTABLE}\" checkout ${git_tag}
-      WORKING_DIRECTORY \"${work_dir}\"
-      RESULT_VARIABLE error_code
-      )
-    if(error_code)
-      message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
-    endif()
-  endif()
-
-  execute_process(
-    COMMAND \"${git_EXECUTABLE}\" submodule update --recursive --init ${git_submodules}
-    WORKING_DIRECTORY \"${work_dir}/${src_name}\"
-    RESULT_VARIABLE error_code
-    )
-  if(error_code)
-    message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
-  endif()
-endif()
-
-"
-)
-
-endfunction(_ep_write_gitupdate_script)
-
-function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo userpwd http_headers netrc netrc_file)
+function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout inactivity_timeout no_progress hash tls_verify tls_cainfo userpwd http_headers netrc netrc_file)
   if(timeout)
     set(TIMEOUT_ARGS TIMEOUT ${timeout})
     set(TIMEOUT_MSG "${timeout} seconds")
@@ -1406,6 +1351,14 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_p
     set(TIMEOUT_ARGS "# no TIMEOUT")
     set(TIMEOUT_MSG "none")
   endif()
+  if(inactivity_timeout)
+    set(INACTIVITY_TIMEOUT_ARGS INACTIVITY_TIMEOUT ${inactivity_timeout})
+    set(INACTIVITY_TIMEOUT_MSG "${inactivity_timeout} seconds")
+  else()
+    set(INACTIVITY_TIMEOUT_ARGS "# no INACTIVITY_TIMEOUT")
+    set(INACTIVITY_TIMEOUT_MSG "none")
+  endif()
+
 
   if(no_progress)
     set(SHOW_PROGRESS "")
@@ -1761,6 +1714,11 @@ function(_ep_write_initial_cache target_name script_filename script_initial_cach
   # Replace location tags.
   _ep_replace_location_tags(${target_name} script_initial_cache)
   _ep_replace_location_tags(${target_name} script_filename)
+  # Replace list separators.
+  get_property(sep TARGET ${target_name} PROPERTY _EP_LIST_SEPARATOR)
+  if(sep AND script_initial_cache)
+    string(REPLACE "${sep}" ";" script_initial_cache "${script_initial_cache}")
+  endif()
   # Write out the initial cache file to the location specified.
   file(GENERATE OUTPUT "${script_filename}" CONTENT "${script_initial_cache}")
 endfunction()
@@ -1884,7 +1842,11 @@ function(_ep_get_build_command name step cmd_var)
     get_target_property(args ${name} _EP_${step}_ARGS)
   endif()
 
-  list(APPEND cmd ${args})
+  if(NOT "${args}" STREQUAL "")
+    # args could have empty items, so we must quote it to prevent them
+    # from being silently removed
+    list(APPEND cmd "${args}")
+  endif()
   set(${cmd_var} "${cmd}" PARENT_SCOPE)
 endfunction()
 
@@ -1972,7 +1934,7 @@ endif()
     set(stderr_log "${logbase}-err.log")
   endif()
   set(code "
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 ${code_cygpath_make}
 set(command \"${command}\")
 set(log_merged \"${log_merged}\")
@@ -2068,40 +2030,137 @@ function(_ep_get_complete_stampfile name stampfile_var)
 endfunction()
 
 
-function(ExternalProject_Add_StepTargets name)
-  set(steps ${ARGN})
-  if(ARGC GREATER 1 AND "${ARGV1}" STREQUAL "NO_DEPENDS")
-    set(no_deps 1)
-    list(REMOVE_AT steps 0)
+function(_ep_step_add_target name step no_deps)
+  if(TARGET ${name}-${step})
+    return()
   endif()
-  foreach(step ${steps})
-    if(no_deps  AND  "${step}" MATCHES "^(configure|build|install|test)$")
+  get_property(cmp0114 TARGET ${name} PROPERTY _EP_CMP0114)
+  _ep_get_step_stampfile(${name} ${step} stamp_file)
+  cmake_policy(PUSH)
+  if(cmp0114 STREQUAL "NEW")
+    # To implement CMP0114 NEW behavior with Makefile generators,
+    # we need CMP0113 NEW behavior.
+    cmake_policy(SET CMP0113 NEW)
+  endif()
+  add_custom_target(${name}-${step}
+    DEPENDS ${stamp_file})
+  cmake_policy(POP)
+  set_property(TARGET ${name}-${step} PROPERTY _EP_IS_EXTERNAL_PROJECT_STEP 1)
+  set_property(TARGET ${name}-${step} PROPERTY LABELS ${name})
+  set_property(TARGET ${name}-${step} PROPERTY FOLDER "ExternalProjectTargets/${name}")
+
+  if(cmp0114 STREQUAL "NEW")
+    # Add target-level dependencies for the step.
+    get_property(exclude_from_main TARGET ${name} PROPERTY _EP_${step}_EXCLUDE_FROM_MAIN)
+    if(NOT exclude_from_main)
+      add_dependencies(${name} ${name}-${step})
+    endif()
+    _ep_step_add_target_dependencies(${name} ${step} ${step})
+    _ep_step_add_target_dependents(${name} ${step} ${step})
+
+    get_property(independent TARGET ${name} PROPERTY _EP_${step}_INDEPENDENT)
+  else()
+    if(no_deps AND "${step}" MATCHES "^(configure|build|install|test)$")
       message(AUTHOR_WARNING "Using NO_DEPENDS for \"${step}\" step  might break parallel builds")
     endif()
-    _ep_get_step_stampfile(${name} ${step} stamp_file)
-    add_custom_target(${name}-${step}
-      DEPENDS ${stamp_file})
-    set_property(TARGET ${name}-${step} PROPERTY _EP_IS_EXTERNAL_PROJECT_STEP 1)
-    set_property(TARGET ${name}-${step} PROPERTY LABELS ${name})
-    set_property(TARGET ${name}-${step} PROPERTY FOLDER "ExternalProjectTargets/${name}")
+    set(independent ${no_deps})
+  endif()
 
-    # Depend on other external projects (target-level).
-    if(NOT no_deps)
-      get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
-      foreach(arg IN LISTS deps)
-        add_dependencies(${name}-${step} ${arg})
-      endforeach()
+  # Depend on other external projects (target-level).
+  if(NOT independent)
+    get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
+    foreach(arg IN LISTS deps)
+      add_dependencies(${name}-${step} ${arg})
+    endforeach()
+  endif()
+endfunction()
+
+
+function(_ep_step_add_target_dependencies name step node)
+  get_property(dependees TARGET ${name} PROPERTY _EP_${node}_INTERNAL_DEPENDEES)
+  list(REMOVE_DUPLICATES dependees)
+  foreach(dependee IN LISTS dependees)
+    get_property(exclude_from_main TARGET ${name} PROPERTY _EP_${step}_EXCLUDE_FROM_MAIN)
+    get_property(dependee_dependers TARGET ${name} PROPERTY _EP_${dependee}_INTERNAL_DEPENDERS)
+    if(exclude_from_main OR dependee_dependers MATCHES ";")
+      # The step on which our step target depends itself has
+      # dependents in multiple targes.  It needs a step target too
+      # so that there is a unique place for its custom command.
+      _ep_step_add_target("${name}" "${dependee}" "FALSE")
+    endif()
+
+    if(TARGET ${name}-${dependee})
+      add_dependencies(${name}-${step} ${name}-${dependee})
+    else()
+      _ep_step_add_target_dependencies(${name} ${step} ${dependee})
     endif()
   endforeach()
 endfunction()
 
 
+function(_ep_step_add_target_dependents name step node)
+  get_property(dependers TARGET ${name} PROPERTY _EP_${node}_INTERNAL_DEPENDERS)
+  list(REMOVE_DUPLICATES dependers)
+  foreach(depender IN LISTS dependers)
+    if(TARGET ${name}-${depender})
+      add_dependencies(${name}-${depender} ${name}-${step})
+    else()
+      _ep_step_add_target_dependents(${name} ${step} ${depender})
+    endif()
+  endforeach()
+endfunction()
+
+
+function(ExternalProject_Add_StepTargets name)
+  get_property(cmp0114 TARGET ${name} PROPERTY _EP_CMP0114)
+  set(steps ${ARGN})
+  if(ARGC GREATER 1 AND "${ARGV1}" STREQUAL "NO_DEPENDS")
+    set(no_deps 1)
+    list(REMOVE_AT steps 0)
+  else()
+    set(no_deps 0)
+  endif()
+  if(cmp0114 STREQUAL "NEW")
+    if(no_deps)
+      message(FATAL_ERROR
+        "The 'NO_DEPENDS' option is no longer allowed.  "
+        "It has been superseded by the per-step 'INDEPENDENT' option.  "
+        "See policy CMP0114."
+        )
+    endif()
+  elseif(cmp0114 STREQUAL "")
+    cmake_policy(GET_WARNING CMP0114 _cmp0114_warning)
+    string(APPEND _cmp0114_warning "\n"
+      "ExternalProject target '${name}' would depend on the targets for "
+      "step(s) '${steps}' under policy CMP0114, but this is being left out "
+      "for compatibility since the policy is not set."
+      )
+    if(no_deps)
+      string(APPEND _cmp0114_warning
+        "  Also, the NO_DEPENDS option is deprecated in favor of policy CMP0114."
+        )
+    endif()
+    message(AUTHOR_WARNING "${_cmp0114_warning}")
+  endif()
+  foreach(step ${steps})
+    _ep_step_add_target("${name}" "${step}" "${no_deps}")
+  endforeach()
+endfunction()
+
+
 function(ExternalProject_Add_Step name step)
+  get_property(cmp0114 TARGET ${name} PROPERTY _EP_CMP0114)
   _ep_get_complete_stampfile(${name} complete_stamp_file)
   _ep_get_step_stampfile(${name} ${step} stamp_file)
 
   _ep_parse_arguments(ExternalProject_Add_Step
                       ${name} _EP_${step}_ "${ARGN}")
+
+  get_property(independent TARGET ${name} PROPERTY _EP_${step}_INDEPENDENT)
+  if(independent STREQUAL "")
+    set(independent FALSE)
+    set_property(TARGET ${name} PROPERTY _EP_${step}_INDEPENDENT "${independent}")
+  endif()
 
   get_property(exclude_from_main TARGET ${name} PROPERTY _EP_${step}_EXCLUDE_FROM_MAIN)
   if(NOT exclude_from_main)
@@ -2113,12 +2172,21 @@ function(ExternalProject_Add_Step name step)
 
   # Steps depending on this step.
   get_property(dependers TARGET ${name} PROPERTY _EP_${step}_DEPENDERS)
+  set_property(TARGET ${name} APPEND PROPERTY _EP_${step}_INTERNAL_DEPENDERS ${dependers})
   foreach(depender IN LISTS dependers)
+    set_property(TARGET ${name} APPEND PROPERTY _EP_${depender}_INTERNAL_DEPENDEES ${step})
     _ep_get_step_stampfile(${name} ${depender} depender_stamp_file)
     add_custom_command(APPEND
       OUTPUT ${depender_stamp_file}
       DEPENDS ${stamp_file}
       )
+    if(cmp0114 STREQUAL "NEW" AND NOT independent)
+      get_property(dep_independent TARGET ${name} PROPERTY _EP_${depender}_INDEPENDENT)
+      if(dep_independent)
+        message(FATAL_ERROR "ExternalProject '${name}' step '${depender}' is marked INDEPENDENT "
+          "but depends on step '${step}' that is not marked INDEPENDENT.")
+      endif()
+    endif()
   endforeach()
 
   # Dependencies on files.
@@ -2129,9 +2197,18 @@ function(ExternalProject_Add_Step name step)
 
   # Dependencies on steps.
   get_property(dependees TARGET ${name} PROPERTY _EP_${step}_DEPENDEES)
+  set_property(TARGET ${name} APPEND PROPERTY _EP_${step}_INTERNAL_DEPENDEES ${dependees})
   foreach(dependee IN LISTS dependees)
+    set_property(TARGET ${name} APPEND PROPERTY _EP_${dependee}_INTERNAL_DEPENDERS ${step})
     _ep_get_step_stampfile(${name} ${dependee} dependee_stamp_file)
     list(APPEND depends ${dependee_stamp_file})
+    if(cmp0114 STREQUAL "NEW" AND independent)
+      get_property(dep_independent TARGET ${name} PROPERTY _EP_${dependee}_INDEPENDENT)
+      if(NOT dep_independent)
+        message(FATAL_ERROR "ExternalProject '${name}' step '${step}' is marked INDEPENDENT "
+          "but depends on step '${dependee}' that is not marked INDEPENDENT.")
+      endif()
+    endif()
   endforeach()
 
   # The command to run.
@@ -2200,17 +2277,23 @@ function(ExternalProject_Add_Step name step)
     set(command ${CMAKE_COMMAND} -E echo_append)
   endif()
 
-  add_custom_command(
-    OUTPUT ${stamp_file}
-    BYPRODUCTS ${byproducts}
-    COMMENT ${comment}
-    COMMAND ${command}
-    COMMAND ${touch}
-    DEPENDS ${depends}
-    WORKING_DIRECTORY ${work_dir}
-    VERBATIM
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS command)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    add_custom_command(
+      OUTPUT \${stamp_file}
+      BYPRODUCTS \${byproducts}
+      COMMENT \${comment}
+      COMMAND ${__cmdQuoted}
+      COMMAND \${touch}
+      DEPENDS \${depends}
+      WORKING_DIRECTORY \${work_dir}
+      VERBATIM
+      ${uses_terminal}
+    )"
+  )
   set_property(TARGET ${name} APPEND PROPERTY _EP_STEPS ${step})
 
   # Add custom "step target"?
@@ -2220,7 +2303,7 @@ function(ExternalProject_Add_Step name step)
   endif()
   foreach(st ${step_targets})
     if("${st}" STREQUAL "${step}")
-      ExternalProject_Add_StepTargets(${name} ${step})
+      _ep_step_add_target("${name}" "${step}" "FALSE")
       break()
     endif()
   endforeach()
@@ -2229,12 +2312,37 @@ function(ExternalProject_Add_Step name step)
   if(NOT independent_step_targets)
     get_property(independent_step_targets DIRECTORY PROPERTY EP_INDEPENDENT_STEP_TARGETS)
   endif()
-  foreach(st ${independent_step_targets})
-    if("${st}" STREQUAL "${step}")
-      ExternalProject_Add_StepTargets(${name} NO_DEPENDS ${step})
-      break()
+  if(cmp0114 STREQUAL "NEW")
+    if(independent_step_targets)
+      message(FATAL_ERROR
+        "ExternalProject '${name}' option 'INDEPENDENT_STEP_TARGETS' is set to\n"
+        "  ${independent_step_targets}\n"
+        "but the option is no longer allowed.  "
+        "It has been superseded by the per-step 'INDEPENDENT' option.  "
+        "See policy CMP0114."
+        )
     endif()
-  endforeach()
+  else()
+    if(independent_step_targets AND cmp0114 STREQUAL "")
+      get_property(warned TARGET ${name} PROPERTY _EP_CMP0114_WARNED_INDEPENDENT_STEP_TARGETS)
+      if(NOT warned)
+        set_property(TARGET ${name} PROPERTY _EP_CMP0114_WARNED_INDEPENDENT_STEP_TARGETS 1)
+        cmake_policy(GET_WARNING CMP0114 _cmp0114_warning)
+        string(APPEND _cmp0114_warning "\n"
+          "ExternalProject '${name}' option INDEPENDENT_STEP_TARGETS is set to\n"
+          "  ${independent_step_targets}\n"
+          "but the option is deprecated in favor of policy CMP0114."
+          )
+        message(AUTHOR_WARNING "${_cmp0114_warning}")
+      endif()
+    endif()
+    foreach(st ${independent_step_targets})
+      if("${st}" STREQUAL "${step}")
+        _ep_step_add_target("${name}" "${step}" "TRUE")
+        break()
+      endif()
+    endforeach()
+  endif()
 endfunction()
 
 
@@ -2258,7 +2366,7 @@ function(ExternalProject_Add_StepDependencies name step)
 
   get_property(steps TARGET ${name} PROPERTY _EP_STEPS)
   list(FIND steps ${step} is_step)
-  if(NOT is_step)
+  if(is_step LESS 0)
     message(FATAL_ERROR "External project \"${name}\" does not have a step \"${step}\".")
   endif()
 
@@ -2297,6 +2405,7 @@ function(_ep_add_mkdir_command name)
   _ep_get_configuration_subdir_suffix(cfgdir)
 
   ExternalProject_Add_Step(${name} mkdir
+    INDEPENDENT TRUE
     COMMENT "Creating directories for '${name}'"
     COMMAND ${CMAKE_COMMAND} -E make_directory ${source_dir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${binary_dir}
@@ -2315,6 +2424,29 @@ function(_ep_is_dir_empty dir empty_var)
     set(${empty_var} 1 PARENT_SCOPE)
   else()
     set(${empty_var} 0 PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(_ep_get_git_submodules_recurse git_submodules_recurse)
+  # Checks for GIT_SUBMODULES_RECURSE property
+  # Default is ON, which sets git_submodules_recurse output variable to "--recursive"
+  # Otherwise, the output variable is set to an empty value ""
+  get_property(git_submodules_recurse_set TARGET ${name} PROPERTY _EP_GIT_SUBMODULES_RECURSE SET)
+  if(NOT git_submodules_recurse_set)
+    set(recurseFlag "--recursive")
+  else()
+    get_property(git_submodules_recurse_value TARGET ${name} PROPERTY _EP_GIT_SUBMODULES_RECURSE)
+    if(git_submodules_recurse_value)
+      set(recurseFlag "--recursive")
+    else()
+      set(recurseFlag "")
+    endif()
+  endif()
+  set(${git_submodules_recurse} "${recurseFlag}" PARENT_SCOPE)
+
+  # The git submodule update '--recursive' flag requires git >= v1.6.5
+  if(recurseFlag AND GIT_VERSION_STRING VERSION_LESS 1.6.5)
+    message(FATAL_ERROR "error: git version 1.6.5 or later required for --recursive flag with 'git submodule ...': GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
   endif()
 endfunction()
 
@@ -2410,17 +2542,21 @@ function(_ep_add_download_command name)
       message(FATAL_ERROR "error: could not find git for clone of ${name}")
     endif()
 
-    # The git submodule update '--recursive' flag requires git >= v1.6.5
-    #
-    if(GIT_VERSION_STRING VERSION_LESS 1.6.5)
-      message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
-    endif()
+    _ep_get_git_submodules_recurse(git_submodules_recurse)
 
     get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
     if(NOT git_tag)
       set(git_tag "master")
     endif()
-    get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
+
+    set(git_init_submodules TRUE)
+    get_property(git_submodules_set TARGET ${name} PROPERTY _EP_GIT_SUBMODULES SET)
+    if(git_submodules_set)
+      get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
+      if(git_submodules  STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
+        set(git_init_submodules FALSE)
+      endif()
+    endif()
 
     get_property(git_remote_name TARGET ${name} PROPERTY _EP_GIT_REMOTE_NAME)
     if(NOT git_remote_name)
@@ -2458,7 +2594,7 @@ function(_ep_add_download_command name)
     # The script will delete the source directory and then call git clone.
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
-      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} "${git_submodules}" "${git_shallow}" "${git_progress}" "${git_config}" ${src_name} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" "${git_shallow}" "${git_progress}" "${git_config}" ${src_name} ${work_dir}
       ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt "${tls_verify}"
       )
     set(comment "Performing download step (git clone) for '${name}'")
@@ -2544,10 +2680,10 @@ function(_ep_add_download_command name)
     if(IS_DIRECTORY "${url}")
       get_filename_component(abs_dir "${url}" ABSOLUTE)
       set(comment "Performing download step (DIR copy) for '${name}'")
-      set(cmd   ${CMAKE_COMMAND} -E remove_directory ${source_dir}
+      set(cmd   ${CMAKE_COMMAND} -E rm -rf ${source_dir}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir})
     else()
-      get_property(no_extract TARGET "${name}" PROPERTY _EP_DOWNLOAD_NO_EXTRACT SET)
+      get_property(no_extract TARGET "${name}" PROPERTY _EP_DOWNLOAD_NO_EXTRACT)
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
         if("x${fname}" STREQUAL "x")
@@ -2568,6 +2704,7 @@ function(_ep_add_download_command name)
         string(REPLACE ";" "-" fname "${fname}")
         set(file ${download_dir}/${fname})
         get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
+        get_property(inactivity_timeout TARGET ${name} PROPERTY _EP_INACTIVITY_TIMEOUT)
         get_property(no_progress TARGET ${name} PROPERTY _EP_DOWNLOAD_NO_PROGRESS)
         get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
         get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
@@ -2577,7 +2714,7 @@ function(_ep_add_download_command name)
         get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
         get_property(http_headers TARGET ${name} PROPERTY _EP_HTTP_HEADER)
         set(download_script "${stamp_dir}/download-${name}.cmake")
-        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}" "${http_headers}" "${netrc}" "${netrc_file}")
+        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${inactivity_timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}" "${http_headers}" "${netrc}" "${netrc_file}")
         set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
         if (no_extract)
@@ -2638,17 +2775,33 @@ function(_ep_add_download_command name)
     set(uses_terminal "")
   endif()
 
-  ExternalProject_Add_Step(${name} download
-    COMMENT ${comment}
-    COMMAND ${cmd}
-    WORKING_DIRECTORY ${work_dir}
-    DEPENDS ${depends}
-    DEPENDEES mkdir
-    ${log}
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(\${name} download
+      INDEPENDENT TRUE
+      COMMENT \${comment}
+      COMMAND ${__cmdQuoted}
+      WORKING_DIRECTORY \${work_dir}
+      DEPENDS \${depends}
+      DEPENDEES mkdir
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 endfunction()
 
+function(_ep_get_update_disconnected var name)
+  get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
+  if(update_disconnected_set)
+    get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
+  else()
+    get_property(update_disconnected DIRECTORY PROPERTY EP_UPDATE_DISCONNECTED)
+  endif()
+  set(${var} "${update_disconnected}" PARENT_SCOPE)
+endfunction()
 
 function(_ep_add_update_command name)
   ExternalProject_Get_Property(${name} source_dir tmp_dir)
@@ -2659,12 +2812,8 @@ function(_ep_add_update_command name)
   get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
   get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
   get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
-  get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
-  if(update_disconnected_set)
-    get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
-  else()
-    get_property(update_disconnected DIRECTORY PROPERTY EP_UPDATE_DISCONNECTED)
-  endif()
+
+  _ep_get_update_disconnected(update_disconnected ${name})
 
   set(work_dir)
   set(comment)
@@ -2723,9 +2872,32 @@ function(_ep_add_update_command name)
     if(NOT git_remote_name)
       set(git_remote_name "origin")
     endif()
-    get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
+
+    set(git_init_submodules TRUE)
+    get_property(git_submodules_set TARGET ${name} PROPERTY _EP_GIT_SUBMODULES SET)
+    if(git_submodules_set)
+      get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
+      if(git_submodules  STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
+        set(git_init_submodules FALSE)
+      endif()
+    endif()
+
+    get_property(git_update_strategy TARGET ${name} PROPERTY _EP_GIT_REMOTE_UPDATE_STRATEGY)
+    if(NOT git_update_strategy)
+      set(git_update_strategy "${CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY}")
+    endif()
+    if(NOT git_update_strategy)
+      set(git_update_strategy REBASE)
+    endif()
+    set(strategies CHECKOUT REBASE REBASE_CHECKOUT)
+    if(NOT git_update_strategy IN_LIST strategies)
+      message(FATAL_ERROR "'${git_update_strategy}' is not one of the supported strategies: ${strategies}")
+    endif()
+
+    _ep_get_git_submodules_recurse(git_submodules_recurse)
+
     _ep_write_gitupdate_script(${tmp_dir}/${name}-gitupdate.cmake
-      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} "${git_submodules}" ${git_repository} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" ${git_repository} ${work_dir} ${git_update_strategy}
       )
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitupdate.cmake)
     set(always 1)
@@ -2767,31 +2939,23 @@ Update to Mercurial >= 2.1.1.
     set(uses_terminal "")
   endif()
 
-  ExternalProject_Add_Step(${name} update
-    COMMENT ${comment}
-    COMMAND ${cmd}
-    ALWAYS ${always}
-    EXCLUDE_FROM_MAIN ${update_disconnected}
-    WORKING_DIRECTORY ${work_dir}
-    DEPENDEES download
-    ${log}
-    ${uses_terminal}
-    )
-
-  if(update_disconnected)
-    _ep_get_step_stampfile(${name} skip-update skip-update_stamp_file)
-    string(REPLACE "Performing" "Skipping" comment "${comment}")
-    ExternalProject_Add_Step(${name} skip-update
-      COMMENT ${comment}
-      ALWAYS ${always}
-      EXCLUDE_FROM_MAIN 1
-      WORKING_DIRECTORY ${work_dir}
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} update
+      INDEPENDENT TRUE
+      COMMENT \${comment}
+      COMMAND ${__cmdQuoted}
+      ALWAYS \${always}
+      EXCLUDE_FROM_MAIN \${update_disconnected}
+      WORKING_DIRECTORY \${work_dir}
       DEPENDEES download
       ${log}
       ${uses_terminal}
-    )
-    set_property(SOURCE ${skip-update_stamp_file} PROPERTY SYMBOLIC 1)
-  endif()
+      )"
+  )
 
 endfunction()
 
@@ -2815,12 +2979,26 @@ function(_ep_add_patch_command name)
     set(log "")
   endif()
 
-  ExternalProject_Add_Step(${name} patch
-    COMMAND ${cmd}
-    WORKING_DIRECTORY ${work_dir}
-    DEPENDEES download
-    ${log}
-    )
+  _ep_get_update_disconnected(update_disconnected ${name})
+  if(update_disconnected)
+    set(patch_dep download)
+  else()
+    set(patch_dep update)
+  endif()
+
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} patch
+      INDEPENDENT TRUE
+      COMMAND ${__cmdQuoted}
+      WORKING_DIRECTORY \${work_dir}
+      DEPENDEES \${patch_dep}
+      ${log}
+      )"
+  )
 endfunction()
 
 
@@ -2915,6 +3093,10 @@ function(_ep_extract_configure_command var name)
       endif()
       _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${script_initial_cache_force}${script_initial_cache_default}")
       list(APPEND cmd "-C${_ep_cache_args_script}")
+      _ep_replace_location_tags(${name} _ep_cache_args_script)
+      set(_ep_cache_args_script
+        "${_ep_cache_args_script}"
+        PARENT_SCOPE)
     endif()
 
     list(APPEND cmd "<SOURCE_DIR><SOURCE_SUBDIR>")
@@ -2945,7 +3127,7 @@ function(_ep_add_configure_command name)
 
   # If anything about the configure command changes, (command itself, cmake
   # used, cmake args or cmake generator) then re-run the configure step.
-  # Fixes issue https://gitlab.kitware.com/cmake/cmake/issues/10258
+  # Fixes issue https://gitlab.kitware.com/cmake/cmake/-/issues/10258
   #
   if(NOT EXISTS ${tmp_dir}/${name}-cfgcmd.txt.in)
     file(WRITE ${tmp_dir}/${name}-cfgcmd.txt.in "cmd='\@cmd\@'\n")
@@ -2969,26 +3151,21 @@ function(_ep_add_configure_command name)
     set(uses_terminal "")
   endif()
 
-  get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
-  if(update_disconnected_set)
-    get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
-  else()
-    get_property(update_disconnected DIRECTORY PROPERTY EP_UPDATE_DISCONNECTED)
-  endif()
-  if(update_disconnected)
-    set(update_dep skip-update)
-  else()
-    set(update_dep update)
-  endif()
-
-  ExternalProject_Add_Step(${name} configure
-    COMMAND ${cmd}
-    WORKING_DIRECTORY ${binary_dir}
-    DEPENDEES ${update_dep} patch
-    DEPENDS ${file_deps}
-    ${log}
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} configure
+      INDEPENDENT FALSE
+      COMMAND ${__cmdQuoted}
+      WORKING_DIRECTORY \${binary_dir}
+      DEPENDEES patch
+      DEPENDS \${file_deps}
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 endfunction()
 
 
@@ -3026,15 +3203,22 @@ function(_ep_add_build_command name)
 
   get_property(build_byproducts TARGET ${name} PROPERTY _EP_BUILD_BYPRODUCTS)
 
-  ExternalProject_Add_Step(${name} build
-    COMMAND ${cmd}
-    BYPRODUCTS ${build_byproducts}
-    WORKING_DIRECTORY ${binary_dir}
-    DEPENDEES configure
-    ALWAYS ${always}
-    ${log}
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} build
+      INDEPENDENT FALSE
+      COMMAND ${__cmdQuoted}
+      BYPRODUCTS \${build_byproducts}
+      WORKING_DIRECTORY \${binary_dir}
+      DEPENDEES configure
+      ALWAYS \${always}
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 endfunction()
 
 
@@ -3063,13 +3247,20 @@ function(_ep_add_install_command name)
     set(uses_terminal "")
   endif()
 
-  ExternalProject_Add_Step(${name} install
-    COMMAND ${cmd}
-    WORKING_DIRECTORY ${binary_dir}
-    DEPENDEES build
-    ${log}
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} install
+      INDEPENDENT FALSE
+      COMMAND ${__cmdQuoted}
+      WORKING_DIRECTORY \${binary_dir}
+      DEPENDEES build
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 endfunction()
 
 
@@ -3124,33 +3315,68 @@ function(_ep_add_test_command name)
       set(uses_terminal "")
     endif()
 
-    ExternalProject_Add_Step(${name} test
-      COMMAND ${cmd}
-      WORKING_DIRECTORY ${binary_dir}
-      ${dependees_args}
-      ${dependers_args}
-      ${exclude_args}
-      ${log}
-      ${uses_terminal}
-      )
+    set(__cmdQuoted)
+    foreach(__item IN LISTS cmd)
+      string(APPEND __cmdQuoted " [==[${__item}]==]")
+    endforeach()
+    cmake_language(EVAL CODE "
+      ExternalProject_Add_Step(${name} test
+        INDEPENDENT FALSE
+        COMMAND ${__cmdQuoted}
+        WORKING_DIRECTORY \${binary_dir}
+        ${dependees_args}
+        ${dependers_args}
+        ${exclude_args}
+        ${log}
+        ${uses_terminal}
+        )"
+    )
   endif()
 endfunction()
 
 
 function(ExternalProject_Add name)
+  cmake_policy(GET CMP0097 _EP_CMP0097
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
+  cmake_policy(GET CMP0114 cmp0114
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
+  if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12 AND NOT cmp0114 STREQUAL "NEW")
+    message(AUTHOR_WARNING
+      "Policy CMP0114 is not set to NEW.  "
+      "In order to support the Xcode \"new build system\", "
+      "this project must be updated to set policy CMP0114 to NEW."
+      "\n"
+      "Since CMake is generating for the Xcode \"new build system\", "
+      "ExternalProject_Add will use policy CMP0114's NEW behavior anyway, "
+      "but the generated build system may not match what the project intends."
+      )
+    set(cmp0114 "NEW")
+  endif()
+
   _ep_get_configuration_subdir_suffix(cfgdir)
 
   # Add a custom target for the external project.
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
   _ep_get_complete_stampfile(${name} complete_stamp_file)
 
+  cmake_policy(PUSH)
+  if(cmp0114 STREQUAL "NEW")
+    # To implement CMP0114 NEW behavior with Makefile generators,
+    # we need CMP0113 NEW behavior.
+    cmake_policy(SET CMP0113 NEW)
+  endif()
   # The "ALL" option to add_custom_target just tells it to not set the
   # EXCLUDE_FROM_ALL target property. Later, if the EXCLUDE_FROM_ALL
   # argument was passed, we explicitly set it for the target.
   add_custom_target(${name} ALL DEPENDS ${complete_stamp_file})
+  cmake_policy(POP)
   set_property(TARGET ${name} PROPERTY _EP_IS_EXTERNAL_PROJECT 1)
   set_property(TARGET ${name} PROPERTY LABELS ${name})
   set_property(TARGET ${name} PROPERTY FOLDER "ExternalProjectTargets/${name}")
+
+  set_property(TARGET ${name} PROPERTY _EP_CMP0114 "${cmp0114}")
 
   _ep_parse_arguments(ExternalProject_Add ${name} _EP_ "${ARGN}")
   _ep_set_directories(${name})

@@ -1,0 +1,6 @@
+-- foreach\(\.\.\. IN ZIP_LISTS\):
+--   Begin output
+--   | one, satu, raz
+--   | two, dua, dva
+--   | three, tiga, tri
+--   End output

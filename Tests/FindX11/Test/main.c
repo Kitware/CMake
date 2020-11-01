@@ -167,12 +167,12 @@ static Bool test_Xkb(void)
 #endif
 
 #ifdef HAVE_X11_xkbfile
+// clang-format off
 #  include <stdio.h>
-
 #  include <X11/XKBlib.h>
 #  include <X11/extensions/XKBfile.h>
-
 #  include <stdlib.h>
+// clang-format on
 
 static void test_xkbfile(void)
 {
@@ -184,7 +184,6 @@ static void test_xkbfile(void)
 
 #ifdef HAVE_X11_Xmu
 #  include <X11/Xmu/Xmu.h>
-
 #  include <stdlib.h>
 
 static Bool test_Xmu(void)
@@ -309,6 +308,62 @@ static int test_Xv(void)
 }
 #endif
 
+#ifdef HAVE_X11_Xaw
+#  include <X11/Intrinsic.h>
+#  include <X11/Xaw/Box.h>
+
+static void test_Xaw(void)
+{
+  XrmOptionDescRec opt_table[] = { { NULL } };
+
+  Widget toplevel;
+  toplevel =
+    XtInitialize("test", "test", opt_table, XtNumber(opt_table), NULL, NULL);
+  Widget box =
+    XtCreateManagedWidget("testbox", boxWidgetClass, toplevel, NULL, 0);
+  return;
+}
+
+#endif
+
+#ifdef HAVE_xcb
+#  include <xcb/xcb.h>
+
+static void test_xcb(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_disconnect(connection);
+}
+
+#  ifdef HAVE_xcb_util
+#    include <xcb/xcb_aux.h>
+
+static void test_xcb_util(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_screen_t* screen = xcb_aux_get_screen(connection, screen_nbr);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#  ifdef HAVE_xcb_xfixes
+#    include <xcb/xcb_xfixes.h>
+
+static void test_xcb_xfixes(void)
+{
+  int screen_nbr;
+  xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
+  xcb_xfixes_query_version(connection, 1, 0);
+  xcb_disconnect(connection);
+}
+
+#  endif
+
+#endif
+
 #include <stddef.h>
 
 int main(int argc, char* argv[])
@@ -393,6 +448,19 @@ int main(int argc, char* argv[])
 #ifdef HAVE_X11_Xv
     test_Xv,
 #endif
+#ifdef HAVE_X11_Xaw
+    test_Xaw,
+#endif
+#ifdef HAVE_xcb
+    test_xcb,
+#endif
+#ifdef HAVE_xcb_util
+    test_xcb_util,
+#endif
+#ifdef HAVE_xcb_xfixes
+    test_xcb_xfixes,
+#endif
+
     NULL,
   };
 

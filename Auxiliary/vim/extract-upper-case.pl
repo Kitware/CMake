@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 use POSIX qw(strftime);
+use JSON;
+use File::Basename;
 
 #my $cmake = "/home/pboettch/devel/upstream/cmake/build/bin/cmake";
 my $cmake = "cmake";
@@ -12,6 +14,9 @@ my @commands;
 my @properties;
 my @modules;
 my %keywords; # command => keyword-list
+
+# find cmake/Modules/ | sed -rn 's/.*CMakeDetermine(.+)Compiler.cmake/\1/p' | sort
+my @languages = qw(ASM ASM_MASM ASM_NASM C CSharp CUDA CXX Fortran Java RC Swift);
 
 # unwanted upper-cases
 my %unwanted = map { $_ => 1 } qw(VS CXX IDE NOTFOUND NO_ DFOO DBAR NEW);
@@ -30,8 +35,21 @@ push @modules, "ExternalProject";
 # variables
 open(CMAKE, "$cmake --help-variable-list|") or die "could not run cmake";
 while (<CMAKE>) {
-	next if /\</; # skip if containing < or >
 	chomp;
+
+	if (/<(.*?)>/) {
+		if ($1 eq 'LANG') {
+			foreach my $lang (@languages) {
+			(my $V = $_) =~ s/<.*>/$lang/;
+				push @variables, $V;
+			}
+
+			next
+		} else {
+			next; # skip if containing < or >
+		}
+	}
+
 	push @variables, $_;
 }
 close(CMAKE);
@@ -79,6 +97,28 @@ close(CMAKE);
 
 # transform all properties in a hash
 my %properties = map { $_ => 1 } @properties;
+
+# read in manually written files
+my $modules_dir =  dirname(__FILE__) . "/modules";
+opendir(DIR, $modules_dir) || die "can't opendir $modules_dir: $!";
+my @json_files = grep { /\.json$/ && -f "$modules_dir/$_" } readdir(DIR);
+closedir DIR;
+
+foreach my $file (@json_files) {
+	local $/; # Enable 'slurp' mode
+	open my $fh, "<", $modules_dir."/".$file;
+	my $json = <$fh>;
+	close $fh;
+
+	my $mod = decode_json($json);
+	foreach my $var (@{$mod->{variables}}) {
+		$variables{$var} = 1;
+	}
+
+	while (my ($cmd, $keywords) = each %{$mod->{commands}}) {
+		$keywords{$cmd} = [ sort @{$keywords} ];
+	}
+}
 
 # version
 open(CMAKE, "$cmake --version|");

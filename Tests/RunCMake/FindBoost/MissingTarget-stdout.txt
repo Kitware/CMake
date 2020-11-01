@@ -1,0 +1,22 @@
+-- Found Boost: [^
+]* \(found suitable version "1\.70\.42", minimum required is "1\.70"\) found components: date_time *
+-- Boost_FOUND: TRUE
+-- Boost_INCLUDE_DIRS: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage_MissingTarget/include
+-- Boost_LIBRARY_DIRS: *
+-- Boost_LIBRARIES: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage_MissingTarget/lib/libboost_date_time.a
+-- Boost_DATE_TIME_FOUND: 1
+-- Boost_DATE_TIME_LIBRARY: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage_MissingTarget/lib/libboost_date_time.a
+-- Boost_VERSION_MACRO: 1070042
+-- Boost_VERSION_STRING: 1.70.42
+-- Boost_VERSION: 1.70.42
+-- Boost_LIB_VERSION: 1_70_42
+-- Boost_MAJOR_VERSION: 1
+-- Boost_MINOR_VERSION: 70
+-- Boost_SUBMINOR_VERSION: 42
+-- Boost_INCLUDE_DIR: [^
+]*/Tests/RunCMake/FindBoost/CMakePackage_MissingTarget/include
+-- Boost_DATE_TIME_LIBRARY_DEBUG: *
+-- Boost_DATE_TIME_LIBRARY_RELEASE: *

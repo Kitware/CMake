@@ -1,0 +1,2 @@
+[Settings]
+StartPath\WhereBuild0=@CMakeGUITest_BINARY_DIR@/sourceBinaryArgs-noExistConfigExists/build

@@ -1,0 +1,11 @@
+CMake Warning \(dev\) in CMakeLists\.txt:
+  Policy CMP0110 is not set: add_test\(\) supports arbitrary characters in test
+  names\.  Run "cmake --help-policy CMP0110" for policy details\.  Use the
+  cmake_policy command to set the policy and suppress this warning\.
+
+  The following name given to add_test\(\) is invalid if CMP0110 is not set or
+  set to OLD:
+
+    `\[=\[InBracketBeforeSemi;InBracketAfterSemi\]=\]´
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

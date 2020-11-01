@@ -18,9 +18,21 @@ if(NOT CTEST_CONFIGURATION_TYPE)
     endif()
   endforeach()
   if(NOT CTEST_CONFIGURATION_TYPE)
-    set(CTEST_CONFIGURATION_TYPE NoConfig)
+    if("@CMAKE_C_COMPILER_ID@;@CMAKE_C_SIMULATE_ID@;@CMAKE_C_COMPILER_FRONTEND_VARIANT@" STREQUAL "Clang;MSVC;GNU")
+      # A valid configuration is required for this compiler in tests that do not set CMP0091 to NEW.
+      set(CTEST_CONFIGURATION_TYPE Debug)
+    else()
+      set(CTEST_CONFIGURATION_TYPE NoConfig)
+    endif()
   endif()
   message("Guessing configuration ${CTEST_CONFIGURATION_TYPE}")
 endif()
+
+# Isolate tests from user configuration in the environment.
+unset(ENV{CMAKE_GENERATOR})
+unset(ENV{CMAKE_GENERATOR_INSTANCE})
+unset(ENV{CMAKE_GENERATOR_PLATFORM})
+unset(ENV{CMAKE_GENERATOR_TOOLSET})
+unset(ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
 
 @TEST_HOME_ENV_CODE@

@@ -20,7 +20,7 @@ void RegexExplorer::setStatusColor(QWidget* widget, bool successful)
   QColor color = successful ? QColor(0, 127, 0) : Qt::red;
 
   QPalette palette = widget->palette();
-  palette.setColor(QPalette::Foreground, color);
+  palette.setColor(QPalette::WindowText, color);
   widget->setPalette(palette);
 }
 
@@ -146,9 +146,6 @@ bool RegexExplorer::stripEscapes(std::string& source)
         in++;
       } else if (nextc == 'n') {
         result.append(1, '\n');
-        in++;
-      } else if (nextc == 't') {
-        result.append(1, '\t');
         in++;
       } else if (isalnum(nextc) || nextc == '\0') {
         return false;

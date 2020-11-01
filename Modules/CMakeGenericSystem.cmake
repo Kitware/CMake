@@ -26,7 +26,10 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
 
 set(CMAKE_AUTOGEN_ORIGIN_DEPENDS ON)
 set(CMAKE_AUTOMOC_COMPILER_PREDEFINES ON)
-set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_NAMESPACE")
+if(NOT DEFINED CMAKE_AUTOMOC_PATH_PREFIX)
+  set(CMAKE_AUTOMOC_PATH_PREFIX OFF)
+endif()
+set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")
 
 # basically all general purpose OSs support shared libs
 set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
@@ -49,17 +52,11 @@ if(CMAKE_GENERATOR MATCHES "Make")
   if(DEFINED CMAKE_TARGET_MESSAGES)
     set_property(GLOBAL PROPERTY TARGET_MESSAGES ${CMAKE_TARGET_MESSAGES})
   endif()
-  if(CMAKE_GENERATOR MATCHES "Unix Makefiles")
-    set(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
-      "Enable/Disable output of compile commands during generation."
-      )
-    mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
-  endif()
 endif()
 
-if(CMAKE_GENERATOR MATCHES "Ninja")
-  set(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
-    "Enable/Disable output of compile commands during generation."
+if(NOT DEFINED CMAKE_EXPORT_COMPILE_COMMANDS AND CMAKE_GENERATOR MATCHES "Ninja|Unix Makefiles")
+  set(CMAKE_EXPORT_COMPILE_COMMANDS "$ENV{CMAKE_EXPORT_COMPILE_COMMANDS}"
+    CACHE BOOL "Enable/Disable output of compile commands during generation."
     )
   mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
 endif()
@@ -80,9 +77,13 @@ function(GetDefaultWindowsPrefixBase var)
   #
   if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
     set(arch_hint "x64")
+  elseif("${CMAKE_GENERATOR_PLATFORM}" MATCHES "x64")
+    set(arch_hint "x64")
   elseif("${CMAKE_GENERATOR_PLATFORM}" MATCHES "ARM64")
     set(arch_hint "ARM64")
   elseif("${CMAKE_GENERATOR}" MATCHES "ARM")
+    set(arch_hint "ARM")
+  elseif("${CMAKE_GENERATOR_PLATFORM}" MATCHES "ARM")
     set(arch_hint "ARM")
   elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(arch_hint "x64")

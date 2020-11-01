@@ -1,0 +1,107 @@
+{
+    "name": "ALL_BUILD",
+    "id": "^ALL_BUILD::@a56b12a3f5c0529fb296$",
+    "directorySource": "^cxx$",
+    "projectName": "Cxx",
+    "type": "UTILITY",
+    "isGeneratorProvided": true,
+    "sources": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/cxx/CMakeFiles/ALL_BUILD$",
+            "isGenerated": true,
+            "sourceGroupName": "",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/cxx/CMakeFiles/ALL_BUILD\\.rule$",
+            "isGenerated": true,
+            "sourceGroupName": "CMake Rules",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/cxx/CMakeFiles/ALL_BUILD$"
+            ]
+        },
+        {
+            "name": "CMake Rules",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/cxx/CMakeFiles/ALL_BUILD\\.rule$"
+            ]
+        }
+    ],
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": null,
+    "build": "^cxx$",
+    "source": "^cxx$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_lib::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_standard_compile_feature_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_standard_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_shared_lib::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_shared_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_static_lib::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_static_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        }
+    ]
+}

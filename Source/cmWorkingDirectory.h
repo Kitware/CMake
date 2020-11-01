@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmWorkingDirectory_h
-#define cmWorkingDirectory_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -37,9 +36,9 @@ public:
    */
   int GetLastResult() const { return ResultCode; }
 
+  std::string const& GetOldDirectory() const { return this->OldDir; }
+
 private:
   std::string OldDir;
   int ResultCode;
 };
-
-#endif

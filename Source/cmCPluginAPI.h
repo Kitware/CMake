@@ -28,6 +28,7 @@ this is the structure of function entry points that a plugin may call. This
 structure must be kept in sync with the static decaled at the bottom of
 cmCPLuginAPI.cxx
 =========================================================================*/
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef struct
 {
   /*=========================================================================
@@ -35,7 +36,7 @@ typedef struct
   of functions are utility functions that are specific to the plugin API
   =========================================================================*/
   /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
-     information is passed from the InitialPass to FInalPass for commands
+     information is passed from the InitialPass to FinalPass for commands
      that need a FinalPass and need information from the InitialPass */
   void*(CCONV* GetClientData)(void* info);
   /* return the summed size in characters of all the arguments */
@@ -43,7 +44,7 @@ typedef struct
   /* free all the memory associated with an argc, argv pair */
   void(CCONV* FreeArguments)(int argc, char** argv);
   /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
-     information is passed from the InitialPass to FInalPass for commands
+     information is passed from the InitialPass to FinalPass for commands
      that need a FinalPass and need information from the InitialPass */
   void(CCONV* SetClientData)(void* info, void* cd);
   /* when an error occurs, call this function to set the error string */
@@ -194,12 +195,21 @@ define the different types of custom commands for a target
 /*=========================================================================
 Finally we define the key data structures and function prototypes
 =========================================================================*/
+
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef const char*(CCONV* CM_DOC_FUNCTION)();
+
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef int(CCONV* CM_INITIAL_PASS_FUNCTION)(void* info, void* mf, int argc,
                                              char* []);
+
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef void(CCONV* CM_FINAL_PASS_FUNCTION)(void* info, void* mf);
+
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef void(CCONV* CM_DESTRUCTOR_FUNCTION)(void* info);
 
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef struct
 {
   unsigned long reserved1; /* Reserved for future use.  DO NOT USE.  */
@@ -216,6 +226,7 @@ typedef struct
   void* ClientData;
 } cmLoadedCommandInfo;
 
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef void(CCONV* CM_INIT_FUNCTION)(cmLoadedCommandInfo*);
 
 #ifdef __cplusplus

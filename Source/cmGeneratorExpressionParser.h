@@ -1,10 +1,10 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGeneratorExpressionParser_h
-#define cmGeneratorExpressionParser_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <vector>
 
 #include "cmGeneratorExpressionLexer.h"
@@ -15,16 +15,17 @@ struct cmGeneratorExpressionParser
 {
   cmGeneratorExpressionParser(std::vector<cmGeneratorExpressionToken> tokens);
 
-  void Parse(std::vector<cmGeneratorExpressionEvaluator*>& result);
+  using cmGeneratorExpressionEvaluatorVector =
+    std::vector<std::unique_ptr<cmGeneratorExpressionEvaluator>>;
+
+  void Parse(cmGeneratorExpressionEvaluatorVector& result);
 
 private:
-  void ParseContent(std::vector<cmGeneratorExpressionEvaluator*>&);
-  void ParseGeneratorExpression(std::vector<cmGeneratorExpressionEvaluator*>&);
+  void ParseContent(cmGeneratorExpressionEvaluatorVector&);
+  void ParseGeneratorExpression(cmGeneratorExpressionEvaluatorVector&);
 
 private:
   std::vector<cmGeneratorExpressionToken>::const_iterator it;
   const std::vector<cmGeneratorExpressionToken> Tokens;
   unsigned int NestingLevel;
 };
-
-#endif

@@ -1,0 +1,2 @@
+libs=imf;svml;irng;m;ipgo;decimal;cilkrts;stdc++;gcc;gcc_s;irc;svml;c;gcc;gcc_s;irc_s;dl;c
+dirs=/opt/intel/2018.2.199/compilers_and_libraries_2018/linux/mkl/lib/intel64;/opt/intel/2018.2.199/compilers_and_libraries_2018.2.199/linux/compiler/lib/intel64_lin;/opt/gcc/6.3.0/snos/lib/gcc/x86_64-suse-linux/6.3.0;/opt/gcc/6.3.0/snos/lib64;/lib64;/usr/lib64;/opt/gcc/6.3.0/snos/lib;/lib;/usr/lib

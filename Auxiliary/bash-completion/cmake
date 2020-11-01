@@ -76,8 +76,8 @@ _cmake()
                 compopt -o nospace
             else
             # complete variable names
-                COMPREPLY=( $( compgen -W '$( cmake -LA -N | tail -n +2 |
-                    cut -f1 -d: )' -P "$prefix" -- "$cur" ) )
+                COMPREPLY=( $( compgen -W '$( cmake -LA -N 2>/dev/null |
+                    tail -n +2 | cut -f1 -d: )' -P "$prefix" -- "$cur" ) )
                 compopt -o nospace
             fi
             return

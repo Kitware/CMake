@@ -1,0 +1,87 @@
+{
+    "name": "custom_tgt",
+    "id": "^custom_tgt::@c11385ffed57b860da63$",
+    "directorySource": "^custom$",
+    "projectName": "Custom",
+    "type": "UTILITY",
+    "isGeneratorProvided": null,
+    "sources": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/custom/CMakeFiles/custom_tgt$",
+            "isGenerated": true,
+            "sourceGroupName": "",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^custom/CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "add_custom_target",
+                    "hasParent": true
+                },
+                {
+                    "file": "^custom/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(custom/)?CMakeFiles/([0-9a-f]+/)?custom_tgt\\.rule$",
+            "isGenerated": true,
+            "sourceGroupName": "CMake Rules",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^custom/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/custom/CMakeFiles/custom_tgt$"
+            ]
+        },
+        {
+            "name": "CMake Rules",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(custom/)?CMakeFiles/([0-9a-f]+/)?custom_tgt\\.rule$"
+            ]
+        }
+    ],
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^custom/CMakeLists\\.txt$",
+            "line": 3,
+            "command": "add_custom_target",
+            "hasParent": true
+        },
+        {
+            "file": "^custom/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": null,
+    "build": "^custom$",
+    "source": "^custom$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@c11385ffed57b860da63$",
+            "backtrace": null
+        }
+    ]
+}

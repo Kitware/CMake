@@ -1,5 +1,8 @@
 include(RunCMake)
 
+set(RunCMake_GENERATOR "Ninja")
+set(RunCMake_GENERATOR_IS_MULTI_CONFIG 0)
+
 # Detect ninja version so we know what tests can be supported.
 execute_process(
   COMMAND "${RunCMake_MAKE_PROGRAM}" --version
@@ -13,6 +16,12 @@ if(ninja_res EQUAL 0 AND "x${ninja_out}" MATCHES "^x[0-9]+\\.[0-9]+")
   message(STATUS "ninja version: ${ninja_version}")
 else()
   message(FATAL_ERROR "'ninja --version' reported:\n${ninja_out}")
+endif()
+
+if(CMAKE_HOST_WIN32)
+  run_cmake(SelectCompilerWindows)
+else()
+  run_cmake(SelectCompilerUNIX)
 endif()
 
 function(run_NinjaToolMissing)
@@ -129,6 +138,7 @@ ${ninja_stderr}
     message(FATAL_ERROR
       "top ninja build failed exited with status ${ninja_result}")
   endif()
+  set(ninja_stdout "${ninja_stdout}" PARENT_SCOPE)
 endfunction(run_ninja)
 
 function (run_LooseObjectDepends)
@@ -304,3 +314,33 @@ function (run_PreventConfigureFileDupBuildRule)
   run_ninja("${RunCMake_TEST_BINARY_DIR}" -w dupbuild=err)
 endfunction()
 run_PreventConfigureFileDupBuildRule()
+
+function (run_ChangeBuildType)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ChangeBuildType-build)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_BUILD_TYPE:STRING=Debug")
+  run_cmake(ChangeBuildType)
+  unset(RunCMake_TEST_OPTIONS)
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" -w dupbuild=err)
+endfunction()
+run_ChangeBuildType()
+
+function(run_Qt5AutoMocDeps)
+  if(CMake_TEST_Qt5 AND CMAKE_TEST_Qt5Core_Version VERSION_GREATER_EQUAL 5.15.0)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Qt5AutoMocDeps-build)
+    set(RunCMake_TEST_OPTIONS "-DQt5Core_DIR=${Qt5Core_DIR}")
+    run_cmake(Qt5AutoMocDeps)
+    unset(RunCMake_TEST_OPTIONS)
+    # Build the project.
+    run_ninja("${RunCMake_TEST_BINARY_DIR}")
+    # Touch just the library source file, which shouldn't cause a rerun of AUTOMOC
+    # for app_with_qt target.
+    touch("${RunCMake_SOURCE_DIR}/simple_lib.cpp")
+    # Build and assert that AUTOMOC was not run for app_with_qt.
+    run_ninja("${RunCMake_TEST_BINARY_DIR}")
+    if(ninja_stdout MATCHES "Automatic MOC for target app_with_qt")
+        message(FATAL_ERROR
+               "AUTOMOC should not have executed for 'app_with_qt' target:\nstdout:\n${ninja_stdout}")
+    endif()
+  endif()
+endfunction()
+run_Qt5AutoMocDeps()

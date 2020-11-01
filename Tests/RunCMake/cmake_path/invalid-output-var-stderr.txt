@@ -1,0 +1,2 @@
+CMake Error at .+/call-cmake_path.cmake:[0-9]+ \(cmake_path\):
+  cmake_path Invalid name for output variable.

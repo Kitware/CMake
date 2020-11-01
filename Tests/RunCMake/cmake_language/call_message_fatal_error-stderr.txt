@@ -1,0 +1,5 @@
+CMake Error at call_message_fatal_error.cmake:1 \(message\):
+  error!
+Call Stack \(most recent call first\):
+  call_message_fatal_error.cmake:1 \(cmake_language\)
+  CMakeLists.txt:3 \(include\)

@@ -2,7 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindFileCommand.h"
 
-cmFindFileCommand::cmFindFileCommand()
+class cmExecutionStatus;
+
+cmFindFileCommand::cmFindFileCommand(cmExecutionStatus& status)
+  : cmFindPathCommand(status)
 {
   this->IncludeFileInPath = true;
+}
+
+bool cmFindFile(std::vector<std::string> const& args,
+                cmExecutionStatus& status)
+{
+  return cmFindFileCommand(status).InitialPass(args);
 }

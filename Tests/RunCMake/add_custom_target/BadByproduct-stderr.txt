@@ -1,0 +1,36 @@
+CMake Error at BadByproduct.cmake:2 \(add_custom_target\):
+  add_custom_target called with BYPRODUCTS containing a "#".  This character
+  is not allowed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at BadByproduct.cmake:3 \(add_custom_target\):
+  add_custom_target called with BYPRODUCTS containing a "<".  This character
+  is not allowed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at BadByproduct.cmake:4 \(add_custom_target\):
+  add_custom_target called with BYPRODUCTS containing a ">".  This character
+  is not allowed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at BadByproduct.cmake:5 \(add_custom_target\):
+  add_custom_target called with BYPRODUCTS containing a "<".  This character
+  is not allowed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at BadByproduct.cmake:6 \(add_custom_target\):
+  add_custom_target attempted to have a file
+
+    .*RunCMake/add_custom_target/j
+
+  in a source directory as an output of custom command.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

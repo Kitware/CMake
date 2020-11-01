@@ -21,6 +21,10 @@ int main(int argc, char** argv)
     std::cout << "value/test." << std::endl;
     std::cout << "  case/0  # GetParam() = 1" << std::endl;
     std::cout << "  case/1  # GetParam() = \"foo\"" << std::endl;
+    std::cout << "param/special." << std::endl;
+    std::cout << "  case/0  # GetParam() = \"semicolon;\"" << std::endl;
+    std::cout << "  case/1  # GetParam() = \"backslash\\\"" << std::endl;
+    std::cout << "  case/2  # GetParam() = \"${var}\"" << std::endl;
     return 0;
   }
 

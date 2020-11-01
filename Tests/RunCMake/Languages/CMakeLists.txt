@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.8.4)
-cmake_policy(SET CMP0042 NEW)
+cmake_minimum_required(VERSION 3.3)
 project(${RunCMake_TEST} NONE)
 include(${RunCMake_TEST}.cmake)

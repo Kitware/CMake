@@ -2,17 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestP4.h"
 
+#include <algorithm>
+#include <ctime>
+#include <ostream>
+#include <utility>
+
+#include <cmext/algorithm>
+
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include "cmsys/RegularExpression.hxx"
-#include <algorithm>
-#include <ostream>
-#include <time.h>
-#include <utility>
 
 cmCTestP4::cmCTestP4(cmCTest* ct, std::ostream& log)
   : cmCTestGlobalVC(ct, log)
@@ -144,8 +148,7 @@ private:
 
 cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
 {
-  std::map<std::string, cmCTestP4::User>::const_iterator it =
-    Users.find(username);
+  auto it = Users.find(username);
 
   if (it == Users.end()) {
     std::vector<char const*> p4_users;
@@ -202,8 +205,8 @@ private:
   cmsys::RegularExpression RegexDiff;
   cmCTestP4* P4;
 
-  typedef cmCTestP4::Revision Revision;
-  typedef cmCTestP4::Change Change;
+  using Revision = cmCTestP4::Revision;
+  using Change = cmCTestP4::Change;
   std::vector<Change> Changes;
   enum SectionType
   {
@@ -324,9 +327,7 @@ void cmCTestP4::SetP4Options(std::vector<char const*>& CommandOptions)
     // The CTEST_P4_OPTIONS variable adds additional Perforce command line
     // options before the main command
     std::string opts = this->CTest->GetCTestConfiguration("P4Options");
-    std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
-
-    P4Options.insert(P4Options.end(), args.begin(), args.end());
+    cm::append(P4Options, cmSystemTools::ParseArguments(opts));
   }
 
   CommandOptions.clear();
@@ -460,8 +461,7 @@ bool cmCTestP4::LoadModifications()
 
 bool cmCTestP4::UpdateCustom(const std::string& custom)
 {
-  std::vector<std::string> p4_custom_command;
-  cmSystemTools::ExpandListArgument(custom, p4_custom_command, true);
+  std::vector<std::string> p4_custom_command = cmExpandedList(custom, true);
 
   std::vector<char const*> p4_custom;
   p4_custom.reserve(p4_custom_command.size() + 1);

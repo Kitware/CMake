@@ -1,11 +1,10 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmLocale_h
-#define cmLocale_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <locale.h>
+#include <clocale>
 #include <string>
 
 class cmLocaleRAII
@@ -25,5 +24,3 @@ public:
 private:
   std::string OldLocale;
 };
-
-#endif

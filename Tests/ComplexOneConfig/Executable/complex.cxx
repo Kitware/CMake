@@ -1,20 +1,22 @@
-#include "Aout.h"
-#include "ExtraSources/file1.h"
 #include "cmTestConfigure.h"
 #include "cmTestConfigureEscape.h"
 #include "cmTestGeneratedHeader.h"
 #include "cmVersion.h"
+
+#include "Aout.h"
+#include "ExtraSources/file1.h"
 #include "file2.h"
 #include "sharedFile.h"
 extern "C" {
 #include "testConly.h"
 }
 #include <iostream>
-#include <string.h>
 #include <string>
 #include <vector>
 
 #include <stdio.h>
+#include <string.h>
+
 #include <sys/stat.h>
 #if !defined(S_ISDIR)
 #  define S_ISDIR(mode) ((mode)&_S_IFDIR)

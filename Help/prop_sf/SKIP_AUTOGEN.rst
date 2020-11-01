@@ -1,6 +1,8 @@
 SKIP_AUTOGEN
 ------------
 
+.. versionadded:: 3.8
+
 Exclude the source file from :prop_tgt:`AUTOMOC`, :prop_tgt:`AUTOUIC` and
 :prop_tgt:`AUTORCC` processing (for Qt projects).
 

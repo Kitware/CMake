@@ -5,21 +5,24 @@
 #include "cmsys/Glob.hxx"
 
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
 
-cmFindPathCommand::cmFindPathCommand()
+cmFindPathCommand::cmFindPathCommand(cmExecutionStatus& status)
+  : cmFindBase(status)
 {
   this->EnvironmentPath = "INCLUDE";
   this->IncludeFileInPath = false;
 }
 
 // cmFindPathCommand
-bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn,
-                                    cmExecutionStatus&)
+bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
+  this->DebugMode = ComputeIfDebugModeWanted();
   this->VariableDocumentation = "Path to a file.";
   this->CMakePathName = "INCLUDE";
   if (!this->ParseArguments(argsIn)) {
@@ -41,29 +44,39 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn,
   std::string result = this->FindHeader();
   if (!result.empty()) {
     this->Makefile->AddCacheDefinition(
-      this->VariableName, result.c_str(), this->VariableDocumentation.c_str(),
+      this->VariableName, result, this->VariableDocumentation.c_str(),
       (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
     return true;
   }
   this->Makefile->AddCacheDefinition(
-    this->VariableName, (this->VariableName + "-NOTFOUND").c_str(),
+    this->VariableName, this->VariableName + "-NOTFOUND",
     this->VariableDocumentation.c_str(),
     (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
+  if (this->Required) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "Could not find " + this->VariableName +
+        " using the following files: " + cmJoin(this->Names, ", "));
+    cmSystemTools::SetFatalErrorOccured();
+  }
   return true;
 }
 
 std::string cmFindPathCommand::FindHeader()
 {
+  std::string debug_name = this->IncludeFileInPath ? "find_file" : "find_path";
+  cmFindBaseDebugState debug(debug_name, this);
   std::string header;
   if (this->SearchFrameworkFirst || this->SearchFrameworkOnly) {
-    header = this->FindFrameworkHeader();
+    header = this->FindFrameworkHeader(debug);
   }
   if (header.empty() && !this->SearchFrameworkOnly) {
-    header = this->FindNormalHeader();
+    header = this->FindNormalHeader(debug);
   }
   if (header.empty() && this->SearchFrameworkLast) {
-    header = this->FindFrameworkHeader();
+    header = this->FindFrameworkHeader(debug);
   }
+
   return header;
 }
 
@@ -88,12 +101,8 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
       frameWorkName.clear();
     }
     if (!frameWorkName.empty()) {
-      std::string fpath = dir;
-      fpath += frameWorkName;
-      fpath += ".framework";
-      std::string intPath = fpath;
-      intPath += "/Headers/";
-      intPath += fileName;
+      std::string fpath = cmStrCat(dir, frameWorkName, ".framework");
+      std::string intPath = cmStrCat(fpath, "/Headers/", fileName);
       if (cmSystemTools::FileExists(intPath)) {
         if (this->IncludeFileInPath) {
           return intPath;
@@ -104,9 +113,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
   }
   // if it is not found yet or not a framework header, then do a glob search
   // for all frameworks in the directory: dir/*.framework/Headers/<file>
-  std::string glob = dir;
-  glob += "*.framework/Headers/";
-  glob += file;
+  std::string glob = cmStrCat(dir, "*.framework/Headers/", file);
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();
@@ -121,33 +128,41 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
   return "";
 }
 
-std::string cmFindPathCommand::FindNormalHeader()
+std::string cmFindPathCommand::FindNormalHeader(cmFindBaseDebugState& debug)
 {
   std::string tryPath;
   for (std::string const& n : this->Names) {
     for (std::string const& sp : this->SearchPaths) {
-      tryPath = sp;
-      tryPath += n;
+      tryPath = cmStrCat(sp, n);
       if (cmSystemTools::FileExists(tryPath)) {
+        debug.FoundAt(tryPath);
         if (this->IncludeFileInPath) {
           return tryPath;
         }
         return sp;
       }
+      debug.FailedAt(tryPath);
     }
   }
   return "";
 }
 
-std::string cmFindPathCommand::FindFrameworkHeader()
+std::string cmFindPathCommand::FindFrameworkHeader(cmFindBaseDebugState& debug)
 {
   for (std::string const& n : this->Names) {
     for (std::string const& sp : this->SearchPaths) {
       std::string fwPath = this->FindHeaderInFramework(n, sp);
+      fwPath.empty() ? debug.FailedAt(fwPath) : debug.FoundAt(fwPath);
       if (!fwPath.empty()) {
         return fwPath;
       }
     }
   }
   return "";
+}
+
+bool cmFindPath(std::vector<std::string> const& args,
+                cmExecutionStatus& status)
+{
+  return cmFindPathCommand(status).InitialPass(args);
 }

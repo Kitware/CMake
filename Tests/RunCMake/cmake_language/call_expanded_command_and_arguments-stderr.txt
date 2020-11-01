@@ -1,0 +1,4 @@
+CMake Error at call_expanded_command_and_arguments.cmake:2 \(cmake_language\):
+  cmake_language CALL command's arguments must be literal
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

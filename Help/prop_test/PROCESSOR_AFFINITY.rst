@@ -1,6 +1,8 @@
 PROCESSOR_AFFINITY
 ------------------
 
+.. versionadded:: 3.12
+
 Set to a true value to ask CTest to launch the test process with CPU affinity
 for a fixed set of processors.  If enabled and supported for the current
 platform, CTest will choose a set of processors to place in the CPU affinity

@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDocumentationFormatter.h"
 
-#include "cmDocumentationEntry.h"
-#include "cmDocumentationSection.h"
-
+#include <cstring>
 #include <iomanip>
 #include <ostream>
-#include <string.h>
 #include <string>
 #include <vector>
+
+#include "cmDocumentationEntry.h"
+#include "cmDocumentationSection.h"
 
 cmDocumentationFormatter::cmDocumentationFormatter() = default;
 

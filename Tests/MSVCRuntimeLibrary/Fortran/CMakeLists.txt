@@ -6,9 +6,17 @@ foreach(t MultiThreaded SingleThreaded)
   foreach(dbg "" Debug)
     foreach(dll "" DLL)
       set(var "CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_${t}${dbg}${dll}")
-      # ifort does not actually define these, so inject them
-      string(REPLACE "-threads" "-threads;-D_MT" "${var}" "${${var}}")
-      string(REPLACE "-dbglibs" "-dbglibs;-D_DEBUG" "${var}" "${${var}}")
+      if(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+        # ifort does not actually define these, so inject them
+        string(REPLACE "-threads" "-threads;-D_MT" "${var}" "${${var}}")
+        string(REPLACE "-dbglibs" "-dbglibs;-D_DEBUG" "${var}" "${${var}}")
+      elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Flang")
+        # flang does not actually define these, so inject them
+        string(REPLACE ";--dependent-lib=libcmt;" ";--dependent-lib=libcmt;-D_MT;" "${var}" ";${${var}};")
+        string(REPLACE ";--dependent-lib=msvcrt;" ";--dependent-lib=msvcrt;-D_MT;-D_DLL;" "${var}" ";${${var}};")
+        string(REPLACE ";--dependent-lib=libcmtd;" ";--dependent-lib=libcmtd;-D_MT;-D_DEBUG;" "${var}" ";${${var}};")
+        string(REPLACE ";--dependent-lib=msvcrtd;" ";--dependent-lib=msvcrtd;-D_MT;-D_DEBUG;-D_DLL;" "${var}" ";${${var}};")
+      endif()
     endforeach()
   endforeach()
 endforeach()
@@ -45,6 +53,6 @@ endfunction()
 verify(Fortran verify.F90)
 # Intel Fortran for Windows supports single-threaded RTL but it is
 # not implemented by the Visual Studio integration.
-if(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel" AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   verify_combinations(SingleThreaded Fortran verify.F90)
 endif()

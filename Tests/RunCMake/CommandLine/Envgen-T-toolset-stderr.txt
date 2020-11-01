@@ -1,0 +1,2 @@
+^CMake Error at CMakeLists.+
+.+(Platform Toolset = 'fromcli'|Specified platform toolset \(fromcli\) is not installed or invalid).+

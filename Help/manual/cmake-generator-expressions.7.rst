@@ -47,8 +47,8 @@ Logical Operators
 -----------------
 
 ``$<BOOL:string>``
-  Converts ``string`` to ``0`` or ``1`` according to the rules of the
-  :command:`if()` command.  Evaluates to ``0`` if any of the following is true:
+  Converts ``string`` to ``0`` or ``1``. Evaluates to ``0`` if any of the
+  following is true:
 
   * ``string`` is empty,
   * ``string`` is a case-insensitive equal of
@@ -105,29 +105,51 @@ Variable Queries
 
 ``$<TARGET_EXISTS:target>``
   ``1`` if ``target`` exists, else ``0``.
-``$<CONFIG:cfg>``
-  ``1`` if config is ``cfg``, else ``0``. This is a case-insensitive comparison.
-  The mapping in :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by
-  this expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
+``$<CONFIG:cfgs>``
+  ``1`` if config is any one of the entries in ``cfgs``, else ``0``. This is a
+  case-insensitive comparison. The mapping in
+  :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by this
+  expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
   target.
-``$<PLATFORM_ID:platform_id>``
-  ``1`` if the CMake's platform id matches ``platform_id``
-  otherwise ``0``.
+``$<PLATFORM_ID:platform_ids>``
+  where ``platform_ids`` is a comma-separated list.
+  ``1`` if the CMake's platform id matches any one of the entries in
+  ``platform_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
-``$<C_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the C compiler matches ``compiler_id``,
-  otherwise ``0``.
+``$<C_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the C compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
-``$<CXX_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the CXX compiler matches ``compiler_id``,
-  otherwise ``0``.
-``$<CUDA_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the CUDA compiler matches ``compiler_id``,
-  otherwise ``0``.
+``$<CXX_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the CXX compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
-``$<Fortran_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the Fortran compiler matches ``compiler_id``,
-  otherwise ``0``.
+``$<CUDA_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the CUDA compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<OBJC_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the Objective-C compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<OBJCXX_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the Objective-C++ compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<Fortran_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the Fortran compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<ISPC_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the ISPC compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION:version>``
   ``1`` if the version of the C compiler matches ``version``, otherwise ``0``.
@@ -138,8 +160,17 @@ Variable Queries
 ``$<CUDA_COMPILER_VERSION:version>``
   ``1`` if the version of the CXX compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<OBJC_COMPILER_VERSION:version>``
+  ``1`` if the version of the OBJC compiler matches ``version``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<OBJCXX_COMPILER_VERSION:version>``
+  ``1`` if the version of the OBJCXX compiler matches ``version``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<Fortran_COMPILER_VERSION:version>``
   ``1`` if the version of the Fortran compiler matches ``version``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<ISPC_COMPILER_VERSION:version>``
+  ``1`` if the version of the ISPC compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<TARGET_POLICY:policy>``
   ``1`` if the ``policy`` was NEW when the 'head' target was created,
@@ -158,20 +189,20 @@ Variable Queries
 
 .. _`Boolean COMPILE_LANGUAGE Generator Expression`:
 
-``$<COMPILE_LANG_AND_ID:language,compiler_id>``
+``$<COMPILE_LANG_AND_ID:language,compiler_ids>``
   ``1`` when the language used for compilation unit matches ``language`` and
-  the CMake's compiler id of the language compiler matches ``compiler_id``,
-  otherwise ``0``. This expression is a short form for the combination of
-  ``$<COMPILE_LANGUAGE:language>`` and ``$<LANG_COMPILER_ID:compiler_id>``.
-  This expression may be used to specify compile options,
-  compile definitions, and include directories for source files of a
+  the CMake's compiler id of the language compiler matches any one of the
+  entries in ``compiler_ids``, otherwise ``0``. This expression is a short form
+  for the combination of ``$<COMPILE_LANGUAGE:language>`` and
+  ``$<LANG_COMPILER_ID:compiler_ids>``. This expression may be used to specify
+  compile options, compile definitions, and include directories for source files of a
   particular language and compiler combination in a target. For example:
 
   .. code-block:: cmake
 
     add_executable(myapp main.cpp foo.c bar.cpp zot.cu)
     target_compile_definitions(myapp
-      PRIVATE $<$<COMPILE_LANG_AND_ID:CXX,Clang>:COMPILING_CXX_WITH_CLANG>
+      PRIVATE $<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang>:COMPILING_CXX_WITH_CLANG>
               $<$<COMPILE_LANG_AND_ID:CXX,Intel>:COMPILING_CXX_WITH_INTEL>
               $<$<COMPILE_LANG_AND_ID:C,Clang>:COMPILING_C_WITH_CLANG>
     )
@@ -189,15 +220,15 @@ Variable Queries
   .. code-block:: cmake
 
     target_compile_definitions(myapp
-      PRIVATE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Clang>>:COMPILING_CXX_WITH_CLANG>
+      PRIVATE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClang,Clang>>:COMPILING_CXX_WITH_CLANG>
               $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Intel>>:COMPILING_CXX_WITH_INTEL>
               $<$<AND:$<COMPILE_LANGUAGE:C>,$<C_COMPILER_ID:Clang>>:COMPILING_C_WITH_CLANG>
     )
 
-``$<COMPILE_LANGUAGE:language>``
-  ``1`` when the language used for compilation unit matches ``language``,
-  otherwise ``0``.  This expression may be used to specify compile options,
-  compile definitions, and include directories for source files of a
+``$<COMPILE_LANGUAGE:languages>``
+  ``1`` when the language used for compilation unit matches any of the entries
+  in ``languages``, otherwise ``0``.  This expression may be used to specify
+  compile options, compile definitions, and include directories for source files of a
   particular language in a target. For example:
 
   .. code-block:: cmake
@@ -211,7 +242,7 @@ Variable Queries
               $<$<COMPILE_LANGUAGE:CUDA>:COMPILING_CUDA>
     )
     target_include_directories(myapp
-      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/opt/foo/cxx_headers>
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX,CUDA>:/opt/foo/headers>
     )
 
   This specifies the use of the ``-fno-exceptions`` compile option,
@@ -236,6 +267,122 @@ Variable Queries
     target_compile_options(myapp_cxx PUBLIC -fno-exceptions)
     add_executable(myapp main.cpp)
     target_link_libraries(myapp myapp_c myapp_cxx)
+
+.. _`Boolean LINK_LANGUAGE Generator Expression`:
+
+``$<LINK_LANG_AND_ID:language,compiler_ids>``
+  ``1`` when the language used for link step matches ``language`` and the
+  CMake's compiler id of the language linker matches any one of the entries
+  in ``compiler_ids``, otherwise ``0``. This expression is a short form for the
+  combination of ``$<LINK_LANGUAGE:language>`` and
+  ``$<LANG_COMPILER_ID:compiler_ids>``. This expression may be used to specify
+  link libraries, link options, link directories and link dependencies of a
+  particular language and linker combination in a target. For example:
+
+  .. code-block:: cmake
+
+    add_library(libC_Clang ...)
+    add_library(libCXX_Clang ...)
+    add_library(libC_Intel ...)
+    add_library(libCXX_Intel ...)
+
+    add_executable(myapp main.c)
+    if (CXX_CONFIG)
+      target_sources(myapp PRIVATE file.cxx)
+    endif()
+    target_link_libraries(myapp
+      PRIVATE $<$<LINK_LANG_AND_ID:CXX,Clang,AppleClang>:libCXX_Clang>
+              $<$<LINK_LANG_AND_ID:C,Clang,AppleClang>:libC_Clang>
+              $<$<LINK_LANG_AND_ID:CXX,Intel>:libCXX_Intel>
+              $<$<LINK_LANG_AND_ID:C,Intel>:libC_Intel>)
+
+  This specifies the use of different link libraries based on both the
+  compiler id and link language. This example will have target ``libCXX_Clang``
+  as link dependency when ``Clang`` or ``AppleClang`` is the ``CXX``
+  linker, and ``libCXX_Intel`` when ``Intel`` is the ``CXX`` linker.
+  Likewise when the ``C`` linker is ``Clang`` or ``AppleClang``, target
+  ``libC_Clang`` will be added as link dependency and ``libC_Intel`` when
+  ``Intel`` is the ``C`` linker.
+
+  See :ref:`the note related to
+  <Constraints LINK_LANGUAGE Generator Expression>`
+  ``$<LINK_LANGUAGE:language>`` for constraints about the usage of this
+  generator expression.
+
+``$<LINK_LANGUAGE:languages>``
+  ``1`` when the language used for link step matches any of the entries
+  in ``languages``, otherwise ``0``.  This expression may be used to specify
+  link libraries, link options, link directories and link dependencies of a
+  particular language in a target. For example:
+
+  .. code-block:: cmake
+
+    add_library(api_C ...)
+    add_library(api_CXX ...)
+    add_library(api INTERFACE)
+    target_link_options(api INTERFACE $<$<LINK_LANGUAGE:C>:-opt_c>
+                                        $<$<LINK_LANGUAGE:CXX>:-opt_cxx>)
+    target_link_libraries(api INTERFACE $<$<LINK_LANGUAGE:C>:api_C>
+                                        $<$<LINK_LANGUAGE:CXX>:api_CXX>)
+
+    add_executable(myapp1 main.c)
+    target_link_options(myapp1 PRIVATE api)
+
+    add_executable(myapp2 main.cpp)
+    target_link_options(myapp2 PRIVATE api)
+
+  This specifies to use the ``api`` target for linking targets ``myapp1`` and
+  ``myapp2``. In practice, ``myapp1`` will link with target ``api_C`` and
+  option ``-opt_c`` because it will use ``C`` as link language. And ``myapp2``
+  will link with ``api_CXX`` and option ``-opt_cxx`` because ``CXX`` will be
+  the link language.
+
+  .. _`Constraints LINK_LANGUAGE Generator Expression`:
+
+  .. note::
+
+    To determine the link language of a target, it is required to collect,
+    transitively, all the targets which will be linked to it. So, for link
+    libraries properties, a double evaluation will be done. During the first
+    evaluation, ``$<LINK_LANGUAGE:..>`` expressions will always return ``0``.
+    The link language computed after this first pass will be used to do the
+    second pass. To avoid inconsistency, it is required that the second pass
+    do not change the link language. Moreover, to avoid unexpected
+    side-effects, it is required to specify complete entities as part of the
+    ``$<LINK_LANGUAGE:..>`` expression. For example:
+
+    .. code-block:: cmake
+
+      add_library(lib STATIC file.cxx)
+      add_library(libother STATIC file.c)
+
+      # bad usage
+      add_executable(myapp1 main.c)
+      target_link_libraries(myapp1 PRIVATE lib$<$<LINK_LANGUAGE:C>:other>)
+
+      # correct usage
+      add_executable(myapp2 main.c)
+      target_link_libraries(myapp2 PRIVATE $<$<LINK_LANGUAGE:C>:libother>)
+
+    In this example, for ``myapp1``, the first pass will, unexpectedly,
+    determine that the link language is ``CXX`` because the evaluation of the
+    generator expression will be an empty string so ``myapp1`` will depends on
+    target ``lib`` which is ``C++``. On the contrary, for ``myapp2``, the first
+    evaluation will give ``C`` as link language, so the second pass will
+    correctly add target ``libother`` as link dependency.
+
+``$<DEVICE_LINK:list>``
+  Returns the list if it is the device link step, an empty list otherwise.
+  The device link step is controlled by :prop_tgt:`CUDA_SEPARABLE_COMPILATION`
+  and :prop_tgt:`CUDA_RESOLVE_DEVICE_SYMBOLS` properties and
+  policy :policy:`CMP0105`. This expression can only be used to specify link
+  options.
+
+``$<HOST_LINK:list>``
+  Returns the list if it is the normal link step, an empty list otherwise.
+  This expression is mainly useful when a device link step is also involved
+  (see ``$<DEVICE_LINK:list>`` generator expression). This expression can only
+  be used to specify link options.
 
 String-Valued Generator Expressions
 ===================================
@@ -395,8 +542,17 @@ Variable Queries
 ``$<CUDA_COMPILER_ID>``
   The CMake's compiler id of the CUDA compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<OBJC_COMPILER_ID>``
+  The CMake's compiler id of the OBJC compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<OBJCXX_COMPILER_ID>``
+  The CMake's compiler id of the OBJCXX compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<Fortran_COMPILER_ID>``
   The CMake's compiler id of the Fortran compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<ISPC_COMPILER_ID>``
+  The CMake's compiler id of the ISPC compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION>``
   The version of the C compiler used.
@@ -407,8 +563,17 @@ Variable Queries
 ``$<CUDA_COMPILER_VERSION>``
   The version of the CUDA compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<OBJC_COMPILER_VERSION>``
+  The version of the OBJC compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<OBJCXX_COMPILER_VERSION>``
+  The version of the OBJCXX compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<Fortran_COMPILER_VERSION>``
   The version of the Fortran compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<ISPC_COMPILER_VERSION>``
+  The version of the ISPC compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<COMPILE_LANGUAGE>``
   The compile language of source files when evaluating compile options.
@@ -416,22 +581,44 @@ Variable Queries
   <Boolean COMPILE_LANGUAGE Generator Expression>`
   ``$<COMPILE_LANGUAGE:language>``
   for notes about the portability of this generator expression.
+``$<LINK_LANGUAGE>``
+  The link language of target when evaluating link options.
+  See :ref:`the related boolean expression
+  <Boolean LINK_LANGUAGE Generator Expression>` ``$<LINK_LANGUAGE:language>``
+  for notes about the portability of this generator expression.
+
+  .. note::
+
+    This generator expression is not supported by the link libraries
+    properties to avoid side-effects due to the double evaluation of
+    these properties.
 
 Target-Dependent Queries
 ------------------------
 
-``$<TARGET_NAME_IF_EXISTS:tgt>``
-  Expands to the ``tgt`` if the given target exists, an empty string
-  otherwise.
-``$<TARGET_FILE:tgt>``
-  Full path to main file (.exe, .so.1.2, .a) where ``tgt`` is the name of a
-  target.
-``$<TARGET_FILE_BASE_NAME:tgt>``
-  Base name of main file where ``tgt`` is the name of a target.
+These queries refer to a target ``tgt``. This can be any runtime artifact,
+namely:
 
-  The base name corresponds to the target file name (see
-  ``$<TARGET_FILE_NAME:tgt>``) without prefix and suffix. For example, if
-  target file name is ``libbase.so``, the base name is ``base``.
+* an executable target created by :command:`add_executable`
+* a shared library target (``.so``, ``.dll`` but not their ``.lib`` import library)
+  created by :command:`add_library`
+* a static library target created by :command:`add_library`
+
+In the following, "the ``tgt`` filename" means the name of the ``tgt``
+binary file. This has to be distinguished from "the target name",
+which is just the string ``tgt``.
+
+``$<TARGET_NAME_IF_EXISTS:tgt>``
+  The target name ``tgt`` if the target exists, an empty string otherwise.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+``$<TARGET_FILE:tgt>``
+  Full path to the ``tgt`` binary file.
+``$<TARGET_FILE_BASE_NAME:tgt>``
+  Base name of ``tgt``, i.e. ``$<TARGET_FILE_NAME:tgt>`` without prefix and
+  suffix.
+  For example, if the ``tgt`` filename is ``libbase.so``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   :prop_tgt:`LIBRARY_OUTPUT_NAME` and :prop_tgt:`RUNTIME_OUTPUT_NAME`
@@ -446,32 +633,34 @@ Target-Dependent Queries
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_FILE_PREFIX:tgt>``
-  Prefix of main file where ``tgt`` is the name of a target.
+  Prefix of the ``tgt`` filename (such as ``lib``).
 
   See also the :prop_tgt:`PREFIX` target property.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_FILE_SUFFIX:tgt>``
-  Suffix of main file where ``tgt`` is the name of a target.
-
-  The suffix corresponds to the file extension (such as ".so" or ".exe").
+  Suffix of the ``tgt`` filename (extension such as ``.so`` or ``.exe``).
 
   See also the :prop_tgt:`SUFFIX` target property.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_FILE_NAME:tgt>``
-  Name of main file (.exe, .so.1.2, .a).
+  The ``tgt`` filename.
 ``$<TARGET_FILE_DIR:tgt>``
-  Directory of main file (.exe, .so.1.2, .a).
-``$<TARGET_LINKER_FILE:tgt>``
-  File used to link (.a, .lib, .so) where ``tgt`` is the name of a target.
-``$<TARGET_LINKER_FILE_BASE_NAME:tgt>``
-  Base name of file used to link where ``tgt`` is the name of a target.
+  Directory of the ``tgt`` binary file.
 
-  The base name corresponds to the target linker file name (see
-  ``$<TARGET_LINKER_FILE_NAME:tgt>``) without prefix and suffix. For example,
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
+``$<TARGET_LINKER_FILE:tgt>``
+  File used when linking to the ``tgt`` target.  This will usually
+  be the library that ``tgt`` represents (``.a``, ``.lib``, ``.so``),
+  but for a shared library on DLL platforms, it would be the ``.lib``
+  import library associated with the DLL.
+``$<TARGET_LINKER_FILE_BASE_NAME:tgt>``
+  Base name of file used to link the target ``tgt``, i.e.
+  ``$<TARGET_LINKER_FILE_NAME:tgt>`` without prefix and suffix. For example,
   if target file name is ``libbase.a``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
@@ -486,7 +675,7 @@ Target-Dependent Queries
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_LINKER_FILE_PREFIX:tgt>``
-  Prefix of file used to link where ``tgt`` is the name of a target.
+  Prefix of file used to link target ``tgt``.
 
   See also the :prop_tgt:`PREFIX` and :prop_tgt:`IMPORT_PREFIX` target
   properties.
@@ -504,15 +693,27 @@ Target-Dependent Queries
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_LINKER_FILE_NAME:tgt>``
-  Name of file used to link (.a, .lib, .so).
+  Name of file used to link target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_LINKER_FILE_DIR:tgt>``
-  Directory of file used to link (.a, .lib, .so).
+  Directory of file used to link target ``tgt``.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_SONAME_FILE:tgt>``
-  File with soname (.so.3) where ``tgt`` is the name of a target.
+  File with soname (``.so.3``) where ``tgt`` is the name of a target.
 ``$<TARGET_SONAME_FILE_NAME:tgt>``
-  Name of file with soname (.so.3).
+  Name of file with soname (``.so.3``).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_SONAME_FILE_DIR:tgt>``
-  Directory of with soname (.so.3).
+  Directory of with soname (``.so.3``).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_PDB_FILE:tgt>``
   Full path to the linker generated program database file (.pdb)
   where ``tgt`` is the name of a target.
@@ -538,31 +739,43 @@ Target-Dependent Queries
   expression is evaluated on.
 ``$<TARGET_PDB_FILE_NAME:tgt>``
   Name of the linker generated program database file (.pdb).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_PDB_FILE_DIR:tgt>``
   Directory of the linker generated program database file (.pdb).
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_BUNDLE_DIR:tgt>``
   Full path to the bundle directory (``my.app``, ``my.framework``, or
   ``my.bundle``) where ``tgt`` is the name of a target.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_BUNDLE_CONTENT_DIR:tgt>``
   Full path to the bundle content directory where ``tgt`` is the name of a
   target. For the macOS SDK it leads to ``my.app/Contents``, ``my.framework``,
   or ``my.bundle/Contents``. For all other SDKs (e.g. iOS) it leads to
   ``my.app``, ``my.framework``, or ``my.bundle`` due to the flat bundle
   structure.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_PROPERTY:tgt,prop>``
   Value of the property ``prop`` on the target ``tgt``.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_PROPERTY:prop>``
-  Value of the property ``prop`` on the target on which the generator
-  expression is evaluated. Note that for generator expressions in
-  :ref:`Target Usage Requirements` this is the value of the property
-  on the consuming target rather than the target specifying the
-  requirement.
+  Value of the property ``prop`` on the target for which the expression
+  is being evaluated. Note that for generator expressions in
+  :ref:`Target Usage Requirements` this is the consuming target rather
+  than the target specifying the requirement.
 ``$<INSTALL_PREFIX>``
   Content of the install prefix when the target is exported via
-  :command:`install(EXPORT)` and empty otherwise.
+  :command:`install(EXPORT)`, or when evaluated in
+  :prop_tgt:`INSTALL_NAME_DIR`, and empty otherwise.
 
 Output-Related Expressions
 --------------------------

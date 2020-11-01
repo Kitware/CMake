@@ -1,0 +1,36 @@
+CMake Error at BadOutput.cmake:2 \(add_custom_command\):
+  add_custom_command called with OUTPUT containing a "#".  This character is
+  not allowed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at BadOutput.cmake:3 \(add_custom_command\):
+  add_custom_command called with OUTPUT containing a "<".  This character is
+  not allowed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at BadOutput.cmake:4 \(add_custom_command\):
+  add_custom_command called with OUTPUT containing a ">".  This character is
+  not allowed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at BadOutput.cmake:5 \(add_custom_command\):
+  add_custom_command called with OUTPUT containing a "<".  This character is
+  not allowed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at BadOutput.cmake:6 \(add_custom_command\):
+  add_custom_command attempted to have a file
+
+    .*RunCMake/add_custom_command/e
+
+  in a source directory as an output of custom command.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

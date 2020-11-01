@@ -1,6 +1,8 @@
 AUTOMOC_MACRO_NAMES
 -------------------
 
+.. versionadded:: 3.10
+
 A :ref:`semicolon-separated list <CMake Language Lists>` list of macro names used by
 :prop_tgt:`AUTOMOC` to determine if a C++ file needs to be processed by ``moc``.
 

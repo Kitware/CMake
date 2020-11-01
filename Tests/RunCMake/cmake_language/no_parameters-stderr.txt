@@ -1,0 +1,2 @@
+CMake Error at no_parameters.cmake:1 \(cmake_language\):
+  cmake_language CALL missing command name

@@ -57,25 +57,6 @@ CMakeLexer.tokens["root"] = [
   #  (r'[^<>\])\}\|$"# \t\n]+', Name.Exception),            # fallback, for debugging only
 ]
 
-# Monkey patch for sphinx generating invalid content for qcollectiongenerator
-# https://bitbucket.org/birkenfeld/sphinx/issue/1435/qthelp-builder-should-htmlescape-keywords
-from sphinx.util.pycompat import htmlescape
-from sphinx.builders.qthelp import QtHelpBuilder
-old_build_keywords = QtHelpBuilder.build_keywords
-def new_build_keywords(self, title, refs, subitems):
-  old_items = old_build_keywords(self, title, refs, subitems)
-  new_items = []
-  for item in old_items:
-    before, rest = item.split("ref=\"", 1)
-    ref, after = rest.split("\"")
-    if ("<" in ref and ">" in ref):
-      new_items.append(before + "ref=\"" + htmlescape(ref) + "\"" + after)
-    else:
-      new_items.append(item)
-  return new_items
-QtHelpBuilder.build_keywords = new_build_keywords
-
-
 from docutils.parsers.rst import Directive, directives
 from docutils.transforms import Transform
 try:
@@ -92,18 +73,37 @@ from sphinx.roles import XRefRole
 from sphinx.util.nodes import make_refnode
 from sphinx import addnodes
 
-# Needed for checking if Sphinx version is >= 1.4.
-# See https://github.com/sphinx-doc/sphinx/issues/2673
-old_sphinx = False
-
+sphinx_before_1_4 = False
+sphinx_before_1_7_2 = False
 try:
     from sphinx import version_info
     if version_info < (1, 4):
-        old_sphinx = True
+        sphinx_before_1_4 = True
+    if version_info < (1, 7, 2):
+        sphinx_before_1_7_2 = True
 except ImportError:
     # The `sphinx.version_info` tuple was added in Sphinx v1.2:
-    old_sphinx = True
+    sphinx_before_1_4 = True
+    sphinx_before_1_7_2 = True
 
+if sphinx_before_1_7_2:
+  # Monkey patch for sphinx generating invalid content for qcollectiongenerator
+  # https://github.com/sphinx-doc/sphinx/issues/1435
+  from sphinx.util.pycompat import htmlescape
+  from sphinx.builders.qthelp import QtHelpBuilder
+  old_build_keywords = QtHelpBuilder.build_keywords
+  def new_build_keywords(self, title, refs, subitems):
+    old_items = old_build_keywords(self, title, refs, subitems)
+    new_items = []
+    for item in old_items:
+      before, rest = item.split("ref=\"", 1)
+      ref, after = rest.split("\"")
+      if ("<" in ref and ">" in ref):
+        new_items.append(before + "ref=\"" + htmlescape(ref) + "\"" + after)
+      else:
+        new_items.append(item)
+    return new_items
+  QtHelpBuilder.build_keywords = new_build_keywords
 
 class CMakeModule(Directive):
     required_arguments = 1
@@ -181,7 +181,7 @@ class _cmake_index_entry:
 
     def __call__(self, title, targetid, main = 'main'):
         # See https://github.com/sphinx-doc/sphinx/issues/2673
-        if old_sphinx:
+        if sphinx_before_1_4:
             return ('pair', u'%s ; %s' % (self.desc, title), targetid, main)
         else:
             return ('pair', u'%s ; %s' % (self.desc, title), targetid, main, None)
@@ -191,6 +191,7 @@ _cmake_index_objs = {
     'cpack_gen':  _cmake_index_entry('cpack generator'),
     'envvar':     _cmake_index_entry('envvar'),
     'generator':  _cmake_index_entry('generator'),
+    'guide':      _cmake_index_entry('guide'),
     'manual':     _cmake_index_entry('manual'),
     'module':     _cmake_index_entry('module'),
     'policy':     _cmake_index_entry('policy'),
@@ -251,7 +252,7 @@ class CMakeTransform(Transform):
         env = self.document.settings.env
 
         # Treat some documents as cmake domain objects.
-        objtype, sep, tail = env.docname.rpartition('/')
+        objtype, sep, tail = env.docname.partition('/')
         make_index_entry = _cmake_index_objs.get(objtype)
         if make_index_entry:
             title = self.parse_title(env.docname)
@@ -373,6 +374,7 @@ class CMakeDomain(Domain):
         'cpack_gen':  ObjType('cpack_gen',  'cpack_gen'),
         'envvar':     ObjType('envvar',     'envvar'),
         'generator':  ObjType('generator',  'generator'),
+        'guide':      ObjType('guide',      'guide'),
         'variable':   ObjType('variable',   'variable'),
         'module':     ObjType('module',     'module'),
         'policy':     ObjType('policy',     'policy'),
@@ -407,6 +409,7 @@ class CMakeDomain(Domain):
         'cpack_gen':  CMakeXRefRole(),
         'envvar':     CMakeXRefRole(),
         'generator':  CMakeXRefRole(),
+        'guide':      CMakeXRefRole(),
         'variable':   CMakeXRefRole(),
         'module':     CMakeXRefRole(),
         'policy':     CMakeXRefRole(),

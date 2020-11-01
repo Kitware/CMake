@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmParseBlanketJSCoverage_h
-#define cmParseBlanketJSCoverage_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -29,7 +28,7 @@ class cmParseBlanketJSCoverage
 public:
   cmParseBlanketJSCoverage(cmCTestCoverageHandlerContainer& cont,
                            cmCTest* ctest);
-  bool LoadCoverageData(std::vector<std::string> files);
+  bool LoadCoverageData(std::vector<std::string> const& files);
   //  Read the JSON output
   bool ReadJSONFile(std::string const& file);
 
@@ -39,4 +38,3 @@ protected:
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;
 };
-#endif

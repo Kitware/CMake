@@ -1,0 +1,2 @@
+^Error removing directory ".*/rm_tests/d1" without recursive option\.
+Error removing directory ".*/rm_tests/d2" without recursive option\.$

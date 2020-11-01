@@ -1,0 +1,60 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#pragma once
+
+#include <type_traits> // IWYU pragma: export
+
+namespace cm {
+
+#if __cplusplus >= 201402L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201402L)
+
+// Miscellaneous transformations
+template <bool B, typename T = void>
+using enable_if_t = std::enable_if_t<B, T>;
+
+#else
+
+// Miscellaneous transformations
+template <bool B, typename T = void>
+using enable_if_t = typename std::enable_if<B, T>::type;
+
+#endif
+
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703)
+
+// Helper classes
+using std::bool_constant;
+
+// Miscellaneous transformations
+using std::invoke_result;
+using std::invoke_result_t;
+
+using std::void_t;
+
+#else
+
+// Helper classes
+template <bool B>
+using bool_constant = std::integral_constant<bool, B>;
+
+// Miscellaneous transformations
+template <typename F, typename... ArgTypes>
+using invoke_result = std::result_of<F(ArgTypes...)>;
+
+template <class F, typename... ArgTypes>
+using invoke_result_t = typename invoke_result<F, ArgTypes...>::type;
+
+template <typename... ArgTypes>
+struct make_void
+{
+  typedef void type;
+};
+template <typename... ArgTypes>
+using void_t = typename make_void<ArgTypes...>::type;
+
+#endif
+
+} // namespace cm

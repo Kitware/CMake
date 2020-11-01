@@ -5,26 +5,35 @@
 CPack
 -----
 
-Build binary and source package installers.
+Configure generators for binary installers and source packages.
 
 Introduction
 ^^^^^^^^^^^^
 
-The CPack module generates a file ``CPackConfig.cmake`` intended for
-use in a subsequent run of  the :manual:`cpack <cpack(1)>` program
-where it steers the generation of installers or/and source packages.
+The CPack module generates the configuration files ``CPackConfig.cmake``
+and ``CPackSourceConfig.cmake``. They are intended for use in a subsequent
+run of  the :manual:`cpack <cpack(1)>` program where they steer the generation
+of installers or/and source packages.
 
-Inclusion of the CPack module adds two new build targets, ``package``
-and ``package_source``, which build the binary and source installers
-respectively.  The generated binary installers contain everything
-installed via CMake's :command:`install` command (and the deprecated
-commands :command:`install_files`, :command:`install_programs`, and
-:command:`install_targets`).
+Depending on the CMake generator, the CPack module may also add two new build
+targets, ``package`` and ``package_source``. See the `packaging targets`_
+section below for details.
 
-For certain kinds of binary installers (including the graphical
-installers on macOS and Windows), CPack generates installers that
-allow users to select individual application components to install.
-See :module:`CPackComponent` module for further details.
+The generated binary installers will contain all files that have been installed
+via CMake's :command:`install` command (and the deprecated commands
+:command:`install_files`, :command:`install_programs`, and
+:command:`install_targets`). Note that the ``DESTINATION`` option of the
+:command:`install` command must be a relative path; otherwise installed files
+are ignored by CPack.
+
+Certain kinds of binary installers can be configured such that users can select
+individual application components to install.  See the :module:`CPackComponent`
+module for further details.
+
+Source packages (configured through ``CPackSourceConfig.cmake`` and generated
+by the :cpack_gen:`CPack Archive Generator`) will contain all source files in
+the project directory except those specified in
+:variable:`CPACK_SOURCE_IGNORE_FILES`.
 
 CPack Generators
 ^^^^^^^^^^^^^^^^
@@ -37,10 +46,6 @@ generator.  In a :variable:`CPACK_PROJECT_CONFIG_FILE`,
 :variable:`CPACK_GENERATOR` is a *string naming a single generator*.  If you
 need per-cpack-generator logic to control *other* cpack settings, then you
 need a :variable:`CPACK_PROJECT_CONFIG_FILE`.
-
-The CMake source tree itself contains a :variable:`CPACK_PROJECT_CONFIG_FILE`.
-See the top level file ``CMakeCPackOptions.cmake.in`` for an example.
-
 If set, the :variable:`CPACK_PROJECT_CONFIG_FILE` is included automatically
 on a per-generator basis.  It only need contain overrides.
 
@@ -62,6 +67,26 @@ This is the key: For each generator listed in :variable:`CPACK_GENERATOR` in
 ``CPackConfig.cmake``, cpack will *reset* :variable:`CPACK_GENERATOR`
 internally to *the one currently being used* and then include the
 :variable:`CPACK_PROJECT_CONFIG_FILE`.
+
+For a list of available generators, see :manual:`cpack-generators(7)`.
+
+.. _`packaging targets`:
+
+Targets package and package_source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If CMake is run with the Makefile, Ninja, or Xcode generator, then
+``include(CPack)`` generates a target ``package``. This makes it possible
+to build a binary installer from CMake, Make, or Ninja: Instead of ``cpack``,
+one may call ``cmake --build . --target package`` or ``make package`` or
+``ninja package``. The VS generator creates an uppercase target ``PACKAGE``.
+
+If CMake is run with the Makefile or Ninja generator, then ``include(CPack)``
+also generates a target ``package_source``. To build a source package,
+instead of ``cpack -G TGZ --config CPackSourceConfig.cmake`` one may call
+``cmake --build . --target package_source``, ``make package_source``,
+or ``ninja package_source``.
+
 
 Variables common to all CPack Generators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -325,7 +350,21 @@ The following variables are for advanced uses of CPack:
 
 .. variable:: CPACK_INSTALL_COMMANDS
 
-  Extra commands to install components.
+  Extra commands to install components.  The environment variable
+  ``CMAKE_INSTALL_PREFIX`` is set to the temporary install directory
+  during execution.
+
+.. variable:: CPACK_INSTALL_SCRIPTS
+
+  Extra CMake scripts executed by CPack during its local staging
+  installation, which is done right before packaging the files.
+  The scripts are not called by a standalone install (e.g.: ``make install``).
+  For every script, the following variables will be set:
+  :variable:`CMAKE_CURRENT_SOURCE_DIR`, :variable:`CMAKE_CURRENT_BINARY_DIR`
+  and :variable:`CMAKE_INSTALL_PREFIX` (which is set to the staging install
+  directory).  The singular form ``CMAKE_INSTALL_SCRIPT`` is supported as
+  an alternative variable for historical reasons, but its value is ignored if
+  ``CMAKE_INSTALL_SCRIPTS`` is set and a warning will be issued.
 
 .. variable:: CPACK_INSTALLED_DIRECTORIES
 
@@ -350,6 +389,21 @@ The following variables are for advanced uses of CPack:
   options (see CMake :command:`option` command) which may then be used to
   select the CPack generator(s) to be used when building the ``package``
   target or when running :manual:`cpack <cpack(1)>` without the ``-G`` option.
+
+.. variable:: CPACK_PRE_BUILD_SCRIPTS
+
+  List of CMake scripts to execute after CPack has installed the files to
+  be packed into a staging directory and before producing the result
+  packages.
+
+.. variable:: CPACK_POST_BUILD_SCRIPTS
+
+  List of CMake scripts to execute after CPack has produced the result
+  packages and before copying them back to a build directory.
+
+.. variable:: CPACK_PACKAGE_FILES
+
+  List of resulting package files passed to the ``CPACK_POST_BUILD_SCRIPTS``.
 
 #]=======================================================================]
 
@@ -385,7 +439,7 @@ endmacro()
 # find any variable that starts with CPACK and create a variable
 # _CPACK_OTHER_VARIABLES_ that contains SET commands for
 # each cpack variable.  _CPACK_OTHER_VARIABLES_ is then
-# used as an @ replacment in configure_file for the CPackConfig.
+# used as an @ replacement in configure_file for the CPackConfig.
 function(cpack_encode_variables)
   set(commands "")
   get_cmake_property(res VARIABLES)
@@ -444,20 +498,23 @@ if(NOT DEFINED CPACK_PACKAGE_VERSION)
 endif()
 
 _cpack_set_default(CPACK_PACKAGE_VENDOR "Humanity")
+set(CPACK_DEFAULT_PACKAGE_DESCRIPTION_SUMMARY "${CMAKE_PROJECT_NAME} built using CMake")
 if(CMAKE_PROJECT_DESCRIPTION)
   _cpack_set_default(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "${CMAKE_PROJECT_DESCRIPTION}")
 else()
   _cpack_set_default(CPACK_PACKAGE_DESCRIPTION_SUMMARY
-    "${CMAKE_PROJECT_NAME} built using CMake")
+    "${CPACK_DEFAULT_PACKAGE_DESCRIPTION_SUMMARY}")
 endif()
 if(CMAKE_PROJECT_HOMEPAGE_URL)
   _cpack_set_default(CPACK_PACKAGE_HOMEPAGE_URL
     "${CMAKE_PROJECT_HOMEPAGE_URL}")
 endif()
 
-_cpack_set_default(CPACK_PACKAGE_DESCRIPTION_FILE
+set(CPACK_DEFAULT_PACKAGE_DESCRIPTION_FILE
   "${CMAKE_ROOT}/Templates/CPack.GenericDescription.txt")
+_cpack_set_default(CPACK_PACKAGE_DESCRIPTION_FILE
+  "${CPACK_DEFAULT_PACKAGE_DESCRIPTION_FILE}")
 _cpack_set_default(CPACK_RESOURCE_FILE_LICENSE
   "${CMAKE_ROOT}/Templates/CPack.GenericLicense.txt")
 _cpack_set_default(CPACK_RESOURCE_FILE_README
@@ -546,11 +603,19 @@ if(NOT CPACK_GENERATOR)
       if(APPLE)
         option(CPACK_BINARY_BUNDLE       "Enable to build OSX bundles"      OFF)
         option(CPACK_BINARY_DRAGNDROP    "Enable to build OSX Drag And Drop package" OFF)
-        option(CPACK_BINARY_OSXX11       "Enable to build OSX X11 packages"      OFF)
-        option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages" OFF)
+        option(CPACK_BINARY_OSXX11       "Enable to build OSX X11 packages (deprecated)" OFF)
+        option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages (deprecated)" OFF)
         option(CPACK_BINARY_PRODUCTBUILD "Enable to build productbuild packages" OFF)
+        mark_as_advanced(
+          CPACK_BINARY_BUNDLE
+          CPACK_BINARY_DRAGNDROP
+          CPACK_BINARY_OSXX11
+          CPACK_BINARY_PACKAGEMAKER
+          CPACK_BINARY_PRODUCTBUILD
+          )
       else()
         option(CPACK_BINARY_TZ  "Enable to build TZ packages"     ON)
+        mark_as_advanced(CPACK_BINARY_TZ)
       endif()
       option(CPACK_BINARY_DEB  "Enable to build Debian packages"  OFF)
       option(CPACK_BINARY_FREEBSD  "Enable to build FreeBSD packages"  OFF)
@@ -560,6 +625,16 @@ if(NOT CPACK_GENERATOR)
       option(CPACK_BINARY_TBZ2 "Enable to build TBZ2 packages"    OFF)
       option(CPACK_BINARY_TGZ  "Enable to build TGZ packages"     ON)
       option(CPACK_BINARY_TXZ  "Enable to build TXZ packages"     OFF)
+      mark_as_advanced(
+        CPACK_BINARY_DEB
+        CPACK_BINARY_FREEBSD
+        CPACK_BINARY_NSIS
+        CPACK_BINARY_RPM
+        CPACK_BINARY_STGZ
+        CPACK_BINARY_TBZ2
+        CPACK_BINARY_TGZ
+        CPACK_BINARY_TXZ
+        )
     endif()
   else()
     option(CPACK_BINARY_7Z    "Enable to build 7-Zip packages" OFF)
@@ -567,8 +642,16 @@ if(NOT CPACK_GENERATOR)
     option(CPACK_BINARY_NUGET "Enable to build NuGet packages" OFF)
     option(CPACK_BINARY_WIX   "Enable to build WiX packages" OFF)
     option(CPACK_BINARY_ZIP   "Enable to build ZIP packages" OFF)
+    mark_as_advanced(
+      CPACK_BINARY_7Z
+      CPACK_BINARY_NSIS
+      CPACK_BINARY_NUGET
+      CPACK_BINARY_WIX
+      CPACK_BINARY_ZIP
+      )
   endif()
   option(CPACK_BINARY_IFW "Enable to build IFW packages" OFF)
+  mark_as_advanced(CPACK_BINARY_IFW)
 
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_7Z           7Z)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_BUNDLE       Bundle)
@@ -598,6 +681,7 @@ if(NOT CPACK_SOURCE_GENERATOR)
   if(UNIX)
     if(CYGWIN)
       option(CPACK_SOURCE_CYGWIN "Enable to build Cygwin source packages" ON)
+      mark_as_advanced(CPACK_SOURCE_CYGWIN)
     else()
       option(CPACK_SOURCE_RPM  "Enable to build RPM source packages"  OFF)
       option(CPACK_SOURCE_TBZ2 "Enable to build TBZ2 source packages" ON)
@@ -605,10 +689,22 @@ if(NOT CPACK_SOURCE_GENERATOR)
       option(CPACK_SOURCE_TXZ  "Enable to build TXZ source packages"  ON)
       option(CPACK_SOURCE_TZ   "Enable to build TZ source packages"   ON)
       option(CPACK_SOURCE_ZIP  "Enable to build ZIP source packages"  OFF)
+      mark_as_advanced(
+        CPACK_SOURCE_RPM
+        CPACK_SOURCE_TBZ2
+        CPACK_SOURCE_TGZ
+        CPACK_SOURCE_TXZ
+        CPACK_SOURCE_TZ
+        CPACK_SOURCE_ZIP
+        )
     endif()
   else()
     option(CPACK_SOURCE_7Z  "Enable to build 7-Zip source packages" ON)
     option(CPACK_SOURCE_ZIP "Enable to build ZIP source packages" ON)
+    mark_as_advanced(
+      CPACK_SOURCE_7Z
+      CPACK_SOURCE_ZIP
+      )
   endif()
 
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_7Z      7Z)
@@ -620,38 +716,6 @@ if(NOT CPACK_SOURCE_GENERATOR)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TZ      TZ)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_ZIP     ZIP)
 endif()
-
-# mark the above options as advanced
-mark_as_advanced(
-  CPACK_BINARY_7Z
-  CPACK_BINARY_BUNDLE
-  CPACK_BINARY_CYGWIN
-  CPACK_BINARY_DEB
-  CPACK_BINARY_DRAGNDROP
-  CPACK_BINARY_FREEBSD
-  CPACK_BINARY_IFW
-  CPACK_BINARY_NSIS
-  CPACK_BINARY_NUGET
-  CPACK_BINARY_OSXX11
-  CPACK_BINARY_PACKAGEMAKER
-  CPACK_BINARY_PRODUCTBUILD
-  CPACK_BINARY_RPM
-  CPACK_BINARY_STGZ
-  CPACK_BINARY_TBZ2
-  CPACK_BINARY_TGZ
-  CPACK_BINARY_TXZ
-  CPACK_BINARY_TZ
-  CPACK_BINARY_WIX
-  CPACK_BINARY_ZIP
-  CPACK_SOURCE_7Z
-  CPACK_SOURCE_CYGWIN
-  CPACK_SOURCE_RPM
-  CPACK_SOURCE_TBZ2
-  CPACK_SOURCE_TGZ
-  CPACK_SOURCE_TXZ
-  CPACK_SOURCE_TZ
-  CPACK_SOURCE_ZIP
-  )
 
 # Set some other variables
 _cpack_set_default(CPACK_INSTALL_CMAKE_PROJECTS
@@ -667,6 +731,8 @@ endif()
 # value of CPACK_NSIS_PACKAGE_NAME  instead
 # of CPACK_PACKAGE_INSTALL_DIRECTORY
 _cpack_set_default(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+# Specify the name of the Uninstall file in NSIS
+_cpack_set_default(CPACK_NSIS_UNINSTALL_NAME "Uninstall")
 
 if(CPACK_NSIS_DISPLAY_NAME_SET)
   _cpack_set_default(CPACK_NSIS_PACKAGE_NAME "${CPACK_NSIS_DISPLAY_NAME}")

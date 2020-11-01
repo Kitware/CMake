@@ -6,7 +6,7 @@
 
 # Support for NVIDIA Nsight Tegra Visual Studio Edition was previously
 # implemented in the CMake VS IDE generators.  Avoid interfering with
-# that functionality for now.  Later we may try to integrate this.
+# that functionality for now.
 if(CMAKE_VS_PLATFORM_NAME STREQUAL "Tegra-Android")
   return()
 endif()
@@ -14,6 +14,19 @@ endif()
 # Commonly used Android toolchain files that pre-date CMake upstream support
 # set CMAKE_SYSTEM_VERSION to 1.  Avoid interfering with them.
 if(CMAKE_SYSTEM_VERSION EQUAL 1)
+  return()
+endif()
+
+set(CMAKE_BUILD_TYPE_INIT Debug)
+
+# Skip sysroot selection if the NDK has a unified toolchain.
+if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
+  return()
+endif()
+
+# Natively compiling on an Android host doesn't use the NDK cross-compilation
+# tools.
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Android")
   return()
 endif()
 
@@ -40,5 +53,3 @@ else()
     "Android: No CMAKE_SYSROOT was selected."
     )
 endif()
-
-set(CMAKE_BUILD_TYPE_INIT Debug)

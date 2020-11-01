@@ -1,6 +1,10 @@
 #include "cmVisualStudioGeneratorOptions.h"
 
+#include <cm/iterator>
+
 #include "cmAlgorithms.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudioGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
@@ -147,27 +151,6 @@ bool cmVisualStudioGeneratorOptions::UsingSBCS() const
   return false;
 }
 
-cmVisualStudioGeneratorOptions::CudaRuntime
-cmVisualStudioGeneratorOptions::GetCudaRuntime() const
-{
-  std::map<std::string, FlagValue>::const_iterator i =
-    this->FlagMap.find("CudaRuntime");
-  if (i != this->FlagMap.end() && i->second.size() == 1) {
-    std::string const& cudaRuntime = i->second[0];
-    if (cudaRuntime == "Static") {
-      return CudaRuntimeStatic;
-    }
-    if (cudaRuntime == "Shared") {
-      return CudaRuntimeShared;
-    }
-    if (cudaRuntime == "None") {
-      return CudaRuntimeNone;
-    }
-  }
-  // nvcc default is static
-  return CudaRuntimeStatic;
-}
-
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
 {
   // Extract temporary values stored by our flag table.
@@ -193,7 +176,7 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
     std::string arch_name = arch[0];
     std::vector<std::string> codes;
     if (!code.empty()) {
-      codes = cmSystemTools::tokenize(code[0], ",");
+      codes = cmTokenize(code[0], ",");
     }
     if (codes.empty()) {
       codes.push_back(arch_name);
@@ -220,7 +203,7 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
     cmSystemTools::ReplaceString(entry, "]", "");
     cmSystemTools::ReplaceString(entry, "\"", "");
 
-    std::vector<std::string> codes = cmSystemTools::tokenize(entry, ",");
+    std::vector<std::string> codes = cmTokenize(entry, ",");
     if (codes.size() >= 2) {
       auto gencode_arch = cm::cbegin(codes);
       for (auto ci = gencode_arch + 1; ci != cm::cend(codes); ++ci) {
@@ -269,8 +252,8 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
     }
 
     if (keyValue[1].front() == '\'' && keyValue[1].back() == '\'') {
-      keyValue[1] =
-        keyValue[1].substr(1, std::max(0, cm::isize(keyValue[1]) - 2));
+      keyValue[1] = keyValue[1].substr(
+        1, std::max(std::string::size_type(0), keyValue[1].length() - 2));
     }
 
     if (keyValue[0] == "level") {
@@ -325,9 +308,9 @@ void cmVisualStudioGeneratorOptions::ParseFinish()
     //  "rtSingleThreadedDLL", "10", /libs:dll
     //  "rtSingleThreadedDebug", "5", /dbglibs /libs:static
     //  "rtSingleThreadedDebugDLL", "11", /dbglibs /libs:dll
-    std::string rl = "rtMultiThreaded";
-    rl += this->FortranRuntimeDebug ? "Debug" : "";
-    rl += this->FortranRuntimeDLL ? "DLL" : "";
+    std::string rl =
+      cmStrCat("rtMultiThreaded", this->FortranRuntimeDebug ? "Debug" : "",
+               this->FortranRuntimeDLL ? "DLL" : "");
     this->FlagMap["RuntimeLibrary"] = rl;
   }
 
@@ -429,7 +412,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   if (this->Defines.empty()) {
     return;
   }
-  const char* tag = "PreprocessorDefinitions";
+  std::string tag = "PreprocessorDefinitions";
   if (lang == "CUDA") {
     tag = "Defines";
   }
@@ -471,7 +454,7 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     return;
   }
 
-  const char* tag = "AdditionalIncludeDirectories";
+  std::string tag = "AdditionalIncludeDirectories";
   if (lang == "CUDA") {
     tag = "Include";
   } else if (lang == "ASM_MASM" || lang == "ASM_NASM") {
@@ -526,6 +509,6 @@ void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
       sep = ";";
     }
 
-    this->OutputFlag(fout, indent, m.first.c_str(), oss.str());
+    this->OutputFlag(fout, indent, m.first, oss.str());
   }
 }

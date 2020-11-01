@@ -4,6 +4,7 @@
 
 #include <sstream>
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #if defined(_MSC_VER)
@@ -42,8 +43,7 @@ static bool LogErrorsAsMessages;
       if (LogErrorsAsMessages) {                                              \
         std::ostringstream _hresult_oss;                                      \
         _hresult_oss.flags(std::ios::hex);                                    \
-        _hresult_oss << context << " failed HRESULT, hr = 0x" << hr           \
-                     << std::endl;                                            \
+        _hresult_oss << context << " failed HRESULT, hr = 0x" << hr << '\n';  \
         _hresult_oss.flags(std::ios::dec);                                    \
         _hresult_oss << __FILE__ << "(" << __LINE__ << ")";                   \
         cmSystemTools::Message(_hresult_oss.str());                           \
@@ -61,7 +61,8 @@ HRESULT InstanceCallMacro(IDispatch* vsIDE, const std::string& macro,
 
   if (0 != vsIDE) {
     DISPID dispid = (DISPID)-1;
-    OLECHAR* name = L"ExecuteCommand";
+    wchar_t execute_command[] = L"ExecuteCommand";
+    OLECHAR* name = execute_command;
 
     hr =
       vsIDE->GetIDsOfNames(IID_NULL, &name, 1, LOCALE_USER_DEFAULT, &dispid);
@@ -96,31 +97,37 @@ HRESULT InstanceCallMacro(IDispatch* vsIDE, const std::string& macro,
                          DISPATCH_METHOD, &params, &result, &excep, &arg);
 
       std::ostringstream oss;
-      oss << std::endl;
-      oss << "Invoke(ExecuteCommand)" << std::endl;
-      oss << "  Macro: " << macro << std::endl;
-      oss << "  Args: " << args << std::endl;
+      /* clang-format off */
+      oss << "\nInvoke(ExecuteCommand)\n"
+             "  Macro: " << macro << "\n"
+             "  Args: " << args << '\n';
+      /* clang-format on */
 
       if (DISP_E_EXCEPTION == hr) {
-        oss << "DISP_E_EXCEPTION EXCEPINFO:" << excep.wCode << std::endl;
-        oss << "  wCode: " << excep.wCode << std::endl;
-        oss << "  wReserved: " << excep.wReserved << std::endl;
+        /* clang-format off */
+        oss << "DISP_E_EXCEPTION EXCEPINFO:" << excep.wCode << "\n"
+               "  wCode: " << excep.wCode << "\n"
+               "  wReserved: " << excep.wReserved << '\n';
+        /* clang-format on */
         if (excep.bstrSource) {
           oss << "  bstrSource: " << (const char*)(_bstr_t)excep.bstrSource
-              << std::endl;
+              << '\n';
         }
         if (excep.bstrDescription) {
           oss << "  bstrDescription: "
-              << (const char*)(_bstr_t)excep.bstrDescription << std::endl;
+              << (const char*)(_bstr_t)excep.bstrDescription << '\n';
         }
         if (excep.bstrHelpFile) {
           oss << "  bstrHelpFile: " << (const char*)(_bstr_t)excep.bstrHelpFile
-              << std::endl;
+              << '\n';
         }
-        oss << "  dwHelpContext: " << excep.dwHelpContext << std::endl;
-        oss << "  pvReserved: " << excep.pvReserved << std::endl;
-        oss << "  pfnDeferredFillIn: " << excep.pfnDeferredFillIn << std::endl;
-        oss << "  scode: " << excep.scode << std::endl;
+        /* clang-format off */
+        oss << "  dwHelpContext: " << excep.dwHelpContext << "\n"
+               "  pvReserved: " << excep.pvReserved << "\n"
+               "  pfnDeferredFillIn: "
+            << reinterpret_cast<void*>(excep.pfnDeferredFillIn) << "\n"
+               "  scode: " << excep.scode << '\n';
+        /* clang-format on */
       }
 
       std::string exstr(oss.str());
@@ -140,7 +147,8 @@ HRESULT GetSolutionObject(IDispatch* vsIDE, IDispatchPtr& vsSolution)
 
   if (0 != vsIDE) {
     DISPID dispid = (DISPID)-1;
-    OLECHAR* name = L"Solution";
+    wchar_t solution[] = L"Solution";
+    OLECHAR* name = solution;
 
     hr =
       vsIDE->GetIDsOfNames(IID_NULL, &name, 1, LOCALE_USER_DEFAULT, &dispid);
@@ -183,7 +191,8 @@ HRESULT GetSolutionFullName(IDispatch* vsSolution, std::string& fullName)
 
   if (0 != vsSolution) {
     DISPID dispid = (DISPID)-1;
-    OLECHAR* name = L"FullName";
+    wchar_t full_name[] = L"FullName";
+    OLECHAR* name = full_name;
 
     hr = vsSolution->GetIDsOfNames(IID_NULL, &name, 1, LOCALE_USER_DEFAULT,
                                    &dispid);
@@ -324,8 +333,7 @@ HRESULT FindVisualStudioInstances(const std::string& slnFile,
   if (SUCCEEDED(hr)) {
     std::map<std::string, IUnknownPtr>::iterator it;
     for (it = mrot.begin(); it != mrot.end(); ++it) {
-      if (cmSystemTools::StringStartsWith(it->first.c_str(),
-                                          "!VisualStudio.DTE.")) {
+      if (cmHasLiteralPrefix(it->first, "!VisualStudio.DTE.")) {
         IDispatchPtr disp(it->second);
         if (disp != (IDispatch*)0) {
           std::string slnName;

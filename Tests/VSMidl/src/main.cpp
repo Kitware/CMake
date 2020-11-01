@@ -1,6 +1,7 @@
+#include <test_i.c>
+
 #include <stdio.h>
 #include <test.h>
-#include <test_i.c>
 
 int main(int argc, char** argv)
 {

@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+project(CheckOBJCCompilerFlag OBJC)
+include(CheckOBJCCompilerFlag)
+check_objc_compiler_flag(-DFOO HAS_COMPILER_FLAG)
+if(NOT HAS_COMPILER_FLAG)
+  message(SEND_ERROR "Test fail: HAS_COMPILER_FLAG: ${COMPILER_FLAG}")
+endif()

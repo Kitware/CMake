@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,6 +51,9 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
 
+bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
+                      char *addr, long *port);
+
 /*
  * Check if a connection seems to be alive.
  */
@@ -74,11 +77,6 @@ void Curl_sndbufset(curl_socket_t sockfd);
 void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd);
 void Curl_persistconninfo(struct connectdata *conn);
 int Curl_closesocket(struct connectdata *conn, curl_socket_t sock);
-
-/*
- * Get presentation format IP address and port from a sockaddr.
- */
-bool Curl_getaddressinfo(struct sockaddr *sa, char *addr, long *port);
 
 /*
  * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -107,11 +105,9 @@ struct Curl_sockaddr_ex {
  *
  */
 CURLcode Curl_socket(struct connectdata *conn,
-                     const Curl_addrinfo *ai,
+                     const struct Curl_addrinfo *ai,
                      struct Curl_sockaddr_ex *addr,
                      curl_socket_t *sockfd);
-
-void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd);
 
 /*
  * Curl_conncontrol() marks the end of a connection/stream. The 'closeit'

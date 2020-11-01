@@ -24,8 +24,7 @@ cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator(cmake* cm)
 std::string cmGlobalMSYSMakefileGenerator::FindMinGW(
   std::string const& makeloc)
 {
-  std::string fstab = makeloc;
-  fstab += "/../etc/fstab";
+  std::string fstab = cmStrCat(makeloc, "/../etc/fstab");
   cmsys::ifstream fin(fstab.c_str());
   std::string path;
   std::string mount;
@@ -34,8 +33,7 @@ std::string cmGlobalMSYSMakefileGenerator::FindMinGW(
     fin >> path;
     fin >> mount;
     if (mount == "/mingw") {
-      mingwBin = path;
-      mingwBin += "/bin";
+      mingwBin = cmStrCat(path, "/bin");
     }
   }
   return mingwBin;
@@ -69,9 +67,9 @@ void cmGlobalMSYSMakefileGenerator::EnableLanguage(
     rc = trc;
   }
   mf->AddDefinition("MSYS", "1");
-  mf->AddDefinition("CMAKE_GENERATOR_CC", gcc.c_str());
-  mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx.c_str());
-  mf->AddDefinition("CMAKE_GENERATOR_RC", rc.c_str());
+  mf->AddDefinition("CMAKE_GENERATOR_CC", gcc);
+  mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx);
+  mf->AddDefinition("CMAKE_GENERATOR_RC", rc);
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 
   if (!mf->IsSet("CMAKE_AR") && !this->CMakeInstance->GetIsInTryCompile() &&

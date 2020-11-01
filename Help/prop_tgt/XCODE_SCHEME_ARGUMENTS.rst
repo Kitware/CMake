@@ -1,6 +1,8 @@
 XCODE_SCHEME_ARGUMENTS
 ----------------------
 
+.. versionadded:: 3.13
+
 Specify command line arguments that should be added to the Arguments
 section of the generated Xcode scheme.
 

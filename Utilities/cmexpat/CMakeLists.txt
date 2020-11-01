@@ -17,7 +17,6 @@ include_directories(
   )
 
 add_library(cmexpat STATIC
-  lib/loadlibrary.c
   lib/xmlparse.c
   lib/xmlrole.c
   lib/xmltok.c

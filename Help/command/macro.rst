@@ -42,10 +42,14 @@ can be invoked through any of
   foo()
   Foo()
   FOO()
+  cmake_language(CALL foo)
 
 and so on. However, it is strongly recommended to stay with the
 case chosen in the macro definition.  Typically macros use
 all-lowercase names.
+
+The :command:`cmake_language(CALL ...)` command can also be used to
+invoke the macro.
 
 Arguments
 ^^^^^^^^^
@@ -90,6 +94,12 @@ consequence that a :command:`return()` in a macro body does not
 just terminate execution of the macro; rather, control is returned
 from the scope of the macro call.  To avoid confusion, it is recommended
 to avoid :command:`return()` in macros altogether.
+
+Unlike a function, the :variable:`CMAKE_CURRENT_FUNCTION`,
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_DIR`,
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_FILE`,
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_LINE` variables are not
+set for a macro.
 
 .. _`Argument Caveats`:
 

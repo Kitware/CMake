@@ -4,6 +4,10 @@
 
 #include <utility>
 
+#include <cm/memory>
+
+#include "cmStringAlgorithms.h"
+
 class cmSourceGroupInternals
 {
 public:
@@ -14,19 +18,15 @@ cmSourceGroup::cmSourceGroup(std::string name, const char* regex,
                              const char* parentName)
   : Name(std::move(name))
 {
-  this->Internal = new cmSourceGroupInternals;
+  this->Internal = cm::make_unique<cmSourceGroupInternals>();
   this->SetGroupRegex(regex);
   if (parentName) {
-    this->FullName = parentName;
-    this->FullName += "\\";
+    this->FullName = cmStrCat(parentName, '\\');
   }
   this->FullName += this->Name;
 }
 
-cmSourceGroup::~cmSourceGroup()
-{
-  delete this->Internal;
-}
+cmSourceGroup::~cmSourceGroup() = default;
 
 cmSourceGroup::cmSourceGroup(cmSourceGroup const& r)
 {
@@ -35,7 +35,7 @@ cmSourceGroup::cmSourceGroup(cmSourceGroup const& r)
   this->GroupRegex = r.GroupRegex;
   this->GroupFiles = r.GroupFiles;
   this->SourceFiles = r.SourceFiles;
-  this->Internal = new cmSourceGroupInternals(*r.Internal);
+  this->Internal = cm::make_unique<cmSourceGroupInternals>(*r.Internal);
 }
 
 cmSourceGroup& cmSourceGroup::operator=(cmSourceGroup const& r)

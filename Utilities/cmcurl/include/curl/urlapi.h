@@ -1,5 +1,5 @@
-#ifndef __CURL_URLAPI_H
-#define __CURL_URLAPI_H
+#ifndef CURLINC_URLAPI_H
+#define CURLINC_URLAPI_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,8 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
+#include "curl.h"
 
 #ifdef  __cplusplus
 extern "C" {
@@ -58,7 +60,8 @@ typedef enum {
   CURLUPART_PORT,
   CURLUPART_PATH,
   CURLUPART_QUERY,
-  CURLUPART_FRAGMENT
+  CURLUPART_FRAGMENT,
+  CURLUPART_ZONEID /* added in 7.65.0 */
 } CURLUPart;
 
 #define CURLU_DEFAULT_PORT (1<<0)       /* return default port number */
@@ -74,6 +77,8 @@ typedef enum {
 #define CURLU_URLENCODE (1<<7)          /* URL encode on set */
 #define CURLU_APPENDQUERY (1<<8)        /* append a form style part */
 #define CURLU_GUESS_SCHEME (1<<9)       /* legacy curl-style guessing */
+#define CURLU_NO_AUTHORITY (1<<10)      /* Allow empty authority when the
+                                           scheme is unknown. */
 
 typedef struct Curl_URL CURLU;
 
@@ -117,4 +122,4 @@ CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,
 } /* end of extern "C" */
 #endif
 
-#endif
+#endif /* CURLINC_URLAPI_H */

@@ -1,0 +1,4 @@
+initial-cache.txt: CMAKE_SOURCE_DIR: .*/Tests/RunCMake/CommandLine
+initial-cache.txt: CMAKE_BINARY_DIR: .*/Tests/RunCMake/CommandLine/C_basic_fullpath-build
+CMakeLists.txt: INITIAL_SOURCE_DIR: .*/Tests/RunCMake/CommandLine
+CMakeLists.txt: INITIAL_BINARY_DIR: .*/Tests/RunCMake/CommandLine/C_basic_fullpath-build

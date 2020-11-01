@@ -31,6 +31,16 @@ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
   set(_ANDROID_HOST_EXT "")
 elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   set(_ANDROID_HOST_EXT ".exe")
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Android")
+  # Natively compiling on an Android host doesn't use the NDK cross-compilation
+  # tools.
+  macro(__android_determine_compiler lang)
+    # Do nothing
+  endmacro()
+  if(NOT CMAKE_CXX_COMPILER_NAMES)
+    set(CMAKE_CXX_COMPILER_NAMES c++)
+  endif()
+  return()
 else()
   message(FATAL_ERROR "Android: Builds hosted on '${CMAKE_HOST_SYSTEM_NAME}' not supported.")
 endif()
@@ -40,7 +50,6 @@ if(CMAKE_ANDROID_NDK)
 elseif(CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
   include(Platform/Android/Determine-Compiler-Standalone)
 else()
-  set(_ANDROID_TOOL_NDK_TOOLCHAIN_HOST_TAG "")
   set(_ANDROID_TOOL_NDK_TOOLCHAIN_VERSION "")
   set(_ANDROID_TOOL_C_COMPILER "")
   set(_ANDROID_TOOL_C_TOOLCHAIN_MACHINE "")
@@ -65,7 +74,6 @@ macro(__android_determine_compiler lang)
 
     # Save the Android-specific information in CMake${lang}Compiler.cmake.
     set(CMAKE_${lang}_COMPILER_CUSTOM_CODE "
-set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG \"${_ANDROID_TOOL_NDK_TOOLCHAIN_HOST_TAG}\")
 set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION \"${_ANDROID_TOOL_NDK_TOOLCHAIN_VERSION}\")
 set(CMAKE_${lang}_ANDROID_TOOLCHAIN_MACHINE \"${_ANDROID_TOOL_${lang}_TOOLCHAIN_MACHINE}\")
 set(CMAKE_${lang}_ANDROID_TOOLCHAIN_VERSION \"${_ANDROID_TOOL_${lang}_TOOLCHAIN_VERSION}\")

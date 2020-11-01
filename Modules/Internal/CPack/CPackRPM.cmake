@@ -844,8 +844,8 @@ function(cpack_rpm_generate_package)
     endif()
   endif()
 
-  if(NOT CPACK_RPM_PACKAGE_URL AND CMAKE_PROJECT_HOMEPAGE_URL)
-    set(CPACK_RPM_PACKAGE_URL "${CMAKE_PROJECT_HOMEPAGE_URL}")
+  if(NOT CPACK_RPM_PACKAGE_URL AND CPACK_PACKAGE_HOMEPAGE_URL)
+    set(CPACK_RPM_PACKAGE_URL "${CPACK_PACKAGE_HOMEPAGE_URL}")
   endif()
 
   # CPACK_RPM_PACKAGE_NAME (mandatory)
@@ -1099,16 +1099,18 @@ function(cpack_rpm_generate_package)
 
   # CPACK_RPM_POST_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE)
   # CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE)
-  # May be used to embed a post (un)installation script in the spec file.
+  # CPACK_RPM_POST_TRANS_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_TRANS_SCRIPT_FILE)
+  # May be used to embed a post installation/uninstallation/transaction script in the spec file.
   # The referred script file(s) will be read and directly
-  # put after the %post or %postun section
+  # put after the %post or %postun or %posttrans section
   # ----------------------------------------------------------------
   # CPACK_RPM_PRE_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE)
   # CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE)
-  # May be used to embed a pre (un)installation script in the spec file.
+  # CPACK_RPM_PRE_TRANS_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_TRANS_SCRIPT_FILE)
+  # May be used to embed a pre installation/uninstallation/transaction script in the spec file.
   # The referred script file(s) will be read and directly
-  # put after the %pre or %preun section
-  foreach(RPM_SCRIPT_FILE_TYPE_ "INSTALL" "UNINSTALL")
+  # put after the %pre or %preun or %pretrans section
+  foreach(RPM_SCRIPT_FILE_TYPE_ "INSTALL" "UNINSTALL" "TRANS")
     foreach(RPM_SCRIPT_FILE_TIME_ "PRE" "POST")
       set("CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_READ_FILE"
         "${CPACK_RPM_${RPM_SCRIPT_FILE_TIME_}_${RPM_SCRIPT_FILE_TYPE_}_SCRIPT_FILE}")
@@ -1727,11 +1729,17 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
 \@RPM_SYMLINK_POSTINSTALL\@
 \@CPACK_RPM_SPEC_POSTINSTALL\@
 
+%posttrans
+\@CPACK_RPM_SPEC_POSTTRANS\@
+
 %postun
 \@CPACK_RPM_SPEC_POSTUNINSTALL\@
 
 %pre
 \@CPACK_RPM_SPEC_PREINSTALL\@
+
+%pretrans
+\@CPACK_RPM_SPEC_PRETRANS\@
 
 %preun
 \@CPACK_RPM_SPEC_PREUNINSTALL\@

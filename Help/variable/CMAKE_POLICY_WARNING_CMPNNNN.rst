@@ -23,6 +23,12 @@ warn by default:
   policy :policy:`CMP0082`.
 * ``CMAKE_POLICY_WARNING_CMP0089`` controls the warning for
   policy :policy:`CMP0089`.
+* ``CMAKE_POLICY_WARNING_CMP0102`` controls the warning for
+  policy :policy:`CMP0102`.
+* ``CMAKE_POLICY_WARNING_CMP0112`` controls the warning for
+  policy :policy:`CMP0112`.
+* ``CMAKE_POLICY_WARNING_CMP0116`` controls the warning for
+  policy :policy:`CMP0116`.
 
 This variable should not be set by a project in CMake code.  Project
 developers running CMake may set this variable in their cache to

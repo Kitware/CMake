@@ -1,13 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGeneratedFileStream_h
-#define cmGeneratedFileStream_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_codecvt.hxx"
-#include "cmsys/FStream.hxx"
 #include <string>
+
+#include "cmsys/FStream.hxx"
+
+#include "cm_codecvt.hxx"
 
 // This is the first base class of cmGeneratedFileStream.  It will be
 // created before and destroyed after the ofstream portion and can
@@ -41,6 +42,9 @@ protected:
   // The name of the final destination file for the output.
   std::string Name;
 
+  // The extension of the temporary file.
+  std::string TempExt;
+
   // The name of the temporary file.
   std::string TempName;
 
@@ -72,8 +76,8 @@ class cmGeneratedFileStream
   , public cmsys::ofstream
 {
 public:
-  typedef cmsys::ofstream Stream;
-  typedef codecvt::Encoding Encoding;
+  using Stream = cmsys::ofstream;
+  using Encoding = codecvt::Encoding;
 
   /**
    * This constructor prepares a default stream.  The open method must
@@ -136,6 +140,20 @@ public:
    * the output file to be changed during the use of cmGeneratedFileStream.
    */
   void SetName(const std::string& fname);
-};
 
-#endif
+  /**
+   * Set set a custom temporary file extension used with 'Open'.
+   * This does not work if the file was opened by the constructor.
+   */
+  void SetTempExt(std::string const& ext);
+
+  /**
+   * Writes the given string directly to the file without changing the
+   * encoding.
+   */
+  void WriteRaw(std::string const& data);
+
+private:
+  // The original locale of the stream (performs no encoding conversion).
+  std::locale OriginalLocale;
+};

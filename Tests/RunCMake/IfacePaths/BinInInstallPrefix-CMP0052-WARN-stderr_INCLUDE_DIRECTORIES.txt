@@ -6,15 +6,15 @@ CMake Warning \(dev\) in CMakeLists.txt:
 
   Directory:
 
-      ".*Tests/RunCMake/IfacePaths_INCLUDE_DIRECTORIES/prefix/BinInInstallPrefix-CMP0052-WARN-build/foo"
+      ".*Tests/RunCMake/IfacePaths_INCDIRS/prefix/BinInInstallPrefix-CMP0052-WARN-build/foo"
 
   in INTERFACE_INCLUDE_DIRECTORIES of target "testTarget" is a subdirectory
   of the install directory:
 
-      ".*Tests/RunCMake/IfacePaths_INCLUDE_DIRECTORIES/prefix"
+      ".*Tests/RunCMake/IfacePaths_INCDIRS/prefix"
 
   however it is also a subdirectory of the build tree:
 
-      ".*Tests/RunCMake/IfacePaths_INCLUDE_DIRECTORIES/prefix/BinInInstallPrefix-CMP0052-WARN-build"
+      ".*Tests/RunCMake/IfacePaths_INCDIRS/prefix/BinInInstallPrefix-CMP0052-WARN-build"
 
 This warning is for project developers.  Use -Wno-dev to suppress it.

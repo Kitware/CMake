@@ -38,6 +38,8 @@
  **
  ****************************************************************************/
 
+#include "calwidget.h"
+
 #include <QCalendarWidget>
 #include <QCheckBox>
 #include <QComboBox>
@@ -46,8 +48,6 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QTextCharFormat>
-
-#include "calwidget.h"
 
 #include "ui_calwidget.h"
 #ifdef UI_CALWIDGET_H

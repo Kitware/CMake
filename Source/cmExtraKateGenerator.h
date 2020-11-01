@@ -1,13 +1,12 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmExtraKateGenerator_h
-#define cmExtraKateGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmExternalMakefileProjectGenerator.h"
-
 #include <string>
+
+#include "cmExternalMakefileProjectGenerator.h"
 
 class cmGeneratedFileStream;
 class cmLocalGenerator;
@@ -25,16 +24,16 @@ public:
   void Generate() override;
 
 private:
-  void CreateKateProjectFile(const cmLocalGenerator* lg) const;
-  void CreateDummyKateProjectFile(const cmLocalGenerator* lg) const;
-  void WriteTargets(const cmLocalGenerator* lg,
+  void CreateKateProjectFile(const cmLocalGenerator& lg) const;
+  void CreateDummyKateProjectFile(const cmLocalGenerator& lg) const;
+  void WriteTargets(const cmLocalGenerator& lg,
                     cmGeneratedFileStream& fout) const;
   void AppendTarget(cmGeneratedFileStream& fout, const std::string& target,
                     const std::string& make, const std::string& makeArgs,
                     const std::string& path,
                     const std::string& homeOutputDir) const;
 
-  std::string GenerateFilesString(const cmLocalGenerator* lg) const;
+  std::string GenerateFilesString(const cmLocalGenerator& lg) const;
   std::string GetPathBasename(const std::string& path) const;
   std::string GenerateProjectName(const std::string& name,
                                   const std::string& type,
@@ -43,5 +42,3 @@ private:
   std::string ProjectName;
   bool UseNinja;
 };
-
-#endif

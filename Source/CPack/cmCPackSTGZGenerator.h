@@ -1,23 +1,22 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackSTGZGenerator_h
-#define cmCPackSTGZGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCPackGenerator.h"
-#include "cmCPackTGZGenerator.h"
-
 #include <iosfwd>
+
+#include "cmCPackArchiveGenerator.h"
+#include "cmCPackGenerator.h"
 
 /** \class cmCPackSTGZGenerator
  * \brief A generator for Self extractable TGZ files
  *
  */
-class cmCPackSTGZGenerator : public cmCPackTGZGenerator
+class cmCPackSTGZGenerator : public cmCPackArchiveGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackSTGZGenerator, cmCPackTGZGenerator);
+  cmCPackTypeMacro(cmCPackSTGZGenerator, cmCPackArchiveGenerator);
 
   /**
    * Construct generator
@@ -29,7 +28,4 @@ protected:
   int PackageFiles() override;
   int InitializeInternal() override;
   int GenerateHeader(std::ostream* os) override;
-  const char* GetOutputExtension() override { return ".sh"; }
 };
-
-#endif

@@ -1,6 +1,8 @@
 AUTOMOC_COMPILER_PREDEFINES
 ---------------------------
 
+.. versionadded:: 3.10
+
 Boolean value used by :prop_tgt:`AUTOMOC` to determine if the
 compiler pre definitions file ``moc_predefs.h`` should be generated.
 

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 project(TestFindBoost CXX)
 include(CTest)
 
+set(Boost_NO_BOOST_CMAKE ON)
 find_package(Boost REQUIRED COMPONENTS filesystem thread
                    OPTIONAL_COMPONENTS program_options foobar)
 

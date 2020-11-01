@@ -2,15 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmEnableTestingCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
-class cmExecutionStatus;
-
-// we do this in the final pass so that we now the subdirs have all
-// been defined
-bool cmEnableTestingCommand::InitialPass(std::vector<std::string> const&,
-                                         cmExecutionStatus&)
+bool cmEnableTestingCommand(std::vector<std::string> const&,
+                            cmExecutionStatus& status)
 {
-  this->Makefile->AddDefinition("CMAKE_TESTING_ENABLED", "1");
+  status.GetMakefile().AddDefinition("CMAKE_TESTING_ENABLED", "1");
   return true;
 }

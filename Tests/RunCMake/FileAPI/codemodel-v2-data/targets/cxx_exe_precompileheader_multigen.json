@@ -1,0 +1,206 @@
+{
+  "compileGroups": [
+    {
+      "language": "CXX",
+      "sourcePaths": [
+        ".*cmake_pch(_[^.]+)?(\\.hxx)?\\.cxx$"
+      ],
+      "includes": null,
+      "defines": null,
+      "precompileHeaders": [
+        {
+          "header": ".*empty\\.h$",
+          "backtrace": [
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": 21,
+              "command": "target_precompile_headers",
+              "hasParent": true
+            },
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": null,
+              "command": null,
+              "hasParent": false
+            }
+          ]
+        }
+      ],
+      "compileCommandFragments": [
+        {
+          "fragment": "TargetCompileOptions",
+          "backtrace": [
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": 17,
+              "command": "target_compile_options",
+              "hasParent": true
+            },
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": null,
+              "command": null,
+              "hasParent": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "language": "CXX",
+      "sourcePaths": [
+        "^empty\\.cxx$"
+      ],
+      "includes": null,
+      "defines": null,
+      "precompileHeaders": [
+        {
+          "header": ".*empty\\.h$",
+          "backtrace": [
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": 21,
+              "command": "target_precompile_headers",
+              "hasParent": true
+            },
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": null,
+              "command": null,
+              "hasParent": false
+            }
+          ]
+        }
+      ],
+      "compileCommandFragments": [
+        {
+          "fragment": "TargetCompileOptions",
+          "backtrace": [
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": 17,
+              "command": "target_compile_options",
+              "hasParent": true
+            },
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": null,
+              "command": null,
+              "hasParent": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": ".*cmake_pch(_[^.]+)?(\\.hxx)?\\.cxx$",
+      "isGenerated": null,
+      "sourceGroupName": "Source Files",
+      "compileGroupLanguage": "CXX",
+      "backtrace": [
+        {
+          "file": "^cxx/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": "^empty\\.cxx$",
+      "isGenerated": null,
+      "sourceGroupName": "Source Files",
+      "compileGroupLanguage": "CXX",
+      "backtrace": [
+        {
+          "file": "^cxx/CMakeLists\\.txt$",
+          "line": 5,
+          "command": "add_executable",
+          "hasParent": true
+        },
+        {
+          "file": "^cxx/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": ".*/Debug/cmake_pch(_[^.]+)?\\.hxx$",
+      "isGenerated": null,
+      "sourceGroupName": "Precompile Header File",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^cxx/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": ".*/Release/cmake_pch(_[^.]+)?\\.hxx$",
+      "isGenerated": null,
+      "sourceGroupName": "Precompile Header File",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^cxx/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": ".*/MinSizeRel/cmake_pch(_[^.]+)?\\.hxx$",
+      "isGenerated": null,
+      "sourceGroupName": "Precompile Header File",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^cxx/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": ".*/RelWithDebInfo/cmake_pch(_[^.]+)?\\.hxx$",
+      "isGenerated": null,
+      "sourceGroupName": "Precompile Header File",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^cxx/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    }
+  ],
+  "sourceGroups": [
+    {
+      "name": "Source Files",
+      "sourcePaths": [
+        ".*cmake_pch(_[^.]+)?(\\.hxx)?\\.cxx$",
+        "^empty\\.cxx$"
+      ]
+    },
+    {
+      "name": "Precompile Header File",
+      "sourcePaths": [
+        ".*/Debug/cmake_pch(_[^.]+)?\\.hxx$",
+        ".*/Release/cmake_pch(_[^.]+)?\\.hxx$",
+        ".*/MinSizeRel/cmake_pch(_[^.]+)?\\.hxx$",
+        ".*/RelWithDebInfo/cmake_pch(_[^.]+)?\\.hxx$"
+      ]
+    }
+  ]
+}

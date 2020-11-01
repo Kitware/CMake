@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFortranParser_h
-#define cmFortranParser_h
+#pragma once
 
 #if !defined(cmFortranLexer_cxx) && !defined(cmFortranParser_cxx)
 #  include "cmConfigure.h" // IWYU pragma: keep
@@ -12,10 +11,10 @@
 #  include <vector>
 #endif
 
-#include <stddef.h> /* size_t */
+#include <cstddef> /* size_t */
 
 /* Forward declare parser object type.  */
-typedef struct cmFortranParser_s cmFortranParser;
+using cmFortranParser = struct cmFortranParser_s;
 
 /* Functions to enter/exit #include'd files in order.  */
 bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname);
@@ -180,6 +179,4 @@ struct cmFortranParser_s
   // Information about the parsed source.
   cmFortranSourceInfo& Info;
 };
-#endif
-
 #endif

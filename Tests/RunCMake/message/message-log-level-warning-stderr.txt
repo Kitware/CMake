@@ -1,0 +1,9 @@
+^CMake Deprecation Warning at.*/Tests/RunCMake/message/message-all-loglevels\.cmake:2 \(message\):
+  Deprecation warning
++
+CMake Warning \(dev\) at.*/Tests/RunCMake/message/message-all-loglevels\.cmake:3 \(message\):
+  Author warning message
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+CMake Warning at.*/Tests/RunCMake/message/message-all-loglevels\.cmake:4 \(message\):
+  Warning message$

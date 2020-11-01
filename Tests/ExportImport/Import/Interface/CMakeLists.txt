@@ -12,6 +12,9 @@ set_property(TARGET define_iface PROPERTY
 add_executable(headeronlytest_bld headeronlytest.cpp)
 target_link_libraries(headeronlytest_bld bld::headeronly)
 
+add_executable(headergentest_bld headergentest.cpp)
+target_link_libraries(headergentest_bld bld::headergen)
+
 set_property(TARGET bld::sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES define_iface)
 
 add_executable(interfacetest_bld interfacetest.cpp)
@@ -93,10 +96,24 @@ target_compile_definitions(source_target_test_exp PRIVATE USE_FROM_INSTALL_DIR)
 add_executable(headeronlytest_exp headeronlytest.cpp)
 target_link_libraries(headeronlytest_exp exp::headeronly)
 
+add_executable(headergentest_exp headergentest.cpp)
+target_link_libraries(headergentest_exp exp::headergen)
+
 set_property(TARGET exp::sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES define_iface)
 
 add_executable(interfacetest_exp interfacetest.cpp)
 target_link_libraries(interfacetest_exp exp::sharediface)
+
+if(NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;$]" OR CMAKE_GENERATOR STREQUAL "Xcode")
+  add_executable(pch_iface_test_bld pch_iface_test.cpp)
+  target_link_libraries(pch_iface_test_bld bld::pch_iface)
+  add_executable(pch_iface_test_exp pch_iface_test.cpp)
+  target_link_libraries(pch_iface_test_exp exp::pch_iface)
+  if(CMAKE_CXX_COMPILE_OPTIONS_USE_PCH)
+    target_compile_definitions(pch_iface_test_bld PRIVATE EXPECT_PCH)
+    target_compile_definitions(pch_iface_test_exp PRIVATE EXPECT_PCH)
+  endif()
+endif()
 
 do_try_compile(exp)
 

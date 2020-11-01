@@ -1,0 +1,90 @@
+{
+    "name": "link_imported_static_exe",
+    "id": "^link_imported_static_exe::@ba7eb709d0b48779c6c8$",
+    "directorySource": "^imported$",
+    "projectName": "Imported",
+    "type": "EXECUTABLE",
+    "isGeneratorProvided": null,
+    "sources": [
+        {
+            "path": "^empty\\.c$",
+            "isGenerated": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "C",
+            "backtrace": [
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": 19,
+                    "command": "add_executable",
+                    "hasParent": true
+                },
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "C",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ],
+            "includes": null,
+            "defines": null,
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^imported/CMakeLists\\.txt$",
+            "line": 19,
+            "command": "add_executable",
+            "hasParent": true
+        },
+        {
+            "file": "^imported/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^link_imported_static_exe(\\.exe)?$",
+    "artifacts": [
+        {
+            "path": "^imported/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?link_imported_static_exe(\\.exe)?$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^imported/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?link_imported_static_exe\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^imported$",
+    "source": "^imported$",
+    "install": null,
+    "link": {
+        "language": "C",
+        "lto": null,
+        "commandFragments": null
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        }
+    ]
+}

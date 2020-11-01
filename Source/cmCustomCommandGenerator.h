@@ -1,41 +1,47 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCustomCommandGenerator_h
-#define cmCustomCommandGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmCustomCommandLines.h"
 
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include "cmCustomCommandLines.h"
+#include "cmListFileCache.h"
+
 class cmCustomCommand;
-class cmGeneratorExpression;
 class cmLocalGenerator;
 
 class cmCustomCommandGenerator
 {
-  cmCustomCommand const& CC;
+  cmCustomCommand const* CC;
   std::string Config;
   cmLocalGenerator* LG;
   bool OldStyle;
   bool MakeVars;
-  cmGeneratorExpression* GE;
   cmCustomCommandLines CommandLines;
+  std::vector<std::vector<std::string>> EmulatorsWithArguments;
+  std::vector<std::string> Byproducts;
   std::vector<std::string> Depends;
   std::string WorkingDirectory;
+  std::set<BT<std::pair<std::string, bool>>> Utilities;
 
-  const char* GetCrossCompilingEmulator(unsigned int c) const;
+  void FillEmulatorsWithArguments();
+  std::vector<std::string> GetCrossCompilingEmulator(unsigned int c) const;
   const char* GetArgv0Location(unsigned int c) const;
 
 public:
   cmCustomCommandGenerator(cmCustomCommand const& cc, std::string config,
-                           cmLocalGenerator* lg);
-  ~cmCustomCommandGenerator();
+                           cmLocalGenerator* lg, bool transformDepfile = true);
   cmCustomCommandGenerator(const cmCustomCommandGenerator&) = delete;
+  cmCustomCommandGenerator(cmCustomCommandGenerator&&) = default;
   cmCustomCommandGenerator& operator=(const cmCustomCommandGenerator&) =
     delete;
-  cmCustomCommand const& GetCC() const { return this->CC; }
+  cmCustomCommandGenerator& operator=(cmCustomCommandGenerator&&) = default;
+  cmCustomCommand const& GetCC() const { return *(this->CC); }
   unsigned int GetNumberOfCommands() const;
   std::string GetCommand(unsigned int c) const;
   void AppendArguments(unsigned int c, std::string& cmd) const;
@@ -44,7 +50,8 @@ public:
   std::vector<std::string> const& GetOutputs() const;
   std::vector<std::string> const& GetByproducts() const;
   std::vector<std::string> const& GetDepends() const;
+  std::set<BT<std::pair<std::string, bool>>> const& GetUtilities() const;
   bool HasOnlyEmptyCommandLines() const;
+  std::string GetFullDepfile() const;
+  std::string GetInternalDepfile() const;
 };
-
-#endif

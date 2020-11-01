@@ -130,14 +130,9 @@ foreach(component ${OpenGL_FIND_COMPONENTS})
   set(OPENGL_USE_${_COMPONENT} 1)
 endforeach()
 
-if (CYGWIN)
-  find_path(OPENGL_INCLUDE_DIR GL/gl.h )
-  list(APPEND _OpenGL_REQUIRED_VARS OPENGL_INCLUDE_DIR)
+set(_OpenGL_CACHE_VARS)
 
-  find_library(OPENGL_gl_LIBRARY opengl32 )
-  find_library(OPENGL_glu_LIBRARY glu32 )
-
-elseif (WIN32)
+if (WIN32)
 
   if(BORLAND)
     set (OPENGL_gl_LIBRARY import32 CACHE STRING "OpenGL library for win32")
@@ -147,6 +142,10 @@ elseif (WIN32)
     set (OPENGL_glu_LIBRARY glu32 CACHE STRING "GLU library for win32")
   endif()
 
+  list(APPEND _OpenGL_CACHE_VARS
+    OPENGL_gl_LIBRARY
+    OPENGL_glu_LIBRARY
+    )
 elseif (APPLE)
   # The OpenGL.framework provides both gl and glu
   find_library(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL library for OS X")
@@ -155,6 +154,11 @@ elseif (APPLE)
   find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OS X")
   list(APPEND _OpenGL_REQUIRED_VARS OPENGL_INCLUDE_DIR)
 
+  list(APPEND _OpenGL_CACHE_VARS
+    OPENGL_INCLUDE_DIR
+    OPENGL_gl_LIBRARY
+    OPENGL_glu_LIBRARY
+    )
 else()
   if (CMAKE_SYSTEM_NAME MATCHES "HP-UX")
     # Handle HP-UX cases where we only want to find OpenGL in either hpux64
@@ -194,6 +198,12 @@ else()
     /usr/openwin/share/include
     /opt/graphics/OpenGL/include
   )
+  list(APPEND _OpenGL_CACHE_VARS
+    OPENGL_INCLUDE_DIR
+    OPENGL_GLX_INCLUDE_DIR
+    OPENGL_EGL_INCLUDE_DIR
+    OPENGL_xmesa_INCLUDE_DIR
+    )
 
   # Search for the GLVND libraries.  We do this regardless of COMPONENTS; we'll
   # take into account the COMPONENTS logic later.
@@ -221,6 +231,13 @@ else()
           /usr/openwin/lib
           /usr/shlib
   )
+
+  list(APPEND _OpenGL_CACHE_VARS
+    OPENGL_opengl_LIBRARY
+    OPENGL_glx_LIBRARY
+    OPENGL_egl_LIBRARY
+    OPENGL_glu_LIBRARY
+    )
 
   set(_OpenGL_GL_POLICY_WARN 0)
   if(NOT DEFINED OpenGL_GL_PREFERENCE)
@@ -268,6 +285,7 @@ else()
             ${_OPENGL_LIB_PATH}
       PATH_SUFFIXES libglvnd
       )
+    list(APPEND _OpenGL_CACHE_VARS OPENGL_gl_LIBRARY)
   endif()
 
   if(_OpenGL_GL_POLICY_WARN AND OPENGL_gl_LIBRARY AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
@@ -394,8 +412,15 @@ if(OPENGL_EGL_INCLUDE_DIR)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+if (CMAKE_FIND_PACKAGE_NAME STREQUAL "GLU")
+  # FindGLU include()'s this module. It's an old pattern, but rather than
+  # trying to suppress this from outside the module (which is then sensitive to
+  # the contents, detect the case in this module and suppress it explicitly.
+  set(FPHSA_NAME_MISMATCHED 1)
+endif ()
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL REQUIRED_VARS ${_OpenGL_REQUIRED_VARS}
                                   HANDLE_COMPONENTS)
+unset(FPHSA_NAME_MISMATCHED)
 unset(_OpenGL_REQUIRED_VARS)
 
 # OpenGL:: targets
@@ -532,14 +557,5 @@ set(OPENGL_LIBRARY ${OPENGL_LIBRARIES})
 # This deprecated setting is for backward compatibility with CMake1.4
 set(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 
-mark_as_advanced(
-  OPENGL_INCLUDE_DIR
-  OPENGL_xmesa_INCLUDE_DIR
-  OPENGL_egl_LIBRARY
-  OPENGL_glu_LIBRARY
-  OPENGL_glx_LIBRARY
-  OPENGL_gl_LIBRARY
-  OPENGL_opengl_LIBRARY
-  OPENGL_EGL_INCLUDE_DIR
-  OPENGL_GLX_INCLUDE_DIR
-)
+mark_as_advanced(${_OpenGL_CACHE_VARS})
+unset(_OpenGL_CACHE_VARS)

@@ -1,16 +1,17 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackNSISGenerator_h
-#define cmCPackNSISGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-
-#include "cmCPackGenerator.h"
 
 #include <iosfwd>
 #include <set>
 #include <string>
 #include <vector>
+
+#include <cm/string_view>
+
+#include "cmCPackGenerator.h"
 
 class cmCPackComponent;
 class cmCPackComponentGroup;
@@ -75,8 +76,7 @@ protected:
 
   /// Returns the custom install directory if available for the specified
   /// component, otherwise $INSTDIR is returned.
-  std::string CustomComponentInstallDirectory(
-    const std::string& componentName);
+  std::string CustomComponentInstallDirectory(cm::string_view componentName);
 
   /// Translations any newlines found in the string into \\r\\n, so that the
   /// resulting string can be used within NSIS.
@@ -84,5 +84,3 @@ protected:
 
   bool Nsis64;
 };
-
-#endif

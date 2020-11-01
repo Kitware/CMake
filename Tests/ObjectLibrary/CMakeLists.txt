@@ -73,3 +73,5 @@ add_executable(UseABstaticObjs $<TARGET_OBJECTS:UseABstatic>)
 target_link_libraries(UseABstaticObjs ABstatic)
 
 add_subdirectory(ExportLanguages)
+
+add_subdirectory(Transitive)

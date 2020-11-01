@@ -1,16 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmInstallDirectoryGenerator_h
-#define cmInstallDirectoryGenerator_h
-
-#include "cmInstallGenerator.h"
-#include "cmScriptGenerator.h"
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>
 #include <vector>
+
+#include "cmInstallGenerator.h"
+#include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
 
@@ -21,12 +20,13 @@ class cmInstallDirectoryGenerator : public cmInstallGenerator
 {
 public:
   cmInstallDirectoryGenerator(std::vector<std::string> const& dirs,
-                              const char* dest, const char* file_permissions,
-                              const char* dir_permissions,
+                              std::string const& dest,
+                              std::string file_permissions,
+                              std::string dir_permissions,
                               std::vector<std::string> const& configurations,
-                              const char* component, MessageLevel message,
-                              bool exclude_from_all, const char* literal_args,
-                              bool optional = false);
+                              std::string const& component,
+                              MessageLevel message, bool exclude_from_all,
+                              std::string literal_args, bool optional = false);
   ~cmInstallDirectoryGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;
@@ -41,11 +41,9 @@ protected:
                                Indent indent,
                                std::vector<std::string> const& dirs);
   cmLocalGenerator* LocalGenerator;
-  std::vector<std::string> Directories;
-  std::string FilePermissions;
-  std::string DirPermissions;
-  std::string LiteralArguments;
-  bool Optional;
+  std::vector<std::string> const Directories;
+  std::string const FilePermissions;
+  std::string const DirPermissions;
+  std::string const LiteralArguments;
+  bool const Optional;
 };
-
-#endif

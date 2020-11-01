@@ -2,19 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportTryCompileFileGenerator.h"
 
+#include <map>
+#include <memory>
+#include <utility>
+
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
-#include "cmSystemTools.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
-
-#include <map>
-#include <memory> // IWYU pragma: keep
-#include <utility>
 
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
   cmGlobalGenerator* gg, const std::vector<std::string>& targets,
@@ -58,7 +59,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
   const std::string& propName, cmGeneratorTarget const* tgt,
   std::string const& language, std::set<cmGeneratorTarget const*>& emitted)
 {
-  const char* prop = tgt->GetProperty(propName);
+  cmProp prop = tgt->GetProperty(propName);
   if (!prop) {
     return std::string();
   }
@@ -67,16 +68,16 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 
   cmGeneratorExpressionDAGChecker dagChecker(tgt, propName, nullptr, nullptr);
 
-  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*prop);
 
   cmTarget dummyHead("try_compile_dummy_exe", cmStateEnums::EXECUTABLE,
-                     cmTarget::VisibilityNormal, tgt->Target->GetMakefile());
+                     cmTarget::VisibilityNormal, tgt->Target->GetMakefile(),
+                     cmTarget::PerConfig::Yes);
 
   cmGeneratorTarget gDummyHead(&dummyHead, tgt->GetLocalGenerator());
 
-  std::string result =
-    cge->Evaluate(tgt->GetLocalGenerator(), this->Config, false, &gDummyHead,
-                  tgt, &dagChecker, language);
+  std::string result = cge->Evaluate(tgt->GetLocalGenerator(), this->Config,
+                                     &gDummyHead, &dagChecker, tgt, language);
 
   const std::set<cmGeneratorTarget const*>& allTargets =
     cge->GetAllTargetsSeen();
@@ -95,16 +96,15 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
   std::vector<std::string> props = target->GetPropertyKeys();
   for (std::string const& p : props) {
 
-    properties[p] = target->GetProperty(p);
+    properties[p] = *target->GetProperty(p);
 
-    if (p.find("IMPORTED_LINK_INTERFACE_LIBRARIES") == 0 ||
-        p.find("IMPORTED_LINK_DEPENDENT_LIBRARIES") == 0 ||
-        p.find("INTERFACE_LINK_LIBRARIES") == 0) {
+    if (cmHasLiteralPrefix(p, "IMPORTED_LINK_INTERFACE_LIBRARIES") ||
+        cmHasLiteralPrefix(p, "IMPORTED_LINK_DEPENDENT_LIBRARIES") ||
+        cmHasLiteralPrefix(p, "INTERFACE_LINK_LIBRARIES")) {
       std::string evalResult =
         this->FindTargets(p, target, std::string(), emitted);
 
-      std::vector<std::string> depends;
-      cmSystemTools::ExpandListArgument(evalResult, depends);
+      std::vector<std::string> depends = cmExpandedList(evalResult);
       for (std::string const& li : depends) {
         cmGeneratorTarget* tgt =
           target->GetLocalGenerator()->FindGeneratorTargetToUse(li);

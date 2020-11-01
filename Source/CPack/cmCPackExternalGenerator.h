@@ -1,13 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackExternalGenerator_h
-#define cmCPackExternalGenerator_h
-
-#include "cmCPackGenerator.h"
-#include "cm_sys_stat.h"
+#pragma once
 
 #include <memory>
 #include <string>
+
+#include "cm_sys_stat.h"
+
+#include "cmCPackGenerator.h"
 
 class cmGlobalGenerator;
 namespace Json {
@@ -85,5 +85,3 @@ private:
 
   std::unique_ptr<cmCPackExternalVersionGenerator> Generator;
 };
-
-#endif

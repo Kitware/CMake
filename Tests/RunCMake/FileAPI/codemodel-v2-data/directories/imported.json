@@ -1,0 +1,18 @@
+{
+    "source": "^imported$",
+    "build": "^imported$",
+    "parentSource": "^\\.$",
+    "childSources": null,
+    "targetIds": [
+        "^ALL_BUILD::@ba7eb709d0b48779c6c8$",
+        "^ZERO_CHECK::@ba7eb709d0b48779c6c8$",
+        "^link_imported_exe::@ba7eb709d0b48779c6c8$",
+        "^link_imported_interface_exe::@ba7eb709d0b48779c6c8$",
+        "^link_imported_object_exe::@ba7eb709d0b48779c6c8$",
+        "^link_imported_shared_exe::@ba7eb709d0b48779c6c8$",
+        "^link_imported_static_exe::@ba7eb709d0b48779c6c8$"
+    ],
+    "projectName": "Imported",
+    "minimumCMakeVersion": "3.12",
+    "hasInstallRule": null
+}

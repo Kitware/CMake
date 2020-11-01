@@ -6,23 +6,30 @@
 #include <set>
 #include <utility>
 
+#include <cmext/algorithm>
+
+#include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
+static void GetIncludes(cmMakefile& mf, const std::string& arg,
+                        std::vector<std::string>& incs);
+static void NormalizeInclude(cmMakefile& mf, std::string& inc);
 
-// cmIncludeDirectoryCommand
-bool cmIncludeDirectoryCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmIncludeDirectoryCommand(std::vector<std::string> const& args,
+                               cmExecutionStatus& status)
 {
   if (args.empty()) {
     return true;
   }
 
-  std::vector<std::string>::const_iterator i = args.begin();
+  cmMakefile& mf = status.GetMakefile();
 
-  bool before = this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_BEFORE");
+  auto i = args.begin();
+
+  bool before = mf.IsOn("CMAKE_INCLUDE_DIRECTORIES_BEFORE");
   bool system = false;
 
   if ((*i) == "BEFORE") {
@@ -43,20 +50,18 @@ bool cmIncludeDirectoryCommand::InitialPass(
       continue;
     }
     if (i->empty()) {
-      this->SetError("given empty-string as include directory.");
+      status.SetError("given empty-string as include directory.");
       return false;
     }
 
     std::vector<std::string> includes;
 
-    this->GetIncludes(*i, includes);
+    GetIncludes(mf, *i, includes);
 
     if (before) {
-      beforeIncludes.insert(beforeIncludes.end(), includes.begin(),
-                            includes.end());
+      cm::append(beforeIncludes, includes);
     } else {
-      afterIncludes.insert(afterIncludes.end(), includes.begin(),
-                           includes.end());
+      cm::append(afterIncludes, includes);
     }
     if (system) {
       systemIncludes.insert(includes.begin(), includes.end());
@@ -64,9 +69,9 @@ bool cmIncludeDirectoryCommand::InitialPass(
   }
   std::reverse(beforeIncludes.begin(), beforeIncludes.end());
 
-  this->Makefile->AddIncludeDirectories(afterIncludes);
-  this->Makefile->AddIncludeDirectories(beforeIncludes, before);
-  this->Makefile->AddSystemIncludeDirectories(systemIncludes);
+  mf.AddIncludeDirectories(afterIncludes);
+  mf.AddIncludeDirectories(beforeIncludes, before);
+  mf.AddSystemIncludeDirectories(systemIncludes);
 
   return true;
 }
@@ -83,8 +88,8 @@ bool cmIncludeDirectoryCommand::InitialPass(
 // output from a program and passing it into a command the cleanup doesn't
 // always happen
 //
-void cmIncludeDirectoryCommand::GetIncludes(const std::string& arg,
-                                            std::vector<std::string>& incs)
+static void GetIncludes(cmMakefile& mf, const std::string& arg,
+                        std::vector<std::string>& incs)
 {
   // break apart any line feed arguments
   std::string::size_type pos = 0;
@@ -92,7 +97,7 @@ void cmIncludeDirectoryCommand::GetIncludes(const std::string& arg,
   while ((pos = arg.find('\n', lastPos)) != std::string::npos) {
     if (pos) {
       std::string inc = arg.substr(lastPos, pos);
-      this->NormalizeInclude(inc);
+      NormalizeInclude(mf, inc);
       if (!inc.empty()) {
         incs.push_back(std::move(inc));
       }
@@ -100,13 +105,13 @@ void cmIncludeDirectoryCommand::GetIncludes(const std::string& arg,
     lastPos = pos + 1;
   }
   std::string inc = arg.substr(lastPos);
-  this->NormalizeInclude(inc);
+  NormalizeInclude(mf, inc);
   if (!inc.empty()) {
     incs.push_back(std::move(inc));
   }
 }
 
-void cmIncludeDirectoryCommand::NormalizeInclude(std::string& inc)
+static void NormalizeInclude(cmMakefile& mf, std::string& inc)
 {
   std::string::size_type b = inc.find_first_not_of(" \r");
   std::string::size_type e = inc.find_last_not_of(" \r");
@@ -117,16 +122,11 @@ void cmIncludeDirectoryCommand::NormalizeInclude(std::string& inc)
     return;
   }
 
-  if (!cmSystemTools::IsOff(inc)) {
+  if (!cmIsOff(inc)) {
     cmSystemTools::ConvertToUnixSlashes(inc);
-
-    if (!cmSystemTools::FileIsFullPath(inc)) {
-      if (!cmGeneratorExpression::StartsWithGeneratorExpression(inc)) {
-        std::string tmp = this->Makefile->GetCurrentSourceDirectory();
-        tmp += "/";
-        tmp += inc;
-        inc = tmp;
-      }
+    if (!cmSystemTools::FileIsFullPath(inc) &&
+        !cmGeneratorExpression::StartsWithGeneratorExpression(inc)) {
+      inc = cmStrCat(mf.GetCurrentSourceDirectory(), '/', inc);
     }
   }
 }

@@ -1,0 +1,29 @@
+^CMake Warning \(dev\) at CMP0109-Common.cmake:4 \(find_program\):
+  Policy CMP0109 is not set: find_program\(\) requires permission to execute
+  but not to read.  Run "cmake --help-policy CMP0109" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  The file
+
+    .*/Tests/RunCMake/find_program/CMP0109-WARN-build/ExeNoRead
+
+  is executable but not readable.  CMake is ignoring it for compatibility.
+Call Stack \(most recent call first\):
+  CMP0109-WARN.cmake:1 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) at CMP0109-Common.cmake:6 \(find_program\):
+  Policy CMP0109 is not set: find_program\(\) requires permission to execute
+  but not to read.  Run "cmake --help-policy CMP0109" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  The file
+
+    .*/Tests/RunCMake/find_program/CMP0109-WARN-build/ReadNoExe
+
+  is readable but not executable.  CMake is using it for compatibility.
+Call Stack \(most recent call first\):
+  CMP0109-WARN.cmake:1 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

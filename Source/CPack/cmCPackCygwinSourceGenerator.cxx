@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackCygwinSourceGenerator.h"
 
+#include "cmsys/SystemTools.hxx"
+
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -9,17 +11,17 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include "cmsys/SystemTools.hxx"
-
 // Includes needed for implementation of RenameFile.  This is not in
 // system tools because it is not implemented robustly enough to move
 // files across directories.
 #ifdef _WIN32
-#  include "cm_sys_stat.h"
 #  include <windows.h>
+
+#  include "cm_sys_stat.h"
 #endif
 
 cmCPackCygwinSourceGenerator::cmCPackCygwinSourceGenerator()
+  : cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2, "paxr", ".tar.bz2")
 {
 }
 
@@ -37,15 +39,11 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
 {
   // Create a tar file of the sources
   std::string packageDirFileName =
-    this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  packageDirFileName += ".tar.bz2";
+    cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), ".tar.bz2");
   packageFileNames[0] = packageDirFileName;
   std::string output;
-  // skip one parent up to the cmCPackTarBZip2Generator
-  // to create tar.bz2 file with the list of source
-  // files
-  this->Compress = cmArchiveWrite::CompressBZip2;
-  if (!this->cmCPackTarBZip2Generator::PackageFiles()) {
+  // create tar.bz2 file with the list of source files
+  if (!this->cmCPackArchiveGenerator::PackageFiles()) {
     return 0;
   }
   // Now create a tar file that contains the above .tar.bz2 file
@@ -94,8 +92,8 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
                     << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "]\n");
     return 0;
   }
-  std::string outerTarFile = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  outerTarFile += "-";
+  std::string outerTarFile =
+    cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), '-');
   const char* patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
   if (!patch) {
     cmCPackLogger(cmCPackLog::LOG_WARNING,
@@ -106,19 +104,18 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   outerTarFile += patch;
   outerTarFile += "-src.tar.bz2";
   std::string tmpDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  std::string buildScript = tmpDir;
-  buildScript += "/";
-  buildScript += cmSystemTools::GetFilenameName(
-    this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT"));
-  std::string patchFile = tmpDir;
-  patchFile += "/";
-  patchFile +=
-    cmSystemTools::GetFilenameName(this->GetOption("CPACK_CYGWIN_PATCH_FILE"));
+  std::string buildScript =
+    cmStrCat(tmpDir, '/',
+             cmSystemTools::GetFilenameName(
+               this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT")));
+  std::string patchFile =
+    cmStrCat(tmpDir, '/',
+             cmSystemTools::GetFilenameName(
+               this->GetOption("CPACK_CYGWIN_PATCH_FILE")));
 
   std::string file = cmSystemTools::GetFilenameName(compressOutFile);
-  std::string sourceTar = cmSystemTools::GetFilenamePath(compressOutFile);
-  sourceTar += "/";
-  sourceTar += file;
+  std::string sourceTar =
+    cmStrCat(cmSystemTools::GetFilenamePath(compressOutFile), '/', file);
   /* reset list of file to be packaged */
   files.clear();
   // a source release in cygwin should have the build script used
@@ -132,7 +129,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   packageFileNames[0] = outerTarFile;
   /* update the toplevel dir */
   toplevel = tmpDir;
-  if (!this->cmCPackTarBZip2Generator::PackageFiles()) {
+  if (!this->cmCPackArchiveGenerator::PackageFiles()) {
     return 0;
   }
   return 1;
@@ -140,8 +137,8 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
 
 const char* cmCPackCygwinSourceGenerator::GetPackagingInstallPrefix()
 {
-  this->InstallPrefix = "/";
-  this->InstallPrefix += this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  this->InstallPrefix =
+    cmStrCat('/', this->GetOption("CPACK_PACKAGE_FILE_NAME"));
   return this->InstallPrefix.c_str();
 }
 

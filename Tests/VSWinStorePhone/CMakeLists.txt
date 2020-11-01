@@ -9,6 +9,7 @@ elseif(MSVC_VERSION GREATER 1600)
 endif()
 
 add_subdirectory(WinRT)
+add_subdirectory(CxxDLL)
 
 set (APP_MANIFEST_NAME Package.appxmanifest)
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsPhone")
@@ -113,7 +114,7 @@ set_property(SOURCE ${ASSET_FILES} PROPERTY VS_DEPLOYMENT_LOCATION "Assets")
 set_property(SOURCE ${STRING_FILES} PROPERTY VS_TOOL_OVERRIDE "PRIResource")
 set_property(SOURCE ${DEBUG_CONTENT_FILES} PROPERTY VS_DEPLOYMENT_CONTENT $<CONFIG:Debug>)
 set_property(SOURCE ${RELEASE_CONTENT_FILES} PROPERTY
-  VS_DEPLOYMENT_CONTENT $<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>)
+  VS_DEPLOYMENT_CONTENT $<CONFIG:Release,RelWithDebInfo,MinSizeRel>)
 
 set_property(SOURCE ${PIXELSHADER_FILES} PROPERTY VS_SHADER_TYPE Pixel)
 set_property(SOURCE ${PIXELSHADER_FILES} PROPERTY VS_SHADER_ENTRYPOINT mainPS)
@@ -126,7 +127,7 @@ set_property(SOURCE ${VERTEXSHADER_FILES} PROPERTY VS_SHADER_ENTRYPOINT mainVS)
 set_property(SOURCE ${VERTEXSHADER_FILES} PROPERTY VS_SHADER_MODEL 4.0_level_9_3)
 set_property(SOURCE ${VERTEXSHADER_FILES} PROPERTY VS_SHADER_FLAGS "/DFLAGS_ADDED")
 set_property(SOURCE ${VERTEXSHADER_FILES} PROPERTY VS_SHADER_OUTPUT_HEADER_FILE "$(OutDir)%(Filename).h")
-
+set_property(SOURCE ${VERTEXSHADER_FILES} PROPERTY VS_SETTINGS "$<$<CONFIG:DEBUG>:SourceProperty1=SourceProperty1Value>")
 
 source_group("Source Files" FILES ${SOURCE_FILES})
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -134,6 +135,11 @@ source_group("Resource Files" FILES ${RESOURCE_FILES})
 
 add_executable(${EXE_NAME} WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 set_property(TARGET ${EXE_NAME} PROPERTY VS_WINRT_COMPONENT TRUE)
+set_property(TARGET ${EXE_NAME} PROPERTY VS_SOURCE_SETTINGS_FXCompile
+  "TargetProperty1=$<$<CONFIG:DEBUG>:TargetProperty1ValueDebug>$<$<CONFIG:RELEASE>:TargetProperty1ValueRelease>")
+
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -Dvcxproj="${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.vcxproj" -P "${CMAKE_CURRENT_SOURCE_DIR}/EnsurePropertiesSet.cmake")
 
 string(SUBSTRING "${CMAKE_SYSTEM_VERSION}" 0, 4, SHORT_VERSION)
 
@@ -151,4 +157,4 @@ if("${SHORT_VERSION}" STREQUAL "10.0")
   set_property(TARGET ${EXE_NAME} PROPERTY VS_SDK_REFERENCES "Microsoft.UniversalCRT.Debug, Version=${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
 endif()
 
-target_link_libraries(${EXE_NAME} d3d11 JusticeLeagueWinRT)
+target_link_libraries(${EXE_NAME} d3d11 JusticeLeagueWinRT CxxDll)

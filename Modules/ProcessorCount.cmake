@@ -168,9 +168,13 @@ function(ProcessorCount var)
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE psrinfo_output)
-      string(REGEX MATCH "([0-9]+) virtual processor" procs "${psrinfo_output}")
-      set(count "${CMAKE_MATCH_1}")
-      #message("ProcessorCount: trying psrinfo -p -v '${ProcessorCount_cmd_prvinfo}'")
+      string(REGEX MATCHALL "has [0-9]+ virtual processor" procs "${psrinfo_output}")
+      set(count "")
+      foreach(proc ${procs})
+        string(REGEX MATCH "has ([0-9]+) virtual" res ${proc})
+        math(EXPR count "${count} + ${CMAKE_MATCH_1}")
+      endforeach()
+      #message("ProcessorCount: trying '${ProcessorCount_cmd_psrinfo}' -p -v")
     else()
       # Sun (systems where uname -X emits "NumCPU" in its output):
       find_program(ProcessorCount_cmd_uname uname)

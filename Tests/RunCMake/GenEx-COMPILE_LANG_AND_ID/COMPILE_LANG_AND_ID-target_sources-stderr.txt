@@ -1,0 +1,8 @@
+CMake Error at COMPILE_LANG_AND_ID-target_sources.cmake:2 \(target_sources\):
+  Error evaluating generator expression:
+
+    \$<COMPILE_LANG_AND_ID>
+
+  \$<COMPILE_LANG_AND_ID> expression requires at least two parameters.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

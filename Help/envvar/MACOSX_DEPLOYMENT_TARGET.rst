@@ -1,6 +1,8 @@
 MACOSX_DEPLOYMENT_TARGET
 ------------------------
 
+.. versionadded:: 3.10
+
 .. include:: ENV_VAR.txt
 
 Specify the minimum version of macOS on which the target binaries are

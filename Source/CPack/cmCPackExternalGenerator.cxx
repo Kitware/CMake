@@ -2,20 +2,22 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackExternalGenerator.h"
 
-#include "cmAlgorithms.h"
-#include "cmCPackComponentGroup.h"
-#include "cmCPackLog.h"
-#include "cmMakefile.h"
-#include "cmSystemTools.h"
-
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
-
-#include "cmsys/FStream.hxx"
-
 #include <map>
 #include <utility>
 #include <vector>
+
+#include <cm/memory>
+
+#include <cm3p/json/value.h>
+#include <cm3p/json/writer.h>
+
+#include "cmsys/FStream.hxx"
+
+#include "cmCPackComponentGroup.h"
+#include "cmCPackLog.h"
+#include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 int cmCPackExternalGenerator::InitializeInternal()
 {
@@ -59,7 +61,7 @@ int cmCPackExternalGenerator::PackageFiles()
   }
 
   const char* packageScript = this->GetOption("CPACK_EXTERNAL_PACKAGE_SCRIPT");
-  if (packageScript && *packageScript) {
+  if (cmNonempty(packageScript)) {
     if (!cmSystemTools::FileIsFullPath(packageScript)) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
@@ -72,6 +74,12 @@ int cmCPackExternalGenerator::PackageFiles()
 
     if (cmSystemTools::GetErrorOccuredFlag() || !res) {
       return 0;
+    }
+
+    const char* builtPackagesStr =
+      this->GetOption("CPACK_EXTERNAL_BUILT_PACKAGES");
+    if (builtPackagesStr) {
+      cmExpandList(builtPackagesStr, this->packageFileNames, false);
     }
   }
 
@@ -148,8 +156,7 @@ int cmCPackExternalGenerator::InstallCMakeProject(
 
 bool cmCPackExternalGenerator::StagingEnabled() const
 {
-  return !cmSystemTools::IsOff(
-    this->GetOption("CPACK_EXTERNAL_ENABLE_STAGING"));
+  return !cmIsOff(this->GetOption("CPACK_EXTERNAL_ENABLE_STAGING"));
 }
 
 cmCPackExternalGenerator::cmCPackExternalVersionGenerator::
@@ -204,11 +211,10 @@ int cmCPackExternalGenerator::cmCPackExternalVersionGenerator::WriteToJSON(
 
   const char* defaultDirectoryPermissions =
     this->Parent->GetOption("CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
-  if (defaultDirectoryPermissions && *defaultDirectoryPermissions) {
+  if (cmNonempty(defaultDirectoryPermissions)) {
     root["defaultDirectoryPermissions"] = defaultDirectoryPermissions;
   }
-  if (cmSystemTools::IsInternallyOn(
-        this->Parent->GetOption("CPACK_SET_DESTDIR"))) {
+  if (cmIsInternallyOn(this->Parent->GetOption("CPACK_SET_DESTDIR"))) {
     root["setDestdir"] = true;
     root["packagingInstallPrefix"] =
       this->Parent->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
@@ -216,8 +222,7 @@ int cmCPackExternalGenerator::cmCPackExternalVersionGenerator::WriteToJSON(
     root["setDestdir"] = false;
   }
 
-  root["stripFiles"] =
-    !cmSystemTools::IsOff(this->Parent->GetOption("CPACK_STRIP_FILES"));
+  root["stripFiles"] = !cmIsOff(this->Parent->GetOption("CPACK_STRIP_FILES"));
   root["warnOnAbsoluteInstallDestination"] =
     this->Parent->IsOn("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION");
   root["errorOnAbsoluteInstallDestination"] =

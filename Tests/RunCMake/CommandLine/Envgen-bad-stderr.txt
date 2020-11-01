@@ -1,0 +1,5 @@
+^CMake Error: No generator specified for -G
+CMake Error: CMAKE_GENERATOR was set but the specified generator doesn't exist. Using CMake default.
+
+Generators.*
+\* (Unix Makefiles|Visual Studio).*

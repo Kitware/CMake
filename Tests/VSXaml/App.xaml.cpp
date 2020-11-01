@@ -3,9 +3,8 @@
 // Implementation of the App class.
 //
 
-#include "pch.h"
-
 #include "MainPage.xaml.h"
+#include "pch.h"
 
 using namespace VSXaml;
 

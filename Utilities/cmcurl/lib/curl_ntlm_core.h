@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,6 +29,7 @@
 /* If NSS is the first available SSL backend (see order in curl_ntlm_core.c)
    then it must be initialized to be used by NTLM. */
 #if !defined(USE_OPENSSL) && \
+    !defined(USE_WOLFSSL) && \
     !defined(USE_GNUTLS_NETTLE) && \
     !defined(USE_GNUTLS) && \
     defined(USE_NSS)
@@ -37,20 +38,21 @@
 
 #if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) || defined(USE_WOLFSSL)
+#ifdef USE_WOLFSSL
+#  include <wolfssl/options.h>
+#endif
 #  include <openssl/ssl.h>
 #endif
 
 /* Define USE_NTRESPONSES in order to make the type-3 message include
  * the NT response message. */
-#if !defined(USE_OPENSSL) || !defined(OPENSSL_NO_MD4)
 #define USE_NTRESPONSES
-#endif
 
 /* Define USE_NTLM2SESSION in order to make the type-3 message include the
-   NTLM2Session response message, requires USE_NTRESPONSES defined to 1 and a
-   Crypto engine that we have curl_ssl_md5sum() for. */
-#if defined(USE_NTRESPONSES) && !defined(USE_WIN32_CRYPTO)
+   NTLM2Session response message, requires USE_NTRESPONSES defined to 1 and
+   MD5 support */
+#if defined(USE_NTRESPONSES) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 #define USE_NTLM2SESSION
 #endif
 

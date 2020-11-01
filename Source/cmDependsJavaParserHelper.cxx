@@ -2,16 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDependsJavaParserHelper.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <utility>
+
+#include <cm/memory>
+#include <cm/string_view>
+
+#include "cmsys/FStream.hxx"
+
 #include "cmDependsJavaLexer.h"
 #include "cmSystemTools.h"
-
-#include "cm_string_view.hxx"
-#include "cmsys/FStream.hxx"
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <utility>
 
 int cmDependsJava_yyparse(yyscan_t yyscanner);
 
@@ -167,10 +170,11 @@ void cmDependsJavaParserHelper::AllocateParserType(
     return;
   }
   this->UnionsAvailable++;
-  pt->str = new char[len + 1];
+  auto up = cm::make_unique<char[]>(len + 1);
+  pt->str = up.get();
   strncpy(pt->str, str, len);
   pt->str[len] = 0;
-  this->Allocates.push_back(pt->str);
+  this->Allocates.push_back(std::move(up));
 }
 
 void cmDependsJavaParserHelper::StartClass(const char* cls)
@@ -273,10 +277,7 @@ int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
 
 void cmDependsJavaParserHelper::CleanupParser()
 {
-  for (char* allocate : this->Allocates) {
-    delete[] allocate;
-  }
-  this->Allocates.erase(this->Allocates.begin(), this->Allocates.end());
+  this->Allocates.clear();
 }
 
 int cmDependsJavaParserHelper::LexInput(char* buf, int maxlen)

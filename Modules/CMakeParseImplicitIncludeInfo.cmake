@@ -7,7 +7,7 @@
 # for compilers that report them that way.  on success we return the
 # list of dirs in id_var and set state_var to the 'done' state.
 function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
-  # clear variables we append to (avoids possible polution from parent scopes)
+  # clear variables we append to (avoids possible pollution from parent scopes)
   unset(rv)
   set(log "")
 
@@ -15,9 +15,9 @@ function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
   if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "Cray" AND
      "${line}" MATCHES "^/" AND "${line}" MATCHES "/ccfe |/ftnfe " AND
      "${line}" MATCHES " -isystem| -I")
-    string(REGEX MATCHALL " (-I ?|-isystem )([^ ]*)" incs "${line}")
+    string(REGEX MATCHALL " (-I ?|-isystem )(\"[^\"]+\"|[^ \"]+)" incs "${line}")
     foreach(inc IN LISTS incs)
-      string(REGEX REPLACE " (-I ?|-isystem )([^ ]*)" "\\2" idir "${inc}")
+      string(REGEX REPLACE " (-I ?|-isystem )(\"[^\"]+\"|[^ \"]+)" "\\2" idir "${inc}")
       list(APPEND rv "${idir}")
     endforeach()
     if(rv)
@@ -162,12 +162,12 @@ endfunction()
 function(cmake_parse_implicit_include_info text lang dir_var log_var state_var)
   set(state start)    # values: start, loading, done
 
-  # clear variables we append to (avoids possible polution from parent scopes)
+  # clear variables we append to (avoids possible pollution from parent scopes)
   set(implicit_dirs_tmp)
   set(log "")
 
   # go through each line of output...
-  string(REGEX REPLACE "\r?\n" ";" output_lines "${text}")
+  string(REGEX REPLACE "\r*\n" ";" output_lines "${text}")
   foreach(line IN LISTS output_lines)
     if(state STREQUAL start)
       string(FIND "${line}" "#include \"...\" search starts here:" rv)

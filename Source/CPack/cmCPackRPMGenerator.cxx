@@ -3,7 +3,7 @@
 #include "cmCPackRPMGenerator.h"
 
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
 #include <map>
 #include <ostream>
 #include <utility>
@@ -12,6 +12,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmCPackRPMGenerator::cmCPackRPMGenerator() = default;
@@ -21,7 +22,7 @@ cmCPackRPMGenerator::~cmCPackRPMGenerator() = default;
 int cmCPackRPMGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
-  if (cmSystemTools::IsOff(this->GetOption("CPACK_SET_DESTDIR"))) {
+  if (cmIsOff(this->GetOption("CPACK_SET_DESTDIR"))) {
     this->SetOption("CPACK_SET_DESTDIR", "I_ON");
   }
   /* Replace space in CPACK_PACKAGE_NAME in order to avoid
@@ -81,8 +82,7 @@ int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
   // Tell CPackRPM.cmake the name of the component NAME.
   this->SetOption("CPACK_RPM_PACKAGE_COMPONENT", packageName.c_str());
   // Tell CPackRPM.cmake the path where the component is.
-  std::string component_path = "/";
-  component_path += packageName;
+  std::string component_path = cmStrCat('/', packageName);
   this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
                   component_path.c_str());
   if (!this->ReadListFile("Internal/CPack/CPackRPM.cmake")) {
@@ -184,8 +184,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
     // The default behavior is to have one package by component group
     // unless CPACK_COMPONENTS_IGNORE_GROUP is specified.
     if (!ignoreGroup) {
-      std::map<std::string, cmCPackComponentGroup>::iterator mainCompGIt =
-        this->ComponentGroups.end();
+      auto mainCompGIt = this->ComponentGroups.end();
 
       std::map<std::string, cmCPackComponentGroup>::iterator compGIt;
       for (compGIt = this->ComponentGroups.begin();
@@ -206,8 +205,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
         retval &= PackageOnePack(initialTopLevel, compGIt->first);
       }
       // Handle Orphan components (components not belonging to any groups)
-      std::map<std::string, cmCPackComponent>::iterator mainCompIt =
-        this->Components.end();
+      auto mainCompIt = this->Components.end();
       std::map<std::string, cmCPackComponent>::iterator compIt;
       for (compIt = this->Components.begin(); compIt != this->Components.end();
            ++compIt) {
@@ -251,8 +249,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
     // CPACK_COMPONENTS_IGNORE_GROUPS is set
     // We build 1 package per component
     else {
-      std::map<std::string, cmCPackComponent>::iterator mainCompIt =
-        this->Components.end();
+      auto mainCompIt = this->Components.end();
 
       std::map<std::string, cmCPackComponent>::iterator compIt;
       for (compIt = this->Components.begin(); compIt != this->Components.end();
@@ -375,8 +372,7 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne(
 
   if (!compInstDirName.empty()) {
     // Tell CPackRPM.cmake the path where the component is.
-    std::string component_path = "/";
-    component_path += compInstDirName;
+    std::string component_path = cmStrCat('/', compInstDirName);
     this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
                     component_path.c_str());
   }

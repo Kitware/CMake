@@ -1,0 +1,9 @@
+cmake_minimum_required(VERSION 3.10)
+project(MocOnAddFile)
+include("@CMAKE_CURRENT_LIST_DIR@/../AutogenCoreTest.cmake")
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+add_executable(mocOnAddFile main.cpp @additional_project_sources@)
+target_link_libraries(mocOnAddFile ${QT_QTCORE_TARGET})

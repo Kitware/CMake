@@ -25,8 +25,8 @@ or a component GROUP name.
 Here are some CPack DEB generator wiki resources that are here for historic
 reasons and are no longer maintained but may still prove useful:
 
- - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/Configuration
- - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators#deb-unix-only
+ - https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/Configuration
+ - https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators#deb-unix-only
 
 List of CPack DEB generator specific variables:
 
@@ -179,16 +179,24 @@ List of CPack DEB generator specific variables:
  * Default   : ``CPACK_PACKAGE_CONTACT``
 
 .. variable:: CPACK_DEBIAN_PACKAGE_DESCRIPTION
-              CPACK_COMPONENT_<COMPONENT>_DESCRIPTION
+              CPACK_DEBIAN_<COMPONENT>_DESCRIPTION
 
  The Debian package description
 
  * Mandatory : YES
  * Default   :
 
-   - :variable:`CPACK_DEBIAN_PACKAGE_DESCRIPTION` if set or
-   - :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
+   - :variable:`CPACK_DEBIAN_<COMPONENT>_DESCRIPTION` (component
+     based installers only) if set, or :variable:`CPACK_DEBIAN_PACKAGE_DESCRIPTION` if set, or
+   - :variable:`CPACK_COMPONENT_<compName>_DESCRIPTION` (component
+     based installers only) if set, or :variable:`CPACK_PACKAGE_DESCRIPTION` if set, or
+   - content of the file specified in :variable:`CPACK_PACKAGE_DESCRIPTION_FILE` if set
 
+ If after that description is not set, :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY` going to be
+ used if set. Otherwise, :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY` will be added as the first
+ line of description as defined in `Debian Policy Manual`_.
+
+.. _Debian Policy Manual: https://www.debian.org/doc/debian-policy/ch-controlfields.html#description
 
 .. variable:: CPACK_DEBIAN_PACKAGE_SECTION
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SECTION
@@ -274,7 +282,7 @@ List of CPack DEB generator specific variables:
    You may need set :variable:`CMAKE_INSTALL_RPATH` to an appropriate value
    if you use this feature, because if you don't ``dpkg-shlibdeps``
    may fail to find your own shared libs.
-   See https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
+   See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 
 .. variable:: CPACK_DEBIAN_PACKAGE_DEBUG
 

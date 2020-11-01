@@ -1,0 +1,13 @@
+CMake Error at malformedInclude.cmake:1:
+  Parse error.  Function missing ending "\)".  End of file reached.
+Call Stack \(most recent call first\):
+  IncludeMalformed.cmake:1 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at IncludeMalformed.cmake:1 \(include\):
+  include could not load requested file:
+
+    malformedInclude.cmake
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

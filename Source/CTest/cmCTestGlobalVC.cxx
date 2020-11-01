@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestGlobalVC.h"
 
+#include <ostream>
+#include <utility>
+
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
-
-#include <ostream>
-#include <utility>
 
 cmCTestGlobalVC::cmCTestGlobalVC(cmCTest* ct, std::ostream& log)
   : cmCTestVC(ct, log)

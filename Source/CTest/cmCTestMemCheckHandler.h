@@ -1,14 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestMemCheckHandler_h
-#define cmCTestMemCheckHandler_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestTestHandler.h"
-
 #include <string>
 #include <vector>
+
+#include "cmCTestTestHandler.h"
 
 class cmMakefile;
 class cmXMLWriter;
@@ -22,7 +21,7 @@ class cmCTestMemCheckHandler : public cmCTestTestHandler
   friend class cmCTestRunTest;
 
 public:
-  typedef cmCTestTestHandler Superclass;
+  using Superclass = cmCTestTestHandler;
 
   void PopulateCustomVectors(cmMakefile* mf) override;
 
@@ -43,8 +42,10 @@ private:
     UNKNOWN = 0,
     VALGRIND,
     PURIFY,
+    DRMEMORY,
     BOUNDS_CHECKER,
     // checkers after here do not use the standard error list
+    CUDA_MEMCHECK,
     ADDRESS_SANITIZER,
     LEAK_SANITIZER,
     THREAD_SANITIZER,
@@ -132,8 +133,12 @@ private:
                              std::vector<int>& results);
   bool ProcessMemCheckValgrindOutput(const std::string& str, std::string& log,
                                      std::vector<int>& results);
+  bool ProcessMemCheckDrMemoryOutput(const std::string& str, std::string& log,
+                                     std::vector<int>& results);
   bool ProcessMemCheckPurifyOutput(const std::string& str, std::string& log,
                                    std::vector<int>& results);
+  bool ProcessMemCheckCudaOutput(const std::string& str, std::string& log,
+                                 std::vector<int>& results);
   bool ProcessMemCheckSanitizerOutput(const std::string& str, std::string& log,
                                       std::vector<int>& results);
   bool ProcessMemCheckBoundsCheckerOutput(const std::string& str,
@@ -142,6 +147,7 @@ private:
 
   void PostProcessTest(cmCTestTestResult& res, int test);
   void PostProcessBoundsCheckerTest(cmCTestTestResult& res, int test);
+  void PostProcessDrMemoryTest(cmCTestTestResult& res, int test);
 
   //! append MemoryTesterOutputFile to the test log
   void AppendMemTesterOutput(cmCTestTestHandler::cmCTestTestResult& res,
@@ -150,5 +156,3 @@ private:
   //! generate the output filename for the given test index
   void TestOutputFileNames(int test, std::vector<std::string>& files);
 };
-
-#endif

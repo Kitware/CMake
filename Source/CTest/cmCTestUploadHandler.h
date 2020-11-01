@@ -1,14 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestUploadHandler_h
-#define cmCTestUploadHandler_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestGenericHandler.h"
-
 #include <set>
 #include <string>
+
+#include "cmCTestGenericHandler.h"
 
 /** \class cmCTestUploadHandler
  * \brief Helper class for CTest
@@ -19,7 +18,7 @@
 class cmCTestUploadHandler : public cmCTestGenericHandler
 {
 public:
-  typedef cmCTestGenericHandler Superclass;
+  using Superclass = cmCTestGenericHandler;
 
   cmCTestUploadHandler();
 
@@ -36,5 +35,3 @@ public:
 private:
   std::set<std::string> Files;
 };
-
-#endif

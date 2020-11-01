@@ -23,7 +23,7 @@ function(check_python case)
   endif()
   file(GLOB index ${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/reply/index-*.json)
   execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} "${RunCMake_SOURCE_DIR}/${case}-check.py" "${index}"
+    COMMAND ${PYTHON_EXECUTABLE} "${RunCMake_SOURCE_DIR}/${case}-check.py" "${index}" "${CMAKE_CXX_COMPILER_ID}"
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output
     ERROR_VARIABLE output
@@ -33,6 +33,10 @@ function(check_python case)
     set(RunCMake_TEST_FAILED "Unexpected index:\n${output}" PARENT_SCOPE)
   endif()
 endfunction()
+
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release\\;MinSizeRel\\;RelWithDebInfo")
+endif()
 
 run_cmake(Nothing)
 run_cmake(Empty)

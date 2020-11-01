@@ -2,19 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddLinkOptionsCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
-class cmExecutionStatus;
-
-bool cmAddLinkOptionsCommand::InitialPass(std::vector<std::string> const& args,
-                                          cmExecutionStatus&)
+bool cmAddLinkOptionsCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status)
 {
-  if (args.empty()) {
-    return true;
-  }
-
+  cmMakefile& mf = status.GetMakefile();
   for (std::string const& i : args) {
-    this->Makefile->AddLinkOption(i);
+    mf.AddLinkOption(i);
   }
   return true;
 }

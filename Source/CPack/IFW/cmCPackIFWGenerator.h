@@ -1,9 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackIFWGenerator_h
-#define cmCPackIFWGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
+
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
@@ -11,11 +15,6 @@
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
-
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
 
 /** \class cmCPackIFWGenerator
  * \brief A generator for Qt Installer Framework tools
@@ -29,12 +28,12 @@ class cmCPackIFWGenerator
 public:
   cmCPackTypeMacro(cmCPackIFWGenerator, cmCPackGenerator);
 
-  typedef std::map<std::string, cmCPackIFWPackage> PackagesMap;
-  typedef std::map<std::string, cmCPackIFWRepository> RepositoriesMap;
-  typedef std::map<std::string, cmCPackComponent> ComponentsMap;
-  typedef std::map<std::string, cmCPackComponentGroup> ComponentGoupsMap;
-  typedef std::map<std::string, cmCPackIFWPackage::DependenceStruct>
-    DependenceMap;
+  using PackagesMap = std::map<std::string, cmCPackIFWPackage>;
+  using RepositoriesMap = std::map<std::string, cmCPackIFWRepository>;
+  using ComponentsMap = std::map<std::string, cmCPackComponent>;
+  using ComponentGoupsMap = std::map<std::string, cmCPackComponentGroup>;
+  using DependenceMap =
+    std::map<std::string, cmCPackIFWPackage::DependenceStruct>;
 
   using cmCPackIFWCommon::GetOption;
   using cmCPackIFWCommon::IsOn;
@@ -152,5 +151,3 @@ private:
   std::vector<std::string> PkgsDirsVector;
   std::vector<std::string> RepoDirsVector;
 };
-
-#endif

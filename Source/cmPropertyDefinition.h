@@ -1,39 +1,31 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmPropertyDefinition_h
-#define cmPropertyDefinition_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmProperty.h"
-
+#include <map>
 #include <string>
+#include <utility>
+
+#include "cmProperty.h"
 
 /** \class cmPropertyDefinition
  * \brief Property meta-information
  *
  * This class contains the following meta-information about property:
- * - Name;
  * - Various documentation strings;
- * - The scope of the property;
  * - If the property is chained.
  */
 class cmPropertyDefinition
 {
 public:
-  /// Define this property
-  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const char* ShortDescription,
-                      const char* FullDescription, bool chained);
-
-  /// Default constructor
-  cmPropertyDefinition() { this->Chained = false; }
+  /// Constructor
+  cmPropertyDefinition(std::string shortDescription,
+                       std::string fullDescription, bool chained);
 
   /// Is the property chained?
   bool IsChained() const { return this->Chained; }
-
-  /// Get the scope
-  cmProperty::ScopeType GetScope() const { return this->Scope; }
 
   /// Get the documentation (short version)
   const std::string& GetShortDescription() const
@@ -47,12 +39,28 @@ public:
     return this->FullDescription;
   }
 
-protected:
-  std::string Name;
+private:
   std::string ShortDescription;
   std::string FullDescription;
-  cmProperty::ScopeType Scope;
   bool Chained;
 };
 
-#endif
+/** \class cmPropertyDefinitionMap
+ * \brief Map property name and scope to their definition
+ */
+class cmPropertyDefinitionMap
+{
+public:
+  // define the property
+  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
+                      const std::string& ShortDescription,
+                      const std::string& FullDescription, bool chain);
+
+  // get the property definition if present, otherwise nullptr
+  cmPropertyDefinition const* GetPropertyDefinition(
+    const std::string& name, cmProperty::ScopeType scope) const;
+
+private:
+  using key_type = std::pair<std::string, cmProperty::ScopeType>;
+  std::map<key_type, cmPropertyDefinition> Map_;
+};

@@ -1,12 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmFileLock.h"
+#include <cerrno> // errno
+#include <cstdio> // SEEK_SET
 
-#include "cmSystemTools.h"
-#include <errno.h> // errno
 #include <fcntl.h>
-#include <stdio.h> // SEEK_SET
 #include <unistd.h>
+
+#include "cmFileLock.h"
+#include "cmSystemTools.h"
 
 cmFileLock::cmFileLock() = default;
 

@@ -18,6 +18,9 @@
  containing :command:`set` commands that use the ``CACHE`` option, not a
  cache-format file.
 
+ References to :variable:`CMAKE_SOURCE_DIR` and :variable:`CMAKE_BINARY_DIR`
+ within the script evaluate to the top-level source and build tree.
+
 ``-D <var>:<type>=<value>, -D <var>=<value>``
  Create or update a CMake ``CACHE`` entry.
 
@@ -55,6 +58,9 @@
  platforms.  A generator is responsible for generating a particular
  build system.  Possible generator names are specified in the
  :manual:`cmake-generators(7)` manual.
+
+ If not specified, CMake checks the :envvar:`CMAKE_GENERATOR` environment
+ variable and otherwise falls back to a builtin default selection.
 
 ``-T <toolset-spec>``
  Toolset specification for the generator, if supported.

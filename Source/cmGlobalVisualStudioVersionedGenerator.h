@@ -1,11 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalVisualStudioVersionedGenerator_h
-#define cmGlobalVisualStudioVersionedGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 
 #include "cmGlobalVisualStudio14Generator.h"
@@ -19,8 +19,8 @@ class cmGlobalVisualStudioVersionedGenerator
   : public cmGlobalVisualStudio14Generator
 {
 public:
-  static cmGlobalGeneratorFactory* NewFactory15();
-  static cmGlobalGeneratorFactory* NewFactory16();
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory15();
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory16();
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
@@ -28,8 +28,14 @@ public:
 
   bool GetVSInstance(std::string& dir) const;
 
+  bool GetVSInstanceVersion(unsigned long long& vsInstanceVersion) const;
+
   bool IsDefaultToolset(const std::string& version) const override;
   std::string GetAuxiliaryToolset() const override;
+
+  bool IsStdOutEncodingSupported() const override;
+
+  const char* GetAndroidApplicationTypeRevision() const override;
 
 protected:
   cmGlobalVisualStudioVersionedGenerator(
@@ -50,7 +56,7 @@ protected:
   // Check for a Win 8 SDK known to the registry or VS installer tool.
   bool IsWin81SDKInstalled() const;
 
-  std::string GetWindows10SDKMaxVersion() const override;
+  std::string GetWindows10SDKMaxVersion(cmMakefile*) const override;
 
   std::string FindMSBuildCommand() override;
   std::string FindDevEnvCommand() override;
@@ -62,4 +68,3 @@ private:
   friend class Factory16;
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
 };
-#endif

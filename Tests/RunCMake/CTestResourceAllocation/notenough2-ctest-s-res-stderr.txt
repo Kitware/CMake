@@ -1,0 +1,11 @@
+^Insufficient resources for test Test1:
+
+  Test requested resources of type 'terminators' which does not exist
+
+Resource spec file:
+
+  [^
+]*/Tests/RunCMake/CTestResourceAllocation/resspec.json
+CMake Error at [^
+]*/Tests/RunCMake/CTestResourceAllocation/notenough2-ctest-s-res/test\.cmake:[0-9]+ \(message\):
+  Tests did not pass$

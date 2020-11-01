@@ -1,14 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmComputeComponentGraph_h
-#define cmComputeComponentGraph_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmGraphAdjacencyList.h"
-
 #include <stack>
 #include <vector>
+
+#include "cmGraphAdjacencyList.h"
 
 /** \class cmComputeComponentGraph
  * \brief Analyze a graph to determine strongly connected components.
@@ -24,12 +23,15 @@ class cmComputeComponentGraph
 {
 public:
   // Represent the graph with an adjacency list.
-  typedef cmGraphNodeList NodeList;
-  typedef cmGraphEdgeList EdgeList;
-  typedef cmGraphAdjacencyList Graph;
+  using NodeList = cmGraphNodeList;
+  using EdgeList = cmGraphEdgeList;
+  using Graph = cmGraphAdjacencyList;
 
   cmComputeComponentGraph(Graph const& input);
   ~cmComputeComponentGraph();
+
+  /** Run the computation.  */
+  void Compute();
 
   /** Get the adjacency list of the component graph.  */
   Graph const& GetComponentGraph() const { return this->ComponentGraph; }
@@ -75,5 +77,3 @@ private:
 
   // Connected components.
 };
-
-#endif

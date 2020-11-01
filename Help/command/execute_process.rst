@@ -21,7 +21,10 @@ Execute one or more child processes.
                   [COMMAND_ECHO <where>]
                   [OUTPUT_STRIP_TRAILING_WHITESPACE]
                   [ERROR_STRIP_TRAILING_WHITESPACE]
-                  [ENCODING <name>])
+                  [ENCODING <name>]
+                  [ECHO_OUTPUT_VARIABLE]
+                  [ECHO_ERROR_VARIABLE]
+                  [COMMAND_ERROR_IS_FATAL <ANY|LAST>])
 
 Runs the given sequence of one or more commands.
 
@@ -80,7 +83,9 @@ Options:
 
 ``COMMAND_ECHO <where>``
  The command being run will be echo'ed to ``<where>`` with ``<where>``
- being set to ``STDERR``|``STDOUT``|``NONE``.
+ being set to one of ``STDERR``, ``STDOUT`` or ``NONE``.
+ See the :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ECHO` variable for a way
+ to control the default behavior when this option is not present.
 
 ``ENCODING <name>``
  On Windows, the encoding that is used to decode output from the process.
@@ -102,6 +107,28 @@ Options:
    Use the UTF-8 codepage. Prior to CMake 3.11.0, only ``UTF8`` was accepted
    for this encoding. In CMake 3.11.0, ``UTF-8`` was added for consistency with
    the `UTF-8 RFC <https://www.ietf.org/rfc/rfc3629>`_ naming convention.
+
+``ECHO_OUTPUT_VARIABLE``, ``ECHO_ERROR_VARIABLE``
+  The standard output or standard error will not be exclusively redirected to
+  the configured variables.
+
+  The output will be duplicated, it will be sent into the configured variables
+  and also on standard output or standard error.
+
+  This is analogous to the ``tee`` Unix command.
+
+``COMMAND_ERROR_IS_FATAL <ANY|LAST>``
+  The option following ``COMMAND_ERROR_IS_FATAL`` determines the behavior when
+  an error is encountered:
+
+    ``ANY``
+    If any of the commands in the list of commands fail, the
+    ``execute_process()`` command halts with an error.
+
+    ``LAST``
+    If the last command in the list of commands fails, the
+    ``execute_process()`` command halts with an error.  Commands earlier in the
+    list will not cause a fatal error.
 
 If more than one ``OUTPUT_*`` or ``ERROR_*`` option is given for the
 same pipe the precedence is not specified.

@@ -1,0 +1,2 @@
+CMake Error at .+/cmake_path/call-cmake_path.cmake:[0-9]+ \(cmake_path\):
+  cmake_path [A-Z_]+ (called with unexpected|must be called with two) arguments.

@@ -3,9 +3,10 @@
 
 #include "cmStringReplaceHelper.h"
 
-#include "cmMakefile.h"
 #include <sstream>
 #include <utility>
+
+#include "cmMakefile.h"
 
 cmStringReplaceHelper::cmStringReplaceHelper(const std::string& regex,
                                              std::string replace_expr,

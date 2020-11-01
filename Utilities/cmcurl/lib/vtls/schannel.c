@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,19 +23,8 @@
  ***************************************************************************/
 
 /*
- * Source file for all SChannel-specific code for the TLS/SSL layer. No code
+ * Source file for all Schannel-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
- *
- */
-
-/*
- * Based upon the PolarSSL implementation in polarssl.c and polarssl.h:
- *   Copyright (C) 2010, 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- *
- * Based upon the CyaSSL implementation in cyassl.c and cyassl.h:
- *   Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
- *
- * Thanks for code and inspiration!
  */
 
 #include "curl_setup.h"
@@ -50,18 +39,20 @@
 
 #include "schannel.h"
 #include "vtls.h"
+#include "strcase.h"
 #include "sendf.h"
 #include "connect.h" /* for the connect timeout */
 #include "strerror.h"
-#include "select.h" /* for the socket readyness */
+#include "select.h" /* for the socket readiness */
 #include "inet_pton.h" /* for IP addr SNI check */
 #include "curl_multibyte.h"
 #include "warnless.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
-#include "system_win32.h"
+#include "multiif.h"
+#include "version_win32.h"
 
- /* The last #include file should be: */
+/* The last #include file should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -179,25 +170,25 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
   long i = ssl_version;
 
   switch(ssl_version_max) {
-    case CURL_SSLVERSION_MAX_NONE:
-    case CURL_SSLVERSION_MAX_DEFAULT:
-      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
-      break;
+  case CURL_SSLVERSION_MAX_NONE:
+  case CURL_SSLVERSION_MAX_DEFAULT:
+    ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+    break;
   }
   for(; i <= (ssl_version_max >> 16); ++i) {
     switch(i) {
-      case CURL_SSLVERSION_TLSv1_0:
-        schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
-        break;
-      case CURL_SSLVERSION_TLSv1_1:
-        schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_1_CLIENT;
-        break;
-      case CURL_SSLVERSION_TLSv1_2:
-        schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_2_CLIENT;
-        break;
-      case CURL_SSLVERSION_TLSv1_3:
-        failf(data, "Schannel: TLS 1.3 is not yet supported");
-        return CURLE_SSL_CONNECT_ERROR;
+    case CURL_SSLVERSION_TLSv1_0:
+      schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_0_CLIENT;
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+      schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_1_CLIENT;
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_2_CLIENT;
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      failf(data, "schannel: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
     }
   }
   return CURLE_OK;
@@ -205,9 +196,9 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
 
 /*longest is 26, buffer is slightly bigger*/
 #define LONGEST_ALG_ID 32
-#define CIPHEROPTION(X) \
-if(strcmp(#X, tmp) == 0) \
-  return X
+#define CIPHEROPTION(X)                         \
+  if(strcmp(#X, tmp) == 0)                      \
+    return X
 
 static int
 get_alg_id_by_name(char *name)
@@ -283,11 +274,11 @@ get_alg_id_by_name(char *name)
 #ifdef CALG_HMAC
   CIPHEROPTION(CALG_HMAC);
 #endif
-#if !defined(__W32API_MAJOR_VERSION) || \
-    !defined(__W32API_MINOR_VERSION) || \
-    defined(__MINGW64_VERSION_MAJOR) || \
-    (__W32API_MAJOR_VERSION > 5)     || \
-    ((__W32API_MAJOR_VERSION == 5) && (__W32API_MINOR_VERSION > 0))
+#if !defined(__W32API_MAJOR_VERSION) ||                                 \
+  !defined(__W32API_MINOR_VERSION) ||                                   \
+  defined(__MINGW64_VERSION_MAJOR) ||                                   \
+  (__W32API_MAJOR_VERSION > 5)     ||                                   \
+  ((__W32API_MAJOR_VERSION == 5) && (__W32API_MINOR_VERSION > 0))
   /* CALG_TLS1PRF has a syntax error in MinGW's w32api up to version 5.0,
      see https://osdn.net/projects/mingw/ticket/38391 */
   CIPHEROPTION(CALG_TLS1PRF);
@@ -325,6 +316,9 @@ get_alg_id_by_name(char *name)
 #ifdef CALG_ECDSA
   CIPHEROPTION(CALG_ECDSA);
 #endif
+#ifdef CALG_ECDH_EPHEM
+  CIPHEROPTION(CALG_ECDH_EPHEM);
+#endif
   return 0;
 }
 
@@ -346,7 +340,7 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
     if(startCur)
       startCur++;
   }
-    schannel_cred->palgSupportedAlgs = algIds;
+  schannel_cred->palgSupportedAlgs = algIds;
   schannel_cred->cSupportedAlgs = algCount;
   return CURLE_OK;
 }
@@ -357,6 +351,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
                   TCHAR **thumbprint)
 {
   TCHAR *sep;
+  TCHAR *store_path_start;
   size_t store_name_len;
 
   sep = _tcschr(path, TEXT('\\'));
@@ -387,13 +382,17 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   else
     return CURLE_SSL_CERTPROBLEM;
 
-  *store_path = sep + 1;
+  store_path_start = sep + 1;
 
-  sep = _tcschr(*store_path, TEXT('\\'));
+  sep = _tcschr(store_path_start, TEXT('\\'));
   if(sep == NULL)
     return CURLE_SSL_CERTPROBLEM;
 
-  *sep = 0;
+  *sep = TEXT('\0');
+  *store_path = _tcsdup(store_path_start);
+  *sep = TEXT('\\');
+  if(*store_path == NULL)
+    return CURLE_OUT_OF_MEMORY;
 
   *thumbprint = sep + 1;
   if(_tcslen(*thumbprint) != CERT_THUMBPRINT_STR_LEN)
@@ -426,28 +425,33 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
   TCHAR *host_name;
   CURLcode result;
+#ifndef CURL_DISABLE_PROXY
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+#else
+  char * const hostname = conn->host.name;
+#endif
 
-  infof(data, "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
-        hostname, conn->remote_port);
+  DEBUGF(infof(data,
+               "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
+               hostname, conn->remote_port));
 
-  if(Curl_verify_windows_version(5, 1, PLATFORM_WINNT,
-                                 VERSION_LESS_THAN_EQUAL)) {
-     /* SChannel in Windows XP (OS version 5.1) uses legacy handshakes and
-        algorithms that may not be supported by all servers. */
-     infof(data, "schannel: WinSSL version is old and may not be able to "
-           "connect to some servers due to lack of SNI, algorithms, etc.\n");
+  if(curlx_verify_windows_version(5, 1, PLATFORM_WINNT,
+                                  VERSION_LESS_THAN_EQUAL)) {
+    /* Schannel in Windows XP (OS version 5.1) uses legacy handshakes and
+       algorithms that may not be supported by all servers. */
+    infof(data, "schannel: Windows version is old and may not be able to "
+          "connect to some servers due to lack of SNI, algorithms, etc.\n");
   }
 
 #ifdef HAS_ALPN
   /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
      Also it doesn't seem to be supported for Wine, see curl bug #983. */
   BACKEND->use_alpn = conn->bits.tls_enable_alpn &&
-                      !GetProcAddress(GetModuleHandleA("ntdll"),
-                                      "wine_get_version") &&
-                      Curl_verify_windows_version(6, 3, PLATFORM_WINNT,
-                                                  VERSION_GREATER_THAN_EQUAL);
+    !GetProcAddress(GetModuleHandle(TEXT("ntdll")),
+                    "wine_get_version") &&
+    curlx_verify_windows_version(6, 3, PLATFORM_WINNT,
+                                 VERSION_GREATER_THAN_EQUAL);
 #else
   BACKEND->use_alpn = false;
 #endif
@@ -463,8 +467,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #else
 #ifdef HAS_MANUAL_VERIFY_API
   if(SSL_CONN_CONFIG(CAfile)) {
-    if(Curl_verify_windows_version(6, 1, PLATFORM_WINNT,
-                                   VERSION_GREATER_THAN_EQUAL)) {
+    if(curlx_verify_windows_version(6, 1, PLATFORM_WINNT,
+                                    VERSION_GREATER_THAN_EQUAL)) {
       BACKEND->use_manual_cred_validation = true;
     }
     else {
@@ -490,12 +494,13 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     Curl_ssl_sessionid_lock(conn);
     if(!Curl_ssl_getsessionid(conn, (void **)&old_cred, NULL, sockindex)) {
       BACKEND->cred = old_cred;
-      infof(data, "schannel: re-using existing credential handle\n");
+      DEBUGF(infof(data, "schannel: re-using existing credential handle\n"));
 
       /* increment the reference counter of the credential/session handle */
       BACKEND->cred->refcount++;
-      infof(data, "schannel: incremented credential handle refcount = %d\n",
-            BACKEND->cred->refcount);
+      DEBUGF(infof(data,
+                   "schannel: incremented credential handle refcount = %d\n",
+                   BACKEND->cred->refcount));
     }
     Curl_ssl_sessionid_unlock(conn);
   }
@@ -513,50 +518,54 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
         schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
 
-      /* TODO s/data->set.ssl.no_revoke/SSL_SET_OPTION(no_revoke)/g */
       if(data->set.ssl.no_revoke) {
         schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
           SCH_CRED_IGNORE_REVOCATION_OFFLINE;
 
-        infof(data, "schannel: disabled server certificate revocation "
-                    "checks\n");
+        DEBUGF(infof(data, "schannel: disabled server certificate revocation "
+                     "checks\n"));
+      }
+      else if(data->set.ssl.revoke_best_effort) {
+        schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+          SCH_CRED_IGNORE_REVOCATION_OFFLINE | SCH_CRED_REVOCATION_CHECK_CHAIN;
+
+        DEBUGF(infof(data, "schannel: ignore revocation offline errors"));
       }
       else {
         schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
-        infof(data, "schannel: checking server certificate revocation\n");
+
+        DEBUGF(infof(data,
+                     "schannel: checking server certificate revocation\n"));
       }
     }
     else {
       schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
         SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
         SCH_CRED_IGNORE_REVOCATION_OFFLINE;
-      infof(data, "schannel: disabled server certificate revocation checks\n");
+      DEBUGF(infof(data,
+                   "schannel: disabled server cert revocation checks\n"));
     }
 
     if(!conn->ssl_config.verifyhost) {
       schannel_cred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
-      infof(data, "schannel: verifyhost setting prevents Schannel from "
-            "comparing the supplied target name with the subject "
-            "names in server certificates.\n");
+      DEBUGF(infof(data, "schannel: verifyhost setting prevents Schannel from "
+                   "comparing the supplied target name with the subject "
+                   "names in server certificates.\n"));
     }
 
     switch(conn->ssl_config.version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
-      schannel_cred.grbitEnabledProtocols = SP_PROT_TLS1_0_CLIENT |
-        SP_PROT_TLS1_1_CLIENT |
-        SP_PROT_TLS1_2_CLIENT;
-      break;
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
-      {
-        result = set_ssl_version_min_max(&schannel_cred, conn);
-        if(result != CURLE_OK)
-          return result;
-        break;
-      }
+    {
+      result = set_ssl_version_min_max(&schannel_cred, conn);
+      if(result != CURLE_OK)
+        return result;
+      break;
+    }
     case CURL_SSLVERSION_SSLv3:
       schannel_cred.grbitEnabledProtocols = SP_PROT_SSL3_CLIENT;
       break;
@@ -579,66 +588,186 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
 #ifdef HAS_CLIENT_CERT_PATH
     /* client certificate */
-    if(data->set.ssl.cert) {
-      DWORD cert_store_name;
-      TCHAR *cert_store_path;
-      TCHAR *cert_thumbprint_str;
+    if(data->set.ssl.cert || data->set.ssl.cert_blob) {
+      DWORD cert_store_name = 0;
+      TCHAR *cert_store_path = NULL;
+      TCHAR *cert_thumbprint_str = NULL;
       CRYPT_HASH_BLOB cert_thumbprint;
       BYTE cert_thumbprint_data[CERT_THUMBPRINT_DATA_LEN];
-      HCERTSTORE cert_store;
+      HCERTSTORE cert_store = NULL;
+      FILE *fInCert = NULL;
+      void *certdata = NULL;
+      size_t certsize = 0;
+      bool blob = data->set.ssl.cert_blob != NULL;
+      TCHAR *cert_path = NULL;
+      if(blob) {
+        certdata = data->set.ssl.cert_blob->data;
+        certsize = data->set.ssl.cert_blob->len;
+      }
+      else {
+        cert_path = curlx_convert_UTF8_to_tchar(data->set.ssl.cert);
+        if(!cert_path)
+          return CURLE_OUT_OF_MEMORY;
 
-      TCHAR *cert_path = Curl_convert_UTF8_to_tchar(data->set.ssl.cert);
-      if(!cert_path)
-        return CURLE_OUT_OF_MEMORY;
+        result = get_cert_location(cert_path, &cert_store_name,
+          &cert_store_path, &cert_thumbprint_str);
 
-      result = get_cert_location(cert_path, &cert_store_name,
-                                 &cert_store_path, &cert_thumbprint_str);
-      if(result != CURLE_OK) {
-        failf(data, "schannel: Failed to get certificate location for %s",
-              cert_path);
-        Curl_unicodefree(cert_path);
-        return result;
+        if(result && (data->set.ssl.cert[0]!='\0'))
+          fInCert = fopen(data->set.ssl.cert, "rb");
+
+        if(result && !fInCert) {
+          failf(data, "schannel: Failed to get certificate location"
+                " or file for %s",
+                data->set.ssl.cert);
+          curlx_unicodefree(cert_path);
+          return result;
+        }
       }
 
-      cert_store =
-        CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0,
-                      (HCRYPTPROV)NULL,
-                      CERT_STORE_OPEN_EXISTING_FLAG | cert_store_name,
-                      cert_store_path);
-      if(!cert_store) {
-        failf(data, "schannel: Failed to open cert store %x %s, "
-              "last error is %x",
-              cert_store_name, cert_store_path, GetLastError());
-        Curl_unicodefree(cert_path);
+      if((fInCert || blob) && (data->set.ssl.cert_type) &&
+          (!strcasecompare(data->set.ssl.cert_type, "P12"))) {
+        failf(data, "schannel: certificate format compatibility error "
+                " for %s",
+                blob ? "(memory blob)" : data->set.ssl.cert);
+        curlx_unicodefree(cert_path);
         return CURLE_SSL_CERTPROBLEM;
       }
 
-      cert_thumbprint.pbData = cert_thumbprint_data;
-      cert_thumbprint.cbData = CERT_THUMBPRINT_DATA_LEN;
+      if(fInCert || blob) {
+        /* Reading a .P12 or .pfx file, like the example at bottom of
+             https://social.msdn.microsoft.com/Forums/windowsdesktop/
+                            en-US/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
+        */
+        CRYPT_DATA_BLOB datablob;
+        WCHAR* pszPassword;
+        size_t pwd_len = 0;
+        int str_w_len = 0;
+        const char *cert_showfilename_error = blob ?
+          "(memory blob)" : data->set.ssl.cert;
+        curlx_unicodefree(cert_path);
+        if(fInCert) {
+          long cert_tell = 0;
+          bool continue_reading = fseek(fInCert, 0, SEEK_END) == 0;
+          if(continue_reading)
+            cert_tell = ftell(fInCert);
+          if(cert_tell < 0)
+            continue_reading = FALSE;
+          else
+            certsize = (size_t)cert_tell;
+          if(continue_reading)
+            continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
+          if(continue_reading)
+            certdata = malloc(certsize + 1);
+          if((!certdata) ||
+             ((int) fread(certdata, certsize, 1, fInCert) != 1))
+            continue_reading = FALSE;
+          fclose(fInCert);
+          if(!continue_reading) {
+            failf(data, "schannel: Failed to read cert file %s",
+                data->set.ssl.cert);
+            free(certdata);
+            return CURLE_SSL_CERTPROBLEM;
+          }
+        }
 
-      if(!CryptStringToBinary(cert_thumbprint_str, CERT_THUMBPRINT_STR_LEN,
-                              CRYPT_STRING_HEX,
-                              cert_thumbprint_data, &cert_thumbprint.cbData,
-                              NULL, NULL)) {
-        Curl_unicodefree(cert_path);
-        return CURLE_SSL_CERTPROBLEM;
-      }
+        /* Convert key-pair data to the in-memory certificate store */
+        datablob.pbData = (BYTE*)certdata;
+        datablob.cbData = (DWORD)certsize;
 
-      client_certs[0] = CertFindCertificateInStore(
-        cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
-        CERT_FIND_HASH, &cert_thumbprint, NULL);
+        if(data->set.ssl.key_passwd != NULL)
+          pwd_len = strlen(data->set.ssl.key_passwd);
+        pszPassword = (WCHAR*)malloc(sizeof(WCHAR)*(pwd_len + 1));
+        if(pszPassword) {
+          if(pwd_len > 0)
+            str_w_len = MultiByteToWideChar(CP_UTF8,
+               MB_ERR_INVALID_CHARS,
+               data->set.ssl.key_passwd, (int)pwd_len,
+               pszPassword, (int)(pwd_len + 1));
 
-      Curl_unicodefree(cert_path);
+          if((str_w_len >= 0) && (str_w_len <= (int)pwd_len))
+            pszPassword[str_w_len] = 0;
+          else
+            pszPassword[0] = 0;
 
-      if(client_certs[0]) {
+          cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
+          free(pszPassword);
+        }
+        if(!blob)
+          free(certdata);
+        if(cert_store == NULL) {
+          DWORD errorcode = GetLastError();
+          if(errorcode == ERROR_INVALID_PASSWORD)
+            failf(data, "schannel: Failed to import cert file %s, "
+                  "password is bad",
+                  cert_showfilename_error);
+          else
+            failf(data, "schannel: Failed to import cert file %s, "
+                  "last error is 0x%x",
+                  cert_showfilename_error, errorcode);
+          return CURLE_SSL_CERTPROBLEM;
+        }
+
+        client_certs[0] = CertFindCertificateInStore(
+          cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
+          CERT_FIND_ANY, NULL, NULL);
+
+        if(client_certs[0] == NULL) {
+          failf(data, "schannel: Failed to get certificate from file %s"
+                ", last error is 0x%x",
+                cert_showfilename_error, GetLastError());
+          CertCloseStore(cert_store, 0);
+          return CURLE_SSL_CERTPROBLEM;
+        }
+
         schannel_cred.cCreds = 1;
         schannel_cred.paCred = client_certs;
       }
       else {
-        /* CRYPT_E_NOT_FOUND / E_INVALIDARG */
-        return CURLE_SSL_CERTPROBLEM;
-      }
+        cert_store =
+          CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0,
+                        (HCRYPTPROV)NULL,
+                        CERT_STORE_OPEN_EXISTING_FLAG | cert_store_name,
+                        cert_store_path);
+        if(!cert_store) {
+          failf(data, "schannel: Failed to open cert store %x %s, "
+                "last error is 0x%x",
+                cert_store_name, cert_store_path, GetLastError());
+          free(cert_store_path);
+          curlx_unicodefree(cert_path);
+          return CURLE_SSL_CERTPROBLEM;
+        }
+        free(cert_store_path);
 
+        cert_thumbprint.pbData = cert_thumbprint_data;
+        cert_thumbprint.cbData = CERT_THUMBPRINT_DATA_LEN;
+
+        if(!CryptStringToBinary(cert_thumbprint_str,
+                                CERT_THUMBPRINT_STR_LEN,
+                                CRYPT_STRING_HEX,
+                                cert_thumbprint_data,
+                                &cert_thumbprint.cbData,
+                                NULL, NULL)) {
+          curlx_unicodefree(cert_path);
+          CertCloseStore(cert_store, 0);
+          return CURLE_SSL_CERTPROBLEM;
+        }
+
+        client_certs[0] = CertFindCertificateInStore(
+          cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
+          CERT_FIND_HASH, &cert_thumbprint, NULL);
+
+        curlx_unicodefree(cert_path);
+
+        if(client_certs[0]) {
+          schannel_cred.cCreds = 1;
+          schannel_cred.paCred = client_certs;
+        }
+        else {
+          /* CRYPT_E_NOT_FOUND / E_INVALIDARG */
+          CertCloseStore(cert_store, 0);
+          return CURLE_SSL_CERTPROBLEM;
+        }
+      }
       CertCloseStore(cert_store, 0);
     }
 #else
@@ -662,7 +791,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     BACKEND->cred->refcount = 1;
 
     /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx
-       */
+     */
     sspi_status =
       s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR *)UNISP_NAME,
                                          SECPKG_CRED_OUTBOUND, NULL,
@@ -674,19 +803,20 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       CertFreeCertificateContext(client_certs[0]);
 
     if(sspi_status != SEC_E_OK) {
+      char buffer[STRERROR_LEN];
       failf(data, "schannel: AcquireCredentialsHandle failed: %s",
-            Curl_sspi_strerror(conn, sspi_status));
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
       Curl_safefree(BACKEND->cred);
       switch(sspi_status) {
-        case SEC_E_INSUFFICIENT_MEMORY:
-          return CURLE_OUT_OF_MEMORY;
-        case SEC_E_NO_CREDENTIALS:
-        case SEC_E_SECPKG_NOT_FOUND:
-        case SEC_E_NOT_OWNER:
-        case SEC_E_UNKNOWN_CREDENTIALS:
-        case SEC_E_INTERNAL_ERROR:
-        default:
-          return CURLE_SSL_CONNECT_ERROR;
+      case SEC_E_INSUFFICIENT_MEMORY:
+        return CURLE_OUT_OF_MEMORY;
+      case SEC_E_NO_CREDENTIALS:
+      case SEC_E_SECPKG_NOT_FOUND:
+      case SEC_E_NOT_OWNER:
+      case SEC_E_UNKNOWN_CREDENTIALS:
+      case SEC_E_INTERNAL_ERROR:
+      default:
+        return CURLE_SSL_CONNECT_ERROR;
       }
     }
   }
@@ -708,7 +838,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     unsigned short* list_len = NULL;
 
     /* The first four bytes will be an unsigned int indicating number
-       of bytes of data in the rest of the the buffer. */
+       of bytes of data in the rest of the buffer. */
     extension_len = (unsigned int *)(&alpn_buffer[cur]);
     cur += sizeof(unsigned int);
 
@@ -770,7 +900,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     return CURLE_OUT_OF_MEMORY;
   }
 
-  host_name = Curl_convert_UTF8_to_tchar(hostname);
+  host_name = curlx_convert_UTF8_to_tchar(hostname);
   if(!host_name)
     return CURLE_OUT_OF_MEMORY;
 
@@ -787,39 +917,40 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     0, &BACKEND->ctxt->ctxt_handle,
     &outbuf_desc, &BACKEND->ret_flags, &BACKEND->ctxt->time_stamp);
 
-  Curl_unicodefree(host_name);
+  curlx_unicodefree(host_name);
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
+    char buffer[STRERROR_LEN];
     Curl_safefree(BACKEND->ctxt);
     switch(sspi_status) {
-      case SEC_E_INSUFFICIENT_MEMORY:
-        failf(data, "schannel: initial InitializeSecurityContext failed: %s",
-              Curl_sspi_strerror(conn, sspi_status));
-        return CURLE_OUT_OF_MEMORY;
-      case SEC_E_WRONG_PRINCIPAL:
-        failf(data, "schannel: SNI or certificate check failed: %s",
-              Curl_sspi_strerror(conn, sspi_status));
-        return CURLE_PEER_FAILED_VERIFICATION;
-        /*
-      case SEC_E_INVALID_HANDLE:
-      case SEC_E_INVALID_TOKEN:
-      case SEC_E_LOGON_DENIED:
-      case SEC_E_TARGET_UNKNOWN:
-      case SEC_E_NO_AUTHENTICATING_AUTHORITY:
-      case SEC_E_INTERNAL_ERROR:
-      case SEC_E_NO_CREDENTIALS:
-      case SEC_E_UNSUPPORTED_FUNCTION:
-      case SEC_E_APPLICATION_PROTOCOL_MISMATCH:
-        */
-      default:
-        failf(data, "schannel: initial InitializeSecurityContext failed: %s",
-              Curl_sspi_strerror(conn, sspi_status));
-        return CURLE_SSL_CONNECT_ERROR;
+    case SEC_E_INSUFFICIENT_MEMORY:
+      failf(data, "schannel: initial InitializeSecurityContext failed: %s",
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+      return CURLE_OUT_OF_MEMORY;
+    case SEC_E_WRONG_PRINCIPAL:
+      failf(data, "schannel: SNI or certificate check failed: %s",
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+      return CURLE_PEER_FAILED_VERIFICATION;
+      /*
+        case SEC_E_INVALID_HANDLE:
+        case SEC_E_INVALID_TOKEN:
+        case SEC_E_LOGON_DENIED:
+        case SEC_E_TARGET_UNKNOWN:
+        case SEC_E_NO_AUTHENTICATING_AUTHORITY:
+        case SEC_E_INTERNAL_ERROR:
+        case SEC_E_NO_CREDENTIALS:
+        case SEC_E_UNSUPPORTED_FUNCTION:
+        case SEC_E_APPLICATION_PROTOCOL_MISMATCH:
+      */
+    default:
+      failf(data, "schannel: initial InitializeSecurityContext failed: %s",
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+      return CURLE_SSL_CONNECT_ERROR;
     }
   }
 
-  infof(data, "schannel: sending initial handshake data: "
-        "sending %lu bytes...\n", outbuf.cbBuffer);
+  DEBUGF(infof(data, "schannel: sending initial handshake data: "
+               "sending %lu bytes...\n", outbuf.cbBuffer));
 
   /* send initial handshake data which is now stored in output buffer */
   result = Curl_write_plain(conn, conn->sock[sockindex], outbuf.pvBuffer,
@@ -831,8 +962,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  infof(data, "schannel: sent initial handshake data: "
-        "sent %zd bytes\n", written);
+  DEBUGF(infof(data, "schannel: sent initial handshake data: "
+               "sent %zd bytes\n", written));
 
   BACKEND->recv_unrecoverable_err = CURLE_OK;
   BACKEND->recv_sspi_close_notify = false;
@@ -853,23 +984,26 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   unsigned char *reallocated_buffer;
-  size_t reallocated_length;
   SecBuffer outbuf[3];
   SecBufferDesc outbuf_desc;
   SecBuffer inbuf[2];
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
-  TCHAR *host_name;
   CURLcode result;
   bool doread;
+#ifndef CURL_DISABLE_PROXY
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+#else
+  char * const hostname = conn->host.name;
+#endif
   const char *pubkey_ptr;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
 
-  infof(data, "schannel: SSL/TLS connection with %s port %hu (step 2/3)\n",
-        hostname, conn->remote_port);
+  DEBUGF(infof(data,
+               "schannel: SSL/TLS connection with %s port %hu (step 2/3)\n",
+               hostname, conn->remote_port));
 
   if(!BACKEND->cred || !BACKEND->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
@@ -901,7 +1035,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   if(BACKEND->encdata_length - BACKEND->encdata_offset <
      CURL_SCHANNEL_BUFFER_FREE_SIZE) {
     /* increase internal encrypted data buffer */
-    reallocated_length = BACKEND->encdata_offset +
+    size_t reallocated_length = BACKEND->encdata_offset +
       CURL_SCHANNEL_BUFFER_FREE_SIZE;
     reallocated_buffer = realloc(BACKEND->encdata_buffer,
                                  reallocated_length);
@@ -917,6 +1051,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   }
 
   for(;;) {
+    TCHAR *host_name;
     if(doread) {
       /* read encrypted handshake data from socket */
       result = Curl_read_plain(conn->sock[sockindex],
@@ -928,8 +1063,8 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       if(result == CURLE_AGAIN) {
         if(connssl->connecting_state != ssl_connect_2_writing)
           connssl->connecting_state = ssl_connect_2_reading;
-        infof(data, "schannel: failed to receive handshake, "
-              "need more data\n");
+        DEBUGF(infof(data, "schannel: failed to receive handshake, "
+                     "need more data\n"));
         return CURLE_OK;
       }
       else if((result != CURLE_OK) || (nread == 0)) {
@@ -941,11 +1076,12 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       /* increase encrypted data buffer offset */
       BACKEND->encdata_offset += nread;
       BACKEND->encdata_is_incomplete = false;
-      infof(data, "schannel: encrypted data got %zd\n", nread);
+      DEBUGF(infof(data, "schannel: encrypted data got %zd\n", nread));
     }
 
-    infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
-          BACKEND->encdata_offset, BACKEND->encdata_length);
+    DEBUGF(infof(data,
+                 "schannel: encrypted data buffer: offset %zu length %zu\n",
+                 BACKEND->encdata_offset, BACKEND->encdata_length));
 
     /* setup input buffers */
     InitSecBuffer(&inbuf[0], SECBUFFER_TOKEN, malloc(BACKEND->encdata_offset),
@@ -968,18 +1104,18 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     memcpy(inbuf[0].pvBuffer, BACKEND->encdata_buffer,
            BACKEND->encdata_offset);
 
-    host_name = Curl_convert_UTF8_to_tchar(hostname);
+    host_name = curlx_convert_UTF8_to_tchar(hostname);
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
     /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
-       */
+     */
     sspi_status = s_pSecFn->InitializeSecurityContext(
       &BACKEND->cred->cred_handle, &BACKEND->ctxt->ctxt_handle,
       host_name, BACKEND->req_flags, 0, 0, &inbuf_desc, 0, NULL,
       &outbuf_desc, &BACKEND->ret_flags, &BACKEND->ctxt->time_stamp);
 
-    Curl_unicodefree(host_name);
+    curlx_unicodefree(host_name);
 
     /* free buffer for received handshake data */
     Curl_safefree(inbuf[0].pvBuffer);
@@ -988,7 +1124,8 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
       BACKEND->encdata_is_incomplete = true;
       connssl->connecting_state = ssl_connect_2_reading;
-      infof(data, "schannel: received incomplete message, need more data\n");
+      DEBUGF(infof(data,
+                   "schannel: received incomplete message, need more data\n"));
       return CURLE_OK;
     }
 
@@ -999,7 +1136,8 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
        !(BACKEND->req_flags & ISC_REQ_USE_SUPPLIED_CREDS)) {
       BACKEND->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
       connssl->connecting_state = ssl_connect_2_writing;
-      infof(data, "schannel: a client certificate has been requested\n");
+      DEBUGF(infof(data,
+                   "schannel: a client certificate has been requested\n"));
       return CURLE_OK;
     }
 
@@ -1008,8 +1146,8 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       for(i = 0; i < 3; i++) {
         /* search for handshake tokens that need to be send */
         if(outbuf[i].BufferType == SECBUFFER_TOKEN && outbuf[i].cbBuffer > 0) {
-          infof(data, "schannel: sending next handshake data: "
-                "sending %lu bytes...\n", outbuf[i].cbBuffer);
+          DEBUGF(infof(data, "schannel: sending next handshake data: "
+                       "sending %lu bytes...\n", outbuf[i].cbBuffer));
 
           /* send handshake token to server */
           result = Curl_write_plain(conn, conn->sock[sockindex],
@@ -1030,36 +1168,38 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       }
     }
     else {
+      char buffer[STRERROR_LEN];
       switch(sspi_status) {
-        case SEC_E_INSUFFICIENT_MEMORY:
-          failf(data, "schannel: next InitializeSecurityContext failed: %s",
-                Curl_sspi_strerror(conn, sspi_status));
-          return CURLE_OUT_OF_MEMORY;
-        case SEC_E_WRONG_PRINCIPAL:
-          failf(data, "schannel: SNI or certificate check failed: %s",
-                Curl_sspi_strerror(conn, sspi_status));
-          return CURLE_PEER_FAILED_VERIFICATION;
-          /*
-        case SEC_E_INVALID_HANDLE:
-        case SEC_E_INVALID_TOKEN:
-        case SEC_E_LOGON_DENIED:
-        case SEC_E_TARGET_UNKNOWN:
-        case SEC_E_NO_AUTHENTICATING_AUTHORITY:
-        case SEC_E_INTERNAL_ERROR:
-        case SEC_E_NO_CREDENTIALS:
-        case SEC_E_UNSUPPORTED_FUNCTION:
-        case SEC_E_APPLICATION_PROTOCOL_MISMATCH:
-          */
-        default:
-          failf(data, "schannel: next InitializeSecurityContext failed: %s",
-                Curl_sspi_strerror(conn, sspi_status));
-          return CURLE_SSL_CONNECT_ERROR;
+      case SEC_E_INSUFFICIENT_MEMORY:
+        failf(data, "schannel: next InitializeSecurityContext failed: %s",
+              Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+        return CURLE_OUT_OF_MEMORY;
+      case SEC_E_WRONG_PRINCIPAL:
+        failf(data, "schannel: SNI or certificate check failed: %s",
+              Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+        return CURLE_PEER_FAILED_VERIFICATION;
+        /*
+          case SEC_E_INVALID_HANDLE:
+          case SEC_E_INVALID_TOKEN:
+          case SEC_E_LOGON_DENIED:
+          case SEC_E_TARGET_UNKNOWN:
+          case SEC_E_NO_AUTHENTICATING_AUTHORITY:
+          case SEC_E_INTERNAL_ERROR:
+          case SEC_E_NO_CREDENTIALS:
+          case SEC_E_UNSUPPORTED_FUNCTION:
+          case SEC_E_APPLICATION_PROTOCOL_MISMATCH:
+        */
+      default:
+        failf(data, "schannel: next InitializeSecurityContext failed: %s",
+              Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+        return CURLE_SSL_CONNECT_ERROR;
       }
     }
 
     /* check if there was additional remaining encrypted data */
     if(inbuf[1].BufferType == SECBUFFER_EXTRA && inbuf[1].cbBuffer > 0) {
-      infof(data, "schannel: encrypted data length: %lu\n", inbuf[1].cbBuffer);
+      DEBUGF(infof(data, "schannel: encrypted data length: %lu\n",
+                   inbuf[1].cbBuffer));
       /*
         There are two cases where we could be getting extra data here:
         1) If we're renegotiating a connection and the handshake is already
@@ -1098,7 +1238,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   /* check if the handshake is complete */
   if(sspi_status == SEC_E_OK) {
     connssl->connecting_state = ssl_connect_3;
-    infof(data, "schannel: SSL/TLS handshake complete\n");
+    DEBUGF(infof(data, "schannel: SSL/TLS handshake complete\n"));
   }
 
   pubkey_ptr = SSL_IS_PROXY() ?
@@ -1114,11 +1254,69 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 
 #ifdef HAS_MANUAL_VERIFY_API
   if(conn->ssl_config.verifypeer && BACKEND->use_manual_cred_validation) {
-    return verify_certificate(conn, sockindex);
+    return Curl_verify_certificate(conn, sockindex);
   }
 #endif
 
   return CURLE_OK;
+}
+
+static bool
+valid_cert_encoding(const CERT_CONTEXT *cert_context)
+{
+  return (cert_context != NULL) &&
+    ((cert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
+    (cert_context->pbCertEncoded != NULL) &&
+    (cert_context->cbCertEncoded > 0);
+}
+
+typedef bool(*Read_crt_func)(const CERT_CONTEXT *ccert_context, void *arg);
+
+static void
+traverse_cert_store(const CERT_CONTEXT *context, Read_crt_func func,
+                    void *arg)
+{
+  const CERT_CONTEXT *current_context = NULL;
+  bool should_continue = true;
+  while(should_continue &&
+        (current_context = CertEnumCertificatesInStore(
+          context->hCertStore,
+          current_context)) != NULL)
+    should_continue = func(current_context, arg);
+
+  if(current_context)
+    CertFreeCertificateContext(current_context);
+}
+
+static bool
+cert_counter_callback(const CERT_CONTEXT *ccert_context, void *certs_count)
+{
+  if(valid_cert_encoding(ccert_context))
+    (*(int *)certs_count)++;
+  return true;
+}
+
+struct Adder_args
+{
+  struct connectdata *conn;
+  CURLcode result;
+  int idx;
+  int certs_count;
+};
+
+static bool
+add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, void *raw_arg)
+{
+  struct Adder_args *args = (struct Adder_args*)raw_arg;
+  args->result = CURLE_OK;
+  if(valid_cert_encoding(ccert_context)) {
+    const char *beg = (const char *) ccert_context->pbCertEncoded;
+    const char *end = beg + ccert_context->cbCertEncoded;
+    int insert_index = (args->certs_count - 1) - args->idx;
+    args->result = Curl_extract_certinfo(args->conn, insert_index, beg, end);
+    args->idx++;
+  }
+  return args->result == CURLE_OK;
 }
 
 static CURLcode
@@ -1129,7 +1327,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef DEBUGBUILD
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
 #endif
@@ -1139,8 +1337,9 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
-  infof(data, "schannel: SSL/TLS connection with %s port %hu (step 3/3)\n",
-        hostname, conn->remote_port);
+  DEBUGF(infof(data,
+               "schannel: SSL/TLS connection with %s port %hu (step 3/3)\n",
+               hostname, conn->remote_port));
 
   if(!BACKEND->cred)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1162,8 +1361,10 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
 
 #ifdef HAS_ALPN
   if(BACKEND->use_alpn) {
-    sspi_status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
-      SECPKG_ATTR_APPLICATION_PROTOCOL, &alpn_result);
+    sspi_status =
+      s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+                                       SECPKG_ATTR_APPLICATION_PROTOCOL,
+                                       &alpn_result);
 
     if(sspi_status != SEC_E_OK) {
       failf(data, "schannel: failed to retrieve ALPN result");
@@ -1174,24 +1375,26 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
        SecApplicationProtocolNegotiationStatus_Success) {
 
       infof(data, "schannel: ALPN, server accepted to use %.*s\n",
-        alpn_result.ProtocolIdSize, alpn_result.ProtocolId);
+            alpn_result.ProtocolIdSize, alpn_result.ProtocolId);
 
 #ifdef USE_NGHTTP2
       if(alpn_result.ProtocolIdSize == NGHTTP2_PROTO_VERSION_ID_LEN &&
          !memcmp(NGHTTP2_PROTO_VERSION_ID, alpn_result.ProtocolId,
-          NGHTTP2_PROTO_VERSION_ID_LEN)) {
+                 NGHTTP2_PROTO_VERSION_ID_LEN)) {
         conn->negnpn = CURL_HTTP_VERSION_2;
       }
       else
 #endif
-      if(alpn_result.ProtocolIdSize == ALPN_HTTP_1_1_LENGTH &&
-         !memcmp(ALPN_HTTP_1_1, alpn_result.ProtocolId,
-           ALPN_HTTP_1_1_LENGTH)) {
-        conn->negnpn = CURL_HTTP_VERSION_1_1;
-      }
+        if(alpn_result.ProtocolIdSize == ALPN_HTTP_1_1_LENGTH &&
+           !memcmp(ALPN_HTTP_1_1, alpn_result.ProtocolId,
+                   ALPN_HTTP_1_1_LENGTH)) {
+          conn->negnpn = CURL_HTTP_VERSION_1_1;
+        }
     }
     else
       infof(data, "ALPN, server did not agree to a protocol\n");
+    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 #endif
 
@@ -1205,7 +1408,8 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
                                       sockindex));
     if(incache) {
       if(old_cred != BACKEND->cred) {
-        infof(data, "schannel: old credential handle is stale, removing\n");
+        DEBUGF(infof(data,
+                     "schannel: old credential handle is stale, removing\n"));
         /* we're not taking old_cred ownership here, no refcount++ is needed */
         Curl_ssl_delsessionid(conn, (void *)old_cred);
         incache = FALSE;
@@ -1223,30 +1427,35 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
       else {
         /* this cred session is now also referenced by sessionid cache */
         BACKEND->cred->refcount++;
-        infof(data, "schannel: stored credential handle in session cache\n");
+        DEBUGF(infof(data,
+                     "schannel: stored credential handle in session cache\n"));
       }
     }
     Curl_ssl_sessionid_unlock(conn);
   }
 
   if(data->set.ssl.certinfo) {
-    sspi_status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
-      SECPKG_ATTR_REMOTE_CERT_CONTEXT, &ccert_context);
+    int certs_count = 0;
+    sspi_status =
+      s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+                                       SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                       &ccert_context);
 
     if((sspi_status != SEC_E_OK) || (ccert_context == NULL)) {
       failf(data, "schannel: failed to retrieve remote cert context");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
 
-    result = Curl_ssl_init_certinfo(data, 1);
-    if(!result) {
-      if(((ccert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
-         (ccert_context->cbCertEncoded > 0)) {
+    traverse_cert_store(ccert_context, cert_counter_callback, &certs_count);
 
-        const char *beg = (const char *) ccert_context->pbCertEncoded;
-        const char *end = beg + ccert_context->cbCertEncoded;
-        result = Curl_extract_certinfo(conn, 0, beg, end);
-      }
+    result = Curl_ssl_init_certinfo(data, certs_count);
+    if(!result) {
+      struct Adder_args args;
+      args.conn = conn;
+      args.idx = 0;
+      args.certs_count = certs_count;
+      traverse_cert_store(ccert_context, add_cert_to_certinfo, &args);
+      result = args.result;
     }
     CertFreeCertificateContext(ccert_context);
     if(result)
@@ -1266,7 +1475,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
-  time_t timeout_ms;
+  timediff_t timeout_ms;
   int what;
 
   /* check if the connection has already been established */
@@ -1359,6 +1568,16 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = schannel_recv;
     conn->send[sockindex] = schannel_send;
+
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+    /* When SSPI is used in combination with Schannel
+     * we need the Schannel context to create the Schannel
+     * binding to pass the IIS extended protection checks.
+     * Available on Windows 7 or later.
+     */
+    conn->sslContext = &BACKEND->ctxt->ctxt_handle;
+#endif
+
     *done = TRUE;
   }
   else
@@ -1452,14 +1671,10 @@ schannel_send(struct connectdata *conn, int sockindex,
 
     /* send entire message or fail */
     while(len > (size_t)written) {
-      ssize_t this_write;
-      time_t timeleft;
+      ssize_t this_write = 0;
       int what;
-
-      this_write = 0;
-
-      timeleft = Curl_timeleft(conn->data, NULL, FALSE);
-      if(timeleft < 0) {
+      timediff_t timeout_ms = Curl_timeleft(conn->data, NULL, FALSE);
+      if(timeout_ms < 0) {
         /* we already got the timeout */
         failf(conn->data, "schannel: timed out sending data "
               "(bytes sent: %zd)", written);
@@ -1467,8 +1682,9 @@ schannel_send(struct connectdata *conn, int sockindex,
         written = -1;
         break;
       }
-
-      what = SOCKET_WRITABLE(conn->sock[sockindex], timeleft);
+      else if(!timeout_ms)
+        timeout_ms = TIMEDIFF_T_MAX;
+      what = SOCKET_WRITABLE(conn->sock[sockindex], timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(conn->data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
@@ -1543,7 +1759,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
    * handled in the cleanup.
    */
 
-  infof(data, "schannel: client wants to read %zu bytes\n", len);
+  DEBUGF(infof(data, "schannel: client wants to read %zu bytes\n", len));
   *err = CURLE_OK;
 
   if(len && len <= BACKEND->decdata_offset) {
@@ -1562,8 +1778,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
   }
   else if(!len) {
     /* It's debatable what to return when !len. Regardless we can't return
-    immediately because there may be data to decrypt (in the case we want to
-    decrypt all encrypted cached data) so handle !len later in cleanup.
+       immediately because there may be data to decrypt (in the case we want to
+       decrypt all encrypted cached data) so handle !len later in cleanup.
     */
     ; /* do nothing */
   }
@@ -1573,7 +1789,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
     if(size < CURL_SCHANNEL_BUFFER_FREE_SIZE ||
        BACKEND->encdata_length < min_encdata_length) {
       reallocated_length = BACKEND->encdata_offset +
-                           CURL_SCHANNEL_BUFFER_FREE_SIZE;
+        CURL_SCHANNEL_BUFFER_FREE_SIZE;
       if(reallocated_length < min_encdata_length) {
         reallocated_length = min_encdata_length;
       }
@@ -1588,12 +1804,13 @@ schannel_recv(struct connectdata *conn, int sockindex,
       BACKEND->encdata_buffer = reallocated_buffer;
       BACKEND->encdata_length = reallocated_length;
       size = BACKEND->encdata_length - BACKEND->encdata_offset;
-      infof(data, "schannel: encdata_buffer resized %zu\n",
-            BACKEND->encdata_length);
+      DEBUGF(infof(data, "schannel: encdata_buffer resized %zu\n",
+                   BACKEND->encdata_length));
     }
 
-    infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
-          BACKEND->encdata_offset, BACKEND->encdata_length);
+    DEBUGF(infof(data,
+                 "schannel: encrypted data buffer: offset %zu length %zu\n",
+                 BACKEND->encdata_offset, BACKEND->encdata_length));
 
     /* read encrypted data from socket */
     *err = Curl_read_plain(conn->sock[sockindex],
@@ -1603,7 +1820,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
     if(*err) {
       nread = -1;
       if(*err == CURLE_AGAIN)
-        infof(data, "schannel: Curl_read_plain returned CURLE_AGAIN\n");
+        DEBUGF(infof(data,
+                     "schannel: Curl_read_plain returned CURLE_AGAIN\n"));
       else if(*err == CURLE_RECV_ERROR)
         infof(data, "schannel: Curl_read_plain returned CURLE_RECV_ERROR\n");
       else
@@ -1611,17 +1829,18 @@ schannel_recv(struct connectdata *conn, int sockindex,
     }
     else if(nread == 0) {
       BACKEND->recv_connection_closed = true;
-      infof(data, "schannel: server closed the connection\n");
+      DEBUGF(infof(data, "schannel: server closed the connection\n"));
     }
     else if(nread > 0) {
       BACKEND->encdata_offset += (size_t)nread;
       BACKEND->encdata_is_incomplete = false;
-      infof(data, "schannel: encrypted data got %zd\n", nread);
+      DEBUGF(infof(data, "schannel: encrypted data got %zd\n", nread));
     }
   }
 
-  infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
-        BACKEND->encdata_offset, BACKEND->encdata_length);
+  DEBUGF(infof(data,
+               "schannel: encrypted data buffer: offset %zu length %zu\n",
+               BACKEND->encdata_offset, BACKEND->encdata_length));
 
   /* decrypt loop */
   while(BACKEND->encdata_offset > 0 && sspi_status == SEC_E_OK &&
@@ -1638,7 +1857,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
     InitSecBufferDesc(&inbuf_desc, inbuf, 4);
 
     /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375348.aspx
-       */
+     */
     sspi_status = s_pSecFn->DecryptMessage(&BACKEND->ctxt->ctxt_handle,
                                            &inbuf_desc, 0, NULL);
 
@@ -1649,12 +1868,12 @@ schannel_recv(struct connectdata *conn, int sockindex,
       /* check for successfully decrypted data, even before actual
          renegotiation or shutdown of the connection context */
       if(inbuf[1].BufferType == SECBUFFER_DATA) {
-        infof(data, "schannel: decrypted data length: %lu\n",
-              inbuf[1].cbBuffer);
+        DEBUGF(infof(data, "schannel: decrypted data length: %lu\n",
+                     inbuf[1].cbBuffer));
 
         /* increase buffer in order to fit the received amount of data */
         size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_FREE_SIZE ?
-               inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_FREE_SIZE;
+          inbuf[1].cbBuffer : CURL_SCHANNEL_BUFFER_FREE_SIZE;
         if(BACKEND->decdata_length - BACKEND->decdata_offset < size ||
            BACKEND->decdata_length < len) {
           /* increase internal decrypted data buffer */
@@ -1682,15 +1901,16 @@ schannel_recv(struct connectdata *conn, int sockindex,
           BACKEND->decdata_offset += size;
         }
 
-        infof(data, "schannel: decrypted data added: %zu\n", size);
-        infof(data, "schannel: decrypted data cached: offset %zu length %zu\n",
-              BACKEND->decdata_offset, BACKEND->decdata_length);
+        DEBUGF(infof(data, "schannel: decrypted data added: %zu\n", size));
+        DEBUGF(infof(data,
+                     "schannel: decrypted cached: offset %zu length %zu\n",
+                     BACKEND->decdata_offset, BACKEND->decdata_length));
       }
 
       /* check for remaining encrypted data */
       if(inbuf[3].BufferType == SECBUFFER_EXTRA && inbuf[3].cbBuffer > 0) {
-        infof(data, "schannel: encrypted data length: %lu\n",
-              inbuf[3].cbBuffer);
+        DEBUGF(infof(data, "schannel: encrypted data length: %lu\n",
+                     inbuf[3].cbBuffer));
 
         /* check if the remaining data is less than the total amount
          * and therefore begins after the already processed data
@@ -1704,8 +1924,9 @@ schannel_recv(struct connectdata *conn, int sockindex,
           BACKEND->encdata_offset = inbuf[3].cbBuffer;
         }
 
-        infof(data, "schannel: encrypted data cached: offset %zu length %zu\n",
-              BACKEND->encdata_offset, BACKEND->encdata_length);
+        DEBUGF(infof(data,
+                     "schannel: encrypted cached: offset %zu length %zu\n",
+                     BACKEND->encdata_offset, BACKEND->encdata_length));
       }
       else {
         /* reset encrypted buffer offset, because there is no data remaining */
@@ -1722,7 +1943,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
         if(BACKEND->encdata_offset) {
           *err = CURLE_RECV_ERROR;
           infof(data, "schannel: can't renogotiate, "
-                      "encrypted data available\n");
+                "encrypted data available\n");
           goto cleanup;
         }
         /* begin renegotiation */
@@ -1759,35 +1980,43 @@ schannel_recv(struct connectdata *conn, int sockindex,
       goto cleanup;
     }
     else {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+      char buffer[STRERROR_LEN];
+#endif
       *err = CURLE_RECV_ERROR;
       infof(data, "schannel: failed to read data from server: %s\n",
-            Curl_sspi_strerror(conn, sspi_status));
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
       goto cleanup;
     }
   }
 
-  infof(data, "schannel: encrypted data buffer: offset %zu length %zu\n",
-        BACKEND->encdata_offset, BACKEND->encdata_length);
+  DEBUGF(infof(data,
+               "schannel: encrypted data buffer: offset %zu length %zu\n",
+               BACKEND->encdata_offset, BACKEND->encdata_length));
 
-  infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
-        BACKEND->decdata_offset, BACKEND->decdata_length);
+  DEBUGF(infof(data,
+               "schannel: decrypted data buffer: offset %zu length %zu\n",
+               BACKEND->decdata_offset, BACKEND->decdata_length));
 
-cleanup:
+  cleanup:
   /* Warning- there is no guarantee the encdata state is valid at this point */
-  infof(data, "schannel: schannel_recv cleanup\n");
+  DEBUGF(infof(data, "schannel: schannel_recv cleanup\n"));
 
   /* Error if the connection has closed without a close_notify.
-  Behavior here is a matter of debate. We don't want to be vulnerable to a
-  truncation attack however there's some browser precedent for ignoring the
-  close_notify for compatibility reasons.
-  Additionally, Windows 2000 (v5.0) is a special case since it seems it doesn't
-  return close_notify. In that case if the connection was closed we assume it
-  was graceful (close_notify) since there doesn't seem to be a way to tell.
+
+     The behavior here is a matter of debate. We don't want to be vulnerable
+     to a truncation attack however there's some browser precedent for
+     ignoring the close_notify for compatibility reasons.
+
+     Additionally, Windows 2000 (v5.0) is a special case since it seems it
+     doesn't return close_notify. In that case if the connection was closed we
+     assume it was graceful (close_notify) since there doesn't seem to be a
+     way to tell.
   */
   if(len && !BACKEND->decdata_offset && BACKEND->recv_connection_closed &&
      !BACKEND->recv_sspi_close_notify) {
-    bool isWin2k = Curl_verify_windows_version(5, 0, PLATFORM_WINNT,
-                                               VERSION_EQUAL);
+    bool isWin2k = curlx_verify_windows_version(5, 0, PLATFORM_WINNT,
+                                                VERSION_EQUAL);
 
     if(isWin2k && sspi_status == SEC_E_OK)
       BACKEND->recv_sspi_close_notify = true;
@@ -1799,7 +2028,7 @@ cleanup:
 
   /* Any error other than CURLE_AGAIN is an unrecoverable error. */
   if(*err && *err != CURLE_AGAIN)
-      BACKEND->recv_unrecoverable_err = *err;
+    BACKEND->recv_unrecoverable_err = *err;
 
   size = len < BACKEND->decdata_offset ? len : BACKEND->decdata_offset;
   if(size) {
@@ -1807,19 +2036,20 @@ cleanup:
     memmove(BACKEND->decdata_buffer, BACKEND->decdata_buffer + size,
             BACKEND->decdata_offset - size);
     BACKEND->decdata_offset -= size;
-
-    infof(data, "schannel: decrypted data returned %zu\n", size);
-    infof(data, "schannel: decrypted data buffer: offset %zu length %zu\n",
-          BACKEND->decdata_offset, BACKEND->decdata_length);
+    DEBUGF(infof(data, "schannel: decrypted data returned %zu\n", size));
+    DEBUGF(infof(data,
+                 "schannel: decrypted data buffer: offset %zu length %zu\n",
+                 BACKEND->decdata_offset, BACKEND->decdata_length));
     *err = CURLE_OK;
     return (ssize_t)size;
   }
 
   if(!*err && !BACKEND->recv_connection_closed)
-      *err = CURLE_AGAIN;
+    *err = CURLE_AGAIN;
 
-  /* It's debatable what to return when !len. We could return whatever error we
-  got from decryption but instead we override here so the return is consistent.
+  /* It's debatable what to return when !len. We could return whatever error
+     we got from decryption but instead we override here so the return is
+     consistent.
   */
   if(!len)
     *err = CURLE_OK;
@@ -1885,8 +2115,14 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
    */
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+#ifndef CURL_DISABLE_PROXY
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+#else
+  char * const hostname = conn->host.name;
+#endif
+
+  DEBUGASSERT(data);
 
   infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
         hostname, conn->remote_port);
@@ -1907,11 +2143,13 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
     sspi_status = s_pSecFn->ApplyControlToken(&BACKEND->ctxt->ctxt_handle,
                                               &BuffDesc);
 
-    if(sspi_status != SEC_E_OK)
+    if(sspi_status != SEC_E_OK) {
+      char buffer[STRERROR_LEN];
       failf(data, "schannel: ApplyControlToken failure: %s",
-            Curl_sspi_strerror(conn, sspi_status));
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+    }
 
-    host_name = Curl_convert_UTF8_to_tchar(hostname);
+    host_name = curlx_convert_UTF8_to_tchar(hostname);
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
@@ -1933,7 +2171,7 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
       &BACKEND->ret_flags,
       &BACKEND->ctxt->time_stamp);
 
-    Curl_unicodefree(host_name);
+    curlx_unicodefree(host_name);
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */
@@ -1951,13 +2189,18 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 
   /* free SSPI Schannel API security context handle */
   if(BACKEND->ctxt) {
-    infof(data, "schannel: clear security context handle\n");
+    DEBUGF(infof(data, "schannel: clear security context handle\n"));
     s_pSecFn->DeleteSecurityContext(&BACKEND->ctxt->ctxt_handle);
     Curl_safefree(BACKEND->ctxt);
   }
 
   /* free SSPI Schannel API credential handle */
   if(BACKEND->cred) {
+    /*
+     * When this function is called from Curl_schannel_close() the connection
+     * might not have an associated transfer so the check for conn->data is
+     * necessary.
+     */
     Curl_ssl_sessionid_lock(conn);
     Curl_schannel_session_free(BACKEND->cred);
     Curl_ssl_sessionid_unlock(conn);
@@ -1994,7 +2237,7 @@ static void Curl_schannel_cleanup(void)
 
 static size_t Curl_schannel_version(char *buffer, size_t size)
 {
-  size = snprintf(buffer, size, "WinSSL");
+  size = msnprintf(buffer, size, "Schannel");
 
   return size;
 }
@@ -2022,14 +2265,9 @@ static CURLcode Curl_schannel_random(struct Curl_easy *data UNUSED_PARAM,
 static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
                                     const char *pinnedpubkey)
 {
-  SECURITY_STATUS status;
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CERT_CONTEXT *pCertContextServer = NULL;
-  const char *x509_der;
-  DWORD x509_der_len;
-  curl_X509certificate x509_parsed;
-  curl_asn1Element *pubkey;
 
   /* Result is returned to caller */
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
@@ -2039,19 +2277,27 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
     return CURLE_OK;
 
   do {
-    status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
-                                              SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                                              &pCertContextServer);
+    SECURITY_STATUS sspi_status;
+    const char *x509_der;
+    DWORD x509_der_len;
+    struct Curl_X509certificate x509_parsed;
+    struct Curl_asn1Element *pubkey;
 
-    if((status != SEC_E_OK) || (pCertContextServer == NULL)) {
+    sspi_status =
+      s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+                                       SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                       &pCertContextServer);
+
+    if((sspi_status != SEC_E_OK) || (pCertContextServer == NULL)) {
+      char buffer[STRERROR_LEN];
       failf(data, "schannel: Failed to read remote certificate context: %s",
-            Curl_sspi_strerror(conn, status));
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
       break; /* failed */
     }
 
 
     if(!(((pCertContextServer->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
-       (pCertContextServer->cbCertEncoded > 0)))
+         (pCertContextServer->cbCertEncoded > 0)))
       break;
 
     x509_der = (const char *)pCertContextServer->pbCertEncoded;
@@ -2082,11 +2328,11 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
 }
 
 static void Curl_schannel_checksum(const unsigned char *input,
-                      size_t inputlen,
-                      unsigned char *checksum,
-                      size_t checksumlen,
-                      DWORD provType,
-                      const unsigned int algId)
+                                   size_t inputlen,
+                                   unsigned char *checksum,
+                                   size_t checksumlen,
+                                   DWORD provType,
+                                   const unsigned int algId)
 {
   HCRYPTPROV hProv = 0;
   HCRYPTHASH hHash = 0;
@@ -2100,7 +2346,7 @@ static void Curl_schannel_checksum(const unsigned char *input,
   memset(checksum, 0, checksumlen);
 
   if(!CryptAcquireContext(&hProv, NULL, NULL, provType,
-                          CRYPT_VERIFYCONTEXT))
+                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return; /* failed */
 
   do {
@@ -2136,19 +2382,19 @@ static CURLcode Curl_schannel_md5sum(unsigned char *input,
                                      unsigned char *md5sum,
                                      size_t md5len)
 {
-    Curl_schannel_checksum(input, inputlen, md5sum, md5len,
-                           PROV_RSA_FULL, CALG_MD5);
-    return CURLE_OK;
+  Curl_schannel_checksum(input, inputlen, md5sum, md5len,
+                         PROV_RSA_FULL, CALG_MD5);
+  return CURLE_OK;
 }
 
 static CURLcode Curl_schannel_sha256sum(const unsigned char *input,
-                                    size_t inputlen,
-                                    unsigned char *sha256sum,
-                                    size_t sha256len)
+                                        size_t inputlen,
+                                        unsigned char *sha256sum,
+                                        size_t sha256len)
 {
-    Curl_schannel_checksum(input, inputlen, sha256sum, sha256len,
-                           PROV_RSA_AES, CALG_SHA_256);
-    return CURLE_OK;
+  Curl_schannel_checksum(input, inputlen, sha256sum, sha256len,
+                         PROV_RSA_AES, CALG_SHA_256);
+  return CURLE_OK;
 }
 
 static void *Curl_schannel_get_internals(struct ssl_connect_data *connssl,

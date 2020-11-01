@@ -1,6 +1,8 @@
 FIND_LIBRARY_USE_LIB32_PATHS
 ----------------------------
 
+.. versionadded:: 3.7
+
 Whether the :command:`find_library` command should automatically search
 ``lib32`` directories.
 

@@ -1,6 +1,6 @@
 include(RunCMake)
 
-if(RunCMake_GENERATOR MATCHES "Visual Studio|Xcode")
+if(RunCMake_GENERATOR STREQUAL "Xcode")
   run_cmake(ConfigNotAllowed)
 endif()
 
@@ -14,3 +14,9 @@ run_cmake(RelativePathInSubdirInterface)
 run_cmake(RelativePathInSubdirPrivate)
 run_cmake(RelativePathInSubdirInclude)
 run_cmake(ExportBuild)
+run_cmake(AddCustomTargetPublicSources)
+run_cmake(AddCustomTargetPrivateSources)
+run_cmake(AddCustomTargetInterfaceSources)
+run_cmake(AddCustomTargetSources)
+run_cmake(AddCustomTargetCheckProperty)
+run_cmake(AddCustomTargetGenx)

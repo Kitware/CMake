@@ -24,10 +24,6 @@
 #  include <unistd.h>
 #endif
 
-#if defined(__BORLANDC__)
-#  pragma warn - 8060 /* possibly incorrect assignment */
-#endif
-
 /* Platform-specific sleep functions. */
 
 #if defined(__BEOS__) && !defined(__ZETA__)
@@ -454,30 +450,31 @@ static int runChild2(kwsysProcess* kp, const char* cmd[], int state,
       printf("The process is still executing.\n");
       break;
     case kwsysProcess_State_Expired:
-      printf("Child was killed when timeout expired.\n");
+      printf("Subprocess was killed when timeout expired.\n");
       break;
     case kwsysProcess_State_Exited:
-      printf("Child exited with value = %d\n", kwsysProcess_GetExitValue(kp));
+      printf("Subprocess exited with value = %d\n",
+             kwsysProcess_GetExitValue(kp));
       result = ((exception != kwsysProcess_GetExitException(kp)) ||
                 (value != kwsysProcess_GetExitValue(kp)));
       break;
     case kwsysProcess_State_Killed:
-      printf("Child was killed by parent.\n");
+      printf("Subprocess was killed by parent.\n");
       break;
     case kwsysProcess_State_Exception:
-      printf("Child terminated abnormally: %s\n",
+      printf("Subprocess terminated abnormally: %s\n",
              kwsysProcess_GetExceptionString(kp));
       result = ((exception != kwsysProcess_GetExitException(kp)) ||
                 (value != kwsysProcess_GetExitValue(kp)));
       break;
     case kwsysProcess_State_Disowned:
-      printf("Child was disowned.\n");
+      printf("Subprocess was disowned.\n");
       break;
     case kwsysProcess_State_Error:
       printf("Error in administrating child process: [%s]\n",
              kwsysProcess_GetErrorString(kp));
       break;
-  };
+  }
 
   if (result) {
     if (exception != kwsysProcess_GetExitException(kp)) {
@@ -631,7 +628,8 @@ int main(int argc, const char* argv[])
     }
     fprintf(stderr, "Invalid test number %d.\n", n);
     return 1;
-  } else if (n >= 1 && n <= 10) {
+  }
+  if (n >= 1 && n <= 10) {
     /* This is the parent process for a requested test number.  */
     int states[10] = {
       kwsysProcess_State_Exited,   kwsysProcess_State_Exited,
@@ -709,7 +707,8 @@ int main(int argc, const char* argv[])
     free(argv0);
 #endif
     return r;
-  } else if (argc > 2 && strcmp(argv[1], "0") == 0) {
+  }
+  if (argc > 2 && strcmp(argv[1], "0") == 0) {
     /* This is the special debugging test to run a given command
        line.  */
     const char** cmd = argv + 2;
@@ -720,9 +719,8 @@ int main(int argc, const char* argv[])
     int r =
       runChild(cmd, state, exception, value, 0, 1, 0, timeout, 0, 1, 0, 0, 0);
     return r;
-  } else {
-    /* Improper usage.  */
-    fprintf(stdout, "Usage: %s <test number>\n", argv[0]);
-    return 1;
   }
+  /* Improper usage.  */
+  fprintf(stdout, "Usage: %s <test number>\n", argv[0]);
+  return 1;
 }

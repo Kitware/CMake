@@ -1,6 +1,8 @@
 <LANG>_CPPCHECK
 ---------------
 
+.. versionadded:: 3.10
+
 This property is supported only when ``<LANG>`` is ``C`` or ``CXX``.
 
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a command line

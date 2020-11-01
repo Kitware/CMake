@@ -2,25 +2,27 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileAPI.h"
 
-#include "cmAlgorithms.h"
+#include <algorithm>
+#include <cassert>
+#include <chrono>
+#include <cstddef>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+#include <utility>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+
 #include "cmCryptoHash.h"
 #include "cmFileAPICMakeFiles.h"
 #include "cmFileAPICache.h"
 #include "cmFileAPICodemodel.h"
 #include "cmGlobalGenerator.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmake.h"
-#include "cmsys/Directory.hxx"
-#include "cmsys/FStream.hxx"
-
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
-#include <utility>
 
 cmFileAPI::cmFileAPI(cmake* cm)
   : CMakeInstance(cm)
@@ -94,7 +96,7 @@ void cmFileAPI::RemoveOldReplyFiles()
   std::vector<std::string> files = this->LoadDir(reply_dir);
   for (std::string const& f : files) {
     if (this->ReplyFiles.find(f) == this->ReplyFiles.end()) {
-      std::string file = reply_dir + "/" + f;
+      std::string file = cmStrCat(reply_dir, "/", f);
       cmSystemTools::RemoveFile(file);
     }
   }
@@ -407,10 +409,16 @@ const char* cmFileAPI::ObjectKindName(ObjectKind kind)
 
 std::string cmFileAPI::ObjectName(Object const& o)
 {
-  std::string name = ObjectKindName(o.Kind);
-  name += "-v";
-  name += std::to_string(o.Version);
+  std::string name = cmStrCat(ObjectKindName(o.Kind), "-v", o.Version);
   return name;
+}
+
+Json::Value cmFileAPI::BuildVersion(unsigned int major, unsigned int minor)
+{
+  Json::Value version;
+  version["major"] = major;
+  version["minor"] = minor;
+  return version;
 }
 
 Json::Value cmFileAPI::BuildObject(Object const& object)
@@ -657,7 +665,7 @@ std::string cmFileAPI::NoSupportedVersion(
 
 // The "codemodel" object kind.
 
-static unsigned int const CodeModelV2Minor = 0;
+static unsigned int const CodeModelV2Minor = 2;
 
 void cmFileAPI::BuildClientRequestCodeModel(
   ClientRequest& r, std::vector<RequestVersion> const& versions)
@@ -676,14 +684,12 @@ void cmFileAPI::BuildClientRequestCodeModel(
 
 Json::Value cmFileAPI::BuildCodeModel(Object const& object)
 {
-  using namespace std::placeholders;
   Json::Value codemodel = cmFileAPICodemodelDump(*this, object.Version);
   codemodel["kind"] = this->ObjectKindName(object.Kind);
 
-  Json::Value& version = codemodel["version"] = Json::objectValue;
+  Json::Value& version = codemodel["version"];
   if (object.Version == 2) {
-    version["major"] = 2;
-    version["minor"] = CodeModelV2Minor;
+    version = BuildVersion(2, CodeModelV2Minor);
   } else {
     return codemodel; // should be unreachable
   }
@@ -712,14 +718,12 @@ void cmFileAPI::BuildClientRequestCache(
 
 Json::Value cmFileAPI::BuildCache(Object const& object)
 {
-  using namespace std::placeholders;
   Json::Value cache = cmFileAPICacheDump(*this, object.Version);
   cache["kind"] = this->ObjectKindName(object.Kind);
 
-  Json::Value& version = cache["version"] = Json::objectValue;
+  Json::Value& version = cache["version"];
   if (object.Version == 2) {
-    version["major"] = 2;
-    version["minor"] = CacheV2Minor;
+    version = BuildVersion(2, CacheV2Minor);
   } else {
     return cache; // should be unreachable
   }
@@ -748,14 +752,12 @@ void cmFileAPI::BuildClientRequestCMakeFiles(
 
 Json::Value cmFileAPI::BuildCMakeFiles(Object const& object)
 {
-  using namespace std::placeholders;
   Json::Value cmakeFiles = cmFileAPICMakeFilesDump(*this, object.Version);
   cmakeFiles["kind"] = this->ObjectKindName(object.Kind);
 
-  Json::Value& version = cmakeFiles["version"] = Json::objectValue;
+  Json::Value& version = cmakeFiles["version"];
   if (object.Version == 1) {
-    version["major"] = 1;
-    version["minor"] = CMakeFilesV1Minor;
+    version = BuildVersion(1, CMakeFilesV1Minor);
   } else {
     return cmakeFiles; // should be unreachable
   }
@@ -788,13 +790,43 @@ Json::Value cmFileAPI::BuildInternalTest(Object const& object)
 {
   Json::Value test = Json::objectValue;
   test["kind"] = this->ObjectKindName(object.Kind);
-  Json::Value& version = test["version"] = Json::objectValue;
+  Json::Value& version = test["version"];
   if (object.Version == 2) {
-    version["major"] = 2;
-    version["minor"] = InternalTestV2Minor;
+    version = BuildVersion(2, InternalTestV2Minor);
   } else {
-    version["major"] = 1;
-    version["minor"] = InternalTestV1Minor;
+    version = BuildVersion(1, InternalTestV1Minor);
   }
   return test;
+}
+
+Json::Value cmFileAPI::ReportCapabilities()
+{
+  Json::Value capabilities = Json::objectValue;
+  Json::Value& requests = capabilities["requests"] = Json::arrayValue;
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::CodeModel);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(2, CodeModelV2Minor));
+    requests.append(std::move(request)); // NOLINT(*)
+  }
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::Cache);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(2, CacheV2Minor));
+    requests.append(std::move(request)); // NOLINT(*)
+  }
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::CMakeFiles);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(1, CMakeFilesV1Minor));
+    requests.append(std::move(request)); // NOLINT(*)
+  }
+
+  return capabilities;
 }

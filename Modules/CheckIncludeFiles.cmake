@@ -131,7 +131,7 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     endif()
 
     if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS "Looking for ${_description}")
+      message(CHECK_START "Looking for ${_description}")
     endif()
     try_compile(${VARIABLE}
       ${CMAKE_BINARY_DIR}
@@ -147,7 +147,7 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     unset(_CIF_LINK_LIBRARIES)
     if(${VARIABLE})
       if(NOT CMAKE_REQUIRED_QUIET)
-        message(STATUS "Looking for ${_description} - found")
+        message(CHECK_PASS "found")
       endif()
       set(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
@@ -156,7 +156,7 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
         "${OUTPUT}\n\n")
     else()
       if(NOT CMAKE_REQUIRED_QUIET)
-        message(STATUS "Looking for ${_description} - not found")
+        message(CHECK_FAIL "not found")
       endif()
       set(${VARIABLE} "" CACHE INTERNAL "Have includes ${INCLUDE}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log

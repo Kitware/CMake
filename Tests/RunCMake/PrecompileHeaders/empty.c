@@ -1,0 +1,3 @@
+void nothing(void)
+{
+}

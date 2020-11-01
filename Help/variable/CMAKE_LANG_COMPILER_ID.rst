@@ -25,6 +25,8 @@ include:
   HP = Hewlett-Packard Compiler (hp.com)
   IAR = IAR Systems (iar.com)
   Intel = Intel Compiler (intel.com)
+  IntelDPCPP = Intel DPCPP Compiler (intel.com)
+  IntelClang = Intel Clang Compiler (intel.com)
   MSVC = Microsoft Visual Studio (microsoft.com)
   NVIDIA = NVIDIA CUDA Compiler (nvidia.com)
   OpenWatcom = Open Watcom (openwatcom.org)
@@ -35,6 +37,7 @@ include:
   TI = Texas Instruments (ti.com)
   TinyCC = Tiny C Compiler (tinycc.org)
   XL, VisualAge, zOS = IBM XL (ibm.com)
+  XLClang = IBM Clang-based XL (ibm.com)
 
 This variable is not guaranteed to be defined for all compilers or
 languages.

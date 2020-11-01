@@ -1,0 +1,248 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#pragma once
+
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <utility>
+
+#include <cm/type_traits>
+#include <cmext/iterator>
+#include <cmext/type_traits>
+
+#if defined(__SUNPRO_CC) && defined(__sparc)
+#  include <list>
+#  include <vector>
+#endif
+
+namespace cm {
+
+#if defined(__SUNPRO_CC) && defined(__sparc)
+// Oracle DeveloperStudio C++ compiler on Solaris/Sparc fails to compile
+// templates with constraints.
+// So, on this platform, use only simple templates.
+#  define APPEND_TWO(C1, C2)                                                  \
+    template <typename T, typename U>                                         \
+    void append(C1<std::unique_ptr<T>>& v, C2<std::unique_ptr<U>>&& r)        \
+    {                                                                         \
+      std::transform(                                                         \
+        r.begin(), r.end(), std::back_inserter(v),                            \
+        [](std::unique_ptr<U>& item) { return std::move(item); });            \
+      r.clear();                                                              \
+    }                                                                         \
+                                                                              \
+    template <typename T, typename U>                                         \
+    void append(C1<T*>& v, C2<std::unique_ptr<U>> const& r)                   \
+    {                                                                         \
+      std::transform(                                                         \
+        r.begin(), r.end(), std::back_inserter(v),                            \
+        [](const std::unique_ptr<U>& item) { return item.get(); });           \
+    }
+
+#  define APPEND_ONE(C)                                                       \
+    template <typename T, typename InputIt,                                   \
+              cm::enable_if_t<cm::is_input_iterator<InputIt>::value, int> =   \
+                0>                                                            \
+    void append(C<T>& v, InputIt first, InputIt last)                         \
+    {                                                                         \
+      v.insert(v.end(), first, last);                                         \
+    }                                                                         \
+                                                                              \
+    template <typename T, typename Range,                                     \
+              cm::enable_if_t<cm::is_input_range<Range>::value, int> = 0>     \
+    void append(C<T>& v, Range const& r)                                      \
+    {                                                                         \
+      v.insert(v.end(), r.begin(), r.end());                                  \
+    }
+
+#  define APPEND(C)                                                           \
+    APPEND_TWO(C, C)                                                          \
+    APPEND_ONE(C)
+
+#  define APPEND_MIX(C1, C2)                                                  \
+    APPEND_TWO(C1, C2)                                                        \
+    APPEND_TWO(C2, C1)
+
+// For now, manage only support for std::vector and std::list.
+// Other sequential container support can be added if needed.
+APPEND(std::vector)
+APPEND(std::list)
+APPEND_MIX(std::vector, std::list)
+
+#  undef APPEND
+#  undef APPEND_MIX
+#  undef APPEND_TWO
+#  undef APPEND_ONE
+
+#else
+
+template <
+  typename Container1, typename Container2,
+  cm::enable_if_t<
+    cm::is_sequence_container<Container1>::value &&
+      cm::is_unique_ptr<typename Container1::value_type>::value &&
+      cm::is_unique_ptr<typename Container2::value_type>::value &&
+      std::is_convertible<typename Container2::value_type::pointer,
+                          typename Container1::value_type::pointer>::value,
+    int> = 0>
+void append(Container1& v, Container2&& r)
+{
+  std::transform(
+    r.begin(), r.end(), std::back_inserter(v),
+    [](typename Container2::value_type& item) { return std::move(item); });
+  r.clear();
+}
+
+template <typename Container1, typename Container2,
+          cm::enable_if_t<
+            cm::is_sequence_container<Container1>::value &&
+              std::is_pointer<typename Container1::value_type>::value &&
+              cm::is_unique_ptr<typename Container2::value_type>::value &&
+              std::is_convertible<typename Container2::value_type::pointer,
+                                  typename Container1::value_type>::value,
+            int> = 0>
+#  if defined(__SUNPRO_CC)
+void append(Container1& v, Container2 const& r, detail::overload_selector<0>)
+#  else
+void append(Container1& v, Container2 const& r)
+#  endif
+{
+  std::transform(
+    r.begin(), r.end(), std::back_inserter(v),
+    [](const typename Container2::value_type& item) { return item.get(); });
+}
+
+template <
+  typename Container, typename InputIt,
+  cm::enable_if_t<
+    cm::is_sequence_container<Container>::value &&
+      cm::is_input_iterator<InputIt>::value &&
+      std::is_convertible<typename std::iterator_traits<InputIt>::value_type,
+                          typename Container::value_type>::value,
+    int> = 0>
+void append(Container& v, InputIt first, InputIt last)
+{
+  v.insert(v.end(), first, last);
+}
+
+template <typename Container, typename Range,
+          cm::enable_if_t<
+            cm::is_sequence_container<Container>::value &&
+              cm::is_input_range<Range>::value &&
+              !cm::is_unique_ptr<typename Container::value_type>::value &&
+              !cm::is_unique_ptr<typename Range::value_type>::value &&
+              std::is_convertible<typename Range::value_type,
+                                  typename Container::value_type>::value,
+            int> = 0>
+#  if defined(__SUNPRO_CC)
+void append(Container& v, Range const& r, detail::overload_selector<1>)
+#  else
+void append(Container& v, Range const& r)
+#  endif
+{
+  v.insert(v.end(), r.begin(), r.end());
+}
+
+#  if defined(__SUNPRO_CC)
+template <typename T, typename U>
+void append(T& v, U const& r)
+{
+  cm::append(v, r, detail::overload_selector<1>{});
+}
+#  endif
+#endif
+
+#if defined(__SUNPRO_CC)
+template <typename Iterator, typename Key>
+auto contains(Iterator first, Iterator last, Key const& key,
+              detail::overload_selector<1>) -> decltype(first->first == key)
+#else
+template <typename Iterator, typename Key,
+          cm::enable_if_t<
+            cm::is_input_iterator<Iterator>::value &&
+              std::is_convertible<Key,
+                                  typename std::iterator_traits<
+                                    Iterator>::value_type::first_type>::value,
+            int> = 0>
+bool contains(Iterator first, Iterator last, Key const& key)
+#endif
+{
+  return std::find_if(
+           first, last,
+           [&key](
+             typename std::iterator_traits<Iterator>::value_type const& item) {
+             return item.first == key;
+           }) != last;
+}
+
+#if defined(__SUNPRO_CC)
+template <typename Iterator, typename Key>
+bool contains(Iterator first, Iterator last, Key const& key,
+              detail::overload_selector<0>)
+#else
+template <
+  typename Iterator, typename Key,
+  cm::enable_if_t<
+    cm::is_input_iterator<Iterator>::value &&
+      std::is_convertible<
+        Key, typename std::iterator_traits<Iterator>::value_type>::value,
+    int> = 0>
+bool contains(Iterator first, Iterator last, Key const& key)
+#endif
+{
+  return std::find(first, last, key) != last;
+}
+
+#if defined(__SUNPRO_CC)
+template <typename Iterator, typename Key>
+bool contains(Iterator first, Iterator last, Key const& key)
+{
+  return contains(first, last, key, detail::overload_selector<1>{});
+}
+#endif
+
+#if defined(__SUNPRO_CC)
+template <typename Range, typename Key>
+auto contains(Range const& range, Key const& key, detail::overload_selector<1>)
+  -> decltype(range.find(key) != range.end())
+#else
+template <
+  typename Range, typename Key,
+  cm::enable_if_t<cm::is_associative_container<Range>::value ||
+                    cm::is_unordered_associative_container<Range>::value,
+                  int> = 0>
+bool contains(Range const& range, Key const& key)
+#endif
+{
+  return range.find(key) != range.end();
+}
+
+#if defined(__SUNPRO_CC)
+template <typename Range, typename Key>
+bool contains(Range const& range, Key const& key, detail::overload_selector<0>)
+#else
+template <
+  typename Range, typename Key,
+  cm::enable_if_t<cm::is_input_range<Range>::value &&
+                    !(cm::is_associative_container<Range>::value ||
+                      cm::is_unordered_associative_container<Range>::value),
+                  int> = 0>
+bool contains(Range const& range, Key const& key)
+#endif
+{
+  return std::find(std::begin(range), std::end(range), key) != std::end(range);
+}
+
+#if defined(__SUNPRO_CC)
+template <typename Range, typename Key>
+bool contains(Range const& range, Key const& key)
+{
+  return contains(range, key, detail::overload_selector<1>{});
+}
+#endif
+
+} // namespace cm

@@ -4,18 +4,19 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
-
 // cmSiteNameCommand
-bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args,
-                                    cmExecutionStatus&)
+bool cmSiteNameCommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status)
 {
   if (args.size() != 1) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
   std::vector<std::string> paths;
@@ -26,15 +27,15 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args,
   paths.emplace_back("/sbin");
   paths.emplace_back("/usr/local/bin");
 
-  const char* cacheValue = this->Makefile->GetDefinition(args[0]);
+  cmProp cacheValue = status.GetMakefile().GetDefinition(args[0]);
   if (cacheValue) {
     return true;
   }
 
-  const char* temp = this->Makefile->GetDefinition("HOSTNAME");
+  cmProp temp = status.GetMakefile().GetDefinition("HOSTNAME");
   std::string hostname_cmd;
   if (temp) {
-    hostname_cmd = temp;
+    hostname_cmd = *temp;
   } else {
     hostname_cmd = cmSystemTools::FindProgram("hostname", paths);
   }
@@ -50,7 +51,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args,
   }
 #else
   // try to find the hostname for this computer
-  if (!cmSystemTools::IsOff(hostname_cmd)) {
+  if (!cmIsOff(hostname_cmd)) {
     std::string host;
     cmSystemTools::RunSingleCommand(hostname_cmd, &host, nullptr, nullptr,
                                     nullptr, cmSystemTools::OUTPUT_NONE);
@@ -71,9 +72,8 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 #endif
-  this->Makefile->AddCacheDefinition(
-    args[0], siteName.c_str(),
-    "Name of the computer/site where compile is being run",
+  status.GetMakefile().AddCacheDefinition(
+    args[0], siteName, "Name of the computer/site where compile is being run",
     cmStateEnums::STRING);
 
   return true;

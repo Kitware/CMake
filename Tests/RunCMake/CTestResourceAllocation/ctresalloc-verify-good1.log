@@ -1,0 +1,14 @@
+begin test1
+alloc widgets 3 4
+alloc widgets 4 1
+alloc transmogrifiers calvin 2
+alloc fluxcapacitors outatime 121
+begin test2
+alloc widgets 3 4
+dealloc widgets 3 4
+dealloc widgets 4 1
+dealloc transmogrifiers calvin 2
+dealloc fluxcapacitors outatime 121
+end test1
+dealloc widgets 3 4
+end test2

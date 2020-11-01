@@ -1,0 +1,242 @@
+CMAKE_LANG=CUDA
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_CUDA_COMPILER_ABI=
+CMAKE_CUDA_COMPILER_AR=
+CMAKE_CUDA_COMPILER_ARCHITECTURE_ID=
+CMAKE_CUDA_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CUDA_COMPILER_ID=NVIDIA
+CMAKE_CUDA_COMPILER_LAUNCHER=
+CMAKE_CUDA_COMPILER_LOADED=1
+CMAKE_CUDA_COMPILER_RANLIB=
+CMAKE_CUDA_COMPILER_TARGET=
+CMAKE_CUDA_COMPILER_VERSION=10.1.168
+CMAKE_CUDA_COMPILER_VERSION_INTERAL=
+Change Dir: /home/robert/Work/cmake/cuda_clang_compiler_info/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/ninja cmTC_e3386 && [1/2] Building CUDA object CMakeFiles/cmTC_e3386.dir/CMakeCUDACompilerABI.cu.o
+clang version 8.0.1-svn369350-1~exp1~20190820121219.79 (branches/release_80)
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+Found candidate GCC installation: /usr/bin/../lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found CUDA installation: /usr/local/cuda-10.1, version unknown
+ "/usr/lib/llvm-8/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -E -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCUDACompilerABI.cu -mrelocation-model static -mthread-model posix -mdisable-fp-elim -fmath-errno -masm-verbose -mconstructor-aliases -munwind-tables -fuse-init-array -target-cpu x86-64 -dwarf-column-info -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-8/lib/clang/8.0.1 -include cuda_runtime.h -D __CUDA_ARCH__=300 -D CUDA_DOUBLE_MATH_FUNCTIONS -D __CUDACC__ -D __NVCC__ -I /usr/local/cuda/bin/../targets/x86_64-linux/include -D __CUDACC_VER_MAJOR__=10 -D __CUDACC_VER_MINOR__=1 -D __CUDACC_VER_BUILD__=168 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward -internal-isystem /usr/include/clang/8.0.1/include/ -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-8/lib/clang/8.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir /home/robert/Work/cmake/cuda_clang_compiler_info/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdiagnostics-show-option -o - -x c++ /opt/cmake-3.15/share/cmake-3.15/Modules/CMakeCUDACompilerABI.cu -faddrsig
+clang -cc1 version 8.0.1 based upon LLVM 8.0.1 default target x86_64-pc-linux-gnu
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8"
+ignoring duplicate directory "/usr/include/clang/8.0.1/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/cuda/bin/../targets/x86_64-linux/include
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward
+ /usr/include/clang/8.0.1/include
+ /usr/local/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+clang version 8.0.1-svn369350-1~exp1~20190820121219.79 (branches/release_80)
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+Found candidate GCC installation: /usr/bin/../lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found CUDA installation: /usr/local/cuda-10.1, version unknown
+ "/usr/lib/llvm-8/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -E -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCUDACompilerABI.cu -mrelocation-model static -mthread-model posix -mdisable-fp-elim -fmath-errno -masm-verbose -mconstructor-aliases -munwind-tables -fuse-init-array -target-cpu x86-64 -dwarf-column-info -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-8/lib/clang/8.0.1 -include cuda_runtime.h -D __CUDACC__ -D __NVCC__ -I /usr/local/cuda/bin/../targets/x86_64-linux/include -D __CUDACC_VER_MAJOR__=10 -D __CUDACC_VER_MINOR__=1 -D __CUDACC_VER_BUILD__=168 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward -internal-isystem /usr/include/clang/8.0.1/include/ -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-8/lib/clang/8.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir /home/robert/Work/cmake/cuda_clang_compiler_info/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdiagnostics-show-option -o - -x c++ /opt/cmake-3.15/share/cmake-3.15/Modules/CMakeCUDACompilerABI.cu -faddrsig
+clang -cc1 version 8.0.1 based upon LLVM 8.0.1 default target x86_64-pc-linux-gnu
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8"
+ignoring duplicate directory "/usr/include/clang/8.0.1/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/cuda/bin/../targets/x86_64-linux/include
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward
+ /usr/include/clang/8.0.1/include
+ /usr/local/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+clang version 8.0.1-svn369350-1~exp1~20190820121219.79 (branches/release_80)
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+Found candidate GCC installation: /usr/bin/../lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found CUDA installation: /usr/local/cuda-10.1, version unknown
+ "/usr/lib/llvm-8/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name tmpxft_00005e34_00000000-5_CMakeCUDACompilerABI.cudafe1.cpp -mrelocation-model static -mthread-model posix -mdisable-fp-elim -fmath-errno -masm-verbose -mconstructor-aliases -munwind-tables -fuse-init-array -target-cpu x86-64 -dwarf-column-info -debugger-tuning=gdb -v -coverage-notes-file /home/robert/Work/cmake/cuda_clang_compiler_info/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_e3386.dir/CMakeCUDACompilerABI.cu.gcno -resource-dir /usr/lib/llvm-8/lib/clang/8.0.1 -D __CUDA_ARCH__=300 -D CUDA_DOUBLE_MATH_FUNCTIONS -I /usr/local/cuda/bin/../targets/x86_64-linux/include -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward -internal-isystem /usr/include/clang/8.0.1/include/ -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-8/lib/clang/8.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir /home/robert/Work/cmake/cuda_clang_compiler_info/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdiagnostics-show-option -o CMakeFiles/cmTC_e3386.dir/CMakeCUDACompilerABI.cu.o -x c++ /tmp/tmpxft_00005e34_00000000-5_CMakeCUDACompilerABI.cudafe1.cpp -faddrsig
+clang -cc1 version 8.0.1 based upon LLVM 8.0.1 default target x86_64-pc-linux-gnu
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8"
+ignoring duplicate directory "/usr/include/clang/8.0.1/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/cuda/bin/../targets/x86_64-linux/include
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward
+ /usr/include/clang/8.0.1/include
+ /usr/local/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+clang version 8.0.1-svn369350-1~exp1~20190820121219.79 (branches/release_80)
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+Found candidate GCC installation: /usr/bin/../lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found CUDA installation: /usr/local/cuda-10.1, version unknown
+ "/usr/lib/llvm-8/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -E -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCUDACompilerABI.cu -mrelocation-model static -mthread-model posix -mdisable-fp-elim -fmath-errno -masm-verbose -mconstructor-aliases -munwind-tables -fuse-init-array -target-cpu x86-64 -dwarf-column-info -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-8/lib/clang/8.0.1 -include cuda_runtime.h -D __CUDA_ARCH__=300 -D CUDA_DOUBLE_MATH_FUNCTIONS -D __CUDACC__ -D __NVCC__ -I /usr/local/cuda/bin/../targets/x86_64-linux/include -D __CUDACC_VER_MAJOR__=10 -D __CUDACC_VER_MINOR__=1 -D __CUDACC_VER_BUILD__=168 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward -internal-isystem /usr/include/clang/8.0.1/include/ -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-8/lib/clang/8.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir /home/robert/Work/cmake/cuda_clang_compiler_info/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdiagnostics-show-option -o - -x c++ /opt/cmake-3.15/share/cmake-3.15/Modules/CMakeCUDACompilerABI.cu -faddrsig
+clang -cc1 version 8.0.1 based upon LLVM 8.0.1 default target x86_64-pc-linux-gnu
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8"
+ignoring duplicate directory "/usr/include/clang/8.0.1/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/cuda/bin/../targets/x86_64-linux/include
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward
+ /usr/include/clang/8.0.1/include
+ /usr/local/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+clang version 8.0.1-svn369350-1~exp1~20190820121219.79 (branches/release_80)
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+Found candidate GCC installation: /usr/bin/../lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found CUDA installation: /usr/local/cuda-10.1, version unknown
+ "/usr/lib/llvm-8/bin/clang" -cc1 -triple x86_64-pc-linux-gnu -E -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCUDACompilerABI.cu -mrelocation-model static -mthread-model posix -mdisable-fp-elim -fmath-errno -masm-verbose -mconstructor-aliases -munwind-tables -fuse-init-array -target-cpu x86-64 -dwarf-column-info -debugger-tuning=gdb -v -resource-dir /usr/lib/llvm-8/lib/clang/8.0.1 -include cuda_runtime.h -D __CUDACC__ -D __NVCC__ -I /usr/local/cuda/bin/../targets/x86_64-linux/include -D __CUDACC_VER_MAJOR__=10 -D __CUDACC_VER_MINOR__=1 -D __CUDACC_VER_BUILD__=168 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8 -internal-isystem /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward -internal-isystem /usr/include/clang/8.0.1/include/ -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-8/lib/clang/8.0.1/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir /home/robert/Work/cmake/cuda_clang_compiler_info/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdiagnostics-show-option -o - -x c++ /opt/cmake-3.15/share/cmake-3.15/Modules/CMakeCUDACompilerABI.cu -faddrsig
+clang -cc1 version 8.0.1 based upon LLVM 8.0.1 default target x86_64-pc-linux-gnu
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8"
+ignoring duplicate directory "/usr/include/clang/8.0.1/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/local/cuda/bin/../targets/x86_64-linux/include
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8
+ /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward
+ /usr/include/clang/8.0.1/include
+ /usr/local/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+[2/2] Linking CUDA executable cmTC_e3386
+clang version 8.0.1-svn369350-1~exp1~20190820121219.79 (branches/release_80)
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+Found candidate GCC installation: /usr/bin/../lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/6.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.4.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found CUDA installation: /usr/local/cuda-10.1, version unknown
+ "/usr/bin/ld" -z relro --hash-style=gnu --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_e3386 /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/8/crtbegin.o -L/usr/local/cuda/targets/x86_64-linux/lib/stubs -L/usr/local/cuda/targets/x86_64-linux/lib -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../.. -L/usr/lib/llvm-8/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_e3386.dir/CMakeCUDACompilerABI.cu.o -lcudadevrt -lcudart_static -lrt -lpthread -ldl -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/8/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o

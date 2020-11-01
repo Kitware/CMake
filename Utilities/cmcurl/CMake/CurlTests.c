@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -125,6 +125,7 @@ int main(void)
 #if   defined(HAVE_GETHOSTBYADDR_R_5) || \
       defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT)
   rc = gethostbyaddr_r(address, length, type, &h, &hdata);
+  (void)rc;
 #elif defined(HAVE_GETHOSTBYADDR_R_7) || \
       defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT)
   hp = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &h_errnop);
@@ -132,6 +133,7 @@ int main(void)
 #elif defined(HAVE_GETHOSTBYADDR_R_8) || \
       defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT)
   rc = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &hp, &h_errnop);
+  (void)rc;
 #endif
 
 #if   defined(HAVE_GETHOSTBYNAME_R_3) || \
@@ -240,6 +242,7 @@ int main()
 #ifndef inet_ntoa_r
   func_type func;
   func = (func_type)inet_ntoa_r;
+  (void)func;
 #endif
   return 0;
 }
@@ -255,6 +258,7 @@ int main()
 #ifndef inet_ntoa_r
   func_type func;
   func = (func_type)&inet_ntoa_r;
+  (void)func;
 #endif
   return 0;
 }
@@ -553,8 +557,8 @@ main() {
 #include <time.h>
 int
 main() {
-  struct timespec ts = {0, 0}; 
-  clock_gettime(CLOCK_MONOTONIC, &ts); 
+  struct timespec ts = {0, 0};
+  clock_gettime(CLOCK_MONOTONIC, &ts);
   return 0;
 }
 #endif
@@ -562,6 +566,52 @@ main() {
 int
 main() {
   if(__builtin_available(macOS 10.12, *)) {}
+  return 0;
+}
+#endif
+#ifdef HAVE_VARIADIC_MACROS_C99
+#define c99_vmacro3(first, ...) fun3(first, __VA_ARGS__)
+#define c99_vmacro2(first, ...) fun2(first, __VA_ARGS__)
+
+int fun3(int arg1, int arg2, int arg3);
+int fun2(int arg1, int arg2);
+
+int fun3(int arg1, int arg2, int arg3) {
+  return arg1 + arg2 + arg3;
+}
+int fun2(int arg1, int arg2) {
+  return arg1 + arg2;
+}
+
+int
+main() {
+  int res3 = c99_vmacro3(1, 2, 3);
+  int res2 = c99_vmacro2(1, 2);
+  (void)res3;
+  (void)res2;
+  return 0;
+}
+#endif
+#ifdef HAVE_VARIADIC_MACROS_GCC
+#define gcc_vmacro3(first, args...) fun3(first, args)
+#define gcc_vmacro2(first, args...) fun2(first, args)
+
+int fun3(int arg1, int arg2, int arg3);
+int fun2(int arg1, int arg2);
+
+int fun3(int arg1, int arg2, int arg3) {
+  return arg1 + arg2 + arg3;
+}
+int fun2(int arg1, int arg2) {
+  return arg1 + arg2;
+}
+
+int
+main() {
+  int res3 = gcc_vmacro3(1, 2, 3);
+  int res2 = gcc_vmacro2(1, 2);
+  (void)res3;
+  (void)res2;
   return 0;
 }
 #endif

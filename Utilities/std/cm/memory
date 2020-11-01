@@ -1,0 +1,67 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#pragma once
+
+#include "cmSTL.hxx" // IWYU pragma: keep
+
+#include <memory> // IWYU pragma: export
+
+#if !defined(CMake_HAVE_CXX_MAKE_UNIQUE)
+#  include <cstddef>
+#  include <type_traits>
+#  include <utility>
+#endif
+
+namespace cm {
+
+#if defined(CMake_HAVE_CXX_MAKE_UNIQUE)
+
+using std::make_unique;
+
+#else
+
+namespace internals {
+
+template <typename T>
+struct make_unique_if
+{
+  using single = std::unique_ptr<T>;
+};
+
+template <typename T>
+struct make_unique_if<T[]>
+{
+  using unbound_array = std::unique_ptr<T[]>;
+};
+
+template <typename T, std::size_t N>
+struct make_unique_if<T[N]>
+{
+  using bound_array = void;
+};
+}
+
+template <typename T, typename... Args>
+typename internals::make_unique_if<T>::single make_unique(Args&&... args)
+{
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+template <typename T>
+typename internals::make_unique_if<T>::unbound_array make_unique(std::size_t n)
+{
+  using E = typename std::remove_extent<T>::type;
+
+  return std::unique_ptr<T>(new E[n]());
+}
+
+template <typename T, typename... Args>
+typename internals::make_unique_if<T>::bound_array make_unique(Args&&...) =
+  delete;
+
+#endif
+
+} // namespace cm

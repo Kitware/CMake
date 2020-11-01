@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "cmCTest.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmCTestGenericHandler::cmCTestGenericHandler()
@@ -23,8 +24,7 @@ cmCTestGenericHandler::~cmCTestGenericHandler() = default;
 void cmCTestGenericHandler::SetOption(const std::string& op, const char* value)
 {
   if (!value) {
-    cmCTestGenericHandler::t_StringToString::iterator remit =
-      this->Options.find(op);
+    auto remit = this->Options.find(op);
     if (remit != this->Options.end()) {
       this->Options.erase(remit);
     }
@@ -39,8 +39,7 @@ void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
 {
   this->SetOption(op, value);
   if (!value) {
-    cmCTestGenericHandler::t_StringToString::iterator remit =
-      this->PersistentOptions.find(op);
+    auto remit = this->PersistentOptions.find(op);
     if (remit != this->PersistentOptions.end()) {
       this->PersistentOptions.erase(remit);
     }
@@ -62,8 +61,7 @@ void cmCTestGenericHandler::Initialize()
 
 const char* cmCTestGenericHandler::GetOption(const std::string& op)
 {
-  cmCTestGenericHandler::t_StringToString::iterator remit =
-    this->Options.find(op);
+  auto remit = this->Options.find(op);
   if (remit == this->Options.end()) {
     return nullptr;
   }
@@ -103,7 +101,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
                                                     << std::endl);
     return false;
   }
-  this->CTest->AddSubmitFile(part, ostr.str().c_str());
+  this->CTest->AddSubmitFile(part, ostr.str());
   return true;
 }
 
@@ -125,6 +123,8 @@ bool cmCTestGenericHandler::StartLogFile(const char* name,
     ostr << "_" << this->CTest->GetCurrentTag();
   }
   ostr << ".log";
+  this->LogFileNames[name] =
+    cmStrCat(this->CTest->GetBinaryDir(), "/Testing/Temporary/", ostr.str());
   if (!this->CTest->OpenOutputFile("Temporary", ostr.str(), xofs)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create log file: " << ostr.str() << std::endl);

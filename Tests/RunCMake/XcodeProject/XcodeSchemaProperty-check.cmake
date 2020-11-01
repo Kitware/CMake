@@ -7,6 +7,13 @@ function(check_property property matcher)
   endif()
 endfunction()
 
+function(expect_schema target)
+  set(schema "${RunCMake_TEST_BINARY_DIR}/XcodeSchemaProperty.xcodeproj/xcshareddata/xcschemes/${target}.xcscheme")
+  if(NOT EXISTS ${schema})
+    message(SEND_ERROR "Missing schema for target ${target}")
+  endif()
+endfunction()
+
 function(expect_no_schema target)
   set(schema "${RunCMake_TEST_BINARY_DIR}/XcodeSchemaProperty.xcodeproj/xcshareddata/xcschemes/${target}.xcscheme")
   if(EXISTS ${schema})
@@ -38,5 +45,9 @@ check_property("ENVIRONMENT" [=[key="FOO"]=])
 check_property("ENVIRONMENT" [=[value="foo"]=])
 check_property("ENVIRONMENT" [=[key="BAR"]=])
 check_property("ENVIRONMENT" [=[value="bar"]=])
+check_property("WORKING_DIRECTORY" [=["/working/dir"]=])
 
 expect_no_schema("NoSchema")
+
+expect_schema("CustomTarget")
+expect_schema("ALL_BUILD")

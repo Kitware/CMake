@@ -1,0 +1,27 @@
+{
+  "version": {
+    "major": 1,
+    "minor": 0
+  },
+  "local": [
+    {
+      "gpus": [
+        {
+          "id": "2",
+          "slots": 4
+        },
+        {
+          "id": "e"
+        }
+      ],
+      ".reserved": [
+        {
+          "id": "a",
+          "slots": 3
+        }
+      ],
+      "threads": [
+      ]
+    }
+  ]
+}

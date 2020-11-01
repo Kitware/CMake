@@ -1,16 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmUVStreambuf_h
-#define cmUVStreambuf_h
-
-#include "cmUVHandlePtr.h"
-
-#include "cm_uv.h"
+#pragma once
 
 #include <algorithm>
 #include <cstring>
 #include <streambuf>
 #include <vector>
+
+#include <cm3p/uv.h>
+
+#include "cmUVHandlePtr.h"
 
 /*
  * This file is based on example code from:
@@ -61,7 +60,7 @@ public:
   cmBasicUVStreambuf* close();
 
 protected:
-  typename cmBasicUVStreambuf::int_type underflow() override;
+  typename cmBasicUVStreambuf<CharT, Traits>::int_type underflow() override;
   std::streamsize showmanyc() override;
 
   // FIXME: Add write support
@@ -215,5 +214,3 @@ void cmBasicUVStreambuf<CharT, Traits>::StreamRead(ssize_t nread)
 }
 
 using cmUVStreambuf = cmBasicUVStreambuf<char>;
-
-#endif

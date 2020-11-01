@@ -1,6 +1,8 @@
 CMAKE_CUDA_EXTENSIONS
 ---------------------
 
+.. versionadded:: 3.8
+
 Default value for :prop_tgt:`CUDA_EXTENSIONS` property of targets.
 
 This variable is used to initialize the :prop_tgt:`CUDA_EXTENSIONS`

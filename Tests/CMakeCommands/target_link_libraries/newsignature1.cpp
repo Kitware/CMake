@@ -2,7 +2,6 @@
 #include "depB.h"
 #include "depC.h"
 #include "depIfaceOnly.h"
-
 #include "subdirlib.h"
 
 int main(int, char**)

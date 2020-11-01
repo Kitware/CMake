@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmXMLParser_h
-#define cmXMLParser_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -42,7 +41,7 @@ public:
   virtual int ParseChunk(const char* inputString,
                          std::string::size_type length);
   virtual int CleanupParser();
-  typedef void (*ReportFunction)(int, const char*, void*);
+  using ReportFunction = void (*)(int, const char*, void*);
   void SetErrorCallback(ReportFunction f, void* d)
   {
     this->ReportCallback = f;
@@ -107,5 +106,3 @@ protected:
   friend void cmXMLParserEndElement(void*, const char*);
   friend void cmXMLParserCharacterDataHandler(void*, const char*, int);
 };
-
-#endif

@@ -1,6 +1,8 @@
 CMAKE_ROLE
 ----------
 
+.. versionadded:: 3.14
+
 Tells what mode the current running script is in. Could be one of several
 values:
 

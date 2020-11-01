@@ -1,6 +1,8 @@
 CMP0064
 -------
 
+.. versionadded:: 3.4
+
 Recognize ``TEST`` as a operator for the :command:`if` command.
 
 The ``TEST`` operator was added to the :command:`if` command to determine if a

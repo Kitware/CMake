@@ -35,12 +35,14 @@ def vsflags(*args):
     return values
 
 
-def read_msbuild_xml(path, values={}):
+def read_msbuild_xml(path, values=None):
     """Reads the MS Build XML file at the path and returns its contents.
 
     Keyword arguments:
     values -- The map to append the contents to (default {})
     """
+    if values is None:
+        values = {}
 
     # Attempt to read the file contents
     try:
@@ -76,12 +78,15 @@ def read_msbuild_xml(path, values={}):
     return values
 
 
-def read_msbuild_json(path, values=[]):
+def read_msbuild_json(path, values=None):
     """Reads the MS Build JSON file at the path and returns its contents.
 
     Keyword arguments:
     values -- The list to append the contents to (default [])
     """
+    if values is None:
+        values = []
+
     if not os.path.exists(path):
         logging.info('Could not find MS Build JSON file at %s', path)
         return values

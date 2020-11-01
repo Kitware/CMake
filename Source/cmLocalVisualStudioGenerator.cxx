@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudioGenerator.h"
 
+#include "windows.h"
+
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratorTarget.h"
@@ -9,7 +11,6 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
-#include "windows.h"
 
 cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator(
   cmGlobalGenerator* gg, cmMakefile* mf)
@@ -98,18 +99,15 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
   }
 
   // Add a pre-build event to create the directory.
-  cmCustomCommandLine command;
-  command.push_back(cmSystemTools::GetCMakeCommand());
-  command.push_back("-E");
-  command.push_back("make_directory");
-  command.push_back(impDir);
   std::vector<std::string> no_output;
   std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
-  cmCustomCommandLines commands;
-  commands.push_back(command);
-  pcc.reset(new cmCustomCommand(0, no_output, no_byproducts, no_depends,
-                                commands, 0, 0));
+  bool stdPipesUTF8 = true;
+  cmCustomCommandLines commands = cmMakeSingleCommandLine(
+    { cmSystemTools::GetCMakeCommand(), "-E", "make_directory", impDir });
+  pcc.reset(new cmCustomCommand(no_output, no_byproducts, no_depends, commands,
+                                cmListFileBacktrace(), nullptr, nullptr,
+                                stdPipesUTF8));
   pcc->SetEscapeOldStyle(false);
   pcc->SetEscapeAllowMakeVars(true);
   return pcc;
@@ -158,8 +156,7 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
     script += newline;
     newline = newline_text;
     script += "cd ";
-    script += this->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(workingDirectory), SHELL);
+    script += this->ConvertToOutputFormat(workingDirectory, SHELL);
     script += check_error;
 
     // Change the working drive.
@@ -175,13 +172,12 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
   // for visual studio IDE add extra stuff to the PATH
   // if CMAKE_MSVCIDE_RUN_PATH is set.
   if (this->Makefile->GetDefinition("MSVC_IDE")) {
-    const char* extraPath =
-      this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
+    cmProp extraPath = this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
     if (extraPath) {
       script += newline;
       newline = newline_text;
       script += "set PATH=";
-      script += extraPath;
+      script += *extraPath;
       script += ";%PATH%";
     }
   }

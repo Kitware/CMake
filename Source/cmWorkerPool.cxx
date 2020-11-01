@@ -2,19 +2,23 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWorkerPool.h"
 
-#include "cmRange.h"
-#include "cmUVHandlePtr.h"
-#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
-#include "cm_uv.h"
-
 #include <algorithm>
 #include <array>
 #include <condition_variable>
+#include <cstddef>
 #include <deque>
 #include <functional>
 #include <mutex>
-#include <stddef.h>
 #include <thread>
+
+#include <cm/memory>
+
+#include <cm3p/uv.h>
+
+#include "cmRange.h"
+#include "cmStringAlgorithms.h"
+#include "cmUVHandlePtr.h"
+#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
 
 /**
  * @brief libuv pipe buffer class
@@ -22,10 +26,10 @@
 class cmUVPipeBuffer
 {
 public:
-  typedef cmRange<char const*> DataRange;
-  typedef std::function<void(DataRange)> DataFunction;
+  using DataRange = cmRange<const char*>;
+  using DataFunction = std::function<void(DataRange)>;
   /// On error the ssize_t argument is a non zero libuv error code
-  typedef std::function<void(ssize_t)> EndFunction;
+  using EndFunction = std::function<void(ssize_t)>;
 
 public:
   /**
@@ -304,13 +308,11 @@ void cmUVReadOnlyProcess::UVExit(uv_process_t* handle, int64_t exitStatus,
     proc.Result()->TermSignal = termSignal;
     if (!proc.Result()->error()) {
       if (termSignal != 0) {
-        proc.Result()->ErrorMessage = "Process was terminated by signal ";
-        proc.Result()->ErrorMessage +=
-          std::to_string(proc.Result()->TermSignal);
+        proc.Result()->ErrorMessage = cmStrCat(
+          "Process was terminated by signal ", proc.Result()->TermSignal);
       } else if (exitStatus != 0) {
-        proc.Result()->ErrorMessage = "Process failed with return value ";
-        proc.Result()->ErrorMessage +=
-          std::to_string(proc.Result()->ExitStatus);
+        proc.Result()->ErrorMessage = cmStrCat(
+          "Process failed with return value ", proc.Result()->ExitStatus);
       }
     }
 
@@ -330,9 +332,8 @@ void cmUVReadOnlyProcess::UVPipeOutEnd(ssize_t error)
 {
   // Process pipe error
   if ((error != 0) && !Result()->error()) {
-    Result()->ErrorMessage =
-      "Reading from stdout pipe failed with libuv error code ";
-    Result()->ErrorMessage += std::to_string(error);
+    Result()->ErrorMessage = cmStrCat(
+      "Reading from stdout pipe failed with libuv error code ", error);
   }
   // Try finish
   UVTryFinish();
@@ -349,9 +350,8 @@ void cmUVReadOnlyProcess::UVPipeErrEnd(ssize_t error)
 {
   // Process pipe error
   if ((error != 0) && !Result()->error()) {
-    Result()->ErrorMessage =
-      "Reading from stderr pipe failed with libuv error code ";
-    Result()->ErrorMessage += std::to_string(error);
+    Result()->ErrorMessage = cmStrCat(
+      "Reading from stderr pipe failed with libuv error code ", error);
   }
   // Try finish
   UVTryFinish();
@@ -469,11 +469,9 @@ void cmWorkerPoolWorker::UVProcessStart(uv_async_t* handle)
 
 void cmWorkerPoolWorker::UVProcessFinished()
 {
-  {
-    std::lock_guard<std::mutex> lock(Proc_.Mutex);
-    if (Proc_.ROP && (Proc_.ROP->IsFinished() || !Proc_.ROP->IsStarted())) {
-      Proc_.ROP.reset();
-    }
+  std::lock_guard<std::mutex> lock(Proc_.Mutex);
+  if (Proc_.ROP && (Proc_.ROP->IsFinished() || !Proc_.ROP->IsStarted())) {
+    Proc_.ROP.reset();
   }
   // Notify idling thread
   Proc_.Condition.notify_one();
@@ -532,6 +530,7 @@ public:
   unsigned int JobsProcessing = 0;
   std::deque<cmWorkerPool::JobHandleT> Queue;
   std::condition_variable Condition;
+  std::condition_variable ConditionFence;
   std::vector<std::unique_ptr<cmWorkerPoolWorker>> Workers;
 
   // -- References
@@ -593,19 +592,12 @@ bool cmWorkerPoolInternal::Process()
 
 void cmWorkerPoolInternal::Abort()
 {
-  bool notifyThreads = false;
   // Clear all jobs and set abort flag
-  {
-    std::lock_guard<std::mutex> guard(Mutex);
-    if (Processing && !Aborting) {
-      // Register abort and clear queue
-      Aborting = true;
-      Queue.clear();
-      notifyThreads = true;
-    }
-  }
-  if (notifyThreads) {
-    // Wake threads
+  std::lock_guard<std::mutex> guard(Mutex);
+  if (!Aborting) {
+    // Register abort and clear queue
+    Aborting = true;
+    Queue.clear();
     Condition.notify_all();
   }
 }
@@ -669,7 +661,7 @@ void cmWorkerPoolInternal::Work(unsigned int workerIndex)
     if (Aborting) {
       break;
     }
-    // Wait for new jobs
+    // Wait for new jobs on the main CV
     if (Queue.empty()) {
       ++WorkersIdle;
       Condition.wait(uLock);
@@ -677,19 +669,33 @@ void cmWorkerPoolInternal::Work(unsigned int workerIndex)
       continue;
     }
 
-    // Check for fence jobs
-    if (FenceProcessing || Queue.front()->IsFence()) {
-      if (JobsProcessing != 0) {
-        Condition.wait(uLock);
-        continue;
-      }
-      // No jobs get processed. Set the fence job processing flag.
-      FenceProcessing = true;
+    // If there is a fence currently active or waiting,
+    // sleep on the main CV and try again.
+    if (FenceProcessing) {
+      Condition.wait(uLock);
+      continue;
     }
 
     // Pop next job from queue
     jobHandle = std::move(Queue.front());
     Queue.pop_front();
+
+    // Check for fence jobs
+    bool raisedFence = false;
+    if (jobHandle->IsFence()) {
+      FenceProcessing = true;
+      raisedFence = true;
+      // Wait on the Fence CV until all pending jobs are done.
+      while (JobsProcessing != 0 && !Aborting) {
+        ConditionFence.wait(uLock);
+      }
+      // When aborting, explicitly kick all threads alive once more.
+      if (Aborting) {
+        FenceProcessing = false;
+        Condition.notify_all();
+        break;
+      }
+    }
 
     // Unlocked scope for job processing
     ++JobsProcessing;
@@ -701,10 +707,17 @@ void cmWorkerPoolInternal::Work(unsigned int workerIndex)
     }
     --JobsProcessing;
 
-    // Was this a fence job?
-    if (FenceProcessing) {
+    // If this was the thread that entered fence processing
+    // originally, notify all idling workers that the fence
+    // is done.
+    if (raisedFence) {
       FenceProcessing = false;
       Condition.notify_all();
+    }
+    // If fence processing is still not done, notify the
+    // the fencing worker when all active jobs are done.
+    if (FenceProcessing && JobsProcessing == 0) {
+      ConditionFence.notify_all();
     }
   }
 

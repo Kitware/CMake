@@ -2,18 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDocumentation.h"
 
+#include <algorithm>
+#include <cctype>
+#include <cstring>
+#include <utility>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
 #include "cmRST.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
-
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
-#include <algorithm>
-#include <ctype.h>
-#include <string.h>
-#include <utility>
 
 static const char* cmDocumentationStandardOptions[][2] = {
   { "--help,-help,-usage,-h,-H,/?", "Print usage information and exit." },

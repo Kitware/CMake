@@ -7,7 +7,7 @@ endif()
 # Wipe out the install tree to make sure the exporter works.
 add_custom_command(
   OUTPUT ${ExportImport_BINARY_DIR}/CleanupProject
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${ExportImport_BINARY_DIR}/Root
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${ExportImport_BINARY_DIR}/Root
   )
 add_custom_target(CleanupTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/CleanupProject)
 set_property(

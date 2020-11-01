@@ -10,14 +10,14 @@
 #include "cmPolicies.h"
 
 // cmBreakCommand
-bool cmBreakCommand::InitialPass(std::vector<std::string> const& args,
-                                 cmExecutionStatus& status)
+bool cmBreakCommand(std::vector<std::string> const& args,
+                    cmExecutionStatus& status)
 {
-  if (!this->Makefile->IsLoopBlock()) {
+  if (!status.GetMakefile().IsLoopBlock()) {
     bool issueMessage = true;
     std::ostringstream e;
     MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0055)) {
+    switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0055)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0055) << "\n";
         break;
@@ -34,7 +34,7 @@ bool cmBreakCommand::InitialPass(std::vector<std::string> const& args,
     if (issueMessage) {
       e << "A BREAK command was found outside of a proper "
            "FOREACH or WHILE loop scope.";
-      this->Makefile->IssueMessage(messageType, e.str());
+      status.GetMakefile().IssueMessage(messageType, e.str());
       if (messageType == MessageType::FATAL_ERROR) {
         return false;
       }
@@ -47,7 +47,7 @@ bool cmBreakCommand::InitialPass(std::vector<std::string> const& args,
     bool issueMessage = true;
     std::ostringstream e;
     MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0055)) {
+    switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0055)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0055) << "\n";
         break;
@@ -63,7 +63,7 @@ bool cmBreakCommand::InitialPass(std::vector<std::string> const& args,
 
     if (issueMessage) {
       e << "The BREAK command does not accept any arguments.";
-      this->Makefile->IssueMessage(messageType, e.str());
+      status.GetMakefile().IssueMessage(messageType, e.str());
       if (messageType == MessageType::FATAL_ERROR) {
         return false;
       }

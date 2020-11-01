@@ -1,0 +1,54 @@
+digraph "GraphvizTestProject" {
+node [
+  fontsize = "12"
+];
+subgraph clusterLegend {
+  label = "Legend";
+  color = black;
+  edge [ style = invis ];
+  legendNode0 [ label = "Executable", shape = egg ];
+  legendNode1 [ label = "Static Library", shape = octagon ];
+  legendNode2 [ label = "Shared Library", shape = doubleoctagon ];
+  legendNode3 [ label = "Module Library", shape = tripleoctagon ];
+  legendNode4 [ label = "Interface Library", shape = pentagon ];
+  legendNode5 [ label = "Object Library", shape = hexagon ];
+  legendNode6 [ label = "Unknown Library", shape = septagon ];
+  legendNode7 [ label = "Custom Target", shape = box ];
+  legendNode0 -> legendNode1 [ style = solid ];
+  legendNode0 -> legendNode2 [ style = solid ];
+  legendNode0 -> legendNode3;
+  legendNode1 -> legendNode4 [ label = "Interface", style = dashed ];
+  legendNode2 -> legendNode5 [ label = "Private", style = dotted ];
+  legendNode3 -> legendNode6 [ style = solid ];
+  legendNode0 -> legendNode7;
+}
+    "point0" [ label = "CompilerFlags", shape = pentagon ];
+    "point1" [ label = "ConsoleApplication", shape = egg ];
+    "point2" [ label = "CoreLibrary", shape = octagon ];
+    "point2" -> "point0"  // CoreLibrary -> CompilerFlags
+    "point3" [ label = "GoofyLoggingLibrary\n(SeriousLoggingLibrary)\n(TheBestLoggingLibrary)", shape = pentagon ];
+    "point2" -> "point3" [ style = dotted ] // CoreLibrary -> GoofyLoggingLibrary
+    "point4" [ label = "SystemLibrary", shape = octagon ];
+    "point4" -> "point2" [ style = dotted ] // SystemLibrary -> CoreLibrary
+    "point2" -> "point4" [ style = dotted ] // CoreLibrary -> SystemLibrary
+    "point1" -> "point2" [ style = dotted ] // ConsoleApplication -> CoreLibrary
+    "point5" [ label = "CryptoCurrencyMiningLibrary", shape = septagon ];
+    "point1" -> "point5" [ style = dotted ] // ConsoleApplication -> CryptoCurrencyMiningLibrary
+    "point6" [ label = "GraphicApplication", shape = egg ];
+    "point6" -> "point2" [ style = dotted ] // GraphicApplication -> CoreLibrary
+    "point7" [ label = "GraphicLibrary", shape = doubleoctagon ];
+    "point8" [ label = "\"-lm\"", shape = septagon ];
+    "point7" -> "point8" [ style = dotted ] // GraphicLibrary -> "-lm"
+    "point7" -> "point0"  // GraphicLibrary -> CompilerFlags
+    "point7" -> "point2" [ style = dotted ] // GraphicLibrary -> CoreLibrary
+    "point9" [ label = "GraphicLibraryObjects", shape = hexagon ];
+    "point7" -> "point9" [ style = dotted ] // GraphicLibrary -> GraphicLibraryObjects
+    "point6" -> "point7" [ style = dotted ] // GraphicApplication -> GraphicLibrary
+    "point10" [ label = "GraphicDriverOpenGL", shape = tripleoctagon ];
+    "point10" -> "point0" [ style = dotted ] // GraphicDriverOpenGL -> CompilerFlags
+    "point10" -> "point2" [ style = dotted ] // GraphicDriverOpenGL -> CoreLibrary
+    "point11" [ label = "GraphicDriverVulkan", shape = tripleoctagon ];
+    "point11" -> "point0" [ style = dotted ] // GraphicDriverVulkan -> CompilerFlags
+    "point11" -> "point2" [ style = dotted ] // GraphicDriverVulkan -> CoreLibrary
+    "point12" [ label = "SubDirectoryTarget", shape = egg ];
+}

@@ -2,21 +2,24 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackDebGenerator.h"
 
+#include <cstring>
+#include <map>
+#include <ostream>
+#include <set>
+#include <utility>
+
+#include "cmsys/Glob.hxx"
+
+#include "cm_sys_stat.h"
+
 #include "cmArchiveWrite.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_sys_stat.h"
-
-#include "cmsys/Glob.hxx"
-#include <map>
-#include <ostream>
-#include <set>
-#include <string.h>
-#include <utility>
 
 namespace {
 
@@ -132,30 +135,29 @@ void DebGenerator::generateDebianBinaryFile() const
 {
   // debian-binary file
   const std::string dbfilename = WorkDir + "/debian-binary";
-  cmGeneratedFileStream out(dbfilename);
-  out << "2.0";
-  out << std::endl; // required for valid debian package
+  cmGeneratedFileStream out;
+  out.Open(dbfilename, false, true);
+  out << "2.0\n"; // required for valid debian package
 }
 
 void DebGenerator::generateControlFile() const
 {
   std::string ctlfilename = WorkDir + "/control";
 
-  cmGeneratedFileStream out(ctlfilename);
+  cmGeneratedFileStream out;
+  out.Open(ctlfilename, false, true);
   for (auto const& kv : ControlValues) {
     out << kv.first << ": " << kv.second << "\n";
   }
 
   unsigned long totalSize = 0;
   {
-    std::string dirName = TemporaryDir;
-    dirName += '/';
+    std::string dirName = cmStrCat(TemporaryDir, '/');
     for (std::string const& file : PackageFiles) {
       totalSize += cmSystemTools::FileLength(file);
     }
   }
-  out << "Installed-Size: " << (totalSize + 1023) / 1024 << "\n";
-  out << std::endl;
+  out << "Installed-Size: " << (totalSize + 1023) / 1024 << "\n\n";
 }
 
 bool DebGenerator::generateDataTar() const
@@ -171,6 +173,7 @@ bool DebGenerator::generateDataTar() const
   }
   cmArchiveWrite data_tar(fileStream_data_tar, TarCompressionType,
                           DebianArchiveType);
+  data_tar.Open();
 
   // uid/gid should be the one of the root user, and this root user has
   // always uid/gid equal to 0.
@@ -245,10 +248,10 @@ std::string DebGenerator::generateMD5File() const
 {
   std::string md5filename = WorkDir + "/md5sums";
 
-  cmGeneratedFileStream out(md5filename);
+  cmGeneratedFileStream out;
+  out.Open(md5filename, false, true);
 
-  std::string topLevelWithTrailingSlash = TemporaryDir;
-  topLevelWithTrailingSlash += '/';
+  std::string topLevelWithTrailingSlash = cmStrCat(TemporaryDir, '/');
   for (std::string const& file : PackageFiles) {
     // hash only regular files
     if (cmSystemTools::FileIsDirectory(file) ||
@@ -290,6 +293,7 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
   }
   cmArchiveWrite control_tar(fileStream_control_tar,
                              cmArchiveWrite::CompressGZip, DebianArchiveType);
+  control_tar.Open();
 
   // sets permissions and uid/gid for the files
   control_tar.SetUIDAndGID(0u, 0u);
@@ -377,8 +381,7 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     // default
     control_tar.ClearPermissions();
 
-    std::vector<std::string> controlExtraList;
-    cmSystemTools::ExpandListArgument(ControlExtra, controlExtraList);
+    std::vector<std::string> controlExtraList = cmExpandedList(ControlExtra);
     for (std::string const& i : controlExtraList) {
       std::string filenamename = cmsys::SystemTools::GetFilenameName(i);
       std::string localcopy = WorkDir + "/" + filenamename;
@@ -410,6 +413,7 @@ bool DebGenerator::generateDeb() const
   cmGeneratedFileStream debStream;
   debStream.Open(outputPath, false, true);
   cmArchiveWrite deb(debStream, cmArchiveWrite::CompressNone, "arbsd");
+  deb.Open();
 
   // uid/gid should be the one of the root user, and this root user has
   // always uid/gid equal to 0.
@@ -439,7 +443,7 @@ cmCPackDebGenerator::~cmCPackDebGenerator() = default;
 int cmCPackDebGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
-  if (cmSystemTools::IsOff(this->GetOption("CPACK_SET_DESTDIR"))) {
+  if (cmIsOff(this->GetOption("CPACK_SET_DESTDIR"))) {
     this->SetOption("CPACK_SET_DESTDIR", "I_ON");
   }
   return this->Superclass::InitializeInternal();
@@ -468,8 +472,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   // Tell CPackDeb.cmake the name of the component GROUP.
   this->SetOption("CPACK_DEB_PACKAGE_COMPONENT", packageName.c_str());
   // Tell CPackDeb.cmake the path where the component is.
-  std::string component_path = "/";
-  component_path += packageName;
+  std::string component_path = cmStrCat('/', packageName);
   this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
                   component_path.c_str());
   if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
@@ -485,6 +488,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     findExpr += "/*";
     gl.RecurseOn();
     gl.SetRecurseListDirs(true);
+    gl.SetRecurseThroughSymlinks(false);
     if (!gl.FindFiles(findExpr)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Cannot find any files in the installed directory"
@@ -499,9 +503,8 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     retval = 0;
   }
   // add the generated package to package file names list
-  packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  packageFileName += "/";
-  packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
+  packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+                             this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
   packageFileNames.push_back(std::move(packageFileName));
 
   if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE")) {
@@ -510,6 +513,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     findExpr += "/*";
     gl.RecurseOn();
     gl.SetRecurseListDirs(true);
+    gl.SetRecurseThroughSymlinks(false);
     if (!gl.FindFiles(findExpr)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Cannot find any files in the installed directory"
@@ -523,9 +527,9 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
       retval = 0;
     }
     // add the generated package to package file names list
-    packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    packageFileName += "/";
-    packageFileName += this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME");
+    packageFileName =
+      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+               this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME"));
     packageFileNames.push_back(std::move(packageFileName));
   }
 
@@ -613,8 +617,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
 
   if (!compInstDirName.empty()) {
     // Tell CPackDeb.cmake the path where the component is.
-    std::string component_path = "/";
-    component_path += compInstDirName;
+    std::string component_path = cmStrCat('/', compInstDirName);
     this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
                     component_path.c_str());
   }
@@ -630,6 +633,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   findExpr += "/*";
   gl.RecurseOn();
   gl.SetRecurseListDirs(true);
+  gl.SetRecurseThroughSymlinks(false);
   if (!gl.FindFiles(findExpr)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find any files in the installed directory"
@@ -643,9 +647,8 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
     retval = 0;
   }
   // add the generated package to package file names list
-  packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  packageFileName += "/";
-  packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
+  packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+                             this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
   packageFileNames.push_back(std::move(packageFileName));
   return retval;
 }
@@ -693,57 +696,57 @@ int cmCPackDebGenerator::createDeb()
 
   const char* debian_pkg_source =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SOURCE");
-  if (debian_pkg_source && *debian_pkg_source) {
+  if (cmNonempty(debian_pkg_source)) {
     controlValues["Source"] = debian_pkg_source;
   }
   const char* debian_pkg_dep =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_DEPENDS");
-  if (debian_pkg_dep && *debian_pkg_dep) {
+  if (cmNonempty(debian_pkg_dep)) {
     controlValues["Depends"] = debian_pkg_dep;
   }
   const char* debian_pkg_rec =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_RECOMMENDS");
-  if (debian_pkg_rec && *debian_pkg_rec) {
+  if (cmNonempty(debian_pkg_rec)) {
     controlValues["Recommends"] = debian_pkg_rec;
   }
   const char* debian_pkg_sug =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SUGGESTS");
-  if (debian_pkg_sug && *debian_pkg_sug) {
+  if (cmNonempty(debian_pkg_sug)) {
     controlValues["Suggests"] = debian_pkg_sug;
   }
   const char* debian_pkg_url =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_HOMEPAGE");
-  if (debian_pkg_url && *debian_pkg_url) {
+  if (cmNonempty(debian_pkg_url)) {
     controlValues["Homepage"] = debian_pkg_url;
   }
   const char* debian_pkg_predep =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_PREDEPENDS");
-  if (debian_pkg_predep && *debian_pkg_predep) {
+  if (cmNonempty(debian_pkg_predep)) {
     controlValues["Pre-Depends"] = debian_pkg_predep;
   }
   const char* debian_pkg_enhances =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_ENHANCES");
-  if (debian_pkg_enhances && *debian_pkg_enhances) {
+  if (cmNonempty(debian_pkg_enhances)) {
     controlValues["Enhances"] = debian_pkg_enhances;
   }
   const char* debian_pkg_breaks =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_BREAKS");
-  if (debian_pkg_breaks && *debian_pkg_breaks) {
+  if (cmNonempty(debian_pkg_breaks)) {
     controlValues["Breaks"] = debian_pkg_breaks;
   }
   const char* debian_pkg_conflicts =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_CONFLICTS");
-  if (debian_pkg_conflicts && *debian_pkg_conflicts) {
+  if (cmNonempty(debian_pkg_conflicts)) {
     controlValues["Conflicts"] = debian_pkg_conflicts;
   }
   const char* debian_pkg_provides =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_PROVIDES");
-  if (debian_pkg_provides && *debian_pkg_provides) {
+  if (cmNonempty(debian_pkg_provides)) {
     controlValues["Provides"] = debian_pkg_provides;
   }
   const char* debian_pkg_replaces =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_REPLACES");
-  if (debian_pkg_replaces && *debian_pkg_replaces) {
+  if (cmNonempty(debian_pkg_replaces)) {
     controlValues["Replaces"] = debian_pkg_replaces;
   }
 
@@ -753,17 +756,19 @@ int cmCPackDebGenerator::createDeb()
   const char* debian_pkg_shlibs =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SHLIBS");
   const bool gen_shibs = this->IsOn("CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS") &&
-    debian_pkg_shlibs && *debian_pkg_shlibs;
+    cmNonempty(debian_pkg_shlibs);
   if (gen_shibs) {
-    cmGeneratedFileStream out(shlibsfilename);
+    cmGeneratedFileStream out;
+    out.Open(shlibsfilename, false, true);
     out << debian_pkg_shlibs;
-    out << std::endl;
+    out << '\n';
   }
 
   const std::string postinst = strGenWDIR + "/postinst";
   const std::string postrm = strGenWDIR + "/postrm";
   if (this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST")) {
-    cmGeneratedFileStream out(postinst);
+    cmGeneratedFileStream out;
+    out.Open(postinst, false, true);
     out << "#!/bin/sh\n\n"
            "set -e\n\n"
            "if [ \"$1\" = \"configure\" ]; then\n"
@@ -771,7 +776,8 @@ int cmCPackDebGenerator::createDeb()
            "fi\n";
   }
   if (this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM")) {
-    cmGeneratedFileStream out(postrm);
+    cmGeneratedFileStream out;
+    out.Open(postrm, false, true);
     out << "#!/bin/sh\n\n"
            "set -e\n\n"
            "if [ \"$1\" = \"remove\" ]; then\n"
@@ -826,11 +832,11 @@ int cmCPackDebGenerator::createDbgsymDDeb()
 
   const char* debian_pkg_source =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SOURCE");
-  if (debian_pkg_source && *debian_pkg_source) {
+  if (cmNonempty(debian_pkg_source)) {
     controlValues["Source"] = debian_pkg_source;
   }
   const char* debian_build_ids = this->GetOption("GEN_BUILD_IDS");
-  if (debian_build_ids && *debian_build_ids) {
+  if (cmNonempty(debian_build_ids)) {
     controlValues["Build-Ids"] = debian_build_ids;
   }
 

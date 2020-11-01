@@ -1,8 +1,32 @@
 include(RunCMake)
+include(RunCTest)
+
 set(RunCMake_TEST_TIMEOUT 60)
 
 unset(ENV{CTEST_PARALLEL_LEVEL})
 unset(ENV{CTEST_OUTPUT_ON_FAILURE})
+
+run_cmake_command(repeat-opt-bad1
+  ${CMAKE_CTEST_COMMAND} --repeat until-pass
+  )
+run_cmake_command(repeat-opt-bad2
+  ${CMAKE_CTEST_COMMAND} --repeat until-pass:foo
+  )
+run_cmake_command(repeat-opt-bad3
+  ${CMAKE_CTEST_COMMAND} --repeat until-fail:2 --repeat-until-fail 2
+  )
+run_cmake_command(repeat-opt-bad4
+  ${CMAKE_CTEST_COMMAND} --repeat-until-fail 2 --repeat until-fail:2
+  )
+run_cmake_command(repeat-opt-until-pass
+  ${CMAKE_CTEST_COMMAND} --repeat until-pass:2
+  )
+run_cmake_command(repeat-opt-until-fail
+  ${CMAKE_CTEST_COMMAND} --repeat until-fail:2
+  )
+run_cmake_command(repeat-opt-after-timeout
+  ${CMAKE_CTEST_COMMAND} --repeat after-timeout:2
+  )
 
 run_cmake_command(repeat-until-fail-bad1
   ${CMAKE_CTEST_COMMAND} --repeat-until-fail
@@ -14,19 +38,39 @@ run_cmake_command(repeat-until-fail-good
   ${CMAKE_CTEST_COMMAND} --repeat-until-fail 2
   )
 
+function(run_repeat_until_pass_tests)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/repeat-until-pass-build)
+  run_cmake(repeat-until-pass-cmake)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(repeat-until-pass-ctest
+    ${CMAKE_CTEST_COMMAND} -C Debug --repeat until-pass:3
+    )
+endfunction()
+run_repeat_until_pass_tests()
+
+function(run_repeat_after_timeout_tests)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/repeat-after-timeout-build)
+  run_cmake(repeat-after-timeout-cmake)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(repeat-after-timeout-ctest
+    ${CMAKE_CTEST_COMMAND} -C Debug --repeat after-timeout:3
+    )
+endfunction()
+run_repeat_after_timeout_tests()
+
 function(run_repeat_until_fail_tests)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/repeat-until-fail-build)
-  set(RunCMake_TEST_NO_CLEAN 1)
-  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-
   run_cmake(repeat-until-fail-cmake)
+  set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(repeat-until-fail-ctest
-    ${CMAKE_CTEST_COMMAND} -C Debug --repeat-until-fail 3
+    ${CMAKE_CTEST_COMMAND} -C Debug ${ARGN}
     )
 endfunction()
-run_repeat_until_fail_tests()
+run_repeat_until_fail_tests(--repeat-until-fail 3)
+run_repeat_until_fail_tests(--repeat until-fail:3)
 
 function(run_BadCTestTestfile)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BadCTestTestfile)
@@ -77,6 +121,62 @@ set_tests_properties(test4 PROPERTIES LABELS 'bar')
 endfunction()
 
 run_LabelCount()
+
+function(run_RequiredRegexFoundTest)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/RequiredRegexFound)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+set_tests_properties(test1 PROPERTIES PASS_REGULAR_EXPRESSION \"foo;test1;bar\")
+")
+
+  run_cmake_command(RequiredRegexFound ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_RequiredRegexFoundTest()
+
+function(run_RequiredRegexNotFoundTest)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/RequiredRegexNotFound)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+set_tests_properties(test1 PROPERTIES PASS_REGULAR_EXPRESSION \"foo;toast1;bar\" WILL_FAIL True)
+")
+
+  run_cmake_command(RequiredRegexNotFound ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_RequiredRegexNotFoundTest()
+
+function(run_FailRegexFoundTest)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/FailRegexFound)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+set_tests_properties(test1 PROPERTIES FAIL_REGULAR_EXPRESSION \"foo;test1;bar\" WILL_FAIL True)
+")
+
+  run_cmake_command(FailRegexFound ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_FailRegexFoundTest()
+
+function(run_SkipRegexFoundTest)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SkipRegexFound)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+set_tests_properties(test1 PROPERTIES SKIP_REGULAR_EXPRESSION \"test1\")
+")
+
+  run_cmake_command(SkipRegexFound ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_SkipRegexFoundTest()
 
 function(run_SerialFailed)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SerialFailed)
@@ -142,6 +242,20 @@ function(run_TestOutputSize)
 endfunction()
 run_TestOutputSize()
 
+# Test --stop-on-failure
+function(run_stop_on_failure)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/stop-on-failure)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E false)
+add_test(test2 \"${CMAKE_COMMAND}\" -E echo \"not running\")
+")
+  run_cmake_command(stop-on-failure ${CMAKE_CTEST_COMMAND} --stop-on-failure)
+endfunction()
+run_stop_on_failure()
+
 function(run_TestAffinity)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestAffinity)
   set(RunCMake_TEST_NO_CLEAN 1)
@@ -200,7 +314,12 @@ function(run_ShowOnly)
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
   file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
     add_test(ShowOnly \"${CMAKE_COMMAND}\" -E echo)
-    set_tests_properties(ShowOnly PROPERTIES WILL_FAIL true _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\")
+    set_tests_properties(ShowOnly PROPERTIES
+      WILL_FAIL true
+      RESOURCE_GROUPS \"2,threads:2,gpus:4;gpus:2,threads:4\"
+      REQUIRED_FILES RequiredFileDoesNotExist
+      _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\"
+      )
     add_test(ShowOnlyNotAvailable NOT_AVAILABLE)
 ")
   run_cmake_command(show-only_human ${CMAKE_CTEST_COMMAND} --show-only=human)
@@ -208,3 +327,56 @@ function(run_ShowOnly)
   run_cmake_command(show-only_json-v1 ${CMAKE_CTEST_COMMAND} --show-only=json-v1)
 endfunction()
 run_ShowOnly()
+
+function(run_NoTests)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/NoTests)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "")
+  run_cmake_command(no-tests_ignore ${CMAKE_CTEST_COMMAND} --no-tests=ignore)
+  run_cmake_command(no-tests_error ${CMAKE_CTEST_COMMAND} --no-tests=error)
+  run_cmake_command(no-tests_bad ${CMAKE_CTEST_COMMAND} --no-tests=bad)
+  run_cmake_command(no-tests_legacy ${CMAKE_CTEST_COMMAND})
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake" "
+    set(CTEST_COMMAND \"${CMAKE_CTEST_COMMAND}\")
+    set(CTEST_SOURCE_DIRECTORY \"${RunCMake_SOURCE_DIR}\")
+    set(CTEST_BINARY_DIRECTORY \"${RunCMake_TEST_BINARY_DIR}\")
+    ctest_start(Experimental)
+    ctest_test()
+")
+  run_cmake_command(
+    no-tests-script_ignore ${CMAKE_CTEST_COMMAND} --no-tests=ignore
+    -S "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake")
+  run_cmake_command(
+    no-tests-script_error ${CMAKE_CTEST_COMMAND} --no-tests=error
+    -S "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake")
+  run_cmake_command(
+    no-tests-script_legacy ${CMAKE_CTEST_COMMAND}
+    -S "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake")
+endfunction()
+run_NoTests()
+
+# Check the configuration type variable is passed
+run_ctest(check-configuration-type)
+
+function(run_MemCheckSan case opts)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/MemCheckSan${case}-build)
+  set(RunCMake_TEST_OPTIONS
+    "-DMEMORYCHECK_TYPE=${case}Sanitizer"
+    "-DMEMORYCHECK_SANITIZER_OPTIONS=${opts}"
+    )
+  run_cmake(MemCheckSan)
+  unset(RunCMake_TEST_OPTIONS)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake-stdout-file "../ctest_memcheck/Dummy${case}Sanitizer-stdout.txt")
+  run_cmake_command(MemCheckSan${case}-ctest
+    ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T MemCheck -V
+    )
+endfunction()
+run_MemCheckSan(Address "simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55")
+run_MemCheckSan(Leak "simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55")
+run_MemCheckSan(Memory "simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55")
+run_MemCheckSan(Thread "report_bugs=1:history_size=5:exitcode=55")
+run_MemCheckSan(UndefinedBehavior "simulate_sanitizer=1")

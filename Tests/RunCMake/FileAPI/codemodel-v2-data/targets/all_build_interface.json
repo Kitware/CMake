@@ -1,0 +1,79 @@
+{
+    "name": "ALL_BUILD",
+    "id": "^ALL_BUILD::@25b7fa8ea00134654b85$",
+    "directorySource": "^interface$",
+    "projectName": "Interface",
+    "type": "UTILITY",
+    "isGeneratorProvided": true,
+    "sources": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/interface/CMakeFiles/ALL_BUILD$",
+            "isGenerated": true,
+            "sourceGroupName": "",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^interface/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/interface/CMakeFiles/ALL_BUILD\\.rule$",
+            "isGenerated": true,
+            "sourceGroupName": "CMake Rules",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^interface/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/interface/CMakeFiles/ALL_BUILD$"
+            ]
+        },
+        {
+            "name": "CMake Rules",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/interface/CMakeFiles/ALL_BUILD\\.rule$"
+            ]
+        }
+    ],
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^interface/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": null,
+    "build": "^interface$",
+    "source": "^interface$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@25b7fa8ea00134654b85$",
+            "backtrace": null
+        },
+        {
+            "id": "^iface_srcs::@25b7fa8ea00134654b85$",
+            "backtrace": null
+        }
+    ]
+}

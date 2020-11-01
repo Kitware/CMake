@@ -1,0 +1,15 @@
+#ifndef ExternDotGenerated_HPP
+#define ExternDotGenerated_HPP
+
+#include <QObject>
+
+// GENERATED Object source includes externally generated .moc file
+class ExternDotGenerated : public QObject
+{
+  Q_OBJECT
+public:
+  ExternDotGenerated();
+  ~ExternDotGenerated();
+};
+
+#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFindPathCommand_h
-#define cmFindPathCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -10,7 +9,6 @@
 
 #include "cmFindBase.h"
 
-class cmCommand;
 class cmExecutionStatus;
 
 /** \class cmFindPathCommand
@@ -23,18 +21,9 @@ class cmExecutionStatus;
 class cmFindPathCommand : public cmFindBase
 {
 public:
-  cmFindPathCommand();
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmFindPathCommand; }
+  cmFindPathCommand(cmExecutionStatus& status);
 
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  bool InitialPass(std::vector<std::string> const& args);
 
   bool IncludeFileInPath;
 
@@ -42,8 +31,9 @@ private:
   std::string FindHeaderInFramework(std::string const& file,
                                     std::string const& dir);
   std::string FindHeader();
-  std::string FindNormalHeader();
-  std::string FindFrameworkHeader();
+  std::string FindNormalHeader(cmFindBaseDebugState& debug);
+  std::string FindFrameworkHeader(cmFindBaseDebugState& debug);
 };
 
-#endif
+bool cmFindPath(std::vector<std::string> const& args,
+                cmExecutionStatus& status);

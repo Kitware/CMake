@@ -11,11 +11,7 @@ Online Documentation and Community Resources
  Links to available documentation and community resources may be
  found on this web page.
 
-Mailing List
- https://cmake.org/mailing-lists
+Discourse Forum
+ https://discourse.cmake.org
 
- For help and discussion about using CMake, a mailing list is
- provided at cmake@cmake.org.  The list is member-post-only but one
- may sign up on the CMake web page.  Please first read the full
- documentation at https://cmake.org before posting questions to
- the list.
+ The Discourse Forum hosts discussion and questions about CMake.

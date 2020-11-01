@@ -1,16 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmTestGenerator_h
-#define cmTestGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-
-#include "cmScriptGenerator.h"
 
 #include <iosfwd>
 #include <string>
 #include <vector>
 
+#include "cmScriptGenerator.h"
+
+class cmGeneratorExpression;
 class cmLocalGenerator;
 class cmTest;
 
@@ -38,6 +38,9 @@ public:
 
 private:
   void GenerateInternalProperties(std::ostream& os);
+  std::vector<std::string> EvaluateCommandLineArguments(
+    const std::vector<std::string>& argv, cmGeneratorExpression& ge,
+    const std::string& config) const;
 
 protected:
   void GenerateScriptConfigs(std::ostream& os, Indent indent) override;
@@ -52,5 +55,3 @@ protected:
   cmTest* Test;
   bool TestGenerated;
 };
-
-#endif

@@ -1,0 +1,8 @@
+CMake Error at COMPILE_LANG_AND_ID-add_custom_command.cmake:2 \(add_custom_command\):
+  Error evaluating generator expression:
+
+    \$<COMPILE_LANG_AND_ID>
+
+  \$<COMPILE_LANG_AND_ID> expression requires at least two parameters.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

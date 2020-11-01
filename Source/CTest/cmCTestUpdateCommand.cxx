@@ -5,23 +5,20 @@
 #include "cmCTest.h"
 #include "cmCTestUpdateHandler.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmSystemTools.h"
-
-#include <vector>
 
 cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
 {
-  if (this->Values[ct_SOURCE]) {
+  if (!this->Source.empty()) {
     this->CTest->SetCTestConfiguration(
-      "SourceDirectory",
-      cmSystemTools::CollapseFullPath(this->Values[ct_SOURCE]).c_str(),
+      "SourceDirectory", cmSystemTools::CollapseFullPath(this->Source),
       this->Quiet);
   } else {
     this->CTest->SetCTestConfiguration(
       "SourceDirectory",
       cmSystemTools::CollapseFullPath(
-        this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY"))
-        .c_str(),
+        cmToCStrSafe(this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY"))),
       this->Quiet);
   }
   std::string source_dir =

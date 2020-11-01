@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.1)
+
+set(CTEST_SITE                          "test-site")
+set(CTEST_BUILD_NAME                    "test-build-name")
+set(CTEST_SOURCE_DIRECTORY              "@RunCMake_BINARY_DIR@/@CASE_NAME@")
+set(CTEST_BINARY_DIRECTORY              "@RunCMake_BINARY_DIR@/@CASE_NAME@-build")
+set(CTEST_CMAKE_GENERATOR               "@RunCMake_GENERATOR@")
+set(CTEST_CMAKE_GENERATOR_PLATFORM      "@RunCMake_GENERATOR_PLATFORM@")
+set(CTEST_CMAKE_GENERATOR_TOOLSET       "@RunCMake_GENERATOR_TOOLSET@")
+set(CTEST_NIGHTLY_START_TIME            "01:00:00 UTC")
+set(CTEST_COMMAND                       "@CMAKE_CTEST_COMMAND@")
+
+if("@CASE_NAME@" MATCHES "^check-configuration-type")
+  message("Command line CTEST_CONFIGURATION_TYPE=" ${CTEST_CONFIGURATION_TYPE})
+  set(CTEST_CONFIGURATION_TYPE "Release")
+  message("set CTEST_CONFIGURATION_TYPE=" ${CTEST_CONFIGURATION_TYPE})
+
+  ctest_start(Experimental)
+endif()

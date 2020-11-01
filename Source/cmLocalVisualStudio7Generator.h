@@ -1,11 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmLocalVisualStudio7Generator_h
-#define cmLocalVisualStudio7Generator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -30,7 +30,7 @@ public:
     : cmVisualStudioGeneratorOptions(lg, tool, table, extraTable)
   {
   }
-  void OutputFlag(std::ostream& fout, int indent, const char* tag,
+  void OutputFlag(std::ostream& fout, int indent, const std::string& tag,
                   const std::string& content) override;
 };
 
@@ -47,6 +47,10 @@ public:
   cmLocalVisualStudio7Generator(cmGlobalGenerator* gg, cmMakefile* mf);
 
   virtual ~cmLocalVisualStudio7Generator();
+
+  cmLocalVisualStudio7Generator(const cmLocalVisualStudio7Generator&) = delete;
+  const cmLocalVisualStudio7Generator& operator=(
+    const cmLocalVisualStudio7Generator&) = delete;
 
   void AddHelperCommands() override;
 
@@ -79,16 +83,21 @@ public:
   virtual void ReadAndStoreExternalGUID(const std::string& name,
                                         const char* path);
 
+  std::set<cmSourceFile const*>& GetSourcesVisited(
+    cmGeneratorTarget const* target)
+  {
+    return this->SourcesVisited[target];
+  };
+
 protected:
-  void CreateSingleVCProj(const std::string& lname, cmGeneratorTarget* tgt);
+  virtual void GenerateTarget(cmGeneratorTarget* target);
 
 private:
-  typedef cmVS7GeneratorOptions Options;
-  typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
+  using Options = cmVS7GeneratorOptions;
+  using FCInfo = cmLocalVisualStudio7GeneratorFCInfo;
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const std::string& configName);
   void FixGlobalTargets();
-  void WriteProjectFiles();
   void WriteVCProjHeader(std::ostream& fout, const std::string& libName,
                          cmGeneratorTarget* tgt,
                          std::vector<cmSourceGroup>& sgs);
@@ -101,8 +110,8 @@ private:
   void WriteConfiguration(std::ostream& fout, const std::string& configName,
                           const std::string& libName, cmGeneratorTarget* tgt);
   std::string EscapeForXML(const std::string& s);
-  std::string ConvertToXMLOutputPath(const char* path);
-  std::string ConvertToXMLOutputPathSingle(const char* path);
+  std::string ConvertToXMLOutputPath(const std::string& path);
+  std::string ConvertToXMLOutputPathSingle(const std::string& path);
   void OutputTargetRules(std::ostream& fout, const std::string& configName,
                          cmGeneratorTarget* target,
                          const std::string& libName);
@@ -144,7 +153,8 @@ private:
 
   bool FortranProject;
   bool WindowsCEProject;
-  cmLocalVisualStudio7GeneratorInternals* Internal;
-};
+  std::unique_ptr<cmLocalVisualStudio7GeneratorInternals> Internal;
 
-#endif
+  std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
+    SourcesVisited;
+};

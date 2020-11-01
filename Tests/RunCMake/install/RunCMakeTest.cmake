@@ -48,6 +48,22 @@ in directory:
   endif()
 endfunction()
 
+# Wrapper for run_cmake() that skips platforms that are non-ELF or have no RPATH support
+function(run_cmake_ELFRPATH_only case)
+  if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
+    run_cmake(${case})
+  else()
+    # Sanity check against a platform known to be ELF-based
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      message(FATAL_ERROR "Expected platform Linux to advertize itself as ELF-based, but it did not.")
+    else()
+      message(STATUS "${case} - SKIPPED (No ELF-based platform found)")
+    endif()
+  endif()
+endfunction()
+
+run_cmake(TARGETS-FILE_RPATH_CHANGE-old_rpath)
+run_cmake_ELFRPATH_only(TARGETS-FILE_RPATH_CHANGE-new_rpath)
 run_cmake(DIRECTORY-MESSAGE_NEVER)
 run_cmake(DIRECTORY-PATTERN-MESSAGE_NEVER)
 run_cmake(DIRECTORY-message)
@@ -60,6 +76,8 @@ run_cmake(DIRECTORY-DESTINATION-bad)
 run_cmake(FILES-DESTINATION-bad)
 run_cmake(TARGETS-DESTINATION-bad)
 run_cmake(EXPORT-OldIFace)
+run_cmake(EXPORT-UnknownExport)
+run_cmake(EXPORT-NamelinkOnly)
 run_cmake(CMP0062-OLD)
 run_cmake(CMP0062-NEW)
 run_cmake(CMP0062-WARN)
@@ -79,6 +97,11 @@ endif()
 if(NOT RunCMake_GENERATOR STREQUAL "Xcode" OR NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" MATCHES "[;$]")
   run_install_test(FILES-TARGET_OBJECTS)
 endif()
+
+if(CMake_TEST_ISPC)
+  run_install_test(FILES-EXTRA_ISPC_TARGET_OBJECTS)
+endif()
+
 
 run_install_test(TARGETS-InstallFromSubDir)
 run_install_test(TARGETS-OPTIONAL)

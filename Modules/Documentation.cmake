@@ -9,6 +9,30 @@ This module provides support for the VTK documentation framework.  It
 relies on several tools (Doxygen, Perl, etc).
 #]=======================================================================]
 
+cmake_policy(GET CMP0106 _Documentation_policy)
+
+if (_Documentation_policy STREQUAL "NEW")
+  message(FATAL_ERROR
+    "Documentation.cmake is VTK-specific code and should not be used in "
+    "non-VTK projects. This logic in this module is best shipped with the "
+    "project using it rather than with CMake. This is now an error according "
+    "to policy CMP0106.")
+else ()
+
+if (_Documentation_policy STREQUAL "")
+  # Ignore the warning if the project is detected as VTK itself.
+  if (NOT CMAKE_PROJECT_NAME STREQUAL "VTK" AND
+      NOT PROJECT_NAME STREQUAL "VTK")
+    cmake_policy(GET_WARNING CMP0106 _Documentation_policy_warning)
+    message(AUTHOR_WARNING
+      "${_Documentation_policy_warning}\n"
+      "Documentation.cmake is VTK-specific code and should not be used in "
+      "non-VTK projects. This logic in this module is best shipped with the "
+      "project using it rather than with CMake.")
+  endif ()
+  unset(_Documentation_policy_warning)
+endif ()
+
 #
 # Build the documentation ?
 #
@@ -44,3 +68,7 @@ if (BUILD_DOCUMENTATION)
   #
 
 endif ()
+
+endif ()
+
+unset(_Documentation_policy)

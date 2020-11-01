@@ -1,6 +1,8 @@
 CMAKE_FIND_APPBUNDLE
 --------------------
 
+.. versionadded:: 3.4
+
 This variable affects how ``find_*`` commands choose between
 macOS Application Bundles and unix-style package components.
 

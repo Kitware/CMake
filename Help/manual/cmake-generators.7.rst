@@ -52,13 +52,16 @@ Makefile Generators
    /generator/Unix Makefiles
    /generator/Watcom WMake
 
-Ninja Generator
-^^^^^^^^^^^^^^^
+.. _`Ninja Generators`:
+
+Ninja Generators
+^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 1
 
    /generator/Ninja
+   /generator/Ninja Multi-Config
 
 .. _`IDE Build Tool Generators`:
 

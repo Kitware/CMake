@@ -13,3 +13,20 @@ target_link_libraries(cxx_shared_exe PRIVATE cxx_shared_lib)
 add_library(cxx_static_lib STATIC ../empty.cxx)
 add_executable(cxx_static_exe ../empty.cxx)
 target_link_libraries(cxx_static_exe PRIVATE cxx_static_lib)
+
+target_compile_options(cxx_exe PUBLIC TargetCompileOptions)
+target_link_options(cxx_exe PUBLIC TargetLinkOptions)
+target_link_directories(cxx_exe PUBLIC "${CMAKE_BINARY_DIR}/TargetLinkDir")
+
+target_precompile_headers(cxx_exe PUBLIC ../empty.h)
+
+add_executable(cxx_standard_exe ../empty.cxx)
+set_property(TARGET cxx_standard_exe PROPERTY CXX_STANDARD 17)
+
+add_executable(cxx_standard_compile_feature_exe ../empty.cxx)
+set_property(TARGET cxx_standard_compile_feature_exe PROPERTY CXX_STANDARD 98)
+if(CMAKE_CXX_STANDARD_DEFAULT AND DEFINED CMAKE_CXX11_STANDARD_COMPILE_OPTION)
+  target_compile_features(cxx_standard_compile_feature_exe PRIVATE cxx_std_11)
+  target_compile_features(cxx_standard_compile_feature_exe PRIVATE cxx_decltype)
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/cxx_std_11.txt" "")
+endif()

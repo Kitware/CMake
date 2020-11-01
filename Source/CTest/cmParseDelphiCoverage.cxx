@@ -1,19 +1,20 @@
 #include "cmParseDelphiCoverage.h"
 
+#include <cstdio>
+#include <cstdlib>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
-#include <stdio.h>
-#include <stdlib.h>
-
 class cmParseDelphiCoverage::HTMLParser
 {
 public:
-  typedef cmCTestCoverageHandlerContainer::SingleFileCoverageVector
-    FileLinesType;
+  using FileLinesType =
+    cmCTestCoverageHandlerContainer::SingleFileCoverageVector;
   HTMLParser(cmCTest* ctest, cmCTestCoverageHandlerContainer& cont)
     : CTest(ctest)
     , Coverage(cont)

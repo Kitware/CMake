@@ -22,10 +22,14 @@ run_cmake_command(E_compare_files-different-eol ${CMAKE_COMMAND} -E compare_file
 run_cmake_command(E_compare_files-ignore-eol-same ${CMAKE_COMMAND} -E compare_files --ignore-eol ${RunCMake_SOURCE_DIR}/compare_files/lf ${RunCMake_SOURCE_DIR}/compare_files/crlf)
 run_cmake_command(E_compare_files-ignore-eol-empty ${CMAKE_COMMAND} -E compare_files --ignore-eol ${RunCMake_SOURCE_DIR}/compare_files/empty1 ${RunCMake_SOURCE_DIR}/compare_files/empty2)
 run_cmake_command(E_compare_files-ignore-eol-nonexistent ${CMAKE_COMMAND} -E compare_files --ignore-eol nonexistent_a nonexistent_b)
+run_cmake_command(E_compare_files-invalid-arguments ${CMAKE_COMMAND} -E compare_files file1.txt file2.txt file3.txt)
 run_cmake_command(E_echo_append ${CMAKE_COMMAND} -E echo_append)
 run_cmake_command(E_rename-no-arg ${CMAKE_COMMAND} -E rename)
-run_cmake_command(E_server-arg ${CMAKE_COMMAND} -E server --extra-arg)
-run_cmake_command(E_server-pipe ${CMAKE_COMMAND} -E server --pipe=)
+run_cmake_command(E_server ${CMAKE_COMMAND} -E server)
+run_cmake_command(E_true ${CMAKE_COMMAND} -E true)
+run_cmake_command(E_true-extraargs ${CMAKE_COMMAND} -E true ignored)
+run_cmake_command(E_false ${CMAKE_COMMAND} -E false)
+run_cmake_command(E_false-extraargs ${CMAKE_COMMAND} -E false ignored)
 
 run_cmake_command(E_touch_nocreate-no-arg ${CMAKE_COMMAND} -E touch_nocreate)
 run_cmake_command(E_touch-nonexistent-dir ${CMAKE_COMMAND} -E touch "${RunCMake_BINARY_DIR}/touch-nonexistent-dir/foo")
@@ -42,6 +46,7 @@ run_cmake_command(G_no-arg ${CMAKE_COMMAND} -B DummyBuildDir -G)
 run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -B DummyBuildDir -G NoSuchGenerator)
 run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
 run_cmake_command(P_no-file ${CMAKE_COMMAND} -P nosuchscriptfile.cmake)
+run_cmake_command(P_arbitrary_args ${CMAKE_COMMAND} -P "${RunCMake_SOURCE_DIR}/P_arbitrary_args.cmake" -- -DFOO)
 
 run_cmake_command(build-no-dir
   ${CMAKE_COMMAND} --build)
@@ -61,6 +66,32 @@ run_cmake_command(install-bad-dir
 run_cmake_command(install-options-to-vars
   ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-install-options-to-vars
   --strip --prefix /var/test --config sample --component pack)
+run_cmake_command(install-default-dir-permissions-all
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-permissions-install-options-to-vars
+  --default-directory-permissions u=rwx,g=rx,o=rx)
+run_cmake_command(install-default-dir-permissions-afew
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-permissions-install-options-to-vars
+  --default-directory-permissions u=rwx,g=rx)
+run_cmake_command(install-default-dir-permissions-none
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-permissions-install-options-to-vars)
+run_cmake_command(install-default-dir-permissions-invalid-comma1
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-permissions-install-options-to-vars
+  --default-directory-permissions u=rwxg=,x)
+run_cmake_command(install-default-dir-permissions-invalid-comma2
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-permissions-install-options-to-vars
+  --default-directory-permissions u=rwxg,=x)
+run_cmake_command(install-default-dir-permissions-comma-at-the-end
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-permissions-install-options-to-vars
+  --default-directory-permissions u=rwx,)
+run_cmake_command(install-default-dir-permissions-invalid-assignment
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-permissions-install-options-to-vars
+  --default-directory-permissions u=rwx,=x)
+run_cmake_command(install-default-dir-permissions-assignment-at-the-end
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-permissions-install-options-to-vars
+  --default-directory-permissions u=rwx,g=)
+run_cmake_command(install-default-dir-permissions-assignment-at-the-beginning
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-permissions-install-options-to-vars
+  --default-directory-permissions =u=rwx,g=rx)
 
 run_cmake_command(cache-bad-entry
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-entry/)
@@ -68,6 +99,9 @@ run_cmake_command(cache-empty-entry
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-empty-entry/)
 
 function(run_ExplicitDirs)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_NO_SOURCE_DIR 1)
+
   set(source_dir ${RunCMake_BINARY_DIR}/ExplicitDirsMissing)
 
   file(REMOVE_RECURSE "${source_dir}")
@@ -76,16 +110,15 @@ function(run_ExplicitDirs)
 cmake_minimum_required(VERSION 3.13)
 project(ExplicitDirsMissing LANGUAGES NONE)
 ]=])
-  run_cmake_command(no-S-B ${CMAKE_COMMAND} -E chdir ${source_dir}
-    ${CMAKE_COMMAND} -DFOO=BAR)
+  set(RunCMake_TEST_SOURCE_DIR "${source_dir}")
+  set(RunCMake_TEST_BINARY_DIR "${source_dir}")
+  run_cmake_with_options(no-S-B -DFOO=BAR)
 
   set(source_dir ${RunCMake_SOURCE_DIR}/ExplicitDirs)
   set(binary_dir ${RunCMake_BINARY_DIR}/ExplicitDirs-build)
 
   set(RunCMake_TEST_SOURCE_DIR "${source_dir}")
   set(RunCMake_TEST_BINARY_DIR "${binary_dir}")
-  set(RunCMake_TEST_NO_CLEAN 1)
-  set(RunCMake_TEST_NO_SOURCE_DIR 1)
 
   file(REMOVE_RECURSE "${binary_dir}")
   run_cmake_with_options(S-arg -S ${source_dir} ${binary_dir})
@@ -104,6 +137,14 @@ project(ExplicitDirsMissing LANGUAGES NONE)
   file(REMOVE_RECURSE "${binary_dir}")
   run_cmake_with_options(B-S -B${binary_dir} -S${source_dir})
 
+  message("copied to ${RunCMake_TEST_BINARY_DIR}/initial-cache.txt")
+  file(COPY ${RunCMake_SOURCE_DIR}/C_buildsrcdir/initial-cache.txt DESTINATION ${RunCMake_TEST_BINARY_DIR})
+
+  # CMAKE_BINARY_DIR should be determined by -B if specified, and CMAKE_SOURCE_DIR determined by -S if specified.
+  # Path to initial-cache.txt is relative to the $PWD, which is normally set to ${RunCMake_TEST_BINARY_DIR}.
+  run_cmake_with_options(C_buildsrcdir -B DummyBuildDir -S ${RunCMake_SOURCE_DIR}/C_buildsrcdir/src -C initial-cache.txt)
+  # Test that full path works, too.
+  run_cmake_with_options(C_buildsrcdir -B DummyBuildDir -S ${RunCMake_SOURCE_DIR}/C_buildsrcdir/src -C ${RunCMake_TEST_BINARY_DIR}/initial-cache.txt)
 endfunction()
 run_ExplicitDirs()
 
@@ -119,6 +160,8 @@ function(run_BuildDir)
     ${CMAKE_COMMAND} --build BuildDir-build --target CustomTarget)
   run_cmake_command(BuildDir--build-multiple-targets ${CMAKE_COMMAND} -E chdir ..
     ${CMAKE_COMMAND} --build BuildDir-build -t CustomTarget2 --target CustomTarget3)
+  run_cmake_command(BuildDir--build-multiple-targets-fail ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build -t CustomTargetFail --target CustomTarget3)
   run_cmake_command(BuildDir--build-multiple-targets-jobs ${CMAKE_COMMAND} -E chdir ..
     ${CMAKE_COMMAND} --build BuildDir-build --target CustomTarget CustomTarget2 -j2 --target CustomTarget3)
   run_cmake_command(BuildDir--build-multiple-targets-with-clean-first ${CMAKE_COMMAND} -E chdir ..
@@ -158,8 +201,8 @@ function(run_BuildDir)
   run_cmake_command(BuildDir--build--parallel-large ${CMAKE_COMMAND} -E chdir ..
     ${CMAKE_COMMAND} --build BuildDir-build --parallel 4294967293)
 
-  # No default jobs for Xcode and FreeBSD build command
-  if(NOT RunCMake_GENERATOR MATCHES "Xcode" AND NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+  # No default jobs for FreeBSD build command
+  if(NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
     run_cmake_command(BuildDir--build-jobs-no-number ${CMAKE_COMMAND} -E chdir ..
       ${CMAKE_COMMAND} --build BuildDir-build -j)
     run_cmake_command(BuildDir--build-jobs-no-number-trailing--target ${CMAKE_COMMAND} -E chdir ..
@@ -171,6 +214,92 @@ function(run_BuildDir)
   endif()
 endfunction()
 run_BuildDir()
+
+function(run_EnvironmentGenerator)
+  set(source_dir ${RunCMake_SOURCE_DIR}/EnvGenerator)
+
+  set(ENV{CMAKE_GENERATOR_INSTANCE} "instance")
+  set(ENV{CMAKE_GENERATOR_PLATFORM} "platform")
+  set(ENV{CMAKE_GENERATOR_TOOLSET} "toolset")
+  run_cmake_command(Envgen-warnings ${CMAKE_COMMAND} -G)
+  unset(ENV{CMAKE_GENERATOR_INSTANCE})
+  unset(ENV{CMAKE_GENERATOR_PLATFORM})
+  unset(ENV{CMAKE_GENERATOR_TOOLSET})
+
+  # Test CMAKE_GENERATOR without actual configuring
+  run_cmake_command(Envgen-unset ${CMAKE_COMMAND} -G)
+  set(ENV{CMAKE_GENERATOR} "Ninja")
+  run_cmake_command(Envgen-ninja ${CMAKE_COMMAND} -G)
+  set(ENV{CMAKE_GENERATOR} "NoSuchGenerator")
+  run_cmake_command(Envgen-bad ${CMAKE_COMMAND} -G)
+  unset(ENV{CMAKE_GENERATOR})
+
+  if(RunCMake_GENERATOR MATCHES "Visual Studio.*")
+    set(ENV{CMAKE_GENERATOR} "${RunCMake_GENERATOR}")
+    run_cmake_command(Envgen ${CMAKE_COMMAND} ${source_dir})
+    # Toolset is available since VS 2010.
+    if(RunCMake_GENERATOR MATCHES "Visual Studio [1-9][0-9]")
+      set(ENV{CMAKE_GENERATOR_TOOLSET} "invalid")
+      # Envvar shouldn't affect existing build tree
+      run_cmake_command(Envgen-toolset-existing ${CMAKE_COMMAND} -E chdir ..
+        ${CMAKE_COMMAND} --build Envgen-build)
+      run_cmake_command(Envgen-toolset-invalid ${CMAKE_COMMAND} ${source_dir})
+      # Command line -G implies -T""
+      run_cmake_command(Envgen-G-implicit-toolset ${CMAKE_COMMAND} -G "${RunCMake_GENERATOR}" ${source_dir})
+      run_cmake_command(Envgen-T-toolset ${CMAKE_COMMAND} -T "fromcli" ${source_dir})
+      unset(ENV{CMAKE_GENERATOR_TOOLSET})
+    endif()
+    # Platform can be set only if not in generator name.
+    if(RunCMake_GENERATOR MATCHES "^Visual Studio [0-9]+ [0-9]+$")
+      set(ENV{CMAKE_GENERATOR_PLATFORM} "invalid")
+      # Envvar shouldn't affect existing build tree
+      run_cmake_command(Envgen-platform-existing ${CMAKE_COMMAND} -E chdir ..
+        ${CMAKE_COMMAND} --build Envgen-build)
+      if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 ")
+        set(RunCMake-stderr-file "Envgen-platform-invalid-stderr-vs9.txt")
+      endif()
+      run_cmake_command(Envgen-platform-invalid ${CMAKE_COMMAND} ${source_dir})
+      unset(RunCMake-stderr-file)
+      # Command line -G implies -A""
+      run_cmake_command(Envgen-G-implicit-platform ${CMAKE_COMMAND} -G "${RunCMake_GENERATOR}" ${source_dir})
+      if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 ")
+        set(RunCMake-stderr-file "Envgen-A-platform-stderr-vs9.txt")
+      endif()
+      run_cmake_command(Envgen-A-platform ${CMAKE_COMMAND} -A "fromcli" ${source_dir})
+      unset(RunCMake-stderr-file)
+      unset(ENV{CMAKE_GENERATOR_PLATFORM})
+    endif()
+    # Instance is available since VS 2017.
+    if(RunCMake_GENERATOR MATCHES "Visual Studio (15|16).*")
+      set(ENV{CMAKE_GENERATOR_INSTANCE} "invalid")
+      # Envvar shouldn't affect existing build tree
+      run_cmake_command(Envgen-instance-existing ${CMAKE_COMMAND} -E chdir ..
+              ${CMAKE_COMMAND} --build Envgen-build)
+      run_cmake_command(Envgen-instance-invalid ${CMAKE_COMMAND} ${source_dir})
+      unset(ENV{CMAKE_GENERATOR_INSTANCE})
+    endif()
+    unset(ENV{CMAKE_GENERATOR})
+  endif()
+endfunction()
+run_EnvironmentGenerator()
+
+function(run_EnvironmentExportCompileCommands)
+  set(RunCMake_TEST_SOURCE_DIR ${RunCMake_SOURCE_DIR}/env-export-compile-commands)
+
+  run_cmake(env-export-compile-commands-unset)
+
+  set(ENV{CMAKE_EXPORT_COMPILE_COMMANDS} ON)
+  run_cmake(env-export-compile-commands-set)
+
+  set(RunCMake_TEST_OPTIONS -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF)
+  run_cmake(env-export-compile-commands-override)
+
+  unset(ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
+endfunction(run_EnvironmentExportCompileCommands)
+
+if(RunCMake_GENERATOR MATCHES "Unix Makefiles" OR RunCMake_GENERATOR MATCHES "Ninja")
+  run_EnvironmentExportCompileCommands()
+endif()
 
 if(RunCMake_GENERATOR STREQUAL "Ninja")
   # Use a single build tree for a few tests without cleaning.
@@ -218,6 +347,42 @@ run_cmake_command(E_create_symlink-no-replace-dir
   ${CMAKE_COMMAND} -E create_symlink T .
   )
 
+#create hard link tests
+run_cmake_command(E_create_hardlink-no-arg
+  ${CMAKE_COMMAND} -E create_hardlink
+  )
+
+set(dir ${RunCMake_BINARY_DIR}/hardlink_tests)
+file(REMOVE_RECURSE "${dir}")
+file(MAKE_DIRECTORY ${dir})
+
+run_cmake_command(E_create_hardlink-non-existent-source
+  ${CMAKE_COMMAND} -E create_hardlink ${dir}/I_dont_exist ${dir}/link
+  )
+
+file(TOUCH ${dir}/1)
+
+run_cmake_command(E_create_hardlink-ok
+  ${CMAKE_COMMAND} -E create_hardlink ${dir}/1 ${dir}/1-link
+  )
+
+run_cmake_command(E_create_hardlink-no-directory
+  ${CMAKE_COMMAND} -E create_hardlink ${dir}/1 ${dir}/a/1-link
+  )
+
+#On Windows, if the user does not have sufficient privileges
+#don't fail this test
+set(RunCMake_DEFAULT_stderr "(operation not permitted)?")
+run_cmake_command(E_create_hardlink-unresolved-symlink-prereq
+  ${CMAKE_COMMAND} -E create_symlink ${dir}/1 ${dir}/1-symlink
+  )
+file(REMOVE ${dir}/1)
+
+run_cmake_command(E_create_hardlink-unresolved-symlink
+  ${CMAKE_COMMAND} -E create_hardlink ${dir}/1-symlink ${dir}/1s-link
+  )
+unset(RunCMake_DEFAULT_stderr)
+
 set(in ${RunCMake_SOURCE_DIR}/copy_input)
 set(out ${RunCMake_BINARY_DIR}/copy_output)
 file(REMOVE_RECURSE "${out}")
@@ -264,13 +429,141 @@ file(MAKE_DIRECTORY ${out})
 file(WRITE ${outfile} "")
 run_cmake_command(E_make_directory-three-directories
   ${CMAKE_COMMAND} -E make_directory ${out}/d1 ${out}/d2 ${out}/d2)
+run_cmake_command(E_remove_directory-three-directories
+  ${CMAKE_COMMAND} -E remove_directory ${out}/d1 ${out}/d2 ${out}/d2)
 run_cmake_command(E_make_directory-directory-with-parent
   ${CMAKE_COMMAND} -E make_directory ${out}/parent/child)
-run_cmake_command(E_make_directory-three-directories-and-file
+run_cmake_command(E_remove_directory-directory-with-parent
+  ${CMAKE_COMMAND} -E remove_directory ${out}/parent)
+run_cmake_command(E_make_directory-two-directories-and-file
   ${CMAKE_COMMAND} -E make_directory ${out}/d1 ${out}/d2 ${outfile})
+run_cmake_command(E_remove_directory-two-directories-and-file
+  ${CMAKE_COMMAND} -E remove_directory ${out}/d1 ${out}/d2 ${outfile})
+
+if(UNIX)
+  file(MAKE_DIRECTORY ${out}/dir)
+  file(CREATE_LINK ${out}/dir ${out}/link_dir SYMBOLIC)
+  file(CREATE_LINK ${outfile} ${out}/link_file_for_test.txt SYMBOLIC)
+  run_cmake_command(E_remove_directory-symlink-dir
+    ${CMAKE_COMMAND} -E remove_directory ${out}/link_dir)
+  run_cmake_command(E_remove_directory-symlink-file
+    ${CMAKE_COMMAND} -E remove_directory ${out}/link_file_for_test.txt)
+endif()
+
 unset(out)
 unset(outfile)
 
+set(out ${RunCMake_BINARY_DIR}/rm_tests)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+file(TOUCH ${out}/existing.txt)
+run_cmake_command(E_rm_file_force_existing
+  ${CMAKE_COMMAND} -E rm -f ${out}/existing.txt)
+file(TOUCH ${out}/existing.txt)
+run_cmake_command(E_rm_file_non_force_existing
+  ${CMAKE_COMMAND} -E rm ${out}/existing.txt)
+run_cmake_command(E_rm_file_force_non_existing
+  ${CMAKE_COMMAND} -E rm -f ${out}/not_existing.txt)
+run_cmake_command(E_rm_file_non_force_non_existing
+  ${CMAKE_COMMAND} -E rm ${out}/not_existing.txt)
+
+file(TOUCH ${out}/existing.txt)
+run_cmake_command(E_rm_file_recursive_existing
+  ${CMAKE_COMMAND} -E rm -r ${out}/existing.txt)
+run_cmake_command(E_rm_file_recursive_non_existing
+  ${CMAKE_COMMAND} -E rm -r ${out}/not_existing.txt)
+
+file(MAKE_DIRECTORY ${out}/d1 ${out}/d2)
+run_cmake_command(E_rm_non_recursive_directory-two-directories
+  ${CMAKE_COMMAND} -E rm ${out}/d1 ${out}/d2)
+
+run_cmake_command(E_rm_recursive_directory-two-directories
+  ${CMAKE_COMMAND} -E rm -R ${out}/d1 ${out}/d2)
+
+run_cmake_command(E_rm_no_file_specified
+  ${CMAKE_COMMAND} -E rm -rf)
+
+run_cmake_command(E_rm_empty_file_specified
+  ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_rm_empty_file_specified.cmake)
+
+run_cmake_command(E_rm_bad_argument
+  ${CMAKE_COMMAND} -E rm -rd ${out}/d1 ${out}/d2)
+
+file(MAKE_DIRECTORY ${out}/d1 ${out}/d2)
+file(WRITE ${out}/test.txt "")
+run_cmake_command(E_rm_force_recursive_directory_with_files
+  ${CMAKE_COMMAND} -E rm -rf ${out}/)
+
+run_cmake_command(E_rm_force_recursive_non_existing_file
+  ${CMAKE_COMMAND} -E rm -Rf ${out}/test.txt)
+
+if(NOT WIN32 AND NOT CYGWIN)
+  file(MAKE_DIRECTORY ${out})
+  file(TOUCH ${out}/existing.txt)
+  file(MAKE_DIRECTORY ${out}/dir)
+  file(TOUCH ${out}/dir/existing.txt) # add a file in the folder
+  file(CREATE_LINK ${out}/dir ${out}/link_dir SYMBOLIC)
+  file(CREATE_LINK ${out}/existing.txt ${out}/existing_file_link.txt SYMBOLIC)
+  file(CREATE_LINK ${out}/non_existing.txt ${out}/non_existing_file_link.txt SYMBOLIC)
+  run_cmake_command(E_rm_file_link_existing
+    ${CMAKE_COMMAND} -E rm ${out}/existing_file_link.txt)
+  run_cmake_command(E_rm_directory_link_existing
+    ${CMAKE_COMMAND} -E rm ${out}/link_dir)
+  run_cmake_command(E_rm_file_link_non_existing
+    ${CMAKE_COMMAND} -E rm ${out}/non_existing_file_link.txt)
+
+  file(CREATE_LINK ${out}/dir ${out}/link_dir SYMBOLIC)
+  file(CREATE_LINK ${out}/existing.txt ${out}/existing_file_link.txt SYMBOLIC)
+  file(CREATE_LINK ${out}/non_existing.txt ${out}/non_existing_file_link.txt SYMBOLIC)
+  run_cmake_command(E_rm_recursive_file_link_existing
+    ${CMAKE_COMMAND} -E rm -R ${out}/existing_file_link.txt)
+  run_cmake_command(E_rm_recursive_directory_link_existing
+    ${CMAKE_COMMAND} -E rm -r ${out}/link_dir)
+  run_cmake_command(E_rm_recursive_file_link_non_existing
+    ${CMAKE_COMMAND} -E rm -r ${out}/non_existing_file_link.txt)
+endif()
+unset(out)
+
+# cat tests
+set(out ${RunCMake_BINARY_DIR}/cat_tests)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+run_cmake_command(E_cat_non_existing_file
+  ${CMAKE_COMMAND} -E cat ${out}/non-existing-file.txt)
+
+if(UNIX)
+  # test non readable file only if not root
+  execute_process(
+    COMMAND id -u $ENV{USER}
+    OUTPUT_VARIABLE uid
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  if(NOT "${uid}" STREQUAL "0")
+    # Create non readable file
+    set(inside_folder "${out}/in")
+    file(MAKE_DIRECTORY ${inside_folder})
+    file(WRITE "${inside_folder}/non_readable_file.txt" "first file to append\n")
+    file(COPY "${inside_folder}/non_readable_file.txt" DESTINATION "${out}" FILE_PERMISSIONS OWNER_WRITE)
+    run_cmake_command(E_cat_non_readable_file
+      ${CMAKE_COMMAND} -E cat "${out}/non_readable_file.txt")
+  endif()
+endif()
+
+run_cmake_command(E_cat_option_not_handled
+  ${CMAKE_COMMAND} -E cat -f)
+
+run_cmake_command(E_cat_directory
+  ${CMAKE_COMMAND} -E cat ${out})
+
+file(WRITE "${out}/first_file.txt" "first file to append\n")
+file(WRITE "${out}/second_file.txt" "second file to append\n")
+file(WRITE "${out}/unicode_file.txt" "àéùç - 한국어") # Korean in Korean
+run_cmake_command(E_cat_good_cat
+  ${CMAKE_COMMAND} -E cat "${out}/first_file.txt" "${out}/second_file.txt" "${out}/unicode_file.txt")
+unset(out)
+
+run_cmake_command(E_cat_good_binary_cat
+  ${CMAKE_COMMAND} -E cat "${RunCMake_SOURCE_DIR}/E_cat_binary_files/binary.obj" "${RunCMake_SOURCE_DIR}/E_cat_binary_files/binary.obj")
 
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)
@@ -311,6 +604,14 @@ run_cmake_command(E_sleep-one-tenth ${CMAKE_COMMAND} -E sleep 0.1)
 
 run_cmake_command(P_directory ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR})
 run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMake_BINARY_DIR}/P_working-dir-build -P ${RunCMake_SOURCE_DIR}/P_working-dir.cmake)
+# Documented to return the same result as above even if -S and -B are set to something else.
+# Tests the values of CMAKE_BINARY_DIR CMAKE_CURRENT_BINARY_DIR CMAKE_SOURCE_DIR CMAKE_CURRENT_SOURCE_DIR.
+run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMake_BINARY_DIR}/P_working-dir-build -P ${RunCMake_SOURCE_DIR}/P_working-dir.cmake -S something_else -B something_else_1)
+
+# Place an initial cache where C_basic will find it when passed the relative path "..".
+file(COPY ${RunCMake_SOURCE_DIR}/C_basic_initial-cache.txt DESTINATION ${RunCMake_BINARY_DIR})
+run_cmake_with_options(C_basic -C ../C_basic_initial-cache.txt)
+run_cmake_with_options(C_basic_fullpath -C ${RunCMake_BINARY_DIR}/C_basic_initial-cache.txt)
 
 set(RunCMake_TEST_OPTIONS
   "-DFOO=-DBAR:BOOL=BAZ")
@@ -404,6 +705,22 @@ set(RunCMake_TEST_OPTIONS --trace-expand --warn-uninitialized)
 run_cmake(trace-expand-warn-uninitialized)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS --trace-redirect=${RunCMake_BINARY_DIR}/redirected.trace)
+run_cmake(trace-redirect)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --trace-redirect=/no/such/file.txt)
+run_cmake(trace-redirect-nofile)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --trace        --trace-format=json-v1 --trace-redirect=${RunCMake_BINARY_DIR}/json-v1.trace)
+run_cmake(trace-json-v1)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --trace-expand --trace-format=json-v1 --trace-redirect=${RunCMake_BINARY_DIR}/json-v1-expand.trace)
+run_cmake(trace-json-v1-expand)
+unset(RunCMake_TEST_OPTIONS)
+
 set(RunCMake_TEST_OPTIONS -Wno-deprecated --warn-uninitialized)
 run_cmake(warn-uninitialized)
 unset(RunCMake_TEST_OPTIONS)
@@ -456,3 +773,54 @@ if(CMAKE_HOST_UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
   run_cmake_command(closed_stderr sh -c "\"${CMAKE_COMMAND}\" --version 2>&-")
   run_cmake_command(closed_stdall sh -c "\"${CMAKE_COMMAND}\" --version <&- >&- 2>&-")
 endif()
+
+function(run_llvm_rc)
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/llvm_rc-build")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake_command(llvm_rc_no_args ${CMAKE_COMMAND} -E cmake_llvm_rc)
+  run_cmake_command(llvm_rc_no_-- ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/source_file test.tmp ${CMAKE_COMMAND} -E echo "This is a test")
+  run_cmake_command(llvm_rc_empty_preprocessor ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/source_file test.tmp ++ ${CMAKE_COMMAND} -E echo "This is a test")
+  run_cmake_command(llvm_rc_failing_first_command ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/source_file test.tmp ${CMAKE_COMMAND} -P FailedProgram.cmake ++ ${CMAKE_COMMAND} -E echo "This is a test")
+  run_cmake_command(llvm_rc_failing_second_command ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/source_file test.tmp ${CMAKE_COMMAND} -E echo "This is a test" ++ ${CMAKE_COMMAND} -P FailedProgram.cmake )
+  if(EXISTS ${RunCMake_TEST_BINARY_DIR}/test.tmp)
+      message(SEND_ERROR "${test} - FAILED:\n"
+        "test.tmp was not deleted")
+  endif()
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir")
+  run_cmake_command(llvm_rc_full_run ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/source_file test.tmp ${CMAKE_COMMAND} -E echo "This is a test" ++ ${LLVM_RC} -bad /FO SOURCE_DIR/llvmrc.result test.tmp )
+  if(EXISTS ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/test.tmp)
+      message(SEND_ERROR "${test} - FAILED:\n"
+        "test.tmp was not deleted")
+  endif()
+  file(READ ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/llvmrc.result LLVMRC_RESULT)
+  if(NOT "${LLVMRC_RESULT}" STREQUAL "This is a test\n")
+    message(SEND_ERROR "${test} - FAILED:\n"
+        "llvmrc.result was not created")
+  endif()
+  unset(LLVMRC_RESULT)
+endfunction()
+run_llvm_rc()
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt --profiling-format=google-trace)
+run_cmake(profiling-all-params)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt --profiling-format=invalid-format)
+run_cmake(profiling-invalid-format)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt)
+run_cmake(profiling-missing-format)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-format=google-trace)
+run_cmake(profiling-missing-output)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/profiling-test")
+set(ProfilingTestOutput ${RunCMake_TEST_BINARY_DIR}/output.json)
+set(RunCMake_TEST_OPTIONS --profiling-format=google-trace --profiling-output=${ProfilingTestOutput})
+run_cmake(ProfilingTest)
+unset(RunCMake_TEST_OPTIONS)

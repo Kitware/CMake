@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmHexFileConverter.h"
 
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
+#include <cctype>
+#include <cstdio>
+#include <cstring>
 
 #include "cmSystemTools.h"
 
@@ -128,7 +128,7 @@ static bool ConvertIntelHexLine(const char* buf, FILE* outFile)
 }
 
 cmHexFileConverter::FileType cmHexFileConverter::DetermineFileType(
-  const char* inFileName)
+  const std::string& inFileName)
 {
   char buf[1024];
   FILE* inFile = cmsys::SystemTools::Fopen(inFileName, "rb");
@@ -170,8 +170,8 @@ cmHexFileConverter::FileType cmHexFileConverter::DetermineFileType(
   return type;
 }
 
-bool cmHexFileConverter::TryConvert(const char* inFileName,
-                                    const char* outFileName)
+bool cmHexFileConverter::TryConvert(const std::string& inFileName,
+                                    const std::string& outFileName)
 {
   FileType type = DetermineFileType(inFileName);
   if (type == Binary) {

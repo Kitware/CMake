@@ -1,6 +1,5 @@
-
-cmake_minimum_required(VERSION 3.7)
-project (ProperLinkFlags CUDA CXX)
+cmake_minimum_required(VERSION 3.18)
+project(ProperLinkFlags CUDA CXX)
 
 #Goal for this example:
 #Verify that when we have CXX and CUDA enabled and we link an executable that
@@ -9,7 +8,12 @@ project (ProperLinkFlags CUDA CXX)
 
 #Specify a set of valid CUDA flags and an invalid set of CXX flags ( for CUDA )
 #to make sure we don't use the CXX flags when linking CUDA executables
-string(APPEND CMAKE_CUDA_FLAGS " -arch=sm_35 --use_fast_math")
+if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+  string(APPEND CMAKE_CUDA_FLAGS "--use_fast_math")
+elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
+  string(APPEND CMAKE_CUDA_FLAGS "-ffast-math")
+endif()
+
 set(CMAKE_CXX_FLAGS "-Wall")
 
 set(CMAKE_CXX_STANDARD 11)

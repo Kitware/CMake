@@ -1,0 +1,73 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#pragma once
+
+#if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
+#  define CMake_HAVE_CXX_SHARED_LOCK
+#endif
+#if __cplusplus >= 201703L || defined(_MSVC_LANG) && _MSVC_LANG >= 201703L
+#  define CMake_HAVE_CXX_SHARED_MUTEX
+#endif
+
+#if defined(CMake_HAVE_CXX_SHARED_LOCK)
+#  include <shared_mutex> // IWYU pragma: export
+#endif
+#if !defined(CMake_HAVE_CXX_SHARED_MUTEX)
+#  include <cm3p/uv.h>
+#endif
+
+namespace cm {
+#if defined(CMake_HAVE_CXX_SHARED_MUTEX)
+using std::shared_mutex;
+#else
+class shared_mutex
+{
+  uv_rwlock_t _M_;
+
+public:
+  using native_handle_type = uv_rwlock_t*;
+
+  shared_mutex() { uv_rwlock_init(&_M_); }
+  ~shared_mutex() { uv_rwlock_destroy(&_M_); }
+
+  shared_mutex(shared_mutex const&) = delete;
+  shared_mutex& operator=(shared_mutex const&) = delete;
+
+  void lock() { uv_rwlock_wrlock(&_M_); }
+  bool try_lock() { return uv_rwlock_trywrlock(&_M_) == 0; }
+  void unlock() { uv_rwlock_wrunlock(&_M_); }
+
+  void lock_shared() { uv_rwlock_rdlock(&_M_); }
+  void unlock_shared() { uv_rwlock_rdunlock(&_M_); }
+
+  native_handle_type native_handle() { return &_M_; }
+};
+#endif
+
+#if defined(CMake_HAVE_CXX_SHARED_LOCK)
+using std::shared_lock;
+#else
+template <typename T>
+class shared_lock
+{
+  T& _mutex;
+
+public:
+  using mutex_type = T;
+
+  shared_lock(T& m)
+    : _mutex(m)
+  {
+    _mutex.lock_shared();
+  }
+
+  ~shared_lock() { _mutex.unlock_shared(); }
+
+  shared_lock(shared_lock const&) = delete;
+  shared_lock& operator=(shared_lock const&) = delete;
+};
+#endif
+}

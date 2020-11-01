@@ -70,6 +70,7 @@ Functions
     doxygen_add_docs(targetName
         [filesOrDirs...]
         [ALL]
+        [USE_STAMP_FILE]
         [WORKING_DIRECTORY dir]
         [COMMENT comment])
 
@@ -92,7 +93,19 @@ Functions
   the :command:`add_custom_target` command used to create the custom target
   internally.
 
-  If ALL is set, the target will be added to the default build target.
+  If ``ALL`` is set, the target will be added to the default build target.
+
+  If ``USE_STAMP_FILE`` is set, the custom command defined by this function will
+  create a stamp file with the name ``<targetName>.stamp`` in the current
+  binary directory whenever doxygen is re-run.  With this option present, all
+  items in ``<filesOrDirs>`` must be files (i.e. no directories, symlinks or
+  wildcards) and each of the files must exist at the time
+  ``doxygen_add_docs()`` is called.  An error will be raised if any of the
+  items listed is missing or is not a file when ``USE_STAMP_FILE`` is given.
+  A dependency will be created on each of the files so that doxygen will only
+  be re-run if one of the files is updated.  Without the ``USE_STAMP_FILE``
+  option, doxygen will always be re-run if the ``<targetName>`` target is built
+  regardless of whether anything listed in ``<filesOrDirs>`` has changed.
 
   The contents of the generated ``Doxyfile`` can be customized by setting CMake
   variables before calling ``doxygen_add_docs()``. Any variable with a name of
@@ -696,8 +709,8 @@ if(TARGET Doxygen::doxygen)
     set(_doxyfile_in       "${CMAKE_BINARY_DIR}/CMakeDoxyfile.in")
     set(_doxyfile_defaults "${CMAKE_BINARY_DIR}/CMakeDoxygenDefaults.cmake")
 
-    file(WRITE "${_doxyfile_in}"       ${_Doxygen_dne_header})
-    file(WRITE "${_doxyfile_defaults}" ${_Doxygen_dne_header})
+    set(_doxyfile_in_contents "")
+    set(_doxyfile_defaults_contents "")
 
     # Get strings containing a configuration key from the template Doxyfile
     # we obtained from this version of Doxygen. Because some options are split
@@ -729,19 +742,19 @@ if(TARGET Doxygen::doxygen)
         if(_Doxygen_param MATCHES "([A-Z][A-Z0-9_]+)( *)=( (.*))?")
             # Ok, this is a config key with a value
             if(CMAKE_MATCH_COUNT EQUAL 4)
-                file(APPEND "${_doxyfile_in}"
-                    "${CMAKE_MATCH_1}${CMAKE_MATCH_2}= @DOXYGEN_${CMAKE_MATCH_1}@\n")
+                string(APPEND _doxyfile_in_contents
+                       "${CMAKE_MATCH_1}${CMAKE_MATCH_2}= @DOXYGEN_${CMAKE_MATCH_1}@\n")
                 # Remove the backslashes we had to preserve to handle newlines
                 string(REPLACE "\\\n" "\n" _value "${CMAKE_MATCH_4}")
-                file(APPEND "${_doxyfile_defaults}"
+                string(APPEND _doxyfile_defaults_contents
 "if(NOT DEFINED DOXYGEN_${CMAKE_MATCH_1})
     set(DOXYGEN_${CMAKE_MATCH_1} ${_value})
 endif()
 ")
             # Ok, this is a config key with empty default value
             elseif(CMAKE_MATCH_COUNT EQUAL 2)
-                file(APPEND "${_doxyfile_in}"
-                    "${CMAKE_MATCH_1}${CMAKE_MATCH_2}= @DOXYGEN_${CMAKE_MATCH_1}@\n")
+                string(APPEND _doxyfile_in_contents
+                       "${CMAKE_MATCH_1}${CMAKE_MATCH_2}= @DOXYGEN_${CMAKE_MATCH_1}@\n")
             else()
                 message(AUTHOR_WARNING
 "Unexpected line format! Code review required!\nFault line: ${_Doxygen_param}")
@@ -751,6 +764,10 @@ endif()
 "Unexpected line format! Code review required!\nFault line: ${_Doxygen_param}")
         endif()
     endforeach()
+    file(WRITE "${_doxyfile_defaults}" "${_Doxygen_dne_header}"
+                                       "${_doxyfile_defaults_contents}")
+    file(WRITE "${_doxyfile_in}"       "${_Doxygen_dne_header}"
+                                       "${_doxyfile_in_contents}")
 
     # Ok, dumped defaults are not needed anymore...
     file(REMOVE "${_Doxygen_tpl}")
@@ -801,7 +818,7 @@ function(doxygen_list_to_quoted_strings LIST_VARIABLE)
 endfunction()
 
 function(doxygen_add_docs targetName)
-    set(_options ALL)
+    set(_options ALL USE_STAMP_FILE)
     set(_one_value_args WORKING_DIRECTORY COMMENT)
     set(_multi_value_args)
     cmake_parse_arguments(_args
@@ -978,22 +995,27 @@ doxygen_add_docs() for target ${targetName}")
     endif()
 
     # Build up a list of files we can identify from the inputs so we can list
-    # them as SOURCES in the custom target (makes them display in IDEs). We
-    # must do this before we transform the various DOXYGEN_... variables below
-    # because we need to process DOXYGEN_INPUT as a list first.
+    # them as DEPENDS and SOURCES in the custom command/target (the latter
+    # makes them display in IDEs). This must be done before we transform the
+    # various DOXYGEN_... variables below because we need to process
+    # DOXYGEN_INPUT as a list first.
     unset(_sources)
     foreach(_item IN LISTS DOXYGEN_INPUT)
         get_filename_component(_abs_item "${_item}" ABSOLUTE
                                BASE_DIR "${_args_WORKING_DIRECTORY}")
-        if(EXISTS "${_abs_item}" AND
-           NOT IS_DIRECTORY "${_abs_item}" AND
-           NOT IS_SYMLINK "${_abs_item}")
+        get_source_file_property(_isGenerated "${_abs_item}" GENERATED)
+        if(_isGenerated OR
+           (EXISTS "${_abs_item}" AND
+            NOT IS_DIRECTORY "${_abs_item}" AND
+            NOT IS_SYMLINK "${_abs_item}"))
             list(APPEND _sources "${_abs_item}")
+        elseif(_args_USE_STAMP_FILE)
+            message(FATAL_ERROR "Source does not exist or is not a file:\n"
+                "    ${_abs_item}\n"
+                "Only existing files may be specified when the "
+                "USE_STAMP_FILE option is given.")
         endif()
     endforeach()
-    if(_sources)
-        list(INSERT _sources 0 SOURCES)
-    endif()
 
     # Transform known list type options into space separated strings.
     set(_doxygen_list_options
@@ -1107,15 +1129,35 @@ doxygen_add_docs() for target ${targetName}")
         set(_all ALL)
     endif()
 
-    # Add the target
-    add_custom_target( ${targetName} ${_all} VERBATIM
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${_original_doxygen_output_dir}
-        COMMAND "${DOXYGEN_EXECUTABLE}" "${_target_doxyfile}"
-        WORKING_DIRECTORY "${_args_WORKING_DIRECTORY}"
-        DEPENDS "${_target_doxyfile}"
-        COMMENT "${_args_COMMENT}"
-        ${_sources}
-    )
+    # Only create the stamp file if asked to. If we don't create it,
+    # the target will always be considered out-of-date.
+    if(_args_USE_STAMP_FILE)
+        set(__stamp_file "${CMAKE_CURRENT_BINARY_DIR}/${targetName}.stamp")
+        add_custom_command(
+            VERBATIM
+            OUTPUT ${__stamp_file}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${_original_doxygen_output_dir}
+            COMMAND "${DOXYGEN_EXECUTABLE}" "${_target_doxyfile}"
+            COMMAND ${CMAKE_COMMAND} -E touch ${__stamp_file}
+            WORKING_DIRECTORY "${_args_WORKING_DIRECTORY}"
+            DEPENDS "${_target_doxyfile}" ${_sources}
+            COMMENT "${_args_COMMENT}"
+        )
+        add_custom_target(${targetName} ${_all}
+            DEPENDS ${__stamp_file}
+            SOURCES ${_sources}
+        )
+        unset(__stamp_file)
+    else()
+        add_custom_target( ${targetName} ${_all} VERBATIM
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${_original_doxygen_output_dir}
+            COMMAND "${DOXYGEN_EXECUTABLE}" "${_target_doxyfile}"
+            WORKING_DIRECTORY "${_args_WORKING_DIRECTORY}"
+            DEPENDS "${_target_doxyfile}" ${_sources}
+            COMMENT "${_args_COMMENT}"
+            SOURCES ${_sources}
+        )
+    endif()
 
 endfunction()
 

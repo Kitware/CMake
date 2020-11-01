@@ -1,0 +1,318 @@
+# Linux-specific builder configurations and build commands
+
+## Base images
+
+### Release
+
+.release_linux:
+    image: "kitware/cmake:build-linux-x86_64-deps-2020-04-02@sha256:77e9ab183f34680990db9da5945473e288f0d6556bce79ecc1589670d656e157"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        LAUNCHER: "scl enable devtoolset-6 rh-python36 --"
+
+.linux_prep_source:
+    image: "fedora:32"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+
+.linux_package:
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        LAUNCHER: "scl enable devtoolset-6 rh-python36 --"
+
+.linux_package_x86_64:
+    extends: .linux_package
+
+    image: "kitware/cmake:build-linux-x86_64-deps-2020-04-02@sha256:77e9ab183f34680990db9da5945473e288f0d6556bce79ecc1589670d656e157"
+
+    variables:
+        CMAKE_ARCH: x86_64
+
+### Debian
+
+.debian10:
+    image: "kitware/cmake:ci-debian10-x86_64-2020-10-03"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+
+.debian10_iwyu:
+    extends: .debian10
+
+    variables:
+        CMAKE_CONFIGURATION: debian10_iwyu
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMake_SKIP_INSTALL: 1
+
+### Fedora
+
+.fedora31:
+    image: "kitware/cmake:ci-fedora31-x86_64-2020-10-22"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
+
+#### Lint builds
+
+.fedora31_tidy:
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_tidy
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMake_SKIP_INSTALL: 1
+
+.fedora31_sphinx:
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_sphinx
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
+        CMake_SKIP_INSTALL: 1
+
+.fedora31_sphinx_package:
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_sphinx_package
+        CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
+
+#### Build and test
+
+.debian10_ninja:
+    extends: .debian10
+
+    variables:
+        CMAKE_CONFIGURATION: debian10_ninja
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.fedora31_ninja:
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_ninja
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.fedora31_ninja_multi:
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_ninja_multi
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+
+.fedora31_makefiles:
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_makefiles
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "Unix Makefiles"
+
+### CUDA builds
+
+.cuda10.2:
+    image: "kitware/cmake:ci-cuda10.2-x86_64-2020-06-11"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CTEST_LABELS: "CUDA"
+
+.cuda10.2_nvidia:
+    extends: .cuda10.2
+
+    variables:
+        CMAKE_CONFIGURATION: cuda10.2_nvidia
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+## Tags
+
+.linux_builder_tags:
+    tags:
+        - cmake
+        - build
+        - docker
+        - linux
+
+.linux_builder_tags_qt:
+    tags:
+        - cmake
+        - build
+        - docker
+        - linux
+        - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
+
+.linux_builder_tags_x11:
+    tags:
+        - cmake
+        - docker
+        - linux
+        - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
+        - x11
+
+.linux_builder_tags_cuda:
+    tags:
+        - cmake
+        - cuda-rt
+        - docker
+        - linux
+
+## Linux-specific scripts
+
+.before_script_linux: &before_script_linux
+    - .gitlab/ci/cmake.sh
+    - .gitlab/ci/ninja.sh
+    - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
+    - cmake --version
+    - ninja --version
+
+.cmake_prep_source_linux:
+    stage: prep
+
+    script:
+        - *before_script_linux
+        - dnf install --setopt=install_weak_deps=False -y git-core
+        - v="$(.gitlab/ci/cmake_version.sh)"
+        - mkdir -p build/
+        - git archive --format=tgz "--prefix=cmake-$v/" -o "build/cmake-$v.tar.gz" HEAD
+        - git -c core.autocrlf=true -c core.eol=crlf archive --format=zip --prefix="cmake-$v/" -o "build/cmake-$v.zip" HEAD
+
+    interruptible: true
+
+.cmake_prep_doc_linux:
+    stage: prep
+
+    script:
+        - *before_script_linux
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
+
+    interruptible: true
+
+.cmake_build_linux:
+    stage: build
+
+    script:
+        - *before_script_linux
+        - .gitlab/ci/sccache.sh
+        - sccache --start-server
+        - sccache --show-stats
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
+        - sccache --show-stats
+
+    interruptible: true
+
+.cmake_test_linux:
+    stage: test
+
+    script:
+        - *before_script_linux
+        - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake"
+
+    interruptible: true
+
+.cmake_build_linux_package:
+    stage: build
+
+    script:
+        # Bootstrap.
+        - cp -v Utilities/Release/linux/$CMAKE_ARCH/cache.txt build/CMakeCache.txt
+        # Make sccache available.
+        - .gitlab/ci/sccache.sh
+        - export PATH=$PWD/.gitlab:$PATH
+        # Append sccache settings to the cache.
+        - echo "CMAKE_C_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
+        - echo "CMAKE_CXX_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
+        # CI settings.
+        - echo "CMake_TEST_INSTALL:BOOL=OFF" >> build/CMakeCache.txt
+        - echo "CMAKE_INSTALL_PREFIX:PATH=$PWD/build/install" >> build/CMakeCache.txt
+        - echo "CMAKE_SKIP_INSTALL_ALL_DEPENDENCY:BOOL=ON" >> build/CMakeCache.txt
+        # Appease Git. The Git in this container is old (1.7) and doesn't
+        # understand some things. But, it doesn't need to, so make it blind.
+        - mkdir -p .git/info
+        - echo "* -crlf" >> .git/info/attributes
+        - git reset --hard
+        # Bootstrap
+        - cd build/
+        - '$LAUNCHER ../bootstrap --parallel=$(nproc) --docdir=doc/cmake -- "-DCMake_DOC_ARTIFACT_PREFIX=$CI_PROJECT_DIR/build/install-doc"'
+        # FIXME: When CTest can drive an external CMake for the build as well,
+        # use the scripts here.
+        - "$LAUNCHER make -j$(nproc)"
+        # NOTE: This regex matches that used in the release build.
+        - "$LAUNCHER bin/ctest --output-on-failure -j$(nproc) -R '^(CMake\\.|CMakeLib\\.|CMakeServerLib\\.|RunCMake\\.ctest_memcheck)'"
+        # Make a package.
+        - bin/cpack -G TGZ
+        - bin/cpack -G STGZ
+        - sccache --show-stats
+
+    interruptible: true
+
+.cmake_build_release_linux:
+    stage: build
+
+    script:
+        # Bootstrap.
+        - mkdir build/
+        - cp -v Utilities/Release/linux/x86_64/cache.txt build/CMakeCache.txt
+        # Make sccache available.
+        - .gitlab/ci/sccache.sh
+        - export PATH=$PWD/.gitlab:$PATH
+        # Append sccache settings to the cache.
+        - echo "CMAKE_C_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
+        - echo "CMAKE_CXX_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
+        # CI settings.
+        - echo "CMake_TEST_INSTALL:BOOL=OFF" >> build/CMakeCache.txt
+        - echo "CMAKE_INSTALL_PREFIX:PATH=$PWD/build/install" >> build/CMakeCache.txt
+        - echo "CMAKE_SKIP_INSTALL_ALL_DEPENDENCY:BOOL=ON" >> build/CMakeCache.txt
+        # Appease Git. The Git in this container is old (1.7) and doesn't
+        # understand some things. But, it doesn't need to, so make it blind.
+        - mkdir -p .git/info
+        - echo "* -crlf" >> .git/info/attributes
+        - git reset --hard
+        # Bootstrap
+        - cd build/
+        - "$LAUNCHER ../bootstrap --parallel=$(nproc) --docdir=doc/cmake"
+        # FIXME: When CTest can drive an external CMake for the build as well,
+        # use the scripts here.
+        - "$LAUNCHER make -j$(nproc)"
+        # NOTE: This regex matches that used in the release build.
+        - "$LAUNCHER bin/ctest --output-on-failure -j$(nproc) -R '^(CMake\\.|CMakeLib\\.|CMakeServerLib\\.|RunCMake\\.ctest_memcheck)'"
+        # Make a package.
+        - bin/cpack -G TGZ
+        - bin/cpack -G STGZ
+        - sccache --show-stats
+
+    interruptible: true
+
+.cmake_test_linux_package:
+    stage: test-ext
+
+    script:
+        - *before_script_linux
+        # Make the CMake package available.
+        - mkdir -p build/install
+        - tar -C build/install --strip-components=1 -xzf build/cmake-*-Linux-x86_64.tar.gz
+        - .gitlab/ci/sccache.sh
+        - sccache --start-server
+        - sccache --show-stats
+        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
+        - sccache --show-stats
+
+    interruptible: true
+
+.cmake_test_linux_external:
+    stage: test-ext
+
+    script:
+        - *before_script_linux
+        - .gitlab/ci/sccache.sh
+        - sccache --start-server
+        - sccache --show-stats
+        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
+        - sccache --show-stats
+
+    interruptible: true

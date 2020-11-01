@@ -1,0 +1,10 @@
+^Test project .*/Tests/RunCMake/CTestCommandLine/stop-on-failure
+    Start 1: test1
+1/2 Test #1: test1 ............................\*\*\*Failed +[0-9.]+ sec
++
+0% tests passed, 1 tests failed out of 1
++
+Total Test time \(real\) = +[0-9.]+ sec
++
+The following tests FAILED:
+[	 ]+1 - test1 \(Failed\)$

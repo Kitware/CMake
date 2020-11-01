@@ -1,9 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGhsMultiGpj_h
-#define cmGhsMultiGpj_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
+
 #include <iosfwd>
 
 class GhsMultiGpj
@@ -24,5 +24,3 @@ public:
 
   static const char* GetGpjTag(Types gpjType);
 };
-
-#endif // ! cmGhsMultiGpjType_h

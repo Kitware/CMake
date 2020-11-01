@@ -1,4 +1,7 @@
-message(STATUS "Checking for curses support")
+include(${CMAKE_CURRENT_LIST_DIR}/cm_message_checks_compat.cmake)
+cm_message_checks_compat(
+  "Checking for curses support" __checkStart __checkPass __checkFail)
+message(${__checkStart})
 
 # Try compiling a simple project using curses.
 # Pass in any cache entries that the user may have set.
@@ -31,11 +34,11 @@ set(CMakeCheckCurses_COMPILED "${CMakeCheckCurses_COMPILED}")
 unset(CMakeCheckCurses_COMPILED CACHE)
 
 if(CMakeCheckCurses_COMPILED)
-  message(STATUS "Checking for curses support - Success")
+  message(${__checkPass} "Success")
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
     "Checking for curses support passed with the following output:\n${CMakeCheckCurses_OUTPUT}\n\n")
 else()
-  message(STATUS "Checking for curses support - Failed")
+  message(${__checkFail} "Failed")
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Checking for curses support failed with the following output:\n${CMakeCheckCurses_OUTPUT}\n\n")
 endif()

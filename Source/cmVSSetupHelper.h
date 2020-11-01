@@ -1,15 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmVSSetupHelper_h
-#define cmVSSetupHelper_h
+#pragma once
 
 #ifndef NOMINMAX
 #  define NOMINMAX // Undefine min and max defined by windows.h
 #endif
 
 // Published by Visual Studio Setup team
-#include "cmvssetup/Setup.Configuration.h"
-
+#include <cm3p/Setup.Configuration.h>
 #include <string>
 #include <vector>
 
@@ -74,26 +72,8 @@ class SmartBSTR
 {
 public:
   SmartBSTR() { str = NULL; }
-  SmartBSTR(const SmartBSTR& src)
-  {
-    if (src.str != NULL) {
-      str = ::SysAllocStringByteLen((char*)str, ::SysStringByteLen(str));
-    } else {
-      str = ::SysAllocStringByteLen(NULL, 0);
-    }
-  }
-  SmartBSTR& operator=(const SmartBSTR& src)
-  {
-    if (str != src.str) {
-      ::SysFreeString(str);
-      if (src.str != NULL) {
-        str = ::SysAllocStringByteLen((char*)str, ::SysStringByteLen(str));
-      } else {
-        str = ::SysAllocStringByteLen(NULL, 0);
-      }
-    }
-    return *this;
-  }
+  SmartBSTR(const SmartBSTR& src) = delete;
+  SmartBSTR& operator=(const SmartBSTR& src) = delete;
   operator BSTR() const { return str; }
   BSTR* operator&() throw() { return &str; }
   ~SmartBSTR() throw() { ::SysFreeString(str); }
@@ -125,6 +105,7 @@ public:
 
   bool IsVSInstalled();
   bool GetVSInstanceInfo(std::string& vsInstallLocation);
+  bool GetVSInstanceVersion(unsigned long long& vsInstanceVersion);
   bool GetVCToolsetVersion(std::string& vsToolsetVersion);
   bool IsWin10SDKInstalled();
   bool IsWin81SDKInstalled();
@@ -154,5 +135,3 @@ private:
 
   std::string SpecifiedVSInstallLocation;
 };
-
-#endif

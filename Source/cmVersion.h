@@ -1,9 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmVersion_h
-#define cmVersion_h
+#pragma once
 
-#include "cm_kwiml.h"
+#include <cm3p/kwiml/int.h>
 
 /** \class cmVersion
  * \brief Helper class for providing CMake and CTest version information.
@@ -30,5 +29,3 @@ public:
   ((((major)*1000u) * CMake_VERSION_ENCODE__BASE) +                           \
    (((minor) % 1000u) * CMake_VERSION_ENCODE__BASE) +                         \
    (((patch) % CMake_VERSION_ENCODE__BASE)))
-
-#endif

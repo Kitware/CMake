@@ -5,7 +5,7 @@ endif()
 include(${CPackComponentsDEB_SOURCE_DIR}/RunCPackVerifyResult.cmake)
 
 # TODO: currently debian doesn't produce lower cased names
-set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib-*_1.0.2_*.deb")
+set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib-*_1.0.3_*.deb")
 set(expected_count 3)
 
 
@@ -44,7 +44,7 @@ if(LINTIAN_EXECUTABLE)
     string(APPEND lintian_output_errors_all "${lintian_output_errors}")
   endforeach()
 
-  if(NOT "${lintian_output_errors_all}" STREQUAL "")
+  if(NOT lintian_output_errors_all STREQUAL "")
     message(FATAL_ERROR "Lintian checks failed:\n${lintian_output_errors_all}")
   endif()
 else()
@@ -64,13 +64,13 @@ if(DPKGDEB_EXECUTABLE)
                                       DPKGDEB_OUTPUT "${dpkg_output}"
                                       METAENTRY "Maintainer:")
 
-    if(NOT "${dpkgentry}" STREQUAL "None")
+    if(NOT dpkgentry STREQUAL "None")
       set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
           "dpkg-deb: ${_f}: Incorrect value for Maintainer: ${dpkgentry} != None\n")
     endif()
   endforeach()
 
-  if(NOT "${dpkgdeb_output_errors_all}" STREQUAL "")
+  if(NOT dpkgdeb_output_errors_all STREQUAL "")
     message(FATAL_ERROR "dpkg-deb checks failed:\n${dpkgdeb_output_errors_all}")
   endif()
 else()

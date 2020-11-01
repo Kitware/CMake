@@ -2,11 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallCommandArguments.h"
 
+#include <utility>
+
+#include <cmext/string_view>
+
 #include "cmRange.h"
 #include "cmSystemTools.h"
-#include "cm_static_string_view.hxx"
-
-#include <utility>
 
 // Table of valid permissions.
 const char* cmInstallCommandArguments::PermissionsTable[] = {

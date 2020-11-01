@@ -1,0 +1,5 @@
+^CMake Error at cmake_install\.cmake:[0-9]+ \(file\):
+  file Failed to run (dumpbin|objdump) on:
+
+    [^
+]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/windows-notfile-build/root-all/bin/(lib)?test\.dll$

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "CyclicInheritance0",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "inherits": [
+        "CyclicInheritance0"
+      ]
+    }
+  ]
+}

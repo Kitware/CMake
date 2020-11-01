@@ -14,10 +14,12 @@ void cmWIXDirectoriesSourceWriter::EmitStartMenuFolder(
   BeginElement("Directory");
   AddAttribute("Id", "ProgramMenuFolder");
 
-  BeginElement("Directory");
-  AddAttribute("Id", "PROGRAM_MENU_FOLDER");
-  AddAttribute("Name", startMenuFolder);
-  EndElement("Directory");
+  if (startMenuFolder != ".") {
+    BeginElement("Directory");
+    AddAttribute("Id", "PROGRAM_MENU_FOLDER");
+    AddAttribute("Name", startMenuFolder);
+    EndElement("Directory");
+  }
 
   EndElement("Directory");
 }

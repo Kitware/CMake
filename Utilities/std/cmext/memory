@@ -1,0 +1,38 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#pragma once
+
+#include <typeinfo>
+
+#include <cm/type_traits>
+
+namespace cm {
+
+template <
+  typename T, typename O,
+  cm::enable_if_t<std::is_pointer<decltype(std::declval<O>().get())>::value,
+                  int> = 0>
+T& static_reference_cast(O& item)
+{
+  return *(static_cast<T*>(item.get()));
+}
+
+template <
+  typename T, typename O,
+  cm::enable_if_t<std::is_pointer<decltype(std::declval<O>().get())>::value,
+                  int> = 0>
+T& dynamic_reference_cast(O& item)
+{
+  auto p = dynamic_cast<T*>(item.get());
+
+  if (p == nullptr) {
+    throw std::bad_cast();
+  }
+
+  return *p;
+}
+
+} // namespace cm

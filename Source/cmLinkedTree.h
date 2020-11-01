@@ -1,11 +1,10 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmLinkedTree_h
-#define cmLinkedTree_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <assert.h>
+#include <cassert>
 #include <vector>
 
 /**
@@ -27,9 +26,9 @@
 template <typename T>
 class cmLinkedTree
 {
-  typedef typename std::vector<T>::size_type PositionType;
-  typedef T* PointerType;
-  typedef T& ReferenceType;
+  using PositionType = typename std::vector<T>::size_type;
+  using PointerType = T*;
+  using ReferenceType = T&;
 
 public:
   class iterator
@@ -188,5 +187,3 @@ private:
   std::vector<T> Data;
   std::vector<PositionType> UpPositions;
 };
-
-#endif

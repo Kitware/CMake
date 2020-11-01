@@ -1,13 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFileTimeCache_h
-#define cmFileTimeCache_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFileTime.h" // IWYU pragma: keep
 #include <string>
 #include <unordered_map>
+
+#include "cmFileTime.h" // IWYU pragma: keep
 
 /** \class cmFileTimeCache
  * \brief Caches file modification times in an internal map for fast lookups.
@@ -52,5 +52,3 @@ public:
 private:
   std::unordered_map<std::string, cmFileTime> Cache;
 };
-
-#endif

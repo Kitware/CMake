@@ -1,14 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmWIXFilesSourceWriter_h
-#define cmWIXFilesSourceWriter_h
-
-#include "cmWIXSourceWriter.h"
-
-#include "cmWIXPatch.h"
-#include "cmWIXShortcut.h"
+#pragma once
 
 #include "cmCPackGenerator.h"
+#include "cmWIXPatch.h"
+#include "cmWIXShortcut.h"
+#include "cmWIXSourceWriter.h"
 
 /** \class cmWIXFilesSourceWriter
  * \brief Helper class to generate files.wxs
@@ -39,5 +36,3 @@ public:
                                 std::string const& filePath, cmWIXPatch& patch,
                                 cmInstalledFile const* installedFile);
 };
-
-#endif

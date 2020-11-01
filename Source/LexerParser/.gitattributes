@@ -2,6 +2,8 @@
 /cmCommandArgumentLexer.h          generated
 /cmCommandArgumentParser.cxx       generated
 /cmCommandArgumentParserTokens.h   generated
+/cmCTestResourceGroupsLexer.cxx    generated
+/cmCTestResourceGroupsLexer.h      generated
 /cmDependsJavaLexer.cxx            generated
 /cmDependsJavaLexer.h              generated
 /cmDependsJavaParser.cxx           generated
@@ -14,4 +16,6 @@
 /cmFortranLexer.h                  generated
 /cmFortranParser.cxx               generated
 /cmFortranParserTokens.h           generated
+/cmGccDepfileLexer.cxx             generated
+/cmGccDepfileLexer.h               generated
 /cmListFileLexer.c                 generated

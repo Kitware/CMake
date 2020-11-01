@@ -1,20 +1,20 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#include "CTest/cmCTestLaunch.h"
-#include "CTest/cmCTestScriptHandler.h"
+#include <cstring>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "cmsys/Encoding.hxx"
+
 #include "cmCTest.h"
+#include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
 #include "cmSystemTools.h"
 
-#include "cmsys/Encoding.hxx"
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-#  include "cmsys/ConsoleBuf.hxx"
-#endif
-#include <iostream>
-#include <string.h>
-#include <string>
-#include <vector>
+#include "CTest/cmCTestLaunch.h"
+#include "CTest/cmCTestScriptHandler.h"
 
 static const char* cmDocumentationName[][2] = {
   { nullptr, "  ctest - Testing driver provided by CMake." },
@@ -34,6 +34,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "--output-on-failure",
     "Output anything outputted by the test program "
     "if the test should fail." },
+  { "--stop-on-failure", "Stop running the tests after one has failed." },
   { "--test-output-size-passed <size>",
     "Limit the output for passed tests "
     "to <size> bytes" },
@@ -83,7 +84,9 @@ static const char* cmDocumentationOptions[][2] = {
   { "-T <action>, --test-action <action>",
     "Sets the dashboard action to "
     "perform" },
-  { "--track <track>", "Specify the track to submit dashboard to" },
+  { "--group <group>",
+    "Specify what build group on the dashboard you'd like to "
+    "submit results to." },
   { "-S <script>, --script <script>",
     "Execute a dashboard for a "
     "configuration" },
@@ -95,11 +98,15 @@ static const char* cmDocumentationOptions[][2] = {
     "Run a specific number of tests by number." },
   { "-U, --union", "Take the Union of -I and -R" },
   { "--rerun-failed", "Run only the tests that failed previously" },
-  { "--repeat-until-fail <n>",
-    "Require each test to run <n> "
-    "times without failing in order to pass" },
+  { "--repeat until-fail:<n>, --repeat-until-fail <n>",
+    "Require each test to run <n> times without failing in order to pass" },
+  { "--repeat until-pass:<n>",
+    "Allow each test to run up to <n> times in order to pass" },
+  { "--repeat after-timeout:<n>",
+    "Allow each test to run up to <n> times if it times out" },
   { "--max-width <width>", "Set the max width for a test name to output" },
   { "--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1." },
+  { "--resource-spec-file <file>", "Set the resource spec file to use." },
   { "--no-label-summary", "Disable timing summary information for labels." },
   { "--no-subproject-summary",
     "Disable timing summary information for "
@@ -137,6 +144,8 @@ static const char* cmDocumentationOptions[][2] = {
   { "--http1.0", "Submit using HTTP 1.0." },
   { "--no-compress-output", "Do not compress test output when submitting." },
   { "--print-labels", "Print all available test labels." },
+  { "--no-tests=<[error|ignore]>",
+    "Regard no tests found either as 'error' or 'ignore' it." },
   { nullptr, nullptr }
 };
 
@@ -144,20 +153,17 @@ static const char* cmDocumentationOptions[][2] = {
 int main(int argc, char const* const* argv)
 {
   cmSystemTools::EnsureStdPipes();
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+
   // Replace streambuf so we can output Unicode to console
-  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
-  consoleOut.SetUTF8Pipes();
-  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-  consoleErr.SetUTF8Pipes();
-#endif
+  cmConsoleBuf consoleBuf;
+  consoleBuf.SetUTF8Pipes();
+
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = encoding_args.argc();
   argv = encoding_args.argv();
 
   cmSystemTools::DoNotInheritStdPipes();
-  cmSystemTools::EnableMSVCDebugHook();
   cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(argv[0]);
 

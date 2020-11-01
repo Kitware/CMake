@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -78,7 +78,7 @@ CURLcode Curl_convert_clone(struct Curl_easy *data,
 
 /*
  * Curl_convert_to_network() is an internal function for performing ASCII
- * conversions on non-ASCII platforms. It convers the buffer _in place_.
+ * conversions on non-ASCII platforms. It converts the buffer _in place_.
  */
 CURLcode Curl_convert_to_network(struct Curl_easy *data,
                                  char *buffer, size_t length)
@@ -144,7 +144,7 @@ CURLcode Curl_convert_to_network(struct Curl_easy *data,
 
 /*
  * Curl_convert_from_network() is an internal function for performing ASCII
- * conversions on non-ASCII platforms. It convers the buffer _in place_.
+ * conversions on non-ASCII platforms. It converts the buffer _in place_.
  */
 CURLcode Curl_convert_from_network(struct Curl_easy *data,
                                    char *buffer, size_t length)

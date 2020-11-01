@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "UserDuplicateInUser",
+      "generator": "@RunCMake_GENERATOR",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "UserDuplicateInUser",
+      "generator": "@RunCMake_GENERATOR",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

@@ -5,6 +5,8 @@
 FindOpenCL
 ----------
 
+.. versionadded:: 3.1
+
 Finds Open Computing Language (OpenCL)
 
 IMPORTED Targets
@@ -78,6 +80,8 @@ find_path(OpenCL_INCLUDE_DIR
     ENV CUDA_PATH
     ENV ATISTREAMSDKROOT
     ENV OCL_ROOT
+    /usr/local/cuda
+    /opt/cuda
   PATH_SUFFIXES
     include
     OpenCL/common/inc
@@ -126,6 +130,8 @@ else()
       PATHS
         ENV AMDAPPSDKROOT
         ENV CUDA_PATH
+        /usr/local/cuda
+        /opt/cuda
       PATH_SUFFIXES
         lib/x86
         lib)
@@ -135,6 +141,8 @@ else()
       PATHS
         ENV AMDAPPSDKROOT
         ENV CUDA_PATH
+        /usr/local/cuda
+        /opt/cuda
       PATH_SUFFIXES
         lib/x86_64
         lib/x64

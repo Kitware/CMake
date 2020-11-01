@@ -1,6 +1,8 @@
 IMPORTED_LIBNAME
 ----------------
 
+.. versionadded:: 3.8
+
 Specify the link library name for an :ref:`imported <Imported Targets>`
 :ref:`Interface Library <Interface Libraries>`.
 

@@ -1,6 +1,8 @@
 MSVC_RUNTIME_LIBRARY
 --------------------
 
+.. versionadded:: 3.15
+
 Select the MSVC runtime library for use by compilers targeting the MSVC ABI.
 
 The allowed values are:
@@ -18,6 +20,9 @@ support per-configuration specification.  For example, the code:
 
 selects for the target ``foo`` a multi-threaded statically-linked runtime
 library with or without debug information depending on the configuration.
+
+If this property is not set then CMake uses the default value
+``MultiThreaded$<$<CONFIG:Debug>:Debug>DLL`` to select a MSVC runtime library.
 
 .. note::
 

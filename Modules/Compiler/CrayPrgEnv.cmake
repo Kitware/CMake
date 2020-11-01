@@ -69,13 +69,27 @@ endfunction()
 # note that cmake applies both CMAKE_${lang}_FLAGS and CMAKE_EXE_LINKER_FLAGS
 # (in that order) to the linking command, so -dynamic can appear in either
 # variable.
+#
+# Note: As of CrayPE v19.06 (which translates to the craype/2.6.0 module)
+# the default has changed and is now dynamic by default.  This is handled
+# accordingly
 function(__cmake_craype_linktype lang rv)
   # start with ENV, but allow flags to override
-  if("$ENV{CRAYPE_LINK_TYPE}" STREQUAL "dynamic")
-    set(linktype dynamic)
+  if(("$ENV{CRAYPE_VERSION}" STREQUAL "") OR
+     ("$ENV{CRAYPE_VERSION}" VERSION_LESS "2.6"))
+    if("$ENV{CRAYPE_LINK_TYPE}" STREQUAL "dynamic")
+      set(linktype dynamic)
+    else()
+      set(linktype static)
+    endif()
   else()
-    set(linktype static)
+    if("$ENV{CRAYPE_LINK_TYPE}" STREQUAL "static")
+      set(linktype static)
+    else()
+      set(linktype dynamic)
+    endif()
   endif()
+
   # combine flags and convert to a list so we can apply the flags in order
   set(linkflags "${CMAKE_${lang}_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
   string(REPLACE " " ";" linkflags "${linkflags}")

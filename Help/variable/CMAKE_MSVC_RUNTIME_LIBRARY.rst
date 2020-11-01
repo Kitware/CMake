@@ -1,6 +1,8 @@
 CMAKE_MSVC_RUNTIME_LIBRARY
 --------------------------
 
+.. versionadded:: 3.15
+
 Select the MSVC runtime library for use by compilers targeting the MSVC ABI.
 This variable is used to initialize the :prop_tgt:`MSVC_RUNTIME_LIBRARY`
 property on all targets as they are created.  It is also propagated by
@@ -19,6 +21,11 @@ support per-configuration specification.  For example, the code:
 
 selects for all following targets a multi-threaded statically-linked runtime
 library with or without debug information depending on the configuration.
+
+If this variable is not set then the :prop_tgt:`MSVC_RUNTIME_LIBRARY` target
+property will not be set automatically.  If that property is not set then
+CMake uses the default value ``MultiThreaded$<$<CONFIG:Debug>:Debug>DLL``
+to select a MSVC runtime library.
 
 .. note::
 

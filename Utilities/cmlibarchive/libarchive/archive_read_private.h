@@ -25,14 +25,14 @@
  * $FreeBSD: head/lib/libarchive/archive_read_private.h 201088 2009-12-28 02:18:55Z kientzle $
  */
 
+#ifndef ARCHIVE_READ_PRIVATE_H_INCLUDED
+#define ARCHIVE_READ_PRIVATE_H_INCLUDED
+
 #ifndef __LIBARCHIVE_BUILD
 #ifndef __LIBARCHIVE_TEST
 #error This header is only to be used internally to libarchive.
 #endif
 #endif
-
-#ifndef ARCHIVE_READ_PRIVATE_H_INCLUDED
-#define	ARCHIVE_READ_PRIVATE_H_INCLUDED
 
 #include "archive.h"
 #include "archive_string.h"
@@ -98,6 +98,8 @@ struct archive_read_filter {
 	int (*close)(struct archive_read_filter *self);
 	/* Function that handles switching from reading one block to the next/prev */
 	int (*sswitch)(struct archive_read_filter *self, unsigned int iindex);
+	/* Read any header metadata if available. */
+	int (*read_header)(struct archive_read_filter *self, struct archive_entry *entry);
 	/* My private data. */
 	void *data;
 
@@ -250,6 +252,7 @@ int64_t	__archive_read_seek(struct archive_read*, int64_t, int);
 int64_t	__archive_read_filter_seek(struct archive_read_filter *, int64_t, int);
 int64_t	__archive_read_consume(struct archive_read *, int64_t);
 int64_t	__archive_read_filter_consume(struct archive_read_filter *, int64_t);
+int __archive_read_header(struct archive_read *, struct archive_entry *);
 int __archive_read_program(struct archive_read_filter *, const char *);
 void __archive_read_free_filters(struct archive_read *);
 struct archive_read_extract *__archive_read_get_extract(struct archive_read *);

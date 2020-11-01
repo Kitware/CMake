@@ -1,6 +1,8 @@
 CMAKE_FIND_PACKAGE_SORT_ORDER
 -----------------------------
 
+.. versionadded:: 3.7
+
 The default order for sorting packages found using :command:`find_package`.
 It can assume one of the following values:
 

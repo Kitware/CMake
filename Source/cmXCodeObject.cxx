@@ -2,8 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmXCodeObject.h"
 
-#include <CoreFoundation/CoreFoundation.h>
 #include <ostream>
+
+#include <CoreFoundation/CoreFoundation.h>
 
 #include "cmSystemTools.h"
 

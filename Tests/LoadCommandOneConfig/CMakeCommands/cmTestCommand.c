@@ -1,7 +1,8 @@
-#include "cmCPluginAPI.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "cmCPluginAPI.h"
 
 typedef struct
 {
@@ -90,7 +91,7 @@ static int CCONV InitialPass(void* inf, void* mf, int argc, char* argv[])
 
   source_file = info->CAPI->CreateNewSourceFile(mf);
   cstr = info->CAPI->SourceFileGetSourceName(source_file);
-  sprintf(buffer, "Shold be empty (source file name): [%s]", cstr);
+  sprintf(buffer, "Should be empty (source file name): [%s]", cstr);
   info->CAPI->DisplaySatus(mf, buffer);
   cstr = info->CAPI->SourceFileGetFullPath(source_file);
   sprintf(buffer, "Should be empty (source file full path): [%s]", cstr);

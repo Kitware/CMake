@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1996-2001  Internet Software Consortium.
+ * Copyright (C) 1996-2019  Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -55,11 +55,11 @@ static char *inet_ntop4 (const unsigned char *src, char *dst, size_t size)
   DEBUGASSERT(size >= 16);
 
   tmp[0] = '\0';
-  (void)snprintf(tmp, sizeof(tmp), "%d.%d.%d.%d",
-                 ((int)((unsigned char)src[0])) & 0xff,
-                 ((int)((unsigned char)src[1])) & 0xff,
-                 ((int)((unsigned char)src[2])) & 0xff,
-                 ((int)((unsigned char)src[3])) & 0xff);
+  (void)msnprintf(tmp, sizeof(tmp), "%d.%d.%d.%d",
+                  ((int)((unsigned char)src[0])) & 0xff,
+                  ((int)((unsigned char)src[1])) & 0xff,
+                  ((int)((unsigned char)src[2])) & 0xff,
+                  ((int)((unsigned char)src[3])) & 0xff);
 
   len = strlen(tmp);
   if(len == 0 || len >= size) {
@@ -148,7 +148,7 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
       tp += strlen(tp);
       break;
     }
-    tp += snprintf(tp, 5, "%lx", words[i]);
+    tp += msnprintf(tp, 5, "%lx", words[i]);
   }
 
   /* Was it a trailing run of 0x00's?

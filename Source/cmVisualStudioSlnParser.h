@@ -1,14 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmVisualStudioSlnParser_h
-#define cmVisualStudioSlnParser_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <bitset>
 #include <iosfwd>
-#include <stddef.h>
 #include <string>
+
+#include <cm/string_view>
+
+#include <stddef.h>
 
 class cmSlnData;
 
@@ -42,7 +44,7 @@ public:
     DataGroupCount
   };
 
-  typedef std::bitset<DataGroupCount> DataGroupSet;
+  using DataGroupSet = std::bitset<DataGroupCount>;
 
   static const DataGroupSet DataGroupProjects;
   static const DataGroupSet DataGroupProjectDependencies;
@@ -96,10 +98,7 @@ protected:
   bool ParseKeyValuePair(const std::string& line, ParsedLine& parsedLine,
                          State& state);
 
-  bool ParseTag(const std::string& fullTag, ParsedLine& parsedLine,
-                State& state);
+  bool ParseTag(cm::string_view fullTag, ParsedLine& parsedLine, State& state);
 
   bool ParseValue(const std::string& value, ParsedLine& parsedLine);
 };
-
-#endif

@@ -5,13 +5,13 @@
 CMakePrintSystemInformation
 ---------------------------
 
-print system information
+Print system information.
 
-This file can be used for diagnostic purposes just include it in a
+This module serves diagnostic purposes. Just include it in a
 project to see various internal CMake variables.
 #]=======================================================================]
 
-message("CMAKE_SYSTEM is ${CMAKE_SYSTEM} ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+message("CMAKE_SYSTEM is ${CMAKE_SYSTEM} ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR}")
 message("CMAKE_SYSTEM file is ${CMAKE_SYSTEM_INFO_FILE}")
 message("CMAKE_C_COMPILER is ${CMAKE_C_COMPILER}")
 message("CMAKE_CXX_COMPILER is ${CMAKE_CXX_COMPILER}")

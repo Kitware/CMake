@@ -1,0 +1,66 @@
+^CMake Error at source_properties_failures.cmake:1 \(set_source_files_properties\):
+  set_source_files_properties called with incorrect number of arguments no
+  value provided to the DIRECTORY option
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:2 \(set_source_files_properties\):
+  set_source_files_properties given non-existent DIRECTORY non_existing_dir
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:3 \(set_source_files_properties\):
+  set_source_files_properties called with incorrect number of arguments no
+  value provided to the TARGET_DIRECTORY option
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:4 \(set_source_files_properties\):
+  set_source_files_properties given non-existent target for TARGET_DIRECTORY
+  non_existing_target
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:6 \(get_property\):
+  get_property called with incorrect number of arguments no value provided to
+  the DIRECTORY option
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:7 \(get_property\):
+  get_property given non-existent DIRECTORY non_existing_dir
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:8 \(get_property\):
+  get_property called with incorrect number of arguments no value provided to
+  the TARGET_DIRECTORY option
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:9 \(get_property\):
+  get_property given non-existent target for TARGET_DIRECTORY
+  non_existing_dir
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:11 \(get_source_file_property\):
+  get_source_file_property given non-existent DIRECTORY PROPERTY
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:12 \(get_source_file_property\):
+  get_source_file_property called with incorrect number of arguments
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:13 \(get_source_file_property\):
+  get_source_file_property given non-existent target for TARGET_DIRECTORY
+  PROPERTY
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at source_properties_failures.cmake:14 \(get_source_file_property\):
+  get_source_file_property called with incorrect number of arguments
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

@@ -6,21 +6,23 @@
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 
 // Needed for ::open() and ::stat()
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
+#include <algorithm>
+#include <ostream>
+#include <utility>
+#include <vector>
 
+#include <fcntl.h>
 #include <pkg.h>
 
-#include <algorithm>
-#include <utility>
+#include <sys/stat.h>
 
 cmCPackFreeBSDGenerator::cmCPackFreeBSDGenerator()
-  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr")
+  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr", ".txz")
 {
 }
 
@@ -130,7 +132,7 @@ public:
 class ManifestKeyListValue : public ManifestKey
 {
 public:
-  typedef std::vector<std::string> VList;
+  using VList = std::vector<std::string>;
   VList value;
 
   ManifestKeyListValue(const std::string& k)
@@ -227,9 +229,8 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
   manifest << ManifestKeyValue(
     "desc", var_lookup("CPACK_FREEBSD_PACKAGE_DESCRIPTION"));
   manifest << ManifestKeyValue("www", var_lookup("CPACK_FREEBSD_PACKAGE_WWW"));
-  std::vector<std::string> licenses;
-  cmSystemTools::ExpandListArgument(
-    var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE"), licenses);
+  std::vector<std::string> licenses =
+    cmExpandedList(var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE"));
   std::string licenselogic("single");
   if (licenses.empty()) {
     cmSystemTools::SetFatalErrorOccured();
@@ -238,14 +239,12 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
   }
   manifest << ManifestKeyValue("licenselogic", licenselogic);
   manifest << (ManifestKeyListValue("licenses") << licenses);
-  std::vector<std::string> categories;
-  cmSystemTools::ExpandListArgument(
-    var_lookup("CPACK_FREEBSD_PACKAGE_CATEGORIES"), categories);
+  std::vector<std::string> categories =
+    cmExpandedList(var_lookup("CPACK_FREEBSD_PACKAGE_CATEGORIES"));
   manifest << (ManifestKeyListValue("categories") << categories);
   manifest << ManifestKeyValue("prefix", var_lookup("CMAKE_INSTALL_PREFIX"));
-  std::vector<std::string> deps;
-  cmSystemTools::ExpandListArgument(var_lookup("CPACK_FREEBSD_PACKAGE_DEPS"),
-                                    deps);
+  std::vector<std::string> deps =
+    cmExpandedList(var_lookup("CPACK_FREEBSD_PACKAGE_DEPS"));
   if (!deps.empty()) {
     manifest << (ManifestKeyDepsValue("deps") << deps);
   }
@@ -278,12 +277,6 @@ void write_manifest_files(cmGeneratedFileStream& s,
   s << "  },\n";
 }
 
-static bool has_suffix(const std::string& str, const std::string& suffix)
-{
-  return str.size() >= suffix.size() &&
-    str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-
 int cmCPackFreeBSDGenerator::PackageFiles()
 {
   if (!this->ReadListFile("Internal/CPack/CPackFreeBSD.cmake")) {
@@ -293,8 +286,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
   }
 
   std::vector<std::string>::const_iterator fileIt;
-  std::string dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(toplevel);
+  cmWorkingDirectory wd(toplevel);
 
   files.erase(std::remove_if(files.begin(), files.end(), ignore_file),
               files.end());
@@ -329,17 +321,16 @@ int cmCPackFreeBSDGenerator::PackageFiles()
   pkg_create_from_manifest(output_dir.c_str(), ::TXZ, toplevel.c_str(),
                            manifestname.c_str(), nullptr);
 
-  std::string broken_suffix = std::string("-") +
-    var_lookup("CPACK_TOPLEVEL_TAG") + std::string(GetOutputExtension());
+  std::string broken_suffix =
+    cmStrCat('-', var_lookup("CPACK_TOPLEVEL_TAG"), ".txz");
   for (std::string& name : packageFileNames) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Packagefile " << name << std::endl);
-    if (has_suffix(name, broken_suffix)) {
+    if (cmHasSuffix(name, broken_suffix)) {
       name.replace(name.size() - broken_suffix.size(), std::string::npos,
-                   GetOutputExtension());
+                   ".txz");
       break;
     }
   }
 
-  cmSystemTools::ChangeDirectory(dir);
   return 1;
 }

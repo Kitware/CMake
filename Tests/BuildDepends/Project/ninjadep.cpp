@@ -1,5 +1,6 @@
-#include "dir/header.h"
 #include <stdio.h>
+
+#include "dir/header.h"
 
 int main()
 {

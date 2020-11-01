@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.18)
+project(MocOnMissingDependency)
+include("@CMAKE_CURRENT_LIST_DIR@/../AutogenCoreTest.cmake")
+set(CMAKE_AUTOMOC ON)
+add_executable(MocOnMissingDependency main.cpp myobject.cpp)
+target_include_directories(MocOnMissingDependency PRIVATE inc1 inc2)
+target_link_libraries(MocOnMissingDependency PRIVATE ${QT_QTCORE_TARGET})

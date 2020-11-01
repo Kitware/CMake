@@ -3,9 +3,9 @@
 // Implementation of the MainPage class.
 //
 
-#include "pch.h"
-
 #include "MainPage.xaml.h"
+
+#include "pch.h"
 
 using namespace VSXaml;
 

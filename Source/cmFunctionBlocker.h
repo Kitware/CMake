@@ -1,7 +1,12 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmFunctionBlocker_h
-#define cmFunctionBlocker_h
+#pragma once
+
+#include "cmConfigure.h" // IWYU pragma: keep
+
+#include <vector>
+
+#include <cm/string_view>
 
 #include "cmListFileCache.h"
 
@@ -14,17 +19,8 @@ public:
   /**
    * should a function be blocked
    */
-  virtual bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                                 cmExecutionStatus& status) = 0;
-
-  /**
-   * should this function blocker be removed, useful when one function adds a
-   * blocker and another must remove it
-   */
-  virtual bool ShouldRemove(const cmListFileFunction&, cmMakefile&)
-  {
-    return false;
-  }
+  bool IsFunctionBlocked(cmListFileFunction const& lff,
+                         cmExecutionStatus& status);
 
   virtual ~cmFunctionBlocker() = default;
 
@@ -39,7 +35,17 @@ public:
   }
 
 private:
-  cmListFileContext StartingContext;
-};
+  virtual cm::string_view StartCommandName() const = 0;
+  virtual cm::string_view EndCommandName() const = 0;
 
-#endif
+  virtual bool ArgumentsMatch(cmListFileFunction const& lff,
+                              cmMakefile& mf) const = 0;
+
+  virtual bool Replay(std::vector<cmListFileFunction> functions,
+                      cmExecutionStatus& status) = 0;
+
+private:
+  cmListFileContext StartingContext;
+  std::vector<cmListFileFunction> Functions;
+  unsigned int ScopeDepth = 1;
+};

@@ -1,15 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmDependsJava_h
-#define cmDependsJava_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-
-#include "cmDepends.h"
 
 #include <iosfwd>
 #include <set>
 #include <string>
+
+#include "cmDepends.h"
 
 /** \class cmDependsJava
  * \brief Dependency scanner for Java class files.
@@ -36,5 +35,3 @@ protected:
                          const std::string& internalDependsFileName,
                          DependencyMap& validDeps) override;
 };
-
-#endif

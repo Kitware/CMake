@@ -1,6 +1,6 @@
-#include <cuda.h>
-
 #include <iostream>
+
+#include <cuda.h>
 
 extern "C" int use_cuda(void)
 {

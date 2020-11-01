@@ -1,14 +1,18 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestMemCheckCommand_h
-#define cmCTestMemCheckCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+#include <utility>
+
+#include <cm/memory>
+
 #include "cmCTestTestCommand.h"
+#include "cmCommand.h"
 
 class cmCTestGenericHandler;
-class cmCommand;
 
 /** \class cmCTestMemCheck
  * \brief Run a ctest script
@@ -18,29 +22,23 @@ class cmCommand;
 class cmCTestMemCheckCommand : public cmCTestTestCommand
 {
 public:
-  cmCTestMemCheckCommand();
-
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestMemCheckCommand* ni = new cmCTestMemCheckCommand;
+    auto ni = cm::make_unique<cmCTestMemCheckCommand>();
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
-    return ni;
+    return std::unique_ptr<cmCommand>(std::move(ni));
   }
 
 protected:
+  void BindArguments() override;
+
   cmCTestGenericHandler* InitializeActualHandler() override;
 
   void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
 
-  enum
-  {
-    ctm_DEFECT_COUNT = ctt_LAST,
-    ctm_LAST
-  };
+  std::string DefectCount;
 };
-
-#endif

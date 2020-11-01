@@ -1,0 +1,1 @@
+CMake Error: INSTALL\(EXPORT\) given unknown export "fooExport"

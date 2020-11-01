@@ -1,7 +1,7 @@
+#include <stdio.h>
+
 #include "libcxx1.h"
 #include "libcxx2.h"
-
-#include <stdio.h>
 
 int main()
 {

@@ -1,8 +1,7 @@
 
 #include <QApplication>
-#include <QWidget>
-
 #include <QString>
+#include <QWidget>
 
 #ifndef QT_CORE_LIB
 #  error Expected QT_CORE_LIB

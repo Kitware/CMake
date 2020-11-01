@@ -3,9 +3,9 @@
 #ifndef YAF_P_H
 #define YAF_P_H
 
-#include <QObject>
-
 #include <stdio.h>
+
+#include <QObject>
 
 class YafP : public QObject
 {

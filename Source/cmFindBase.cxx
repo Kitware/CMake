@@ -2,25 +2,27 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindBase.h"
 
+#include <cstddef>
 #include <deque>
-#include <iostream>
 #include <map>
-#include <stddef.h>
+#include <utility>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-cmFindBase::cmFindBase()
+class cmExecutionStatus;
+
+cmFindBase::cmFindBase(cmExecutionStatus& status)
+  : cmFindCommon(status)
 {
-  this->AlreadyInCache = false;
-  this->AlreadyInCacheWithoutMetaInfo = false;
-  this->NamesPerDir = false;
-  this->NamesPerDirAllowed = false;
 }
 
 bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
@@ -67,6 +69,9 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   }
   this->AlreadyInCache = false;
 
+  // Find what search path locations have been enabled/disable
+  this->SelectDefaultSearchModes();
+
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
 
@@ -107,19 +112,25 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     } else if (args[j] == "NO_SYSTEM_PATH") {
       doing = DoingNone;
       this->NoDefaultPath = true;
+    } else if (args[j] == "REQUIRED") {
+      doing = DoingNone;
+      this->Required = true;
+      newStyle = true;
     } else if (this->CheckCommonArgument(args[j])) {
       doing = DoingNone;
+    } else {
       // Some common arguments were accidentally supported by CMake
       // 2.4 and 2.6.0 in the short-hand form of the command, so we
       // must support it even though it is not documented.
-    } else if (doing == DoingNames) {
-      this->Names.push_back(args[j]);
-    } else if (doing == DoingPaths) {
-      this->UserGuessArgs.push_back(args[j]);
-    } else if (doing == DoingHints) {
-      this->UserHintsArgs.push_back(args[j]);
-    } else if (doing == DoingPathSuffixes) {
-      this->AddPathSuffix(args[j]);
+      if (doing == DoingNames) {
+        this->Names.push_back(args[j]);
+      } else if (doing == DoingPaths) {
+        this->UserGuessArgs.push_back(args[j]);
+      } else if (doing == DoingHints) {
+        this->UserHintsArgs.push_back(args[j]);
+      } else if (doing == DoingPathSuffixes) {
+        this->AddPathSuffix(args[j]);
+      }
     }
   }
 
@@ -141,13 +152,12 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 
   // look for old style
   // FIND_*(VAR name path1 path2 ...)
-  if (!newStyle) {
+  if (!newStyle && !this->Names.empty()) {
     // All the short-hand arguments have been recorded as names.
     std::vector<std::string> shortArgs = this->Names;
     this->Names.clear(); // clear out any values in Names
     this->Names.push_back(shortArgs[0]);
-    this->UserGuessArgs.insert(this->UserGuessArgs.end(),
-                               shortArgs.begin() + 1, shortArgs.end());
+    cm::append(this->UserGuessArgs, shortArgs.begin() + 1, shortArgs.end());
   }
   this->ExpandPaths();
 
@@ -186,9 +196,7 @@ void cmFindBase::FillCMakeEnvironmentPath()
   cmSearchPath& paths = this->LabeledPaths[PathLabel::CMakeEnvironment];
 
   // Add CMAKE_*_PATH environment variables
-  std::string var = "CMAKE_";
-  var += this->CMakePathName;
-  var += "_PATH";
+  std::string var = cmStrCat("CMAKE_", this->CMakePathName, "_PATH");
   paths.AddEnvPrefixPath("CMAKE_PREFIX_PATH");
   paths.AddEnvPath(var);
 
@@ -220,9 +228,7 @@ void cmFindBase::FillCMakeVariablePath()
   // Add CMake variables of the same name as the previous environment
   // variables CMAKE_*_PATH to be used most of the time with -D
   // command line options
-  std::string var = "CMAKE_";
-  var += this->CMakePathName;
-  var += "_PATH";
+  std::string var = cmStrCat("CMAKE_", this->CMakePathName, "_PATH");
   paths.AddCMakePrefixPath("CMAKE_PREFIX_PATH");
   paths.AddCMakePath(var);
 
@@ -254,9 +260,7 @@ void cmFindBase::FillCMakeSystemVariablePath()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::CMakeSystem];
 
-  std::string var = "CMAKE_SYSTEM_";
-  var += this->CMakePathName;
-  var += "_PATH";
+  std::string var = cmStrCat("CMAKE_SYSTEM_", this->CMakePathName, "_PATH");
   paths.AddCMakePrefixPath("CMAKE_SYSTEM_PREFIX_PATH");
   paths.AddCMakePath(var);
 
@@ -288,40 +292,12 @@ void cmFindBase::FillUserGuessPath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
-void cmFindBase::PrintFindStuff()
-{
-  std::cerr << "SearchFrameworkLast: " << this->SearchFrameworkLast << "\n";
-  std::cerr << "SearchFrameworkOnly: " << this->SearchFrameworkOnly << "\n";
-  std::cerr << "SearchFrameworkFirst: " << this->SearchFrameworkFirst << "\n";
-  std::cerr << "SearchAppBundleLast: " << this->SearchAppBundleLast << "\n";
-  std::cerr << "SearchAppBundleOnly: " << this->SearchAppBundleOnly << "\n";
-  std::cerr << "SearchAppBundleFirst: " << this->SearchAppBundleFirst << "\n";
-  std::cerr << "VariableName " << this->VariableName << "\n";
-  std::cerr << "VariableDocumentation " << this->VariableDocumentation << "\n";
-  std::cerr << "NoDefaultPath " << this->NoDefaultPath << "\n";
-  std::cerr << "NoCMakeEnvironmentPath " << this->NoCMakeEnvironmentPath
-            << "\n";
-  std::cerr << "NoCMakePath " << this->NoCMakePath << "\n";
-  std::cerr << "NoSystemEnvironmentPath " << this->NoSystemEnvironmentPath
-            << "\n";
-  std::cerr << "NoCMakeSystemPath " << this->NoCMakeSystemPath << "\n";
-  std::cerr << "EnvironmentPath " << this->EnvironmentPath << "\n";
-  std::cerr << "CMakePathName " << this->CMakePathName << "\n";
-  std::cerr << "Names  " << cmJoin(this->Names, " ") << "\n";
-  std::cerr << "\n";
-  std::cerr << "SearchPathSuffixes  ";
-  std::cerr << cmJoin(this->SearchPathSuffixes, "\n") << "\n";
-  std::cerr << "SearchPaths\n";
-  std::cerr << cmWrap("[", this->SearchPaths, "]", "\n") << "\n";
-}
-
 bool cmFindBase::CheckForVariableInCache()
 {
-  if (const char* cacheValue =
-        this->Makefile->GetDefinition(this->VariableName)) {
+  if (cmProp cacheValue = this->Makefile->GetDefinition(this->VariableName)) {
     cmState* state = this->Makefile->GetState();
-    const char* cacheEntry = state->GetCacheEntryValue(this->VariableName);
-    bool found = !cmSystemTools::IsNOTFOUND(cacheValue);
+    cmProp cacheEntry = state->GetCacheEntryValue(this->VariableName);
+    bool found = !cmIsNOTFOUND(*cacheValue);
     bool cached = cacheEntry != nullptr;
     if (found) {
       // If the user specifies the entry on the command line without a
@@ -336,10 +312,94 @@ bool cmFindBase::CheckForVariableInCache()
       return true;
     }
     if (cached) {
-      const char* hs =
+      cmProp hs =
         state->GetCacheEntryProperty(this->VariableName, "HELPSTRING");
-      this->VariableDocumentation = hs ? hs : "(none)";
+      this->VariableDocumentation = hs ? *hs : "(none)";
     }
   }
   return false;
+}
+
+cmFindBaseDebugState::cmFindBaseDebugState(std::string commandName,
+                                           cmFindBase const* findBase)
+  : FindCommand(findBase)
+  , CommandName(std::move(commandName))
+{
+}
+
+cmFindBaseDebugState::~cmFindBaseDebugState()
+{
+  if (this->FindCommand->DebugMode) {
+    std::string buffer =
+      cmStrCat(this->CommandName, " called with the following settings:\n");
+    buffer += cmStrCat("  VAR: ", this->FindCommand->VariableName, "\n");
+    buffer += cmStrCat(
+      "  NAMES: ", cmWrap("\"", this->FindCommand->Names, "\"", "\n         "),
+      "\n");
+    buffer += cmStrCat(
+      "  Documentation: ", this->FindCommand->VariableDocumentation, "\n");
+    buffer += "  Framework\n";
+    buffer += cmStrCat("    Only Search Frameworks: ",
+                       this->FindCommand->SearchFrameworkOnly, "\n");
+
+    buffer += cmStrCat("    Search Frameworks Last: ",
+                       this->FindCommand->SearchFrameworkLast, "\n");
+    buffer += cmStrCat("    Search Frameworks First: ",
+                       this->FindCommand->SearchFrameworkFirst, "\n");
+    buffer += "  AppBundle\n";
+    buffer += cmStrCat("    Only Search AppBundle: ",
+                       this->FindCommand->SearchAppBundleOnly, "\n");
+    buffer += cmStrCat("    Search AppBundle Last: ",
+                       this->FindCommand->SearchAppBundleLast, "\n");
+    buffer += cmStrCat("    Search AppBundle First: ",
+                       this->FindCommand->SearchAppBundleFirst, "\n");
+
+    if (this->FindCommand->NoDefaultPath) {
+      buffer += "  NO_DEFAULT_PATH Enabled\n";
+    } else {
+      buffer += cmStrCat(
+        "  CMAKE_FIND_USE_CMAKE_PATH: ", !this->FindCommand->NoCMakePath, "\n",
+        "  CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: ",
+        !this->FindCommand->NoCMakeEnvironmentPath, "\n",
+        "  CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: ",
+        !this->FindCommand->NoSystemEnvironmentPath, "\n",
+        "  CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: ",
+        !this->FindCommand->NoCMakeSystemPath, "\n");
+    }
+
+    buffer +=
+      cmStrCat(this->CommandName, " considered the following locations:\n");
+    for (auto const& state : this->FailedSearchLocations) {
+      std::string path = cmStrCat("  ", state.path);
+      if (!state.regexName.empty()) {
+        path = cmStrCat(path, "/", state.regexName);
+      }
+      buffer += cmStrCat(path, "\n");
+    }
+
+    if (!this->FoundSearchLocation.path.empty()) {
+      buffer += cmStrCat("The item was found at\n  ",
+                         this->FoundSearchLocation.path, "\n");
+    } else {
+      buffer += "The item was not found.\n";
+    }
+
+    this->FindCommand->DebugMessage(buffer);
+  }
+}
+
+void cmFindBaseDebugState::FoundAt(std::string const& path,
+                                   std::string regexName)
+{
+  if (this->FindCommand->DebugMode) {
+    this->FoundSearchLocation = DebugLibState{ std::move(regexName), path };
+  }
+}
+
+void cmFindBaseDebugState::FailedAt(std::string const& path,
+                                    std::string regexName)
+{
+  if (this->FindCommand->DebugMode) {
+    this->FailedSearchLocations.emplace_back(std::move(regexName), path);
+  }
 }

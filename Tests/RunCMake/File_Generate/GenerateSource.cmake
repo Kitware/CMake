@@ -10,3 +10,6 @@ file(GENERATE
 )
 
 add_executable(mn "${CMAKE_CURRENT_BINARY_DIR}/main.cpp")
+
+add_subdirectory(GenerateSource)
+target_link_libraries(mn PRIVATE ObjLib)

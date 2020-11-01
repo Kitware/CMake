@@ -1,11 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalBorlandMakefileGenerator_h
-#define cmGlobalBorlandMakefileGenerator_h
-
-#include "cmGlobalNMakeMakefileGenerator.h"
+#pragma once
 
 #include <iosfwd>
+#include <memory>
+
+#include "cmGlobalNMakeMakefileGenerator.h"
 
 /** \class cmGlobalBorlandMakefileGenerator
  * \brief Write a Borland makefiles.
@@ -16,10 +16,10 @@ class cmGlobalBorlandMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalBorlandMakefileGenerator(cmake* cm);
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<
-      cmGlobalBorlandMakefileGenerator>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalBorlandMakefileGenerator>());
   }
 
   //! Get the name for the generator.
@@ -33,7 +33,8 @@ public:
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   //! Create a local generator appropriate to this Global Generator
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
   /**
    * Try to determine system information such as shared library
@@ -44,6 +45,7 @@ public:
 
   bool AllowNotParallel() const override { return false; }
   bool AllowDeleteOnError() const override { return false; }
+  bool CanEscapeOctothorpe() const override { return true; }
 
 protected:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
@@ -55,5 +57,3 @@ protected:
 
   void PrintBuildCommandAdvice(std::ostream& os, int jobs) const override;
 };
-
-#endif

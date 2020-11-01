@@ -1,1 +1,1 @@
--- INTERFACE_LINK_LIBRARIES='foo'
+-- INTERFACE_LINK_LIBRARIES='\$<\$<CONFIG:DEBUG>:\$<1:foo;foo>>;\$<\$<NOT:\$<CONFIG:DEBUG>>:\$<1:foo;foo>>'

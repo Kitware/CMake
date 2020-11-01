@@ -13,9 +13,6 @@
 
 /* Disable some warnings inside kwsys source files.  */
 #if defined(KWSYS_NAMESPACE)
-#  if defined(__BORLANDC__)
-#    pragma warn - 8027 /* function not inlined.  */
-#  endif
 #  if defined(__INTEL_COMPILER)
 #    pragma warning(disable : 1572) /* floating-point equality test */
 #  endif
@@ -67,11 +64,6 @@
                                      */
 #    pragma warning(disable : 4710) /* function not inlined */
 #    pragma warning(disable : 4786) /* identifier truncated in debug info */
-#  endif
-#  if defined(__BORLANDC__) && !defined(__cplusplus)
-/* Code has no effect; raised by winnt.h in C (not C++) when ignoring an
-   unused parameter using "(param)" syntax (i.e. no cast to void).  */
-#    pragma warn - 8019
 #  endif
 #endif
 

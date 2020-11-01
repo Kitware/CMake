@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 3.1)
+
+project(TestPyPy3 LANGUAGES C)
+
+set (Python3_FIND_IMPLEMENTATIONS "PyPy")
+
+find_package(Python3 COMPONENTS Interpreter Development)
+if (NOT Python3_FOUND)
+  message (FATAL_ERROR "Failed to find Python PyPy 3")
+endif()
+
+if (NOT Python3_Interpreter_FOUND)
+  message (FATAL_ERROR "Failed to find Python PyPy 3 Interpreter")
+endif()
+if (NOT Python3_INTERPRETER_ID STREQUAL "PyPy")
+  message (FATAL_ERROR "Erroneous interpreter ID (${Python3_INTERPRETER_ID})")
+endif()
+
+if (NOT Python3_Development.Module_FOUND)
+  message (FATAL_ERROR "Failed to find Python PyPy 3 Development.Module")
+endif()
+if (NOT Python3_Development.Embed_FOUND)
+  message (FATAL_ERROR "Failed to find Python PyPy 3 Development.Embed")
+endif()
+if (NOT Python3_Development_FOUND)
+  message (FATAL_ERROR "Failed to find Python PyPy 3 Development")
+endif()
+
+if(NOT TARGET Python3::Interpreter)
+  message(SEND_ERROR "Python3::Interpreter not found")
+endif()
+if(NOT TARGET Python3::Module)
+  message(SEND_ERROR "Python3::Module not found")
+endif()
+if(NOT TARGET Python3::Python)
+  message(SEND_ERROR "Python3::Python not found")
+endif()

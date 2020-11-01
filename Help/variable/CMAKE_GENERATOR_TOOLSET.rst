@@ -5,7 +5,8 @@ Native build system toolset specification provided by user.
 
 Some CMake generators support a toolset specification to tell the
 native build system how to choose a compiler.  If the user specifies
-a toolset (e.g.  via the :manual:`cmake(1)` ``-T`` option) the value
+a toolset (e.g. via the :manual:`cmake(1)` ``-T`` option or via
+the :envvar:`CMAKE_GENERATOR_TOOLSET` environment variable) the value
 will be available in this variable.
 
 The value of this variable should never be modified by project code.
@@ -39,10 +40,13 @@ The ``key=value`` pairs form a comma-separated list of options to
 specify generator-specific details of the toolset selection.
 Supported pairs are:
 
-``cuda=<version>``
-  Specify the CUDA toolkit version to use.  Supported by VS 2010
-  and above with the CUDA toolkit VS integration installed.
-  See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_CUDA` variable.
+``cuda=<version>|<path>``
+  Specify the CUDA toolkit version to use or the path to a
+  standalone CUDA toolkit directory.  Supported by VS 2010
+  and above. The version can only be used with the CUDA
+  toolkit VS integration globally installed.
+  See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_CUDA` and
+  :variable:`CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR` variables.
 
 ``host=<arch>``
   Specify the host tools architecture as ``x64`` or ``x86``.
@@ -54,3 +58,8 @@ Supported pairs are:
   Specify the toolset version to use.  Supported by VS 2017
   and above with the specified toolset installed.
   See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_VERSION` variable.
+
+``VCTargetsPath=<path>``
+  Specify an alternative ``VCTargetsPath`` value for Visual Studio
+  project files.  This allows use of VS platform extension configuration
+  files (``.props`` and ``.targets``) that are not installed with VS.

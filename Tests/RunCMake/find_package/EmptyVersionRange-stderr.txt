@@ -1,0 +1,10 @@
+CMake Error at EmptyVersionRange.cmake:[0-9]+ \(find_package\):
+  find_package specified version range is empty.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at EmptyVersionRange.cmake:[0-9]+ \(find_package\):
+  find_package specified version range is empty.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -1,11 +1,13 @@
 // ChildFrm.cpp : implementation of the CChildFrame class
 //
 
+// clang-format off
 #include "stdafx.h"
 
 #include "mfc1.h"
 
 #include "ChildFrm.h"
+// clang-format on
 
 #ifdef _DEBUG
 #  define new DEBUG_NEW

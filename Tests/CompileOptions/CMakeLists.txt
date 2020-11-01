@@ -43,7 +43,7 @@ else()
     )
 endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Borland|Embarcadero")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Borland|Embarcadero" AND NOT "${CMAKE_GENERATOR}" MATCHES "NMake Makefiles")
   set_property(TARGET CompileOptions APPEND PROPERTY COMPILE_OPTIONS
     "-DTEST_OCTOTHORPE=\"#\""
     )

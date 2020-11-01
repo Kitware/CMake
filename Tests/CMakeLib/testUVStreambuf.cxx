@@ -1,17 +1,14 @@
-#include "cmUVStreambuf.h"
-
-#include "cmGetPipes.h"
-#include "cmUVHandlePtr.h"
-
-#include "cm_uv.h"
-
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include <cstring>
-
+#include <cm3p/uv.h>
 #include <stdint.h>
+
+#include "cmGetPipes.h"
+#include "cmUVHandlePtr.h"
+#include "cmUVStreambuf.h"
 
 #define TEST_STR_LINE_1 "This string must be exactly 128 characters long so"
 #define TEST_STR_LINE_2 "that we can test CMake's std::streambuf integration"

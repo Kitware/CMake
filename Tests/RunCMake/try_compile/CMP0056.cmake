@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.1)
 enable_language(C)
 set(obj "${CMAKE_C_OUTPUT_EXTENSION}")
 if(BORLAND)

@@ -1,15 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmQtAutoGenGlobalInitializer_h
-#define cmQtAutoGenGlobalInitializer_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "cmQtAutoGen.h"
 
 class cmLocalGenerator;
 class cmQtAutoGenInitializer;
@@ -46,7 +47,7 @@ public:
 
 public:
   cmQtAutoGenGlobalInitializer(
-    std::vector<cmLocalGenerator*> const& localGenerators);
+    std::vector<std::unique_ptr<cmLocalGenerator>> const& localGenerators);
   ~cmQtAutoGenGlobalInitializer();
 
   Keywords const& kw() const { return Keywords_; };
@@ -68,16 +69,15 @@ private:
   void AddToGlobalAutoRcc(cmLocalGenerator* localGen,
                           std::string const& targetName);
 
-  bool GetExecutableTestOutput(std::string const& generator,
-                               std::string const& executable,
-                               std::string& error, std::string* output);
+  cmQtAutoGen::CompilerFeaturesHandle GetCompilerFeatures(
+    std::string const& generator, std::string const& executable,
+    std::string& error);
 
 private:
   std::vector<std::unique_ptr<cmQtAutoGenInitializer>> Initializers_;
   std::map<cmLocalGenerator*, std::string> GlobalAutoGenTargets_;
   std::map<cmLocalGenerator*, std::string> GlobalAutoRccTargets_;
-  std::unordered_map<std::string, std::string> ExecutableTestOutputs_;
+  std::unordered_map<std::string, cmQtAutoGen::CompilerFeaturesHandle>
+    CompilerFeatures_;
   Keywords const Keywords_;
 };
-
-#endif

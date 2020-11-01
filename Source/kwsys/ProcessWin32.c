@@ -31,9 +31,6 @@ a UNIX-style select system call.
 #include <io.h>     /* _unlink */
 #include <stdio.h>  /* sprintf */
 #include <string.h> /* strlen, strdup */
-#ifdef __WATCOMC__
-#  define _unlink unlink
-#endif
 
 #ifndef _MAX_FNAME
 #  define _MAX_FNAME 4096
@@ -46,11 +43,6 @@ a UNIX-style select system call.
 #  pragma warning(pop)
 #  pragma warning(disable : 4514)
 #  pragma warning(disable : 4706)
-#endif
-
-#if defined(__BORLANDC__)
-#  pragma warn - 8004 /* assigned a value that is never used  */
-#  pragma warn - 8060 /* Assignment inside if() condition.  */
 #endif
 
 /* There are pipes for the process pipeline's stdout and stderr.  */
@@ -117,7 +109,6 @@ static kwsysProcessTime kwsysProcessTimeAdd(kwsysProcessTime in1,
                                             kwsysProcessTime in2);
 static kwsysProcessTime kwsysProcessTimeSubtract(kwsysProcessTime in1,
                                                  kwsysProcessTime in2);
-static void kwsysProcessSetExitException(kwsysProcess* cp, int code);
 static void kwsysProcessSetExitExceptionByIndex(kwsysProcess* cp, int code,
                                                 int idx);
 static void kwsysProcessKillTree(int pid);
@@ -358,13 +349,20 @@ kwsysProcess* kwsysProcess_New(void)
 #  pragma warning(push)
 #  ifdef __INTEL_COMPILER
 #    pragma warning(disable : 1478)
+#  elif defined __clang__
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #  else
 #    pragma warning(disable : 4996)
 #  endif
 #endif
   GetVersionEx(&osv);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#  pragma warning(pop)
+#  ifdef __clang__
+#    pragma clang diagnostic pop
+#  else
+#    pragma warning(pop)
+#  endif
 #endif
   if (osv.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
     /* Win9x no longer supported.  */
@@ -755,7 +753,7 @@ void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe, int shared)
   }
 }
 
-void kwsysProcess_SetPipeNative(kwsysProcess* cp, int pipe, HANDLE p[2])
+void kwsysProcess_SetPipeNative(kwsysProcess* cp, int pipe, const HANDLE p[2])
 {
   HANDLE* pPipeNative = 0;
 
@@ -2269,13 +2267,20 @@ static kwsysProcess_List* kwsysProcess_List_New(void)
 #  pragma warning(push)
 #  ifdef __INTEL_COMPILER
 #    pragma warning(disable : 1478)
+#  elif defined __clang__
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #  else
 #    pragma warning(disable : 4996)
 #  endif
 #endif
   GetVersionEx(&osv);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#  pragma warning(pop)
+#  ifdef __clang__
+#    pragma clang diagnostic pop
+#  else
+#    pragma warning(pop)
+#  endif
 #endif
   self->NT4 =
     (osv.dwPlatformId == VER_PLATFORM_WIN32_NT && osv.dwMajorVersion < 5) ? 1
@@ -2659,8 +2664,8 @@ static int kwsysProcessesAdd(HANDLE hProcess, DWORD dwProcessid,
     newSize = kwsysProcesses.Size ? kwsysProcesses.Size * 2 : 4;
 
     /* Try allocating the new block of memory.  */
-    if (newArray = (kwsysProcessInstance*)malloc(
-          newSize * sizeof(kwsysProcessInstance))) {
+    if ((newArray = (kwsysProcessInstance*)malloc(
+           newSize * sizeof(kwsysProcessInstance)))) {
       /* Copy the old process handles to the new memory.  */
       if (kwsysProcesses.Count > 0) {
         memcpy(newArray, kwsysProcesses.Processes,

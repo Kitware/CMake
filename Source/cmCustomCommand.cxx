@@ -2,28 +2,27 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCustomCommand.h"
 
-#include "cmMakefile.h"
-
 #include <utility>
 
-cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
-                                 std::vector<std::string> outputs,
+#include <cmext/algorithm>
+
+cmCustomCommand::cmCustomCommand(std::vector<std::string> outputs,
                                  std::vector<std::string> byproducts,
                                  std::vector<std::string> depends,
                                  cmCustomCommandLines commandLines,
-                                 const char* comment,
-                                 const char* workingDirectory)
+                                 cmListFileBacktrace lfbt, const char* comment,
+                                 const char* workingDirectory,
+                                 bool stdPipesUTF8)
   : Outputs(std::move(outputs))
   , Byproducts(std::move(byproducts))
   , Depends(std::move(depends))
   , CommandLines(std::move(commandLines))
+  , Backtrace(std::move(lfbt))
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
   , HaveComment(comment != nullptr)
+  , StdPipesUTF8(stdPipesUTF8)
 {
-  if (mf) {
-    this->Backtrace = mf->GetBacktrace();
-  }
 }
 
 const std::vector<std::string>& cmCustomCommand::GetOutputs() const
@@ -54,13 +53,12 @@ const char* cmCustomCommand::GetComment() const
 
 void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
 {
-  this->CommandLines.insert(this->CommandLines.end(), commandLines.begin(),
-                            commandLines.end());
+  cm::append(this->CommandLines, commandLines);
 }
 
 void cmCustomCommand::AppendDepends(const std::vector<std::string>& depends)
 {
-  this->Depends.insert(this->Depends.end(), depends.begin(), depends.end());
+  cm::append(this->Depends, depends);
 }
 
 bool cmCustomCommand::GetEscapeOldStyle() const
@@ -88,21 +86,19 @@ cmListFileBacktrace const& cmCustomCommand::GetBacktrace() const
   return this->Backtrace;
 }
 
-cmCustomCommand::ImplicitDependsList const&
-cmCustomCommand::GetImplicitDepends() const
+cmImplicitDependsList const& cmCustomCommand::GetImplicitDepends() const
 {
   return this->ImplicitDepends;
 }
 
-void cmCustomCommand::SetImplicitDepends(ImplicitDependsList const& l)
+void cmCustomCommand::SetImplicitDepends(cmImplicitDependsList const& l)
 {
   this->ImplicitDepends = l;
 }
 
-void cmCustomCommand::AppendImplicitDepends(ImplicitDependsList const& l)
+void cmCustomCommand::AppendImplicitDepends(cmImplicitDependsList const& l)
 {
-  this->ImplicitDepends.insert(this->ImplicitDepends.end(), l.begin(),
-                               l.end());
+  cm::append(this->ImplicitDepends, l);
 }
 
 bool cmCustomCommand::GetUsesTerminal() const

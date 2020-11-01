@@ -69,7 +69,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
       if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(_Intel_archdir intel64)
       else()
-        set(_Intel_archdir x86)
+        set(_Intel_archdir ia32)
       endif()
       set(_Intel_compiler_ver ${CMAKE_${LANG}_COMPILER_VERSION})
       if(WIN32)
@@ -210,8 +210,8 @@ if(MSVC)
   set(_MSVC_IDE_VERSION "")
   if(MSVC_VERSION GREATER_EQUAL 2000)
     message(WARNING "MSVC ${MSVC_VERSION} not yet supported.")
-  elseif(MSVC_VERSION_VERSION GREATER_EQUAL 143)
-    message(WARNING "MSVC toolset v${MSVC_VERSION_VERSION} not yet supported.")
+  elseif(MSVC_TOOLSET_VERSION GREATER_EQUAL 143)
+    message(WARNING "MSVC toolset v${MSVC_TOOLSET_VERSION} not yet supported.")
   elseif(MSVC_TOOLSET_VERSION EQUAL 142)
     set(MSVC_REDIST_NAME VC142)
     set(_MSVC_DLL_VERSION 140)
@@ -251,10 +251,19 @@ if(MSVC)
     endif()
     if(NOT vs VERSION_LESS 15)
       set(_vs_redist_paths "")
-      cmake_host_system_information(RESULT _vs_dir QUERY VS_${vs}_DIR) # undocumented query
-      if(IS_DIRECTORY "${_vs_dir}")
-        file(GLOB _vs_redist_paths "${_vs_dir}/VC/Redist/MSVC/*")
-      endif()
+      # The toolset and its redistributables may come with any VS version 15 or newer.
+      set(_MSVC_IDE_VERSIONS 16 15)
+      foreach(_vs_ver ${_MSVC_IDE_VERSIONS})
+        set(_vs_glob_redist_paths "")
+        cmake_host_system_information(RESULT _vs_dir QUERY VS_${_vs_ver}_DIR) # undocumented query
+        if(IS_DIRECTORY "${_vs_dir}")
+          file(GLOB _vs_glob_redist_paths "${_vs_dir}/VC/Redist/MSVC/*")
+          list(REVERSE _vs_glob_redist_paths)
+          list(APPEND _vs_redist_paths ${_vs_glob_redist_paths})
+        endif()
+        unset(_vs_glob_redist_paths)
+      endforeach()
+      unset(_MSVC_IDE_VERSIONS)
       unset(_vs_dir)
     else()
       get_filename_component(_vs_dir
@@ -279,6 +288,16 @@ if(MSVC)
         "${MSVC_CRT_DIR}/msvcp${v}.dll"
         )
       if(NOT vs VERSION_LESS 14)
+        foreach(crt
+            "${MSVC_CRT_DIR}/msvcp${v}_1.dll"
+            "${MSVC_CRT_DIR}/msvcp${v}_2.dll"
+            "${MSVC_CRT_DIR}/msvcp${v}_codecvt_ids.dll"
+            "${MSVC_CRT_DIR}/vcruntime${v}_1.dll"
+            )
+          if(EXISTS "${crt}")
+            list(APPEND __install__libs "${crt}")
+          endif()
+        endforeach()
         list(APPEND __install__libs
             "${MSVC_CRT_DIR}/vcruntime${v}.dll"
             "${MSVC_CRT_DIR}/concrt${v}.dll"
@@ -297,6 +316,16 @@ if(MSVC)
         "${MSVC_CRT_DIR}/msvcp${v}d.dll"
         )
       if(NOT vs VERSION_LESS 14)
+        foreach(crt
+            "${MSVC_CRT_DIR}/msvcp${v}_1d.dll"
+            "${MSVC_CRT_DIR}/msvcp${v}_2d.dll"
+            "${MSVC_CRT_DIR}/msvcp${v}d_codecvt_ids.dll"
+            "${MSVC_CRT_DIR}/vcruntime${v}_1d.dll"
+            )
+          if(EXISTS "${crt}")
+            list(APPEND __install__libs "${crt}")
+          endif()
+        endforeach()
         list(APPEND __install__libs
             "${MSVC_CRT_DIR}/vcruntime${v}d.dll"
             "${MSVC_CRT_DIR}/concrt${v}d.dll"

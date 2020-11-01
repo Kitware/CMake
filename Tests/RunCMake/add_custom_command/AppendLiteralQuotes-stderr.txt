@@ -1,0 +1,7 @@
+CMake Error at AppendLiteralQuotes.cmake:2 \(add_custom_command\):
+  COMMAND may not contain literal quotes:
+
+    "c"
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

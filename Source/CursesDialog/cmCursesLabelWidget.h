@@ -1,14 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCursesLabelWidget_h
-#define cmCursesLabelWidget_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
-
-#include <string>
 
 class cmCursesMainForm;
 
@@ -28,5 +27,3 @@ public:
   // handled
   bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w) override;
 };
-
-#endif // cmCursesLabelWidget_h

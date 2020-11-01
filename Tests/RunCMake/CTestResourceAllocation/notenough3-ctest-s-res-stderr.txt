@@ -1,0 +1,21 @@
+^Insufficient resources for test Test1:
+
+  Test requested resources of type 'widgets' in the following amounts:
+    12 slots
+  but only the following units were available:
+    '0': 4 slots
+    '1': 2 slots
+    '2': 4 slots
+    '3': 8 slots
+    '4': 1 slot
+    '5': 1 slot
+    '6': 1 slot
+    '7': 1 slot
+
+Resource spec file:
+
+  [^
+]*/Tests/RunCMake/CTestResourceAllocation/resspec.json
+CMake Error at [^
+]*/Tests/RunCMake/CTestResourceAllocation/notenough3-ctest-s-res/test\.cmake:[0-9]+ \(message\):
+  Tests did not pass$

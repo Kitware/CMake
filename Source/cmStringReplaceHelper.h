@@ -1,13 +1,12 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmStringReplaceHelper_h
-#define cmStringReplaceHelper_h
-
-#include "cmsys/RegularExpression.hxx"
+#pragma once
 
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
 
 class cmMakefile;
 
@@ -64,5 +63,3 @@ private:
   std::vector<RegexReplacement> Replacements;
   cmMakefile* Makefile = nullptr;
 };
-
-#endif

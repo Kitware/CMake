@@ -21,9 +21,19 @@ function(run_cmake test)
   else()
     set(expect_result 0)
   endif()
+
+  string(TOLOWER ${CMAKE_HOST_SYSTEM_NAME} platform_name)
+  if(platform_name MATCHES cygwin)
+    #remove all additional bits from cygwin name
+    set(platform_name cygwin)
+  endif()
+
   foreach(o out err)
     if(RunCMake-std${o}-file AND EXISTS ${top_src}/${RunCMake-std${o}-file})
       file(READ ${top_src}/${RunCMake-std${o}-file} expect_std${o})
+      string(REGEX REPLACE "\n+$" "" expect_std${o} "${expect_std${o}}")
+    elseif(EXISTS ${top_src}/${test}-std${o}-${platform_name}.txt)
+      file(READ ${top_src}/${test}-std${o}-${platform_name}.txt expect_std${o})
       string(REGEX REPLACE "\n+$" "" expect_std${o} "${expect_std${o}}")
     elseif(EXISTS ${top_src}/${test}-std${o}.txt)
       file(READ ${top_src}/${test}-std${o}.txt expect_std${o})
@@ -82,9 +92,12 @@ function(run_cmake test)
     set(maybe_input_file "")
   endif()
   if(RunCMake_TEST_COMMAND)
+    if(NOT RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
+      set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+    endif()
     execute_process(
       COMMAND ${RunCMake_TEST_COMMAND}
-      WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
+      WORKING_DIRECTORY "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}"
       OUTPUT_VARIABLE actual_stdout
       ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
@@ -133,10 +146,16 @@ function(run_cmake test)
     "|clang[^:]*: warning: the object size sanitizer has no effect at -O0, but is explicitly enabled:"
     "|Error kstat returned"
     "|Hit xcodebuild bug"
+
+    "|LICENSE WARNING:"
+    "|Your license to use PGI[^\n]*expired"
+    "|Please obtain a new version at"
+    "|contact PGI Sales at"
+
     "|[^\n]*xcodebuild[^\n]*warning: file type[^\n]*is based on missing file type"
-    "|ld: 0711-224 WARNING: Duplicate symbol: .__init_aix_libgcc_cxa_atexit"
-    "|ld: 0711-345 Use the -bloadmap or -bnoquiet option to obtain more information"
+    "|[^\n]*objc[^\n]*: Class AMSupportURL[^\n]* One of the two will be used. Which one is undefined."
     "|[^\n]*is a member of multiple groups"
+    "|[^\n]*offset in archive not a multiple of 8"
     "|[^\n]*from Time Machine by path"
     "|[^\n]*Bullseye Testing Technology"
     ")[^\n]*\n)+"
@@ -191,6 +210,29 @@ endfunction()
 function(run_cmake_with_options test)
   set(RunCMake_TEST_OPTIONS "${ARGN}")
   run_cmake(${test})
+endfunction()
+
+function(ensure_files_match expected_file actual_file)
+  if(NOT EXISTS "${expected_file}")
+    message(FATAL_ERROR "Expected file does not exist:\n  ${expected_file}")
+  endif()
+  if(NOT EXISTS "${actual_file}")
+    message(FATAL_ERROR "Actual file does not exist:\n  ${actual_file}")
+  endif()
+  file(READ "${expected_file}" expected_file_content)
+  file(READ "${actual_file}" actual_file_content)
+  if(NOT "${expected_file_content}" STREQUAL "${actual_file_content}")
+    message(FATAL_ERROR "Actual file content does not match expected:\n
+    \n
+      expected file: ${expected_file}\n
+      expected content:\n
+      ${expected_file_content}\n
+    \n
+      actual file: ${actual_file}\n
+      actual content:\n
+      ${actual_file_content}\n
+    ")
+  endif()
 endfunction()
 
 # Protect RunCMake tests from calling environment.

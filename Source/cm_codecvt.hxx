@@ -1,12 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_codecvt_hxx
-#define cm_codecvt_hxx
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cwchar>
 #include <locale>
-#include <wchar.h>
 
 class codecvt : public std::codecvt<char, char, mbstate_t>
 {
@@ -18,7 +17,7 @@ public:
     ANSI
   };
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 
   codecvt(Encoding e);
 
@@ -62,5 +61,3 @@ private:
 
 #endif
 };
-
-#endif

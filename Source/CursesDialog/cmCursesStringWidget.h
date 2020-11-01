@@ -1,14 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCursesStringWidget_h
-#define cmCursesStringWidget_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
-
-#include <string>
 
 class cmCursesMainForm;
 
@@ -22,9 +21,6 @@ class cmCursesStringWidget : public cmCursesWidget
 {
 public:
   cmCursesStringWidget(int width, int height, int left, int top);
-
-  cmCursesStringWidget(cmCursesStringWidget const&) = delete;
-  cmCursesStringWidget& operator=(cmCursesStringWidget const&) = delete;
 
   /**
    * Handle user input. Called by the container of this widget
@@ -65,8 +61,6 @@ public:
 protected:
   // true if the widget is in edit mode
   bool InEdit;
-  char* OriginalString;
+  std::string OriginalString;
   bool Done;
 };
-
-#endif // cmCursesStringWidget_h

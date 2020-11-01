@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmDepends_h
-#define cmDepends_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -12,7 +11,7 @@
 #include <vector>
 
 class cmFileTimeCache;
-class cmLocalGenerator;
+class cmLocalUnixMakefileGenerator3;
 
 /** \class cmDepends
  * \brief Dependency scanner superclass.
@@ -24,12 +23,13 @@ class cmLocalGenerator;
 class cmDepends
 {
 public:
-  typedef std::map<std::string, std::vector<std::string>> DependencyMap;
+  using DependencyMap = std::map<std::string, std::vector<std::string>>;
 
 public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
-  cmDepends(cmLocalGenerator* lg = nullptr, std::string targetDir = "");
+  cmDepends(cmLocalUnixMakefileGenerator3* lg = nullptr,
+            std::string targetDir = "");
 
   cmDepends(cmDepends const&) = delete;
   cmDepends& operator=(cmDepends const&) = delete;
@@ -38,7 +38,10 @@ public:
       scanning dependencies.  This is not a full local generator; it
       has been setup to do relative path conversions for the current
       directory.  */
-  void SetLocalGenerator(cmLocalGenerator* lg) { this->LocalGenerator = lg; }
+  void SetLocalGenerator(cmLocalUnixMakefileGenerator3* lg)
+  {
+    this->LocalGenerator = lg;
+  }
 
   /** Set the specific language to be scanned.  */
   void SetLanguage(const std::string& lang) { this->Language = lang; }
@@ -92,7 +95,7 @@ protected:
                         std::ostream& internalDepends);
 
   // The local generator.
-  cmLocalGenerator* LocalGenerator;
+  cmLocalUnixMakefileGenerator3* LocalGenerator;
 
   // Flag for verbose output.
   bool Verbose = false;
@@ -108,5 +111,3 @@ protected:
 
   void SetIncludePathFromLanguage(const std::string& lang);
 };
-
-#endif

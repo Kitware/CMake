@@ -11,6 +11,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "warning: \\(Long double usage is reported only once for each file"
   "warning: To disable this warning use"
   "could not be inlined"
+  "libcmexpat.*has no symbols"
   "libcmcurl.*has no symbols"
   "not sorted slower link editing will result"
   "stl_deque.h:479"
@@ -49,6 +50,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "WarningMessagesDialog\\.cxx"
   "warning.*directory name.*CMake-Xcode.*/bin/.*does not exist.*"
   "stl_deque.h:1051"
+  "Tests/CMakeLib/testCTestResourceSpec.cxx:.*warning: missing initializer for member.*cmCTestResourceSpec::.*" # GCC 4.8 disagrees with later compilers on C++11 initializer list conversion
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
   "(Lexer|Parser).*warning.*(statement is unreachable|will never be executed)"
   "(Lexer|Parser).*warning.*variable.*was set but never used"
@@ -63,6 +65,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "ld: warning .*/libgcc.a archive's cputype"
   "ld: warning: ignoring file .*/libgcc.a, file was built for archive which is not the architecture being linked"
   "ld: warning: in .*/libgcc.a, file is not of required architecture"
+  "ld: warning: symbol .(deflate|inflate)_copyright. has differing sizes" # system libz and QtCore disagree
   "warning.*This version of Mac OS X is unsupported"
   "clang.*: warning: argument unused during compilation: .-g"
   "note: in expansion of macro" # diagnostic context note
@@ -71,6 +74,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*isn.*t random" # we do not do crypto
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*srand.*seed choices are.*poor" # we do not do crypto
   "IPA warning: function.*multiply defined in"
+  "LICENSE WARNING" # PGI license expiry.  Not useful in nightly testing.
 
   # Ignore compiler summary warning, assuming prior text has matched some
   # other warning expression:
@@ -78,7 +82,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "compilation completed with warnings" # PGI
   "[0-9]+ Warning\\(s\\) detected" # SunPro
 
-# scanbuild exceptions
+  # scanbuild exceptions
   "char_traits.h:.*: warning: Null pointer argument in call to string length function"
   "stl_construct.h:.*: warning: Forming reference to null pointer"
   ".*stl_uninitialized.h:75:19: warning: Forming reference to null pointer.*"
@@ -97,6 +101,9 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "liblzma/common/index_encoder.c:[0-9]+:[0-9]+: warning: Value stored to .* during its initialization is never read"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: The left operand of '==' is a garbage value"
+  "libuv/src/.*:[0-9]+:[0-9]+: warning: 1st function call argument is an uninitialized value"
+  "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
+  "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Value stored to .* is never read"
   )
 
 if(NOT "@CMAKE_GENERATOR@" MATCHES "Xcode")

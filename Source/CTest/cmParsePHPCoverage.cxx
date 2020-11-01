@@ -1,13 +1,17 @@
 #include "cmParsePHPCoverage.h"
 
-#include "cmCTest.h"
-#include "cmCTestCoverageHandler.h"
-#include "cmSystemTools.h"
+#include <cstdlib>
+#include <cstring>
+
+#include <cm/memory>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
-#include <stdlib.h>
-#include <string.h>
+
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 /*
   To setup coverage for php.
@@ -140,17 +144,15 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
   int size = 0;
   if (this->ReadInt(in, size)) {
     size++; // add one for null termination
-    char* s = new char[size + 1];
+    auto s = cm::make_unique<char[]>(size + 1);
     // read open quote
     if (in.get(c) && c != '"') {
-      delete[] s;
       return false;
     }
     // read the string data
-    in.read(s, size - 1);
+    in.read(s.get(), size - 1);
     s[size - 1] = 0;
-    std::string fileName = s;
-    delete[] s;
+    std::string fileName = s.get();
     // read close quote
     if (in.get(c) && c != '"') {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -210,9 +212,7 @@ bool cmParsePHPCoverage::ReadPHPCoverageDirectory(const char* d)
   for (i = 0; i < numf; i++) {
     std::string file = dir.GetFile(i);
     if (file != "." && file != ".." && !cmSystemTools::FileIsDirectory(file)) {
-      std::string path = d;
-      path += "/";
-      path += file;
+      std::string path = cmStrCat(d, '/', file);
       if (!this->ReadPHPData(path.c_str())) {
         return false;
       }

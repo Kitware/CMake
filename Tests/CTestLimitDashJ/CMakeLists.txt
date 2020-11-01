@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(CTestLimitDashJ NONE)
 
-# This file demonstrates https://gitlab.kitware.com/cmake/cmake/issues/12904
+# This file demonstrates https://gitlab.kitware.com/cmake/cmake/-/issues/12904
 # when configured with CMake 2.8.10.2 and earlier, and when running
 # "ctest -j 4" in the resulting build tree. This example is hard-coded
 # to assume -j 4 just to reproduce the issue easily. Adjust the

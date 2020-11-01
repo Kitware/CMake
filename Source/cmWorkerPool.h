@@ -1,17 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmWorkerPool_h
-#define cmWorkerPool_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmAlgorithms.h" // IWYU pragma: keep
-
-#include <memory> // IWYU pragma: keep
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <cm/memory>
 
 // -- Types
 class cmWorkerPoolInternal;
@@ -127,7 +125,7 @@ public:
   /**
    * Job handle type
    */
-  typedef std::unique_ptr<JobT> JobHandleT;
+  using JobHandleT = std::unique_ptr<JobT>;
 
   /**
    * Fence job base class
@@ -222,5 +220,3 @@ private:
   unsigned int ThreadCount_ = 1;
   std::unique_ptr<cmWorkerPoolInternal> Int_;
 };
-
-#endif

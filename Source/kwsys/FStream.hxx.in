@@ -87,7 +87,7 @@ public:
 
   bool _open(char const* file_name, std::ios_base::openmode mode)
   {
-    if (is_open() || file_) {
+    if (_is_open() || file_) {
       return false;
     }
 #  if defined(_MSC_VER)
@@ -108,7 +108,7 @@ public:
     return success;
   }
 
-  bool is_open()
+  bool _is_open()
   {
     if (!buf_) {
       return false;
@@ -116,7 +116,7 @@ public:
     return buf_->is_open();
   }
 
-  bool is_open() const
+  bool _is_open() const
   {
     if (!buf_) {
       return false;
@@ -198,9 +198,11 @@ public:
     this->_set_state(this->_open(file_name, mode), this, this);
   }
 
+  bool is_open() { return this->_is_open(); }
+
   void close() { this->_set_state(this->_close(), this, this); }
 
-  using basic_efilebuf<CharType, Traits>::is_open;
+  using basic_efilebuf<CharType, Traits>::_is_open;
 
   internal_buffer_type* rdbuf() const { return this->buf_; }
 
@@ -212,7 +214,7 @@ class basic_ofstream
   : public std::basic_ostream<CharType, Traits>
   , public basic_efilebuf<CharType, Traits>
 {
-  using basic_efilebuf<CharType, Traits>::is_open;
+  using basic_efilebuf<CharType, Traits>::_is_open;
 
 public:
   typedef typename basic_efilebuf<CharType, Traits>::internal_buffer_type
@@ -241,6 +243,8 @@ public:
   }
 
   void close() { this->_set_state(this->_close(), this, this); }
+
+  bool is_open() { return this->_is_open(); }
 
   internal_buffer_type* rdbuf() const { return this->buf_; }
 

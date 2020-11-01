@@ -1,6 +1,8 @@
 CMAKE_C_KNOWN_FEATURES
 ----------------------
 
+.. versionadded:: 3.1
+
 List of C features known to this version of CMake.
 
 The features listed in this global property may be known to be available to the
@@ -14,13 +16,13 @@ compile features and a list of supported compilers.
 The features known to this version of CMake are:
 
 ``c_std_90``
-  Compiler mode is aware of C 90.
+  Compiler mode is at least C 90.
 
 ``c_std_99``
-  Compiler mode is aware of C 99.
+  Compiler mode is at least C 99.
 
 ``c_std_11``
-  Compiler mode is aware of C 11.
+  Compiler mode is at least C 11.
 
 ``c_function_prototypes``
   Function prototypes, as defined in ``ISO/IEC 9899:1990``.

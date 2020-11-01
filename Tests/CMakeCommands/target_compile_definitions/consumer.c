@@ -35,6 +35,10 @@
 #  endif
 #endif
 
+#if !LANG_IS_C_OR_CXX
+#  error Expected LANG_IS_C_OR_CXX
+#endif
+
 void consumer_c()
 {
 }

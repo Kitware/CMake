@@ -1,12 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalGeneratorFactory_h
-#define cmGlobalGeneratorFactory_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
+
+#include <cm/memory>
 
 class cmGlobalGenerator;
 class cmake;
@@ -23,8 +24,8 @@ public:
   virtual ~cmGlobalGeneratorFactory() = default;
 
   /** Create a GlobalGenerator */
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& n,
-                                                   cmake* cm) const = 0;
+  virtual std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    const std::string& n, bool allowArch, cmake* cm) const = 0;
 
   /** Get the documentation entry for this factory */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const = 0;
@@ -42,7 +43,7 @@ public:
   /** Get the list of supported platforms name for this generator */
   virtual std::vector<std::string> GetKnownPlatforms() const = 0;
 
-  /** If the generator suports platforms, get its default.  */
+  /** If the generator supports platforms, get its default.  */
   virtual std::string GetDefaultPlatformName() const = 0;
 };
 
@@ -51,13 +52,13 @@ class cmGlobalGeneratorSimpleFactory : public cmGlobalGeneratorFactory
 {
 public:
   /** Create a GlobalGenerator */
-  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const override
+  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    const std::string& name, bool /*allowArch*/, cmake* cm) const override
   {
     if (name != T::GetActualName()) {
-      return nullptr;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
-    return new T(cm);
+    return std::unique_ptr<cmGlobalGenerator>(cm::make_unique<T>(cm));
   }
 
   /** Get the documentation entry for this factory */
@@ -93,5 +94,3 @@ public:
 
   std::string GetDefaultPlatformName() const override { return std::string(); }
 };
-
-#endif

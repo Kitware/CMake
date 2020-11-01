@@ -1,8 +1,7 @@
 #include <assert.h>
+#include <gif_lib.h>
 #include <stdio.h>
 #include <string.h>
-
-#include <gif_lib.h>
 
 // GIFLIB before version 5 didn't know this macro
 #ifndef GIFLIB_MAJOR

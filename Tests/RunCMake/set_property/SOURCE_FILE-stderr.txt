@@ -1,0 +1,22 @@
+^CMake Error at SOURCE_FILE.cmake:1 \(set_property\):
+  set_property called with incorrect number of arguments no value provided to
+  the DIRECTORY option
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at SOURCE_FILE.cmake:2 \(set_property\):
+  set_property given non-existent DIRECTORY non_existing_dir
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at SOURCE_FILE.cmake:3 \(set_property\):
+  set_property called with incorrect number of arguments no value provided to
+  the TARGET_DIRECTORY option
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at SOURCE_FILE.cmake:4 \(set_property\):
+  set_property given non-existent target for TARGET_DIRECTORY
+  non_existing_target
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

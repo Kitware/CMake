@@ -1,6 +1,8 @@
 XCODE_GENERATE_SCHEME
 ---------------------
 
+.. versionadded:: 3.15
+
 If enabled, the :generator:`Xcode` generator will generate schema files.  These
 are useful to invoke analyze, archive, build-for-testing and test
 actions from the command line.
@@ -31,9 +33,11 @@ at target creation time.
 - :prop_tgt:`XCODE_SCHEME_ZOMBIE_OBJECTS`
 
 The following target properties will be applied on the
-"Info" and "Arguments" tab:
+"Info", "Arguments", and "Options" tab:
 
 - :prop_tgt:`XCODE_SCHEME_ARGUMENTS`
 - :prop_tgt:`XCODE_SCHEME_DEBUG_AS_ROOT`
+- :prop_tgt:`XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING`
 - :prop_tgt:`XCODE_SCHEME_ENVIRONMENT`
 - :prop_tgt:`XCODE_SCHEME_EXECUTABLE`
+- :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY`

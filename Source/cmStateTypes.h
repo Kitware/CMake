@@ -1,8 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#ifndef cmStateTypes_h
-#define cmStateTypes_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -10,7 +9,7 @@
 
 namespace cmStateDetail {
 struct SnapshotDataType;
-typedef cmLinkedTree<cmStateDetail::SnapshotDataType>::iterator PositionType;
+using PositionType = cmLinkedTree<cmStateDetail::SnapshotDataType>::iterator;
 }
 
 namespace cmStateEnums {
@@ -19,6 +18,7 @@ enum SnapshotType
 {
   BaseType,
   BuildsystemDirectoryType,
+  DeferCallType,
   FunctionCallType,
   MacroCallType,
   IncludeFileType,
@@ -60,5 +60,3 @@ enum ArtifactType
   ImportLibraryArtifact
 };
 }
-
-#endif

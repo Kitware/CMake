@@ -1,17 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestSubmitHandler_h
-#define cmCTestSubmitHandler_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-
-#include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
 
 #include <iosfwd>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmCTest.h"
+#include "cmCTestGenericHandler.h"
 
 /** \class cmCTestSubmitHandler
  * \brief Helper class for CTest
@@ -22,7 +21,7 @@
 class cmCTestSubmitHandler : public cmCTestGenericHandler
 {
 public:
-  typedef cmCTestGenericHandler Superclass;
+  using Superclass = cmCTestGenericHandler;
 
   cmCTestSubmitHandler();
   ~cmCTestSubmitHandler() override { this->LogFile = nullptr; }
@@ -59,7 +58,7 @@ private:
                        const std::string& remoteprefix,
                        const std::string& url);
 
-  typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
+  using cmCTestSubmitHandlerVectorOfChar = std::vector<char>;
 
   void ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk);
 
@@ -77,5 +76,3 @@ private:
   std::set<std::string> Files;
   std::vector<std::string> HttpHeaders;
 };
-
-#endif

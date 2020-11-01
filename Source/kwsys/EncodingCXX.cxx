@@ -17,8 +17,8 @@
 #  include "Encoding.hxx.in"
 #endif
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <vector>
 
 #ifdef _MSC_VER
@@ -65,7 +65,7 @@ Encoding::CommandLineArguments::CommandLineArguments(int ac,
   for (int i = 0; i < ac; i++) {
     this->argv_[i] = strdup(av[i]);
   }
-  this->argv_[ac] = KWSYS_NULLPTR;
+  this->argv_[ac] = nullptr;
 }
 
 Encoding::CommandLineArguments::CommandLineArguments(int ac,
@@ -75,7 +75,7 @@ Encoding::CommandLineArguments::CommandLineArguments(int ac,
   for (int i = 0; i < ac; i++) {
     this->argv_[i] = kwsysEncoding_DupToNarrow(av[i]);
   }
-  this->argv_[ac] = KWSYS_NULLPTR;
+  this->argv_[ac] = nullptr;
 }
 
 Encoding::CommandLineArguments::~CommandLineArguments()
@@ -90,7 +90,7 @@ Encoding::CommandLineArguments::CommandLineArguments(
 {
   this->argv_.resize(other.argv_.size());
   for (size_t i = 0; i < this->argv_.size(); i++) {
-    this->argv_[i] = other.argv_[i] ? strdup(other.argv_[i]) : KWSYS_NULLPTR;
+    this->argv_[i] = other.argv_[i] ? strdup(other.argv_[i]) : nullptr;
   }
 }
 
@@ -105,7 +105,7 @@ Encoding::CommandLineArguments& Encoding::CommandLineArguments::operator=(
 
     this->argv_.resize(other.argv_.size());
     for (i = 0; i < this->argv_.size(); i++) {
-      this->argv_[i] = other.argv_[i] ? strdup(other.argv_[i]) : KWSYS_NULLPTR;
+      this->argv_[i] = other.argv_[i] ? strdup(other.argv_[i]) : nullptr;
     }
   }
 
@@ -128,8 +128,9 @@ std::wstring Encoding::ToWide(const std::string& str)
 {
   std::wstring wstr;
 #  if defined(_WIN32)
-  const int wlength = MultiByteToWideChar(
-    KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(), int(str.size()), NULL, 0);
+  const int wlength =
+    MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
+                        int(str.size()), nullptr, 0);
   if (wlength > 0) {
     wchar_t* wdata = new wchar_t[wlength];
     int r = MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
@@ -162,12 +163,12 @@ std::string Encoding::ToNarrow(const std::wstring& str)
 #  if defined(_WIN32)
   int length =
     WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.c_str(),
-                        int(str.size()), NULL, 0, NULL, NULL);
+                        int(str.size()), nullptr, 0, nullptr, nullptr);
   if (length > 0) {
     char* data = new char[length];
     int r =
       WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.c_str(),
-                          int(str.size()), data, length, NULL, NULL);
+                          int(str.size()), data, length, nullptr, nullptr);
     if (r > 0) {
       nstr = std::string(data, length);
     }
@@ -193,7 +194,7 @@ std::string Encoding::ToNarrow(const std::wstring& str)
 std::wstring Encoding::ToWide(const char* cstr)
 {
   std::wstring wstr;
-  size_t length = kwsysEncoding_mbstowcs(KWSYS_NULLPTR, cstr, 0) + 1;
+  size_t length = kwsysEncoding_mbstowcs(nullptr, cstr, 0) + 1;
   if (length > 0) {
     std::vector<wchar_t> wchars(length);
     if (kwsysEncoding_mbstowcs(&wchars[0], cstr, length) > 0) {
@@ -206,7 +207,7 @@ std::wstring Encoding::ToWide(const char* cstr)
 std::string Encoding::ToNarrow(const wchar_t* wcstr)
 {
   std::string str;
-  size_t length = kwsysEncoding_wcstombs(KWSYS_NULLPTR, wcstr, 0) + 1;
+  size_t length = kwsysEncoding_wcstombs(nullptr, wcstr, 0) + 1;
   if (length > 0) {
     std::vector<char> chars(length);
     if (kwsysEncoding_wcstombs(&chars[0], wcstr, length) > 0) {
@@ -220,16 +221,26 @@ std::string Encoding::ToNarrow(const wchar_t* wcstr)
 // Convert local paths to UNC style paths
 std::wstring Encoding::ToWindowsExtendedPath(std::string const& source)
 {
-  std::wstring wsource = Encoding::ToWide(source);
+  return ToWindowsExtendedPath(ToWide(source));
+}
 
+// Convert local paths to UNC style paths
+std::wstring Encoding::ToWindowsExtendedPath(const char* source)
+{
+  return ToWindowsExtendedPath(ToWide(source));
+}
+
+// Convert local paths to UNC style paths
+std::wstring Encoding::ToWindowsExtendedPath(std::wstring const& wsource)
+{
   // Resolve any relative paths
   DWORD wfull_len;
 
   /* The +3 is a workaround for a bug in some versions of GetFullPathNameW that
    * won't return a large enough buffer size if the input is too small */
-  wfull_len = GetFullPathNameW(wsource.c_str(), 0, NULL, NULL) + 3;
+  wfull_len = GetFullPathNameW(wsource.c_str(), 0, nullptr, nullptr) + 3;
   std::vector<wchar_t> wfull(wfull_len);
-  GetFullPathNameW(wsource.c_str(), wfull_len, &wfull[0], NULL);
+  GetFullPathNameW(wsource.c_str(), wfull_len, &wfull[0], nullptr);
 
   /* This should get the correct size without any extra padding from the
    * previous size workaround. */
@@ -268,7 +279,7 @@ std::wstring Encoding::ToWindowsExtendedPath(std::string const& source)
 
   // If this case has been reached, then the path is invalid.  Leave it
   // unchanged
-  return Encoding::ToWide(source);
+  return wsource;
 }
 #  endif
 

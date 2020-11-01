@@ -1,0 +1,76 @@
+CMAKE_LANG=CXX
+CMAKE_CXX_COMPILER_ABI=ELF
+CMAKE_CXX_COMPILER_AR=C:/DoesNotExist/MinGW/bin/gcc-ar.exe
+CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
+CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CXX_COMPILER_ID=GNU
+CMAKE_CXX_COMPILER_LAUNCHER=
+CMAKE_CXX_COMPILER_LOADED=1
+CMAKE_CXX_COMPILER_RANLIB=C:/DoesNotExist/MinGW/bin/gcc-ranlib.exe
+CMAKE_CXX_COMPILER_TARGET=
+CMAKE_CXX_COMPILER_VERSION=4.9.3
+CMAKE_CXX_COMPILER_VERSION_INTERAL=
+Change Dir: C:/tmp/ii/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/DoesNotExist/MinGW/bin/mingw32-make.exe" "cmTC_2b790/fast"
+C:/DoesNotExist/MinGW/bin/mingw32-make.exe -f CMakeFiles\cmTC_2b790.dir\build.make CMakeFiles/cmTC_2b790.dir/build
+mingw32-make.exe[1]: Entering directory 'C:/tmp/ii/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_2b790.dir/CMakeCXXCompilerABI.cpp.obj
+C:\DoesNotExist\MinGW\bin\g++.exe    -v   -o CMakeFiles\cmTC_2b790.dir\CMakeCXXCompilerABI.cpp.obj -c "C:\CMake\Modules\CMakeCXXCompilerABI.cpp"
+Using built-in specs.
+COLLECT_GCC=C:\DoesNotExist\MinGW\bin\g++.exe
+Target: mingw32
+Configured with: ../src/gcc-4.9.3/configure --build=x86_64-pc-linux-gnu --host=mingw32 --prefix=/mingw --disable-win32-registry --target=mingw32 --with-arch=i586 --enable-languages=c,c++,objc,obj-c++,fortran,ada --enable-static --enable-shared --enable-threads --with-dwarf2 --disable-sjlj-exceptions --enable-version-specific-runtime-libs --enable-libstdcxx-debug --with-tune=generic --enable-nls
+Thread model: win32
+gcc version 4.9.3 (GCC)
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_2b790.dir\CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=i586'
+ c:/DoesNotExist/mingw/bin/../libexec/gcc/mingw32/4.9.3/cc1plus.exe -quiet -v -iprefix c:\DoesNotExist\mingw\bin\../lib/gcc/mingw32/4.9.3/ C:\CMake\Modules\CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mtune=generic -march=i586 -auxbase-strip CMakeFiles\cmTC_2b790.dir\CMakeCXXCompilerABI.cpp.obj -version -o C:\Users\DASHBO~1\AppData\Local\Temp\cceEHFvQ.s
+GNU C++ (GCC) version 4.9.3 (mingw32)
+	compiled by GNU C version 4.9.3, GMP version 5.1.2, MPFR version 3.1.2, MPC version 1.0.2
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "c:\DoesNotExist\mingw\bin\../lib/gcc/mingw32/4.9.3/../../../../mingw32/include"
+ignoring duplicate directory "c:/DoesNotExist/mingw/lib/gcc/../../lib/gcc/mingw32/4.9.3/include/c++"
+ignoring duplicate directory "c:/DoesNotExist/mingw/lib/gcc/../../lib/gcc/mingw32/4.9.3/include/c++/mingw32"
+ignoring duplicate directory "c:/DoesNotExist/mingw/lib/gcc/../../lib/gcc/mingw32/4.9.3/include/c++/backward"
+ignoring duplicate directory "c:/DoesNotExist/mingw/lib/gcc/../../lib/gcc/mingw32/4.9.3/include"
+ignoring duplicate directory "/mingw/lib/gcc/mingw32/4.9.3/../../../../include"
+ignoring duplicate directory "c:/DoesNotExist/mingw/lib/gcc/../../include"
+ignoring duplicate directory "c:/DoesNotExist/mingw/lib/gcc/../../lib/gcc/mingw32/4.9.3/include-fixed"
+ignoring nonexistent directory "c:/DoesNotExist/mingw/lib/gcc/../../lib/gcc/mingw32/4.9.3/../../../../mingw32/include"
+ignoring duplicate directory "/mingw/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ c:\DoesNotExist\mingw\bin\../lib/gcc/mingw32/4.9.3/include/c++
+ c:\DoesNotExist\mingw\bin\../lib/gcc/mingw32/4.9.3/include/c++/mingw32
+ c:\DoesNotExist\mingw\bin\../lib/gcc/mingw32/4.9.3/include/c++/backward
+ c:\DoesNotExist\mingw\bin\../lib/gcc/mingw32/4.9.3/include
+ c:\DoesNotExist\mingw\bin\../lib/gcc/mingw32/4.9.3/../../../../include
+ c:\DoesNotExist\mingw\bin\../lib/gcc/mingw32/4.9.3/include-fixed
+End of search list.
+GNU C++ (GCC) version 4.9.3 (mingw32)
+	compiled by GNU C version 4.9.3, GMP version 5.1.2, MPFR version 3.1.2, MPC version 1.0.2
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: 5086496b116ea21cdc0e479568243b88
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_2b790.dir\CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=i586'
+ c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/../../../../mingw32/bin/as.exe -v -o CMakeFiles\cmTC_2b790.dir\CMakeCXXCompilerABI.cpp.obj C:\Users\DASHBO~1\AppData\Local\Temp\cceEHFvQ.s
+GNU assembler version 2.25.1 (mingw32) using BFD version (GNU Binutils) 2.25.1
+COMPILER_PATH=c:/DoesNotExist/mingw/bin/../libexec/gcc/mingw32/4.9.3/;c:/DoesNotExist/mingw/bin/../libexec/gcc/;c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/../../../../mingw32/bin/
+LIBRARY_PATH=c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/;c:/DoesNotExist/mingw/bin/../lib/gcc/;c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/../../../../mingw32/lib/;c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/../../../
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_2b790.dir\CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=i586'
+Linking CXX executable cmTC_2b790.exe
+"C:\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTC_2b790.dir\link.txt --verbose=1
+"C:\CMake\bin\cmake.exe" -E rm -f CMakeFiles\cmTC_2b790.dir/objects.a
+C:\DoesNotExist\MinGW\bin\ar.exe cr CMakeFiles\cmTC_2b790.dir/objects.a @CMakeFiles\cmTC_2b790.dir\objects1.rsp
+C:\DoesNotExist\MinGW\bin\g++.exe  -v    -Wl,--whole-archive CMakeFiles\cmTC_2b790.dir/objects.a -Wl,--no-whole-archive  -o cmTC_2b790.exe -Wl,--out-implib,libcmTC_2b790.dll.a -Wl,--major-image-version,0,--minor-image-version,0
+Using built-in specs.
+COLLECT_GCC=C:\DoesNotExist\MinGW\bin\g++.exe
+COLLECT_LTO_WRAPPER=c:/DoesNotExist/mingw/bin/../libexec/gcc/mingw32/4.9.3/lto-wrapper.exe
+Target: mingw32
+Configured with: ../src/gcc-4.9.3/configure --build=x86_64-pc-linux-gnu --host=mingw32 --prefix=/mingw --disable-win32-registry --target=mingw32 --with-arch=i586 --enable-languages=c,c++,objc,obj-c++,fortran,ada --enable-static --enable-shared --enable-threads --with-dwarf2 --disable-sjlj-exceptions --enable-version-specific-runtime-libs --enable-libstdcxx-debug --with-tune=generic --enable-nls
+Thread model: win32
+gcc version 4.9.3 (GCC)
+COMPILER_PATH=c:/DoesNotExist/mingw/bin/../libexec/gcc/mingw32/4.9.3/;c:/DoesNotExist/mingw/bin/../libexec/gcc/;c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/../../../../mingw32/bin/
+LIBRARY_PATH=c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/;c:/DoesNotExist/mingw/bin/../lib/gcc/;c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/../../../../mingw32/lib/;c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/../../../
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_2b790.exe' '-shared-libgcc' '-mtune=generic' '-march=i586'
+ c:/DoesNotExist/mingw/bin/../libexec/gcc/mingw32/4.9.3/collect2.exe -plugin c:/DoesNotExist/mingw/bin/../libexec/gcc/mingw32/4.9.3/liblto_plugin-0.dll -plugin-opt=c:/DoesNotExist/mingw/bin/../libexec/gcc/mingw32/4.9.3/lto-wrapper.exe -plugin-opt=-fresolution=C:\Users\DASHBO~1\AppData\Local\Temp\ccYpt7zh.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -Bdynamic -u ___register_frame_info -u ___deregister_frame_info -o cmTC_2b790.exe c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/../../../crt2.o c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/crtbegin.o -Lc:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3 -Lc:/DoesNotExist/mingw/bin/../lib/gcc -Lc:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/../../../../mingw32/lib -Lc:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/../../.. --whole-archive CMakeFiles\cmTC_2b790.dir/objects.a --no-whole-archive --out-implib libcmTC_2b790.dll.a --major-image-version 0 --minor-image-version 0 -lstdc++ -lmingw32 -lgcc_s -lgcc -lmoldname -lmingwex -lmsvcrt -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc_s -lgcc -lmoldname -lmingwex -lmsvcrt c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/crtend.o
+mingw32-make.exe[1]: Leaving directory 'C:/tmp/ii/CMakeFiles/CMakeTmp'

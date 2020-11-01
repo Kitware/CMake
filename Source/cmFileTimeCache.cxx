@@ -38,7 +38,8 @@ bool cmFileTimeCache::Compare(std::string const& f1, std::string const& f2,
                               int* result)
 {
   // Get the modification time for each file.
-  cmFileTime ft1, ft2;
+  cmFileTime ft1;
+  cmFileTime ft2;
   if (this->Load(f1, ft1) && this->Load(f2, ft2)) {
     // Compare the two modification times.
     *result = ft1.Compare(ft2);
@@ -52,7 +53,8 @@ bool cmFileTimeCache::Compare(std::string const& f1, std::string const& f2,
 bool cmFileTimeCache::DifferS(std::string const& f1, std::string const& f2)
 {
   // Get the modification time for each file.
-  cmFileTime ft1, ft2;
+  cmFileTime ft1;
+  cmFileTime ft2;
   if (this->Load(f1, ft1) && this->Load(f2, ft2)) {
     // Compare the two modification times.
     return ft1.DifferS(ft2);

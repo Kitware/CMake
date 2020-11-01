@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmParseMumpsCoverage_h
-#define cmParseMumpsCoverage_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -29,10 +28,10 @@ public:
 protected:
   // sub classes will use this to
   // load all coverage files found in the given directory
-  virtual bool LoadCoverageData(const char* d) = 0;
+  virtual bool LoadCoverageData(std::string const& d) = 0;
   // search the package directory for mumps files and fill
   // in the RoutineToDirectory map
-  bool LoadPackages(const char* dir);
+  bool LoadPackages(std::string const& dir);
   // initialize the coverage information for a single mumps file
   void InitializeMumpsFile(std::string& file);
   // Find mumps file for routine
@@ -43,5 +42,3 @@ protected:
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;
 };
-
-#endif

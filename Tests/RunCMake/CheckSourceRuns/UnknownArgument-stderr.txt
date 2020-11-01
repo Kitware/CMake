@@ -1,0 +1,24 @@
+^CMake Warning \(dev\) at [^
+]*/Modules/Internal/CheckSourceRuns.cmake:[0-9]+ \(message\):
+  Unknown argument:
+
+    BAD
+
+Call Stack \(most recent call first\):
+  [^
+]*/Modules/CheckCSourceRuns.cmake:[0-9]+ \(cmake_check_source_runs\)
+  UnknownArgument.cmake:[0-9]+ \(check_c_source_runs\)
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Error at [^
+]*/Modules/Internal/CheckSourceRuns.cmake:[0-9]+ \(message\):
+  Unknown argument:
+
+    BAD
+
+Call Stack \(most recent call first\):
+  [^
+]*/Modules/CheckSourceRuns.cmake:[0-9]+ \(cmake_check_source_runs\)
+  UnknownArgument.cmake:[0-9]+ \(check_source_runs\)
+  CMakeLists.txt:[0-9]+ \(include\)$

@@ -11,6 +11,11 @@ set(__COMPILER_GNU 1)
 include(Compiler/CMakeCommonCompilerMacros)
 include(Internal/CMakeCheckCompilerFlag)
 
+set(__pch_header_C "c-header")
+set(__pch_header_CXX "c++-header")
+set(__pch_header_OBJC "objective-c-header")
+set(__pch_header_OBJCXX "objective-c++-header")
+
 macro(__compiler_gnu lang)
   # Feature flags.
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
@@ -39,7 +44,8 @@ macro(__compiler_gnu lang)
   # tests to always succeed.  Work around this by disabling dependency tracking
   # in try_compile mode.
   get_property(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
-  if(NOT _IN_TC OR CMAKE_FORCE_DEPFILES)
+  if(CMAKE_${lang}_COMPILER_ID STREQUAL "GNU" AND _IN_TC AND NOT CMAKE_FORCE_DEPFILES)
+  else()
     # distcc does not transform -o to -MT when invoking the preprocessor
     # internally, as it ought to.  Work around this bug by setting -MT here
     # even though it isn't strictly necessary.
@@ -104,4 +110,14 @@ macro(__compiler_gnu lang)
     unset(_COMPILER_ARGS)
   endif()
   list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-dM" "-E" "-c" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
+
+  if(NOT "x${lang}" STREQUAL "xFortran")
+    set(CMAKE_PCH_EXTENSION .gch)
+    if (NOT CMAKE_GENERATOR MATCHES "Xcode")
+      set(CMAKE_PCH_PROLOGUE "#pragma GCC system_header")
+    endif()
+    set(CMAKE_${lang}_COMPILE_OPTIONS_INVALID_PCH -Winvalid-pch)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -include <PCH_HEADER>)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -x ${__pch_header_${lang}} -include <PCH_HEADER>)
+  endif()
 endmacro()

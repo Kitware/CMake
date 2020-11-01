@@ -1,17 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackCygwinBinaryGenerator_h
-#define cmCPackCygwinBinaryGenerator_h
+#pragma once
 
-#include "cmCPackTarBZip2Generator.h"
+#include "cmCPackArchiveGenerator.h"
 
 /** \class cmCPackCygwinBinaryGenerator
  * \brief A generator for TarBZip2 files
  */
-class cmCPackCygwinBinaryGenerator : public cmCPackTarBZip2Generator
+class cmCPackCygwinBinaryGenerator : public cmCPackArchiveGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackCygwinBinaryGenerator, cmCPackTarBZip2Generator);
+  cmCPackTypeMacro(cmCPackCygwinBinaryGenerator, cmCPackArchiveGenerator);
 
   /**
    * Construct generator
@@ -25,5 +24,3 @@ protected:
   virtual const char* GetOutputExtension();
   std::string OutputExtension;
 };
-
-#endif

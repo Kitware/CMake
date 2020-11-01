@@ -18,18 +18,18 @@ set(_cmake_feature_test_cxx_attribute_deprecated "${GNU49_CXX14}")
 set(_cmake_feature_test_cxx_decltype_auto "${GNU49_CXX14}")
 set(_cmake_feature_test_cxx_digit_separators "${GNU49_CXX14}")
 set(_cmake_feature_test_cxx_generic_lambdas "${GNU49_CXX14}")
-set(_cmake_feature_test_cxx_lambda_init_captures "${GNU49_CXX14}")
 # GNU 4.3 supports binary literals as an extension, but may warn about
 # use of extensions prior to GNU 4.9
 # http://stackoverflow.com/questions/16334024/difference-between-gcc-binary-literals-and-c14-ones
 set(_cmake_feature_test_cxx_binary_literals "${GNU49_CXX14}")
-# The feature below is documented as available in GNU 4.8 (by implementing an
+# The features below are documented as available in GNU 4.8 (by implementing an
 # earlier draft of the standard paper), but that version of the compiler
 # does not set __cplusplus to a value greater than 201103L until GNU 4.9:
 # http://gcc.gnu.org/onlinedocs/gcc-4.8.2/cpp/Standard-Predefined-Macros.html#Standard-Predefined-Macros
 # http://gcc.gnu.org/onlinedocs/gcc-4.9.0/cpp/Standard-Predefined-Macros.html#Standard-Predefined-Macros
 # So, CMake only reports availability for it with GNU 4.9 or later.
 set(_cmake_feature_test_cxx_return_type_deduction "${GNU49_CXX14}")
+set(_cmake_feature_test_cxx_lambda_init_captures "${GNU49_CXX14}")
 
 # Introduced in GCC 4.8.1
 set(GNU481_CXX11 "((__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40801) && __cplusplus >= 201103L")

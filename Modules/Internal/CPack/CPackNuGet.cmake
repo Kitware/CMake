@@ -230,31 +230,22 @@ function(_cpack_nuget_render_spec)
     foreach(_dep IN LISTS _deps)
         _cpack_nuget_debug("  checking dependency `${_dep}`")
 
-        string(MAKE_C_IDENTIFIER "${_dep}" _dep_id)
-
-        _cpack_nuget_variable_fallback(_ver DEPENDENCIES_${_dep_id}_VERSION)
+        _cpack_nuget_variable_fallback(_ver DEPENDENCIES_${_dep}_VERSION)
 
         if(NOT _ver)
-            string(TOUPPER "${_dep_id}" _dep_id)
-            _cpack_nuget_variable_fallback(_ver DEPENDENCIES_${_dep_id}_VERSION)
+            string(TOUPPER "${_dep}" _dep_upper)
+            _cpack_nuget_variable_fallback(_ver DEPENDENCIES_${_dep_upper}_VERSION)
         endif()
 
         if(_ver)
             _cpack_nuget_debug("  got `${_dep}` dependency version ${_ver}")
-            list(APPEND _collected_deps "<dependency id=\"${_dep}\" version=\"${_ver}\" />")
+            string(CONCAT _collected_deps "${_collected_deps}" "            <dependency id=\"${_dep}\" version=\"${_ver}\" />\n")
         endif()
     endforeach()
 
     # Render deps into the variable
     if(_collected_deps)
-        set(_CPACK_NUGET_DEPENDENCIES_TAG "<dependencies>\n")
-        foreach(_line IN LISTS _collected_deps)
-            string(
-                APPEND _CPACK_NUGET_DEPENDENCIES_TAG
-                "            ${_line}\n"
-              )
-        endforeach()
-        string(APPEND _CPACK_NUGET_DEPENDENCIES_TAG "        </dependencies>")
+        string(CONCAT _CPACK_NUGET_DEPENDENCIES_TAG "<dependencies>\n" "${_collected_deps}" "        </dependencies>")
     endif()
 
     # Render the spec file
@@ -262,7 +253,7 @@ function(_cpack_nuget_render_spec)
     # NuGet will name it properly.
     _cpack_nuget_debug("Rendering `${CPACK_TEMPORARY_DIRECTORY}/CPack.NuGet.nuspec` file...")
     configure_file(
-        "${CMAKE_ROOT}/Modules/CPack.NuGet.nuspec.in"
+        "${CMAKE_ROOT}/Modules/Internal/CPack/CPack.NuGet.nuspec.in"
         "${CPACK_TEMPORARY_DIRECTORY}/CPack.NuGet.nuspec"
         @ONLY
       )
@@ -276,7 +267,7 @@ function(_cpack_nuget_make_files_tag)
     set(_CPACK_NUGET_FILES_TAG "<files>\n${_files}    </files>" PARENT_SCOPE)
 endfunction()
 
-find_program(NUGET_EXECUTABLE NuGet)
+find_program(NUGET_EXECUTABLE nuget)
 _cpack_nuget_debug_var(NUGET_EXECUTABLE)
 if(NOT NUGET_EXECUTABLE)
     message(FATAL_ERROR "NuGet executable not found")
@@ -296,7 +287,11 @@ if(CPACK_NUGET_ORDINAL_MONOLITIC)
     execute_process(
         COMMAND "${NUGET_EXECUTABLE}" pack ${CPACK_NUGET_PACK_ADDITIONAL_OPTIONS}
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+        RESULT_VARIABLE _nuget_result
       )
+    if(NOT _nuget_result EQUAL 0)
+        message(FATAL_ERROR "Nuget pack failed")
+    endif()
 
 elseif(CPACK_NUGET_ALL_IN_ONE)
     # This variable `CPACK_NUGET_ALL_IN_ONE` set by C++ code:
@@ -309,7 +304,11 @@ elseif(CPACK_NUGET_ALL_IN_ONE)
     execute_process(
         COMMAND "${NUGET_EXECUTABLE}" pack ${CPACK_NUGET_PACK_ADDITIONAL_OPTIONS}
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+        RESULT_VARIABLE _nuget_result
       )
+    if(NOT _nuget_result EQUAL 0)
+        message(FATAL_ERROR "Nuget pack failed")
+    endif()
 
 else()
     # Is there any grouped component?
@@ -331,7 +330,11 @@ else()
             execute_process(
                 COMMAND "${NUGET_EXECUTABLE}" pack ${CPACK_NUGET_PACK_ADDITIONAL_OPTIONS}
                 WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+                RESULT_VARIABLE _nuget_result
               )
+            if(NOT _nuget_result EQUAL 0)
+                message(FATAL_ERROR "Nuget pack failed")
+            endif()
         endforeach()
     endif()
     # Is there any single component package needed?
@@ -350,7 +353,11 @@ else()
             execute_process(
                 COMMAND "${NUGET_EXECUTABLE}" pack ${CPACK_NUGET_PACK_ADDITIONAL_OPTIONS}
                 WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+                RESULT_VARIABLE _nuget_result
               )
+            if(NOT _nuget_result EQUAL 0)
+                message(FATAL_ERROR "Nuget pack failed")
+            endif()
         endforeach()
     endif()
 endif()

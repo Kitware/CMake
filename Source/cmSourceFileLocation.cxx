@@ -2,14 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceFileLocation.h"
 
-#include "cmAlgorithms.h"
+#include <cassert>
+
+#include <cm/string_view>
+
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include <assert.h>
 
 cmSourceFileLocation::cmSourceFileLocation() = default;
 
@@ -98,7 +100,7 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
   cmMakefile const* mf = this->Makefile;
   auto cm = mf->GetCMakeInstance();
   if (!gg->GetLanguageFromExtension(ext.c_str()).empty() ||
-      cm->IsSourceExtension(ext) || cm->IsHeaderExtension(ext)) {
+      cm->IsAKnownExtension(ext)) {
     // This is a known extension.  Use the given filename with extension.
     this->Name = cmSystemTools::GetFilenameName(name);
     this->AmbiguousExtension = false;
@@ -110,8 +112,7 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
       // Check the source tree only because a file in the build tree should
       // be specified by full path at least once.  We do not want this
       // detection to depend on whether the project has already been built.
-      tryPath = this->Makefile->GetCurrentSourceDirectory();
-      tryPath += "/";
+      tryPath = cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/');
     }
     if (!this->Directory.empty()) {
       tryPath += this->Directory;
@@ -146,17 +147,16 @@ bool cmSourceFileLocation::MatchesAmbiguousExtension(
   // adding an extension.
   if (!(this->Name.size() > loc.Name.size() &&
         this->Name[loc.Name.size()] == '.' &&
-        cmHasLiteralPrefixImpl(this->Name.c_str(), loc.Name.c_str(),
-                               loc.Name.size()))) {
+        cmHasPrefix(this->Name, loc.Name))) {
     return false;
   }
 
   // Only a fixed set of extensions will be tried to match a file on
   // disk.  One of these must match if loc refers to this source file.
-  std::string const& ext = this->Name.substr(loc.Name.size() + 1);
+  auto ext = cm::string_view(this->Name).substr(loc.Name.size() + 1);
   cmMakefile const* mf = this->Makefile;
   auto cm = mf->GetCMakeInstance();
-  return cm->IsSourceExtension(ext) || cm->IsHeaderExtension(ext);
+  return cm->IsAKnownExtension(ext);
 }
 
 bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)

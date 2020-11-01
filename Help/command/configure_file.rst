@@ -6,7 +6,9 @@ Copy a file to another location and modify its contents.
 .. code-block:: cmake
 
   configure_file(<input> <output>
+                 [FILE_PERMISSIONS <permissions>...]
                  [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
+                 [NO_SOURCE_PERMISSIONS] [USE_SOURCE_PERMISSIONS]
                  [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 
 Copies an ``<input>`` file to an ``<output>`` file and substitutes
@@ -71,6 +73,9 @@ The arguments are:
   If the path names an existing directory the output file is placed
   in that directory with the same file name as the input file.
 
+``FILE_PERMISSIONS <permissions>...``
+  Use user provided permissions for the output file.
+
 ``COPYONLY``
   Copy the file without replacing any variable references or other
   content.  This option may not be used with ``NEWLINE_STYLE``.
@@ -81,6 +86,14 @@ The arguments are:
 ``@ONLY``
   Restrict variable replacement to references of the form ``@VAR@``.
   This is useful for configuring scripts that use ``${VAR}`` syntax.
+
+``NO_SOURCE_PERMISSIONS``
+  Does not transfer the file permissions of the original file to the copy.
+  The copied file permissions default to the standard 644 value
+  (-rw-r--r--).
+
+``USE_SOURCE_PERMISSIONS``
+  Transfer the file permissions of the original file to the output file.
 
 ``NEWLINE_STYLE <style>``
   Specify the newline style for the output file.  Specify

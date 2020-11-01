@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
 
-#include "cmCTestScriptHandler.h"
-
 #include <sstream>
+
+#include "cmCTestScriptHandler.h"
 
 class cmExecutionStatus;
 

@@ -1,11 +1,23 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+
+#if !defined(_WIN32) && !defined(__sun)
+// POSIX APIs are needed
+#  define _POSIX_C_SOURCE 200809L
+#endif
+#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) ||    \
+  defined(__QNX__)
+// For isascii
+#  define _XOPEN_SOURCE 700
+#endif
+
 #include "cmTimestamp.h"
 
+#include <cstdlib>
 #include <cstring>
 #include <sstream>
-#include <stdlib.h>
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 std::string cmTimestamp::CurrentTime(const std::string& formatString,
@@ -109,7 +121,7 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm& tm) const
 
   time_t result = mktime(&tm);
 
-#  ifdef CMAKE_BUILD_WITH_CMAKE
+#  ifndef CMAKE_BOOTSTRAP
   if (tz_was_set) {
     cmSystemTools::PutEnv(tz_old);
   } else {
@@ -131,8 +143,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
                                                struct tm& timeStruct,
                                                const time_t timeT) const
 {
-  std::string formatString = "%";
-  formatString += flag;
+  std::string formatString = cmStrCat('%', flag);
 
   switch (flag) {
     case 'a':
@@ -154,7 +165,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
       break;
     case 's': // Seconds since UNIX epoch (midnight 1-jan-1970)
     {
-      // Build a time_t for UNIX epoch and substract from the input "timeT":
+      // Build a time_t for UNIX epoch and subtract from the input "timeT":
       struct tm tmUnixEpoch;
       memset(&tmUnixEpoch, 0, sizeof(tmUnixEpoch));
       tmUnixEpoch.tm_mday = 1;
@@ -168,9 +179,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
         return std::string();
       }
 
-      std::ostringstream ss;
-      ss << static_cast<long int>(difftime(timeT, unixEpoch));
-      return ss.str();
+      return std::to_string(static_cast<long int>(difftime(timeT, unixEpoch)));
     }
     default: {
       return formatString;

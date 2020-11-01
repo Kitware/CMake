@@ -2,26 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstalledFile.h"
 
-#include "cmAlgorithms.h"
+#include <utility>
+
+#include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
-#include "cmSystemTools.h"
-
-#include <utility>
+#include "cmStringAlgorithms.h"
 
 cmInstalledFile::cmInstalledFile() = default;
 
-cmInstalledFile::~cmInstalledFile()
-{
-  delete NameExpression;
-}
+cmInstalledFile::~cmInstalledFile() = default;
 
 cmInstalledFile::Property::Property() = default;
 
-cmInstalledFile::Property::~Property()
-{
-  cmDeleteAll(this->ValueExpressions);
-}
+cmInstalledFile::Property::~Property() = default;
 
 void cmInstalledFile::SetName(cmMakefile* mf, const std::string& name)
 {
@@ -29,7 +23,7 @@ void cmInstalledFile::SetName(cmMakefile* mf, const std::string& name)
   cmGeneratorExpression ge(backtrace);
 
   this->Name = name;
-  this->NameExpression = ge.Parse(name).release();
+  this->NameExpression = ge.Parse(name);
 }
 
 std::string const& cmInstalledFile::GetName() const
@@ -48,7 +42,8 @@ void cmInstalledFile::RemoveProperty(const std::string& prop)
 }
 
 void cmInstalledFile::SetProperty(cmMakefile const* mf,
-                                  const std::string& prop, const char* value)
+                                  const std::string& prop,
+                                  const std::string& value)
 {
   this->RemoveProperty(prop);
   this->AppendProperty(mf, prop, value);
@@ -56,13 +51,14 @@ void cmInstalledFile::SetProperty(cmMakefile const* mf,
 
 void cmInstalledFile::AppendProperty(cmMakefile const* mf,
                                      const std::string& prop,
-                                     const char* value, bool /*asString*/)
+                                     const std::string& value,
+                                     bool /*asString*/)
 {
   cmListFileBacktrace backtrace = mf->GetBacktrace();
   cmGeneratorExpression ge(backtrace);
 
   Property& property = this->Properties[prop];
-  property.ValueExpressions.push_back(ge.Parse(value).release());
+  property.ValueExpressions.push_back(ge.Parse(value));
 }
 
 bool cmInstalledFile::HasProperty(const std::string& prop) const
@@ -73,7 +69,7 @@ bool cmInstalledFile::HasProperty(const std::string& prop) const
 bool cmInstalledFile::GetProperty(const std::string& prop,
                                   std::string& value) const
 {
-  PropertyMapType::const_iterator i = this->Properties.find(prop);
+  auto i = this->Properties.find(prop);
   if (i == this->Properties.end()) {
     return false;
   }
@@ -83,7 +79,7 @@ bool cmInstalledFile::GetProperty(const std::string& prop,
   std::string output;
   std::string separator;
 
-  for (auto ve : property.ValueExpressions) {
+  for (const auto& ve : property.ValueExpressions) {
     output += separator;
     output += ve->GetInput();
     separator = ";";
@@ -97,7 +93,7 @@ bool cmInstalledFile::GetPropertyAsBool(const std::string& prop) const
 {
   std::string value;
   bool isSet = this->GetProperty(prop, value);
-  return isSet && cmSystemTools::IsOn(value);
+  return isSet && cmIsOn(value);
 }
 
 void cmInstalledFile::GetPropertyAsList(const std::string& prop,
@@ -107,5 +103,5 @@ void cmInstalledFile::GetPropertyAsList(const std::string& prop,
   this->GetProperty(prop, value);
 
   list.clear();
-  cmSystemTools::ExpandListArgument(value, list);
+  cmExpandList(value, list);
 }

@@ -3,8 +3,4 @@ CMake Error at CMakeLists.txt:[0-9]+ \(project\):
 
     .*
 
-  does not recognize the toolset
-
-    Test Toolset,host=x6[45]
-
-  that was specified\.$
+  given toolset specification that contains invalid field 'host'\.$

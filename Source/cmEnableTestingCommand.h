@@ -1,18 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmEnableTestingCommand_h
-#define cmEnableTestingCommand_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmEnableTestingCommand
+/**
  * \brief Enable testing for this directory and below.
  *
  * Produce the output testfile. This produces a file in the build directory
@@ -25,20 +22,5 @@ class cmExecutionStatus;
  * Note that CTest expects to find this file in the build directory root;
  * therefore, this command should be in the source directory root too.
  */
-class cmEnableTestingCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmEnableTestingCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) override;
-};
-
-#endif
+bool cmEnableTestingCommand(std::vector<std::string> const&,
+                            cmExecutionStatus&);

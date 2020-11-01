@@ -1,0 +1,20 @@
+{
+    "name": "Cxx",
+    "parentName": "codemodel-v2",
+    "childNames": null,
+    "directorySources": [
+        "^cxx$"
+    ],
+    "targetIds": [
+        "^ALL_BUILD::@a56b12a3f5c0529fb296$",
+        "^ZERO_CHECK::@a56b12a3f5c0529fb296$",
+        "^cxx_lib::@a56b12a3f5c0529fb296$",
+        "^cxx_exe::@a56b12a3f5c0529fb296$",
+        "^cxx_standard_compile_feature_exe::@a56b12a3f5c0529fb296$",
+        "^cxx_standard_exe::@a56b12a3f5c0529fb296$",
+        "^cxx_shared_lib::@a56b12a3f5c0529fb296$",
+        "^cxx_shared_exe::@a56b12a3f5c0529fb296$",
+        "^cxx_static_lib::@a56b12a3f5c0529fb296$",
+        "^cxx_static_exe::@a56b12a3f5c0529fb296$"
+    ]
+}

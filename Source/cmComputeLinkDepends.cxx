@@ -2,26 +2,27 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmComputeLinkDepends.h"
 
-#include "cmAlgorithms.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdio>
+#include <iterator>
+#include <sstream>
+#include <utility>
+
+#include <cm/memory>
+
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStateTypes.h"
-#include "cmSystemTools.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <assert.h>
-#include <iterator>
-#include <sstream>
-#include <stdio.h>
-#include <string.h>
-#include <utility>
 
 /*
 
@@ -199,11 +200,7 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   this->CCG = nullptr;
 }
 
-cmComputeLinkDepends::~cmComputeLinkDepends()
-{
-  cmDeleteAll(this->InferredDependSets);
-  delete this->CCG;
-}
+cmComputeLinkDepends::~cmComputeLinkDepends() = default;
 
 void cmComputeLinkDepends::SetOldLinkDirMode(bool b)
 {
@@ -256,13 +253,13 @@ cmComputeLinkDepends::Compute()
   // Compute the final set of link entries.
   // Iterate in reverse order so we can keep only the last occurrence
   // of a shared library.
-  std::set<int> emmitted;
+  std::set<int> emitted;
   for (int i : cmReverseRange(this->FinalLinkOrder)) {
     LinkEntry const& e = this->EntryList[i];
     cmGeneratorTarget const* t = e.Target;
     // Entries that we know the linker will re-use do not need to be repeated.
     bool uniquify = t && t->GetType() == cmStateEnums::SHARED_LIBRARY;
-    if (!uniquify || emmitted.insert(i).second) {
+    if (!uniquify || emitted.insert(i).second) {
       this->FinalLinkEntries.push_back(e);
     }
   }
@@ -282,10 +279,9 @@ std::map<cmLinkItem, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
 {
   std::map<cmLinkItem, int>::value_type index_entry(
     item, static_cast<int>(this->EntryList.size()));
-  std::map<cmLinkItem, int>::iterator lei =
-    this->LinkEntryIndex.insert(index_entry).first;
+  auto lei = this->LinkEntryIndex.insert(index_entry).first;
   this->EntryList.emplace_back();
-  this->InferredDependSets.push_back(nullptr);
+  this->InferredDependSets.emplace_back();
   this->EntryConstraintGraph.emplace_back();
   return lei;
 }
@@ -293,7 +289,7 @@ std::map<cmLinkItem, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
 int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
 {
   // Check if the item entry has already been added.
-  std::map<cmLinkItem, int>::iterator lei = this->LinkEntryIndex.find(item);
+  auto lei = this->LinkEntryIndex.find(item);
   if (lei != this->LinkEntryIndex.end()) {
     // Yes.  We do not need to follow the item's dependencies again.
     return lei->second;
@@ -305,11 +301,11 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   // Initialize the item entry.
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
-  entry.Item = item.AsStr();
+  entry.Item = BT<std::string>(item.AsStr(), item.Backtrace);
   entry.Target = item.Target;
-  entry.IsFlag =
-    (!entry.Target && entry.Item[0] == '-' && entry.Item[1] != 'l' &&
-     entry.Item.substr(0, 10) != "-framework");
+  entry.IsFlag = (!entry.Target && entry.Item.Value[0] == '-' &&
+                  entry.Item.Value[1] != 'l' &&
+                  entry.Item.Value.substr(0, 10) != "-framework");
 
   // If the item has dependencies queue it to follow them.
   if (entry.Target) {
@@ -318,15 +314,14 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
     this->BFSQueue.push(qe);
   } else {
     // Look for an old-style <item>_LIB_DEPENDS variable.
-    std::string var = entry.Item;
-    var += "_LIB_DEPENDS";
-    if (const char* val = this->Makefile->GetDefinition(var)) {
+    std::string var = cmStrCat(entry.Item.Value, "_LIB_DEPENDS");
+    if (cmProp val = this->Makefile->GetDefinition(var)) {
       // The item dependencies are known.  Follow them.
-      BFSEntry qe = { index, val };
+      BFSEntry qe = { index, val->c_str() };
       this->BFSQueue.push(qe);
     } else if (!entry.IsFlag) {
       // The item dependencies are not known.  We need to infer them.
-      this->InferredDependSets[index] = new DependSetList;
+      this->InferredDependSets[index].Initialized = true;
     }
   }
 
@@ -394,15 +389,14 @@ void cmComputeLinkDepends::QueueSharedDependencies(
 void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 {
   // Check if the target already has an entry.
-  std::map<cmLinkItem, int>::iterator lei =
-    this->LinkEntryIndex.find(dep.Item);
+  auto lei = this->LinkEntryIndex.find(dep.Item);
   if (lei == this->LinkEntryIndex.end()) {
     // Allocate a spot for the item entry.
     lei = this->AllocateLinkEntry(dep.Item);
 
     // Initialize the item entry.
     LinkEntry& entry = this->EntryList[lei->second];
-    entry.Item = dep.Item.AsStr();
+    entry.Item = BT<std::string>(dep.Item.AsStr(), dep.Item.Backtrace);
     entry.Target = dep.Item.Target;
 
     // This item was added specifically because it is a dependent
@@ -418,7 +412,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // This shared library dependency must follow the item that listed
   // it.
   this->EntryConstraintGraph[dep.DependerIndex].emplace_back(
-    index, true, cmListFileBacktrace());
+    index, true, false, cmListFileBacktrace());
 
   // Target items may have their own dependencies.
   if (entry.Target) {
@@ -436,8 +430,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
   // This is called to add the dependencies named by
   // <item>_LIB_DEPENDS.  The variable contains a semicolon-separated
   // list.  The list contains link-type;item pairs and just items.
-  std::vector<std::string> deplist;
-  cmSystemTools::ExpandListArgument(value, deplist);
+  std::vector<std::string> deplist = cmExpandedList(value);
 
   // Look for entries meant for this configuration.
   std::vector<cmLinkItem> actual_libs;
@@ -460,12 +453,11 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
       // the export_library_dependencies command from CMake 2.4 and
       // lower.
       if (!haveLLT) {
-        std::string var = d;
-        var += "_LINK_TYPE";
-        if (const char* val = this->Makefile->GetDefinition(var)) {
-          if (strcmp(val, "debug") == 0) {
+        std::string var = cmStrCat(d, "_LINK_TYPE");
+        if (cmProp val = this->Makefile->GetDefinition(var)) {
+          if (*val == "debug") {
             llt = DEBUG_LibraryType;
-          } else if (strcmp(val, "optimized") == 0) {
+          } else if (*val == "optimized") {
             llt = OPTIMIZED_LibraryType;
           }
         }
@@ -522,7 +514,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
     // The dependee must come after the depender.
     if (depender_index >= 0) {
       this->EntryConstraintGraph[depender_index].emplace_back(
-        dependee_index, false, cmListFileBacktrace());
+        dependee_index, false, false, cmListFileBacktrace());
     } else {
       // This is a direct dependency of the target being linked.
       this->OriginalEntries.push_back(dependee_index);
@@ -542,7 +534,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
     }
 
     // If this item needs to have dependencies inferred, do so.
-    if (this->InferredDependSets[dependee_index]) {
+    if (this->InferredDependSets[dependee_index].Initialized) {
       // Make sure an entry exists to hold the set for the item.
       dependSets[dependee_index];
     }
@@ -550,7 +542,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
 
   // Store the inferred dependency sets discovered for this list.
   for (auto const& dependSet : dependSets) {
-    this->InferredDependSets[dependSet.first]->push_back(dependSet.second);
+    this->InferredDependSets[dependSet.first].push_back(dependSet.second);
   }
 }
 
@@ -577,14 +569,14 @@ void cmComputeLinkDepends::InferDependencies()
        depender_index < this->InferredDependSets.size(); ++depender_index) {
     // Skip items for which dependencies do not need to be inferred or
     // for which the inferred dependency sets are empty.
-    DependSetList* sets = this->InferredDependSets[depender_index];
-    if (!sets || sets->empty()) {
+    DependSetList& sets = this->InferredDependSets[depender_index];
+    if (!sets.Initialized || sets.empty()) {
       continue;
     }
 
     // Intersect the sets for this item.
-    DependSet common = sets->front();
-    for (DependSet const& i : cmMakeRange(*sets).advance(1)) {
+    DependSet common = sets.front();
+    for (DependSet const& i : cmMakeRange(sets).advance(1)) {
       DependSet intersection;
       std::set_intersection(common.begin(), common.end(), i.begin(), i.end(),
                             std::inserter(intersection, intersection.begin()));
@@ -595,7 +587,7 @@ void cmComputeLinkDepends::InferDependencies()
     cmGraphEdgeList& edges = this->EntryConstraintGraph[depender_index];
     edges.reserve(edges.size() + common.size());
     for (auto const& c : common) {
-      edges.emplace_back(c, true, cmListFileBacktrace());
+      edges.emplace_back(c, true, false, cmListFileBacktrace());
     }
   }
 }
@@ -632,7 +624,9 @@ void cmComputeLinkDepends::OrderLinkEntires()
   // the same order in which the items were originally discovered in
   // the BFS.  This should preserve the original order when no
   // constraints disallow it.
-  this->CCG = new cmComputeComponentGraph(this->EntryConstraintGraph);
+  this->CCG =
+    cm::make_unique<cmComputeComponentGraph>(this->EntryConstraintGraph);
+  this->CCG->Compute();
 
   // The component graph is guaranteed to be acyclic.  Start a DFS
   // from every entry to compute a topological order for the
@@ -678,7 +672,8 @@ void cmComputeLinkDepends::DisplayComponents()
     fprintf(stderr, "Component (%u):\n", c);
     NodeList const& nl = components[c];
     for (int i : nl) {
-      fprintf(stderr, "  item %d [%s]\n", i, this->EntryList[i].Item.c_str());
+      fprintf(stderr, "  item %d [%s]\n", i,
+              this->EntryList[i].Item.Value.c_str());
     }
     EdgeList const& ol = this->CCG->GetComponentGraphEdges(c);
     for (cmGraphEdge const& oi : ol) {
@@ -720,8 +715,7 @@ void cmComputeLinkDepends::VisitEntry(int index)
   // This entry has now been seen.  Update its component.
   bool completed = false;
   int component = this->CCG->GetComponentMap()[index];
-  std::map<int, PendingComponent>::iterator mi =
-    this->PendingComponents.find(this->ComponentOrder[component]);
+  auto mi = this->PendingComponents.find(this->ComponentOrder[component]);
   if (mi != this->PendingComponents.end()) {
     // The entry is in an already pending component.
     PendingComponent& pc = mi->second;
@@ -827,7 +821,7 @@ void cmComputeLinkDepends::DisplayFinalEntries()
     if (lei.Target) {
       fprintf(stderr, "  target [%s]\n", lei.Target->GetName().c_str());
     } else {
-      fprintf(stderr, "  item [%s]\n", lei.Item.c_str());
+      fprintf(stderr, "  item [%s]\n", lei.Item.Value.c_str());
     }
   }
   fprintf(stderr, "\n");

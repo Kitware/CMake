@@ -31,7 +31,7 @@ if(MFC_ATTEMPT_TRY_COMPILE)
     set(CHECK_INCLUDE_FILE_VAR "afxwin.h")
     configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx)
-    message(STATUS "Looking for MFC")
+    message(CHECK_START "Looking for MFC")
     # Try both shared and static as the root project may have set the /MT flag
     try_compile(MFC_HAVE_MFC
       ${CMAKE_BINARY_DIR}
@@ -51,13 +51,13 @@ if(MFC_ATTEMPT_TRY_COMPILE)
         OUTPUT_VARIABLE OUTPUT)
     endif()
     if(MFC_HAVE_MFC)
-      message(STATUS "Looking for MFC - found")
+      message(CHECK_PASS "found")
       set(MFC_HAVE_MFC 1 CACHE INTERNAL "Have MFC?")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if MFC exists passed with the following output:\n"
         "${OUTPUT}\n\n")
     else()
-      message(STATUS "Looking for MFC - not found")
+      message(CHECK_FAIL "not found")
       set(MFC_HAVE_MFC 0 CACHE INTERNAL "Have MFC?")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if MFC exists failed with the following output:\n"

@@ -7,34 +7,44 @@ FindThreads
 
 This module determines the thread library of the system.
 
-The following variables are set
+Imported Targets
+^^^^^^^^^^^^^^^^
 
-::
+This module defines the following :prop_tgt:`IMPORTED` target:
 
-  CMAKE_THREAD_LIBS_INIT     - the thread library
-  CMAKE_USE_WIN32_THREADS_INIT - using WIN32 threads?
-  CMAKE_USE_PTHREADS_INIT    - are we using pthreads
-  CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
+``Threads::Threads``
+  The thread library, if found.
 
-The following import target is created
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+The following variables are set:
 
-  Threads::Threads
+``Threads_FOUND``
+  If a supported thread library was found.
+``CMAKE_THREAD_LIBS_INIT``
+  The thread library to use. This may be empty if the thread functions
+  are provided by the system libraries and no special flags are needed
+  to use them.
+``CMAKE_USE_WIN32_THREADS_INIT``
+  If the found thread library is the win32 one.
+``CMAKE_USE_PTHREADS_INIT``
+  If the found thread library is pthread compatible.
+``CMAKE_HP_PTHREADS_INIT``
+  If the found thread library is the HP thread library.
 
-If the use of the -pthread compiler and linker flag is preferred then the
-caller can set
+Variables Affecting Behavior
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. variable:: THREADS_PREFER_PTHREAD_FLAG
 
-  THREADS_PREFER_PTHREAD_FLAG
+  If the use of the -pthread compiler and linker flag is preferred then
+  the caller can set this variable to TRUE. The compiler flag can only be
+  used with the imported target. Use of both the imported target as well
+  as this switch is highly recommended for new code.
 
-The compiler flag can only be used with the imported
-target. Use of both the imported target as well as this switch is highly
-recommended for new code.
-
-This module is not needed for C++11 and later if threading is done using
-``std::thread`` from the standard library.
+  This variable has no effect if the system libraries provide the
+  thread functions, i.e. when ``CMAKE_THREAD_LIBS_INIT`` will be empty.
 #]=======================================================================]
 
 include (CheckLibraryExists)
@@ -56,7 +66,7 @@ endif()
 set(PTHREAD_C_CXX_TEST_SOURCE [====[
 #include <pthread.h>
 
-void* test_func(void* data)
+static void* test_func(void* data)
 {
   return data;
 }
@@ -66,6 +76,7 @@ int main(void)
   pthread_t thread;
   pthread_create(&thread, NULL, test_func, NULL);
   pthread_detach(thread);
+  pthread_cancel(thread);
   pthread_join(thread, NULL);
   pthread_atfork(NULL, NULL, NULL);
   pthread_exit(NULL);
@@ -93,7 +104,7 @@ macro(_check_pthreads_flag)
   if(NOT Threads_FOUND)
     # If we did not found -lpthread, -lpthread, or -lthread, look for -pthread
     if(NOT DEFINED THREADS_HAVE_PTHREAD_ARG)
-      message(STATUS "Check if compiler accepts -pthread")
+      message(CHECK_START "Check if compiler accepts -pthread")
       if(CMAKE_C_COMPILER_LOADED)
         set(_threads_src ${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c)
       elseif(CMAKE_CXX_COMPILER_LOADED)
@@ -109,9 +120,9 @@ macro(_check_pthreads_flag)
 
       if(THREADS_HAVE_PTHREAD_ARG)
         set(Threads_FOUND TRUE)
-        message(STATUS "Check if compiler accepts -pthread - yes")
+        message(CHECK_PASS "yes")
       else()
-        message(STATUS "Check if compiler accepts -pthread - no")
+        message(CHECK_FAIL "no")
         file(APPEND
           ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Determining if compiler accepts -pthread failed with the following output:\n${OUTPUT}\n\n")
@@ -227,8 +238,8 @@ if(THREADS_FOUND AND NOT TARGET Threads::Threads)
 
   if(THREADS_HAVE_PTHREAD_ARG)
     set_property(TARGET Threads::Threads
-                 PROPERTY INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:CUDA>:SHELL:-Xcompiler -pthread>"
-                                                    "$<$<NOT:$<COMPILE_LANGUAGE:CUDA>>:-pthread>")
+                 PROPERTY INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>:SHELL:-Xcompiler -pthread>"
+                                                    "$<$<NOT:$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>>:-pthread>")
   endif()
 
   if(CMAKE_THREAD_LIBS_INIT)

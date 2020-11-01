@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAffinity.h"
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #ifndef CMAKE_USE_SYSTEM_LIBUV
 #  ifdef _WIN32
@@ -12,15 +12,18 @@
 #    define CM_HAVE_CPU_AFFINITY
 #    include <pthread.h>
 #    include <sched.h>
+// On some platforms CPU_ZERO needs memset but sched.h forgets string.h
+#    include <cstring> // IWYU pragma: keep
 #    if defined(__FreeBSD__)
 #      include <pthread_np.h>
+
 #      include <sys/cpuset.h>
 #      include <sys/param.h>
 #    endif
 #    if defined(__linux__)
-typedef cpu_set_t cm_cpuset_t;
+using cm_cpuset_t = cpu_set_t;
 #    else
-typedef cpuset_t cm_cpuset_t;
+using cm_cpuset_t = cpuset_t;
 #    endif
 #  endif
 #endif

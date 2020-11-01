@@ -1,13 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestCurl_h
-#define cmCTestCurl_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_curl.h"
 #include <string>
 #include <vector>
+
+#include <cm3p/curl/curl.h>
 
 class cmCTest;
 
@@ -51,5 +51,3 @@ private:
   bool Quiet;
   int TimeOutSeconds;
 };
-
-#endif

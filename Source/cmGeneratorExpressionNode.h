@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGeneratorExpressionNode_h
-#define cmGeneratorExpressionNode_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -20,7 +19,9 @@ struct cmGeneratorExpressionNode
   {
     DynamicParameters = 0,
     OneOrMoreParameters = -1,
-    OneOrZeroParameters = -2
+    TwoOrMoreParameters = -2,
+    ZeroOrMoreParameters = -3,
+    OneOrZeroParameters = -4
   };
   virtual ~cmGeneratorExpressionNode() = default;
 
@@ -41,8 +42,8 @@ struct cmGeneratorExpressionNode
   static std::string EvaluateDependentExpression(
     std::string const& prop, cmLocalGenerator* lg,
     cmGeneratorExpressionContext* context, const cmGeneratorTarget* headTarget,
-    const cmGeneratorTarget* currentTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker);
+    cmGeneratorExpressionDAGChecker* dagChecker,
+    const cmGeneratorTarget* currentTarget);
 
   static const cmGeneratorExpressionNode* GetNode(
     const std::string& identifier);
@@ -50,5 +51,3 @@ struct cmGeneratorExpressionNode
 
 void reportError(cmGeneratorExpressionContext* context,
                  const std::string& expr, const std::string& result);
-
-#endif

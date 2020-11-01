@@ -1,9 +1,9 @@
 #include "testVisualStudioSlnParser.h"
 
+#include <iostream>
+
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
-
-#include <iostream>
 
 static bool parsedRight(cmVisualStudioSlnParser& parser,
                         const std::string& file, cmSlnData& data,

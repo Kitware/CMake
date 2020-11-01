@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,6 +30,7 @@
  * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
  * RFC5034 POP3 SASL Authentication Mechanism
  * RFC6749 OAuth 2.0 Authorization Framework
+ * RFC8314 Use of TLS for Email Submission and Access
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
@@ -94,8 +95,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
 static CURLcode pop3_connect(struct connectdata *conn, bool *done);
 static CURLcode pop3_disconnect(struct connectdata *conn, bool dead);
 static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done);
-static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks);
+static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks);
 static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode pop3_setup_connection(struct connectdata *conn);
 static CURLcode pop3_parse_url_options(struct connectdata *conn);
@@ -178,7 +178,7 @@ static void pop3_to_pop3s(struct connectdata *conn)
   conn->handler = &Curl_handler_pop3s;
 
   /* Set the connection's upgraded to TLS flag */
-  conn->tls_upgraded = TRUE;
+  conn->bits.tls_upgraded = TRUE;
 }
 #else
 #define pop3_to_pop3s(x) Curl_nop_stmt
@@ -208,7 +208,7 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
   /* Are we processing CAPA command responses? */
   if(pop3c->state == POP3_CAPA) {
     /* Do we have the terminating line? */
-    if(len >= 1 && !memcmp(line, ".", 1))
+    if(len >= 1 && line[0] == '.')
       /* Treat the response as a success */
       *resp = '+';
     else
@@ -226,7 +226,7 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
   }
 
   /* Do we have a continuation response? */
-  if(len >= 1 && !memcmp("+", line, 1)) {
+  if(len >= 1 && line[0] == '+') {
     *resp = '*';
 
     return TRUE;
@@ -338,10 +338,8 @@ static CURLcode pop3_perform_capa(struct connectdata *conn)
  */
 static CURLcode pop3_perform_starttls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the STLS command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "STLS");
+  CURLcode result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "STLS");
 
   if(!result)
     state(conn, POP3_STARTTLS);
@@ -357,11 +355,10 @@ static CURLcode pop3_perform_starttls(struct connectdata *conn)
  */
 static CURLcode pop3_perform_upgrade_tls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
-
   /* Start the SSL connection */
-  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  CURLcode result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET,
+                                                 &pop3c->ssldone);
 
   if(!result) {
     if(pop3c->state != POP3_UPGRADETLS)
@@ -415,7 +412,7 @@ static CURLcode pop3_perform_apop(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   size_t i;
-  MD5_context *ctxt;
+  struct MD5_context *ctxt;
   unsigned char digest[MD5_DIGEST_LEN];
   char secret[2 * MD5_DIGEST_LEN + 1];
 
@@ -443,7 +440,7 @@ static CURLcode pop3_perform_apop(struct connectdata *conn)
 
   /* Convert the calculated 16 octet digest into a 32 byte hex string */
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    snprintf(&secret[2 * i], 3, "%02x", digest[i]);
+    msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
 
   result = Curl_pp_sendf(&pop3c->pp, "APOP %s %s", conn->user, secret);
 
@@ -592,10 +589,8 @@ static CURLcode pop3_perform_command(struct connectdata *conn)
  */
 static CURLcode pop3_perform_quit(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "QUIT");
+  CURLcode result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "QUIT");
 
   if(!result)
     state(conn, POP3_QUIT);
@@ -629,6 +624,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
         if(line[i] == '<') {
           /* Calculate the length of the timestamp */
           size_t timestamplen = len - 1 - i;
+          char *at;
           if(!timestamplen)
             break;
 
@@ -642,8 +638,15 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
           memcpy(pop3c->apoptimestamp, line + i, timestamplen);
           pop3c->apoptimestamp[timestamplen] = '\0';
 
-          /* Store the APOP capability */
-          pop3c->authtypes |= POP3_TYPE_APOP;
+          /* If the timestamp does not contain '@' it is not (as required by
+             RFC-1939) conformant to the RFC-822 message id syntax, and we
+             therefore do not use APOP authentication. */
+          at = strchr(pop3c->apoptimestamp, '@');
+          if(!at)
+            Curl_safefree(pop3c->apoptimestamp);
+          else
+            /* Store the APOP capability */
+            pop3c->authtypes |= POP3_TYPE_APOP;
           break;
         }
       }
@@ -904,7 +907,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
 
   if(pop3->transfer == FTPTRANSFER_BODY) {
     /* POP3 download */
-    Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
 
     if(pp->cache) {
       /* The header "cache" contains a bunch of data that is actually body
@@ -1017,19 +1020,20 @@ static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
       return result;
   }
 
-  result = Curl_pp_statemach(&pop3c->pp, FALSE);
+  result = Curl_pp_statemach(&pop3c->pp, FALSE, FALSE);
   *done = (pop3c->state == POP3_STOP) ? TRUE : FALSE;
 
   return result;
 }
 
-static CURLcode pop3_block_statemach(struct connectdata *conn)
+static CURLcode pop3_block_statemach(struct connectdata *conn,
+                                     bool disconnecting)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   while(pop3c->state != POP3_STOP && !result)
-    result = Curl_pp_statemach(&pop3c->pp, TRUE);
+    result = Curl_pp_statemach(&pop3c->pp, TRUE, disconnecting);
 
   return result;
 }
@@ -1050,10 +1054,9 @@ static CURLcode pop3_init(struct connectdata *conn)
 }
 
 /* For the POP3 "protocol connect" and "doing" phases only */
-static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks)
+static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
-  return Curl_pp_getsock(&conn->proto.pop3c.pp, socks, numsocks);
+  return Curl_pp_getsock(&conn->proto.pop3c.pp, socks);
 }
 
 /***********************************************************************
@@ -1227,7 +1230,7 @@ static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
      point! */
   if(!dead_connection && pop3c->pp.conn && pop3c->pp.conn->bits.protoconnstart)
     if(!pop3_perform_quit(conn))
-      (void)pop3_block_statemach(conn); /* ignore errors on QUIT */
+      (void)pop3_block_statemach(conn, TRUE); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);
@@ -1309,7 +1312,7 @@ static CURLcode pop3_setup_connection(struct connectdata *conn)
     return result;
 
   /* Clear the TLS upgraded flag */
-  conn->tls_upgraded = FALSE;
+  conn->bits.tls_upgraded = FALSE;
 
   return CURLE_OK;
 }
@@ -1387,7 +1390,7 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
   const char *path = &data->state.up.path[1]; /* skip leading path */
 
   /* URL decode the path for the message ID */
-  return Curl_urldecode(data, path, 0, &pop3->id, NULL, TRUE);
+  return Curl_urldecode(data, path, 0, &pop3->id, NULL, REJECT_CTRL);
 }
 
 /***********************************************************************
@@ -1405,7 +1408,7 @@ static CURLcode pop3_parse_custom_request(struct connectdata *conn)
 
   /* URL decode the custom request */
   if(custom)
-    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, TRUE);
+    result = Curl_urldecode(data, custom, 0, &pop3->custom, NULL, REJECT_CTRL);
 
   return result;
 }

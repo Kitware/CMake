@@ -30,6 +30,19 @@ add_CMakeOnly_test(CheckStructHasMember)
 
 add_CMakeOnly_test(CompilerIdC)
 add_CMakeOnly_test(CompilerIdCXX)
+
+if (APPLE AND CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
+  add_CMakeOnly_test(CompilerIdOBJC)
+  add_CMakeOnly_test(CheckOBJCCompilerFlag)
+  add_CMakeOnly_test(CompilerIdOBJCXX)
+  add_CMakeOnly_test(CheckOBJCXXCompilerFlag)
+endif()
+
+if(CMake_TEST_CUDA)
+  add_CMakeOnly_test(CompilerIdCUDA)
+endif()
+
+
 if(CMAKE_Fortran_COMPILER)
   add_CMakeOnly_test(CompilerIdFortran)
 endif()
@@ -64,6 +77,12 @@ add_test(CMakeOnly.ProjectIncludeAny ${CMAKE_CMAKE_COMMAND}
 
 add_test(CMakeOnly.ProjectIncludeBefore ${CMAKE_CMAKE_COMMAND}
   -DTEST=ProjectIncludeBefore
+  -DCMAKE_ARGS=-DCMAKE_PROJECT_ProjectInclude_INCLUDE_BEFORE=${CMAKE_CURRENT_SOURCE_DIR}/ProjectIncludeBefore/include.cmake
+  -P ${CMAKE_CURRENT_BINARY_DIR}/Test.cmake
+  )
+
+add_test(CMakeOnly.ProjectIncludeBeforeAny ${CMAKE_CMAKE_COMMAND}
+  -DTEST=ProjectIncludeBeforeAny
   -DCMAKE_ARGS=-DCMAKE_PROJECT_INCLUDE_BEFORE=${CMAKE_CURRENT_SOURCE_DIR}/ProjectIncludeBefore/include.cmake
   -P ${CMAKE_CURRENT_BINARY_DIR}/Test.cmake
   )
@@ -84,5 +103,5 @@ function(add_major_test module)
 endfunction()
 
 add_major_test(PythonLibs VERSIONS 2 3 VERSION_VAR PYTHONLIBS_VERSION_STRING)
-add_major_test(PythonInterp NOLANG VERSIONS 2 3 VERSION_VAR PYTHON_VERSION_STRING)
+add_major_test(PythonInterp NOLANG VERSIONS 3 VERSION_VAR PYTHON_VERSION_STRING)
 add_major_test(Qt VERSIONS 3 4 VERSION_VAR QT_VERSION_STRING)

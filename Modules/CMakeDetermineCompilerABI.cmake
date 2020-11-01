@@ -12,7 +12,7 @@ include(CMakeTestCompilerCommon)
 
 function(CMAKE_DETERMINE_COMPILER_ABI lang src)
   if(NOT DEFINED CMAKE_${lang}_ABI_COMPILED)
-    message(STATUS "Detecting ${lang} compiler ABI info")
+    message(CHECK_START "Detecting ${lang} compiler ABI info")
 
     # Compile the ABI identification source.
     set(BIN "${CMAKE_PLATFORM_INFO_DIR}/CMakeDetermineCompilerABI_${lang}.bin")
@@ -31,6 +31,9 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       list(APPEND CMAKE_FLAGS "-DCMAKE_${lang}_STANDARD_LIBRARIES=")
     endif()
     __TestCompiler_setTryCompileTargetType()
+
+    # Avoid failing ABI detection on warnings.
+    string(REGEX REPLACE "(^| )-Werror([= ][^ ]*)?( |$)" " " CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS}")
 
     # Save the current LC_ALL, LC_MESSAGES, and LANG environment variables
     # and set them to "C" that way GCC's "search starts here" text is in
@@ -62,11 +65,14 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     # Move result from cache to normal variable.
     set(CMAKE_${lang}_ABI_COMPILED ${CMAKE_${lang}_ABI_COMPILED})
     unset(CMAKE_${lang}_ABI_COMPILED CACHE)
+    if(CMAKE_${lang}_ABI_COMPILED AND _copy_error)
+      set(CMAKE_${lang}_ABI_COMPILED 0)
+    endif()
     set(CMAKE_${lang}_ABI_COMPILED ${CMAKE_${lang}_ABI_COMPILED} PARENT_SCOPE)
 
     # Load the resulting information strings.
-    if(CMAKE_${lang}_ABI_COMPILED AND NOT _copy_error)
-      message(STATUS "Detecting ${lang} compiler ABI info - done")
+    if(CMAKE_${lang}_ABI_COMPILED)
+      message(CHECK_PASS "done")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Detecting ${lang} compiler ABI info compiled with the following output:\n${OUTPUT}\n\n")
       file(STRINGS "${BIN}" ABI_STRINGS LIMIT_COUNT 2 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
@@ -124,8 +130,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       # a try-compile
       if("${lang}" MATCHES "Fortran"
           AND "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
-        set(_desc "Determine Intel Fortran Compiler Implicit Link Path")
-        message(STATUS "${_desc}")
+        message(CHECK_START "Determine Intel Fortran Compiler Implicit Link Path")
         # Build a sample project which reports symbols.
         try_compile(IFORT_LIB_PATH_COMPILED
           ${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath
@@ -138,8 +143,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
           "${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.txt"
           "${_output}")
         include(${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.cmake OPTIONAL)
-        set(_desc "Determine Intel Fortran Compiler Implicit Link Path -- done")
-        message(STATUS "${_desc}")
+        message(CHECK_PASS "done")
       endif()
 
       # Implicit link libraries cannot be used explicitly for multiple
@@ -163,10 +167,22 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
             break()
           endif()
         endforeach()
+      elseif(CMAKE_CXX_COMPILER_ID STREQUAL QCC)
+        foreach(dir ${implicit_dirs})
+          if (dir MATCHES "/lib$")
+            get_filename_component(assumedArchDir "${dir}" DIRECTORY)
+            get_filename_component(archParentDir "${assumedArchDir}" DIRECTORY)
+            if (archParentDir STREQUAL CMAKE_SYSROOT)
+              get_filename_component(archDirName "${assumedArchDir}" NAME)
+              set(CMAKE_${lang}_LIBRARY_ARCHITECTURE "${archDirName}" PARENT_SCOPE)
+              break()
+            endif()
+          endif()
+        endforeach()
       endif()
 
     else()
-      message(STATUS "Detecting ${lang} compiler ABI info - failed")
+      message(CHECK_FAIL "failed")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Detecting ${lang} compiler ABI info failed to compile with the following output:\n${OUTPUT}\n${_copy_error}\n\n")
     endif()

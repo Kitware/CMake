@@ -7,6 +7,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
@@ -34,8 +35,8 @@ std::string cmCPackPKGGenerator::GetPackageName(
   const cmCPackComponent& component)
 {
   if (component.ArchiveFile.empty()) {
-    std::string packagesDir = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-    packagesDir += ".dummy";
+    std::string packagesDir =
+      cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), ".dummy");
     std::ostringstream out;
     out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir) << "-"
         << component.Name << ".pkg";
@@ -45,7 +46,66 @@ std::string cmCPackPKGGenerator::GetPackageName(
   return component.ArchiveFile + ".pkg";
 }
 
-void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
+void cmCPackPKGGenerator::CreateBackground(const char* themeName,
+                                           const char* metapackageFile,
+                                           cm::string_view genName,
+                                           cmXMLWriter& xout)
+{
+  std::string paramSuffix =
+    (themeName == nullptr) ? "" : cmSystemTools::UpperCase(themeName);
+  std::string opt = (themeName == nullptr)
+    ? cmStrCat("CPACK_", genName, "_BACKGROUND")
+    : cmStrCat("CPACK_", genName, "_BACKGROUND_", paramSuffix);
+  const char* bgFileName = this->GetOption(opt);
+  if (bgFileName == nullptr) {
+    return;
+  }
+
+  std::string bgFilePath = cmStrCat(metapackageFile, "/Contents/", bgFileName);
+
+  if (!cmSystemTools::FileExists(bgFilePath)) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Background image doesn't exist in the resource directory: "
+                    << bgFileName << std::endl);
+    return;
+  }
+
+  if (themeName == nullptr) {
+    xout.StartElement("background");
+  } else {
+    xout.StartElement(cmStrCat("background-", themeName));
+  }
+
+  xout.Attribute("file", bgFileName);
+
+  const char* param = this->GetOption(cmStrCat(opt, "_ALIGNMENT"));
+  if (param != nullptr) {
+    xout.Attribute("alignment", param);
+  }
+
+  param = this->GetOption(cmStrCat(opt, "_SCALING"));
+  if (param != nullptr) {
+    xout.Attribute("scaling", param);
+  }
+
+  // Apple docs say that you must provide either mime-type or uti
+  // attribute for the background, but I've seen examples that
+  // doesn't have them, so don't make them mandatory.
+  param = this->GetOption(cmStrCat(opt, "_MIME_TYPE"));
+  if (param != nullptr) {
+    xout.Attribute("mime-type", param);
+  }
+
+  param = this->GetOption(cmStrCat(opt, "_UTI"));
+  if (param != nullptr) {
+    xout.Attribute("uti", param);
+  }
+
+  xout.EndElement();
+}
+
+void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
+                                                const char* genName)
 {
   std::string distributionTemplate =
     this->FindTemplate("CPack.distribution.dist.in");
@@ -56,8 +116,8 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
     return;
   }
 
-  std::string distributionFile = metapackageFile;
-  distributionFile += "/Contents/distribution.dist";
+  std::string distributionFile =
+    cmStrCat(metapackageFile, "/Contents/distribution.dist");
 
   // Create the choice outline, which provides a tree-based view of
   // the components in their groups.
@@ -100,6 +160,11 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
   if (!this->PostFlightComponent.Name.empty()) {
     CreateChoice(PostFlightComponent, xout);
   }
+
+  // default background
+  this->CreateBackground(nullptr, metapackageFile, genName, xout);
+  // Dark Aqua
+  this->CreateBackground("darkAqua", metapackageFile, genName, xout);
 
   this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str().c_str());
 
@@ -144,12 +209,9 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponentGroup& group,
 void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
                                        cmXMLWriter& xout)
 {
-  std::string packageId = "com.";
-  packageId += this->GetOption("CPACK_PACKAGE_VENDOR");
-  packageId += '.';
-  packageId += this->GetOption("CPACK_PACKAGE_NAME");
-  packageId += '.';
-  packageId += component.Name;
+  std::string packageId =
+    cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
+             this->GetOption("CPACK_PACKAGE_NAME"), '.', component.Name);
 
   xout.StartElement("choice");
   xout.Attribute("id", component.Name + "Choice");
@@ -192,14 +254,13 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
 
   // Create a description of the package associated with this
   // component.
-  std::string relativePackageLocation = "Contents/Packages/";
-  relativePackageLocation += this->GetPackageName(component);
+  std::string relativePackageLocation =
+    cmStrCat("Contents/Packages/", this->GetPackageName(component));
 
   // Determine the installed size of the package.
-  std::string dirName = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  dirName += '/';
-  dirName += component.Name;
-  dirName += this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
+  std::string dirName =
+    cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), '/', component.Name,
+             this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX"));
   unsigned long installedSize = component.GetInstalledSizeInKbytes(dirName);
 
   xout.StartElement("pkg-ref");
@@ -282,9 +343,7 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
     return false;
   }
 
-  std::string destFileName = dirName;
-  destFileName += '/';
-  destFileName += name + ext;
+  std::string destFileName = cmStrCat(dirName, '/', name, ext);
 
   // Set this so that distribution.dist gets the right name (without
   // the path).
@@ -305,9 +364,7 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
     outName = name.c_str();
   }
 
-  std::string inFName = "CPack.";
-  inFName += name;
-  inFName += ".in";
+  std::string inFName = cmStrCat("CPack.", name, ".in");
   std::string inFileName = this->FindTemplate(inFName.c_str());
   if (inFileName.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -315,9 +372,8 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
     return false;
   }
 
-  std::string destFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  destFileName += "/";
-  destFileName += outName;
+  std::string destFileName =
+    cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/', outName);
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Configure file: " << inFileName << " to " << destFileName
@@ -330,9 +386,7 @@ int cmCPackPKGGenerator::CopyInstallScript(const std::string& resdir,
                                            const std::string& script,
                                            const std::string& name)
 {
-  std::string dst = resdir;
-  dst += "/";
-  dst += name;
+  std::string dst = cmStrCat(resdir, '/', name);
   cmSystemTools::CopyFileAlways(script, dst);
   cmSystemTools::SetPermissions(dst.c_str(), 0777);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,

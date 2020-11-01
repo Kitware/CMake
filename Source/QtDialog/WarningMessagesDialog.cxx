@@ -26,18 +26,22 @@ void WarningMessagesDialog::setInitialValues()
 
 void WarningMessagesDialog::setupSignals()
 {
-  QObject::connect(this->buttonBox, SIGNAL(accepted()), this,
-                   SLOT(doAccept()));
+  QObject::connect(this->buttonBox, &QDialogButtonBox::accepted, this,
+                   &WarningMessagesDialog::doAccept);
 
-  QObject::connect(this->suppressDeveloperWarnings, SIGNAL(stateChanged(int)),
-                   this, SLOT(doSuppressDeveloperWarningsChanged(int)));
-  QObject::connect(this->suppressDeprecatedWarnings, SIGNAL(stateChanged(int)),
-                   this, SLOT(doSuppressDeprecatedWarningsChanged(int)));
+  QObject::connect(this->suppressDeveloperWarnings, &QCheckBox::stateChanged,
+                   this,
+                   &WarningMessagesDialog::doSuppressDeveloperWarningsChanged);
+  QObject::connect(
+    this->suppressDeprecatedWarnings, &QCheckBox::stateChanged, this,
+    &WarningMessagesDialog::doSuppressDeprecatedWarningsChanged);
 
-  QObject::connect(this->developerWarningsAsErrors, SIGNAL(stateChanged(int)),
-                   this, SLOT(doDeveloperWarningsAsErrorsChanged(int)));
-  QObject::connect(this->deprecatedWarningsAsErrors, SIGNAL(stateChanged(int)),
-                   this, SLOT(doDeprecatedWarningsAsErrorsChanged(int)));
+  QObject::connect(this->developerWarningsAsErrors, &QCheckBox::stateChanged,
+                   this,
+                   &WarningMessagesDialog::doDeveloperWarningsAsErrorsChanged);
+  QObject::connect(
+    this->deprecatedWarningsAsErrors, &QCheckBox::stateChanged, this,
+    &WarningMessagesDialog::doDeprecatedWarningsAsErrorsChanged);
 }
 
 void WarningMessagesDialog::doAccept()

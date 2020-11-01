@@ -2,19 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddCompileOptionsCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
-class cmExecutionStatus;
-
-bool cmAddCompileOptionsCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmAddCompileOptionsCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status)
 {
-  if (args.empty()) {
-    return true;
-  }
-
+  cmMakefile& mf = status.GetMakefile();
   for (std::string const& i : args) {
-    this->Makefile->AddCompileOption(i);
+    mf.AddCompileOption(i);
   }
   return true;
 }

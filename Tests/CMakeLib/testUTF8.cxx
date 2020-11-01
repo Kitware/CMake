@@ -1,16 +1,19 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include <cm_utf8.h>
 #include <stdio.h>
+
+#include <cm_utf8.h>
 
 typedef char test_utf8_char[5];
 
 static void test_utf8_char_print(test_utf8_char const c)
 {
   unsigned char const* d = reinterpret_cast<unsigned char const*>(c);
+#ifndef __clang_analyzer__ // somehow thinks arguments are not initialized
   printf("[0x%02X,0x%02X,0x%02X,0x%02X]", static_cast<int>(d[0]),
          static_cast<int>(d[1]), static_cast<int>(d[2]),
          static_cast<int>(d[3]));
+#endif
 }
 
 static void byte_array_print(char const* s)

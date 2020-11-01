@@ -1,13 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmState_h
-#define cmState_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <map>
+#include <functional>
+#include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "cmDefinitions.h"
@@ -15,7 +17,7 @@
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
-#include "cmPropertyDefinitionMap.h"
+#include "cmPropertyDefinition.h"
 #include "cmPropertyMap.h"
 #include "cmStatePrivate.h"
 #include "cmStateTypes.h"
@@ -23,9 +25,10 @@
 class cmCacheManager;
 class cmCommand;
 class cmGlobVerificationManager;
-class cmPropertyDefinition;
+class cmMakefile;
 class cmStateSnapshot;
 class cmMessenger;
+class cmExecutionStatus;
 
 class cmState
 {
@@ -48,11 +51,14 @@ public:
     CPack,
   };
 
-  static const char* GetTargetTypeName(cmStateEnums::TargetType targetType);
+  static const std::string& GetTargetTypeName(
+    cmStateEnums::TargetType targetType);
 
   cmStateSnapshot CreateBaseSnapshot();
   cmStateSnapshot CreateBuildsystemDirectorySnapshot(
     cmStateSnapshot const& originSnapshot);
+  cmStateSnapshot CreateDeferCallSnapshot(
+    cmStateSnapshot const& originSnapshot, std::string const& fileName);
   cmStateSnapshot CreateFunctionCallSnapshot(
     cmStateSnapshot const& originSnapshot, std::string const& fileName);
   cmStateSnapshot CreateMacroCallSnapshot(
@@ -67,10 +73,12 @@ public:
     cmStateSnapshot const& originSnapshot);
   cmStateSnapshot Pop(cmStateSnapshot const& originSnapshot);
 
-  static cmStateEnums::CacheEntryType StringToCacheEntryType(const char*);
-  static bool StringToCacheEntryType(const char*,
+  static cmStateEnums::CacheEntryType StringToCacheEntryType(
+    const std::string&);
+  static bool StringToCacheEntryType(const std::string&,
                                      cmStateEnums::CacheEntryType& type);
-  static const char* CacheEntryTypeToString(cmStateEnums::CacheEntryType);
+  static const std::string& CacheEntryTypeToString(
+    cmStateEnums::CacheEntryType);
   static bool IsCacheEntryType(std::string const& key);
 
   bool LoadCache(const std::string& path, bool internal,
@@ -81,12 +89,14 @@ public:
 
   bool DeleteCache(const std::string& path);
 
+  bool IsCacheLoaded() const;
+
   std::vector<std::string> GetCacheEntryKeys() const;
-  const char* GetCacheEntryValue(std::string const& key) const;
-  const std::string* GetInitializedCacheValue(std::string const& key) const;
+  cmProp GetCacheEntryValue(std::string const& key) const;
+  std::string GetSafeCacheEntryValue(std::string const& key) const;
+  cmProp GetInitializedCacheValue(std::string const& key) const;
   cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const;
   void SetCacheEntryValue(std::string const& key, std::string const& value);
-  void SetCacheValue(std::string const& key, std::string const& value);
 
   void RemoveCacheEntry(std::string const& key);
 
@@ -96,8 +106,8 @@ public:
   void SetCacheEntryBoolProperty(std::string const& key,
                                  std::string const& propertyName, bool value);
   std::vector<std::string> GetCacheEntryPropertyList(std::string const& key);
-  const char* GetCacheEntryProperty(std::string const& key,
-                                    std::string const& propertyName);
+  cmProp GetCacheEntryProperty(std::string const& key,
+                               std::string const& propertyName);
   bool GetCacheEntryPropertyAsBool(std::string const& key,
                                    std::string const& propertyName);
   void AppendCacheEntryProperty(std::string const& key,
@@ -115,16 +125,13 @@ public:
   cmStateSnapshot Reset();
   // Define a property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const char* ShortDescription,
-                      const char* FullDescription, bool chain = false);
+                      const std::string& ShortDescription,
+                      const std::string& FullDescription, bool chain = false);
 
   // get property definition
   cmPropertyDefinition const* GetPropertyDefinition(
     const std::string& name, cmProperty::ScopeType scope) const;
 
-  // Is a property defined?
-  bool IsPropertyDefined(const std::string& name,
-                         cmProperty::ScopeType scope) const;
   bool IsPropertyChained(const std::string& name,
                          cmProperty::ScopeType scope) const;
 
@@ -140,24 +147,35 @@ public:
   bool GetIsGeneratorMultiConfig() const;
   void SetIsGeneratorMultiConfig(bool b);
 
-  // Returns a command from its name, case insensitive, or nullptr
-  cmCommand* GetCommand(std::string const& name) const;
-  // Returns a command from its name, or nullptr
-  cmCommand* GetCommandByExactName(std::string const& name) const;
+  using Command = std::function<bool(std::vector<cmListFileArgument> const&,
+                                     cmExecutionStatus&)>;
+  using BuiltinCommand = bool (*)(std::vector<std::string> const&,
+                                  cmExecutionStatus&);
 
-  void AddBuiltinCommand(std::string const& name, cmCommand* command);
-  void AddDisallowedCommand(std::string const& name, cmCommand* command,
+  // Returns a command from its name, case insensitive, or nullptr
+  Command GetCommand(std::string const& name) const;
+  // Returns a command from its name, or nullptr
+  Command GetCommandByExactName(std::string const& name) const;
+
+  void AddBuiltinCommand(std::string const& name,
+                         std::unique_ptr<cmCommand> command);
+  void AddBuiltinCommand(std::string const& name, Command command);
+  void AddBuiltinCommand(std::string const& name, BuiltinCommand command);
+  void AddFlowControlCommand(std::string const& name, Command command);
+  void AddFlowControlCommand(std::string const& name, BuiltinCommand command);
+  void AddDisallowedCommand(std::string const& name, BuiltinCommand command,
                             cmPolicies::PolicyID policy, const char* message);
   void AddUnexpectedCommand(std::string const& name, const char* error);
-  void AddScriptedCommand(std::string const& name, cmCommand* command);
+  bool AddScriptedCommand(std::string const& name, BT<Command> command,
+                          cmMakefile& mf);
   void RemoveBuiltinCommand(std::string const& name);
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;
 
   void SetGlobalProperty(const std::string& prop, const char* value);
-  void AppendGlobalProperty(const std::string& prop, const char* value,
+  void AppendGlobalProperty(const std::string& prop, const std::string& value,
                             bool asString = false);
-  const char* GetGlobalProperty(const std::string& prop);
+  cmProp GetGlobalProperty(const std::string& prop);
   bool GetGlobalPropertyAsBool(const std::string& prop);
 
   std::string const& GetSourceDirectory() const;
@@ -179,6 +197,8 @@ public:
   bool UseNMake() const;
   void SetMSYSShell(bool mSYSShell);
   bool UseMSYSShell() const;
+  void SetNinjaMulti(bool ninjaMulti);
+  bool UseNinjaMulti() const;
 
   unsigned int GetCacheMajorVersion() const;
   unsigned int GetCacheMinorVersion() const;
@@ -206,13 +226,14 @@ private:
                          const std::string& variable,
                          cmListFileBacktrace const& bt);
 
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
+  cmPropertyDefinitionMap PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
-  std::map<std::string, cmCommand*> BuiltinCommands;
-  std::map<std::string, cmCommand*> ScriptedCommands;
+  std::unordered_map<std::string, Command> BuiltinCommands;
+  std::unordered_map<std::string, Command> ScriptedCommands;
+  std::unordered_set<std::string> FlowControlCommands;
   cmPropertyMap GlobalProperties;
-  cmCacheManager* CacheManager;
-  cmGlobVerificationManager* GlobVerificationManager;
+  std::unique_ptr<cmCacheManager> CacheManager;
+  std::unique_ptr<cmGlobVerificationManager> GlobVerificationManager;
 
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>
     BuildsystemDirectory;
@@ -234,7 +255,6 @@ private:
   bool MinGWMake = false;
   bool NMake = false;
   bool MSYSShell = false;
+  bool NinjaMulti = false;
   Mode CurrentMode = Unknown;
 };
-
-#endif

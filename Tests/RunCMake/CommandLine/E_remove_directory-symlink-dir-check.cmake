@@ -1,0 +1,6 @@
+if(EXISTS ${out}/link_dir)
+  set(RunCMake_TEST_FAILED "did not remove ${out}/link_dir")
+endif()
+if(NOT EXISTS ${out}/dir)
+  set(RunCMake_TEST_FAILED "should not have removed ${out}/dir")
+endif()

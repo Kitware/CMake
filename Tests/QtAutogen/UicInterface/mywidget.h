@@ -2,8 +2,9 @@
 #ifndef MYWIDGET_H
 #define MYWIDGET_H
 
-#include <QWidget>
 #include <memory>
+
+#include <QWidget>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 3, 0)
 #  include <klocalizedstring.h>

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmVisualStudioGeneratorOptions_h
-#define cmVisualStudioGeneratorOptions_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -13,8 +12,9 @@
 #include "cmIDEOptions.h"
 
 class cmLocalVisualStudioGenerator;
+class cmGeneratorTarget;
 
-typedef cmIDEFlagTable cmVS7FlagTable;
+using cmVS7FlagTable = cmIDEFlagTable;
 
 class cmVisualStudioGeneratorOptions : public cmIDEOptions
 {
@@ -61,14 +61,6 @@ public:
   bool UsingUnicode() const;
   bool UsingSBCS() const;
 
-  enum CudaRuntime
-  {
-    CudaRuntimeStatic,
-    CudaRuntimeShared,
-    CudaRuntimeNone
-  };
-  CudaRuntime GetCudaRuntime() const;
-
   void FixCudaCodeGeneration();
 
   void FixManifestUACFlags();
@@ -86,7 +78,8 @@ public:
   const std::string& GetConfiguration() const;
 
 protected:
-  virtual void OutputFlag(std::ostream& fout, int indent, const char* tag,
+  virtual void OutputFlag(std::ostream& fout, int indent,
+                          const std::string& tag,
                           const std::string& content) = 0;
 
 private:
@@ -106,5 +99,3 @@ private:
 
   FlagValue TakeFlag(std::string const& key);
 };
-
-#endif

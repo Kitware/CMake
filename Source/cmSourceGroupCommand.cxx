@@ -2,16 +2,24 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroupCommand.h"
 
-#include <algorithm>
+#include <cstddef>
+#include <map>
 #include <set>
-#include <stddef.h>
 #include <utility>
 
+#include <cmext/algorithm>
+
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSourceGroup.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 namespace {
+
+using ParsedArguments = std::map<std::string, std::vector<std::string>>;
+using ExpectedOptions = std::vector<std::string>;
+
 const std::string kTreeOptionName = "TREE";
 const std::string kPrefixOptionName = "PREFIX";
 const std::string kFilesOptionName = "FILES";
@@ -20,21 +28,7 @@ const std::string kSourceGroupOptionName = "<sg_name>";
 
 std::vector<std::string> tokenizePath(const std::string& path)
 {
-  return cmSystemTools::tokenize(path, "\\/");
-}
-
-std::string getFullFilePath(const std::string& currentPath,
-                            const std::string& path)
-{
-  std::string fullPath = path;
-
-  if (!cmSystemTools::FileIsFullPath(path)) {
-    fullPath = currentPath;
-    fullPath += "/";
-    fullPath += path;
-  }
-
-  return cmSystemTools::CollapseFullPath(fullPath);
+  return cmTokenize(path, "\\/");
 }
 
 std::set<std::string> getSourceGroupFilesPaths(
@@ -54,22 +48,13 @@ bool rootIsPrefix(const std::string& root,
                   const std::vector<std::string>& files, std::string& error)
 {
   for (std::string const& file : files) {
-    if (!cmSystemTools::StringStartsWith(file, root.c_str())) {
-      error = "ROOT: " + root + " is not a prefix of file: " + file;
+    if (!cmHasPrefix(file, root)) {
+      error = cmStrCat("ROOT: ", root, " is not a prefix of file: ", file);
       return false;
     }
   }
 
   return true;
-}
-
-std::string prepareFilePathForTree(const std::string& path,
-                                   const std::string& currentSourceDir)
-{
-  if (!cmSystemTools::FileIsFullPath(path)) {
-    return cmSystemTools::CollapseFullPath(currentSourceDir + "/" + path);
-  }
-  return cmSystemTools::CollapseFullPath(path);
 }
 
 std::vector<std::string> prepareFilesPathsForTree(
@@ -80,10 +65,20 @@ std::vector<std::string> prepareFilesPathsForTree(
   prepared.reserve(filesPaths.size());
 
   for (auto const& filePath : filesPaths) {
-    // If provided file path is actually not a file, silently ignore it.
-    if (cmSystemTools::FileExists(filePath, /*isFile=*/true)) {
-      prepared.push_back(prepareFilePathForTree(filePath, currentSourceDir));
+    std::string fullPath =
+      cmSystemTools::CollapseFullPath(filePath, currentSourceDir);
+    // If provided file path is actually not a directory, silently ignore it.
+    if (cmSystemTools::FileIsDirectory(fullPath)) {
+      continue;
     }
+
+    // Handle directory that doesn't exist yet.
+    if (!fullPath.empty() &&
+        (fullPath.back() == '/' || fullPath.back() == '\\')) {
+      continue;
+    }
+
+    prepared.emplace_back(std::move(fullPath));
   }
 
   return prepared;
@@ -100,7 +95,7 @@ bool addFilesToItsSourceGroups(const std::string& root,
 
     std::vector<std::string> tokenizedPath;
     if (!prefix.empty()) {
-      tokenizedPath = tokenizePath(prefix + '/' + sgFilesPath);
+      tokenizedPath = tokenizePath(cmStrCat(prefix, '/', sgFilesPath));
     } else {
       tokenizedPath = tokenizePath(sgFilesPath);
     }
@@ -118,20 +113,16 @@ bool addFilesToItsSourceGroups(const std::string& root,
         errorMsg = "Could not create source group for file: " + sgFilesPath;
         return false;
       }
-      const std::string fullPath = getFullFilePath(root, sgFilesPath);
+      const std::string fullPath =
+        cmSystemTools::CollapseFullPath(sgFilesPath, root);
       sg->AddGroupFile(fullPath);
     }
   }
 
   return true;
 }
-}
 
-class cmExecutionStatus;
-
-// cmSourceGroupCommand
-cmSourceGroupCommand::ExpectedOptions
-cmSourceGroupCommand::getExpectedOptions() const
+ExpectedOptions getExpectedOptions()
 {
   ExpectedOptions options;
 
@@ -143,16 +134,14 @@ cmSourceGroupCommand::getExpectedOptions() const
   return options;
 }
 
-bool cmSourceGroupCommand::isExpectedOption(
-  const std::string& argument, const ExpectedOptions& expectedOptions)
+bool isExpectedOption(const std::string& argument,
+                      const ExpectedOptions& expectedOptions)
 {
-  return std::find(expectedOptions.begin(), expectedOptions.end(), argument) !=
-    expectedOptions.end();
+  return cm::contains(expectedOptions, argument);
 }
 
-void cmSourceGroupCommand::parseArguments(
-  const std::vector<std::string>& args,
-  cmSourceGroupCommand::ParsedArguments& parsedArguments)
+void parseArguments(const std::vector<std::string>& args,
+                    ParsedArguments& parsedArguments)
 {
   const ExpectedOptions expectedOptions = getExpectedOptions();
   size_t i = 0;
@@ -181,21 +170,35 @@ void cmSourceGroupCommand::parseArguments(
   }
 }
 
-bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus&)
+} // namespace
+
+static bool checkArgumentsPreconditions(const ParsedArguments& parsedArguments,
+                                        std::string& errorMsg);
+
+static bool processTree(cmMakefile& mf, ParsedArguments& parsedArguments,
+                        std::string& errorMsg);
+
+static bool checkSingleParameterArgumentPreconditions(
+  const std::string& argument, const ParsedArguments& parsedArguments,
+  std::string& errorMsg);
+
+bool cmSourceGroupCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
+
+  cmMakefile& mf = status.GetMakefile();
 
   // If only two arguments are given, the pre-1.8 version of the
   // command is being invoked.
   if (args.size() == 2 && args[1] != "FILES") {
-    cmSourceGroup* sg = this->Makefile->GetOrCreateSourceGroup(args[0]);
+    cmSourceGroup* sg = mf.GetOrCreateSourceGroup(args[0]);
 
     if (!sg) {
-      this->SetError("Could not create or find source group");
+      status.SetError("Could not create or find source group");
       return false;
     }
 
@@ -213,21 +216,21 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   if (parsedArguments.find(kTreeOptionName) != parsedArguments.end()) {
-    if (!processTree(parsedArguments, errorMsg)) {
-      this->SetError(errorMsg);
+    if (!processTree(mf, parsedArguments, errorMsg)) {
+      status.SetError(errorMsg);
       return false;
     }
   } else {
     if (parsedArguments.find(kSourceGroupOptionName) ==
         parsedArguments.end()) {
-      this->SetError("Missing source group name.");
+      status.SetError("Missing source group name.");
       return false;
     }
 
-    cmSourceGroup* sg = this->Makefile->GetOrCreateSourceGroup(args[0]);
+    cmSourceGroup* sg = mf.GetOrCreateSourceGroup(args[0]);
 
     if (!sg) {
-      this->SetError("Could not create or find source group");
+      status.SetError("Could not create or find source group");
       return false;
     }
 
@@ -242,12 +245,8 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
       parsedArguments[kFilesOptionName];
     for (auto const& filesArg : filesArguments) {
       std::string src = filesArg;
-      if (!cmSystemTools::FileIsFullPath(src)) {
-        src = this->Makefile->GetCurrentSourceDirectory();
-        src += "/";
-        src += filesArg;
-      }
-      src = cmSystemTools::CollapseFullPath(src);
+      src =
+        cmSystemTools::CollapseFullPath(src, mf.GetCurrentSourceDirectory());
       sg->AddGroupFile(src);
     }
   }
@@ -255,8 +254,8 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmSourceGroupCommand::checkArgumentsPreconditions(
-  const ParsedArguments& parsedArguments, std::string& errorMsg) const
+static bool checkArgumentsPreconditions(const ParsedArguments& parsedArguments,
+                                        std::string& errorMsg)
 {
   return checkSingleParameterArgumentPreconditions(
            kPrefixOptionName, parsedArguments, errorMsg) &&
@@ -266,8 +265,8 @@ bool cmSourceGroupCommand::checkArgumentsPreconditions(
                                               parsedArguments, errorMsg);
 }
 
-bool cmSourceGroupCommand::processTree(ParsedArguments& parsedArguments,
-                                       std::string& errorMsg)
+static bool processTree(cmMakefile& mf, ParsedArguments& parsedArguments,
+                        std::string& errorMsg)
 {
   const std::string root =
     cmSystemTools::CollapseFullPath(parsedArguments[kTreeOptionName].front());
@@ -275,9 +274,8 @@ bool cmSourceGroupCommand::processTree(ParsedArguments& parsedArguments,
     ? ""
     : parsedArguments[kPrefixOptionName].front();
 
-  const std::vector<std::string> filesVector =
-    prepareFilesPathsForTree(parsedArguments[kFilesOptionName],
-                             this->Makefile->GetCurrentSourceDirectory());
+  const std::vector<std::string> filesVector = prepareFilesPathsForTree(
+    parsedArguments[kFilesOptionName], mf.GetCurrentSourceDirectory());
 
   if (!rootIsPrefix(root, filesVector, errorMsg)) {
     return false;
@@ -286,16 +284,15 @@ bool cmSourceGroupCommand::processTree(ParsedArguments& parsedArguments,
   std::set<std::string> sourceGroupPaths =
     getSourceGroupFilesPaths(root, filesVector);
 
-  return addFilesToItsSourceGroups(root, sourceGroupPaths, prefix,
-                                   *(this->Makefile), errorMsg);
+  return addFilesToItsSourceGroups(root, sourceGroupPaths, prefix, mf,
+                                   errorMsg);
 }
 
-bool cmSourceGroupCommand::checkSingleParameterArgumentPreconditions(
+static bool checkSingleParameterArgumentPreconditions(
   const std::string& argument, const ParsedArguments& parsedArguments,
-  std::string& errorMsg) const
+  std::string& errorMsg)
 {
-  ParsedArguments::const_iterator foundArgument =
-    parsedArguments.find(argument);
+  auto foundArgument = parsedArguments.find(argument);
   if (foundArgument != parsedArguments.end()) {
     const std::vector<std::string>& optionArguments = foundArgument->second;
 

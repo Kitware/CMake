@@ -2,12 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVisualStudioSlnParser.h"
 
-#include "cmSystemTools.h"
-#include "cmVisualStudioSlnData.h"
-#include "cmsys/FStream.hxx"
-
 #include <cassert>
 #include <stack>
+
+#include "cmsys/FStream.hxx"
+
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmVisualStudioSlnData.h"
 
 namespace {
 enum LineFormat
@@ -50,7 +52,7 @@ public:
   void CopyVerbatim(const std::string& line) { this->Tag = line; }
 
 private:
-  typedef std::pair<std::string, bool> StringData;
+  using StringData = std::pair<std::string, bool>;
   std::string Tag;
   StringData Arg;
   std::vector<StringData> Values;
@@ -192,8 +194,8 @@ bool cmVisualStudioSlnParser::State::Process(
   assert(!line.IsComment());
   switch (this->Stack.top()) {
     case FileStateStart:
-      if (!cmSystemTools::StringStartsWith(
-            line.GetTag().c_str(), "Microsoft Visual Studio Solution File")) {
+      if (!cmHasLiteralPrefix(line.GetTag(),
+                              "Microsoft Visual Studio Solution File")) {
         result.SetError(ResultErrorInputStructure, this->GetCurrentLine());
         return false;
       }
@@ -462,7 +464,7 @@ bool cmVisualStudioSlnParser::ParseImpl(std::istream& input, cmSlnData& output,
   if (!this->ParseBOM(input, line, state))
     return false;
   do {
-    line = cmSystemTools::TrimWhitespace(line);
+    line = cmTrimWhitespace(line);
     if (line.empty())
       continue;
     ParsedLine parsedLine;
@@ -515,7 +517,7 @@ bool cmVisualStudioSlnParser::ParseMultiValueTag(const std::string& line,
                                                  State& state)
 {
   size_t idxEqualSign = line.find('=');
-  const std::string& fullTag = line.substr(0, idxEqualSign);
+  auto fullTag = cm::string_view(line).substr(0, idxEqualSign);
   if (!this->ParseTag(fullTag, parsedLine, state))
     return false;
   if (idxEqualSign != line.npos) {
@@ -558,7 +560,7 @@ bool cmVisualStudioSlnParser::ParseSingleValueTag(const std::string& line,
                                                   State& state)
 {
   size_t idxEqualSign = line.find('=');
-  const std::string& fullTag = line.substr(0, idxEqualSign);
+  auto fullTag = cm::string_view(line).substr(0, idxEqualSign);
   if (!this->ParseTag(fullTag, parsedLine, state))
     return false;
   if (idxEqualSign != line.npos) {
@@ -578,29 +580,28 @@ bool cmVisualStudioSlnParser::ParseKeyValuePair(const std::string& line,
     return true;
   }
   const std::string& key = line.substr(0, idxEqualSign);
-  parsedLine.SetTag(cmSystemTools::TrimWhitespace(key));
+  parsedLine.SetTag(cmTrimWhitespace(key));
   const std::string& value = line.substr(idxEqualSign + 1);
-  parsedLine.AddValue(cmSystemTools::TrimWhitespace(value));
+  parsedLine.AddValue(cmTrimWhitespace(value));
   return true;
 }
 
-bool cmVisualStudioSlnParser::ParseTag(const std::string& fullTag,
+bool cmVisualStudioSlnParser::ParseTag(cm::string_view fullTag,
                                        ParsedLine& parsedLine, State& state)
 {
   size_t idxLeftParen = fullTag.find('(');
-  if (idxLeftParen == fullTag.npos) {
-    parsedLine.SetTag(cmSystemTools::TrimWhitespace(fullTag));
+  if (idxLeftParen == cm::string_view::npos) {
+    parsedLine.SetTag(cmTrimWhitespace(fullTag));
     return true;
   }
-  parsedLine.SetTag(
-    cmSystemTools::TrimWhitespace(fullTag.substr(0, idxLeftParen)));
+  parsedLine.SetTag(cmTrimWhitespace(fullTag.substr(0, idxLeftParen)));
   size_t idxRightParen = fullTag.rfind(')');
-  if (idxRightParen == fullTag.npos) {
+  if (idxRightParen == cm::string_view::npos) {
     this->LastResult.SetError(ResultErrorInputStructure,
                               state.GetCurrentLine());
     return false;
   }
-  const std::string& arg = cmSystemTools::TrimWhitespace(
+  const std::string& arg = cmTrimWhitespace(
     fullTag.substr(idxLeftParen + 1, idxRightParen - idxLeftParen - 1));
   if (arg.front() == '"') {
     if (arg.back() != '"') {
@@ -617,7 +618,7 @@ bool cmVisualStudioSlnParser::ParseTag(const std::string& fullTag,
 bool cmVisualStudioSlnParser::ParseValue(const std::string& value,
                                          ParsedLine& parsedLine)
 {
-  const std::string& trimmed = cmSystemTools::TrimWhitespace(value);
+  const std::string& trimmed = cmTrimWhitespace(value);
   if (trimmed.empty())
     parsedLine.AddValue(trimmed);
   else if (trimmed.front() == '"' && trimmed.back() == '"')

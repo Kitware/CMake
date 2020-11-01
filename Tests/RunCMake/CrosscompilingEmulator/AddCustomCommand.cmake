@@ -26,12 +26,14 @@ add_custom_command(OUTPUT output2
 
 # DoesNotUseEmulator: The command will fail if emulator is prepended
 add_custom_command(OUTPUT output3
+  COMMAND ${CMAKE_COMMAND} -E echo generated_exe_emulator_unexpected
   COMMAND $<TARGET_FILE:generated_exe_emulator_unexpected>
   COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/output3
   DEPENDS generated_exe_emulator_unexpected)
 
 # DoesNotUseEmulator: The command will fail if emulator is prepended
 add_custom_command(OUTPUT outputImp
+  COMMAND ${CMAKE_COMMAND} -E echo generated_exe_emulator_unexpected_imported
   COMMAND generated_exe_emulator_unexpected_imported
   COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/outputImp
   )
@@ -39,6 +41,7 @@ add_custom_command(OUTPUT outputImp
 # UsesEmulator: The command only succeeds if the emulator is prepended
 #               to the command.
 add_custom_command(OUTPUT output4
+  COMMAND ${CMAKE_COMMAND} -E echo generated_exe_emulator_expected
   COMMAND generated_exe_emulator_expected
   COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/output4
   DEPENDS generated_exe_emulator_expected)

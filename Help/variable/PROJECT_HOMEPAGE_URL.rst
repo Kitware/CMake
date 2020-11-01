@@ -1,6 +1,8 @@
 PROJECT_HOMEPAGE_URL
 --------------------
 
+.. versionadded:: 3.12
+
 The homepage URL of the project.
 
 This is the homepage URL given to the most recently called :command:`project`

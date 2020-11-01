@@ -1,0 +1,2 @@
+libs=Cstd;Crun;m;c
+dirs=/opt/solarisstudio12.4/lib/compilers/sparc;/opt/solarisstudio12.4/lib/compilers;/opt/solarisstudio12.4/lib/sparc;/opt/solarisstudio12.4/lib;/usr/ccs/lib;/lib;/usr/lib

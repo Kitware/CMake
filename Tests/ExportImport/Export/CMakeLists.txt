@@ -156,6 +156,7 @@ target_link_libraries(testLibDepends PRIVATE testStaticLibRequiredPrivate)
 cmake_policy(POP)
 
 cmake_policy(PUSH)
+cmake_policy(SET CMP0022 NEW)
 cmake_policy(SET CMP0079 NEW)
 add_library(TopDirLib STATIC testTopDirLib.c)
 add_subdirectory(SubDirLinkA)
@@ -240,6 +241,10 @@ set_property(TARGET testLibRequired APPEND PROPERTY
 )
 include(GenerateExportHeader)
 
+# Test deprecation of imported library
+add_library(testLibDeprecation STATIC testLib1.c)
+set_property(TARGET testLibDeprecation PROPERTY DEPRECATION "Deprecated version. Please use latest version")
+
 add_subdirectory(renamed)
 
 add_library(testSharedLibRequired SHARED testSharedLibRequired.cpp)
@@ -313,6 +318,8 @@ install(FILES
 )
 cmake_policy(POP)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0041 NEW)
 add_library(testSharedLibDepends SHARED testSharedLibDepends.cpp)
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
   INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
@@ -329,9 +336,10 @@ install(FILES
     DESTINATION include/testSharedLibDepends
 )
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
-  INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/testSharedLibDepends>"
+  INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/$<1:include>/testSharedLibDepends>"
                                 "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
 )
+cmake_policy(POP)
 
 # LINK_PRIVATE because the LINK_INTERFACE_LIBRARIES is specified above.
 target_link_libraries(testSharedLibDepends LINK_PRIVATE testSharedLibRequired)
@@ -512,6 +520,7 @@ install(
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
   testLib6 testLib7 testLib8
   testLib9
+  testLibDeprecation
   testLibCycleA testLibCycleB
   testLibNoSONAME
   cmp0022NEW cmp0022OLD
@@ -582,6 +591,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
 export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe4 testExe2lib
   testLib8
   testLib9 testLib9ObjPub testLib9ObjPriv testLib9ObjIface
+  testLibDeprecation
   testLib4lib testLib4libdbg testLib4libopt
   testLibCycleA testLibCycleB
   testLibNoSONAME
@@ -641,4 +651,36 @@ if(CMAKE_GENERATOR MATCHES "Make|Ninja")
   install(TARGETS testLinkDepends
     EXPORT RequiredExp DESTINATION lib)
   export(TARGETS testLinkDepends NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
+endif()
+
+#------------------------------------------------------------------------------
+# test export of CUDA language
+if(CMake_TEST_CUDA)
+  enable_language(CUDA)
+  add_library(cudaInterfaceLib INTERFACE)
+  target_compile_features(cudaInterfaceLib INTERFACE $<BUILD_INTERFACE:cuda_std_11> $<INSTALL_INTERFACE:cuda_std_14>)
+
+  install(TARGETS cudaInterfaceLib
+    EXPORT RequiredExp DESTINATION lib)
+  export(TARGETS cudaInterfaceLib NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
+endif()
+
+# Test the presence of targets named the same as languages.
+# IMPORTED_LINK_INTERFACE_LANGUAGES entries should not be targets.
+add_library(C INTERFACE)
+add_library(CXX INTERFACE)
+
+#------------------------------------------------------------------------------
+# test export of targets built from sources named using $<CONFIG> generator-expression
+# FIXME: Enable test on Xcode generator when it supports per-config sources.
+if(NOT XCODE)
+  file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/Generated_$<CONFIG>.cpp" CONTENT "// content")
+  add_library(testStaticFromGeneratedSource STATIC)
+  target_sources(testStaticFromGeneratedSource PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Generated_$<CONFIG>.cpp")
+
+  add_library(testLibFromGeneratedSource SHARED empty.cpp)
+  target_link_libraries(testLibFromGeneratedSource PRIVATE testStaticFromGeneratedSource)
+
+  install(TARGETS testLibFromGeneratedSource EXPORT testLibFromGeneratedSource_Export)
+  install(EXPORT testLibFromGeneratedSource_Export DESTINATION lib)
 endif()

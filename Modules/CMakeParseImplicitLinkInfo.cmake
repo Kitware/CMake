@@ -47,6 +47,18 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
       endif()
       separate_arguments(args NATIVE_COMMAND "${line}")
       list(GET args 0 cmd)
+    else()
+      #check to see if the link line is comma-separated instead of space separated
+      string(REGEX REPLACE "," " " line "${line}")
+      if("${line}" MATCHES "${linker_regex}" AND
+        NOT "${line}" MATCHES "${linker_exclude_regex}")
+        separate_arguments(args NATIVE_COMMAND "${line}")
+        list(GET args 0 cmd)
+        if("${cmd}" MATCHES "exec:")
+          # ibm xl sometimes has 'exec: ' in-front of the linker
+          list(GET args 1 cmd)
+        endif()
+      endif()
     endif()
     set(is_msvc 0)
     if("${cmd}" MATCHES "${linker_regex}")

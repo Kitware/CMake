@@ -26,7 +26,7 @@ const char* info_language_dialect_default = "INFO" ":" "dialect_default["
 #elif __cplusplus >= 201103L
   "11"
 #else
-  "98"
+  "03"
 #endif
 "]";
 

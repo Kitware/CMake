@@ -1,6 +1,8 @@
 AUTOMOC_DEPEND_FILTERS
 ----------------------
 
+.. versionadded:: 3.9
+
 Filter definitions used by :prop_tgt:`AUTOMOC` to extract file names from a
 source file that are registered as additional dependencies for the
 ``moc`` file of the source file.
@@ -25,6 +27,9 @@ See :prop_tgt:`AUTOGEN_TARGET_DEPENDS` for reference.
 
 By default :prop_tgt:`AUTOMOC_DEPEND_FILTERS` is initialized from
 :variable:`CMAKE_AUTOMOC_DEPEND_FILTERS`, which is empty by default.
+
+From Qt 5.15.0 on this variable is ignored as moc is able to output the correct
+dependencies.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.

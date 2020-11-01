@@ -15,7 +15,7 @@ if(${FortranCInterface_BINARY_DIR}/Input.cmake
     OR ${CMAKE_CURRENT_LIST_FILE}
     IS_NEWER_THAN ${FortranCInterface_BINARY_DIR}/Output.cmake
     )
-  message(STATUS "Detecting Fortran/C Interface")
+  message(CHECK_START "Detecting Fortran/C Interface")
 else()
   return()
 endif()
@@ -43,17 +43,11 @@ set(FortranCInterface_COMPILED ${FortranCInterface_COMPILED})
 unset(FortranCInterface_COMPILED CACHE)
 
 # Locate the sample project executable.
+set(FortranCInterface_EXE)
 if(FortranCInterface_COMPILED)
-  find_program(FortranCInterface_EXE
-    NAMES FortranCInterface${CMAKE_EXECUTABLE_SUFFIX}
-    PATHS ${FortranCInterface_BINARY_DIR} ${FortranCInterface_BINARY_DIR}/Release
-    NO_DEFAULT_PATH
-    )
-  set(FortranCInterface_EXE ${FortranCInterface_EXE})
-  unset(FortranCInterface_EXE CACHE)
+  include(${FortranCInterface_BINARY_DIR}/exe-Release.cmake OPTIONAL)
 else()
   set(_result "Failed to compile")
-  set(FortranCInterface_EXE)
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Fortran/C interface test project failed with the following output:\n"
     "${FortranCInterface_OUTPUT}\n")
@@ -172,7 +166,9 @@ if(FortranCInterface_GLOBAL_FOUND)
   else()
     set(_result "Found GLOBAL but not MODULE mangling")
   endif()
+  set(_result_type CHECK_PASS)
 elseif(NOT _result)
   set(_result "Failed to recognize symbols")
+  set(_result_type CHECK_FAIL)
 endif()
-message(STATUS "Detecting Fortran/C Interface - ${_result}")
+message(${_result_type} "${_result}")

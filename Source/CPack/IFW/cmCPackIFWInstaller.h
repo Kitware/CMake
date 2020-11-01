@@ -1,15 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCPackIFWInstaller_h
-#define cmCPackIFWInstaller_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-
-#include "cmCPackIFWCommon.h"
 
 #include <map>
 #include <string>
 #include <vector>
+
+#include "cmCPackIFWCommon.h"
 
 class cmCPackIFWPackage;
 class cmCPackIFWRepository;
@@ -22,8 +21,8 @@ class cmCPackIFWInstaller : public cmCPackIFWCommon
 public:
   // Types
 
-  typedef std::map<std::string, cmCPackIFWPackage*> PackagesMap;
-  typedef std::vector<cmCPackIFWRepository*> RepositoriesVector;
+  using PackagesMap = std::map<std::string, cmCPackIFWPackage*>;
+  using RepositoriesVector = std::vector<cmCPackIFWRepository*>;
 
 public:
   // Constructor
@@ -132,5 +131,3 @@ protected:
   void printSkippedOptionWarning(const std::string& optionName,
                                  const std::string& optionValue);
 };
-
-#endif // cmCPackIFWInstaller_h

@@ -1,8 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#ifndef cmStateDirectory_h
-#define cmStateDirectory_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -12,8 +11,10 @@
 #include "cmAlgorithms.h"
 #include "cmLinkedTree.h"
 #include "cmListFileCache.h"
+#include "cmProperty.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 
 class cmStateDirectory
 {
@@ -83,10 +84,10 @@ public:
 
   void SetProperty(const std::string& prop, const char* value,
                    cmListFileBacktrace const& lfbt);
-  void AppendProperty(const std::string& prop, const char* value,
+  void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString, cmListFileBacktrace const& lfbt);
-  const char* GetProperty(const std::string& prop) const;
-  const char* GetProperty(const std::string& prop, bool chain) const;
+  cmProp GetProperty(const std::string& prop) const;
+  cmProp GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
 
@@ -102,5 +103,3 @@ private:
   cmStateSnapshot Snapshot_;
   friend class cmStateSnapshot;
 };
-
-#endif

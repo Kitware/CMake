@@ -11,8 +11,11 @@ add_library(Framework ${FRAMEWORK_TYPE}
             flatresource.txt
             deepresource.txt
             some.txt)
+if("${CMAKE_FRAMEWORK}" STREQUAL "")
+  set_target_properties(Framework PROPERTIES
+                        FRAMEWORK TRUE)
+endif()
 set_target_properties(Framework PROPERTIES
-                      FRAMEWORK TRUE
                       PUBLIC_HEADER foo.h
                       RESOURCE "res.txt")
 set_source_files_properties(flatresource.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)

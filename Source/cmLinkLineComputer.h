@@ -1,18 +1,20 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#ifndef cmLinkLineComputer_h
-#define cmLinkLineComputer_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <vector>
 
 #include "cmStateDirectory.h"
 
 class cmComputeLinkInformation;
 class cmGeneratorTarget;
 class cmOutputConverter;
+template <typename T>
+class BT;
 
 class cmLinkLineComputer
 {
@@ -25,6 +27,7 @@ public:
   cmLinkLineComputer& operator=(cmLinkLineComputer const&) = delete;
 
   void SetUseWatcomQuote(bool useWatcomQuote);
+  void SetUseNinjaMulti(bool useNinjaMulti);
   void SetForResponse(bool forResponse);
   void SetRelink(bool relink);
 
@@ -34,17 +37,28 @@ public:
                               std::string const& libPathFlag,
                               std::string const& libPathTerminator);
 
+  void ComputeLinkPath(cmComputeLinkInformation& cli,
+                       std::string const& libPathFlag,
+                       std::string const& libPathTerminator,
+                       std::vector<BT<std::string>>& linkPath);
+
   std::string ComputeFrameworkPath(cmComputeLinkInformation& cli,
                                    std::string const& fwSearchFlag);
 
-  virtual std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
-                                           std::string const& stdLibString);
+  std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
+                                   std::string const& stdLibString);
+
+  virtual void ComputeLinkLibraries(
+    cmComputeLinkInformation& cli, std::string const& stdLibString,
+    std::vector<BT<std::string>>& linkLibraries);
 
   virtual std::string GetLinkerLanguage(cmGeneratorTarget* target,
                                         std::string const& config);
 
 protected:
   std::string ComputeLinkLibs(cmComputeLinkInformation& cli);
+  void ComputeLinkLibs(cmComputeLinkInformation& cli,
+                       std::vector<BT<std::string>>& linkLibraries);
   std::string ComputeRPath(cmComputeLinkInformation& cli);
 
   std::string ConvertToOutputFormat(std::string const& input);
@@ -55,7 +69,6 @@ protected:
 
   bool ForResponse;
   bool UseWatcomQuote;
+  bool UseNinjaMulti;
   bool Relink;
 };
-
-#endif

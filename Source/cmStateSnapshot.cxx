@@ -4,13 +4,14 @@
 #include "cmStateSnapshot.h"
 
 #include <algorithm>
-#include <assert.h>
-#include <iterator>
+#include <cassert>
 #include <string>
 
-#include "cmAlgorithms.h"
+#include <cm/iterator>
+
 #include "cmDefinitions.h"
 #include "cmListFileCache.h"
+#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -52,7 +53,7 @@ void cmStateSnapshot::SetListFile(const std::string& listfile)
   *this->Position->ExecutionListFile = listfile;
 }
 
-std::string cmStateSnapshot::GetExecutionListFile() const
+std::string const& cmStateSnapshot::GetExecutionListFile() const
 {
   return *this->Position->ExecutionListFile;
 }
@@ -66,8 +67,7 @@ bool cmStateSnapshot::IsValid() const
 
 cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectory() const
 {
-  return cmStateSnapshot(this->State,
-                         this->Position->BuildSystemDirectory->DirectoryEnd);
+  return { this->State, this->Position->BuildSystemDirectory->DirectoryEnd };
 }
 
 cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectoryParent() const
@@ -126,7 +126,7 @@ cmStateSnapshot cmStateSnapshot::GetCallStackBottom() const
          pos != this->State->SnapshotData.Root()) {
     ++pos;
   }
-  return cmStateSnapshot(this->State, pos);
+  return { this->State, pos };
 }
 
 void cmStateSnapshot::PushPolicy(cmPolicies::PolicyMap const& entry, bool weak)
@@ -148,7 +148,7 @@ bool cmStateSnapshot::PopPolicy()
 
 bool cmStateSnapshot::CanPopPolicyScope()
 {
-  return this->Position->Policies == this->Position->PolicyScope;
+  return this->Position->Policies != this->Position->PolicyScope;
 }
 
 void cmStateSnapshot::SetPolicy(cmPolicies::PolicyID id,
@@ -222,19 +222,14 @@ bool cmStateSnapshot::IsInitialized(std::string const& name) const
 }
 
 void cmStateSnapshot::SetDefinition(std::string const& name,
-                                    std::string const& value)
+                                    cm::string_view value)
 {
-  this->Position->Vars->Set(name, value.c_str());
+  this->Position->Vars->Set(name, value);
 }
 
 void cmStateSnapshot::RemoveDefinition(std::string const& name)
 {
-  this->Position->Vars->Set(name, nullptr);
-}
-
-std::vector<std::string> cmStateSnapshot::UnusedKeys() const
-{
-  return this->Position->Vars->UnusedKeys();
+  this->Position->Vars->Unset(name);
 }
 
 std::vector<std::string> cmStateSnapshot::ClosureKeys() const
@@ -264,7 +259,11 @@ bool cmStateSnapshot::RaiseScope(std::string const& var, const char* varDef)
   cmDefinitions::Raise(var, this->Position->Vars, this->Position->Root);
 
   // Now update the definition in the parent scope.
-  this->Position->Parent->Set(var, varDef);
+  if (varDef) {
+    this->Position->Parent->Set(var, varDef);
+  } else {
+    this->Position->Parent->Unset(var);
+  }
   return true;
 }
 
@@ -273,22 +272,18 @@ void InitializeContentFromParent(T& parentContent, T& thisContent,
                                  U& parentBacktraces, U& thisBacktraces,
                                  V& contentEndPosition)
 {
-  std::vector<std::string>::const_iterator parentBegin = parentContent.begin();
-  std::vector<std::string>::const_iterator parentEnd = parentContent.end();
+  auto parentBegin = parentContent.begin();
+  auto parentEnd = parentContent.end();
 
-  std::vector<std::string>::const_reverse_iterator parentRbegin =
-    cmMakeReverseIterator(parentEnd);
-  std::vector<std::string>::const_reverse_iterator parentRend =
-    parentContent.rend();
+  auto parentRbegin = cm::make_reverse_iterator(parentEnd);
+  auto parentRend = parentContent.rend();
   parentRbegin = std::find(parentRbegin, parentRend, cmPropertySentinal);
-  std::vector<std::string>::const_iterator parentIt = parentRbegin.base();
+  auto parentIt = parentRbegin.base();
 
   thisContent = std::vector<std::string>(parentIt, parentEnd);
 
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-    parentBacktraces.begin() + std::distance(parentBegin, parentIt);
-  std::vector<cmListFileBacktrace>::const_iterator btEnd =
-    parentBacktraces.end();
+  auto btIt = parentBacktraces.begin() + std::distance(parentBegin, parentIt);
+  auto btEnd = parentBacktraces.end();
 
   thisBacktraces = std::vector<cmListFileBacktrace>(btIt, btEnd);
 
@@ -316,15 +311,19 @@ void cmStateSnapshot::SetDefaultDefinitions()
   this->SetDefinition("UNIX", "1");
   this->SetDefinition("CMAKE_HOST_UNIX", "1");
 
+#  if defined(__ANDROID__)
+  this->SetDefinition("CMAKE_HOST_SYSTEM_NAME", "Android");
+#  else
   struct utsname uts_name;
   if (uname(&uts_name) >= 0) {
     this->SetDefinition("CMAKE_HOST_SYSTEM_NAME", uts_name.sysname);
   }
+#  endif
 #endif
 #if defined(__CYGWIN__)
   std::string legacy;
   if (cmSystemTools::GetEnv("CMAKE_LEGACY_CYGWIN_WIN32", legacy) &&
-      cmSystemTools::IsOn(legacy.c_str())) {
+      cmIsOn(legacy)) {
     this->SetDefinition("WIN32", "1");
     this->SetDefinition("CMAKE_HOST_WIN32", "1");
   }
@@ -408,11 +407,11 @@ void cmStateSnapshot::InitializeFromParent()
     this->Position->BuildSystemDirectory->LinkDirectoriesBacktraces,
     this->Position->LinkDirectoriesPosition);
 
-  const char* include_regex =
+  cmProp include_regex =
     parent->BuildSystemDirectory->Properties.GetPropertyValue(
       "INCLUDE_REGULAR_EXPRESSION");
   this->Position->BuildSystemDirectory->Properties.SetProperty(
-    "INCLUDE_REGULAR_EXPRESSION", include_regex);
+    "INCLUDE_REGULAR_EXPRESSION", cmToCStr(include_regex));
 }
 
 cmState* cmStateSnapshot::GetState() const
@@ -422,7 +421,7 @@ cmState* cmStateSnapshot::GetState() const
 
 cmStateDirectory cmStateSnapshot::GetDirectory() const
 {
-  return cmStateDirectory(this->Position->BuildSystemDirectory, *this);
+  return { this->Position->BuildSystemDirectory, *this };
 }
 
 void cmStateSnapshot::SetProjectName(const std::string& name)

@@ -1,0 +1,59 @@
+{
+  "version": {
+    "major": 1,
+    "minor": 0
+  },
+  "local": [
+    {
+      "widgets": [
+        {
+          "id": "0",
+          "slots": 4
+        },
+        {
+          "id": "1",
+          "slots": 2
+        },
+        {
+          "id": "2",
+          "slots": 4
+        },
+        {
+          "id": "3",
+          "slots": 8
+        },
+        {
+          "id": "4",
+          "slots": 1
+        },
+        {
+          "id": "5",
+          "slots": 1
+        },
+        {
+          "id": "6",
+          "slots": 1
+        },
+        {
+          "id": "7"
+        }
+      ],
+      "transmogrifiers": [
+        {
+          "id": "calvin",
+          "slots": 2
+        },
+        {
+          "id": "hobbes",
+          "slots": 2
+        }
+      ],
+      "fluxcapacitors": [
+        {
+          "id": "outatime",
+          "slots": 121
+        }
+      ]
+    }
+  ]
+}

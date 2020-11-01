@@ -1,0 +1,15 @@
+{
+    "source": "^alias$",
+    "build": "^alias$",
+    "parentSource": "^\\.$",
+    "childSources": null,
+    "targetIds": [
+        "^ALL_BUILD::@53632cba2752272bb008$",
+        "^ZERO_CHECK::@53632cba2752272bb008$",
+        "^c_alias_exe::@53632cba2752272bb008$",
+        "^cxx_alias_exe::@53632cba2752272bb008$"
+    ],
+    "projectName": "Alias",
+    "minimumCMakeVersion": "3.12",
+    "hasInstallRule": null
+}

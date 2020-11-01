@@ -17,6 +17,17 @@ set(CMAKE_SYSTEM_AND_RC_COMPILER_INFO_FILE
   ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}.cmake)
 include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
 
+# This should be included before the _INIT variables are
+# used to initialize the cache.  Since the rule variables
+# have if blocks on them, users can still define them here.
+# But, it should still be after the platform file so changes can
+# be made to those values.
+if(CMAKE_USER_MAKE_RULES_OVERRIDE)
+  # Save the full path of the file so try_compile can use it.
+  include(${CMAKE_USER_MAKE_RULES_OVERRIDE} RESULT_VARIABLE _override)
+  set(CMAKE_USER_MAKE_RULES_OVERRIDE "${_override}")
+endif()
+
 set(CMAKE_RC_FLAGS_INIT "$ENV{RCFLAGS} ${CMAKE_RC_FLAGS_INIT}")
 
 cmake_initialize_per_config_variable(CMAKE_RC_FLAGS "Flags for Windows Resource Compiler")
@@ -28,7 +39,7 @@ set(CMAKE_RC_FLAG_REGEX "^[-/](D|I)")
 
 # now define the following rule variables
 # CMAKE_RC_COMPILE_OBJECT
-set(CMAKE_INCLUDE_FLAG_RC "-I")
+set(CMAKE_INCLUDE_FLAG_RC "-I ")
 # compile a Resource file into an object file
 if(NOT CMAKE_RC_COMPILE_OBJECT)
   set(CMAKE_RC_COMPILE_OBJECT

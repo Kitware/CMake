@@ -1,0 +1,7 @@
+^CMake Error at .+/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
+  Could NOT find CustomMessage \(missing: FOOBAR\) \(found suitable version
+  "1\.2\.3\.4", minimum required is "1\.2"\)
+
+      Reason given by package: Reason Failure
+
+Call Stack \(most recent call first\):

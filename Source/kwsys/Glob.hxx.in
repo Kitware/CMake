@@ -28,6 +28,7 @@ public:
   enum MessageType
   {
     error,
+    warning,
     cyclicRecursion
   };
 
@@ -54,7 +55,7 @@ public:
   ~Glob();
 
   //! Find all files that match the pattern.
-  bool FindFiles(const std::string& inexpr, GlobMessages* messages = 0);
+  bool FindFiles(const std::string& inexpr, GlobMessages* messages = nullptr);
 
   //! Return the list of files that matched.
   std::vector<std::string>& GetFiles();
@@ -125,8 +126,8 @@ protected:
   bool RecurseListDirs;
 
 private:
-  Glob(const Glob&);           // Not implemented.
-  void operator=(const Glob&); // Not implemented.
+  Glob(const Glob&) = delete;
+  void operator=(const Glob&) = delete;
 };
 
 } // namespace @KWSYS_NAMESPACE@

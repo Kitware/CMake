@@ -1,0 +1,8 @@
+initial-cache.txt: CMAKE_SOURCE_DIR: .*/C_buildsrcdir/src
+initial-cache.txt: CMAKE_BINARY_DIR: .*/ExplicitDirs-build/DummyBuildDir
+PreLoad.cmake: CMAKE_SOURCE_DIR: .*/C_buildsrcdir/src
+PreLoad.cmake: CMAKE_BINARY_DIR: .*/ExplicitDirs-build/DummyBuildDir
+CMakeLists.txt: INITIAL_SOURCE_DIR: .*/C_buildsrcdir/src
+CMakeLists.txt: INITIAL_BINARY_DIR: .*/ExplicitDirs-build/DummyBuildDir
+CMakeLists.txt: PRELOAD_SOURCE_DIR: .*/C_buildsrcdir/src
+CMakeLists.txt: PRELOAD_BINARY_DIR: .*/ExplicitDirs-build/DummyBuildDir

@@ -53,6 +53,20 @@ macro(_cmake_find_compiler lang)
       NO_DEFAULT_PATH
       DOC "${lang} compiler")
   endif()
+  if(CMAKE_HOST_WIN32 AND CMAKE_GENERATOR MATCHES "Ninja")
+    # On Windows command-line builds, the Makefile generators each imply
+    # a preferred compiler tool.  The Ninja generator does not imply a
+    # compiler tool, so use the compiler that occurs first in PATH.
+    find_program(CMAKE_${lang}_COMPILER
+      NAMES ${CMAKE_${lang}_COMPILER_LIST}
+      NAMES_PER_DIR
+      DOC "${lang} compiler"
+      NO_PACKAGE_ROOT_PATH
+      NO_CMAKE_PATH
+      NO_CMAKE_ENVIRONMENT_PATH
+      NO_CMAKE_SYSTEM_PATH
+      )
+  endif()
   find_program(CMAKE_${lang}_COMPILER NAMES ${CMAKE_${lang}_COMPILER_LIST} DOC "${lang} compiler")
   if(CMAKE_${lang}_COMPILER_INIT AND NOT CMAKE_${lang}_COMPILER)
     set_property(CACHE CMAKE_${lang}_COMPILER PROPERTY VALUE "${CMAKE_${lang}_COMPILER_INIT}")
@@ -93,16 +107,14 @@ macro(_cmake_find_compiler_path lang)
   if(CMAKE_${lang}_COMPILER)
     # we only get here if CMAKE_${lang}_COMPILER was specified using -D or a pre-made CMakeCache.txt
     # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
-    # if CMAKE_${lang}_COMPILER is a list of length 2, use the first item as
-    # CMAKE_${lang}_COMPILER and the 2nd one as CMAKE_${lang}_COMPILER_ARG1
-    list(LENGTH CMAKE_${lang}_COMPILER _CMAKE_${lang}_COMPILER_LIST_LENGTH)
-    if("${_CMAKE_${lang}_COMPILER_LIST_LENGTH}" EQUAL 2)
-      list(GET CMAKE_${lang}_COMPILER 1 CMAKE_${lang}_COMPILER_ARG1)
-      list(GET CMAKE_${lang}_COMPILER 0 CMAKE_${lang}_COMPILER)
-    endif()
-    unset(_CMAKE_${lang}_COMPILER_LIST_LENGTH)
+    # if CMAKE_${lang}_COMPILER is a list, use the first item as
+    # CMAKE_${lang}_COMPILER and the rest as CMAKE_${lang}_COMPILER_ARG1
+    set(CMAKE_${lang}_COMPILER_ARG1 "${CMAKE_${lang}_COMPILER}")
+    list(POP_FRONT CMAKE_${lang}_COMPILER_ARG1 CMAKE_${lang}_COMPILER)
+    list(JOIN CMAKE_${lang}_COMPILER_ARG1 " " CMAKE_${lang}_COMPILER_ARG1)
 
     # find the compiler in the PATH if necessary
+    # if compiler (and arguments) comes from cache then synchronize cache with updated CMAKE_<LANG>_COMPILER
     get_filename_component(_CMAKE_USER_${lang}_COMPILER_PATH "${CMAKE_${lang}_COMPILER}" PATH)
     if(NOT _CMAKE_USER_${lang}_COMPILER_PATH)
       find_program(CMAKE_${lang}_COMPILER_WITH_PATH NAMES ${CMAKE_${lang}_COMPILER})
@@ -115,6 +127,30 @@ macro(_cmake_find_compiler_path lang)
         unset(_CMAKE_${lang}_COMPILER_CACHED)
       endif()
       unset(CMAKE_${lang}_COMPILER_WITH_PATH CACHE)
+    elseif (EXISTS ${CMAKE_${lang}_COMPILER})
+      get_property(_CMAKE_${lang}_COMPILER_CACHED CACHE CMAKE_${lang}_COMPILER PROPERTY TYPE)
+      if(_CMAKE_${lang}_COMPILER_CACHED)
+        set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER}" CACHE STRING "${lang} compiler" FORCE)
+      endif()
+      unset(_CMAKE_${lang}_COMPILER_CACHED)
     endif()
   endif()
 endmacro()
+
+function(_cmake_find_compiler_sysroot lang)
+  if(CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
+    execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" -print-sysroot
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      OUTPUT_VARIABLE _cmake_sysroot_run_out
+      ERROR_VARIABLE _cmake_sysroot_run_err)
+
+    if(_cmake_sysroot_run_out AND NOT _cmake_sysroot_run_err
+        AND NOT _cmake_sysroot_run_out STREQUAL "/"
+        AND IS_DIRECTORY "${_cmake_sysroot_run_out}/usr")
+      file(TO_CMAKE_PATH "${_cmake_sysroot_run_out}/usr" _cmake_sysroot_run_out_usr)
+      set(CMAKE_${lang}_COMPILER_SYSROOT "${_cmake_sysroot_run_out_usr}" PARENT_SCOPE)
+    else()
+      set(CMAKE_${lang}_COMPILER_SYSROOT "" PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()

@@ -1,7 +1,8 @@
 
+#include <string>
+
 #include <a_qt.hpp>
 #include <b_qt.hpp>
-#include <string>
 
 int main()
 {

@@ -2,14 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestStartCommand.h"
 
+#include <cstddef>
+#include <sstream>
+
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmSystemTools.h"
-
-#include <sstream>
-#include <stddef.h>
 
 class cmExecutionStatus;
 
@@ -29,18 +30,20 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   size_t cnt = 0;
   const char* smodel = nullptr;
-  const char* src_dir = nullptr;
-  const char* bld_dir = nullptr;
+  const std::string* src_dir = nullptr;
+  const std::string* bld_dir = nullptr;
 
   while (cnt < args.size()) {
-    if (args[cnt] == "TRACK") {
+    if (args[cnt] == "GROUP" || args[cnt] == "TRACK") {
       cnt++;
       if (cnt >= args.size() || args[cnt] == "APPEND" ||
           args[cnt] == "QUIET") {
-        this->SetError("TRACK argument missing track name");
+        std::ostringstream e;
+        e << args[cnt - 1] << " argument missing group name";
+        this->SetError(e.str());
         return false;
       }
-      this->CTest->SetSpecificTrack(args[cnt].c_str());
+      this->CTest->SetSpecificGroup(args[cnt].c_str());
       cnt++;
     } else if (args[cnt] == "APPEND") {
       cnt++;
@@ -52,10 +55,10 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
       smodel = args[cnt].c_str();
       cnt++;
     } else if (!src_dir) {
-      src_dir = args[cnt].c_str();
+      src_dir = &args[cnt];
       cnt++;
     } else if (!bld_dir) {
-      bld_dir = args[cnt].c_str();
+      bld_dir = &args[cnt];
       cnt++;
     } else {
       this->SetError("Too many arguments");
@@ -85,38 +88,37 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
-  cmSystemTools::AddKeepPath(src_dir);
-  cmSystemTools::AddKeepPath(bld_dir);
+  cmSystemTools::AddKeepPath(*src_dir);
+  cmSystemTools::AddKeepPath(*bld_dir);
 
   this->CTest->EmptyCTestConfiguration();
 
-  std::string sourceDir = cmSystemTools::CollapseFullPath(src_dir);
-  std::string binaryDir = cmSystemTools::CollapseFullPath(bld_dir);
-  this->CTest->SetCTestConfiguration("SourceDirectory", sourceDir.c_str(),
+  std::string sourceDir = cmSystemTools::CollapseFullPath(*src_dir);
+  std::string binaryDir = cmSystemTools::CollapseFullPath(*bld_dir);
+  this->CTest->SetCTestConfiguration("SourceDirectory", sourceDir,
                                      this->Quiet);
-  this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir.c_str(),
-                                     this->Quiet);
+  this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir, this->Quiet);
 
   if (smodel) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "Run dashboard with model "
                          << smodel << std::endl
-                         << "   Source directory: " << src_dir << std::endl
-                         << "   Build directory: " << bld_dir << std::endl,
+                         << "   Source directory: " << *src_dir << std::endl
+                         << "   Build directory: " << *bld_dir << std::endl,
                        this->Quiet);
   } else {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "Run dashboard with "
                        "to-be-determined model"
                          << std::endl
-                         << "   Source directory: " << src_dir << std::endl
-                         << "   Build directory: " << bld_dir << std::endl,
+                         << "   Source directory: " << *src_dir << std::endl
+                         << "   Build directory: " << *bld_dir << std::endl,
                        this->Quiet);
   }
-  const char* track = this->CTest->GetSpecificTrack();
-  if (track) {
+  const char* group = this->CTest->GetSpecificGroup();
+  if (group) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Track: " << track << std::endl, this->Quiet);
+                       "   Group: " << group << std::endl, this->Quiet);
   }
 
   // Log startup actions.
@@ -160,7 +162,7 @@ bool cmCTestStartCommand::InitialCheckout(std::ostream& ofs,
                                           std::string const& sourceDir)
 {
   // Use the user-provided command to create the source tree.
-  const char* initialCheckoutCommand =
+  cmProp initialCheckoutCommand =
     this->Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
   if (!initialCheckoutCommand) {
     initialCheckoutCommand =
@@ -170,7 +172,7 @@ bool cmCTestStartCommand::InitialCheckout(std::ostream& ofs,
     // Use a generic VC object to run and log the command.
     cmCTestVC vc(this->CTest, ofs);
     vc.SetSourceDirectory(sourceDir);
-    if (!vc.InitialCheckout(initialCheckoutCommand)) {
+    if (!vc.InitialCheckout(*initialCheckoutCommand)) {
       return false;
     }
   }

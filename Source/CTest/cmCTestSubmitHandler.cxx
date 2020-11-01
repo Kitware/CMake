@@ -2,13 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSubmitHandler.h"
 
-#include "cm_curl.h"
-#include "cm_jsoncpp_reader.h"
-#include "cm_jsoncpp_value.h"
 #include <chrono>
+#include <cstdio>
+#include <cstdlib>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
+
+#include <cmext/algorithm>
+
+#include <cm3p/curl/curl.h>
+#include <cm3p/json/reader.h>
+#include <cm3p/json/value.h>
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
@@ -18,14 +21,16 @@
 #include "cmCurl.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmProperty.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120
 
-typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
+using cmCTestSubmitHandlerVectorOfChar = std::vector<char>;
 
 class cmCTestSubmitHandler::ResponseParser : public cmXMLParser
 {
@@ -63,7 +68,7 @@ private:
 
   void CharacterDataHandler(const char* data, int length) override
   {
-    this->CurrentValue.insert(this->CurrentValue.end(), data, data + length);
+    cm::append(this->CurrentValue, data, data + length);
   }
 
   void EndElement(const std::string& name) override
@@ -93,12 +98,9 @@ static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
                                                       size_t nmemb, void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
-
-  cmCTestSubmitHandlerVectorOfChar* vec =
-    static_cast<cmCTestSubmitHandlerVectorOfChar*>(data);
   const char* chPtr = static_cast<char*>(ptr);
-  vec->insert(vec->end(), chPtr, chPtr + realsize);
-
+  cm::append(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
+             chPtr + realsize);
   return realsize;
 }
 
@@ -107,11 +109,9 @@ static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
                                                     char* chPtr, size_t size,
                                                     void* data)
 {
-  cmCTestSubmitHandlerVectorOfChar* vec =
-    static_cast<cmCTestSubmitHandlerVectorOfChar*>(data);
-  vec->insert(vec->end(), chPtr, chPtr + size);
-
-  return size;
+  cm::append(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
+             chPtr + size);
+  return 0;
 }
 
 cmCTestSubmitHandler::cmCTestSubmitHandler()
@@ -159,8 +159,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArgument(curlopt, args);
+  std::vector<std::string> args = cmExpandedList(curlopt);
   bool verifyPeerOff = false;
   bool verifyHostOff = false;
   for (std::string const& arg : args) {
@@ -229,7 +228,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       std::string local_file = file;
       bool initialize_cdash_buildid = false;
       if (!cmSystemTools::FileExists(local_file)) {
-        local_file = localprefix + "/" + file;
+        local_file = cmStrCat(localprefix, "/", file);
         // If this file exists within the local Testing directory we assume
         // that it will be associated with the current build in CDash.
         initialize_cdash_buildid = true;
@@ -241,9 +240,9 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
                      << remote_file << std::endl;
 
       std::string ofile = cmSystemTools::EncodeURL(remote_file);
-      std::string upload_as = url +
-        ((url.find('?') == std::string::npos) ? '?' : '&') +
-        "FileName=" + ofile;
+      std::string upload_as =
+        cmStrCat(url, ((url.find('?') == std::string::npos) ? '?' : '&'),
+                 "FileName=", ofile);
 
       if (initialize_cdash_buildid) {
         // Provide extra arguments to CDash so that it can initialize and
@@ -262,22 +261,12 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
         cmake* cm = ch->GetCMake();
         if (cm) {
-          const char* subproject =
-            cm->GetState()->GetGlobalProperty("SubProject");
+          cmProp subproject = cm->GetState()->GetGlobalProperty("SubProject");
           if (subproject) {
             upload_as += "&subproject=";
-            upload_as += ctest_curl.Escape(subproject);
+            upload_as += ctest_curl.Escape(*subproject);
           }
         }
-      }
-
-      upload_as += "&MD5=";
-
-      if (cmSystemTools::IsOn(this->GetOption("InternalTest"))) {
-        upload_as += "bad_md5sum";
-      } else {
-        upload_as +=
-          cmSystemTools::ComputeFileHash(local_file, cmCryptoHash::AlgoMD5);
       }
 
       // Generate Done.xml right before it is submitted.
@@ -289,6 +278,15 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       //    entire build took to complete.
       if (file == "Done.xml") {
         this->CTest->GenerateDoneFile();
+      }
+
+      upload_as += "&MD5=";
+
+      if (cmIsOn(this->GetOption("InternalTest"))) {
+        upload_as += "bad_md5sum";
+      } else {
+        upload_as +=
+          cmSystemTools::ComputeFileHash(local_file, cmCryptoHash::AlgoMD5);
       }
 
       if (!cmSystemTools::FileExists(local_file)) {
@@ -503,25 +501,25 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   cmCTestCurl curl(this->CTest);
   curl.SetQuiet(this->Quiet);
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
-  std::vector<std::string> args;
-  cmSystemTools::ExpandListArgument(curlopt, args);
+  std::vector<std::string> args = cmExpandedList(curlopt);
   curl.SetCurlOptions(args);
   curl.SetTimeOutSeconds(SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
   curl.SetHttpHeaders(this->HttpHeaders);
   std::string url = this->CTest->GetSubmitURL();
-  std::string fields;
-  std::string::size_type pos = url.find('?');
-  if (pos != std::string::npos) {
-    fields = url.substr(pos + 1);
-    url = url.substr(0, pos);
-  }
   if (!cmHasLiteralPrefix(url, "http://") &&
       !cmHasLiteralPrefix(url, "https://")) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Only http and https are supported for CDASH_UPLOAD\n");
     return -1;
   }
-  bool internalTest = cmSystemTools::IsOn(this->GetOption("InternalTest"));
+
+  std::string fields;
+  std::string::size_type pos = url.find('?');
+  if (pos != std::string::npos) {
+    fields = url.substr(pos + 1);
+    url.erase(pos);
+  }
+  bool internalTest = cmIsOn(this->GetOption("InternalTest"));
 
   // Get RETRY_COUNT and RETRY_DELAY values if they were set.
   std::string retryDelayString = this->GetOption("RetryDelay") == nullptr
@@ -533,8 +531,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   auto retryDelay = std::chrono::seconds(0);
   if (!retryDelayString.empty()) {
     unsigned long retryDelayValue = 0;
-    if (!cmSystemTools::StringToULong(retryDelayString.c_str(),
-                                      &retryDelayValue)) {
+    if (!cmStrToULong(retryDelayString, &retryDelayValue)) {
       cmCTestLog(this->CTest, WARNING,
                  "Invalid value for 'RETRY_DELAY' : " << retryDelayString
                                                       << std::endl);
@@ -544,7 +541,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   }
   unsigned long retryCount = 0;
   if (!retryCountString.empty()) {
-    if (!cmSystemTools::StringToULong(retryCountString.c_str(), &retryCount)) {
+    if (!cmStrToULong(retryCountString, &retryCount)) {
       cmCTestLog(this->CTest, WARNING,
                  "Invalid value for 'RETRY_DELAY' : " << retryCountString
                                                       << std::endl);
@@ -559,11 +556,11 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   // a "&subproject=subprojectname" to the first POST.
   cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
   cmake* cm = ch->GetCMake();
-  const char* subproject = cm->GetState()->GetGlobalProperty("SubProject");
+  cmProp subproject = cm->GetState()->GetGlobalProperty("SubProject");
   // TODO: Encode values for a URL instead of trusting caller.
   std::ostringstream str;
   if (subproject) {
-    str << "subproject=" << curl.Escape(subproject) << "&";
+    str << "subproject=" << curl.Escape(*subproject) << "&";
   }
   auto timeNow =
     std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -574,6 +571,11 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
       << curl.Escape(this->CTest->GetCTestConfiguration("BuildName")) << "&"
       << "site=" << curl.Escape(this->CTest->GetCTestConfiguration("Site"))
       << "&"
+      << "group=" << curl.Escape(this->CTest->GetTestModelString())
+      << "&"
+      // For now, we send both "track" and "group" to CDash in case we're
+      // submitting to an older instance that still expects the prior
+      // terminology.
       << "track=" << curl.Escape(this->CTest->GetTestModelString()) << "&"
       << "starttime=" << timeNow << "&"
       << "endtime=" << timeNow << "&"
@@ -769,8 +771,7 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   if (!this->Files.empty()) {
     // Submit the explicitly selected files:
-    //
-    files.insert(files.end(), this->Files.begin(), this->Files.end());
+    cm::append(files, this->Files);
   }
 
   // Add to the list of files to submit from any selected, existing parts:
@@ -796,7 +797,7 @@ int cmCTestSubmitHandler::ProcessHandler()
         gfile = gfile.substr(glen);
         cmCTestOptionalLog(this->CTest, DEBUG,
                            "Glob file: " << gfile << std::endl, this->Quiet);
-        this->CTest->AddSubmitFile(cmCTest::PartCoverage, gfile.c_str());
+        this->CTest->AddSubmitFile(cmCTest::PartCoverage, gfile);
       }
     } else {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Problem globbing" << std::endl);
@@ -816,8 +817,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     }
 
     // Submit files from this part.
-    std::vector<std::string> const& pfiles = this->CTest->GetSubmitFiles(p);
-    files.insert(files.end(), pfiles.begin(), pfiles.end());
+    cm::append(files, this->CTest->GetSubmitFiles(p));
   }
 
   // Make sure files are unique, but preserve order.
@@ -844,10 +844,10 @@ int cmCTestSubmitHandler::ProcessHandler()
   }
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Submit files\n",
                      this->Quiet);
-  const char* specificTrack = this->CTest->GetSpecificTrack();
-  if (specificTrack) {
+  const char* specificGroup = this->CTest->GetSpecificGroup();
+  if (specificGroup) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Send to track: " << specificTrack << std::endl,
+                       "   Send to group: " << specificGroup << std::endl,
                        this->Quiet);
   }
   this->SetLogFile(&ofs);

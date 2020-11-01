@@ -2,11 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXSourceWriter.h"
 
-#include "cmCPackGenerator.h"
-
-#include "cmUuid.h"
-
 #include <windows.h>
+
+#include "cmCPackGenerator.h"
+#include "cmUuid.h"
 
 cmWIXSourceWriter::cmWIXSourceWriter(cmCPackLog* logger,
                                      std::string const& filename,

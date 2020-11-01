@@ -68,7 +68,7 @@ _cpack_freebsd_fallback_var("CPACK_FREEBSD_PACKAGE_DESCRIPTION"
 # There's really only one homepage for a project, so
 # re-use the Debian setting if it's there.
 _cpack_freebsd_fallback_var("CPACK_FREEBSD_PACKAGE_WWW"
-    "CMAKE_PROJECT_HOMEPAGE_URL"
+    "CPACK_PACKAGE_HOMEPAGE_URL"
     "CPACK_DEBIAN_PACKAGE_HOMEPAGE"
     "_cpack_freebsd_fallback_www"
     )

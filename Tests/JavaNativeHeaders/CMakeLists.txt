@@ -3,6 +3,8 @@ project(helloJavaNativeHeaders Java CXX)
 cmake_minimum_required (VERSION 2.6)
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
+include (CTest)
+
 find_package(Java COMPONENTS Development)
 include (UseJava)
 
@@ -16,3 +18,7 @@ add_jar(hello4 HelloWorld3.java)
 
 add_library(D SHARED D.cpp E.cpp)
 target_link_libraries (D PRIVATE D1-native E1-native)
+
+
+add_test (NAME Java.NativeHeaders
+          COMMAND "${Java_JAVA_EXECUTABLE}" -Djava.library.path=$<TARGET_FILE_DIR:D> -classpath hello4.jar HelloWorld3)

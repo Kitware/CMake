@@ -2,8 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetPipes.h"
 
-#include "cm_uv.h"
-
+#include <cm3p/uv.h>
 #include <fcntl.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -28,7 +27,8 @@ int cmGetPipes(int* fds)
   return 0;
 }
 #else
-#  include <errno.h>
+#  include <cerrno>
+
 #  include <unistd.h>
 
 int cmGetPipes(int* fds)

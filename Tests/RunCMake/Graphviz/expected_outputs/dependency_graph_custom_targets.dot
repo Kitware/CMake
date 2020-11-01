@@ -1,0 +1,56 @@
+digraph "GraphvizTestProject" {
+node [
+  fontsize = "12"
+];
+subgraph clusterLegend {
+  label = "Legend";
+  color = black;
+  edge [ style = invis ];
+  legendNode0 [ label = "Executable", shape = egg ];
+  legendNode1 [ label = "Static Library", shape = octagon ];
+  legendNode2 [ label = "Shared Library", shape = doubleoctagon ];
+  legendNode3 [ label = "Module Library", shape = tripleoctagon ];
+  legendNode4 [ label = "Interface Library", shape = pentagon ];
+  legendNode5 [ label = "Object Library", shape = hexagon ];
+  legendNode6 [ label = "Unknown Library", shape = septagon ];
+  legendNode7 [ label = "Custom Target", shape = box ];
+  legendNode0 -> legendNode1 [ style = solid ];
+  legendNode0 -> legendNode2 [ style = solid ];
+  legendNode0 -> legendNode3;
+  legendNode1 -> legendNode4 [ label = "Interface", style = dashed ];
+  legendNode2 -> legendNode5 [ label = "Private", style = dotted ];
+  legendNode3 -> legendNode6 [ style = solid ];
+  legendNode0 -> legendNode7;
+}
+    "node0" [ label = "CompilerFlags", shape = pentagon ];
+    "node1" [ label = "ConsoleApplication", shape = egg ];
+    "node2" [ label = "CoreLibrary", shape = octagon ];
+    "node2" -> "node0"  // CoreLibrary -> CompilerFlags
+    "node3" [ label = "GoofyLoggingLibrary\n(SeriousLoggingLibrary)\n(TheBestLoggingLibrary)", shape = pentagon ];
+    "node2" -> "node3" [ style = dotted ] // CoreLibrary -> GoofyLoggingLibrary
+    "node4" [ label = "SystemLibrary", shape = octagon ];
+    "node4" -> "node2" [ style = dotted ] // SystemLibrary -> CoreLibrary
+    "node2" -> "node4" [ style = dotted ] // CoreLibrary -> SystemLibrary
+    "node1" -> "node2" [ style = dotted ] // ConsoleApplication -> CoreLibrary
+    "node5" [ label = "CryptoCurrencyMiningLibrary", shape = septagon ];
+    "node1" -> "node5" [ style = dotted ] // ConsoleApplication -> CryptoCurrencyMiningLibrary
+    "node6" [ label = "GenerateManPage", shape = box ];
+    "node1" -> "node6"  // ConsoleApplication -> GenerateManPage
+    "node7" [ label = "GraphicApplication", shape = egg ];
+    "node7" -> "node2" [ style = dotted ] // GraphicApplication -> CoreLibrary
+    "node8" [ label = "GraphicLibrary", shape = doubleoctagon ];
+    "node9" [ label = "\"-lm\"", shape = septagon ];
+    "node8" -> "node9" [ style = dotted ] // GraphicLibrary -> "-lm"
+    "node8" -> "node0"  // GraphicLibrary -> CompilerFlags
+    "node8" -> "node2" [ style = dotted ] // GraphicLibrary -> CoreLibrary
+    "node10" [ label = "GraphicLibraryObjects", shape = hexagon ];
+    "node8" -> "node10" [ style = dotted ] // GraphicLibrary -> GraphicLibraryObjects
+    "node7" -> "node8" [ style = dotted ] // GraphicApplication -> GraphicLibrary
+    "node11" [ label = "GraphicDriverOpenGL", shape = tripleoctagon ];
+    "node11" -> "node0" [ style = dotted ] // GraphicDriverOpenGL -> CompilerFlags
+    "node11" -> "node2" [ style = dotted ] // GraphicDriverOpenGL -> CoreLibrary
+    "node12" [ label = "GraphicDriverVulkan", shape = tripleoctagon ];
+    "node12" -> "node0" [ style = dotted ] // GraphicDriverVulkan -> CompilerFlags
+    "node12" -> "node2" [ style = dotted ] // GraphicDriverVulkan -> CoreLibrary
+    "node13" [ label = "SubDirectoryTarget", shape = egg ];
+}

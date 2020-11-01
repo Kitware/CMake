@@ -1,13 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmDependsC_h
-#define cmDependsC_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmDepends.h"
-
-#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <map>
 #include <queue>
@@ -15,7 +11,11 @@
 #include <string>
 #include <vector>
 
-class cmLocalGenerator;
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmDepends.h"
+
+class cmLocalUnixMakefileGenerator3;
 
 /** \class cmDependsC
  * \brief Dependency scanner for C and C++ object files.
@@ -26,7 +26,7 @@ public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
   cmDependsC();
-  cmDependsC(cmLocalGenerator* lg, const std::string& targetDir,
+  cmDependsC(cmLocalUnixMakefileGenerator3* lg, const std::string& targetDir,
              const std::string& lang, const DependencyMap* validDeps);
 
   /** Virtual destructor to cleanup subclasses properly.  */
@@ -59,7 +59,7 @@ protected:
   // Regex to transform #include lines.
   std::string IncludeRegexTransformString;
   cmsys::RegularExpression IncludeRegexTransform;
-  typedef std::map<std::string, std::string> TransformRulesType;
+  using TransformRulesType = std::map<std::string, std::string>;
   TransformRulesType TransformRules;
   void SetupTransforms();
   void ParseTransform(std::string const& xform);
@@ -84,7 +84,7 @@ protected:
   std::set<std::string> Encountered;
   std::queue<UnscannedEntry> Unscanned;
 
-  std::map<std::string, cmIncludeLines*> FileCache;
+  std::map<std::string, cmIncludeLines> FileCache;
   std::map<std::string, std::string> HeaderLocationCache;
 
   std::string CacheFileName;
@@ -92,5 +92,3 @@ protected:
   void WriteCacheFile() const;
   void ReadCacheFile();
 };
-
-#endif

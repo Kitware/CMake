@@ -4,24 +4,26 @@
 
 #include <sstream>
 
-#include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
+static void AddLinkDir(cmMakefile& mf, std::string const& dir,
+                       std::vector<std::string>& directories);
 
-// cmLinkDirectoriesCommand
-bool cmLinkDirectoriesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmLinkDirectoriesCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status)
 {
   if (args.empty()) {
     return true;
   }
 
-  bool before = this->Makefile->IsOn("CMAKE_LINK_DIRECTORIES_BEFORE");
+  cmMakefile& mf = status.GetMakefile();
+  bool before = mf.IsOn("CMAKE_LINK_DIRECTORIES_BEFORE");
 
   auto i = args.cbegin();
   if ((*i) == "BEFORE") {
@@ -34,16 +36,16 @@ bool cmLinkDirectoriesCommand::InitialPass(
 
   std::vector<std::string> directories;
   for (; i != args.cend(); ++i) {
-    this->AddLinkDir(*i, directories);
+    AddLinkDir(mf, *i, directories);
   }
 
-  this->Makefile->AddLinkDirectory(cmJoin(directories, ";"), before);
+  mf.AddLinkDirectory(cmJoin(directories, ";"), before);
 
   return true;
 }
 
-void cmLinkDirectoriesCommand::AddLinkDir(
-  std::string const& dir, std::vector<std::string>& directories)
+static void AddLinkDir(cmMakefile& mf, std::string const& dir,
+                       std::vector<std::string>& directories)
 {
   std::string unixPath = dir;
   cmSystemTools::ConvertToUnixSlashes(unixPath);
@@ -56,10 +58,10 @@ void cmLinkDirectoriesCommand::AddLinkDir(
       << "  " << unixPath << "\n"
       << "as a link directory.\n";
     /* clang-format on */
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0015)) {
+    switch (mf.GetPolicyStatus(cmPolicies::CMP0015)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0015);
-        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+        mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
         break;
       case cmPolicies::OLD:
         // OLD behavior does not convert
@@ -67,7 +69,7 @@ void cmLinkDirectoriesCommand::AddLinkDir(
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0015);
-        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
         CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior converts
@@ -75,10 +77,7 @@ void cmLinkDirectoriesCommand::AddLinkDir(
         break;
     }
     if (convertToAbsolute) {
-      std::string tmp = this->Makefile->GetCurrentSourceDirectory();
-      tmp += "/";
-      tmp += unixPath;
-      unixPath = tmp;
+      unixPath = cmStrCat(mf.GetCurrentSourceDirectory(), '/', unixPath);
     }
   }
   directories.push_back(unixPath);

@@ -28,7 +28,7 @@ request is accepted" option when creating the MR or by editing it.
 This will cause the MR topic branch to be automatically removed from
 the user's fork during the `Merge`_ step.
 
-.. _`CMake Merge Requests Page`: https://gitlab.kitware.com/cmake/cmake/merge_requests
+.. _`CMake Merge Requests Page`: https://gitlab.kitware.com/cmake/cmake/-/merge_requests
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 
 Workflow Status
@@ -53,10 +53,14 @@ in GitLab to track the state of a MR:
   to a period of inactivity.  See the `Expire`_ step.  Use this label
   after closing a MR for this reason.
 
+* ``workflow:external-discussion`` indicates that the MR has been closed
+  pending discussion elsewhere.  See the `External Discussion`_ step.
+  Use this label after closing a MR for this reason.
+
 The workflow status labels are intended to be mutually exclusive,
 so please remove any existing workflow label when adding one.
 
-.. _`CMake GitLab Project Developers`: https://gitlab.kitware.com/cmake/cmake/settings/members
+.. _`CMake GitLab Project Developers`: https://gitlab.kitware.com/cmake/cmake/-/settings/members
 
 Robot Review
 ============
@@ -256,10 +260,11 @@ This may be generated with
 If the commit is a fix for the mentioned commit, consider using a ``Fixes:``
 trailer in the commit message with the specified format. This trailer should
 not be word-wrapped. Note that if there is also an issue for what is being
-fixed, it is preferrable to link to the issue instead.
+fixed, it is preferable to link to the issue instead.
 
 If relevant, add the first release tag of CMake containing the commit after
 the ``<date>``, i.e., ``commit <shorthash> (<subject>, <date>, <tag>)``.
+Or, use the output of ``git describe --contains <commit>`` as the ``<tag>``.
 
 Alternatively, the full commit ``<hash>`` may be used.
 
@@ -274,42 +279,52 @@ merging.
 Topic Testing
 =============
 
-CMake has a `buildbot`_ instance watching for merge requests to test.
-`CMake GitLab Project Developers`_ may activate buildbot on a MR by
-adding a comment with a command among the `comment trailing lines`_::
+CMake uses `GitLab CI`_ to test merge requests, configured by the top-level
+``.gitlab-ci.yml`` file.  Results may be seen both on the merge request's
+pipeline page and on the `CMake CDash Page`_.  Filtered CDash results
+showing just the pipeline's jobs can be reached by selecting the ``cdash``
+job in the ``External`` stage of the pipeline.
 
-  Do: test
+Lint and documentation build jobs run automatically after every push.
+Heavier jobs require a manual trigger to run:
 
-``@kwrobot`` will add an award emoji to the comment to indicate that it
-was processed and also inform buildbot about the request.  The buildbot
-user (``@buildbot``) will schedule builds and respond with a comment
-linking to the `CMake CDash Page`_ with a filter for results associated
-with the topic test request.  If the MR topic branch is updated by a
-push a new ``Do: test`` command is needed to activate testing again.
+* Merge request authors may visit their merge request's pipeline and click the
+  "Play" button on one or more jobs manually.  If the merge request has the
+  "Allow commits from members who can merge to the target branch" check box
+  enabled, CMake maintainers may use the "Play" button too.
 
-The ``Do: test`` command accepts the following arguments:
+* `CMake GitLab Project Developers`_ may trigger CI on a merge request by
+  adding a comment with a command among the `comment trailing lines`_::
 
-* ``--stop``: clear the list of commands for the merge request
-* ``--clear``: clear previous commands before adding this command
-* ``--regex-include <arg>`` or ``-i <arg>``: only build on builders
-  matching ``<arg>`` (a Python regular expression)
-* ``--regex-exclude <arg>`` or ``-e <arg>``: exclude builds on builders
-  matching ``<arg>`` (a Python regular expression)
+    Do: test
 
-Builder names follow the pattern ``project-host-os-buildtype-generator``:
+  ``@kwrobot`` will add an award emoji to the comment to indicate that it
+  was processed and also trigger all manual jobs in the merge request's
+  pipeline.
 
-* ``project``: always ``cmake`` for CMake builds
-* ``host``: the buildbot host
-* ``os``: one of ``windows``, ``osx``, or ``linux``
-* ``buildtype``: ``release`` or ``debug``
-* ``generator``: ``ninja``, ``makefiles``, ``vs<year>``,
-  or ``lint-iwyu-tidy``
+  The ``Do: test`` command accepts the following arguments:
 
-The special ``lint-<tools>`` generator name is a builder that builds
-CMake using lint tools but does not run the test suite (so the actual
-generator does not matter).
+  * ``--named <regex>``, ``-n <regex>``: Trigger jobs matching ``<regex>``
+    anywhere in their name.  Job names may be seen on the merge request's
+    pipeline page.
+  * ``--stage <stage>``, ``-s <stage>``: Only affect jobs in a given stage.
+    Stage names may be seen on the merge request's pipeline page.  Note that
+    the names are determined by what is in the ``.gitlab-ci.yml`` file and may
+    be capitalized in the web page, so lowercasing the webpage's display name
+    for stages may be required.
+  * ``--action <action>``, ``-a <action>``: The action to perform on the jobs.
+    Possible actions:
 
-.. _`buildbot`: http://buildbot.net
+    * ``manual`` (the default): Start jobs awaiting manual interaction.
+    * ``unsuccessful``: Start or restart jobs which have not completed
+      successfully.
+    * ``failed``: Restart jobs which have completed, but without success.
+    * ``completed``: Restart all completed jobs.
+
+If the merge request topic branch is updated by a push, a new manual trigger
+using one of the above methods is needed to start CI again.
+
+.. _`GitLab CI`: https://gitlab.kitware.com/help/ci/README.md
 .. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
 
 Integration Testing
@@ -377,7 +392,15 @@ command is needed to stage it again.
 Resolve
 =======
 
-A MR may be resolved in one of the following ways.
+The workflow used by the CMake project supports a number of different
+ways in which a MR can be moved to a resolved state.  In addition to
+the conventional practices of merging or closing a MR without merging it,
+a MR can also be moved to a quasi-resolved state pending some action.
+This may involve moving discussion to an issue or it may be the result of
+an extended period of inactivity.  These quasi-resolved states are used
+to help manage the relatively large number of MRs the project receives
+and are not an indication of the changes being rejected.  The following
+sections explain the different resolutions a MR may be given.
 
 Merge
 -----
@@ -421,27 +444,97 @@ Additionally, ``Do: merge`` extracts configuration from trailing lines
 in the MR description (the following have no effect if used in a MR
 comment instead):
 
+* ``Backport: release[:<commit-ish>]``: merge the topic branch into
+  the ``release`` branch to backport the change.  This is allowed
+  only if the topic branch is based on a commit in ``release`` already.
+  If only part of the topic branch should be backported, specify it as
+  ``:<commit-ish>``.  The ``<commit-ish>`` may use `git rev-parse`_
+  syntax to reference commits relative to the topic ``HEAD``.
+  See additional `backport instructions`_ for details.
+  For example:
+
+  ``Backport: release``
+    Merge the topic branch head into both ``release`` and ``master``.
+  ``Backport: release:HEAD~1^2``
+    Merge the topic branch head's parent's second parent commit into
+    the ``release`` branch.  Merge the topic branch head to ``master``.
+
 * ``Topic-rename: <topic>``: substitute ``<topic>`` for the name of
   the MR topic branch in the constructed merge commit message.
   It is also used in merge commits constructed by ``Do: stage``.
   The ``-t`` option to a ``Do: merge`` command overrides any topic
   rename set in the MR description.
 
-.. _`CMake GitLab Project Masters`: https://gitlab.kitware.com/cmake/cmake/settings/members
+.. _`CMake GitLab Project Masters`: https://gitlab.kitware.com/cmake/cmake/-/settings/members
+.. _`backport instructions`: https://gitlab.kitware.com/utils/git-workflow/-/wikis/Backport-topics
+.. _`git rev-parse`: https://git-scm.com/docs/git-rev-parse
 
 Close
 -----
 
 If review has concluded that the MR should not be integrated then it
-may be closed through GitLab.
+may be closed through GitLab.  This would normally be a final state
+with no expectation that the MR would be re-opened in the future.
+It is also used when a MR is being superseded by another separate one,
+in which case a reference to the new MR should be added to the MR being
+closed.
 
 Expire
 ------
 
 If progress on a MR has stalled for a while, it may be closed with a
 ``workflow:expired`` label and a comment indicating that the MR has
-been closed due to inactivity.
+been closed due to inactivity (it may also be done where the MR is blocked
+for an extended period by work in a different MR).  This is not an
+indication that there is a problem with the MR's content, it is only a
+practical measure to allow the reviewers to focus attention on MRs that
+are actively being worked on.  As a guide, the average period of inactivity
+before transitioning a MR to the expired state would be around 2 weeks,
+but this may decrease to 1 week or less when there is a high number of
+open merge requests.
 
-Contributors are welcome to re-open an expired MR when they are ready
-to continue work.  Please re-open *before* pushing an update to the
-MR topic branch to ensure GitLab will still act on the association.
+Reviewers would usually provide a message similar to the following when
+resolving a MR as expired::
+
+  Closing for now. @<MR-author> please re-open when ready to continue work.
+
+This is to make it clear to contributors that they are welcome to re-open
+the expired MR when they are ready to return to working on it and moving
+it forward.  In the meantime, the MR will appear as ``Closed`` in GitLab,
+but it can be differentiated from permanently closed MRs by the presence
+of the ``workflow:expired`` label.
+
+**NOTE:** Please re-open *before* pushing an update to the MR topic branch
+to ensure GitLab will still act on the association.  If changes are pushed
+before re-opening the MR, the reviewer should initiate a ``Do: check`` to
+force GitLab to act on the updates.
+
+External Discussion
+-------------------
+
+In some situations, a series of comments on a MR may develop into a more
+involved discussion, or it may become apparent that there are broader
+discussions that need to take place before the MR can move forward in an
+agreed direction.  Such discussions are better suited to GitLab issues
+rather than in a MR because MRs may be superseded by a different MR, or
+the set of changes may evolve to look quite different to the context in
+which the discussions began.  When this occurs, reviewers may ask the
+MR author to open an issue to discuss things there and they will transition
+the MR to a resolved state with the label ``workflow:external-discussion``.
+The MR will appear in GitLab as closed, but it can be differentiated from
+permanently closed MRs by the presence of the ``workflow:external-discussion``
+label.  Reviewers should leave a message clearly explaining the action
+so that the MR author understands that the MR closure is temporary and
+it is clear what actions need to happen next.  The following is an example
+of such a message, but it will usually be necessary to tailor the message
+to the individual situation::
+
+  The desired behavior here looks to be more involved than first thought.
+  Please open an issue so we can discuss the relevant details there.
+  Once the path forward is clear, we can re-open this MR and continue work.
+
+When the discussion in the associated issue runs its course and the way
+forward is clear, the MR can be re-opened again and the
+``workflow:external-discussion`` label removed.  Reviewers should ensure
+that the issue created contains a reference to the MR so that GitLab
+provides a cross-reference to link the two.

@@ -1,11 +1,13 @@
 // MainFrm.cpp : implementation of the CMainFrame class
 //
 
+// clang-format off
 #include "stdafx.h"
 
 #include "mfc1.h"
 
 #include "MainFrm.h"
+// clang-format on
 
 #ifdef _DEBUG
 #  define new DEBUG_NEW

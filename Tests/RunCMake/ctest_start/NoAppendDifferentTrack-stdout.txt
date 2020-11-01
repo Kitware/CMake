@@ -1,7 +1,7 @@
 Run dashboard with model Experimental
    Source directory: .*/Tests/RunCMake/ctest_start/NoAppendDifferentTrack
    Build directory: .*/Tests/RunCMake/ctest_start/NoAppendDifferentTrack-build
-   Track: ExperimentalDifferent
+   Group: ExperimentalDifferent
    Site: test-site
    Build name: test-build-name
    Use ExperimentalDifferent tag: [0-9-]+

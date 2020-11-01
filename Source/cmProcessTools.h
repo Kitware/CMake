@@ -1,14 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmProcessTools_h
-#define cmProcessTools_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmProcessOutput.h"
 
+#include <cstring>
 #include <iosfwd>
-#include <string.h>
 #include <string>
+
+#include "cmProcessOutput.h"
 
 /** \class cmProcessTools
  * \brief Helper classes for process output parsing
@@ -17,7 +17,7 @@
 class cmProcessTools
 {
 public:
-  typedef cmProcessOutput::Encoding Encoding;
+  using Encoding = cmProcessOutput::Encoding;
   /** Abstract interface for process output parsers.  */
   class OutputParser
   {
@@ -85,5 +85,3 @@ public:
                          OutputParser* err = nullptr,
                          Encoding encoding = cmProcessOutput::Auto);
 };
-
-#endif
