@@ -1,0 +1,4 @@
+^\[1/3\] Building C object CMakeFiles[\/]echo.dir[\/]Debug[\/]echo\.c\.(o|obj)
+\[2/3\] Linking C executable Debug[\/]echo(\.exe)?
+\[3/3\] Generating depend_echo_raw_Debug\.txt
+depend_echo_raw_Debug\.txt$

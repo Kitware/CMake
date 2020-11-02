@@ -242,6 +242,102 @@ run_ninja(CustomCommandsAndTargets release-leaf-exe build-Release.ninja LeafExe)
 run_cmake_build(CustomCommandsAndTargets release-clean Release clean:all)
 run_ninja(CustomCommandsAndTargets release-leaf-byproduct build-Release.ninja main.c)
 
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CustomCommandOutputGenex-build)
+set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release\\;MinSizeRel\\;RelWithDebInfo;-DCMAKE_CROSS_CONFIGS=all")
+run_cmake_configure(CustomCommandOutputGenex)
+set(RunCMake_TEST_NO_CLEAN 1)
+unset(RunCMake_TEST_OPTIONS)
+# echo_raw
+run_ninja(CustomCommandOutputGenex echo_raw-debug build-Debug.ninja echo_raw:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_raw-debug-in-release-graph build-Release.ninja echo_raw:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# echo_genex
+run_ninja(CustomCommandOutputGenex echo_genex-debug build-Debug.ninja echo_genex:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_genex-debug-in-release-graph build-Release.ninja echo_genex:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# echo_genex_out
+run_ninja(CustomCommandOutputGenex echo_genex_out-debug build-Debug.ninja echo_genex_out:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_genex_out-debug-in-release-graph build-Release.ninja echo_genex_out:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# echo_depend*
+run_ninja(CustomCommandOutputGenex echo_depend-debug build-Debug.ninja echo_depend:Debug)
+run_ninja(CustomCommandOutputGenex echo_depend_out-debug build-Debug.ninja echo_depend_out_Debug.txt)
+run_ninja(CustomCommandOutputGenex echo_depend_cmd-debug build-Debug.ninja echo_depend_cmd_Debug.txt)
+run_ninja(CustomCommandOutputGenex echo_depend-debug-in-release-graph build-Release.ninja echo_depend:Debug)
+run_ninja(CustomCommandOutputGenex echo_depend_out-debug-in-release-graph build-Release.ninja echo_depend_out_Debug.txt)
+run_ninja(CustomCommandOutputGenex echo_depend_cmd-debug-in-release-graph build-Release.ninja echo_depend_cmd_Debug.txt)
+# depend_echo_raw
+run_ninja(CustomCommandOutputGenex depend_echo_raw-debug build-Debug.ninja depend_echo_raw:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex depend_echo_raw-debug-in-release-graph build-Release.ninja depend_echo_raw:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# depend_echo_genex
+run_ninja(CustomCommandOutputGenex depend_echo_genex-debug build-Debug.ninja depend_echo_genex:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex depend_echo_genex-debug-in-release-graph build-Release.ninja depend_echo_genex:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# depend_echo_genex_out
+run_ninja(CustomCommandOutputGenex depend_echo_genex_out-debug build-Debug.ninja depend_echo_genex_out:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex depend_echo_genex_out-debug-in-release-graph build-Release.ninja depend_echo_genex_out:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# depend_echo_genex_cmd
+run_ninja(CustomCommandOutputGenex depend_echo_genex_cmd-debug build-Debug.ninja depend_echo_genex_cmd:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex depend_echo_genex_cmd-debug-in-release-graph build-Release.ninja depend_echo_genex_cmd:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# no_cross_output
+run_ninja(CustomCommandOutputGenex echo_no_cross_output-debug build-Debug.ninja echo_no_cross_output:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_no_cross_output-debug-in-release-graph build-Release.ninja echo_no_cross_output:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# no_cross_output_if
+run_ninja(CustomCommandOutputGenex echo_no_cross_output_if-debug build-Debug.ninja echo_no_cross_output_if:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_no_cross_output_if-debug-in-release-graph build-Release.ninja echo_no_cross_output_if:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# no_cross_byproduct
+run_ninja(CustomCommandOutputGenex echo_no_cross_byproduct-debug build-Debug.ninja echo_no_cross_byproduct:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_no_cross_byproduct-debug-in-release-graph build-Release.ninja echo_no_cross_byproduct:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# no_cross_byproduct_if
+run_ninja(CustomCommandOutputGenex echo_no_cross_byproduct_if-debug build-Debug.ninja echo_no_cross_byproduct_if:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_no_cross_byproduct_if-debug-in-release-graph build-Release.ninja echo_no_cross_byproduct_if:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# echo_target_raw
+run_ninja(CustomCommandOutputGenex echo_target_raw-debug build-Debug.ninja echo_target_raw:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_target_raw-debug-in-release-graph build-Release.ninja echo_target_raw:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# echo_target_genex
+run_ninja(CustomCommandOutputGenex echo_target_genex-debug build-Debug.ninja echo_target_genex:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_target_genex-debug-in-release-graph build-Release.ninja echo_target_genex:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# echo_target_genex_out
+run_ninja(CustomCommandOutputGenex echo_target_genex_out-debug build-Debug.ninja echo_target_genex_out:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_target_genex_out-debug-in-release-graph build-Release.ninja echo_target_genex_out:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# echo_target_depend*
+run_ninja(CustomCommandOutputGenex echo_target_depend-debug build-Debug.ninja echo_target_depend:Debug)
+run_ninja(CustomCommandOutputGenex echo_target_depend_out-debug build-Debug.ninja echo_target_depend_out:Debug)
+run_ninja(CustomCommandOutputGenex echo_target_depend_cmd-debug build-Debug.ninja CMakeFiles/echo_target_depend_cmd-Debug) # undocumented
+run_ninja(CustomCommandOutputGenex echo_target_depend-debug-in-release-graph build-Release.ninja echo_target_depend:Debug)
+run_ninja(CustomCommandOutputGenex echo_target_depend_out-debug-in-release-graph build-Release.ninja echo_target_depend_out:Debug)
+run_ninja(CustomCommandOutputGenex echo_target_depend_cmd-debug-in-release-graph build-Release.ninja CMakeFiles/echo_target_depend_cmd-Debug) # undocumented
+# target_no_cross_*
+run_ninja(CustomCommandOutputGenex target_no_cross_byproduct-debug build-Debug.ninja target_no_cross_byproduct:Debug)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex target_no_cross_byproduct-debug-in-release-graph build-Release.ninja target_no_cross_byproduct:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+unset(RunCMake_TEST_NO_CLEAN)
+
 unset(RunCMake_TEST_BINARY_DIR)
 
 run_cmake(CustomCommandDepfile)
