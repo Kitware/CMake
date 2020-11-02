@@ -664,10 +664,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     cmLocalGenerator::SHELL);
 
   std::string launcher;
-  const char* val = this->GetLocalGenerator()->GetRuleLauncher(
+  cmProp val = this->GetLocalGenerator()->GetRuleLauncher(
     this->GetGeneratorTarget(), "RULE_LAUNCH_COMPILE");
   if (cmNonempty(val)) {
-    launcher = cmStrCat(val, ' ');
+    launcher = cmStrCat(*val, ' ');
   }
 
   std::string const cmakeCmd =

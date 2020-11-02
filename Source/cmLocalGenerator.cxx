@@ -823,16 +823,13 @@ cmStateSnapshot cmLocalGenerator::GetStateSnapshot() const
   return this->Makefile->GetStateSnapshot();
 }
 
-const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
-                                              const std::string& prop)
+cmProp cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
+                                         const std::string& prop)
 {
-  cmProp p;
   if (target) {
-    p = target->GetProperty(prop);
-  } else {
-    p = this->Makefile->GetProperty(prop);
+    return target->GetProperty(prop);
   }
-  return p ? p->c_str() : nullptr;
+  return this->Makefile->GetProperty(prop);
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(
