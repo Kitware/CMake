@@ -943,10 +943,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
     std::string launcher;
     {
-      const char* val = this->LocalGenerator->GetRuleLauncher(
+      cmProp val = this->LocalGenerator->GetRuleLauncher(
         this->GeneratorTarget, "RULE_LAUNCH_COMPILE");
       if (cmNonempty(val)) {
-        launcher = cmStrCat(val, ' ');
+        launcher = cmStrCat(*val, ' ');
       }
     }
 
