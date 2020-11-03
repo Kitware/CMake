@@ -31,7 +31,7 @@ Imported targets::
   ICU::<C>
 
 Where ``<C>`` is the name of an ICU component, for example
-``ICU::i18n``.
+``ICU::i18n``; ``<C>`` is lower-case.
 
 ICU programs are reported in::
 
@@ -54,15 +54,13 @@ ICU programs are reported in::
 
 ICU component libraries are reported in::
 
-  ICU_<C>_FOUND - ON if component was found
-  ICU_<C>_LIBRARIES - libraries for component
+  ICU_<C>_FOUND - ON if component was found; ``<C>`` is upper-case.
+  ICU_<C>_LIBRARIES - libraries for component; ``<C>`` is upper-case.
 
 ICU datafiles are reported in::
 
   ICU_MAKEFILE_INC - Makefile.inc
   ICU_PKGDATA_INC - pkgdata.inc
-
-Note that ``<C>`` is the uppercased name of the component.
 
 This module reads hints about search results from::
 
@@ -73,9 +71,9 @@ ICU_ROOT variable takes precedence.
 
 The following cache variables may also be set::
 
-  ICU_<P>_EXECUTABLE - the path to executable <P>
+  ICU_<P>_EXECUTABLE - the path to executable <P>; ``<P>`` is upper-case.
   ICU_INCLUDE_DIR - the directory containing the ICU headers
-  ICU_<C>_LIBRARY - the library for component <C>
+  ICU_<C>_LIBRARY - the library for component <C>; ``<C>`` is upper-case.
 
 .. note::
 
