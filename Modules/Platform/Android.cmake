@@ -1,3 +1,9 @@
+# Include the NDK hook.
+# It can be used by NDK to inject necessary fixes for an earlier cmake.
+if(CMAKE_ANDROID_NDK)
+  include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/pre/Android.cmake OPTIONAL)
+endif()
+
 include(Platform/Linux)
 
 set(ANDROID 1)
@@ -95,4 +101,10 @@ if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
     "${_ANDROID_SYSROOT_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}")
 
   list(APPEND CMAKE_SYSTEM_PROGRAM_PATH "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/bin")
+endif()
+
+# Include the NDK hook.
+# It can be used by NDK to inject necessary fixes for an earlier cmake.
+if(CMAKE_ANDROID_NDK)
+  include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/post/Android.cmake OPTIONAL)
 endif()
