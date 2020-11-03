@@ -164,7 +164,8 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   endif()
 
   set(_variant "")
-  if("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang")
+  if("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang"
+    OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xIntelLLVM")
     if("x${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "xMSVC")
       if(CMAKE_GENERATOR MATCHES "Visual Studio")
         set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "MSVC")

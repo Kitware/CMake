@@ -58,7 +58,7 @@ else()
 
     # finally list compilers to try
     if(NOT CMAKE_CXX_COMPILER_INIT)
-      set(CMAKE_CXX_COMPILER_LIST CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC clang++)
+      set(CMAKE_CXX_COMPILER_LIST CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC icpx icx clang++)
     endif()
 
     _cmake_find_compiler(CXX)
@@ -131,7 +131,8 @@ else()
     # variable but are not aware of CMAKE_CXX_COMPILER_FRONTEND_VARIANT.
     # They pre-date our support for the GNU-like variant targeting the
     # MSVC ABI so we do not consider that here.
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
+      OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xIntelLLVM")
       if("x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
         set(CMAKE_CXX_COMPILER_FRONTEND_VARIANT "MSVC")
       else()
