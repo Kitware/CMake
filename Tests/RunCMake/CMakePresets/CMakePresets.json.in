@@ -170,6 +170,11 @@
       "binaryDir": "${sourceDir}/build"
     },
     {
+      "name": "GoodNoSourceArg",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
       "name": "GoodInheritanceParentBase",
       "hidden": true,
       "generator": "@RunCMake_GENERATOR@",

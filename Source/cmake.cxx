@@ -1005,9 +1005,15 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 
   const bool haveSourceDir = !this->GetHomeDirectory().empty();
   const bool haveBinaryDir = !this->GetHomeOutputDirectory().empty();
+  const bool havePreset =
+#ifdef CMAKE_BOOTSTRAP
+    false;
+#else
+    !presetName.empty();
+#endif
 
   if (this->CurrentWorkingMode == cmake::NORMAL_MODE && !haveSourceDir &&
-      !haveBinaryDir) {
+      !haveBinaryDir && !havePreset) {
     this->IssueMessage(
       MessageType::WARNING,
       "No source or binary directory provided. Both will be assumed to be "
