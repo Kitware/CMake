@@ -732,6 +732,8 @@ if(CMAKE_CROSSCOMPILING)
     # Support for aarch64 cross compilation
     if (ANDROID_ARCH_NAME STREQUAL "arm64")
       set(CUDA_TOOLKIT_TARGET_NAME "aarch64-linux-androideabi")
+    elseif (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+      set(CUDA_TOOLKIT_TARGET_NAME "aarch64-qnx")
     else()
       set(CUDA_TOOLKIT_TARGET_NAME "aarch64-linux")
     endif (ANDROID_ARCH_NAME STREQUAL "arm64")
@@ -902,7 +904,7 @@ if(CUDA_USE_STATIC_CUDA_RUNTIME)
     find_package(Threads REQUIRED)
     set(CMAKE_C_FLAGS ${_cuda_cmake_c_flags})
 
-    if(NOT APPLE)
+    if(NOT APPLE AND NOT (CMAKE_SYSTEM_NAME STREQUAL "QNX"))
       #On Linux, you must link against librt when using the static cuda runtime.
       find_library(CUDA_rt_LIBRARY rt)
       if (NOT CUDA_rt_LIBRARY)
