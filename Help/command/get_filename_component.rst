@@ -56,6 +56,6 @@ separate a program name from its arguments in a command line string.
 
 .. note::
 
-  This command been superseded by :command:`cmake_path` command, except
-  ``REALPATH`` now offered by :ref:`file(REAL_PATH) <REAL_PATH>` command and
-  ``PROGRAM`` now available in :command:`separate_arguments(PROGRAM)` command.
+  The ``REALPATH`` and ``PROGRAM`` subcommands had been superseded,
+  respectively, by :ref:`file(REAL_PATH) <REAL_PATH>` and
+  :command:`separate_arguments(PROGRAM)` commands.
