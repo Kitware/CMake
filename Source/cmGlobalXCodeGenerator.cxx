@@ -3557,6 +3557,8 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       for (auto& libDir : linkSearchPaths) {
         libSearchPaths.Add(this->XCodeEscapePath(libDir));
       }
+      // Add paths defined in project-wide build settings
+      libSearchPaths.Add("$(inherited)");
       this->AppendBuildSettingAttribute(target, "LIBRARY_SEARCH_PATHS",
                                         libSearchPaths.CreateList(),
                                         configName);
@@ -3570,6 +3572,8 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       for (auto& fwDir : frameworkSearchPaths) {
         fwSearchPaths.Add(this->XCodeEscapePath(fwDir));
       }
+      // Add paths defined in project-wide build settings
+      fwSearchPaths.Add("$(inherited)");
       this->AppendBuildSettingAttribute(target, "FRAMEWORK_SEARCH_PATHS",
                                         fwSearchPaths.CreateList(),
                                         configName);
