@@ -337,6 +337,9 @@ function (_PYTHON_GET_NAMES _PYTHON_PGN_NAMES)
 
   foreach (implementation IN LISTS _PGN_IMPLEMENTATIONS)
     if (implementation STREQUAL "CPython")
+      if (_PGN_INTERPRETER AND _${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES STREQUAL "FIRST")
+        list (APPEND names python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} python)
+      endif()
       foreach (version IN LISTS _PGN_VERSION)
         if (_PGN_WIN32)
           string (REPLACE "." "" version_no_dots ${version})
@@ -386,7 +389,7 @@ function (_PYTHON_GET_NAMES _PYTHON_PGN_NAMES)
           endif()
         endif()
       endforeach()
-      if (_PGN_INTERPRETER)
+      if (_PGN_INTERPRETER AND _${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES STREQUAL "LAST")
         list (APPEND names python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} python)
       endif()
     elseif (implementation STREQUAL "IronPython")
@@ -1364,9 +1367,22 @@ else()
 endif()
 
 
+# Python naming handling
+if (DEFINED ${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES)
+  if (NOT ${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES MATCHES "^(FIRST|LAST|NEVER)$")
+    message (AUTHOR_WARNING "Find${_PYTHON_PREFIX}: ${_${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES}: invalid value for '${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES'. 'FIRST', 'LAST' or 'NEVER' expected. 'LAST' will be used instead.")
+    set (_${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES LAST)
+  else()
+    set (_${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES ${${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES})
+  endif()
+else()
+  set (_${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES LAST)
+endif()
+
+
 # Compute search signature
 # This signature will be used to check validity of cached variables on new search
-set (_${_PYTHON_PREFIX}_SIGNATURE "${${_PYTHON_PREFIX}_ROOT_DIR}:${_${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS}:${_${_PYTHON_PREFIX}_FIND_STRATEGY}:${${_PYTHON_PREFIX}_FIND_VIRTUALENV}")
+set (_${_PYTHON_PREFIX}_SIGNATURE "${${_PYTHON_PREFIX}_ROOT_DIR}:${_${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS}:${_${_PYTHON_PREFIX}_FIND_STRATEGY}:${${_PYTHON_PREFIX}_FIND_VIRTUALENV}${_${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES}")
 if (NOT WIN32)
   string (APPEND _${_PYTHON_PREFIX}_SIGNATURE ":${${_PYTHON_PREFIX}_USE_STATIC_LIBS}:")
 endif()
