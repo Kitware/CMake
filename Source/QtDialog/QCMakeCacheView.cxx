@@ -642,6 +642,19 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e,
   return success;
 }
 
+bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* evt)
+{
+  // FIXME: This filter avoids a crash when opening a file dialog
+  // with the '...' button on a cache entry line in the GUI.
+  // Previously this filter was commented as a workaround for Qt issue 205903,
+  // but that was fixed in Qt 4.5.0 and the crash still occurs as of Qt 5.14
+  // without this filter.  This needs further investigation.
+  if (evt->type() == QEvent::FocusOut && this->FileDialogFlag) {
+    return false;
+  }
+  return QItemDelegate::eventFilter(object, evt);
+}
+
 void QCMakeCacheModelDelegate::setModelData(QWidget* editor,
                                             QAbstractItemModel* model,
                                             const QModelIndex& index) const
