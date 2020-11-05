@@ -391,7 +391,7 @@ bool HandleSourceMode(cmExecutionStatus& status, const std::string& name,
   if (cmSourceFile* sf =
         directory_makefile.GetOrCreateSource(source_file_absolute_path)) {
     return StoreResult(infoType, status.GetMakefile(), variable,
-                       sf->GetPropertyForUser(propertyName));
+                       cmToCStr(sf->GetPropertyForUser(propertyName)));
   }
   status.SetError(
     cmStrCat("given SOURCE name that could not be found or created: ",

@@ -47,12 +47,12 @@ public:
   //! Might return a nullptr if the property is not set or invalid
   cmProp GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer
-  const char* GetSafeProperty(const std::string& prop) const;
+  const std::string& GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
 
   /** Implement getting a property when called from a CMake language
       command like get_property or get_source_file_property.  */
-  const char* GetPropertyForUser(const std::string& prop);
+  cmProp GetPropertyForUser(const std::string& prop);
 
   //! Checks is the GENERATED property is set and true
   /// @return Equivalent to GetPropertyAsBool("GENERATED")
