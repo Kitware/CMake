@@ -1482,15 +1482,14 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   // Include transform property.  There is no per-config version.
   {
     const char* prop = "IMPLICIT_DEPENDS_INCLUDE_TRANSFORM";
-    cmProp p = parent->GetProperty(prop);
-    this->SetProperty(prop, cmToCStr(p));
+    this->SetProperty(prop, cmToCStr(parent->GetProperty(prop)));
   }
 
   // compile definitions property and per-config versions
   cmPolicies::PolicyStatus polSt = this->GetPolicyStatus(cmPolicies::CMP0043);
   if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-    cmProp p = parent->GetProperty("COMPILE_DEFINITIONS");
-    this->SetProperty("COMPILE_DEFINITIONS", cmToCStr(p));
+    this->SetProperty("COMPILE_DEFINITIONS",
+                      cmToCStr(parent->GetProperty("COMPILE_DEFINITIONS")));
     std::vector<std::string> configs =
       this->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
     for (std::string const& config : configs) {
@@ -1502,12 +1501,11 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   }
 
   // labels
-  cmProp p = parent->GetProperty("LABELS");
-  this->SetProperty("LABELS", cmToCStr(p));
+  this->SetProperty("LABELS", cmToCStr(parent->GetProperty("LABELS")));
 
   // link libraries
-  p = parent->GetProperty("LINK_LIBRARIES");
-  this->SetProperty("LINK_LIBRARIES", cmToCStr(p));
+  this->SetProperty("LINK_LIBRARIES",
+                    cmToCStr(parent->GetProperty("LINK_LIBRARIES")));
 
   // the initial project name
   this->StateSnapshot.SetProjectName(parent->StateSnapshot.GetProjectName());

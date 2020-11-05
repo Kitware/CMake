@@ -990,9 +990,8 @@ cmProp cmGeneratorTarget::GetLanguageExtensions(std::string const& lang) const
 bool cmGeneratorTarget::GetLanguageStandardRequired(
   std::string const& lang) const
 {
-  cmProp p =
-    this->GetPropertyWithPairedLanguageSupport(lang, "_STANDARD_REQUIRED");
-  return cmIsOn(p);
+  return cmIsOn(
+    this->GetPropertyWithPairedLanguageSupport(lang, "_STANDARD_REQUIRED"));
 }
 
 void cmGeneratorTarget::GetModuleDefinitionSources(

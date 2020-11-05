@@ -401,8 +401,7 @@ public:
   }
   const char* GetIncludeRegularExpression() const
   {
-    cmProp p = this->GetProperty("INCLUDE_REGULAR_EXPRESSION");
-    return p ? p->c_str() : nullptr;
+    return cmToCStr(this->GetProperty("INCLUDE_REGULAR_EXPRESSION"));
   }
 
   /**
