@@ -105,7 +105,7 @@ std::string cmNinjaTargetGenerator::LanguageCompilerRule(
     '_', config);
 }
 
-std::string cmNinjaTargetGenerator::LanguagePreprocessRule(
+std::string cmNinjaTargetGenerator::LanguagePreprocessAndScanRule(
   std::string const& lang, const std::string& config) const
 {
   return cmStrCat(
@@ -114,7 +114,7 @@ std::string cmNinjaTargetGenerator::LanguagePreprocessRule(
     '_', config);
 }
 
-std::string cmNinjaTargetGenerator::LanguageDependencyRule(
+std::string cmNinjaTargetGenerator::LanguageScanRule(
   std::string const& lang, const std::string& config) const
 {
   return cmStrCat(
@@ -129,8 +129,7 @@ bool cmNinjaTargetGenerator::NeedExplicitPreprocessing(
   return lang == "Fortran";
 }
 
-bool cmNinjaTargetGenerator::CompilePreprocessedSourceWithDefines(
-  std::string const& lang) const
+bool cmNinjaTargetGenerator::CompileWithDefines(std::string const& lang) const
 {
   return this->Makefile->IsOn(
     cmStrCat("CMAKE_", lang, "_COMPILE_WITH_DEFINES"));
@@ -634,7 +633,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(lang);
   bool const compilePPWithDefines =
-    explicitPP && this->CompilePreprocessedSourceWithDefines(lang);
+    explicitPP && this->CompileWithDefines(lang);
   bool const needDyndep = this->NeedDyndep(lang);
 
   std::string flags = "$FLAGS";
@@ -675,8 +674,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     const auto ppVar = cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE");
 
     auto ppRule = GetPreprocessScanRule(
-      this->LanguagePreprocessRule(lang, config), vars, responseFlag, flags,
-      launcher, rulePlaceholderExpander.get(), ppScanCommand,
+      this->LanguagePreprocessAndScanRule(lang, config), vars, responseFlag,
+      flags, launcher, rulePlaceholderExpander.get(), ppScanCommand,
       this->GetLocalGenerator(), mf->GetRequiredDefinition(ppVar));
 
     // Write the rule for preprocessing file of the given language.
@@ -695,7 +694,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       GetScanCommand(cmakeCmd, tdi, lang, "$in", needDyndep, "$out");
 
     auto scanRule = GetPreprocessScanRule(
-      this->LanguageDependencyRule(lang, config), vars, "", flags, launcher,
+      this->LanguageScanRule(lang, config), vars, "", flags, launcher,
       rulePlaceholderExpander.get(), scanCommand, this->GetLocalGenerator());
 
     // Write the rule for generating dependencies for the given language.
@@ -1300,15 +1299,15 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     bool const compilePP = explicitPP &&
       (preprocess != cmOutputConverter::FortranPreprocess::NotNeeded);
     bool const compilePPWithDefines =
-      compilePP && this->CompilePreprocessedSourceWithDefines(language);
+      compilePP && this->CompileWithDefines(language);
 
     std::string const ppFileName = compilePP
       ? this->ConvertToNinjaPath(this->GetPreprocessedFilePath(source, config))
       : "";
 
     std::string const buildName = compilePP
-      ? this->LanguagePreprocessRule(language, config)
-      : this->LanguageDependencyRule(language, config);
+      ? this->LanguagePreprocessAndScanRule(language, config)
+      : this->LanguageScanRule(language, config);
 
     const auto depExtension = compilePP ? ".pp.d" : ".d";
     const std::string depFileName =
