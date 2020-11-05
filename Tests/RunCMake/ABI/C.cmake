@@ -1,0 +1,4 @@
+enable_language(C)
+if(NOT CMAKE_C_BYTE_ORDER MATCHES "^(BIG_ENDIAN|LITTLE_ENDIAN)$" AND NOT CMAKE_OSX_ARCHITECTURES MATCHES ";ppc|ppc;")
+  message(FATAL_ERROR "CMAKE_C_BYTE_ORDER has unexpected value '${CMAKE_C_BYTE_ORDER}'")
+endif()
