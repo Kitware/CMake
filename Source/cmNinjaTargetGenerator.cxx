@@ -543,7 +543,8 @@ std::string GetScanCommand(const std::string& cmakeCmd, const std::string& tdi,
 // Helper function to create dependency scanning rule, with optional
 // explicit preprocessing step if preprocessCommand is non-empty
 cmNinjaRule GetPreprocessScanRule(
-  const std::string& ruleName, cmRulePlaceholderExpander::RuleVariables& vars,
+  const std::string& ruleName,
+  cmRulePlaceholderExpander::RuleVariables const& vars,
   const std::string& responseFlag, const std::string& flags,
   const std::string& launcher,
   cmRulePlaceholderExpander* const rulePlaceholderExpander,
@@ -566,7 +567,6 @@ cmNinjaRule GetPreprocessScanRule(
   // Preprocessing uses the original source, compilation uses
   // preprocessed output or original source
   ppVars.Source = vars.Source;
-  vars.Source = "$in";
 
   // Copy preprocessor definitions to the preprocessor rule.
   ppVars.Defines = vars.Defines;
