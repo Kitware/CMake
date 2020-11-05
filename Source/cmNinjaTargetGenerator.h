@@ -71,11 +71,10 @@ protected:
                                      const std::string& config) const;
   std::string LanguageDependencyRule(std::string const& lang,
                                      const std::string& config) const;
-  bool NeedExplicitPreprocessing(std::string const& lang) const;
   std::string LanguageDyndepRule(std::string const& lang,
                                  const std::string& config) const;
   bool NeedDyndep(std::string const& lang) const;
-  bool UsePreprocessedSource(std::string const& lang) const;
+  bool NeedExplicitPreprocessing(std::string const& lang) const;
   bool CompilePreprocessedSourceWithDefines(std::string const& lang) const;
 
   std::string OrderDependsTargetForTarget(const std::string& config);

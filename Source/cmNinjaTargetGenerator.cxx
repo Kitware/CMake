@@ -129,12 +129,6 @@ bool cmNinjaTargetGenerator::NeedExplicitPreprocessing(
   return lang == "Fortran";
 }
 
-bool cmNinjaTargetGenerator::UsePreprocessedSource(
-  std::string const& lang) const
-{
-  return lang == "Fortran";
-}
-
 bool cmNinjaTargetGenerator::CompilePreprocessedSourceWithDefines(
   std::string const& lang) const
 {
@@ -639,8 +633,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(lang);
-  bool const compilePPWithDefines = this->UsePreprocessedSource(lang) &&
-    this->CompilePreprocessedSourceWithDefines(lang);
+  bool const compilePPWithDefines =
+    explicitPP && this->CompilePreprocessedSourceWithDefines(lang);
   bool const needDyndep = this->NeedDyndep(lang);
 
   std::string flags = "$FLAGS";
@@ -1303,7 +1297,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       preprocess = cmOutputConverter::GetFortranPreprocess(tgtpp);
     }
 
-    bool const compilePP = this->UsePreprocessedSource(language) &&
+    bool const compilePP = explicitPP &&
       (preprocess != cmOutputConverter::FortranPreprocess::NotNeeded);
     bool const compilePPWithDefines =
       compilePP && this->CompilePreprocessedSourceWithDefines(language);
