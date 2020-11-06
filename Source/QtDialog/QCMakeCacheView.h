@@ -143,6 +143,7 @@ public:
   bool editorEvent(QEvent* event, QAbstractItemModel* model,
                    const QStyleOptionViewItem& option,
                    const QModelIndex& index);
+  bool eventFilter(QObject* object, QEvent* event);
   void setModelData(QWidget* editor, QAbstractItemModel* model,
                     const QModelIndex& index) const;
   QSize sizeHint(const QStyleOptionViewItem& option,
