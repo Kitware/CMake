@@ -824,15 +824,21 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   }
 
   // Maybe insert an include-what-you-use runner.
-  if (!compileCmds.empty() && (lang == "C" || lang == "CXX")) {
-    std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE");
-    cmProp iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
+  if (!compileCmds.empty() &&
+      (lang == "C" || lang == "CXX" || lang == "OBJC" || lang == "OBJCXX")) {
     std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY");
     cmProp tidy = this->GeneratorTarget->GetProperty(tidy_prop);
-    std::string const cpplint_prop = cmStrCat(lang, "_CPPLINT");
-    cmProp cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
-    std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
-    cmProp cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+    cmProp iwyu = nullptr;
+    cmProp cpplint = nullptr;
+    cmProp cppcheck = nullptr;
+    if (lang == "C" || lang == "CXX") {
+      std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE");
+      iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
+      std::string const cpplint_prop = cmStrCat(lang, "_CPPLINT");
+      cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
+      std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
+      cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+    }
     if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
         cmNonempty(cppcheck)) {
       std::string run_iwyu = cmStrCat(cmakeCmd, " -E __run_co_compile");
