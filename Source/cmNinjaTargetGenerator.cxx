@@ -610,10 +610,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
   // For some cases we scan to dynamically discover dependencies.
   bool const needDyndep = this->NeedDyndep(lang);
-  // For some cases we do an explicit preprocessor invocation.
-  bool const explicitPP = this->NeedExplicitPreprocessing(lang);
-  bool const compilePPWithDefines =
-    explicitPP && this->CompileWithDefines(lang);
+  bool const compilationPreprocesses = !this->NeedExplicitPreprocessing(lang);
 
   std::string flags = "$FLAGS";
 
@@ -672,13 +669,14 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       this->GetGlobalGenerator()->AddRule(scanRule);
     }
 
-    if (!compilePPWithDefines) {
-      // Remove preprocessor definitions from compilation step
-      vars.Defines = "";
-    }
-
-    // Rule to scan dependencies of sources that do not need preprocessing.
     {
+      // Compilation will not preprocess, so it does not need the defines
+      // unless the compiler wants them for some other purpose.
+      if (!this->CompileWithDefines(lang)) {
+        vars.Defines = "";
+      }
+
+      // Rule to scan dependencies of sources that do not need preprocessing.
       std::string const& scanRuleName = this->LanguageScanRule(lang, config);
       std::vector<std::string> scanCommands;
       scanCommands.emplace_back(
@@ -735,8 +733,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
   // Tell ninja dependency format so all deps can be loaded into a database
   std::string cldeps;
-  if (explicitPP) {
-    // The explicit preprocessing step will handle dependency scanning.
+  if (!compilationPreprocesses) {
+    // The compiler will not do preprocessing, so it has no such dependencies.
   } else if (this->NeedDepTypeMSVC(lang)) {
     rule.DepType = "msvc";
     rule.DepFile.clear();
@@ -1271,13 +1269,12 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       sourceFileName, objBuild.OrderOnlyDeps);
   }
 
-  // For some cases we need to generate a ninja dyndep file.
+  // For some cases we scan to dynamically discover dependencies.
   bool const needDyndep = this->NeedDyndep(language);
+  bool const compilationPreprocesses =
+    !this->NeedExplicitPreprocessing(language);
 
   if (needDyndep) {
-    // For some cases we do an explicit preprocessor invocation.
-    bool const explicitPP = this->NeedExplicitPreprocessing(language);
-
     // If source/target has preprocessing turned off, we still need to
     // generate an explicit dependency step
     const auto srcpp = source->GetSafeProperty("Fortran_PREPROCESS");
@@ -1289,7 +1286,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       preprocess = cmOutputConverter::GetFortranPreprocess(tgtpp);
     }
 
-    bool const compilePP = explicitPP &&
+    bool const compilePP = !compilationPreprocesses &&
       (preprocess != cmOutputConverter::FortranPreprocess::NotNeeded);
     bool const compilePPWithDefines =
       compilePP && this->CompileWithDefines(language);
