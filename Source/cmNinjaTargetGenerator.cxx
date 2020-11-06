@@ -624,11 +624,12 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
   cmMakefile* mf = this->GetMakefile();
 
+  // For some cases we scan to dynamically discover dependencies.
+  bool const needDyndep = this->NeedDyndep(lang);
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(lang);
   bool const compilePPWithDefines =
     explicitPP && this->CompileWithDefines(lang);
-  bool const needDyndep = this->NeedDyndep(lang);
 
   std::string flags = "$FLAGS";
 
@@ -661,7 +662,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
 
-  if (explicitPP) {
+  if (needDyndep) {
     // Rule to scan dependencies of sources that need preprocessing.
     {
       const auto ppScanCommand = GetScanCommand(
@@ -702,9 +703,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
       this->GetGlobalGenerator()->AddRule(scanRule);
     }
-  }
 
-  if (needDyndep) {
     // Write the rule for ninja dyndep file generation.
     cmNinjaRule rule(this->LanguageDyndepRule(lang, config));
     // Command line length is almost always limited -> use response file for
@@ -1280,9 +1279,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // For some cases we need to generate a ninja dyndep file.
   bool const needDyndep = this->NeedDyndep(language);
 
-  // For some cases we do an explicit preprocessor invocation.
-  bool const explicitPP = this->NeedExplicitPreprocessing(language);
-  if (explicitPP) {
+  if (needDyndep) {
+    // For some cases we do an explicit preprocessor invocation.
+    bool const explicitPP = this->NeedExplicitPreprocessing(language);
 
     // If source/target has preprocessing turned off, we still need to
     // generate an explicit dependency step
@@ -1337,7 +1336,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       vars["INCLUDES"] = cmStrCat(sourceDirectoryFlag, ' ', vars["INCLUDES"]);
     }
 
-    if (firstForConfig && needDyndep) {
+    if (firstForConfig) {
       std::string const ddiFile = cmStrCat(objectFileName, ".ddi");
       this->Configs[config].DDIFiles[language].push_back(ddiFile);
     }
@@ -1347,8 +1346,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
                                            ppBuild, commandLineLengthLimit);
-  }
-  if (needDyndep) {
+
     std::string const dyndep = this->GetDyndepFilePath(language, config);
     objBuild.OrderOnlyDeps.push_back(dyndep);
     vars["dyndep"] = dyndep;
