@@ -721,8 +721,7 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
 
 bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
 {
-  cmProp p = this->GeneratorTarget->GetProperty("ghs_integrity_app");
-  if (p) {
+  if (cmProp p = this->GeneratorTarget->GetProperty("ghs_integrity_app")) {
     return cmIsOn(*p);
   }
   std::vector<cmSourceFile*> sources;
