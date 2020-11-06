@@ -11,3 +11,5 @@ endif()
 if(CMake_TEST_CUDA)
   run_cmake(CUDA)
 endif()
+
+run_cmake(TestBigEndian-NoLang)

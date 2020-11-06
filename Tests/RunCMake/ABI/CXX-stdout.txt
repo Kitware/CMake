@@ -1,0 +1,1 @@
+-- Check if the system is big endian
