@@ -23,7 +23,7 @@ if(CMAKE_SYSTEM_VERSION EQUAL 1)
   return()
 endif()
 
-set(CMAKE_BUILD_TYPE_INIT Debug)
+set(CMAKE_BUILD_TYPE_INIT "RelWithDebInfo")
 
 # Skip sysroot selection if the NDK has a unified toolchain.
 if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
