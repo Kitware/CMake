@@ -529,15 +529,11 @@ namespace {
 // Create the command to run the dependency scanner
 std::string GetScanCommand(const std::string& cmakeCmd, const std::string& tdi,
                            const std::string& lang, const std::string& ppFile,
-                           bool needDyndep, const std::string& ddiFile)
+                           const std::string& ddiFile)
 {
-  std::string ccmd =
-    cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi, " --lang=", lang,
-             " --pp=", ppFile, " --dep=$DEP_FILE");
-  if (needDyndep) {
-    ccmd = cmStrCat(ccmd, " --obj=$OBJ_FILE --ddi=", ddiFile);
-  }
-  return ccmd;
+  return cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi,
+                  " --lang=", lang, " --pp=", ppFile,
+                  " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=", ddiFile);
 }
 
 // Helper function to create dependency scanning rule that may or may
@@ -665,8 +661,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   if (needDyndep) {
     // Rule to scan dependencies of sources that need preprocessing.
     {
-      const auto ppScanCommand = GetScanCommand(
-        cmakeCmd, tdi, lang, "$out", needDyndep, "$DYNDEP_INTERMEDIATE_FILE");
+      const auto ppScanCommand = GetScanCommand(cmakeCmd, tdi, lang, "$out",
+                                                "$DYNDEP_INTERMEDIATE_FILE");
       const auto ppVar = cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE");
 
       auto ppRule = GetScanRule(
@@ -689,7 +685,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     // Rule to scan dependencies of sources that do not need preprocessing.
     {
       const auto scanCommand =
-        GetScanCommand(cmakeCmd, tdi, lang, "$in", needDyndep, "$out");
+        GetScanCommand(cmakeCmd, tdi, lang, "$in", "$out");
 
       auto scanRule = GetScanRule(
         this->LanguageScanRule(lang, config), vars, "", flags, launcher,
@@ -1072,7 +1068,6 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
                                    bool compilePP, bool compilePPWithDefines,
                                    cmNinjaBuild& objBuild, cmNinjaVars& vars,
                                    const std::string& depFileName,
-                                   bool needDyndep,
                                    const std::string& objectFileName)
 {
   cmNinjaBuild scanBuild(ruleName);
@@ -1125,19 +1120,17 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
     vars.erase("DEP_FILE");
   }
 
-  if (needDyndep) {
-    // Tell dependency scanner the object file that will result from
-    // compiling the source.
-    scanBuild.Variables["OBJ_FILE"] = objectFileName;
+  // Tell dependency scanner the object file that will result from
+  // compiling the source.
+  scanBuild.Variables["OBJ_FILE"] = objectFileName;
 
-    // Tell dependency scanner where to store dyndep intermediate results.
-    std::string const ddiFile = cmStrCat(objectFileName, ".ddi");
-    if (ppFileName.empty()) {
-      scanBuild.Outputs.push_back(ddiFile);
-    } else {
-      scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
-      scanBuild.ImplicitOuts.push_back(ddiFile);
-    }
+  // Tell dependency scanner where to store dyndep intermediate results.
+  std::string const ddiFile = cmStrCat(objectFileName, ".ddi");
+  if (ppFileName.empty()) {
+    scanBuild.Outputs.push_back(ddiFile);
+  } else {
+    scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
+    scanBuild.ImplicitOuts.push_back(ddiFile);
   }
   return scanBuild;
 }
@@ -1314,7 +1307,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     cmNinjaBuild ppBuild = GetScanBuildStatement(
       buildName, ppFileName, compilePP, compilePPWithDefines, objBuild, vars,
-      depFileName, needDyndep, objectFileName);
+      depFileName, objectFileName);
 
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
