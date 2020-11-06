@@ -662,42 +662,46 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
 
   if (explicitPP) {
-    // Combined preprocessing and dependency scanning
-    const auto ppScanCommand = GetScanCommand(
-      cmakeCmd, tdi, lang, "$out", needDyndep, "$DYNDEP_INTERMEDIATE_FILE");
-    const auto ppVar = cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE");
+    // Rule to scan dependencies of sources that need preprocessing.
+    {
+      const auto ppScanCommand = GetScanCommand(
+        cmakeCmd, tdi, lang, "$out", needDyndep, "$DYNDEP_INTERMEDIATE_FILE");
+      const auto ppVar = cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE");
 
-    auto ppRule = GetScanRule(
-      this->LanguagePreprocessAndScanRule(lang, config), vars, responseFlag,
-      flags, launcher, rulePlaceholderExpander.get(), ppScanCommand,
-      this->GetLocalGenerator(), mf->GetRequiredDefinition(ppVar));
+      auto ppRule = GetScanRule(
+        this->LanguagePreprocessAndScanRule(lang, config), vars, responseFlag,
+        flags, launcher, rulePlaceholderExpander.get(), ppScanCommand,
+        this->GetLocalGenerator(), mf->GetRequiredDefinition(ppVar));
 
-    // Write the rule for preprocessing file of the given language.
-    ppRule.Comment = cmStrCat("Rule for preprocessing ", lang, " files.");
-    ppRule.Description = cmStrCat("Building ", lang, " preprocessed $out");
+      // Write the rule for preprocessing file of the given language.
+      ppRule.Comment = cmStrCat("Rule for preprocessing ", lang, " files.");
+      ppRule.Description = cmStrCat("Building ", lang, " preprocessed $out");
 
-    this->GetGlobalGenerator()->AddRule(ppRule);
+      this->GetGlobalGenerator()->AddRule(ppRule);
+    }
 
     if (!compilePPWithDefines) {
       // Remove preprocessor definitions from compilation step
       vars.Defines = "";
     }
 
-    // Just dependency scanning for files that have preprocessing turned off
-    const auto scanCommand =
-      GetScanCommand(cmakeCmd, tdi, lang, "$in", needDyndep, "$out");
+    // Rule to scan dependencies of sources that do not need preprocessing.
+    {
+      const auto scanCommand =
+        GetScanCommand(cmakeCmd, tdi, lang, "$in", needDyndep, "$out");
 
-    auto scanRule = GetScanRule(this->LanguageScanRule(lang, config), vars, "",
-                                flags, launcher, rulePlaceholderExpander.get(),
-                                scanCommand, this->GetLocalGenerator());
+      auto scanRule = GetScanRule(
+        this->LanguageScanRule(lang, config), vars, "", flags, launcher,
+        rulePlaceholderExpander.get(), scanCommand, this->GetLocalGenerator());
 
-    // Write the rule for generating dependencies for the given language.
-    scanRule.Comment = cmStrCat("Rule for generating ", lang,
-                                " dependencies on non-preprocessed files.");
-    scanRule.Description =
-      cmStrCat("Generating ", lang, " dependencies for $in");
+      // Write the rule for generating dependencies for the given language.
+      scanRule.Comment = cmStrCat("Rule for generating ", lang,
+                                  " dependencies on non-preprocessed files.");
+      scanRule.Description =
+        cmStrCat("Generating ", lang, " dependencies for $in");
 
-    this->GetGlobalGenerator()->AddRule(scanRule);
+      this->GetGlobalGenerator()->AddRule(scanRule);
+    }
   }
 
   if (needDyndep) {
