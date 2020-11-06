@@ -542,10 +542,8 @@ cmNinjaRule GetScanRule(
   const std::string& ruleName,
   cmRulePlaceholderExpander::RuleVariables const& vars,
   const std::string& responseFlag, const std::string& flags,
-  const std::string& launcher,
   cmRulePlaceholderExpander* const rulePlaceholderExpander,
-  std::string scanCommand, cmLocalNinjaGenerator* generator,
-  const std::string& preprocessCommand = "")
+  cmLocalNinjaGenerator* generator, std::vector<std::string> scanCmds)
 {
   cmNinjaRule rule(ruleName);
   // Scanning always uses a depfile for preprocessor dependencies.
@@ -581,19 +579,9 @@ cmNinjaRule GetScanRule(
   scanVars.Flags = scanFlags.c_str();
 
   // Rule for scanning a source file.
-  std::vector<std::string> scanCmds;
-
-  if (!preprocessCommand.empty()) {
-    // Lookup the explicit preprocessing rule.
-    cmExpandList(preprocessCommand, scanCmds);
-    for (std::string& i : scanCmds) {
-      i = cmStrCat(launcher, i);
-      rulePlaceholderExpander->ExpandRuleVariables(generator, i, scanVars);
-    }
+  for (std::string& scanCmd : scanCmds) {
+    rulePlaceholderExpander->ExpandRuleVariables(generator, scanCmd, scanVars);
   }
-
-  // Run CMake dependency scanner on either preprocessed output or source file
-  scanCmds.emplace_back(std::move(scanCommand));
   rule.Command = generator->BuildCommandLine(scanCmds);
 
   return rule;
@@ -661,20 +649,27 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   if (needDyndep) {
     // Rule to scan dependencies of sources that need preprocessing.
     {
-      const auto ppScanCommand = GetScanCommand(cmakeCmd, tdi, lang, "$out",
-                                                "$DYNDEP_INTERMEDIATE_FILE");
-      const auto ppVar = cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE");
+      std::vector<std::string> scanCommands;
+      std::string const& scanRuleName =
+        this->LanguagePreprocessAndScanRule(lang, config);
+      std::string const& ppCommmand = mf->GetRequiredDefinition(
+        cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE"));
+      cmExpandList(ppCommmand, scanCommands);
+      for (std::string& i : scanCommands) {
+        i = cmStrCat(launcher, i);
+      }
+      scanCommands.emplace_back(GetScanCommand(cmakeCmd, tdi, lang, "$out",
+                                               "$DYNDEP_INTERMEDIATE_FILE"));
 
-      auto ppRule = GetScanRule(
-        this->LanguagePreprocessAndScanRule(lang, config), vars, responseFlag,
-        flags, launcher, rulePlaceholderExpander.get(), ppScanCommand,
-        this->GetLocalGenerator(), mf->GetRequiredDefinition(ppVar));
+      auto scanRule = GetScanRule(
+        scanRuleName, vars, responseFlag, flags, rulePlaceholderExpander.get(),
+        this->GetLocalGenerator(), std::move(scanCommands));
 
-      // Write the rule for preprocessing file of the given language.
-      ppRule.Comment = cmStrCat("Rule for preprocessing ", lang, " files.");
-      ppRule.Description = cmStrCat("Building ", lang, " preprocessed $out");
+      scanRule.Comment =
+        cmStrCat("Rule for generating ", lang, " dependencies.");
+      scanRule.Description = cmStrCat("Building ", lang, " preprocessed $out");
 
-      this->GetGlobalGenerator()->AddRule(ppRule);
+      this->GetGlobalGenerator()->AddRule(scanRule);
     }
 
     if (!compilePPWithDefines) {
@@ -684,12 +679,14 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
     // Rule to scan dependencies of sources that do not need preprocessing.
     {
-      const auto scanCommand =
-        GetScanCommand(cmakeCmd, tdi, lang, "$in", "$out");
+      std::string const& scanRuleName = this->LanguageScanRule(lang, config);
+      std::vector<std::string> scanCommands;
+      scanCommands.emplace_back(
+        GetScanCommand(cmakeCmd, tdi, lang, "$in", "$out"));
 
       auto scanRule = GetScanRule(
-        this->LanguageScanRule(lang, config), vars, "", flags, launcher,
-        rulePlaceholderExpander.get(), scanCommand, this->GetLocalGenerator());
+        scanRuleName, vars, "", flags, rulePlaceholderExpander.get(),
+        this->GetLocalGenerator(), std::move(scanCommands));
 
       // Write the rule for generating dependencies for the given language.
       scanRule.Comment = cmStrCat("Rule for generating ", lang,
