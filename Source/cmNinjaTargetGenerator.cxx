@@ -1064,13 +1064,12 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
                                    const std::string& ppFileName,
                                    bool compilePP, bool compilePPWithDefines,
                                    cmNinjaBuild& objBuild, cmNinjaVars& vars,
-                                   const std::string& depFileName,
-                                   const std::string& objectFileName)
+                                   const std::string& objectFileName,
+                                   cmLocalGenerator* lg)
 {
   cmNinjaBuild scanBuild(ruleName);
 
   if (!ppFileName.empty()) {
-    scanBuild.Outputs.push_back(ppFileName);
     scanBuild.RspFile = cmStrCat(ppFileName, ".rsp");
   } else {
     scanBuild.RspFile = "$out.rsp";
@@ -1109,26 +1108,32 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
   // directive.
   scanBuild.Variables["INCLUDES"] = vars["INCLUDES"];
 
-  // Explicit preprocessing always uses a depfile.
-  scanBuild.Variables["DEP_FILE"] = depFileName;
+  // Tell dependency scanner the object file that will result from
+  // compiling the source.
+  scanBuild.Variables["OBJ_FILE"] = objectFileName;
+
+  // Tell dependency scanner where to store dyndep intermediate results.
+  std::string const& ddiFile = cmStrCat(objectFileName, ".ddi");
+  scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
+
+  // Outputs of the scan/preprocessor build statement.
+  if (!ppFileName.empty()) {
+    scanBuild.Outputs.push_back(ppFileName);
+    scanBuild.ImplicitOuts.push_back(ddiFile);
+  } else {
+    scanBuild.Outputs.push_back(ddiFile);
+  }
+
+  // Scanning always uses a depfile for preprocessor dependencies.
+  std::string const& depFileName = cmStrCat(scanBuild.Outputs.front(), ".d");
+  scanBuild.Variables["DEP_FILE"] =
+    lg->ConvertToOutputFormat(depFileName, cmOutputConverter::SHELL);
   if (compilePP) {
     // The actual compilation does not need a depfile because it
     // depends on the already-preprocessed source.
     vars.erase("DEP_FILE");
   }
 
-  // Tell dependency scanner the object file that will result from
-  // compiling the source.
-  scanBuild.Variables["OBJ_FILE"] = objectFileName;
-
-  // Tell dependency scanner where to store dyndep intermediate results.
-  std::string const ddiFile = cmStrCat(objectFileName, ".ddi");
-  if (ppFileName.empty()) {
-    scanBuild.Outputs.push_back(ddiFile);
-  } else {
-    scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
-    scanBuild.ImplicitOuts.push_back(ddiFile);
-  }
   return scanBuild;
 }
 }
@@ -1289,22 +1294,19 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     bool const compilePPWithDefines =
       compilePP && this->CompileWithDefines(language);
 
-    std::string const ppFileName = compilePP
-      ? this->ConvertToNinjaPath(this->GetPreprocessedFilePath(source, config))
-      : "";
-
-    std::string const buildName = compilePP
-      ? this->LanguagePreprocessAndScanRule(language, config)
-      : this->LanguageScanRule(language, config);
-
-    const auto depExtension = compilePP ? ".pp.d" : ".d";
-    const std::string depFileName =
-      this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(objectFileName, depExtension), cmOutputConverter::SHELL);
+    std::string scanRuleName;
+    std::string ppFileName;
+    if (compilePP) {
+      scanRuleName = this->LanguagePreprocessAndScanRule(language, config);
+      ppFileName = this->ConvertToNinjaPath(
+        this->GetPreprocessedFilePath(source, config));
+    } else {
+      scanRuleName = this->LanguageScanRule(language, config);
+    }
 
     cmNinjaBuild ppBuild = GetScanBuildStatement(
-      buildName, ppFileName, compilePP, compilePPWithDefines, objBuild, vars,
-      depFileName, objectFileName);
+      scanRuleName, ppFileName, compilePP, compilePPWithDefines, objBuild,
+      vars, objectFileName, this->LocalGenerator);
 
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
