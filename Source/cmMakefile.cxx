@@ -3406,11 +3406,7 @@ cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
                                        bool generated,
                                        cmSourceFileLocationKind kind)
 {
-  auto sf = cm::make_unique<cmSourceFile>(this, sourceName, kind);
-  if (generated) {
-    sf->SetProperty("GENERATED", "1");
-  }
-
+  auto sf = cm::make_unique<cmSourceFile>(this, sourceName, generated, kind);
   auto name =
     this->GetCMakeInstance()->StripExtension(sf->GetLocation().GetName());
 #if defined(_WIN32) || defined(__APPLE__)
@@ -3442,7 +3438,7 @@ cmSourceFile* cmMakefile::GetOrCreateGeneratedSource(
 {
   cmSourceFile* sf =
     this->GetOrCreateSource(sourceName, true, cmSourceFileLocationKind::Known);
-  sf->SetProperty("GENERATED", "1");
+  sf->MarkAsGenerated(); // In case we did not create the source file.
   return sf;
 }
 

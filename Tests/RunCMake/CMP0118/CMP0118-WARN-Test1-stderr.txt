@@ -1,4 +1,4 @@
-^prop: ``
+^prop: `0`
 CMake Error at CMP0118-Common-Test1\.cmake:[0-9]+ \(add_executable\):
   Cannot find source file:
 

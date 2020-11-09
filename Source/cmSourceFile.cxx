@@ -16,9 +16,12 @@
 #include "cmake.h"
 
 cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name,
-                           cmSourceFileLocationKind kind)
-  : Location(mf, name, kind)
+                           bool generated, cmSourceFileLocationKind kind)
+  : Location(mf, name, (!generated) ? kind : cmSourceFileLocationKind::Known)
 {
+  if (generated) {
+    this->MarkAsGenerated();
+  }
 }
 
 std::string const& cmSourceFile::GetExtension() const
@@ -26,6 +29,8 @@ std::string const& cmSourceFile::GetExtension() const
   return this->Extension;
 }
 
+const std::string propTRUE = "1";
+const std::string propFALSE = "0";
 const std::string cmSourceFile::propLANGUAGE = "LANGUAGE";
 const std::string cmSourceFile::propLOCATION = "LOCATION";
 const std::string cmSourceFile::propGENERATED = "GENERATED";
@@ -112,11 +117,14 @@ bool cmSourceFile::FindFullPath(std::string* error,
                                 std::string* cmp0115Warning)
 {
   // If the file is generated compute the location without checking on disk.
-  if (this->GetIsGenerated()) {
+  // Note: We also check for a locally set GENERATED property, because
+  //       it might have been set before policy CMP0118 was set to NEW.
+  if (this->GetIsGenerated(CheckScope::GlobalAndLocal)) {
     // The file is either already a full path or is relative to the
     // build directory for the target.
     this->Location.DirectoryUseBinary();
     this->FullPath = this->Location.GetFullPath();
+    this->FindFullPathFailed = false;
     return true;
   }
 
@@ -273,11 +281,6 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
   } else {
     this->Properties.SetProperty(prop, value);
   }
-
-  // Update IsGenerated flag
-  if (prop == propGENERATED) {
-    this->IsGenerated = cmIsOn(value);
-  }
 }
 
 void cmSourceFile::AppendProperty(const std::string& prop,
@@ -300,11 +303,6 @@ void cmSourceFile::AppendProperty(const std::string& prop,
     }
   } else {
     this->Properties.AppendProperty(prop, value, asString);
-  }
-
-  // Update IsGenerated flag
-  if (prop == propGENERATED) {
-    this->IsGenerated = this->GetPropertyAsBool(propGENERATED);
   }
 }
 
@@ -334,6 +332,21 @@ cmProp cmSourceFile::GetPropertyForUser(const std::string& prop)
   if (prop == propLANGUAGE) {
     // The pointer is valid until `this->Language` is modified.
     return &this->GetOrDetermineLanguage();
+  }
+
+  // Special handling for GENERATED property.
+  if (prop == propGENERATED) {
+    // We need to check policy CMP0118 in order to determine if we need to
+    // possibly consider the value of a locally set GENERATED property, too.
+    auto policyStatus =
+      this->Location.GetMakefile()->GetPolicyStatus(cmPolicies::CMP0118);
+    if (this->GetIsGenerated(
+          (policyStatus == cmPolicies::WARN || policyStatus == cmPolicies::OLD)
+            ? CheckScope::GlobalAndLocal
+            : CheckScope::Global)) {
+      return &propTRUE;
+    }
+    return &propFALSE;
   }
 
   // Perform the normal property lookup.
@@ -411,11 +424,29 @@ bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
   return cmIsOn(this->GetProperty(prop));
 }
 
+void cmSourceFile::MarkAsGenerated()
+{
+  this->IsGenerated = true;
+  auto& mf = *this->Location.GetMakefile();
+  mf.GetGlobalGenerator()->MarkAsGeneratedFile(this->ResolveFullPath());
+}
+
+bool cmSourceFile::GetIsGenerated(CheckScope checkScope) const
+{
+  if (this->IsGenerated) {
+    // Globally marked as generated!
+    return true;
+  }
+  if (checkScope == CheckScope::GlobalAndLocal) {
+    // Check locally stored properties.
+    return this->GetPropertyAsBool(propGENERATED);
+  }
+  return false;
+}
+
 void cmSourceFile::SetProperties(cmPropertyMap properties)
 {
   this->Properties = std::move(properties);
-
-  this->IsGenerated = this->GetPropertyAsBool(propGENERATED);
 }
 
 cmCustomCommand* cmSourceFile::GetCustomCommand() const

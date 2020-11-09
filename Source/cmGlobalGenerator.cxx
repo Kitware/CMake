@@ -1814,6 +1814,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
   this->BinaryDirectories.clear();
+  this->GeneratedFiles.clear();
 }
 
 void cmGlobalGenerator::ComputeTargetObjectDirectory(
@@ -2137,6 +2138,16 @@ void cmGlobalGenerator::AddInstallComponent(const std::string& component)
   if (!component.empty()) {
     this->InstallComponents.insert(component);
   }
+}
+
+void cmGlobalGenerator::MarkAsGeneratedFile(const std::string& filepath)
+{
+  this->GeneratedFiles.insert(filepath);
+}
+
+bool cmGlobalGenerator::IsGeneratedFile(const std::string& filepath)
+{
+  return this->GeneratedFiles.find(filepath) != this->GeneratedFiles.end();
 }
 
 void cmGlobalGenerator::EnableInstallTarget()

@@ -550,6 +550,11 @@ void* CCONV cmAddSource(void* arg, void* arg2)
   // Create the real cmSourceFile instance and copy over saved information.
   cmSourceFile* rsf = mf->GetOrCreateSource(osf->FullPath);
   rsf->SetProperties(osf->Properties);
+  // In case the properties contain the GENERATED property,
+  // mark the real cmSourceFile as generated.
+  if (rsf->GetIsGenerated()) {
+    rsf->MarkAsGenerated();
+  }
   for (std::string const& d : osf->Depends) {
     rsf->AddDepend(d);
   }

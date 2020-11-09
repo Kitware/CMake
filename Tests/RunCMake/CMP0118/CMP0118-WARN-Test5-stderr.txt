@@ -1,9 +1,9 @@
-^Generated_with_full_path1\.cpp: # 1a # GENERATED = `tRue`
-Generated_with_full_path1\.cpp: # 1b # GENERATED = `tRue`
-Generated_with_full_path1\.cpp: # 2a # GENERATED = `tRue`
-Generated_with_full_path1\.cpp: # 2b # GENERATED = `tRue`
-Generated_with_full_path1\.cpp: # 3a # GENERATED = ``
-Generated_with_full_path1\.cpp: # 3b # GENERATED = `NOTFOUND`
+^Generated_with_full_path1\.cpp: # 1a # GENERATED = `1`
+Generated_with_full_path1\.cpp: # 1b # GENERATED = `1`
+Generated_with_full_path1\.cpp: # 2a # GENERATED = `1`
+Generated_with_full_path1\.cpp: # 2b # GENERATED = `1`
+Generated_with_full_path1\.cpp: # 3a # GENERATED = `0`
+Generated_with_full_path1\.cpp: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: The GENERATED source file property is now
   visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
@@ -17,12 +17,12 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
-Generated_with_full_path2\.cpp: # 1a # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_full_path2\.cpp: # 1b # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_full_path2\.cpp: # 2a # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_full_path2\.cpp: # 2b # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_full_path2\.cpp: # 3a # GENERATED = ``
-Generated_with_full_path2\.cpp: # 3b # GENERATED = `NOTFOUND`
+Generated_with_full_path2\.cpp: # 1a # GENERATED = `0`
+Generated_with_full_path2\.cpp: # 1b # GENERATED = `0`
+Generated_with_full_path2\.cpp: # 2a # GENERATED = `0`
+Generated_with_full_path2\.cpp: # 2b # GENERATED = `0`
+Generated_with_full_path2\.cpp: # 3a # GENERATED = `0`
+Generated_with_full_path2\.cpp: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: The GENERATED source file property is now
   visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
@@ -44,18 +44,18 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
-Generated_with_full_path3\.cpp: # 1a # GENERATED = `Junk-value`
-Generated_with_full_path3\.cpp: # 1b # GENERATED = `Junk-value`
-Generated_with_full_path3\.cpp: # 2a # GENERATED = `Junk-value`
-Generated_with_full_path3\.cpp: # 2b # GENERATED = `Junk-value`
-Generated_with_full_path3\.cpp: # 3a # GENERATED = ``
-Generated_with_full_path3\.cpp: # 3b # GENERATED = `NOTFOUND`
-Generated_with_relative_path1\.cpp: # 1a # GENERATED = `tRue`
-Generated_with_relative_path1\.cpp: # 1b # GENERATED = `tRue`
-Generated_with_relative_path1\.cpp: # 2a # GENERATED = `tRue`
-Generated_with_relative_path1\.cpp: # 2b # GENERATED = `tRue`
-Generated_with_relative_path1\.cpp: # 3a # GENERATED = ``
-Generated_with_relative_path1\.cpp: # 3b # GENERATED = `NOTFOUND`
+Generated_with_full_path3\.cpp: # 1a # GENERATED = `0`
+Generated_with_full_path3\.cpp: # 1b # GENERATED = `0`
+Generated_with_full_path3\.cpp: # 2a # GENERATED = `0`
+Generated_with_full_path3\.cpp: # 2b # GENERATED = `0`
+Generated_with_full_path3\.cpp: # 3a # GENERATED = `0`
+Generated_with_full_path3\.cpp: # 3b # GENERATED = `0`
+Generated_with_relative_path1\.cpp: # 1a # GENERATED = `1`
+Generated_with_relative_path1\.cpp: # 1b # GENERATED = `1`
+Generated_with_relative_path1\.cpp: # 2a # GENERATED = `1`
+Generated_with_relative_path1\.cpp: # 2b # GENERATED = `1`
+Generated_with_relative_path1\.cpp: # 3a # GENERATED = `0`
+Generated_with_relative_path1\.cpp: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: The GENERATED source file property is now
   visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
@@ -69,12 +69,12 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
-Generated_with_relative_path2\.cpp: # 1a # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_relative_path2\.cpp: # 1b # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_relative_path2\.cpp: # 2a # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_relative_path2\.cpp: # 2b # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_relative_path2\.cpp: # 3a # GENERATED = ``
-Generated_with_relative_path2\.cpp: # 3b # GENERATED = `NOTFOUND`
+Generated_with_relative_path2\.cpp: # 1a # GENERATED = `0`
+Generated_with_relative_path2\.cpp: # 1b # GENERATED = `0`
+Generated_with_relative_path2\.cpp: # 2a # GENERATED = `0`
+Generated_with_relative_path2\.cpp: # 2b # GENERATED = `0`
+Generated_with_relative_path2\.cpp: # 3a # GENERATED = `0`
+Generated_with_relative_path2\.cpp: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: The GENERATED source file property is now
   visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
@@ -96,18 +96,18 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
-Generated_with_relative_path3\.cpp: # 1a # GENERATED = `Junk-value`
-Generated_with_relative_path3\.cpp: # 1b # GENERATED = `Junk-value`
-Generated_with_relative_path3\.cpp: # 2a # GENERATED = `Junk-value`
-Generated_with_relative_path3\.cpp: # 2b # GENERATED = `Junk-value`
-Generated_with_relative_path3\.cpp: # 3a # GENERATED = ``
-Generated_with_relative_path3\.cpp: # 3b # GENERATED = `NOTFOUND`
-Generated_with_full_source_path1\.cpp: # 1a # GENERATED = `tRue`
-Generated_with_full_source_path1\.cpp: # 1b # GENERATED = `tRue`
-Generated_with_full_source_path1\.cpp: # 2a # GENERATED = `tRue`
-Generated_with_full_source_path1\.cpp: # 2b # GENERATED = `tRue`
-Generated_with_full_source_path1\.cpp: # 3a # GENERATED = ``
-Generated_with_full_source_path1\.cpp: # 3b # GENERATED = `NOTFOUND`
+Generated_with_relative_path3\.cpp: # 1a # GENERATED = `0`
+Generated_with_relative_path3\.cpp: # 1b # GENERATED = `0`
+Generated_with_relative_path3\.cpp: # 2a # GENERATED = `0`
+Generated_with_relative_path3\.cpp: # 2b # GENERATED = `0`
+Generated_with_relative_path3\.cpp: # 3a # GENERATED = `0`
+Generated_with_relative_path3\.cpp: # 3b # GENERATED = `0`
+Generated_with_full_source_path1\.cpp: # 1a # GENERATED = `1`
+Generated_with_full_source_path1\.cpp: # 1b # GENERATED = `1`
+Generated_with_full_source_path1\.cpp: # 2a # GENERATED = `1`
+Generated_with_full_source_path1\.cpp: # 2b # GENERATED = `1`
+Generated_with_full_source_path1\.cpp: # 3a # GENERATED = `0`
+Generated_with_full_source_path1\.cpp: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: The GENERATED source file property is now
   visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
@@ -121,12 +121,12 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
-Generated_with_full_source_path2\.cpp: # 1a # GENERATED = ``
-Generated_with_full_source_path2\.cpp: # 1b # GENERATED = `NOTFOUND`
-Generated_with_full_source_path2\.cpp: # 2a # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_full_source_path2\.cpp: # 2b # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_full_source_path2\.cpp: # 3a # GENERATED = `SomeVar-NOTFOUND`
-Generated_with_full_source_path2\.cpp: # 3b # GENERATED = `SomeVar-NOTFOUND`
+Generated_with_full_source_path2\.cpp: # 1a # GENERATED = `0`
+Generated_with_full_source_path2\.cpp: # 1b # GENERATED = `0`
+Generated_with_full_source_path2\.cpp: # 2a # GENERATED = `0`
+Generated_with_full_source_path2\.cpp: # 2b # GENERATED = `0`
+Generated_with_full_source_path2\.cpp: # 3a # GENERATED = `0`
+Generated_with_full_source_path2\.cpp: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test5\.cmake:[0-9]+ \(set_property\):
   Policy CMP0118 is not set: The GENERATED source file property is now
   visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
@@ -148,12 +148,12 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
-Generated_with_full_source_path3\.cpp: # 1a # GENERATED = ``
-Generated_with_full_source_path3\.cpp: # 1b # GENERATED = `NOTFOUND`
-Generated_with_full_source_path3\.cpp: # 2a # GENERATED = ``
-Generated_with_full_source_path3\.cpp: # 2b # GENERATED = `NOTFOUND`
-Generated_with_full_source_path3\.cpp: # 3a # GENERATED = ``
-Generated_with_full_source_path3\.cpp: # 3b # GENERATED = `NOTFOUND`
+Generated_with_full_source_path3\.cpp: # 1a # GENERATED = `0`
+Generated_with_full_source_path3\.cpp: # 1b # GENERATED = `0`
+Generated_with_full_source_path3\.cpp: # 2a # GENERATED = `0`
+Generated_with_full_source_path3\.cpp: # 2b # GENERATED = `0`
+Generated_with_full_source_path3\.cpp: # 3a # GENERATED = `0`
+Generated_with_full_source_path3\.cpp: # 3b # GENERATED = `0`
 CMake Error at CMP0118-Common-Test5\.cmake:[0-9]+ \(add_executable\):
   Cannot find source file:
 
