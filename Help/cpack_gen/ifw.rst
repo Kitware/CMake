@@ -1,6 +1,8 @@
 CPack IFW Generator
 -------------------
 
+.. versionadded:: 3.1
+
 Configure and run the Qt Installer Framework to generate a Qt installer.
 
 .. only:: html
@@ -34,6 +36,8 @@ Debug
 """""
 
 .. variable:: CPACK_IFW_VERBOSE
+
+ .. versionadded:: 3.3
 
  Set to ``ON`` to enable addition debug output.
  By default is ``OFF``.
@@ -71,41 +75,51 @@ Package
 
 .. variable:: CPACK_IFW_PACKAGE_WATERMARK
 
+ .. versionadded:: 3.8
+
  Filename for a watermark is used as QWizard::WatermarkPixmap.
 
 .. variable:: CPACK_IFW_PACKAGE_BANNER
+
+ .. versionadded:: 3.8
 
  Filename for a banner is used as QWizard::BannerPixmap.
 
 .. variable:: CPACK_IFW_PACKAGE_BACKGROUND
 
+ .. versionadded:: 3.8
+
  Filename for an image used as QWizard::BackgroundPixmap (only used by MacStyle).
 
 .. variable:: CPACK_IFW_PACKAGE_WIZARD_STYLE
 
+ .. versionadded:: 3.8
+
  Wizard style to be used ("Modern", "Mac", "Aero" or "Classic").
 
-.. variable:: CPACK_IFW_PACKAGE_STYLE_SHEET
-
- Filename for a stylesheet.
-
 .. variable:: CPACK_IFW_PACKAGE_WIZARD_DEFAULT_WIDTH
+
+ .. versionadded:: 3.8
 
  Default width of the wizard in pixels. Setting a banner image will override this.
 
 .. variable:: CPACK_IFW_PACKAGE_WIZARD_DEFAULT_HEIGHT
 
+ .. versionadded:: 3.8
+
  Default height of the wizard in pixels. Setting a watermark image will override this.
 
 .. variable:: CPACK_IFW_PACKAGE_TITLE_COLOR
 
+ .. versionadded:: 3.8
+
  Color of the titles and subtitles (takes an HTML color code, such as "#88FF33").
 
-.. variable:: CPACK_IFW_PACKAGE_START_MENU_DIRECTORY
+.. variable:: CPACK_IFW_PACKAGE_STYLE_SHEET
 
- Name of the default program group for the product in the Windows Start menu.
+ .. versionadded:: 3.15
 
- By default used :variable:`CPACK_IFW_PACKAGE_NAME`.
+ Filename for a stylesheet.
 
 .. variable:: CPACK_IFW_TARGET_DIRECTORY
 
@@ -123,6 +137,14 @@ Package
 
  You can use predefined variables.
 
+.. variable:: CPACK_IFW_PACKAGE_REMOVE_TARGET_DIR
+
+ .. versionadded:: 3.11
+
+ Set to ``OFF`` if the target directory should not be deleted when uninstalling.
+
+ Is ``ON`` by default
+
 .. variable:: CPACK_IFW_PACKAGE_GROUP
 
  The group, which will be used to configure the root package
@@ -132,20 +154,26 @@ Package
  The root package name, which will be used if configuration group is not
  specified
 
+.. variable:: CPACK_IFW_PACKAGE_START_MENU_DIRECTORY
+
+ .. versionadded:: 3.3
+
+ Name of the default program group for the product in the Windows Start menu.
+
+ By default used :variable:`CPACK_IFW_PACKAGE_NAME`.
+
 .. variable:: CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_NAME
+
+ .. versionadded:: 3.3
 
  Filename of the generated maintenance tool.
  The platform-specific executable file extension is appended.
 
  By default used QtIFW defaults (``maintenancetool``).
 
-.. variable:: CPACK_IFW_PACKAGE_REMOVE_TARGET_DIR
-
- Set to ``OFF`` if the target directory should not be deleted when uninstalling.
-
- Is ``ON`` by default
-
 .. variable:: CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_INI_FILE
+
+ .. versionadded:: 3.3
 
  Filename for the configuration of the generated maintenance tool.
 
@@ -153,17 +181,23 @@ Package
 
 .. variable:: CPACK_IFW_PACKAGE_ALLOW_NON_ASCII_CHARACTERS
 
+ .. versionadded:: 3.3
+
  Set to ``ON`` if the installation path can contain non-ASCII characters.
 
  Is ``ON`` for QtIFW less 2.0 tools.
 
 .. variable:: CPACK_IFW_PACKAGE_ALLOW_SPACE_IN_PATH
 
+ .. versionadded:: 3.3
+
  Set to ``OFF`` if the installation path cannot contain space characters.
 
  Is ``ON`` for QtIFW less 2.0 tools.
 
 .. variable:: CPACK_IFW_PACKAGE_CONTROL_SCRIPT
+
+ .. versionadded:: 3.3
 
  Filename for a custom installer control script.
 
@@ -176,6 +210,8 @@ Package
  relative paths.
 
 .. variable:: CPACK_IFW_PACKAGE_FILE_EXTENSION
+
+ .. versionadded:: 3.10
 
  The target binary extension.
 
@@ -216,6 +252,8 @@ Components
 
 .. variable:: CPACK_IFW_REPOSITORIES_DIRECTORIES
 
+ .. versionadded:: 3.10
+
  Additional prepared repository dirs that will be used to resolve and
  repack dependent components. This feature available only
  since QtIFW 3.1.
@@ -224,6 +262,8 @@ QtIFW Tools
 """""""""""
 
 .. variable:: CPACK_IFW_FRAMEWORK_VERSION
+
+ .. versionadded:: 3.3
 
  The version of used QtIFW tools.
 
@@ -255,6 +295,8 @@ but if you don't use a default path for installation of the QtIFW tools,
 the path may be specified in either a CMake or an environment variable:
 
 .. variable:: CPACK_IFW_ROOT
+
+ .. versionadded:: 3.9
 
  An CMake variable which specifies the location of the QtIFW tool suite.
 
@@ -301,6 +343,8 @@ these files accessible from a download URL.
 
 Internationalization
 """"""""""""""""""""
+
+.. versionadded:: 3.9
 
 Some variables and command arguments support internationalization via
 CMake script. This is an optional feature.

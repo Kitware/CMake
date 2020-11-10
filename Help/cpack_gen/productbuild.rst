@@ -1,6 +1,8 @@
 CPack productbuild Generator
 ----------------------------
 
+.. versionadded:: 3.7
+
 productbuild CPack generator (macOS).
 
 Variables specific to CPack productbuild generator
@@ -18,10 +20,14 @@ macOS using ProductBuild:
 
 .. variable:: CPACK_PRODUCTBUILD_IDENTITY_NAME
 
+ .. versionadded:: 3.8
+
  Adds a digital signature to the resulting package.
 
 
 .. variable:: CPACK_PRODUCTBUILD_KEYCHAIN_PATH
+
+ .. versionadded:: 3.8
 
  Specify a specific keychain to search for the signing identity.
 
@@ -35,10 +41,14 @@ macOS using ProductBuild:
 
 .. variable:: CPACK_PKGBUILD_IDENTITY_NAME
 
+ .. versionadded:: 3.8
+
  Adds a digital signature to the resulting package.
 
 
 .. variable:: CPACK_PKGBUILD_KEYCHAIN_PATH
+
+ .. versionadded:: 3.8
 
  Specify a specific keychain to search for the signing identity.
 
@@ -60,11 +70,21 @@ macOS using ProductBuild:
 
 .. variable:: CPACK_PRODUCTBUILD_RESOURCES_DIR
 
+ .. versionadded:: 3.9
+
  If specified the productbuild generator copies files from this directory
  (including subdirectories) to the ``Resources`` directory. This is done
  before the :variable:`CPACK_RESOURCE_FILE_WELCOME`,
  :variable:`CPACK_RESOURCE_FILE_README`, and
  :variable:`CPACK_RESOURCE_FILE_LICENSE` files are copied.
+
+Background Image
+""""""""""""""""
+
+.. versionadded:: 3.17
+
+This group of variables controls the background image of the generated
+installer.
 
 .. variable:: CPACK_PRODUCTBUILD_BACKGROUND
 
