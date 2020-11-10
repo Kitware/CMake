@@ -1,8 +1,6 @@
 FC
 --
 
-.. versionadded:: 3.10
-
 .. include:: ENV_VAR.txt
 
 Preferred executable for compiling ``Fortran`` language files. Will only be used

@@ -1,7 +1,7 @@
 CUDAHOSTCXX
 -----------
 
-.. versionadded:: 3.10
+.. versionadded:: 3.8
 
 .. include:: ENV_VAR.txt
 
