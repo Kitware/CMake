@@ -281,7 +281,7 @@ above-documented condition syntax accepts ``<variable|string>``:
   tested to see if they are boolean constants, if so they are used as
   such, otherwise they are assumed to be variables and are dereferenced.
 
-.. versionadded:: 3.1
+.. versionchanged:: 3.1
   To prevent ambiguity, potential variable or keyword names can be
   specified in a :ref:`Quoted Argument` or a :ref:`Bracket Argument`.
   A quoted or bracketed variable or keyword will be interpreted as a
