@@ -36,9 +36,11 @@ specify the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC``
 items will populate the :prop_tgt:`LINK_OPTIONS` property of
 ``<target>``.  ``PUBLIC`` and ``INTERFACE`` items will populate the
 :prop_tgt:`INTERFACE_LINK_OPTIONS` property of ``<target>``.
-(:ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items.)
 The following arguments specify link options.  Repeated calls for the same
 ``<target>`` append items in the order called.
+
+.. note::
+  :ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items.
 
 Arguments to ``target_link_options`` may use "generator expressions"
 with the syntax ``$<...>``. See the :manual:`cmake-generator-expressions(7)`

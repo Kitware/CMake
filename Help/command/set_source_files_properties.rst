@@ -14,9 +14,10 @@ Source files can have properties that affect how they are built.
 Sets properties associated with source files using a key/value paired
 list.
 
-By default, source file properties are only visible to targets added in the
-same directory (``CMakeLists.txt``).  Visibility can be set in other directory
-scopes using one or both of the following options:
+.. versionadded:: 3.18
+  By default, source file properties are only visible to targets added in the
+  same directory (``CMakeLists.txt``).  Visibility can be set in other directory
+  scopes using one or both of the following options:
 
 ``DIRECTORY <dirs>...``
   The source file properties will be set in each of the ``<dirs>``
