@@ -427,12 +427,12 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       bool foundError = false;
       unsigned int nameStartPosition = 0;
 
-      if (entry.find("no-", nameStartPosition) == 0) {
+      if (entry.find("no-", nameStartPosition) == nameStartPosition) {
         foundNo = true;
         nameStartPosition += 3;
       }
 
-      if (entry.find("error=", nameStartPosition) == 0) {
+      if (entry.find("error=", nameStartPosition) == nameStartPosition) {
         foundError = true;
         nameStartPosition += 6;
       }
@@ -454,7 +454,12 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         this->DiagLevels[name] = DIAG_ERROR;
       } else {
         // -Wno-error=<name>
-        this->DiagLevels[name] = std::min(this->DiagLevels[name], DIAG_WARN);
+        // This can downgrade an error to a warning, but should not enable
+        // or disable a warning in the first place.
+        auto dli = this->DiagLevels.find(name);
+        if (dli != this->DiagLevels.end()) {
+          dli->second = std::min(dli->second, DIAG_WARN);
+        }
       }
     } else if (cmHasLiteralPrefix(arg, "-U")) {
       std::string entryPattern = arg.substr(2);
