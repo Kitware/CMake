@@ -527,28 +527,26 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     return true;
   };
 
-  auto WarningLambda = [](std::string const& entry, cmake* state) -> bool {
-    std::string name;
+  auto WarningLambda = [](cm::string_view entry, cmake* state) -> bool {
     bool foundNo = false;
     bool foundError = false;
-    unsigned int nameStartPosition = 0;
 
-    if (entry.find("no-", nameStartPosition) == nameStartPosition) {
+    if (cmHasLiteralPrefix(entry, "no-")) {
       foundNo = true;
-      nameStartPosition += 3;
+      entry.remove_prefix(3);
     }
 
-    if (entry.find("error=", nameStartPosition) == nameStartPosition) {
+    if (cmHasLiteralPrefix(entry, "error=")) {
       foundError = true;
-      nameStartPosition += 6;
+      entry.remove_prefix(6);
     }
 
-    name = entry.substr(nameStartPosition);
-    if (name.empty()) {
+    if (entry.empty()) {
       cmSystemTools::Error("No warning name provided.");
       return false;
     }
 
+    std::string const name = std::string(entry);
     if (!foundNo && !foundError) {
       // -W<name>
       state->DiagLevels[name] = std::max(state->DiagLevels[name], DIAG_WARN);
