@@ -240,6 +240,12 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     }
   }
 
+  if (build.Variables.count("dyndep") > 0) {
+    // The ninja 'cleandead' operation does not account for outputs
+    // discovered by 'dyndep' bindings.  Avoid removing them.
+    this->DisableCleandead = true;
+  }
+
   os << buildStr << arguments << assignments << "\n";
 }
 
@@ -501,6 +507,7 @@ void cmGlobalNinjaGenerator::Generate()
   this->InitOutputPathPrefix();
   this->TargetAll = this->NinjaOutputPath("all");
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
+  this->DisableCleandead = false;
 
   this->PolicyCMP0058 =
     this->LocalGenerators[0]->GetMakefile()->GetPolicyStatus(
@@ -581,8 +588,8 @@ void cmGlobalNinjaGenerator::CleanMetaData()
   // wrote out. Ninja-Multi doesn't have a single `build.ninja` we can use that
   // is the union of all generated configurations, so we can't run it reliably
   // in that case.
-  if (this->NinjaSupportsCleanDeadTool && expectBuildManifest &&
-      !missingBuildManifest) {
+  if (this->NinjaSupportsCleanDeadTool && !this->DisableCleandead &&
+      expectBuildManifest && !missingBuildManifest) {
     run_ninja_tool({ "cleandead" });
   }
   // The `recompact` tool loads the manifest. As above, we don't have a single
