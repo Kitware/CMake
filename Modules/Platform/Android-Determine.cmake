@@ -202,8 +202,13 @@ if(NOT CMAKE_ANDROID_NDK AND NOT CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
 endif()
 
 if(CMAKE_ANDROID_NDK)
-  # NDK >= 18 has abis.cmake and platforms.cmake.
+  # NDK >= 18 has platforms.cmake. It provides:
+  #   NDK_MIN_PLATFORM_LEVEL
+  #   NDK_MAX_PLATFORM_LEVEL
   include("${CMAKE_ANDROID_NDK}/build/cmake/platforms.cmake" OPTIONAL RESULT_VARIABLE _INCLUDED_PLATFORMS)
+  # NDK >= 18 has abis.cmake. It provides:
+  #   NDK_KNOWN_DEVICE_ABI32S
+  #   NDK_KNOWN_DEVICE_ABI64S
   include("${CMAKE_ANDROID_NDK}/build/cmake/abis.cmake" OPTIONAL RESULT_VARIABLE _INCLUDED_ABIS)
 endif()
 
@@ -239,6 +244,10 @@ if(CMAKE_ANDROID_NDK)
 else()
   set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "")
   set(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED "")
+endif()
+
+if(_INCLUDED_ABIS)
+  set(_ANDROID_KNOWN_ABIS ${NDK_KNOWN_DEVICE_ABI32S} ${NDK_KNOWN_DEVICE_ABI64S})
 endif()
 
 # https://developer.android.com/ndk/guides/abis.html
@@ -307,7 +316,7 @@ if(NOT CMAKE_ANDROID_ARCH_ABI)
   elseif(_INCLUDED_ABIS)
     # Default to the oldest ARM ABI.
     foreach(abi armeabi armeabi-v7a arm64-v8a)
-      if("${abi}" IN_LIST NDK_DEFAULT_ABIS)
+      if("${abi}" IN_LIST _ANDROID_KNOWN_ABIS)
         set(CMAKE_ANDROID_ARCH_ABI "${abi}")
         break()
       endif()
@@ -353,10 +362,10 @@ if(NOT CMAKE_ANDROID_ARCH_ABI)
     endif()
   endif()
 endif()
-if(_INCLUDED_ABIS AND NOT CMAKE_ANDROID_ARCH_ABI IN_LIST NDK_DEFAULT_ABIS)
+if(_INCLUDED_ABIS AND NOT CMAKE_ANDROID_ARCH_ABI IN_LIST _ANDROID_KNOWN_ABIS)
   message(FATAL_ERROR
     "Android: ABI '${CMAKE_ANDROID_ARCH_ABI}' is not supported by the NDK.\n"
-    "Supported ABIS: ${NDK_DEFAULT_ABIS}."
+    "Supported ABIS: ${_ANDROID_KNOWN_ABIS}."
   )
 endif()
 set(CMAKE_ANDROID_ARCH "${_ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_ARCH}")
