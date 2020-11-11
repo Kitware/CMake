@@ -1,8 +1,6 @@
 DASHBOARD_TEST_FROM_CTEST
 -------------------------
 
-.. versionadded:: 3.10
-
 .. include:: ENV_VAR.txt
 
 Environment variable that will exist when a test executed by :manual:`ctest(1)`

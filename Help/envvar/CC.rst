@@ -1,8 +1,6 @@
 CC
 --
 
-.. versionadded:: 3.10
-
 .. include:: ENV_VAR.txt
 
 Preferred executable for compiling ``C`` language files. Will only be used by
