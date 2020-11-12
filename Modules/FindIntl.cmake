@@ -15,7 +15,9 @@ installation in several variables.  General variables::
   Intl_FOUND - true if the libintl headers and libraries were found
   Intl_INCLUDE_DIRS - the directory containing the libintl headers
   Intl_LIBRARIES - libintl libraries to be linked
-  Intl::Intl - imported target for Intl
+
+.. versionadded:: 3.20
+  This module defines :prop_tgt:`IMPORTED` target ``Intl::Intl``.
 
 The following cache variables may also be set::
 
@@ -25,6 +27,10 @@ The following cache variables may also be set::
   Intl_HAVE_DCGETTEXT_BUILTIN - check if dcgettext is in the C library
   Intl_IS_BUILTIN - whether intl is a part of the C library determined
       from the result of Intl_HAVE_GETTEXT_BUILTIN and Intl_HAVE_DCGETTEXT_BUILTIN
+
+.. versionadded:: 3.20
+  Added the ``Intl_HAVE_GETTEXT_BUILTIN``, ``Intl_HAVE_DCGETTEXT_BUILTIN`` and
+  ``Intl_IS_BUILTIN`` variables.
 
 .. note::
   On some platforms, such as Linux with GNU libc, the gettext

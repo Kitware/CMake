@@ -21,6 +21,8 @@ The following variables may be set to influence this module's behavior:
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.1
+
 This module defines the following :ref:`Imported Targets <Imported Targets>`:
 
 
@@ -54,6 +56,9 @@ This module defines the following variables:
   GLEW minor version
 ``GLEW_VERSION_MICRO``
   GLEW micro version
+
+.. versionadded:: 3.7
+  Debug and Release variants are found separately.
 
 #]=======================================================================]
 

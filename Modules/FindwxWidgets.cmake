@@ -14,6 +14,12 @@ package:
 
 find_package(wxWidgets COMPONENTS core base ... OPTIONAL_COMPONENTS net ...)
 
+.. versionadded:: 3.4
+  Support for :command:`find_package` version argument; ``webview`` component.
+
+.. versionadded:: 3.14
+  ``OPTIONAL_COMPONENTS`` support.
+
 There are two search branches: a windows style and a unix style.  For
 windows, the following variables are searched for and set to defaults
 in case of multiple choices.  Change them if the defaults are not
@@ -82,6 +88,9 @@ and unix style:
                                "`wx-config --cxxflags`".
   wxWidgets_USE_FILE         - Convenience include file.
 
+.. versionadded:: 3.11
+  The following environment variables can be used as hints: ``WX_CONFIG``,
+  ``WXRC_CMD``.
 
 
 Sample usage:

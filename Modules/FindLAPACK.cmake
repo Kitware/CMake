@@ -45,11 +45,32 @@ The following variables may be set to influence this module's behavior:
   * ``Arm_ilp64_mp``
   * ``Generic``
 
+  .. versionadded:: 3.6
+    ``OpenBLAS`` support.
+
+  .. versionadded:: 3.11
+    ``FLAME`` support.
+
+    .. versionadded:: 3.13
+      Added ILP64 MKL variants (``Intel10_64ilp``, ``Intel10_64ilp_seq``).
+
+  .. versionadded:: 3.17
+    Added single dynamic library MKL variant (``Intel10_64_dyn``).
+
+  .. versionadded:: 3.18
+    Arm Performance Libraries support (``Arm``, ``Arm_mp``, ``Arm_ilp64``,
+    ``Arm_ilp64_mp``).
+
+  .. versionadded:: 3.19
+    ``FlexiBLAS`` support.
+
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95/LAPACK95 interfaces
 
 Imported targets
 ^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.18
 
 This module defines the following :prop_tgt:`IMPORTED` target:
 

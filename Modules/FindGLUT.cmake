@@ -10,6 +10,8 @@ Find OpenGL Utility Toolkit (GLUT) library and include files.
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.1
+
 This module defines the :prop_tgt:`IMPORTED` targets:
 
 ``GLUT::GLUT``
@@ -33,6 +35,9 @@ Also defined, but not for general use are:
   GLUT_glut_LIBRARY = the full path to the glut library.
   GLUT_Xmu_LIBRARY  = the full path to the Xmu library.
   GLUT_Xi_LIBRARY   = the full path to the Xi Library.
+
+.. versionadded:: 3.13
+  Debug and Release variants are found separately.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)

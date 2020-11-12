@@ -80,19 +80,28 @@ Possible compiler identifiers are documented with the
 Available features in this version of CMake are listed in the
 :prop_gbl:`CMAKE_C_KNOWN_FEATURES` and
 :prop_gbl:`CMAKE_CXX_KNOWN_FEATURES` global properties.
-The ``{c,cxx}_std_*`` meta-features are ignored if requested.
-
 See the :manual:`cmake-compile-features(7)` manual for information on
 compile features.
 
-``BARE_FEATURES`` will define the compatibility macros with the name used in
-newer versions of the language standard, so the code can use the new feature
-name unconditionally.
+.. versionadded:: 3.2
+  Added ``MSVC`` and ``AppleClang`` compiler support.
 
-``ALLOW_UNKNOWN_COMPILERS`` and ``ALLOW_UNKNOWN_COMPILER_VERSIONS`` cause
-the module to generate conditions that treat unknown compilers as simply
-lacking all features.  Without these options the default behavior is to
-generate a ``#error`` for unknown compilers and versions.
+.. versionadded:: 3.6
+  Added ``Intel`` compiler support.
+
+.. versionchanged:: 3.8
+  The ``{c,cxx}_std_*`` meta-features are ignored if requested.
+
+.. versionadded:: 3.8
+  ``ALLOW_UNKNOWN_COMPILERS`` and ``ALLOW_UNKNOWN_COMPILER_VERSIONS`` cause
+  the module to generate conditions that treat unknown compilers as simply
+  lacking all features.  Without these options the default behavior is to
+  generate a ``#error`` for unknown compilers and versions.
+
+.. versionadded:: 3.12
+  ``BARE_FEATURES`` will define the compatibility macros with the name used in
+  newer versions of the language standard, so the code can use the new feature
+  name unconditionally.
 
 Feature Test Macros
 ===================

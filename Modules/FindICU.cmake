@@ -18,6 +18,9 @@ Note that on Windows ``data`` is named ``dt`` and ``i18n`` is named
 ``in``; any of the names may be used, and the appropriate
 platform-specific library name will be automatically selected.
 
+.. versionadded:: 3.11
+  Added support for static libraries on Windows.
+
 This module reports information about the ICU installation in
 several variables.  General variables::
 

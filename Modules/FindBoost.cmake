@@ -24,6 +24,18 @@ This module finds headers and requested component libraries OR a CMake
 package configuration file provided by a "Boost CMake" build.  For the
 latter case skip to the :ref:`Boost CMake` section below.
 
+.. versionadded:: 3.7
+  ``bzip2`` and ``zlib`` components (Windows only).
+
+.. versionadded:: 3.11
+  The ``OPTIONAL_COMPONENTS`` option.
+
+.. versionadded:: 3.13
+  ``stacktrace_*`` components.
+
+.. versionadded:: 3.19
+  ``bzip2`` and ``zlib`` components on all platforms.
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -55,8 +67,12 @@ This module defines the following variables:
   Boost version number in ``X.Y.Z`` format.
 
 ``Boost_VERSION``
-  If :policy:`CMP0093` policy is set to ``NEW``, same as ``Boost_VERSION_STRING``.
-  If :policy:`CMP0093` policy is set to ``OLD`` or unset, same as ``Boost_VERSION_MACRO``.
+  Boost version number in ``X.Y.Z`` format (same as ``Boost_VERSION_STRING``).
+
+  .. versionchanged:: 3.15
+    In previous CMake versions, this variable used the raw version string
+    from the Boost header (same as ``Boost_VERSION_MACRO``).
+    See policy :policy:`CMP0093`.
 
 ``Boost_LIB_VERSION``
   Version string appended to library filenames.
@@ -78,14 +94,8 @@ This module defines the following variables:
   information about Boost's automatic linking
   displayed during compilation
 
-Note that Boost Python components require a Python version suffix
-(Boost 1.67 and later), e.g. ``python36`` or ``python27`` for the
-versions built against Python 3.6 and 2.7, respectively.  This also
-applies to additional components using Python including
-``mpi_python`` and ``numpy``.  Earlier Boost releases may use
-distribution-specific suffixes such as ``2``, ``3`` or ``2.7``.
-These may also be used as suffixes, but note that they are not
-portable.
+.. versionadded:: 3.15
+  The ``Boost_VERSION_<PART>`` variables.
 
 Cache variables
 ^^^^^^^^^^^^^^^
@@ -106,6 +116,10 @@ Search results are saved persistently in CMake cache entries:
 
 ``Boost_<COMPONENT>_LIBRARY_RELEASE``
   Component ``<COMPONENT>`` library release variant.
+
+.. versionadded:: 3.3
+  Per-configuration variables ``Boost_LIBRARY_DIR_RELEASE`` and
+  ``Boost_LIBRARY_DIR_DEBUG``.
 
 Hints
 ^^^^^
@@ -151,11 +165,16 @@ search results affected by the changes and searches again.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.5
+
 This module defines the following :prop_tgt:`IMPORTED` targets:
 
-``Boost::headers``
+``Boost::boost``
   Target for header-only dependencies. (Boost include directory).
-  ``Boost::boost`` is an alias.
+
+``Boost::headers``
+  .. versionadded:: 3.15
+    Alias for ``Boost::boost``.
 
 ``Boost::<component>``
   Target for specific component dependency (shared or static library);
@@ -193,10 +212,14 @@ Users or projects may tell this module which variant to find by
 setting variables:
 
 ``Boost_USE_DEBUG_LIBS``
+  .. versionadded:: 3.10
+
   Set to ``ON`` or ``OFF`` to specify whether to search and use the debug
   libraries.  Default is ``ON``.
 
 ``Boost_USE_RELEASE_LIBS``
+  .. versionadded:: 3.10
+
   Set to ``ON`` or ``OFF`` to specify whether to search and use the release
   libraries.  Default is ``ON``.
 
@@ -229,15 +252,22 @@ setting variables:
 
 ``Boost_COMPILER``
   Set to the compiler-specific library suffix (e.g. ``-gcc43``).  Default is
-  auto-computed for the C++ compiler in use.  A list may be used if multiple
-  compatible suffixes should be tested for, in decreasing order of preference.
+  auto-computed for the C++ compiler in use.
+
+  .. versionchanged:: 3.9
+    A list may be used if multiple compatible suffixes should be tested for,
+    in decreasing order of preference.
 
 ``Boost_LIB_PREFIX``
+  .. versionadded:: 3.18
+
   Set to the platform-specific library name prefix (e.g. ``lib``) used by
   Boost static libs.  This is needed only on platforms where CMake does not
   know the prefix by default.
 
 ``Boost_ARCHITECTURE``
+  .. versionadded:: 3.13
+
   Set to the architecture-specific library suffix (e.g. ``-x64``).
   Default is auto-computed for the C++ compiler in use.
 

@@ -5,12 +5,6 @@
 FindGit
 -------
 
-The module defines the following ``IMPORTED`` targets (when
-:prop_gbl:`CMAKE_ROLE` is ``PROJECT``):
-
-``Git::Git``
-  Executable of the Git command-line client.
-
 The module defines the following variables:
 
 ``GIT_EXECUTABLE``
@@ -19,6 +13,13 @@ The module defines the following variables:
   True if the Git command-line client was found.
 ``GIT_VERSION_STRING``
   The version of Git found.
+
+.. versionadded:: 3.14
+  The module defines the following ``IMPORTED`` targets (when
+  :prop_gbl:`CMAKE_ROLE` is ``PROJECT``):
+
+``Git::Git``
+  Executable of the Git command-line client.
 
 Example usage:
 

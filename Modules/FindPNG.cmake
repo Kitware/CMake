@@ -10,6 +10,8 @@ Find libpng, the official reference library for the PNG image format.
 Imported targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.5
+
 This module defines the following :prop_tgt:`IMPORTED` target:
 
 ``PNG::PNG``

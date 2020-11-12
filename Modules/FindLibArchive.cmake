@@ -22,6 +22,10 @@ The module defines the following ``IMPORTED`` targets:
 ::
 
   LibArchive::LibArchive  - target for linking against libarchive
+
+.. versionadded:: 3.6
+  Support for new libarchive 3.2 version string format.
+
 #]=======================================================================]
 
 find_path(LibArchive_INCLUDE_DIR

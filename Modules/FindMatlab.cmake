@@ -17,6 +17,9 @@ can also be used:
 * to retrieve various information from Matlab (mex extensions, versions and
   release queries, ...)
 
+.. versionadded:: 3.12
+  Added Matlab Compiler Runtime (MCR) support.
+
 The module supports the following components:
 
 * ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the ``ENG`` and ``MAT``
@@ -27,6 +30,17 @@ The module supports the following components:
 * ``MEX_COMPILER`` the MEX compiler.
 * ``MCC_COMPILER`` the MCC compiler, included with the Matlab Compiler add-on.
 * ``SIMULINK`` the Simulink environment.
+
+.. versionadded:: 3.7
+  Added the ``MAT_LIBRARY`` component.
+
+.. versionadded:: 3.13
+  Added the ``ENGINE_LIBRARY``, ``DATAARRAY_LIBRARY`` and ``MCC_COMPILER``
+  components.
+
+.. versionchanged:: 3.14
+  Removed the ``MX_LIBRARY``, ``ENGINE_LIBRARY`` and ``DATAARRAY_LIBRARY``
+  components.  These libraries are found unconditionally.
 
 .. note::
 
@@ -107,8 +121,12 @@ Result variables
   Matlab matrix library. Available only if the component ``MAT_LIBRARY``
   is requested.
 ``Matlab_ENGINE_LIBRARY``
+  .. versionadded:: 3.13
+
   Matlab C++ engine library, always available for R2018a and newer.
 ``Matlab_DATAARRAY_LIBRARY``
+  .. versionadded:: 3.13
+
   Matlab C++ data array library, always available for R2018a and newer.
 ``Matlab_LIBRARIES``
   the whole set of libraries of Matlab
@@ -116,6 +134,8 @@ Result variables
   the mex compiler of Matlab. Currently not used.
   Available only if the component ``MEX_COMPILER`` is requested.
 ``Matlab_MCC_COMPILER``
+  .. versionadded:: 3.13
+
   the mcc compiler of Matlab. Included with the Matlab Compiler add-on.
   Available only if the component ``MCC_COMPILER`` is requested.
 
@@ -923,14 +943,26 @@ endfunction()
     the same folder without any processing, with the same name as the final
     mex file, and with extension `.m`. In that case, typing ``help <name>``
     in Matlab prints the documentation contained in this file.
-  ``R2017b`` or ``R2018a`` may be given to specify the version of the C API
+  ``R2017b`` or ``R2018a``
+    .. versionadded:: 3.14
+
+    May be given to specify the version of the C API
     to use: ``R2017b`` specifies the traditional (separate complex) C API,
     and corresponds to the ``-R2017b`` flag for the `mex` command. ``R2018a``
     specifies the new interleaved complex C API, and corresponds to the
     ``-R2018a`` flag for the `mex` command. Ignored if MATLAB version prior
     to R2018a. Defaults to ``R2017b``.
-  ``MODULE`` or ``SHARED`` may be given to specify the type of library to be
-    created. ``EXECUTABLE`` may be given to create an executable instead of
+
+  ``MODULE`` or ``SHARED``
+    .. versionadded:: 3.7
+
+    May be given to specify the type of library to be
+    created.
+
+  ``EXECUTABLE``
+    .. versionadded:: 3.7
+
+    May be given to create an executable instead of
     a library. If no type is given explicitly, the type is ``SHARED``.
   ``EXCLUDE_FROM_ALL``
     This option has the same meaning as for :prop_tgt:`EXCLUDE_FROM_ALL` and

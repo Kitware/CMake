@@ -34,7 +34,7 @@ The following components are supported:
 * ``NumPy``: search for NumPy include directories.
 
 .. versionadded:: 3.14
-  Added ``NumPy`` component.
+  Added the ``NumPy`` component.
 
 If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 

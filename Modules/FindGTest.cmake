@@ -7,10 +7,14 @@ FindGTest
 
 Locate the Google C++ Testing Framework.
 
+.. versionadded:: 3.20
+  Upstream ``GTestConfig.cmake`` is used if possible.
+
 Imported targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :prop_tgt:`IMPORTED` targets:
+.. versionadded:: 3.20
+  This module defines the following :prop_tgt:`IMPORTED` targets:
 
 ``GTest::gtest``
   The Google Test ``gtest`` library, if found; adds Thread::Thread
@@ -18,8 +22,9 @@ This module defines the following :prop_tgt:`IMPORTED` targets:
 ``GTest::gtest_main``
   The Google Test ``gtest_main`` library, if found
 
-For backwards compatibility, this module defines additionally the
-following deprecated :prop_tgt:`IMPORTED` targets:
+.. deprecated:: 3.20
+  For backwards compatibility, this module defines additionally the
+  following deprecated :prop_tgt:`IMPORTED` targets (available since 3.5):
 
 ``GTest::GTest``
   The Google Test ``gtest`` library, if found; adds Thread::Thread
@@ -81,6 +86,10 @@ Deeper integration with CTest
 
 See :module:`GoogleTest` for information on the :command:`gtest_add_tests`
 and :command:`gtest_discover_tests` commands.
+
+.. versionchanged:: 3.9
+  Previous CMake versions defined :command:`gtest_add_tests` macro in this
+  module.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/GoogleTest.cmake)

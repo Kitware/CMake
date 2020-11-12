@@ -27,14 +27,17 @@ may be set prior to including the module to adjust behavior:
   tools even if the release runtime libraries are also available.
 
 ``CMAKE_INSTALL_UCRT_LIBRARIES``
+  .. versionadded:: 3.6
+
   Set to TRUE to install the Windows Universal CRT libraries for
   app-local deployment (e.g. to Windows XP).  This is meaningful
   only with MSVC from Visual Studio 2015 or higher.
 
-  One may set a ``CMAKE_WINDOWS_KITS_10_DIR`` *environment variable*
-  to an absolute path to tell CMake to look for Windows 10 SDKs in
-  a custom location.  The specified directory is expected to contain
-  ``Redist/ucrt/DLLs/*`` directories.
+  .. versionadded:: 3.9
+    One may set a ``CMAKE_WINDOWS_KITS_10_DIR`` *environment variable*
+    to an absolute path to tell CMake to look for Windows 10 SDKs in
+    a custom location.  The specified directory is expected to contain
+    ``Redist/ucrt/DLLs/*`` directories.
 
 ``CMAKE_INSTALL_MFC_LIBRARIES``
   Set to TRUE to install the MSVC MFC runtime libraries.
@@ -53,8 +56,13 @@ may be set prior to including the module to adjust behavior:
   not provide the redistributable files.)
 
 ``CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT``
+  .. versionadded:: 3.3
+
   Specify the :command:`install(PROGRAMS)` command ``COMPONENT``
   option.  If not specified, no such option will be used.
+
+.. versionadded:: 3.10
+  Support for installing Intel compiler runtimes.
 #]=======================================================================]
 
 cmake_policy(PUSH)

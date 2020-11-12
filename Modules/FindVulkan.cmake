@@ -16,8 +16,9 @@ IMPORTED Targets
 This module defines :prop_tgt:`IMPORTED` target ``Vulkan::Vulkan``, if
 Vulkan has been found.
 
-This module defines :prop_tgt:`IMPORTED` target ``Vulkan::glslc``, if
-Vulkan and the GLSLC SPIR-V compiler has been found.
+.. versionadded:: 3.19
+  This module defines :prop_tgt:`IMPORTED` target ``Vulkan::glslc``, if
+  Vulkan and the GLSLC SPIR-V compiler has been found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -36,6 +37,8 @@ The module will also define three cache variables::
 
 Hints
 ^^^^^
+
+.. versionadded:: 3.18
 
 The ``VULKAN_SDK`` environment variable optionally specifies the
 location of the Vulkan SDK root directory for the given

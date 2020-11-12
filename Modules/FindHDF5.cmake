@@ -32,6 +32,9 @@ static link to a dynamic link for ``HDF5`` and all of it's dependencies.
 To use this feature, make sure that the ``HDF5_USE_STATIC_LIBRARIES``
 variable is set before the call to find_package.
 
+.. versionadded:: 3.10
+  Support for ``HDF5_USE_STATIC_LIBRARIES`` on Windows.
+
 Both the serial and parallel ``HDF5`` wrappers are considered and the first
 directory to contain either one will be used.  In the event that both appear
 in the same directory the serial version is preferentially selected. This
@@ -51,7 +54,8 @@ This module will set the following variables in your project:
 ``HDF5_FOUND``
   HDF5 was found on the system
 ``HDF5_VERSION``
-  HDF5 library version
+  .. versionadded:: 3.3
+    HDF5 library version
 ``HDF5_INCLUDE_DIRS``
   Location of the HDF5 header files
 ``HDF5_DEFINITIONS``
@@ -128,12 +132,18 @@ Hints
 The following variables can be set to guide the search for HDF5 libraries and includes:
 
 ``HDF5_PREFER_PARALLEL``
+  .. versionadded:: 3.4
+
   set ``true`` to prefer parallel HDF5 (by default, serial is preferred)
 
 ``HDF5_FIND_DEBUG``
+  .. versionadded:: 3.9
+
   Set ``true`` to get extra debugging output.
 
 ``HDF5_NO_FIND_PACKAGE_CONFIG_FILE``
+  .. versionadded:: 3.8
+
   Set ``true`` to skip trying to find ``hdf5-config.cmake``.
 #]=======================================================================]
 

@@ -4,12 +4,6 @@ FindCUDA
 
 .. deprecated:: 3.10
 
-  Superseded by first-class support for the CUDA language in CMake.
-  Superseded by the :module:`FindCUDAToolkit` for CUDA toolkit libraries.
-
-Replacement
-^^^^^^^^^^^
-
 It is no longer necessary to use this module or call ``find_package(CUDA)``
 for compiling CUDA code. Instead, list ``CUDA`` among the languages named
 in the top-level call to the :command:`project` command, or call the
@@ -17,9 +11,10 @@ in the top-level call to the :command:`project` command, or call the
 Then one can add CUDA (``.cu``) sources to programs directly
 in calls to :command:`add_library` and :command:`add_executable`.
 
-To find and use the CUDA toolkit libraries the :module:`FindCUDAToolkit`
-module has superseded this module.  It works whether or not the ``CUDA``
-language is enabled.
+.. versionadded:: 3.17
+  To find and use the CUDA toolkit libraries the :module:`FindCUDAToolkit`
+  module has superseded this module.  It works whether or not the ``CUDA``
+  language is enabled.
 
 Documentation of Deprecated Usage
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -29,6 +24,9 @@ Tools for building CUDA C files: libraries and build dependencies.
 This script locates the NVIDIA CUDA C tools.  It should work on Linux,
 Windows, and macOS and should be reasonably up to date with CUDA C
 releases.
+
+.. versionadded:: 3.19
+  QNX support.
 
 This script makes use of the standard :command:`find_package` arguments of
 ``<VERSION>``, ``REQUIRED`` and ``QUIET``.  ``CUDA_FOUND`` will report if an
@@ -94,6 +92,8 @@ or ``cuda_wrap_srcs()``:
   when ``CUDA_BUILD_EMULATION`` is ``TRUE``.
 
 ``CUDA_LINK_LIBRARIES_KEYWORD`` (Default: ``""``)
+  .. versionadded:: 3.9
+
   The ``<PRIVATE|PUBLIC|INTERFACE>`` keyword to use for internal
   :command:`target_link_libraries` calls. The default is to use no keyword which
   uses the old "plain" form of :command:`target_link_libraries`. Note that is matters
@@ -116,12 +116,18 @@ or ``cuda_wrap_srcs()``:
   the host compiler is constructed with one or more visual studio macros
   such as ``$(VCInstallDir)``, that expands out to the path when
   the command is run from within VS.
-  If the :envvar:`CUDAHOSTCXX` environment variable is set it will
-  be used as the default.
+
+  .. versionadded:: 3.13
+    If the :envvar:`CUDAHOSTCXX` environment variable is set it will
+    be used as the default.
 
 ``CUDA_NVCC_FLAGS``, ``CUDA_NVCC_FLAGS_<CONFIG>``
   Additional NVCC command line arguments.  NOTE: multiple arguments must be
   semi-colon delimited (e.g. ``--compiler-options;-Wall``)
+
+  .. versionadded:: 3.6
+    Contents of these variables may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 ``CUDA_PROPAGATE_HOST_FLAGS`` (Default: ``ON``)
   Set to ``ON`` to propagate :variable:`CMAKE_{C,CXX}_FLAGS <CMAKE_<LANG>_FLAGS>` and their configuration
@@ -142,6 +148,8 @@ or ``cuda_wrap_srcs()``:
   ``cuda_link_separable_compilation_objects()`` should be called.
 
 ``CUDA_SOURCE_PROPERTY_FORMAT``
+  .. versionadded:: 3.3
+
   If this source file property is set, it can override the format specified
   to ``cuda_wrap_srcs()`` (``OBJ``, ``PTX``, ``CUBIN``, or ``FATBIN``).  If an input source file
   is not a ``.cu`` file, setting this file will cause it to be treated as a ``.cu``
@@ -149,6 +157,8 @@ or ``cuda_wrap_srcs()``:
   this property.
 
 ``CUDA_USE_STATIC_CUDA_RUNTIME`` (Default: ``ON``)
+  .. versionadded:: 3.3
+
   When enabled the static version of the CUDA runtime library will be used
   in ``CUDA_LIBRARIES``.  If the version of CUDA configured doesn't support
   this option, then it will be silently disabled.
@@ -227,11 +237,15 @@ Returns a list of ``PTX`` files generated from the input source files.
 
   cuda_compile_fatbin(<generated_files> <file>... [OPTIONS ...])
 
+.. versionadded:: 3.1
+
 Returns a list of ``FATBIN`` files generated from the input source files.
 
 .. code-block:: cmake
 
   cuda_compile_cubin(<generated_files> <file>... [OPTIONS ...])
+
+.. versionadded:: 3.1
 
 Returns a list of ``CUBIN`` files generated from the input source files.
 
@@ -374,7 +388,8 @@ The script defines the following variables:
   Full version in the ``X.Y`` format.
 
 ``CUDA_HAS_FP16``
-  Whether a short float (``float16``, ``fp16``) is supported.
+  .. versionadded:: 3.6
+    Whether a short float (``float16``, ``fp16``) is supported.
 
 ``CUDA_TOOLKIT_ROOT_DIR``
   Path to the CUDA Toolkit (defined if not set).
@@ -407,7 +422,8 @@ The script defines the following variables:
   Only available for CUDA version 5.5+.
 
 ``CUDA_cudadevrt_LIBRARY``
-  Device runtime library.  Required for separable compilation.
+  .. versionadded:: 3.7
+    Device runtime library.  Required for separable compilation.
 
 ``CUDA_cupti_LIBRARY``
   CUDA Profiling Tools Interface library.
@@ -418,8 +434,9 @@ The script defines the following variables:
   Only available for CUDA version 3.2+.
 
 ``CUDA_cusolver_LIBRARY``
-  CUDA Direct Solver library.
-  Only available for CUDA version 7.0+.
+  .. versionadded:: 3.2
+    CUDA Direct Solver library.
+    Only available for CUDA version 7.0+.
 
 ``CUDA_cusparse_LIBRARY``
   CUDA Sparse Matrix library.
@@ -493,12 +510,14 @@ The script defines the following variables:
   Windows only.
 
 ``CUDA_nvToolsExt_LIBRARY``
-  NVIDA CUDA Tools Extension library.
-  Available for CUDA version 5+.
+  .. versionadded:: 3.16
+    NVIDA CUDA Tools Extension library.
+    Available for CUDA version 5+.
 
 ``CUDA_OpenCL_LIBRARY``
-  NVIDA CUDA OpenCL library.
-  Available for CUDA version 5+.
+  .. versionadded:: 3.16
+    NVIDA CUDA OpenCL library.
+    Available for CUDA version 5+.
 
 #]=======================================================================]
 

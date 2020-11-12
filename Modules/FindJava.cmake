@@ -13,6 +13,9 @@ to specify a Java installation prefix explicitly.
 
 See also the :module:`FindJNI` module to find Java Native Interface (JNI).
 
+.. versionadded:: 3.10
+  Added support for Java 9+ version parsing.
+
 Specify one or more of the following components as you call this find module. See example below.
 
 ::
@@ -41,7 +44,9 @@ This module sets the following result variables:
   Java_VERSION_TWEAK        = The tweak version of the package found (after '_')
   Java_VERSION              = This is set to: $major[.$minor[.$patch[.$tweak]]]
 
-
+.. versionadded:: 3.4
+  Added the ``Java_IDLJ_EXECUTABLE`` and ``Java_JARSIGNER_EXECUTABLE``
+  variables.
 
 The minimum required version of Java can be specified using the
 :command:`find_package` syntax, e.g.

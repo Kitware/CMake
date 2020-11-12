@@ -33,6 +33,9 @@ property.
 It makes no sense to use this module when :policy:`CMP0069` is set to ``OLD`` so
 module will return error in this case. See policy :policy:`CMP0069` for details.
 
+.. versionadded:: 3.13
+  Add support for Visual Studio generators.
+
 Examples
 ^^^^^^^^
 
