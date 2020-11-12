@@ -436,6 +436,16 @@ find_program(CPACK_IFW_DEVTOOL_EXECUTABLE
   )
 mark_as_advanced(CPACK_IFW_DEVTOOL_EXECUTABLE)
 
+# Look for 'archivegen'
+
+find_program(CPACK_IFW_ARCHIVEGEN_EXECUTABLE
+  NAMES archivegen
+  PATHS ${_CPACK_IFW_PATHS}
+  PATH_SUFFIXES ${_CPACK_IFW_SUFFIXES}
+  DOC "QtIFW archivegen command line client"
+  )
+mark_as_advanced(CPACK_IFW_ARCHIVEGEN_EXECUTABLE)
+
 #
 ## Next code is included only once
 #

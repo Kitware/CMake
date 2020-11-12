@@ -231,6 +231,10 @@ The following variables provide the locations of the QtIFW
 command-line tools as discovered by the module :module:`CPackIFW`.
 These variables are cached, and may be configured if needed.
 
+.. variable:: CPACK_IFW_ARCHIVEGEN_EXECUTABLE
+
+ The path to ``archivegen``.
+
 .. variable:: CPACK_IFW_BINARYCREATOR_EXECUTABLE
 
  The path to ``binarycreator``.
