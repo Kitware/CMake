@@ -516,9 +516,16 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_OSX_SYSROOT MATCHES "^$|[Mm][Aa][Cc][Oo][Ss]")
       # When targeting macOS, use only the host architecture.
-      set(id_archs [[ARCHS = "$(NATIVE_ARCH_ACTUAL)";]])
+      if (_CMAKE_APPLE_ARCHS_DEFAULT)
+        set(id_archs "ARCHS = \"${_CMAKE_APPLE_ARCHS_DEFAULT}\";")
+        set(id_arch_active "ONLY_ACTIVE_ARCH = NO;")
+      else()
+        set(id_archs [[ARCHS = "$(NATIVE_ARCH_ACTUAL)";]])
+        set(id_arch_active "ONLY_ACTIVE_ARCH = YES;")
+      endif()
     else()
       set(id_archs "")
+      set(id_arch_active "ONLY_ACTIVE_ARCH = YES;")
     endif()
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/Xcode-3.pbxproj.in
       ${id_dir}/CompilerId${lang}.xcodeproj/project.pbxproj @ONLY)
