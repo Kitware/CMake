@@ -48,36 +48,36 @@
 
 ### Fedora
 
-.fedora31:
-    image: "kitware/cmake:ci-fedora31-x86_64-2020-10-22"
+.fedora33:
+    image: "kitware/cmake:ci-fedora33-x86_64-2020-11-13"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
 
 #### Lint builds
 
-.fedora31_tidy:
-    extends: .fedora31
+.fedora33_tidy:
+    extends: .fedora33
 
     variables:
-        CMAKE_CONFIGURATION: fedora31_tidy
+        CMAKE_CONFIGURATION: fedora33_tidy
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMake_SKIP_INSTALL: 1
 
-.fedora31_sphinx:
-    extends: .fedora31
+.fedora33_sphinx:
+    extends: .fedora33
 
     variables:
-        CMAKE_CONFIGURATION: fedora31_sphinx
+        CMAKE_CONFIGURATION: fedora33_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
         CMake_SKIP_INSTALL: 1
 
-.fedora31_sphinx_package:
-    extends: .fedora31
+.fedora33_sphinx_package:
+    extends: .fedora33
 
     variables:
-        CMAKE_CONFIGURATION: fedora31_sphinx_package
+        CMAKE_CONFIGURATION: fedora33_sphinx_package
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
 
 #### Build and test
@@ -89,26 +89,26 @@
         CMAKE_CONFIGURATION: debian10_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora31_ninja:
-    extends: .fedora31
+.fedora33_ninja:
+    extends: .fedora33
 
     variables:
-        CMAKE_CONFIGURATION: fedora31_ninja
+        CMAKE_CONFIGURATION: fedora33_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora31_ninja_multi:
-    extends: .fedora31
+.fedora33_ninja_multi:
+    extends: .fedora33
 
     variables:
-        CMAKE_CONFIGURATION: fedora31_ninja_multi
+        CMAKE_CONFIGURATION: fedora33_ninja_multi
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.fedora31_makefiles:
-    extends: .fedora31
+.fedora33_makefiles:
+    extends: .fedora33
 
     variables:
-        CMAKE_CONFIGURATION: fedora31_makefiles
+        CMAKE_CONFIGURATION: fedora33_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
