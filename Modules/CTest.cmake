@@ -179,12 +179,6 @@ if(BUILD_TESTING)
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Rational Software\\Purify\\Setup;InstallFolder]"
     DOC "Path to the memory checking command, used for memory error detection."
     )
-  find_program(SLURM_SBATCH_COMMAND sbatch DOC
-    "Path to the SLURM sbatch executable"
-    )
-  find_program(SLURM_SRUN_COMMAND srun DOC
-    "Path to the SLURM srun executable"
-    )
   set(MEMORYCHECK_SUPPRESSIONS_FILE "" CACHE FILEPATH
     "File that contains suppressions for the memory checker")
   find_program(COVERAGE_COMMAND gcov DOC
@@ -263,8 +257,6 @@ if(BUILD_TESTING)
     MAKECOMMAND
     MEMORYCHECK_COMMAND
     MEMORYCHECK_SUPPRESSIONS_FILE
-    SLURM_SBATCH_COMMAND
-    SLURM_SRUN_COMMAND
     SITE
     SVNCOMMAND
     )

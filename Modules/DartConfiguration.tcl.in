@@ -83,10 +83,6 @@ MemoryCheckSuppressionFile: @MEMORYCHECK_SUPPRESSIONS_FILE@
 CoverageCommand: @COVERAGE_COMMAND@
 CoverageExtraFlags: @COVERAGE_EXTRA_FLAGS@
 
-# Cluster commands
-SlurmBatchCommand: @SLURM_SBATCH_COMMAND@
-SlurmRunCommand: @SLURM_SRUN_COMMAND@
-
 # Testing options
 # TimeOut is the amount of time in seconds to wait for processes
 # to complete during testing.  After TimeOut seconds, the
