@@ -55,16 +55,14 @@ std::string const& cmSourceFile::GetOrDetermineLanguage()
   }
 
   // Perform computation needed to get the language if necessary.
-  if (this->FullPath.empty() && this->Language.empty()) {
-    // If a known extension is given or a known full path is given
-    // then trust that the current extension is sufficient to
-    // determine the language.  This will fail only if the user
-    // specifies a full path to the source but leaves off the
-    // extension, which is kind of weird.
-    if (this->Location.ExtensionIsAmbiguous() &&
+  if (this->Language.empty()) {
+    // If a known extension is given or a known full path is given then trust
+    // that the current extension is sufficient to determine the language. This
+    // will fail only if the user specifies a full path to the source but
+    // leaves off the extension, which is kind of weird.
+    if (this->FullPath.empty() && this->Location.ExtensionIsAmbiguous() &&
         this->Location.DirectoryIsAmbiguous()) {
-      // Finalize the file location to get the extension and set the
-      // language.
+      // Finalize the file location to get the extension and set the language.
       this->ResolveFullPath();
     } else {
       // Use the known extension to get the language if possible.
