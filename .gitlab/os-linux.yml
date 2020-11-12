@@ -12,7 +12,7 @@
         LAUNCHER: "scl enable devtoolset-6 rh-python36 --"
 
 .linux_prep_source:
-    image: "fedora:32"
+    image: "fedora:33"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
