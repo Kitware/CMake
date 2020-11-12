@@ -401,6 +401,7 @@ if(Ruby_VERSION_MAJOR)
   set(_Ruby_VERSION_SHORT "${Ruby_VERSION_MAJOR}.${Ruby_VERSION_MINOR}")
   set(_Ruby_VERSION_SHORT_NODOT "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}")
   set(_Ruby_NODOT_VERSION "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}${Ruby_VERSION_PATCH}")
+  set(_Ruby_NODOT_VERSION_ZERO_PATCH "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}0")
 endif()
 
 # FIXME: Currently we require both the interpreter and development components to be found
@@ -433,22 +434,27 @@ endif()
 set(_Ruby_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_Ruby_VERSION_SHORT} ruby${_Ruby_VERSION_SHORT_NODOT} ruby-${_Ruby_VERSION_SHORT} ruby-${Ruby_VERSION})
 
 if(WIN32)
+  set(_Ruby_POSSIBLE_MSVC_RUNTIMES "msvcrt;vcruntime140;vcruntime140_1")
   if(MSVC_TOOLSET_VERSION)
-    set(_Ruby_MSVC_RUNTIME "${MSVC_TOOLSET_VERSION}")
+    list(APPEND _Ruby_POSSIBLE_MSVC_RUNTIMES "msvcr${MSVC_TOOLSET_VERSION}")
   else()
-    set(_Ruby_MSVC_RUNTIME "")
+    list(APPEND _Ruby_POSSIBLE_MSVC_RUNTIMES "msvcr")
   endif()
+
+  set(_Ruby_POSSIBLE_VERSION_SUFFICES "${_Ruby_NODOT_VERSION};${_Ruby_NODOT_VERSION_ZERO_PATCH}")
 
   set(_Ruby_ARCH_PREFIX "")
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(_Ruby_ARCH_PREFIX "x64-")
   endif()
 
-  list(APPEND _Ruby_POSSIBLE_LIB_NAMES
-             "${_Ruby_ARCH_PREFIX}msvcr${_Ruby_MSVC_RUNTIME}-ruby${_Ruby_NODOT_VERSION}"
-             "${_Ruby_ARCH_PREFIX}msvcr${_Ruby_MSVC_RUNTIME}-ruby${_Ruby_NODOT_VERSION}-static"
-             "${_Ruby_ARCH_PREFIX}msvcrt-ruby${_Ruby_NODOT_VERSION}"
-             "${_Ruby_ARCH_PREFIX}msvcrt-ruby${_Ruby_NODOT_VERSION}-static" )
+  foreach(_Ruby_MSVC_RUNTIME ${_Ruby_POSSIBLE_MSVC_RUNTIMES})
+    foreach(_Ruby_VERSION_SUFFIX ${_Ruby_POSSIBLE_VERSION_SUFFICES})
+      list(APPEND _Ruby_POSSIBLE_LIB_NAMES
+                 "${_Ruby_ARCH_PREFIX}${_Ruby_MSVC_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}"
+                 "${_Ruby_ARCH_PREFIX}${_Ruby_MSVC_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}-static")
+    endforeach()
+  endforeach()
 endif()
 
 find_library(Ruby_LIBRARY NAMES ${_Ruby_POSSIBLE_LIB_NAMES} HINTS ${Ruby_POSSIBLE_LIB_DIR} )
