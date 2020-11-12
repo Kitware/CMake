@@ -7,6 +7,7 @@ bugprone-*,\
 -bugprone-too-small-loop-variable,\
 google-readability-casting,\
 misc-*,\
+-misc-no-recursion,\
 -misc-non-private-member-variables-in-classes,\
 -misc-static-assert,\
 modernize-*,\
