@@ -586,16 +586,22 @@ if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
     else()
       find_package(Threads REQUIRED)
     endif()
+    set(_threadlibs "${CMAKE_THREAD_LIBS_INIT}")
+    if(BLA_STATIC)
+      find_package(OpenMP COMPONENTS C)
+      list(PREPEND _threadlibs "${OpenMP_C_LIBRARIES}")
+    endif()
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
       "openblas"
-      "${CMAKE_THREAD_LIBS_INIT}"
+      "${_threadlibs}"
       ""
       ""
       )
+    unset(_threadlibs)
   endif()
 endif()
 
