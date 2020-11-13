@@ -1,16 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#[=======================================================================[.rst:
-UseJavaSymlinks
----------------
-
-
-
-
-
-Helper script for UseJava.cmake
-#]=======================================================================]
+# Helper script for UseJava.cmake
 
 if (UNIX AND _JAVA_TARGET_OUTPUT_LINK)
     if (_JAVA_TARGET_OUTPUT_NAME)
