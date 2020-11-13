@@ -52,7 +52,7 @@ The options are:
 ``PROJECT_NAME <project-name>``
   Ignored since CMake 3.0.
 
-  .. versionadded:: 3.14
+  .. versionchanged:: 3.14
     This value is no longer required.
 
 ``TARGET <target-name>``

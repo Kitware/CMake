@@ -497,7 +497,7 @@ from the input content to produce the output content.  The options are:
 ``INPUT <input-file>``
   Use the content from a given file as input.
 
-  .. versionadded:: 3.10
+  .. versionchanged:: 3.10
     A relative path is treated with respect to the value of
     :variable:`CMAKE_CURRENT_SOURCE_DIR`.  See policy :policy:`CMP0070`.
 
@@ -508,7 +508,7 @@ from the input content to produce the output content.  The options are:
   if the generated content is identical.  Otherwise, the ``<output-file>``
   must evaluate to an unique name for each configuration.
 
-  .. versionadded:: 3.10
+  .. versionchanged:: 3.10
     A relative path (after evaluating generator expressions) is treated
     with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
     See policy :policy:`CMP0070`.
@@ -591,7 +591,7 @@ regular expressions, but much simpler.  If ``RELATIVE`` flag is
 specified, the results will be returned as relative paths to the given
 path.
 
-.. versionadded:: 3.6
+.. versionchanged:: 3.6
   The results will be ordered lexicographically.
 
 On Windows and macOS, globbing is case-insensitive even if the underlying
@@ -662,7 +662,7 @@ files and directories, also non-empty directories. No error is emitted if a
 given file does not exist.  Relative input paths are evaluated with respect
 to the current source directory.
 
-.. versionadded:: 3.15
+.. versionchanged:: 3.15
   Empty input paths are ignored with a warning.  Previous versions of CMake
   interpreted empty string as a relative path with respect to the current
   directory and removed its contents.

@@ -162,7 +162,7 @@ Other Behavior Settings
   If :policy:`CMP0056` is set to ``NEW``, then
   :variable:`CMAKE_EXE_LINKER_FLAGS` is passed in as well.
 
-.. versionadded:: 3.14
+.. versionchanged:: 3.14
   If :policy:`CMP0083` is set to ``NEW``, then in order to obtain correct
   behavior at link time, the ``check_pie_supported()`` command from the
   :module:`CheckPIESupported` module must be called before using the
@@ -185,7 +185,7 @@ a build configuration.
   ``try_compile()`` command for the source files form, not when given a whole
   project.
 
-.. versionadded:: 3.8
+.. versionchanged:: 3.8
   If :policy:`CMP0067` is set to ``NEW``, or any of the ``<LANG>_STANDARD``,
   ``<LANG>_STANDARD_REQUIRED``, or ``<LANG>_EXTENSIONS`` options are used,
   then the language standard variables are honored:
@@ -209,6 +209,6 @@ a build configuration.
   Their values are used to set the corresponding target properties in
   the generated project (unless overridden by an explicit option).
 
-.. versionadded:: 3.14
+.. versionchanged:: 3.14
   For the :generator:`Green Hills MULTI` generator the GHS toolset and target
   system customization cache variables are also propagated into the test project.

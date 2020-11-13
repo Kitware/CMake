@@ -31,7 +31,7 @@ The parameters are as follows:
   CDash server. If no ``GROUP`` is specified, the name of the model is used by
   default.
 
-  .. versionadded:: 3.16
+  .. versionchanged:: 3.16
     This replaces the deprecated option ``TRACK``. Despite the name
     change its behavior is unchanged.
 

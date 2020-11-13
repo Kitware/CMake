@@ -17,7 +17,7 @@ The named ``<target>`` must have been created by a command such as
 :command:`add_custom_target` and must not be an
 :ref:`ALIAS target <Alias Targets>`.
 
-.. versionadded:: 3.13
+.. versionchanged:: 3.13
   Relative source file paths are interpreted as being relative to the current
   source directory (i.e. :variable:`CMAKE_CURRENT_SOURCE_DIR`).
   See policy :policy:`CMP0076`.

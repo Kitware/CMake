@@ -22,7 +22,7 @@ This command generates installation rules for a project.  Install rules
 specified by calls to the ``install()`` command within a source directory
 are executed in order during installation.
 
-.. versionadded:: 3.14
+.. versionchanged:: 3.14
   Install rules in subdirectories
   added by calls to the :command:`add_subdirectory` command are interleaved
   with those in the parent directory to run in the order declared (see

@@ -1,6 +1,8 @@
 CPack NuGet Generator
 ---------------------
 
+.. versionadded:: 3.12
+
 When build a NuGet package there is no direct way to control an output
 filename due a lack of the corresponding CLI option of NuGet, so there
 is no ``CPACK_NUGET_PACKAGE_FILE_NAME`` variable. To form the output filename
@@ -105,19 +107,22 @@ List of CPack NuGet generator specific variables:
 .. variable:: CPACK_NUGET_PACKAGE_LICENSEURL
               CPACK_NUGET_<compName>_PACKAGE_LICENSEURL
 
+ .. deprecated:: 3.20
+  Use a local license file
+  (:variable:`CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME`)
+  or a `(SPDX) license identifier`_
+  (:variable:`CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION`) instead.
+
  An URL for the package's license, often shown in UI displays as well
- as on nuget.org_. To be deprecated in favor of a reference to a local
- license file (``CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME`` or
- ``CPACK_NUGET_<compName>_PACKAGE_LICENSE_FILE_NAME``) or a Software
- Package Data Exchange `(SPDX) license identifier`_ or expression
- (``CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION`` or
- ``CPACK_NUGET_<compName>_PACKAGE_LICENSE_EXPRESSION``)
+ as on nuget.org_.
 
  * Mandatory : NO
  * Default   : -
 
 .. variable:: CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION
               CPACK_NUGET_<compName>_PACKAGE_LICENSE_EXPRESSION
+
+ .. versionadded:: 3.20
 
  A Software Package Data Exchange `(SPDX) license identifier`_ such as
  ``MIT``, ``BSD-3-Clause``, or ``LGPL-3.0-or-later``. In the case of a
@@ -140,21 +145,27 @@ List of CPack NuGet generator specific variables:
  If ``CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME`` is specified,
  ``CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION`` is ignored.
 
+ .. versionadded:: 3.20
+
  * Mandatory : NO
  * Default   : -
 
 .. variable:: CPACK_NUGET_PACKAGE_ICONURL
               CPACK_NUGET_<compName>_PACKAGE_ICONURL
 
+ .. deprecated:: 3.20
+  Use a local icon file (:variable:`CPACK_NUGET_PACKAGE_ICON`) instead.
+
  An URL for a 64x64 image with transparency background to use as the
- icon for the package in UI display. To be deprecated in favor of
- ``CPACK_NUGET_PACKAGE_ICON``.
+ icon for the package in UI display.
 
  * Mandatory : NO
  * Default   : -
 
 .. variable:: CPACK_NUGET_PACKAGE_ICON
               CPACK_NUGET_<compName>_PACKAGE_ICON
+
+ .. versionadded:: 3.20
 
  The filename of a 64x64 image with transparency background to use as the
  icon for the package in UI display.
@@ -191,6 +202,8 @@ List of CPack NuGet generator specific variables:
 
 .. variable:: CPACK_NUGET_PACKAGE_LANGUAGE
               CPACK_NUGET_<compName>_PACKAGE_LANGUAGE
+
+ .. versionadded:: 3.20
 
  Locale specifier for the package, for example ``en_CA``.
 

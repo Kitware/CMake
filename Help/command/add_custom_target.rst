@@ -107,7 +107,7 @@ The options are:
   (``CMakeLists.txt`` file).  They will be brought up to date when
   the target is built.
 
-  .. versionadded:: 3.16
+  .. versionchanged:: 3.16
     A target-level dependency is added if any dependency is a byproduct
     of a target or any of its build events in the same directory to ensure
     the byproducts will be available before this target is built.

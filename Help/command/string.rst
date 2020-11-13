@@ -281,7 +281,7 @@ Store in an ``<output_variable>`` a substring of a given ``<string>``.  If
 ``<length>`` is ``-1`` the remainder of the string starting at ``<begin>``
 will be returned.
 
-.. versionadded:: 3.2
+.. versionchanged:: 3.2
   If ``<string>`` is shorter than ``<length>`` then the end of the string
   is used instead.  Previous versions of CMake reported an error in this case.
 

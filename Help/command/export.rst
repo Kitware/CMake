@@ -64,11 +64,11 @@ build tree. In some cases, for example for packaging and for system
 wide installations, it is not desirable to write the user package
 registry.
 
-.. versionadded:: 3.1
+.. versionchanged:: 3.1
   If the :variable:`CMAKE_EXPORT_NO_PACKAGE_REGISTRY` variable
   is enabled, the ``export(PACKAGE)`` command will do nothing.
 
-.. versionadded:: 3.15
+.. versionchanged:: 3.15
   By default the ``export(PACKAGE)`` command does nothing (see policy
   :policy:`CMP0090`) because populating the user package registry has effects
   outside the source and build trees.  Set the
