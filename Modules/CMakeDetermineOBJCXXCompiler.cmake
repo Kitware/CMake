@@ -117,7 +117,7 @@ if(NOT CMAKE_OBJCXX_COMPILER_ID_RUN)
   #      ...
   #      /path/to/cc ...CompilerIdOBJCXX/...
   # to extract the compiler front-end for the language.
-  set(CMAKE_OBJCXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdOBJCXX/(\\./)?(CompilerIdOBJCXX.(framework|xctest)/)?CompilerIdOBJCXX[ \t\n\\\"]")
+  set(CMAKE_OBJCXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdOBJCXX/(\\./)?(CompilerIdOBJCXX.(framework|xctest|build/[^ \t\r\n]+)/)?CompilerIdOBJCXX[ \t\n\\\"]")
   set(CMAKE_OBJCXX_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
