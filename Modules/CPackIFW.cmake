@@ -361,6 +361,7 @@ set(_CPACK_IFW_PREFIXES
   "QtIFW-")
 
 set(_CPACK_IFW_VERSIONS
+  "4.0"
   "3.2"
   "3.2.0"
   "3.1"
@@ -456,7 +457,7 @@ mark_as_advanced(CPACK_IFW_FRAMEWORK_VERSION_TIMEOUT)
 if(CPACK_IFW_INSTALLERBASE_EXECUTABLE AND NOT CPACK_IFW_FRAMEWORK_VERSION_FORCED)
   set(CPACK_IFW_FRAMEWORK_VERSION)
   # Invoke version from "installerbase" executable
-  foreach(_ifw_version_argument --framework-version --version)
+  foreach(_ifw_version_argument --version --framework-version)
     if(NOT CPACK_IFW_FRAMEWORK_VERSION)
       execute_process(COMMAND
         "${CPACK_IFW_INSTALLERBASE_EXECUTABLE}" ${_ifw_version_argument}
