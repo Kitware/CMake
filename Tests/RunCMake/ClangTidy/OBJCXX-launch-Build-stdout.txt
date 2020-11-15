@@ -1,0 +1,1 @@
+Tests[/\]RunCMake[/\]ClangTidy[/\]main\.mm:0:0: warning: message \[checker\]

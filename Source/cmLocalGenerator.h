@@ -519,8 +519,7 @@ public:
   void CreateEvaluationFileOutputs(const std::string& config);
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
-  const char* GetRuleLauncher(cmGeneratorTarget* target,
-                              const std::string& prop);
+  cmProp GetRuleLauncher(cmGeneratorTarget* target, const std::string& prop);
 
 protected:
   //! put all the libraries for a target on into the given stream

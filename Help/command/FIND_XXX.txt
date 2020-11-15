@@ -33,9 +33,6 @@ of this command.
 If the |SEARCH_XXX| is found the result is stored in the variable
 and the search will not be repeated unless the variable is cleared.
 If nothing is found, the result will be ``<VAR>-NOTFOUND``.
-The ``REQUIRED`` option stops processing with an error message if nothing
-is found, otherwise the search will be attempted again the
-next time |FIND_XXX| is invoked with the same variable.
 
 Options include:
 
@@ -60,7 +57,11 @@ Options include:
   Specify the documentation string for the ``<VAR>`` cache entry.
 
 ``REQUIRED``
-  Stop processing with an error message if nothing is found.
+  .. versionadded:: 3.18
+
+  Stop processing with an error message if nothing is found, otherwise
+  the search will be attempted again the next time |FIND_XXX| is invoked
+  with the same variable.
 
 If ``NO_DEFAULT_PATH`` is specified, then no additional paths are
 added to the search.
@@ -84,20 +85,21 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    |prefix_XXX_SUBDIR| for each ``<prefix>`` in
    :variable:`CMAKE_SYSTEM_PREFIX_PATH`
 
-1. If called from within a find module or any other script loaded by a call to
-   :command:`find_package(<PackageName>)`, search prefixes unique to the
-   current package being found.  Specifically, look in the
-   :variable:`<PackageName>_ROOT` CMake variable and the
-   :envvar:`<PackageName>_ROOT` environment variable.
-   The package root variables are maintained as a stack, so if called from
-   nested find modules or config packages, root paths from the parent's find
-   module or config package will be searched after paths from the current
-   module or package.  In other words, the search order would be
-   ``<CurrentPackage>_ROOT``, ``ENV{<CurrentPackage>_ROOT}``,
-   ``<ParentPackage>_ROOT``, ``ENV{<ParentPackage>_ROOT}``, etc.
-   This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed or by setting
-   the :variable:`CMAKE_FIND_USE_PACKAGE_ROOT_PATH` to ``FALSE``.
-   See policy :policy:`CMP0074`.
+1. .. versionadded:: 3.12
+    If called from within a find module or any other script loaded by a call to
+    :command:`find_package(<PackageName>)`, search prefixes unique to the
+    current package being found.  Specifically, look in the
+    :variable:`<PackageName>_ROOT` CMake variable and the
+    :envvar:`<PackageName>_ROOT` environment variable.
+    The package root variables are maintained as a stack, so if called from
+    nested find modules or config packages, root paths from the parent's find
+    module or config package will be searched after paths from the current
+    module or package.  In other words, the search order would be
+    ``<CurrentPackage>_ROOT``, ``ENV{<CurrentPackage>_ROOT}``,
+    ``<ParentPackage>_ROOT``, ``ENV{<ParentPackage>_ROOT}``, etc.
+    This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed or by setting
+    the :variable:`CMAKE_FIND_USE_PACKAGE_ROOT_PATH` to ``FALSE``.
+    See policy :policy:`CMP0074`.
 
    * |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX|
 
@@ -150,6 +152,10 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
 7. Search the paths specified by the PATHS option
    or in the short-hand version of the command.
    These are typically hard-coded guesses.
+
+.. versionadded:: 3.16
+  Added ``CMAKE_FIND_USE_<CATEGORY>_PATH`` variables to globally disable
+  various search locations.
 
 .. |FIND_ARGS_XXX| replace:: <VAR> NAMES name
 

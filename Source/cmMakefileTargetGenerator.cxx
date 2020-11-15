@@ -795,7 +795,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   bool lang_has_preprocessor =
     ((lang == "C") || (lang == "CXX") || (lang == "OBJC") ||
      (lang == "OBJCXX") || (lang == "Fortran") || (lang == "CUDA") ||
-     lang == "ISPC");
+     lang == "ISPC" || lang == "ASM");
   bool const lang_has_assembly = lang_has_preprocessor;
   bool const lang_can_export_cmds = lang_has_preprocessor;
 
@@ -873,15 +873,21 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     }
 
     // Maybe insert an include-what-you-use runner.
-    if (!compileCommands.empty() && (lang == "C" || lang == "CXX")) {
-      std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
-      cmProp iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
+    if (!compileCommands.empty() &&
+        (lang == "C" || lang == "CXX" || lang == "OBJC" || lang == "OBJCXX")) {
       std::string const tidy_prop = lang + "_CLANG_TIDY";
       cmProp tidy = this->GeneratorTarget->GetProperty(tidy_prop);
-      std::string const cpplint_prop = lang + "_CPPLINT";
-      cmProp cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
-      std::string const cppcheck_prop = lang + "_CPPCHECK";
-      cmProp cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+      cmProp iwyu = nullptr;
+      cmProp cpplint = nullptr;
+      cmProp cppcheck = nullptr;
+      if (lang == "C" || lang == "CXX") {
+        std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
+        iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
+        std::string const cpplint_prop = lang + "_CPPLINT";
+        cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
+        std::string const cppcheck_prop = lang + "_CPPCHECK";
+        cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+      }
       if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
           cmNonempty(cppcheck)) {
         std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_co_compile";
@@ -943,10 +949,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
     std::string launcher;
     {
-      const char* val = this->LocalGenerator->GetRuleLauncher(
+      cmProp val = this->LocalGenerator->GetRuleLauncher(
         this->GeneratorTarget, "RULE_LAUNCH_COMPILE");
       if (cmNonempty(val)) {
-        launcher = cmStrCat(val, ' ');
+        launcher = cmStrCat(*val, ' ');
       }
     }
 

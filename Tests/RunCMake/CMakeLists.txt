@@ -179,6 +179,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     )
 endif()
 
+add_RunCMake_test(ABI -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+set_property(TEST RunCMake.ABI APPEND
+  PROPERTY LABELS "CUDA")
+
 add_RunCMake_test(AndroidTestUtilities)
 set(autogen_with_qt5 FALSE)
 if(CMake_TEST_Qt5)

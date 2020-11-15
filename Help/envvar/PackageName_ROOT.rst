@@ -1,7 +1,7 @@
 <PackageName>_ROOT
 ------------------
 
-.. versionadded:: 3.12.1
+.. versionadded:: 3.12
 
 .. include:: ENV_VAR.txt
 

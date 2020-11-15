@@ -2000,7 +2000,7 @@ static bool RunCommand(const char* comment,
               << NumberFormatter(exitFormat, retCode)
               << ") with the following output:\n"
               << output;
-  } else {
+  } else if (verbose) {
     // always print the output of the command, unless
     // it is the dumb rc command banner
     if (output.find("Resource Compiler Version") == std::string::npos) {

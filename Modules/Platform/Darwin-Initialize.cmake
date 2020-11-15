@@ -145,20 +145,26 @@ function(_apple_resolve_supported_archs_for_sdk_from_system_lib sdk_path ret ret
   # Newer SDKs ship text based dylib stub files which contain the architectures supported by the
   # library in text form.
   if(EXISTS "${system_lib_tbd_path}")
-    file(STRINGS "${system_lib_tbd_path}" tbd_lines REGEX "^archs: +\\[.+\\]")
+    file(STRINGS "${system_lib_tbd_path}" tbd_lines REGEX "^(archs|targets): +\\[.+\\]")
     if(NOT tbd_lines)
       set(${ret_failed} TRUE PARENT_SCOPE)
       return()
     endif()
 
     # The tbd architectures line looks like the following:
-    # archs:           [ armv7, armv7s, arm64, arm64e ]
+    #   archs:           [ armv7, armv7s, arm64, arm64e ]
+    # or for version 4 TBD files:
+    #   targets:         [ armv7-ios, armv7s-ios, arm64-ios, arm64e-ios ]
     list(GET tbd_lines 0 first_arch_line)
     string(REGEX REPLACE
-           "archs: +\\[ (.+) \\]" "\\1" arches_comma_separated "${first_arch_line}")
+           "(archs|targets): +\\[ (.+) \\]" "\\2" arches_comma_separated "${first_arch_line}")
     string(STRIP "${arches_comma_separated}" arches_comma_separated)
     string(REPLACE "," ";" arch_list "${arches_comma_separated}")
     string(REPLACE " " "" arch_list "${arch_list}")
+
+    # Remove -platform suffix from target (version 4 only)
+    string(REGEX REPLACE "-[a-z-]+" "" arch_list "${arch_list}")
+
     if(NOT arch_list)
       set(${ret_failed} TRUE PARENT_SCOPE)
       return()

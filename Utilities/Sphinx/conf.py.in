@@ -17,6 +17,7 @@ version = '@conf_version@' # feature version
 release = '@conf_release@' # full version string
 pygments_style = 'colors.CMakeTemplateStyle'
 
+language = 'en'
 primary_domain = 'cmake'
 highlight_language = 'none'
 

@@ -1,7 +1,7 @@
 CSFLAGS
 -------
 
-.. versionadded:: 3.10
+.. versionadded:: 3.9.2
 
 .. include:: ENV_VAR.txt
 

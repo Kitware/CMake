@@ -26,6 +26,14 @@ unset(FortranCInterface_VERIFIED_CXX CACHE)
 
 set(_result)
 
+cmake_policy(GET CMP0056 _FortranCInterface_CMP0056)
+if(_FortranCInterface_CMP0056 STREQUAL "NEW")
+  set(_FortranCInterface_EXE_LINKER_FLAGS "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_EXE_LINKER_FLAGS}")
+else()
+  set(_FortranCInterface_EXE_LINKER_FLAGS "")
+endif()
+unset(_FortranCInterface_CMP0056)
+
 # Build a sample project which reports symbols.
 set(CMAKE_TRY_COMPILE_CONFIGURATION Release)
 try_compile(FortranCInterface_COMPILED
@@ -38,9 +46,11 @@ try_compile(FortranCInterface_COMPILED
     "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
     "-DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELEASE}"
     "-DCMAKE_Fortran_FLAGS_RELEASE:STRING=${CMAKE_Fortran_FLAGS_RELEASE}"
+    ${_FortranCInterface_EXE_LINKER_FLAGS}
   OUTPUT_VARIABLE FortranCInterface_OUTPUT)
 set(FortranCInterface_COMPILED ${FortranCInterface_COMPILED})
 unset(FortranCInterface_COMPILED CACHE)
+unset(_FortranCInterface_EXE_LINKER_FLAGS)
 
 # Locate the sample project executable.
 set(FortranCInterface_EXE)

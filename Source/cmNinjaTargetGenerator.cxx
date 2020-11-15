@@ -105,7 +105,7 @@ std::string cmNinjaTargetGenerator::LanguageCompilerRule(
     '_', config);
 }
 
-std::string cmNinjaTargetGenerator::LanguagePreprocessRule(
+std::string cmNinjaTargetGenerator::LanguagePreprocessAndScanRule(
   std::string const& lang, const std::string& config) const
 {
   return cmStrCat(
@@ -114,7 +114,7 @@ std::string cmNinjaTargetGenerator::LanguagePreprocessRule(
     '_', config);
 }
 
-std::string cmNinjaTargetGenerator::LanguageDependencyRule(
+std::string cmNinjaTargetGenerator::LanguageScanRule(
   std::string const& lang, const std::string& config) const
 {
   return cmStrCat(
@@ -129,14 +129,7 @@ bool cmNinjaTargetGenerator::NeedExplicitPreprocessing(
   return lang == "Fortran";
 }
 
-bool cmNinjaTargetGenerator::UsePreprocessedSource(
-  std::string const& lang) const
-{
-  return lang == "Fortran";
-}
-
-bool cmNinjaTargetGenerator::CompilePreprocessedSourceWithDefines(
-  std::string const& lang) const
+bool cmNinjaTargetGenerator::CompileWithDefines(std::string const& lang) const
 {
   return this->Makefile->IsOn(
     cmStrCat("CMAKE_", lang, "_COMPILE_WITH_DEFINES"));
@@ -536,82 +529,60 @@ namespace {
 // Create the command to run the dependency scanner
 std::string GetScanCommand(const std::string& cmakeCmd, const std::string& tdi,
                            const std::string& lang, const std::string& ppFile,
-                           bool needDyndep, const std::string& ddiFile)
+                           const std::string& ddiFile)
 {
-  std::string ccmd =
-    cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi, " --lang=", lang,
-             " --pp=", ppFile, " --dep=$DEP_FILE");
-  if (needDyndep) {
-    ccmd = cmStrCat(ccmd, " --obj=$OBJ_FILE --ddi=", ddiFile);
-  }
-  return ccmd;
+  return cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi,
+                  " --lang=", lang, " --pp=", ppFile,
+                  " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=", ddiFile);
 }
 
-// Helper function to create dependency scanning rule, with optional
-// explicit preprocessing step if preprocessCommand is non-empty
-cmNinjaRule GetPreprocessScanRule(
-  const std::string& ruleName, cmRulePlaceholderExpander::RuleVariables& vars,
+// Helper function to create dependency scanning rule that may or may
+// not perform explicit preprocessing too.
+cmNinjaRule GetScanRule(
+  const std::string& ruleName,
+  cmRulePlaceholderExpander::RuleVariables const& vars,
   const std::string& responseFlag, const std::string& flags,
-  const std::string& launcher,
   cmRulePlaceholderExpander* const rulePlaceholderExpander,
-  std::string scanCommand, cmLocalNinjaGenerator* generator,
-  const std::string& preprocessCommand = "")
+  cmLocalNinjaGenerator* generator, std::vector<std::string> scanCmds)
 {
   cmNinjaRule rule(ruleName);
-  // Explicit preprocessing always uses a depfile.
+  // Scanning always uses a depfile for preprocessor dependencies.
   rule.DepType = ""; // no deps= for multiple outputs
   rule.DepFile = "$DEP_FILE";
 
-  cmRulePlaceholderExpander::RuleVariables ppVars;
-  ppVars.CMTargetName = vars.CMTargetName;
-  ppVars.CMTargetType = vars.CMTargetType;
-  ppVars.Language = vars.Language;
-  ppVars.Object = "$out"; // for RULE_LAUNCH_COMPILE
-  ppVars.PreprocessedSource = "$out";
-  ppVars.DependencyFile = rule.DepFile.c_str();
+  cmRulePlaceholderExpander::RuleVariables scanVars;
+  scanVars.CMTargetName = vars.CMTargetName;
+  scanVars.CMTargetType = vars.CMTargetType;
+  scanVars.Language = vars.Language;
+  scanVars.Object = "$out"; // for RULE_LAUNCH_COMPILE
+  scanVars.PreprocessedSource = "$out";
+  scanVars.DependencyFile = rule.DepFile.c_str();
 
-  // Preprocessing uses the original source, compilation uses
-  // preprocessed output or original source
-  ppVars.Source = vars.Source;
-  vars.Source = "$in";
+  // Scanning needs the same preprocessor settings as direct compilation would.
+  scanVars.Source = vars.Source;
+  scanVars.Defines = vars.Defines;
+  scanVars.Includes = vars.Includes;
 
-  // Copy preprocessor definitions to the preprocessor rule.
-  ppVars.Defines = vars.Defines;
-
-  // Copy include directories to the preprocessor rule.  The Fortran
-  // compilation rule still needs them for the INCLUDE directive.
-  ppVars.Includes = vars.Includes;
-
-  // Preprocessing and compilation use the same flags.
-  std::string ppFlags = flags;
+  // Scanning needs the compilation flags too.
+  std::string scanFlags = flags;
 
   // If using a response file, move defines, includes, and flags into it.
   if (!responseFlag.empty()) {
     rule.RspFile = "$RSP_FILE";
     rule.RspContent =
-      cmStrCat(' ', ppVars.Defines, ' ', ppVars.Includes, ' ', ppFlags);
-    ppFlags = cmStrCat(responseFlag, rule.RspFile);
-    ppVars.Defines = "";
-    ppVars.Includes = "";
+      cmStrCat(' ', scanVars.Defines, ' ', scanVars.Includes, ' ', scanFlags);
+    scanFlags = cmStrCat(responseFlag, rule.RspFile);
+    scanVars.Defines = "";
+    scanVars.Includes = "";
   }
 
-  ppVars.Flags = ppFlags.c_str();
+  scanVars.Flags = scanFlags.c_str();
 
-  // Rule for preprocessing source file.
-  std::vector<std::string> ppCmds;
-
-  if (!preprocessCommand.empty()) {
-    // Lookup the explicit preprocessing rule.
-    cmExpandList(preprocessCommand, ppCmds);
-    for (std::string& i : ppCmds) {
-      i = cmStrCat(launcher, i);
-      rulePlaceholderExpander->ExpandRuleVariables(generator, i, ppVars);
-    }
+  // Rule for scanning a source file.
+  for (std::string& scanCmd : scanCmds) {
+    rulePlaceholderExpander->ExpandRuleVariables(generator, scanCmd, scanVars);
   }
-
-  // Run CMake dependency scanner on either preprocessed output or source file
-  ppCmds.emplace_back(std::move(scanCommand));
-  rule.Command = generator->BuildCommandLine(ppCmds);
+  rule.Command = generator->BuildCommandLine(scanCmds);
 
   return rule;
 }
@@ -637,11 +608,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
   cmMakefile* mf = this->GetMakefile();
 
-  // For some cases we do an explicit preprocessor invocation.
-  bool const explicitPP = this->NeedExplicitPreprocessing(lang);
-  bool const compilePPWithDefines = this->UsePreprocessedSource(lang) &&
-    this->CompilePreprocessedSourceWithDefines(lang);
+  // For some cases we scan to dynamically discover dependencies.
   bool const needDyndep = this->NeedDyndep(lang);
+  bool const compilationPreprocesses = !this->NeedExplicitPreprocessing(lang);
 
   std::string flags = "$FLAGS";
 
@@ -664,56 +633,68 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     cmLocalGenerator::SHELL);
 
   std::string launcher;
-  const char* val = this->GetLocalGenerator()->GetRuleLauncher(
+  cmProp val = this->GetLocalGenerator()->GetRuleLauncher(
     this->GetGeneratorTarget(), "RULE_LAUNCH_COMPILE");
   if (cmNonempty(val)) {
-    launcher = cmStrCat(val, ' ');
+    launcher = cmStrCat(*val, ' ');
   }
 
   std::string const cmakeCmd =
     this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
 
-  if (explicitPP) {
-    // Combined preprocessing and dependency scanning
-    const auto ppScanCommand = GetScanCommand(
-      cmakeCmd, tdi, lang, "$out", needDyndep, "$DYNDEP_INTERMEDIATE_FILE");
-    const auto ppVar = cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE");
+  if (needDyndep) {
+    // Rule to scan dependencies of sources that need preprocessing.
+    {
+      std::vector<std::string> scanCommands;
+      std::string const& scanRuleName =
+        this->LanguagePreprocessAndScanRule(lang, config);
+      std::string const& ppCommmand = mf->GetRequiredDefinition(
+        cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE"));
+      cmExpandList(ppCommmand, scanCommands);
+      for (std::string& i : scanCommands) {
+        i = cmStrCat(launcher, i);
+      }
+      scanCommands.emplace_back(GetScanCommand(cmakeCmd, tdi, lang, "$out",
+                                               "$DYNDEP_INTERMEDIATE_FILE"));
 
-    auto ppRule = GetPreprocessScanRule(
-      this->LanguagePreprocessRule(lang, config), vars, responseFlag, flags,
-      launcher, rulePlaceholderExpander.get(), ppScanCommand,
-      this->GetLocalGenerator(), mf->GetRequiredDefinition(ppVar));
+      auto scanRule = GetScanRule(
+        scanRuleName, vars, responseFlag, flags, rulePlaceholderExpander.get(),
+        this->GetLocalGenerator(), std::move(scanCommands));
 
-    // Write the rule for preprocessing file of the given language.
-    ppRule.Comment = cmStrCat("Rule for preprocessing ", lang, " files.");
-    ppRule.Description = cmStrCat("Building ", lang, " preprocessed $out");
+      scanRule.Comment =
+        cmStrCat("Rule for generating ", lang, " dependencies.");
+      scanRule.Description = cmStrCat("Building ", lang, " preprocessed $out");
 
-    this->GetGlobalGenerator()->AddRule(ppRule);
-
-    if (!compilePPWithDefines) {
-      // Remove preprocessor definitions from compilation step
-      vars.Defines = "";
+      this->GetGlobalGenerator()->AddRule(scanRule);
     }
 
-    // Just dependency scanning for files that have preprocessing turned off
-    const auto scanCommand =
-      GetScanCommand(cmakeCmd, tdi, lang, "$in", needDyndep, "$out");
+    {
+      // Compilation will not preprocess, so it does not need the defines
+      // unless the compiler wants them for some other purpose.
+      if (!this->CompileWithDefines(lang)) {
+        vars.Defines = "";
+      }
 
-    auto scanRule = GetPreprocessScanRule(
-      this->LanguageDependencyRule(lang, config), vars, "", flags, launcher,
-      rulePlaceholderExpander.get(), scanCommand, this->GetLocalGenerator());
+      // Rule to scan dependencies of sources that do not need preprocessing.
+      std::string const& scanRuleName = this->LanguageScanRule(lang, config);
+      std::vector<std::string> scanCommands;
+      scanCommands.emplace_back(
+        GetScanCommand(cmakeCmd, tdi, lang, "$in", "$out"));
 
-    // Write the rule for generating dependencies for the given language.
-    scanRule.Comment = cmStrCat("Rule for generating ", lang,
-                                " dependencies on non-preprocessed files.");
-    scanRule.Description =
-      cmStrCat("Generating ", lang, " dependencies for $in");
+      auto scanRule = GetScanRule(
+        scanRuleName, vars, "", flags, rulePlaceholderExpander.get(),
+        this->GetLocalGenerator(), std::move(scanCommands));
 
-    this->GetGlobalGenerator()->AddRule(scanRule);
-  }
+      // Write the rule for generating dependencies for the given language.
+      scanRule.Comment = cmStrCat("Rule for generating ", lang,
+                                  " dependencies on non-preprocessed files.");
+      scanRule.Description =
+        cmStrCat("Generating ", lang, " dependencies for $in");
 
-  if (needDyndep) {
+      this->GetGlobalGenerator()->AddRule(scanRule);
+    }
+
     // Write the rule for ninja dyndep file generation.
     cmNinjaRule rule(this->LanguageDyndepRule(lang, config));
     // Command line length is almost always limited -> use response file for
@@ -752,8 +733,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
   // Tell ninja dependency format so all deps can be loaded into a database
   std::string cldeps;
-  if (explicitPP) {
-    // The explicit preprocessing step will handle dependency scanning.
+  if (!compilationPreprocesses) {
+    // The compiler will not do preprocessing, so it has no such dependencies.
   } else if (this->NeedDepTypeMSVC(lang)) {
     rule.DepType = "msvc";
     rule.DepFile.clear();
@@ -824,15 +805,21 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   }
 
   // Maybe insert an include-what-you-use runner.
-  if (!compileCmds.empty() && (lang == "C" || lang == "CXX")) {
-    std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE");
-    cmProp iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
+  if (!compileCmds.empty() &&
+      (lang == "C" || lang == "CXX" || lang == "OBJC" || lang == "OBJCXX")) {
     std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY");
     cmProp tidy = this->GeneratorTarget->GetProperty(tidy_prop);
-    std::string const cpplint_prop = cmStrCat(lang, "_CPPLINT");
-    cmProp cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
-    std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
-    cmProp cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+    cmProp iwyu = nullptr;
+    cmProp cpplint = nullptr;
+    cmProp cppcheck = nullptr;
+    if (lang == "C" || lang == "CXX") {
+      std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE");
+      iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
+      std::string const cpplint_prop = cmStrCat(lang, "_CPPLINT");
+      cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
+      std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
+      cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+    }
     if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
         cmNonempty(cppcheck)) {
       std::string run_iwyu = cmStrCat(cmakeCmd, " -E __run_co_compile");
@@ -1071,78 +1058,81 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
 }
 
 namespace {
-cmNinjaBuild GetPreprocessOrScanBuild(
-  const std::string& ruleName, const std::string& ppFileName, bool compilePP,
-  bool compilePPWithDefines, cmNinjaBuild& objBuild, cmNinjaVars& vars,
-  const std::string& depFileName, bool needDyndep,
-  const std::string& objectFileName)
+cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
+                                   const std::string& ppFileName,
+                                   bool compilePP, bool compilePPWithDefines,
+                                   cmNinjaBuild& objBuild, cmNinjaVars& vars,
+                                   const std::string& objectFileName,
+                                   cmLocalGenerator* lg)
 {
-  // Explicit preprocessing and dependency
-  cmNinjaBuild ppBuild(ruleName);
+  cmNinjaBuild scanBuild(ruleName);
 
   if (!ppFileName.empty()) {
-    ppBuild.Outputs.push_back(ppFileName);
-    ppBuild.RspFile = cmStrCat(ppFileName, ".rsp");
+    scanBuild.RspFile = cmStrCat(ppFileName, ".rsp");
   } else {
-    ppBuild.RspFile = "$out.rsp";
+    scanBuild.RspFile = "$out.rsp";
   }
 
   if (compilePP) {
-    // Move compilation dependencies to the preprocessing build statement.
-    std::swap(ppBuild.ExplicitDeps, objBuild.ExplicitDeps);
-    std::swap(ppBuild.ImplicitDeps, objBuild.ImplicitDeps);
-    std::swap(ppBuild.OrderOnlyDeps, objBuild.OrderOnlyDeps);
-    std::swap(ppBuild.Variables["IN_ABS"], vars["IN_ABS"]);
+    // Move compilation dependencies to the scan/preprocessing build statement.
+    std::swap(scanBuild.ExplicitDeps, objBuild.ExplicitDeps);
+    std::swap(scanBuild.ImplicitDeps, objBuild.ImplicitDeps);
+    std::swap(scanBuild.OrderOnlyDeps, objBuild.OrderOnlyDeps);
+    std::swap(scanBuild.Variables["IN_ABS"], vars["IN_ABS"]);
 
     // The actual compilation will now use the preprocessed source.
     objBuild.ExplicitDeps.push_back(ppFileName);
   } else {
-    // Copy compilation dependencies to the preprocessing build statement.
-    ppBuild.ExplicitDeps = objBuild.ExplicitDeps;
-    ppBuild.ImplicitDeps = objBuild.ImplicitDeps;
-    ppBuild.OrderOnlyDeps = objBuild.OrderOnlyDeps;
-    ppBuild.Variables["IN_ABS"] = vars["IN_ABS"];
+    // Copy compilation dependencies to the scan/preprocessing build statement.
+    scanBuild.ExplicitDeps = objBuild.ExplicitDeps;
+    scanBuild.ImplicitDeps = objBuild.ImplicitDeps;
+    scanBuild.OrderOnlyDeps = objBuild.OrderOnlyDeps;
+    scanBuild.Variables["IN_ABS"] = vars["IN_ABS"];
   }
 
-  // Preprocessing and compilation generally use the same flags.
-  ppBuild.Variables["FLAGS"] = vars["FLAGS"];
+  // Scanning and compilation generally use the same flags.
+  scanBuild.Variables["FLAGS"] = vars["FLAGS"];
 
   if (compilePP && !compilePPWithDefines) {
-    // Move preprocessor definitions to the preprocessor build statement.
-    std::swap(ppBuild.Variables["DEFINES"], vars["DEFINES"]);
+    // Move preprocessor definitions to the scan/preprocessor build statement.
+    std::swap(scanBuild.Variables["DEFINES"], vars["DEFINES"]);
   } else {
-    // Copy preprocessor definitions to the preprocessor build statement.
-    ppBuild.Variables["DEFINES"] = vars["DEFINES"];
+    // Copy preprocessor definitions to the scan/preprocessor build statement.
+    scanBuild.Variables["DEFINES"] = vars["DEFINES"];
   }
 
   // Copy include directories to the preprocessor build statement.  The
   // Fortran compilation build statement still needs them for the INCLUDE
   // directive.
-  ppBuild.Variables["INCLUDES"] = vars["INCLUDES"];
+  scanBuild.Variables["INCLUDES"] = vars["INCLUDES"];
 
-  // Explicit preprocessing always uses a depfile.
-  ppBuild.Variables["DEP_FILE"] = depFileName;
+  // Tell dependency scanner the object file that will result from
+  // compiling the source.
+  scanBuild.Variables["OBJ_FILE"] = objectFileName;
+
+  // Tell dependency scanner where to store dyndep intermediate results.
+  std::string const& ddiFile = cmStrCat(objectFileName, ".ddi");
+  scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
+
+  // Outputs of the scan/preprocessor build statement.
+  if (!ppFileName.empty()) {
+    scanBuild.Outputs.push_back(ppFileName);
+    scanBuild.ImplicitOuts.push_back(ddiFile);
+  } else {
+    scanBuild.Outputs.push_back(ddiFile);
+  }
+
+  // Scanning always uses a depfile for preprocessor dependencies.
+  std::string const& depFileName = cmStrCat(scanBuild.Outputs.front(), ".d");
+  scanBuild.Variables["DEP_FILE"] =
+    lg->ConvertToOutputFormat(depFileName, cmOutputConverter::SHELL);
   if (compilePP) {
     // The actual compilation does not need a depfile because it
     // depends on the already-preprocessed source.
     vars.erase("DEP_FILE");
   }
 
-  if (needDyndep) {
-    // Tell dependency scanner the object file that will result from
-    // compiling the source.
-    ppBuild.Variables["OBJ_FILE"] = objectFileName;
-
-    // Tell dependency scanner where to store dyndep intermediate results.
-    std::string const ddiFile = cmStrCat(objectFileName, ".ddi");
-    if (ppFileName.empty()) {
-      ppBuild.Outputs.push_back(ddiFile);
-    } else {
-      ppBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
-      ppBuild.ImplicitOuts.push_back(ddiFile);
-    }
-  }
-  return ppBuild;
+  return scanBuild;
 }
 }
 
@@ -1279,13 +1269,12 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       sourceFileName, objBuild.OrderOnlyDeps);
   }
 
-  // For some cases we need to generate a ninja dyndep file.
+  // For some cases we scan to dynamically discover dependencies.
   bool const needDyndep = this->NeedDyndep(language);
+  bool const compilationPreprocesses =
+    !this->NeedExplicitPreprocessing(language);
 
-  // For some cases we do an explicit preprocessor invocation.
-  bool const explicitPP = this->NeedExplicitPreprocessing(language);
-  if (explicitPP) {
-
+  if (needDyndep) {
     // If source/target has preprocessing turned off, we still need to
     // generate an explicit dependency step
     const auto srcpp = source->GetSafeProperty("Fortran_PREPROCESS");
@@ -1297,27 +1286,24 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       preprocess = cmOutputConverter::GetFortranPreprocess(tgtpp);
     }
 
-    bool const compilePP = this->UsePreprocessedSource(language) &&
+    bool const compilePP = !compilationPreprocesses &&
       (preprocess != cmOutputConverter::FortranPreprocess::NotNeeded);
     bool const compilePPWithDefines =
-      compilePP && this->CompilePreprocessedSourceWithDefines(language);
+      compilePP && this->CompileWithDefines(language);
 
-    std::string const ppFileName = compilePP
-      ? this->ConvertToNinjaPath(this->GetPreprocessedFilePath(source, config))
-      : "";
+    std::string scanRuleName;
+    std::string ppFileName;
+    if (compilePP) {
+      scanRuleName = this->LanguagePreprocessAndScanRule(language, config);
+      ppFileName = this->ConvertToNinjaPath(
+        this->GetPreprocessedFilePath(source, config));
+    } else {
+      scanRuleName = this->LanguageScanRule(language, config);
+    }
 
-    std::string const buildName = compilePP
-      ? this->LanguagePreprocessRule(language, config)
-      : this->LanguageDependencyRule(language, config);
-
-    const auto depExtension = compilePP ? ".pp.d" : ".d";
-    const std::string depFileName =
-      this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(objectFileName, depExtension), cmOutputConverter::SHELL);
-
-    cmNinjaBuild ppBuild = GetPreprocessOrScanBuild(
-      buildName, ppFileName, compilePP, compilePPWithDefines, objBuild, vars,
-      depFileName, needDyndep, objectFileName);
+    cmNinjaBuild ppBuild = GetScanBuildStatement(
+      scanRuleName, ppFileName, compilePP, compilePPWithDefines, objBuild,
+      vars, objectFileName, this->LocalGenerator);
 
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
@@ -1339,7 +1325,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       vars["INCLUDES"] = cmStrCat(sourceDirectoryFlag, ' ', vars["INCLUDES"]);
     }
 
-    if (firstForConfig && needDyndep) {
+    if (firstForConfig) {
       std::string const ddiFile = cmStrCat(objectFileName, ".ddi");
       this->Configs[config].DDIFiles[language].push_back(ddiFile);
     }
@@ -1349,8 +1335,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
                                            ppBuild, commandLineLengthLimit);
-  }
-  if (needDyndep) {
+
     std::string const dyndep = this->GetDyndepFilePath(language, config);
     objBuild.OrderOnlyDeps.push_back(dyndep);
     vars["dyndep"] = dyndep;

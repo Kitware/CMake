@@ -372,6 +372,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("ISPC_INSTRUCTION_SETS");
     initProp("LINK_SEARCH_START_STATIC");
     initProp("LINK_SEARCH_END_STATIC");
+    initProp("OBJC_CLANG_TIDY");
+    initProp("OBJCXX_CLANG_TIDY");
     initProp("Swift_LANGUAGE_VERSION");
     initProp("Swift_MODULE_DIRECTORY");
     initProp("VS_JUST_MY_CODE_DEBUGGING");

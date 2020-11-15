@@ -310,7 +310,7 @@ void cmSourceFile::AppendProperty(const std::string& prop,
   }
 }
 
-const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
+cmProp cmSourceFile::GetPropertyForUser(const std::string& prop)
 {
   // This method is a consequence of design history and backwards
   // compatibility.  GetProperty is (and should be) a const method.
@@ -334,13 +334,12 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
   // Similarly, LANGUAGE can be determined by the file extension
   // if it is requested by the user.
   if (prop == propLANGUAGE) {
-    // The c_str pointer is valid until `this->Language` is modified.
-    return this->GetOrDetermineLanguage().c_str();
+    // The pointer is valid until `this->Language` is modified.
+    return &this->GetOrDetermineLanguage();
   }
 
   // Perform the normal property lookup.
-  cmProp p = this->GetProperty(prop);
-  return p ? p->c_str() : nullptr;
+  return this->GetProperty(prop);
 }
 
 cmProp cmSourceFile::GetProperty(const std::string& prop) const
@@ -398,13 +397,15 @@ cmProp cmSourceFile::GetProperty(const std::string& prop) const
   return retVal;
 }
 
-const char* cmSourceFile::GetSafeProperty(const std::string& prop) const
+const std::string& cmSourceFile::GetSafeProperty(const std::string& prop) const
 {
   cmProp ret = this->GetProperty(prop);
-  if (!ret) {
-    return "";
+  if (ret) {
+    return *ret;
   }
-  return ret->c_str();
+
+  static std::string const s_empty;
+  return s_empty;
 }
 
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const

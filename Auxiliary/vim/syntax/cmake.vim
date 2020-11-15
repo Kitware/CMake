@@ -1260,9 +1260,11 @@ syn keyword cmakeVariable contained
             \ CMAKE_NOT_USING_CONFIG_FLAGS
             \ CMAKE_NO_BUILTIN_CHRPATH
             \ CMAKE_NO_SYSTEM_FROM_IMPORTED
+            \ CMAKE_OBJCXX_CLANG_TIDY
             \ CMAKE_OBJCXX_EXTENSIONS
             \ CMAKE_OBJCXX_STANDARD
             \ CMAKE_OBJCXX_STANDARD_REQUIRED
+            \ CMAKE_OBJC_CLANG_TIDY
             \ CMAKE_OBJC_EXTENSIONS
             \ CMAKE_OBJC_STANDARD
             \ CMAKE_OBJC_STANDARD_REQUIRED

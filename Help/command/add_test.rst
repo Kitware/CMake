@@ -31,6 +31,8 @@ if necessary.  See policy :policy:`CMP0110`.  The options are:
   current source directory.
 
 ``COMMAND_EXPAND_LISTS``
+  .. versionadded:: 3.16
+
   Lists in ``COMMAND`` arguments will be expanded, including those
   created with
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
@@ -42,6 +44,9 @@ captured by :manual:`ctest(1)` but does not affect the pass/fail status
 unless the :prop_test:`PASS_REGULAR_EXPRESSION`,
 :prop_test:`FAIL_REGULAR_EXPRESSION` or
 :prop_test:`SKIP_REGULAR_EXPRESSION` test property is used.
+
+.. versionadded:: 3.16
+  Added :prop_test:`SKIP_REGULAR_EXPRESSION` property.
 
 The ``COMMAND`` and ``WORKING_DIRECTORY`` options may use "generator
 expressions" with the syntax ``$<...>``.  See the

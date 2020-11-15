@@ -823,16 +823,13 @@ cmStateSnapshot cmLocalGenerator::GetStateSnapshot() const
   return this->Makefile->GetStateSnapshot();
 }
 
-const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
-                                              const std::string& prop)
+cmProp cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
+                                         const std::string& prop)
 {
-  cmProp p;
   if (target) {
-    p = target->GetProperty(prop);
-  } else {
-    p = this->Makefile->GetProperty(prop);
+    return target->GetProperty(prop);
   }
-  return p ? p->c_str() : nullptr;
+  return this->Makefile->GetProperty(prop);
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(
@@ -3526,11 +3523,11 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   // we don't end up having:
   // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/generated_source_file.obj
   cmProp unitySourceFile = source.GetProperty("UNITY_SOURCE_FILE");
-  cmProp psExtension = source.GetProperty("PCH_EXTENSION");
+  cmProp pchExtension = source.GetProperty("PCH_EXTENSION");
   const bool isPchObject = objectName.find("cmake_pch") != std::string::npos;
-  if (unitySourceFile || psExtension || isPchObject) {
-    if (psExtension) {
-      customOutputExtension = psExtension->c_str();
+  if (unitySourceFile || pchExtension || isPchObject) {
+    if (pchExtension) {
+      customOutputExtension = pchExtension->c_str();
     }
 
     cmsys::RegularExpression var("(CMakeFiles/[^/]+.dir/)");

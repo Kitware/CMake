@@ -118,10 +118,15 @@ Parse a list of ASCII strings from ``<filename>`` and store it in
  Consider only strings that match the given regular expression.
 
 ``ENCODING <encoding-type>``
+ .. versionadded:: 3.1
+
  Consider strings of a given encoding.  Currently supported encodings are:
- UTF-8, UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE.  If the ENCODING option
- is not provided and the file has a Byte Order Mark, the ENCODING option
- will be defaulted to respect the Byte Order Mark.
+ ``UTF-8``, ``UTF-16LE``, ``UTF-16BE``, ``UTF-32LE``, ``UTF-32BE``.
+ If the ``ENCODING`` option is not provided and the file has a Byte Order Mark,
+ the ``ENCODING`` option will be defaulted to respect the Byte Order Mark.
+
+ .. versionadded:: 3.2
+   Added ``UTF-16LE``, ``UTF-16BE``, ``UTF-32LE``, ``UTF-32BE`` encodings.
 
 For example, the code
 
@@ -174,6 +179,8 @@ the ``<format>`` and ``UTC`` options.
     [POST_INCLUDE_REGEXES [<regexes>...]]
     [POST_EXCLUDE_REGEXES [<regexes>...]]
     )
+
+.. versionadded:: 3.16
 
 Recursively get the list of libraries depended on by the given files.
 
@@ -423,6 +430,9 @@ dependency resolution:
   If this variable is not specified, it is determined by the value of
   ``CMAKE_OBJDUMP`` if set, else by system introspection.
 
+  .. versionadded:: 3.18
+    Use ``CMAKE_OBJDUMP`` if set.
+
 Writing
 ^^^^^^^
 
@@ -450,6 +460,8 @@ to update the file only when its content changes.
 
   file(TOUCH [<files>...])
   file(TOUCH_NOCREATE [<files>...])
+
+.. versionadded:: 3.12
 
 Create a file with no content if it does not yet exist. If the file already
 exists, its access and/or modification will be updated to the time when the
@@ -484,8 +496,10 @@ from the input content to produce the output content.  The options are:
 
 ``INPUT <input-file>``
   Use the content from a given file as input.
-  A relative path is treated with respect to the value of
-  :variable:`CMAKE_CURRENT_SOURCE_DIR`.  See policy :policy:`CMP0070`.
+
+  .. versionchanged:: 3.10
+    A relative path is treated with respect to the value of
+    :variable:`CMAKE_CURRENT_SOURCE_DIR`.  See policy :policy:`CMP0070`.
 
 ``OUTPUT <output-file>``
   Specify the output file name to generate.  Use generator expressions
@@ -493,11 +507,15 @@ from the input content to produce the output content.  The options are:
   name.  Multiple configurations may generate the same output file only
   if the generated content is identical.  Otherwise, the ``<output-file>``
   must evaluate to an unique name for each configuration.
-  A relative path (after evaluating generator expressions) is treated
-  with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
-  See policy :policy:`CMP0070`.
+
+  .. versionchanged:: 3.10
+    A relative path (after evaluating generator expressions) is treated
+    with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
+    See policy :policy:`CMP0070`.
 
 ``TARGET <target>``
+  .. versionadded:: 3.19
+
   Specify which target to use when evaluating generator expressions that
   require a target for evaluation (e.g. ``$<COMPILE_FEATURES:...>``,
   ``$<TARGET_PROPERTY:prop>``).
@@ -520,6 +538,8 @@ of a project's ``CMakeLists.txt`` files.
        CONTENT content
        [ESCAPE_QUOTES] [@ONLY]
        [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+
+.. versionadded:: 3.18
 
 Generate an output file using the input given by ``CONTENT`` and substitute
 variable values referenced as ``@VAR@`` or ``${VAR}`` contained therein. The
@@ -569,20 +589,25 @@ Generate a list of files that match the ``<globbing-expressions>`` and
 store it into the ``<variable>``.  Globbing expressions are similar to
 regular expressions, but much simpler.  If ``RELATIVE`` flag is
 specified, the results will be returned as relative paths to the given
-path.  The results will be ordered lexicographically.
+path.
+
+.. versionchanged:: 3.6
+  The results will be ordered lexicographically.
 
 On Windows and macOS, globbing is case-insensitive even if the underlying
 filesystem is case-sensitive (both filenames and globbing expressions are
 converted to lowercase before matching).  On other platforms, globbing is
 case-sensitive.
 
-If the ``CONFIGURE_DEPENDS`` flag is specified, CMake will add logic
-to the main build system check target to rerun the flagged ``GLOB`` commands
-at build time. If any of the outputs change, CMake will regenerate the build
-system.
+.. versionadded:: 3.3
+  By default ``GLOB`` lists directories - directories are omitted in result if
+  ``LIST_DIRECTORIES`` is set to false.
 
-By default ``GLOB`` lists directories - directories are omitted in result if
-``LIST_DIRECTORIES`` is set to false.
+.. versionadded:: 3.12
+  If the ``CONFIGURE_DEPENDS`` flag is specified, CMake will add logic
+  to the main build system check target to rerun the flagged ``GLOB`` commands
+  at build time. If any of the outputs change, CMake will regenerate the build
+  system.
 
 .. note::
   We do not recommend using GLOB to collect a list of source files from
@@ -605,10 +630,11 @@ matched directory and match the files.  Subdirectories that are symlinks
 are only traversed if ``FOLLOW_SYMLINKS`` is given or policy
 :policy:`CMP0009` is not set to ``NEW``.
 
-By default ``GLOB_RECURSE`` omits directories from result list - setting
-``LIST_DIRECTORIES`` to true adds directories to result list.
-If ``FOLLOW_SYMLINKS`` is given or policy :policy:`CMP0009` is not set to
-``NEW`` then ``LIST_DIRECTORIES`` treats symlinks as directories.
+.. versionadded:: 3.3
+  By default ``GLOB_RECURSE`` omits directories from result list - setting
+  ``LIST_DIRECTORIES`` to true adds directories to result list.
+  If ``FOLLOW_SYMLINKS`` is given or policy :policy:`CMP0009` is not set to
+  ``NEW`` then ``LIST_DIRECTORIES`` treats symlinks as directories.
 
 Examples of recursive globbing include::
 
@@ -634,7 +660,12 @@ Move a file or directory within a filesystem from ``<oldname>`` to
 Remove the given files.  The ``REMOVE_RECURSE`` mode will remove the given
 files and directories, also non-empty directories. No error is emitted if a
 given file does not exist.  Relative input paths are evaluated with respect
-to the current source directory.  Empty input paths are ignored with a warning.
+to the current source directory.
+
+.. versionchanged:: 3.15
+  Empty input paths are ignored with a warning.  Previous versions of CMake
+  interpreted empty string as a relative path with respect to the current
+  directory and removed its contents.
 
 .. _MAKE_DIRECTORY:
 
@@ -667,17 +698,18 @@ at the destination with the same timestamp.  Copying preserves input
 permissions unless explicit permissions or ``NO_SOURCE_PERMISSIONS``
 are given (default is ``USE_SOURCE_PERMISSIONS``).
 
-If ``FOLLOW_SYMLINK_CHAIN`` is specified, ``COPY`` will recursively resolve
-the symlinks at the paths given until a real file is found, and install
-a corresponding symlink in the destination for each symlink encountered. For
-each symlink that is installed, the resolution is stripped of the directory,
-leaving only the filename, meaning that the new symlink points to a file in
-the same directory as the symlink. This feature is useful on some Unix systems,
-where libraries are installed as a chain of symlinks with version numbers, with
-less specific versions pointing to more specific versions.
-``FOLLOW_SYMLINK_CHAIN`` will install all of these symlinks and the library
-itself into the destination directory. For example, if you have the following
-directory structure:
+.. versionadded:: 3.15
+  If ``FOLLOW_SYMLINK_CHAIN`` is specified, ``COPY`` will recursively resolve
+  the symlinks at the paths given until a real file is found, and install
+  a corresponding symlink in the destination for each symlink encountered. For
+  each symlink that is installed, the resolution is stripped of the directory,
+  leaving only the filename, meaning that the new symlink points to a file in
+  the same directory as the symlink. This feature is useful on some Unix systems,
+  where libraries are installed as a chain of symlinks with version numbers, with
+  less specific versions pointing to more specific versions.
+  ``FOLLOW_SYMLINK_CHAIN`` will install all of these symlinks and the library
+  itself into the destination directory. For example, if you have the following
+  directory structure:
 
 * ``/opt/foo/lib/libfoo.so.1.2.3``
 * ``/opt/foo/lib/libfoo.so.1.2 -> libfoo.so.1.2.3``
@@ -711,6 +743,8 @@ use this signature (with some undocumented options for internal use).
 
   file(SIZE <filename> <variable>)
 
+.. versionadded:: 3.14
+
 Determine the file size of the ``<filename>`` and put the result in
 ``<variable>`` variable. Requires that ``<filename>`` is a valid path
 pointing to a file and is readable.
@@ -720,6 +754,8 @@ pointing to a file and is readable.
 .. code-block:: cmake
 
   file(READ_SYMLINK <linkname> <variable>)
+
+.. versionadded:: 3.14
 
 This subcommand queries the symlink ``<linkname>`` and stores the path it
 points to in the result ``<variable>``.  If ``<linkname>`` does not exist or
@@ -745,6 +781,8 @@ absolute path is obtained:
   file(CREATE_LINK <original> <linkname>
        [RESULT <result>] [COPY_ON_ERROR] [SYMBOLIC])
 
+.. versionadded:: 3.14
+
 Create a link ``<linkname>`` that points to ``<original>``.
 It will be a hard link by default, but providing the ``SYMBOLIC`` option
 results in a symbolic link instead.  Hard links require that ``original``
@@ -768,6 +806,8 @@ which would make them unable to support a hard link.
       [PERMISSIONS <permissions>...]
       [FILE_PERMISSIONS <permissions>...]
       [DIRECTORY_PERMISSIONS <permissions>...])
+
+.. versionadded:: 3.19
 
 Set the permissions for the ``<files>...`` and ``<directories>...`` specified.
 Valid permissions are  ``OWNER_READ``, ``OWNER_WRITE``, ``OWNER_EXECUTE``,
@@ -805,6 +845,8 @@ Valid combination of keywords are:
        [FILE_PERMISSIONS <permissions>...]
        [DIRECTORY_PERMISSIONS <permissions>...])
 
+.. versionadded:: 3.19
+
 Same as `CHMOD`_, but change the permissions of files and directories present in
 the ``<directories>...`` recursively.
 
@@ -816,6 +858,8 @@ Path Conversion
 .. code-block:: cmake
 
   file(REAL_PATH <path> <out-var> [BASE_DIRECTORY <dir>])
+
+.. versionadded:: 3.19
 
 Compute the absolute path to an existing file or directory with symlinks
 resolved.
@@ -864,10 +908,12 @@ Transfer
   file(UPLOAD   <file> <url> [<options>...])
 
 The ``DOWNLOAD`` subcommand downloads the given ``<url>`` to a local ``<file>``.
-If ``<file>`` is not specified for ``file(DOWNLOAD)``, the file is not saved.
-This can be useful if you want to know if a file can be downloaded (for example,
-to check that it exists) without actually saving it anywhere. The ``UPLOAD``
-mode uploads a local ``<file>`` to a given ``<url>``.
+The ``UPLOAD`` mode uploads a local ``<file>`` to a given ``<url>``.
+
+.. versionadded:: 3.19
+  If ``<file>`` is not specified for ``file(DOWNLOAD)``, the file is not saved.
+  This can be useful if you want to know if a file can be downloaded (for example,
+  to check that it exists) without actually saving it anywhere.
 
 Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 
@@ -892,12 +938,18 @@ Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
   Terminate the operation after a given total time has elapsed.
 
 ``USERPWD <username>:<password>``
+  .. versionadded:: 3.7
+
   Set username and password for operation.
 
 ``HTTPHEADER <HTTP-header>``
+  .. versionadded:: 3.7
+
   HTTP header for operation. Suboption can be repeated several times.
 
 ``NETRC <level>``
+  .. versionadded:: 3.11
+
   Specify whether the .netrc file is to be used for operation.  If this
   option is not specified, the value of the ``CMAKE_NETRC`` variable
   will be used instead.
@@ -914,6 +966,8 @@ Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
     The .netrc file is required, and information in the URL is ignored.
 
 ``NETRC_FILE <file>``
+  .. versionadded:: 3.11
+
   Specify an alternative .netrc file to the one in your home directory,
   if the ``NETRC`` level is ``OPTIONAL`` or ``REQUIRED``. If this option
   is not specified, the value of the ``CMAKE_NETRC_FILE`` variable will
@@ -926,8 +980,14 @@ If neither ``NETRC`` option is given CMake will check variables
   Specify whether to verify the server certificate for ``https://`` URLs.
   The default is to *not* verify.
 
+  .. versionadded:: 3.18
+    Added support to ``file(UPLOAD)``.
+
 ``TLS_CAINFO <file>``
   Specify a custom Certificate Authority file for ``https://`` URLs.
+
+  .. versionadded:: 3.18
+    Added support to ``file(UPLOAD)``.
 
 For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
 certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
@@ -958,6 +1018,8 @@ Locking
        [GUARD <FUNCTION|FILE|PROCESS>]
        [RESULT_VARIABLE <variable>]
        [TIMEOUT <seconds>])
+
+.. versionadded:: 3.2
 
 Lock a file specified by ``<path>`` if no ``DIRECTORY`` option present and file
 ``<path>/cmake.lock`` otherwise. File will be locked for scope defined by
@@ -994,6 +1056,8 @@ Archiving
     [MTIME <mtime>]
     [VERBOSE])
 
+.. versionadded:: 3.18
+
 Creates the specified ``<archive>`` file with the files and directories
 listed in ``<paths>``.  Note that ``<paths>`` must list actual files or
 directories, wildcards are not supported.
@@ -1008,9 +1072,10 @@ compression.  The other formats use no compression by default, but can be
 directed to do so with the ``COMPRESSION`` option.  Valid values for
 ``<compression>`` are ``None``, ``BZip2``, ``GZip``, ``XZ``, and ``Zstd``.
 
-The compression level can be specified with the ``COMPRESSION_LEVEL`` option.
-The ``<compression-level>`` should be between 0-9, with the default being 0.
-The ``COMPRESSION`` option must be present when ``COMPRESSION_LEVEL`` is given.
+.. versionadded:: 3.19
+  The compression level can be specified with the ``COMPRESSION_LEVEL`` option.
+  The ``<compression-level>`` should be between 0-9, with the default being 0.
+  The ``COMPRESSION`` option must be present when ``COMPRESSION_LEVEL`` is given.
 
 .. note::
   With ``FORMAT`` set to ``raw`` only one file will be compressed with the
@@ -1030,6 +1095,8 @@ the ``MTIME`` option.
     [PATTERNS <patterns>...]
     [LIST_ONLY]
     [VERBOSE])
+
+.. versionadded:: 3.18
 
 Extracts or lists the content of the specified ``<archive>``.
 

@@ -51,6 +51,8 @@ The options are:
   used in the future.
 
 ``BYPRODUCTS``
+  .. versionadded:: 3.2
+
   Specify the files the command is expected to produce but whose
   modification time may or may not be newer than the dependencies.
   If a byproduct name is a relative path it will be interpreted
@@ -88,10 +90,11 @@ The options are:
 
   * The target is not being cross-compiled (i.e. the
     :variable:`CMAKE_CROSSCOMPILING` variable is not set to true).
-  * The target is being cross-compiled and an emulator is provided (i.e.
-    its :prop_tgt:`CROSSCOMPILING_EMULATOR` target property is set).
-    In this case, the contents of :prop_tgt:`CROSSCOMPILING_EMULATOR` will be
-    prepended to the command before the location of the target executable.
+  * .. versionadded:: 3.6
+      The target is being cross-compiled and an emulator is provided (i.e.
+      its :prop_tgt:`CROSSCOMPILING_EMULATOR` target property is set).
+      In this case, the contents of :prop_tgt:`CROSSCOMPILING_EMULATOR` will be
+      prepended to the command before the location of the target executable.
 
   If neither of the above conditions are met, it is assumed that the
   command name is a program to be found on the ``PATH`` at build time.
@@ -153,18 +156,23 @@ The options are:
   If any dependency is an ``OUTPUT`` of another custom command in the same
   directory (``CMakeLists.txt`` file), CMake automatically brings the other
   custom command into the target in which this command is built.
-  A target-level dependency is added if any dependency is listed as
-  ``BYPRODUCTS`` of a target or any of its build events in the same
-  directory to ensure the byproducts will be available.
+
+  .. versionadded:: 3.16
+    A target-level dependency is added if any dependency is listed as
+    ``BYPRODUCTS`` of a target or any of its build events in the same
+    directory to ensure the byproducts will be available.
 
   If ``DEPENDS`` is not specified, the command will run whenever
   the ``OUTPUT`` is missing; if the command does not actually
   create the ``OUTPUT``, the rule will always run.
 
-  Arguments to ``DEPENDS`` may use
-  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+  .. versionadded:: 3.1
+    Arguments to ``DEPENDS`` may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 ``COMMAND_EXPAND_LISTS``
+  .. versionadded:: 3.8
+
   Lists in ``COMMAND`` arguments will be expanded, including those
   created with
   :manual:`generator expressions <cmake-generator-expressions(7)>`,
@@ -184,6 +192,8 @@ The options are:
   only for Makefile generators and will be ignored by other generators.
 
 ``JOB_POOL``
+  .. versionadded:: 3.15
+
   Specify a :prop_gbl:`pool <JOB_POOLS>` for the :generator:`Ninja`
   generator. Incompatible with ``USES_TERMINAL``, which implies
   the ``console`` pool.
@@ -211,6 +221,8 @@ The options are:
   source file property.
 
 ``USES_TERMINAL``
+  .. versionadded:: 3.2
+
   The command will be given direct access to the terminal if possible.
   With the :generator:`Ninja` generator, this places the command in
   the ``console`` :prop_gbl:`pool <JOB_POOLS>`.
@@ -230,10 +242,13 @@ The options are:
   If it is a relative path it will be interpreted relative to the
   build tree directory corresponding to the current source directory.
 
-  Arguments to ``WORKING_DIRECTORY`` may use
-  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+  .. versionadded:: 3.13
+    Arguments to ``WORKING_DIRECTORY`` may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 ``DEPFILE``
+  .. versionadded:: 3.7
+
   Specify a ``.d`` depfile for the :generator:`Ninja` generator.
   A ``.d`` file holds dependencies usually emitted by the custom
   command itself.

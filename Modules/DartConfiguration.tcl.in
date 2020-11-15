@@ -71,6 +71,8 @@ ValgrindCommand: @VALGRIND_COMMAND@
 ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@
 DrMemoryCommand: @DRMEMORY_COMMAND@
 DrMemoryCommandOptions: @DRMEMORY_COMMAND_OPTIONS@
+CudaMemcheckCommand: @CUDA_MEMCHECK_COMMAND@
+CudaMemcheckCommandOptions: @CUDA_MEMCHECK_COMMAND_OPTIONS@
 MemoryCheckType: @MEMORYCHECK_TYPE@
 MemoryCheckSanitizerOptions: @MEMORYCHECK_SANITIZER_OPTIONS@
 MemoryCheckCommand: @MEMORYCHECK_COMMAND@
@@ -80,10 +82,6 @@ MemoryCheckSuppressionFile: @MEMORYCHECK_SUPPRESSIONS_FILE@
 # Coverage
 CoverageCommand: @COVERAGE_COMMAND@
 CoverageExtraFlags: @COVERAGE_EXTRA_FLAGS@
-
-# Cluster commands
-SlurmBatchCommand: @SLURM_SBATCH_COMMAND@
-SlurmRunCommand: @SLURM_SRUN_COMMAND@
 
 # Testing options
 # TimeOut is the amount of time in seconds to wait for processes

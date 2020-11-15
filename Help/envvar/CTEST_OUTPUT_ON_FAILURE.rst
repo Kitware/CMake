@@ -1,8 +1,6 @@
 CTEST_OUTPUT_ON_FAILURE
 -----------------------
 
-.. versionadded:: 3.10
-
 .. include:: ENV_VAR.txt
 
 Boolean environment variable that controls if the output should be logged for
