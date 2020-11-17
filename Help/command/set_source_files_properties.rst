@@ -36,3 +36,8 @@ See also the :command:`set_property(SOURCE)` command.
 
 See :ref:`Source File Properties` for the list of properties known
 to CMake.
+
+.. note::
+
+  The :prop_sf:`GENERATED` source file property may be globally visible.
+  See its documentation for details.

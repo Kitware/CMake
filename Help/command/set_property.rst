@@ -105,3 +105,8 @@ directly set in the nominated scope, the command will behave as though
 
 See the :manual:`cmake-properties(7)` manual for a list of properties
 in each scope.
+
+.. note::
+
+  The :prop_sf:`GENERATED` source file property may be globally visible.
+  See its documentation for details.
