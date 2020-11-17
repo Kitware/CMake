@@ -179,11 +179,11 @@ unset(CTEST_SUFFIX_CODE)
 #-----------------------------------------------------------------------------
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
--P \"${RunCMake_SOURCE_DIR}/testCudaMemcheck.cmake\")
+-P \"${RunCMake_SOURCE_DIR}/testCudaSanitizer.cmake\")
 ")
 set(CTEST_SUFFIX_CODE "message(\"Defect count: \${defect_count}\")")
 set(CTEST_MEMCHECK_ARGS "DEFECT_COUNT defect_count")
-run_mc_test(DummyCudaMemcheck "${PSEUDO_CUDA_MEMCHECK}")
+run_mc_test(DummyCudaSanitizer "${PSEUDO_CUDA_SANITIZER}")
 unset(CTEST_MEMCHECK_ARGS)
 unset(CTEST_SUFFIX_CODE)
 unset(CTEST_EXTRA_CODE)
