@@ -2607,14 +2607,16 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
           // Add pchHeader to source files, which will
           // be grouped as "Precompile Header File"
           auto pchHeader_sf = this->Makefile->GetOrCreateSource(
-            pchHeader, true, cmSourceFileLocationKind::Known);
+            pchHeader, false, cmSourceFileLocationKind::Known);
           std::string err;
           pchHeader_sf->ResolveFullPath(&err);
-
-          // The pch file is generated, but mark it as not generated
-          // so that a clean operation will not remove it from disk
-          pchHeader_sf->SetProperty("GENERATED", "0");
-
+          if (!err.empty()) {
+            std::ostringstream msg;
+            msg << "Unable to resolve full path of PCH-header '" << pchHeader
+                << "' assigned to target " << target->GetName()
+                << ", although its path is supposed to be known!";
+            this->IssueMessage(MessageType::FATAL_ERROR, msg.str());
+          }
           target->AddSource(pchHeader);
         }
       }
