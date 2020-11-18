@@ -532,7 +532,7 @@ std::string GetScanCommand(const std::string& cmakeCmd, const std::string& tdi,
                            const std::string& ddiFile)
 {
   return cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi,
-                  " --lang=", lang, " --pp=", ppFile,
+                  " --lang=", lang, " --src=$in", " --pp=", ppFile,
                   " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=", ddiFile);
 }
 

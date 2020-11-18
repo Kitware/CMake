@@ -834,6 +834,7 @@ endif()
 
 # Ninja support
 set(SRCS ${SRCS}
+  cmScanDepFormat.cxx
   cmGlobalNinjaGenerator.cxx
   cmGlobalNinjaGenerator.h
   cmNinjaTypes.h

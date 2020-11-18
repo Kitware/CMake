@@ -34,6 +34,7 @@
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
 #include "cmRange.h"
+#include "cmScanDepFormat.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -2024,6 +2025,8 @@ void cmGlobalNinjaGenerator::StripNinjaOutputPathPrefixAsSuffix(
   cmStripSuffixIfExists(path, this->OutputPathPrefix);
 }
 
+#if !defined(CMAKE_BOOTSTRAP)
+
 /*
 
 We use the following approach to support Fortran.  Each target already
@@ -2103,16 +2106,6 @@ Compilation of source files within a target is split into the following steps:
    (because the latter consumes the module).
 */
 
-struct cmSourceInfo
-{
-  // Set of provided and required modules.
-  std::set<std::string> Provides;
-  std::set<std::string> Requires;
-
-  // Set of files included in the translation unit.
-  std::set<std::string> Includes;
-};
-
 static std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   std::string const& arg_tdi, std::string const& arg_pp);
 
@@ -2120,6 +2113,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
                               std::vector<std::string>::const_iterator argEnd)
 {
   std::string arg_tdi;
+  std::string arg_src;
   std::string arg_pp;
   std::string arg_dep;
   std::string arg_obj;
@@ -2128,6 +2122,8 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
   for (std::string const& arg : cmMakeRange(argBeg, argEnd)) {
     if (cmHasLiteralPrefix(arg, "--tdi=")) {
       arg_tdi = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--src=")) {
+      arg_src = arg.substr(6);
     } else if (cmHasLiteralPrefix(arg, "--pp=")) {
       arg_pp = arg.substr(5);
     } else if (cmHasLiteralPrefix(arg, "--dep=")) {
@@ -2168,6 +2164,9 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     cmSystemTools::Error("-E cmake_ninja_depends requires value for --lang=");
     return 1;
   }
+  if (arg_src.empty()) {
+    arg_src = cmStrCat("<", arg_obj, " input file>");
+  }
 
   std::unique_ptr<cmSourceInfo> info;
   if (arg_lang == "Fortran") {
@@ -2184,6 +2183,8 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     return 1;
   }
 
+  info->PrimaryOutput = arg_obj;
+
   {
     cmGeneratedFileStream depfile(arg_dep);
     depfile << cmSystemTools::ConvertToUnixOutputPath(arg_pp) << ":";
@@ -2193,24 +2194,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     depfile << "\n";
   }
 
-  Json::Value ddi(Json::objectValue);
-  ddi["object"] = arg_obj;
-
-  Json::Value& ddi_provides = ddi["provides"] = Json::arrayValue;
-  for (std::string const& provide : info->Provides) {
-    ddi_provides.append(provide);
-  }
-  Json::Value& ddi_requires = ddi["requires"] = Json::arrayValue;
-  for (std::string const& r : info->Requires) {
-    // Require modules not provided in the same source.
-    if (!info->Provides.count(r)) {
-      ddi_requires.append(r);
-    }
-  }
-
-  cmGeneratedFileStream ddif(arg_ddi);
-  ddif << ddi;
-  if (!ddif) {
+  if (!cmScanDepFormat_P1689_Write(arg_ddi, arg_src, *info)) {
     cmSystemTools::Error(
       cmStrCat("-E cmake_ninja_depends failed to write ", arg_ddi));
     return 1;
@@ -2268,18 +2252,27 @@ std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   }
 
   auto info = cm::make_unique<cmSourceInfo>();
-  info->Provides = finfo.Provides;
-  info->Requires = finfo.Requires;
-  info->Includes = finfo.Includes;
+  for (std::string const& provide : finfo.Provides) {
+    cmSourceReqInfo src_info;
+    src_info.LogicalName = provide;
+    src_info.CompiledModulePath = provide;
+    info->Provides.emplace_back(src_info);
+  }
+  for (std::string const& require : finfo.Requires) {
+    // Require modules not provided in the same source.
+    if (finfo.Provides.count(require)) {
+      continue;
+    }
+    cmSourceReqInfo src_info;
+    src_info.LogicalName = require;
+    src_info.CompiledModulePath = require;
+    info->Requires.emplace_back(src_info);
+  }
+  for (std::string const& include : finfo.Includes) {
+    info->Includes.push_back(include);
+  }
   return info;
 }
-
-struct cmDyndepObjectInfo
-{
-  std::string Object;
-  std::vector<std::string> Provides;
-  std::vector<std::string> Requires;
-};
 
 bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::string const& dir_top_src, std::string const& dir_top_bld,
@@ -2302,33 +2295,13 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     this->LocalGenerators.push_back(std::move(lgd));
   }
 
-  std::vector<cmDyndepObjectInfo> objects;
+  std::vector<cmSourceInfo> objects;
   for (std::string const& arg_ddi : arg_ddis) {
-    // Load the ddi file and compute the module file paths it provides.
-    Json::Value ddio;
-    Json::Value const& ddi = ddio;
-    cmsys::ifstream ddif(arg_ddi.c_str(), std::ios::in | std::ios::binary);
-    Json::Reader reader;
-    if (!reader.parse(ddif, ddio, false)) {
-      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
-                                    arg_ddi,
-                                    reader.getFormattedErrorMessages()));
+    cmSourceInfo info;
+    if (!cmScanDepFormat_P1689_Parse(arg_ddi, &info)) {
+      cmSystemTools::Error(
+        cmStrCat("-E cmake_ninja_dyndep failed to parse ddi file ", arg_ddi));
       return false;
-    }
-
-    cmDyndepObjectInfo info;
-    info.Object = ddi["object"].asString();
-    Json::Value const& ddi_provides = ddi["provides"];
-    if (ddi_provides.isArray()) {
-      for (auto const& ddi_provide : ddi_provides) {
-        info.Provides.push_back(ddi_provide.asString());
-      }
-    }
-    Json::Value const& ddi_requires = ddi["requires"];
-    if (ddi_requires.isArray()) {
-      for (auto const& ddi_require : ddi_requires) {
-        info.Requires.push_back(ddi_require.asString());
-      }
     }
     objects.push_back(std::move(info));
   }
@@ -2360,11 +2333,12 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // We do this after loading the modules provided by linked targets
   // in case we have one of the same name that must be preferred.
   Json::Value tm = Json::objectValue;
-  for (cmDyndepObjectInfo const& object : objects) {
-    for (std::string const& p : object.Provides) {
-      std::string const mod = cmStrCat(module_dir, p);
-      mod_files[p] = mod;
-      tm[p] = mod;
+  for (cmSourceInfo const& object : objects) {
+    for (auto const& p : object.Provides) {
+      std::string const mod = cmStrCat(
+        module_dir, cmSystemTools::GetFilenameName(p.CompiledModulePath));
+      mod_files[p.LogicalName] = mod;
+      tm[p.LogicalName] = mod;
     }
   }
 
@@ -2374,15 +2348,16 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   {
     cmNinjaBuild build("dyndep");
     build.Outputs.emplace_back("");
-    for (cmDyndepObjectInfo const& object : objects) {
-      build.Outputs[0] = object.Object;
+    for (cmSourceInfo const& object : objects) {
+      build.Outputs[0] = this->ConvertToNinjaPath(object.PrimaryOutput);
       build.ImplicitOuts.clear();
-      for (std::string const& p : object.Provides) {
-        build.ImplicitOuts.push_back(this->ConvertToNinjaPath(mod_files[p]));
+      for (auto const& p : object.Provides) {
+        build.ImplicitOuts.push_back(
+          this->ConvertToNinjaPath(mod_files[p.LogicalName]));
       }
       build.ImplicitDeps.clear();
-      for (std::string const& r : object.Requires) {
-        auto mit = mod_files.find(r);
+      for (auto const& r : object.Requires) {
+        auto mit = mod_files.find(r.LogicalName);
         if (mit != mod_files.end()) {
           build.ImplicitDeps.push_back(this->ConvertToNinjaPath(mit->second));
         }
@@ -2404,11 +2379,6 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   tmf << tm;
 
   return true;
-}
-
-bool cmGlobalNinjaGenerator::EnableCrossConfigBuild() const
-{
-  return !this->CrossConfigs.empty();
 }
 
 int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
@@ -2490,6 +2460,13 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     return 1;
   }
   return 0;
+}
+
+#endif
+
+bool cmGlobalNinjaGenerator::EnableCrossConfigBuild() const
+{
+  return !this->CrossConfigs.empty();
 }
 
 void cmGlobalNinjaGenerator::AppendDirectoryForConfig(
