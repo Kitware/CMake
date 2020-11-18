@@ -12,25 +12,13 @@
 
 #include "cmsys/FStream.hxx"
 
-#include "cm_utf8.h"
-
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 static bool ParseFilename(Json::Value const& val, std::string& result)
 {
-  if (val.isObject()) {
-    Json::Value const& format = val["format"];
-    if (format == "raw8") {
-      Json::Value const& data = val["data"];
-      for (auto const& byte : data) {
-        result.push_back(static_cast<char>(byte.asUInt()));
-      }
-    } else /* TODO: if (format == "raw16") */ {
-      return false;
-    }
-  } else if (val.isString()) {
+  if (val.isString()) {
     result = val.asString();
   } else {
     return false;
@@ -41,35 +29,24 @@ static bool ParseFilename(Json::Value const& val, std::string& result)
 
 static Json::Value EncodeFilename(std::string const& path)
 {
-  if (cm_utf8_is_valid(path.c_str())) {
-    std::string valid_data;
-    valid_data.reserve(path.size());
+  std::string data;
+  data.reserve(path.size());
 
-    for (auto const& byte : path) {
-      if (std::iscntrl(byte)) {
-        // Control characters.
-        valid_data.append("\\u");
-        char buf[5];
-        std::snprintf(buf, sizeof(buf), "%04x", byte);
-        valid_data.append(buf);
-      } else if (byte == '"' || byte == '\\') {
-        // Special JSON characters.
-        valid_data.push_back('\\');
-        valid_data.push_back(byte);
-      } else {
-        // Other data.
-        valid_data.push_back(byte);
-      }
+  for (auto const& byte : path) {
+    if (std::iscntrl(byte)) {
+      // Control characters.
+      data.append("\\u");
+      char buf[5];
+      std::snprintf(buf, sizeof(buf), "%04x", byte);
+      data.append(buf);
+    } else if (byte == '"' || byte == '\\') {
+      // Special JSON characters.
+      data.push_back('\\');
+      data.push_back(byte);
+    } else {
+      // Other data.
+      data.push_back(byte);
     }
-
-    return valid_data;
-  }
-
-  Json::Value data;
-  data["format"] = "raw8";
-  Json::Value& code_units = data["code-units"];
-  for (auto const& code_unit : path) {
-    code_units.append(static_cast<int>(code_unit));
   }
 
   return data;
@@ -121,15 +98,6 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
     return false;
   }
 
-  Json::Value const& workdir = ppi["work-directory"];
-  if (!workdir.isString()) {
-    cmSystemTools::Error(cmStrCat("-E cmake_ninja_depends failed to parse ",
-                                  arg_pp, ": work-directory is not a string"));
-    return false;
-  }
-  std::string work_directory;
-  PARSE_BLOB(workdir, work_directory);
-
   Json::Value const& rules = ppi["rules"];
   if (rules.isArray()) {
     if (rules.size() != 1) {
@@ -139,6 +107,16 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
     }
 
     for (auto const& rule : rules) {
+      Json::Value const& workdir = rule["work-directory"];
+      if (!workdir.isString()) {
+        cmSystemTools::Error(
+          cmStrCat("-E cmake_ninja_depends failed to parse ", arg_pp,
+                   ": work-directory is not a string"));
+        return false;
+      }
+      std::string work_directory;
+      PARSE_BLOB(workdir, work_directory);
+
       Json::Value const& depends = rule["depends"];
       if (depends.isArray()) {
         std::string depend_filename;
@@ -223,12 +201,12 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
   Json::Value ddi(Json::objectValue);
   ddi["version"] = 0;
   ddi["revision"] = 0;
-  ddi["work-directory"] =
-    EncodeFilename(cmSystemTools::GetCurrentWorkingDirectory());
 
   Json::Value& rules = ddi["rules"] = Json::arrayValue;
 
   Json::Value rule(Json::objectValue);
+  rule["work-directory"] =
+    EncodeFilename(cmSystemTools::GetCurrentWorkingDirectory());
   Json::Value& inputs = rule["inputs"] = Json::arrayValue;
   inputs.append(EncodeFilename(input));
 
