@@ -349,6 +349,11 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
   if (language.empty()) {
     language = "C";
   }
+
+  // Explicitly add the explicit language flag before any other flag
+  // so user flags can override it.
+  gtgt->AddExplicitLanguageFlags(flags, *source);
+
   std::string const& config =
     lg->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
 
