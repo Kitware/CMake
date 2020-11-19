@@ -832,6 +832,7 @@ public:
                                     std::string const& config) const;
 
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
+  bool IsFortranBuildingInstrinsicModules() const;
 
   const std::string& GetSourcesProperty() const;
 
