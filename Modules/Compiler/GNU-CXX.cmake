@@ -1,8 +1,6 @@
 include(Compiler/GNU)
 __compiler_gnu(CXX)
 
-set(CMAKE_CXX_COMPILE_OPTIONS_EXPLICIT_LANGUAGE -x c++)
-
 if (WIN32)
   if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
     set(CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN "-fno-keep-inline-dllexport")
