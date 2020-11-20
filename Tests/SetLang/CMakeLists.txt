@@ -15,10 +15,3 @@ if(CMAKE_GENERATOR MATCHES "^Visual Studio" AND "x${CMAKE_C_COMPILER_ID}" STREQU
   add_library(stay stay_c.c stay_cxx.cxx)
   set_property(TARGET stay PROPERTY COMPILE_OPTIONS "-TP")
 endif()
-
-if((CMAKE_C_COMPILER_ID MATCHES "(GNU|Clang|MSVC|Borland|Embarcadero|Intel|TI|XL)"))
-  add_library(zoom zoom.zzz)
-  set_source_files_properties(zoom.zzz PROPERTIES LANGUAGE CXX)
-  target_link_libraries(SetLang zoom)
-  target_compile_definitions(SetLang PRIVATE WITH_ZOOM)
-endif()
