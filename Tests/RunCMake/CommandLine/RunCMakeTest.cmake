@@ -671,6 +671,10 @@ set(RunCMake_TEST_OPTIONS -Wno-error=deprecated)
 run_cmake(Wno-error_deprecated)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS -Werror=deprecated -Wno-error=deprecated)
+run_cmake(Wno-error_deprecated)
+unset(RunCMake_TEST_OPTIONS)
+
 # Dev warnings should be on by default
 run_cmake(Wdev)
 
