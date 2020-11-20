@@ -3,6 +3,9 @@ CPack WIX Generator
 
 CPack WIX generator specific options
 
+.. versionadded:: 3.7
+  Support :variable:`CPACK_COMPONENT_<compName>_DISABLED` variable.
+
 Variables specific to CPack WIX generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -95,9 +98,10 @@ Windows using WiX.
 
  If this variable is not set, it will be initialized with CPACK_PACKAGE_NAME
 
- If this variable is set to ``.``, then application shortcuts will be
- created directly in the start menu and the uninstaller shortcut will be
- omitted.
+ .. versionadded:: 3.16
+  If this variable is set to ``.``, then application shortcuts will be
+  created directly in the start menu and the uninstaller shortcut will be
+  omitted.
 
 .. variable:: CPACK_WIX_CULTURES
 
@@ -123,7 +127,10 @@ Windows using WiX.
 .. variable:: CPACK_WIX_PATCH_FILE
 
  Optional list of XML files with fragments to be inserted into
- generated WiX sources
+ generated WiX sources.
+
+ .. versionadded:: 3.5
+  Support listing multiple patch files.
 
  This optional variable can be used to specify an XML file that the
  WIX generator will use to inject fragments into its generated
@@ -152,10 +159,17 @@ Windows using WiX.
  Currently fragments can be injected into most
  Component, File, Directory and Feature elements.
 
- The following additional special Ids can be used:
+ .. versionadded:: 3.3
+  The following additional special Ids can be used:
 
- * ``#PRODUCT`` for the ``<Product>`` element.
- * ``#PRODUCTFEATURE`` for the root ``<Feature>`` element.
+  * ``#PRODUCT`` for the ``<Product>`` element.
+  * ``#PRODUCTFEATURE`` for the root ``<Feature>`` element.
+
+ .. versionadded:: 3.7
+  Support patching arbitrary ``<Feature>`` elements.
+
+ .. versionadded:: 3.9
+  Allow setting additional attributes.
 
  The following example illustrates how this works.
 
@@ -227,6 +241,8 @@ Windows using WiX.
 
 .. variable:: CPACK_WIX_PROPERTY_<PROPERTY>
 
+ .. versionadded:: 3.1
+
  This variable can be used to provide a value for
  the Windows Installer property ``<PROPERTY>``
 
@@ -243,15 +259,21 @@ Windows using WiX.
 
 .. variable:: CPACK_WIX_ROOT_FEATURE_TITLE
 
+ .. versionadded:: 3.7
+
  Sets the name of the root install feature in the WIX installer. Same as
  CPACK_COMPONENT_<compName>_DISPLAY_NAME for components.
 
 .. variable:: CPACK_WIX_ROOT_FEATURE_DESCRIPTION
 
+ .. versionadded:: 3.7
+
  Sets the description of the root install feature in the WIX installer. Same as
  CPACK_COMPONENT_<compName>_DESCRIPTION for components.
 
 .. variable:: CPACK_WIX_SKIP_PROGRAM_FOLDER
+
+ .. versionadded:: 3.7
 
  If this variable is set to true, the default install location
  of the generated package will be CPACK_PACKAGE_INSTALL_DIRECTORY directly.
@@ -269,6 +291,8 @@ Windows using WiX.
     installation is performed.
 
 .. variable:: CPACK_WIX_ROOT_FOLDER_ID
+
+ .. versionadded:: 3.9
 
  This variable allows specification of a custom root folder ID.
  The generator specific ``<64>`` token can be used for
@@ -288,6 +312,8 @@ Windows using WiX.
  installation via the ``WIX`` environment variable instead.
 
 .. variable:: CPACK_WIX_CUSTOM_XMLNS
+
+ .. versionadded:: 3.19
 
  This variable provides a list of custom namespace declarations that are necessary
  for using WiX extensions. Each declaration should be in the form name=url, where

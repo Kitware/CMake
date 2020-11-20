@@ -179,12 +179,6 @@ if(BUILD_TESTING)
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Rational Software\\Purify\\Setup;InstallFolder]"
     DOC "Path to the memory checking command, used for memory error detection."
     )
-  find_program(SLURM_SBATCH_COMMAND sbatch DOC
-    "Path to the SLURM sbatch executable"
-    )
-  find_program(SLURM_SRUN_COMMAND srun DOC
-    "Path to the SLURM srun executable"
-    )
   set(MEMORYCHECK_SUPPRESSIONS_FILE "" CACHE FILEPATH
     "File that contains suppressions for the memory checker")
   find_program(COVERAGE_COMMAND gcov DOC
@@ -194,7 +188,14 @@ if(BUILD_TESTING)
     "Extra command line flags to pass to the coverage tool")
 
   # set the site name
-  site_name(SITE)
+  if(COMMAND cmake_host_system_information)
+    cmake_host_system_information(RESULT _ctest_hostname QUERY HOSTNAME)
+    set(SITE "${_ctest_hostname}" CACHE STRING "Name of the computer/site where compile is being run")
+    unset(_ctest_hostname)
+  else()
+    # This code path is needed for CMake itself during bootstrap.
+    site_name(SITE)
+  endif()
   # set the build name
   if(NOT BUILDNAME)
     set(DART_COMPILER "${CMAKE_CXX_COMPILER}")
@@ -256,8 +257,6 @@ if(BUILD_TESTING)
     MAKECOMMAND
     MEMORYCHECK_COMMAND
     MEMORYCHECK_SUPPRESSIONS_FILE
-    SLURM_SBATCH_COMMAND
-    SLURM_SRUN_COMMAND
     SITE
     SVNCOMMAND
     )

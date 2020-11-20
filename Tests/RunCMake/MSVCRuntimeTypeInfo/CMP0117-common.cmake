@@ -1,0 +1,12 @@
+enable_language(CXX)
+
+cmake_policy(GET CMP0117 cmp0117)
+if(cmp0117 STREQUAL "NEW")
+  if(" ${CMAKE_CXX_FLAGS} " MATCHES " ([/-]GR) ")
+    message(SEND_ERROR "CMAKE_CXX_FLAGS has '${CMAKE_MATCH_1}' under NEW behavior")
+  endif()
+else()
+  if(NOT " ${CMAKE_CXX_FLAGS} " MATCHES " /GR ")
+    message(SEND_ERROR "CMAKE_CXX_FLAGS does not have '/GR' under OLD behavior")
+  endif()
+endif()

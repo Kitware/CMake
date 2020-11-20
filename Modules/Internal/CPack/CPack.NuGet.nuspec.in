@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <!-- Required elements-->
         <id>@CPACK_NUGET_PACKAGE_NAME@</id>
@@ -12,11 +12,14 @@
         @_CPACK_NUGET_OWNERS_TAG@
         @_CPACK_NUGET_PROJECTURL_TAG@
         @_CPACK_NUGET_LICENSEURL_TAG@
+        @_CPACK_NUGET_LICENSE_TAG@
         @_CPACK_NUGET_ICONURL_TAG@
+        @_CPACK_NUGET_ICON_TAG@
         @_CPACK_NUGET_REQUIRELICENSEACCEPTANCE_TAG@
         @_CPACK_NUGET_SUMMARY_TAG@
         @_CPACK_NUGET_RELEASENOTES_TAG@
         @_CPACK_NUGET_COPYRIGHT_TAG@
+        @_CPACK_NUGET_LANGUAGE_TAG@
         @_CPACK_NUGET_TAGS_TAG@
         @_CPACK_NUGET_DEPENDENCIES_TAG@
     </metadata>

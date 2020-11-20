@@ -37,10 +37,14 @@ The options are:
   configuration tool.
 
 ``CAPTURE_CMAKE_ERROR <result-var>``
+  .. versionadded:: 3.7
+
   Store in the ``<result-var>`` variable -1 if there are any errors running
   the command and prevent ctest from returning non-zero if an error occurs.
 
 ``QUIET``
+  .. versionadded:: 3.3
+
   Suppress any CTest-specific non-error messages that would have
   otherwise been printed to the console.  Output from the underlying
   configure command is not affected.

@@ -68,6 +68,8 @@ The options are:
   Tests not matching this expression are excluded.
 
 ``EXCLUDE_FIXTURE <regex>``
+  .. versionadded:: 3.7
+
   If a test in the set of tests to be executed requires a particular fixture,
   that fixture's setup and cleanup tests would normally be added to the test
   set automatically. This option prevents adding setup or cleanup tests for
@@ -76,9 +78,13 @@ The options are:
   setup tests that fail.
 
 ``EXCLUDE_FIXTURE_SETUP <regex>``
+  .. versionadded:: 3.7
+
   Same as ``EXCLUDE_FIXTURE`` except only matching setup tests are excluded.
 
 ``EXCLUDE_FIXTURE_CLEANUP <regex>``
+  .. versionadded:: 3.7
+
   Same as ``EXCLUDE_FIXTURE`` except only matching cleanup tests are excluded.
 
 ``PARALLEL_LEVEL <level>``
@@ -86,11 +92,15 @@ The options are:
   be run in parallel.
 
 ``RESOURCE_SPEC_FILE <file>``
+  .. versionadded:: 3.16
+
   Specify a
   :ref:`resource specification file <ctest-resource-specification-file>`. See
   :ref:`ctest-resource-allocation` for more information.
 
 ``TEST_LOAD <threshold>``
+  .. versionadded:: 3.4
+
   While running tests in parallel, try not to start tests when they
   may cause the CPU load to pass above a given threshold.  If not
   specified the :variable:`CTEST_TEST_LOAD` variable will be checked,
@@ -98,6 +108,8 @@ The options are:
   See also the ``TestLoad`` setting in the :ref:`CTest Test Step`.
 
 ``REPEAT <mode>:<n>``
+  .. versionadded:: 3.17
+
   Run tests repeatedly based on the given ``<mode>`` up to ``<n>`` times.
   The modes are:
 
@@ -121,6 +133,8 @@ The options are:
   implicit test dependencies.
 
 ``STOP_ON_FAILURE``
+  .. versionadded:: 3.18
+
   Stop the execution of the tests once one has failed.
 
 ``STOP_TIME <time-of-day>``
@@ -131,10 +145,14 @@ The options are:
   Store non-zero if anything went wrong.
 
 ``CAPTURE_CMAKE_ERROR <result-var>``
+  .. versionadded:: 3.7
+
   Store in the ``<result-var>`` variable -1 if there are any errors running
   the command and prevent ctest from returning non-zero if an error occurs.
 
 ``QUIET``
+  .. versionadded:: 3.3
+
   Suppress any CTest-specific non-error messages that would have otherwise
   been printed to the console.  Output from the underlying test command is not
   affected.  Summary info detailing the percentage of passing tests is also

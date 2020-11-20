@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cm/optional>
+
 #include "cmGccDepfileReaderTypes.h"
 
-cmGccDepfileContent cmReadGccDepfile(const char* filePath);
+cm::optional<cmGccDepfileContent> cmReadGccDepfile(const char* filePath);

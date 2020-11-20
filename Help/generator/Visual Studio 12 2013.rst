@@ -17,13 +17,14 @@ Platform Selection
 
 The default target platform name (architecture) is ``Win32``.
 
-The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set, perhaps
-via the :manual:`cmake(1)` ``-A`` option, to specify a target platform
-name (architecture).  For example:
+.. versionadded:: 3.1
+  The :variable:`CMAKE_GENERATOR_PLATFORM` variable may be set, perhaps
+  via the :manual:`cmake(1)` ``-A`` option, to specify a target platform
+  name (architecture).  For example:
 
-* ``cmake -G "Visual Studio 12 2013" -A Win32``
-* ``cmake -G "Visual Studio 12 2013" -A x64``
-* ``cmake -G "Visual Studio 12 2013" -A ARM``
+  * ``cmake -G "Visual Studio 12 2013" -A Win32``
+  * ``cmake -G "Visual Studio 12 2013" -A x64``
+  * ``cmake -G "Visual Studio 12 2013" -A ARM``
 
 For compatibility with CMake versions prior to 3.1, one may specify
 a target platform name optionally at the end of the generator name.

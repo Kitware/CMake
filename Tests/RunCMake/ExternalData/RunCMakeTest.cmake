@@ -2,6 +2,7 @@ include(RunCMake)
 
 run_cmake(BadAlgoMap1)
 run_cmake(BadAlgoMap2)
+run_cmake(BadArguments)
 run_cmake(BadCustom1)
 run_cmake(BadCustom2)
 run_cmake(BadCustom3)

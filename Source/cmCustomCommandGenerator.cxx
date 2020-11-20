@@ -6,18 +6,22 @@
 #include <memory>
 #include <utility>
 
+#include <cm/optional>
 #include <cmext/algorithm>
 
+#include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTransformDepfile.h"
 
 namespace {
 void AppendPaths(const std::vector<std::string>& inputs,
@@ -31,8 +35,7 @@ void AppendPaths(const std::vector<std::string>& inputs,
     for (std::string& it : result) {
       cmSystemTools::ConvertToUnixSlashes(it);
       if (cmSystemTools::FileIsFullPath(it)) {
-        it = cmSystemTools::CollapseFullPath(
-          it, lg->GetMakefile()->GetHomeOutputDirectory());
+        it = cmSystemTools::CollapseFullPath(it);
       }
     }
     cm::append(output, result);
@@ -42,8 +45,9 @@ void AppendPaths(const std::vector<std::string>& inputs,
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
                                                    std::string config,
-                                                   cmLocalGenerator* lg)
-  : CC(cc)
+                                                   cmLocalGenerator* lg,
+                                                   bool transformDepfile)
+  : CC(&cc)
   , Config(std::move(config))
   , LG(lg)
   , OldStyle(cc.GetEscapeOldStyle())
@@ -52,25 +56,67 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
 {
   cmGeneratorExpression ge(cc.GetBacktrace());
 
-  const cmCustomCommandLines& cmdlines = this->CC.GetCommandLines();
+  const cmCustomCommandLines& cmdlines = this->CC->GetCommandLines();
   for (cmCustomCommandLine const& cmdline : cmdlines) {
     cmCustomCommandLine argv;
     for (std::string const& clarg : cmdline) {
       std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(clarg);
       std::string parsed_arg = cge->Evaluate(this->LG, this->Config);
-      if (this->CC.GetCommandExpandLists()) {
+      for (cmGeneratorTarget* gt : cge->GetTargets()) {
+        this->Utilities.emplace(BT<std::pair<std::string, bool>>(
+          { gt->GetName(), true }, cge->GetBacktrace()));
+      }
+      if (this->CC->GetCommandExpandLists()) {
         cm::append(argv, cmExpandedList(parsed_arg));
       } else {
         argv.push_back(std::move(parsed_arg));
       }
     }
 
-    // Later code assumes at least one entry exists, but expanding
-    // lists on an empty command may have left this empty.
-    // FIXME: Should we define behavior for removing empty commands?
-    if (argv.empty()) {
+    if (!argv.empty()) {
+      // If the command references an executable target by name,
+      // collect the target to add a target-level dependency on it.
+      cmGeneratorTarget* gt = this->LG->FindGeneratorTargetToUse(argv.front());
+      if (gt && gt->GetType() == cmStateEnums::EXECUTABLE) {
+        this->Utilities.emplace(BT<std::pair<std::string, bool>>(
+          { gt->GetName(), true }, cc.GetBacktrace()));
+      }
+    } else {
+      // Later code assumes at least one entry exists, but expanding
+      // lists on an empty command may have left this empty.
+      // FIXME: Should we define behavior for removing empty commands?
       argv.emplace_back();
     }
+
+    this->CommandLines.push_back(std::move(argv));
+  }
+
+  if (transformDepfile && !this->CommandLines.empty() &&
+      !cc.GetDepfile().empty() &&
+      this->LG->GetGlobalGenerator()->DepfileFormat()) {
+    cmCustomCommandLine argv;
+    argv.push_back(cmSystemTools::GetCMakeCommand());
+    argv.emplace_back("-E");
+    argv.emplace_back("cmake_transform_depfile");
+    switch (*this->LG->GetGlobalGenerator()->DepfileFormat()) {
+      case cmDepfileFormat::GccDepfile:
+        argv.emplace_back("gccdepfile");
+        break;
+      case cmDepfileFormat::VsTlog:
+        argv.emplace_back("vstlog");
+        break;
+    }
+    if (this->LG->GetCurrentBinaryDirectory() ==
+        this->LG->GetBinaryDirectory()) {
+      argv.emplace_back("./");
+    } else {
+      argv.push_back(cmStrCat(this->LG->MaybeConvertToRelativePath(
+                                this->LG->GetBinaryDirectory(),
+                                this->LG->GetCurrentBinaryDirectory()),
+                              '/'));
+    }
+    argv.push_back(this->GetFullDepfile());
+    argv.push_back(this->GetInternalDepfile());
 
     this->CommandLines.push_back(std::move(argv));
   }
@@ -79,7 +125,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
               this->Byproducts);
   AppendPaths(cc.GetDepends(), ge, this->LG, this->Config, this->Depends);
 
-  const std::string& workingdirectory = this->CC.GetWorkingDirectory();
+  const std::string& workingdirectory = this->CC->GetWorkingDirectory();
   if (!workingdirectory.empty()) {
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(workingdirectory);
@@ -97,7 +143,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
 
 unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
 {
-  return static_cast<unsigned int>(this->CC.GetCommandLines().size());
+  return static_cast<unsigned int>(this->CommandLines.size());
 }
 
 void cmCustomCommandGenerator::FillEmulatorsWithArguments()
@@ -234,9 +280,43 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
   }
 }
 
+std::string cmCustomCommandGenerator::GetFullDepfile() const
+{
+  std::string depfile = this->CC->GetDepfile();
+  if (depfile.empty()) {
+    return "";
+  }
+
+  if (!cmSystemTools::FileIsFullPath(depfile)) {
+    depfile = cmStrCat(this->LG->GetCurrentBinaryDirectory(), '/', depfile);
+  }
+  return cmSystemTools::CollapseFullPath(depfile);
+}
+
+std::string cmCustomCommandGenerator::GetInternalDepfile() const
+{
+  std::string depfile = this->GetFullDepfile();
+  if (depfile.empty()) {
+    return "";
+  }
+
+  cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
+  std::string extension;
+  switch (*this->LG->GetGlobalGenerator()->DepfileFormat()) {
+    case cmDepfileFormat::GccDepfile:
+      extension = ".d";
+      break;
+    case cmDepfileFormat::VsTlog:
+      extension = ".tlog";
+      break;
+  }
+  return cmStrCat(this->LG->GetBinaryDirectory(), "/CMakeFiles/d/",
+                  hash.HashString(depfile), extension);
+}
+
 const char* cmCustomCommandGenerator::GetComment() const
 {
-  return this->CC.GetComment();
+  return this->CC->GetComment();
 }
 
 std::string cmCustomCommandGenerator::GetWorkingDirectory() const
@@ -246,7 +326,7 @@ std::string cmCustomCommandGenerator::GetWorkingDirectory() const
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const
 {
-  return this->CC.GetOutputs();
+  return this->CC->GetOutputs();
 }
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
@@ -257,4 +337,10 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
 std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
 {
   return this->Depends;
+}
+
+std::set<BT<std::pair<std::string, bool>>> const&
+cmCustomCommandGenerator::GetUtilities() const
+{
+  return this->Utilities;
 }

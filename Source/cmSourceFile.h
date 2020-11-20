@@ -47,12 +47,12 @@ public:
   //! Might return a nullptr if the property is not set or invalid
   cmProp GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer
-  const char* GetSafeProperty(const std::string& prop) const;
+  const std::string& GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
 
   /** Implement getting a property when called from a CMake language
       command like get_property or get_source_file_property.  */
-  const char* GetPropertyForUser(const std::string& prop);
+  cmProp GetPropertyForUser(const std::string& prop);
 
   //! Checks is the GENERATED property is set and true
   /// @return Equivalent to GetPropertyAsBool("GENERATED")
@@ -77,7 +77,8 @@ public:
    * Resolves the full path to the file.  Attempts to locate the file on disk
    * and finalizes its location.
    */
-  std::string const& ResolveFullPath(std::string* error = nullptr);
+  std::string const& ResolveFullPath(std::string* error = nullptr,
+                                     std::string* cmp0115Warning = nullptr);
 
   /**
    * The resolved full path to the file.  The returned file name might be empty
@@ -138,7 +139,7 @@ private:
   bool FindFullPathFailed = false;
   bool IsGenerated = false;
 
-  bool FindFullPath(std::string* error);
+  bool FindFullPath(std::string* error, std::string* cmp0115Warning);
   void CheckExtension();
   void CheckLanguage(std::string const& ext);
 

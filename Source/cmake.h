@@ -411,7 +411,7 @@ public:
   WorkingMode GetWorkingMode() { return this->CurrentWorkingMode; }
 
   //! Debug the try compile stuff by not deleting the files
-  bool GetDebugTryCompile() { return this->DebugTryCompile; }
+  bool GetDebugTryCompile() const { return this->DebugTryCompile; }
   void DebugTryCompileOn() { this->DebugTryCompile = true; }
 
   /**
@@ -456,11 +456,11 @@ public:
   void SetShowLogContext(bool b) { this->LogContext = b; }
 
   //! Do we want debug output during the cmake run.
-  bool GetDebugOutput() { return this->DebugOutput; }
+  bool GetDebugOutput() const { return this->DebugOutput; }
   void SetDebugOutputOn(bool b) { this->DebugOutput = b; }
 
   //! Do we want debug output from the find commands during the cmake run.
-  bool GetDebugFindOutput() { return this->DebugFindOutput; }
+  bool GetDebugFindOutput() const { return this->DebugFindOutput; }
   void SetDebugFindOutputOn(bool b) { this->DebugFindOutput = b; }
 
   //! Do we want trace output during the cmake run.
@@ -482,11 +482,11 @@ public:
   void SetTraceFile(std::string const& file);
   void PrintTraceFormatVersion();
 
-  bool GetWarnUninitialized() { return this->WarnUninitialized; }
+  bool GetWarnUninitialized() const { return this->WarnUninitialized; }
   void SetWarnUninitialized(bool b) { this->WarnUninitialized = b; }
-  bool GetWarnUnusedCli() { return this->WarnUnusedCli; }
+  bool GetWarnUnusedCli() const { return this->WarnUnusedCli; }
   void SetWarnUnusedCli(bool b) { this->WarnUnusedCli = b; }
-  bool GetCheckSystemVars() { return this->CheckSystemVars; }
+  bool GetCheckSystemVars() const { return this->CheckSystemVars; }
   void SetCheckSystemVars(bool b) { this->CheckSystemVars = b; }
 
   void MarkCliAsUsed(const std::string& variable);
@@ -591,8 +591,8 @@ protected:
   using RegisteredExtraGeneratorsVector =
     std::vector<cmExternalMakefileProjectGeneratorFactory*>;
   RegisteredExtraGeneratorsVector ExtraGenerators;
-  void AddScriptingCommands();
-  void AddProjectCommands();
+  void AddScriptingCommands() const;
+  void AddProjectCommands() const;
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
 

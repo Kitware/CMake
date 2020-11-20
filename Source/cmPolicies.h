@@ -340,7 +340,15 @@ class cmMakefile;
          3, 19, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0114,                                                     \
          "ExternalProject step targets fully adopt their steps.", 3, 19, 0,   \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0115, "Source file extensions must be explicit.", 3, 20,  \
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0116,                                                     \
+         "Ninja generators transform DEPFILEs from add_custom_command().", 3, \
+         20, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0117,                                                     \
+         "MSVC RTTI flag /GR is not added to CMAKE_CXX_FLAGS by default.", 3, \
+         20, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

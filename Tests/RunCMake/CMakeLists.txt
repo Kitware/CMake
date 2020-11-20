@@ -125,6 +125,10 @@ if(CMake_TEST_CUDA)
 endif()
 add_RunCMake_test(CMP0106)
 add_RunCMake_test(CMP0111)
+add_RunCMake_test(CMP0115)
+if(CMAKE_GENERATOR MATCHES "Ninja")
+  add_RunCMake_test(CMP0116)
+endif()
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -174,6 +178,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     -DMEMCHECK_FAIL=$<TARGET_FILE:memcheck_fail>
     )
 endif()
+
+add_RunCMake_test(ABI -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+set_property(TEST RunCMake.ABI APPEND
+  PROPERTY LABELS "CUDA")
 
 add_RunCMake_test(AndroidTestUtilities)
 set(autogen_with_qt5 FALSE)
@@ -254,6 +262,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|XL|XLClang)$")
 endif()
 if(MSVC)
   add_RunCMake_test(MSVCRuntimeLibrary)
+  add_RunCMake_test(MSVCRuntimeTypeInfo)
   add_RunCMake_test(MSVCWarningFlags)
 endif()
 add_RunCMake_test(ObjectLibrary)
@@ -308,7 +317,7 @@ add_RunCMake_test(export)
 add_RunCMake_test(cmake_language)
 add_RunCMake_test(cmake_minimum_required)
 add_RunCMake_test(cmake_parse_arguments)
-# add_RunCMake_test(cmake_path)
+add_RunCMake_test(cmake_path)
 add_RunCMake_test(continue)
 add_executable(color_warning color_warning.c)
 add_executable(fake_build_command fake_build_command.c)
@@ -561,7 +570,8 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)"
 endif()
 
 
-add_RunCMake_test(CommandLine -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DCYGWIN=${CYGWIN} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
+add_executable(pseudo_llvm-rc pseudo_llvm-rc.c)
+add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DCYGWIN=${CYGWIN} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
 add_RunCMake_test(CommandLineTar)
 
 if(CMAKE_PLATFORM_NO_VERSIONED_SONAME OR (NOT CMAKE_SHARED_LIBRARY_SONAME_FLAG AND NOT CMAKE_SHARED_LIBRARY_SONAME_C_FLAG))
@@ -770,6 +780,7 @@ add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
 
 add_RunCMake_test("UnityBuild")
 add_RunCMake_test(CMakePresets -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
+add_RunCMake_test(TransformDepfile)
 
 if(WIN32)
   add_RunCMake_test(Win32GenEx)

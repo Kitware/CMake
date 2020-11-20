@@ -8,6 +8,7 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
@@ -93,10 +94,11 @@ cmSourceFileLocation const& cmSourceFile::GetLocation() const
   return this->Location;
 }
 
-std::string const& cmSourceFile::ResolveFullPath(std::string* error)
+std::string const& cmSourceFile::ResolveFullPath(std::string* error,
+                                                 std::string* cmp0115Warning)
 {
   if (this->FullPath.empty()) {
-    if (this->FindFullPath(error)) {
+    if (this->FindFullPath(error, cmp0115Warning)) {
       this->CheckExtension();
     }
   }
@@ -108,7 +110,8 @@ std::string const& cmSourceFile::GetFullPath() const
   return this->FullPath;
 }
 
-bool cmSourceFile::FindFullPath(std::string* error)
+bool cmSourceFile::FindFullPath(std::string* error,
+                                std::string* cmp0115Warning)
 {
   // If the file is generated compute the location without checking on disk.
   if (this->GetIsGenerated()) {
@@ -131,9 +134,11 @@ bool cmSourceFile::FindFullPath(std::string* error)
   // List of extension lists
   std::vector<std::string> exts =
     makefile->GetCMakeInstance()->GetAllExtensions();
+  auto cmp0115 = makefile->GetPolicyStatus(cmPolicies::CMP0115);
 
   // Tries to find the file in a given directory
-  auto findInDir = [this, &exts, &lPath](std::string const& dir) -> bool {
+  auto findInDir = [this, &exts, &lPath, cmp0115, cmp0115Warning,
+                    makefile](std::string const& dir) -> bool {
     // Compute full path
     std::string const fullPath = cmSystemTools::CollapseFullPath(lPath, dir);
     // Try full path
@@ -141,13 +146,29 @@ bool cmSourceFile::FindFullPath(std::string* error)
       this->FullPath = fullPath;
       return true;
     }
-    // Try full path with extension
-    for (std::string const& ext : exts) {
-      if (!ext.empty()) {
-        std::string extPath = cmStrCat(fullPath, '.', ext);
-        if (cmSystemTools::FileExists(extPath)) {
-          this->FullPath = extPath;
-          return true;
+    // This has to be an if statement due to a bug in Oracle Developer Studio.
+    // See https://community.oracle.com/tech/developers/discussion/4476246/
+    // for details.
+    if (cmp0115 == cmPolicies::OLD || cmp0115 == cmPolicies::WARN) {
+      // Try full path with extension
+      for (std::string const& ext : exts) {
+        if (!ext.empty()) {
+          std::string extPath = cmStrCat(fullPath, '.', ext);
+          if (cmSystemTools::FileExists(extPath)) {
+            this->FullPath = extPath;
+            if (cmp0115 == cmPolicies::WARN) {
+              std::string warning =
+                cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0115),
+                         "\nFile:\n  ", extPath);
+              if (cmp0115Warning) {
+                *cmp0115Warning = std::move(warning);
+              } else {
+                makefile->GetCMakeInstance()->IssueMessage(
+                  MessageType::AUTHOR_WARNING, warning);
+              }
+            }
+            return true;
+          }
         }
       }
     }
@@ -168,11 +189,19 @@ bool cmSourceFile::FindFullPath(std::string* error)
   }
 
   // Compose error
-  std::string err =
-    cmStrCat("Cannot find source file:\n  ", lPath, "\nTried extensions");
-  for (std::string const& ext : exts) {
-    err += " .";
-    err += ext;
+  std::string err = cmStrCat("Cannot find source file:\n  ", lPath);
+  switch (cmp0115) {
+    case cmPolicies::OLD:
+    case cmPolicies::WARN:
+      err = cmStrCat(err, "\nTried extensions");
+      for (auto const& ext : exts) {
+        err = cmStrCat(err, " .", ext);
+      }
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      break;
   }
   if (error != nullptr) {
     *error = std::move(err);
@@ -281,7 +310,7 @@ void cmSourceFile::AppendProperty(const std::string& prop,
   }
 }
 
-const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
+cmProp cmSourceFile::GetPropertyForUser(const std::string& prop)
 {
   // This method is a consequence of design history and backwards
   // compatibility.  GetProperty is (and should be) a const method.
@@ -305,13 +334,12 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
   // Similarly, LANGUAGE can be determined by the file extension
   // if it is requested by the user.
   if (prop == propLANGUAGE) {
-    // The c_str pointer is valid until `this->Language` is modified.
-    return this->GetOrDetermineLanguage().c_str();
+    // The pointer is valid until `this->Language` is modified.
+    return &this->GetOrDetermineLanguage();
   }
 
   // Perform the normal property lookup.
-  cmProp p = this->GetProperty(prop);
-  return p ? p->c_str() : nullptr;
+  return this->GetProperty(prop);
 }
 
 cmProp cmSourceFile::GetProperty(const std::string& prop) const
@@ -369,13 +397,15 @@ cmProp cmSourceFile::GetProperty(const std::string& prop) const
   return retVal;
 }
 
-const char* cmSourceFile::GetSafeProperty(const std::string& prop) const
+const std::string& cmSourceFile::GetSafeProperty(const std::string& prop) const
 {
   cmProp ret = this->GetProperty(prop);
-  if (!ret) {
-    return "";
+  if (ret) {
+    return *ret;
   }
-  return ret->c_str();
+
+  static std::string const s_empty;
+  return s_empty;
 }
 
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
