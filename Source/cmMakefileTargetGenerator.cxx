@@ -838,13 +838,17 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       compileCommand.replace(compileCommand.find(langFlags), langFlags.size(),
                              this->GetFlags(lang, this->GetConfigName()));
       std::string langDefines = std::string("$(") + lang + "_DEFINES)";
-      compileCommand.replace(compileCommand.find(langDefines),
-                             langDefines.size(),
-                             this->GetDefines(lang, this->GetConfigName()));
+      std::string::size_type ldPos = compileCommand.find(langDefines);
+      if (ldPos != std::string::npos) {
+        compileCommand.replace(ldPos, langDefines.size(),
+                               this->GetDefines(lang, this->GetConfigName()));
+      }
       std::string langIncludes = std::string("$(") + lang + "_INCLUDES)";
-      compileCommand.replace(compileCommand.find(langIncludes),
-                             langIncludes.size(),
-                             this->GetIncludes(lang, this->GetConfigName()));
+      std::string::size_type liPos = compileCommand.find(langIncludes);
+      if (liPos != std::string::npos) {
+        compileCommand.replace(liPos, langIncludes.size(),
+                               this->GetIncludes(lang, this->GetConfigName()));
+      }
 
       cmProp eliminate[] = {
         this->Makefile->GetDefinition("CMAKE_START_TEMP_FILE"),
