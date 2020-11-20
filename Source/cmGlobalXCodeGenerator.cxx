@@ -936,14 +936,6 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     default:
       break;
   }
-
-  // explicitly add the explicit language flag before any other flag
-  // this way backwards compatibility with user flags is maintained
-  if (sf->GetProperty("LANGUAGE")) {
-    this->CurrentLocalGenerator->AppendFeatureOptions(flags, lang,
-                                                      "EXPLICIT_LANGUAGE");
-  }
-
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (cmProp cflags = sf->GetProperty(COMPILE_FLAGS)) {
     lg->AppendFlags(flags, genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS));
