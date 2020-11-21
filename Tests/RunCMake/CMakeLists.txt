@@ -171,7 +171,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     -DPSEUDO_BC=$<TARGET_FILE:pseudo_BC>
     -DPSEUDO_PURIFY=$<TARGET_FILE:pseudo_purify>
     -DPSEUDO_VALGRIND=$<TARGET_FILE:pseudo_valgrind>
-    -DPSEUDO_CUDA_MEMCHECK=$<TARGET_FILE:pseudo_cuda-memcheck>
+    -DPSEUDO_CUDA_SANITIZER=$<TARGET_FILE:pseudo_cuda-memcheck>
     -DPSEUDO_BC_NOLOG=$<TARGET_FILE:pseudonl_BC>
     -DPSEUDO_PURIFY_NOLOG=$<TARGET_FILE:pseudonl_purify>
     -DPSEUDO_VALGRIND_NOLOG=$<TARGET_FILE:pseudonl_valgrind>
@@ -262,6 +262,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|XL|XLClang)$")
 endif()
 if(MSVC)
   add_RunCMake_test(MSVCRuntimeLibrary)
+  add_RunCMake_test(MSVCRuntimeTypeInfo)
   add_RunCMake_test(MSVCWarningFlags)
 endif()
 add_RunCMake_test(ObjectLibrary)

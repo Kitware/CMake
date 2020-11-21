@@ -45,7 +45,7 @@ private:
     DRMEMORY,
     BOUNDS_CHECKER,
     // checkers after here do not use the standard error list
-    CUDA_MEMCHECK,
+    CUDA_SANITIZER,
     ADDRESS_SANITIZER,
     LEAK_SANITIZER,
     THREAD_SANITIZER,

@@ -330,3 +330,19 @@ Other Changes
 * If ``CUDA`` compiler detection fails with user-specified
   :variable:`CMAKE_CUDA_ARCHITECTURES` or
   :variable:`CMAKE_CUDA_HOST_COMPILER`, an error is raised.
+
+Updates
+=======
+
+Changes made since CMake 3.19.0 include the following.
+
+3.19.1
+------
+
+* CMake 3.19.0 compiles source files with the :prop_sf:`LANGUAGE`
+  property by passing an explicit language flag such as ``-x c``.
+  This is consistent with the property's documented meaning that
+  the source file is written in the specified language.  However,
+  it can break projects that were using the property only to
+  cause the specified language's compiler to be used.  This has
+  been reverted to restore behavior from CMake 3.18 and below.

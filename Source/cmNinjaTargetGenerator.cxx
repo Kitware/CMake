@@ -183,16 +183,7 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
     }
   }
 
-  std::string flags;
-  // explicitly add the explicit language flag before any other flag
-  // this way backwards compatibility with user flags is maintained
-  if (source->GetProperty("LANGUAGE")) {
-    this->LocalGenerator->AppendFeatureOptions(flags, language,
-                                               "EXPLICIT_LANGUAGE");
-    flags += " ";
-  }
-
-  flags += this->GetFlags(language, config, filterArch);
+  std::string flags = this->GetFlags(language, config, filterArch);
 
   // Add Fortran format flags.
   if (language == "Fortran") {
@@ -532,7 +523,7 @@ std::string GetScanCommand(const std::string& cmakeCmd, const std::string& tdi,
                            const std::string& ddiFile)
 {
   return cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi,
-                  " --lang=", lang, " --pp=", ppFile,
+                  " --lang=", lang, " --src=$in", " --pp=", ppFile,
                   " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=", ddiFile);
 }
 

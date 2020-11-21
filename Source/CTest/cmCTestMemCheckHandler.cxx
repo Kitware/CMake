@@ -326,8 +326,8 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
     case cmCTestMemCheckHandler::BOUNDS_CHECKER:
       xml.Attribute("Checker", "BoundsChecker");
       break;
-    case cmCTestMemCheckHandler::CUDA_MEMCHECK:
-      xml.Attribute("Checker", "CudaMemcheck");
+    case cmCTestMemCheckHandler::CUDA_SANITIZER:
+      xml.Attribute("Checker", "CudaSanitizer");
       break;
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
       xml.Attribute("Checker", "AddressSanitizer");
@@ -470,7 +470,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterStyle = cmCTestMemCheckHandler::BOUNDS_CHECKER;
     } else if (testerName.find("cuda-memcheck") != std::string::npos ||
                testerName.find("compute-sanitizer") != std::string::npos) {
-      this->MemoryTesterStyle = cmCTestMemCheckHandler::CUDA_MEMCHECK;
+      this->MemoryTesterStyle = cmCTestMemCheckHandler::CUDA_SANITIZER;
     } else {
       this->MemoryTesterStyle = cmCTestMemCheckHandler::UNKNOWN;
     }
@@ -492,10 +492,10 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->CTest->GetCTestConfiguration("BoundsCheckerCommand");
     this->MemoryTesterStyle = cmCTestMemCheckHandler::BOUNDS_CHECKER;
   } else if (cmSystemTools::FileExists(
-               this->CTest->GetCTestConfiguration("CudaMemcheckCommand"))) {
+               this->CTest->GetCTestConfiguration("CudaSanitizerCommand"))) {
     this->MemoryTester =
-      this->CTest->GetCTestConfiguration("CudaMemcheckCommand");
-    this->MemoryTesterStyle = cmCTestMemCheckHandler::CUDA_MEMCHECK;
+      this->CTest->GetCTestConfiguration("CudaSanitizerCommand");
+    this->MemoryTesterStyle = cmCTestMemCheckHandler::CUDA_SANITIZER;
   }
   if (this->CTest->GetCTestConfiguration("MemoryCheckType") ==
       "AddressSanitizer") {
@@ -539,8 +539,8 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterStyle = cmCTestMemCheckHandler::VALGRIND;
     } else if (checkType == "DrMemory") {
       this->MemoryTesterStyle = cmCTestMemCheckHandler::DRMEMORY;
-    } else if (checkType == "CudaMemcheck") {
-      this->MemoryTesterStyle = cmCTestMemCheckHandler::CUDA_MEMCHECK;
+    } else if (checkType == "CudaSanitizer") {
+      this->MemoryTesterStyle = cmCTestMemCheckHandler::CUDA_SANITIZER;
     }
   }
   if (this->MemoryTester.empty()) {
@@ -566,10 +566,10 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
                 .empty()) {
     memoryTesterOptions =
       this->CTest->GetCTestConfiguration("DrMemoryCommandOptions");
-  } else if (!this->CTest->GetCTestConfiguration("CudaMemcheckCommandOptions")
+  } else if (!this->CTest->GetCTestConfiguration("CudaSanitizerCommandOptions")
                 .empty()) {
     memoryTesterOptions =
-      this->CTest->GetCTestConfiguration("CudaMemcheckCommandOptions");
+      this->CTest->GetCTestConfiguration("CudaSanitizerCommandOptions");
   }
   this->MemoryTesterOptions =
     cmSystemTools::ParseArguments(memoryTesterOptions);
@@ -703,8 +703,8 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterOptions.emplace_back("/M");
       break;
     }
-    case cmCTestMemCheckHandler::CUDA_MEMCHECK: {
-      // cuda-memcheck separates flags from arguments by spaces
+    case cmCTestMemCheckHandler::CUDA_SANITIZER: {
+      // cuda sanitizer separates flags from arguments by spaces
       if (this->MemoryTesterOptions.empty()) {
         this->MemoryTesterOptions.emplace_back("--tool");
         this->MemoryTesterOptions.emplace_back("memcheck");
@@ -800,7 +800,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckOutput(const std::string& str,
       return this->ProcessMemCheckSanitizerOutput(str, log, results);
     case cmCTestMemCheckHandler::BOUNDS_CHECKER:
       return this->ProcessMemCheckBoundsCheckerOutput(str, log, results);
-    case cmCTestMemCheckHandler::CUDA_MEMCHECK:
+    case cmCTestMemCheckHandler::CUDA_SANITIZER:
       return this->ProcessMemCheckCudaOutput(str, log, results);
     default:
       log.append("\nMemory checking style used was: ");
@@ -1188,7 +1188,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckCudaOutput(
 
     if (memcheckLine.find(lines[cc])) {
       cmCTestOptionalLog(this->CTest, DEBUG,
-                         "cuda-memcheck line " << lines[cc] << std::endl,
+                         "cuda sanitizer line " << lines[cc] << std::endl,
                          this->Quiet);
       int failure = -1;
       auto& line = lines[cc];
@@ -1219,7 +1219,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckCudaOutput(
       nonMemcheckOutput.push_back(cc);
     }
   }
-  // Now put all all the non cuda-memcheck output into the test output
+  // Now put all all the non cuda sanitizer output into the test output
   // This should be last in case it gets truncated by the output
   // limiting code
   for (std::string::size_type i : nonMemcheckOutput) {
