@@ -44,6 +44,7 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3(cmake* cm)
 #endif
 
   this->IncludeDirective = "include";
+  this->LineContinueDirective = "\\\n";
   this->DefineWindowsNULL = false;
   this->PassMakeflags = false;
   this->UnixCD = true;

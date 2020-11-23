@@ -170,6 +170,7 @@ public:
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 
   std::string IncludeDirective;
+  std::string LineContinueDirective;
   bool DefineWindowsNULL;
   bool PassMakeflags;
   bool UnixCD;
