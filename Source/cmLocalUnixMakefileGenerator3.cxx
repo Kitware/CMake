@@ -9,12 +9,14 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cm/vector>
 #include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Terminal.h"
 
+#include "cmCMakePath.h"
 #include "cmCustomCommand.h" // IWYU pragma: keep
 #include "cmCustomCommandGenerator.h"
 #include "cmFileTimeCache.h"
@@ -1742,44 +1744,32 @@ class NotInProjectDir
 {
 public:
   // Constructor with the source and binary directory's path
-  NotInProjectDir(std::string sourceDir, std::string binaryDir)
-    : SourceDir(std::move(sourceDir))
-    , BinaryDir(std::move(binaryDir))
+  NotInProjectDir(cm::string_view sourceDir, cm::string_view binaryDir)
+    : SourceDir(sourceDir)
+    , BinaryDir(binaryDir)
   {
   }
 
   // Operator evaluating the predicate
-  bool operator()(const std::string& path) const
+  bool operator()(const std::string& p) const
   {
+    auto path = cmCMakePath(p).Normal();
+
     // Keep all relative paths:
-    if (!cmSystemTools::FileIsFullPath(path)) {
+    if (path.IsRelative()) {
       return false;
     }
     // If it's an absolute path, check if it starts with the source
     // directory:
-    return (
-      !(IsInDirectory(SourceDir, path) || IsInDirectory(BinaryDir, path)));
+    return !(cmCMakePath(SourceDir).IsPrefix(path) ||
+             cmCMakePath(BinaryDir).IsPrefix(path));
   }
 
 private:
-  // Helper function used by the predicate
-  static bool IsInDirectory(const std::string& baseDir,
-                            const std::string& testDir)
-  {
-    // First check if the test directory "starts with" the base directory:
-    if (!cmHasPrefix(testDir, baseDir)) {
-      return false;
-    }
-    // If it does, then check that it's either the same string, or that the
-    // next character is a slash:
-    return ((testDir.size() == baseDir.size()) ||
-            (testDir[baseDir.size()] == '/'));
-  }
-
   // The path to the source directory
-  std::string SourceDir;
+  cm::string_view SourceDir;
   // The path to the binary directory
-  std::string BinaryDir;
+  cm::string_view BinaryDir;
 };
 }
 
@@ -1862,7 +1852,7 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
 
     this->GetIncludeDirectories(includes, target, implicitLang.first,
                                 this->GetConfigName());
-    std::string binaryDir = this->GetState()->GetBinaryDirectory();
+    std::string const& binaryDir = this->GetState()->GetBinaryDirectory();
     if (this->Makefile->IsOn("CMAKE_DEPENDS_IN_PROJECT_ONLY")) {
       std::string const& sourceDir = this->GetState()->GetSourceDirectory();
       cm::erase_if(includes, ::NotInProjectDir(sourceDir, binaryDir));
