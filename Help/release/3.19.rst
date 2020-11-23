@@ -346,3 +346,5 @@ Changes made since CMake 3.19.0 include the following.
   it can break projects that were using the property only to
   cause the specified language's compiler to be used.  This has
   been reverted to restore behavior from CMake 3.18 and below.
+
+* CUDA 11.1 support for Clang.
