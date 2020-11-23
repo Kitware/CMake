@@ -280,6 +280,8 @@ Deprecated Utility Modules
    /module/CMakeParseArguments
    /module/MacroAddFileDependencies
    /module/TestCXXAcceptsFlag
+   /module/UseJavaClassFilelist
+   /module/UseJavaSymlinks
    /module/UsePkgConfig
    /module/Use_wxWindows
    /module/WriteBasicConfigVersionFile
