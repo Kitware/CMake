@@ -13,9 +13,15 @@
 class cmFileTime
 {
 public:
-  using NSC = long long;
-  static constexpr NSC NsPerS = 1000000000;
-
+  using TimeType = long long;
+  // unit time per second
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  // unit time is one nanosecond
+  static constexpr TimeType UtPerS = 1000000000;
+#else
+  // unit time is 100 nanosecond
+  static constexpr TimeType UtPerS = 10000000;
+#endif
   cmFileTime() = default;
   ~cmFileTime() = default;
 
@@ -28,22 +34,28 @@ public:
   /**
    * @brief Return true if this is older than ftm
    */
-  bool Older(cmFileTime const& ftm) const { return (this->NS - ftm.NS) < 0; }
+  bool Older(cmFileTime const& ftm) const
+  {
+    return (this->Time - ftm.Time) < 0;
+  }
 
   /**
    * @brief Return true if this is newer than ftm
    */
-  bool Newer(cmFileTime const& ftm) const { return (ftm.NS - this->NS) < 0; }
+  bool Newer(cmFileTime const& ftm) const
+  {
+    return (ftm.Time - this->Time) < 0;
+  }
 
   /**
    * @brief Return true if this is the same as ftm
    */
-  bool Equal(cmFileTime const& ftm) const { return this->NS == ftm.NS; }
+  bool Equal(cmFileTime const& ftm) const { return this->Time == ftm.Time; }
 
   /**
    * @brief Return true if this is not the same as ftm
    */
-  bool Differ(cmFileTime const& ftm) const { return this->NS != ftm.NS; }
+  bool Differ(cmFileTime const& ftm) const { return this->Time != ftm.Time; }
 
   /**
    * @brief Compare file modification times.
@@ -51,7 +63,7 @@ public:
    */
   int Compare(cmFileTime const& ftm) const
   {
-    NSC const diff = this->NS - ftm.NS;
+    TimeType const diff = this->Time - ftm.Time;
     if (diff == 0) {
       return 0;
     }
@@ -65,7 +77,7 @@ public:
    */
   bool OlderS(cmFileTime const& ftm) const
   {
-    return (ftm.NS - this->NS) >= cmFileTime::NsPerS;
+    return (ftm.Time - this->Time) >= cmFileTime::UtPerS;
   }
 
   /**
@@ -73,7 +85,7 @@ public:
    */
   bool NewerS(cmFileTime const& ftm) const
   {
-    return (this->NS - ftm.NS) >= cmFileTime::NsPerS;
+    return (this->Time - ftm.Time) >= cmFileTime::UtPerS;
   }
 
   /**
@@ -81,11 +93,11 @@ public:
    */
   bool EqualS(cmFileTime const& ftm) const
   {
-    NSC diff = this->NS - ftm.NS;
+    TimeType diff = this->Time - ftm.Time;
     if (diff < 0) {
       diff = -diff;
     }
-    return (diff < cmFileTime::NsPerS);
+    return (diff < cmFileTime::UtPerS);
   }
 
   /**
@@ -93,11 +105,11 @@ public:
    */
   bool DifferS(cmFileTime const& ftm) const
   {
-    NSC diff = this->NS - ftm.NS;
+    TimeType diff = this->Time - ftm.Time;
     if (diff < 0) {
       diff = -diff;
     }
-    return (diff >= cmFileTime::NsPerS);
+    return (diff >= cmFileTime::UtPerS);
   }
 
   /**
@@ -107,21 +119,21 @@ public:
    */
   int CompareS(cmFileTime const& ftm) const
   {
-    NSC const diff = this->NS - ftm.NS;
-    if (diff <= -cmFileTime::NsPerS) {
+    TimeType const diff = this->Time - ftm.Time;
+    if (diff <= -cmFileTime::UtPerS) {
       return -1;
     }
-    if (diff >= cmFileTime::NsPerS) {
+    if (diff >= cmFileTime::UtPerS) {
       return 1;
     }
     return 0;
   }
 
   /**
-   * @brief The file modification time in nanoseconds
+   * @brief The file modification time in unit time per second
    */
-  NSC GetNS() const { return this->NS; }
+  TimeType GetTime() const { return this->Time; }
 
 private:
-  NSC NS = 0;
+  TimeType Time = 0;
 };
