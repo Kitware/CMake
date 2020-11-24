@@ -124,6 +124,11 @@ protected:
   void AddExtraIDETargets() override;
   void Generate() override;
 
+  FindMakeProgramStage GetFindMakeProgramStage() const override
+  {
+    return FindMakeProgramStage::Early;
+  }
+
 private:
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
   bool ProcessGeneratorToolsetField(std::string const& key,

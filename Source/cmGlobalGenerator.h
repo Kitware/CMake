@@ -597,6 +597,17 @@ protected:
 
   std::string GetPredefinedTargetsFolder();
 
+  enum class FindMakeProgramStage
+  {
+    Early,
+    Late,
+  };
+
+  virtual FindMakeProgramStage GetFindMakeProgramStage() const
+  {
+    return FindMakeProgramStage::Late;
+  }
+
 private:
   using TargetMap = std::unordered_map<std::string, cmTarget*>;
   using GeneratorTargetMap =
