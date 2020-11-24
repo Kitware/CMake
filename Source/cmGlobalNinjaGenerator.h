@@ -445,6 +445,8 @@ public:
 
   bool IsSingleConfigUtility(cmGeneratorTarget const* target) const;
 
+  bool CheckCxxModuleSupport();
+
 protected:
   void Generate() override;
 
@@ -564,6 +566,8 @@ private:
   bool NinjaSupportsUnconditionalRecompactTool = false;
   bool NinjaSupportsMultipleOutputs = false;
   bool NinjaSupportsMetadataOnRegeneration = false;
+
+  bool DiagnosedCxxModuleSupport = false;
 
 private:
   void InitOutputPathPrefix();

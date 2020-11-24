@@ -41,6 +41,7 @@ public:
     const char* Source = nullptr;
     const char* AssemblySource = nullptr;
     const char* PreprocessedSource = nullptr;
+    const char* DynDepFile = nullptr;
     const char* Output = nullptr;
     const char* Object = nullptr;
     const char* ObjectDir = nullptr;

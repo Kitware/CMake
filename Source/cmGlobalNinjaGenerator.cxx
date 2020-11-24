@@ -555,6 +555,7 @@ void cmGlobalNinjaGenerator::Generate()
   this->TargetAll = this->NinjaOutputPath("all");
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
   this->DisableCleandead = false;
+  this->DiagnosedCxxModuleSupport = false;
 
   this->PolicyCMP0058 =
     this->LocalGenerators[0]->GetMakefile()->GetPolicyStatus(
@@ -753,6 +754,37 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
     }
   }
   return true;
+}
+
+bool cmGlobalNinjaGenerator::CheckCxxModuleSupport()
+{
+  bool const diagnose = !this->DiagnosedCxxModuleSupport &&
+    !this->CMakeInstance->GetIsInTryCompile();
+  if (diagnose) {
+    this->DiagnosedCxxModuleSupport = true;
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      "C++20 modules support via CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP "
+      "is experimental.  It is meant only for compiler developers to try.");
+  }
+  if (this->NinjaSupportsDyndeps) {
+    return true;
+  }
+  if (diagnose) {
+    std::ostringstream e;
+    /* clang-format off */
+    e <<
+      "The Ninja generator does not support C++20 modules "
+      "using Ninja version \n"
+      "  " << this->NinjaVersion << "\n"
+      "due to lack of required features.  "
+      "Ninja " << RequiredNinjaVersionForDyndeps() << " or higher is required."
+      ;
+    /* clang-format on */
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+  }
+  return false;
 }
 
 bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
