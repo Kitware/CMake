@@ -2,6 +2,8 @@
 enable_language (CUDA)
 include(CheckSourceCompiles)
 
+set(CUDA 1) # test that this is tolerated
+
 check_source_compiles(CUDA "I don't build" SHOULD_FAIL)
 if(SHOULD_FAIL)
   message(SEND_ERROR "invalid CUDA source didn't fail.")

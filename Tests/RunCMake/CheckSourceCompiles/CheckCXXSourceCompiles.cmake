@@ -2,6 +2,8 @@
 enable_language (CXX)
 include(CheckSourceCompiles)
 
+set(CXX 1) # test that this is tolerated
+
 check_source_compiles(CXX "I don't build" SHOULD_FAIL)
 if(SHOULD_FAIL)
   message(SEND_ERROR "invalid CXX source didn't fail.")

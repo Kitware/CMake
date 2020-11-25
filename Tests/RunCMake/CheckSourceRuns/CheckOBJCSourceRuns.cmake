@@ -1,6 +1,8 @@
 enable_language (OBJC)
 include(CheckSourceRuns)
 
+set(OBJC 1) # test that this is tolerated
+
 check_source_runs(OBJC [[
   #import <Foundation/Foundation.h>
   int main() {
