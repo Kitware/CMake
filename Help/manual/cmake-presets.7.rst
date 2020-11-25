@@ -93,7 +93,7 @@ Format
       An optional array of strings representing the names of presets to inherit
       from. The preset will inherit all of the fields from the ``inherits``
       presets by default (except ``name``, ``hidden``, ``inherits``,
-      ``description``, and ``longDescription``), but can override them as
+      ``description``, and ``displayName``), but can override them as
       desired. If multiple ``inherits`` presets provide conflicting values for
       the same field, the earlier preset in the ``inherits`` list will be
       preferred. Presets in ``CMakePresets.json`` may not inherit from presets
