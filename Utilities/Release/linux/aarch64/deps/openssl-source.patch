@@ -1,0 +1,12 @@
+# enable pthread APIs disabled by our _POSIX_SOURCE definitions
+--- openssl-source/crypto/threads_pthread.c.orig
++++ openssl-source/crypto/threads_pthread.c
+@@ -6,6 +6,8 @@
+  * in the file LICENSE in the source distribution or at
+  * https://www.openssl.org/source/license.html
+  */
++#undef _POSIX_C_SOURCE
++#undef _POSIX_SOURCE
+
+ #include <openssl/crypto.h>
+ #include "internal/cryptlib.h"
