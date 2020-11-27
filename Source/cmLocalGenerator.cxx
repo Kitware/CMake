@@ -2506,8 +2506,10 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         }
 
         if (!useMultiArchPch.empty()) {
-          target->Target->SetProperty(
-            cmStrCat(lang, "_COMPILE_OPTIONS_USE_PCH"), useMultiArchPch);
+
+          target->Target->AppendProperty(
+            cmStrCat(lang, "_COMPILE_OPTIONS_USE_PCH"),
+            cmStrCat("$<$<CONFIG:", config, ">:", useMultiArchPch, ">"));
         }
       }
 
