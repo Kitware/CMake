@@ -8,6 +8,7 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
   target_compile_options(CudaOnlyCompileFlags PRIVATE
     -gencode arch=compute_50,code=compute_50
   )
+  set_property(TARGET CudaOnlyCompileFlags PROPERTY CUDA_ARCHITECTURES)
 else()
   set_property(TARGET CudaOnlyCompileFlags PROPERTY CUDA_ARCHITECTURES 50-real)
 endif()
