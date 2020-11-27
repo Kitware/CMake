@@ -109,6 +109,12 @@ Package
 
  Default height of the wizard in pixels. Setting a watermark image will override this.
 
+.. variable:: CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST
+
+ Set to ``OFF`` if the widget listing installer pages on the left side of the wizard should not be shown.
+
+ Is ``ON`` by default.
+
 .. variable:: CPACK_IFW_PACKAGE_TITLE_COLOR
 
  .. versionadded:: 3.8
