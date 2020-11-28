@@ -39,3 +39,12 @@ For example, the following are all equivalent:
   target_compile_definitions(foo PUBLIC -DFOO)  # -D removed
   target_compile_definitions(foo PUBLIC "" FOO) # "" ignored
   target_compile_definitions(foo PUBLIC -D FOO) # -D becomes "", then ignored
+
+Definitions may optionally have values:
+
+.. code-block:: cmake
+
+  target_compile_definitions(foo PUBLIC FOO=1)
+
+Note that many compilers treat ``-DFOO`` as equivalent to ``-DFOO=1``, but
+other tools may not recognize this in all circumstances (e.g. IntelliSense).
