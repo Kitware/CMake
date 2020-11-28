@@ -275,8 +275,10 @@ function(FIND_PACKAGE_CHECK_VERSION version result)
     unset (${FPCV_RESULT_MESSAGE_VARIABLE} PARENT_SCOPE)
   endif()
 
-  if (CMAKE_FIND_PACKAGE_NAME)
-    set (package ${CMAKE_FIND_PACKAGE_NAME})
+  if (_CMAKE_FPHSA_PACKAGE_NAME)
+    set (package "${_CMAKE_FPHSA_PACKAGE_NAME}")
+  elseif (CMAKE_FIND_PACKAGE_NAME)
+    set (package "${CMAKE_FIND_PACKAGE_NAME}")
   else()
     message (FATAL_ERROR "find_package_check_version(): Cannot be used outside a 'Find Module'")
   endif()
@@ -435,6 +437,9 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       "not support this capability. Only the lower endpoint of the range "
       "will be used.")
   endif()
+
+  # to propagate package name to FIND_PACKAGE_CHECK_VERSION
+  set(_CMAKE_FPHSA_PACKAGE_NAME "${_NAME}")
 
   # now that we collected all arguments, process them
 
