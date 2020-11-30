@@ -62,7 +62,7 @@ Examples
 #]=======================================================================]
 
 
-include (Internal/CMakeCheckCompilerFlag)
+include (Internal/CMakeTryCompilerOrLinkerFlag)
 
 function (check_pie_supported)
   cmake_policy(GET CMP0083 cmp0083)
@@ -109,14 +109,16 @@ function (check_pie_supported)
 
   foreach(lang IN LISTS CHECK_PIE_LANGUAGES)
     if(_CMAKE_${lang}_PIE_MAY_BE_SUPPORTED_BY_LINKER)
-      cmake_check_compiler_flag(${lang} "${CMAKE_${lang}_LINK_OPTIONS_PIE}"
+      cmake_try_compiler_or_linker_flag(${lang}
+                                "${CMAKE_${lang}_LINK_OPTIONS_PIE}"
                                 CMAKE_${lang}_LINK_PIE_SUPPORTED
                                 OUTPUT_VARIABLE output)
       if (NOT CMAKE_${lang}_LINK_PIE_SUPPORTED)
         string (APPEND outputs "PIE (${lang}): ${output}\n")
       endif()
 
-      cmake_check_compiler_flag(${lang} "${CMAKE_${lang}_LINK_OPTIONS_NO_PIE}"
+      cmake_try_compiler_or_linker_flag(${lang}
+                                "${CMAKE_${lang}_LINK_OPTIONS_NO_PIE}"
                                 CMAKE_${lang}_LINK_NO_PIE_SUPPORTED
                                 OUTPUT_VARIABLE output)
       if (NOT CMAKE_${lang}_LINK_NO_PIE_SUPPORTED)
