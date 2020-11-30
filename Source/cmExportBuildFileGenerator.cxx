@@ -288,6 +288,9 @@ void cmExportBuildFileGenerator::GetTargets(
   if (this->ExportSet) {
     for (std::unique_ptr<cmTargetExport> const& te :
          this->ExportSet->GetTargetExports()) {
+      if (te->NamelinkOnly) {
+        continue;
+      }
       targets.push_back(te->TargetName);
     }
     return;
