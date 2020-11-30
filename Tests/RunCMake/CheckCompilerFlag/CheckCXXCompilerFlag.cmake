@@ -2,6 +2,8 @@
 enable_language (CXX)
 include(CheckCompilerFlag)
 
+set(CXX 1) # test that this is tolerated
+
 check_compiler_flag(CXX "-_this_is_not_a_flag_" SHOULD_FAIL)
 if(SHOULD_FAIL)
   message(SEND_ERROR "invalid CXX compile flag didn't fail.")

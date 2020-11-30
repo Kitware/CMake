@@ -2,6 +2,8 @@
 enable_language (C)
 include(CheckSourceCompiles)
 
+set(C 1) # test that this is tolerated
+
 check_source_compiles(C "I don't build" SHOULD_FAIL)
 if(SHOULD_FAIL)
   message(SEND_ERROR "invalid C source didn't fail.")
