@@ -1017,6 +1017,17 @@ int cmCTest::ProcessSteps()
   }
   if (res != 0) {
     cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest" << std::endl);
+    if (!this->Impl->OutputTestOutputOnTestFailure) {
+      const std::string lastTestLog =
+        this->GetBinaryDir() + "/Testing/Temporary/LastTest.log";
+      cmCTestLog(this, ERROR_MESSAGE,
+                 "Output from these tests are in: " << lastTestLog
+                                                    << std::endl);
+      cmCTestLog(this, ERROR_MESSAGE,
+                 "Use \"--rerun-failed --output-on-failure\" to re-run the "
+                 "failed cases verbosely."
+                   << std::endl);
+    }
   }
   return res;
 }
