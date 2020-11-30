@@ -846,6 +846,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
   bool haveToolset = false;
   bool havePlatform = false;
   bool haveBArg = false;
+  bool scriptMode = false;
+  std::string possibleUnknownArg;
 #if !defined(CMAKE_BOOTSTRAP)
   std::string profilingFormat;
   std::string profilingOutput;
@@ -898,7 +900,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     CommandArgument{ "-B", "No build directory specified for -B",
                      CommandArgument::Values::One, BuildArgLambda },
     CommandArgument{ "-P", "-P must be followed by a file name.",
-                     CommandArgument::Values::One, IgnoreAndTrueLambda },
+                     CommandArgument::Values::One,
+                     [&](std::string const&, cmake*) -> bool {
+                       scriptMode = true;
+                       return true;
+                     } },
     CommandArgument{ "-D", "-D must be followed with VAR=VALUE.",
                      CommandArgument::Values::One, IgnoreAndTrueLambda },
     CommandArgument{ "-C", "-C must be followed by a file name.",
@@ -1145,12 +1151,26 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         break;
       }
     }
+
+    // We have an issue where arguments to a "-P" script mode
+    // can be provided before the "-P" argument. This means
+    // that we need to lazily check this argument after checking
+    // all args.
+    // Additionally it can't be the source/binary tree location
     if (!parsedCorrectly) {
       cmSystemTools::Error("Run 'cmake --help' for all supported options.");
       exit(1);
+    } else if (!matched && cmHasLiteralPrefix(arg, "-")) {
+      possibleUnknownArg = arg;
     } else if (!matched) {
       this->SetDirectoriesFromFile(arg);
     }
+  }
+
+  if (!possibleUnknownArg.empty() && !scriptMode) {
+    cmSystemTools::Error(cmStrCat("Unknown argument ", possibleUnknownArg));
+    cmSystemTools::Error("Run 'cmake --help' for all supported options.");
+    exit(1);
   }
 
   // Empty instance, platform and toolset if only a generator is specified
