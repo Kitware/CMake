@@ -2,7 +2,13 @@ include(Compiler/Clang)
 __compiler_clang(CUDA)
 
 # Set explicitly, because __compiler_clang() doesn't set this if we're simulating MSVC.
-set(CMAKE_DEPFILE_FLAGS_CUDA "-MD -MT <OBJECT> -MF <DEPFILE>")
+set(CMAKE_DEPFILE_FLAGS_CUDA "-MD -MT <DEP_TARGET> -MF <DEP_FILE>")
+if((NOT DEFINED CMAKE_DEPENDS_USE_COMPILER OR CMAKE_DEPENDS_USE_COMPILER)
+    AND CMAKE_GENERATOR MATCHES "Makefiles|WMake")
+  # dependencies are computed by the compiler itself
+  set(CMAKE_CUDA_DEPFILE_FORMAT gcc)
+  set(CMAKE_CUDA_DEPENDS_USE_COMPILER TRUE)
+endif()
 
 # C++03 isn't supported for CXX, but is for CUDA, so we need to set these manually.
 # Do this before __compiler_clang_cxx_standards() since that adds the feature.

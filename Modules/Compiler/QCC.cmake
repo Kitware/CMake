@@ -14,7 +14,7 @@ macro(__compiler_qcc lang)
 
   set(CMAKE_${lang}_COMPILE_OPTIONS_SYSROOT "-Wc,-isysroot,")
   set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-Wp,-isystem,")
-  set(CMAKE_DEPFILE_FLAGS_${lang} "-Wp,-MD,<DEPFILE> -Wp,-MT,<OBJECT> -Wp,-MF,<DEPFILE>")
+  set(CMAKE_DEPFILE_FLAGS_${lang} "-Wp,-MD,<DEP_FILE> -Wp,-MT,<DEP_TARGET> -Wp,-MF,<DEP_FILE>")
 
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")

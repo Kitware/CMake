@@ -67,7 +67,11 @@ else()
 endif()
 
 # Test escaping of special characters in include directory paths.
-set(special_chars "~@%&{}()!'")
+set(special_chars "~@&{}()!'")
+if(NOT CMAKE_GENERATOR MATCHES "(Unix|MinGW|MSYS) Makefiles")
+  # when compiler is used for dependencies, special characters for make are not escaped
+  string(APPEND special_chars "%")
+endif()
 if(NOT CMAKE_GENERATOR STREQUAL "Watcom WMake")
   # Watcom seems to have no way to encode these characters.
   string(APPEND special_chars "#=[]")

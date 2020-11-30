@@ -437,6 +437,13 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_${lang}_LINKER_SUPPORTS_PDB ON)
   set(CMAKE_NINJA_DEPTYPE_${lang} msvc)
   __windows_compiler_msvc_enable_rc("${_PLATFORM_DEFINES} ${_PLATFORM_DEFINES_${lang}}")
+
+  # define generic information about compiler dependencies
+  # activation is done on per language platform configuration basis
+  if (MSVC_VERSION GREATER 1300)
+    set(CMAKE_DEPFILE_FLAGS_${lang} "/showIncludes")
+    set(CMAKE_${lang}_DEPFILE_FORMAT msvc)
+  endif()
 endmacro()
 
 macro(__windows_compiler_msvc_enable_rc flags)

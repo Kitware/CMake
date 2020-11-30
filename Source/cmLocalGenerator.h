@@ -43,6 +43,13 @@ enum class cmSourceOutputKind
   OutputOrByproduct
 };
 
+/** What scanner to use for dependencies lookup.  */
+enum class cmDependencyScannerKind
+{
+  CMake,
+  Compiler
+};
+
 /** Target and source file which have a specific output.  */
 struct cmSourcesWithOutput
 {

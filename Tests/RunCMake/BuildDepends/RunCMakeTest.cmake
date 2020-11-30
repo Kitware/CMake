@@ -113,3 +113,13 @@ if(CMake_TEST_BuildDepends_GNU_AS)
   set(ENV{ASM} "${CMake_TEST_BuildDepends_GNU_AS}")
   run_BuildDepends(GNU-AS)
 endif()
+
+if ((RunCMake_GENERATOR STREQUAL "Unix Makefiles"
+      AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"
+        OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
+        OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
+    OR (RunCMake_GENERATOR STREQUAL "NMake Makefiles"
+      AND MSVC_VERSION GREATER 1300
+      AND CMAKE_C_COMPILER_ID STREQUAL "MSVC"))
+  run_BuildDepends(CompilerDependencies)
+endif()

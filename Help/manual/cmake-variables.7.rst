@@ -387,6 +387,7 @@ Variables that Control the Build
    /variable/CMAKE_DEFAULT_BUILD_TYPE
    /variable/CMAKE_DEFAULT_CONFIGS
    /variable/CMAKE_DISABLE_PRECOMPILE_HEADERS
+   /variable/CMAKE_DEPENDS_USE_COMPILER
    /variable/CMAKE_ENABLE_EXPORTS
    /variable/CMAKE_EXE_LINKER_FLAGS
    /variable/CMAKE_EXE_LINKER_FLAGS_CONFIG

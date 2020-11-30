@@ -204,7 +204,10 @@ if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
     set(CMake_TEST_BuildDepends_GNU_AS "${_gnu_as}")
   endif()
 endif()
+
 add_RunCMake_test(BuildDepends
+  -DMSVC_VERSION=${MSVC_VERSION}
+  -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
   -DCMake_TEST_BuildDepends_GNU_AS=${CMake_TEST_BuildDepends_GNU_AS}
   )
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
