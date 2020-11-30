@@ -1624,7 +1624,7 @@ cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
   std::string const& filename)
 {
   cmSourceFile* gFile = this->Makefile->GetOrCreateSource(filename, true);
-  gFile->SetProperty("GENERATED", "1");
+  gFile->MarkAsGenerated();
   gFile->SetProperty("SKIP_AUTOGEN", "1");
   return gFile;
 }

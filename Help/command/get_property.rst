@@ -94,3 +94,8 @@ If ``BRIEF_DOCS`` or ``FULL_DOCS`` is given then the variable is set to a
 string containing documentation for the requested property.  If
 documentation is requested for a property that has not been defined
 ``NOTFOUND`` is returned.
+
+.. note::
+
+  The :prop_sf:`GENERATED` source file property may be globally visible.
+  See its documentation for details.

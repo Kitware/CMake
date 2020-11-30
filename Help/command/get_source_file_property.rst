@@ -40,3 +40,8 @@ file properties usually control how the file is built. One property that is
 always there is :prop_sf:`LOCATION`.
 
 See also the more general :command:`get_property` command.
+
+.. note::
+
+  The :prop_sf:`GENERATED` source file property may be globally visible.
+  See its documentation for details.

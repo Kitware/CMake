@@ -11,6 +11,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -289,6 +290,11 @@ public:
   std::string GetExtraGeneratorName() const;
 
   void AddInstallComponent(const std::string& component);
+
+  /** Mark the (absolute path to a) file as generated.  */
+  void MarkAsGeneratedFile(const std::string& filepath);
+  /** Determine if the absolute filepath belongs to a generated file.  */
+  bool IsGeneratedFile(const std::string& filepath);
 
   const std::set<std::string>* GetInstallComponents() const
   {
@@ -732,6 +738,8 @@ private:
     FilenameTargetDepends;
 
   std::map<std::string, std::string> RealPaths;
+
+  std::unordered_set<std::string> GeneratedFiles;
 
 #if !defined(CMAKE_BOOTSTRAP)
   // Pool of file locks
