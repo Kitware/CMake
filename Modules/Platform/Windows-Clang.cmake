@@ -35,6 +35,9 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS 1)
   set (CMAKE_LINK_DEF_FILE_FLAG "-Xlinker /DEF:")
 
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Xlinker" " ")
+  set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
+
   if("${CMAKE_${lang}_SIMULATE_VERSION}" MATCHES "^([0-9]+)\\.([0-9]+)")
     math(EXPR MSVC_VERSION "${CMAKE_MATCH_1}*100 + ${CMAKE_MATCH_2}")
   endif()
