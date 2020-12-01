@@ -1,7 +1,7 @@
 $erroractionpreference = "stop"
 
-$version = "1.10.0"
-$sha256sum = "919FD158C16BF135E8A850BB4046EC1CE28A7439EE08B977CD0B7F6B3463D178"
+$version = "1.10.2"
+$sha256sum = "BBDE850D247D2737C5764C927D1071CBB1F1957DCABDA4A130FA8547C12C695F"
 $filename = "ninja-win"
 $tarball = "$filename.zip"
 
