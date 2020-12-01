@@ -42,7 +42,7 @@ else()
     if(NOT $ENV{CXX} STREQUAL "")
       get_filename_component(CMAKE_CXX_COMPILER_INIT $ENV{CXX} PROGRAM PROGRAM_ARGS CMAKE_CXX_FLAGS_ENV_INIT)
       if(CMAKE_CXX_FLAGS_ENV_INIT)
-        set(CMAKE_CXX_COMPILER_ARG1 "${CMAKE_CXX_FLAGS_ENV_INIT}" CACHE STRING "First argument to CXX compiler")
+        set(CMAKE_CXX_COMPILER_ARG1 "${CMAKE_CXX_FLAGS_ENV_INIT}" CACHE STRING "Arguments to CXX compiler")
       endif()
       if(NOT EXISTS ${CMAKE_CXX_COMPILER_INIT})
         message(FATAL_ERROR "Could not find compiler set in environment variable CXX:\n$ENV{CXX}.\n${CMAKE_CXX_COMPILER_INIT}")
@@ -83,6 +83,10 @@ else()
     )
 endif()
 
+if(CMAKE_CXX_COMPILER_TARGET)
+  set(CMAKE_CXX_COMPILER_ID_TEST_FLAGS_FIRST "-c --target=${CMAKE_CXX_COMPILER_TARGET}")
+endif()
+
 # Build a small source file to identify the compiler.
 if(NOT CMAKE_CXX_COMPILER_ID_RUN)
   set(CMAKE_CXX_COMPILER_ID_RUN 1)
@@ -104,7 +108,7 @@ if(NOT CMAKE_CXX_COMPILER_ID_RUN)
   #      ...
   #      /path/to/cc ...CompilerIdCXX/...
   # to extract the compiler front-end for the language.
-  set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCXX/(\\./)?(CompilerIdCXX.(framework|xctest)/)?CompilerIdCXX[ \t\n\\\"]")
+  set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdCXX/(\\./)?(CompilerIdCXX.(framework|xctest|build/[^ \t\r\n]+)/)?CompilerIdCXX[ \t\n\\\"]")
   set(CMAKE_CXX_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)

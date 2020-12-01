@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmString_hxx
-#define cmString_hxx
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -383,7 +382,7 @@ public:
       instance is mutated or destroyed.  */
   std::string const* str_if_stable() const;
 
-  /** Get a refernce to a normal std::string.  The reference
+  /** Get a reference to a normal std::string.  The reference
       is valid until this instance is mutated or destroyed.  */
   std::string const& str();
 
@@ -928,5 +927,3 @@ struct hash<cm::String>
   }
 };
 }
-
-#endif

@@ -5,6 +5,8 @@
 CPackIFW
 --------
 
+.. versionadded:: 3.1
+
 This module looks for the location of the command-line utilities supplied with the
 `Qt Installer Framework <http://doc.qt.io/qtinstallerframework/index.html>`_
 (QtIFW).
@@ -359,6 +361,7 @@ set(_CPACK_IFW_PREFIXES
   "QtIFW-")
 
 set(_CPACK_IFW_VERSIONS
+  "4.0"
   "3.2"
   "3.2.0"
   "3.1"
@@ -434,6 +437,16 @@ find_program(CPACK_IFW_DEVTOOL_EXECUTABLE
   )
 mark_as_advanced(CPACK_IFW_DEVTOOL_EXECUTABLE)
 
+# Look for 'archivegen'
+
+find_program(CPACK_IFW_ARCHIVEGEN_EXECUTABLE
+  NAMES archivegen
+  PATHS ${_CPACK_IFW_PATHS}
+  PATH_SUFFIXES ${_CPACK_IFW_SUFFIXES}
+  DOC "QtIFW archivegen command line client"
+  )
+mark_as_advanced(CPACK_IFW_ARCHIVEGEN_EXECUTABLE)
+
 #
 ## Next code is included only once
 #
@@ -454,7 +467,7 @@ mark_as_advanced(CPACK_IFW_FRAMEWORK_VERSION_TIMEOUT)
 if(CPACK_IFW_INSTALLERBASE_EXECUTABLE AND NOT CPACK_IFW_FRAMEWORK_VERSION_FORCED)
   set(CPACK_IFW_FRAMEWORK_VERSION)
   # Invoke version from "installerbase" executable
-  foreach(_ifw_version_argument --framework-version --version)
+  foreach(_ifw_version_argument --version --framework-version)
     if(NOT CPACK_IFW_FRAMEWORK_VERSION)
       execute_process(COMMAND
         "${CPACK_IFW_INSTALLERBASE_EXECUTABLE}" ${_ifw_version_argument}

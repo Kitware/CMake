@@ -30,12 +30,14 @@
 #include "uv.h"
 #include "internal.h"
 
+/* clang-format off */
 #include <winsock2.h>
 #include <winperf.h>
 #include <iphlpapi.h>
 #include <psapi.h>
 #include <tlhelp32.h>
 #include <windows.h>
+/* clang-format on */
 #include <userenv.h>
 #include <math.h>
 
@@ -67,8 +69,8 @@ extern BOOLEAN NTAPI SystemFunction036(PVOID Buffer, ULONG BufferLength);
 static char *process_title;
 static CRITICAL_SECTION process_title_lock;
 
-/* Interval (in seconds) of the high-resolution clock. */
-static double hrtime_interval_ = 0;
+/* Frequency of the high-resolution clock. */
+static uint64_t hrtime_frequency_ = 0;
 
 
 /*
@@ -84,9 +86,9 @@ void uv__util_init(void) {
    * and precompute its reciprocal.
    */
   if (QueryPerformanceFrequency(&perf_frequency)) {
-    hrtime_interval_ = 1.0 / perf_frequency.QuadPart;
+    hrtime_frequency_ = perf_frequency.QuadPart;
   } else {
-    hrtime_interval_= 0;
+    uv_fatal_error(GetLastError(), "QueryPerformanceFrequency");
   }
 }
 
@@ -490,23 +492,25 @@ uint64_t uv_hrtime(void) {
   return uv__hrtime(UV__NANOSEC);
 }
 
-uint64_t uv__hrtime(double scale) {
+uint64_t uv__hrtime(unsigned int scale) {
   LARGE_INTEGER counter;
+  double scaled_freq;
+  double result;
 
-  /* If the performance interval is zero, there's no support. */
-  if (hrtime_interval_ == 0) {
-    return 0;
-  }
-
+  assert(hrtime_frequency_ != 0);
+  assert(scale != 0);
   if (!QueryPerformanceCounter(&counter)) {
-    return 0;
+    uv_fatal_error(GetLastError(), "QueryPerformanceCounter");
   }
+  assert(counter.QuadPart != 0);
 
   /* Because we have no guarantee about the order of magnitude of the
    * performance counter interval, integer math could cause this computation
    * to overflow. Therefore we resort to floating point math.
    */
-  return (uint64_t) ((double) counter.QuadPart * hrtime_interval_ * scale);
+  scaled_freq = (double) hrtime_frequency_ / scale;
+  result = (double) counter.QuadPart / scaled_freq;
+  return (uint64_t) result;
 }
 
 
@@ -1804,7 +1808,9 @@ int uv_os_uname(uv_utsname_t* buffer) {
     pRtlGetVersion(&os_info);
   } else {
     /* Silence GetVersionEx() deprecation warning. */
+    #ifdef _MSC_VER
     #pragma warning(suppress : 4996)
+    #endif
     if (GetVersionExW(&os_info) == 0) {
       r = uv_translate_sys_error(GetLastError());
       goto error;
@@ -1871,7 +1877,7 @@ int uv_os_uname(uv_utsname_t* buffer) {
                "MINGW32_NT-%u.%u",
                (unsigned int) os_info.dwMajorVersion,
                (unsigned int) os_info.dwMinorVersion);
-  assert(r < sizeof(buffer->sysname));
+  assert((size_t)r < sizeof(buffer->sysname));
 #else
   uv__strscpy(buffer->sysname, "Windows_NT", sizeof(buffer->sysname));
 #endif
@@ -1883,7 +1889,7 @@ int uv_os_uname(uv_utsname_t* buffer) {
                (unsigned int) os_info.dwMajorVersion,
                (unsigned int) os_info.dwMinorVersion,
                (unsigned int) os_info.dwBuildNumber);
-  assert(r < sizeof(buffer->release));
+  assert((size_t)r < sizeof(buffer->release));
 
   /* Populate the machine field. */
   GetSystemInfo(&system_info);

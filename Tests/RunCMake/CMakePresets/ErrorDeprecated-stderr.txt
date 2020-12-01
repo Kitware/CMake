@@ -1,0 +1,7 @@
+^CMake Deprecation Error at [^
+]*/Tests/RunCMake/CMakePresets/WarningsBase\.cmake:[0-9]+ \(message\):
+  Deprecation warning
+Call Stack \(most recent call first\):
+  [^
+]*/Tests/RunCMake/CMakePresets/ErrorDeprecated\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)$

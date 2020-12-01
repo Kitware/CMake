@@ -1,6 +1,8 @@
 CMAKE_OBJC_STANDARD_REQUIRED
 ----------------------------
 
+.. versionadded:: 3.16
+
 Default value for :prop_tgt:`OBJC_STANDARD_REQUIRED` property of targets.
 
 This variable is used to initialize the :prop_tgt:`OBJC_STANDARD_REQUIRED`

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmParseDelphiCoverage_h
-#define cmParseDelphiCoverage_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -35,4 +34,3 @@ protected:
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;
 };
-#endif

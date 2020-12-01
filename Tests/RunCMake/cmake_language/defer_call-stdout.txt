@@ -1,0 +1,8 @@
+-- Immediate Message In Subdirectory: ids='__0;__1'
+-- Deferred Message In Subdirectory: '[^']*/Tests/RunCMake/cmake_language/defer_call/CMakeLists.txt:DEFERRED:id1'
+-- Deferred Message In Included File: '[^']*/Tests/RunCMake/cmake_language/defer_call/include.cmake:1'
+-- Immediate Message: ids='__0;__1;__2;__3;__4'
+-- First Deferred Message
+-- Deferred Message From Subdirectory
+-- Deferred Message: ids='__4;__5'
+-- Final Deferred Message

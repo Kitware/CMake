@@ -5,6 +5,8 @@
 FindSQLite3
 -----------
 
+.. versionadded:: 3.14
+
 Find the SQLite libraries, v3
 
 IMPORTED targets

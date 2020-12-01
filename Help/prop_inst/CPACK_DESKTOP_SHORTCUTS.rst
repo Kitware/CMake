@@ -1,6 +1,8 @@
 CPACK_DESKTOP_SHORTCUTS
 -----------------------
 
+.. versionadded:: 3.3
+
 Species a list of shortcut names that should be created on the `Desktop`
 for this file.
 

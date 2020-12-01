@@ -1,6 +1,8 @@
 CMP0090
 -------
 
+.. versionadded:: 3.15
+
 :command:`export(PACKAGE)` does not populate package registry by default.
 
 In CMake 3.14 and below the :command:`export(PACKAGE)` command populated the

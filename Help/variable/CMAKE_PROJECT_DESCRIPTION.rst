@@ -1,6 +1,8 @@
 CMAKE_PROJECT_DESCRIPTION
 -------------------------
 
+.. versionadded:: 3.9
+
 The description of the top level project.
 
 This variable holds the description of the project as specified in the top

@@ -315,10 +315,9 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 {
   // Configurations
   this->MultiConfig = this->GlobalGen->IsMultiConfig();
-  this->ConfigDefault = this->Makefile->GetConfigurations(this->ConfigsList);
-  if (this->ConfigsList.empty()) {
-    this->ConfigsList.push_back(this->ConfigDefault);
-  }
+  this->ConfigDefault = this->Makefile->GetDefaultConfiguration();
+  this->ConfigsList =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   // Verbosity
   {
@@ -490,7 +489,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
     if (this->Moc.Enabled) {
       // Path prefix
-      if (cmIsOn(this->GenTarget->GetSafeProperty("AUTOMOC_PATH_PREFIX"))) {
+      if (cmIsOn(this->GenTarget->GetProperty("AUTOMOC_PATH_PREFIX"))) {
         this->Moc.PathPrefix = true;
       }
 
@@ -789,9 +788,9 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
       // Register files that will be scanned by moc or uic
       if (this->MocOrUicEnabled()) {
-        if (cm->IsHeaderExtension(extLower)) {
+        if (cm->IsAHeaderExtension(extLower)) {
           addMUHeader(makeMUFile(sf, fullPath, true), extLower);
-        } else if (cm->IsSourceExtension(extLower)) {
+        } else if (cm->IsACLikeSourceExtension(extLower)) {
           addMUSource(makeMUFile(sf, fullPath, true));
         }
       }
@@ -863,7 +862,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
             if (sf != nullptr) {
               auto eMuf = makeMUFile(sf, fullPath, true);
-              // Ony process moc/uic when the parent is processed as well
+              // Only process moc/uic when the parent is processed as well
               if (!muf.MocIt) {
                 eMuf->MocIt = false;
               }
@@ -895,14 +894,14 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       std::string const& extLower =
         cmSystemTools::LowerCase(sf->GetExtension());
 
-      if (cm->IsHeaderExtension(extLower)) {
+      if (cm->IsAHeaderExtension(extLower)) {
         if (!cm::contains(this->AutogenTarget.Headers, sf.get())) {
           auto muf = makeMUFile(sf.get(), fullPath, false);
           if (muf->SkipMoc || muf->SkipUic) {
             addMUHeader(std::move(muf), extLower);
           }
         }
-      } else if (cm->IsSourceExtension(extLower)) {
+      } else if (cm->IsACLikeSourceExtension(extLower)) {
         if (!cm::contains(this->AutogenTarget.Sources, sf.get())) {
           auto muf = makeMUFile(sf.get(), fullPath, false);
           if (muf->SkipMoc || muf->SkipUic) {
@@ -1224,9 +1223,13 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
 
       if (this->Moc.ExecutableTarget != nullptr) {
         dependencies.push_back(this->Moc.ExecutableTarget->Target->GetName());
+      } else if (!this->Moc.Executable.empty()) {
+        dependencies.push_back(this->Moc.Executable);
       }
       if (this->Uic.ExecutableTarget != nullptr) {
         dependencies.push_back(this->Uic.ExecutableTarget->Target->GetName());
+      } else if (!this->Uic.Executable.empty()) {
+        dependencies.push_back(this->Uic.Executable);
       }
 
       // Create the custom command that outputs the timestamp file.
@@ -1514,6 +1517,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
   info.SetConfig("PARSE_CACHE_FILE", this->AutogenTarget.ParseCacheFile);
   info.Set("DEP_FILE", this->AutogenTarget.DepFile);
   info.Set("DEP_FILE_RULE_NAME", this->AutogenTarget.DepFileRuleName);
+  info.SetArray("CMAKE_LIST_FILES", this->Makefile->GetListFiles());
   info.SetArray("HEADER_EXTENSIONS",
                 this->Makefile->GetCMakeInstance()->GetHeaderExtensions());
   info.SetArrayArray(
@@ -1654,7 +1658,7 @@ void cmQtAutoGenInitializer::AddToSourceGroup(std::string const& fileName,
       };
       for (std::string const& prop : props) {
         cmProp propName = this->Makefile->GetState()->GetGlobalProperty(prop);
-        if (propName && !propName->empty()) {
+        if (cmNonempty(propName)) {
           groupName = *propName;
           property = prop;
           break;
@@ -1754,8 +1758,8 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target)
 
     // Read versions from variables
     for (auto const& keyPair : keys) {
-      addVersion(target->Makefile->GetDef(std::string(keyPair.first)),
-                 target->Makefile->GetDef(std::string(keyPair.second)));
+      addVersion(target->Makefile->GetDefinition(std::string(keyPair.first)),
+                 target->Makefile->GetDefinition(std::string(keyPair.second)));
     }
 
     // Read versions from directory properties

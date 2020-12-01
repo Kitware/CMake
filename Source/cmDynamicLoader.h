@@ -5,8 +5,7 @@
 // cmDynamicLoader provides a portable interface to loading dynamic
 // libraries into a process.
 
-#ifndef cmDynamicLoader_h
-#define cmDynamicLoader_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -29,5 +28,3 @@ protected:
   cmDynamicLoader() = default;
   ~cmDynamicLoader() = default;
 };
-
-#endif

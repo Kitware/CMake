@@ -1,6 +1,8 @@
 CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR
 -----------------------------------------
 
+.. versionadded:: 3.16
+
 Path to standalone NVIDIA CUDA Toolkit (eg. extracted from installer).
 
 The :ref:`Visual Studio Generators` for VS 2010 and above support using

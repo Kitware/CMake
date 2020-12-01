@@ -258,6 +258,8 @@ Properties on Targets
    /prop_tgt/INTERPROCEDURAL_OPTIMIZATION_CONFIG
    /prop_tgt/INTERPROCEDURAL_OPTIMIZATION
    /prop_tgt/IOS_INSTALL_COMBINED
+   /prop_tgt/ISPC_HEADER_DIRECTORY
+   /prop_tgt/ISPC_INSTRUCTION_SETS
    /prop_tgt/JOB_POOL_COMPILE
    /prop_tgt/JOB_POOL_LINK
    /prop_tgt/JOB_POOL_PRECOMPILE_HEADER
@@ -307,11 +309,13 @@ Properties on Targets
    /prop_tgt/OBJCXX_EXTENSIONS
    /prop_tgt/OBJCXX_STANDARD
    /prop_tgt/OBJCXX_STANDARD_REQUIRED
+   /prop_tgt/OPTIMIZE_DEPENDENCIES
    /prop_tgt/OSX_ARCHITECTURES_CONFIG
    /prop_tgt/OSX_ARCHITECTURES
    /prop_tgt/OUTPUT_NAME_CONFIG
    /prop_tgt/OUTPUT_NAME
    /prop_tgt/PCH_WARN_INVALID
+   /prop_tgt/PCH_INSTANTIATE_TEMPLATES
    /prop_tgt/PDB_NAME_CONFIG
    /prop_tgt/PDB_NAME
    /prop_tgt/PDB_OUTPUT_DIRECTORY_CONFIG
@@ -394,6 +398,7 @@ Properties on Targets
    /prop_tgt/XCODE_ATTRIBUTE_an-attribute
    /prop_tgt/XCODE_EXPLICIT_FILE_TYPE
    /prop_tgt/XCODE_GENERATE_SCHEME
+   /prop_tgt/XCODE_LINK_BUILD_PHASE_MODE
    /prop_tgt/XCODE_PRODUCT_TYPE
    /prop_tgt/XCODE_SCHEME_ADDRESS_SANITIZER
    /prop_tgt/XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN

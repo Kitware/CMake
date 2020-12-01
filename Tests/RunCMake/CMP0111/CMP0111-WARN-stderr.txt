@@ -1,0 +1,39 @@
+^CMake Warning \(dev\) in CMakeLists.txt:
+  Policy CMP0111 is not set: An imported target missing its location property
+  fails during generation.  Run "cmake --help-policy CMP0111" for policy
+  details.  Use the cmake_policy command to set the policy and suppress this
+  warning.
+
+  IMPORTED_LOCATION not set for imported target "unknown_lib"( configuration
+  "[^"]+")?.
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) in CMakeLists.txt:
+  Policy CMP0111 is not set: An imported target missing its location property
+  fails during generation.  Run "cmake --help-policy CMP0111" for policy
+  details.  Use the cmake_policy command to set the policy and suppress this
+  warning.
+
+  IMPORTED_LOCATION not set for imported target "static_lib"( configuration
+  "[^"]+")?.
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CMake Warning \(dev\) in CMakeLists.txt:
+  Policy CMP0111 is not set: An imported target missing its location property
+  fails during generation.  Run "cmake --help-policy CMP0111" for policy
+  details.  Use the cmake_policy command to set the policy and suppress this
+  warning.
+
+  IMPORTED_IMPLIB not set for imported target "shared_lib"( configuration
+  "[^"]+")?.
+This warning is for project developers.  Use -Wno-dev to suppress it.(
++
+CMake Warning \(dev\) in CMakeLists.txt:
+  Policy CMP0111 is not set: An imported target missing its location property
+  fails during generation.  Run "cmake --help-policy CMP0111" for policy
+  details.  Use the cmake_policy command to set the policy and suppress this
+  warning.
+
+  IMPORTED_(LOCATION|IMPLIB) not set for imported target "(unknown|static|shared)_lib"( configuration
+  "[^"]+")?.
+This warning is for project developers.  Use -Wno-dev to suppress it.)*$

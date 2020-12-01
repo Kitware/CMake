@@ -1,6 +1,8 @@
 CMAKE_ECLIPSE_GENERATE_LINKED_RESOURCES
 ---------------------------------------
 
+.. versionadded:: 3.6
+
 This cache variable is used by the Eclipse project generator.  See
 :manual:`cmake-generators(7)`.
 

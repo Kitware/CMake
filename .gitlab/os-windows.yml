@@ -5,6 +5,8 @@
 .windows:
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci ext\\$CI_CONCURRENT_ID"
+        # Avoid conflicting with other projects running on the same machine.
+        SCCACHE_SERVER_PORT: 4227
 
 ### Build and test
 
@@ -36,7 +38,7 @@
         CMAKE_CONFIGURATION: windows_vs2019_x64_ninja
         VCVARSALL: "${VS160COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
-        VCVARSVERSION: "14.26"
+        VCVARSVERSION: "14.28"
 
 ### External testing
 
@@ -47,7 +49,7 @@
         CMAKE_CONFIGURATION: windows_vs2019_x64
         CMAKE_GENERATOR: "Visual Studio 16 2019"
         CMAKE_GENERATOR_PLATFORM: "x64"
-        CMAKE_GENERATOR_TOOLSET: "v142,version=14.26"
+        CMAKE_GENERATOR_TOOLSET: "v142,version=14.28"
 
 ## Tags
 
@@ -57,7 +59,7 @@
         - windows
         - shell
         - vs2019
-        - msvc-19.25
+        - msvc-19.28
         - nonconcurrent
 
 .windows_builder_ext_tags:
@@ -66,7 +68,7 @@
         - windows
         - shell
         - vs2019
-        - msvc-19.25
+        - msvc-19.28
         - concurrent
 
 ## Windows-specific scripts
@@ -80,6 +82,9 @@
     - ninja --version
     - cmake -P .gitlab/ci/download_qt.cmake
     - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\qt\bin;$env:PATH"
+    - cmake -P .gitlab/ci/download_python3.cmake
+    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\python3;$env:PATH"
+    - python --version
 
 .cmake_build_windows:
     stage: build

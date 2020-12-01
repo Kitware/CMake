@@ -1,0 +1,16 @@
+^CMake Error at [^
+]*/Modules/ExternalProject.cmake:[0-9]+ \(message\):
+  ExternalProject 'FOO' option 'INDEPENDENT_STEP_TARGETS' is set to
+
+    download;patch;update;configure;build
+
+  but the option is no longer allowed.  It has been superseded by the
+  per-step 'INDEPENDENT' option.  See policy CMP0114.
+Call Stack \(most recent call first\):
+  [^
+]*/Modules/ExternalProject.cmake:[0-9]+ \(ExternalProject_Add_Step\)
+  [^
+]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_mkdir_command\)
+  NO_DEPENDS-CMP0114-Common.cmake:[0-9]+ \(ExternalProject_Add\)
+  NO_DEPENDS-CMP0114-NEW.cmake:[0-9]+ \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)$

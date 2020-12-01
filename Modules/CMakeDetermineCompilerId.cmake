@@ -14,8 +14,10 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # Make sure user-specified compiler flags are used.
   if(CMAKE_${lang}_FLAGS)
     set(CMAKE_${lang}_COMPILER_ID_FLAGS ${CMAKE_${lang}_FLAGS})
-  else()
+  elseif(DEFINED ENV{${flagvar}})
     set(CMAKE_${lang}_COMPILER_ID_FLAGS $ENV{${flagvar}})
+  else(CMAKE_${lang}_FLAGS_INIT)
+    set(CMAKE_${lang}_COMPILER_ID_FLAGS ${CMAKE_${lang}_FLAGS_INIT})
   endif()
   string(REPLACE " " ";" CMAKE_${lang}_COMPILER_ID_FLAGS_LIST "${CMAKE_${lang}_COMPILER_ID_FLAGS}")
 
@@ -107,6 +109,28 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       endif()
     endif()
   endif()
+
+  # For ISPC we need to explicitly query the version.
+  if(lang STREQUAL "ISPC"
+     AND CMAKE_${lang}_COMPILER
+     AND NOT CMAKE_${lang}_COMPILER_VERSION)
+    execute_process(
+      COMMAND "${CMAKE_${lang}_COMPILER}"
+      --version
+      OUTPUT_VARIABLE output ERROR_VARIABLE output
+      RESULT_VARIABLE result
+      TIMEOUT 10
+    )
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+      "Running the ${lang} compiler: \"${CMAKE_${lang}_COMPILER}\" -version\n"
+      "${output}\n"
+      )
+
+    if(output MATCHES [[ISPC\), ([0-9]+\.[0-9]+(\.[0-9]+)?)]])
+      set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_MATCH_1}")
+    endif()
+  endif()
+
 
   if (COMPILER_QNXNTO AND CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
     execute_process(
@@ -248,7 +272,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     set(id_PostBuildEvent_Command "")
     if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "^[Ll][Ll][Vv][Mm](_v[0-9]+(_xp)?)?$")
       set(id_cl_var "ClangClExecutable")
-    elseif(CMAKE_VS_PLATFORM_TOOLSET MATCHES "^[Cc][Ll][Aa][Nn][Gg][Cc][Ll]$")
+    elseif(CMAKE_VS_PLATFORM_TOOLSET MATCHES "^[Cc][Ll][Aa][Nn][Gg]([Cc][Ll]$|_[0-9])")
       set(id_cl "$(CLToolExe)")
     elseif(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v[0-9]+_clang_.*")
       set(id_cl clang.exe)
@@ -310,16 +334,35 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       set(id_PreferredToolArchitecture "")
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "WindowsPhone")
+      set(id_keyword "Win32Proj")
       set(id_system "<ApplicationType>Windows Phone</ApplicationType>")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
+      set(id_keyword "Win32Proj")
       set(id_system "<ApplicationType>Windows Store</ApplicationType>")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+      set(id_keyword "Android")
+      set(id_system "<ApplicationType>Android</ApplicationType>")
     else()
+      set(id_keyword "Win32Proj")
       set(id_system "")
     endif()
-    if(id_system AND CMAKE_SYSTEM_VERSION MATCHES "^([0-9]+\\.[0-9]+)")
+    if(id_keyword STREQUAL "Android")
+      if(CMAKE_GENERATOR MATCHES "Visual Studio 14")
+        set(id_system_version "<ApplicationTypeRevision>2.0</ApplicationTypeRevision>")
+      elseif(CMAKE_GENERATOR MATCHES "Visual Studio 1[56]")
+        set(id_system_version "<ApplicationTypeRevision>3.0</ApplicationTypeRevision>")
+      else()
+        set(id_system_version "")
+      endif()
+    elseif(id_system AND CMAKE_SYSTEM_VERSION MATCHES "^([0-9]+\\.[0-9]+)")
       set(id_system_version "<ApplicationTypeRevision>${CMAKE_MATCH_1}</ApplicationTypeRevision>")
     else()
       set(id_system_version "")
+    endif()
+    if(id_keyword STREQUAL "Android")
+      set(id_config_type "DynamicLibrary")
+    else()
+      set(id_config_type "Application")
     endif()
     if(CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION)
       set(id_WindowsTargetPlatformVersion "<WindowsTargetPlatformVersion>${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}</WindowsTargetPlatformVersion>")
@@ -333,9 +376,11 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
         string(APPEND id_CustomGlobals "<${CMAKE_MATCH_1}>${CMAKE_MATCH_2}</${CMAKE_MATCH_1}>\n    ")
       endif()
     endforeach()
-    if(id_platform STREQUAL ARM64)
+    if(id_keyword STREQUAL "Android")
+      set(id_WindowsSDKDesktopARMSupport "")
+    elseif(id_platform STREQUAL "ARM64")
       set(id_WindowsSDKDesktopARMSupport "<WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>")
-    elseif(id_platform STREQUAL ARM)
+    elseif(id_platform STREQUAL "ARM")
       set(id_WindowsSDKDesktopARMSupport "<WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>")
     else()
       set(id_WindowsSDKDesktopARMSupport "")
@@ -368,7 +413,14 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       endif()
       set(cuda_tools "CUDA ${CMAKE_VS_PLATFORM_TOOLSET_CUDA}")
       set(id_compile "CudaCompile")
-      set(id_ItemDefinitionGroup_entry "<CudaCompile><AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions></CudaCompile>")
+      if(CMAKE_VS_PLATFORM_NAME STREQUAL x64)
+        set(cuda_target "<TargetMachinePlatform>64</TargetMachinePlatform>")
+      endif()
+      foreach(arch ${CMAKE_CUDA_ARCHITECTURES})
+        string(REGEX MATCH "[0-9]+" arch_name "${arch}")
+        string(APPEND cuda_codegen "compute_${arch_name},sm_${arch_name};")
+      endforeach()
+      set(id_ItemDefinitionGroup_entry "<CudaCompile>${cuda_target}<AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions><CodeGeneration>${cuda_codegen}</CodeGeneration></CudaCompile>")
       set(id_PostBuildEvent_Command [[echo CMAKE_CUDA_COMPILER=$(CudaToolkitBinDir)\nvcc.exe]])
       if(CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR)
         set(id_CudaToolkitCustomDir "<CudaToolkitCustomDir>${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}nvcc</CudaToolkitCustomDir>")
@@ -377,9 +429,6 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       else()
         string(CONCAT id_Import_props [[<Import Project="$(VCTargetsPath)\BuildCustomizations\]] "${cuda_tools}" [[.props" />]])
         string(CONCAT id_Import_targets [[<Import Project="$(VCTargetsPath)\BuildCustomizations\]] "${cuda_tools}" [[.targets" />]])
-      endif()
-      if(CMAKE_VS_PLATFORM_NAME STREQUAL x64)
-        set(id_ItemDefinitionGroup_entry "<CudaCompile><TargetMachinePlatform>64</TargetMachinePlatform><AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions></CudaCompile>")
       endif()
       if(CMAKE_CUDA_FLAGS MATCHES "(^| )-cudart +shared( |$)")
         set(id_Link_AdditionalDependencies "<AdditionalDependencies>cudart.lib</AdditionalDependencies>")
@@ -471,9 +520,16 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_OSX_SYSROOT MATCHES "^$|[Mm][Aa][Cc][Oo][Ss]")
       # When targeting macOS, use only the host architecture.
-      set(id_archs [[ARCHS = "$(NATIVE_ARCH_ACTUAL)";]])
+      if (_CMAKE_APPLE_ARCHS_DEFAULT)
+        set(id_archs "ARCHS = \"${_CMAKE_APPLE_ARCHS_DEFAULT}\";")
+        set(id_arch_active "ONLY_ACTIVE_ARCH = NO;")
+      else()
+        set(id_archs [[ARCHS = "$(NATIVE_ARCH_ACTUAL)";]])
+        set(id_arch_active "ONLY_ACTIVE_ARCH = YES;")
+      endif()
     else()
       set(id_archs "")
+      set(id_arch_active "ONLY_ACTIVE_ARCH = YES;")
     endif()
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/Xcode-3.pbxproj.in
       ${id_dir}/CompilerId${lang}.xcodeproj/project.pbxproj @ONLY)
@@ -583,9 +639,12 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
 ")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log "${MSG}")
-    #if(NOT CMAKE_${lang}_COMPILER_ID_ALLOW_FAIL)
-    #  message(FATAL_ERROR "${MSG}")
-    #endif()
+
+    # Some languages may know the correct/desired set of flags and want to fail right away if they don't work.
+    # This is currently only used by CUDA.
+    if(CMAKE_${lang}_COMPILER_ID_REQUIRE_SUCCESS)
+      message(FATAL_ERROR "${MSG}")
+    endif()
 
     # No output files should be inspected.
     set(COMPILER_${lang}_PRODUCED_FILES)
@@ -702,7 +761,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     foreach(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
       # The IAR-AVR compiler uses a binary format that places a '6'
       # character (0x34) before each character in the string.  Strip
-      # out these characters without removing any legitamate characters.
+      # out these characters without removing any legitimate characters.
       if("${info}" MATCHES "(.)I.N.F.O.:.")
         string(REGEX REPLACE "${CMAKE_MATCH_1}(.)" "\\1" info "${info}")
       endif()

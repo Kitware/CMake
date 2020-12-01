@@ -820,7 +820,7 @@ void cmInstallTargetGenerator::AddStripRule(std::ostream& os, Indent indent,
 
   os << indent << "if(CMAKE_INSTALL_DO_STRIP)\n";
   os << indent << "  execute_process(COMMAND \""
-     << this->Target->Target->GetMakefile()->GetDefinition("CMAKE_STRIP")
+     << this->Target->Target->GetMakefile()->GetSafeDefinition("CMAKE_STRIP")
      << "\" " << stripArgs << "\"" << toDestDirPath << "\")\n";
   os << indent << "endif()\n";
 }
@@ -858,9 +858,9 @@ void cmInstallTargetGenerator::AddUniversalInstallRule(
     return;
   }
 
-  const char* xcodeVersion = mf->GetDefinition("XCODE_VERSION");
+  cmProp xcodeVersion = mf->GetDefinition("XCODE_VERSION");
   if (!xcodeVersion ||
-      cmSystemTools::VersionCompareGreater("6", xcodeVersion)) {
+      cmSystemTools::VersionCompareGreater("6", *xcodeVersion)) {
     return;
   }
 

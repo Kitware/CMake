@@ -1,6 +1,8 @@
 CMAKE_<LANG>_COMPILER_PREDEFINES_COMMAND
 ----------------------------------------
 
+.. versionadded:: 3.10
+
 Command that outputs the compiler pre definitions.
 
 See :prop_tgt:`AUTOMOC` which uses

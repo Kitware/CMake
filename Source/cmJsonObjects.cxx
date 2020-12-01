@@ -51,11 +51,7 @@ std::vector<std::string> getConfigurations(const cmake* cm)
     return configurations;
   }
 
-  makefiles[0]->GetConfigurations(configurations);
-  if (configurations.empty()) {
-    configurations.emplace_back();
-  }
-  return configurations;
+  return makefiles[0]->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 }
 
 bool hasString(const Json::Value& v, const std::string& s)
@@ -635,8 +631,8 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
 
     // Project structure information:
     const cmMakefile* mf = lg->GetMakefile();
-    auto minVersion = mf->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
-    pObj[kMINIMUM_CMAKE_VERSION] = minVersion ? minVersion : "";
+    auto minVersion = mf->GetSafeDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+    pObj[kMINIMUM_CMAKE_VERSION] = minVersion;
     pObj[kSOURCE_DIRECTORY_KEY] = mf->GetCurrentSourceDirectory();
     pObj[kBUILD_DIRECTORY_KEY] = mf->GetCurrentBinaryDirectory();
     pObj[kTARGETS_KEY] = DumpTargetsList(projectIt.second, config);

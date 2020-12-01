@@ -1,6 +1,8 @@
 CMAKE_GLOBAL_AUTORCC_TARGET
 ---------------------------
 
+.. versionadded:: 3.14
+
 Switch to enable generation of a global ``autorcc`` target.
 
 When :variable:`CMAKE_GLOBAL_AUTORCC_TARGET` is enabled, a custom target

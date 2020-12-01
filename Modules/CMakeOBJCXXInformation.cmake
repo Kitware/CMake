@@ -263,7 +263,7 @@ endif()
 # compile an Objective-C++ file into an object file
 if(NOT CMAKE_OBJCXX_COMPILE_OBJECT)
   set(CMAKE_OBJCXX_COMPILE_OBJECT
-    "<CMAKE_OBJCXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -x objective-c++ -o <OBJECT> -c <SOURCE>")
+    "<CMAKE_OBJCXX_COMPILER> <DEFINES> <INCLUDES> -x objective-c++ <FLAGS> -o <OBJECT> -c <SOURCE>")
 endif()
 
 if(NOT CMAKE_OBJCXX_LINK_EXECUTABLE)

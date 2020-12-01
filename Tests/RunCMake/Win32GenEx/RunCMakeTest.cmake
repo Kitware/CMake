@@ -1,0 +1,28 @@
+include(RunCMake)
+
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Win32GenEx-build)
+  run_cmake(Win32GenEx)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(Win32GenEx-debug-build ${CMAKE_COMMAND} --build ${RunCMake_TEST_BINARY_DIR} --config Debug)
+  run_cmake_command(Win32GenEx-release-build ${CMAKE_COMMAND} --build ${RunCMake_TEST_BINARY_DIR} --config Release)
+  unset(RunCMake_TEST_NO_CLEAN)
+else()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Win32GenEx-debug-build)
+  set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  run_cmake(Win32GenEx-debug)
+  unset(RunCMake_TEST_OPTIONS)
+
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(Win32GenEx-debug-build ${CMAKE_COMMAND} --build ${RunCMake_TEST_BINARY_DIR})
+  unset(RunCMake_TEST_NO_CLEAN)
+
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Win32GenEx-release-build)
+  set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Release)
+  run_cmake(Win32GenEx-release)
+  unset(RunCMake_TEST_OPTIONS)
+
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(Win32GenEx-release-build ${CMAKE_COMMAND} --build ${RunCMake_TEST_BINARY_DIR})
+  unset(RunCMake_TEST_NO_CLEAN)
+endif()

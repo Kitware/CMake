@@ -132,19 +132,7 @@ endforeach()
 
 set(_OpenGL_CACHE_VARS)
 
-if (CYGWIN)
-  find_path(OPENGL_INCLUDE_DIR GL/gl.h )
-  list(APPEND _OpenGL_REQUIRED_VARS OPENGL_INCLUDE_DIR)
-
-  find_library(OPENGL_gl_LIBRARY opengl32 )
-  find_library(OPENGL_glu_LIBRARY glu32 )
-
-  list(APPEND _OpenGL_CACHE_VARS
-    OPENGL_INCLUDE_DIR
-    OPENGL_gl_LIBRARY
-    OPENGL_glu_LIBRARY
-    )
-elseif (WIN32)
+if (WIN32)
 
   if(BORLAND)
     set (OPENGL_gl_LIBRARY import32 CACHE STRING "OpenGL library for win32")

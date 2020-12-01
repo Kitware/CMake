@@ -43,9 +43,9 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
 #endif
 {
   // Store the configuration name that is being used
-  if (const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
+  if (cmProp config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
     // Use the build type given by the user.
-    this->ConfigName = config;
+    this->ConfigName = *config;
   } else {
     // No configuration type given.
     this->ConfigName.clear();
@@ -550,10 +550,9 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
    */
   for (auto& sg : groupFilesList) {
     std::ostream* fout;
-    cmProp noSourceGroupFile =
-      this->GeneratorTarget->GetProperty("GHS_NO_SOURCE_GROUP_FILE");
-    bool useProjectFile = (noSourceGroupFile && cmIsOn(*noSourceGroupFile)) ||
-      cmIsOn(this->Makefile->GetDefinition("CMAKE_GHS_NO_SOURCE_GROUP_FILE"));
+    bool useProjectFile =
+      cmIsOn(this->GeneratorTarget->GetProperty("GHS_NO_SOURCE_GROUP_FILE")) ||
+      this->Makefile->IsOn("CMAKE_GHS_NO_SOURCE_GROUP_FILE");
     if (useProjectFile || sg.empty()) {
       fout = &fout_proj;
     } else {

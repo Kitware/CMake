@@ -5,5 +5,5 @@ add_library(bar UNKNOWN IMPORTED)
 set_property(TARGET foo APPEND PROPERTY COMPATIBLE_INTERFACE_STRING INCLUDE_DIRECTORIES)
 
 add_executable(user main.cpp)
-set_property(TARGET user PROPERTY INCLUDE_DIRECTORIES bar_inc)
+set_property(TARGET user PROPERTY INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/bar_inc)
 target_link_libraries(user foo bar)

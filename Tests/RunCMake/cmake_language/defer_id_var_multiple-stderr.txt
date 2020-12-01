@@ -1,0 +1,4 @@
+^CMake Error at defer_id_var_multiple.cmake:1 \(cmake_language\):
+  cmake_language DEFER given multiple ID_VAR arguments
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)$

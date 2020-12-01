@@ -33,7 +33,7 @@ void cmXCodeScheme::WriteXCodeSharedScheme(const std::string& xcProjDir,
   // Create shared scheme sub-directory tree
   //
   std::string xcodeSchemeDir = cmStrCat(xcProjDir, "/xcshareddata/xcschemes");
-  cmSystemTools::MakeDirectory(xcodeSchemeDir.c_str());
+  cmSystemTools::MakeDirectory(xcodeSchemeDir);
 
   std::string xcodeSchemeFile =
     cmStrCat(xcodeSchemeDir, '/', this->TargetName, ".xcscheme");
@@ -324,8 +324,7 @@ bool cmXCodeScheme::WriteLaunchActionBooleanAttribute(
   bool defaultValue)
 {
   cmProp property = Target->GetTarget()->GetProperty(varName);
-  bool isOn =
-    (property == nullptr && defaultValue) || (property && cmIsOn(*property));
+  bool isOn = (property == nullptr && defaultValue) || cmIsOn(property);
 
   if (isOn) {
     xout.Attribute(attrName.c_str(), "YES");

@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_string
-#define cm_string
+#pragma once
 
 #include <algorithm>
 #include <string> // IWYU pragma: export
@@ -38,5 +37,3 @@ inline void erase_if(std::basic_string<T, Traits, Allocator>& cont,
 #endif
 
 } // namespace cm
-
-#endif

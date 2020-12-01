@@ -13,6 +13,7 @@
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 
 void cmCTestTestCommand::BindArguments()
@@ -39,12 +40,11 @@ void cmCTestTestCommand::BindArguments()
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 {
-  const char* ctestTimeout =
-    this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
+  cmProp ctestTimeout = this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
 
   cmDuration timeout;
   if (ctestTimeout) {
-    timeout = cmDuration(atof(ctestTimeout));
+    timeout = cmDuration(atof(ctestTimeout->c_str()));
   } else {
     timeout = this->CTest->GetTimeOut();
     if (timeout <= cmDuration::zero()) {
@@ -54,10 +54,10 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
   this->CTest->SetTimeOut(timeout);
 
-  const char* resourceSpecFile =
+  cmProp resourceSpecFile =
     this->Makefile->GetDefinition("CTEST_RESOURCE_SPEC_FILE");
   if (this->ResourceSpecFile.empty() && resourceSpecFile) {
-    this->ResourceSpecFile = resourceSpecFile;
+    this->ResourceSpecFile = *resourceSpecFile;
   }
 
   cmCTestGenericHandler* handler = this->InitializeActualHandler();
@@ -114,19 +114,19 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   // or CTEST_TEST_LOAD script variable, or ctest --test-load
   // command line argument... in that order.
   unsigned long testLoad;
-  const char* ctestTestLoad = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
+  cmProp ctestTestLoad = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
   if (!this->TestLoad.empty()) {
-    if (!cmStrToULong(this->TestLoad.c_str(), &testLoad)) {
+    if (!cmStrToULong(this->TestLoad, &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,
                  "Invalid value for 'TEST_LOAD' : " << this->TestLoad
                                                     << std::endl);
     }
-  } else if (ctestTestLoad && *ctestTestLoad) {
-    if (!cmStrToULong(ctestTestLoad, &testLoad)) {
+  } else if (cmNonempty(ctestTestLoad)) {
+    if (!cmStrToULong(*ctestTestLoad, &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,
-                 "Invalid value for 'CTEST_TEST_LOAD' : " << ctestTestLoad
+                 "Invalid value for 'CTEST_TEST_LOAD' : " << *ctestTestLoad
                                                           << std::endl);
     }
   } else {
@@ -134,10 +134,10 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
   handler->SetTestLoad(testLoad);
 
-  if (const char* labelsForSubprojects =
+  if (cmProp labelsForSubprojects =
         this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
-                                       labelsForSubprojects, this->Quiet);
+                                       *labelsForSubprojects, this->Quiet);
   }
 
   handler->SetQuiet(this->Quiet);

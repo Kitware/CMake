@@ -1,0 +1,11 @@
+CMake Error at [^
+]*/Tests/RunCMake/CTest/TestfileErrors-Script.cmake:1 \(message\):
+  SEND_ERROR
+Call Stack \(most recent call first\):
+  CTestTestfile.cmake:[0-9]+ \(include\)
++
+CMake Error at [^
+]*/Tests/RunCMake/CTest/TestfileErrors-Script.cmake:2 \(message\):
+  FATAL_ERROR
+Call Stack \(most recent call first\):
+  CTestTestfile.cmake:[0-9]+ \(include\)

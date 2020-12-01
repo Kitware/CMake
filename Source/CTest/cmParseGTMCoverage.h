@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmParseGTMCoverage_h
-#define cmParseGTMCoverage_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -37,5 +36,3 @@ protected:
   bool ParseMCOVLine(std::string const& line, std::string& routine,
                      std::string& function, int& linenumber, int& count);
 };
-
-#endif

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmAlgorithms_h
-#define cmAlgorithms_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -143,5 +142,3 @@ typename Range::const_iterator cmFindNot(Range const& r, T const& t)
 {
   return std::find_if(r.begin(), r.end(), [&t](T const& i) { return i != t; });
 }
-
-#endif

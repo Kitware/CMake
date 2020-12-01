@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalBorlandMakefileGenerator_h
-#define cmGlobalBorlandMakefileGenerator_h
+#pragma once
 
 #include <iosfwd>
 #include <memory>
@@ -58,5 +57,3 @@ protected:
 
   void PrintBuildCommandAdvice(std::ostream& os, int jobs) const override;
 };
-
-#endif

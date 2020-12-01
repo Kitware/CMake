@@ -1,0 +1,5 @@
+CMake Error at CHMOD-all-perms\.cmake:[0-9]+ \(file\):
+  file Remove either PERMISSIONS or FILE_PERMISSIONS or DIRECTORY_PERMISSIONS
+  from the invocation
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

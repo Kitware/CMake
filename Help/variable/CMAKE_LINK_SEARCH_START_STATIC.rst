@@ -1,6 +1,8 @@
 CMAKE_LINK_SEARCH_START_STATIC
 ------------------------------
 
+.. versionadded:: 3.4
+
 Assume the linker looks for static libraries by default.
 
 Some linkers support switches such as ``-Bstatic`` and ``-Bdynamic`` to

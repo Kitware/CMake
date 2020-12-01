@@ -1,0 +1,6 @@
+CMake Error at CHMOD-write-only\.cmake:[0-9]+ \(file\):
+  file failed to open for reading \(Permission denied\):
+
+    .*/chmod-tests/a
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

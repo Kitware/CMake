@@ -37,6 +37,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
@@ -819,14 +820,16 @@ void cmCTestTestHandler::CheckLabelFilter(cmCTestTestProperties& it)
   this->CheckLabelFilterExclude(it);
 }
 
-void cmCTestTestHandler::ComputeTestList()
+bool cmCTestTestHandler::ComputeTestList()
 {
   this->TestList.clear(); // clear list of test
-  this->GetListOfTests();
+  if (!this->GetListOfTests()) {
+    return false;
+  }
 
   if (this->RerunFailed) {
     this->ComputeTestListForRerunFailed();
-    return;
+    return true;
   }
 
   cmCTestTestHandler::ListOfTests::size_type tmsize = this->TestList.size();
@@ -882,6 +885,7 @@ void cmCTestTestHandler::ComputeTestList()
   this->TestList = finalList;
 
   this->UpdateMaxTestNameWidth();
+  return true;
 }
 
 void cmCTestTestHandler::ComputeTestListForRerunFailed()
@@ -1260,7 +1264,10 @@ bool cmCTestTestHandler::GetValue(const char* tag, std::string& value,
 bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
                                           std::vector<std::string>& failed)
 {
-  this->ComputeTestList();
+  if (!this->ComputeTestList()) {
+    return false;
+  }
+
   this->StartTest = this->CTest->CurrentTime();
   this->StartTestTime = std::chrono::system_clock::now();
   auto elapsed_time_start = std::chrono::steady_clock::now();
@@ -1374,7 +1381,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
   xml.StartElement("TestList");
   for (cmCTestTestResult const& result : this->TestResults) {
     std::string testPath = result.Path + "/" + result.Name;
-    xml.Element("Test", this->CTest->GetShortPathToFile(testPath.c_str()));
+    xml.Element("Test", this->CTest->GetShortPathToFile(testPath));
   }
   xml.EndElement(); // TestList
   for (cmCTestTestResult& result : this->TestResults) {
@@ -1483,8 +1490,8 @@ void cmCTestTestHandler::WriteTestResultHeader(cmXMLWriter& xml,
   }
   std::string testPath = result.Path + "/" + result.Name;
   xml.Element("Name", result.Name);
-  xml.Element("Path", this->CTest->GetShortPathToFile(result.Path.c_str()));
-  xml.Element("FullName", this->CTest->GetShortPathToFile(testPath.c_str()));
+  xml.Element("Path", this->CTest->GetShortPathToFile(result.Path));
+  xml.Element("FullName", this->CTest->GetShortPathToFile(testPath));
   xml.Element("FullCommandLine", result.FullCommandLine);
 }
 
@@ -1546,12 +1553,12 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
 }
 
 // Find the appropriate executable to run for a test
-std::string cmCTestTestHandler::FindTheExecutable(const char* exe)
+std::string cmCTestTestHandler::FindTheExecutable(const std::string& exe)
 {
   std::string resConfig;
   std::vector<std::string> extraPaths;
   std::vector<std::string> failedPaths;
-  if (strcmp(exe, "NOT_AVAILABLE") == 0) {
+  if (exe == "NOT_AVAILABLE") {
     return exe;
   }
   return cmCTestTestHandler::FindExecutable(this->CTest, exe, resConfig,
@@ -1607,7 +1614,7 @@ void cmCTestTestHandler::AddConfigurations(
 
 // Find the appropriate executable to run for a test
 std::string cmCTestTestHandler::FindExecutable(
-  cmCTest* ctest, const char* testCommand, std::string& resultingConfig,
+  cmCTest* ctest, const std::string& testCommand, std::string& resultingConfig,
   std::vector<std::string>& extraPaths, std::vector<std::string>& failed)
 {
   // now run the compiled test if we can find it
@@ -1695,7 +1702,7 @@ bool cmCTestTestHandler::ParseResourceGroupsProperty(
   return lexer.ParseString(val);
 }
 
-void cmCTestTestHandler::GetListOfTests()
+bool cmCTestTestHandler::GetListOfTests()
 {
   if (!this->IncludeLabelRegExp.empty()) {
     this->IncludeLabelRegularExpression.compile(
@@ -1748,22 +1755,24 @@ void cmCTestTestHandler::GetListOfTests()
     // does the DartTestfile.txt exist ?
     testFilename = "DartTestfile.txt";
   } else {
-    return;
+    return true;
   }
 
   if (!mf.ReadListFile(testFilename)) {
-    return;
+    return false;
   }
   if (cmSystemTools::GetErrorOccuredFlag()) {
-    return;
+    // SEND_ERROR or FATAL_ERROR in CTestTestfile or TEST_INCLUDE_FILES
+    return false;
   }
-  const char* specFile = mf.GetDefinition("CTEST_RESOURCE_SPEC_FILE");
+  cmProp specFile = mf.GetDefinition("CTEST_RESOURCE_SPEC_FILE");
   if (this->ResourceSpecFile.empty() && specFile) {
-    this->ResourceSpecFile = specFile;
+    this->ResourceSpecFile = *specFile;
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Done constructing a list of tests" << std::endl,
                      this->Quiet);
+  return true;
 }
 
 void cmCTestTestHandler::UseIncludeRegExp()

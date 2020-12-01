@@ -1,6 +1,8 @@
 CMAKE_NINJA_OUTPUT_PATH_PREFIX
 ------------------------------
 
+.. versionadded:: 3.6
+
 Set output files path prefix for the :generator:`Ninja` generator.
 
 Every output files listed in the generated ``build.ninja`` will be

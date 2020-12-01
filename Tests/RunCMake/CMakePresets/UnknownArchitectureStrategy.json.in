@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "UnknownArchitectureStrategy",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": {
+        "strategy": "unknown"
+      }
+    }
+  ]
+}

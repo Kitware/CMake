@@ -58,7 +58,7 @@ void cmMakefileProfilingData::StartEntry(const cmListFileFunction& lff,
     cmsys::SystemInformation info;
     Json::Value v;
     v["ph"] = "B";
-    v["name"] = lff.Name.Lower;
+    v["name"] = lff.LowerCaseName();
     v["cat"] = "cmake";
     v["ts"] = Json::Value::UInt64(
       std::chrono::duration_cast<std::chrono::microseconds>(
@@ -67,9 +67,9 @@ void cmMakefileProfilingData::StartEntry(const cmListFileFunction& lff,
     v["pid"] = static_cast<int>(info.GetProcessId());
     v["tid"] = 0;
     Json::Value argsValue;
-    if (!lff.Arguments.empty()) {
+    if (!lff.Arguments().empty()) {
       std::string args;
-      for (const auto& a : lff.Arguments) {
+      for (auto const& a : lff.Arguments()) {
         args += (args.empty() ? "" : " ") + a.Value;
       }
       argsValue["functionArgs"] = args;

@@ -1,1 +1,2 @@
+^Cannot find file: .*/Tests/RunCMake/CTestCommandLine/TestOutputSize/DartConfiguration.tcl
 Errors while running CTest

@@ -41,7 +41,7 @@ bool cmQTWrapCPPCommand(std::vector<std::string> const& args,
       cmSourceFile* sf = mf.GetOrCreateSource(newName, true);
       if (curr) {
         cmProp p = curr->GetProperty("ABSTRACT");
-        sf->SetProperty("ABSTRACT", p ? p->c_str() : nullptr);
+        sf->SetProperty("ABSTRACT", cmToCStr(p));
       }
 
       // Compute the name of the header from which to generate the file.

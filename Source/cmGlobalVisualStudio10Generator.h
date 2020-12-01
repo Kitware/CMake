@@ -1,9 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalVisualStudio10Generator_h
-#define cmGlobalVisualStudio10Generator_h
+#pragma once
 
 #include <memory>
+#include <set>
 
 #include "cmGlobalVisualStudio8Generator.h"
 #include "cmVisualStudio10ToolsetOptions.h"
@@ -42,6 +42,11 @@ public:
    */
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
                       bool optional) override;
+
+  void AddAndroidExecutableWarning(const std::string& name)
+  {
+    this->AndroidExecutableWarnings.insert(name);
+  }
 
   bool IsCudaEnabled() const { return this->CudaEnabled; }
 
@@ -100,6 +105,9 @@ public:
   /** Return true if building for WindowsStore */
   bool TargetsWindowsStore() const { return this->SystemIsWindowsStore; }
 
+  /** Return true if building for Android */
+  bool TargetsAndroid() const { return this->SystemIsAndroid; }
+
   const char* GetCMakeCFGIntDir() const override { return "$(Configuration)"; }
   bool Find64BitTools(cmMakefile* mf);
 
@@ -128,6 +136,8 @@ public:
   /** Return the first two components of CMAKE_SYSTEM_VERSION.  */
   std::string GetApplicationTypeRevision() const;
 
+  virtual const char* GetAndroidApplicationTypeRevision() const { return ""; }
+
   cmIDEFlagTable const* GetClFlagTable() const;
   cmIDEFlagTable const* GetCSharpFlagTable() const;
   cmIDEFlagTable const* GetRcFlagTable() const;
@@ -148,6 +158,8 @@ protected:
   virtual bool InitializeWindowsCE(cmMakefile* mf);
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);
+  virtual bool InitializeTegraAndroid(cmMakefile* mf);
+  virtual bool InitializeAndroid(cmMakefile* mf);
 
   virtual bool ProcessGeneratorToolsetField(std::string const& key,
                                             std::string const& value);
@@ -171,6 +183,7 @@ protected:
   std::string GeneratorToolsetCudaCustomDir;
   std::string DefaultPlatformToolset;
   std::string DefaultPlatformToolsetHostArchitecture;
+  std::string DefaultAndroidToolset;
   std::string WindowsTargetPlatformVersion;
   std::string SystemName;
   std::string SystemVersion;
@@ -185,9 +198,10 @@ protected:
   std::string DefaultNasmFlagTableName;
   std::string DefaultRCFlagTableName;
   bool SupportsUnityBuilds = false;
-  bool SystemIsWindowsCE;
-  bool SystemIsWindowsPhone;
-  bool SystemIsWindowsStore;
+  bool SystemIsWindowsCE = false;
+  bool SystemIsWindowsPhone = false;
+  bool SystemIsWindowsStore = false;
+  bool SystemIsAndroid = false;
 
 private:
   class Factory;
@@ -211,6 +225,7 @@ private:
   std::string MSBuildCommand;
   bool MSBuildCommandInitialized;
   cmVisualStudio10ToolsetOptions ToolsetOptions;
+  std::set<std::string> AndroidExecutableWarnings;
   virtual std::string FindMSBuildCommand();
   std::string FindDevEnvCommand() override;
   std::string GetVSMakeProgram() override { return this->GetMSBuildCommand(); }
@@ -228,4 +243,3 @@ private:
   // We do not use the reload macros for VS >= 10.
   std::string GetUserMacrosDirectory() override { return ""; }
 };
-#endif

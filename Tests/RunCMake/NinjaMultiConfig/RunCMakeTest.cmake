@@ -235,10 +235,20 @@ run_cmake_build(CustomCommandsAndTargets debug-in-release-graph-postbuild Releas
 run_ninja(CustomCommandsAndTargets release-postbuild build-Release.ninja SubdirPostBuild)
 run_cmake_build(CustomCommandsAndTargets debug-targetpostbuild Debug TopTargetPostBuild)
 run_ninja(CustomCommandsAndTargets release-targetpostbuild build-Release.ninja SubdirTargetPostBuild)
+run_cmake_build(CustomCommandsAndTargets release-clean Release clean:all)
+run_ninja(CustomCommandsAndTargets release-leaf-custom build-Release.ninja LeafCustom.txt)
+run_cmake_build(CustomCommandsAndTargets release-clean Release clean:all)
+run_ninja(CustomCommandsAndTargets release-leaf-exe build-Release.ninja LeafExe)
+run_cmake_build(CustomCommandsAndTargets release-clean Release clean:all)
+run_ninja(CustomCommandsAndTargets release-leaf-byproduct build-Release.ninja main.c)
 
 unset(RunCMake_TEST_BINARY_DIR)
 
 run_cmake(CustomCommandDepfile)
+
+set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
+run_cmake(PerConfigSources)
+unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/PostfixAndLocation-build)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release;-DCMAKE_CROSS_CONFIGS=all")
@@ -274,6 +284,11 @@ run_ninja(Install default-install build.ninja install)
 file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}/install")
 run_ninja(Install all-install build.ninja install:all)
 
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ExcludeFromAll-build)
+run_cmake_configure(ExcludeFromAll)
+include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
+run_cmake_build(ExcludeFromAll all "" all:all)
+
 # FIXME Get this working
 #set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/AutoMocExecutable-build)
 #run_cmake_configure(AutoMocExecutable)
@@ -300,9 +315,12 @@ endif()
 
 if(CMake_TEST_Qt5)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Qt5-build)
-  set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all" "-DQt5Core_DIR=${Qt5Core_DIR}")
   run_cmake_configure(Qt5)
   unset(RunCMake_TEST_OPTIONS)
   include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
   run_cmake_build(Qt5 debug-in-release-graph Release exe:Debug)
+  if(CMAKE_TEST_Qt5Core_Version VERSION_GREATER_EQUAL 5.15.0)
+    run_ninja(Qt5 automoc-check build-Debug.ninja -t query exe_autogen/timestamp)
+  endif()
 endif()

@@ -40,8 +40,10 @@ AddCacheEntry::AddCacheEntry(QWidget* p, const QStringList& varNames,
   AddCacheEntry::setTabOrder(string, this->Description);
   QCompleter* completer = new QCompleter(this->VarNames, this);
   this->Name->setCompleter(completer);
-  connect(completer, SIGNAL(activated(const QString&)), this,
-          SLOT(onCompletionActivated(const QString&)));
+  connect(
+    completer,
+    static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::activated),
+    this, &AddCacheEntry::onCompletionActivated);
 }
 
 QString AddCacheEntry::name() const

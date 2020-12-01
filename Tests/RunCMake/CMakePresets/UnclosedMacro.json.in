@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "UnclosedMacro",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir"
+    }
+  ]
+}

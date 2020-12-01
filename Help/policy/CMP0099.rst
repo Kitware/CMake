@@ -1,6 +1,8 @@
 CMP0099
 -------
 
+.. versionadded:: 3.17
+
 Target link properties :prop_tgt:`INTERFACE_LINK_OPTIONS`,
 :prop_tgt:`INTERFACE_LINK_DIRECTORIES` and :prop_tgt:`INTERFACE_LINK_DEPENDS`
 are now transitive over private dependencies of static libraries.

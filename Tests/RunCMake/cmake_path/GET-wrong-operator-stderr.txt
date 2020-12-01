@@ -1,0 +1,2 @@
+CMake Error at GET-wrong-operator.cmake:[0-9]+ \(cmake_path\):
+  cmake_path GET called with an unknown action: FOO.

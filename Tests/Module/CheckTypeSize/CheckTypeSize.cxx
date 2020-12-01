@@ -11,6 +11,12 @@
 #ifdef HAVE_STDDEF_H
 #  include <stddef.h>
 #endif
+#ifdef HAVE_CSTDINT
+#  include <cstdint>
+#endif
+#ifdef HAVE_CSTDDEF
+#  include <cstddef>
+#endif
 
 #include <stdio.h>
 
@@ -120,6 +126,26 @@ int main()
 #  endif
 #elif defined(HAVE_SIZEOF_SSIZE_T)
   NODEF(SIZEOF_SSIZE_T);
+#endif
+
+/* uint8_t */
+#if defined(SIZEOF_UINT8_T)
+  CHECK(uint8_t, SIZEOF_UINT8_T);
+#  if !defined(HAVE_SIZEOF_UINT8_T)
+  NODEF(HAVE_SIZEOF_UINT8_T);
+#  endif
+#elif defined(HAVE_SIZEOF_UINT8_T)
+  NODEF(SIZEOF_UINT8_T);
+#endif
+
+/* std::uint8_t */
+#if defined(SIZEOF_STD_UINT8_T)
+  CHECK(std::uint8_t, SIZEOF_STD_UINT8_T);
+#  if !defined(HAVE_SIZEOF_STD_UINT8_T)
+  NODEF(HAVE_SIZEOF_STD_UINT8_T);
+#  endif
+#elif defined(HAVE_SIZEOF_STD_UINT8_T)
+  NODEF(SIZEOF_STD_UINT8_T);
 #endif
 
 /* ns::someclass::someint */

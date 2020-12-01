@@ -37,8 +37,3 @@ bool cmExpandedCommandArgument::empty() const
 {
   return this->Value.empty();
 }
-
-const char* cmExpandedCommandArgument::c_str() const
-{
-  return this->Value.c_str();
-}

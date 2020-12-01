@@ -760,7 +760,7 @@ function (_MPI_interrogate_compiler LANG)
   # Save the explicitly given link directories
   set(MPI_LINK_DIRECTORIES_LEFTOVER "${MPI_LINK_DIRECTORIES_WORK}")
 
-  # An MPI compiler wrapper could have its MPI libraries in the implictly
+  # An MPI compiler wrapper could have its MPI libraries in the implicitly
   # linked directories of the compiler itself.
   if(DEFINED CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES)
     list(APPEND MPI_LINK_DIRECTORIES_WORK "${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}")
@@ -1157,7 +1157,7 @@ macro(_MPI_create_imported_target LANG)
   string(REPLACE "-pthread" "$<$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>:SHELL:-Xcompiler >-pthread"
     _MPI_${LANG}_COMPILE_OPTIONS "${MPI_${LANG}_COMPILE_OPTIONS}")
   string(REPLACE "-fexceptions" "$<$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>:SHELL:-Xcompiler >-fexceptions"
-    _MPI_${LANG}_COMPILE_OPTIONS "${MPI_${LANG}_COMPILE_OPTIONS}")
+    _MPI_${LANG}_COMPILE_OPTIONS "${_MPI_${LANG}_COMPILE_OPTIONS}")
   set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_COMPILE_OPTIONS "${_MPI_${LANG}_COMPILE_OPTIONS}")
   unset(_MPI_${LANG}_COMPILE_OPTIONS)
 

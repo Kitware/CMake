@@ -1,6 +1,8 @@
 CPACK_STARTUP_SHORTCUTS
 -----------------------
 
+.. versionadded:: 3.3
+
 Species a list of shortcut names that should be created in the `Startup` folder
 for this file.
 

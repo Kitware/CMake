@@ -8,9 +8,14 @@ Get a property of ``DIRECTORY`` scope.
   get_directory_property(<variable> [DIRECTORY <dir>] <prop-name>)
 
 Stores a property of directory scope in the named ``<variable>``.
+
 The ``DIRECTORY`` argument specifies another directory from which
 to retrieve the property value instead of the current directory.
-The specified directory must have already been traversed by CMake.
+It may reference either a source directory, or since CMake 3.19,
+a binary directory.  Relative paths are treated as relative to the
+current source directory.  CMake must already know about the directory,
+either by having added it through a call to :command:`add_subdirectory`
+or being the top level directory.
 
 If the property is not defined for the nominated directory scope,
 an empty string is returned.  In the case of ``INHERITED`` properties,

@@ -38,7 +38,7 @@ pkg_check_modules(PC_EXPAT QUIET expat)
 find_path(EXPAT_INCLUDE_DIR NAMES expat.h HINTS ${PC_EXPAT_INCLUDE_DIRS})
 
 # Look for the library.
-find_library(EXPAT_LIBRARY NAMES expat libexpat HINTS ${PC_EXPAT_LIBRARY_DIRS})
+find_library(EXPAT_LIBRARY NAMES expat libexpat NAMES_PER_DIR HINTS ${PC_EXPAT_LIBRARY_DIRS})
 
 if (EXPAT_INCLUDE_DIR AND EXISTS "${EXPAT_INCLUDE_DIR}/expat.h")
     file(STRINGS "${EXPAT_INCLUDE_DIR}/expat.h" expat_version_str

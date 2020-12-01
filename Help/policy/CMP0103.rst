@@ -1,6 +1,8 @@
 CMP0103
 -------
 
+.. versionadded:: 3.18
+
 Multiple calls to :command:`export` command with same ``FILE`` without
 ``APPEND`` is no longer allowed.
 

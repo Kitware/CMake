@@ -1,6 +1,8 @@
 CUDA_STANDARD
 -------------
 
+.. versionadded:: 3.8
+
 The CUDA/C++ standard whose features are requested to build this target.
 
 This property specifies the CUDA/C++ standard whose features are requested

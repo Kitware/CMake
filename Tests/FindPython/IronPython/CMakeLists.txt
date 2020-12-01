@@ -1,23 +1,23 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestIronPython C)
+project(TestIronPython LANGUAGES NONE)
 
 set (Python_FIND_IMPLEMENTATIONS IronPython)
 
 find_package(Python ${Python_REQUESTED_VERSION} COMPONENTS Interpreter Compiler)
 if (NOT Python_FOUND)
-  message (FATAL_ERROR "Fail to found Python ${Python_REQUESTED_VERSION}")
+  message (FATAL_ERROR "Failed to find Python ${Python_REQUESTED_VERSION}")
 endif()
 
 if (NOT Python_Interpreter_FOUND)
-  message (FATAL_ERROR "Fail to found Python Interpreter")
+  message (FATAL_ERROR "Failed to find Python Interpreter")
 endif()
 if (NOT Python_INTERPRETER_ID STREQUAL "IronPython")
   message (FATAL_ERROR "Erroneous interpreter ID (${Python_INTERPRETER_ID})")
 endif()
 
 if (NOT Python_Compiler_FOUND)
-  message (FATAL_ERROR "Fail to found Python Compiler")
+  message (FATAL_ERROR "Failed to find Python Compiler")
 endif()
 if (NOT Python_COMPILER_ID STREQUAL "IronPython")
   message (FATAL_ERROR "Erroneous compiler ID (${Python_COMPILER_ID})")

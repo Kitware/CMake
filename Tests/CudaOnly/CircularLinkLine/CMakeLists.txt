@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.7)
-project (CircularLinkLine CUDA)
+cmake_minimum_required(VERSION 3.18)
+project(CircularLinkLine CUDA)
 
 #Goal for this example:
 # Verify that we de-duplicate the device link line
@@ -7,7 +7,6 @@ project (CircularLinkLine CUDA)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
-set(CMAKE_CUDA_ARCHITECTURES 30)
 
 add_library(CUDACircularDeviceLinking1 STATIC file1.cu)
 add_library(CUDACircularDeviceLinking2 STATIC file2.cu)

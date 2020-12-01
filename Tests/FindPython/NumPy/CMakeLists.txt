@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestNumPy C)
+project(TestNumPy LANGUAGES C)
 
 find_package (Python2 REQUIRED COMPONENTS Interpreter Development NumPy)
 find_package (Python3 REQUIRED COMPONENTS Interpreter Development NumPy)

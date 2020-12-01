@@ -5,6 +5,8 @@
 FindLibinput
 ------------
 
+.. versionadded:: 3.14
+
 Find libinput headers and library.
 
 Imported Targets

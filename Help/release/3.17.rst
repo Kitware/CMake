@@ -346,3 +346,12 @@ Changes made since CMake 3.17.0 include the following.
   :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target properties.
   Previously they would be places in ``*_CFLAGS_OTHER`` variables and
   :prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties.
+
+3.17.5
+------
+
+* The default value of :variable:`CMAKE_AUTOMOC_PATH_PREFIX` was changed to
+  ``OFF`` because this feature can break existing projects that have
+  identically named header files in different include directories.
+  This restores compatibility with behavior of CMake 3.15 and below.
+  The default was also changed to ``OFF`` in 3.16.9.

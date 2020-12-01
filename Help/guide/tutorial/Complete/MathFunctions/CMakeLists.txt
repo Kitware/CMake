@@ -57,7 +57,11 @@ set_property(TARGET MathFunctions PROPERTY VERSION "1.0.0")
 set_property(TARGET MathFunctions PROPERTY SOVERSION "1")
 
 # install rules
-install(TARGETS MathFunctions tutorial_compiler_flags
+set(installable_libs MathFunctions tutorial_compiler_flags)
+if(TARGET SqrtLibrary)
+  list(APPEND installable_libs SqrtLibrary)
+endif()
+install(TARGETS ${installable_libs}
         DESTINATION lib
         EXPORT MathFunctionsTargets)
 install(FILES MathFunctions.h DESTINATION include)

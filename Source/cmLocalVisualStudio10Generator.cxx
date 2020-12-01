@@ -66,33 +66,11 @@ cmLocalVisualStudio10Generator::~cmLocalVisualStudio10Generator()
 {
 }
 
-void cmLocalVisualStudio10Generator::GenerateTargetsDepthFirst(
-  cmGeneratorTarget* target, std::vector<cmGeneratorTarget*>& remaining)
+void cmLocalVisualStudio10Generator::GenerateTarget(cmGeneratorTarget* target)
 {
-  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-    return;
-  }
-  // Find this target in the list of remaining targets.
-  auto it = std::find(remaining.begin(), remaining.end(), target);
-  if (it == remaining.end()) {
-    // This target was already handled.
-    return;
-  }
-  // Remove this target from the list of remaining targets because
-  // we are handling it now.
-  *it = nullptr;
-  auto& deps = this->GlobalGenerator->GetTargetDirectDepends(target);
-  for (auto& d : deps) {
-    // FIXME: Revise CreateSingleVCProj so we do not have to drop `const` here.
-    auto dependee = const_cast<cmGeneratorTarget*>(&*d);
-    GenerateTargetsDepthFirst(dependee, remaining);
-    // Take the union of visited source files of custom commands
-    auto visited = GetSourcesVisited(dependee);
-    GetSourcesVisited(target).insert(visited.begin(), visited.end());
-  }
   if (static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
         ->TargetIsFortranOnly(target)) {
-    this->CreateSingleVCProj(target->GetName(), target);
+    this->cmLocalVisualStudio7Generator::GenerateTarget(target);
   } else {
     cmVisualStudio10TargetGenerator tg(
       target,
@@ -100,18 +78,6 @@ void cmLocalVisualStudio10Generator::GenerateTargetsDepthFirst(
         this->GetGlobalGenerator()));
     tg.Generate();
   }
-}
-
-void cmLocalVisualStudio10Generator::Generate()
-{
-  std::vector<cmGeneratorTarget*> remaining;
-  cm::append(remaining, this->GetGeneratorTargets());
-  for (auto& t : remaining) {
-    if (t) {
-      this->GenerateTargetsDepthFirst(t, remaining);
-    }
-  }
-  this->WriteStampFiles();
 }
 
 void cmLocalVisualStudio10Generator::ReadAndStoreExternalGUID(

@@ -15,14 +15,7 @@ library is.  This code sets the following variables:
 
   TCLSH_FOUND = TRUE if tclsh has been found
   TCL_TCLSH = the path to the tclsh executable
-
-In cygwin, look for the cygwin version first.  Don't look for it later
-to avoid finding the cygwin version on a Win32 build.
 #]=======================================================================]
-
-if(CYGWIN)
-  find_program(TCL_TCLSH NAMES cygtclsh83 cygtclsh80)
-endif()
 
 get_filename_component(TK_WISH_PATH "${TK_WISH}" PATH)
 get_filename_component(TK_WISH_PATH_PARENT "${TK_WISH_PATH}" PATH)

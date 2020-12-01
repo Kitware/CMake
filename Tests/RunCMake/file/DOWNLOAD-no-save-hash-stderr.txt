@@ -1,0 +1,4 @@
+^CMake Error at DOWNLOAD-no-save-hash\.cmake:[0-9]+ \(file\):
+  file DOWNLOAD cannot calculate hash if file is not saved\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

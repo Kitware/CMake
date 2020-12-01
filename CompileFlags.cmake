@@ -26,6 +26,12 @@ if(MSVC)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stack:10000000")
 endif()
 
+# MSVC 14.28 enables C5105, but the Windows SDK 10.0.18362.0 triggers it.
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 19.28)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd5105")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd5105")
+endif()
+
 if(_CLANG_MSVC_WINDOWS AND "x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Xlinker -stack:20000000")
 endif()
@@ -51,6 +57,12 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "^parisc")
   if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mlong-calls")
   endif()
+endif()
+
+# Use 64-bit off_t on 32-bit Linux
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SIZEOF_VOID_P EQUAL 4)
+  # ensure 64bit offsets are used for filesystem accesses for 32bit compilation
+  add_definitions(-D_FILE_OFFSET_BITS=64)
 endif()
 
 # Workaround for TOC Overflow on ppc64

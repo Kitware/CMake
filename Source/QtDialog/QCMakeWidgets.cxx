@@ -4,9 +4,9 @@
 
 #include <utility>
 
-#include <QDirModel>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFileSystemModel>
 #include <QResizeEvent>
 #include <QToolButton>
 
@@ -17,8 +17,8 @@ QCMakeFileEditor::QCMakeFileEditor(QWidget* p, QString var)
   this->ToolButton = new QToolButton(this);
   this->ToolButton->setText("...");
   this->ToolButton->setCursor(QCursor(Qt::ArrowCursor));
-  QObject::connect(this->ToolButton, SIGNAL(clicked(bool)), this,
-                   SLOT(chooseFile()));
+  QObject::connect(this->ToolButton, &QToolButton::clicked, this,
+                   &QCMakeFileEditor::chooseFile);
 }
 
 QCMakeFilePathEditor::QCMakeFilePathEditor(QWidget* p, const QString& var)
@@ -88,20 +88,20 @@ void QCMakePathEditor::chooseFile()
   }
 }
 
-// use same QDirModel for all completers
-static QDirModel* fileDirModel()
+// use same QFileSystemModel for all completers
+static QFileSystemModel* fileDirModel()
 {
-  static QDirModel* m = nullptr;
+  static QFileSystemModel* m = nullptr;
   if (!m) {
-    m = new QDirModel();
+    m = new QFileSystemModel();
   }
   return m;
 }
-static QDirModel* pathDirModel()
+static QFileSystemModel* pathDirModel()
 {
-  static QDirModel* m = nullptr;
+  static QFileSystemModel* m = nullptr;
   if (!m) {
-    m = new QDirModel();
+    m = new QFileSystemModel();
     m->setFilter(QDir::AllDirs | QDir::Drives | QDir::NoDotAndDotDot);
   }
   return m;
@@ -110,7 +110,7 @@ static QDirModel* pathDirModel()
 QCMakeFileCompleter::QCMakeFileCompleter(QObject* o, bool dirs)
   : QCompleter(o)
 {
-  QDirModel* m = dirs ? pathDirModel() : fileDirModel();
+  QFileSystemModel* m = dirs ? pathDirModel() : fileDirModel();
   this->setModel(m);
 }
 

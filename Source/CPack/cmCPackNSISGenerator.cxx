@@ -696,7 +696,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     const char* userUploadDirectory =
       this->GetOption("CPACK_UPLOAD_DIRECTORY");
     std::string uploadDirectory;
-    if (userUploadDirectory && *userUploadDirectory) {
+    if (cmNonempty(userUploadDirectory)) {
       uploadDirectory = userUploadDirectory;
     } else {
       uploadDirectory =

@@ -11,6 +11,7 @@ Synopsis
  cmake-gui [<options>]
  cmake-gui [<options>] {<path-to-source> | <path-to-existing-build>}
  cmake-gui [<options>] -S <path-to-source> -B <path-to-build>
+ cmake-gui [<options>] --browse-manual
 
 Description
 ===========
@@ -35,6 +36,13 @@ Options
  Path to directory which CMake will use as the root of build directory.
 
  If the directory doesn't already exist CMake will make it.
+
+``--preset=<preset-name>``
+ Name of the preset to use from the project's
+ :manual:`presets <cmake-presets(7)>` files, if it has them.
+
+``--browse-manual``
+ Open the CMake reference manual in a browser and immediately exit.
 
 .. include:: OPTIONS_HELP.txt
 

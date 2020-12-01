@@ -1,6 +1,8 @@
 VS_DEBUGGER_ENVIRONMENT
 -----------------------
 
+.. versionadded:: 3.13
+
 Sets the local debugger environment for Visual Studio C++ targets.
 The property value may use
 :manual:`generator expressions <cmake-generator-expressions(7)>`.

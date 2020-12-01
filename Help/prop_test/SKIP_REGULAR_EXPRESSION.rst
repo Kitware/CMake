@@ -1,6 +1,8 @@
 SKIP_REGULAR_EXPRESSION
 -----------------------
 
+.. versionadded:: 3.16
+
 If the output matches this regular expression the test will be marked as skipped.
 
 If set, if the output matches one of specified regular expressions,

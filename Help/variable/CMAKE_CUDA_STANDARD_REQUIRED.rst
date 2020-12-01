@@ -1,6 +1,8 @@
 CMAKE_CUDA_STANDARD_REQUIRED
 ----------------------------
 
+.. versionadded:: 3.8
+
 Default value for :prop_tgt:`CUDA_STANDARD_REQUIRED` property of targets.
 
 This variable is used to initialize the :prop_tgt:`CUDA_STANDARD_REQUIRED`

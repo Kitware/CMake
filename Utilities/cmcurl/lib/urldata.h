@@ -1090,7 +1090,6 @@ struct connectdata {
   struct http_connect_state *connect_state; /* for HTTP CONNECT */
   struct connectbundle *bundle; /* The bundle we are member of */
   int negnpn; /* APLN or NPN TLS negotiated protocol, CURL_HTTP_VERSION* */
-  int retrycount; /* number of retries on a new connection */
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
 #endif
@@ -1195,7 +1194,6 @@ typedef enum {
   HTTPREQ_POST_MIME, /* we make a difference internally */
   HTTPREQ_PUT,
   HTTPREQ_HEAD,
-  HTTPREQ_OPTIONS,
   HTTPREQ_LAST /* last in list */
 } Curl_HttpReq;
 
@@ -1297,10 +1295,12 @@ struct UrlState {
   /* Points to the connection cache */
   struct conncache *conn_cache;
 
+  int retrycount; /* number of retries on a new connection */
+
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
 
-  struct connectdata *lastconnect; /* The last connection, NULL if undefined */
+  long lastconnect_id; /* The last connection, -1 if undefined */
   struct dynbuf headerb; /* buffer to store headers in */
 
   char *buffer; /* download buffer */

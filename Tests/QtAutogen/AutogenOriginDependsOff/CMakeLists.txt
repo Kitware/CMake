@@ -9,8 +9,8 @@ include_directories(${CBD})
 
 # A GENERATED file ensures there will be an _autogen target in VS
 add_custom_command (
-    OUTPUT "${CBD}/config.hpp"
-    COMMAND ${CMAKE_COMMAND} -E copy "${CSD}/config.hpp.in" "${CBD}/config.hpp"
+    OUTPUT "${CBD}/config_a.hpp"
+    COMMAND ${CMAKE_COMMAND} -E copy "${CSD}/config.hpp.in" "${CBD}/config_a.hpp"
     )
 
 
@@ -30,13 +30,18 @@ add_dependencies ( a_mc a_qt_autogen )
 # - depends on a GENERATED file
 # - AUTOMOC enabled
 # - depends on a target (a_mc) that depends on a_qt_qutogen
-add_library ( a_qt a_qt.cpp "${CBD}/config.hpp" )
+add_library ( a_qt a_qt.cpp "${CBD}/config_a.hpp" )
 add_dependencies ( a_qt a_mc )
 target_link_libraries ( a_qt ${QT_QTCORE_TARGET})
 set_target_properties ( a_qt PROPERTIES AUTOMOC TRUE)
 # Disable AUTOGEN_ORIGIN_DEPENDS to avoid loop dependencies
 set_target_properties ( a_qt PROPERTIES AUTOGEN_ORIGIN_DEPENDS OFF)
 
+# A GENERATED file ensures there will be an _autogen target in VS
+add_custom_command (
+    OUTPUT "${CBD}/config_b.hpp"
+    COMMAND ${CMAKE_COMMAND} -E copy "${CSD}/config.hpp.in" "${CBD}/config_b.hpp"
+    )
 
 # Library "b_mc" provides a header that holds a string function that returns
 # the content of mocs_compilation.cpp from b_qt.
@@ -57,7 +62,7 @@ add_library ( b_mc ${CSD}/b_mc.hpp ${CBD}/b_mc.cpp )
 # - depends on a GENERATED file
 # - AUTOMOC enabled
 # - depends on a library (b_mc) that depends on b_qt_qutogen
-add_library ( b_qt b_qt.cpp "${CBD}/config.hpp" )
+add_library ( b_qt b_qt.cpp "${CBD}/config_b.hpp" )
 target_link_libraries ( b_qt b_mc )
 target_link_libraries ( b_qt ${QT_QTCORE_TARGET})
 set_target_properties ( b_qt PROPERTIES AUTOMOC TRUE)

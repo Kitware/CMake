@@ -1,6 +1,8 @@
 CCMAKE_COLORS
 -------------
 
+.. versionadded:: 3.18
+
 Determines what colors are used by the CMake curses interface,
 when run on a terminal that supports colors.
 The syntax follows the same conventions as ``LS_COLORS``;

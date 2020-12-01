@@ -1142,6 +1142,20 @@ Additional configuration settings include:
   * `CTest Script`_ variable: none
   * :module:`CTest` module variable: ``DRMEMORY_COMMAND_OPTIONS``
 
+``CudaSanitizerCommand``
+  Specify a ``MemoryCheckCommand`` that is known to be a command-line
+  compatible with cuda-memcheck or compute-sanitizer.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: ``CUDA_SANITIZER_COMMAND``
+
+``CudaSanitizerCommandOptions``
+  Specify command-line options to the ``CudaSanitizerCommand`` tool.
+  They will be placed prior to the test command line.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: ``CUDA_SANITIZER_COMMAND_OPTIONS``
+
 .. _`CTest Submit Step`:
 
 CTest Submit Step
@@ -1333,7 +1347,7 @@ Resource Allocation
 ===================
 
 CTest provides a mechanism for tests to specify the resources that they need
-in a fine-grained way, and for users to specify the resources availiable on
+in a fine-grained way, and for users to specify the resources available on
 the running machine. This allows CTest to internally keep track of which
 resources are in use and which are free, scheduling tests in a way that
 prevents them from trying to claim resources that are not available.

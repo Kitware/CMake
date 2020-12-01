@@ -1,21 +1,20 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
+#include <cstring>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "cmsys/Encoding.hxx"
 
 #include "cmCTest.h"
+#include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
 #include "cmSystemTools.h"
 
 #include "CTest/cmCTestLaunch.h"
 #include "CTest/cmCTestScriptHandler.h"
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
-#  include "cmsys/ConsoleBuf.hxx"
-#endif
-#include <cstring>
-#include <iostream>
-#include <string>
-#include <vector>
 
 static const char* cmDocumentationName[][2] = {
   { nullptr, "  ctest - Testing driver provided by CMake." },
@@ -154,13 +153,11 @@ static const char* cmDocumentationOptions[][2] = {
 int main(int argc, char const* const* argv)
 {
   cmSystemTools::EnsureStdPipes();
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
+
   // Replace streambuf so we can output Unicode to console
-  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
-  consoleOut.SetUTF8Pipes();
-  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-  consoleErr.SetUTF8Pipes();
-#endif
+  cmConsoleBuf consoleBuf;
+  consoleBuf.SetUTF8Pipes();
+
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = encoding_args.argc();

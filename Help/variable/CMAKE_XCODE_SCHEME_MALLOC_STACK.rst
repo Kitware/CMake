@@ -1,6 +1,8 @@
 CMAKE_XCODE_SCHEME_MALLOC_STACK
 -------------------------------
 
+.. versionadded:: 3.13
+
 Whether to enable ``Malloc Stack`` in the Diagnostics
 section of the generated Xcode scheme.
 

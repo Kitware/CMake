@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestCoverageHandler_h
-#define cmCTestCoverageHandler_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -149,5 +148,3 @@ private:
   bool IntersectsFilter(LabelSet const& labels);
   bool IsFilteredOut(std::string const& source);
 };
-
-#endif

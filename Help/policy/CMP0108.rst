@@ -1,6 +1,8 @@
 CMP0108
 -------
 
+.. versionadded:: 3.18
+
 A target is not allowed to link to itself even through an ``ALIAS`` target.
 
 In CMake 3.17 and below, a target can link to a target aliased to itself.

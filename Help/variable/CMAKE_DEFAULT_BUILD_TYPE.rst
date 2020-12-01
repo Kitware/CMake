@@ -1,6 +1,8 @@
 CMAKE_DEFAULT_BUILD_TYPE
 ------------------------
 
+.. versionadded:: 3.17
+
 Specifies the configuration to use by default in a ``build.ninja`` file in the
 :generator:`Ninja Multi-Config` generator. If this variable is specified,
 ``build.ninja`` uses build rules from ``build-<Config>.ninja`` by default. All

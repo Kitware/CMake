@@ -1,6 +1,8 @@
 PROJECT_DESCRIPTION
 -------------------
 
+.. versionadded:: 3.9
+
 Short project description given to the project command.
 
 This is the description given to the most recently called :command:`project`

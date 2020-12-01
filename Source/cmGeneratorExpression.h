@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGeneratorExpression_h
-#define cmGeneratorExpression_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -199,8 +198,6 @@ public:
 
   const std::string& Evaluate(std::string expression,
                               const std::string& property);
-  const std::string& Evaluate(const char* expression,
-                              const std::string& property);
 
 protected:
   cmGeneratorExpression GeneratorExpression;
@@ -210,5 +207,3 @@ protected:
   cmGeneratorTarget const* HeadTarget = nullptr;
   std::string Language;
 };
-
-#endif

@@ -1,0 +1,7 @@
+^CMake Error at [^
+]*/Modules/ExternalProject.cmake:[0-9]+ \(message\):
+  The 'NO_DEPENDS' option is no longer allowed.  It has been superseded by
+  the per-step 'INDEPENDENT' option.  See policy CMP0114.
+Call Stack \(most recent call first\):
+  NO_DEPENDS-CMP0114-NEW-Direct.cmake:[0-9]+ \(ExternalProject_Add_StepTargets\)
+  CMakeLists.txt:[0-9]+ \(include\)$

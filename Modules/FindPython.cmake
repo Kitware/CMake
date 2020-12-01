@@ -5,8 +5,14 @@
 FindPython
 ----------
 
+.. versionadded:: 3.12
+
 Find Python interpreter, compiler and development environment (include
 directories and libraries).
+
+When a version is requested, it can be specified as a simple value or as a
+range. For a detailed description of version range usage and capabilities,
+refer to the :command:`find_package` command.
 
 The following components are supported:
 
@@ -44,7 +50,7 @@ To manage concurrent versions 3 and 2 of Python, use :module:`FindPython3` and
   If components ``Interpreter`` and ``Development`` (or one of its
   sub-components) are both specified, this module search only for interpreter
   with same platform architecture as the one defined by ``CMake``
-  configuration. This contraint does not apply if only ``Interpreter``
+  configuration. This constraint does not apply if only ``Interpreter``
   component is specified.
 
 Imported Targets
@@ -136,6 +142,9 @@ This module will set the following variables in your project
   System has the Python development artifacts for Python embedding.
 ``Python_INCLUDE_DIRS``
   The Python include directories.
+``Python_LINK_OPTIONS``
+  The Python link options. Some configurations require specific link options
+  for a correct build and execution.
 ``Python_LIBRARIES``
   The Python libraries.
 ``Python_LIBRARY_DIRS``
@@ -155,7 +164,7 @@ This module will set the following variables in your project
 ``Python_NumPy_FOUND``
   System has the NumPy.
 ``Python_NumPy_INCLUDE_DIRS``
-  The NumPy include directries.
+  The NumPy include directories.
 ``Python_NumPy_VERSION``
   The NumPy version.
 
@@ -189,7 +198,7 @@ Hints
 
   * ``ON``: Corresponding flag is selected.
   * ``OFF``: Corresponding flag is not selected.
-  * ``ANY``: The two posibilties (``ON`` and ``OFF``) will be searched.
+  * ``ANY``: The two possibilities (``ON`` and ``OFF``) will be searched.
 
   From this 3-tuple, various ABIs will be searched starting from the most
   specialized to the most general. Moreover, ``debug`` versions will be
@@ -326,7 +335,7 @@ setting the following variables:
 
 ``Python_LIBRARY``
   The path to the library. It will be used to compute the
-  variables ``Python_LIBRARIES``, ``Python_LIBRAY_DIRS`` and
+  variables ``Python_LIBRARIES``, ``Python_LIBRARY_DIRS`` and
   ``Python_RUNTIME_LIBRARY_DIRS``.
 
 ``Python_INCLUDE_DIR``
@@ -347,7 +356,7 @@ setting the following variables:
   When an artifact is specified, all ``HINTS`` will be ignored and no search
   will be performed for this artifact.
 
-  If more than one artifact is specified, it is the user's responsability to
+  If more than one artifact is specified, it is the user's responsibility to
   ensure the consistency of the various artifacts.
 
 By default, this module supports multiple calls in different directories of a
@@ -355,7 +364,7 @@ project with different version/component requirements while providing correct
 and consistent results for each call. To support this behavior, ``CMake`` cache
 is not used in the traditional way which can be problematic for interactive
 specification. So, to enable also interactive specification, module behavior
-can be controled with the following variable:
+can be controlled with the following variable:
 
 ``Python_ARTIFACTS_INTERACTIVE``
   Selects the behavior of the module. This is a boolean variable:
@@ -385,13 +394,39 @@ module suffix will include the ``Python_SOABI`` value, if any.
 #]=======================================================================]
 
 
+cmake_policy(PUSH)
+# numbers and boolean constants
+cmake_policy (SET CMP0012 NEW)
+
+
 set (_PYTHON_PREFIX Python)
+unset (_Python_REQUIRED_VERSION_MAJOR)
+unset (_Python_REQUIRED_VERSIONS)
 
-if (DEFINED Python_FIND_VERSION)
+if (Python_FIND_VERSION_RANGE)
+  # compute list of major versions
+  foreach (_Python_MAJOR IN ITEMS 3 2)
+    if (_Python_MAJOR VERSION_GREATER_EQUAL Python_FIND_VERSION_MIN_MAJOR
+        AND ((Python_FIND_VERSION_RANGE_MAX STREQUAL "INCLUDE" AND _Python_MAJOR VERSION_LESS_EQUAL Python_FIND_VERSION_MAX)
+        OR (Python_FIND_VERSION_RANGE_MAX STREQUAL "EXCLUDE" AND _Python_MAJOR VERSION_LESS Python_FIND_VERSION_MAX)))
+      list (APPEND _Python_REQUIRED_VERSIONS ${_Python_MAJOR})
+    endif()
+  endforeach()
+  list (LENGTH _Python_REQUIRED_VERSIONS _Python_VERSION_COUNT)
+  if (_Python_VERSION_COUNT EQUAL 0)
+    unset (_Python_REQUIRED_VERSIONS)
+  elseif (_Python_VERSION_COUNT EQUAL 1)
+    set (_Python_REQUIRED_VERSION_MAJOR ${_Python_REQUIRED_VERSIONS})
+  endif()
+elseif (DEFINED Python_FIND_VERSION)
   set (_Python_REQUIRED_VERSION_MAJOR ${Python_FIND_VERSION_MAJOR})
-
-  include (${CMAKE_CURRENT_LIST_DIR}/FindPython/Support.cmake)
 else()
+  set (_Python_REQUIRED_VERSIONS 3 2)
+endif()
+
+if (_Python_REQUIRED_VERSION_MAJOR)
+  include (${CMAKE_CURRENT_LIST_DIR}/FindPython/Support.cmake)
+elseif (_Python_REQUIRED_VERSIONS)
   # iterate over versions in quiet and NOT required modes to avoid multiple
   # "Found" messages and prematurally failure.
   set (_Python_QUIETLY ${Python_FIND_QUIETLY})
@@ -399,7 +434,6 @@ else()
   set (Python_FIND_QUIETLY TRUE)
   set (Python_FIND_REQUIRED FALSE)
 
-  set (_Python_REQUIRED_VERSIONS 3 2)
   set (_Python_REQUIRED_VERSION_LAST 2)
 
   unset (_Python_INPUT_VARS)
@@ -433,10 +467,21 @@ else()
   set (Python_FIND_REQUIRED ${_Python_REQUIRED})
   if (Python_FIND_REQUIRED OR NOT Python_FIND_QUIETLY)
     # call again validation command to get "Found" or error message
-    find_package_handle_standard_args (Python HANDLE_COMPONENTS
+    find_package_handle_standard_args (Python HANDLE_COMPONENTS HANDLE_VERSION_RANGE
                                               REQUIRED_VARS ${_Python_REQUIRED_VARS}
                                               VERSION_VAR Python_VERSION)
   endif()
+else()
+  # supported versions not in the specified range. Call final check
+  if (NOT Python_FIND_COMPONENTS)
+    set (Python_FIND_COMPONENTS Interpreter)
+    set (Python_FIND_REQUIRED_Interpreter TRUE)
+  endif()
+
+  include (${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+  find_package_handle_standard_args (Python HANDLE_COMPONENTS HANDLE_VERSION_RANGE
+                                            VERSION_VAR Python_VERSION
+                                            REASON_FAILURE_MESSAGE "Version range specified \"${Python_FIND_VERSION_RANGE}\" does not include supported versions")
 endif()
 
 if (COMMAND __Python_add_library)
@@ -446,3 +491,5 @@ if (COMMAND __Python_add_library)
 endif()
 
 unset (_PYTHON_PREFIX)
+
+cmake_policy(POP)

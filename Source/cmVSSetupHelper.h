@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmVSSetupHelper_h
-#define cmVSSetupHelper_h
+#pragma once
 
 #ifndef NOMINMAX
 #  define NOMINMAX // Undefine min and max defined by windows.h
@@ -136,5 +135,3 @@ private:
 
   std::string SpecifiedVSInstallLocation;
 };
-
-#endif

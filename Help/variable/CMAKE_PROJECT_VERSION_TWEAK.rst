@@ -1,6 +1,8 @@
 CMAKE_PROJECT_VERSION_TWEAK
 ---------------------------
 
+.. versionadded:: 3.12
+
 The tweak version of the top level project.
 
 This variable holds the tweak version of the project as specified in the top

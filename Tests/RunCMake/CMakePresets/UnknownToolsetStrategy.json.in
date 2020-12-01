@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "UnknownToolsetStrategy",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "toolset": {
+        "strategy": "unknown"
+      }
+    }
+  ]
+}

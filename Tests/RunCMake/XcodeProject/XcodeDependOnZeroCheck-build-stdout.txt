@@ -1,1 +1,3 @@
-BUILD AGGREGATE TARGET ZERO_CHECK
+BUILD AGGREGATE TARGET ZERO_CHECK|PhaseScriptExecution [^
+]*/ZERO_CHECK.build/Script-[^
+]*in target 'ZERO_CHECK' from project 'XcodeDependOnZeroCheck'

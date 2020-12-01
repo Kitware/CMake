@@ -1,0 +1,4 @@
+^CMake Error at call_invalid_command.cmake:1 \(cmake_language\):
+  cmake_language invalid command specified: [A-Za-z_]+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)$

@@ -1,0 +1,28 @@
+CMake Error at WrongVersionRange.cmake:[0-9]+ \(find_package\):
+  find_package called with invalid argument "1\.2\.\.\."
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at WrongVersionRange.cmake:[0-9]+ \(find_package\):
+  find_package called with invalid argument "\.\.\.1\.2"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at WrongVersionRange.cmake:[0-9]+ \(find_package\):
+  find_package called with invalid argument "1\.2\.\.\.\.2\.3"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at WrongVersionRange.cmake:[0-9]+ \(find_package\):
+  find_package called with invalid argument "1\.2\.\.\.>2\.3"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at WrongVersionRange.cmake:[0-9]+ \(find_package\):
+  find_package called with invalid argument "1\.2>\.\.\.2\.3"
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

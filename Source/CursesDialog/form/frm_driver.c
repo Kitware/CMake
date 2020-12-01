@@ -2983,7 +2983,7 @@ INLINE static FIELD *Right_Neighbour_Field(FIELD * field)
 |   Function      :  static FIELD *Upper_Neighbour_Field(FIELD * field)
 |   
 |   Description   :  Because of the row-major nature of sorting the fields,
-|                    its more difficult to define whats the upper neighbour
+|                    its more difficult to define what's the upper neighbour
 |                    field really means. We define that it must be on a
 |                    'previous' line (cyclic order!) and is the rightmost
 |                    field laying on the left side of the given field. If
@@ -3030,7 +3030,7 @@ static FIELD *Upper_Neighbour_Field(FIELD * field)
 |   Function      :  static FIELD *Down_Neighbour_Field(FIELD * field)
 |   
 |   Description   :  Because of the row-major nature of sorting the fields,
-|                    its more difficult to define whats the down neighbour
+|                    its more difficult to define what's the down neighbour
 |                    field really means. We define that it must be on a
 |                    'next' line (cyclic order!) and is the leftmost
 |                    field laying on the right side of the given field. If

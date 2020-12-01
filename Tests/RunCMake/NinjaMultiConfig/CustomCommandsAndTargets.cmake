@@ -34,6 +34,18 @@ add_subdirectory(CustomCommandsAndTargetsSubdir)
 
 create_targets(Top)
 
+add_executable(RootExe main.c)
+add_custom_target(RootCustom COMMAND ${CMAKE_COMMAND} -E touch RootCustom.txt BYPRODUCTS RootCustom.txt)
+add_custom_command(OUTPUT main.c COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/main.c ${CMAKE_CURRENT_BINARY_DIR}/main.c DEPENDS RootCustom)
+add_executable(LeafExe ${CMAKE_CURRENT_BINARY_DIR}/main.c)
+add_custom_target(LeafCustom COMMAND ${CMAKE_COMMAND} -E touch LeafCustom.txt BYPRODUCTS LeafCustom.txt DEPENDS RootCustom RootExe)
+add_dependencies(LeafExe RootExe)
+file(APPEND "${CMAKE_BINARY_DIR}/target_files_custom.cmake"
+"set(TARGET_BYPRODUCTS_LeafCustom [==[${CMAKE_CURRENT_BINARY_DIR}/LeafCustom.txt]==])
+set(TARGET_BYPRODUCTS_LeafExe [==[${CMAKE_CURRENT_BINARY_DIR}/main.c]==])
+set(TARGET_BYPRODUCTS_RootCustom [==[${CMAKE_CURRENT_BINARY_DIR}/RootCustom.txt]==])
+")
+
 include(${CMAKE_CURRENT_LIST_DIR}/Common.cmake)
-generate_output_files(TopPostBuild SubdirPostBuild)
+generate_output_files(TopPostBuild SubdirPostBuild RootExe LeafExe)
 file(APPEND "${CMAKE_BINARY_DIR}/target_files.cmake" "include(\${CMAKE_CURRENT_LIST_DIR}/target_files_custom.cmake)\n")

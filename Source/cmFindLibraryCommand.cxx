@@ -13,6 +13,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -50,9 +51,9 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 
   // add custom lib<qual> paths instead of using fixed lib32, lib64 or
   // libx32
-  if (const char* customLib = this->Makefile->GetDefinition(
+  if (cmProp customLib = this->Makefile->GetDefinition(
         "CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX")) {
-    this->AddArchitecturePaths(customLib);
+    this->AddArchitecturePaths(customLib->c_str());
   }
   // add special 32 bit paths if this is a 32 bit compile.
   else if (this->Makefile->PlatformIs32Bit() &&

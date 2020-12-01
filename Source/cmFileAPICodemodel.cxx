@@ -175,6 +175,38 @@ public:
   }
 };
 
+template <typename T>
+class JBTs
+{
+public:
+  JBTs(T v = T(), std::vector<JBTIndex> ids = std::vector<JBTIndex>())
+    : Value(std::move(v))
+    , Backtraces(std::move(ids))
+  {
+  }
+  T Value;
+  std::vector<JBTIndex> Backtraces;
+  friend bool operator==(JBTs<T> const& l, JBTs<T> const& r)
+  {
+    if ((l.Value == r.Value) && (l.Backtraces.size() == r.Backtraces.size())) {
+      for (size_t i = 0; i < l.Backtraces.size(); i++) {
+        if (l.Backtraces[i].Index != r.Backtraces[i].Index) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  static bool ValueEq(JBTs<T> const& l, JBTs<T> const& r)
+  {
+    return l.Value == r.Value;
+  }
+  static bool ValueLess(JBTs<T> const& l, JBTs<T> const& r)
+  {
+    return l.Value < r.Value;
+  }
+};
+
 class BacktraceData
 {
   std::string TopSource;
@@ -277,6 +309,7 @@ struct CompileData
 
   std::string Language;
   std::string Sysroot;
+  JBTs<std::string> LanguageStandard;
   std::vector<JBT<std::string>> Flags;
   std::vector<JBT<std::string>> Defines;
   std::vector<JBT<std::string>> PrecompileHeaders;
@@ -287,6 +320,7 @@ struct CompileData
     return (l.Language == r.Language && l.Sysroot == r.Sysroot &&
             l.Flags == r.Flags && l.Defines == r.Defines &&
             l.PrecompileHeaders == r.PrecompileHeaders &&
+            l.LanguageStandard == r.LanguageStandard &&
             l.Includes == r.Includes);
   }
 };
@@ -319,6 +353,12 @@ struct hash<CompileData>
     for (auto const& i : in.PrecompileHeaders) {
       result = result ^ hash<std::string>()(i.Value) ^
         hash<Json::ArrayIndex>()(i.Backtrace.Index);
+    }
+    if (!in.LanguageStandard.Value.empty()) {
+      result = result ^ hash<std::string>()(in.LanguageStandard.Value);
+      for (JBTIndex backtrace : in.LanguageStandard.Backtraces) {
+        result = result ^ hash<Json::ArrayIndex>()(backtrace.Index);
+      }
     }
     return result;
   }
@@ -363,6 +403,16 @@ class Target
     return JBT<T>(bt.Value, this->Backtraces.Add(bt.Backtrace));
   }
 
+  template <typename T>
+  JBTs<T> ToJBTs(BTs<T> const& bts)
+  {
+    std::vector<JBTIndex> ids;
+    for (cmListFileBacktrace const& backtrace : bts.Backtraces) {
+      ids.emplace_back(this->Backtraces.Add(backtrace));
+    }
+    return JBTs<T>(bts.Value, ids);
+  }
+
   void ProcessLanguages();
   void ProcessLanguage(std::string const& lang);
 
@@ -377,6 +427,7 @@ class Target
   Json::Value DumpCompileData(CompileData const& cd);
   Json::Value DumpInclude(CompileData::IncludeEntry const& inc);
   Json::Value DumpPrecompileHeader(JBT<std::string> const& header);
+  Json::Value DumpLanguageStandard(JBTs<std::string> const& standard);
   Json::Value DumpDefine(JBT<std::string> const& def);
   Json::Value DumpSources();
   Json::Value DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
@@ -438,7 +489,7 @@ Json::Value Codemodel::DumpConfigurations()
   const auto& makefiles = gg->GetMakefiles();
   if (!makefiles.empty()) {
     std::vector<std::string> const& configs =
-      makefiles[0]->GetGeneratorConfigs();
+      makefiles[0]->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
     for (std::string const& config : configs) {
       configurations.append(this->DumpConfiguration(config));
     }
@@ -574,7 +625,7 @@ Json::Value CodemodelConfig::DumpTargets()
 
   for (cmGeneratorTarget* gt : targetList) {
     if (gt->GetType() == cmStateEnums::GLOBAL_TARGET ||
-        gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+        !gt->IsInBuildSystem()) {
       continue;
     }
 
@@ -801,12 +852,12 @@ void Target::ProcessLanguage(std::string const& lang)
 {
   CompileData& cd = this->CompileDataMap[lang];
   cd.Language = lang;
-  if (const char* sysrootCompile =
+  if (cmProp sysrootCompile =
         this->GT->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE")) {
-    cd.Sysroot = sysrootCompile;
-  } else if (const char* sysroot =
+    cd.Sysroot = *sysrootCompile;
+  } else if (cmProp sysroot =
                this->GT->Makefile->GetDefinition("CMAKE_SYSROOT")) {
-    cd.Sysroot = sysroot;
+    cd.Sysroot = *sysroot;
   }
   cmLocalGenerator* lg = this->GT->GetLocalGenerator();
   {
@@ -837,6 +888,11 @@ void Target::ProcessLanguage(std::string const& lang)
     this->GT->GetPrecompileHeaders(this->Config, lang);
   for (BT<std::string> const& pch : precompileHeaders) {
     cd.PrecompileHeaders.emplace_back(this->ToJBT(pch));
+  }
+  BTs<std::string> const* languageStandard =
+    this->GT->GetLanguageStandardProperty(lang, this->Config);
+  if (languageStandard) {
+    cd.LanguageStandard = this->ToJBTs(*languageStandard);
   }
 }
 
@@ -996,6 +1052,9 @@ CompileData Target::MergeCompileData(CompileData const& fd)
   // All compile groups share the precompile headers of the target.
   cd.PrecompileHeaders = td.PrecompileHeaders;
 
+  // All compile groups share the language standard of the target.
+  cd.LanguageStandard = td.LanguageStandard;
+
   // Use target-wide flags followed by source-specific flags.
   cd.Flags.reserve(td.Flags.size() + fd.Flags.size());
   cd.Flags.insert(cd.Flags.end(), td.Flags.begin(), td.Flags.end());
@@ -1153,6 +1212,10 @@ Json::Value Target::DumpCompileData(CompileData const& cd)
     }
     result["precompileHeaders"] = std::move(precompileHeaders);
   }
+  if (!cd.LanguageStandard.Value.empty()) {
+    result["languageStandard"] =
+      this->DumpLanguageStandard(cd.LanguageStandard);
+  }
 
   return result;
 }
@@ -1174,6 +1237,20 @@ Json::Value Target::DumpPrecompileHeader(JBT<std::string> const& header)
   precompileHeader["header"] = header.Value;
   this->AddBacktrace(precompileHeader, header.Backtrace);
   return precompileHeader;
+}
+
+Json::Value Target::DumpLanguageStandard(JBTs<std::string> const& standard)
+{
+  Json::Value languageStandard = Json::objectValue;
+  languageStandard["standard"] = standard.Value;
+  if (!standard.Backtraces.empty()) {
+    Json::Value backtraces = Json::arrayValue;
+    for (JBTIndex backtrace : standard.Backtraces) {
+      backtraces.append(backtrace.Index);
+    }
+    languageStandard["backtraces"] = backtraces;
+  }
+  return languageStandard;
 }
 
 Json::Value Target::DumpDefine(JBT<std::string> const& def)
@@ -1327,12 +1404,12 @@ Json::Value Target::DumpLink()
       link["commandFragments"] = std::move(commandFragments);
     }
   }
-  if (const char* sysrootLink =
+  if (cmProp sysrootLink =
         this->GT->Makefile->GetDefinition("CMAKE_SYSROOT_LINK")) {
-    link["sysroot"] = this->DumpSysroot(sysrootLink);
-  } else if (const char* sysroot =
+    link["sysroot"] = this->DumpSysroot(*sysrootLink);
+  } else if (cmProp sysroot =
                this->GT->Makefile->GetDefinition("CMAKE_SYSROOT")) {
-    link["sysroot"] = this->DumpSysroot(sysroot);
+    link["sysroot"] = this->DumpSysroot(*sysroot);
   }
   if (this->GT->IsIPOEnabled(lang, this->Config)) {
     link["lto"] = true;

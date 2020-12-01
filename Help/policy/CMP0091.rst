@@ -1,6 +1,8 @@
 CMP0091
 -------
 
+.. versionadded:: 3.15
+
 MSVC runtime library flags are selected by an abstraction.
 
 Compilers targeting the MSVC ABI have flags to select the MSVC runtime library.

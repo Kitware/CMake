@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

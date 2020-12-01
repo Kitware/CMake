@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.1)
 project(XCTest C)
 enable_testing()
 
+set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO")
+set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
+
 find_package(XCTest REQUIRED)
 
 # Framework

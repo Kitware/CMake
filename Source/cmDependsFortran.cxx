@@ -15,6 +15,7 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmProperty.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
@@ -394,9 +395,9 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod " << modFile
                   << ' ' << stampFileForShell;
       cmMakefile* mf = this->LocalGenerator->GetMakefile();
-      const char* cid = mf->GetDefinition("CMAKE_Fortran_COMPILER_ID");
-      if (cid && *cid) {
-        makeDepends << ' ' << cid;
+      cmProp cid = mf->GetDefinition("CMAKE_Fortran_COMPILER_ID");
+      if (cmNonempty(cid)) {
+        makeDepends << ' ' << *cid;
       }
       makeDepends << '\n';
     }

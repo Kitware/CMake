@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_algorithm
-#define cm_algorithm
+#pragma once
 
 #include <algorithm> // IWYU pragma: export
 #include <cassert>
@@ -34,5 +33,3 @@ T const& clamp(T const& v, T const& lo, T const& hi, Comp comp)
 #endif
 
 } // namespace cm
-
-#endif

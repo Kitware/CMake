@@ -1,1 +1,1 @@
-#define somthing
+#define something

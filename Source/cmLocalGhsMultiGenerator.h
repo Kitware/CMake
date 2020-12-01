@@ -1,11 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmLocalGhsMultiGenerator_h
-#define cmLocalGhsMultiGenerator_h
+#pragma once
 
 #include <map>
 #include <string>
-#include <vector>
 
 #include "cmLocalGenerator.h"
 
@@ -38,10 +36,4 @@ public:
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
     cmGeneratorTarget const* gt = nullptr) override;
-
-private:
-  void GenerateTargetsDepthFirst(cmGeneratorTarget* target,
-                                 std::vector<cmGeneratorTarget*>& remaining);
 };
-
-#endif

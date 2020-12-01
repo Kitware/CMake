@@ -1,6 +1,8 @@
 UNITY_BUILD_BATCH_SIZE
 ----------------------
 
+.. versionadded:: 3.16
+
 Specifies the maximum number of source files that can be combined into any one
 unity source file when unity builds are enabled by the :prop_tgt:`UNITY_BUILD`
 target property.  The original source files will be distributed across as many

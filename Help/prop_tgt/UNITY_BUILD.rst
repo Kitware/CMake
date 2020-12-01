@@ -1,6 +1,8 @@
 UNITY_BUILD
 -----------
 
+.. versionadded:: 3.16
+
 When this property is set to true, the target source files will be combined
 into batches for faster compilation.  This is done by creating a (set of)
 unity sources which ``#include`` the original sources, then compiling these

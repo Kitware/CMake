@@ -1,6 +1,8 @@
 Swift_MODULE_DIRECTORY
 ----------------------
 
+.. versionadded:: 3.15
+
 Specify output directory for Swift modules provided by the target.
 
 If the target contains Swift source files, this specifies the directory in which

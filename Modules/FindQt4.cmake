@@ -147,7 +147,7 @@ more-manual way. Several macros are available to add targets for such uses.
         in:  directories sources ts_files
         options: flags to pass to lupdate, such as -extensions to specify
         extensions for a directory scan.
-        generates commands to create .ts (vie lupdate) and .qm
+        generates commands to create .ts (via lupdate) and .qm
         (via lrelease) - files from directories and/or sources. The ts files are
         created and/or updated in the source tree (unless given with full paths).
         The qm files are generated in the build tree.

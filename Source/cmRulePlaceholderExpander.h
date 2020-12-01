@@ -1,8 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#ifndef cmRulePlaceholderExpander_h
-#define cmRulePlaceholderExpander_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -64,6 +63,9 @@ public:
     const char* SwiftModuleName;
     const char* SwiftOutputFileMap;
     const char* SwiftSources;
+    const char* ISPCHeader;
+    const char* Fatbinary;
+    const char* RegisterFile;
   };
 
   // Expand rule variables in CMake of the type found in language rules
@@ -84,5 +86,3 @@ private:
   std::string CompilerSysroot;
   std::string LinkerSysroot;
 };
-
-#endif

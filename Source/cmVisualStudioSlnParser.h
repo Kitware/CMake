@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmVisualStudioSlnParser_h
-#define cmVisualStudioSlnParser_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -103,5 +102,3 @@ protected:
 
   bool ParseValue(const std::string& value, ParsedLine& parsedLine);
 };
-
-#endif

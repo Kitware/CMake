@@ -1,29 +1,29 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestPyPy C)
+project(TestPyPy LANGUAGES C)
 
 set (Python_FIND_IMPLEMENTATIONS PyPy)
 
 find_package(Python ${Python_REQUESTED_VERSION} COMPONENTS Interpreter Development)
 if (NOT Python_FOUND)
-  message (FATAL_ERROR "Fail to found Python PyPy ${Python_REQUESTED_VERSION}")
+  message (FATAL_ERROR "Failed to find Python PyPy ${Python_REQUESTED_VERSION}")
 endif()
 
 if (NOT Python_Interpreter_FOUND)
-  message (FATAL_ERROR "Fail to found Python PyPy Interpreter")
+  message (FATAL_ERROR "Failed to find Python PyPy Interpreter")
 endif()
 if (NOT Python_INTERPRETER_ID STREQUAL "PyPy")
   message (FATAL_ERROR "Erroneous interpreter ID (${Python_INTERPRETER_ID})")
 endif()
 
 if (NOT Python_Development.Module_FOUND)
-  message (FATAL_ERROR "Fail to found Python PyPy ${Python_REQUESTED_VERSION} Development.Module")
+  message (FATAL_ERROR "Failed to find Python PyPy ${Python_REQUESTED_VERSION} Development.Module")
 endif()
 if (NOT Python_Development.Embed_FOUND)
-  message (FATAL_ERROR "Fail to found Python PyPy ${Python_REQUESTED_VERSION} Development.Embed")
+  message (FATAL_ERROR "Failed to find Python PyPy ${Python_REQUESTED_VERSION} Development.Embed")
 endif()
 if (NOT Python_Development_FOUND)
-  message (FATAL_ERROR "Fail to found Python PyPy ${Python_REQUESTED_VERSION} Development")
+  message (FATAL_ERROR "Failed to find Python PyPy ${Python_REQUESTED_VERSION} Development")
 endif()
 
 if(NOT TARGET Python::Interpreter)

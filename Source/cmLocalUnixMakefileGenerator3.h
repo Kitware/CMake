@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmLocalUnixMakefileGenerator3_h
-#define cmLocalUnixMakefileGenerator3_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -20,6 +19,7 @@ class cmCustomCommandGenerator;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
+class cmSourceFile;
 
 /** \class cmLocalUnixMakefileGenerator3
  * \brief Write a LocalUnix makefiles.
@@ -295,6 +295,13 @@ private:
   bool ColorMakefile;
   bool SkipPreprocessedSourceRules;
   bool SkipAssemblySourceRules;
-};
 
-#endif
+  std::set<cmSourceFile const*>& GetCommandsVisited(
+    cmGeneratorTarget const* target)
+  {
+    return this->CommandsVisited[target];
+  };
+
+  std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
+    CommandsVisited;
+};

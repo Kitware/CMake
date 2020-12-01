@@ -5,6 +5,8 @@
 GoogleTest
 ----------
 
+.. versionadded:: 3.9
+
 This module defines functions to help use the Google Test infrastructure.  Two
 mechanisms for adding tests are provided. :command:`gtest_add_tests` has been
 around for some time, originally via ``find_package(GTest)``.
@@ -493,7 +495,7 @@ function(gtest_discover_tests TARGET)
     string(CONCAT ctest_include_content
       "if(EXISTS \"$<TARGET_FILE:${TARGET}>\")"                                    "\n"
       "  if(\"$<TARGET_FILE:${TARGET}>\" IS_NEWER_THAN \"${ctest_tests_file}\")"   "\n"
-      "    include(GoogleTestAddTests)"                                            "\n"
+      "    include(\"${_GOOGLETEST_DISCOVER_TESTS_SCRIPT}\")"                      "\n"
       "    gtest_discover_tests_impl("                                             "\n"
       "      TEST_EXECUTABLE"        " [==[" "$<TARGET_FILE:${TARGET}>"   "]==]"   "\n"
       "      TEST_EXECUTOR"          " [==[" "${crosscompiling_emulator}" "]==]"   "\n"

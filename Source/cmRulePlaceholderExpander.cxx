@@ -90,6 +90,11 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       return replaceValues.AIXExports;
     }
   }
+  if (replaceValues.ISPCHeader) {
+    if (variable == "ISPC_HEADER") {
+      return replaceValues.ISPCHeader;
+    }
+  }
   if (replaceValues.Defines && variable == "DEFINES") {
     return replaceValues.Defines;
   }
@@ -134,6 +139,16 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   if (replaceValues.DependencyFile) {
     if (variable == "DEP_FILE") {
       return replaceValues.DependencyFile;
+    }
+  }
+  if (replaceValues.Fatbinary) {
+    if (variable == "FATBINARY") {
+      return replaceValues.Fatbinary;
+    }
+  }
+  if (replaceValues.RegisterFile) {
+    if (variable == "REGISTER_FILE") {
+      return replaceValues.RegisterFile;
     }
   }
 
@@ -261,7 +276,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       this->VariableMappings["CMAKE_" + compIt->second +
                              "_COMPILE_OPTIONS_SYSROOT"];
 
-    // if there is a required first argument to the compiler add it
+    // if there are required arguments to the compiler add it
     // to the compiler string
     if (!compilerArg1.empty()) {
       ret += " ";

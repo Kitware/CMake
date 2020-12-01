@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGhsMultiTargetGenerator_h
-#define cmGhsMultiTargetGenerator_h
+#pragma once
 
 #include <iosfwd>
 #include <map>
@@ -43,7 +42,7 @@ private:
   void SetCompilerFlags(std::string const& config,
                         const std::string& language);
 
-  std::string GetDefines(const std::string& langugae,
+  std::string GetDefines(const std::string& language,
                          std::string const& config);
 
   void WriteIncludes(std::ostream& fout, const std::string& config,
@@ -82,5 +81,3 @@ private:
   std::string ConfigName;     /* CMAKE_BUILD_TYPE */
   bool const CmdWindowsShell; /* custom commands run in cmd.exe or /bin/sh */
 };
-
-#endif // ! cmGhsMultiTargetGenerator_h

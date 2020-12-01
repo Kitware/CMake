@@ -1,6 +1,5 @@
-
-cmake_minimum_required(VERSION 3.7)
-project (ConsumeCompileFeatures CXX CUDA)
+cmake_minimum_required(VERSION 3.18)
+project(ConsumeCompileFeatures CXX CUDA)
 #Goal for this example:
 
 #build a c++11 library that express a c++11 public compile feature

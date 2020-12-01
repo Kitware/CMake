@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.18)
+project(${RunCMake_TEST} NONE)
+set(RunCMake_SOURCE_DIR [==[@RunCMake_SOURCE_DIR@]==])
+include("${RunCMake_SOURCE_DIR}/${RunCMake_TEST}.cmake")

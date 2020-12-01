@@ -63,7 +63,7 @@ function(check_custom_platform TARGET_FILE PROJECT_NAME PLATFORM_NAME RESULT)
     return()
   endif()
 
-  # probably whould be better to use configuration name
+  # probably would be better to use configuration name
   # extracted from CMAKE_CONFIGURATION_TYPES than just hardcoded "Debug" instead
   set(REG_EXP "^(\t)*\\{${FOUND_GUID}\\}\\.Debug[^ ]*\\.ActiveCfg = Debug\\|${PLATFORM_NAME}$")
   check_line_exists(${TARGET_FILE} REG_EXP)

@@ -241,6 +241,7 @@ if(NOT MATLAB_ADDITIONAL_VERSIONS)
 endif()
 
 set(MATLAB_VERSIONS_MAPPING
+  "R2020b=9.9"
   "R2020a=9.8"
   "R2019b=9.7"
   "R2019a=9.6"
@@ -992,7 +993,10 @@ function(matlab_add_mex)
     endif()
   endif()
 
-  if(NOT Matlab_VERSION_STRING VERSION_LESS "9.4") # For 9.4 (R2018a) and newer, add API macro
+  # For 9.4 (R2018a) and newer, add API macro.
+  # Add it for unknown versions too, just in case.
+  if(NOT Matlab_VERSION_STRING VERSION_LESS "9.4"
+      OR Matlab_VERSION_STRING STREQUAL "unknown")
     if(${${prefix}_R2018a})
       set(MEX_API_MACRO "MATLAB_DEFAULT_RELEASE=R2018a")
     else()

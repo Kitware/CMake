@@ -12,7 +12,6 @@
 #include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmTarget.h"
-#include "cmTargetPropertyComputer.h"
 
 class cmMessenger;
 
@@ -46,12 +45,9 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
       cmProp prop_cstr = nullptr;
       cmListFileBacktrace bt = mf.GetBacktrace();
       cmMessenger* messenger = mf.GetMessenger();
-      if (cmTargetPropertyComputer::PassesWhitelist(tgt->GetType(), args[2],
-                                                    messenger, bt)) {
-        prop_cstr = tgt->GetComputedProperty(args[2], messenger, bt);
-        if (!prop_cstr) {
-          prop_cstr = tgt->GetProperty(args[2]);
-        }
+      prop_cstr = tgt->GetComputedProperty(args[2], messenger, bt);
+      if (!prop_cstr) {
+        prop_cstr = tgt->GetProperty(args[2]);
       }
       if (prop_cstr) {
         prop = *prop_cstr;

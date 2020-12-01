@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestPython3Embedded C)
+project(TestPython3Embedded LANGUAGES C)
 
 include(CTest)
 
 find_package(Python3 REQUIRED COMPONENTS Development.Embed)
 if (NOT Python3_FOUND)
-  message (FATAL_ERROR "Fail to found Python 3")
+  message (FATAL_ERROR "Failed to find Python 3")
 endif()
 if (Python3_Development_FOUND)
   message (FATAL_ERROR "Python 3, COMPONENT 'Development' unexpectedly found")

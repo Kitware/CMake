@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmQtAutoGenGlobalInitializer_h
-#define cmQtAutoGenGlobalInitializer_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -82,5 +81,3 @@ private:
     CompilerFeatures_;
   Keywords const Keywords_;
 };
-
-#endif
