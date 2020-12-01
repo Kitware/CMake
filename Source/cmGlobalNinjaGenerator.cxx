@@ -766,7 +766,8 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
   e <<
     "The Ninja generator does not support Fortran using Ninja version\n"
     "  " << this->NinjaVersion << "\n"
-    "due to lack of required features.  Ninja 1.10 or higher is required."
+    "due to lack of required features.  "
+    "Ninja " << RequiredNinjaVersionForDyndeps() << " or higher is required."
     ;
   /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
@@ -785,7 +786,9 @@ bool cmGlobalNinjaGenerator::CheckISPC(cmMakefile* mf) const
   e <<
     "The Ninja generator does not support ISPC using Ninja version\n"
     "  " << this->NinjaVersion << "\n"
-    "due to lack of required features.  Ninja 1.10 or higher is required."
+    "due to lack of required features.  "
+    "Ninja " << RequiredNinjaVersionForMultipleOutputs() <<
+    " or higher is required."
     ;
   /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
