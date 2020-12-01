@@ -55,9 +55,8 @@ static Json::Value EncodeFilename(std::string const& path)
 #define PARSE_BLOB(val, res)                                                  \
   do {                                                                        \
     if (!ParseFilename(val, res)) {                                           \
-      cmSystemTools::Error(                                                   \
-        cmStrCat("-E cmake_ninja_depends failed to parse ", arg_pp,           \
-                 ": invalid blob"));                                          \
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ", \
+                                    arg_pp, ": invalid blob"));               \
       return false;                                                           \
     }                                                                         \
   } while (0)
@@ -65,9 +64,8 @@ static Json::Value EncodeFilename(std::string const& path)
 #define PARSE_FILENAME(val, res)                                              \
   do {                                                                        \
     if (!ParseFilename(val, res)) {                                           \
-      cmSystemTools::Error(                                                   \
-        cmStrCat("-E cmake_ninja_depends failed to parse ", arg_pp,           \
-                 ": invalid filename"));                                      \
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ", \
+                                    arg_pp, ": invalid filename"));           \
       return false;                                                           \
     }                                                                         \
                                                                               \
@@ -84,7 +82,7 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
   {
     Json::Reader reader;
     if (!reader.parse(ppf, ppio, false)) {
-      cmSystemTools::Error(cmStrCat("-E cmake_ninja_depends failed to parse ",
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
                                     arg_pp,
                                     reader.getFormattedErrorMessages()));
       return false;
@@ -93,7 +91,7 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
 
   Json::Value const& version = ppi["version"];
   if (version.asUInt() != 0) {
-    cmSystemTools::Error(cmStrCat("-E cmake_ninja_depends failed to parse ",
+    cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
                                   arg_pp, ": version ", version.asString()));
     return false;
   }
@@ -101,7 +99,7 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
   Json::Value const& rules = ppi["rules"];
   if (rules.isArray()) {
     if (rules.size() != 1) {
-      cmSystemTools::Error(cmStrCat("-E cmake_ninja_depends failed to parse ",
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
                                     arg_pp, ": expected 1 source entry"));
       return false;
     }
@@ -109,9 +107,9 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
     for (auto const& rule : rules) {
       Json::Value const& workdir = rule["work-directory"];
       if (!workdir.isString()) {
-        cmSystemTools::Error(
-          cmStrCat("-E cmake_ninja_depends failed to parse ", arg_pp,
-                   ": work-directory is not a string"));
+        cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
+                                      arg_pp,
+                                      ": work-directory is not a string"));
         return false;
       }
       std::string work_directory;
@@ -134,7 +132,7 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
           if (outputs.isArray()) {
             if (outputs.empty()) {
               cmSystemTools::Error(
-                cmStrCat("-E cmake_ninja_depends failed to parse ", arg_pp,
+                cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
                          ": expected at least one 1 output"));
               return false;
             }
