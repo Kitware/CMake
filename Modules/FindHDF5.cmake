@@ -1026,7 +1026,7 @@ if (HDF5_FOUND)
           # Error if we still don't have the location.
           message(SEND_ERROR
             "HDF5 was found, but a different variable was set which contains "
-            "its location.")
+            "the location of the `hdf5::${hdf5_target_name}` library.")
         endif ()
         add_library("hdf5::${hdf5_target_name}" UNKNOWN IMPORTED)
         string(REPLACE "-D" "" _hdf5_definitions "${HDF5_${hdf5_lang}_DEFINITIONS}")
@@ -1085,7 +1085,7 @@ if (HDF5_FOUND)
           # Error if we still don't have the location.
           message(SEND_ERROR
             "HDF5 was found, but a different variable was set which contains "
-            "its location.")
+            "the location of the `hdf5::${hdf5_target_name}` library.")
         endif ()
         add_library("hdf5::${hdf5_target_name}" UNKNOWN IMPORTED)
         string(REPLACE "-D" "" _hdf5_definitions "${HDF5_${hdf5_lang}_HL_DEFINITIONS}")
