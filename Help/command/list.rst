@@ -318,10 +318,10 @@ Reverses the contents of the list in-place.
 Sorts the list in-place alphabetically.
 
 .. versionadded:: 3.13
-  Added ``COMPARE``, ``CASE``, and ``ORDER`` options.
+  Added the ``COMPARE``, ``CASE``, and ``ORDER`` options.
 
 .. versionadded:: 3.18
-  Added ``COMPARE NATURAL`` option.
+  Added the ``COMPARE NATURAL`` option.
 
 Use the ``COMPARE`` keyword to select the comparison method for sorting.
 The ``<compare>`` option should be one of:

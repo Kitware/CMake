@@ -224,7 +224,7 @@ List of CPack DEB generator specific variables:
   Per-component ``CPACK_DEBIAN_<COMPONENT>_DESCRIPTION`` variables.
 
  .. versionadded:: 3.16
-  ``CPACK_PACKAGE_DESCRIPTION_FILE`` variable.
+  The ``CPACK_PACKAGE_DESCRIPTION_FILE`` variable.
 
 .. _Debian Policy Manual: https://www.debian.org/doc/debian-policy/ch-controlfields.html#description
 
@@ -303,7 +303,7 @@ List of CPack DEB generator specific variables:
  * Default   : :variable:`CMAKE_PROJECT_HOMEPAGE_URL`
 
  .. versionadded:: 3.12
-  ``CMAKE_PROJECT_HOMEPAGE_URL`` variable.
+  The ``CMAKE_PROJECT_HOMEPAGE_URL`` variable.
 
  .. note::
 

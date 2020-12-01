@@ -25,7 +25,7 @@ Sets ``<var>`` to a component of ``<FileName>``, where ``<mode>`` is one of:
  PATH      = Legacy alias for DIRECTORY (use for CMake <= 2.8.11)
 
 .. versionadded:: 3.14
-  Added ``LAST_EXT`` and ``NAME_WLE`` modes.
+  Added the ``LAST_EXT`` and ``NAME_WLE`` modes.
 
 Paths are returned with forward slashes and have no trailing slashes.
 If the optional ``CACHE`` argument is specified, the result variable is

@@ -115,16 +115,16 @@ to tell CDash which handler to use to process the data.
 This signature interprets options in the same way as the first one.
 
 .. versionadded:: 3.8
-  Added ``RETRY_COUNT``, ``RETRY_DELAY``, ``QUIET`` options.
+  Added the ``RETRY_COUNT``, ``RETRY_DELAY``, ``QUIET`` options.
 
 .. versionadded:: 3.9
-  Added ``HTTPHEADER`` option.
+  Added the ``HTTPHEADER`` option.
 
 .. versionadded:: 3.13
-  Added ``RETURN_VALUE`` option.
+  Added the ``RETURN_VALUE`` option.
 
 .. versionadded:: 3.14
-  Added ``SUBMIT_URL`` option.
+  Added the ``SUBMIT_URL`` option.
 
 .. versionadded:: 3.15
-  Added ``BUILD_ID`` option.
+  Added the ``BUILD_ID`` option.

@@ -65,7 +65,7 @@ Cache variables that are used for toolset and target system customization:
   | ``GHS_OS_DIR_OPTION`` default value is ``-os_dir``.
 
   .. versionadded:: 3.15
-    ``GHS_OS_DIR_OPTION`` variable.
+    The ``GHS_OS_DIR_OPTION`` variable.
 
 * ``GHS_BSP_NAME``
 

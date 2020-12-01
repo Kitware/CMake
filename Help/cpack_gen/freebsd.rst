@@ -90,7 +90,7 @@ the RPM information (e.g. package license).
      for Debian packaging, so we may as well re-use it).
 
   .. versionadded:: 3.12
-    ``CMAKE_PROJECT_HOMEPAGE_URL`` variable.
+    The ``CMAKE_PROJECT_HOMEPAGE_URL`` variable.
 
 .. variable:: CPACK_FREEBSD_PACKAGE_LICENSE
 

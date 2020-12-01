@@ -210,7 +210,7 @@ List of CPack RPM generator specific variables:
  * Default   : :variable:`CMAKE_PROJECT_HOMEPAGE_URL`
 
  .. versionadded:: 3.12
-  ``CMAKE_PROJECT_HOMEPAGE_URL`` variable.
+  The ``CMAKE_PROJECT_HOMEPAGE_URL`` variable.
 
 .. variable:: CPACK_RPM_PACKAGE_DESCRIPTION
               CPACK_RPM_<component>_PACKAGE_DESCRIPTION
@@ -527,7 +527,7 @@ List of CPack RPM generator specific variables:
   rpm -qp --scripts  package.rpm
 
  .. versionadded:: 3.18
-  ``CPACK_RPM_PRE_TRANS_SCRIPT_FILE`` variable.
+  The ``CPACK_RPM_PRE_TRANS_SCRIPT_FILE`` variable.
 
 .. variable:: CPACK_RPM_POST_INSTALL_SCRIPT_FILE
               CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE
@@ -551,7 +551,7 @@ List of CPack RPM generator specific variables:
   rpm -qp --scripts  package.rpm
 
  .. versionadded:: 3.18
-  ``CPACK_RPM_POST_TRANS_SCRIPT_FILE`` variable.
+  The ``CPACK_RPM_POST_TRANS_SCRIPT_FILE`` variable.
 
 .. variable:: CPACK_RPM_USER_FILELIST
               CPACK_RPM_<COMPONENT>_USER_FILELIST

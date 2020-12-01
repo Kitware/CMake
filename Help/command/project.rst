@@ -76,7 +76,7 @@ The options are:
   then the description is also stored in the variable :variable:`CMAKE_PROJECT_DESCRIPTION`.
 
   .. versionadded:: 3.12
-    Added ``<PROJECT-NAME>_DESCRIPTION`` variable.
+    Added the ``<PROJECT-NAME>_DESCRIPTION`` variable.
 
 ``HOMEPAGE_URL <url-string>``
   .. versionadded:: 3.12
@@ -134,10 +134,11 @@ If both are set, then :variable:`CMAKE_PROJECT_INCLUDE` will be included before
 :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`.
 
 .. versionadded:: 3.15
-  Added ``CMAKE_PROJECT_INCLUDE`` and ``CMAKE_PROJECT_INCLUDE_BEFORE`` variables.
+  Added the ``CMAKE_PROJECT_INCLUDE`` and ``CMAKE_PROJECT_INCLUDE_BEFORE``
+  variables.
 
 .. versionadded:: 3.17
-  Added ``CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`` variable.
+  Added the ``CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`` variable.
 
 Usage
 ^^^^^
