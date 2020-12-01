@@ -1,0 +1,1172 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#pragma once
+
+#include "cmSTL.hxx" // IWYU pragma: keep
+
+#if defined(CMake_HAVE_CXX_FILESYSTEM)
+
+#  include <filesystem> // IWYU pragma: export
+
+#else
+
+#  include <cstddef>
+#  include <cstdint>
+#  include <iostream>
+#  include <iterator>
+#  include <memory>
+#  include <string>
+#  include <utility>
+
+#  include <cm/iomanip>
+#  include <cm/string_view>
+#  include <cm/type_traits>
+#  include <cmext/iterator>
+
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+#    include <algorithm>
+#  endif
+
+#endif
+
+namespace cm {
+namespace filesystem {
+
+#if defined(CMake_HAVE_CXX_FILESYSTEM)
+
+using std::filesystem::path;
+using std::filesystem::swap;
+using std::filesystem::hash_value;
+
+#else
+
+#  if !defined(CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR)
+// Oracle DeveloperStudio C++ compiler on Solaris/Sparc fails to compile
+// the source_traits for iterator check.  So disable it for now.
+#    define CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR 0
+#  endif
+
+namespace internals {
+
+class path_parser;
+
+class unicode_helper
+{
+protected:
+  using utf8_state = unsigned char;
+  static const utf8_state s_start = 0;
+  static const utf8_state s_reject = 8;
+
+  static inline bool in_range(std::uint32_t c, std::uint32_t lo,
+                              std::uint32_t hi)
+  {
+    return (static_cast<std::uint32_t>(c - lo) < (hi - lo + 1));
+  }
+
+  static inline bool is_surrogate(std::uint32_t c)
+  {
+    return in_range(c, 0xd800, 0xdfff);
+  }
+
+  static inline bool is_high_surrogate(std::uint32_t c)
+  {
+    return (c & 0xfffffc00) == 0xd800;
+  }
+
+  static inline bool is_low_surrogate(std::uint32_t c)
+  {
+    return (c & 0xfffffc00) == 0xdc00;
+  }
+
+  static void append(std::string& str, std::uint32_t codepoint);
+
+  static utf8_state decode(const utf8_state state, const std::uint8_t fragment,
+                           std::uint32_t& codepoint);
+};
+
+template <typename Char, typename = void>
+class unicode
+{
+};
+
+template <typename Char>
+class unicode<Char, typename std::enable_if<(sizeof(Char) == 4)>::type>
+  : public unicode_helper
+{
+public:
+  // UTF32 -> UTF8
+  static std::string to_utf8(const std::wstring& str)
+  {
+    std::string result;
+    for (auto c : str) {
+      append(result, c);
+    }
+    return result;
+  }
+  static std::string to_utf8(Char c)
+  {
+    std::string result;
+    append(result, c);
+    return result;
+  }
+
+  // UTF8 -> UTF32
+  static std::wstring from_utf8(const std::string& str)
+  {
+    std::wstring result;
+    result.reserve(str.length());
+    auto iter = str.begin();
+    utf8_state state = s_start;
+    std::uint32_t codepoint = 0;
+    while (iter < str.end()) {
+      if ((state = decode(state, static_cast<std::uint8_t>(*iter++),
+                          codepoint)) == s_start) {
+        result += static_cast<std::wstring::value_type>(codepoint);
+        codepoint = 0;
+      } else if (state == s_reject) {
+        result += static_cast<std::wstring::value_type>(0xfffd);
+        state = s_start;
+        codepoint = 0;
+      }
+    }
+    if (state) {
+      result += static_cast<std::wstring::value_type>(0xfffd);
+    }
+    return result;
+  }
+  static std::wstring from_utf8(char c)
+  {
+    std::wstring result;
+    utf8_state state = s_start;
+    std::uint32_t codepoint = 0;
+    if ((state = decode(state, static_cast<std::uint8_t>(c), codepoint)) ==
+        s_start) {
+      result += static_cast<std::wstring::value_type>(codepoint);
+    } else {
+      result += static_cast<std::wstring::value_type>(0xfffd);
+    }
+
+    return result;
+  }
+};
+
+template <typename Char>
+class unicode<Char, typename std::enable_if<(sizeof(Char) == 2)>::type>
+  : public unicode_helper
+{
+public:
+  // UTF16 -> UTF8
+  static std::string to_utf8(const std::wstring& str)
+  {
+    std::string result;
+    for (auto iter = str.begin(); iter != str.end(); ++iter) {
+      std::uint32_t c = *iter;
+      if (is_surrogate(c)) {
+        ++iter;
+        if (iter != str.end() && is_high_surrogate(c) &&
+            is_low_surrogate(*iter)) {
+          append(result, (std::uint32_t(c) << 10) + *iter - 0x35fdc00);
+        } else {
+          append(result, 0xfffd);
+          if (iter == str.end()) {
+            break;
+          }
+        }
+      } else {
+        append(result, c);
+      }
+    }
+    return result;
+  }
+  static std::string to_utf8(Char c)
+  {
+    std::string result;
+    if (is_surrogate(c)) {
+      append(result, 0xfffd);
+    } else {
+      append(result, c);
+    }
+    return result;
+  }
+
+  // UTF8 -> UTF16
+  static std::wstring from_utf8(const std::string& str)
+  {
+    std::wstring result;
+    result.reserve(str.length());
+    auto iter = str.begin();
+    utf8_state state = s_start;
+    std::uint32_t codepoint = 0;
+    while (iter < str.end()) {
+      if ((state = decode(state, static_cast<std::uint8_t>(*iter++),
+                          codepoint)) == s_start) {
+        if (codepoint <= 0xffff) {
+          result += static_cast<std::wstring::value_type>(codepoint);
+        } else {
+          codepoint -= 0x10000;
+          result +=
+            static_cast<std::wstring::value_type>((codepoint >> 10) + 0xd800);
+          result += static_cast<std::wstring::value_type>((codepoint & 0x3ff) +
+                                                          0xdc00);
+        }
+        codepoint = 0;
+      } else if (state == s_reject) {
+        result += static_cast<std::wstring::value_type>(0xfffd);
+        state = s_start;
+        codepoint = 0;
+      }
+    }
+    if (state) {
+      result += static_cast<std::wstring::value_type>(0xfffd);
+    }
+    return result;
+  }
+  static std::wstring from_utf8(char c)
+  {
+    std::wstring result;
+    utf8_state state = s_start;
+    std::uint32_t codepoint = 0;
+    if ((state = decode(state, static_cast<std::uint8_t>(c), codepoint)) ==
+        s_start) {
+      if (codepoint <= 0xffff) {
+        result += static_cast<std::wstring::value_type>(codepoint);
+      } else {
+        codepoint -= 0x10000;
+        result +=
+          static_cast<std::wstring::value_type>((codepoint >> 10) + 0xd800);
+        result +=
+          static_cast<std::wstring::value_type>((codepoint & 0x3ff) + 0xdc00);
+      }
+    } else {
+      result += static_cast<std::wstring::value_type>(0xfffd);
+    }
+    return result;
+  }
+};
+
+template <typename In, typename Out>
+class unicode_converter;
+
+template <>
+class unicode_converter<char, wchar_t>
+{
+public:
+  std::wstring operator()(const std::string& in)
+  {
+    return unicode<wchar_t>::from_utf8(in);
+  }
+  std::wstring operator()(const char* in)
+  {
+    return unicode<wchar_t>::from_utf8(in);
+  }
+  std::wstring operator()(char in) { return unicode<wchar_t>::from_utf8(in); }
+};
+template <>
+class unicode_converter<wchar_t, char>
+{
+public:
+  std::string operator()(const std::wstring& in)
+  {
+    return unicode<wchar_t>::to_utf8(in);
+  }
+  std::string operator()(const wchar_t* in)
+  {
+    return unicode<wchar_t>::to_utf8(in);
+  }
+  std::string operator()(wchar_t in) { return unicode<wchar_t>::to_utf8(in); }
+};
+template <>
+class unicode_converter<char, char>
+{
+public:
+  std::string operator()(const std::string& in) { return in; }
+  std::string operator()(const char* in) { return std::string(in); }
+  std::string operator()(char in) { return std::string(1, in); }
+};
+template <>
+class unicode_converter<wchar_t, wchar_t>
+{
+public:
+  std::wstring operator()(const std::wstring& in) { return in; }
+  std::wstring operator()(const wchar_t* in) { return std::wstring(in); }
+  std::wstring operator()(wchar_t in) { return std::wstring(1, in); }
+};
+
+template <typename In>
+struct string_converter
+{
+};
+
+template <>
+struct string_converter<char>
+{
+  // some compilers, like gcc 4.8 does not implement the following C++11
+  // signature:
+  // std::string::string(const string&, const Allocator&)
+  // As workaround, use char* pointer.
+  template <typename Char, typename Traits, typename Alloc>
+  static std::basic_string<Char, Traits, Alloc> to(const std::string& in,
+                                                   const Alloc& a)
+  {
+    return std::basic_string<Char, Traits, Alloc>(
+      unicode_converter<char, Char>()(in).c_str(), a);
+  }
+  template <typename Char, typename Traits, typename Alloc>
+  static std::basic_string<Char, Traits, Alloc> to(const char* in,
+                                                   const Alloc& a)
+  {
+    return std::basic_string<Char, Traits, Alloc>(
+      unicode_converter<char, Char>()(in).c_str(), a);
+  }
+  template <typename Char, typename Traits, typename Alloc>
+  static std::basic_string<Char, Traits, Alloc> to(char in, const Alloc& a)
+  {
+    return std::basic_string<Char, Traits, Alloc>(
+      unicode_converter<char, Char>()(in).c_str(), a);
+  }
+
+  template <typename Char>
+  static std::basic_string<Char> to(const std::string& in)
+  {
+    return std::basic_string<Char>(unicode_converter<char, Char>()(in));
+  }
+  template <typename Char>
+  static std::basic_string<Char> to(const char* in)
+  {
+    return std::basic_string<Char>(unicode_converter<char, Char>()(in));
+  }
+  template <typename Char>
+  static std::basic_string<Char> to(char in)
+  {
+    return std::basic_string<Char>(unicode_converter<char, Char>()(in));
+  }
+};
+template <>
+struct string_converter<wchar_t>
+{
+  // some compilers, like gcc 4.8 does not implement the following C++11
+  // signature:
+  // std::string::string(const string&, const Allocator&)
+  // As workaround, use char* pointer.
+  template <typename Char, typename Traits, typename Alloc>
+  static std::basic_string<Char, Traits, Alloc> to(const std::wstring& in,
+                                                   const Alloc& a)
+  {
+    return std::basic_string<Char, Traits, Alloc>(
+      unicode_converter<wchar_t, Char>()(in).c_str(), a);
+  }
+  template <typename Char, typename Traits, typename Alloc>
+  static std::basic_string<Char, Traits, Alloc> to(const wchar_t* in,
+                                                   const Alloc& a)
+  {
+    return std::basic_string<Char, Traits, Alloc>(
+      unicode_converter<wchar_t, Char>()(in).c_str(), a);
+  }
+  template <typename Char, typename Traits, typename Alloc>
+  static std::basic_string<Char, Traits, Alloc> to(wchar_t in, const Alloc& a)
+  {
+    return std::basic_string<Char, Traits, Alloc>(
+      unicode_converter<wchar_t, Char>()(in).c_str(), a);
+  }
+
+  template <typename Char>
+  static std::basic_string<Char> to(const std::wstring& in)
+  {
+    return std::basic_string<Char>(unicode_converter<wchar_t, Char>()(in));
+  }
+  template <typename Char>
+  static std::basic_string<Char> to(const wchar_t* in)
+  {
+    return std::basic_string<Char>(unicode_converter<wchar_t, Char>()(in));
+  }
+  template <typename Char>
+  static std::basic_string<Char> to(wchar_t in)
+  {
+    return std::basic_string<Char>(unicode_converter<wchar_t, Char>()(in));
+  }
+};
+
+template <typename T, typename = void>
+struct source_traits
+{
+};
+
+template <typename T, std::size_t N>
+struct source_traits<T[N]>
+{
+  using value_type = T;
+};
+
+template <typename Char, typename Traits, typename Alloc>
+struct source_traits<std::basic_string<Char, Traits, Alloc>>
+{
+  using value_type =
+    typename std::basic_string<Char, Traits, Alloc>::value_type;
+};
+
+template <>
+struct source_traits<cm::string_view>
+{
+  using value_type = cm::string_view::value_type;
+};
+
+#  if CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR
+template <typename T>
+struct source_traits<T, cm::enable_if_t<cm::is_iterator<T>::value, void>>
+{
+  using value_type =
+    typename std::iterator_traits<typename std::decay<T>::type>::value_type;
+};
+#  endif
+
+template <typename In, typename Out>
+struct source_converter
+{
+};
+
+template <>
+struct source_converter<char, char>
+{
+  template <typename Iterator>
+  static void append_range(std::string& p, Iterator b, Iterator e)
+  {
+    if (b == e) {
+      return;
+    }
+    p.append(b, e);
+  }
+  template <typename Iterator>
+  static void append_range(std::string& p, Iterator b)
+  {
+    char e = '\0';
+
+    if (*b == e) {
+      return;
+    }
+    for (; *b != e; ++b) {
+      p.push_back(*b);
+    }
+  }
+
+  static void append_source(std::string& p, const cm::string_view s)
+  {
+    append_range(p, s.begin(), s.end());
+  }
+  template <typename Traits, typename Alloc>
+  static void append_source(std::string& p,
+                            const std::basic_string<char, Traits, Alloc>& s)
+  {
+    append_range(p, s.begin(), s.end());
+  }
+  template <typename Source>
+  static void append_source(std::string& p, const Source& s)
+  {
+    append_range(p, s);
+  }
+
+  static void set_source(std::string& p, std::string&& s) { p = std::move(s); }
+};
+
+template <>
+struct source_converter<wchar_t, char>
+{
+  template <typename Iterator>
+  static void append_range(std::string& p, Iterator b, Iterator e)
+  {
+    if (b == e) {
+      return;
+    }
+
+    std::wstring tmp(b, e);
+    std::string dest = string_converter<wchar_t>::to<char>(tmp);
+    p.append(dest.begin(), dest.end());
+  }
+  template <typename Iterator>
+  static void append_range(std::string& p, Iterator b)
+  {
+    wchar_t e = '\0';
+
+    if (*b == e) {
+      return;
+    }
+    std::wstring tmp;
+    for (; *b != e; ++b) {
+      tmp.push_back(*b);
+    }
+
+    std::string dest = string_converter<wchar_t>::to<char>(tmp);
+    p.append(dest.begin(), dest.end());
+  }
+
+  template <typename Traits, typename Alloc>
+  static void append_source(std::string& p,
+                            const std::basic_string<wchar_t, Traits, Alloc>& s)
+  {
+    append_range(p, s.begin(), s.end());
+  }
+  template <typename Source>
+  static void append_source(std::string& p, const Source& s)
+  {
+    append_range(p, s);
+  }
+
+  static void set_source(std::string& p, std::wstring&& s)
+  {
+    p = string_converter<wchar_t>::to<char>(s);
+  }
+};
+
+template <typename T>
+struct is_pathable_string : std::false_type
+{
+};
+template <typename Traits, typename Alloc>
+struct is_pathable_string<std::basic_string<char, Traits, Alloc>>
+  : std::true_type
+{
+};
+template <typename Traits, typename Alloc>
+struct is_pathable_string<std::basic_string<wchar_t, Traits, Alloc>>
+  : std::true_type
+{
+};
+template <>
+struct is_pathable_string<cm::string_view> : std::true_type
+{
+};
+
+template <typename T, typename = void>
+struct is_pathable_char_array : std::false_type
+{
+};
+template <typename T>
+struct is_pathable_char_array<
+  T,
+  cm::enable_if_t<
+    std::is_same<char*, typename std::decay<T>::type>::value ||
+      std::is_same<wchar_t*, typename std::decay<T>::type>::value,
+    void>>
+  : bool_constant<std::is_same<char*, typename std::decay<T>::type>::value ||
+                  std::is_same<wchar_t*, typename std::decay<T>::type>::value>
+{
+};
+
+template <typename T, typename = void>
+struct is_pathable_iterator : std::false_type
+{
+};
+template <typename T>
+struct is_pathable_iterator<
+  T,
+  cm::enable_if_t<
+    is_input_iterator<T>::value &&
+      (std::is_same<char,
+                    typename std::iterator_traits<
+                      typename std::decay<T>::type>::value_type>::value ||
+       std::is_same<wchar_t,
+                    typename std::iterator_traits<
+                      typename std::decay<T>::type>::value_type>::value),
+    void>>
+  : bool_constant<
+      std::is_same<char,
+                   typename std::iterator_traits<
+                     typename std::decay<T>::type>::value_type>::value ||
+      std::is_same<wchar_t,
+                   typename std::iterator_traits<
+                     typename std::decay<T>::type>::value_type>::value>
+{
+};
+
+#  if defined(__SUNPRO_CC) && defined(__sparc)
+// Oracle DeveloperStudio C++ compiler on Solaris/Sparc fails to compile
+// the full 'is_pathable' check.  We use it only to improve error messages
+// via 'enable_if' when calling methods with incorrect types.  Just
+// pretend all types are allowed so we can at least compile valid code.
+template <typename T>
+struct is_pathable : std::true_type
+{
+};
+#  else
+template <typename T>
+struct is_pathable
+  : bool_constant<is_pathable_string<T>::value ||
+                  is_pathable_char_array<T>::value ||
+                  is_pathable_iterator<T>::value>
+{
+};
+#  endif
+}
+
+class path
+{
+  using path_type = std::string;
+
+  template <typename Source>
+  using enable_if_pathable =
+    enable_if_t<internals::is_pathable<Source>::value, path&>;
+
+  enum class filename_fragment : unsigned char
+  {
+    stem,
+    extension
+  };
+
+public:
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+  using value_type = wchar_t;
+#  else
+  using value_type = char;
+#  endif
+  using string_type = std::basic_string<value_type>;
+
+  class iterator;
+  using const_iterator = iterator;
+
+  enum format : unsigned char
+  {
+    auto_format,
+    native_format,
+    generic_format
+  };
+
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+  static constexpr value_type preferred_separator = L'\\';
+#  else
+  static constexpr value_type preferred_separator = '/';
+#  endif
+
+  // Constructors
+  // ============
+  path() noexcept {}
+  path(const path& p)
+    : path_(p.path_)
+  {
+  }
+  path(path&& p) noexcept
+    : path_(std::move(p.path_))
+  {
+  }
+  path(string_type&& source, format fmt = auto_format)
+  {
+    (void)fmt;
+    internals::source_converter<value_type, path_type::value_type>::set_source(
+      this->path_, std::move(source));
+  }
+  template <typename Source, typename = enable_if_pathable<Source>>
+  path(const Source& source, format fmt = auto_format)
+  {
+    (void)fmt;
+    internals::source_converter<
+      typename internals::source_traits<Source>::value_type,
+      path_type::value_type>::append_source(this->path_, source);
+  }
+  template <typename Iterator, typename = enable_if_pathable<Iterator>>
+  path(const Iterator first, Iterator last, format fmt = auto_format)
+  {
+    (void)fmt;
+    internals::source_converter<
+      typename std::iterator_traits<Iterator>::value_type,
+      path_type::value_type>::append_range(this->path_, first, last);
+  }
+
+  ~path() = default;
+
+  // Assignments
+  // ===========
+  path& operator=(const path& p)
+  {
+    if (this != &p) {
+      this->path_ = p.path_;
+    }
+    return *this;
+  }
+  path& operator=(path&& p) noexcept
+  {
+    if (this != &p) {
+      this->path_ = std::move(p.path_);
+    }
+    return *this;
+  }
+  path& operator=(string_type&& source) { return this->assign(source); }
+  template <typename Source, typename = enable_if_pathable<Source>>
+  path& operator=(const Source& source)
+  {
+    return this->assign(source);
+  }
+
+  path& assign(string_type&& source)
+  {
+    internals::source_converter<value_type, path_type::value_type>::set_source(
+      this->path_, std::move(source));
+    return *this;
+  }
+  template <typename Source, typename = enable_if_pathable<Source>>
+  path& assign(const Source& source)
+  {
+    this->path_.clear();
+    internals::source_converter<
+      typename internals::source_traits<Source>::value_type,
+      path_type::value_type>::append_source(this->path_, source);
+    return *this;
+  }
+  template <typename Iterator, typename = enable_if_pathable<Iterator>>
+  path& assign(Iterator first, Iterator last)
+  {
+    this->path_.clear();
+    internals::source_converter<
+      typename std::iterator_traits<Iterator>::value_type,
+      path_type::value_type>::append_range(this->path_, first, last);
+    return *this;
+  }
+
+  // Concatenation
+  // =============
+  path& operator/=(const path& p);
+
+  template <typename Source, typename = enable_if_pathable<Source>>
+  path& append(const Source& source)
+  {
+    return this->operator/=(path(source));
+  }
+  template <typename Source>
+  path& operator/=(const Source& source)
+  {
+    return this->append(source);
+  }
+
+  template <typename Iterator, typename = enable_if_pathable<Iterator>>
+  path& append(Iterator first, Iterator last)
+  {
+    return this->operator/=(path(first, last));
+  }
+
+  path& operator+=(const path& p)
+  {
+    this->path_ += p.path_;
+    return *this;
+  }
+  path& operator+=(const string_type& str)
+  {
+    this->path_ +=
+      internals::string_converter<value_type>::to<path_type::value_type>(str);
+    return *this;
+  }
+  path& operator+=(cm::string_view str)
+  {
+    this->path_.append(str.begin(), str.end());
+    return *this;
+  }
+  path& operator+=(const value_type* str)
+  {
+    this->path_ +=
+      internals::string_converter<value_type>::to<path_type::value_type>(str);
+    return *this;
+  }
+  path& operator+=(const value_type c)
+  {
+    this->path_ +=
+      internals::string_converter<value_type>::to<path_type::value_type>(c);
+    return *this;
+  }
+  template <typename Source, typename = enable_if_pathable<Source>>
+  path& concat(const Source& source)
+  {
+    internals::source_converter<
+      typename internals::source_traits<Source>::value_type,
+      path_type::value_type>::append_source(this->path_, source);
+    return *this;
+  }
+  template <typename Source>
+  path& operator+=(const Source& source)
+  {
+    return this->concat(source);
+  }
+  template <typename Iterator, typename = enable_if_pathable<Iterator>>
+  path& concat(Iterator first, Iterator last)
+  {
+    internals::source_converter<
+      typename std::iterator_traits<Iterator>::value_type,
+      path_type::value_type>::append_range(this->path_, first, last);
+    return *this;
+  }
+
+  // Modifiers
+  // =========
+  void clear() noexcept { this->path_.clear(); }
+
+  path& make_preferred()
+  {
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+    std::replace(
+      this->path_.begin(), this->path_.end(), '/',
+      static_cast<path_type::value_type>(this->preferred_separator));
+#  endif
+    return *this;
+  }
+
+  path& remove_filename()
+  {
+    auto fname = this->get_filename();
+    if (!fname.empty()) {
+      this->path_.erase(fname.data() - this->path_.data());
+    }
+    return *this;
+  }
+
+  path& replace_filename(const path& replacement)
+  {
+    this->remove_filename();
+    this->operator/=(replacement);
+    return *this;
+  }
+
+  path& replace_extension(const path& replacement = path())
+  {
+    auto ext = this->get_filename_fragment(filename_fragment::extension);
+    if (!ext.empty()) {
+      this->path_.erase(ext.data() - this->path_.data());
+    }
+    if (!replacement.path_.empty()) {
+      if (replacement.path_[0] != '.') {
+        this->path_ += '.';
+      }
+      this->path_.append(replacement.path_);
+    }
+    return *this;
+  }
+
+  void swap(path& other) noexcept { this->path_.swap(other.path_); }
+
+  // Format observers
+  // ================
+  const string_type& native() const noexcept
+  {
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+    this->native_path_ = internals::string_converter<
+      path_type::value_type>::to<string_type::value_type>(this->path_);
+    return this->native_path_;
+#  else
+    return this->path_;
+#  endif
+  }
+  const value_type* c_str() const noexcept { return this->native().c_str(); }
+  operator string_type() const { return this->native(); }
+
+  template <
+    typename Char, typename Traits = std::char_traits<Char>,
+    typename Alloc = std::allocator<Char>,
+    cm::enable_if_t<(std::is_same<Char, char>::value &&
+                     std::is_same<Traits, std::char_traits<char>>::value) ||
+                      (std::is_same<Char, wchar_t>::value &&
+                       std::is_same<Traits, std::char_traits<wchar_t>>::value),
+                    int> = 1>
+  std::basic_string<Char, Traits, Alloc> string(const Alloc& a = Alloc()) const
+  {
+    return internals::string_converter<path_type::value_type>::to<Char, Traits,
+                                                                  Alloc>(
+      this->path_, a);
+  }
+  const std::string string() const { return this->path_; }
+  std::wstring wstring() const
+  {
+    std::string out = this->string();
+    return internals::string_converter<path_type::value_type>::to<
+      std::wstring::value_type>(out);
+  }
+
+  template <
+    typename Char, typename Traits = std::char_traits<Char>,
+    typename Alloc = std::allocator<Char>,
+    cm::enable_if_t<(std::is_same<Char, char>::value &&
+                     std::is_same<Traits, std::char_traits<char>>::value) ||
+                      (std::is_same<Char, wchar_t>::value &&
+                       std::is_same<Traits, std::char_traits<wchar_t>>::value),
+                    int> = 1>
+  std::basic_string<Char, Traits, Alloc> generic_string(
+    const Alloc& a = Alloc()) const
+  {
+    return internals::string_converter<path_type::value_type>::to<Char, Traits,
+                                                                  Alloc>(
+      this->get_generic(), a);
+  }
+  std::string generic_string() const { return this->get_generic(); }
+  std::wstring generic_wstring() const
+  {
+    auto dest = this->generic_string();
+    return internals::string_converter<path_type::value_type>::to<
+      std::wstring::value_type>(dest);
+  }
+
+  // Compare
+  // =======
+  int compare(const path& p) const noexcept
+  {
+    return this->compare_path(p.path_);
+  }
+  int compare(const string_type& str) const
+  {
+    return this->compare_path(
+      internals::string_converter<value_type>::to<path_type::value_type>(str));
+  }
+  int compare(const value_type* str) const
+  {
+    return this->compare_path(
+      internals::string_converter<value_type>::to<path_type::value_type>(str));
+  }
+  int compare(cm::string_view str) const { return this->compare_path(str); }
+
+  // Generation
+  // ==========
+  path lexically_normal() const;
+
+  path lexically_relative(const path& base) const;
+
+  path lexically_proximate(const path& base) const
+  {
+    path result = this->lexically_relative(base);
+    return result.empty() ? *this : result;
+  }
+
+  // Decomposition
+  // =============
+  path root_name() const { return get_root_name(); }
+
+  path root_directory() const { return this->get_root_directory(); }
+
+  path root_path() const
+  {
+    return this->root_name().append(this->get_root_directory());
+  }
+
+  path relative_path() const { return this->get_relative_path(); }
+
+  path parent_path() const { return this->get_parent_path(); }
+
+  path filename() const { return this->get_filename(); }
+
+  path stem() const
+  {
+    return this->get_filename_fragment(filename_fragment::stem);
+  }
+  path extension() const
+  {
+    return this->get_filename_fragment(filename_fragment::extension);
+  }
+
+  // Queries
+  // =======
+  bool empty() const noexcept { return this->path_.empty(); }
+
+  bool has_root_name() const { return !this->get_root_name().empty(); }
+
+  bool has_root_directory() const
+  {
+    return !this->get_root_directory().empty();
+  }
+
+  bool has_root_path() const
+  {
+    return this->has_root_name() || this->has_root_directory();
+  }
+
+  bool has_relative_path() const { return !this->get_relative_path().empty(); }
+
+  bool has_parent_path() const { return !this->get_parent_path().empty(); }
+
+  bool has_filename() const { return !this->get_filename().empty(); }
+
+  bool has_stem() const
+  {
+    return !this->get_filename_fragment(filename_fragment::stem).empty();
+  }
+  bool has_extension() const
+  {
+    return !this->get_filename_fragment(filename_fragment::extension).empty();
+  }
+
+  bool is_absolute() const
+  {
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+    return this->has_root_name() && this->has_root_directory();
+#  else
+    // For CYGWIN, root_name (i.e. //host or /cygdrive/x) is not considered.
+    // Same as current GNU g++ implementation (9.3).
+    return this->has_root_directory();
+#  endif
+  }
+
+  bool is_relative() const { return !this->is_absolute(); }
+
+  // Iterators
+  // =========
+  inline iterator begin() const;
+  inline iterator end() const;
+
+  // Non-members
+  // ===========
+  friend inline bool operator==(const path& lhs, const path& rhs) noexcept
+  {
+    return lhs.compare(rhs) == 0;
+  }
+  friend inline bool operator!=(const path& lhs, const path& rhs) noexcept
+  {
+    return lhs.compare(rhs) != 0;
+  }
+  friend inline bool operator<(const path& lhs, const path& rhs) noexcept
+  {
+    return lhs.compare(rhs) < 0;
+  }
+  friend inline bool operator<=(const path& lhs, const path& rhs) noexcept
+  {
+    return lhs.compare(rhs) <= 0;
+  }
+  friend inline bool operator>(const path& lhs, const path& rhs) noexcept
+  {
+    return lhs.compare(rhs) > 0;
+  }
+  friend inline bool operator>=(const path& lhs, const path& rhs) noexcept
+  {
+    return lhs.compare(rhs) >= 0;
+  }
+
+  friend inline path operator/(const path& lhs, const path& rhs)
+  {
+    path result(lhs);
+    result /= rhs;
+
+    return result;
+  }
+
+  template <typename Char, typename Traits>
+  friend inline cm::enable_if_t<
+    (std::is_same<Char, path::value_type>::value &&
+     std::is_same<Traits, std::char_traits<path::value_type>>::value) ||
+      (std::is_same<Char, path::path_type::value_type>::value &&
+       std::is_same<Traits,
+                    std::char_traits<path::path_type::value_type>>::value),
+    std::basic_ostream<Char, Traits>&>
+  operator<<(std::basic_ostream<Char, Traits>& os, const path& p)
+  {
+    os << cm::quoted(p.string<Char, Traits>());
+    return os;
+  }
+
+  template <typename Char, typename Traits>
+  friend inline cm::enable_if_t<
+    (std::is_same<Char, path::value_type>::value &&
+     std::is_same<Traits, std::char_traits<path::value_type>>::value) ||
+      (std::is_same<Char, path::path_type::value_type>::value &&
+       std::is_same<Traits,
+                    std::char_traits<path::path_type::value_type>>::value),
+    std::basic_istream<Char, Traits>&>
+  operator>>(std::basic_istream<Char, Traits>& is, path& p)
+  {
+    std::basic_string<Char, Traits> tmp;
+    is >> cm::quoted(tmp);
+    p = tmp;
+    return is;
+  }
+
+private:
+  friend class iterator;
+  friend std::size_t hash_value(const path& p) noexcept;
+
+  path_type get_generic() const;
+
+  cm::string_view get_root_name() const;
+  cm::string_view get_root_directory() const;
+  cm::string_view get_relative_path() const;
+  cm::string_view get_parent_path() const;
+  cm::string_view get_filename() const;
+  cm::string_view get_filename_fragment(filename_fragment fragment) const;
+
+  int compare_path(cm::string_view str) const;
+
+  path_type path_;
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+  mutable string_type native_path_;
+#  endif
+};
+
+class path::iterator
+{
+public:
+  using iterator_category = std::bidirectional_iterator_tag;
+
+  using value_type = path;
+  using difference_type = std::ptrdiff_t;
+  using pointer = const path*;
+  using reference = const path&;
+
+  iterator();
+  iterator(const iterator& other);
+
+  ~iterator();
+
+  iterator& operator=(const iterator& other);
+
+  reference operator*() const { return this->path_element_; }
+
+  pointer operator->() const { return &this->path_element_; }
+
+  iterator& operator++();
+
+  iterator operator++(int)
+  {
+    iterator it(*this);
+    this->operator++();
+    return it;
+  }
+
+  iterator& operator--();
+
+  iterator operator--(int)
+  {
+    iterator it(*this);
+    this->operator--();
+    return it;
+  }
+
+private:
+  friend class path;
+  friend bool operator==(const iterator&, const iterator&);
+
+  iterator(const path* p, bool at_end = false);
+
+  const path* path_;
+  std::unique_ptr<internals::path_parser> parser_;
+  path path_element_;
+};
+
+inline path::iterator path::begin() const
+{
+  return iterator(this);
+}
+inline path::iterator path::end() const
+{
+  return iterator(this, true);
+}
+
+// Non-member functions
+// ====================
+bool operator==(const path::iterator& lhs, const path::iterator& rhs);
+
+inline bool operator!=(const path::iterator& lhs, const path::iterator& rhs)
+{
+  return !(lhs == rhs);
+}
+
+inline void swap(path& lhs, path& rhs) noexcept
+{
+  lhs.swap(rhs);
+}
+
+std::size_t hash_value(const path& p) noexcept;
+
+#endif
+
+} // namespace filesystem
+} // namespace cm

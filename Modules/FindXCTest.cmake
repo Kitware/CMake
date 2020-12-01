@@ -5,6 +5,8 @@
 FindXCTest
 ----------
 
+.. versionadded:: 3.3
+
 Functions to help creating and executing XCTest bundles.
 
 An XCTest bundle is a CFBundle with a special product-type

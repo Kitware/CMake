@@ -100,8 +100,11 @@ void cmNinjaUtilityTargetGenerator::Generate(const std::string& config)
   if (genTarget->Target->GetType() != cmStateEnums::GLOBAL_TARGET) {
     lg->AppendTargetOutputs(genTarget, gg->GetByproductsForCleanTarget(),
                             config);
+    std::copy(util_outputs.begin(), util_outputs.end(),
+              std::back_inserter(gg->GetByproductsForCleanTarget()));
   }
-  lg->AppendTargetDepends(genTarget, deps, config, config);
+  lg->AppendTargetDepends(genTarget, deps, config, config,
+                          DependOnTargetArtifact);
 
   if (commands.empty()) {
     phonyBuild.Comment = "Utility command for " + this->GetTargetName();

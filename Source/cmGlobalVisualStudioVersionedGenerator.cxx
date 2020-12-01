@@ -100,6 +100,24 @@ static const char* VSVersionToToolset(
   return "";
 }
 
+static const char* VSVersionToAndroidToolset(
+  cmGlobalVisualStudioGenerator::VSVersion v)
+{
+  switch (v) {
+    case cmGlobalVisualStudioGenerator::VS9:
+    case cmGlobalVisualStudioGenerator::VS10:
+    case cmGlobalVisualStudioGenerator::VS11:
+    case cmGlobalVisualStudioGenerator::VS12:
+      return "";
+    case cmGlobalVisualStudioGenerator::VS14:
+      return "Clang_3_8";
+    case cmGlobalVisualStudioGenerator::VS15:
+    case cmGlobalVisualStudioGenerator::VS16:
+      return "Clang_5_0";
+  }
+  return "";
+}
+
 static const char vs15generatorName[] = "Visual Studio 15 2017";
 
 // Map generator name without year to name with year.
@@ -122,7 +140,7 @@ class cmGlobalVisualStudioVersionedGenerator::Factory15
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, cmake* cm) const override
+    const std::string& name, bool allowArch, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS15GenName(name, genName);
@@ -134,7 +152,7 @@ public:
         new cmGlobalVisualStudioVersionedGenerator(
           cmGlobalVisualStudioGenerator::VS15, cm, genName, ""));
     }
-    if (*p++ != ' ') {
+    if (!allowArch || *p++ != ' ') {
       return std::unique_ptr<cmGlobalGenerator>();
     }
     if (strcmp(p, "Win64") == 0) {
@@ -216,7 +234,7 @@ class cmGlobalVisualStudioVersionedGenerator::Factory16
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, cmake* cm) const override
+    const std::string& name, bool /*allowArch*/, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS16GenName(name, genName);
@@ -284,6 +302,7 @@ cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
   this->Version = version;
   this->ExpressEdition = false;
   this->DefaultPlatformToolset = VSVersionToToolset(this->Version);
+  this->DefaultAndroidToolset = VSVersionToAndroidToolset(this->Version);
   this->DefaultCLFlagTableName = VSVersionToToolset(this->Version);
   this->DefaultCSharpFlagTableName = VSVersionToToolset(this->Version);
   this->DefaultLinkFlagTableName = VSVersionToToolset(this->Version);
@@ -408,6 +427,25 @@ bool cmGlobalVisualStudioVersionedGenerator::IsStdOutEncodingSupported() const
           vsInstanceVersion > vsInstanceVersion16_7_P2);
 }
 
+const char*
+cmGlobalVisualStudioVersionedGenerator::GetAndroidApplicationTypeRevision()
+  const
+{
+  switch (this->Version) {
+    case cmGlobalVisualStudioGenerator::VS9:
+    case cmGlobalVisualStudioGenerator::VS10:
+    case cmGlobalVisualStudioGenerator::VS11:
+    case cmGlobalVisualStudioGenerator::VS12:
+      return "";
+    case cmGlobalVisualStudioGenerator::VS14:
+      return "2.0";
+    case cmGlobalVisualStudioGenerator::VS15:
+    case cmGlobalVisualStudioGenerator::VS16:
+      return "3.0";
+  }
+  return "";
+}
+
 std::string cmGlobalVisualStudioVersionedGenerator::GetAuxiliaryToolset() const
 {
   const char* version = this->GetPlatformToolsetVersion();
@@ -502,8 +540,8 @@ bool cmGlobalVisualStudioVersionedGenerator::IsWin81SDKInstalled() const
   return false;
 }
 
-std::string cmGlobalVisualStudioVersionedGenerator::GetWindows10SDKMaxVersion()
-  const
+std::string cmGlobalVisualStudioVersionedGenerator::GetWindows10SDKMaxVersion(
+  cmMakefile*) const
 {
   return std::string();
 }

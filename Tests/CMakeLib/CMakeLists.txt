@@ -13,6 +13,7 @@ set(CMakeLib_TESTS
   testCTestResourceGroups.cxx
   testGccDepfileReader.cxx
   testGeneratedFileStream.cxx
+  testJSONHelpers.cxx
   testRST.cxx
   testRange.cxx
   testOptional.cxx
@@ -29,6 +30,9 @@ set(CMakeLib_TESTS
   testCMExtMemory.cxx
   testCMExtAlgorithm.cxx
   )
+if (CMake_TEST_FILESYSTEM_PATH OR NOT CMake_HAVE_CXX_FILESYSTEM)
+  list(APPEND CMakeLib_TESTS testCMFilesystemPath.cxx)
+endif()
 
 add_executable(testUVProcessChainHelper testUVProcessChainHelper.cxx)
 

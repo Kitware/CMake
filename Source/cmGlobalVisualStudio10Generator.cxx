@@ -59,7 +59,7 @@ class cmGlobalVisualStudio10Generator::Factory
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, cmake* cm) const override
+    const std::string& name, bool allowArch, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS10GenName(name, genName);
@@ -70,7 +70,7 @@ public:
       return std::unique_ptr<cmGlobalGenerator>(
         new cmGlobalVisualStudio10Generator(cm, genName, ""));
     }
-    if (*p++ != ' ') {
+    if (!allowArch || *p++ != ' ') {
       return std::unique_ptr<cmGlobalGenerator>();
     }
     if (strcmp(p, "Win64") == 0) {
@@ -138,9 +138,6 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
     "ProductDir",
     vc10Express, cmSystemTools::KeyWOW64_32);
   this->CudaEnabled = false;
-  this->SystemIsWindowsCE = false;
-  this->SystemIsWindowsPhone = false;
-  this->SystemIsWindowsStore = false;
   this->MSBuildCommandInitialized = false;
   {
     std::string envPlatformToolset;
@@ -511,18 +508,16 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
       mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
-    std::string v = this->GetInstalledNsightTegraVersion();
-    if (v.empty()) {
-      mf->IssueMessage(MessageType::FATAL_ERROR,
-                       "CMAKE_SYSTEM_NAME is 'Android' but "
-                       "'NVIDIA Nsight Tegra Visual Studio Edition' "
-                       "is not installed.");
-      return false;
+    if (mf->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM") == "Tegra-Android") {
+      if (!this->InitializeTegraAndroid(mf)) {
+        return false;
+      }
+    } else {
+      this->SystemIsAndroid = true;
+      if (!this->InitializeAndroid(mf)) {
+        return false;
+      }
     }
-    this->DefaultPlatformName = "Tegra-Android";
-    this->DefaultPlatformToolset = "Default";
-    this->NsightTegraVersion = v;
-    mf->AddDefinition("CMAKE_VS_NsightTegra_VERSION", v);
   }
 
   return true;
@@ -564,6 +559,31 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
   return false;
 }
 
+bool cmGlobalVisualStudio10Generator::InitializeTegraAndroid(cmMakefile* mf)
+{
+  std::string v = this->GetInstalledNsightTegraVersion();
+  if (v.empty()) {
+    mf->IssueMessage(MessageType::FATAL_ERROR,
+                     "CMAKE_SYSTEM_NAME is 'Android' but "
+                     "'NVIDIA Nsight Tegra Visual Studio Edition' "
+                     "is not installed.");
+    return false;
+  }
+  this->DefaultPlatformName = "Tegra-Android";
+  this->DefaultPlatformToolset = "Default";
+  this->NsightTegraVersion = v;
+  mf->AddDefinition("CMAKE_VS_NsightTegra_VERSION", v);
+  return true;
+}
+
+bool cmGlobalVisualStudio10Generator::InitializeAndroid(cmMakefile* mf)
+{
+  std::ostringstream e;
+  e << this->GetName() << " does not support Android.";
+  mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  return false;
+}
+
 bool cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset(
   std::string& toolset) const
 {
@@ -598,6 +618,28 @@ void cmGlobalVisualStudio10Generator::Generate()
 {
   this->LongestSource = LongestSourcePath();
   this->cmGlobalVisualStudio8Generator::Generate();
+  if (!this->AndroidExecutableWarnings.empty() &&
+      !this->CMakeInstance->GetIsInTryCompile()) {
+    std::ostringstream e;
+    /* clang-format off */
+    e <<
+      "You are using Visual Studio tools for Android, which does not support "
+      "standalone executables. However, the following executable targets do "
+      "not have the ANDROID_GUI property set, and thus will not be built as "
+      "expected. They will be built as shared libraries with executable "
+      "filenames:\n"
+      "  ";
+    /* clang-format on */
+    bool first = true;
+    for (auto const& name : this->AndroidExecutableWarnings) {
+      if (!first) {
+        e << ", ";
+      }
+      first = false;
+      e << name;
+    }
+    this->CMakeInstance->IssueMessage(MessageType::WARNING, e.str());
+  }
   if (this->LongestSource.Length > 0) {
     cmLocalGenerator* lg = this->LongestSource.Target->GetLocalGenerator();
     std::ostringstream e;
@@ -664,8 +706,14 @@ std::string const& cmGlobalVisualStudio10Generator::GetPlatformToolsetString()
   if (!this->GeneratorToolset.empty()) {
     return this->GeneratorToolset;
   }
-  if (!this->DefaultPlatformToolset.empty()) {
-    return this->DefaultPlatformToolset;
+  if (this->SystemIsAndroid) {
+    if (!this->DefaultAndroidToolset.empty()) {
+      return this->DefaultAndroidToolset;
+    }
+  } else {
+    if (!this->DefaultPlatformToolset.empty()) {
+      return this->DefaultPlatformToolset;
+    }
   }
   static std::string const empty;
   return empty;
@@ -879,7 +927,10 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
       epg.Attribute("Label", "Globals");
       cmXMLElement(epg, "ProjectGuid")
         .Content("{F3FC6D86-508D-3FB1-96D2-995F08B142EC}");
-      cmXMLElement(epg, "Keyword").Content("Win32Proj");
+      cmXMLElement(epg, "Keyword")
+        .Content(mf->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Android"
+                   ? "Android"
+                   : "Win32Proj");
       cmXMLElement(epg, "Platform").Content(this->GetPlatformName());
       if (this->GetSystemName() == "WindowsPhone") {
         cmXMLElement(epg, "ApplicationType").Content("Windows Phone");
@@ -889,15 +940,21 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
         cmXMLElement(epg, "ApplicationType").Content("Windows Store");
         cmXMLElement(epg, "ApplicationTypeRevision")
           .Content(this->GetApplicationTypeRevision());
+      } else if (this->GetSystemName() == "Android") {
+        cmXMLElement(epg, "ApplicationType").Content("Android");
+        cmXMLElement(epg, "ApplicationTypeRevision")
+          .Content(this->GetApplicationTypeRevision());
       }
       if (!this->WindowsTargetPlatformVersion.empty()) {
         cmXMLElement(epg, "WindowsTargetPlatformVersion")
           .Content(this->WindowsTargetPlatformVersion);
       }
-      if (this->GetPlatformName() == "ARM64") {
-        cmXMLElement(epg, "WindowsSDKDesktopARM64Support").Content("true");
-      } else if (this->GetPlatformName() == "ARM") {
-        cmXMLElement(epg, "WindowsSDKDesktopARMSupport").Content("true");
+      if (this->GetSystemName() != "Android") {
+        if (this->GetPlatformName() == "ARM64") {
+          cmXMLElement(epg, "WindowsSDKDesktopARM64Support").Content("true");
+        } else if (this->GetPlatformName() == "ARM") {
+          cmXMLElement(epg, "WindowsSDKDesktopARMSupport").Content("true");
+        }
       }
     }
     cmXMLElement(eprj, "Import")
@@ -1209,6 +1266,10 @@ std::string cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion()
 
 std::string cmGlobalVisualStudio10Generator::GetApplicationTypeRevision() const
 {
+  if (this->GetSystemName() == "Android") {
+    return this->GetAndroidApplicationTypeRevision();
+  }
+
   // Return the first two '.'-separated components of the Windows version.
   std::string::size_type end1 = this->SystemVersion.find('.');
   std::string::size_type end2 =

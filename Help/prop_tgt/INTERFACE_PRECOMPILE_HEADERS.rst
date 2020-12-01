@@ -1,6 +1,8 @@
 INTERFACE_PRECOMPILE_HEADERS
 ----------------------------
 
+.. versionadded:: 3.16
+
 List of interface header files to precompile into consuming targets.
 
 Targets may populate this property to publish the header files

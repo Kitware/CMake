@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmMakefileProfilingData_h
-#define cmMakefileProfilingData_h
+#pragma once
 #include <memory>
 #include <string>
 
@@ -12,7 +11,7 @@ class StreamWriter;
 }
 
 class cmListFileContext;
-struct cmListFileFunction;
+class cmListFileFunction;
 
 class cmMakefileProfilingData
 {
@@ -26,4 +25,3 @@ private:
   cmsys::ofstream ProfileStream;
   std::unique_ptr<Json::StreamWriter> JsonWriter;
 };
-#endif

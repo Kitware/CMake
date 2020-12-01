@@ -1,0 +1,11 @@
+
+set(objs obj1 obj2)
+set(targets  sse2 sse4 avx avx2)
+foreach(o IN LISTS objs)
+  set(item "objs/${o}\\.ispc\\.(o|obj)")
+  check_installed("${item}")
+  foreach(t IN LISTS targets)
+    set(item "objs/${o}\\.ispc_${t}\\.(o|obj)")
+    check_installed("${item}")
+  endforeach()
+endforeach()

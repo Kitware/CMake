@@ -22,9 +22,13 @@ section below for details.
 The generated binary installers will contain all files that have been installed
 via CMake's :command:`install` command (and the deprecated commands
 :command:`install_files`, :command:`install_programs`, and
-:command:`install_targets`).  Certain kinds of binary installers can be
-configured such that users can select individual application components to
-install.  See the :module:`CPackComponent` module for further details.
+:command:`install_targets`). Note that the ``DESTINATION`` option of the
+:command:`install` command must be a relative path; otherwise installed files
+are ignored by CPack.
+
+Certain kinds of binary installers can be configured such that users can select
+individual application components to install.  See the :module:`CPackComponent`
+module for further details.
 
 Source packages (configured through ``CPackSourceConfig.cmake`` and generated
 by the :cpack_gen:`CPack Archive Generator`) will contain all source files in
@@ -353,7 +357,7 @@ The following variables are for advanced uses of CPack:
 .. variable:: CPACK_INSTALL_SCRIPTS
 
   Extra CMake scripts executed by CPack during its local staging
-  installation, which is done right before packaging the files.
+  installation.  They are executed before installing the files to be packaged.
   The scripts are not called by a standalone install (e.g.: ``make install``).
   For every script, the following variables will be set:
   :variable:`CMAKE_CURRENT_SOURCE_DIR`, :variable:`CMAKE_CURRENT_BINARY_DIR`
@@ -361,6 +365,33 @@ The following variables are for advanced uses of CPack:
   directory).  The singular form ``CMAKE_INSTALL_SCRIPT`` is supported as
   an alternative variable for historical reasons, but its value is ignored if
   ``CMAKE_INSTALL_SCRIPTS`` is set and a warning will be issued.
+
+  See also :variable:`CPACK_PRE_BUILD_SCRIPTS` and
+  :variable:`CPACK_POST_BUILD_SCRIPTS` which can be used to specify scripts
+  to be executed later in the packaging process.
+
+.. variable:: CPACK_PRE_BUILD_SCRIPTS
+
+  List of CMake scripts to execute after CPack has installed the files to
+  be packaged into a staging directory and before producing the package(s)
+  from those files. See also :variable:`CPACK_INSTALL_SCRIPTS` and
+  :variable:`CPACK_POST_BUILD_SCRIPTS`.
+
+.. variable:: CPACK_POST_BUILD_SCRIPTS
+
+  List of CMake scripts to execute after CPack has produced the resultant
+  packages and before copying them back to the build directory.
+  See also :variable:`CPACK_INSTALL_SCRIPTS`,
+  :variable:`CPACK_PRE_BUILD_SCRIPTS` and :variable:`CPACK_PACKAGE_FILES`.
+
+.. variable:: CPACK_PACKAGE_FILES
+
+  List of package files created in the staging directory, with each file
+  provided as a full absolute path.  This variable is populated by CPack
+  just before invoking the post-build scripts listed in
+  :variable:`CPACK_POST_BUILD_SCRIPTS`.  It is the preferred way for the
+  post-build scripts to know the set of package files to operate on.
+  Projects should not try to set this variable themselves.
 
 .. variable:: CPACK_INSTALLED_DIRECTORIES
 
@@ -420,7 +451,7 @@ endmacro()
 # find any variable that starts with CPACK and create a variable
 # _CPACK_OTHER_VARIABLES_ that contains SET commands for
 # each cpack variable.  _CPACK_OTHER_VARIABLES_ is then
-# used as an @ replacment in configure_file for the CPackConfig.
+# used as an @ replacement in configure_file for the CPackConfig.
 function(cpack_encode_variables)
   set(commands "")
   get_cmake_property(res VARIABLES)

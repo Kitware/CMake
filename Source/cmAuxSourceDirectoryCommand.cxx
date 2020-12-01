@@ -36,10 +36,7 @@ bool cmAuxSourceDirectoryCommand(std::vector<std::string> const& args,
   }
 
   // was the list already populated
-  const char* def = mf.GetDefinition(args[1]);
-  if (def) {
-    sourceListValue = def;
-  }
+  sourceListValue = mf.GetSafeDefinition(args[1]);
 
   std::vector<std::string> files;
 
@@ -55,7 +52,7 @@ bool cmAuxSourceDirectoryCommand(std::vector<std::string> const& args,
         auto ext = cm::string_view(file).substr(dotpos + 1);
         // Process only source files
         auto cm = mf.GetCMakeInstance();
-        if (dotpos > 0 && cm->IsSourceExtension(ext)) {
+        if (dotpos > 0 && cm->IsACLikeSourceExtension(ext)) {
           std::string fullname = cmStrCat(templateDirectory, '/', file);
           // add the file as a class file so
           // depends can be done

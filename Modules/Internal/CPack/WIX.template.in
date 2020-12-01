@@ -2,7 +2,7 @@
 
 <?include "cpack_variables.wxi"?>
 
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" @CPACK_WIX_CUSTOM_XMLNS_EXPANDED@
     RequiredVersion="3.6.3303.0">
 
     <Product Id="$(var.CPACK_WIX_PRODUCT_GUID)"

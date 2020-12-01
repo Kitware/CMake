@@ -5,6 +5,8 @@
 CheckIPOSupported
 -----------------
 
+.. versionadded:: 3.9
+
 Check whether the compiler supports an interprocedural optimization (IPO/LTO).
 Use this before enabling the :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION` target
 property.

@@ -1,1 +1,1 @@
-int FourtyFour();
+int FourtyFour(void);

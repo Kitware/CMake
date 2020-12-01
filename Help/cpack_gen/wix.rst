@@ -286,3 +286,11 @@ Windows using WiX.
 
  When unspecified CPack will try to locate a WiX Toolset
  installation via the ``WIX`` environment variable instead.
+
+.. variable:: CPACK_WIX_CUSTOM_XMLNS
+
+ This variable provides a list of custom namespace declarations that are necessary
+ for using WiX extensions. Each declaration should be in the form name=url, where
+ name is the plain namespace without the usual xmlns: prefix and url is an unquoted
+ namespace url. A list of commonly known WiX schemata can be found here:
+ https://wixtoolset.org/documentation/manual/v3/xsd/

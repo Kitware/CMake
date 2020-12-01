@@ -1,6 +1,8 @@
 VS_DEPLOYMENT_CONTENT
 ---------------------
 
+.. versionadded:: 3.1
+
 Mark a source file as content for deployment with a Windows Phone or
 Windows Store application when built with a
 :manual:`Visual Studio generators <cmake-generators(7)>`.

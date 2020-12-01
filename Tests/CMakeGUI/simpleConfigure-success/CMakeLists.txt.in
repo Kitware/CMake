@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.18)
+project(simpleConfigure-success NONE)
+
+message(STATUS "This is a successful configure")

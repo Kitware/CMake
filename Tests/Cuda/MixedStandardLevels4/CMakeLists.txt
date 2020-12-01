@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.18)
 project(MixedStandardLevels4 CXX CUDA)
 
 set(CMAKE_CUDA_STANDARD 03)
-set(CMAKE_CUDA_ARCHITECTURES 30)
 
 add_executable(MixedStandardLevels4 main.cu lib.cpp)
 target_compile_features(MixedStandardLevels4 PUBLIC cxx_std_14)

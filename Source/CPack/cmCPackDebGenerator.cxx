@@ -696,57 +696,57 @@ int cmCPackDebGenerator::createDeb()
 
   const char* debian_pkg_source =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SOURCE");
-  if (debian_pkg_source && *debian_pkg_source) {
+  if (cmNonempty(debian_pkg_source)) {
     controlValues["Source"] = debian_pkg_source;
   }
   const char* debian_pkg_dep =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_DEPENDS");
-  if (debian_pkg_dep && *debian_pkg_dep) {
+  if (cmNonempty(debian_pkg_dep)) {
     controlValues["Depends"] = debian_pkg_dep;
   }
   const char* debian_pkg_rec =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_RECOMMENDS");
-  if (debian_pkg_rec && *debian_pkg_rec) {
+  if (cmNonempty(debian_pkg_rec)) {
     controlValues["Recommends"] = debian_pkg_rec;
   }
   const char* debian_pkg_sug =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SUGGESTS");
-  if (debian_pkg_sug && *debian_pkg_sug) {
+  if (cmNonempty(debian_pkg_sug)) {
     controlValues["Suggests"] = debian_pkg_sug;
   }
   const char* debian_pkg_url =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_HOMEPAGE");
-  if (debian_pkg_url && *debian_pkg_url) {
+  if (cmNonempty(debian_pkg_url)) {
     controlValues["Homepage"] = debian_pkg_url;
   }
   const char* debian_pkg_predep =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_PREDEPENDS");
-  if (debian_pkg_predep && *debian_pkg_predep) {
+  if (cmNonempty(debian_pkg_predep)) {
     controlValues["Pre-Depends"] = debian_pkg_predep;
   }
   const char* debian_pkg_enhances =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_ENHANCES");
-  if (debian_pkg_enhances && *debian_pkg_enhances) {
+  if (cmNonempty(debian_pkg_enhances)) {
     controlValues["Enhances"] = debian_pkg_enhances;
   }
   const char* debian_pkg_breaks =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_BREAKS");
-  if (debian_pkg_breaks && *debian_pkg_breaks) {
+  if (cmNonempty(debian_pkg_breaks)) {
     controlValues["Breaks"] = debian_pkg_breaks;
   }
   const char* debian_pkg_conflicts =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_CONFLICTS");
-  if (debian_pkg_conflicts && *debian_pkg_conflicts) {
+  if (cmNonempty(debian_pkg_conflicts)) {
     controlValues["Conflicts"] = debian_pkg_conflicts;
   }
   const char* debian_pkg_provides =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_PROVIDES");
-  if (debian_pkg_provides && *debian_pkg_provides) {
+  if (cmNonempty(debian_pkg_provides)) {
     controlValues["Provides"] = debian_pkg_provides;
   }
   const char* debian_pkg_replaces =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_REPLACES");
-  if (debian_pkg_replaces && *debian_pkg_replaces) {
+  if (cmNonempty(debian_pkg_replaces)) {
     controlValues["Replaces"] = debian_pkg_replaces;
   }
 
@@ -756,7 +756,7 @@ int cmCPackDebGenerator::createDeb()
   const char* debian_pkg_shlibs =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SHLIBS");
   const bool gen_shibs = this->IsOn("CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS") &&
-    debian_pkg_shlibs && *debian_pkg_shlibs;
+    cmNonempty(debian_pkg_shlibs);
   if (gen_shibs) {
     cmGeneratedFileStream out;
     out.Open(shlibsfilename, false, true);
@@ -832,11 +832,11 @@ int cmCPackDebGenerator::createDbgsymDDeb()
 
   const char* debian_pkg_source =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SOURCE");
-  if (debian_pkg_source && *debian_pkg_source) {
+  if (cmNonempty(debian_pkg_source)) {
     controlValues["Source"] = debian_pkg_source;
   }
   const char* debian_build_ids = this->GetOption("GEN_BUILD_IDS");
-  if (debian_build_ids && *debian_build_ids) {
+  if (cmNonempty(debian_build_ids)) {
     controlValues["Build-Ids"] = debian_build_ids;
   }
 

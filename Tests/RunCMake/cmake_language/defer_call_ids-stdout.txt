@@ -1,0 +1,13 @@
+-- Immediate Message: ids='message0;getCallIds1;messageIds1;cancelCall;getCallIds2;messageIds2;toBeCancelled;message3'
+-- Immediate Message: message0='message;STATUS;First Deferred Message'
+-- Immediate Message: getCallIds1='cmake_language;DEFER;GET_CALL_IDS;ids'
+-- Immediate Message: messageIds1='cmake_language;EVAL;CODE;message\(STATUS "Deferred Message: ids='\${ids}'"\)'
+-- Immediate Message: cancelCall='cmake_language;DEFER;CANCEL_CALL;toBeCancelled'
+-- Immediate Message: getCallIds2='cmake_language;DEFER;GET_CALL_IDS;ids'
+-- Immediate Message: messageIds2='cmake_language;EVAL;CODE;message\(STATUS "Deferred Message: ids='\${ids}'"\)'
+-- Immediate Message: toBeCancelled='message;STATUS;Cancelled Message'
+-- Immediate Message: message3='message;STATUS;Final Deferred Message'
+-- First Deferred Message
+-- Deferred Message: ids='messageIds1;cancelCall;getCallIds2;messageIds2;toBeCancelled;message3'
+-- Deferred Message: ids='messageIds2;message3'
+-- Final Deferred Message

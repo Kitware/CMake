@@ -1,6 +1,8 @@
 XCODE_SCHEME_WORKING_DIRECTORY
 ------------------------------
 
+.. versionadded:: 3.17
+
 Specify the ``Working Directory`` of the *Run* and *Profile*
 actions in the generated Xcode scheme. In case the value contains
 generator expressions those are evaluated.

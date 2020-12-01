@@ -1,6 +1,8 @@
 CUDAFLAGS
 ---------
 
+.. versionadded:: 3.8
+
 .. include:: ENV_VAR.txt
 
 Default compilation flags to be used when compiling ``CUDA`` files. Will only be

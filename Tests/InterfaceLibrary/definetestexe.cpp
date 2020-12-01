@@ -15,6 +15,12 @@
 #  error Expected IFACE_HEADER_BUILDDIR
 #endif
 
+#include "iface_genheader.h"
+
+#ifndef IFACE_GENHEADER
+#  error Expected IFACE_GENHEADER
+#endif
+
 extern int obj();
 extern int sub();
 extern int item();

@@ -1,6 +1,8 @@
 target_link_options
 -------------------
 
+.. versionadded:: 3.13
+
 Add options to the link step for an executable, shared library or module
 library target.
 

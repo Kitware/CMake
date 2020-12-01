@@ -1,17 +1,19 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef CMakeSetupDialog_h
-#define CMakeSetupDialog_h
+#pragma once
 
 #include <memory>
 
 #include "QCMake.h"
+#include "QCMakePreset.h"
 #include <QEventLoop>
 #include <QMainWindow>
 #include <QThread>
+#include <QVector>
 
 #include "ui_CMakeSetupDialog.h"
 
+class QCMakePresetItemModel;
 class QCMakeThread;
 class CMakeCacheModel;
 class QProgressBar;
@@ -34,6 +36,8 @@ public:
 public slots:
   void setBinaryDirectory(const QString& dir);
   void setSourceDirectory(const QString& dir);
+  void setDeferredPreset(const QString& preset);
+  void setStartupBinaryDirectory(bool startup);
 
 protected slots:
   void initialize();
@@ -53,6 +57,10 @@ protected slots:
   void doDeleteCache();
   void updateSourceDirectory(const QString& dir);
   void updateBinaryDirectory(const QString& dir);
+  void updatePresets(const QVector<QCMakePreset>& presets);
+  void updatePreset(const QString& name);
+  void showPresetLoadError(const QString& dir,
+                           cmCMakePresetsFile::ReadFileResult result);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
   bool setupFirstConfigure();
@@ -63,9 +71,11 @@ protected slots:
   void saveBuildPaths(const QStringList&);
   void onBinaryDirectoryChanged(const QString& dir);
   void onSourceDirectoryChanged(const QString& dir);
+  void onBuildPresetChanged(const QString& name);
   void setCacheModified();
   void removeSelectedCacheEntries();
   void selectionChanged();
+  void editEnvironment();
   void addCacheEntry();
   void startSearch();
   void setDebugOutput(bool);
@@ -111,9 +121,10 @@ protected:
   QAction* ConfigureAction;
   QAction* GenerateAction;
   QAction* WarnUninitializedAction;
-  QAction* WarnUnusedAction;
   QAction* InstallForCommandLineAction;
   State CurrentState;
+  QString DeferredPreset;
+  bool StartupBinaryDirectory = false;
 
   QTextCharFormat ErrorFormat;
   QTextCharFormat MessageFormat;
@@ -147,5 +158,3 @@ protected:
   virtual void run();
   std::unique_ptr<QCMake> CMakeInstance;
 };
-
-#endif // CMakeSetupDialog_h

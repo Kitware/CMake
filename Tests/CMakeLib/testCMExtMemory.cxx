@@ -13,7 +13,7 @@ public:
 class Derived : public Base
 {
 public:
-  ~Derived() = default;
+  ~Derived() override = default;
 
   void method() {}
 };

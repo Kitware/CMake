@@ -1,6 +1,8 @@
 CMAKE_FIND_USE_PACKAGE_ROOT_PATH
 --------------------------------
 
+.. versionadded:: 3.16
+
 Controls the default behavior of the following commands for whether or not to
 search paths provided by :variable:`<PackageName>_ROOT` variables:
 

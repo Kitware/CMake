@@ -455,6 +455,20 @@
     "flags": []
   },
   {
+    "name": "LanguageStandard_C",
+    "switch": "std:c11",
+    "comment": "ISO C11 Standard",
+    "value": "stdc11",
+    "flags": []
+  },
+  {
+    "name": "LanguageStandard_C",
+    "switch": "std:c17",
+    "comment": "ISO C17 (2018) Standard",
+    "value": "stdc17",
+    "flags": []
+  },
+  {
     "name": "PrecompiledHeader",
     "switch": "Yc",
     "comment": "Create",

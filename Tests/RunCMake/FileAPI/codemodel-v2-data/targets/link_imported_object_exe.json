@@ -14,7 +14,7 @@
             "backtrace": [
                 {
                     "file": "^imported/CMakeLists\\.txt$",
-                    "line": 18,
+                    "line": 24,
                     "command": "add_executable",
                     "hasParent": true
                 },
@@ -49,7 +49,7 @@
     "backtrace": [
         {
             "file": "^imported/CMakeLists\\.txt$",
-            "line": 18,
+            "line": 24,
             "command": "add_executable",
             "hasParent": true
         },

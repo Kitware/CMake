@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-present, Yann Collet, Facebook, Inc.
+ * Copyright (c) 2016-2020, Yann Collet, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -127,9 +127,13 @@ POOL_ctx* POOL_create_advanced(size_t numThreads, size_t queueSize,
     ctx->queueTail = 0;
     ctx->numThreadsBusy = 0;
     ctx->queueEmpty = 1;
-    (void)ZSTD_pthread_mutex_init(&ctx->queueMutex, NULL);
-    (void)ZSTD_pthread_cond_init(&ctx->queuePushCond, NULL);
-    (void)ZSTD_pthread_cond_init(&ctx->queuePopCond, NULL);
+    {
+        int error = 0;
+        error |= ZSTD_pthread_mutex_init(&ctx->queueMutex, NULL);
+        error |= ZSTD_pthread_cond_init(&ctx->queuePushCond, NULL);
+        error |= ZSTD_pthread_cond_init(&ctx->queuePopCond, NULL);
+        if (error) { POOL_free(ctx); return NULL; }
+    }
     ctx->shutdown = 0;
     /* Allocate space for the thread handles */
     ctx->threads = (ZSTD_pthread_t*)ZSTD_malloc(numThreads * sizeof(ZSTD_pthread_t), customMem);

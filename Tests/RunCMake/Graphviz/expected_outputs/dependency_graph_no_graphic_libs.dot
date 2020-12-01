@@ -28,8 +28,12 @@ subgraph clusterLegend {
     "node2" -> "node0"  // CoreLibrary -> CompilerFlags
     "node3" [ label = "GoofyLoggingLibrary\n(SeriousLoggingLibrary)\n(TheBestLoggingLibrary)", shape = pentagon ];
     "node2" -> "node3" [ style = dotted ] // CoreLibrary -> GoofyLoggingLibrary
+    "node4" [ label = "SystemLibrary", shape = octagon ];
+    "node4" -> "node2" [ style = dotted ] // SystemLibrary -> CoreLibrary
+    "node2" -> "node4" [ style = dotted ] // CoreLibrary -> SystemLibrary
     "node1" -> "node2" [ style = dotted ] // ConsoleApplication -> CoreLibrary
-    "node4" [ label = "CryptoCurrencyMiningLibrary", shape = septagon ];
-    "node1" -> "node4" [ style = dotted ] // ConsoleApplication -> CryptoCurrencyMiningLibrary
-    "node5" [ label = "\"-lm\"", shape = septagon ];
+    "node5" [ label = "CryptoCurrencyMiningLibrary", shape = septagon ];
+    "node1" -> "node5" [ style = dotted ] // ConsoleApplication -> CryptoCurrencyMiningLibrary
+    "node6" [ label = "\"-lm\"", shape = septagon ];
+    "node7" [ label = "SubDirectoryTarget", shape = egg ];
 }

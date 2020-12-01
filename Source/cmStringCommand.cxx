@@ -8,10 +8,20 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
+#include <initializer_list>
+#include <limits>
 #include <memory>
+#include <stdexcept>
+#include <utility>
 
 #include <cm/iterator>
+#include <cm/optional>
+#include <cm/string_view>
 #include <cmext/string_view>
+
+#include <cm3p/json/reader.h>
+#include <cm3p/json/value.h>
+#include <cm3p/json/writer.h>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -20,6 +30,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
@@ -533,15 +544,14 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  const std::string& variable = args[1];
+  auto const& variableName = args[1];
 
-  std::string value;
-  const char* oldValue = status.GetMakefile().GetDefinition(variable);
-  if (oldValue) {
-    value = oldValue;
-  }
-  value += cmJoin(cmMakeRange(args).advance(2), std::string());
-  status.GetMakefile().AddDefinition(variable, value);
+  cm::string_view oldView{ status.GetMakefile().GetSafeDefinition(
+    variableName) };
+
+  auto const newValue = cmJoin(cmMakeRange(args).advance(2), {}, oldView);
+  status.GetMakefile().AddDefinition(variableName, newValue);
+
   return true;
 }
 
@@ -561,9 +571,9 @@ bool HandlePrependCommand(std::vector<std::string> const& args,
   const std::string& variable = args[1];
 
   std::string value = cmJoin(cmMakeRange(args).advance(2), std::string());
-  const char* oldValue = status.GetMakefile().GetDefinition(variable);
+  cmProp oldValue = status.GetMakefile().GetDefinition(variable);
   if (oldValue) {
-    value += oldValue;
+    value += *oldValue;
   }
   status.GetMakefile().AddDefinition(variable, value);
   return true;
@@ -929,6 +939,296 @@ bool HandleUuidCommand(std::vector<std::string> const& args,
 #endif
 }
 
+#if !defined(CMAKE_BOOTSTRAP)
+
+// Helpers for string(JSON ...)
+struct Args : cmRange<typename std::vector<std::string>::const_iterator>
+{
+  using cmRange<typename std::vector<std::string>::const_iterator>::cmRange;
+
+  auto PopFront(cm::string_view error) -> const std::string&;
+  auto PopBack(cm::string_view error) -> const std::string&;
+};
+
+class json_error : public std::runtime_error
+{
+public:
+  json_error(std::initializer_list<cm::string_view> message,
+             cm::optional<Args> errorPath = cm::nullopt)
+    : std::runtime_error(cmCatViews(message))
+    , ErrorPath{
+      std::move(errorPath) // NOLINT(performance-move-const-arg)
+    }
+  {
+  }
+  cm::optional<Args> ErrorPath;
+};
+
+const std::string& Args::PopFront(cm::string_view error)
+{
+  if (empty()) {
+    throw json_error({ error });
+  }
+  const std::string& res = *begin();
+  advance(1);
+  return res;
+}
+
+const std::string& Args::PopBack(cm::string_view error)
+{
+  if (empty()) {
+    throw json_error({ error });
+  }
+  const std::string& res = *(end() - 1);
+  retreat(1);
+  return res;
+}
+
+cm::string_view JsonTypeToString(Json::ValueType type)
+{
+  switch (type) {
+    case Json::ValueType::nullValue:
+      return "NULL"_s;
+    case Json::ValueType::intValue:
+    case Json::ValueType::uintValue:
+    case Json::ValueType::realValue:
+      return "NUMBER"_s;
+    case Json::ValueType::stringValue:
+      return "STRING"_s;
+    case Json::ValueType::booleanValue:
+      return "BOOLEAN"_s;
+    case Json::ValueType::arrayValue:
+      return "ARRAY"_s;
+    case Json::ValueType::objectValue:
+      return "OBJECT"_s;
+  }
+  throw json_error({ "invalid JSON type found"_s });
+}
+
+int ParseIndex(
+  const std::string& str, cm::optional<Args> const& progress = cm::nullopt,
+  Json::ArrayIndex max = std::numeric_limits<Json::ArrayIndex>::max())
+{
+  unsigned long lindex;
+  if (!cmStrToULong(str, &lindex)) {
+    throw json_error({ "expected an array index, got: '"_s, str, "'"_s },
+                     progress);
+  }
+  Json::ArrayIndex index = static_cast<Json::ArrayIndex>(lindex);
+  if (index >= max) {
+    cmAlphaNum sizeStr{ max };
+    throw json_error({ "expected an index less then "_s, sizeStr.View(),
+                       " got '"_s, str, "'"_s },
+                     progress);
+  }
+  return index;
+}
+
+Json::Value& ResolvePath(Json::Value& json, Args path)
+{
+  Json::Value* search = &json;
+
+  for (auto curr = path.begin(); curr != path.end(); ++curr) {
+    const std::string& field = *curr;
+    Args progress{ path.begin(), curr + 1 };
+
+    if (search->isArray()) {
+      auto index = ParseIndex(field, progress, search->size());
+      search = &(*search)[index];
+
+    } else if (search->isObject()) {
+      if (!search->isMember(field)) {
+        const auto progressStr = cmJoin(progress, " "_s);
+        throw json_error({ "member '"_s, progressStr, "' not found"_s },
+                         progress);
+      }
+      search = &(*search)[field];
+    } else {
+      const auto progressStr = cmJoin(progress, " "_s);
+      throw json_error(
+        { "invalid path '"_s, progressStr,
+          "', need element of OBJECT or ARRAY type to lookup '"_s, field,
+          "' got "_s, JsonTypeToString(search->type()) },
+        progress);
+    }
+  }
+  return *search;
+};
+
+Json::Value ReadJson(const std::string& jsonstr)
+{
+  Json::CharReaderBuilder builder;
+  builder["collectComments"] = false;
+  auto jsonReader = std::unique_ptr<Json::CharReader>(builder.newCharReader());
+  Json::Value json;
+  std::string error;
+  if (!jsonReader->parse(jsonstr.data(), jsonstr.data() + jsonstr.size(),
+                         &json, &error)) {
+    throw json_error({ "failed parsing json string: "_s, error });
+  }
+  return json;
+}
+std::string WriteJson(const Json::Value& value)
+{
+  Json::StreamWriterBuilder writer;
+  writer["indentation"] = "  ";
+  writer["commentStyle"] = "None";
+  return Json::writeString(writer, value);
+}
+
+#endif
+
+bool HandleJSONCommand(std::vector<std::string> const& arguments,
+                       cmExecutionStatus& status)
+{
+#if !defined(CMAKE_BOOTSTRAP)
+
+  auto& makefile = status.GetMakefile();
+  Args args{ arguments.begin() + 1, arguments.end() };
+
+  const std::string* errorVariable = nullptr;
+  const std::string* outputVariable = nullptr;
+  bool success = true;
+
+  try {
+    outputVariable = &args.PopFront("missing out-var argument"_s);
+
+    if (!args.empty() && *args.begin() == "ERROR_VARIABLE"_s) {
+      args.PopFront("");
+      errorVariable = &args.PopFront("missing error-var argument"_s);
+      makefile.AddDefinition(*errorVariable, "NOTFOUND"_s);
+    }
+
+    const auto& mode = args.PopFront("missing mode argument"_s);
+    if (mode != "GET"_s && mode != "TYPE"_s && mode != "MEMBER"_s &&
+        mode != "LENGTH"_s && mode != "REMOVE"_s && mode != "SET"_s &&
+        mode != "EQUAL"_s) {
+      throw json_error(
+        { "got an invalid mode '"_s, mode,
+          "', expected one of GET, GET_ARRAY, TYPE, MEMBER, MEMBERS,"
+          " LENGTH, REMOVE, SET, EQUAL"_s });
+    }
+
+    const auto& jsonstr = args.PopFront("missing json string argument"_s);
+    Json::Value json = ReadJson(jsonstr);
+
+    if (mode == "GET"_s) {
+      const auto& value = ResolvePath(json, args);
+      if (value.isObject() || value.isArray()) {
+        makefile.AddDefinition(*outputVariable, WriteJson(value));
+      } else if (value.isBool()) {
+        makefile.AddDefinitionBool(*outputVariable, value.asBool());
+      } else {
+        makefile.AddDefinition(*outputVariable, value.asString());
+      }
+
+    } else if (mode == "TYPE"_s) {
+      const auto& value = ResolvePath(json, args);
+      makefile.AddDefinition(*outputVariable, JsonTypeToString(value.type()));
+
+    } else if (mode == "MEMBER"_s) {
+      const auto& indexStr = args.PopBack("missing member index"_s);
+      const auto& value = ResolvePath(json, args);
+      if (!value.isObject()) {
+        throw json_error({ "MEMBER needs to be called with an element of "
+                           "type OBJECT, got "_s,
+                           JsonTypeToString(value.type()) },
+                         args);
+      }
+      const auto index = ParseIndex(
+        indexStr, Args{ args.begin(), args.end() + 1 }, value.size());
+      const auto memIt = std::next(value.begin(), index);
+      makefile.AddDefinition(*outputVariable, memIt.name());
+
+    } else if (mode == "LENGTH"_s) {
+      const auto& value = ResolvePath(json, args);
+      if (!value.isArray() && !value.isObject()) {
+        throw json_error({ "LENGTH needs to be called with an "
+                           "element of type ARRAY or OBJECT, got "_s,
+                           JsonTypeToString(value.type()) },
+                         args);
+      }
+
+      cmAlphaNum sizeStr{ value.size() };
+      makefile.AddDefinition(*outputVariable, sizeStr.View());
+
+    } else if (mode == "REMOVE"_s) {
+      const auto& toRemove =
+        args.PopBack("missing member or index to remove"_s);
+      auto& value = ResolvePath(json, args);
+
+      if (value.isArray()) {
+        const auto index = ParseIndex(
+          toRemove, Args{ args.begin(), args.end() + 1 }, value.size());
+        Json::Value removed;
+        value.removeIndex(index, &removed);
+
+      } else if (value.isObject()) {
+        Json::Value removed;
+        value.removeMember(toRemove, &removed);
+
+      } else {
+        throw json_error({ "REMOVE needs to be called with an "
+                           "element of type ARRAY or OBJECT, got "_s,
+                           JsonTypeToString(value.type()) },
+                         args);
+      }
+      makefile.AddDefinition(*outputVariable, WriteJson(json));
+
+    } else if (mode == "SET"_s) {
+      const auto& newValueStr = args.PopBack("missing new value remove"_s);
+      const auto& toAdd = args.PopBack("missing member name to add"_s);
+      auto& value = ResolvePath(json, args);
+
+      Json::Value newValue = ReadJson(newValueStr);
+      if (value.isObject()) {
+        value[toAdd] = newValue;
+      } else if (value.isArray()) {
+        const auto index =
+          ParseIndex(toAdd, Args{ args.begin(), args.end() + 1 });
+        if (value.isValidIndex(index)) {
+          value[static_cast<int>(index)] = newValue;
+        } else {
+          value.append(newValue);
+        }
+      } else {
+        throw json_error({ "SET needs to be called with an "
+                           "element of type OBJECT or ARRAY, got "_s,
+                           JsonTypeToString(value.type()) });
+      }
+
+      makefile.AddDefinition(*outputVariable, WriteJson(json));
+
+    } else if (mode == "EQUAL"_s) {
+      const auto& jsonstr2 =
+        args.PopFront("missing second json string argument"_s);
+      Json::Value json2 = ReadJson(jsonstr2);
+      makefile.AddDefinitionBool(*outputVariable, json == json2);
+    }
+
+  } catch (const json_error& e) {
+    if (outputVariable && e.ErrorPath) {
+      const auto errorPath = cmJoin(*e.ErrorPath, "-");
+      makefile.AddDefinition(*outputVariable,
+                             cmCatViews({ errorPath, "-NOTFOUND"_s }));
+    } else if (outputVariable) {
+      makefile.AddDefinition(*outputVariable, "NOTFOUND"_s);
+    }
+
+    if (errorVariable) {
+      makefile.AddDefinition(*errorVariable, e.what());
+    } else {
+      status.SetError(cmCatViews({ "sub-command JSON "_s, e.what(), "."_s }));
+      success = false;
+    }
+  }
+  return success;
+#else
+  status.SetError(cmStrCat(arguments[0], " not available during bootstrap"_s));
+  return false;
+#endif
+}
+
 } // namespace
 
 bool cmStringCommand(std::vector<std::string> const& args,
@@ -972,6 +1272,7 @@ bool cmStringCommand(std::vector<std::string> const& args,
     { "MAKE_C_IDENTIFIER"_s, HandleMakeCIdentifierCommand },
     { "GENEX_STRIP"_s, HandleGenexStripCommand },
     { "UUID"_s, HandleUuidCommand },
+    { "JSON"_s, HandleJSONCommand },
   };
 
   return subcommand(args[0], args, status);

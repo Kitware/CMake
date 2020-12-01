@@ -59,6 +59,8 @@ macro(java_append_library_directories _var)
       endif()
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^i.86$")
         set(_java_libarch "i386")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^aarch64")
+        set(_java_libarch "arm64" "aarch64")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^alpha")
         set(_java_libarch "alpha")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
@@ -213,6 +215,14 @@ set(_JNI_JAVA_DIRECTORIES_BASE
   /usr/local/jre-1.7.0
   /usr/local/jdk-1.6.0
   /usr/local/jre-1.6.0
+  # FreeBSD specific paths for default JVM
+  /usr/local/openjdk15
+  /usr/local/openjdk14
+  /usr/local/openjdk13
+  /usr/local/openjdk12
+  /usr/local/openjdk11
+  /usr/local/openjdk8
+  /usr/local/openjdk7
   # SuSE specific paths for default JVM
   /usr/lib64/jvm/java
   /usr/lib64/jvm/jre

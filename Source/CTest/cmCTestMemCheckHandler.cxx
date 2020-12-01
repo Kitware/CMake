@@ -326,6 +326,9 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
     case cmCTestMemCheckHandler::BOUNDS_CHECKER:
       xml.Attribute("Checker", "BoundsChecker");
       break;
+    case cmCTestMemCheckHandler::CUDA_SANITIZER:
+      xml.Attribute("Checker", "CudaSanitizer");
+      break;
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
       xml.Attribute("Checker", "AddressSanitizer");
       break;
@@ -351,7 +354,7 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
   cmCTestMemCheckHandler::TestResultsVector::size_type cc;
   for (cmCTestTestResult const& result : this->TestResults) {
     std::string testPath = result.Path + "/" + result.Name;
-    xml.Element("Test", this->CTest->GetShortPathToFile(testPath.c_str()));
+    xml.Element("Test", this->CTest->GetShortPathToFile(testPath));
   }
   xml.EndElement(); // TestList
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
@@ -465,6 +468,9 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterStyle = cmCTestMemCheckHandler::PURIFY;
     } else if (testerName.find("BC") != std::string::npos) {
       this->MemoryTesterStyle = cmCTestMemCheckHandler::BOUNDS_CHECKER;
+    } else if (testerName.find("cuda-memcheck") != std::string::npos ||
+               testerName.find("compute-sanitizer") != std::string::npos) {
+      this->MemoryTesterStyle = cmCTestMemCheckHandler::CUDA_SANITIZER;
     } else {
       this->MemoryTesterStyle = cmCTestMemCheckHandler::UNKNOWN;
     }
@@ -485,6 +491,11 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     this->MemoryTester =
       this->CTest->GetCTestConfiguration("BoundsCheckerCommand");
     this->MemoryTesterStyle = cmCTestMemCheckHandler::BOUNDS_CHECKER;
+  } else if (cmSystemTools::FileExists(
+               this->CTest->GetCTestConfiguration("CudaSanitizerCommand"))) {
+    this->MemoryTester =
+      this->CTest->GetCTestConfiguration("CudaSanitizerCommand");
+    this->MemoryTesterStyle = cmCTestMemCheckHandler::CUDA_SANITIZER;
   }
   if (this->CTest->GetCTestConfiguration("MemoryCheckType") ==
       "AddressSanitizer") {
@@ -528,6 +539,8 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterStyle = cmCTestMemCheckHandler::VALGRIND;
     } else if (checkType == "DrMemory") {
       this->MemoryTesterStyle = cmCTestMemCheckHandler::DRMEMORY;
+    } else if (checkType == "CudaSanitizer") {
+      this->MemoryTesterStyle = cmCTestMemCheckHandler::CUDA_SANITIZER;
     }
   }
   if (this->MemoryTester.empty()) {
@@ -553,6 +566,10 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
                 .empty()) {
     memoryTesterOptions =
       this->CTest->GetCTestConfiguration("DrMemoryCommandOptions");
+  } else if (!this->CTest->GetCTestConfiguration("CudaSanitizerCommandOptions")
+                .empty()) {
+    memoryTesterOptions =
+      this->CTest->GetCTestConfiguration("CudaSanitizerCommandOptions");
   }
   this->MemoryTesterOptions =
     cmSystemTools::ParseArguments(memoryTesterOptions);
@@ -686,6 +703,18 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterOptions.emplace_back("/M");
       break;
     }
+    case cmCTestMemCheckHandler::CUDA_SANITIZER: {
+      // cuda sanitizer separates flags from arguments by spaces
+      if (this->MemoryTesterOptions.empty()) {
+        this->MemoryTesterOptions.emplace_back("--tool");
+        this->MemoryTesterOptions.emplace_back("memcheck");
+        this->MemoryTesterOptions.emplace_back("--leak-check");
+        this->MemoryTesterOptions.emplace_back("full");
+      }
+      this->MemoryTesterDynamicOptions.emplace_back("--log-file");
+      this->MemoryTesterDynamicOptions.push_back(this->MemoryTesterOutputFile);
+      break;
+    }
     // these are almost the same but the env var used is different
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
     case cmCTestMemCheckHandler::LEAK_SANITIZER:
@@ -771,6 +800,8 @@ bool cmCTestMemCheckHandler::ProcessMemCheckOutput(const std::string& str,
       return this->ProcessMemCheckSanitizerOutput(str, log, results);
     case cmCTestMemCheckHandler::BOUNDS_CHECKER:
       return this->ProcessMemCheckBoundsCheckerOutput(str, log, results);
+    case cmCTestMemCheckHandler::CUDA_SANITIZER:
+      return this->ProcessMemCheckCudaOutput(str, log, results);
     default:
       log.append("\nMemory checking style used was: ");
       log.append("None that I know");
@@ -1099,6 +1130,119 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
     // errors or leaks detected
     log = parser.Log;
   }
+  this->DefectCount += defects;
+  return defects == 0;
+}
+
+bool cmCTestMemCheckHandler::ProcessMemCheckCudaOutput(
+  const std::string& str, std::string& log, std::vector<int>& results)
+{
+  std::vector<std::string> lines;
+  cmsys::SystemTools::Split(str, lines);
+  bool unlimitedOutput = false;
+  if (str.find("CTEST_FULL_OUTPUT") != std::string::npos ||
+      this->CustomMaximumFailedTestOutputSize == 0) {
+    unlimitedOutput = true;
+  }
+
+  std::string::size_type cc;
+
+  std::ostringstream ostr;
+  log.clear();
+
+  int defects = 0;
+
+  cmsys::RegularExpression memcheckLine("^========");
+
+  cmsys::RegularExpression leakExpr("== Leaked [0-9,]+ bytes at");
+
+  // list of matchers for output messages that contain variable content
+  // (addresses, sizes, ...) or can be shortened in general. the first match is
+  // used as a error name.
+  std::vector<cmsys::RegularExpression> matchers{
+    // API errors
+    "== Malloc/Free error encountered: (.*)",
+    "== Program hit error ([^ ]*).* on CUDA API call to",
+    "== Program hit ([^ ]*).* on CUDA API call to",
+    // memcheck
+    "== (Invalid .*) of size [0-9,]+", "== (Fatal UVM [CG]PU fault)",
+    // racecheck
+    "== .* (Potential .* hazard detected)", "== .* (Race reported)",
+    // synccheck
+    "== (Barrier error)",
+    // initcheck
+    "== (Uninitialized .* memory read)", "== (Unused memory)",
+    "== (Host API memory access error)",
+    // generic error: ignore ERROR SUMMARY, CUDA-MEMCHECK and others
+    "== ([A-Z][a-z].*)"
+  };
+
+  std::vector<std::string::size_type> nonMemcheckOutput;
+  auto sttime = std::chrono::steady_clock::now();
+  cmCTestOptionalLog(this->CTest, DEBUG,
+                     "Start test: " << lines.size() << std::endl, this->Quiet);
+  std::string::size_type totalOutputSize = 0;
+  for (cc = 0; cc < lines.size(); cc++) {
+    cmCTestOptionalLog(this->CTest, DEBUG,
+                       "test line " << lines[cc] << std::endl, this->Quiet);
+
+    if (memcheckLine.find(lines[cc])) {
+      cmCTestOptionalLog(this->CTest, DEBUG,
+                         "cuda sanitizer line " << lines[cc] << std::endl,
+                         this->Quiet);
+      int failure = -1;
+      auto& line = lines[cc];
+      if (leakExpr.find(line)) {
+        failure = static_cast<int>(this->FindOrAddWarning("Memory leak"));
+      } else {
+        for (auto& matcher : matchers) {
+          if (matcher.find(line)) {
+            failure =
+              static_cast<int>(this->FindOrAddWarning(matcher.match(1)));
+            break;
+          }
+        }
+      }
+
+      if (failure >= 0) {
+        ostr << "<b>" << this->ResultStrings[failure] << "</b> ";
+        if (results.empty() || unsigned(failure) > results.size() - 1) {
+          results.push_back(1);
+        } else {
+          results[failure]++;
+        }
+        defects++;
+      }
+      totalOutputSize += lines[cc].size();
+      ostr << lines[cc] << std::endl;
+    } else {
+      nonMemcheckOutput.push_back(cc);
+    }
+  }
+  // Now put all all the non cuda sanitizer output into the test output
+  // This should be last in case it gets truncated by the output
+  // limiting code
+  for (std::string::size_type i : nonMemcheckOutput) {
+    totalOutputSize += lines[i].size();
+    ostr << lines[i] << std::endl;
+    if (!unlimitedOutput &&
+        totalOutputSize >
+          static_cast<size_t>(this->CustomMaximumFailedTestOutputSize)) {
+      ostr << "....\n";
+      ostr << "Test Output for this test has been truncated see testing"
+              " machine logs for full output,\n";
+      ostr << "or put CTEST_FULL_OUTPUT in the output of "
+              "this test program.\n";
+      break; // stop the copy of output if we are full
+    }
+  }
+  cmCTestOptionalLog(this->CTest, DEBUG,
+                     "End test (elapsed: "
+                       << cmDurationTo<unsigned int>(
+                            std::chrono::steady_clock::now() - sttime)
+                       << "s)" << std::endl,
+                     this->Quiet);
+  log = ostr.str();
   this->DefectCount += defects;
   return defects == 0;
 }

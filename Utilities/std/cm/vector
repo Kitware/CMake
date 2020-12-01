@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_vector
-#define cm_vector
+#pragma once
 
 #include <algorithm>
 #include <vector> // IWYU pragma: export
@@ -36,5 +35,3 @@ inline void erase_if(std::vector<T, Allocator>& cont, Predicate pred)
 #endif
 
 } // namespace cm
-
-#endif

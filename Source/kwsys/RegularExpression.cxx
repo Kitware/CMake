@@ -359,7 +359,7 @@ bool RegularExpression::compile(const char* exp)
   this->regmatch.clear();
 
   // Small enough for pointer-storage convention?
-  if (comp.regsize >= 32767L) { // Probably could be 65535L.
+  if (comp.regsize >= 65535L) {
     // RAISE Error, SYM(RegularExpression), SYM(Expr_Too_Big),
     printf("RegularExpression::compile(): Expression too big.\n");
     return false;

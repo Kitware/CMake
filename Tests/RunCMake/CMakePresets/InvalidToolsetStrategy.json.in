@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "InvalidToolsetStrategy",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "toolset": {
+        "strategy": {}
+      }
+    }
+  ]
+}

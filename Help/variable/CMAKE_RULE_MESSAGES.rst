@@ -1,6 +1,8 @@
 CMAKE_RULE_MESSAGES
 -------------------
 
+.. versionadded:: 3.13
+
 Specify whether to report a message for each make rule.
 
 If set in the cache it is used to initialize the value of the :prop_gbl:`RULE_MESSAGES` property.

@@ -1,8 +1,10 @@
 <LANG>_COMPILER_LAUNCHER
 ------------------------
 
+.. versionadded:: 3.4
+
 This property is implemented only when ``<LANG>`` is ``C``, ``CXX``,
-``Fortran``, ``OBJC``, ``OBJCXX``, or ``CUDA``.
+``Fortran``, ``ISPC``, ``OBJC``, ``OBJCXX``, or ``CUDA``.
 
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a command line
 for a compiler launching tool. The :ref:`Makefile Generators` and the

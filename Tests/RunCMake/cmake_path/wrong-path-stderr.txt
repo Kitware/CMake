@@ -1,0 +1,2 @@
+CMake Error at .+/cmake_path/call-cmake_path.cmake:[0-9]+ \(cmake_path\):
+  cmake_path undefined variable for input path.

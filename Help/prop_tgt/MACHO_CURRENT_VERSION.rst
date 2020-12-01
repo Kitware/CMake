@@ -1,6 +1,8 @@
 MACHO_CURRENT_VERSION
 ---------------------
 
+.. versionadded:: 3.17
+
 What current version number is this target for Mach-O binaries.
 
 For shared libraries on Mach-O systems (e.g. macOS, iOS)

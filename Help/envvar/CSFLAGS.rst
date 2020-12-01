@@ -1,9 +1,11 @@
 CSFLAGS
 -------
 
+.. versionadded:: 3.9.2
+
 .. include:: ENV_VAR.txt
 
-Preferred executable for compiling ``CSharp`` language files. Will only be
+Default compilation flags to be used when compiling ``CSharp`` files. Will only be
 used by CMake on the first configuration to determine ``CSharp`` default
 compilation flags, after which the value for ``CSFLAGS`` is stored in the cache
 as :variable:`CMAKE_CSharp_FLAGS <CMAKE_<LANG>_FLAGS>`. For any configuration

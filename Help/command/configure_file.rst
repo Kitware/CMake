@@ -7,6 +7,7 @@ Copy a file to another location and modify its contents.
 
   configure_file(<input> <output>
                  [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
+                 [NO_SOURCE_PERMISSIONS]
                  [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 
 Copies an ``<input>`` file to an ``<output>`` file and substitutes
@@ -81,6 +82,11 @@ The arguments are:
 ``@ONLY``
   Restrict variable replacement to references of the form ``@VAR@``.
   This is useful for configuring scripts that use ``${VAR}`` syntax.
+
+``NO_SOURCE_PERMISSIONS``
+  Does not transfer the file permissions of the original file to the copy.
+  The copied file permissions default to the standard 644 value
+  (-rw-r--r--).
 
 ``NEWLINE_STYLE <style>``
   Specify the newline style for the output file.  Specify

@@ -9,6 +9,9 @@
 # Initial configuration
 #
 
+cmake_policy(PUSH)
+# numbers and boolean constants
+cmake_policy (SET CMP0012 NEW)
 # IN_LIST operator
 cmake_policy (SET CMP0057 NEW)
 
@@ -19,7 +22,7 @@ if (NOT DEFINED _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
   message (FATAL_ERROR "FindPython: INTERNAL ERROR")
 endif()
 if (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR EQUAL "3")
-  set(_${_PYTHON_PREFIX}_VERSIONS 3.9 3.8 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
+  set(_${_PYTHON_PREFIX}_VERSIONS 3.10 3.9 3.8 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
 elseif (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR EQUAL "2")
   set(_${_PYTHON_PREFIX}_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
 else()
@@ -28,6 +31,7 @@ endif()
 
 get_property(_${_PYTHON_PREFIX}_CMAKE_ROLE GLOBAL PROPERTY CMAKE_ROLE)
 
+include (${CMAKE_CURRENT_LIST_DIR}/../FindPackageHandleStandardArgs.cmake)
 
 #
 # helper commands
@@ -44,7 +48,6 @@ macro (_PYTHON_DISPLAY_FAILURE _PYTHON_MSG)
   set (${_PYTHON_PREFIX}_FOUND FALSE)
   string (TOUPPER "${_PYTHON_PREFIX}" _${_PYTHON_PREFIX}_UPPER_PREFIX)
   set (${_PYTHON_UPPER_PREFIX}_FOUND FALSE)
-  return()
 endmacro()
 
 
@@ -486,7 +489,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
       endif()
     elseif (NAME STREQUAL "SOABI")
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('EXT_SUFFIX') or '']))\nexcept Exception:\n   import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('EXT_SUFFIX') or '']))"
+                               "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('EXT_SUFFIX') or '',sysconfig.get_config_var('SO') or '']))\nexcept Exception:\n   import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('EXT_SUFFIX') or '',sysconfig.get_config_var('SO') or '']))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _soabi
                        ERROR_QUIET
@@ -522,7 +525,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
     endif()
   endif()
 
-  if (config_flag STREQUAL "ABIFLAGS")
+  if (NAME STREQUAL "ABIFLAGS" OR NAME STREQUAL "SOABI")
     set (${_PYTHON_PGCV_VALUE} "${_values}" PARENT_SCOPE)
     return()
   endif()
@@ -558,18 +561,19 @@ function (_PYTHON_GET_VERSION)
   if (_PGV_LIBRARY)
     # retrieve version and abi from library name
     if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+      get_filename_component (library_name "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" NAME)
       # extract version from library name
-      if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "python([23])([0-9]+)")
+      if (library_name MATCHES "python([23])([0-9]+)")
         set (${_PGV_PREFIX}VERSION_MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
         set (${_PGV_PREFIX}VERSION_MINOR "${CMAKE_MATCH_2}" PARENT_SCOPE)
         set (${_PGV_PREFIX}VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}" PARENT_SCOPE)
         set (${_PGV_PREFIX}ABI "" PARENT_SCOPE)
-      elseif (_${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "python([23])\\.([0-9]+)([dmu]*)")
+      elseif (library_name MATCHES "python([23])\\.([0-9]+)([dmu]*)")
         set (${_PGV_PREFIX}VERSION_MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
         set (${_PGV_PREFIX}VERSION_MINOR "${CMAKE_MATCH_2}" PARENT_SCOPE)
         set (${_PGV_PREFIX}VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}" PARENT_SCOPE)
         set (${_PGV_PREFIX}ABI "${CMAKE_MATCH_3}" PARENT_SCOPE)
-      elseif (_${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "pypy(3)?")
+      elseif (library_name MATCHES "pypy(3)?-c")
         set (version "${CMAKE_MATCH_1}")
         if (version EQUAL "3")
           set (${_PGV_PREFIX}VERSION_MAJOR "3" PARENT_SCOPE)
@@ -606,14 +610,24 @@ function (_PYTHON_GET_VERSION)
           # ABI not used on Windows
           set (abi "")
         else()
-          if (config MATCHES "#[ ]*define[ ]+Py_DEBUG[ ]+1")
-            string (APPEND abi "d")
-          endif()
-          if (config MATCHES "#[ ]*define[ ]+WITH_PYMALLOC[ ]+1")
-            string (APPEND abi "m")
-          endif()
-          if (config MATCHES "#[ ]*define[ ]+Py_UNICODE_SIZE[ ]+4")
-            string (APPEND abi "u")
+          if (NOT config)
+            # pyconfig.h can be a wrapper to a platform specific pyconfig.h
+            # In this case, try to identify ABI from include directory
+            if (_${_PYTHON_PREFIX}_INCLUDE_DIR MATCHES "python${version_major}\\.${version_minor}+([dmu]*)")
+              set (abi "${CMAKE_MATCH_1}")
+            else()
+              set (abi "")
+            endif()
+          else()
+            if (config MATCHES "#[ ]*define[ ]+Py_DEBUG[ ]+1")
+              string (APPEND abi "d")
+            endif()
+            if (config MATCHES "#[ ]*define[ ]+WITH_PYMALLOC[ ]+1")
+              string (APPEND abi "m")
+            endif()
+            if (config MATCHES "#[ ]*define[ ]+Py_UNICODE_SIZE[ ]+4")
+              string (APPEND abi "u")
+            endif()
           endif()
           set (${_PGV_PREFIX}ABI "${abi}" PARENT_SCOPE)
         endif()
@@ -661,12 +675,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
     return()
   endif()
 
-  cmake_parse_arguments (PARSE_ARGV 0 _PVI "EXACT;CHECK_EXISTS" "" "")
-  if (_PVI_UNPARSED_ARGUMENTS)
-    set (expected_version "${_PVI_UNPARSED_ARGUMENTS}")
-  else()
-    unset (expected_version)
-  endif()
+  cmake_parse_arguments (PARSE_ARGV 0 _PVI "IN_RANGE;EXACT;CHECK_EXISTS" "VERSION" "")
 
   if (_PVI_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_EXECUTABLE}")
     # interpreter does not exist anymore
@@ -697,50 +706,69 @@ function (_PYTHON_VALIDATE_INTERPRETER)
     endif()
   endif()
 
-  get_filename_component (python_name "${_${_PYTHON_PREFIX}_EXECUTABLE}" NAME)
+  if (_PVI_IN_RANGE OR _PVI_VERSION)
+    # retrieve full version
+    execute_process (COMMAND ${launcher} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
+                             "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]]))"
+                     RESULT_VARIABLE result
+                     OUTPUT_VARIABLE version
+                     ERROR_QUIET
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (result)
+      # interpreter is not usable
+      set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot use the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"" PARENT_SCOPE)
+      set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+      return()
+    endif()
 
-  if (expected_version)
-    if (NOT python_name STREQUAL "python${expected_version}${abi}${CMAKE_EXECUTABLE_SUFFIX}")
-      # compute number of components for version
-      string (REGEX REPLACE "[^.]" "" dots "${expected_version}")
-      # add one dot because there is one dot less than there are components
+    if (_PVI_VERSION)
+      # check against specified version
+      ## compute number of components for version
+      string (REGEX REPLACE "[^.]" "" dots "${_PVI_VERSION}")
+      ## add one dot because there is one dot less than there are components
       string (LENGTH "${dots}." count)
       if (count GREATER 3)
         set (count 3)
       endif()
+      set (version_regex "^[0-9]+")
+      if (count EQUAL 3)
+        string (APPEND version_regex "\\.[0-9]+\\.[0-9]+")
+      elseif (count EQUAL 2)
+        string (APPEND version_regex "\\.[0-9]+")
+      endif()
+      # extract needed range
+      string (REGEX MATCH "${version_regex}" version "${version}")
 
-      # executable found must have a specific version
-      execute_process (COMMAND ${launcher} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:${count}]]))"
-                       RESULT_VARIABLE result
-                       OUTPUT_VARIABLE version
-                       ERROR_QUIET
-                       OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if (result)
-        # interpreter is not usable
-        set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot use the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"" PARENT_SCOPE)
+      if (_PVI_EXACT AND NOT version VERSION_EQUAL _PVI_VERSION)
+        # interpreter has wrong version
+        set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"" PARENT_SCOPE)
         set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+        return()
       else()
-        if (_PVI_EXACT AND NOT version VERSION_EQUAL expected_version)
-          # interpreter has wrong version
+        # check that version is OK
+        string(REGEX REPLACE "^([0-9]+)\\.?.*$" "\\1" major_version "${version}")
+        string(REGEX REPLACE "^([0-9]+)\\.?.*$" "\\1" expected_major_version "${_PVI_VERSION}")
+        if (NOT major_version VERSION_EQUAL expected_major_version
+            OR NOT version VERSION_GREATER_EQUAL _PVI_VERSION)
           set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"" PARENT_SCOPE)
           set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
-        else()
-          # check that version is OK
-          string(REGEX REPLACE "^([0-9]+)\\.?.*$" "\\1" major_version "${version}")
-          string(REGEX REPLACE "^([0-9]+)\\.?.*$" "\\1" expected_major_version "${expected_version}")
-          if (NOT major_version VERSION_EQUAL expected_major_version
-              OR NOT version VERSION_GREATER_EQUAL expected_version)
-            set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"" PARENT_SCOPE)
-            set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
-          endif()
+          return()
         endif()
       endif()
-      if (NOT _${_PYTHON_PREFIX}_EXECUTABLE)
+    endif()
+
+    if (_PVI_IN_RANGE)
+      # check if version is in the requested range
+      find_package_check_version ("${version}" in_range HANDLE_VERSION_RANGE)
+      if (NOT in_range)
+        # interpreter has invalid version
+        set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"" PARENT_SCOPE)
+        set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
         return()
       endif()
     endif()
   else()
+    get_filename_component (python_name "${_${_PYTHON_PREFIX}_EXECUTABLE}" NAME)
     if (NOT python_name STREQUAL "python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}${CMAKE_EXECUTABLE_SUFFIX}")
       # executable found do not have version in name
       # ensure major version is OK
@@ -792,15 +820,7 @@ function (_PYTHON_VALIDATE_COMPILER)
     return()
   endif()
 
-  cmake_parse_arguments (PARSE_ARGV 0 _PVC "EXACT;CHECK_EXISTS" "" "")
-  if (_PVC_UNPARSED_ARGUMENTS)
-    set (major_version FALSE)
-    set (expected_version "${_PVC_UNPARSED_ARGUMENTS}")
-  else()
-    set (major_version TRUE)
-    set (expected_version "${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}")
-    set (_PVC_EXACT TRUE)
-  endif()
+  cmake_parse_arguments (PARSE_ARGV 0 _PVC "IN_RANGE;EXACT;CHECK_EXISTS" "VERSION" "")
 
   if (_PVC_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_COMPILER}")
     # Compiler does not exist anymore
@@ -813,19 +833,7 @@ function (_PYTHON_VALIDATE_COMPILER)
 
   # retrieve python environment version from compiler
   set (working_dir "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PythonCompilerVersion.dir")
-  if (major_version)
-    # check only major version
-    file (WRITE "${working_dir}/version.py" "import sys; sys.stdout.write(str(sys.version_info[0]))")
-  else()
-    # compute number of components for version
-    string (REGEX REPLACE "[^.]" "" dots "${expected_version}")
-    # add one dot because there is one dot less than there are components
-    string (LENGTH "${dots}." count)
-    if (count GREATER 3)
-      set (count 3)
-    endif()
-    file (WRITE "${working_dir}/version.py" "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:${count}]]))\n")
-  endif()
+  file (WRITE "${working_dir}/version.py" "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]]))\n")
   execute_process (COMMAND ${launcher} "${_${_PYTHON_PREFIX}_COMPILER}"
                            ${_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_ARCH_FLAGS}
                            /target:exe /embed "${working_dir}/version.py"
@@ -845,11 +853,64 @@ function (_PYTHON_VALIDATE_COMPILER)
     # compiler is not usable
     set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Cannot use the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"" PARENT_SCOPE)
     set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
-  elseif ((_PVC_EXACT AND NOT version VERSION_EQUAL expected_version)
-          OR NOT version VERSION_GREATER_EQUAL expected_version)
-    # Compiler has wrong version
-    set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Wrong version for the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"" PARENT_SCOPE)
-    set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
+    return()
+  endif()
+
+  if (_PVC_VERSION OR _PVC_IN_RANGE)
+    if (_PVC_VERSION)
+      # check against specified version
+      ## compute number of components for version
+      string (REGEX REPLACE "[^.]" "" dots "${_PVC_VERSION}")
+      ## add one dot because there is one dot less than there are components
+      string (LENGTH "${dots}." count)
+      if (count GREATER 3)
+        set (count 3)
+      endif()
+      set (version_regex "^[0-9]+")
+      if (count EQUAL 3)
+        string (APPEND version_regex "\\.[0-9]+\\.[0-9]+")
+      elseif (count EQUAL 2)
+        string (APPEND version_regex "\\.[0-9]+")
+      endif()
+      # extract needed range
+      string (REGEX MATCH "${version_regex}" version "${version}")
+
+      if (_PVC_EXACT AND NOT version VERSION_EQUAL _PVC_VERSION)
+        # interpreter has wrong version
+        set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Wrong version for the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"" PARENT_SCOPE)
+        set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
+        return()
+      else()
+        # check that version is OK
+        string(REGEX REPLACE "^([0-9]+)\\.?.*$" "\\1" major_version "${version}")
+        string(REGEX REPLACE "^([0-9]+)\\.?.*$" "\\1" expected_major_version "${_PVC_VERSION}")
+        if (NOT major_version VERSION_EQUAL expected_major_version
+            OR NOT version VERSION_GREATER_EQUAL _PVC_VERSION)
+          set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Wrong version for the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"" PARENT_SCOPE)
+          set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
+          return()
+        endif()
+      endif()
+    endif()
+
+    if (_PVC_IN_RANGE)
+      # check if version is in the requested range
+      find_package_check_version ("${version}" in_range HANDLE_VERSION_RANGE)
+      if (NOT in_range)
+        # interpreter has invalid version
+        set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Wrong version for the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"" PARENT_SCOPE)
+        set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
+        return()
+      endif()
+    endif()
+  else()
+    string(REGEX REPLACE "^([0-9]+)\\.?.*$" "\\1" major_version "${version}")
+    if (NOT major_version EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
+      # Compiler has wrong major version
+      set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Wrong major version for the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"" PARENT_SCOPE)
+      set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
+      return()
+    endif()
   endif()
 endfunction()
 
@@ -860,12 +921,7 @@ function (_PYTHON_VALIDATE_LIBRARY)
     return()
   endif()
 
-  cmake_parse_arguments (PARSE_ARGV 0 _PVL "EXACT;CHECK_EXISTS" "" "")
-  if (_PVL_UNPARSED_ARGUMENTS)
-    set (expected_version ${_PVL_UNPARSED_ARGUMENTS})
-  else()
-    unset (expected_version)
-  endif()
+  cmake_parse_arguments (PARSE_ARGV 0 _PVL "IN_RANGE;EXACT;CHECK_EXISTS" "VERSION" "")
 
   if (_PVL_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
     # library does not exist anymore
@@ -886,13 +942,25 @@ function (_PYTHON_VALIDATE_LIBRARY)
     set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong ABI for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"" PARENT_SCOPE)
     set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
   else()
-    if (expected_version)
-      # library have only major.minor information
-      string (REGEX MATCH "[0-9](\\.[0-9]+)?" version "${expected_version}")
-      if ((_PVL_EXACT AND NOT lib_VERSION VERSION_EQUAL version) OR (lib_VERSION VERSION_LESS version))
-        # library has wrong version
-        set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"" PARENT_SCOPE)
-        set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
+    if (_PVL_VERSION OR _PVL_IN_RANGE)
+      if (_PVL_VERSION)
+        # library have only major.minor information
+        string (REGEX MATCH "[0-9](\\.[0-9]+)?" version "${_PVL_VERSION}")
+        if ((_PVL_EXACT AND NOT lib_VERSION VERSION_EQUAL version) OR (lib_VERSION VERSION_LESS version))
+          # library has wrong version
+          set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"" PARENT_SCOPE)
+          set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
+        endif()
+      endif()
+
+      if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE AND _PVL_IN_RANGE)
+        # check if library version is in the requested range
+        find_package_check_version ("${lib_VERSION}" in_range HANDLE_VERSION_RANGE)
+        if (NOT in_range)
+          # library has wrong version
+          set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"" PARENT_SCOPE)
+          set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
+        endif()
       endif()
     else()
       if (NOT lib_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
@@ -919,12 +987,7 @@ function (_PYTHON_VALIDATE_INCLUDE_DIR)
     return()
   endif()
 
-  cmake_parse_arguments (PARSE_ARGV 0 _PVID "EXACT;CHECK_EXISTS" "" "")
-  if (_PVID_UNPARSED_ARGUMENTS)
-    set (expected_version ${_PVID_UNPARSED_ARGUMENTS})
-  else()
-    unset (expected_version)
-  endif()
+  cmake_parse_arguments (PARSE_ARGV 0 _PVID "IN_RANGE;EXACT;CHECK_EXISTS" "VERSION" "")
 
   if (_PVID_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
     # include file does not exist anymore
@@ -941,11 +1004,23 @@ function (_PYTHON_VALIDATE_INCLUDE_DIR)
     set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong ABI for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"" PARENT_SCOPE)
     set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
   else()
-    if (expected_version)
-      if ((_PVID_EXACT AND NOT inc_VERSION VERSION_EQUAL expected_version) OR (inc_VERSION VERSION_LESS expected_version))
-        # include dir has wrong version
-        set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"" PARENT_SCOPE)
-        set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+    if (_PVID_VERSION OR _PVID_IN_RANGE)
+      if (_PVID_VERSION)
+        if ((_PVID_EXACT AND NOT inc_VERSION VERSION_EQUAL expected_version) OR (inc_VERSION VERSION_LESS expected_version))
+          # include dir has wrong version
+          set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"" PARENT_SCOPE)
+          set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+        endif()
+      endif()
+
+      if (_${_PYTHON_PREFIX}_INCLUDE_DIR AND PVID_IN_RANGE)
+        # check if include dir is in the request range
+        find_package_check_version ("${inc_VERSION}" in_range HANDLE_VERSION_RANGE)
+        if (NOT in_range)
+          # include dir has wrong version
+          set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"" PARENT_SCOPE)
+          set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+        endif()
       endif()
     else()
       if (NOT inc_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
@@ -1007,10 +1082,27 @@ function (_PYTHON_SET_DEVELOPMENT_MODULE_FOUND module)
 endfunction()
 
 
-# If major version is specified, it must be the same as internal major version
-if (DEFINED ${_PYTHON_PREFIX}_FIND_VERSION_MAJOR
-    AND NOT ${_PYTHON_PREFIX}_FIND_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
-  _python_display_failure ("Could NOT find ${_PYTHON_PREFIX}: Wrong major version specified is \"${${_PYTHON_PREFIX}_FIND_VERSION_MAJOR}\", but expected major version is \"${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}\"")
+if (${_PYTHON_PREFIX}_FIND_VERSION_RANGE)
+  # range must include internal major version
+  if (${_PYTHON_PREFIX}_FIND_VERSION_MIN_MAJOR VERSION_GREATER _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR
+      OR ((${_PYTHON_PREFIX}_FIND_VERSION_RANGE_MAX STREQUAL "INCLUDE"
+          AND ${_PYTHON_PREFIX}_FIND_VERSION_MAX VERSION_LESS _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
+        OR (${_PYTHON_PREFIX}_FIND_VERSION_RANGE_MAX STREQUAL "EXCLUDE"
+          AND ${_PYTHON_PREFIX}_FIND_VERSION_MAX VERSION_LESS_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)))
+    _python_display_failure ("Could NOT find ${_PYTHON_PREFIX}: Wrong version range specified is \"${${_PYTHON_PREFIX}_FIND_VERSION_RANGE}\", but expected version range must include major version \"${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}\"")
+
+    cmake_policy(POP)
+    return()
+  endif()
+else()
+  if (DEFINED ${_PYTHON_PREFIX}_FIND_VERSION_MAJOR
+      AND NOT ${_PYTHON_PREFIX}_FIND_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
+    # If major version is specified, it must be the same as internal major version
+    _python_display_failure ("Could NOT find ${_PYTHON_PREFIX}: Wrong major version specified is \"${${_PYTHON_PREFIX}_FIND_VERSION_MAJOR}\", but expected major version is \"${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}\"")
+
+    cmake_policy(POP)
+    return()
+  endif()
 endif()
 
 
@@ -1054,18 +1146,32 @@ list (REMOVE_DUPLICATES _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
 set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${_${_PYTHON_PREFIX}_VERSIONS})
 unset (_${_PYTHON_PREFIX}_FIND_VERSION_EXACT)
 
-if (${_PYTHON_PREFIX}_FIND_VERSION_COUNT)
-  if (${_PYTHON_PREFIX}_FIND_VERSION_EXACT)
-    set (_${_PYTHON_PREFIX}_FIND_VERSION_EXACT "EXACT")
-    set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${${_PYTHON_PREFIX}_FIND_VERSION_MAJOR}.${${_PYTHON_PREFIX}_FIND_VERSION_MINOR})
-  else()
-    unset (_${_PYTHON_PREFIX}_FIND_VERSIONS)
-    # add all compatible versions
-    foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_VERSIONS)
-      if (_${_PYTHON_PREFIX}_VERSION VERSION_GREATER_EQUAL "${${_PYTHON_PREFIX}_FIND_VERSION_MAJOR}.${${_PYTHON_PREFIX}_FIND_VERSION_MINOR}")
-        list (APPEND _${_PYTHON_PREFIX}_FIND_VERSIONS ${_${_PYTHON_PREFIX}_VERSION})
-      endif()
-    endforeach()
+if (${_PYTHON_PREFIX}_FIND_VERSION_RANGE)
+  unset (_${_PYTHON_PREFIX}_FIND_VERSIONS)
+  foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_VERSIONS)
+    if ((${_PYTHON_PREFIX}_FIND_VERSION_RANGE_MIN STREQUAL "INCLUDE"
+          AND _${_PYTHON_PREFIX}_VERSION VERSION_GREATER_EQUAL ${_PYTHON_PREFIX}_FIND_VERSION_MIN)
+        AND ((${_PYTHON_PREFIX}_FIND_VERSION_RANGE_MAX STREQUAL "INCLUDE"
+            AND _${_PYTHON_PREFIX}_VERSION VERSION_LESS_EQUAL ${_PYTHON_PREFIX}_FIND_VERSION_MAX)
+          OR (${_PYTHON_PREFIX}_FIND_VERSION_RANGE_MAX STREQUAL "EXCLUDE"
+            AND _${_PYTHON_PREFIX}_VERSION VERSION_LESS ${_PYTHON_PREFIX}_FIND_VERSION_MAX)))
+      list (APPEND _${_PYTHON_PREFIX}_FIND_VERSIONS ${_${_PYTHON_PREFIX}_VERSION})
+    endif()
+  endforeach()
+else()
+  if (${_PYTHON_PREFIX}_FIND_VERSION_COUNT GREATER 1)
+    if (${_PYTHON_PREFIX}_FIND_VERSION_EXACT)
+      set (_${_PYTHON_PREFIX}_FIND_VERSION_EXACT "EXACT")
+      set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${${_PYTHON_PREFIX}_FIND_VERSION_MAJOR}.${${_PYTHON_PREFIX}_FIND_VERSION_MINOR})
+    else()
+      unset (_${_PYTHON_PREFIX}_FIND_VERSIONS)
+      # add all compatible versions
+      foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_VERSIONS)
+        if (_${_PYTHON_PREFIX}_VERSION VERSION_GREATER_EQUAL "${${_PYTHON_PREFIX}_FIND_VERSION_MAJOR}.${${_PYTHON_PREFIX}_FIND_VERSION_MINOR}")
+          list (APPEND _${_PYTHON_PREFIX}_FIND_VERSIONS ${_${_PYTHON_PREFIX}_VERSION})
+        endif()
+      endforeach()
+    endif()
   endif()
 endif()
 
@@ -1284,14 +1390,26 @@ function (_PYTHON_CHECK_DEVELOPMENT_SIGNATURE module)
     string (MD5 signature "${signature}")
     if (signature STREQUAL _${_PYTHON_PREFIX}_DEVELOPMENT_${id}_SIGNATURE)
       if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
-        _python_validate_library (${${_PYTHON_PREFIX}_FIND_VERSION}
-                                  ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT}
-                                  CHECK_EXISTS)
+        if (${_PYTHON_PREFIX}_FIND_VERSION_EXACT)
+          _python_validate_library (VERSION ${${_PYTHON_PREFIX}_FIND_VERSION} EXACT CHECK_EXISTS)
+        elseif (${_PYTHON_PREFIX}_FIND_VERSION_RANGE)
+          _python_validate_library (IN_RANGE CHECK_EXISTS)
+        elseif (DEFINED ${_PYTHON_PREFIX}_FIND_VERSION)
+          _python_validate_library (VERSION ${${_PYTHON_PREFIX}_FIND_VERSION} CHECK_EXISTS)
+        else()
+          _python_validate_library (CHECK_EXISTS)
+        endif()
       endif()
       if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
-        _python_validate_include_dir (${${_PYTHON_PREFIX}_FIND_VERSION}
-                                      ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT}
-                                      CHECK_EXISTS)
+        if (${_PYTHON_PREFIX}_FIND_VERSION_EXACT)
+          _python_validate_include_dir (VERSION ${${_PYTHON_PREFIX}_FIND_VERSION} EXACT CHECK_EXISTS)
+        elseif (${_PYTHON_PREFIX}_FIND_VERSION_RANGE)
+          _python_validate_include_dir (IN_RANGE CHECK_EXISTS)
+        elseif (${_PYTHON_PREFIX}_FIND_VERSION)
+          _python_validate_include_dir (VERSION ${${_PYTHON_PREFIX}_FIND_VERSION} CHECK_EXISTS)
+        else()
+          _python_validate_include_dir (CHECK_EXISTS)
+        endif()
       endif()
     else()
       if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_${id}_ARTIFACTS)
@@ -1368,9 +1486,13 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     if (__${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE STREQUAL _${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE)
       # check version validity
       if (${_PYTHON_PREFIX}_FIND_VERSION_EXACT)
-        _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION} EXACT CHECK_EXISTS)
+        _python_validate_interpreter (VERSION ${${_PYTHON_PREFIX}_FIND_VERSION} EXACT CHECK_EXISTS)
+      elseif (${_PYTHON_PREFIX}_FIND_VERSION_RANGE)
+        _python_validate_interpreter (IN_RANGE CHECK_EXISTS)
+      elseif (DEFINED ${_PYTHON_PREFIX}_FIND_VERSION)
+        _python_validate_interpreter (VERSION ${${_PYTHON_PREFIX}_FIND_VERSION} CHECK_EXISTS)
       else()
-        _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION} CHECK_EXISTS)
+        _python_validate_interpreter (CHECK_EXISTS)
       endif()
     else()
       unset (_${_PYTHON_PREFIX}_EXECUTABLE CACHE)
@@ -1394,6 +1516,13 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       # Registry Paths
       _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS})
 
+      set (_${_PYTHON_PREFIX}_VALIDATE_OPTIONS ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+      if (${_PYTHON_PREFIX}_FIND_VERSION_RANGE)
+        list (APPEND _${_PYTHON_PREFIX}_VALIDATE_OPTIONS IN_RANGE)
+      elseif (DEFINED ${_PYTHON_PREFIX}_FIND_VERSION)
+        list (APPEND VERSION ${${_PYTHON_PREFIX}_FIND_VERSION})
+      endif()
+
       while (TRUE)
         # Virtual environments handling
         if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
@@ -1408,7 +1537,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
 
-          _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+          _python_validate_interpreter (${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_EXECUTABLE)
             break()
           endif()
@@ -1429,7 +1558,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NO_CMAKE_ENVIRONMENT_PATH
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
-          _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+          _python_validate_interpreter (${${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_EXECUTABLE)
             break()
           endif()
@@ -1444,7 +1573,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
-          _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+          _python_validate_interpreter (${${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_EXECUTABLE)
             break()
           endif()
@@ -1458,7 +1587,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_SYSTEM_ENVIRONMENT_PATH
                       NO_CMAKE_SYSTEM_PATH)
-        _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+        _python_validate_interpreter (${${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
         if (_${_PYTHON_PREFIX}_EXECUTABLE)
           break()
         endif()
@@ -1467,7 +1596,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
                       NAMES_PER_DIR
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES})
-        _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+        _python_validate_interpreter (${${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
         if (_${_PYTHON_PREFIX}_EXECUTABLE)
           break()
         endif()
@@ -1480,7 +1609,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
-          _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+          _python_validate_interpreter (${${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_EXECUTABLE)
             break()
           endif()
@@ -1493,7 +1622,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
-          _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+          _python_validate_interpreter (${${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_EXECUTABLE)
             break()
           endif()
@@ -1503,6 +1632,11 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endwhile()
     else()
       # look-up for various versions and locations
+      set (_${_PYTHON_PREFIX}_VALIDATE_OPTIONS EXACT)
+      if (${_PYTHON_PREFIX}_FIND_VERSION_RANGE)
+        list (APPEND _${_PYTHON_PREFIX}_VALIDATE_OPTIONS IN_RANGE)
+      endif()
+
       foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
         _python_get_names (_${_PYTHON_PREFIX}_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX INTERPRETER)
         _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_VERSION} INTERPRETER)
@@ -1522,7 +1656,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NO_CMAKE_ENVIRONMENT_PATH
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
-          _python_validate_interpreter (${_${_PYTHON_PREFIX}_VERSION} EXACT)
+          _python_validate_interpreter (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_EXECUTABLE)
             break()
           endif()
@@ -1557,7 +1691,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NO_CMAKE_SYSTEM_PATH)
         endif()
 
-        _python_validate_interpreter (${_${_PYTHON_PREFIX}_VERSION} EXACT)
+        _python_validate_interpreter (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
         if (_${_PYTHON_PREFIX}_EXECUTABLE)
           break()
         endif()
@@ -1570,7 +1704,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_SYSTEM_ENVIRONMENT_PATH
                       NO_CMAKE_SYSTEM_PATH)
-        _python_validate_interpreter (${_${_PYTHON_PREFIX}_VERSION} EXACT)
+        _python_validate_interpreter (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
         if (_${_PYTHON_PREFIX}_EXECUTABLE)
           break()
         endif()
@@ -1583,7 +1717,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         find_program (_${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES})
-        _python_validate_interpreter (${_${_PYTHON_PREFIX}_VERSION} EXACT)
+        _python_validate_interpreter (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
         if (_${_PYTHON_PREFIX}_EXECUTABLE)
           break()
         endif()
@@ -1608,7 +1742,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NO_DEFAULT_PATH)
         endif()
 
-        _python_validate_interpreter (${_${_PYTHON_PREFIX}_VERSION} EXACT)
+        _python_validate_interpreter (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
         if (_${_PYTHON_PREFIX}_EXECUTABLE)
           break()
         endif()
@@ -1768,9 +1902,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
           unset (${_PYTHON_PREFIX}_SITEARCH)
         endif()
 
-        if (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR VERSION_GREATER_EQUAL "3")
-          _python_get_config_var (${_PYTHON_PREFIX}_SOABI SOABI)
-        endif()
+        _python_get_config_var (${_PYTHON_PREFIX}_SOABI SOABI)
 
         # store properties in the cache to speed-up future searches
         set (_${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES
@@ -1811,9 +1943,13 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     if (__${_PYTHON_PREFIX}_COMPILER_SIGNATURE STREQUAL _${_PYTHON_PREFIX}_COMPILER_SIGNATURE)
       # check version validity
       if (${_PYTHON_PREFIX}_FIND_VERSION_EXACT)
-        _python_validate_compiler (${${_PYTHON_PREFIX}_FIND_VERSION} EXACT CHECK_EXISTS)
+        _python_validate_compiler (VERSION ${${_PYTHON_PREFIX}_FIND_VERSION} EXACT CHECK_EXISTS)
+      elseif (${_PYTHON_PREFIX}_FIND_VERSION_RANGE)
+        _python_validate_compiler (IN_RANGE CHECK_EXISTS)
+      elseif (DEFINED ${_PYTHON_PREFIX}_FIND_VERSION)
+        _python_validate_compiler (VERSION ${${_PYTHON_PREFIX}_FIND_VERSION} CHECK_EXISTS)
       else()
-        _python_validate_compiler (${${_PYTHON_PREFIX}_FIND_VERSION} CHECK_EXISTS)
+        _python_validate_compiler (CHECK_EXISTS)
       endif()
     else()
       unset (_${_PYTHON_PREFIX}_COMPILER CACHE)
@@ -1848,6 +1984,13 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                               IMPLEMENTATIONS IronPython
                               VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS})
 
+      set (_${_PYTHON_PREFIX}_VALIDATE_OPTIONS ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+      if (${_PYTHON_PREFIX}_FIND_VERSION_RANGE)
+        list (APPEND _${_PYTHON_PREFIX}_VALIDATE_OPTIONS IN_RANGE)
+      elseif (DEFINED ${_PYTHON_PREFIX}_FIND_VERSION)
+        list (APPEND VERSION ${${_PYTHON_PREFIX}_FIND_VERSION})
+      endif()
+
       while (TRUE)
         # Apple frameworks handling
         if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
@@ -1861,7 +2004,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NO_CMAKE_ENVIRONMENT_PATH
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
-          _python_validate_compiler (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+          _python_validate_compiler (${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_COMPILER)
             break()
           endif()
@@ -1876,7 +2019,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
-          _python_validate_compiler (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+          _python_validate_compiler (${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_COMPILER)
             break()
           endif()
@@ -1890,7 +2033,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_SYSTEM_ENVIRONMENT_PATH
                       NO_CMAKE_SYSTEM_PATH)
-        _python_validate_compiler (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+        _python_validate_compiler (${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
         if (_${_PYTHON_PREFIX}_COMPILER)
           break()
         endif()
@@ -1900,7 +2043,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                       NAMES ${_${_PYTHON_PREFIX}_COMPILER_NAMES}
                       NAMES_PER_DIR
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES})
-        _python_validate_compiler (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+        _python_validate_compiler (${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
         if (_${_PYTHON_PREFIX}_COMPILER)
           break()
         endif()
@@ -1913,7 +2056,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
-          _python_validate_compiler (${${_PYTHON_PREFIX}_FIND_VERSION} ${_${_PYTHON_PREFIX}_FIND_VERSION_EXACT})
+          _python_validate_compiler (${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_COMPILER)
             break()
           endif()
@@ -1926,6 +2069,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
+          _python_validate_compiler (${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_COMPILER)
             break()
           endif()
@@ -1935,6 +2079,11 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endwhile()
     else()
       # try using root dir and registry
+      set (_${_PYTHON_PREFIX}_VALIDATE_OPTIONS EXACT)
+      if (${_PYTHON_PREFIX}_FIND_VERSION_RANGE)
+        list (APPEND _${_PYTHON_PREFIX}_VALIDATE_OPTIONS IN_RANGE)
+      endif()
+
       foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
         _python_get_names (_${_PYTHON_PREFIX}_COMPILER_NAMES
                            IMPLEMENTATIONS IronPython
@@ -1965,7 +2114,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NO_CMAKE_ENVIRONMENT_PATH
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
-          _python_validate_compiler (${_${_PYTHON_PREFIX}_VERSION} EXACT)
+          _python_validate_compiler (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_COMPILER)
             break()
           endif()
@@ -1980,7 +2129,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
-          _python_validate_compiler (${_${_PYTHON_PREFIX}_VERSION} EXACT)
+          _python_validate_compiler (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_COMPILER)
             break()
           endif()
@@ -1994,7 +2143,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_SYSTEM_ENVIRONMENT_PATH
                       NO_CMAKE_SYSTEM_PATH)
-        _python_validate_compiler (${_${_PYTHON_PREFIX}_VERSION} EXACT)
+        _python_validate_compiler (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
         if (_${_PYTHON_PREFIX}_COMPILER)
           break()
         endif()
@@ -2007,7 +2156,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
-          _python_validate_compiler (${_${_PYTHON_PREFIX}_VERSION} EXACT)
+          _python_validate_compiler (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_COMPILER)
             break()
           endif()
@@ -2020,7 +2169,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
-          _python_validate_compiler (${_${_PYTHON_PREFIX}_VERSION} EXACT)
+          _python_validate_compiler (VERSION ${_${_PYTHON_PREFIX}_VERSION} ${_${_PYTHON_PREFIX}_VALIDATE_OPTIONS})
           if (_${_PYTHON_PREFIX}_COMPILER)
             break()
           endif()
@@ -2040,6 +2189,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                     NAMES ${_${_PYTHON_PREFIX}_COMPILER_NAMES}
                     HINTS ${_${_PYTHON_PREFIX}_IRON_ROOT} ${_${_PYTHON_PREFIX}_HINTS}
                     PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES})
+      _python_validate_compiler ()
     endif()
   endif()
 
@@ -2740,7 +2890,6 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     if (_${_PYTHON_PREFIX}_INCLUDE_DIR)
       # retrieve version from header file
       _python_get_version (INCLUDE PREFIX _${_PYTHON_PREFIX}_INC_)
-
       if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
         if ("${_${_PYTHON_PREFIX}_INC_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_INC_VERSION_MINOR}"
             VERSION_EQUAL _${_PYTHON_PREFIX}_VERSION)
@@ -2841,8 +2990,29 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                 ${_PYTHON_PREFIX}_PyPy_VERSION "${${_PYTHON_PREFIX}_PyPy_VERSION}")
   endif()
 
-  if (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR VERSION_GREATER_EQUAL "3"
-      AND NOT DEFINED ${_PYTHON_PREFIX}_SOABI)
+  unset(${_PYTHON_PREFIX}_LINK_OPTIONS)
+  if (${_PYTHON_PREFIX}_Development.Embed_FOUND AND APPLE
+      AND ${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$")
+    # rpath must be specified if python is part of a framework
+    unset(_${_PYTHON_PREFIX}_is_prefix)
+    foreach (_${_PYTHON_PREFIX}_implementation IN LISTS _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
+      foreach (_${_PYTHON_PREFIX}_framework IN LISTS _${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_implementation}_FRAMEWORKS)
+        if (${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "^${_${_PYTHON_PREFIX}_framework}")
+          get_filename_component (_${_PYTHON_PREFIX}_framework "${_${_PYTHON_PREFIX}_framework}" DIRECTORY)
+          set (${_PYTHON_PREFIX}_LINK_OPTIONS "LINKER:-rpath,${_${_PYTHON_PREFIX}_framework}")
+          break()
+        endif()
+      endforeach()
+      if (_${_PYTHON_PREFIX}_is_prefix)
+        break()
+      endif()
+    endforeach()
+    unset(_${_PYTHON_PREFIX}_implementation)
+    unset(_${_PYTHON_PREFIX}_framework)
+    unset(_${_PYTHON_PREFIX}_is_prefix)
+  endif()
+
+  if (NOT DEFINED ${_PYTHON_PREFIX}_SOABI)
     _python_get_config_var (${_PYTHON_PREFIX}_SOABI SOABI)
   endif()
 
@@ -2954,6 +3124,9 @@ endif()
 if (${_PYTHON_PREFIX}_VERSION_MAJOR AND
     NOT ${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
   _python_display_failure ("Could NOT find ${_PYTHON_PREFIX}: Found unsuitable major version \"${${_PYTHON_PREFIX}_VERSION_MAJOR}\", but required major version is exact version \"${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}\"")
+
+  cmake_policy(POP)
+  return()
 endif()
 
 unset (_${_PYTHON_PREFIX}_REASON_FAILURE)
@@ -2964,10 +3137,10 @@ foreach (_${_PYTHON_PREFIX}_COMPONENT IN ITEMS Interpreter Compiler Development 
   endif()
 endforeach()
 
-include (${CMAKE_CURRENT_LIST_DIR}/../FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args (${_PYTHON_PREFIX}
                                    REQUIRED_VARS ${_${_PYTHON_PREFIX}_REQUIRED_VARS}
                                    VERSION_VAR ${_PYTHON_PREFIX}_VERSION
+                                   HANDLE_VERSION_RANGE
                                    HANDLE_COMPONENTS
                                    REASON_FAILURE_MESSAGE "${_${_PYTHON_PREFIX}_REASON_FAILURE}")
 
@@ -3051,6 +3224,11 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
                         PROPERTY INTERFACE_LINK_LIBRARIES ${_${_PYTHON_PREFIX}_LINK_LIBRARIES})
         endif()
       endif()
+
+      if (${_PYTHON_PREFIX}_LINK_OPTIONS
+          AND _${_PYTHON_PREFIX}_LIBRARY_TYPE STREQUAL "SHARED")
+        set_property (TARGET ${__name} PROPERTY INTERFACE_LINK_OPTIONS "${${_PYTHON_PREFIX}_LINK_OPTIONS}")
+      endif()
     endmacro()
 
     if (${_PYTHON_PREFIX}_Development.Embed_FOUND)
@@ -3091,11 +3269,6 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
     #
     function (__${_PYTHON_PREFIX}_ADD_LIBRARY prefix name)
       cmake_parse_arguments (PARSE_ARGV 2 PYTHON_ADD_LIBRARY "STATIC;SHARED;MODULE;WITH_SOABI" "" "")
-
-      if (prefix STREQUAL "Python2" AND PYTHON_ADD_LIBRARY_WITH_SOABI)
-        message (AUTHOR_WARNING "FindPython2: Option `WITH_SOABI` is not supported for Python2 and will be ignored.")
-        unset (PYTHON_ADD_LIBRARY_WITH_SOABI)
-      endif()
 
       if (PYTHON_ADD_LIBRARY_STATIC)
         set (type STATIC)
@@ -3167,3 +3340,5 @@ if (DEFINED _${_PYTHON_PREFIX}_CMAKE_FIND_FRAMEWORK)
 else()
   unset (CMAKE_FIND_FRAMEWORK)
 endif()
+
+cmake_policy(POP)

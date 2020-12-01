@@ -1,10 +1,10 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmGlobalGenerator_h
-#define cmGlobalGenerator_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <iosfwd>
 #include <map>
 #include <memory>
@@ -265,6 +265,9 @@ public:
     return this->LocalGenerators;
   }
 
+  std::vector<cmGeneratorTarget*> GetLocalGeneratorTargetsInOrder(
+    cmLocalGenerator* lg) const;
+
   cmMakefile* GetCurrentMakefile() const
   {
     return this->CurrentConfigureMakefile;
@@ -505,6 +508,8 @@ public:
 
   std::string const& GetRealPath(std::string const& dir);
 
+  std::string NewDeferId();
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -542,7 +547,8 @@ protected:
   bool IsExcluded(cmStateSnapshot const& root,
                   cmStateSnapshot const& snp) const;
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
-  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
+  bool IsExcluded(cmLocalGenerator* root,
+                  const cmGeneratorTarget* target) const;
   virtual void InitializeProgressMarks() {}
 
   struct GlobalTargetInfo
@@ -591,6 +597,17 @@ protected:
 
   std::string GetPredefinedTargetsFolder();
 
+  enum class FindMakeProgramStage
+  {
+    Early,
+    Late,
+  };
+
+  virtual FindMakeProgramStage GetFindMakeProgramStage() const
+  {
+    return FindMakeProgramStage::Late;
+  }
+
 private:
   using TargetMap = std::unordered_map<std::string, cmTarget*>;
   using GeneratorTargetMap =
@@ -613,6 +630,10 @@ private:
   // Its order is not deterministic.
   LocalGeneratorMap LocalGeneratorSearchIndex;
 
+  void ComputeTargetOrder();
+  void ComputeTargetOrder(cmGeneratorTarget const* gt, size_t& index);
+  std::map<cmGeneratorTarget const*, size_t> TargetOrderIndex;
+
   cmMakefile* TryCompileOuterMakefile;
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator
@@ -624,6 +645,9 @@ private:
   std::map<std::string, std::string> ExtensionToLanguage;
   std::map<std::string, int> LanguageToLinkerPreference;
   std::map<std::string, std::string> LanguageToOriginalSharedLibFlags;
+
+  // Deferral id generation.
+  size_t NextDeferId = 0;
 
   // Record hashes for rules and outputs.
   struct RuleHash
@@ -716,5 +740,3 @@ protected:
   bool InstallTargetEnabled;
   bool ConfigureDoneCMP0026AndCMP0024;
 };
-
-#endif

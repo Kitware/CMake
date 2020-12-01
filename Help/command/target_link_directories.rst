@@ -1,6 +1,8 @@
 target_link_directories
 -----------------------
 
+.. versionadded:: 3.13
+
 Add link directories to a target.
 
 .. code-block:: cmake

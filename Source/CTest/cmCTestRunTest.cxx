@@ -619,11 +619,11 @@ void cmCTestRunTest::ComputeArguments()
     cmCTestMemCheckHandler* handler =
       static_cast<cmCTestMemCheckHandler*>(this->TestHandler);
     this->ActualCommand = handler->MemoryTester;
-    this->TestProperties->Args[1] = this->TestHandler->FindTheExecutable(
-      this->TestProperties->Args[1].c_str());
+    this->TestProperties->Args[1] =
+      this->TestHandler->FindTheExecutable(this->TestProperties->Args[1]);
   } else {
-    this->ActualCommand = this->TestHandler->FindTheExecutable(
-      this->TestProperties->Args[1].c_str());
+    this->ActualCommand =
+      this->TestHandler->FindTheExecutable(this->TestProperties->Args[1]);
     ++j; // skip the executable (it will be actualCommand)
   }
   std::string testCommand =

@@ -54,7 +54,7 @@ public:
 bool cmIfFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
                                          cmMakefile&) const
 {
-  return lff.Arguments.empty() || lff.Arguments == this->Args;
+  return lff.Arguments().empty() || lff.Arguments() == this->Args;
 }
 
 bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
@@ -65,20 +65,22 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
   int scopeDepth = 0;
   for (cmListFileFunction const& func : functions) {
     // keep track of scope depth
-    if (func.Name.Lower == "if") {
+    if (func.LowerCaseName() == "if") {
       scopeDepth++;
     }
-    if (func.Name.Lower == "endif") {
+    if (func.LowerCaseName() == "endif") {
       scopeDepth--;
     }
     // watch for our state change
-    if (scopeDepth == 0 && func.Name.Lower == "else") {
+    if (scopeDepth == 0 && func.LowerCaseName() == "else") {
 
       if (this->ElseSeen) {
-        cmListFileBacktrace bt = mf.GetBacktrace(func);
+        cmListFileBacktrace elseBT = mf.GetBacktrace().Push(cmListFileContext{
+          func.OriginalName(), this->GetStartingContext().FilePath,
+          func.Line() });
         mf.GetCMakeInstance()->IssueMessage(
           MessageType::FATAL_ERROR,
-          "A duplicate ELSE command was found inside an IF block.", bt);
+          "A duplicate ELSE command was found inside an IF block.", elseBT);
         cmSystemTools::SetFatalErrorOccured();
         return true;
       }
@@ -92,12 +94,14 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       if (!this->IsBlocking && mf.GetCMakeInstance()->GetTrace()) {
         mf.PrintCommandTrace(func);
       }
-    } else if (scopeDepth == 0 && func.Name.Lower == "elseif") {
+    } else if (scopeDepth == 0 && func.LowerCaseName() == "elseif") {
+      cmListFileBacktrace elseifBT = mf.GetBacktrace().Push(
+        cmListFileContext{ func.OriginalName(),
+                           this->GetStartingContext().FilePath, func.Line() });
       if (this->ElseSeen) {
-        cmListFileBacktrace bt = mf.GetBacktrace(func);
         mf.GetCMakeInstance()->IssueMessage(
           MessageType::FATAL_ERROR,
-          "An ELSEIF command was found after an ELSE command.", bt);
+          "An ELSEIF command was found after an ELSE command.", elseifBT);
         cmSystemTools::SetFatalErrorOccured();
         return true;
       }
@@ -113,16 +117,11 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         std::string errorString;
 
         std::vector<cmExpandedCommandArgument> expandedArguments;
-        mf.ExpandArguments(func.Arguments, expandedArguments);
+        mf.ExpandArguments(func.Arguments(), expandedArguments);
 
         MessageType messType;
 
-        cmListFileContext conditionContext =
-          cmListFileContext::FromCommandContext(
-            func, this->GetStartingContext().FilePath);
-
-        cmConditionEvaluator conditionEvaluator(mf, conditionContext,
-                                                mf.GetBacktrace(func));
+        cmConditionEvaluator conditionEvaluator(mf, elseifBT);
 
         bool isTrue =
           conditionEvaluator.IsTrue(expandedArguments, errorString, messType);
@@ -130,8 +129,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         if (!errorString.empty()) {
           std::string err =
             cmStrCat(cmIfCommandError(expandedArguments), errorString);
-          cmListFileBacktrace bt = mf.GetBacktrace(func);
-          mf.GetCMakeInstance()->IssueMessage(messType, err, bt);
+          mf.GetCMakeInstance()->IssueMessage(messType, err, elseifBT);
           if (messType == MessageType::FATAL_ERROR) {
             cmSystemTools::SetFatalErrorOccured();
             return true;
@@ -178,8 +176,7 @@ bool cmIfCommand(std::vector<cmListFileArgument> const& args,
 
   MessageType status;
 
-  cmConditionEvaluator conditionEvaluator(
-    makefile, makefile.GetExecutionContext(), makefile.GetBacktrace());
+  cmConditionEvaluator conditionEvaluator(makefile, makefile.GetBacktrace());
 
   bool isTrue =
     conditionEvaluator.IsTrue(expandedArguments, errorString, status);

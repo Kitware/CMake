@@ -17,7 +17,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmTargetPropertyComputer.h"
 #include "cmTest.h"
 #include "cmake.h"
 
@@ -282,8 +281,7 @@ bool HandleGlobalMode(cmExecutionStatus& status, const std::string& name,
   // Get the property.
   cmake* cm = status.GetMakefile().GetCMakeInstance();
   cmProp p = cm->GetState()->GetGlobalProperty(propertyName);
-  return StoreResult(infoType, status.GetMakefile(), variable,
-                     p ? p->c_str() : nullptr);
+  return StoreResult(infoType, status.GetMakefile(), variable, cmToCStr(p));
 }
 
 bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
@@ -330,8 +328,7 @@ bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
 
   // Get the property.
   cmProp p = mf->GetProperty(propertyName);
-  return StoreResult(infoType, status.GetMakefile(), variable,
-                     p ? p->c_str() : nullptr);
+  return StoreResult(infoType, status.GetMakefile(), variable, cmToCStr(p));
 }
 
 bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
@@ -364,12 +361,9 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
     cmProp prop_cstr = nullptr;
     cmListFileBacktrace bt = status.GetMakefile().GetBacktrace();
     cmMessenger* messenger = status.GetMakefile().GetMessenger();
-    if (cmTargetPropertyComputer::PassesWhitelist(
-          target->GetType(), propertyName, messenger, bt)) {
-      prop_cstr = target->GetComputedProperty(propertyName, messenger, bt);
-      if (!prop_cstr) {
-        prop_cstr = target->GetProperty(propertyName);
-      }
+    prop_cstr = target->GetComputedProperty(propertyName, messenger, bt);
+    if (!prop_cstr) {
+      prop_cstr = target->GetProperty(propertyName);
     }
     return StoreResult(infoType, status.GetMakefile(), variable,
                        prop_cstr ? prop_cstr->c_str() : nullptr);
@@ -434,8 +428,9 @@ bool HandleVariableMode(cmExecutionStatus& status, const std::string& name,
     return false;
   }
 
-  return StoreResult(infoType, status.GetMakefile(), variable,
-                     status.GetMakefile().GetDefinition(propertyName));
+  return StoreResult(
+    infoType, status.GetMakefile(), variable,
+    cmToCStr(status.GetMakefile().GetDefinition(propertyName)));
 }
 
 bool HandleCacheMode(cmExecutionStatus& status, const std::string& name,
@@ -452,8 +447,7 @@ bool HandleCacheMode(cmExecutionStatus& status, const std::string& name,
     value = status.GetMakefile().GetState()->GetCacheEntryProperty(
       name, propertyName);
   }
-  StoreResult(infoType, status.GetMakefile(), variable,
-              value ? value->c_str() : nullptr);
+  StoreResult(infoType, status.GetMakefile(), variable, cmToCStr(value));
   return true;
 }
 

@@ -1,6 +1,8 @@
 CMAKE_FIND_FRAMEWORK
 --------------------
 
+.. versionadded:: 3.4
+
 This variable affects how ``find_*`` commands choose between
 macOS Frameworks and unix-style package components.
 

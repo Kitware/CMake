@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmSourceFileLocationKind_h
-#define cmSourceFileLocationKind_h
+#pragma once
 
 enum class cmSourceFileLocationKind
 {
@@ -11,5 +10,3 @@ enum class cmSourceFileLocationKind
   // extensions or absolute path.
   Known
 };
-
-#endif

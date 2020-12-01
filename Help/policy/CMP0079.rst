@@ -1,6 +1,8 @@
 CMP0079
 -------
 
+.. versionadded:: 3.13
+
 :command:`target_link_libraries` allows use with targets in other directories.
 
 Prior to CMake 3.13 the :command:`target_link_libraries` command did not

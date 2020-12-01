@@ -13,7 +13,8 @@ endfunction()
 
 function(compiler_id_detection outvar lang)
 
-  if (NOT lang STREQUAL Fortran AND NOT lang STREQUAL CSharp)
+  if (NOT lang STREQUAL Fortran AND NOT lang STREQUAL CSharp
+      AND NOT lang STREQUAL ISPC)
     file(GLOB lang_files
       "${CMAKE_ROOT}/Modules/Compiler/*-DetermineCompiler.cmake")
     set(nonlang CXX)
@@ -77,6 +78,8 @@ function(compiler_id_detection outvar lang)
       ARMCC
       AppleClang
       ARMClang
+      IntelDPCPP
+      IntelClang
       Clang
       GNU
       MSVC

@@ -1,6 +1,8 @@
 CMAKE_XCODE_ATTRIBUTE_<an-attribute>
 ------------------------------------
 
+.. versionadded:: 3.1
+
 Set Xcode target attributes directly.
 
 Tell the :generator:`Xcode` generator to set '<an-attribute>' to a given value

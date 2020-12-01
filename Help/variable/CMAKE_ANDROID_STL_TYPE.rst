@@ -1,6 +1,8 @@
 CMAKE_ANDROID_STL_TYPE
 ----------------------
 
+.. versionadded:: 3.4
+
 When :ref:`Cross Compiling for Android with NVIDIA Nsight Tegra Visual Studio
 Edition`, this variable may be set to specify the default value for the
 :prop_tgt:`ANDROID_STL_TYPE` target property.  See that target property

@@ -1,6 +1,8 @@
 VS_IOT_EXTENSIONS_VERSION
 -------------------------
 
+.. versionadded:: 3.4
+
 Visual Studio Windows 10 IoT Extensions Version
 
 Specifies the version of the IoT Extensions that should be included in the

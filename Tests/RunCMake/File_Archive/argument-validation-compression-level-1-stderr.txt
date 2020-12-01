@@ -1,0 +1,5 @@
+CMake Error at compression-level.cmake:39 \(file\):
+  file compression level 100 should be in range 0 to 9
+Call Stack \(most recent call first\):
+  argument-validation-compression-level-1.cmake:8 \(check_compression_level\)
+  CMakeLists.txt:3 \(include\)

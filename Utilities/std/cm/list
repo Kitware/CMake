@@ -3,8 +3,7 @@
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_list
-#define cm_list
+#pragma once
 
 #include <list> // IWYU pragma: export
 
@@ -35,5 +34,3 @@ inline void erase_if(std::list<T, Allocator>& cont, Predicate pred)
 #endif
 
 } // namespace cm
-
-#endif

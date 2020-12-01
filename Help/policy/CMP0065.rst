@@ -1,6 +1,8 @@
 CMP0065
 -------
 
+.. versionadded:: 3.4
+
 Do not add flags to export symbols from executables without
 the :prop_tgt:`ENABLE_EXPORTS` target property.
 

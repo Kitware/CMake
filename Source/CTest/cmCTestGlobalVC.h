@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestGlobalVC_h
-#define cmCTestGlobalVC_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -73,5 +72,3 @@ protected:
   void WriteXMLDirectory(cmXMLWriter& xml, std::string const& path,
                          Directory const& dir);
 };
-
-#endif

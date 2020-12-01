@@ -1,6 +1,8 @@
 AUTOUIC_SEARCH_PATHS
 --------------------
 
+.. versionadded:: 3.9
+
 Search path list used by :prop_tgt:`AUTOUIC` to find included
 ``.ui`` files.
 

@@ -1,6 +1,8 @@
 FIXTURES_SETUP
 --------------
 
+.. versionadded:: 3.7
+
 Specifies a list of fixtures for which the test is to be treated as a setup
 test. These fixture names are distinct from test case names and are not
 required to have any similarity to the names of tests associated with them.

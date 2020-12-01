@@ -1,0 +1,7 @@
+^(CMake Warning:
+  You are using Visual Studio tools for Android, which does not support
+  standalone executables\.  However, the following executable targets do not
+  have the ANDROID_GUI property set, and thus will not be built as expected\.
+  They will be built as shared libraries with executable filenames:
+
+    android_c, android_cxx, android_sysinc_c, android_sysinc_cxx)?$

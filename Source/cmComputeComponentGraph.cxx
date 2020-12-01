@@ -8,6 +8,12 @@
 cmComputeComponentGraph::cmComputeComponentGraph(Graph const& input)
   : InputGraph(input)
 {
+}
+
+cmComputeComponentGraph::~cmComputeComponentGraph() = default;
+
+void cmComputeComponentGraph::Compute()
+{
   // Identify components.
   this->Tarjan();
 
@@ -16,8 +22,6 @@ cmComputeComponentGraph::cmComputeComponentGraph(Graph const& input)
   this->ComponentGraph.resize(this->Components.size());
   this->TransferEdges();
 }
-
-cmComputeComponentGraph::~cmComputeComponentGraph() = default;
 
 void cmComputeComponentGraph::Tarjan()
 {

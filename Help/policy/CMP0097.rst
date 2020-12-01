@@ -1,6 +1,8 @@
 CMP0097
 -------
 
+.. versionadded:: 3.16
+
 :command:`ExternalProject_Add` with ``GIT_SUBMODULES ""`` initializes no
 submodules.
 

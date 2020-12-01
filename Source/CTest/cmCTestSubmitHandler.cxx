@@ -797,7 +797,7 @@ int cmCTestSubmitHandler::ProcessHandler()
         gfile = gfile.substr(glen);
         cmCTestOptionalLog(this->CTest, DEBUG,
                            "Glob file: " << gfile << std::endl, this->Quiet);
-        this->CTest->AddSubmitFile(cmCTest::PartCoverage, gfile.c_str());
+        this->CTest->AddSubmitFile(cmCTest::PartCoverage, gfile);
       }
     } else {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Problem globbing" << std::endl);

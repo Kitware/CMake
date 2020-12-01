@@ -1,6 +1,8 @@
 CMAKE_FIND_USE_PACKAGE_REGISTRY
 -------------------------------
 
+.. versionadded:: 3.16
+
 Controls the default behavior of the :command:`find_package` command for
 whether or not to search paths provided by the :ref:`User Package Registry`.
 

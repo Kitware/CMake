@@ -2,16 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalGhsMultiGenerator.h"
 
-#include <algorithm>
 #include <utility>
-
-#include <cmext/algorithm>
+#include <vector>
 
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiTargetGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
-#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -30,34 +27,16 @@ std::string cmLocalGhsMultiGenerator::GetTargetDirectory(
   return dir;
 }
 
-void cmLocalGhsMultiGenerator::GenerateTargetsDepthFirst(
-  cmGeneratorTarget* target, std::vector<cmGeneratorTarget*>& remaining)
-{
-  if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-    return;
-  }
-  // Find this target in the list of remaining targets.
-  auto it = std::find(remaining.begin(), remaining.end(), target);
-  if (it == remaining.end()) {
-    // This target was already handled.
-    return;
-  }
-  // Remove this target from the list of remaining targets because
-  // we are handling it now.
-  *it = nullptr;
-
-  cmGhsMultiTargetGenerator tg(target);
-  tg.Generate();
-}
-
 void cmLocalGhsMultiGenerator::Generate()
 {
-  std::vector<cmGeneratorTarget*> remaining;
-  cm::append(remaining, this->GetGeneratorTargets());
-  for (auto& t : remaining) {
-    if (t) {
-      this->GenerateTargetsDepthFirst(t, remaining);
+  for (cmGeneratorTarget* gt :
+       this->GlobalGenerator->GetLocalGeneratorTargetsInOrder(this)) {
+    if (!gt->IsInBuildSystem()) {
+      continue;
     }
+
+    cmGhsMultiTargetGenerator tg(gt);
+    tg.Generate();
   }
 }
 

@@ -76,8 +76,8 @@ if(ZLIB_FOUND)
   # For compatibility with versions prior to this multi-config search, honor
   # any PNG_LIBRARY that is already specified and skip the search.
   if(NOT PNG_LIBRARY)
-    find_library(PNG_LIBRARY_RELEASE NAMES ${PNG_NAMES})
-    find_library(PNG_LIBRARY_DEBUG NAMES ${PNG_NAMES_DEBUG})
+    find_library(PNG_LIBRARY_RELEASE NAMES ${PNG_NAMES} NAMES_PER_DIR)
+    find_library(PNG_LIBRARY_DEBUG NAMES ${PNG_NAMES_DEBUG} NAMES_PER_DIR)
     include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
     select_library_configurations(PNG)
     mark_as_advanced(PNG_LIBRARY_RELEASE PNG_LIBRARY_DEBUG)

@@ -1,0 +1,13 @@
+Memory checking results:
+Uninitialized __global__ memory read - 1
+Unused memory - 1
+Host API memory access error - 1
+Barrier error - 2
+Invalid __global__ read - 1
+cudaErrorLaunchFailure - 2
+Fatal UVM GPU fault - 1
+Fatal UVM CPU fault - 1
+Memory leak - 1
+Potential WAR hazard detected - 4
+Potential RAW hazard detected - 4
+Race reported - 4

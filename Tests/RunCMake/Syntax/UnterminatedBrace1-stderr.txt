@@ -7,7 +7,7 @@ CMake Warning \(dev\) at UnterminatedBrace1.cmake:3 \(set\):
 
     \${
 
-  syntax error, unexpected \$end, expecting } \(2\)
+  syntax error, unexpected \$end, expecting } \(3\)
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

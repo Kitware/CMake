@@ -1,0 +1,5 @@
+CMake Error at ProgramOnly.cmake:[0-9]+ \(separate_arguments\):
+  separate_arguments missing required option: 'UNIX_COMMAND' or
+  'WINDOWS_COMMAND' or 'NATIVE_COMMAND'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -31,7 +31,13 @@ set(PKG_CONFIG_VERSION 1)
 if((NOT PKG_CONFIG_EXECUTABLE) AND (NOT "$ENV{PKG_CONFIG}" STREQUAL ""))
   set(PKG_CONFIG_EXECUTABLE "$ENV{PKG_CONFIG}" CACHE FILEPATH "pkg-config executable")
 endif()
-find_program(PKG_CONFIG_EXECUTABLE NAMES pkg-config DOC "pkg-config executable")
+
+set(PKG_CONFIG_NAMES "pkg-config")
+if(CMAKE_HOST_WIN32)
+  list(PREPEND PKG_CONFIG_NAMES "pkg-config.bat")
+endif()
+
+find_program(PKG_CONFIG_EXECUTABLE NAMES ${PKG_CONFIG_NAMES} DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
 set(_PKG_CONFIG_FAILURE_MESSAGE "")
@@ -47,7 +53,9 @@ if (PKG_CONFIG_EXECUTABLE)
     string(APPEND _PKG_CONFIG_FAILURE_MESSAGE
       "The command\n"
       "      \"${PKG_CONFIG_EXECUTABLE}\" --version\n"
-      "    failed with output\n${_PKG_CONFIG_VERSION_ERROR}"
+      "    failed with output:\n${PKG_CONFIG_VERSION_STRING}\n"
+      "    stderr: \n${_PKG_CONFIG_VERSION_ERROR}\n"
+      "    result: \n${_PKG_CONFIG_VERSION_RESULT}"
       )
     set(PKG_CONFIG_EXECUTABLE "")
     unset(PKG_CONFIG_VERSION_STRING)

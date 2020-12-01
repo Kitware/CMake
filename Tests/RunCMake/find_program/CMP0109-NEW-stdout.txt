@@ -1,0 +1,2 @@
+-- ExeNoRead_EXECUTABLE='.*/Tests/RunCMake/find_program/CMP0109-NEW-build/ExeNoRead'
+-- ReadNoExe_EXECUTABLE='ReadNoExe_EXECUTABLE-NOTFOUND'

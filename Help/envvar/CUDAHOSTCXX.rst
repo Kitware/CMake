@@ -1,6 +1,8 @@
 CUDAHOSTCXX
 -----------
 
+.. versionadded:: 3.8
+
 .. include:: ENV_VAR.txt
 
 Preferred executable for compiling host code when compiling ``CUDA``

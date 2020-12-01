@@ -86,9 +86,7 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
           break;
       }
     }
-    if (cmProp p = dir->GetProperty(*i)) {
-      prop = p->c_str();
-    }
+    prop = cmToCStr(dir->GetProperty(*i));
   }
   StoreResult(status.GetMakefile(), variable, prop);
   return true;

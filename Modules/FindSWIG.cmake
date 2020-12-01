@@ -7,11 +7,16 @@ FindSWIG
 
 Find the Simplified Wrapper and Interface Generator (SWIG_) executable.
 
-
 This module finds an installed SWIG and determines its version. If a
-``COMPONENTS`` or ``OPTIONAL_COMPONENTS`` argument is given to ``find_package``,
-it will also determine supported target languages.  The module sents the
-following variables:
+``COMPONENTS`` or ``OPTIONAL_COMPONENTS`` argument is given to the
+:command:`find_package` command, it will also determine supported target
+languages.
+
+When a version is requested, it can be specified as a simple value or as a
+range. For a detailed description of version range usage and capabilities,
+refer to the :command:`find_package` command.
+
+The module defines the following variables:
 
 ``SWIG_FOUND``
   Whether SWIG and any required components were found on the system.
@@ -50,7 +55,35 @@ optional Fortran support:
 
 #]=======================================================================]
 
-find_program(SWIG_EXECUTABLE NAMES swig4.0 swig3.0 swig2.0 swig)
+# compute list of possible names
+unset (_SWIG_NAMES)
+if (SWIG_FIND_VERSION_RANGE)
+  foreach (_SWIG_MAJOR IN ITEMS 4 3 2)
+    if (_SWIG_MAJOR VERSION_GREATER_EQUAL SWIG_FIND_VERSION_MIN_MAJOR
+        AND ((SWIG_FIND_VERSION_RANGE_MAX STREQUAL "INCLUDE" AND _SWIG_MAJOR VERSION_LESS_EQUAL SWIG_FIND_VERSION_MAX)
+        OR (SWIG_FIND_VERSION_RANGE_MAX STREQUAL "EXCLUDE" AND _SWIG_MAJOR VERSION_LESS SWIG_FIND_VERSION_MAX)))
+      list (APPEND _SWIG_NAMES swig${_SWIG_MAJOR}.0)
+    endif()
+  endforeach()
+elseif(SWIG_FIND_VERSION)
+  if (SWIG_FIND_VERSION_EXACT)
+    set(_SWIG_NAMES swig${SWIG_FIND_VERSION_MAJOR}.0)
+  else()
+    foreach (_SWIG_MAJOR IN ITEMS 4 3 2)
+      if (_SWIG_MAJOR VERSION_GREATER_EQUAL SWIG_FIND_VERSION_MAJOR)
+        list (APPEND _SWIG_NAMES swig${_SWIG_MAJOR}.0)
+      endif()
+    endforeach()
+  endif()
+else()
+  set (_SWIG_NAMES swig4.0 swig3.0 swig2.0)
+endif()
+if (NOT _SWIG_NAMES)
+  # try to find any version
+  set (_SWIG_NAMES swig4.0 swig3.0 swig2.0)
+endif()
+
+find_program(SWIG_EXECUTABLE NAMES ${_SWIG_NAMES} swig)
 
 if(SWIG_EXECUTABLE)
   execute_process(COMMAND ${SWIG_EXECUTABLE} -swiglib
@@ -105,6 +138,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(
   SWIG HANDLE_COMPONENTS
   REQUIRED_VARS SWIG_EXECUTABLE SWIG_DIR
-  VERSION_VAR SWIG_VERSION)
+  VERSION_VAR SWIG_VERSION
+  HANDLE_VERSION_RANGE)
 
 mark_as_advanced(SWIG_DIR SWIG_VERSION SWIG_EXECUTABLE)

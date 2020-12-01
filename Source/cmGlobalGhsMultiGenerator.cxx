@@ -3,7 +3,6 @@
 #include "cmGlobalGhsMultiGenerator.h"
 
 #include <algorithm>
-#include <cstring>
 #include <map>
 #include <ostream>
 #include <utility>
@@ -100,13 +99,13 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
   /* set the build tool to use */
   std::string gbuild(tsp + ((tsp.back() == '/') ? "" : "/") +
                      DEFAULT_BUILD_PROGRAM);
-  const char* prevTool = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
+  cmProp prevTool = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
 
   /* check if the toolset changed from last generate */
-  if (prevTool != nullptr && (gbuild != prevTool)) {
+  if (prevTool && (gbuild != *prevTool)) {
     std::string message =
       cmStrCat("toolset build tool: ", gbuild,
-               "\nDoes not match the previously used build tool: ", prevTool,
+               "\nDoes not match the previously used build tool: ", *prevTool,
                "\nEither remove the CMakeCache.txt file and CMakeFiles "
                "directory or choose a different binary directory.");
     cmSystemTools::Error(message);
@@ -187,7 +186,8 @@ void cmGlobalGhsMultiGenerator::EnableLanguage(
 
   mf->AddDefinition("GHSMULTI", "1"); // identifier for user CMake files
 
-  const char* tgtPlatform = mf->GetDefinition("GHS_TARGET_PLATFORM");
+  const char* tgtPlatform =
+    cmToCStrSafe(mf->GetDefinition("GHS_TARGET_PLATFORM"));
   if (!tgtPlatform) {
     cmSystemTools::Message("Green Hills MULTI: GHS_TARGET_PLATFORM not "
                            "specified; defaulting to \"integrity\"");
@@ -216,12 +216,13 @@ bool cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* /*mf*/)
 void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsd,
                                            const std::string& ts)
 {
-  const char* ghsRoot = mf->GetDefinition("GHS_TOOLSET_ROOT");
+  cmProp ghsRoot = mf->GetDefinition("GHS_TOOLSET_ROOT");
 
-  if (!ghsRoot || ghsRoot[0] == '\0') {
-    ghsRoot = DEFAULT_TOOLSET_ROOT;
+  if (cmNonempty(ghsRoot)) {
+    tsd = *ghsRoot;
+  } else {
+    tsd = DEFAULT_TOOLSET_ROOT;
   }
-  tsd = ghsRoot;
 
   if (ts.empty()) {
     std::vector<std::string> output;
@@ -333,23 +334,23 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
   fout << "# Top Level Project File\n";
 
   // Specify BSP option if supplied by user
-  const char* bspName =
+  cmProp bspName =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_BSP_NAME");
   if (!cmIsOff(bspName)) {
-    fout << "    -bsp " << bspName << '\n';
+    fout << "    -bsp " << *bspName << '\n';
   }
 
   // Specify OS DIR if supplied by user
   // -- not all platforms require this entry in the project file
   if (!cmIsOff(this->OsDir)) {
-    const char* osDirOption =
+    cmProp osDirOption =
       this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR_OPTION");
     std::replace(this->OsDir.begin(), this->OsDir.end(), '\\', '/');
     fout << "    ";
     if (cmIsOff(osDirOption)) {
       fout << "";
     } else {
-      fout << osDirOption;
+      fout << *osDirOption;
     }
     fout << "\"" << this->OsDir << "\"\n";
   }
@@ -467,11 +468,10 @@ void cmGlobalGhsMultiGenerator::WriteAllTarget(
     this->ProjectTargets.push_back(t);
   }
   for (cmGeneratorTarget const* t : sortedProjectTargets) {
-    if (t->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!t->IsInBuildSystem()) {
       continue;
     }
-    cmProp p = t->GetProperty("EXCLUDE_FROM_ALL");
-    if (!(p && cmIsOn(*p))) {
+    if (!IsExcluded(t->GetLocalGenerator(), t)) {
       defaultTargets.push_back(t);
     }
   }
@@ -564,9 +564,9 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
 {
   GeneratedMakeCommand makeCommand = {};
   std::string gbuild;
-  if (const char* gbuildCached =
+  if (cmProp gbuildCached =
         this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM")) {
-    gbuild = gbuildCached;
+    gbuild = *gbuildCached;
   }
   makeCommand.Add(this->SelectMakeProgram(makeProgram, gbuild));
 
@@ -617,11 +617,10 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
                                             cmLocalGenerator* root)
 {
   fout << "macro PROJ_NAME=" << root->GetProjectName() << '\n';
-  char const* ghsGpjMacros =
+  cmProp ghsGpjMacros =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_GPJ_MACROS");
-  if (nullptr != ghsGpjMacros) {
-    std::vector<std::string> expandedList =
-      cmExpandedList(std::string(ghsGpjMacros));
+  if (ghsGpjMacros) {
+    std::vector<std::string> expandedList = cmExpandedList(*ghsGpjMacros);
     for (std::string const& arg : expandedList) {
       fout << "macro " << arg << '\n';
     }
@@ -633,17 +632,17 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
 {
   /* set primary target */
   std::string tgt;
-  const char* t =
+  cmProp t =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_PRIMARY_TARGET");
-  if (t && *t != '\0') {
-    tgt = t;
+  if (cmNonempty(t)) {
+    tgt = *t;
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_PRIMARY_TARGET");
   } else {
-    const char* a =
+    cmProp a =
       this->GetCMakeInstance()->GetCacheDefinition("CMAKE_GENERATOR_PLATFORM");
-    const char* p =
+    cmProp p =
       this->GetCMakeInstance()->GetCacheDefinition("GHS_TARGET_PLATFORM");
-    tgt = cmStrCat((a ? a : ""), '_', (p ? p : ""), ".tgt");
+    tgt = cmStrCat((a ? *a : ""), '_', (p ? *p : ""), ".tgt");
   }
 
   /* clang-format off */
@@ -654,11 +653,11 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
        << "/CMakeFiles/custom_target.bod" << '\n';
   /* clang-format on */
 
-  char const* const customization =
+  cmProp const customization =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");
-  if (nullptr != customization && strlen(customization) > 0) {
+  if (cmNonempty(customization)) {
     fout << "customization="
-         << cmGlobalGhsMultiGenerator::TrimQuotes(customization) << '\n';
+         << cmGlobalGhsMultiGenerator::TrimQuotes(*customization) << '\n';
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_CUSTOMIZATION");
   }
 }

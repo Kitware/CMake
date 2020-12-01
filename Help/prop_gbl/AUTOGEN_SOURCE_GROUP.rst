@@ -1,6 +1,8 @@
 AUTOGEN_SOURCE_GROUP
 --------------------
 
+.. versionadded:: 3.9
+
 Name of the  :command:`source_group` for :prop_tgt:`AUTOMOC` and
 :prop_tgt:`AUTORCC` generated files.
 

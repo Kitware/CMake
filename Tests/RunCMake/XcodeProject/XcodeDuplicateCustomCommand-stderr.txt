@@ -1,0 +1,13 @@
+^CMake Error in CMakeLists.txt:
+  The custom command generating
+
+    [^
+]*/Tests/RunCMake/XcodeProject/XcodeDuplicateCustomCommand-build/out.txt
+
+  is attached to multiple targets:
+
+    drive[0-9]
+    drive[0-9]
+
+  but none of these is a common dependency of the other\(s\).  This is not
+  allowed by the Xcode "new build system".

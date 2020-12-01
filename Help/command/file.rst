@@ -30,13 +30,16 @@ Synopsis
     file(`SIZE`_ <filename> <out-var>)
     file(`READ_SYMLINK`_ <linkname> <out-var>)
     file(`CREATE_LINK`_ <original> <linkname> [...])
+    file(`CHMOD`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
+    file(`CHMOD_RECURSE`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
 
   `Path Conversion`_
+    file(`REAL_PATH`_ <path> <out-var> [BASE_DIRECTORY <dir>])
     file(`RELATIVE_PATH`_ <out-var> <directory> <file>)
     file({`TO_CMAKE_PATH`_ | `TO_NATIVE_PATH`_} <path> <out-var>)
 
   `Transfer`_
-    file(`DOWNLOAD`_ <url> <file> [...])
+    file(`DOWNLOAD`_ <url> [<file>] [...])
     file(`UPLOAD`_ <file> <url> [...])
 
   `Locking`_
@@ -449,7 +452,7 @@ modified.
 
   file(GENERATE OUTPUT output-file
        <INPUT input-file|CONTENT content>
-       [CONDITION expression])
+       [CONDITION expression] [TARGET target])
 
 Generate an output file for each build configuration supported by the current
 :manual:`CMake Generator <cmake-generators(7)>`.  Evaluate
@@ -478,6 +481,11 @@ from the input content to produce the output content.  The options are:
   A relative path (after evaluating generator expressions) is treated
   with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
   See policy :policy:`CMP0070`.
+
+``TARGET <target>``
+  Specify which target to use when evaluating generator expressions that
+  require a target for evaluation (e.g. ``$<COMPILE_FEATURES:...>``,
+  ``$<TARGET_PROPERTY:prop>``).
 
 Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
 ``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.
@@ -737,8 +745,69 @@ creating the link fails.  It can be useful for handling situations such as
 ``<original>`` and ``<linkname>`` being on different drives or mount points,
 which would make them unable to support a hard link.
 
+.. _CHMOD:
+
+.. code-block:: cmake
+
+  file(CHMOD <files>... <directories>...
+      [PERMISSIONS <permissions>...]
+      [FILE_PERMISSIONS <permissions>...]
+      [DIRECTORY_PERMISSIONS <permissions>...])
+
+Set the permissions for the ``<files>...`` and ``<directories>...`` specified.
+Valid permissions are  ``OWNER_READ``, ``OWNER_WRITE``, ``OWNER_EXECUTE``,
+``GROUP_READ``, ``GROUP_WRITE``, ``GROUP_EXECUTE``, ``WORLD_READ``,
+``WORLD_WRITE``, ``WORLD_EXECUTE``.
+
+Valid combination of keywords are:
+
+``PERMISSIONS``
+  All items are changed.
+
+``FILE_PERMISSIONS``
+  Only files are changed.
+
+``DIRECTORY_PERMISSIONS``
+  Only directories are changed.
+
+``PERMISSIONS`` and ``FILE_PERMISSIONS``
+  ``FILE_PERMISSIONS`` overrides ``PERMISSIONS`` for files.
+
+``PERMISSIONS`` and ``DIRECTORY_PERMISSIONS``
+  ``DIRECTORY_PERMISSIONS`` overrides ``PERMISSIONS`` for directories.
+
+``FILE_PERMISSIONS`` and ``DIRECTORY_PERMISSIONS``
+  Use ``FILE_PERMISSIONS`` for files and ``DIRECTORY_PERMISSIONS`` for
+  directories.
+
+
+.. _CHMOD_RECURSE:
+
+.. code-block:: cmake
+
+  file(CHMOD_RECURSE <files>... <directories>...
+       [PERMISSIONS <permissions>...]
+       [FILE_PERMISSIONS <permissions>...]
+       [DIRECTORY_PERMISSIONS <permissions>...])
+
+Same as `CHMOD`_, but change the permissions of files and directories present in
+the ``<directories>...`` recursively.
+
 Path Conversion
 ^^^^^^^^^^^^^^^
+
+.. _REAL_PATH:
+
+.. code-block:: cmake
+
+  file(REAL_PATH <path> <out-var> [BASE_DIRECTORY <dir>])
+
+Compute the absolute path to an existing file or directory with symlinks
+resolved.
+
+If the provided ``<path>`` is a relative path, it is evaluated relative to the
+given base directory ``<dir>``. If no base directory is provided, the default
+base directory will be :variable:`CMAKE_CURRENT_SOURCE_DIR`.
 
 .. _RELATIVE_PATH:
 
@@ -776,11 +845,14 @@ Transfer
 
 .. code-block:: cmake
 
-  file(DOWNLOAD <url> <file> [<options>...])
+  file(DOWNLOAD <url> [<file>] [<options>...])
   file(UPLOAD   <file> <url> [<options>...])
 
-The ``DOWNLOAD`` mode downloads the given ``<url>`` to a local ``<file>``.
-The ``UPLOAD`` mode uploads a local ``<file>`` to a given ``<url>``.
+The ``DOWNLOAD`` subcommand downloads the given ``<url>`` to a local ``<file>``.
+If ``<file>`` is not specified for ``file(DOWNLOAD)``, the file is not saved.
+This can be useful if you want to know if a file can be downloaded (for example,
+to check that it exists) without actually saving it anywhere. The ``UPLOAD``
+mode uploads a local ``<file>`` to a given ``<url>``.
 
 Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 
@@ -853,10 +925,12 @@ Additional options to ``DOWNLOAD`` are:
 
   Verify that the downloaded content hash matches the expected value, where
   ``ALGO`` is one of the algorithms supported by ``file(<HASH>)``.
-  If it does not match, the operation fails with an error.
+  If it does not match, the operation fails with an error. It is an error to
+  specify this if ``DOWNLOAD`` is not given a ``<file>``.
 
 ``EXPECTED_MD5 <value>``
-  Historical short-hand for ``EXPECTED_HASH MD5=<value>``.
+  Historical short-hand for ``EXPECTED_HASH MD5=<value>``. It is an error to
+  specify this if ``DOWNLOAD`` is not given a ``<file>``.
 
 Locking
 ^^^^^^^
@@ -901,7 +975,7 @@ Archiving
   file(ARCHIVE_CREATE OUTPUT <archive>
     PATHS <paths>...
     [FORMAT <format>]
-    [COMPRESSION <compression>]
+    [COMPRESSION <compression> [COMPRESSION_LEVEL <compression-level>]]
     [MTIME <mtime>]
     [VERBOSE])
 
@@ -918,6 +992,10 @@ The ``7zip`` and ``zip`` archive formats already imply a specific type of
 compression.  The other formats use no compression by default, but can be
 directed to do so with the ``COMPRESSION`` option.  Valid values for
 ``<compression>`` are ``None``, ``BZip2``, ``GZip``, ``XZ``, and ``Zstd``.
+
+The compression level can be specified with the ``COMPRESSION_LEVEL`` option.
+The ``<compression-level>`` should be between 0-9, with the default being 0.
+The ``COMPRESSION`` option must be present when ``COMPRESSION_LEVEL`` is given.
 
 .. note::
   With ``FORMAT`` set to ``raw`` only one file will be compressed with the

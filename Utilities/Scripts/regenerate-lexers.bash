@@ -9,6 +9,8 @@ fi
 
 pushd "${BASH_SOURCE%/*}/../../Source/LexerParser" > /dev/null
 
+extra_args_CommandArgument="--never-interactive --batch"
+
 for lexer in            \
     CommandArgument     \
     CTestResourceGroups \
@@ -22,8 +24,9 @@ do
     in_file=cm${lexer}Lexer.in.l
 
     if [[ (${in_file} -nt ${cxx_file}) || (${in_file} -nt ${h_file}) || (${forced} -gt 0) ]]; then
+    extra_args=`eval echo \\${extra_args_\${lexer}}`
     echo "Generating Lexer ${lexer}"
-        flex --nounistd -DFLEXINT_H --noline --header-file=${h_file} -o${cxx_file} ${in_file}
+        flex --nounistd ${extra_args} -DFLEXINT_H --noline --header-file=${h_file} -o${cxx_file} ${in_file}
         sed -i 's/\s*$//'                       ${h_file} ${cxx_file}   # remove trailing whitespaces
         sed -i '${/^$/d;}'                      ${h_file} ${cxx_file}   # remove blank line at the end
         sed -i '1i#include "cmStandardLexer.h"' ${cxx_file}             # add cmStandardLexer.h include

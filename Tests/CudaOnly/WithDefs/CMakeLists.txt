@@ -1,9 +1,6 @@
+cmake_minimum_required(VERSION 3.18)
+project(WithDefs CUDA)
 
-cmake_minimum_required(VERSION 3.7)
-project (WithDefs CUDA)
-
-#verify that we can pass explicit cuda arch flags
-set(CMAKE_CUDA_ARCHITECTURES 30)
 set(release_compile_defs DEFREL)
 
 #Goal for this example:

@@ -1,6 +1,8 @@
 VERBOSE
 -------
 
+.. versionadded:: 3.14
+
 Activates verbose output from CMake and your build tools of choice when
 you start to actually build your project.
 

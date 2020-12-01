@@ -1,15 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmState_h
-#define cmState_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <functional>
-#include <map>
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "cmDefinitions.h"
@@ -56,6 +55,8 @@ public:
   cmStateSnapshot CreateBaseSnapshot();
   cmStateSnapshot CreateBuildsystemDirectorySnapshot(
     cmStateSnapshot const& originSnapshot);
+  cmStateSnapshot CreateDeferCallSnapshot(
+    cmStateSnapshot const& originSnapshot, std::string const& fileName);
   cmStateSnapshot CreateFunctionCallSnapshot(
     cmStateSnapshot const& originSnapshot, std::string const& fileName);
   cmStateSnapshot CreateMacroCallSnapshot(
@@ -85,6 +86,8 @@ public:
   bool SaveCache(const std::string& path, cmMessenger* messenger);
 
   bool DeleteCache(const std::string& path);
+
+  bool IsCacheLoaded() const;
 
   std::vector<std::string> GetCacheEntryKeys() const;
   cmProp GetCacheEntryValue(std::string const& key) const;
@@ -220,8 +223,8 @@ private:
 
   cmPropertyDefinitionMap PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
-  std::map<std::string, Command> BuiltinCommands;
-  std::map<std::string, Command> ScriptedCommands;
+  std::unordered_map<std::string, Command> BuiltinCommands;
+  std::unordered_map<std::string, Command> ScriptedCommands;
   cmPropertyMap GlobalProperties;
   std::unique_ptr<cmCacheManager> CacheManager;
   std::unique_ptr<cmGlobVerificationManager> GlobVerificationManager;
@@ -249,5 +252,3 @@ private:
   bool NinjaMulti = false;
   Mode CurrentMode = Unknown;
 };
-
-#endif

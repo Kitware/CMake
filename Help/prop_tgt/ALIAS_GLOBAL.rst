@@ -1,6 +1,8 @@
 ALIAS_GLOBAL
 ------------
 
+.. versionadded:: 3.18
+
 Read-only property indicating of whether an :ref:`ALIAS target <Alias Targets>`
 is globally visible.
 

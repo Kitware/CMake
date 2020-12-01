@@ -8,6 +8,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 
@@ -19,12 +20,12 @@ bool cmBuildNameCommand(std::vector<std::string> const& args,
     return false;
   }
   cmMakefile& mf = status.GetMakefile();
-  const char* cacheValue = mf.GetDefinition(args[0]);
+  cmProp cacheValue = mf.GetDefinition(args[0]);
   if (cacheValue) {
     // do we need to correct the value?
     cmsys::RegularExpression reg("[()/]");
-    if (reg.find(cacheValue)) {
-      std::string cv = cacheValue;
+    std::string cv = *cacheValue;
+    if (reg.find(cv)) {
       std::replace(cv.begin(), cv.end(), '/', '_');
       std::replace(cv.begin(), cv.end(), '(', '_');
       std::replace(cv.begin(), cv.end(), ')', '_');

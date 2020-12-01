@@ -96,17 +96,10 @@
 #  if defined(_MSC_VER) && _MSC_VER >= 1800
 #    define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #  endif
-#elif defined(__CYGWIN__)
-#  include <windows.h>
-#  undef _WIN32
 #endif
 
 #if !KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H
 extern char** environ;
-#endif
-
-#ifdef __CYGWIN__
-#  include <sys/cygwin.h>
 #endif
 
 // getpwnam doesn't exist on Windows and Cray Xt3/Catamount
@@ -1290,15 +1283,7 @@ bool SystemTools::PathExists(const std::string& path)
   if (path.empty()) {
     return false;
   }
-#if defined(__CYGWIN__)
-  // Convert path to native windows path if possible.
-  char winpath[MAX_PATH];
-  if (SystemTools::PathCygwinToWin32(path.c_str(), winpath)) {
-    return (GetFileAttributesA(winpath) != INVALID_FILE_ATTRIBUTES);
-  }
-  struct stat st;
-  return lstat(path.c_str(), &st) == 0;
-#elif defined(_WIN32)
+#if defined(_WIN32)
   return (GetFileAttributesW(Encoding::ToWindowsExtendedPath(path).c_str()) !=
           INVALID_FILE_ATTRIBUTES);
 #else
@@ -1320,14 +1305,7 @@ bool SystemTools::FileExists(const std::string& filename)
   if (filename.empty()) {
     return false;
   }
-#if defined(__CYGWIN__)
-  // Convert filename to native windows path if possible.
-  char winpath[MAX_PATH];
-  if (SystemTools::PathCygwinToWin32(filename.c_str(), winpath)) {
-    return (GetFileAttributesA(winpath) != INVALID_FILE_ATTRIBUTES);
-  }
-  return access(filename.c_str(), R_OK) == 0;
-#elif defined(_WIN32)
+#if defined(_WIN32)
   DWORD attr =
     GetFileAttributesW(Encoding::ToWindowsExtendedPath(filename).c_str());
   if (attr == INVALID_FILE_ATTRIBUTES) {
@@ -1433,27 +1411,9 @@ int SystemTools::Stat(const std::string& path, SystemTools::Stat_t* buf)
 #endif
 }
 
-#ifdef __CYGWIN__
-bool SystemTools::PathCygwinToWin32(const char* path, char* win32_path)
-{
-  auto itr = SystemToolsStatics->Cyg2Win32Map.find(path);
-  if (itr != SystemToolsStatics->Cyg2Win32Map.end()) {
-    strncpy(win32_path, itr->second.c_str(), MAX_PATH);
-  } else {
-    if (cygwin_conv_path(CCP_POSIX_TO_WIN_A, path, win32_path, MAX_PATH) !=
-        0) {
-      win32_path[0] = 0;
-    }
-    SystemToolsStatics->Cyg2Win32Map.insert(
-      SystemToolsStatic::StringMap::value_type(path, win32_path));
-  }
-  return win32_path[0] != 0;
-}
-#endif
-
 bool SystemTools::Touch(const std::string& filename, bool create)
 {
-  if (!SystemTools::PathExists(filename)) {
+  if (!SystemTools::FileExists(filename)) {
     if (create) {
       FILE* file = Fopen(filename, "a+b");
       if (file) {

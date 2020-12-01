@@ -12,3 +12,11 @@ in the cache as
 :variable:`CMAKE_ASM<DIALECT>_COMPILER <CMAKE_<LANG>_COMPILER>`. For subsequent
 configuration runs, the environment variable will be ignored in favor of
 :variable:`CMAKE_ASM<DIALECT>_COMPILER <CMAKE_<LANG>_COMPILER>`.
+
+.. note::
+  Options that are required to make the compiler work correctly can be included;
+  they can not be changed.
+
+.. code-block:: console
+
+  $ export ASM="custom-compiler --arg1 --arg2"

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCursesWidget_h
-#define cmCursesWidget_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -68,5 +67,3 @@ protected:
   // The page in the main form this widget is in
   int Page;
 };
-
-#endif // cmCursesWidget_h

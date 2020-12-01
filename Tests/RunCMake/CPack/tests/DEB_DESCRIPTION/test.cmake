@@ -5,7 +5,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "This is the summary line")
 set(_description [[This is the Debian package multiline description.
 
 It must be formatted properly! Otherwise, the result `*.deb`
-package become broken and cant be installed!
+package become broken and cannot be installed!
 
 It may contains `;` characters (even like this `;;;;`). Example:
 

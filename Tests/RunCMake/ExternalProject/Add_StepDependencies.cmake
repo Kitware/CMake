@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
+if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12)
+  cmake_policy(SET CMP0114 NEW)
+else()
+  cmake_policy(SET CMP0114 OLD) # Test deprecated behavior.
+endif()
 
 include(ExternalProject)
 

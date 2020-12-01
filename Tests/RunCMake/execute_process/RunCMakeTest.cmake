@@ -26,3 +26,7 @@ run_cmake_command(EchoCommand3 ${CMAKE_COMMAND}
   ${RunCMake_SOURCE_DIR}/EchoCommand.cmake)
 
 run_cmake_command(EchoVariable ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/EchoVariable.cmake)
+
+run_cmake_command(AnyCommandError ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/AnyCommandError.cmake)
+run_cmake_command(LastCommandError ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/LastCommandError.cmake)
+run_cmake_command(CommandError ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/CommandError.cmake)

@@ -1,0 +1,4 @@
+CMake Error at SeparateArgsOnly.cmake:[0-9]+ \(separate_arguments\):
+  separate_arguments `SEPARATE_ARGS` option requires `PROGRAM' option
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

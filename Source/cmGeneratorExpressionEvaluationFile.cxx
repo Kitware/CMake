@@ -19,11 +19,12 @@
 #include "cmSystemTools.h"
 
 cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
-  std::string input,
+  std::string input, std::string target,
   std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
   std::unique_ptr<cmCompiledGeneratorExpression> condition,
   bool inputIsContent, cmPolicies::PolicyStatus policyStatusCMP0070)
   : Input(std::move(input))
+  , Target(std::move(target))
   , OutputFileExpr(std::move(outputFileExpr))
   , Condition(std::move(condition))
   , InputIsContent(inputIsContent)
@@ -37,9 +38,10 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   std::map<std::string, std::string>& outputFiles, mode_t perm)
 {
   std::string rawCondition = this->Condition->GetInput();
+  cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(Target);
   if (!rawCondition.empty()) {
     std::string condResult =
-      this->Condition->Evaluate(lg, config, nullptr, nullptr, nullptr, lang);
+      this->Condition->Evaluate(lg, config, target, nullptr, nullptr, lang);
     if (condResult == "0") {
       return;
     }
@@ -54,16 +56,10 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     }
   }
 
-  std::string outputFileName = this->OutputFileExpr->Evaluate(
-    lg, config, nullptr, nullptr, nullptr, lang);
+  const std::string outputFileName =
+    this->GetOutputFileName(lg, target, config, lang);
   const std::string& outputContent =
-    inputExpression->Evaluate(lg, config, nullptr, nullptr, nullptr, lang);
-
-  if (cmSystemTools::FileIsFullPath(outputFileName)) {
-    outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
-  } else {
-    outputFileName = this->FixRelativePath(outputFileName, PathForOutput, lg);
-  }
+    inputExpression->Evaluate(lg, config, target, nullptr, nullptr, lang);
 
   auto it = outputFiles.find(outputFileName);
 
@@ -98,11 +94,11 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
 {
   std::vector<std::string> enabledLanguages;
   cmGlobalGenerator* gg = lg->GetGlobalGenerator();
+  cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(Target);
   gg->GetEnabledLanguages(enabledLanguages);
 
   for (std::string const& le : enabledLanguages) {
-    std::string name = this->OutputFileExpr->Evaluate(lg, config, nullptr,
-                                                      nullptr, nullptr, le);
+    std::string const name = this->GetOutputFileName(lg, target, config, le);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(
       name, false, cmSourceFileLocationKind::Known);
     // Tell TraceDependencies that the file is not expected to exist
@@ -125,12 +121,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
   if (this->InputIsContent) {
     inputContent = this->Input;
   } else {
-    std::string inputFileName = this->Input;
-    if (cmSystemTools::FileIsFullPath(inputFileName)) {
-      inputFileName = cmSystemTools::CollapseFullPath(inputFileName);
-    } else {
-      inputFileName = this->FixRelativePath(inputFileName, PathForInput, lg);
-    }
+    const std::string inputFileName = this->GetInputFileName(lg);
     lg->GetMakefile()->AddCMakeDependFile(inputFileName);
     cmSystemTools::GetPermissions(inputFileName.c_str(), perm);
     cmsys::ifstream fin(inputFileName.c_str());
@@ -157,12 +148,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
 
   std::map<std::string, std::string> outputFiles;
 
-  std::vector<std::string> allConfigs;
-  lg->GetMakefile()->GetConfigurations(allConfigs);
-
-  if (allConfigs.empty()) {
-    allConfigs.emplace_back();
-  }
+  std::vector<std::string> allConfigs =
+    lg->GetMakefile()->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   std::vector<std::string> enabledLanguages;
   cmGlobalGenerator* gg = lg->GetGlobalGenerator();
@@ -176,6 +163,36 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
       }
     }
   }
+}
+
+std::string cmGeneratorExpressionEvaluationFile::GetInputFileName(
+  cmLocalGenerator* lg)
+{
+  std::string inputFileName = this->Input;
+
+  if (cmSystemTools::FileIsFullPath(inputFileName)) {
+    inputFileName = cmSystemTools::CollapseFullPath(inputFileName);
+  } else {
+    inputFileName = this->FixRelativePath(inputFileName, PathForInput, lg);
+  }
+
+  return inputFileName;
+}
+
+std::string cmGeneratorExpressionEvaluationFile::GetOutputFileName(
+  cmLocalGenerator* lg, cmGeneratorTarget* target, const std::string& config,
+  const std::string& lang)
+{
+  std::string outputFileName =
+    this->OutputFileExpr->Evaluate(lg, config, target, nullptr, nullptr, lang);
+
+  if (cmSystemTools::FileIsFullPath(outputFileName)) {
+    outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
+  } else {
+    outputFileName = this->FixRelativePath(outputFileName, PathForOutput, lg);
+  }
+
+  return outputFileName;
 }
 
 std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(

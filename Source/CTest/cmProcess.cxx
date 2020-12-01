@@ -545,17 +545,17 @@ std::string cmProcess::GetExitExceptionString()
 #  endif
 #  ifdef SIGABRT
     case SIGABRT:
-      exception_str = "Child aborted";
+      exception_str = "Subprocess aborted";
       break;
 #  endif
 #  ifdef SIGKILL
     case SIGKILL:
-      exception_str = "Child killed";
+      exception_str = "Subprocess killed";
       break;
 #  endif
 #  ifdef SIGTERM
     case SIGTERM:
-      exception_str = "Child terminated";
+      exception_str = "Subprocess terminated";
       break;
 #  endif
 #  ifdef SIGHUP

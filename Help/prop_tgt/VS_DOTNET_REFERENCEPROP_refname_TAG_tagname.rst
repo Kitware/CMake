@@ -1,6 +1,8 @@
 VS_DOTNET_REFERENCEPROP_<refname>_TAG_<tagname>
 -----------------------------------------------
 
+.. versionadded:: 3.10
+
 Defines an XML property ``<tagname>`` for a .NET reference
 ``<refname>``.
 

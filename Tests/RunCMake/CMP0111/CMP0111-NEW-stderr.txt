@@ -1,0 +1,17 @@
+^CMake Error in CMakeLists.txt:
+  IMPORTED_LOCATION not set for imported target "unknown_lib"( configuration
+  "[^"]+")?.
++
+CMake Error in CMakeLists.txt:
+  IMPORTED_LOCATION not set for imported target "static_lib"( configuration
+  "[^"]+")?.
++
+CMake Error in CMakeLists.txt:
+  IMPORTED_IMPLIB not set for imported target "shared_lib"( configuration
+  "[^"]+")?.(
++
+CMake Error in CMakeLists.txt:
+  IMPORTED_(LOCATION|IMPLIB) not set for imported target "(unknown|static|shared)_lib"( configuration
+  "[^"]+")?.)*
++
+CMake Generate step failed.  Build files cannot be regenerated correctly.$

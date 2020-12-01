@@ -1,6 +1,8 @@
 CMAKE_FIND_PACKAGE_SORT_DIRECTION
 ---------------------------------
 
+.. versionadded:: 3.7
+
 The sorting direction used by :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER`.
 It can assume one of the following values:
 

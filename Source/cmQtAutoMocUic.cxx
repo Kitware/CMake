@@ -184,6 +184,7 @@ public:
     std::string DepFile;
     std::string DepFileRuleName;
     std::vector<std::string> HeaderExtensions;
+    std::vector<std::string> ListFiles;
   };
 
   /** Shared common variables.  */
@@ -191,7 +192,7 @@ public:
   {
   public:
     // -- Parse Cache
-    bool ParseCacheChanged = false;
+    std::atomic<bool> ParseCacheChanged = ATOMIC_VAR_INIT(false);
     cmFileTime ParseCacheTime;
     ParseCacheT ParseCache;
 
@@ -1776,16 +1777,24 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
   {
     // Check dependency timestamps
     std::string const sourceDir = SubDirPrefix(sourceFile);
-    for (std::string const& dep : mapping.SourceFile->ParseData->Moc.Depends) {
+    auto& dependencies = mapping.SourceFile->ParseData->Moc.Depends;
+    for (auto it = dependencies.begin(); it != dependencies.end(); ++it) {
+      auto& dep = *it;
+
       // Find dependency file
       auto const depMatch = FindDependency(sourceDir, dep);
       if (depMatch.first.empty()) {
-        Log().Warning(GenT::MOC,
-                      cmStrCat(MessagePath(sourceFile), " depends on ",
-                               MessagePath(dep),
-                               " but the file does not exist."));
-        continue;
+        if (reason != nullptr) {
+          *reason =
+            cmStrCat("Generating ", MessagePath(outputFile), " from ",
+                     MessagePath(sourceFile), ", because its dependency ",
+                     MessagePath(dep), " vanished.");
+        }
+        dependencies.erase(it);
+        BaseEval().ParseCacheChanged = true;
+        return true;
       }
+
       // Test if dependency file is older
       if (outputFileTime.Older(depMatch.second)) {
         if (reason != nullptr) {
@@ -2176,7 +2185,7 @@ void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
     return dependenciesFromDepFile(f.c_str());
   };
 
-  std::vector<std::string> dependencies;
+  std::vector<std::string> dependencies = BaseConst().ListFiles;
   ParseCacheT& parseCache = BaseEval().ParseCache;
   auto processMappingEntry = [&](const MappingMapT::value_type& m) {
     auto cacheEntry = parseCache.GetOrInsert(m.first);
@@ -2257,6 +2266,7 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
       !info.GetString("DEP_FILE_RULE_NAME", BaseConst_.DepFileRuleName,
                       false) ||
       !info.GetStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
+      !info.GetArray("CMAKE_LIST_FILES", BaseConst_.ListFiles, true) ||
       !info.GetArray("HEADER_EXTENSIONS", BaseConst_.HeaderExtensions, true) ||
       !info.GetString("QT_MOC_EXECUTABLE", MocConst_.Executable, false) ||
       !info.GetString("QT_UIC_EXECUTABLE", UicConst_.Executable, false)) {

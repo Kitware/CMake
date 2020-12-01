@@ -5,6 +5,8 @@
 FindICU
 -------
 
+.. versionadded:: 3.7
+
 Find the International Components for Unicode (ICU) libraries and
 programs.
 

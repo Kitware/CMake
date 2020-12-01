@@ -84,13 +84,31 @@ void cmLocalNinjaGenerator::Generate()
     if (!showIncludesPrefix.empty()) {
       cmGlobalNinjaGenerator::WriteComment(this->GetRulesFileStream(),
                                            "localized /showIncludes string");
-      this->GetRulesFileStream()
-        << "msvc_deps_prefix = " << showIncludesPrefix << "\n\n";
+      this->GetRulesFileStream() << "msvc_deps_prefix = ";
+#ifdef WIN32
+      // Ninja uses the ANSI Windows APIs, so strings in the rules file
+      // typically need to be ANSI encoded. However, in this case the compiler
+      // is being invoked using the UTF-8 codepage so the /showIncludes prefix
+      // will be UTF-8 encoded on stdout. Ninja can't successfully compare this
+      // UTF-8 encoded prefix to the ANSI encoded msvc_deps_prefix if it
+      // contains any non-ASCII characters and dependency checking will fail.
+      // As a workaround, leave the msvc_deps_prefix UTF-8 encoded even though
+      // the rest of the file is ANSI encoded.
+      if (GetConsoleOutputCP() == CP_UTF8 && GetACP() != CP_UTF8) {
+        this->GetRulesFileStream().WriteRaw(showIncludesPrefix);
+      } else {
+        this->GetRulesFileStream() << showIncludesPrefix;
+      }
+#else
+      // It's safe to use the standard encoding on other platforms.
+      this->GetRulesFileStream() << showIncludesPrefix;
+#endif
+      this->GetRulesFileStream() << "\n\n";
     }
   }
 
   for (const auto& target : this->GetGeneratorTargets()) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (!target->IsInBuildSystem()) {
       continue;
     }
     auto tg = cmNinjaTargetGenerator::New(target.get());
@@ -102,9 +120,10 @@ void cmLocalNinjaGenerator::Generate()
               this->GetGlobalGenerator()->IsMultiConfig()) {
             cmNinjaBuild phonyAlias("phony");
             this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-              target.get(), phonyAlias.Outputs, "");
+              target.get(), phonyAlias.Outputs, "", DependOnTargetArtifact);
             this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-              target.get(), phonyAlias.ExplicitDeps, config);
+              target.get(), phonyAlias.ExplicitDeps, config,
+              DependOnTargetArtifact);
             this->GetGlobalNinjaGenerator()->WriteBuild(
               *this->GetGlobalNinjaGenerator()->GetConfigFileStream(config),
               phonyAlias);
@@ -115,11 +134,12 @@ void cmLocalNinjaGenerator::Generate()
           if (!this->GetGlobalNinjaGenerator()->GetDefaultConfigs().empty()) {
             cmNinjaBuild phonyAlias("phony");
             this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-              target.get(), phonyAlias.Outputs, "");
+              target.get(), phonyAlias.Outputs, "", DependOnTargetArtifact);
             for (auto const& config :
                  this->GetGlobalNinjaGenerator()->GetDefaultConfigs()) {
               this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-                target.get(), phonyAlias.ExplicitDeps, config);
+                target.get(), phonyAlias.ExplicitDeps, config,
+                DependOnTargetArtifact);
             }
             this->GetGlobalNinjaGenerator()->WriteBuild(
               *this->GetGlobalNinjaGenerator()->GetDefaultFileStream(),
@@ -127,10 +147,11 @@ void cmLocalNinjaGenerator::Generate()
           }
           cmNinjaBuild phonyAlias("phony");
           this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-            target.get(), phonyAlias.Outputs, "all");
+            target.get(), phonyAlias.Outputs, "all", DependOnTargetArtifact);
           for (auto const& config : this->GetConfigNames()) {
             this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
-              target.get(), phonyAlias.ExplicitDeps, config);
+              target.get(), phonyAlias.ExplicitDeps, config,
+              DependOnTargetArtifact);
           }
           this->GetGlobalNinjaGenerator()->WriteBuild(
             *this->GetGlobalNinjaGenerator()->GetDefaultFileStream(),
@@ -291,7 +312,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
   cmProp jobpools =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("JOB_POOLS");
   if (!jobpools) {
-    jobpools = this->GetMakefile()->GetDef("CMAKE_JOB_POOLS");
+    jobpools = this->GetMakefile()->GetDefinition("CMAKE_JOB_POOLS");
   }
   if (jobpools) {
     cmGlobalNinjaGenerator::WriteComment(
@@ -342,7 +363,7 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Write statements declared in CMakeLists.txt:\n"
-     << "# " << this->Makefile->GetDefinition("CMAKE_CURRENT_LIST_FILE")
+     << "# " << this->Makefile->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE")
      << '\n';
   if (this->IsRootMakefile()) {
     os << "# Which is the root file.\n";
@@ -355,8 +376,8 @@ void cmLocalNinjaGenerator::AppendTargetOutputs(cmGeneratorTarget* target,
                                                 cmNinjaDeps& outputs,
                                                 const std::string& config)
 {
-  this->GetGlobalNinjaGenerator()->AppendTargetOutputs(target, outputs,
-                                                       config);
+  this->GetGlobalNinjaGenerator()->AppendTargetOutputs(target, outputs, config,
+                                                       DependOnTargetArtifact);
 }
 
 void cmLocalNinjaGenerator::AppendTargetDepends(cmGeneratorTarget* target,
@@ -668,7 +689,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
 {
   cmProp property_value = this->Makefile->GetProperty("RULE_LAUNCH_CUSTOM");
 
-  if (!property_value || property_value->empty()) {
+  if (!cmNonempty(property_value)) {
     return std::string();
   }
 

@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmBase32_h
-#define cmBase32_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -29,5 +28,3 @@ public:
   std::string encodeString(const unsigned char* input, size_t len,
                            bool padding = true);
 };
-
-#endif

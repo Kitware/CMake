@@ -1,0 +1,4 @@
+CMake Warning \(dev\) at .+FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
+  `find_package\(\)` specify a version range but the module Pseudo does not
+  support this capability.  Only the lower endpoint of the range will be
+  used.

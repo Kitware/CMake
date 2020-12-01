@@ -1,6 +1,8 @@
 VS_CONFIGURATION_TYPE
 ---------------------
 
+.. versionadded:: 3.6
+
 Visual Studio project configuration type.
 
 Sets the ``ConfigurationType`` attribute for a generated Visual Studio project.

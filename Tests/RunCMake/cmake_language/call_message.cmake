@@ -1,1 +1,1 @@
-cmake_language(CALL message WORKS!)
+cmake_language(CALL ${empty} message WORKS!)

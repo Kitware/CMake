@@ -1,6 +1,8 @@
 <PackageName>_ROOT
 ------------------
 
+.. versionadded:: 3.12
+
 Calls to :command:`find_package(<PackageName>)` will search in prefixes
 specified by the ``<PackageName>_ROOT`` CMake variable, where
 ``<PackageName>`` is the name given to the :command:`find_package` call

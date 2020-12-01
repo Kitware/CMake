@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceFile.h"
 
-#include <array>
 #include <utility>
 
 #include "cmGlobalGenerator.h"
@@ -130,13 +129,11 @@ bool cmSourceFile::FindFullPath(std::string* error)
   // Location path
   std::string const& lPath = this->Location.GetFullPath();
   // List of extension lists
-  std::array<std::vector<std::string> const*, 2> const extsLists = {
-    { &makefile->GetCMakeInstance()->GetSourceExtensions(),
-      &makefile->GetCMakeInstance()->GetHeaderExtensions() }
-  };
+  std::vector<std::string> exts =
+    makefile->GetCMakeInstance()->GetAllExtensions();
 
   // Tries to find the file in a given directory
-  auto findInDir = [this, &extsLists, &lPath](std::string const& dir) -> bool {
+  auto findInDir = [this, &exts, &lPath](std::string const& dir) -> bool {
     // Compute full path
     std::string const fullPath = cmSystemTools::CollapseFullPath(lPath, dir);
     // Try full path
@@ -145,14 +142,12 @@ bool cmSourceFile::FindFullPath(std::string* error)
       return true;
     }
     // Try full path with extension
-    for (auto& exts : extsLists) {
-      for (std::string const& ext : *exts) {
-        if (!ext.empty()) {
-          std::string extPath = cmStrCat(fullPath, '.', ext);
-          if (cmSystemTools::FileExists(extPath)) {
-            this->FullPath = extPath;
-            return true;
-          }
+    for (std::string const& ext : exts) {
+      if (!ext.empty()) {
+        std::string extPath = cmStrCat(fullPath, '.', ext);
+        if (cmSystemTools::FileExists(extPath)) {
+          this->FullPath = extPath;
+          return true;
         }
       }
     }
@@ -175,11 +170,9 @@ bool cmSourceFile::FindFullPath(std::string* error)
   // Compose error
   std::string err =
     cmStrCat("Cannot find source file:\n  ", lPath, "\nTried extensions");
-  for (auto exts : extsLists) {
-    for (std::string const& ext : *exts) {
-      err += " .";
-      err += ext;
-    }
+  for (std::string const& ext : exts) {
+    err += " .";
+    err += ext;
   }
   if (error != nullptr) {
     *error = std::move(err);
@@ -387,8 +380,7 @@ const char* cmSourceFile::GetSafeProperty(const std::string& prop) const
 
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 {
-  cmProp p = this->GetProperty(prop);
-  return p && cmIsOn(*p);
+  return cmIsOn(this->GetProperty(prop));
 }
 
 void cmSourceFile::SetProperties(cmPropertyMap properties)

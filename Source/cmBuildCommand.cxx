@@ -6,6 +6,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -94,7 +95,7 @@ bool TwoArgsSignature(std::vector<std::string> const& args,
   cmMakefile& mf = status.GetMakefile();
 
   std::string const& define = args[0];
-  const char* cacheValue = mf.GetDefinition(define);
+  cmProp cacheValue = mf.GetDefinition(define);
 
   std::string configType;
   if (!cmSystemTools::GetEnv("CMAKE_CONFIG_TYPE", configType) ||

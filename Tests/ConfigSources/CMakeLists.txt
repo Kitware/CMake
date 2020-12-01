@@ -8,7 +8,12 @@ project(ConfigSources CXX)
 # Source file(s) named with the configuration(s).
 file(GENERATE
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/config_$<CONFIG>.cpp"
-  CONTENT "void config_$<CONFIG>() {}\n"
+  CONTENT [[
+#if defined(_WIN32) && defined(OBJ_SHARED)
+__declspec(dllexport)
+#endif
+void config_$<CONFIG>() {}
+]]
   )
 
 # Per-config sources via INTERFACE_SOURCES.
@@ -76,3 +81,26 @@ else()
 endif()
 add_library(OneConfigOnly OBJECT "$<$<CONFIG:${one_config}>:${CMAKE_CURRENT_SOURCE_DIR}/iface_src.cpp>")
 set_property(TARGET OneConfigOnly PROPERTY LINKER_LANGUAGE CXX)
+
+
+# ---------------------------------------------------------------------------
+# Makes sure that each configuration uses the correct generated file.
+add_library(ObjLibFromGeneratedSources OBJECT)
+set_property(TARGET ObjLibFromGeneratedSources PROPERTY POSITION_INDEPENDENT_CODE 1)
+target_compile_definitions(ObjLibFromGeneratedSources PRIVATE OBJ_SHARED)
+target_sources(ObjLibFromGeneratedSources PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/config_$<CONFIG>.cpp)
+add_library(SharedLibFromObjLibFromGeneratedSources SHARED shared.cpp)
+target_link_libraries(SharedLibFromObjLibFromGeneratedSources PRIVATE ObjLibFromGeneratedSources)
+
+
+# ---------------------------------------------------------------------------
+# Make sure that additional build-events do not confuse CMake when using generated files.
+add_library(SharedLibFromGeneratedSources SHARED)
+set_property(TARGET SharedLibFromGeneratedSources PROPERTY POSITION_INDEPENDENT_CODE 1)
+target_sources(SharedLibFromGeneratedSources PRIVATE
+  shared.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/config_$<CONFIG>.cpp
+  )
+add_custom_command(TARGET SharedLibFromGeneratedSources POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" "-E" "echo" "$<TARGET_FILE:SharedLibFromGeneratedSources>"
+  )

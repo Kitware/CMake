@@ -20,6 +20,17 @@ execute_process(COMMAND sw_vers -productVersion
 set(CMAKE_OSX_ARCHITECTURES "$ENV{CMAKE_OSX_ARCHITECTURES}" CACHE STRING
   "Build architectures for OSX")
 
+if(NOT CMAKE_CROSSCOMPILING AND
+   CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND
+   CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64" AND
+   CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+  # When building on Apple Silicon (arm64), we need to explicitly specify
+  # the architecture to the toolchain since it will otherwise guess the
+  # architecture based on that of the build system tool.
+  # Set an *internal variable* to tell the generators to do this.
+  set(_CMAKE_APPLE_ARCHS_DEFAULT "arm64")
+endif()
+
 # macOS, iOS, tvOS, and watchOS should lookup compilers from
 # Platform/Apple-${CMAKE_CXX_COMPILER_ID}-<LANG>
 set(CMAKE_EFFECTIVE_SYSTEM_NAME "Apple")
@@ -62,45 +73,36 @@ elseif("${CMAKE_GENERATOR}" MATCHES Xcode
   # Find installed SDKs in either Xcode-4.3+ or pre-4.3 SDKs directory.
   set(_CMAKE_OSX_SDKS_DIR "")
   if(OSX_DEVELOPER_ROOT)
-    foreach(d Platforms/MacOSX.platform/Developer/SDKs SDKs)
-      file(GLOB _CMAKE_OSX_SDKS ${OSX_DEVELOPER_ROOT}/${d}/*)
+    foreach(_d Platforms/MacOSX.platform/Developer/SDKs SDKs)
+      file(GLOB _CMAKE_OSX_SDKS ${OSX_DEVELOPER_ROOT}/${_d}/*)
       if(_CMAKE_OSX_SDKS)
-        set(_CMAKE_OSX_SDKS_DIR ${OSX_DEVELOPER_ROOT}/${d})
+        set(_CMAKE_OSX_SDKS_DIR ${OSX_DEVELOPER_ROOT}/${_d})
         break()
       endif()
     endforeach()
   endif()
 
   if(_CMAKE_OSX_SDKS_DIR)
-    # Select SDK for current OSX version accounting for the known
-    # specially named SDKs.
-    set(_CMAKE_OSX_SDKS_VER_SUFFIX_10.4 "u")
-    set(_CMAKE_OSX_SDKS_VER_SUFFIX_10.3 ".9")
-
-    # find the latest SDK
+    # Find the latest SDK as recommended by Apple (Technical Q&A QA1806)
     set(_CMAKE_OSX_LATEST_SDK_VERSION "0.0")
     file(GLOB _CMAKE_OSX_SDKS RELATIVE "${_CMAKE_OSX_SDKS_DIR}" "${_CMAKE_OSX_SDKS_DIR}/MacOSX*.sdk")
     foreach(_SDK ${_CMAKE_OSX_SDKS})
-      if(_SDK MATCHES "MacOSX([0-9]+\\.[0-9]+)[^/]*\\.sdk" AND CMAKE_MATCH_1 VERSION_GREATER ${_CMAKE_OSX_LATEST_SDK_VERSION})
+      if(IS_DIRECTORY "${_CMAKE_OSX_SDKS_DIR}/${_SDK}"
+         AND _SDK MATCHES "MacOSX([0-9]+\\.[0-9]+)[^/]*\\.sdk"
+         AND CMAKE_MATCH_1 VERSION_GREATER ${_CMAKE_OSX_LATEST_SDK_VERSION})
         set(_CMAKE_OSX_LATEST_SDK_VERSION "${CMAKE_MATCH_1}")
       endif()
     endforeach()
 
-    # pick an SDK that works
-    set(_CMAKE_OSX_SYSROOT_DEFAULT)
-    foreach(ver ${CMAKE_OSX_DEPLOYMENT_TARGET}
-                ${_CURRENT_OSX_VERSION}
-                ${_CMAKE_OSX_LATEST_SDK_VERSION})
-      set(_CMAKE_OSX_DEPLOYMENT_TARGET ${ver})
-      set(_CMAKE_OSX_SDKS_VER ${_CMAKE_OSX_DEPLOYMENT_TARGET}${_CMAKE_OSX_SDKS_VER_SUFFIX_${_CMAKE_OSX_DEPLOYMENT_TARGET}})
-      set(_CMAKE_OSX_SYSROOT_CHECK "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_SDKS_VER}.sdk")
-      if(IS_DIRECTORY "${_CMAKE_OSX_SYSROOT_CHECK}")
-        set(_CMAKE_OSX_SYSROOT_DEFAULT "${_CMAKE_OSX_SYSROOT_CHECK}")
-        break()
-      endif()
-    endforeach()
+    if(NOT _CMAKE_OSX_LATEST_SDK_VERSION STREQUAL "0.0")
+      set(_CMAKE_OSX_SYSROOT_DEFAULT "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_LATEST_SDK_VERSION}.sdk")
+    else()
+      message(WARNING "Could not find any valid SDKs in ${_CMAKE_OSX_SDKS_DIR}")
+    endif()
 
-    if(NOT CMAKE_CROSSCOMPILING AND NOT CMAKE_OSX_DEPLOYMENT_TARGET AND _CURRENT_OSX_VERSION VERSION_LESS _CMAKE_OSX_DEPLOYMENT_TARGET)
+    if(NOT CMAKE_CROSSCOMPILING AND NOT CMAKE_OSX_DEPLOYMENT_TARGET
+       AND (_CURRENT_OSX_VERSION VERSION_LESS _CMAKE_OSX_LATEST_SDK_VERSION
+            OR _CMAKE_OSX_LATEST_SDK_VERSION STREQUAL "0.0"))
       set(CMAKE_OSX_DEPLOYMENT_TARGET ${_CURRENT_OSX_VERSION} CACHE STRING
         "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value." FORCE)
     endif()
@@ -113,8 +115,8 @@ endif()
 # Set cache variable - end user may change this during ccmake or cmake-gui configure.
 # Choose the type based on the current value.
 set(_CMAKE_OSX_SYSROOT_TYPE STRING)
-foreach(v CMAKE_OSX_SYSROOT _CMAKE_OSX_SYSROOT_DEFAULT)
-  if("x${${v}}" MATCHES "/")
+foreach(_v CMAKE_OSX_SYSROOT _CMAKE_OSX_SYSROOT_DEFAULT)
+  if("x${${_v}}" MATCHES "/")
     set(_CMAKE_OSX_SYSROOT_TYPE PATH)
     break()
   endif()
@@ -143,20 +145,26 @@ function(_apple_resolve_supported_archs_for_sdk_from_system_lib sdk_path ret ret
   # Newer SDKs ship text based dylib stub files which contain the architectures supported by the
   # library in text form.
   if(EXISTS "${system_lib_tbd_path}")
-    file(STRINGS "${system_lib_tbd_path}" tbd_lines REGEX "^archs: +\\[.+\\]")
+    file(STRINGS "${system_lib_tbd_path}" tbd_lines REGEX "^(archs|targets): +\\[.+\\]")
     if(NOT tbd_lines)
       set(${ret_failed} TRUE PARENT_SCOPE)
       return()
     endif()
 
     # The tbd architectures line looks like the following:
-    # archs:           [ armv7, armv7s, arm64, arm64e ]
+    #   archs:           [ armv7, armv7s, arm64, arm64e ]
+    # or for version 4 TBD files:
+    #   targets:         [ armv7-ios, armv7s-ios, arm64-ios, arm64e-ios ]
     list(GET tbd_lines 0 first_arch_line)
     string(REGEX REPLACE
-           "archs: +\\[ (.+) \\]" "\\1" arches_comma_separated "${first_arch_line}")
+           "(archs|targets): +\\[ (.+) \\]" "\\2" arches_comma_separated "${first_arch_line}")
     string(STRIP "${arches_comma_separated}" arches_comma_separated)
     string(REPLACE "," ";" arch_list "${arches_comma_separated}")
     string(REPLACE " " "" arch_list "${arch_list}")
+
+    # Remove -platform suffix from target (version 4 only)
+    string(REGEX REPLACE "-[a-z-]+" "" arch_list "${arch_list}")
+
     if(NOT arch_list)
       set(${ret_failed} TRUE PARENT_SCOPE)
       return()

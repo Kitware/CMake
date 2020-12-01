@@ -5,6 +5,9 @@ CMake Tutorial
 
    .. contents::
 
+Introduction
+============
+
 The CMake tutorial provides a step-by-step guide that covers common build
 system issues that CMake helps address. Seeing how various topics all
 work together in an example project can be very helpful. The tutorial
@@ -81,8 +84,8 @@ replaced.
 Next modify ``tutorial.cxx`` to include the configured header file,
 ``TutorialConfig.h``.
 
-Finally, let's print out the version number by updating ``tutorial.cxx`` as
-follows:
+Finally, let's print out the executable name and version number by updating
+``tutorial.cxx`` as follows:
 
 .. literalinclude:: Step2/tutorial.cxx
   :language: c++
@@ -106,7 +109,8 @@ correct flags. The easiest way to enable support for a specific C++ standard
 in CMake is by using the :variable:`CMAKE_CXX_STANDARD` variable. For this
 tutorial, set the :variable:`CMAKE_CXX_STANDARD` variable in the
 ``CMakeLists.txt`` file to 11 and :variable:`CMAKE_CXX_STANDARD_REQUIRED` to
-True:
+True. Make sure to add the ``CMAKE_CXX_STANDARD`` declarations above the call
+to ``add_executable``.
 
 .. literalinclude:: Step2/CMakeLists.txt
   :language: cmake
@@ -120,18 +124,28 @@ Run the :manual:`cmake <cmake(1)>` executable or the
 with your chosen build tool.
 
 For example, from the command line we could navigate to the
-``Help/guide/tutorial`` directory of the CMake source code tree and run the
-following commands:
+``Help/guide/tutorial`` directory of the CMake source code tree and create a
+build directory:
 
 .. code-block:: console
 
   mkdir Step1_build
+
+Next, navigate to the build directory and run CMake to configure the project
+and generate a native build system:
+
+.. code-block:: console
+
   cd Step1_build
   cmake ../Step1
+
+Then call that build system to actually compile/link the project:
+
+.. code-block:: console
+
   cmake --build .
 
-Navigate to the directory where Tutorial was built (likely the make directory
-or a Debug or Release build configuration subdirectory) and run these commands:
+Finally, try to use the newly built ``Tutorial`` with these commands:
 
 .. code-block:: console
 
@@ -212,8 +226,9 @@ libraries to later be linked into the executable. The variable
 classic approach when dealing with many optional components, we will cover
 the modern approach in the next step.
 
-The corresponding changes to the source code are fairly straightforward. First,
-in ``tutorial.cxx``, include the ``MathFunctions.h`` header if we need it:
+The corresponding changes to the source code are fairly straightforward.
+First, in ``tutorial.cxx``, include the ``MathFunctions.h`` header if we
+need it:
 
 .. literalinclude:: Step3/tutorial.cxx
   :language: c++
@@ -242,8 +257,17 @@ Run the :manual:`cmake  <cmake(1)>` executable or the
 :manual:`cmake-gui <cmake-gui(1)>` to configure the project and then build it
 with your chosen build tool. Then run the built Tutorial executable.
 
-Use the :manual:`ccmake <ccmake(1)>` executable or the :manual:`cmake-gui <cmake-gui(1)>`
-to update the value of ``USE_MYMATH``. Rebuild and run the tutorial again.
+Now let's update the value of ``USE_MYMATH``. The easiest way is to use the
+:manual:`cmake-gui <cmake-gui(1)>` or  :manual:`ccmake <ccmake(1)>` if you're
+in the terminal. Or, alternatively, if you want to change the option from the
+command-line, try:
+
+.. code-block:: console
+
+  cmake ../Step2 -DUSE_MYMATH=OFF
+
+Rebuild and run the tutorial again.
+
 Which function gives better results, sqrt or mysqrt?
 
 Adding Usage Requirements for Library (Step 3)
@@ -320,21 +344,32 @@ And to the end of the top-level ``CMakeLists.txt`` we add:
 
 That is all that is needed to create a basic local install of the tutorial.
 
-Run the :manual:`cmake  <cmake(1)>` executable or the
+Now run the :manual:`cmake  <cmake(1)>` executable or the
 :manual:`cmake-gui <cmake-gui(1)>` to configure the project and then build it
-with your chosen build tool. Run the install step by using the ``install``
-option of the :manual:`cmake  <cmake(1)>` command (introduced in 3.15, older
-versions of CMake must use ``make install``) from the command line, or build
-the ``INSTALL`` target from an IDE. This will install the appropriate header
-files, libraries, and executables.
+with your chosen build tool.
+
+Then run the install step by using the ``install`` option of the
+:manual:`cmake  <cmake(1)>` command (introduced in 3.15, older versions of
+CMake must use ``make install``) from the command line. For
+multi-configuration tools, don't forget to use the ``--config`` argument to
+specify the configuration. If using an IDE, simply build the ``INSTALL``
+target. This step will install the appropriate header files, libraries, and
+executables. For example:
+
+.. code-block:: console
+
+  cmake --install .
 
 The CMake variable :variable:`CMAKE_INSTALL_PREFIX` is used to determine the
-root of where the files will be installed. If using ``cmake --install`` a
-custom installation directory can be given via the ``--prefix`` argument. For
-multi-configuration tools, use the ``--config`` argument to specify the
-configuration.
+root of where the files will be installed. If using the ``cmake --install``
+command, the installation prefix can be overridden via the ``--prefix``
+argument. For example:
 
-Verify that the installed Tutorial runs.
+.. code-block:: console
+
+  cmake --install . --prefix "/home/myuser/installdir"
+
+Navigate to the install directory and verify that the installed Tutorial runs.
 
 Testing Support
 ---------------
@@ -520,6 +555,7 @@ We also have to add the current binary directory to the list of include
 directories so that ``Table.h`` can be found and included by ``mysqrt.cxx``.
 
 .. literalinclude:: Step7/MathFunctions/CMakeLists.txt
+  :language: cmake
   :start-after: # state that we depend on our bin
   :end-before: # install rules
 
@@ -675,9 +711,9 @@ The first step is to update the starting section of the top-level
 
 Now that we have made MathFunctions always be used, we will need to update
 the logic of that library. So, in ``MathFunctions/CMakeLists.txt`` we need to
-create a SqrtLibrary that will conditionally be built when ``USE_MYMATH`` is
-enabled. Now, since this is a tutorial, we are going to explicitly require
-that SqrtLibrary is built statically.
+create a SqrtLibrary that will conditionally be built and installed when
+``USE_MYMATH`` is enabled. Now, since this is a tutorial, we are going to
+explicitly require that SqrtLibrary is built statically.
 
 The end result is that ``MathFunctions/CMakeLists.txt`` should look like:
 
@@ -703,7 +739,7 @@ Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
 .. literalinclude:: Step10/MathFunctions/MathFunctions.h
   :language: c++
 
-At this point, if you build everything, you will notice that linking fails
+At this point, if you build everything, you may notice that linking fails
 as we are combining a static library without position independent code with a
 library that has position independent code. The solution to this is to
 explicitly set the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property of
@@ -750,7 +786,7 @@ A common usage of
 :manual:`generator expressions <cmake-generator-expressions(7)>` is to
 conditionally add compiler flags, such as those for language levels or
 warnings. A nice pattern is to associate this information to an ``INTERFACE``
-target allowing this information to propagate. Lets start by constructing an
+target allowing this information to propagate. Let's start by constructing an
 ``INTERFACE`` target and specifying the required C++ standard level of ``11``
 instead of using :variable:`CMAKE_CXX_STANDARD`.
 

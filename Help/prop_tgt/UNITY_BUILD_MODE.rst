@@ -1,6 +1,8 @@
 UNITY_BUILD_MODE
 ----------------
 
+.. versionadded:: 3.18
+
 CMake provides different algorithms for selecting which sources are grouped
 together into a *bucket*. Selection is decided by this property,
 which has the following acceptable values:

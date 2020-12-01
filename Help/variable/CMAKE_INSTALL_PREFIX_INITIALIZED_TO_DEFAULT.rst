@@ -1,6 +1,8 @@
 CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT
 -------------------------------------------
 
+.. versionadded:: 3.7.1
+
 CMake sets this variable to a ``TRUE`` value when the
 :variable:`CMAKE_INSTALL_PREFIX` has just been initialized to
 its default value, typically on the first run of CMake within

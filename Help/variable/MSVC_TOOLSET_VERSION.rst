@@ -1,6 +1,8 @@
 MSVC_TOOLSET_VERSION
 --------------------
 
+.. versionadded:: 3.12
+
 The toolset version of Microsoft Visual C/C++ being used if any.
 If MSVC-like is being used, this variable is set based on the version
 of the compiler as given by the :variable:`MSVC_VERSION` variable.

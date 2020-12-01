@@ -1,6 +1,8 @@
 CACHE
 -----
 
+.. versionadded:: 3.13
+
 Operator to read cache variables.
 
 Use the syntax ``$CACHE{VAR}`` to read cache entry ``VAR``.

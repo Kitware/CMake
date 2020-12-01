@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmSystemTools_h
-#define cmSystemTools_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -363,7 +362,8 @@ public:
                         const std::vector<std::string>& files,
                         cmTarCompression compressType, bool verbose,
                         std::string const& mtime = std::string(),
-                        std::string const& format = std::string());
+                        std::string const& format = std::string(),
+                        int compressionLevel = 0);
   static bool ExtractTar(const std::string& inFileName,
                          const std::vector<std::string>& files, bool verbose);
   // This should be called first thing in main
@@ -389,6 +389,7 @@ public:
   static std::string const& GetCMakeCursesCommand();
   static std::string const& GetCMClDepsCommand();
   static std::string const& GetCMakeRoot();
+  static std::string const& GetHTMLDoc();
 
   /** Get the CWD mapped through the KWSys translation map.  */
   static std::string GetCurrentWorkingDirectory();
@@ -434,6 +435,7 @@ public:
     unsigned int Delay;
   };
   static WindowsFileRetry GetWindowsFileRetry();
+  static WindowsFileRetry GetWindowsDirectoryRetry();
 #endif
 
   /** Get the real path for a given path, removing all symlinks.
@@ -464,5 +466,3 @@ private:
   static bool s_FatalErrorOccured;
   static bool s_DisableRunCommandOutput;
 };
-
-#endif

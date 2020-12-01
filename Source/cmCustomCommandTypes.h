@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCustomCommandTypes_h
-#define cmCustomCommandTypes_h
+#pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -35,5 +34,3 @@ struct cmUtilityOutput
   std::string Name;
   std::string NameCMP0049;
 };
-
-#endif

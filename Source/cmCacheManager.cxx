@@ -162,6 +162,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
       cmSystemTools::Error(message.str());
     }
   }
+  this->CacheLoaded = true;
   return true;
 }
 
@@ -578,10 +579,7 @@ cmProp cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
 bool cmCacheManager::CacheEntry::GetPropertyAsBool(
   const std::string& prop) const
 {
-  if (cmProp value = this->GetProperty(prop)) {
-    return cmIsOn(*value);
-  }
-  return false;
+  return cmIsOn(this->GetProperty(prop));
 }
 
 void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,

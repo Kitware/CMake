@@ -1,6 +1,8 @@
 CMP0061
 -------
 
+.. versionadded:: 3.3
+
 CTest does not by default tell ``make`` to ignore errors (``-i``).
 
 The :command:`ctest_build` and :command:`build_command` commands no

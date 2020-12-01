@@ -1,0 +1,504 @@
+/*
+ * Block comment
+ */
+{
+  // Inline comment
+  "version": 1,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 18,
+    "patch": 0
+  },
+  "vendor": {
+    "example.com/ExampleIDE/1.0": true
+  },
+  "configurePresets": [
+    {
+      "name": "Good",
+      "displayName": "Good Preset",
+      "description": "This preset is meant to test most of the fields when set correctly.",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cmakeExecutable": "/path/does/not/exist/cmake",
+      "vendor": {
+        "example.com/ExampleIDE/1.0": {
+          "transmogrify": true
+        }
+      },
+      "cacheVariables": {
+        "TEST_SOURCE_DIR": {
+          "type": "PATH",
+          "value": "${sourceDir}"
+        },
+        "TEST_SOURCE_PARENT_DIR": {
+          "type": "PATH",
+          "value": "${sourceParentDir}"
+        },
+        "TEST_SOURCE_LIST": {
+          "type": "FILEPATH",
+          "value": "${sourceDir}/CMakeLists.txt"
+        },
+        "TEST_TRUE": {
+          "type": "BOOL",
+          "value": "TRUE"
+        },
+        "TEST_OFF": {
+          "type": "BOOL",
+          "value": "OFF"
+        },
+        "TEST_BOOL_TRUE": true,
+        "TEST_BOOL_FALSE": false,
+        "TEST_TYPED_BOOL_TRUE": {
+          "type": "STRING",
+          "value": true
+        },
+        "TEST_TYPED_BOOL_FALSE": {
+          "type": "STRING",
+          "value": false
+        },
+        "TEST_UNTYPED_BOOL_TRUE": {
+          "value": true
+        },
+        "TEST_UNTYPED_BOOL_FALSE": {
+          "value": false
+        },
+        "TEST_PRESET_NAME": {
+          "type": "STRING",
+          "value": "x${presetName}x"
+        },
+        "TEST_GENERATOR": {
+          "value": "x${generator}x"
+        },
+        "TEST_DOLLAR": {
+          "value": "${dollar}"
+        },
+        "TEST_SOURCE_DIR_NAME": "${sourceDirName}",
+        "TEST_ENV_REF": "$env{TEST_ENV_REF}",
+        "TEST_ENV": "$env{TEST_ENV}",
+        "TEST_D_ENV_REF": "$env{TEST_D_ENV_REF}",
+        "TEST_ENV_OVERRIDE": "$env{TEST_ENV_OVERRIDE}",
+        "TEST_PENV": "$env{TEST_PENV}",
+        "TEST_ENV_REF_PENV": "$env{TEST_ENV_REF_PENV}",
+        "TEST_ENV_REF_P": "$penv{TEST_ENV_REF}",
+        "TEST_ENV_P": "$penv{TEST_ENV}",
+        "TEST_D_ENV_REF_P": "$penv{TEST_D_ENV_REF}",
+        "TEST_ENV_OVERRIDE_P": "$penv{TEST_ENV_OVERRIDE}",
+        "TEST_PENV_P": "$penv{TEST_PENV}",
+        "TEST_ENV_REF_PENV_P": "$penv{TEST_ENV_REF_PENV}",
+        "TEST_MULTIPLE_MACROS": "${presetName} ${generator}",
+        "TEST_EXPANSION": "\\${presetName} ${dollar}{dollar} $unknown{namespace} $en{NOT_ENV} $enve{NOT_ENV} $ \\$ $a",
+        "TEST_TRAILING_DOLLAR": "a $",
+        "TEST_TRAILING_BACKSLASH": "a \\",
+        "TEST_TRAILING_UNKNOWN_NAMESPACE": "$unknown{namespace",
+        "TEST_OVERRIDE_1": {
+          "type": "STRING",
+          "value": "Default value"
+        },
+        "TEST_OVERRIDE_2": "Default value",
+        "TEST_OVERRIDE_3": {
+          "type": "STRING",
+          "value": "Default value"
+        },
+        "TEST_OVERRIDE_4": {
+          "type": "STRING",
+          "value": "Default value"
+        },
+        "TEST_UNDEF": "undef"
+      },
+      "environment": {
+        "TEST_ENV_REF": "$env{TEST_ENV}",
+        "TEST_ENV": "Environment variable",
+        "TEST_D_ENV_REF": "x$env{TEST_ENV_REF}x",
+        "TEST_ENV_OVERRIDE": "Overridden environment variable",
+        "TEST_ENV_REF_PENV": "prefix+$penv{TEST_ENV_REF_PENV}",
+        "TEST_PENV": null
+      }
+    },
+    {
+      "name": "GoodNoArgs",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "GoodBinaryUp",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/../GoodBinaryUp-build"
+    },
+    {
+      "name": "GoodBinaryRelative",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "build"
+    },
+    {
+      "name": "Good Spaces",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "GoodWindowsBackslash",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}\\build"
+    },
+    {
+      "name": "GoodBinaryCmdLine",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "GoodGeneratorCmdLine",
+      "generator": "Invalid Generator",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "InvalidGeneratorCmdLine",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "GoodNoS",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "GoodNoSCachePrep",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceParentDir}/GoodNoSCachePrep-build"
+    },
+    {
+      "name": "GoodNoSCache",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "GoodNoSourceArg",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "GoodInheritanceParentBase",
+      "hidden": true,
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "TEST_VARIABLE": {
+          "type": "STRING",
+          "value": "Some string"
+        }
+      },
+      "environment": {
+        "TEST_ENV": "Some environment variable"
+      }
+    },
+    {
+      "name": "GoodInheritanceParent",
+      "inherits": "GoodInheritanceParentBase"
+    },
+    {
+      "name": "GoodInheritanceChildBase",
+      "hidden": true
+    },
+    {
+      "name": "GoodInheritanceChild",
+      "inherits": "GoodInheritanceChildBase",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "TEST_VARIABLE": {
+          "type": "STRING",
+          "value": "Some string"
+        }
+      },
+      "environment": {
+        "TEST_ENV": "Some environment variable"
+      }
+    },
+    {
+      "name": "GoodInheritanceOverrideBase",
+      "hidden": true,
+      "generator": "Invalid Generator",
+      "binaryDir": "${sourceDir}/../GoodInheritanceBase-build",
+      "cacheVariables": {
+        "PARENT_VARIABLE": {
+          "type": "STRING",
+          "value": "Parent variable"
+        },
+        "OVERRIDDEN_VARIABLE": {
+          "type": "BOOL",
+          "value": "ON"
+        },
+        "DELETED_VARIABLE": "This variable will be deleted"
+      },
+      "environment": {
+        "PARENT_ENV": "Parent environment variable",
+        "OVERRIDDEN_ENV": "This environment variable will be overridden",
+        "DELETED_ENV": "This environment variable will be deleted"
+      }
+    },
+    {
+      "name": "GoodInheritanceOverride",
+      "inherits": "GoodInheritanceOverrideBase",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "OVERRIDDEN_VARIABLE": {
+          "type": "STRING",
+          "value": "Overridden variable"
+        },
+        "CHILD_VARIABLE": {
+          "type": "STRING",
+          "value": "Child variable"
+        },
+        "DELETED_VARIABLE": null
+      },
+      "environment": {
+        "OVERRIDDEN_ENV": "Overridden environment variable",
+        "CHILD_ENV": "Child environment variable",
+        "DELETED_ENV": null
+      }
+    },
+    {
+      "name": "GoodInheritanceOverrideDummy",
+      "inherits": "GoodInheritanceOverride"
+    },
+    {
+      "name": "GoodInheritanceMulti1",
+      "hidden": true,
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "FIRST_VARIABLE": {
+          "type": "STRING",
+          "value": "First variable"
+        },
+        "OVERRIDDEN_VARIABLE": {
+          "type": "STRING",
+          "value": "Overridden variable"
+        }
+      },
+      "environment": {
+        "FIRST_ENV": "First environment variable",
+        "OVERRIDDEN_ENV": "Overridden environment variable"
+      }
+    },
+    {
+      "name": "GoodInheritanceMulti2",
+      "hidden": true,
+      "generator": "Invalid Generator",
+      "binaryDir": "${sourceDir}/../GoodInheritanceMulti2-build",
+      "cacheVariables": {
+        "SECOND_VARIABLE": {
+          "type": "STRING",
+          "value": "Second variable"
+        },
+        "OVERRIDDEN_VARIABLE": {
+          "type": "BOOL",
+          "value": "ON"
+        }
+      },
+      "environment": {
+        "SECOND_ENV": "Second environment variable",
+        "OVERRIDDEN_ENV": "This will be overridden"
+      }
+    },
+    {
+      "name": "GoodInheritanceMulti",
+      "inherits": [
+        "GoodInheritanceMulti1",
+        "GoodInheritanceMulti2"
+      ]
+    },
+    {
+      "name": "GoodInheritanceMultiSecond1",
+      "hidden": true
+    },
+    {
+      "name": "GoodInheritanceMultiSecond2",
+      "hidden": true,
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "GoodInheritanceMultiSecond",
+      "inherits": [
+        "GoodInheritanceMultiSecond1",
+        "GoodInheritanceMultiSecond2"
+      ]
+    },
+    {
+      "name": "GoodInheritanceMacroBase",
+      "hidden": true,
+      "cacheVariables": {
+        "PRESET_NAME": "${presetName}"
+      }
+    },
+    {
+      "name": "GoodInheritanceMacro",
+      "inherits": "GoodInheritanceMacroBase",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "VendorMacro",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "$vendor{unknown.unknownMacro}"
+    },
+    {
+      "name": "InvalidGenerator",
+      "generator": "Invalid Generator",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "UseHiddenPreset",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "hidden": true
+    },
+    {
+      "name": "VisualStudioGeneratorArch",
+      "generator": "@RunCMake_GENERATOR@ Win64",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "VisualStudioWin32",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": "Win32"
+    },
+    {
+      "name": "VisualStudioWin64",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": "x64"
+    },
+    {
+      "name": "VisualStudioWin32Override",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": "Win32"
+    },
+    {
+      "name": "VisualStudioToolset",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "toolset": "Test Toolset"
+    },
+    {
+      "name": "VisualStudioToolsetOverride",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "toolset": "Invalid Toolset"
+    },
+    {
+      "name": "VisualStudioInheritanceParentBase",
+      "hidden": true,
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": "Test Platform",
+      "toolset": "Test Toolset"
+    },
+    {
+      "name": "VisualStudioInheritanceParent",
+      "inherits": "VisualStudioInheritanceParentBase"
+    },
+    {
+      "name": "VisualStudioInheritanceChildBase",
+      "hidden": true
+    },
+    {
+      "name": "VisualStudioInheritanceChild",
+      "inherits": "VisualStudioInheritanceChildBase",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": "Test Platform",
+      "toolset": "Test Toolset"
+    },
+    {
+      "name": "VisualStudioInheritanceOverrideBase",
+      "hidden": true,
+      "architecture": "Invalid Platform",
+      "toolset": "Invalid Toolset"
+    },
+    {
+      "name": "VisualStudioInheritanceOverride",
+      "inherits": "VisualStudioInheritanceOverrideBase",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": "Test Platform",
+      "toolset": "Test Toolset"
+    },
+    {
+      "name": "VisualStudioInheritanceMulti1",
+      "hidden": true,
+      "architecture": "Test Platform",
+      "toolset": "Test Toolset"
+    },
+    {
+      "name": "VisualStudioInheritanceMulti2",
+      "hidden": true,
+      "architecture": "Invalid Platform",
+      "toolset": "Invalid Toolset"
+    },
+    {
+      "name": "VisualStudioInheritanceMulti",
+      "inherits": [
+        "VisualStudioInheritanceMulti1",
+        "VisualStudioInheritanceMulti2"
+      ],
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "VisualStudioInheritanceMultiSecond1",
+      "hidden": true
+    },
+    {
+      "name": "VisualStudioInheritanceMultiSecond2",
+      "hidden": true,
+      "architecture": "Test Platform",
+      "toolset": "Test Toolset"
+    },
+    {
+      "name": "VisualStudioInheritanceMultiSecond",
+      "inherits": [
+        "VisualStudioInheritanceMultiSecond1",
+        "VisualStudioInheritanceMultiSecond2"
+      ],
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "ArchToolsetStrategyNone",
+      "generator": "@RunCMake_GENERATOR@",
+      "architecture": "a",
+      "toolset": "a",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "ArchToolsetStrategyBase",
+      "generator": "@RunCMake_GENERATOR@",
+      "architecture": {
+        "value": "a",
+        "strategy": "external"
+      },
+      "toolset": {
+        "value": "a",
+        "strategy": "external"
+      },
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "ArchToolsetStrategyDefault",
+      "inherits": "ArchToolsetStrategyBase",
+      "architecture": {
+        "strategy": "set"
+      },
+      "toolset": {
+        "strategy": "set"
+      }
+    },
+    {
+      "name": "ArchToolsetStrategyIgnore",
+      "inherits": "ArchToolsetStrategyBase"
+    }
+  ]
+}

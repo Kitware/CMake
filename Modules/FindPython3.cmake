@@ -5,8 +5,14 @@
 FindPython3
 -----------
 
+.. versionadded:: 3.12
+
 Find Python 3 interpreter, compiler and development environment (include
 directories and libraries).
+
+When a version is requested, it can be specified as a simple value or as a
+range. For a detailed description of version range usage and capabilities,
+refer to the :command:`find_package` command.
 
 The following components are supported:
 
@@ -45,7 +51,7 @@ for you.
   If components ``Interpreter`` and ``Development`` (or one of its
   sub-components) are both specified, this module search only for interpreter
   with same platform architecture as the one defined by ``CMake``
-  configuration. This contraint does not apply if only ``Interpreter``
+  configuration. This constraint does not apply if only ``Interpreter``
   component is specified.
 
 Imported Targets
@@ -137,6 +143,9 @@ This module will set the following variables in your project
   System has the Python 3 development artifacts for Python embedding.
 ``Python3_INCLUDE_DIRS``
   The Python 3 include directories.
+``Python3_LINK_OPTIONS``
+  The Python 3 link options. Some configurations require specific link options
+  for a correct build and execution.
 ``Python3_LIBRARIES``
   The Python 3 libraries.
 ``Python3_LIBRARY_DIRS``
@@ -156,7 +165,7 @@ This module will set the following variables in your project
 ``Python3_NumPy_FOUND``
   System has the NumPy.
 ``Python3_NumPy_INCLUDE_DIRS``
-  The NumPy include directries.
+  The NumPy include directories.
 ``Python3_NumPy_VERSION``
   The NumPy version.
 
@@ -186,7 +195,7 @@ Hints
 
   * ``ON``: Corresponding flag is selected.
   * ``OFF``: Corresponding flag is not selected.
-  * ``ANY``: The two posibilties (``ON`` and ``OFF``) will be searched.
+  * ``ANY``: The two possibilities (``ON`` and ``OFF``) will be searched.
 
   From this 3-tuple, various ABIs will be searched starting from the most
   specialized to the most general. Moreover, ``debug`` versions will be
@@ -323,7 +332,7 @@ setting the following variables:
 
 ``Python3_LIBRARY``
   The path to the library. It will be used to compute the
-  variables ``Python3_LIBRARIES``, ``Python3_LIBRAY_DIRS`` and
+  variables ``Python3_LIBRARIES``, ``Python3_LIBRARY_DIRS`` and
   ``Python3_RUNTIME_LIBRARY_DIRS``.
 
 ``Python3_INCLUDE_DIR``
@@ -344,7 +353,7 @@ setting the following variables:
   When an artifact is specified, all ``HINTS`` will be ignored and no search
   will be performed for this artifact.
 
-  If more than one artifact is specified, it is the user's responsability to
+  If more than one artifact is specified, it is the user's responsibility to
   ensure the consistency of the various artifacts.
 
 By default, this module supports multiple calls in different directories of a
@@ -352,7 +361,7 @@ project with different version/component requirements while providing correct
 and consistent results for each call. To support this behavior, ``CMake`` cache
 is not used in the traditional way which can be problematic for interactive
 specification. So, to enable also interactive specification, module behavior
-can be controled with the following variable:
+can be controlled with the following variable:
 
 ``Python3_ARTIFACTS_INTERACTIVE``
   Selects the behavior of the module. This is a boolean variable:

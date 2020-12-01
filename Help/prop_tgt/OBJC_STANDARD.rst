@@ -1,6 +1,8 @@
 OBJC_STANDARD
 -------------
 
+.. versionadded:: 3.16
+
 The OBJC standard whose features are requested to build this target.
 
 This property specifies the OBJC standard whose features are requested

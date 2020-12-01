@@ -5,6 +5,8 @@
 CheckFortranSourceCompiles
 --------------------------
 
+.. versionadded:: 3.1
+
 Check if given Fortran source compiles and links into an executable.
 
 .. command:: check_fortran_source_compiles
@@ -85,82 +87,10 @@ Check if given Fortran source compiles and links into an executable.
 #]=======================================================================]
 
 include_guard(GLOBAL)
+include(Internal/CheckSourceCompiles)
 
 macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
-  if(NOT DEFINED "${VAR}")
-    set(_FAIL_REGEX)
-    set(_SRC_EXT)
-    set(_key)
-    foreach(arg ${ARGN})
-      if("${arg}" MATCHES "^(FAIL_REGEX|SRC_EXT)$")
-        set(_key "${arg}")
-      elseif(_key)
-        list(APPEND _${_key} "${arg}")
-      else()
-        message(FATAL_ERROR "Unknown argument:\n  ${arg}\n")
-      endif()
-    endforeach()
-    if(NOT _SRC_EXT)
-      set(_SRC_EXT F)
-    endif()
-    if(CMAKE_REQUIRED_LINK_OPTIONS)
-      set(CHECK_Fortran_SOURCE_COMPILES_ADD_LINK_OPTIONS
-        LINK_OPTIONS ${CMAKE_REQUIRED_LINK_OPTIONS})
-    else()
-      set(CHECK_Fortran_SOURCE_COMPILES_ADD_LINK_OPTIONS)
-    endif()
-    if(CMAKE_REQUIRED_LIBRARIES)
-      set(CHECK_Fortran_SOURCE_COMPILES_ADD_LIBRARIES
-        LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
-    else()
-      set(CHECK_Fortran_SOURCE_COMPILES_ADD_LIBRARIES)
-    endif()
-    if(CMAKE_REQUIRED_INCLUDES)
-      set(CHECK_Fortran_SOURCE_COMPILES_ADD_INCLUDES
-        "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
-    else()
-      set(CHECK_Fortran_SOURCE_COMPILES_ADD_INCLUDES)
-    endif()
-    file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.${_SRC_EXT}"
-      "${SOURCE}\n")
-
-    if(NOT CMAKE_REQUIRED_QUIET)
-      message(CHECK_START "Performing Test ${VAR}")
-    endif()
-    try_compile(${VAR}
-      ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.${_SRC_EXT}
-      COMPILE_DEFINITIONS -D${VAR} ${CMAKE_REQUIRED_DEFINITIONS}
-      ${CHECK_Fortran_SOURCE_COMPILES_ADD_LINK_OPTIONS}
-      ${CHECK_Fortran_SOURCE_COMPILES_ADD_LIBRARIES}
-      CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CMAKE_REQUIRED_FLAGS}
-      "${CHECK_Fortran_SOURCE_COMPILES_ADD_INCLUDES}"
-      OUTPUT_VARIABLE OUTPUT)
-
-    foreach(_regex ${_FAIL_REGEX})
-      if("${OUTPUT}" MATCHES "${_regex}")
-        set(${VAR} 0)
-      endif()
-    endforeach()
-
-    if(${VAR})
-      set(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
-      if(NOT CMAKE_REQUIRED_QUIET)
-        message(CHECK_PASS "Success")
-      endif()
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Performing Fortran SOURCE FILE Test ${VAR} succeeded with the following output:\n"
-        "${OUTPUT}\n"
-        "Source file was:\n${SOURCE}\n")
-    else()
-      if(NOT CMAKE_REQUIRED_QUIET)
-        message(CHECK_FAIL "Failed")
-      endif()
-      set(${VAR} "" CACHE INTERNAL "Test ${VAR}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Performing Fortran SOURCE FILE Test ${VAR} failed with the following output:\n"
-        "${OUTPUT}\n"
-        "Source file was:\n${SOURCE}\n")
-    endif()
-  endif()
+  # Pass the SRC_EXT we used by default historically.
+  # A user-provided SRC_EXT argument in ARGN will override ours.
+  cmake_check_source_compiles(Fortran "${SOURCE}" ${VAR} SRC_EXT "F" ${ARGN})
 endmacro()

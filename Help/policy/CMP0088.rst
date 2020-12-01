@@ -1,6 +1,8 @@
 CMP0088
 -------
 
+.. versionadded:: 3.14
+
 :module:`FindBISON` runs bison in :variable:`CMAKE_CURRENT_BINARY_DIR`
 when executing.
 
