@@ -174,6 +174,26 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     this->WizardDefaultHeight = option;
   }
 
+  // WizardShowPageList
+  if (const char* option =
+        this->GetOption("CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST")) {
+    if (!this->IsVersionLess("4.0")) {
+      if (this->IsSetToOff("CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST")) {
+        this->WizardShowPageList = "false";
+      } else if (this->IsOn("CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST")) {
+        this->WizardShowPageList = "true";
+      } else {
+        this->WizardShowPageList.clear();
+      }
+    } else {
+      cmCPackIFWLogger(
+        WARNING,
+        "Option CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST is set to value \""
+          << option << "\". But has no any effect for QtIFW less than 4.0 "
+          << "and will be skipped." << std::endl);
+    }
+  }
+
   // TitleColor
   if (const char* option = this->GetOption("CPACK_IFW_PACKAGE_TITLE_COLOR")) {
     this->TitleColor = option;
@@ -406,6 +426,11 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // WizardDefaultHeight
   if (!this->WizardDefaultHeight.empty()) {
     xout.Element("WizardDefaultHeight", this->WizardDefaultHeight);
+  }
+
+  // WizardShowPageList
+  if (!this->IsVersionLess("4.0") && !this->WizardShowPageList.empty()) {
+    xout.Element("WizardShowPageList", this->WizardShowPageList);
   }
 
   // TitleColor

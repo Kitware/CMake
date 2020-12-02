@@ -80,6 +80,10 @@ public:
   /// Wizard height
   std::string WizardDefaultHeight;
 
+  /// Set to false if the widget listing installer pages on the left side
+  /// of the wizard should not be shown
+  std::string WizardShowPageList;
+
   /// Title color
   std::string TitleColor;
 
