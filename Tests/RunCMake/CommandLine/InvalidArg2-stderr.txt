@@ -1,0 +1,2 @@
+^CMake Error: Unknown argument --invalid
+CMake Error: Run 'cmake --help' for all supported options.$
