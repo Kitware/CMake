@@ -182,6 +182,11 @@ bool cmDependsCompiler::CheckDependencies(
           ParseLine(line, depends);
         }
 
+        if (depends.empty()) {
+          // unexpectedly empty, ignore it and continue
+          continue;
+        }
+
         // depending of the effective format of the dependencies file generated
         // by the compiler, the target can be wrongly identified as a
         // dependency so remove it from the list
@@ -189,7 +194,13 @@ bool cmDependsCompiler::CheckDependencies(
           depends.erase(depends.begin());
         }
 
-        if (isValidPath) {
+        // ensure source file is the first dependency
+        if (depends.front() != source) {
+          cm::erase(depends, source);
+          if (!isValidPath) {
+            depends.insert(depends.begin(), source);
+          }
+        } else if (isValidPath) {
           // remove first dependency because it must not be filtered out
           depends.erase(depends.begin());
         }
