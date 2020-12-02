@@ -42,6 +42,9 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     std::string sep;
     for (std::unique_ptr<cmTargetExport> const& te :
          this->IEGen->GetExportSet()->GetTargetExports()) {
+      if (te->NamelinkOnly) {
+        continue;
+      }
       expectedTargets += sep + this->Namespace + te->Target->GetExportName();
       sep = " ";
       if (this->ExportedTargets.insert(te->Target).second) {
