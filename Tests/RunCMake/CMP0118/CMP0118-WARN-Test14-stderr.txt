@@ -1,0 +1,57 @@
+^Generated_source0\.cpp: # 1a # GENERATED = `1`
+Generated_source0\.cpp: # 1b # GENERATED = `1`
+Generated_source0\.cpp: # 2a # GENERATED = `1`
+Generated_source0\.cpp: # 2b # GENERATED = `1`
+Generated_source0\.cpp: # 3a # GENERATED = `0`
+Generated_source0\.cpp: # 3b # GENERATED = `0`
+Generated_source1\.cpp: # 1a # GENERATED = `1`
+Generated_source1\.cpp: # 1b # GENERATED = `1`
+Generated_source1\.cpp: # 2a # GENERATED = `1`
+Generated_source1\.cpp: # 2b # GENERATED = `1`
+Generated_source1\.cpp: # 3a # GENERATED = `0`
+Generated_source1\.cpp: # 3b # GENERATED = `0`
+Generated_source2\.cpp: # 1a # GENERATED = `1`
+Generated_source2\.cpp: # 1b # GENERATED = `1`
+Generated_source2\.cpp: # 2a # GENERATED = `1`
+Generated_source2\.cpp: # 2b # GENERATED = `1`
+Generated_source2\.cpp: # 3a # GENERATED = `0`
+Generated_source2\.cpp: # 3b # GENERATED = `0`
+Generated_source3\.cpp: # 1a # GENERATED = `1`
+Generated_source3\.cpp: # 1b # GENERATED = `1`
+Generated_source3\.cpp: # 2a # GENERATED = `1`
+Generated_source3\.cpp: # 2b # GENERATED = `1`
+Generated_source3\.cpp: # 3a # GENERATED = `0`
+Generated_source3\.cpp: # 3b # GENERATED = `0`
+Generated_source4\.cpp: # 1a # GENERATED = `0`
+Generated_source4\.cpp: # 1b # GENERATED = `0`
+Generated_source4\.cpp: # 2a # GENERATED = `0`
+Generated_source4\.cpp: # 2b # GENERATED = `0`
+Generated_source4\.cpp: # 3a # GENERATED = `0`
+Generated_source4\.cpp: # 3b # GENERATED = `0`
+Generated_source5\.cpp: # 1a # GENERATED = `1`
+Generated_source5\.cpp: # 1b # GENERATED = `1`
+Generated_source5\.cpp: # 2a # GENERATED = `1`
+Generated_source5\.cpp: # 2b # GENERATED = `1`
+Generated_source5\.cpp: # 3a # GENERATED = `0`
+Generated_source5\.cpp: # 3b # GENERATED = `0`
+Generated_source6\.cpp: # 1a # GENERATED = `1`
+Generated_source6\.cpp: # 1b # GENERATED = `1`
+Generated_source6\.cpp: # 2a # GENERATED = `1`
+Generated_source6\.cpp: # 2b # GENERATED = `1`
+Generated_source6\.cpp: # 3a # GENERATED = `0`
+Generated_source6\.cpp: # 3b # GENERATED = `0`
+CMake Error at CMP0118-Common-Test14\.cmake:[0-9]+ \(add_executable\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/CMP0118-WARN-Test14-build/Generated_source4\.cpp
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test14\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test14\.cmake:[0-9]+ \(add_executable\):
+  No SOURCES given to target: executable4
+Call Stack \(most recent call first\):
+  CMP0118-WARN-Test14\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

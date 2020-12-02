@@ -250,9 +250,48 @@ bool HandleGetCommand(std::vector<std::string> const& args,
   return true;
 }
 
+bool HandleSetCommand(std::vector<std::string> const& args,
+                      cmExecutionStatus& status)
+{
+  if (args.size() < 3 || args.size() > 4) {
+    status.SetError("SET must be called with two or three arguments.");
+    return false;
+  }
+
+  if (args[1].empty()) {
+    status.SetError("Invalid name for path variable.");
+    return false;
+  }
+
+  static NormalizeParser const parser;
+
+  const auto arguments = parser.Parse(args);
+
+  if (parser.GetInputs().size() != 1) {
+    status.SetError("SET called with unexpected arguments.");
+    return false;
+  }
+
+  auto path =
+    cmCMakePath(parser.GetInputs().front(), cmCMakePath::native_format);
+
+  if (arguments.Normalize) {
+    path = path.Normal();
+  }
+
+  status.GetMakefile().AddDefinition(args[1], path.GenericString());
+
+  return true;
+}
+
 bool HandleAppendCommand(std::vector<std::string> const& args,
                          cmExecutionStatus& status)
 {
+  if (args[1].empty()) {
+    status.SetError("Invalid name for path variable.");
+    return false;
+  }
+
   static OutputVariableParser const parser{};
 
   const auto arguments = parser.Parse(args);
@@ -272,8 +311,8 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
   return true;
 }
 
-bool HandleConcatCommand(std::vector<std::string> const& args,
-                         cmExecutionStatus& status)
+bool HandleAppendStringCommand(std::vector<std::string> const& args,
+                               cmExecutionStatus& status)
 {
   static OutputVariableParser const parser{};
 
@@ -546,16 +585,6 @@ bool HandleRelativePathCommand(std::vector<std::string> const& args,
     });
 }
 
-bool HandleProximatePathCommand(std::vector<std::string> const& args,
-                                cmExecutionStatus& status)
-{
-  return HandleTransformPathCommand(
-    args, status,
-    [](const cmCMakePath& path, const std::string& base) -> cmCMakePath {
-      return path.Proximate(base);
-    });
-}
-
 bool HandleAbsolutePathCommand(std::vector<std::string> const& args,
                                cmExecutionStatus& status)
 {
@@ -565,40 +594,6 @@ bool HandleAbsolutePathCommand(std::vector<std::string> const& args,
       return path.Absolute(base);
     },
     true);
-}
-
-bool HandleCMakePathCommand(std::vector<std::string> const& args,
-                            cmExecutionStatus& status)
-{
-  if (args.size() < 3 || args.size() > 4) {
-    status.SetError("CMAKE_PATH must be called with two or three arguments.");
-    return false;
-  }
-
-  static NormalizeParser const parser;
-
-  const auto arguments = parser.Parse(args);
-
-  if (parser.GetInputs().size() != 1) {
-    status.SetError("CMAKE_PATH called with unexpected arguments.");
-    return false;
-  }
-
-  if (args[1].empty()) {
-    status.SetError("Invalid name for output variable.");
-    return false;
-  }
-
-  auto path =
-    cmCMakePath(parser.GetInputs().front(), cmCMakePath::native_format);
-
-  if (arguments.Normalize) {
-    path = path.Normal();
-  }
-
-  status.GetMakefile().AddDefinition(args[1], path.GenericString());
-
-  return true;
 }
 
 bool HandleNativePathCommand(std::vector<std::string> const& args,
@@ -737,12 +732,7 @@ bool HandleCompareCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::string inputPath;
-  if (!getInputPath(args[1], status, inputPath)) {
-    return false;
-  }
-
-  cmCMakePath path1(inputPath);
+  cmCMakePath path1(args[1]);
   cmCMakePath path2(args[3]);
   auto result = op->second(path1, path2);
 
@@ -987,17 +977,16 @@ bool cmCMakePathCommand(std::vector<std::string> const& args,
 
   static cmSubcommandTable const subcommand{
     { "GET"_s, HandleGetCommand },
+    { "SET"_s, HandleSetCommand },
     { "APPEND"_s, HandleAppendCommand },
-    { "CONCAT"_s, HandleConcatCommand },
+    { "APPEND_STRING"_s, HandleAppendStringCommand },
     { "REMOVE_FILENAME"_s, HandleRemoveFilenameCommand },
     { "REPLACE_FILENAME"_s, HandleReplaceFilenameCommand },
     { "REMOVE_EXTENSION"_s, HandleRemoveExtensionCommand },
     { "REPLACE_EXTENSION"_s, HandleReplaceExtensionCommand },
     { "NORMAL_PATH"_s, HandleNormalPathCommand },
     { "RELATIVE_PATH"_s, HandleRelativePathCommand },
-    { "PROXIMATE_PATH"_s, HandleProximatePathCommand },
     { "ABSOLUTE_PATH"_s, HandleAbsolutePathCommand },
-    { "CMAKE_PATH"_s, HandleCMakePathCommand },
     { "NATIVE_PATH"_s, HandleNativePathCommand },
     { "CONVERT"_s, HandleConvertCommand },
     { "COMPARE"_s, HandleCompareCommand },

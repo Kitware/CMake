@@ -122,7 +122,7 @@ bool cmCTestSubdirCommand(std::vector<std::string> const& args,
       readit = status.GetMakefile().ReadDependentFile(fname);
     }
     if (!readit) {
-      status.SetError(cmStrCat("Could not find include file: ", fname));
+      status.SetError(cmStrCat("Could not load include file: ", fname));
       return false;
     }
   }

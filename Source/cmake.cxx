@@ -132,6 +132,131 @@ namespace {
 using JsonValueMapType = std::unordered_map<std::string, Json::Value>;
 #endif
 
+struct CommandArgument
+{
+  enum struct Values
+  {
+    Zero,
+    One,
+    Two,
+  };
+
+  std::string InvalidSyntaxMessage;
+  std::string InvalidValueMessage;
+  std::string Name;
+  CommandArgument::Values Type;
+  std::function<bool(std::string const& value, cmake* state)> StoreCall;
+
+  template <typename FunctionType>
+  CommandArgument(std::string n, CommandArgument::Values t,
+                  FunctionType&& func)
+    : InvalidSyntaxMessage(cmStrCat("Invalid syntax used with ", n))
+    , InvalidValueMessage(cmStrCat("Invalid value used with ", n))
+    , Name(std::move(n))
+    , Type(t)
+    , StoreCall(std::forward<FunctionType>(func))
+  {
+  }
+
+  template <typename FunctionType>
+  CommandArgument(std::string n, std::string failedMsg,
+                  CommandArgument::Values t, FunctionType&& func)
+    : InvalidSyntaxMessage(cmStrCat("Invalid syntax used with ", n))
+    , InvalidValueMessage(std::move(failedMsg))
+    , Name(std::move(n))
+    , Type(t)
+    , StoreCall(std::forward<FunctionType>(func))
+  {
+  }
+
+  bool matches(std::string const& input) const
+  {
+    return cmHasPrefix(input, this->Name);
+  }
+
+  template <typename T>
+  bool parse(std::string const& input, T& index,
+             std::vector<std::string> const& allArgs, cmake* state) const
+  {
+    enum struct ParseMode
+    {
+      Valid,
+      Invalid,
+      SyntaxError,
+      ValueError
+    };
+    ParseMode parseState = ParseMode::Valid;
+
+    // argument is the next parameter
+    if (this->Type == CommandArgument::Values::Zero) {
+      if (input.size() == this->Name.size()) {
+        parseState = this->StoreCall(input, state) ? ParseMode::Valid
+                                                   : ParseMode::Invalid;
+      } else {
+        parseState = ParseMode::SyntaxError;
+      }
+
+    } else if (this->Type == CommandArgument::Values::One) {
+      if (input.size() == this->Name.size()) {
+        ++index;
+        if (index >= allArgs.size() || allArgs[index][0] == '-') {
+          parseState = ParseMode::ValueError;
+        } else {
+          parseState = this->StoreCall(allArgs[index], state)
+            ? ParseMode::Valid
+            : ParseMode::Invalid;
+        }
+      } else {
+        // parse the string to get the value
+        auto possible_value = cm::string_view(input).substr(this->Name.size());
+        if (possible_value.empty()) {
+          parseState = ParseMode::SyntaxError;
+          parseState = ParseMode::ValueError;
+        } else if (possible_value[0] == '=') {
+          possible_value.remove_prefix(1);
+          if (possible_value.empty()) {
+            parseState = ParseMode::ValueError;
+          } else {
+            parseState = this->StoreCall(std::string(possible_value), state)
+              ? ParseMode::Valid
+              : ParseMode::Invalid;
+          }
+        }
+        if (parseState == ParseMode::Valid) {
+          parseState = this->StoreCall(std::string(possible_value), state)
+            ? ParseMode::Valid
+            : ParseMode::Invalid;
+        }
+      }
+    } else if (this->Type == CommandArgument::Values::Two) {
+      if (input.size() == this->Name.size()) {
+        if (index + 2 >= allArgs.size() || allArgs[index + 1][0] == '-' ||
+            allArgs[index + 2][0] == '-') {
+          parseState = ParseMode::ValueError;
+        } else {
+          index += 2;
+          parseState =
+            this->StoreCall(cmStrCat(allArgs[index - 1], ";", allArgs[index]),
+                            state)
+            ? ParseMode::Valid
+            : ParseMode::Invalid;
+        }
+      }
+    }
+
+    if (parseState == ParseMode::SyntaxError) {
+      cmSystemTools::Error(this->InvalidSyntaxMessage);
+    } else if (parseState == ParseMode::ValueError) {
+      cmSystemTools::Error(this->InvalidValueMessage);
+    }
+    return (parseState == ParseMode::Valid);
+  }
+};
+
+auto IgnoreAndTrueLambda = [](std::string const&, cmake*) -> bool {
+  return true;
+};
+
 } // namespace
 
 static bool cmakeCheckStampFile(const std::string& stampName);
@@ -263,7 +388,7 @@ Json::Value cmake::ReportCapabilitiesJson() const
   }
   obj["generators"] = generators;
   obj["fileApi"] = cmFileAPI::ReportCapabilities();
-  obj["serverMode"] = true;
+  obj["serverMode"] = false;
 
   return obj;
 }
@@ -384,152 +509,145 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 {
   auto findPackageMode = false;
   auto seenScriptOption = false;
-  for (unsigned int i = 1; i < args.size(); ++i) {
+
+  auto DefineLambda = [](std::string const& entry, cmake* state) -> bool {
+    std::string var;
+    std::string value;
+    cmStateEnums::CacheEntryType type = cmStateEnums::UNINITIALIZED;
+    if (cmState::ParseCacheEntry(entry, var, value, type)) {
+#ifndef CMAKE_BOOTSTRAP
+      state->UnprocessedPresetVariables.erase(var);
+#endif
+      state->ProcessCacheArg(var, value, type);
+    } else {
+      cmSystemTools::Error(cmStrCat("Parse error in command line argument: ",
+                                    entry, "\n Should be: VAR:type=value\n"));
+      return false;
+    }
+    return true;
+  };
+
+  auto WarningLambda = [](cm::string_view entry, cmake* state) -> bool {
+    bool foundNo = false;
+    bool foundError = false;
+
+    if (cmHasLiteralPrefix(entry, "no-")) {
+      foundNo = true;
+      entry.remove_prefix(3);
+    }
+
+    if (cmHasLiteralPrefix(entry, "error=")) {
+      foundError = true;
+      entry.remove_prefix(6);
+    }
+
+    if (entry.empty()) {
+      cmSystemTools::Error("No warning name provided.");
+      return false;
+    }
+
+    std::string const name = std::string(entry);
+    if (!foundNo && !foundError) {
+      // -W<name>
+      state->DiagLevels[name] = std::max(state->DiagLevels[name], DIAG_WARN);
+    } else if (foundNo && !foundError) {
+      // -Wno<name>
+      state->DiagLevels[name] = DIAG_IGNORE;
+    } else if (!foundNo && foundError) {
+      // -Werror=<name>
+      state->DiagLevels[name] = DIAG_ERROR;
+    } else {
+      // -Wno-error=<name>
+      // This can downgrade an error to a warning, but should not enable
+      // or disable a warning in the first place.
+      auto dli = state->DiagLevels.find(name);
+      if (dli != state->DiagLevels.end()) {
+        dli->second = std::min(dli->second, DIAG_WARN);
+      }
+    }
+    return true;
+  };
+
+  auto UnSetLambda = [](std::string const& entryPattern,
+                        cmake* state) -> bool {
+    cmsys::RegularExpression regex(
+      cmsys::Glob::PatternToRegex(entryPattern, true, true));
+    // go through all cache entries and collect the vars which will be
+    // removed
+    std::vector<std::string> entriesToDelete;
+    std::vector<std::string> cacheKeys = state->State->GetCacheEntryKeys();
+    for (std::string const& ck : cacheKeys) {
+      cmStateEnums::CacheEntryType t = state->State->GetCacheEntryType(ck);
+      if (t != cmStateEnums::STATIC) {
+        if (regex.find(ck)) {
+          entriesToDelete.push_back(ck);
+        }
+      }
+    }
+
+    // now remove them from the cache
+    for (std::string const& currentEntry : entriesToDelete) {
+#ifndef CMAKE_BOOTSTRAP
+      state->UnprocessedPresetVariables.erase(currentEntry);
+#endif
+      state->State->RemoveCacheEntry(currentEntry);
+    }
+    return true;
+  };
+
+  auto ScriptLambda = [&](std::string const& path, cmake* state) -> bool {
+    // Register fake project commands that hint misuse in script mode.
+    GetProjectCommandsInScriptMode(state->GetState());
+    // Documented behaviour of CMAKE{,_CURRENT}_{SOURCE,BINARY}_DIR is to be
+    // set to $PWD for -P mode.
+    state->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
+    state->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
+    state->ReadListFile(args, path);
+    seenScriptOption = true;
+    return true;
+  };
+
+  std::vector<CommandArgument> arguments = {
+    CommandArgument{ "-D", "-D must be followed with VAR=VALUE.",
+                     CommandArgument::Values::One, DefineLambda },
+    CommandArgument{ "-W", "-W must be followed with [no-]<name>.",
+                     CommandArgument::Values::One, WarningLambda },
+    CommandArgument{ "-U", "-U must be followed with VAR.",
+                     CommandArgument::Values::One, UnSetLambda },
+    CommandArgument{ "-C", "-C must be followed by a file name.",
+                     CommandArgument::Values::One,
+                     [&](std::string const& value, cmake* state) -> bool {
+                       cmSystemTools::Stdout("loading initial cache file " +
+                                             value + "\n");
+                       // Resolve script path specified on command line
+                       // relative to $PWD.
+                       auto path = cmSystemTools::CollapseFullPath(value);
+                       state->ReadListFile(args, path);
+                       return true;
+                     } },
+    CommandArgument{ "-P", "-P must be followed by a file name.",
+                     CommandArgument::Values::One, ScriptLambda },
+    CommandArgument{ "--find-package", CommandArgument::Values::Zero,
+                     [&](std::string const&, cmake*) -> bool {
+                       findPackageMode = true;
+                       return true;
+                     } },
+  };
+  for (decltype(args.size()) i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
-    if (cmHasLiteralPrefix(arg, "-D")) {
-      std::string entry = arg.substr(2);
-      if (entry.empty()) {
-        ++i;
-        if (i < args.size()) {
-          entry = args[i];
-        } else {
-          cmSystemTools::Error("-D must be followed with VAR=VALUE.");
-          return false;
-        }
-      }
-      std::string var;
-      std::string value;
-      cmStateEnums::CacheEntryType type = cmStateEnums::UNINITIALIZED;
-      if (cmState::ParseCacheEntry(entry, var, value, type)) {
-#ifndef CMAKE_BOOTSTRAP
-        this->UnprocessedPresetVariables.erase(var);
-#endif
-        this->ProcessCacheArg(var, value, type);
-      } else {
-        cmSystemTools::Error("Parse error in command line argument: " + arg +
-                             "\n" + "Should be: VAR:type=value\n");
-        return false;
-      }
-    } else if (cmHasLiteralPrefix(arg, "-W")) {
-      std::string entry = arg.substr(2);
-      if (entry.empty()) {
-        ++i;
-        if (i < args.size()) {
-          entry = args[i];
-        } else {
-          cmSystemTools::Error("-W must be followed with [no-]<name>.");
-          return false;
-        }
-      }
 
-      std::string name;
-      bool foundNo = false;
-      bool foundError = false;
-      unsigned int nameStartPosition = 0;
-
-      if (entry.find("no-", nameStartPosition) == 0) {
-        foundNo = true;
-        nameStartPosition += 3;
-      }
-
-      if (entry.find("error=", nameStartPosition) == 0) {
-        foundError = true;
-        nameStartPosition += 6;
-      }
-
-      name = entry.substr(nameStartPosition);
-      if (name.empty()) {
-        cmSystemTools::Error("No warning name provided.");
-        return false;
-      }
-
-      if (!foundNo && !foundError) {
-        // -W<name>
-        this->DiagLevels[name] = std::max(this->DiagLevels[name], DIAG_WARN);
-      } else if (foundNo && !foundError) {
-        // -Wno<name>
-        this->DiagLevels[name] = DIAG_IGNORE;
-      } else if (!foundNo && foundError) {
-        // -Werror=<name>
-        this->DiagLevels[name] = DIAG_ERROR;
-      } else {
-        // -Wno-error=<name>
-        this->DiagLevels[name] = std::min(this->DiagLevels[name], DIAG_WARN);
-      }
-    } else if (cmHasLiteralPrefix(arg, "-U")) {
-      std::string entryPattern = arg.substr(2);
-      if (entryPattern.empty()) {
-        ++i;
-        if (i < args.size()) {
-          entryPattern = args[i];
-        } else {
-          cmSystemTools::Error("-U must be followed with VAR.");
-          return false;
-        }
-      }
-      cmsys::RegularExpression regex(
-        cmsys::Glob::PatternToRegex(entryPattern, true, true));
-      // go through all cache entries and collect the vars which will be
-      // removed
-      std::vector<std::string> entriesToDelete;
-      std::vector<std::string> cacheKeys = this->State->GetCacheEntryKeys();
-      for (std::string const& ck : cacheKeys) {
-        cmStateEnums::CacheEntryType t = this->State->GetCacheEntryType(ck);
-        if (t != cmStateEnums::STATIC) {
-          if (regex.find(ck)) {
-            entriesToDelete.push_back(ck);
-          }
-        }
-      }
-
-      // now remove them from the cache
-      for (std::string const& currentEntry : entriesToDelete) {
-#ifndef CMAKE_BOOTSTRAP
-        this->UnprocessedPresetVariables.erase(currentEntry);
-#endif
-        this->State->RemoveCacheEntry(currentEntry);
-      }
-    } else if (cmHasLiteralPrefix(arg, "-C")) {
-      std::string path = arg.substr(2);
-      if (path.empty()) {
-        ++i;
-        if (i < args.size()) {
-          path = args[i];
-        } else {
-          cmSystemTools::Error("-C must be followed by a file name.");
-          return false;
-        }
-      }
-      cmSystemTools::Stdout("loading initial cache file " + path + "\n");
-      // Resolve script path specified on command line relative to $PWD.
-      path = cmSystemTools::CollapseFullPath(path);
-      this->ReadListFile(args, path);
-    } else if (cmHasLiteralPrefix(arg, "-P")) {
-      i++;
-      if (i >= args.size()) {
-        cmSystemTools::Error("-P must be followed by a file name.");
-        return false;
-      }
-      std::string path = args[i];
-      if (path.empty()) {
-        cmSystemTools::Error("No cmake script provided.");
-        return false;
-      }
-      // Register fake project commands that hint misuse in script mode.
-      GetProjectCommandsInScriptMode(this->GetState());
-      // Documented behaviour of CMAKE{,_CURRENT}_{SOURCE,BINARY}_DIR is to be
-      // set to $PWD for -P mode.
-      this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
-      this->SetHomeOutputDirectory(
-        cmSystemTools::GetCurrentWorkingDirectory());
-      this->ReadListFile(args, path);
-      seenScriptOption = true;
-    } else if (arg == "--" && seenScriptOption) {
+    if (arg == "--" && seenScriptOption) {
       // Stop processing CMake args and avoid possible errors
       // when arbitrary args are given to CMake script.
       break;
-    } else if (cmHasLiteralPrefix(arg, "--find-package")) {
-      findPackageMode = true;
+    }
+    for (auto const& m : arguments) {
+      if (m.matches(arg)) {
+        const bool parsedCorrectly = m.parse(arg, i, args, this);
+        if (!parsedCorrectly) {
+          return false;
+        }
+      }
     }
   }
 
@@ -734,249 +852,315 @@ void cmake::SetArgs(const std::vector<std::string>& args)
   std::string presetName;
   bool listPresets = false;
 #endif
-  for (unsigned int i = 1; i < args.size(); ++i) {
-    std::string const& arg = args[i];
-    if (cmHasLiteralPrefix(arg, "-H") || cmHasLiteralPrefix(arg, "-S")) {
-      std::string path = arg.substr(2);
-      if (path.empty()) {
-        ++i;
-        if (i >= args.size()) {
-          cmSystemTools::Error("No source directory specified for -S");
-          return;
-        }
-        path = args[i];
-        if (path[0] == '-') {
-          cmSystemTools::Error("No source directory specified for -S");
-          return;
-        }
-      }
 
-      path = cmSystemTools::CollapseFullPath(path);
-      cmSystemTools::ConvertToUnixSlashes(path);
-      this->SetHomeDirectory(path);
-      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
-      // NOLINTNEXTLINE(bugprone-branch-clone)
-    } else if (cmHasLiteralPrefix(arg, "-O")) {
-      // There is no local generate anymore.  Ignore -O option.
-    } else if (cmHasLiteralPrefix(arg, "-B")) {
-      std::string path = arg.substr(2);
-      if (path.empty()) {
-        ++i;
-        if (i >= args.size()) {
-          cmSystemTools::Error("No build directory specified for -B");
-          return;
-        }
-        path = args[i];
-        if (path[0] == '-') {
-          cmSystemTools::Error("No build directory specified for -B");
-          return;
-        }
-      }
+  auto SourceArgLambda = [](std::string const& value, cmake* state) -> bool {
+    std::string path = cmSystemTools::CollapseFullPath(value);
+    cmSystemTools::ConvertToUnixSlashes(path);
+    state->SetHomeDirectory(path);
+    return true;
+  };
 
-      path = cmSystemTools::CollapseFullPath(path);
-      cmSystemTools::ConvertToUnixSlashes(path);
-      this->SetHomeOutputDirectory(path);
-      haveBArg = true;
-    } else if ((i < args.size() - 2) &&
-               cmHasLiteralPrefix(arg, "--check-build-system")) {
-      this->CheckBuildSystemArgument = args[++i];
-      this->ClearBuildSystem = (atoi(args[++i].c_str()) > 0);
-    } else if ((i < args.size() - 1) &&
-               cmHasLiteralPrefix(arg, "--check-stamp-file")) {
-      this->CheckStampFile = args[++i];
-    } else if ((i < args.size() - 1) &&
-               cmHasLiteralPrefix(arg, "--check-stamp-list")) {
-      this->CheckStampList = args[++i];
-    } else if (arg == "--regenerate-during-build"_s) {
-      this->RegenerateDuringBuild = true;
+  auto BuildArgLambda = [&](std::string const& value, cmake* state) -> bool {
+    std::string path = cmSystemTools::CollapseFullPath(value);
+    cmSystemTools::ConvertToUnixSlashes(path);
+    state->SetHomeOutputDirectory(path);
+    haveBArg = true;
+    return true;
+  };
+
+  auto PlatformLambda = [&](std::string const& value, cmake* state) -> bool {
+    if (havePlatform) {
+      cmSystemTools::Error("Multiple -A options not allowed");
+      return false;
     }
+    state->SetGeneratorPlatform(value);
+    havePlatform = true;
+    return true;
+  };
+
+  auto ToolsetLamda = [&](std::string const& value, cmake* state) -> bool {
+    if (haveToolset) {
+      cmSystemTools::Error("Multiple -T options not allowed");
+      return false;
+    }
+    state->SetGeneratorToolset(value);
+    haveToolset = true;
+    return true;
+  };
+
+  std::vector<CommandArgument> arguments = {
+    CommandArgument{ "-S", "No source directory specified for -S",
+                     CommandArgument::Values::One, SourceArgLambda },
+    CommandArgument{ "-H", "No source directory specified for -H",
+                     CommandArgument::Values::One, SourceArgLambda },
+    CommandArgument{ "-O", CommandArgument::Values::Zero,
+                     IgnoreAndTrueLambda },
+    CommandArgument{ "-B", "No build directory specified for -B",
+                     CommandArgument::Values::One, BuildArgLambda },
+    CommandArgument{ "-P", "-P must be followed by a file name.",
+                     CommandArgument::Values::One, IgnoreAndTrueLambda },
+    CommandArgument{ "-D", "-D must be followed with VAR=VALUE.",
+                     CommandArgument::Values::One, IgnoreAndTrueLambda },
+    CommandArgument{ "-C", "-C must be followed by a file name.",
+                     CommandArgument::Values::One, IgnoreAndTrueLambda },
+    CommandArgument{ "-U", "-U must be followed with VAR.",
+                     CommandArgument::Values::One, IgnoreAndTrueLambda },
+    CommandArgument{ "-W", "-W must be followed with [no-]<name>.",
+                     CommandArgument::Values::One, IgnoreAndTrueLambda },
+    CommandArgument{ "-A", "No platform specified for -A",
+                     CommandArgument::Values::One, PlatformLambda },
+    CommandArgument{ "-T", "No toolset specified for -T",
+                     CommandArgument::Values::One, ToolsetLamda },
+
+    CommandArgument{ "--check-build-system", CommandArgument::Values::Two,
+                     [](std::string const& value, cmake* state) -> bool {
+                       std::vector<std::string> values = cmExpandedList(value);
+                       state->CheckBuildSystemArgument = values[0];
+                       state->ClearBuildSystem = (atoi(values[1].c_str()) > 0);
+                       return true;
+                     } },
+    CommandArgument{ "--check-stamp-file", CommandArgument::Values::One,
+                     [](std::string const& value, cmake* state) -> bool {
+                       state->CheckStampFile = value;
+                       return true;
+                     } },
+    CommandArgument{ "--check-stamp-list", CommandArgument::Values::One,
+                     [](std::string const& value, cmake* state) -> bool {
+                       state->CheckStampList = value;
+                       return true;
+                     } },
+    CommandArgument{ "--regenerate-during-build",
+                     CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* state) -> bool {
+                       state->RegenerateDuringBuild = true;
+                       return true;
+                     } },
+
+    CommandArgument{ "--find-package", CommandArgument::Values::Zero,
+                     IgnoreAndTrueLambda },
+
+    CommandArgument{ "--graphviz", "No file specified for --graphviz",
+                     CommandArgument::Values::One,
+                     [](std::string const& value, cmake* state) -> bool {
+                       std::string path =
+                         cmSystemTools::CollapseFullPath(value);
+                       cmSystemTools::ConvertToUnixSlashes(path);
+                       state->GraphVizFile = path;
+                       return true;
+                     } },
+
+    CommandArgument{ "--debug-trycompile", CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* state) -> bool {
+                       std::cout << "debug trycompile on\n";
+                       state->DebugTryCompileOn();
+                       return true;
+                     } },
+    CommandArgument{ "--debug-output", CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* state) -> bool {
+                       std::cout << "Running with debug output on.\n";
+                       state->SetDebugOutputOn(true);
+                       return true;
+                     } },
+
+    CommandArgument{ "--log-level", "Invalid level specified for --log-level",
+                     CommandArgument::Values::One,
+                     [](std::string const& value, cmake* state) -> bool {
+                       const auto logLevel = StringToLogLevel(value);
+                       if (logLevel == LogLevel::LOG_UNDEFINED) {
+                         cmSystemTools::Error(
+                           "Invalid level specified for --log-level");
+                         return false;
+                       }
+                       state->SetLogLevel(logLevel);
+                       state->LogLevelWasSetViaCLI = true;
+                       return true;
+                     } },
+    // This is supported for backward compatibility. This option only
+    // appeared in the 3.15.x release series and was renamed to
+    // --log-level in 3.16.0
+    CommandArgument{ "--loglevel", "Invalid level specified for --loglevel",
+                     CommandArgument::Values::One,
+                     [](std::string const& value, cmake* state) -> bool {
+                       const auto logLevel = StringToLogLevel(value);
+                       if (logLevel == LogLevel::LOG_UNDEFINED) {
+                         cmSystemTools::Error(
+                           "Invalid level specified for --loglevel");
+                         return false;
+                       }
+                       state->SetLogLevel(logLevel);
+                       state->LogLevelWasSetViaCLI = true;
+                       return true;
+                     } },
+
+    CommandArgument{ "--log-context", CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* state) -> bool {
+                       state->SetShowLogContext(true);
+                       return true;
+                     } },
+    CommandArgument{
+      "--debug-find", CommandArgument::Values::Zero,
+      [](std::string const&, cmake* state) -> bool {
+        std::cout << "Running with debug output on for the `find` commands.\n";
+        state->SetDebugFindOutputOn(true);
+        return true;
+      } },
+    CommandArgument{ "--trace-expand", CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* state) -> bool {
+                       std::cout << "Running with expanded trace output on.\n";
+                       state->SetTrace(true);
+                       state->SetTraceExpand(true);
+                       return true;
+                     } },
+    CommandArgument{ "--trace-format", CommandArgument::Values::One,
+                     [](std::string const& value, cmake* state) -> bool {
+                       state->SetTrace(true);
+                       const auto traceFormat = StringToTraceFormat(value);
+                       if (traceFormat == TraceFormat::TRACE_UNDEFINED) {
+                         cmSystemTools::Error(
+                           "Invalid format specified for --trace-format. "
+                           "Valid formats are human, json-v1.");
+                         return false;
+                       }
+                       state->SetTraceFormat(traceFormat);
+                       return true;
+                     } },
+    CommandArgument{ "--trace-source", CommandArgument::Values::One,
+                     [](std::string const& value, cmake* state) -> bool {
+                       std::string file(value);
+                       cmSystemTools::ConvertToUnixSlashes(file);
+                       state->AddTraceSource(file);
+                       state->SetTrace(true);
+                       return true;
+                     } },
+    CommandArgument{ "--trace-redirect", CommandArgument::Values::One,
+                     [](std::string const& value, cmake* state) -> bool {
+                       std::string file(value);
+                       cmSystemTools::ConvertToUnixSlashes(file);
+                       state->SetTraceFile(file);
+                       state->SetTrace(true);
+                       return true;
+                     } },
+    CommandArgument{ "--trace", CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* state) -> bool {
+                       std::cout << "Running with trace output on.\n";
+                       state->SetTrace(true);
+                       state->SetTraceExpand(false);
+                       return true;
+                     } },
+    CommandArgument{ "--warn-uninitialized", CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* state) -> bool {
+                       std::cout << "Warn about uninitialized values.\n";
+                       state->SetWarnUninitialized(true);
+                       return true;
+                     } },
+    CommandArgument{ "--warn-unused-vars", CommandArgument::Values::Zero,
+                     IgnoreAndTrueLambda }, // Option was removed.
+    CommandArgument{ "--no-warn-unused-cli", CommandArgument::Values::Zero,
+                     [](std::string const&, cmake* state) -> bool {
+                       std::cout
+                         << "Not searching for unused variables given on the "
+                         << "command line.\n";
+                       state->SetWarnUnusedCli(false);
+                       return true;
+                     } },
+    CommandArgument{
+      "--check-system-vars", CommandArgument::Values::Zero,
+      [](std::string const&, cmake* state) -> bool {
+        std::cout << "Also check system files when warning about unused and "
+                  << "uninitialized variables.\n";
+        state->SetCheckSystemVars(true);
+        return true;
+      } }
+  };
+
 #if defined(CMAKE_HAVE_VS_GENERATORS)
-    else if ((i < args.size() - 1) &&
-             cmHasLiteralPrefix(arg, "--vs-solution-file")) {
-      this->VSSolutionFile = args[++i];
-    }
+  arguments.emplace_back("--vs-solution-file", CommandArgument::Values::One,
+                         [](std::string const& value, cmake* state) -> bool {
+                           state->VSSolutionFile = value;
+                           return true;
+                         });
 #endif
-    else if (cmHasLiteralPrefix(arg, "-D") || cmHasLiteralPrefix(arg, "-U") ||
-             cmHasLiteralPrefix(arg, "-C")) {
-      // skip for now
-      // in case '-[DUC] argval' var' is given, also skip the next
-      // in case '-[DUC]argval' is given, don't skip the next
-      if (arg.size() == 2) {
-        ++i;
-      }
-      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
-      // NOLINTNEXTLINE(bugprone-branch-clone)
-    } else if (cmHasLiteralPrefix(arg, "-P")) {
-      // skip for now
-      i++;
-    } else if (cmHasLiteralPrefix(arg, "--find-package")) {
-      // skip for now
-      i++;
-    } else if (cmHasLiteralPrefix(arg, "-W")) {
-      // skip for now
-    } else if (cmHasLiteralPrefix(arg, "--graphviz=")) {
-      std::string path = arg.substr(strlen("--graphviz="));
-      path = cmSystemTools::CollapseFullPath(path);
-      cmSystemTools::ConvertToUnixSlashes(path);
-      this->GraphVizFile = path;
-      if (this->GraphVizFile.empty()) {
-        cmSystemTools::Error("No file specified for --graphviz");
-        return;
-      }
-    } else if (cmHasLiteralPrefix(arg, "--debug-trycompile")) {
-      std::cout << "debug trycompile on\n";
-      this->DebugTryCompileOn();
-    } else if (cmHasLiteralPrefix(arg, "--debug-output")) {
-      std::cout << "Running with debug output on.\n";
-      this->SetDebugOutputOn(true);
-    } else if (cmHasLiteralPrefix(arg, "--log-level=")) {
-      const auto logLevel =
-        StringToLogLevel(arg.substr(sizeof("--log-level=") - 1));
-      if (logLevel == LogLevel::LOG_UNDEFINED) {
-        cmSystemTools::Error("Invalid level specified for --log-level");
-        return;
-      }
-      this->SetLogLevel(logLevel);
-      this->LogLevelWasSetViaCLI = true;
-    } else if (cmHasLiteralPrefix(arg, "--loglevel=")) {
-      // This is supported for backward compatibility. This option only
-      // appeared in the 3.15.x release series and was renamed to
-      // --log-level in 3.16.0
-      const auto logLevel =
-        StringToLogLevel(arg.substr(sizeof("--loglevel=") - 1));
-      if (logLevel == LogLevel::LOG_UNDEFINED) {
-        cmSystemTools::Error("Invalid level specified for --loglevel");
-        return;
-      }
-      this->SetLogLevel(logLevel);
-      this->LogLevelWasSetViaCLI = true;
-    } else if (arg == "--log-context"_s) {
-      this->SetShowLogContext(true);
-    } else if (cmHasLiteralPrefix(arg, "--debug-find")) {
-      std::cout << "Running with debug output on for the `find` commands.\n";
-      this->SetDebugFindOutputOn(true);
-    } else if (cmHasLiteralPrefix(arg, "--trace-expand")) {
-      std::cout << "Running with expanded trace output on.\n";
-      this->SetTrace(true);
-      this->SetTraceExpand(true);
-    } else if (cmHasLiteralPrefix(arg, "--trace-format=")) {
-      this->SetTrace(true);
-      const auto traceFormat =
-        StringToTraceFormat(arg.substr(strlen("--trace-format=")));
-      if (traceFormat == TraceFormat::TRACE_UNDEFINED) {
-        cmSystemTools::Error("Invalid format specified for --trace-format. "
-                             "Valid formats are human, json-v1.");
-        return;
-      }
-      this->SetTraceFormat(traceFormat);
-    } else if (cmHasLiteralPrefix(arg, "--trace-source=")) {
-      std::string file = arg.substr(strlen("--trace-source="));
-      cmSystemTools::ConvertToUnixSlashes(file);
-      this->AddTraceSource(file);
-      this->SetTrace(true);
-    } else if (cmHasLiteralPrefix(arg, "--trace-redirect=")) {
-      std::string file = arg.substr(strlen("--trace-redirect="));
-      cmSystemTools::ConvertToUnixSlashes(file);
-      this->SetTraceFile(file);
-      this->SetTrace(true);
-    } else if (cmHasLiteralPrefix(arg, "--trace")) {
-      std::cout << "Running with trace output on.\n";
-      this->SetTrace(true);
-      this->SetTraceExpand(false);
-    } else if (cmHasLiteralPrefix(arg, "--warn-uninitialized")) {
-      std::cout << "Warn about uninitialized values.\n";
-      this->SetWarnUninitialized(true);
-    } else if (cmHasLiteralPrefix(arg, "--warn-unused-vars")) {
-      // Option was removed.
-    } else if (cmHasLiteralPrefix(arg, "--no-warn-unused-cli")) {
-      std::cout << "Not searching for unused variables given on the "
-                << "command line.\n";
-      this->SetWarnUnusedCli(false);
-    } else if (cmHasLiteralPrefix(arg, "--check-system-vars")) {
-      std::cout << "Also check system files when warning about unused and "
-                << "uninitialized variables.\n";
-      this->SetCheckSystemVars(true);
-    } else if (cmHasLiteralPrefix(arg, "-A")) {
-      std::string value = arg.substr(2);
-      if (value.empty()) {
-        ++i;
-        if (i >= args.size()) {
-          cmSystemTools::Error("No platform specified for -A");
-          return;
-        }
-        value = args[i];
-      }
-      if (havePlatform) {
-        cmSystemTools::Error("Multiple -A options not allowed");
-        return;
-      }
-      this->SetGeneratorPlatform(value);
-      havePlatform = true;
-    } else if (cmHasLiteralPrefix(arg, "-T")) {
-      std::string value = arg.substr(2);
-      if (value.empty()) {
-        ++i;
-        if (i >= args.size()) {
-          cmSystemTools::Error("No toolset specified for -T");
-          return;
-        }
-        value = args[i];
-      }
-      if (haveToolset) {
-        cmSystemTools::Error("Multiple -T options not allowed");
-        return;
-      }
-      this->SetGeneratorToolset(value);
-      haveToolset = true;
-    } else if (cmHasLiteralPrefix(arg, "-G")) {
-      std::string value = arg.substr(2);
-      if (value.empty()) {
-        ++i;
-        if (i >= args.size()) {
-          cmSystemTools::Error("No generator specified for -G");
-          this->PrintGeneratorList();
-          return;
-        }
-        value = args[i];
-      }
-      if (!this->CreateAndSetGlobalGenerator(value, true)) {
-        return;
-      }
+
 #if !defined(CMAKE_BOOTSTRAP)
-    } else if (cmHasLiteralPrefix(arg, "--profiling-format=")) {
-      profilingFormat = arg.substr(strlen("--profiling-format="));
-      if (profilingFormat.empty()) {
-        cmSystemTools::Error("No format specified for --profiling-format");
-      }
-    } else if (cmHasLiteralPrefix(arg, "--profiling-output=")) {
-      profilingOutput = arg.substr(strlen("--profiling-output="));
-      profilingOutput = cmSystemTools::CollapseFullPath(profilingOutput);
+  arguments.emplace_back("--profiling-format",
+                         "No format specified for --profiling-format",
+                         CommandArgument::Values::One,
+                         [&](std::string const& value, cmake*) -> bool {
+                           profilingFormat = value;
+                           return true;
+                         });
+  arguments.emplace_back(
+    "--profiling-output", "No path specified for --profiling-output",
+    CommandArgument::Values::One,
+    [&](std::string const& value, cmake*) -> bool {
+      profilingOutput = cmSystemTools::CollapseFullPath(value);
       cmSystemTools::ConvertToUnixSlashes(profilingOutput);
-      if (profilingOutput.empty()) {
-        cmSystemTools::Error("No path specified for --profiling-output");
-      }
-    } else if (cmHasLiteralPrefix(arg, "--preset=")) {
-      presetName = arg.substr(strlen("--preset="));
-      if (presetName.empty()) {
-        cmSystemTools::Error("No preset specified for --preset");
-      }
-    } else if (cmHasLiteralPrefix(arg, "--list-presets")) {
-      listPresets = true;
+      return true;
+    });
+  arguments.emplace_back("--preset", "No preset specified for --preset",
+                         CommandArgument::Values::One,
+                         [&](std::string const& value, cmake*) -> bool {
+                           presetName = value;
+                           return true;
+                         });
+  arguments.emplace_back("--list-presets", CommandArgument::Values::Zero,
+                         [&](std::string const&, cmake*) -> bool {
+                           listPresets = true;
+                           return true;
+                         });
+
 #endif
+
+  bool badGeneratorName = false;
+  CommandArgument generatorCommand(
+    "-G", "No generator specified for -G", CommandArgument::Values::One,
+    [&](std::string const& value, cmake* state) -> bool {
+      bool valid = state->CreateAndSetGlobalGenerator(value, true);
+      badGeneratorName = !valid;
+      return valid;
+    });
+
+  for (decltype(args.size()) i = 1; i < args.size(); ++i) {
+    // iterate each argument
+    std::string const& arg = args[i];
+
+    // Generator flag has special handling for when to print help
+    // so it becomes the exception
+    if (generatorCommand.matches(arg)) {
+      bool parsed = generatorCommand.parse(arg, i, args, this);
+      if (!parsed && !badGeneratorName) {
+        this->PrintGeneratorList();
+        return;
+      }
+      continue;
     }
-    // no option assume it is the path to the source or an existing build
-    else {
+
+    bool matched = false;
+    bool parsedCorrectly = true; // needs to be true so we can ignore
+                                 // arguments so as -E
+    for (auto const& m : arguments) {
+      if (m.matches(arg)) {
+        matched = true;
+        parsedCorrectly = m.parse(arg, i, args, this);
+        break;
+      }
+    }
+    if (!parsedCorrectly) {
+      cmSystemTools::Error("Run 'cmake --help' for all supported options.");
+      exit(1);
+    } else if (!matched) {
       this->SetDirectoriesFromFile(arg);
     }
-    // Empty instance, platform and toolset if only a generator is specified
-    if (this->GlobalGenerator) {
-      this->GeneratorInstance = "";
-      if (!this->GeneratorPlatformSet) {
-        this->GeneratorPlatform = "";
-      }
-      if (!this->GeneratorToolsetSet) {
-        this->GeneratorToolset = "";
-      }
+  }
+
+  // Empty instance, platform and toolset if only a generator is specified
+  if (this->GlobalGenerator) {
+    this->GeneratorInstance = "";
+    if (!this->GeneratorPlatformSet) {
+      this->GeneratorPlatform = "";
+    }
+    if (!this->GeneratorToolsetSet) {
+      this->GeneratorToolset = "";
     }
   }
 
@@ -1949,7 +2133,7 @@ int cmake::ActualConfigure()
     }
   }
 
-  auto& mf = this->GlobalGenerator->GetMakefiles()[0];
+  const auto& mf = this->GlobalGenerator->GetMakefiles()[0];
   if (mf->IsOn("CTEST_USE_LAUNCHERS") &&
       !this->State->GetGlobalProperty("RULE_LAUNCH_COMPILE")) {
     cmSystemTools::Error(
@@ -2113,7 +2297,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 #endif
   // Add any cache args
   if (!this->SetCacheArgs(args)) {
-    cmSystemTools::Error("Problem processing arguments. Aborting.\n");
+    cmSystemTools::Error("Run 'cmake --help' for all supported options.");
     return -1;
   }
 #ifndef CMAKE_BOOTSTRAP
@@ -2291,12 +2475,12 @@ cmProp cmake::GetCacheDefinition(const std::string& name) const
   return this->State->GetInitializedCacheValue(name);
 }
 
-void cmake::AddScriptingCommands()
+void cmake::AddScriptingCommands() const
 {
   GetScriptingCommands(this->GetState());
 }
 
-void cmake::AddProjectCommands()
+void cmake::AddProjectCommands() const
 {
   GetProjectCommands(this->GetState());
 }
@@ -2571,8 +2755,7 @@ int cmake::CheckBuildSystem()
 
   if (this->ClearBuildSystem) {
     // Get the generator used for this build system.
-    const char* genName =
-      cmToCStr(mf.GetDefinition("CMAKE_DEPENDS_GENERATOR"));
+    std::string genName = mf.GetSafeDefinition("CMAKE_DEPENDS_GENERATOR");
     if (!cmNonempty(genName)) {
       genName = "Unix Makefiles";
     }

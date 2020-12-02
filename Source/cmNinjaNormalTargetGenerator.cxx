@@ -266,10 +266,10 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
     vars.LanguageCompileFlags = "$LANGUAGE_COMPILE_FLAGS";
 
     std::string launcher;
-    const char* val = this->GetLocalGenerator()->GetRuleLauncher(
+    cmProp val = this->GetLocalGenerator()->GetRuleLauncher(
       this->GetGeneratorTarget(), "RULE_LAUNCH_LINK");
     if (cmNonempty(val)) {
-      launcher = cmStrCat(val, ' ');
+      launcher = cmStrCat(*val, ' ');
     }
 
     std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
@@ -452,10 +452,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     }
 
     std::string launcher;
-    const char* val = this->GetLocalGenerator()->GetRuleLauncher(
+    cmProp val = this->GetLocalGenerator()->GetRuleLauncher(
       this->GetGeneratorTarget(), "RULE_LAUNCH_LINK");
     if (cmNonempty(val)) {
-      launcher = cmStrCat(val, ' ');
+      launcher = cmStrCat(*val, ' ');
     }
 
     std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(

@@ -113,7 +113,7 @@ Macros
 
   ::
 
-    GNUInstallDirs_get_absolute_install_dir(absvar var)
+    GNUInstallDirs_get_absolute_install_dir(absvar var dirname)
 
   Set the given variable ``absvar`` to the absolute path contained
   within the variable ``var``.  This is to allow the computation of an
@@ -121,7 +121,8 @@ Macros
   above.  While this macro is used to compute the various
   ``CMAKE_INSTALL_FULL_<dir>`` variables, it is exposed publicly to
   allow users who create additional path variables to also compute
-  absolute paths where necessary, using the same logic.
+  absolute paths where necessary, using the same logic.  ``dirname`` is
+  the directory name to get, e.g. ``BINDIR``.
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -334,13 +335,25 @@ mark_as_advanced(
   )
 
 macro(GNUInstallDirs_get_absolute_install_dir absvar var)
+  set(GGAID_extra_args ${ARGN})
+  list(LENGTH GGAID_extra_args GGAID_extra_arg_count)
+  if(GGAID_extra_arg_count GREATER 0)
+    list(GET GGAID_extra_args 0 GGAID_dir)
+  else()
+    # Historical behaviour: use ${dir} from caller's scope
+    set(GGAID_dir "${dir}")
+    message(AUTHOR_WARNING
+      "GNUInstallDirs_get_absolute_install_dir called without third argument. "
+      "Using \${dir} from the caller's scope for compatibility with CMake 3.19 and below.")
+  endif()
+
   if(NOT IS_ABSOLUTE "${${var}}")
     # Handle special cases:
     # - CMAKE_INSTALL_PREFIX == /
     # - CMAKE_INSTALL_PREFIX == /usr
     # - CMAKE_INSTALL_PREFIX == /opt/...
     if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-      if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR" OR "${dir}" STREQUAL "RUNSTATEDIR")
+      if("${GGAID_dir}" STREQUAL "SYSCONFDIR" OR "${GGAID_dir}" STREQUAL "LOCALSTATEDIR" OR "${GGAID_dir}" STREQUAL "RUNSTATEDIR")
         set(${absvar} "/${${var}}")
       else()
         if (NOT "${${var}}" MATCHES "^usr/")
@@ -349,13 +362,13 @@ macro(GNUInstallDirs_get_absolute_install_dir absvar var)
         set(${absvar} "/${${var}}")
       endif()
     elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
-      if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR" OR "${dir}" STREQUAL "RUNSTATEDIR")
+      if("${GGAID_dir}" STREQUAL "SYSCONFDIR" OR "${GGAID_dir}" STREQUAL "LOCALSTATEDIR" OR "${GGAID_dir}" STREQUAL "RUNSTATEDIR")
         set(${absvar} "/${${var}}")
       else()
         set(${absvar} "${CMAKE_INSTALL_PREFIX}/${${var}}")
       endif()
     elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/opt/.*")
-      if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR" OR "${dir}" STREQUAL "RUNSTATEDIR")
+      if("${GGAID_dir}" STREQUAL "SYSCONFDIR" OR "${GGAID_dir}" STREQUAL "LOCALSTATEDIR" OR "${GGAID_dir}" STREQUAL "RUNSTATEDIR")
         set(${absvar} "/${${var}}${CMAKE_INSTALL_PREFIX}")
       else()
         set(${absvar} "${CMAKE_INSTALL_PREFIX}/${${var}}")
@@ -366,6 +379,10 @@ macro(GNUInstallDirs_get_absolute_install_dir absvar var)
   else()
     set(${absvar} "${${var}}")
   endif()
+
+  unset(GGAID_dir)
+  unset(GGAID_extra_arg_count)
+  unset(GGAID_extra_args)
 endmacro()
 
 # Result directories
@@ -388,7 +405,7 @@ foreach(dir
     MANDIR
     DOCDIR
     )
-  GNUInstallDirs_get_absolute_install_dir(CMAKE_INSTALL_FULL_${dir} CMAKE_INSTALL_${dir})
+  GNUInstallDirs_get_absolute_install_dir(CMAKE_INSTALL_FULL_${dir} CMAKE_INSTALL_${dir} ${dir})
 endforeach()
 
 cmake_policy(POP)

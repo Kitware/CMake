@@ -1,0 +1,5 @@
+CMake Error at SourcePermissionsInvalidArg-1.cmake:1 \(configure_file\):
+  configure_file given both USE_SOURCE_PERMISSIONS and NO_SOURCE_PERMISSIONS.
+  Only one option allowed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

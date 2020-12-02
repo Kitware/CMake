@@ -807,7 +807,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           qrc.Generated = sf->GetIsGenerated();
           // RCC options
           {
-            std::string const opts = sf->GetSafeProperty(kw.AUTORCC_OPTIONS);
+            std::string const& opts = sf->GetSafeProperty(kw.AUTORCC_OPTIONS);
             if (!opts.empty()) {
               cmExpandList(opts, qrc.Options);
             }
@@ -1624,7 +1624,7 @@ cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
   std::string const& filename)
 {
   cmSourceFile* gFile = this->Makefile->GetOrCreateSource(filename, true);
-  gFile->SetProperty("GENERATED", "1");
+  gFile->MarkAsGenerated();
   gFile->SetProperty("SKIP_AUTOGEN", "1");
   return gFile;
 }

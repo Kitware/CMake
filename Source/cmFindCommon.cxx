@@ -182,7 +182,7 @@ void cmFindCommon::SelectDefaultSearchModes()
       { this->NoCMakeSystemPath, "CMAKE_FIND_USE_CMAKE_SYSTEM_PATH" } }
   };
 
-  for (auto& path : search_paths) {
+  for (auto const& path : search_paths) {
     cmProp def = this->Makefile->GetDefinition(path.second);
     if (def) {
       path.first = !cmIsOn(*def);

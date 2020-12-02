@@ -97,9 +97,7 @@ These modules are loaded using the :command:`include` command.
    /module/TestForSSTREAM
    /module/TestForSTDNamespace
    /module/UseEcos
-   /module/UseJavaClassFilelist
    /module/UseJava
-   /module/UseJavaSymlinks
    /module/UseSWIG
    /module/UsewxWidgets
    /module/WriteCompilerDetectionHeader
@@ -282,6 +280,8 @@ Deprecated Utility Modules
    /module/CMakeParseArguments
    /module/MacroAddFileDependencies
    /module/TestCXXAcceptsFlag
+   /module/UseJavaClassFilelist
+   /module/UseJavaSymlinks
    /module/UsePkgConfig
    /module/Use_wxWindows
    /module/WriteBasicConfigVersionFile

@@ -1821,6 +1821,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
   this->BinaryDirectories.clear();
+  this->GeneratedFiles.clear();
 }
 
 void cmGlobalGenerator::ComputeTargetObjectDirectory(
@@ -2144,6 +2145,16 @@ void cmGlobalGenerator::AddInstallComponent(const std::string& component)
   if (!component.empty()) {
     this->InstallComponents.insert(component);
   }
+}
+
+void cmGlobalGenerator::MarkAsGeneratedFile(const std::string& filepath)
+{
+  this->GeneratedFiles.insert(filepath);
+}
+
+bool cmGlobalGenerator::IsGeneratedFile(const std::string& filepath)
+{
+  return this->GeneratedFiles.find(filepath) != this->GeneratedFiles.end();
 }
 
 void cmGlobalGenerator::EnableInstallTarget()
@@ -2608,7 +2619,7 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
 }
 
 void cmGlobalGenerator::AddGlobalTarget_EditCache(
-  std::vector<GlobalTargetInfo>& targets)
+  std::vector<GlobalTargetInfo>& targets) const
 {
   const char* editCacheTargetName = this->GetEditCacheTargetName();
   if (!editCacheTargetName) {
@@ -2642,7 +2653,7 @@ void cmGlobalGenerator::AddGlobalTarget_EditCache(
 }
 
 void cmGlobalGenerator::AddGlobalTarget_RebuildCache(
-  std::vector<GlobalTargetInfo>& targets)
+  std::vector<GlobalTargetInfo>& targets) const
 {
   const char* rebuildCacheTargetName = this->GetRebuildCacheTargetName();
   if (!rebuildCacheTargetName) {
@@ -2765,7 +2776,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
   }
 }
 
-std::string cmGlobalGenerator::GetPredefinedTargetsFolder()
+std::string cmGlobalGenerator::GetPredefinedTargetsFolder() const
 {
   cmProp prop = this->GetCMakeInstance()->GetState()->GetGlobalProperty(
     "PREDEFINED_TARGETS_FOLDER");

@@ -994,7 +994,7 @@ case 5:
 YY_RULE_SETUP
 {
                          // A line continuation ends the current file name.
-                         yyextra->newDependency();
+                         yyextra->newRuleOrDependency();
                        }
 	YY_BREAK
 case 6:

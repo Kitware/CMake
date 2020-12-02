@@ -172,7 +172,7 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
 
   std::vector<cmMakefile*> source_file_directory_makefiles;
   bool file_scopes_handled =
-    SetPropertyCommand::HandleAndValidateSourceFileDirectortoryScopes(
+    SetPropertyCommand::HandleAndValidateSourceFileDirectoryScopes(
       status, source_file_directory_option_enabled,
       source_file_target_option_enabled, source_file_directories,
       source_file_target_directories, source_file_directory_makefiles);
@@ -280,8 +280,9 @@ bool HandleGlobalMode(cmExecutionStatus& status, const std::string& name,
 
   // Get the property.
   cmake* cm = status.GetMakefile().GetCMakeInstance();
-  cmProp p = cm->GetState()->GetGlobalProperty(propertyName);
-  return StoreResult(infoType, status.GetMakefile(), variable, cmToCStr(p));
+  return StoreResult(
+    infoType, status.GetMakefile(), variable,
+    cmToCStr(cm->GetState()->GetGlobalProperty(propertyName)));
 }
 
 bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
@@ -327,8 +328,8 @@ bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
   }
 
   // Get the property.
-  cmProp p = mf->GetProperty(propertyName);
-  return StoreResult(infoType, status.GetMakefile(), variable, cmToCStr(p));
+  return StoreResult(infoType, status.GetMakefile(), variable,
+                     cmToCStr(mf->GetProperty(propertyName)));
 }
 
 bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
@@ -358,15 +359,14 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
       }
       return StoreResult(infoType, status.GetMakefile(), variable, nullptr);
     }
-    cmProp prop_cstr = nullptr;
     cmListFileBacktrace bt = status.GetMakefile().GetBacktrace();
     cmMessenger* messenger = status.GetMakefile().GetMessenger();
-    prop_cstr = target->GetComputedProperty(propertyName, messenger, bt);
-    if (!prop_cstr) {
-      prop_cstr = target->GetProperty(propertyName);
+    cmProp prop = target->GetComputedProperty(propertyName, messenger, bt);
+    if (!prop) {
+      prop = target->GetProperty(propertyName);
     }
     return StoreResult(infoType, status.GetMakefile(), variable,
-                       prop_cstr ? prop_cstr->c_str() : nullptr);
+                       cmToCStr(prop));
   }
   status.SetError(cmStrCat("could not find TARGET ", name,
                            ".  Perhaps it has not yet been created."));
@@ -391,7 +391,7 @@ bool HandleSourceMode(cmExecutionStatus& status, const std::string& name,
   if (cmSourceFile* sf =
         directory_makefile.GetOrCreateSource(source_file_absolute_path)) {
     return StoreResult(infoType, status.GetMakefile(), variable,
-                       sf->GetPropertyForUser(propertyName));
+                       cmToCStr(sf->GetPropertyForUser(propertyName)));
   }
   status.SetError(
     cmStrCat("given SOURCE name that could not be found or created: ",

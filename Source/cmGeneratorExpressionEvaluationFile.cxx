@@ -15,7 +15,6 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
-#include "cmSourceFileLocationKind.h"
 #include "cmSystemTools.h"
 
 cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
@@ -99,11 +98,7 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
 
   for (std::string const& le : enabledLanguages) {
     std::string const name = this->GetOutputFileName(lg, target, config, le);
-    cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(
-      name, false, cmSourceFileLocationKind::Known);
-    // Tell TraceDependencies that the file is not expected to exist
-    // on disk yet.  We generate it after that runs.
-    sf->SetProperty("GENERATED", "1");
+    cmSourceFile* sf = lg->GetMakefile()->GetOrCreateGeneratedSource(name);
 
     // Tell the build system generators that there is no build rule
     // to generate the file.

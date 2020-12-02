@@ -676,7 +676,7 @@ void cmVisualStudio10TargetGenerator::Generate()
           cmStrCat(this->DefaultArtifactDir, "\\nasm.props");
         ConvertToWindowsSlash(propsLocal);
         this->Makefile->ConfigureFile(propsTemplate, propsLocal, false, true,
-                                      true, true);
+                                      true);
         Elem(e1, "Import").Attribute("Project", propsLocal);
       }
     }
@@ -1020,9 +1020,9 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
             cm::string_view tagName =
               cm::string_view(p).substr(propNamePrefix.length());
             if (!tagName.empty()) {
-              const std::string& value = *props.GetPropertyValue(p);
-              if (!value.empty()) {
-                e2.Element(tagName, value);
+              cmProp value = props.GetPropertyValue(p);
+              if (cmNonempty(value)) {
+                e2.Element(tagName, *value);
               }
             }
           }
@@ -2402,27 +2402,28 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       configDefines += *ccdefs;
     }
 
-    // Add precompile headers compile options.
-    std::string customAndPchOptions = options;
+    // We have pch state in the following situation:
+    // 1. We have SKIP_PRECOMPILE_HEADERS == true
+    // 2. We are creating the pre-compiled header
+    // 3. We are a different language than the linker language AND pch is
+    // enabled
     const std::string pchSource =
       this->GeneratorTarget->GetPchSource(config, lang);
-    if (!pchSource.empty() && !sf.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
-      std::string pchOptions;
-      if (sf.GetFullPath() == pchSource) {
-        pchOptions =
-          this->GeneratorTarget->GetPchCreateCompileOptions(config, lang);
-      } else {
-        pchOptions =
-          this->GeneratorTarget->GetPchUseCompileOptions(config, lang);
-      }
-      customAndPchOptions = cmStrCat(customAndPchOptions, ';', pchOptions);
-    }
+    const bool skipPCH =
+      pchSource.empty() || sf.GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS");
+    const bool makePCH = (sf.GetFullPath() == pchSource);
+    const bool useSharedPCH =
+      !skipPCH && (lang == this->GeneratorTarget->GetLinkerLanguage(config));
+    const bool useDifferentLangPCH =
+      !skipPCH && (lang != this->GeneratorTarget->GetLinkerLanguage(config));
+    const bool needsPCHFlags =
+      (makePCH || useSharedPCH || useDifferentLangPCH);
 
     // if we have flags or defines for this config then
     // use them
     if (!flags.empty() || !options.empty() || !configDefines.empty() ||
-        !includes.empty() || compileAs || noWinRT ||
-        !customAndPchOptions.empty()) {
+        !includes.empty() || compileAs || noWinRT || !options.empty() ||
+        needsPCHFlags) {
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
       cmIDEFlagTable const* flagtable = nullptr;
       const std::string& srclang = source->GetLanguage();
@@ -2455,15 +2456,35 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       } else {
         clOptions.Parse(flags);
       }
-      if (!customAndPchOptions.empty()) {
+
+      if (needsPCHFlags) {
+        // Add precompile headers compile options.
+        std::string expandedOptions;
+        std::string pchOptions;
+        if (makePCH) {
+          pchOptions =
+            this->GeneratorTarget->GetPchCreateCompileOptions(config, lang);
+        } else if (useSharedPCH) {
+          std::string pchHeader =
+            this->GeneratorTarget->GetPchHeader(config, lang);
+          clOptions.AddFlag("ForcedIncludeFiles", pchHeader);
+        } else if (useDifferentLangPCH) {
+          pchOptions =
+            this->GeneratorTarget->GetPchUseCompileOptions(config, lang);
+        }
+        this->LocalGenerator->AppendCompileOptions(expandedOptions,
+                                                   pchOptions);
+        clOptions.Parse(expandedOptions);
+      }
+
+      if (!options.empty()) {
         std::string expandedOptions;
         if (configDependentOptions) {
           this->LocalGenerator->AppendCompileOptions(
             expandedOptions,
-            genexInterpreter.Evaluate(customAndPchOptions, "COMPILE_OPTIONS"));
+            genexInterpreter.Evaluate(options, "COMPILE_OPTIONS"));
         } else {
-          this->LocalGenerator->AppendCompileOptions(expandedOptions,
-                                                     customAndPchOptions);
+          this->LocalGenerator->AppendCompileOptions(expandedOptions, options);
         }
         clOptions.Parse(expandedOptions);
       }
@@ -2786,6 +2807,13 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     this->GeneratorTarget->GetPchHeader(configName, linkLanguage);
   if (this->MSTools && vcxproj == this->ProjectType && pchHeader.empty()) {
     clOptions.AddFlag("PrecompiledHeader", "NotUsing");
+  } else if (this->MSTools && vcxproj == this->ProjectType &&
+             !pchHeader.empty()) {
+    clOptions.AddFlag("PrecompiledHeader", "Use");
+    clOptions.AddFlag("PrecompiledHeaderFile", pchHeader);
+    std::string pchFile =
+      this->GeneratorTarget->GetPchFile(configName, linkLanguage);
+    clOptions.AddFlag("PrecompiledHeaderOutputFile", pchFile);
   }
 
   // Get preprocessor definitions for this directory.
@@ -4183,8 +4211,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
     cmLocalGenerator* lg = dt->GetLocalGenerator();
     std::string name = dt->GetName();
     std::string path;
-    cmProp p = dt->GetProperty("EXTERNAL_MSPROJECT");
-    if (p) {
+    if (cmProp p = dt->GetProperty("EXTERNAL_MSPROJECT")) {
       path = *p;
     } else {
       path = cmStrCat(lg->GetCurrentBinaryDirectory(), '/', dt->GetName(),
@@ -4972,9 +4999,9 @@ void cmVisualStudio10TargetGenerator::GetCSharpSourceProperties(
       if (cmHasPrefix(p, propNamePrefix)) {
         std::string tagName = p.substr(propNamePrefix.length());
         if (!tagName.empty()) {
-          const std::string& val = *props.GetPropertyValue(p);
-          if (!val.empty()) {
-            tags[tagName] = val;
+          cmProp val = props.GetPropertyValue(p);
+          if (cmNonempty(val)) {
+            tags[tagName] = *val;
           } else {
             tags.erase(tagName);
           }

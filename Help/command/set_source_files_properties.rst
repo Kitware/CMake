@@ -14,9 +14,10 @@ Source files can have properties that affect how they are built.
 Sets properties associated with source files using a key/value paired
 list.
 
-By default, source file properties are only visible to targets added in the
-same directory (``CMakeLists.txt``).  Visibility can be set in other directory
-scopes using one or both of the following options:
+.. versionadded:: 3.18
+  By default, source file properties are only visible to targets added in the
+  same directory (``CMakeLists.txt``).  Visibility can be set in other directory
+  scopes using one or both of the following options:
 
 ``DIRECTORY <dirs>...``
   The source file properties will be set in each of the ``<dirs>``
@@ -35,3 +36,8 @@ See also the :command:`set_property(SOURCE)` command.
 
 See :ref:`Source File Properties` for the list of properties known
 to CMake.
+
+.. note::
+
+  The :prop_sf:`GENERATED` source file property may be globally visible.
+  See its documentation for details.

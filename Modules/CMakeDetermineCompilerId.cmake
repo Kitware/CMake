@@ -152,7 +152,10 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     set(CMAKE_EXECUTABLE_FORMAT "Unknown" CACHE INTERNAL "Executable file format")
   endif()
 
-  if(CMAKE_GENERATOR MATCHES "^Ninja" AND MSVC_${lang}_ARCHITECTURE_ID)
+  if((CMAKE_GENERATOR MATCHES "^Ninja"
+        OR ((NOT DEFINED CMAKE_DEPENDS_USE_COMPILER OR CMAKE_DEPENDS_USE_COMPILER)
+          AND CMAKE_GENERATOR MATCHES "Makefiles|WMake"))
+      AND MSVC_${lang}_ARCHITECTURE_ID)
     foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
       CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX(${lang} "${userflags}")
     endforeach()

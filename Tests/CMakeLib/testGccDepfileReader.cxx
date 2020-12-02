@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmGccDepfileReader.h"
@@ -112,17 +114,26 @@ int testGccDepfileReader(int argc, char* argv[])
 
   std::string dataDirPath = argv[1];
   dataDirPath += "/testGccDepfileReader_data";
-  const int numberOfTestFiles = 3;
+  const int numberOfTestFiles = 7; // 6th file doesn't exist
   for (int i = 1; i <= numberOfTestFiles; ++i) {
     const std::string base = dataDirPath + "/deps" + std::to_string(i);
     const std::string depfile = base + ".d";
     const std::string plainDepfile = base + ".txt";
     std::cout << "Comparing " << base << " with " << plainDepfile << std::endl;
     const auto actual = cmReadGccDepfile(depfile.c_str());
-    const auto expected = readPlainDepfile(plainDepfile.c_str());
-    if (!compare(actual, expected)) {
-      dump("actual", actual);
-      dump("expected", expected);
+    if (cmSystemTools::FileExists(plainDepfile)) {
+      if (!actual) {
+        std::cerr << "Reading " << depfile << " should have succeeded\n";
+        return 1;
+      }
+      const auto expected = readPlainDepfile(plainDepfile.c_str());
+      if (!compare(*actual, expected)) {
+        dump("actual", *actual);
+        dump("expected", expected);
+        return 1;
+      }
+    } else if (actual) {
+      std::cerr << "Reading " << depfile << " should have failed\n";
       return 1;
     }
   }

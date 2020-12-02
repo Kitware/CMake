@@ -102,6 +102,12 @@ target_link_libraries(zot zot_pch)
 if(NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;$]")
   target_precompile_headers(zot_pch PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/zot_pch.hxx)
 endif()
+if (CMAKE_CXX_DEPENDS_USE_COMPILER AND
+    CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.4")
+  # Mixing pre-compile headers and flags to generate dependencies (-M options family)
+  # causes the compiler to crash
+  set_property(TARGET zot_pch PROPERTY DISABLE_PRECOMPILE_HEADERS ON)
+endif()
 
 # Test the #include line macro transformation rule support.
 set_property(

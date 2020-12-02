@@ -22,8 +22,10 @@ the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC`` items will
 populate the :prop_tgt:`INCLUDE_DIRECTORIES` property of ``<target>``.
 ``PUBLIC`` and ``INTERFACE`` items will populate the
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` property of ``<target>``.
-(:ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items.)
 The following arguments specify include directories.
+
+.. versionadded:: 3.11
+  Allow setting ``INTERFACE`` items on :ref:`IMPORTED targets <Imported Targets>`.
 
 Specified include directories may be absolute paths or relative paths.
 Repeated calls for the same <target> append items in the order called.  If
