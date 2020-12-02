@@ -42,8 +42,6 @@ public:
 
   std::string GetTargetName() const;
 
-  bool NeedDepTypeMSVC(const std::string& lang) const;
-
 protected:
   bool SetMsvcTargetPdbVariable(cmNinjaVars&, const std::string& config) const;
 

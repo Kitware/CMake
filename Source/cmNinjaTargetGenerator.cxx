@@ -12,7 +12,9 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
@@ -243,32 +245,6 @@ void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
   }
 
   this->LocalGenerator->AppendFlags(languageFlags, includeFlags);
-}
-
-bool cmNinjaTargetGenerator::NeedDepTypeMSVC(const std::string& lang) const
-{
-  std::string const& deptype = this->GetMakefile()->GetSafeDefinition(
-    cmStrCat("CMAKE_NINJA_DEPTYPE_", lang));
-  if (deptype == "msvc") {
-    return true;
-  }
-  if (deptype == "intel") {
-    // Ninja does not really define "intel", but we use it to switch based
-    // on whether this environment supports "gcc" or "msvc" deptype.
-    if (!this->GetGlobalGenerator()->SupportsMultilineDepfile()) {
-      // This ninja version is too old to support the Intel depfile format.
-      // Fall back to msvc deptype.
-      return true;
-    }
-    if ((this->Makefile->GetHomeDirectory().find(' ') != std::string::npos) ||
-        (this->Makefile->GetHomeOutputDirectory().find(' ') !=
-         std::string::npos)) {
-      // The Intel compiler does not properly escape spaces in a depfile.
-      // Fall back to msvc deptype.
-      return true;
-    }
-  }
-  return false;
 }
 
 // TODO: Refactor with
@@ -727,10 +703,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   std::string cldeps;
   if (!compilationPreprocesses) {
     // The compiler will not do preprocessing, so it has no such dependencies.
-  } else if (this->NeedDepTypeMSVC(lang)) {
-    rule.DepType = "msvc";
-    rule.DepFile.clear();
-    flags += " /showIncludes";
   } else if (mf->IsOn(cmStrCat("CMAKE_NINJA_CMCLDEPS_", lang))) {
     // For the MS resource compiler we need cmcldeps, but skip dependencies
     // for source-file try_compile cases because they are always fresh.
@@ -746,16 +718,23 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                         "\" \"", cl, "\" ");
     }
   } else {
-    rule.DepType = "gcc";
-    rule.DepFile = "$DEP_FILE";
+    const auto& depType = this->GetMakefile()->GetSafeDefinition(
+      cmStrCat("CMAKE_", lang, "_DEPFILE_FORMAT"));
+    if (depType == "msvc"_s) {
+      rule.DepType = "msvc";
+      rule.DepFile.clear();
+    } else {
+      rule.DepType = "gcc";
+      rule.DepFile = "$DEP_FILE";
+    }
+    vars.DependencyFile = rule.DepFile.c_str();
+    vars.DependencyTarget = "$out";
+
     const std::string flagsName = cmStrCat("CMAKE_DEPFILE_FLAGS_", lang);
     std::string depfileFlags = mf->GetSafeDefinition(flagsName);
     if (!depfileFlags.empty()) {
-      cmSystemTools::ReplaceString(depfileFlags, "<DEP_FILE>", "$DEP_FILE");
-      cmSystemTools::ReplaceString(depfileFlags, "<DEP_TARGET>", "$out");
-      cmSystemTools::ReplaceString(
-        depfileFlags, "<CMAKE_C_COMPILER>",
-        cmToCStr(mf->GetDefinition("CMAKE_C_COMPILER")));
+      rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
+                                                   depfileFlags, vars);
       flags += cmStrCat(' ', depfileFlags);
     }
   }
@@ -873,6 +852,14 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
   if (!compileCmds.empty()) {
     compileCmds.front().insert(0, cldeps);
+  }
+
+  const auto& extraCommands = this->GetMakefile()->GetSafeDefinition(
+    cmStrCat("CMAKE_", lang, "_DEPENDS_EXTRA_COMMANDS"));
+  if (!extraCommands.empty()) {
+    auto commandList = cmExpandedList(extraCommands);
+    compileCmds.insert(compileCmds.end(), commandList.cbegin(),
+                       commandList.cend());
   }
 
   for (std::string& i : compileCmds) {
@@ -1161,7 +1148,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["DEFINES"] = this->ComputeDefines(source, language, config);
   vars["INCLUDES"] = this->ComputeIncludes(source, language, config);
 
-  if (!this->NeedDepTypeMSVC(language)) {
+  if (this->GetMakefile()->GetSafeDefinition(
+        cmStrCat("CMAKE_", language, "_DEPFILE_FORMAT")) != "msvc"_s) {
     bool replaceExt(false);
     if (!language.empty()) {
       std::string repVar =
