@@ -752,10 +752,11 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
         break()
       endif()
     endforeach()
-    set(COMPILER_ID_TWICE)
+
     # With the IAR Compiler, some strings are found twice, first time as incomplete
     # list like "?<Constant "INFO:compiler[IAR]">".  Remove the incomplete copies.
     list(FILTER CMAKE_${lang}_COMPILER_ID_STRINGS EXCLUDE REGEX "\\?<Constant \\\"")
+
     # The IAR-AVR compiler uses a binary format that places a '6'
     # character (0x34) before each character in the string.  Strip
     # out these characters without removing any legitimate characters.
@@ -763,8 +764,11 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
       string(REGEX REPLACE "${CMAKE_MATCH_1}([^;])" "\\1"
         CMAKE_${lang}_COMPILER_ID_STRINGS "${CMAKE_${lang}_COMPILER_ID_STRINGS}")
     endif()
+
     # In C# binaries, some strings are found more than once.
     list(REMOVE_DUPLICATES CMAKE_${lang}_COMPILER_ID_STRINGS)
+
+    set(COMPILER_ID_TWICE)
     foreach(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
       if("${info}" MATCHES "INFO:compiler\\[([^]\"]*)\\]")
         if(COMPILER_ID)
