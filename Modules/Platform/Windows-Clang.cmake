@@ -105,7 +105,7 @@ macro(__windows_compiler_clang_gnu lang)
   enable_language(RC)
 endmacro()
 
-macro(__enable_llvm_rc_preprocessing clang_option_prefix)
+macro(__enable_llvm_rc_preprocessing clang_option_prefix extra_pp_flags)
   # Feed the preprocessed rc file to llvm-rc
   if(CMAKE_RC_COMPILER_INIT MATCHES "llvm-rc" OR CMAKE_RC_COMPILER MATCHES "llvm-rc")
     if(DEFINED CMAKE_C_COMPILER_ID)
@@ -117,7 +117,7 @@ macro(__enable_llvm_rc_preprocessing clang_option_prefix)
       set(CMAKE_DEPFILE_FLAGS_RC "${clang_option_prefix}-MD ${clang_option_prefix}-MF ${clang_option_prefix}<DEP_FILE>")
       # The <FLAGS> are passed to the preprocess and the resource compiler to pick
       # up the eventual -D / -C options passed through the CMAKE_RC_FLAGS.
-      set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_COMMAND> -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> -E -- <SOURCE> ++ <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> <FLAGS> /fo <OBJECT> <OBJECT>.pp")
+      set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_COMMAND> -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> ${extra_pp_flags} -E -- <SOURCE> ++ <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> <FLAGS> /fo <OBJECT> <OBJECT>.pp")
       if(CMAKE_GENERATOR MATCHES "Ninja")
         set(CMAKE_NINJA_CMCLDEPS_RC 0)
         set(CMAKE_NINJA_DEP_TYPE_RC gcc)
@@ -167,7 +167,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
   if ( "x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC" OR "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC" )
     include(Platform/Windows-MSVC)
     # Set the clang option forwarding prefix for clang-cl usage in the llvm-rc processing stage
-    __enable_llvm_rc_preprocessing("-clang:")
+    __enable_llvm_rc_preprocessing("-clang:" "")
     macro(__windows_compiler_clang_base lang)
       set(_COMPILE_${lang} "${_COMPILE_${lang}_MSVC}")
       __windows_compiler_msvc(${lang})
@@ -183,7 +183,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
 
     set(CMAKE_BUILD_TYPE_INIT Debug)
 
-    __enable_llvm_rc_preprocessing("")
+    __enable_llvm_rc_preprocessing("" "-x c")
     macro(__windows_compiler_clang_base lang)
       __windows_compiler_clang_gnu(${lang})
     endmacro()
@@ -191,7 +191,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
 
 else()
   include(Platform/Windows-GNU)
-  __enable_llvm_rc_preprocessing("")
+  __enable_llvm_rc_preprocessing("" "-x c")
   macro(__windows_compiler_clang_base lang)
     __windows_compiler_gnu(${lang})
   endmacro()
