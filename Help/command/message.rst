@@ -72,7 +72,7 @@ influences the way the message is handled:
   removed before releasing the project, packaging up the files, etc.
 
 .. versionadded:: 3.15
-  Added ``NOTICE``, ``VERBOSE``, ``DEBUG``, and ``TRACE`` levels.
+  Added the ``NOTICE``, ``VERBOSE``, ``DEBUG``, and ``TRACE`` levels.
 
 The CMake command-line tool displays ``STATUS`` to ``TRACE`` messages on stdout
 with the message preceded by two hyphens and a space.  All other message types

@@ -11,6 +11,8 @@ Locate the SDL library
 Imported targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.19
+
 This module defines the following :prop_tgt:`IMPORTED` target:
 
 ``SDL::SDL``
@@ -35,6 +37,10 @@ This module will set the following variables in your project:
   SDL minor version
 ``SDL_VERSION_PATCH``
   SDL patch version
+
+.. versionadded:: 3.19
+  Added the ``SDL_INCLUDE_DIRS``, ``SDL_LIBRARIES`` and ``SDL_VERSION[_<PART>]``
+  variables.
 
 Cache variables
 ^^^^^^^^^^^^^^^
@@ -62,6 +68,8 @@ This module responds to the flag:
 
 Obsolete variables
 ^^^^^^^^^^^^^^^^^^
+
+.. deprecated:: 3.19
 
 These variables are obsolete and provided for backwards compatibility:
 

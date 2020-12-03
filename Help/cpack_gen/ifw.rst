@@ -209,6 +209,8 @@ Package
 
 .. variable:: CPACK_IFW_PACKAGE_RESOURCES
 
+ .. versionadded:: 3.7
+
  List of additional resources ('.qrc' files) to include in the installer
  binary.
 
@@ -278,6 +280,8 @@ command-line tools as discovered by the module :module:`CPackIFW`.
 These variables are cached, and may be configured if needed.
 
 .. variable:: CPACK_IFW_ARCHIVEGEN_EXECUTABLE
+
+ .. versionadded:: 3.19
 
  The path to ``archivegen``.
 

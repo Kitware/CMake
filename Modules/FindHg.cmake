@@ -15,7 +15,8 @@ The module defines the following variables:
    HG_FOUND - true if the command line client was found
    HG_VERSION_STRING - the version of mercurial found
 
-If the command line client executable is found the following macro is defined:
+.. versionadded:: 3.1
+  If the command line client executable is found the following macro is defined:
 
 ::
 

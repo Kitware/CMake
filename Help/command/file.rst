@@ -126,7 +126,7 @@ Parse a list of ASCII strings from ``<filename>`` and store it in
  the ``ENCODING`` option will be defaulted to respect the Byte Order Mark.
 
  .. versionadded:: 3.2
-   Added ``UTF-16LE``, ``UTF-16BE``, ``UTF-32LE``, ``UTF-32BE`` encodings.
+   Added the ``UTF-16LE``, ``UTF-16BE``, ``UTF-32LE``, ``UTF-32BE`` encodings.
 
 For example, the code
 

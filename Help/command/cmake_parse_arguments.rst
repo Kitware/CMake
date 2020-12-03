@@ -1,8 +1,6 @@
 cmake_parse_arguments
 ---------------------
 
-.. versionadded:: 3.5
-
 Parse function or macro arguments.
 
 .. code-block:: cmake
@@ -12,6 +10,10 @@ Parse function or macro arguments.
 
   cmake_parse_arguments(PARSE_ARGV <N> <prefix> <options>
                         <one_value_keywords> <multi_value_keywords>)
+
+.. versionadded:: 3.5
+  This command is implemented natively.  Previously, it has been defined in the
+  module :module:`CMakeParseArguments`.
 
 This command is for use in macros or functions.
 It processes the arguments given to that macro or function,

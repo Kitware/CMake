@@ -7,8 +7,11 @@ FindCURL
 
 Find the native CURL headers and libraries.
 
-This module accept optional COMPONENTS to check supported features and
-protocols::
+.. versionadded:: 3.14
+  This module accept optional COMPONENTS to check supported features and
+  protocols:
+
+::
 
   PROTOCOLS: ICT FILE FTP FTPS GOPHER HTTP HTTPS IMAP IMAPS LDAP LDAPS POP3
              POP3S RTMP RTSP SCP SFTP SMB SMBS SMTP SMTPS TELNET TFTP
@@ -17,6 +20,8 @@ protocols::
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.12
 
 This module defines :prop_tgt:`IMPORTED` target ``CURL::libcurl``, if
 curl has been found.
@@ -38,8 +43,13 @@ This module defines the following variables:
 ``CURL_VERSION_STRING``
   The version of ``curl`` found.
 
+.. versionadded:: 3.13
+  Debug and Release variants are found separately.
+
 CURL CMake
 ^^^^^^^^^^
+
+.. versionadded:: 3.17
 
 If CURL was built using the CMake buildsystem then it provides its own
 ``CURLConfig.cmake`` file for use with the :command:`find_package` command's

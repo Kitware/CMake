@@ -432,7 +432,7 @@ enabled.
    hard-coded guesses.
 
 .. versionadded:: 3.16
-   Added ``CMAKE_FIND_USE_<CATEGORY>_PATH`` variables to globally disable
+   Added the ``CMAKE_FIND_USE_<CATEGORY>_PATH`` variables to globally disable
    various search locations.
 
 .. |FIND_XXX| replace:: find_package

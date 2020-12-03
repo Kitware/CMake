@@ -10,6 +10,8 @@ Find Geospatial Data Abstraction Library (GDAL).
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.14
+
 This module defines :prop_tgt:`IMPORTED` target ``GDAL::GDAL``
 if GDAL has been found.
 
@@ -25,7 +27,8 @@ This module will set the following variables in your project:
 ``GDAL_LIBRARIES``
   Libraries to link to GDAL.
 ``GDAL_VERSION``
-  The version of GDAL found.
+  .. versionadded:: 3.14
+    The version of GDAL found.
 
 Cache variables
 ^^^^^^^^^^^^^^^

@@ -335,7 +335,7 @@ Comparison
 Compare the strings and store true or false in the ``<output_variable>``.
 
 .. versionadded:: 3.7
-  Added ``LESS_EQUAL`` and ``GREATER_EQUAL`` options.
+  Added the ``LESS_EQUAL`` and ``GREATER_EQUAL`` options.
 
 .. _`Supported Hash Algorithms`:
 
@@ -373,7 +373,7 @@ The supported ``<HASH>`` algorithm names are:
   Keccak SHA-3.
 
 .. versionadded:: 3.8
-  Added ``SHA3`` hash algorithms.
+  Added the ``SHA3_*`` hash algorithms.
 
 Generation
 ^^^^^^^^^^

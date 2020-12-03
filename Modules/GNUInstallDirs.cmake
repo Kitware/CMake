@@ -46,7 +46,8 @@ where ``<dir>`` is one of:
 ``LOCALSTATEDIR``
   modifiable single-machine data (``var``)
 ``RUNSTATEDIR``
-  run-time variable data (``LOCALSTATEDIR/run``)
+  .. versionadded:: 3.9
+    run-time variable data (``LOCALSTATEDIR/run``)
 ``LIBDIR``
   object code libraries (``lib`` or ``lib64``
   or ``lib/<multiarch-tuple>`` on Debian)
@@ -72,6 +73,8 @@ used and the value will appear in the cache for editing by the user.
 
 Special Cases
 ^^^^^^^^^^^^^
+
+.. versionadded:: 3.4
 
 The following values of :variable:`CMAKE_INSTALL_PREFIX` are special:
 
@@ -115,6 +118,8 @@ Macros
 
     GNUInstallDirs_get_absolute_install_dir(absvar var dirname)
 
+  .. versionadded:: 3.7
+
   Set the given variable ``absvar`` to the absolute path contained
   within the variable ``var``.  This is to allow the computation of an
   absolute path, accounting for all the special cases documented
@@ -123,6 +128,10 @@ Macros
   allow users who create additional path variables to also compute
   absolute paths where necessary, using the same logic.  ``dirname`` is
   the directory name to get, e.g. ``BINDIR``.
+
+  .. versionchanged:: 3.20
+    Added the ``<dirname>`` parameter.  Previous versions of CMake passed
+    this value through the variable ``${dir}``.
 #]=======================================================================]
 
 cmake_policy(PUSH)

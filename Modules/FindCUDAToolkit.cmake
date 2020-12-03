@@ -11,6 +11,9 @@ This script locates the NVIDIA CUDA toolkit and the associated libraries, but
 does not require the ``CUDA`` language be enabled for a given project. This
 module does not search for the NVIDIA CUDA Samples.
 
+.. versionadded:: 3.19
+  QNX support.
+
 Search Behavior
 ^^^^^^^^^^^^^^^
 
@@ -426,6 +429,8 @@ Result variables
     Runtime library ``cudart``.
 
 ``CUDAToolkit_LIBRARY_ROOT``
+    .. versionadded:: 3.18
+
     The path to the CUDA Toolkit directory containing the nvvm directory and
     version.txt.
 

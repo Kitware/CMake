@@ -5,6 +5,9 @@
 Documentation
 -------------
 
+.. deprecated:: 3.18
+  This module does nothing, unless policy :policy:`CMP0106` is set to ``OLD``.
+
 This module provides support for the VTK documentation framework.  It
 relies on several tools (Doxygen, Perl, etc).
 #]=======================================================================]

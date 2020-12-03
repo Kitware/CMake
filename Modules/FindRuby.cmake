@@ -37,7 +37,8 @@ This module will set the following variables in your project:
 ``Ruby_INCLUDE_DIRS``
   include dirs to be used when using the ruby library
 ``Ruby_LIBRARIES``
-  libraries needed to use ruby from C.
+  .. versionadded:: 3.18
+    libraries needed to use ruby from C.
 ``Ruby_VERSION``
   the version of ruby which was found, e.g. "1.8.7"
 ``Ruby_VERSION_MAJOR``
@@ -47,9 +48,10 @@ This module will set the following variables in your project:
 ``Ruby_VERSION_PATCH``
   Ruby patch version.
 
-
-The following variables are also provided for compatibility reasons,
-don't use them in new code:
+.. versionchanged:: 3.18
+  Previous versions of CMake used the ``RUBY_`` prefix for all variables.
+  The following variables are provided for compatibility reasons,
+  don't use them in new code:
 
 ``RUBY_EXECUTABLE``
   same as Ruby_EXECUTABLE.
@@ -66,6 +68,8 @@ don't use them in new code:
 
 Hints
 ^^^^^
+
+.. versionadded:: 3.18
 
 ``Ruby_ROOT_DIR``
   Define the root directory of a Ruby installation.

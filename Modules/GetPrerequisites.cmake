@@ -25,6 +25,9 @@ files:
    ldd (Linux/Unix)
    otool (Mac OSX)
 
+.. versionchanged:: 3.16
+  The tool specified by ``CMAKE_OBJDUMP`` will be used, if set.
+
 The following functions are provided by this module:
 
 ::
@@ -41,9 +44,6 @@ The following functions are provided by this module:
    gp_resolved_file_type
      (projects can override with gp_resolved_file_type_override)
    gp_file_type
-
-Requires CMake 2.6 or greater because it uses function, break, return
-and PARENT_SCOPE.
 
 ::
 
@@ -67,8 +67,9 @@ searched first when a target without any path info is given.  Then
 standard system locations are also searched: PATH, Framework
 locations, /usr/lib...
 
-The variable GET_PREREQUISITES_VERBOSE can be set to true to enable verbose
-output.
+.. versionadded:: 3.14
+  The variable GET_PREREQUISITES_VERBOSE can be set to true to enable verbose
+  output.
 
 ::
 

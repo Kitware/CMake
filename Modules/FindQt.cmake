@@ -5,13 +5,13 @@
 FindQt
 ------
 
+.. deprecated:: 3.14
+  This module is available only if policy :policy:`CMP0084` is not set to ``NEW``.
+
 Searches for all installed versions of Qt3 or Qt4.
 
 This module cannot handle Qt5 or any later versions.
 For those, see :manual:`cmake-qt(7)`.
-
-This module exists for the :command:`find_package` command only if
-policy :policy:`CMP0084` is not set to ``NEW``.
 
 This module should only be used if your project can work with multiple
 versions of Qt.  If not, you should just directly use FindQt4 or
