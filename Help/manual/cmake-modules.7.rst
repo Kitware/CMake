@@ -75,7 +75,6 @@ These modules are loaded using the :command:`include` command.
    /module/CTestUseLaunchers
    /module/Dart
    /module/DeployQt4
-   /module/Documentation
    /module/ExternalData
    /module/ExternalProject
    /module/FeatureSummary
@@ -278,6 +277,7 @@ Deprecated Utility Modules
    /module/CMakeExpandImportedTargets
    /module/CMakeForceCompiler
    /module/CMakeParseArguments
+   /module/Documentation
    /module/MacroAddFileDependencies
    /module/TestCXXAcceptsFlag
    /module/UseJavaClassFilelist
