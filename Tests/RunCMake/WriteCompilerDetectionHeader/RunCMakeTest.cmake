@@ -1,5 +1,12 @@
 include(RunCMake)
 
+run_cmake(CMP0120-WARN)
+run_cmake(CMP0120-OLD)
+run_cmake(CMP0120-NEW)
+run_cmake(CMP0120-WARN-Direct)
+run_cmake(CMP0120-OLD-Direct)
+run_cmake(CMP0120-NEW-Direct)
+
 run_cmake(InvalidArgs)
 run_cmake(NoCompiler)
 run_cmake(NoFeature)

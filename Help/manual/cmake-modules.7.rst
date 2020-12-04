@@ -99,7 +99,6 @@ These modules are loaded using the :command:`include` command.
    /module/UseJava
    /module/UseSWIG
    /module/UsewxWidgets
-   /module/WriteCompilerDetectionHeader
 
 Find Modules
 ^^^^^^^^^^^^
@@ -285,6 +284,7 @@ Deprecated Utility Modules
    /module/UsePkgConfig
    /module/Use_wxWindows
    /module/WriteBasicConfigVersionFile
+   /module/WriteCompilerDetectionHeader
 
 Deprecated Find Modules
 =======================

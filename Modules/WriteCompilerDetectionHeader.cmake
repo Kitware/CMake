@@ -5,6 +5,10 @@
 WriteCompilerDetectionHeader
 ----------------------------
 
+.. deprecated:: 3.20
+  This module is available only if policy :policy:`CMP0120`
+  is not set to ``NEW``.  Do not use it in new code.
+
 .. versionadded:: 3.1
 
 This module provides the function ``write_compiler_detection_header()``.
@@ -242,6 +246,18 @@ library:
       CompatSupport_DEPRECATED=
   )
 #]=======================================================================]
+
+# Guard against inclusion by absolute path.
+cmake_policy(GET CMP0120 _WCDH_policy)
+if(_WCDH_policy STREQUAL "NEW")
+  message(FATAL_ERROR "The WriteCompilerDetectionHeader module has been removed by policy CMP0120.")
+elseif(_WCDH_policy STREQUAL "")
+  message(AUTHOR_WARNING
+    "The WriteCompilerDetectionHeader module will be removed by policy CMP0120.  "
+    "Projects should be ported away from the module, perhaps by bundling a copy "
+    "of the generated header or using a third-party alternative."
+    )
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeCompilerIdDetection.cmake)
 

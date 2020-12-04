@@ -21,6 +21,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
   static std::map<std::string, cmPolicies::PolicyID> DeprecatedModules;
   if (DeprecatedModules.empty()) {
     DeprecatedModules["Documentation"] = cmPolicies::CMP0106;
+    DeprecatedModules["WriteCompilerDetectionHeader"] = cmPolicies::CMP0120;
   }
 
   if (args.empty() || args.size() > 4) {
