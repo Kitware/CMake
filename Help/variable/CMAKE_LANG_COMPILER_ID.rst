@@ -26,7 +26,6 @@ include:
   IAR = IAR Systems (iar.com)
   Intel = Intel Compiler (intel.com)
   IntelDPCPP = Intel DPCPP Compiler (intel.com)
-  IntelClang = Intel Clang Compiler (intel.com)
   MSVC = Microsoft Visual Studio (microsoft.com)
   NVIDIA = NVIDIA CUDA Compiler (nvidia.com)
   OpenWatcom = Open Watcom (openwatcom.org)

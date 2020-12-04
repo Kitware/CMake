@@ -79,7 +79,6 @@ function(compiler_id_detection outvar lang)
       AppleClang
       ARMClang
       IntelDPCPP
-      IntelClang
       Clang
       GNU
       MSVC
