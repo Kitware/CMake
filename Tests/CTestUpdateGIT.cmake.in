@@ -32,6 +32,20 @@ if(UNIX)
   set(GIT ${TOP}/git.sh)
 endif()
 
+# Adapt to the system default branch name.
+execute_process(
+  COMMAND ${GIT} config --get init.defaultBranch
+  RESULT_VARIABLE defaultBranchFailed
+  OUTPUT_VARIABLE defaultBranch
+  ERROR_VARIABLE defaultBranchError
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_STRIP_TRAILING_WHITESPACE
+  )
+if(defaultBranch STREQUAL "")
+  set(defaultBranch master)
+endif()
+message("Detected default branch name '${defaultBranch}'")
+
 #-----------------------------------------------------------------------------
 # Create the repository.
 message("Creating repository...")
@@ -64,7 +78,7 @@ run_child(WORKING_DIRECTORY ${TOP}/module
   COMMAND ${GIT} commit -m "Initial content"
   )
 run_child(WORKING_DIRECTORY ${TOP}/module
-  COMMAND ${GIT} push origin master:refs/heads/master
+  COMMAND ${GIT} push origin ${defaultBranch}:refs/heads/${defaultBranch}
   )
 
 #-----------------------------------------------------------------------------
@@ -80,7 +94,7 @@ file(APPEND ${TOP}/import/.git/config "
 ${AUTHOR_CONFIG}")
 create_content(import)
 file(WRITE ${TOP}/import/HEAD "HEAD\n")
-file(WRITE ${TOP}/import/master "master\n")
+file(WRITE ${TOP}/import/${defaultBranch} "${defaultBranch}\n")
 run_child(WORKING_DIRECTORY ${TOP}/import
   COMMAND ${GIT} add .
   )
@@ -94,7 +108,7 @@ run_child(WORKING_DIRECTORY ${TOP}/import
   COMMAND ${GIT} commit -m "Initial content"
   )
 run_child(WORKING_DIRECTORY ${TOP}/import
-  COMMAND ${GIT} push origin master:refs/heads/master
+  COMMAND ${GIT} push origin ${defaultBranch}:refs/heads/${defaultBranch}
   )
 
 #-----------------------------------------------------------------------------
@@ -107,7 +121,7 @@ run_child(WORKING_DIRECTORY ${TOP}/module
   COMMAND ${GIT} commit -m "Changed content"
   )
 run_child(WORKING_DIRECTORY ${TOP}/module
-  COMMAND ${GIT} push origin master:refs/heads/master
+  COMMAND ${GIT} push origin ${defaultBranch}:refs/heads/${defaultBranch}
   )
 
 #-----------------------------------------------------------------------------
@@ -163,7 +177,7 @@ run_child(
   COMMAND ${GIT} rm -- ${files_removed}
   )
 run_child(WORKING_DIRECTORY ${TOP}/user-source/module
-  COMMAND ${GIT} checkout master --
+  COMMAND ${GIT} checkout ${defaultBranch} --
   )
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
@@ -222,7 +236,7 @@ rewind_source(user-source)
 # modified files) even if ~/.gitconfig sets "branch.master.rebase".
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${GIT} config branch.master.rebase false
+  COMMAND ${GIT} config branch.${defaultBranch}.rebase false
   )
 
 # Create a modified file.
@@ -254,7 +268,7 @@ create_build_tree(user-source user-binary-custom)
 file(APPEND ${TOP}/user-binary-custom/CTestConfiguration.ini
   "# GIT command configuration
 UpdateCommand: ${GIT}
-GITUpdateCustom: ${GIT};pull;origin;master
+GITUpdateCustom: ${GIT};pull;origin;${defaultBranch}
 ")
 
 # Run the dashboard command line interface.
@@ -304,7 +318,7 @@ create_dashboard_script(dash-binary-custom
   "# git command configuration
 set(CTEST_GIT_COMMAND \"${GIT}\")
 set(CTEST_GIT_UPDATE_OPTIONS)
-set(CTEST_GIT_UPDATE_CUSTOM \${CTEST_GIT_COMMAND} pull origin master)
+set(CTEST_GIT_UPDATE_CUSTOM \${CTEST_GIT_COMMAND} pull origin ${defaultBranch})
 ")
 
 # Run the dashboard script with CTest.
@@ -339,7 +353,7 @@ create_dashboard_script(dash-binary-quiet
   "# git command configuration
 set(CTEST_GIT_COMMAND \"${GIT}\")
 set(CTEST_GIT_UPDATE_OPTIONS)
-set(CTEST_GIT_UPDATE_CUSTOM \${CTEST_GIT_COMMAND} pull origin master)
+set(CTEST_GIT_UPDATE_CUSTOM \${CTEST_GIT_COMMAND} pull origin ${defaultBranch})
 ")
 unset(ctest_update_args)
 
