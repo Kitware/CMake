@@ -30,7 +30,9 @@ char const* qnxnto = "INFO" ":" "qnxnto[]";
 #endif
 
 const char* info_language_dialect_default = "INFO" ":" "dialect_default["
-#if CXX_STD > 201703L
+#if CXX_STD > 202002L
+  "23"
+#elfif CXX_STD > 201703L
   "20"
 #elif CXX_STD >= 201703L
   "17"

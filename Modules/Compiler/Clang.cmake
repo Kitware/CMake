@@ -165,6 +165,11 @@ macro(__compiler_clang_cxx_standards lang)
 
     unset(_clang_version_std17)
 
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 12.0)
+      set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std=c++2b")
+      set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std=gnu++2b")
+    endif()
+
     if("x${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "xMSVC")
       # The MSVC standard library requires C++14, and MSVC itself has no
       # notion of operating in a mode not aware of at least that standard.
@@ -215,6 +220,8 @@ macro(__compiler_clang_cxx_standards lang)
     set(CMAKE_${lang}17_EXTENSION_COMPILE_OPTION "")
     set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "")
     set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "")
+    set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "")
 
     # There is no meaningful default for this
     set(CMAKE_${lang}_STANDARD_DEFAULT "")
@@ -230,6 +237,7 @@ macro(__compiler_clang_cxx_standards lang)
         cxx_std_14
         cxx_std_17
         cxx_std_20
+        cxx_std_23
         )
       _record_compiler_features(${lang} "" CMAKE_${lang}_COMPILE_FEATURES)
     endmacro()
