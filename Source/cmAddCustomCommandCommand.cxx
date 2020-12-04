@@ -296,6 +296,12 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     status.SetError("given APPEND option with no OUTPUT.");
     return false;
   }
+  if (!implicit_depends.empty() && !depfile.empty() &&
+      mf.GetGlobalGenerator()->GetName() != "Ninja") {
+    // Makefiles generators does not support both at the same time
+    status.SetError("IMPLICIT_DEPENDS and DEPFILE can not both be specified.");
+    return false;
+  }
 
   // Check for an append request.
   if (append) {

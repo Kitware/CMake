@@ -1,0 +1,4 @@
+CMake Error at CustomCommandDependencies-BadArgs.cmake:[0-9]+ \(add_custom_command\):
+  add_custom_command IMPLICIT_DEPENDS and DEPFILE can not both be specified.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
