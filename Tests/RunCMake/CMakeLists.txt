@@ -130,6 +130,7 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
   add_RunCMake_test(CMP0116)
 endif()
 add_RunCMake_test(CMP0118)
+add_RunCMake_test(CMP0119 -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode

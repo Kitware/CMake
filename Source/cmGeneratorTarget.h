@@ -447,6 +447,9 @@ public:
   void GetAppleArchs(const std::string& config,
                      std::vector<std::string>& archVec) const;
 
+  void AddExplicitLanguageFlags(std::string& flags,
+                                cmSourceFile const& sf) const;
+
   void AddCUDAArchitectureFlags(std::string& flags) const;
   void AddCUDAToolkitFlags(std::string& flags) const;
 

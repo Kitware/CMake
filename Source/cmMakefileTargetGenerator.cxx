@@ -622,6 +622,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   // Build the set of compiler flags.
   std::string flags;
 
+  // Explicitly add the explicit language flag before any other flag
+  // so user flags can override it.
+  this->GeneratorTarget->AddExplicitLanguageFlags(flags, source);
+
   // Add language-specific flags.
   std::string langFlags = cmStrCat("$(", lang, "_FLAGS", filterArch, ")");
   this->LocalGenerator->AppendFlags(flags, langFlags);
