@@ -50,6 +50,10 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
       return false;
     }
     ++i;
+    if (i == args.end()) {
+      status.SetError("called with incorrect number of arguments");
+      return false;
+    }
   }
 
   // OK, now we have the directory to process, we just get the requested
@@ -67,27 +71,30 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  const char* prop = nullptr;
-  if (!i->empty()) {
-    if (*i == "DEFINITIONS") {
-      switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0059)) {
-        case cmPolicies::WARN:
-          status.GetMakefile().IssueMessage(
-            MessageType::AUTHOR_WARNING,
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
-          CM_FALLTHROUGH;
-        case cmPolicies::OLD:
-          StoreResult(status.GetMakefile(), variable,
-                      status.GetMakefile().GetDefineFlagsCMP0059());
-          return true;
-        case cmPolicies::NEW:
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::REQUIRED_IF_USED:
-          break;
-      }
-    }
-    prop = cmToCStr(dir->GetProperty(*i));
+  if (i->empty()) {
+    status.SetError("given empty string for the property name to get");
+    return false;
   }
+
+  const char* prop = nullptr;
+  if (*i == "DEFINITIONS") {
+    switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0059)) {
+      case cmPolicies::WARN:
+        status.GetMakefile().IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        StoreResult(status.GetMakefile(), variable,
+                    status.GetMakefile().GetDefineFlagsCMP0059());
+        return true;
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+        break;
+    }
+  }
+  prop = cmToCStr(dir->GetProperty(*i));
   StoreResult(status.GetMakefile(), variable, prop);
   return true;
 }
