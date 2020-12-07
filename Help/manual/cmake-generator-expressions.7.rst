@@ -648,6 +648,9 @@ which is just the string ``tgt``.
   expression is evaluated on.
 ``$<TARGET_FILE_NAME:tgt>``
   The ``tgt`` filename.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on (see policy :policy:`CMP0112`).
 ``$<TARGET_FILE_DIR:tgt>``
   Directory of the ``tgt`` binary file.
 
