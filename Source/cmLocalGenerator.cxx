@@ -1876,7 +1876,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     target->GetAppleArchs(config, archs);
     if (!archs.empty() &&
         (lang == "C" || lang == "CXX" || lang == "OBJ" || lang == "OBJCXX" ||
-         cmHasLiteralPrefix(lang, "ASM"))) {
+         lang == "ASM")) {
       for (std::string const& arch : archs) {
         if (filterArch.empty() || filterArch == arch) {
           flags += " -arch ";
