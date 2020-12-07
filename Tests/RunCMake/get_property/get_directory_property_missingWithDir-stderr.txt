@@ -1,0 +1,4 @@
+^CMake Error at get_directory_property_missingWithDir.cmake:1 \(get_directory_property\):
+  get_directory_property called with incorrect number of arguments
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
