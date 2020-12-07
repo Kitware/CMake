@@ -1375,15 +1375,16 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     std::string ispcSource =
       cmSystemTools::GetFilenameWithoutLastExtension(objectName);
 
-    std::string ispcDirectory = objectFileDir;
+    std::string ispcHeaderDirectory =
+      this->GeneratorTarget->GetObjectDirectory(config);
     if (cmProp prop =
           this->GeneratorTarget->GetProperty("ISPC_HEADER_DIRECTORY")) {
-      ispcDirectory = *prop;
+      ispcHeaderDirectory =
+        cmStrCat(this->LocalGenerator->GetBinaryDirectory(), '/', *prop);
     }
-    ispcDirectory =
-      cmStrCat(this->LocalGenerator->GetBinaryDirectory(), '/', ispcDirectory);
 
-    std::string ispcHeader = cmStrCat(ispcDirectory, '/', ispcSource, ".h");
+    std::string ispcHeader =
+      cmStrCat(ispcHeaderDirectory, '/', ispcSource, ".h");
     ispcHeader = this->ConvertToNinjaPath(ispcHeader);
 
     // Make sure ninja knows what command generates the header
@@ -1395,8 +1396,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     auto ispcSuffixes =
       detail::ComputeISPCObjectSuffixes(this->GeneratorTarget);
     if (ispcSuffixes.size() > 1) {
+      std::string rootObjectDir =
+        this->GeneratorTarget->GetObjectDirectory(config);
       auto ispcSideEfffectObjects = detail::ComputeISPCExtraObjects(
-        objectName, ispcDirectory, ispcSuffixes);
+        objectName, rootObjectDir, ispcSuffixes);
 
       for (auto sideEffect : ispcSideEfffectObjects) {
         sideEffect = this->ConvertToNinjaPath(sideEffect);
