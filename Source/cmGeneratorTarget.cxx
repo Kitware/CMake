@@ -5107,9 +5107,14 @@ void cmGeneratorTarget::GetTargetObjectNames(
     objects.push_back(map_it->second);
   }
 
+  // We need to compute the relative path from the root of
+  // of the object directory to handle subdirectory paths
+  std::string rootObjectDir = this->GetObjectDirectory(config);
+  rootObjectDir = cmSystemTools::CollapseFullPath(rootObjectDir);
   auto ispcObjects = this->GetGeneratedISPCObjects(config);
   for (std::string const& output : ispcObjects) {
-    objects.push_back(cmSystemTools::GetFilenameName(output));
+    auto relativePathFromObjectDir = output.substr(rootObjectDir.size());
+    objects.push_back(relativePathFromObjectDir);
   }
 }
 
