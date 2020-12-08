@@ -2431,9 +2431,10 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   for (std::string const& config : configsList) {
 
-    std::string perConfigDir = target->GetObjectDirectory(config);
+    std::string rootObjectDir = target->GetObjectDirectory(config);
+    std::string headerDir = rootObjectDir;
     if (cmProp prop = target->GetProperty("ISPC_HEADER_DIRECTORY")) {
-      perConfigDir = cmSystemTools::CollapseFullPath(
+      headerDir = cmSystemTools::CollapseFullPath(
         cmStrCat(this->GetBinaryDirectory(), '/', *prop));
     }
 
@@ -2450,11 +2451,11 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
         std::string ispcSource =
           cmSystemTools::GetFilenameWithoutLastExtension(objectName);
 
-        auto headerPath = cmStrCat(perConfigDir, '/', ispcSource, ".h");
+        auto headerPath = cmStrCat(headerDir, '/', ispcSource, ".h");
         target->AddISPCGeneratedHeader(headerPath, config);
         if (extra_objects) {
           std::vector<std::string> objs = detail::ComputeISPCExtraObjects(
-            objectName, perConfigDir, ispcSuffixes);
+            objectName, rootObjectDir, ispcSuffixes);
           target->AddISPCGeneratedObject(std::move(objs), config);
         }
       }
@@ -4098,15 +4099,23 @@ std::vector<std::string> ComputeISPCExtraObjects(
   std::string const& objectName, std::string const& buildDirectory,
   std::vector<std::string> const& ispcSuffixes)
 {
+  auto normalizedDir = cmSystemTools::CollapseFullPath(buildDirectory);
   std::vector<std::string> computedObjects;
   computedObjects.reserve(ispcSuffixes.size());
 
   auto extension = cmSystemTools::GetFilenameLastExtension(objectName);
-  auto objNameNoExt =
-    cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+
+  // We can't use cmSystemTools::GetFilenameWithoutLastExtension as it
+  // drops any directories in objectName
+  auto objNameNoExt = objectName;
+  std::string::size_type dot_pos = objectName.rfind('.');
+  if (dot_pos != std::string::npos) {
+    objNameNoExt.resize(dot_pos);
+  }
+
   for (const auto& ispcTarget : ispcSuffixes) {
     computedObjects.emplace_back(
-      cmStrCat(buildDirectory, "/", objNameNoExt, "_", ispcTarget, extension));
+      cmStrCat(normalizedDir, "/", objNameNoExt, "_", ispcTarget, extension));
   }
 
   return computedObjects;
