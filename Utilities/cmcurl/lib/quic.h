@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -41,7 +41,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
                            const struct sockaddr *addr,
                            socklen_t addrlen);
 CURLcode Curl_quic_is_connected(struct connectdata *conn,
-                                curl_socket_t sockfd,
+                                int sockindex,
                                 bool *connected);
 int Curl_quic_ver(char *p, size_t len);
 CURLcode Curl_quic_done_sending(struct connectdata *conn);
