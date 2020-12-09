@@ -168,3 +168,12 @@ The options are:
   .. versionadded:: 3.13
     Arguments to ``WORKING_DIRECTORY`` may use
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
+Ninja Multi-Config
+^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.20
+
+  ``add_custom_target`` supports the :generator:`Ninja Multi-Config`
+  generator's cross-config capabilities. See the generator documentation
+  for more information.

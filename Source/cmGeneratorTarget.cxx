@@ -3064,7 +3064,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     } else {
       // The original name of the dependency was not a full path.  It
       // must name a target, so add the target-level dependency.
-      this->GeneratorTarget->Target->AddUtility(util, false);
+      this->GeneratorTarget->Target->AddUtility(util, true);
       return true;
     }
   }

@@ -86,3 +86,47 @@ used to generate ``generated.c``, which would be used to build the ``Debug``
 configuration of ``generated``. This is useful for running a release-optimized
 version of a generator utility while still building the debug version of the
 targets built with the generated code.
+
+Custom Commands
+^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.20
+
+The ``Ninja Multi-Config`` generator adds extra capabilities to
+:command:`add_custom_command` and :command:`add_custom_target` through its
+cross-config mode. The ``COMMAND``, ``DEPENDS``, and ``WORKING_DIRECTORY``
+arguments can be evaluated in the context of either the "command config" (the
+"native" configuration of the ``build-<Config>.ninja`` file in use) or the
+"output config" (the configuration used to evaluate the ``OUTPUT`` and
+``BYPRODUCTS``).
+
+If either ``OUTPUT`` or ``BYPRODUCTS`` names a path that is common to
+more than one configuration (e.g. it does not use any generator expressions),
+all arguments are evaluated in the command config by default.
+If all ``OUTPUT`` and ``BYPRODUCTS`` paths are unique to each configuration
+(e.g. by using the ``$<CONFIG>`` generator expression), the first argument of
+``COMMAND`` is still evaluated in the command config by default, while all
+subsequent arguments, as well as the arguments to ``DEPENDS`` and
+``WORKING_DIRECTORY``, are evaluated in the output config. These defaults can
+be overridden with the ``$<OUTPUT_CONFIG:...>`` and ``$<COMMAND_CONFIG:...>``
+generator-expressions. Note that if a target is specified by its name in
+``DEPENDS``, or as the first argument of ``COMMAND``, it is always evaluated
+in the command config, even if it is wrapped in ``$<OUTPUT_CONFIG:...>``
+(because its plain name is not a generator expression).
+
+As an example, consider the following:
+
+.. code-block:: cmake
+
+  add_custom_command(
+    OUTPUT "$<CONFIG>.txt"
+    COMMAND generator "$<CONFIG>.txt" "$<OUTPUT_CONFIG:$<CONFIG>>" "$<COMMAND_CONFIG:$<CONFIG>>"
+    DEPENDS tgt1 "$<TARGET_FILE:tgt2>" "$<OUTPUT_CONFIG:$<TARGET_FILE:tgt3>>" "$<COMMAND_CONFIG:$<TARGET_FILE:tgt4>>"
+    )
+
+Assume that ``generator``, ``tgt1``, ``tgt2``, ``tgt3``, and ``tgt4`` are all
+executable targets, and assume that ``$<CONFIG>.txt`` is built in the ``Debug``
+output config using the ``Release`` command config. The ``Release`` build of
+the ``generator`` target is called with ``Debug.txt Debug Release`` as
+arguments. The command depends on the ``Release`` builds of ``tgt1`` and
+``tgt4``, and the ``Debug`` builds of ``tgt2`` and ``tgt3``.

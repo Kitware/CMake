@@ -398,3 +398,12 @@ after linking.
   will run ``someHasher`` after linking ``myPlugin``, e.g. to produce a ``.c``
   file containing code to check the hash of ``myPlugin`` that the ``myExe``
   executable can use to verify it before loading.
+
+Ninja Multi-Config
+^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.20
+
+  ``add_custom_command`` supports the :generator:`Ninja Multi-Config`
+  generator's cross-config capabilities. See the generator documentation
+  for more information.

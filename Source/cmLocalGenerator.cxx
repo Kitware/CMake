@@ -4128,7 +4128,8 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
   }
 
   // Create the generated symbolic output name of the utility target.
-  std::string output = lg.CreateUtilityOutput(target->GetName());
+  std::string output =
+    lg.CreateUtilityOutput(target->GetName(), byproducts, lfbt);
 
   std::string no_main_dependency;
   cmImplicitDependsList no_implicit_depends;
@@ -4235,7 +4236,8 @@ cmSourceFile* cmLocalGenerator::GetSourceFileWithOutput(
 }
 
 std::string cmLocalGenerator::CreateUtilityOutput(
-  std::string const& targetName)
+  std::string const& targetName, std::vector<std::string> const&,
+  cmListFileBacktrace const&)
 {
   std::string force =
     cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/", targetName);

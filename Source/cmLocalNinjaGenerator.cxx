@@ -10,6 +10,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmCryptoHash.h"
@@ -567,16 +569,45 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
 }
 
 void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
-  cmCustomCommand const* cc, const cmNinjaDeps& orderOnlyDeps,
-  const std::string& config)
+  cmCustomCommand const* cc, const std::set<cmGeneratorTarget*>& targets,
+  const std::string& fileConfig)
 {
   cmGlobalNinjaGenerator* gg = this->GetGlobalNinjaGenerator();
-  if (gg->SeenCustomCommand(cc, config)) {
+  if (gg->SeenCustomCommand(cc, fileConfig)) {
     return;
   }
 
-  for (cmCustomCommandGenerator const& ccg :
-       this->MakeCustomCommandGenerators(*cc, config)) {
+  auto ccgs = this->MakeCustomCommandGenerators(*cc, fileConfig);
+  for (cmCustomCommandGenerator const& ccg : ccgs) {
+    cmNinjaDeps orderOnlyDeps;
+
+    // A custom command may appear on multiple targets.  However, some build
+    // systems exist where the target dependencies on some of the targets are
+    // overspecified, leading to a dependency cycle.  If we assume all target
+    // dependencies are a superset of the true target dependencies for this
+    // custom command, we can take the set intersection of all target
+    // dependencies to obtain a correct dependency list.
+    //
+    // FIXME: This won't work in certain obscure scenarios involving indirect
+    // dependencies.
+    auto j = targets.begin();
+    assert(j != targets.end());
+    this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
+      *j, orderOnlyDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
+    std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
+    ++j;
+
+    for (; j != targets.end(); ++j) {
+      std::vector<std::string> jDeps;
+      std::vector<std::string> depsIntersection;
+      this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
+        *j, jDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
+      std::sort(jDeps.begin(), jDeps.end());
+      std::set_intersection(orderOnlyDeps.begin(), orderOnlyDeps.end(),
+                            jDeps.begin(), jDeps.end(),
+                            std::back_inserter(depsIntersection));
+      orderOnlyDeps = depsIntersection;
+    }
 
     const std::vector<std::string>& outputs = ccg.GetOutputs();
     const std::vector<std::string>& byproducts = ccg.GetByproducts();
@@ -603,7 +634,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     }
 
     cmNinjaDeps ninjaDeps;
-    this->AppendCustomCommandDeps(ccg, ninjaDeps, config);
+    this->AppendCustomCommandDeps(ccg, ninjaDeps, fileConfig);
 
     std::vector<std::string> cmdLines;
     this->AppendCustomCommandLines(ccg, cmdLines);
@@ -614,7 +645,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       build.Outputs = std::move(ninjaOutputs);
       build.ExplicitDeps = std::move(ninjaDeps);
       build.OrderOnlyDeps = orderOnlyDeps;
-      gg->WriteBuild(this->GetImplFileStream(config), build);
+      gg->WriteBuild(this->GetImplFileStream(fileConfig), build);
     } else {
       std::string customStep = cmSystemTools::GetFilenameName(ninjaOutputs[0]);
       // Hash full path to make unique.
@@ -652,16 +683,92 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
         this->BuildCommandLine(cmdLines, customStep),
         this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
         depfile, cc->GetJobPool(), cc->GetUsesTerminal(),
-        /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, config,
+        /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, fileConfig,
         ninjaDeps, orderOnlyDeps);
     }
   }
 }
 
-std::vector<cmCustomCommandGenerator>
-cmLocalNinjaGenerator::MakeCustomCommandGenerators(cmCustomCommand const& cc,
-                                                   std::string const& config)
+namespace {
+bool HasUniqueByproducts(cmLocalGenerator& lg,
+                         std::vector<std::string> const& byproducts,
+                         cmListFileBacktrace const& bt)
 {
+  std::vector<std::string> configs =
+    lg.GetMakefile()->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+  cmGeneratorExpression ge(bt);
+  for (std::string const& p : byproducts) {
+    if (cmGeneratorExpression::Find(p) == std::string::npos) {
+      return false;
+    }
+    std::set<std::string> seen;
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(p);
+    for (std::string const& config : configs) {
+      for (std::string const& b :
+           lg.ExpandCustomCommandOutputPaths(*cge, config)) {
+        if (!seen.insert(b).second) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+bool HasUniqueOutputs(std::vector<cmCustomCommandGenerator> const& ccgs)
+{
+  std::set<std::string> allOutputs;
+  std::set<std::string> allByproducts;
+  for (cmCustomCommandGenerator const& ccg : ccgs) {
+    for (std::string const& output : ccg.GetOutputs()) {
+      if (!allOutputs.insert(output).second) {
+        return false;
+      }
+    }
+    for (std::string const& byproduct : ccg.GetByproducts()) {
+      if (!allByproducts.insert(byproduct).second) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+}
+
+std::string cmLocalNinjaGenerator::CreateUtilityOutput(
+  std::string const& targetName, std::vector<std::string> const& byproducts,
+  cmListFileBacktrace const& bt)
+{
+  // In Ninja Multi-Config, we can only produce cross-config utility
+  // commands if all byproducts are per-config.
+  if (!this->GetGlobalGenerator()->IsMultiConfig() ||
+      !HasUniqueByproducts(*this, byproducts, bt)) {
+    return this->cmLocalGenerator::CreateUtilityOutput(targetName, byproducts,
+                                                       bt);
+  }
+
+  std::string const base = cmStrCat(this->GetCurrentBinaryDirectory(),
+                                    "/CMakeFiles/", targetName, '-');
+  // The output is not actually created so mark it symbolic.
+  for (std::string const& config :
+       this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig)) {
+    std::string const force = cmStrCat(base, config);
+    if (cmSourceFile* sf = this->Makefile->GetOrCreateGeneratedSource(force)) {
+      sf->SetProperty("SYMBOLIC", "1");
+    } else {
+      cmSystemTools::Error("Could not get source file entry for " + force);
+    }
+  }
+  this->GetGlobalNinjaGenerator()->AddPerConfigUtilityTarget(targetName);
+  return cmStrCat(base, "$<CONFIG>"_s);
+}
+
+std::vector<cmCustomCommandGenerator>
+cmLocalNinjaGenerator::MakeCustomCommandGenerators(
+  cmCustomCommand const& cc, std::string const& fileConfig)
+{
+  cmGlobalNinjaGenerator const* gg = this->GetGlobalNinjaGenerator();
+
   bool transformDepfile = false;
   switch (this->GetPolicyStatus(cmPolicies::CMP0116)) {
     case cmPolicies::OLD:
@@ -674,8 +781,40 @@ cmLocalNinjaGenerator::MakeCustomCommandGenerators(cmCustomCommand const& cc,
       break;
   }
 
+  // Start with the build graph's configuration.
   std::vector<cmCustomCommandGenerator> ccgs;
-  ccgs.emplace_back(cc, config, this, transformDepfile);
+  ccgs.emplace_back(cc, fileConfig, this, transformDepfile);
+
+  // Consider adding cross configurations.
+  if (!gg->EnableCrossConfigBuild()) {
+    return ccgs;
+  }
+
+  // Outputs and byproducts must be expressed using generator expressions.
+  for (std::string const& output : cc.GetOutputs()) {
+    if (cmGeneratorExpression::Find(output) == std::string::npos) {
+      return ccgs;
+    }
+  }
+  for (std::string const& byproduct : cc.GetByproducts()) {
+    if (cmGeneratorExpression::Find(byproduct) == std::string::npos) {
+      return ccgs;
+    }
+  }
+
+  // Tentatively add the other cross configurations.
+  for (std::string const& config : gg->GetCrossConfigs(fileConfig)) {
+    if (fileConfig != config) {
+      ccgs.emplace_back(cc, fileConfig, this, transformDepfile, config);
+    }
+  }
+
+  // If outputs and byproducts are not unique to each configuration,
+  // drop the cross configurations.
+  if (!HasUniqueOutputs(ccgs)) {
+    ccgs.erase(ccgs.begin() + 1, ccgs.end());
+  }
+
   return ccgs;
 }
 
@@ -692,42 +831,13 @@ void cmLocalNinjaGenerator::AddCustomCommandTarget(cmCustomCommand const* cc,
 }
 
 void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements(
-  const std::string& config)
+  const std::string& fileConfig)
 {
   for (cmCustomCommand const* customCommand : this->CustomCommands) {
     auto i = this->CustomCommandTargets.find(customCommand);
     assert(i != this->CustomCommandTargets.end());
 
-    // A custom command may appear on multiple targets.  However, some build
-    // systems exist where the target dependencies on some of the targets are
-    // overspecified, leading to a dependency cycle.  If we assume all target
-    // dependencies are a superset of the true target dependencies for this
-    // custom command, we can take the set intersection of all target
-    // dependencies to obtain a correct dependency list.
-    //
-    // FIXME: This won't work in certain obscure scenarios involving indirect
-    // dependencies.
-    auto j = i->second.begin();
-    assert(j != i->second.end());
-    std::vector<std::string> ccTargetDeps;
-    this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
-      *j, ccTargetDeps, config);
-    std::sort(ccTargetDeps.begin(), ccTargetDeps.end());
-    ++j;
-
-    for (; j != i->second.end(); ++j) {
-      std::vector<std::string> jDeps;
-      std::vector<std::string> depsIntersection;
-      this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(*j, jDeps,
-                                                                  config);
-      std::sort(jDeps.begin(), jDeps.end());
-      std::set_intersection(ccTargetDeps.begin(), ccTargetDeps.end(),
-                            jDeps.begin(), jDeps.end(),
-                            std::back_inserter(depsIntersection));
-      ccTargetDeps = depsIntersection;
-    }
-
-    this->WriteCustomCommandBuildStatement(i->first, ccTargetDeps, config);
+    this->WriteCustomCommandBuildStatement(i->first, i->second, fileConfig);
   }
 }
 

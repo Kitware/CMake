@@ -7,7 +7,7 @@
     "isGeneratorProvided": null,
     "sources": [
         {
-            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/custom/CMakeFiles/custom_tgt$",
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/custom/CMakeFiles/custom_tgt(-(Debug|Release|RelWithDebInfo|MinSizeRel))?$",
             "isGenerated": true,
             "sourceGroupName": "",
             "compileGroupLanguage": null,
@@ -27,7 +27,7 @@
             ]
         },
         {
-            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(custom/)?CMakeFiles/([0-9a-f]+/)?custom_tgt\\.rule$",
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(custom/)?CMakeFiles/([0-9a-f]+/)?custom_tgt(-\\(CONFIG\\))?\\.rule$",
             "isGenerated": true,
             "sourceGroupName": "CMake Rules",
             "compileGroupLanguage": null,
@@ -45,13 +45,13 @@
         {
             "name": "",
             "sourcePaths": [
-                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/custom/CMakeFiles/custom_tgt$"
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/custom/CMakeFiles/custom_tgt(-(Debug|Release|RelWithDebInfo|MinSizeRel))?$"
             ]
         },
         {
             "name": "CMake Rules",
             "sourcePaths": [
-                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(custom/)?CMakeFiles/([0-9a-f]+/)?custom_tgt\\.rule$"
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(custom/)?CMakeFiles/([0-9a-f]+/)?custom_tgt(-\\(CONFIG\\))?\\.rule$"
             ]
         }
     ],
