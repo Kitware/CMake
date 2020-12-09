@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -92,7 +92,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       if(!share->sslsession) {
         share->max_ssl_sessions = 8;
         share->sslsession = calloc(share->max_ssl_sessions,
-                                   sizeof(struct curl_ssl_session));
+                                   sizeof(struct Curl_ssl_session));
         share->sessionage = 0;
         if(!share->sslsession)
           res = CURLSHE_NOMEM;
