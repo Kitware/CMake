@@ -1649,6 +1649,14 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
     }
   }
 
+  // Allow empty source file list for iOS Sticker packs
+  if (const char* productType = GetTargetProductType(gtgt)) {
+    if (strcmp(productType,
+               "com.apple.product-type.app-extension.messages-sticker-pack") ==
+        0)
+      return;
+  }
+
   // Add an empty source file to the target that compiles with the
   // linker language.  This should convince Xcode to choose the proper
   // language.
