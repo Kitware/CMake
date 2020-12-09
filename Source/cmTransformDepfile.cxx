@@ -47,7 +47,8 @@ void WriteGccDepfile(cmsys::ofstream& fout, const cmGccDepfileContent& content)
     }
     fout << ':';
     for (auto const& path : dep.paths) {
-      fout << " \\\n  " << path;
+      fout << " \\\n  ";
+      WriteFilenameGcc(fout, path);
     }
     fout << '\n';
   }

@@ -29,6 +29,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmGlobalNinjaGenerator.h"
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -1237,11 +1238,23 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       const std::string outputFile =
         cmStrCat(this->Dir.Build, "/", timestampFileName);
       this->AutogenTarget.DepFile = cmStrCat(this->Dir.Build, "/deps");
-      auto relativeBinaryDir = cmSystemTools::RelativePath(
-        this->LocalGen->GetBinaryDirectory(),
-        this->LocalGen->GetCurrentBinaryDirectory());
-      if (!relativeBinaryDir.empty()) {
-        relativeBinaryDir = cmStrCat(relativeBinaryDir, "/");
+      std::string relativeBinaryDir;
+      if (dynamic_cast<cmGlobalNinjaGenerator*>(this->GlobalGen)) {
+        switch (this->LocalGen->GetPolicyStatus(cmPolicies::CMP0116)) {
+          case cmPolicies::OLD:
+          case cmPolicies::WARN:
+            relativeBinaryDir = cmSystemTools::RelativePath(
+              this->LocalGen->GetBinaryDirectory(),
+              this->LocalGen->GetCurrentBinaryDirectory());
+            if (!relativeBinaryDir.empty()) {
+              relativeBinaryDir = cmStrCat(relativeBinaryDir, "/");
+            }
+            break;
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::NEW:
+            break;
+        }
       }
       this->AutogenTarget.DepFileRuleName =
         cmStrCat(relativeBinaryDir, this->GenTarget->GetName(), "_autogen/",
