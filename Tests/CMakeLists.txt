@@ -301,18 +301,7 @@ if(BUILD_TESTING)
   set(CTEST_TEST_OSX_ARCH 0)
   set(CMake_TEST_XCODE_VERSION 0)
   if(APPLE)
-    execute_process(
-      COMMAND sw_vers -productVersion
-      OUTPUT_VARIABLE OSX_VERSION
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    if(OSX_VERSION VERSION_LESS 10.4)
-      message(STATUS "Forcing CTEST_TEST_CPACK=OFF on OSX < 10.4")
-      message(STATUS "OSX_VERSION='${OSX_VERSION}'")
-      set(CTEST_TEST_CPACK OFF)
-    else()
-      set(CTEST_TEST_OSX_ARCH 1)
-    endif()
+    set(CTEST_TEST_OSX_ARCH 1)
     if(XCODE_VERSION)
       set(CMake_TEST_XCODE_VERSION "${XCODE_VERSION}")
     else()
