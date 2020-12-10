@@ -115,13 +115,8 @@
 
     script:
         - *before_script_macos
-        - .gitlab/ci/sccache.sh
-        # Allow the server to already be running.
-        - "sccache --start-server || :"
-        - sccache --show-stats
         - ctest -VV -S .gitlab/ci/ctest_configure.cmake
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
-        - sccache --show-stats
         - cd build
         - cpack -G TGZ
         - cpack -G DragNDrop
