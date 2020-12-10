@@ -74,3 +74,9 @@ Each ``<os>/<arch>/`` directory contains the following:
   argument specifying either ``x86_64`` or ``i386``.
 
 .. _`kitware/cmake Docker Hub Repository`: https://hub.docker.com/r/kitware/cmake
+
+macOS
+-----
+
+The ``macos/`` directory contains scripts used to produce dependencies
+for building CMake binaries on macOS.
