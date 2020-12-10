@@ -53,6 +53,8 @@ The following variables may be set to influence this module's behavior:
   * ``Arm_mp``
   * ``Arm_ilp64``
   * ``Arm_ilp64_mp``
+  * ``EML``
+  * ``EML_mt``
   * ``Generic``
 
   .. versionadded:: 3.6
@@ -73,6 +75,9 @@ The following variables may be set to influence this module's behavior:
 
   .. versionadded:: 3.19
     ``FlexiBLAS`` support.
+
+  .. versionadded:: 3.20
+    Elbrus Math Library support (``EML``, ``EML_mt``).
 
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95 interfaces
@@ -981,6 +986,31 @@ if(BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
       ""
       )
   endif()
+endif()
+
+# Elbrus Math Library?
+if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
+
+   set(BLAS_EML_LIB "eml")
+
+   # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
+   if(BLA_VENDOR MATCHES "_mt")
+     set(BLAS_EML_LIB "${BLAS_EML_LIB}_mt")
+   endif()
+
+   if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${BLAS_EML_LIB}"
+      ""
+      ""
+      ""
+      )
+  endif()
+
 endif()
 
 # Generic BLAS library?

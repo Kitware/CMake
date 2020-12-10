@@ -43,6 +43,8 @@ The following variables may be set to influence this module's behavior:
   * ``Arm_mp``
   * ``Arm_ilp64``
   * ``Arm_ilp64_mp``
+  * ``EML``
+  * ``EML_mt``
   * ``Generic``
 
   .. versionadded:: 3.6
@@ -63,6 +65,9 @@ The following variables may be set to influence this module's behavior:
 
   .. versionadded:: 3.19
     ``FlexiBLAS`` support.
+
+  .. versionadded:: 3.20
+    Elbrus Math Library support (``EML``, ``EML_mt``).
 
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95/LAPACK95 interfaces
@@ -508,6 +513,30 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       cheev
       ""
       "vecLib"
+      ""
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
+  endif()
+
+  # Elbrus Math Library?
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All"))
+
+    set(LAPACK_EML_LIB "eml")
+
+    # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
+    if(BLA_VENDOR MATCHES "_mt")
+     set(LAPACK_EML_LIB "${LAPACK_EML_LIB}_mt")
+    endif()
+
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "${LAPACK_EML_LIB}"
       ""
       ""
       ""
