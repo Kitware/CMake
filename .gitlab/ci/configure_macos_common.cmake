@@ -11,3 +11,8 @@ set(CMake_TEST_Java 0 CACHE FILEPATH "")
 set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF CACHE BOOL "")
 
 set(BUILD_QtDialog ON CACHE BOOL "")
+
+# The "XCTest" test uses an explicit deployment target chosen
+# when CMake itself is configured.  Use a version that is not
+# newer than the macOS version running on any CI host.
+set(CMake_TEST_XCTest_DEPLOYMENT_TARGET "10.15" CACHE STRING "")
