@@ -348,3 +348,12 @@ Changes made since CMake 3.19.0 include the following.
   been reverted to restore behavior from CMake 3.18 and below.
 
 * CUDA 11.1 support for Clang.
+
+3.19.2
+------
+
+* The precompiled macOS binary provided on ``cmake.org`` is now a
+  universal binary with ``x86_64`` and ``arm64`` architectures.
+  It requires macOS 10.10 or newer.
+  The package file naming pattern has been changed from
+  ``cmake-$ver-Darwin-x86_64`` to ``cmake-$ver-macos-universal``.
