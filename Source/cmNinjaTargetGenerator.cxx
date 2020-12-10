@@ -1374,6 +1374,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       this->GeneratorTarget->GetObjectName(source);
     std::string ispcSource =
       cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+    ispcSource = cmSystemTools::GetFilenameWithoutLastExtension(ispcSource);
+
+    cmProp ispcSuffixProp =
+      this->GeneratorTarget->GetProperty("ISPC_HEADER_SUFFIX");
+    assert(ispcSuffixProp != nullptr);
 
     std::string ispcHeaderDirectory =
       this->GeneratorTarget->GetObjectDirectory(config);
@@ -1384,7 +1389,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
 
     std::string ispcHeader =
-      cmStrCat(ispcHeaderDirectory, '/', ispcSource, ".h");
+      cmStrCat(ispcHeaderDirectory, '/', ispcSource, *ispcSuffixProp);
     ispcHeader = this->ConvertToNinjaPath(ispcHeader);
 
     // Make sure ninja knows what command generates the header

@@ -369,6 +369,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("JOB_POOL_PRECOMPILE_HEADER");
     initProp("ISPC_COMPILER_LAUNCHER");
     initProp("ISPC_HEADER_DIRECTORY");
+    initPropValue("ISPC_HEADER_SUFFIX", "_ispc.h");
     initProp("ISPC_INSTRUCTION_SETS");
     initProp("LINK_SEARCH_START_STATIC");
     initProp("LINK_SEARCH_END_STATIC");

@@ -2426,9 +2426,12 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
     return;
   }
 
-  std::vector<std::string> ispcSuffixes =
+  cmProp ispcHeaderSuffixProp = target->GetProperty("ISPC_HEADER_SUFFIX");
+  assert(ispcHeaderSuffixProp != nullptr);
+
+  std::vector<std::string> ispcArchSuffixes =
     detail::ComputeISPCObjectSuffixes(target);
-  const bool extra_objects = (ispcSuffixes.size() > 1);
+  const bool extra_objects = (ispcArchSuffixes.size() > 1);
 
   std::vector<std::string> configsList =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
@@ -2451,14 +2454,19 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
       const std::string& lang = sf->GetLanguage();
       if (lang == "ISPC") {
         std::string const& objectName = target->GetObjectName(sf);
+
+        // Drop both ".obj" and the source file extension
         std::string ispcSource =
           cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+        ispcSource =
+          cmSystemTools::GetFilenameWithoutLastExtension(ispcSource);
 
-        auto headerPath = cmStrCat(headerDir, '/', ispcSource, ".h");
+        auto headerPath =
+          cmStrCat(headerDir, '/', ispcSource, *ispcHeaderSuffixProp);
         target->AddISPCGeneratedHeader(headerPath, config);
         if (extra_objects) {
           std::vector<std::string> objs = detail::ComputeISPCExtraObjects(
-            objectName, rootObjectDir, ispcSuffixes);
+            objectName, rootObjectDir, ispcArchSuffixes);
           target->AddISPCGeneratedObject(std::move(objs), config);
         }
       }

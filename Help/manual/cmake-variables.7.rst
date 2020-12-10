@@ -515,6 +515,7 @@ Variables for Languages
    /variable/CMAKE_Fortran_MODDIR_FLAG
    /variable/CMAKE_Fortran_MODOUT_FLAG
    /variable/CMAKE_ISPC_HEADER_DIRECTORY
+   /variable/CMAKE_ISPC_HEADER_SUFFIX
    /variable/CMAKE_ISPC_INSTRUCTION_SETS
    /variable/CMAKE_LANG_ANDROID_TOOLCHAIN_MACHINE
    /variable/CMAKE_LANG_ANDROID_TOOLCHAIN_PREFIX
