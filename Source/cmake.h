@@ -811,6 +811,7 @@ private:
   F(cxx_std_14)                                                               \
   F(cxx_std_17)                                                               \
   F(cxx_std_20)                                                               \
+  F(cxx_std_23)                                                               \
   FOR_EACH_CXX98_FEATURE(F)                                                   \
   FOR_EACH_CXX11_FEATURE(F)                                                   \
   FOR_EACH_CXX14_FEATURE(F)
@@ -820,4 +821,5 @@ private:
   F(cuda_std_11)                                                              \
   F(cuda_std_14)                                                              \
   F(cuda_std_17)                                                              \
-  F(cuda_std_20)
+  F(cuda_std_20)                                                              \
+  F(cuda_std_23)

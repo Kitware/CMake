@@ -18,7 +18,11 @@ struct Outputter;
 #  define CXX_STD __cplusplus
 #endif
 
-#if DEFAULT_CXX20
+#if DEFAULT_CXX23
+#  if CXX_STD <= 202002L
+Outputter<CXX_STD> o;
+#  endif
+#elif DEFAULT_CXX20
 #  if CXX_STD <= 201703L
 Outputter<CXX_STD> o;
 #  endif

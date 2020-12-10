@@ -155,10 +155,6 @@ macro(__compiler_clang_cxx_standards lang)
       set(CMAKE_${lang}17_EXTENSION_COMPILE_OPTION "-std=gnu++1z")
     endif()
 
-    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 6.0)
-      set(CMAKE_${lang}17_STANDARD__HAS_FULL_SUPPORT ON)
-    endif()
-
     if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 11.0)
       set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "-std=c++20")
       set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "-std=gnu++20")
@@ -168,6 +164,11 @@ macro(__compiler_clang_cxx_standards lang)
     endif()
 
     unset(_clang_version_std17)
+
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 12.0)
+      set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std=c++2b")
+      set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std=gnu++2b")
+    endif()
 
     if("x${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "xMSVC")
       # The MSVC standard library requires C++14, and MSVC itself has no
@@ -180,8 +181,6 @@ macro(__compiler_clang_cxx_standards lang)
       # This clang++ is missing some features because of MSVC compatibility.
       unset(CMAKE_${lang}11_STANDARD__HAS_FULL_SUPPORT)
       unset(CMAKE_${lang}14_STANDARD__HAS_FULL_SUPPORT)
-      unset(CMAKE_${lang}17_STANDARD__HAS_FULL_SUPPORT)
-      unset(CMAKE_${lang}20_STANDARD__HAS_FULL_SUPPORT)
     endif()
 
     __compiler_check_default_language_standard(${lang} 2.1 98)
@@ -221,6 +220,8 @@ macro(__compiler_clang_cxx_standards lang)
     set(CMAKE_${lang}17_EXTENSION_COMPILE_OPTION "")
     set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "")
     set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "")
+    set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "")
+    set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "")
 
     # There is no meaningful default for this
     set(CMAKE_${lang}_STANDARD_DEFAULT "")
@@ -236,6 +237,7 @@ macro(__compiler_clang_cxx_standards lang)
         cxx_std_14
         cxx_std_17
         cxx_std_20
+        cxx_std_23
         )
       _record_compiler_features(${lang} "" CMAKE_${lang}_COMPILE_FEATURES)
     endmacro()

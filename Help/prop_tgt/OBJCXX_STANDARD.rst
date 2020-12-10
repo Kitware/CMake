@@ -9,7 +9,7 @@ This property specifies the ObjC++ standard whose features are requested
 to build this target.  For some compilers, this results in adding a
 flag such as ``-std=gnu++11`` to the compile line.
 
-Supported values are ``98``, ``11``, ``14``, ``17``, and ``20``.
+Supported values are ``98``, ``11``, ``14``, ``17``, ``20``, ``23``.
 
 If the value requested does not result in a compile flag being added for
 the compiler in use, a previous standard flag will be added instead.  This
