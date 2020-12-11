@@ -38,3 +38,6 @@ side effects that are relevant for the Fortran library. However, if you build
 the middle C library, the bottom Fortran library will also build, even though
 it does not have any side effects that are relevant to the C library, since the
 C library does not have optimization enabled.
+
+This property is initialized by the value of the
+:variable:`CMAKE_OPTIMIZE_DEPENDENCIES` variable when the target is created.
