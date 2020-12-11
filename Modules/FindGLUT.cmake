@@ -64,8 +64,12 @@ else ()
       add_library(GLUT::Cocoa UNKNOWN IMPORTED)
       # Cocoa should always be a Framework, but we check to make sure.
       if(GLUT_cocoa_LIBRARY MATCHES "/([^/]+)\\.framework$")
+        set(_glut_cocoa "${GLUT_cocoa_LIBRARY}/${CMAKE_MATCH_1}")
+        if(EXISTS "${_glut_cocoa}.tbd")
+          string(APPEND _glut_cocoa ".tbd")
+        endif()
         set_target_properties(GLUT::Cocoa PROPERTIES
-          IMPORTED_LOCATION "${GLUT_cocoa_LIBRARY}/${CMAKE_MATCH_1}")
+          IMPORTED_LOCATION "${_glut_cocoa}")
       else()
         set_target_properties(GLUT::Cocoa PROPERTIES
           IMPORTED_LOCATION "${GLUT_cocoa_LIBRARY}")
@@ -146,8 +150,12 @@ if (GLUT_FOUND)
     set_target_properties(GLUT::GLUT PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${GLUT_INCLUDE_DIR}")
     if(GLUT_glut_LIBRARY MATCHES "/([^/]+)\\.framework$")
+      set(_glut_glut "${GLUT_glut_LIBRARY}/${CMAKE_MATCH_1}")
+      if(EXISTS "${_glut_glut}.tbd")
+        string(APPEND _glut_glut ".tbd")
+      endif()
       set_target_properties(GLUT::GLUT PROPERTIES
-        IMPORTED_LOCATION "${GLUT_glut_LIBRARY}/${CMAKE_MATCH_1}")
+        IMPORTED_LOCATION "${_glut_glut}")
     else()
       if(GLUT_glut_LIBRARY_RELEASE)
         set_property(TARGET GLUT::GLUT APPEND PROPERTY
