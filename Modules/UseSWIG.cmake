@@ -12,6 +12,8 @@ Defines the following command for use with ``SWIG``:
 
 .. command:: swig_add_library
 
+  .. versionadded:: 3.8
+
   Define swig module with given name and specified language::
 
     swig_add_library(<name>
@@ -28,12 +30,15 @@ Defines the following command for use with ``SWIG``:
   those targets can be used with any command expecting a target (e.g.
   :command:`target_link_libraries`).
 
-  .. note::
-
+  .. versionchanged:: 3.13
     This command creates a target with the specified ``<name>`` when
     policy :policy:`CMP0078` is set to ``NEW``.  Otherwise, the legacy
     behavior will choose a different target name and store it in the
     ``SWIG_MODULE_<name>_REAL_NAME`` variable.
+
+  .. versionchanged:: 3.15
+    Alternate library name (set with the :prop_tgt:`OUTPUT_NAME` property,
+    for example) will be passed on to Python and CSharp wrapper libraries.
 
   .. note::
 
@@ -59,10 +64,23 @@ Defines the following command for use with ``SWIG``:
   ``LANGUAGE``
     Specify the target language.
 
+    .. versionadded:: 3.1
+      Go and Lua language support.
+
+    .. versionadded:: 3.2
+      R language support.
+
+    .. versionadded:: 3.18
+      Fortran language support.
+
   ``NO_PROXY``
+    .. versionadded:: 3.12
+
     Prevent the generation of the wrapper layer (swig ``-noproxy`` option).
 
   ``OUTPUT_DIR``
+    .. versionadded:: 3.12
+
     Specify where to write the language specific files (swig ``-outdir``
     option). If not given, the ``CMAKE_SWIG_OUTDIR`` variable will be used.
     If neither is specified, the default depends on the value of the
@@ -75,6 +93,8 @@ Defines the following command for use with ``SWIG``:
       ``SWIG_SUPPORT_FILES_DIRECTORY`` target property.
 
   ``OUTFILE_DIR``
+    .. versionadded:: 3.12
+
     Specify an output directory name where the generated source file will be
     placed (swig ``-o`` option). If not specified, the ``SWIG_OUTFILE_DIR``
     variable will be used. If neither is specified, ``OUTPUT_DIR`` or
@@ -83,8 +103,11 @@ Defines the following command for use with ``SWIG``:
   ``SOURCES``
     List of sources for the library. Files with extension ``.i`` will be
     identified as sources for the ``SWIG`` tool. Other files will be handled in
-    the standard way. This behavior can be overridden by specifying the variable
-    ``SWIG_SOURCE_FILE_EXTENSIONS``.
+    the standard way.
+
+    .. versionadded:: 3.14
+      This behavior can be overridden by specifying the variable
+      ``SWIG_SOURCE_FILE_EXTENSIONS``.
 
   .. note::
 
@@ -122,12 +145,22 @@ ensure generated files will receive the required settings.
     set_property(SOURCE mymod.i PROPERTY CPLUSPLUS ON)
     swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
 
+``SWIG_FLAGS``
+  .. deprecated:: 3.12
+    Replaced with the fine-grained properties that follow.
+
+  Pass custom flags to the SWIG executable.
+
 ``INCLUDE_DIRECTORIES``, ``COMPILE_DEFINITIONS`` and ``COMPILE_OPTIONS``
+  .. versionadded:: 3.12
+
   Add custom flags to SWIG compiler and have same semantic as properties
   :prop_sf:`INCLUDE_DIRECTORIES`, :prop_sf:`COMPILE_DEFINITIONS` and
   :prop_sf:`COMPILE_OPTIONS`.
 
 ``USE_TARGET_INCLUDE_DIRECTORIES``
+  .. versionadded:: 3.13
+
   If set to ``TRUE``, contents of target property
   :prop_tgt:`INCLUDE_DIRECTORIES` will be forwarded to ``SWIG`` compiler.
   If set to ``FALSE`` target property :prop_tgt:`INCLUDE_DIRECTORIES` will be
@@ -135,11 +168,15 @@ ensure generated files will receive the required settings.
   will be considered.
 
 ``GENERATED_INCLUDE_DIRECTORIES``, ``GENERATED_COMPILE_DEFINITIONS`` and ``GENERATED_COMPILE_OPTIONS``
+  .. versionadded:: 3.12
+
   Add custom flags to the C/C++ generated source. They will fill, respectively,
   properties :prop_sf:`INCLUDE_DIRECTORIES`, :prop_sf:`COMPILE_DEFINITIONS` and
   :prop_sf:`COMPILE_OPTIONS` of generated C/C++ file.
 
 ``DEPENDS``
+  .. versionadded:: 3.12
+
   Specify additional dependencies to the source file.
 
 ``SWIG_MODULE_NAME``
@@ -151,18 +188,21 @@ ensure generated files will receive the required settings.
 
     set_property(SOURCE mymod.i PROPERTY SWIG_MODULE_NAME mymod_realname)
 
-  .. note::
-
+  .. versionchanged:: 3.14
     If policy :policy:`CMP0086` is set to ``NEW``, ``-module <module_name>``
     is passed to ``SWIG`` compiler.
 
 ``OUTPUT_DIR``
+  .. versionadded:: 3.19
+
   Specify where to write the language specific files (swig ``-outdir`` option)
   for the considered source file. If not specified, the other ways to define
   the output directory applies (see ``OUTPUT_DIR`` option of
   ``swig_add_library()`` command).
 
 ``OUTFILE_DIR``
+  .. versionadded:: 3.19
+
   Specify an output directory where the generated source file will be placed
   (swig ``-o`` option) for the considered source file. If not specified,
   ``OUTPUT_DIR`` source property will be used. If neither are specified, the
@@ -173,6 +213,8 @@ Target library properties can be set to apply same configuration to all SWIG
 input files.
 
 ``SWIG_INCLUDE_DIRECTORIES``, ``SWIG_COMPILE_DEFINITIONS`` and ``SWIG_COMPILE_OPTIONS``
+  .. versionadded:: 3.12
+
   These properties will be applied to all SWIG input files and have same
   semantic as target properties :prop_tgt:`INCLUDE_DIRECTORIES`,
   :prop_tgt:`COMPILE_DEFINITIONS` and :prop_tgt:`COMPILE_OPTIONS`.
@@ -185,6 +227,8 @@ input files.
     set_property(TARGET mymod PROPERTY SWIG_COMPILE_OPTIONS -bla -blb)
 
 ``SWIG_USE_TARGET_INCLUDE_DIRECTORIES``
+  .. versionadded:: 3.13
+
   If set to ``TRUE``, contents of target property
   :prop_tgt:`INCLUDE_DIRECTORIES` will be forwarded to ``SWIG`` compiler.
   If set to ``FALSE`` or not defined, target property
@@ -192,17 +236,23 @@ input files.
   overridden by specifying source property ``USE_TARGET_INCLUDE_DIRECTORIES``.
 
 ``SWIG_GENERATED_INCLUDE_DIRECTORIES``, ``SWIG_GENERATED_COMPILE_DEFINITIONS`` and ``SWIG_GENERATED_COMPILE_OPTIONS``
+  .. versionadded:: 3.12
+
   These properties will populate, respectively, properties
   :prop_sf:`INCLUDE_DIRECTORIES`, :prop_sf:`COMPILE_DEFINITIONS` and
   :prop_sf:`COMPILE_FLAGS` of all generated C/C++ files.
 
 ``SWIG_DEPENDS``
+  .. versionadded:: 3.12
+
   Add dependencies to all SWIG input files.
 
 The following target properties are output properties and can be used to get
 information about support files generated by ``SWIG`` interface compilation.
 
 ``SWIG_SUPPORT_FILES``
+  .. versionadded:: 3.12
+
   This output property list of wrapper files generated during SWIG compilation.
 
   .. code-block:: cmake
@@ -219,6 +269,8 @@ information about support files generated by ``SWIG`` interface compilation.
     ``SWIG_SUPPORT_FILES_DIRECTORY`` property to handle support files.
 
 ``SWIG_SUPPORT_FILES_DIRECTORY``
+  .. versionadded:: 3.12
+
   This output property specifies the directory where support files will be
   generated.
 
@@ -231,6 +283,8 @@ Some variables can be set to customize the behavior of ``swig_add_library``
 as well as ``SWIG``:
 
 ``UseSWIG_MODULE_VERSION``
+  .. versionadded:: 3.12
+
   Specify different behaviors for ``UseSWIG`` module.
 
   * Set to 1 or undefined: Legacy behavior is applied.
@@ -244,6 +298,8 @@ as well as ``SWIG``:
   Specify where to write the language specific files (swig ``-outdir`` option).
 
 ``SWIG_OUTFILE_DIR``
+  .. versionadded:: 3.8
+
   Specify an output directory name where the generated source file will be
   placed.  If not specified, ``CMAKE_SWIG_OUTDIR`` is used.
 
@@ -251,6 +307,8 @@ as well as ``SWIG``:
   Specify extra dependencies for the generated module for ``<name>``.
 
 ``SWIG_SOURCE_FILE_EXTENSIONS``
+  .. versionadded:: 3.14
+
   Specify a list of source file extensions to override the default
   behavior of considering only ``.i`` files as sources for the ``SWIG``
   tool. For example:

@@ -338,8 +338,17 @@ function(run_Qt5AutoMocDeps)
     # Build and assert that AUTOMOC was not run for app_with_qt.
     run_ninja("${RunCMake_TEST_BINARY_DIR}")
     if(ninja_stdout MATCHES "Automatic MOC for target app_with_qt")
-        message(FATAL_ERROR
-               "AUTOMOC should not have executed for 'app_with_qt' target:\nstdout:\n${ninja_stdout}")
+      message(FATAL_ERROR
+        "AUTOMOC should not have executed for 'app_with_qt' target:\nstdout:\n${ninja_stdout}")
+    endif()
+    # Assert that the subdir executables were not rebuilt.
+    if(ninja_stdout MATCHES "Automatic MOC for target sub_exe_1")
+      message(FATAL_ERROR
+        "AUTOMOC should not have executed for 'sub_exe_1' target:\nstdout:\n${ninja_stdout}")
+    endif()
+    if(ninja_stdout MATCHES "Automatic MOC for target sub_exe_2")
+      message(FATAL_ERROR
+        "AUTOMOC should not have executed for 'sub_exe_2' target:\nstdout:\n${ninja_stdout}")
     endif()
   endif()
 endfunction()

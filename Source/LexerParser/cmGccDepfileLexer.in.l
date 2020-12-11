@@ -42,7 +42,7 @@ NEWLINE \r?\n
                        }
 {WSPACE}*\\{NEWLINE}   {
                          // A line continuation ends the current file name.
-                         yyextra->newDependency();
+                         yyextra->newRuleOrDependency();
                        }
 {NEWLINE}              {
                          // A newline ends the current file name and the current rule.

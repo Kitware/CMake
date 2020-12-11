@@ -7,6 +7,9 @@ Require a minimum version of cmake.
 
   cmake_minimum_required(VERSION <min>[...<max>] [FATAL_ERROR])
 
+.. versionadded:: 3.12
+  The optional ``<max>`` version.
+
 Sets the minimum required version of cmake for a project.
 Also updates the policy settings as explained below.
 

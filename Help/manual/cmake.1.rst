@@ -580,6 +580,7 @@ Available commands are:
 
   ``serverMode``
     ``true`` if cmake supports server-mode and ``false`` otherwise.
+    Always false since CMake 3.20.
 
 ``cat <files>...``
   Concatenate files and print on the standard output.

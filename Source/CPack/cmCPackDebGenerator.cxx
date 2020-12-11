@@ -507,7 +507,8 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
                              this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
   packageFileNames.push_back(std::move(packageFileName));
 
-  if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE")) {
+  if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") &&
+      this->GetOption("GEN_DBGSYMDIR")) {
     cmsys::Glob gl;
     std::string findExpr(this->GetOption("GEN_DBGSYMDIR"));
     findExpr += "/*";

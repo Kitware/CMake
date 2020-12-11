@@ -1,0 +1,11 @@
+set(CMAKE_SIZEOF_VOID_P 8)
+set(CMAKE_LIBRARY_ARCHITECTURE "arch")
+set(CMAKE_INSTALL_PREFIX /usr)
+include(GNUInstallDirs)
+
+GNUInstallDirs_get_absolute_install_dir(PROJ1_FULL_BINDIR CMAKE_INSTALL_BINDIR BINDIR)
+message("PROJ1_FULL_BINDIR='${PROJ1_FULL_BINDIR}'")
+
+set(dir BINDIR)
+GNUInstallDirs_get_absolute_install_dir(PROJ2_FULL_BINDIR CMAKE_INSTALL_BINDIR)
+message("PROJ2_FULL_BINDIR='${PROJ2_FULL_BINDIR}'")

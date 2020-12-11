@@ -311,19 +311,19 @@ std::unordered_map<std::string, StanardLevelComputer> StandardComputerMapping =
                             std::vector<std::string>{ "90", "99", "11" } } },
     { "CXX",
       StanardLevelComputer{
-        "CXX", std::vector<int>{ 98, 11, 14, 17, 20 },
-        std::vector<std::string>{ "98", "11", "14", "17", "20" } } },
+        "CXX", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
+        std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } },
     { "CUDA",
       StanardLevelComputer{
-        "CUDA", std::vector<int>{ 03, 11, 14, 17, 20 },
-        std::vector<std::string>{ "03", "11", "14", "17", "20" } } },
+        "CUDA", std::vector<int>{ 03, 11, 14, 17, 20, 23 },
+        std::vector<std::string>{ "03", "11", "14", "17", "20", "23" } } },
     { "OBJC",
       StanardLevelComputer{ "OBJC", std::vector<int>{ 90, 99, 11 },
                             std::vector<std::string>{ "90", "99", "11" } } },
     { "OBJCXX",
       StanardLevelComputer{
-        "OBJCXX", std::vector<int>{ 98, 11, 14, 17, 20 },
-        std::vector<std::string>{ "98", "11", "14", "17", "20" } } },
+        "OBJCXX", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
+        std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } },
   };
 }
 

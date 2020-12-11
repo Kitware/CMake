@@ -12,7 +12,10 @@ int main(int argc, char** argv)
     std::cout << "  case_foo" << std::endl;
     std::cout << "  case_bar" << std::endl;
     std::cout << "  DISABLED_disabled_case" << std::endl;
+    std::cout << "  DISABLEDnot_really_case" << std::endl;
     std::cout << "DISABLED_disabled." << std::endl;
+    std::cout << "  case" << std::endl;
+    std::cout << "DISABLEDnotreally." << std::endl;
     std::cout << "  case" << std::endl;
     std::cout << "typed/0.  # TypeParam = short" << std::endl;
     std::cout << "  case" << std::endl;

@@ -171,8 +171,11 @@ bool cmMacroFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
   f.Functions = std::move(functions);
   f.FilePath = this->GetStartingContext().FilePath;
   mf.RecordPolicies(f.Policies);
-  mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
-  return true;
+  return mf.GetState()->AddScriptedCommand(
+    this->Args[0],
+    BT<cmState::Command>(std::move(f),
+                         mf.GetBacktrace().Push(this->GetStartingContext())),
+    mf);
 }
 }
 

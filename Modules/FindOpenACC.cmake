@@ -14,6 +14,16 @@ If the compiler supports OpenACC, the flags required to compile with
 OpenACC support are returned in variables for the different languages.
 Currently, only PGI, GNU and Cray compilers are supported.
 
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.16
+
+The module provides :prop_tgt:`IMPORTED` targets:
+
+``OpenACC::OpenACC_<lang>``
+  Target for using OpenACC from ``<lang>``.
+
 Variables
 ^^^^^^^^^
 
@@ -25,13 +35,10 @@ project, where ``<lang>`` is one of C, CXX, or Fortran:
 ``OpenACC_<lang>_FLAGS``
   OpenACC compiler flags for ``<lang>``, separated by spaces.
 ``OpenACC_<lang>_OPTIONS``
+  .. versionadded:: 3.16
+
   OpenACC compiler flags for ``<lang>``, as a list. Suitable for usage
   with target_compile_options or target_link_options.
-
-Additionally, the module provides :prop_tgt:`IMPORTED` targets:
-
-``OpenACC::OpenACC_<lang>``
-  Target for using OpenACC from ``<lang>``.
 
 The module will also try to provide the OpenACC version variables:
 

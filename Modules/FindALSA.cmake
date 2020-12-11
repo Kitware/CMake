@@ -12,6 +12,8 @@ Find the alsa libraries (``asound``)
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.12
+
 This module defines :prop_tgt:`IMPORTED` target ``ALSA::ALSA``, if
 ALSA has been found.
 

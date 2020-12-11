@@ -4,6 +4,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmSetPropertyCommand.h"
 #include "cmSourceFile.h"
 
@@ -34,7 +35,7 @@ bool cmGetSourceFilePropertyCommand(std::vector<std::string> const& args,
 
   std::vector<cmMakefile*> source_file_directory_makefiles;
   bool file_scopes_handled =
-    SetPropertyCommand::HandleAndValidateSourceFileDirectortoryScopes(
+    SetPropertyCommand::HandleAndValidateSourceFileDirectoryScopes(
       status, source_file_directory_option_enabled,
       source_file_target_option_enabled, source_file_directories,
       source_file_target_directories, source_file_directory_makefiles);
@@ -57,14 +58,14 @@ bool cmGetSourceFilePropertyCommand(std::vector<std::string> const& args,
   }
 
   if (sf) {
-    const char* prop = nullptr;
+    cmProp prop = nullptr;
     if (!args[property_arg_index].empty()) {
       prop = sf->GetPropertyForUser(args[property_arg_index]);
     }
     if (prop) {
       // Set the value on the original Makefile scope, not the scope of the
       // requested directory.
-      status.GetMakefile().AddDefinition(var, prop);
+      status.GetMakefile().AddDefinition(var, *prop);
       return true;
     }
   }

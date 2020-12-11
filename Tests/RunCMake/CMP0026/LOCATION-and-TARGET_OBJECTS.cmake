@@ -1,4 +1,4 @@
-
+cmake_policy(SET CMP0118 NEW)
 enable_language(CXX)
 
 add_library(foo OBJECT empty.cpp)

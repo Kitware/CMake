@@ -19,9 +19,11 @@ specify the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC``
 items will populate the :prop_tgt:`COMPILE_DEFINITIONS` property of
 ``<target>``. ``PUBLIC`` and ``INTERFACE`` items will populate the
 :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` property of ``<target>``.
-(:ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items.)
 The following arguments specify compile definitions.  Repeated calls for the
 same ``<target>`` append items in the order called.
+
+.. versionadded:: 3.11
+  Allow setting ``INTERFACE`` items on :ref:`IMPORTED targets <Imported Targets>`.
 
 Arguments to ``target_compile_definitions`` may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
@@ -37,3 +39,12 @@ For example, the following are all equivalent:
   target_compile_definitions(foo PUBLIC -DFOO)  # -D removed
   target_compile_definitions(foo PUBLIC "" FOO) # "" ignored
   target_compile_definitions(foo PUBLIC -D FOO) # -D becomes "", then ignored
+
+Definitions may optionally have values:
+
+.. code-block:: cmake
+
+  target_compile_definitions(foo PUBLIC FOO=1)
+
+Note that many compilers treat ``-DFOO`` as equivalent to ``-DFOO=1``, but
+other tools may not recognize this in all circumstances (e.g. IntelliSense).

@@ -29,6 +29,11 @@ executable was built, but failed to run, then ``<runResultVar>`` will be
 set to ``FAILED_TO_RUN``.  See the :command:`try_compile` command for
 information on how the test project is constructed to build the source file.
 
+.. versionadded:: 3.14
+  The names of the result variables ``<runResultVar>`` and
+  ``<compileResultVar>`` are defined by the user.  Previously, they had
+  fixed names ``RUN_RESULT_VAR`` and ``COMPILE_RESULT_VAR``.
+
 The options are:
 
 ``CMAKE_FLAGS <flags>...``
@@ -46,6 +51,8 @@ The options are:
   Report the compile step build output in a given variable.
 
 ``LINK_LIBRARIES <libs>...``
+  .. versionadded:: 3.2
+
   Specify libraries to be linked in the generated project.
   The list of libraries may refer to system libraries and to
   :ref:`Imported Targets <Imported Targets>` from the calling project.
@@ -54,6 +61,8 @@ The options are:
   given to the ``CMAKE_FLAGS`` option will be ignored.
 
 ``LINK_OPTIONS <options>...``
+  .. versionadded:: 3.14
+
   Specify link step options to pass to :command:`target_link_options` in the
   generated project.
 
@@ -73,6 +82,10 @@ a build configuration.
 
 Behavior when Cross Compiling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.3
+  Use ``CMAKE_CROSSCOMPILING_EMULATOR`` when running cross-compiled
+  binaries.
 
 When cross compiling, the executable compiled in the first step
 usually cannot be run on the build host.  The ``try_run`` command checks

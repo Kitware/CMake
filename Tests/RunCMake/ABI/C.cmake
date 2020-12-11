@@ -1,0 +1,22 @@
+enable_language(C)
+if(NOT CMAKE_C_BYTE_ORDER MATCHES "^(BIG_ENDIAN|LITTLE_ENDIAN)$")
+  if(CMAKE_OSX_ARCHITECTURES MATCHES ";ppc|ppc;")
+    return()
+  endif()
+  message(FATAL_ERROR "CMAKE_C_BYTE_ORDER has unexpected value '${CMAKE_C_BYTE_ORDER}'")
+endif()
+
+include(TestBigEndian)
+test_big_endian(IS_BIG_ENDIAN)
+if(IS_BIG_ENDIAN AND NOT CMAKE_C_BYTE_ORDER STREQUAL "BIG_ENDIAN")
+  message(FATAL_ERROR "test_big_endian result does not match ABI result")
+endif()
+
+# Test legacy check.
+set(byte_order "${CMAKE_C_BYTE_ORDER}")
+unset(CMAKE_C_BYTE_ORDER)
+include(TestBigEndian)
+test_big_endian(IS_BIG)
+if(IS_BIG AND NOT byte_order STREQUAL "BIG_ENDIAN")
+  message(FATAL_ERROR "test_big_endian result does not match ABI result")
+endif()

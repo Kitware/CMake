@@ -1,0 +1,77 @@
+^Generated_source1\.txt: # 1a # GENERATED = `1`
+Generated_source1\.txt: # 1b # GENERATED = `1`
+Generated_source1\.txt: # 2a # GENERATED = `1`
+Generated_source1\.txt: # 2b # GENERATED = `1`
+Generated_source1\.txt: # 3a # GENERATED = `0`
+Generated_source1\.txt: # 3b # GENERATED = `0`
+Generated_source2\.txt: # 1a # GENERATED = `0`
+Generated_source2\.txt: # 1b # GENERATED = `0`
+Generated_source2\.txt: # 2a # GENERATED = `0`
+Generated_source2\.txt: # 2b # GENERATED = `0`
+Generated_source2\.txt: # 3a # GENERATED = `0`
+Generated_source2\.txt: # 3b # GENERATED = `0`
+Generated_source3\.txt: # 1a # GENERATED = `0`
+Generated_source3\.txt: # 1b # GENERATED = `0`
+Generated_source3\.txt: # 2a # GENERATED = `0`
+Generated_source3\.txt: # 2b # GENERATED = `0`
+Generated_source3\.txt: # 3a # GENERATED = `0`
+Generated_source3\.txt: # 3b # GENERATED = `0`
+Generated_source4\.txt: # 1a # GENERATED = `0`
+Generated_source4\.txt: # 1b # GENERATED = `0`
+Generated_source4\.txt: # 2a # GENERATED = `0`
+Generated_source4\.txt: # 2b # GENERATED = `0`
+Generated_source4\.txt: # 3a # GENERATED = `0`
+Generated_source4\.txt: # 3b # GENERATED = `0`
+Generated_source5\.txt: # 1a # GENERATED = `0`
+Generated_source5\.txt: # 1b # GENERATED = `0`
+Generated_source5\.txt: # 2a # GENERATED = `0`
+Generated_source5\.txt: # 2b # GENERATED = `0`
+Generated_source5\.txt: # 3a # GENERATED = `0`
+Generated_source5\.txt: # 3b # GENERATED = `0`
+Generated_source6\.txt: # 1a # GENERATED = `0`
+Generated_source6\.txt: # 1b # GENERATED = `0`
+Generated_source6\.txt: # 2a # GENERATED = `0`
+Generated_source6\.txt: # 2b # GENERATED = `0`
+Generated_source6\.txt: # 3a # GENERATED = `0`
+Generated_source6\.txt: # 3b # GENERATED = `0`
+CMake Error at CMP0118-Common-Test7\.cmake:[0-9]+ \(add_custom_target\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/CMP0118-OLD-Test7-build/Generated_source[2-6]\.txt
+Call Stack \(most recent call first\):
+  CMP0118-OLD-Test7\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test7\.cmake:[0-9]+ \(add_custom_target\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/CMP0118-OLD-Test7-build/Generated_source[2-6]\.txt
+Call Stack \(most recent call first\):
+  CMP0118-OLD-Test7\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test7\.cmake:[0-9]+ \(add_custom_target\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/CMP0118-OLD-Test7-build/Generated_source[2-6]\.txt
+Call Stack \(most recent call first\):
+  CMP0118-OLD-Test7\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test7\.cmake:[0-9]+ \(add_custom_target\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/CMP0118-OLD-Test7-build/Generated_source[2-6]\.txt
+Call Stack \(most recent call first\):
+  CMP0118-OLD-Test7\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0118-Common-Test7\.cmake:[0-9]+ \(add_custom_target\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/CMP0118-OLD-Test7-build/Generated_source[2-6]\.txt
+Call Stack \(most recent call first\):
+  CMP0118-OLD-Test7\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

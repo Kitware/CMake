@@ -51,7 +51,9 @@ implementing :command:`find_package(<PackageName>)` calls.
     (recommended).  Not valid in the full signature.
 
   ``FOUND_VAR <result-var>``
-    Obsolete.  Specifies either ``<PackageName>_FOUND`` or
+    .. deprecated:: 3.3
+
+    Specifies either ``<PackageName>_FOUND`` or
     ``<PACKAGENAME>_FOUND`` as the result variable.  This exists only
     for compatibility with older versions of CMake and is now ignored.
     Result variables of both names are always set for compatibility.
@@ -61,8 +63,10 @@ implementing :command:`find_package(<PackageName>)` calls.
     These may be named in the generated failure message asking the
     user to set the missing variable values.  Therefore these should
     typically be cache entries such as ``FOO_LIBRARY`` and not output
-    variables like ``FOO_LIBRARIES``. This option is mandatory if
-    ``HANDLE_COMPONENTS`` is not specified.
+    variables like ``FOO_LIBRARIES``.
+
+    .. versionchanged:: 3.18
+      If ``HANDLE_COMPONENTS`` is specified, this option can be omitted.
 
   ``VERSION_VAR <version-var>``
     Specify the name of a variable that holds the version of the package
@@ -74,6 +78,8 @@ implementing :command:`find_package(<PackageName>)` calls.
     if the version is ok or not.
 
   ``HANDLE_VERSION_RANGE``
+    .. versionadded:: 3.19
+
     Enable handling of a version range, if one is specified. Without this
     option, a developer warning will be displayed if a version range is
     specified.
@@ -94,6 +100,8 @@ implementing :command:`find_package(<PackageName>)` calls.
     was found.
 
   ``REASON_FAILURE_MESSAGE <reason-failure-message>``
+    .. versionadded:: 3.16
+
     Specify a custom message of the reason for the failure which will be
     appended to the default generated message.
 
@@ -102,6 +110,8 @@ implementing :command:`find_package(<PackageName>)` calls.
     generated message.  Not recommended.
 
   ``NAME_MISMATCHED``
+    .. versionadded:: 3.17
+
     Indicate that the ``<PackageName>`` does not match
     ``${CMAKE_FIND_PACKAGE_NAME}``. This is usually a mistake and raises a
     warning, but it may be intentional for usage of the command for components
@@ -162,6 +172,8 @@ directory for ``automoc4``.  Then the call to
 message.
 
 .. command:: find_package_check_version
+
+  .. versionadded:: 3.19
 
   Helper function which can be used to check if a ``<version>`` is valid
   against version-related arguments of :command:`find_package`.

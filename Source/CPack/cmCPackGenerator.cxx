@@ -1329,7 +1329,7 @@ bool cmCPackGenerator::ConfigureFile(const std::string& inName,
                                      bool copyOnly /* = false */)
 {
   return this->MakefileMap->ConfigureFile(inName, outName, copyOnly, true,
-                                          false, true) == 1;
+                                          false) == 1;
 }
 
 int cmCPackGenerator::CleanTemporaryDirectory()

@@ -21,6 +21,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
   static std::map<std::string, cmPolicies::PolicyID> DeprecatedModules;
   if (DeprecatedModules.empty()) {
     DeprecatedModules["Documentation"] = cmPolicies::CMP0106;
+    DeprecatedModules["WriteCompilerDetectionHeader"] = cmPolicies::CMP0120;
   }
 
   if (args.empty() || args.size() > 4) {
@@ -146,11 +147,24 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
 
   std::string listFile = cmSystemTools::CollapseFullPath(
     fname, status.GetMakefile().GetCurrentSourceDirectory());
-  if (optional && !cmSystemTools::FileExists(listFile)) {
+
+  const bool fileDoesnotExist = !cmSystemTools::FileExists(listFile);
+  const bool fileIsDirectory = cmSystemTools::FileIsDirectory(listFile);
+  if (fileDoesnotExist || fileIsDirectory) {
     if (!resultVarName.empty()) {
       status.GetMakefile().AddDefinition(resultVarName, "NOTFOUND");
     }
-    return true;
+    if (optional) {
+      return true;
+    }
+    if (fileDoesnotExist) {
+      status.SetError(cmStrCat("could not find requested file:\n  ", fname));
+      return false;
+    }
+    if (fileIsDirectory) {
+      status.SetError(cmStrCat("requested file is a directory:\n  ", fname));
+      return false;
+    }
   }
 
   bool readit =
@@ -163,9 +177,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
   }
 
   if (!optional && !readit && !cmSystemTools::GetFatalErrorOccured()) {
-    std::string m = cmStrCat("could not find load file:\n"
-                             "  ",
-                             fname);
+    std::string m = cmStrCat("could not load requested file:\n  ", fname);
     status.SetError(m);
     return false;
   }

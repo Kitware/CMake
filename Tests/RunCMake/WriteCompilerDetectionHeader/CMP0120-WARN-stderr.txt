@@ -1,0 +1,18 @@
+^CMake Warning \(dev\) at CMP0120-WARN.cmake:[0-9]+ \(include\):
+  Policy CMP0120 is not set: The WriteCompilerDetectionHeader module is
+  removed.  Run "cmake --help-policy CMP0120" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at [^
+]*/Modules/WriteCompilerDetectionHeader.cmake:[0-9]+ \(message\):
+  The WriteCompilerDetectionHeader module will be removed by policy CMP0120.
+  Projects should be ported away from the module, perhaps by bundling a copy
+  of the generated header or using a third-party alternative.
+Call Stack \(most recent call first\):
+  CMP0120-WARN.cmake:[0-9]+ \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

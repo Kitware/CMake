@@ -396,6 +396,10 @@ Properties on Targets
    /prop_tgt/WIN32_EXECUTABLE
    /prop_tgt/WINDOWS_EXPORT_ALL_SYMBOLS
    /prop_tgt/XCODE_ATTRIBUTE_an-attribute
+   /prop_tgt/XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY
+   /prop_tgt/XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY
+   /prop_tgt/XCODE_EMBED_type
+   /prop_tgt/XCODE_EMBED_type_PATH
    /prop_tgt/XCODE_EXPLICIT_FILE_TYPE
    /prop_tgt/XCODE_GENERATE_SCHEME
    /prop_tgt/XCODE_LINK_BUILD_PHASE_MODE

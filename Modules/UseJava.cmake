@@ -36,17 +36,21 @@ compiling the java sources and also to the dependencies of the target.
 For backwards compatibility, jar files listed as sources are ignored (as
 they have been since the first version of this module).
 
+.. versionadded:: 3.4
+  Support fot response files (prefixed by ``@``) in the ``SOURCES`` list.
+
 The default ``OUTPUT_DIR`` can also be changed by setting the variable
 ``CMAKE_JAVA_TARGET_OUTPUT_DIR``.
 
-Optionally, using option ``GENERATE_NATIVE_HEADERS``, native header files can
-be generated for methods declared as native.  These files provide the
-connective glue that allow your Java and C code to interact.  An INTERFACE
-target will be created for an easy usage of generated files.  Sub-option
-``DESTINATION`` can be used to specify the output directory for generated
-header files.
+.. versionadded:: 3.11
+  Optionally, using option ``GENERATE_NATIVE_HEADERS``, native header files can
+  be generated for methods declared as native.  These files provide the
+  connective glue that allow your Java and C code to interact.  An INTERFACE
+  target will be created for an easy usage of generated files.  Sub-option
+  ``DESTINATION`` can be used to specify the output directory for generated
+  header files.
 
-``GENERATE_NATIVE_HEADERS`` option requires, at least, version 1.8 of the JDK.
+  ``GENERATE_NATIVE_HEADERS`` option requires, at least, version 1.8 of the JDK.
 
 The ``add_jar()`` function sets the following target properties on
 ``<target_name>``:
@@ -77,6 +81,9 @@ described above, and is used by ``install_jar_exports()``.  You can get this
 information with :command:`get_property` and the ``INSTALL_DESTINATION``
 property key.
 
+.. versionadded:: 3.4
+  The second signature with ``DESTINATION`` and ``COMPONENT`` options.
+
 .. code-block:: cmake
 
  install_jni_symlink(<target_name> <destination>)
@@ -85,6 +92,14 @@ property key.
 This command installs the ``<target_name>`` JNI symlinks to the given
 ``<destination>``.  It should be called in the same scope as ``add_jar()`` or
 it will fail.
+
+.. versionadded:: 3.4
+  The second signature with ``DESTINATION`` and ``COMPONENT`` options.
+
+Exporting JAR Targets
+^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.7
 
 .. code-block:: cmake
 
@@ -97,6 +112,9 @@ This command installs a target export file ``<filename>`` for the named jar
 targets to the given ``<destination>`` directory.  Its function is similar to
 that of :command:`install(EXPORTS)`.
 
+.. versionadded:: 3.9
+  The ``NAMESPACE`` option.
+
 .. code-block:: cmake
 
  export_jars(TARGETS <jars>...
@@ -105,6 +123,9 @@ that of :command:`install(EXPORTS)`.
 
 This command writes a target export file ``<filename>`` for the named ``<jars>``
 targets.  Its function is similar to that of :command:`export`.
+
+.. versionadded:: 3.9
+  The ``NAMESPACE`` option.
 
 
 Examples
@@ -316,16 +337,15 @@ Header Generation
               [OUTPUT_NAME <path>|OUTPUT_DIR <path>]
               )
 
-Create C header files from java classes. These files provide the connective glue
-that allow your Java and C code to interact.
+.. versionadded:: 3.4
 
 .. deprecated:: 3.11
-
-.. note::
-
   This command will no longer be supported starting with version 10 of the JDK
   due to the `suppression of javah tool <http://openjdk.java.net/jeps/313>`_.
   The ``add_jar(GENERATE_NATIVE_HEADERS)`` command should be used instead.
+
+Create C header files from java classes. These files provide the connective glue
+that allow your Java and C code to interact.
 
 There are two main signatures for ``create_javah()``.  The first signature
 returns generated files through variable specified by the ``GENERATED_FILES``
@@ -406,8 +426,8 @@ function(__java_export_jar VAR TARGET PATH)
 endfunction()
 
 # define helper scripts
-set(_JAVA_EXPORT_TARGETS_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/javaTargets.cmake.in)
-set(_JAVA_SYMLINK_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJavaSymlinks.cmake)
+set(_JAVA_EXPORT_TARGETS_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJava/javaTargets.cmake.in)
+set(_JAVA_SYMLINK_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJava/Symlinks.cmake)
 
 if (CMAKE_HOST_WIN32 AND NOT CYGWIN AND CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
     set(_UseJava_PATH_SEP "$<SEMICOLON>")
@@ -636,7 +656,7 @@ function(add_jar _TARGET_NAME)
             COMMAND ${CMAKE_COMMAND}
                 -DCMAKE_JAVA_CLASS_OUTPUT_PATH=${CMAKE_JAVA_CLASS_OUTPUT_PATH}
                 -DCMAKE_JAR_CLASSES_PREFIX=${CMAKE_JAR_CLASSES_PREFIX}
-                -P ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/UseJavaClassFilelist.cmake
+                -P ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/UseJava/ClassFilelist.cmake
             DEPENDS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             VERBATIM

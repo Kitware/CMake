@@ -1,8 +1,6 @@
 cmake_parse_arguments
 ---------------------
 
-.. versionadded:: 3.5
-
 Parse function or macro arguments.
 
 .. code-block:: cmake
@@ -13,6 +11,10 @@ Parse function or macro arguments.
   cmake_parse_arguments(PARSE_ARGV <N> <prefix> <options>
                         <one_value_keywords> <multi_value_keywords>)
 
+.. versionadded:: 3.5
+  This command is implemented natively.  Previously, it has been defined in the
+  module :module:`CMakeParseArguments`.
+
 This command is for use in macros or functions.
 It processes the arguments given to that macro or function,
 and defines a set of variables which hold the values of the
@@ -21,11 +23,12 @@ respective options.
 The first signature reads processes arguments passed in the ``<args>...``.
 This may be used in either a :command:`macro` or a :command:`function`.
 
-The ``PARSE_ARGV`` signature is only for use in a :command:`function`
-body.  In this case the arguments that are parsed come from the
-``ARGV#`` variables of the calling function.  The parsing starts with
-the ``<N>``-th argument, where ``<N>`` is an unsigned integer.  This allows for
-the values to have special characters like ``;`` in them.
+.. versionadded:: 3.7
+  The ``PARSE_ARGV`` signature is only for use in a :command:`function`
+  body.  In this case the arguments that are parsed come from the
+  ``ARGV#`` variables of the calling function.  The parsing starts with
+  the ``<N>``-th argument, where ``<N>`` is an unsigned integer.
+  This allows for the values to have special characters like ``;`` in them.
 
 The ``<options>`` argument contains all options for the respective macro,
 i.e.  keywords which can be used when calling the macro without any value
@@ -40,12 +43,11 @@ The ``<multi_value_keywords>`` argument contains all keywords for this
 macro which can be followed by more than one value, like e.g. the
 ``TARGETS`` or ``FILES`` keywords of the :command:`install` command.
 
-.. note::
-
-   All keywords shall be unique. I.e. every keyword shall only be specified
-   once in either ``<options>``, ``<one_value_keywords>`` or
-   ``<multi_value_keywords>``. A warning will be emitted if uniqueness is
-   violated.
+.. versionchanged:: 3.5
+  All keywords shall be unique. I.e. every keyword shall only be specified
+  once in either ``<options>``, ``<one_value_keywords>`` or
+  ``<multi_value_keywords>``. A warning will be emitted if uniqueness is
+  violated.
 
 When done, ``cmake_parse_arguments`` will consider for each of the
 keywords listed in ``<options>``, ``<one_value_keywords>`` and
@@ -61,10 +63,12 @@ All remaining arguments are collected in a variable
 were recognized. This can be checked afterwards to see
 whether your macro was called with unrecognized parameters.
 
-``<one_value_keywords>`` and ``<multi_value_keywords>`` that were given no
-values at all are collected in a variable ``<prefix>_KEYWORDS_MISSING_VALUES``
-that will be undefined if all keywords received values. This can be checked
-to see if there were keywords without any values given.
+.. versionadded:: 3.15
+   ``<one_value_keywords>`` and ``<multi_value_keywords>`` that were given no
+   values at all are collected in a variable
+   ``<prefix>_KEYWORDS_MISSING_VALUES`` that will be undefined if all keywords
+   received values. This can be checked to see if there were keywords without
+   any values given.
 
 Consider the following example macro, ``my_install()``, which takes similar
 arguments to the real :command:`install` command:

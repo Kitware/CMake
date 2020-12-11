@@ -23,6 +23,15 @@ Ice 3.7 and later also include C++11-specific components:
 
 Note that the set of supported components is Ice version-specific.
 
+.. versionadded:: 3.4
+  Imported targets for components and most ``EXECUTABLE`` variables.
+
+.. versionadded:: 3.7
+  Debug and Release variants are found separately.
+
+.. versionadded:: 3.10
+  Ice 3.7 support, including new components, programs and the Nuget package.
+
 This module reports information about the Ice installation in
 several variables.  General variables::
 
@@ -55,6 +64,9 @@ Ice slice programs are reported in::
   Ice_SLICE2PHP_EXECUTABLE - path to slice2php executable
   Ice_SLICE2PY_EXECUTABLE - path to slice2py executable
   Ice_SLICE2RB_EXECUTABLE - path to slice2rb executable
+
+.. versionadded:: 3.14
+  Variables for ``slice2confluence`` and ``slice2matlab``.
 
 Ice programs are reported in::
 

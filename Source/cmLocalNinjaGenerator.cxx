@@ -22,7 +22,9 @@
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmNinjaTargetGenerator.h"
+#include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -573,7 +575,20 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     return;
   }
 
-  cmCustomCommandGenerator ccg(*cc, config, this);
+  bool transformDepfile = false;
+  auto cmp0116 = this->GetPolicyStatus(cmPolicies::CMP0116);
+  switch (cmp0116) {
+    case cmPolicies::OLD:
+    case cmPolicies::WARN:
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      transformDepfile = true;
+      break;
+  }
+
+  cmCustomCommandGenerator ccg(*cc, config, this, transformDepfile);
 
   const std::vector<std::string>& outputs = ccg.GetOutputs();
   const std::vector<std::string>& byproducts = ccg.GetByproducts();
@@ -588,11 +603,6 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     }
   }
 
-#if 0
-#  error TODO: Once CC in an ExternalProject target must provide the \
-    file of each imported target that has an add_dependencies pointing \
-    at us.  How to know which ExternalProject step actually provides it?
-#endif
   cmNinjaDeps ninjaOutputs(outputs.size() + byproducts.size());
   std::transform(outputs.begin(), outputs.end(), ninjaOutputs.begin(),
                  gg->MapToNinjaPath());
@@ -623,10 +633,36 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
     customStep += hash.HashString(ninjaOutputs[0]).substr(0, 7);
 
+    std::string depfile = cc->GetDepfile();
+    if (!depfile.empty()) {
+      switch (cmp0116) {
+        case cmPolicies::WARN:
+          if (this->GetCurrentBinaryDirectory() !=
+                this->GetBinaryDirectory() ||
+              this->Makefile->PolicyOptionalWarningEnabled(
+                "CMAKE_POLICY_WARNING_CMP0116")) {
+            this->GetCMakeInstance()->IssueMessage(
+              MessageType::AUTHOR_WARNING,
+              cmPolicies::GetPolicyWarning(cmPolicies::CMP0116),
+              cc->GetBacktrace());
+          }
+          CM_FALLTHROUGH;
+        case cmPolicies::OLD:
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+          cmSystemTools::MakeDirectory(
+            cmStrCat(this->GetBinaryDirectory(), "/CMakeFiles/d"));
+          depfile = ccg.GetInternalDepfile();
+          break;
+      }
+    }
+
     gg->WriteCustomCommandBuild(
       this->BuildCommandLine(cmdLines, customStep),
       this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
-      cc->GetDepfile(), cc->GetJobPool(), cc->GetUsesTerminal(),
+      depfile, cc->GetJobPool(), cc->GetUsesTerminal(),
       /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, config,
       ninjaDeps, orderOnlyDeps);
   }

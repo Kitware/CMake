@@ -30,10 +30,12 @@ It must be one of the following:
 ``DIRECTORY``
   Scope defaults to the current directory but another
   directory (already processed by CMake) may be named by the
-  full or relative path ``<dir>``.  The ``<dir>`` may reference either a
-  source directory, or since CMake 3.19, a binary directory.
+  full or relative path ``<dir>``.
   Relative paths are treated as relative to the current source directory.
   See also the :command:`get_directory_property` command.
+
+  .. versionadded:: 3.19
+    ``<dir>`` may reference a binary directory.
 
 ``TARGET``
   Scope must name one existing target.
@@ -41,24 +43,30 @@ It must be one of the following:
 
 ``SOURCE``
   Scope must name one source file.  By default, the source file's property
-  will be read from the current source directory's scope, but this can be
-  overridden with one of the following sub-options:
+  will be read from the current source directory's scope.
 
-  ``DIRECTORY <dir>``
-    The source file property will be read from the ``<dir>`` directory's
-    scope.  The ``<dir>`` may reference either a source directory, or
-    since CMake 3.19, a binary directory.  CMake must already know about
-    the directory, either by having added it through a call
-    to :command:`add_subdirectory` or ``<dir>`` being the top level directory.
-    Relative paths are treated as relative to the current source directory.
+  .. versionadded:: 3.18
+    Directory scope can be overridden with one of the following sub-options:
 
-  ``TARGET_DIRECTORY <target>``
-    The source file property will be read from the directory scope in which
-    ``<target>`` was created (``<target>`` must therefore already exist).
+    ``DIRECTORY <dir>``
+      The source file property will be read from the ``<dir>`` directory's
+      scope.  CMake must already know about
+      the directory, either by having added it through a call
+      to :command:`add_subdirectory` or ``<dir>`` being the top level directory.
+      Relative paths are treated as relative to the current source directory.
+
+      .. versionadded:: 3.19
+        ``<dir>`` may reference a binary directory.
+
+    ``TARGET_DIRECTORY <target>``
+      The source file property will be read from the directory scope in which
+      ``<target>`` was created (``<target>`` must therefore already exist).
 
   See also the :command:`get_source_file_property` command.
 
 ``INSTALL``
+  .. versionadded:: 3.1
+
   Scope must name one installed file path.
 
 ``TEST``
@@ -86,3 +94,8 @@ If ``BRIEF_DOCS`` or ``FULL_DOCS`` is given then the variable is set to a
 string containing documentation for the requested property.  If
 documentation is requested for a property that has not been defined
 ``NOTFOUND`` is returned.
+
+.. note::
+
+  The :prop_sf:`GENERATED` source file property may be globally visible.
+  See its documentation for details.

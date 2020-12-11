@@ -10,6 +10,8 @@ Find the PostgreSQL installation.
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.14
+
 This module defines :prop_tgt:`IMPORTED` target ``PostgreSQL::PostgreSQL``
 if PostgreSQL has been found.
 

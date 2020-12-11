@@ -289,6 +289,7 @@ CMAKE_CXX_SOURCES="\
   cmBuildCommand \
   cmCMakeMinimumRequired \
   cmCMakePath \
+  cmCMakePathCommand \
   cmCMakePolicyCommand \
   cmCPackPropertiesGenerator \
   cmCacheManager \
@@ -307,6 +308,7 @@ CMAKE_CXX_SOURCES="\
   cmContinueCommand \
   cmCoreTryCompile \
   cmCreateTestSourceList \
+  cmCryptoHash \
   cmCustomCommand \
   cmCustomCommandGenerator \
   cmCustomCommandLines \
@@ -412,6 +414,8 @@ CMAKE_CXX_SOURCES="\
   cmProjectCommand \
   cmPropertyDefinition \
   cmPropertyMap \
+  cmGccDepfileLexerHelper \
+  cmGccDepfileReader \
   cmReturnCommand \
   cmRulePlaceholderExpander \
   cmRuntimeDependencyArchive \
@@ -452,6 +456,7 @@ CMAKE_CXX_SOURCES="\
   cmTest \
   cmTestGenerator \
   cmTimestamp \
+  cmTransformDepfile \
   cmTryCompileCommand \
   cmTryRunCommand \
   cmUnsetCommand \
@@ -491,6 +496,7 @@ LexerParser_CXX_SOURCES="\
   cmCommandArgumentParser \
   cmExprLexer \
   cmExprParser \
+  cmGccDepfileLexer \
 "
 
 LexerParser_C_SOURCES="\
@@ -534,6 +540,18 @@ KWSYS_FILES="\
   System.h \
   SystemTools.hxx \
   Terminal.h"
+
+LIBRHASH_C_SOURCES="\
+  librhash/algorithms.c \
+  librhash/byte_order.c \
+  librhash/hex.c \
+  librhash/md5.c \
+  librhash/rhash.c \
+  librhash/sha1.c \
+  librhash/sha256.c \
+  librhash/sha3.c \
+  librhash/sha512.c \
+  "
 
 if ${cmake_system_mingw}; then
   LIBUV_C_SOURCES="\
@@ -1012,7 +1030,6 @@ cmake_ld_flags=${LDFLAGS}
 # Add generator-specific files
 if test "${cmake_bootstrap_generator}" = "Ninja"; then
   CMAKE_CXX_SOURCES="${CMAKE_CXX_SOURCES} \
-    cmCryptoHash \
     cmFortranParserImpl \
     cmGlobalNinjaGenerator \
     cmLocalNinjaGenerator \
@@ -1033,32 +1050,21 @@ if test "${cmake_bootstrap_generator}" = "Ninja"; then
     src/lib_json/json_value.cpp \
     src/lib_json/json_writer.cpp \
     "
-
-  LIBRHASH_C_SOURCES="\
-    librhash/algorithms.c \
-    librhash/byte_order.c \
-    librhash/hex.c \
-    librhash/md5.c \
-    librhash/rhash.c \
-    librhash/sha1.c \
-    librhash/sha256.c \
-    librhash/sha3.c \
-    librhash/sha512.c \
-    "
 else
   CMAKE_CXX_SOURCES="${CMAKE_CXX_SOURCES} \
     cmDepends \
     cmDependsC \
+    cmDependsCompiler \
     cmGlobalUnixMakefileGenerator3 \
     cmLocalUnixMakefileGenerator3 \
     cmMakefileExecutableTargetGenerator \
     cmMakefileLibraryTargetGenerator \
     cmMakefileTargetGenerator \
     cmMakefileUtilityTargetGenerator \
+    cmProcessTools \
     "
 
   JSONCPP_CXX_SOURCES=
-  LIBRHASH_C_SOURCES=
 fi
 
 # Add Cygwin-specific flags
@@ -1628,15 +1634,15 @@ if test "x${bootstrap_system_libuv}" = "x"; then
     objs="${objs} uv-`cmake_obj ${a}`"
   done
 fi
+if test "x${bootstrap_system_librhash}" = "x"; then
+  for a in ${LIBRHASH_C_SOURCES}; do
+    objs="${objs} rhash-`cmake_obj ${a}`"
+  done
+fi
 if test "${cmake_bootstrap_generator}" = "Ninja"; then
   if test "x${bootstrap_system_jsoncpp}" = "x"; then
     for a in ${JSONCPP_CXX_SOURCES}; do
       objs="${objs} jsoncpp-`cmake_obj ${a}`"
-    done
-  fi
-  if test "x${bootstrap_system_librhash}" = "x"; then
-    for a in ${LIBRHASH_C_SOURCES}; do
-      objs="${objs} rhash-`cmake_obj ${a}`"
     done
   fi
 fi
@@ -1698,6 +1704,15 @@ else
   libs="${libs} -luv"
 fi
 
+if test "x${bootstrap_system_librhash}" != "x"; then
+  if test `which pkg-config`; then
+    use_librhash_flags="`pkg-config --cflags librhash`"
+    cmake_c_flags="${cmake_c_flags} ${use_librhash_flags}"
+    cmake_cxx_flags="${cmake_cxx_flags} ${use_librhash_flags}"
+  fi
+  libs="${libs} -lrhash"
+fi
+
 if test "${cmake_bootstrap_generator}" = "Ninja"; then
   jsoncpp_cxx_flags=
   if test "x${bootstrap_system_jsoncpp}" = "x"; then
@@ -1708,15 +1723,6 @@ if test "${cmake_bootstrap_generator}" = "Ninja"; then
       cmake_cxx_flags="${cmake_cxx_flags} ${use_jsoncpp_flags}"
     fi
     libs="${libs} -ljsoncpp"
-  fi
-
-  if test "x${bootstrap_system_librhash}" != "x"; then
-    if test `which pkg-config`; then
-      use_librhash_flags="`pkg-config --cflags librhash`"
-      cmake_c_flags="${cmake_c_flags} ${use_librhash_flags}"
-      cmake_cxx_flags="${cmake_cxx_flags} ${use_librhash_flags}"
-    fi
-    libs="${libs} -lrhash"
   fi
 fi
 
@@ -1841,17 +1847,17 @@ if test "x${bootstrap_system_libuv}" = "x"; then
     write_source_rule "c" "uv-`cmake_obj ${a}`" "${src}" "${uv_c_flags}"
   done
 fi
+if test "x${bootstrap_system_librhash}" = "x"; then
+  for a in ${LIBRHASH_C_SOURCES}; do
+    src=`cmake_escape_artifact "${cmake_source_dir}/Utilities/cmlibrhash/${a}"`
+    write_source_rule "c" "rhash-`cmake_obj ${a}`" "${src}" ""
+  done
+fi
 if test "${cmake_bootstrap_generator}" = "Ninja"; then
   if test "x${bootstrap_system_jsoncpp}" = "x"; then
     for a in ${JSONCPP_CXX_SOURCES}; do
       src=`cmake_escape_artifact "${cmake_source_dir}/Utilities/cmjsoncpp/${a}"`
       write_source_rule "cxx" "jsoncpp-`cmake_obj ${a}`" "${src}" "${jsoncpp_cxx_flags}"
-    done
-  fi
-  if test "x${bootstrap_system_librhash}" = "x"; then
-    for a in ${LIBRHASH_C_SOURCES}; do
-      src=`cmake_escape_artifact "${cmake_source_dir}/Utilities/cmlibrhash/${a}"`
-      write_source_rule "c" "rhash-`cmake_obj ${a}`" "${src}" ""
     done
   fi
 fi

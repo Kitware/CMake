@@ -11,6 +11,8 @@ Transformations (XSLT) library (LibXslt)
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.18
+
 The following :prop_tgt:`IMPORTED` targets may be defined:
 
 ``LibXslt::LibXslt``
@@ -35,7 +37,8 @@ Additionally, the following two variables are set (but not required
 for using xslt):
 
 ``LIBXSLT_EXSLT_INCLUDE_DIR``
-  The include directory for exslt.
+  .. versionadded:: 3.18
+    The include directory for exslt.
 ``LIBXSLT_EXSLT_LIBRARIES``
   Link to these if you need to link against the exslt library.
 ``LIBXSLT_XSLTPROC_EXECUTABLE``

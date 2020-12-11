@@ -3,7 +3,8 @@ Xcode
 
 Generate Xcode project files.
 
-This supports Xcode 5.0 and above.
+.. versionchanged:: 3.15
+  This generator supports Xcode 5.0 and above.
 
 .. _`Xcode Build System Selection`:
 
@@ -14,7 +15,8 @@ By default Xcode is allowed to select its own default toolchain.
 The :variable:`CMAKE_GENERATOR_TOOLSET` option may be set, perhaps
 via the :manual:`cmake(1)` ``-T`` option, to specify another toolset.
 
-This generator supports toolset specification using one of these forms:
+.. versionadded:: 3.19
+  This generator supports toolset specification using one of these forms:
 
 * ``toolset``
 * ``toolset[,key=value]*``
@@ -33,3 +35,12 @@ Supported pairs are:
 
   For example, to select the original build system under Xcode 12,
   run :manual:`cmake(1)` with the option ``-T buildsystem=1``.
+
+Swift Support
+^^^^^^^^^^^^^
+
+.. versionadded:: 3.4
+
+When using the :generator:`Xcode` generator with Xcode 6.1 or higher,
+one may enable the ``Swift`` language with the :command:`enable_language`
+command or the :command:`project`.

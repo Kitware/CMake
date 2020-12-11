@@ -7,6 +7,7 @@
 
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -82,7 +83,7 @@ bool cmSetSourceFilesPropertiesCommand(std::vector<std::string> const& args,
   const auto props_begin = options_it;
 
   bool file_scopes_handled =
-    SetPropertyCommand::HandleAndValidateSourceFileDirectortoryScopes(
+    SetPropertyCommand::HandleAndValidateSourceFileDirectoryScopes(
       status, source_file_directory_option_enabled,
       source_file_target_option_enabled, source_file_directories,
       source_file_target_directories, source_file_directory_makefiles);
@@ -167,7 +168,13 @@ static bool RunCommandForScope(
     if (cmSourceFile* sf = mf->GetOrCreateSource(sfname)) {
       // loop through the props and set them
       for (auto k = propertyPairs.begin(); k != propertyPairs.end(); k += 2) {
-        sf->SetProperty(*k, (k + 1)->c_str());
+        // Special handling for GENERATED property?
+        if (*k == "GENERATED"_s) {
+          SetPropertyCommand::HandleAndValidateSourceFilePropertyGENERATED(
+            sf, *(k + 1));
+        } else {
+          sf->SetProperty(*k, (k + 1)->c_str());
+        }
       }
     }
   }

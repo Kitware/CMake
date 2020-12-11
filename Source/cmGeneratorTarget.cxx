@@ -24,9 +24,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
-#include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
-#include "cmCustomCommandLines.h"
 #include "cmFileTimes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
@@ -254,7 +252,7 @@ EvaluatedTargetPropertyEntries EvaluateTargetPropertyEntries(
 {
   EvaluatedTargetPropertyEntries out;
   out.Entries.reserve(in.size());
-  for (auto& entry : in) {
+  for (auto const& entry : in) {
     out.Entries.emplace_back(EvaluateTargetPropertyEntry(
       thisTarget, config, lang, dagChecker, *entry));
   }
@@ -332,7 +330,7 @@ cmGeneratorTarget::~cmGeneratorTarget() = default;
 const std::string& cmGeneratorTarget::GetSourcesProperty() const
 {
   std::vector<std::string> values;
-  for (auto& se : this->SourceEntries) {
+  for (auto const& se : this->SourceEntries) {
     values.push_back(se->GetInput());
   }
   static std::string value;
@@ -992,9 +990,8 @@ cmProp cmGeneratorTarget::GetLanguageExtensions(std::string const& lang) const
 bool cmGeneratorTarget::GetLanguageStandardRequired(
   std::string const& lang) const
 {
-  cmProp p =
-    this->GetPropertyWithPairedLanguageSupport(lang, "_STANDARD_REQUIRED");
-  return cmIsOn(p);
+  return cmIsOn(
+    this->GetPropertyWithPairedLanguageSupport(lang, "_STANDARD_REQUIRED"));
 }
 
 void cmGeneratorTarget::GetModuleDefinitionSources(
@@ -1539,10 +1536,14 @@ bool processSources(cmGeneratorTarget const* tgt,
     for (std::string& src : entry.Values) {
       cmSourceFile* sf = mf->GetOrCreateSource(src);
       std::string e;
-      std::string fullPath = sf->ResolveFullPath(&e);
+      std::string w;
+      std::string fullPath = sf->ResolveFullPath(&e, &w);
+      cmake* cm = tgt->GetLocalGenerator()->GetCMakeInstance();
+      if (!w.empty()) {
+        cm->IssueMessage(MessageType::AUTHOR_WARNING, w, tgt->GetBacktrace());
+      }
       if (fullPath.empty()) {
         if (!e.empty()) {
-          cmake* cm = tgt->GetLocalGenerator()->GetCMakeInstance();
           cm->IssueMessage(MessageType::FATAL_ERROR, e, tgt->GetBacktrace());
         }
         return contextDependent;
@@ -2500,7 +2501,7 @@ public:
     }
   }
 
-  bool GetHadLinkLanguageSensitiveCondition()
+  bool GetHadLinkLanguageSensitiveCondition() const
   {
     return HadLinkLanguageSensitiveCondition;
   }
@@ -2888,9 +2889,6 @@ private:
   bool IsUtility(std::string const& dep);
   void CheckCustomCommand(cmCustomCommand const& cc);
   void CheckCustomCommands(const std::vector<cmCustomCommand>& commands);
-  void FollowCommandDepends(cmCustomCommand const& cc,
-                            const std::string& config,
-                            std::set<std::string>& emitted);
 };
 
 cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
@@ -2986,7 +2984,8 @@ void cmTargetTraceDependencies::FollowName(std::string const& name)
   auto i = this->NameMap.lower_bound(name);
   if (i == this->NameMap.end() || i->first != name) {
     // Check if we know how to generate this file.
-    cmSourcesWithOutput sources = this->Makefile->GetSourcesWithOutput(name);
+    cmSourcesWithOutput sources =
+      this->LocalGenerator->GetSourcesWithOutput(name);
     // If we failed to find a target or source and we have a relative path, it
     // might be a valid source if made relative to the current binary
     // directory.
@@ -2996,7 +2995,7 @@ void cmTargetTraceDependencies::FollowName(std::string const& name)
         cmStrCat(this->Makefile->GetCurrentBinaryDirectory(), '/', name);
       fullname = cmSystemTools::CollapseFullPath(
         fullname, this->Makefile->GetHomeOutputDirectory());
-      sources = this->Makefile->GetSourcesWithOutput(fullname);
+      sources = this->LocalGenerator->GetSourcesWithOutput(fullname);
     }
     i = this->NameMap.emplace_hint(i, name, sources);
   }
@@ -3076,71 +3075,27 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
 
 void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
 {
-  // Transform command names that reference targets built in this
-  // project to corresponding target-level dependencies.
-  cmGeneratorExpression ge(cc.GetBacktrace());
+  // Collect dependencies referenced by all configurations.
+  std::set<std::string> depends;
+  for (std::string const& config :
+       this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig)) {
+    cmCustomCommandGenerator ccg(cc, config, this->LocalGenerator);
 
-  // Add target-level dependencies referenced by generator expressions.
-  std::set<cmGeneratorTarget*> targets;
-
-  for (cmCustomCommandLine const& cCmdLine : cc.GetCommandLines()) {
-    std::string const& command = cCmdLine.front();
-    // Check for a target with this name.
-    if (cmGeneratorTarget* t =
-          this->LocalGenerator->FindGeneratorTargetToUse(command)) {
-      if (t->GetType() == cmStateEnums::EXECUTABLE) {
-        // The command refers to an executable target built in
-        // this project.  Add the target-level dependency to make
-        // sure the executable is up to date before this custom
-        // command possibly runs.
-        this->GeneratorTarget->Target->AddUtility(command, true);
-      }
+    // Collect target-level dependencies referenced in command lines.
+    for (auto const& util : ccg.GetUtilities()) {
+      this->GeneratorTarget->Target->AddUtility(util);
     }
 
-    // Check for target references in generator expressions.
-    std::vector<std::string> const& configs =
-      this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
-    for (std::string const& c : configs) {
-      for (std::string const& cl : cCmdLine) {
-        const std::unique_ptr<cmCompiledGeneratorExpression> cge =
-          ge.Parse(cl);
-        cge->SetQuiet(true);
-        cge->Evaluate(this->GeneratorTarget->GetLocalGenerator(), c);
-        std::set<cmGeneratorTarget*> geTargets = cge->GetTargets();
-        targets.insert(geTargets.begin(), geTargets.end());
-      }
-    }
+    // Collect file-level dependencies referenced in DEPENDS.
+    depends.insert(ccg.GetDepends().begin(), ccg.GetDepends().end());
   }
 
-  for (cmGeneratorTarget* target : targets) {
-    this->GeneratorTarget->Target->AddUtility(target->GetName(), true);
-  }
-
-  // Queue the custom command dependencies.
-  std::set<std::string> emitted;
-  std::vector<std::string> const& configs =
-    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
-  for (std::string const& conf : configs) {
-    this->FollowCommandDepends(cc, conf, emitted);
-  }
-}
-
-void cmTargetTraceDependencies::FollowCommandDepends(
-  cmCustomCommand const& cc, const std::string& config,
-  std::set<std::string>& emitted)
-{
-  cmCustomCommandGenerator ccg(cc, config,
-                               this->GeneratorTarget->LocalGenerator);
-
-  const std::vector<std::string>& depends = ccg.GetDepends();
-
+  // Queue file-level dependencies.
   for (std::string const& dep : depends) {
-    if (emitted.insert(dep).second) {
-      if (!this->IsUtility(dep)) {
-        // The dependency does not name a target and may be a file we
-        // know how to generate.  Queue it.
-        this->FollowName(dep);
-      }
+    if (!this->IsUtility(dep)) {
+      // The dependency does not name a target and may be a file we
+      // know how to generate.  Queue it.
+      this->FollowName(dep);
     }
   }
 }
@@ -3198,6 +3153,30 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
   if (archVec.empty()) {
     this->Makefile->GetDefExpandList("_CMAKE_APPLE_ARCHS_DEFAULT", archVec);
   }
+}
+
+void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,
+                                                 cmSourceFile const& sf) const
+{
+  cmProp lang = sf.GetProperty("LANGUAGE");
+  if (!lang) {
+    return;
+  }
+
+  switch (this->GetPolicyStatusCMP0119()) {
+    case cmPolicies::WARN:
+    case cmPolicies::OLD:
+      // The OLD behavior is to not add explicit language flags.
+      return;
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::NEW:
+      // The NEW behavior is to add explicit language flags.
+      break;
+  }
+
+  this->LocalGenerator->AppendFeatureOptions(flags, *lang,
+                                             "EXPLICIT_LANGUAGE");
 }
 
 void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const

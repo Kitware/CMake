@@ -24,6 +24,14 @@ Key                           Description
 ``AVAILABLE_VIRTUAL_MEMORY``  Available virtual memory in MiB [#mebibytes]_
 ``TOTAL_PHYSICAL_MEMORY``     Total physical memory in MiB [#mebibytes]_
 ``AVAILABLE_PHYSICAL_MEMORY`` Available physical memory in MiB [#mebibytes]_
+============================= ================================================
+
+.. versionadded:: 3.10
+  Additional ``<key>`` values are available:
+
+============================= ================================================
+Key                           Description
+============================= ================================================
 ``IS_64BIT``                  One if processor is 64Bit
 ``HAS_FPU``                   One if processor has floating point unit
 ``HAS_MMX``                   One if processor supports MMX instructions

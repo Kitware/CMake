@@ -721,8 +721,7 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
 
 bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
 {
-  cmProp p = this->GeneratorTarget->GetProperty("ghs_integrity_app");
-  if (p) {
+  if (cmProp p = this->GeneratorTarget->GetProperty("ghs_integrity_app")) {
     return cmIsOn(*p);
   }
   std::vector<cmSourceFile*> sources;
@@ -763,9 +762,9 @@ bool cmGhsMultiTargetGenerator::VisitCustomCommand(
     /* set temporary mark; check if revisit*/
     if (temp.insert(si).second) {
       for (auto& di : si->GetCustomCommand()->GetDepends()) {
-        cmSourceFile const* sf = this->GeneratorTarget->GetLocalGenerator()
-                                   ->GetMakefile()
-                                   ->GetSourceFileWithOutput(di);
+        cmSourceFile const* sf =
+          this->GeneratorTarget->GetLocalGenerator()->GetSourceFileWithOutput(
+            di);
         /* if sf exists then visit */
         if (sf && this->VisitCustomCommand(temp, perm, order, sf)) {
           return true;

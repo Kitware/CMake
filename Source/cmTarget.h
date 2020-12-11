@@ -114,7 +114,7 @@ public:
   LinkLibraryVectorType const& GetOriginalLinkLibraries() const;
 
   //! Clear the dependency information recorded for this target, if any.
-  void ClearDependencyInformation(cmMakefile& mf);
+  void ClearDependencyInformation(cmMakefile& mf) const;
 
   void AddLinkLibrary(cmMakefile& mf, std::string const& lib,
                       cmTargetLinkLibraryType llt);
@@ -164,6 +164,7 @@ public:
    */
   void AddUtility(std::string const& name, bool cross,
                   cmMakefile* mf = nullptr);
+  void AddUtility(BT<std::pair<std::string, bool>> util);
   //! Get the utilities used by this target
   std::set<BT<std::pair<std::string, bool>>> const& GetUtilities() const;
 

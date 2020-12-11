@@ -550,6 +550,11 @@ void* CCONV cmAddSource(void* arg, void* arg2)
   // Create the real cmSourceFile instance and copy over saved information.
   cmSourceFile* rsf = mf->GetOrCreateSource(osf->FullPath);
   rsf->SetProperties(osf->Properties);
+  // In case the properties contain the GENERATED property,
+  // mark the real cmSourceFile as generated.
+  if (rsf->GetIsGenerated()) {
+    rsf->MarkAsGenerated();
+  }
   for (std::string const& d : osf->Depends) {
     rsf->AddDepend(d);
   }
@@ -583,14 +588,12 @@ const char* CCONV cmSourceFileGetProperty(void* arg, const char* prop)
 {
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
-    cmProp p = rsf->GetProperty(prop);
-    return cmToCStr(p);
+    return cmToCStr(rsf->GetProperty(prop));
   }
   if (!strcmp(prop, "LOCATION")) {
     return sf->FullPath.c_str();
   }
-  cmProp retVal = sf->Properties.GetPropertyValue(prop);
-  return cmToCStr(retVal);
+  return cmToCStr(sf->Properties.GetPropertyValue(prop));
 }
 
 int CCONV cmSourceFileGetPropertyAsBool(void* arg, const char* prop)

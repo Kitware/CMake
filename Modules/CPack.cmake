@@ -194,6 +194,8 @@ installers.  The most commonly-used variables are:
 
 .. variable:: CPACK_PACKAGE_CHECKSUM
 
+  .. versionadded:: 3.7
+
   An algorithm that will be used to generate an additional file with the
   checksum of the package.  The output file name will be::
 
@@ -270,6 +272,8 @@ installers.  The most commonly-used variables are:
   so this change is compatible).
 
 .. variable:: CPACK_VERBATIM_VARIABLES
+
+  .. versionadded:: 3.4
 
   If set to ``TRUE``, values of variables prefixed with ``CPACK_`` will be
   escaped before being written to the configuration files, so that the cpack
@@ -356,6 +360,8 @@ The following variables are for advanced uses of CPack:
 
 .. variable:: CPACK_INSTALL_SCRIPTS
 
+  .. versionadded:: 3.16
+
   Extra CMake scripts executed by CPack during its local staging
   installation.  They are executed before installing the files to be packaged.
   The scripts are not called by a standalone install (e.g.: ``make install``).
@@ -372,6 +378,8 @@ The following variables are for advanced uses of CPack:
 
 .. variable:: CPACK_PRE_BUILD_SCRIPTS
 
+  .. versionadded:: 3.19
+
   List of CMake scripts to execute after CPack has installed the files to
   be packaged into a staging directory and before producing the package(s)
   from those files. See also :variable:`CPACK_INSTALL_SCRIPTS` and
@@ -379,12 +387,16 @@ The following variables are for advanced uses of CPack:
 
 .. variable:: CPACK_POST_BUILD_SCRIPTS
 
+  .. versionadded:: 3.19
+
   List of CMake scripts to execute after CPack has produced the resultant
   packages and before copying them back to the build directory.
   See also :variable:`CPACK_INSTALL_SCRIPTS`,
   :variable:`CPACK_PRE_BUILD_SCRIPTS` and :variable:`CPACK_PACKAGE_FILES`.
 
 .. variable:: CPACK_PACKAGE_FILES
+
+  .. versionadded:: 3.19
 
   List of package files created in the staging directory, with each file
   provided as a full absolute path.  This variable is populated by CPack

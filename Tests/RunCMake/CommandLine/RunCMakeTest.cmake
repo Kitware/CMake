@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.1)
 include(RunCMake)
 
 run_cmake_command(NoArgs ${CMAKE_COMMAND})
+run_cmake_command(InvalidArg1 ${CMAKE_COMMAND} -invalid)
+run_cmake_command(InvalidArg2 ${CMAKE_COMMAND} --invalid)
 run_cmake_command(Wizard ${CMAKE_COMMAND} -i)
 run_cmake_command(C-no-arg ${CMAKE_COMMAND} -B DummyBuildDir -C)
 run_cmake_command(C-no-file ${CMAKE_COMMAND} -B DummyBuildDir -C nosuchcachefile.txt)
@@ -25,8 +27,7 @@ run_cmake_command(E_compare_files-ignore-eol-nonexistent ${CMAKE_COMMAND} -E com
 run_cmake_command(E_compare_files-invalid-arguments ${CMAKE_COMMAND} -E compare_files file1.txt file2.txt file3.txt)
 run_cmake_command(E_echo_append ${CMAKE_COMMAND} -E echo_append)
 run_cmake_command(E_rename-no-arg ${CMAKE_COMMAND} -E rename)
-run_cmake_command(E_server-arg ${CMAKE_COMMAND} -E server --extra-arg)
-run_cmake_command(E_server-pipe ${CMAKE_COMMAND} -E server --pipe=)
+run_cmake_command(E_server ${CMAKE_COMMAND} -E server)
 run_cmake_command(E_true ${CMAKE_COMMAND} -E true)
 run_cmake_command(E_true-extraargs ${CMAKE_COMMAND} -E true ignored)
 run_cmake_command(E_false ${CMAKE_COMMAND} -E false)
@@ -202,8 +203,8 @@ function(run_BuildDir)
   run_cmake_command(BuildDir--build--parallel-large ${CMAKE_COMMAND} -E chdir ..
     ${CMAKE_COMMAND} --build BuildDir-build --parallel 4294967293)
 
-  # No default jobs for Xcode and FreeBSD build command
-  if(NOT RunCMake_GENERATOR MATCHES "Xcode" AND NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+  # No default jobs for FreeBSD build command
+  if(NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
     run_cmake_command(BuildDir--build-jobs-no-number ${CMAKE_COMMAND} -E chdir ..
       ${CMAKE_COMMAND} --build BuildDir-build -j)
     run_cmake_command(BuildDir--build-jobs-no-number-trailing--target ${CMAKE_COMMAND} -E chdir ..
@@ -672,6 +673,10 @@ set(RunCMake_TEST_OPTIONS -Wno-error=deprecated)
 run_cmake(Wno-error_deprecated)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS -Werror=deprecated -Wno-error=deprecated)
+run_cmake(Wno-error_deprecated)
+unset(RunCMake_TEST_OPTIONS)
+
 # Dev warnings should be on by default
 run_cmake(Wdev)
 
@@ -790,7 +795,7 @@ function(run_llvm_rc)
         "test.tmp was not deleted")
   endif()
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir")
-  run_cmake_command(llvm_rc_full_run ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/source_file test.tmp ${CMAKE_COMMAND} -E echo "This is a test" ++ ${CMAKE_COMMAND} -E copy test.tmp SOURCE_DIR/llvmrc.result )
+  run_cmake_command(llvm_rc_full_run ${CMAKE_COMMAND} -E cmake_llvm_rc ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/source_file test.tmp ${CMAKE_COMMAND} -E echo "This is a test" ++ ${LLVM_RC} -bad /FO SOURCE_DIR/llvmrc.result test.tmp )
   if(EXISTS ${RunCMake_TEST_BINARY_DIR}/ExpandSourceDir/test.tmp)
       message(SEND_ERROR "${test} - FAILED:\n"
         "test.tmp was not deleted")

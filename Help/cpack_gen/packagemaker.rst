@@ -27,6 +27,14 @@ macOS using PackageMaker:
  don't mind missing extra features available in the installer shipping with
  later versions of macOS.
 
+Background Image
+""""""""""""""""
+
+.. versionadded:: 3.17
+
+This group of variables controls the background image of the generated
+installer.
+
 .. variable:: CPACK_PACKAGEMAKER_BACKGROUND
 
  Adds a background to Distribution XML if specified. The value contains the
