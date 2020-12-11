@@ -22,13 +22,22 @@ set(CMAKE_OSX_ARCHITECTURES "$ENV{CMAKE_OSX_ARCHITECTURES}" CACHE STRING
 
 if(NOT CMAKE_CROSSCOMPILING AND
    CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND
-   CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64" AND
-   CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
-  # When building on Apple Silicon (arm64), we need to explicitly specify
+   CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(arm64|x86_64)$")
+  execute_process(COMMAND sysctl -q hw.optional.arm64
+    OUTPUT_VARIABLE _sysctl_stdout
+    ERROR_VARIABLE _sysctl_stderr
+    RESULT_VARIABLE _sysctl_result
+    )
+  # When building on an Apple Silicon host, we need to explicitly specify
   # the architecture to the toolchain since it will otherwise guess the
   # architecture based on that of the build system tool.
   # Set an *internal variable* to tell the generators to do this.
-  set(_CMAKE_APPLE_ARCHS_DEFAULT "arm64")
+  if(_sysctl_result EQUAL 0 AND _sysctl_stdout MATCHES "hw.optional.arm64: 1")
+    set(_CMAKE_APPLE_ARCHS_DEFAULT "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+  endif()
+  unset(_sysctl_result)
+  unset(_sysctl_stderr)
+  unset(_sysctl_stdout)
 endif()
 
 # macOS, iOS, tvOS, and watchOS should lookup compilers from

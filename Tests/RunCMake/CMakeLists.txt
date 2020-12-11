@@ -186,6 +186,9 @@ set_property(TEST RunCMake.ABI APPEND
   PROPERTY LABELS "CUDA")
 
 add_RunCMake_test(AndroidTestUtilities)
+if(CMake_TEST_APPLE_SILICON)
+  add_RunCMake_test(AppleSilicon)
+endif()
 set(autogen_with_qt5 FALSE)
 if(CMake_TEST_Qt5)
   find_package(Qt5Widgets QUIET NO_MODULE)

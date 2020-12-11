@@ -228,6 +228,22 @@ if(BUILD_TESTING)
     endif()
   endif()
 
+  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT DEFINED CMake_TEST_APPLE_SILICON)
+    execute_process(COMMAND sysctl -q hw.optional.arm64
+      OUTPUT_VARIABLE _sysctl_stdout
+      ERROR_VARIABLE  _sysctl_stderr
+      RESULT_VARIABLE _sysctl_result
+      )
+    if(_sysctl_result EQUAL 0 AND _sysctl_stdout MATCHES "hw.optional.arm64: 1")
+      set(CMake_TEST_APPLE_SILICON 1)
+    else()
+      set(CMake_TEST_APPLE_SILICON 0)
+    endif()
+    unset(_sysctl_result)
+    unset(_sysctl_stderr)
+    unset(_sysctl_stdout)
+  endif()
+
   #---------------------------------------------------------------------------
   # Add tests below here.
 
