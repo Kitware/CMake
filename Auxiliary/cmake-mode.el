@@ -190,6 +190,61 @@ the indentation.  Otherwise it retains the same position on the line"
     )
   )
 
+
+;------------------------------------------------------------------------------
+
+;;
+;; Navigation / marking by function or macro
+;;
+
+(defconst cmake--regex-defun-start
+  (rx line-start
+      (zero-or-more space)
+      (or "function" "macro")
+      (zero-or-more space)
+      "("))
+
+(defconst cmake--regex-defun-end
+  (rx line-start
+      (zero-or-more space)
+      "end"
+      (or "function" "macro")
+      (zero-or-more space)
+      "(" (zero-or-more (not ")")) ")"))
+
+(defun cmake-beginning-of-defun ()
+  "Move backward to the beginning of a CMake function or macro.
+
+Return t unless search stops due to beginning of buffer."
+  (interactive)
+  (when (not (region-active-p))
+    (push-mark))
+  (let ((case-fold-search t))
+    (when (re-search-backward cmake--regex-defun-start nil 'move)
+      t)))
+
+(defun cmake-end-of-defun ()
+  "Move forward to the end of a CMake function or macro.
+
+Return t unless search stops due to end of buffer."
+  (interactive)
+  (when (not (region-active-p))
+    (push-mark))
+  (let ((case-fold-search t))
+    (when (re-search-forward cmake--regex-defun-end nil 'move)
+      (forward-line)
+      t)))
+
+(defun cmake-mark-defun ()
+  "Mark the current CMake function or macro.
+
+This puts the mark at the end, and point at the beginning."
+  (interactive)
+  (cmake-end-of-defun)
+  (push-mark nil :nomsg :activate)
+  (cmake-beginning-of-defun))
+
+
 ;------------------------------------------------------------------------------
 
 ;;
@@ -241,6 +296,12 @@ the indentation.  Otherwise it retains the same position on the line"
   (set (make-local-variable 'indent-line-function) 'cmake-indent)
   ; Setup comment syntax.
   (set (make-local-variable 'comment-start) "#"))
+
+;; Default cmake-mode key bindings
+(define-key cmake-mode-map "\e\C-a" #'cmake-beginning-of-defun)
+(define-key cmake-mode-map "\e\C-e" #'cmake-end-of-defun)
+(define-key cmake-mode-map "\e\C-h" #'cmake-mark-defun)
+
 
 ; Help mode starts here
 
