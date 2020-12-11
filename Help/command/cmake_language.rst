@@ -150,7 +150,12 @@ The currently scheduled list of deferred calls may be retrieved:
   cmake_language(DEFER [DIRECTORY <dir>] GET_CALL_IDS <var>)
 
 This will store in ``<var>`` a :ref:`semicolon-separated list <CMake Language
-Lists>` of deferred call ids.
+Lists>` of deferred call ids.  The ids are for the directory scope in which
+the calls have been deferred to (i.e. where they will be executed), which can
+be different to the scope in which they were created.  The ``DIRECTORY``
+option can be used to specify the scope for which to retrieve the call ids.
+If that option is not given, the call ids for the current directory scope will
+be returned.
 
 Details of a specific call may be retrieved from its id:
 
@@ -163,8 +168,9 @@ Lists>` in which the first element is the name of the command to be
 called, and the remaining elements are its unevaluated arguments (any
 contained ``;`` characters are included literally and cannot be distinguished
 from multiple arguments).  If multiple calls are scheduled with the same id,
-this retrieves the first one.  If no call is scheduled with the given id,
-this stores an empty string in the variable.
+this retrieves the first one.  If no call is scheduled with the given id in
+the specified ``DIRECTORY`` scope (or the current directory scope if no
+``DIRECTORY`` option is given), this stores an empty string in the variable.
 
 Deferred calls may be canceled by their id:
 
@@ -172,8 +178,9 @@ Deferred calls may be canceled by their id:
 
   cmake_language(DEFER [DIRECTORY <dir>] CANCEL_CALL <id>...)
 
-This cancels all deferred calls matching any of the given ids.
-Unknown ids are silently ignored.
+This cancels all deferred calls matching any of the given ids in the specified
+``DIRECTORY`` scope (or the current directory scope if no ``DIRECTORY`` option
+is given).  Unknown ids are silently ignored.
 
 Deferred Call Examples
 """"""""""""""""""""""
