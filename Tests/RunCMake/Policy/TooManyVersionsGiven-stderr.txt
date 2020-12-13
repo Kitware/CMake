@@ -1,0 +1,4 @@
+CMake Error at TooManyVersionsGiven.cmake:[0-9]+ \(cmake_policy\):
+  cmake_policy VERSION given too many arguments
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
