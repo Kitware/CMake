@@ -1,0 +1,2 @@
+CMake Error at .*LastCommandAbnormalExit-2.cmake:[0-9]+ \(execute_process\):
+  execute_process Abnormal exit: Segmentation fault

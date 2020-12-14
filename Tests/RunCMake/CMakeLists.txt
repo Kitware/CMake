@@ -316,7 +316,10 @@ add_RunCMake_test(add_subdirectory)
 add_RunCMake_test(add_test)
 add_RunCMake_test(build_command)
 add_executable(exit_code exit_code.c)
-set(execute_process_ARGS -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>)
+set(execute_process_ARGS
+  -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
+  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  )
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   list(APPEND execute_process_ARGS -DTEST_ENCODING_EXE=$<TARGET_FILE:testEncoding>)
 endif()

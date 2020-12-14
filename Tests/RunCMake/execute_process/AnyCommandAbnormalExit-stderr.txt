@@ -1,0 +1,4 @@
+CMake Error at .*AnyCommandAbnormalExit.cmake:[0-9]+ \(execute_process\):
+  execute_process failed command indexes:
+
+    1: "Abnormal exit with child return code: Segmentation fault
