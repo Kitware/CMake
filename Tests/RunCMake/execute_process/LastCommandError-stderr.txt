@@ -1,2 +1,2 @@
-CMake Error at .*LastCommandError.cmake:1 \(execute_process\):
+CMake Error at .*LastCommandError.cmake:11 \(execute_process\):
   execute_process last command failed
