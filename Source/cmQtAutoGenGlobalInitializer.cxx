@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenGlobalInitializer.h"
 
+#include <set>
 #include <utility>
 
 #include <cm/memory>
@@ -89,6 +90,12 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
       }
       if (target->IsImported()) {
         // Don't process target
+        continue;
+      }
+      std::set<std::string> const& languages =
+        target->GetAllConfigCompileLanguages();
+      if (languages.count("CSharp")) {
+        // Don't process target if it's a CSharp target
         continue;
       }
 
