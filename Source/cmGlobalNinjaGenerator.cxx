@@ -571,18 +571,9 @@ void cmGlobalNinjaGenerator::CleanMetaData()
 
   // Skip some ninja tools if they need 'build.ninja' but it is missing.
   bool const missingBuildManifest = expectBuildManifest &&
-    (this->NinjaSupportsCleanDeadTool ||
-     this->NinjaSupportsUnconditionalRecompactTool) &&
+    this->NinjaSupportsUnconditionalRecompactTool &&
     !cmSystemTools::FileExists("build.ninja");
 
-  // The `cleandead` tool needs to know about all outputs in the build we just
-  // wrote out. Ninja-Multi doesn't have a single `build.ninja` we can use that
-  // is the union of all generated configurations, so we can't run it reliably
-  // in that case.
-  if (this->NinjaSupportsCleanDeadTool && expectBuildManifest &&
-      !missingBuildManifest) {
-    run_ninja_tool({ "cleandead" });
-  }
   // The `recompact` tool loads the manifest. As above, we don't have a single
   // `build.ninja` to load for this in Ninja-Multi. This may be relaxed in the
   // future pending further investigation into how Ninja works upstream
@@ -669,9 +660,6 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
       }
     }
   }
-  this->NinjaSupportsCleanDeadTool = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForCleanDeadTool().c_str());
   this->NinjaSupportsUnconditionalRecompactTool =
     !cmSystemTools::VersionCompare(
       cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
