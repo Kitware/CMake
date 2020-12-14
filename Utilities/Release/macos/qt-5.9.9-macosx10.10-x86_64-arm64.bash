@@ -20,6 +20,7 @@ type -p makeuniversal >/dev/null
 curl -OL https://download.qt.io/archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.9.tar.xz
 shasum -a 256 qt-everywhere-opensource-src-5.9.9.tar.xz | grep -q 5ce285209290a157d7f42ec8eb22bf3f1d76f2e03a95fc0b99b553391be01642
 tar xjf qt-everywhere-opensource-src-5.9.9.tar.xz
+patch -p0 < "${BASH_SOURCE%/*}/qt-5.9.9.patch"
 
 # Build the x86_64 variant.
 mkdir qt-5.9.9-x86_64
