@@ -177,9 +177,10 @@ macro.
   packages with no binaries.
 
 .. versionadded:: 3.19
-  ``COMPATIBILITY_MODE`` ``AnyNewerVersion`` handles the version range
-  if any is specified (see :command:`find_package` command for the details).
-  All other modes are incompatible with version ranges and will display an
+  ``COMPATIBILITY_MODE`` ``AnyNewerVersion``, ``SameMajorVersion`` and
+  ``SameMinorVersion`` handle the version range if any is specified
+  (see :command:`find_package` command for the details).
+  ``ExactVersion`` mode is incompatible with version ranges and will display an
   author warning if one is specified.
 
 Internally, this macro executes :command:`configure_file()` to create the
