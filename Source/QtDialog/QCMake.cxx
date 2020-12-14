@@ -68,9 +68,9 @@ QCMake::QCMake(QObject* p)
   connect(&this->LoadPresetsTimer, &QTimer::timeout, this, [this]() {
     this->loadPresets();
     if (!this->PresetName.isEmpty() &&
-        this->CMakePresetsFile.Presets.find(
+        this->CMakePresetsFile.ConfigurePresets.find(
           std::string(this->PresetName.toLocal8Bit())) ==
-          this->CMakePresetsFile.Presets.end()) {
+          this->CMakePresetsFile.ConfigurePresets.end()) {
       this->setPreset(QString{});
     }
   });
@@ -158,7 +158,7 @@ void QCMake::setPreset(const QString& name, bool setBinary)
     if (!name.isNull()) {
       std::string presetName(name.toLocal8Bit());
       auto const& expandedPreset =
-        this->CMakePresetsFile.Presets[presetName].Expanded;
+        this->CMakePresetsFile.ConfigurePresets[presetName].Expanded;
       if (expandedPreset) {
         if (setBinary) {
           QString binaryDir =
@@ -420,7 +420,8 @@ QCMakePropertyList QCMake::properties() const
 
   if (!this->PresetName.isNull()) {
     std::string presetName(this->PresetName.toLocal8Bit());
-    auto const& p = this->CMakePresetsFile.Presets.at(presetName).Expanded;
+    auto const& p =
+      this->CMakePresetsFile.ConfigurePresets.at(presetName).Expanded;
     if (p) {
       for (auto const& v : p->CacheVariables) {
         if (!v.second) {
@@ -535,8 +536,8 @@ void QCMake::loadPresets()
   this->LastLoadPresetsResult = result;
 
   QVector<QCMakePreset> presets;
-  for (auto const& name : this->CMakePresetsFile.PresetOrder) {
-    auto const& it = this->CMakePresetsFile.Presets[name];
+  for (auto const& name : this->CMakePresetsFile.ConfigurePresetOrder) {
+    auto const& it = this->CMakePresetsFile.ConfigurePresets[name];
     auto const& p = it.Unexpanded;
     if (p.Hidden) {
       continue;
