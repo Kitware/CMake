@@ -56,7 +56,9 @@ file(GLOB GLOB_PATHS /usr/lib/qt-3*)
 foreach(GLOB_PATH ${GLOB_PATHS})
   list(APPEND GLOB_PATHS_BIN "${GLOB_PATH}/bin")
 endforeach()
-find_path(QT_INCLUDE_DIR qt.h
+find_path(QT_INCLUDE_DIR
+  NAMES qt.h
+  PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"
@@ -179,7 +181,8 @@ if(QT_UIC_EXECUTABLE)
 endif()
 
 if (WIN32)
-  find_library(QT_QTMAIN_LIBRARY qtmain
+  find_library(QT_QTMAIN_LIBRARY
+    NAMES qtmain
     HINTS
       ENV QTDIR
       "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]"
