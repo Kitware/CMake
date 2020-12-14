@@ -22,6 +22,7 @@
 #include "cmProperty.h"
 #include "cmStateSnapshot.h"
 
+class cmCompiledGeneratorExpression;
 class cmComputeLinkInformation;
 class cmCustomCommandGenerator;
 class cmCustomCommandLines;
@@ -362,18 +363,32 @@ public:
     bool command_expand_lists = false, const std::string& job_pool = "",
     bool stdPipesUTF8 = false);
 
+  std::vector<std::string> ExpandCustomCommandOutputPaths(
+    cmCompiledGeneratorExpression const& cge, std::string const& config);
+  std::vector<std::string> ExpandCustomCommandOutputGenex(
+    std::string const& o, cmListFileBacktrace const& bt);
+
   /**
    * Add target byproducts.
    */
   void AddTargetByproducts(cmTarget* target,
-                           const std::vector<std::string>& byproducts);
+                           const std::vector<std::string>& byproducts,
+                           cmListFileBacktrace const& bt,
+                           cmCommandOrigin origin);
+
+  enum class OutputRole
+  {
+    Primary,
+    Byproduct,
+  };
 
   /**
    * Add source file outputs.
    */
   void AddSourceOutputs(cmSourceFile* source,
-                        const std::vector<std::string>& outputs,
-                        const std::vector<std::string>& byproducts);
+                        std::vector<std::string> const& outputs,
+                        OutputRole role, cmListFileBacktrace const& bt,
+                        cmCommandOrigin origin);
 
   /**
    * Return the target if the provided source name is a byproduct of a utility
@@ -607,9 +622,12 @@ private:
   using OutputToSourceMap = std::unordered_map<std::string, SourceEntry>;
   OutputToSourceMap OutputToSource;
 
-  void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target);
+  void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target,
+                               cmListFileBacktrace const& bt,
+                               cmCommandOrigin origin);
   void UpdateOutputToSourceMap(std::string const& output, cmSourceFile* source,
-                               bool byproduct);
+                               OutputRole role, cmListFileBacktrace const& bt,
+                               cmCommandOrigin origin);
 
   void AddSharedFlags(std::string& flags, const std::string& lang,
                       bool shared);

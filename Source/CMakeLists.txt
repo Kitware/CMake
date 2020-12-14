@@ -181,8 +181,6 @@ set(SRCS
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h
   cmCacheManager.cxx
   cmCacheManager.h
-  cmCheckCustomOutputs.h
-  cmCheckCustomOutputs.cxx
   cmCLocaleEnvironmentScope.h
   cmCLocaleEnvironmentScope.cxx
   cmCMakePath.h

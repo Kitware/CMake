@@ -17,9 +17,11 @@
 #include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
@@ -3812,38 +3814,95 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(
 }
 
 namespace {
+cm::string_view CustomOutputRoleKeyword(cmLocalGenerator::OutputRole role)
+{
+  return (role == cmLocalGenerator::OutputRole::Primary ? "OUTPUT"_s
+                                                        : "BYPRODUCTS"_s);
+}
+
 void CreateGeneratedSource(cmLocalGenerator& lg, const std::string& output,
+                           cmLocalGenerator::OutputRole role,
                            cmCommandOrigin origin,
                            const cmListFileBacktrace& lfbt)
 {
-  if (cmGeneratorExpression::Find(output) == std::string::npos) {
-    // Outputs without generator expressions from the project are already
-    // created and marked as generated.  Do not mark them again, because
-    // other commands might have overwritten the property.
-    if (origin == cmCommandOrigin::Generator) {
-      lg.GetMakefile()->GetOrCreateGeneratedSource(output);
-    }
-  } else {
+  if (cmGeneratorExpression::Find(output) != std::string::npos) {
     lg.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       "Generator expressions in custom command outputs are not implemented!",
       lfbt);
+    return;
+  }
+
+  // Make sure the file will not be generated into the source
+  // directory during an out of source build.
+  if (!lg.GetMakefile()->CanIWriteThisFile(output)) {
+    lg.GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(CustomOutputRoleKeyword(role), " path\n  ", output,
+               "\nin a source directory as an output of custom command."),
+      lfbt);
+    return;
+  }
+
+  // Make sure the output file name has no invalid characters.
+  std::string::size_type pos = output.find_first_of("#<>");
+  if (pos != std::string::npos) {
+    lg.GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(CustomOutputRoleKeyword(role), " containing a \"", output[pos],
+               "\" is not allowed."),
+      lfbt);
+    return;
+  }
+
+  // Outputs without generator expressions from the project are already
+  // created and marked as generated.  Do not mark them again, because
+  // other commands might have overwritten the property.
+  if (origin == cmCommandOrigin::Generator) {
+    lg.GetMakefile()->GetOrCreateGeneratedSource(output);
   }
 }
 
-void CreateGeneratedSources(cmLocalGenerator& lg,
-                            const std::vector<std::string>& outputs,
-                            cmCommandOrigin origin,
-                            const cmListFileBacktrace& lfbt)
+std::string ComputeCustomCommandRuleFileName(cmLocalGenerator& lg,
+                                             cmListFileBacktrace const& bt,
+                                             std::string const& output)
 {
-  for (std::string const& o : outputs) {
-    CreateGeneratedSource(lg, o, origin, lfbt);
+  // If the output path has no generator expressions, use it directly.
+  if (cmGeneratorExpression::Find(output) == std::string::npos) {
+    return output;
   }
+
+  // The output path contains a generator expression, but we must choose
+  // a single source file path to which to attach the custom command.
+  // Use some heuristics to provie a nice-looking name when possible.
+
+  // If the only genex is $<CONFIG>, replace that gracefully.
+  {
+    std::string simple = output;
+    cmSystemTools::ReplaceString(simple, "$<CONFIG>", "(CONFIG)");
+    if (cmGeneratorExpression::Find(simple) == std::string::npos) {
+      return simple;
+    }
+  }
+
+  // If the genex evaluates to the same value in all configurations, use that.
+  {
+    std::vector<std::string> allConfigOutputs =
+      lg.ExpandCustomCommandOutputGenex(output, bt);
+    if (allConfigOutputs.size() == 1) {
+      return allConfigOutputs.front();
+    }
+  }
+
+  // Fall back to a deterministic unique name.
+  cmCryptoHash h(cmCryptoHash::AlgoSHA256);
+  return cmStrCat(lg.GetCurrentBinaryDirectory(), "/CMakeFiles/",
+                  h.HashString(output).substr(0, 16));
 }
 
 cmSourceFile* AddCustomCommand(
   cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
-  const std::vector<std::string>& outputs,
+  cmCommandOrigin origin, const std::vector<std::string>& outputs,
   const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends, const std::string& main_dependency,
   const cmImplicitDependsList& implicit_depends,
@@ -3880,7 +3939,8 @@ cmSourceFile* AddCustomCommand(
     cmGlobalGenerator* gg = lg.GetGlobalGenerator();
 
     // Construct a rule file associated with the first output produced.
-    std::string outName = gg->GenerateRuleFile(outputs[0]);
+    std::string outName = gg->GenerateRuleFile(
+      ComputeCustomCommandRuleFileName(lg, lfbt, outputs[0]));
 
     // Check if the rule file already exists.
     file = mf->GetSource(outName, cmSourceFileLocationKind::Known);
@@ -3923,7 +3983,10 @@ cmSourceFile* AddCustomCommand(
     cc->SetJobPool(job_pool);
     file->SetCustomCommand(std::move(cc));
 
-    lg.AddSourceOutputs(file, outputs, byproducts);
+    lg.AddSourceOutputs(file, outputs, cmLocalGenerator::OutputRole::Primary,
+                        lfbt, origin);
+    lg.AddSourceOutputs(file, byproducts,
+                        cmLocalGenerator::OutputRole::Byproduct, lfbt, origin);
   }
   return file;
 }
@@ -3967,9 +4030,6 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
                               const std::string& job_pool,
                               bool command_expand_lists, bool stdPipesUTF8)
 {
-  // Always create the byproduct sources and mark them generated.
-  CreateGeneratedSources(lg, byproducts, origin, lfbt);
-
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
   cmCustomCommand cc(no_output, byproducts, depends, commandLines, lfbt,
@@ -3992,7 +4052,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
       break;
   }
 
-  lg.AddTargetByproducts(target, byproducts);
+  lg.AddTargetByproducts(target, byproducts, lfbt, origin);
 }
 
 cmSourceFile* AddCustomCommandToOutput(
@@ -4006,14 +4066,11 @@ cmSourceFile* AddCustomCommandToOutput(
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
   const std::string& job_pool, bool stdPipesUTF8)
 {
-  // Always create the output sources and mark them generated.
-  CreateGeneratedSources(lg, outputs, origin, lfbt);
-  CreateGeneratedSources(lg, byproducts, origin, lfbt);
-
-  return AddCustomCommand(
-    lg, lfbt, outputs, byproducts, depends, main_dependency, implicit_depends,
-    commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
-    command_expand_lists, depfile, job_pool, stdPipesUTF8);
+  return AddCustomCommand(lg, lfbt, origin, outputs, byproducts, depends,
+                          main_dependency, implicit_depends, commandLines,
+                          comment, workingDir, replace, escapeOldStyle,
+                          uses_terminal, command_expand_lists, depfile,
+                          job_pool, stdPipesUTF8);
 }
 
 void AppendCustomCommandToOutput(cmLocalGenerator& lg,
@@ -4024,7 +4081,22 @@ void AppendCustomCommandToOutput(cmLocalGenerator& lg,
                                  const cmCustomCommandLines& commandLines)
 {
   // Lookup an existing command.
-  if (cmSourceFile* sf = lg.GetSourceFileWithOutput(output)) {
+  cmSourceFile* sf = nullptr;
+  if (cmGeneratorExpression::Find(output) == std::string::npos) {
+    sf = lg.GetSourceFileWithOutput(output);
+  } else {
+    // This output path has a generator expression.  Evaluate it to
+    // find the output for any configurations.
+    for (std::string const& out :
+         lg.ExpandCustomCommandOutputGenex(output, lfbt)) {
+      sf = lg.GetSourceFileWithOutput(out);
+      if (sf) {
+        break;
+      }
+    }
+  }
+
+  if (sf) {
     if (cmCustomCommand* cc = sf->GetCustomCommand()) {
       cc->AppendCommands(commandLines);
       cc->AppendDepends(depends);
@@ -4051,10 +4123,6 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        bool uses_terminal, bool command_expand_lists,
                        const std::string& job_pool, bool stdPipesUTF8)
 {
-  // Always create the byproduct sources and mark them generated.
-  CreateGeneratedSource(lg, force.Name, origin, lfbt);
-  CreateGeneratedSources(lg, byproducts, origin, lfbt);
-
   // Use an empty comment to avoid generation of default comment.
   if (!comment) {
     comment = "";
@@ -4063,12 +4131,12 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
   std::string no_main_dependency;
   cmImplicitDependsList no_implicit_depends;
   cmSourceFile* rule = AddCustomCommand(
-    lg, lfbt, { force.Name }, byproducts, depends, no_main_dependency,
+    lg, lfbt, origin, { force.Name }, byproducts, depends, no_main_dependency,
     no_implicit_depends, commandLines, comment, workingDir,
     /*replace=*/false, escapeOldStyle, uses_terminal, command_expand_lists,
     /*depfile=*/"", job_pool, stdPipesUTF8);
   if (rule) {
-    lg.AddTargetByproducts(target, byproducts);
+    lg.AddTargetByproducts(target, byproducts, lfbt, origin);
   }
 
   if (!force.NameCMP0049.empty()) {
@@ -4166,34 +4234,87 @@ cmSourceFile* cmLocalGenerator::GetSourceFileWithOutput(
   return nullptr;
 }
 
+std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputPaths(
+  cmCompiledGeneratorExpression const& cge, std::string const& config)
+{
+  std::vector<std::string> paths = cmExpandedList(cge.Evaluate(this, config));
+  for (std::string& p : paths) {
+    p = cmSystemTools::CollapseFullPath(p, this->GetCurrentBinaryDirectory());
+  }
+  return paths;
+}
+
+std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputGenex(
+  std::string const& o, cmListFileBacktrace const& bt)
+{
+  std::vector<std::string> allConfigOutputs;
+  cmGeneratorExpression ge(bt);
+  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(o);
+  std::vector<std::string> configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+  for (std::string const& config : configs) {
+    std::vector<std::string> configOutputs =
+      this->ExpandCustomCommandOutputPaths(*cge, config);
+    allConfigOutputs.reserve(allConfigOutputs.size() + configOutputs.size());
+    std::move(configOutputs.begin(), configOutputs.end(),
+              std::back_inserter(allConfigOutputs));
+  }
+  auto endUnique =
+    cmRemoveDuplicates(allConfigOutputs.begin(), allConfigOutputs.end());
+  allConfigOutputs.erase(endUnique, allConfigOutputs.end());
+  return allConfigOutputs;
+}
+
 void cmLocalGenerator::AddTargetByproducts(
-  cmTarget* target, const std::vector<std::string>& byproducts)
+  cmTarget* target, const std::vector<std::string>& byproducts,
+  cmListFileBacktrace const& bt, cmCommandOrigin origin)
 {
   for (std::string const& o : byproducts) {
-    this->UpdateOutputToSourceMap(o, target);
+    if (cmGeneratorExpression::Find(o) == std::string::npos) {
+      this->UpdateOutputToSourceMap(o, target, bt, origin);
+      continue;
+    }
+
+    // This byproduct path has a generator expression.  Evaluate it to
+    // register the byproducts for all configurations.
+    for (std::string const& b : this->ExpandCustomCommandOutputGenex(o, bt)) {
+      this->UpdateOutputToSourceMap(b, target, bt, cmCommandOrigin::Generator);
+    }
   }
 }
 
 void cmLocalGenerator::AddSourceOutputs(
   cmSourceFile* source, const std::vector<std::string>& outputs,
-  const std::vector<std::string>& byproducts)
+  OutputRole role, cmListFileBacktrace const& bt, cmCommandOrigin origin)
 {
   for (std::string const& o : outputs) {
-    this->UpdateOutputToSourceMap(o, source, false);
-  }
-  for (std::string const& o : byproducts) {
-    this->UpdateOutputToSourceMap(o, source, true);
+    if (cmGeneratorExpression::Find(o) == std::string::npos) {
+      this->UpdateOutputToSourceMap(o, source, role, bt, origin);
+      continue;
+    }
+
+    // This output path has a generator expression.  Evaluate it to
+    // register the outputs for all configurations.
+    for (std::string const& out :
+         this->ExpandCustomCommandOutputGenex(o, bt)) {
+      this->UpdateOutputToSourceMap(out, source, role, bt,
+                                    cmCommandOrigin::Generator);
+    }
   }
 }
 
 void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& byproduct,
-                                               cmTarget* target)
+                                               cmTarget* target,
+                                               cmListFileBacktrace const& bt,
+                                               cmCommandOrigin origin)
 {
   SourceEntry entry;
   entry.Sources.Target = target;
 
   auto pr = this->OutputToSource.emplace(byproduct, entry);
-  if (!pr.second) {
+  if (pr.second) {
+    CreateGeneratedSource(*this, byproduct, OutputRole::Byproduct, origin, bt);
+  } else {
     SourceEntry& current = pr.first->second;
     // Has the target already been set?
     if (!current.Sources.Target) {
@@ -4210,18 +4331,22 @@ void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& byproduct,
 
 void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& output,
                                                cmSourceFile* source,
-                                               bool byproduct)
+                                               OutputRole role,
+                                               cmListFileBacktrace const& bt,
+                                               cmCommandOrigin origin)
 {
   SourceEntry entry;
   entry.Sources.Source = source;
-  entry.Sources.SourceIsByproduct = byproduct;
+  entry.Sources.SourceIsByproduct = role == OutputRole::Byproduct;
 
   auto pr = this->OutputToSource.emplace(output, entry);
-  if (!pr.second) {
+  if (pr.second) {
+    CreateGeneratedSource(*this, output, role, origin, bt);
+  } else {
     SourceEntry& current = pr.first->second;
     // Outputs take precedence over byproducts
     if (!current.Sources.Source ||
-        (current.Sources.SourceIsByproduct && !byproduct)) {
+        (current.Sources.SourceIsByproduct && role == OutputRole::Primary)) {
       current.Sources.Source = source;
       current.Sources.SourceIsByproduct = false;
     } else {

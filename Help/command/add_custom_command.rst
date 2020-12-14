@@ -46,6 +46,12 @@ The options are:
   Append the ``COMMAND`` and ``DEPENDS`` option values to the custom
   command for the first output specified.  There must have already
   been a previous call to this command with the same output.
+
+  If the previous call specified the output via a generator expression,
+  the output specified by the current call must match in at least one
+  configuration after evaluating generator expressions.  In this case,
+  the appended commands and dependencies apply to all configurations.
+
   The ``COMMENT``, ``MAIN_DEPENDENCY``, and ``WORKING_DIRECTORY``
   options are currently ignored when APPEND is given, but may be
   used in the future.
@@ -72,6 +78,9 @@ The options are:
 
   The :ref:`Makefile Generators` will remove ``BYPRODUCTS`` and other
   :prop_sf:`GENERATED` files during ``make clean``.
+
+  Since CMake 3.20, arguments to ``BYPRODUCTS`` may use
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
@@ -220,6 +229,9 @@ The options are:
   as a file on disk it should be marked with the :prop_sf:`SYMBOLIC`
   source file property.
 
+  Since CMake 3.20, arguments to ``OUTPUT`` may use
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
 ``USES_TERMINAL``
   .. versionadded:: 3.2
 
@@ -258,6 +270,44 @@ The options are:
   :variable:`CMAKE_CURRENT_BINARY_DIR`, and any relative paths inside the
   ``DEPFILE`` should also be relative to :variable:`CMAKE_CURRENT_BINARY_DIR`
   (see policy :policy:`CMP0116`.)
+
+Examples: Generating Files
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Custom commands may be used to generate source files.
+For example, the code:
+
+.. code-block:: cmake
+
+  add_custom_command(
+    OUTPUT out.c
+    COMMAND someTool -i ${CMAKE_CURRENT_SOURCE_DIR}/in.txt
+                     -o out.c
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/in.txt
+    VERBATIM)
+  add_library(myLib out.c)
+
+adds a custom command to run ``someTool`` to generate ``out.c`` and then
+compile the generated source as part of a library.  The generation rule
+will re-run whenever ``in.txt`` changes.
+
+Since CMake 3.20, one may use generator expressions to specify
+per-configuration outputs.  For example, the code:
+
+.. code-block:: cmake
+
+  add_custom_command(
+    OUTPUT "out-$<CONFIG>.c"
+    COMMAND someTool -i ${CMAKE_CURRENT_SOURCE_DIR}/in.txt
+                     -o "out-$<CONFIG>.c"
+                     -c "$<CONFIG>"
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/in.txt
+    VERBATIM)
+  add_library(myLib "out-$<CONFIG>.c")
+
+adds a custom command to run ``someTool`` to generate ``out-<config>.c``,
+where ``<config>`` is the build configuration, and then compile the generated
+source as part of a library.
 
 Build Events
 ^^^^^^^^^^^^
@@ -308,3 +358,39 @@ of the following is specified:
   configuration and no "empty-string-command" will be added.
 
   This allows to add individual build events for every configuration.
+
+Examples: Build Events
+^^^^^^^^^^^^^^^^^^^^^^
+
+A ``POST_BUILD`` event may be used to post-process a binary after linking.
+For example, the code:
+
+.. code-block:: cmake
+
+  add_executable(myExe myExe.c)
+  add_custom_command(
+    TARGET myExe POST_BUILD
+    COMMAND someHasher -i "$<TARGET_FILE:myExe>"
+                       -o "$<TARGET_FILE:myExe>.hash"
+    VERBATIM)
+
+will run ``someHasher`` to produce a ``.hash`` file next to the executable
+after linking.
+
+Since CMake 3.20, one may use generator expressions to specify
+per-configuration byproducts.  For example, the code:
+
+.. code-block:: cmake
+
+  add_library(myPlugin MODULE myPlugin.c)
+  add_custom_command(
+    TARGET myPlugin POST_BUILD
+    COMMAND someHasher -i "$<TARGET_FILE:myPlugin>"
+                       --as-code "myPlugin-hash-$<CONFIG>.c"
+    BYPRODUCTS "myPlugin-hash-$<CONFIG>.c"
+    VERBATIM)
+  add_executable(myExe myExe.c "myPlugin-hash-$<CONFIG>.c")
+
+will run ``someHasher`` after linking ``myPlugin``, e.g. to produce a ``.c``
+file containing code to check the hash of ``myPlugin`` that the ``myExe``
+executable can use to verify it before loading.

@@ -293,7 +293,6 @@ CMAKE_CXX_SOURCES="\
   cmCMakePolicyCommand \
   cmCPackPropertiesGenerator \
   cmCacheManager \
-  cmCheckCustomOutputs \
   cmCommand \
   cmCommandArgumentParserHelper \
   cmCommands \

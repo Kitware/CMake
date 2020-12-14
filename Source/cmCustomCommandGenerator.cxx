@@ -24,22 +24,38 @@
 #include "cmTransformDepfile.h"
 
 namespace {
-void AppendPaths(const std::vector<std::string>& inputs,
-                 cmGeneratorExpression const& ge, cmLocalGenerator* lg,
-                 std::string const& config, std::vector<std::string>& output)
+std::vector<std::string> EvaluateDepends(std::vector<std::string> const& paths,
+                                         cmGeneratorExpression const& ge,
+                                         cmLocalGenerator* lg,
+                                         std::string const& config)
 {
-  for (std::string const& in : inputs) {
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(in);
-    std::vector<std::string> result =
-      cmExpandedList(cge->Evaluate(lg, config));
-    for (std::string& it : result) {
-      cmSystemTools::ConvertToUnixSlashes(it);
-      if (cmSystemTools::FileIsFullPath(it)) {
-        it = cmSystemTools::CollapseFullPath(it);
-      }
-    }
-    cm::append(output, result);
+  std::vector<std::string> depends;
+  for (std::string const& p : paths) {
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(p);
+    std::string const& ep = cge->Evaluate(lg, config);
+    cm::append(depends, cmExpandedList(ep));
   }
+  for (std::string& p : depends) {
+    if (cmSystemTools::FileIsFullPath(p)) {
+      p = cmSystemTools::CollapseFullPath(p);
+    } else {
+      cmSystemTools::ConvertToUnixSlashes(p);
+    }
+  }
+  return depends;
+}
+
+std::vector<std::string> EvaluateOutputs(std::vector<std::string> const& paths,
+                                         cmGeneratorExpression const& ge,
+                                         cmLocalGenerator* lg,
+                                         std::string const& config)
+{
+  std::vector<std::string> outputs;
+  for (std::string const& p : paths) {
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(p);
+    cm::append(outputs, lg->ExpandCustomCommandOutputPaths(*cge, config));
+  }
+  return outputs;
 }
 }
 
@@ -121,9 +137,10 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     this->CommandLines.push_back(std::move(argv));
   }
 
-  AppendPaths(cc.GetByproducts(), ge, this->LG, this->Config,
-              this->Byproducts);
-  AppendPaths(cc.GetDepends(), ge, this->LG, this->Config, this->Depends);
+  this->Outputs = EvaluateOutputs(cc.GetOutputs(), ge, this->LG, this->Config);
+  this->Byproducts =
+    EvaluateOutputs(cc.GetByproducts(), ge, this->LG, this->Config);
+  this->Depends = EvaluateDepends(cc.GetDepends(), ge, this->LG, this->Config);
 
   const std::string& workingdirectory = this->CC->GetWorkingDirectory();
   if (!workingdirectory.empty()) {
@@ -326,7 +343,7 @@ std::string cmCustomCommandGenerator::GetWorkingDirectory() const
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const
 {
-  return this->CC->GetOutputs();
+  return this->Outputs;
 }
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const

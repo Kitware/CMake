@@ -4,7 +4,6 @@
 
 #include <utility>
 
-#include "cmCheckCustomOutputs.h"
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -120,12 +119,16 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
           break;
         case doing_byproducts: {
           std::string filename;
-          if (!cmSystemTools::FileIsFullPath(copy)) {
+          if (!cmSystemTools::FileIsFullPath(copy) &&
+              cmGeneratorExpression::Find(copy) != 0) {
             filename = cmStrCat(mf.GetCurrentBinaryDirectory(), '/');
           }
           filename += copy;
           cmSystemTools::ConvertToUnixSlashes(filename);
-          byproducts.push_back(cmSystemTools::CollapseFullPath(filename));
+          if (cmSystemTools::FileIsFullPath(filename)) {
+            filename = cmSystemTools::CollapseFullPath(filename);
+          }
+          byproducts.push_back(filename);
         } break;
         case doing_depends: {
           std::string dep = copy;
@@ -203,11 +206,6 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
 
   if (uses_terminal && !job_pool.empty()) {
     status.SetError("JOB_POOL is shadowed by USES_TERMINAL.");
-    return false;
-  }
-
-  // Make sure the byproduct names and locations are safe.
-  if (!cmCheckCustomOutputs(byproducts, "BYPRODUCTS", status)) {
     return false;
   }
 
