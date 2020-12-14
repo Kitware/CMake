@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -268,6 +268,9 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_LOCAL_PORT:
     /* Return the local port of the most recent (primary) connection */
     *param_longp = data->info.conn_local_port;
+    break;
+  case CURLINFO_PROXY_ERROR:
+    *param_longp = (long)data->info.pxcode;
     break;
   case CURLINFO_CONDITION_UNMET:
     if(data->info.httpcode == 304)
