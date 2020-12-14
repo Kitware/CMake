@@ -16,7 +16,7 @@ when linking an executable statically (e.g.  with the GNU ``-static``
 option).
 
 This variable is used to initialize the target property
-:prop_tgt:`LINK_SEARCH_START_STATIC` for all targets.  If set, it's
+:prop_tgt:`LINK_SEARCH_START_STATIC` for all targets.  If set, its
 value is also used by the :command:`try_compile` command.
 
 See also :variable:`CMAKE_LINK_SEARCH_END_STATIC`.
