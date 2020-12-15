@@ -591,6 +591,11 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   if (lang == "ISPC") {
     std::string ispcSource =
       cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+    ispcSource = cmSystemTools::GetFilenameWithoutLastExtension(ispcSource);
+
+    cmProp ispcSuffixProp =
+      this->GeneratorTarget->GetProperty("ISPC_HEADER_SUFFIX");
+    assert(ispcSuffixProp != nullptr);
 
     std::string directory = this->GeneratorTarget->GetObjectDirectory(config);
     if (cmProp prop =
@@ -598,7 +603,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       directory =
         cmStrCat(this->LocalGenerator->GetBinaryDirectory(), '/', *prop);
     }
-    ispcHeaderRelative = cmStrCat(directory, '/', ispcSource, ".h");
+    ispcHeaderRelative = cmStrCat(directory, '/', ispcSource, *ispcSuffixProp);
     ispcHeaderForShell = this->LocalGenerator->ConvertToOutputFormat(
       ispcHeaderRelative, cmOutputConverter::SHELL);
   }

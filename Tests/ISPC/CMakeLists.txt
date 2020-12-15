@@ -7,6 +7,7 @@ macro (add_ispc_test_macro name)
 endmacro ()
 
 add_ispc_test_macro(ISPC.ChainedStaticLibraries ISPCChainedStaticLibraries)
+add_ispc_test_macro(ISPC.CustomHeaderSuffix ISPCCustomHeaderSuffix)
 add_ispc_test_macro(ISPC.Defines ISPCDefines)
 add_ispc_test_macro(ISPC.DynamicLibrary ISPCDynamicLibrary)
 add_ispc_test_macro(ISPC.ObjectGenex ISPCObjectGenex)

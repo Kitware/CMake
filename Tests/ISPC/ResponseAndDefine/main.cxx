@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "simple.ispc.h"
+#include "simple_ispc.h"
 
 int main()
 {
