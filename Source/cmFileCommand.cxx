@@ -2946,17 +2946,60 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
 bool HandleConfigureCommand(std::vector<std::string> const& args,
                             cmExecutionStatus& status)
 {
-  if (args.size() < 5) {
-    status.SetError("Incorrect arguments to CONFIGURE subcommand.");
+  struct Arguments
+  {
+    std::string Output;
+    std::string Content;
+    bool EscapeQuotes = false;
+    bool AtOnly = false;
+    std::string NewlineStyle;
+  };
+
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("OUTPUT"_s, &Arguments::Output)
+      .Bind("CONTENT"_s, &Arguments::Content)
+      .Bind("ESCAPE_QUOTES"_s, &Arguments::EscapeQuotes)
+      .Bind("@ONLY"_s, &Arguments::AtOnly)
+      .Bind("NEWLINE_STYLE"_s, &Arguments::NewlineStyle);
+
+  std::vector<std::string> unrecognizedArguments;
+  std::vector<std::string> keywordsMissingArguments;
+  std::vector<std::string> parsedKeywords;
+  auto parsedArgs =
+    parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
+                 &keywordsMissingArguments, &parsedKeywords);
+
+  auto argIt = unrecognizedArguments.begin();
+  if (argIt != unrecognizedArguments.end()) {
+    status.SetError(
+      cmStrCat("CONFIGURE Unrecognized argument: \"", *argIt, "\""));
+    cmSystemTools::SetFatalErrorOccured();
     return false;
   }
-  if (args[1] != "OUTPUT") {
-    status.SetError("Incorrect arguments to CONFIGURE subcommand.");
-    return false;
+
+  std::vector<std::string> mandatoryOptions{ "OUTPUT", "CONTENT" };
+  for (auto const& e : mandatoryOptions) {
+    const bool optionHasNoValue =
+      std::find(keywordsMissingArguments.begin(),
+                keywordsMissingArguments.end(),
+                e) != keywordsMissingArguments.end();
+    if (optionHasNoValue) {
+      status.SetError(cmStrCat("CONFIGURE ", e, " option needs a value."));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
   }
-  if (args[3] != "CONTENT") {
-    status.SetError("Incorrect arguments to CONFIGURE subcommand.");
-    return false;
+
+  for (auto const& e : mandatoryOptions) {
+    const bool optionGiven =
+      std::find(parsedKeywords.begin(), parsedKeywords.end(), e) !=
+      parsedKeywords.end();
+    if (!optionGiven) {
+      status.SetError(cmStrCat("CONFIGURE ", e, " option is mandatory."));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
   }
 
   std::string errorMessage;
@@ -2966,28 +3009,9 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  bool escapeQuotes = false;
-  bool atOnly = false;
-  for (unsigned int i = 5; i < args.size(); ++i) {
-    if (args[i] == "@ONLY") {
-      atOnly = true;
-    } else if (args[i] == "ESCAPE_QUOTES") {
-      escapeQuotes = true;
-    } else if (args[i] == "NEWLINE_STYLE" || args[i] == "LF" ||
-               args[i] == "UNIX" || args[i] == "CRLF" || args[i] == "WIN32" ||
-               args[i] == "DOS") {
-      /* Options handled by NewLineStyle member above.  */
-    } else {
-      status.SetError(
-        cmStrCat("CONFIGURE Unrecognized argument \"", args[i], "\""));
-      return false;
-    }
-  }
-
   // Check for generator expressions
-  const std::string input = args[4];
   std::string outputFile = cmSystemTools::CollapseFullPath(
-    args[2], status.GetMakefile().GetCurrentBinaryDirectory());
+    parsedArgs.Output, status.GetMakefile().GetCurrentBinaryDirectory());
 
   std::string::size_type pos = outputFile.find_first_of("<>");
   if (pos != std::string::npos) {
@@ -3036,12 +3060,13 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
   fout.SetCopyIfDifferent(true);
 
   // copy input to output and expand variables from input at the same time
-  std::stringstream sin(input, std::ios::in);
+  std::stringstream sin(parsedArgs.Content, std::ios::in);
   std::string inLine;
   std::string outLine;
   while (cmSystemTools::GetLineFromStream(sin, inLine)) {
     outLine.clear();
-    makeFile.ConfigureString(inLine, outLine, atOnly, escapeQuotes);
+    makeFile.ConfigureString(inLine, outLine, parsedArgs.AtOnly,
+                             parsedArgs.EscapeQuotes);
     fout << outLine << newLineCharacters;
   }
 
