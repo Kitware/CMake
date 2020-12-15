@@ -381,3 +381,7 @@ Changes made since CMake 3.19.0 include the following.
   the invoking process tree, the :variable:`CMAKE_APPLE_SILICON_PROCESSOR`
   variable or :envvar:`CMAKE_APPLE_SILICON_PROCESSOR` environment
   variable may be set to specify a host architecture explicitly.
+
+* The :variable:`CMAKE_ISPC_HEADER_SUFFIX` variable and corresponding
+  :prop_tgt:`ISPC_HEADER_SUFFIX` target property were added to control
+  the header suffix used by ``ISPC`` compiler generated headers.
