@@ -368,7 +368,6 @@ public:
   {
     return "1.10";
   }
-  static std::string RequiredNinjaVersionForCleanDeadTool() { return "1.10"; }
   static std::string RequiredNinjaVersionForMultipleOutputs()
   {
     return "1.10";
@@ -540,7 +539,6 @@ private:
   bool NinjaSupportsDyndeps = false;
   bool NinjaSupportsRestatTool = false;
   bool NinjaSupportsUnconditionalRecompactTool = false;
-  bool NinjaSupportsCleanDeadTool = false;
   bool NinjaSupportsMultipleOutputs = false;
   bool NinjaSupportsMetadataOnRegeneration = false;
 
