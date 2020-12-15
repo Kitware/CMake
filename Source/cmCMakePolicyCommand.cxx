@@ -191,8 +191,7 @@ bool HandleVersionMode(std::vector<std::string> const& args,
     return false;
   }
 
-  status.GetMakefile().SetPolicyVersion(version_min, version_max);
-  return true;
+  return status.GetMakefile().SetPolicyVersion(version_min, version_max);
 }
 
 bool HandleGetWarningMode(std::vector<std::string> const& args,
