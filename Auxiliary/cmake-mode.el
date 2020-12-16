@@ -28,6 +28,7 @@
 ;;
 
 (require 'rst)
+(require 'rx)
 
 (defcustom cmake-mode-cmake-executable "cmake"
   "*The name of the cmake executable.
