@@ -44,4 +44,24 @@ CMake Error at BadOutput.cmake:7 \(add_custom_command\):
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 
+)+(
+CMake Error at BadOutput.cmake:8 \(add_custom_command\):
+  Error evaluating generator expression:
+
+    \$<OUTPUT_CONFIG:h>
+
+  Expression did not evaluate to a known generator expression
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+)+(
+CMake Error at BadOutput.cmake:9 \(add_custom_command\):
+  Error evaluating generator expression:
+
+    \$<COMMAND_CONFIG:i>
+
+  Expression did not evaluate to a known generator expression
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
 )+

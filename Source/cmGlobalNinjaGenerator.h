@@ -330,10 +330,14 @@ public:
                            cmNinjaTargetDepends depends);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaDeps& outputs,
-                                  const std::string& config);
+                                  const std::string& config,
+                                  const std::string& fileConfig,
+                                  bool genexOutput);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaOuts& outputs,
-                                  const std::string& config, bool omit_self);
+                                  const std::string& config,
+                                  const std::string& fileConfig,
+                                  bool genexOutput, bool omit_self);
 
   void AppendDirectoryForConfig(const std::string& prefix,
                                 const std::string& config,
@@ -429,6 +433,18 @@ public:
     return this->DefaultConfigs;
   }
 
+  const std::set<std::string>& GetPerConfigUtilityTargets() const
+  {
+    return this->PerConfigUtilityTargets;
+  }
+
+  void AddPerConfigUtilityTarget(const std::string& name)
+  {
+    this->PerConfigUtilityTargets.insert(name);
+  }
+
+  bool IsSingleConfigUtility(cmGeneratorTarget const* target) const;
+
 protected:
   void Generate() override;
 
@@ -522,6 +538,9 @@ private:
   /// The mapping from source file to assumed dependencies.
   std::map<std::string, std::set<std::string>> AssumedSourceDependencies;
 
+  /// Utility targets which have per-config outputs
+  std::set<std::string> PerConfigUtilityTargets;
+
   struct TargetAlias
   {
     cmGeneratorTarget* GeneratorTarget;
@@ -561,7 +580,14 @@ private:
     /// The set of custom commands we have seen.
     std::set<cmCustomCommand const*> CustomCommands;
 
-    std::map<cmGeneratorTarget const*, cmNinjaOuts> TargetDependsClosures;
+    struct TargetDependsClosureKey
+    {
+      cmGeneratorTarget const* Target;
+      std::string Config;
+      bool GenexOutput;
+    };
+
+    std::map<TargetDependsClosureKey, cmNinjaOuts> TargetDependsClosures;
 
     TargetAliasMap TargetAliases;
 
@@ -570,6 +596,19 @@ private:
   std::map<std::string, ByConfig> Configs;
 
   cmNinjaDeps ByproductsForCleanTarget;
+
+  friend bool operator==(const ByConfig::TargetDependsClosureKey& lhs,
+                         const ByConfig::TargetDependsClosureKey& rhs);
+  friend bool operator!=(const ByConfig::TargetDependsClosureKey& lhs,
+                         const ByConfig::TargetDependsClosureKey& rhs);
+  friend bool operator<(const ByConfig::TargetDependsClosureKey& lhs,
+                        const ByConfig::TargetDependsClosureKey& rhs);
+  friend bool operator>(const ByConfig::TargetDependsClosureKey& lhs,
+                        const ByConfig::TargetDependsClosureKey& rhs);
+  friend bool operator<=(const ByConfig::TargetDependsClosureKey& lhs,
+                         const ByConfig::TargetDependsClosureKey& rhs);
+  friend bool operator>=(const ByConfig::TargetDependsClosureKey& lhs,
+                         const ByConfig::TargetDependsClosureKey& rhs);
 };
 
 class cmGlobalNinjaMultiGenerator : public cmGlobalNinjaGenerator

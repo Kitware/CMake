@@ -27,10 +27,3 @@ enum class cmObjectLibraryCommands
   Reject,
   Accept
 };
-
-/** Utility target output source file name.  */
-struct cmUtilityOutput
-{
-  std::string Name;
-  std::string NameCMP0049;
-};

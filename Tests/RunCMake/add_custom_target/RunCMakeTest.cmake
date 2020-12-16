@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(BadByproduct)
+run_cmake(BadCommand)
 run_cmake(BadTargetName)
 run_cmake(ByproductsNoCommand)
 run_cmake(CommandExpandsEmpty)

@@ -1129,9 +1129,8 @@ cmTarget* cmLocalGenerator::AddUtilityCommand(
 
   detail::AddUtilityCommand(
     *this, this->DirectoryBacktrace, cmCommandOrigin::Generator, target,
-    this->Makefile->GetUtilityOutput(target), workingDir, byproducts, depends,
-    commandLines, escapeOldStyle, comment, uses_terminal, command_expand_lists,
-    job_pool, stdPipesUTF8);
+    workingDir, byproducts, depends, commandLines, escapeOldStyle, comment,
+    uses_terminal, command_expand_lists, job_pool, stdPipesUTF8);
 
   return target;
 }
@@ -4135,7 +4134,7 @@ void AppendCustomCommandToOutput(cmLocalGenerator& lg,
 
 void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        cmCommandOrigin origin, cmTarget* target,
-                       const cmUtilityOutput& force, const char* workingDir,
+                       const char* workingDir,
                        const std::vector<std::string>& byproducts,
                        const std::vector<std::string>& depends,
                        const cmCustomCommandLines& commandLines,
@@ -4148,10 +4147,14 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
     comment = "";
   }
 
+  // Create the generated symbolic output name of the utility target.
+  std::string output =
+    lg.CreateUtilityOutput(target->GetName(), byproducts, lfbt);
+
   std::string no_main_dependency;
   cmImplicitDependsList no_implicit_depends;
   cmSourceFile* rule = AddCustomCommand(
-    lg, lfbt, origin, { force.Name }, byproducts, depends, no_main_dependency,
+    lg, lfbt, origin, { output }, byproducts, depends, no_main_dependency,
     no_implicit_depends, commandLines, comment, workingDir,
     /*replace=*/false, escapeOldStyle, uses_terminal, command_expand_lists,
     /*depfile=*/"", job_pool, stdPipesUTF8);
@@ -4159,9 +4162,7 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
     lg.AddTargetByproducts(target, byproducts, lfbt, origin);
   }
 
-  if (!force.NameCMP0049.empty()) {
-    target->AddSource(force.NameCMP0049);
-  }
+  target->AddSource(output);
 }
 
 std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target)
@@ -4252,6 +4253,30 @@ cmSourceFile* cmLocalGenerator::GetSourceFileWithOutput(
     return o->second.Sources.Source;
   }
   return nullptr;
+}
+
+std::string cmLocalGenerator::CreateUtilityOutput(
+  std::string const& targetName, std::vector<std::string> const&,
+  cmListFileBacktrace const&)
+{
+  std::string force =
+    cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/", targetName);
+  // The output is not actually created so mark it symbolic.
+  if (cmSourceFile* sf = this->Makefile->GetOrCreateGeneratedSource(force)) {
+    sf->SetProperty("SYMBOLIC", "1");
+  } else {
+    cmSystemTools::Error("Could not get source file entry for " + force);
+  }
+  return force;
+}
+
+std::vector<cmCustomCommandGenerator>
+cmLocalGenerator::MakeCustomCommandGenerators(cmCustomCommand const& cc,
+                                              std::string const& config)
+{
+  std::vector<cmCustomCommandGenerator> ccgs;
+  ccgs.emplace_back(cc, config, this);
+  return ccgs;
 }
 
 std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputPaths(

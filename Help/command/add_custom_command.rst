@@ -79,8 +79,9 @@ The options are:
   The :ref:`Makefile Generators` will remove ``BYPRODUCTS`` and other
   :prop_sf:`GENERATED` files during ``make clean``.
 
-  Since CMake 3.20, arguments to ``BYPRODUCTS`` may use
-  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+  .. versionadded:: 3.20
+    Arguments to ``BYPRODUCTS`` may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
@@ -229,8 +230,9 @@ The options are:
   as a file on disk it should be marked with the :prop_sf:`SYMBOLIC`
   source file property.
 
-  Since CMake 3.20, arguments to ``OUTPUT`` may use
-  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+  .. versionadded:: 3.20
+    Arguments to ``OUTPUT`` may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 ``USES_TERMINAL``
   .. versionadded:: 3.2
@@ -291,23 +293,24 @@ adds a custom command to run ``someTool`` to generate ``out.c`` and then
 compile the generated source as part of a library.  The generation rule
 will re-run whenever ``in.txt`` changes.
 
-Since CMake 3.20, one may use generator expressions to specify
-per-configuration outputs.  For example, the code:
+.. versionadded:: 3.20
+  One may use generator expressions to specify per-configuration outputs.
+  For example, the code:
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  add_custom_command(
-    OUTPUT "out-$<CONFIG>.c"
-    COMMAND someTool -i ${CMAKE_CURRENT_SOURCE_DIR}/in.txt
-                     -o "out-$<CONFIG>.c"
-                     -c "$<CONFIG>"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/in.txt
-    VERBATIM)
-  add_library(myLib "out-$<CONFIG>.c")
+    add_custom_command(
+      OUTPUT "out-$<CONFIG>.c"
+      COMMAND someTool -i ${CMAKE_CURRENT_SOURCE_DIR}/in.txt
+                       -o "out-$<CONFIG>.c"
+                       -c "$<CONFIG>"
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/in.txt
+      VERBATIM)
+    add_library(myLib "out-$<CONFIG>.c")
 
-adds a custom command to run ``someTool`` to generate ``out-<config>.c``,
-where ``<config>`` is the build configuration, and then compile the generated
-source as part of a library.
+  adds a custom command to run ``someTool`` to generate ``out-<config>.c``,
+  where ``<config>`` is the build configuration, and then compile the generated
+  source as part of a library.
 
 Build Events
 ^^^^^^^^^^^^
@@ -377,20 +380,30 @@ For example, the code:
 will run ``someHasher`` to produce a ``.hash`` file next to the executable
 after linking.
 
-Since CMake 3.20, one may use generator expressions to specify
-per-configuration byproducts.  For example, the code:
+.. versionadded:: 3.20
+  One may use generator expressions to specify per-configuration byproducts.
+  For example, the code:
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  add_library(myPlugin MODULE myPlugin.c)
-  add_custom_command(
-    TARGET myPlugin POST_BUILD
-    COMMAND someHasher -i "$<TARGET_FILE:myPlugin>"
-                       --as-code "myPlugin-hash-$<CONFIG>.c"
-    BYPRODUCTS "myPlugin-hash-$<CONFIG>.c"
-    VERBATIM)
-  add_executable(myExe myExe.c "myPlugin-hash-$<CONFIG>.c")
+    add_library(myPlugin MODULE myPlugin.c)
+    add_custom_command(
+      TARGET myPlugin POST_BUILD
+      COMMAND someHasher -i "$<TARGET_FILE:myPlugin>"
+                         --as-code "myPlugin-hash-$<CONFIG>.c"
+      BYPRODUCTS "myPlugin-hash-$<CONFIG>.c"
+      VERBATIM)
+    add_executable(myExe myExe.c "myPlugin-hash-$<CONFIG>.c")
 
-will run ``someHasher`` after linking ``myPlugin``, e.g. to produce a ``.c``
-file containing code to check the hash of ``myPlugin`` that the ``myExe``
-executable can use to verify it before loading.
+  will run ``someHasher`` after linking ``myPlugin``, e.g. to produce a ``.c``
+  file containing code to check the hash of ``myPlugin`` that the ``myExe``
+  executable can use to verify it before loading.
+
+Ninja Multi-Config
+^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.20
+
+  ``add_custom_command`` supports the :generator:`Ninja Multi-Config`
+  generator's cross-config capabilities. See the generator documentation
+  for more information.

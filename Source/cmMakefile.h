@@ -243,11 +243,6 @@ public:
                           bool excludeFromAll = false);
 
   /**
-   * Return the utility target output source file name and the CMP0049 name.
-   */
-  cmUtilityOutput GetUtilityOutput(cmTarget* target);
-
-  /**
    * Dispatch adding a utility to the build.  A utility target is a command
    * that is run every time the target is built.
    */

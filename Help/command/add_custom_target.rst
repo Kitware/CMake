@@ -54,8 +54,9 @@ The options are:
   The :ref:`Makefile Generators` will remove ``BYPRODUCTS`` and other
   :prop_sf:`GENERATED` files during ``make clean``.
 
-  Since CMake 3.20, arguments to ``BYPRODUCTS`` may use
-  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+  .. versionadded:: 3.20
+    Arguments to ``BYPRODUCTS`` may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
@@ -167,3 +168,12 @@ The options are:
   .. versionadded:: 3.13
     Arguments to ``WORKING_DIRECTORY`` may use
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
+Ninja Multi-Config
+^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.20
+
+  ``add_custom_target`` supports the :generator:`Ninja Multi-Config`
+  generator's cross-config capabilities. See the generator documentation
+  for more information.
