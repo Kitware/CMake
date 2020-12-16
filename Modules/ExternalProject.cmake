@@ -543,6 +543,18 @@ External Project Definition
         When ``BUILD_IN_SOURCE`` option is enabled, the ``BUILD_COMMAND``
         is used to point to an alternative directory within the source tree.
 
+    ``CONFIGURE_HANDLED_BY_BUILD <bool>``
+      .. versionadded:: 3.20
+
+      Enabling this option relaxes the dependencies of the configure step on
+      other external projects to order-only. This means the configure step will
+      be executed after its external project dependencies are built but it will
+      not be marked dirty when one of its external project dependencies is
+      rebuilt. This option can be enabled when the build step is smart enough
+      to figure out if the configure step needs to be rerun. CMake and Meson are
+      examples of build systems whose build step is smart enough to know if the
+      configure step needs to be rerun.
+
   **Build Step Options:**
     If the configure step assumed the external project uses CMake as its build
     system, the build step will also. Otherwise, the build step will assume a
@@ -3081,6 +3093,23 @@ function(_ep_add_patch_command name)
   )
 endfunction()
 
+function(_ep_get_file_deps var name)
+  set(file_deps)
+
+  get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
+  foreach(dep IN LISTS deps)
+    get_property(dep_type TARGET ${dep} PROPERTY TYPE)
+    if(dep_type STREQUAL "UTILITY")
+      get_property(is_ep TARGET ${dep} PROPERTY _EP_IS_EXTERNAL_PROJECT)
+      if(is_ep)
+        _ep_get_step_stampfile(${dep} "done" done_stamp_file)
+        list(APPEND file_deps ${done_stamp_file})
+      endif()
+    endif()
+  endforeach()
+
+  set("${var}" "${file_deps}" PARENT_SCOPE)
+endfunction()
 
 function(_ep_extract_configure_command var name)
   get_property(cmd_set TARGET ${name} PROPERTY _EP_CONFIGURE_COMMAND SET)
@@ -3189,19 +3218,13 @@ endfunction()
 function(_ep_add_configure_command name)
   ExternalProject_Get_Property(${name} binary_dir tmp_dir)
 
-  # Depend on other external projects (file-level).
   set(file_deps)
-  get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
-  foreach(dep IN LISTS deps)
-    get_property(dep_type TARGET ${dep} PROPERTY TYPE)
-    if(dep_type STREQUAL "UTILITY")
-      get_property(is_ep TARGET ${dep} PROPERTY _EP_IS_EXTERNAL_PROJECT)
-      if(is_ep)
-        _ep_get_step_stampfile(${dep} "done" done_stamp_file)
-        list(APPEND file_deps ${done_stamp_file})
-      endif()
-    endif()
-  endforeach()
+  get_property(configure_handled_by_build TARGET ${name}
+               PROPERTY _EP_CONFIGURE_HANDLED_BY_BUILD)
+  if(NOT configure_handled_by_build)
+    # Depend on other external projects (file-level)
+    _ep_get_file_deps(file_deps ${name})
+  endif()
 
   _ep_extract_configure_command(cmd ${name})
 
@@ -3252,6 +3275,14 @@ endfunction()
 function(_ep_add_build_command name)
   ExternalProject_Get_Property(${name} binary_dir)
 
+  set(file_deps)
+  get_property(configure_handled_by_build TARGET ${name}
+               PROPERTY _EP_CONFIGURE_HANDLED_BY_BUILD)
+  if(configure_handled_by_build)
+    # Depend on other external projects (file-level)
+    _ep_get_file_deps(file_deps ${name})
+  endif()
+
   get_property(cmd_set TARGET ${name} PROPERTY _EP_BUILD_COMMAND SET)
   if(cmd_set)
     get_property(cmd TARGET ${name} PROPERTY _EP_BUILD_COMMAND)
@@ -3294,6 +3325,7 @@ function(_ep_add_build_command name)
       BYPRODUCTS \${build_byproducts}
       WORKING_DIRECTORY \${binary_dir}
       DEPENDEES configure
+      DEPENDS \${file_deps}
       ALWAYS \${always}
       ${log}
       ${uses_terminal}
