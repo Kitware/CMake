@@ -380,6 +380,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("VS_JUST_MY_CODE_DEBUGGING");
     initProp("DISABLE_PRECOMPILE_HEADERS");
     initProp("UNITY_BUILD");
+    initProp("UNITY_BUILD_UNIQUE_ID");
     initProp("OPTIMIZE_DEPENDENCIES");
     initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
     initPropValue("UNITY_BUILD_MODE", "BATCH");
