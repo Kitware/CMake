@@ -9,31 +9,30 @@ set (QT_COMPONENTS
   Gui
 )
 # Look for Qt6 first
-find_package(Qt6Widgets QUIET)
-if (Qt6Widgets_FOUND)
-  set(INSTALLED_QT_VERSION 6)
-else()
-  set(INSTALLED_QT_VERSION 5)
-endif()
-
-find_package (Qt${INSTALLED_QT_VERSION}
+find_package(Qt6
   COMPONENTS ${QT_COMPONENTS}
-  REQUIRED
+  QUIET
 )
+if (NOT Qt6Widgets_FOUND)
+  find_package(Qt5
+    COMPONENTS ${QT_COMPONENTS}
+    REQUIRED QUIET
+  )
+endif()
 
 set(CMake_QT_EXTRA_LIBRARIES)
 
 # Try to find the package WinExtras for the task bar progress
 if(WIN32)
-  find_package(Qt${INSTALLED_QT_VERSION}WinExtras QUIET)
-  if (Qt${INSTALLED_QT_VERSION}WinExtras_FOUND)
+  find_package(Qt${QT_DEFAULT_MAJOR_VERSION}WinExtras QUIET)
+  if (Qt${QT_DEFAULT_MAJOR_VERSION}WinExtras_FOUND)
     add_definitions(-DQT_WINEXTRAS)
-    list(APPEND CMake_QT_EXTRA_LIBRARIES Qt${INSTALLED_QT_VERSION}::WinExtras)
+    list(APPEND CMake_QT_EXTRA_LIBRARIES Qt${QT_DEFAULT_MAJOR_VERSION}::WinExtras)
     list(APPEND QT_COMPONENTS WinExtras)
   endif()
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt${INSTALLED_QT_VERSION}Widgets_EXECUTABLE_COMPILE_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt${QT_DEFAULT_MAJOR_VERSION}Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 if(CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES)
   list(APPEND CMake_QT_EXTRA_LIBRARIES ${CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES})
@@ -85,10 +84,10 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   endmacro()
   macro(install_qt_plugins _comps _plugins_var)
     foreach(_qt_comp ${${_comps}})
-      get_target_property(_qt_module_plugins Qt${INSTALLED_QT_VERSION}::${_qt_comp} QT_PLUGINS)
+      get_target_property(_qt_module_plugins Qt${QT_DEFAULT_MAJOR_VERSION}::${_qt_comp} QT_PLUGINS)
       foreach(_qt_plugin ${_qt_module_plugins})
-        find_package(Qt${INSTALLED_QT_VERSION}${_qt_plugin} QUIET
-          PATHS ${Qt${INSTALLED_QT_VERSION}${_qt_comp}_DIR})
+        find_package(Qt${QT_DEFAULT_MAJOR_VERSION}${_qt_plugin} QUIET
+          PATHS ${Qt${QT_DEFAULT_MAJOR_VERSION}${_qt_comp}_DIR})
         install_qt_plugin(${_qt_plugin} _plugins_var)
       endforeach()
     endforeach()
@@ -109,7 +108,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   endif()
 endif()
 
-get_property(_Qt_Core_LOCATION TARGET Qt${INSTALLED_QT_VERSION}::Core PROPERTY LOCATION)
+get_property(_Qt_Core_LOCATION TARGET Qt${QT_DEFAULT_MAJOR_VERSION}::Core PROPERTY LOCATION)
 get_filename_component(Qt_BIN_DIR "${_Qt_Core_LOCATION}" PATH)
 if(APPLE)
   get_filename_component(Qt_BIN_DIR "${Qt_BIN_DIR}" PATH)
@@ -167,7 +166,7 @@ set(MOC_SRCS
   )
 set(QRC_SRCS CMakeSetup.qrc)
 
-if (INSTALLED_QT_VERSION VERSION_LESS 6)
+if (QT_DEFAULT_MAJOR_VERSION VERSION_LESS 6)
   qt5_wrap_ui(UI_BUILT_SRCS ${UI_SRCS})
   qt5_wrap_cpp(MOC_BUILT_SRCS ${MOC_SRCS})
   qt5_add_resources(QRC_BUILT_SRCS ${QRC_SRCS})
@@ -201,13 +200,13 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_library(CMakeGUILib STATIC ${SRCS})
 # CMake_QT_EXTRA_LIBRARIES have to come before the main libraries on the link line
 target_link_libraries(CMakeGUILib PUBLIC CMakeLib ${CMake_QT_EXTRA_LIBRARIES}
-  Qt${INSTALLED_QT_VERSION}::Core Qt${INSTALLED_QT_VERSION}::Widgets)
+  Qt${QT_DEFAULT_MAJOR_VERSION}::Core Qt${QT_DEFAULT_MAJOR_VERSION}::Widgets)
 
 add_library(CMakeGUIMainLib STATIC CMakeSetup.cxx)
 target_link_libraries(CMakeGUIMainLib PUBLIC CMakeGUILib)
 
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx ${MANIFEST_FILE})
-target_link_libraries(cmake-gui CMakeGUIMainLib Qt${INSTALLED_QT_VERSION}::Core)
+target_link_libraries(cmake-gui CMakeGUIMainLib Qt${QT_DEFAULT_MAJOR_VERSION}::Core)
 
 if(WIN32)
   target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeVersion> CMakeSetup.rc)
