@@ -911,12 +911,12 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
 
 #    # COFF (.exe) files start with "MZ"
 #    if("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "4d5a....")
-#      set(CMAKE_EXECUTABLE_FORMAT "COFF" CACHE STRING "Executable file format")
+#      set(CMAKE_EXECUTABLE_FORMAT "COFF" CACHE INTERNAL "Executable file format")
 #    endif()
 #
     # Mach-O files start with MH_MAGIC or MH_CIGAM
     if("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "feedface|cefaedfe|feedfacf|cffaedfe")
-      set(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE STRING "Executable file format")
+      set(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE INTERNAL "Executable file format")
     endif()
 
   endif()
