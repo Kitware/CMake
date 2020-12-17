@@ -182,6 +182,9 @@ private:
                                 cmGeneratorTarget* gtgt);
   void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr,
                                cmXCodeObject* value);
+  void AppendBuildSettingAttribute(cmXCodeObject* settings,
+                                   const char* attribute, cmXCodeObject* attr,
+                                   cmXCodeObject* value);
   void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr,
                                    cmXCodeObject* value,
                                    const std::string& configName);

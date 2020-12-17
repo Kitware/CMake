@@ -3213,36 +3213,43 @@ void cmGlobalXCodeGenerator::AppendOrAddBuildSetting(cmXCodeObject* settings,
     if (!attr) {
       settings->AddAttribute(attribute, value);
     } else {
-      if (value->GetType() != cmXCodeObject::OBJECT_LIST &&
-          value->GetType() != cmXCodeObject::STRING) {
-        cmSystemTools::Error("Unsupported value type for appending: " +
-                             std::string(attribute));
-        return;
-      }
-      if (attr->GetType() == cmXCodeObject::OBJECT_LIST) {
-        if (value->GetType() == cmXCodeObject::OBJECT_LIST) {
-          for (auto* obj : value->GetObjectList()) {
-            attr->AddObject(obj);
-          }
-        } else {
-          attr->AddObject(value);
-        }
-      } else if (attr->GetType() == cmXCodeObject::STRING) {
-        if (value->GetType() == cmXCodeObject::OBJECT_LIST) {
-          // Add old value as a list item to new object list
-          // and replace the attribute with the new list
-          value->PrependObject(attr);
-          settings->AddAttribute(attribute, value);
-        } else {
-          std::string newValue =
-            cmStrCat(attr->GetString(), ' ', value->GetString());
-          attr->SetString(newValue);
-        }
-      } else {
-        cmSystemTools::Error("Unsupported attribute type for appending: " +
-                             std::string(attribute));
-      }
+      this->AppendBuildSettingAttribute(settings, attribute, attr, value);
     }
+  }
+}
+
+void cmGlobalXCodeGenerator::AppendBuildSettingAttribute(
+  cmXCodeObject* settings, const char* attribute, cmXCodeObject* attr,
+  cmXCodeObject* value)
+{
+  if (value->GetType() != cmXCodeObject::OBJECT_LIST &&
+      value->GetType() != cmXCodeObject::STRING) {
+    cmSystemTools::Error("Unsupported value type for appending: " +
+                         std::string(attribute));
+    return;
+  }
+  if (attr->GetType() == cmXCodeObject::OBJECT_LIST) {
+    if (value->GetType() == cmXCodeObject::OBJECT_LIST) {
+      for (auto* obj : value->GetObjectList()) {
+        attr->AddObject(obj);
+      }
+    } else {
+      attr->AddObject(value);
+    }
+  } else if (attr->GetType() == cmXCodeObject::STRING) {
+    if (value->GetType() == cmXCodeObject::OBJECT_LIST) {
+      // Add old value as a list item to new object list
+      // and replace the attribute with the new list
+      value->PrependObject(attr);
+      settings->AddAttribute(attribute, value);
+    } else {
+      std::string newValue =
+        cmStrCat(attr->GetString(), ' ', value->GetString());
+      attr->SetString(newValue);
+    }
+  } else {
+    cmSystemTools::Error("Unsupported attribute type for appending: " +
+                         std::string(attribute));
   }
 }
 
