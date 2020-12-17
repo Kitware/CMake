@@ -1,17 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-// FIXME: Port to QFileSystemModel from the deprecated QDirModel.
-// Be sure completion works when incrementally editing existing paths.
-#define QT_DEPRECATED_WARNINGS_SINCE QT_VERSION_CHECK(5, 14, 0)
-
 #include "QCMakeWidgets.h"
 
 #include <utility>
 
-#include <QDirModel>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFileSystemModel>
 #include <QResizeEvent>
 #include <QToolButton>
 
@@ -93,20 +89,20 @@ void QCMakePathEditor::chooseFile()
   }
 }
 
-// use same QDirModel for all completers
-static QDirModel* fileDirModel()
+// use same QFileSystemModel for all completers
+static QFileSystemModel* fileDirModel()
 {
-  static QDirModel* m = nullptr;
+  static QFileSystemModel* m = nullptr;
   if (!m) {
-    m = new QDirModel();
+    m = new QFileSystemModel();
   }
   return m;
 }
-static QDirModel* pathDirModel()
+static QFileSystemModel* pathDirModel()
 {
-  static QDirModel* m = nullptr;
+  static QFileSystemModel* m = nullptr;
   if (!m) {
-    m = new QDirModel();
+    m = new QFileSystemModel();
     m->setFilter(QDir::AllDirs | QDir::Drives | QDir::NoDotAndDotDot);
   }
   return m;
@@ -115,8 +111,9 @@ static QDirModel* pathDirModel()
 QCMakeFileCompleter::QCMakeFileCompleter(QObject* o, bool dirs)
   : QCompleter(o)
 {
-  QDirModel* m = dirs ? pathDirModel() : fileDirModel();
+  QFileSystemModel* m = dirs ? pathDirModel() : fileDirModel();
   this->setModel(m);
+  m->setRootPath(QString());
 }
 
 QString QCMakeFileCompleter::pathFromIndex(const QModelIndex& idx) const
