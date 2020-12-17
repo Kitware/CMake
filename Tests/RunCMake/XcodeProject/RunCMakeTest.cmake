@@ -3,6 +3,7 @@ include(RunCMake)
 run_cmake(ExplicitCMakeLists)
 run_cmake(ImplicitCMakeLists)
 run_cmake(InterfaceLibSources)
+run_cmake_with_options(SearchPaths -DCMAKE_CONFIGURATION_TYPES=Debug)
 
 run_cmake(XcodeFileType)
 run_cmake(XcodeAttributeLocation)

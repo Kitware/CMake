@@ -3272,6 +3272,24 @@ void cmGlobalXCodeGenerator::AppendBuildSettingAttribute(
   }
 }
 
+void cmGlobalXCodeGenerator::InheritBuildSettingAttribute(
+  cmXCodeObject* target, const char* attribute)
+{
+  cmXCodeObject* configurationList =
+    target->GetAttribute("buildConfigurationList")->GetObject();
+  cmXCodeObject* buildConfigs =
+    configurationList->GetAttribute("buildConfigurations");
+  for (auto obj : buildConfigs->GetObjectList()) {
+    cmXCodeObject* settings = obj->GetAttribute("buildSettings");
+    if (cmXCodeObject* attr = settings->GetAttribute(attribute)) {
+      BuildObjectListOrString inherited(this, true);
+      inherited.Add("$(inherited)");
+      this->AppendBuildSettingAttribute(settings, attribute, attr,
+                                        inherited.CreateList());
+    }
+  }
+}
+
 void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 {
   cmGeneratorTarget* gt = target->GetTarget();
@@ -3588,11 +3606,11 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       for (auto& libDir : linkSearchPaths) {
         libSearchPaths.Add(this->XCodeEscapePath(libDir));
       }
-      // Add paths defined in project-wide build settings
-      libSearchPaths.Add("$(inherited)");
-      this->AppendBuildSettingAttribute(target, "LIBRARY_SEARCH_PATHS",
-                                        libSearchPaths.CreateList(),
-                                        configName);
+      if (!libSearchPaths.IsEmpty()) {
+        this->AppendBuildSettingAttribute(target, "LIBRARY_SEARCH_PATHS",
+                                          libSearchPaths.CreateList(),
+                                          configName);
+      }
     }
 
     // add framework search paths
@@ -3603,11 +3621,11 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       for (auto& fwDir : frameworkSearchPaths) {
         fwSearchPaths.Add(this->XCodeEscapePath(fwDir));
       }
-      // Add paths defined in project-wide build settings
-      fwSearchPaths.Add("$(inherited)");
-      this->AppendBuildSettingAttribute(target, "FRAMEWORK_SEARCH_PATHS",
-                                        fwSearchPaths.CreateList(),
-                                        configName);
+      if (!fwSearchPaths.IsEmpty()) {
+        this->AppendBuildSettingAttribute(target, "FRAMEWORK_SEARCH_PATHS",
+                                          fwSearchPaths.CreateList(),
+                                          configName);
+      }
     }
 
     // now add the left-over link libraries
@@ -4161,6 +4179,13 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   for (auto t : targets) {
     this->AddDependAndLinkInformation(t);
     this->AddEmbeddedFrameworks(t);
+    // Inherit project-wide values for any target-specific search paths.
+    this->InheritBuildSettingAttribute(t, "HEADER_SEARCH_PATHS");
+    this->InheritBuildSettingAttribute(t, "SYSTEM_HEADER_SEARCH_PATHS");
+    this->InheritBuildSettingAttribute(t, "FRAMEWORK_SEARCH_PATHS");
+    this->InheritBuildSettingAttribute(t, "SYSTEM_FRAMEWORK_SEARCH_PATHS");
+    this->InheritBuildSettingAttribute(t, "LIBRARY_SEARCH_PATHS");
+    this->InheritBuildSettingAttribute(t, "LD_RUNPATH_SEARCH_PATHS");
   }
 
   if (this->XcodeBuildSystem == BuildSystem::One) {
