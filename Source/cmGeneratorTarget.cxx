@@ -7039,7 +7039,7 @@ const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
   return &impl;
 }
 
-bool cmGeneratorTarget::GetConfigCommonSourceFiles(
+bool cmGeneratorTarget::GetConfigCommonSourceFilesForXcode(
   std::vector<cmSourceFile*>& files) const
 {
   std::vector<std::string> const& configs =

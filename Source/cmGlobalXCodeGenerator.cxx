@@ -1384,7 +1384,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
 
   // organize the sources
   std::vector<cmSourceFile*> commonSourceFiles;
-  if (!gtgt->GetConfigCommonSourceFiles(commonSourceFiles)) {
+  if (!gtgt->GetConfigCommonSourceFilesForXcode(commonSourceFiles)) {
     return false;
   }
 
@@ -1748,7 +1748,7 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
       this->CreateRunScriptBuildPhase("CMake PostBuild Rules", postbuild);
   } else {
     std::vector<cmSourceFile*> classes;
-    if (!gtgt->GetConfigCommonSourceFiles(classes)) {
+    if (!gtgt->GetConfigCommonSourceFilesForXcode(classes)) {
       return;
     }
     // add all the sources
@@ -1821,7 +1821,7 @@ void cmGlobalXCodeGenerator::CreateRunScriptBuildPhases(
   cmXCodeObject* buildPhases, cmGeneratorTarget const* gt)
 {
   std::vector<cmSourceFile*> sources;
-  if (!gt->GetConfigCommonSourceFiles(sources)) {
+  if (!gt->GetConfigCommonSourceFilesForXcode(sources)) {
     return;
   }
   auto& visited = this->CommandsVisited[gt];
@@ -2964,7 +2964,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
   if (gtgt->GetType() != cmStateEnums::GLOBAL_TARGET &&
       gtgt->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
     std::vector<cmSourceFile*> sources;
-    if (!gtgt->GetConfigCommonSourceFiles(sources)) {
+    if (!gtgt->GetConfigCommonSourceFilesForXcode(sources)) {
       return nullptr;
     }
 

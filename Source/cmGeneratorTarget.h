@@ -430,8 +430,9 @@ public:
 
   /** Get source files common to all configurations and diagnose cases
       with per-config sources.  Excludes sources added by a TARGET_OBJECTS
-      generator expression.  */
-  bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
+      generator expression.  Do not use outside the Xcode generator.  */
+  bool GetConfigCommonSourceFilesForXcode(
+    std::vector<cmSourceFile*>& files) const;
 
   bool HaveBuildTreeRPATH(const std::string& config) const;
 
