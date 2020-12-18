@@ -155,7 +155,6 @@ private:
   void AddFullItem(BT<std::string> const& item);
   bool CheckImplicitDirItem(std::string const& item);
   void AddUserItem(BT<std::string> const& item, bool pathNotKnown);
-  void AddDirectoryItem(std::string const& item);
   void AddFrameworkItem(std::string const& item);
   void DropDirectoryItem(std::string const& item);
   bool CheckSharedLibNoSOName(std::string const& item);
