@@ -699,9 +699,13 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
   } else {
     // This is not a CMake target.  Use the name given.
     if (cmSystemTools::FileIsFullPath(item.Value)) {
-      if (cmSystemTools::FileIsDirectory(item.Value)) {
+      if (cmSystemTools::IsPathToFramework(item.Value) &&
+          this->Makefile->IsOn("APPLE")) {
+        // This is a framework.
+        this->AddFrameworkItem(item.Value);
+      } else if (cmSystemTools::FileIsDirectory(item.Value)) {
         // This is a directory.
-        this->AddDirectoryItem(item.Value);
+        this->DropDirectoryItem(item.Value);
       } else {
         // Use the full path given to the library file.
         this->Depends.push_back(item.Value);
@@ -1303,16 +1307,6 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
     cmOutputConverter converter(this->Makefile->GetStateSnapshot());
     fw = converter.EscapeForShell(fw);
     this->Items.emplace_back(fw, false);
-  }
-}
-
-void cmComputeLinkInformation::AddDirectoryItem(std::string const& item)
-{
-  if (this->Makefile->IsOn("APPLE") &&
-      cmSystemTools::IsPathToFramework(item)) {
-    this->AddFrameworkItem(item);
-  } else {
-    this->DropDirectoryItem(item);
   }
 }
 
