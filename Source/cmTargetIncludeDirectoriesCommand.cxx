@@ -101,5 +101,6 @@ bool cmTargetIncludeDirectoriesCommand(std::vector<std::string> const& args,
     args, "INCLUDE_DIRECTORIES",
     TargetIncludeDirectoriesImpl::ArgumentFlags(
       TargetIncludeDirectoriesImpl::PROCESS_BEFORE |
+      TargetIncludeDirectoriesImpl::PROCESS_AFTER |
       TargetIncludeDirectoriesImpl::PROCESS_SYSTEM));
 }
