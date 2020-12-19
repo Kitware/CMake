@@ -150,3 +150,13 @@ void cmCustomCommand::SetCMP0116Status(cmPolicies::PolicyStatus cmp0116)
 {
   this->CMP0116Status = cmp0116;
 }
+
+const std::string& cmCustomCommand::GetTarget() const
+{
+  return this->Target;
+}
+
+void cmCustomCommand::SetTarget(const std::string& target)
+{
+  this->Target = target;
+}

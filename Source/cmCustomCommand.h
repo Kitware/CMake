@@ -100,6 +100,10 @@ public:
   cmPolicies::PolicyStatus GetCMP0116Status() const;
   void SetCMP0116Status(cmPolicies::PolicyStatus cmp0116);
 
+  /** Set/Get the associated target */
+  const std::string& GetTarget() const;
+  void SetTarget(const std::string& target);
+
 private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Byproducts;
@@ -107,6 +111,7 @@ private:
   cmCustomCommandLines CommandLines;
   cmListFileBacktrace Backtrace;
   cmImplicitDependsList ImplicitDepends;
+  std::string Target;
   std::string Comment;
   std::string WorkingDirectory;
   std::string Depfile;
