@@ -324,6 +324,9 @@ Options
 ``--build-and-test``
 See `Build and Test Mode`_.
 
+``--test-dir <dir>``
+Specify the directory in which to look for tests.
+
 ``--test-output-size-passed <size>``
  Limit the output for passed tests to ``<size>`` bytes.
 

@@ -380,3 +380,20 @@ run_MemCheckSan(Leak "simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode
 run_MemCheckSan(Memory "simulate_sanitizer=1:report_bugs=1:history_size=5:exitcode=55")
 run_MemCheckSan(Thread "report_bugs=1:history_size=5:exitcode=55")
 run_MemCheckSan(UndefinedBehavior "simulate_sanitizer=1")
+
+run_cmake_command(test-dir-invalid-arg ${CMAKE_CTEST_COMMAND} --test-dir)
+run_cmake_command(test-dir-non-existing-dir ${CMAKE_CTEST_COMMAND} --test-dir non-existing-dir)
+
+function(run_testDir)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/testDir)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/sub")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/sub/CTestTestfile.cmake" "
+  add_test(Test1 \"${CMAKE_COMMAND}\" -E true)
+  add_test(Test2 \"${CMAKE_COMMAND}\" -E true)
+  ")
+  run_cmake_command(testDir ${CMAKE_CTEST_COMMAND} --test-dir "${RunCMake_TEST_BINARY_DIR}/sub")
+endfunction()
+run_testDir()

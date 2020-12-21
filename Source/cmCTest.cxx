@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cerrno>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -179,6 +180,7 @@ struct cmCTest::Private
 
   // information for the --build-and-test options
   std::string BinaryDir;
+  std::string TestDir;
 
   std::string NotesFiles;
 
@@ -2059,6 +2061,13 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     i++;
     this->SetNotesFiles(args[i]);
     return true;
+  } else if (this->CheckArgument(arg, "--test-dir"_s)) {
+    if (i >= args.size() - 1) {
+      errormsg = "'--test-dir' requires an argument";
+      return false;
+    }
+    i++;
+    this->Impl->TestDir = std::string(args[i]);
   }
 
   cm::string_view noTestsPrefix = "--no-tests=";
@@ -2467,8 +2476,26 @@ int cmCTest::ExecuteTests()
       handler->SetVerbose(this->Impl->Verbose);
       handler->SetSubmitIndex(this->Impl->SubmitIndex);
     }
-    std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-    if (!this->Initialize(cwd.c_str(), nullptr)) {
+
+    const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
+    std::string workDir = currDir;
+    if (!this->Impl->TestDir.empty()) {
+      workDir = cmSystemTools::CollapseFullPath(this->Impl->TestDir);
+    }
+
+    if (currDir != workDir) {
+      cmCTestLog(this, OUTPUT,
+                 "Internal ctest changing into directory: " << workDir
+                                                            << std::endl);
+      if (cmSystemTools::ChangeDirectory(workDir) != 0) {
+        auto msg = "Failed to change working directory to \"" + workDir +
+          "\" : " + std::strerror(errno) + "\n";
+        cmCTestLog(this, ERROR_MESSAGE, msg);
+        return 1;
+      }
+    }
+
+    if (!this->Initialize(workDir.c_str(), nullptr)) {
       res = 12;
       cmCTestLog(this, ERROR_MESSAGE,
                  "Problem initializing the dashboard." << std::endl);
@@ -2476,6 +2503,10 @@ int cmCTest::ExecuteTests()
       res = this->ProcessSteps();
     }
     this->Finalize();
+
+    if (currDir != workDir) {
+      cmSystemTools::ChangeDirectory(currDir);
+    }
   }
   if (res != 0) {
     cmCTestLog(this, DEBUG,
