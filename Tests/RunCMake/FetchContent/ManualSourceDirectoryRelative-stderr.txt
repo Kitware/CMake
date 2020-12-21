@@ -1,0 +1,3 @@
+ *Relative source directory specified.  This is not safe, as it depends on
+ *the calling directory scope.
++ *FETCHCONTENT_SOURCE_DIR_WITHPROJECT --> WithProject
