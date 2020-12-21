@@ -57,7 +57,7 @@ Example usage:
 .. code-block:: cmake
 
   add_test(NAME mytest
-           COMMAND testDriver --config $<CONFIGURATION>
+           COMMAND testDriver --config $<CONFIG>
                               --exe $<TARGET_FILE:myexe>)
 
 This creates a test ``mytest`` whose command runs a ``testDriver`` tool
