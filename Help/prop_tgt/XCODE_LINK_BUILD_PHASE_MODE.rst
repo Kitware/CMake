@@ -31,6 +31,7 @@ Possible values are:
 * ``KNOWN_LOCATION``
   The "Link Binary With Libraries" build phase will be used to link to another
   target under the same conditions as with ``BUILT_ONLY`` and also:
+
   - Imported library targets except those of type ``UNKNOWN``.
   - Any non-target library specified directly with a path.
 
