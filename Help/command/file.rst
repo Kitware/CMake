@@ -479,7 +479,9 @@ modified.
 
   file(GENERATE OUTPUT output-file
        <INPUT input-file|CONTENT content>
-       [CONDITION expression] [TARGET target])
+       [CONDITION expression] [TARGET target]
+       [FILE_PERMISSIONS <permissions>...]
+       [NO_SOURCE_PERMISSIONS] [USE_SOURCE_PERMISSIONS])
 
 Generate an output file for each build configuration supported by the current
 :manual:`CMake Generator <cmake-generators(7)>`.  Evaluate
@@ -519,6 +521,17 @@ from the input content to produce the output content.  The options are:
   Specify which target to use when evaluating generator expressions that
   require a target for evaluation (e.g. ``$<COMPILE_FEATURES:...>``,
   ``$<TARGET_PROPERTY:prop>``).
+
+``FILE_PERMISSIONS <permissions>...``
+  Use user provided permissions for the generated file.
+
+``NO_SOURCE_PERMISSIONS``
+  The generated file permissions default to the standard 644 value
+  (-rw-r--r--).
+
+``USE_SOURCE_PERMISSIONS``
+  Transfer the file permissions of the original file to the generated file.
+  This option expects INPUT option.
 
 Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
 ``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.

@@ -1,0 +1,4 @@
+CMake Error at SourcePermissions4.cmake:[0-9]+ \(file\):
+  file given USE_SOURCE_PERMISSIONS without a file INPUT.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

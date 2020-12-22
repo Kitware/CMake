@@ -2291,7 +2291,7 @@ void AddEvaluationFile(const std::string& inputName,
                        const std::string& targetName,
                        const std::string& outputExpr,
                        const std::string& condition, bool inputIsContent,
-                       cmExecutionStatus& status)
+                       mode_t permissions, cmExecutionStatus& status)
 {
   cmListFileBacktrace lfbt = status.GetMakefile().GetBacktrace();
 
@@ -2305,7 +2305,7 @@ void AddEvaluationFile(const std::string& inputName,
 
   status.GetMakefile().AddEvaluationFile(
     inputName, targetName, std::move(outputCge), std::move(conditionCge),
-    inputIsContent);
+    permissions, inputIsContent);
 }
 
 bool HandleGenerateCommand(std::vector<std::string> const& args,
@@ -2323,14 +2323,21 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     std::string Content;
     std::string Condition;
     std::string Target;
+    bool NoSourcePermissions = false;
+    bool UseSourcePermissions = false;
+    std::vector<std::string> FilePermissions;
   };
 
-  static auto const parser = cmArgumentParser<Arguments>{}
-                               .Bind("OUTPUT"_s, &Arguments::Output)
-                               .Bind("INPUT"_s, &Arguments::Input)
-                               .Bind("CONTENT"_s, &Arguments::Content)
-                               .Bind("CONDITION"_s, &Arguments::Condition)
-                               .Bind("TARGET"_s, &Arguments::Target);
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("OUTPUT"_s, &Arguments::Output)
+      .Bind("INPUT"_s, &Arguments::Input)
+      .Bind("CONTENT"_s, &Arguments::Content)
+      .Bind("CONDITION"_s, &Arguments::Condition)
+      .Bind("TARGET"_s, &Arguments::Target)
+      .Bind("NO_SOURCE_PERMISSIONS"_s, &Arguments::NoSourcePermissions)
+      .Bind("USE_SOURCE_PERMISSIONS"_s, &Arguments::UseSourcePermissions)
+      .Bind("FILE_PERMISSIONS"_s, &Arguments::FilePermissions);
 
   std::vector<std::string> unparsedArguments;
   std::vector<std::string> keywordsMissingValues;
@@ -2399,8 +2406,65 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     input = arguments.Content;
   }
 
+  if (arguments.NoSourcePermissions && arguments.UseSourcePermissions) {
+    status.SetError("given both NO_SOURCE_PERMISSIONS and "
+                    "USE_SOURCE_PERMISSIONS. Only one option allowed.");
+    return false;
+  }
+
+  if (!arguments.FilePermissions.empty()) {
+    if (arguments.NoSourcePermissions) {
+      status.SetError("given both NO_SOURCE_PERMISSIONS and "
+                      "FILE_PERMISSIONS. Only one option allowed.");
+      return false;
+    }
+    if (arguments.UseSourcePermissions) {
+      status.SetError("given both USE_SOURCE_PERMISSIONS and "
+                      "FILE_PERMISSIONS. Only one option allowed.");
+      return false;
+    }
+  }
+
+  if (arguments.UseSourcePermissions) {
+    if (inputIsContent) {
+      status.SetError("given USE_SOURCE_PERMISSIONS without a file INPUT.");
+      return false;
+    }
+  }
+
+  mode_t permisiions = 0;
+  if (arguments.NoSourcePermissions) {
+    permisiions |= cmFSPermissions::mode_owner_read;
+    permisiions |= cmFSPermissions::mode_owner_write;
+    permisiions |= cmFSPermissions::mode_group_read;
+    permisiions |= cmFSPermissions::mode_world_read;
+  }
+
+  if (!arguments.FilePermissions.empty()) {
+    std::vector<std::string> invalidOptions;
+    for (auto const& e : arguments.FilePermissions) {
+      if (!cmFSPermissions::stringToModeT(e, permisiions)) {
+        invalidOptions.push_back(e);
+      }
+    }
+    if (!invalidOptions.empty()) {
+      std::ostringstream oss;
+      oss << "given invalid permission ";
+      for (auto i = 0u; i < invalidOptions.size(); i++) {
+        if (i == 0u) {
+          oss << "\"" << invalidOptions[i] << "\"";
+        } else {
+          oss << ",\"" << invalidOptions[i] << "\"";
+        }
+      }
+      oss << ".";
+      status.SetError(oss.str());
+      return false;
+    }
+  }
+
   AddEvaluationFile(input, arguments.Target, arguments.Output,
-                    arguments.Condition, inputIsContent, status);
+                    arguments.Condition, inputIsContent, permisiions, status);
   return true;
 }
 
