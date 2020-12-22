@@ -34,7 +34,7 @@ typedef struct /* NOLINT */
 } functionMapEntry;
 
 static functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
-  @CMAKE_FUNCTION_TABLE_ENTIRES@
+  @CMAKE_FUNCTION_TABLE_ENTRIES@
   { CM_NULL, CM_NULL } /* NOLINT */
 };
 
