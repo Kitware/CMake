@@ -24,7 +24,7 @@ public:
     std::string input, std::string target,
     std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
     std::unique_ptr<cmCompiledGeneratorExpression> condition,
-    bool inputIsContent, mode_t permissions,
+    bool inputIsContent, std::string newLineCharacter, mode_t permissions,
     cmPolicies::PolicyStatus policyStatusCMP0070);
 
   void Generate(cmLocalGenerator* lg);
@@ -58,6 +58,7 @@ private:
   const std::unique_ptr<cmCompiledGeneratorExpression> Condition;
   std::vector<std::string> Files;
   const bool InputIsContent;
+  const std::string NewLineCharacter;
   cmPolicies::PolicyStatus PolicyStatusCMP0070;
   mode_t Permissions;
 };

@@ -21,13 +21,14 @@ cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
   std::string input, std::string target,
   std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
   std::unique_ptr<cmCompiledGeneratorExpression> condition,
-  bool inputIsContent, mode_t permissions,
+  bool inputIsContent, std::string newLineCharacter, mode_t permissions,
   cmPolicies::PolicyStatus policyStatusCMP0070)
   : Input(std::move(input))
   , Target(std::move(target))
   , OutputFileExpr(std::move(outputFileExpr))
   , Condition(std::move(condition))
   , InputIsContent(inputIsContent)
+  , NewLineCharacter(std::move(newLineCharacter))
   , PolicyStatusCMP0070(policyStatusCMP0070)
   , Permissions(permissions)
 {
@@ -82,9 +83,33 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   this->Files.push_back(outputFileName);
   outputFiles[outputFileName] = outputContent;
 
-  cmGeneratedFileStream fout(outputFileName);
+  bool openWithBinaryFlag = false;
+  if (!this->NewLineCharacter.empty()) {
+    openWithBinaryFlag = true;
+  }
+  cmGeneratedFileStream fout;
+  fout.Open(outputFileName, false, openWithBinaryFlag);
+  if (!fout) {
+    lg->IssueMessage(MessageType::FATAL_ERROR,
+                     "Could not open file for write in copy operation " +
+                       outputFileName);
+    return;
+  }
   fout.SetCopyIfDifferent(true);
-  fout << outputContent;
+  std::istringstream iss(outputContent);
+  std::string line;
+  bool hasNewLine = false;
+  while (cmSystemTools::GetLineFromStream(iss, line, &hasNewLine)) {
+    fout << line;
+    if (!this->NewLineCharacter.empty()) {
+      fout << this->NewLineCharacter;
+    } else if (hasNewLine) {
+      // if new line character is not specified, the file will be opened in
+      // text mode. So, "\n" will be translated to the correct newline
+      // ending based on the platform.
+      fout << "\n";
+    }
+  }
   if (fout.Close() && perm) {
     cmSystemTools::SetPermissions(outputFileName.c_str(), perm);
   }

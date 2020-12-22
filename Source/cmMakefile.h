@@ -899,7 +899,8 @@ public:
     const std::string& inputFile, const std::string& targetName,
     std::unique_ptr<cmCompiledGeneratorExpression> outputName,
     std::unique_ptr<cmCompiledGeneratorExpression> condition,
-    mode_t permissions, bool inputIsContent);
+    const std::string& newLineCharacter, mode_t permissions,
+    bool inputIsContent);
   const std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>&
   GetEvaluationFiles() const;
 

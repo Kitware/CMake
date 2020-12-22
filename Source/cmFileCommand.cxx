@@ -2290,7 +2290,8 @@ void AddEvaluationFile(const std::string& inputName,
                        const std::string& targetName,
                        const std::string& outputExpr,
                        const std::string& condition, bool inputIsContent,
-                       mode_t permissions, cmExecutionStatus& status)
+                       const std::string& newLineCharacter, mode_t permissions,
+                       cmExecutionStatus& status)
 {
   cmListFileBacktrace lfbt = status.GetMakefile().GetBacktrace();
 
@@ -2304,7 +2305,7 @@ void AddEvaluationFile(const std::string& inputName,
 
   status.GetMakefile().AddEvaluationFile(
     inputName, targetName, std::move(outputCge), std::move(conditionCge),
-    permissions, inputIsContent);
+    newLineCharacter, permissions, inputIsContent);
 }
 
 bool HandleGenerateCommand(std::vector<std::string> const& args,
@@ -2322,6 +2323,7 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     std::string Content;
     std::string Condition;
     std::string Target;
+    std::string NewLineStyle;
     bool NoSourcePermissions = false;
     bool UseSourcePermissions = false;
     std::vector<std::string> FilePermissions;
@@ -2336,7 +2338,8 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
       .Bind("TARGET"_s, &Arguments::Target)
       .Bind("NO_SOURCE_PERMISSIONS"_s, &Arguments::NoSourcePermissions)
       .Bind("USE_SOURCE_PERMISSIONS"_s, &Arguments::UseSourcePermissions)
-      .Bind("FILE_PERMISSIONS"_s, &Arguments::FilePermissions);
+      .Bind("FILE_PERMISSIONS"_s, &Arguments::FilePermissions)
+      .Bind("NEWLINE_STYLE"_s, &Arguments::NewLineStyle);
 
   std::vector<std::string> unparsedArguments;
   std::vector<std::string> keywordsMissingValues;
@@ -2398,6 +2401,18 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
   const bool inputIsContent = parsedKeywords[1] != "INPUT"_s;
   if (inputIsContent && parsedKeywords[1] != "CONTENT") {
     status.SetError("Unknown argument to GENERATE subcommand.");
+  }
+
+  const bool newLineStyleSpecified =
+    std::find(parsedKeywords.begin(), parsedKeywords.end(),
+              "NEWLINE_STYLE"_s) != parsedKeywords.end();
+  cmNewLineStyle newLineStyle;
+  if (newLineStyleSpecified) {
+    std::string errorMessage;
+    if (!newLineStyle.ReadFromArguments(args, errorMessage)) {
+      status.SetError(cmStrCat("GENERATE ", errorMessage));
+      return false;
+    }
   }
 
   std::string input = arguments.Input;
@@ -2463,7 +2478,8 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
   }
 
   AddEvaluationFile(input, arguments.Target, arguments.Output,
-                    arguments.Condition, inputIsContent, permisiions, status);
+                    arguments.Condition, inputIsContent,
+                    newLineStyle.GetCharacters(), permisiions, status);
   return true;
 }
 

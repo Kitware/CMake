@@ -481,7 +481,8 @@ modified.
        <INPUT input-file|CONTENT content>
        [CONDITION expression] [TARGET target]
        [FILE_PERMISSIONS <permissions>...]
-       [NO_SOURCE_PERMISSIONS] [USE_SOURCE_PERMISSIONS])
+       [NO_SOURCE_PERMISSIONS] [USE_SOURCE_PERMISSIONS]
+       [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 
 Generate an output file for each build configuration supported by the current
 :manual:`CMake Generator <cmake-generators(7)>`.  Evaluate
@@ -532,6 +533,13 @@ from the input content to produce the output content.  The options are:
 ``USE_SOURCE_PERMISSIONS``
   Transfer the file permissions of the original file to the generated file.
   This option expects INPUT option.
+
+``NEWLINE_STYLE <style>``
+  .. versionadded:: 3.20
+
+  Specify the newline style for the generated file.  Specify
+  ``UNIX`` or ``LF`` for ``\n`` newlines, or specify
+  ``DOS``, ``WIN32``, or ``CRLF`` for ``\r\n`` newlines.
 
 Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
 ``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.

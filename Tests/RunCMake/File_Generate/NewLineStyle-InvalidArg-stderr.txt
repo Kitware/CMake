@@ -1,0 +1,5 @@
+CMake Error at NewLineStyle-InvalidArg.cmake:[0-9]+ \(file\):
+  file GENERATE NEWLINE_STYLE sets an unknown style, only LF, CRLF, UNIX,
+  DOS, and WIN32 are supported
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
