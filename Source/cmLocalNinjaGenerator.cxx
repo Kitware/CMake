@@ -557,9 +557,13 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
   std::string launcher = this->MakeCustomLauncher(ccg);
 
   for (unsigned i = 0; i != ccg.GetNumberOfCommands(); ++i) {
+    std::string c = ccg.GetCommand(i);
+    if (c.empty()) {
+      continue;
+    }
     cmdLines.push_back(launcher +
                        this->ConvertToOutputFormat(
-                         ccg.GetCommand(i),
+                         c,
                          gg->IsMultiConfig() ? cmOutputConverter::NINJAMULTI
                                              : cmOutputConverter::SHELL));
 
