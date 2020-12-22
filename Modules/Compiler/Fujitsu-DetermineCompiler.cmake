@@ -1,5 +1,5 @@
 
-set(_compiler_id_pp_test "defined(__FUJITSU) && !defined(__CLANG_FUJITSU)")
+set(_compiler_id_pp_test "defined(__FUJITSU)")
 
 set(_compiler_id_version_compute "
 # if defined(__FCC_version__)

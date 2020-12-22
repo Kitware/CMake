@@ -20,6 +20,7 @@ include:
   Embarcadero, Borland = Embarcadero (embarcadero.com)
   Flang = Flang LLVM Fortran Compiler
   Fujitsu = Fujitsu HPC compiler (Trad mode)
+  FujitsuClang = Fujitsu HPC compiler (Clang mode)
   G95 = G95 Fortran (g95.org)
   GNU = GNU Compiler Collection (gcc.gnu.org)
   GHS = Green Hills Software (www.ghs.com)
