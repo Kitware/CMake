@@ -87,6 +87,13 @@ bool cmTargetPropCommandBase::HandleArguments(
     }
     prepend = true;
     ++argIndex;
+  } else if ((flags & PROCESS_AFTER) && args[argIndex] == "AFTER") {
+    if (args.size() < 3) {
+      this->SetError("called with incorrect number of arguments");
+      return false;
+    }
+    prepend = false;
+    ++argIndex;
   }
 
   if ((flags & PROCESS_REUSE_FROM) && args[argIndex] == "REUSE_FROM") {

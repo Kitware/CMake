@@ -5,7 +5,7 @@ Add include directories to a target.
 
 .. code-block:: cmake
 
-  target_include_directories(<target> [SYSTEM] [BEFORE]
+  target_include_directories(<target> [SYSTEM] [AFTER|BEFORE]
     <INTERFACE|PUBLIC|PRIVATE> [items1...]
     [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
 
@@ -14,8 +14,8 @@ The named ``<target>`` must have been created by a command such
 as :command:`add_executable` or :command:`add_library` and must not be an
 :ref:`ALIAS target <Alias Targets>`.
 
-If ``BEFORE`` is specified, the content will be prepended to the property
-instead of being appended.
+By using ``AFTER`` or ``BEFORE`` explicitly, you can select between appending
+and prepending, independent of the default.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to specify
 the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC`` items will
