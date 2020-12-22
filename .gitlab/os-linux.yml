@@ -17,17 +17,12 @@
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
 
-.linux_package:
-    variables:
-        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        LAUNCHER: "scl enable devtoolset-6 rh-python36 --"
-
 .linux_package_x86_64:
-    extends: .linux_package
-
     image: "kitware/cmake:build-linux-x86_64-deps-2020-04-02@sha256:77e9ab183f34680990db9da5945473e288f0d6556bce79ecc1589670d656e157"
 
     variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        LAUNCHER: "scl enable devtoolset-6 rh-python36 --"
         CMAKE_ARCH: x86_64
 
 ### Debian
