@@ -897,7 +897,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       cmExpandList(compileRule, compileCommands);
     }
 
-    if (this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS") &&
+    if (this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS") &&
         lang_can_export_cmds && compileCommands.size() == 1) {
       std::string compileCommand = compileCommands[0];
 
