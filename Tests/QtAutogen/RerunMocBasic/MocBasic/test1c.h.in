@@ -1,0 +1,6 @@
+#include <QObject>
+class Test1
+{
+public:
+  void onTst1() {}
+};

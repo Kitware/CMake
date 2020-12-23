@@ -118,3 +118,29 @@ message(STATUS "Changing nothing for no MOC re-run")
 rebuild(3)
 acquire_timestamp(After)
 require_change_not()
+
+
+# - Ensure that the timestamp will change
+# - Remove Q_OBJECT from header
+# - Rebuild
+acquire_timestamp(Before)
+sleep()
+message(STATUS "Remove Q_OBJECT from header file for a MOC re-run")
+configure_file("${mocBasicSrcDir}/test1c.h.in" "${mocBasicBinDir}/test1.h" COPYONLY)
+sleep()
+rebuild(4)
+acquire_timestamp(After)
+require_change()
+
+
+# - Ensure that the timestamp will change
+# - Add Q_OBJECT to header again
+# - Rebuild
+acquire_timestamp(Before)
+sleep()
+message(STATUS "Add Q_OBJECT to header file for a MOC re-run")
+configure_file("${mocBasicSrcDir}/test1a.h.in" "${mocBasicBinDir}/test1.h" COPYONLY)
+sleep()
+rebuild(5)
+acquire_timestamp(After)
+require_change()
