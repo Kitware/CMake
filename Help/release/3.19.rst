@@ -385,3 +385,8 @@ Changes made since CMake 3.19.0 include the following.
 * The :variable:`CMAKE_ISPC_HEADER_SUFFIX` variable and corresponding
   :prop_tgt:`ISPC_HEADER_SUFFIX` target property were added to control
   the header suffix used by ``ISPC`` compiler generated headers.
+
+3.19.3
+------
+
+* A precompiled Linux ``aarch64`` binary is now provided on ``cmake.org``.
