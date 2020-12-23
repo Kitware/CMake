@@ -805,6 +805,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_ADD_TARGET      (GIOMM GTK2_DEPENDS gio glibmm gobject sigc++ glib)
 
         _GTK2_FIND_INCLUDE_DIR(ATKMM atkmm.h)
+        _GTK2_FIND_INCLUDE_DIR(ATKMMCONFIG atkmmconfig.h)
         _GTK2_FIND_LIBRARY    (ATKMM atkmm true true)
         _GTK2_ADD_TARGET      (ATKMM GTK2_DEPENDS atk glibmm gobject sigc++ glib)
 
