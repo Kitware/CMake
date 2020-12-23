@@ -47,19 +47,37 @@ macro(require_change_not)
 endmacro()
 
 
-# Initial build
+# Configure the test project
 configure_file("${mocBasicSrcDir}/test1a.h.in" "${mocBasicBinDir}/test1.h" COPYONLY)
-try_compile(MOC_RERUN
-  "${mocBasicBinDir}"
-  "${mocBasicSrcDir}"
-  MocBasic
-  CMAKE_FLAGS "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
-              "-DCMAKE_AUTOGEN_VERBOSE=${CMAKE_AUTOGEN_VERBOSE}"
-              "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+if(CMAKE_GENERATOR_INSTANCE)
+    set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE}")
+else()
+    set(_D_CMAKE_GENERATOR_INSTANCE "")
+endif()
+execute_process(
+  COMMAND "${CMAKE_COMMAND}" -B "${mocBasicBinDir}" -S "${mocBasicSrcDir}"
+          -G "${CMAKE_GENERATOR}"
+          -A "${CMAKE_GENERATOR_PLATFORM}"
+          -T "${CMAKE_GENERATOR_TOOLSET}"
+          ${_D_CMAKE_GENERATOR_INSTANCE}
+          "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+          "-DCMAKE_AUTOGEN_VERBOSE=${CMAKE_AUTOGEN_VERBOSE}"
+          "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+  RESULT_VARIABLE exit_code
   OUTPUT_VARIABLE output
 )
-if (NOT MOC_RERUN)
-  message(FATAL_ERROR "Initial build of mocBasic failed. Output: ${output}")
+if(NOT exit_code EQUAL 0)
+  message(FATAL_ERROR "Initial configuration of mocBasic failed. Output: ${output}")
+endif()
+
+# Initial build
+execute_process(
+    COMMAND "${CMAKE_COMMAND}" --build "${mocBasicBinDir}"
+    RESULT_VARIABLE exit_code
+    OUTPUT_VARIABLE output
+)
+if(NOT exit_code EQUAL 0)
+    message(FATAL_ERROR "Initial build of mocBasic failed. Output: ${output}")
 endif()
 
 # Get name of the output binary
