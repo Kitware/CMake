@@ -71,6 +71,9 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> -fuse-ld=lld-link -nostartfiles -nostdlib <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> -Xlinker /implib:<TARGET_IMPLIB> -Xlinker /pdb:<TARGET_PDB> -Xlinker /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
 
+  set(CMAKE_CREATE_WIN32_EXE "-Xlinker /subsystem:windows")
+  set(CMAKE_CREATE_CONSOLE_EXE "-Xlinker /subsystem:console")
+
   if(NOT "${lang}" STREQUAL "ASM")
     set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         -Xclang -flto-visibility-public-std -D_MT -Xclang --dependent-lib=libcmt)
     set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      -D_DLL -D_MT -Xclang --dependent-lib=msvcrt)
