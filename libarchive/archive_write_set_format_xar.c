@@ -681,7 +681,8 @@ xar_write_data(struct archive_write *a, const void *buff, size_t s)
 {
 	struct xar *xar;
 	enum la_zaction run;
-	size_t size, rsize;
+	size_t size = 0;
+	size_t rsize;
 	int r;
 
 	xar = (struct xar *)a->format_data;
@@ -2930,8 +2931,8 @@ compression_init_encoder_xz(struct archive *a,
 		return (ARCHIVE_FATAL);
 	}
 	lzmafilters = (lzma_filter *)(strm+1);
-	if (level > 6)
-		level = 6;
+	if (level > 9)
+		level = 9;
 	if (lzma_lzma_preset(&lzma_opt, level)) {
 		free(strm);
 		lastrm->real_stream = NULL;

@@ -1,4 +1,5 @@
 /* config.h.  Generated from build/cmake/config.h.in by cmake configure */
+#define __LIBARCHIVE_CONFIG_H_INCLUDED 1
 
 /*
  * Ensure we have C99-style int64_t, etc, all defined.
@@ -957,6 +958,9 @@ typedef uint64_t uintmax_t;
 
 /* Define to 1 if you have the `strchr' function. */
 #cmakedefine HAVE_STRCHR 1
+
+/* Define to 1 if you have the `strnlen' function. */
+#cmakedefine HAVE_STRNLEN 1
 
 /* Define to 1 if you have the `strdup' function. */
 #cmakedefine HAVE_STRDUP 1
