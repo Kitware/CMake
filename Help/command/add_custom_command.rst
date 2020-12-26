@@ -201,6 +201,10 @@ The options are:
   Note that the ``IMPLICIT_DEPENDS`` option is currently supported
   only for Makefile generators and will be ignored by other generators.
 
+  .. note::
+
+    This option cannot be specified at the same time as ``DEPFILE`` option.
+
 ``JOB_POOL``
   .. versionadded:: 3.15
 
@@ -263,15 +267,26 @@ The options are:
 ``DEPFILE``
   .. versionadded:: 3.7
 
-  Specify a ``.d`` depfile for the :generator:`Ninja` generator.
+  Specify a ``.d`` depfile for the :generator:`Ninja` generator and
+  :ref:`Makefile Generators`.
   A ``.d`` file holds dependencies usually emitted by the custom
   command itself.
-  Using ``DEPFILE`` with other generators than Ninja is an error.
+  Using ``DEPFILE`` with other generators than :generator:`Ninja` or
+  :ref:`Makefile Generators` is an error.
+
+  .. versionadded:: 3.20
+    Added the support of :ref:`Makefile Generators`.
 
   If the ``DEPFILE`` argument is relative, it should be relative to
   :variable:`CMAKE_CURRENT_BINARY_DIR`, and any relative paths inside the
   ``DEPFILE`` should also be relative to :variable:`CMAKE_CURRENT_BINARY_DIR`
-  (see policy :policy:`CMP0116`.)
+  (see policy :policy:`CMP0116`. This policy is always ``NEW`` for
+  :ref:`Makefile Generators`).
+
+  .. note::
+
+    For :ref:`Makefile Generators`, this option cannot be specified at the
+    same time as ``IMPLICIT_DEPENDS`` option.
 
 Examples: Generating Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

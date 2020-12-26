@@ -39,7 +39,6 @@ function(run_VerboseBuild)
 endfunction()
 run_VerboseBuild()
 
-run_cmake(CustomCommandDepfile-ERROR)
 run_cmake(IncludeRegexSubdir)
 
 function(run_MakefileConflict)

@@ -13,6 +13,7 @@
 #include <cm/string_view>
 #include <cm/vector>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Terminal.h"
@@ -1435,7 +1436,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
     this->Makefile->GetSafeDefinition("CMAKE_DEPENDS_DEPENDENCY_FILES");
   if (!depends.empty()) {
     // dependencies are managed by compiler
-    auto depFiles = cmExpandedList(depends);
+    auto depFiles = cmExpandedList(depends, true);
     std::string const internalDepFile =
       targetDir + "/compiler_depend.internal";
     std::string const depFile = targetDir + "/compiler_depend.make";
@@ -1998,18 +1999,32 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
   cmakefileStream << "\n# The set of dependency files which are needed:\n";
   cmakefileStream << "set(CMAKE_DEPENDS_DEPENDENCY_FILES\n";
   for (auto const& compilerLang : compilerLangs) {
-    auto depFormat = this->Makefile->GetSafeDefinition(
-      cmStrCat("CMAKE_", compilerLang.first, "_DEPFILE_FORMAT"));
     auto const& compilerPairs = compilerLang.second;
-    for (auto const& compilerPair : compilerPairs) {
-      for (auto const& src : compilerPair.second) {
-        cmakefileStream << "  \"" << src << "\" \""
-                        << this->MaybeConvertToRelativePath(
-                             this->GetBinaryDirectory(), compilerPair.first)
-                        << "\" \"" << depFormat << "\" \""
-                        << this->MaybeConvertToRelativePath(
-                             this->GetBinaryDirectory(), compilerPair.first)
-                        << ".d\"\n";
+    if (compilerLang.first == "CUSTOM"_s) {
+      for (auto const& compilerPair : compilerPairs) {
+        for (auto const& src : compilerPair.second) {
+          cmakefileStream << R"(  "" ")"
+                          << this->MaybeConvertToRelativePath(
+                               this->GetBinaryDirectory(), compilerPair.first)
+                          << R"(" "custom" ")"
+                          << this->MaybeConvertToRelativePath(
+                               this->GetBinaryDirectory(), src)
+                          << "\"\n";
+        }
+      }
+    } else {
+      auto depFormat = this->Makefile->GetSafeDefinition(
+        cmStrCat("CMAKE_", compilerLang.first, "_DEPFILE_FORMAT"));
+      for (auto const& compilerPair : compilerPairs) {
+        for (auto const& src : compilerPair.second) {
+          cmakefileStream << "  \"" << src << "\" \""
+                          << this->MaybeConvertToRelativePath(
+                               this->GetBinaryDirectory(), compilerPair.first)
+                          << "\" \"" << depFormat << "\" \""
+                          << this->MaybeConvertToRelativePath(
+                               this->GetBinaryDirectory(), compilerPair.first)
+                          << ".d\"\n";
+        }
       }
     }
   }

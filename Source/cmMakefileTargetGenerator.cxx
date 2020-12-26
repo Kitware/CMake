@@ -1617,6 +1617,16 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
   std::vector<std::string> depends;
   this->LocalGenerator->AppendCustomDepend(depends, ccg);
 
+  if (!ccg.GetCC().GetDepfile().empty()) {
+    // Add dependency over timestamp file for dependencies management
+    auto dependTimestamp = cmSystemTools::ConvertToOutputPath(
+      this->LocalGenerator->MaybeConvertToRelativePath(
+        this->LocalGenerator->GetBinaryDirectory(),
+        cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.ts")));
+
+    depends.push_back(dependTimestamp);
+  }
+
   // Write the rule.
   const std::vector<std::string>& outputs = ccg.GetOutputs();
   bool symbolic = this->WriteMakeRule(*this->BuildFileStream, nullptr, outputs,
@@ -1651,6 +1661,15 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
       idi.second, this->LocalGenerator->GetCurrentBinaryDirectory());
     this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, idi.first,
                                              objFullPath, srcFullPath);
+  }
+
+  // Setup implicit depend for depfile if any
+  if (!ccg.GetCC().GetDepfile().empty()) {
+    std::string objFullPath = cmSystemTools::CollapseFullPath(
+      outputs[0], this->LocalGenerator->GetCurrentBinaryDirectory());
+    this->LocalGenerator->AddImplicitDepends(
+      this->GeneratorTarget, "CUSTOM", objFullPath, ccg.GetFullDepfile(),
+      cmDependencyScannerKind::Compiler);
   }
 
   this->CustomCommandOutputs.insert(outputs.begin(), outputs.end());

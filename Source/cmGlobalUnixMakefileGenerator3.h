@@ -93,6 +93,12 @@ public:
    */
   static bool SupportsPlatform() { return false; }
 
+  /**
+   * Utilized to determine if this generator
+   * supports DEPFILE option.
+   */
+  bool SupportsCustomCommandDepfile() const override { return true; }
+
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 

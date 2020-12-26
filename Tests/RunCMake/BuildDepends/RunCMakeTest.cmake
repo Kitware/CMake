@@ -30,7 +30,16 @@ function(run_BuildDepends CASE)
   include(${RunCMake_SOURCE_DIR}/${CASE}.step2.cmake OPTIONAL)
   set(check_step 2)
   run_cmake_command(${CASE}-build2 ${CMAKE_COMMAND} --build . --config Debug)
+  if(run_BuildDepends_skip_step_3)
+    return()
+  endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep ${fs_delay}) # handle 1s resolution
+  include(${RunCMake_SOURCE_DIR}/${CASE}.step3.cmake OPTIONAL)
+  set(check_step 3)
+  run_cmake_command(${CASE}-build3 ${CMAKE_COMMAND} --build . --config Debug)
 endfunction()
+
+set(run_BuildDepends_skip_step_3 1)
 
 run_BuildDepends(C-Exe)
 if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
@@ -122,4 +131,15 @@ if ((RunCMake_GENERATOR STREQUAL "Unix Makefiles"
       AND MSVC_VERSION GREATER 1300
       AND CMAKE_C_COMPILER_ID STREQUAL "MSVC"))
   run_BuildDepends(CompilerDependencies)
+  run_BuildDepends(CustomCommandDependencies)
+endif()
+
+if (RunCMake_GENERATOR MATCHES "Makefiles")
+  run_cmake(CustomCommandDependencies-BadArgs)
+endif()
+
+if(RunCMake_GENERATOR MATCHES "Make|Ninja")
+  unset(run_BuildDepends_skip_step_3)
+  run_BuildDepends(CustomCommandDepfile)
+  set(run_BuildDepends_skip_step_3 1)
 endif()

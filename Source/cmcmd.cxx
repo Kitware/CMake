@@ -1272,6 +1272,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
         snapshot.GetDirectory().SetCurrentBinary(startOutDir);
         snapshot.GetDirectory().SetCurrentSource(startDir);
+        snapshot.GetDirectory().SetRelativePathTopSource(homeDir.c_str());
+        snapshot.GetDirectory().SetRelativePathTopBinary(homeOutDir.c_str());
         cmMakefile mf(cm.GetGlobalGenerator(), snapshot);
         auto lgd = cm.GetGlobalGenerator()->CreateLocalGenerator(&mf);
 
