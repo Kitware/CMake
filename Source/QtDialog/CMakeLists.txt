@@ -8,15 +8,27 @@ set (QT_COMPONENTS
   Widgets
   Gui
 )
-# Look for Qt6 first
-find_package(Qt6Widgets QUIET)
-set(INSTALLED_QT_VERSION 6)
-if(NOT Qt6Widgets_FOUND)
-  find_package(Qt5Widgets QUIET)
-  if(NOT Qt5Widgets_FOUND)
-    message(FATAL_ERROR "Could not find a valid Qt installation.")
+
+set(CMake_QT_MAJOR_VERSION "A" CACHE
+  STRING "Expected Qt major version. Valid values are A (auto-select), 5, 6.")
+set(SUPPORTED_QT_VERSIONS "A" 5 6)
+set_property(CACHE CMake_QT_MAJOR_VERSION PROPERTY STRINGS ${SUPPORTED_QT_VERSIONS})
+if(NOT CMake_QT_MAJOR_VERSION VERSION_EQUAL "A")
+  if(NOT CMake_QT_MAJOR_VERSION IN_LIST SUPPORTED_QT_VERSIONS)
+    message(FATAL_ERROR "Supported Qt versions are \"${SUPPORTED_QT_VERSIONS}\"."
+            " But CMake_QT_MAJOR_VERSION is set to ${CMake_QT_MAJOR_VERSION}.")
   endif()
-  set(INSTALLED_QT_VERSION 5)
+  set(INSTALLED_QT_VERSION ${CMake_QT_MAJOR_VERSION})
+else()
+  find_package(Qt6Widgets QUIET)
+  set(INSTALLED_QT_VERSION 6)
+  if(NOT Qt6Widgets_FOUND)
+    find_package(Qt5Widgets QUIET)
+    if(NOT Qt5Widgets_FOUND)
+      message(FATAL_ERROR "Could not find a valid Qt installation.")
+    endif()
+    set(INSTALLED_QT_VERSION 5)
+  endif()
 endif()
 
 find_package(Qt${INSTALLED_QT_VERSION}
