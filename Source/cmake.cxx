@@ -29,6 +29,7 @@
 #include "cm_sys_stat.h"
 
 #include "cmCMakePresetsFile.h"
+#include "cmCommandLineArgument.h"
 #include "cmCommands.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
@@ -132,130 +133,12 @@ namespace {
 using JsonValueMapType = std::unordered_map<std::string, Json::Value>;
 #endif
 
-struct CommandArgument
-{
-  enum struct Values
-  {
-    Zero,
-    One,
-    Two,
-  };
-
-  std::string InvalidSyntaxMessage;
-  std::string InvalidValueMessage;
-  std::string Name;
-  CommandArgument::Values Type;
-  std::function<bool(std::string const& value, cmake* state)> StoreCall;
-
-  template <typename FunctionType>
-  CommandArgument(std::string n, CommandArgument::Values t,
-                  FunctionType&& func)
-    : InvalidSyntaxMessage(cmStrCat("Invalid syntax used with ", n))
-    , InvalidValueMessage(cmStrCat("Invalid value used with ", n))
-    , Name(std::move(n))
-    , Type(t)
-    , StoreCall(std::forward<FunctionType>(func))
-  {
-  }
-
-  template <typename FunctionType>
-  CommandArgument(std::string n, std::string failedMsg,
-                  CommandArgument::Values t, FunctionType&& func)
-    : InvalidSyntaxMessage(cmStrCat("Invalid syntax used with ", n))
-    , InvalidValueMessage(std::move(failedMsg))
-    , Name(std::move(n))
-    , Type(t)
-    , StoreCall(std::forward<FunctionType>(func))
-  {
-  }
-
-  bool matches(std::string const& input) const
-  {
-    return cmHasPrefix(input, this->Name);
-  }
-
-  template <typename T>
-  bool parse(std::string const& input, T& index,
-             std::vector<std::string> const& allArgs, cmake* state) const
-  {
-    enum struct ParseMode
-    {
-      Valid,
-      Invalid,
-      SyntaxError,
-      ValueError
-    };
-    ParseMode parseState = ParseMode::Valid;
-
-    // argument is the next parameter
-    if (this->Type == CommandArgument::Values::Zero) {
-      if (input.size() == this->Name.size()) {
-        parseState = this->StoreCall(input, state) ? ParseMode::Valid
-                                                   : ParseMode::Invalid;
-      } else {
-        parseState = ParseMode::SyntaxError;
-      }
-
-    } else if (this->Type == CommandArgument::Values::One) {
-      if (input.size() == this->Name.size()) {
-        ++index;
-        if (index >= allArgs.size() || allArgs[index][0] == '-') {
-          parseState = ParseMode::ValueError;
-        } else {
-          parseState = this->StoreCall(allArgs[index], state)
-            ? ParseMode::Valid
-            : ParseMode::Invalid;
-        }
-      } else {
-        // parse the string to get the value
-        auto possible_value = cm::string_view(input).substr(this->Name.size());
-        if (possible_value.empty()) {
-          parseState = ParseMode::SyntaxError;
-          parseState = ParseMode::ValueError;
-        } else if (possible_value[0] == '=') {
-          possible_value.remove_prefix(1);
-          if (possible_value.empty()) {
-            parseState = ParseMode::ValueError;
-          } else {
-            parseState = this->StoreCall(std::string(possible_value), state)
-              ? ParseMode::Valid
-              : ParseMode::Invalid;
-          }
-        }
-        if (parseState == ParseMode::Valid) {
-          parseState = this->StoreCall(std::string(possible_value), state)
-            ? ParseMode::Valid
-            : ParseMode::Invalid;
-        }
-      }
-    } else if (this->Type == CommandArgument::Values::Two) {
-      if (input.size() == this->Name.size()) {
-        if (index + 2 >= allArgs.size() || allArgs[index + 1][0] == '-' ||
-            allArgs[index + 2][0] == '-') {
-          parseState = ParseMode::ValueError;
-        } else {
-          index += 2;
-          parseState =
-            this->StoreCall(cmStrCat(allArgs[index - 1], ";", allArgs[index]),
-                            state)
-            ? ParseMode::Valid
-            : ParseMode::Invalid;
-        }
-      }
-    }
-
-    if (parseState == ParseMode::SyntaxError) {
-      cmSystemTools::Error(this->InvalidSyntaxMessage);
-    } else if (parseState == ParseMode::ValueError) {
-      cmSystemTools::Error(this->InvalidValueMessage);
-    }
-    return (parseState == ParseMode::Valid);
-  }
-};
-
 auto IgnoreAndTrueLambda = [](std::string const&, cmake*) -> bool {
   return true;
 };
+
+using CommandArgument =
+  cmCommandLineArgument<bool(std::string const& value, cmake* state)>;
 
 } // namespace
 
