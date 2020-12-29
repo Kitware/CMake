@@ -211,7 +211,7 @@ the indentation.  Otherwise it retains the same position on the line"
       "end"
       (or "function" "macro")
       (zero-or-more space)
-      "(" (zero-or-more (not ")")) ")"))
+      "(" (zero-or-more (not-char ")")) ")"))
 
 (defun cmake-beginning-of-defun ()
   "Move backward to the beginning of a CMake function or macro.
