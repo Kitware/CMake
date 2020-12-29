@@ -3394,6 +3394,9 @@ if(BUILD_TESTING)
               ${build_generator_args}
               --build-project helloJavaNativeHeaders
               --build-run-dir "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/"
+              --build-target install
+              --build-options
+              "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/JavaNativeHeaders/Install"
               --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIG>)
             list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/JavaNativeHeaders")
           endif()
