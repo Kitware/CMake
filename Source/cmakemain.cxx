@@ -387,16 +387,9 @@ int do_cmake(int ac, char const* const* av)
 }
 
 #ifndef CMAKE_BOOTSTRAP
-int extract_job_number(int& index, char const* current, char const* next,
-                       int len_of_flag)
+int extract_job_number(std::string const& command,
+                       std::string const& jobString)
 {
-  std::string command(current);
-  std::string jobString = command.substr(len_of_flag);
-  if (jobString.empty() && next && isdigit(next[0])) {
-    ++index; // skip parsing the job number
-    jobString = std::string(next);
-  }
-
   int jobs = -1;
   unsigned long numJobs = 0;
   if (jobString.empty()) {
@@ -411,8 +404,8 @@ int extract_job_number(int& index, char const* current, char const* next,
       jobs = int(numJobs);
     }
   } else {
-    std::cerr << "'" << command.substr(0, len_of_flag) << "' invalid number '"
-              << jobString << "' given.\n\n";
+    std::cerr << "'" << command << "' invalid number '" << jobString
+              << "' given.\n\n";
   }
   return jobs;
 }
@@ -429,88 +422,107 @@ int do_build(int ac, char const* const* av)
   std::string config;
   std::string dir;
   std::vector<std::string> nativeOptions;
+  bool nativeOptionsPassed = false;
   bool cleanFirst = false;
   bool foundClean = false;
   bool foundNonClean = false;
   bool verbose = cmSystemTools::HasEnv("VERBOSE");
 
-  enum Doing
-  {
-    DoingNone,
-    DoingDir,
-    DoingTarget,
-    DoingConfig,
-    DoingNative
+  auto jLambda = [&](std::string const& value) -> bool {
+    jobs = extract_job_number("-j", value);
+    if (jobs < 0) {
+      dir.clear();
+    }
+    return true;
   };
-  Doing doing = DoingDir;
-  for (int i = 2; i < ac; ++i) {
-    if (doing == DoingNative) {
-      nativeOptions.emplace_back(av[i]);
-    } else if (cmHasLiteralPrefix(av[i], "-j")) {
-      const char* nextArg = ((i + 1 < ac) ? av[i + 1] : nullptr);
-      jobs = extract_job_number(i, av[i], nextArg, sizeof("-j") - 1);
-      if (jobs < 0) {
-        dir.clear();
+  auto parallelLambda = [&](std::string const& value) -> bool {
+    jobs = extract_job_number("--parallel", value);
+    if (jobs < 0) {
+      dir.clear();
+    }
+    return true;
+  };
+  auto targetLambda = [&](std::string const& value) -> bool {
+    if (!value.empty()) {
+      std::vector<std::string> values = cmExpandedList(value);
+      for (auto const& v : values) {
+        targets.emplace_back(v);
+        if (v == "clean") {
+          foundClean = true;
+        } else {
+          foundNonClean = true;
+        }
       }
-      doing = DoingNone;
-    } else if (cmHasLiteralPrefix(av[i], "--parallel")) {
-      const char* nextArg = ((i + 1 < ac) ? av[i + 1] : nullptr);
-      jobs = extract_job_number(i, av[i], nextArg, sizeof("--parallel") - 1);
-      if (jobs < 0) {
-        dir.clear();
-      }
-      doing = DoingNone;
-    } else if ((strcmp(av[i], "--target") == 0) ||
-               (strcmp(av[i], "-t") == 0)) {
-      doing = DoingTarget;
-    } else if (strcmp(av[i], "--config") == 0) {
-      doing = DoingConfig;
-    } else if (strcmp(av[i], "--clean-first") == 0) {
-      cleanFirst = true;
-      doing = DoingNone;
-    } else if ((strcmp(av[i], "--verbose") == 0) ||
-               (strcmp(av[i], "-v") == 0)) {
-      verbose = true;
-      doing = DoingNone;
-    } else if (strcmp(av[i], "--use-stderr") == 0) {
-      /* tolerate legacy option */
-    } else if (strcmp(av[i], "--") == 0) {
-      doing = DoingNative;
-    } else {
-      switch (doing) {
-        case DoingDir:
-          dir = cmSystemTools::CollapseFullPath(av[i]);
-          doing = DoingNone;
+      return true;
+    }
+    return false;
+  };
+  auto verboseLambda = [&](std::string const&) -> bool {
+    verbose = true;
+    return true;
+  };
+
+  using CommandArgument =
+    cmCommandLineArgument<bool(std::string const& value)>;
+
+  std::vector<CommandArgument> arguments = {
+    CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne, jLambda },
+    CommandArgument{ "--parallel", CommandArgument::Values::ZeroOrOne,
+                     parallelLambda },
+    CommandArgument{ "-t", CommandArgument::Values::OneOrMore, targetLambda },
+    CommandArgument{ "--target", CommandArgument::Values::OneOrMore,
+                     targetLambda },
+    CommandArgument{ "--config", CommandArgument::Values::One,
+                     [&](std::string const& value) -> bool {
+                       config = value;
+                       return true;
+                     } },
+    CommandArgument{ "--clean-first", CommandArgument::Values::Zero,
+                     [&](std::string const&) -> bool {
+                       cleanFirst = true;
+                       return true;
+                     } },
+    CommandArgument{ "-v", CommandArgument::Values::Zero, verboseLambda },
+    CommandArgument{ "--verbose", CommandArgument::Values::Zero,
+                     verboseLambda },
+    /* legacy option no-op*/
+    CommandArgument{ "--use-stderr", CommandArgument::Values::Zero,
+                     [](std::string const&) -> bool { return true; } },
+    CommandArgument{ "--", CommandArgument::Values::Zero,
+                     [&](std::string const&) -> bool {
+                       nativeOptionsPassed = true;
+                       return true;
+                     } },
+  };
+
+  if (ac >= 3) {
+    dir = cmSystemTools::CollapseFullPath(av[2]);
+
+    std::vector<std::string> inputArgs;
+    inputArgs.reserve(ac - 3);
+    cm::append(inputArgs, av + 3, av + ac);
+
+    decltype(inputArgs.size()) i = 0;
+    for (; i < inputArgs.size() && !nativeOptionsPassed; ++i) {
+
+      std::string const& arg = inputArgs[i];
+      for (auto const& m : arguments) {
+        if (m.matches(arg) && m.parse(arg, i, inputArgs)) {
           break;
-        case DoingTarget:
-          if (strlen(av[i]) == 0) {
-            std::cerr << "Warning: Argument number " << i
-                      << " after --target option is empty." << std::endl;
-          } else {
-            targets.emplace_back(av[i]);
-            if (strcmp(av[i], "clean") == 0) {
-              foundClean = true;
-            } else {
-              foundNonClean = true;
-            }
-          }
-          if (foundClean && foundNonClean) {
-            std::cerr << "Error: Building 'clean' and other targets together "
-                         "is not supported."
-                      << std::endl;
-            dir.clear();
-          }
-          break;
-        case DoingConfig:
-          config = av[i];
-          doing = DoingNone;
-          break;
-        default:
-          std::cerr << "Unknown argument " << av[i] << std::endl;
-          dir.clear();
-          break;
+        }
       }
     }
+
+    if (nativeOptionsPassed) {
+      cm::append(nativeOptions, inputArgs.begin() + i, inputArgs.end());
+    }
+  }
+
+  if (foundClean && foundNonClean) {
+    std::cerr << "Error: Building 'clean' and other targets together "
+                 "is not supported."
+              << std::endl;
+    dir.clear();
   }
 
   if (jobs == cmake::NO_BUILD_PARALLEL_LEVEL) {
