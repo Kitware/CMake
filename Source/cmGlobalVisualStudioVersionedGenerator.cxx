@@ -200,6 +200,7 @@ public:
     platforms.emplace_back("Win32");
     platforms.emplace_back("ARM");
     platforms.emplace_back("ARM64");
+    platforms.emplace_back("ARM64EC");
     return platforms;
   }
 
