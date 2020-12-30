@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <climits>
 #include <cstring>
 #include <iostream>
@@ -275,7 +274,7 @@ int do_cmake(int ac, char const* const* av)
                      [&](std::string const& value) -> bool {
                        workingMode = cmake::SCRIPT_MODE;
                        parsedArgs.emplace_back("-P");
-                       parsedArgs.push_back(std::move(value));
+                       parsedArgs.push_back(value);
                        return true;
                      } },
     CommandArgument{ "--find-package", CommandArgument::Values::Zero,
@@ -304,9 +303,8 @@ int do_cmake(int ac, char const* const* av)
         matched = true;
         if (m.parse(arg, i, inputArgs)) {
           break;
-        } else {
-          return 1;
         }
+        return 1; // failed to parse
       }
     }
     if (!matched) {
@@ -725,60 +723,59 @@ int do_install(int ac, char const* const* av)
   bool strip = false;
   bool verbose = cmSystemTools::HasEnv("VERBOSE");
 
-  enum Doing
-  {
-    DoingNone,
-    DoingDir,
-    DoingConfig,
-    DoingComponent,
-    DoingPrefix,
-    DoingDefaultDirectoryPermissions,
+  auto verboseLambda = [&](std::string const&) -> bool {
+    verbose = true;
+    return true;
   };
 
-  Doing doing = DoingDir;
+  using CommandArgument =
+    cmCommandLineArgument<bool(std::string const& value)>;
 
-  for (int i = 2; i < ac; ++i) {
-    if (strcmp(av[i], "--config") == 0) {
-      doing = DoingConfig;
-    } else if (strcmp(av[i], "--component") == 0) {
-      doing = DoingComponent;
-    } else if (strcmp(av[i], "--prefix") == 0) {
-      doing = DoingPrefix;
-    } else if (strcmp(av[i], "--strip") == 0) {
-      strip = true;
-      doing = DoingNone;
-    } else if ((strcmp(av[i], "--verbose") == 0) ||
-               (strcmp(av[i], "-v") == 0)) {
-      verbose = true;
-      doing = DoingNone;
-    } else if (strcmp(av[i], "--default-directory-permissions") == 0) {
-      doing = DoingDefaultDirectoryPermissions;
-    } else {
-      switch (doing) {
-        case DoingDir:
-          dir = cmSystemTools::CollapseFullPath(av[i]);
-          doing = DoingNone;
+  std::vector<CommandArgument> arguments = {
+    CommandArgument{ "--config", CommandArgument::Values::One,
+                     [&](std::string const& value) -> bool {
+                       config = value;
+                       return true;
+                     } },
+    CommandArgument{ "--component", CommandArgument::Values::One,
+                     [&](std::string const& value) -> bool {
+                       component = value;
+                       return true;
+                     } },
+    CommandArgument{ "--default-directory-permissions",
+                     CommandArgument::Values::One,
+                     [&](std::string const& value) -> bool {
+                       defaultDirectoryPermissions = value;
+                       return true;
+                     } },
+    CommandArgument{ "--prefix", CommandArgument::Values::One,
+                     [&](std::string const& value) -> bool {
+                       prefix = value;
+                       return true;
+                     } },
+    CommandArgument{ "--strip", CommandArgument::Values::Zero,
+                     [&](std::string const&) -> bool {
+                       strip = true;
+                       return true;
+                     } },
+    CommandArgument{ "-v", CommandArgument::Values::Zero, verboseLambda },
+    CommandArgument{ "--verbose", CommandArgument::Values::Zero,
+                     verboseLambda }
+  };
+
+  if (ac >= 3) {
+    dir = cmSystemTools::CollapseFullPath(av[2]);
+
+    std::vector<std::string> inputArgs;
+    inputArgs.reserve(ac - 3);
+    cm::append(inputArgs, av + 3, av + ac);
+    for (decltype(inputArgs.size()) i = 0; i < inputArgs.size(); ++i) {
+
+      std::string const& arg = inputArgs[i];
+      for (auto const& m : arguments) {
+        if (m.matches(arg) && m.parse(arg, i, inputArgs)) {
           break;
-        case DoingConfig:
-          config = av[i];
-          doing = DoingNone;
-          break;
-        case DoingComponent:
-          component = av[i];
-          doing = DoingNone;
-          break;
-        case DoingPrefix:
-          prefix = av[i];
-          doing = DoingNone;
-          break;
-        case DoingDefaultDirectoryPermissions:
-          defaultDirectoryPermissions = av[i];
-          doing = DoingNone;
-          break;
-        default:
-          std::cerr << "Unknown argument " << av[i] << std::endl;
-          dir.clear();
-          break;
+        }
       }
     }
   }
