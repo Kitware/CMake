@@ -14,6 +14,7 @@ struct cmCommandLineArgument
     One,
     Two,
     ZeroOrOne,
+    OneOrMore
   };
 
   std::string InvalidSyntaxMessage;
@@ -125,6 +126,23 @@ struct cmCommandLineArgument
           parseState =
             this->StoreCall(cmStrCat(allArgs[index - 1], ";", allArgs[index]),
                             std::forward<CallState>(state)...)
+            ? ParseMode::Valid
+            : ParseMode::Invalid;
+        }
+      }
+    } else if (this->Type == Values::OneOrMore) {
+      if (input.size() == this->Name.size()) {
+        auto nextValueIndex = index + 1;
+        if (nextValueIndex >= allArgs.size() || allArgs[index + 1][0] == '-') {
+          parseState = ParseMode::ValueError;
+        } else {
+          std::string buffer = allArgs[nextValueIndex++];
+          while (nextValueIndex < allArgs.size() &&
+                 allArgs[nextValueIndex][0] != '-') {
+            buffer = cmStrCat(buffer, ";", allArgs[nextValueIndex++]);
+          }
+          parseState =
+            this->StoreCall(buffer, std::forward<CallState>(state)...)
             ? ParseMode::Valid
             : ParseMode::Invalid;
         }
