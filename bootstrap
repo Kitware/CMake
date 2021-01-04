@@ -944,11 +944,10 @@ while test $# != 0; do
 done
 
 # Make sure the generator is valid
-if test "${cmake_bootstrap_generator}" != "MSYS Makefiles" -a \
-    "${cmake_bootstrap_generator}" != "Unix Makefiles" -a \
-    "${cmake_bootstrap_generator}" != "Ninja"; then
-  cmake_error 10 "Invalid generator: ${cmake_bootstrap_generator}"
-fi
+case "${cmake_bootstrap_generator}" in
+  'MSYS Makefiles'|'Unix Makefiles'|'Ninja') ;;
+  *) cmake_error 10 "Invalid generator: ${cmake_bootstrap_generator}"
+esac
 
 # If verbose, display some information about bootstrap
 if test -n "${cmake_verbose}"; then
