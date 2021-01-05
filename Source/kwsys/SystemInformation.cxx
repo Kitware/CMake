@@ -447,6 +447,7 @@ public:
     Motorola,
     HP,
     Hygon,
+    Zhaoxin,
     UnknownManufacturer
   };
 
@@ -1731,7 +1732,8 @@ const char* SystemInformationImplementation::GetVendorID()
     case NexGen:
       return "NexGen Inc., Advanced Micro Devices";
     case IDT:
-      return "IDT\\Centaur, Via Inc.";
+      return "IDT\\Centaur, Via Inc., Shanghai Zhaoxin Semiconductor Co., "
+             "Ltd.";
     case UMC:
       return "United Microelectronics Corp.";
     case Rise:
@@ -1748,6 +1750,8 @@ const char* SystemInformationImplementation::GetVendorID()
       return "Hewlett-Packard";
     case Hygon:
       return "Chengdu Haiguang IC Design Co., Ltd.";
+    case Zhaoxin:
+      return "Shanghai Zhaoxin Semiconductor Co., Ltd.";
     case UnknownManufacturer:
     default:
       return "Unknown Manufacturer";
@@ -2109,7 +2113,10 @@ void SystemInformationImplementation::FindManufacturer(
   else if (this->ChipID.Vendor == "NexGenDriven")
     this->ChipManufacturer = NexGen; // NexGen Inc. (now AMD)
   else if (this->ChipID.Vendor == "CentaurHauls")
-    this->ChipManufacturer = IDT; // IDT/Centaur (now VIA)
+    this->ChipManufacturer = IDT; // original IDT/Centaur/VIA (now Zhaoxin)
+  else if (this->ChipID.Vendor == "  Shanghai  ")
+    this->ChipManufacturer =
+      Zhaoxin; // Shanghai Zhaoxin Semiconductor Co., Ltd.
   else if (this->ChipID.Vendor == "RiseRiseRise")
     this->ChipManufacturer = Rise; // Rise
   else if (this->ChipID.Vendor == "GenuineTMx86")
@@ -3223,7 +3230,8 @@ bool SystemInformationImplementation::RetrieveClassicalCPUIdentity()
               this->ChipID.ProcessorName = "C3";
               break;
             default:
-              this->ChipID.ProcessorName = "Unknown IDT\\Centaur family";
+              this->ChipID.ProcessorName =
+                "Unknown IDT\\Centaur\\VIA\\Zhaoxin family";
               return false;
           }
           break;
@@ -3232,13 +3240,63 @@ bool SystemInformationImplementation::RetrieveClassicalCPUIdentity()
             case 6:
               this->ChipID.ProcessorName = "VIA Cyrix III - Samuel";
               break;
+            case 0xf:
+              this->ChipID.ProcessorName = "Zhaoxin zxc";
+              break;
             default:
-              this->ChipID.ProcessorName = "Unknown IDT\\Centaur family";
+              this->ChipID.ProcessorName =
+                "Unknown IDT\\Centaur\\VIA\\Zhaoxin family";
+              return false;
+          }
+          break;
+        case 7:
+          switch (this->ChipID.Model) {
+            case 0x1b:
+              this->ChipID.ProcessorName = "Zhaoxin kx5000";
+              break;
+            case 0x3b:
+              this->ChipID.ProcessorName = "Zhaoxin kx6000";
+              break;
+            default:
+              this->ChipID.ProcessorName =
+                "Unknown IDT\\Centaur\\VIA\\Zhaoxin family";
               return false;
           }
           break;
         default:
-          this->ChipID.ProcessorName = "Unknown IDT\\Centaur family";
+          this->ChipID.ProcessorName =
+            "Unknown IDT\\Centaur\\VIA\\Zhaoxin family";
+          return false;
+      }
+      break;
+
+    case Zhaoxin:
+      switch (this->ChipID.Family) {
+        case 6:
+          switch (this->ChipID.Model) {
+            case 0x19:
+              this->ChipID.ProcessorName = "Zhaoxin zxc";
+              break;
+            default:
+              this->ChipID.ProcessorName = "Unknown Zhaoxin family";
+              return false;
+          }
+          break;
+        case 7:
+          switch (this->ChipID.Model) {
+            case 0x1b:
+              this->ChipID.ProcessorName = "Zhaoxin kx5000";
+              break;
+            case 0x3b:
+              this->ChipID.ProcessorName = "Zhaoxin kx6000";
+              break;
+            default:
+              this->ChipID.ProcessorName = "Unknown Zhaoxin family";
+              return false;
+          }
+          break;
+        default:
+          this->ChipID.ProcessorName = "Unknown Zhaoxin family";
           return false;
       }
       break;
