@@ -69,17 +69,17 @@ struct GeneratedMakeCommand
   void Add(T&&... args)
   {
     // iterate the args and append each one
-    AppendStrs(PrimaryCommand, std::forward<T>(args)...);
+    AppendStrs(this->PrimaryCommand, std::forward<T>(args)...);
   }
 
   // Add each value in the iterators as a separate element to the vector
   void Add(std::vector<std::string>::const_iterator start,
            std::vector<std::string>::const_iterator end)
   {
-    cm::append(PrimaryCommand, start, end);
+    cm::append(this->PrimaryCommand, start, end);
   }
 
-  std::string Printable() const { return cmJoin(PrimaryCommand, " "); }
+  std::string Printable() const { return cmJoin(this->PrimaryCommand, " "); }
 
   std::vector<std::string> PrimaryCommand;
   bool RequiresOutputForward = false;
@@ -501,7 +501,7 @@ public:
     cmSourceFile* sf) const;
 
 #if !defined(CMAKE_BOOTSTRAP)
-  cmFileLockPool& GetFileLockPool() { return FileLockPool; }
+  cmFileLockPool& GetFileLockPool() { return this->FileLockPool; }
 #endif
 
   bool GetConfigureDoneCMP0026() const

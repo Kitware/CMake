@@ -148,11 +148,13 @@ bool cmStateDirectory::ContainsBoth(std::string const& local_path,
             cmSystemTools::IsSubDirectory(a, b));
   };
 
-  bool bothInBinary = PathEqOrSubDir(local_path, GetRelativePathTopBinary()) &&
-    PathEqOrSubDir(remote_path, GetRelativePathTopBinary());
+  bool bothInBinary =
+    PathEqOrSubDir(local_path, this->GetRelativePathTopBinary()) &&
+    PathEqOrSubDir(remote_path, this->GetRelativePathTopBinary());
 
-  bool bothInSource = PathEqOrSubDir(local_path, GetRelativePathTopSource()) &&
-    PathEqOrSubDir(remote_path, GetRelativePathTopSource());
+  bool bothInSource =
+    PathEqOrSubDir(local_path, this->GetRelativePathTopSource()) &&
+    PathEqOrSubDir(remote_path, this->GetRelativePathTopSource());
 
   return bothInBinary || bothInSource;
 }

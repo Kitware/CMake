@@ -57,7 +57,7 @@ private:
                               bool prepend, bool system) override
   {
     std::string const& base = this->Makefile->GetCurrentSourceDirectory();
-    cmTargetPropCommandBase::HandleInterfaceContent(
+    this->cmTargetPropCommandBase::HandleInterfaceContent(
       tgt, ConvertToAbsoluteContent(content, base), prepend, system);
   }
 

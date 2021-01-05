@@ -467,7 +467,7 @@ bool DumpFile(std::string const& nmPath, const char* filename,
 
 bool bindexplib::AddObjectFile(const char* filename)
 {
-  return DumpFile(NmPath, filename, this->Symbols, this->DataSymbols);
+  return DumpFile(this->NmPath, filename, this->Symbols, this->DataSymbols);
 }
 
 bool bindexplib::AddDefinitionFile(const char* filename)
@@ -511,5 +511,5 @@ void bindexplib::WriteFile(FILE* file)
 
 void bindexplib::SetNmPath(std::string const& nm)
 {
-  NmPath = nm;
+  this->NmPath = nm;
 }

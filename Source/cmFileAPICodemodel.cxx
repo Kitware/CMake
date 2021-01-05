@@ -145,7 +145,7 @@ class JBTIndex
 {
 public:
   JBTIndex() = default;
-  explicit operator bool() const { return Index != None; }
+  explicit operator bool() const { return this->Index != None; }
   Json::ArrayIndex Index = None;
   static Json::ArrayIndex const None = static_cast<Json::ArrayIndex>(-1);
 };

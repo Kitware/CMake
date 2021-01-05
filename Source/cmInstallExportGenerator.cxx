@@ -122,10 +122,10 @@ size_t cmInstallExportGenerator::GetMaxConfigLength() const
 void cmInstallExportGenerator::GenerateScript(std::ostream& os)
 {
   // Skip empty sets.
-  if (ExportSet->GetTargetExports().empty()) {
+  if (this->ExportSet->GetTargetExports().empty()) {
     std::ostringstream e;
-    e << "INSTALL(EXPORT) given unknown export \"" << ExportSet->GetName()
-      << "\"";
+    e << "INSTALL(EXPORT) given unknown export \""
+      << this->ExportSet->GetName() << "\"";
     cmSystemTools::Error(e.str());
     return;
   }

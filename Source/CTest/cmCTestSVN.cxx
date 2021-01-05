@@ -286,9 +286,9 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
   args.push_back(nullptr);
 
   if (strcmp(parameters[0], "update") == 0) {
-    return RunUpdateCommand(&args[0], out, err);
+    return this->RunUpdateCommand(&args[0], out, err);
   }
-  return RunChild(&args[0], out, err);
+  return this->RunChild(&args[0], out, err);
 }
 
 class cmCTestSVN::LogParser
@@ -328,7 +328,7 @@ private:
     this->CData.clear();
     if (name == "logentry") {
       this->Rev = Revision();
-      this->Rev.SVNInfo = &SVNRepo;
+      this->Rev.SVNInfo = &this->SVNRepo;
       if (const char* rev =
             cmCTestSVN::LogParser::FindAttribute(atts, "revision")) {
         this->Rev.Rev = rev;
@@ -354,7 +354,7 @@ private:
       this->SVN->DoRevisionSVN(this->Rev, this->Changes);
     } else if (!this->CData.empty() && name == "path") {
       std::string orig_path(&this->CData[0], this->CData.size());
-      std::string new_path = SVNRepo.BuildLocalPath(orig_path);
+      std::string new_path = this->SVNRepo.BuildLocalPath(orig_path);
       this->CurChange.Path.assign(new_path);
       this->Changes.push_back(this->CurChange);
     } else if (!this->CData.empty() && name == "author") {

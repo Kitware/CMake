@@ -31,7 +31,7 @@
 
 cmCPackNSISGenerator::cmCPackNSISGenerator(bool nsis64)
 {
-  Nsis64 = nsis64;
+  this->Nsis64 = nsis64;
 }
 
 cmCPackNSISGenerator::~cmCPackNSISGenerator() = default;
@@ -61,18 +61,18 @@ int cmCPackNSISGenerator::PackageFiles()
   std::string nsisInstallOptions = nsisFileName + "/NSIS.InstallOptions.ini";
   nsisFileName += "/project.nsi";
   std::ostringstream str;
-  for (std::string const& file : files) {
+  for (std::string const& file : this->files) {
     std::string outputDir = "$INSTDIR";
-    std::string fileN = cmSystemTools::RelativePath(toplevel, file);
+    std::string fileN = cmSystemTools::RelativePath(this->toplevel, file);
     if (!this->Components.empty()) {
       const std::string::size_type pos = fileN.find('/');
 
       // Use the custom component install directory if we have one
       if (pos != std::string::npos) {
         auto componentName = cm::string_view(fileN).substr(0, pos);
-        outputDir = CustomComponentInstallDirectory(componentName);
+        outputDir = this->CustomComponentInstallDirectory(componentName);
       } else {
-        outputDir = CustomComponentInstallDirectory(fileN);
+        outputDir = this->CustomComponentInstallDirectory(fileN);
       }
 
       // Strip off the component part of the path.
@@ -86,15 +86,15 @@ int cmCPackNSISGenerator::PackageFiles()
                 "Uninstall Files: " << str.str() << std::endl);
   this->SetOptionIfNotSet("CPACK_NSIS_DELETE_FILES", str.str().c_str());
   std::vector<std::string> dirs;
-  this->GetListOfSubdirectories(toplevel.c_str(), dirs);
+  this->GetListOfSubdirectories(this->toplevel.c_str(), dirs);
   std::ostringstream dstr;
   for (std::string const& dir : dirs) {
     std::string componentName;
-    std::string fileN = cmSystemTools::RelativePath(toplevel, dir);
+    std::string fileN = cmSystemTools::RelativePath(this->toplevel, dir);
     if (fileN.empty()) {
       continue;
     }
-    if (!Components.empty()) {
+    if (!this->Components.empty()) {
       // If this is a component installation, strip off the component
       // part of the path.
       std::string::size_type slash = fileN.find('/');
@@ -110,7 +110,7 @@ int cmCPackNSISGenerator::PackageFiles()
     std::replace(fileN.begin(), fileN.end(), '/', '\\');
 
     const std::string componentOutputDir =
-      CustomComponentInstallDirectory(componentName);
+      this->CustomComponentInstallDirectory(componentName);
 
     dstr << "  RMDir \"" << componentOutputDir << "\\" << fileN << "\""
          << std::endl;
@@ -677,7 +677,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
   }
 
   const std::string componentOutputDir =
-    CustomComponentInstallDirectory(component->Name);
+    this->CustomComponentInstallDirectory(component->Name);
   componentCode += cmStrCat("  SetOutPath \"", componentOutputDir, "\"\n");
 
   // Create the actual installation commands
@@ -833,14 +833,16 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
   // depends on.
   std::set<cmCPackComponent*> visited;
   macrosOut << "!macro Select_" << component->Name << "_depends\n";
-  macrosOut << CreateSelectionDependenciesDescription(component, visited);
+  macrosOut << this->CreateSelectionDependenciesDescription(component,
+                                                            visited);
   macrosOut << "!macroend\n";
 
   // Macro used to deselect each of the components that depend on this
   // component.
   visited.clear();
   macrosOut << "!macro Deselect_required_by_" << component->Name << "\n";
-  macrosOut << CreateDeselectionDependenciesDescription(component, visited);
+  macrosOut << this->CreateDeselectionDependenciesDescription(component,
+                                                              visited);
   macrosOut << "!macroend\n";
   return componentCode;
 }
@@ -862,7 +864,8 @@ std::string cmCPackNSISGenerator::CreateSelectionDependenciesDescription(
     out << "  SectionSetFlags ${" << depend->Name << "} $0\n";
     out << "  IntOp $" << depend->Name << "_selected 0 + ${SF_SELECTED}\n";
     // Recurse
-    out << CreateSelectionDependenciesDescription(depend, visited).c_str();
+    out
+      << this->CreateSelectionDependenciesDescription(depend, visited).c_str();
   }
 
   return out.str();
@@ -887,7 +890,8 @@ std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription(
     out << "  IntOp $" << depend->Name << "_selected 0 + 0\n";
 
     // Recurse
-    out << CreateDeselectionDependenciesDescription(depend, visited).c_str();
+    out << this->CreateDeselectionDependenciesDescription(depend, visited)
+             .c_str();
   }
 
   return out.str();

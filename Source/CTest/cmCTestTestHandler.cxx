@@ -340,7 +340,7 @@ void cmCTestTestHandler::Initialize()
   this->ExcludeFixtureSetupRegExp.clear();
   this->ExcludeFixtureCleanupRegExp.clear();
 
-  TestsToRunString.clear();
+  this->TestsToRunString.clear();
   this->UseUnion = false;
   this->TestList.clear();
 }
@@ -877,7 +877,7 @@ bool cmCTestTestHandler::ComputeTestList()
     finalList.push_back(tp);
   }
 
-  UpdateForFixtures(finalList);
+  this->UpdateForFixtures(finalList);
 
   // Save the total number of tests before exclusions
   this->TotalNumberOfTests = this->TestList.size();
@@ -906,7 +906,7 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
     finalList.push_back(tp);
   }
 
-  UpdateForFixtures(finalList);
+  this->UpdateForFixtures(finalList);
 
   // Save the total number of tests before exclusions
   this->TotalNumberOfTests = this->TestList.size();

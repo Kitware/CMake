@@ -71,7 +71,8 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
       this->CMP0113New = true;
       break;
   }
-  MacOSXContentGenerator = cm::make_unique<MacOSXContentGeneratorType>(this);
+  this->MacOSXContentGenerator =
+    cm::make_unique<MacOSXContentGeneratorType>(this);
 }
 
 cmMakefileTargetGenerator::~cmMakefileTargetGenerator() = default;

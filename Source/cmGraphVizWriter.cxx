@@ -131,8 +131,8 @@ cmGraphVizWriter::~cmGraphVizWriter()
 
 void cmGraphVizWriter::VisitGraph(std::string const&)
 {
-  this->WriteHeader(GlobalFileStream, this->GraphName);
-  this->WriteLegend(GlobalFileStream);
+  this->WriteHeader(this->GlobalFileStream, this->GraphName);
+  this->WriteLegend(this->GlobalFileStream);
 }
 
 void cmGraphVizWriter::OnItem(cmLinkItem const& item)
@@ -141,8 +141,9 @@ void cmGraphVizWriter::OnItem(cmLinkItem const& item)
     return;
   }
 
-  NodeNames[item.AsStr()] = cmStrCat(GraphNodePrefix, NextNodeId);
-  ++NextNodeId;
+  this->NodeNames[item.AsStr()] =
+    cmStrCat(this->GraphNodePrefix, this->NextNodeId);
+  ++this->NextNodeId;
 
   this->WriteNode(this->GlobalFileStream, item);
 }
@@ -191,12 +192,13 @@ void cmGraphVizWriter::VisitLink(cmLinkItem const& depender,
   this->WriteConnection(this->GlobalFileStream, depender, dependee, scopeType);
 
   if (this->GeneratePerTarget) {
-    PerTargetConnections[depender].emplace_back(depender, dependee, scopeType);
+    this->PerTargetConnections[depender].emplace_back(depender, dependee,
+                                                      scopeType);
   }
 
   if (this->GenerateDependers) {
-    TargetDependersConnections[dependee].emplace_back(dependee, depender,
-                                                      scopeType);
+    this->TargetDependersConnections[dependee].emplace_back(dependee, depender,
+                                                            scopeType);
   }
 }
 
@@ -307,12 +309,12 @@ void cmGraphVizWriter::Write()
   }
 
   if (this->GeneratePerTarget) {
-    WritePerTargetConnections<DependeesDir>(PerTargetConnections);
+    this->WritePerTargetConnections<DependeesDir>(this->PerTargetConnections);
   }
 
   if (this->GenerateDependers) {
-    WritePerTargetConnections<DependersDir>(TargetDependersConnections,
-                                            ".dependers");
+    this->WritePerTargetConnections<DependersDir>(
+      this->TargetDependersConnections, ".dependers");
   }
 }
 
@@ -336,7 +338,8 @@ void cmGraphVizWriter::FindAllConnections(const ConnectionsMap& connectionMap,
     bool const visited = visitedItems.find(dstItem) != visitedItems.cend();
     if (!visited) {
       visitedItems.insert(dstItem);
-      FindAllConnections(connectionMap, dstItem, extendedCons, visitedItems);
+      this->FindAllConnections(connectionMap, dstItem, extendedCons,
+                               visitedItems);
     }
   }
 }
@@ -346,7 +349,8 @@ void cmGraphVizWriter::FindAllConnections(const ConnectionsMap& connectionMap,
                                           Connections& extendedCons)
 {
   std::set<cmLinkItem> visitedItems = { rootItem };
-  FindAllConnections(connectionMap, rootItem, extendedCons, visitedItems);
+  this->FindAllConnections(connectionMap, rootItem, extendedCons,
+                           visitedItems);
 }
 
 template <typename DirFunc>
@@ -358,7 +362,7 @@ void cmGraphVizWriter::WritePerTargetConnections(
   for (auto const& conPerTarget : connections) {
     const cmLinkItem& rootItem = conPerTarget.first;
     Connections& extendedCons = extendedConnections[conPerTarget.first];
-    FindAllConnections(connections, rootItem, extendedCons);
+    this->FindAllConnections(connections, rootItem, extendedCons);
   }
 
   for (auto const& conPerTarget : extendedConnections) {
@@ -451,7 +455,7 @@ void cmGraphVizWriter::WriteNode(cmGeneratedFileStream& fs,
   auto const& itemName = item.AsStr();
   auto const& nodeName = this->NodeNames[itemName];
 
-  auto const itemNameWithAliases = ItemNameWithAliases(itemName);
+  auto const itemNameWithAliases = this->ItemNameWithAliases(itemName);
   auto const escapedLabel = EscapeForDotFile(itemNameWithAliases);
 
   fs << "    \"" << nodeName << "\" [ label = \"" << escapedLabel

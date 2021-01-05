@@ -966,21 +966,21 @@ public:
 
 const std::string& Args::PopFront(cm::string_view error)
 {
-  if (empty()) {
+  if (this->empty()) {
     throw json_error({ error });
   }
-  const std::string& res = *begin();
-  advance(1);
+  const std::string& res = *this->begin();
+  this->advance(1);
   return res;
 }
 
 const std::string& Args::PopBack(cm::string_view error)
 {
-  if (empty()) {
+  if (this->empty()) {
     throw json_error({ error });
   }
-  const std::string& res = *(end() - 1);
-  retreat(1);
+  const std::string& res = *(this->end() - 1);
+  this->retreat(1);
   return res;
 }
 

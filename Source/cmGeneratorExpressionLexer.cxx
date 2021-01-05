@@ -35,14 +35,14 @@ std::vector<cmGeneratorExpressionToken> cmGeneratorExpressionLexer::Tokenize(
                               2);
           upto = c + 2;
           ++c;
-          SawBeginExpression = true;
+          this->SawBeginExpression = true;
         }
         break;
       case '>':
         InsertText(upto, c, result);
         result.emplace_back(cmGeneratorExpressionToken::EndExpression, c, 1);
         upto = c + 1;
-        SawGeneratorExpression = SawBeginExpression;
+        this->SawGeneratorExpression = this->SawBeginExpression;
         break;
       case ':':
         InsertText(upto, c, result);

@@ -37,7 +37,7 @@ public:
   template <typename T>
   CMakePathArgumentParser& Bind(cm::static_string_view name, T Result::*member)
   {
-    cmArgumentParser<Result>::Bind(name, member);
+    this->cmArgumentParser<Result>::Bind(name, member);
     return *this;
   }
 
@@ -48,12 +48,12 @@ public:
   {
     this->Inputs.clear();
 
-    return cmArgumentParser<Result>::Parse(cmMakeRange(args).advance(Advance),
-                                           &this->Inputs, keywordsMissingValue,
-                                           parsedKeywords);
+    return this->cmArgumentParser<Result>::Parse(
+      cmMakeRange(args).advance(Advance), &this->Inputs, keywordsMissingValue,
+      parsedKeywords);
   }
 
-  const std::vector<std::string>& GetInputs() const { return Inputs; }
+  const std::vector<std::string>& GetInputs() const { return this->Inputs; }
 
 protected:
   mutable std::vector<std::string> Inputs;
@@ -74,7 +74,7 @@ public:
   ArgumentParserWithOutputVariable& Bind(cm::static_string_view name,
                                          T Result::*member)
   {
-    cmArgumentParser<Result>::Bind(name, member);
+    this->cmArgumentParser<Result>::Bind(name, member);
     return *this;
   }
 
@@ -84,7 +84,7 @@ public:
     this->KeywordsMissingValue.clear();
     this->ParsedKeywords.clear();
 
-    return CMakePathArgumentParser<Result>::template Parse<Advance>(
+    return this->CMakePathArgumentParser<Result>::template Parse<Advance>(
       args, &this->KeywordsMissingValue, &this->ParsedKeywords);
   }
 

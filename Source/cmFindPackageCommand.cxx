@@ -144,7 +144,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     this->RequiredCMakeVersion = CMake_VERSION_ENCODE(v[0], v[1], v[2]);
   }
 
-  this->DebugMode = ComputeIfDebugModeWanted();
+  this->DebugMode = this->ComputeIfDebugModeWanted();
   this->DebugBuffer.clear();
 
   // Lookup target architecture, if any.
@@ -534,7 +534,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         loadedPackage = true;
       } else {
         // The package was not loaded. Report errors.
-        if (HandlePackageMode(HandlePackageModeType::Module)) {
+        if (this->HandlePackageMode(HandlePackageModeType::Module)) {
           loadedPackage = true;
         }
       }
@@ -2070,8 +2070,8 @@ public:
   void SetSort(cmFindPackageCommand::SortOrderType o,
                cmFindPackageCommand::SortDirectionType d)
   {
-    SortOrder = o;
-    SortDirection = d;
+    this->SortOrder = o;
+    this->SortDirection = d;
   }
 
 protected:
@@ -2102,8 +2102,8 @@ private:
     // before testing the matches check if there is a specific sorting order to
     // perform
     if (this->SortOrder != cmFindPackageCommand::None) {
-      cmFindPackageCommand::Sort(matches.begin(), matches.end(), SortOrder,
-                                 SortDirection);
+      cmFindPackageCommand::Sort(matches.begin(), matches.end(),
+                                 this->SortOrder, this->SortDirection);
     }
 
     for (std::string const& i : matches) {

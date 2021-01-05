@@ -150,7 +150,7 @@ public:
   static void WriteDefault(std::ostream& os, const cmNinjaDeps& targets,
                            const std::string& comment = "");
 
-  bool IsGCCOnWindows() const { return UsingGCCOnWindows; }
+  bool IsGCCOnWindows() const { return this->UsingGCCOnWindows; }
 
 public:
   cmGlobalNinjaGenerator(cmake* cm);
@@ -354,7 +354,10 @@ public:
     outputs.push_back(this->NinjaOutputPath(NINJA_BUILD_FILE));
   }
 
-  int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
+  int GetRuleCmdLength(const std::string& name)
+  {
+    return this->RuleCmdLength[name];
+  }
 
   void AddTargetAlias(const std::string& alias, cmGeneratorTarget* target,
                       const std::string& config);

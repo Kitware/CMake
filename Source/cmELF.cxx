@@ -379,7 +379,7 @@ private:
 
     // Fix the byte order of the header.
     if (this->NeedSwap) {
-      ByteSwap(x);
+      this->ByteSwap(x);
     }
     return true;
   }
@@ -387,7 +387,7 @@ private:
   {
     if (this->Stream->read(reinterpret_cast<char*>(&x), sizeof(x)) &&
         this->NeedSwap) {
-      ByteSwap(x);
+      this->ByteSwap(x);
     }
     return !this->Stream->fail();
   }
@@ -395,7 +395,7 @@ private:
   {
     if (this->Stream->read(reinterpret_cast<char*>(&x), sizeof(x)) &&
         this->NeedSwap) {
-      ByteSwap(x);
+      this->ByteSwap(x);
     }
     return !this->Stream->fail();
   }
@@ -573,7 +573,7 @@ std::vector<char> cmELFInternalImpl<Types>::EncodeDynamicEntries(
     dyn.d_un.d_val = static_cast<tagtype>(entry.second);
 
     if (this->NeedSwap) {
-      ByteSwap(dyn);
+      this->ByteSwap(dyn);
     }
 
     char* pdyn = reinterpret_cast<char*>(&dyn);

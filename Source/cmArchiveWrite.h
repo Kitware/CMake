@@ -26,7 +26,7 @@ public:
   }
   void Clear() { this->IsValueSet = false; }
   bool IsSet() const { return this->IsValueSet; }
-  T Get() const { return Value; }
+  T Get() const { return this->Value; }
 
 private:
   T Value;

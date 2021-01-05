@@ -978,7 +978,7 @@ struct BacktraceGuard
     this->Backtrace = std::move(current);
   }
 
-  ~BacktraceGuard() { this->Backtrace = std::move(Previous); }
+  ~BacktraceGuard() { this->Backtrace = std::move(this->Previous); }
 
 private:
   cmListFileBacktrace& Backtrace;
@@ -2438,7 +2438,7 @@ cmMakefile::AppleSDK cmMakefile::GetAppleSDKType() const
 
 bool cmMakefile::PlatformIsAppleEmbedded() const
 {
-  return GetAppleSDKType() != AppleSDK::MacOS;
+  return this->GetAppleSDKType() != AppleSDK::MacOS;
 }
 
 const char* cmMakefile::GetSONameFlag(const std::string& language) const
@@ -2449,7 +2449,7 @@ const char* cmMakefile::GetSONameFlag(const std::string& language) const
     name += language;
   }
   name += "_FLAG";
-  return cmToCStr(GetDefinition(name));
+  return cmToCStr(this->GetDefinition(name));
 }
 
 bool cmMakefile::CanIWriteThisFile(std::string const& fileName) const
@@ -2472,7 +2472,7 @@ const std::string& cmMakefile::GetRequiredDefinition(
   const std::string& name) const
 {
   static std::string const empty;
-  const std::string* def = GetDefinition(name);
+  const std::string* def = this->GetDefinition(name);
   if (!def) {
     cmSystemTools::Error("Error required internal CMake variable not "
                          "set, cmake may not be built correctly.\n"
@@ -2532,7 +2532,7 @@ cmProp cmMakefile::GetDefinition(const std::string& name) const
 const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
 {
   static std::string const empty;
-  const std::string* def = GetDefinition(name);
+  const std::string* def = this->GetDefinition(name);
   if (!def) {
     return empty;
   }
@@ -2598,24 +2598,24 @@ const std::string& cmMakefile::ExpandVariablesInString(
       // Suppress variable watches to avoid calling hooks twice. Suppress new
       // dereferences since the OLD behavior is still what is actually used.
       this->SuppressSideEffects = true;
-      newError = ExpandVariablesInStringNew(newErrorstr, newResult,
-                                            escapeQuotes, noEscapes, atOnly,
-                                            filename, line, replaceAt);
+      newError = this->ExpandVariablesInStringNew(
+        newErrorstr, newResult, escapeQuotes, noEscapes, atOnly, filename,
+        line, replaceAt);
       this->SuppressSideEffects = false;
       CM_FALLTHROUGH;
     }
     case cmPolicies::OLD:
-      mtype =
-        ExpandVariablesInStringOld(errorstr, source, escapeQuotes, noEscapes,
-                                   atOnly, filename, line, removeEmpty, true);
+      mtype = this->ExpandVariablesInStringOld(errorstr, source, escapeQuotes,
+                                               noEscapes, atOnly, filename,
+                                               line, removeEmpty, true);
       break;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
     // Messaging here would be *very* verbose.
     case cmPolicies::NEW:
-      mtype =
-        ExpandVariablesInStringNew(errorstr, source, escapeQuotes, noEscapes,
-                                   atOnly, filename, line, replaceAt);
+      mtype = this->ExpandVariablesInStringNew(errorstr, source, escapeQuotes,
+                                               noEscapes, atOnly, filename,
+                                               line, replaceAt);
       break;
   }
 

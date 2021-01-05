@@ -26,7 +26,7 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
   , Optional(optional)
 {
   // We need per-config actions if the destination has generator expressions.
-  if (cmGeneratorExpression::Find(Destination) != std::string::npos) {
+  if (cmGeneratorExpression::Find(this->Destination) != std::string::npos) {
     this->ActionsPerConfig = true;
   }
 

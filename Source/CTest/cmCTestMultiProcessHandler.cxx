@@ -56,8 +56,8 @@ public:
   // Sorts tests in descending order of cost
   bool operator()(int index1, int index2) const
   {
-    return Handler->Properties[index1]->Cost >
-      Handler->Properties[index2]->Cost;
+    return this->Handler->Properties[index1]->Cost >
+      this->Handler->Properties[index2]->Cost;
   }
 
 private:
@@ -169,7 +169,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->TestRunningMap[test] = true; // mark the test as running
   // now remove the test itself
   this->EraseTest(test);
-  this->RunningCount += GetProcessorsUsed(test);
+  this->RunningCount += this->GetProcessorsUsed(test);
 
   auto testRun = cm::make_unique<cmCTestRunTest>(*this);
 
@@ -552,12 +552,12 @@ void cmCTestMultiProcessHandler::StartNextTests()
       continue;
     }
 
-    size_t processors = GetProcessorsUsed(test);
+    size_t processors = this->GetProcessorsUsed(test);
     bool testLoadOk = true;
     if (this->TestLoad > 0) {
       if (processors <= spareLoad) {
         cmCTestLog(this->CTest, DEBUG,
-                   "OK to run " << GetName(test) << ", it requires "
+                   "OK to run " << this->GetName(test) << ", it requires "
                                 << processors << " procs & system load is: "
                                 << systemLoad << std::endl);
         allTestsFailedTestLoadCheck = false;
@@ -568,7 +568,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
 
     if (processors <= minProcessorsRequired) {
       minProcessorsRequired = processors;
-      testWithMinProcessors = GetName(test);
+      testWithMinProcessors = this->GetName(test);
     }
 
     if (testLoadOk && processors <= numToStart && this->StartTest(test)) {
@@ -660,7 +660,7 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
   this->WriteCheckpoint(test);
   this->DeallocateResources(test);
   this->UnlockResources(test);
-  this->RunningCount -= GetProcessorsUsed(test);
+  this->RunningCount -= this->GetProcessorsUsed(test);
 
   for (auto p : properties->Affinity) {
     this->ProcessorsAvailable.insert(p);
@@ -793,9 +793,9 @@ int cmCTestMultiProcessHandler::SearchByName(std::string const& name)
 void cmCTestMultiProcessHandler::CreateTestCostList()
 {
   if (this->ParallelLevel > 1) {
-    CreateParallelTestCostList();
+    this->CreateParallelTestCostList();
   } else {
-    CreateSerialTestCostList();
+    this->CreateSerialTestCostList();
   }
 }
 
@@ -862,7 +862,7 @@ void cmCTestMultiProcessHandler::GetAllTestDependencies(int test,
 {
   TestSet const& dependencySet = this->Tests[test];
   for (int i : dependencySet) {
-    GetAllTestDependencies(i, dependencies);
+    this->GetAllTestDependencies(i, dependencies);
     dependencies.push_back(i);
   }
 }
@@ -886,7 +886,7 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
     }
 
     TestList dependencies;
-    GetAllTestDependencies(test, dependencies);
+    this->GetAllTestDependencies(test, dependencies);
 
     for (int testDependency : dependencies) {
       if (!cm::contains(alreadySortedTests, testDependency)) {
@@ -1274,7 +1274,7 @@ void cmCTestMultiProcessHandler::PrintOutputAsJson()
 void cmCTestMultiProcessHandler::PrintTestList()
 {
   if (this->CTest->GetOutputAsJson()) {
-    PrintOutputAsJson();
+    this->PrintOutputAsJson();
     return;
   }
 

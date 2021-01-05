@@ -39,7 +39,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   std::map<std::string, std::string>& outputFiles, mode_t perm)
 {
   std::string rawCondition = this->Condition->GetInput();
-  cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(Target);
+  cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(this->Target);
   if (!rawCondition.empty()) {
     std::string condResult =
       this->Condition->Evaluate(lg, config, target, nullptr, nullptr, lang);
@@ -95,7 +95,7 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
 {
   std::vector<std::string> enabledLanguages;
   cmGlobalGenerator* gg = lg->GetGlobalGenerator();
-  cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(Target);
+  cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(this->Target);
   gg->GetEnabledLanguages(enabledLanguages);
 
   for (std::string const& le : enabledLanguages) {

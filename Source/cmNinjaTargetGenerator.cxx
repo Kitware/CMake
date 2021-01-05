@@ -332,7 +332,8 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps(
 
   const std::vector<std::string>& deps = cli->GetDepends();
   cmNinjaDeps result(deps.size());
-  std::transform(deps.begin(), deps.end(), result.begin(), MapToNinjaPath());
+  std::transform(deps.begin(), deps.end(), result.begin(),
+                 this->MapToNinjaPath());
 
   // Add a dependency on the link definitions file, if any.
   if (cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
@@ -353,7 +354,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps(
   std::vector<std::string> linkDeps;
   this->GeneratorTarget->GetLinkDepends(linkDeps, config, linkLanguage);
   std::transform(linkDeps.begin(), linkDeps.end(), std::back_inserter(result),
-                 MapToNinjaPath());
+                 this->MapToNinjaPath());
 
   return result;
 }
@@ -361,7 +362,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps(
 std::string cmNinjaTargetGenerator::GetSourceFilePath(
   cmSourceFile const* source) const
 {
-  return ConvertToNinjaPath(source->GetFullPath());
+  return this->ConvertToNinjaPath(source->GetFullPath());
 }
 
 std::string cmNinjaTargetGenerator::GetObjectFilePath(
@@ -442,7 +443,7 @@ std::string cmNinjaTargetGenerator::GetTargetOutputDir(
   const std::string& config) const
 {
   std::string dir = this->GeneratorTarget->GetDirectory(config);
-  return ConvertToNinjaPath(dir);
+  return this->ConvertToNinjaPath(dir);
 }
 
 std::string cmNinjaTargetGenerator::GetTargetFilePath(
@@ -479,13 +480,13 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(
     }
 
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      ConvertToNinjaPath(pdbPath), cmOutputConverter::SHELL);
+      this->ConvertToNinjaPath(pdbPath), cmOutputConverter::SHELL);
     vars["TARGET_COMPILE_PDB"] =
       this->GetLocalGenerator()->ConvertToOutputFormat(
-        ConvertToNinjaPath(compilePdbPath), cmOutputConverter::SHELL);
+        this->ConvertToNinjaPath(compilePdbPath), cmOutputConverter::SHELL);
 
-    EnsureParentDirectoryExists(pdbPath);
-    EnsureParentDirectoryExists(compilePdbPath);
+    this->EnsureParentDirectoryExists(pdbPath);
+    this->EnsureParentDirectoryExists(compilePdbPath);
     return true;
   }
   return false;
@@ -605,7 +606,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     this->GetLocalGenerator()->CreateRulePlaceholderExpander());
 
   std::string const tdi = this->GetLocalGenerator()->ConvertToOutputFormat(
-    ConvertToNinjaPath(this->GetTargetDependInfoPath(lang, config)),
+    this->ConvertToNinjaPath(this->GetTargetDependInfoPath(lang, config)),
     cmLocalGenerator::SHELL);
 
   std::string launcher;
@@ -922,7 +923,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       config);
   }
   if (firstForConfig) {
-    cmProp pchExtension = GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
+    cmProp pchExtension =
+      this->GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
 
     std::vector<cmSourceFile const*> externalObjects;
     this->GeneratorTarget->GetExternalObjects(externalObjects, config);
@@ -956,9 +958,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
       const std::vector<std::string>& ccbyproducts = ccg.GetByproducts();
       std::transform(ccoutputs.begin(), ccoutputs.end(),
-                     std::back_inserter(orderOnlyDeps), MapToNinjaPath());
+                     std::back_inserter(orderOnlyDeps),
+                     this->MapToNinjaPath());
       std::transform(ccbyproducts.begin(), ccbyproducts.end(),
-                     std::back_inserter(orderOnlyDeps), MapToNinjaPath());
+                     std::back_inserter(orderOnlyDeps),
+                     this->MapToNinjaPath());
     }
 
     std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
@@ -1143,7 +1147,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // build response file name
   std::string cmakeLinkVar = cmStrCat(cmakeVarLang, "_RESPONSE_FILE_FLAG");
 
-  cmProp flag = GetMakefile()->GetDefinition(cmakeLinkVar);
+  cmProp flag = this->GetMakefile()->GetDefinition(cmakeLinkVar);
 
   bool const lang_supports_response =
     !(language == "RC" || (language == "CUDA" && !flag));
@@ -1240,7 +1244,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
     std::transform(depList.begin(), depList.end(),
                    std::back_inserter(objBuild.ImplicitDeps),
-                   MapToNinjaPath());
+                   this->MapToNinjaPath());
   }
 
   objBuild.OrderOnlyDeps.push_back(this->OrderDependsTargetForTarget(config));
@@ -1329,7 +1333,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     vars["dyndep"] = dyndep;
   }
 
-  EnsureParentDirectoryExists(objectFileName);
+  this->EnsureParentDirectoryExists(objectFileName);
 
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     objectDir, cmOutputConverter::SHELL);
@@ -1402,7 +1406,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     auto headers = this->GeneratorTarget->GetGeneratedISPCHeaders(config);
     if (!headers.empty()) {
       std::transform(headers.begin(), headers.end(), headers.begin(),
-                     MapToNinjaPath());
+                     this->MapToNinjaPath());
       objBuild.OrderOnlyDeps.insert(objBuild.OrderOnlyDeps.end(),
                                     headers.begin(), headers.end());
     }
@@ -1424,7 +1428,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       build.Comment = "Additional output files.";
       build.Outputs = cmExpandedList(evaluatedObjectOutputs);
       std::transform(build.Outputs.begin(), build.Outputs.end(),
-                     build.Outputs.begin(), MapToNinjaPath());
+                     build.Outputs.begin(), this->MapToNinjaPath());
       build.ExplicitDeps = objBuild.Outputs;
       this->GetGlobalGenerator()->WriteBuild(
         this->GetImplFileStream(fileConfig), build);
@@ -1644,7 +1648,7 @@ void cmNinjaTargetGenerator::EnsureDirectoryExists(
 void cmNinjaTargetGenerator::EnsureParentDirectoryExists(
   const std::string& path) const
 {
-  EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path));
+  this->EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path));
 }
 
 void cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(

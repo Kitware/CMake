@@ -22,7 +22,7 @@ cmGeneratorExpressionParser::cmGeneratorExpressionParser(
 void cmGeneratorExpressionParser::Parse(
   cmGeneratorExpressionEvaluatorVector& result)
 {
-  it = this->Tokens.begin();
+  this->it = this->Tokens.begin();
 
   while (this->it != this->Tokens.end()) {
     this->ParseContent(result);

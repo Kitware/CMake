@@ -27,7 +27,7 @@ cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
       static_cast<cmLocalCommonGenerator*>(gt->LocalGenerator))
   , GlobalCommonGenerator(static_cast<cmGlobalCommonGenerator*>(
       gt->LocalGenerator->GetGlobalGenerator()))
-  , ConfigNames(LocalCommonGenerator->GetConfigNames())
+  , ConfigNames(this->LocalCommonGenerator->GetConfigNames())
 {
 }
 

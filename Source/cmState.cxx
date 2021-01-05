@@ -524,7 +524,7 @@ bool cmState::AddScriptedCommand(std::string const& name, BT<Command> command,
 
 cmState::Command cmState::GetCommand(std::string const& name) const
 {
-  return GetCommandByExactName(cmSystemTools::LowerCase(name));
+  return this->GetCommandByExactName(cmSystemTools::LowerCase(name));
 }
 
 cmState::Command cmState::GetCommandByExactName(std::string const& name) const

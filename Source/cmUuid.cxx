@@ -82,7 +82,7 @@ bool cmUuid::StringToBinary(std::string const& input,
       return false;
     }
     size_t digits = kUuidGroups[i] * 2;
-    if (!StringToBinaryImpl(input.substr(index, digits), output)) {
+    if (!this->StringToBinaryImpl(input.substr(index, digits), output)) {
       return false;
     }
 
@@ -134,12 +134,12 @@ bool cmUuid::StringToBinaryImpl(std::string const& input,
 
   for (size_t i = 0; i < input.size(); i += 2) {
     char c1 = 0;
-    if (!IntFromHexDigit(input[i], c1)) {
+    if (!this->IntFromHexDigit(input[i], c1)) {
       return false;
     }
 
     char c2 = 0;
-    if (!IntFromHexDigit(input[i + 1], c2)) {
+    if (!this->IntFromHexDigit(input[i + 1], c2)) {
       return false;
     }
 

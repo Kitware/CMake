@@ -22,7 +22,7 @@ cmFindPathCommand::cmFindPathCommand(cmExecutionStatus& status)
 // cmFindPathCommand
 bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  this->DebugMode = ComputeIfDebugModeWanted();
+  this->DebugMode = this->ComputeIfDebugModeWanted();
   this->VariableDocumentation = "Path to a file.";
   this->CMakePathName = "INCLUDE";
   if (!this->ParseArguments(argsIn)) {

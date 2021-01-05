@@ -96,8 +96,8 @@ public:
 
     // If it's an absolute path, check if it starts with the source
     // directory:
-    return !(cmCMakePath(SourceDir).IsPrefix(path) ||
-             cmCMakePath(BinaryDir).IsPrefix(path));
+    return !(cmCMakePath(this->SourceDir).IsPrefix(path) ||
+             cmCMakePath(this->BinaryDir).IsPrefix(path));
   }
 
 private:

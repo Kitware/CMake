@@ -80,10 +80,10 @@ std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
     packageFileName +=
       this->GetOption("CPACK_ARCHIVE_" + componentUpper + "_FILE_NAME");
   } else if (this->IsSet("CPACK_ARCHIVE_FILE_NAME")) {
-    packageFileName += GetComponentPackageFileName(
+    packageFileName += this->GetComponentPackageFileName(
       this->GetOption("CPACK_ARCHIVE_FILE_NAME"), component, isGroupName);
   } else {
-    packageFileName += GetComponentPackageFileName(
+    packageFileName += this->GetComponentPackageFileName(
       this->GetOption("CPACK_PACKAGE_FILE_NAME"), component, isGroupName);
   }
 
@@ -181,7 +181,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
 
 int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
 {
-  packageFileNames.clear();
+  this->packageFileNames.clear();
   // The default behavior is to have one package by component group
   // unless CPACK_COMPONENTS_IGNORE_GROUP is specified.
   if (!ignoreGroup) {
@@ -189,7 +189,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                     "Packaging component group: " << compG.first << std::endl);
       // Begin the archive for this group
-      std::string packageFileName = std::string(toplevel) + "/" +
+      std::string packageFileName = std::string(this->toplevel) + "/" +
         this->GetArchiveComponentFileName(compG.first, true);
 
       // open a block in order to automatically close archive
@@ -199,11 +199,11 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
         // now iterate over the component of this group
         for (cmCPackComponent* comp : (compG.second).Components) {
           // Add the files of this component to the archive
-          addOneComponentToArchive(archive, comp);
+          this->addOneComponentToArchive(archive, comp);
         }
       }
       // add the generated package to package file names list
-      packageFileNames.push_back(std::move(packageFileName));
+      this->packageFileNames.push_back(std::move(packageFileName));
     }
     // Handle Orphan components (components not belonging to any groups)
     for (auto& comp : this->Components) {
@@ -217,7 +217,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
             << std::endl);
         std::string localToplevel(
           this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
-        std::string packageFileName = std::string(toplevel);
+        std::string packageFileName = std::string(this->toplevel);
 
         localToplevel += "/" + comp.first;
         packageFileName +=
@@ -226,10 +226,10 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
         {
           DECLARE_AND_OPEN_ARCHIVE(packageFileName, archive);
           // Add the files of this component to the archive
-          addOneComponentToArchive(archive, &(comp.second));
+          this->addOneComponentToArchive(archive, &(comp.second));
         }
         // add the generated package to package file names list
-        packageFileNames.push_back(std::move(packageFileName));
+        this->packageFileNames.push_back(std::move(packageFileName));
       }
     }
   }
@@ -238,7 +238,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
   else {
     for (auto& comp : this->Components) {
       std::string localToplevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
-      std::string packageFileName = std::string(toplevel);
+      std::string packageFileName = std::string(this->toplevel);
 
       localToplevel += "/" + comp.first;
       packageFileName +=
@@ -247,10 +247,10 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
       {
         DECLARE_AND_OPEN_ARCHIVE(packageFileName, archive);
         // Add the files of this component to the archive
-        addOneComponentToArchive(archive, &(comp.second));
+        this->addOneComponentToArchive(archive, &(comp.second));
       }
       // add the generated package to package file names list
-      packageFileNames.push_back(std::move(packageFileName));
+      this->packageFileNames.push_back(std::move(packageFileName));
     }
   }
   return 1;
@@ -259,17 +259,17 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
 int cmCPackArchiveGenerator::PackageComponentsAllInOne()
 {
   // reset the package file names
-  packageFileNames.clear();
-  packageFileNames.emplace_back(toplevel);
-  packageFileNames[0] += "/";
+  this->packageFileNames.clear();
+  this->packageFileNames.emplace_back(this->toplevel);
+  this->packageFileNames[0] += "/";
 
   if (this->IsSet("CPACK_ARCHIVE_FILE_NAME")) {
-    packageFileNames[0] += this->GetOption("CPACK_ARCHIVE_FILE_NAME");
+    this->packageFileNames[0] += this->GetOption("CPACK_ARCHIVE_FILE_NAME");
   } else {
-    packageFileNames[0] += this->GetOption("CPACK_PACKAGE_FILE_NAME");
+    this->packageFileNames[0] += this->GetOption("CPACK_PACKAGE_FILE_NAME");
   }
 
-  packageFileNames[0] += this->GetOutputExtension();
+  this->packageFileNames[0] += this->GetOutputExtension();
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Packaging all groups in one package..."
@@ -280,7 +280,7 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne()
   // The ALL COMPONENTS in ONE package case
   for (auto& comp : this->Components) {
     // Add the files of this component to the archive
-    addOneComponentToArchive(archive, &(comp.second));
+    this->addOneComponentToArchive(archive, &(comp.second));
   }
 
   // archive goes out of scope so it will finalized and closed.
@@ -289,41 +289,42 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne()
 
 int cmCPackArchiveGenerator::PackageFiles()
 {
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: " << toplevel << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                "Toplevel: " << this->toplevel << std::endl);
 
-  if (WantsComponentInstallation()) {
+  if (this->WantsComponentInstallation()) {
     // CASE 1 : COMPONENT ALL-IN-ONE package
     // If ALL COMPONENTS in ONE package has been requested
     // then the package file is unique and should be open here.
-    if (componentPackageMethod == ONE_PACKAGE) {
-      return PackageComponentsAllInOne();
+    if (this->componentPackageMethod == ONE_PACKAGE) {
+      return this->PackageComponentsAllInOne();
     }
     // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
     // There will be 1 package for each component group
     // however one may require to ignore component group and
     // in this case you'll get 1 package for each component.
-    return PackageComponents(componentPackageMethod ==
-                             ONE_PACKAGE_PER_COMPONENT);
+    return this->PackageComponents(this->componentPackageMethod ==
+                                   ONE_PACKAGE_PER_COMPONENT);
   }
 
   // CASE 3 : NON COMPONENT package.
   DECLARE_AND_OPEN_ARCHIVE(packageFileNames[0], archive);
-  cmWorkingDirectory workdir(toplevel);
+  cmWorkingDirectory workdir(this->toplevel);
   if (workdir.Failed()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Failed to change working directory to "
-                    << toplevel << " : "
+                    << this->toplevel << " : "
                     << std::strerror(workdir.GetLastResult()) << std::endl);
     return 0;
   }
-  for (std::string const& file : files) {
+  for (std::string const& file : this->files) {
     // Get the relative path to the file
-    std::string rp = cmSystemTools::RelativePath(toplevel, file);
+    std::string rp = cmSystemTools::RelativePath(this->toplevel, file);
     archive.Add(rp, 0, nullptr, false);
     if (!archive) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Problem while adding file <"
-                      << file << "> to archive <" << packageFileNames[0]
+                      << file << "> to archive <" << this->packageFileNames[0]
                       << ">, ERROR = " << archive.GetError() << std::endl);
       return 0;
     }
@@ -342,7 +343,7 @@ bool cmCPackArchiveGenerator::SupportsComponentInstallation() const
   // The Component installation support should only
   // be activated if explicitly requested by the user
   // (for backward compatibility reason)
-  return IsOn("CPACK_ARCHIVE_COMPONENT_INSTALL");
+  return this->IsOn("CPACK_ARCHIVE_COMPONENT_INSTALL");
 }
 
 bool cmCPackArchiveGenerator::SetArchiveOptions(cmArchiveWrite* archive)

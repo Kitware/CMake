@@ -198,7 +198,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   if (this->CTest->GetTestProgressOutput()) {
     if (!passed) {
       // If the test did not pass, reprint test name and error
-      std::string output = GetTestPrefix(completed, total);
+      std::string output = this->GetTestPrefix(completed, total);
       std::string testName = this->TestProperties->Name;
       const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
       testName.resize(maxTestNameWidth + 4, '.');
@@ -211,8 +211,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, "\n"); // flush
     }
     if (completed == total) {
-      std::string testName =
-        GetTestPrefix(completed, total) + this->TestProperties->Name + "\n";
+      std::string testName = this->GetTestPrefix(completed, total) +
+        this->TestProperties->Name + "\n";
       cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, testName);
     }
   }
@@ -485,8 +485,8 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
                  << this->TestProperties->Index << ": "
                  << this->TestProperties->Name << std::endl);
   } else {
-    std::string testName =
-      GetTestPrefix(completed, total) + this->TestProperties->Name + "\n";
+    std::string testName = this->GetTestPrefix(completed, total) +
+      this->TestProperties->Name + "\n";
     cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, testName);
   }
 

@@ -8,13 +8,13 @@ cmNewLineStyle::cmNewLineStyle() = default;
 
 bool cmNewLineStyle::IsValid() const
 {
-  return NewLineStyle != Invalid;
+  return this->NewLineStyle != Invalid;
 }
 
 bool cmNewLineStyle::ReadFromArguments(const std::vector<std::string>& args,
                                        std::string& errorString)
 {
-  NewLineStyle = Invalid;
+  this->NewLineStyle = Invalid;
 
   for (size_t i = 0; i < args.size(); i++) {
     if (args[i] == "NEWLINE_STYLE") {
@@ -22,11 +22,11 @@ bool cmNewLineStyle::ReadFromArguments(const std::vector<std::string>& args,
       if (args.size() > styleIndex) {
         std::string const& eol = args[styleIndex];
         if (eol == "LF" || eol == "UNIX") {
-          NewLineStyle = LF;
+          this->NewLineStyle = LF;
           return true;
         }
         if (eol == "CRLF" || eol == "WIN32" || eol == "DOS") {
-          NewLineStyle = CRLF;
+          this->NewLineStyle = CRLF;
           return true;
         }
         errorString = "NEWLINE_STYLE sets an unknown style, only LF, "
@@ -43,7 +43,7 @@ bool cmNewLineStyle::ReadFromArguments(const std::vector<std::string>& args,
 
 std::string cmNewLineStyle::GetCharacters() const
 {
-  switch (NewLineStyle) {
+  switch (this->NewLineStyle) {
     case Invalid:
       return "";
     case LF:
@@ -56,10 +56,10 @@ std::string cmNewLineStyle::GetCharacters() const
 
 void cmNewLineStyle::SetStyle(Style style)
 {
-  NewLineStyle = style;
+  this->NewLineStyle = style;
 }
 
 cmNewLineStyle::Style cmNewLineStyle::GetStyle() const
 {
-  return NewLineStyle;
+  return this->NewLineStyle;
 }

@@ -137,7 +137,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
 bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
                                       cmExecutionStatus& status)
 {
-  bool ret = cmCTestHandlerCommand::InitialPass(args, status);
+  bool ret = this->cmCTestHandlerCommand::InitialPass(args, status);
   if (!this->NumberErrors.empty()) {
     this->Makefile->AddDefinition(
       this->NumberErrors, std::to_string(this->Handler->GetTotalErrors()));

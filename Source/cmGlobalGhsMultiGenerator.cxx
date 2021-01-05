@@ -366,7 +366,7 @@ void cmGlobalGhsMultiGenerator::WriteSubProjects(std::ostream& fout,
         target->GetType() == cmStateEnums::MODULE_LIBRARY ||
         target->GetType() == cmStateEnums::SHARED_LIBRARY ||
         (target->GetType() == cmStateEnums::GLOBAL_TARGET &&
-         target->GetName() != GetInstallTargetName())) {
+         target->GetName() != this->GetInstallTargetName())) {
       continue;
     }
     fout << "CMakeFiles/" << target->GetName() + ".tgt" + FILE_EXTENSION
@@ -415,7 +415,7 @@ void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
         target->GetType() == cmStateEnums::MODULE_LIBRARY ||
         target->GetType() == cmStateEnums::SHARED_LIBRARY ||
         (target->GetType() == cmStateEnums::GLOBAL_TARGET &&
-         target->GetName() != GetInstallTargetName())) {
+         target->GetName() != this->GetInstallTargetName())) {
       continue;
     }
 
@@ -427,13 +427,13 @@ void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
     this->WriteFileHeader(fbld);
     GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, fbld);
     std::vector<cmGeneratorTarget const*> build;
-    if (ComputeTargetBuildOrder(target, build)) {
+    if (this->ComputeTargetBuildOrder(target, build)) {
       cmSystemTools::Error(
         cmStrCat("The inter-target dependency graph for target [",
                  target->GetName(), "] had a cycle.\n"));
     } else {
       for (auto& tgt : build) {
-        WriteProjectLine(fbld, tgt, root, rootBinaryDir);
+        this->WriteProjectLine(fbld, tgt, root, rootBinaryDir);
       }
     }
     fbld.Close();
@@ -471,12 +471,12 @@ void cmGlobalGhsMultiGenerator::WriteAllTarget(
     if (!t->IsInBuildSystem()) {
       continue;
     }
-    if (!IsExcluded(t->GetLocalGenerator(), t)) {
+    if (!this->IsExcluded(t->GetLocalGenerator(), t)) {
       defaultTargets.push_back(t);
     }
   }
   std::vector<cmGeneratorTarget const*> build;
-  if (ComputeTargetBuildOrder(defaultTargets, build)) {
+  if (this->ComputeTargetBuildOrder(defaultTargets, build)) {
     std::string message = "The inter-target dependency graph for project [" +
       root->GetProjectName() + "] had a cycle.\n";
     cmSystemTools::Error(message);
@@ -694,7 +694,7 @@ bool cmGlobalGhsMultiGenerator::ComputeTargetBuildOrder(
   cmGeneratorTarget const* tgt, std::vector<cmGeneratorTarget const*>& build)
 {
   std::vector<cmGeneratorTarget const*> t{ tgt };
-  return ComputeTargetBuildOrder(t, build);
+  return this->ComputeTargetBuildOrder(t, build);
 }
 
 bool cmGlobalGhsMultiGenerator::ComputeTargetBuildOrder(
@@ -705,7 +705,7 @@ bool cmGlobalGhsMultiGenerator::ComputeTargetBuildOrder(
   std::set<cmGeneratorTarget const*> perm;
 
   for (auto const ti : tgt) {
-    bool r = VisitTarget(temp, perm, build, ti);
+    bool r = this->VisitTarget(temp, perm, build, ti);
     if (r) {
       return r;
     }

@@ -172,7 +172,7 @@ public:
   void SetProperty(const std::string& prop, const char* value);
   void SetProperty(const std::string& prop, const std::string& value)
   {
-    SetProperty(prop, value.c_str());
+    this->SetProperty(prop, value.c_str());
   }
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);

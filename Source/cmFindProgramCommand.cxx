@@ -152,7 +152,7 @@ cmFindProgramCommand::cmFindProgramCommand(cmExecutionStatus& status)
 // cmFindProgramCommand
 bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  this->DebugMode = ComputeIfDebugModeWanted();
+  this->DebugMode = this->ComputeIfDebugModeWanted();
   this->VariableDocumentation = "Path to a program.";
   this->CMakePathName = "PROGRAM";
   // call cmFindBase::ParseArguments
@@ -171,7 +171,7 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
     return true;
   }
 
-  std::string const result = FindProgram();
+  std::string const result = this->FindProgram();
   if (!result.empty()) {
     // Save the value in the cache
     this->Makefile->AddCacheDefinition(this->VariableName, result,
@@ -198,7 +198,7 @@ std::string cmFindProgramCommand::FindProgram()
   std::string program;
 
   if (this->SearchAppBundleFirst || this->SearchAppBundleOnly) {
-    program = FindAppBundle();
+    program = this->FindAppBundle();
   }
   if (program.empty() && !this->SearchAppBundleOnly) {
     program = this->FindNormalProgram();
@@ -274,7 +274,7 @@ std::string cmFindProgramCommand::FindAppBundle()
       cmSystemTools::FindDirectory(appName, this->SearchPaths, true);
 
     if (!appPath.empty()) {
-      std::string executable = GetBundleExecutable(appPath);
+      std::string executable = this->GetBundleExecutable(appPath);
       if (!executable.empty()) {
         return cmSystemTools::CollapseFullPath(executable);
       }
