@@ -799,7 +799,8 @@ void cmGlobalXCodeGenerator::addObject(std::unique_ptr<cmXCodeObject> obj)
 cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(
   cmXCodeObject::PBXType ptype)
 {
-  auto obj = cm::make_unique<cmXCode21Object>(ptype, cmXCodeObject::OBJECT);
+  auto obj = cm::make_unique<cmXCode21Object>(ptype, cmXCodeObject::OBJECT,
+                                              this->GetObjectId());
   auto ptr = obj.get();
   this->addObject(std::move(obj));
   return ptr;
@@ -807,7 +808,9 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
 {
-  auto obj = cm::make_unique<cmXCodeObject>(cmXCodeObject::None, type);
+  auto obj = cm::make_unique<cmXCodeObject>(
+    cmXCodeObject::None, type,
+    "Temporary cmake object, should not be referred to in Xcode file");
   auto ptr = obj.get();
   this->addObject(std::move(obj));
   return ptr;
@@ -3136,6 +3139,23 @@ cmXCodeObject* cmGlobalXCodeGenerator::FindXCodeTarget(
     return nullptr;
   }
   return i->second;
+}
+
+std::string cmGlobalXCodeGenerator::GetObjectId()
+{
+  std::string objectId;
+  char cUuid[40] = { 0 };
+  CFUUIDRef uuid = CFUUIDCreate(kCFAllocatorDefault);
+  CFStringRef s = CFUUIDCreateString(kCFAllocatorDefault, uuid);
+  CFStringGetCString(s, cUuid, sizeof(cUuid), kCFStringEncodingUTF8);
+  objectId = cUuid;
+  CFRelease(s);
+  CFRelease(uuid);
+  cmSystemTools::ReplaceString(objectId, "-", "");
+  if (objectId.size() > 24) {
+    objectId = objectId.substr(0, 24);
+  }
+  return objectId;
 }
 
 std::string cmGlobalXCodeGenerator::GetOrCreateId(const std::string& name,

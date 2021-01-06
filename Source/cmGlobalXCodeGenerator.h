@@ -162,6 +162,7 @@ private:
                                  const std::string& configName);
 
   cmXCodeObject* FindXCodeTarget(const cmGeneratorTarget*);
+  std::string GetObjectId();
   std::string GetOrCreateId(const std::string& name, const std::string& id);
 
   // create cmXCodeObject from these functions so that memory can be managed
