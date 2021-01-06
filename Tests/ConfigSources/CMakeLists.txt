@@ -5,6 +5,11 @@ if(NOT _isMultiConfig AND NOT CMAKE_BUILD_TYPE)
 endif()
 project(ConfigSources CXX)
 
+if("${CMAKE_CXX_COMPILER_ID};${CMAKE_CXX_SIMULATE_ID}" STREQUAL "Intel;MSVC")
+  string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Z7")
+  string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -Z7")
+endif()
+
 # Source file(s) named with the configuration(s).
 file(GENERATE
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/config_$<CONFIG>.cpp"
