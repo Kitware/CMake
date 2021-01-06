@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmGlobalGenerator.h"
 #include "cmXCodeObject.h"
 
@@ -162,12 +164,13 @@ private:
                                  const std::string& configName);
 
   cmXCodeObject* FindXCodeTarget(const cmGeneratorTarget*);
-  std::string GetObjectId();
+  std::string GetObjectId(cmXCodeObject::PBXType ptype, cm::string_view key);
   std::string GetOrCreateId(const std::string& name, const std::string& id);
 
   // create cmXCodeObject from these functions so that memory can be managed
   // correctly.  All objects created are stored in this->XCodeObjects.
-  cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype);
+  cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype,
+                              cm::string_view key = {});
   cmXCodeObject* CreateObject(cmXCodeObject::Type type);
   cmXCodeObject* CreateString(const std::string& s);
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);

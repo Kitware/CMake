@@ -18,6 +18,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmComputeLinkInformation.h"
+#include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmCustomCommandLines.h"
@@ -797,10 +798,10 @@ void cmGlobalXCodeGenerator::addObject(std::unique_ptr<cmXCodeObject> obj)
 }
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(
-  cmXCodeObject::PBXType ptype)
+  cmXCodeObject::PBXType ptype, cm::string_view key)
 {
   auto obj = cm::make_unique<cmXCode21Object>(ptype, cmXCodeObject::OBJECT,
-                                              this->GetObjectId());
+                                              this->GetObjectId(ptype, key));
   auto ptr = obj.get();
   this->addObject(std::move(obj));
   return ptr;
@@ -3141,19 +3142,28 @@ cmXCodeObject* cmGlobalXCodeGenerator::FindXCodeTarget(
   return i->second;
 }
 
-std::string cmGlobalXCodeGenerator::GetObjectId()
+std::string cmGlobalXCodeGenerator::GetObjectId(cmXCodeObject::PBXType ptype,
+                                                cm::string_view key)
 {
   std::string objectId;
-  char cUuid[40] = { 0 };
-  CFUUIDRef uuid = CFUUIDCreate(kCFAllocatorDefault);
-  CFStringRef s = CFUUIDCreateString(kCFAllocatorDefault, uuid);
-  CFStringGetCString(s, cUuid, sizeof(cUuid), kCFStringEncodingUTF8);
-  objectId = cUuid;
-  CFRelease(s);
-  CFRelease(uuid);
-  cmSystemTools::ReplaceString(objectId, "-", "");
-  if (objectId.size() > 24) {
-    objectId = objectId.substr(0, 24);
+  if (!key.empty()) {
+    cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
+    hash.Initialize();
+    hash.Append(&ptype, sizeof(ptype));
+    hash.Append(key);
+    objectId = cmSystemTools::UpperCase(hash.FinalizeHex().substr(0, 24));
+  } else {
+    char cUuid[40] = { 0 };
+    CFUUIDRef uuid = CFUUIDCreate(kCFAllocatorDefault);
+    CFStringRef s = CFUUIDCreateString(kCFAllocatorDefault, uuid);
+    CFStringGetCString(s, cUuid, sizeof(cUuid), kCFStringEncodingUTF8);
+    objectId = cUuid;
+    CFRelease(s);
+    CFRelease(uuid);
+    cmSystemTools::ReplaceString(objectId, "-", "");
+    if (objectId.size() > 24) {
+      objectId = objectId.substr(0, 24);
+    }
   }
   return objectId;
 }
