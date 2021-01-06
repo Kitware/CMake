@@ -2607,11 +2607,11 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 }
 
                 if (editAndContinueDebugInfo || msvc2008OrLess) {
-                  CopyPchCompilePdb(config, target, *ReuseFrom, reuseTarget,
-                                    { ".pdb", ".idb" });
+                  this->CopyPchCompilePdb(config, target, *ReuseFrom,
+                                          reuseTarget, { ".pdb", ".idb" });
                 } else if (enableDebuggingInformation) {
-                  CopyPchCompilePdb(config, target, *ReuseFrom, reuseTarget,
-                                    { ".pdb" });
+                  this->CopyPchCompilePdb(config, target, *ReuseFrom,
+                                          reuseTarget, { ".pdb" });
                 }
               }
 

@@ -26,9 +26,9 @@ public:
     : value(v)
   {
   }
-  ~Wrapper() { delete value; }
+  ~Wrapper() { delete this->value; }
 
-  T* get() const { return value; }
+  T* get() const { return this->value; }
 
 private:
   T* value;

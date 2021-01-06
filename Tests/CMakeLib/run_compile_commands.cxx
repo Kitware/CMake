@@ -36,8 +36,8 @@ public:
 
   void Parse()
   {
-    NextNonWhitespace();
-    ParseTranslationUnits();
+    this->NextNonWhitespace();
+    this->ParseTranslationUnits();
   }
 
   const TranslationUnitsType& GetTranslationUnits()
@@ -49,51 +49,51 @@ private:
   void ParseTranslationUnits()
   {
     this->TranslationUnits = TranslationUnitsType();
-    ExpectOrDie('[', "at start of compile command file\n");
+    this->ExpectOrDie('[', "at start of compile command file\n");
     do {
-      ParseTranslationUnit();
+      this->ParseTranslationUnit();
       this->TranslationUnits.push_back(this->Command);
-    } while (Expect(','));
-    ExpectOrDie(']', "at end of array");
+    } while (this->Expect(','));
+    this->ExpectOrDie(']', "at end of array");
   }
 
   void ParseTranslationUnit()
   {
     this->Command = CommandType();
-    if (!Expect('{')) {
+    if (!this->Expect('{')) {
       return;
     }
-    if (Expect('}')) {
+    if (this->Expect('}')) {
       return;
     }
     do {
-      ParseString();
+      this->ParseString();
       std::string name = this->String;
-      ExpectOrDie(':', "between name and value");
-      ParseString();
+      this->ExpectOrDie(':', "between name and value");
+      this->ParseString();
       std::string value = this->String;
       this->Command[name] = value;
-    } while (Expect(','));
-    ExpectOrDie('}', "at end of object");
+    } while (this->Expect(','));
+    this->ExpectOrDie('}', "at end of object");
   }
 
   void ParseString()
   {
     this->String = "";
-    if (!Expect('"')) {
+    if (!this->Expect('"')) {
       return;
     }
-    while (!Expect('"')) {
-      Expect('\\');
-      this->String.append(1, C);
-      Next();
+    while (!this->Expect('"')) {
+      this->Expect('\\');
+      this->String.append(1, this->C);
+      this->Next();
     }
   }
 
   bool Expect(char c)
   {
     if (this->C == c) {
-      NextNonWhitespace();
+      this->NextNonWhitespace();
       return true;
     }
     return false;
@@ -101,23 +101,23 @@ private:
 
   void ExpectOrDie(char c, const std::string& message)
   {
-    if (!Expect(c)) {
-      ErrorExit(std::string("'") + c + "' expected " + message + ".");
+    if (!this->Expect(c)) {
+      this->ErrorExit(std::string("'") + c + "' expected " + message + ".");
     }
   }
 
   void NextNonWhitespace()
   {
     do {
-      Next();
-    } while (IsWhitespace());
+      this->Next();
+    } while (this->IsWhitespace());
   }
 
   void Next()
   {
-    this->C = char(Input.get());
+    this->C = char(this->Input.get());
     if (this->Input.bad()) {
-      ErrorExit("Unexpected end of file.");
+      this->ErrorExit("Unexpected end of file.");
     }
   }
 

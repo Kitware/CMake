@@ -111,20 +111,20 @@ public:
     RccLister(std::string rccExecutable, std::vector<std::string> listOptions);
 
     //! The rcc executable
-    std::string const& RccExcutable() const { return RccExcutable_; }
+    std::string const& RccExcutable() const { return this->RccExcutable_; }
     void SetRccExecutable(std::string const& rccExecutable)
     {
-      RccExcutable_ = rccExecutable;
+      this->RccExcutable_ = rccExecutable;
     }
 
     //! The rcc executable list options
     std::vector<std::string> const& ListOptions() const
     {
-      return ListOptions_;
+      return this->ListOptions_;
     }
     void SetListOptions(std::vector<std::string> const& listOptions)
     {
-      ListOptions_ = listOptions;
+      this->ListOptions_ = listOptions;
     }
 
     /**

@@ -205,13 +205,13 @@ void cmDependsCompiler::WriteDependencies(
 
   // external dependencies file
   for (auto& node : makeDependencies) {
-    auto target = LocalGenerator->ConvertToMakefilePath(
+    auto target = this->LocalGenerator->ConvertToMakefilePath(
       this->LocalGenerator->MaybeConvertToRelativePath(binDir, node.first));
     auto& deps = node.second;
     std::transform(
       deps.cbegin(), deps.cend(), deps.begin(),
       [this, &binDir](const std::string& dep) {
-        return LocalGenerator->ConvertToMakefilePath(
+        return this->LocalGenerator->ConvertToMakefilePath(
           this->LocalGenerator->MaybeConvertToRelativePath(binDir, dep));
       });
 

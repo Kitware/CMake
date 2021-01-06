@@ -271,10 +271,10 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
 {
   // Use the policy if it is set.
   if (this->Policy12Status == cmPolicies::NEW) {
-    return GetBooleanValue(newArg);
+    return this->GetBooleanValue(newArg);
   }
   if (this->Policy12Status == cmPolicies::OLD) {
-    return GetBooleanValueOld(newArg, oneArg);
+    return this->GetBooleanValueOld(newArg, oneArg);
   }
 
   // Check policy only if old and new results differ.
@@ -367,7 +367,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
     reducible = 0;
     auto arg = newArgs.begin();
     while (arg != newArgs.end()) {
-      if (IsKeyword(keyParenL, *arg)) {
+      if (this->IsKeyword(keyParenL, *arg)) {
         // search for the closing paren for this opening one
         cmArgumentList::iterator argClose;
         argClose = arg;
@@ -531,7 +531,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       argP1 = arg;
       this->IncrementArguments(newArgs, argP1, argP2);
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          IsKeyword(keyMATCHES, *argP1)) {
+          this->IsKeyword(keyMATCHES, *argP1)) {
         def = this->GetDefinitionIfUnquoted(*arg);
         if (!def) {
           def = &arg->GetValue();
@@ -707,8 +707,8 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
     cmArgumentList::iterator argP2;
     while (arg != newArgs.end()) {
       argP1 = arg;
-      IncrementArguments(newArgs, argP1, argP2);
-      if (argP1 != newArgs.end() && IsKeyword(keyNOT, *arg)) {
+      this->IncrementArguments(newArgs, argP1, argP2);
+      if (argP1 != newArgs.end() && this->IsKeyword(keyNOT, *arg)) {
         bool rhs = this->GetBooleanValueWithAutoDereference(
           *argP1, errorString, status);
         this->HandlePredicate(!rhs, reducible, arg, newArgs, argP1, argP2);
@@ -735,8 +735,8 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
     cmArgumentList::iterator argP2;
     while (arg != newArgs.end()) {
       argP1 = arg;
-      IncrementArguments(newArgs, argP1, argP2);
-      if (argP1 != newArgs.end() && IsKeyword(keyAND, *argP1) &&
+      this->IncrementArguments(newArgs, argP1, argP2);
+      if (argP1 != newArgs.end() && this->IsKeyword(keyAND, *argP1) &&
           argP2 != newArgs.end()) {
         lhs =
           this->GetBooleanValueWithAutoDereference(*arg, errorString, status);

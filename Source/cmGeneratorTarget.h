@@ -585,7 +585,8 @@ public:
     std::string PdbDir;
     bool empty() const
     {
-      return OutDir.empty() && ImpDir.empty() && PdbDir.empty();
+      return this->OutDir.empty() && this->ImpDir.empty() &&
+        this->PdbDir.empty();
     }
   };
 

@@ -83,7 +83,8 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
         lg->AppendCustomCommandLines(ccg, commands);
         std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
         std::transform(ccByproducts.begin(), ccByproducts.end(),
-                       std::back_inserter(util_outputs), MapToNinjaPath());
+                       std::back_inserter(util_outputs),
+                       this->MapToNinjaPath());
         if (ci.GetUsesTerminal()) {
           uses_terminal = true;
         }
@@ -103,9 +104,9 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
         const std::vector<std::string>& ccOutputs = ccg.GetOutputs();
         const std::vector<std::string>& ccByproducts = ccg.GetByproducts();
         std::transform(ccOutputs.begin(), ccOutputs.end(),
-                       std::back_inserter(deps), MapToNinjaPath());
+                       std::back_inserter(deps), this->MapToNinjaPath());
         std::transform(ccByproducts.begin(), ccByproducts.end(),
-                       std::back_inserter(deps), MapToNinjaPath());
+                       std::back_inserter(deps), this->MapToNinjaPath());
       }
     }
   }

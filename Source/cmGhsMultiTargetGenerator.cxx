@@ -62,7 +62,7 @@ void cmGhsMultiTargetGenerator::Generate()
       // Get the name of the executable to generate.
       this->TargetNameReal =
         this->GeneratorTarget->GetExecutableNames(this->ConfigName).Real;
-      if (cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()) {
+      if (this->cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()) {
         this->TagType = GhsMultiGpj::INTERGRITY_APPLICATION;
       } else {
         this->TagType = GhsMultiGpj::PROGRAM;
@@ -631,7 +631,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       }
     } else {
       std::vector<cmSourceFile const*> customCommands;
-      if (ComputeCustomCommandOrder(customCommands)) {
+      if (this->ComputeCustomCommandOrder(customCommands)) {
         std::string message = "The custom commands for target [" +
           this->GeneratorTarget->GetName() + "] had a cycle.\n";
         cmSystemTools::Error(message);
@@ -745,7 +745,7 @@ bool cmGhsMultiTargetGenerator::ComputeCustomCommandOrder(
   this->GeneratorTarget->GetCustomCommands(customCommands, this->ConfigName);
 
   for (cmSourceFile const* si : customCommands) {
-    bool r = VisitCustomCommand(temp, perm, order, si);
+    bool r = this->VisitCustomCommand(temp, perm, order, si);
     if (r) {
       return r;
     }

@@ -284,7 +284,7 @@ void cmCTestLaunchReporter::DumpFileToXML(cmXMLElement& e3, const char* tag,
 
   cmXMLElement e4(e3, tag);
   while (cmSystemTools::GetLineFromStream(fin, line)) {
-    if (MatchesFilterPrefix(line)) {
+    if (this->MatchesFilterPrefix(line)) {
       continue;
     }
     if (this->Match(line, this->RegexWarningSuppress)) {

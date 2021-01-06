@@ -56,7 +56,7 @@ public:
   ChangesParser(cmCTestP4* p4, const char* prefix)
     : P4(p4)
   {
-    this->SetLog(&P4->Log, prefix);
+    this->SetLog(&this->P4->Log, prefix);
     this->RegexIdentify.compile("^Change ([0-9]+) on");
   }
 
@@ -67,7 +67,7 @@ private:
   bool ProcessLine() override
   {
     if (this->RegexIdentify.find(this->Line)) {
-      P4->ChangeLists.push_back(this->RegexIdentify.match(1));
+      this->P4->ChangeLists.push_back(this->RegexIdentify.match(1));
     }
     return true;
   }
@@ -79,7 +79,7 @@ public:
   UserParser(cmCTestP4* p4, const char* prefix)
     : P4(p4)
   {
-    this->SetLog(&P4->Log, prefix);
+    this->SetLog(&this->P4->Log, prefix);
     this->RegexUser.compile("^(.+) <(.*)> \\((.*)\\) accessed (.*)$");
   }
 
@@ -96,7 +96,7 @@ private:
       NewUser.EMail = this->RegexUser.match(2);
       NewUser.Name = this->RegexUser.match(3);
       NewUser.AccessTime = this->RegexUser.match(4);
-      P4->Users[this->RegexUser.match(1)] = NewUser;
+      this->P4->Users[this->RegexUser.match(1)] = NewUser;
 
       return false;
     }
@@ -120,7 +120,7 @@ public:
     : P4(p4)
     , AlreadyNotified(false)
   {
-    this->SetLog(&P4->Log, prefix);
+    this->SetLog(&this->P4->Log, prefix);
     this->RegexDiff.compile("^==== (.*)#[0-9]+ - (.*)");
   }
 
@@ -134,12 +134,12 @@ private:
   {
     if (!this->Line.empty() && this->Line[0] == '=' &&
         this->RegexDiff.find(this->Line)) {
-      CurrentPath = this->RegexDiff.match(1);
-      AlreadyNotified = false;
+      this->CurrentPath = this->RegexDiff.match(1);
+      this->AlreadyNotified = false;
     } else {
-      if (!AlreadyNotified) {
-        P4->DoModification(PathModified, CurrentPath);
-        AlreadyNotified = true;
+      if (!this->AlreadyNotified) {
+        this->P4->DoModification(PathModified, this->CurrentPath);
+        this->AlreadyNotified = true;
       }
     }
     return true;
@@ -148,11 +148,11 @@ private:
 
 cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
 {
-  auto it = Users.find(username);
+  auto it = this->Users.find(username);
 
-  if (it == Users.end()) {
+  if (it == this->Users.end()) {
     std::vector<char const*> p4_users;
-    SetP4Options(p4_users);
+    this->SetP4Options(p4_users);
     p4_users.push_back("users");
     p4_users.push_back("-m");
     p4_users.push_back("1");
@@ -161,11 +161,11 @@ cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
 
     UserParser out(this, "users-out> ");
     OutputLogger err(this->Log, "users-err> ");
-    RunChild(&p4_users[0], &out, &err);
+    this->RunChild(&p4_users[0], &out, &err);
 
     // The user should now be added to the map. Search again.
-    it = Users.find(username);
-    if (it == Users.end()) {
+    it = this->Users.find(username);
+    if (it == this->Users.end()) {
       return cmCTestP4::User();
     }
   }
@@ -195,7 +195,7 @@ public:
     , P4(p4)
     , Section(SectionHeader)
   {
-    this->SetLog(&P4->Log, prefix);
+    this->SetLog(&this->P4->Log, prefix);
     this->RegexHeader.compile("^Change ([0-9]+) by (.+)@(.+) on (.*)$");
     this->RegexDiff.compile(R"(^\.\.\. (.*)#[0-9]+ ([^ ]+)$)");
   }
@@ -259,7 +259,7 @@ private:
       this->Rev.Rev = this->RegexHeader.match(1);
       this->Rev.Date = this->RegexHeader.match(4);
 
-      cmCTestP4::User user = P4->GetUserData(this->RegexHeader.match(2));
+      cmCTestP4::User user = this->P4->GetUserData(this->RegexHeader.match(2));
       this->Rev.Author = user.Name;
       this->Rev.EMail = user.EMail;
 
@@ -300,38 +300,38 @@ private:
         change.Action = 'M';
       }
 
-      Changes.push_back(change);
+      this->Changes.push_back(change);
     }
   }
 };
 
 void cmCTestP4::SetP4Options(std::vector<char const*>& CommandOptions)
 {
-  if (P4Options.empty()) {
+  if (this->P4Options.empty()) {
     const char* p4 = this->CommandLineTool.c_str();
-    P4Options.emplace_back(p4);
+    this->P4Options.emplace_back(p4);
 
     // The CTEST_P4_CLIENT variable sets the P4 client used when issuing
     // Perforce commands, if it's different from the default one.
     std::string client = this->CTest->GetCTestConfiguration("P4Client");
     if (!client.empty()) {
-      P4Options.emplace_back("-c");
-      P4Options.push_back(client);
+      this->P4Options.emplace_back("-c");
+      this->P4Options.push_back(client);
     }
 
     // Set the message language to be English, in case the P4 admin
     // has localized them
-    P4Options.emplace_back("-L");
-    P4Options.emplace_back("en");
+    this->P4Options.emplace_back("-L");
+    this->P4Options.emplace_back("en");
 
     // The CTEST_P4_OPTIONS variable adds additional Perforce command line
     // options before the main command
     std::string opts = this->CTest->GetCTestConfiguration("P4Options");
-    cm::append(P4Options, cmSystemTools::ParseArguments(opts));
+    cm::append(this->P4Options, cmSystemTools::ParseArguments(opts));
   }
 
   CommandOptions.clear();
-  for (std::string const& o : P4Options) {
+  for (std::string const& o : this->P4Options) {
     CommandOptions.push_back(o.c_str());
   }
 }
@@ -339,7 +339,7 @@ void cmCTestP4::SetP4Options(std::vector<char const*>& CommandOptions)
 std::string cmCTestP4::GetWorkingRevision()
 {
   std::vector<char const*> p4_identify;
-  SetP4Options(p4_identify);
+  this->SetP4Options(p4_identify);
 
   p4_identify.push_back("changes");
   p4_identify.push_back("-m");
@@ -354,7 +354,7 @@ std::string cmCTestP4::GetWorkingRevision()
   IdentifyParser out(this, "p4_changes-out> ", rev);
   OutputLogger err(this->Log, "p4_changes-err> ");
 
-  bool result = RunChild(&p4_identify[0], &out, &err);
+  bool result = this->RunChild(&p4_identify[0], &out, &err);
 
   // If there was a problem contacting the server return "<unknown>"
   if (!result) {
@@ -391,7 +391,7 @@ bool cmCTestP4::NoteNewRevision()
 bool cmCTestP4::LoadRevisions()
 {
   std::vector<char const*> p4_changes;
-  SetP4Options(p4_changes);
+  this->SetP4Options(p4_changes);
 
   // Use 'p4 changes ...@old,new' to get a list of changelists
   std::string range = this->SourceDirectory + "/...";
@@ -417,17 +417,17 @@ bool cmCTestP4::LoadRevisions()
   ChangesParser out(this, "p4_changes-out> ");
   OutputLogger err(this->Log, "p4_changes-err> ");
 
-  ChangeLists.clear();
+  this->ChangeLists.clear();
   this->RunChild(&p4_changes[0], &out, &err);
 
-  if (ChangeLists.empty()) {
+  if (this->ChangeLists.empty()) {
     return true;
   }
 
   // p4 describe -s ...@1111111,2222222
   std::vector<char const*> p4_describe;
-  for (std::string const& i : cmReverseRange(ChangeLists)) {
-    SetP4Options(p4_describe);
+  for (std::string const& i : cmReverseRange(this->ChangeLists)) {
+    this->SetP4Options(p4_describe);
     p4_describe.push_back("describe");
     p4_describe.push_back("-s");
     p4_describe.push_back(i.c_str());
@@ -443,7 +443,7 @@ bool cmCTestP4::LoadRevisions()
 bool cmCTestP4::LoadModifications()
 {
   std::vector<char const*> p4_diff;
-  SetP4Options(p4_diff);
+  this->SetP4Options(p4_diff);
 
   p4_diff.push_back("diff");
 
@@ -491,7 +491,7 @@ bool cmCTestP4::UpdateImpl()
   }
 
   std::vector<char const*> p4_sync;
-  SetP4Options(p4_sync);
+  this->SetP4Options(p4_sync);
 
   p4_sync.push_back("sync");
 

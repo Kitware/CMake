@@ -50,11 +50,14 @@ public:
   bool startRead(DataFunction dataFunction, EndFunction endFunction);
 
   //! libuv pipe
-  uv_pipe_t* uv_pipe() const { return UVPipe_.get(); }
+  uv_pipe_t* uv_pipe() const { return this->UVPipe_.get(); }
   //! uv_pipe() casted to libuv stream
-  uv_stream_t* uv_stream() const { return static_cast<uv_stream_t*>(UVPipe_); }
+  uv_stream_t* uv_stream() const
+  {
+    return static_cast<uv_stream_t*>(this->UVPipe_);
+  }
   //! uv_pipe() casted to libuv handle
-  uv_handle_t* uv_handle() { return static_cast<uv_handle_t*>(UVPipe_); }
+  uv_handle_t* uv_handle() { return static_cast<uv_handle_t*>(this->UVPipe_); }
 
 private:
   // -- Libuv callbacks
@@ -71,37 +74,37 @@ private:
 
 void cmUVPipeBuffer::reset()
 {
-  if (UVPipe_.get() != nullptr) {
-    EndFunction_ = nullptr;
-    DataFunction_ = nullptr;
-    Buffer_.clear();
-    Buffer_.shrink_to_fit();
-    UVPipe_.reset();
+  if (this->UVPipe_.get() != nullptr) {
+    this->EndFunction_ = nullptr;
+    this->DataFunction_ = nullptr;
+    this->Buffer_.clear();
+    this->Buffer_.shrink_to_fit();
+    this->UVPipe_.reset();
   }
 }
 
 bool cmUVPipeBuffer::init(uv_loop_t* uv_loop)
 {
-  reset();
+  this->reset();
   if (uv_loop == nullptr) {
     return false;
   }
-  int ret = UVPipe_.init(*uv_loop, 0, this);
+  int ret = this->UVPipe_.init(*uv_loop, 0, this);
   return (ret == 0);
 }
 
 bool cmUVPipeBuffer::startRead(DataFunction dataFunction,
                                EndFunction endFunction)
 {
-  if (UVPipe_.get() == nullptr) {
+  if (this->UVPipe_.get() == nullptr) {
     return false;
   }
   if (!dataFunction || !endFunction) {
     return false;
   }
-  DataFunction_ = std::move(dataFunction);
-  EndFunction_ = std::move(endFunction);
-  int ret = uv_read_start(uv_stream(), &cmUVPipeBuffer::UVAlloc,
+  this->DataFunction_ = std::move(dataFunction);
+  this->EndFunction_ = std::move(endFunction);
+  int ret = uv_read_start(this->uv_stream(), &cmUVPipeBuffer::UVAlloc,
                           &cmUVPipeBuffer::UVData);
   return (ret == 0);
 }
@@ -153,10 +156,10 @@ public:
 
 public:
   // -- Const accessors
-  SetupT const& Setup() const { return Setup_; }
-  cmWorkerPool::ProcessResultT* Result() const { return Setup_.Result; }
-  bool IsStarted() const { return IsStarted_; }
-  bool IsFinished() const { return IsFinished_; }
+  SetupT const& Setup() const { return this->Setup_; }
+  cmWorkerPool::ProcessResultT* Result() const { return this->Setup_.Result; }
+  bool IsStarted() const { return this->IsStarted_; }
+  bool IsFinished() const { return this->IsFinished_; }
 
   // -- Runtime
   void setup(cmWorkerPool::ProcessResultT* result, bool mergedOutput,
@@ -193,109 +196,113 @@ void cmUVReadOnlyProcess::setup(cmWorkerPool::ProcessResultT* result,
                                 std::vector<std::string> const& command,
                                 std::string const& workingDirectory)
 {
-  Setup_.WorkingDirectory = workingDirectory;
-  Setup_.Command = command;
-  Setup_.Result = result;
-  Setup_.MergedOutput = mergedOutput;
+  this->Setup_.WorkingDirectory = workingDirectory;
+  this->Setup_.Command = command;
+  this->Setup_.Result = result;
+  this->Setup_.MergedOutput = mergedOutput;
 }
 
 bool cmUVReadOnlyProcess::start(uv_loop_t* uv_loop,
                                 std::function<void()> finishedCallback)
 {
-  if (IsStarted() || (Result() == nullptr)) {
+  if (this->IsStarted() || (this->Result() == nullptr)) {
     return false;
   }
 
   // Reset result before the start
-  Result()->reset();
+  this->Result()->reset();
 
   // Fill command string pointers
-  if (!Setup().Command.empty()) {
-    CommandPtr_.reserve(Setup().Command.size() + 1);
-    for (std::string const& arg : Setup().Command) {
-      CommandPtr_.push_back(arg.c_str());
+  if (!this->Setup().Command.empty()) {
+    this->CommandPtr_.reserve(this->Setup().Command.size() + 1);
+    for (std::string const& arg : this->Setup().Command) {
+      this->CommandPtr_.push_back(arg.c_str());
     }
-    CommandPtr_.push_back(nullptr);
+    this->CommandPtr_.push_back(nullptr);
   } else {
-    Result()->ErrorMessage = "Empty command";
+    this->Result()->ErrorMessage = "Empty command";
   }
 
-  if (!Result()->error()) {
-    if (!UVPipeOut_.init(uv_loop)) {
-      Result()->ErrorMessage = "libuv stdout pipe initialization failed";
+  if (!this->Result()->error()) {
+    if (!this->UVPipeOut_.init(uv_loop)) {
+      this->Result()->ErrorMessage = "libuv stdout pipe initialization failed";
     }
   }
-  if (!Result()->error()) {
-    if (!UVPipeErr_.init(uv_loop)) {
-      Result()->ErrorMessage = "libuv stderr pipe initialization failed";
+  if (!this->Result()->error()) {
+    if (!this->UVPipeErr_.init(uv_loop)) {
+      this->Result()->ErrorMessage = "libuv stderr pipe initialization failed";
     }
   }
-  if (!Result()->error()) {
+  if (!this->Result()->error()) {
     // -- Setup process stdio options
     // stdin
-    UVOptionsStdIO_[0].flags = UV_IGNORE;
-    UVOptionsStdIO_[0].data.stream = nullptr;
+    this->UVOptionsStdIO_[0].flags = UV_IGNORE;
+    this->UVOptionsStdIO_[0].data.stream = nullptr;
     // stdout
-    UVOptionsStdIO_[1].flags =
+    this->UVOptionsStdIO_[1].flags =
       static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
-    UVOptionsStdIO_[1].data.stream = UVPipeOut_.uv_stream();
+    this->UVOptionsStdIO_[1].data.stream = this->UVPipeOut_.uv_stream();
     // stderr
-    UVOptionsStdIO_[2].flags =
+    this->UVOptionsStdIO_[2].flags =
       static_cast<uv_stdio_flags>(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
-    UVOptionsStdIO_[2].data.stream = UVPipeErr_.uv_stream();
+    this->UVOptionsStdIO_[2].data.stream = this->UVPipeErr_.uv_stream();
 
     // -- Setup process options
-    std::fill_n(reinterpret_cast<char*>(&UVOptions_), sizeof(UVOptions_), 0);
-    UVOptions_.exit_cb = &cmUVReadOnlyProcess::UVExit;
-    UVOptions_.file = CommandPtr_[0];
-    UVOptions_.args = const_cast<char**>(CommandPtr_.data());
-    UVOptions_.cwd = Setup_.WorkingDirectory.c_str();
-    UVOptions_.flags = UV_PROCESS_WINDOWS_HIDE;
-    UVOptions_.stdio_count = static_cast<int>(UVOptionsStdIO_.size());
-    UVOptions_.stdio = UVOptionsStdIO_.data();
+    std::fill_n(reinterpret_cast<char*>(&this->UVOptions_),
+                sizeof(this->UVOptions_), 0);
+    this->UVOptions_.exit_cb = &cmUVReadOnlyProcess::UVExit;
+    this->UVOptions_.file = this->CommandPtr_[0];
+    this->UVOptions_.args = const_cast<char**>(this->CommandPtr_.data());
+    this->UVOptions_.cwd = this->Setup_.WorkingDirectory.c_str();
+    this->UVOptions_.flags = UV_PROCESS_WINDOWS_HIDE;
+    this->UVOptions_.stdio_count =
+      static_cast<int>(this->UVOptionsStdIO_.size());
+    this->UVOptions_.stdio = this->UVOptionsStdIO_.data();
 
     // -- Spawn process
-    int uvErrorCode = UVProcess_.spawn(*uv_loop, UVOptions_, this);
+    int uvErrorCode = this->UVProcess_.spawn(*uv_loop, this->UVOptions_, this);
     if (uvErrorCode != 0) {
-      Result()->ErrorMessage = "libuv process spawn failed";
+      this->Result()->ErrorMessage = "libuv process spawn failed";
       if (const char* uvErr = uv_strerror(uvErrorCode)) {
-        Result()->ErrorMessage += ": ";
-        Result()->ErrorMessage += uvErr;
+        this->Result()->ErrorMessage += ": ";
+        this->Result()->ErrorMessage += uvErr;
       }
     }
   }
   // -- Start reading from stdio streams
-  if (!Result()->error()) {
-    if (!UVPipeOut_.startRead(
+  if (!this->Result()->error()) {
+    if (!this->UVPipeOut_.startRead(
           [this](cmUVPipeBuffer::DataRange range) {
             this->UVPipeOutData(range);
           },
           [this](ssize_t error) { this->UVPipeOutEnd(error); })) {
-      Result()->ErrorMessage = "libuv start reading from stdout pipe failed";
+      this->Result()->ErrorMessage =
+        "libuv start reading from stdout pipe failed";
     }
   }
-  if (!Result()->error()) {
-    if (!UVPipeErr_.startRead(
+  if (!this->Result()->error()) {
+    if (!this->UVPipeErr_.startRead(
           [this](cmUVPipeBuffer::DataRange range) {
             this->UVPipeErrData(range);
           },
           [this](ssize_t error) { this->UVPipeErrEnd(error); })) {
-      Result()->ErrorMessage = "libuv start reading from stderr pipe failed";
+      this->Result()->ErrorMessage =
+        "libuv start reading from stderr pipe failed";
     }
   }
 
-  if (!Result()->error()) {
-    IsStarted_ = true;
-    FinishedCallback_ = std::move(finishedCallback);
+  if (!this->Result()->error()) {
+    this->IsStarted_ = true;
+    this->FinishedCallback_ = std::move(finishedCallback);
   } else {
     // Clear libuv handles and finish
-    UVProcess_.reset();
-    UVPipeOut_.reset();
-    UVPipeErr_.reset();
-    CommandPtr_.clear();
+    this->UVProcess_.reset();
+    this->UVPipeOut_.reset();
+    this->UVPipeErr_.reset();
+    this->CommandPtr_.clear();
   }
 
-  return IsStarted();
+  return this->IsStarted();
 }
 
 void cmUVReadOnlyProcess::UVExit(uv_process_t* handle, int64_t exitStatus,
@@ -325,36 +332,36 @@ void cmUVReadOnlyProcess::UVExit(uv_process_t* handle, int64_t exitStatus,
 
 void cmUVReadOnlyProcess::UVPipeOutData(cmUVPipeBuffer::DataRange data)
 {
-  Result()->StdOut.append(data.begin(), data.end());
+  this->Result()->StdOut.append(data.begin(), data.end());
 }
 
 void cmUVReadOnlyProcess::UVPipeOutEnd(ssize_t error)
 {
   // Process pipe error
-  if ((error != 0) && !Result()->error()) {
-    Result()->ErrorMessage = cmStrCat(
+  if ((error != 0) && !this->Result()->error()) {
+    this->Result()->ErrorMessage = cmStrCat(
       "Reading from stdout pipe failed with libuv error code ", error);
   }
   // Try finish
-  UVTryFinish();
+  this->UVTryFinish();
 }
 
 void cmUVReadOnlyProcess::UVPipeErrData(cmUVPipeBuffer::DataRange data)
 {
-  std::string* str =
-    Setup_.MergedOutput ? &Result()->StdOut : &Result()->StdErr;
+  std::string* str = this->Setup_.MergedOutput ? &this->Result()->StdOut
+                                               : &this->Result()->StdErr;
   str->append(data.begin(), data.end());
 }
 
 void cmUVReadOnlyProcess::UVPipeErrEnd(ssize_t error)
 {
   // Process pipe error
-  if ((error != 0) && !Result()->error()) {
-    Result()->ErrorMessage = cmStrCat(
+  if ((error != 0) && !this->Result()->error()) {
+    this->Result()->ErrorMessage = cmStrCat(
       "Reading from stderr pipe failed with libuv error code ", error);
   }
   // Try finish
-  UVTryFinish();
+  this->UVTryFinish();
 }
 
 void cmUVReadOnlyProcess::UVTryFinish()
@@ -362,12 +369,13 @@ void cmUVReadOnlyProcess::UVTryFinish()
   // There still might be data in the pipes after the process has finished.
   // Therefore check if the process is finished AND all pipes are closed
   // before signaling the worker thread to continue.
-  if ((UVProcess_.get() != nullptr) || (UVPipeOut_.uv_pipe() != nullptr) ||
-      (UVPipeErr_.uv_pipe() != nullptr)) {
+  if ((this->UVProcess_.get() != nullptr) ||
+      (this->UVPipeOut_.uv_pipe() != nullptr) ||
+      (this->UVPipeErr_.uv_pipe() != nullptr)) {
     return;
   }
-  IsFinished_ = true;
-  FinishedCallback_();
+  this->IsFinished_ = true;
+  this->FinishedCallback_();
 }
 
 /**
@@ -385,7 +393,7 @@ public:
   /**
    * Set the internal thread
    */
-  void SetThread(std::thread&& aThread) { Thread_ = std::move(aThread); }
+  void SetThread(std::thread&& aThread) { this->Thread_ = std::move(aThread); }
 
   /**
    * Run an external process
@@ -414,13 +422,13 @@ private:
 
 cmWorkerPoolWorker::cmWorkerPoolWorker(uv_loop_t& uvLoop)
 {
-  Proc_.Request.init(uvLoop, &cmWorkerPoolWorker::UVProcessStart, this);
+  this->Proc_.Request.init(uvLoop, &cmWorkerPoolWorker::UVProcessStart, this);
 }
 
 cmWorkerPoolWorker::~cmWorkerPoolWorker()
 {
-  if (Thread_.joinable()) {
-    Thread_.join();
+  if (this->Thread_.joinable()) {
+    this->Thread_.join();
   }
 }
 
@@ -433,17 +441,17 @@ bool cmWorkerPoolWorker::RunProcess(cmWorkerPool::ProcessResultT& result,
   }
   // Create process instance
   {
-    std::lock_guard<std::mutex> lock(Proc_.Mutex);
-    Proc_.ROP = cm::make_unique<cmUVReadOnlyProcess>();
-    Proc_.ROP->setup(&result, true, command, workingDirectory);
+    std::lock_guard<std::mutex> lock(this->Proc_.Mutex);
+    this->Proc_.ROP = cm::make_unique<cmUVReadOnlyProcess>();
+    this->Proc_.ROP->setup(&result, true, command, workingDirectory);
   }
   // Send asynchronous process start request to libuv loop
-  Proc_.Request.send();
+  this->Proc_.Request.send();
   // Wait until the process has been finished and destroyed
   {
-    std::unique_lock<std::mutex> ulock(Proc_.Mutex);
-    while (Proc_.ROP) {
-      Proc_.Condition.wait(ulock);
+    std::unique_lock<std::mutex> ulock(this->Proc_.Mutex);
+    while (this->Proc_.ROP) {
+      this->Proc_.Condition.wait(ulock);
     }
   }
   return !result.error();
@@ -469,12 +477,13 @@ void cmWorkerPoolWorker::UVProcessStart(uv_async_t* handle)
 
 void cmWorkerPoolWorker::UVProcessFinished()
 {
-  std::lock_guard<std::mutex> lock(Proc_.Mutex);
-  if (Proc_.ROP && (Proc_.ROP->IsFinished() || !Proc_.ROP->IsStarted())) {
-    Proc_.ROP.reset();
+  std::lock_guard<std::mutex> lock(this->Proc_.Mutex);
+  if (this->Proc_.ROP &&
+      (this->Proc_.ROP->IsFinished() || !this->Proc_.ROP->IsStarted())) {
+    this->Proc_.ROP.reset();
   }
   // Notify idling thread
-  Proc_.Condition.notify_one();
+  this->Proc_.Condition.notify_one();
 }
 
 /**
@@ -539,19 +548,19 @@ public:
 
 void cmWorkerPool::ProcessResultT::reset()
 {
-  ExitStatus = 0;
-  TermSignal = 0;
-  if (!StdOut.empty()) {
-    StdOut.clear();
-    StdOut.shrink_to_fit();
+  this->ExitStatus = 0;
+  this->TermSignal = 0;
+  if (!this->StdOut.empty()) {
+    this->StdOut.clear();
+    this->StdOut.shrink_to_fit();
   }
-  if (!StdErr.empty()) {
-    StdErr.clear();
-    StdErr.shrink_to_fit();
+  if (!this->StdErr.empty()) {
+    this->StdErr.clear();
+    this->StdErr.shrink_to_fit();
   }
-  if (!ErrorMessage.empty()) {
-    ErrorMessage.clear();
-    ErrorMessage.shrink_to_fit();
+  if (!this->ErrorMessage.empty()) {
+    this->ErrorMessage.clear();
+    this->ErrorMessage.shrink_to_fit();
   }
 }
 
@@ -563,56 +572,58 @@ cmWorkerPoolInternal::cmWorkerPoolInternal(cmWorkerPool* pool)
 #ifdef CMAKE_UV_SIGNAL_HACK
   UVHackRAII = cm::make_unique<cmUVSignalHackRAII>();
 #endif
-  UVLoop = cm::make_unique<uv_loop_t>();
-  uv_loop_init(UVLoop.get());
+  this->UVLoop = cm::make_unique<uv_loop_t>();
+  uv_loop_init(this->UVLoop.get());
 }
 
 cmWorkerPoolInternal::~cmWorkerPoolInternal()
 {
-  uv_loop_close(UVLoop.get());
+  uv_loop_close(this->UVLoop.get());
 }
 
 bool cmWorkerPoolInternal::Process()
 {
   // Reset state flags
-  Processing = true;
-  Aborting = false;
+  this->Processing = true;
+  this->Aborting = false;
   // Initialize libuv asynchronous request
-  UVRequestBegin.init(*UVLoop, &cmWorkerPoolInternal::UVSlotBegin, this);
-  UVRequestEnd.init(*UVLoop, &cmWorkerPoolInternal::UVSlotEnd, this);
+  this->UVRequestBegin.init(*this->UVLoop, &cmWorkerPoolInternal::UVSlotBegin,
+                            this);
+  this->UVRequestEnd.init(*this->UVLoop, &cmWorkerPoolInternal::UVSlotEnd,
+                          this);
   // Send begin request
-  UVRequestBegin.send();
+  this->UVRequestBegin.send();
   // Run libuv loop
-  bool success = (uv_run(UVLoop.get(), UV_RUN_DEFAULT) == 0);
+  bool success = (uv_run(this->UVLoop.get(), UV_RUN_DEFAULT) == 0);
   // Update state flags
-  Processing = false;
-  Aborting = false;
+  this->Processing = false;
+  this->Aborting = false;
   return success;
 }
 
 void cmWorkerPoolInternal::Abort()
 {
   // Clear all jobs and set abort flag
-  std::lock_guard<std::mutex> guard(Mutex);
-  if (!Aborting) {
+  std::lock_guard<std::mutex> guard(this->Mutex);
+  if (!this->Aborting) {
     // Register abort and clear queue
-    Aborting = true;
-    Queue.clear();
-    Condition.notify_all();
+    this->Aborting = true;
+    this->Queue.clear();
+    this->Condition.notify_all();
   }
 }
 
 inline bool cmWorkerPoolInternal::PushJob(cmWorkerPool::JobHandleT&& jobHandle)
 {
-  std::lock_guard<std::mutex> guard(Mutex);
-  if (Aborting) {
+  std::lock_guard<std::mutex> guard(this->Mutex);
+  if (this->Aborting) {
     return false;
   }
   // Append the job to the queue
-  Queue.emplace_back(std::move(jobHandle));
+  this->Queue.emplace_back(std::move(jobHandle));
   // Notify an idle worker if there's one
-  if (WorkersIdle != 0) {
-    Condition.notify_one();
+  if (this->WorkersIdle != 0) {
+    this->Condition.notify_one();
   }
   // Return success
   return true;
@@ -652,79 +663,79 @@ void cmWorkerPoolInternal::UVSlotEnd(uv_async_t* handle)
 void cmWorkerPoolInternal::Work(unsigned int workerIndex)
 {
   cmWorkerPool::JobHandleT jobHandle;
-  std::unique_lock<std::mutex> uLock(Mutex);
+  std::unique_lock<std::mutex> uLock(this->Mutex);
   // Increment running workers count
-  ++WorkersRunning;
+  ++this->WorkersRunning;
   // Enter worker main loop
   while (true) {
     // Abort on request
-    if (Aborting) {
+    if (this->Aborting) {
       break;
     }
     // Wait for new jobs on the main CV
-    if (Queue.empty()) {
-      ++WorkersIdle;
-      Condition.wait(uLock);
-      --WorkersIdle;
+    if (this->Queue.empty()) {
+      ++this->WorkersIdle;
+      this->Condition.wait(uLock);
+      --this->WorkersIdle;
       continue;
     }
 
     // If there is a fence currently active or waiting,
     // sleep on the main CV and try again.
-    if (FenceProcessing) {
-      Condition.wait(uLock);
+    if (this->FenceProcessing) {
+      this->Condition.wait(uLock);
       continue;
     }
 
     // Pop next job from queue
-    jobHandle = std::move(Queue.front());
-    Queue.pop_front();
+    jobHandle = std::move(this->Queue.front());
+    this->Queue.pop_front();
 
     // Check for fence jobs
     bool raisedFence = false;
     if (jobHandle->IsFence()) {
-      FenceProcessing = true;
+      this->FenceProcessing = true;
       raisedFence = true;
       // Wait on the Fence CV until all pending jobs are done.
-      while (JobsProcessing != 0 && !Aborting) {
-        ConditionFence.wait(uLock);
+      while (this->JobsProcessing != 0 && !this->Aborting) {
+        this->ConditionFence.wait(uLock);
       }
       // When aborting, explicitly kick all threads alive once more.
-      if (Aborting) {
-        FenceProcessing = false;
-        Condition.notify_all();
+      if (this->Aborting) {
+        this->FenceProcessing = false;
+        this->Condition.notify_all();
         break;
       }
     }
 
     // Unlocked scope for job processing
-    ++JobsProcessing;
+    ++this->JobsProcessing;
     {
       uLock.unlock();
-      jobHandle->Work(Pool, workerIndex); // Process job
-      jobHandle.reset();                  // Destroy job
+      jobHandle->Work(this->Pool, workerIndex); // Process job
+      jobHandle.reset();                        // Destroy job
       uLock.lock();
     }
-    --JobsProcessing;
+    --this->JobsProcessing;
 
     // If this was the thread that entered fence processing
     // originally, notify all idling workers that the fence
     // is done.
     if (raisedFence) {
-      FenceProcessing = false;
-      Condition.notify_all();
+      this->FenceProcessing = false;
+      this->Condition.notify_all();
     }
     // If fence processing is still not done, notify the
     // the fencing worker when all active jobs are done.
-    if (FenceProcessing && JobsProcessing == 0) {
-      ConditionFence.notify_all();
+    if (this->FenceProcessing && this->JobsProcessing == 0) {
+      this->ConditionFence.notify_all();
     }
   }
 
   // Decrement running workers count
-  if (--WorkersRunning == 0) {
+  if (--this->WorkersRunning == 0) {
     // Last worker thread about to finish. Send libuv event.
-    UVRequestEnd.send();
+    this->UVRequestEnd.send();
   }
 }
 
@@ -735,7 +746,7 @@ bool cmWorkerPool::JobT::RunProcess(ProcessResultT& result,
                                     std::string const& workingDirectory)
 {
   // Get worker by index
-  auto* wrk = Pool_->Int_->Workers.at(WorkerIndex_).get();
+  auto* wrk = this->Pool_->Int_->Workers.at(this->WorkerIndex_).get();
   return wrk->RunProcess(result, command, workingDirectory);
 }
 
@@ -748,29 +759,29 @@ cmWorkerPool::~cmWorkerPool() = default;
 
 void cmWorkerPool::SetThreadCount(unsigned int threadCount)
 {
-  if (!Int_->Processing) {
-    ThreadCount_ = (threadCount > 0) ? threadCount : 1u;
+  if (!this->Int_->Processing) {
+    this->ThreadCount_ = (threadCount > 0) ? threadCount : 1u;
   }
 }
 
 bool cmWorkerPool::Process(void* userData)
 {
   // Setup user data
-  UserData_ = userData;
+  this->UserData_ = userData;
   // Run libuv loop
-  bool success = Int_->Process();
+  bool success = this->Int_->Process();
   // Clear user data
-  UserData_ = nullptr;
+  this->UserData_ = nullptr;
   // Return
   return success;
 }
 
 bool cmWorkerPool::PushJob(JobHandleT&& jobHandle)
 {
-  return Int_->PushJob(std::move(jobHandle));
+  return this->Int_->PushJob(std::move(jobHandle));
 }
 
 void cmWorkerPool::Abort()
 {
-  Int_->Abort();
+  this->Int_->Abort();
 }

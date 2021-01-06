@@ -838,7 +838,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
     for (const auto& gt : lg->GetGeneratorTargets()) {
       cmLocalGenerator* tlg = gt->GetLocalGenerator();
 
-      if (!gt->IsInBuildSystem() || IsExcluded(lg.get(), gt.get())) {
+      if (!gt->IsInBuildSystem() || this->IsExcluded(lg.get(), gt.get())) {
         continue;
       }
 

@@ -19,17 +19,17 @@ void String::internally_mutate_to_stable_string()
   // We assume that only one thread mutates this instance at
   // a time even if we point to a shared string buffer referenced
   // by other threads.
-  *this = String(data(), size());
+  *this = String(this->data(), this->size());
 }
 
 bool String::is_stable() const
 {
-  return str_if_stable() != nullptr;
+  return this->str_if_stable() != nullptr;
 }
 
 void String::stabilize()
 {
-  if (is_stable()) {
+  if (this->is_stable()) {
     return;
   }
   this->internally_mutate_to_stable_string();
@@ -37,16 +37,17 @@ void String::stabilize()
 
 std::string const* String::str_if_stable() const
 {
-  if (!data()) {
+  if (!this->data()) {
     // We view no string.
     // This is stable for the lifetime of our current value.
     return &empty_string_;
   }
 
-  if (string_ && data() == string_->data() && size() == string_->size()) {
+  if (this->string_ && this->data() == this->string_->data() &&
+      this->size() == this->string_->size()) {
     // We view an entire string.
     // This is stable for the lifetime of our current value.
-    return string_.get();
+    return this->string_.get();
   }
 
   return nullptr;
@@ -54,18 +55,18 @@ std::string const* String::str_if_stable() const
 
 std::string const& String::str()
 {
-  if (std::string const* s = str_if_stable()) {
+  if (std::string const* s = this->str_if_stable()) {
     return *s;
   }
   // Mutate to hold a std::string that is stable for the lifetime
   // of our current value.
   this->internally_mutate_to_stable_string();
-  return *string_;
+  return *this->string_;
 }
 
 const char* String::c_str()
 {
-  const char* c = data();
+  const char* c = this->data();
   if (c == nullptr) {
     return c;
   }
@@ -73,42 +74,42 @@ const char* String::c_str()
   // We always point into a null-terminated string so it is safe to
   // access one past the end.  If it is a null byte then we can use
   // the pointer directly.
-  if (c[size()] == '\0') {
+  if (c[this->size()] == '\0') {
     return c;
   }
 
   // Mutate to hold a std::string so we can get a null terminator.
   this->internally_mutate_to_stable_string();
-  c = string_->c_str();
+  c = this->string_->c_str();
   return c;
 }
 
 String& String::insert(size_type index, size_type count, char ch)
 {
   std::string s;
-  s.reserve(size() + count);
-  s.assign(data(), size());
+  s.reserve(this->size() + count);
+  s.assign(this->data(), this->size());
   s.insert(index, count, ch);
   return *this = std::move(s);
 }
 
 String& String::erase(size_type index, size_type count)
 {
-  if (index > size()) {
+  if (index > this->size()) {
     throw std::out_of_range("Index out of range in String::erase");
   }
-  size_type const rcount = std::min(count, size() - index);
+  size_type const rcount = std::min(count, this->size() - index);
   size_type const rindex = index + rcount;
   std::string s;
-  s.reserve(size() - rcount);
-  s.assign(data(), index);
-  s.append(data() + rindex, size() - rindex);
+  s.reserve(this->size() - rcount);
+  s.assign(this->data(), index);
+  s.append(this->data() + rindex, this->size() - rindex);
   return *this = std::move(s);
 }
 
 String String::substr(size_type pos, size_type count) const
 {
-  if (pos > size()) {
+  if (pos > this->size()) {
     throw std::out_of_range("Index out of range in String::substr");
   }
   return String(*this, pos, count);
@@ -116,14 +117,14 @@ String String::substr(size_type pos, size_type count) const
 
 String::String(std::string&& s, Private)
   : string_(std::make_shared<std::string>(std::move(s)))
-  , view_(string_->data(), string_->size())
+  , view_(this->string_->data(), this->string_->size())
 {
 }
 
 String::size_type String::copy(char* dest, size_type count,
                                size_type pos) const
 {
-  return view_.copy(dest, count, pos);
+  return this->view_.copy(dest, count, pos);
 }
 
 std::ostream& operator<<(std::ostream& os, String const& s)

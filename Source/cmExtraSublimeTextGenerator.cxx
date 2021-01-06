@@ -132,7 +132,7 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
   // doesn't currently support these settings per build system, only project
   // wide
   MapSourceFileFlags sourceFileFlags;
-  AppendAllTargets(lgs, mf, fout, sourceFileFlags);
+  this->AppendAllTargets(lgs, mf, fout, sourceFileFlags);
 
   // End of build_systems
   fout << "\n\t]";

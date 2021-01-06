@@ -289,7 +289,7 @@ void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 void cmFindCommon::GetIgnoredPaths(std::set<std::string>& ignore)
 {
   std::vector<std::string> ignoreVec;
-  GetIgnoredPaths(ignoreVec);
+  this->GetIgnoredPaths(ignoreVec);
   ignore.insert(ignoreVec.begin(), ignoreVec.end());
 }
 

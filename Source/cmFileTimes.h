@@ -19,7 +19,7 @@ public:
   ~cmFileTimes();
 
   //! @return true, if file times were loaded successfully
-  bool IsValid() const { return (times != nullptr); }
+  bool IsValid() const { return (this->times != nullptr); }
   //! Try to load the file times from @a fileName and @return IsValid()
   bool Load(std::string const& fileName);
   //! Stores the file times at @a fileName (if IsValid())

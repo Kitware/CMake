@@ -105,7 +105,7 @@ bool cmListFileParser::ParseFile(const char* filename)
     return false;
   }
 
-  return Parse();
+  return this->Parse();
 }
 
 bool cmListFileParser::ParseString(const char* str,
@@ -118,7 +118,7 @@ bool cmListFileParser::ParseString(const char* str,
     return false;
   }
 
-  return Parse();
+  return this->Parse();
 }
 
 bool cmListFileParser::Parse()

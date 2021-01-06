@@ -557,7 +557,7 @@ std::string cmGeneratorTarget::GetFilePostfix(const std::string& config) const
 
     // Frameworks created by multi config generators can have a special
     // framework postfix.
-    frameworkPostfix = GetFrameworkMultiConfigPostfix(config);
+    frameworkPostfix = this->GetFrameworkMultiConfigPostfix(config);
     if (!frameworkPostfix.empty()) {
       postfix = &frameworkPostfix;
     }
@@ -576,7 +576,7 @@ std::string cmGeneratorTarget::GetFrameworkMultiConfigPostfix(
 
     if (!this->IsImported() && postfix &&
         (this->IsFrameworkOnApple() &&
-         !GetGlobalGenerator()->IsMultiConfig())) {
+         !this->GetGlobalGenerator()->IsMultiConfig())) {
       postfix = nullptr;
     }
   }
@@ -2503,7 +2503,7 @@ public:
 
   bool GetHadLinkLanguageSensitiveCondition() const
   {
-    return HadLinkLanguageSensitiveCondition;
+    return this->HadLinkLanguageSensitiveCondition;
   }
 
 private:
@@ -3278,7 +3278,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
       flags += " --cuda-gpu-arch=sm_" + architecture.name;
 
       if (!architecture.real) {
-        Makefile->IssueMessage(
+        this->Makefile->IssueMessage(
           MessageType::WARNING,
           "Clang doesn't support disabling CUDA real code generation.");
       }
@@ -4968,7 +4968,7 @@ void cmGeneratorTarget::GetFullNameInternal(
   // the base, because the suffix ends up being used in Xcode's
   // EXECUTABLE_SUFFIX attribute.
   if (this->IsFrameworkOnApple() &&
-      GetGlobalGenerator()->GetName() == "Xcode") {
+      this->GetGlobalGenerator()->GetName() == "Xcode") {
     targetSuffix = &configPostfix;
   } else {
     outBase += configPostfix;

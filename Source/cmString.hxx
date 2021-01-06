@@ -301,8 +301,8 @@ public:
       The other instance is left as a null string.  */
   String& operator=(String&& s) noexcept
   {
-    string_ = std::move(s.string_);
-    view_ = s.view_;
+    this->string_ = std::move(s.string_);
+    this->view_ = s.view_;
     s.view_ = string_view();
     return *this;
   }
@@ -340,33 +340,33 @@ public:
   }
 
   /** Return true if the instance is not a null string.  */
-  explicit operator bool() const noexcept { return data() != nullptr; }
+  explicit operator bool() const noexcept { return this->data() != nullptr; }
 
   /** Return a view of the string.  */
-  string_view view() const noexcept { return view_; }
+  string_view view() const noexcept { return this->view_; }
   operator string_view() const noexcept { return this->view(); }
 
   /** Return true if the instance is an empty stringn or null string.  */
-  bool empty() const noexcept { return view_.empty(); }
+  bool empty() const noexcept { return this->view_.empty(); }
 
   /** Return a pointer to the start of the string.  */
-  const char* data() const noexcept { return view_.data(); }
+  const char* data() const noexcept { return this->view_.data(); }
 
   /** Return the length of the string in bytes.  */
-  size_type size() const noexcept { return view_.size(); }
-  size_type length() const noexcept { return view_.length(); }
+  size_type size() const noexcept { return this->view_.size(); }
+  size_type length() const noexcept { return this->view_.length(); }
 
   /** Return the character at the given position.
       No bounds checking is performed.  */
-  char operator[](size_type pos) const noexcept { return view_[pos]; }
+  char operator[](size_type pos) const noexcept { return this->view_[pos]; }
 
   /** Return the character at the given position.
       If the position is out of bounds, throws std::out_of_range.  */
-  char at(size_type pos) const { return view_.at(pos); }
+  char at(size_type pos) const { return this->view_.at(pos); }
 
-  char front() const noexcept { return view_.front(); }
+  char front() const noexcept { return this->view_.front(); }
 
-  char back() const noexcept { return view_.back(); }
+  char back() const noexcept { return this->view_.back(); }
 
   /** Return true if this instance is stable and otherwise false.
       An instance is stable if it is in the 'null' state or if it is
@@ -392,15 +392,18 @@ public:
       or str() is called.  */
   const char* c_str();
 
-  const_iterator begin() const noexcept { return view_.begin(); }
-  const_iterator end() const noexcept { return view_.end(); }
-  const_iterator cbegin() const noexcept { return begin(); }
-  const_iterator cend() const noexcept { return end(); }
+  const_iterator begin() const noexcept { return this->view_.begin(); }
+  const_iterator end() const noexcept { return this->view_.end(); }
+  const_iterator cbegin() const noexcept { return this->begin(); }
+  const_iterator cend() const noexcept { return this->end(); }
 
-  const_reverse_iterator rbegin() const noexcept { return view_.rbegin(); }
-  const_reverse_iterator rend() const noexcept { return view_.rend(); }
-  const_reverse_iterator crbegin() const noexcept { return rbegin(); }
-  const_reverse_iterator crend() const noexcept { return rend(); }
+  const_reverse_iterator rbegin() const noexcept
+  {
+    return this->view_.rbegin();
+  }
+  const_reverse_iterator rend() const noexcept { return this->view_.rend(); }
+  const_reverse_iterator crbegin() const noexcept { return this->rbegin(); }
+  const_reverse_iterator crend() const noexcept { return this->rend(); }
 
   /** Append to the string using any type that implements the
       AsStringView trait.  */
@@ -410,8 +413,8 @@ public:
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
     std::string r;
-    r.reserve(size() + v.size());
-    r.assign(data(), size());
+    r.reserve(this->size() + v.size());
+    r.assign(this->data(), this->size());
     r.append(v.data(), v.size());
     return *this = std::move(r);
   }
@@ -428,21 +431,21 @@ public:
   void push_back(char ch)
   {
     std::string s;
-    s.reserve(size() + 1);
-    s.assign(data(), size());
+    s.reserve(this->size() + 1);
+    s.assign(this->data(), this->size());
     s.push_back(ch);
     *this = std::move(s);
   }
 
-  void pop_back() { *this = String(*this, 0, size() - 1); }
+  void pop_back() { *this = String(*this, 0, this->size() - 1); }
 
   template <typename T>
   typename std::enable_if<AsStringView<T>::value, String&>::type replace(
     size_type pos, size_type count, T&& s)
   {
-    const_iterator first = begin() + pos;
+    const_iterator first = this->begin() + pos;
     const_iterator last = first + count;
-    return replace(first, last, std::forward<T>(s));
+    return this->replace(first, last, std::forward<T>(s));
   }
 
   template <typename InputIterator>
@@ -450,9 +453,9 @@ public:
                   InputIterator first2, InputIterator last2)
   {
     std::string out;
-    out.append(view_.begin(), first);
+    out.append(this->view_.begin(), first);
     out.append(first2, last2);
-    out.append(last, view_.end());
+    out.append(last, this->view_.end());
     return *this = std::move(out);
   }
 
@@ -462,10 +465,11 @@ public:
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
     std::string out;
-    out.reserve((first - view_.begin()) + v.size() + (view_.end() - last));
-    out.append(view_.begin(), first);
+    out.reserve((first - this->view_.begin()) + v.size() +
+                (this->view_.end() - last));
+    out.append(this->view_.begin(), first);
     out.append(v.data(), v.size());
-    out.append(last, view_.end());
+    out.append(last, this->view_.end());
     return *this = std::move(out);
   }
 
@@ -476,39 +480,40 @@ public:
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
     v = v.substr(pos2, count2);
-    return replace(pos, count, v);
+    return this->replace(pos, count, v);
   }
 
   String& replace(size_type pos, size_type count, size_type count2, char ch)
   {
-    const_iterator first = begin() + pos;
+    const_iterator first = this->begin() + pos;
     const_iterator last = first + count;
-    return replace(first, last, count2, ch);
+    return this->replace(first, last, count2, ch);
   }
 
   String& replace(const_iterator first, const_iterator last, size_type count2,
                   char ch)
   {
     std::string out;
-    out.reserve((first - view_.begin()) + count2 + (view_.end() - last));
-    out.append(view_.begin(), first);
+    out.reserve((first - this->view_.begin()) + count2 +
+                (this->view_.end() - last));
+    out.append(this->view_.begin(), first);
     out.append(count2, ch);
-    out.append(last, view_.end());
+    out.append(last, this->view_.end());
     return *this = std::move(out);
   }
 
   size_type copy(char* dest, size_type count, size_type pos = 0) const;
 
-  void resize(size_type count) { resize(count, char()); }
+  void resize(size_type count) { this->resize(count, char()); }
 
   void resize(size_type count, char ch)
   {
     std::string s;
     s.reserve(count);
-    if (count <= size()) {
-      s.assign(data(), count);
+    if (count <= this->size()) {
+      s.assign(this->data(), count);
     } else {
-      s.assign(data(), size());
+      s.assign(this->data(), this->size());
       s.resize(count, ch);
     }
     *this = std::move(s);
@@ -516,8 +521,8 @@ public:
 
   void swap(String& other)
   {
-    std::swap(string_, other.string_);
-    std::swap(view_, other.view_);
+    std::swap(this->string_, other.string_);
+    std::swap(this->view_, other.view_);
   }
 
   /** Return a substring starting at position 'pos' and
@@ -528,29 +533,29 @@ public:
   typename std::enable_if<AsStringView<T>::value, int>::type compare(
     T&& s) const
   {
-    return view_.compare(AsStringView<T>::view(std::forward<T>(s)));
+    return this->view_.compare(AsStringView<T>::view(std::forward<T>(s)));
   }
 
   int compare(size_type pos1, size_type count1, string_view v) const
   {
-    return view_.compare(pos1, count1, v);
+    return this->view_.compare(pos1, count1, v);
   }
 
   int compare(size_type pos1, size_type count1, string_view v, size_type pos2,
               size_type count2) const
   {
-    return view_.compare(pos1, count1, v, pos2, count2);
+    return this->view_.compare(pos1, count1, v, pos2, count2);
   }
 
   int compare(size_type pos1, size_type count1, const char* s) const
   {
-    return view_.compare(pos1, count1, s);
+    return this->view_.compare(pos1, count1, s);
   }
 
   int compare(size_type pos1, size_type count1, const char* s,
               size_type count2) const
   {
-    return view_.compare(pos1, count1, s, count2);
+    return this->view_.compare(pos1, count1, s, count2);
   }
 
   template <typename T>
@@ -558,12 +563,12 @@ public:
     T&& s, size_type pos = 0) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
-    return view_.find(v, pos);
+    return this->view_.find(v, pos);
   }
 
   size_type find(const char* s, size_type pos, size_type count) const
   {
-    return view_.find(s, pos, count);
+    return this->view_.find(s, pos, count);
   }
 
   template <typename T>
@@ -571,12 +576,12 @@ public:
     T&& s, size_type pos = npos) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
-    return view_.rfind(v, pos);
+    return this->view_.rfind(v, pos);
   }
 
   size_type rfind(const char* s, size_type pos, size_type count) const
   {
-    return view_.rfind(s, pos, count);
+    return this->view_.rfind(s, pos, count);
   }
 
   template <typename T>
@@ -584,12 +589,12 @@ public:
   find_first_of(T&& s, size_type pos = 0) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
-    return view_.find_first_of(v, pos);
+    return this->view_.find_first_of(v, pos);
   }
 
   size_type find_first_of(const char* s, size_type pos, size_type count) const
   {
-    return view_.find_first_of(s, pos, count);
+    return this->view_.find_first_of(s, pos, count);
   }
 
   template <typename T>
@@ -597,13 +602,13 @@ public:
   find_first_not_of(T&& s, size_type pos = 0) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
-    return view_.find_first_not_of(v, pos);
+    return this->view_.find_first_not_of(v, pos);
   }
 
   size_type find_first_not_of(const char* s, size_type pos,
                               size_type count) const
   {
-    return view_.find_first_not_of(s, pos, count);
+    return this->view_.find_first_not_of(s, pos, count);
   }
 
   template <typename T>
@@ -611,12 +616,12 @@ public:
   find_last_of(T&& s, size_type pos = npos) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
-    return view_.find_last_of(v, pos);
+    return this->view_.find_last_of(v, pos);
   }
 
   size_type find_last_of(const char* s, size_type pos, size_type count) const
   {
-    return view_.find_last_of(s, pos, count);
+    return this->view_.find_last_of(s, pos, count);
   }
 
   template <typename T>
@@ -624,13 +629,13 @@ public:
   find_last_not_of(T&& s, size_type pos = npos) const
   {
     string_view v = AsStringView<T>::view(std::forward<T>(s));
-    return view_.find_last_not_of(v, pos);
+    return this->view_.find_last_not_of(v, pos);
   }
 
   size_type find_last_not_of(const char* s, size_type pos,
                              size_type count) const
   {
-    return view_.find_last_not_of(s, pos, count);
+    return this->view_.find_last_not_of(s, pos, count);
   }
 
 private:
@@ -822,7 +827,10 @@ struct StringOpPlus
   }
 #endif
   operator std::string() const;
-  std::string::size_type size() const { return l.size() + r.size(); }
+  std::string::size_type size() const
+  {
+    return this->l.size() + this->r.size();
+  }
 };
 
 template <typename T>
@@ -848,7 +856,7 @@ template <typename L, typename R>
 StringOpPlus<L, R>::operator std::string() const
 {
   std::string s;
-  s.reserve(size());
+  s.reserve(this->size());
   s += *this;
   return s;
 }

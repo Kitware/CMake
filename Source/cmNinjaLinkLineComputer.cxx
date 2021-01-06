@@ -18,5 +18,5 @@ cmNinjaLinkLineComputer::cmNinjaLinkLineComputer(
 std::string cmNinjaLinkLineComputer::ConvertToLinkReference(
   std::string const& lib) const
 {
-  return GG->ConvertToNinjaPath(lib);
+  return this->GG->ConvertToNinjaPath(lib);
 }

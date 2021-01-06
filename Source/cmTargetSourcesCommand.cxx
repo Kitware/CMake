@@ -25,8 +25,9 @@ protected:
                               const std::vector<std::string>& content,
                               bool prepend, bool system) override
   {
-    cmTargetPropCommandBase::HandleInterfaceContent(
-      tgt, ConvertToAbsoluteContent(tgt, content, true), prepend, system);
+    this->cmTargetPropCommandBase::HandleInterfaceContent(
+      tgt, this->ConvertToAbsoluteContent(tgt, content, true), prepend,
+      system);
   }
 
 private:
@@ -43,7 +44,8 @@ private:
                            bool /*prepend*/, bool /*system*/) override
   {
     tgt->AppendProperty(
-      "SOURCES", this->Join(ConvertToAbsoluteContent(tgt, content, false)));
+      "SOURCES",
+      this->Join(this->ConvertToAbsoluteContent(tgt, content, false)));
     return true; // Successfully handled.
   }
 

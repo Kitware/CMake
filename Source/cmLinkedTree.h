@@ -133,9 +133,9 @@ public:
     return iterator(const_cast<cmLinkedTree*>(this), 0);
   }
 
-  iterator Push(iterator it) { return Push_impl(it, T()); }
+  iterator Push(iterator it) { return this->Push_impl(it, T()); }
 
-  iterator Push(iterator it, T t) { return Push_impl(it, std::move(t)); }
+  iterator Push(iterator it, T t) { return this->Push_impl(it, std::move(t)); }
 
   bool IsLast(iterator it) { return it.Position == this->Data.size(); }
 

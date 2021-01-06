@@ -38,7 +38,7 @@ std::string cmTimestamp::CurrentTime(const std::string& formatString,
     return std::string();
   }
 
-  return CreateTimestampFromTimeT(currentTimeT, formatString, utcFlag);
+  return this->CreateTimestampFromTimeT(currentTimeT, formatString, utcFlag);
 }
 
 std::string cmTimestamp::FileModificationTime(const char* path,
@@ -53,7 +53,7 @@ std::string cmTimestamp::FileModificationTime(const char* path,
   }
 
   time_t mtime = cmsys::SystemTools::ModifiedTime(real_path);
-  return CreateTimestampFromTimeT(mtime, formatString, utcFlag);
+  return this->CreateTimestampFromTimeT(mtime, formatString, utcFlag);
 }
 
 std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
@@ -90,7 +90,7 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
                                             : static_cast<char>(0);
 
     if (c1 == '%' && c2 != 0) {
-      result += AddTimestampComponent(c2, timeStruct, timeT);
+      result += this->AddTimestampComponent(c2, timeStruct, timeT);
       ++i;
     } else {
       result += c1;

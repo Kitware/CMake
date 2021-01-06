@@ -66,7 +66,7 @@ public:
         }
         foundFile = true;
         inSource = false;
-        filename = getValue(line, 0);
+        filename = this->getValue(line, 0);
       } else if ((line.find("coverage") != std::string::npos) && foundFile &&
                  inSource) {
         /*
@@ -78,7 +78,7 @@ public:
          *  FoundFile and foundSource ensure that
          *  only the value of the line coverage is captured
          */
-        std::string result = getValue(line, 1);
+        std::string result = this->getValue(line, 1);
         result = result.substr(2);
         if (result == "\"\"") {
           // Empty quotation marks indicate that the

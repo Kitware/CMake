@@ -292,7 +292,7 @@ public:
                           const char* doc, cmStateEnums::CacheEntryType type,
                           bool force = false)
   {
-    AddCacheDefinition(name, value.c_str(), doc, type, force);
+    this->AddCacheDefinition(name, value.c_str(), doc, type, force);
   }
 
   /**
