@@ -231,11 +231,10 @@ private:
   bool ProcessLine() override
   {
     if (cmHasPrefix(this->Line, this->IncludePrefix)) {
-      this->DepFile << cmCMakePath(
-                         cmTrimWhitespace(this->Line.c_str() +
-                                          this->IncludePrefix.size()))
-                         .GenericString()
-                    << std::endl;
+      auto path =
+        cmTrimWhitespace(this->Line.c_str() + this->IncludePrefix.size());
+      cmSystemTools::ConvertToLongPath(path);
+      this->DepFile << cmCMakePath(path).GenericString() << std::endl;
     } else {
       this->Output << this->Line << std::endl << std::flush;
     }
