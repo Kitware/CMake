@@ -254,7 +254,8 @@ private:
                                            cmGeneratorTarget const* gt,
                                            cmCustomCommand const& cc);
   cmXCodeObject* CreateRunScriptBuildPhase(
-    std::string const& name, std::vector<cmCustomCommand> const& commands);
+    std::string const& name, cmGeneratorTarget const* gt,
+    std::vector<cmCustomCommand> const& commands);
   std::string ConstructScript(cmCustomCommandGenerator const& ccg);
   void CreateReRunCMakeFile(cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*> const& gens);

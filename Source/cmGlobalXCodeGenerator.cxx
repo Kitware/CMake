@@ -1729,13 +1729,13 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
   if (this->XcodeBuildSystem >= BuildSystem::Twelve) {
     // create prebuild phase
     preBuildPhase =
-      this->CreateRunScriptBuildPhase("CMake PreBuild Rules", prebuild);
+      this->CreateRunScriptBuildPhase("CMake PreBuild Rules", gtgt, prebuild);
     // create prelink phase
     preLinkPhase =
-      this->CreateRunScriptBuildPhase("CMake PreLink Rules", prelink);
+      this->CreateRunScriptBuildPhase("CMake PreLink Rules", gtgt, prelink);
     // create postbuild phase
-    postBuildPhase =
-      this->CreateRunScriptBuildPhase("CMake PostBuild Rules", postbuild);
+    postBuildPhase = this->CreateRunScriptBuildPhase("CMake PostBuild Rules",
+                                                     gtgt, postbuild);
   } else {
     std::vector<cmSourceFile*> classes;
     if (!gtgt->GetConfigCommonSourceFiles(classes)) {
@@ -1863,7 +1863,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
   }
 
   cmXCodeObject* buildPhase =
-    this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase);
+    this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase,
+                       cmStrCat(gt->GetName(), ':', sf->GetFullPath()));
   buildPhase->AddAttribute("buildActionMask",
                            this->CreateString("2147483647"));
   cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -1922,7 +1923,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
 }
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
-  std::string const& name, std::vector<cmCustomCommand> const& commands)
+  std::string const& name, cmGeneratorTarget const* gt,
+  std::vector<cmCustomCommand> const& commands)
 {
   if (commands.empty()) {
     return nullptr;
@@ -1945,7 +1947,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
   }
 
   cmXCodeObject* buildPhase =
-    this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase);
+    this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase,
+                       cmStrCat(gt->GetName(), ':', name));
   buildPhase->AddAttribute("buildActionMask",
                            this->CreateString("2147483647"));
   cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -2913,8 +2916,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
   cmGeneratorTarget* gtgt)
 {
-  cmXCodeObject* shellBuildPhase =
-    this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase);
+  cmXCodeObject* shellBuildPhase = this->CreateObject(
+    cmXCodeObject::PBXShellScriptBuildPhase, gtgt->GetName());
   shellBuildPhase->AddAttribute("buildActionMask",
                                 this->CreateString("2147483647"));
   cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
