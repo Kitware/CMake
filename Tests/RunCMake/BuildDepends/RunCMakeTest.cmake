@@ -143,3 +143,7 @@ if(RunCMake_GENERATOR MATCHES "Make|Ninja")
   run_BuildDepends(CustomCommandDepfile)
   set(run_BuildDepends_skip_step_3 1)
 endif()
+
+if(RunCMake_GENERATOR MATCHES "Make")
+  run_BuildDepends(MakeDependencies)
+endif()

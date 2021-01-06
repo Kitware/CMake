@@ -196,6 +196,9 @@ void cmDependsCompiler::WriteDependencies(
   const auto& lineContinue = static_cast<cmGlobalUnixMakefileGenerator3*>(
                                this->LocalGenerator->GetGlobalGenerator())
                                ->LineContinueDirective;
+  bool supportLongLineDepend = static_cast<cmGlobalUnixMakefileGenerator3*>(
+                                 this->LocalGenerator->GetGlobalGenerator())
+                                 ->SupportsLongLineDependencies();
   const auto& binDir = this->LocalGenerator->GetBinaryDirectory();
   cmDepends::DependencyMap makeDependencies(dependencies);
   std::unordered_set<cm::string_view> phonyTargets;
@@ -213,13 +216,19 @@ void cmDependsCompiler::WriteDependencies(
       });
 
     bool first_dep = true;
-    makeDepends << target << ": ";
+    if (supportLongLineDepend) {
+      makeDepends << target << ": ";
+    }
     for (const auto& dep : deps) {
-      if (first_dep) {
-        first_dep = false;
-        makeDepends << dep;
+      if (supportLongLineDepend) {
+        if (first_dep) {
+          first_dep = false;
+          makeDepends << dep;
+        } else {
+          makeDepends << ' ' << lineContinue << "  " << dep;
+        }
       } else {
-        makeDepends << ' ' << lineContinue << "  " << dep;
+        makeDepends << target << ": " << dep << std::endl;
       }
 
       phonyTargets.emplace(dep.data(), dep.length());

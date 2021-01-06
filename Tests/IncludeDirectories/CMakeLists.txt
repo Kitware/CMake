@@ -67,7 +67,13 @@ else()
 endif()
 
 # Test escaping of special characters in include directory paths.
-set(special_chars "~@&{}()!'")
+set(special_chars "~@&{}()'")
+if(NOT (CMAKE_GENERATOR STREQUAL "NMake Makefiles" AND
+        "x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC" AND
+        "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 13.0))
+  # NMake from VS 6 mistakes '!' in a path after a line continuation for a directive.
+  string(APPEND special_chars "!")
+endif()
 if(NOT CMAKE_GENERATOR MATCHES "(Unix|MinGW|MSYS) Makefiles")
   # when compiler is used for dependencies, special characters for make are not escaped
   string(APPEND special_chars "%")
