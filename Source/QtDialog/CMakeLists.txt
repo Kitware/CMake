@@ -57,6 +57,9 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   endmacro()
   if(APPLE)
     install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
+    if(TARGET Qt5::QMacStylePlugin)
+      install_qt5_plugin("Qt5::QMacStylePlugin" QT_PLUGINS)
+    endif()
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = ${_qt_plugin_dir}\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
