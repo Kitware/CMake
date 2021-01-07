@@ -116,14 +116,15 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
       endforeach()
     endforeach()
   endmacro()
-  install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
   if(APPLE)
+    install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = ${_qt_plugin_dir}\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
       ${COMPONENT})
   elseif(WIN32 AND NOT CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
+    install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = ../${_qt_plugin_dir}\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
