@@ -47,7 +47,11 @@ protected:
 
     // check all strings for a match
     foreach (QString const& str, strs) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+      if (str.contains(this->filterRegularExpression())) {
+#else
       if (str.contains(this->filterRegExp())) {
+#endif
         return true;
       }
     }

@@ -7,7 +7,6 @@
 #include <QDir>
 #include <QLocale>
 #include <QString>
-#include <QTextCodec>
 #include <QTranslator>
 #include <QtPlugin>
 
@@ -121,9 +120,6 @@ int main(int argc, char** argv)
   QApplication app(argc, argv);
 
   setlocale(LC_NUMERIC, "C");
-
-  QTextCodec* utf8_codec = QTextCodec::codecForName("UTF-8");
-  QTextCodec::setCodecForLocale(utf8_codec);
 
   // tell the cmake library where cmake is
   QDir cmExecDir(QApplication::applicationDirPath());
