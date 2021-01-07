@@ -1536,7 +1536,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::string const& objectFileDir, std::string const& flags,
   std::string const& defines, std::string const& includes)
 {
-  if (!this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS")) {
+  if (!this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS")) {
     return;
   }
 
