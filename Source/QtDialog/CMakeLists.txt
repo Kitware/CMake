@@ -112,7 +112,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
           find_package(Qt${INSTALLED_QT_VERSION}${_qt_plugin} QUIET
             PATHS ${Qt${INSTALLED_QT_VERSION}${_qt_comp}_DIR})
         endif()
-        install_qt_plugin(${_qt_plugin} _plugins_var)
+        install_qt_plugin("${_qt_plugin}" "${_plugins_var}")
       endforeach()
     endforeach()
   endmacro()
