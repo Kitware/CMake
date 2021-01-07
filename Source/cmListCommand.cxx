@@ -422,9 +422,10 @@ bool HandleJoinCommand(std::vector<std::string> const& args,
 bool HandleRemoveItemCommand(std::vector<std::string> const& args,
                              cmExecutionStatus& status)
 {
-  if (args.size() < 3) {
-    status.SetError("sub-command REMOVE_ITEM requires two or more arguments.");
-    return false;
+  assert(args.size() >= 2);
+
+  if (args.size() == 2) {
+    return true;
   }
 
   const std::string& listName = args[1];
