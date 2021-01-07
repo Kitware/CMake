@@ -139,7 +139,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         s << "SKIP_RETURN_CODE=" << this->TestProperties->SkipReturnCode;
       }
       this->TestResult.CompletionStatus = s.str();
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Skipped ");
+      outputStream << "***Skipped ";
       skipped = true;
     } else if (success != this->TestProperties->WillFail) {
       this->TestResult.Status = cmCTestTestHandler::COMPLETED;
@@ -195,8 +195,9 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   sprintf(buf, "%6.2f sec", this->TestProcess->GetTotalTime().count());
   outputStream << buf << "\n";
 
+  bool passedOrSkipped = passed || skipped;
   if (this->CTest->GetTestProgressOutput()) {
-    if (!passed) {
+    if (!passedOrSkipped) {
       // If the test did not pass, reprint test name and error
       std::string output = this->GetTestPrefix(completed, total);
       std::string testName = this->TestProperties->Name;
@@ -216,7 +217,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       cmCTestLog(this->CTest, HANDLER_TEST_PROGRESS_OUTPUT, testName);
     }
   }
-  if (!this->CTest->GetTestProgressOutput() || !passed) {
+  if (!this->CTest->GetTestProgressOutput() || !passedOrSkipped) {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, outputStream.str());
   }
 

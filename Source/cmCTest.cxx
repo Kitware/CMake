@@ -2901,7 +2901,7 @@ bool cmCTest::GetFailover() const
 
 bool cmCTest::GetTestProgressOutput() const
 {
-  return this->Impl->TestProgressOutput;
+  return this->Impl->TestProgressOutput && !GetExtraVerbose();
 }
 
 bool cmCTest::GetVerbose() const
