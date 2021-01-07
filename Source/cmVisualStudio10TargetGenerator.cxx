@@ -1897,8 +1897,15 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     }
     // Figure out if there's any additional flags to use
     if (cmProp saf = sf->GetProperty("VS_SHADER_FLAGS")) {
+      cmGeneratorExpression ge;
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*saf);
+
       for (const std::string& config : this->Configurations) {
-        toolSettings[config]["AdditionalOptions"] = *saf;
+        std::string evaluated = cge->Evaluate(this->LocalGenerator, config);
+
+        if (!evaluated.empty()) {
+          toolSettings[config]["AdditionalOptions"] = evaluated;
+        }
       }
     }
     // Figure out if debug information should be generated
