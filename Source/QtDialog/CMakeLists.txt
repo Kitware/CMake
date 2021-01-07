@@ -117,14 +117,24 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
     endforeach()
   endmacro()
   if(APPLE)
-    install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
+    if (INSTALLED_QT_VERSION VERSION_EQUAL 5)
+      install_qt_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
+    else()
+      # FIXME: Minimize plugins for Qt6.
+      install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
+    endif()
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = ${_qt_plugin_dir}\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
       ${COMPONENT})
   elseif(WIN32 AND NOT CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
-    install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
+    if (INSTALLED_QT_VERSION VERSION_EQUAL 5)
+      install_qt_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS)
+    else()
+      # FIXME: Minimize plugins for Qt6.
+      install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
+    endif()
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = ../${_qt_plugin_dir}\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
