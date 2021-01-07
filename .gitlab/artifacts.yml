@@ -75,7 +75,7 @@
             # Any packages made.
             - build/cmake-*-Linux-x86_64.*
             - build/cmake-*-Linux-aarch64.*
-            - build/cmake-*-macos-universal.*
+            - build/cmake-*-macos*-universal.*
             # Any source packages made.
             - build/cmake-*.tar.gz
             - build/cmake-*.zip

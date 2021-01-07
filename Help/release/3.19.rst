@@ -390,3 +390,13 @@ Changes made since CMake 3.19.0 include the following.
 ------
 
 * A precompiled Linux ``aarch64`` binary is now provided on ``cmake.org``.
+
+* Two precompiled macOS binaries are now provided on ``cmake.org``:
+
+  * The naming pattern ``cmake-$ver-macos-universal`` is a universal
+    binary with ``x86_64`` and ``arm64`` architectures.  It requires
+    macOS 10.13 or newer.
+
+  * The naming pattern ``cmake-$ver-macos10.10-universal`` is a universal
+    binary with ``x86_64`` and ``arm64`` architectures.  It requires
+    macOS 10.10 or newer.
