@@ -522,6 +522,7 @@ public:
   class JobDepFilesMergeT : public JobFenceT
   {
   private:
+    std::vector<std::string> initialDependencies() const;
     void Process() override;
   };
 
@@ -2198,6 +2199,29 @@ std::string escapeDependencyPath(cm::string_view path)
   return escapedPath;
 }
 
+/*
+ * Return the initial dependencies of the merged depfile.
+ * Those are dependencies from the project files, not from moc runs.
+ */
+std::vector<std::string>
+cmQtAutoMocUicT::JobDepFilesMergeT::initialDependencies() const
+{
+  std::vector<std::string> dependencies;
+  dependencies.reserve(this->BaseConst().ListFiles.size() +
+                       this->BaseEval().Headers.size() +
+                       this->BaseEval().Sources.size());
+  cm::append(dependencies, this->BaseConst().ListFiles);
+  auto append_file_path =
+    [&dependencies](const SourceFileMapT::value_type& p) {
+      dependencies.push_back(p.first);
+    };
+  std::for_each(this->BaseEval().Headers.begin(),
+                this->BaseEval().Headers.end(), append_file_path);
+  std::for_each(this->BaseEval().Sources.begin(),
+                this->BaseEval().Sources.end(), append_file_path);
+  return dependencies;
+}
+
 void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
 {
   if (this->Log().Verbose()) {
@@ -2215,7 +2239,7 @@ void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
     return dependenciesFromDepFile(f.c_str());
   };
 
-  std::vector<std::string> dependencies = this->BaseConst().ListFiles;
+  std::vector<std::string> dependencies = this->initialDependencies();
   ParseCacheT& parseCache = this->BaseEval().ParseCache;
   auto processMappingEntry = [&](const MappingMapT::value_type& m) {
     auto cacheEntry = parseCache.GetOrInsert(m.first);
