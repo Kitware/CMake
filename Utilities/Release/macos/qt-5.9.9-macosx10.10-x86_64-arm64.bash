@@ -13,6 +13,8 @@
 set -e
 set -x
 
+umask 022
+
 # Verify that 'makeuniversal' is available in the PATH.
 type -p makeuniversal >/dev/null
 
