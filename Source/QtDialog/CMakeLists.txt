@@ -63,8 +63,6 @@ if(CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
 endif()
 
 # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
-# FIXME: This should be part of Qt5 CMake scripts, but unfortunately
-# Qt5 support is missing there.
 if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   function(_qt_get_plugin_name_with_version target out_var)
       string(REGEX REPLACE "^Qt::(.+)" "Qt${INSTALLED_QT_VERSION}::\\1"
