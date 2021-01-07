@@ -44,6 +44,11 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       return replaceValues.Source;
     }
   }
+  if (replaceValues.DynDepFile) {
+    if (variable == "DYNDEP_FILE") {
+      return replaceValues.DynDepFile;
+    }
+  }
   if (replaceValues.PreprocessedSource) {
     if (variable == "PREPROCESSED_SOURCE") {
       return replaceValues.PreprocessedSource;

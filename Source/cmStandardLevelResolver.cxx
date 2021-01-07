@@ -44,6 +44,16 @@ struct StandardNeeded
   int value;
 };
 
+int ParseStd(std::string const& level)
+{
+  try {
+    return std::stoi(level);
+  } catch (std::invalid_argument&) {
+    // Fall through to use an invalid value.
+  }
+  return -1;
+}
+
 struct StanardLevelComputer
 {
   explicit StanardLevelComputer(std::string lang, std::vector<int> levels,
@@ -113,17 +123,8 @@ struct StanardLevelComputer
       standardStr = "03";
     }
 
-    int standardValue = -1;
-    int defaultValue = -1;
-    try {
-      standardValue = std::stoi(standardStr);
-      defaultValue = std::stoi(*defaultStd);
-    } catch (std::invalid_argument&) {
-      // fall through as we want an error
-      // when we can't find the bad value in the `stds` vector
-    }
-
-    auto stdIt = std::find(cm::cbegin(stds), cm::cend(stds), standardValue);
+    auto stdIt =
+      std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(standardStr));
     if (stdIt == cm::cend(stds)) {
       std::string e =
         cmStrCat(this->Language, "_STANDARD is set to invalid value '",
@@ -134,7 +135,7 @@ struct StanardLevelComputer
     }
 
     auto defaultStdIt =
-      std::find(cm::cbegin(stds), cm::cend(stds), defaultValue);
+      std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(*defaultStd));
     if (defaultStdIt == cm::cend(stds)) {
       std::string e = cmStrCat("CMAKE_", this->Language,
                                "_STANDARD_DEFAULT is set to invalid value '",
@@ -195,7 +196,7 @@ struct StanardLevelComputer
     if (existingStandard) {
       existingLevelIter =
         std::find(cm::cbegin(this->Levels), cm::cend(this->Levels),
-                  std::stoi(*existingStandard));
+                  ParseStd(*existingStandard));
       if (existingLevelIter == cm::cend(this->Levels)) {
         const std::string e =
           cmStrCat("The ", this->Language, "_STANDARD property on target \"",
@@ -240,7 +241,7 @@ struct StanardLevelComputer
     }
     // convert defaultStandard to an integer
     if (std::find(cm::cbegin(this->Levels), cm::cend(this->Levels),
-                  std::stoi(*defaultStandard)) == cm::cend(this->Levels)) {
+                  ParseStd(*defaultStandard)) == cm::cend(this->Levels)) {
       const std::string e = cmStrCat("The CMAKE_", this->Language,
                                      "_STANDARD_DEFAULT variable contains an "
                                      "invalid value: \"",
@@ -257,7 +258,7 @@ struct StanardLevelComputer
 
     auto existingLevelIter =
       std::find(cm::cbegin(this->Levels), cm::cend(this->Levels),
-                std::stoi(*existingStandard));
+                ParseStd(*existingStandard));
     if (existingLevelIter == cm::cend(this->Levels)) {
       const std::string e =
         cmStrCat("The ", this->Language, "_STANDARD property on target \"",

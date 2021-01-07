@@ -555,6 +555,7 @@ void cmGlobalNinjaGenerator::Generate()
   this->TargetAll = this->NinjaOutputPath("all");
   this->CMakeCacheFile = this->NinjaOutputPath("CMakeCache.txt");
   this->DisableCleandead = false;
+  this->DiagnosedCxxModuleSupport = false;
 
   this->PolicyCMP0058 =
     this->LocalGenerators[0]->GetMakefile()->GetPolicyStatus(
@@ -755,6 +756,37 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
   return true;
 }
 
+bool cmGlobalNinjaGenerator::CheckCxxModuleSupport()
+{
+  bool const diagnose = !this->DiagnosedCxxModuleSupport &&
+    !this->CMakeInstance->GetIsInTryCompile();
+  if (diagnose) {
+    this->DiagnosedCxxModuleSupport = true;
+    this->GetCMakeInstance()->IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      "C++20 modules support via CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP "
+      "is experimental.  It is meant only for compiler developers to try.");
+  }
+  if (this->NinjaSupportsDyndeps) {
+    return true;
+  }
+  if (diagnose) {
+    std::ostringstream e;
+    /* clang-format off */
+    e <<
+      "The Ninja generator does not support C++20 modules "
+      "using Ninja version \n"
+      "  " << this->NinjaVersion << "\n"
+      "due to lack of required features.  "
+      "Ninja " << RequiredNinjaVersionForDyndeps() << " or higher is required."
+      ;
+    /* clang-format on */
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+  }
+  return false;
+}
+
 bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
 {
   if (this->NinjaSupportsDyndeps) {
@@ -766,7 +798,8 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
   e <<
     "The Ninja generator does not support Fortran using Ninja version\n"
     "  " << this->NinjaVersion << "\n"
-    "due to lack of required features.  Ninja 1.10 or higher is required."
+    "due to lack of required features.  "
+    "Ninja " << RequiredNinjaVersionForDyndeps() << " or higher is required."
     ;
   /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
@@ -785,7 +818,9 @@ bool cmGlobalNinjaGenerator::CheckISPC(cmMakefile* mf) const
   e <<
     "The Ninja generator does not support ISPC using Ninja version\n"
     "  " << this->NinjaVersion << "\n"
-    "due to lack of required features.  Ninja 1.10 or higher is required."
+    "due to lack of required features.  "
+    "Ninja " << RequiredNinjaVersionForMultipleOutputs() <<
+    " or higher is required."
     ;
   /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
@@ -2336,7 +2371,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
   std::string const& module_dir,
   std::vector<std::string> const& linked_target_dirs,
-  std::string const& arg_lang)
+  std::string const& arg_lang, std::string const& arg_modmapfmt)
 {
   // Setup path conversions.
   {
@@ -2423,6 +2458,48 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         build.Variables.emplace("restat", "1");
       }
 
+      if (arg_modmapfmt.empty()) {
+        // nothing to do.
+      } else {
+        std::stringstream mm;
+        if (arg_modmapfmt == "gcc") {
+          // Documented in GCC's documentation. The format is a series of lines
+          // with a module name and the associated filename separated by
+          // spaces. The first line may use `$root` as the module name to
+          // specify a "repository root". That is used to anchor any relative
+          // paths present in the file (CMake should never generate any).
+
+          // Write the root directory to use for module paths.
+          mm << "$root .\n";
+
+          for (auto const& l : object.Provides) {
+            auto m = mod_files.find(l.LogicalName);
+            if (m != mod_files.end()) {
+              mm << l.LogicalName << " " << this->ConvertToNinjaPath(m->second)
+                 << "\n";
+            }
+          }
+          for (auto const& r : object.Requires) {
+            auto m = mod_files.find(r.LogicalName);
+            if (m != mod_files.end()) {
+              mm << r.LogicalName << " " << this->ConvertToNinjaPath(m->second)
+                 << "\n";
+            }
+          }
+        } else {
+          cmSystemTools::Error(
+            cmStrCat("-E cmake_ninja_dyndep does not understand the ",
+                     arg_modmapfmt, " module map format"));
+          return false;
+        }
+
+        // XXX(modmap): If changing this path construction, change
+        // `cmNinjaTargetGenerator::WriteObjectBuildStatements` to generate the
+        // corresponding file path.
+        cmGeneratedFileStream mmf(cmStrCat(object.PrimaryOutput, ".modmap"));
+        mmf << mm.str();
+      }
+
       this->WriteBuild(ddf, build);
     }
   }
@@ -2446,6 +2523,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   std::string arg_dd;
   std::string arg_lang;
   std::string arg_tdi;
+  std::string arg_modmapfmt;
   std::vector<std::string> arg_ddis;
   for (std::string const& arg : arg_full) {
     if (cmHasLiteralPrefix(arg, "--tdi=")) {
@@ -2454,6 +2532,8 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
       arg_lang = arg.substr(7);
     } else if (cmHasLiteralPrefix(arg, "--dd=")) {
       arg_dd = arg.substr(5);
+    } else if (cmHasLiteralPrefix(arg, "--modmapfmt=")) {
+      arg_modmapfmt = arg.substr(12);
     } else if (!cmHasLiteralPrefix(arg, "--") &&
                cmHasLiteralSuffix(arg, ".ddi")) {
       arg_ddis.push_back(arg);
@@ -2512,7 +2592,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   if (!ggd ||
       !cm::static_reference_cast<cmGlobalNinjaGenerator>(ggd).WriteDyndepFile(
         dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld, arg_dd, arg_ddis,
-        module_dir, linked_target_dirs, arg_lang)) {
+        module_dir, linked_target_dirs, arg_lang, arg_modmapfmt)) {
     return 1;
   }
   return 0;

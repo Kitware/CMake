@@ -71,9 +71,11 @@ protected:
                                const std::string& config) const;
   std::string LanguageDyndepRule(std::string const& lang,
                                  const std::string& config) const;
-  bool NeedDyndep(std::string const& lang) const;
+  bool NeedDyndep(std::string const& lang, std::string const& config) const;
   bool NeedExplicitPreprocessing(std::string const& lang) const;
   bool CompileWithDefines(std::string const& lang) const;
+  bool NeedCxxModuleSupport(std::string const& lang,
+                            std::string const& config) const;
 
   std::string OrderDependsTargetForTarget(const std::string& config);
 
