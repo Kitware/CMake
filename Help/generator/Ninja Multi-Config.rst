@@ -130,3 +130,34 @@ output config using the ``Release`` command config. The ``Release`` build of
 the ``generator`` target is called with ``Debug.txt Debug Release`` as
 arguments. The command depends on the ``Release`` builds of ``tgt1`` and
 ``tgt4``, and the ``Debug`` builds of ``tgt2`` and ``tgt3``.
+
+``PRE_BUILD``, ``PRE_LINK``, and ``POST_BUILD`` custom commands for targets
+only get run in their "native" configuration (the ``Release`` configuration in
+the ``build-Release.ninja`` file) unless they have no ``BYPRODUCTS`` or their
+``BYPRODUCTS`` are unique per config. Consider the following example:
+
+.. code-block:: cmake
+
+  add_executable(exe main.c)
+  add_custom_command(
+    TARGET exe
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "Running no-byproduct command"
+    )
+  add_custom_command(
+    TARGET exe
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "Running separate-byproduct command for $<CONFIG>"
+    BYPRODUCTS $<CONFIG>.txt
+    )
+  add_custom_command(
+    TARGET exe
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "Running common-byproduct command for $<CONFIG>"
+    BYPRODUCTS exe.txt
+    )
+
+In this example, if you build ``exe:Debug`` in ``build-Release.ninja``, the
+first and second custom commands get run, since their byproducts are unique
+per-config, but the last custom command does not. However, if you build
+``exe:Release`` in ``build-Release.ninja``, all three custom commands get run.

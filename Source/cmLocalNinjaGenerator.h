@@ -86,6 +86,9 @@ public:
                                cmNinjaDeps& ninjaDeps,
                                const std::string& config);
 
+  bool HasUniqueByproducts(std::vector<std::string> const& byproducts,
+                           cmListFileBacktrace const& bt);
+
 protected:
   std::string ConvertToIncludeReference(
     std::string const& path,
