@@ -13,7 +13,7 @@ set(CMake_QT_MAJOR_VERSION "A" CACHE
   STRING "Expected Qt major version. Valid values are A (auto-select), 5, 6.")
 set(SUPPORTED_QT_VERSIONS "A" 5 6)
 set_property(CACHE CMake_QT_MAJOR_VERSION PROPERTY STRINGS ${SUPPORTED_QT_VERSIONS})
-if(NOT CMake_QT_MAJOR_VERSION VERSION_EQUAL "A")
+if(NOT CMake_QT_MAJOR_VERSION STREQUAL "A")
   if(NOT CMake_QT_MAJOR_VERSION IN_LIST SUPPORTED_QT_VERSIONS)
     message(FATAL_ERROR "Supported Qt versions are \"${SUPPORTED_QT_VERSIONS}\"."
             " But CMake_QT_MAJOR_VERSION is set to ${CMake_QT_MAJOR_VERSION}.")
@@ -63,8 +63,6 @@ if(CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
 endif()
 
 # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
-# FIXME: This should be part of Qt5 CMake scripts, but unfortunately
-# Qt5 support is missing there.
 if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   function(_qt_get_plugin_name_with_version target out_var)
       string(REGEX REPLACE "^Qt::(.+)" "Qt${INSTALLED_QT_VERSION}::\\1"
@@ -114,18 +112,29 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
           find_package(Qt${INSTALLED_QT_VERSION}${_qt_plugin} QUIET
             PATHS ${Qt${INSTALLED_QT_VERSION}${_qt_comp}_DIR})
         endif()
-        install_qt_plugin(${_qt_plugin} _plugins_var)
+        install_qt_plugin("${_qt_plugin}" "${_plugins_var}")
       endforeach()
     endforeach()
   endmacro()
-  install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
   if(APPLE)
+    if (INSTALLED_QT_VERSION VERSION_EQUAL 5)
+      install_qt_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
+    else()
+      # FIXME: Minimize plugins for Qt6.
+      install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
+    endif()
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = ${_qt_plugin_dir}\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
       ${COMPONENT})
   elseif(WIN32 AND NOT CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
+    if (INSTALLED_QT_VERSION VERSION_EQUAL 5)
+      install_qt_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS)
+    else()
+      # FIXME: Minimize plugins for Qt6.
+      install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
+    endif()
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = ../${_qt_plugin_dir}\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
