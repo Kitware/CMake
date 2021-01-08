@@ -284,6 +284,18 @@ build:macos-package:
     variables:
         RSYNC_DESTINATION: dev
 
+build:macos10.10-package:
+    extends:
+        - .macos10.10_package
+        - .cmake_build_macos_package
+        - .cmake_release_artifacts
+        - .macos_builder_tags_package
+        - .run_only_for_package
+    dependencies:
+        - prep:doc-package
+    needs:
+        - prep:doc-package
+
 # Windows builds
 
 build:windows-vs2019-x64-ninja:

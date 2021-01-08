@@ -19,19 +19,18 @@ umask 022
 type -p makeuniversal >/dev/null
 
 # Download, verify, and extract sources.
-curl -OL https://download.qt.io/archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.9.tar.xz
-shasum -a 256 qt-everywhere-opensource-src-5.9.9.tar.xz | grep -q 5ce285209290a157d7f42ec8eb22bf3f1d76f2e03a95fc0b99b553391be01642
-tar xjf qt-everywhere-opensource-src-5.9.9.tar.xz
-patch -p0 < "${BASH_SOURCE%/*}/qt-5.9.9.patch"
+curl -OL https://download.qt.io/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
+shasum -a 256 qt-everywhere-src-5.15.2.tar.xz | grep -q 3a530d1b243b5dec00bc54937455471aaa3e56849d2593edb8ded07228202240
+tar xjf qt-everywhere-src-5.15.2.tar.xz
 
 # Build the x86_64 variant.
-mkdir qt-5.9.9-x86_64
-cd qt-5.9.9-x86_64
-../qt-everywhere-opensource-src-5.9.9/configure \
+mkdir qt-5.15.2-x86_64
+cd qt-5.15.2-x86_64
+../qt-everywhere-src-5.15.2/configure \
   --prefix=/ \
   -platform macx-clang \
   -device-option QMAKE_APPLE_DEVICE_ARCHS=x86_64 \
-  -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=10.10 \
+  -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=10.13 \
   -release \
   -opensource -confirm-license \
   -gui \
@@ -71,13 +70,13 @@ make -j 8
 cd ..
 
 # Build the arm64 variant.
-mkdir qt-5.9.9-arm64
-cd qt-5.9.9-arm64
-../qt-everywhere-opensource-src-5.9.9/configure \
+mkdir qt-5.15.2-arm64
+cd qt-5.15.2-arm64
+../qt-everywhere-src-5.15.2/configure \
   --prefix=/ \
   -platform macx-clang \
   -device-option QMAKE_APPLE_DEVICE_ARCHS=arm64 \
-  -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=10.10 \
+  -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=10.13 \
   -release \
   -opensource -confirm-license \
   -gui \
@@ -113,23 +112,14 @@ cd qt-5.9.9-arm64
   -nomake examples \
   -nomake tests \
   -nomake tools
-# Some executables fail to link due to architecture mismatch.
-# Build what we can first.
-make -j 8 -k || true
-# Provide needed executables using the x86_64 variants.
-cp ../qt-5.9.9-x86_64/qtbase/bin/uic qtbase/bin/uic
-install_name_tool -add_rpath @executable_path/../../../qt-5.9.9-x86_64/qtbase/lib qtbase/bin/uic
-cp ../qt-5.9.9-x86_64/qtbase/bin/qlalr qtbase/bin/qlalr
-install_name_tool -add_rpath @executable_path/../../../qt-5.9.9-x86_64/qtbase/lib qtbase/bin/qlalr
-# Some parts still fail to build, but the parts we need can finish.
-make -j 8 -k || true
+make -j 8 -k
 cd ..
 
 # Combine the two builds into universal binaries.
-makeuniversal qt-5.9.9-univ qt-5.9.9-x86_64 qt-5.9.9-arm64
-cd qt-5.9.9-univ
-make install -j 8 INSTALL_ROOT=/tmp/qt-5.9.9-macosx10.10-x86_64-arm64
+makeuniversal qt-5.15.2-univ qt-5.15.2-x86_64 qt-5.15.2-arm64
+cd qt-5.15.2-univ
+make install -j 8 INSTALL_ROOT=/tmp/qt-5.15.2-macosx10.13-x86_64-arm64
 cd ..
 
 # Create the final tarball containing universal binaries.
-tar cjf qt-5.9.9-macosx10.10-x86_64-arm64.tar.xz -C /tmp qt-5.9.9-macosx10.10-x86_64-arm64
+tar cjf qt-5.15.2-macosx10.13-x86_64-arm64.tar.xz -C /tmp qt-5.15.2-macosx10.13-x86_64-arm64
