@@ -15,4 +15,4 @@
         - dnf install -y --setopt=install_weak_deps=False rsync openssh-clients
         - chmod 400 $RSYNC_BINARY_KEY
         - ssh-keygen -y -f $RSYNC_BINARY_KEY > $RSYNC_BINARY_KEY.pub
-        - rsync -tv --recursive -e "ssh -i $RSYNC_BINARY_KEY -o StrictHostKeyChecking=no -o LogLevel=ERROR" build/ kitware@public.kitware.com:$RSYNC_DESTINATION/
+        - rsync -tv --recursive -e "ssh -i $RSYNC_BINARY_KEY -o StrictHostKeyChecking=no -o LogLevel=ERROR" build/ kitware@cmake.org:$RSYNC_DESTINATION/

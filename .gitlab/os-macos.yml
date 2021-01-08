@@ -47,6 +47,14 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMake_SKIP_INSTALL: 1
 
+.macos10.10_package:
+    extends: .macos_build
+
+    variables:
+        CMAKE_CONFIGURATION: macos10.10_package
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMake_SKIP_INSTALL: 1
+
 ### External testing
 
 .macos_xcode:

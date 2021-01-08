@@ -48,7 +48,11 @@ if (qt_platform STREQUAL "windows_x86")
 
   set(qt_subdir "${qt_version}/msvc${msvc_year}_64")
 elseif (qt_platform STREQUAL "mac_x64")
-  if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "package")
+  if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "macos_package")
+    list(APPEND qt_files
+      "qt-5.15.2-macosx10.13-x86_64-arm64.tar.xz")
+    set(qt_subdir "qt-5.15.2-macosx10.13-x86_64-arm64")
+  elseif ("$ENV{CMAKE_CONFIGURATION}" MATCHES "macos10.10_package")
     list(APPEND qt_files
       "qt-5.9.9-macosx10.10-x86_64-arm64.tar.xz")
     set(qt_subdir "qt-5.9.9-macosx10.10-x86_64-arm64")
