@@ -1154,3 +1154,169 @@ The members specific to ``cmakeFiles`` objects are:
   ``isCMake``
     Optional member that is present with boolean value ``true``
     if the path specifies a file in the CMake installation.
+
+Object Kind "toolchains"
+------------------------
+
+The ``toolchains`` object kind lists properties of the toolchains used during
+the build.  These include the language, compiler path, ID, and version.
+
+There is only one ``toolchains`` object major version, version 1.
+
+"toolchains" version 1
+^^^^^^^^^^^^^^^^^^^^^^
+
+``toolchains`` object version 1 is a JSON object:
+
+.. code-block:: json
+
+  {
+    "kind": "toolchains",
+    "version": { "major": 1, "minor": 0 },
+    "toolchains": [
+      {
+        "language": "C",
+        "compiler": {
+          "path": "/usr/bin/cc",
+          "id": "GNU",
+          "version": "9.3.0",
+          "implicit": {
+            "includeDirectories": [
+              "/usr/lib/gcc/x86_64-linux-gnu/9/include",
+              "/usr/local/include",
+              "/usr/include/x86_64-linux-gnu",
+              "/usr/include"
+            ],
+            "linkDirectories": [
+              "/usr/lib/gcc/x86_64-linux-gnu/9",
+              "/usr/lib/x86_64-linux-gnu",
+              "/usr/lib",
+              "/lib/x86_64-linux-gnu",
+              "/lib"
+            ],
+            "linkFrameworkDirectories": [],
+            "linkLibraries": [
+              "gcc",
+              "gcc_s",
+              "c",
+              "gcc",
+              "gcc_s"
+            ]
+          }
+        },
+        "sourceFileExtensions": [
+          "c",
+          "m"
+        ]
+      },
+      {
+        "language": "CXX",
+        "compiler": {
+          "path": "/usr/bin/c++",
+          "id": "GNU",
+          "version": "9.3.0",
+          "implicit": {
+            "includeDirectories": [
+              "/usr/include/c++/9",
+              "/usr/include/x86_64-linux-gnu/c++/9",
+              "/usr/include/c++/9/backward",
+              "/usr/lib/gcc/x86_64-linux-gnu/9/include",
+              "/usr/local/include",
+              "/usr/include/x86_64-linux-gnu",
+              "/usr/include"
+            ],
+            "linkDirectories": [
+              "/usr/lib/gcc/x86_64-linux-gnu/9",
+              "/usr/lib/x86_64-linux-gnu",
+              "/usr/lib",
+              "/lib/x86_64-linux-gnu",
+              "/lib"
+            ],
+            "linkFrameworkDirectories": [],
+            "linkLibraries": [
+              "stdc++",
+              "m",
+              "gcc_s",
+              "gcc",
+              "c",
+              "gcc_s",
+              "gcc"
+            ]
+          }
+        },
+        "sourceFileExtensions": [
+          "C",
+          "M",
+          "c++",
+          "cc",
+          "cpp",
+          "cxx",
+          "mm",
+          "CPP"
+        ]
+      }
+    ]
+  }
+
+The members specific to ``toolchains`` objects are:
+
+``toolchains``
+  A JSON array whose entries are each a JSON object specifying a toolchain
+  associated with a particular language. The members of each entry are:
+
+  ``language``
+    A string specifying the toolchain language, like C or CXX. Language
+    names are the same as langauge names that can be passed to the
+    :command:`project` command. Because CMake only supports a single toolchain
+    per language, this field can be used as a key.
+
+  ``compiler``
+    A JSON object containing members:
+
+    ``path``
+      Optional member that has the same value as
+      :variable:`CMAKE_<LANG>_COMPILER` if it is defined for the current
+      language.
+
+    ``id``
+      Optional member that has the same value as
+      :variable:`CMAKE_<LANG>_COMPILER_ID` if it is defined for the current
+      language.
+
+    ``version``
+      Optional member that has the same value as
+      :variable:`CMAKE_<LANG>_COMPILER_VERSION` if it is defined for the
+      current language.
+
+    ``target``
+      Optional member that has the same value as
+      :variable:`CMAKE_<LANG>_COMPILER_TARGET` if it is defined for the
+      current language.
+
+    ``implicit``
+      A JSON object containing members:
+
+      ``includeDirectories``
+        Optional JSON array that has the same value as
+        :variable:`CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES` if it is defined
+        for the current language.
+
+      ``linkDirectories``
+        Optional JSON array that has the same value as
+        :variable:`CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES` if it is defined
+        for the current language.
+
+      ``linkFrameworkDirectories``
+        Optional JSON array that has the same value as
+        :variable:`CMAKE_<LANG>_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES` if it is
+        defined for the current language.
+
+      ``linkLibraries``
+        Optional JSON array that has the same value as
+        :variable:`CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES` if it is defined for
+        the current language.
+
+  ``sourceFileExtensions``
+    Optional JSON array that has the same value as
+    :variable:`CMAKE_<LANG>_SOURCE_FILE_EXTENSIONS` if it is defined for the
+    current language.
