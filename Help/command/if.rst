@@ -47,7 +47,8 @@ as ``EXISTS``, ``COMMAND``, and ``DEFINED``.  Then binary tests such as
 and ``MATCHES``.  Then the boolean operators in the order ``NOT``,  ``AND``,
 and finally ``OR``.
 
-Possible conditions are:
+Basic Expressions
+"""""""""""""""""
 
 ``if(<constant>)``
  True if the constant is ``1``, ``ON``, ``YES``, ``TRUE``, ``Y``,
@@ -62,6 +63,9 @@ Possible conditions are:
  True if given a variable that is defined to a value that is not a false
  constant.  False otherwise.  (Note macro arguments are not variables.)
 
+Logic Operators
+"""""""""""""""
+
 ``if(NOT <condition>)``
  True if the condition is not true.
 
@@ -70,6 +74,15 @@ Possible conditions are:
 
 ``if(<cond1> OR <cond2>)``
  True if either condition would be considered true individually.
+
+``if((condition) AND (condition OR (condition)))``
+ The conditions inside the parenthesis are evaluated first and then
+ the remaining condition is evaluated as in the other examples.
+ Where there are nested parenthesis the innermost are evaluated as part
+ of evaluating the condition that contains them.
+
+Existence Checks
+""""""""""""""""
 
 ``if(COMMAND command-name)``
  True if the given name is a command, macro or function that can be
@@ -88,6 +101,21 @@ Possible conditions are:
  .. versionadded:: 3.3
   True if the given name is an existing test name created by the
   :command:`add_test` command.
+
+``if(DEFINED <name>|CACHE{<name>}|ENV{<name>})``
+ True if a variable, cache variable or environment variable
+ with given ``<name>`` is defined. The value of the variable
+ does not matter. Note that macro arguments are not variables.
+
+ .. versionadded:: 3.14
+  Added support for ``CACHE{<name>}`` variables.
+
+``if(<variable|string> IN_LIST <variable>)``
+ .. versionadded:: 3.3
+  True if the given element is contained in the named list variable.
+
+File Operations
+"""""""""""""""
 
 ``if(EXISTS path-to-file-or-directory)``
  True if the named file or directory exists.  Behavior is well-defined
@@ -113,6 +141,9 @@ Possible conditions are:
 
 ``if(IS_ABSOLUTE path)``
  True if the given path is an absolute path.
+
+Comparisons
+"""""""""""
 
 ``if(<variable|string> MATCHES regex)``
  True if the given string or variable's value matches the given regular
@@ -165,6 +196,9 @@ Possible conditions are:
   True if the given string or variable's value is lexicographically greater
   than or equal to the string or variable on the right.
 
+Version Comparisons
+"""""""""""""""""""
+
 ``if(<variable|string> VERSION_LESS <variable|string>)``
  Component-wise integer version number comparison (version format is
  ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
@@ -196,24 +230,6 @@ Possible conditions are:
   ``major[.minor[.patch[.tweak]]]``, omitted components are treated as zero).
   Any non-integer version component or non-integer trailing part of a version
   component effectively truncates the string at that point.
-
-``if(<variable|string> IN_LIST <variable>)``
- .. versionadded:: 3.3
-  True if the given element is contained in the named list variable.
-
-``if(DEFINED <name>|CACHE{<name>}|ENV{<name>})``
- True if a variable, cache variable or environment variable
- with given ``<name>`` is defined. The value of the variable
- does not matter. Note that macro arguments are not variables.
-
- .. versionadded:: 3.14
-  Added support for ``CACHE{<name>}`` variables.
-
-``if((condition) AND (condition OR (condition)))``
- The conditions inside the parenthesis are evaluated first and then
- the remaining condition is evaluated as in the previous examples.
- Where there are nested parenthesis the innermost are evaluated as part
- of evaluating the condition that contains them.
 
 Variable Expansion
 ^^^^^^^^^^^^^^^^^^
