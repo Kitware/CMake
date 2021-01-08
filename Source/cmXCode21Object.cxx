@@ -4,11 +4,12 @@
 
 #include <ostream>
 #include <string>
+#include <utility>
 
 #include "cmSystemTools.h"
 
-cmXCode21Object::cmXCode21Object(PBXType ptype, Type type)
-  : cmXCodeObject(ptype, type)
+cmXCode21Object::cmXCode21Object(PBXType ptype, Type type, std::string id)
+  : cmXCodeObject(ptype, type, std::move(id))
 {
   this->Version = 21;
 }
