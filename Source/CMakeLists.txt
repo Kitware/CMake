@@ -268,6 +268,8 @@ set(SRCS
   cmFileAPICodemodel.h
   cmFileAPICMakeFiles.cxx
   cmFileAPICMakeFiles.h
+  cmFileAPIToolchains.cxx
+  cmFileAPIToolchains.h
   cmFileCopier.cxx
   cmFileCopier.h
   cmFileInstaller.cxx
