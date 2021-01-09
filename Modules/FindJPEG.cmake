@@ -58,7 +58,7 @@ Obsolete variables
 
 find_path(JPEG_INCLUDE_DIR jpeglib.h)
 
-set(jpeg_names ${JPEG_NAMES} jpeg jpeg-static libjpeg libjpeg-static)
+set(jpeg_names ${JPEG_NAMES} jpeg jpeg-static libjpeg libjpeg-static turbojpeg turbojpeg-static)
 foreach(name ${jpeg_names})
   list(APPEND jpeg_names_debug "${name}d")
 endforeach()
