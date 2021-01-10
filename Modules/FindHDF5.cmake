@@ -116,15 +116,22 @@ also be defined.  With all components enabled, the following variables will be d
 
 With all components enabled, the following targets will be defined:
 
-::
-
-  ``hdf5::hdf5``
-  ``hdf5::hdf5_hl_cpp``
-  ``hdf5::hdf5_fortran``
-  ``hdf5::hdf5_hl``
-  ``hdf5::hdf5_hl_cpp``
-  ``hdf5::hdf5_hl_fortran``
-  ``hdf5::h5diff``
+``HDF5::HDF5``
+  All detected ``HDF5_LIBRARIES``.
+``hdf5::hdf5``
+  C library.
+``hdf5::hdf5_cpp``
+  C++ library.
+``hdf5::hdf5_fortran``
+  Fortran library.
+``hdf5::hdf5_hl``
+  High-level C library.
+``hdf5::hdf5_hl_cpp``
+  High-level C++ library.
+``hdf5::hdf5_hl_fortran``
+  High-level Fortran library.
+``hdf5::h5diff``
+  ``h5diff`` executable.
 
 Hints
 ^^^^^
