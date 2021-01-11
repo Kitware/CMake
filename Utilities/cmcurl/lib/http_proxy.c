@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -102,9 +102,9 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
      * This function might be called several times in the multi interface case
      * if the proxy's CONNECT response is not instant.
      */
-    prot_save = conn->data->req.protop;
+    prot_save = conn->data->req.p.http;
     memset(&http_proxy, 0, sizeof(http_proxy));
-    conn->data->req.protop = &http_proxy;
+    conn->data->req.p.http = &http_proxy;
     connkeep(conn, "HTTP proxy CONNECT");
 
     /* for the secondary socket (FTP), use the "connect to host"
@@ -125,7 +125,7 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
     else
       remote_port = conn->remote_port;
     result = Curl_proxyCONNECT(conn, sockindex, hostname, remote_port);
-    conn->data->req.protop = prot_save;
+    conn->data->req.p.http = prot_save;
     if(CURLE_OK != result)
       return result;
     Curl_safefree(data->state.aptr.proxyuserpwd);
@@ -167,7 +167,7 @@ static CURLcode connect_init(struct connectdata *conn, bool reinit)
     Curl_dyn_reset(&s->rcvbuf);
   }
   s->tunnel_state = TUNNEL_INIT;
-  s->keepon = TRUE;
+  s->keepon = KEEPON_CONNECT;
   s->cl = 0;
   s->close_connection = FALSE;
   return CURLE_OK;
@@ -339,7 +339,7 @@ static CURLcode CONNECT(struct connectdata *conn,
           return CURLE_ABORTED_BY_CALLBACK;
 
         if(result) {
-          s->keepon = FALSE;
+          s->keepon = KEEPON_DONE;
           break;
         }
         else if(gotbytes <= 0) {
@@ -353,11 +353,11 @@ static CURLcode CONNECT(struct connectdata *conn,
             error = SELECT_ERROR;
             failf(data, "Proxy CONNECT aborted");
           }
-          s->keepon = FALSE;
+          s->keepon = KEEPON_DONE;
           break;
         }
 
-        if(s->keepon > TRUE) {
+        if(s->keepon == KEEPON_IGNORE) {
           /* This means we are currently ignoring a response-body */
 
           if(s->cl) {
@@ -365,7 +365,7 @@ static CURLcode CONNECT(struct connectdata *conn,
                and make sure to break out of the loop when we're done! */
             s->cl--;
             if(s->cl <= 0) {
-              s->keepon = FALSE;
+              s->keepon = KEEPON_DONE;
               s->tunnel_state = TUNNEL_COMPLETE;
               break;
             }
@@ -383,7 +383,7 @@ static CURLcode CONNECT(struct connectdata *conn,
             if(r == CHUNKE_STOP) {
               /* we're done reading chunks! */
               infof(data, "chunk reading DONE\n");
-              s->keepon = FALSE;
+              s->keepon = KEEPON_DONE;
               /* we did the full CONNECT treatment, go COMPLETE */
               s->tunnel_state = TUNNEL_COMPLETE;
             }
@@ -410,8 +410,7 @@ static CURLcode CONNECT(struct connectdata *conn,
           return result;
 
         /* output debug if that is requested */
-        if(data->set.verbose)
-          Curl_debug(data, CURLINFO_HEADER_IN, linep, perline);
+        Curl_debug(data, CURLINFO_HEADER_IN, linep, perline);
 
         if(!data->set.suppress_connect_headers) {
           /* send the header to the callback */
@@ -425,7 +424,6 @@ static CURLcode CONNECT(struct connectdata *conn,
         }
 
         data->info.header_size += (long)perline;
-        data->req.headerbytecount += (long)perline;
 
         /* Newlines are CRLF, so the CR is ignored as the line isn't
            really terminated until the LF comes. Treat a following CR
@@ -439,7 +437,7 @@ static CURLcode CONNECT(struct connectdata *conn,
             /* If we get a 407 response code with content length
                when we have no auth problem, we must ignore the
                whole response-body */
-            s->keepon = 2;
+            s->keepon = KEEPON_IGNORE;
 
             if(s->cl) {
               infof(data, "Ignore %" CURL_FORMAT_CURL_OFF_T
@@ -467,7 +465,7 @@ static CURLcode CONNECT(struct connectdata *conn,
               if(r == CHUNKE_STOP) {
                 /* we're done reading chunks! */
                 infof(data, "chunk reading DONE\n");
-                s->keepon = FALSE;
+                s->keepon = KEEPON_DONE;
                 /* we did the full CONNECT treatment, go to COMPLETE */
                 s->tunnel_state = TUNNEL_COMPLETE;
               }
@@ -476,11 +474,11 @@ static CURLcode CONNECT(struct connectdata *conn,
               /* without content-length or chunked encoding, we
                  can't keep the connection alive since the close is
                  the end signal so we bail out at once instead */
-              s->keepon = FALSE;
+              s->keepon = KEEPON_DONE;
             }
           }
           else
-            s->keepon = FALSE;
+            s->keepon = KEEPON_DONE;
           if(!s->cl)
             /* we did the full CONNECT treatment, go to COMPLETE */
             s->tunnel_state = TUNNEL_COMPLETE;

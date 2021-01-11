@@ -1,36 +1,67 @@
 CMake Error at BadByproduct.cmake:2 \(add_custom_command\):
-  add_custom_command called with BYPRODUCTS containing a "#".  This character
-  is not allowed.
+  BYPRODUCTS containing a "#" is not allowed.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 
 
 CMake Error at BadByproduct.cmake:3 \(add_custom_command\):
-  add_custom_command called with BYPRODUCTS containing a "<".  This character
-  is not allowed.
+  BYPRODUCTS containing a "<" is not allowed.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 
 
 CMake Error at BadByproduct.cmake:4 \(add_custom_command\):
-  add_custom_command called with BYPRODUCTS containing a ">".  This character
-  is not allowed.
+  BYPRODUCTS containing a ">" is not allowed.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 
-
+(
 CMake Error at BadByproduct.cmake:5 \(add_custom_command\):
-  add_custom_command called with BYPRODUCTS containing a "<".  This character
-  is not allowed.
+  BYPRODUCTS containing a "#" is not allowed.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 
-
+)+
 CMake Error at BadByproduct.cmake:6 \(add_custom_command\):
-  add_custom_command attempted to have a file
+  BYPRODUCTS path
 
     .*RunCMake/add_custom_command/f
 
   in a source directory as an output of custom command.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
+
+(
+CMake Error at BadByproduct.cmake:7 \(add_custom_command\):
+  Error evaluating generator expression:
+
+    \$<TARGET_PROPERTY:prop>
+
+  \$<TARGET_PROPERTY:prop> may only be used with binary targets.  It may not
+  be used with add_custom_command or add_custom_target.  Specify the target
+  to read a property from using the \$<TARGET_PROPERTY:tgt,prop> signature
+  instead.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+)+(
+CMake Error at BadByproduct.cmake:8 \(add_custom_command\):
+  Error evaluating generator expression:
+
+    \$<OUTPUT_CONFIG:h>
+
+  Expression did not evaluate to a known generator expression
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+)+(
+CMake Error at BadByproduct.cmake:9 \(add_custom_command\):
+  Error evaluating generator expression:
+
+    \$<COMMAND_CONFIG:i>
+
+  Expression did not evaluate to a known generator expression
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+)+

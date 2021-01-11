@@ -30,5 +30,5 @@ macro(__compiler_xl lang)
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
   set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
 
-  set(CMAKE_DEPFILE_FLAGS_${lang} "-MF <DEPFILE> -qmakedep=gcc")
+  set(CMAKE_DEPFILE_FLAGS_${lang} "-MF <DEP_FILE> -qmakedep=gcc")
 endmacro()

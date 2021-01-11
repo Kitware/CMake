@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <memory>
 #include <set>
 #include <string>
@@ -70,6 +71,7 @@ public:
   {
     std::string FullPath;
     cmSourceFile* SF = nullptr;
+    std::vector<size_t> Configs;
     bool Generated = false;
     bool SkipMoc = false;
     bool SkipUic = false;
@@ -132,6 +134,8 @@ private:
   cmSourceFile* AddGeneratedSource(std::string const& filename,
                                    GenVarsT const& genVars,
                                    bool prepend = false);
+  void AddGeneratedSource(ConfigString const& filename,
+                          GenVarsT const& genVars, bool prepend = false);
   void AddToSourceGroup(std::string const& fileName,
                         cm::string_view genNameUpper);
   void AddCleanFile(std::string const& fileName);
@@ -207,7 +211,8 @@ private:
 
     bool RelaxedMode = false;
     bool PathPrefix = false;
-    std::string CompilationFile;
+    ConfigString CompilationFile;
+    std::string CompilationFileGenex;
     // Compiler implicit pre defines
     std::vector<std::string> PredefsCmd;
     ConfigString PredefsFile;

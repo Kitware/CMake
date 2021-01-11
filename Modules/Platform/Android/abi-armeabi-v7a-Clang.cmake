@@ -1,6 +1,3 @@
-# <ndk>/build/core/toolchains/arm-linux-androideabi-clang/setup.mk
-set(_ANDROID_ABI_CLANG_TARGET "armv7-none-linux-androideabi")
-
 string(APPEND _ANDROID_ABI_INIT_CFLAGS
   " -march=armv7-a"
   )

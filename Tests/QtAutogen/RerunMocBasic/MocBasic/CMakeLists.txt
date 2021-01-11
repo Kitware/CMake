@@ -13,10 +13,15 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
 
 add_executable(mocBasic
   ${CMAKE_CURRENT_BINARY_DIR}/test1.h
+  ${CMAKE_CURRENT_BINARY_DIR}/myobject3.h
   ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
+  plainobject.cpp
   res1.qrc
 )
-target_include_directories(mocBasic PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(mocBasic PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
 target_link_libraries(mocBasic ${QT_QTCORE_TARGET})
 # Write target name to text file
 add_custom_command(TARGET mocBasic POST_BUILD COMMAND

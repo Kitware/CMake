@@ -62,14 +62,14 @@ public:
 cmFileTimes::cmFileTimes() = default;
 cmFileTimes::cmFileTimes(std::string const& fileName)
 {
-  Load(fileName);
+  this->Load(fileName);
 }
 cmFileTimes::~cmFileTimes() = default;
 
 bool cmFileTimes::Load(std::string const& fileName)
 {
   std::unique_ptr<Times> ptr;
-  if (IsValid()) {
+  if (this->IsValid()) {
     // Invalidate this and re-use times
     ptr.swap(this->times);
   } else {
@@ -103,7 +103,7 @@ bool cmFileTimes::Load(std::string const& fileName)
 
 bool cmFileTimes::Store(std::string const& fileName) const
 {
-  if (!IsValid()) {
+  if (!this->IsValid()) {
     return false;
   }
 

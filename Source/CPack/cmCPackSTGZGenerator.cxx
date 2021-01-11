@@ -50,7 +50,7 @@ int cmCPackSTGZGenerator::PackageFiles()
    * have generated several packages (component packaging)
    * so we must iterate over generated packages.
    */
-  for (std::string const& pfn : packageFileNames) {
+  for (std::string const& pfn : this->packageFileNames) {
     retval &= cmSystemTools::SetPermissions(pfn.c_str(),
 #if defined(_MSC_VER) || defined(__MINGW32__)
                                             S_IREAD | S_IWRITE | S_IEXEC

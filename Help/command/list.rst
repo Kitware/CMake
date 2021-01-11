@@ -88,6 +88,8 @@ Returns the list of elements specified by indices from the list.
 
   list(JOIN <list> <glue> <output variable>)
 
+.. versionadded:: 3.12
+
 Returns a string joining all list's elements using the glue string.
 To join multiple strings, which are not part of a list, use ``JOIN`` operator
 from :command:`string` command.
@@ -97,6 +99,8 @@ from :command:`string` command.
 .. code-block:: cmake
 
   list(SUBLIST <list> <begin> <length> <output variable>)
+
+.. versionadded:: 3.12
 
 Returns a sublist of the given list.
 If ``<length>`` is 0, an empty list will be returned.
@@ -132,6 +136,8 @@ Appends elements to the list.
 
   list(FILTER <list> <INCLUDE|EXCLUDE> REGEX <regular_expression>)
 
+.. versionadded:: 3.6
+
 Includes or removes items from the list that match the mode's pattern.
 In ``REGEX`` mode, items will be matched against the given regular expression.
 
@@ -152,6 +158,8 @@ Inserts elements to the list to the specified location.
 
   list(POP_BACK <list> [<out-var>...])
 
+.. versionadded:: 3.15
+
 If no variable name is given, removes exactly one element. Otherwise,
 assign the last element's value to the given variable and removes it,
 up to the last variable name given.
@@ -162,6 +170,8 @@ up to the last variable name given.
 
   list(POP_FRONT <list> [<out-var>...])
 
+.. versionadded:: 3.15
+
 If no variable name is given, removes exactly one element. Otherwise,
 assign the first element's value to the given variable and removes it,
 up to the last variable name given.
@@ -171,6 +181,8 @@ up to the last variable name given.
 .. code-block:: cmake
 
   list(PREPEND <list> [<element> ...])
+
+.. versionadded:: 3.15
 
 Insert elements to the 0th position in the list.
 
@@ -205,6 +217,8 @@ but if duplicates are encountered, only the first instance is preserved.
 
   list(TRANSFORM <list> <ACTION> [<SELECTOR>]
                         [OUTPUT_VARIABLE <output variable>])
+
+.. versionadded:: 3.12
 
 Transforms the list by applying an action to all or, by specifying a
 ``<SELECTOR>``, to the selected elements of the list, storing the result
@@ -302,6 +316,13 @@ Reverses the contents of the list in-place.
   list(SORT <list> [COMPARE <compare>] [CASE <case>] [ORDER <order>])
 
 Sorts the list in-place alphabetically.
+
+.. versionadded:: 3.13
+  Added the ``COMPARE``, ``CASE``, and ``ORDER`` options.
+
+.. versionadded:: 3.18
+  Added the ``COMPARE NATURAL`` option.
+
 Use the ``COMPARE`` keyword to select the comparison method for sorting.
 The ``<compare>`` option should be one of:
 

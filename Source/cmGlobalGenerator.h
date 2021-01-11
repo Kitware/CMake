@@ -11,9 +11,11 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include "cm_codecvt.hxx"
@@ -26,6 +28,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
+#include "cmTransformDepfile.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <cm3p/json/value.h>
@@ -66,17 +69,17 @@ struct GeneratedMakeCommand
   void Add(T&&... args)
   {
     // iterate the args and append each one
-    AppendStrs(PrimaryCommand, std::forward<T>(args)...);
+    AppendStrs(this->PrimaryCommand, std::forward<T>(args)...);
   }
 
   // Add each value in the iterators as a separate element to the vector
   void Add(std::vector<std::string>::const_iterator start,
            std::vector<std::string>::const_iterator end)
   {
-    cm::append(PrimaryCommand, start, end);
+    cm::append(this->PrimaryCommand, start, end);
   }
 
-  std::string Printable() const { return cmJoin(PrimaryCommand, " "); }
+  std::string Printable() const { return cmJoin(this->PrimaryCommand, " "); }
 
   std::vector<std::string> PrimaryCommand;
   bool RequiresOutputForward = false;
@@ -288,6 +291,11 @@ public:
 
   void AddInstallComponent(const std::string& component);
 
+  /** Mark the (absolute path to a) file as generated.  */
+  void MarkAsGeneratedFile(const std::string& filepath);
+  /** Determine if the absolute filepath belongs to a generated file.  */
+  bool IsGeneratedFile(const std::string& filepath);
+
   const std::set<std::string>* GetInstallComponents() const
   {
     return &this->InstallComponents;
@@ -452,6 +460,10 @@ public:
   virtual bool ShouldStripResourcePath(cmMakefile*) const;
 
   virtual bool SupportsCustomCommandDepfile() const { return false; }
+  virtual cm::optional<cmDepfileFormat> DepfileFormat() const
+  {
+    return cm::nullopt;
+  }
 
   std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 
@@ -489,7 +501,7 @@ public:
     cmSourceFile* sf) const;
 
 #if !defined(CMAKE_BOOTSTRAP)
-  cmFileLockPool& GetFileLockPool() { return FileLockPool; }
+  cmFileLockPool& GetFileLockPool() { return this->FileLockPool; }
 #endif
 
   bool GetConfigureDoneCMP0026() const
@@ -568,8 +580,9 @@ protected:
   void AddGlobalTarget_Package(std::vector<GlobalTargetInfo>& targets);
   void AddGlobalTarget_PackageSource(std::vector<GlobalTargetInfo>& targets);
   void AddGlobalTarget_Test(std::vector<GlobalTargetInfo>& targets);
-  void AddGlobalTarget_EditCache(std::vector<GlobalTargetInfo>& targets);
-  void AddGlobalTarget_RebuildCache(std::vector<GlobalTargetInfo>& targets);
+  void AddGlobalTarget_EditCache(std::vector<GlobalTargetInfo>& targets) const;
+  void AddGlobalTarget_RebuildCache(
+    std::vector<GlobalTargetInfo>& targets) const;
   void AddGlobalTarget_Install(std::vector<GlobalTargetInfo>& targets);
   cmTarget CreateGlobalTarget(GlobalTargetInfo const& gti, cmMakefile* mf);
 
@@ -595,7 +608,7 @@ protected:
 
   cmGeneratorTarget* FindGeneratorTargetImpl(std::string const& name) const;
 
-  std::string GetPredefinedTargetsFolder();
+  std::string GetPredefinedTargetsFolder() const;
 
   enum class FindMakeProgramStage
   {
@@ -725,6 +738,8 @@ private:
     FilenameTargetDepends;
 
   std::map<std::string, std::string> RealPaths;
+
+  std::unordered_set<std::string> GeneratedFiles;
 
 #if !defined(CMAKE_BOOTSTRAP)
   // Pool of file locks

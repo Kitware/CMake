@@ -386,7 +386,8 @@ Configure use of an Android NDK with the following variables:
 
 :variable:`CMAKE_ANDROID_ARCH_ABI`
   Set to the Android ABI (architecture).  If not specified, this
-  variable will default to ``armeabi``.
+  variable will default to the first supported ABI in the list of
+  ``armeabi``, ``armeabi-v7a`` and ``arm64-v8a``.
   The :variable:`CMAKE_ANDROID_ARCH` variable will be computed
   from ``CMAKE_ANDROID_ARCH_ABI`` automatically.
   Also see the :variable:`CMAKE_ANDROID_ARM_MODE` and
@@ -394,7 +395,6 @@ Configure use of an Android NDK with the following variables:
 
 :variable:`CMAKE_ANDROID_NDK`
   Set to the absolute path to the Android NDK root directory.
-  A ``${CMAKE_ANDROID_NDK}/platforms`` directory must exist.
   If not specified, a default for this variable will be chosen
   as specified :ref:`above <Cross Compiling for Android>`.
 

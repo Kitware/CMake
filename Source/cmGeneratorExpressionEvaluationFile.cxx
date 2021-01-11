@@ -15,20 +15,21 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
-#include "cmSourceFileLocationKind.h"
 #include "cmSystemTools.h"
 
 cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
   std::string input, std::string target,
   std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
   std::unique_ptr<cmCompiledGeneratorExpression> condition,
-  bool inputIsContent, cmPolicies::PolicyStatus policyStatusCMP0070)
+  bool inputIsContent, mode_t permissions,
+  cmPolicies::PolicyStatus policyStatusCMP0070)
   : Input(std::move(input))
   , Target(std::move(target))
   , OutputFileExpr(std::move(outputFileExpr))
   , Condition(std::move(condition))
   , InputIsContent(inputIsContent)
   , PolicyStatusCMP0070(policyStatusCMP0070)
+  , Permissions(permissions)
 {
 }
 
@@ -38,7 +39,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   std::map<std::string, std::string>& outputFiles, mode_t perm)
 {
   std::string rawCondition = this->Condition->GetInput();
-  cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(Target);
+  cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(this->Target);
   if (!rawCondition.empty()) {
     std::string condResult =
       this->Condition->Evaluate(lg, config, target, nullptr, nullptr, lang);
@@ -94,16 +95,12 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
 {
   std::vector<std::string> enabledLanguages;
   cmGlobalGenerator* gg = lg->GetGlobalGenerator();
-  cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(Target);
+  cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(this->Target);
   gg->GetEnabledLanguages(enabledLanguages);
 
   for (std::string const& le : enabledLanguages) {
     std::string const name = this->GetOutputFileName(lg, target, config, le);
-    cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(
-      name, false, cmSourceFileLocationKind::Known);
-    // Tell TraceDependencies that the file is not expected to exist
-    // on disk yet.  We generate it after that runs.
-    sf->SetProperty("GENERATED", "1");
+    cmSourceFile* sf = lg->GetMakefile()->GetOrCreateGeneratedSource(name);
 
     // Tell the build system generators that there is no build rule
     // to generate the file.
@@ -116,14 +113,15 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
 
 void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
 {
-  mode_t perm = 0;
   std::string inputContent;
   if (this->InputIsContent) {
     inputContent = this->Input;
   } else {
     const std::string inputFileName = this->GetInputFileName(lg);
     lg->GetMakefile()->AddCMakeDependFile(inputFileName);
-    cmSystemTools::GetPermissions(inputFileName.c_str(), perm);
+    if (!this->Permissions) {
+      cmSystemTools::GetPermissions(inputFileName.c_str(), this->Permissions);
+    }
     cmsys::ifstream fin(inputFileName.c_str());
     if (!fin) {
       std::ostringstream e;
@@ -157,7 +155,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
 
   for (std::string const& le : enabledLanguages) {
     for (std::string const& li : allConfigs) {
-      this->Generate(lg, li, le, inputExpression.get(), outputFiles, perm);
+      this->Generate(lg, li, le, inputExpression.get(), outputFiles,
+                     this->Permissions);
       if (cmSystemTools::GetFatalErrorOccured()) {
         return;
       }

@@ -71,6 +71,9 @@ influences the way the message is handled:
   using this log level would normally only be temporary and would expect to be
   removed before releasing the project, packaging up the files, etc.
 
+.. versionadded:: 3.15
+  Added the ``NOTICE``, ``VERBOSE``, ``DEBUG``, and ``TRACE`` levels.
+
 The CMake command-line tool displays ``STATUS`` to ``TRACE`` messages on stdout
 with the message preceded by two hyphens and a space.  All other message types
 are sent to stderr and are not prefixed with hyphens.  The
@@ -79,25 +82,29 @@ The :manual:`curses interface <ccmake(1)>` shows ``STATUS`` to ``TRACE``
 messages one at a time on a status line and other messages in an
 interactive pop-up box.  The ``--log-level`` command-line option to each of
 these tools can be used to control which messages will be shown.
-To make a log level persist between CMake runs, the
-:variable:`CMAKE_MESSAGE_LOG_LEVEL` variable can be set instead.
-Note that the command line option takes precedence over the cache variable.
 
-Messages of log levels ``NOTICE`` and below will have each line preceded
-by the content of the :variable:`CMAKE_MESSAGE_INDENT` variable (converted to
-a single string by concatenating its list items).  For ``STATUS`` to ``TRACE``
-messages, this indenting content will be inserted after the hyphens.
+.. versionadded:: 3.17
+  To make a log level persist between CMake runs, the
+  :variable:`CMAKE_MESSAGE_LOG_LEVEL` variable can be set instead.
+  Note that the command line option takes precedence over the cache variable.
 
-Messages of log levels ``NOTICE`` and below can also have each line preceded
-with context of the form ``[some.context.example]``.  The content between the
-square brackets is obtained by converting the :variable:`CMAKE_MESSAGE_CONTEXT`
-list variable to a dot-separated string.  The message context will always
-appear before any indenting content but after any automatically added leading
-hyphens. By default, message context is not shown, it has to be explicitly
-enabled by giving the :manual:`cmake <cmake(1)>` ``--log-context``
-command-line option or by setting the :variable:`CMAKE_MESSAGE_CONTEXT_SHOW`
-variable to true.  See the :variable:`CMAKE_MESSAGE_CONTEXT` documentation for
-usage examples.
+.. versionadded:: 3.16
+  Messages of log levels ``NOTICE`` and below will have each line preceded
+  by the content of the :variable:`CMAKE_MESSAGE_INDENT` variable (converted to
+  a single string by concatenating its list items).  For ``STATUS`` to ``TRACE``
+  messages, this indenting content will be inserted after the hyphens.
+
+.. versionadded:: 3.17
+  Messages of log levels ``NOTICE`` and below can also have each line preceded
+  with context of the form ``[some.context.example]``.  The content between the
+  square brackets is obtained by converting the :variable:`CMAKE_MESSAGE_CONTEXT`
+  list variable to a dot-separated string.  The message context will always
+  appear before any indenting content but after any automatically added leading
+  hyphens. By default, message context is not shown, it has to be explicitly
+  enabled by giving the :manual:`cmake <cmake(1)>` ``--log-context``
+  command-line option or by setting the :variable:`CMAKE_MESSAGE_CONTEXT_SHOW`
+  variable to true.  See the :variable:`CMAKE_MESSAGE_CONTEXT` documentation for
+  usage examples.
 
 CMake Warning and Error message text displays using a simple markup
 language.  Non-indented text is formatted in line-wrapped paragraphs
@@ -106,6 +113,8 @@ delimited by newlines.  Indented text is considered pre-formatted.
 
 Reporting checks
 ^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.17
 
 A common pattern in CMake output is a message indicating the start of some
 sort of check, followed by another message reporting the result of that check.

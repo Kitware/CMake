@@ -89,6 +89,8 @@ Feature requirements are evaluated transitively by consuming the link
 implementation.  See :manual:`cmake-buildsystem(7)` for more on
 transitive behavior of build properties and usage requirements.
 
+.. _`Requiring Language Standards`:
+
 Requiring Language Standards
 ----------------------------
 

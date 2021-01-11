@@ -56,6 +56,8 @@ External Project Definition
       (see *Logging Options* below).
 
     ``LOG_DIR <dir>``
+      .. versionadded:: 3.14
+
       Directory in which to store the logs of each step.
 
     ``DOWNLOAD_DIR <dir>``
@@ -144,6 +146,9 @@ External Project Definition
         is determined by inspecting the actual content rather than using logic
         based on the file extension.
 
+        .. versionchanged:: 3.7
+          Multiple URLs are allowed.
+
       ``URL_HASH <algo>=<hashValue>``
         Hash of the archive file to be downloaded. The argument should be of
         the form ``<algo>=<hashValue>`` where ``algo`` can be any of the hashing
@@ -164,6 +169,8 @@ External Project Definition
         of code internal to the ``ExternalProject`` module.
 
       ``DOWNLOAD_NO_EXTRACT <bool>``
+        .. versionadded:: 3.6
+
         Allows the extraction part of the download step to be disabled by
         passing a boolean true value for this option. If this option is not
         given, the downloaded contents will be unpacked automatically if
@@ -180,15 +187,23 @@ External Project Definition
         Maximum time allowed for file download operations.
 
       ``INACTIVITY_TIMEOUT <seconds>``
+        .. versionadded:: 3.19
+
         Terminate the operation after a period of inactivity.
 
       ``HTTP_USERNAME <username>``
+        .. versionadded:: 3.7
+
         Username for the download operation if authentication is required.
 
       ``HTTP_PASSWORD <password>``
+        .. versionadded:: 3.7
+
         Password for the download operation if authentication is required.
 
       ``HTTP_HEADER <header1> [<header2>...]``
+        .. versionadded:: 3.7
+
         Provides an arbitrary list of HTTP headers for the download operation.
         This can be useful for accessing content in systems like AWS, etc.
 
@@ -201,6 +216,9 @@ External Project Definition
         cannot be provided, this option can be an alternative verification
         measure.
 
+        .. versionchanged:: 3.6
+          This option also applies to ``git clone`` invocations.
+
       ``TLS_CAINFO <file>``
         Specify a custom certificate authority file to use if ``TLS_VERIFY``
         is enabled. If this option is not specified, the value of the
@@ -208,6 +226,8 @@ External Project Definition
         :command:`file(DOWNLOAD)`)
 
       ``NETRC <level>``
+        .. versionadded:: 3.11
+
         Specify whether the ``.netrc`` file is to be used for operation.
         If this option is not specified, the value of the ``CMAKE_NETRC``
         variable will be used instead (see :command:`file(DOWNLOAD)`)
@@ -225,10 +245,15 @@ External Project Definition
           is ignored.
 
       ``NETRC_FILE <file>``
+        .. versionadded:: 3.11
+
         Specify an alternative ``.netrc`` file to the one in your home directory
         if the ``NETRC`` level is ``OPTIONAL`` or ``REQUIRED``. If this option
         is not specified, the value of the ``CMAKE_NETRC_FILE`` variable will
         be used instead (see :command:`file(DOWNLOAD)`)
+
+      .. versionadded:: 3.1
+        Added support for `tbz2`, `.tar.xz`, `.txz`, and `.7z` extensions.
 
     *Git*
       NOTE: A git version of 1.6.5 or later is required if this download method
@@ -267,22 +292,30 @@ External Project Definition
 
       ``GIT_SUBMODULES <module>...``
         Specific git submodules that should also be updated. If this option is
-        not provided, all git submodules will be updated. When :policy:`CMP0097`
-        is set to ``NEW`` if this value is set to an empty string then no submodules
-        are initialized or updated.
+        not provided, all git submodules will be updated.
+
+        .. versionchanged:: 3.16
+          When :policy:`CMP0097` is set to ``NEW``, if this value is set
+          to an empty string then no submodules are initialized or updated.
 
       ``GIT_SUBMODULES_RECURSE <bool>``
+        .. versionadded:: 3.17
+
         Specify whether git submodules (if any) should update recursively by
         passing the ``--recursive`` flag to ``git submodule update``.
         If not specified, the default is on.
 
       ``GIT_SHALLOW <bool>``
+        .. versionadded:: 3.6
+
         When this option is enabled, the ``git clone`` operation will be given
         the ``--depth 1`` option. This performs a shallow clone, which avoids
         downloading the whole history and instead retrieves just the commit
         denoted by the ``GIT_TAG`` option.
 
       ``GIT_PROGRESS <bool>``
+        .. versionadded:: 3.8
+
         When enabled, this option instructs the ``git clone`` operation to
         report its progress by passing it the ``--progress`` option. Without
         this option, the clone step for large projects may appear to make the
@@ -292,12 +325,16 @@ External Project Definition
         overly noisy if lots of external projects are used.
 
       ``GIT_CONFIG <option1> [<option2>...]``
+        .. versionadded:: 3.8
+
         Specify a list of config options to pass to ``git clone``. Each option
         listed will be transformed into its own ``--config <option>`` on the
         ``git clone`` command line, with each option required to be in the
         form ``key=value``.
 
       ``GIT_REMOTE_UPDATE_STRATEGY <strategy>``
+        .. versionadded:: 3.18
+
         When ``GIT_TAG`` refers to a remote branch, this option can be used to
         specify how the update step behaves.  The ``<strategy>`` must be one of
         the following:
@@ -379,6 +416,8 @@ External Project Definition
       :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
     ``UPDATE_DISCONNECTED <bool>``
+      .. versionadded:: 3.2
+
       When enabled, this option causes the update step to be skipped. It does
       not, however, prevent the download step. The update step can still be
       added as a step target (see :command:`ExternalProject_Add_StepTargets`)
@@ -436,6 +475,8 @@ External Project Definition
       ``CONFIGURE_COMMAND`` option.
 
     ``CMAKE_GENERATOR_PLATFORM <platform>``
+      .. versionadded:: 3.1
+
       Pass a generator-specific platform name to the CMake command (see
       :variable:`CMAKE_GENERATOR_PLATFORM`). It is an error to provide this
       option without the ``CMAKE_GENERATOR`` option.
@@ -446,6 +487,8 @@ External Project Definition
       option without the ``CMAKE_GENERATOR`` option.
 
     ``CMAKE_GENERATOR_INSTANCE <instance>``
+      .. versionadded:: 3.11
+
       Pass a generator-specific instance selection to the CMake command (see
       :variable:`CMAKE_GENERATOR_INSTANCE`). It is an error to provide this
       option without the ``CMAKE_GENERATOR`` option.
@@ -454,8 +497,10 @@ External Project Definition
       The specified arguments are passed to the ``cmake`` command line. They
       can be any argument the ``cmake`` command understands, not just cache
       values defined by ``-D...`` arguments (see also
-      :manual:`CMake Options <cmake(1)>`). In addition, arguments may use
-      :manual:`generator expressions <cmake-generator-expressions(7)>`.
+      :manual:`CMake Options <cmake(1)>`).
+
+      .. versionadded:: 3.3
+        Arguments may use :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
     ``CMAKE_CACHE_ARGS <arg>...``
       This is an alternate way of specifying cache variables where command line
@@ -463,10 +508,14 @@ External Project Definition
       the form ``-Dvar:STRING=value``, which are then transformed into
       CMake :command:`set` commands with the ``FORCE`` option used. These
       ``set()`` commands are written to a pre-load script which is then applied
-      using the :manual:`cmake -C <cmake(1)>` command line option. Arguments
-      may use :manual:`generator expressions <cmake-generator-expressions(7)>`.
+      using the :manual:`cmake -C <cmake(1)>` command line option.
+
+      .. versionadded:: 3.3
+        Arguments may use :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
     ``CMAKE_CACHE_DEFAULT_ARGS <arg>...``
+      .. versionadded:: 3.2
+
       This is the same as the ``CMAKE_CACHE_ARGS`` option except the ``set()``
       commands do not include the ``FORCE`` keyword. This means the values act
       as initial defaults only and will not override any variables already set
@@ -474,20 +523,25 @@ External Project Definition
       different behavior depending on whether the build starts from a fresh
       build directory or re-uses previous build contents.
 
-      If the CMake generator is the ``Green Hills MULTI`` and not overridden then
-      the original project's settings for the GHS toolset and target system
-      customization cache variables are propagated into the external project.
+      .. versionadded:: 3.15
+        If the CMake generator is the ``Green Hills MULTI`` and not overridden then
+        the original project's settings for the GHS toolset and target system
+        customization cache variables are propagated into the external project.
 
     ``SOURCE_SUBDIR <dir>``
+      .. versionadded:: 3.7
+
       When no ``CONFIGURE_COMMAND`` option is specified, the configure step
       assumes the external project has a ``CMakeLists.txt`` file at the top of
       its source tree (i.e. in ``SOURCE_DIR``). The ``SOURCE_SUBDIR`` option
       can be used to point to an alternative directory within the source tree
       to use as the top of the CMake source tree instead. This must be a
       relative path and it will be interpreted as being relative to
-      ``SOURCE_DIR``.  When ``BUILD_IN_SOURCE 1`` is specified, the
-      ``BUILD_COMMAND`` is used to point to an alternative directory within the
-      source tree.
+      ``SOURCE_DIR``.
+
+      .. versionadded:: 3.14
+        When ``BUILD_IN_SOURCE`` option is enabled, the ``BUILD_COMMAND``
+        is used to point to an alternative directory within the source tree.
 
   **Build Step Options:**
     If the configure step assumed the external project uses CMake as its build
@@ -524,6 +578,8 @@ External Project Definition
       developers might modify the sources in ``SOURCE_DIR``).
 
     ``BUILD_BYPRODUCTS <file>...``
+      .. versionadded:: 3.2
+
       Specifies files that will be generated by the build command but which
       might or might not have their modification time updated by subsequent
       builds. These ultimately get passed through as ``BYPRODUCTS`` to the
@@ -578,6 +634,8 @@ External Project Definition
       ``TEST_AFTER_INSTALL`` are enabled, the latter is silently ignored.
 
     ``TEST_EXCLUDE_FROM_MAIN <bool>``
+      .. versionadded:: 3.2
+
       If enabled, the main build's default ALL target will not depend on the
       test step. This can be a useful way of ensuring the test step is defined
       but only gets invoked when manually requested.
@@ -597,6 +655,8 @@ External Project Definition
       When enabled, the output of the update step is logged to files.
 
     ``LOG_PATCH <bool>``
+      .. versionadded:: 3.14
+
       When enabled, the output of the patch step is logged to files.
 
     ``LOG_CONFIGURE <bool>``
@@ -612,10 +672,14 @@ External Project Definition
       When enabled, the output of the test step is logged to files.
 
     ``LOG_MERGED_STDOUTERR <bool>``
+      .. versionadded:: 3.14
+
       When enabled, stdout and stderr will be merged for any step whose
       output is being logged to files.
 
     ``LOG_OUTPUT_ON_FAILURE <bool>``
+      .. versionadded:: 3.14
+
       This option only has an effect if at least one of the other ``LOG_<step>``
       options is enabled.  If an error occurs for a step which has logging to
       file enabled, that step's output will be printed to the console if
@@ -624,6 +688,8 @@ External Project Definition
       console.
 
   **Terminal Access Options:**
+    .. versionadded:: 3.4
+
     Steps can be given direct access to the terminal in some cases. Giving a
     step access to the terminal may allow it to receive terminal input if
     required, such as for authentication details not provided by other options.
@@ -673,8 +739,9 @@ External Project Definition
       discussion of the effects of this option.
 
     ``INDEPENDENT_STEP_TARGETS <step-target>...``
-      Deprecated.  This is allowed only if policy :policy:`CMP0114` is not set
-      to ``NEW``.
+      .. deprecated:: 3.19
+        This is allowed only if policy :policy:`CMP0114` is not set to ``NEW``.
+
       Generates custom targets for the specified steps and prevent these targets
       from having the usual dependencies applied to them. If this option is not
       specified, the default value is taken from the
@@ -780,6 +847,8 @@ control needed to implement such step-level capabilities.
     Files on which this custom step depends.
 
   ``INDEPENDENT <bool>``
+    .. versionadded:: 3.19
+
     Specifies whether this step is independent of the external dependencies
     specified by the :command:`ExternalProject_Add`'s ``DEPENDS`` option.
     The default is ``FALSE``.  Steps marked as independent may depend only
@@ -795,6 +864,8 @@ control needed to implement such step-level capabilities.
     on the external targets, but may depend on targets for other steps.
 
   ``BYPRODUCTS <file>...``
+    .. versionadded:: 3.2
+
     Files that will be generated by this custom step but which might or might
     not have their modification time updated by subsequent builds. This list of
     files will ultimately be passed through as the ``BYPRODUCTS`` option to the
@@ -830,6 +901,12 @@ control needed to implement such step-level capabilities.
   ``<TMP_DIR>``, ``<DOWNLOAD_DIR>`` and ``<DOWNLOADED_FILE>`` with their
   corresponding property values defined in the original call to
   :command:`ExternalProject_Add`.
+
+  .. versionadded:: 3.3
+    Token replacement is extended to byproducts.
+
+  .. versionadded:: 3.11
+    The ``<DOWNLOAD_DIR>`` substitution token.
 
 .. command:: ExternalProject_Add_StepTargets
 
@@ -868,15 +945,16 @@ control needed to implement such step-level capabilities.
   can save having to repeatedly specify the same set of step targets when
   multiple external projects are being defined.
 
-  If :policy:`CMP0114` is set to ``NEW``, step targets are fully responsible
-  for holding the custom commands implementing their steps.  The primary target
-  created by ``ExternalProject_Add`` depends on the step targets, and the
-  step targets depend on each other.  The target-level dependencies match
-  the file-level dependencies used by the custom commands for each step.
-  The targets for steps created with :command:`ExternalProject_Add_Step`'s
-  ``INDEPENDENT`` option do not depend on the external targets specified
-  by :command:`ExternalProject_Add`'s ``DEPENDS`` option.  The predefined
-  steps ``mkdir``, ``download``, ``update``, and ``patch`` are independent.
+  .. versionadded:: 3.19
+    If :policy:`CMP0114` is set to ``NEW``, step targets are fully responsible
+    for holding the custom commands implementing their steps.  The primary target
+    created by ``ExternalProject_Add`` depends on the step targets, and the
+    step targets depend on each other.  The target-level dependencies match
+    the file-level dependencies used by the custom commands for each step.
+    The targets for steps created with :command:`ExternalProject_Add_Step`'s
+    ``INDEPENDENT`` option do not depend on the external targets specified
+    by :command:`ExternalProject_Add`'s ``DEPENDS`` option.  The predefined
+    steps ``mkdir``, ``download``, ``update``, and ``patch`` are independent.
 
   If :policy:`CMP0114` is not ``NEW``, the following deprecated behavior
   is available:
@@ -900,6 +978,8 @@ control needed to implement such step-level capabilities.
     using the ``NO_DEPENDS`` option for the specified steps.
 
 .. command:: ExternalProject_Add_StepDependencies
+
+  .. versionadded:: 3.2
 
   The ``ExternalProject_Add_StepDependencies()`` function can be used to add
   dependencies to a step. The dependencies added must be targets CMake already
@@ -1984,8 +2064,10 @@ if(result)
     message(FATAL_ERROR \"\${msg}\")
   endif()
 else()
-  set(msg \"${name} ${step} command succeeded.  See also ${logbase}-*.log\")
-  message(STATUS \"\${msg}\")
+  if(NOT \"${CMAKE_GENERATOR}\" MATCHES \"Ninja\")
+    set(msg \"${name} ${step} command succeeded.  See also ${logbase}-*.log\")
+    message(STATUS \"\${msg}\")
+  endif()
 endif()
 ")
   file(GENERATE OUTPUT "${script}" CONTENT "${code}")

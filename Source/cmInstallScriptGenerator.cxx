@@ -22,7 +22,7 @@ cmInstallScriptGenerator::cmInstallScriptGenerator(
   , AllowGenex(false)
 {
   // We need per-config actions if the script has generator expressions.
-  if (cmGeneratorExpression::Find(Script) != std::string::npos) {
+  if (cmGeneratorExpression::Find(this->Script) != std::string::npos) {
     this->ActionsPerConfig = true;
   }
 }

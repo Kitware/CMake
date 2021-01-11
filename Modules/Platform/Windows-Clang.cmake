@@ -27,7 +27,7 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_SHARED_MODULE_SUFFIX  ".dll")
   set(CMAKE_STATIC_LIBRARY_SUFFIX ".lib")
   if(NOT "${lang}" STREQUAL "ASM")
-    set(CMAKE_DEPFILE_FLAGS_${lang} "-MD -MT <OBJECT> -MF <DEPFILE>")
+    set(CMAKE_DEPFILE_FLAGS_${lang} "-MD -MT <DEP_TARGET> -MF <DEP_FILE>")
   endif()
 
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
@@ -70,6 +70,9 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_CREATE_SHARED_MODULE ${CMAKE_${lang}_CREATE_SHARED_LIBRARY})
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> -fuse-ld=lld-link -nostartfiles -nostdlib <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> -Xlinker /implib:<TARGET_IMPLIB> -Xlinker /pdb:<TARGET_PDB> -Xlinker /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
+
+  set(CMAKE_CREATE_WIN32_EXE "-Xlinker /subsystem:windows")
+  set(CMAKE_CREATE_CONSOLE_EXE "-Xlinker /subsystem:console")
 
   if(NOT "${lang}" STREQUAL "ASM")
     set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         -Xclang -flto-visibility-public-std -D_MT -Xclang --dependent-lib=libcmt)
@@ -114,8 +117,10 @@ macro(__enable_llvm_rc_preprocessing clang_option_prefix extra_pp_flags)
       set(CMAKE_RC_PREPROCESSOR CMAKE_CXX_COMPILER)
     endif()
     if(DEFINED CMAKE_RC_PREPROCESSOR)
-      set(CMAKE_DEPFILE_FLAGS_RC "${clang_option_prefix}-MD ${clang_option_prefix}-MF ${clang_option_prefix}<DEPFILE>")
-      set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_COMMAND> -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> ${extra_pp_flags} -E -- <SOURCE> ++ <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> /fo <OBJECT> <OBJECT>.pp")
+      set(CMAKE_DEPFILE_FLAGS_RC "${clang_option_prefix}-MD ${clang_option_prefix}-MF ${clang_option_prefix}<DEP_FILE>")
+      # The <FLAGS> are passed to the preprocess and the resource compiler to pick
+      # up the eventual -D / -C options passed through the CMAKE_RC_FLAGS.
+      set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_COMMAND> -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> ${extra_pp_flags} -E -- <SOURCE> ++ <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> <FLAGS> /fo <OBJECT> <OBJECT>.pp")
       if(CMAKE_GENERATOR MATCHES "Ninja")
         set(CMAKE_NINJA_CMCLDEPS_RC 0)
         set(CMAKE_NINJA_DEP_TYPE_RC gcc)

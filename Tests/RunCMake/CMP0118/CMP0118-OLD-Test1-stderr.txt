@@ -1,0 +1,10 @@
+^prop: `0`
+CMake Error at CMP0118-Common-Test1\.cmake:[0-9]+ \(add_custom_target\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0118/CMP0118-OLD-Test1-build/GeneratedMain\.txt
+Call Stack \(most recent call first\):
+  CMP0118-OLD-Test1\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

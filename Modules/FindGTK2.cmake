@@ -16,6 +16,23 @@ module.  See example below.
 * ``glade``
 * ``glademm``
 
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module defines the following :prop_tgt:`IMPORTED` targets (subject to
+component selection):
+
+``GTK2::atk``, ``GTK2::atkmm``, ``GTK2::cairo``, ``GTK2::cairomm``,
+``GTK2::gdk_pixbuf``, ``GTK2::gdk``, ``GTK2::gdkmm``, ``GTK2::gio``,
+``GTK2::giomm``, ``GTK2::glade``, ``GTK2::glademm``, ``GTK2::glib``,
+``GTK2::glibmm``, ``GTK2::gmodule``, ``GTK2::gobject``, ``GTK2::gthread``,
+``GTK2::gtk``, ``GTK2::gtkmm``, ``GTK2::harfbuzz``, ``GTK2::pango``,
+``GTK2::pangocairo``, ``GTK2::pangoft2``, ``GTK2::pangomm``,
+``GTK2::pangoxft``, ``GTK2::sigc``.
+
+.. versionadded:: 3.16.7
+  Added the ``GTK2::harfbuzz`` target.
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -28,7 +45,8 @@ The following variables will be defined for your use
 ``GTK2_LIBRARIES``
   All libraries
 ``GTK2_TARGETS``
-  All imported targets
+  .. versionadded:: 3.5
+    All imported targets
 ``GTK2_DEFINITIONS``
   Additional compiler flags
 ``GTK2_VERSION``
@@ -39,6 +57,10 @@ The following variables will be defined for your use
   The minor version of GTK2
 ``GTK2_PATCH_VERSION``
   The patch version of GTK2
+
+.. versionadded:: 3.5
+  When ``GTK2_USE_IMPORTED_TARGETS`` is set to ``TRUE``, ``GTK2_LIBRARIES``
+  will list imported targets instead of library paths.
 
 Input Variables
 ^^^^^^^^^^^^^^^
@@ -783,6 +805,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_ADD_TARGET      (GIOMM GTK2_DEPENDS gio glibmm gobject sigc++ glib)
 
         _GTK2_FIND_INCLUDE_DIR(ATKMM atkmm.h)
+        _GTK2_FIND_INCLUDE_DIR(ATKMMCONFIG atkmmconfig.h)
         _GTK2_FIND_LIBRARY    (ATKMM atkmm true true)
         _GTK2_ADD_TARGET      (ATKMM GTK2_DEPENDS atk glibmm gobject sigc++ glib)
 

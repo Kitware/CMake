@@ -17,32 +17,33 @@
 
 bool cmCPackNuGetGenerator::SupportsComponentInstallation() const
 {
-  return IsOn("CPACK_NUGET_COMPONENT_INSTALL");
+  return this->IsOn("CPACK_NUGET_COMPONENT_INSTALL");
 }
 
 int cmCPackNuGetGenerator::PackageFiles()
 {
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: " << toplevel << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                "Toplevel: " << this->toplevel << std::endl);
 
   /* Reset package file name list it will be populated after the
    * `CPackNuGet.cmake` run */
-  packageFileNames.clear();
+  this->packageFileNames.clear();
 
   /* Are we in the component packaging case */
-  if (WantsComponentInstallation()) {
-    if (componentPackageMethod == ONE_PACKAGE) {
+  if (this->WantsComponentInstallation()) {
+    if (this->componentPackageMethod == ONE_PACKAGE) {
       // CASE 1 : COMPONENT ALL-IN-ONE package
       // Meaning that all per-component pre-installed files
       // goes into the single package.
       this->SetOption("CPACK_NUGET_ALL_IN_ONE", "TRUE");
-      SetupGroupComponentVariables(true);
+      this->SetupGroupComponentVariables(true);
     } else {
       // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
       // There will be 1 package for each component group
       // however one may require to ignore component group and
       // in this case you'll get 1 package for each component.
-      SetupGroupComponentVariables(componentPackageMethod ==
-                                   ONE_PACKAGE_PER_COMPONENT);
+      this->SetupGroupComponentVariables(this->componentPackageMethod ==
+                                         ONE_PACKAGE_PER_COMPONENT);
     }
   } else {
     // CASE 3 : NON COMPONENT package.
@@ -51,7 +52,7 @@ int cmCPackNuGetGenerator::PackageFiles()
 
   auto retval = this->ReadListFile("Internal/CPack/CPackNuGet.cmake");
   if (retval) {
-    AddGeneratedPackageNames();
+    this->AddGeneratedPackageNames();
   } else {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackNuGet.cmake" << std::endl);
@@ -133,9 +134,9 @@ void cmCPackNuGetGenerator::AddGeneratedPackageNames()
   std::string::size_type pos1 = 0;
   std::string::size_type pos2 = fileNames.find(sep, pos1 + 1);
   while (pos2 != std::string::npos) {
-    packageFileNames.push_back(fileNames.substr(pos1, pos2 - pos1));
+    this->packageFileNames.push_back(fileNames.substr(pos1, pos2 - pos1));
     pos1 = pos2 + 1;
     pos2 = fileNames.find(sep, pos1 + 1);
   }
-  packageFileNames.push_back(fileNames.substr(pos1, pos2 - pos1));
+  this->packageFileNames.push_back(fileNames.substr(pos1, pos2 - pos1));
 }

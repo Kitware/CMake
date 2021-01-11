@@ -4,7 +4,7 @@ CMAKE_<LANG>_CLANG_TIDY
 .. versionadded:: 3.6
 
 Default value for :prop_tgt:`<LANG>_CLANG_TIDY` target property
-when ``<LANG>`` is ``C`` or ``CXX``.
+when ``<LANG>`` is ``C``, ``CXX``, ``OBJC`` or ``OBJCXX``.
 
 This variable is used to initialize the property on each target as it is
 created.  For example:

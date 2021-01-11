@@ -1,0 +1,10 @@
+--RULES--
+out1
+out2
+--DEPENDENCIES--
+in1
+in2
+--RULES--
+out3
+--DEPENDENCIES--
+in3

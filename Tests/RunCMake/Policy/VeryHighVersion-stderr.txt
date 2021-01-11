@@ -1,0 +1,7 @@
+CMake Error at VeryHighVersion.cmake:[0-9]+ \(cmake_policy\):
+  An attempt was made to set the policy version of CMake to "99.1" which is
+  greater than this version of CMake.  This is not allowed because the
+  greater version may have new policies not known to this CMake.  You may
+  need a newer CMake version to build this project.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

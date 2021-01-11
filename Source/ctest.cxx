@@ -111,6 +111,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "--no-subproject-summary",
     "Disable timing summary information for "
     "subprojects." },
+  { "--test-dir <dir>", "Specify the directory in which to look for tests." },
   { "--build-and-test", "Configure, build and run a test." },
   { "--build-target", "Specify a specific target to build." },
   { "--build-nocmake", "Run the build without running cmake first." },

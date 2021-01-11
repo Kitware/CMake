@@ -18,6 +18,9 @@ Note that on Windows ``data`` is named ``dt`` and ``i18n`` is named
 ``in``; any of the names may be used, and the appropriate
 platform-specific library name will be automatically selected.
 
+.. versionadded:: 3.11
+  Added support for static libraries on Windows.
+
 This module reports information about the ICU installation in
 several variables.  General variables::
 
@@ -31,7 +34,7 @@ Imported targets::
   ICU::<C>
 
 Where ``<C>`` is the name of an ICU component, for example
-``ICU::i18n``.
+``ICU::i18n``; ``<C>`` is lower-case.
 
 ICU programs are reported in::
 
@@ -54,15 +57,13 @@ ICU programs are reported in::
 
 ICU component libraries are reported in::
 
-  ICU_<C>_FOUND - ON if component was found
-  ICU_<C>_LIBRARIES - libraries for component
+  ICU_<C>_FOUND - ON if component was found; ``<C>`` is upper-case.
+  ICU_<C>_LIBRARIES - libraries for component; ``<C>`` is upper-case.
 
 ICU datafiles are reported in::
 
   ICU_MAKEFILE_INC - Makefile.inc
   ICU_PKGDATA_INC - pkgdata.inc
-
-Note that ``<C>`` is the uppercased name of the component.
 
 This module reads hints about search results from::
 
@@ -73,9 +74,9 @@ ICU_ROOT variable takes precedence.
 
 The following cache variables may also be set::
 
-  ICU_<P>_EXECUTABLE - the path to executable <P>
+  ICU_<P>_EXECUTABLE - the path to executable <P>; ``<P>`` is upper-case.
   ICU_INCLUDE_DIR - the directory containing the ICU headers
-  ICU_<C>_LIBRARY - the library for component <C>
+  ICU_<C>_LIBRARY - the library for component <C>; ``<C>`` is upper-case.
 
 .. note::
 
@@ -188,7 +189,8 @@ function(_ICU_FIND)
     set(component_cache "ICU_${component_upcase}_LIBRARY")
     set(component_cache_release "${component_cache}_RELEASE")
     set(component_cache_debug "${component_cache}_DEBUG")
-    set(component_found "${component_upcase}_FOUND")
+    set(component_found "ICU_${component_upcase}_FOUND")
+    set(component_found_compat "${component_upcase}_FOUND")
     set(component_libnames "icu${component}")
     set(component_debug_libnames "icu${component}d")
 
@@ -250,12 +252,15 @@ function(_ICU_FIND)
     mark_as_advanced("${component_cache_release}" "${component_cache_debug}")
     if(${component_cache})
       set("${component_found}" ON)
+      set("${component_found_compat}" ON)
       list(APPEND ICU_LIBRARY "${${component_cache}}")
     endif()
     mark_as_advanced("${component_found}")
+    mark_as_advanced("${component_found_compat}")
     set("${component_cache}" "${${component_cache}}" PARENT_SCOPE)
     set("${component_found}" "${${component_found}}" PARENT_SCOPE)
-    if(${component_found})
+    set("${component_found_compat}" "${${component_found_compat}}" PARENT_SCOPE)
+    if(component_found OR component_found_compat)
       if (ICU_FIND_REQUIRED_${component})
         list(APPEND ICU_LIBS_FOUND "${component} (required)")
       else()
@@ -346,7 +351,7 @@ if(ICU_FOUND)
     set(_ICU_component_cache_release "ICU_${_ICU_component_upcase}_LIBRARY_RELEASE")
     set(_ICU_component_cache_debug "ICU_${_ICU_component_upcase}_LIBRARY_DEBUG")
     set(_ICU_component_lib "ICU_${_ICU_component_upcase}_LIBRARIES")
-    set(_ICU_component_found "${_ICU_component_upcase}_FOUND")
+    set(_ICU_component_found "ICU_${_ICU_component_upcase}_FOUND")
     set(_ICU_imported_target "ICU::${_ICU_component}")
     if(${_ICU_component_found})
       set("${_ICU_component_lib}" "${${_ICU_component_cache}}")
@@ -400,7 +405,7 @@ if(ICU_DEBUG)
   foreach(program IN LISTS icu_programs)
     string(TOUPPER "${program}" program_upcase)
     set(program_lib "ICU_${program_upcase}_EXECUTABLE")
-    message(STATUS "${program} program: ${${program_lib}}")
+    message(STATUS "${program} program: ${program_lib}=${${program_lib}}")
     unset(program_upcase)
     unset(program_lib)
   endforeach()
@@ -409,7 +414,7 @@ if(ICU_DEBUG)
     string(TOUPPER "${data}" data_upcase)
     string(REPLACE "." "_" data_upcase "${data_upcase}")
     set(data_lib "ICU_${data_upcase}")
-    message(STATUS "${data} data: ${${data_lib}}")
+    message(STATUS "${data} data: ${data_lib}=${${data_lib}}")
     unset(data_upcase)
     unset(data_lib)
   endforeach()
@@ -417,12 +422,15 @@ if(ICU_DEBUG)
   foreach(component IN LISTS ICU_FIND_COMPONENTS)
     string(TOUPPER "${component}" component_upcase)
     set(component_lib "ICU_${component_upcase}_LIBRARIES")
-    set(component_found "${component_upcase}_FOUND")
-    message(STATUS "${component} library found: ${${component_found}}")
-    message(STATUS "${component} library: ${${component_lib}}")
+    set(component_found "ICU_${component_upcase}_FOUND")
+    set(component_found_compat "${component_upcase}_FOUND")
+    message(STATUS "${component} library found: ${component_found}=${${component_found}}")
+    message(STATUS "${component} library found (compat name): ${component_found_compat}=${${component_found_compat}}")
+    message(STATUS "${component} library: ${component_lib}=${${component_lib}}")
     unset(component_upcase)
     unset(component_lib)
     unset(component_found)
+    unset(component_found_compat)
   endforeach()
   message(STATUS "----------------")
 endif()

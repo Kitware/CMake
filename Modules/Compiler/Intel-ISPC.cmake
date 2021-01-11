@@ -3,7 +3,13 @@ include(Compiler/CMakeCommonCompilerMacros)
 # Not aware of any verbose flag for ISPC
 #set(CMAKE_ISPC_VERBOSE_FLAG )
 
-set(CMAKE_DEPFILE_FLAGS_ISPC "-M -MT <OBJECT> -MF <DEPFILE>")
+set(CMAKE_DEPFILE_FLAGS_ISPC "-M -MT <DEP_TARGET> -MF <DEP_FILE>")
+if((NOT DEFINED CMAKE_DEPENDS_USE_COMPILER OR CMAKE_DEPENDS_USE_COMPILER)
+    AND CMAKE_GENERATOR MATCHES "Makefiles|WMake")
+  # dependencies are computed by the compiler itself
+  set(CMAKE_ISPC_DEPFILE_FORMAT gcc)
+  set(CMAKE_ISPC_DEPENDS_USE_COMPILER TRUE)
+endif()
 
 string(APPEND CMAKE_ISPC_FLAGS_INIT " ")
 string(APPEND CMAKE_ISPC_FLAGS_DEBUG_INIT "-O0 -g")

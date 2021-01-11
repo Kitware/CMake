@@ -7,17 +7,17 @@
 
 void cmPropertyMap::Clear()
 {
-  Map_.clear();
+  this->Map_.clear();
 }
 
 void cmPropertyMap::SetProperty(const std::string& name, const char* value)
 {
   if (!value) {
-    Map_.erase(name);
+    this->Map_.erase(name);
     return;
   }
 
-  Map_[name] = value;
+  this->Map_[name] = value;
 }
 
 void cmPropertyMap::AppendProperty(const std::string& name,
@@ -29,7 +29,7 @@ void cmPropertyMap::AppendProperty(const std::string& name,
   }
 
   {
-    std::string& pVal = Map_[name];
+    std::string& pVal = this->Map_[name];
     if (!pVal.empty() && !asString) {
       pVal += ';';
     }
@@ -39,13 +39,13 @@ void cmPropertyMap::AppendProperty(const std::string& name,
 
 void cmPropertyMap::RemoveProperty(const std::string& name)
 {
-  Map_.erase(name);
+  this->Map_.erase(name);
 }
 
 cmProp cmPropertyMap::GetPropertyValue(const std::string& name) const
 {
-  auto it = Map_.find(name);
-  if (it != Map_.end()) {
+  auto it = this->Map_.find(name);
+  if (it != this->Map_.end()) {
     return &it->second;
   }
   return nullptr;
@@ -54,8 +54,8 @@ cmProp cmPropertyMap::GetPropertyValue(const std::string& name) const
 std::vector<std::string> cmPropertyMap::GetKeys() const
 {
   std::vector<std::string> keyList;
-  keyList.reserve(Map_.size());
-  for (auto const& item : Map_) {
+  keyList.reserve(this->Map_.size());
+  for (auto const& item : this->Map_) {
     keyList.push_back(item.first);
   }
   std::sort(keyList.begin(), keyList.end());
@@ -66,8 +66,8 @@ std::vector<std::pair<std::string, std::string>> cmPropertyMap::GetList() const
 {
   using StringPair = std::pair<std::string, std::string>;
   std::vector<StringPair> kvList;
-  kvList.reserve(Map_.size());
-  for (auto const& item : Map_) {
+  kvList.reserve(this->Map_.size());
+  for (auto const& item : this->Map_) {
     kvList.emplace_back(item.first, item.second);
   }
   std::sort(kvList.begin(), kvList.end(),

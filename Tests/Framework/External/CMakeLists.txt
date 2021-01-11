@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.19)
+project(ExternalFramework C)
+add_library(External SHARED external.c)
+set_property(TARGET External PROPERTY FRAMEWORK 1)
+install(TARGETS External DESTINATION lib)

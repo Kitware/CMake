@@ -177,7 +177,7 @@ bool cmProcess::Buffer::GetLine(std::string& line)
 
       // Start a new range for the next line.
       ++this->Last;
-      this->First = Last;
+      this->First = this->Last;
 
       // Return the line extracted.
       return true;

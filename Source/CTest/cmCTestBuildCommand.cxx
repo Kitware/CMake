@@ -54,22 +54,21 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
     //
     cmProp ctestBuildConfiguration =
       this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
-    const std::string* cmakeBuildConfiguration = !this->Configuration.empty()
-      ? &this->Configuration
-      : (cmNonempty(ctestBuildConfiguration) ? ctestBuildConfiguration
-                                             : &this->CTest->GetConfigType());
+    std::string cmakeBuildConfiguration = cmNonempty(this->Configuration)
+      ? this->Configuration
+      : cmNonempty(ctestBuildConfiguration) ? *ctestBuildConfiguration
+                                            : this->CTest->GetConfigType();
 
-    const std::string* cmakeBuildAdditionalFlags = !this->Flags.empty()
-      ? &this->Flags
-      : this->Makefile->GetDefinition("CTEST_BUILD_FLAGS");
-    const std::string* cmakeBuildTarget = !this->Target.empty()
-      ? &this->Target
-      : this->Makefile->GetDefinition("CTEST_BUILD_TARGET");
+    const std::string& cmakeBuildAdditionalFlags = cmNonempty(this->Flags)
+      ? this->Flags
+      : this->Makefile->GetSafeDefinition("CTEST_BUILD_FLAGS");
+    const std::string& cmakeBuildTarget = cmNonempty(this->Target)
+      ? this->Target
+      : this->Makefile->GetSafeDefinition("CTEST_BUILD_TARGET");
 
     if (cmNonempty(cmakeGeneratorName)) {
-      if (!cmakeBuildConfiguration) {
-        static const std::string sRelease = "Release";
-        cmakeBuildConfiguration = &sRelease;
+      if (cmakeBuildConfiguration.empty()) {
+        cmakeBuildConfiguration = "Release";
       }
       if (this->GlobalGenerator) {
         if (this->GlobalGenerator->GetName() != *cmakeGeneratorName) {
@@ -88,24 +87,18 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
           return nullptr;
         }
       }
-      if (cmakeBuildConfiguration->empty()) {
-        const std::string* config = nullptr;
+      if (cmakeBuildConfiguration.empty()) {
 #ifdef CMAKE_INTDIR
-        static const std::string sIntDir = CMAKE_INTDIR;
-        config = &sIntDir;
+        cmakeBuildConfiguration = CMAKE_INTDIR;
+#else
+        cmakeBuildConfiguration = "Debug";
 #endif
-        if (!config) {
-          static const std::string sDebug = "Debug";
-          config = &sDebug;
-        }
-        cmakeBuildConfiguration = config;
       }
 
       std::string dir = this->CTest->GetCTestConfiguration("BuildDirectory");
       std::string buildCommand =
         this->GlobalGenerator->GenerateCMakeBuildCommand(
-          cmakeBuildTarget ? *cmakeBuildTarget : "", *cmakeBuildConfiguration,
-          cmakeBuildAdditionalFlags ? *cmakeBuildAdditionalFlags : "",
+          cmakeBuildTarget, cmakeBuildConfiguration, cmakeBuildAdditionalFlags,
           this->Makefile->IgnoreErrorsCMP0061());
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          "SetMakeCommand:" << buildCommand << "\n",
@@ -144,7 +137,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
 bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
                                       cmExecutionStatus& status)
 {
-  bool ret = cmCTestHandlerCommand::InitialPass(args, status);
+  bool ret = this->cmCTestHandlerCommand::InitialPass(args, status);
   if (!this->NumberErrors.empty()) {
     this->Makefile->AddDefinition(
       this->NumberErrors, std::to_string(this->Handler->GetTotalErrors()));

@@ -778,16 +778,16 @@ struct cmCTestCoverageHandlerLocale
   {
     std::string l;
     if (cmSystemTools::GetEnv("LC_ALL", l)) {
-      lc_all = l;
+      this->lc_all = l;
     }
-    if (lc_all != "C") {
+    if (this->lc_all != "C") {
       cmSystemTools::PutEnv("LC_ALL=C");
     }
   }
   ~cmCTestCoverageHandlerLocale()
   {
-    if (!lc_all.empty()) {
-      cmSystemTools::PutEnv("LC_ALL=" + lc_all);
+    if (!this->lc_all.empty()) {
+      cmSystemTools::PutEnv("LC_ALL=" + this->lc_all);
     } else {
       cmSystemTools::UnsetEnv("LC_ALL");
     }

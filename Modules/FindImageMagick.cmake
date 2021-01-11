@@ -7,6 +7,9 @@ FindImageMagick
 
 Find ImageMagick binary suite.
 
+.. versionadded:: 3.9
+  Added support for ImageMagick 7.
+
 This module will search for a set of ImageMagick tools specified as
 components in the :command:`find_package` call.  Typical components include,
 but are not limited to (future versions of ImageMagick might have

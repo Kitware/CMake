@@ -84,8 +84,8 @@ void TargetIncludeDirectoriesImpl::HandleInterfaceContent(
   cmTarget* tgt, const std::vector<std::string>& content, bool prepend,
   bool system)
 {
-  cmTargetPropCommandBase::HandleInterfaceContent(tgt, content, prepend,
-                                                  system);
+  this->cmTargetPropCommandBase::HandleInterfaceContent(tgt, content, prepend,
+                                                        system);
   if (system) {
     std::string joined = this->Join(content);
     tgt->AppendProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", joined);
@@ -101,5 +101,6 @@ bool cmTargetIncludeDirectoriesCommand(std::vector<std::string> const& args,
     args, "INCLUDE_DIRECTORIES",
     TargetIncludeDirectoriesImpl::ArgumentFlags(
       TargetIncludeDirectoriesImpl::PROCESS_BEFORE |
+      TargetIncludeDirectoriesImpl::PROCESS_AFTER |
       TargetIncludeDirectoriesImpl::PROCESS_SYSTEM));
 }

@@ -46,9 +46,9 @@ bool cmCPackIFWRepository::ConfigureFromOptions()
   // Update
   if (this->IsOn(prefix + "ADD")) {
     this->Update = cmCPackIFWRepository::Add;
-  } else if (IsOn(prefix + "REMOVE")) {
+  } else if (this->IsOn(prefix + "REMOVE")) {
     this->Update = cmCPackIFWRepository::Remove;
-  } else if (IsOn(prefix + "REPLACE")) {
+  } else if (this->IsOn(prefix + "REPLACE")) {
     this->Update = cmCPackIFWRepository::Replace;
   } else {
     this->Update = cmCPackIFWRepository::None;
@@ -247,7 +247,7 @@ void cmCPackIFWRepository::WriteRepositoryUpdate(cmXMLWriter& xout)
   if (this->Update == cmCPackIFWRepository::Add ||
       this->Update == cmCPackIFWRepository::Remove) {
     xout.Attribute("url", this->Url);
-  } else if (Update == cmCPackIFWRepository::Replace) {
+  } else if (this->Update == cmCPackIFWRepository::Replace) {
     xout.Attribute("oldUrl", this->OldUrl);
     xout.Attribute("newUrl", this->NewUrl);
   }

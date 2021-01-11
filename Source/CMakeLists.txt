@@ -181,8 +181,6 @@ set(SRCS
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h
   cmCacheManager.cxx
   cmCacheManager.h
-  cmCheckCustomOutputs.h
-  cmCheckCustomOutputs.cxx
   cmCLocaleEnvironmentScope.h
   cmCLocaleEnvironmentScope.cxx
   cmCMakePath.h
@@ -227,6 +225,8 @@ set(SRCS
   cmDependsJava.h
   cmDependsJavaParserHelper.cxx
   cmDependsJavaParserHelper.h
+  cmDependsCompiler.cxx
+  cmDependsCompiler.h
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
   cmDocumentationSection.cxx
@@ -444,6 +444,8 @@ set(SRCS
   cmTest.h
   cmTestGenerator.cxx
   cmTestGenerator.h
+  cmTransformDepfile.cxx
+  cmTransformDepfile.h
   cmUuid.cxx
   cmUVHandlePtr.cxx
   cmUVHandlePtr.h
@@ -508,6 +510,8 @@ set(SRCS
   cmCMakeLanguageCommand.h
   cmCMakeMinimumRequired.cxx
   cmCMakeMinimumRequired.h
+  cmCMakePathCommand.h
+  cmCMakePathCommand.cxx
   cmCMakePolicyCommand.cxx
   cmCMakePolicyCommand.h
   cmConditionEvaluator.cxx
@@ -833,6 +837,7 @@ endif()
 
 # Ninja support
 set(SRCS ${SRCS}
+  cmScanDepFormat.cxx
   cmGlobalNinjaGenerator.cxx
   cmGlobalNinjaGenerator.h
   cmNinjaTypes.h
@@ -1156,20 +1161,6 @@ endif()
 add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h ${MANIFEST_FILE})
 list(APPEND _tools cmake)
 target_link_libraries(cmake CMakeLib)
-
-add_library(CMakeServerLib
-  cmConnection.h cmConnection.cxx
-  cmFileMonitor.cxx cmFileMonitor.h
-  cmJsonObjectDictionary.h
-  cmJsonObjects.h
-  cmJsonObjects.cxx
-  cmPipeConnection.cxx cmPipeConnection.h
-  cmServer.cxx cmServer.h
-  cmServerConnection.cxx cmServerConnection.h
-  cmServerProtocol.cxx cmServerProtocol.h
-  )
-target_link_libraries(CMakeServerLib CMakeLib)
-target_link_libraries(cmake CMakeServerLib)
 
 # Build CTest executable
 add_executable(ctest ctest.cxx ${MANIFEST_FILE})

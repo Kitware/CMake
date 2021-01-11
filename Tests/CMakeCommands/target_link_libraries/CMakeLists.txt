@@ -1,3 +1,6 @@
+# Using 2.8 will trigger a deprecation warning.  In this case it's explicitly
+# intentional since the tests checks various policy implementations prior to
+# 2.8.12
 cmake_minimum_required(VERSION 2.8)
 
 project(target_link_libraries)

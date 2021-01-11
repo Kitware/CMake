@@ -430,8 +430,9 @@ public:
 
   /** Get source files common to all configurations and diagnose cases
       with per-config sources.  Excludes sources added by a TARGET_OBJECTS
-      generator expression.  */
-  bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
+      generator expression.  Do not use outside the Xcode generator.  */
+  bool GetConfigCommonSourceFilesForXcode(
+    std::vector<cmSourceFile*>& files) const;
 
   bool HaveBuildTreeRPATH(const std::string& config) const;
 
@@ -446,6 +447,9 @@ public:
 
   void GetAppleArchs(const std::string& config,
                      std::vector<std::string>& archVec) const;
+
+  void AddExplicitLanguageFlags(std::string& flags,
+                                cmSourceFile const& sf) const;
 
   void AddCUDAArchitectureFlags(std::string& flags) const;
   void AddCUDAToolkitFlags(std::string& flags) const;
@@ -581,7 +585,8 @@ public:
     std::string PdbDir;
     bool empty() const
     {
-      return OutDir.empty() && ImpDir.empty() && PdbDir.empty();
+      return this->OutDir.empty() && this->ImpDir.empty() &&
+        this->PdbDir.empty();
     }
   };
 

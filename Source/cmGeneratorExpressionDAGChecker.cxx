@@ -28,7 +28,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Backtrace(std::move(backtrace))
   , TransitivePropertiesOnly(false)
 {
-  Initialize();
+  this->Initialize();
 }
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
@@ -42,7 +42,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Backtrace()
   , TransitivePropertiesOnly(false)
 {
-  Initialize();
+  this->Initialize();
 }
 
 void cmGeneratorExpressionDAGChecker::Initialize()
@@ -52,7 +52,7 @@ void cmGeneratorExpressionDAGChecker::Initialize()
 
 #define TEST_TRANSITIVE_PROPERTY_METHOD(METHOD) top->METHOD() ||
 
-  if (CheckResult == DAG &&
+  if (this->CheckResult == DAG &&
       (CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
         TEST_TRANSITIVE_PROPERTY_METHOD) false)) // NOLINT(*)
 #undef TEST_TRANSITIVE_PROPERTY_METHOD

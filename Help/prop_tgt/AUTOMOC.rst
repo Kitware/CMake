@@ -137,7 +137,8 @@ parent directory path of the ``moc`` input file.  This scheme allows to have
 All not included ``moc`` output files will be included automatically by the
 CMake generated file
 
-- ``<AUTOGEN_BUILD_DIR>/mocs_compilation.cpp``,
+- ``<AUTOGEN_BUILD_DIR>/mocs_compilation.cpp``, or
+- ``<AUTOGEN_BUILD_DIR>/mocs_compilation_$<CONFIG>.cpp``,
 
 which is added to the target's sources.
 

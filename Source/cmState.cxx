@@ -441,6 +441,19 @@ void cmState::AddBuiltinCommand(std::string const& name,
     });
 }
 
+void cmState::AddFlowControlCommand(std::string const& name, Command command)
+{
+  this->FlowControlCommands.insert(name);
+  this->AddBuiltinCommand(name, std::move(command));
+}
+
+void cmState::AddFlowControlCommand(std::string const& name,
+                                    BuiltinCommand command)
+{
+  this->FlowControlCommands.insert(name);
+  this->AddBuiltinCommand(name, command);
+}
+
 void cmState::AddDisallowedCommand(std::string const& name,
                                    BuiltinCommand command,
                                    cmPolicies::PolicyID policy,
@@ -470,7 +483,7 @@ void cmState::AddDisallowedCommand(std::string const& name,
 
 void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
 {
-  this->AddBuiltinCommand(
+  this->AddFlowControlCommand(
     name,
     [name, error](std::vector<cmListFileArgument> const&,
                   cmExecutionStatus& status) -> bool {
@@ -485,21 +498,33 @@ void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
     });
 }
 
-void cmState::AddScriptedCommand(std::string const& name, Command command)
+bool cmState::AddScriptedCommand(std::string const& name, BT<Command> command,
+                                 cmMakefile& mf)
 {
   std::string sName = cmSystemTools::LowerCase(name);
+
+  if (this->FlowControlCommands.count(sName)) {
+    mf.GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Built-in flow control command \"", sName,
+               "\" cannot be overridden."),
+      command.Backtrace);
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
 
   // if the command already exists, give a new name to the old command.
   if (Command oldCmd = this->GetCommandByExactName(sName)) {
     this->ScriptedCommands["_" + sName] = oldCmd;
   }
 
-  this->ScriptedCommands[sName] = std::move(command);
+  this->ScriptedCommands[sName] = std::move(command.Value);
+  return true;
 }
 
 cmState::Command cmState::GetCommand(std::string const& name) const
 {
-  return GetCommandByExactName(cmSystemTools::LowerCase(name));
+  return this->GetCommandByExactName(cmSystemTools::LowerCase(name));
 }
 
 cmState::Command cmState::GetCommandByExactName(std::string const& name) const

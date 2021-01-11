@@ -57,6 +57,7 @@ Environment Variables for Languages
    /envvar/CC
    /envvar/CFLAGS
    /envvar/CSFLAGS
+   /envvar/CUDAARCHS
    /envvar/CUDACXX
    /envvar/CUDAFLAGS
    /envvar/CUDAHOSTCXX

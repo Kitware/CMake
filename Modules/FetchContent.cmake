@@ -77,6 +77,9 @@ operation and would not normally be the way the module is used, but it is
 sometimes useful as part of implementing some higher level feature or to
 populate some content in CMake's script mode.
 
+.. versionchanged:: 3.14
+  ``FetchContent`` commands can access the terminal. This is necessary
+  for password prompts and real-time progress displays to work.
 
 Commands
 ^^^^^^^^
@@ -371,6 +374,8 @@ is simpler and provides additional features over the pattern above.
   :variable:`CMAKE_MAKE_PROGRAM` variables will need to be set appropriately
   on the command line invoking the script.
 
+  .. versionadded:: 3.18
+    Added support for ``DOWNLOAD_NO_EXTRACT`` and ``SOURCE_SUBDIR`` options.
 
 .. command:: FetchContent_GetProperties
 
@@ -415,6 +420,8 @@ is simpler and provides additional features over the pattern above.
   .. code-block:: cmake
 
     FetchContent_MakeAvailable( <name1> [<name2>...] )
+
+  .. versionadded:: 3.14
 
   This command implements the common pattern typically needed for most
   dependencies.  It iterates over each of the named dependencies in turn

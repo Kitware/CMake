@@ -3,6 +3,7 @@
 #include "cmLocalGenerator.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -16,9 +17,11 @@
 #include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
@@ -279,7 +282,7 @@ static void MoveSystemIncludesToEnd(std::vector<BT<std::string>>& includeDirs,
                    });
 }
 
-void cmLocalGenerator::TraceDependencies()
+void cmLocalGenerator::TraceDependencies() const
 {
   // Generate the rule files for each target.
   const auto& targets = this->GetGeneratorTargets();
@@ -823,16 +826,13 @@ cmStateSnapshot cmLocalGenerator::GetStateSnapshot() const
   return this->Makefile->GetStateSnapshot();
 }
 
-const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
-                                              const std::string& prop)
+cmProp cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
+                                         const std::string& prop)
 {
-  cmProp p;
   if (target) {
-    p = target->GetProperty(prop);
-  } else {
-    p = this->Makefile->GetProperty(prop);
+    return target->GetProperty(prop);
   }
-  return p ? p->c_str() : nullptr;
+  return this->Makefile->GetProperty(prop);
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(
@@ -1129,9 +1129,8 @@ cmTarget* cmLocalGenerator::AddUtilityCommand(
 
   detail::AddUtilityCommand(
     *this, this->DirectoryBacktrace, cmCommandOrigin::Generator, target,
-    this->Makefile->GetUtilityOutput(target), workingDir, byproducts, depends,
-    commandLines, escapeOldStyle, comment, uses_terminal, command_expand_lists,
-    job_pool, stdPipesUTF8);
+    workingDir, byproducts, depends, commandLines, escapeOldStyle, comment,
+    uses_terminal, command_expand_lists, job_pool, stdPipesUTF8);
 
   return target;
 }
@@ -2498,8 +2497,10 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
     target->GetSourceFiles(sources, config);
 
     const std::string configUpper = cmSystemTools::UpperCase(config);
+    static const std::array<std::string, 4> langs = { { "C", "CXX", "OBJC",
+                                                        "OBJCXX" } };
 
-    for (const std::string& lang : { "C", "CXX", "OBJC", "OBJCXX" }) {
+    for (const std::string& lang : langs) {
       auto langSources = std::count_if(
         sources.begin(), sources.end(), [lang](cmSourceFile* sf) {
           return lang == sf->GetLanguage() &&
@@ -2606,11 +2607,11 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 }
 
                 if (editAndContinueDebugInfo || msvc2008OrLess) {
-                  CopyPchCompilePdb(config, target, *ReuseFrom, reuseTarget,
-                                    { ".pdb", ".idb" });
+                  this->CopyPchCompilePdb(config, target, *ReuseFrom,
+                                          reuseTarget, { ".pdb", ".idb" });
                 } else if (enableDebuggingInformation) {
-                  CopyPchCompilePdb(config, target, *ReuseFrom, reuseTarget,
-                                    { ".pdb" });
+                  this->CopyPchCompilePdb(config, target, *ReuseFrom,
+                                          reuseTarget, { ".pdb" });
                 }
               }
 
@@ -2633,14 +2634,16 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
           // Add pchHeader to source files, which will
           // be grouped as "Precompile Header File"
           auto pchHeader_sf = this->Makefile->GetOrCreateSource(
-            pchHeader, true, cmSourceFileLocationKind::Known);
+            pchHeader, false, cmSourceFileLocationKind::Known);
           std::string err;
           pchHeader_sf->ResolveFullPath(&err);
-
-          // The pch file is generated, but mark it as not generated
-          // so that a clean operation will not remove it from disk
-          pchHeader_sf->SetProperty("GENERATED", "0");
-
+          if (!err.empty()) {
+            std::ostringstream msg;
+            msg << "Unable to resolve full path of PCH-header '" << pchHeader
+                << "' assigned to target " << target->GetName()
+                << ", although its path is supposed to be known!";
+            this->IssueMessage(MessageType::FATAL_ERROR, msg.str());
+          }
           target->AddSource(pchHeader);
         }
       }
@@ -2769,8 +2772,15 @@ inline void RegisterUnitySources(cmGeneratorTarget* target, cmSourceFile* sf,
 inline void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
                                       std::string const& sf_full_path,
                                       cmProp beforeInclude,
-                                      cmProp afterInclude)
+                                      cmProp afterInclude, cmProp uniqueIdName)
 {
+
+  if (uniqueIdName && !uniqueIdName->empty()) {
+    unity_file << "#undef " << *uniqueIdName << "\n"
+               << "#define " << *uniqueIdName << " unity_"
+               << cmSystemTools::ComputeStringMD5(sf_full_path) << "\n";
+  }
+
   if (beforeInclude) {
     unity_file << *beforeInclude << "\n";
   }
@@ -2790,6 +2800,8 @@ std::vector<std::string> AddUnityFilesModeAuto(
   if (batchSize == 0) {
     batchSize = filtered_sources.size();
   }
+
+  cmProp uniqueIdName = target->GetProperty("UNITY_BUILD_UNIQUE_ID");
 
   std::vector<std::string> unity_files;
   for (size_t itemsLeft = filtered_sources.size(), chunk, batch = 0;
@@ -2814,7 +2826,7 @@ std::vector<std::string> AddUnityFilesModeAuto(
         cmSourceFile* sf = filtered_sources[begin];
         RegisterUnitySources(target, sf, filename);
         IncludeFileInUnitySources(file, sf->ResolveFullPath(), beforeInclude,
-                                  afterInclude);
+                                  afterInclude, uniqueIdName);
       }
     }
     cmSystemTools::MoveFileIfDifferent(filename_tmp, filename);
@@ -2845,6 +2857,8 @@ std::vector<std::string> AddUnityFilesModeGroup(
     }
   }
 
+  cmProp uniqueIdName = target->GetProperty("UNITY_BUILD_UNIQUE_ID");
+
   for (auto const& item : explicit_mapping) {
     auto const& name = item.first;
     std::string filename = cmStrCat(filename_base, "unity_", name,
@@ -2860,7 +2874,7 @@ std::vector<std::string> AddUnityFilesModeGroup(
       for (cmSourceFile* sf : item.second) {
         RegisterUnitySources(target, sf, filename);
         IncludeFileInUnitySources(file, sf->ResolveFullPath(), beforeInclude,
-                                  afterInclude);
+                                  afterInclude, uniqueIdName);
       }
     }
     cmSystemTools::MoveFileIfDifferent(filename_tmp, filename);
@@ -3233,7 +3247,7 @@ std::string cmLocalGenerator::GetProjectName() const
 }
 
 std::string cmLocalGenerator::ConstructComment(
-  cmCustomCommandGenerator const& ccg, const char* default_comment)
+  cmCustomCommandGenerator const& ccg, const char* default_comment) const
 {
   // Check for a comment provided with the command.
   if (ccg.GetComment()) {
@@ -3549,11 +3563,11 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   // we don't end up having:
   // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/generated_source_file.obj
   cmProp unitySourceFile = source.GetProperty("UNITY_SOURCE_FILE");
-  cmProp psExtension = source.GetProperty("PCH_EXTENSION");
+  cmProp pchExtension = source.GetProperty("PCH_EXTENSION");
   const bool isPchObject = objectName.find("cmake_pch") != std::string::npos;
-  if (unitySourceFile || psExtension || isPchObject) {
-    if (psExtension) {
-      customOutputExtension = psExtension->c_str();
+  if (unitySourceFile || pchExtension || isPchObject) {
+    if (pchExtension) {
+      customOutputExtension = pchExtension->c_str();
     }
 
     cmsys::RegularExpression var("(CMakeFiles/[^/]+.dir/)");
@@ -3791,7 +3805,7 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmGeneratorTarget* target,
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_SHORT_VERSION_STRING");
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_BUNDLE_VERSION");
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_COPYRIGHT");
-  mf->ConfigureFile(inFile, fname, false, false, false, true);
+  mf->ConfigureFile(inFile, fname, false, false, false);
 }
 
 void cmLocalGenerator::GenerateFrameworkInfoPList(
@@ -3826,42 +3840,99 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_IDENTIFIER");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_SHORT_VERSION_STRING");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_BUNDLE_VERSION");
-  mf->ConfigureFile(inFile, fname, false, false, false, true);
+  mf->ConfigureFile(inFile, fname, false, false, false);
 }
 
 namespace {
+cm::string_view CustomOutputRoleKeyword(cmLocalGenerator::OutputRole role)
+{
+  return (role == cmLocalGenerator::OutputRole::Primary ? "OUTPUT"_s
+                                                        : "BYPRODUCTS"_s);
+}
+
 void CreateGeneratedSource(cmLocalGenerator& lg, const std::string& output,
+                           cmLocalGenerator::OutputRole role,
                            cmCommandOrigin origin,
                            const cmListFileBacktrace& lfbt)
 {
-  if (cmGeneratorExpression::Find(output) == std::string::npos) {
-    // Outputs without generator expressions from the project are already
-    // created and marked as generated.  Do not mark them again, because
-    // other commands might have overwritten the property.
-    if (origin == cmCommandOrigin::Generator) {
-      lg.GetMakefile()->GetOrCreateGeneratedSource(output);
-    }
-  } else {
+  if (cmGeneratorExpression::Find(output) != std::string::npos) {
     lg.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
       "Generator expressions in custom command outputs are not implemented!",
       lfbt);
+    return;
+  }
+
+  // Make sure the file will not be generated into the source
+  // directory during an out of source build.
+  if (!lg.GetMakefile()->CanIWriteThisFile(output)) {
+    lg.GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(CustomOutputRoleKeyword(role), " path\n  ", output,
+               "\nin a source directory as an output of custom command."),
+      lfbt);
+    return;
+  }
+
+  // Make sure the output file name has no invalid characters.
+  std::string::size_type pos = output.find_first_of("#<>");
+  if (pos != std::string::npos) {
+    lg.GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(CustomOutputRoleKeyword(role), " containing a \"", output[pos],
+               "\" is not allowed."),
+      lfbt);
+    return;
+  }
+
+  // Outputs without generator expressions from the project are already
+  // created and marked as generated.  Do not mark them again, because
+  // other commands might have overwritten the property.
+  if (origin == cmCommandOrigin::Generator) {
+    lg.GetMakefile()->GetOrCreateGeneratedSource(output);
   }
 }
 
-void CreateGeneratedSources(cmLocalGenerator& lg,
-                            const std::vector<std::string>& outputs,
-                            cmCommandOrigin origin,
-                            const cmListFileBacktrace& lfbt)
+std::string ComputeCustomCommandRuleFileName(cmLocalGenerator& lg,
+                                             cmListFileBacktrace const& bt,
+                                             std::string const& output)
 {
-  for (std::string const& o : outputs) {
-    CreateGeneratedSource(lg, o, origin, lfbt);
+  // If the output path has no generator expressions, use it directly.
+  if (cmGeneratorExpression::Find(output) == std::string::npos) {
+    return output;
   }
+
+  // The output path contains a generator expression, but we must choose
+  // a single source file path to which to attach the custom command.
+  // Use some heuristics to provie a nice-looking name when possible.
+
+  // If the only genex is $<CONFIG>, replace that gracefully.
+  {
+    std::string simple = output;
+    cmSystemTools::ReplaceString(simple, "$<CONFIG>", "(CONFIG)");
+    if (cmGeneratorExpression::Find(simple) == std::string::npos) {
+      return simple;
+    }
+  }
+
+  // If the genex evaluates to the same value in all configurations, use that.
+  {
+    std::vector<std::string> allConfigOutputs =
+      lg.ExpandCustomCommandOutputGenex(output, bt);
+    if (allConfigOutputs.size() == 1) {
+      return allConfigOutputs.front();
+    }
+  }
+
+  // Fall back to a deterministic unique name.
+  cmCryptoHash h(cmCryptoHash::AlgoSHA256);
+  return cmStrCat(lg.GetCurrentBinaryDirectory(), "/CMakeFiles/",
+                  h.HashString(output).substr(0, 16));
 }
 
 cmSourceFile* AddCustomCommand(
   cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
-  const std::vector<std::string>& outputs,
+  cmCommandOrigin origin, const std::vector<std::string>& outputs,
   const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends, const std::string& main_dependency,
   const cmImplicitDependsList& implicit_depends,
@@ -3898,7 +3969,8 @@ cmSourceFile* AddCustomCommand(
     cmGlobalGenerator* gg = lg.GetGlobalGenerator();
 
     // Construct a rule file associated with the first output produced.
-    std::string outName = gg->GenerateRuleFile(outputs[0]);
+    std::string outName = gg->GenerateRuleFile(
+      ComputeCustomCommandRuleFileName(lg, lfbt, outputs[0]));
 
     // Check if the rule file already exists.
     file = mf->GetSource(outName, cmSourceFileLocationKind::Known);
@@ -3941,9 +4013,37 @@ cmSourceFile* AddCustomCommand(
     cc->SetJobPool(job_pool);
     file->SetCustomCommand(std::move(cc));
 
-    mf->AddSourceOutputs(file, outputs, byproducts);
+    lg.AddSourceOutputs(file, outputs, cmLocalGenerator::OutputRole::Primary,
+                        lfbt, origin);
+    lg.AddSourceOutputs(file, byproducts,
+                        cmLocalGenerator::OutputRole::Byproduct, lfbt, origin);
   }
   return file;
+}
+
+bool AnyOutputMatches(const std::string& name,
+                      const std::vector<std::string>& outputs)
+{
+  for (std::string const& output : outputs) {
+    std::string::size_type pos = output.rfind(name);
+    // If the output matches exactly
+    if (pos != std::string::npos && pos == output.size() - name.size() &&
+        (pos == 0 || output[pos - 1] == '/')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool AnyTargetCommandOutputMatches(
+  const std::string& name, const std::vector<cmCustomCommand>& commands)
+{
+  for (cmCustomCommand const& command : commands) {
+    if (AnyOutputMatches(name, command.GetByproducts())) {
+      return true;
+    }
+  }
+  return false;
 }
 }
 
@@ -3960,11 +4060,6 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
                               const std::string& job_pool,
                               bool command_expand_lists, bool stdPipesUTF8)
 {
-  cmMakefile* mf = lg.GetMakefile();
-
-  // Always create the byproduct sources and mark them generated.
-  CreateGeneratedSources(lg, byproducts, origin, lfbt);
-
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
   cmCustomCommand cc(no_output, byproducts, depends, commandLines, lfbt,
@@ -3987,7 +4082,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
       break;
   }
 
-  mf->AddTargetByproducts(target, byproducts);
+  lg.AddTargetByproducts(target, byproducts, lfbt, origin);
 }
 
 cmSourceFile* AddCustomCommandToOutput(
@@ -4001,14 +4096,11 @@ cmSourceFile* AddCustomCommandToOutput(
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
   const std::string& job_pool, bool stdPipesUTF8)
 {
-  // Always create the output sources and mark them generated.
-  CreateGeneratedSources(lg, outputs, origin, lfbt);
-  CreateGeneratedSources(lg, byproducts, origin, lfbt);
-
-  return AddCustomCommand(
-    lg, lfbt, outputs, byproducts, depends, main_dependency, implicit_depends,
-    commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
-    command_expand_lists, depfile, job_pool, stdPipesUTF8);
+  return AddCustomCommand(lg, lfbt, origin, outputs, byproducts, depends,
+                          main_dependency, implicit_depends, commandLines,
+                          comment, workingDir, replace, escapeOldStyle,
+                          uses_terminal, command_expand_lists, depfile,
+                          job_pool, stdPipesUTF8);
 }
 
 void AppendCustomCommandToOutput(cmLocalGenerator& lg,
@@ -4019,7 +4111,22 @@ void AppendCustomCommandToOutput(cmLocalGenerator& lg,
                                  const cmCustomCommandLines& commandLines)
 {
   // Lookup an existing command.
-  if (cmSourceFile* sf = lg.GetMakefile()->GetSourceFileWithOutput(output)) {
+  cmSourceFile* sf = nullptr;
+  if (cmGeneratorExpression::Find(output) == std::string::npos) {
+    sf = lg.GetSourceFileWithOutput(output);
+  } else {
+    // This output path has a generator expression.  Evaluate it to
+    // find the output for any configurations.
+    for (std::string const& out :
+         lg.ExpandCustomCommandOutputGenex(output, lfbt)) {
+      sf = lg.GetSourceFileWithOutput(out);
+      if (sf) {
+        break;
+      }
+    }
+  }
+
+  if (sf) {
     if (cmCustomCommand* cc = sf->GetCustomCommand()) {
       cc->AppendCommands(commandLines);
       cc->AppendDepends(depends);
@@ -4031,14 +4138,14 @@ void AppendCustomCommandToOutput(cmLocalGenerator& lg,
   // No existing command found.
   lg.GetCMakeInstance()->IssueMessage(
     MessageType::FATAL_ERROR,
-    cmStrCat("Attempt to append to output\n  ", output,
+    cmStrCat("Attempt to APPEND to custom command with output\n  ", output,
              "\nwhich is not already a custom command output."),
     lfbt);
 }
 
 void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        cmCommandOrigin origin, cmTarget* target,
-                       const cmUtilityOutput& force, const char* workingDir,
+                       const char* workingDir,
                        const std::vector<std::string>& byproducts,
                        const std::vector<std::string>& depends,
                        const cmCustomCommandLines& commandLines,
@@ -4046,29 +4153,27 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        bool uses_terminal, bool command_expand_lists,
                        const std::string& job_pool, bool stdPipesUTF8)
 {
-  // Always create the byproduct sources and mark them generated.
-  CreateGeneratedSource(lg, force.Name, origin, lfbt);
-  CreateGeneratedSources(lg, byproducts, origin, lfbt);
-
   // Use an empty comment to avoid generation of default comment.
   if (!comment) {
     comment = "";
   }
 
+  // Create the generated symbolic output name of the utility target.
+  std::string output =
+    lg.CreateUtilityOutput(target->GetName(), byproducts, lfbt);
+
   std::string no_main_dependency;
   cmImplicitDependsList no_implicit_depends;
   cmSourceFile* rule = AddCustomCommand(
-    lg, lfbt, { force.Name }, byproducts, depends, no_main_dependency,
+    lg, lfbt, origin, { output }, byproducts, depends, no_main_dependency,
     no_implicit_depends, commandLines, comment, workingDir,
     /*replace=*/false, escapeOldStyle, uses_terminal, command_expand_lists,
     /*depfile=*/"", job_pool, stdPipesUTF8);
   if (rule) {
-    lg.GetMakefile()->AddTargetByproducts(target, byproducts);
+    lg.AddTargetByproducts(target, byproducts, lfbt, origin);
   }
 
-  if (!force.NameCMP0049.empty()) {
-    target->AddSource(force.NameCMP0049);
-  }
+  target->AddSource(output);
 }
 
 std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target)
@@ -4118,4 +4223,248 @@ std::vector<std::string> ComputeISPCExtraObjects(
 
   return computedObjects;
 }
+}
+
+cmSourcesWithOutput cmLocalGenerator::GetSourcesWithOutput(
+  const std::string& name) const
+{
+  // Linear search?  Also see GetSourceFileWithOutput for detail.
+  if (!cmSystemTools::FileIsFullPath(name)) {
+    cmSourcesWithOutput sources;
+    sources.Target = this->LinearGetTargetWithOutput(name);
+    sources.Source = this->LinearGetSourceFileWithOutput(
+      name, cmSourceOutputKind::OutputOrByproduct, sources.SourceIsByproduct);
+    return sources;
+  }
+  // Otherwise we use an efficient lookup map.
+  auto o = this->OutputToSource.find(name);
+  if (o != this->OutputToSource.end()) {
+    return o->second.Sources;
+  }
+  return {};
+}
+
+cmSourceFile* cmLocalGenerator::GetSourceFileWithOutput(
+  const std::string& name, cmSourceOutputKind kind) const
+{
+  // If the queried path is not absolute we use the backward compatible
+  // linear-time search for an output with a matching suffix.
+  if (!cmSystemTools::FileIsFullPath(name)) {
+    bool byproduct = false;
+    return this->LinearGetSourceFileWithOutput(name, kind, byproduct);
+  }
+  // Otherwise we use an efficient lookup map.
+  auto o = this->OutputToSource.find(name);
+  if (o != this->OutputToSource.end() &&
+      (!o->second.Sources.SourceIsByproduct ||
+       kind == cmSourceOutputKind::OutputOrByproduct)) {
+    // Source file could also be null pointer for example if we found the
+    // byproduct of a utility target, a PRE_BUILD, PRE_LINK, or POST_BUILD
+    // command of a target, or a not yet created custom command.
+    return o->second.Sources.Source;
+  }
+  return nullptr;
+}
+
+std::string cmLocalGenerator::CreateUtilityOutput(
+  std::string const& targetName, std::vector<std::string> const&,
+  cmListFileBacktrace const&)
+{
+  std::string force =
+    cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/", targetName);
+  // The output is not actually created so mark it symbolic.
+  if (cmSourceFile* sf = this->Makefile->GetOrCreateGeneratedSource(force)) {
+    sf->SetProperty("SYMBOLIC", "1");
+  } else {
+    cmSystemTools::Error("Could not get source file entry for " + force);
+  }
+  return force;
+}
+
+std::vector<cmCustomCommandGenerator>
+cmLocalGenerator::MakeCustomCommandGenerators(cmCustomCommand const& cc,
+                                              std::string const& config)
+{
+  std::vector<cmCustomCommandGenerator> ccgs;
+  ccgs.emplace_back(cc, config, this);
+  return ccgs;
+}
+
+std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputPaths(
+  cmCompiledGeneratorExpression const& cge, std::string const& config)
+{
+  std::vector<std::string> paths = cmExpandedList(cge.Evaluate(this, config));
+  for (std::string& p : paths) {
+    p = cmSystemTools::CollapseFullPath(p, this->GetCurrentBinaryDirectory());
+  }
+  return paths;
+}
+
+std::vector<std::string> cmLocalGenerator::ExpandCustomCommandOutputGenex(
+  std::string const& o, cmListFileBacktrace const& bt)
+{
+  std::vector<std::string> allConfigOutputs;
+  cmGeneratorExpression ge(bt);
+  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(o);
+  std::vector<std::string> configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+  for (std::string const& config : configs) {
+    std::vector<std::string> configOutputs =
+      this->ExpandCustomCommandOutputPaths(*cge, config);
+    allConfigOutputs.reserve(allConfigOutputs.size() + configOutputs.size());
+    std::move(configOutputs.begin(), configOutputs.end(),
+              std::back_inserter(allConfigOutputs));
+  }
+  auto endUnique =
+    cmRemoveDuplicates(allConfigOutputs.begin(), allConfigOutputs.end());
+  allConfigOutputs.erase(endUnique, allConfigOutputs.end());
+  return allConfigOutputs;
+}
+
+void cmLocalGenerator::AddTargetByproducts(
+  cmTarget* target, const std::vector<std::string>& byproducts,
+  cmListFileBacktrace const& bt, cmCommandOrigin origin)
+{
+  for (std::string const& o : byproducts) {
+    if (cmGeneratorExpression::Find(o) == std::string::npos) {
+      this->UpdateOutputToSourceMap(o, target, bt, origin);
+      continue;
+    }
+
+    // This byproduct path has a generator expression.  Evaluate it to
+    // register the byproducts for all configurations.
+    for (std::string const& b : this->ExpandCustomCommandOutputGenex(o, bt)) {
+      this->UpdateOutputToSourceMap(b, target, bt, cmCommandOrigin::Generator);
+    }
+  }
+}
+
+void cmLocalGenerator::AddSourceOutputs(
+  cmSourceFile* source, const std::vector<std::string>& outputs,
+  OutputRole role, cmListFileBacktrace const& bt, cmCommandOrigin origin)
+{
+  for (std::string const& o : outputs) {
+    if (cmGeneratorExpression::Find(o) == std::string::npos) {
+      this->UpdateOutputToSourceMap(o, source, role, bt, origin);
+      continue;
+    }
+
+    // This output path has a generator expression.  Evaluate it to
+    // register the outputs for all configurations.
+    for (std::string const& out :
+         this->ExpandCustomCommandOutputGenex(o, bt)) {
+      this->UpdateOutputToSourceMap(out, source, role, bt,
+                                    cmCommandOrigin::Generator);
+    }
+  }
+}
+
+void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& byproduct,
+                                               cmTarget* target,
+                                               cmListFileBacktrace const& bt,
+                                               cmCommandOrigin origin)
+{
+  SourceEntry entry;
+  entry.Sources.Target = target;
+
+  auto pr = this->OutputToSource.emplace(byproduct, entry);
+  if (pr.second) {
+    CreateGeneratedSource(*this, byproduct, OutputRole::Byproduct, origin, bt);
+  } else {
+    SourceEntry& current = pr.first->second;
+    // Has the target already been set?
+    if (!current.Sources.Target) {
+      current.Sources.Target = target;
+    } else {
+      // Multiple custom commands/targets produce the same output (source file
+      // or target).  See also comment in other UpdateOutputToSourceMap
+      // overload.
+      //
+      // TODO: Warn the user about this case.
+    }
+  }
+}
+
+void cmLocalGenerator::UpdateOutputToSourceMap(std::string const& output,
+                                               cmSourceFile* source,
+                                               OutputRole role,
+                                               cmListFileBacktrace const& bt,
+                                               cmCommandOrigin origin)
+{
+  SourceEntry entry;
+  entry.Sources.Source = source;
+  entry.Sources.SourceIsByproduct = role == OutputRole::Byproduct;
+
+  auto pr = this->OutputToSource.emplace(output, entry);
+  if (pr.second) {
+    CreateGeneratedSource(*this, output, role, origin, bt);
+  } else {
+    SourceEntry& current = pr.first->second;
+    // Outputs take precedence over byproducts
+    if (!current.Sources.Source ||
+        (current.Sources.SourceIsByproduct && role == OutputRole::Primary)) {
+      current.Sources.Source = source;
+      current.Sources.SourceIsByproduct = false;
+    } else {
+      // Multiple custom commands produce the same output but may
+      // be attached to a different source file (MAIN_DEPENDENCY).
+      // LinearGetSourceFileWithOutput would return the first one,
+      // so keep the mapping for the first one.
+      //
+      // TODO: Warn the user about this case.  However, the VS 8 generator
+      // triggers it for separate generate.stamp rules in ZERO_CHECK and
+      // individual targets.
+    }
+  }
+}
+
+cmTarget* cmLocalGenerator::LinearGetTargetWithOutput(
+  const std::string& name) const
+{
+  // We go through the ordered vector of targets to get reproducible results
+  // should multiple names match.
+  for (cmTarget* t : this->Makefile->GetOrderedTargets()) {
+    // Does the output of any command match the source file name?
+    if (AnyTargetCommandOutputMatches(name, t->GetPreBuildCommands())) {
+      return t;
+    }
+    if (AnyTargetCommandOutputMatches(name, t->GetPreLinkCommands())) {
+      return t;
+    }
+    if (AnyTargetCommandOutputMatches(name, t->GetPostBuildCommands())) {
+      return t;
+    }
+  }
+  return nullptr;
+}
+
+cmSourceFile* cmLocalGenerator::LinearGetSourceFileWithOutput(
+  const std::string& name, cmSourceOutputKind kind, bool& byproduct) const
+{
+  // Outputs take precedence over byproducts.
+  byproduct = false;
+  cmSourceFile* fallback = nullptr;
+
+  // Look through all the source files that have custom commands and see if the
+  // custom command has the passed source file as an output.
+  for (const auto& src : this->Makefile->GetSourceFiles()) {
+    // Does this source file have a custom command?
+    if (src->GetCustomCommand()) {
+      // Does the output of the custom command match the source file name?
+      if (AnyOutputMatches(name, src->GetCustomCommand()->GetOutputs())) {
+        // Return the first matching output.
+        return src.get();
+      }
+      if (kind == cmSourceOutputKind::OutputOrByproduct) {
+        if (AnyOutputMatches(name, src->GetCustomCommand()->GetByproducts())) {
+          // Do not return the source yet as there might be a matching output.
+          fallback = src.get();
+        }
+      }
+    }
+  }
+
+  // Did we find a byproduct?
+  byproduct = fallback != nullptr;
+  return fallback;
 }

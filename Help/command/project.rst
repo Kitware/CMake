@@ -55,10 +55,14 @@ The options are:
   * :variable:`PROJECT_VERSION_TWEAK`,
     :variable:`<PROJECT-NAME>_VERSION_TWEAK`.
 
-  When the ``project()`` command is called from the top-level ``CMakeLists.txt``,
-  then the version is also stored in the variable :variable:`CMAKE_PROJECT_VERSION`.
+  .. versionadded:: 3.12
+    When the ``project()`` command is called from the top-level
+    ``CMakeLists.txt``, then the version is also stored in the variable
+    :variable:`CMAKE_PROJECT_VERSION`.
 
 ``DESCRIPTION <project-description-string>``
+  .. versionadded:: 3.9
+
   Optional.
   Sets the variables
 
@@ -71,7 +75,12 @@ The options are:
   When the ``project()`` command is called from the top-level ``CMakeLists.txt``,
   then the description is also stored in the variable :variable:`CMAKE_PROJECT_DESCRIPTION`.
 
+  .. versionadded:: 3.12
+    Added the ``<PROJECT-NAME>_DESCRIPTION`` variable.
+
 ``HOMEPAGE_URL <url-string>``
+  .. versionadded:: 3.12
+
   Optional.
   Sets the variables
 
@@ -92,6 +101,15 @@ The options are:
   By default ``C`` and ``CXX`` are enabled if no language options are given.
   Specify language ``NONE``, or use the ``LANGUAGES`` keyword and list no languages,
   to skip enabling any languages.
+
+  .. versionadded:: 3.8
+    Added ``CUDA`` support.
+
+  .. versionadded:: 3.16
+    Added ``OBJC`` and ``OBJCXX`` support.
+
+  .. versionadded:: 3.18
+    Added ``ISPC`` support.
 
   If enabling ``ASM``, list it last so that CMake can check whether
   compilers for other languages like ``C`` work for assembly too.
@@ -114,6 +132,13 @@ If the :variable:`CMAKE_PROJECT_INCLUDE` or
 they point to will be included as the last step of the ``project()`` command.
 If both are set, then :variable:`CMAKE_PROJECT_INCLUDE` will be included before
 :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`.
+
+.. versionadded:: 3.15
+  Added the ``CMAKE_PROJECT_INCLUDE`` and ``CMAKE_PROJECT_INCLUDE_BEFORE``
+  variables.
+
+.. versionadded:: 3.17
+  Added the ``CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`` variable.
 
 Usage
 ^^^^^

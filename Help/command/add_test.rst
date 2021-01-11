@@ -31,6 +31,8 @@ if necessary.  See policy :policy:`CMP0110`.  The options are:
   current source directory.
 
 ``COMMAND_EXPAND_LISTS``
+  .. versionadded:: 3.16
+
   Lists in ``COMMAND`` arguments will be expanded, including those
   created with
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
@@ -43,6 +45,9 @@ unless the :prop_test:`PASS_REGULAR_EXPRESSION`,
 :prop_test:`FAIL_REGULAR_EXPRESSION` or
 :prop_test:`SKIP_REGULAR_EXPRESSION` test property is used.
 
+.. versionadded:: 3.16
+  Added :prop_test:`SKIP_REGULAR_EXPRESSION` property.
+
 The ``COMMAND`` and ``WORKING_DIRECTORY`` options may use "generator
 expressions" with the syntax ``$<...>``.  See the
 :manual:`cmake-generator-expressions(7)` manual for available expressions.
@@ -52,7 +57,7 @@ Example usage:
 .. code-block:: cmake
 
   add_test(NAME mytest
-           COMMAND testDriver --config $<CONFIGURATION>
+           COMMAND testDriver --config $<CONFIG>
                               --exe $<TARGET_FILE:myexe>)
 
 This creates a test ``mytest`` whose command runs a ``testDriver`` tool

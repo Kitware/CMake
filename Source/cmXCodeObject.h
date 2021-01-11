@@ -81,6 +81,13 @@ public:
   void SetObject(cmXCodeObject* value) { this->Object = value; }
   cmXCodeObject* GetObject() { return this->Object; }
   void AddObject(cmXCodeObject* value) { this->List.push_back(value); }
+  size_t GetObjectCount() { return this->List.size(); }
+  void InsertObject(size_t position, cmXCodeObject* value)
+  {
+    if (position < GetObjectCount()) {
+      this->List.insert(this->List.begin() + position, value);
+    }
+  }
   void PrependObject(cmXCodeObject* value)
   {
     this->List.insert(this->List.begin(), value);

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -2290,7 +2291,7 @@ void AddEvaluationFile(const std::string& inputName,
                        const std::string& targetName,
                        const std::string& outputExpr,
                        const std::string& condition, bool inputIsContent,
-                       cmExecutionStatus& status)
+                       mode_t permissions, cmExecutionStatus& status)
 {
   cmListFileBacktrace lfbt = status.GetMakefile().GetBacktrace();
 
@@ -2304,7 +2305,7 @@ void AddEvaluationFile(const std::string& inputName,
 
   status.GetMakefile().AddEvaluationFile(
     inputName, targetName, std::move(outputCge), std::move(conditionCge),
-    inputIsContent);
+    permissions, inputIsContent);
 }
 
 bool HandleGenerateCommand(std::vector<std::string> const& args,
@@ -2314,49 +2315,156 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     status.SetError("Incorrect arguments to GENERATE subcommand.");
     return false;
   }
-  if (args[1] != "OUTPUT") {
+
+  struct Arguments
+  {
+    std::string Output;
+    std::string Input;
+    std::string Content;
+    std::string Condition;
+    std::string Target;
+    bool NoSourcePermissions = false;
+    bool UseSourcePermissions = false;
+    std::vector<std::string> FilePermissions;
+  };
+
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("OUTPUT"_s, &Arguments::Output)
+      .Bind("INPUT"_s, &Arguments::Input)
+      .Bind("CONTENT"_s, &Arguments::Content)
+      .Bind("CONDITION"_s, &Arguments::Condition)
+      .Bind("TARGET"_s, &Arguments::Target)
+      .Bind("NO_SOURCE_PERMISSIONS"_s, &Arguments::NoSourcePermissions)
+      .Bind("USE_SOURCE_PERMISSIONS"_s, &Arguments::UseSourcePermissions)
+      .Bind("FILE_PERMISSIONS"_s, &Arguments::FilePermissions);
+
+  std::vector<std::string> unparsedArguments;
+  std::vector<std::string> keywordsMissingValues;
+  std::vector<std::string> parsedKeywords;
+  Arguments const arguments =
+    parser.Parse(cmMakeRange(args).advance(1), &unparsedArguments,
+                 &keywordsMissingValues, &parsedKeywords);
+
+  if (!keywordsMissingValues.empty()) {
     status.SetError("Incorrect arguments to GENERATE subcommand.");
     return false;
   }
 
-  std::string condition;
-  std::string target;
-
-  for (std::size_t i = 5; i < args.size();) {
-    const std::string& arg = args[i++];
-
-    if (args.size() - i == 0) {
-      status.SetError("Incorrect arguments to GENERATE subcommand.");
-      return false;
-    }
-
-    const std::string& value = args[i++];
-
-    if (value.empty()) {
-      status.SetError(
-        arg + " of sub-command GENERATE must not be empty if specified.");
-      return false;
-    }
-
-    if (arg == "CONDITION") {
-      condition = value;
-    } else if (arg == "TARGET") {
-      target = value;
-    } else {
-      status.SetError("Unknown argument to GENERATE subcommand.");
-      return false;
-    }
+  if (!unparsedArguments.empty()) {
+    status.SetError("Unknown argument to GENERATE subcommand.");
+    return false;
   }
 
-  std::string output = args[2];
-  const bool inputIsContent = args[3] != "INPUT";
-  if (inputIsContent && args[3] != "CONTENT") {
+  bool mandatoryOptionsSpecified = false;
+  if (parsedKeywords.size() > 1) {
+    const bool outputOprionSpecified = parsedKeywords[0] == "OUTPUT"_s;
+    const bool inputOrContentSpecified =
+      parsedKeywords[1] == "INPUT"_s || parsedKeywords[1] == "CONTENT"_s;
+    if (outputOprionSpecified && inputOrContentSpecified) {
+      mandatoryOptionsSpecified = true;
+    }
+  }
+  if (!mandatoryOptionsSpecified) {
     status.SetError("Incorrect arguments to GENERATE subcommand.");
     return false;
   }
-  std::string input = args[4];
 
-  AddEvaluationFile(input, target, output, condition, inputIsContent, status);
+  const bool conditionOptionSpecified =
+    std::find(parsedKeywords.begin(), parsedKeywords.end(), "CONDITION"_s) !=
+    parsedKeywords.end();
+  if (conditionOptionSpecified && arguments.Condition.empty()) {
+    status.SetError("CONDITION of sub-command GENERATE must not be empty "
+                    "if specified.");
+    return false;
+  }
+
+  const bool targetOptionSpecified =
+    std::find(parsedKeywords.begin(), parsedKeywords.end(), "TARGET"_s) !=
+    parsedKeywords.end();
+  if (targetOptionSpecified && arguments.Target.empty()) {
+    status.SetError("TARGET of sub-command GENERATE must not be empty "
+                    "if specified.");
+    return false;
+  }
+
+  const bool outputOptionSpecified =
+    std::find(parsedKeywords.begin(), parsedKeywords.end(), "OUTPUT"_s) !=
+    parsedKeywords.end();
+  if (outputOptionSpecified && parsedKeywords[0] != "OUTPUT"_s) {
+    status.SetError("Incorrect arguments to GENERATE subcommand.");
+    return false;
+  }
+
+  const bool inputIsContent = parsedKeywords[1] != "INPUT"_s;
+  if (inputIsContent && parsedKeywords[1] != "CONTENT") {
+    status.SetError("Unknown argument to GENERATE subcommand.");
+  }
+
+  std::string input = arguments.Input;
+  if (inputIsContent) {
+    input = arguments.Content;
+  }
+
+  if (arguments.NoSourcePermissions && arguments.UseSourcePermissions) {
+    status.SetError("given both NO_SOURCE_PERMISSIONS and "
+                    "USE_SOURCE_PERMISSIONS. Only one option allowed.");
+    return false;
+  }
+
+  if (!arguments.FilePermissions.empty()) {
+    if (arguments.NoSourcePermissions) {
+      status.SetError("given both NO_SOURCE_PERMISSIONS and "
+                      "FILE_PERMISSIONS. Only one option allowed.");
+      return false;
+    }
+    if (arguments.UseSourcePermissions) {
+      status.SetError("given both USE_SOURCE_PERMISSIONS and "
+                      "FILE_PERMISSIONS. Only one option allowed.");
+      return false;
+    }
+  }
+
+  if (arguments.UseSourcePermissions) {
+    if (inputIsContent) {
+      status.SetError("given USE_SOURCE_PERMISSIONS without a file INPUT.");
+      return false;
+    }
+  }
+
+  mode_t permisiions = 0;
+  if (arguments.NoSourcePermissions) {
+    permisiions |= cmFSPermissions::mode_owner_read;
+    permisiions |= cmFSPermissions::mode_owner_write;
+    permisiions |= cmFSPermissions::mode_group_read;
+    permisiions |= cmFSPermissions::mode_world_read;
+  }
+
+  if (!arguments.FilePermissions.empty()) {
+    std::vector<std::string> invalidOptions;
+    for (auto const& e : arguments.FilePermissions) {
+      if (!cmFSPermissions::stringToModeT(e, permisiions)) {
+        invalidOptions.push_back(e);
+      }
+    }
+    if (!invalidOptions.empty()) {
+      std::ostringstream oss;
+      oss << "given invalid permission ";
+      for (auto i = 0u; i < invalidOptions.size(); i++) {
+        if (i == 0u) {
+          oss << "\"" << invalidOptions[i] << "\"";
+        } else {
+          oss << ",\"" << invalidOptions[i] << "\"";
+        }
+      }
+      oss << ".";
+      status.SetError(oss.str());
+      return false;
+    }
+  }
+
+  AddEvaluationFile(input, arguments.Target, arguments.Output,
+                    arguments.Condition, inputIsContent, permisiions, status);
   return true;
 }
 
@@ -2902,17 +3010,60 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
 bool HandleConfigureCommand(std::vector<std::string> const& args,
                             cmExecutionStatus& status)
 {
-  if (args.size() < 5) {
-    status.SetError("Incorrect arguments to CONFIGURE subcommand.");
+  struct Arguments
+  {
+    std::string Output;
+    std::string Content;
+    bool EscapeQuotes = false;
+    bool AtOnly = false;
+    std::string NewlineStyle;
+  };
+
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("OUTPUT"_s, &Arguments::Output)
+      .Bind("CONTENT"_s, &Arguments::Content)
+      .Bind("ESCAPE_QUOTES"_s, &Arguments::EscapeQuotes)
+      .Bind("@ONLY"_s, &Arguments::AtOnly)
+      .Bind("NEWLINE_STYLE"_s, &Arguments::NewlineStyle);
+
+  std::vector<std::string> unrecognizedArguments;
+  std::vector<std::string> keywordsMissingArguments;
+  std::vector<std::string> parsedKeywords;
+  auto parsedArgs =
+    parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
+                 &keywordsMissingArguments, &parsedKeywords);
+
+  auto argIt = unrecognizedArguments.begin();
+  if (argIt != unrecognizedArguments.end()) {
+    status.SetError(
+      cmStrCat("CONFIGURE Unrecognized argument: \"", *argIt, "\""));
+    cmSystemTools::SetFatalErrorOccured();
     return false;
   }
-  if (args[1] != "OUTPUT") {
-    status.SetError("Incorrect arguments to CONFIGURE subcommand.");
-    return false;
+
+  std::vector<std::string> mandatoryOptions{ "OUTPUT", "CONTENT" };
+  for (auto const& e : mandatoryOptions) {
+    const bool optionHasNoValue =
+      std::find(keywordsMissingArguments.begin(),
+                keywordsMissingArguments.end(),
+                e) != keywordsMissingArguments.end();
+    if (optionHasNoValue) {
+      status.SetError(cmStrCat("CONFIGURE ", e, " option needs a value."));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
   }
-  if (args[3] != "CONTENT") {
-    status.SetError("Incorrect arguments to CONFIGURE subcommand.");
-    return false;
+
+  for (auto const& e : mandatoryOptions) {
+    const bool optionGiven =
+      std::find(parsedKeywords.begin(), parsedKeywords.end(), e) !=
+      parsedKeywords.end();
+    if (!optionGiven) {
+      status.SetError(cmStrCat("CONFIGURE ", e, " option is mandatory."));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
   }
 
   std::string errorMessage;
@@ -2922,28 +3073,9 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  bool escapeQuotes = false;
-  bool atOnly = false;
-  for (unsigned int i = 5; i < args.size(); ++i) {
-    if (args[i] == "@ONLY") {
-      atOnly = true;
-    } else if (args[i] == "ESCAPE_QUOTES") {
-      escapeQuotes = true;
-    } else if (args[i] == "NEWLINE_STYLE" || args[i] == "LF" ||
-               args[i] == "UNIX" || args[i] == "CRLF" || args[i] == "WIN32" ||
-               args[i] == "DOS") {
-      /* Options handled by NewLineStyle member above.  */
-    } else {
-      status.SetError(
-        cmStrCat("CONFIGURE Unrecognized argument \"", args[i], "\""));
-      return false;
-    }
-  }
-
   // Check for generator expressions
-  const std::string input = args[4];
   std::string outputFile = cmSystemTools::CollapseFullPath(
-    args[2], status.GetMakefile().GetCurrentBinaryDirectory());
+    parsedArgs.Output, status.GetMakefile().GetCurrentBinaryDirectory());
 
   std::string::size_type pos = outputFile.find_first_of("<>");
   if (pos != std::string::npos) {
@@ -2992,12 +3124,13 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
   fout.SetCopyIfDifferent(true);
 
   // copy input to output and expand variables from input at the same time
-  std::stringstream sin(input, std::ios::in);
+  std::stringstream sin(parsedArgs.Content, std::ios::in);
   std::string inLine;
   std::string outLine;
   while (cmSystemTools::GetLineFromStream(sin, inLine)) {
     outLine.clear();
-    makeFile.ConfigureString(inLine, outLine, atOnly, escapeQuotes);
+    makeFile.ConfigureString(inLine, outLine, parsedArgs.AtOnly,
+                             parsedArgs.EscapeQuotes);
     fout << outLine << newLineCharacters;
   }
 

@@ -22,7 +22,9 @@
 #include "cmProperty.h"
 #include "cmStateSnapshot.h"
 
+class cmCompiledGeneratorExpression;
 class cmComputeLinkInformation;
+class cmCustomCommand;
 class cmCustomCommandGenerator;
 class cmCustomCommandLines;
 class cmGeneratorTarget;
@@ -35,6 +37,31 @@ class cmSourceFile;
 class cmState;
 class cmTarget;
 class cmake;
+
+/** Flag if byproducts shall also be considered.  */
+enum class cmSourceOutputKind
+{
+  OutputOnly,
+  OutputOrByproduct
+};
+
+/** What scanner to use for dependencies lookup.  */
+enum class cmDependencyScannerKind
+{
+  CMake,
+  Compiler
+};
+
+/** Target and source file which have a specific output.  */
+struct cmSourcesWithOutput
+{
+  /** Target with byproduct.  */
+  cmTarget* Target = nullptr;
+
+  /** Source file with output or byproduct.  */
+  cmSourceFile* Source = nullptr;
+  bool SourceIsByproduct = false;
+};
 
 /** \class cmLocalGenerator
  * \brief Create required build files for a directory.
@@ -59,7 +86,7 @@ public:
   /**
    * Calls TraceVSDependencies() on all targets of this generator.
    */
-  void TraceDependencies();
+  void TraceDependencies() const;
 
   virtual void AddHelperCommands() {}
 
@@ -337,6 +364,55 @@ public:
     bool command_expand_lists = false, const std::string& job_pool = "",
     bool stdPipesUTF8 = false);
 
+  virtual std::string CreateUtilityOutput(
+    std::string const& targetName, std::vector<std::string> const& byproducts,
+    cmListFileBacktrace const& bt);
+
+  virtual std::vector<cmCustomCommandGenerator> MakeCustomCommandGenerators(
+    cmCustomCommand const& cc, std::string const& config);
+
+  std::vector<std::string> ExpandCustomCommandOutputPaths(
+    cmCompiledGeneratorExpression const& cge, std::string const& config);
+  std::vector<std::string> ExpandCustomCommandOutputGenex(
+    std::string const& o, cmListFileBacktrace const& bt);
+
+  /**
+   * Add target byproducts.
+   */
+  void AddTargetByproducts(cmTarget* target,
+                           const std::vector<std::string>& byproducts,
+                           cmListFileBacktrace const& bt,
+                           cmCommandOrigin origin);
+
+  enum class OutputRole
+  {
+    Primary,
+    Byproduct,
+  };
+
+  /**
+   * Add source file outputs.
+   */
+  void AddSourceOutputs(cmSourceFile* source,
+                        std::vector<std::string> const& outputs,
+                        OutputRole role, cmListFileBacktrace const& bt,
+                        cmCommandOrigin origin);
+
+  /**
+   * Return the target if the provided source name is a byproduct of a utility
+   * target or a PRE_BUILD, PRE_LINK, or POST_BUILD command.
+   * Return the source file which has the provided source name as output.
+   */
+  cmSourcesWithOutput GetSourcesWithOutput(const std::string& name) const;
+
+  /**
+   * Is there a source file that has the provided source name as an output?
+   * If so then return it.
+   */
+  cmSourceFile* GetSourceFileWithOutput(
+    const std::string& name,
+    cmSourceOutputKind kind = cmSourceOutputKind::OutputOnly) const;
+
   std::string GetProjectName() const;
 
   /** Compute the language used to compile the given source file.  */
@@ -405,7 +481,7 @@ public:
                                   const std::string& fname);
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(cmCustomCommandGenerator const& ccg,
-                               const char* default_comment = "");
+                               const char* default_comment = "") const;
   // Compute object file names.
   std::string GetObjectFileNameWithoutTarget(
     const cmSourceFile& source, std::string const& dir_max,
@@ -473,8 +549,7 @@ public:
   void CreateEvaluationFileOutputs(const std::string& config);
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
-  const char* GetRuleLauncher(cmGeneratorTarget* target,
-                              const std::string& prop);
+  cmProp GetRuleLauncher(cmGeneratorTarget* target, const std::string& prop);
 
 protected:
   //! put all the libraries for a target on into the given stream
@@ -532,6 +607,36 @@ protected:
   bool BackwardsCompatibilityFinal;
 
 private:
+  /**
+   * See LinearGetSourceFileWithOutput for background information
+   */
+  cmTarget* LinearGetTargetWithOutput(const std::string& name) const;
+
+  /**
+   * Generalized old version of GetSourceFileWithOutput kept for
+   * backward-compatibility. It implements a linear search and supports
+   * relative file paths. It is used as a fall back by GetSourceFileWithOutput
+   * and GetSourcesWithOutput.
+   */
+  cmSourceFile* LinearGetSourceFileWithOutput(const std::string& name,
+                                              cmSourceOutputKind kind,
+                                              bool& byproduct) const;
+  struct SourceEntry
+  {
+    cmSourcesWithOutput Sources;
+  };
+
+  // A map for fast output to input look up.
+  using OutputToSourceMap = std::unordered_map<std::string, SourceEntry>;
+  OutputToSourceMap OutputToSource;
+
+  void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target,
+                               cmListFileBacktrace const& bt,
+                               cmCommandOrigin origin);
+  void UpdateOutputToSourceMap(std::string const& output, cmSourceFile* source,
+                               OutputRole role, cmListFileBacktrace const& bt,
+                               cmCommandOrigin origin);
+
   void AddSharedFlags(std::string& flags, const std::string& lang,
                       bool shared);
   bool GetShouldUseOldFlags(bool shared, const std::string& lang) const;
@@ -587,7 +692,7 @@ void AppendCustomCommandToOutput(cmLocalGenerator& lg,
 
 void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        cmCommandOrigin origin, cmTarget* target,
-                       const cmUtilityOutput& force, const char* workingDir,
+                       const char* workingDir,
                        const std::vector<std::string>& byproducts,
                        const std::vector<std::string>& depends,
                        const cmCustomCommandLines& commandLines,

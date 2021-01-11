@@ -176,7 +176,7 @@ directory:
 To make use of the new library we will add an :command:`add_subdirectory`
 call in the top-level ``CMakeLists.txt`` file so that the library will get
 built. We add the new library to the executable, and add ``MathFunctions`` as
-an include directory so that the ``mqsqrt.h`` header file can be found. The
+an include directory so that the ``mysqrt.h`` header file can be found. The
 last few lines of the top-level ``CMakeLists.txt`` file should now look like:
 
 .. code-block:: cmake

@@ -147,7 +147,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
   // Evaluate command line arguments
   std::vector<std::string> argv =
-    EvaluateCommandLineArguments(this->Test->GetCommand(), ge, config);
+    this->EvaluateCommandLineArguments(this->Test->GetCommand(), ge, config);
 
   // Expand arguments if COMMAND_EXPAND_LISTS is set
   if (this->Test->GetCommandExpandLists()) {

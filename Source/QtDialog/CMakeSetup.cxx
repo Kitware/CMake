@@ -7,7 +7,6 @@
 #include <QDir>
 #include <QLocale>
 #include <QString>
-#include <QTextCodec>
 #include <QTranslator>
 #include <QtPlugin>
 
@@ -122,9 +121,6 @@ int main(int argc, char** argv)
 
   setlocale(LC_NUMERIC, "C");
 
-  QTextCodec* utf8_codec = QTextCodec::codecForName("UTF-8");
-  QTextCodec::setCodecForLocale(utf8_codec);
-
   // tell the cmake library where cmake is
   QDir cmExecDir(QApplication::applicationDirPath());
 #if defined(Q_OS_MAC)
@@ -146,7 +142,7 @@ int main(int argc, char** argv)
   QIcon appIcon;
   appIcon.addFile(":/Icons/CMakeSetup32.png");
   appIcon.addFile(":/Icons/CMakeSetup128.png");
-  QApplication::setWindowIcon(appIcon);
+  QApplication::setWindowIcon(QIcon::fromTheme("cmake-gui", appIcon));
 
   CMakeSetupDialog dialog;
   dialog.show();

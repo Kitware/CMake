@@ -240,7 +240,7 @@ int cmCommandArgumentParserHelper::ParseString(std::string const& str,
 
   this->CleanupParser();
 
-  if (Verbose) {
+  if (this->Verbose) {
     std::cerr << "Expanding [" << str << "] produced: [" << this->Result << "]"
               << std::endl;
   }

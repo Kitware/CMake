@@ -5,6 +5,7 @@ run_cmake(BeforeProject)
 unset(RunCMake_TEST_OPTIONS)
 
 run_cmake(NotOn)
+run_cmake(Site)
 
 function(run_CMakeCTestArguments)
   run_cmake_with_options(CMakeCTestArguments "-DCMAKE_CTEST_ARGUMENTS=--quiet\\;--output-log\\;output-log.txt")

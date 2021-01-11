@@ -54,7 +54,7 @@ PO_FILES <po1> <po2> ...  )
      If ALL is specified, the po files are processed when building the all traget.
      It creates a custom target "pofiles".
 
-.. note::
+.. versionadded:: 3.2
   If you wish to use the Gettext library (libintl), use :module:`FindIntl`.
 #]=======================================================================]
 

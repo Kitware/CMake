@@ -80,7 +80,7 @@ struct uv_handle_deleter
 template <typename T>
 void uv_handle_ptr_base_<T>::allocate(void* data)
 {
-  reset();
+  this->reset();
 
   /*
     We use calloc since we know all these types are c structs
@@ -88,32 +88,33 @@ void uv_handle_ptr_base_<T>::allocate(void* data)
     but casting from uv_handle_t to certain other types -- namely
     uv_timer_t -- triggers a cast_align warning on certain systems.
   */
-  handle.reset(static_cast<T*>(calloc(1, sizeof(T))), uv_handle_deleter<T>());
-  handle->data = data;
+  this->handle.reset(static_cast<T*>(calloc(1, sizeof(T))),
+                     uv_handle_deleter<T>());
+  this->handle->data = data;
 }
 
 template <typename T>
 void uv_handle_ptr_base_<T>::reset()
 {
-  handle.reset();
+  this->handle.reset();
 }
 
 template <typename T>
 uv_handle_ptr_base_<T>::operator uv_handle_t*()
 {
-  return reinterpret_cast<uv_handle_t*>(handle.get());
+  return reinterpret_cast<uv_handle_t*>(this->handle.get());
 }
 
 template <typename T>
 T* uv_handle_ptr_base_<T>::operator->() const noexcept
 {
-  return handle.get();
+  return this->handle.get();
 }
 
 template <typename T>
 T* uv_handle_ptr_base_<T>::get() const
 {
-  return handle.get();
+  return this->handle.get();
 }
 
 template <typename T>
@@ -146,7 +147,7 @@ struct uv_handle_deleter<uv_async_t>
 
   void operator()(uv_async_t* handle)
   {
-    std::lock_guard<std::mutex> lock(*handleMutex);
+    std::lock_guard<std::mutex> lock(*this->handleMutex);
     handle_default_delete(handle);
   }
 };
@@ -164,8 +165,8 @@ void uv_async_ptr::send()
 
 int uv_async_ptr::init(uv_loop_t& loop, uv_async_cb async_cb, void* data)
 {
-  allocate(data);
-  return uv_async_init(&loop, handle.get(), async_cb);
+  this->allocate(data);
+  return uv_async_init(&loop, this->handle.get(), async_cb);
 }
 #endif
 
@@ -183,62 +184,62 @@ struct uv_handle_deleter<uv_signal_t>
 
 int uv_signal_ptr::init(uv_loop_t& loop, void* data)
 {
-  allocate(data);
-  return uv_signal_init(&loop, handle.get());
+  this->allocate(data);
+  return uv_signal_init(&loop, this->handle.get());
 }
 
 int uv_signal_ptr::start(uv_signal_cb cb, int signum)
 {
-  assert(handle);
+  assert(this->handle);
   return uv_signal_start(*this, cb, signum);
 }
 
 void uv_signal_ptr::stop()
 {
-  if (handle) {
+  if (this->handle) {
     uv_signal_stop(*this);
   }
 }
 
 int uv_pipe_ptr::init(uv_loop_t& loop, int ipc, void* data)
 {
-  allocate(data);
+  this->allocate(data);
   return uv_pipe_init(&loop, *this, ipc);
 }
 
 uv_pipe_ptr::operator uv_stream_t*() const
 {
-  return reinterpret_cast<uv_stream_t*>(handle.get());
+  return reinterpret_cast<uv_stream_t*>(this->handle.get());
 }
 
 int uv_process_ptr::spawn(uv_loop_t& loop, uv_process_options_t const& options,
                           void* data)
 {
-  allocate(data);
+  this->allocate(data);
   return uv_spawn(&loop, *this, &options);
 }
 
 int uv_timer_ptr::init(uv_loop_t& loop, void* data)
 {
-  allocate(data);
+  this->allocate(data);
   return uv_timer_init(&loop, *this);
 }
 
 int uv_timer_ptr::start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat)
 {
-  assert(handle);
+  assert(this->handle);
   return uv_timer_start(*this, cb, timeout, repeat);
 }
 
 #ifndef CMAKE_BOOTSTRAP
 uv_tty_ptr::operator uv_stream_t*() const
 {
-  return reinterpret_cast<uv_stream_t*>(handle.get());
+  return reinterpret_cast<uv_stream_t*>(this->handle.get());
 }
 
 int uv_tty_ptr::init(uv_loop_t& loop, int fd, int readable, void* data)
 {
-  allocate(data);
+  this->allocate(data);
   return uv_tty_init(&loop, *this, fd, readable);
 }
 #endif

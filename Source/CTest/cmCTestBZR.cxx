@@ -104,8 +104,8 @@ private:
   {
     if (this->RegexCheckOut.find(this->Line)) {
       this->BZR->URL = this->RegexCheckOut.match(1);
-      CheckOutFound = true;
-    } else if (!CheckOutFound && this->RegexParent.find(this->Line)) {
+      this->CheckOutFound = true;
+    } else if (!this->CheckOutFound && this->RegexParent.find(this->Line)) {
       this->BZR->URL = this->RegexParent.match(1);
     }
     return true;
@@ -191,7 +191,7 @@ public:
 
   int InitializeParser() override
   {
-    int res = cmXMLParser::InitializeParser();
+    int res = this->cmXMLParser::InitializeParser();
     if (res) {
       XML_SetUnknownEncodingHandler(static_cast<XML_Parser>(this->Parser),
                                     cmBZRXMLParserUnknownEncodingHandler,

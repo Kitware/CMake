@@ -10,6 +10,8 @@ Find the native ZLIB includes and library.
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.1
+
 This module defines :prop_tgt:`IMPORTED` target ``ZLIB::ZLIB``, if
 ZLIB has been found.
 
@@ -31,6 +33,9 @@ This module defines the following variables:
   ZLIB_VERSION_MINOR  - The minor version of zlib
   ZLIB_VERSION_PATCH  - The patch version of zlib
   ZLIB_VERSION_TWEAK  - The tweak version of zlib
+
+.. versionadded:: 3.4
+  Debug and Release variants are found separately.
 
 Backward Compatibility
 ^^^^^^^^^^^^^^^^^^^^^^

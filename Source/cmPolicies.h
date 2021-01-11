@@ -340,6 +340,25 @@ class cmMakefile;
          3, 19, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0114,                                                     \
          "ExternalProject step targets fully adopt their steps.", 3, 19, 0,   \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0115, "Source file extensions must be explicit.", 3, 20,  \
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0116,                                                     \
+         "Ninja generators transform DEPFILEs from add_custom_command().", 3, \
+         20, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0117,                                                     \
+         "MSVC RTTI flag /GR is not added to CMAKE_CXX_FLAGS by default.", 3, \
+         20, 0, cmPolicies::WARN)                                             \
+  SELECT(                                                                     \
+    POLICY, CMP0118,                                                          \
+    "The GENERATED source file property is now visible in all directories.",  \
+    3, 20, 0, cmPolicies::WARN)                                               \
+  SELECT(POLICY, CMP0119,                                                     \
+         "LANGUAGE source file property explicitly compiles as specified "    \
+         "language.",                                                         \
+         3, 20, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0120,                                                     \
+         "The WriteCompilerDetectionHeader module is removed.", 3, 20, 0,     \
          cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -375,7 +394,8 @@ class cmMakefile;
   F(CMP0105)                                                                  \
   F(CMP0108)                                                                  \
   F(CMP0112)                                                                  \
-  F(CMP0113)
+  F(CMP0113)                                                                  \
+  F(CMP0119)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

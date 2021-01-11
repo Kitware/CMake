@@ -1255,6 +1255,30 @@ void cmSystemTools::ConvertToOutputSlashes(std::string& path)
 #endif
 }
 
+void cmSystemTools::ConvertToLongPath(std::string& path)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  // Try to convert path to a long path only if the path contains character '~'
+  if (path.find('~') == std::string::npos) {
+    return;
+  }
+
+  std::wstring wPath = cmsys::Encoding::ToWide(path);
+  DWORD ret = GetLongPathNameW(wPath.c_str(), nullptr, 0);
+  std::vector<wchar_t> buffer(ret);
+  if (ret != 0) {
+    ret = GetLongPathNameW(wPath.c_str(), buffer.data(),
+                           static_cast<DWORD>(buffer.size()));
+  }
+
+  if (ret != 0) {
+    path = cmsys::Encoding::ToNarrow(buffer.data());
+  }
+#else
+  static_cast<void>(path);
+#endif
+}
+
 std::string cmSystemTools::ConvertToRunCommandPath(const std::string& path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)

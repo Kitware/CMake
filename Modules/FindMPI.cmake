@@ -12,6 +12,10 @@ high-performance distributed-memory parallel applications, and is
 typically deployed on a cluster.  MPI is a standard interface (defined
 by the MPI forum) for which many implementations are available.
 
+.. versionadded:: 3.10
+  Major overhaul of the module: many new variables, per-language components,
+  support for a wider variety of runtimes.
+
 Variables for using MPI
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -50,7 +54,8 @@ project, where ``<lang>`` is one of C, CXX, or Fortran:
 ``MPI_<lang>_LIBRARIES``
   All libraries to link MPI programs against.
 
-Additionally, the following :prop_tgt:`IMPORTED` targets are defined:
+.. versionadded:: 3.9
+  Additionally, the following :prop_tgt:`IMPORTED` targets are defined:
 
 ``MPI::MPI_<lang>``
   Target for using MPI from ``<lang>``.
@@ -236,8 +241,10 @@ If the following variables are set to true, the respective search will be perfor
 Backward Compatibility
 ^^^^^^^^^^^^^^^^^^^^^^
 
+.. deprecated:: 3.10
+
 For backward compatibility with older versions of FindMPI, these
-variables are set, but deprecated:
+variables are set:
 
 ::
 

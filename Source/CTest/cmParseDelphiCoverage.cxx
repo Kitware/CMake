@@ -133,7 +133,7 @@ public:
     cmsys::Glob gl;
     gl.RecurseOn();
     gl.RecurseThroughSymlinksOff();
-    std::string glob = Coverage.SourceDir + "*/" + filename;
+    std::string glob = this->Coverage.SourceDir + "*/" + filename;
     gl.FindFiles(glob);
     std::vector<std::string> const& files = gl.GetFiles();
     if (files.empty()) {

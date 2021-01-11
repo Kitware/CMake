@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -96,6 +96,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "getinfo.h"
 #include "urlapi-int.h"
 #include "system_win32.h"
+#include "hsts.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -130,7 +131,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "memdebug.h"
 
 static void conn_free(struct connectdata *conn);
-static unsigned int get_protocol_family(unsigned int protocol);
 
 /* Some parts of the code (e.g. chunked encoding) assume this buffer has at
  * more than just a few bytes to play with. Don't let it become too small or
@@ -139,6 +139,24 @@ static unsigned int get_protocol_family(unsigned int protocol);
 #if READBUFFER_SIZE < READBUFFER_MIN
 # error READBUFFER_SIZE is too small
 #endif
+
+/*
+* get_protocol_family()
+*
+* This is used to return the protocol family for a given protocol.
+*
+* Parameters:
+*
+* 'h'  [in]  - struct Curl_handler pointer.
+*
+* Returns the family as a single bit protocol identifier.
+*/
+static unsigned int get_protocol_family(const struct Curl_handler *h)
+{
+  DEBUGASSERT(h);
+  DEBUGASSERT(h->family);
+  return h->family;
+}
 
 
 /*
@@ -215,9 +233,8 @@ static const struct Curl_handler * const protocols[] = {
 #endif
 #endif
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) && \
-   (CURL_SIZEOF_CURL_OFF_T > 4) && \
-   (!defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO))
+#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
+   (CURL_SIZEOF_CURL_OFF_T > 4)
   &Curl_handler_smb,
 #ifdef USE_SSL
   &Curl_handler_smbs,
@@ -228,7 +245,7 @@ static const struct Curl_handler * const protocols[] = {
   &Curl_handler_rtsp,
 #endif
 
-#ifdef CURL_ENABLE_MQTT
+#ifndef CURL_DISABLE_MQTT
   &Curl_handler_mqtt,
 #endif
 
@@ -274,6 +291,7 @@ static const struct Curl_handler Curl_handler_dummy = {
   ZERO_NULL,                            /* connection_check */
   0,                                    /* defport */
   0,                                    /* protocol */
+  0,                                    /* family */
   PROTOPT_NONE                          /* flags */
 };
 
@@ -392,11 +410,10 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_dyn_free(&data->state.headerb);
   Curl_safefree(data->state.ulbuf);
   Curl_flush_cookies(data, TRUE);
-#ifdef USE_ALTSVC
   Curl_altsvc_save(data, data->asi, data->set.str[STRING_ALTSVC]);
-  Curl_altsvc_cleanup(data->asi);
-  data->asi = NULL;
-#endif
+  Curl_altsvc_cleanup(&data->asi);
+  Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
+  Curl_hsts_cleanup(&data->hsts);
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif
@@ -480,6 +497,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->ftp_use_eprt = TRUE;   /* FTP defaults to EPRT operations */
   set->ftp_use_pret = FALSE;  /* mainly useful for drftpd servers */
   set->ftp_filemethod = FTPFILE_MULTICWD;
+  set->ftp_skip_ip = TRUE;    /* skip PASV IP by default */
 #endif
   set->dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
 
@@ -1019,7 +1037,7 @@ static void prune_dead_connections(struct Curl_easy *data)
       Curl_conncache_remove_conn(data, prune.extracted, TRUE);
 
       /* disconnect it */
-      (void)Curl_disconnect(data, prune.extracted, /* dead_connection */TRUE);
+      (void)Curl_disconnect(data, prune.extracted, TRUE);
     }
     CONNCACHE_LOCK(data);
     data->state.conn_cache->last_cleanup = now;
@@ -1075,7 +1093,7 @@ ConnectionExists(struct Curl_easy *data,
                                       &hostbundle);
   if(bundle) {
     /* Max pipe length is zero (unlimited) for multiplexed connections */
-    struct curl_llist_element *curr;
+    struct Curl_llist_element *curr;
 
     infof(data, "Found bundle for host %s: %p [%s]\n",
           hostbundle, (void *)bundle, (bundle->multiuse == BUNDLE_MULTIPLEX ?
@@ -1120,6 +1138,12 @@ ConnectionExists(struct Curl_easy *data,
       if(check->bits.connect_only || check->bits.close)
         /* connect-only or to-be-closed connections will not be reused */
         continue;
+
+      if(extract_if_dead(check, data)) {
+        /* disconnect it */
+        (void)Curl_disconnect(data, check, TRUE);
+        continue;
+      }
 
       if(bundle->multiuse == BUNDLE_MULTIPLEX)
         multiplexed = CONN_INUSE(check);
@@ -1171,7 +1195,7 @@ ConnectionExists(struct Curl_easy *data,
       if((needle->handler->flags&PROTOPT_SSL) !=
          (check->handler->flags&PROTOPT_SSL))
         /* don't do mixed SSL and non-SSL connections */
-        if(get_protocol_family(check->handler->protocol) !=
+        if(get_protocol_family(check->handler) !=
            needle->handler->protocol || !check->bits.tls_upgraded)
           /* except protocols that have been upgraded via TLS */
           continue;
@@ -1276,7 +1300,7 @@ ConnectionExists(struct Curl_easy *data,
            is allowed to be upgraded via TLS */
 
         if((strcasecompare(needle->handler->scheme, check->handler->scheme) ||
-            (get_protocol_family(check->handler->protocol) ==
+            (get_protocol_family(check->handler) ==
              needle->handler->protocol && check->bits.tls_upgraded)) &&
            (!needle->bits.conn_to_host || strcasecompare(
             needle->conn_to_host.name, check->conn_to_host.name)) &&
@@ -1891,6 +1915,37 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   if(uc)
     return Curl_uc_to_curlcode(uc);
 
+  uc = curl_url_get(uh, CURLUPART_HOST, &data->state.up.hostname, 0);
+  if(uc) {
+    if(!strcasecompare("file", data->state.up.scheme))
+      return CURLE_OUT_OF_MEMORY;
+  }
+
+#ifdef USE_HSTS
+  if(data->hsts && strcasecompare("http", data->state.up.scheme)) {
+    if(Curl_hsts(data->hsts, data->state.up.hostname, TRUE)) {
+      char *url;
+      Curl_safefree(data->state.up.scheme);
+      uc = curl_url_set(uh, CURLUPART_SCHEME, "https", 0);
+      if(uc)
+        return Curl_uc_to_curlcode(uc);
+      if(data->change.url_alloc)
+        Curl_safefree(data->change.url);
+      /* after update, get the updated version */
+      uc = curl_url_get(uh, CURLUPART_URL, &url, 0);
+      if(uc)
+        return Curl_uc_to_curlcode(uc);
+      uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
+      if(uc)
+        return Curl_uc_to_curlcode(uc);
+      data->change.url = url;
+      data->change.url_alloc = TRUE;
+      infof(data, "Switched from HTTP to HTTPS due to HSTS => %s\n",
+            data->change.url);
+    }
+  }
+#endif
+
   result = findprotocol(data, conn, data->state.up.scheme);
   if(result)
     return result;
@@ -1935,12 +1990,6 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   }
   else if(uc != CURLUE_NO_OPTIONS)
     return Curl_uc_to_curlcode(uc);
-
-  uc = curl_url_get(uh, CURLUPART_HOST, &data->state.up.hostname, 0);
-  if(uc) {
-    if(!strcasecompare("file", data->state.up.scheme))
-      return CURLE_OUT_OF_MEMORY;
-  }
 
   uc = curl_url_get(uh, CURLUPART_PATH, &data->state.up.path, 0);
   if(uc)
@@ -2060,7 +2109,7 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
 
 void Curl_free_request_state(struct Curl_easy *data)
 {
-  Curl_safefree(data->req.protop);
+  Curl_safefree(data->req.p.http);
   Curl_safefree(data->req.newurl);
 
 #ifndef CURL_DISABLE_DOH
@@ -2377,8 +2426,10 @@ static CURLcode parse_proxy(struct Curl_easy *data,
 static CURLcode parse_proxy_auth(struct Curl_easy *data,
                                  struct connectdata *conn)
 {
-  char *proxyuser = data->set.str[STRING_PROXYUSERNAME];
-  char *proxypasswd = data->set.str[STRING_PROXYPASSWORD];
+  const char *proxyuser = data->set.str[STRING_PROXYUSERNAME] ?
+    data->set.str[STRING_PROXYUSERNAME] : "";
+  const char *proxypasswd = data->set.str[STRING_PROXYPASSWORD] ?
+    data->set.str[STRING_PROXYPASSWORD] : "";
   CURLcode result = CURLE_OK;
 
   if(proxyuser)
@@ -2551,6 +2602,9 @@ static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
     conn->bits.socksproxy = FALSE;
     conn->bits.proxy_user_passwd = FALSE;
     conn->bits.tunnel_proxy = FALSE;
+    /* CURLPROXY_HTTPS does not have its own flag in conn->bits, yet we need
+       to signal that CURLPROXY_HTTPS is not used for this connection */
+    conn->http_proxy.proxytype = CURLPROXY_HTTP;
   }
 
 out:
@@ -3070,7 +3124,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     conn_to_host = conn_to_host->next;
   }
 
-#ifdef USE_ALTSVC
+#ifndef CURL_DISABLE_ALTSVC
   if(data->asi && !host && (port == -1) &&
      ((conn->handler->protocol == CURLPROTO_HTTPS) ||
 #ifdef CURLDEBUG
@@ -3611,6 +3665,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   data->set.ssl.primary.pinned_key =
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
   data->set.ssl.primary.cert_blob = data->set.blobs[BLOB_CERT_ORIG];
+  data->set.ssl.primary.curves = data->set.str[STRING_SSL_EC_CURVES];
 
 #ifndef CURL_DISABLE_PROXY
   data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
@@ -3627,18 +3682,15 @@ static CURLcode create_conn(struct Curl_easy *data,
   data->set.proxy_ssl.primary.cert_blob = data->set.blobs[BLOB_CERT_PROXY];
   data->set.proxy_ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_PROXY];
   data->set.proxy_ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_PROXY];
-  data->set.proxy_ssl.cert = data->set.str[STRING_CERT_PROXY];
   data->set.proxy_ssl.cert_type = data->set.str[STRING_CERT_TYPE_PROXY];
   data->set.proxy_ssl.key = data->set.str[STRING_KEY_PROXY];
   data->set.proxy_ssl.key_type = data->set.str[STRING_KEY_TYPE_PROXY];
   data->set.proxy_ssl.key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
   data->set.proxy_ssl.primary.clientcert = data->set.str[STRING_CERT_PROXY];
-  data->set.proxy_ssl.cert_blob = data->set.blobs[BLOB_CERT_PROXY];
   data->set.proxy_ssl.key_blob = data->set.blobs[BLOB_KEY_PROXY];
 #endif
   data->set.ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_ORIG];
   data->set.ssl.issuercert = data->set.str[STRING_SSL_ISSUERCERT_ORIG];
-  data->set.ssl.cert = data->set.str[STRING_CERT_ORIG];
   data->set.ssl.cert_type = data->set.str[STRING_CERT_TYPE_ORIG];
   data->set.ssl.key = data->set.str[STRING_KEY_ORIG];
   data->set.ssl.key_type = data->set.str[STRING_KEY_TYPE_ORIG];
@@ -3653,7 +3705,6 @@ static CURLcode create_conn(struct Curl_easy *data,
 #endif
 #endif
 
-  data->set.ssl.cert_blob = data->set.blobs[BLOB_CERT_ORIG];
   data->set.ssl.key_blob = data->set.blobs[BLOB_KEY_ORIG];
   data->set.ssl.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT_ORIG];
 
@@ -3752,8 +3803,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         CONNCACHE_UNLOCK(data);
 
         if(conn_candidate)
-          (void)Curl_disconnect(data, conn_candidate,
-                                /* dead_connection */ FALSE);
+          (void)Curl_disconnect(data, conn_candidate, FALSE);
         else {
           infof(data, "No more connections allowed to host %s: %zu\n",
                 bundlehost, max_host_connections);
@@ -3773,8 +3823,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       /* The cache is full. Let's see if we can kill a connection. */
       conn_candidate = Curl_conncache_extract_oldest(data);
       if(conn_candidate)
-        (void)Curl_disconnect(data, conn_candidate,
-                              /* dead_connection */ FALSE);
+        (void)Curl_disconnect(data, conn_candidate, FALSE);
       else {
         infof(data, "No connections available in cache\n");
         connections_available = FALSE;
@@ -4025,114 +4074,4 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   Curl_pgrsSetDownloadCounter(data, 0);
 
   return CURLE_OK;
-}
-
-/*
-* get_protocol_family()
-*
-* This is used to return the protocol family for a given protocol.
-*
-* Parameters:
-*
-* protocol  [in]  - A single bit protocol identifier such as HTTP or HTTPS.
-*
-* Returns the family as a single bit protocol identifier.
-*/
-
-static unsigned int get_protocol_family(unsigned int protocol)
-{
-  unsigned int family;
-
-  switch(protocol) {
-  case CURLPROTO_HTTP:
-  case CURLPROTO_HTTPS:
-    family = CURLPROTO_HTTP;
-    break;
-
-  case CURLPROTO_FTP:
-  case CURLPROTO_FTPS:
-    family = CURLPROTO_FTP;
-    break;
-
-  case CURLPROTO_SCP:
-    family = CURLPROTO_SCP;
-    break;
-
-  case CURLPROTO_SFTP:
-    family = CURLPROTO_SFTP;
-    break;
-
-  case CURLPROTO_TELNET:
-    family = CURLPROTO_TELNET;
-    break;
-
-  case CURLPROTO_LDAP:
-  case CURLPROTO_LDAPS:
-    family = CURLPROTO_LDAP;
-    break;
-
-  case CURLPROTO_DICT:
-    family = CURLPROTO_DICT;
-    break;
-
-  case CURLPROTO_FILE:
-    family = CURLPROTO_FILE;
-    break;
-
-  case CURLPROTO_TFTP:
-    family = CURLPROTO_TFTP;
-    break;
-
-  case CURLPROTO_IMAP:
-  case CURLPROTO_IMAPS:
-    family = CURLPROTO_IMAP;
-    break;
-
-  case CURLPROTO_POP3:
-  case CURLPROTO_POP3S:
-    family = CURLPROTO_POP3;
-    break;
-
-  case CURLPROTO_SMTP:
-  case CURLPROTO_SMTPS:
-      family = CURLPROTO_SMTP;
-      break;
-
-  case CURLPROTO_RTSP:
-    family = CURLPROTO_RTSP;
-    break;
-
-  case CURLPROTO_RTMP:
-  case CURLPROTO_RTMPS:
-    family = CURLPROTO_RTMP;
-    break;
-
-  case CURLPROTO_RTMPT:
-  case CURLPROTO_RTMPTS:
-    family = CURLPROTO_RTMPT;
-    break;
-
-  case CURLPROTO_RTMPE:
-    family = CURLPROTO_RTMPE;
-    break;
-
-  case CURLPROTO_RTMPTE:
-    family = CURLPROTO_RTMPTE;
-    break;
-
-  case CURLPROTO_GOPHER:
-    family = CURLPROTO_GOPHER;
-    break;
-
-  case CURLPROTO_SMB:
-  case CURLPROTO_SMBS:
-    family = CURLPROTO_SMB;
-    break;
-
-  default:
-      family = 0;
-      break;
-  }
-
-  return family;
 }

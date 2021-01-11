@@ -5,7 +5,8 @@ CMAKE_CUDA_ARCHITECTURES
 
 Default value for :prop_tgt:`CUDA_ARCHITECTURES` property of targets.
 
-This is initialized as follows depending on :variable:`CMAKE_CUDA_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>`:
+Initialized by the :envvar:`CUDAARCHS` environment variable if set.
+Otherwise as follows depending on :variable:`CMAKE_CUDA_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>`:
 
 - For ``Clang``: the oldest architecture that works.
 

@@ -39,8 +39,15 @@ function(run_VerboseBuild)
 endfunction()
 run_VerboseBuild()
 
-run_cmake(CustomCommandDepfile-ERROR)
 run_cmake(IncludeRegexSubdir)
+
+function(run_MakefileConflict)
+  run_cmake(MakefileConflict)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/MakefileConflict-build)
+  run_cmake_command(MakefileConflict-build ${CMAKE_COMMAND} --build . --target Custom)
+endfunction()
+run_MakefileConflict()
 
 function(run_CMP0113 val)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0113-${val}-build)

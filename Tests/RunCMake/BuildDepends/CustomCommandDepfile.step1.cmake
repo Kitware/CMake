@@ -1,0 +1,10 @@
+file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/DepfileSubdir")
+file(REMOVE "${RunCMake_TEST_BINARY_DIR}/../sublib.c")
+file(REMOVE "${RunCMake_TEST_BINARY_DIR}/step3.timestamp")
+
+file(TOUCH "${RunCMake_TEST_BINARY_DIR}/topccdep.txt")
+file(TOUCH "${RunCMake_TEST_BINARY_DIR}/topexedep.txt")
+file(TOUCH "${RunCMake_TEST_BINARY_DIR}/toplibdep.txt")
+file(TOUCH "${RunCMake_TEST_BINARY_DIR}/DepfileSubdir/subccdep.txt")
+file(TOUCH "${RunCMake_TEST_BINARY_DIR}/DepfileSubdir/subexedep.txt")
+file(TOUCH "${RunCMake_TEST_BINARY_DIR}/DepfileSubdir/sublibdep.txt")

@@ -16,6 +16,13 @@ run_cmake(NewLineStyle-WrongArg)
 run_cmake(NewLineStyle-ValidArg)
 run_cmake(NewLineStyle-COPYONLY)
 run_cmake(NoSourcePermissions)
+run_cmake(SourcePermissionsInvalidArg-1)
+run_cmake(SourcePermissionsInvalidArg-2)
+run_cmake(SourcePermissionsInvalidArg-3)
+run_cmake(SourcePermissionsInvalidArg-4)
+run_cmake(SourcePermissionsInvalidArg-5)
+run_cmake(UseSourcePermissions)
+run_cmake(SourcePermissions)
 
 if(RunCMake_GENERATOR MATCHES "Make")
   # Use a single build tree for a few tests without cleaning.

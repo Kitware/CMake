@@ -196,6 +196,7 @@ Properties on Targets
    /prop_tgt/EXCLUDE_FROM_ALL
    /prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD
    /prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD_CONFIG
+   /prop_tgt/EXPORT_COMPILE_COMMANDS
    /prop_tgt/EXPORT_NAME
    /prop_tgt/EXPORT_PROPERTIES
    /prop_tgt/FOLDER
@@ -354,6 +355,7 @@ Properties on Targets
    /prop_tgt/UNITY_BUILD_CODE_AFTER_INCLUDE
    /prop_tgt/UNITY_BUILD_CODE_BEFORE_INCLUDE
    /prop_tgt/UNITY_BUILD_MODE
+   /prop_tgt/UNITY_BUILD_UNIQUE_ID
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
    /prop_tgt/VS_CONFIGURATION_TYPE
@@ -397,6 +399,10 @@ Properties on Targets
    /prop_tgt/WIN32_EXECUTABLE
    /prop_tgt/WINDOWS_EXPORT_ALL_SYMBOLS
    /prop_tgt/XCODE_ATTRIBUTE_an-attribute
+   /prop_tgt/XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY
+   /prop_tgt/XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY
+   /prop_tgt/XCODE_EMBED_type
+   /prop_tgt/XCODE_EMBED_type_PATH
    /prop_tgt/XCODE_EXPLICIT_FILE_TYPE
    /prop_tgt/XCODE_GENERATE_SCHEME
    /prop_tgt/XCODE_LINK_BUILD_PHASE_MODE

@@ -132,7 +132,7 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
   // doesn't currently support these settings per build system, only project
   // wide
   MapSourceFileFlags sourceFileFlags;
-  AppendAllTargets(lgs, mf, fout, sourceFileFlags);
+  this->AppendAllTargets(lgs, mf, fout, sourceFileFlags);
 
   // End of build_systems
   fout << "\n\t]";
@@ -349,6 +349,11 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
   if (language.empty()) {
     language = "C";
   }
+
+  // Explicitly add the explicit language flag before any other flag
+  // so user flags can override it.
+  gtgt->AddExplicitLanguageFlags(flags, *source);
+
   std::string const& config =
     lg->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
 

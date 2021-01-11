@@ -3,6 +3,7 @@ include(RunCMake)
 run_cmake(ExplicitCMakeLists)
 run_cmake(ImplicitCMakeLists)
 run_cmake(InterfaceLibSources)
+run_cmake_with_options(SearchPaths -DCMAKE_CONFIGURATION_TYPES=Debug)
 
 run_cmake(XcodeFileType)
 run_cmake(XcodeAttributeLocation)
@@ -50,6 +51,35 @@ run_cmake(PerConfigPerSourceFlags)
 run_cmake(PerConfigPerSourceOptions)
 run_cmake(PerConfigPerSourceDefinitions)
 run_cmake(PerConfigPerSourceIncludeDirs)
+
+if(XCODE_VERSION VERSION_GREATER_EQUAL 12)
+
+  function(XcodeObjectLibsInTwoProjectsiOS)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeObjectLibsInTwoProjects-build-ios)
+    set(RunCMake_TEST_OPTIONS "-DCMAKE_SYSTEM_NAME=iOS")
+
+    run_cmake(XcodeObjectLibsInTwoProjects)
+
+    set(RunCMake_TEST_NO_CLEAN 1)
+
+    run_cmake_command(XcodeObjectLibsInTwoProjects-build-ios ${CMAKE_COMMAND} --build . --target shared_lib -- -sdk iphonesimulator)
+  endfunction()
+
+  XcodeObjectLibsInTwoProjectsiOS()
+
+  function(XcodeObjectLibsInTwoProjectsMacOS)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeObjectLibsInTwoProjects-build-macos)
+
+    run_cmake(XcodeObjectLibsInTwoProjects)
+
+    set(RunCMake_TEST_NO_CLEAN 1)
+
+    run_cmake_command(XcodeObjectLibsInTwoProjects-build-macos ${CMAKE_COMMAND} --build . --target shared_lib)
+  endfunction()
+
+  XcodeObjectLibsInTwoProjectsMacOS()
+
+endif()
 
 function(XcodeSchemaGeneration)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeSchemaGeneration-build)
