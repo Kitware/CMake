@@ -46,6 +46,9 @@
 
 namespace {
 
+using TargetIndexMapType =
+  std::unordered_map<cmGeneratorTarget const*, Json::ArrayIndex>;
+
 class Codemodel
 {
   cmFileAPI& FileAPI;
@@ -93,6 +96,8 @@ class CodemodelConfig
   std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
     ProjectMap;
   std::vector<Project> Projects;
+
+  TargetIndexMapType TargetIndexMap;
 
   void ProcessDirectories();
 
@@ -662,6 +667,8 @@ Json::Value CodemodelConfig::DumpTarget(cmGeneratorTarget* gt,
   Json::ArrayIndex pi = this->Directories[di].ProjectIndex;
   target["projectIndex"] = pi;
   this->Projects[pi].TargetIndexes.append(ti);
+
+  this->TargetIndexMap[gt] = ti;
 
   return target;
 }
