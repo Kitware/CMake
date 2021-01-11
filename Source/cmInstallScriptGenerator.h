@@ -25,6 +25,10 @@ public:
 
   bool Compute(cmLocalGenerator* lg) override;
 
+  bool IsCode() const { return this->Code; }
+
+  std::string GetScript(std::string const& config) const;
+
 protected:
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
   void GenerateScriptForConfig(std::ostream& os, const std::string& config,
