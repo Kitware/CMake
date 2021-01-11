@@ -32,6 +32,9 @@ public:
   bool Compute(cmLocalGenerator* lg) override;
 
   std::string GetDestination(std::string const& config) const;
+  std::vector<std::string> GetDirectories(std::string const& config) const;
+
+  bool GetOptional() const { return this->Optional; }
 
 protected:
   void GenerateScriptActions(std::ostream& os, Indent indent) override;

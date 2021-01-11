@@ -50,6 +50,22 @@ bool cmInstallDirectoryGenerator::Compute(cmLocalGenerator* lg)
   return true;
 }
 
+std::vector<std::string> cmInstallDirectoryGenerator::GetDirectories(
+  std::string const& config) const
+{
+  std::vector<std::string> directories;
+  if (this->ActionsPerConfig) {
+    for (std::string const& f : this->Directories) {
+      cmExpandList(
+        cmGeneratorExpression::Evaluate(f, this->LocalGenerator, config),
+        directories);
+    }
+  } else {
+    directories = this->Directories;
+  }
+  return directories;
+}
+
 void cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
                                                         Indent indent)
 {
@@ -63,11 +79,7 @@ void cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
 void cmInstallDirectoryGenerator::GenerateScriptForConfig(
   std::ostream& os, const std::string& config, Indent indent)
 {
-  std::vector<std::string> dirs;
-  for (std::string const& d : this->Directories) {
-    cmExpandList(
-      cmGeneratorExpression::Evaluate(d, this->LocalGenerator, config), dirs);
-  }
+  std::vector<std::string> dirs = this->GetDirectories(config);
 
   // Make sure all dirs have absolute paths.
   cmMakefile const& mf = *this->LocalGenerator->GetMakefile();
