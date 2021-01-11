@@ -206,22 +206,6 @@ else()
   set(HDF5_Fortran_COMPILER_NAMES h5fc h5pfc)
 endif()
 
-# We may have picked up some duplicates in various lists during the above
-# process for the language bindings (both the C and C++ bindings depend on
-# libz for example).  Remove the duplicates. It appears that the default
-# CMake behavior is to remove duplicates from the end of a list. However,
-# for link lines, this is incorrect since unresolved symbols are searched
-# for down the link line. Therefore, we reverse the list, remove the
-# duplicates, and then reverse it again to get the duplicates removed from
-# the beginning.
-macro(_HDF5_remove_duplicates_from_beginning _list_name)
-  if(${_list_name})
-    list(REVERSE ${_list_name})
-    list(REMOVE_DUPLICATES ${_list_name})
-    list(REVERSE ${_list_name})
-  endif()
-endmacro()
-
 # Test first if the current compilers automatically wrap HDF5
 function(_HDF5_test_regular_compiler_C success version is_parallel)
   set(scratch_directory
@@ -726,8 +710,6 @@ if(NOT HDF5_FOUND)
           set(HDF5_${_lang}_FOUND TRUE)
           list(REMOVE_DUPLICATES HDF5_${_lang}_DEFINITIONS)
           list(REMOVE_DUPLICATES HDF5_${_lang}_INCLUDE_DIRS)
-          _HDF5_remove_duplicates_from_beginning(HDF5_${_lang}_LIBRARIES)
-          _HDF5_remove_duplicates_from_beginning(HDF5_${_lang}_HL_LIBRARIES)
         else()
           set(_HDF5_NEED_TO_SEARCH TRUE)
         endif()
@@ -782,8 +764,6 @@ elseif(NOT HDF5_FOUND AND NOT _HDF5_NEED_TO_SEARCH)
   endforeach()
   list(REMOVE_DUPLICATES HDF5_DEFINITIONS)
   list(REMOVE_DUPLICATES HDF5_INCLUDE_DIRS)
-  _HDF5_remove_duplicates_from_beginning(HDF5_LIBRARIES)
-  _HDF5_remove_duplicates_from_beginning(HDF5_HL_LIBRARIES)
   set(HDF5_FOUND TRUE)
   set(HDF5_REQUIRED_VARS HDF5_LIBRARIES)
   if(HDF5_FIND_HL)
@@ -925,8 +905,6 @@ if( NOT HDF5_FOUND )
 
     list(REMOVE_DUPLICATES HDF5_DEFINITIONS)
     list(REMOVE_DUPLICATES HDF5_INCLUDE_DIRS)
-    _HDF5_remove_duplicates_from_beginning(HDF5_LIBRARIES)
-    _HDF5_remove_duplicates_from_beginning(HDF5_HL_LIBRARIES)
 
     # If the HDF5 include directory was found, open H5pubconf.h to determine if
     # HDF5 was compiled with parallel IO support
