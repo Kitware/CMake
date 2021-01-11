@@ -133,7 +133,8 @@ std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
   return cm::make_unique<cmInstallFilesGenerator>(
     absFiles, destination, programs, args.GetPermissions(),
     args.GetConfigurations(), args.GetComponent(), message,
-    args.GetExcludeFromAll(), args.GetRename(), args.GetOptional());
+    args.GetExcludeFromAll(), args.GetRename(), args.GetOptional(),
+    mf->GetBacktrace());
 }
 
 std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
@@ -206,14 +207,16 @@ bool HandleScriptMode(std::vector<std::string> const& args,
         return false;
       }
       helper.Makefile->AddInstallGenerator(
-        cm::make_unique<cmInstallScriptGenerator>(script, false, component,
-                                                  exclude_from_all));
+        cm::make_unique<cmInstallScriptGenerator>(
+          script, false, component, exclude_from_all,
+          helper.Makefile->GetBacktrace()));
     } else if (doing_code) {
       doing_code = false;
       std::string const& code = arg;
       helper.Makefile->AddInstallGenerator(
-        cm::make_unique<cmInstallScriptGenerator>(code, true, component,
-                                                  exclude_from_all));
+        cm::make_unique<cmInstallScriptGenerator>(
+          code, true, component, exclude_from_all,
+          helper.Makefile->GetBacktrace()));
     }
   }
 
@@ -1253,7 +1256,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   helper.Makefile->AddInstallGenerator(
     cm::make_unique<cmInstallDirectoryGenerator>(
       dirs, *destination, permissions_file, permissions_dir, configurations,
-      component, message, exclude_from_all, literal_args, optional));
+      component, message, exclude_from_all, literal_args, optional,
+      helper.Makefile->GetBacktrace()));
 
   // Tell the global generator about any installation component names
   // specified.
@@ -1345,7 +1349,8 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
     cm::make_unique<cmInstallExportGenerator>(
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
-      ica.GetExcludeFromAll(), fname, name_space, exportOld, true));
+      ica.GetExcludeFromAll(), fname, name_space, exportOld, true,
+      helper.Makefile->GetBacktrace()));
 
   return true;
 #else
@@ -1458,7 +1463,8 @@ bool HandleExportMode(std::vector<std::string> const& args,
     cm::make_unique<cmInstallExportGenerator>(
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
-      ica.GetExcludeFromAll(), fname, name_space, exportOld, false));
+      ica.GetExcludeFromAll(), fname, name_space, exportOld, false,
+      helper.Makefile->GetBacktrace()));
 
   return true;
 }

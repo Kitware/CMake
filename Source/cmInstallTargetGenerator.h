@@ -66,8 +66,6 @@ public:
 
   std::string GetDestination(std::string const& config) const;
 
-  cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
-
   struct Files
   {
     // Names or paths of files to be read from the source or build tree.
@@ -134,5 +132,4 @@ protected:
   NamelinkModeType NamelinkMode;
   bool const ImportLibrary;
   bool const Optional;
-  cmListFileBacktrace const Backtrace;
 };

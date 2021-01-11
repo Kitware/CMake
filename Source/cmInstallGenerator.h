@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cmInstallType.h"
+#include "cmListFileCache.h"
 #include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
@@ -32,7 +33,7 @@ public:
   cmInstallGenerator(std::string destination,
                      std::vector<std::string> const& configurations,
                      std::string component, MessageLevel message,
-                     bool exclude_from_all);
+                     bool exclude_from_all, cmListFileBacktrace backtrace);
   ~cmInstallGenerator() override;
 
   cmInstallGenerator(cmInstallGenerator const&) = delete;
@@ -61,6 +62,8 @@ public:
 
   virtual bool Compute(cmLocalGenerator*) { return true; }
 
+  cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
+
 protected:
   void GenerateScript(std::ostream& os) override;
 
@@ -72,4 +75,5 @@ protected:
   std::string const Component;
   MessageLevel const Message;
   bool const ExcludeFromAll;
+  cmListFileBacktrace const Backtrace;
 };

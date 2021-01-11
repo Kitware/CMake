@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cmInstallGenerator.h"
+#include "cmListFileCache.h"
 #include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
@@ -25,7 +26,7 @@ public:
                           std::vector<std::string> const& configurations,
                           std::string const& component, MessageLevel message,
                           bool exclude_from_all, std::string rename,
-                          bool optional = false);
+                          bool optional, cmListFileBacktrace backtrace);
   ~cmInstallFilesGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;

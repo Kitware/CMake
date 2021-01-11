@@ -46,13 +46,12 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
   std::string const& component, MessageLevel message, bool exclude_from_all,
   bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all)
+                       exclude_from_all, std::move(backtrace))
   , TargetName(std::move(targetName))
   , Target(nullptr)
   , FilePermissions(std::move(file_permissions))
   , ImportLibrary(implib)
   , Optional(optional)
-  , Backtrace(std::move(backtrace))
 {
   this->ActionsPerConfig = true;
   this->NamelinkMode = NamelinkModeNone;

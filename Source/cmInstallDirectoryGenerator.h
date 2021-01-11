@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cmInstallGenerator.h"
+#include "cmListFileCache.h"
 #include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
@@ -19,14 +20,12 @@ class cmLocalGenerator;
 class cmInstallDirectoryGenerator : public cmInstallGenerator
 {
 public:
-  cmInstallDirectoryGenerator(std::vector<std::string> const& dirs,
-                              std::string const& dest,
-                              std::string file_permissions,
-                              std::string dir_permissions,
-                              std::vector<std::string> const& configurations,
-                              std::string const& component,
-                              MessageLevel message, bool exclude_from_all,
-                              std::string literal_args, bool optional = false);
+  cmInstallDirectoryGenerator(
+    std::vector<std::string> const& dirs, std::string const& dest,
+    std::string file_permissions, std::string dir_permissions,
+    std::vector<std::string> const& configurations,
+    std::string const& component, MessageLevel message, bool exclude_from_all,
+    std::string literal_args, bool optional, cmListFileBacktrace backtrace);
   ~cmInstallDirectoryGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;

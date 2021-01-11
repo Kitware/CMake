@@ -15,9 +15,9 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
   bool programs, std::string file_permissions,
   std::vector<std::string> const& configurations, std::string const& component,
   MessageLevel message, bool exclude_from_all, std::string rename,
-  bool optional)
+  bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all)
+                       exclude_from_all, std::move(backtrace))
   , LocalGenerator(nullptr)
   , Files(files)
   , FilePermissions(std::move(file_permissions))

@@ -8,6 +8,7 @@
 #include <string>
 
 #include "cmInstallGenerator.h"
+#include "cmListFileCache.h"
 #include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
@@ -18,9 +19,10 @@ class cmLocalGenerator;
 class cmInstallScriptGenerator : public cmInstallGenerator
 {
 public:
-  cmInstallScriptGenerator(std::string script, bool code,
-                           std::string const& component,
-                           bool exclude_from_all);
+  cmInstallScriptGenerator(
+    std::string script, bool code, std::string const& component,
+    bool exclude_from_all,
+    cmListFileBacktrace backtrace = cmListFileBacktrace());
   ~cmInstallScriptGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;

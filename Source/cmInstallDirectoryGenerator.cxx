@@ -16,9 +16,9 @@ cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::string file_permissions, std::string dir_permissions,
   std::vector<std::string> const& configurations, std::string const& component,
   MessageLevel message, bool exclude_from_all, std::string literal_args,
-  bool optional)
+  bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all)
+                       exclude_from_all, std::move(backtrace))
   , LocalGenerator(nullptr)
   , Directories(dirs)
   , FilePermissions(std::move(file_permissions))
