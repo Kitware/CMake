@@ -32,6 +32,8 @@ public:
 
   std::string GetDestination(std::string const& config) const;
   std::string GetRename(std::string const& config) const;
+  std::vector<std::string> GetFiles(std::string const& config) const;
+  bool GetOptional() const { return this->Optional; }
 
 protected:
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
