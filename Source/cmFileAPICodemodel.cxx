@@ -49,80 +49,6 @@ namespace {
 using TargetIndexMapType =
   std::unordered_map<cmGeneratorTarget const*, Json::ArrayIndex>;
 
-class Codemodel
-{
-  cmFileAPI& FileAPI;
-  unsigned long Version;
-
-  Json::Value DumpPaths();
-  Json::Value DumpConfigurations();
-  Json::Value DumpConfiguration(std::string const& config);
-
-public:
-  Codemodel(cmFileAPI& fileAPI, unsigned long version);
-  Json::Value Dump();
-};
-
-class CodemodelConfig
-{
-  cmFileAPI& FileAPI;
-  unsigned long Version;
-  std::string const& Config;
-  std::string TopSource;
-  std::string TopBuild;
-
-  struct Directory
-  {
-    cmStateSnapshot Snapshot;
-    cmLocalGenerator const* LocalGenerator = nullptr;
-    Json::Value TargetIndexes = Json::arrayValue;
-    Json::ArrayIndex ProjectIndex;
-    bool HasInstallRule = false;
-  };
-  std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
-    DirectoryMap;
-  std::vector<Directory> Directories;
-
-  struct Project
-  {
-    cmStateSnapshot Snapshot;
-    static const Json::ArrayIndex NoParentIndex =
-      static_cast<Json::ArrayIndex>(-1);
-    Json::ArrayIndex ParentIndex = NoParentIndex;
-    Json::Value ChildIndexes = Json::arrayValue;
-    Json::Value DirectoryIndexes = Json::arrayValue;
-    Json::Value TargetIndexes = Json::arrayValue;
-  };
-  std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
-    ProjectMap;
-  std::vector<Project> Projects;
-
-  TargetIndexMapType TargetIndexMap;
-
-  void ProcessDirectories();
-
-  Json::ArrayIndex GetDirectoryIndex(cmLocalGenerator const* lg);
-  Json::ArrayIndex GetDirectoryIndex(cmStateSnapshot s);
-
-  Json::ArrayIndex AddProject(cmStateSnapshot s);
-
-  Json::Value DumpTargets();
-  Json::Value DumpTarget(cmGeneratorTarget* gt, Json::ArrayIndex ti);
-
-  Json::Value DumpDirectories();
-  Json::Value DumpDirectory(Directory& d);
-
-  Json::Value DumpProjects();
-  Json::Value DumpProject(Project& p);
-
-  Json::Value DumpMinimumCMakeVersion(cmStateSnapshot s);
-
-public:
-  CodemodelConfig(cmFileAPI& fileAPI, unsigned long version,
-                  std::string const& config);
-  Json::Value Dump();
-};
-
 std::string RelativeIfUnder(std::string const& top, std::string const& in)
 {
   std::string out;
@@ -134,16 +60,6 @@ std::string RelativeIfUnder(std::string const& top, std::string const& in)
     out = in;
   }
   return out;
-}
-
-std::string TargetId(cmGeneratorTarget const* gt, std::string const& topBuild)
-{
-  cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_256);
-  std::string path = RelativeIfUnder(
-    topBuild, gt->GetLocalGenerator()->GetCurrentBinaryDirectory());
-  std::string hash = hasher.HashString(path);
-  hash.resize(20, '0');
-  return gt->GetName() + CMAKE_DIRECTORY_ID_SEP + hash;
 }
 
 class JBTIndex
@@ -293,6 +209,90 @@ Json::Value BacktraceData::Dump()
   backtraceGraph["files"] = std::move(this->Files);
   backtraceGraph["nodes"] = std::move(this->Nodes);
   return backtraceGraph;
+}
+
+class Codemodel
+{
+  cmFileAPI& FileAPI;
+  unsigned long Version;
+
+  Json::Value DumpPaths();
+  Json::Value DumpConfigurations();
+  Json::Value DumpConfiguration(std::string const& config);
+
+public:
+  Codemodel(cmFileAPI& fileAPI, unsigned long version);
+  Json::Value Dump();
+};
+
+class CodemodelConfig
+{
+  cmFileAPI& FileAPI;
+  unsigned long Version;
+  std::string const& Config;
+  std::string TopSource;
+  std::string TopBuild;
+
+  struct Directory
+  {
+    cmStateSnapshot Snapshot;
+    cmLocalGenerator const* LocalGenerator = nullptr;
+    Json::Value TargetIndexes = Json::arrayValue;
+    Json::ArrayIndex ProjectIndex;
+    bool HasInstallRule = false;
+  };
+  std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
+    DirectoryMap;
+  std::vector<Directory> Directories;
+
+  struct Project
+  {
+    cmStateSnapshot Snapshot;
+    static const Json::ArrayIndex NoParentIndex =
+      static_cast<Json::ArrayIndex>(-1);
+    Json::ArrayIndex ParentIndex = NoParentIndex;
+    Json::Value ChildIndexes = Json::arrayValue;
+    Json::Value DirectoryIndexes = Json::arrayValue;
+    Json::Value TargetIndexes = Json::arrayValue;
+  };
+  std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
+    ProjectMap;
+  std::vector<Project> Projects;
+
+  TargetIndexMapType TargetIndexMap;
+
+  void ProcessDirectories();
+
+  Json::ArrayIndex GetDirectoryIndex(cmLocalGenerator const* lg);
+  Json::ArrayIndex GetDirectoryIndex(cmStateSnapshot s);
+
+  Json::ArrayIndex AddProject(cmStateSnapshot s);
+
+  Json::Value DumpTargets();
+  Json::Value DumpTarget(cmGeneratorTarget* gt, Json::ArrayIndex ti);
+
+  Json::Value DumpDirectories();
+  Json::Value DumpDirectory(Directory& d);
+
+  Json::Value DumpProjects();
+  Json::Value DumpProject(Project& p);
+
+  Json::Value DumpMinimumCMakeVersion(cmStateSnapshot s);
+
+public:
+  CodemodelConfig(cmFileAPI& fileAPI, unsigned long version,
+                  std::string const& config);
+  Json::Value Dump();
+};
+
+std::string TargetId(cmGeneratorTarget const* gt, std::string const& topBuild)
+{
+  cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_256);
+  std::string path = RelativeIfUnder(
+    topBuild, gt->GetLocalGenerator()->GetCurrentBinaryDirectory());
+  std::string hash = hasher.HashString(path);
+  hash.resize(20, '0');
+  return gt->GetName() + CMAKE_DIRECTORY_ID_SEP + hash;
 }
 
 struct CompileData

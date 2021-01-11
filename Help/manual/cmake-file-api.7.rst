@@ -964,40 +964,48 @@ with members:
       with forward slashes.
 
 ``backtraceGraph``
-  A JSON object describing the graph of backtraces whose nodes are
-  referenced from ``backtrace`` members elsewhere.  The members are:
+  A `"codemodel" version 2 "backtrace graph"`_ whose nodes are referenced
+  from ``backtrace`` members elsewhere in this "target" object.
 
-  ``nodes``
-    A JSON array listing nodes in the backtrace graph.  Each entry
-    is a JSON object with members:
+"codemodel" version 2 "backtrace graph"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    ``file``
-      An unsigned integer 0-based index into the backtrace ``files`` array.
+The ``backtraceGraph`` member of a `"codemodel" version 2 "target" object`_
+is a JSON object describing a graph of backtraces.  Its nodes are referenced
+from ``backtrace`` members elsewhere in the containing object.
+The backtrace graph object members are:
 
-    ``line``
-      An optional member present when the node represents a line within
-      the file.  The value is an unsigned integer 1-based line number.
+``nodes``
+  A JSON array listing nodes in the backtrace graph.  Each entry
+  is a JSON object with members:
 
-    ``command``
-      An optional member present when the node represents a command
-      invocation within the file.  The value is an unsigned integer
-      0-based index into the backtrace ``commands`` array.
+  ``file``
+    An unsigned integer 0-based index into the backtrace ``files`` array.
 
-    ``parent``
-      An optional member present when the node is not the bottom of
-      the call stack.  The value is an unsigned integer 0-based index
-      of another entry in the backtrace ``nodes`` array.
+  ``line``
+    An optional member present when the node represents a line within
+    the file.  The value is an unsigned integer 1-based line number.
 
-  ``commands``
-    A JSON array listing command names referenced by backtrace nodes.
-    Each entry is a string specifying a command name.
+  ``command``
+    An optional member present when the node represents a command
+    invocation within the file.  The value is an unsigned integer
+    0-based index into the backtrace ``commands`` array.
 
-  ``files``
-    A JSON array listing CMake language files referenced by backtrace nodes.
-    Each entry is a string specifying the path to a file, represented
-    with forward slashes.  If the file is inside the top-level source
-    directory then the path is specified relative to that directory.
-    Otherwise the path is absolute.
+  ``parent``
+    An optional member present when the node is not the bottom of
+    the call stack.  The value is an unsigned integer 0-based index
+    of another entry in the backtrace ``nodes`` array.
+
+``commands``
+  A JSON array listing command names referenced by backtrace nodes.
+  Each entry is a string specifying a command name.
+
+``files``
+  A JSON array listing CMake language files referenced by backtrace nodes.
+  Each entry is a string specifying the path to a file, represented
+  with forward slashes.  If the file is inside the top-level source
+  directory then the path is specified relative to that directory.
+  Otherwise the path is absolute.
 
 Object Kind "cache"
 -------------------

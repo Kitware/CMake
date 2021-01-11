@@ -94,8 +94,7 @@ def check_directory(c):
 
     return _check
 
-def check_target_backtrace_graph(t):
-    btg = t["backtraceGraph"]
+def check_backtrace_graph(btg):
     assert is_dict(btg)
     assert sorted(btg.keys()) == ["commands", "files", "nodes"]
     assert is_list(btg["commands"])
@@ -148,7 +147,7 @@ def check_target(c):
         assert is_string(obj["name"], expected["name"])
         assert matches(obj["id"], expected["id"])
         assert is_string(obj["type"], expected["type"])
-        check_target_backtrace_graph(obj)
+        check_backtrace_graph(obj["backtraceGraph"])
 
         assert is_dict(obj["paths"])
         assert sorted(obj["paths"].keys()) == ["build", "source"]
