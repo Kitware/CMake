@@ -345,27 +345,51 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
              this->LocalGenerator->GetBinaryDirectory(), compilerDependFile))
       << "\n\n";
 
-    if (!cmSystemTools::FileExists(compilerDependFile)) {
-      // Write an empty dependency file.
-      cmGeneratedFileStream depFileStream(
-        compilerDependFile, false,
-        this->GlobalGenerator->GetMakefileEncoding());
-      depFileStream << "# Empty compiler generated dependencies file for "
-                    << this->GeneratorTarget->GetName() << ".\n"
-                    << "# This may be replaced when dependencies are built.\n";
-    }
+    // Write an empty dependency file.
+    cmGeneratedFileStream depFileStream(
+      compilerDependFile, false, this->GlobalGenerator->GetMakefileEncoding());
+    depFileStream << "# Empty compiler generated dependencies file for "
+                  << this->GeneratorTarget->GetName() << ".\n"
+                  << "# This may be replaced when dependencies are built.\n";
+    // remove internal dependency file
+    cmSystemTools::RemoveFile(
+      cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.internal"));
 
     std::string compilerDependTimestamp =
       cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.ts");
     if (!cmSystemTools::FileExists(compilerDependTimestamp)) {
       // Write a dependency timestamp file.
-      cmGeneratedFileStream depFileStream(
+      cmGeneratedFileStream timestampFileStream(
         compilerDependTimestamp, false,
         this->GlobalGenerator->GetMakefileEncoding());
-      depFileStream << "# CMAKE generated file: DO NOT EDIT!\n"
-                    << "# Timestamp file for compiler generated dependencies "
-                       "management for "
-                    << this->GeneratorTarget->GetName() << ".\n";
+      timestampFileStream
+        << "# CMAKE generated file: DO NOT EDIT!\n"
+        << "# Timestamp file for compiler generated dependencies "
+           "management for "
+        << this->GeneratorTarget->GetName() << ".\n";
+    }
+
+    // deactivate no longer needed legacy dependency files
+    // Write an empty dependency file.
+    cmGeneratedFileStream legacyDepFileStream(
+      dependFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
+    legacyDepFileStream
+      << "# Empty dependencies file for " << this->GeneratorTarget->GetName()
+      << ".\n"
+      << "# This may be replaced when dependencies are built.\n";
+    // remove internal dependency file
+    cmSystemTools::RemoveFile(
+      cmStrCat(this->TargetBuildDirectoryFull, "/depend.internal"));
+  } else {
+    // make sure the depend file exists
+    if (!cmSystemTools::FileExists(dependFileNameFull)) {
+      // Write an empty dependency file.
+      cmGeneratedFileStream depFileStream(
+        dependFileNameFull, false,
+        this->GlobalGenerator->GetMakefileEncoding());
+      depFileStream << "# Empty dependencies file for "
+                    << this->GeneratorTarget->GetName() << ".\n"
+                    << "# This may be replaced when dependencies are built.\n";
     }
   }
 
@@ -379,16 +403,6 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
              this->LocalGenerator->GetBinaryDirectory(),
              this->ProgressFileNameFull))
       << "\n\n";
-  }
-
-  // make sure the depend file exists
-  if (!cmSystemTools::FileExists(dependFileNameFull)) {
-    // Write an empty dependency file.
-    cmGeneratedFileStream depFileStream(
-      dependFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
-    depFileStream << "# Empty dependencies file for "
-                  << this->GeneratorTarget->GetName() << ".\n"
-                  << "# This may be replaced when dependencies are built.\n";
   }
 
   // Open the flags file.  This should be copy-if-different because the
@@ -855,6 +869,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     shellDependencyFile = this->LocalGenerator->ConvertToOutputFormat(
       depFile, cmOutputConverter::SHELL);
     vars.DependencyFile = shellDependencyFile.c_str();
+    this->CleanFiles.insert(depFile);
 
     dependencyTimestamp = this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetBinaryDirectory(),

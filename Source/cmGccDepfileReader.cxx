@@ -12,40 +12,33 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-cm::optional<cmGccDepfileContent> cmReadGccDepfile(const char* filePath)
-{
-  cmGccDepfileLexerHelper helper;
-  if (helper.readFile(filePath)) {
-    return cm::make_optional(std::move(helper).extractContent());
-  }
-  return cm::nullopt;
-}
-
 cm::optional<cmGccDepfileContent> cmReadGccDepfile(const char* filePath,
                                                    const std::string& prefix)
 {
-  auto deps = cmReadGccDepfile(filePath);
-
-  if (prefix.empty() || !deps) {
-    return deps;
+  cmGccDepfileLexerHelper helper;
+  if (!helper.readFile(filePath)) {
+    return cm::nullopt;
   }
+  auto deps = cm::make_optional(std::move(helper).extractContent());
 
   for (auto& dep : *deps) {
     for (auto& rule : dep.rules) {
-      if (!cmSystemTools::FileIsFullPath(rule)) {
+      if (!prefix.empty() && !cmSystemTools::FileIsFullPath(rule)) {
         rule = cmStrCat(prefix, rule);
       }
       if (cmSystemTools::FileIsFullPath(rule)) {
         rule = cmSystemTools::CollapseFullPath(rule);
       }
+      cmSystemTools::ConvertToLongPath(rule);
     }
     for (auto& path : dep.paths) {
-      if (!cmSystemTools::FileIsFullPath(path)) {
+      if (!prefix.empty() && !cmSystemTools::FileIsFullPath(path)) {
         path = cmStrCat(prefix, path);
       }
       if (cmSystemTools::FileIsFullPath(path)) {
         path = cmSystemTools::CollapseFullPath(path);
       }
+      cmSystemTools::ConvertToLongPath(path);
     }
   }
 
