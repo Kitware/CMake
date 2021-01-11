@@ -44,8 +44,11 @@ public:
 
   const std::string& GetNamespace() const { return this->Namespace; }
 
+  std::string const& GetMainImportFile() const { return this->MainImportFile; }
+
   std::string const& GetDestination() const { return this->Destination; }
   std::string GetDestinationFile() const;
+  std::string GetFileName() const { return this->FileName; }
 
 protected:
   void GenerateScript(std::ostream& os) override;
