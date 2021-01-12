@@ -116,15 +116,22 @@ also be defined.  With all components enabled, the following variables will be d
 
 With all components enabled, the following targets will be defined:
 
-::
-
-  ``hdf5::hdf5``
-  ``hdf5::hdf5_hl_cpp``
-  ``hdf5::hdf5_fortran``
-  ``hdf5::hdf5_hl``
-  ``hdf5::hdf5_hl_cpp``
-  ``hdf5::hdf5_hl_fortran``
-  ``hdf5::h5diff``
+``HDF5::HDF5``
+  All detected ``HDF5_LIBRARIES``.
+``hdf5::hdf5``
+  C library.
+``hdf5::hdf5_cpp``
+  C++ library.
+``hdf5::hdf5_fortran``
+  Fortran library.
+``hdf5::hdf5_hl``
+  High-level C library.
+``hdf5::hdf5_hl_cpp``
+  High-level C++ library.
+``hdf5::hdf5_hl_fortran``
+  High-level Fortran library.
+``hdf5::h5diff``
+  ``h5diff`` executable.
 
 Hints
 ^^^^^
@@ -1146,6 +1153,21 @@ if (HDF5_FIND_DEBUG)
     message(STATUS "HDF5_${_lang}_LIBRARIES: ${HDF5_${_lang}_LIBRARIES}")
     message(STATUS "HDF5_${_lang}_HL_LIBRARY: ${HDF5_${_lang}_HL_LIBRARY}")
     message(STATUS "HDF5_${_lang}_HL_LIBRARIES: ${HDF5_${_lang}_HL_LIBRARIES}")
+  endforeach()
+  message(STATUS "Defined targets (if any):")
+  foreach(_lang IN  ITEMS "" "_cpp" "_fortran")
+    foreach(_hl IN  ITEMS "" "_hl")
+      foreach(_prefix IN ITEMS "hdf5::" "")
+        foreach(_suffix IN ITEMS "-static" "-shared" "")
+          set (_target ${_prefix}hdf5${_hl}${_lang}${_suffix})
+          if (TARGET  ${_target})
+            message(STATUS "... ${_target}")
+          else()
+            #message(STATUS "... ${_target} does not exist")
+          endif()
+        endforeach()
+      endforeach()
+    endforeach()
   endforeach()
 endif()
 unset(_lang)
