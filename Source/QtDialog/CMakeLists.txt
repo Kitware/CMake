@@ -132,6 +132,7 @@ qt5_wrap_cpp(MOC_SRCS
   WarningMessagesDialog.h
   )
 qt5_add_resources(RC_SRCS CMakeSetup.qrc)
+add_library(CMakeGUIQRCLib OBJECT ${RC_SRCS})
 
 if (FALSE) # CMake's bootstrap binary does not support automoc
   set(CMAKE_AUTOMOC 1)
@@ -140,8 +141,7 @@ if (FALSE) # CMake's bootstrap binary does not support automoc
 else ()
   list(APPEND SRCS
     ${UI_SRCS}
-    ${MOC_SRCS}
-    ${RC_SRCS})
+    ${MOC_SRCS})
 endif ()
 
 if(USE_LGPL)
@@ -164,6 +164,7 @@ target_link_libraries(CMakeGUIMainLib PUBLIC CMakeGUILib)
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx ${MANIFEST_FILE})
 target_link_libraries(cmake-gui CMakeGUIMainLib Qt5::Core)
 
+target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeGUIQRCLib>)
 if(WIN32)
   target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeVersion> CMakeSetup.rc)
 endif()
