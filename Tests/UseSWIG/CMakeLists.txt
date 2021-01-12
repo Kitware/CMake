@@ -1,3 +1,5 @@
+find_package(SWIG QUIET)
+
 add_test(NAME UseSWIG.LegacyPython COMMAND
   ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
   --build-and-test
@@ -64,6 +66,28 @@ add_test(NAME UseSWIG.BasicPerl COMMAND
   --build-options ${build_options}
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+if(SWIG_FOUND AND NOT SWIG_VERSION VERSION_LESS "4.0.2")
+  add_test(NAME UseSWIG.Depfile.BasicPython COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/UseSWIG/BasicPython"
+    "${CMake_BINARY_DIR}/Tests/UseSWIG/BasicPython.Depfile"
+    ${build_generator_args}
+    --build-project TestBasicPython
+    --build-options ${build_options} -DSWIG_USE_SWIG_DEPENDENCIES=ON
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME UseSWIG.Depfile.BasicPerl COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/UseSWIG/BasicPerl"
+    "${CMake_BINARY_DIR}/Tests/UseSWIG/BasicPerl.Depfile"
+    ${build_generator_args}
+    --build-project TestBasicPerl
+    --build-options ${build_options} -DSWIG_USE_SWIG_DEPENDENCIES=ON
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+endif()
 
 if (CMake_TEST_UseSWIG_Fortran)
   check_language(Fortran)
