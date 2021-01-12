@@ -1195,19 +1195,10 @@ There is only one ``toolchains`` object major version, version 1.
               "/lib"
             ],
             "linkFrameworkDirectories": [],
-            "linkLibraries": [
-              "gcc",
-              "gcc_s",
-              "c",
-              "gcc",
-              "gcc_s"
-            ]
+            "linkLibraries": [ "gcc", "gcc_s", "c", "gcc", "gcc_s" ]
           }
         },
-        "sourceFileExtensions": [
-          "c",
-          "m"
-        ]
+        "sourceFileExtensions": [ "c", "m" ]
       },
       {
         "language": "CXX",
@@ -1234,25 +1225,12 @@ There is only one ``toolchains`` object major version, version 1.
             ],
             "linkFrameworkDirectories": [],
             "linkLibraries": [
-              "stdc++",
-              "m",
-              "gcc_s",
-              "gcc",
-              "c",
-              "gcc_s",
-              "gcc"
+              "stdc++", "m", "gcc_s", "gcc", "c", "gcc_s", "gcc"
             ]
           }
         },
         "sourceFileExtensions": [
-          "C",
-          "M",
-          "c++",
-          "cc",
-          "cpp",
-          "cxx",
-          "mm",
-          "CPP"
+          "C", "M", "c++", "cc", "cpp", "cxx", "mm", "CPP"
         ]
       }
     ]
@@ -1265,7 +1243,7 @@ The members specific to ``toolchains`` objects are:
   associated with a particular language. The members of each entry are:
 
   ``language``
-    A string specifying the toolchain language, like C or CXX. Language
+    A JSON string specifying the toolchain language, like C or CXX. Language
     names are the same as langauge names that can be passed to the
     :command:`project` command. Because CMake only supports a single toolchain
     per language, this field can be used as a key.
@@ -1274,49 +1252,62 @@ The members specific to ``toolchains`` objects are:
     A JSON object containing members:
 
     ``path``
-      Optional member that has the same value as
-      :variable:`CMAKE_<LANG>_COMPILER` if it is defined for the current
-      language.
+      Optional member that is present when the
+      :variable:`CMAKE_<LANG>_COMPILER` variable is defined for the current
+      language. Its value is a JSON string holding the path to the compiler.
 
     ``id``
-      Optional member that has the same value as
-      :variable:`CMAKE_<LANG>_COMPILER_ID` if it is defined for the current
-      language.
+      Optional member that is present when the
+      :variable:`CMAKE_<LANG>_COMPILER_ID` variable is defined for the current
+      language. Its value is a JSON string holding the ID (GNU, MSVC, etc.) of
+      the compiler.
 
     ``version``
-      Optional member that has the same value as
-      :variable:`CMAKE_<LANG>_COMPILER_VERSION` if it is defined for the
-      current language.
+      Optional member that is present when the
+      :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable is defined for the
+      current language. Its value is a JSON string holding the version of the
+      compiler.
 
     ``target``
-      Optional member that has the same value as
-      :variable:`CMAKE_<LANG>_COMPILER_TARGET` if it is defined for the
-      current language.
+      Optional member that is present when the
+      :variable:`CMAKE_<LANG>_COMPILER_TARGET` variable is defined for the
+      current language. Its value is a JSON string holding the cross-compiling
+      target of the compiler.
 
     ``implicit``
       A JSON object containing members:
 
       ``includeDirectories``
-        Optional JSON array that has the same value as
-        :variable:`CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES` if it is defined
-        for the current language.
+        Optional member that is present when the
+        :variable:`CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES` variable is
+        defined for the current language. Its value is a JSON array of JSON
+        strings where each string holds a path to an implicit include
+        directory for the compiler.
 
       ``linkDirectories``
-        Optional JSON array that has the same value as
-        :variable:`CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES` if it is defined
-        for the current language.
+        Optional member that is present when the
+        :variable:`CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES` variable is
+        defined for the current language. Its value is a JSON array of JSON
+        strings where each string holds a path to an implicit link directory
+        for the compiler.
 
       ``linkFrameworkDirectories``
-        Optional JSON array that has the same value as
-        :variable:`CMAKE_<LANG>_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES` if it is
-        defined for the current language.
+        Optional member that is present when the
+        :variable:`CMAKE_<LANG>_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES` variable
+        is defined for the current language. Its value is a JSON array of JSON
+        strings where each string holds a path to an implicit link framework
+        directory for the compiler.
 
       ``linkLibraries``
-        Optional JSON array that has the same value as
-        :variable:`CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES` if it is defined for
-        the current language.
+        Optional member that is present when the
+        :variable:`CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES` variable is defined
+        for the current language. Its value is a JSON array of JSON strings
+        where each string holds a path to an implicit link library for the
+        compiler.
 
   ``sourceFileExtensions``
-    Optional JSON array that has the same value as
-    :variable:`CMAKE_<LANG>_SOURCE_FILE_EXTENSIONS` if it is defined for the
-    current language.
+    Optional member that is present when the
+    :variable:`CMAKE_<LANG>_SOURCE_FILE_EXTENSIONS` variable is defined for
+    the current language. Its value is a JSON array of JSON strings where each
+    each string holds a file extension (without the leading dot) for the
+    language.
