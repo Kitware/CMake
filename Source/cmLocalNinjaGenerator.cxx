@@ -693,13 +693,11 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   }
 }
 
-namespace {
-bool HasUniqueByproducts(cmLocalGenerator& lg,
-                         std::vector<std::string> const& byproducts,
-                         cmListFileBacktrace const& bt)
+bool cmLocalNinjaGenerator::HasUniqueByproducts(
+  std::vector<std::string> const& byproducts, cmListFileBacktrace const& bt)
 {
   std::vector<std::string> configs =
-    lg.GetMakefile()->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+    this->GetMakefile()->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   cmGeneratorExpression ge(bt);
   for (std::string const& p : byproducts) {
     if (cmGeneratorExpression::Find(p) == std::string::npos) {
@@ -709,7 +707,7 @@ bool HasUniqueByproducts(cmLocalGenerator& lg,
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(p);
     for (std::string const& config : configs) {
       for (std::string const& b :
-           lg.ExpandCustomCommandOutputPaths(*cge, config)) {
+           this->ExpandCustomCommandOutputPaths(*cge, config)) {
         if (!seen.insert(b).second) {
           return false;
         }
@@ -719,6 +717,7 @@ bool HasUniqueByproducts(cmLocalGenerator& lg,
   return true;
 }
 
+namespace {
 bool HasUniqueOutputs(std::vector<cmCustomCommandGenerator> const& ccgs)
 {
   std::set<std::string> allOutputs;
@@ -746,7 +745,7 @@ std::string cmLocalNinjaGenerator::CreateUtilityOutput(
   // In Ninja Multi-Config, we can only produce cross-config utility
   // commands if all byproducts are per-config.
   if (!this->GetGlobalGenerator()->IsMultiConfig() ||
-      !HasUniqueByproducts(*this, byproducts, bt)) {
+      !this->HasUniqueByproducts(byproducts, bt)) {
     return this->cmLocalGenerator::CreateUtilityOutput(targetName, byproducts,
                                                        bt);
   }

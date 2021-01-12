@@ -12,6 +12,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/vector>
 
 #include "cmComputeLinkInformation.h"
@@ -1238,14 +1239,17 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   std::vector<std::string> preLinkCmdLines;
   std::vector<std::string> postBuildCmdLines;
 
-  if (config == fileConfig) {
-    std::vector<std::string>* cmdLineLists[3] = { &preLinkCmdLines,
-                                                  &preLinkCmdLines,
-                                                  &postBuildCmdLines };
+  std::vector<std::string>* cmdLineLists[3] = { &preLinkCmdLines,
+                                                &preLinkCmdLines,
+                                                &postBuildCmdLines };
 
-    for (unsigned i = 0; i != 3; ++i) {
-      for (cmCustomCommand const& cc : *cmdLists[i]) {
-        cmCustomCommandGenerator ccg(cc, config, this->GetLocalGenerator());
+  for (unsigned i = 0; i != 3; ++i) {
+    for (cmCustomCommand const& cc : *cmdLists[i]) {
+      if (config == fileConfig ||
+          this->GetLocalGenerator()->HasUniqueByproducts(cc.GetByproducts(),
+                                                         cc.GetBacktrace())) {
+        cmCustomCommandGenerator ccg(cc, fileConfig, this->GetLocalGenerator(),
+                                     true, config);
         localGen.AppendCustomCommandLines(ccg, *cmdLineLists[i]);
         std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
         std::transform(ccByproducts.begin(), ccByproducts.end(),

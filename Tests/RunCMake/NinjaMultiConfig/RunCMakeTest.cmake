@@ -187,6 +187,12 @@ run_ninja(SimpleCrossConfigs clean-all-in-release-graph build-Release.ninja clea
 run_cmake_build(SimpleCrossConfigs all-all-in-release-graph Release all:all)
 run_cmake_build(SimpleCrossConfigs all-relwithdebinfo-in-release-graph Release all:RelWithDebInfo)
 
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/PostBuild-build)
+set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
+run_cmake_configure(PostBuild)
+run_cmake_build(PostBuild release Release Exe)
+run_cmake_build(PostBuild debug-in-release-graph Release Exe:Debug)
+
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Framework-build)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
 run_cmake_configure(Framework)
