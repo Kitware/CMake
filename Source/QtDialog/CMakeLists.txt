@@ -213,6 +213,7 @@ else()
   qt_wrap_cpp(MOC_BUILT_SRCS ${MOC_SRCS})
   qt_add_resources(QRC_BUILT_SRCS ${QRC_SRCS})
 endif()
+add_library(CMakeGUIQRCLib OBJECT ${QRC_BUILT_SRCS})
 
 if (FALSE) # CMake's bootstrap binary does not support automoc
   set(CMAKE_AUTOMOC 1)
@@ -221,8 +222,7 @@ if (FALSE) # CMake's bootstrap binary does not support automoc
 else ()
   list(APPEND SRCS
     ${UI_BUILT_SRCS}
-    ${MOC_BUILT_SRCS}
-    ${QRC_BUILT_SRCS})
+    ${MOC_BUILT_SRCS})
 endif ()
 
 if(USE_LGPL)
@@ -246,6 +246,7 @@ target_link_libraries(CMakeGUIMainLib PUBLIC CMakeGUILib)
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx ${MANIFEST_FILE})
 target_link_libraries(cmake-gui CMakeGUIMainLib Qt${INSTALLED_QT_VERSION}::Core)
 
+target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeGUIQRCLib>)
 if(WIN32)
   target_sources(CMakeGUIMainLib INTERFACE $<TARGET_OBJECTS:CMakeVersion> CMakeSetup.rc)
 endif()
