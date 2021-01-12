@@ -519,7 +519,19 @@ else()
       endif()
 
       if(CUDAToolkit_NVCC_EXECUTABLE)
-        get_filename_component(CUDAToolkit_BIN_DIR "${CUDAToolkit_NVCC_EXECUTABLE}" DIRECTORY)
+        # If NVCC is a symlink due to a wrapper script (e.g. ccache or colornvcc), then invoke it to find the
+        # real non-scattered toolkit.
+        if(IS_SYMLINK ${CUDAToolkit_NVCC_EXECUTABLE})
+          execute_process(COMMAND ${CUDAToolkit_NVCC_EXECUTABLE} "-v" "__cmake_determine_cuda" ERROR_VARIABLE NVCC_ERR)
+          if(NVCC_ERR MATCHES " _HERE_=([^\r\n]*)")
+            set(CUDAToolkit_BIN_DIR "${CMAKE_MATCH_1}")
+          else()
+            message(FATAL_ERROR "Could not execute nvcc with -v.")
+          endif()
+          unset(NVCC_ERR)
+        else()
+          get_filename_component(CUDAToolkit_BIN_DIR "${CUDAToolkit_NVCC_EXECUTABLE}" DIRECTORY)
+        endif()
 
         set(CUDAToolkit_BIN_DIR "${CUDAToolkit_BIN_DIR}" CACHE PATH "" FORCE)
         mark_as_advanced(CUDAToolkit_BIN_DIR)
