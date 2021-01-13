@@ -71,6 +71,14 @@ The root object recognizes the following fields:
 
   An optional array of `Configure Preset`_ objects.
 
+``buildPresets``
+
+  An optional array of `Build Preset`_ objects.
+
+``testPresets``
+
+  An optional array of `Test Preset`_ objects.
+
 Configure Preset
 ^^^^^^^^^^^^^^^^
 
@@ -289,6 +297,489 @@ that may contain the following fields:
     An optional boolean. Setting this to ``true`` is equivalent to passing
     ``--debug-find`` on the command line.
 
+Build Preset
+^^^^^^^^^^^^
+
+Each entry of the ``buildPresets`` array is a JSON object
+that may contain the following fields:
+
+``name``
+
+  A required string representing the machine-friendly name of the preset.
+  This identifier is used in the ``--preset`` argument. There must not be
+  two presets (configure, build, or test) in the union of
+  ``CMakePresets.json`` and ``CMakeUserPresets.json`` in the same
+  directory with the same name.
+
+``hidden``
+
+  An optional boolean specifying whether or not a preset should be hidden.
+  If a preset is hidden, it cannot be used in the ``--preset`` argument
+  and does not have to have a valid ``configurePreset``, even from
+  inheritance. ``hidden`` presets are intended to be used as a base for
+  other presets to inherit via the ``inherits`` field.
+
+``inherits``
+
+  An optional array of strings representing the names of presets to
+  inherit from. The preset will inherit all of the fields from the
+  ``inherits`` presets by default (except ``name``, ``hidden``,
+  ``inherits``, ``description``, and ``displayName``), but can override
+  them as desired. If multiple ``inherits`` presets provide conflicting
+  values for the same field, the earlier preset in the ``inherits`` list
+  will be preferred. Presets in ``CMakePresets.json`` may not inherit from
+  presets in ``CMakeUserPresets.json``.
+
+  This field can also be a string, which is equivalent to an array
+  containing one string.
+
+``vendor``
+
+  An optional map containing vendor-specific information. CMake does not
+  interpret the contents of this field except to verify that it is a map
+  if it does exist. However, it should follow the same conventions as the
+  root-level ``vendor`` field. If vendors use their own per-preset
+  ``vendor`` field, they should implement inheritance in a sensible manner
+  when appropriate.
+
+``displayName``
+
+  An optional string with a human-friendly name of the preset.
+
+``description``
+
+  An optional string with a human-friendly description of the preset.
+
+``environment``
+
+  An optional map of environment variables. The key is the variable name
+  (which may not be an empty string), and the value is either ``null`` or
+  a string representing the value of the variable. Each variable is set
+  regardless of whether or not a value was given to it by the process's
+  environment. This field supports macro expansion, and environment
+  variables in this map may reference each other, and may be listed in any
+  order, as long as such references do not cause a cycle (for example, if
+  ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
+
+  Environment variables are inherited through the ``inherits`` field, and
+  the preset's environment will be the union of its own ``environment``
+  and the ``environment`` from all its parents. If multiple presets in
+  this union define the same variable, the standard rules of ``inherits``
+  are applied. Setting a variable to ``null`` causes it to not be set,
+  even if a value was inherited from another preset.
+
+``configurePreset``
+
+  An optional string specifying the name of a configure preset to
+  associate with this build preset. If ``configurePreset`` is not
+  specified, it must be inherited from the inherits preset (unless this
+  preset is hidden). The build tree directory is inferred from the
+  configure preset.
+
+``inheritConfigureEnvironment``
+
+  An optional boolean that defaults to true. If true, the environment
+  variables from the associated configure preset are inherited after all
+  inherited build preset environments, but before environment variables
+  explicitly specified in this build preset.
+
+``jobs``
+
+  An optional integer. Equivalent to passing ``--parallel`` or ``-j`` on
+  the command line.
+
+``targets``
+
+  An optional string or array of strings. Equivalent to passing
+  ``--target`` or ``-t`` on the command line. Vendors may ignore the
+  targets property or hide build presets that explicitly specify targets.
+  This field supports macro expansion.
+
+``configuration``
+
+  An optional string. Equivalent to passing ``--config`` on the command
+  line.
+
+``cleanFirst``
+
+  An optional bool. If true, equivalent to passing ``--clean-first`` on
+  the command line.
+
+``verbose``
+
+  An optional bool. If true, equivalent to passing ``--verbose`` on the
+  command line.
+
+``nativeToolOptions``
+
+  An optional array of strings. Equivalent to passing options after ``--``
+  on the command line. The array values support macro expansion.
+
+Test Preset
+^^^^^^^^^^^
+
+Each entry of the ``testPresets`` array is a JSON object
+that may contain the following fields:
+
+``name``
+
+  A required string representing the machine-friendly name of the preset.
+  This identifier is used in the ``--preset`` argument. There must not be
+  two presets (configure, build, or test) in the union of
+  ``CMakePresets.json`` and ``CMakeUserPresets.json`` in the same
+  directory with the same name.
+
+``hidden``
+
+  An optional boolean specifying whether or not a preset should be hidden.
+  If a preset is hidden, it cannot be used in the ``--preset`` argument
+  and does not have to have a valid ``configurePreset``, even from
+  inheritance. ``hidden`` presets are intended to be used as a base for
+  other presets to inherit via the ``inherits`` field.
+
+``inherits``
+
+  An optional array of strings representing the names of presets to
+  inherit from. The preset will inherit all of the fields from the
+  ``inherits`` presets by default (except ``name``, ``hidden``,
+  ``inherits``, ``description``, and ``displayName``), but can override
+  them as desired. If multiple ``inherits`` presets provide conflicting
+  values for the same field, the earlier preset in the ``inherits`` list
+  will be preferred. Presets in ``CMakePresets.json`` may not inherit from
+  presets in ``CMakeUserPresets.json``.
+
+  This field can also be a string, which is equivalent to an array
+  containing one string.
+
+``vendor``
+
+  An optional map containing vendor-specific information. CMake does not
+  interpret the contents of this field except to verify that it is a map
+  if it does exist. However, it should follow the same conventions as the
+  root-level ``vendor`` field. If vendors use their own per-preset
+  ``vendor`` field, they should implement inheritance in a sensible manner
+  when appropriate.
+
+``displayName``
+
+  An optional string with a human-friendly name of the preset.
+
+``description``
+
+  An optional string with a human-friendly description of the preset.
+
+``environment``
+
+  An optional map of environment variables. The key is the variable name
+  (which may not be an empty string), and the value is either ``null`` or
+  a string representing the value of the variable. Each variable is set
+  regardless of whether or not a value was given to it by the process's
+  environment. This field supports macro expansion, and environment
+  variables in this map may reference each other, and may be listed in any
+  order, as long as such references do not cause a cycle (for example, if
+  ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
+
+  Environment variables are inherited through the ``inherits`` field, and
+  the preset's environment will be the union of its own ``environment``
+  and the ``environment`` from all its parents. If multiple presets in
+  this union define the same variable, the standard rules of ``inherits``
+  are applied. Setting a variable to ``null`` causes it to not be set,
+  even if a value was inherited from another preset.
+
+``configurePreset``
+
+  An optional string specifying the name of a configure preset to
+  associate with this test preset. If ``configurePreset`` is not
+  specified, it must be inherited from the inherits preset (unless this
+  preset is hidden). The build tree directory is inferred from the
+  configure preset.
+
+``inheritConfigureEnvironment``
+
+  An optional boolean that defaults to true. If true, the environment
+  variables from the associated configure preset are inherited after all
+  inherited test preset environments, but before environment variables
+  explicitly specified in this test preset.
+
+``configuration``
+
+  An optional string. Equivalent to passing ``--build-config`` on the
+  command line.
+
+``overwriteConfigurationFile``
+
+  An optional array of configuration options to overwrite options
+  specified in the CTest configuration file. Equivalent to passing
+  ``--overwrite`` for each value in the array. The array values
+  support macro expansion.
+
+``output``
+
+  An optional object specifying output options. The object may contain the
+  following fields.
+
+  ``shortProgress``
+
+    An optional bool. If true, equivalent to passing ``--progress`` on the
+    command line.
+
+  ``verbosity``
+
+    An optional string specifying verbosity level. Must be one of the
+    following:
+
+    ``default``
+
+      Equivalent to passing no verbosity flags on the command line.
+
+    ``verbose``
+
+      Equivalent to passing ``--verbose`` on the command line.
+
+    ``extra``
+
+      Equivalent to passing ``--extra-verbose`` on the command line.
+
+  ``debug``
+
+    An optional bool. If true, equivalent to passing ``--debug`` on the
+    command line.
+
+  ``outputOnFailure``
+
+    An optional bool. If true, equivalent to passing
+    ``--output-on-failure`` on the command line.
+
+  ``quiet``
+
+    An optional bool. If true, equivalent to passing ``--quiet`` on the
+    command line.
+
+  ``outputLogFile``
+
+    An optional string specifying a path to a log file. Equivalent to
+    passing ``--output-log`` on the command line. This field supports
+    macro expansion.
+
+  ``labelSummary``
+
+    An optional bool. If false, equivalent to passing
+    ``--no-label-summary`` on the command line.
+
+  ``subprojectSummary``
+
+    An optional bool. If false, equivalent to passing
+    ``--no-subproject-summary`` on the command line.
+
+  ``maxPassedTestOutputSize``
+
+    An optional integer specifying the maximum output for passed tests in
+    bytes. Equivalent to passing ``--test-output-size-passed`` on the
+    command line.
+
+  ``maxFailedTestOutputSize``
+
+    An optional integer specifying the maximum output for failed tests in
+    bytes. Equivalent to passing ``--test-output-size-failed`` on the
+    command line.
+
+  ``maxTestNameWidth``
+
+    An optional integer specifying the maximum width of a test name to
+    output. Equivalent to passing ``--max-width`` on the command line.
+
+``filter``
+
+  An optional object specifying how to filter the tests to run. The object
+  may contain the following fields.
+
+  ``include``
+
+    An optional object specifying which tests to include. The object may
+    contain the following fields.
+
+    ``name``
+
+      An optional string specifying a regex for test names. Equivalent to
+      passing ``--tests-regex`` on the command line. This field supports
+      macro expansion.
+
+
+    ``label``
+
+      An optional string specifying a regex for test labels. Equivalent to
+      passing ``--label-regex`` on the command line. This field supports
+      macro expansion.
+
+    ``useUnion``
+
+      An optional bool. Equivalent to passing ``--union`` on the command
+      line.
+
+    ``index``
+
+      An optional object specifying tests to include by test index. The
+      object may contain the following fields. Can also be an optional
+      string specifying a file with the command line syntax for
+      ``--tests-information``. If specified as a string, this field
+      supports macro expansion.
+
+      ``start``
+
+        An optional integer specifying a test index to start testing at.
+
+      ``end``
+
+        An optional integer specifying a test index to stop testing at.
+
+      ``stride``
+
+        An optional integer specifying the increment.
+
+      ``specificTests``
+
+        An optional array of integers specifying specific test indices to
+        run.
+
+  ``exclude``
+
+    An optional object specifying which tests to exclude. The object may
+    contain the following fields.
+
+    ``name``
+
+      An optional string specifying a regex for test names. Equivalent to
+      passing ``--exclude-regex`` on the command line. This field supports
+      macro expansion.
+
+    ``label``
+
+      An optional string specifying a regex for test labels. Equivalent to
+      passing ``--label-exclude`` on the command line. This field supports
+      macro expansion.
+
+    ``fixtures``
+
+      An optional object specifying which fixtures to exclude from adding
+      tests. The object may contain the following fields.
+
+      ``any``
+
+        An optional string specifying a regex for text fixtures to exclude
+        from adding any tests. Equivalent to ``--fixture-exclude-any`` on
+        the command line. This field supports macro expansion.
+
+      ``setup``
+
+        An optional string specifying a regex for text fixtures to exclude
+        from adding setup tests. Equivalent to ``--fixture-exclude-setup``
+        on the command line. This field supports macro expansion.
+
+      ``cleanup``
+
+        An optional string specifying a regex for text fixtures to exclude
+        from adding cleanup tests. Equivalent to
+        ``--fixture-exclude-cleanup`` on the command line. This field
+        supports macro expansion.
+
+``execution``
+
+  An optional object specifying options for test execution. The object may
+  contain the following fields.
+
+  ``stopOnFailure``
+
+    An optional bool. If true, equivalent to passing ``--stop-on-failure``
+    on the command line.
+
+  ``enableFailover``
+
+    An optional bool. If true, equivalent to passing ``-F`` on the command
+    line.
+
+  ``jobs``
+
+    An optional integer. Equivalent to passing ``--parallel`` on the
+    command line.
+
+  ``resourceSpecFile``
+
+    An optional string. Equivalent to passing ``--resource-spec-file`` on
+    the command line. This field supports macro expansion.
+
+  ``testLoad``
+
+    An optional integer. Equivalent to passing ``--test-load`` on the
+    command line.
+
+  ``showOnly``
+
+    An optional string. Equivalent to passing ``--show-only`` on the
+    command line. The string must be one of the following values:
+
+    ``human``
+
+    ``json-v1``
+
+  ``rerunFailed``
+
+    An optional bool. If true, equivalent to passing ``--rerun-failed`` on
+    the command line.
+
+  ``repeat``
+
+    An optional object specifying how to repeat tests. Equivalent to
+    passing ``--repeat`` on the command line. The object must have the
+    following fields.
+
+    ``mode``
+
+      A required string. Must be one of the following values:
+
+      ``until-fail``
+
+      ``until-pass``
+
+      ``after-timeout``
+
+    ``count``
+
+      A required integer.
+
+  ``interactiveDebugging``
+
+    An optional bool. If true, equivalent to passing
+    ``--interactive-debug-mode 1`` on the command line. If false,
+    equivalent to passing ``--interactive-debug-mode 0`` on the command
+    line.
+
+  ``scheduleRandom``
+
+    An optional bool. If true, equivalent to passing ``--schedule-random``
+    on the command line.
+
+  ``timeout``
+
+    An optional integer. Equivalent to passing ``--timeout`` on the
+    command line.
+
+  ``noTestsAction``
+
+    An optional string specifying the behavior if no tests are found. Must
+    be one of the following values:
+
+    ``default``
+
+      Equivalent to not passing any value on the command line.
+
+    ``error``
+
+      Equivalent to passing ``--no-tests=error`` on the command line.
+
+    ``ignore``
+
+      Equivalent to passing ``--no-tests=ignore`` on the command line.
+
 Macro Expansion
 ^^^^^^^^^^^^^^^
 
@@ -326,7 +817,9 @@ Recognized macros include:
 
 ``${generator}``
 
-  Generator specified in the preset's ``generator`` field.
+  Generator specified in the preset's ``generator`` field. For build and
+  test presets, this will evaluate to the generator specified by
+  ``configurePreset``.
 
 ``${dollar}``
 

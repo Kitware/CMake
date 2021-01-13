@@ -382,7 +382,8 @@ Options
  ``<path-to-source>/CMakePresets.json`` and
  ``<path-to-source>/CMakeUserPresets.json``. The preset specifies the
  generator and the build directory, and optionally a list of variables and
- other arguments to pass to CMake. The :manual:`CMake GUI <cmake-gui(1)>` can
+ other arguments to pass to CMake. The current working directory must contain
+ CMake preset files. The :manual:`CMake GUI <cmake-gui(1)>` can
  also recognize ``CMakePresets.json`` and ``CMakeUserPresets.json`` files. For
  full details on these files, see :manual:`cmake-presets(7)`.
 
@@ -391,6 +392,10 @@ Options
  manually specifying them on the command line. For example, if the preset sets
  a variable called ``MYVAR`` to ``1``, but the user sets it to ``2`` with a
  ``-D`` argument, the value ``2`` is preferred.
+
+``--list-presets, --list-presets=<[configure | build | test | all]>``
+ Lists the available presets. If no option is specified only configure presets
+ will be listed. The current working directory must contain CMake preset files.
 
 .. _`Build Tool Mode`:
 
@@ -402,13 +407,24 @@ project binary tree:
 
 .. code-block:: shell
 
-  cmake --build <dir> [<options>] [-- <build-tool-options>]
+  cmake --build [<dir> | --preset <preset>] [<options>] [-- <build-tool-options>]
 
 This abstracts a native build tool's command-line interface with the
 following options:
 
 ``--build <dir>``
-  Project binary directory to be built.  This is required and must be first.
+  Project binary directory to be built.  This is required (unless a preset
+  is specified) and must be first.
+
+``--preset <preset>``
+  Use a build preset to specify build options. The project binary directory
+  is inferred from the ``configurePreset`` key. The current working directory
+  must contain CMake preset files.
+  See :manual:`preset <cmake-presets(7)>` for more details.
+
+``--list-presets``
+  Lists the available build presets. The current working directory must
+  contain CMake preset files.
 
 ``--parallel [<jobs>], -j [<jobs>]``
   The maximum number of concurrent processes to use when building.
