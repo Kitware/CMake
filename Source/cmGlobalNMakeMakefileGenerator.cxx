@@ -21,6 +21,8 @@ cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator(cmake* cm)
   this->PassMakeflags = true;
   this->UnixCD = false;
   this->MakeSilentFlag = "/nologo";
+  // nmake breaks on '!' in long-line dependencies
+  this->ToolSupportsLongLineDependencies = false;
 }
 
 void cmGlobalNMakeMakefileGenerator::EnableLanguage(
