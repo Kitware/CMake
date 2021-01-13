@@ -929,17 +929,8 @@ bool HandleIsPrefixCommand(std::vector<std::string> const& args,
 bool HandleHashCommand(std::vector<std::string> const& args,
                        cmExecutionStatus& status)
 {
-  if (args.size() < 3 || args.size() > 4) {
-    status.SetError("HASH must be called with two or three arguments.");
-    return false;
-  }
-
-  static NormalizeParser const parser;
-
-  const auto arguments = parser.Parse(args);
-
-  if (parser.GetInputs().size() != 1) {
-    status.SetError("HASH called with unexpected arguments.");
+  if (args.size() != 3) {
+    status.SetError("HASH must be called with two arguments.");
     return false;
   }
 
@@ -948,15 +939,14 @@ bool HandleHashCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const auto& output = parser.GetInputs().front();
+  const auto& output = args[2];
 
   if (output.empty()) {
     status.SetError("Invalid name for output variable.");
     return false;
   }
 
-  auto hash = hash_value(arguments.Normalize ? cmCMakePath(inputPath).Normal()
-                                             : cmCMakePath(inputPath));
+  auto hash = hash_value(cmCMakePath(inputPath).Normal());
 
   std::ostringstream out;
   out << std::setbase(16) << hash;

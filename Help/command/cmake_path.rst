@@ -156,7 +156,7 @@ Synopsis
     cmake_path(`IS_PREFIX`_ <path-var> <input> [NORMALIZE] <out-var>)
 
   `Hashing`_
-    cmake_path(`HASH`_ <path-var> [NORMALIZE] <out-var>)
+    cmake_path(`HASH`_ <path-var> <out-var>)
 
 Decomposition
 ^^^^^^^^^^^^^
@@ -807,11 +807,10 @@ Hashing
 
 .. code-block:: cmake
 
-    cmake_path(HASH <path-var> [NORMALIZE] <out-var>)
+    cmake_path(HASH <path-var> <out-var>)
 
 Compute hash value of ``<path-var>`` such that if for two paths (``p1`` and
 ``p2``) are equal (:ref:`COMPARE ... EQUAL <COMPARE>`) then hash value of p1 is
 equal to hash value of p2.
 
-When ``NORMALIZE`` option is specified, the paths are :ref:`normalized
-<NORMAL_PATH>` before the check.
+Path is always :ref:`normalized <NORMAL_PATH>` before the hash is computed.
