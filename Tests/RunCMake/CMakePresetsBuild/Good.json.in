@@ -1,0 +1,78 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "default",
+            "generator": "@RunCMake_GENERATOR@",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "environment": {
+                "TEST_ENV_": "Environment variable",
+                "TEST_ENV_OVERRIDE_": "Environment variable",
+                "TEST_ENV_OVERRIDE_REF": "x$env{TEST_ENV_OVERRIDE_}x"
+            }
+        },
+        {
+            "name": "other",
+            "inherits": "default",
+            "environment": {
+                "TEST_ENV_": "other"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-default",
+            "hidden": true,
+            "inherits": [],
+            "configurePreset": "default",
+            "vendor": {},
+            "displayName": "",
+            "description": "",
+            "inheritConfigureEnvironment": true,
+            "environment": {},
+            "jobs": 0,
+            "targets": [],
+            "configuration": "",
+            "verbose": true,
+            "nativeToolOptions": []
+        },
+        {
+            "name": "build-other",
+            "configurePreset": "other"
+        },
+        {
+            "name": "withEnvironment",
+            "inherits": "build-default",
+            "environment": {
+                "TEST_ENV_OVERRIDE_": "Overridden",
+                "TEST_ENV_REF": "x$env{TEST_ENV_}x",
+                "TEST_ENV_OVERRIDE_REF": "x$env{TEST_ENV_OVERRIDE_}x"
+            }
+        },
+        {
+            "name": "noEnvironment",
+            "inherits": "build-default",
+            "inheritConfigureEnvironment": false
+        },
+        {
+            "name": "macros",
+            "inherits": "build-default",
+            "inheritConfigureEnvironment": false,
+            "environment": {
+                "TEST_SOURCE_DIR_": "x${sourceDir}x",
+                "TEST_SOURCE_PARENT_DIR": "x${sourceParentDir}x",
+                "TEST_SOURCE_DIR_NAME": "x${sourceDirName}x",
+                "TEST_PRESET_NAME": "x${presetName}x",
+                "TEST_GENERATOR": "x${generator}x",
+                "TEST_DOLLAR": "x${dollar}x"
+            }
+        },
+        {
+            "name": "vendorObject",
+            "configurePreset": "default",
+            "vendor": {
+                "example.com": "value"
+            }
+        }
+    ]
+}
