@@ -31,6 +31,7 @@ public:
   bool Compute(cmLocalGenerator* lg) override;
 
   std::string GetDestination(std::string const& config) const;
+  std::string GetRename(std::string const& config) const;
 
 protected:
   void GenerateScriptActions(std::ostream& os, Indent indent) override;

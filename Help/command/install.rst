@@ -473,6 +473,11 @@ this advice while installing headers to a project-specific subdirectory:
   use "generator expressions" with the syntax ``$<...>``.  See the
   :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
+.. versionadded:: 3.20
+  An install rename given as a ``RENAME`` argument may
+  use "generator expressions" with the syntax ``$<...>``.  See the
+  :manual:`cmake-generator-expressions(7)` manual for available expressions.
+
 Installing Directories
 ^^^^^^^^^^^^^^^^^^^^^^
 

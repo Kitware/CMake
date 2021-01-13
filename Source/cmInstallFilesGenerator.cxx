@@ -25,8 +25,12 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
   , Programs(programs)
   , Optional(optional)
 {
-  // We need per-config actions if the destination has generator expressions.
+  // We need per-config actions if the destination and rename have generator
+  // expressions.
   if (cmGeneratorExpression::Find(this->Destination) != std::string::npos) {
+    this->ActionsPerConfig = true;
+  }
+  if (cmGeneratorExpression::Find(this->Rename) != std::string::npos) {
     this->ActionsPerConfig = true;
   }
 
@@ -56,6 +60,12 @@ std::string cmInstallFilesGenerator::GetDestination(
                                          this->LocalGenerator, config);
 }
 
+std::string cmInstallFilesGenerator::GetRename(std::string const& config) const
+{
+  return cmGeneratorExpression::Evaluate(this->Rename, this->LocalGenerator,
+                                         config);
+}
+
 void cmInstallFilesGenerator::AddFilesInstallRule(
   std::ostream& os, std::string const& config, Indent indent,
   std::vector<std::string> const& files)
@@ -66,7 +76,7 @@ void cmInstallFilesGenerator::AddFilesInstallRule(
     os, this->GetDestination(config),
     (this->Programs ? cmInstallType_PROGRAMS : cmInstallType_FILES), files,
     this->Optional, this->FilePermissions.c_str(), no_dir_permissions,
-    this->Rename.c_str(), nullptr, indent);
+    this->GetRename(config).c_str(), nullptr, indent);
 }
 
 void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
