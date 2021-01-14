@@ -10,5 +10,5 @@
     ],
     "projectName": "External",
     "minimumCMakeVersion": "3.12",
-    "hasInstallRule": null
+    "hasInstallRule": true
 }

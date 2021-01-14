@@ -443,7 +443,8 @@ Version 1 does not exist to avoid confusion with that from
             "hasInstallRule": true,
             "minimumCMakeVersion": {
               "string": "3.14"
-            }
+            },
+            "jsonFile": "<file>"
           },
           {
             "source": "sub",
@@ -453,7 +454,8 @@ Version 1 does not exist to avoid confusion with that from
             "targetIndexes": [ 1 ],
             "minimumCMakeVersion": {
               "string": "3.14"
-            }
+            },
+            "jsonFile": "<file>"
           }
         ],
         "projects": [
@@ -569,6 +571,13 @@ The members specific to ``codemodel`` objects are:
       :command:`install` rules, i.e. whether a ``make install``
       or equivalent rule is available.
 
+    ``jsonFile``
+      A JSON string specifying a path relative to the codemodel file
+      to another JSON file containing a
+      `"codemodel" version 2 "directory" object`_.
+
+      This field was added in codemodel version 2.3.
+
   ``projects``
     A JSON array of entries corresponding to the top-level project
     and sub-projects defined in the build system.  Each (sub-)project
@@ -632,6 +641,30 @@ The members specific to ``codemodel`` objects are:
       A JSON string specifying a path relative to the codemodel file
       to another JSON file containing a
       `"codemodel" version 2 "target" object`_.
+
+"codemodel" version 2 "directory" object
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A codemodel "directory" object is referenced by a `"codemodel" version 2`_
+object's ``directories`` array.  Each "directory" object is a JSON object
+with members:
+
+``paths``
+  A JSON object containing members:
+
+  ``source``
+    A string specifying the path to the source directory, represented
+    with forward slashes.  If the directory is inside the top-level
+    source directory then the path is specified relative to that
+    directory (with ``.`` for the top-level source directory itself).
+    Otherwise the path is absolute.
+
+  ``build``
+    A string specifying the path to the build directory, represented
+    with forward slashes.  If the directory is inside the top-level
+    build directory then the path is specified relative to that
+    directory (with ``.`` for the top-level build directory itself).
+    Otherwise the path is absolute.
 
 "codemodel" version 2 "target" object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

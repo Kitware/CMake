@@ -273,6 +273,7 @@ class CodemodelConfig
 
   Json::Value DumpDirectories();
   Json::Value DumpDirectory(Directory& d);
+  Json::Value DumpDirectoryObject(Directory& d);
 
   Json::Value DumpProjects();
   Json::Value DumpProject(Project& p);
@@ -372,6 +373,20 @@ struct hash<CompileData>
 } // namespace std
 
 namespace {
+class DirectoryObject
+{
+  cmLocalGenerator const* LG = nullptr;
+  std::string const& Config;
+  std::string TopSource;
+  std::string TopBuild;
+
+  Json::Value DumpPaths();
+
+public:
+  DirectoryObject(cmLocalGenerator const* lg, std::string const& config);
+  Json::Value Dump();
+};
+
 class Target
 {
   cmGeneratorTarget* GT;
@@ -684,7 +699,7 @@ Json::Value CodemodelConfig::DumpDirectories()
 
 Json::Value CodemodelConfig::DumpDirectory(Directory& d)
 {
-  Json::Value directory = Json::objectValue;
+  Json::Value directory = this->DumpDirectoryObject(d);
 
   std::string sourceDir = d.Snapshot.GetDirectory().GetCurrentSource();
   directory["source"] = RelativeIfUnder(this->TopSource, sourceDir);
@@ -722,6 +737,31 @@ Json::Value CodemodelConfig::DumpDirectory(Directory& d)
   }
 
   return directory;
+}
+
+Json::Value CodemodelConfig::DumpDirectoryObject(Directory& d)
+{
+  std::string prefix = "directory";
+  std::string sourceDirRel = RelativeIfUnder(
+    this->TopSource, d.Snapshot.GetDirectory().GetCurrentSource());
+  std::string buildDirRel = RelativeIfUnder(
+    this->TopBuild, d.Snapshot.GetDirectory().GetCurrentBinary());
+  if (!cmSystemTools::FileIsFullPath(buildDirRel)) {
+    prefix = cmStrCat(prefix, '-', buildDirRel);
+  } else if (!cmSystemTools::FileIsFullPath(sourceDirRel)) {
+    prefix = cmStrCat(prefix, '-', sourceDirRel);
+  }
+  for (char& c : prefix) {
+    if (c == '/' || c == '\\') {
+      c = '.';
+    }
+  }
+  if (!this->Config.empty()) {
+    prefix += "-" + this->Config;
+  }
+
+  DirectoryObject dir(d.LocalGenerator, this->Config);
+  return this->FileAPI.MaybeJsonFile(dir.Dump(), prefix);
 }
 
 Json::Value CodemodelConfig::DumpProjects()
@@ -765,6 +805,36 @@ Json::Value CodemodelConfig::DumpMinimumCMakeVersion(cmStateSnapshot s)
     minimumCMakeVersion["string"] = *def;
   }
   return minimumCMakeVersion;
+}
+
+DirectoryObject::DirectoryObject(cmLocalGenerator const* lg,
+                                 std::string const& config)
+  : LG(lg)
+  , Config(config)
+  , TopSource(lg->GetGlobalGenerator()->GetCMakeInstance()->GetHomeDirectory())
+  , TopBuild(
+      lg->GetGlobalGenerator()->GetCMakeInstance()->GetHomeOutputDirectory())
+{
+}
+
+Json::Value DirectoryObject::Dump()
+{
+  Json::Value directoryObject = Json::objectValue;
+  directoryObject["paths"] = this->DumpPaths();
+  return directoryObject;
+}
+
+Json::Value DirectoryObject::DumpPaths()
+{
+  Json::Value paths = Json::objectValue;
+
+  std::string const& sourceDir = this->LG->GetCurrentSourceDirectory();
+  paths["source"] = RelativeIfUnder(this->TopSource, sourceDir);
+
+  std::string const& buildDir = this->LG->GetCurrentBinaryDirectory();
+  paths["build"] = RelativeIfUnder(this->TopBuild, buildDir);
+
+  return paths;
 }
 
 Target::Target(cmGeneratorTarget* gt, std::string const& config)

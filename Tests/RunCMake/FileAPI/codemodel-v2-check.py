@@ -12,7 +12,7 @@ def read_codemodel_json_data(filename):
 def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
-    check_index_object(o[0], "codemodel", 2, 2, check_object_codemodel(g))
+    check_index_object(o[0], "codemodel", 2, 3, check_object_codemodel(g))
 
 def check_backtrace(t, b, backtrace):
     btg = t["backtraceGraph"]
@@ -55,7 +55,7 @@ def check_backtraces(t, actual, expected):
 def check_directory(c):
     def _check(actual, expected):
         assert is_dict(actual)
-        expected_keys = ["build", "source", "projectIndex"]
+        expected_keys = ["build", "jsonFile", "source", "projectIndex"]
         assert matches(actual["build"], expected["build"])
 
         assert is_int(actual["projectIndex"])
@@ -91,6 +91,17 @@ def check_directory(c):
             assert is_bool(actual["hasInstallRule"], expected["hasInstallRule"])
 
         assert sorted(actual.keys()) == sorted(expected_keys)
+
+        assert is_string(actual["jsonFile"])
+        filepath = os.path.join(reply_dir, actual["jsonFile"])
+        with open(filepath) as f:
+            d = json.load(f)
+
+        assert is_dict(d)
+        assert sorted(d.keys()) == ["paths"]
+
+        assert is_string(d["paths"]["source"], actual["source"])
+        assert is_string(d["paths"]["build"], actual["build"])
 
     return _check
 
@@ -704,6 +715,13 @@ def gen_check_targets(c, g, inSource):
     if sys.platform not in ("win32", "cygwin", "msys"):
         for e in expected:
             e["artifacts"] = filter_list(lambda a: not a["_dllExtra"], e["artifacts"])
+            if e["install"] is not None:
+                e["install"]["destinations"] = filter_list(lambda d: "_dllExtra" not in d or not d["_dllExtra"], e["install"]["destinations"])
+
+    else:
+        for e in expected:
+            if e["install"] is not None:
+                e["install"]["destinations"] = filter_list(lambda d: "_namelink" not in d or not d["_namelink"], e["install"]["destinations"])
 
     if "aix" not in sys.platform:
         for e in expected:
