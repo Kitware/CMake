@@ -134,8 +134,7 @@ that may contain the following fields:
   argument, you cannot include the platform name in the generator name. Use
   the ``architecture`` field instead.
 
-``architecture``
-``toolset``
+``architecture``, ``toolset``
 
   Optional fields representing the platform and toolset, respectively, for
   generators that support them. Each may be either a string or an object
