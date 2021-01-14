@@ -162,8 +162,8 @@ The root object recognizes the following fields:
   ``binaryDir``
 
     An optional string representing the path to the output binary directory.
-    This field supports macro expansion. If a relative path is specified, it
-    is calculated relative to the source directory. If ``binaryDir`` is not
+    This field supports `macro expansion`_. If a relative path is specified,
+    it is calculated relative to the source directory. If ``binaryDir`` is not
     specified, it must be inherited from the ``inherits`` preset (unless this
     preset is ``hidden``).
 
@@ -179,7 +179,7 @@ The root object recognizes the following fields:
     may not be an empty string), and the value is either ``null``, a boolean
     (which is equivalent to a value of ``"TRUE"`` or ``"FALSE"`` and a type
     of ``BOOL``), a string representing the value of the variable (which
-    supports macro expansion), or an object with the following fields:
+    supports `macro expansion`_), or an object with the following fields:
 
     ``type``
 
@@ -189,7 +189,7 @@ The root object recognizes the following fields:
 
       A required string or boolean representing the value of the variable.
       A boolean is equivalent to ``"TRUE"`` or ``"FALSE"``. This field
-      supports macro expansion.
+      supports `macro expansion`_.
 
     Cache variables are inherited through the ``inherits`` field, and the
     preset's variables will be the union of its own ``cacheVariables`` and
@@ -204,7 +204,7 @@ The root object recognizes the following fields:
     (which may not be an empty string), and the value is either ``null`` or
     a string representing the value of the variable. Each variable is set
     regardless of whether or not a value was given to it by the process's
-    environment. This field supports macro expansion, and environment
+    environment. This field supports `macro expansion`_, and environment
     variables in this map may reference each other, and may be listed in any
     order, as long as such references do not cause a cycle (for example,
     if ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
@@ -284,6 +284,9 @@ The root object recognizes the following fields:
 
       An optional boolean. Setting this to ``true`` is equivalent to passing
       ``--debug-find`` on the command line.
+
+Macro Expansion
+^^^^^^^^^^^^^^^
 
 As mentioned above, some fields support macro expansion. Macros are
 recognized in the form ``$<macro-namespace>{<macro-name>}``. All macros are
