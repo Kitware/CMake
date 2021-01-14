@@ -98,10 +98,12 @@ def check_directory(c):
             d = json.load(f)
 
         assert is_dict(d)
-        assert sorted(d.keys()) == ["paths"]
+        assert sorted(d.keys()) == ["backtraceGraph", "paths"]
 
         assert is_string(d["paths"]["source"], actual["source"])
         assert is_string(d["paths"]["build"], actual["build"])
+
+        check_backtrace_graph(d["backtraceGraph"])
 
     return _check
 

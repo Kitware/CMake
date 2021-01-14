@@ -666,6 +666,10 @@ with members:
     directory (with ``.`` for the top-level build directory itself).
     Otherwise the path is absolute.
 
+``backtraceGraph``
+  A `"codemodel" version 2 "backtrace graph"`_ whose nodes are referenced
+  from ``backtrace`` members elsewhere in this "directory" object.
+
 "codemodel" version 2 "target" object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1003,10 +1007,10 @@ with members:
 "codemodel" version 2 "backtrace graph"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``backtraceGraph`` member of a `"codemodel" version 2 "target" object`_
-is a JSON object describing a graph of backtraces.  Its nodes are referenced
-from ``backtrace`` members elsewhere in the containing object.
-The backtrace graph object members are:
+The ``backtraceGraph`` member of a `"codemodel" version 2 "directory" object`_,
+or `"codemodel" version 2 "target" object`_ is a JSON object describing a
+graph of backtraces.  Its nodes are referenced from ``backtrace`` members
+elsewhere in the containing object.  The backtrace graph object members are:
 
 ``nodes``
   A JSON array listing nodes in the backtrace graph.  Each entry

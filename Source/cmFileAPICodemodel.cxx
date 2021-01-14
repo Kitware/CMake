@@ -379,6 +379,9 @@ class DirectoryObject
   std::string const& Config;
   std::string TopSource;
   std::string TopBuild;
+  BacktraceData Backtraces;
+
+  void AddBacktrace(Json::Value& object, cmListFileBacktrace const& bt);
 
   Json::Value DumpPaths();
 
@@ -814,6 +817,7 @@ DirectoryObject::DirectoryObject(cmLocalGenerator const* lg,
   , TopSource(lg->GetGlobalGenerator()->GetCMakeInstance()->GetHomeDirectory())
   , TopBuild(
       lg->GetGlobalGenerator()->GetCMakeInstance()->GetHomeOutputDirectory())
+  , Backtraces(this->TopSource)
 {
 }
 
@@ -821,7 +825,16 @@ Json::Value DirectoryObject::Dump()
 {
   Json::Value directoryObject = Json::objectValue;
   directoryObject["paths"] = this->DumpPaths();
+  directoryObject["backtraceGraph"] = this->Backtraces.Dump();
   return directoryObject;
+}
+
+void DirectoryObject::AddBacktrace(Json::Value& object,
+                                   cmListFileBacktrace const& bt)
+{
+  if (JBTIndex backtrace = this->Backtraces.Add(bt)) {
+    object["backtrace"] = backtrace.Index;
+  }
 }
 
 Json::Value DirectoryObject::DumpPaths()
