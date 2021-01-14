@@ -62,6 +62,10 @@ public:
 
   virtual bool Compute(cmLocalGenerator*) { return true; }
 
+  std::string const& GetComponent() const { return this->Component; }
+
+  bool GetExcludeFromAll() const { return this->ExcludeFromAll; }
+
   cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
 
 protected:
