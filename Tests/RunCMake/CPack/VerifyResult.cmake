@@ -79,6 +79,11 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
           "which does not match:${msg_expected}\n"
           "${output_error_message}")
       endif()
+    elseif(foundFilescount_ EQUAL 0)
+      message(FATAL_ERROR
+        "Found no files for file No. '${file_no_}'!"
+        " Globbing expression: '${EXPECTED_FILE_${file_no_}}'"
+        "${output_error_message}")
     else()
       message(FATAL_ERROR
         "Found more than one file for file No. '${file_no_}'!"
