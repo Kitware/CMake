@@ -123,6 +123,10 @@ documentation:
 ``command``
  A CMake language command.
 
+``cpack_gen``
+ A CPack package generator.
+ See the `cpack(1)`_ command-line tool's ``-G`` option.
+
 ``envvar``
  An environment variable.
  See the `cmake-env-variables(7)`_ manual
@@ -198,6 +202,7 @@ the first approach above.
 .. _`cmake-properties(7)`: https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html
 .. _`cmake-variables(7)`: https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html
 .. _`cmake_policy()`: https://cmake.org/cmake/help/latest/command/cmake_policy.html
+.. _`cpack(1)`: https://cmake.org/cmake/help/latest/manual/cpack.1.html
 .. _`include()`: https://cmake.org/cmake/help/latest/command/include.html
 .. _`set()`: https://cmake.org/cmake/help/latest/command/set.html
 .. _`set_property()`: https://cmake.org/cmake/help/latest/command/set_property.html
