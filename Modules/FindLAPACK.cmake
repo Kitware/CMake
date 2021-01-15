@@ -72,6 +72,12 @@ The following variables may be set to influence this module's behavior:
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95/LAPACK95 interfaces
 
+``BLA_PREFER_PKGCONFIG``
+  .. versionadded:: 3.20
+
+  if set ``pkg-config`` will be used to search for a LAPACK library first
+  and if one is found that is preferred
+
 Imported targets
 ^^^^^^^^^^^^^^^^
 
@@ -120,6 +126,26 @@ else()
 endif()
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
+function(_add_lapack_target)
+  if(LAPACK_FOUND AND NOT TARGET LAPACK::LAPACK)
+    add_library(LAPACK::LAPACK INTERFACE IMPORTED)
+    set(_lapack_libs "${LAPACK_LIBRARIES}")
+    if(_lapack_libs AND TARGET BLAS::BLAS)
+      # remove the ${BLAS_LIBRARIES} from the interface and replace it
+      # with the BLAS::BLAS target
+      list(REMOVE_ITEM _lapack_libs "${BLAS_LIBRARIES}")
+      list(APPEND _lapack_libs BLAS::BLAS)
+    endif()
+
+    if(_lapack_libs)
+      set_target_properties(LAPACK::LAPACK PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${_lapack_libs}"
+      )
+    endif()
+    unset(_lapack_libs)
+  endif()
+endfunction()
 
 macro(_lapack_find_library_setup)
   cmake_push_check_state()
@@ -263,6 +289,21 @@ endif()
 # Load BLAS
 if(NOT LAPACK_NOT_FOUND_MESSAGE)
   _lapack_find_dependency(BLAS)
+endif()
+
+# Search with pkg-config if specified
+if(BLA_PREFER_PKGCONFIG)
+  find_package(PkgConfig)
+  pkg_check_modules(PKGC_LAPACK lapack)
+  if(PKGC_LAPACK_FOUND)
+    set(LAPACK_FOUND TRUE)
+    set(LAPACK_LIBRARIES "${PKGC_LAPACK_LINK_LIBRARIES}")
+    if (BLAS_LIBRARIES)
+      list(APPEND LAPACK_LIBRARIES "${BLAS_LIBRARIES}")
+    endif()
+    _add_lapack_target()
+    return()
+  endif()
 endif()
 
 # Search for different LAPACK distributions if BLAS is found
@@ -585,21 +626,6 @@ if(LAPACK_LIBRARIES STREQUAL "LAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
   set(LAPACK_LIBRARIES "")
 endif()
 
-if(LAPACK_FOUND AND NOT TARGET LAPACK::LAPACK)
-  add_library(LAPACK::LAPACK INTERFACE IMPORTED)
-  set(_lapack_libs "${LAPACK_LIBRARIES}")
-  if(_lapack_libs AND TARGET BLAS::BLAS)
-    # remove the ${BLAS_LIBRARIES} from the interface and replace it
-    # with the BLAS::BLAS target
-    list(REMOVE_ITEM _lapack_libs "${BLAS_LIBRARIES}")
-  endif()
-
-  if(_lapack_libs)
-    set_target_properties(LAPACK::LAPACK PROPERTIES
-      INTERFACE_LINK_LIBRARIES "${_lapack_libs}"
-    )
-  endif()
-  unset(_lapack_libs)
-endif()
+_add_lapack_target()
 
 _lapack_find_library_teardown()
