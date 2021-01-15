@@ -1364,9 +1364,15 @@ void cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
     }
   }
   if (this->LogWithPID) {
-    cmSystemTools::RemoveFile(ofile);
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Remove: " << ofile << "\n", this->Quiet);
+    auto pos = ofile.find_last_of('.');
+    if (pos != std::string::npos) {
+      auto ofileWithoutPid = ofile.substr(0, pos);
+      cmSystemTools::RenameFile(ofile, ofileWithoutPid);
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                         "Renaming: " << ofile << " to: " << ofileWithoutPid
+                                      << "\n",
+                         this->Quiet);
+    }
   }
 }
 
