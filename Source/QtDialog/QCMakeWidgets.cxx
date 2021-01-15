@@ -25,7 +25,7 @@ QCMakeFileEditor::QCMakeFileEditor(QWidget* p, QString var)
   this->ToolButton = new QToolButton(this);
   this->ToolButton->setText("...");
   this->ToolButton->setCursor(QCursor(Qt::ArrowCursor));
-  QObject::connect(this->ToolButton, &QToolButton::clicked, this,
+  QObject::connect(this->ToolButton, &QAbstractButton::clicked, this,
                    &QCMakeFileEditor::chooseFile);
 }
 

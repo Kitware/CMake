@@ -106,9 +106,9 @@ EnvironmentDialog::EnvironmentDialog(const QProcessEnvironment& environment,
   this->Environment->setSelectionMode(QAbstractItemView::ExtendedSelection);
   this->Environment->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-  QObject::connect(this->AddEntry, &QToolButton::clicked, this,
+  QObject::connect(this->AddEntry, &QAbstractButton::clicked, this,
                    &EnvironmentDialog::addEntry);
-  QObject::connect(this->RemoveEntry, &QToolButton::clicked, this,
+  QObject::connect(this->RemoveEntry, &QAbstractButton::clicked, this,
                    &EnvironmentDialog::removeSelectedEntries);
   QObject::connect(this->Search, &QLineEdit::textChanged, this->m_filter,
                    &EnvironmentSearchFilter::setFilterFixedString);
