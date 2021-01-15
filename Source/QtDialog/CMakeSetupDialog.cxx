@@ -22,7 +22,6 @@
 #include <QShortcut>
 #include <QStatusBar>
 #include <QString>
-#include <QToolButton>
 #include <QUrl>
 #include <QVector>
 

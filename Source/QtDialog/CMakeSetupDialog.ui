@@ -208,7 +208,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="AddEntry">
+          <widget class="QPushButton" name="AddEntry">
            <property name="toolTip">
             <string>Add New Entry</string>
            </property>
@@ -219,13 +219,10 @@
             <iconset resource="CMakeSetup.qrc">
              <normaloff>:/Icons/Plus16.png</normaloff>:/Icons/Plus16.png</iconset>
            </property>
-           <property name="toolButtonStyle">
-            <enum>Qt::ToolButtonTextBesideIcon</enum>
-           </property>
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="RemoveEntry">
+          <widget class="QPushButton" name="RemoveEntry">
            <property name="toolTip">
             <string>Remove Selected Entries</string>
            </property>
@@ -235,9 +232,6 @@
            <property name="icon">
             <iconset resource="CMakeSetup.qrc">
              <normaloff>:/Icons/Delete16.png</normaloff>:/Icons/Delete16.png</iconset>
-           </property>
-           <property name="toolButtonStyle">
-            <enum>Qt::ToolButtonTextBesideIcon</enum>
            </property>
           </widget>
          </item>
