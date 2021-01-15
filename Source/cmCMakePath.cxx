@@ -88,7 +88,8 @@ bool cmCMakePath::IsPrefix(const cmCMakePath& path) const
     ++prefix_it;
     ++path_it;
   }
-  return prefix_it == prefix_end;
+  return (prefix_it == prefix_end) ||
+    (prefix_it->empty() && path_it != path_end);
 }
 
 std::string cmCMakePath::FormatPath(std::string path, format fmt)
