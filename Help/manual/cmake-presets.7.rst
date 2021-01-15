@@ -29,337 +29,344 @@ is using Git, ``CMakePresets.json`` may be tracked, and
 Format
 ======
 
-  The files are a JSON document with an object as the root:
+The files are a JSON document with an object as the root:
 
-  .. literalinclude:: presets/example.json
-    :language: json
+.. literalinclude:: presets/example.json
+  :language: json
 
-  The root object recognizes the following fields:
+The root object recognizes the following fields:
 
-  ``version``
+``version``
 
-    A required integer representing the version of the JSON schema. Currently,
-    the only supported version is 1.
+  A required integer representing the version of the JSON schema. Currently,
+  the only supported version is 1.
 
-  ``cmakeMinimumRequired``
+``cmakeMinimumRequired``
 
-    An optional object representing the minimum version of CMake needed to
-    build this project. This object consists of the following fields:
+  An optional object representing the minimum version of CMake needed to
+  build this project. This object consists of the following fields:
 
-    ``major``
+  ``major``
 
-      An optional integer representing the major version.
+    An optional integer representing the major version.
 
-    ``minor``
+  ``minor``
 
-      An optional integer representing the minor version.
+    An optional integer representing the minor version.
 
-    ``patch``
+  ``patch``
 
-      An optional integer representing the patch version.
+    An optional integer representing the patch version.
 
-  ``vendor``
+``vendor``
 
-    An optional map containing vendor-specific information. CMake does not
-    interpret the contents of this field except to verify that it is a map if
-    it does exist. However, the keys should be a vendor-specific domain name
-    followed by a ``/``-separated path. For example, the Example IDE 1.0 could
-    use ``example.com/ExampleIDE/1.0``. The value of each field can be anything
-    desired by the vendor, though will typically be a map.
+  An optional map containing vendor-specific information. CMake does not
+  interpret the contents of this field except to verify that it is a map if
+  it does exist. However, the keys should be a vendor-specific domain name
+  followed by a ``/``-separated path. For example, the Example IDE 1.0 could
+  use ``example.com/ExampleIDE/1.0``. The value of each field can be anything
+  desired by the vendor, though will typically be a map.
 
-  ``configurePresets``
+``configurePresets``
 
-    An optional array of configure preset objects. Each preset may contain the
-    following fields:
+  An optional array of `Configure Preset`_ objects.
 
-    ``name``
+Configure Preset
+^^^^^^^^^^^^^^^^
 
-      A required string representing the machine-friendly name of the preset.
-      This identifier is used in the ``--preset`` argument. There must not be
-      two presets in the union of ``CMakePresets.json`` and
-      ``CMakeUserPresets.json`` in the same directory with the same name.
+Each entry of the ``configurePresets`` array is a JSON object
+that may contain the following fields:
 
-    ``hidden``
+``name``
 
-      An optional boolean specifying whether or not a preset should be hidden.
-      If a preset is hidden, it cannot be used in the ``--preset=`` argument,
-      will not show up in the :manual:`CMake GUI <cmake-gui(1)>`, and does not
-      have to have a valid ``generator`` or ``binaryDir``, even from
-      inheritance. ``hidden`` presets are intended to be used as a base for
-      other presets to inherit via the ``inherits`` field.
+  A required string representing the machine-friendly name of the preset.
+  This identifier is used in the ``--preset`` argument. There must not be
+  two presets in the union of ``CMakePresets.json`` and
+  ``CMakeUserPresets.json`` in the same directory with the same name.
 
-    ``inherits``
+``hidden``
 
-      An optional array of strings representing the names of presets to inherit
-      from. The preset will inherit all of the fields from the ``inherits``
-      presets by default (except ``name``, ``hidden``, ``inherits``,
-      ``description``, and ``displayName``), but can override them as
-      desired. If multiple ``inherits`` presets provide conflicting values for
-      the same field, the earlier preset in the ``inherits`` list will be
-      preferred. Presets in ``CMakePresets.json`` may not inherit from presets
-      in ``CMakeUserPresets.json``.
+  An optional boolean specifying whether or not a preset should be hidden.
+  If a preset is hidden, it cannot be used in the ``--preset=`` argument,
+  will not show up in the :manual:`CMake GUI <cmake-gui(1)>`, and does not
+  have to have a valid ``generator`` or ``binaryDir``, even from
+  inheritance. ``hidden`` presets are intended to be used as a base for
+  other presets to inherit via the ``inherits`` field.
 
-      This field can also be a string, which is equivalent to an array
-      containing one string.
+``inherits``
 
-    ``vendor``
+  An optional array of strings representing the names of presets to inherit
+  from. The preset will inherit all of the fields from the ``inherits``
+  presets by default (except ``name``, ``hidden``, ``inherits``,
+  ``description``, and ``displayName``), but can override them as
+  desired. If multiple ``inherits`` presets provide conflicting values for
+  the same field, the earlier preset in the ``inherits`` list will be
+  preferred. Presets in ``CMakePresets.json`` may not inherit from presets
+  in ``CMakeUserPresets.json``.
 
-      An optional map containing vendor-specific information. CMake does not
-      interpret the contents of this field except to verify that it is a map
-      if it does exist. However, it should follow the same conventions as the
-      root-level ``vendor`` field. If vendors use their own per-preset
-      ``vendor`` field, they should implement inheritance in a sensible manner
-      when appropriate.
+  This field can also be a string, which is equivalent to an array
+  containing one string.
 
-    ``displayName``
+``vendor``
 
-      An optional string with a human-friendly name of the preset.
+  An optional map containing vendor-specific information. CMake does not
+  interpret the contents of this field except to verify that it is a map
+  if it does exist. However, it should follow the same conventions as the
+  root-level ``vendor`` field. If vendors use their own per-preset
+  ``vendor`` field, they should implement inheritance in a sensible manner
+  when appropriate.
 
-    ``description``
+``displayName``
 
-      An optional string with a human-friendly description of the preset.
+  An optional string with a human-friendly name of the preset.
 
-    ``generator``
+``description``
 
-      An optional string representing the generator to use for the preset. If
-      ``generator`` is not specified, it must be inherited from the
-      ``inherits`` preset (unless this preset is ``hidden``).
+  An optional string with a human-friendly description of the preset.
 
-      Note that for Visual Studio generators, unlike in the command line ``-G``
-      argument, you cannot include the platform name in the generator name. Use
-      the ``architecture`` field instead.
+``generator``
 
-    ``architecture``
-    ``toolset``
+  An optional string representing the generator to use for the preset. If
+  ``generator`` is not specified, it must be inherited from the
+  ``inherits`` preset (unless this preset is ``hidden``).
 
-      Optional fields representing the platform and toolset, respectively, for
-      generators that support them. Each may be either a string or an object
-      with the following fields:
+  Note that for Visual Studio generators, unlike in the command line ``-G``
+  argument, you cannot include the platform name in the generator name. Use
+  the ``architecture`` field instead.
 
-      ``value``
+``architecture``, ``toolset``
 
-        An optional string representing the value.
+  Optional fields representing the platform and toolset, respectively, for
+  generators that support them. Each may be either a string or an object
+  with the following fields:
 
-      ``strategy``
+  ``value``
 
-        An optional string telling CMake how to handle the ``architecture`` or
-        ``toolset`` field. Valid values are:
+    An optional string representing the value.
 
-        ``"set"``
+  ``strategy``
 
-          Set the respective value. This will result in an error for generators
-          that do not support the respective field.
+    An optional string telling CMake how to handle the ``architecture`` or
+    ``toolset`` field. Valid values are:
 
-        ``"external"``
+    ``"set"``
 
-          Do not set the value, even if the generator supports it. This is
-          useful if, for example, a preset uses the Ninja generator, and an IDE
-          knows how to set up the Visual C++ environment from the
-          ``architecture`` and ``toolset`` fields. In that case, CMake will
-          ignore the field, but the IDE can use them to set up the environment
-          before invoking CMake.
+      Set the respective value. This will result in an error for generators
+      that do not support the respective field.
 
-    ``binaryDir``
+    ``"external"``
 
-      An optional string representing the path to the output binary directory.
-      This field supports macro expansion. If a relative path is specified, it
-      is calculated relative to the source directory. If ``binaryDir`` is not
-      specified, it must be inherited from the ``inherits`` preset (unless this
-      preset is ``hidden``).
+      Do not set the value, even if the generator supports it. This is
+      useful if, for example, a preset uses the Ninja generator, and an IDE
+      knows how to set up the Visual C++ environment from the
+      ``architecture`` and ``toolset`` fields. In that case, CMake will
+      ignore the field, but the IDE can use them to set up the environment
+      before invoking CMake.
 
-    ``cmakeExecutable``
+``binaryDir``
 
-      An optional string representing the path to the CMake executable to use
-      for this preset. This is reserved for use by IDEs, and is not used by
-      CMake itself. IDEs that use this field should expand any macros in it.
+  An optional string representing the path to the output binary directory.
+  This field supports `macro expansion`_. If a relative path is specified,
+  it is calculated relative to the source directory. If ``binaryDir`` is not
+  specified, it must be inherited from the ``inherits`` preset (unless this
+  preset is ``hidden``).
 
-    ``cacheVariables``
+``cmakeExecutable``
 
-      An optional map of cache variables. The key is the variable name (which
-      may not be an empty string), and the value is either ``null``, a boolean
-      (which is equivalent to a value of ``"TRUE"`` or ``"FALSE"`` and a type
-      of ``BOOL``), a string representing the value of the variable (which
-      supports macro expansion), or an object with the following fields:
+  An optional string representing the path to the CMake executable to use
+  for this preset. This is reserved for use by IDEs, and is not used by
+  CMake itself. IDEs that use this field should expand any macros in it.
 
-      ``type``
+``cacheVariables``
 
-        An optional string representing the type of the variable.
+  An optional map of cache variables. The key is the variable name (which
+  may not be an empty string), and the value is either ``null``, a boolean
+  (which is equivalent to a value of ``"TRUE"`` or ``"FALSE"`` and a type
+  of ``BOOL``), a string representing the value of the variable (which
+  supports `macro expansion`_), or an object with the following fields:
 
-      ``value``
+  ``type``
 
-        A required string or boolean representing the value of the variable.
-        A boolean is equivalent to ``"TRUE"`` or ``"FALSE"``. This field
-        supports macro expansion.
+    An optional string representing the type of the variable.
 
-      Cache variables are inherited through the ``inherits`` field, and the
-      preset's variables will be the union of its own ``cacheVariables`` and
-      the ``cacheVariables`` from all its parents. If multiple presets in this
-      union define the same variable, the standard rules of ``inherits`` are
-      applied. Setting a variable to ``null`` causes it to not be set, even if
-      a value was inherited from another preset.
+  ``value``
 
-    ``environment``
+    A required string or boolean representing the value of the variable.
+    A boolean is equivalent to ``"TRUE"`` or ``"FALSE"``. This field
+    supports `macro expansion`_.
 
-      An optional map of environment variables. The key is the variable name
-      (which may not be an empty string), and the value is either ``null`` or
-      a string representing the value of the variable. Each variable is set
-      regardless of whether or not a value was given to it by the process's
-      environment. This field supports macro expansion, and environment
-      variables in this map may reference each other, and may be listed in any
-      order, as long as such references do not cause a cycle (for example,
-      if ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
+  Cache variables are inherited through the ``inherits`` field, and the
+  preset's variables will be the union of its own ``cacheVariables`` and
+  the ``cacheVariables`` from all its parents. If multiple presets in this
+  union define the same variable, the standard rules of ``inherits`` are
+  applied. Setting a variable to ``null`` causes it to not be set, even if
+  a value was inherited from another preset.
 
-      Environment variables are inherited through the ``inherits`` field, and
-      the preset's environment will be the union of its own ``environment`` and
-      the ``environment`` from all its parents. If multiple presets in this
-      union define the same variable, the standard rules of ``inherits`` are
-      applied. Setting a variable to ``null`` causes it to not be set, even if
-      a value was inherited from another preset.
+``environment``
 
-    ``warnings``
+  An optional map of environment variables. The key is the variable name
+  (which may not be an empty string), and the value is either ``null`` or
+  a string representing the value of the variable. Each variable is set
+  regardless of whether or not a value was given to it by the process's
+  environment. This field supports `macro expansion`_, and environment
+  variables in this map may reference each other, and may be listed in any
+  order, as long as such references do not cause a cycle (for example,
+  if ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
 
-      An optional object specifying the warnings to enable. The object may
-      contain the following fields:
+  Environment variables are inherited through the ``inherits`` field, and
+  the preset's environment will be the union of its own ``environment`` and
+  the ``environment`` from all its parents. If multiple presets in this
+  union define the same variable, the standard rules of ``inherits`` are
+  applied. Setting a variable to ``null`` causes it to not be set, even if
+  a value was inherited from another preset.
 
-      ``dev``
+``warnings``
 
-        An optional boolean. Equivalent to passing ``-Wdev`` or ``-Wno-dev``
-        on the command line. This may not be set to ``false`` if ``errors.dev``
-        is set to ``true``.
+  An optional object specifying the warnings to enable. The object may
+  contain the following fields:
 
-      ``deprecated``
+  ``dev``
 
-        An optional boolean. Equivalent to passing ``-Wdeprecated`` or
-        ``-Wno-deprecated`` on the command line. This may not be set to
-        ``false`` if ``errors.deprecated`` is set to ``true``.
+    An optional boolean. Equivalent to passing ``-Wdev`` or ``-Wno-dev``
+    on the command line. This may not be set to ``false`` if ``errors.dev``
+    is set to ``true``.
 
-      ``uninitialized``
+  ``deprecated``
 
-        An optional boolean. Setting this to ``true`` is equivalent to passing
-        ``--warn-uninitialized`` on the command line.
+    An optional boolean. Equivalent to passing ``-Wdeprecated`` or
+    ``-Wno-deprecated`` on the command line. This may not be set to
+    ``false`` if ``errors.deprecated`` is set to ``true``.
 
-      ``unusedCli``
+  ``uninitialized``
 
-        An optional boolean. Setting this to ``false`` is equivalent to passing
-        ``--no-warn-unused-cli`` on the command line.
+    An optional boolean. Setting this to ``true`` is equivalent to passing
+    ``--warn-uninitialized`` on the command line.
 
-      ``systemVars``
+  ``unusedCli``
 
-        An optional boolean. Setting this to ``true`` is equivalent to passing
-        ``--check-system-vars`` on the command line.
+    An optional boolean. Setting this to ``false`` is equivalent to passing
+    ``--no-warn-unused-cli`` on the command line.
 
-    ``errors``
+  ``systemVars``
 
-      An optional object specifying the errors to enable. The object may
-      contain the following fields:
+    An optional boolean. Setting this to ``true`` is equivalent to passing
+    ``--check-system-vars`` on the command line.
 
-      ``dev``
+``errors``
 
-        An optional boolean. Equivalent to passing ``-Werror=dev`` or
-        ``-Wno-error=dev`` on the command line. This may not be set to ``true``
-        if ``warnings.dev`` is set to ``false``.
+  An optional object specifying the errors to enable. The object may
+  contain the following fields:
 
-      ``deprecated``
+  ``dev``
 
-        An optional boolean. Equivalent to passing ``-Werror=deprecated`` or
-        ``-Wno-error=deprecated`` on the command line. This may not be set to
-        ``true`` if ``warnings.deprecated`` is set to ``false``.
+    An optional boolean. Equivalent to passing ``-Werror=dev`` or
+    ``-Wno-error=dev`` on the command line. This may not be set to ``true``
+    if ``warnings.dev`` is set to ``false``.
 
-    ``debug``
+  ``deprecated``
 
-      An optional object specifying debug options. The object may contain the
-      following fields:
+    An optional boolean. Equivalent to passing ``-Werror=deprecated`` or
+    ``-Wno-error=deprecated`` on the command line. This may not be set to
+    ``true`` if ``warnings.deprecated`` is set to ``false``.
 
-      ``output``
+``debug``
 
-        An optional boolean. Setting this to ``true`` is equivalent to passing
-        ``--debug-output`` on the command line.
+  An optional object specifying debug options. The object may contain the
+  following fields:
 
-      ``tryCompile``
+  ``output``
 
-        An optional boolean. Setting this to ``true`` is equivalent to passing
-        ``--debug-trycompile`` on the command line.
+    An optional boolean. Setting this to ``true`` is equivalent to passing
+    ``--debug-output`` on the command line.
 
-      ``find``
+  ``tryCompile``
 
-        An optional boolean. Setting this to ``true`` is equivalent to passing
-        ``--debug-find`` on the command line.
+    An optional boolean. Setting this to ``true`` is equivalent to passing
+    ``--debug-trycompile`` on the command line.
 
-  As mentioned above, some fields support macro expansion. Macros are
-  recognized in the form ``$<macro-namespace>{<macro-name>}``. All macros are
-  evaluated in the context of the preset being used, even if the macro is in a
-  field that was inherited from another preset. For example, if the ``Base``
-  preset sets variable ``PRESET_NAME`` to ``${presetName}``, and the
-  ``Derived`` preset inherits from ``Base``, ``PRESET_NAME`` will be set to
-  ``Derived``.
+  ``find``
 
-  It is an error to not put a closing brace at the end of a macro name. For
-  example, ``${sourceDir`` is invalid. A dollar sign (``$``) followed by
-  anything other than a left curly brace (``{``) with a possible namespace is
-  interpreted as a literal dollar sign.
+    An optional boolean. Setting this to ``true`` is equivalent to passing
+    ``--debug-find`` on the command line.
 
-  Recognized macros include:
+Macro Expansion
+^^^^^^^^^^^^^^^
 
-  ``${sourceDir}``
+As mentioned above, some fields support macro expansion. Macros are
+recognized in the form ``$<macro-namespace>{<macro-name>}``. All macros are
+evaluated in the context of the preset being used, even if the macro is in a
+field that was inherited from another preset. For example, if the ``Base``
+preset sets variable ``PRESET_NAME`` to ``${presetName}``, and the
+``Derived`` preset inherits from ``Base``, ``PRESET_NAME`` will be set to
+``Derived``.
 
-    Path to the project source directory.
+It is an error to not put a closing brace at the end of a macro name. For
+example, ``${sourceDir`` is invalid. A dollar sign (``$``) followed by
+anything other than a left curly brace (``{``) with a possible namespace is
+interpreted as a literal dollar sign.
 
-  ``${sourceParentDir}``
+Recognized macros include:
 
-    Path to the project source directory's parent directory.
+``${sourceDir}``
 
-  ``${sourceDirName}``
+  Path to the project source directory.
 
-    The last filename component of ``${sourceDir}``. For example, if
-    ``${sourceDir}`` is ``/path/to/source``, this would be ``source``.
+``${sourceParentDir}``
 
-  ``${presetName}``
+  Path to the project source directory's parent directory.
 
-    Name specified in the preset's ``name`` field.
+``${sourceDirName}``
 
-  ``${generator}``
+  The last filename component of ``${sourceDir}``. For example, if
+  ``${sourceDir}`` is ``/path/to/source``, this would be ``source``.
 
-    Generator specified in the preset's ``generator`` field.
+``${presetName}``
 
-  ``${dollar}``
+  Name specified in the preset's ``name`` field.
 
-    A literal dollar sign (``$``).
+``${generator}``
 
-  ``$env{<variable-name>}``
+  Generator specified in the preset's ``generator`` field.
 
-    Environment variable with name ``<variable-name>``. The variable name may
-    not be an empty string. If the variable is defined in the ``environment``
-    field, that value is used instead of the value from the parent environment.
-    If the environment variable is not defined, this evaluates as an empty
-    string.
+``${dollar}``
 
-    Note that while Windows environment variable names are case-insensitive,
-    variable names within a preset are still case-sensitive. This may lead to
-    unexpected results when using inconsistent casing. For best results, keep
-    the casing of environment variable names consistent.
+  A literal dollar sign (``$``).
 
-  ``$penv{<variable-name>}``
+``$env{<variable-name>}``
 
-    Similar to ``$env{<variable-name>}``, except that the value only comes from
-    the parent environment, and never from the ``environment`` field. This
-    allows you to prepend or append values to existing environment variables.
-    For example, setting ``PATH`` to ``/path/to/ninja/bin:$penv{PATH}`` will
-    prepend ``/path/to/ninja/bin`` to the ``PATH`` environment variable. This
-    is needed because ``$env{<variable-name>}`` does not allow circular
-    references.
+  Environment variable with name ``<variable-name>``. The variable name may
+  not be an empty string. If the variable is defined in the ``environment``
+  field, that value is used instead of the value from the parent environment.
+  If the environment variable is not defined, this evaluates as an empty
+  string.
 
-  ``$vendor{<macro-name>}``
+  Note that while Windows environment variable names are case-insensitive,
+  variable names within a preset are still case-sensitive. This may lead to
+  unexpected results when using inconsistent casing. For best results, keep
+  the casing of environment variable names consistent.
 
-    An extension point for vendors to insert their own macros. CMake will not
-    be able to use presets which have a ``$vendor{<macro-name>}`` macro, and
-    effectively ignores such presets. However, it will still be able to use
-    other presets from the same file.
+``$penv{<variable-name>}``
 
-    CMake does not make any attempt to interpret ``$vendor{<macro-name>}``
-    macros. However, to avoid name collisions, IDE vendors should prefix
-    ``<macro-name>`` with a very short (preferably <= 4 characters) vendor
-    identifier prefix, followed by a ``.``, followed by the macro name. For
-    example, the Example IDE could have ``$vendor{xide.ideInstallDir}``.
+  Similar to ``$env{<variable-name>}``, except that the value only comes from
+  the parent environment, and never from the ``environment`` field. This
+  allows you to prepend or append values to existing environment variables.
+  For example, setting ``PATH`` to ``/path/to/ninja/bin:$penv{PATH}`` will
+  prepend ``/path/to/ninja/bin`` to the ``PATH`` environment variable. This
+  is needed because ``$env{<variable-name>}`` does not allow circular
+  references.
+
+``$vendor{<macro-name>}``
+
+  An extension point for vendors to insert their own macros. CMake will not
+  be able to use presets which have a ``$vendor{<macro-name>}`` macro, and
+  effectively ignores such presets. However, it will still be able to use
+  other presets from the same file.
+
+  CMake does not make any attempt to interpret ``$vendor{<macro-name>}``
+  macros. However, to avoid name collisions, IDE vendors should prefix
+  ``<macro-name>`` with a very short (preferably <= 4 characters) vendor
+  identifier prefix, followed by a ``.``, followed by the macro name. For
+  example, the Example IDE could have ``$vendor{xide.ideInstallDir}``.
 
 Schema
 ======
