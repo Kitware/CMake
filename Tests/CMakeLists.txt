@@ -1279,21 +1279,6 @@ if(BUILD_TESTING)
     set_property(TEST CMakeTestAllGenerators PROPERTY RUN_SERIAL 1)
   endif()
 
-  if(NOT DEFINED CTEST_RUN_CMakeTestMultipleConfigures)
-    set(CTEST_RUN_CMakeTestMultipleConfigures ON)
-  endif()
-
-  if(CTEST_RUN_CMakeTestMultipleConfigures)
-    add_test(CMakeTestMultipleConfigures ${CMAKE_CMAKE_COMMAND}
-        -D dir=${CMake_BINARY_DIR}/Tests/CMakeTestMultipleConfigures
-        -D gen=${CMAKE_GENERATOR}
-        -D CMake_SOURCE_DIR=${CMake_SOURCE_DIR}
-        -P ${CMake_SOURCE_DIR}/Tests/CMakeTestMultipleConfigures/RunCMake.cmake
-      )
-    list(APPEND TEST_BUILD_DIRS
-      "${CMake_BINARY_DIR}/Tests/CMakeTestMultipleConfigures")
-  endif()
-
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
     add_test(LoadedCommandOneConfig  ${CMAKE_CTEST_COMMAND}
       --build-and-test
