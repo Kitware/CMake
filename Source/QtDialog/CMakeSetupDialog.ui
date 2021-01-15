@@ -216,7 +216,7 @@
             <string>&amp;Add Entry</string>
            </property>
            <property name="icon">
-            <iconset resource="CMakeSetup.qrc">
+            <iconset theme="list-add" resource="CMakeSetup.qrc">
              <normaloff>:/Icons/Plus16.png</normaloff>:/Icons/Plus16.png</iconset>
            </property>
           </widget>
@@ -230,7 +230,7 @@
             <string>&amp;Remove Entry</string>
            </property>
            <property name="icon">
-            <iconset resource="CMakeSetup.qrc">
+            <iconset theme="list-remove" resource="CMakeSetup.qrc">
              <normaloff>:/Icons/Delete16.png</normaloff>:/Icons/Delete16.png</iconset>
            </property>
           </widget>
