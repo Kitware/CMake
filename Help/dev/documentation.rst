@@ -123,6 +123,11 @@ documentation:
 ``command``
  A CMake language command.
 
+``envvar``
+ An environment variable.
+ See the `cmake-env-variables(7)`_ manual
+ and the `set()`_ command.
+
 ``generator``
  A CMake native build system generator.
  See the `cmake(1)`_ command-line tool's ``-G`` option.
@@ -174,6 +179,10 @@ other documents:
 
   This indented block documents <command-name>.
 
+ .. envvar:: <envvar-name>
+
+  This indented block documents <envvar-name>.
+
  .. variable:: <variable-name>
 
   This indented block documents <variable-name>.
@@ -183,6 +192,7 @@ the first approach above.
 
 .. _`Sphinx Domain`: http://sphinx-doc.org/domains.html
 .. _`cmake(1)`: https://cmake.org/cmake/help/latest/manual/cmake.1.html
+.. _`cmake-env-variables(7)`: https://cmake.org/cmake/help/latest/manual/cmake-env-variables.7.html
 .. _`cmake-modules(7)`: https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html
 .. _`cmake-policies(7)`: https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html
 .. _`cmake-properties(7)`: https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html
