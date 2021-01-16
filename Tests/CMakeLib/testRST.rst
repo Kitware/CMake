@@ -51,6 +51,14 @@ Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
 
    Command other_cmd description.
 
+.. cmake:envvar:: some_var
+
+   Environment variable some_var description.
+
+.. envvar:: other_var
+
+   Environment variable other_var description.
+
 .. cmake:variable:: some_var
 
    Variable some_var description.

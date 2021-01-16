@@ -25,7 +25,7 @@ cmRST::cmRST(std::ostream& os, std::string docroot)
   , Markup(MarkupNone)
   , Directive(DirectiveNone)
   , CMakeDirective("^.. (cmake:)?("
-                   "command|variable"
+                   "command|envvar|variable"
                    ")::[ \t]+([^ \t\n]+)$")
   , CMakeModuleDirective("^.. cmake-module::[ \t]+([^ \t\n]+)$")
   , ParsedLiteralDirective("^.. parsed-literal::[ \t]*(.*)$")
