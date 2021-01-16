@@ -167,15 +167,9 @@ set(do_git_tests 0)
 if(GIT_EXECUTABLE)
   set(do_git_tests 1)
 
-  execute_process(
-    COMMAND "${GIT_EXECUTABLE}" --version
-    OUTPUT_VARIABLE ov
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-  string(REGEX REPLACE "^git version (.+)$" "\\1" git_version "${ov}")
-  message(STATUS "git_version='${git_version}'")
+  message(STATUS "GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
 
-  if(git_version VERSION_LESS 1.6.5)
+  if("${GIT_VERSION_STRING}" VERSION_LESS 1.6.5)
     message(STATUS "No ExternalProject git tests with git client less than version 1.6.5")
     set(do_git_tests 0)
   endif()
