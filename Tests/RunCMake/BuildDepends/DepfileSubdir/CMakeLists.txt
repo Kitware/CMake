@@ -3,7 +3,7 @@ cmake_policy(SET CMP0116 NEW)
 add_custom_command(
   OUTPUT subcc.c
   DEPFILE subcc.c.d
-  COMMAND ${CMAKE_COMMAND} -DOUTFILE=subcc.c -DINFILE=subccdep.txt -DDEPFILE=subcc.c.d -P "${CMAKE_CURRENT_LIST_DIR}/../WriteDepfile.cmake"
+  COMMAND ${CMAKE_COMMAND} -DOUTFILE=${CMAKE_CURRENT_BINARY_DIR}/subcc.c -DINFILE=subccdep.txt -DDEPFILE=subcc.c.d -P "${CMAKE_CURRENT_LIST_DIR}/../WriteDepfile.cmake"
   )
 add_custom_target(subcc ALL DEPENDS subcc.c)
 

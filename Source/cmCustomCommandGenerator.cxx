@@ -200,6 +200,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
     argv.push_back(cmSystemTools::GetCMakeCommand());
     argv.emplace_back("-E");
     argv.emplace_back("cmake_transform_depfile");
+    argv.push_back(this->LG->GetGlobalGenerator()->GetName());
     switch (*this->LG->GetGlobalGenerator()->DepfileFormat()) {
       case cmDepfileFormat::GccDepfile:
         argv.emplace_back("gccdepfile");
@@ -208,15 +209,10 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
         argv.emplace_back("vstlog");
         break;
     }
-    if (this->LG->GetCurrentBinaryDirectory() ==
-        this->LG->GetBinaryDirectory()) {
-      argv.emplace_back("./");
-    } else {
-      argv.push_back(cmStrCat(this->LG->MaybeConvertToRelativePath(
-                                this->LG->GetBinaryDirectory(),
-                                this->LG->GetCurrentBinaryDirectory()),
-                              '/'));
-    }
+    argv.push_back(this->LG->GetSourceDirectory());
+    argv.push_back(this->LG->GetCurrentSourceDirectory());
+    argv.push_back(this->LG->GetBinaryDirectory());
+    argv.push_back(this->LG->GetCurrentBinaryDirectory());
     argv.push_back(this->GetFullDepfile());
     argv.push_back(this->GetInternalDepfile());
 

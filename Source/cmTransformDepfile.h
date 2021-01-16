@@ -10,5 +10,7 @@ enum class cmDepfileFormat
   VsTlog,
 };
 
-bool cmTransformDepfile(cmDepfileFormat format, const std::string& prefix,
+class cmLocalGenerator;
+
+bool cmTransformDepfile(cmDepfileFormat format, const cmLocalGenerator& lg,
                         const std::string& infile, const std::string& outfile);

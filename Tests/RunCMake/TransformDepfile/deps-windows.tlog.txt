@@ -1,6 +1,6 @@
-^..\out1|C:\build\out2
-..\in1
+^subdir\out1|C:\build\out2
+subdir\in1
 C:\build\in2
-^..\out3|C:\build\out4
-..\in3
+^subdir\out3|C:\build\out4
+subdir\in3
 C:\build\in4

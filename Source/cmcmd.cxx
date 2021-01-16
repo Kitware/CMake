@@ -1522,20 +1522,42 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 #endif
 
     // Internal depfile transformation
-    if (args[1] == "cmake_transform_depfile" && args.size() == 6) {
+    if (args[1] == "cmake_transform_depfile" && args.size() == 10) {
       auto format = cmDepfileFormat::GccDepfile;
-      if (args[2] == "gccdepfile") {
+      if (args[3] == "gccdepfile") {
         format = cmDepfileFormat::GccDepfile;
-      } else if (args[2] == "vstlog") {
+      } else if (args[3] == "vstlog") {
         format = cmDepfileFormat::VsTlog;
       } else {
         return 1;
       }
-      std::string prefix = args[3];
-      if (prefix == "./") {
-        prefix.clear();
+      // Create a cmake object instance to process dependencies.
+      // All we need is the `set` command.
+      cmake cm(cmake::RoleScript, cmState::Unknown);
+      std::string homeDir;
+      std::string startDir;
+      std::string homeOutDir;
+      std::string startOutDir;
+      homeDir = cmSystemTools::CollapseFullPath(args[4]);
+      startDir = cmSystemTools::CollapseFullPath(args[5]);
+      homeOutDir = cmSystemTools::CollapseFullPath(args[6]);
+      startOutDir = cmSystemTools::CollapseFullPath(args[7]);
+      cm.SetHomeDirectory(homeDir);
+      cm.SetHomeOutputDirectory(homeOutDir);
+      cm.GetCurrentSnapshot().SetDefaultDefinitions();
+      if (auto ggd = cm.CreateGlobalGenerator(args[2])) {
+        cm.SetGlobalGenerator(std::move(ggd));
+        cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
+        snapshot.GetDirectory().SetCurrentBinary(startOutDir);
+        snapshot.GetDirectory().SetCurrentSource(startDir);
+        snapshot.GetDirectory().SetRelativePathTopSource(homeDir.c_str());
+        snapshot.GetDirectory().SetRelativePathTopBinary(homeOutDir.c_str());
+        cmMakefile mf(cm.GetGlobalGenerator(), snapshot);
+        auto lgd = cm.GetGlobalGenerator()->CreateLocalGenerator(&mf);
+
+        return cmTransformDepfile(format, *lgd, args[8], args[9]) ? 0 : 2;
       }
-      return cmTransformDepfile(format, prefix, args[4], args[5]) ? 0 : 1;
+      return 1;
     }
   }
 
