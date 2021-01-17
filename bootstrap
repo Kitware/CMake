@@ -1195,8 +1195,8 @@ for std in 11 99 90; do
   for compiler in ${cmake_c_compilers}; do
     for std_flag in '' $std_flags; do
       for thread_flag in '' $thread_flags; do
-        echo "Checking whether '${compiler} ${cmake_c_flags} ${std_flag} ${thread_flag}' works." >> cmake_bootstrap.log 2>&1
-        if cmake_try_run "${compiler}" "${cmake_c_flags} ${std_flag} ${thread_flag}" \
+        echo "Checking whether '${compiler} ${cmake_c_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}' works." >> cmake_bootstrap.log 2>&1
+        if cmake_try_run "${compiler}" "${cmake_c_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}" \
           "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
           cmake_c_compiler="${compiler}"
           cmake_c_flags="${cmake_c_flags} ${std_flag} ${thread_flag}"
@@ -1316,8 +1316,8 @@ for std in 17 14 11; do
   for compiler in ${cmake_cxx_compilers}; do
     for std_flag in '' $std_flags; do
       for thread_flag in '' $thread_flags; do
-        echo "Checking whether '${compiler} ${cmake_cxx_flags} ${std_flag} ${thread_flag}' works." >> cmake_bootstrap.log 2>&1
-        if cmake_try_run "${compiler}" "${cmake_cxx_flags} ${std_flag} ${thread_flag}" \
+        echo "Checking whether '${compiler} ${cmake_cxx_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}' works." >> cmake_bootstrap.log 2>&1
+        if cmake_try_run "${compiler}" "${cmake_cxx_flags} ${cmake_ld_flags} ${std_flag} ${thread_flag}" \
           "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
           cmake_cxx_compiler="${compiler}"
           cmake_cxx_flags="${cmake_cxx_flags} ${std_flag} ${thread_flag} "
@@ -1345,8 +1345,8 @@ cmake_cxx_features="make_unique filesystem"
 
 for feature in ${cmake_cxx_features}; do
   eval "cmake_have_cxx_${feature}=0"
-  echo "Checking whether '${cmake_cxx_compiler} ${cmake_cxx_flags}' supports '${feature}'." >> cmake_bootstrap.log 2>&1
-  if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" \
+  echo "Checking whether '${cmake_cxx_compiler} ${cmake_cxx_flags} ${cmake_ld_flags}' supports '${feature}'." >> cmake_bootstrap.log 2>&1
+  if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags} ${cmake_ld_flags}" \
                    "${cmake_source_dir}/Source/Checks/cm_cxx_${feature}.cxx" >> cmake_bootstrap.log 2>&1; then
     eval "cmake_have_cxx_${feature}=1"
   fi
