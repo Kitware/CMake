@@ -2040,6 +2040,7 @@ syn keyword cmakeKWExternalProject contained
             \ UPDATE_DISCONNECTED
             \ URL
             \ URL_HASH
+            \ URL_MD5
             \ USES_TERMINAL_BUILD
             \ USES_TERMINAL_CONFIGURE
             \ USES_TERMINAL_DOWNLOAD
