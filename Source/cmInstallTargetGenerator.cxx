@@ -25,6 +25,21 @@
 #include "cmTarget.h"
 #include "cmake.h"
 
+namespace {
+std::string computeInstallObjectDir(cmGeneratorTarget* gt,
+                                    std::string const& config)
+{
+  std::string objectDir = "objects";
+  if (!config.empty()) {
+    objectDir += "-";
+    objectDir += config;
+  }
+  objectDir += "/";
+  objectDir += gt->GetName();
+  return objectDir;
+}
+}
+
 cmInstallTargetGenerator::cmInstallTargetGenerator(
   std::string targetName, std::string const& dest, bool implib,
   std::string file_permissions, std::vector<std::string> const& configurations,
@@ -330,19 +345,6 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   // Add post-installation tweaks.
   this->AddTweak(os, indent, config, filesTo,
                  &cmInstallTargetGenerator::PostReplacementTweaks);
-}
-
-static std::string computeInstallObjectDir(cmGeneratorTarget* gt,
-                                           std::string const& config)
-{
-  std::string objectDir = "objects";
-  if (!config.empty()) {
-    objectDir += "-";
-    objectDir += config;
-  }
-  objectDir += "/";
-  objectDir += gt->GetName();
-  return objectDir;
 }
 
 void cmInstallTargetGenerator::GenerateScriptForConfigObjectLibrary(
