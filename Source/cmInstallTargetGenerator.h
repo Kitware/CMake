@@ -79,7 +79,8 @@ protected:
   void AddTweak(std::ostream& os, Indent indent, const std::string& config,
                 std::string const& file, TweakMethod tweak);
   void AddTweak(std::ostream& os, Indent indent, const std::string& config,
-                std::vector<std::string> const& files, TweakMethod tweak);
+                std::string const& dir, std::vector<std::string> const& files,
+                TweakMethod tweak);
   std::string GetDestDirPath(std::string const& file);
   void PreReplacementTweaks(std::ostream& os, Indent indent,
                             const std::string& config,

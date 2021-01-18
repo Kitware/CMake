@@ -112,9 +112,6 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       cmStrCat(this->Target->GetDirectory(config, artifact), '/');
   }
 
-  std::string toDir = cmStrCat(
-    this->ConvertToAbsoluteDestination(this->GetDestination(config)), '/');
-
   // Compute the list of files to install for this target.
   std::vector<std::string> filesFrom;
   std::vector<std::string> filesTo;
@@ -128,21 +125,21 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       this->Target->GetExecutableNames(config);
     if (this->ImportLibrary) {
       std::string from1 = fromDirConfig + targetNames.ImportLibrary;
-      std::string to1 = toDir + targetNames.ImportLibrary;
+      std::string to1 = targetNames.ImportLibrary;
       filesFrom.push_back(std::move(from1));
       filesTo.push_back(std::move(to1));
       std::string targetNameImportLib;
       if (this->Target->GetImplibGNUtoMS(config, targetNames.ImportLibrary,
                                          targetNameImportLib)) {
         filesFrom.push_back(fromDirConfig + targetNameImportLib);
-        filesTo.push_back(toDir + targetNameImportLib);
+        filesTo.push_back(targetNameImportLib);
       }
 
       // An import library looks like a static library.
       type = cmInstallType_STATIC_LIBRARY;
     } else {
       std::string from1 = fromDirConfig + targetNames.Output;
-      std::string to1 = toDir + targetNames.Output;
+      std::string to1 = targetNames.Output;
 
       // Handle OSX Bundles.
       if (this->Target->IsAppBundleOnApple()) {
@@ -174,7 +171,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
         // Tweaks apply to the real file, so list it first.
         if (targetNames.Real != targetNames.Output) {
           std::string from2 = fromDirConfig + targetNames.Real;
-          std::string to2 = toDir += targetNames.Real;
+          std::string to2 = targetNames.Real;
           filesFrom.push_back(std::move(from2));
           filesTo.push_back(std::move(to2));
         }
@@ -191,14 +188,14 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       assert(this->NamelinkMode == NamelinkModeNone);
 
       std::string from1 = fromDirConfig + targetNames.ImportLibrary;
-      std::string to1 = toDir + targetNames.ImportLibrary;
+      std::string to1 = targetNames.ImportLibrary;
       filesFrom.push_back(std::move(from1));
       filesTo.push_back(std::move(to1));
       std::string targetNameImportLib;
       if (this->Target->GetImplibGNUtoMS(config, targetNames.ImportLibrary,
                                          targetNameImportLib)) {
         filesFrom.push_back(fromDirConfig + targetNameImportLib);
-        filesTo.push_back(toDir + targetNameImportLib);
+        filesTo.push_back(targetNameImportLib);
       }
 
       // An import library looks like a static library.
@@ -241,7 +238,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       from1 = cmSystemTools::GetFilenamePath(from1);
 
       // Tweaks apply to the binary inside the bundle.
-      std::string to1 = toDir + targetNames.Real;
+      std::string to1 = targetNames.Real;
 
       filesFrom.push_back(std::move(from1));
       filesTo.push_back(std::move(to1));
@@ -254,7 +251,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
         targetNames.Output.substr(0, targetNames.Output.find('/'));
 
       std::string from1 = fromDirConfig + targetNameBase;
-      std::string to1 = toDir + targetNames.Output;
+      std::string to1 = targetNames.Output;
 
       filesFrom.push_back(std::move(from1));
       filesTo.push_back(std::move(to1));
@@ -263,7 +260,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
 
       // Library link name.
       std::string fromName = fromDirConfig + targetNames.Output;
-      std::string toName = toDir + targetNames.Output;
+      std::string toName = targetNames.Output;
 
       // Library interface name.
       std::string fromSOName;
@@ -271,7 +268,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       if (targetNames.SharedObject != targetNames.Output) {
         haveNamelink = true;
         fromSOName = fromDirConfig + targetNames.SharedObject;
-        toSOName = toDir + targetNames.SharedObject;
+        toSOName = targetNames.SharedObject;
       }
 
       // Library implementation name.
@@ -281,7 +278,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
           targetNames.Real != targetNames.SharedObject) {
         haveNamelink = true;
         fromRealName = fromDirConfig + targetNames.Real;
-        toRealName = toDir + targetNames.Real;
+        toRealName = targetNames.Real;
       }
 
       // Add the names based on the current namelink mode.
@@ -329,8 +326,12 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
     return;
   }
 
+  // Tweak files located in the destination directory.
+  std::string toDir = cmStrCat(
+    this->ConvertToAbsoluteDestination(this->GetDestination(config)), '/');
+
   // Add pre-installation tweaks.
-  this->AddTweak(os, indent, config, filesTo,
+  this->AddTweak(os, indent, config, toDir, filesTo,
                  &cmInstallTargetGenerator::PreReplacementTweaks);
 
   // Write code to install the target file.
@@ -343,7 +344,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
                        indent);
 
   // Add post-installation tweaks.
-  this->AddTweak(os, indent, config, filesTo,
+  this->AddTweak(os, indent, config, toDir, filesTo,
                  &cmInstallTargetGenerator::PostReplacementTweaks);
 }
 
@@ -466,12 +467,14 @@ void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent indent,
 
 void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent indent,
                                         const std::string& config,
+                                        std::string const& dir,
                                         std::vector<std::string> const& files,
                                         TweakMethod tweak)
 {
   if (files.size() == 1) {
     // Tweak a single file.
-    this->AddTweak(os, indent, config, this->GetDestDirPath(files[0]), tweak);
+    this->AddTweak(os, indent, config,
+                   this->GetDestDirPath(cmStrCat(dir, files[0])), tweak);
   } else {
     // Generate a foreach loop to tweak multiple files.
     std::ostringstream tw;
@@ -481,7 +484,8 @@ void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent indent,
       Indent indent2 = indent.Next().Next();
       os << indent << "foreach(file\n";
       for (std::string const& f : files) {
-        os << indent2 << "\"" << this->GetDestDirPath(f) << "\"\n";
+        os << indent2 << "\"" << this->GetDestDirPath(cmStrCat(dir, f))
+           << "\"\n";
       }
       os << indent2 << ")\n";
       os << tws;
