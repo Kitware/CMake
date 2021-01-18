@@ -396,6 +396,15 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
       }
 
       // if we can copy the file, it means it does exist, let's add it:
+      if (!cmsys::SystemTools::FileExists(i)) {
+        cmCPackLogger(cmCPackLog::LOG_WARNING,
+                      "Adding file to tar:" << std::endl
+                                            << "#top level directory: "
+                                            << this->WorkDir << std::endl
+                                            << "#missing file: " << i
+                                            << std::endl);
+      }
+
       if (cmsys::SystemTools::CopyFileIfDifferent(i, localcopy)) {
         control_tar.Add(localcopy, this->WorkDir.length(), ".");
       }

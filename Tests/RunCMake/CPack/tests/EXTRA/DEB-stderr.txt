@@ -1,0 +1,6 @@
+CPack Warning: Adding file to tar:
+#top level directory: .*/Tests/RunCMake/DEB.EXTRA/CPack/EXTRA-build/_CPack_Packages/Linux/DEB/extra-0.1.1-Linux/bas
+#missing file: .*/Tests/RunCMake/DEB.EXTRA/CPack/EXTRA-build/conffiles
+CPack Warning: Adding file to tar:
+#top level directory: .*/Tests/RunCMake/DEB.EXTRA/CPack/EXTRA-build/_CPack_Packages/Linux/DEB/extra-0.1.1-Linux/foo
+#missing file: .*/Tests/RunCMake/DEB.EXTRA/CPack/EXTRA-build/conffiles
