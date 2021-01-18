@@ -1422,10 +1422,13 @@ function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_r
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
-  if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.6)
-    set(git_stash_save_options --all --quiet)
-  else()
-    set(git_stash_save_options --quiet)
+  set(git_stash_save_options --quiet)
+  if(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.7.7)
+    # This avoids stashing files covered by .gitignore
+    list(APPEND git_stash_save_options --include-untracked)
+  elseif(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.7.6)
+    # Untracked files, but also ignored files, so potentially slower
+    list(APPEND git_stash_save_options --all)
   endif()
 
   configure_file(
