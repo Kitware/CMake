@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackDebGenerator.h"
 
+#include <cstdlib>
 #include <cstring>
 #include <map>
 #include <ostream>
@@ -28,7 +29,7 @@ class DebGenerator
 public:
   DebGenerator(cmCPackLog* logger, std::string outputName, std::string workDir,
                std::string topLevelDir, std::string temporaryDir,
-               const char* debianCompressionType,
+               const char* debianCompressionType, const char* numThreads,
                const char* debianArchiveType,
                std::map<std::string, std::string> controlValues,
                bool genShLibs, std::string shLibsFilename, bool genPostInst,
@@ -53,6 +54,7 @@ private:
   const std::string TopLevelDir;
   const std::string TemporaryDir;
   const char* DebianArchiveType;
+  int NumThreads;
   const std::map<std::string, std::string> ControlValues;
   const bool GenShLibs;
   const std::string ShLibsFilename;
@@ -69,7 +71,8 @@ private:
 DebGenerator::DebGenerator(
   cmCPackLog* logger, std::string outputName, std::string workDir,
   std::string topLevelDir, std::string temporaryDir,
-  const char* debianCompressionType, const char* debianArchiveType,
+  const char* debianCompressionType, const char* numThreads,
+  const char* debianArchiveType,
   std::map<std::string, std::string> controlValues, bool genShLibs,
   std::string shLibsFilename, bool genPostInst, std::string postInst,
   bool genPostRm, std::string postRm, const char* controlExtra,
@@ -114,6 +117,23 @@ DebGenerator::DebGenerator(
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error unrecognized compression type: "
                     << debianCompressionType << std::endl);
+  }
+
+  if (numThreads == nullptr) {
+    numThreads = "1";
+  }
+
+  char* endptr;
+  this->NumThreads = static_cast<int>(strtol(numThreads, &endptr, 10));
+  if (numThreads != endptr && *endptr != '\0') {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Unrecognized number of threads: " << numThreads
+                                                     << std::endl);
+  }
+
+  if (this->NumThreads < 0) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Number of threads cannot be negative" << std::endl);
   }
 }
 
@@ -173,7 +193,7 @@ bool DebGenerator::generateDataTar() const
     return false;
   }
   cmArchiveWrite data_tar(fileStream_data_tar, this->TarCompressionType,
-                          this->DebianArchiveType);
+                          this->DebianArchiveType, 0, this->NumThreads);
   data_tar.Open();
 
   // uid/gid should be the one of the root user, and this root user has
@@ -807,6 +827,7 @@ int cmCPackDebGenerator::createDeb()
     this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
     this->GetOption("CPACK_TEMPORARY_DIRECTORY"),
     this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_TYPE"),
+    this->GetOption("CPACK_THREADS"),
     this->GetOption("GEN_CPACK_DEBIAN_ARCHIVE_TYPE"), controlValues, gen_shibs,
     shlibsfilename, this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST"), postinst,
     this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM"), postrm,
@@ -864,6 +885,7 @@ int cmCPackDebGenerator::createDbgsymDDeb()
     this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
     this->GetOption("CPACK_TEMPORARY_DIRECTORY"),
     this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_TYPE"),
+    this->GetOption("CPACK_THREADS"),
     this->GetOption("GEN_CPACK_DEBIAN_ARCHIVE_TYPE"), controlValues, false, "",
     false, "", false, "", nullptr,
     this->IsSet("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION"),

@@ -282,6 +282,28 @@ installers.  The most commonly-used variables are:
   received by the cpack program.  Defaults to ``FALSE`` for backwards
   compatibility.
 
+.. variable:: CPACK_THREADS
+
+  .. versionadded:: 3.20
+
+  Number of threads to use when performing parallelized operations, such
+  as compressing the installer package.
+
+  Some compression methods used by CPack generators such as Debian or Archive
+  may take advantage of multiple CPU cores to speed up compression.
+  ``CPACK_THREADS`` can be set to positive integer to specify how many threads
+  will be used for compression. If it is set to 0, CPack will set it so that
+  all available CPU cores are used.
+  By default ``CPACK_THREADS`` is set to ``1``.
+
+  Currently only ``xz`` compression *may* take advantage of multiple cores. Other
+  compression methods ignore this value and use only one thread.
+
+  .. note::
+
+     Official CMake binaries available on ``cmake.org`` ship with a ``liblzma``
+     that does not support parallel compression.
+
 Variables for Source Package Generators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -746,6 +768,7 @@ _cpack_set_default(CPACK_INSTALL_CMAKE_PROJECTS
   "${CMAKE_BINARY_DIR};${CMAKE_PROJECT_NAME};ALL;/")
 _cpack_set_default(CPACK_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 _cpack_set_default(CPACK_TOPLEVEL_TAG "${CPACK_SYSTEM_NAME}")
+_cpack_set_default(CPACK_THREADS 1)
 # if the user has set CPACK_NSIS_DISPLAY_NAME remember it
 if(DEFINED CPACK_NSIS_DISPLAY_NAME)
   set(CPACK_NSIS_DISPLAY_NAME_SET TRUE)
