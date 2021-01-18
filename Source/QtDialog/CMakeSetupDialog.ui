@@ -84,13 +84,10 @@
      <item row="2" column="1">
       <widget class="QComboBox" name="BinaryDirectory">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">padding-left: 0</string>
        </property>
        <property name="editable">
         <bool>true</bool>
@@ -208,7 +205,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="AddEntry">
+          <widget class="QPushButton" name="AddEntry">
            <property name="toolTip">
             <string>Add New Entry</string>
            </property>
@@ -216,16 +213,13 @@
             <string>&amp;Add Entry</string>
            </property>
            <property name="icon">
-            <iconset resource="CMakeSetup.qrc">
+            <iconset theme="list-add" resource="CMakeSetup.qrc">
              <normaloff>:/Icons/Plus16.png</normaloff>:/Icons/Plus16.png</iconset>
-           </property>
-           <property name="toolButtonStyle">
-            <enum>Qt::ToolButtonTextBesideIcon</enum>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="RemoveEntry">
+          <widget class="QPushButton" name="RemoveEntry">
            <property name="toolTip">
             <string>Remove Selected Entries</string>
            </property>
@@ -233,11 +227,8 @@
             <string>&amp;Remove Entry</string>
            </property>
            <property name="icon">
-            <iconset resource="CMakeSetup.qrc">
+            <iconset theme="list-remove" resource="CMakeSetup.qrc">
              <normaloff>:/Icons/Delete16.png</normaloff>:/Icons/Delete16.png</iconset>
-           </property>
-           <property name="toolButtonStyle">
-            <enum>Qt::ToolButtonTextBesideIcon</enum>
            </property>
           </widget>
          </item>
