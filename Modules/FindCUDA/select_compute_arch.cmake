@@ -107,6 +107,17 @@ if(CUDA_VERSION VERSION_GREATER_EQUAL "11.1")
   endif()
 endif()
 
+
+# Check with: cmake -DCUDA_VERSION=7.0 -P select_compute_arch.cmake
+if(DEFINED CMAKE_SCRIPT_MODE_FILE)
+  include(CMakePrintHelpers)
+  cmake_print_variables(CUDA_KNOWN_GPU_ARCHITECTURES)
+  cmake_print_variables(CUDA_COMMON_GPU_ARCHITECTURES)
+  cmake_print_variables(CUDA_LIMIT_GPU_ARCHITECTURE)
+  cmake_print_variables(CUDA_ALL_GPU_ARCHITECTURES)
+endif()
+
+
 ################################################################################################
 # A function for automatic detection of GPUs installed  (if autodetection is enabled)
 # Usage:
