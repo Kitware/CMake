@@ -329,11 +329,35 @@ List of CPack DEB generator specific variables:
    may fail to find your own shared libs.
    See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 
+ .. note::
+
+   You can also set :variable:`CPACK_DEBIAN_PACKAGE_SHLIBDEPS_PRIVATE_DIRS`
+   to an appropriate value if you use this feature, in order to please
+   ``dpkg-shlibdeps``. However, you should only do this for private
+   shared libraries that could not get resolved otherwise.
+
  .. versionadded:: 3.3
   Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS`` variables.
 
  .. versionadded:: 3.6
   Correct handling of ``$ORIGIN`` in :variable:`CMAKE_INSTALL_RPATH`.
+
+.. variable:: CPACK_DEBIAN_PACKAGE_SHLIBDEPS_PRIVATE_DIRS
+
+ .. versionadded:: 3.20
+
+ May be set to a list of directories that will be given to ``dpkg-shlibdeps``
+ via its ``-d`` option. These will be searched by ``dpkg-shlibdeps`` in order
+ to find private shared library dependencies.
+
+ * Mandatory : NO
+ * Default   :
+
+ .. note::
+
+   You should prefer to set :variable:`CMAKE_INSTALL_RPATH` to an appropriate
+   value if you use ``dpkg-shlibdeps``. The current option is really only
+   needed for private shared library dependencies.
 
 .. variable:: CPACK_DEBIAN_PACKAGE_DEBUG
 
