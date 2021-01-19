@@ -2630,10 +2630,13 @@ function(_ep_add_download_command name)
       --non-interactive ${svn_trust_cert_args} ${svn_user_pw_args} ${src_name})
     list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
   elseif(git_repository)
-    unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
-    find_package(Git QUIET)
-    if(NOT GIT_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find git for clone of ${name}")
+    # FetchContent gives us these directly, so don't try to recompute them
+    if(NOT GIT_EXECUTABLE OR NOT GIT_VERSION_STRING)
+      unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
+      find_package(Git QUIET)
+      if(NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find git for clone of ${name}")
+      endif()
     endif()
 
     _ep_get_git_submodules_recurse(git_submodules_recurse)
@@ -2951,10 +2954,13 @@ function(_ep_add_update_command name)
       --non-interactive ${svn_trust_cert_args} ${svn_user_pw_args})
     set(always 1)
   elseif(git_repository)
-    unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
-    find_package(Git QUIET)
-    if(NOT GIT_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find git for fetch of ${name}")
+    # FetchContent gives us these directly, so don't try to recompute them
+    if(NOT GIT_EXECUTABLE OR NOT GIT_VERSION_STRING)
+      unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
+      find_package(Git QUIET)
+      if(NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "error: could not find git for fetch of ${name}")
+      endif()
     endif()
     set(work_dir ${source_dir})
     set(comment "Performing update step for '${name}'")
