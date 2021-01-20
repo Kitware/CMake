@@ -13,6 +13,7 @@
 
 #include "cmGccDepfileReader.h"
 #include "cmGccDepfileReaderTypes.h"
+#include "cmLocalGenerator.h"
 #include "cmSystemTools.h"
 
 namespace {
@@ -33,8 +34,11 @@ void WriteFilenameGcc(cmsys::ofstream& fout, const std::string& filename)
   }
 }
 
-void WriteGccDepfile(cmsys::ofstream& fout, const cmGccDepfileContent& content)
+void WriteGccDepfile(cmsys::ofstream& fout, const cmLocalGenerator& lg,
+                     const cmGccDepfileContent& content)
 {
+  const auto& binDir = lg.GetBinaryDirectory();
+
   for (auto const& dep : content) {
     bool first = true;
     for (auto const& rule : dep.rules) {
@@ -42,19 +46,32 @@ void WriteGccDepfile(cmsys::ofstream& fout, const cmGccDepfileContent& content)
         fout << " \\\n  ";
       }
       first = false;
-      WriteFilenameGcc(fout, rule);
+      WriteFilenameGcc(fout, lg.MaybeConvertToRelativePath(binDir, rule));
     }
     fout << ':';
     for (auto const& path : dep.paths) {
       fout << " \\\n  ";
-      WriteFilenameGcc(fout, path);
+      WriteFilenameGcc(fout, lg.MaybeConvertToRelativePath(binDir, path));
     }
     fout << '\n';
   }
 }
 
-void WriteVsTlog(cmsys::ofstream& fout, const cmGccDepfileContent& content)
+// tlog format : always windows paths on Windows regardless the generator
+std::string ConvertToTLogOutputPath(const std::string& path)
 {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  return cmSystemTools::ConvertToWindowsOutputPath(path);
+#else
+  return cmSystemTools::ConvertToOutputPath(path);
+#endif
+}
+
+void WriteVsTlog(cmsys::ofstream& fout, const cmLocalGenerator& lg,
+                 const cmGccDepfileContent& content)
+{
+  const auto& binDir = lg.GetBinaryDirectory();
+
   for (auto const& dep : content) {
     fout << '^';
     bool first = true;
@@ -63,22 +80,26 @@ void WriteVsTlog(cmsys::ofstream& fout, const cmGccDepfileContent& content)
         fout << '|';
       }
       first = false;
-      fout << cmSystemTools::ConvertToOutputPath(rule);
+      fout << ConvertToTLogOutputPath(
+        lg.MaybeConvertToRelativePath(binDir, rule));
     }
     fout << "\r\n";
     for (auto const& path : dep.paths) {
-      fout << cmSystemTools::ConvertToOutputPath(path) << "\r\n";
+      fout << ConvertToTLogOutputPath(
+                lg.MaybeConvertToRelativePath(binDir, path))
+           << "\r\n";
     }
   }
 }
 }
 
-bool cmTransformDepfile(cmDepfileFormat format, const std::string& prefix,
+bool cmTransformDepfile(cmDepfileFormat format, const cmLocalGenerator& lg,
                         const std::string& infile, const std::string& outfile)
 {
   cmGccDepfileContent content;
   if (cmSystemTools::FileExists(infile)) {
-    auto result = cmReadGccDepfile(infile.c_str(), prefix);
+    auto result =
+      cmReadGccDepfile(infile.c_str(), lg.GetCurrentBinaryDirectory());
     if (!result) {
       return false;
     }
@@ -91,10 +112,10 @@ bool cmTransformDepfile(cmDepfileFormat format, const std::string& prefix,
   }
   switch (format) {
     case cmDepfileFormat::GccDepfile:
-      WriteGccDepfile(fout, content);
+      WriteGccDepfile(fout, lg, content);
       break;
     case cmDepfileFormat::VsTlog:
-      WriteVsTlog(fout, content);
+      WriteVsTlog(fout, lg, content);
       break;
   }
   return true;

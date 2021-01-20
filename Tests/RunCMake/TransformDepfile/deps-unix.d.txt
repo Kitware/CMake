@@ -1,8 +1,8 @@
-../out1 \
+subdir/out1 \
   /home/build/out2: \
-  ../in1 \
+  subdir/in1 \
   /home/build/in2
-../out3 \
+subdir/out3 \
   /home/build/out4: \
-  ../in3 \
+  subdir/in3 \
   /home/build/in4

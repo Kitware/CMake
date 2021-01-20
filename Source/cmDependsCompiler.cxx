@@ -97,17 +97,8 @@ bool cmDependsCompiler::CheckDependencies(
 
       std::vector<std::string> depends;
       if (format == "custom"_s) {
-        std::string prefix;
-        if (this->LocalGenerator->GetCurrentBinaryDirectory() !=
-            this->LocalGenerator->GetBinaryDirectory()) {
-          prefix =
-            cmStrCat(this->LocalGenerator->MaybeConvertToRelativePath(
-                       this->LocalGenerator->GetBinaryDirectory(),
-                       this->LocalGenerator->GetCurrentBinaryDirectory()),
-                     '/');
-        }
-
-        auto deps = cmReadGccDepfile(depFile.c_str(), prefix);
+        auto deps = cmReadGccDepfile(
+          depFile.c_str(), this->LocalGenerator->GetCurrentBinaryDirectory());
         if (!deps) {
           continue;
         }

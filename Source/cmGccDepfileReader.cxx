@@ -24,7 +24,7 @@ cm::optional<cmGccDepfileContent> cmReadGccDepfile(const char* filePath,
   for (auto& dep : *deps) {
     for (auto& rule : dep.rules) {
       if (!prefix.empty() && !cmSystemTools::FileIsFullPath(rule)) {
-        rule = cmStrCat(prefix, rule);
+        rule = cmStrCat(prefix, '/', rule);
       }
       if (cmSystemTools::FileIsFullPath(rule)) {
         rule = cmSystemTools::CollapseFullPath(rule);
@@ -33,7 +33,7 @@ cm::optional<cmGccDepfileContent> cmReadGccDepfile(const char* filePath,
     }
     for (auto& path : dep.paths) {
       if (!prefix.empty() && !cmSystemTools::FileIsFullPath(path)) {
-        path = cmStrCat(prefix, path);
+        path = cmStrCat(prefix, '/', path);
       }
       if (cmSystemTools::FileIsFullPath(path)) {
         path = cmSystemTools::CollapseFullPath(path);

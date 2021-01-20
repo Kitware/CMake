@@ -4,7 +4,7 @@ enable_language(C)
 add_custom_command(
   OUTPUT topcc.c
   DEPFILE topcc.c.d
-  COMMAND ${CMAKE_COMMAND} -DOUTFILE=topcc.c -DINFILE=topccdep.txt -DDEPFILE=topcc.c.d -P "${CMAKE_CURRENT_LIST_DIR}/WriteDepfile.cmake"
+  COMMAND ${CMAKE_COMMAND} -DOUTFILE=${CMAKE_CURRENT_BINARY_DIR}/topcc.c -DINFILE=topccdep.txt -DDEPFILE=topcc.c.d -P "${CMAKE_CURRENT_LIST_DIR}/WriteDepfile.cmake"
   )
 add_custom_target(topcc ALL DEPENDS topcc.c)
 
