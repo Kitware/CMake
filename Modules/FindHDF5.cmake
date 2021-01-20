@@ -360,6 +360,8 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
   execute_process(
     COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} ${test_file}
     WORKING_DIRECTORY ${scratch_dir}
+    OUTPUT_VARIABLE output
+    ERROR_VARIABLE output
     RESULT_VARIABLE return_value
     )
   if(return_value)
