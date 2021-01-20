@@ -123,9 +123,22 @@ documentation:
 ``command``
  A CMake language command.
 
+``cpack_gen``
+ A CPack package generator.
+ See the `cpack(1)`_ command-line tool's ``-G`` option.
+
+``envvar``
+ An environment variable.
+ See the `cmake-env-variables(7)`_ manual
+ and the `set()`_ command.
+
 ``generator``
  A CMake native build system generator.
  See the `cmake(1)`_ command-line tool's ``-G`` option.
+
+``genex``
+ A CMake generator expression.
+ See the `cmake-generator-expressions(7)`_ manual.
 
 ``manual``
  A CMake manual page, like the `cmake(1)`_ manual.
@@ -160,10 +173,12 @@ which is expected to be of the form::
  -------------
 
 and to appear at or near the top of the ``.rst`` file before any other
-lines starting in a letter, digit, or ``<``.  If no such title appears
+lines starting in a letter, digit, ``<``, or ``$``.  If no such title appears
 literally in the ``.rst`` file, the object name is the ``<file-name>``.
 If a title does appear, it is expected that ``<file-name>`` is equal
-to ``<object-name>`` with any ``<`` and ``>`` characters removed.
+to ``<object-name>`` with any ``<`` and ``>`` characters removed,
+or in the case of a ``$<genex-name>`` or ``$<genex-name:...>``, the
+``genex-name``.
 
 Second, the CMake Domain provides directives to define objects inside
 other documents:
@@ -174,6 +189,14 @@ other documents:
 
   This indented block documents <command-name>.
 
+ .. envvar:: <envvar-name>
+
+  This indented block documents <envvar-name>.
+
+ .. genex:: <genex-name>
+
+  This indented block documents <genex-name>.
+
  .. variable:: <variable-name>
 
   This indented block documents <variable-name>.
@@ -183,11 +206,14 @@ the first approach above.
 
 .. _`Sphinx Domain`: http://sphinx-doc.org/domains.html
 .. _`cmake(1)`: https://cmake.org/cmake/help/latest/manual/cmake.1.html
+.. _`cmake-env-variables(7)`: https://cmake.org/cmake/help/latest/manual/cmake-env-variables.7.html
+.. _`cmake-generator-expressions(7)`: https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html
 .. _`cmake-modules(7)`: https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html
 .. _`cmake-policies(7)`: https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html
 .. _`cmake-properties(7)`: https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html
 .. _`cmake-variables(7)`: https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html
 .. _`cmake_policy()`: https://cmake.org/cmake/help/latest/command/cmake_policy.html
+.. _`cpack(1)`: https://cmake.org/cmake/help/latest/manual/cpack.1.html
 .. _`include()`: https://cmake.org/cmake/help/latest/command/include.html
 .. _`set()`: https://cmake.org/cmake/help/latest/command/set.html
 .. _`set_property()`: https://cmake.org/cmake/help/latest/command/set_property.html
