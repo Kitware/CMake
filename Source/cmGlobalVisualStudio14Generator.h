@@ -40,9 +40,13 @@ protected:
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
 
+  // Used to adjust the max-SDK-version calculation to accommodate user
+  // configuration.
+  std::string GetWindows10SDKMaxVersion(cmMakefile* mf) const;
+
   // Used to make sure that the Windows 10 SDK selected can work with the
   // version of the toolset.
-  virtual std::string GetWindows10SDKMaxVersion(cmMakefile* mf) const;
+  virtual std::string GetWindows10SDKMaxVersionDefault(cmMakefile* mf) const;
 
   virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
 

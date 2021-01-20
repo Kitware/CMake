@@ -540,7 +540,8 @@ bool cmGlobalVisualStudioVersionedGenerator::IsWin81SDKInstalled() const
   return false;
 }
 
-std::string cmGlobalVisualStudioVersionedGenerator::GetWindows10SDKMaxVersion(
+std::string
+cmGlobalVisualStudioVersionedGenerator::GetWindows10SDKMaxVersionDefault(
   cmMakefile*) const
 {
   return std::string();
