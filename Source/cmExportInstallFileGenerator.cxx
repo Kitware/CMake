@@ -290,6 +290,7 @@ bool cmExportInstallFileGenerator::GenerateImportFileConfig(
     cmSystemTools::Error(e.str());
     return false;
   }
+  exportFileStream.SetCopyIfDifferent(true);
   std::ostream& os = exportFileStream;
 
   // Start with the import file header.
