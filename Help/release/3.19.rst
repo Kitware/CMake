@@ -400,3 +400,11 @@ Changes made since CMake 3.19.0 include the following.
   * The naming pattern ``cmake-$ver-macos10.10-universal`` is a universal
     binary with ``x86_64`` and ``arm64`` architectures.  It requires
     macOS 10.10 or newer.
+
+3.19.4
+------
+
+* The :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION_MAXIMUM`
+  variable introduced in 3.19.0 previously worked only with the
+  :generator:`Visual Studio 14 2015` generator.  It has now been fixed to
+  work with :ref:`Visual Studio Generators` for later VS versions too.
