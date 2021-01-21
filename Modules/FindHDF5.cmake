@@ -360,9 +360,11 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
   execute_process(
     COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} ${test_file}
     WORKING_DIRECTORY ${scratch_dir}
+    OUTPUT_VARIABLE output
+    ERROR_VARIABLE output
     RESULT_VARIABLE return_value
     )
-  if(return_value)
+  if(return_value AND NOT HDF5_FIND_QUIETLY)
     message(STATUS
       "HDF5 ${language} compiler wrapper is unable to compile a minimal HDF5 program.")
   else()
@@ -374,7 +376,7 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
       RESULT_VARIABLE return_value
       OUTPUT_STRIP_TRAILING_WHITESPACE
       )
-    if(return_value)
+    if(return_value AND NOT HDF5_FIND_QUIETLY)
       message(STATUS
         "Unable to determine HDF5 ${language} flags from HDF5 wrapper.")
     endif()
@@ -385,7 +387,7 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
       RESULT_VARIABLE return_value
       OUTPUT_STRIP_TRAILING_WHITESPACE
       )
-    if(return_value)
+    if(return_value AND NOT HDF5_FIND_QUIETLY)
       message(STATUS
         "Unable to determine HDF5 ${language} version_var from HDF5 wrapper.")
     endif()
