@@ -666,6 +666,154 @@ with members:
     directory (with ``.`` for the top-level build directory itself).
     Otherwise the path is absolute.
 
+``installers``
+  A JSON array of entries corresponding to :command:`install` rules.
+  Each entry is a JSON object containing members:
+
+  ``component``
+    A string specifying the component selected by the corresponding
+    :command:`install` command invocation.
+
+  ``destination``
+    Optional member that is present for specific ``type`` values below.
+    The value is a string specifying the install destination path.
+    The path may be absolute or relative to the install prefix.
+
+  ``paths``
+    Optional member that is present for specific ``type`` values below.
+    The value is a JSON array of entries corresponding to the paths
+    (files or directories) to be installed.  Each entry is one of:
+
+    * A string specifying the path from which a file or directory
+      is to be installed.  The portion of the path not preceded by
+      a ``/`` also specifies the path (name) to which the file
+      or directory is to be installed under the destination.
+
+    * A JSON object with members:
+
+      ``from``
+        A string specifying the path from which a file or directory
+        is to be installed.
+
+      ``to``
+        A string specifying the path to which the file or directory
+        is to be installed under the destination.
+
+    In both cases the paths are represented with forward slashes.  If
+    the "from" path is inside the top-level directory documented by the
+    corresponding ``type`` value, then the path is specified relative
+    to that directory.  Otherwise the path is absolute.
+
+  ``type``
+    A string specifying the type of installation rule.  The value is one
+    of the following, with some variants providing additional members:
+
+    ``file``
+      An :command:`install(FILES)` or :command:`install(PROGRAMS)` call.
+      The ``destination`` and ``paths`` members are populated, with paths
+      under the top-level *source* directory expressed relative to it.
+      The ``isOptional`` member may exist.
+      This type has no additional members.
+
+    ``directory``
+      An :command:`install(DIRECTORY)` call.
+      The ``destination`` and ``paths`` members are populated, with paths
+      under the top-level *source* directory expressed relative to it.
+      The ``isOptional`` member may exist.
+      This type has no additional members.
+
+    ``target``
+      An :command:`install(TARGETS)` call.
+      The ``destination`` and ``paths`` members are populated, with paths
+      under the top-level *build* directory expressed relative to it.
+      The ``isOptional`` member may exist.
+      This type has additional members ``targetId``, ``targetIndex``,
+      ``targetIsImportLibrary``, and ``targetInstallNamelink``.
+
+    ``export``
+      An :command:`install(EXPORT)` call.
+      The ``destination`` and ``paths`` members are populated, with paths
+      under the top-level *build* directory expressed relative to it.
+      The ``paths`` entries refer to files generated automatically by
+      CMake for installation, and their actual values are considered
+      private implementation details.
+      This type has additional members ``exportName`` and ``exportTargets``.
+
+    ``script``
+      An :command:`install(SCRIPT)` call.
+      This type has additional member ``scriptFile``.
+
+    ``code``
+      An :command:`install(CODE)` call.
+      This type has no additional members.
+
+  ``isExcludeFromAll``
+    Optional member that is present with boolean value ``true`` when
+    :command:`install` is called with the ``EXCLUDE_FROM_ALL`` option.
+
+  ``isOptional``
+    Optional member that is present with boolean value ``true`` when
+    :command:`install` is called with the ``OPTIONAL`` option.
+    This is allowed when ``type`` is ``file``, ``directory``, or ``target``.
+
+  ``targetId``
+    Optional member that is present when ``type`` is ``target``.
+    The value is a string uniquely identifying the target to be installed.
+    This matches the ``id`` member of the target in the main
+    "codemodel" object's ``targets`` array.
+
+  ``targetIndex``
+    Optional member that is present when ``type`` is ``target``.
+    The value is an unsigned integer 0-based index into the main "codemodel"
+    object's ``targets`` array for the target to be installed.
+
+  ``targetIsImportLibrary``
+    Optional member that is present when ``type`` is ``target`` and
+    the installer is for a Windows DLL import library file or for an
+    AIX linker import file.  If present, it has boolean value ``true``.
+
+  ``targetInstallNamelink``
+    Optional member that is present when ``type`` is ``target`` and
+    the installer corresponds to a target that may use symbolic links
+    to implement the :prop_tgt:`VERSION` and :prop_tgt:`SOVERSION`
+    target properties.
+    The value is a string indicating how the installer is supposed to
+    handle the symlinks: ``skip`` means the installer should skip the
+    symlinks and install only the real file, and ``only`` means the
+    installer should install only the symlinks and not the real file.
+    In all cases the ``paths`` member lists what it actually installs.
+
+  ``exportName``
+    Optional member that is present when ``type`` is ``export``.
+    The value is a string specifying the name of the export.
+
+  ``exportTargets``
+    Optional member that is present when ``type`` is ``export``.
+    The value is a JSON array of entries corresponding to the targets
+    included in the export.  Each entry is a JSON object with members:
+
+    ``id``
+      A string uniquely identifying the target.  This matches
+      the ``id`` member of the target in the main "codemodel"
+      object's ``targets`` array.
+
+    ``index``
+      An unsigned integer 0-based index into the main "codemodel"
+      object's ``targets`` array for the target.
+
+  ``scriptFile``
+    Optional member that is present when ``type`` is ``script``.
+    The value is a string specifying the path to the script file on disk,
+    represented with forward slashes.  If the file is inside the top-level
+    source directory then the path is specified relative to that directory.
+    Otherwise the path is absolute.
+
+  ``backtrace``
+    Optional member that is present when a CMake language backtrace to
+    the :command:`install` or other command invocation that added this
+    installer is available.  The value is an unsigned integer 0-based
+    index into the ``backtraceGraph`` member's ``nodes`` array.
+
 ``backtraceGraph``
   A `"codemodel" version 2 "backtrace graph"`_ whose nodes are referenced
   from ``backtrace`` members elsewhere in this "directory" object.

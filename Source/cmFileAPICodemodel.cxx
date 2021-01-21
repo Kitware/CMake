@@ -20,11 +20,16 @@
 #include <cm3p/json/value.h>
 
 #include "cmCryptoHash.h"
+#include "cmExportSet.h"
 #include "cmFileAPI.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallDirectoryGenerator.h"
+#include "cmInstallExportGenerator.h"
+#include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmInstallScriptGenerator.h"
 #include "cmInstallSubdirectoryGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
@@ -42,6 +47,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
+#include "cmTargetExport.h"
 #include "cmake.h"
 
 namespace {
@@ -377,6 +383,7 @@ class DirectoryObject
 {
   cmLocalGenerator const* LG = nullptr;
   std::string const& Config;
+  TargetIndexMapType& TargetIndexMap;
   std::string TopSource;
   std::string TopBuild;
   BacktraceData Backtraces;
@@ -384,9 +391,16 @@ class DirectoryObject
   void AddBacktrace(Json::Value& object, cmListFileBacktrace const& bt);
 
   Json::Value DumpPaths();
+  Json::Value DumpInstallers();
+  Json::Value DumpInstaller(cmInstallGenerator* gen);
+  Json::Value DumpInstallerExportTargets(cmExportSet* exp);
+  Json::Value DumpInstallerPath(std::string const& top,
+                                std::string const& fromPathIn,
+                                std::string const& toPath);
 
 public:
-  DirectoryObject(cmLocalGenerator const* lg, std::string const& config);
+  DirectoryObject(cmLocalGenerator const* lg, std::string const& config,
+                  TargetIndexMapType& targetIndexMap);
   Json::Value Dump();
 };
 
@@ -763,7 +777,7 @@ Json::Value CodemodelConfig::DumpDirectoryObject(Directory& d)
     prefix += "-" + this->Config;
   }
 
-  DirectoryObject dir(d.LocalGenerator, this->Config);
+  DirectoryObject dir(d.LocalGenerator, this->Config, this->TargetIndexMap);
   return this->FileAPI.MaybeJsonFile(dir.Dump(), prefix);
 }
 
@@ -811,9 +825,11 @@ Json::Value CodemodelConfig::DumpMinimumCMakeVersion(cmStateSnapshot s)
 }
 
 DirectoryObject::DirectoryObject(cmLocalGenerator const* lg,
-                                 std::string const& config)
+                                 std::string const& config,
+                                 TargetIndexMapType& targetIndexMap)
   : LG(lg)
   , Config(config)
+  , TargetIndexMap(targetIndexMap)
   , TopSource(lg->GetGlobalGenerator()->GetCMakeInstance()->GetHomeDirectory())
   , TopBuild(
       lg->GetGlobalGenerator()->GetCMakeInstance()->GetHomeOutputDirectory())
@@ -825,6 +841,7 @@ Json::Value DirectoryObject::Dump()
 {
   Json::Value directoryObject = Json::objectValue;
   directoryObject["paths"] = this->DumpPaths();
+  directoryObject["installers"] = this->DumpInstallers();
   directoryObject["backtraceGraph"] = this->Backtraces.Dump();
   return directoryObject;
 }
@@ -848,6 +865,203 @@ Json::Value DirectoryObject::DumpPaths()
   paths["build"] = RelativeIfUnder(this->TopBuild, buildDir);
 
   return paths;
+}
+
+Json::Value DirectoryObject::DumpInstallers()
+{
+  Json::Value installers = Json::arrayValue;
+  for (const auto& gen : this->LG->GetMakefile()->GetInstallGenerators()) {
+    Json::Value installer = this->DumpInstaller(gen.get());
+    if (!installer.empty()) {
+      installers.append(std::move(installer)); // NOLINT(*)
+    }
+  }
+  return installers;
+}
+
+Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
+{
+  Json::Value installer = Json::objectValue;
+
+  // Exclude subdirectory installers.  They are implementation details.
+  if (dynamic_cast<cmInstallSubdirectoryGenerator*>(gen)) {
+    return installer;
+  }
+
+  // Exclude installers not used in this configuration.
+  if (!gen->InstallsForConfig(this->Config)) {
+    return installer;
+  }
+
+  // Add fields specific to each kind of install generator.
+  if (auto* installTarget = dynamic_cast<cmInstallTargetGenerator*>(gen)) {
+    cmInstallTargetGenerator::Files const& files =
+      installTarget->GetFiles(this->Config);
+    if (files.From.empty()) {
+      return installer;
+    }
+
+    installer["type"] = "target";
+    installer["destination"] = installTarget->GetDestination(this->Config);
+    installer["targetId"] =
+      TargetId(installTarget->GetTarget(), this->TopBuild);
+    installer["targetIndex"] =
+      this->TargetIndexMap[installTarget->GetTarget()];
+
+    std::string fromDir = files.FromDir;
+    if (!fromDir.empty()) {
+      fromDir.push_back('/');
+    }
+
+    std::string toDir = files.ToDir;
+    if (!toDir.empty()) {
+      toDir.push_back('/');
+    }
+
+    Json::Value paths = Json::arrayValue;
+    for (size_t i = 0; i < files.From.size(); ++i) {
+      std::string const& fromPath = cmStrCat(fromDir, files.From[i]);
+      std::string const& toPath = cmStrCat(toDir, files.To[i]);
+      paths.append(this->DumpInstallerPath(this->TopBuild, fromPath, toPath));
+    }
+    installer["paths"] = std::move(paths);
+
+    if (installTarget->GetOptional()) {
+      installer["isOptional"] = true;
+    }
+
+    if (installTarget->IsImportLibrary()) {
+      installer["targetIsImportLibrary"] = true;
+    }
+
+    switch (files.NamelinkMode) {
+      case cmInstallTargetGenerator::NamelinkModeNone:
+        break;
+      case cmInstallTargetGenerator::NamelinkModeOnly:
+        installer["targetInstallNamelink"] = "only";
+        break;
+      case cmInstallTargetGenerator::NamelinkModeSkip:
+        installer["targetInstallNamelink"] = "skip";
+        break;
+    }
+
+    // FIXME: Parse FilePermissions to provide structured information.
+    // FIXME: Thread EXPORT name through from install() call.
+  } else if (auto* installFiles =
+               dynamic_cast<cmInstallFilesGenerator*>(gen)) {
+    std::vector<std::string> const& files =
+      installFiles->GetFiles(this->Config);
+    if (files.empty()) {
+      return installer;
+    }
+
+    installer["type"] = "file";
+    installer["destination"] = installFiles->GetDestination(this->Config);
+    Json::Value paths = Json::arrayValue;
+    std::string const& rename = installFiles->GetRename(this->Config);
+    if (!rename.empty() && files.size() == 1) {
+      paths.append(this->DumpInstallerPath(this->TopSource, files[0], rename));
+    } else {
+      for (std::string const& file : installFiles->GetFiles(this->Config)) {
+        paths.append(RelativeIfUnder(this->TopSource, file));
+      }
+    }
+    installer["paths"] = std::move(paths);
+    if (installFiles->GetOptional()) {
+      installer["isOptional"] = true;
+    }
+    // FIXME: Parse FilePermissions to provide structured information.
+  } else if (auto* installDir =
+               dynamic_cast<cmInstallDirectoryGenerator*>(gen)) {
+    std::vector<std::string> const& dirs =
+      installDir->GetDirectories(this->Config);
+    if (dirs.empty()) {
+      return installer;
+    }
+
+    installer["type"] = "directory";
+    installer["destination"] = installDir->GetDestination(this->Config);
+    Json::Value paths = Json::arrayValue;
+    for (std::string const& dir : dirs) {
+      if (cmHasLiteralSuffix(dir, "/")) {
+        paths.append(this->DumpInstallerPath(
+          this->TopSource, dir.substr(0, dir.size() - 1), "."));
+      } else {
+        paths.append(this->DumpInstallerPath(
+          this->TopSource, dir, cmSystemTools::GetFilenameName(dir)));
+      }
+    }
+    installer["paths"] = std::move(paths);
+    if (installDir->GetOptional()) {
+      installer["isOptional"] = true;
+    }
+    // FIXME: Parse FilePermissions, DirPermissions, and LiteralArguments.
+    // to provide structured information.
+  } else if (auto* installExport =
+               dynamic_cast<cmInstallExportGenerator*>(gen)) {
+    installer["type"] = "export";
+    installer["destination"] = installExport->GetDestination();
+    cmExportSet* exportSet = installExport->GetExportSet();
+    installer["exportName"] = exportSet->GetName();
+    installer["exportTargets"] = this->DumpInstallerExportTargets(exportSet);
+    Json::Value paths = Json::arrayValue;
+    paths.append(
+      RelativeIfUnder(this->TopBuild, installExport->GetMainImportFile()));
+    installer["paths"] = std::move(paths);
+  } else if (auto* installScript =
+               dynamic_cast<cmInstallScriptGenerator*>(gen)) {
+    if (installScript->IsCode()) {
+      installer["type"] = "code";
+    } else {
+      installer["type"] = "script";
+      installer["scriptFile"] = RelativeIfUnder(
+        this->TopSource, installScript->GetScript(this->Config));
+    }
+  }
+
+  // Add fields common to all install generators.
+  installer["component"] = gen->GetComponent();
+  if (gen->GetExcludeFromAll()) {
+    installer["isExcludeFromAll"] = true;
+  }
+  this->AddBacktrace(installer, gen->GetBacktrace());
+
+  return installer;
+}
+
+Json::Value DirectoryObject::DumpInstallerExportTargets(cmExportSet* exp)
+{
+  Json::Value targets = Json::arrayValue;
+  for (auto const& targetExport : exp->GetTargetExports()) {
+    Json::Value target = Json::objectValue;
+    target["id"] = TargetId(targetExport->Target, this->TopBuild);
+    target["index"] = this->TargetIndexMap[targetExport->Target];
+    targets.append(std::move(target)); // NOLINT(*)
+  }
+  return targets;
+}
+
+Json::Value DirectoryObject::DumpInstallerPath(std::string const& top,
+                                               std::string const& fromPathIn,
+                                               std::string const& toPath)
+{
+  Json::Value installPath;
+
+  std::string fromPath = RelativeIfUnder(top, fromPathIn);
+
+  // If toPath is the last component of fromPath, use just fromPath.
+  if (toPath.find_first_of('/') == std::string::npos &&
+      cmHasSuffix(fromPath, toPath) &&
+      (fromPath.size() == toPath.size() ||
+       fromPath[fromPath.size() - toPath.size() - 1] == '/')) {
+    installPath = fromPath;
+  } else {
+    installPath = Json::objectValue;
+    installPath["from"] = fromPath;
+    installPath["to"] = toPath;
+  }
+
+  return installPath;
 }
 
 Target::Target(cmGeneratorTarget* gt, std::string const& config)
