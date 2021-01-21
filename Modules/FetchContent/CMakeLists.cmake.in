@@ -9,6 +9,8 @@ cmake_minimum_required(VERSION ${CMAKE_VERSION})
 
 project(${contentName}-populate NONE)
 
+@__FETCHCONTENT_CACHED_INFO@
+
 include(ExternalProject)
 ExternalProject_Add(${contentName}-populate
                     ${ARG_EXTRA}

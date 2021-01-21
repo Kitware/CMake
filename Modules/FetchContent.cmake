@@ -964,6 +964,22 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
       "-DCMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY=${CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY}")
   endif()
 
+  # Avoid using if(... IN_LIST ...) so we don't have to alter policy settings
+  set(__FETCHCONTENT_CACHED_INFO "")
+  list(FIND ARG_UNPARSED_ARGUMENTS GIT_REPOSITORY indexResult)
+  if(indexResult GREATER_EQUAL 0)
+    find_package(Git QUIET)
+    set(__FETCHCONTENT_CACHED_INFO
+"# Pass through things we've already detected in the main project to avoid
+# paying the cost of redetecting them again in ExternalProject_Add()
+set(GIT_EXECUTABLE [==[${GIT_EXECUTABLE}]==])
+set(GIT_VERSION_STRING [==[${GIT_VERSION_STRING}]==])
+set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
+  [==[${GIT_EXECUTABLE};${GIT_VERSION_STRING}]==]
+)
+")
+  endif()
+
   # Create and build a separate CMake project to carry out the population.
   # If we've already previously done these steps, they will not cause
   # anything to be updated, so extra rebuilds of the project won't occur.
