@@ -7,6 +7,7 @@ $tarball = "$filename.zip"
 
 $outdir = $pwd.Path
 $outdir = "$outdir\.gitlab"
+$ProgressPreference = 'SilentlyContinue'
 Invoke-WebRequest -Uri "https://github.com/Kitware/CMake/releases/download/v$version/$tarball" -OutFile "$outdir\$tarball"
 $hash = Get-FileHash "$outdir\$tarball" -Algorithm SHA256
 if ($hash.Hash -ne $sha256sum) {
