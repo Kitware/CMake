@@ -60,7 +60,7 @@ private:
   bool ScrapeRulesLoaded;
   void LoadScrapeRules();
   void LoadScrapeRules(const char* purpose,
-                       std::vector<cmsys::RegularExpression>& regexps);
+                       std::vector<cmsys::RegularExpression>& regexps) const;
   bool ScrapeLog(std::string const& fname);
 
   // Helper class to generate the xml fragment.

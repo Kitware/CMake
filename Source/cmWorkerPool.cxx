@@ -170,9 +170,9 @@ public:
 private:
   // -- Libuv callbacks
   static void UVExit(uv_process_t* handle, int64_t exitStatus, int termSignal);
-  void UVPipeOutData(cmUVPipeBuffer::DataRange data);
+  void UVPipeOutData(cmUVPipeBuffer::DataRange data) const;
   void UVPipeOutEnd(ssize_t error);
-  void UVPipeErrData(cmUVPipeBuffer::DataRange data);
+  void UVPipeErrData(cmUVPipeBuffer::DataRange data) const;
   void UVPipeErrEnd(ssize_t error);
   void UVTryFinish();
 
@@ -330,7 +330,7 @@ void cmUVReadOnlyProcess::UVExit(uv_process_t* handle, int64_t exitStatus,
   }
 }
 
-void cmUVReadOnlyProcess::UVPipeOutData(cmUVPipeBuffer::DataRange data)
+void cmUVReadOnlyProcess::UVPipeOutData(cmUVPipeBuffer::DataRange data) const
 {
   this->Result()->StdOut.append(data.begin(), data.end());
 }
@@ -346,7 +346,7 @@ void cmUVReadOnlyProcess::UVPipeOutEnd(ssize_t error)
   this->UVTryFinish();
 }
 
-void cmUVReadOnlyProcess::UVPipeErrData(cmUVPipeBuffer::DataRange data)
+void cmUVReadOnlyProcess::UVPipeErrData(cmUVPipeBuffer::DataRange data) const
 {
   std::string* str = this->Setup_.MergedOutput ? &this->Result()->StdOut
                                                : &this->Result()->StdErr;

@@ -951,6 +951,9 @@ void cmComputeLinkInformation::AddLinkExtension(std::string const& e,
   }
 }
 
+// XXX(clang-tidy): This method's const-ness is platform dependent, so we
+// cannot make it `const` as `clang-tidy` wants us to.
+// NOLINTNEXTLINE(readability-make-member-function-const)
 std::string cmComputeLinkInformation::CreateExtensionRegex(
   std::vector<std::string> const& exts, LinkType type)
 {

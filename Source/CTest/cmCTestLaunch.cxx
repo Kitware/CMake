@@ -265,7 +265,7 @@ void cmCTestLaunch::LoadScrapeRules()
 }
 
 void cmCTestLaunch::LoadScrapeRules(
-  const char* purpose, std::vector<cmsys::RegularExpression>& regexps)
+  const char* purpose, std::vector<cmsys::RegularExpression>& regexps) const
 {
   std::string fname =
     cmStrCat(this->Reporter.LogDir, "Custom", purpose, ".txt");

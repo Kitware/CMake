@@ -57,28 +57,38 @@ public:
   bool MakeFilesFullPath(const char* modeName,
                          const std::vector<std::string>& relFiles,
                          std::vector<std::string>& absFiles);
-  bool CheckCMP0006(bool& failure);
+  bool CheckCMP0006(bool& failure) const;
 
   std::string GetDestination(const cmInstallCommandArguments* args,
                              const std::string& varName,
-                             const std::string& guess);
-  std::string GetRuntimeDestination(const cmInstallCommandArguments* args);
-  std::string GetSbinDestination(const cmInstallCommandArguments* args);
-  std::string GetArchiveDestination(const cmInstallCommandArguments* args);
-  std::string GetLibraryDestination(const cmInstallCommandArguments* args);
-  std::string GetIncludeDestination(const cmInstallCommandArguments* args);
-  std::string GetSysconfDestination(const cmInstallCommandArguments* args);
-  std::string GetSharedStateDestination(const cmInstallCommandArguments* args);
-  std::string GetLocalStateDestination(const cmInstallCommandArguments* args);
-  std::string GetRunStateDestination(const cmInstallCommandArguments* args);
-  std::string GetDataRootDestination(const cmInstallCommandArguments* args);
-  std::string GetDataDestination(const cmInstallCommandArguments* args);
-  std::string GetInfoDestination(const cmInstallCommandArguments* args);
-  std::string GetLocaleDestination(const cmInstallCommandArguments* args);
-  std::string GetManDestination(const cmInstallCommandArguments* args);
-  std::string GetDocDestination(const cmInstallCommandArguments* args);
+                             const std::string& guess) const;
+  std::string GetRuntimeDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetSbinDestination(const cmInstallCommandArguments* args) const;
+  std::string GetArchiveDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetLibraryDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetIncludeDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetSysconfDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetSharedStateDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetLocalStateDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetRunStateDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetDataRootDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetDataDestination(const cmInstallCommandArguments* args) const;
+  std::string GetInfoDestination(const cmInstallCommandArguments* args) const;
+  std::string GetLocaleDestination(
+    const cmInstallCommandArguments* args) const;
+  std::string GetManDestination(const cmInstallCommandArguments* args) const;
+  std::string GetDocDestination(const cmInstallCommandArguments* args) const;
   std::string GetDestinationForType(const cmInstallCommandArguments* args,
-                                    const std::string& type);
+                                    const std::string& type) const;
 
   cmExecutionStatus& Status;
   cmMakefile* Makefile;
@@ -1477,7 +1487,7 @@ bool Helper::MakeFilesFullPath(const char* modeName,
   return true;
 }
 
-bool Helper::CheckCMP0006(bool& failure)
+bool Helper::CheckCMP0006(bool& failure) const
 {
   switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0006)) {
     case cmPolicies::WARN:
@@ -1504,7 +1514,7 @@ bool Helper::CheckCMP0006(bool& failure)
 
 std::string Helper::GetDestination(const cmInstallCommandArguments* args,
                                    const std::string& varName,
-                                   const std::string& guess)
+                                   const std::string& guess) const
 {
   if (args && !args->GetDestination().empty()) {
     return args->GetDestination();
@@ -1517,54 +1527,55 @@ std::string Helper::GetDestination(const cmInstallCommandArguments* args,
 }
 
 std::string Helper::GetRuntimeDestination(
-  const cmInstallCommandArguments* args)
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_BINDIR", "bin");
 }
 
-std::string Helper::GetSbinDestination(const cmInstallCommandArguments* args)
+std::string Helper::GetSbinDestination(
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_SBINDIR", "sbin");
 }
 
 std::string Helper::GetArchiveDestination(
-  const cmInstallCommandArguments* args)
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_LIBDIR", "lib");
 }
 
 std::string Helper::GetLibraryDestination(
-  const cmInstallCommandArguments* args)
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_LIBDIR", "lib");
 }
 
 std::string Helper::GetIncludeDestination(
-  const cmInstallCommandArguments* args)
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_INCLUDEDIR", "include");
 }
 
 std::string Helper::GetSysconfDestination(
-  const cmInstallCommandArguments* args)
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_SYSCONFDIR", "etc");
 }
 
 std::string Helper::GetSharedStateDestination(
-  const cmInstallCommandArguments* args)
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_SHAREDSTATEDIR", "com");
 }
 
 std::string Helper::GetLocalStateDestination(
-  const cmInstallCommandArguments* args)
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_LOCALSTATEDIR", "var");
 }
 
 std::string Helper::GetRunStateDestination(
-  const cmInstallCommandArguments* args)
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_RUNSTATEDIR",
                               this->GetLocalStateDestination(nullptr) +
@@ -1572,44 +1583,49 @@ std::string Helper::GetRunStateDestination(
 }
 
 std::string Helper::GetDataRootDestination(
-  const cmInstallCommandArguments* args)
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_DATAROOTDIR", "share");
 }
 
-std::string Helper::GetDataDestination(const cmInstallCommandArguments* args)
+std::string Helper::GetDataDestination(
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_DATADIR",
                               this->GetDataRootDestination(nullptr));
 }
 
-std::string Helper::GetInfoDestination(const cmInstallCommandArguments* args)
+std::string Helper::GetInfoDestination(
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_INFODIR",
                               this->GetDataRootDestination(nullptr) + "/info");
 }
 
-std::string Helper::GetLocaleDestination(const cmInstallCommandArguments* args)
+std::string Helper::GetLocaleDestination(
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_LOCALEDIR",
                               this->GetDataRootDestination(nullptr) +
                                 "/locale");
 }
 
-std::string Helper::GetManDestination(const cmInstallCommandArguments* args)
+std::string Helper::GetManDestination(
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_MANDIR",
                               this->GetDataRootDestination(nullptr) + "/man");
 }
 
-std::string Helper::GetDocDestination(const cmInstallCommandArguments* args)
+std::string Helper::GetDocDestination(
+  const cmInstallCommandArguments* args) const
 {
   return this->GetDestination(args, "CMAKE_INSTALL_DOCDIR",
                               this->GetDataRootDestination(nullptr) + "/doc");
 }
 
 std::string Helper::GetDestinationForType(
-  const cmInstallCommandArguments* args, const std::string& type)
+  const cmInstallCommandArguments* args, const std::string& type) const
 {
   if (args && !args->GetDestination().empty()) {
     return args->GetDestination();

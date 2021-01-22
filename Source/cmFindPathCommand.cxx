@@ -80,8 +80,8 @@ std::string cmFindPathCommand::FindHeader()
   return header;
 }
 
-std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
-                                                     std::string const& dir)
+std::string cmFindPathCommand::FindHeaderInFramework(
+  std::string const& file, std::string const& dir) const
 {
   std::string fileName = file;
   std::string frameWorkName;

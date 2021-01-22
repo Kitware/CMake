@@ -77,7 +77,7 @@ bool cmDepends::Check(const std::string& makeFile,
   return okay;
 }
 
-void cmDepends::Clear(const std::string& file)
+void cmDepends::Clear(const std::string& file) const
 {
   // Print verbose output.
   if (this->Verbose) {

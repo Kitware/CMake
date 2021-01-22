@@ -14,11 +14,11 @@
 class cmTimestamp
 {
 public:
-  std::string CurrentTime(const std::string& formatString, bool utcFlag);
+  std::string CurrentTime(const std::string& formatString, bool utcFlag) const;
 
   std::string FileModificationTime(const char* path,
                                    const std::string& formatString,
-                                   bool utcFlag);
+                                   bool utcFlag) const;
 
   std::string CreateTimestampFromTimeT(time_t timeT, std::string formatString,
                                        bool utcFlag) const;

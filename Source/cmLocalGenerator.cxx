@@ -2772,7 +2772,7 @@ inline void RegisterUnitySources(cmGeneratorTarget* target, cmSourceFile* sf,
 
 void cmLocalGenerator::IncludeFileInUnitySources(
   cmGeneratedFileStream& unity_file, std::string const& sf_full_path,
-  cmProp beforeInclude, cmProp afterInclude, cmProp uniqueIdName)
+  cmProp beforeInclude, cmProp afterInclude, cmProp uniqueIdName) const
 {
   if (uniqueIdName && !uniqueIdName->empty()) {
     std::string pathToHash;

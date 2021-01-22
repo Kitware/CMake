@@ -23,7 +23,7 @@
 #include "cmSystemTools.h"
 
 std::string cmTimestamp::CurrentTime(const std::string& formatString,
-                                     bool utcFlag)
+                                     bool utcFlag) const
 {
   time_t currentTimeT = time(nullptr);
   std::string source_date_epoch;
@@ -45,7 +45,7 @@ std::string cmTimestamp::CurrentTime(const std::string& formatString,
 
 std::string cmTimestamp::FileModificationTime(const char* path,
                                               const std::string& formatString,
-                                              bool utcFlag)
+                                              bool utcFlag) const
 {
   std::string real_path =
     cmSystemTools::GetRealPathResolvingWindowsSubst(path);

@@ -70,7 +70,7 @@ public:
              DependencyMap& validDeps);
 
   /** Clear dependencies for the target file so they will be regenerated.  */
-  void Clear(const std::string& file);
+  void Clear(const std::string& file) const;
 
   /** Set the file comparison object */
   void SetFileTimeCache(cmFileTimeCache* fc) { this->FileTimeCache = fc; }

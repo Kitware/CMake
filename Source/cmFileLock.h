@@ -57,7 +57,7 @@ private:
   BOOL LockFile(DWORD flags);
 #else
   int File = -1;
-  int LockFile(int cmd, int type);
+  int LockFile(int cmd, int type) const;
 #endif
 
   std::string Filename;

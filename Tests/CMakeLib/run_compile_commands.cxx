@@ -127,7 +127,7 @@ private:
     exit(1);
   }
 
-  bool IsWhitespace()
+  bool IsWhitespace() const
   {
     return (this->C == ' ' || this->C == '\t' || this->C == '\n' ||
             this->C == '\r');

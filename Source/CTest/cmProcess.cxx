@@ -358,7 +358,7 @@ void cmProcess::ResetStartTime()
   this->StartTime = std::chrono::steady_clock::now();
 }
 
-cmProcess::Exception cmProcess::GetExitException()
+cmProcess::Exception cmProcess::GetExitException() const
 {
   auto exception = Exception::None;
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -430,7 +430,7 @@ cmProcess::Exception cmProcess::GetExitException()
   return exception;
 }
 
-std::string cmProcess::GetExitExceptionString()
+std::string cmProcess::GetExitExceptionString() const
 {
   std::string exception_str;
 #if defined(_WIN32)

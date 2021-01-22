@@ -24,7 +24,6 @@ readability-*,\
 -readability-implicit-bool-conversion,\
 -readability-inconsistent-declaration-parameter-name,\
 -readability-magic-numbers,\
--readability-make-member-function-const,\
 -readability-named-parameter,\
 -readability-qualified-auto,\
 -readability-redundant-access-specifiers,\
