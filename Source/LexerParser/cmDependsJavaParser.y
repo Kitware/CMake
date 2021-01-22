@@ -7,7 +7,7 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmDependsJava_yy --defines=cmDependsJavaParserTokens.h -ocmDependsJavaParser.cxx cmDependsJavaParser.y
+  bison --name-prefix=cmDependsJava_yy --defines=cmDependsJavaParserTokens.h -ocmDependsJavaParser.cxx cmDependsJavaParser.y
 
 Modify cmDependsJavaParser.cxx:
   - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]

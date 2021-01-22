@@ -7,7 +7,7 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmCommandArgument_yy --defines=cmCommandArgumentParserTokens.h -ocmCommandArgumentParser.cxx cmCommandArgumentParser.y
+  bison --name-prefix=cmCommandArgument_yy --defines=cmCommandArgumentParserTokens.h -ocmCommandArgumentParser.cxx cmCommandArgumentParser.y
 
 Modify cmCommandArgumentParser.cxx:
   - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]

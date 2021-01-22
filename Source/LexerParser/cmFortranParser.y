@@ -17,7 +17,7 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmFortran_yy
+  bison --name-prefix=cmFortran_yy
         --defines=cmFortranParserTokens.h
          -ocmFortranParser.cxx
           cmFortranParser.y
