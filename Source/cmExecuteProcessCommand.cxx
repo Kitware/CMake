@@ -231,7 +231,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   }
   if (echo_stdout || echo_stderr) {
     std::string command;
-    for (auto& cmd : arguments.Commands) {
+    for (const auto& cmd : arguments.Commands) {
       command += "'";
       command += cmJoin(cmd, "' '");
       command += "'";

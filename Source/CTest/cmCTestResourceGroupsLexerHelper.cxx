@@ -17,7 +17,7 @@ bool cmCTestResourceGroupsLexerHelper::ParseString(const std::string& value)
   yyscan_t lexer;
   cmCTestResourceGroups_yylex_init_extra(this, &lexer);
 
-  auto state = cmCTestResourceGroups_yy_scan_string(value.c_str(), lexer);
+  auto* state = cmCTestResourceGroups_yy_scan_string(value.c_str(), lexer);
   int retval = cmCTestResourceGroups_yylex(lexer);
   cmCTestResourceGroups_yy_delete_buffer(state, lexer);
 

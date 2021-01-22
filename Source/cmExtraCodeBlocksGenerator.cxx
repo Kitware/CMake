@@ -341,7 +341,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   all_files_map_t allFiles;
   std::vector<std::string> cFiles;
 
-  auto cm = this->GlobalGenerator->GetCMakeInstance();
+  auto* cm = this->GlobalGenerator->GetCMakeInstance();
 
   for (cmLocalGenerator* lg : lgs) {
     cmMakefile* makefile = lg->GetMakefile();

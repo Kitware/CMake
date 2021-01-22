@@ -621,7 +621,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
 
 void cmCTestMultiProcessHandler::OnTestLoadRetryCB(uv_timer_t* timer)
 {
-  auto self = static_cast<cmCTestMultiProcessHandler*>(timer->data);
+  auto* self = static_cast<cmCTestMultiProcessHandler*>(timer->data);
   self->StartNextTests();
 }
 
@@ -631,7 +631,7 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
   this->Completed++;
 
   int test = runner->GetIndex();
-  auto properties = runner->GetTestProperties();
+  auto* properties = runner->GetTestProperties();
 
   bool testResult = runner->EndTest(this->Completed, this->Total, started);
   if (runner->TimedOutForStopTime()) {
@@ -920,7 +920,7 @@ void cmCTestMultiProcessHandler::MarkFinished()
 static Json::Value DumpToJsonArray(const std::set<std::string>& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (auto& it : values) {
+  for (const auto& it : values) {
     jsonArray.append(it);
   }
   return jsonArray;
@@ -929,7 +929,7 @@ static Json::Value DumpToJsonArray(const std::set<std::string>& values)
 static Json::Value DumpToJsonArray(const std::vector<std::string>& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (auto& it : values) {
+  for (const auto& it : values) {
     jsonArray.append(it);
   }
   return jsonArray;
@@ -939,7 +939,7 @@ static Json::Value DumpRegExToJsonArray(
   const std::vector<std::pair<cmsys::RegularExpression, std::string>>& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (auto& it : values) {
+  for (const auto& it : values) {
     jsonArray.append(it.second);
   }
   return jsonArray;
@@ -949,7 +949,7 @@ static Json::Value DumpMeasurementToJsonArray(
   const std::map<std::string, std::string>& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (auto& it : values) {
+  for (const auto& it : values) {
     Json::Value measurement = Json::objectValue;
     measurement["measurement"] = it.first;
     measurement["value"] = it.second;

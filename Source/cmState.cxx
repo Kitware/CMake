@@ -347,7 +347,7 @@ cmPropertyDefinition const* cmState::GetPropertyDefinition(
 bool cmState::IsPropertyChained(const std::string& name,
                                 cmProperty::ScopeType scope) const
 {
-  if (auto def = this->GetPropertyDefinition(name, scope)) {
+  if (const auto* def = this->GetPropertyDefinition(name, scope)) {
     return def->IsChained();
   }
   return false;

@@ -25,7 +25,6 @@ readability-*,\
 -readability-inconsistent-declaration-parameter-name,\
 -readability-magic-numbers,\
 -readability-named-parameter,\
--readability-qualified-auto,\
 -readability-redundant-access-specifiers,\
 -readability-redundant-declaration,\
 -readability-redundant-string-init,\

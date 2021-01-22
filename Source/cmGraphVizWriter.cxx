@@ -282,7 +282,7 @@ void cmGraphVizWriter::ReadSettings(
 
 void cmGraphVizWriter::Write()
 {
-  auto gg = this->GlobalGenerator;
+  const auto* gg = this->GlobalGenerator;
 
   this->VisitGraph(gg->GetName());
 
@@ -303,7 +303,7 @@ void cmGraphVizWriter::Write()
   }
 
   // write global data and collect all connection data for per target graphs
-  for (auto const gt : sortedGeneratorTargets) {
+  for (const auto* const gt : sortedGeneratorTargets) {
     auto item = cmLinkItem(gt, false, gt->GetBacktrace());
     this->VisitItem(item);
   }

@@ -2708,7 +2708,7 @@ void cmQtAutoMocUicT::CreateParseJobs(SourceFileMapT const& sourceMap)
 {
   cmFileTime const parseCacheTime = this->BaseEval().ParseCacheTime;
   ParseCacheT& parseCache = this->BaseEval().ParseCache;
-  for (auto& src : sourceMap) {
+  for (const auto& src : sourceMap) {
     // Get or create the file parse data reference
     ParseCacheT::GetOrInsertT cacheEntry = parseCache.GetOrInsert(src.first);
     src.second->ParseData = std::move(cacheEntry.first);

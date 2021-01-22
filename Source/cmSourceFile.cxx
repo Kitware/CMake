@@ -427,7 +427,7 @@ bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 void cmSourceFile::MarkAsGenerated()
 {
   this->IsGenerated = true;
-  auto& mf = *this->Location.GetMakefile();
+  const auto& mf = *this->Location.GetMakefile();
   mf.GetGlobalGenerator()->MarkAsGeneratedFile(this->ResolveFullPath());
 }
 

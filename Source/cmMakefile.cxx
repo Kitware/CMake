@@ -1824,7 +1824,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
 
   auto subMfu =
     cm::make_unique<cmMakefile>(this->GlobalGenerator, newSnapshot);
-  auto subMf = subMfu.get();
+  auto* subMf = subMfu.get();
   this->GetGlobalGenerator()->AddMakefile(std::move(subMfu));
 
   if (excludeFromAll) {
@@ -3370,7 +3370,7 @@ cmSourceFile* cmMakefile::GetSource(const std::string& sourceName,
 #endif
   auto sfsi = this->SourceFileSearchIndex.find(name);
   if (sfsi != this->SourceFileSearchIndex.end()) {
-    for (auto sf : sfsi->second) {
+    for (auto* sf : sfsi->second) {
       if (sf->Matches(sfl)) {
         return sf;
       }

@@ -2553,7 +2553,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         cmProp ReuseFrom =
           target->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
 
-        auto pch_sf = this->Makefile->GetOrCreateSource(
+        auto* pch_sf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
 
         if (!this->GetGlobalGenerator()->IsXcode()) {
@@ -2570,7 +2570,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 "OBJECT_OUTPUTS",
                 cmStrCat("$<$<CONFIG:", config, ">:", pchFile, ">"));
             } else {
-              auto reuseTarget =
+              auto* reuseTarget =
                 this->GlobalGenerator->FindGeneratorTarget(*ReuseFrom);
 
               if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
@@ -2633,7 +2633,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
           // Add pchHeader to source files, which will
           // be grouped as "Precompile Header File"
-          auto pchHeader_sf = this->Makefile->GetOrCreateSource(
+          auto* pchHeader_sf = this->Makefile->GetOrCreateSource(
             pchHeader, false, cmSourceFileLocationKind::Known);
           std::string err;
           pchHeader_sf->ResolveFullPath(&err);
@@ -2961,7 +2961,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
     }
 
     for (auto const& file : unity_files) {
-      auto unity = this->GetMakefile()->GetOrCreateSource(file);
+      auto* unity = this->GetMakefile()->GetOrCreateSource(file);
       target->AddSource(file, true);
       unity->SetProperty("SKIP_UNITY_BUILD_INCLUSION", "ON");
       unity->SetProperty("UNITY_SOURCE_FILE", file.c_str());

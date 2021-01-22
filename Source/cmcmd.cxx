@@ -1885,7 +1885,7 @@ int cmcmd::RunPreprocessor(const std::vector<std::string>& command,
   }
   auto status = process.GetStatus();
   if (!status[0] || status[0]->ExitStatus != 0) {
-    auto errorStream = process.ErrorStream();
+    auto* errorStream = process.ErrorStream();
     if (errorStream) {
       std::cerr << errorStream->rdbuf();
     }
@@ -2013,7 +2013,7 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
   }
   auto status = process.GetStatus();
   if (!status[0] || status[0]->ExitStatus != 0) {
-    auto errorStream = process.ErrorStream();
+    auto* errorStream = process.ErrorStream();
     if (errorStream) {
       std::cerr << errorStream->rdbuf();
     }

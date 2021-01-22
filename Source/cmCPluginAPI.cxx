@@ -567,7 +567,7 @@ void* CCONV cmAddSource(void* arg, void* arg2)
   sf->SourceExtension = osf->SourceExtension;
 
   // Store the proxy in the map so it can be re-used and deleted later.
-  auto value = sf.get();
+  auto* value = sf.get();
   cmCPluginAPISourceFiles[rsf] = std::move(sf);
   return value;
 }

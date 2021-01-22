@@ -31,7 +31,7 @@ std::string GeneratorExpressionContent::ProcessArbitraryContent(
 
   const auto pend = this->ParamChildren.end();
   for (; pit != pend; ++pit) {
-    for (auto& pExprEval : *pit) {
+    for (const auto& pExprEval : *pit) {
       if (node->RequiresLiteralInput()) {
         if (pExprEval->GetType() != cmGeneratorExpressionEvaluator::Text) {
           reportError(context, this->GetOriginalExpression(),
@@ -63,7 +63,7 @@ std::string GeneratorExpressionContent::Evaluate(
 {
   std::string identifier;
   {
-    for (auto& pExprEval : this->IdentifierChildren) {
+    for (const auto& pExprEval : this->IdentifierChildren) {
       identifier += pExprEval->Evaluate(context, dagChecker);
       if (context->HadError) {
         return std::string();
@@ -124,7 +124,7 @@ std::string GeneratorExpressionContent::EvaluateParameters(
         return std::string();
       }
       std::string parameter;
-      for (auto& pExprEval : *pit) {
+      for (const auto& pExprEval : *pit) {
         parameter += pExprEval->Evaluate(context, dagChecker);
         if (context->HadError) {
           return std::string();
