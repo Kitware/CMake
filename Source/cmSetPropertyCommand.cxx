@@ -189,7 +189,7 @@ std::string MakeSourceFilePathAbsoluteIfNeeded(
   if (!needed) {
     return source_file_path;
   }
-  const std::string absolute_file_path = cmSystemTools::CollapseFullPath(
+  std::string absolute_file_path = cmSystemTools::CollapseFullPath(
     source_file_path, status.GetMakefile().GetCurrentSourceDirectory());
   return absolute_file_path;
 }
