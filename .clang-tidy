@@ -26,7 +26,6 @@ readability-*,\
 -readability-magic-numbers,\
 -readability-named-parameter,\
 -readability-redundant-declaration,\
--readability-simplify-boolean-expr,\
 -readability-uppercase-literal-suffix,\
 -readability-use-anyofallof,\
 "
