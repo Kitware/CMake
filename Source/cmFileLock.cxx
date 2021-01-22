@@ -80,7 +80,9 @@ bool cmFileLock::IsLocked(const std::string& filename) const
 }
 
 #if defined(_WIN32)
+// NOLINTNEXTLINE(bugprone-suspicious-include)
 #  include "cmFileLockWin32.cxx"
 #else
+// NOLINTNEXTLINE(bugprone-suspicious-include)
 #  include "cmFileLockUnix.cxx"
 #endif

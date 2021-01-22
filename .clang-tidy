@@ -4,7 +4,6 @@ bugprone-*,\
 -bugprone-macro-parentheses,\
 -bugprone-misplaced-widening-cast,\
 -bugprone-narrowing-conversions,\
--bugprone-suspicious-include,\
 -bugprone-too-small-loop-variable,\
 google-readability-casting,\
 misc-*,\

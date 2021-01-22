@@ -33,6 +33,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+// NOLINTNEXTLINE(bugprone-suspicious-include)
 #include "cmCPluginAPI.cxx"
 
 #ifdef __QNX__
