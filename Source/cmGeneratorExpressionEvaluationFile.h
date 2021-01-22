@@ -52,7 +52,6 @@ private:
   std::string FixRelativePath(std::string const& filePath, PathRole role,
                               cmLocalGenerator* lg);
 
-private:
   const std::string Input;
   const std::string Target;
   const std::unique_ptr<cmCompiledGeneratorExpression> OutputFileExpr;

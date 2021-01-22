@@ -44,7 +44,6 @@ private:
   virtual bool Replay(std::vector<cmListFileFunction> functions,
                       cmExecutionStatus& status) = 0;
 
-private:
   cmListFileContext StartingContext;
   std::vector<cmListFileFunction> Functions;
   unsigned int ScopeDepth = 1;

@@ -111,7 +111,6 @@ private:
   static bool Shell_ArgumentNeedsQuotes(cm::string_view in, int flags);
   static std::string Shell_GetArgument(cm::string_view in, int flags);
 
-private:
   cmStateSnapshot StateSnapshot;
 
   bool LinkScriptShell;

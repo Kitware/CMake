@@ -54,7 +54,6 @@ public:
   private:
     static std::string HeadLine(cm::string_view title);
 
-  private:
     mutable std::mutex Mutex_;
     unsigned int Verbosity_ = 0;
     bool ColorOutput_ = false;
@@ -79,7 +78,6 @@ public:
   static bool FileDiffers(std::string const& filename,
                           std::string const& content);
 
-public:
   // -- Constructors
   cmQtAutoGenerator(GenT genType);
   virtual ~cmQtAutoGenerator();
@@ -140,7 +138,6 @@ public:
   private:
     std::string ConfigKey(cm::string_view key) const;
 
-  private:
     Json::Value Json_;
     cmQtAutoGenerator& Gen_;
   };
