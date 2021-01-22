@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.4.2.  */
+/* A Bison parser, made by GNU Bison 3.7.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_CMEXPR_YY_CMEXPRPARSERTOKENS_H_INCLUDED
 # define YY_CMEXPR_YY_CMEXPRPARSERTOKENS_H_INCLUDED
@@ -44,42 +45,32 @@
 extern int cmExpr_yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    exp_PLUS = 258,
-    exp_MINUS = 259,
-    exp_TIMES = 260,
-    exp_DIVIDE = 261,
-    exp_MOD = 262,
-    exp_SHIFTLEFT = 263,
-    exp_SHIFTRIGHT = 264,
-    exp_OPENPARENT = 265,
-    exp_CLOSEPARENT = 266,
-    exp_OR = 267,
-    exp_AND = 268,
-    exp_XOR = 269,
-    exp_NOT = 270,
-    exp_NUMBER = 271
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    exp_PLUS = 258,                /* exp_PLUS  */
+    exp_MINUS = 259,               /* exp_MINUS  */
+    exp_TIMES = 260,               /* exp_TIMES  */
+    exp_DIVIDE = 261,              /* exp_DIVIDE  */
+    exp_MOD = 262,                 /* exp_MOD  */
+    exp_SHIFTLEFT = 263,           /* exp_SHIFTLEFT  */
+    exp_SHIFTRIGHT = 264,          /* exp_SHIFTRIGHT  */
+    exp_OPENPARENT = 265,          /* exp_OPENPARENT  */
+    exp_CLOSEPARENT = 266,         /* exp_CLOSEPARENT  */
+    exp_OR = 267,                  /* exp_OR  */
+    exp_AND = 268,                 /* exp_AND  */
+    exp_XOR = 269,                 /* exp_XOR  */
+    exp_NOT = 270,                 /* exp_NOT  */
+    exp_NUMBER = 271               /* exp_NUMBER  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
-#define exp_PLUS 258
-#define exp_MINUS 259
-#define exp_TIMES 260
-#define exp_DIVIDE 261
-#define exp_MOD 262
-#define exp_SHIFTLEFT 263
-#define exp_SHIFTRIGHT 264
-#define exp_OPENPARENT 265
-#define exp_CLOSEPARENT 266
-#define exp_OR 267
-#define exp_AND 268
-#define exp_XOR 269
-#define exp_NOT 270
-#define exp_NUMBER 271
 
 /* Value type.  */
 

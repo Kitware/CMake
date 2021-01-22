@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.4.2.  */
+/* A Bison parser, made by GNU Bison 3.7.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_CMCOMMANDARGUMENT_YY_CMCOMMANDARGUMENTPARSERTOKENS_H_INCLUDED
 # define YY_CMCOMMANDARGUMENT_YY_CMCOMMANDARGUMENTPARSERTOKENS_H_INCLUDED
@@ -44,38 +45,30 @@
 extern int cmCommandArgument_yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    cal_ENVCURLY = 258,
-    cal_NCURLY = 259,
-    cal_DCURLY = 260,
-    cal_DOLLAR = 261,
-    cal_LCURLY = 262,
-    cal_RCURLY = 263,
-    cal_NAME = 264,
-    cal_BSLASH = 265,
-    cal_SYMBOL = 266,
-    cal_AT = 267,
-    cal_ERROR = 268,
-    cal_ATNAME = 269
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    cal_ENVCURLY = 258,            /* cal_ENVCURLY  */
+    cal_NCURLY = 259,              /* cal_NCURLY  */
+    cal_DCURLY = 260,              /* cal_DCURLY  */
+    cal_DOLLAR = 261,              /* "$"  */
+    cal_LCURLY = 262,              /* "{"  */
+    cal_RCURLY = 263,              /* "}"  */
+    cal_NAME = 264,                /* cal_NAME  */
+    cal_BSLASH = 265,              /* "\\"  */
+    cal_SYMBOL = 266,              /* cal_SYMBOL  */
+    cal_AT = 267,                  /* "@"  */
+    cal_ERROR = 268,               /* cal_ERROR  */
+    cal_ATNAME = 269               /* cal_ATNAME  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
-#define cal_ENVCURLY 258
-#define cal_NCURLY 259
-#define cal_DCURLY 260
-#define cal_DOLLAR 261
-#define cal_LCURLY 262
-#define cal_RCURLY 263
-#define cal_NAME 264
-#define cal_BSLASH 265
-#define cal_SYMBOL 266
-#define cal_AT 267
-#define cal_ERROR 268
-#define cal_ATNAME 269
 
 /* Value type.  */
 

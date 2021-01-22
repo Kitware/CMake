@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.4.2.  */
+/* A Bison parser, made by GNU Bison 3.7.4.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_CMFORTRAN_YY_CMFORTRANPARSERTOKENS_H_INCLUDED
 # define YY_CMFORTRAN_YY_CMFORTRANPARSERTOKENS_H_INCLUDED
@@ -44,100 +45,66 @@
 extern int cmFortran_yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    EOSTMT = 258,
-    ASSIGNMENT_OP = 259,
-    GARBAGE = 260,
-    CPP_LINE_DIRECTIVE = 261,
-    CPP_INCLUDE = 262,
-    F90PPR_INCLUDE = 263,
-    COCO_INCLUDE = 264,
-    F90PPR_DEFINE = 265,
-    CPP_DEFINE = 266,
-    F90PPR_UNDEF = 267,
-    CPP_UNDEF = 268,
-    CPP_IFDEF = 269,
-    CPP_IFNDEF = 270,
-    CPP_IF = 271,
-    CPP_ELSE = 272,
-    CPP_ELIF = 273,
-    CPP_ENDIF = 274,
-    F90PPR_IFDEF = 275,
-    F90PPR_IFNDEF = 276,
-    F90PPR_IF = 277,
-    F90PPR_ELSE = 278,
-    F90PPR_ELIF = 279,
-    F90PPR_ENDIF = 280,
-    COMMA = 281,
-    COLON = 282,
-    DCOLON = 283,
-    LPAREN = 284,
-    RPAREN = 285,
-    UNTERMINATED_STRING = 286,
-    STRING = 287,
-    WORD = 288,
-    CPP_INCLUDE_ANGLE = 289,
-    END = 290,
-    INCLUDE = 291,
-    INTERFACE = 292,
-    MODULE = 293,
-    SUBMODULE = 294,
-    USE = 295
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    EOSTMT = 258,                  /* EOSTMT  */
+    ASSIGNMENT_OP = 259,           /* ASSIGNMENT_OP  */
+    GARBAGE = 260,                 /* GARBAGE  */
+    CPP_LINE_DIRECTIVE = 261,      /* CPP_LINE_DIRECTIVE  */
+    CPP_INCLUDE = 262,             /* CPP_INCLUDE  */
+    F90PPR_INCLUDE = 263,          /* F90PPR_INCLUDE  */
+    COCO_INCLUDE = 264,            /* COCO_INCLUDE  */
+    F90PPR_DEFINE = 265,           /* F90PPR_DEFINE  */
+    CPP_DEFINE = 266,              /* CPP_DEFINE  */
+    F90PPR_UNDEF = 267,            /* F90PPR_UNDEF  */
+    CPP_UNDEF = 268,               /* CPP_UNDEF  */
+    CPP_IFDEF = 269,               /* CPP_IFDEF  */
+    CPP_IFNDEF = 270,              /* CPP_IFNDEF  */
+    CPP_IF = 271,                  /* CPP_IF  */
+    CPP_ELSE = 272,                /* CPP_ELSE  */
+    CPP_ELIF = 273,                /* CPP_ELIF  */
+    CPP_ENDIF = 274,               /* CPP_ENDIF  */
+    F90PPR_IFDEF = 275,            /* F90PPR_IFDEF  */
+    F90PPR_IFNDEF = 276,           /* F90PPR_IFNDEF  */
+    F90PPR_IF = 277,               /* F90PPR_IF  */
+    F90PPR_ELSE = 278,             /* F90PPR_ELSE  */
+    F90PPR_ELIF = 279,             /* F90PPR_ELIF  */
+    F90PPR_ENDIF = 280,            /* F90PPR_ENDIF  */
+    COMMA = 281,                   /* COMMA  */
+    COLON = 282,                   /* COLON  */
+    DCOLON = 283,                  /* DCOLON  */
+    LPAREN = 284,                  /* LPAREN  */
+    RPAREN = 285,                  /* RPAREN  */
+    UNTERMINATED_STRING = 286,     /* UNTERMINATED_STRING  */
+    STRING = 287,                  /* STRING  */
+    WORD = 288,                    /* WORD  */
+    CPP_INCLUDE_ANGLE = 289,       /* CPP_INCLUDE_ANGLE  */
+    END = 290,                     /* END  */
+    INCLUDE = 291,                 /* INCLUDE  */
+    INTERFACE = 292,               /* INTERFACE  */
+    MODULE = 293,                  /* MODULE  */
+    SUBMODULE = 294,               /* SUBMODULE  */
+    USE = 295                      /* USE  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
-#define EOSTMT 258
-#define ASSIGNMENT_OP 259
-#define GARBAGE 260
-#define CPP_LINE_DIRECTIVE 261
-#define CPP_INCLUDE 262
-#define F90PPR_INCLUDE 263
-#define COCO_INCLUDE 264
-#define F90PPR_DEFINE 265
-#define CPP_DEFINE 266
-#define F90PPR_UNDEF 267
-#define CPP_UNDEF 268
-#define CPP_IFDEF 269
-#define CPP_IFNDEF 270
-#define CPP_IF 271
-#define CPP_ELSE 272
-#define CPP_ELIF 273
-#define CPP_ENDIF 274
-#define F90PPR_IFDEF 275
-#define F90PPR_IFNDEF 276
-#define F90PPR_IF 277
-#define F90PPR_ELSE 278
-#define F90PPR_ELIF 279
-#define F90PPR_ENDIF 280
-#define COMMA 281
-#define COLON 282
-#define DCOLON 283
-#define LPAREN 284
-#define RPAREN 285
-#define UNTERMINATED_STRING 286
-#define STRING 287
-#define WORD 288
-#define CPP_INCLUDE_ANGLE 289
-#define END 290
-#define INCLUDE 291
-#define INTERFACE 292
-#define MODULE 293
-#define SUBMODULE 294
-#define USE 295
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 73 "cmFortranParser.y"
+#line 71 "cmFortranParser.y"
 
   char* string;
 
-#line 141 "cmFortranParserTokens.h"
+#line 108 "cmFortranParserTokens.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
