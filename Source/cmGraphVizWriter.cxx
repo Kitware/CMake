@@ -230,7 +230,7 @@ void cmGraphVizWriter::ReadSettings(
 
   std::cout << "Reading GraphViz options file: " << inFileName << std::endl;
 
-#define __set_if_set(var, cmakeDefinition)                                    \
+#define set_if_set(var, cmakeDefinition)                                      \
   do {                                                                        \
     cmProp value = mf.GetDefinition(cmakeDefinition);                         \
     if (value) {                                                              \
@@ -238,11 +238,11 @@ void cmGraphVizWriter::ReadSettings(
     }                                                                         \
   } while (false)
 
-  __set_if_set(this->GraphName, "GRAPHVIZ_GRAPH_NAME");
-  __set_if_set(this->GraphHeader, "GRAPHVIZ_GRAPH_HEADER");
-  __set_if_set(this->GraphNodePrefix, "GRAPHVIZ_NODE_PREFIX");
+  set_if_set(this->GraphName, "GRAPHVIZ_GRAPH_NAME");
+  set_if_set(this->GraphHeader, "GRAPHVIZ_GRAPH_HEADER");
+  set_if_set(this->GraphNodePrefix, "GRAPHVIZ_NODE_PREFIX");
 
-#define __set_bool_if_set(var, cmakeDefinition)                               \
+#define set_bool_if_set(var, cmakeDefinition)                                 \
   do {                                                                        \
     cmProp value = mf.GetDefinition(cmakeDefinition);                         \
     if (value) {                                                              \
@@ -250,20 +250,20 @@ void cmGraphVizWriter::ReadSettings(
     }                                                                         \
   } while (false)
 
-  __set_bool_if_set(this->GenerateForExecutables, "GRAPHVIZ_EXECUTABLES");
-  __set_bool_if_set(this->GenerateForStaticLibs, "GRAPHVIZ_STATIC_LIBS");
-  __set_bool_if_set(this->GenerateForSharedLibs, "GRAPHVIZ_SHARED_LIBS");
-  __set_bool_if_set(this->GenerateForModuleLibs, "GRAPHVIZ_MODULE_LIBS");
-  __set_bool_if_set(this->GenerateForInterfaceLibs, "GRAPHVIZ_INTERFACE_LIBS");
-  __set_bool_if_set(this->GenerateForObjectLibs, "GRAPHVIZ_OBJECT_LIBS");
-  __set_bool_if_set(this->GenerateForUnknownLibs, "GRAPHVIZ_UNKNOWN_LIBS");
-  __set_bool_if_set(this->GenerateForCustomTargets, "GRAPHVIZ_CUSTOM_TARGETS");
-  __set_bool_if_set(this->GenerateForExternals, "GRAPHVIZ_EXTERNAL_LIBS");
-  __set_bool_if_set(this->GeneratePerTarget, "GRAPHVIZ_GENERATE_PER_TARGET");
-  __set_bool_if_set(this->GenerateDependers, "GRAPHVIZ_GENERATE_DEPENDERS");
+  set_bool_if_set(this->GenerateForExecutables, "GRAPHVIZ_EXECUTABLES");
+  set_bool_if_set(this->GenerateForStaticLibs, "GRAPHVIZ_STATIC_LIBS");
+  set_bool_if_set(this->GenerateForSharedLibs, "GRAPHVIZ_SHARED_LIBS");
+  set_bool_if_set(this->GenerateForModuleLibs, "GRAPHVIZ_MODULE_LIBS");
+  set_bool_if_set(this->GenerateForInterfaceLibs, "GRAPHVIZ_INTERFACE_LIBS");
+  set_bool_if_set(this->GenerateForObjectLibs, "GRAPHVIZ_OBJECT_LIBS");
+  set_bool_if_set(this->GenerateForUnknownLibs, "GRAPHVIZ_UNKNOWN_LIBS");
+  set_bool_if_set(this->GenerateForCustomTargets, "GRAPHVIZ_CUSTOM_TARGETS");
+  set_bool_if_set(this->GenerateForExternals, "GRAPHVIZ_EXTERNAL_LIBS");
+  set_bool_if_set(this->GeneratePerTarget, "GRAPHVIZ_GENERATE_PER_TARGET");
+  set_bool_if_set(this->GenerateDependers, "GRAPHVIZ_GENERATE_DEPENDERS");
 
   std::string ignoreTargetsRegexes;
-  __set_if_set(ignoreTargetsRegexes, "GRAPHVIZ_IGNORE_TARGETS");
+  set_if_set(ignoreTargetsRegexes, "GRAPHVIZ_IGNORE_TARGETS");
 
   this->TargetsToIgnoreRegex.clear();
   if (!ignoreTargetsRegexes.empty()) {

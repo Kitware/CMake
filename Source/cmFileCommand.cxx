@@ -334,7 +334,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
     arg_limit_count,
     arg_length_minimum,
     arg_length_maximum,
-    arg__maximum,
+    arg_maximum,
     arg_regex,
     arg_encoding
   };

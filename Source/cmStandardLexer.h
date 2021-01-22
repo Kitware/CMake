@@ -4,18 +4,22 @@
 
 #if defined(__linux)
 /* Needed for glibc < 2.12 */
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 600
 #endif
 #if !defined(_WIN32) && !defined(__sun)
 /* POSIX APIs are needed */
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _POSIX_C_SOURCE 200809L
 #endif
 #if defined(__sun) && defined(__GNUC__) && !defined(__cplusplus)
 /* C sources: for fileno and strdup */
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 600
 #endif
 #if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
 /* For isascii */
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 700
 #endif
 

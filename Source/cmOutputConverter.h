@@ -105,11 +105,11 @@ public:
 private:
   cmState* GetState() const;
 
-  static bool Shell__CharNeedsQuotes(char c, int flags);
-  static cm::string_view::iterator Shell__SkipMakeVariables(
+  static bool Shell_CharNeedsQuotes(char c, int flags);
+  static cm::string_view::iterator Shell_SkipMakeVariables(
     cm::string_view::iterator begin, cm::string_view::iterator end);
-  static bool Shell__ArgumentNeedsQuotes(cm::string_view in, int flags);
-  static std::string Shell__GetArgument(cm::string_view in, int flags);
+  static bool Shell_ArgumentNeedsQuotes(cm::string_view in, int flags);
+  static std::string Shell_GetArgument(cm::string_view in, int flags);
 
 private:
   cmStateSnapshot StateSnapshot;
