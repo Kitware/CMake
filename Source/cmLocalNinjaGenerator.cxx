@@ -40,7 +40,6 @@
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)
   : cmLocalCommonGenerator(gg, mf, mf->GetState()->GetBinaryDirectory())
-  , HomeRelativeOutputPath("")
 {
 }
 
