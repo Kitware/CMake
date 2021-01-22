@@ -4,9 +4,12 @@ cmake_policy(SET CMP0057 NEW)
 
 project(CompileFeatures)
 
+set(ext_C c)
+set(ext_CXX cpp)
+
 macro(run_test feature lang)
   if (${feature} IN_LIST CMAKE_${lang}_COMPILE_FEATURES)
-    add_library(test_${feature} OBJECT ${feature})
+    add_library(test_${feature} OBJECT ${feature}.${ext_${lang}})
     set_property(TARGET test_${feature}
       PROPERTY COMPILE_FEATURES "${feature}"
     )
