@@ -145,10 +145,7 @@ cmFileLockResult cmFileLockPool::ScopePool::Release(
 bool cmFileLockPool::ScopePool::IsAlreadyLocked(
   const std::string& filename) const
 {
-  for (auto const& lock : this->Locks) {
-    if (lock.IsLocked(filename)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+    this->Locks.begin(), this->Locks.end(),
+    [&filename](auto const& lock) { return lock.IsLocked(filename); });
 }

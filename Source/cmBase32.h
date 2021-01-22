@@ -19,7 +19,7 @@ public:
 
 public:
   cmBase32Encoder();
-  ~cmBase32Encoder();
+  ~cmBase32Encoder() = default;
 
   // Encodes the given input byte sequence into a string
   // @arg input Input data pointer

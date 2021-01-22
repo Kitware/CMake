@@ -16,7 +16,7 @@ class cmConsoleBuf
 #endif
 public:
   cmConsoleBuf();
-  ~cmConsoleBuf();
+  ~cmConsoleBuf() = default;
   cmConsoleBuf(cmConsoleBuf const&) = delete;
   cmConsoleBuf& operator=(cmConsoleBuf const&) = delete;
   void SetUTF8Pipes();

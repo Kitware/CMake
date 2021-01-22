@@ -31,7 +31,7 @@ public:
   public:
     // -- Construction
     Logger();
-    ~Logger();
+    ~Logger() = default;
     // -- Verbosity
     unsigned int Verbosity() const { return this->Verbosity_; }
     void SetVerbosity(unsigned int value) { this->Verbosity_ = value; }

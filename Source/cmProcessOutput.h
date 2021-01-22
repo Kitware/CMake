@@ -47,7 +47,7 @@ public:
    * 0 as \a maxSize.
    */
   cmProcessOutput(Encoding encoding = Auto, unsigned int maxSize = 1024);
-  ~cmProcessOutput();
+  ~cmProcessOutput() = default;
   /**
    * Decode \a raw string using external encoding to internal
    * encoding in \a decoded.

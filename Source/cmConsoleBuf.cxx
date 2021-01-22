@@ -12,8 +12,6 @@ cmConsoleBuf::cmConsoleBuf()
 cmConsoleBuf::cmConsoleBuf() = default;
 #endif
 
-cmConsoleBuf::~cmConsoleBuf() = default;
-
 void cmConsoleBuf::SetUTF8Pipes()
 {
 #if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
