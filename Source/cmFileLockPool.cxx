@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileLockPool.h"
 
+#include <algorithm>
 #include <cassert>
 #include <utility>
 
@@ -145,7 +146,8 @@ cmFileLockResult cmFileLockPool::ScopePool::Release(
 bool cmFileLockPool::ScopePool::IsAlreadyLocked(
   const std::string& filename) const
 {
-  return std::any_of(
-    this->Locks.begin(), this->Locks.end(),
-    [&filename](auto const& lock) { return lock.IsLocked(filename); });
+  return std::any_of(this->Locks.begin(), this->Locks.end(),
+                     [&filename](cmFileLock const& lock) -> bool {
+                       return lock.IsLocked(filename);
+                     });
 }

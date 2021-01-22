@@ -1426,13 +1426,12 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::FindIncludedHeader(
     return true;
   }
   // Search in include directories
-  for (std::string const& path : this->MocConst().IncludePaths) {
-    if (findHeader(cmStrCat(path, '/', includeBase))) {
-      return true;
-    }
-  }
-  // Return without success
-  return false;
+  auto const& includePaths = this->MocConst().IncludePaths;
+  return std::any_of(
+    includePaths.begin(), includePaths.end(),
+    [&findHeader, &includeBase](std::string const& path) -> bool {
+      return findHeader(cmStrCat(path, '/', includeBase));
+    });
 }
 
 bool cmQtAutoMocUicT::JobEvalCacheMocT::RegisterIncluded(
@@ -1538,31 +1537,30 @@ bool cmQtAutoMocUicT::JobEvalCacheUicT::EvalFile(
   }
 
   std::string const sourceDirPrefix = SubDirPrefix(sourceFile.FileName);
-  for (IncludeKeyT const& incKey : Include) {
-    // Find .ui file
-    this->UiName = cmStrCat(incKey.Base, ".ui");
-    if (!this->FindIncludedUi(sourceDirPrefix, incKey.Dir)) {
-      this->LogError(
-        GenT::UIC,
-        cmStrCat(this->MessagePath(sourceFile.FileName),
-                 "\nincludes the uic file ", this->MessagePath(incKey.Key),
-                 ",\nbut the user interface file ",
-                 this->MessagePath(this->UiName),
-                 "\ncould not be found in the following directories\n",
-                 this->MessageSearchLocations()));
-      return false;
-    }
-    // Check if the file is skipped
-    if (this->UicConst().skipped(this->UiFileHandle->FileName)) {
-      continue;
-    }
-    // Register mapping
-    if (!this->RegisterMapping(incKey.Key, sourceFileHandle)) {
-      return false;
-    }
-  }
-
-  return true;
+  return std::all_of(
+    Include.begin(), Include.end(),
+    [this, &sourceDirPrefix, &sourceFile,
+     &sourceFileHandle](IncludeKeyT const& incKey) -> bool {
+      // Find .ui file
+      this->UiName = cmStrCat(incKey.Base, ".ui");
+      if (!this->FindIncludedUi(sourceDirPrefix, incKey.Dir)) {
+        this->LogError(
+          GenT::UIC,
+          cmStrCat(this->MessagePath(sourceFile.FileName),
+                   "\nincludes the uic file ", this->MessagePath(incKey.Key),
+                   ",\nbut the user interface file ",
+                   this->MessagePath(this->UiName),
+                   "\ncould not be found in the following directories\n",
+                   this->MessageSearchLocations()));
+        return false;
+      }
+      // Check if the file is skipped
+      if (this->UicConst().skipped(this->UiFileHandle->FileName)) {
+        return true;
+      }
+      // Register mapping
+      return this->RegisterMapping(incKey.Key, sourceFileHandle);
+    });
 }
 
 bool cmQtAutoMocUicT::JobEvalCacheUicT::FindIncludedUi(

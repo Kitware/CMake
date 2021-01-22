@@ -27,7 +27,6 @@ readability-*,\
 -readability-named-parameter,\
 -readability-redundant-declaration,\
 -readability-uppercase-literal-suffix,\
--readability-use-anyofallof,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'
 CheckOptions:

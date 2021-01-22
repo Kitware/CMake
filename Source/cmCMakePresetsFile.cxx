@@ -2,8 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakePresetsFile.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <functional>
+#include <iterator>
 #include <utility>
 
 #include <cmext/string_view>
@@ -461,22 +463,16 @@ constexpr const char* ValidPrefixes[] = {
 
 bool PrefixesValidMacroNamespace(const std::string& str)
 {
-  for (auto const& prefix : ValidPrefixes) {
-    if (cmHasPrefix(prefix, str)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+    std::begin(ValidPrefixes), std::end(ValidPrefixes),
+    [&str](const char* prefix) -> bool { return cmHasPrefix(prefix, str); });
 }
 
 bool IsValidMacroNamespace(const std::string& str)
 {
-  for (auto const& prefix : ValidPrefixes) {
-    if (str == prefix) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+    std::begin(ValidPrefixes), std::end(ValidPrefixes),
+    [&str](const char* prefix) -> bool { return str == prefix; });
 }
 
 enum class ExpandMacroResult

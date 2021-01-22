@@ -726,12 +726,10 @@ bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
   }
   std::vector<cmSourceFile*> sources;
   this->GeneratorTarget->GetSourceFiles(sources, this->ConfigName);
-  for (const cmSourceFile* sf : sources) {
-    if ("int" == sf->GetExtension()) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(sources.begin(), sources.end(),
+                     [](cmSourceFile const* sf) -> bool {
+                       return "int" == sf->GetExtension();
+                     });
 }
 
 bool cmGhsMultiTargetGenerator::ComputeCustomCommandOrder(

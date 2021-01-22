@@ -2675,33 +2675,35 @@ bool cmGlobalNinjaMultiGenerator::OpenBuildFileStreams()
     << "# This file contains build statements common to all "
        "configurations.\n\n";
 
-  for (auto const& config : this->Makefiles[0]->GetGeneratorConfigs(
-         cmMakefile::IncludeEmptyConfig)) {
-    // Open impl file.
-    if (!this->OpenFileStream(this->ImplFileStreams[config],
-                              GetNinjaImplFilename(config))) {
-      return false;
-    }
+  auto const& configs =
+    this->Makefiles[0]->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+  return std::all_of(
+    configs.begin(), configs.end(), [this](std::string const& config) -> bool {
+      // Open impl file.
+      if (!this->OpenFileStream(this->ImplFileStreams[config],
+                                GetNinjaImplFilename(config))) {
+        return false;
+      }
 
-    // Write a comment about this file.
-    *this->ImplFileStreams[config]
-      << "# This file contains build statements specific to the \"" << config
-      << "\"\n# configuration.\n\n";
+      // Write a comment about this file.
+      *this->ImplFileStreams[config]
+        << "# This file contains build statements specific to the \"" << config
+        << "\"\n# configuration.\n\n";
 
-    // Open config file.
-    if (!this->OpenFileStream(this->ConfigFileStreams[config],
-                              GetNinjaConfigFilename(config))) {
-      return false;
-    }
+      // Open config file.
+      if (!this->OpenFileStream(this->ConfigFileStreams[config],
+                                GetNinjaConfigFilename(config))) {
+        return false;
+      }
 
-    // Write a comment about this file.
-    *this->ConfigFileStreams[config]
-      << "# This file contains aliases specific to the \"" << config
-      << "\"\n# configuration.\n\n"
-      << "include " << GetNinjaImplFilename(config) << "\n\n";
-  }
+      // Write a comment about this file.
+      *this->ConfigFileStreams[config]
+        << "# This file contains aliases specific to the \"" << config
+        << "\"\n# configuration.\n\n"
+        << "include " << GetNinjaImplFilename(config) << "\n\n";
 
-  return true;
+      return true;
+    });
 }
 
 void cmGlobalNinjaMultiGenerator::CloseBuildFileStreams()

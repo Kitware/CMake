@@ -1853,17 +1853,12 @@ bool cmLocalGenerator::AllAppleArchSysrootsAreTheSame(
     return false;
   }
 
-  for (std::string const& arch : archs) {
-    std::string const& archSysroot = this->AppleArchSysroots[arch];
-    if (cmIsOff(archSysroot)) {
-      continue;
-    }
-    if (archSysroot != sysroot) {
-      return false;
-    }
-  }
-
-  return true;
+  return std::all_of(archs.begin(), archs.end(),
+                     [this, &sysroot](std::string const& arch) -> bool {
+                       std::string const& archSysroot =
+                         this->AppleArchSysroots[arch];
+                       return cmIsOff(archSysroot) || archSysroot == sysroot;
+                     });
 }
 
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
@@ -4039,26 +4034,23 @@ cmSourceFile* AddCustomCommand(
 bool AnyOutputMatches(const std::string& name,
                       const std::vector<std::string>& outputs)
 {
-  for (std::string const& output : outputs) {
-    std::string::size_type pos = output.rfind(name);
-    // If the output matches exactly
-    if (pos != std::string::npos && pos == output.size() - name.size() &&
-        (pos == 0 || output[pos - 1] == '/')) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(outputs.begin(), outputs.end(),
+                     [&name](std::string const& output) -> bool {
+                       std::string::size_type pos = output.rfind(name);
+                       // If the output matches exactly
+                       return (pos != std::string::npos &&
+                               pos == output.size() - name.size() &&
+                               (pos == 0 || output[pos - 1] == '/'));
+                     });
 }
 
 bool AnyTargetCommandOutputMatches(
   const std::string& name, const std::vector<cmCustomCommand>& commands)
 {
-  for (cmCustomCommand const& command : commands) {
-    if (AnyOutputMatches(name, command.GetByproducts())) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(commands.begin(), commands.end(),
+                     [&name](cmCustomCommand const& command) -> bool {
+                       return AnyOutputMatches(name, command.GetByproducts());
+                     });
 }
 }
 

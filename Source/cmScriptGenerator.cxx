@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmScriptGenerator.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "cmStringAlgorithms.h"
@@ -119,12 +120,10 @@ bool cmScriptGenerator::GeneratesForConfig(const std::string& config)
   // This is a configuration-specific rule.  Check if the config
   // matches this rule.
   std::string config_upper = cmSystemTools::UpperCase(config);
-  for (std::string const& cfg : this->Configurations) {
-    if (cmSystemTools::UpperCase(cfg) == config_upper) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(this->Configurations.begin(), this->Configurations.end(),
+                     [&config_upper](std::string const& cfg) -> bool {
+                       return cmSystemTools::UpperCase(cfg) == config_upper;
+                     });
 }
 
 void cmScriptGenerator::GenerateScriptActionsOnce(std::ostream& os,
