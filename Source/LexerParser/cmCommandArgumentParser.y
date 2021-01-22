@@ -9,9 +9,6 @@ Run bison like this:
 
   bison --name-prefix=cmCommandArgument_yy --defines=cmCommandArgumentParserTokens.h -ocmCommandArgumentParser.cxx cmCommandArgumentParser.y
 
-Modify cmCommandArgumentParser.cxx:
-  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
-
 */
 
 #include "cmConfigure.h" // IWYU pragma: keep

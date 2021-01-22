@@ -9,9 +9,6 @@ Run bison like this:
 
   bison --name-prefix=cmExpr_yy --defines=cmExprParserTokens.h -ocmExprParser.cxx cmExprParser.y
 
-Modify cmExprParser.cxx:
-  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
-
 */
 
 #include "cmConfigure.h" // IWYU pragma: keep

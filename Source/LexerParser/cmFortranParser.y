@@ -22,8 +22,6 @@ Run bison like this:
          -ocmFortranParser.cxx
           cmFortranParser.y
 
-Modify cmFortranParser.cxx:
-  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 */
 
 #include "cmConfigure.h" // IWYU pragma: keep

@@ -9,9 +9,6 @@ Run bison like this:
 
   bison --name-prefix=cmDependsJava_yy --defines=cmDependsJavaParserTokens.h -ocmDependsJavaParser.cxx cmDependsJavaParser.y
 
-Modify cmDependsJavaParser.cxx:
-  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
-
 */
 
 #include "cmConfigure.h" // IWYU pragma: keep
