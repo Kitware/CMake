@@ -103,7 +103,7 @@ add_executable(GenerateExportHeader exportheader_test.cpp)
 
 target_link_libraries(GenerateExportHeader ${link_libraries})
 if (WIN32 OR CYGWIN)
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+  if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM") AND
     CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
     set(_platform Win32-Clang)
   elseif(MSVC AND COMPILER_HAS_DEPRECATED)
