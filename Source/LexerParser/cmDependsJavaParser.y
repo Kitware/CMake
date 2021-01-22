@@ -13,6 +13,7 @@ Run bison like this:
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
@@ -22,7 +23,6 @@ Run bison like this:
 /*-------------------------------------------------------------------------*/
 #include "cmDependsJavaParserHelper.h" /* Interface to parser object.  */
 #include "cmDependsJavaLexer.h"  /* Interface to lexer object.  */
-#include "cmDependsJavaParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
 
 /* Forward declare the lexer entry point.  */
 YY_DECL;

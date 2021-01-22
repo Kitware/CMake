@@ -33,7 +33,6 @@ Run bison like this:
 /*-------------------------------------------------------------------------*/
 #define cmFortranParser_cxx
 #include "cmFortranParser.h" /* Interface to parser object.  */
-#include "cmFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
 
 /* Forward declare the lexer entry point.  */
 YY_DECL;

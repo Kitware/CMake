@@ -22,6 +22,7 @@ Run bison like this:
 # include <malloc.h>
 #endif
 
+#include <stdint.h>
 /* Make sure the parser uses standard memory allocation.  The default
    generated parser malloc/free declarations do not work on all
    platforms.  */
@@ -32,7 +33,6 @@ Run bison like this:
 /*-------------------------------------------------------------------------*/
 #include "cmCommandArgumentParserHelper.h" /* Interface to parser object.  */
 #include "cmCommandArgumentLexer.h"  /* Interface to lexer object.  */
-#include "cmCommandArgumentParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
 
 /* Forward declare the lexer entry point.  */
 YY_DECL;
