@@ -1,6 +1,8 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+include_guard(GLOBAL)
+
 #[=======================================================================[.rst:
 ExternalProject
 ---------------
@@ -1111,59 +1113,36 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
 
-# Pre-compute a regex to match documented keywords for each command.
-math(EXPR _ep_documentation_line_count "${CMAKE_CURRENT_LIST_LINE} - 4")
-file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines
-     LIMIT_COUNT ${_ep_documentation_line_count}
-     REGEX "^\\.\\. command:: [A-Za-z0-9_]+|^ +``[A-Z0-9_]+ [^`]*``$")
-foreach(line IN LISTS lines)
-  if("${line}" MATCHES "^\\.\\. command:: ([A-Za-z0-9_]+)")
-    if(_ep_func)
-      string(APPEND _ep_keywords_${_ep_func} ")$")
-    endif()
-    set(_ep_func "${CMAKE_MATCH_1}")
-    #message("function [${_ep_func}]")
-    set(_ep_keywords_${_ep_func} "^(")
-    set(_ep_keyword_sep)
-  elseif("${line}" MATCHES "^ +``([A-Z0-9_]+) [^`]*``$")
-    set(_ep_key "${CMAKE_MATCH_1}")
-    # COMMAND should never be included as a keyword,
-    # for ExternalProject_Add(), as it is treated as a
-    # special case by argument parsing as an extension
-    # of a previous ..._COMMAND
-    if("x${_ep_key}x" STREQUAL "xCOMMANDx" AND
-       "x${_ep_func}x" STREQUAL "xExternalProject_Addx")
-      continue()
-    endif()
-    #message("  keyword [${_ep_key}]")
-    string(APPEND _ep_keywords_${_ep_func}
-      "${_ep_keyword_sep}${_ep_key}")
-    set(_ep_keyword_sep "|")
-  endif()
-endforeach()
-if(_ep_func)
-  string(APPEND _ep_keywords_${_ep_func} ")$")
-endif()
+macro(_ep_get_hash_algos out_var)
+  set(${out_var}
+    MD5
+    SHA1
+    SHA224
+    SHA256
+    SHA384
+    SHA512
+    SHA3_224
+    SHA3_256
+    SHA3_384
+    SHA3_512
+  )
+endmacro()
 
-# Save regex matching supported hash algorithm names.
-set(_ep_hash_algos "MD5|SHA1|SHA224|SHA256|SHA384|SHA512|SHA3_224|SHA3_256|SHA3_384|SHA3_512")
-set(_ep_hash_regex "^(${_ep_hash_algos})=([0-9A-Fa-f]+)$")
+macro(_ep_get_hash_regex out_var)
+  _ep_get_hash_algos(${out_var})
+  list(JOIN ${out_var} "|" ${out_var})
+  set(${out_var} "^(${${out_var}})=([0-9A-Fa-f]+)$")
+endmacro()
 
-set(_ExternalProject_SELF "${CMAKE_CURRENT_LIST_FILE}")
-get_filename_component(_ExternalProject_SELF_DIR "${_ExternalProject_SELF}" PATH)
-
-function(_ep_parse_arguments f name ns args)
+function(_ep_parse_arguments f keywords name ns args)
   # Transfer the arguments to this function into target properties for the
   # new custom target we just added so that we can set up all the build steps
   # correctly based on target properties.
   #
-  # We loop through ARGN and consider the namespace starting with an
+  # Because some keywords can be repeated, we can't use cmake_parse_arguments().
+  # Instead, we loop through ARGN and consider the namespace starting with an
   # upper-case letter followed by at least two more upper-case letters,
   # numbers or underscores to be keywords.
-
-  if(NOT DEFINED _ExternalProject_SELF)
-    message(FATAL_ERROR "error: ExternalProject module must be explicitly included before using ${f} function")
-  endif()
 
   set(key)
 
@@ -1173,7 +1152,7 @@ function(_ep_parse_arguments f name ns args)
     if(arg MATCHES "^[A-Z][A-Z0-9_][A-Z0-9_]+$" AND
         NOT (("x${arg}x" STREQUAL "x${key}x") AND ("x${key}x" STREQUAL "xCOMMANDx")) AND
         NOT arg MATCHES "^(TRUE|FALSE)$")
-      if(_ep_keywords_${f} AND arg MATCHES "${_ep_keywords_${f}}")
+      if(arg IN_LIST keywords)
         set(is_value 0)
       endif()
     endif()
@@ -1198,9 +1177,6 @@ function(_ep_parse_arguments f name ns args)
       endif()
     else()
       set(key "${arg}")
-      if(key MATCHES GIT)
-       get_property(have_key TARGET ${name} PROPERTY ${ns}${key} SET)
-      endif()
     endif()
   endforeach()
 endfunction()
@@ -1432,7 +1408,7 @@ function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_r
   endif()
 
   configure_file(
-      "${_ExternalProject_SELF_DIR}/ExternalProject-gitupdate.cmake.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-gitupdate.cmake.in"
       "${script_filename}"
       @ONLY
   )
@@ -1461,6 +1437,7 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout inac
     set(SHOW_PROGRESS "SHOW_PROGRESS")
   endif()
 
+  _ep_get_hash_regex(_ep_hash_regex)
   if("${hash}" MATCHES "${_ep_hash_regex}")
     set(ALGO "${CMAKE_MATCH_1}")
     string(TOLOWER "${CMAKE_MATCH_2}" EXPECT_VALUE)
@@ -1541,13 +1518,14 @@ function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout inac
   # * USERPWD_ARGS
   # * HTTP_HEADERS_ARGS
   configure_file(
-      "${_ExternalProject_SELF_DIR}/ExternalProject-download.cmake.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-download.cmake.in"
       "${script_filename}"
       @ONLY
   )
 endfunction()
 
 function(_ep_write_verifyfile_script script_filename LOCAL hash)
+  _ep_get_hash_regex(_ep_hash_regex)
   if("${hash}" MATCHES "${_ep_hash_regex}")
     set(ALGO "${CMAKE_MATCH_1}")
     string(TOLOWER "${CMAKE_MATCH_2}" EXPECT_VALUE)
@@ -1561,7 +1539,7 @@ function(_ep_write_verifyfile_script script_filename LOCAL hash)
   # * EXPECT_VALUE
   # * LOCAL
   configure_file(
-      "${_ExternalProject_SELF_DIR}/ExternalProject-verify.cmake.in"
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-verify.cmake.in"
       "${script_filename}"
       @ONLY
   )
@@ -2250,7 +2228,21 @@ function(ExternalProject_Add_Step name step)
   _ep_get_complete_stampfile(${name} complete_stamp_file)
   _ep_get_step_stampfile(${name} ${step} stamp_file)
 
-  _ep_parse_arguments(ExternalProject_Add_Step
+  set(keywords
+    COMMAND
+    COMMENT
+    DEPENDEES
+    DEPENDERS
+    DEPENDS
+    INDEPENDENT
+    BYPRODUCTS
+    ALWAYS
+    EXCLUDE_FROM_MAIN
+    WORKING_DIRECTORY
+    LOG
+    USES_TERMINAL
+  )
+  _ep_parse_arguments(ExternalProject_Add_Step "${keywords}"
                       ${name} _EP_${step}_ "${ARGN}")
 
   get_property(independent TARGET ${name} PROPERTY _EP_${step}_INDEPENDENT)
@@ -2747,7 +2739,10 @@ function(_ep_add_download_command name)
   elseif(url)
     get_filename_component(work_dir "${source_dir}" PATH)
     get_property(hash TARGET ${name} PROPERTY _EP_URL_HASH)
+    _ep_get_hash_regex(_ep_hash_regex)
     if(hash AND NOT "${hash}" MATCHES "${_ep_hash_regex}")
+      _ep_get_hash_algos(_ep_hash_algos)
+      list(JOIN _ep_hash_algos "|" _ep_hash_algos)
       message(FATAL_ERROR "URL_HASH is set to\n  ${hash}\n"
         "but must be ALGO=value where ALGO is\n  ${_ep_hash_algos}\n"
         "and value is a hex string.")
@@ -3505,7 +3500,136 @@ function(ExternalProject_Add name)
 
   set_property(TARGET ${name} PROPERTY _EP_CMP0114 "${cmp0114}")
 
-  _ep_parse_arguments(ExternalProject_Add ${name} _EP_ "${ARGN}")
+  set(keywords
+    #
+    # Directory options
+    #
+    PREFIX
+    TMP_DIR
+    STAMP_DIR
+    LOG_DIR
+    DOWNLOAD_DIR
+    SOURCE_DIR
+    BINARY_DIR
+    INSTALL_DIR
+    #
+    # Download step options
+    #
+    DOWNLOAD_COMMAND
+    #
+    URL
+    URL_HASH
+    URL_MD5
+    DOWNLOAD_NAME
+    DOWNLOAD_NO_EXTRACT
+    DOWNLOAD_NO_PROGRESS
+    TIMEOUT
+    INACTIVITY_TIMEOUT
+    HTTP_USERNAME
+    HTTP_PASSWORD
+    HTTP_HEADER
+    TLS_VERIFY     # Also used for git clone operations
+    TLS_CAINFO
+    NETRC
+    NETRC_FILE
+    #
+    GIT_REPOSITORY
+    GIT_TAG
+    GIT_REMOTE_NAME
+    GIT_SUBMODULES
+    GIT_SUBMODULES_RECURSE
+    GIT_SHALLOW
+    GIT_PROGRESS
+    GIT_CONFIG
+    GIT_REMOTE_UPDATE_STRATEGY
+    #
+    SVN_REPOSITORY
+    SVN_REVISION
+    SVN_USERNAME
+    SVN_PASSWORD
+    SVN_TRUST_CERT
+    #
+    HG_REPOSITORY
+    HG_TAG
+    #
+    CVS_REPOSITORY
+    CVS_MODULE
+    CVS_TAG
+    #
+    # Update step options
+    #
+    UPDATE_COMMAND
+    UPDATE_DISCONNECTED
+    #
+    # Patch step options
+    #
+    PATCH_COMMAND
+    #
+    # Configure step options
+    #
+    CONFIGURE_COMMAND
+    CMAKE_COMMAND
+    CMAKE_GENERATOR
+    CMAKE_GENERATOR_PLATFORM
+    CMAKE_GENERATOR_TOOLSET
+    CMAKE_GENERATOR_INSTANCE
+    CMAKE_ARGS
+    CMAKE_CACHE_ARGS
+    CMAKE_CACHE_DEFAULT_ARGS
+    SOURCE_SUBDIR
+    CONFIGURE_HANDLED_BY_BUILD
+    #
+    # Build step options
+    #
+    BUILD_COMMAND
+    BUILD_IN_SOURCE
+    BUILD_ALWAYS
+    BUILD_BYPRODUCTS
+    #
+    # Install step options
+    #
+    INSTALL_COMMAND
+    #
+    # Test step options
+    #
+    TEST_COMMAND
+    TEST_BEFORE_INSTALL
+    TEST_AFTER_INSTALL
+    TEST_EXCLUDE_FROM_MAIN
+    #
+    # Logging options
+    #
+    LOG_DOWNLOAD
+    LOG_UPDATE
+    LOG_PATCH
+    LOG_CONFIGURE
+    LOG_BUILD
+    LOG_INSTALL
+    LOG_TEST
+    LOG_MERGED_STDOUTERR
+    LOG_OUTPUT_ON_FAILURE
+    #
+    # Terminal access options
+    #
+    USES_TERMINAL_DOWNLOAD
+    USES_TERMINAL_UPDATE
+    USES_TERMINAL_CONFIGURE
+    USES_TERMINAL_BUILD
+    USES_TERMINAL_INSTALL
+    USES_TERMINAL_TEST
+    #
+    # Target options
+    #
+    DEPENDS
+    EXCLUDE_FROM_ALL
+    STEP_TARGETS
+    INDEPENDENT_STEP_TARGETS
+    #
+    # Miscellaneous options
+    #
+    LIST_SEPARATOR
+  )
+  _ep_parse_arguments(ExternalProject_Add "${keywords}" ${name} _EP_ "${ARGN}")
   _ep_set_directories(${name})
   _ep_get_step_stampfile(${name} "done" done_stamp_file)
   _ep_get_step_stampfile(${name} "install" install_stamp_file)
