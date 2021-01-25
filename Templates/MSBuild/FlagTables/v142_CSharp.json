@@ -271,6 +271,17 @@
     "flags": []
   },
   {
+    "name":  "WarningsAsErrors",
+    "switch": "warnaserror:",
+    "comment": "",
+    "value": "",
+    "flags": [
+      "UserValue",
+      "UserRequired",
+      "CommaAppendable"
+    ]
+  },
+  {
     "name":  "WarningLevel",
     "switch": "warn:0",
     "comment": "",
