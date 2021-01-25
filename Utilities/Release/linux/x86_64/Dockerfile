@@ -32,5 +32,5 @@ RUN : \
  && bin/cpack -G STGZ \
  && set +x \
  && mkdir /out \
- && mv cmake-*-Linux-x86_64.* /out \
+ && mv cmake-*-linux-x86_64.* /out \
  && :
