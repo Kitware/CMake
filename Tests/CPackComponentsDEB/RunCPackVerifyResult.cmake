@@ -29,7 +29,7 @@ endif()
 # run cpack with some options and returns the list of files generated
 # -output_expected_file: list of files that match the pattern
 function(run_cpack output_expected_file CPack_output_parent CPack_error_parent)
-  set(options )
+  set(options "EXPECT_FAILURE")
   set(oneValueArgs "EXPECTED_FILE_MASK" "CONFIG_VERBOSE")
   set(multiValueArgs "CONFIG_ARGS")
   cmake_parse_arguments(run_cpack_deb "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
@@ -45,17 +45,26 @@ function(run_cpack output_expected_file CPack_output_parent CPack_error_parent)
 
   message("config_args = ${run_cpack_deb_CONFIG_ARGS}")
   message("config_verbose = ${run_cpack_deb_CONFIG_VERBOSE}")
+
+  set(_backup_lang "$ENV{LANG}")
+  set(_backup_lc_all "$ENV{LC_ALL}")
+  set(ENV{LANG} "C")
+  set(ENV{LC_ALL} "C")
   execute_process(COMMAND ${CMAKE_CPACK_COMMAND} ${run_cpack_deb_CONFIG_VERBOSE} -G ${CPackGen} -C "${CONFIG}" ${run_cpack_deb_CONFIG_ARGS}
       RESULT_VARIABLE CPack_result
       OUTPUT_VARIABLE CPack_output
       ERROR_VARIABLE CPack_error
       WORKING_DIRECTORY ${CPackComponentsDEB_BINARY_DIR})
+  set(ENV{LANG} "${_backup_lang}")
+  set(ENV{LC_ALL} "${_backup_lc_all}")
 
   set(${CPack_output_parent} ${CPack_output} PARENT_SCOPE)
   set(${CPack_error_parent}  ${CPack_error} PARENT_SCOPE)
 
-  if (CPack_result)
+  if (CPack_result AND NOT run_cpack_deb_EXPECT_FAILURE)
     message(FATAL_ERROR "error: CPack execution went wrong!, CPack_output=${CPack_output}, CPack_error=${CPack_error}")
+  elseif (NOT CPack_result AND run_cpack_deb_EXPECT_FAILURE)
+    message(FATAL_ERROR "error: CPack execution succeeded although failure was expected!, CPack_output=${CPack_output}, CPack_error=${CPack_error}")
   else ()
     message(STATUS "CPack_output=${CPack_output}")
     message(STATUS "CPack_error=${CPack_error}")

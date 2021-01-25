@@ -22,6 +22,13 @@ target_link_libraries(mylibapp mylib)
 add_executable(mylibapp2 mylibapp.cpp)
 target_link_libraries(mylibapp2 mylib)
 
+if (CPackDEBConfiguration MATCHES "shlibdeps-with-private-lib")
+  add_subdirectory("shlibdeps-with-private-lib")
+  add_executable(mylibapp3 mylibapp.cpp)
+  target_compile_definitions(mylibapp3 PRIVATE -DSHLIBDEPS_PRIVATE)
+  target_link_libraries(mylibapp3 myprivatelib)
+endif()
+
 # Create installation targets. Note that we put each kind of file
 # into a different component via COMPONENT. These components will
 # be used to create the installation components.
@@ -38,6 +45,13 @@ install(TARGETS mylibapp
 install(FILES mylib.h
         DESTINATION include
         COMPONENT headers)
+
+if (CPackDEBConfiguration MATCHES "shlibdeps-with-private-lib")
+  install(TARGETS mylibapp3
+    RUNTIME
+    DESTINATION bin
+    COMPONENT applications)
+endif()
 
 # CPack boilerplate for this project
 set(CPACK_PACKAGE_NAME "MyLib")
