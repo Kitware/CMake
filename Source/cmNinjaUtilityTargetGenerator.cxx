@@ -35,6 +35,11 @@ cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator() = default;
 
 void cmNinjaUtilityTargetGenerator::Generate(const std::string& config)
 {
+  if (!this->GetGeneratorTarget()->Target->IsPerConfig()) {
+    this->WriteUtilBuildStatements(config, config);
+    return;
+  }
+
   for (auto const& fileConfig : this->GetConfigNames()) {
     if (!this->GetGlobalGenerator()
            ->GetCrossConfigs(fileConfig)
