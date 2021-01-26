@@ -10,6 +10,11 @@ case "$(uname -s)-$(uname -m)" in
         sha256sum="c18b65697e9679e5c88dccede08c323cd3d3730648e59048047bba82097e0ffc"
         platform="Linux-x86_64"
         ;;
+    Linux-aarch64)
+        shatool="sha256sum"
+        sha256sum="66e507c97ffb586d7ca6567890808b792c8eb004b645706df6fbf27826a395a2"
+        platform="Linux-aarch64"
+        ;;
     Darwin-*)
         shatool="shasum -a 256"
         sha256sum="a6b79ad05f89241a05797510e650354d74ff72cc988981cdd1eb2b3b2bda66ac"
