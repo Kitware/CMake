@@ -99,6 +99,16 @@ build:centos6-x86_64:
         - .linux_builder_tags
         - .run_manually
 
+build:centos7-aarch64:
+    extends:
+        - .linux_release_aarch64
+        - .cmake_build_linux_release
+        - .cmake_release_artifacts
+        - .linux_builder_tags_aarch64
+        - .run_manually
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
 test:debian10-ninja:
     extends:
         - .debian10_ninja
