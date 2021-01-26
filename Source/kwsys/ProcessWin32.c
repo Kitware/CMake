@@ -962,7 +962,10 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       kwsysProcessCleanup(cp, GetLastError());
       return;
     }
-    SetCurrentDirectoryW(cp->WorkingDirectory);
+    if (!SetCurrentDirectoryW(cp->WorkingDirectory)) {
+      kwsysProcessCleanup(cp, GetLastError());
+      return;
+    }
   }
 
   /* Setup the stdin pipe for the first process.  */
