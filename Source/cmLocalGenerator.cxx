@@ -2768,17 +2768,32 @@ inline void RegisterUnitySources(cmGeneratorTarget* target, cmSourceFile* sf,
   target->AddSourceFileToUnityBatch(sf->ResolveFullPath());
   sf->SetProperty("UNITY_SOURCE_FILE", filename.c_str());
 }
+}
 
-inline void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
-                                      std::string const& sf_full_path,
-                                      cmProp beforeInclude,
-                                      cmProp afterInclude, cmProp uniqueIdName)
+void cmLocalGenerator::IncludeFileInUnitySources(
+  cmGeneratedFileStream& unity_file, std::string const& sf_full_path,
+  cmProp beforeInclude, cmProp afterInclude, cmProp uniqueIdName)
 {
-
   if (uniqueIdName && !uniqueIdName->empty()) {
-    unity_file << "#undef " << *uniqueIdName << "\n"
+    std::string pathToHash;
+    auto PathEqOrSubDir = [](std::string const& a, std::string const& b) {
+      return (cmSystemTools::ComparePath(a, b) ||
+              cmSystemTools::IsSubDirectory(a, b));
+    };
+    const auto path = cmSystemTools::GetFilenamePath(sf_full_path);
+    if (PathEqOrSubDir(path, this->GetBinaryDirectory())) {
+      pathToHash = "BLD_" +
+        cmSystemTools::RelativePath(this->GetBinaryDirectory(), sf_full_path);
+    } else if (PathEqOrSubDir(path, this->GetSourceDirectory())) {
+      pathToHash = "SRC_" +
+        cmSystemTools::RelativePath(this->GetSourceDirectory(), sf_full_path);
+    } else {
+      pathToHash = "ABS_" + sf_full_path;
+    }
+    unity_file << "/* " << pathToHash << " */\n"
+               << "#undef " << *uniqueIdName << "\n"
                << "#define " << *uniqueIdName << " unity_"
-               << cmSystemTools::ComputeStringMD5(sf_full_path) << "\n";
+               << cmSystemTools::ComputeStringMD5(pathToHash) << "\n";
   }
 
   if (beforeInclude) {
@@ -2790,9 +2805,10 @@ inline void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
   if (afterInclude) {
     unity_file << *afterInclude << "\n";
   }
+  unity_file << "\n";
 }
 
-std::vector<std::string> AddUnityFilesModeAuto(
+std::vector<std::string> cmLocalGenerator::AddUnityFilesModeAuto(
   cmGeneratorTarget* target, std::string const& lang,
   std::vector<cmSourceFile*> const& filtered_sources, cmProp beforeInclude,
   cmProp afterInclude, std::string const& filename_base, size_t batchSize)
@@ -2835,7 +2851,7 @@ std::vector<std::string> AddUnityFilesModeAuto(
   return unity_files;
 }
 
-std::vector<std::string> AddUnityFilesModeGroup(
+std::vector<std::string> cmLocalGenerator::AddUnityFilesModeGroup(
   cmGeneratorTarget* target, std::string const& lang,
   std::vector<cmSourceFile*> const& filtered_sources, cmProp beforeInclude,
   cmProp afterInclude, std::string const& filename_base)
@@ -2882,7 +2898,6 @@ std::vector<std::string> AddUnityFilesModeGroup(
   }
 
   return unity_files;
-}
 }
 
 void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)

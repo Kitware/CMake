@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <iosfwd>
 #include <map>
 #include <memory>
@@ -27,6 +28,7 @@ class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmCustomCommandGenerator;
 class cmCustomCommandLines;
+class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmImplicitDependsList;
@@ -651,6 +653,18 @@ private:
                          const std::string& ReuseFrom,
                          cmGeneratorTarget* reuseTarget,
                          std::vector<std::string> const& extensions);
+  void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
+                                 std::string const& sf_full_path,
+                                 cmProp beforeInclude, cmProp afterInclude,
+                                 cmProp uniqueIdName);
+  std::vector<std::string> AddUnityFilesModeAuto(
+    cmGeneratorTarget* target, std::string const& lang,
+    std::vector<cmSourceFile*> const& filtered_sources, cmProp beforeInclude,
+    cmProp afterInclude, std::string const& filename_base, size_t batchSize);
+  std::vector<std::string> AddUnityFilesModeGroup(
+    cmGeneratorTarget* target, std::string const& lang,
+    std::vector<cmSourceFile*> const& filtered_sources, cmProp beforeInclude,
+    cmProp afterInclude, std::string const& filename_base);
 };
 
 #if !defined(CMAKE_BOOTSTRAP)
