@@ -5,7 +5,7 @@
 # Build using the CMake source directory as the build context.
 # The resulting image will have an '/out' directory containing the package.
 
-# Keep this in sync with the `.gitlab-ci.yml` `release_linux` image.
+# Keep this in sync with the `.gitlab/os-linux.yml` `.linux_release_aarch64` image.
 ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-aarch64-deps-2020-12-21
 ARG FROM_IMAGE_DIGEST=@sha256:0bd7dfe4e45593b04e39cd21e44011034610cfd376900558c5ef959bb1af15af
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
