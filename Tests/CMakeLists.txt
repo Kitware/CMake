@@ -2018,11 +2018,18 @@ if(BUILD_TESTING)
         endif()
       endif()
 
-      # For the Watcom WMake generator, avoid the MFC test by default.
       if(CTEST_RUN_MFC)
+        # For the Watcom WMake generator, avoid the MFC test by default.
         if("${CMAKE_GENERATOR}" MATCHES "WMake")
           message(STATUS
             "using the Watcom WMake generator, avoiding MFC test")
+          set(CTEST_RUN_MFC OFF)
+        elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "IntelLLVM")
+          # clang-cl cannot deal with implicit dependencies in UTF16 files
+          # (see #18311).  IntelLLVM inherits this behavior from Clang.
+          # TODO: maybe clang should also skip the MFC test
+          message(STATUS
+            "using generator other than Visual Studio with clang-cl, avoiding MFC test")
           set(CTEST_RUN_MFC OFF)
         endif()
       endif()
