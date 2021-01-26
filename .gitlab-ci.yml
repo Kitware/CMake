@@ -91,7 +91,7 @@ build:fedora33-sphinx:
 
 # Linux builds
 
-build:centos6-release:
+build:centos6-x86_64:
     extends:
         - .linux_release_x86_64
         - .cmake_build_linux_release
@@ -106,9 +106,9 @@ test:debian10-ninja:
         - .linux_builder_tags_qt
         - .run_dependent
     dependencies:
-        - build:centos6-release
+        - build:centos6-x86_64
     needs:
-        - build:centos6-release
+        - build:centos6-x86_64
 
 test:fedora33-makefiles:
     extends:
@@ -117,9 +117,9 @@ test:fedora33-makefiles:
         - .linux_builder_tags_qt
         - .run_dependent
     dependencies:
-        - build:centos6-release
+        - build:centos6-x86_64
     needs:
-        - build:centos6-release
+        - build:centos6-x86_64
 
 test:cuda10.2-nvidia:
     extends:
@@ -128,9 +128,9 @@ test:cuda10.2-nvidia:
         - .linux_builder_tags_cuda
         - .run_dependent
     dependencies:
-        - build:centos6-release
+        - build:centos6-x86_64
     needs:
-        - build:centos6-release
+        - build:centos6-x86_64
 
 build:fedora33-ninja:
     extends:
