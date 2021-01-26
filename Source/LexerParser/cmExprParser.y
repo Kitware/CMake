@@ -38,6 +38,11 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 #if defined(__GNUC__) && __GNUC__ >= 8
 # pragma GCC diagnostic ignored "-Wconversion"
 #endif
+#if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wused-but-marked-unused")
+#  pragma clang diagnostic ignored "-Wused-but-marked-unused"
+# endif
+#endif
 %}
 
 /* Generate a reentrant parser object.  */
