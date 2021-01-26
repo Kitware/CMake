@@ -47,6 +47,13 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMake_SKIP_INSTALL: 1
 
+.debian10_aarch64:
+    image: "kitware/cmake:ci-debian10-aarch64-2021-01-26"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: aarch64
+
 ### Fedora
 
 .fedora33:
@@ -89,6 +96,13 @@
 
     variables:
         CMAKE_CONFIGURATION: debian10_ninja
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.debian10_aarch64_ninja:
+    extends: .debian10_aarch64
+
+    variables:
+        CMAKE_CONFIGURATION: debian10_aarch64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
 .fedora33_ninja:
@@ -169,6 +183,14 @@
         - build
         - docker
         - linux-aarch64
+
+.linux_builder_tags_aarch64_qt:
+    tags:
+        - cmake
+        - build
+        - docker
+        - linux-aarch64
+        - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
 
 ## Linux-specific scripts
 

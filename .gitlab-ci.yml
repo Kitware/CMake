@@ -120,6 +120,19 @@ test:debian10-ninja:
     needs:
         - build:centos6-x86_64
 
+test:debian10-aarch64-ninja:
+    extends:
+        - .debian10_aarch64_ninja
+        - .cmake_test_linux_release
+        - .linux_builder_tags_aarch64_qt
+        - .run_dependent
+    dependencies:
+        - build:centos7-aarch64
+    needs:
+        - build:centos7-aarch64
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
 test:fedora33-makefiles:
     extends:
         - .fedora33_makefiles
