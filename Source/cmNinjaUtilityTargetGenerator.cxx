@@ -35,6 +35,11 @@ cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator() = default;
 
 void cmNinjaUtilityTargetGenerator::Generate(const std::string& config)
 {
+  if (!this->GetGeneratorTarget()->Target->IsPerConfig()) {
+    this->WriteUtilBuildStatements(config, config);
+    return;
+  }
+
   for (auto const& fileConfig : this->GetConfigNames()) {
     if (!this->GetGlobalGenerator()
            ->GetCrossConfigs(fileConfig)
@@ -122,8 +127,6 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
     std::copy(util_outputs.begin(), util_outputs.end(),
               std::back_inserter(gg->GetByproductsForCleanTarget()));
   }
-  // TODO: Does this need an output config?
-  // Does this need to go in impl-<config>.ninja?
   lg->AppendTargetDepends(genTarget, deps, config, fileConfig,
                           DependOnTargetArtifact);
 

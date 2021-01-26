@@ -1,0 +1,3 @@
+(rebuild_cache: phony.*
+edit_cache: phony|edit_cache: phony.*
+rebuild_cache: phony)
