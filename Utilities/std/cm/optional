@@ -313,7 +313,7 @@ bool operator!=(const optional<T>& opt, nullopt_t) noexcept
 }
 
 template <typename T>
-bool operator<(const optional<T>& opt, nullopt_t) noexcept
+bool operator<(const optional<T>& /*opt*/, nullopt_t) noexcept
 {
   return false;
 }
@@ -331,7 +331,7 @@ bool operator>(const optional<T>& opt, nullopt_t) noexcept
 }
 
 template <typename T>
-bool operator>=(const optional<T>& opt, nullopt_t) noexcept
+bool operator>=(const optional<T>& /*opt*/, nullopt_t) noexcept
 {
   return true;
 }
@@ -355,13 +355,13 @@ bool operator<(nullopt_t, const optional<T>& opt) noexcept
 }
 
 template <typename T>
-bool operator<=(nullopt_t, const optional<T>& opt) noexcept
+bool operator<=(nullopt_t, const optional<T>& /*opt*/) noexcept
 {
   return true;
 }
 
 template <typename T>
-bool operator>(nullopt_t, const optional<T>& opt) noexcept
+bool operator>(nullopt_t, const optional<T>& /*opt*/) noexcept
 {
   return false;
 }
