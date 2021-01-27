@@ -17,13 +17,11 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmFortran_yy
+  bison --name-prefix=cmFortran_yy
         --defines=cmFortranParserTokens.h
          -ocmFortranParser.cxx
           cmFortranParser.y
 
-Modify cmFortranParser.cxx:
-  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
 */
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -35,7 +33,6 @@ Modify cmFortranParser.cxx:
 /*-------------------------------------------------------------------------*/
 #define cmFortranParser_cxx
 #include "cmFortranParser.h" /* Interface to parser object.  */
-#include "cmFortranParserTokens.h" /* Need YYSTYPE for YY_DECL.  */
 
 /* Forward declare the lexer entry point.  */
 YY_DECL;

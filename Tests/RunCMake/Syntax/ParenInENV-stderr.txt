@@ -9,12 +9,12 @@ This warning is for project developers.  Use -Wno-dev to suppress it.
 CMake Error at ParenInENV.cmake:2 \(message\):
   Syntax error in cmake code at
 
-    .*Tests/RunCMake/Syntax/ParenInENV.cmake:2
+    .*/Tests/RunCMake/Syntax/ParenInENV.cmake:2
 
   when parsing string
 
     -->\$ENV{e
 
-  syntax error, unexpected \$end, expecting } \(10\)
+  syntax error, unexpected end of file, expecting } \(10\)
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
