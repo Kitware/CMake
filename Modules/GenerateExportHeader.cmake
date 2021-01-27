@@ -232,7 +232,7 @@ macro(_test_compiler_hidden_visibility)
       AND NOT WIN32
       AND NOT CYGWIN
       AND NOT CMAKE_CXX_COMPILER_ID MATCHES XL
-      AND NOT CMAKE_CXX_COMPILER_ID MATCHES PGI
+      AND NOT CMAKE_CXX_COMPILER_ID MATCHES "^(PGI|NVHPC)$"
       AND NOT CMAKE_CXX_COMPILER_ID MATCHES Watcom)
     if (CMAKE_CXX_COMPILER_LOADED)
       check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
@@ -254,7 +254,7 @@ macro(_test_compiler_has_deprecated)
       OR CMAKE_CXX_COMPILER_ID MATCHES Embarcadero
       OR CMAKE_CXX_COMPILER_ID MATCHES HP
       OR GCC_TOO_OLD
-      OR CMAKE_CXX_COMPILER_ID MATCHES PGI
+      OR CMAKE_CXX_COMPILER_ID MATCHES "^(PGI|NVHPC)$"
       OR CMAKE_CXX_COMPILER_ID MATCHES Watcom)
     set(COMPILER_HAS_DEPRECATED "" CACHE INTERNAL
       "Compiler support for a deprecated attribute")
