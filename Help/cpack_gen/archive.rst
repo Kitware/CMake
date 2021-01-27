@@ -80,6 +80,8 @@ CPack generators which are essentially archives at their core. These include:
   not all compression modes support threading in all environments. Currently,
   only the XZ compression may support it.
 
+  See also the :variable:`CPACK_THREADS` variable.
+
 .. note::
 
     Official CMake binaries available on ``cmake.org`` ship with a ``liblzma``

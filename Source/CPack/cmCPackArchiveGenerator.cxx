@@ -353,8 +353,12 @@ bool cmCPackArchiveGenerator::SetArchiveOptions(cmArchiveWrite* archive)
   // cause spurious errors to be raised from `strtoull`.
   if (this->Compress == cmArchiveWrite::CompressXZ) {
     const char* threads = "1";
+
+    // CPACK_ARCHIVE_THREADS overrides CPACK_THREADS
     if (this->IsSet("CPACK_ARCHIVE_THREADS")) {
       threads = this->GetOption("CPACK_ARCHIVE_THREADS");
+    } else if (this->IsSet("CPACK_THREADS")) {
+      threads = this->GetOption("CPACK_THREADS");
     }
 
     if (!archive->SetFilterOption("xz", "threads", threads)) {

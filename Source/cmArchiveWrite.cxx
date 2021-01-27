@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmArchiveWrite.h"
 
+#include <cstdio>
 #include <cstring>
 #include <ctime>
 #include <iostream>
@@ -81,7 +82,8 @@ struct cmArchiveWrite::Callback
 };
 
 cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
-                               std::string const& format, int compressionLevel)
+                               std::string const& format, int compressionLevel,
+                               int numThreads)
   : Stream(os)
   , Archive(archive_write_new())
   , Disk(archive_read_disk_new())
@@ -142,6 +144,18 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
                                cm_archive_error_string(this->Archive));
         return;
       }
+      {
+        char sNumThreads[8];
+        snprintf(sNumThreads, sizeof(sNumThreads), "%d", numThreads);
+        sNumThreads[7] = '\0'; // for safety
+        if (archive_write_set_filter_option(this->Archive, "xz", "threads",
+                                            sNumThreads) != ARCHIVE_OK) {
+          this->Error = cmStrCat("archive_compressor_xz_options: ",
+                                 cm_archive_error_string(this->Archive));
+          return;
+        }
+      }
+
       break;
     case CompressZstd:
       if (archive_write_add_filter_zstd(this->Archive) != ARCHIVE_OK) {
