@@ -119,9 +119,10 @@ File Operations
 
 ``if(EXISTS path-to-file-or-directory)``
  True if the named file or directory exists.  Behavior is well-defined
- only for full paths. Resolves symbolic links, i.e. if the named file or
- directory is a symbolic link, returns true if the target of the
- symbolic link exists.
+ only for explicit full paths (a leading ``~/`` is not expanded as
+ a home directory and is considered a relative path).
+ Resolves symbolic links, i.e. if the named file or directory is a
+ symbolic link, returns true if the target of the symbolic link exists.
 
 ``if(file1 IS_NEWER_THAN file2)``
  True if ``file1`` is newer than ``file2`` or if one of the two files doesn't
