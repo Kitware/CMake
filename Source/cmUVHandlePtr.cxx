@@ -59,7 +59,7 @@ uv_loop_t* uv_loop_ptr::get() const
 template <typename T>
 static void handle_default_delete(T* type_handle)
 {
-  auto handle = reinterpret_cast<uv_handle_t*>(type_handle);
+  auto* handle = reinterpret_cast<uv_handle_t*>(type_handle);
   if (handle) {
     assert(!uv_is_closing(handle));
     if (!uv_is_closing(handle)) {
@@ -154,7 +154,8 @@ struct uv_handle_deleter<uv_async_t>
 
 void uv_async_ptr::send()
 {
-  auto deleter = std::get_deleter<uv_handle_deleter<uv_async_t>>(this->handle);
+  auto* deleter =
+    std::get_deleter<uv_handle_deleter<uv_async_t>>(this->handle);
   assert(deleter);
 
   std::lock_guard<std::mutex> lock(*deleter->handleMutex);

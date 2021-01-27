@@ -51,7 +51,7 @@ bool cmAuxSourceDirectoryCommand(std::vector<std::string> const& args,
       if (dotpos != std::string::npos) {
         auto ext = cm::string_view(file).substr(dotpos + 1);
         // Process only source files
-        auto cm = mf.GetCMakeInstance();
+        auto* cm = mf.GetCMakeInstance();
         if (dotpos > 0 && cm->IsACLikeSourceExtension(ext)) {
           std::string fullname = cmStrCat(templateDirectory, '/', file);
           // add the file as a class file so

@@ -17,9 +17,8 @@ class cmBase32Encoder
 public:
   static const char paddingChar = '=';
 
-public:
   cmBase32Encoder();
-  ~cmBase32Encoder();
+  ~cmBase32Encoder() = default;
 
   // Encodes the given input byte sequence into a string
   // @arg input Input data pointer

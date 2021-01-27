@@ -1853,17 +1853,12 @@ bool cmLocalGenerator::AllAppleArchSysrootsAreTheSame(
     return false;
   }
 
-  for (std::string const& arch : archs) {
-    std::string const& archSysroot = this->AppleArchSysroots[arch];
-    if (cmIsOff(archSysroot)) {
-      continue;
-    }
-    if (archSysroot != sysroot) {
-      return false;
-    }
-  }
-
-  return true;
+  return std::all_of(archs.begin(), archs.end(),
+                     [this, &sysroot](std::string const& arch) -> bool {
+                       std::string const& archSysroot =
+                         this->AppleArchSysroots[arch];
+                       return cmIsOff(archSysroot) || archSysroot == sysroot;
+                     });
 }
 
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
@@ -2553,7 +2548,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         cmProp ReuseFrom =
           target->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
 
-        auto pch_sf = this->Makefile->GetOrCreateSource(
+        auto* pch_sf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
 
         if (!this->GetGlobalGenerator()->IsXcode()) {
@@ -2570,7 +2565,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 "OBJECT_OUTPUTS",
                 cmStrCat("$<$<CONFIG:", config, ">:", pchFile, ">"));
             } else {
-              auto reuseTarget =
+              auto* reuseTarget =
                 this->GlobalGenerator->FindGeneratorTarget(*ReuseFrom);
 
               if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
@@ -2633,7 +2628,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
           // Add pchHeader to source files, which will
           // be grouped as "Precompile Header File"
-          auto pchHeader_sf = this->Makefile->GetOrCreateSource(
+          auto* pchHeader_sf = this->Makefile->GetOrCreateSource(
             pchHeader, false, cmSourceFileLocationKind::Known);
           std::string err;
           pchHeader_sf->ResolveFullPath(&err);
@@ -2772,7 +2767,7 @@ inline void RegisterUnitySources(cmGeneratorTarget* target, cmSourceFile* sf,
 
 void cmLocalGenerator::IncludeFileInUnitySources(
   cmGeneratedFileStream& unity_file, std::string const& sf_full_path,
-  cmProp beforeInclude, cmProp afterInclude, cmProp uniqueIdName)
+  cmProp beforeInclude, cmProp afterInclude, cmProp uniqueIdName) const
 {
   if (uniqueIdName && !uniqueIdName->empty()) {
     std::string pathToHash;
@@ -2961,7 +2956,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
     }
 
     for (auto const& file : unity_files) {
-      auto unity = this->GetMakefile()->GetOrCreateSource(file);
+      auto* unity = this->GetMakefile()->GetOrCreateSource(file);
       target->AddSource(file, true);
       unity->SetProperty("SKIP_UNITY_BUILD_INCLUSION", "ON");
       unity->SetProperty("UNITY_SOURCE_FILE", file.c_str());
@@ -4039,26 +4034,23 @@ cmSourceFile* AddCustomCommand(
 bool AnyOutputMatches(const std::string& name,
                       const std::vector<std::string>& outputs)
 {
-  for (std::string const& output : outputs) {
-    std::string::size_type pos = output.rfind(name);
-    // If the output matches exactly
-    if (pos != std::string::npos && pos == output.size() - name.size() &&
-        (pos == 0 || output[pos - 1] == '/')) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(outputs.begin(), outputs.end(),
+                     [&name](std::string const& output) -> bool {
+                       std::string::size_type pos = output.rfind(name);
+                       // If the output matches exactly
+                       return (pos != std::string::npos &&
+                               pos == output.size() - name.size() &&
+                               (pos == 0 || output[pos - 1] == '/'));
+                     });
 }
 
 bool AnyTargetCommandOutputMatches(
   const std::string& name, const std::vector<cmCustomCommand>& commands)
 {
-  for (cmCustomCommand const& command : commands) {
-    if (AnyOutputMatches(name, command.GetByproducts())) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(commands.begin(), commands.end(),
+                     [&name](cmCustomCommand const& command) -> bool {
+                       return AnyOutputMatches(name, command.GetByproducts());
+                     });
 }
 }
 

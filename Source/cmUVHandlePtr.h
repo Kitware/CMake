@@ -78,7 +78,7 @@ template <typename T>
 class uv_handle_ptr_base_
 {
 protected:
-  template <typename _T>
+  template <typename U>
   friend class uv_handle_ptr_base_;
 
   /**
@@ -160,7 +160,7 @@ inline uv_handle_ptr_base_<T>& uv_handle_ptr_base_<T>::operator=(
 template <typename T>
 class uv_handle_ptr_ : public uv_handle_ptr_base_<T>
 {
-  template <typename _T>
+  template <typename U>
   friend class uv_handle_ptr_;
 
 public:

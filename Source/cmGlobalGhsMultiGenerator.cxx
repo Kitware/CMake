@@ -704,7 +704,7 @@ bool cmGlobalGhsMultiGenerator::ComputeTargetBuildOrder(
   std::set<cmGeneratorTarget const*> temp;
   std::set<cmGeneratorTarget const*> perm;
 
-  for (auto const ti : tgt) {
+  for (const auto* const ti : tgt) {
     bool r = this->VisitTarget(temp, perm, build, ti);
     if (r) {
       return r;

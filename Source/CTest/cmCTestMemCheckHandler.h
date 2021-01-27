@@ -29,7 +29,7 @@ public:
 
   void Initialize() override;
 
-  int GetDefectCount();
+  int GetDefectCount() const;
 
 protected:
   int PreProcessHandler() override;

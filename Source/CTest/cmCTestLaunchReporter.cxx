@@ -150,7 +150,7 @@ void cmCTestLaunchReporter::WriteXML()
   this->WriteXMLLabels(e2);
 }
 
-void cmCTestLaunchReporter::WriteXMLAction(cmXMLElement& e2)
+void cmCTestLaunchReporter::WriteXMLAction(cmXMLElement& e2) const
 {
   e2.Comment("Meta-information about the build action");
   cmXMLElement e3(e2, "Action");

@@ -24,8 +24,8 @@ public:
 
 /* Encode with room for up to 1000 minor releases between major releases
    and to encode dates until the year 10000 in the patch level.  */
-#define CMake_VERSION_ENCODE__BASE KWIML_INT_UINT64_C(100000000)
+#define CMake_VERSION_ENCODE_BASE KWIML_INT_UINT64_C(100000000)
 #define CMake_VERSION_ENCODE(major, minor, patch)                             \
-  ((((major)*1000u) * CMake_VERSION_ENCODE__BASE) +                           \
-   (((minor) % 1000u) * CMake_VERSION_ENCODE__BASE) +                         \
-   (((patch) % CMake_VERSION_ENCODE__BASE)))
+  ((((major)*1000u) * CMake_VERSION_ENCODE_BASE) +                            \
+   (((minor) % 1000u) * CMake_VERSION_ENCODE_BASE) +                          \
+   (((patch) % CMake_VERSION_ENCODE_BASE)))

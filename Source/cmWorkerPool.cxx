@@ -31,7 +31,6 @@ public:
   /// On error the ssize_t argument is a non zero libuv error code
   using EndFunction = std::function<void(ssize_t)>;
 
-public:
   /**
    * Reset to construction state
    */
@@ -65,7 +64,6 @@ private:
                       uv_buf_t* buf);
   static void UVData(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf);
 
-private:
   cm::uv_pipe_ptr UVPipe_;
   std::vector<char> Buffer_;
   DataFunction DataFunction_;
@@ -154,7 +152,6 @@ public:
     bool MergedOutput = false;
   };
 
-public:
   // -- Const accessors
   SetupT const& Setup() const { return this->Setup_; }
   cmWorkerPool::ProcessResultT* Result() const { return this->Setup_.Result; }
@@ -170,13 +167,12 @@ public:
 private:
   // -- Libuv callbacks
   static void UVExit(uv_process_t* handle, int64_t exitStatus, int termSignal);
-  void UVPipeOutData(cmUVPipeBuffer::DataRange data);
+  void UVPipeOutData(cmUVPipeBuffer::DataRange data) const;
   void UVPipeOutEnd(ssize_t error);
-  void UVPipeErrData(cmUVPipeBuffer::DataRange data);
+  void UVPipeErrData(cmUVPipeBuffer::DataRange data) const;
   void UVPipeErrEnd(ssize_t error);
   void UVTryFinish();
 
-private:
   // -- Setup
   SetupT Setup_;
   // -- Runtime
@@ -330,7 +326,7 @@ void cmUVReadOnlyProcess::UVExit(uv_process_t* handle, int64_t exitStatus,
   }
 }
 
-void cmUVReadOnlyProcess::UVPipeOutData(cmUVPipeBuffer::DataRange data)
+void cmUVReadOnlyProcess::UVPipeOutData(cmUVPipeBuffer::DataRange data) const
 {
   this->Result()->StdOut.append(data.begin(), data.end());
 }
@@ -346,7 +342,7 @@ void cmUVReadOnlyProcess::UVPipeOutEnd(ssize_t error)
   this->UVTryFinish();
 }
 
-void cmUVReadOnlyProcess::UVPipeErrData(cmUVPipeBuffer::DataRange data)
+void cmUVReadOnlyProcess::UVPipeErrData(cmUVPipeBuffer::DataRange data) const
 {
   std::string* str = this->Setup_.MergedOutput ? &this->Result()->StdOut
                                                : &this->Result()->StdErr;
@@ -407,7 +403,6 @@ private:
   static void UVProcessStart(uv_async_t* handle);
   void UVProcessFinished();
 
-private:
   // -- Process management
   struct
   {
@@ -520,7 +515,6 @@ public:
   static void UVSlotBegin(uv_async_t* handle);
   static void UVSlotEnd(uv_async_t* handle);
 
-public:
   // -- UV loop
 #ifdef CMAKE_UV_SIGNAL_HACK
   std::unique_ptr<cmUVSignalHackRAII> UVHackRAII;

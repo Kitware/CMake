@@ -30,7 +30,7 @@ protected:
   void GenerateScriptForConfig(std::ostream& os, const std::string& config,
                                Indent indent) override;
   void AddScriptInstallRule(std::ostream& os, Indent indent,
-                            std::string const& script);
+                            std::string const& script) const;
 
   std::string const Script;
   bool const Code;

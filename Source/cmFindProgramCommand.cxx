@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindProgramCommand.h"
 
+#include <algorithm>
+#include <string>
+
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -60,44 +63,42 @@ struct cmFindProgramHelper
   }
   bool CheckCompoundNames()
   {
-    for (std::string const& n : this->Names) {
-      // Only perform search relative to current directory if the file name
-      // contains a directory separator.
-      if (n.find('/') != std::string::npos) {
-        if (this->CheckDirectoryForName("", n)) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return std::any_of(this->Names.begin(), this->Names.end(),
+                       [this](std::string const& n) -> bool {
+                         // Only perform search relative to current directory
+                         // if the file name contains a directory separator.
+                         return n.find('/') != std::string::npos &&
+                           this->CheckDirectoryForName("", n);
+                       });
   }
   bool CheckDirectory(std::string const& path)
   {
-    for (std::string const& n : this->Names) {
-      if (this->CheckDirectoryForName(path, n)) {
-        return true;
-      }
-    }
-    return false;
+    return std::any_of(this->Names.begin(), this->Names.end(),
+                       [this, &path](std::string const& n) -> bool {
+                         // Only perform search relative to current directory
+                         // if the file name contains a directory separator.
+                         return this->CheckDirectoryForName(path, n);
+                       });
   }
   bool CheckDirectoryForName(std::string const& path, std::string const& name)
   {
-    for (std::string const& ext : this->Extensions) {
-      if (!ext.empty() && cmHasSuffix(name, ext)) {
-        continue;
-      }
-      this->TestNameExt = cmStrCat(name, ext);
-      this->TestPath =
-        cmSystemTools::CollapseFullPath(this->TestNameExt, path);
-      bool exists = this->FileIsExecutable(this->TestPath);
-      exists ? this->DebugSearches.FoundAt(this->TestPath)
-             : this->DebugSearches.FailedAt(this->TestPath);
-      if (exists) {
-        this->BestPath = this->TestPath;
-        return true;
-      }
-    }
-    return false;
+    return std::any_of(this->Extensions.begin(), this->Extensions.end(),
+                       [this, &path, &name](std::string const& ext) -> bool {
+                         if (!ext.empty() && cmHasSuffix(name, ext)) {
+                           return false;
+                         }
+                         this->TestNameExt = cmStrCat(name, ext);
+                         this->TestPath = cmSystemTools::CollapseFullPath(
+                           this->TestNameExt, path);
+                         bool exists = this->FileIsExecutable(this->TestPath);
+                         exists ? this->DebugSearches.FoundAt(this->TestPath)
+                                : this->DebugSearches.FailedAt(this->TestPath);
+                         if (exists) {
+                           this->BestPath = this->TestPath;
+                           return true;
+                         }
+                         return false;
+                       });
   }
   bool FileIsExecutable(std::string const& file) const
   {

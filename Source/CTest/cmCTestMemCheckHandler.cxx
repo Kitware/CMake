@@ -300,7 +300,7 @@ void cmCTestMemCheckHandler::PopulateCustomVectors(cmMakefile* mf)
                                     this->CustomTestsIgnore);
 }
 
-int cmCTestMemCheckHandler::GetDefectCount()
+int cmCTestMemCheckHandler::GetDefectCount() const
 {
   return this->DefectCount;
 }

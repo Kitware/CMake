@@ -149,7 +149,7 @@ public:
 bool getInputPath(const std::string& arg, cmExecutionStatus& status,
                   std::string& path)
 {
-  auto def = status.GetMakefile().GetDefinition(arg);
+  const auto* def = status.GetMakefile().GetDefinition(arg);
   if (def == nullptr) {
     status.SetError("undefined variable for input path.");
     return false;

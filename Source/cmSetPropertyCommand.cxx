@@ -189,7 +189,7 @@ std::string MakeSourceFilePathAbsoluteIfNeeded(
   if (!needed) {
     return source_file_path;
   }
-  const std::string absolute_file_path = cmSystemTools::CollapseFullPath(
+  std::string absolute_file_path = cmSystemTools::CollapseFullPath(
     source_file_path, status.GetMakefile().GetCurrentSourceDirectory());
   return absolute_file_path;
 }
@@ -223,7 +223,7 @@ void MakeSourceFilePathsAbsoluteIfNeeded(
 bool HandleAndValidateSourceFilePropertyGENERATED(
   cmSourceFile* sf, std::string const& propertyValue, PropertyOp op)
 {
-  auto& mf = *sf->GetLocation().GetMakefile();
+  const auto& mf = *sf->GetLocation().GetMakefile();
   auto policyStatus = mf.GetPolicyStatus(cmPolicies::CMP0118);
 
   const bool policyWARN = policyStatus == cmPolicies::WARN;
@@ -589,7 +589,7 @@ bool HandleSourceMode(cmExecutionStatus& status,
     status, files_absolute, unique_files.begin(), unique_files.end(),
     source_file_paths_should_be_absolute);
 
-  for (const auto mf : directory_makefiles) {
+  for (auto* const mf : directory_makefiles) {
     for (std::string const& name : files_absolute) {
       // Get the source file.
       if (cmSourceFile* sf = mf->GetOrCreateSource(name)) {

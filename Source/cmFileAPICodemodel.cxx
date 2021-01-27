@@ -1324,7 +1324,7 @@ Json::Value Target::DumpInstallDestinations()
 {
   Json::Value destinations = Json::arrayValue;
   auto installGens = this->GT->Target->GetInstallGenerators();
-  for (auto itGen : installGens) {
+  for (auto* itGen : installGens) {
     destinations.append(this->DumpInstallDestination(itGen));
   }
   return destinations;

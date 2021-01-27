@@ -1229,7 +1229,7 @@ void cmGlobalGenerator::Configure()
     this->CMakeInstance->GetHomeOutputDirectory());
 
   auto dirMfu = cm::make_unique<cmMakefile>(this, snapshot);
-  auto dirMf = dirMfu.get();
+  auto* dirMf = dirMfu.get();
   this->Makefiles.push_back(std::move(dirMfu));
   dirMf->SetRecursionDepth(this->RecursionDepth);
   this->IndexMakefile(dirMf);
@@ -1627,8 +1627,8 @@ void cmGlobalGenerator::ComputeTargetOrder(cmGeneratorTarget const* gt,
   }
   auto entry = insertion.first;
 
-  auto& deps = this->GetTargetDirectDepends(gt);
-  for (auto& d : deps) {
+  const auto& deps = this->GetTargetDirectDepends(gt);
+  for (const auto& d : deps) {
     this->ComputeTargetOrder(d, index);
   }
 
@@ -2928,7 +2928,7 @@ void cmGlobalGenerator::GetTargetSets(
   cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators)
 {
   // loop over all local generators
-  for (auto generator : generators) {
+  for (auto* generator : generators) {
     // check to make sure generator is not excluded
     if (this->IsExcluded(root, generator)) {
       continue;

@@ -656,7 +656,7 @@ private:
   void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
                                  std::string const& sf_full_path,
                                  cmProp beforeInclude, cmProp afterInclude,
-                                 cmProp uniqueIdName);
+                                 cmProp uniqueIdName) const;
   std::vector<std::string> AddUnityFilesModeAuto(
     cmGeneratorTarget* target, std::string const& lang,
     std::vector<cmSourceFile*> const& filtered_sources, cmProp beforeInclude,

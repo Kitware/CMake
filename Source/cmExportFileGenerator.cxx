@@ -1214,7 +1214,7 @@ bool cmExportFileGenerator::PopulateExportProperties(
   cmGeneratorTarget* gte, ImportPropertyMap& properties,
   std::string& errorMessage)
 {
-  auto& targetProperties = gte->Target->GetProperties();
+  const auto& targetProperties = gte->Target->GetProperties();
   if (cmProp exportProperties =
         targetProperties.GetPropertyValue("EXPORT_PROPERTIES")) {
     for (auto& prop : cmExpandedList(*exportProperties)) {

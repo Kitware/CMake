@@ -103,7 +103,7 @@ void cmDependsJavaParserHelper::SafePrintMissing(const char* str, int line,
     std::cout << "- " << strlen(str) << std::endl;
   }
 }
-void cmDependsJavaParserHelper::Print(const char* place, const char* str)
+void cmDependsJavaParserHelper::Print(const char* place, const char* str) const
 {
   if (this->Verbose) {
     std::cout << "[" << place << "=" << str << "]" << std::endl;

@@ -98,7 +98,7 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
   // The global generator checks extensions of enabled languages.
   cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
   cmMakefile const* mf = this->Makefile;
-  auto cm = mf->GetCMakeInstance();
+  auto* cm = mf->GetCMakeInstance();
   if (!gg->GetLanguageFromExtension(ext.c_str()).empty() ||
       cm->IsAKnownExtension(ext)) {
     // This is a known extension.  Use the given filename with extension.
@@ -155,7 +155,7 @@ bool cmSourceFileLocation::MatchesAmbiguousExtension(
   // disk.  One of these must match if loc refers to this source file.
   auto ext = cm::string_view(this->Name).substr(loc.Name.size() + 1);
   cmMakefile const* mf = this->Makefile;
-  auto cm = mf->GetCMakeInstance();
+  auto* cm = mf->GetCMakeInstance();
   return cm->IsAKnownExtension(ext);
 }
 

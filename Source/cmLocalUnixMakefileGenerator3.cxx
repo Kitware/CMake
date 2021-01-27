@@ -151,8 +151,8 @@ void cmLocalUnixMakefileGenerator3::Generate()
     }
 
     auto& gtVisited = this->GetCommandsVisited(gt);
-    auto& deps = this->GlobalGenerator->GetTargetDirectDepends(gt);
-    for (auto& d : deps) {
+    const auto& deps = this->GlobalGenerator->GetTargetDirectDepends(gt);
+    for (const auto& d : deps) {
       // Take the union of visited source files of custom commands
       auto depVisited = this->GetCommandsVisited(d);
       gtVisited.insert(depVisited.begin(), depVisited.end());
@@ -718,7 +718,7 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsTop(
     constexpr const char* vcs_rules[] = {
       "%,v", "RCS/%", "RCS/%,v", "SCCS/s.%", "s.%",
     };
-    for (auto vcs_rule : vcs_rules) {
+    for (const auto* vcs_rule : vcs_rules) {
       std::vector<std::string> vcs_depend;
       vcs_depend.emplace_back(vcs_rule);
       this->WriteMakeRule(makefileStream, "Disable VCS-based implicit rules.",

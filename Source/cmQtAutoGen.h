@@ -64,7 +64,6 @@ public:
   /// @brief Maximum number of parallel threads/processes in a generator
   static unsigned int const ParallelMax;
 
-public:
   /// @brief Returns the generator name
   static cm::string_view GeneratorName(GenT genType);
   /// @brief Returns the generator name in upper case

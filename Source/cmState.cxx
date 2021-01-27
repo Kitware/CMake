@@ -110,12 +110,9 @@ bool cmState::StringToCacheEntryType(const std::string& s,
 
 bool cmState::IsCacheEntryType(std::string const& key)
 {
-  for (const std::string& i : cmCacheEntryTypes) {
-    if (key == i) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+    cmCacheEntryTypes.begin(), cmCacheEntryTypes.end(),
+    [&key](std::string const& i) -> bool { return key == i; });
 }
 
 bool cmState::LoadCache(const std::string& path, bool internal,
@@ -347,7 +344,7 @@ cmPropertyDefinition const* cmState::GetPropertyDefinition(
 bool cmState::IsPropertyChained(const std::string& name,
                                 cmProperty::ScopeType scope) const
 {
-  if (auto def = this->GetPropertyDefinition(name, scope)) {
+  if (const auto* def = this->GetPropertyDefinition(name, scope)) {
     return def->IsChained();
   }
   return false;

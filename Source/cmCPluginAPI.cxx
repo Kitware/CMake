@@ -221,8 +221,8 @@ void CCONV cmAddUtilityCommand(void* arg, const char* utilityName,
 
   // Pass the call to the makefile instance.
   std::vector<std::string> no_byproducts;
-  mf->AddUtilityCommand(utilityName, (all ? false : true), nullptr,
-                        no_byproducts, depends2, commandLines);
+  mf->AddUtilityCommand(utilityName, !all, nullptr, no_byproducts, depends2,
+                        commandLines);
 }
 
 void CCONV cmAddCustomCommand(void* arg, const char* source,
@@ -567,7 +567,7 @@ void* CCONV cmAddSource(void* arg, void* arg2)
   sf->SourceExtension = osf->SourceExtension;
 
   // Store the proxy in the map so it can be re-used and deleted later.
-  auto value = sf.get();
+  auto* value = sf.get();
   cmCPluginAPISourceFiles[rsf] = std::move(sf);
   return value;
 }

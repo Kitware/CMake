@@ -1145,34 +1145,27 @@ bool cmFindPackageCommand::FindConfig()
 bool cmFindPackageCommand::FindPrefixedConfig()
 {
   std::vector<std::string> const& prefixes = this->SearchPaths;
-  for (std::string const& p : prefixes) {
-    if (this->SearchPrefix(p)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+    prefixes.begin(), prefixes.end(),
+    [this](std::string const& p) -> bool { return this->SearchPrefix(p); });
 }
 
 bool cmFindPackageCommand::FindFrameworkConfig()
 {
   std::vector<std::string> const& prefixes = this->SearchPaths;
-  for (std::string const& p : prefixes) {
-    if (this->SearchFrameworkPrefix(p)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(prefixes.begin(), prefixes.end(),
+                     [this](std::string const& p) -> bool {
+                       return this->SearchFrameworkPrefix(p);
+                     });
 }
 
 bool cmFindPackageCommand::FindAppBundleConfig()
 {
   std::vector<std::string> const& prefixes = this->SearchPaths;
-  for (std::string const& p : prefixes) {
-    if (this->SearchAppBundlePrefix(p)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(prefixes.begin(), prefixes.end(),
+                     [this](std::string const& p) -> bool {
+                       return this->SearchAppBundlePrefix(p);
+                     });
 }
 
 bool cmFindPackageCommand::ReadListFile(const std::string& f,

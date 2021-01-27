@@ -356,7 +356,7 @@ void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
     } else {
       fout << fname << "\n    :outputName=\"" << fname << ".rule\"\n";
     }
-    for (auto& byp : ccg.GetByproducts()) {
+    for (const auto& byp : ccg.GetByproducts()) {
       fout << "    :extraOutputFile=\"" << byp << "\"\n";
     }
   }
@@ -528,7 +528,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
     }
   }
 
-  for (auto& n : groupNames) {
+  for (const auto& n : groupNames) {
     groupFilesList[i] = n;
     i += 1;
   }
@@ -691,14 +691,14 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandLine(
    * the outputs is manually deleted.
    */
   bool specifyExtra = true;
-  for (auto& out : ccg.GetOutputs()) {
+  for (const auto& out : ccg.GetOutputs()) {
     fout << fname << '\n';
     fout << "    :outputName=\"" << out << "\"\n";
     if (specifyExtra) {
-      for (auto& byp : ccg.GetByproducts()) {
+      for (const auto& byp : ccg.GetByproducts()) {
         fout << "    :extraOutputFile=\"" << byp << "\"\n";
       }
-      for (auto& dep : ccg.GetDepends()) {
+      for (const auto& dep : ccg.GetDepends()) {
         fout << "    :depends=\"" << dep << "\"\n";
       }
       specifyExtra = false;
@@ -726,12 +726,10 @@ bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
   }
   std::vector<cmSourceFile*> sources;
   this->GeneratorTarget->GetSourceFiles(sources, this->ConfigName);
-  for (const cmSourceFile* sf : sources) {
-    if ("int" == sf->GetExtension()) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(sources.begin(), sources.end(),
+                     [](cmSourceFile const* sf) -> bool {
+                       return "int" == sf->GetExtension();
+                     });
 }
 
 bool cmGhsMultiTargetGenerator::ComputeCustomCommandOrder(
@@ -761,7 +759,7 @@ bool cmGhsMultiTargetGenerator::VisitCustomCommand(
   if (perm.find(si) == perm.end()) {
     /* set temporary mark; check if revisit*/
     if (temp.insert(si).second) {
-      for (auto& di : si->GetCustomCommand()->GetDepends()) {
+      for (const auto& di : si->GetCustomCommand()->GetDepends()) {
         cmSourceFile const* sf =
           this->GeneratorTarget->GetLocalGenerator()->GetSourceFileWithOutput(
             di);

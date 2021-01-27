@@ -117,7 +117,6 @@ public:
       this->Process();
     }
 
-  private:
     cmWorkerPool* Pool_ = nullptr;
     unsigned int WorkerIndex_ = 0;
     bool Fence_ = false;
@@ -154,7 +153,6 @@ public:
     void Process() override { this->Pool()->Abort(); }
   };
 
-public:
   // -- Methods
   cmWorkerPool();
   ~cmWorkerPool();

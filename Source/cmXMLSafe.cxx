@@ -28,7 +28,7 @@ cmXMLSafe& cmXMLSafe::Quotes(bool b)
   return *this;
 }
 
-std::string cmXMLSafe::str()
+std::string cmXMLSafe::str() const
 {
   std::ostringstream ss;
   ss << *this;

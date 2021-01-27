@@ -27,7 +27,7 @@ public:
 
   void SetResult(KWIML_INT_int64_t value);
 
-  KWIML_INT_int64_t GetResult() { return this->Result; }
+  KWIML_INT_int64_t GetResult() const { return this->Result; }
 
   const char* GetError() { return this->ErrorString.c_str(); }
 

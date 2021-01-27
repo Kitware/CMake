@@ -108,7 +108,6 @@ private:
     std::vector<cmGeneratorExpressionEvaluatorVector>::const_iterator pit)
     const;
 
-private:
   cmGeneratorExpressionEvaluatorVector IdentifierChildren;
   std::vector<cmGeneratorExpressionEvaluatorVector> ParamChildren;
   const char* StartContent;

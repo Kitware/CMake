@@ -1675,7 +1675,7 @@ std::string cmCTestTestHandler::FindExecutable(
   // if everything else failed, check the users path, but only if a full path
   // wasn't specified
   if (fullPath.empty() && filepath.empty()) {
-    std::string const path = cmSystemTools::FindProgram(filename.c_str());
+    std::string path = cmSystemTools::FindProgram(filename.c_str());
     if (!path.empty()) {
       resultingConfig.clear();
       return path;

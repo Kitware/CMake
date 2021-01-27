@@ -3,11 +3,13 @@
 
 #if !defined(_WIN32) && !defined(__sun)
 // POSIX APIs are needed
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _POSIX_C_SOURCE 200809L
 #endif
 #if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) ||    \
   defined(__QNX__)
 // For isascii
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 700
 #endif
 
@@ -21,7 +23,7 @@
 #include "cmSystemTools.h"
 
 std::string cmTimestamp::CurrentTime(const std::string& formatString,
-                                     bool utcFlag)
+                                     bool utcFlag) const
 {
   time_t currentTimeT = time(nullptr);
   std::string source_date_epoch;
@@ -43,7 +45,7 @@ std::string cmTimestamp::CurrentTime(const std::string& formatString,
 
 std::string cmTimestamp::FileModificationTime(const char* path,
                                               const std::string& formatString,
-                                              bool utcFlag)
+                                              bool utcFlag) const
 {
   std::string real_path =
     cmSystemTools::GetRealPathResolvingWindowsSubst(path);

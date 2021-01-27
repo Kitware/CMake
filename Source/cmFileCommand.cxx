@@ -334,7 +334,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
     arg_limit_count,
     arg_length_minimum,
     arg_length_maximum,
-    arg__maximum,
+    arg_maximum,
     arg_regex,
     arg_encoding
   };
@@ -558,8 +558,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
       // back subsequent characters
       if ((current_str.length() != num_utf8_bytes)) {
         for (unsigned int j = 0; j < current_str.size() - 1; j++) {
-          c = current_str[current_str.size() - 1 - j];
-          fin.putback(static_cast<char>(c));
+          fin.putback(current_str[current_str.size() - 1 - j]);
         }
         current_str.clear();
       }

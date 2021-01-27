@@ -30,7 +30,7 @@ struct cmListFileParser
   bool ParseFunction(const char* name, long line);
   bool AddArgument(cmListFileLexer_Token* token,
                    cmListFileArgument::Delimiter delim);
-  cm::optional<cmListFileContext> CheckNesting();
+  cm::optional<cmListFileContext> CheckNesting() const;
   cmListFile* ListFile;
   cmListFileBacktrace Backtrace;
   cmMessenger* Messenger;
@@ -352,7 +352,7 @@ bool TopIs(std::vector<NestingState>& stack, NestingStateEnum state)
 }
 }
 
-cm::optional<cmListFileContext> cmListFileParser::CheckNesting()
+cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
 {
   std::vector<NestingState> stack;
 

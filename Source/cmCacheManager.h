@@ -74,7 +74,7 @@ public:
 
   cmProp GetCacheEntryValue(const std::string& key) const
   {
-    if (auto entry = this->GetCacheEntry(key)) {
+    if (const auto* entry = this->GetCacheEntry(key)) {
       return &entry->GetValue();
     }
     return nullptr;
@@ -82,14 +82,14 @@ public:
 
   void SetCacheEntryValue(std::string const& key, std::string const& value)
   {
-    if (auto entry = this->GetCacheEntry(key)) {
+    if (auto* entry = this->GetCacheEntry(key)) {
       entry->SetValue(value.c_str());
     }
   }
 
   cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const
   {
-    if (auto entry = this->GetCacheEntry(key)) {
+    if (const auto* entry = this->GetCacheEntry(key)) {
       return entry->GetType();
     }
     return cmStateEnums::UNINITIALIZED;
@@ -98,7 +98,7 @@ public:
   std::vector<std::string> GetCacheEntryPropertyList(
     std::string const& key) const
   {
-    if (auto entry = this->GetCacheEntry(key)) {
+    if (const auto* entry = this->GetCacheEntry(key)) {
       return entry->GetPropertyList();
     }
     return {};
@@ -107,7 +107,7 @@ public:
   cmProp GetCacheEntryProperty(std::string const& key,
                                std::string const& propName) const
   {
-    if (auto entry = this->GetCacheEntry(key)) {
+    if (const auto* entry = this->GetCacheEntry(key)) {
       return entry->GetProperty(propName);
     }
     return nullptr;
@@ -116,7 +116,7 @@ public:
   bool GetCacheEntryPropertyAsBool(std::string const& key,
                                    std::string const& propName) const
   {
-    if (auto entry = this->GetCacheEntry(key)) {
+    if (const auto* entry = this->GetCacheEntry(key)) {
       return entry->GetPropertyAsBool(propName);
     }
     return false;
@@ -126,7 +126,7 @@ public:
                              std::string const& propName,
                              std::string const& value)
   {
-    if (auto entry = this->GetCacheEntry(key)) {
+    if (auto* entry = this->GetCacheEntry(key)) {
       entry->SetProperty(propName, value.c_str());
     }
   }
@@ -134,7 +134,7 @@ public:
   void SetCacheEntryBoolProperty(std::string const& key,
                                  std::string const& propName, bool value)
   {
-    if (auto entry = this->GetCacheEntry(key)) {
+    if (auto* entry = this->GetCacheEntry(key)) {
       entry->SetProperty(propName, value);
     }
   }
@@ -142,7 +142,7 @@ public:
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propName)
   {
-    if (auto entry = this->GetCacheEntry(key)) {
+    if (auto* entry = this->GetCacheEntry(key)) {
       entry->SetProperty(propName, nullptr);
     }
   }
@@ -152,7 +152,7 @@ public:
                                 std::string const& value,
                                 bool asString = false)
   {
-    if (auto entry = this->GetCacheEntry(key)) {
+    if (auto* entry = this->GetCacheEntry(key)) {
       entry->AppendProperty(propName, value, asString);
     }
   }

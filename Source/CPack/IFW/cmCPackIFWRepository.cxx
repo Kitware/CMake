@@ -199,7 +199,7 @@ bool cmCPackIFWRepository::PatchUpdatesXml()
   return cmSystemTools::RenameFile(updatesPatchXml, updatesXml);
 }
 
-void cmCPackIFWRepository::WriteRepositoryConfig(cmXMLWriter& xout)
+void cmCPackIFWRepository::WriteRepositoryConfig(cmXMLWriter& xout) const
 {
   xout.StartElement("Repository");
 
@@ -225,7 +225,7 @@ void cmCPackIFWRepository::WriteRepositoryConfig(cmXMLWriter& xout)
   xout.EndElement();
 }
 
-void cmCPackIFWRepository::WriteRepositoryUpdate(cmXMLWriter& xout)
+void cmCPackIFWRepository::WriteRepositoryUpdate(cmXMLWriter& xout) const
 {
   xout.StartElement("Repository");
 

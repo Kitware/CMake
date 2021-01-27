@@ -107,7 +107,7 @@ public:
     this->PipeState = cmsysProcess_WaitForExit(this->Process, timeout);
     return this->PipeState;
   }
-  int GetProcessState() { return this->PipeState; }
+  int GetProcessState() const { return this->PipeState; }
 
 private:
   int PipeState;

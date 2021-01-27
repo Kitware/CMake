@@ -101,7 +101,7 @@ bool cmSetSourceFilesPropertiesCommand(std::vector<std::string> const& args,
   // Now call the worker function for each directory scope represented by a
   // cmMakefile instance.
   std::string errors;
-  for (const auto mf : source_file_directory_makefiles) {
+  for (auto* const mf : source_file_directory_makefiles) {
     bool ret = RunCommandForScope(mf, files.begin(), files.end(), props_begin,
                                   args.end(), errors);
     if (!ret) {
