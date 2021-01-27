@@ -55,6 +55,8 @@ The following variables may be set to influence this module's behavior:
   * ``Arm_ilp64_mp``
   * ``EML``
   * ``EML_mt``
+  * ``Fujitsu_SSL2`` (Fujitsu serial blas / lapack)
+  * ``Fujitsu_SSL2BLAMP`` (Fujitsu parallel blas / lapack)
   * ``Generic``
 
   .. versionadded:: 3.6
@@ -78,6 +80,7 @@ The following variables may be set to influence this module's behavior:
 
   .. versionadded:: 3.20
     Elbrus Math Library support (``EML``, ``EML_mt``).
+    Fujitsu SSL2 Library support (``Fujitsu_SSL2``, ``Fujitsu_SSL2BLAMP``)
 
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95 interfaces
@@ -153,11 +156,16 @@ if(NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_CO
 endif()
 
 function(_add_blas_target)
-  if(NOT TARGET BLAS::BLAS)
+  if(BLAS_FOUND AND NOT TARGET BLAS::BLAS)
     add_library(BLAS::BLAS INTERFACE IMPORTED)
     if(BLAS_LIBRARIES)
       set_target_properties(BLAS::BLAS PROPERTIES
         INTERFACE_LINK_LIBRARIES "${BLAS_LIBRARIES}"
+      )
+    endif()
+    if(BLAS_LINKER_FLAGS)
+      set_target_properties(BLAS::BLAS PROPERTIES
+        INTERFACE_LINK_OPTIONS "${BLAS_LINKER_FLAGS}"
       )
     endif()
   endif()
@@ -228,34 +236,34 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
   endif()
   list(APPEND _extaddlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
-  foreach(_library ${_list})
+  foreach(_library ${_list} ${_threadlibs})
     if(_library MATCHES "^-Wl,--(start|end)-group$")
       # Respect linker flags like --start/end-group (required by MKL)
       set(${LIBRARIES} ${${LIBRARIES}} "${_library}")
     else()
-      set(_combined_name ${_combined_name}_${_library})
-      if(NOT "${_threadlibs}" STREQUAL "")
-        set(_combined_name ${_combined_name}_threadlibs)
-      endif()
+      string(REGEX REPLACE "[^A-Za-z0-9]" "_" _lib_var "${_library}")
+      set(_combined_name ${_combined_name}_${_lib_var})
       if(_libraries_work)
-        find_library(${_prefix}_${_library}_LIBRARY
+        find_library(${_prefix}_${_lib_var}_LIBRARY
           NAMES ${_library}
           NAMES_PER_DIR
           PATHS ${_extaddlibdir}
           PATH_SUFFIXES ${_subdirs}
         )
-        #message("DEBUG: find_library(${_library}) got ${${_prefix}_${_library}_LIBRARY}")
-        mark_as_advanced(${_prefix}_${_library}_LIBRARY)
-        set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
-        set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
+        mark_as_advanced(${_prefix}_${_lib_var}_LIBRARY)
+        set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_lib_var}_LIBRARY})
+        set(_libraries_work ${${_prefix}_${_lib_var}_LIBRARY})
       endif()
     endif()
   endforeach()
 
+  foreach(_flag ${_flags})
+    string(REGEX REPLACE "[^A-Za-z0-9]" "_" _flag_var "${_flag}")
+    set(_combined_name ${_combined_name}_${_flag_var})
+  endforeach()
   if(_libraries_work)
     # Test this combination of libraries.
     set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_threadlibs})
-    #message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
     if(CMAKE_Fortran_COMPILER_LOADED)
       check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
     else()
@@ -274,12 +282,12 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
   else()
     set(${LIBRARIES} FALSE)
   endif()
-  #message("DEBUG: ${LIBRARIES} = ${${LIBRARIES}}")
 endmacro()
 
 set(BLAS_LINKER_FLAGS)
 set(BLAS_LIBRARIES)
 set(BLAS95_LIBRARIES)
+set(_blas_fphsa_req_var BLAS_LIBRARIES)
 if(NOT $ENV{BLA_VENDOR} STREQUAL "")
   set(BLA_VENDOR $ENV{BLA_VENDOR})
 else()
@@ -301,6 +309,9 @@ if(BLA_VENDOR STREQUAL "All")
       ""
       ""
       )
+  endif()
+  if(BLAS_WORKS)
+    set(_blas_fphsa_req_var BLAS_WORKS)
   endif()
 endif()
 
@@ -1016,6 +1027,31 @@ if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
 
 endif()
 
+# Fujitsu SSL2 Library?
+if(NOT BLAS_LIBRARIES AND
+    BLA_VENDOR MATCHES "Fujitsu_SSL2" OR BLA_VENDOR STREQUAL "All")
+  if(BLA_VENDOR STREQUAL "Fujitsu_SSL2BLAMP")
+    set(_ssl2_suffix BLAMP)
+  else()
+    set(_ssl2_suffix)
+  endif()
+  check_blas_libraries(
+    BLAS_LIBRARIES
+    BLAS
+    sgemm
+    "-SSL2${_ssl2_suffix}"
+    ""
+    ""
+    ""
+    ""
+    )
+  if(BLAS_LIBRARIES)
+    set(BLAS_LINKER_FLAGS "-SSL2${_ssl2_suffix}")
+    set(_blas_fphsa_req_var BLAS_LINKER_FLAGS)
+  endif()
+  unset(_ssl2_suffix)
+endif()
+
 # Generic BLAS library?
 if(BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
@@ -1032,15 +1068,14 @@ if(BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
   endif()
 endif()
 
-if(NOT BLA_F95)
-  find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS_LIBRARIES)
-endif()
-
-
-# On compilers that implicitly link BLAS (such as ftn, cc, and CC on Cray HPC machines)
-# we used a placeholder for empty BLAS_LIBRARIES to get through our logic above.
+# On compilers that implicitly link BLAS (i.e. CrayPrgEnv) we used a
+# placeholder for empty BLAS_LIBRARIES to get through our logic above.
 if(BLAS_LIBRARIES STREQUAL "BLAS_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
   set(BLAS_LIBRARIES "")
+endif()
+
+if(NOT BLA_F95)
+  find_package_handle_standard_args(BLAS REQUIRED_VARS ${_blas_fphsa_req_var})
 endif()
 
 _add_blas_target()

@@ -45,6 +45,8 @@ The following variables may be set to influence this module's behavior:
   * ``Arm_ilp64_mp``
   * ``EML``
   * ``EML_mt``
+  * ``Fujitsu_SSL2`` (Fujitsu serial blas / lapack)
+  * ``Fujitsu_SSL2BLAMP`` (Fujitsu parallel blas / lapack)
   * ``Generic``
 
   .. versionadded:: 3.6
@@ -68,6 +70,7 @@ The following variables may be set to influence this module's behavior:
 
   .. versionadded:: 3.20
     Elbrus Math Library support (``EML``, ``EML_mt``).
+    Fujitsu SSL2 Library support (``Fujitsu_SSL2``, ``Fujitsu_SSL2BLAMP``)
 
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95/LAPACK95 interfaces
@@ -130,20 +133,33 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 function(_add_lapack_target)
   if(LAPACK_FOUND AND NOT TARGET LAPACK::LAPACK)
     add_library(LAPACK::LAPACK INTERFACE IMPORTED)
+
+    # Filter out redundant BLAS info and replace with the BLAS target
     set(_lapack_libs "${LAPACK_LIBRARIES}")
-    if(_lapack_libs AND TARGET BLAS::BLAS)
-      # remove the ${BLAS_LIBRARIES} from the interface and replace it
-      # with the BLAS::BLAS target
-      list(REMOVE_ITEM _lapack_libs "${BLAS_LIBRARIES}")
+    set(_lapack_flags "${LAPACK_LINKER_FLAGS}")
+    if(TARGET BLAS::BLAS)
+      if(_lapack_libs AND BLAS_LIBRARIES)
+        foreach(_blas_lib IN LISTS BLAS_LIBRARIES)
+          list(REMOVE_ITEM _lapack_libs "${_blas_lib}")
+        endforeach()
+      endif()
+      if(_lapack_flags AND BLAS_LINKER_FLAGS)
+        foreach(_blas_flag IN LISTS BLAS_LINKER_FLAGS)
+          list(REMOVE_ITEM _lapack_flags "${_blas_flag}")
+        endforeach()
+      endif()
       list(APPEND _lapack_libs BLAS::BLAS)
     endif()
-
     if(_lapack_libs)
       set_target_properties(LAPACK::LAPACK PROPERTIES
         INTERFACE_LINK_LIBRARIES "${_lapack_libs}"
       )
     endif()
-    unset(_lapack_libs)
+    if(_lapack_flags)
+      set_target_properties(LAPACK::LAPACK PROPERTIES
+        INTERFACE_LINK_OPTIONS "${_lapack_flags}"
+      )
+    endif()
   endif()
 endfunction()
 
@@ -202,32 +218,35 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
   endif()
   list(APPEND _extaddlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
-  foreach(_library ${_list})
+  foreach(_library ${_list} ${_threadlibs})
     if(_library MATCHES "^-Wl,--(start|end)-group$")
       # Respect linker flags like --start/end-group (required by MKL)
       set(${LIBRARIES} ${${LIBRARIES}} "${_library}")
     else()
-      set(_combined_name ${_combined_name}_${_library})
+      string(REGEX REPLACE "[^A-Za-z0-9]" "_" _lib_var "${_library}")
+      set(_combined_name ${_combined_name}_${_lib_var})
       if(_libraries_work)
-        find_library(${_prefix}_${_library}_LIBRARY
+        find_library(${_prefix}_${_lib_var}_LIBRARY
           NAMES ${_library}
           NAMES_PER_DIR
           PATHS ${_extaddlibdir}
           PATH_SUFFIXES ${_subdirs}
         )
-        #message("DEBUG: find_library(${_library}) got ${${_prefix}_${_library}_LIBRARY}")
-        mark_as_advanced(${_prefix}_${_library}_LIBRARY)
-        set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
-        set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
+        mark_as_advanced(${_prefix}_${_lib_var}_LIBRARY)
+        set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_lib_var}_LIBRARY})
+        set(_libraries_work ${${_prefix}_${_lib_var}_LIBRARY})
       endif()
     endif()
   endforeach()
   unset(_library)
 
+  foreach(_flag ${_flags})
+    string(REGEX REPLACE "[^A-Za-z0-9]" "_" _flag_var "${_flag}")
+    set(_combined_name ${_combined_name}_${_flag_var})
+  endforeach()
   if(_libraries_work)
     # Test this combination of libraries.
     set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_threadlibs})
-    #message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
     if(CMAKE_Fortran_COMPILER_LOADED)
       check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
     else()
@@ -250,7 +269,6 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
   unset(_extaddlibdir)
   unset(_libraries_work)
   unset(_combined_name)
-  #message("DEBUG: ${LIBRARIES} = ${${LIBRARIES}}")
 endmacro()
 
 macro(_lapack_find_dependency dep)
@@ -279,6 +297,7 @@ _lapack_find_library_setup()
 set(LAPACK_LINKER_FLAGS)
 set(LAPACK_LIBRARIES)
 set(LAPACK95_LIBRARIES)
+set(_lapack_fphsa_req_var LAPACK_LIBRARIES)
 
 # Check the language being used
 if(NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_COMPILER_LOADED))
@@ -585,6 +604,38 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     )
   endif()
 
+  # Fujitsu SSL2 Library?
+  if(NOT LAPACK_LIBRARIES
+      AND BLA_VENDOR MATCHES "Fujitsu_SSL2" OR BLA_VENDOR STREQUAL "All")
+    if(BLA_VENDOR STREQUAL "Fujitsu_SSL2BLAMP")
+      set(_ssl2_suffix BLAMP)
+    else()
+      set(_ssl2_suffix)
+    endif()
+    set(_ssl2_blas)
+    if(BLAS_LIBRARIES STREQUAL "")
+      set(_ssl2_blas "${BLAS_LINKER_FLAGS}")
+    else()
+      set(_ssl2_blas "${BLAS_LIBRARIES} ${BLAS_LINKER_FLAGS}")
+    endif()
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      "-SSL2${_ssl2_suffix}"
+      ""
+      ""
+      ""
+      ""
+      "${_ssl2_blas}"
+    )
+    if(LAPACK_LIBRARIES)
+      set(LAPACK_LINKER_FLAGS "-SSL2${_ssl2_suffix}")
+      set(_lapack_fphsa_req_var LAPACK_LINKER_FLAGS)
+    endif()
+    unset(_ssl2_suffix)
+  endif()
+
   # Generic LAPACK library?
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR STREQUAL "Generic"
@@ -612,7 +663,7 @@ if(LAPACK_NOT_FOUND_MESSAGE)
   set(LAPACK_NOT_FOUND_MESSAGE
     REASON_FAILURE_MESSAGE ${LAPACK_NOT_FOUND_MESSAGE})
 endif()
-find_package_handle_standard_args(LAPACK REQUIRED_VARS LAPACK_LIBRARIES
+find_package_handle_standard_args(LAPACK REQUIRED_VARS ${_lapack_fphsa_req_var}
   ${LAPACK_NOT_FOUND_MESSAGE})
 unset(LAPACK_NOT_FOUND_MESSAGE)
 
