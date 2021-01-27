@@ -42,4 +42,4 @@ CMAKE_Swift_COMPILER:FILEPATH=FALSE
 CMake_TEST_Qt5:BOOL=FALSE
 
 # CPack package file name component for this platform.
-CPACK_SYSTEM_NAME:STRING=win64-x64
+CPACK_SYSTEM_NAME:STRING=windows-x86_64

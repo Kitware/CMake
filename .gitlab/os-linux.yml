@@ -305,7 +305,7 @@
         - *before_script_linux
         # Make the CMake package available.
         - mkdir -p build/install
-        - tar -C build/install --strip-components=1 -xzf build/cmake-*-Linux-x86_64.tar.gz
+        - tar -C build/install --strip-components=1 -xzf build/cmake-*-linux-x86_64.tar.gz
         - .gitlab/ci/sccache.sh
         - sccache --start-server
         - sccache --show-stats
