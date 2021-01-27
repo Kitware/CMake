@@ -6491,15 +6491,14 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
   if (cmProp config_outdir = this->GetProperty(configProp)) {
     // Use the user-specified per-configuration output directory.
     out = cmGeneratorExpression::Evaluate(*config_outdir, this->LocalGenerator,
-                                          config);
+                                          config, this);
 
     // Skip per-configuration subdirectory.
     conf.clear();
   } else if (cmProp outdir = this->GetProperty(propertyName)) {
     // Use the user-specified output directory.
-    out =
-      cmGeneratorExpression::Evaluate(*outdir, this->LocalGenerator, config);
-
+    out = cmGeneratorExpression::Evaluate(*outdir, this->LocalGenerator,
+                                          config, this);
     // Skip per-configuration subdirectory if the value contained a
     // generator expression.
     if (out != *outdir) {

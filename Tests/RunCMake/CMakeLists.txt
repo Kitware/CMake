@@ -197,6 +197,9 @@ if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
   set(autogen_with_qt5 TRUE)
 endif ()
 add_RunCMake_test(Autogen -Dwith_qt5=${autogen_with_qt5})
+
+add_RunCMake_test(ArtifactOutputDirs)
+
 if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
     AND CMAKE_C_COMPILER_ID STREQUAL "GNU"
     AND CMAKE_GENERATOR MATCHES "^Ninja"
