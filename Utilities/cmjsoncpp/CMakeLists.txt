@@ -2,7 +2,7 @@ project(JsonCpp CXX)
 
 # Disable warnings to avoid changing 3rd party code.
 if(CMAKE_CXX_COMPILER_ID MATCHES
-    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel)$")
+    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM)$")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PathScale")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -woffall")
