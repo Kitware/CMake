@@ -146,7 +146,7 @@ set_property(SOURCE no_preprocess_source_lower.f PROPERTY Fortran_PREPROCESS OFF
 # Test that we can explicitly not preprocess a target or source.
 # This will not work on certain compilers due to either missing a
 # "don't preprocess" flag, or due to choice of file extension.
-if(test_pp_flags AND NOT CMAKE_Fortran_COMPILER_ID MATCHES "(Flang|NAG|PGI|SunPro|XL)")
+if(test_pp_flags AND NOT CMAKE_Fortran_COMPILER_ID MATCHES "(Flang|NAG|PGI|NVHPC|SunPro|XL)")
   add_library(no_preprocess_target STATIC no_preprocess_target_upper.F)
   target_compile_options(no_preprocess_target PRIVATE -DINTEGER=nonsense)
   add_library(no_preprocess_source STATIC no_preprocess_source_upper.F)
