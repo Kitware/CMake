@@ -91,46 +91,69 @@ build:fedora33-sphinx:
 
 # Linux builds
 
-build:centos6-release:
+build:centos6-x86_64:
     extends:
-        - .release_linux
-        - .cmake_build_release_linux
+        - .linux_release_x86_64
+        - .cmake_build_linux_release
         - .cmake_release_artifacts
         - .linux_builder_tags
         - .run_manually
 
+build:centos7-aarch64:
+    extends:
+        - .linux_release_aarch64
+        - .cmake_build_linux_release
+        - .cmake_release_artifacts
+        - .linux_builder_tags_aarch64
+        - .run_manually
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
 test:debian10-ninja:
     extends:
         - .debian10_ninja
-        - .cmake_test_linux_package
+        - .cmake_test_linux_release
         - .linux_builder_tags_qt
         - .run_dependent
     dependencies:
-        - build:centos6-release
+        - build:centos6-x86_64
     needs:
-        - build:centos6-release
+        - build:centos6-x86_64
+
+test:debian10-aarch64-ninja:
+    extends:
+        - .debian10_aarch64_ninja
+        - .cmake_test_linux_release
+        - .linux_builder_tags_aarch64_qt
+        - .run_dependent
+    dependencies:
+        - build:centos7-aarch64
+    needs:
+        - build:centos7-aarch64
+    variables:
+        CMAKE_CI_NO_MR: "true"
 
 test:fedora33-makefiles:
     extends:
         - .fedora33_makefiles
-        - .cmake_test_linux_package
+        - .cmake_test_linux_release
         - .linux_builder_tags_qt
         - .run_dependent
     dependencies:
-        - build:centos6-release
+        - build:centos6-x86_64
     needs:
-        - build:centos6-release
+        - build:centos6-x86_64
 
 test:cuda10.2-nvidia:
     extends:
         - .cuda10.2_nvidia
-        - .cmake_test_linux_package
+        - .cmake_test_linux_release
         - .linux_builder_tags_cuda
         - .run_dependent
     dependencies:
-        - build:centos6-release
+        - build:centos6-x86_64
     needs:
-        - build:centos6-release
+        - build:centos6-x86_64
 
 build:fedora33-ninja:
     extends:
@@ -165,8 +188,9 @@ test:fedora33-ninja-multi:
 
 build:linux-x86_64-package:
     extends:
-        - .linux_package_x86_64
-        - .cmake_build_linux_package
+        - .linux_package
+        - .linux_release_x86_64
+        - .cmake_build_linux_release
         - .cmake_release_artifacts
         - .linux_builder_tags
         - .run_only_for_package
@@ -188,8 +212,9 @@ upload:linux-x86_64-package:
 
 build:linux-aarch64-package:
     extends:
-        - .linux_package_aarch64
-        - .cmake_build_linux_package
+        - .linux_package
+        - .linux_release_aarch64
+        - .cmake_build_linux_release
         - .cmake_release_artifacts
         - .linux_builder_tags_aarch64
         - .run_only_for_package
