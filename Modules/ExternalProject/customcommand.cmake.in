@@ -1,0 +1,8 @@
+
+execute_process(
+  COMMAND @this_command@
+  WORKING_DIRECTORY "@work_dir@"
+  RESULT_VARIABLE result
+  ${capture_output}
+)
+_ep_command_check_result(result)

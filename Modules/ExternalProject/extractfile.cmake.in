@@ -3,17 +3,24 @@
 
 cmake_minimum_required(VERSION 3.5)
 
+set(quiet "@quiet@")
+set(script_dir "@CMAKE_CURRENT_FUNCTION_LIST_DIR@/ExternalProject")
+include(${script_dir}/captured_process_setup.cmake)
+
 # Make file names absolute:
 #
 get_filename_component(filename "@filename@" ABSOLUTE)
 get_filename_component(directory "@directory@" ABSOLUTE)
 
-message(STATUS "extracting...
+_ep_message_quiet_capture(STATUS "extracting...
      src='${filename}'
-     dst='${directory}'")
+     dst='${directory}'"
+)
 
 if(NOT EXISTS "${filename}")
-  message(FATAL_ERROR "File to extract does not exist: '${filename}'")
+  _ep_message_quiet_capture(FATAL_ERROR
+    "File to extract does not exist: '${filename}'"
+  )
 endif()
 
 # Prepare a space for extracting:
@@ -27,20 +34,23 @@ file(MAKE_DIRECTORY "${ut_dir}")
 
 # Extract it:
 #
-message(STATUS "extracting... [tar @args@]")
+_ep_message_quiet_capture(STATUS "extracting... [tar @args@]")
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar @args@ ${filename}
   WORKING_DIRECTORY ${ut_dir}
-  RESULT_VARIABLE rv)
+  RESULT_VARIABLE rv
+  ${capture_output}
+)
+_ep_accumulate_captured_output()
 
 if(NOT rv EQUAL 0)
-  message(STATUS "extracting... [error clean up]")
+  _ep_message_quiet_capture(STATUS "extracting... [error clean up]")
   file(REMOVE_RECURSE "${ut_dir}")
-  message(FATAL_ERROR "Extract of '${filename}' failed")
+  _ep_message_quiet_capture(FATAL_ERROR "Extract of '${filename}' failed")
 endif()
 
 # Analyze what came out of the tar file:
 #
-message(STATUS "extracting... [analysis]")
+_ep_message_quiet_capture(STATUS "extracting... [analysis]")
 file(GLOB contents "${ut_dir}/*")
 list(REMOVE_ITEM contents "${ut_dir}/.DS_Store")
 list(LENGTH contents n)
@@ -50,14 +60,14 @@ endif()
 
 # Move "the one" directory to the final directory:
 #
-message(STATUS "extracting... [rename]")
+_ep_message_quiet_capture(STATUS "extracting... [rename]")
 file(REMOVE_RECURSE ${directory})
 get_filename_component(contents ${contents} ABSOLUTE)
 file(RENAME ${contents} ${directory})
 
 # Clean up:
 #
-message(STATUS "extracting... [clean up]")
+_ep_message_quiet_capture(STATUS "extracting... [clean up]")
 file(REMOVE_RECURSE "${ut_dir}")
 
-message(STATUS "extracting... done")
+_ep_message_quiet_capture(STATUS "extracting... done")

@@ -3,14 +3,22 @@
 
 cmake_minimum_required(VERSION 3.19)
 
+set(quiet "@quiet@")
+set(script_dir "@CMAKE_CURRENT_FUNCTION_LIST_DIR@/ExternalProject")
+include(${script_dir}/captured_process_setup.cmake)
+
 execute_process(
   COMMAND "@hg_EXECUTABLE@" pull
-  COMMAND_ERROR_IS_FATAL ANY
   WORKING_DIRECTORY "@work_dir@"
+  RESULT_VARIABLE error_code
+  ${capture_output}
 )
+_ep_command_check_result(error_code)
 
 execute_process(
   COMMAND "@hg_EXECUTABLE@" update @hg_tag@
-  COMMAND_ERROR_IS_FATAL ANY
   WORKING_DIRECTORY "@work_dir@"
+  RESULT_VARIABLE error_code
+  ${capture_output}
 )
+_ep_command_check_result(error_code)

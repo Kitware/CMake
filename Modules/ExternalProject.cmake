@@ -1200,46 +1200,46 @@ function(_ep_parse_arguments keywords name ns args)
 
 endfunction()
 
+if(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
+  define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED
+    BRIEF_DOCS "Base directory for External Project storage."
+    FULL_DOCS
+    "See documentation of the ExternalProject_Add() function in the "
+    "ExternalProject module."
+    )
 
-define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED
-  BRIEF_DOCS "Base directory for External Project storage."
-  FULL_DOCS
-  "See documentation of the ExternalProject_Add() function in the "
-  "ExternalProject module."
-  )
+  define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
+    BRIEF_DOCS "Top prefix for External Project storage."
+    FULL_DOCS
+    "See documentation of the ExternalProject_Add() function in the "
+    "ExternalProject module."
+    )
 
-define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
-  BRIEF_DOCS "Top prefix for External Project storage."
-  FULL_DOCS
-  "See documentation of the ExternalProject_Add() function in the "
-  "ExternalProject module."
-  )
+  define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED
+    BRIEF_DOCS
+    "List of ExternalProject steps that automatically get corresponding targets"
+    FULL_DOCS
+    "These targets will be dependent on the main target dependencies. "
+    "See documentation of the ExternalProject_Add_StepTargets() function in the "
+    "ExternalProject module."
+    )
 
-define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED
-  BRIEF_DOCS
-  "List of ExternalProject steps that automatically get corresponding targets"
-  FULL_DOCS
-  "These targets will be dependent on the main target dependencies. "
-  "See documentation of the ExternalProject_Add_StepTargets() function in the "
-  "ExternalProject module."
-  )
+  define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED
+    BRIEF_DOCS
+    "List of ExternalProject steps that automatically get corresponding targets"
+    FULL_DOCS
+    "These targets will not be dependent on the main target dependencies. "
+    "See documentation of the ExternalProject_Add_StepTargets() function in the "
+    "ExternalProject module."
+    )
 
-define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED
-  BRIEF_DOCS
-  "List of ExternalProject steps that automatically get corresponding targets"
-  FULL_DOCS
-  "These targets will not be dependent on the main target dependencies. "
-  "See documentation of the ExternalProject_Add_StepTargets() function in the "
-  "ExternalProject module."
-  )
-
-define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
-  BRIEF_DOCS "Never update automatically from the remote repo."
-  FULL_DOCS
-  "See documentation of the ExternalProject_Add() function in the "
-  "ExternalProject module."
-  )
-
+  define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
+    BRIEF_DOCS "Never update automatically from the remote repo."
+    FULL_DOCS
+    "See documentation of the ExternalProject_Add() function in the "
+    "ExternalProject module."
+    )
+endif()
 
 function(_ep_write_gitclone_script
          script_filename
@@ -1258,7 +1258,8 @@ function(_ep_write_gitclone_script
          work_dir
          gitclone_infofile
          gitclone_stampfile
-         tls_verify)
+         tls_verify
+         quiet)
 
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
     # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
@@ -1322,7 +1323,8 @@ function(_ep_write_hgclone_script
          src_name
          work_dir
          hgclone_infofile
-         hgclone_stampfile)
+         hgclone_stampfile
+         quiet)
 
   if("${hg_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for hg checkout should not be empty.")
@@ -1347,7 +1349,8 @@ function(_ep_write_gitupdate_script
          git_submodules
          git_repository
          work_dir
-         git_update_strategy)
+         git_update_strategy
+         quiet)
 
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
@@ -1372,7 +1375,8 @@ function(_ep_write_hgupdate_script
          script_filename
          hg_EXECUTABLE
          hg_tag
-         work_dir)
+         work_dir
+         quiet)
 
   configure_file(
     ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/hgupdate.cmake.in
@@ -1408,7 +1412,8 @@ function(_ep_write_downloadfile_script
          http_headers
          netrc
          netrc_file
-         extract_script_filename)
+         extract_script_filename
+         quiet)
 
   if(timeout)
     set(TIMEOUT_ARGS TIMEOUT ${timeout})
@@ -1426,7 +1431,7 @@ function(_ep_write_downloadfile_script
   endif()
 
 
-  if(no_progress)
+  if(no_progress OR quiet)
     set(SHOW_PROGRESS "")
   else()
     set(SHOW_PROGRESS "SHOW_PROGRESS")
@@ -1523,7 +1528,8 @@ function(_ep_write_verifyfile_script
          script_filename
          LOCAL
          hash
-         extract_script_filename)
+         extract_script_filename
+         quiet)
 
   _ep_get_hash_regex(_ep_hash_regex)
   if("${hash}" MATCHES "${_ep_hash_regex}")
@@ -1551,7 +1557,8 @@ function(_ep_write_extractfile_script
          script_filename
          name
          filename
-         directory)
+         directory
+         quiet)
 
   set(args "")
 
@@ -1578,7 +1585,8 @@ function(_ep_write_extractfile_script
 endfunction()
 
 
-# This function is an implementation detail of ExternalProject_Add().
+# This function is an implementation detail of ExternalProject_Add() and
+# _ep_do_preconfigure_steps_now().
 #
 # The function expects keyword arguments to have already been parsed into
 # variables of the form _EP_<keyword>. It will create the various directories
@@ -2059,7 +2067,7 @@ if(result)
     message(FATAL_ERROR \"\${msg}\")
   endif()
 else()
-  if(NOT \"${CMAKE_GENERATOR}\" MATCHES \"Ninja\")
+  if(NOT \"${CMAKE_GENERATOR}\" MATCHES \"Ninja\" AND NOT \"${_EP_QUIET}\")
     set(msg \"${name} ${step} command succeeded.  See also ${logbase}-*.log\")
     message(STATUS \"\${msg}\")
   endif()
@@ -2523,6 +2531,7 @@ function(_ep_write_command_script
          commands
          work_dir
          genex_supported
+         quiet
          have_commands_var)
 
   set(sep "${_EP_LIST_SEPARATOR}")
@@ -2531,6 +2540,10 @@ function(_ep_write_command_script
   endif()
   _ep_replace_location_tags_from_vars(commands)
 
+  file(READ
+    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/customcommand.cmake.in
+    exec_command_template
+  )
   set(script_content)
   set(this_command)
   foreach(token IN LISTS commands)
@@ -2539,13 +2552,8 @@ function(_ep_write_command_script
         # Silently skip empty commands
         continue()
       endif()
-      string(APPEND script_content "
-execute_process(
-  COMMAND ${this_command}
-  COMMAND_ERROR_IS_FATAL LAST
-  WORKING_DIRECTORY [==[${work_dir}]==]
-)
-")
+      string(CONFIGURE "${exec_command_template}" content @ONLY)
+      string(APPEND script_content "${content}")
       set(this_command)
     else()
       # Ensure we quote every token so we preserve empty items, quotes, etc
@@ -2554,20 +2562,20 @@ execute_process(
   endforeach()
 
   if(NOT "${this_command}" STREQUAL "")
-    string(APPEND script_content "
-execute_process(
-  COMMAND ${this_command}
-  COMMAND_ERROR_IS_FATAL LAST
-  WORKING_DIRECTORY [==[${work_dir}]==]
-)
-")
+    string(CONFIGURE "${exec_command_template}" content @ONLY)
+    string(APPEND script_content "${content}")
   endif()
 
   if(script_content STREQUAL "")
     set(${have_commands_var} FALSE PARENT_SCOPE)
   else()
     set(${have_commands_var} TRUE PARENT_SCOPE)
-    string(PREPEND script_content "cmake_minimum_required(VERSION 3.19)\n")
+    file(READ
+      ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/customcommand_preamble.cmake.in
+      exec_command_preamble
+    )
+    string(CONFIGURE "${exec_command_preamble}" exec_command_preamble @ONLY)
+    string(PREPEND script_content "${exec_command_preamble}")
   endif()
 
   if(genex_supported)
@@ -2603,7 +2611,8 @@ function(_ep_add_preconfigure_command name step)
   )
 endfunction()
 
-# This function is an implementation detail of ExternalProject_Add().
+# This function is an implementation detail of ExternalProject_Add() and
+# _ep_do_preconfigure_steps_now().
 #
 # The function expects keyword arguments to have already been parsed into
 # variables of the form _EP_<keyword>. It will populate the variable
@@ -2619,6 +2628,7 @@ function(_ep_prepare_download name genex_supported)
   set(tmp_dir      "${_EP_TMP_DIR}")
   set(source_dir   "${_EP_SOURCE_DIR}")
   set(download_dir "${_EP_DOWNLOAD_DIR}")
+  set(quiet        "${_EP_QUIET}")
 
   set(comment)
 
@@ -2628,6 +2638,7 @@ function(_ep_prepare_download name genex_supported)
   if(log)
     set(script_filename ${tmp_dir}/${name}-download-impl.cmake)
     set(log TRUE)
+    set(quiet FALSE)  # Already quiet as a result of log being enabled
   else()
     set(script_filename ${tmp_dir}/${name}-download.cmake)
     set(log FALSE)
@@ -2660,6 +2671,7 @@ work_dir=${work_dir}
       "${_EP_DOWNLOAD_COMMAND}"
       "${work_dir}"
       "${genex_supported}"
+      "${quiet}"
       script_does_something
     )
     set(comment "Performing download step (custom command) for '${name}'")
@@ -2698,6 +2710,7 @@ source_dir=${source_dir}
       "${cmd}"
       "${work_dir}"
       "${genex_supported}"
+      "${quiet}"
       script_does_something
     )
     set(comment "Performing download step (CVS checkout) for '${name}'")
@@ -2750,6 +2763,7 @@ source_dir=${source_dir}
       "${cmd}"
       "${work_dir}"
       "${genex_supported}"
+      "${quiet}"
       script_does_something
     )
     set(comment "Performing download step (SVN checkout) for '${name}'")
@@ -2835,6 +2849,7 @@ source_dir=${source_dir}
       "${repo_info_file}"
       "${last_run_file}"
       "${tls_verify}"
+      "${quiet}"
     )
     set(comment "Performing download step (git clone) for '${name}'")
 
@@ -2880,6 +2895,7 @@ source_dir=${source_dir}
       "${work_dir}"
       "${repo_info_file}"
       "${last_run_file}"
+      "${quiet}"
     )
     set(comment "Performing download step (hg clone) for '${name}'")
 
@@ -2982,6 +2998,7 @@ source_dir=${source_dir}
           "${_EP_NETRC}"
           "${_EP_NETRC_FILE}"
           "${extract_script}"
+          "${quiet}"
         )
         if(no_extract)
           set(steps "download and verify")
@@ -2995,6 +3012,7 @@ source_dir=${source_dir}
           "${file}"
           "${hash}"
           "${extract_script}"
+          "${quiet}"
         )
         if(no_extract)
           set(steps "verify")
@@ -3012,6 +3030,7 @@ source_dir=${source_dir}
           "${name}"
           "${file}"
           "${source_dir}"
+          "${quiet}"
         )
       endif()
     endif()
@@ -3079,7 +3098,8 @@ function(_ep_get_update_disconnected var)
   set(${var} "${update_disconnected}" PARENT_SCOPE)
 endfunction()
 
-# This function is an implementation detail of ExternalProject_Add().
+# This function is an implementation detail of ExternalProject_Add() and
+# _ep_do_preconfigure_steps_now().
 #
 # The function expects keyword arguments to have already been parsed into
 # variables of the form _EP_<keyword>.
@@ -3091,6 +3111,7 @@ function(_ep_prepare_update name genex_supported)
 
   set(tmp_dir    "${_EP_TMP_DIR}")
   set(source_dir "${_EP_SOURCE_DIR}")
+  set(quiet      "${_EP_QUIET}")
 
   set(comment)
 
@@ -3102,6 +3123,7 @@ function(_ep_prepare_update name genex_supported)
   if(log)
     set(script_filename ${tmp_dir}/${name}-update-impl.cmake)
     set(log TRUE)
+    set(quiet FALSE)  # Already quiet as a result of log being enabled
   else()
     set(script_filename ${tmp_dir}/${name}-update.cmake)
     set(log FALSE)
@@ -3114,6 +3136,7 @@ function(_ep_prepare_update name genex_supported)
       "${_EP_UPDATE_COMMAND}"
       "${work_dir}"
       "${genex_supported}"
+      "${quiet}"
       script_does_something
     )
     set(comment "Performing update step (custom command) for '${name}'")
@@ -3132,6 +3155,7 @@ function(_ep_prepare_update name genex_supported)
       "${cmd}"
       "${work_dir}"
       "${genex_supported}"
+      "${quiet}"
       script_does_something
     )
     set(comment "Performing update step (CVS update) for '${name}'")
@@ -3165,6 +3189,7 @@ function(_ep_prepare_update name genex_supported)
       "${cmd}"
       "${work_dir}"
       "${genex_supported}"
+      "${quiet}"
       script_does_something
     )
     set(comment "Performing update step (SVN update) for '${name}'")
@@ -3222,6 +3247,7 @@ function(_ep_prepare_update name genex_supported)
       "${_EP_GIT_REPOSITORY}"
       "${work_dir}"
       "${git_update_strategy}"
+      "${quiet}"
     )
     set(script_does_something TRUE)
     set(comment "Performing update step (git update) for '${name}'")
@@ -3250,6 +3276,7 @@ Update to Mercurial >= 2.1.1.
       "${HG_EXECUTABLE}"
       "${hg_tag}"
       "${work_dir}"
+      "${quiet}"
     )
     set(script_does_something TRUE)
     set(comment "Performing update step (hg pull) for '${name}'")
@@ -3280,7 +3307,8 @@ Update to Mercurial >= 2.1.1.
 
 endfunction()
 
-# This function is an implementation detail of ExternalProject_Add().
+# This function is an implementation detail of ExternalProject_Add() and
+# _ep_do_preconfigure_steps_now().
 #
 # The function expects keyword arguments to have already been parsed into
 # variables of the form _EP_<keyword>.
@@ -3292,6 +3320,7 @@ function(_ep_prepare_patch name genex_supported)
 
   set(tmp_dir    "${_EP_TMP_DIR}")
   set(source_dir "${_EP_SOURCE_DIR}")
+  set(quiet      "${_EP_QUIET}")
 
   _ep_get_update_disconnected(update_disconnected)
   if(update_disconnected)
@@ -3306,6 +3335,7 @@ function(_ep_prepare_patch name genex_supported)
   if(log)
     set(script_filename ${tmp_dir}/${name}-patch-impl.cmake)
     set(log TRUE)
+    set(quiet FALSE)  # Already quiet as a result of log being enabled
   else()
     set(script_filename ${tmp_dir}/${name}-patch.cmake)
     set(log FALSE)
@@ -3318,6 +3348,7 @@ function(_ep_prepare_patch name genex_supported)
       "${_EP_PATCH_COMMAND}"
       "${work_dir}"
       "${genex_supported}"
+      "${quiet}"
       script_does_something
     )
     if(script_does_something)
@@ -3836,6 +3867,73 @@ macro(_ep_get_add_keywords out_var)
   )
 endmacro()
 
+
+# Internal function called by FetchContent to populate immediately.
+# It only executes steps up to and including "patch". It takes the same
+# arguments as ExternalProject_Add() plus one additional argument: QUIET.
+#
+# Not to be used outside of CMake.
+#
+function(_ep_do_preconfigure_steps_now name)
+
+  cmake_policy(GET CMP0097 _EP_CMP0097
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+
+  set(genex_supported FALSE)
+
+  _ep_get_add_keywords(keywords)
+  _ep_parse_arguments_to_vars("${keywords};QUIET" ${name} _EP_ "${ARGN}")
+
+  _ep_get_update_disconnected(update_disconnected)
+
+  _ep_prepare_directories(${name})
+  _ep_prepare_download(${name} ${genex_supported})
+  _ep_prepare_update(${name} ${genex_supported})
+  _ep_prepare_patch(${name} ${genex_supported})
+
+  set(stamp_dir "${_EP_STAMP_DIR}")
+  set(tmp_dir   "${_EP_TMP_DIR}")
+
+  # Once any step has to run, all later steps have to be run too
+  set(need_to_run FALSE)
+  foreach(step IN ITEMS download update parse)
+    if(update_disconnected AND "${step}" STREQUAL "update")
+      continue()
+    endif()
+
+    string(TOUPPER "${step}" STEP)
+    if("${_EPcommand_${STEP}}" STREQUAL "")
+      continue()
+    endif()
+
+    set(stamp_file "${stamp_dir}/${name}-${step}")
+    set(script_file ${tmp_dir}/${name}-${step}.cmake)
+
+    if(NOT EXISTS ${stamp_file})
+      set(need_to_run TRUE)
+    endif()
+
+    if(NOT need_to_run)
+      foreach(dep_file ${script_file} ${_EPdepends_${STEP}})
+        if(NOT EXISTS ${dep_file} OR ${dep_file} IS_NEWER_THAN ${stamp_file})
+          set(need_to_run TRUE)
+          break()
+        endif()
+      endforeach()
+    endif()
+
+    if(need_to_run)
+      include(${script_file})
+      file(TOUCH ${stamp_file})
+    endif()
+  endforeach()
+
+  if("${_EP_DOWNLOAD_NO_EXTRACT}")
+    file(COPY "${_EP_DOWNLOADED_FILE}" DESTINATION "${_EP_SOURCE_DIR}")
+  endif()
+
+endfunction()
 
 function(ExternalProject_Add name)
   cmake_policy(GET CMP0097 _EP_CMP0097

@@ -3,13 +3,17 @@
 
 cmake_minimum_required(VERSION 3.5)
 
+set(quiet "@quiet@")
+set(script_dir "@CMAKE_CURRENT_FUNCTION_LIST_DIR@/ExternalProject")
+include(${script_dir}/captured_process_setup.cmake)
+
 function(check_file_hash has_hash hash_is_good)
   if("${has_hash}" STREQUAL "")
-    message(FATAL_ERROR "has_hash Can't be empty")
+    _ep_message_quiet_capture(FATAL_ERROR "has_hash Can't be empty")
   endif()
 
   if("${hash_is_good}" STREQUAL "")
-    message(FATAL_ERROR "hash_is_good Can't be empty")
+    _ep_message_quiet_capture(FATAL_ERROR "hash_is_good Can't be empty")
   endif()
 
   if("@ALGO@" STREQUAL "")
@@ -21,18 +25,20 @@ function(check_file_hash has_hash hash_is_good)
 
   set("${has_hash}" TRUE PARENT_SCOPE)
 
-  message(STATUS "verifying file...
+  _ep_message_quiet_capture(STATUS "verifying file...
        file='@LOCAL@'")
+  set(accumulated_output "${accumulated_output}" PARENT_SCOPE)
 
   file("@ALGO@" "@LOCAL@" actual_value)
 
   if(NOT "${actual_value}" STREQUAL "@EXPECT_VALUE@")
     set("${hash_is_good}" FALSE PARENT_SCOPE)
-    message(STATUS "@ALGO@ hash of
+    _ep_message_quiet_capture(STATUS "@ALGO@ hash of
     @LOCAL@
   does not match expected value
     expected: '@EXPECT_VALUE@'
       actual: '${actual_value}'")
+    set(accumulated_output "${accumulated_output}" PARENT_SCOPE)
   else()
     set("${hash_is_good}" TRUE PARENT_SCOPE)
   endif()
@@ -44,7 +50,8 @@ function(sleep_before_download attempt)
   endif()
 
   if(attempt EQUAL 1)
-    message(STATUS "Retrying...")
+    _ep_message_quiet_capture(STATUS "Retrying...")
+    set(accumulated_output "${accumulated_output}" PARENT_SCOPE)
     return()
   endif()
 
@@ -66,7 +73,10 @@ function(sleep_before_download attempt)
     set(sleep_seconds 1200)
   endif()
 
-  message(STATUS "Retry after ${sleep_seconds} seconds (attempt #${attempt}) ...")
+  _ep_message_quiet_capture(STATUS
+    "Retry after ${sleep_seconds} seconds (attempt #${attempt}) ..."
+  )
+  set(accumulated_output "${accumulated_output}" PARENT_SCOPE)
 
   execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep "${sleep_seconds}")
 endfunction()
@@ -84,18 +94,22 @@ function(download_and_verify)
     check_file_hash(has_hash hash_is_good)
     if(has_hash)
       if(hash_is_good)
-        message(STATUS
+        _ep_message_quiet_capture(STATUS
 "File already exists and hash match (skip download):
   file='@LOCAL@'
   @ALGO@='@EXPECT_VALUE@'"
         )
+        set(accumulated_output "${accumulated_output}" PARENT_SCOPE)
         return()
       else()
-        message(STATUS "File already exists but hash mismatch. Removing...")
+        _ep_message_quiet_capture(STATUS
+          "File already exists but hash mismatch. Removing..."
+        )
+        set(accumulated_output "${accumulated_output}" PARENT_SCOPE)
         file(REMOVE "@LOCAL@")
       endif()
     else()
-      message(STATUS
+      _ep_message_quiet_capture(STATUS
 "File already exists but no hash specified (use URL_HASH):
   file='@LOCAL@'
 Old file will be removed and new file downloaded from URL."
@@ -106,11 +120,12 @@ Old file will be removed and new file downloaded from URL."
 
   set(retry_number 5)
 
-  message(STATUS "Downloading...
+  _ep_message_quiet_capture(STATUS "Downloading...
    dst='@LOCAL@'
    timeout='@TIMEOUT_MSG@'
    inactivity timeout='@INACTIVITY_TIMEOUT_MSG@'"
   )
+  set(accumulated_output "${accumulated_output}" PARENT_SCOPE)
   set(download_retry_codes 7 6 8 15)
   set(skip_url_list)
   set(status_code)
@@ -120,7 +135,8 @@ Old file will be removed and new file downloaded from URL."
     endif()
     foreach(url @REMOTE@)
       if(NOT url IN_LIST skip_url_list)
-        message(STATUS "Using src='${url}'")
+        _ep_message_quiet_capture(STATUS "Using src='${url}'")
+        set(accumulated_output "${accumulated_output}" PARENT_SCOPE)
 
         @TLS_VERIFY_CODE@
         @TLS_CAINFO_CODE@
@@ -145,10 +161,12 @@ Old file will be removed and new file downloaded from URL."
         if(status_code EQUAL 0)
           check_file_hash(has_hash hash_is_good)
           if(has_hash AND NOT hash_is_good)
-            message(STATUS "Hash mismatch, removing...")
+            _ep_message_quiet_capture(STATUS "Hash mismatch, removing...")
+            set(accumulated_output "${accumulated_output}" PARENT_SCOPE)
             file(REMOVE "@LOCAL@")
           else()
-            message(STATUS "Downloading... done")
+            _ep_message_quiet_capture(STATUS "Downloading... done")
+            set(accumulated_output "${accumulated_output}" PARENT_SCOPE)
             return()
           endif()
         else()
@@ -171,7 +189,7 @@ Old file will be removed and new file downloaded from URL."
     endforeach()
   endforeach()
 
-  message(FATAL_ERROR
+  _ep_message_quiet_capture(FATAL_ERROR
 "Each download failed!
   ${logFailedURLs}
   "
