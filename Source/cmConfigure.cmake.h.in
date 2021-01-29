@@ -18,6 +18,7 @@
 #cmakedefine HAVE_UNSETENV
 #cmakedefine CMake_USE_ELF_PARSER
 #cmakedefine CMake_USE_MACH_PARSER
+#cmakedefine CMake_USE_XCOFF_PARSER
 #define CMake_DEFAULT_RECURSION_LIMIT @CMake_DEFAULT_RECURSION_LIMIT@
 #define CMAKE_BIN_DIR "/@CMAKE_BIN_DIR@"
 #define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"

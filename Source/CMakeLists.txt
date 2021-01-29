@@ -57,6 +57,10 @@ if(APPLE)
   set(CMake_USE_MACH_PARSER 1)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
+  set(CMake_USE_XCOFF_PARSER 1)
+endif()
+
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
 if(WIN32)
@@ -115,6 +119,11 @@ endif()
 # Check if we can build the Mach-O parser.
 if(CMake_USE_MACH_PARSER)
   set(MACH_SRCS cmMachO.h cmMachO.cxx)
+endif()
+
+# Check if we can build the XCOFF parser.
+if(CMake_USE_XCOFF_PARSER)
+  set(XCOFF_SRCS cmXCOFF.h cmXCOFF.cxx)
 endif()
 
 #
@@ -465,6 +474,7 @@ set(SRCS
   cmWorkerPool.h
   cmWorkingDirectory.cxx
   cmWorkingDirectory.h
+  ${XCOFF_SRCS}
   cmXMLParser.cxx
   cmXMLParser.h
   cmXMLSafe.cxx
