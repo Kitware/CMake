@@ -825,7 +825,7 @@ which would make them unable to support a hard link.
 Set the permissions for the ``<files>...`` and ``<directories>...`` specified.
 Valid permissions are  ``OWNER_READ``, ``OWNER_WRITE``, ``OWNER_EXECUTE``,
 ``GROUP_READ``, ``GROUP_WRITE``, ``GROUP_EXECUTE``, ``WORLD_READ``,
-``WORLD_WRITE``, ``WORLD_EXECUTE``.
+``WORLD_WRITE``, ``WORLD_EXECUTE``, ``SETUID``, ``SETGID``.
 
 Valid combination of keywords are:
 
