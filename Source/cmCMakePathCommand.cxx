@@ -194,7 +194,7 @@ bool HandleGetCommand(std::vector<std::string> const& args,
                  }
                  return path.GetNarrowStem();
                } },
-             { "RELATIVE_PATH"_s,
+             { "RELATIVE_PART"_s,
                [](const cmCMakePath& path, bool) -> cmCMakePath {
                  return path.GetRelativePath();
                } },
@@ -817,7 +817,7 @@ bool HandleHasStemCommand(std::vector<std::string> const& args,
     [](const cmCMakePath& path) -> bool { return path.HasStem(); });
 }
 
-bool HandleHasRelativePathCommand(std::vector<std::string> const& args,
+bool HandleHasRelativePartCommand(std::vector<std::string> const& args,
                                   cmExecutionStatus& status)
 {
   return HandleHasItemCommand(
@@ -986,7 +986,7 @@ bool cmCMakePathCommand(std::vector<std::string> const& args,
     { "HAS_FILENAME"_s, HandleHasFilenameCommand },
     { "HAS_EXTENSION"_s, HandleHasExtensionCommand },
     { "HAS_STEM"_s, HandleHasStemCommand },
-    { "HAS_RELATIVE_PATH"_s, HandleHasRelativePathCommand },
+    { "HAS_RELATIVE_PART"_s, HandleHasRelativePartCommand },
     { "HAS_PARENT_PATH"_s, HandleHasParentPathCommand },
     { "IS_ABSOLUTE"_s, HandleIsAbsoluteCommand },
     { "IS_RELATIVE"_s, HandleIsRelativeCommand },

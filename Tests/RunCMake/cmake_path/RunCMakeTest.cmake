@@ -7,7 +7,7 @@ set (RunCMake-stderr-file "wrong-path-stderr.txt")
 
 ### GET sub-command
 foreach (subcommand IN ITEMS ROOT_NAME ROOT_DIRECTORY ROOT_PATH FILENAME EXTENSION
-                             STEM RELATIVE_PATH PARENT_PATH)
+                             STEM RELATIVE_PART PARENT_PATH)
   run_cmake_command (GET-${subcommand}-wrong-path "${CMAKE_COMMAND}" "-DCMAKE_PATH_ARGUMENTS=GET wrong_path ${subcommand} output" -P "${RunCMake_SOURCE_DIR}/call-cmake_path.cmake")
 endforeach()
 
@@ -20,7 +20,7 @@ endforeach()
 foreach (command IN ITEMS NATIVE_PATH
                           HAS_ROOT_NAME HAS_ROOT_DIRECTORY HAS_ROOT_PATH
                           HAS_FILENAME HAS_EXTENSION HAS_STEM
-                          HAS_RELATIVE_PATH HAS_PARENT_PATH
+                          HAS_RELATIVE_PART HAS_PARENT_PATH
                           IS_ABSOLUTE IS_RELATIVE IS_PREFIX HASH)
   if (command STREQUAL "IS_PREFIX")
     set (extra_args path2)
@@ -36,7 +36,7 @@ set (RunCMake-stderr-file "missing-output-stderr.txt")
 
 ### GET sub-command
 foreach (subcommand IN ITEMS ROOT_NAME ROOT_DIRECTORY ROOT_PATH FILENAME EXTENSION
-                             STEM RELATIVE_PATH PARENT_PATH)
+                             STEM RELATIVE_PART PARENT_PATH)
   run_cmake_command (GET-${subcommand}-missing-output "${CMAKE_COMMAND}" "-DCMAKE_PATH_ARGUMENTS=GET path ${subcommand}" -P "${RunCMake_SOURCE_DIR}/call-cmake_path.cmake")
 endforeach()
 
@@ -53,7 +53,7 @@ endforeach()
 foreach (command IN ITEMS SET NATIVE_PATH
                           HAS_ROOT_NAME HAS_ROOT_DIRECTORY HAS_ROOT_PATH
                           HAS_FILENAME HAS_EXTENSION HAS_STEM
-                          HAS_RELATIVE_PATH HAS_PARENT_PATH
+                          HAS_RELATIVE_PART HAS_PARENT_PATH
                           IS_ABSOLUTE IS_RELATIVE IS_PREFIX HASH)
   if (command STREQUAL "IS_PREFIX")
     set (extra_args path2)
@@ -79,7 +79,7 @@ set (RunCMake-stderr-file "invalid-output-var-stderr.txt")
 
 ### GET sub-command
 foreach (subcommand IN ITEMS ROOT_NAME ROOT_DIRECTORY ROOT_PATH FILENAME EXTENSION
-                             STEM RELATIVE_PATH PARENT_PATH)
+                             STEM RELATIVE_PART PARENT_PATH)
   run_cmake_command (GET-${subcommand}-invalid-output "${CMAKE_COMMAND}" "-DCMAKE_PATH_ARGUMENTS=GET path ${subcommand}"  -DCHECK_INVALID_OUTPUT=ON -P "${RunCMake_SOURCE_DIR}/call-cmake_path.cmake")
 endforeach()
 
@@ -96,7 +96,7 @@ endforeach()
 foreach (command IN ITEMS NATIVE_PATH
                           HAS_ROOT_NAME HAS_ROOT_DIRECTORY HAS_ROOT_PATH
                           HAS_FILENAME HAS_EXTENSION HAS_STEM
-                          HAS_RELATIVE_PATH HAS_PARENT_PATH
+                          HAS_RELATIVE_PART HAS_PARENT_PATH
                           IS_ABSOLUTE IS_RELATIVE IS_PREFIX HASH)
   if (command STREQUAL "IS_PREFIX")
     set (extra_args path2)
@@ -118,7 +118,7 @@ set (RunCMake-stderr-file "unexpected-arg-stderr.txt")
 
 ### GET sub-command
 foreach (subcommand IN ITEMS ROOT_NAME ROOT_DIRECTORY ROOT_PATH FILENAME EXTENSION
-                             STEM RELATIVE_PATH PARENT_PATH)
+                             STEM RELATIVE_PART PARENT_PATH)
   if (subcommand STREQUAL "EXTENSION" OR subcommand STREQUAL "STEM")
     set (extra_args LAST_ONLY)
   else()
@@ -146,7 +146,7 @@ endforeach()
 foreach (command IN ITEMS SET NATIVE_PATH
                           HAS_ROOT_NAME HAS_ROOT_DIRECTORY HAS_ROOT_PATH
                           HAS_FILENAME HAS_EXTENSION HAS_STEM
-                          HAS_RELATIVE_PATH HAS_PARENT_PATH
+                          HAS_RELATIVE_PART HAS_PARENT_PATH
                           IS_ABSOLUTE IS_RELATIVE IS_PREFIX
                           HASH)
   if (command STREQUAL "IS_PREFIX")
