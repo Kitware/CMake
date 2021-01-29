@@ -920,6 +920,11 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
       set(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE INTERNAL "Executable file format")
     endif()
 
+    # XCOFF files start with 0x01 followed by 0xDF (32-bit) or 0xF7 (64-bit).
+    if("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "^01(df|f7)")
+      set(CMAKE_EXECUTABLE_FORMAT "XCOFF" CACHE INTERNAL "Executable file format")
+    endif()
+
   endif()
   if(NOT DEFINED CMAKE_EXECUTABLE_FORMAT)
     set(CMAKE_EXECUTABLE_FORMAT)
