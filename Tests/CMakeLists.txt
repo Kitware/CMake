@@ -429,6 +429,10 @@ if(BUILD_TESTING)
         set(CMAKE_SKIP_VSGNUFortran TRUE)
       endif()
     endif()
+    if(CMAKE_Fortran_COMPILER_ID STREQUAL IntelLLVM)
+      message(STATUS "Skip VSGNUFortran for ifx until DLLEXPORT support is implemented")
+      set(CMAKE_SKIP_VSGNUFortran TRUE)
+    endif()
     if((CMAKE_C_COMPILER MATCHES lsb)
         AND (CMAKE_Fortran_COMPILER MATCHES ifort))
       message(STATUS "Skip VSGNUFortran for ifort and lsb compilers")
@@ -1948,7 +1952,7 @@ if(BUILD_TESTING)
     if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang" OR NOT "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
       ADD_TEST_MACRO(ForceInclude foo)
     endif()
-    if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM")
       ADD_TEST_MACRO(PrecompiledHeader foo)
     endif()
     set(MSVCRuntimeLibrary_BUILD_OPTIONS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
@@ -2014,11 +2018,18 @@ if(BUILD_TESTING)
         endif()
       endif()
 
-      # For the Watcom WMake generator, avoid the MFC test by default.
       if(CTEST_RUN_MFC)
+        # For the Watcom WMake generator, avoid the MFC test by default.
         if("${CMAKE_GENERATOR}" MATCHES "WMake")
           message(STATUS
             "using the Watcom WMake generator, avoiding MFC test")
+          set(CTEST_RUN_MFC OFF)
+        elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "IntelLLVM")
+          # clang-cl cannot deal with implicit dependencies in UTF16 files
+          # (see #18311).  IntelLLVM inherits this behavior from Clang.
+          # TODO: maybe clang should also skip the MFC test
+          message(STATUS
+            "using generator other than Visual Studio with clang-cl, avoiding MFC test")
           set(CTEST_RUN_MFC OFF)
         endif()
       endif()

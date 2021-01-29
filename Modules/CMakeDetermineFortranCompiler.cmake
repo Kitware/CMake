@@ -59,6 +59,8 @@ else()
       #  af77: Apogee F77 compiler for Intergraph hardware running CLIX
       #  epcf90: "Edinburgh Portable Compiler" F90
       #  fort: Compaq (now HP) Fortran 90/95 compiler for Tru64 and Linux/Alpha
+      #  ifx: Intel Fortran LLVM-based compiler
+      #  ifort: Intel Classic Fortran compiler
       #  ifc: Intel Fortran 95 compiler for Linux/x86
       #  efc: Intel Fortran 95 compiler for IA64
       #  nagfor: NAG Fortran compiler
@@ -68,14 +70,14 @@ else()
       #  so if you paid for a compiler it is picked by default.
       if(CMAKE_HOST_WIN32)
         set(CMAKE_Fortran_COMPILER_LIST
-          ifort pgf95 pgfortran lf95 fort
+          ifort ifx pgf95 pgfortran lf95 fort
           flang gfortran gfortran-4 g95 f90 pgf90
           pgf77 g77 f77 nag
           )
       else()
         set(CMAKE_Fortran_COMPILER_LIST
           ftn
-          ifort ifc efc pgf95 pgfortran lf95 xlf95 fort
+          ifort ifc ifx efc pgf95 pgfortran lf95 xlf95 fort
           flang gfortran gfortran-4 g95 f90 pgf90
           frt pgf77 xlf g77 f77 nag
           )
@@ -83,7 +85,7 @@ else()
 
       # Vendor-specific compiler names.
       set(_Fortran_COMPILER_NAMES_GNU       gfortran gfortran-4 g95 g77)
-      set(_Fortran_COMPILER_NAMES_Intel     ifort ifc efc)
+      set(_Fortran_COMPILER_NAMES_Intel     ifort ifc efc ifx)
       set(_Fortran_COMPILER_NAMES_Absoft    af95 af90 af77)
       set(_Fortran_COMPILER_NAMES_PGI       pgf95 pgfortran pgf90 pgf77)
       set(_Fortran_COMPILER_NAMES_Flang     flang)

@@ -6,8 +6,9 @@ foreach(t MultiThreaded SingleThreaded)
   foreach(dbg "" Debug)
     foreach(dll "" DLL)
       set(var "CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_${t}${dbg}${dll}")
-      if(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
-        # ifort does not actually define these, so inject them
+      if(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel"
+        OR CMAKE_Fortran_COMPILER_ID STREQUAL "IntelLLVM")
+        # ifort and ifx do not actually define these, so inject them
         string(REPLACE "-threads" "-threads;-D_MT" "${var}" "${${var}}")
         string(REPLACE "-dbglibs" "-dbglibs;-D_DEBUG" "${var}" "${${var}}")
       elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Flang")

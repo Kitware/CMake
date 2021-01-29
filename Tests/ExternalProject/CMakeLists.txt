@@ -161,7 +161,7 @@ if(do_cvs_tests)
   #
   set(proj TutorialStep1-CVS-20090626)
   ExternalProject_Add(${proj}
-    CVS_REPOSITORY "${local_cvs_repo}"
+    CVS_REPOSITORY ":local:${local_cvs_repo}"
     CVS_MODULE "TutorialStep1"
     CVS_TAG "-D2009-06-26 16:50:00 UTC"
     UPDATE_COMMAND ""
@@ -176,7 +176,7 @@ if(do_cvs_tests)
   #
   set(proj TutorialStep1-CVS-testtag1)
   ExternalProject_Add(${proj}
-    CVS_REPOSITORY "${local_cvs_repo}"
+    CVS_REPOSITORY ":local:${local_cvs_repo}"
     CVS_MODULE "TutorialStep1"
     CVS_TAG -rtesttag1
     UPDATE_COMMAND ""
@@ -191,7 +191,7 @@ if(do_cvs_tests)
   #
   set(proj TutorialStep1-CVS-HEAD)
   ExternalProject_Add(${proj}
-    CVS_REPOSITORY "${local_cvs_repo}"
+    CVS_REPOSITORY ":local:${local_cvs_repo}"
     CVS_MODULE "TutorialStep1"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>

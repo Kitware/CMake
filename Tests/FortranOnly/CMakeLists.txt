@@ -111,7 +111,7 @@ endif()
 
 # Test that with Intel Fortran we always compile with preprocessor
 # defines even if splitting the preprocessing and compilation steps.
-if(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
   add_executable(IntelIfDef IntelIfDef.f)
   set_property(TARGET IntelIfDef PROPERTY Fortran_FORMAT FIXED)
   target_compile_definitions(IntelIfDef PRIVATE SOME_DEF)
@@ -152,7 +152,7 @@ if(test_pp_flags AND NOT CMAKE_Fortran_COMPILER_ID MATCHES "(Flang|NAG|PGI|NVHPC
   add_library(no_preprocess_source STATIC no_preprocess_source_upper.F)
   target_compile_options(no_preprocess_source PRIVATE -DINTEGER=nonsense)
   if(NOT CMAKE_Fortran_COMPILER_ID STREQUAL "Cray"
-      AND NOT "${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "Intel;MSVC")
+      AND NOT "${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" MATCHES "Intel(LLVM)?;MSVC")
     target_sources(no_preprocess_target PRIVATE no_preprocess_target_fpp.fpp)
     target_sources(no_preprocess_source PRIVATE no_preprocess_source_fpp.fpp)
   endif()
