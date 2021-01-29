@@ -13,7 +13,7 @@ run_cpack(actual_output
           CONFIG_ARGS ${config_args}
           CONFIG_VERBOSE ${config_verbose})
 
-string(REGEX MATCH "dpkg-shlibdeps: error: (cannot|couldn't) find library\n[ \t]*libmyprivatelib.so.1 needed by ./usr/bin/mylibapp3" expected_error ${CPack_error})
+string(REGEX MATCH "dpkg-shlibdeps: error: (cannot|couldn't) find[ \n\t]+library[ \n\t]+libmyprivatelib.so.1[ \n\t]+needed[ \n\t]+by[ \n\t]+./usr/bin/mylibapp3" expected_error ${CPack_error})
 if(NOT expected_error)
   message(FATAL_ERROR "Did not get the expected error-message!")
 endif()
