@@ -3105,15 +3105,13 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     cmSystemTools::MakeDirectory(path);
   }
 
-  std::string newLineCharacters;
-  bool open_with_binary_flag = false;
+  std::string newLineCharacters = "\n";
   if (newLineStyle.IsValid()) {
-    open_with_binary_flag = true;
     newLineCharacters = newLineStyle.GetCharacters();
   }
 
   cmGeneratedFileStream fout;
-  fout.Open(outputFile, false, open_with_binary_flag);
+  fout.Open(outputFile, false, true);
   if (!fout) {
     cmSystemTools::Error("Could not open file for write in copy operation " +
                          outputFile);
@@ -3126,11 +3124,15 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
   std::stringstream sin(parsedArgs.Content, std::ios::in);
   std::string inLine;
   std::string outLine;
-  while (cmSystemTools::GetLineFromStream(sin, inLine)) {
+  bool hasNewLine = false;
+  while (cmSystemTools::GetLineFromStream(sin, inLine, &hasNewLine)) {
     outLine.clear();
     makeFile.ConfigureString(inLine, outLine, parsedArgs.AtOnly,
                              parsedArgs.EscapeQuotes);
-    fout << outLine << newLineCharacters;
+    fout << outLine;
+    if (hasNewLine || newLineStyle.IsValid()) {
+      fout << newLineCharacters;
+    }
   }
 
   // close file before attempting to copy
