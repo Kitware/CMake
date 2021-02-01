@@ -8,6 +8,7 @@
 #include <string>
 
 #include "cmInstallGenerator.h"
+#include "cmListFileCache.h"
 
 class cmLocalGenerator;
 class cmMakefile;
@@ -20,7 +21,8 @@ class cmInstallSubdirectoryGenerator : public cmInstallGenerator
 public:
   cmInstallSubdirectoryGenerator(cmMakefile* makefile,
                                  std::string binaryDirectory,
-                                 bool excludeFromAll);
+                                 bool excludeFromAll,
+                                 cmListFileBacktrace backtrace);
   ~cmInstallSubdirectoryGenerator() override;
 
   bool HaveInstall() override;

@@ -15,9 +15,9 @@ cmInstallFilesGenerator::cmInstallFilesGenerator(
   bool programs, std::string file_permissions,
   std::vector<std::string> const& configurations, std::string const& component,
   MessageLevel message, bool exclude_from_all, std::string rename,
-  bool optional)
+  bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all)
+                       exclude_from_all, std::move(backtrace))
   , LocalGenerator(nullptr)
   , Files(files)
   , FilePermissions(std::move(file_permissions))
@@ -66,6 +66,22 @@ std::string cmInstallFilesGenerator::GetRename(std::string const& config) const
                                          config);
 }
 
+std::vector<std::string> cmInstallFilesGenerator::GetFiles(
+  std::string const& config) const
+{
+  std::vector<std::string> files;
+  if (this->ActionsPerConfig) {
+    for (std::string const& f : this->Files) {
+      cmExpandList(
+        cmGeneratorExpression::Evaluate(f, this->LocalGenerator, config),
+        files);
+    }
+  } else {
+    files = this->Files;
+  }
+  return files;
+}
+
 void cmInstallFilesGenerator::AddFilesInstallRule(
   std::ostream& os, std::string const& config, Indent indent,
   std::vector<std::string> const& files)
@@ -92,10 +108,6 @@ void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
 void cmInstallFilesGenerator::GenerateScriptForConfig(
   std::ostream& os, const std::string& config, Indent indent)
 {
-  std::vector<std::string> files;
-  for (std::string const& f : this->Files) {
-    cmExpandList(
-      cmGeneratorExpression::Evaluate(f, this->LocalGenerator, config), files);
-  }
+  std::vector<std::string> files = this->GetFiles(config);
   this->AddFilesInstallRule(os, config, indent, files);
 }
