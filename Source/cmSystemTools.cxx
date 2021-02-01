@@ -49,7 +49,7 @@
 #  include "cmELF.h"
 #endif
 
-#if defined(CMAKE_USE_MACH_PARSER)
+#if defined(CMake_USE_MACH_PARSER)
 #  include "cmMachO.h"
 #endif
 
@@ -2347,7 +2347,7 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
                                             std::string& soname)
 {
-#if defined(CMAKE_USE_MACH_PARSER)
+#if defined(CMake_USE_MACH_PARSER)
   cmMachO macho(fullPath.c_str());
   if (macho) {
     return macho.GetInstallName(soname);

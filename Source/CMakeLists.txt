@@ -54,7 +54,7 @@ if(NOT CMake_DEFAULT_RECURSION_LIMIT)
 endif()
 
 if(APPLE)
-  set(CMAKE_USE_MACH_PARSER 1)
+  set(CMake_USE_MACH_PARSER 1)
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
@@ -113,7 +113,7 @@ if(CMake_USE_ELF_PARSER)
 endif()
 
 # Check if we can build the Mach-O parser.
-if(CMAKE_USE_MACH_PARSER)
+if(CMake_USE_MACH_PARSER)
   set(MACH_SRCS cmMachO.h cmMachO.cxx)
 endif()
 
