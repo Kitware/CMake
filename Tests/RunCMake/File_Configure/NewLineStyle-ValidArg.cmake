@@ -1,10 +1,13 @@
 set(file_name  ${CMAKE_CURRENT_BINARY_DIR}/NewLineStyle.txt)
 
 function(test_eol style in out)
+    if (style)
+      set(newline_stle NEWLINE_STYLE ${style})
+    endif()
     file(CONFIGURE
         OUTPUT ${file_name}
         CONTENT "@in@"
-        NEWLINE_STYLE ${style}
+        ${newline_stle}
     )
     file(READ ${file_name} new HEX)
     if(NOT "${new}" STREQUAL "${out}")
@@ -18,3 +21,5 @@ test_eol(CRLF  "c" "630d0a")
 
 test_eol(UNIX  "d" "640a")
 test_eol(LF    "e" "650a")
+
+test_eol("" "a\nb" "610a62")
