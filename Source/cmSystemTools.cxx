@@ -45,7 +45,7 @@
 #  include "cmCryptoHash.h"
 #endif
 
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
 #  include "cmELF.h"
 #endif
 
@@ -2317,7 +2317,7 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 {
 // For ELF shared libraries use a real parser to get the correct
 // soname.
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
   cmELF elf(fullPath.c_str());
   if (elf) {
     return elf.GetSOName(soname);
@@ -2360,7 +2360,7 @@ bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
   return false;
 }
 
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
 std::string::size_type cmSystemToolsFindRPath(std::string const& have,
                                               std::string const& want)
 {
@@ -2394,7 +2394,7 @@ std::string::size_type cmSystemToolsFindRPath(std::string const& have,
 }
 #endif
 
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
 struct cmSystemToolsRPathInfo
 {
   unsigned long Position;
@@ -2404,7 +2404,7 @@ struct cmSystemToolsRPathInfo
 };
 #endif
 
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
                                 std::string const& newRPath,
@@ -2720,7 +2720,7 @@ int cmSystemTools::strverscmp(std::string const& lhs, std::string const& rhs)
   return cm_strverscmp(lhs.c_str(), rhs.c_str());
 }
 
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
 bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
                                 bool* removed)
 {
@@ -2872,7 +2872,7 @@ bool cmSystemTools::RemoveRPath(std::string const& /*file*/,
 bool cmSystemTools::CheckRPath(std::string const& file,
                                std::string const& newRPath)
 {
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
   // Parse the ELF binary.
   cmELF elf(file.c_str());
 

@@ -2059,7 +2059,7 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
     return true;
   }
 
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
   // Enable if the rpath flag uses a separator and the target uses ELF
   // binaries.
   std::string ll = this->GetLinkerLanguage(config);

@@ -19,7 +19,7 @@ else()
   CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
 endif()
 if(HAVE_ELF_H)
-  set(CMAKE_USE_ELF_PARSER 1)
+  set(CMake_USE_ELF_PARSER 1)
 elseif(HAIKU)
   # On Haiku, we need to include elf32.h from the private headers
   set(CMake_HAIKU_INCLUDE_DIRS
@@ -32,13 +32,13 @@ elseif(HAIKU)
   unset(CMAKE_REQUIRED_INCLUDES)
 
   if(HAVE_ELF32_H)
-    set(CMAKE_USE_ELF_PARSER 1)
+    set(CMake_USE_ELF_PARSER 1)
   else()
     unset(CMake_HAIKU_INCLUDE_DIRS)
-    set(CMAKE_USE_ELF_PARSER)
+    set(CMake_USE_ELF_PARSER)
   endif()
 else()
-  set(CMAKE_USE_ELF_PARSER)
+  set(CMake_USE_ELF_PARSER)
 endif()
 
 if(NOT CMake_DEFAULT_RECURSION_LIMIT)
@@ -108,7 +108,7 @@ include_directories(
   )
 
 # Check if we can build the ELF parser.
-if(CMAKE_USE_ELF_PARSER)
+if(CMake_USE_ELF_PARSER)
   set(ELF_SRCS cmELF.h cmELF.cxx)
 endif()
 
