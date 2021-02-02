@@ -7,6 +7,13 @@ FindOpenSSL
 
 Find the OpenSSL encryption library.
 
+This module finds an installed OpenSSL library and determines its version.
+
+.. versionadded:: 3.19
+  When a version is requested, it can be specified as a simple value or as a
+  range. For a detailed description of version range usage and capabilities,
+  refer to the :command:`find_package` command.
+
 .. versionadded:: 3.18
   Support for OpenSSL 3.0.
 
@@ -566,6 +573,7 @@ find_package_handle_standard_args(OpenSSL
     OPENSSL_INCLUDE_DIR
   VERSION_VAR
     OPENSSL_VERSION
+  HANDLE_VERSION_RANGE
   HANDLE_COMPONENTS
   FAIL_MESSAGE
     "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
