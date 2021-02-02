@@ -815,6 +815,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       // avoiding a trailing backslash in the argument.
       targetOutPathCompilePDB.back() = '/';
     }
+
+    std::string compilePdbOutputPath =
+      this->GeneratorTarget->GetCompilePDBDirectory(this->GetConfigName());
+    cmSystemTools::MakeDirectory(compilePdbOutputPath);
   }
   cmRulePlaceholderExpander::RuleVariables vars;
   vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
