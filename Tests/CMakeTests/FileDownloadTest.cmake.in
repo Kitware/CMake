@@ -136,6 +136,9 @@ __reportIfWrongStatus("${status}" 0)
 # Print status because we check its message too
 message(STATUS "${status}")
 
+# do not use proxy for lookup of invalid site (DNS failure by proxy looks
+# different than DNS failure without proxy)
+set(ENV{no_proxy} "$ENV{no_proxy},badhostname.invalid")
 message(STATUS "FileDownload:11")
 file(DOWNLOAD
   badhostname.invalid
