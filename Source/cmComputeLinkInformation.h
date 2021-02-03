@@ -164,7 +164,7 @@ private:
   // Framework info.
   void ComputeFrameworkInfo();
   void AddFrameworkPath(std::string const& p);
-  std::set<std::string> FrameworkPathsEmmitted;
+  std::set<std::string> FrameworkPathsEmitted;
   cmsys::RegularExpression SplitFramework;
 
   // Linker search path computation.
