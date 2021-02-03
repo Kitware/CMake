@@ -1010,7 +1010,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       this->GetStaticLibraryFlags(
         libflags, configName, target->GetLinkerLanguage(configName), target);
       if (!libflags.empty()) {
-        fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
+        fout << "\t\t\t\tAdditionalOptions=\"" << this->EscapeForXML(libflags)
+             << "\"\n";
       }
       fout << "\t\t\t\tOutputFile=\""
            << this->ConvertToXMLOutputPathSingle(libpath) << "\"/>\n";
