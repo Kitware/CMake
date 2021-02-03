@@ -170,6 +170,8 @@ public:
 
   static std::string GetActualName() { return "Ninja"; }
 
+  bool IsNinja() const override { return true; }
+
   /** Get encoding used by generator for ninja files */
   codecvt::Encoding GetMakefileEncoding() const override;
 
