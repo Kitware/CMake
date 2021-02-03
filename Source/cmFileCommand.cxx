@@ -3122,12 +3122,14 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
   }
 
   std::string newLineCharacters = "\n";
+  bool open_with_binary_flag = false;
   if (newLineStyle.IsValid()) {
     newLineCharacters = newLineStyle.GetCharacters();
+    open_with_binary_flag = true;
   }
 
   cmGeneratedFileStream fout;
-  fout.Open(outputFile, false, true);
+  fout.Open(outputFile, false, open_with_binary_flag);
   if (!fout) {
     cmSystemTools::Error("Could not open file for write in copy operation " +
                          outputFile);
