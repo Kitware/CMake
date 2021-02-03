@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -787,6 +787,7 @@ typedef enum {
 #define CURLAUTH_DIGEST_IE    (((unsigned long)1)<<4)
 #define CURLAUTH_NTLM_WB      (((unsigned long)1)<<5)
 #define CURLAUTH_BEARER       (((unsigned long)1)<<6)
+#define CURLAUTH_AWS_SIGV4    (((unsigned long)1)<<7)
 #define CURLAUTH_ONLY         (((unsigned long)1)<<31)
 #define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
 #define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
@@ -1015,6 +1016,7 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 #define CURLPROTO_SMB    (1<<26)
 #define CURLPROTO_SMBS   (1<<27)
 #define CURLPROTO_MQTT   (1<<28)
+#define CURLPROTO_GOPHERS (1<<29)
 #define CURLPROTO_ALL    (~0) /* enable everything */
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
@@ -1614,7 +1616,7 @@ typedef enum {
   CURLOPT(CURLOPT_NEW_FILE_PERMS, CURLOPTTYPE_LONG, 159),
   CURLOPT(CURLOPT_NEW_DIRECTORY_PERMS, CURLOPTTYPE_LONG, 160),
 
-  /* Set the behaviour of POST when redirecting. Values must be set to one
+  /* Set the behavior of POST when redirecting. Values must be set to one
      of CURL_REDIR* defines below. This used to be called CURLOPT_POST301 */
   CURLOPT(CURLOPT_POSTREDIR, CURLOPTTYPE_VALUES, 161),
 
@@ -2072,6 +2074,9 @@ typedef enum {
   /* HSTS write callback */
   CURLOPT(CURLOPT_HSTSWRITEFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 303),
   CURLOPT(CURLOPT_HSTSWRITEDATA, CURLOPTTYPE_CBPOINT, 304),
+
+  /* Parameters for V4 signature */
+  CURLOPT(CURLOPT_AWS_SIGV4, CURLOPTTYPE_STRINGPOINT, 305),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
@@ -2849,6 +2854,7 @@ typedef enum {
   CURLVERSION_SIXTH,
   CURLVERSION_SEVENTH,
   CURLVERSION_EIGHTH,
+  CURLVERSION_NINTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -2857,7 +2863,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_EIGHTH
+#define CURLVERSION_NOW CURLVERSION_NINTH
 
 struct curl_version_info_data {
   CURLversion age;          /* age of the returned struct */
@@ -2908,6 +2914,8 @@ struct curl_version_info_data {
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *zstd_version; /* human readable string. */
 
+  /* These fields were added in CURLVERSION_NINTH */
+  const char *hyper_version; /* human readable string. */
 };
 typedef struct curl_version_info_data curl_version_info_data;
 

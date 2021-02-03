@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1001,6 +1001,10 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
+
+/* Define to 1 if you don't want the OpenSSL configuration to be loaded
+   automatically */
+#cmakedefine CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG 1
 
 /* to enable NGHTTP2  */
 #cmakedefine USE_NGHTTP2 1
