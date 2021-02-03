@@ -167,6 +167,50 @@ protected:
 };
 
 template <typename CharType, typename Traits = std::char_traits<CharType> >
+class basic_fstream
+  : public std::basic_iostream<CharType, Traits>
+  , public basic_efilebuf<CharType, Traits>
+{
+public:
+  typedef typename basic_efilebuf<CharType, Traits>::internal_buffer_type
+    internal_buffer_type;
+  typedef std::basic_iostream<CharType, Traits> internal_stream_type;
+
+  basic_fstream()
+    : internal_stream_type(new internal_buffer_type())
+  {
+    this->buf_ =
+      static_cast<internal_buffer_type*>(internal_stream_type::rdbuf());
+  }
+  explicit basic_fstream(char const* file_name,
+                         std::ios_base::openmode mode = std::ios_base::in |
+                           std::ios_base::out)
+    : internal_stream_type(new internal_buffer_type())
+  {
+    this->buf_ =
+      static_cast<internal_buffer_type*>(internal_stream_type::rdbuf());
+    open(file_name, mode);
+  }
+
+  void open(char const* file_name,
+            std::ios_base::openmode mode = std::ios_base::in |
+              std::ios_base::out)
+  {
+    this->_set_state(this->_open(file_name, mode), this, this);
+  }
+
+  bool is_open() { return this->_is_open(); }
+
+  void close() { this->_set_state(this->_close(), this, this); }
+
+  using basic_efilebuf<CharType, Traits>::_is_open;
+
+  internal_buffer_type* rdbuf() const { return this->buf_; }
+
+  ~basic_fstream() @KWSYS_NAMESPACE@_FStream_NOEXCEPT { close(); }
+};
+
+template <typename CharType, typename Traits = std::char_traits<CharType> >
 class basic_ifstream
   : public std::basic_istream<CharType, Traits>
   , public basic_efilebuf<CharType, Traits>
@@ -251,11 +295,13 @@ public:
   ~basic_ofstream() @KWSYS_NAMESPACE@_FStream_NOEXCEPT { close(); }
 };
 
+typedef basic_fstream<char> fstream;
 typedef basic_ifstream<char> ifstream;
 typedef basic_ofstream<char> ofstream;
 
 #  undef @KWSYS_NAMESPACE@_FStream_NOEXCEPT
 #else
+using std::fstream;
 using std::ofstream;
 using std::ifstream;
 #endif
