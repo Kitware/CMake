@@ -3620,6 +3620,15 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
 
     // now add the left-over link libraries
     {
+      // Keep track of framework search paths we've already added or that are
+      // part of the set of implicit search paths. We don't want to repeat
+      // them and we also need to avoid hard-coding any SDK-specific paths.
+      // This is essential for getting device-and-simulator builds to work,
+      // otherwise we end up hard-coding a path to the wrong SDK for
+      // SDK-provided frameworks that are added by their full path.
+      std::set<std::string> emitted(cli->GetFrameworkPathsEmitted());
+      const auto& fwPaths = cli->GetFrameworkPaths();
+      emitted.insert(fwPaths.begin(), fwPaths.end());
       BuildObjectListOrString libPaths(this, true);
       for (auto const& libItem : configItemMap[configName]) {
         auto const& libName = *libItem;
@@ -3633,7 +3642,11 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
             const auto fwName =
               cmSystemTools::GetFilenameWithoutExtension(libPath);
             const auto fwDir = cmSystemTools::GetParentDirectory(libPath);
-            libPaths.Add("-F " + this->XCodeEscapePath(fwDir));
+            if (emitted.insert(fwDir).second) {
+              // This is a search path we had not added before and it isn't an
+              // implicit search path, so we need it
+              libPaths.Add("-F " + this->XCodeEscapePath(fwDir));
+            }
             libPaths.Add("-framework " + fwName);
           } else {
             libPaths.Add(this->XCodeEscapePath(cleanPath));

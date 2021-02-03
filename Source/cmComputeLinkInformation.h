@@ -55,6 +55,7 @@ public:
   std::vector<BT<std::string>> GetDirectoriesWithBacktraces();
   std::vector<std::string> const& GetDepends() const;
   std::vector<std::string> const& GetFrameworkPaths() const;
+  std::set<std::string> const& GetFrameworkPathsEmitted() const;
   std::string GetLinkLanguage() const { return this->LinkLanguage; }
   std::vector<std::string> const& GetRuntimeSearchPath() const;
   std::string const& GetRuntimeFlag() const { return this->RuntimeFlag; }

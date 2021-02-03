@@ -474,6 +474,12 @@ std::vector<std::string> const& cmComputeLinkInformation::GetFrameworkPaths()
   return this->FrameworkPaths;
 }
 
+std::set<std::string> const&
+cmComputeLinkInformation::GetFrameworkPathsEmitted() const
+{
+  return this->FrameworkPathsEmitted;
+}
+
 const std::set<const cmGeneratorTarget*>&
 cmComputeLinkInformation::GetSharedLibrariesLinked() const
 {
