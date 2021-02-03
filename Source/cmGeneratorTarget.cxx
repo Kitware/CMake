@@ -2009,10 +2009,10 @@ bool cmGeneratorTarget::NeedRelinkBeforeInstall(
     std::ostringstream w;
     /* clang-format off */
     w <<
-      "The install of the " << this->GetName() << " target requires "
-      "changing an RPATH from the build tree, but this is not supported "
-      "with the Ninja generator unless on an ELF-based platform.  The "
-      "CMAKE_BUILD_WITH_INSTALL_RPATH variable may be set to avoid this "
+      "The install of the " << this->GetName() << " target requires changing "
+      "an RPATH from the build tree, but this is not supported with the Ninja "
+      "generator unless on an ELF-based or XCOFF-based platform.  "
+      "The CMAKE_BUILD_WITH_INSTALL_RPATH variable may be set to avoid this "
       "relinking step."
       ;
     /* clang-format on */
@@ -2058,20 +2058,29 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
     return true;
   }
 
-#if defined(CMake_USE_ELF_PARSER)
-  // Enable if the rpath flag uses a separator and the target uses ELF
-  // binaries.
+#if defined(CMake_USE_ELF_PARSER) || defined(CMake_USE_XCOFF_PARSER)
+  // Enable if the rpath flag uses a separator and the target uses
+  // binaries we know how to edit.
   std::string ll = this->GetLinkerLanguage(config);
   if (!ll.empty()) {
     std::string sepVar =
       cmStrCat("CMAKE_SHARED_LIBRARY_RUNTIME_", ll, "_FLAG_SEP");
     cmProp sep = this->Makefile->GetDefinition(sepVar);
     if (cmNonempty(sep)) {
-      // TODO: Add ELF check to ABI detection and get rid of
+      // TODO: Add binary format check to ABI detection and get rid of
       // CMAKE_EXECUTABLE_FORMAT.
       if (cmProp fmt =
             this->Makefile->GetDefinition("CMAKE_EXECUTABLE_FORMAT")) {
-        return (*fmt == "ELF");
+#  if defined(CMake_USE_ELF_PARSER)
+        if (*fmt == "ELF") {
+          return true;
+        }
+#  endif
+#  if defined(CMake_USE_XCOFF_PARSER)
+        if (*fmt == "XCOFF") {
+          return true;
+        }
+#  endif
       }
     }
   }

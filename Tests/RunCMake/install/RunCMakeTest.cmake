@@ -48,14 +48,16 @@ in directory:
   endif()
 endfunction()
 
-# Wrapper for run_cmake() that skips platforms that are non-ELF or have no RPATH support
-function(run_cmake_ELFRPATH_only case)
-  if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
+# Wrapper for run_cmake() that skips platforms on which we do not support editing the RPATH.
+function(run_cmake_EDIT_RPATH_only case)
+  if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT MATCHES "^(ELF|XCOFF)$")
     run_cmake(${case})
   else()
     # Sanity check against a platform known to be ELF-based
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
       message(FATAL_ERROR "Expected platform Linux to advertize itself as ELF-based, but it did not.")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "AIX")
+      message(FATAL_ERROR "Expected platform AIX to advertize itself as XCOFF-based, but it did not.")
     else()
       message(STATUS "${case} - SKIPPED (No ELF-based platform found)")
     endif()
@@ -63,7 +65,7 @@ function(run_cmake_ELFRPATH_only case)
 endfunction()
 
 run_cmake(TARGETS-FILE_RPATH_CHANGE-old_rpath)
-run_cmake_ELFRPATH_only(TARGETS-FILE_RPATH_CHANGE-new_rpath)
+run_cmake_EDIT_RPATH_only(TARGETS-FILE_RPATH_CHANGE-new_rpath)
 run_cmake(DIRECTORY-MESSAGE_NEVER)
 run_cmake(DIRECTORY-PATTERN-MESSAGE_NEVER)
 run_cmake(DIRECTORY-message)
