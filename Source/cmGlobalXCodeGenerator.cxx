@@ -47,8 +47,11 @@
 struct cmLinkImplementation;
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(__APPLE__)
-#  define HAVE_APPLICATION_SERVICES
-#  include <ApplicationServices/ApplicationServices.h>
+#  include <CoreFoundation/CoreFoundation.h>
+#  if !TARGET_OS_IPHONE
+#    define HAVE_APPLICATION_SERVICES
+#    include <ApplicationServices/ApplicationServices.h>
+#  endif
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP)
