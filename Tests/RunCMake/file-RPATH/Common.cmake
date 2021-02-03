@@ -1,15 +1,6 @@
-set(names
-  elf32lsb.bin
-  elf32msb.bin
-  elf64lsb.bin
-  elf64msb.bin
-  )
-
 # Prepare binaries on which to operate.
-set(in "@CMAKE_CURRENT_SOURCE_DIR@/ELF")
-set(out "@CMAKE_CURRENT_BINARY_DIR@/ELF-Out")
-file(REMOVE_RECURSE "${out}")
-file(MAKE_DIRECTORY "${out}")
+set(in "${CMAKE_CURRENT_LIST_DIR}/${format}")
+set(out "${CMAKE_CURRENT_BINARY_DIR}")
 foreach(f ${names})
   file(COPY ${in}/${f} DESTINATION ${out} NO_SOURCE_PERMISSIONS)
   list(APPEND files "${out}/${f}")

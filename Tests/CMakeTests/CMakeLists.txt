@@ -44,10 +44,6 @@ set_property(TEST CMake.FileDownloadBadHash PROPERTY
 
 AddCMakeTest(FileUpload "")
 
-if(HAVE_ELF_H)
-  AddCMakeTest(ELF "")
-endif()
-
 set(EndStuff_PreArgs
   "-Ddir:STRING=${CMAKE_CURRENT_BINARY_DIR}/EndStuffTest"
   )
