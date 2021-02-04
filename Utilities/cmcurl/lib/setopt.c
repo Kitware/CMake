@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -274,11 +274,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Do not include the body part in the output data stream.
      */
     data->set.opt_no_body = (0 != va_arg(param, long)) ? TRUE : FALSE;
+#ifndef CURL_DISABLE_HTTP
     if(data->set.opt_no_body)
       /* in HTTP lingo, no body means using the HEAD request... */
       data->set.method = HTTPREQ_HEAD;
     else if(data->set.method == HTTPREQ_HEAD)
       data->set.method = HTTPREQ_GET;
+#endif
     break;
   case CURLOPT_FAILONERROR:
     /*
@@ -600,7 +602,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_POSTREDIR:
     /*
-     * Set the behaviour of POST when redirecting
+     * Set the behavior of POST when redirecting
      * CURL_REDIR_GET_ALL - POST is changed to GET after 301 and 302
      * CURL_REDIR_POST_301 - POST is kept as POST after 301
      * CURL_REDIR_POST_302 - POST is kept as POST after 302
@@ -636,6 +638,21 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.method = HTTPREQ_POST_FORM;
     data->set.opt_no_body = FALSE; /* this is implied */
     break;
+
+  case CURLOPT_AWS_SIGV4:
+    /*
+     * String that is merged to some authentication
+     * parameters are used by the algorithm.
+     */
+    result = Curl_setstropt(&data->set.str[STRING_AWS_SIGV4],
+                            va_arg(param, char *));
+    /*
+     * Basic been set by default it need to be unset here
+     */
+    if(data->set.str[STRING_AWS_SIGV4])
+      data->set.httpauth = CURLAUTH_AWS_SIGV4;
+    break;
+
 #endif   /* CURL_DISABLE_HTTP */
 
   case CURLOPT_MIMEPOST:
@@ -865,7 +882,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       ;
     else
 #endif
-#ifndef USE_NGHTTP2
+#if !defined(USE_NGHTTP2) && !defined(USE_HYPER)
     if(arg >= CURL_HTTP_VERSION_2)
       return CURLE_UNSUPPORTED_PROTOCOL;
 #else
@@ -1444,13 +1461,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
   case CURLOPT_RESOLVE:
     /*
-     * List of NAME:[address] names to populate the DNS cache with
-     * Prefix the NAME with dash (-) to _remove_ the name from the cache.
-     *
-     * Names added with this API will remain in the cache until explicitly
+     * List of HOST:PORT:[addresses] strings to populate the DNS cache with
+     * Entries added this way will remain in the cache until explicitly
      * removed or the handle is cleaned up.
      *
-     * This API can remove any name from the DNS cache, but only entries
+     * Prefix the HOST with plus sign (+) to have the entry expire just like
+     * automatically added entries.
+     *
+     * Prefix the HOST with dash (-) to _remove_ the entry from the cache.
+     *
+     * This API can remove any entry from the DNS cache, but only entries
      * that aren't actually in use right now will be pruned immediately.
      */
     data->set.resolve = va_arg(param, struct curl_slist *);
@@ -2150,8 +2170,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       data->share = NULL;
     }
 
-    /* use new share if it set */
-    data->share = set;
+    if(GOOD_SHARE_HANDLE(set))
+      /* use new share if it set */
+      data->share = set;
     if(data->share) {
 
       Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
@@ -2251,7 +2272,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     if((arg < CURL_IPRESOLVE_WHATEVER) || (arg > CURL_IPRESOLVE_V6))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.ipver = arg;
+    data->set.ipver = (unsigned char) arg;
     break;
 
   case CURLOPT_MAXFILESIZE_LARGE:

@@ -20,6 +20,7 @@ set(CURL_DISABLE_IMAP ON CACHE INTERNAL "Disable curl imap protocol?")
 set(CURL_DISABLE_LDAP ON CACHE INTERNAL "Disable curl ldap protocol?")
 set(CURL_DISABLE_LDAPS ON CACHE INTERNAL "Disable curl ldaps protocol?")
 set(CURL_DISABLE_MQTT ON)
+set(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG OFF)
 set(CURL_DISABLE_POP3 ON CACHE INTERNAL "Disable curl pop3 protocol?")
 set(CURL_DISABLE_PROXY OFF CACHE INTERNAL "Do not disable curl proxy")
 set(CURL_DISABLE_RTSP ON CACHE INTERNAL "Disable curl rtsp protocol?")
@@ -45,6 +46,7 @@ set(ENABLE_UNICODE OFF)
 set(ENABLE_UNIX_SOCKETS OFF CACHE INTERNAL "No curl Unix domain sockets support")
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
 set(PICKY_COMPILER OFF CACHE INTERNAL "Enable picky compiler options")
+set(USE_LIBIDN2 ON)
 set(USE_NGHTTP2 ON)
 set(USE_NGTCP2 OFF)
 set(USE_QUICHE OFF)
@@ -108,7 +110,7 @@ endif()
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -457,6 +459,7 @@ set(openssl_default ON)
 if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_SCHANNEL OR CMAKE_USE_MBEDTLS OR CMAKE_USE_NSS OR CMAKE_USE_WOLFSSL)
   set(openssl_default OFF)
 endif()
+option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
 count_true(enabled_ssl_options_count
   CMAKE_USE_SCHANNEL
@@ -744,7 +747,11 @@ if(NOT CURL_DISABLE_LDAPS)
 endif()
 
 # Check for idn
-check_library_exists_concat("idn2" idn2_lookup_ul HAVE_LIBIDN2)
+option(USE_LIBIDN2 "Use libidn2 for IDN support" ON)
+set(HAVE_LIBIDN2 OFF)
+if(USE_LIBIDN2)
+  check_library_exists_concat("idn2" idn2_lookup_ul HAVE_LIBIDN2)
+endif()
 
 # Check for symbol dlopen (same as HAVE_LIBDL)
 check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
@@ -1543,6 +1550,7 @@ _add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
 _add_if("DICT"          NOT CURL_DISABLE_DICT)
 _add_if("TFTP"          NOT CURL_DISABLE_TFTP)
 _add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
+_add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND SSL_ENABLED)
 _add_if("POP3"          NOT CURL_DISABLE_POP3)
 _add_if("POP3S"         NOT CURL_DISABLE_POP3 AND SSL_ENABLED)
 _add_if("IMAP"          NOT CURL_DISABLE_IMAP)
