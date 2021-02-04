@@ -1,0 +1,16 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
+cmake_minimum_required(VERSION 3.19)
+
+execute_process(
+  COMMAND "@hg_EXECUTABLE@" pull
+  COMMAND_ERROR_IS_FATAL ANY
+  WORKING_DIRECTORY "@work_dir@"
+)
+
+execute_process(
+  COMMAND "@hg_EXECUTABLE@" update @hg_tag@
+  COMMAND_ERROR_IS_FATAL ANY
+  WORKING_DIRECTORY "@work_dir@"
+)

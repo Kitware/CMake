@@ -13,7 +13,7 @@ Call Stack \(most recent call first\):
   [^
 ]*/Modules/ExternalProject.cmake:[0-9]+ \(ExternalProject_Add_Step\)
   [^
-]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_mkdir_command\)
+]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_preconfigure_command\)
   NO_DEPENDS-CMP0114-Common.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN.cmake:[0-9]+ \(include\)
   CMakeLists.txt:[0-9]+ \(include\)
@@ -68,7 +68,7 @@ Call Stack \(most recent call first\):
   [^
 ]*/Modules/ExternalProject.cmake:[0-9]+ \(ExternalProject_Add_Step\)
   [^
-]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_mkdir_command\)
+]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_preconfigure_command\)
   NO_DEPENDS-CMP0114-Common.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN.cmake:[0-9]+ \(include\)
   CMakeLists.txt:[0-9]+ \(include\)

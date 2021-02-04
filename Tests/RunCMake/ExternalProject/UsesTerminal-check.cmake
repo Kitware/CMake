@@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 3.3)
 # console pool.
 macro(CheckNinjaStep _target _step _require)
   if("${_build}" MATCHES
-"  DESC = Performing ${_step} step for '${_target}'
+"  DESC = Performing ${_step} step (\\([a-zA-Z0-9 ]*\\) )?for '${_target}'
   pool = console"
   )
     if(NOT ${_require})
