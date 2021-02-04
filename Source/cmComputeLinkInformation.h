@@ -55,6 +55,7 @@ public:
   std::vector<BT<std::string>> GetDirectoriesWithBacktraces();
   std::vector<std::string> const& GetDepends() const;
   std::vector<std::string> const& GetFrameworkPaths() const;
+  std::set<std::string> const& GetFrameworkPathsEmitted() const;
   std::string GetLinkLanguage() const { return this->LinkLanguage; }
   std::vector<std::string> const& GetRuntimeSearchPath() const;
   std::string const& GetRuntimeFlag() const { return this->RuntimeFlag; }
@@ -164,7 +165,7 @@ private:
   // Framework info.
   void ComputeFrameworkInfo();
   void AddFrameworkPath(std::string const& p);
-  std::set<std::string> FrameworkPathsEmmitted;
+  std::set<std::string> FrameworkPathsEmitted;
   cmsys::RegularExpression SplitFramework;
 
   // Linker search path computation.

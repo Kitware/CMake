@@ -474,6 +474,12 @@ std::vector<std::string> const& cmComputeLinkInformation::GetFrameworkPaths()
   return this->FrameworkPaths;
 }
 
+std::set<std::string> const&
+cmComputeLinkInformation::GetFrameworkPathsEmitted() const
+{
+  return this->FrameworkPathsEmitted;
+}
+
 const std::set<const cmGeneratorTarget*>&
 cmComputeLinkInformation::GetSharedLibrariesLinked() const
 {
@@ -1339,8 +1345,8 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
     "CMAKE_", this->LinkLanguage, "_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES");
   this->Makefile->GetDefExpandList(implicitDirVar, implicitDirVec);
 
-  this->FrameworkPathsEmmitted.insert(implicitDirVec.begin(),
-                                      implicitDirVec.end());
+  this->FrameworkPathsEmitted.insert(implicitDirVec.begin(),
+                                     implicitDirVec.end());
 
   // Regular expression to extract a framework path and name.
   this->SplitFramework.compile("(.*)/(.*)\\.framework$");
@@ -1348,7 +1354,7 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
 
 void cmComputeLinkInformation::AddFrameworkPath(std::string const& p)
 {
-  if (this->FrameworkPathsEmmitted.insert(p).second) {
+  if (this->FrameworkPathsEmitted.insert(p).second) {
     this->FrameworkPaths.push_back(p);
   }
 }
