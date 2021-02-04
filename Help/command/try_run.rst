@@ -20,6 +20,7 @@ Try Compiling and Running Source Files
           [COMPILE_OUTPUT_VARIABLE <var>]
           [RUN_OUTPUT_VARIABLE <var>]
           [OUTPUT_VARIABLE <var>]
+          [WORKING_DIRECTORY <var>]
           [ARGS <args>...])
 
 Try compiling a ``<srcfile>``.  Returns ``TRUE`` or ``FALSE`` for success
@@ -73,6 +74,12 @@ The options are:
 
 ``RUN_OUTPUT_VARIABLE <var>``
   Report the output from running the executable in a given variable.
+
+``WORKING_DIRECTORY <var>``
+  .. versionadded:: 3.20
+
+  Run the executable in the given directory. If no ``WORKING_DIRECTORY`` is
+  specified, the executable will run in ``<bindir>``.
 
 Other Behavior Settings
 ^^^^^^^^^^^^^^^^^^^^^^^
