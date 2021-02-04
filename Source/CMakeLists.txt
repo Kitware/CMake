@@ -19,7 +19,7 @@ else()
   CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
 endif()
 if(HAVE_ELF_H)
-  set(CMAKE_USE_ELF_PARSER 1)
+  set(CMake_USE_ELF_PARSER 1)
 elseif(HAIKU)
   # On Haiku, we need to include elf32.h from the private headers
   set(CMake_HAIKU_INCLUDE_DIRS
@@ -32,13 +32,13 @@ elseif(HAIKU)
   unset(CMAKE_REQUIRED_INCLUDES)
 
   if(HAVE_ELF32_H)
-    set(CMAKE_USE_ELF_PARSER 1)
+    set(CMake_USE_ELF_PARSER 1)
   else()
     unset(CMake_HAIKU_INCLUDE_DIRS)
-    set(CMAKE_USE_ELF_PARSER)
+    set(CMake_USE_ELF_PARSER)
   endif()
 else()
-  set(CMAKE_USE_ELF_PARSER)
+  set(CMake_USE_ELF_PARSER)
 endif()
 
 if(NOT CMake_DEFAULT_RECURSION_LIMIT)
@@ -54,7 +54,11 @@ if(NOT CMake_DEFAULT_RECURSION_LIMIT)
 endif()
 
 if(APPLE)
-  set(CMAKE_USE_MACH_PARSER 1)
+  set(CMake_USE_MACH_PARSER 1)
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
+  set(CMake_USE_XCOFF_PARSER 1)
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
@@ -108,13 +112,18 @@ include_directories(
   )
 
 # Check if we can build the ELF parser.
-if(CMAKE_USE_ELF_PARSER)
+if(CMake_USE_ELF_PARSER)
   set(ELF_SRCS cmELF.h cmELF.cxx)
 endif()
 
 # Check if we can build the Mach-O parser.
-if(CMAKE_USE_MACH_PARSER)
+if(CMake_USE_MACH_PARSER)
   set(MACH_SRCS cmMachO.h cmMachO.cxx)
+endif()
+
+# Check if we can build the XCOFF parser.
+if(CMake_USE_XCOFF_PARSER)
+  set(XCOFF_SRCS cmXCOFF.h cmXCOFF.cxx)
 endif()
 
 #
@@ -465,6 +474,7 @@ set(SRCS
   cmWorkerPool.h
   cmWorkingDirectory.cxx
   cmWorkingDirectory.h
+  ${XCOFF_SRCS}
   cmXMLParser.cxx
   cmXMLParser.h
   cmXMLSafe.cxx

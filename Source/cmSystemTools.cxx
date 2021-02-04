@@ -45,12 +45,16 @@
 #  include "cmCryptoHash.h"
 #endif
 
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
 #  include "cmELF.h"
 #endif
 
-#if defined(CMAKE_USE_MACH_PARSER)
+#if defined(CMake_USE_MACH_PARSER)
 #  include "cmMachO.h"
+#endif
+
+#if defined(CMake_USE_XCOFF_PARSER)
+#  include "cmXCOFF.h"
 #endif
 
 #include <algorithm>
@@ -2317,7 +2321,7 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 {
 // For ELF shared libraries use a real parser to get the correct
 // soname.
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
   cmELF elf(fullPath.c_str());
   if (elf) {
     return elf.GetSOName(soname);
@@ -2347,7 +2351,7 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
                                             std::string& soname)
 {
-#if defined(CMAKE_USE_MACH_PARSER)
+#if defined(CMake_USE_MACH_PARSER)
   cmMachO macho(fullPath.c_str());
   if (macho) {
     return macho.GetInstallName(soname);
@@ -2360,9 +2364,9 @@ bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
   return false;
 }
 
-#if defined(CMAKE_USE_ELF_PARSER)
-std::string::size_type cmSystemToolsFindRPath(std::string const& have,
-                                              std::string const& want)
+#if defined(CMake_USE_ELF_PARSER) || defined(CMake_USE_XCOFF_PARSER)
+std::string::size_type cmSystemToolsFindRPath(cm::string_view const& have,
+                                              cm::string_view const& want)
 {
   std::string::size_type pos = 0;
   while (pos < have.size()) {
@@ -2394,7 +2398,7 @@ std::string::size_type cmSystemToolsFindRPath(std::string const& have,
 }
 #endif
 
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
 struct cmSystemToolsRPathInfo
 {
   unsigned long Position;
@@ -2404,7 +2408,8 @@ struct cmSystemToolsRPathInfo
 };
 #endif
 
-#if defined(CMAKE_USE_ELF_PARSER)
+// FIXME: Dispatch if multiple formats are supported.
+#if defined(CMake_USE_ELF_PARSER)
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
                                 std::string const& newRPath,
@@ -2576,6 +2581,75 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   }
   return true;
 }
+#elif defined(CMake_USE_XCOFF_PARSER)
+bool cmSystemTools::ChangeRPath(std::string const& file,
+                                std::string const& oldRPath,
+                                std::string const& newRPath,
+                                bool removeEnvironmentRPath, std::string* emsg,
+                                bool* changed)
+{
+  if (changed) {
+    *changed = false;
+  }
+
+  bool chg = false;
+  cmXCOFF xcoff(file.c_str(), cmXCOFF::Mode::ReadWrite);
+  if (cm::optional<cm::string_view> maybeLibPath = xcoff.GetLibPath()) {
+    cm::string_view libPath = *maybeLibPath;
+    // Make sure the current rpath contains the old rpath.
+    std::string::size_type pos = cmSystemToolsFindRPath(libPath, oldRPath);
+    if (pos == std::string::npos) {
+      // If it contains the new rpath instead then it is okay.
+      if (cmSystemToolsFindRPath(libPath, newRPath) != std::string::npos) {
+        return true;
+      }
+      if (emsg) {
+        std::ostringstream e;
+        /* clang-format off */
+        e << "The current RPATH is:\n"
+          << "  " << libPath << "\n"
+          << "which does not contain:\n"
+          << "  " << oldRPath << "\n"
+          << "as was expected.";
+        /* clang-format on */
+        *emsg = e.str();
+      }
+      return false;
+    }
+
+    // The prefix is either empty or ends in a ':'.
+    cm::string_view prefix = libPath.substr(0, pos);
+    if (newRPath.empty() && !prefix.empty()) {
+      prefix.remove_suffix(1);
+    }
+
+    // The suffix is either empty or starts in a ':'.
+    cm::string_view suffix = libPath.substr(pos + oldRPath.length());
+
+    // Construct the new value which preserves the part of the path
+    // not being changed.
+    std::string newLibPath;
+    if (!removeEnvironmentRPath) {
+      newLibPath = std::string(prefix);
+    }
+    newLibPath += newRPath;
+    newLibPath += suffix;
+
+    chg = xcoff.SetLibPath(newLibPath);
+  }
+  if (!xcoff) {
+    if (emsg) {
+      *emsg = xcoff.GetErrorMessage();
+    }
+    return false;
+  }
+
+  // Everything was updated successfully.
+  if (changed) {
+    *changed = chg;
+  }
+  return true;
+}
 #else
 bool cmSystemTools::ChangeRPath(std::string const& /*file*/,
                                 std::string const& /*oldRPath*/,
@@ -2720,7 +2794,8 @@ int cmSystemTools::strverscmp(std::string const& lhs, std::string const& rhs)
   return cm_strverscmp(lhs.c_str(), rhs.c_str());
 }
 
-#if defined(CMAKE_USE_ELF_PARSER)
+// FIXME: Dispatch if multiple formats are supported.
+#if defined(CMake_USE_ELF_PARSER)
 bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
                                 bool* removed)
 {
@@ -2861,6 +2936,28 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
   }
   return true;
 }
+#elif defined(CMake_USE_XCOFF_PARSER)
+bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
+                                bool* removed)
+{
+  if (removed) {
+    *removed = false;
+  }
+
+  cmXCOFF xcoff(file.c_str(), cmXCOFF::Mode::ReadWrite);
+  bool rm = xcoff.RemoveLibPath();
+  if (!xcoff) {
+    if (emsg) {
+      *emsg = xcoff.GetErrorMessage();
+    }
+    return false;
+  }
+
+  if (removed) {
+    *removed = rm;
+  }
+  return true;
+}
 #else
 bool cmSystemTools::RemoveRPath(std::string const& /*file*/,
                                 std::string* /*emsg*/, bool* /*removed*/)
@@ -2869,10 +2966,11 @@ bool cmSystemTools::RemoveRPath(std::string const& /*file*/,
 }
 #endif
 
+// FIXME: Dispatch if multiple formats are supported.
 bool cmSystemTools::CheckRPath(std::string const& file,
                                std::string const& newRPath)
 {
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
   // Parse the ELF binary.
   cmELF elf(file.c_str());
 
@@ -2890,6 +2988,15 @@ bool cmSystemTools::CheckRPath(std::string const& file,
   } else {
     if (se &&
         cmSystemToolsFindRPath(se->Value, newRPath) != std::string::npos) {
+      return true;
+    }
+  }
+  return false;
+#elif defined(CMake_USE_XCOFF_PARSER)
+  // Parse the XCOFF binary.
+  cmXCOFF xcoff(file.c_str());
+  if (cm::optional<cm::string_view> libPath = xcoff.GetLibPath()) {
+    if (cmSystemToolsFindRPath(*libPath, newRPath) != std::string::npos) {
       return true;
     }
   }

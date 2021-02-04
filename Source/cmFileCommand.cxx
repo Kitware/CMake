@@ -64,7 +64,7 @@
 #  include "cmFileLockResult.h"
 #endif
 
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
 #  include "cmELF.h"
 #endif
 
@@ -1198,7 +1198,7 @@ bool HandleReadElfCommand(std::vector<std::string> const& args,
     return false;
   }
 
-#if defined(CMAKE_USE_ELF_PARSER)
+#if defined(CMake_USE_ELF_PARSER)
   cmELF elf(fileNameArg.c_str());
 
   if (!arguments.RPath.empty()) {

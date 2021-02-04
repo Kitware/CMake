@@ -22,6 +22,8 @@ macro(skip_without_rpath_change_rule)
     # Sanity check against a platform known to generate a file(RPATH_CHANGE) rule
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
       message(FATAL_ERROR "Expected generated file(RPATH_CHANGE) rule on platform Linux.")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "AIX")
+      message(FATAL_ERROR "Expected generated file(RPATH_CHANGE) rule on platform AIX.")
     else()
       message(STATUS "${test} - All checks skipped. No file(RPATH_CHANGE) rule found on this platform.")
       return()
