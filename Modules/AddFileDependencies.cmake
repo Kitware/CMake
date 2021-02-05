@@ -9,20 +9,13 @@ Add dependencies to a source file.
 
 .. code-block:: cmake
 
-  ADD_FILE_DEPENDENCIES(<source> <files>)
+  add_file_dependencies(<source> <files>)
 
 Adds the given ``<files>`` to the dependencies of file ``<source>``.
 #]=======================================================================]
 
-macro(ADD_FILE_DEPENDENCIES _file)
+function(add_file_dependencies _file)
 
-  get_source_file_property(_deps ${_file} OBJECT_DEPENDS)
-  if (_deps)
-    set(_deps ${_deps} ${ARGN})
-  else ()
-    set(_deps ${ARGN})
-  endif ()
+  set_property(SOURCE "${_file}" APPEND PROPERTY OBJECT_DEPENDS "${ARGN}")
 
-  set_source_files_properties(${_file} PROPERTIES OBJECT_DEPENDS "${_deps}")
-
-endmacro()
+endfunction()
