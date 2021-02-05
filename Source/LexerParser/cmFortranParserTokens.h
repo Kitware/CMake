@@ -100,7 +100,7 @@ extern int cmFortran_yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 70 "cmFortranParser.y"
+#line 71 "cmFortranParser.y"
 
   char* string;
 

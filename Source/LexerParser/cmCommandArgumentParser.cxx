@@ -129,9 +129,10 @@ static void cmCommandArgument_yyerror(yyscan_t yyscanner, const char* message);
 #endif
 #if defined(__GNUC__) && __GNUC__ >= 8
 # pragma GCC diagnostic ignored "-Wconversion"
+# pragma GCC diagnostic ignored "-Wfree-nonheap-object"
 #endif
 
-#line 135 "cmCommandArgumentParser.cxx"
+#line 136 "cmCommandArgumentParser.cxx"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -552,9 +553,9 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    96,    96,   102,   105,   110,   113,   118,   121,   126,
-     129,   132,   135,   138,   141,   146,   149,   152,   155,   160,
-     163,   168,   171,   176,   179
+       0,    97,    97,   103,   106,   111,   114,   119,   122,   127,
+     130,   133,   136,   139,   142,   147,   150,   153,   156,   161,
+     164,   169,   172,   177,   180
 };
 #endif
 
@@ -1427,192 +1428,192 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* Start: GoalWithOptionalBackSlash  */
-#line 96 "cmCommandArgumentParser.y"
+#line 97 "cmCommandArgumentParser.y"
                             {
     (yyval.str) = 0;
     yyGetParser->SetResult((yyvsp[0].str));
   }
-#line 1436 "cmCommandArgumentParser.cxx"
+#line 1437 "cmCommandArgumentParser.cxx"
     break;
 
   case 3: /* GoalWithOptionalBackSlash: Goal  */
-#line 102 "cmCommandArgumentParser.y"
+#line 103 "cmCommandArgumentParser.y"
        {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1444 "cmCommandArgumentParser.cxx"
+#line 1445 "cmCommandArgumentParser.cxx"
     break;
 
   case 4: /* GoalWithOptionalBackSlash: Goal "\\"  */
-#line 105 "cmCommandArgumentParser.y"
+#line 106 "cmCommandArgumentParser.y"
                   {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1452 "cmCommandArgumentParser.cxx"
+#line 1453 "cmCommandArgumentParser.cxx"
     break;
 
   case 5: /* Goal: %empty  */
-#line 110 "cmCommandArgumentParser.y"
+#line 111 "cmCommandArgumentParser.y"
   {
     (yyval.str) = 0;
   }
-#line 1460 "cmCommandArgumentParser.cxx"
+#line 1461 "cmCommandArgumentParser.cxx"
     break;
 
   case 6: /* Goal: String Goal  */
-#line 113 "cmCommandArgumentParser.y"
+#line 114 "cmCommandArgumentParser.y"
               {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1468 "cmCommandArgumentParser.cxx"
+#line 1469 "cmCommandArgumentParser.cxx"
     break;
 
   case 7: /* String: OuterText  */
-#line 118 "cmCommandArgumentParser.y"
+#line 119 "cmCommandArgumentParser.y"
             {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1476 "cmCommandArgumentParser.cxx"
+#line 1477 "cmCommandArgumentParser.cxx"
     break;
 
   case 8: /* String: Variable  */
-#line 121 "cmCommandArgumentParser.y"
+#line 122 "cmCommandArgumentParser.y"
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1484 "cmCommandArgumentParser.cxx"
+#line 1485 "cmCommandArgumentParser.cxx"
     break;
 
   case 9: /* OuterText: cal_NAME  */
-#line 126 "cmCommandArgumentParser.y"
+#line 127 "cmCommandArgumentParser.y"
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1492 "cmCommandArgumentParser.cxx"
+#line 1493 "cmCommandArgumentParser.cxx"
     break;
 
   case 10: /* OuterText: "@"  */
-#line 129 "cmCommandArgumentParser.y"
+#line 130 "cmCommandArgumentParser.y"
          {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1500 "cmCommandArgumentParser.cxx"
+#line 1501 "cmCommandArgumentParser.cxx"
     break;
 
   case 11: /* OuterText: "$"  */
-#line 132 "cmCommandArgumentParser.y"
+#line 133 "cmCommandArgumentParser.y"
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1508 "cmCommandArgumentParser.cxx"
+#line 1509 "cmCommandArgumentParser.cxx"
     break;
 
   case 12: /* OuterText: "{"  */
-#line 135 "cmCommandArgumentParser.y"
+#line 136 "cmCommandArgumentParser.y"
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1516 "cmCommandArgumentParser.cxx"
+#line 1517 "cmCommandArgumentParser.cxx"
     break;
 
   case 13: /* OuterText: "}"  */
-#line 138 "cmCommandArgumentParser.y"
+#line 139 "cmCommandArgumentParser.y"
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1524 "cmCommandArgumentParser.cxx"
+#line 1525 "cmCommandArgumentParser.cxx"
     break;
 
   case 14: /* OuterText: cal_SYMBOL  */
-#line 141 "cmCommandArgumentParser.y"
+#line 142 "cmCommandArgumentParser.y"
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1532 "cmCommandArgumentParser.cxx"
+#line 1533 "cmCommandArgumentParser.cxx"
     break;
 
   case 15: /* Variable: cal_ENVCURLY EnvVarName "}"  */
-#line 146 "cmCommandArgumentParser.y"
+#line 147 "cmCommandArgumentParser.y"
                                      {
     (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[-2].str), (yyvsp[-1].str));
   }
-#line 1540 "cmCommandArgumentParser.cxx"
+#line 1541 "cmCommandArgumentParser.cxx"
     break;
 
   case 16: /* Variable: cal_NCURLY MultipleIds "}"  */
-#line 149 "cmCommandArgumentParser.y"
+#line 150 "cmCommandArgumentParser.y"
                                     {
     (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[-2].str), (yyvsp[-1].str));
   }
-#line 1548 "cmCommandArgumentParser.cxx"
+#line 1549 "cmCommandArgumentParser.cxx"
     break;
 
   case 17: /* Variable: cal_DCURLY MultipleIds "}"  */
-#line 152 "cmCommandArgumentParser.y"
+#line 153 "cmCommandArgumentParser.y"
                                     {
     (yyval.str) = yyGetParser->ExpandVariable((yyvsp[-1].str));
   }
-#line 1556 "cmCommandArgumentParser.cxx"
+#line 1557 "cmCommandArgumentParser.cxx"
     break;
 
   case 18: /* Variable: cal_ATNAME  */
-#line 155 "cmCommandArgumentParser.y"
+#line 156 "cmCommandArgumentParser.y"
              {
     (yyval.str) = yyGetParser->ExpandVariableForAt((yyvsp[0].str));
   }
-#line 1564 "cmCommandArgumentParser.cxx"
+#line 1565 "cmCommandArgumentParser.cxx"
     break;
 
   case 19: /* EnvVarName: MultipleIds  */
-#line 160 "cmCommandArgumentParser.y"
+#line 161 "cmCommandArgumentParser.y"
               {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1572 "cmCommandArgumentParser.cxx"
+#line 1573 "cmCommandArgumentParser.cxx"
     break;
 
   case 20: /* EnvVarName: cal_SYMBOL EnvVarName  */
-#line 163 "cmCommandArgumentParser.y"
+#line 164 "cmCommandArgumentParser.y"
                         {
     (yyval.str) = (yyvsp[-1].str);
   }
-#line 1580 "cmCommandArgumentParser.cxx"
+#line 1581 "cmCommandArgumentParser.cxx"
     break;
 
   case 21: /* MultipleIds: %empty  */
-#line 168 "cmCommandArgumentParser.y"
+#line 169 "cmCommandArgumentParser.y"
   {
     (yyval.str) = 0;
   }
-#line 1588 "cmCommandArgumentParser.cxx"
+#line 1589 "cmCommandArgumentParser.cxx"
     break;
 
   case 22: /* MultipleIds: ID MultipleIds  */
-#line 171 "cmCommandArgumentParser.y"
+#line 172 "cmCommandArgumentParser.y"
                  {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1596 "cmCommandArgumentParser.cxx"
+#line 1597 "cmCommandArgumentParser.cxx"
     break;
 
   case 23: /* ID: cal_NAME  */
-#line 176 "cmCommandArgumentParser.y"
+#line 177 "cmCommandArgumentParser.y"
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1604 "cmCommandArgumentParser.cxx"
+#line 1605 "cmCommandArgumentParser.cxx"
     break;
 
   case 24: /* ID: Variable  */
-#line 179 "cmCommandArgumentParser.y"
+#line 180 "cmCommandArgumentParser.y"
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1612 "cmCommandArgumentParser.cxx"
+#line 1613 "cmCommandArgumentParser.cxx"
     break;
 
 
-#line 1616 "cmCommandArgumentParser.cxx"
+#line 1617 "cmCommandArgumentParser.cxx"
 
       default: break;
     }
@@ -1837,7 +1838,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 184 "cmCommandArgumentParser.y"
+#line 185 "cmCommandArgumentParser.y"
 
 /* End of grammar */
 
