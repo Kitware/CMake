@@ -1,0 +1,7 @@
+Test project [^
+]*/Tests/RunCMake/CMakePresetsTest/Good/build/default
+    Start 3: testc
+.*
+    Start 4: testd
+.*
+100% tests passed, 0 tests failed out of 2

@@ -425,6 +425,8 @@ int do_build(int ac, char const* const* av)
   bool foundClean = false;
   bool foundNonClean = false;
   bool verbose = cmSystemTools::HasEnv("VERBOSE");
+  std::string presetName;
+  bool listPresets = false;
 
   auto jLambda = [&](std::string const& value) -> bool {
     jobs = extract_job_number("-j", value);
@@ -464,6 +466,16 @@ int do_build(int ac, char const* const* av)
     cmCommandLineArgument<bool(std::string const& value)>;
 
   std::vector<CommandArgument> arguments = {
+    CommandArgument{ "--preset", CommandArgument::Values::One,
+                     [&](std::string const& value) -> bool {
+                       presetName = value;
+                       return true;
+                     } },
+    CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
+                     [&](std::string const&) -> bool {
+                       listPresets = true;
+                       return true;
+                     } },
     CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne, jLambda },
     CommandArgument{ "--parallel", CommandArgument::Values::ZeroOrOne,
                      parallelLambda },
@@ -494,11 +506,26 @@ int do_build(int ac, char const* const* av)
   };
 
   if (ac >= 3) {
-    dir = cmSystemTools::CollapseFullPath(av[2]);
-
     std::vector<std::string> inputArgs;
-    inputArgs.reserve(ac - 3);
-    cm::append(inputArgs, av + 3, av + ac);
+
+    bool hasPreset = false;
+    for (int i = 2; i < ac; ++i) {
+      if (strcmp(av[i], "--list-presets") == 0 ||
+          strcmp(av[i], "--preset") == 0) {
+        hasPreset = true;
+        break;
+      }
+    }
+
+    if (hasPreset) {
+      inputArgs.reserve(ac - 2);
+      cm::append(inputArgs, av + 2, av + ac);
+    } else {
+      dir = cmSystemTools::CollapseFullPath(av[2]);
+
+      inputArgs.reserve(ac - 3);
+      cm::append(inputArgs, av + 3, av + ac);
+    }
 
     decltype(inputArgs.size()) i = 0;
     for (; i < inputArgs.size() && !nativeOptionsPassed; ++i) {
@@ -551,12 +578,16 @@ int do_build(int ac, char const* const* av)
     }
   }
 
-  if (dir.empty()) {
+  if (dir.empty() && presetName.empty() && !listPresets) {
     /* clang-format off */
     std::cerr <<
-      "Usage: cmake --build <dir> [options] [-- [native-options]]\n"
+      "Usage: cmake --build [<dir> | --preset <preset>] [options] [-- [native-options]]\n"
       "Options:\n"
       "  <dir>          = Project binary directory to be built.\n"
+      "  --preset <preset>\n"
+      "                 = Specify a build preset.\n"
+      "  --list-presets\n"
+      "                 = List available build presets.\n"
       "  --parallel [<jobs>], -j [<jobs>]\n"
       "                 = Build in parallel using the given number of jobs. \n"
       "                   If <jobs> is omitted the native build tool's \n"
@@ -587,8 +618,10 @@ int do_build(int ac, char const* const* av)
   cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
-  return cm.Build(jobs, dir, targets, config, nativeOptions, cleanFirst,
-                  verbose);
+
+  return cm.Build(jobs, std::move(dir), std::move(targets), std::move(config),
+                  std::move(nativeOptions), cleanFirst, verbose, presetName,
+                  listPresets);
 #endif
 }
 

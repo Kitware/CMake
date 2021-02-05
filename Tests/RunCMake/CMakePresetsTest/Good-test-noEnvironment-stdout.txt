@@ -1,0 +1,8 @@
+Test project [^
+]*/Tests/RunCMake/CMakePresetsTest/Good/build/default
+.*
+    Start 5: test-env
+.*
+5: TEST_ENV_REF=xx
+.*
+100% tests passed, 0 tests failed out of 1

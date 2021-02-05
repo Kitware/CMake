@@ -1,0 +1,5 @@
+Test project [^
+]*/Tests/RunCMake/CMakePresetsTest/Good/build/default
+    Start 6: debug-only
+.*
+100% tests passed, 0 tests failed out of 1

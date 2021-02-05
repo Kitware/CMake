@@ -28,6 +28,16 @@ This program will run the tests and report results.
 Options
 =======
 
+``--preset <preset>``
+ Use a test preset to specify test options. The project binary directory
+ is inferred from the ``configurePreset`` key. The current working directory
+ must contain CMake preset files.
+ See :manual:`preset <cmake-presets(7)>` for more details.
+
+``--list-presets``
+ Lists the available test presets. The current working directory must contain
+ CMake preset files.
+
 ``-C <cfg>, --build-config <cfg>``
  Choose configuration to test.
 

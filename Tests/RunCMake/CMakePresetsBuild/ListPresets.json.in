@@ -1,0 +1,31 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "default",
+            "generator": "@RunCMake_GENERATOR@",
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-default",
+            "configurePreset": "default",
+            "displayName": "build-default displayName",
+            "description": "build-default description"
+        },
+        {
+            "name": "empty",
+            "inherits": "build-default"
+        },
+        {
+            "name": "display",
+            "inherits": "build-default",
+            "displayName": "display displayName"
+        },
+        {
+            "name": "hidden",
+            "hidden": true
+        }
+    ]
+}

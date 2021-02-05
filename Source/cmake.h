@@ -238,7 +238,7 @@ public:
   bool CreateAndSetGlobalGenerator(const std::string& name, bool allowArch);
 
 #ifndef CMAKE_BOOTSTRAP
-  //! Print list of presets
+  //! Print list of configure presets
   void PrintPresetList(const cmCMakePresetsFile& file) const;
 #endif
 
@@ -556,10 +556,10 @@ public:
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
   //! run the --build option
-  int Build(int jobs, const std::string& dir,
-            const std::vector<std::string>& targets, const std::string& config,
-            const std::vector<std::string>& nativeOptions, bool clean,
-            bool verbose);
+  int Build(int jobs, std::string dir, std::vector<std::string> targets,
+            std::string config, std::vector<std::string> nativeOptions,
+            bool clean, bool verbose, const std::string& presetName,
+            bool listPresets);
 
   //! run the --open option
   bool Open(const std::string& dir, bool dryRun);
