@@ -9,12 +9,12 @@ determine the eventual location of build targets.  This relies on the
 assumption that all necessary information is available at
 configure-time to determine the final location and filename of the
 target.  However, this property is not fully determined until later at
-generate-time.  At generate time, the ``$<TARGET_FILE>`` generator
+generate-time.  At generate time, the :genex:`$<TARGET_FILE>` generator
 expression can be used to determine the eventual :prop_tgt:`LOCATION` of a target
 output.
 
 Code which reads the :prop_tgt:`LOCATION` target property can be ported to
-use the ``$<TARGET_FILE>`` generator expression together with the
+use the :genex:`$<TARGET_FILE>` generator expression together with the
 :command:`file(GENERATE)` subcommand to generate a file containing
 the target location.
 
