@@ -39,6 +39,8 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 # else
 #  define C_DIALECT
 # endif
+#elif __STDC_VERSION__ > 201710L
+# define C_DIALECT "23"
 #elif __STDC_VERSION__ >= 201710L
 # define C_DIALECT "17"
 #elif __STDC_VERSION__ >= 201000L

@@ -309,8 +309,8 @@ std::unordered_map<std::string, StanardLevelComputer> StandardComputerMapping =
   {
     { "C",
       StanardLevelComputer{
-        "C", std::vector<int>{ 90, 99, 11, 17 },
-        std::vector<std::string>{ "90", "99", "11", "17" } } },
+        "C", std::vector<int>{ 90, 99, 11, 17, 23 },
+        std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
     { "CXX",
       StanardLevelComputer{
         "CXX", std::vector<int>{ 98, 11, 14, 17, 20, 23 },

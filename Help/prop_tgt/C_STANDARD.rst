@@ -11,7 +11,7 @@ flag such as ``-std=gnu11`` to the compile line.  For compilers that
 have no notion of a C standard level, such as Microsoft Visual C++ before
 VS 16.7, this property has no effect.
 
-Supported values are ``90``, ``99``, ``11``, ``17``.
+Supported values are ``90``, ``99``, ``11``, ``17``, ``23``.
 
 If the value requested does not result in a compile flag being added for
 the compiler in use, a previous standard flag will be added instead.  This

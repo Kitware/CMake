@@ -11,6 +11,7 @@ function(cmake_determine_compile_features lang)
     set(CMAKE_C99_COMPILE_FEATURES)
     set(CMAKE_C11_COMPILE_FEATURES)
     set(CMAKE_C17_COMPILE_FEATURES)
+    set(CMAKE_C23_COMPILE_FEATURES)
 
     include("${CMAKE_ROOT}/Modules/Internal/FeatureTesting.cmake")
 
@@ -21,6 +22,9 @@ function(cmake_determine_compile_features lang)
       return()
     endif()
 
+    if (CMAKE_C17_COMPILE_FEATURES AND CMAKE_C23_COMPILE_FEATURES)
+      list(REMOVE_ITEM CMAKE_C23_COMPILE_FEATURES ${CMAKE_C17_COMPILE_FEATURES})
+    endif()
     if (CMAKE_C11_COMPILE_FEATURES AND CMAKE_C17_COMPILE_FEATURES)
       list(REMOVE_ITEM CMAKE_C17_COMPILE_FEATURES ${CMAKE_C11_COMPILE_FEATURES})
     endif()
@@ -37,6 +41,7 @@ function(cmake_determine_compile_features lang)
         ${CMAKE_C99_COMPILE_FEATURES}
         ${CMAKE_C11_COMPILE_FEATURES}
         ${CMAKE_C17_COMPILE_FEATURES}
+        ${CMAKE_C23_COMPILE_FEATURES}
       )
     endif()
 
@@ -45,6 +50,7 @@ function(cmake_determine_compile_features lang)
     set(CMAKE_C99_COMPILE_FEATURES ${CMAKE_C99_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_C11_COMPILE_FEATURES ${CMAKE_C11_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_C17_COMPILE_FEATURES ${CMAKE_C17_COMPILE_FEATURES} PARENT_SCOPE)
+    set(CMAKE_C23_COMPILE_FEATURES ${CMAKE_C23_COMPILE_FEATURES} PARENT_SCOPE)
 
     message(CHECK_PASS "done")
 
