@@ -739,6 +739,7 @@ private:
   F(c_std_90)                                                                 \
   F(c_std_99)                                                                 \
   F(c_std_11)                                                                 \
+  F(c_std_17)                                                                 \
   FOR_EACH_C90_FEATURE(F)                                                     \
   FOR_EACH_C99_FEATURE(F)                                                     \
   FOR_EACH_C11_FEATURE(F)
