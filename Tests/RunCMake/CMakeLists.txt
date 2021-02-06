@@ -420,7 +420,9 @@ function(add_RunCMake_test_try_compile)
   if(CMAKE_VERSION VERSION_LESS 3.20.20210225 AND "x${CMAKE_C_COMPILER_ID}" STREQUAL "xClang")
     # Older CMake versions do not know about Clang MSVC compatibility mode
     # standards. Approximate the logic from Clang-C.cmake.
-    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.5.2)
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0)
+      set(CMAKE_C_STANDARD_DEFAULT 17)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.5.2)
       set(CMAKE_C_STANDARD_DEFAULT 11)
     endif()
   endif()
