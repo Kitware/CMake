@@ -36,4 +36,9 @@ elseif (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
   set(CMAKE_C11_EXTENSION_COMPILE_OPTION "-std=gnu1x")
 endif()
 
-__compiler_check_default_language_standard(C 3.4 90 5.0 11)
+if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1)
+  set(CMAKE_C17_STANDARD_COMPILE_OPTION "-std=c17")
+  set(CMAKE_C17_EXTENSION_COMPILE_OPTION "-std=gnu17")
+endif()
+
+__compiler_check_default_language_standard(C 3.4 90 5.0 11 8.1 17)
