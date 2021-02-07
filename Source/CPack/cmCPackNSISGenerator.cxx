@@ -209,6 +209,25 @@ int cmCPackNSISGenerator::PackageFiles()
                             "ManifestDPIAware true");
   }
 
+  if (this->IsSet("CPACK_NSIS_BRANDING_TEXT")) {
+    // Default position to LEFT
+    std::string brandingTextPosition = "LEFT";
+    if (this->IsSet("CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION")) {
+      std::string wantedPosition =
+        this->GetOption("CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION");
+      const std::set<std::string> possiblePositions{ "CENTER", "LEFT",
+                                                     "RIGHT" };
+      if (possiblePositions.find(wantedPosition) != possiblePositions.end()) {
+        brandingTextPosition = wantedPosition;
+      }
+    }
+    std::string brandingTextCode =
+      cmStrCat("BrandingText /TRIM", brandingTextPosition, " \"",
+               this->GetOption("CPACK_NSIS_BRANDING_TEXT"), "\"\n");
+    this->SetOptionIfNotSet("CPACK_NSIS_BRANDING_TEXT_CODE",
+                            brandingTextCode.c_str());
+  }
+
   // Setup all of the component sections
   if (this->Components.empty()) {
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLATION_TYPES", "");
