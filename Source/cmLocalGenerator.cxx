@@ -644,6 +644,8 @@ void cmLocalGenerator::GenerateInstallRules()
     /* clang-format on */
   }
 
+  this->AddGeneratorSpecificInstallSetup(fout);
+
   // Ask each install generator to write its code.
   cmPolicies::PolicyStatus status = this->GetPolicyStatus(cmPolicies::CMP0082);
   auto const& installers = this->Makefile->GetInstallGenerators();

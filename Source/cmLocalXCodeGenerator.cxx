@@ -4,6 +4,7 @@
 
 #include "cmGeneratorTarget.h"
 #include "cmGlobalXCodeGenerator.h"
+#include "cmMakefile.h"
 #include "cmSourceFile.h"
 
 class cmGeneratorTarget;
@@ -45,12 +46,65 @@ void cmLocalXCodeGenerator::Generate()
   }
 }
 
-void cmLocalXCodeGenerator::GenerateInstallRules()
+void cmLocalXCodeGenerator::AddGeneratorSpecificInstallSetup(std::ostream& os)
 {
-  cmLocalGenerator::GenerateInstallRules();
-
+  // First check if we need to warn about incompatible settings
   for (const auto& target : this->GetGeneratorTargets()) {
     target->HasMacOSXRpathInstallNameDir("");
+  }
+
+  // CMakeIOSInstallCombined.cmake needs to know the location of the top of
+  // the build directory
+  os << "set(CMAKE_BINARY_DIR \"" << this->GetBinaryDirectory() << "\")\n\n";
+
+  if (this->Makefile->PlatformIsAppleEmbedded()) {
+    std::string platformName;
+    switch (this->Makefile->GetAppleSDKType()) {
+      case cmMakefile::AppleSDK::IPhoneOS:
+        platformName = "iphoneos";
+        break;
+      case cmMakefile::AppleSDK::IPhoneSimulator:
+        platformName = "iphonesimulator";
+        break;
+      case cmMakefile::AppleSDK::AppleTVOS:
+        platformName = "appletvos";
+        break;
+      case cmMakefile::AppleSDK::AppleTVSimulator:
+        platformName = "appletvsimulator";
+        break;
+      case cmMakefile::AppleSDK::WatchOS:
+        platformName = "watchos";
+        break;
+      case cmMakefile::AppleSDK::WatchSimulator:
+        platformName = "watchsimulator";
+        break;
+      case cmMakefile::AppleSDK::MacOS:
+        break;
+    }
+    if (!platformName.empty()) {
+      // The effective platform name is just the platform name with a hyphen
+      // prepended. We can get the SUPPORTED_PLATFORMS from the project file
+      // at runtime, so we don't need to compute that here.
+      /* clang-format off */
+      os <<
+        "if(NOT PLATFORM_NAME)\n"
+        "  if(NOT \"$ENV{PLATFORM_NAME}\" STREQUAL \"\")\n"
+        "    set(PLATFORM_NAME \"$ENV{PLATFORM_NAME}\")\n"
+        "  endif()\n"
+        "  if(NOT PLATFORM_NAME)\n"
+        "    set(PLATFORM_NAME " << platformName << ")\n"
+        "  endif()\n"
+        "endif()\n\n"
+        "if(NOT EFFECTIVE_PLATFORM_NAME)\n"
+        "  if(NOT \"$ENV{EFFECTIVE_PLATFORM_NAME}\" STREQUAL \"\")\n"
+        "    set(EFFECTIVE_PLATFORM_NAME \"$ENV{EFFECTIVE_PLATFORM_NAME}\")\n"
+        "  endif()\n"
+        "  if(NOT EFFECTIVE_PLATFORM_NAME)\n"
+        "    set(EFFECTIVE_PLATFORM_NAME -" << platformName << ")\n"
+        "  endif()\n"
+        "endif()\n\n";
+      /* clang-format off */
+    }
   }
 }
 
