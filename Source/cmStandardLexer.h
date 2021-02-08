@@ -7,7 +7,7 @@
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 600
 #endif
-#if !defined(_WIN32) && !defined(__sun)
+#if !defined(_POSIX_C_SOURCE) && !defined(_WIN32) && !defined(__sun)
 /* POSIX APIs are needed */
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _POSIX_C_SOURCE 200809L
