@@ -155,9 +155,16 @@ function(xctest_add_bundle target testee)
       set_target_properties(${target} PROPERTIES
         XCODE_ATTRIBUTE_BUNDLE_LOADER "$(TEST_HOST)"
         XCODE_ATTRIBUTE_TEST_HOST "$<TARGET_FILE:${testee}>")
-      if(NOT XCODE_VERSION VERSION_LESS 7.3)
+      if(XCODE_VERSION VERSION_GREATER_EQUAL 7.3)
+        # CMAKE_XCODE_BUILD_SYSTEM equals 12 means that at least Xcode 11.x is used.
+        if(CMAKE_XCODE_BUILD_SYSTEM EQUAL 12 AND
+           NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+          set(_output_directory "$<TARGET_BUNDLE_CONTENT_DIR:${testee}>")
+        else()
+          set(_output_directory "$<TARGET_BUNDLE_CONTENT_DIR:${testee}>/PlugIns")
+        endif()
         set_target_properties(${target} PROPERTIES
-          LIBRARY_OUTPUT_DIRECTORY "$<TARGET_BUNDLE_CONTENT_DIR:${testee}>/PlugIns")
+          LIBRARY_OUTPUT_DIRECTORY "${_output_directory}")
       endif()
     else(XCODE)
       target_link_libraries(${target}
