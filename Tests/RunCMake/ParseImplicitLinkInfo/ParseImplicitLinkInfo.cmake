@@ -50,6 +50,7 @@ else()
 endif()
 
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
+include(${CMAKE_ROOT}/Modules/CMakeParseLibraryArchitecture.cmake)
 
 #
 # load_compiler_info: read infile, parsing out cmake compiler info
@@ -80,6 +81,7 @@ function(load_compiler_info infile lang_var outcmvars_var outstr_var)
     message("load_compiler_info: ${infile} no LANG info; default to C")
     set(lang C)
   endif()
+
   set(${lang_var} "${lang}" PARENT_SCOPE)
   set(${outcmvars_var} "${outcmvars}" PARENT_SCOPE)
   set(${outstr_var} "${outstr}" PARENT_SCOPE)
@@ -92,6 +94,21 @@ function(unload_compiler_info cmvars)
   foreach(var IN LISTS cmvars)
     unset("${var}" PARENT_SCOPE)
   endforeach()
+endfunction()
+
+
+#
+# load_platform_info: establish CMAKE_LIBRARY_ARCHITECTURE_REGEX
+# based on the target platform.
+#
+function(load_platform_info target)
+  if(target MATCHES "linux-")
+    set(CMAKE_LIBRARY_ARCHITECTURE_REGEX "[a-z0-9_]+(-[a-z0-9_]+)?-linux-gnu[a-z0-9_]*" PARENT_SCOPE)
+    set(CMAKE_LIBRARY_ARCHITECTURE_REGEX_VERSIONED "gcc/[a-z0-9_]+(-[a-z0-9_]+)?-linux(-gnu)?/[0-9]+(\\.[0-9]+\\.[0-9]+)*" PARENT_SCOPE)
+  else()
+    unset(CMAKE_LIBRARY_ARCHITECTURE_REGEX PARENT_SCOPE)
+    unset(CMAKE_LIBRARY_ARCHITECTURE_REGEX_VERSIONED PARENT_SCOPE)
+  endif()
 endfunction()
 
 #
@@ -112,10 +129,12 @@ foreach(t ${targets})
   endif()
 
   load_compiler_info(${infile} lang cmvars input)
+  load_platform_info(${t})
 
   # Need to handle files with empty entries for both libs or dirs
   set(implicit_lib_output "")
   set(idirs_output "")
+  set(library_arch_output "")
   file(STRINGS ${outfile} outputs)
   foreach(line IN LISTS outputs)
     if(line MATCHES "libs=")
@@ -124,13 +143,19 @@ foreach(t ${targets})
     if(line MATCHES "dirs=")
       string(REPLACE "dirs=" "" idirs_output "${line}")
     endif()
+    if(line MATCHES "library_arch=")
+      string(REPLACE "library_arch=" "" library_arch_output "${line}")
+    endif()
   endforeach()
 
   cmake_parse_implicit_link_info("${input}" implicit_libs idirs implicit_fwks log
       "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}")
 
+  set(library_arch)
+  cmake_parse_library_architecture("${idirs}" library_arch)
+
   # File format
-  # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\n")
+  # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}")
 
   if(t MATCHES "-empty$")          # empty isn't supposed to parse
     if("${state}" STREQUAL "done")
@@ -140,6 +165,8 @@ foreach(t ${targets})
     message("${t} parse failed: state=${state}, '${idirs}' does not match '${idirs_output}'")
   elseif(NOT "${implicit_libs}" STREQUAL "${implicit_lib_output}")
     message("${t} parse failed: state=${state}, '${implicit_libs}' does not match '${implicit_lib_output}'")
+  elseif(library_arch AND NOT "${library_arch}" STREQUAL "${library_arch_output}")
+    message("${t} parse failed: state=${state}, '${library_arch}' does not match '${library_arch_output}'")
   endif()
 
   unload_compiler_info("${cmvars}")
