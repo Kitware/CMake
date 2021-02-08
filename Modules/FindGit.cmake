@@ -80,26 +80,26 @@ if(GIT_EXECUTABLE)
   # Avoid querying the version if we've already done that this run. For
   # projects that use things like ExternalProject or FetchContent heavily,
   # this saving can be measurable on some platforms.
-  set(__doGitVersionCheck YES)
-  if(DEFINED GIT_VERSION_STRING)
-    # This is an internal property, projects must not try to use it.
-    # We don't want this stored in the cache because it might still change
-    # between CMake runs, but it shouldn't change during a run.
-    get_property(__gitVersionProp GLOBAL
-      PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
-    )
-    if(__gitVersionProp)
-      list(GET __gitVersionProp 0 __gitExe)
-      list(GET __gitVersionProp 1 __gitVersion)
-      if("${__gitExe}" STREQUAL "${GIT_EXECUTABLE}" AND
-         "${__gitVersion}" STREQUAL "${GIT_VERSION_STRING}")
-        set(__doGitVersionCheck NO)
-      endif()
+  #
+  # This is an internal property, projects must not try to use it.
+  # We don't want this stored in the cache because it might still change
+  # between CMake runs, but it shouldn't change during a run for a given
+  # git executable location.
+  set(__doGitVersionCheck TRUE)
+  get_property(__gitVersionProp GLOBAL
+    PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
+  )
+  if(__gitVersionProp)
+    list(GET __gitVersionProp 0 __gitExe)
+    list(GET __gitVersionProp 1 __gitVersion)
+    if(__gitExe STREQUAL GIT_EXECUTABLE AND NOT __gitVersion STREQUAL "")
+      set(GIT_VERSION_STRING "${__gitVersion}")
+      set(__doGitVersionCheck FALSE)
     endif()
-    unset(__gitVersionProp)
     unset(__gitExe)
     unset(__gitVersion)
   endif()
+  unset(__gitVersionProp)
 
   if(__doGitVersionCheck)
     execute_process(COMMAND ${GIT_EXECUTABLE} --version
@@ -121,6 +121,7 @@ if(GIT_EXECUTABLE)
     add_executable(Git::Git IMPORTED)
     set_property(TARGET Git::Git PROPERTY IMPORTED_LOCATION "${GIT_EXECUTABLE}")
   endif()
+  unset(_findgit_role)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
