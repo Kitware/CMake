@@ -65,8 +65,8 @@ The following individuals and institutions are among the Contributors:
 * Jan Woetzel
 * Julien Schueller
 * Kelly Thompson <kgt@lanl.gov>
-* Laurent Montel <montel@kde.org>
 * Konstantin Podsvirov <konstantin@podsvirov.pro>
+* Laurent Montel <montel@kde.org>
 * Mario Bensi <mbensi@ipsquad.net>
 * Martin Gräßlin <mgraesslin@kde.org>
 * Mathieu Malaterre <mathieu.malaterre@gmail.com>
