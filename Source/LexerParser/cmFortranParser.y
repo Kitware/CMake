@@ -55,6 +55,7 @@ static void cmFortran_yyerror(yyscan_t yyscanner, const char* message)
 #endif
 #if defined(__GNUC__) && __GNUC__ >= 8
 # pragma GCC diagnostic ignored "-Wconversion"
+# pragma GCC diagnostic ignored "-Wfree-nonheap-object"
 #endif
 %}
 
