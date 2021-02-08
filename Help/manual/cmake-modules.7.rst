@@ -15,7 +15,6 @@ These modules are loaded using the :command:`include` command.
 .. toctree::
    :maxdepth: 1
 
-   /module/AddFileDependencies
    /module/AndroidTestUtilities
    /module/BundleUtilities
    /module/CheckCCompilerFlag
@@ -272,6 +271,7 @@ Deprecated Utility Modules
 .. toctree::
    :maxdepth: 1
 
+   /module/AddFileDependencies
    /module/CMakeDetermineVSServicePack
    /module/CMakeExpandImportedTargets
    /module/CMakeForceCompiler
