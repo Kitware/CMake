@@ -84,8 +84,8 @@ The options are:
 
   Arguments to ``COMMAND`` may use
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
-  Use the ``TARGET_FILE`` generator expression to refer to the location of
-  a target later in the command line (i.e. as a command argument rather
+  Use the :genex:`TARGET_FILE` generator expression to refer to the location
+  of a target later in the command line (i.e. as a command argument rather
   than as the command to execute).
 
   Whenever one of the following target based generator expressions are used as

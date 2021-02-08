@@ -12,5 +12,5 @@ This property is initialized by the value of the variable
 created.
 
 This property supports :manual:`generator expressions <cmake-generator-expressions(7)>`.
-In particular, the ``$<INSTALL_PREFIX>`` generator expression can be used to set the
-directory relative to the install-time prefix.
+In particular, the :genex:`$<INSTALL_PREFIX>` generator expression can be
+used to set the directory relative to the install-time prefix.
