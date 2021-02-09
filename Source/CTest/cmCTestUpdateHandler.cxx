@@ -240,7 +240,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   if (localModifications) {
     xml.Content("Update error: "
                 "There are modified or conflicting files in the repository");
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
+    cmCTestLog(this->CTest, WARNING,
                "   There are modified or conflicting files in the repository"
                  << std::endl);
   }
