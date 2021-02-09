@@ -32,7 +32,7 @@ public:
   void AppendFlagEscape(std::string& flags,
                         const std::string& rawFlag) const override;
   void Generate() override;
-  virtual void GenerateInstallRules();
+  void AddGeneratorSpecificInstallSetup(std::ostream& os) override;
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, std::string>& mapping,
     cmGeneratorTarget const* gt = nullptr) override;
