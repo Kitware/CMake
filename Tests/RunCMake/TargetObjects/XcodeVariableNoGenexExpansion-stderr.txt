@@ -1,0 +1,10 @@
+CMake Error at XcodeVariableNoGenexExpansion\.cmake:9 \(file\):
+  Error evaluating generator expression:
+
+    \$\<TARGET_OBJECTS:A\>
+
+  The evaluation of the TARGET_OBJECTS generator expression is only suitable
+  for consumption by CMake \(limited under Xcode with multiple architectures\)\.
+  It is not suitable for writing out elsewhere\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

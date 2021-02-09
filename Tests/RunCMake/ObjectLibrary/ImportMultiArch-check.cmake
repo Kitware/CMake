@@ -1,0 +1,15 @@
+set(xcProjectFile "${RunCMake_TEST_BINARY_DIR}/ImportMultiArch.xcodeproj/project.pbxproj")
+if(NOT EXISTS "${xcProjectFile}")
+  set(RunCMake_TEST_FAILED "Project file ${xcProjectFile} does not exist.")
+  return()
+endif()
+
+file(READ ${xcProjectFile} pbxFileContents)
+foreach(config IN ITEMS Debug Release RelWithDebInfo MinSizeRel)
+  set(regex "--findconfig-${config}[^
+]*\\$\\(CURRENT_ARCH\\)")
+  if(NOT pbxFileContents MATCHES "${regex}")
+    set(RunCMake_TEST_FAILED "$(CURRENT_ARCH) not preserved for config ${config}")
+    return()
+  endif()
+endforeach()
