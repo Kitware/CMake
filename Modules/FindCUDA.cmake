@@ -834,21 +834,18 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
     )
 
   if (CUDA_TOOLKIT_ROOT_DIR_NVCC)
-    # If NVCC is a symlink due to a wrapper script (e.g. ccache or colornvcc), then invoke it to find the
-    # real non-scattered toolkit.
-    if(IS_SYMLINK ${CUDA_TOOLKIT_ROOT_DIR_NVCC})
-      execute_process(COMMAND ${CUDA_TOOLKIT_ROOT_DIR_NVCC} "-v" "__cmake_determine_cuda" ERROR_VARIABLE NVCC_ERR)
-      if(NVCC_ERR MATCHES " _HERE_=([^\r\n]*)")
-        set(CUDA_TOOLKIT_ROOT_DIR_NVCC_PAR "${CMAKE_MATCH_1}")
-      else()
-        message(FATAL_ERROR "Could not execute nvcc with -v.")
-      endif()
-      unset(NVCC_ERR)
+    # Given that NVCC can be provided by multiple different sources (NVIDIA HPC SDK, CUDA Toolkit, distro)
+    # each of which has a different layout, we need to extract the CUDA toolkit root from the compiler
+    # itself, allowing us to support numerous different scattered toolkit layouts
+    execute_process(COMMAND ${CUDA_TOOLKIT_ROOT_DIR_NVCC} "-v" "__cmake_determine_cuda" ERROR_VARIABLE NVCC_ERR)
+    if(NVCC_ERR MATCHES "TOP=([^\r\n]*)")
+      get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CMAKE_MATCH_1}" ABSOLUTE CACHE)
     else()
-      get_filename_component(CUDA_TOOLKIT_ROOT_DIR_NVCC_PAR "${CUDA_TOOLKIT_ROOT_DIR_NVCC}" DIRECTORY)
+      get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CUDA_TOOLKIT_ROOT_DIR_NVCC}" DIRECTORY)
+      get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CUDA_TOOLKIT_ROOT_DIR}" DIRECTORY CACHE)
     endif()
+    unset(NVCC_ERR)
 
-    get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CUDA_TOOLKIT_ROOT_DIR_NVCC_PAR}" DIRECTORY CACHE)
     string(REGEX REPLACE "[/\\\\]?bin[64]*[/\\\\]?$" "" CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT_DIR})
     # We need to force this back into the cache.
     set(CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT_DIR} CACHE PATH "Toolkit location." FORCE)
