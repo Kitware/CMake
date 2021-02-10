@@ -296,6 +296,12 @@ Other variables one may set to control this module are:
   Default value for ``Boost_LIBRARY_DIR_RELEASE`` and
   ``Boost_LIBRARY_DIR_DEBUG``.
 
+``Boost_NO_WARN_NEW_VERSIONS``
+  .. versionadded:: 3.20
+
+  Set to ``ON`` to suppress the warning about unknown dependencies for new
+  Boost versions.
+
 On Visual Studio and Borland compilers Boost headers request automatic
 linking to corresponding libraries.  This requires matching libraries
 to be linked explicitly or available in the link library search path.
@@ -1344,7 +1350,7 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
       set(_Boost_TIMER_DEPENDENCIES chrono)
       set(_Boost_WAVE_DEPENDENCIES filesystem serialization thread chrono date_time atomic)
       set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
-      if(Boost_VERSION_STRING VERSION_GREATER_EQUAL 1.76.0)
+      if(Boost_VERSION_STRING VERSION_GREATER_EQUAL 1.76.0 AND NOT Boost_NO_WARN_NEW_VERSIONS)
         message(WARNING "New Boost version may have incorrect or missing dependencies and imported targets")
       endif()
     endif()
