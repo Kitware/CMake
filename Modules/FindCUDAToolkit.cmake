@@ -737,6 +737,7 @@ elseif(NOT CUDAToolkit_FIND_QUIETLY)
 endif()
 
 if(CUDAToolkit_NVCC_EXECUTABLE AND
+   CMAKE_CUDA_COMPILER_VERSION AND
    CUDAToolkit_NVCC_EXECUTABLE STREQUAL CMAKE_CUDA_COMPILER)
   # Need to set these based off the already computed CMAKE_CUDA_COMPILER_VERSION value
   # This if statement will always match, but is used to provide variables for MATCH 1,2,3...

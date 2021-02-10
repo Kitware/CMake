@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.15)
 project(CudaOnlyToolkit CUDA)
 find_package(CUDAToolkit REQUIRED)
 
+if(NOT DEFINED CUDAToolkit_VERSION)
+  message(FATAL_ERROR "expected CUDAToolkit variable CUDAToolkit_VERSION not found")
+endif()
+
 message(STATUS "CUDAToolkit_VERSION: ${CUDAToolkit_VERSION}")
 message(STATUS "CUDAToolkit_VERSION_MAJOR: ${CUDAToolkit_VERSION_MAJOR}")
 message(STATUS "CUDAToolkit_VERSION_MINOR: ${CUDAToolkit_VERSION_MINOR}")
