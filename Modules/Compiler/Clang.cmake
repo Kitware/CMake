@@ -19,7 +19,6 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
   macro(__compiler_clang lang)
-    set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc ")
   endmacro()
 else()
   include(Compiler/GNU)
