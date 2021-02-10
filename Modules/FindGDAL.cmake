@@ -68,9 +68,9 @@ find_path(GDAL_INCLUDE_DIR gdal.h
     ENV GDAL_DIR
     ENV GDAL_ROOT
   PATH_SUFFIXES
-     include/gdal
-     include/GDAL
-     include
+    include/gdal
+    include/GDAL
+    include
 )
 
 if(UNIX)
