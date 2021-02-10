@@ -52,6 +52,8 @@ The following variables may be set to modify the search strategy:
   If set, ``gdal-config`` will not be used. This can be useful if there are
   GDAL libraries built with autotools (which provide the tool) and CMake (which
   do not) in the same environment.
+``GDAL_ADDITIONAL_LIBRARY_VERSIONS``
+  Extra versions of library names to search for.
 #]=======================================================================]
 
 # $GDALDIR is an environment variable that would
@@ -145,8 +147,20 @@ if(UNIX AND NOT FindGDAL_SKIP_GDAL_CONFIG)
     endif()
 endif()
 
+# GDAL name its library when built with CMake as `gdal${major}${minor}`.
+set(_gdal_versions
+    ${GDAL_ADDITIONAL_LIBRARY_VERSIONS} 3.0 2.4 2.3 2.2 2.1 2.0 1.11 1.10 1.9 1.8 1.7 1.6 1.5 1.4 1.3 1.2)
+
+set(_gdal_libnames)
+foreach (_gdal_version IN LISTS _gdal_versions)
+    string(REPLACE "." "" _gdal_version "${_gdal_version}")
+    list(APPEND _gdal_libnames "gdal${_gdal_version}" "GDAL${_gdal_version}")
+endforeach ()
+unset(_gdal_version)
+unset(_gdal_versions)
+
 find_library(GDAL_LIBRARY
-  NAMES ${_gdal_lib} gdal gdal_i gdal1.5.0 gdal1.4.0 gdal1.3.2 GDAL
+  NAMES ${_gdal_lib} ${_gdal_libnames} gdal gdal_i gdal1.5.0 gdal1.4.0 gdal1.3.2 GDAL
   HINTS
      ENV GDAL_DIR
      ENV GDAL_ROOT
@@ -155,6 +169,8 @@ find_library(GDAL_LIBRARY
   DOC "Path to the GDAL library"
 )
 mark_as_advanced(GDAL_LIBRARY)
+unset(_gdal_libnames)
+unset(_gdal_lib)
 
 if (EXISTS "${GDAL_INCLUDE_DIR}/gdal_version.h")
     file(STRINGS "${GDAL_INCLUDE_DIR}/gdal_version.h" _gdal_version
