@@ -71,6 +71,7 @@ find_path(GDAL_INCLUDE_DIR gdal.h
     include/gdal
     include/GDAL
     include
+  DOC "Path to the GDAL include directory"
 )
 mark_as_advanced(GDAL_INCLUDE_DIR)
 
@@ -84,6 +85,7 @@ if(UNIX)
           ENV GDAL_DIR
           ENV GDAL_ROOT
         PATH_SUFFIXES bin
+        DOC "Path to the gdal-config tool"
     )
     mark_as_advanced(GDAL_CONFIG)
 
@@ -143,6 +145,7 @@ find_library(GDAL_LIBRARY
      ENV GDAL_ROOT
      ${_gdal_libpath}
   PATH_SUFFIXES lib
+  DOC "Path to the GDAL library"
 )
 mark_as_advanced(GDAL_LIBRARY)
 
