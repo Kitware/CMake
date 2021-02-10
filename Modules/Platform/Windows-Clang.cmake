@@ -169,6 +169,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     macro(__windows_compiler_clang_base lang)
       set(_COMPILE_${lang} "${_COMPILE_${lang}_MSVC}")
       __windows_compiler_msvc(${lang})
+      set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc ")
     endmacro()
   else()
     cmake_policy(GET CMP0091 __WINDOWS_CLANG_CMP0091)
