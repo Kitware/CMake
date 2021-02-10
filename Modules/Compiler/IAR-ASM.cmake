@@ -47,6 +47,11 @@ elseif("${CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID}" STREQUAL "8051")
   __compiler_iar_xlink(ASM)
   set(CMAKE_ASM_SOURCE_FILE_EXTENSIONS s51;asm;msa)
 
+elseif("${CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID}" STREQUAL "STM8")
+  set(CMAKE_ASM_COMPILE_OBJECT  "<CMAKE_ASM_COMPILER> --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT>")
+  __compiler_iar_ilink(ASM)
+  set(CMAKE_ASM_SOURCE_FILE_EXTENSIONS s;asm;msa)
+
 else()
   message(FATAL_ERROR "CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID not detected. This should be automatic.")
 endif()
