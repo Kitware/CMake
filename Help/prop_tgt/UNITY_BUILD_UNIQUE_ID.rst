@@ -1,6 +1,8 @@
 UNITY_BUILD_UNIQUE_ID
 ---------------------
 
+.. versionadded:: 3.20
+
 The name of a valid C-identifier which is set to a unique per-file
 value during unity builds.
 

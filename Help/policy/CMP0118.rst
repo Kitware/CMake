@@ -1,6 +1,8 @@
 CMP0118
 -------
 
+.. versionadded:: 3.20
+
 The :prop_sf:`GENERATED` source file property is now visible in all directories.
 
 Whether or not a source file is generated is an all-or-nothing global
