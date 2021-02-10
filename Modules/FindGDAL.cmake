@@ -72,6 +72,7 @@ find_path(GDAL_INCLUDE_DIR gdal.h
     include/GDAL
     include
 )
+mark_as_advanced(GDAL_INCLUDE_DIR)
 
 if(UNIX)
     # Use gdal-config to obtain the library version (this should hopefully
@@ -84,6 +85,7 @@ if(UNIX)
           ENV GDAL_ROOT
         PATH_SUFFIXES bin
     )
+    mark_as_advanced(GDAL_CONFIG)
 
     if(GDAL_CONFIG)
         execute_process(COMMAND ${GDAL_CONFIG} --libs OUTPUT_VARIABLE GDAL_CONFIG_LIBS)
@@ -142,6 +144,7 @@ find_library(GDAL_LIBRARY
      ${_gdal_libpath}
   PATH_SUFFIXES lib
 )
+mark_as_advanced(GDAL_LIBRARY)
 
 if (EXISTS "${GDAL_INCLUDE_DIR}/gdal_version.h")
     file(STRINGS "${GDAL_INCLUDE_DIR}/gdal_version.h" _gdal_version
