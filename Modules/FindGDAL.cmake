@@ -86,7 +86,7 @@ if(UNIX)
     )
 
     if(GDAL_CONFIG)
-        exec_program(${GDAL_CONFIG} ARGS --libs OUTPUT_VARIABLE GDAL_CONFIG_LIBS)
+        execute_process(COMMAND ${GDAL_CONFIG} --libs OUTPUT_VARIABLE GDAL_CONFIG_LIBS)
 
         if(GDAL_CONFIG_LIBS)
             # treat the output as a command line and split it up
