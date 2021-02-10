@@ -45,6 +45,13 @@ Hints
 
 Set ``GDAL_DIR`` or ``GDAL_ROOT`` in the environment to specify the
 GDAL installation prefix.
+
+The following variables may be set to modify the search strategy:
+
+``FindGDAL_SKIP_GDAL_CONFIG``
+  If set, ``gdal-config`` will not be used. This can be useful if there are
+  GDAL libraries built with autotools (which provide the tool) and CMake (which
+  do not) in the same environment.
 #]=======================================================================]
 
 # $GDALDIR is an environment variable that would
@@ -75,7 +82,7 @@ find_path(GDAL_INCLUDE_DIR gdal.h
 )
 mark_as_advanced(GDAL_INCLUDE_DIR)
 
-if(UNIX)
+if(UNIX AND NOT FindGDAL_SKIP_GDAL_CONFIG)
     # Use gdal-config to obtain the library version (this should hopefully
     # allow us to -lgdal1.x.y where x.y are correct version)
     # For some reason, libgdal development packages do not contain
