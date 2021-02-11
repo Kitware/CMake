@@ -18,7 +18,6 @@ set(__pch_header_OBJCXX "objective-c++-header")
 if(CMAKE_HOST_WIN32)
   # MSVC-like
   macro(__compiler_intel_llvm lang)
-    set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc ")
     if(NOT "x${lang}" STREQUAL "xFortran")
       set(CMAKE_${lang}_COMPILE_OPTIONS_INVALID_PCH -Winvalid-pch)
     endif()
