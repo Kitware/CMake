@@ -1,4 +1,4 @@
-^CMake Deprecation Warning at CMP0079-link-OLD.cmake:[0-9]+ \(cmake_policy\):
+^CMake Deprecation Warning at CMP0079-iface-OLD.cmake:[0-9]+ \(cmake_policy\):
   The OLD behavior for policy CMP0079 will be removed from a future version
   of CMake.
 
@@ -7,10 +7,4 @@
   specific short-term circumstances.  Projects should be ported to the NEW
   behavior and not rely on setting a policy to OLD.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
-+
-CMake Error at CMP0079-link/CMakeLists.txt:[0-9]+ \(target_link_libraries\):
-  Attempt to add link library "foo" to target "top" which is not built in
-  this directory.
-
-  This is allowed only when policy CMP0079 is set to NEW.$
+  CMakeLists.txt:[0-9]+ \(include\)$
