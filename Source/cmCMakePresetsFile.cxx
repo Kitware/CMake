@@ -631,8 +631,6 @@ auto const TestPresetExecutionHelper =
             PresetOptionalIntHelper, false)
       .Bind("showOnly"_s, &TestPreset::ExecutionOptions::ShowOnly,
             TestPresetOptionalExecutionShowOnlyHelper, false)
-      .Bind("rerunFailed"_s, &TestPreset::ExecutionOptions::RerunFailed,
-            PresetOptionalBoolHelper, false)
       .Bind("repeat"_s, &TestPreset::ExecutionOptions::Repeat,
             TestPresetOptionalExecutionRepeatHelper, false)
       .Bind("interactiveDebugging"_s,
@@ -1340,7 +1338,6 @@ cmCMakePresetsFile::TestPreset::VisitPresetInherit(
                     parentExecution.ResourceSpecFile);
       InheritOptionalValue(execution.TestLoad, parentExecution.TestLoad);
       InheritOptionalValue(execution.ShowOnly, parentExecution.ShowOnly);
-      InheritOptionalValue(execution.RerunFailed, parentExecution.RerunFailed);
       InheritOptionalValue(execution.Repeat, parentExecution.Repeat);
       InheritOptionalValue(execution.InteractiveDebugging,
                            parentExecution.InteractiveDebugging);
