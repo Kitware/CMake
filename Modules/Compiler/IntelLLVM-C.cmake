@@ -27,7 +27,6 @@ endif()
 set(CMAKE_C90_STANDARD__HAS_FULL_SUPPORT ON)
 set(CMAKE_C99_STANDARD__HAS_FULL_SUPPORT ON)
 set(CMAKE_C11_STANDARD__HAS_FULL_SUPPORT ON)
-set(CMAKE_C17_STANDARD__HAS_FULL_SUPPORT ON)
 
 if(NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "-std=c90")
@@ -38,9 +37,6 @@ if(NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
 
   set(CMAKE_C11_STANDARD_COMPILE_OPTION "-std=c11")
   set(CMAKE_C11_EXTENSION_COMPILE_OPTION "-std=gnu11")
-
-  set(CMAKE_C17_STANDARD_COMPILE_OPTION "-std=c17")
-  set(CMAKE_C17_EXTENSION_COMPILE_OPTION "-std=gnu17")
 else()
   # clang-cl doesn't have any of these
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "")
@@ -51,13 +47,12 @@ else()
 
   set(CMAKE_C11_STANDARD_COMPILE_OPTION "")
   set(CMAKE_C11_EXTENSION_COMPILE_OPTION "")
-
-  set(CMAKE_C17_STANDARD_COMPILE_OPTION "")
-  set(CMAKE_C17_EXTENSION_COMPILE_OPTION "")
 endif()
 
 if(NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
-  __compiler_check_default_language_standard(C 2020 17)
+  # FIXME: The compiler actually defaults to C17, but
+  # CMake does not yet model or detect that standard.
+  __compiler_check_default_language_standard(C 2020 11)
 else()
   set(CMAKE_C_STANDARD_DEFAULT "")
 endif()
