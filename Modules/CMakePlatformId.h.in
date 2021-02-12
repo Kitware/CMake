@@ -186,6 +186,9 @@
 # elif defined(__ICC8051__)
 #  define ARCHITECTURE_ID "8051"
 
+# elif defined(__ICCSTM8__)
+#  define ARCHITECTURE_ID "STM8"
+
 # else /* unknown architecture */
 #  define ARCHITECTURE_ID ""
 # endif

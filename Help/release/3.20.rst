@@ -58,6 +58,8 @@ Compilers
   The Intel oneAPI Classic compilers (``icc``, ``icpc``, and ``ifort``)
   continue to be supported with compiler id ``Intel``.
 
+* Support was added for the IAR STM8 compiler.
+
 Platforms
 ---------
 
