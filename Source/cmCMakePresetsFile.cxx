@@ -1278,6 +1278,7 @@ cmCMakePresetsFile::TestPreset::VisitPresetInherit(
       InheritOptionalValue(output.Debug, parentOutput.Debug);
       InheritOptionalValue(output.OutputOnFailure,
                            parentOutput.OutputOnFailure);
+      InheritOptionalValue(output.Quiet, parentOutput.Quiet);
       InheritString(output.OutputLogFile, parentOutput.OutputLogFile);
       InheritOptionalValue(output.LabelSummary, parentOutput.LabelSummary);
       InheritOptionalValue(output.SubprojectSummary,
