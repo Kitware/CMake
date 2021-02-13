@@ -60,7 +60,7 @@ if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.0)
 endif()
 
 if(NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
-  __compiler_check_default_language_standard(C 3.4 99 3.6 11)
+  __compiler_check_default_language_standard(C 2.1 99 3.5.2 11)
 else()
   set(CMAKE_C_STANDARD_DEFAULT "")
 endif()
