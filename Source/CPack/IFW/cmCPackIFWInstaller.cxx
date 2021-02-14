@@ -188,9 +188,11 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     } else {
       cmCPackIFWLogger(
         WARNING,
-        "Option CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST is set to value \""
-          << option << "\". But has no any effect for QtIFW less than 4.0 "
-          << "and will be skipped." << std::endl);
+        "Option CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST is set to \""
+          << option
+          << "\", but it is only supported with QtIFW version 4.0 or later. "
+             "It is being ignored because you are using QtIFW version "
+          << this->Generator->FrameworkVersion.data() << std::endl);
     }
   }
 
