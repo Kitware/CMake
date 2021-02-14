@@ -275,9 +275,8 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
 class cmCPackIFWResourcesParser : public cmXMLParser
 {
 public:
-  cmCPackIFWResourcesParser(cmCPackIFWInstaller* i)
+  explicit cmCPackIFWResourcesParser(cmCPackIFWInstaller* i)
     : installer(i)
-    , file(false)
   {
     this->path = i->Directory + "/resources";
   }
@@ -296,7 +295,9 @@ public:
   }
 
   cmCPackIFWInstaller* installer;
-  bool file, hasFiles, hasErrors;
+  bool file = false;
+  bool hasFiles = false;
+  bool hasErrors = false;
   std::string path, basePath;
 
 protected:
