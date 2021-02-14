@@ -408,3 +408,20 @@ Changes made since CMake 3.19.0 include the following.
   variable introduced in 3.19.0 previously worked only with the
   :generator:`Visual Studio 14 2015` generator.  It has now been fixed to
   work with :ref:`Visual Studio Generators` for later VS versions too.
+
+
+3.19.5
+------
+
+* When :prop_tgt:`IOS_INSTALL_COMBINED` is enabled and the :generator:`Xcode`
+  generator is used, it is now possible to initiate an install or package
+  creation by running ``cmake --install`` or ``cpack`` from the command line.
+  When using the Xcode new build system, these are the only supported methods
+  due to a limitation of Xcode.  Initiating these operations by building the
+  ``install`` or ``package`` targets in Xcode is only supported when using
+  the legacy build system.
+
+* The framework handling introduced in 3.19.0 as part of supporting Xcode's
+  *Link Binaries With Libraries* build phase broke the ability to switch
+  between device and simulator builds without reconfiguring.  That capability
+  has now been restored.
