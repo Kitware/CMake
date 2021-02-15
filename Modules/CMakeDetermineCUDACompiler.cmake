@@ -175,14 +175,15 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     # Given that NVCC can be provided by multiple different sources (NVIDIA HPC SDK, CUDA Toolkit, distro)
     # each of which has a different layout, we need to extract the CUDA toolkit root from the compiler
     # itself, allowing us to support numerous different scattered toolkit layouts
-    execute_process(COMMAND ${_CUDA_NVCC_EXECUTABLE} "-v" "__cmake_determine_cuda" ERROR_VARIABLE NVCC_ERR)
-    if(NVCC_ERR MATCHES "TOP=([^\r\n]*)")
+    execute_process(COMMAND ${_CUDA_NVCC_EXECUTABLE} "-v" "__cmake_determine_cuda"
+      OUTPUT_VARIABLE _CUDA_NVCC_OUT ERROR_VARIABLE _CUDA_NVCC_OUT)
+    if(_CUDA_NVCC_OUT MATCHES "TOP=([^\r\n]*)")
       get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_MATCH_1}" ABSOLUTE)
     else()
       get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${_CUDA_NVCC_EXECUTABLE}" DIRECTORY)
       get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}" DIRECTORY)
     endif()
-    unset(NVCC_ERR)
+    unset(_CUDA_NVCC_OUT)
 
     set(CMAKE_CUDA_DEVICE_LINKER "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/bin/nvlink${CMAKE_EXECUTABLE_SUFFIX}")
     set(CMAKE_CUDA_FATBINARY "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/bin/fatbinary${CMAKE_EXECUTABLE_SUFFIX}")
