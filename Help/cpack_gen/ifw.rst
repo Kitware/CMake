@@ -111,9 +111,11 @@ Package
 
 .. variable:: CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST
 
+ .. versionadded:: 3.20
+
  Set to ``OFF`` if the widget listing installer pages on the left side of the wizard should not be shown.
 
- Is ``ON`` by default.
+ It is ``ON`` by default, but will only have an effect if using QtIFW 4.0 or later.
 
 .. variable:: CPACK_IFW_PACKAGE_TITLE_COLOR
 
