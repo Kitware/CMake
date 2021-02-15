@@ -103,16 +103,16 @@ Commands
 * The :command:`cmake_path` command was added for operations on
   filesystem paths.
 
-* The :command:`configure_file` command gained a ``USE_SOURCE_PERMISSIONS``
-  and ``FILE_PERMISSIONS`` option to support copying of permissions of source
-  file and specifying user defined permissions.
+* The :command:`configure_file` command gained ``USE_SOURCE_PERMISSIONS``
+  and ``FILE_PERMISSIONS`` options to support copying of permissions of the
+  source file and using specified permissions respectively.
 
-* The :command:`file(GENERATE)` command gained ``NEWLINE_STYLE`` option to
-  support newline style of the generated file.
+* The :command:`file(GENERATE)` command gained a ``NEWLINE_STYLE`` option to
+  specify how newlines are handled for the generated file.
 
 * The :command:`file(GENERATE)` command gained ``NO_SOURCE_PERMISSIONS``,
-  ``USE_SOURCE_PERMISSIONS``, and ``FILE_PERMISSIONS`` options to support
-  permissions of the generated file.
+  ``USE_SOURCE_PERMISSIONS``, and ``FILE_PERMISSIONS`` options for controlling
+  the permissions of the generated file.
 
 * The :command:`install(FILES)` command ``RENAME`` option learned to
   support :manual:`generator expressions <cmake-generator-expressions(7)>`.
@@ -171,14 +171,14 @@ Modules
 -------
 
 * The :module:`ExternalData` module :command:`ExternalData_Add_Target`
-  function gained a ``SHOW_PROGRESS <bool>`` option to suppress progress
-  output during the build.
+  function gained a ``SHOW_PROGRESS <bool>`` option for controlling whether
+  or not to show progress output during the build.
 
 * The :module:`ExternalProject` module :command:`ExternalProject_Add` function
-  gained a ``CONFIGURE_HANDLED_BY_BUILD`` option to have subsequent runs of
-  the configure step be triggered by the build step when an external project
-  dependency rebuilds instead of always rerunning the configure step when
-  an external project dependency rebuilds.
+  gained a ``CONFIGURE_HANDLED_BY_BUILD`` option.  This can be used to make
+  subsequent runs of the configure step be triggered by the build step when
+  an external project dependency rebuilds instead of always re-running the
+  configure step in such cases.
 
 * The :module:`FindBoost` module gained a ``Boost_NO_WARN_NEW_VERSIONS``
   option to silence the warning about unknown dependencies for new
@@ -234,7 +234,7 @@ CPack
   resolving private library dependencies when using
   ``dpkg-shlibdeps``.
 
-* The :cpack_gen:`CPack IFW Generator` gained new
+* The :cpack_gen:`CPack IFW Generator` gained a new
   :variable:`CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST` variable to
   control visibility of the widget listing installer pages on the left side
   of the wizard. This feature available only since QtIFW 4.0.
@@ -244,9 +244,9 @@ CPack
   :variable:`CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION` variables to change
   the text at the bottom of the install window and change its trim position
 
-* The :cpack_gen:`CPack NSIS Generator` now handles correctly Unicode characters.
-  If you want to have a ``CPACK_RESOURCE_FILE_LICENSE`` with UTF-8 characters
-  it needs to be encoded in UTF-8 BOM.
+* The :cpack_gen:`CPack NSIS Generator` now correctly handles Unicode
+  characters.  If you want to have a :variable:`CPACK_RESOURCE_FILE_LICENSE`
+  with UTF-8 characters, it needs to be encoded in UTF-8 BOM.
 
 * The :cpack_gen:`CPack NuGet Generator` gained options:
 
@@ -327,10 +327,12 @@ Other Changes
   phase when the required content is already populated and
   up-to-date.
 
-* The precompiled Linux binaries provided on ``cmake.org`` have changed
-  their naming pattern to ``cmake-$ver-linux-$arch``, where ``$arch``
-  is either ``x86_64`` or ``aarch64``.
+* The precompiled Linux binaries provided on
+  `cmake.org <https://cmake.org/download/>`_ have changed their naming pattern
+  to ``cmake-$ver-linux-$arch``, where ``$arch`` is either ``x86_64`` or
+  ``aarch64``.
 
-* The precompiled Windows binaries provided on ``cmake.org`` have changed
-  their naming pattern to ``cmake-$ver-windows-$arch``, where ``$arch``
-  is either ``x86_64`` or ``i386``.
+* The precompiled Windows binaries provided on
+  `cmake.org <https://cmake.org/download/>`_ have changed their naming pattern
+  to ``cmake-$ver-windows-$arch``, where ``$arch`` is either ``x86_64`` or
+  ``i386``.
