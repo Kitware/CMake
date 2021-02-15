@@ -837,14 +837,15 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
     # Given that NVCC can be provided by multiple different sources (NVIDIA HPC SDK, CUDA Toolkit, distro)
     # each of which has a different layout, we need to extract the CUDA toolkit root from the compiler
     # itself, allowing us to support numerous different scattered toolkit layouts
-    execute_process(COMMAND ${CUDA_TOOLKIT_ROOT_DIR_NVCC} "-v" "__cmake_determine_cuda" ERROR_VARIABLE NVCC_ERR)
-    if(NVCC_ERR MATCHES "TOP=([^\r\n]*)")
+    execute_process(COMMAND ${CUDA_TOOLKIT_ROOT_DIR_NVCC} "-v" "__cmake_determine_cuda"
+      OUTPUT_VARIABLE _CUDA_NVCC_OUT ERROR_VARIABLE _CUDA_NVCC_OUT)
+    if(_CUDA_NVCC_OUT MATCHES "TOP=([^\r\n]*)")
       get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CMAKE_MATCH_1}" ABSOLUTE CACHE)
     else()
       get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CUDA_TOOLKIT_ROOT_DIR_NVCC}" DIRECTORY)
       get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CUDA_TOOLKIT_ROOT_DIR}" DIRECTORY CACHE)
     endif()
-    unset(NVCC_ERR)
+    unset(_CUDA_NVCC_OUT)
 
     string(REGEX REPLACE "[/\\\\]?bin[64]*[/\\\\]?$" "" CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT_DIR})
     # We need to force this back into the cache.
