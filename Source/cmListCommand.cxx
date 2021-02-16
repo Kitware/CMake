@@ -4,9 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <cstdio>
-#include <cstdlib> // required for atoi
 #include <functional>
 #include <iterator>
 #include <set>
@@ -38,8 +36,14 @@ namespace {
 
 bool GetIndexArg(char const* arg, int* idx)
 {
-  *idx = atoi(arg);
-  // Ignore errors.
+  long value;
+  if (!cmStrToLong(arg, &value)) {
+    // An error was detected.
+  }
+
+  // Truncation is happening here, but it had always been happening here.
+  *idx = static_cast<int>(value);
+
   return true;
 }
 
