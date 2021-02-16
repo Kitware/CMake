@@ -1,0 +1,8 @@
+CMake Error at CMP0121-ERANGE-Common.cmake:3 \(list\):
+  list index: (-2147483643|2147483647) out of range \(-5, 4\)
+Call Stack \(most recent call first\):
+  CMP0121-ERANGE-OLD.cmake:2 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+ERANGE: --><--
