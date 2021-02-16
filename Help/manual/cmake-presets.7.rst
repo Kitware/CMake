@@ -721,11 +721,6 @@ that may contain the following fields:
 
     ``json-v1``
 
-  ``rerunFailed``
-
-    An optional bool. If true, equivalent to passing ``--rerun-failed`` on
-    the command line.
-
   ``repeat``
 
     An optional object specifying how to repeat tests. Equivalent to
