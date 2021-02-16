@@ -255,7 +255,6 @@ public:
       std::string ResourceSpecFile;
       cm::optional<int> TestLoad;
       cm::optional<ShowOnlyEnum> ShowOnly;
-      cm::optional<bool> RerunFailed;
 
       cm::optional<RepeatOptions> Repeat;
       cm::optional<bool> InteractiveDebugging;

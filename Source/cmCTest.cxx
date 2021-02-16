@@ -2501,11 +2501,6 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
       }
     }
 
-    if (expandedPreset->Execution->RerunFailed.value_or(false)) {
-      this->GetTestHandler()->SetPersistentOption("RerunFailed", "true");
-      this->GetMemCheckHandler()->SetPersistentOption("RerunFailed", "true");
-    }
-
     if (expandedPreset->Execution->Repeat) {
       this->Impl->RepeatCount = expandedPreset->Execution->Repeat->Count;
       switch (expandedPreset->Execution->Repeat->Mode) {
