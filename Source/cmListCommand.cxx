@@ -36,6 +36,13 @@
 
 namespace {
 
+bool GetIndexArg(char const* arg, int* idx)
+{
+  *idx = atoi(arg);
+  // Ignore errors.
+  return true;
+}
+
 bool FilterRegex(std::vector<std::string> const& args, bool includeMatches,
                  std::string const& listName,
                  std::vector<std::string>& varArgsExpanded,
@@ -154,7 +161,11 @@ bool HandleGetCommand(std::vector<std::string> const& args,
   const char* sep = "";
   size_t nitem = varArgsExpanded.size();
   for (cc = 2; cc < args.size() - 1; cc++) {
-    int item = atoi(args[cc].c_str());
+    int item;
+    if (!GetIndexArg(args[cc].c_str(), &item)) {
+      status.SetError(cmStrCat("index: ", args[cc], " is not a valid index"));
+      return false;
+    }
     value += sep;
     sep = ";";
     if (item < 0) {
@@ -362,7 +373,11 @@ bool HandleInsertCommand(std::vector<std::string> const& args,
   const std::string& listName = args[1];
 
   // expand the variable
-  int item = atoi(args[2].c_str());
+  int item;
+  if (!GetIndexArg(args[2].c_str(), &item)) {
+    status.SetError(cmStrCat("index: ", args[2], " is not a valid index"));
+    return false;
+  }
   std::vector<std::string> varArgsExpanded;
   if ((!GetList(varArgsExpanded, listName, status.GetMakefile()) ||
        varArgsExpanded.empty()) &&
@@ -1282,8 +1297,16 @@ bool HandleSublistCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  const int start = atoi(args[2].c_str());
-  const int length = atoi(args[3].c_str());
+  int start;
+  int length;
+  if (!GetIndexArg(args[2].c_str(), &start)) {
+    status.SetError(cmStrCat("index: ", args[2], " is not a valid index"));
+    return false;
+  }
+  if (!GetIndexArg(args[3].c_str(), &length)) {
+    status.SetError(cmStrCat("index: ", args[3], " is not a valid index"));
+    return false;
+  }
 
   using size_type = decltype(varArgsExpanded)::size_type;
 
@@ -1338,7 +1361,11 @@ bool HandleRemoveAtCommand(std::vector<std::string> const& args,
   std::vector<size_t> removed;
   size_t nitem = varArgsExpanded.size();
   for (cc = 2; cc < args.size(); ++cc) {
-    int item = atoi(args[cc].c_str());
+    int item;
+    if (!GetIndexArg(args[cc].c_str(), &item)) {
+      status.SetError(cmStrCat("index: ", args[cc], " is not a valid index"));
+      return false;
+    }
     if (item < 0) {
       item = static_cast<int>(nitem) + item;
     }
