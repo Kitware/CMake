@@ -1,0 +1,6 @@
+.* *download 1
+.* *download 2
+.* *update 1
+.* *update 2
+.* *patch 1
+.* *patch 2
