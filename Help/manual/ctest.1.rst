@@ -25,6 +25,8 @@ CMake-generated build trees created for projects that use the
 :command:`enable_testing` and :command:`add_test` commands have testing support.
 This program will run the tests and report results.
 
+.. _`CTest Options`:
+
 Options
 =======
 
