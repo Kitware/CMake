@@ -377,8 +377,9 @@ that may contain the following fields:
   An optional string specifying the name of a configure preset to
   associate with this build preset. If ``configurePreset`` is not
   specified, it must be inherited from the inherits preset (unless this
-  preset is hidden). The build tree directory is inferred from the
-  configure preset.
+  preset is hidden). The build directory is inferred from the configure
+  preset, so the build will take place in the same ``binaryDir`` that the
+  configuration did.
 
 ``inheritConfigureEnvironment``
 
@@ -495,8 +496,9 @@ that may contain the following fields:
   An optional string specifying the name of a configure preset to
   associate with this test preset. If ``configurePreset`` is not
   specified, it must be inherited from the inherits preset (unless this
-  preset is hidden). The build tree directory is inferred from the
-  configure preset.
+  preset is hidden). The build directory is inferred from the configure
+  preset, so tests will run in the same ``binaryDir`` that the
+  configuration did and build did.
 
 ``inheritConfigureEnvironment``
 
