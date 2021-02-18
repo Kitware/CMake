@@ -29,6 +29,7 @@ extensions = ['cmake']
 templates_path = ['@conf_path@/templates']
 
 nitpicky = True
+smartquotes = False
 
 cmake_manuals = sorted(glob.glob(r'@conf_docs@/manual/*.rst'))
 cmake_manual_description = re.compile('^\.\. cmake-manual-description:(.*)$')
