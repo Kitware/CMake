@@ -135,7 +135,7 @@ else()
     # They pre-date our support for the GNU-like variant targeting the
     # MSVC ABI so we do not consider that here.
     if(CMAKE_C_COMPILER_ID STREQUAL "Clang"
-      OR "x${CMAKE_${lang}_COMPILER_ID" STREQUAL "xIntelLLVM")
+      OR "x${CMAKE_C_COMPILER_ID}" STREQUAL "xIntelLLVM")
       if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
         set(CMAKE_C_COMPILER_FRONTEND_VARIANT "MSVC")
       else()
