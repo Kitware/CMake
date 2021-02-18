@@ -23,6 +23,13 @@ case $kernel in
         platform="x86_64-apple-darwin"
         url="https://paraview.org/files/dependencies"
         ;;
+    Darwin-arm64)
+        version="0.2.15-1-disk_cache_init"
+        shatool="shasum -a 256"
+        sha256sum="f7c9ff78e701810b8b1dbc2a163c7fda1177fc3f69c71f46e7a38242657a99fd"
+        platform="aarch64-apple-darwin"
+        url="https://cmake.org/files/dependencies/sccache"
+        ;;
     *)
         echo "Unrecognized platform $kernel"
         exit 1
