@@ -95,8 +95,9 @@ that may contain the following fields:
 
   A required string representing the machine-friendly name of the preset.
   This identifier is used in the :ref:`cmake --preset <CMake Options>` option.
-  There must not be two presets in the union of ``CMakePresets.json`` and
-  ``CMakeUserPresets.json`` in the same directory with the same name.
+  There must not be two configure presets in the union of ``CMakePresets.json``
+  and ``CMakeUserPresets.json`` in the same directory with the same name.
+  However, a configure preset may have the same name as a build or test preset.
 
 ``hidden``
 
@@ -314,9 +315,9 @@ that may contain the following fields:
   A required string representing the machine-friendly name of the preset.
   This identifier is used in the
   :ref:`cmake --build --preset <Build Tool Mode>` option.
-  There must not be two presets (configure, build, or test) in the union of
-  ``CMakePresets.json`` and ``CMakeUserPresets.json`` in the same
-  directory with the same name.
+  There must not be two build presets in the union of ``CMakePresets.json``
+  and ``CMakeUserPresets.json`` in the same directory with the same name.
+  However, a build preset may have the same name as a configure or test preset.
 
 ``hidden``
 
@@ -433,9 +434,9 @@ that may contain the following fields:
 
   A required string representing the machine-friendly name of the preset.
   This identifier is used in the :ref:`ctest --preset <CTest Options>` option.
-  There must not be two presets (configure, build, or test) in the union of
-  ``CMakePresets.json`` and ``CMakeUserPresets.json`` in the same
-  directory with the same name.
+  There must not be two test presets in the union of ``CMakePresets.json``
+  and ``CMakeUserPresets.json`` in the same directory with the same name.
+  However, a test preset may have the same name as a configure or build preset.
 
 ``hidden``
 
