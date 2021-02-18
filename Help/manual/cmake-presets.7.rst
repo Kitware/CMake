@@ -38,8 +38,8 @@ The root object recognizes the following fields:
 
 ``version``
 
-  A required integer representing the version of the JSON schema. Currently,
-  the only supported version is 1.
+  A required integer representing the version of the JSON schema.
+  The supported versions are ``1`` and ``2``.
 
 ``cmakeMinimumRequired``
 
@@ -70,14 +70,17 @@ The root object recognizes the following fields:
 ``configurePresets``
 
   An optional array of `Configure Preset`_ objects.
+  This is allowed in preset files specifying version 1 or above.
 
 ``buildPresets``
 
   An optional array of `Build Preset`_ objects.
+  This is allowed in preset files specifying version 2 or above.
 
 ``testPresets``
 
   An optional array of `Test Preset`_ objects.
+  This is allowed in preset files specifying version 2 or above.
 
 Configure Preset
 ^^^^^^^^^^^^^^^^
