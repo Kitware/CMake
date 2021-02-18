@@ -939,6 +939,30 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           if (!uicOpts.empty()) {
             this->Uic.UiFiles.emplace_back(fullPath, cmExpandedList(uicOpts));
           }
+
+          auto uiHeaderRelativePath = cmSystemTools::RelativePath(
+            this->LocalGen->GetCurrentSourceDirectory(),
+            cmSystemTools::GetFilenamePath(fullPath));
+
+          auto uiHeaderFilePath = cmStrCat(
+            '/', uiHeaderRelativePath, '/', "ui_"_s,
+            cmSystemTools::GetFilenameWithoutLastExtension(fullPath), ".h"_s);
+
+          ConfigString uiHeader;
+          uiHeader.Default =
+            cmStrCat(this->Dir.Build, "/include"_s, uiHeaderFilePath);
+          auto uiHeaderGenex = uiHeader.Default;
+          if (this->MultiConfig) {
+            uiHeaderGenex = cmStrCat(this->Dir.Build, "/include_$<CONFIG>"_s,
+                                     uiHeaderFilePath);
+            for (std::string const& cfg : this->ConfigsList) {
+              uiHeader.Config[cfg] = cmStrCat(this->Dir.Build, "/include_"_s,
+                                              cfg, uiHeaderFilePath);
+            }
+          }
+
+          this->Uic.UiHeaders.emplace_back(
+            std::make_pair(uiHeader, uiHeaderGenex));
         } else {
           // Register skipped .ui file
           this->Uic.SkipUi.insert(fullPath);
@@ -1090,6 +1114,13 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   if (this->Moc.Enabled) {
     this->AddGeneratedSource(this->Moc.CompilationFile, this->Moc, true);
     autogenByproducts.push_back(this->Moc.CompilationFileGenex);
+  }
+
+  if (this->Uic.Enabled) {
+    for (const auto& file : this->Uic.UiHeaders) {
+      this->AddGeneratedSource(file.first, this->Uic);
+      autogenByproducts.push_back(file.second);
+    }
   }
 
   // Compose target comment
