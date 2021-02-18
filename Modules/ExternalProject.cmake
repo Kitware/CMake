@@ -3897,7 +3897,7 @@ function(_ep_do_preconfigure_steps_now name)
 
   # Once any step has to run, all later steps have to be run too
   set(need_to_run FALSE)
-  foreach(step IN ITEMS download update parse)
+  foreach(step IN ITEMS download update patch)
     if(update_disconnected AND "${step}" STREQUAL "update")
       continue()
     endif()
