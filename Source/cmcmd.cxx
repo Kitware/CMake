@@ -754,7 +754,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         std::string const& a = args[4];
         if (cmHasLiteralPrefix(a, "--nm=")) {
           deffile.SetNmPath(a.substr(5));
-          std::cerr << a.substr(5) << "\n";
         } else {
           std::cerr << "unknown argument: " << a << "\n";
         }
