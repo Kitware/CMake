@@ -5,17 +5,16 @@ set -e
 readonly kernel="$(uname -s)-$(uname -m)"
 case $kernel in
     Linux-x86_64)
-        version="0.2.13"
+        version="v0.2.15"
         shatool="sha256sum"
-        sha256sum="28a5499e340865b08b632306b435913beb590fbd7b49a3f887a623b459fabdeb"
+        sha256sum="e5d03a9aa3b9fac7e490391bbe22d4f42c840d31ef9eaf127a03101930cbb7ca"
         platform="x86_64-unknown-linux-musl"
         ;;
     Linux-aarch64)
-        version="g6628e1f"
+        version="v0.2.15"
         shatool="sha256sum"
-        sha256sum="bb88adbb5a29c166ecaa78d0593493b609a7f84d91d1228502a908f319b513f0"
+        sha256sum="90d91d21a767e3f558196dbd52395f6475c08de5c4951a4c8049575fa6894489"
         platform="aarch64-unknown-linux-musl"
-        url="https://github.com/hwinit/sccache/releases/download/$version"
         ;;
     Darwin-x86_64)
         version="gfe63078"
@@ -49,3 +48,4 @@ curl -OL "$url/$tarball"
 $shatool --check sccache.sha256sum
 tar xf "$tarball"
 mv "$filename/sccache" .
+chmod +x sccache
