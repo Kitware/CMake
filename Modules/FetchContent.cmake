@@ -34,7 +34,7 @@ The following shows a typical example of declaring content details:
   FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        release-1.8.0
+    GIT_TAG        703bd9caab50b139428cea1aaff9974ebee5742e # release-1.10.0
   )
 
 For most typical cases, populating the content can then be done with a single
@@ -126,7 +126,7 @@ Declaring Content Details
     FetchContent_Declare(
       googletest
       GIT_REPOSITORY https://github.com/google/googletest.git
-      GIT_TAG        release-1.8.0
+      GIT_TAG        703bd9caab50b139428cea1aaff9974ebee5742e # release-1.10.0
     )
 
     FetchContent_Declare(
@@ -140,6 +140,11 @@ Declaring Content Details
       SVN_REPOSITORY svn+ssh://svn.mycompany.com/srv/svn/trunk/certs
       SVN_REVISION   -r12345
     )
+
+  Where contents are being fetched from a remote location and you do not
+  control that server, it is advisable to use a hash for ``GIT_TAG`` rather
+  than a branch or tag name.  A commit hash is more secure and helps to
+  confirm that the downloaded contents are what you expected.
 
 Populating The Content
 """"""""""""""""""""""
@@ -456,12 +461,12 @@ frameworks are available to the main build:
   FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        release-1.8.0
+    GIT_TAG        703bd9caab50b139428cea1aaff9974ebee5742e # release-1.10.0
   )
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        v2.5.0
+    GIT_TAG        de6fe184a9ac1a06895cdd1c9b437f0a0bdf14ad # v2.13.4
   )
 
   # After the following call, the CMake targets defined by googletest and
@@ -480,7 +485,7 @@ it into the main build:
   FetchContent_Declare(
     protobuf
     GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
-    GIT_TAG        v3.12.0
+    GIT_TAG        ae50d9b9902526efd6c7a1907d09739f959c6297 # v3.15.0
     SOURCE_SUBDIR  cmake
   )
   set(protobuf_BUILD_TESTS OFF)
@@ -517,7 +522,7 @@ that all five projects are available on a company git server.  The
   FetchContent_Declare(
     projE
     GIT_REPOSITORY git@mycompany.com:git/projE.git
-    GIT_TAG        origin/release/2.3-rc1
+    GIT_TAG        v2.3-rc1
   )
 
   # Order is important, see notes in the discussion further below
