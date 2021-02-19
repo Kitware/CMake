@@ -938,6 +938,29 @@ which is just the string ``tgt``.
   :ref:`Target Usage Requirements` this is the consuming target rather
   than the target specifying the requirement.
 
+.. genex:: $<TARGET_RUNTIME_DLLS:tgt>
+
+  List of DLLs that the target depends on at runtime. This is determined by
+  the locations of all the ``SHARED`` and ``MODULE`` targets in the target's
+  transitive dependencies. Using this generator expression on targets other
+  than executables, ``SHARED`` libraries, and ``MODULE`` libraries is an error.
+  On non-DLL platforms, it evaluates to an empty string.
+
+  This generator expression can be used to copy all of the DLLs that a target
+  depends on into its output directory in a ``POST_BUILD`` custom command. For
+  example:
+
+  .. code-block:: cmake
+
+    find_package(foo REQUIRED)
+
+    add_executable(exe main.c)
+    target_link_libraries(exe PRIVATE foo::foo foo::bar)
+    add_custom_command(TARGET exe POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:exe> $<TARGET_FILE_DIR:exe>
+      COMMAND_EXPAND_LISTS
+      )
+
 .. genex:: $<INSTALL_PREFIX>
 
   Content of the install prefix when the target is exported via

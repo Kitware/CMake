@@ -1062,6 +1062,20 @@ const std::string& cmGeneratorTarget::GetLocation(
   return location;
 }
 
+cm::optional<std::string> cmGeneratorTarget::MaybeGetLocation(
+  std::string const& config) const
+{
+  cm::optional<std::string> location;
+  if (cmGeneratorTarget::ImportInfo const* imp = this->GetImportInfo(config)) {
+    if (!imp->Location.empty()) {
+      location = imp->Location;
+    }
+  } else {
+    location = this->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
+  }
+  return location;
+}
+
 std::vector<cmCustomCommand> const& cmGeneratorTarget::GetPreBuildCommands()
   const
 {
