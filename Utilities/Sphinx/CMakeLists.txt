@@ -22,6 +22,7 @@ option(SPHINX_MAN "Build man pages with Sphinx" OFF)
 option(SPHINX_HTML "Build html help with Sphinx" OFF)
 option(SPHINX_SINGLEHTML "Build html single page help with Sphinx" OFF)
 option(SPHINX_QTHELP "Build Qt help with Sphinx" OFF)
+option(SPHINX_LATEXPDF "Build PDF help with Sphinx using LaTeX" OFF)
 option(SPHINX_TEXT "Build text help with Sphinx (not installed)" OFF)
 find_program(SPHINX_EXECUTABLE
   NAMES sphinx-build
@@ -33,7 +34,7 @@ separate_arguments(sphinx_flags UNIX_COMMAND "${SPHINX_FLAGS}")
 mark_as_advanced(SPHINX_TEXT)
 mark_as_advanced(SPHINX_FLAGS)
 
-if(NOT SPHINX_INFO AND NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_SINGLEHTML AND NOT SPHINX_QTHELP AND NOT SPHINX_TEXT)
+if(NOT SPHINX_INFO AND NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_SINGLEHTML AND NOT SPHINX_QTHELP AND NOT SPHINX_TEXT AND NOT SPHINX_LATEXPDF)
   return()
 elseif(NOT SPHINX_EXECUTABLE)
   message(FATAL_ERROR "SPHINX_EXECUTABLE (sphinx-build) is not found!")
@@ -117,28 +118,51 @@ if(SPHINX_QTHELP)
       ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qhcp
   )
 endif()
-
+if(SPHINX_LATEXPDF)
+  list(APPEND doc_formats latexpdf)
+endif()
 
 set(doc_format_outputs "")
 set(doc_format_last "")
 foreach(format ${doc_formats})
   set(doc_format_output "doc_format_${format}")
   set(doc_format_log "build-${format}.log")
-  add_custom_command(
-    OUTPUT ${doc_format_output}
-    COMMAND ${SPHINX_EXECUTABLE}
-            -c ${CMAKE_CURRENT_BINARY_DIR}
-            -d ${CMAKE_CURRENT_BINARY_DIR}/doctrees
-            -b ${format}
-            ${sphinx_flags}
-            ${CMake_SOURCE_DIR}/Help
-            ${CMAKE_CURRENT_BINARY_DIR}/${format}
-            > ${doc_format_log} # log stdout, pass stderr
-    ${${format}_extra_commands}
-    DEPENDS ${doc_format_last}
-    COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
-    VERBATIM
-    )
+  if(format STREQUAL "latexpdf")
+    # This format does not use builder (-b) but make_mode (-M) which expects
+    # arguments in peculiar order
+    add_custom_command(
+      OUTPUT ${doc_format_output}
+      COMMAND ${SPHINX_EXECUTABLE}
+              -M ${format}
+              ${CMake_SOURCE_DIR}/Help
+              ${CMAKE_CURRENT_BINARY_DIR}/${format}
+              -c ${CMAKE_CURRENT_BINARY_DIR}
+              -d ${CMAKE_CURRENT_BINARY_DIR}/doctrees
+              ${sphinx_flags}
+              > ${doc_format_log} # log stdout, pass stderr
+      ${${format}_extra_commands}
+      DEPENDS ${doc_format_last}
+      COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
+      VERBATIM
+      )
+  else()
+    # other formats use standard builder (-b) mode
+    add_custom_command(
+      OUTPUT ${doc_format_output}
+      COMMAND ${SPHINX_EXECUTABLE}
+              -c ${CMAKE_CURRENT_BINARY_DIR}
+              -d ${CMAKE_CURRENT_BINARY_DIR}/doctrees
+              -b ${format}
+              ${sphinx_flags}
+              ${CMake_SOURCE_DIR}/Help
+              ${CMAKE_CURRENT_BINARY_DIR}/${format}
+              > ${doc_format_log} # log stdout, pass stderr
+      ${${format}_extra_commands}
+      DEPENDS ${doc_format_last}
+      COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
+      VERBATIM
+      )
+  endif()
   set_property(SOURCE ${doc_format_output} PROPERTY SYMBOLIC 1)
   list(APPEND doc_format_outputs ${doc_format_output})
   set(doc_format_last ${doc_format_output})
@@ -216,6 +240,13 @@ endif()
 if(SPHINX_QTHELP)
   CMake_OPTIONAL_COMPONENT(sphinx-qthelp)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qch
+          DESTINATION ${CMAKE_DOC_DIR} ${COMPONENT}
+          )
+endif()
+
+if(SPHINX_LATEXPDF)
+  CMake_OPTIONAL_COMPONENT(sphinx-latexpdf)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/latexpdf/latex/CMake.pdf
           DESTINATION ${CMAKE_DOC_DIR} ${COMPONENT}
           )
 endif()
