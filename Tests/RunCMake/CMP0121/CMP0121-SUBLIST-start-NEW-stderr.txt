@@ -1,0 +1,8 @@
+CMake Error at CMP0121-SUBLIST-start-Common.cmake:3 \(list\):
+  list index: invalid is not a valid index
+Call Stack \(most recent call first\):
+  CMP0121-SUBLIST-start-NEW.cmake:2 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+SUBLIST-start: --><--
