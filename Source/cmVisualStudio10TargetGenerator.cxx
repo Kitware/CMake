@@ -2423,8 +2423,10 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     const bool makePCH = (sf.GetFullPath() == pchSource);
     const bool useSharedPCH = !skipPCH && (lang == linkLanguage);
     const bool useDifferentLangPCH = !skipPCH && (lang != linkLanguage);
+    const bool useNoPCH = skipPCH && (lang != linkLanguage) &&
+      !this->GeneratorTarget->GetPchHeader(config, linkLanguage).empty();
     const bool needsPCHFlags =
-      (makePCH || useSharedPCH || useDifferentLangPCH);
+      (makePCH || useSharedPCH || useDifferentLangPCH || useNoPCH);
 
     // if we have flags or defines for this config then
     // use them
@@ -2471,6 +2473,8 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         if (makePCH) {
           pchOptions =
             this->GeneratorTarget->GetPchCreateCompileOptions(config, lang);
+        } else if (useNoPCH) {
+          clOptions.AddFlag("PrecompiledHeader", "NotUsing");
         } else if (useSharedPCH) {
           std::string pchHeader =
             this->GeneratorTarget->GetPchHeader(config, lang);
