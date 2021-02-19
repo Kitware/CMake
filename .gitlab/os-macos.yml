@@ -31,6 +31,13 @@
         CMAKE_CONFIGURATION: macos_x86_64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.macos_arm64_ninja:
+    extends: .macos_build
+
+    variables:
+        CMAKE_CONFIGURATION: macos_arm64_ninja
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 .macos_x86_64_makefiles:
     extends: .macos_build
 
@@ -64,6 +71,13 @@
         CMAKE_CONFIGURATION: macos_x86_64_xcode
         CMAKE_GENERATOR: Xcode
 
+.macos_arm64_xcode:
+    extends: .macos
+
+    variables:
+        CMAKE_CONFIGURATION: macos_arm64_xcode
+        CMAKE_GENERATOR: Xcode
+
 ## Tags
 
 .macos_x86_64_builder_tags:
@@ -87,6 +101,22 @@
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - macos
+        - shell
+        - xcode-12.3
+        - concurrent
+
+.macos_arm64_builder_tags:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - macos-arm64
+        - shell
+        - xcode-12.3
+        - nonconcurrent
+
+.macos_arm64_builder_ext_tags:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - macos-arm64
         - shell
         - xcode-12.3
         - concurrent

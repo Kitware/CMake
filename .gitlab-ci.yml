@@ -244,6 +244,16 @@ build:macos-x86_64-ninja:
         - .macos_x86_64_builder_tags
         - .run_manually
 
+build:macos-arm64-ninja:
+    extends:
+        - .macos_arm64_ninja
+        - .cmake_build_macos
+        - .cmake_build_artifacts
+        - .macos_arm64_builder_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
 test:macos-x86_64-ninja:
     extends:
         - .macos_x86_64_ninja
@@ -255,6 +265,20 @@ test:macos-x86_64-ninja:
         - build:macos-x86_64-ninja
     needs:
         - build:macos-x86_64-ninja
+
+test:macos-arm64-ninja:
+    extends:
+        - .macos_arm64_ninja
+        - .cmake_test_macos
+        - .cmake_test_artifacts
+        - .macos_arm64_builder_tags
+        - .run_dependent
+    dependencies:
+        - build:macos-arm64-ninja
+    needs:
+        - build:macos-arm64-ninja
+    variables:
+        CMAKE_CI_NO_MR: "true"
 
 build:macos-x86_64-makefiles:
     extends:
@@ -285,6 +309,19 @@ test:macos-x86_64-xcode:
         - test:macos-x86_64-ninja
     needs:
         - test:macos-x86_64-ninja
+
+test:macos-arm64-xcode:
+    extends:
+        - .macos_arm64_xcode
+        - .cmake_test_macos_external
+        - .macos_arm64_builder_ext_tags
+        - .run_dependent
+    dependencies:
+        - test:macos-arm64-ninja
+    needs:
+        - test:macos-arm64-ninja
+    variables:
+        CMAKE_CI_NO_MR: "true"
 
 build:macos-package:
     extends:
