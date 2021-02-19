@@ -236,62 +236,62 @@ build:linux-aarch64-package:
 
 # macOS builds
 
-build:macos-ninja:
+build:macos-x86_64-ninja:
     extends:
-        - .macos_ninja
+        - .macos_x86_64_ninja
         - .cmake_build_macos
         - .cmake_build_artifacts
-        - .macos_builder_tags
+        - .macos_x86_64_builder_tags
         - .run_manually
 
-test:macos-ninja:
+test:macos-x86_64-ninja:
     extends:
-        - .macos_ninja
+        - .macos_x86_64_ninja
         - .cmake_test_macos
         - .cmake_test_artifacts
-        - .macos_builder_tags
+        - .macos_x86_64_builder_tags
         - .run_dependent
     dependencies:
-        - build:macos-ninja
+        - build:macos-x86_64-ninja
     needs:
-        - build:macos-ninja
+        - build:macos-x86_64-ninja
 
-build:macos-makefiles:
+build:macos-x86_64-makefiles:
     extends:
-        - .macos_makefiles
+        - .macos_x86_64_makefiles
         - .cmake_build_macos
         - .cmake_build_artifacts
-        - .macos_builder_tags
+        - .macos_x86_64_builder_tags
         - .run_manually
 
-test:macos-makefiles:
+test:macos-x86_64-makefiles:
     extends:
-        - .macos_makefiles
+        - .macos_x86_64_makefiles
         - .cmake_test_macos
-        - .macos_builder_tags
+        - .macos_x86_64_builder_tags
         - .run_dependent
     dependencies:
-        - build:macos-makefiles
+        - build:macos-x86_64-makefiles
     needs:
-        - build:macos-makefiles
+        - build:macos-x86_64-makefiles
 
-test:macos-xcode:
+test:macos-x86_64-xcode:
     extends:
-        - .macos_xcode
+        - .macos_x86_64_xcode
         - .cmake_test_macos_external
-        - .macos_builder_ext_tags
+        - .macos_x86_64_builder_ext_tags
         - .run_dependent
     dependencies:
-        - test:macos-ninja
+        - test:macos-x86_64-ninja
     needs:
-        - test:macos-ninja
+        - test:macos-x86_64-ninja
 
 build:macos-package:
     extends:
         - .macos_package
         - .cmake_build_macos_package
         - .cmake_release_artifacts
-        - .macos_builder_tags_package
+        - .macos_x86_64_builder_tags_package
         - .run_only_for_package
     dependencies:
         - prep:doc-package
@@ -314,7 +314,7 @@ build:macos10.10-package:
         - .macos10.10_package
         - .cmake_build_macos_package
         - .cmake_release_artifacts
-        - .macos_builder_tags_package
+        - .macos_x86_64_builder_tags_package
         - .run_only_for_package
     dependencies:
         - prep:doc-package

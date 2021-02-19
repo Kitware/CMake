@@ -24,18 +24,18 @@
         # could run at the same time, so we drop it.
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
 
-.macos_ninja:
+.macos_x86_64_ninja:
     extends: .macos_build
 
     variables:
-        CMAKE_CONFIGURATION: macos_ninja
+        CMAKE_CONFIGURATION: macos_x86_64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.macos_makefiles:
+.macos_x86_64_makefiles:
     extends: .macos_build
 
     variables:
-        CMAKE_CONFIGURATION: macos_makefiles
+        CMAKE_CONFIGURATION: macos_x86_64_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
@@ -57,16 +57,16 @@
 
 ### External testing
 
-.macos_xcode:
+.macos_x86_64_xcode:
     extends: .macos
 
     variables:
-        CMAKE_CONFIGURATION: macos_xcode
+        CMAKE_CONFIGURATION: macos_x86_64_xcode
         CMAKE_GENERATOR: Xcode
 
 ## Tags
 
-.macos_builder_tags:
+.macos_x86_64_builder_tags:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - macos
@@ -74,7 +74,7 @@
         - xcode-12.3
         - nonconcurrent
 
-.macos_builder_tags_package:
+.macos_x86_64_builder_tags_package:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - macos
@@ -83,7 +83,7 @@
         - nonconcurrent
         - finder
 
-.macos_builder_ext_tags:
+.macos_x86_64_builder_ext_tags:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - macos
