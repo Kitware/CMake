@@ -2698,8 +2698,9 @@ void cmLocalGenerator::CopyPchCompilePdb(
     }
 
     file << "foreach(retry RANGE 1 30)\n";
-    file << "  if (EXISTS \"" << from_file << "\" AND \"" << from_file
-         << "  \" IS_NEWER_THAN \"" << dest_file << "\")\n";
+    file << "  if (EXISTS \"" << from_file << "\" AND (NOT EXISTS \""
+         << dest_file << "\" OR NOT \"" << dest_file << "  \" IS_NEWER_THAN \""
+         << from_file << "\"))\n";
     file << "    execute_process(COMMAND ${CMAKE_COMMAND} -E copy";
     file << " \"" << from_file << "\""
          << " \"" << to_dir << "\" RESULT_VARIABLE result "
