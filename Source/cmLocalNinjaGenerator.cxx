@@ -658,7 +658,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 
       std::string depfile = cc->GetDepfile();
       if (!depfile.empty()) {
-        switch (this->GetPolicyStatus(cmPolicies::CMP0116)) {
+        switch (cc->GetCMP0116Status()) {
           case cmPolicies::WARN:
             if (this->GetCurrentBinaryDirectory() !=
                   this->GetBinaryDirectory() ||
@@ -772,7 +772,7 @@ cmLocalNinjaGenerator::MakeCustomCommandGenerators(
   cmGlobalNinjaGenerator const* gg = this->GetGlobalNinjaGenerator();
 
   bool transformDepfile = false;
-  switch (this->GetPolicyStatus(cmPolicies::CMP0116)) {
+  switch (cc.GetCMP0116Status()) {
     case cmPolicies::OLD:
     case cmPolicies::WARN:
       break;
