@@ -69,6 +69,10 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     set(CMAKE_CUDA_COMPILER_ID_VENDOR_REGEX_Clang "(clang version)")
     CMAKE_DETERMINE_COMPILER_ID_VENDOR(CUDA "--version")
 
+    if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang" AND WIN32)
+      message(FATAL_ERROR "Clang with CUDA is not yet supported on Windows. See CMake issue #20776.")
+    endif()
+
     # Find the CUDA toolkit. We store the CMAKE_CUDA_COMPILER_TOOLKIT_ROOT and CMAKE_CUDA_COMPILER_LIBRARY_ROOT
     # in CMakeCUDACompiler.cmake, so FindCUDAToolkit can avoid searching on future runs and the toolkit stays the same.
     # This is very similar to FindCUDAToolkit, but somewhat simplified since we can issue fatal errors
@@ -167,7 +171,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
         unset(search_paths)
 
         if(NOT _CUDA_NVCC_EXECUTABLE)
-          message(FATAL_ERROR "Could not find nvcc, please set CUDAToolkit_ROOT.")
+          message(FATAL_ERROR "Failed to find nvcc.\nCompiler ${CMAKE_CUDA_COMPILER_ID} requires the CUDA toolkit. Please set the CUDAToolkit_ROOT variable.")
         endif()
       endif()
     endif()
@@ -224,10 +228,6 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
       set(CMAKE_CUDA_COMPILER_ID_REQUIRE_SUCCESS ON)
     endif()
   elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
-    if(WIN32)
-      message(FATAL_ERROR "Clang with CUDA is not yet supported on Windows. See CMake issue #20776.")
-    endif()
-
     set(clang_test_flags "--cuda-path=\"${CMAKE_CUDA_COMPILER_LIBRARY_ROOT}\"")
     if(CMAKE_CROSSCOMPILING)
       # Need to pass the host target and include directories if we're crosscompiling.
