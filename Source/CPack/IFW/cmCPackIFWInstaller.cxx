@@ -186,13 +186,20 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         this->WizardShowPageList.clear();
       }
     } else {
+      std::string currentVersionMsg;
+      if (this->Generator) {
+        currentVersionMsg =
+          "QtIFW version " + this->Generator->FrameworkVersion;
+      } else {
+        currentVersionMsg = "an older QtIFW version";
+      }
       cmCPackIFWLogger(
         WARNING,
         "Option CPACK_IFW_PACKAGE_WIZARD_SHOW_PAGE_LIST is set to \""
           << option
           << "\", but it is only supported with QtIFW version 4.0 or later. "
-             "It is being ignored because you are using QtIFW version "
-          << this->Generator->FrameworkVersion.data() << std::endl);
+             "It is being ignored because you are using "
+          << currentVersionMsg << std::endl);
     }
   }
 
