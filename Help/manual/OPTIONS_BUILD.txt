@@ -76,6 +76,9 @@
  native build system to choose a compiler or SDK.  See the
  :variable:`CMAKE_GENERATOR_PLATFORM` variable for details.
 
+``--install-prefix <directory>``
+ Specify the installation prefix, :variable:`CMAKE_INSTALL_PREFIX`.
+
 ``-Wno-dev``
  Suppress developer warnings.
 
