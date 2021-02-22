@@ -170,7 +170,11 @@ bool QCMakeCacheView::showAdvanced() const
 
 void QCMakeCacheView::setSearchFilter(const QString& s)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+  this->SearchFilter->setFilterRegularExpression(s);
+#else
   this->SearchFilter->setFilterFixedString(s);
+#endif
 }
 
 QCMakeCacheModel::QCMakeCacheModel(QObject* p)
