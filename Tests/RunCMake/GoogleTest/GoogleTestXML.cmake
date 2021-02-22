@@ -3,6 +3,8 @@ include(GoogleTest)
 
 enable_testing()
 
+include(xcode_sign_adhoc.cmake)
+
 # This creates the folder structure for the paramterized tests
 # to avoid handling missing folders in C++
 #
@@ -15,6 +17,7 @@ enable_testing()
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/GoogleTestXMLSpecial/cases.case")
 
 add_executable(xml_output xml_output.cpp)
+xcode_sign_adhoc(xml_output)
 gtest_discover_tests(
   xml_output
   XML_OUTPUT_DIR ${CMAKE_BINARY_DIR}
