@@ -347,7 +347,7 @@ List of CPack DEB generator specific variables:
  .. versionadded:: 3.20
 
  May be set to a list of directories that will be given to ``dpkg-shlibdeps``
- via its ``-d`` option. These will be searched by ``dpkg-shlibdeps`` in order
+ via its ``-l`` option. These will be searched by ``dpkg-shlibdeps`` in order
  to find private shared library dependencies.
 
  * Mandatory : NO
