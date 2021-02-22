@@ -2413,18 +2413,20 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     // 1. We have SKIP_PRECOMPILE_HEADERS == true
     // 2. We are creating the pre-compiled header
     // 3. We are a different language than the linker language AND pch is
-    // enabled
-    const std::string pchSource =
+    //    enabled.
+    std::string const& linkLanguage =
+      this->GeneratorTarget->GetLinkerLanguage(config);
+    std::string const& pchSource =
       this->GeneratorTarget->GetPchSource(config, lang);
     const bool skipPCH =
       pchSource.empty() || sf.GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS");
     const bool makePCH = (sf.GetFullPath() == pchSource);
-    const bool useSharedPCH =
-      !skipPCH && (lang == this->GeneratorTarget->GetLinkerLanguage(config));
-    const bool useDifferentLangPCH =
-      !skipPCH && (lang != this->GeneratorTarget->GetLinkerLanguage(config));
+    const bool useSharedPCH = !skipPCH && (lang == linkLanguage);
+    const bool useDifferentLangPCH = !skipPCH && (lang != linkLanguage);
+    const bool useNoPCH = skipPCH && (lang != linkLanguage) &&
+      !this->GeneratorTarget->GetPchHeader(config, linkLanguage).empty();
     const bool needsPCHFlags =
-      (makePCH || useSharedPCH || useDifferentLangPCH);
+      (makePCH || useSharedPCH || useDifferentLangPCH || useNoPCH);
 
     // if we have flags or defines for this config then
     // use them
@@ -2471,6 +2473,8 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         if (makePCH) {
           pchOptions =
             this->GeneratorTarget->GetPchCreateCompileOptions(config, lang);
+        } else if (useNoPCH) {
+          clOptions.AddFlag("PrecompiledHeader", "NotUsing");
         } else if (useSharedPCH) {
           std::string pchHeader =
             this->GeneratorTarget->GetPchHeader(config, lang);
