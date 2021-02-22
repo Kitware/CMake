@@ -7,7 +7,8 @@ set(quiet "@quiet@")
 set(script_dir "@CMAKE_CURRENT_FUNCTION_LIST_DIR@/ExternalProject")
 include(${script_dir}/captured_process_setup.cmake)
 
-if(NOT "@gitclone_infofile@" IS_NEWER_THAN "@gitclone_stampfile@")
+if(EXISTS "@gitclone_stampfile@" AND EXISTS "@gitclone_infofile@" AND
+   "@gitclone_stampfile@" IS_NEWER_THAN "@gitclone_infofile@")
   if(NOT quiet)
     message(STATUS
       "Avoiding repeated git clone, stamp file is up to date: "
