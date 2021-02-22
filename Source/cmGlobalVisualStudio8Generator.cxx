@@ -108,9 +108,9 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   cmCustomCommandLines no_commands;
-  cmTarget* tgt = lg.AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
-                                       no_working_directory, no_byproducts,
-                                       no_depends, no_commands);
+  cmTarget* tgt = lg.AddUtilityCommand(
+    CMAKE_CHECK_BUILD_SYSTEM_TARGET, false, no_working_directory,
+    no_byproducts, no_depends, no_commands, cmPolicies::NEW);
 
   auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
   auto gt = ptr.get();
@@ -160,10 +160,11 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       std::vector<std::string> byproducts;
       byproducts.push_back(cm->GetGlobVerifyStamp());
 
-      lg.AddCustomCommandToTarget(
-        CMAKE_CHECK_BUILD_SYSTEM_TARGET, byproducts, no_depends,
-        verifyCommandLines, cmCustomCommandType::PRE_BUILD,
-        "Checking File Globs", no_working_directory, stdPipesUTF8);
+      lg.AddCustomCommandToTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET, byproducts,
+                                  no_depends, verifyCommandLines,
+                                  cmCustomCommandType::PRE_BUILD,
+                                  "Checking File Globs", no_working_directory,
+                                  cmPolicies::NEW, stdPipesUTF8);
 
       // Ensure ZERO_CHECK always runs in Visual Studio using MSBuild,
       // otherwise the prebuild command will not be run.
@@ -195,8 +196,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     if (cmSourceFile* file = lg.AddCustomCommandToOutput(
           stamps, no_byproducts, listFiles, no_main_dependency,
           no_implicit_depends, commandLines, "Checking Build System",
-          no_working_directory, true, false, false, false, "", "",
-          stdPipesUTF8)) {
+          no_working_directory, cmPolicies::NEW, true, false, false, false, "",
+          "", stdPipesUTF8)) {
       gt->AddSource(file->ResolveFullPath());
     } else {
       cmSystemTools::Error("Error adding rule for " + stamps[0]);

@@ -200,7 +200,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
       // considered always out of date.
       cmTarget* allBuild = gen[0]->AddUtilityCommand(
         "ALL_BUILD", true, no_working_dir, no_byproducts, no_depends,
-        no_commands, false, "Build all projects");
+        no_commands, cmPolicies::NEW, false, "Build all projects");
 
       gen[0]->AddGeneratorTarget(
         cm::make_unique<cmGeneratorTarget>(allBuild, gen[0]));

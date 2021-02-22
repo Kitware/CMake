@@ -620,7 +620,8 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   // Add ALL_BUILD
   cmTarget* allbuild = root->AddUtilityCommand(
     "ALL_BUILD", true, no_working_directory, no_byproducts, no_depends,
-    cmMakeSingleCommandLine({ "echo", "Build all projects" }));
+    cmMakeSingleCommandLine({ "echo", "Build all projects" }),
+    cmPolicies::NEW);
 
   root->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(allbuild, root));
 
@@ -646,10 +647,10 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
     std::string file =
       this->ConvertToRelativeForMake(this->CurrentReRunCMakeMakefile);
     cmSystemTools::ReplaceString(file, "\\ ", " ");
-    cmTarget* check =
-      root->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, true,
-                              no_working_directory, no_byproducts, no_depends,
-                              cmMakeSingleCommandLine({ "make", "-f", file }));
+    cmTarget* check = root->AddUtilityCommand(
+      CMAKE_CHECK_BUILD_SYSTEM_TARGET, true, no_working_directory,
+      no_byproducts, no_depends,
+      cmMakeSingleCommandLine({ "make", "-f", file }), cmPolicies::NEW);
 
     root->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(check, root));
   }
@@ -678,8 +679,9 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
         gen->AddCustomCommandToTarget(
           target->GetName(), no_byproducts, no_depends,
           legacyDependHelperCommandLines, cmCustomCommandType::POST_BUILD,
-          "Depend check for xcode", legacyDependHelperDir.c_str(), true, false,
-          "", "", false, cmObjectLibraryCommands::Accept);
+          "Depend check for xcode", legacyDependHelperDir.c_str(),
+          cmPolicies::NEW, true, false, "", "", false,
+          cmObjectLibraryCommands::Accept);
       }
 
       if (!this->IsExcluded(gens[0], target.get())) {
