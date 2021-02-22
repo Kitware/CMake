@@ -47,3 +47,6 @@ run_cmp0116(NEW OFF)
 run_cmp0116(WARN ON)
 run_cmp0116(OLD ON)
 run_cmp0116(NEW ON)
+
+set(RunCMake_TEST_OPTIONS -DCMAKE_POLICY_WARNING_CMP0116:BOOL=TRUE)
+run_cmake(CMP0116-Mixed)
