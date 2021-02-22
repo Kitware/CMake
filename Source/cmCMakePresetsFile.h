@@ -32,6 +32,7 @@ public:
     USER_PRESET_INHERITANCE,
     INVALID_MACRO_EXPANSION,
     BUILD_TEST_PRESETS_UNSUPPORTED,
+    INSTALL_PREFIX_UNSUPPORTED,
   };
 
   enum class ArchToolsetStrategy
@@ -102,6 +103,7 @@ public:
     std::string Toolset;
     cm::optional<ArchToolsetStrategy> ToolsetStrategy;
     std::string BinaryDir;
+    std::string InstallDir;
 
     std::map<std::string, cm::optional<CacheVariable>> CacheVariables;
 

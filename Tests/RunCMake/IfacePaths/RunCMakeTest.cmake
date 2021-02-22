@@ -79,7 +79,7 @@ foreach(policyStatus NEW OLD "")
     set(policySuffix -CMP0052-${policyStatus})
   endif()
   set(RunCMake_TEST_OPTIONS
-    "--install-prefix=${RunCMake_BINARY_DIR}/prefix" ${policyOption}
+    "--install-prefix ${RunCMake_BINARY_DIR}/prefix" ${policyOption}
     "-DTEST_FILE=${RunCMake_SOURCE_DIR}/BinaryDirectoryInInterface.cmake"
     )
   # Set the RunCMake_TEST_SOURCE_DIR here to the copy too. This is needed to run

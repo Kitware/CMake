@@ -77,7 +77,8 @@
  :variable:`CMAKE_GENERATOR_PLATFORM` variable for details.
 
 ``--install-prefix <directory>``
- Specify the installation prefix, :variable:`CMAKE_INSTALL_PREFIX`.
+ Specify the installation directory, used by the
+ :variable:`CMAKE_INSTALL_PREFIX` variable. Must be an absolute path.
 
 ``-Wno-dev``
  Suppress developer warnings.

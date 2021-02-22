@@ -183,6 +183,12 @@ that may contain the following fields:
   specified, it must be inherited from the ``inherits`` preset (unless this
   preset is ``hidden``).
 
+``installDir``
+
+  An optional string representing the path to the installation directory.
+  This field supports `macro expansion`_. If a relative path is specified,
+  it is calculated relative to the source directory.
+
 ``cmakeExecutable``
 
   An optional string representing the path to the CMake executable to use
