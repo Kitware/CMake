@@ -7,7 +7,8 @@ set(quiet "@quiet@")
 set(script_dir "@CMAKE_CURRENT_FUNCTION_LIST_DIR@/ExternalProject")
 include(${script_dir}/captured_process_setup.cmake)
 
-if(NOT "@hgclone_infofile@" IS_NEWER_THAN "@hgclone_stampfile@")
+if(EXISTS "@hgclone_stampfile@" AND EXISTS "@hgclone_infofile@" AND
+   "@hgclone_stampfile@" IS_NEWER_THAN "@hgclone_infofile@")
   if(NOT quiet)
     message(STATUS
       "Avoiding repeated hg clone, stamp file is up to date: "

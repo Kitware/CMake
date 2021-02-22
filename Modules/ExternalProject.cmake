@@ -2579,11 +2579,24 @@ function(_ep_write_command_script
   endif()
 
   if(genex_supported)
-    # Only written at generation phase
+    # Only written at generation phase. This will only change the file's
+    # timestamp if the contents change.
     file(GENERATE OUTPUT "${script_filename}" CONTENT "${script_content}")
   else()
-    # Written immediately, needed if script has to be invoked in configure phase
-    file(WRITE "${script_filename}" "${script_content}")
+    # Update the file immediately, needed if script has to be invoked in the
+    # configure phase (e.g. via FetchContent). We need to be careful to avoid
+    # updating the timestamp if the file contents don't change. The file(WRITE)
+    # command always updates the file, so avoid it if we don't need to call it.
+    set(doWrite TRUE)
+    if(EXISTS "${script_filename}")
+      file(READ "${script_filename}" existing_content)
+      if(existing_content STREQUAL script_content)
+        set(doWrite FALSE)
+      endif()
+    endif()
+    if(doWrite)
+      file(WRITE "${script_filename}" "${script_content}")
+    endif()
   endif()
 
 endfunction()
@@ -3916,7 +3929,12 @@ function(_ep_do_preconfigure_steps_now name)
 
     if(NOT need_to_run)
       foreach(dep_file ${script_file} ${_EPdepends_${STEP}})
-        if(NOT EXISTS ${dep_file} OR ${dep_file} IS_NEWER_THAN ${stamp_file})
+        # IS_NEWER_THAN is also true if the timestamps are the same. On some
+        # file systems, we only have second resolution timestamps and the
+        # likelihood of having the same timestamp is high. Use the negative
+        # form to ensure we actually get a true "is newer than" test.
+        if(NOT EXISTS ${dep_file} OR
+           NOT ${stamp_file} IS_NEWER_THAN ${dep_file})
           set(need_to_run TRUE)
           break()
         endif()
