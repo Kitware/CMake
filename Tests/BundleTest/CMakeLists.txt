@@ -19,7 +19,7 @@ set_source_files_properties(
   SomeRandomFile.txt
   "${BundleTest_SOURCE_DIR}/../../README.rst"
   PROPERTIES
-  MACOSX_PACKAGE_LOCATION MacOS
+  MACOSX_PACKAGE_LOCATION Other
   )
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/foobar")
@@ -56,11 +56,7 @@ install(TARGETS BundleTest DESTINATION Applications)
 # installed into a location that uses this output name this will fail if the
 # bundle does not respect the name.  Also the executable will not be found by
 # the test driver if this does not work.
-set_target_properties(BundleTest PROPERTIES
-  OUTPUT_NAME BundleTestExe
-  XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
-  XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
-  )
+set_target_properties(BundleTest PROPERTIES OUTPUT_NAME BundleTestExe)
 
 # Test executable versioning if it is supported.
 if(NOT XCODE)
