@@ -30,7 +30,7 @@ This program will run the tests and report results.
 Options
 =======
 
-``--preset <preset>``
+``--preset <preset>``, ``--preset=<preset>``
  Use a test preset to specify test options. The project binary directory
  is inferred from the ``configurePreset`` key. The current working directory
  must contain CMake preset files.
