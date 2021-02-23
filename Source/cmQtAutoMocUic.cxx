@@ -2520,8 +2520,8 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
 
       Json::Value const& entryName = entry[0u];
       Json::Value const& entryFlags = entry[1u];
-      Json::Value const& entryConfigs = entry[2u];
-      Json::Value const& entryBuild = entry[3u];
+      Json::Value const& entryBuild = entry[2u];
+      Json::Value const& entryConfigs = entry[3u];
       if (testEntry(entryName.isString(),
                     "JSON value for name is not a string.") ||
           testEntry(entryFlags.isString(),
