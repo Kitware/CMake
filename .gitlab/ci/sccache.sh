@@ -5,17 +5,16 @@ set -e
 readonly kernel="$(uname -s)-$(uname -m)"
 case $kernel in
     Linux-x86_64)
-        version="0.2.13"
+        version="v0.2.15"
         shatool="sha256sum"
-        sha256sum="28a5499e340865b08b632306b435913beb590fbd7b49a3f887a623b459fabdeb"
+        sha256sum="e5d03a9aa3b9fac7e490391bbe22d4f42c840d31ef9eaf127a03101930cbb7ca"
         platform="x86_64-unknown-linux-musl"
         ;;
     Linux-aarch64)
-        version="g6628e1f"
+        version="v0.2.15"
         shatool="sha256sum"
-        sha256sum="bb88adbb5a29c166ecaa78d0593493b609a7f84d91d1228502a908f319b513f0"
+        sha256sum="90d91d21a767e3f558196dbd52395f6475c08de5c4951a4c8049575fa6894489"
         platform="aarch64-unknown-linux-musl"
-        url="https://github.com/hwinit/sccache/releases/download/$version"
         ;;
     Darwin-x86_64)
         version="gfe63078"
@@ -23,6 +22,13 @@ case $kernel in
         sha256sum="60a0302b1d7227f7ef56abd82266353f570d27c6e850c56c6448bf62def38888"
         platform="x86_64-apple-darwin"
         url="https://paraview.org/files/dependencies"
+        ;;
+    Darwin-arm64)
+        version="0.2.15-1-disk_cache_init"
+        shatool="shasum -a 256"
+        sha256sum="f7c9ff78e701810b8b1dbc2a163c7fda1177fc3f69c71f46e7a38242657a99fd"
+        platform="aarch64-apple-darwin"
+        url="https://cmake.org/files/dependencies/sccache"
         ;;
     *)
         echo "Unrecognized platform $kernel"
@@ -49,3 +55,4 @@ curl -OL "$url/$tarball"
 $shatool --check sccache.sha256sum
 tar xf "$tarball"
 mv "$filename/sccache" .
+chmod +x sccache
