@@ -16,7 +16,7 @@ set_source_files_properties(
   "${BundleTest_SOURCE_DIR}/SomeRandomFile.txt"
   "${BundleTest_SOURCE_DIR}/../../README.rst"
   PROPERTIES
-  MACOSX_PACKAGE_LOCATION MacOS
+  MACOSX_PACKAGE_LOCATION Other
   )
 
 add_executable(SecondBundle
@@ -35,11 +35,7 @@ install(TARGETS SecondBundle DESTINATION Applications)
 # installed into a location that uses this output name this will fail if the
 # bundle does not respect the name.  Also the executable will not be found by
 # the test driver if this does not work.
-set_target_properties(SecondBundle PROPERTIES
-  OUTPUT_NAME SecondBundleExe
-  XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
-  XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
-  )
+set_target_properties(SecondBundle PROPERTIES OUTPUT_NAME SecondBundleExe)
 
 # Express one app bundle in terms of another's SOURCES to verify that
 # the generators do not expose the Info.plist of one to the other.
