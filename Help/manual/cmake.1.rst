@@ -416,7 +416,7 @@ following options:
   Project binary directory to be built.  This is required (unless a preset
   is specified) and must be first.
 
-``--preset <preset>``
+``--preset <preset>``, ``--preset=<preset>``
   Use a build preset to specify build options. The project binary directory
   is inferred from the ``configurePreset`` key. The current working directory
   must contain CMake preset files.
