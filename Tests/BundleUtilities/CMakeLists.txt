@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(BundleUtilities)
 
+if(CMAKE_GENERATOR STREQUAL "Xcode" AND
+   "${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+  # Tell Xcode to pretend the linker signed binaries so that
+  # editing with install_name_tool preserves ad-hoc signatures.
+  # See CMake Issue 21854.
+  # This option is supported by codesign on macOS 11 or higher.
+  set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "-o linker-signed")
+endif()
+
 ###### the various types of dependencies we can have
 
 # a shared library
