@@ -10,27 +10,51 @@ FindIntl
 Find the Gettext libintl headers and libraries.
 
 This module reports information about the Gettext libintl
-installation in several variables.  General variables::
+installation in several variables.
 
-  Intl_FOUND - true if the libintl headers and libraries were found
-  Intl_INCLUDE_DIRS - the directory containing the libintl headers
-  Intl_LIBRARIES - libintl libraries to be linked
+.. variable:: Intl_FOUND
+
+  True if libintl is found.
+
+.. variable:: Intl_INCLUDE_DIRS
+
+  The directory containing the libintl headers.
+
+.. variable:: Intl_LIBRARIES
+
+  The intl libraries to be linked.
 
 .. versionadded:: 3.20
   This module defines :prop_tgt:`IMPORTED` target ``Intl::Intl``.
 
-The following cache variables may also be set::
+The following cache variables may also be set:
 
-  Intl_INCLUDE_DIR - the directory containing the libintl headers
-  Intl_LIBRARY - the libintl library (if any)
-  Intl_HAVE_GETTEXT_BUILTIN - check if gettext is in the C library
-  Intl_HAVE_DCGETTEXT_BUILTIN - check if dcgettext is in the C library
-  Intl_IS_BUILTIN - whether intl is a part of the C library determined
-      from the result of Intl_HAVE_GETTEXT_BUILTIN and Intl_HAVE_DCGETTEXT_BUILTIN
+.. variable:: Intl_INCLUDE_DIR
 
-.. versionadded:: 3.20
-  Added the ``Intl_HAVE_GETTEXT_BUILTIN``, ``Intl_HAVE_DCGETTEXT_BUILTIN`` and
-  ``Intl_IS_BUILTIN`` variables.
+  The directory containing the libintl headers
+
+.. variable:: Intl_LIBRARY
+
+  The libintl library (if any)
+
+.. variable:: Intl_HAVE_GETTEXT_BUILTIN
+
+  .. versionadded:: 3.20
+
+  True if gettext is in the C library
+
+.. variable:: Intl_HAVE_DCGETTEXT_BUILTIN
+
+  .. versionadded:: 3.20
+
+  True if dcgettext is in the C library
+
+.. variable:: Intl_IS_BUILTIN
+
+  .. versionadded:: 3.20
+
+  whether intl is a part of the C library determined from the result of
+  Intl_HAVE_GETTEXT_BUILTIN and Intl_HAVE_DCGETTEXT_BUILTIN
 
 .. note::
   On some platforms, such as Linux with GNU libc, the gettext
@@ -42,9 +66,6 @@ The following cache variables may also be set::
   If you wish to use the Gettext tools (``msgmerge``,
   ``msgfmt``, etc.), use :module:`FindGettext`.
 #]=======================================================================]
-
-
-# Written by Roger Leigh <rleigh@codelibre.net>
 
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CheckSymbolExists.cmake)
