@@ -1568,8 +1568,8 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
                        jval[0u] = muf->FullPath;
                        jval[1u] = cmStrCat(muf->MocIt ? 'M' : 'm',
                                            muf->UicIt ? 'U' : 'u');
-                       jval[2u] = cfgArray(muf->Configs);
-                       jval[3u] = this->GetMocBuildPath(*muf);
+                       jval[2u] = this->GetMocBuildPath(*muf);
+                       jval[3u] = cfgArray(muf->Configs);
                      });
   info.SetArrayArray(
     "SOURCES", sources, [&cfgArray](Json::Value& jval, MUFile const* muf) {
