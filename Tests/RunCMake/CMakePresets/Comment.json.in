@@ -1,0 +1,11 @@
+// Comment
+{
+  "version": 1,
+  "configurePresets": [
+    {
+      "name": "Comment",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}
