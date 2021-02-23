@@ -64,7 +64,7 @@ const char* cmDocumentationUsageNote[][2] = {
 
 const char* cmDocumentationOptions[][2] = {
   CMAKE_STANDARD_OPTIONS_TABLE,
-  { "--preset=<preset>", "Specify a configure preset." },
+  { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
   { "--list-presets", "List available presets." },
   { "-E", "CMake command mode." },
   { "-L[A][H]", "List non-advanced cached variables." },

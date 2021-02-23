@@ -132,7 +132,13 @@
     {
       "name": "Good Spaces",
       "generator": "@RunCMake_GENERATOR@",
-      "binaryDir": "${sourceDir}/build"
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "GOOD_SPACES": {
+          "type": "STRING",
+          "value": "1"
+        }
+      }
     },
     {
       "name": "GoodWindowsBackslash",

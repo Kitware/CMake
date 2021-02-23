@@ -377,7 +377,7 @@ Options
  about:tracing tab of Google Chrome or using a plugin for a tool like Trace
  Compass.
 
-``--preset=<preset>``
+``--preset <preset>``, ``--preset=<preset>``
  Reads a :manual:`preset <cmake-presets(7)>` from
  ``<path-to-source>/CMakePresets.json`` and
  ``<path-to-source>/CMakeUserPresets.json``. The preset specifies the
