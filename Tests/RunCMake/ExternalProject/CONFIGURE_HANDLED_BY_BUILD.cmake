@@ -11,7 +11,7 @@ ExternalProject_Add(proj1
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Doing something"
   # file(TIMESTAMP) gives back the timestamp in seconds so we sleep a second to
   # make sure we get a different timestamp on the stamp file
-  BUILD_COMMAND ${CMAKE_COMMAND} -E sleep 1
+  BUILD_COMMAND ${CMAKE_COMMAND} -E sleep 1.125
   INSTALL_COMMAND ""
   BUILD_ALWAYS ON
   STAMP_DIR "stamp"
@@ -20,7 +20,7 @@ ExternalProject_Add(proj2
   DOWNLOAD_COMMAND ""
   SOURCE_DIR ""
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Doing something"
-  BUILD_COMMAND ${CMAKE_COMMAND} -E sleep 1
+  BUILD_COMMAND ${CMAKE_COMMAND} -E sleep 1.125
   INSTALL_COMMAND ""
   CONFIGURE_HANDLED_BY_BUILD ON
   DEPENDS proj1
