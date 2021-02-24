@@ -409,7 +409,6 @@ Changes made since CMake 3.19.0 include the following.
   :generator:`Visual Studio 14 2015` generator.  It has now been fixed to
   work with :ref:`Visual Studio Generators` for later VS versions too.
 
-
 3.19.5
 ------
 
@@ -425,3 +424,11 @@ Changes made since CMake 3.19.0 include the following.
   *Link Binaries With Libraries* build phase broke the ability to switch
   between device and simulator builds without reconfiguring.  That capability
   has now been restored.
+
+3.19.6
+------
+
+* The :manual:`cmake-presets(7)` feature no longer allows comments in
+  ``CMakePresets.json`` or ``CMakeUserPresets.json`` files.
+  This was mistakenly allowed by the implementation in CMake 3.19.0 through
+  CMake 3.19.5, and was not documented.

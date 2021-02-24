@@ -1,8 +1,4 @@
-/*
- * Block comment
- */
 {
-  // Inline comment
   "version": 1,
   "cmakeMinimumRequired": {
     "major": 3,
