@@ -34,6 +34,7 @@ if (RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Visual Studio|Xcode|Watcom WMake
   run_cmake_target(genex CXX_interface2 LinkLibraries_CXX_interface2 --config Release)
   run_cmake_target(genex C_static LinkLibraries_C_static --config Release)
   run_cmake_target(genex CXX_static LinkLibraries_CXX_static --config Release)
+  run_cmake_target(genex C_static_CXX LinkLibraries_C_static_CXX --config Release)
 
   unset(RunCMake_TEST_OPTIONS)
   unset(RunCMake_TEST_OUTPUT_MERGE)

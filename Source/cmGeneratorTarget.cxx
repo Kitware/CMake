@@ -2648,8 +2648,12 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
     LinkClosure linkClosure;
     linkClosure.LinkerLanguage = this->LinkerLanguage;
 
+    bool hasHardCodedLinkerLanguage = this->Target->GetProperty("HAS_CXX") ||
+      !this->Target->GetSafeProperty("LINKER_LANGUAGE").empty();
+
     // Get languages built in this target.
-    secondPass = this->ComputeLinkClosure(config, linkClosure, false);
+    secondPass = this->ComputeLinkClosure(config, linkClosure, false) &&
+      !hasHardCodedLinkerLanguage;
     this->LinkerLanguage = linkClosure.LinkerLanguage;
     if (!secondPass) {
       lc = std::move(linkClosure);
