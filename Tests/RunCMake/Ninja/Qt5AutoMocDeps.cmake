@@ -10,3 +10,4 @@ target_link_libraries(app_with_qt PRIVATE simple_lib Qt5::Core)
 
 add_subdirectory(QtSubDir1)
 add_subdirectory(QtSubDir2)
+add_subdirectory(QtSubDir3)

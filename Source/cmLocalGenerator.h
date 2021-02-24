@@ -324,7 +324,8 @@ public:
     const std::string& target, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, cmCustomCommandType type,
-    const char* comment, const char* workingDir, bool escapeOldStyle = true,
+    const char* comment, const char* workingDir,
+    cmPolicies::PolicyStatus cmp0116, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
     const std::string& job_pool = "", bool command_expand_lists = false,
     cmObjectLibraryCommands objLibCommands = cmObjectLibraryCommands::Reject,
@@ -337,7 +338,8 @@ public:
     const std::string& output, const std::vector<std::string>& depends,
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, bool replace = false, bool escapeOldStyle = true,
+    const char* workingDir, cmPolicies::PolicyStatus cmp0116,
+    bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
     const std::string& depfile = "", const std::string& job_pool = "",
     bool stdPipesUTF8 = false);
@@ -348,7 +350,8 @@ public:
     const std::string& main_dependency,
     const cmImplicitDependsList& implicit_depends,
     const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, bool replace = false, bool escapeOldStyle = true,
+    const char* workingDir, cmPolicies::PolicyStatus cmp0116,
+    bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
     const std::string& depfile = "", const std::string& job_pool = "",
     bool stdPipesUTF8 = false);
@@ -361,10 +364,10 @@ public:
     const std::string& utilityName, bool excludeFromAll,
     const char* workingDir, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false, const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
+    const cmCustomCommandLines& commandLines, cmPolicies::PolicyStatus cmp0116,
+    bool escapeOldStyle = true, const char* comment = nullptr,
+    bool uses_terminal = false, bool command_expand_lists = false,
+    const std::string& job_pool = "", bool stdPipesUTF8 = false);
 
   virtual std::string CreateUtilityOutput(
     std::string const& targetName, std::vector<std::string> const& byproducts,
@@ -686,7 +689,8 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
                               const char* workingDir, bool escapeOldStyle,
                               bool uses_terminal, const std::string& depfile,
                               const std::string& job_pool,
-                              bool command_expand_lists, bool stdPipesUTF8);
+                              bool command_expand_lists, bool stdPipesUTF8,
+                              cmPolicies::PolicyStatus cmp0116);
 
 cmSourceFile* AddCustomCommandToOutput(
   cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
@@ -697,7 +701,8 @@ cmSourceFile* AddCustomCommandToOutput(
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool, bool stdPipesUTF8);
+  const std::string& job_pool, bool stdPipesUTF8,
+  cmPolicies::PolicyStatus cmp0116);
 
 void AppendCustomCommandToOutput(cmLocalGenerator& lg,
                                  const cmListFileBacktrace& lfbt,
@@ -714,7 +719,8 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        const cmCustomCommandLines& commandLines,
                        bool escapeOldStyle, const char* comment,
                        bool uses_terminal, bool command_expand_lists,
-                       const std::string& job_pool, bool stdPipesUTF8);
+                       const std::string& job_pool, bool stdPipesUTF8,
+                       cmPolicies::PolicyStatus cmp0116);
 
 std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target);
 std::vector<std::string> ComputeISPCExtraObjects(

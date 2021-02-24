@@ -169,7 +169,8 @@ public:
     const std::string& target, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, cmCustomCommandType type,
-    const char* comment, const char* workingDir, bool escapeOldStyle = true,
+    const char* comment, const char* workingDir,
+    cmPolicies::PolicyStatus cmp0116, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
     const std::string& job_pool = "", bool command_expand_lists = false,
     bool stdPipesUTF8 = false);
@@ -186,11 +187,11 @@ public:
     const std::string& output, const std::vector<std::string>& depends,
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, const CommandSourceCallback& callback = nullptr,
-    bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
+    const char* workingDir, cmPolicies::PolicyStatus cmp0116,
+    const CommandSourceCallback& callback = nullptr, bool replace = false,
+    bool escapeOldStyle = true, bool uses_terminal = false,
+    bool command_expand_lists = false, const std::string& depfile = "",
+    const std::string& job_pool = "", bool stdPipesUTF8 = false);
   void AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,
@@ -198,17 +199,18 @@ public:
     const std::string& main_dependency,
     const cmImplicitDependsList& implicit_depends,
     const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, const CommandSourceCallback& callback = nullptr,
-    bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
+    const char* workingDir, cmPolicies::PolicyStatus cmp0116,
+    const CommandSourceCallback& callback = nullptr, bool replace = false,
+    bool escapeOldStyle = true, bool uses_terminal = false,
+    bool command_expand_lists = false, const std::string& depfile = "",
+    const std::string& job_pool = "", bool stdPipesUTF8 = false);
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
                                 const std::string& source,
                                 const cmCustomCommandLines& commandLines,
-                                const char* comment);
+                                const char* comment,
+                                cmPolicies::PolicyStatus cmp0116);
   void AppendCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const cmImplicitDependsList& implicit_depends,
@@ -250,10 +252,10 @@ public:
     const std::string& utilityName, bool excludeFromAll,
     const char* workingDir, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false, const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
+    const cmCustomCommandLines& commandLines, cmPolicies::PolicyStatus cmp0116,
+    bool escapeOldStyle = true, const char* comment = nullptr,
+    bool uses_terminal = false, bool command_expand_lists = false,
+    const std::string& job_pool = "", bool stdPipesUTF8 = false);
 
   /**
    * Add a subdirectory to the build.

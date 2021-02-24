@@ -13,6 +13,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmProcessOutput.h"
 #include "cmProperty.h"
 #include "cmQtAutoGen.h"
@@ -167,9 +168,10 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
     std::vector<std::string> no_byproducts;
     std::vector<std::string> no_depends;
     cmCustomCommandLines no_commands;
+    const cmPolicies::PolicyStatus cmp0116_new = cmPolicies::NEW;
     cmTarget* target = localGen->AddUtilityCommand(
       name, true, makefile->GetHomeOutputDirectory().c_str(), no_byproducts,
-      no_depends, no_commands, false, comment.c_str());
+      no_depends, no_commands, cmp0116_new, false, comment.c_str());
     localGen->AddGeneratorTarget(
       cm::make_unique<cmGeneratorTarget>(target, localGen));
 
