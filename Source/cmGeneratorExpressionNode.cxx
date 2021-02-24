@@ -1629,8 +1629,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
         type != cmStateEnums::OBJECT_LIBRARY) {
       std::ostringstream e;
       e << "Objects of target \"" << tgtName
-        << "\" referenced but is not an allowed library types (EXECUTABLE, "
-        << "STATIC, SHARED, MODULE, OBJECT).";
+        << "\" referenced but is not one of the allowed target types "
+        << "(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT).";
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
     }
