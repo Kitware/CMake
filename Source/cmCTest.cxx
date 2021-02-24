@@ -2574,7 +2574,10 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
 
   bool listPresets =
     find(args.begin(), args.end(), "--list-presets") != args.end();
-  auto it = find(args.begin(), args.end(), "--preset");
+  auto it =
+    std::find_if(args.begin(), args.end(), [](std::string const& arg) -> bool {
+      return arg == "--preset" || cmHasLiteralPrefix(arg, "--preset=");
+    });
   if (listPresets || it != args.end()) {
     std::string errormsg;
     bool success;
@@ -2583,7 +2586,10 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       // If listing presets we don't need a presetName
       success = this->SetArgsFromPreset("", listPresets);
     } else {
-      if (++it != args.end()) {
+      if (cmHasLiteralPrefix(*it, "--preset=")) {
+        auto presetName = it->substr(9);
+        success = this->SetArgsFromPreset(presetName, listPresets);
+      } else if (++it != args.end()) {
         auto presetName = *it;
         success = this->SetArgsFromPreset(presetName, listPresets);
       } else {
