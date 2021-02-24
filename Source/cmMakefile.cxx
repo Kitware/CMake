@@ -1085,8 +1085,9 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
   const std::string& target, const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, cmCustomCommandType type,
-  const char* comment, const char* workingDir, bool escapeOldStyle,
-  bool uses_terminal, const std::string& depfile, const std::string& job_pool,
+  const char* comment, const char* workingDir,
+  cmPolicies::PolicyStatus cmp0116, bool escapeOldStyle, bool uses_terminal,
+  const std::string& depfile, const std::string& job_pool,
   bool command_expand_lists, bool stdPipesUTF8)
 {
   cmTarget* t = this->GetCustomCommandTarget(
@@ -1112,7 +1113,7 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
         lg, lfbt, cmCommandOrigin::Project, t, byproducts, depends,
         commandLines, type, GetCStrOrNull(commentStr),
         GetCStrOrNull(workingStr), escapeOldStyle, uses_terminal, depfile,
-        job_pool, command_expand_lists, stdPipesUTF8);
+        job_pool, command_expand_lists, stdPipesUTF8, cmp0116);
     });
 
   return t;
@@ -1122,16 +1123,18 @@ void cmMakefile::AddCustomCommandToOutput(
   const std::string& output, const std::vector<std::string>& depends,
   const std::string& main_dependency, const cmCustomCommandLines& commandLines,
   const char* comment, const char* workingDir,
-  const CommandSourceCallback& callback, bool replace, bool escapeOldStyle,
-  bool uses_terminal, bool command_expand_lists, const std::string& depfile,
+  cmPolicies::PolicyStatus cmp0116, const CommandSourceCallback& callback,
+  bool replace, bool escapeOldStyle, bool uses_terminal,
+  bool command_expand_lists, const std::string& depfile,
   const std::string& job_pool, bool stdPipesUTF8)
 {
   std::vector<std::string> no_byproducts;
   cmImplicitDependsList no_implicit_depends;
   this->AddCustomCommandToOutput(
     { output }, no_byproducts, depends, main_dependency, no_implicit_depends,
-    commandLines, comment, workingDir, callback, replace, escapeOldStyle,
-    uses_terminal, command_expand_lists, depfile, job_pool, stdPipesUTF8);
+    commandLines, comment, workingDir, cmp0116, callback, replace,
+    escapeOldStyle, uses_terminal, command_expand_lists, depfile, job_pool,
+    stdPipesUTF8);
 }
 
 void cmMakefile::AddCustomCommandToOutput(
@@ -1140,9 +1143,10 @@ void cmMakefile::AddCustomCommandToOutput(
   const std::vector<std::string>& depends, const std::string& main_dependency,
   const cmImplicitDependsList& implicit_depends,
   const cmCustomCommandLines& commandLines, const char* comment,
-  const char* workingDir, const CommandSourceCallback& callback, bool replace,
-  bool escapeOldStyle, bool uses_terminal, bool command_expand_lists,
-  const std::string& depfile, const std::string& job_pool, bool stdPipesUTF8)
+  const char* workingDir, cmPolicies::PolicyStatus cmp0116,
+  const CommandSourceCallback& callback, bool replace, bool escapeOldStyle,
+  bool uses_terminal, bool command_expand_lists, const std::string& depfile,
+  const std::string& job_pool, bool stdPipesUTF8)
 {
   // Make sure there is at least one output.
   if (outputs.empty()) {
@@ -1172,7 +1176,7 @@ void cmMakefile::AddCustomCommandToOutput(
         main_dependency, implicit_depends, commandLines,
         GetCStrOrNull(commentStr), GetCStrOrNull(workingStr), replace,
         escapeOldStyle, uses_terminal, command_expand_lists, depfile, job_pool,
-        stdPipesUTF8);
+        stdPipesUTF8, cmp0116);
       if (callback && sf) {
         callback(sf);
       }
@@ -1182,7 +1186,8 @@ void cmMakefile::AddCustomCommandToOutput(
 void cmMakefile::AddCustomCommandOldStyle(
   const std::string& target, const std::vector<std::string>& outputs,
   const std::vector<std::string>& depends, const std::string& source,
-  const cmCustomCommandLines& commandLines, const char* comment)
+  const cmCustomCommandLines& commandLines, const char* comment,
+  cmPolicies::PolicyStatus cmp0116)
 {
   // Translate the old-style signature to one of the new-style
   // signatures.
@@ -1193,7 +1198,7 @@ void cmMakefile::AddCustomCommandOldStyle(
     std::vector<std::string> no_byproducts;
     this->AddCustomCommandToTarget(
       target, no_byproducts, depends, commandLines,
-      cmCustomCommandType::POST_BUILD, comment, nullptr);
+      cmCustomCommandType::POST_BUILD, comment, nullptr, cmp0116);
     return;
   }
 
@@ -1226,7 +1231,8 @@ void cmMakefile::AddCustomCommandOldStyle(
     // The source looks like a real file.  Use it as the main dependency.
     for (std::string const& output : outputs) {
       this->AddCustomCommandToOutput(output, depends, source, commandLines,
-                                     comment, nullptr, addRuleFileToTarget);
+                                     comment, nullptr, cmp0116,
+                                     addRuleFileToTarget);
     }
   } else {
     std::string no_main_dependency;
@@ -1236,7 +1242,7 @@ void cmMakefile::AddCustomCommandOldStyle(
     // The source may not be a real file.  Do not use a main dependency.
     for (std::string const& output : outputs) {
       this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
-                                     commandLines, comment, nullptr,
+                                     commandLines, comment, nullptr, cmp0116,
                                      addRuleFileToTarget);
     }
   }
@@ -1263,9 +1269,9 @@ cmTarget* cmMakefile::AddUtilityCommand(
   const std::string& utilityName, bool excludeFromAll, const char* workingDir,
   const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends,
-  const cmCustomCommandLines& commandLines, bool escapeOldStyle,
-  const char* comment, bool uses_terminal, bool command_expand_lists,
-  const std::string& job_pool, bool stdPipesUTF8)
+  const cmCustomCommandLines& commandLines, cmPolicies::PolicyStatus cmp0116,
+  bool escapeOldStyle, const char* comment, bool uses_terminal,
+  bool command_expand_lists, const std::string& job_pool, bool stdPipesUTF8)
 {
   cmTarget* target = this->AddNewUtilityTarget(utilityName, excludeFromAll);
 
@@ -1286,11 +1292,11 @@ cmTarget* cmMakefile::AddUtilityCommand(
   this->AddGeneratorAction(
     [=](cmLocalGenerator& lg, const cmListFileBacktrace& lfbt) {
       BacktraceGuard guard(this->Backtrace, lfbt);
-      detail::AddUtilityCommand(lg, lfbt, cmCommandOrigin::Project, target,
-                                GetCStrOrNull(workingStr), byproducts, depends,
-                                commandLines, escapeOldStyle,
-                                GetCStrOrNull(commentStr), uses_terminal,
-                                command_expand_lists, job_pool, stdPipesUTF8);
+      detail::AddUtilityCommand(
+        lg, lfbt, cmCommandOrigin::Project, target, GetCStrOrNull(workingStr),
+        byproducts, depends, commandLines, escapeOldStyle,
+        GetCStrOrNull(commentStr), uses_terminal, command_expand_lists,
+        job_pool, stdPipesUTF8, cmp0116);
     });
 
   return target;

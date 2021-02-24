@@ -5,6 +5,7 @@
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
@@ -87,16 +88,19 @@ bool cmQTWrapUICommand(std::vector<std::string> const& args,
       const char* no_comment = nullptr;
       const char* no_working_dir = nullptr;
       mf.AddCustomCommandToOutput(hName, depends, no_main_dependency,
-                                  hCommandLines, no_comment, no_working_dir);
+                                  hCommandLines, no_comment, no_working_dir,
+                                  mf.GetPolicyStatus(cmPolicies::CMP0116));
 
       depends.push_back(hName);
       mf.AddCustomCommandToOutput(cxxName, depends, no_main_dependency,
-                                  cxxCommandLines, no_comment, no_working_dir);
+                                  cxxCommandLines, no_comment, no_working_dir,
+                                  mf.GetPolicyStatus(cmPolicies::CMP0116));
 
       depends.clear();
       depends.push_back(hName);
       mf.AddCustomCommandToOutput(mocName, depends, no_main_dependency,
-                                  mocCommandLines, no_comment, no_working_dir);
+                                  mocCommandLines, no_comment, no_working_dir,
+                                  mf.GetPolicyStatus(cmPolicies::CMP0116));
     }
   }
 

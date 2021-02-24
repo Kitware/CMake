@@ -10,6 +10,7 @@
 
 #include "cmCustomCommandLines.h"
 #include "cmListFileCache.h"
+#include "cmPolicies.h"
 
 class cmImplicitDependsList
   : public std::vector<std::pair<std::string, std::string>>
@@ -95,6 +96,10 @@ public:
   const std::string& GetJobPool() const;
   void SetJobPool(const std::string& job_pool);
 
+  /** Set/Get the CMP0116 status (used by the Ninja generator) */
+  cmPolicies::PolicyStatus GetCMP0116Status() const;
+  void SetCMP0116Status(cmPolicies::PolicyStatus cmp0116);
+
 private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Byproducts;
@@ -112,4 +117,5 @@ private:
   bool UsesTerminal = false;
   bool CommandExpandLists = false;
   bool StdPipesUTF8 = false;
+  cmPolicies::PolicyStatus CMP0116Status = cmPolicies::WARN;
 };

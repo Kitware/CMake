@@ -28,7 +28,10 @@ called from a subdirectory.
 
 The ``OLD`` behavior for this policy is to pass the ``DEPFILE`` to Ninja
 unaltered. The ``NEW`` behavior for this policy is to transform the ``DEPFILE``
-after running the custom command.
+after running the custom command. The status of ``CMP0116`` is recorded at the
+time of the custom command's creation, and you can have custom commands in the
+same directory with different values for ``CMP0116`` by setting the policy
+before each custom command.
 
 This policy was introduced in CMake version 3.20.  Unlike most policies,
 CMake version |release| does *not* warn by default when this policy is not set

@@ -30,7 +30,6 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
-#include "cmGlobalNinjaGenerator.h"
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -1226,7 +1225,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       cmTarget* timestampTarget = this->LocalGen->AddUtilityCommand(
         timestampTargetName, true, this->Dir.Work.c_str(),
         /*byproducts=*/timestampTargetProvides,
-        /*depends=*/dependencies, timestampTargetCommandLines, false, nullptr);
+        /*depends=*/dependencies, timestampTargetCommandLines, cmPolicies::NEW,
+        false, nullptr);
       this->LocalGen->AddGeneratorTarget(
         cm::make_unique<cmGeneratorTarget>(timestampTarget, this->LocalGen));
 
@@ -1257,27 +1257,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       const std::string outputFile =
         cmStrCat(this->Dir.Build, "/", timestampFileName);
       this->AutogenTarget.DepFile = cmStrCat(this->Dir.Build, "/deps");
-      std::string relativeBinaryDir;
-      if (dynamic_cast<cmGlobalNinjaGenerator*>(this->GlobalGen)) {
-        switch (this->LocalGen->GetPolicyStatus(cmPolicies::CMP0116)) {
-          case cmPolicies::OLD:
-          case cmPolicies::WARN:
-            relativeBinaryDir = cmSystemTools::RelativePath(
-              this->LocalGen->GetBinaryDirectory(),
-              this->LocalGen->GetCurrentBinaryDirectory());
-            if (!relativeBinaryDir.empty()) {
-              relativeBinaryDir = cmStrCat(relativeBinaryDir, "/");
-            }
-            break;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
-          case cmPolicies::NEW:
-            break;
-        }
-      }
       this->AutogenTarget.DepFileRuleName =
-        cmStrCat(relativeBinaryDir, this->GenTarget->GetName(), "_autogen/",
-                 timestampFileName);
+        cmStrCat(this->GenTarget->GetName(), "_autogen/", timestampFileName);
       commandLines.push_back(cmMakeCommandLine(
         { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
 
@@ -1285,7 +1266,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       const std::string no_main_dependency;
       this->LocalGen->AddCustomCommandToOutput(
         outputFile, dependencies, no_main_dependency, commandLines,
-        autogenComment.c_str(), this->Dir.Work.c_str(), /*replace=*/false,
+        autogenComment.c_str(), this->Dir.Work.c_str(),
+        /*cmp0116=*/cmPolicies::NEW, /*replace=*/false,
         /*escapeOldStyle=*/false,
         /*uses_terminal=*/false,
         /*command_expand_lists=*/false, this->AutogenTarget.DepFile, "",
@@ -1303,7 +1285,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     cmTarget* autogenTarget = this->LocalGen->AddUtilityCommand(
       this->AutogenTarget.Name, true, this->Dir.Work.c_str(),
       /*byproducts=*/autogenByproducts,
-      /*depends=*/dependencies, commandLines, false, autogenComment.c_str());
+      /*depends=*/dependencies, commandLines, cmPolicies::NEW, false,
+      autogenComment.c_str());
     // Create autogen generator target
     this->LocalGen->AddGeneratorTarget(
       cm::make_unique<cmGeneratorTarget>(autogenTarget, this->LocalGen));
@@ -1389,8 +1372,8 @@ bool cmQtAutoGenInitializer::InitRccTargets()
 
         cmTarget* autoRccTarget = this->LocalGen->AddUtilityCommand(
           ccName, true, this->Dir.Work.c_str(), ccOutput, ccDepends,
-          commandLines, false, ccComment.c_str(), false, false, "",
-          stdPipesUTF8);
+          commandLines, cmPolicies::NEW, false, ccComment.c_str(), false,
+          false, "", stdPipesUTF8);
 
         // Create autogen generator target
         this->LocalGen->AddGeneratorTarget(
@@ -1430,8 +1413,8 @@ bool cmQtAutoGenInitializer::InitRccTargets()
         this->LocalGen->AddCustomCommandToOutput(
           ccOutput, ccByproducts, ccDepends, no_main_dependency,
           no_implicit_depends, commandLines, ccComment.c_str(),
-          this->Dir.Work.c_str(), false, true, false, false, "", "",
-          stdPipesUTF8);
+          this->Dir.Work.c_str(), cmPolicies::NEW, false, true, false, false,
+          "", "", stdPipesUTF8);
       }
       // Reconfigure when .qrc file changes
       this->Makefile->AddCMakeDependFile(qrc.QrcFile);
