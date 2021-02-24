@@ -29,10 +29,7 @@ is using Git, ``CMakePresets.json`` may be tracked, and
 Format
 ======
 
-The files are JSON documents.  C-style comments are allowed using
-line-wise ``//`` syntax or block ``/*...*/`` syntax.
-
-Each document has an object as the root:
+The files are a JSON document with an object as the root:
 
 .. literalinclude:: presets/example.json
   :language: json

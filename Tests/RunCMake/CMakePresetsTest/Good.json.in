@@ -49,8 +49,6 @@
                 "outputLogFile": "",
                 "labelSummary": true,
                 "subprojectSummary": true
-                // "maxPassedTestOutputSize": 0
-                // "maxTestNameWidth": 0
             },
             "filter": {
                 "include": {
@@ -58,11 +56,6 @@
                     "label": "",
                     "useUnion": false,
                     "index": ""
-                    // "index": {
-                    //     "start": 0,
-                    //     "end": 0,
-                    //     "stride": 0
-                    // }
                 },
                 "exclude": {
                     "name": "",
@@ -79,7 +72,6 @@
                 "enableFailover": false,
                 "jobs": 0,
                 "resourceSpecFile": "",
-                // "testLoad": 0,
                 "showOnly": "human",
                 "repeat": {
                     "mode": "until-pass",
@@ -87,7 +79,6 @@
                 },
                 "interactiveDebugging": false,
                 "scheduleRandom": false,
-                // "timeout": 0,
                 "noTestsAction": "default"
             }
         },
