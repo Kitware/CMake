@@ -7,6 +7,8 @@ enable_language(CXX)
 add_library(shared_C SHARED func.c)
 add_library(shared_CXX SHARED func.cxx)
 
+add_library(static_cxx STATIC func.cxx)
+target_compile_definitions(static_cxx PRIVATE BUILD_STATIC)
 
 add_library(static1_C STATIC empty.c)
 target_link_libraries (static1_C INTERFACE $<$<LINK_LANGUAGE:C>:shared_C>)
@@ -70,3 +72,10 @@ add_executable(LinkLibraries_C_static main.c)
 target_link_libraries (LinkLibraries_C_static PRIVATE static3)
 add_executable(LinkLibraries_CXX_static main.cxx)
 target_link_libraries (LinkLibraries_CXX_static PRIVATE static3)
+
+# $<LINK_LANGUAGE:> change, by default, link language from C to CXX
+# but because LINKER_LANGUAGE property is set, keep C as link language
+add_executable(LinkLibraries_C_static_CXX main.c)
+target_compile_definitions (LinkLibraries_C_static_CXX PRIVATE C_USE_CXX)
+target_link_libraries (LinkLibraries_C_static_CXX PRIVATE $<$<LINK_LANGUAGE:C>:static_cxx>)
+set_property(TARGET LinkLibraries_C_static_CXX PROPERTY LINKER_LANGUAGE C)
