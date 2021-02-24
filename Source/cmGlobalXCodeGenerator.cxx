@@ -991,10 +991,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
       includes, genexInterpreter.Evaluate(*cincludes, INCLUDE_DIRECTORIES),
       *sf);
   }
-  lg->AppendFlags(
-    flags,
-    lg->GetIncludeFlags(includes, gtgt, lang, std::string(), false,
-                        cmLocalGenerator::IncludePathStyle::Absolute));
+  lg->AppendFlags(flags,
+                  lg->GetIncludeFlags(includes, gtgt, lang, std::string()));
 
   cmXCodeObject* buildFile =
     this->CreateXCodeBuildFileFromPath(sf->ResolveFullPath(), gtgt, lang, sf);
@@ -2698,8 +2696,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     // GNU assembly files (#16449)
     for (auto const& language : languages) {
       std::string includeFlags = this->CurrentLocalGenerator->GetIncludeFlags(
-        includes, gtgt, language, configName, false,
-        cmLocalGenerator::IncludePathStyle::Absolute);
+        includes, gtgt, language, configName);
 
       if (!includeFlags.empty()) {
         cflags[language] += " " + includeFlags;

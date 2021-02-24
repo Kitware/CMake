@@ -854,8 +854,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   vars.Defines = definesString.c_str();
 
   std::string includesString = this->LocalGenerator->GetIncludeFlags(
-    includes, this->GeneratorTarget, lang, config, false,
-    cmLocalGenerator::IncludePathStyle::Absolute);
+    includes, this->GeneratorTarget, lang, config);
   this->LocalGenerator->AppendFlags(includesString,
                                     "$(" + lang + "_INCLUDES)");
   vars.Includes = includesString.c_str();
@@ -2197,7 +2196,7 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
 
   std::string includeFlags = this->LocalGenerator->GetIncludeFlags(
     includes, this->GeneratorTarget, lang, this->GetConfigName(),
-    useResponseFile, cmLocalGenerator::IncludePathStyle::Default);
+    useResponseFile);
   if (includeFlags.empty()) {
     return;
   }
