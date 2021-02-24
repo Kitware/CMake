@@ -838,16 +838,16 @@ cmProp cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(
-  std::string const& path, OutputFormat format, bool forceFullPaths)
+  std::string const& path, IncludePathStyle pathStyle, OutputFormat format)
 {
-  static_cast<void>(forceFullPaths);
+  static_cast<void>(pathStyle);
   return this->ConvertToOutputForExisting(path, format);
 }
 
 std::string cmLocalGenerator::GetIncludeFlags(
-  const std::vector<std::string>& includeDirs, cmGeneratorTarget* target,
-  const std::string& lang, bool forceFullPaths, bool forResponseFile,
-  const std::string& config)
+  std::vector<std::string> const& includeDirs, cmGeneratorTarget* target,
+  std::string const& lang, std::string const& config, bool forResponseFile,
+  IncludePathStyle pathStyle)
 {
   if (lang.empty()) {
     return "";
@@ -923,7 +923,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
       flagUsed = true;
     }
     std::string includePath =
-      this->ConvertToIncludeReference(i, shellFormat, forceFullPaths);
+      this->ConvertToIncludeReference(i, pathStyle, shellFormat);
     if (quotePaths && !includePath.empty() && includePath.front() != '\"') {
       includeFlags << "\"";
     }

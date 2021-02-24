@@ -649,7 +649,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     this->GlobalGenerator->CreateGenerationObjects();
     const auto& lg = this->GlobalGenerator->LocalGenerators[0];
     std::string includeFlags =
-      lg->GetIncludeFlags(includeDirs, nullptr, language);
+      lg->GetIncludeFlags(includeDirs, nullptr, language, std::string());
 
     std::string definitions = mf->GetSafeDefinition("PACKAGE_DEFINITIONS");
     printf("%s %s\n", includeFlags.c_str(), definitions.c_str());
