@@ -64,7 +64,7 @@ const char* cmDocumentationUsageNote[][2] = {
 
 const char* cmDocumentationOptions[][2] = {
   CMAKE_STANDARD_OPTIONS_TABLE,
-  { "--preset=<preset>", "Specify a configure preset." },
+  { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
   { "--list-presets", "List available presets." },
   { "-E", "CMake command mode." },
   { "-L[A][H]", "List non-advanced cached variables." },
@@ -511,6 +511,7 @@ int do_build(int ac, char const* const* av)
     bool hasPreset = false;
     for (int i = 2; i < ac; ++i) {
       if (strcmp(av[i], "--list-presets") == 0 ||
+          cmHasLiteralPrefix(av[i], "--preset=") ||
           strcmp(av[i], "--preset") == 0) {
         hasPreset = true;
         break;
@@ -584,7 +585,7 @@ int do_build(int ac, char const* const* av)
       "Usage: cmake --build [<dir> | --preset <preset>] [options] [-- [native-options]]\n"
       "Options:\n"
       "  <dir>          = Project binary directory to be built.\n"
-      "  --preset <preset>\n"
+      "  --preset <preset>, --preset=<preset>\n"
       "                 = Specify a build preset.\n"
       "  --list-presets\n"
       "                 = List available build presets.\n"

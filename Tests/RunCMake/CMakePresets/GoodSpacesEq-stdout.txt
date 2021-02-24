@@ -1,0 +1,3 @@
+Preset CMake variables:
+
+  GOOD_SPACES:STRING="1"

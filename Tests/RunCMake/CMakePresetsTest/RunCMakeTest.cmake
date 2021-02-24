@@ -51,6 +51,7 @@ function(run_cmake_test_presets name CMakePresetsTest_CONFIGURE_PRESETS CMakePre
     endforeach()
   endif()
 
+  set(eq 0)
   foreach(TEST_PRESET ${CMakePresetsTest_TEST_PRESETS})
     if (EXISTS "${RunCMake_SOURCE_DIR}/${name}-test-${TEST_PRESET}-check.cmake")
       set(RunCMake-check-file "${name}-test-${TEST_PRESET}-check.cmake")
@@ -58,8 +59,15 @@ function(run_cmake_test_presets name CMakePresetsTest_CONFIGURE_PRESETS CMakePre
       set(RunCMake-check-file "check.cmake")
     endif()
 
-    run_cmake_command(${name}-test-${TEST_PRESET}
-      ${CMAKE_CTEST_COMMAND} "--preset" "${TEST_PRESET}" ${ARGN})
+    if(eq)
+      run_cmake_command(${name}-test-${TEST_PRESET}
+        ${CMAKE_CTEST_COMMAND} "--preset=${TEST_PRESET}" ${ARGN})
+      set(eq 0)
+    else()
+      run_cmake_command(${name}-test-${TEST_PRESET}
+        ${CMAKE_CTEST_COMMAND} "--preset" "${TEST_PRESET}" ${ARGN})
+      set(eq 1)
+    endif()
   endforeach()
 endfunction()
 

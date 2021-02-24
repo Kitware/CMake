@@ -26,7 +26,8 @@ static const char* cmDocumentationUsage[][2] = { { nullptr,
                                                  { nullptr, nullptr } };
 
 static const char* cmDocumentationOptions[][2] = {
-  { "--preset <preset>", "Read arguments from a test preset." },
+  { "--preset <preset>, --preset=<preset>",
+    "Read arguments from a test preset." },
   { "--list-presets", "List available test presets." },
   { "-C <cfg>, --build-config <cfg>", "Choose configuration to test." },
   { "--progress", "Enable short progress output from tests." },

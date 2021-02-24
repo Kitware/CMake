@@ -40,6 +40,7 @@ function(run_cmake_build_presets name CMakePresetsBuild_CONFIGURE_PRESETS CMakeP
     endforeach()
   endif()
 
+  set(eq 0)
   foreach(BUILD_PRESET ${CMakePresetsBuild_BUILD_PRESETS})
     if (EXISTS "${RunCMake_SOURCE_DIR}/${name}-build-${BUILD_PRESET}-check.cmake")
       set(RunCMake-check-file "${name}-build-${BUILD_PRESET}-check.cmake")
@@ -47,8 +48,15 @@ function(run_cmake_build_presets name CMakePresetsBuild_CONFIGURE_PRESETS CMakeP
       set(RunCMake-check-file "check.cmake")
     endif()
 
-    run_cmake_command(${name}-build-${BUILD_PRESET}
-      ${CMAKE_COMMAND} "--build" "--preset" "${BUILD_PRESET}" ${ARGN})
+    if(eq)
+      run_cmake_command(${name}-build-${BUILD_PRESET}
+        ${CMAKE_COMMAND} "--build" "--preset=${BUILD_PRESET}" ${ARGN})
+      set(eq 0)
+    else()
+      run_cmake_command(${name}-build-${BUILD_PRESET}
+        ${CMAKE_COMMAND} "--build" "--preset" "${BUILD_PRESET}" ${ARGN})
+      set(eq 1)
+    endif()
   endforeach()
 endfunction()
 
