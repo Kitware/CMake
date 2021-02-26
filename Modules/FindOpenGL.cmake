@@ -465,7 +465,7 @@ if(OPENGL_FOUND)
 
   # ::GLX is a GLVND library, and thus Linux-only: we don't bother checking
   # for a framework version of this library.
-  if(OpenGL_GLX_FOUND AND NOT TARGET OpenGL::GLX)
+  if(OpenGL_GLX_FOUND AND NOT TARGET OpenGL::GLX AND TARGET OpenGL::OpenGL)
     if(IS_ABSOLUTE "${OPENGL_glx_LIBRARY}")
       add_library(OpenGL::GLX UNKNOWN IMPORTED)
       set_target_properties(OpenGL::GLX PROPERTIES IMPORTED_LOCATION
