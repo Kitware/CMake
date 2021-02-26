@@ -388,6 +388,7 @@ public:
   {
     return "1.10.2";
   }
+  static std::string RequiredNinjaVersionForCodePage() { return "1.11"; }
   bool SupportsConsolePool() const;
   bool SupportsImplicitOuts() const;
   bool SupportsManifestRestat() const;
@@ -474,6 +475,7 @@ private:
   std::string GetEditCacheCommand() const override;
   bool FindMakeProgram(cmMakefile* mf) override;
   void CheckNinjaFeatures();
+  void CheckNinjaCodePage();
   bool CheckLanguages(std::vector<std::string> const& languages,
                       cmMakefile* mf) const override;
   bool CheckFortran(cmMakefile* mf) const;
@@ -568,6 +570,9 @@ private:
   bool NinjaSupportsUnconditionalRecompactTool = false;
   bool NinjaSupportsMultipleOutputs = false;
   bool NinjaSupportsMetadataOnRegeneration = false;
+  bool NinjaSupportsCodePage = false;
+
+  codecvt::Encoding NinjaExpectedEncoding = codecvt::None;
 
   bool DiagnosedCxxModuleSupport = false;
 
