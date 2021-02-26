@@ -202,10 +202,10 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
 // Virtual protected methods.
 
 std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
-  std::string const& path, cmOutputConverter::OutputFormat format,
-  bool forceFullPaths)
+  std::string const& path, IncludePathStyle pathStyle,
+  cmOutputConverter::OutputFormat format)
 {
-  if (forceFullPaths) {
+  if (pathStyle == IncludePathStyle::Absolute) {
     return this->ConvertToOutputFormat(
       cmSystemTools::CollapseFullPath(path, this->GetCurrentBinaryDirectory()),
       format);
