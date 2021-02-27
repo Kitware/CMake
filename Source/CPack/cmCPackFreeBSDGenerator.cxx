@@ -21,8 +21,12 @@
 
 #include <sys/stat.h>
 
+// Suffix including the '.', used to tell libpkg what compression to use
+static const char FreeBSDPackageSuffix[] = ".txz";
+
 cmCPackFreeBSDGenerator::cmCPackFreeBSDGenerator()
-  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr", ".txz")
+  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr",
+                            FreeBSDPackageSuffix)
 {
 }
 
@@ -57,7 +61,7 @@ public:
 
   {
     if (d) {
-      pkg_create_set_format(d, "txz");
+      pkg_create_set_format(d, FreeBSDPackageSuffix + 1); // Skip over the '.'
       pkg_create_set_compression_level(d, 0); // Explicitly set default
       pkg_create_set_overwrite(d, false);
       pkg_create_set_rootdir(d, toplevel_dir.c_str());
@@ -321,7 +325,7 @@ void write_manifest_files(cmGeneratedFileStream& s,
   s << "\"files\": {\n";
   for (std::string const& file : files) {
     s << "  \"/" << cmSystemTools::RelativePath(toplevel, file) << "\": \""
-      << "<sha256>"
+      << "<sha256>" // this gets replaced by libpkg by the actual SHA256
       << "\",\n";
   }
   s << "  },\n";
@@ -335,7 +339,6 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     return 0;
   }
 
-  std::vector<std::string>::const_iterator fileIt;
   cmWorkingDirectory wd(toplevel);
 
   files.erase(std::remove_if(files.begin(), files.end(), ignore_file),
@@ -367,6 +370,32 @@ int cmCPackFreeBSDGenerator::PackageFiles()
                              ONE_PACKAGE_PER_COMPONENT);
   }
 
+  // There should be one name in the packageFileNames (already, see comment
+  // in cmCPackGenerator::DoPackage(), which holds what CPack guesses
+  // will be the package filename. libpkg does something else, though,
+  // so update the single filename to what we know will be right.
+  if (this->packageFileNames.size() == 1) {
+    std::string currentPackage = this->packageFileNames[0];
+    int lastSlash = currentPackage.rfind('/');
+
+    // If there is a pathname, preserve that; libpkg will write out
+    // a file with the package name and version as specified in the
+    // manifest, so we look those up (again). lastSlash is the slash
+    // itself, we need that as path separator to the calculated package name.
+    std::string actualPackage =
+      ((lastSlash != std::string::npos)
+         ? std::string(currentPackage, 0, lastSlash + 1)
+         : std::string()) +
+      var_lookup("CPACK_FREEBSD_PACKAGE_NAME") + '-' +
+      var_lookup("CPACK_FREEBSD_PACKAGE_VERSION") + FreeBSDPackageSuffix;
+
+    this->packageFileNames.clear();
+    this->packageFileNames.emplace_back(actualPackage);
+
+    cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                  "Real filename:" << this->packageFileNames[0] << std::endl);
+  }
+
   if (!pkg_initialized() && pkg_init(NULL, NULL) != EPKG_OK) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Can not initialize FreeBSD libpkg." << std::endl);
@@ -388,12 +417,12 @@ int cmCPackFreeBSDGenerator::PackageFiles()
   }
 
   std::string broken_suffix =
-    cmStrCat('-', var_lookup("CPACK_TOPLEVEL_TAG"), ".txz");
+    cmStrCat('-', var_lookup("CPACK_TOPLEVEL_TAG"), FreeBSDPackageSuffix);
   for (std::string& name : packageFileNames) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Packagefile " << name << std::endl);
     if (cmHasSuffix(name, broken_suffix)) {
       name.replace(name.size() - broken_suffix.size(), std::string::npos,
-                   ".txz");
+                   FreeBSDPackageSuffix);
       break;
     }
   }
