@@ -1,6 +1,17 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+macro(__determine_compiler_id_test testflags_in userflags)
+  separate_arguments(testflags UNIX_COMMAND "${testflags_in}")
+  CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${testflags}" "${userflags}" "${src}")
+  CMAKE_DETERMINE_COMPILER_ID_MATCH_VENDOR("${lang}" "${COMPILER_${lang}_PRODUCED_OUTPUT}")
+
+  if(NOT CMAKE_${lang}_COMPILER_ID)
+    foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
+      CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${CMAKE_${lang}_COMPILER_ID_DIR}/${file}" "${src}")
+    endforeach()
+  endif()
+endmacro()
 
 # Function to compile a source file to identify the compiler.  This is
 # used internally by CMake and should not be included by user code.
@@ -24,29 +35,36 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # Compute the directory in which to run the test.
   set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_PLATFORM_INFO_DIR}/CompilerId${lang})
 
-  # Try building with no extra flags and then try each set
-  # of helper flags.  Stop when the compiler is identified.
-  foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
-    foreach(testflags ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}
-                      ""
-                      ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
-      separate_arguments(testflags UNIX_COMMAND "${testflags}")
-      CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${testflags}" "${userflags}" "${src}")
-      CMAKE_DETERMINE_COMPILER_ID_MATCH_VENDOR("${lang}" "${COMPILER_${lang}_PRODUCED_OUTPUT}")
+  # If we REQUIRE_SUCCESS, i.e. TEST_FLAGS_FIRST has the correct flags, we still need to
+  # try two combinations: with COMPILER_ID_FLAGS (from user) and without (see issue #21869).
+  if(CMAKE_${lang}_COMPILER_ID_REQUIRE_SUCCESS)
+    # If there COMPILER_ID_FLAGS is empty we can error for the first invocation.
+    if("${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" STREQUAL "")
+      set(__compiler_id_require_success TRUE)
+    endif()
+
+    foreach(userflags ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST} "")
+      __determine_compiler_id_test("${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}" "${userflags}")
       if(CMAKE_${lang}_COMPILER_ID)
         break()
       endif()
-      foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
-        CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${CMAKE_${lang}_COMPILER_ID_DIR}/${file}" "${src}")
+      set(__compiler_id_require_success TRUE)
+    endforeach()
+  else()
+    # Try building with no extra flags and then try each set
+    # of helper flags.  Stop when the compiler is identified.
+    foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
+      foreach(testflags ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST} "" ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
+        __determine_compiler_id_test("${testflags}" "${userflags}")
+        if(CMAKE_${lang}_COMPILER_ID)
+          break()
+        endif()
       endforeach()
       if(CMAKE_${lang}_COMPILER_ID)
         break()
       endif()
     endforeach()
-    if(CMAKE_${lang}_COMPILER_ID)
-      break()
-    endif()
-  endforeach()
+  endif()
 
   # Check if compiler id detection gave us the compiler tool.
   if(CMAKE_${lang}_COMPILER_ID_TOOL)
@@ -653,7 +671,7 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
     # Some languages may know the correct/desired set of flags and want to fail right away if they don't work.
     # This is currently only used by CUDA.
-    if(CMAKE_${lang}_COMPILER_ID_REQUIRE_SUCCESS)
+    if(__compiler_id_require_success)
       message(FATAL_ERROR "${MSG}")
     endif()
 
