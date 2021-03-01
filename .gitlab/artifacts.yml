@@ -71,6 +71,8 @@
 .cmake_release_artifacts:
     artifacts:
         expire_in: 5d
+        # Release artifacts are of interest even for failed jobs.
+        when: always
         paths:
             # Any packages made.
             - build/cmake-*-linux-x86_64.*
@@ -83,6 +85,8 @@
 .cmake_test_artifacts:
     artifacts:
         expire_in: 1d
+        # External testing can be useful even if test jobs fail.
+        when: always
         paths:
             # Take the install tree.
             - build/install/
