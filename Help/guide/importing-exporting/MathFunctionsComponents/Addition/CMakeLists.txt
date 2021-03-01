@@ -26,5 +26,5 @@ install(FILES Addition.h DESTINATION include)
 install(EXPORT AdditionTargets
         FILE MathFunctionsAdditionTargets.cmake
         NAMESPACE MathFunctions::
-        DESTINATION lib/cmake
+        DESTINATION lib/cmake/MathFunctions
 )
