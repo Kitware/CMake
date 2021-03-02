@@ -43,7 +43,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       set(__compiler_id_require_success TRUE)
     endif()
 
-    foreach(userflags ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST} "")
+    foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
       __determine_compiler_id_test("${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}" "${userflags}")
       if(CMAKE_${lang}_COMPILER_ID)
         break()
