@@ -944,7 +944,7 @@ function(_ExternalData_link_or_copy src dst)
     execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${tgt}" "${tmp}" RESULT_VARIABLE result)
   else()
     # Create a copy.
-    execute_process(COMMAND "${CMAKE_COMMAND}" -E copy "${src}" "${tmp}" RESULT_VARIABLE result)
+    file(COPY_FILE "${src}" "${tmp}" RESULT result)
   endif()
   if(result)
     file(REMOVE "${tmp}")
