@@ -24,7 +24,7 @@ write_basic_package_version_file(
 # create config file
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/MathFunctionsConfig.cmake"
-  INSTALL_DESTINATION lib/cmake
+  INSTALL_DESTINATION lib/cmake/MathFunctions
   NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
 
@@ -32,5 +32,5 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
 install(FILES
           "${CMAKE_CURRENT_BINARY_DIR}/MathFunctionsConfig.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/MathFunctionsConfigVersion.cmake"
-        DESTINATION lib/cmake
+        DESTINATION lib/cmake/MathFunctions
 )
