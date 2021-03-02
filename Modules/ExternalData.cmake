@@ -941,7 +941,8 @@ function(_ExternalData_link_or_copy src dst)
         file(RELATIVE_PATH tgt "${dst_dir}" "${src}")
       endif()
     endif()
-    execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${tgt}" "${tmp}" RESULT_VARIABLE result)
+    # Create link (falling back to copying if there's a problem).
+    file(CREATE_LINK "${tgt}" "${tmp}" RESULT result COPY_ON_ERROR SYMBOLIC)
   else()
     # Create a copy.
     file(COPY_FILE "${src}" "${tmp}" RESULT result)
