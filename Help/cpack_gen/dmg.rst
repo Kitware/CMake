@@ -103,6 +103,12 @@ on macOS:
 
  - Default: ``CPACK_PACKAGE_FILE_NAME-<component>``
 
+.. variable:: CPACK_DMG_FILESYSTEM
+
+ The filesystem format. Common values are ``APFS`` and ``HFS+``.
+ See ``man hdiutil`` for a full list of supported formats.
+ Defaults to ``HFS+``.
+
 .. variable:: CPACK_COMMAND_HDIUTIL
 
  Path to the ``hdiutil(1)`` command used to operate on disk image files on
