@@ -40,6 +40,13 @@ endif()
 
 set(CMAKE_DEPFILE_FLAGS_ASM_NASM "-MD <DEP_FILE> -MT <DEP_TARGET>")
 
+if((NOT DEFINED CMAKE_DEPENDS_USE_COMPILER OR CMAKE_DEPENDS_USE_COMPILER)
+    AND CMAKE_GENERATOR MATCHES "Makefiles|WMake")
+  # dependencies are computed by the compiler itself
+  set(CMAKE_ASM_NASM_DEPFILE_FORMAT gcc)
+  set(CMAKE_ASM_NASM_DEPENDS_USE_COMPILER TRUE)
+endif()
+
 # Load the generic ASMInformation file:
 set(ASM_DIALECT "_NASM")
 include(CMakeASMInformation)
