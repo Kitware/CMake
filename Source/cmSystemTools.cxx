@@ -149,6 +149,27 @@ static int cm_archive_read_open_file(struct archive* a, const char* file,
 #  define environ (*_NSGetEnviron())
 #endif
 
+namespace {
+void ReportError(std::string* err)
+{
+  if (!err) {
+    return;
+  }
+#ifdef _WIN32
+  LPSTR message = NULL;
+  DWORD size = FormatMessageA(
+    FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+      FORMAT_MESSAGE_IGNORE_INSERTS,
+    NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+    (LPSTR)&message, 0, NULL);
+  *err = std::string(message, size);
+  LocalFree(message);
+#else
+  *err = strerror(errno);
+#endif
+}
+}
+
 bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
@@ -967,6 +988,13 @@ bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname)
 bool cmSystemTools::RenameFile(const std::string& oldname,
                                const std::string& newname)
 {
+  return cmSystemTools::RenameFile(oldname, newname, nullptr) ==
+    RenameResult::Success;
+}
+
+cmSystemTools::RenameResult cmSystemTools::RenameFile(
+  std::string const& oldname, std::string const& newname, std::string* err)
+{
 #ifdef _WIN32
 #  ifndef INVALID_FILE_ATTRIBUTES
 #    define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
@@ -1004,7 +1032,8 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
     // 3) Windows Explorer has an associated directory already opened.
     if (move_last_error != ERROR_ACCESS_DENIED &&
         move_last_error != ERROR_SHARING_VIOLATION) {
-      return false;
+      ReportError(err);
+      return RenameResult::Failure;
     }
 
     DWORD const attrs = GetFileAttributesW(newname_wstr.c_str());
@@ -1028,10 +1057,18 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
     save_restore_file_attributes.SetPath(newname_wstr);
   }
   SetLastError(move_last_error);
-  return retry.Count > 0;
+  if (retry.Count > 0) {
+    return RenameResult::Success;
+  }
+  ReportError(err);
+  return RenameResult::Failure;
 #else
   /* On UNIX we have an OS-provided call to do this atomically.  */
-  return rename(oldname.c_str(), newname.c_str()) == 0;
+  if (rename(oldname.c_str(), newname.c_str()) == 0) {
+    return RenameResult::Success;
+  }
+  ReportError(err);
+  return RenameResult::Failure;
 #endif
 }
 
