@@ -26,6 +26,9 @@ if(UNIX  AND  "${CMAKE_GENERATOR}" MATCHES "Makefile" AND
       if(CMAKE_OSX_SYSROOT)
         string(APPEND EXTRA_FLAGS " -isysroot ${CMAKE_OSX_SYSROOT}")
       endif()
+      foreach(arch ${CMAKE_OSX_ARCHITECTURES})
+        string(APPEND EXTRA_FLAGS " -arch ${arch}")
+      endforeach()
     endif()
 
     # now set up the test:
