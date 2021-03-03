@@ -70,6 +70,7 @@
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_xcode
         CMAKE_GENERATOR: Xcode
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_xcode:
     extends: .macos
@@ -77,6 +78,7 @@
     variables:
         CMAKE_CONFIGURATION: macos_arm64_xcode
         CMAKE_GENERATOR: Xcode
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 ## Tags
 
