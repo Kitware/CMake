@@ -226,6 +226,44 @@ if(CMAKE_ANDROID_NDK)
   include("${CMAKE_ANDROID_NDK}/build/cmake/abis.cmake" OPTIONAL RESULT_VARIABLE _INCLUDED_ABIS)
 endif()
 
+if(CMAKE_ANDROID_NDK AND EXISTS "${CMAKE_ANDROID_NDK}/source.properties")
+  # Android NDK revision
+  # Possible formats:
+  # * r16, build 1234: 16.0.1234
+  # * r16b, build 1234: 16.1.1234
+  # * r16 beta 1, build 1234: 16.0.1234-beta1
+  #
+  # Canary builds are not specially marked.
+  file(READ "${CMAKE_ANDROID_NDK}/source.properties" _ANDROID_NDK_SOURCE_PROPERTIES)
+
+  set(_ANDROID_NDK_REVISION_REGEX
+    "^Pkg\\.Desc = Android NDK\nPkg\\.Revision = ([0-9]+)\\.([0-9]+)\\.([0-9]+)(-beta([0-9]+))?")
+  if(NOT _ANDROID_NDK_SOURCE_PROPERTIES MATCHES "${_ANDROID_NDK_REVISION_REGEX}")
+    string(REPLACE "\n" "\n  " _ANDROID_NDK_SOURCE_PROPERTIES "${_ANDROID_NDK_SOURCE_PROPERTIES}")
+    message(FATAL_ERROR
+      "Android: Failed to parse NDK revision from:\n"
+      " ${CMAKE_ANDROID_NDK}/source.properties\n"
+      "with content:\n"
+      "  ${_ANDROID_NDK_SOURCE_PROPERTIES}")
+  endif()
+
+  set(_ANDROID_NDK_MAJOR "${CMAKE_MATCH_1}")
+  set(_ANDROID_NDK_MINOR "${CMAKE_MATCH_2}")
+  set(_ANDROID_NDK_BUILD "${CMAKE_MATCH_3}")
+  set(_ANDROID_NDK_BETA "${CMAKE_MATCH_5}")
+  if(_ANDROID_NDK_BETA STREQUAL "")
+    set(_ANDROID_NDK_BETA "0")
+  endif()
+  set(CMAKE_ANDROID_NDK_VERSION "${_ANDROID_NDK_MAJOR}.${_ANDROID_NDK_MINOR}")
+
+  unset(_ANDROID_NDK_SOURCE_PROPERTIES)
+  unset(_ANDROID_NDK_REVISION_REGEX)
+  unset(_ANDROID_NDK_MAJOR)
+  unset(_ANDROID_NDK_MINOR)
+  unset(_ANDROID_NDK_BUILD)
+  unset(_ANDROID_NDK_BETA)
+endif()
+
 if(CMAKE_ANDROID_NDK)
   # Identify the host platform.
   if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
@@ -523,6 +561,7 @@ if(CMAKE_ANDROID_NDK)
   string(APPEND CMAKE_SYSTEM_CUSTOM_CODE
     "set(CMAKE_ANDROID_ARCH_TRIPLE \"${CMAKE_ANDROID_ARCH_TRIPLE}\")\n"
     "set(CMAKE_ANDROID_ARCH_LLVM_TRIPLE \"${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}\")\n"
+    "set(CMAKE_ANDROID_NDK_VERSION \"${CMAKE_ANDROID_NDK_VERSION}\")\n"
     "set(CMAKE_ANDROID_NDK_DEPRECATED_HEADERS \"${CMAKE_ANDROID_NDK_DEPRECATED_HEADERS}\")\n"
     "set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG \"${CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG}\")\n"
     "set(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED \"${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}\")\n"

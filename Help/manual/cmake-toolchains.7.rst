@@ -359,6 +359,10 @@ CMake uses the following steps to select one of the environments:
 * Else, an error diagnostic will be issued that neither the NDK or
   Standalone Toolchain can be found.
 
+.. versionadded:: 3.20
+  If an Android NDK is selected, its version number is reported
+  in the :variable:`CMAKE_ANDROID_NDK_VERSION` variable.
+
 .. _`Cross Compiling for Android with the NDK`:
 
 Cross Compiling for Android with the NDK
