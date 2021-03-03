@@ -73,6 +73,9 @@ Platforms
   - The default :variable:`CMAKE_BUILD_TYPE` for Android is
     now ``RelWithDebInfo``.
 
+  - The :variable:`CMAKE_ANDROID_NDK_VERSION` variable was added to
+    report the version of the NDK.
+
 File-Based API
 --------------
 
