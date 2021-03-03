@@ -38,7 +38,7 @@ Synopsis
 
   `Filesystem`_
     file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] [<globbing-expr>...])
-    file(`RENAME`_ <oldname> <newname>)
+    file(`RENAME`_ <oldname> <newname> [...])
     file({`REMOVE`_ | `REMOVE_RECURSE`_ } [<files>...])
     file(`MAKE_DIRECTORY`_ [<dir>...])
     file({`COPY`_ | `INSTALL`_} <file>... DESTINATION <dir> [...])
@@ -665,10 +665,17 @@ Examples of recursive globbing include::
 
 .. code-block:: cmake
 
-  file(RENAME <oldname> <newname>)
+  file(RENAME <oldname> <newname>
+       [RESULT <result>])
 
 Move a file or directory within a filesystem from ``<oldname>`` to
 ``<newname>``, replacing the destination atomically.
+
+The options are:
+
+``RESULT <result>``
+  Set ``<result>`` variable to ``0`` on success or an error message otherwise.
+  If ``RESULT`` is not specified and the operation fails, an error is emitted.
 
 .. _REMOVE:
 .. _REMOVE_RECURSE:

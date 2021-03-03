@@ -1313,8 +1313,9 @@ bool HandleRelativePathCommand(std::vector<std::string> const& args,
 bool HandleRename(std::vector<std::string> const& args,
                   cmExecutionStatus& status)
 {
-  if (args.size() != 3) {
-    status.SetError("RENAME given incorrect number of arguments.");
+  if (args.size() < 3) {
+    status.SetError("RENAME must be called with at least two additional "
+                    "arguments");
     return false;
   }
 
@@ -1330,13 +1331,39 @@ bool HandleRename(std::vector<std::string> const& args,
       cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', args[2]);
   }
 
-  if (!cmSystemTools::RenameFile(oldname, newname)) {
-    std::string err = cmSystemTools::GetLastSystemError();
-    status.SetError(cmStrCat("RENAME failed to rename\n  ", oldname,
-                             "\nto\n  ", newname, "\nbecause: ", err, "\n"));
+  struct Arguments
+  {
+    std::string Result;
+  };
+
+  static auto const parser =
+    cmArgumentParser<Arguments>{}.Bind("RESULT"_s, &Arguments::Result);
+
+  std::vector<std::string> unconsumedArgs;
+  Arguments const arguments =
+    parser.Parse(cmMakeRange(args).advance(3), &unconsumedArgs);
+  if (!unconsumedArgs.empty()) {
+    status.SetError("RENAME unknown argument:\n  " + unconsumedArgs.front());
     return false;
   }
-  return true;
+
+  std::string err;
+  switch (cmSystemTools::RenameFile(oldname, newname, &err)) {
+    case cmSystemTools::RenameResult::Success:
+      if (!arguments.Result.empty()) {
+        status.GetMakefile().AddDefinition(arguments.Result, "0");
+      }
+      return true;
+    case cmSystemTools::RenameResult::Failure:
+      if (!arguments.Result.empty()) {
+        status.GetMakefile().AddDefinition(arguments.Result, err);
+        return true;
+      }
+      break;
+  }
+  status.SetError(cmStrCat("RENAME failed to rename\n  ", oldname, "\nto\n  ",
+                           newname, "\nbecause: ", err, "\n"));
+  return false;
 }
 
 bool HandleRemoveImpl(std::vector<std::string> const& args, bool recurse,
