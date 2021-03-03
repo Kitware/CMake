@@ -38,6 +38,8 @@
     rules:
         - if: '$CMAKE_CI_PACKAGE == "true"'
           when: never
+        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_NIGHTLY_IGNORE_DEPS == "true")'
+          when: always
         - if: '$CMAKE_CI_NIGHTLY == "true"'
           when: on_success
         - if: '($CMAKE_CI_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
