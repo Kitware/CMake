@@ -232,12 +232,12 @@ private:
 
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
-  std::string GetClFlagTableName(std::string const& toolset) const;
-  std::string GetCSharpFlagTableName(std::string const& toolset) const;
-  std::string GetRcFlagTableName(std::string const& toolset) const;
-  std::string GetLibFlagTableName(std::string const& toolset) const;
-  std::string GetLinkFlagTableName(std::string const& toolset) const;
-  std::string GetMasmFlagTableName(std::string const& toolset) const;
+  std::string GetClFlagTableName() const;
+  std::string GetCSharpFlagTableName() const;
+  std::string GetRcFlagTableName() const;
+  std::string GetLibFlagTableName() const;
+  std::string GetLinkFlagTableName() const;
+  std::string GetMasmFlagTableName() const;
   std::string CanonicalToolsetName(std::string const& toolset) const;
 
   std::string CustomVCTargetsPath;
