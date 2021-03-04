@@ -828,6 +828,8 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project LibName
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LibName/lib"
+    --build-options
+      -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     --test-command foobar
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LibName")
