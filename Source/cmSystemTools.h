@@ -128,6 +128,24 @@ public:
   static bool SimpleGlob(const std::string& glob,
                          std::vector<std::string>& files, int type = 0);
 
+  enum class CopyWhen
+  {
+    Always,
+    OnlyIfDifferent,
+  };
+  enum class CopyResult
+  {
+    Success,
+    Failure,
+  };
+
+  /** Copy a file. */
+  static bool CopySingleFile(const std::string& oldname,
+                             const std::string& newname);
+  static CopyResult CopySingleFile(std::string const& oldname,
+                                   std::string const& newname, CopyWhen when,
+                                   std::string* err = nullptr);
+
   enum class Replace
   {
     Yes,
