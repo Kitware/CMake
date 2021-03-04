@@ -238,7 +238,7 @@ private:
   std::string GetLibFlagTableName(std::string const& toolset) const;
   std::string GetLinkFlagTableName(std::string const& toolset) const;
   std::string GetMasmFlagTableName(std::string const& toolset) const;
-  std::string GetToolsetName(std::string const& toolset) const;
+  std::string CanonicalToolsetName(std::string const& toolset) const;
 
   std::string CustomVCTargetsPath;
   std::string VCTargetsPath;
