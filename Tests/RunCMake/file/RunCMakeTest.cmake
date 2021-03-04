@@ -50,9 +50,12 @@ run_cmake(SIZE-error-does-not-exist)
 
 run_cmake(REMOVE-empty)
 
+run_cmake_script(RENAME-file-replace)
 run_cmake_script(RENAME-file-to-file)
 run_cmake_script(RENAME-file-to-dir-capture)
 run_cmake_script(RENAME-file-to-dir-fail)
+run_cmake_script(RENAME-file-NO_REPLACE-capture)
+run_cmake_script(RENAME-file-NO_REPLACE-fail)
 run_cmake_script(RENAME-arg-missing)
 run_cmake_script(RENAME-arg-unknown)
 

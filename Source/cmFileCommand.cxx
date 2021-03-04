@@ -1333,11 +1333,13 @@ bool HandleRename(std::vector<std::string> const& args,
 
   struct Arguments
   {
+    bool NoReplace = false;
     std::string Result;
   };
 
-  static auto const parser =
-    cmArgumentParser<Arguments>{}.Bind("RESULT"_s, &Arguments::Result);
+  static auto const parser = cmArgumentParser<Arguments>{}
+                               .Bind("NO_REPLACE"_s, &Arguments::NoReplace)
+                               .Bind("RESULT"_s, &Arguments::Result);
 
   std::vector<std::string> unconsumedArgs;
   Arguments const arguments =
@@ -1349,13 +1351,22 @@ bool HandleRename(std::vector<std::string> const& args,
 
   std::string err;
   switch (cmSystemTools::RenameFile(oldname, newname,
-                                    cmSystemTools::Replace::Yes, &err)) {
+                                    arguments.NoReplace
+                                      ? cmSystemTools::Replace::No
+                                      : cmSystemTools::Replace::Yes,
+                                    &err)) {
     case cmSystemTools::RenameResult::Success:
       if (!arguments.Result.empty()) {
         status.GetMakefile().AddDefinition(arguments.Result, "0");
       }
       return true;
     case cmSystemTools::RenameResult::NoReplace:
+      if (!arguments.Result.empty()) {
+        err = "NO_REPLACE";
+      } else {
+        err = "path not replaced";
+      }
+      CM_FALLTHROUGH;
     case cmSystemTools::RenameResult::Failure:
       if (!arguments.Result.empty()) {
         status.GetMakefile().AddDefinition(arguments.Result, err);
