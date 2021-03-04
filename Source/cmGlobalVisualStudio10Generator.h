@@ -170,7 +170,6 @@ protected:
   std::string const& GetMSBuildCommand();
 
   cmIDEFlagTable const* LoadFlagTable(std::string const& optionsName,
-                                      std::string const& toolsetName,
                                       std::string const& defaultName,
                                       std::string const& table) const;
 
