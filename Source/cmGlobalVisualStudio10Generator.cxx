@@ -1358,46 +1358,61 @@ static cmIDEFlagTable const* cmLoadFlagTableJson(
   return ret;
 }
 
-static std::string cmGetFlagTableName(std::string const& toolsetName,
-                                      std::string const& table)
+cm::optional<std::string> cmGlobalVisualStudio10Generator::FindFlagTable(
+  cm::string_view toolsetName, cm::string_view table) const
 {
-  return cmSystemTools::GetCMakeRoot() + "/Templates/MSBuild/FlagTables/" +
-    toolsetName + "_" + table + ".json";
+  std::string fullPath =
+    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Templates/MSBuild/FlagTables/",
+             toolsetName, '_', table, ".json");
+  if (cmSystemTools::FileExists(fullPath)) {
+    return fullPath;
+  }
+  return {};
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
   std::string const& toolSpecificName, std::string const& defaultName,
   std::string const& table) const
 {
-  cmIDEFlagTable const* ret = nullptr;
+  cmMakefile* mf = this->GetCurrentMakefile();
 
   std::string filename;
   if (!toolSpecificName.empty()) {
-    filename = cmGetFlagTableName(toolSpecificName, table);
-    ret = cmLoadFlagTableJson(filename);
+    if (cm::optional<std::string> found =
+          this->FindFlagTable(toolSpecificName, table)) {
+      filename = std::move(*found);
+    } else {
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("JSON flag table for ", table,
+                                " not found for toolset ", toolSpecificName));
+      return nullptr;
+    }
   } else {
     std::string const& genericName =
       this->CanonicalToolsetName(this->GetPlatformToolsetString());
-    filename = cmGetFlagTableName(genericName, table);
-    if (cmSystemTools::FileExists(filename)) {
-      ret = cmLoadFlagTableJson(filename);
+    cm::optional<std::string> found = this->FindFlagTable(genericName, table);
+    if (!found) {
+      found = this->FindFlagTable(defaultName, table);
+    }
+    if (found) {
+      filename = std::move(*found);
     } else {
-      filename = cmGetFlagTableName(defaultName, table);
-      ret = cmLoadFlagTableJson(filename);
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("JSON flag table for ", table,
+                                " not found for toolset ", genericName, " ",
+                                defaultName));
+      return nullptr;
     }
   }
 
-  if (!ret) {
-    cmMakefile* mf = this->GetCurrentMakefile();
-
-    std::ostringstream e;
-    /* clang-format off */
-    e << "JSON flag table \"" << filename <<
-      "\" could not be loaded.\n";
-    /* clang-format on */
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  if (cmIDEFlagTable const* ret = cmLoadFlagTableJson(filename)) {
+    return ret;
   }
-  return ret;
+
+  mf->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("JSON flag table could not be loaded:\n  ", filename));
+  return nullptr;
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetClFlagTable() const

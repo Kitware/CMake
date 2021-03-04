@@ -5,6 +5,9 @@
 #include <memory>
 #include <set>
 
+#include <cm/optional>
+#include <cm/string_view>
+
 #include "cmGlobalVisualStudio8Generator.h"
 
 /** \class cmGlobalVisualStudio10Generator
@@ -238,6 +241,9 @@ private:
   std::string GetLinkFlagTableName() const;
   std::string GetMasmFlagTableName() const;
   std::string CanonicalToolsetName(std::string const& toolset) const;
+
+  cm::optional<std::string> FindFlagTable(cm::string_view toolsetName,
+                                          cm::string_view table) const;
 
   std::string CustomVCTargetsPath;
   std::string VCTargetsPath;
