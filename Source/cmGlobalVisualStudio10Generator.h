@@ -232,20 +232,13 @@ private:
 
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
-  std::string GetClFlagTableName(std::string const& name,
-                                 std::string const& toolset) const;
-  std::string GetCSharpFlagTableName(std::string const& name,
-                                     std::string const& toolset) const;
-  std::string GetRcFlagTableName(std::string const& name,
-                                 std::string const& toolset) const;
-  std::string GetLibFlagTableName(std::string const& name,
-                                  std::string const& toolset) const;
-  std::string GetLinkFlagTableName(std::string const& name,
-                                   std::string const& toolset) const;
-  std::string GetMasmFlagTableName(std::string const& name,
-                                   std::string const& toolset) const;
-  std::string GetToolsetName(std::string const& name,
-                             std::string const& toolset) const;
+  std::string GetClFlagTableName(std::string const& toolset) const;
+  std::string GetCSharpFlagTableName(std::string const& toolset) const;
+  std::string GetRcFlagTableName(std::string const& toolset) const;
+  std::string GetLibFlagTableName(std::string const& toolset) const;
+  std::string GetLinkFlagTableName(std::string const& toolset) const;
+  std::string GetMasmFlagTableName(std::string const& toolset) const;
+  std::string GetToolsetName(std::string const& toolset) const;
 
   std::string CustomVCTargetsPath;
   std::string VCTargetsPath;
