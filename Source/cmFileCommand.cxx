@@ -1348,12 +1348,14 @@ bool HandleRename(std::vector<std::string> const& args,
   }
 
   std::string err;
-  switch (cmSystemTools::RenameFile(oldname, newname, &err)) {
+  switch (cmSystemTools::RenameFile(oldname, newname,
+                                    cmSystemTools::Replace::Yes, &err)) {
     case cmSystemTools::RenameResult::Success:
       if (!arguments.Result.empty()) {
         status.GetMakefile().AddDefinition(arguments.Result, "0");
       }
       return true;
+    case cmSystemTools::RenameResult::NoReplace:
     case cmSystemTools::RenameResult::Failure:
       if (!arguments.Result.empty()) {
         status.GetMakefile().AddDefinition(arguments.Result, err);

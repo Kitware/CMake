@@ -128,9 +128,15 @@ public:
   static bool SimpleGlob(const std::string& glob,
                          std::vector<std::string>& files, int type = 0);
 
+  enum class Replace
+  {
+    Yes,
+    No,
+  };
   enum class RenameResult
   {
     Success,
+    NoReplace,
     Failure,
   };
 
@@ -139,7 +145,8 @@ public:
   static bool RenameFile(const std::string& oldname,
                          const std::string& newname);
   static RenameResult RenameFile(std::string const& oldname,
-                                 std::string const& newname, std::string* err);
+                                 std::string const& newname, Replace replace,
+                                 std::string* err = nullptr);
 
   //! Rename a file if contents are different, delete the source otherwise
   static void MoveFileIfDifferent(const std::string& source,

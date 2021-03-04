@@ -973,14 +973,19 @@ void cmSystemTools::InitializeLibUV()
 
 #ifdef _WIN32
 namespace {
-bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname)
+bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname,
+                cmSystemTools::Replace replace)
 {
   // Not only ignore any previous error, but clear any memory of it.
   SetLastError(0);
 
-  // Use MOVEFILE_REPLACE_EXISTING to replace an existing destination file.
-  return MoveFileExW(oldname.c_str(), newname.c_str(),
-                     MOVEFILE_REPLACE_EXISTING);
+  DWORD flags = 0;
+  if (replace == cmSystemTools::Replace::Yes) {
+    // Use MOVEFILE_REPLACE_EXISTING to replace an existing destination file.
+    flags = flags | MOVEFILE_REPLACE_EXISTING;
+  }
+
+  return MoveFileExW(oldname.c_str(), newname.c_str(), flags);
 }
 }
 #endif
@@ -988,12 +993,13 @@ bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname)
 bool cmSystemTools::RenameFile(const std::string& oldname,
                                const std::string& newname)
 {
-  return cmSystemTools::RenameFile(oldname, newname, nullptr) ==
+  return cmSystemTools::RenameFile(oldname, newname, Replace::Yes) ==
     RenameResult::Success;
 }
 
 cmSystemTools::RenameResult cmSystemTools::RenameFile(
-  std::string const& oldname, std::string const& newname, std::string* err)
+  std::string const& oldname, std::string const& newname, Replace replace,
+  std::string* err)
 {
 #ifdef _WIN32
 #  ifndef INVALID_FILE_ATTRIBUTES
@@ -1016,7 +1022,7 @@ cmSystemTools::RenameResult cmSystemTools::RenameFile(
     oldname_wstr, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
 
   DWORD move_last_error = 0;
-  while (!cmMoveFile(oldname_wstr, newname_wstr) && --retry.Count) {
+  while (!cmMoveFile(oldname_wstr, newname_wstr, replace) && --retry.Count) {
     move_last_error = GetLastError();
 
     // There was no error ==> the operation is not yet complete.
@@ -1032,6 +1038,9 @@ cmSystemTools::RenameResult cmSystemTools::RenameFile(
     // 3) Windows Explorer has an associated directory already opened.
     if (move_last_error != ERROR_ACCESS_DENIED &&
         move_last_error != ERROR_SHARING_VIOLATION) {
+      if (replace == Replace::No && move_last_error == ERROR_ALREADY_EXISTS) {
+        return RenameResult::NoReplace;
+      }
       ReportError(err);
       return RenameResult::Failure;
     }
@@ -1060,10 +1069,23 @@ cmSystemTools::RenameResult cmSystemTools::RenameFile(
   if (retry.Count > 0) {
     return RenameResult::Success;
   }
+  if (replace == Replace::No && GetLastError() == ERROR_ALREADY_EXISTS) {
+    return RenameResult::NoReplace;
+  }
   ReportError(err);
   return RenameResult::Failure;
 #else
-  /* On UNIX we have an OS-provided call to do this atomically.  */
+  // On UNIX we have OS-provided calls to create 'newname' atomically.
+  if (replace == Replace::No) {
+    if (link(oldname.c_str(), newname.c_str()) == 0) {
+      return RenameResult::Success;
+    }
+    if (errno == EEXIST) {
+      return RenameResult::NoReplace;
+    }
+    ReportError(err);
+    return RenameResult::Failure;
+  }
   if (rename(oldname.c_str(), newname.c_str()) == 0) {
     return RenameResult::Success;
   }
