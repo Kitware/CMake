@@ -1366,19 +1366,19 @@ static std::string cmGetFlagTableName(std::string const& toolsetName,
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
-  std::string const& optionsName, std::string const& defaultName,
+  std::string const& toolSpecificName, std::string const& defaultName,
   std::string const& table) const
 {
   cmIDEFlagTable const* ret = nullptr;
 
   std::string filename;
-  if (!optionsName.empty()) {
-    filename = cmGetFlagTableName(optionsName, table);
+  if (!toolSpecificName.empty()) {
+    filename = cmGetFlagTableName(toolSpecificName, table);
     ret = cmLoadFlagTableJson(filename);
   } else {
-    std::string const& toolsetName =
+    std::string const& genericName =
       this->CanonicalToolsetName(this->GetPlatformToolsetString());
-    filename = cmGetFlagTableName(toolsetName, table);
+    filename = cmGetFlagTableName(genericName, table);
     if (cmSystemTools::FileExists(filename)) {
       ret = cmLoadFlagTableJson(filename);
     } else {
