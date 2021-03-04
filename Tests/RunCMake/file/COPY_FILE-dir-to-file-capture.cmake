@@ -1,0 +1,8 @@
+set(oldname "${CMAKE_CURRENT_BINARY_DIR}/input")
+set(newname "${CMAKE_CURRENT_BINARY_DIR}/output")
+file(MAKE_DIRECTORY "${oldname}")
+file(COPY_FILE "${oldname}" "${newname}" RESULT result)
+message(STATUS "file(COPY_FILE) failed with result: ${result}")
+if(EXISTS "${newname}")
+  message(FATAL_ERROR "The new name exists:\n ${newname}")
+endif()
