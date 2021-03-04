@@ -1403,72 +1403,55 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetClFlagTable() const
 {
   std::string optionsName = this->GetClFlagTableName();
-  std::string defaultName =
-    this->CanonicalToolsetName(this->DefaultCLFlagTableName);
-  return LoadFlagTable(optionsName, defaultName, "CL");
+  return LoadFlagTable(optionsName, this->DefaultCLFlagTableName, "CL");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCSharpFlagTable()
   const
 {
   std::string optionsName = this->GetCSharpFlagTableName();
-  std::string defaultName =
-    this->CanonicalToolsetName(this->DefaultCSharpFlagTableName);
-  return LoadFlagTable(optionsName, defaultName, "CSharp");
+  return LoadFlagTable(optionsName, this->DefaultCSharpFlagTableName,
+                       "CSharp");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetRcFlagTable() const
 {
   std::string optionsName = this->GetRcFlagTableName();
-  std::string defaultName =
-    this->CanonicalToolsetName(this->DefaultRCFlagTableName);
-  return LoadFlagTable(optionsName, defaultName, "RC");
+  return LoadFlagTable(optionsName, this->DefaultRCFlagTableName, "RC");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLibFlagTable() const
 {
   std::string optionsName = this->GetLibFlagTableName();
-  std::string defaultName =
-    this->CanonicalToolsetName(this->DefaultLibFlagTableName);
-  return LoadFlagTable(optionsName, defaultName, "LIB");
+  return LoadFlagTable(optionsName, this->DefaultLibFlagTableName, "LIB");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLinkFlagTable() const
 {
   std::string optionsName = this->GetLinkFlagTableName();
-  std::string defaultName =
-    this->CanonicalToolsetName(this->DefaultLinkFlagTableName);
-  return LoadFlagTable(optionsName, defaultName, "Link");
+  return LoadFlagTable(optionsName, this->DefaultLinkFlagTableName, "Link");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaFlagTable() const
 {
-  std::string defaultName =
-    this->CanonicalToolsetName(this->DefaultCudaFlagTableName);
-  return LoadFlagTable("", defaultName, "Cuda");
+  return LoadFlagTable("", this->DefaultCudaFlagTableName, "Cuda");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaHostFlagTable()
   const
 {
-  std::string defaultName =
-    this->CanonicalToolsetName(this->DefaultCudaHostFlagTableName);
-  return LoadFlagTable("", defaultName, "CudaHost");
+  return LoadFlagTable("", this->DefaultCudaHostFlagTableName, "CudaHost");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
 {
   std::string optionsName = this->GetMasmFlagTableName();
-  std::string defaultName =
-    this->CanonicalToolsetName(this->DefaultMasmFlagTableName);
-  return LoadFlagTable(optionsName, defaultName, "MASM");
+  return LoadFlagTable(optionsName, this->DefaultMasmFlagTableName, "MASM");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetNasmFlagTable() const
 {
-  std::string defaultName =
-    this->CanonicalToolsetName(this->DefaultNasmFlagTableName);
-  return LoadFlagTable("", defaultName, "NASM");
+  return LoadFlagTable("", this->DefaultNasmFlagTableName, "NASM");
 }
 
 std::string cmGlobalVisualStudio10Generator::GetClFlagTableName() const
