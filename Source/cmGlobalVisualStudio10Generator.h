@@ -6,7 +6,6 @@
 #include <set>
 
 #include "cmGlobalVisualStudio8Generator.h"
-#include "cmVisualStudio10ToolsetOptions.h"
 
 /** \class cmGlobalVisualStudio10Generator
  * \brief Write a Unix makefiles.
@@ -224,7 +223,6 @@ private:
 
   std::string MSBuildCommand;
   bool MSBuildCommandInitialized;
-  cmVisualStudio10ToolsetOptions ToolsetOptions;
   std::set<std::string> AndroidExecutableWarnings;
   virtual std::string FindMSBuildCommand();
   std::string FindDevEnvCommand() override;
@@ -233,6 +231,21 @@ private:
   bool PlatformToolsetNeedsDebugEnum;
 
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
+
+  std::string GetClFlagTableName(std::string const& name,
+                                 std::string const& toolset) const;
+  std::string GetCSharpFlagTableName(std::string const& name,
+                                     std::string const& toolset) const;
+  std::string GetRcFlagTableName(std::string const& name,
+                                 std::string const& toolset) const;
+  std::string GetLibFlagTableName(std::string const& name,
+                                  std::string const& toolset) const;
+  std::string GetLinkFlagTableName(std::string const& name,
+                                   std::string const& toolset) const;
+  std::string GetMasmFlagTableName(std::string const& name,
+                                   std::string const& toolset) const;
+  std::string GetToolsetName(std::string const& name,
+                             std::string const& toolset) const;
 
   std::string CustomVCTargetsPath;
   std::string VCTargetsPath;
