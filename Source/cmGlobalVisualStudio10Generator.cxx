@@ -1402,56 +1402,56 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetClFlagTable() const
 {
-  std::string optionsName = this->GetClFlagTableName();
-  return LoadFlagTable(optionsName, this->DefaultCLFlagTableName, "CL");
+  return LoadFlagTable(this->GetClFlagTableName(),
+                       this->DefaultCLFlagTableName, "CL");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCSharpFlagTable()
   const
 {
-  std::string optionsName = this->GetCSharpFlagTableName();
-  return LoadFlagTable(optionsName, this->DefaultCSharpFlagTableName,
-                       "CSharp");
+  return LoadFlagTable(this->GetCSharpFlagTableName(),
+                       this->DefaultCSharpFlagTableName, "CSharp");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetRcFlagTable() const
 {
-  std::string optionsName = this->GetRcFlagTableName();
-  return LoadFlagTable(optionsName, this->DefaultRCFlagTableName, "RC");
+  return LoadFlagTable(this->GetRcFlagTableName(),
+                       this->DefaultRCFlagTableName, "RC");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLibFlagTable() const
 {
-  std::string optionsName = this->GetLibFlagTableName();
-  return LoadFlagTable(optionsName, this->DefaultLibFlagTableName, "LIB");
+  return LoadFlagTable(this->GetLibFlagTableName(),
+                       this->DefaultLibFlagTableName, "LIB");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetLinkFlagTable() const
 {
-  std::string optionsName = this->GetLinkFlagTableName();
-  return LoadFlagTable(optionsName, this->DefaultLinkFlagTableName, "Link");
+  return LoadFlagTable(this->GetLinkFlagTableName(),
+                       this->DefaultLinkFlagTableName, "Link");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaFlagTable() const
 {
-  return LoadFlagTable("", this->DefaultCudaFlagTableName, "Cuda");
+  return LoadFlagTable(std::string(), this->DefaultCudaFlagTableName, "Cuda");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetCudaHostFlagTable()
   const
 {
-  return LoadFlagTable("", this->DefaultCudaHostFlagTableName, "CudaHost");
+  return LoadFlagTable(std::string(), this->DefaultCudaHostFlagTableName,
+                       "CudaHost");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetMasmFlagTable() const
 {
-  std::string optionsName = this->GetMasmFlagTableName();
-  return LoadFlagTable(optionsName, this->DefaultMasmFlagTableName, "MASM");
+  return LoadFlagTable(this->GetMasmFlagTableName(),
+                       this->DefaultMasmFlagTableName, "MASM");
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::GetNasmFlagTable() const
 {
-  return LoadFlagTable("", this->DefaultNasmFlagTableName, "NASM");
+  return LoadFlagTable(std::string(), this->DefaultNasmFlagTableName, "NASM");
 }
 
 std::string cmGlobalVisualStudio10Generator::GetClFlagTableName() const
