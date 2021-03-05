@@ -1,0 +1,13 @@
+^CMake Error at [^
+]*/Tests/RunCMake/file/RENAME-file-to-dir-fail.cmake:[0-9] \(file\):
+  file RENAME failed to rename
+
+    [^
+]*/Tests/RunCMake/file/RENAME-file-to-dir-fail-build/input
+
+  to
+
+    [^
+]*/Tests/RunCMake/file/RENAME-file-to-dir-fail-build/output
+
+  because: [A-Za-z]
