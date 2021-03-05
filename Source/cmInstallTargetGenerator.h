@@ -81,6 +81,7 @@ public:
     // Prefix for all files in To.
     std::string ToDir;
 
+    NamelinkModeType NamelinkMode = NamelinkModeNone;
     bool NoTweak = false;
     bool UseSourcePermissions = false;
     cmInstallType Type = cmInstallType();

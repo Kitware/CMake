@@ -338,6 +338,7 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
 
       // Add the names based on the current namelink mode.
       if (haveNamelink) {
+        files.NamelinkMode = this->NamelinkMode;
         // With a namelink we need to check the mode.
         if (this->NamelinkMode == NamelinkModeOnly) {
           // Install the namelink only.
