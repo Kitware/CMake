@@ -384,7 +384,8 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       for (std::string const& gf : this->files) {
         bool skip = false;
         std::string inFile = gf;
-        if (cmSystemTools::FileIsDirectory(gf)) {
+        if (cmSystemTools::FileIsDirectory(gf) &&
+            !cmSystemTools::FileIsSymlink(gf)) {
           inFile += '/';
         }
         for (cmsys::RegularExpression& reg : ignoreFilesRegex) {
