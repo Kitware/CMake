@@ -39,7 +39,6 @@ public:
     NamelinkModeSkip
   };
   void SetNamelinkMode(NamelinkModeType mode) { this->NamelinkMode = mode; }
-  NamelinkModeType GetNamelinkMode() const { return this->NamelinkMode; }
 
   std::string GetInstallFilename(const std::string& config) const;
 
