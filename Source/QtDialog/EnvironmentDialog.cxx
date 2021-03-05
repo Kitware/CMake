@@ -81,7 +81,7 @@ bool EnvironmentSearchFilter::filterAcceptsRow(int row,
   auto* model = this->sourceModel();
   auto key =
     model->data(model->index(row, 0, parent), Qt::DisplayRole).toString();
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
   return key.contains(this->filterRegularExpression());
 #else
   return key.contains(this->filterRegExp());
@@ -110,7 +110,7 @@ EnvironmentDialog::EnvironmentDialog(const QProcessEnvironment& environment,
                    &EnvironmentDialog::addEntry);
   QObject::connect(this->RemoveEntry, &QAbstractButton::clicked, this,
                    &EnvironmentDialog::removeSelectedEntries);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
   QObject::connect(this->Search, &QLineEdit::textChanged, this->m_filter,
                    QOverload<const QString&>::of(
                      &EnvironmentSearchFilter::setFilterRegularExpression));
