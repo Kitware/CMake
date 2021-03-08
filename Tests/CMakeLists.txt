@@ -96,7 +96,7 @@ if(BUILD_TESTING)
   # some old versions of make simply cannot handle spaces in paths
   if (MAKE_IS_GNU OR
       CMAKE_MAKE_PROGRAM MATCHES "nmake|gmake|wmake" OR
-      CMAKE_GENERATOR MATCHES "Visual Studio|Xcode|Borland")
+      CMAKE_GENERATOR MATCHES "Visual Studio|Xcode|Borland|Ninja")
     set(MAKE_SUPPORTS_SPACES 1)
   else()
     set(MAKE_SUPPORTS_SPACES 0)
