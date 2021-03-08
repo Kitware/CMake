@@ -121,7 +121,21 @@ bool Directory::Load(const std::string& name, std::string* errorMessage)
   delete[] buf;
 
   if (srchHandle == -1) {
-    return 0;
+    if (errorMessage) {
+      if (unsigned int errorId = GetLastError()) {
+        LPSTR message = nullptr;
+        DWORD size = FormatMessageA(
+          FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+          nullptr, errorId, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+          (LPSTR)&message, 0, nullptr);
+        *errorMessage = std::string(message, size);
+        LocalFree(message);
+      } else {
+        *errorMessage = "Unknown error.";
+      }
+    }
+    return false;
   }
 
   // Loop through names
@@ -152,6 +166,20 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
   delete[] buf;
 
   if (srchHandle == -1) {
+    if (errorMessage) {
+      if (unsigned int errorId = GetLastError()) {
+        LPSTR message = nullptr;
+        DWORD size = FormatMessageA(
+          FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+          nullptr, errorId, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+          (LPSTR)&message, 0, nullptr);
+        *errorMessage = std::string(message, size);
+        LocalFree(message);
+      } else {
+        *errorMessage = "Unknown error.";
+      }
+    }
     return 0;
   }
 

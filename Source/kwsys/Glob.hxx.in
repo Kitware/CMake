@@ -54,6 +54,9 @@ public:
   Glob();
   ~Glob();
 
+  Glob(const Glob&) = delete;
+  void operator=(const Glob&) = delete;
+
   //! Find all files that match the pattern.
   bool FindFiles(const std::string& inexpr, GlobMessages* messages = nullptr);
 
@@ -124,10 +127,6 @@ protected:
   std::vector<std::string> VisitedSymlinks;
   bool ListDirs;
   bool RecurseListDirs;
-
-private:
-  Glob(const Glob&) = delete;
-  void operator=(const Glob&) = delete;
 };
 
 } // namespace @KWSYS_NAMESPACE@
