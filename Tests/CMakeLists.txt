@@ -1424,6 +1424,7 @@ if(BUILD_TESTING)
             CURL
             Cups
             Doxygen
+            DevIL
             EnvModules
             EXPAT
             Fontconfig

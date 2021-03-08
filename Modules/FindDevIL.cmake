@@ -10,6 +10,25 @@ FindDevIL
 This module locates the developer's image library.
 http://openil.sourceforge.net/
 
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.21
+
+This module defines the :prop_tgt:`IMPORTED` targets:
+
+``DevIL::IL``
+ Defined if the system has DevIL.
+
+``DevIL::ILU``
+ Defined if the system has DevIL Utilities.
+
+``DevIL::ILUT``
+ Defined if the system has DevIL Utility Toolkit.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
 This module sets:
 
 ``IL_LIBRARIES``
@@ -37,6 +56,11 @@ This module sets:
   even if they are not needed. In most systems, if one
   library is found all the others are as well. That's the
   way the DevIL developers release it.
+
+``DevIL_ILUT_FOUND``
+  .. versionadded:: 3.21
+
+  This is set to TRUE if the ILUT library is found.
 #]=======================================================================]
 
 # TODO: Add version support.
@@ -80,3 +104,36 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(DevIL DEFAULT_MSG
                                   IL_INCLUDE_DIR)
 # provide legacy variable for compatibility
 set(IL_FOUND ${DevIL_FOUND})
+
+# create imported targets ONLY if we found DevIL.
+if(DevIL_FOUND)
+  # Report the ILUT found if ILUT_LIBRARIES contains valid path.
+  if (ILUT_LIBRARIES)
+    set(DevIL_ILUT_FOUND TRUE)
+  else()
+    set(DevIL_ILUT_FOUND FALSE)
+  endif()
+
+  if(NOT TARGET DevIL::IL)
+    add_library(DevIL::IL UNKNOWN IMPORTED)
+    set_target_properties(DevIL::IL PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${IL_INCLUDE_DIR}"
+      IMPORTED_LOCATION "${IL_LIBRARIES}")
+  endif()
+
+  # DevIL Utilities target
+  if(NOT TARGET DevIL::ILU)
+    add_library(DevIL::ILU UNKNOWN IMPORTED)
+    set_target_properties(DevIL::ILU PROPERTIES
+      IMPORTED_LOCATION "${ILU_LIBRARIES}")
+    target_link_libraries(DevIL::ILU INTERFACE DevIL::IL)
+  endif()
+
+  # ILUT (if found)
+  if(NOT TARGET DevIL::ILUT AND DevIL_ILUT_FOUND)
+    add_library(DevIL::ILUT UNKNOWN IMPORTED)
+    set_target_properties(DevIL::ILUT PROPERTIES
+      IMPORTED_LOCATION "${ILUT_LIBRARIES}")
+    target_link_libraries(DevIL::ILUT INTERFACE DevIL::ILU)
+  endif()
+endif()
