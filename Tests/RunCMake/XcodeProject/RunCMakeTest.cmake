@@ -387,4 +387,30 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 8)
   XcodeRemoveExcessiveISystemSDK(iphoneos)
   XcodeRemoveExcessiveISystemSDK(iphonesimulator)
 endif()
+
+if (XCODE_VERSION VERSION_GREATER_EQUAL 7.3)
+  function(xctest_add_bundle_test SystemName SDK BuildSystemVersion ExpectedOutputDir)
+    set(RunCMake_TEST_BINARY_DIR
+      ${RunCMake_BINARY_DIR}/DeploymentTarget-${SystemName}-${SDK}-${BuildSystemVersion}-build)
+    set(RunCMake_TEST_OPTIONS
+      "-DCMAKE_SYSTEM_NAME=${SystemName}"
+      "-DCMAKE_OSX_SYSROOT=${SDK}"
+      "-DTEST_EXPECTED_OUTPUT_DIR=${ExpectedOutputDir}")
+    unset(RunCMake_GENERATOR_TOOLSET)
+    if(BuildSystemVersion)
+      set(RunCMake_GENERATOR_TOOLSET "buildsystem=${BuildSystemVersion}")
+    endif()
+    run_cmake(XCTestAddBundle)
+  endfunction()
+
+  if(XCODE_VERSION VERSION_GREATER_EQUAL 12)
+    xctest_add_bundle_test(Darwin macosx "1" "$<TARGET_BUNDLE_CONTENT_DIR:TestedApp>/PlugIns")
+    xctest_add_bundle_test(Darwin macosx "12" "$<TARGET_BUNDLE_CONTENT_DIR:TestedApp>/PlugIns")
+    xctest_add_bundle_test(iOS iphoneos "1" "$<TARGET_BUNDLE_CONTENT_DIR:TestedApp>/PlugIns")
+    xctest_add_bundle_test(iOS iphoneos "12" "$<TARGET_BUNDLE_CONTENT_DIR:TestedApp>")
+  else()
+    xctest_add_bundle_test(Darwin macosx "" "$<TARGET_BUNDLE_CONTENT_DIR:TestedApp>/PlugIns")
+    xctest_add_bundle_test(iOS iphoneos "" "$<TARGET_BUNDLE_CONTENT_DIR:TestedApp>/PlugIns")
+  endif()
+endif()
 # Please add macOS-only tests above before the device-specific tests.
