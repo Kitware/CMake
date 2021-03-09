@@ -92,49 +92,41 @@ function(run_cmake test)
     if(RunCMake_MAKE_PROGRAM)
       list(APPEND RunCMake_TEST_OPTIONS "-DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM}")
     endif()
-    if(RunCMake_GENERATOR_INSTANCE)
-      set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE=${RunCMake_GENERATOR_INSTANCE}")
-    else()
-      set(_D_CMAKE_GENERATOR_INSTANCE "")
-    endif()
+    set(RunCMake_TEST_COMMAND ${CMAKE_COMMAND})
     if(NOT RunCMake_TEST_NO_SOURCE_DIR)
-      set(maybe_source_dir "${RunCMake_TEST_SOURCE_DIR}")
-    else()
-      set(maybe_source_dir "")
+      list(APPEND RunCMake_TEST_COMMAND "${RunCMake_TEST_SOURCE_DIR}")
     endif()
-    execute_process(
-      COMMAND ${CMAKE_COMMAND}
-                ${maybe_source_dir}
-                -G "${RunCMake_GENERATOR}"
-                -A "${RunCMake_GENERATOR_PLATFORM}"
-                -T "${RunCMake_GENERATOR_TOOLSET}"
-                ${_D_CMAKE_GENERATOR_INSTANCE}
-                -DRunCMake_TEST=${test}
-                --no-warn-unused-cli
-                ${RunCMake_TEST_OPTIONS}
-      WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
-      OUTPUT_VARIABLE actual_stdout
-      ERROR_VARIABLE ${actual_stderr_var}
-      RESULT_VARIABLE actual_result
-      ENCODING UTF8
-      ${maybe_timeout}
-      ${maybe_input_file}
+    list(APPEND RunCMake_TEST_COMMAND -G "${RunCMake_GENERATOR}")
+    if(RunCMake_GENERATOR_PLATFORM)
+      list(APPEND RunCMake_TEST_COMMAND -A "${RunCMake_GENERATOR_PLATFORM}")
+    endif()
+    if(RunCMake_GENERATOR_TOOLSET)
+      list(APPEND RunCMake_TEST_COMMAND -T "${RunCMake_GENERATOR_TOOLSET}")
+    endif()
+    if(RunCMake_GENERATOR_INSTANCE)
+      list(APPEND RunCMake_TEST_COMMAND "-DCMAKE_GENERATOR_INSTANCE=${RunCMake_GENERATOR_INSTANCE}")
+    endif()
+    list(APPEND RunCMake_TEST_COMMAND
+      -DRunCMake_TEST=${test}
+      --no-warn-unused-cli
       )
   else()
-    if(NOT RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
-      set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-    endif()
-    execute_process(
-      COMMAND ${RunCMake_TEST_COMMAND}
-      WORKING_DIRECTORY "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}"
-      OUTPUT_VARIABLE actual_stdout
-      ERROR_VARIABLE ${actual_stderr_var}
-      RESULT_VARIABLE actual_result
-      ENCODING UTF8
-      ${maybe_timeout}
-      ${maybe_input_file}
-      )
+    set(RunCMake_TEST_OPTIONS "")
   endif()
+  if(NOT RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
+    set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  endif()
+  execute_process(
+    COMMAND ${RunCMake_TEST_COMMAND}
+            ${RunCMake_TEST_OPTIONS}
+    WORKING_DIRECTORY "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}"
+    OUTPUT_VARIABLE actual_stdout
+    ERROR_VARIABLE ${actual_stderr_var}
+    RESULT_VARIABLE actual_result
+    ENCODING UTF8
+    ${maybe_timeout}
+    ${maybe_input_file}
+    )
   set(msg "")
   if(NOT "${actual_result}" MATCHES "${expect_result}")
     string(APPEND msg "Result is [${actual_result}], not [${expect_result}].\n")
@@ -190,8 +182,12 @@ function(run_cmake test)
   if(RunCMake_TEST_FAILED)
     set(msg "${RunCMake_TEST_FAILED}\n${msg}")
   endif()
-  if(msg AND RunCMake_TEST_COMMAND)
+  if(msg)
     string(REPLACE ";" "\" \"" command "\"${RunCMake_TEST_COMMAND}\"")
+    if(RunCMake_TEST_OPTIONS)
+      string(REPLACE ";" "\" \"" options "\"${RunCMake_TEST_OPTIONS}\"")
+      string(APPEND command " ${options}")
+    endif()
     string(APPEND msg "Command was:\n command> ${command}\n")
   endif()
   if(msg)
