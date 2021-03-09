@@ -1854,8 +1854,15 @@ endif()
 
 set(Matlab_LIBRARIES
   ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY}
-  ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY}
-  ${Matlab_DATAARRAY_LIBRARY} ${Matlab_ENGINE_LIBRARY})
+  ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY})
+
+if(Matlab_ENGINE_LIBRARY)
+  list(APPEND Matlab_LIBRARIES ${Matlab_ENGINE_LIBRARY})
+endif()
+
+if(Matlab_DATAARRAY_LIBRARY)
+  list(APPEND Matlab_LIBRARIES ${Matlab_DATAARRAY_LIBRARY})
+endif()
 
 find_package_handle_standard_args(
   Matlab
