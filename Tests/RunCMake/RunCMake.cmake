@@ -91,21 +91,7 @@ function(run_cmake test)
   else()
     set(maybe_input_file "")
   endif()
-  if(RunCMake_TEST_COMMAND)
-    if(NOT RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
-      set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-    endif()
-    execute_process(
-      COMMAND ${RunCMake_TEST_COMMAND}
-      WORKING_DIRECTORY "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}"
-      OUTPUT_VARIABLE actual_stdout
-      ERROR_VARIABLE ${actual_stderr_var}
-      RESULT_VARIABLE actual_result
-      ENCODING UTF8
-      ${maybe_timeout}
-      ${maybe_input_file}
-      )
-  else()
+  if(NOT RunCMake_TEST_COMMAND)
     if(RunCMake_GENERATOR_INSTANCE)
       set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE=${RunCMake_GENERATOR_INSTANCE}")
     else()
@@ -127,6 +113,20 @@ function(run_cmake test)
                 --no-warn-unused-cli
                 ${RunCMake_TEST_OPTIONS}
       WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
+      OUTPUT_VARIABLE actual_stdout
+      ERROR_VARIABLE ${actual_stderr_var}
+      RESULT_VARIABLE actual_result
+      ENCODING UTF8
+      ${maybe_timeout}
+      ${maybe_input_file}
+      )
+  else()
+    if(NOT RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
+      set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+    endif()
+    execute_process(
+      COMMAND ${RunCMake_TEST_COMMAND}
+      WORKING_DIRECTORY "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}"
       OUTPUT_VARIABLE actual_stdout
       ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
