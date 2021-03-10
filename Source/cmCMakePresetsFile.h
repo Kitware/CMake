@@ -294,6 +294,13 @@ public:
   std::vector<std::string> TestPresetOrder;
 
   std::string SourceDir;
+  int Version;
+  int UserVersion;
+
+  int GetVersion(const Preset& preset) const
+  {
+    return preset.User ? this->UserVersion : this->Version;
+  }
 
   static std::string GetFilename(const std::string& sourceDir);
   static std::string GetUserFilename(const std::string& sourceDir);
