@@ -407,7 +407,7 @@ External Project Definition
       ``CVS_TAG <tag>``
         Tag to checkout from the CVS repository.
 
-  **Update Step Options:**
+  **Update/Patch Step Options:**
     Whenever CMake is re-run, by default the external project's sources will be
     updated if the download method supports updates (e.g. a git repository
     would be checked if the ``GIT_TAG`` does not refer to a specific commit).
@@ -442,7 +442,6 @@ External Project Definition
       This may cause a step target to be created automatically for the
       ``download`` step.  See policy :policy:`CMP0114`.
 
-  **Patch Step Options:**
     ``PATCH_COMMAND <cmd>...``
       Specifies a custom command to patch the sources after an update. By
       default, no patch command is defined. Note that it can be quite difficult
@@ -717,11 +716,6 @@ External Project Definition
 
     ``USES_TERMINAL_UPDATE <bool>``
       Give the update step access to the terminal.
-
-    ``USES_TERMINAL_PATCH <bool>``
-      .. versionadded:: 3.20
-
-      Give the patch step access to the terminal.
 
     ``USES_TERMINAL_CONFIGURE <bool>``
       Give the configure step access to the terminal.
@@ -1140,16 +1134,15 @@ macro(_ep_get_hash_regex out_var)
   set(${out_var} "^(${${out_var}})=([0-9A-Fa-f]+)$")
 endmacro()
 
-function(_ep_parse_arguments_to_vars keywords name ns args)
-  # Transfer the arguments into variables in the calling scope.
+function(_ep_parse_arguments f keywords name ns args)
+  # Transfer the arguments to this function into target properties for the
+  # new custom target we just added so that we can set up all the build steps
+  # correctly based on target properties.
+  #
   # Because some keywords can be repeated, we can't use cmake_parse_arguments().
-  # Instead, we loop through the args and consider the namespace starting with
-  # an upper-case letter followed by at least two more upper-case letters,
+  # Instead, we loop through ARGN and consider the namespace starting with an
+  # upper-case letter followed by at least two more upper-case letters,
   # numbers or underscores to be keywords.
-
-  foreach(key IN LISTS keywords)
-    unset(${ns}${key})
-  endforeach()
 
   set(key)
 
@@ -1167,100 +1160,68 @@ function(_ep_parse_arguments_to_vars keywords name ns args)
     if(is_value)
       if(key)
         # Value
-        list(APPEND ${ns}${key} "${arg}")
+        if(NOT arg STREQUAL "")
+          set_property(TARGET ${name} APPEND PROPERTY ${ns}${key} "${arg}")
+        else()
+          get_property(have_key TARGET ${name} PROPERTY ${ns}${key} SET)
+          if(have_key)
+            get_property(value TARGET ${name} PROPERTY ${ns}${key})
+            set_property(TARGET ${name} PROPERTY ${ns}${key} "${value};${arg}")
+          else()
+            set_property(TARGET ${name} PROPERTY ${ns}${key} "${arg}")
+          endif()
+        endif()
       else()
         # Missing Keyword
-        message(AUTHOR_WARNING "value '${arg}' with no previous keyword")
+        message(AUTHOR_WARNING "value '${arg}' with no previous keyword in ${f}")
       endif()
     else()
       set(key "${arg}")
     endif()
   endforeach()
-
-  foreach(key IN LISTS keywords)
-    if(DEFINED ${ns}${key})
-      set(${ns}${key} "${${ns}${key}}" PARENT_SCOPE)
-    else()
-      unset(${ns}${key} PARENT_SCOPE)
-    endif()
-  endforeach()
-
 endfunction()
 
-function(_ep_parse_arguments keywords name ns args)
-  _ep_parse_arguments_to_vars("${keywords}" ${name} ${ns} "${args}")
 
-  # Transfer the arguments to the target as target properties. These are
-  # read by the various steps, potentially from different scopes.
-  foreach(key IN LISTS keywords)
-    if(DEFINED ${ns}${key})
-      set_property(TARGET ${name} PROPERTY ${ns}${key} "${${ns}${key}}")
-    endif()
-  endforeach()
+define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED
+  BRIEF_DOCS "Base directory for External Project storage."
+  FULL_DOCS
+  "See documentation of the ExternalProject_Add() function in the "
+  "ExternalProject module."
+  )
 
-endfunction()
+define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
+  BRIEF_DOCS "Top prefix for External Project storage."
+  FULL_DOCS
+  "See documentation of the ExternalProject_Add() function in the "
+  "ExternalProject module."
+  )
 
-if(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
-  define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED
-    BRIEF_DOCS "Base directory for External Project storage."
-    FULL_DOCS
-    "See documentation of the ExternalProject_Add() function in the "
-    "ExternalProject module."
-    )
+define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED
+  BRIEF_DOCS
+  "List of ExternalProject steps that automatically get corresponding targets"
+  FULL_DOCS
+  "These targets will be dependent on the main target dependencies. "
+  "See documentation of the ExternalProject_Add_StepTargets() function in the "
+  "ExternalProject module."
+  )
 
-  define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
-    BRIEF_DOCS "Top prefix for External Project storage."
-    FULL_DOCS
-    "See documentation of the ExternalProject_Add() function in the "
-    "ExternalProject module."
-    )
+define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED
+  BRIEF_DOCS
+  "List of ExternalProject steps that automatically get corresponding targets"
+  FULL_DOCS
+  "These targets will not be dependent on the main target dependencies. "
+  "See documentation of the ExternalProject_Add_StepTargets() function in the "
+  "ExternalProject module."
+  )
 
-  define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED
-    BRIEF_DOCS
-    "List of ExternalProject steps that automatically get corresponding targets"
-    FULL_DOCS
-    "These targets will be dependent on the main target dependencies. "
-    "See documentation of the ExternalProject_Add_StepTargets() function in the "
-    "ExternalProject module."
-    )
+define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
+  BRIEF_DOCS "Never update automatically from the remote repo."
+  FULL_DOCS
+  "See documentation of the ExternalProject_Add() function in the "
+  "ExternalProject module."
+  )
 
-  define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED
-    BRIEF_DOCS
-    "List of ExternalProject steps that automatically get corresponding targets"
-    FULL_DOCS
-    "These targets will not be dependent on the main target dependencies. "
-    "See documentation of the ExternalProject_Add_StepTargets() function in the "
-    "ExternalProject module."
-    )
-
-  define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
-    BRIEF_DOCS "Never update automatically from the remote repo."
-    FULL_DOCS
-    "See documentation of the ExternalProject_Add() function in the "
-    "ExternalProject module."
-    )
-endif()
-
-function(_ep_write_gitclone_script
-         script_filename
-         source_dir
-         git_EXECUTABLE
-         git_repository
-         git_tag
-         git_remote_name
-         init_submodules
-         git_submodules_recurse
-         git_submodules
-         git_shallow
-         git_progress
-         git_config
-         src_name
-         work_dir
-         gitclone_infofile
-         gitclone_stampfile
-         tls_verify
-         quiet)
-
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
     # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
     set(git_checkout_explicit-- "--")
@@ -1306,52 +1267,134 @@ function(_ep_write_gitclone_script
   endif()
   string (REPLACE ";" " " git_options "${git_options}")
 
-  configure_file(
-    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/gitclone.cmake.in
-    ${script_filename}
-    @ONLY
+  file(WRITE ${script_filename}
+"
+if(NOT \"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
+  message(STATUS \"Avoiding repeated git clone, stamp file is up to date: '${gitclone_stampfile}'\")
+  return()
+endif()
+
+execute_process(
+  COMMAND \${CMAKE_COMMAND} -E rm -rf \"${source_dir}\"
+  RESULT_VARIABLE error_code
   )
+if(error_code)
+  message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
+endif()
+
+# try the clone 3 times in case there is an odd git clone issue
+set(error_code 1)
+set(number_of_tries 0)
+while(error_code AND number_of_tries LESS 3)
+  execute_process(
+    COMMAND \"${git_EXECUTABLE}\" ${git_options} clone ${git_clone_options} \"${git_repository}\" \"${src_name}\"
+    WORKING_DIRECTORY \"${work_dir}\"
+    RESULT_VARIABLE error_code
+    )
+  math(EXPR number_of_tries \"\${number_of_tries} + 1\")
+endwhile()
+if(number_of_tries GREATER 1)
+  message(STATUS \"Had to git clone more than once:
+          \${number_of_tries} times.\")
+endif()
+if(error_code)
+  message(FATAL_ERROR \"Failed to clone repository: '${git_repository}'\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" ${git_options} checkout ${git_tag} ${git_checkout_explicit--}
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
+endif()
+
+set(init_submodules ${init_submodules})
+if(init_submodules)
+  execute_process(
+    COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update ${git_submodules_recurse} --init ${git_submodules}
+    WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+    RESULT_VARIABLE error_code
+    )
+endif()
+if(error_code)
+  message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
+endif()
+
+# Complete success, update the script-last-run stamp file:
+#
+execute_process(
+  COMMAND \${CMAKE_COMMAND} -E copy
+    \"${gitclone_infofile}\"
+    \"${gitclone_stampfile}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to copy script-last-run stamp file: '${gitclone_stampfile}'\")
+endif()
+
+"
+)
 
 endfunction()
 
-function(_ep_write_hgclone_script
-         script_filename
-         source_dir
-         hg_EXECUTABLE
-         hg_repository
-         hg_tag
-         src_name
-         work_dir
-         hgclone_infofile
-         hgclone_stampfile
-         quiet)
-
+function(_ep_write_hgclone_script script_filename source_dir hg_EXECUTABLE hg_repository hg_tag src_name work_dir hgclone_infofile hgclone_stampfile)
   if("${hg_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for hg checkout should not be empty.")
   endif()
+  file(WRITE ${script_filename}
+"
+if(NOT \"${hgclone_infofile}\" IS_NEWER_THAN \"${hgclone_stampfile}\")
+  message(STATUS \"Avoiding repeated hg clone, stamp file is up to date: '${hgclone_stampfile}'\")
+  return()
+endif()
 
-  configure_file(
-    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/hgclone.cmake.in
-    ${script_filename}
-    @ONLY
+execute_process(
+  COMMAND \${CMAKE_COMMAND} -E rm -rf \"${source_dir}\"
+  RESULT_VARIABLE error_code
   )
+if(error_code)
+  message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
+endif()
+
+execute_process(
+  COMMAND \"${hg_EXECUTABLE}\" clone -U \"${hg_repository}\" \"${src_name}\"
+  WORKING_DIRECTORY \"${work_dir}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to clone repository: '${hg_repository}'\")
+endif()
+
+execute_process(
+  COMMAND \"${hg_EXECUTABLE}\" update ${hg_tag}
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to checkout tag: '${hg_tag}'\")
+endif()
+
+# Complete success, update the script-last-run stamp file:
+#
+execute_process(
+  COMMAND \${CMAKE_COMMAND} -E copy
+    \"${hgclone_infofile}\"
+    \"${hgclone_stampfile}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to copy script-last-run stamp file: '${hgclone_stampfile}'\")
+endif()
+
+"
+)
 
 endfunction()
 
 
-function(_ep_write_gitupdate_script
-         script_filename
-         git_EXECUTABLE
-         git_tag
-         git_remote_name
-         init_submodules
-         git_submodules_recurse
-         git_submodules
-         git_repository
-         work_dir
-         git_update_strategy
-         quiet)
-
+function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_repository work_dir git_update_strategy)
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
@@ -1365,56 +1408,13 @@ function(_ep_write_gitupdate_script
   endif()
 
   configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/gitupdate.cmake.in"
-    "${script_filename}"
-    @ONLY
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-gitupdate.cmake.in"
+      "${script_filename}"
+      @ONLY
   )
 endfunction()
 
-function(_ep_write_hgupdate_script
-         script_filename
-         hg_EXECUTABLE
-         hg_tag
-         work_dir
-         quiet)
-
-  configure_file(
-    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/hgupdate.cmake.in
-    ${script_filename}
-    @ONLY
-  )
-
-endfunction()
-
-function(_ep_write_copydir_script
-         script_filename
-         from_dir
-         to_dir)
-
-  configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/copydir.cmake.in"
-    "${script_filename}"
-    @ONLY
-  )
-endfunction()
-
-function(_ep_write_downloadfile_script
-         script_filename
-         REMOTE
-         LOCAL
-         timeout
-         inactivity_timeout
-         no_progress
-         hash
-         tls_verify
-         tls_cainfo
-         userpwd
-         http_headers
-         netrc
-         netrc_file
-         extract_script_filename
-         quiet)
-
+function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout inactivity_timeout no_progress hash tls_verify tls_cainfo userpwd http_headers netrc netrc_file)
   if(timeout)
     set(TIMEOUT_ARGS TIMEOUT ${timeout})
     set(TIMEOUT_MSG "${timeout} seconds")
@@ -1431,7 +1431,7 @@ function(_ep_write_downloadfile_script
   endif()
 
 
-  if(no_progress OR quiet)
+  if(no_progress)
     set(SHOW_PROGRESS "")
   else()
     set(SHOW_PROGRESS "SHOW_PROGRESS")
@@ -1518,19 +1518,13 @@ function(_ep_write_downloadfile_script
   # * USERPWD_ARGS
   # * HTTP_HEADERS_ARGS
   configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/download.cmake.in"
-    "${script_filename}"
-    @ONLY
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-download.cmake.in"
+      "${script_filename}"
+      @ONLY
   )
 endfunction()
 
-function(_ep_write_verifyfile_script
-         script_filename
-         LOCAL
-         hash
-         extract_script_filename
-         quiet)
-
+function(_ep_write_verifyfile_script script_filename LOCAL hash)
   _ep_get_hash_regex(_ep_hash_regex)
   if("${hash}" MATCHES "${_ep_hash_regex}")
     set(ALGO "${CMAKE_MATCH_1}")
@@ -1544,22 +1538,15 @@ function(_ep_write_verifyfile_script
   # * ALGO
   # * EXPECT_VALUE
   # * LOCAL
-  # * extract_script_filename
   configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/verify.cmake.in"
-    "${script_filename}"
-    @ONLY
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject-verify.cmake.in"
+      "${script_filename}"
+      @ONLY
   )
 endfunction()
 
 
-function(_ep_write_extractfile_script
-         script_filename
-         name
-         filename
-         directory
-         quiet)
-
+function(_ep_write_extractfile_script script_filename name filename directory)
   set(args "")
 
   if(filename MATCHES "(\\.|=)(7z|tar\\.bz2|tar\\.gz|tar\\.xz|tbz2|tgz|txz|zip)$")
@@ -1571,34 +1558,77 @@ function(_ep_write_extractfile_script
   endif()
 
   if(args STREQUAL "")
-    message(FATAL_ERROR
-      "Do not know how to extract '${filename}' -- known types are: "
-      ".7z, .tar, .tar.bz2, .tar.gz, .tar.xz, .tbz2, .tgz, .txz and .zip")
+    message(SEND_ERROR "error: do not know how to extract '${filename}' -- known types are .7z, .tar, .tar.bz2, .tar.gz, .tar.xz, .tbz2, .tgz, .txz and .zip")
+    return()
   endif()
 
-  configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/extractfile.cmake.in"
-    "${script_filename}"
-    @ONLY
-  )
+  file(WRITE ${script_filename}
+"# Make file names absolute:
+#
+get_filename_component(filename \"${filename}\" ABSOLUTE)
+get_filename_component(directory \"${directory}\" ABSOLUTE)
+
+message(STATUS \"extracting...
+     src='\${filename}'
+     dst='\${directory}'\")
+
+if(NOT EXISTS \"\${filename}\")
+  message(FATAL_ERROR \"error: file to extract does not exist: '\${filename}'\")
+endif()
+
+# Prepare a space for extracting:
+#
+set(i 1234)
+while(EXISTS \"\${directory}/../ex-${name}\${i}\")
+  math(EXPR i \"\${i} + 1\")
+endwhile()
+set(ut_dir \"\${directory}/../ex-${name}\${i}\")
+file(MAKE_DIRECTORY \"\${ut_dir}\")
+
+# Extract it:
+#
+message(STATUS \"extracting... [tar ${args}]\")
+execute_process(COMMAND \${CMAKE_COMMAND} -E tar ${args} \${filename}
+  WORKING_DIRECTORY \${ut_dir}
+  RESULT_VARIABLE rv)
+
+if(NOT rv EQUAL 0)
+  message(STATUS \"extracting... [error clean up]\")
+  file(REMOVE_RECURSE \"\${ut_dir}\")
+  message(FATAL_ERROR \"error: extract of '\${filename}' failed\")
+endif()
+
+# Analyze what came out of the tar file:
+#
+message(STATUS \"extracting... [analysis]\")
+file(GLOB contents \"\${ut_dir}/*\")
+list(REMOVE_ITEM contents \"\${ut_dir}/.DS_Store\")
+list(LENGTH contents n)
+if(NOT n EQUAL 1 OR NOT IS_DIRECTORY \"\${contents}\")
+  set(contents \"\${ut_dir}\")
+endif()
+
+# Move \"the one\" directory to the final directory:
+#
+message(STATUS \"extracting... [rename]\")
+file(REMOVE_RECURSE \${directory})
+get_filename_component(contents \${contents} ABSOLUTE)
+file(RENAME \${contents} \${directory})
+
+# Clean up:
+#
+message(STATUS \"extracting... [clean up]\")
+file(REMOVE_RECURSE \"\${ut_dir}\")
+
+message(STATUS \"extracting... done\")
+"
+)
 
 endfunction()
 
 
-# This function is an implementation detail of ExternalProject_Add() and
-# _ep_do_preconfigure_steps_now().
-#
-# The function expects keyword arguments to have already been parsed into
-# variables of the form _EP_<keyword>. It will create the various directories
-# before returning and it will populate variables of the form
-# _EP_<location>_DIR in the calling scope.
-#
-# Variables will also be set in the calling scope to enable subsequently
-# calling _ep_add_preconfigure_command() for the mkdir step.
-#
-function(_ep_prepare_directories name)
-
-  set(prefix ${_EP_PREFIX})
+function(_ep_set_directories name)
+  get_property(prefix TARGET ${name} PROPERTY _EP_PREFIX)
   if(NOT prefix)
     get_property(prefix DIRECTORY PROPERTY EP_PREFIX)
     if(NOT prefix)
@@ -1609,7 +1639,6 @@ function(_ep_prepare_directories name)
     endif()
   endif()
   if(prefix)
-    file(TO_CMAKE_PATH "${prefix}" prefix)
     set(tmp_default "${prefix}/tmp")
     set(download_default "${prefix}/src")
     set(source_default "${prefix}/src/${name}")
@@ -1617,7 +1646,6 @@ function(_ep_prepare_directories name)
     set(stamp_default "${prefix}/src/${name}-stamp")
     set(install_default "${prefix}")
   else()
-    file(TO_CMAKE_PATH "${base}" base)
     set(tmp_default "${base}/tmp/${name}")
     set(download_default "${base}/Download/${name}")
     set(source_default "${base}/Source/${name}")
@@ -1625,10 +1653,10 @@ function(_ep_prepare_directories name)
     set(stamp_default "${base}/Stamp/${name}")
     set(install_default "${base}/Install/${name}")
   endif()
-
-  set(build_in_source "${_EP_BUILD_IN_SOURCE}")
+  get_property(build_in_source TARGET ${name} PROPERTY _EP_BUILD_IN_SOURCE)
   if(build_in_source)
-    if(DEFINED _EP_BINARY_DIR)
+    get_property(have_binary_dir TARGET ${name} PROPERTY _EP_BINARY_DIR SET)
+    if(have_binary_dir)
       message(FATAL_ERROR
         "External project ${name} has both BINARY_DIR and BUILD_IN_SOURCE!")
     endif()
@@ -1639,77 +1667,64 @@ function(_ep_prepare_directories name)
   set(places stamp download source binary install tmp)
   foreach(var ${places})
     string(TOUPPER "${var}" VAR)
-    set(${var}_dir "${_EP_${VAR}_DIR}")
+    get_property(${var}_dir TARGET ${name} PROPERTY _EP_${VAR}_DIR)
     if(NOT ${var}_dir)
       set(${var}_dir "${${var}_default}")
     endif()
     if(NOT IS_ABSOLUTE "${${var}_dir}")
       get_filename_component(${var}_dir "${top}/${${var}_dir}" ABSOLUTE)
     endif()
-    file(TO_CMAKE_PATH "${${var}_dir}" ${var}_dir)
+    set_property(TARGET ${name} PROPERTY _EP_${VAR}_DIR "${${var}_dir}")
   endforeach()
 
   # Special case for default log directory based on stamp directory.
-  set(log_dir "${_EP_LOG_DIR}")
+  get_property(log_dir TARGET ${name} PROPERTY _EP_LOG_DIR)
   if(NOT log_dir)
-    set(log_dir "${stamp_dir}")
-  else()
-    if(NOT IS_ABSOLUTE "${log_dir}")
-      get_filename_component(log_dir "${top}/${log_dir}" ABSOLUTE)
-    endif()
+    get_property(log_dir TARGET ${name} PROPERTY _EP_STAMP_DIR)
   endif()
-  file(TO_CMAKE_PATH "${log_dir}" log_dir)
-  list(APPEND places log)
+  if(NOT IS_ABSOLUTE "${log_dir}")
+    get_filename_component(log_dir "${top}/${log_dir}" ABSOLUTE)
+  endif()
+  set_property(TARGET ${name} PROPERTY _EP_LOG_DIR "${log_dir}")
 
-  set(source_subdir "${_EP_SOURCE_SUBDIR}")
-  if(source_subdir)
-    if(IS_ABSOLUTE "${source_subdir}")
-      message(FATAL_ERROR
-        "External project ${name} has non-relative SOURCE_SUBDIR!")
-    endif()
-    string(REPLACE "\\" "/" source_subdir "${source_subdir}")
+  get_property(source_subdir TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR)
+  if(NOT source_subdir)
+    set_property(TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR "")
+  elseif(IS_ABSOLUTE "${source_subdir}")
+    message(FATAL_ERROR
+      "External project ${name} has non-relative SOURCE_SUBDIR!")
+  else()
     # Prefix with a slash so that when appended to the source directory, it
     # behaves as expected.
-    string(PREPEND source_subdir "/")
+    set_property(TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR "/${source_subdir}")
   endif()
-
   if(build_in_source)
-    set(binary_dir "${source_dir}${source_subdir}")
+    get_property(source_dir TARGET ${name} PROPERTY _EP_SOURCE_DIR)
+    if(source_subdir)
+      set_property(TARGET ${name} PROPERTY _EP_BINARY_DIR "${source_dir}/${source_subdir}")
+    else()
+      set_property(TARGET ${name} PROPERTY _EP_BINARY_DIR "${source_dir}")
+    endif()
   endif()
 
-  # This script will be used both here and by the mkdir step. We create the
-  # directories now at configure time and ensure they exists again at build
-  # time (since somebody might remove one of the required directories and try
-  # to rebuild without re-running cmake). They need to exist now at makefile
-  # generation time for Borland make and wmake so that CMake may generate
-  # makefiles with "cd C:\short\paths\with\no\spaces" commands in them.
-  set(script_filename "${tmp_dir}/${name}-mkdirs.cmake")
-  configure_file(
-    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/mkdirs.cmake.in
-    ${script_filename}
-    @ONLY
-  )
-  include(${script_filename})
-
-  set(comment "Creating directories for '${name}'")
-  set(cmd ${CMAKE_COMMAND} -P ${script_filename})
-
-  # Provide variables that can be used later to create a custom command or
-  # invoke the step directly
-  set(_EPcomment_MKDIR         "${comment}" PARENT_SCOPE)
-  set(_EPcommand_MKDIR         "${cmd}"     PARENT_SCOPE)
-  set(_EPalways_MKDIR          FALSE        PARENT_SCOPE)
-  set(_EPexcludefrommain_MKDIR FALSE        PARENT_SCOPE)
-  set(_EPdepends_MKDIR         ""           PARENT_SCOPE)
-  set(_EPdependees_MKDIR       ""           PARENT_SCOPE)
-
+  # Make the directories at CMake configure time *and* add a custom command
+  # to make them at build time. They need to exist at makefile generation
+  # time for Borland make and wmake so that CMake may generate makefiles
+  # with "cd C:\short\paths\with\no\spaces" commands in them.
+  #
+  # Additionally, the add_custom_command is still used in case somebody
+  # removes one of the necessary directories and tries to rebuild without
+  # re-running cmake.
   foreach(var ${places})
     string(TOUPPER "${var}" VAR)
-    set(_EP_${VAR}_DIR "${${var}_dir}" PARENT_SCOPE)
+    get_property(dir TARGET ${name} PROPERTY _EP_${VAR}_DIR)
+    file(MAKE_DIRECTORY "${dir}")
+    if(NOT EXISTS "${dir}")
+      message(FATAL_ERROR "dir '${dir}' does not exist after file(MAKE_DIRECTORY)")
+    endif()
   endforeach()
-  set(_EP_SOURCE_SUBDIR "${source_subdir}" PARENT_SCOPE)
-
 endfunction()
+
 
 # IMPORTANT: this MUST be a macro and not a function because of the
 # in-place replacements that occur in each ${var}
@@ -1721,17 +1736,6 @@ macro(_ep_replace_location_tags target_name)
       foreach(dir SOURCE_DIR SOURCE_SUBDIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOAD_DIR DOWNLOADED_FILE LOG_DIR)
         get_property(val TARGET ${target_name} PROPERTY _EP_${dir})
         string(REPLACE "<${dir}>" "${val}" ${var} "${${var}}")
-      endforeach()
-    endif()
-  endforeach()
-endmacro()
-
-macro(_ep_replace_location_tags_from_vars)
-  set(vars ${ARGN})
-  foreach(var ${vars})
-    if(${var})
-      foreach(dir SOURCE_DIR SOURCE_SUBDIR BINARY_DIR INSTALL_DIR TMP_DIR DOWNLOAD_DIR DOWNLOADED_FILE LOG_DIR)
-        string(REPLACE "<${dir}>" "${_EP_${dir}}" ${var} "${${var}}")
       endforeach()
     endif()
   endforeach()
@@ -1919,24 +1923,17 @@ function(_ep_get_build_command name step cmd_var)
   set(${cmd_var} "${cmd}" PARENT_SCOPE)
 endfunction()
 
-function(_ep_write_log_script name step genex_supported cmd_var)
-
-  set(log_dir "${_EP_LOG_DIR}")
-  set(tmp_dir "${_EP_TMP_DIR}")
-
-  if(genex_supported)
-    set(script_base ${tmp_dir}/${name}-${step}-$<CONFIG>)
-  else()
-    set(script_base ${tmp_dir}/${name}-${step})
-  endif()
+function(_ep_write_log_script name step cmd_var)
+  ExternalProject_Get_Property(${name} log_dir)
+  ExternalProject_Get_Property(${name} stamp_dir)
   set(command "${${cmd_var}}")
 
   set(make "")
   set(code_cygpath_make "")
-  if(command MATCHES [[^\$\(MAKE\)]])
+  if(command MATCHES "^\\$\\(MAKE\\)")
     # GNU make recognizes the string "$(MAKE)" as recursive make, so
     # ensure that it appears directly in the makefile.
-    string(REGEX REPLACE [[^\$\(MAKE\)]] [[${make}]] command "${command}")
+    string(REGEX REPLACE "^\\$\\(MAKE\\)" "\${make}" command "${command}")
     set(make "-Dmake=$(MAKE)")
 
     if(WIN32 AND NOT CYGWIN)
@@ -1958,8 +1955,8 @@ endif()
   endif()
 
   set(config "")
-  if("${CMAKE_CFG_INTDIR}" MATCHES [[^\$]])
-    string(REPLACE "${CMAKE_CFG_INTDIR}" [[${config}]] command "${command}")
+  if("${CMAKE_CFG_INTDIR}" MATCHES "^\\$")
+    string(REPLACE "${CMAKE_CFG_INTDIR}" "\${config}" command "${command}")
     set(config "-Dconfig=${CMAKE_CFG_INTDIR}")
   endif()
 
@@ -1993,22 +1990,15 @@ endif()
       endif()
     endforeach()
     string(APPEND code "set(command \"${cmd}\")${code_execute_process}")
-    if(genex_supported)
-      file(GENERATE OUTPUT "${script_base}-impl.cmake" CONTENT "${code}")
-    else()
-      file(WRITE "${script_base}-impl.cmake" "${code}")
-    endif()
-    set(command ${CMAKE_COMMAND}
-      -D "make=\${make}"
-      -D "config=\${config}"
-      -P ${script_base}-impl.cmake
-    )
+    file(GENERATE OUTPUT "${stamp_dir}/${name}-${step}-$<CONFIG>-impl.cmake" CONTENT "${code}")
+    set(command ${CMAKE_COMMAND} "-Dmake=\${make}" "-Dconfig=\${config}" -P ${stamp_dir}/${name}-${step}-$<CONFIG>-impl.cmake)
   endif()
 
   # Wrap the command in a script to log output to files.
+  set(script ${stamp_dir}/${name}-${step}-$<CONFIG>.cmake)
   set(logbase ${log_dir}/${name}-${step})
-  set(log_merged "${_EP_LOG_MERGED_STDOUTERR}")
-  set(log_output_on_failure "${_EP_LOG_OUTPUT_ON_FAILURE}")
+  get_property(log_merged TARGET ${name} PROPERTY _EP_LOG_MERGED_STDOUTERR)
+  get_property(log_output_on_failure TARGET ${name} PROPERTY _EP_LOG_OUTPUT_ON_FAILURE)
   if (log_merged)
     set(stdout_log "${logbase}.log")
     set(stderr_log "${logbase}.log")
@@ -2067,19 +2057,14 @@ if(result)
     message(FATAL_ERROR \"\${msg}\")
   endif()
 else()
-  if(NOT \"${CMAKE_GENERATOR}\" MATCHES \"Ninja\" AND NOT \"${_EP_QUIET}\")
+  if(NOT \"${CMAKE_GENERATOR}\" MATCHES \"Ninja\")
     set(msg \"${name} ${step} command succeeded.  See also ${logbase}-*.log\")
     message(STATUS \"\${msg}\")
   endif()
 endif()
 ")
-  set(script_filename ${script_base}.cmake)
-  if(genex_supported)
-    file(GENERATE OUTPUT ${script_filename} CONTENT "${code}")
-  else()
-    file(WRITE ${script_filename} "${code}")
-  endif()
-  set(command ${CMAKE_COMMAND} ${make} ${config} -P ${script_filename})
+  file(GENERATE OUTPUT "${script}" CONTENT "${code}")
+  set(command ${CMAKE_COMMAND} ${make} ${config} -P ${script})
   set(${cmd_var} "${command}" PARENT_SCOPE)
 endfunction()
 
@@ -2257,7 +2242,8 @@ function(ExternalProject_Add_Step name step)
     LOG
     USES_TERMINAL
   )
-  _ep_parse_arguments("${keywords}" ${name} _EP_${step}_ "${ARGN}")
+  _ep_parse_arguments(ExternalProject_Add_Step "${keywords}"
+                      ${name} _EP_${step}_ "${ARGN}")
 
   get_property(independent TARGET ${name} PROPERTY _EP_${step}_INDEPENDENT)
   if(independent STREQUAL "")
@@ -2368,8 +2354,7 @@ function(ExternalProject_Add_Step name step)
   # Wrap with log script?
   get_property(log TARGET ${name} PROPERTY _EP_${step}_LOG)
   if(command AND log)
-    set(genex_supported TRUE)
-    _ep_write_log_script(${name} ${step} ${genex_supported} command)
+    _ep_write_log_script(${name} ${step} command)
   endif()
 
   if("${command}" STREQUAL "")
@@ -2501,6 +2486,27 @@ function(ExternalProject_Add_StepDependencies name step)
 
 endfunction()
 
+
+function(_ep_add_mkdir_command name)
+  ExternalProject_Get_Property(${name}
+    source_dir binary_dir install_dir stamp_dir download_dir tmp_dir log_dir)
+
+  _ep_get_configuration_subdir_suffix(cfgdir)
+
+  ExternalProject_Add_Step(${name} mkdir
+    INDEPENDENT TRUE
+    COMMENT "Creating directories for '${name}'"
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${source_dir}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${binary_dir}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${install_dir}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${tmp_dir}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${stamp_dir}${cfgdir}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${download_dir}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${log_dir}
+    )
+endfunction()
+
+
 function(_ep_is_dir_empty dir empty_var)
   file(GLOB gr "${dir}/*")
   if("${gr}" STREQUAL "")
@@ -2511,277 +2517,114 @@ function(_ep_is_dir_empty dir empty_var)
 endfunction()
 
 function(_ep_get_git_submodules_recurse git_submodules_recurse)
-
-  if(NOT DEFINED _EP_GIT_SUBMODULES_RECURSE OR _EP_GIT_SUBMODULES_RECURSE)
-    # The git submodule update '--recursive' flag requires git >= v1.6.5
-    if(recurseFlag AND GIT_VERSION_STRING VERSION_LESS 1.6.5)
-      message(FATAL_ERROR
-        "git version 1.6.5 or later required for --recursive flag with "
-        "'git submodule ...': GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
-    endif()
-    set(${git_submodules_recurse} "--recursive" PARENT_SCOPE)
+  # Checks for GIT_SUBMODULES_RECURSE property
+  # Default is ON, which sets git_submodules_recurse output variable to "--recursive"
+  # Otherwise, the output variable is set to an empty value ""
+  get_property(git_submodules_recurse_set TARGET ${name} PROPERTY _EP_GIT_SUBMODULES_RECURSE SET)
+  if(NOT git_submodules_recurse_set)
+    set(recurseFlag "--recursive")
   else()
-    set(${git_submodules_recurse} "" PARENT_SCOPE)
-  endif()
-
-endfunction()
-
-function(_ep_write_command_script
-         script_filename
-         commands
-         work_dir
-         genex_supported
-         quiet
-         have_commands_var)
-
-  set(sep "${_EP_LIST_SEPARATOR}")
-  if(sep AND commands)
-    string(REPLACE "${sep}" "\\;" commands "${commands}")
-  endif()
-  _ep_replace_location_tags_from_vars(commands)
-
-  file(READ
-    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/customcommand.cmake.in
-    exec_command_template
-  )
-  set(script_content)
-  set(this_command)
-  foreach(token IN LISTS commands)
-    if(token STREQUAL "COMMAND")
-      if("${this_command}" STREQUAL "")
-        # Silently skip empty commands
-        continue()
-      endif()
-      string(CONFIGURE "${exec_command_template}" content @ONLY)
-      string(APPEND script_content "${content}")
-      set(this_command)
+    get_property(git_submodules_recurse_value TARGET ${name} PROPERTY _EP_GIT_SUBMODULES_RECURSE)
+    if(git_submodules_recurse_value)
+      set(recurseFlag "--recursive")
     else()
-      # Ensure we quote every token so we preserve empty items, quotes, etc
-      string(APPEND this_command " [==[${token}]==]")
-    endif()
-  endforeach()
-
-  if(NOT "${this_command}" STREQUAL "")
-    string(CONFIGURE "${exec_command_template}" content @ONLY)
-    string(APPEND script_content "${content}")
-  endif()
-
-  if(script_content STREQUAL "")
-    set(${have_commands_var} FALSE PARENT_SCOPE)
-  else()
-    set(${have_commands_var} TRUE PARENT_SCOPE)
-    file(READ
-      ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/customcommand_preamble.cmake.in
-      exec_command_preamble
-    )
-    string(CONFIGURE "${exec_command_preamble}" exec_command_preamble @ONLY)
-    string(PREPEND script_content "${exec_command_preamble}")
-  endif()
-
-  if(genex_supported)
-    # Only written at generation phase. This will only change the file's
-    # timestamp if the contents change.
-    file(GENERATE OUTPUT "${script_filename}" CONTENT "${script_content}")
-  else()
-    # Update the file immediately, needed if script has to be invoked in the
-    # configure phase (e.g. via FetchContent). We need to be careful to avoid
-    # updating the timestamp if the file contents don't change. The file(WRITE)
-    # command always updates the file, so avoid it if we don't need to call it.
-    set(doWrite TRUE)
-    if(EXISTS "${script_filename}")
-      file(READ "${script_filename}" existing_content)
-      if(existing_content STREQUAL script_content)
-        set(doWrite FALSE)
-      endif()
-    endif()
-    if(doWrite)
-      file(WRITE "${script_filename}" "${script_content}")
+      set(recurseFlag "")
     endif()
   endif()
+  set(${git_submodules_recurse} "${recurseFlag}" PARENT_SCOPE)
 
+  # The git submodule update '--recursive' flag requires git >= v1.6.5
+  if(recurseFlag AND GIT_VERSION_STRING VERSION_LESS 1.6.5)
+    message(FATAL_ERROR "error: git version 1.6.5 or later required for --recursive flag with 'git submodule ...': GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
+  endif()
 endfunction()
 
-function(_ep_add_preconfigure_command name step)
 
-  string(TOUPPER "${step}" STEP)
-  set(uses_terminal "${_EP_USES_TERMINAL_${STEP}}")
-  if(uses_terminal)
-    set(uses_terminal TRUE)
-  else()
-    set(uses_terminal FALSE)
-  endif()
+function(_ep_add_download_command name)
+  ExternalProject_Get_Property(${name} source_dir stamp_dir download_dir tmp_dir)
 
-  # Pre-configure steps are expected to set their own work_dir
-  ExternalProject_Add_Step(${name} ${step}
-    INDEPENDENT        TRUE
-    COMMENT           "${_EPcomment_${STEP}}"
-    COMMAND            ${_EPcommand_${STEP}}
-    ALWAYS             ${_EPalways_${STEP}}
-    EXCLUDE_FROM_MAIN  ${_EPexcludefrommain_${STEP}}
-    DEPENDS            ${_EPdepends_${STEP}}
-    DEPENDEES          ${_EPdependees_${STEP}}
-    USES_TERMINAL      ${uses_terminal}
-  )
-endfunction()
+  get_property(cmd_set TARGET ${name} PROPERTY _EP_DOWNLOAD_COMMAND SET)
+  get_property(cmd TARGET ${name} PROPERTY _EP_DOWNLOAD_COMMAND)
+  get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
+  get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
+  get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
+  get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
+  get_property(url TARGET ${name} PROPERTY _EP_URL)
+  get_property(fname TARGET ${name} PROPERTY _EP_DOWNLOAD_NAME)
 
-# This function is an implementation detail of ExternalProject_Add() and
-# _ep_do_preconfigure_steps_now().
-#
-# The function expects keyword arguments to have already been parsed into
-# variables of the form _EP_<keyword>. It will populate the variable
-# _EP_DOWNLOADED_FILE in the calling scope only if the download method is
-# URL-based and extraction has been turned off.
-#
-# Variables will also be set in the calling scope to enable subsequently
-# calling _ep_add_preconfigure_command() for the download step.
-#
-function(_ep_prepare_download name genex_supported)
+  # TODO: Perhaps file:// should be copied to download dir before extraction.
+  string(REGEX REPLACE "file://" "" url "${url}")
 
-  set(stamp_dir    "${_EP_STAMP_DIR}")
-  set(tmp_dir      "${_EP_TMP_DIR}")
-  set(source_dir   "${_EP_SOURCE_DIR}")
-  set(download_dir "${_EP_DOWNLOAD_DIR}")
-  set(quiet        "${_EP_QUIET}")
-
+  set(depends)
   set(comment)
+  set(work_dir)
 
-  # We handle the log setting directly here rather than deferring it to
-  # be handled by ExternalProject_Add_Step()
-  set(log "${_EP_LOG_DOWNLOAD}")
-  if(log)
-    set(script_filename ${tmp_dir}/${name}-download-impl.cmake)
-    set(log TRUE)
-    set(quiet FALSE)  # Already quiet as a result of log being enabled
-  else()
-    set(script_filename ${tmp_dir}/${name}-download.cmake)
-    set(log FALSE)
-  endif()
-
-  set(repo_info_file  ${tmp_dir}/${name}-download-repoinfo.txt)
-  set(last_run_file ${stamp_dir}/${name}-download-lastrun.txt)
-  set(script_does_something TRUE)
-
-  # We use configure_file() to write the repo_info_file below so that the
-  # file's timestamp is not updated if we don't change the contents of an
-  # existing file.
-
-  if(DEFINED _EP_DOWNLOAD_COMMAND)
+  if(cmd_set)
     set(work_dir ${download_dir})
-    set(repo_info_content
-"method=custom
-command=${_EP_DOWNLOAD_COMMAND}
-source_dir=${source_dir}
-work_dir=${work_dir}
-")
-    configure_file(
-      ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in
-      ${repo_info_file}
-      @ONLY
-    )
-
-    _ep_write_command_script(
-      "${script_filename}"
-      "${_EP_DOWNLOAD_COMMAND}"
-      "${work_dir}"
-      "${genex_supported}"
-      "${quiet}"
-      script_does_something
-    )
-    set(comment "Performing download step (custom command) for '${name}'")
-
-  elseif(DEFINED _EP_CVS_REPOSITORY)
+  elseif(cvs_repository)
     find_package(CVS QUIET)
     if(NOT CVS_EXECUTABLE)
       message(FATAL_ERROR "error: could not find cvs for checkout of ${name}")
     endif()
 
-    if("${_EP_CVS_MODULE}" STREQUAL "")
+    get_target_property(cvs_module ${name} _EP_CVS_MODULE)
+    if(NOT cvs_module)
       message(FATAL_ERROR "error: no CVS_MODULE")
     endif()
 
-    set(repo_info_content
-"method=cvs
-repository=${_EP_CVS_REPOSITORY}
-module=${_EP_CVS_MODULE}
-tag=${_EP_CVS_TAG}
-source_dir=${source_dir}
-")
+    get_property(cvs_tag TARGET ${name} PROPERTY _EP_CVS_TAG)
+
+    set(repository ${cvs_repository})
+    set(module ${cvs_module})
+    set(tag ${cvs_tag})
     configure_file(
-      ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in
-      ${repo_info_file}
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${stamp_dir}/${name}-cvsinfo.txt"
       @ONLY
-    )
+      )
 
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
-
-    set(cmd "${CVS_EXECUTABLE}" -d "${_EP_CVS_REPOSITORY}" -q
-      co ${_EP_CVS_TAG} -d "${src_name}" "${_EP_CVS_MODULE}"
-    )
-    _ep_write_command_script(
-      "${script_filename}"
-      "${cmd}"
-      "${work_dir}"
-      "${genex_supported}"
-      "${quiet}"
-      script_does_something
-    )
     set(comment "Performing download step (CVS checkout) for '${name}'")
-
-  elseif(DEFINED _EP_SVN_REPOSITORY)
+    set(cmd ${CVS_EXECUTABLE} -d ${cvs_repository} -q co ${cvs_tag} -d ${src_name} ${cvs_module})
+    list(APPEND depends ${stamp_dir}/${name}-cvsinfo.txt)
+  elseif(svn_repository)
     find_package(Subversion QUIET)
     if(NOT Subversion_SVN_EXECUTABLE)
       message(FATAL_ERROR "error: could not find svn for checkout of ${name}")
     endif()
 
-    set(svn_repository "${_EP_SVN_REPOSITORY}")
-    set(svn_revision   "${_EP_SVN_REVISION}")
-    set(svn_username   "${_EP_SVN_USERNAME}")
-    set(svn_password   "${_EP_SVN_PASSWORD}")
-    set(svn_trust_cert "${_EP_SVN_TRUST_CERT}")
+    get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
+    get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
+    get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
+    get_property(svn_trust_cert TARGET ${name} PROPERTY _EP_SVN_TRUST_CERT)
 
-    set(svn_options --non-interactive)
-    if(DEFINED _EP_SVN_USERNAME)
-      list(APPEND svn_options "--username=${svn_username}")
-    endif()
-    if(DEFINED _EP_SVN_PASSWORD)
-      list(APPEND svn_options "--password=${svn_password}")
-    endif()
-    if(svn_trust_cert)
-      list(APPEND svn_options --trust-server-cert)
-    endif()
-
-    set(repo_info_content
-"method=svn
-repository=${svn_repository}
-user=${svn_username}
-password=${svn_password}
-revision=${svn_revision}
-source_dir=${source_dir}
-")
+    set(repository "${svn_repository} user=${svn_username} password=${svn_password}")
+    set(module)
+    set(tag ${svn_revision})
     configure_file(
-      ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in
-      ${repo_info_file}
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${stamp_dir}/${name}-svninfo.txt"
       @ONLY
-    )
+      )
 
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
-
-    set(cmd "${Subversion_SVN_EXECUTABLE}" co "${svn_repository}"
-      ${svn_revision} ${svn_options} "${src_name}"
-    )
-    _ep_write_command_script(
-      "${script_filename}"
-      "${cmd}"
-      "${work_dir}"
-      "${genex_supported}"
-      "${quiet}"
-      script_does_something
-    )
     set(comment "Performing download step (SVN checkout) for '${name}'")
-
-  elseif(DEFINED _EP_GIT_REPOSITORY)
+    set(svn_user_pw_args "")
+    if(DEFINED svn_username)
+      set(svn_user_pw_args ${svn_user_pw_args} "--username=${svn_username}")
+    endif()
+    if(DEFINED svn_password)
+      set(svn_user_pw_args ${svn_user_pw_args} "--password=${svn_password}")
+    endif()
+    if(svn_trust_cert)
+      set(svn_trust_cert_args --trust-server-cert)
+    endif()
+    set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_revision}
+      --non-interactive ${svn_trust_cert_args} ${svn_user_pw_args} ${src_name})
+    list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
+  elseif(git_repository)
     # FetchContent gives us these directly, so don't try to recompute them
     if(NOT GIT_EXECUTABLE OR NOT GIT_VERSION_STRING)
       unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
@@ -2791,133 +2634,111 @@ source_dir=${source_dir}
       endif()
     endif()
 
-    set(git_tag "${_EP_GIT_TAG}")
+    _ep_get_git_submodules_recurse(git_submodules_recurse)
+
+    get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
     if(NOT git_tag)
       set(git_tag "master")
     endif()
 
-    set(git_remote_name "${_EP_GIT_REMOTE_NAME}")
+    set(git_init_submodules TRUE)
+    get_property(git_submodules_set TARGET ${name} PROPERTY _EP_GIT_SUBMODULES SET)
+    if(git_submodules_set)
+      get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
+      if(git_submodules  STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
+        set(git_init_submodules FALSE)
+      endif()
+    endif()
+
+    get_property(git_remote_name TARGET ${name} PROPERTY _EP_GIT_REMOTE_NAME)
     if(NOT git_remote_name)
       set(git_remote_name "origin")
     endif()
 
-    set(git_init_submodules TRUE)
-    if(DEFINED _EP_GIT_SUBMODULES)
-      set(git_submodules "${_EP_GIT_SUBMODULES}")
-      if(git_submodules STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
-        set(git_init_submodules FALSE)
-      endif()
-    endif()
-    _ep_get_git_submodules_recurse(git_submodules_recurse)
-
-    set(tls_verify "${_EP_TLS_VERIFY}")
+    get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
     if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
       set(tls_verify "${CMAKE_TLS_VERIFY}")
     endif()
-    set(git_shallow  "${_EP_GIT_SHALLOW}")
-    set(git_progress "${_EP_GIT_PROGRESS}")
-    set(git_config   "${_EP_GIT_CONFIG}")
+    get_property(git_shallow TARGET ${name} PROPERTY _EP_GIT_SHALLOW)
+    get_property(git_progress TARGET ${name} PROPERTY _EP_GIT_PROGRESS)
+    get_property(git_config TARGET ${name} PROPERTY _EP_GIT_CONFIG)
 
     # Make checkouts quiet when checking out a git hash (this avoids the
     # very noisy detached head message)
     list(PREPEND git_config advice.detachedHead=false)
 
-    # For the git clone operation, only the repository and remote should be
-    # recorded in a configured repository info file. If the repo or remote
-    # name changes, the clone script should be run again. But if only the tag
+    # For the download step, and the git clone operation, only the repository
+    # should be recorded in a configured RepositoryInfo file. If the repo
+    # changes, the clone script should be run again. But if only the tag
     # changes, avoid running the clone script again. Let the 'always' running
     # update step checkout the new tag.
-    set(repo_info_content
-"method=git
-repository=${_EP_GIT_REPOSITORY}
-remote=${git_remote_name}
-source_dir=${source_dir}
-")
+    #
+    set(repository ${git_repository})
+    set(module)
+    set(tag ${git_remote_name})
     configure_file(
-      ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in
-      ${repo_info_file}
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${stamp_dir}/${name}-gitinfo.txt"
       @ONLY
-    )
+      )
 
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
 
     # Since git clone doesn't succeed if the non-empty source_dir exists,
-    # the script will delete the source directory and then call git clone.
-    _ep_write_gitclone_script(
-      "${script_filename}"
-      "${source_dir}"
-      "${GIT_EXECUTABLE}"
-      "${_EP_GIT_REPOSITORY}"
-      "${git_tag}"
-      "${git_remote_name}"
-      "${git_init_submodules}"
-      "${git_submodules_recurse}"
-      "${git_submodules}"
-      "${git_shallow}"
-      "${git_progress}"
-      "${git_config}"
-      "${src_name}"
-      "${work_dir}"
-      "${repo_info_file}"
-      "${last_run_file}"
-      "${tls_verify}"
-      "${quiet}"
-    )
+    # create a cmake script to invoke as download command.
+    # The script will delete the source directory and then call git clone.
+    #
+    _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
+      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" "${git_shallow}" "${git_progress}" "${git_config}" ${src_name} ${work_dir}
+      ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt "${tls_verify}"
+      )
     set(comment "Performing download step (git clone) for '${name}'")
-
-  elseif(DEFINED _EP_HG_REPOSITORY)
+    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
+    list(APPEND depends ${stamp_dir}/${name}-gitinfo.txt)
+  elseif(hg_repository)
     find_package(Hg QUIET)
     if(NOT HG_EXECUTABLE)
       message(FATAL_ERROR "error: could not find hg for clone of ${name}")
     endif()
 
-    set(hg_tag "${_EP_HG_TAG}")
+    get_property(hg_tag TARGET ${name} PROPERTY _EP_HG_TAG)
     if(NOT hg_tag)
       set(hg_tag "tip")
     endif()
 
-    # For the hg clone operation, only the repository should be recorded in a
-    # configured repository info file. If the repo changes, the clone script
-    # should be run again. But if only the tag changes, avoid running the
-    # clone script again. Let the 'always' running update step checkout the
-    # new tag.
-    set(repo_info_content
-"method=hg
-repository=${_EP_HG_REPOSITORY}
-source_dir=${source_dir}
-")
+    # For the download step, and the hg clone operation, only the repository
+    # should be recorded in a configured RepositoryInfo file. If the repo
+    # changes, the clone script should be run again. But if only the tag
+    # changes, avoid running the clone script again. Let the 'always' running
+    # update step checkout the new tag.
+    #
+    set(repository ${hg_repository})
+    set(module)
+    set(tag)
     configure_file(
-      ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in
-      ${repo_info_file}
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${stamp_dir}/${name}-hginfo.txt"
       @ONLY
-    )
+      )
 
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
 
     # Since hg clone doesn't succeed if the non-empty source_dir exists,
-    # the script will delete the source directory and then call hg clone.
-    _ep_write_hgclone_script(
-      "${script_filename}"
-      "${source_dir}"
-      "${HG_EXECUTABLE}"
-      "${_EP_HG_REPOSITORY}"
-      "${hg_tag}"
-      "${src_name}"
-      "${work_dir}"
-      "${repo_info_file}"
-      "${last_run_file}"
-      "${quiet}"
-    )
+    # create a cmake script to invoke as download command.
+    # The script will delete the source directory and then call hg clone.
+    #
+    _ep_write_hgclone_script(${tmp_dir}/${name}-hgclone.cmake ${source_dir}
+      ${HG_EXECUTABLE} ${hg_repository} ${hg_tag} ${src_name} ${work_dir}
+      ${stamp_dir}/${name}-hginfo.txt ${stamp_dir}/${name}-hgclone-lastrun.txt
+      )
     set(comment "Performing download step (hg clone) for '${name}'")
-
-  elseif(DEFINED _EP_URL)
-    set(url "${_EP_URL}")
-    # TODO: Perhaps file:// should be copied to download dir before extraction.
-    string(REGEX REPLACE "file://" "" url "${url}")
-
-    set(hash "${_EP_URL_HASH}")
+    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-hgclone.cmake)
+    list(APPEND depends ${stamp_dir}/${name}-hginfo.txt)
+  elseif(url)
+    get_filename_component(work_dir "${source_dir}" PATH)
+    get_property(hash TARGET ${name} PROPERTY _EP_URL_HASH)
     _ep_get_hash_regex(_ep_hash_regex)
     if(hash AND NOT "${hash}" MATCHES "${_ep_hash_regex}")
       _ep_get_hash_algos(_ep_hash_algos)
@@ -2926,27 +2747,22 @@ source_dir=${source_dir}
         "but must be ALGO=value where ALGO is\n  ${_ep_hash_algos}\n"
         "and value is a hex string.")
     endif()
-    set(md5 "${_EP_URL_MD5}")
+    get_property(md5 TARGET ${name} PROPERTY _EP_URL_MD5)
     if(md5 AND NOT "MD5=${md5}" MATCHES "${_ep_hash_regex}")
       message(FATAL_ERROR "URL_MD5 is set to\n  ${md5}\nbut must be a hex string.")
     endif()
     if(md5 AND NOT hash)
       set(hash "MD5=${md5}")
     endif()
-
-    set(repo_info_content
-"method=url
-url=${url}
-hash=${hash}
-source_dir=${source_dir}
-")
+    set(repository "external project URL")
+    set(module "${url}")
+    set(tag "${hash}")
     configure_file(
-      ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in
-      ${repo_info_file}
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${stamp_dir}/${name}-urlinfo.txt"
       @ONLY
-    )
-
-    set(fname "${_EP_DOWNLOAD_NAME}")
+      )
+    list(APPEND depends ${stamp_dir}/${name}-urlinfo.txt)
 
     list(LENGTH url url_list_length)
     if(NOT "${url_list_length}" STREQUAL "1")
@@ -2961,21 +2777,12 @@ source_dir=${source_dir}
     endif()
 
     if(IS_DIRECTORY "${url}")
-      get_filename_component(from_dir "${url}" ABSOLUTE)
-      _ep_write_copydir_script(
-        ${script_filename}
-        ${from_dir}
-        ${source_dir}
-      )
-      set(steps "DIR copy")
+      get_filename_component(abs_dir "${url}" ABSOLUTE)
+      set(comment "Performing download step (DIR copy) for '${name}'")
+      set(cmd   ${CMAKE_COMMAND} -E rm -rf ${source_dir}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir})
     else()
-      set(no_extract "${_EP_DOWNLOAD_NO_EXTRACT}")
-      if(no_extract)
-        set(extract_script)
-      else()
-        set(extract_script "${tmp_dir}/extract-${name}.cmake")
-      endif()
-
+      get_property(no_extract TARGET "${name}" PROPERTY _EP_DOWNLOAD_NO_EXTRACT)
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
         if("x${fname}" STREQUAL "x")
@@ -2989,70 +2796,55 @@ source_dir=${source_dir}
           # Fall back to a default file name.  The actual file name does not
           # matter because it is used only internally and our extraction tool
           # inspects the file content directly.  If it turns out the wrong URL
-          # was given, that will be revealed when the download is attempted
-          # (during the build unless we are being invoked by FetchContent)
-          # which is an easier place for users to diagnose than an error here.
+          # was given that will be revealed during the build which is an easier
+          # place for users to diagnose than an error here anyway.
           set(fname "archive.tar")
         endif()
         string(REPLACE ";" "-" fname "${fname}")
         set(file ${download_dir}/${fname})
-        _ep_write_downloadfile_script(
-          "${script_filename}"
-          "${url}"
-          "${file}"
-          "${_EP_TIMEOUT}"
-          "${_EP_INACTIVITY_TIMEOUT}"
-          "${_EP_DOWNLOAD_NO_PROGRESS}"
-          "${hash}"
-          "${_EP_TLS_VERIFY}"
-          "${_EP_TLS_CAINFO}"
-          "${_EP_HTTP_USERNAME}:${_EP_HTTP_PASSWORD}"
-          "${_EP_HTTP_HEADER}"
-          "${_EP_NETRC}"
-          "${_EP_NETRC_FILE}"
-          "${extract_script}"
-          "${quiet}"
-        )
-        if(no_extract)
+        get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
+        get_property(inactivity_timeout TARGET ${name} PROPERTY _EP_INACTIVITY_TIMEOUT)
+        get_property(no_progress TARGET ${name} PROPERTY _EP_DOWNLOAD_NO_PROGRESS)
+        get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
+        get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
+        get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
+        get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
+        get_property(http_username TARGET ${name} PROPERTY _EP_HTTP_USERNAME)
+        get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
+        get_property(http_headers TARGET ${name} PROPERTY _EP_HTTP_HEADER)
+        set(download_script "${stamp_dir}/download-${name}.cmake")
+        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${inactivity_timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}" "${http_username}:${http_password}" "${http_headers}" "${netrc}" "${netrc_file}")
+        set(cmd ${CMAKE_COMMAND} -P "${download_script}"
+          COMMAND)
+        if (no_extract)
           set(steps "download and verify")
-        else()
+        else ()
           set(steps "download, verify and extract")
-        endif()
+        endif ()
+        set(comment "Performing download step (${steps}) for '${name}'")
+        file(WRITE "${stamp_dir}/verify-${name}.cmake" "") # already verified by 'download_script'
       else()
         set(file "${url}")
-        _ep_write_verifyfile_script(
-          "${script_filename}"
-          "${file}"
-          "${hash}"
-          "${extract_script}"
-          "${quiet}"
-        )
-        if(no_extract)
+        if (no_extract)
           set(steps "verify")
-        else()
+        else ()
           set(steps "verify and extract")
-        endif()
+        endif ()
+        set(comment "Performing download step (${steps}) for '${name}'")
+        _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}")
       endif()
-
-      if(no_extract)
-        set(_EP_DOWNLOADED_FILE ${file} PARENT_SCOPE)
-      else()
-        # This will be pulled in by the download/verify script written above
-        _ep_write_extractfile_script(
-          "${extract_script}"
-          "${name}"
-          "${file}"
-          "${source_dir}"
-          "${quiet}"
-        )
-      endif()
+      list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake)
+      if (NOT no_extract)
+        _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${name}" "${file}" "${source_dir}")
+        list(APPEND cmd COMMAND ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
+      else ()
+        set_property(TARGET ${name} PROPERTY _EP_DOWNLOADED_FILE ${file})
+      endif ()
     endif()
-    set(comment "Performing download step (${steps}) for '${name}'")
-
   else()
     _ep_is_dir_empty("${source_dir}" empty)
     if(${empty})
-      message(FATAL_ERROR
+      message(SEND_ERROR
         "No download info given for '${name}' and its source directory:\n"
         " ${source_dir}\n"
         "is not an existing non-empty directory.  Please specify one of:\n"
@@ -3065,149 +2857,105 @@ source_dir=${source_dir}
         " * CVS_REPOSITORY and CVS_MODULE"
         )
     endif()
-    set(repo_info_content
-"method=source_dir
-source_dir=${source_dir}
-")
-    configure_file(
-      ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in
-      ${repo_info_file}
-      @ONLY
-    )
-
-    set(comment "Skipping download step (SOURCE_DIR given) for '${name}'")
-    set(script_does_something FALSE)
   endif()
 
-  # Provide variables that can be used later to create a custom command or
-  # invoke the step directly
-  if(script_does_something)
-    set(cmd ${CMAKE_COMMAND} -P ${script_filename})
-    if(log)
-      _ep_write_log_script(${name} download "${genex_supported}" cmd)
-    endif()
-    set(depends ${repo_info_file})
+  get_property(log TARGET ${name} PROPERTY _EP_LOG_DOWNLOAD)
+  if(log)
+    set(log LOG 1)
   else()
-    set(cmd)
-    set(depends)
-    string(REPLACE "Performing" "Skipping" comment "${comment}")
+    set(log "")
   endif()
 
-  set(_EPcomment_DOWNLOAD         "${comment}" PARENT_SCOPE)
-  set(_EPcommand_DOWNLOAD         "${cmd}"     PARENT_SCOPE)
-  set(_EPalways_DOWNLOAD          FALSE        PARENT_SCOPE)
-  set(_EPexcludefrommain_DOWNLOAD FALSE        PARENT_SCOPE)
-  set(_EPdepends_DOWNLOAD         "${depends}" PARENT_SCOPE)
-  set(_EPdependees_DOWNLOAD       mkdir        PARENT_SCOPE)
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_DOWNLOAD)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
 
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(\${name} download
+      INDEPENDENT TRUE
+      COMMENT \${comment}
+      COMMAND ${__cmdQuoted}
+      WORKING_DIRECTORY \${work_dir}
+      DEPENDS \${depends}
+      DEPENDEES mkdir
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 endfunction()
 
-function(_ep_get_update_disconnected var)
-  if(DEFINED _EP_UPDATE_DISCONNECTED)
-    set(update_disconnected "${_EP_UPDATE_DISCONNECTED}")
+function(_ep_get_update_disconnected var name)
+  get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
+  if(update_disconnected_set)
+    get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
   else()
     get_property(update_disconnected DIRECTORY PROPERTY EP_UPDATE_DISCONNECTED)
   endif()
   set(${var} "${update_disconnected}" PARENT_SCOPE)
 endfunction()
 
-# This function is an implementation detail of ExternalProject_Add() and
-# _ep_do_preconfigure_steps_now().
-#
-# The function expects keyword arguments to have already been parsed into
-# variables of the form _EP_<keyword>.
-#
-# Variables will also be set in the calling scope to enable subsequently
-# calling _ep_add_preconfigure_command() for the updated step.
-#
-function(_ep_prepare_update name genex_supported)
+function(_ep_add_update_command name)
+  ExternalProject_Get_Property(${name} source_dir tmp_dir)
 
-  set(tmp_dir    "${_EP_TMP_DIR}")
-  set(source_dir "${_EP_SOURCE_DIR}")
-  set(quiet      "${_EP_QUIET}")
+  get_property(cmd_set TARGET ${name} PROPERTY _EP_UPDATE_COMMAND SET)
+  get_property(cmd TARGET ${name} PROPERTY _EP_UPDATE_COMMAND)
+  get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
+  get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
+  get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
+  get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
 
+  _ep_get_update_disconnected(update_disconnected ${name})
+
+  set(work_dir)
   set(comment)
+  set(always)
 
-  _ep_get_update_disconnected(update_disconnected)
-
-  # We handle the log setting directly here rather than deferring it to
-  # be handled by ExternalProject_Add_Step()
-  set(log "${_EP_LOG_UPDATE}")
-  if(log)
-    set(script_filename ${tmp_dir}/${name}-update-impl.cmake)
-    set(log TRUE)
-    set(quiet FALSE)  # Already quiet as a result of log being enabled
-  else()
-    set(script_filename ${tmp_dir}/${name}-update.cmake)
-    set(log FALSE)
-  endif()
-
-  if(DEFINED _EP_UPDATE_COMMAND)
+  if(cmd_set)
     set(work_dir ${source_dir})
-    _ep_write_command_script(
-      "${script_filename}"
-      "${_EP_UPDATE_COMMAND}"
-      "${work_dir}"
-      "${genex_supported}"
-      "${quiet}"
-      script_does_something
-    )
-    set(comment "Performing update step (custom command) for '${name}'")
-
-  elseif(DEFINED _EP_CVS_REPOSITORY)
+    if(NOT "x${cmd}" STREQUAL "x")
+      set(always 1)
+    endif()
+  elseif(cvs_repository)
     if(NOT CVS_EXECUTABLE)
       message(FATAL_ERROR "error: could not find cvs for update of ${name}")
     endif()
-
     set(work_dir ${source_dir})
-    set(cmd "${CVS_EXECUTABLE}" -d "${_EP_CVS_REPOSITORY}" -q
-      up -dP ${_EP_CVS_TAG}
-    )
-    _ep_write_command_script(
-      "${script_filename}"
-      "${cmd}"
-      "${work_dir}"
-      "${genex_supported}"
-      "${quiet}"
-      script_does_something
-    )
     set(comment "Performing update step (CVS update) for '${name}'")
-
-  elseif(DEFINED _EP_SVN_REPOSITORY)
+    get_property(cvs_tag TARGET ${name} PROPERTY _EP_CVS_TAG)
+    set(cmd ${CVS_EXECUTABLE} -d ${cvs_repository} -q up -dP ${cvs_tag})
+    set(always 1)
+  elseif(svn_repository)
     if(NOT Subversion_SVN_EXECUTABLE)
       message(FATAL_ERROR "error: could not find svn for update of ${name}")
     endif()
-
-    set(svn_revision   "${_EP_SVN_REVISION}")
-    set(svn_username   "${_EP_SVN_USERNAME}")
-    set(svn_password   "${_EP_SVN_PASSWORD}")
-    set(svn_trust_cert "${_EP_SVN_TRUST_CERT}")
-
-    set(svn_options --non-interactive)
-    if(DEFINED _EP_SVN_USERNAME)
-      list(APPEND svn_options "--username=${svn_username}")
+    set(work_dir ${source_dir})
+    set(comment "Performing update step (SVN update) for '${name}'")
+    get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
+    get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
+    get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
+    get_property(svn_trust_cert TARGET ${name} PROPERTY _EP_SVN_TRUST_CERT)
+    set(svn_user_pw_args "")
+    if(DEFINED svn_username)
+      set(svn_user_pw_args ${svn_user_pw_args} "--username=${svn_username}")
     endif()
-    if(DEFINED _EP_SVN_PASSWORD)
-      list(APPEND svn_options "--password=${svn_password}")
+    if(DEFINED svn_password)
+      set(svn_user_pw_args ${svn_user_pw_args} "--password=${svn_password}")
     endif()
     if(svn_trust_cert)
-      list(APPEND svn_options --trust-server-cert)
+      set(svn_trust_cert_args --trust-server-cert)
     endif()
-
-    set(work_dir ${source_dir})
-    set(cmd "${Subversion_SVN_EXECUTABLE}" up ${svn_revision} ${svn_options})
-
-    _ep_write_command_script(
-      "${script_filename}"
-      "${cmd}"
-      "${work_dir}"
-      "${genex_supported}"
-      "${quiet}"
-      script_does_something
-    )
-    set(comment "Performing update step (SVN update) for '${name}'")
-
-  elseif(DEFINED _EP_GIT_REPOSITORY)
+    set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_revision}
+      --non-interactive ${svn_trust_cert_args} ${svn_user_pw_args})
+    set(always 1)
+  elseif(git_repository)
     # FetchContent gives us these directly, so don't try to recompute them
     if(NOT GIT_EXECUTABLE OR NOT GIT_VERSION_STRING)
       unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
@@ -3216,27 +2964,27 @@ function(_ep_prepare_update name genex_supported)
         message(FATAL_ERROR "error: could not find git for fetch of ${name}")
       endif()
     endif()
-
-    set(git_tag "${_EP_GIT_TAG}")
+    set(work_dir ${source_dir})
+    set(comment "Performing update step for '${name}'")
+    get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
     if(NOT git_tag)
       set(git_tag "master")
     endif()
-
-    set(git_remote_name "${_EP_GIT_REMOTE_NAME}")
+    get_property(git_remote_name TARGET ${name} PROPERTY _EP_GIT_REMOTE_NAME)
     if(NOT git_remote_name)
       set(git_remote_name "origin")
     endif()
 
     set(git_init_submodules TRUE)
-    if(DEFINED _EP_GIT_SUBMODULES)
-      set(git_submodules "${_EP_GIT_SUBMODULES}")
+    get_property(git_submodules_set TARGET ${name} PROPERTY _EP_GIT_SUBMODULES SET)
+    if(git_submodules_set)
+      get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
       if(git_submodules  STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
         set(git_init_submodules FALSE)
       endif()
     endif()
-    _ep_get_git_submodules_recurse(git_submodules_recurse)
 
-    set(git_update_strategy "${_EP_GIT_REMOTE_UPDATE_STRATEGY}")
+    get_property(git_update_strategy TARGET ${name} PROPERTY _EP_GIT_REMOTE_UPDATE_STRATEGY)
     if(NOT git_update_strategy)
       set(git_update_strategy "${CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY}")
     endif()
@@ -3248,28 +2996,23 @@ function(_ep_prepare_update name genex_supported)
       message(FATAL_ERROR "'${git_update_strategy}' is not one of the supported strategies: ${strategies}")
     endif()
 
-    set(work_dir ${source_dir})
-    _ep_write_gitupdate_script(
-      "${script_filename}"
-      "${GIT_EXECUTABLE}"
-      "${git_tag}"
-      "${git_remote_name}"
-      "${git_init_submodules}"
-      "${git_submodules_recurse}"
-      "${git_submodules}"
-      "${_EP_GIT_REPOSITORY}"
-      "${work_dir}"
-      "${git_update_strategy}"
-      "${quiet}"
-    )
-    set(script_does_something TRUE)
-    set(comment "Performing update step (git update) for '${name}'")
+    _ep_get_git_submodules_recurse(git_submodules_recurse)
 
-  elseif(DEFINED _EP_HG_REPOSITORY)
+    _ep_write_gitupdate_script(${tmp_dir}/${name}-gitupdate.cmake
+      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" ${git_repository} ${work_dir} ${git_update_strategy}
+      )
+    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitupdate.cmake)
+    set(always 1)
+  elseif(hg_repository)
     if(NOT HG_EXECUTABLE)
       message(FATAL_ERROR "error: could not find hg for pull of ${name}")
     endif()
-
+    set(work_dir ${source_dir})
+    set(comment "Performing update step (hg pull) for '${name}'")
+    get_property(hg_tag TARGET ${name} PROPERTY _EP_HG_TAG)
+    if(NOT hg_tag)
+      set(hg_tag "tip")
+    endif()
     if("${HG_VERSION_STRING}" STREQUAL "2.1")
       message(WARNING "Mercurial 2.1 does not distinguish an empty pull from a failed pull:
  http://mercurial.selenic.com/wiki/UpgradeNotes#A2.1.1:_revert_pull_return_code_change.2C_compile_issue_on_OS_X
@@ -3277,117 +3020,87 @@ function(_ep_prepare_update name genex_supported)
 Update to Mercurial >= 2.1.1.
 ")
     endif()
-
-    set(hg_tag "${_EP_HG_TAG}")
-    if(NOT hg_tag)
-      set(hg_tag "tip")
-    endif()
-
-    set(work_dir ${source_dir})
-    _ep_write_hgupdate_script(
-      "${script_filename}"
-      "${HG_EXECUTABLE}"
-      "${hg_tag}"
-      "${work_dir}"
-      "${quiet}"
-    )
-    set(script_does_something TRUE)
-    set(comment "Performing update step (hg pull) for '${name}'")
-
-  else()
-    set(script_does_something FALSE)
+    set(cmd ${HG_EXECUTABLE} pull
+      COMMAND ${HG_EXECUTABLE} update ${hg_tag}
+      )
+    set(always 1)
   endif()
 
-  # Provide variables that can be used later to create a custom command or
-  # invoke the step directly
-  if(script_does_something)
-    set(always TRUE)
-    set(cmd ${CMAKE_COMMAND} -P ${script_filename})
-    if(log)
-      _ep_write_log_script(${name} update "${genex_supported}" cmd)
-    endif()
+  get_property(log TARGET ${name} PROPERTY _EP_LOG_UPDATE)
+  if(log)
+    set(log LOG 1)
   else()
-    set(always FALSE)
-    set(cmd)
+    set(log "")
   endif()
 
-  set(_EPcomment_UPDATE         "${comment}"  PARENT_SCOPE)
-  set(_EPcommand_UPDATE         "${cmd}"      PARENT_SCOPE)
-  set(_EPalways_UPDATE          "${always}"   PARENT_SCOPE)
-  set(_EPexcludefrommain_UPDATE "${update_disconnected}" PARENT_SCOPE)
-  set(_EPdepends_UPDATE         ""            PARENT_SCOPE)
-  set(_EPdependees_UPDATE       download      PARENT_SCOPE)
+  get_property(uses_terminal TARGET ${name} PROPERTY
+    _EP_USES_TERMINAL_UPDATE)
+  if(uses_terminal)
+    set(uses_terminal USES_TERMINAL 1)
+  else()
+    set(uses_terminal "")
+  endif()
+
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} update
+      INDEPENDENT TRUE
+      COMMENT \${comment}
+      COMMAND ${__cmdQuoted}
+      ALWAYS \${always}
+      EXCLUDE_FROM_MAIN \${update_disconnected}
+      WORKING_DIRECTORY \${work_dir}
+      DEPENDEES download
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 
 endfunction()
 
-# This function is an implementation detail of ExternalProject_Add() and
-# _ep_do_preconfigure_steps_now().
-#
-# The function expects keyword arguments to have already been parsed into
-# variables of the form _EP_<keyword>.
-#
-# Variables will also be set in the calling scope to enable subsequently
-# calling _ep_add_preconfigure_command() for the patch step.
-#
-function(_ep_prepare_patch name genex_supported)
 
-  set(tmp_dir    "${_EP_TMP_DIR}")
-  set(source_dir "${_EP_SOURCE_DIR}")
-  set(quiet      "${_EP_QUIET}")
+function(_ep_add_patch_command name)
+  ExternalProject_Get_Property(${name} source_dir)
 
-  _ep_get_update_disconnected(update_disconnected)
+  get_property(cmd_set TARGET ${name} PROPERTY _EP_PATCH_COMMAND SET)
+  get_property(cmd TARGET ${name} PROPERTY _EP_PATCH_COMMAND)
+
+  set(work_dir)
+
+  if(cmd_set)
+    set(work_dir ${source_dir})
+  endif()
+
+  get_property(log TARGET ${name} PROPERTY _EP_LOG_PATCH)
+  if(log)
+    set(log LOG 1)
+  else()
+    set(log "")
+  endif()
+
+  _ep_get_update_disconnected(update_disconnected ${name})
   if(update_disconnected)
     set(patch_dep download)
   else()
     set(patch_dep update)
   endif()
 
-  # We handle the log setting directly here rather than deferring it to
-  # be handled by ExternalProject_Add_Step()
-  set(log "${_EP_LOG_PATCH}")
-  if(log)
-    set(script_filename ${tmp_dir}/${name}-patch-impl.cmake)
-    set(log TRUE)
-    set(quiet FALSE)  # Already quiet as a result of log being enabled
-  else()
-    set(script_filename ${tmp_dir}/${name}-patch.cmake)
-    set(log FALSE)
-  endif()
-
-  if(DEFINED _EP_PATCH_COMMAND)
-    set(work_dir "${source_dir}")
-    _ep_write_command_script(
-      "${script_filename}"
-      "${_EP_PATCH_COMMAND}"
-      "${work_dir}"
-      "${genex_supported}"
-      "${quiet}"
-      script_does_something
-    )
-    if(script_does_something)
-      set(cmd ${CMAKE_COMMAND} -P ${script_filename})
-      if(log)
-        _ep_write_log_script(${name} patch "${genex_supported}" cmd)
-      endif()
-      set(comment "Performing patch step (custom command) for '${name}'")
-    else()
-      set(cmd)
-      set(comment "Skipping patch step (empty custom command) for '${name}'")
-    endif()
-  else()
-    set(cmd)
-    set(comment "Skipping patch step (no custom command) for '${name}'")
-  endif()
-
-  # Provide variables that can be used later to create a custom command or
-  # invoke the step directly
-  set(_EPcomment_PATCH         "${comment}"   PARENT_SCOPE)
-  set(_EPcommand_PATCH         "${cmd}"       PARENT_SCOPE)
-  set(_EPalways_PATCH          FALSE          PARENT_SCOPE)
-  set(_EPexcludefrommain_PATCH FALSE          PARENT_SCOPE)
-  set(_EPdepends_PATCH         ""             PARENT_SCOPE)
-  set(_EPdependees_PATCH       "${patch_dep}" PARENT_SCOPE)
-
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} patch
+      INDEPENDENT TRUE
+      COMMAND ${__cmdQuoted}
+      WORKING_DIRECTORY \${work_dir}
+      DEPENDEES \${patch_dep}
+      ${log}
+      )"
+  )
 endfunction()
 
 function(_ep_get_file_deps var name)
@@ -3497,11 +3210,7 @@ function(_ep_extract_configure_command var name)
       if(has_cmake_cache_default_args)
         _ep_command_line_to_initial_cache(script_initial_cache_default "${cmake_cache_default_args}" 0)
       endif()
-      _ep_write_initial_cache(
-        ${name}
-        "${_ep_cache_args_script}"
-        "${script_initial_cache_force}${script_initial_cache_default}"
-      )
+      _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${script_initial_cache_force}${script_initial_cache_default}")
       list(APPEND cmd "-C${_ep_cache_args_script}")
       _ep_replace_location_tags(${name} _ep_cache_args_script)
       set(_ep_cache_args_script
@@ -3533,11 +3242,10 @@ function(_ep_add_configure_command name)
   # used, cmake args or cmake generator) then re-run the configure step.
   # Fixes issue https://gitlab.kitware.com/cmake/cmake/-/issues/10258
   #
-  configure_file(
-    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/cfgcmd.txt.in
-    ${tmp_dir}/${name}-cfgcmd.txt
-    @ONLY
-  )
+  if(NOT EXISTS ${tmp_dir}/${name}-cfgcmd.txt.in)
+    file(WRITE ${tmp_dir}/${name}-cfgcmd.txt.in "cmd='\@cmd\@'\n")
+  endif()
+  configure_file(${tmp_dir}/${name}-cfgcmd.txt.in ${tmp_dir}/${name}-cfgcmd.txt)
   list(APPEND file_deps ${tmp_dir}/${name}-cfgcmd.txt)
   list(APPEND file_deps ${_ep_cache_args_script})
 
@@ -3748,8 +3456,51 @@ function(_ep_add_test_command name)
   endif()
 endfunction()
 
-macro(_ep_get_add_keywords out_var)
-  set(${out_var}
+
+function(ExternalProject_Add name)
+  cmake_policy(GET CMP0097 _EP_CMP0097
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
+  cmake_policy(GET CMP0114 cmp0114
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
+  if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12 AND NOT cmp0114 STREQUAL "NEW")
+    message(AUTHOR_WARNING
+      "Policy CMP0114 is not set to NEW.  "
+      "In order to support the Xcode \"new build system\", "
+      "this project must be updated to set policy CMP0114 to NEW."
+      "\n"
+      "Since CMake is generating for the Xcode \"new build system\", "
+      "ExternalProject_Add will use policy CMP0114's NEW behavior anyway, "
+      "but the generated build system may not match what the project intends."
+      )
+    set(cmp0114 "NEW")
+  endif()
+
+  _ep_get_configuration_subdir_suffix(cfgdir)
+
+  # Add a custom target for the external project.
+  set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
+  _ep_get_complete_stampfile(${name} complete_stamp_file)
+
+  cmake_policy(PUSH)
+  if(cmp0114 STREQUAL "NEW")
+    # To implement CMP0114 NEW behavior with Makefile generators,
+    # we need CMP0113 NEW behavior.
+    cmake_policy(SET CMP0113 NEW)
+  endif()
+  # The "ALL" option to add_custom_target just tells it to not set the
+  # EXCLUDE_FROM_ALL target property. Later, if the EXCLUDE_FROM_ALL
+  # argument was passed, we explicitly set it for the target.
+  add_custom_target(${name} ALL DEPENDS ${complete_stamp_file})
+  cmake_policy(POP)
+  set_property(TARGET ${name} PROPERTY _EP_IS_EXTERNAL_PROJECT 1)
+  set_property(TARGET ${name} PROPERTY LABELS ${name})
+  set_property(TARGET ${name} PROPERTY FOLDER "ExternalProjectTargets/${name}")
+
+  set_property(TARGET ${name} PROPERTY _EP_CMP0114 "${cmp0114}")
+
+  set(keywords
     #
     # Directory options
     #
@@ -3878,145 +3629,14 @@ macro(_ep_get_add_keywords out_var)
     #
     LIST_SEPARATOR
   )
-endmacro()
-
-
-# Internal function called by FetchContent to populate immediately.
-# It only executes steps up to and including "patch". It takes the same
-# arguments as ExternalProject_Add() plus one additional argument: QUIET.
-#
-# Not to be used outside of CMake.
-#
-function(_ep_do_preconfigure_steps_now name)
-
-  cmake_policy(GET CMP0097 _EP_CMP0097
-    PARENT_SCOPE # undocumented, do not use outside of CMake
-  )
-
-  set(genex_supported FALSE)
-
-  _ep_get_add_keywords(keywords)
-  _ep_parse_arguments_to_vars("${keywords};QUIET" ${name} _EP_ "${ARGN}")
-
-  _ep_get_update_disconnected(update_disconnected)
-
-  _ep_prepare_directories(${name})
-  _ep_prepare_download(${name} ${genex_supported})
-  _ep_prepare_update(${name} ${genex_supported})
-  _ep_prepare_patch(${name} ${genex_supported})
-
-  set(stamp_dir "${_EP_STAMP_DIR}")
-  set(tmp_dir   "${_EP_TMP_DIR}")
-
-  # Once any step has to run, all later steps have to be run too
-  set(need_to_run FALSE)
-  foreach(step IN ITEMS download update patch)
-    if(update_disconnected AND "${step}" STREQUAL "update")
-      continue()
-    endif()
-
-    string(TOUPPER "${step}" STEP)
-    if("${_EPcommand_${STEP}}" STREQUAL "")
-      continue()
-    endif()
-
-    set(stamp_file "${stamp_dir}/${name}-${step}")
-    set(script_file ${tmp_dir}/${name}-${step}.cmake)
-
-    if(NOT EXISTS ${stamp_file})
-      set(need_to_run TRUE)
-    endif()
-
-    if(NOT need_to_run)
-      foreach(dep_file ${script_file} ${_EPdepends_${STEP}})
-        # IS_NEWER_THAN is also true if the timestamps are the same. On some
-        # file systems, we only have second resolution timestamps and the
-        # likelihood of having the same timestamp is high. Use the negative
-        # form to ensure we actually get a true "is newer than" test.
-        if(NOT EXISTS ${dep_file} OR
-           NOT ${stamp_file} IS_NEWER_THAN ${dep_file})
-          set(need_to_run TRUE)
-          break()
-        endif()
-      endforeach()
-    endif()
-
-    if(need_to_run)
-      include(${script_file})
-      file(TOUCH ${stamp_file})
-    endif()
-  endforeach()
-
-  if("${_EP_DOWNLOAD_NO_EXTRACT}")
-    file(COPY "${_EP_DOWNLOADED_FILE}" DESTINATION "${_EP_SOURCE_DIR}")
-  endif()
-
-endfunction()
-
-function(ExternalProject_Add name)
-  cmake_policy(GET CMP0097 _EP_CMP0097
-    PARENT_SCOPE # undocumented, do not use outside of CMake
-    )
-  cmake_policy(GET CMP0114 cmp0114
-    PARENT_SCOPE # undocumented, do not use outside of CMake
-    )
-  if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12 AND NOT cmp0114 STREQUAL "NEW")
-    message(AUTHOR_WARNING
-      "Policy CMP0114 is not set to NEW.  "
-      "In order to support the Xcode \"new build system\", "
-      "this project must be updated to set policy CMP0114 to NEW."
-      "\n"
-      "Since CMake is generating for the Xcode \"new build system\", "
-      "ExternalProject_Add will use policy CMP0114's NEW behavior anyway, "
-      "but the generated build system may not match what the project intends."
-      )
-    set(cmp0114 "NEW")
-  endif()
-
-  set(genex_supported TRUE)
-
-  _ep_get_add_keywords(keywords)
-  _ep_parse_arguments_to_vars("${keywords}" ${name} _EP_ "${ARGN}")
-  _ep_prepare_directories(${name})
-  _ep_prepare_download(${name} ${genex_supported})
-  _ep_prepare_update(${name} ${genex_supported})
-  _ep_prepare_patch(${name} ${genex_supported})
-
-  _ep_get_configuration_subdir_suffix(cfgdir)
-
-  # Add a custom target for the external project.
-  set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  _ep_get_complete_stampfile(${name} complete_stamp_file)
-
-  cmake_policy(PUSH)
-  if(cmp0114 STREQUAL "NEW")
-    # To implement CMP0114 NEW behavior with Makefile generators,
-    # we need CMP0113 NEW behavior.
-    cmake_policy(SET CMP0113 NEW)
-  endif()
-  # The "ALL" option to add_custom_target just tells it to not set the
-  # EXCLUDE_FROM_ALL target property. Later, if the EXCLUDE_FROM_ALL
-  # argument was passed, we explicitly set it for the target.
-  add_custom_target(${name} ALL DEPENDS ${complete_stamp_file})
-  cmake_policy(POP)
-  set_property(TARGET ${name} PROPERTY _EP_IS_EXTERNAL_PROJECT 1)
-  set_property(TARGET ${name} PROPERTY LABELS ${name})
-  set_property(TARGET ${name} PROPERTY FOLDER "ExternalProjectTargets/${name}")
-
-  set_property(TARGET ${name} PROPERTY _EP_CMP0114 "${cmp0114}")
-
-  # Transfer the arguments to the target as target properties. These are
-  # read by the various steps, potentially from different scopes.
-  foreach(key IN LISTS keywords ITEMS DOWNLOADED_FILE)
-    if(DEFINED _EP_${key})
-      set_property(TARGET ${name} PROPERTY _EP_${key} "${_EP_${key}}")
-    endif()
-  endforeach()
-
+  _ep_parse_arguments(ExternalProject_Add "${keywords}" ${name} _EP_ "${ARGN}")
+  _ep_set_directories(${name})
   _ep_get_step_stampfile(${name} "done" done_stamp_file)
   _ep_get_step_stampfile(${name} "install" install_stamp_file)
 
-  if(arg_EXCLUDE_FROM_ALL)
+  # Set the EXCLUDE_FROM_ALL target property if required.
+  get_property(exclude_from_all TARGET ${name} PROPERTY _EP_EXCLUDE_FROM_ALL)
+  if(exclude_from_all)
     set_property(TARGET ${name} PROPERTY EXCLUDE_FROM_ALL TRUE)
   endif()
 
@@ -4057,10 +3677,10 @@ function(ExternalProject_Add name)
   # The target depends on the output of the final step.
   # (Already set up above in the DEPENDS of the add_custom_target command.)
   #
-  _ep_add_preconfigure_command(${name} mkdir)
-  _ep_add_preconfigure_command(${name} download)
-  _ep_add_preconfigure_command(${name} update)
-  _ep_add_preconfigure_command(${name} patch)
+  _ep_add_mkdir_command(${name})
+  _ep_add_download_command(${name})
+  _ep_add_update_command(${name})
+  _ep_add_patch_command(${name})
   _ep_add_configure_command(${name})
   _ep_add_build_command(${name})
   _ep_add_install_command(${name})

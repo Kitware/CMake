@@ -13,6 +13,6 @@
    \* HG_REPOSITORY
    \* CVS_REPOSITORY and CVS_MODULE
 Call Stack \(most recent call first\):
-  .*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_prepare_download\)
+  .*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_download_command\)
   NoOptions.cmake:[0-9]+ \(ExternalProject_Add\)
   CMakeLists.txt:[0-9]+ \(include\)$
