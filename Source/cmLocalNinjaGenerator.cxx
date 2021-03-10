@@ -97,9 +97,12 @@ void cmLocalNinjaGenerator::Generate()
       // contains any non-ASCII characters and dependency checking will fail.
       // As a workaround, leave the msvc_deps_prefix UTF-8 encoded even though
       // the rest of the file is ANSI encoded.
-      if (GetConsoleOutputCP() == CP_UTF8 && GetACP() != CP_UTF8) {
+      if (GetConsoleOutputCP() == CP_UTF8 && GetACP() != CP_UTF8 &&
+          this->GetGlobalGenerator()->GetMakefileEncoding() != codecvt::None) {
         this->GetRulesFileStream().WriteRaw(showIncludesPrefix);
       } else {
+        // Ninja 1.11 and above uses the UTF-8 code page if it's supported, so
+        // in that case we can write it normally without using raw bytes.
         this->GetRulesFileStream() << showIncludesPrefix;
       }
 #else
