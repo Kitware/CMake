@@ -1217,6 +1217,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                                     "\": Invalid macro expansion"));
       return;
     }
+    if (!expandedPreset->ConditionResult) {
+      cmSystemTools::Error(cmStrCat("Could not use disabled preset \"",
+                                    preset->second.Unexpanded.Name, "\""));
+      return;
+    }
 
     if (!this->State->IsCacheLoaded() && !haveBArg) {
       this->SetHomeOutputDirectory(expandedPreset->BinaryDir);
@@ -3160,6 +3165,14 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       cmSystemTools::Error(cmStrCat("Could not evaluate build preset \"",
                                     presetName,
                                     "\": Invalid macro expansion"));
+      settingsFile.PrintBuildPresetList();
+      return 1;
+    }
+
+    if (!expandedPreset->ConditionResult) {
+      cmSystemTools::Error(cmStrCat("Cannot use disabled build preset in ",
+                                    this->GetHomeDirectory(), ": \"",
+                                    presetName, '"'));
       settingsFile.PrintBuildPresetList();
       return 1;
     }

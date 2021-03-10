@@ -2310,6 +2310,13 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
     return false;
   }
 
+  if (!expandedPreset->ConditionResult) {
+    cmSystemTools::Error(cmStrCat("Cannot use disabled test preset in ",
+                                  workingDirectory, ": \"", presetName, '"'));
+    settingsFile.PrintTestPresetList();
+    return false;
+  }
+
   auto configurePresetPair =
     settingsFile.ConfigurePresets.find(expandedPreset->ConfigurePreset);
   if (configurePresetPair == settingsFile.ConfigurePresets.end()) {

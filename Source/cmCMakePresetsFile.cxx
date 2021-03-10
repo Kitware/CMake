@@ -9,6 +9,8 @@
 #include <iterator>
 #include <utility>
 
+#include <cm/string_view>
+
 #include "cmCMakePresetsFileInternal.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -114,6 +116,14 @@ ReadFileResult VisitPreset(
     for (auto const& v : parentPreset.Environment) {
       preset.Environment.insert(v);
     }
+
+    if (!preset.ConditionEvaluator) {
+      preset.ConditionEvaluator = parentPreset.ConditionEvaluator;
+    }
+  }
+
+  if (preset.ConditionEvaluator && preset.ConditionEvaluator->IsNull()) {
+    preset.ConditionEvaluator.reset();
   }
 
   CHECK_OK(preset.VisitPresetAfterInherit())
@@ -382,6 +392,19 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const T& preset,
     }
   }
 
+  if (preset.ConditionEvaluator) {
+    cm::optional<bool> result;
+    if (!preset.ConditionEvaluator->Evaluate(
+          macroExpanders, file.GetVersion(preset), result)) {
+      return false;
+    }
+    if (!result) {
+      out.reset();
+      return true;
+    }
+    out->ConditionResult = *result;
+  }
+
   return ExpandMacros(file, preset, out, macroExpanders);
 }
 
@@ -503,6 +526,80 @@ ExpandMacroResult ExpandMacro(std::string& out,
 
   return ExpandMacroResult::Error;
 }
+}
+
+bool cmCMakePresetsFileInternal::EqualsCondition::Evaluate(
+  const std::vector<MacroExpander>& expanders, int version,
+  cm::optional<bool>& out) const
+{
+  std::string lhs = this->Lhs;
+  CHECK_EXPAND(out, lhs, expanders, version);
+
+  std::string rhs = this->Rhs;
+  CHECK_EXPAND(out, rhs, expanders, version);
+
+  out = (lhs == rhs);
+  return true;
+}
+
+bool cmCMakePresetsFileInternal::InListCondition::Evaluate(
+  const std::vector<MacroExpander>& expanders, int version,
+  cm::optional<bool>& out) const
+{
+  std::string str = this->String;
+  CHECK_EXPAND(out, str, expanders, version);
+
+  for (auto item : this->List) {
+    CHECK_EXPAND(out, item, expanders, version);
+    if (str == item) {
+      out = true;
+      return true;
+    }
+  }
+
+  out = false;
+  return true;
+}
+
+bool cmCMakePresetsFileInternal::AnyAllOfCondition::Evaluate(
+  const std::vector<MacroExpander>& expanders, int version,
+  cm::optional<bool>& out) const
+{
+  for (auto const& condition : this->Conditions) {
+    cm::optional<bool> result;
+    if (!condition->Evaluate(expanders, version, result)) {
+      out.reset();
+      return false;
+    }
+
+    if (!result) {
+      out.reset();
+      return true;
+    }
+
+    if (result == this->StopValue) {
+      out = result;
+      return true;
+    }
+  }
+
+  out = !this->StopValue;
+  return true;
+}
+
+bool cmCMakePresetsFileInternal::NotCondition::Evaluate(
+  const std::vector<MacroExpander>& expanders, int version,
+  cm::optional<bool>& out) const
+{
+  out.reset();
+  if (!this->SubCondition->Evaluate(expanders, version, out)) {
+    out.reset();
+    return false;
+  }
+  if (out) {
+    *out = !*out;
+  }
+  return true;
 }
 
 cmCMakePresetsFile::ReadFileResult
@@ -862,6 +959,10 @@ const char* cmCMakePresetsFile::ResultToString(ReadFileResult result)
     case ReadFileResult::INSTALL_PREFIX_UNSUPPORTED:
       return "File version must be 3 or higher for installDir preset "
              "support.";
+    case ReadFileResult::INVALID_CONDITION:
+      return "Invalid preset condition";
+    case ReadFileResult::CONDITION_UNSUPPORTED:
+      return "File version must be 3 or higher for condition support";
   }
 
   return "Unknown error";
@@ -918,7 +1019,7 @@ void cmCMakePresetsFile::PrintConfigurePresetList(
   for (auto const& p : this->ConfigurePresetOrder) {
     auto const& preset = this->ConfigurePresets.at(p);
     if (!preset.Unexpanded.Hidden && preset.Expanded &&
-        filter(preset.Unexpanded)) {
+        preset.Expanded->ConditionResult && filter(preset.Unexpanded)) {
       presets.push_back(
         static_cast<const cmCMakePresetsFile::Preset*>(&preset.Unexpanded));
     }
@@ -935,7 +1036,8 @@ void cmCMakePresetsFile::PrintBuildPresetList() const
   std::vector<const cmCMakePresetsFile::Preset*> presets;
   for (auto const& p : this->BuildPresetOrder) {
     auto const& preset = this->BuildPresets.at(p);
-    if (!preset.Unexpanded.Hidden && preset.Expanded) {
+    if (!preset.Unexpanded.Hidden && preset.Expanded &&
+        preset.Expanded->ConditionResult) {
       presets.push_back(
         static_cast<const cmCMakePresetsFile::Preset*>(&preset.Unexpanded));
     }
@@ -952,7 +1054,8 @@ void cmCMakePresetsFile::PrintTestPresetList() const
   std::vector<const cmCMakePresetsFile::Preset*> presets;
   for (auto const& p : this->TestPresetOrder) {
     auto const& preset = this->TestPresets.at(p);
-    if (!preset.Unexpanded.Hidden && preset.Expanded) {
+    if (!preset.Unexpanded.Hidden && preset.Expanded &&
+        preset.Expanded->ConditionResult) {
       presets.push_back(
         static_cast<const cmCMakePresetsFile::Preset*>(&preset.Unexpanded));
     }
