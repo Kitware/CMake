@@ -83,6 +83,16 @@ if(NOT XCODE OR NOT XCODE_VERSION VERSION_LESS 5)
   target_link_libraries(barStatic fooStatic)
 endif()
 
+if(XCODE)
+  add_library(space SHARED space.c)
+  set_target_properties(space PROPERTIES
+    FRAMEWORK TRUE
+    OUTPUT_NAME "space space"
+    )
+  add_executable(use_space use_space.c)
+  target_link_libraries(use_space PRIVATE space)
+endif()
+
 include(CPack)
 
 if(APPLE)
