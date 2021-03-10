@@ -3647,7 +3647,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
               // implicit search path, so we need it
               libPaths.Add("-F " + this->XCodeEscapePath(fwDir));
             }
-            libPaths.Add("-framework " + fwName);
+            libPaths.Add("-framework " + this->XCodeEscapePath(fwName));
           } else {
             libPaths.Add(this->XCodeEscapePath(cleanPath));
           }
