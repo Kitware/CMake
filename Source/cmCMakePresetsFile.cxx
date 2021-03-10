@@ -9,6 +9,7 @@
 #include <iterator>
 #include <utility>
 
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include <cm3p/json/reader.h>
@@ -981,7 +982,7 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const T& preset,
   MacroExpander defaultMacroExpander =
     [&file, &preset](const std::string& macroNamespace,
                      const std::string& macroName, std::string& macroOut,
-                     int /*version*/) -> ExpandMacroResult {
+                     int version) -> ExpandMacroResult {
     if (macroNamespace.empty()) {
       if (macroName == "sourceDir") {
         macroOut += file.SourceDir;
@@ -1008,6 +1009,13 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const T& preset,
       }
       if (macroName == "dollar") {
         macroOut += '$';
+        return ExpandMacroResult::Ok;
+      }
+      if (macroName == "hostSystemName") {
+        if (version < 3) {
+          return ExpandMacroResult::Error;
+        }
+        macroOut += cmSystemTools::GetSystemName();
         return ExpandMacroResult::Ok;
       }
     }

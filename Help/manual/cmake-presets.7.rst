@@ -830,6 +830,12 @@ Recognized macros include:
   test presets, this will evaluate to the generator specified by
   ``configurePreset``.
 
+``${hostSystemName}``
+
+  The name of the host operating system. Contains the same value as
+  :variable:`CMAKE_HOST_SYSTEM_NAME`. This is allowed in preset files
+  specifying version ``3`` or above.
+
 ``${dollar}``
 
   A literal dollar sign (``$``).
