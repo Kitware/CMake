@@ -28,6 +28,7 @@
 
 #include "cm_sys_stat.h"
 
+#include "cmCMakePath.h"
 #include "cmCMakePresetsFile.h"
 #include "cmCommandLineArgument.h"
 #include "cmCommands.h"
@@ -493,6 +494,21 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     return true;
   };
 
+  auto PrefixLambda = [&](std::string const& path, cmake* state) -> bool {
+    const std::string var = "CMAKE_INSTALL_PREFIX";
+    cmStateEnums::CacheEntryType type = cmStateEnums::PATH;
+    cmCMakePath absolutePath(path);
+    if (absolutePath.IsAbsolute()) {
+#ifndef CMAKE_BOOTSTRAP
+      state->UnprocessedPresetVariables.erase(var);
+#endif
+      state->ProcessCacheArg(var, path, type);
+      return true;
+    }
+    cmSystemTools::Error("Absolute paths are required for --install-prefix");
+    return false;
+  };
+
   std::vector<CommandArgument> arguments = {
     CommandArgument{ "-D", "-D must be followed with VAR=VALUE.",
                      CommandArgument::Values::One, DefineLambda },
@@ -511,8 +527,12 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
                        state->ReadListFile(args, path);
                        return true;
                      } },
+
     CommandArgument{ "-P", "-P must be followed by a file name.",
                      CommandArgument::Values::One, ScriptLambda },
+    CommandArgument{ "--install-prefix",
+                     "No install directory specified for --install-prefix",
+                     CommandArgument::Values::One, PrefixLambda },
     CommandArgument{ "--find-package", CommandArgument::Values::Zero,
                      [&](std::string const&, cmake*) -> bool {
                        findPackageMode = true;
@@ -815,6 +835,9 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                      CommandArgument::Values::One, PlatformLambda },
     CommandArgument{ "-T", "No toolset specified for -T",
                      CommandArgument::Values::One, ToolsetLamda },
+    CommandArgument{ "--install-prefix",
+                     "No install directory specified for --install-prefix",
+                     CommandArgument::Values::One, IgnoreAndTrueLambda },
 
     CommandArgument{ "--check-build-system", CommandArgument::Values::Two,
                      [](std::string const& value, cmake* state) -> bool {
@@ -1206,6 +1229,14 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     }
     this->UnprocessedPresetVariables = expandedPreset->CacheVariables;
     this->UnprocessedPresetEnvironment = expandedPreset->Environment;
+
+    if (!expandedPreset->InstallDir.empty() &&
+        this->State->GetInitializedCacheValue("CMAKE_INSTALL_PREFIX") ==
+          nullptr) {
+      this->UnprocessedPresetVariables["CMAKE_INSTALL_PREFIX"] = {
+        "PATH", expandedPreset->InstallDir
+      };
+    }
 
     if (!expandedPreset->ArchitectureStrategy ||
         expandedPreset->ArchitectureStrategy ==

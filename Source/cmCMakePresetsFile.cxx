@@ -57,7 +57,7 @@ using TestPreset = cmCMakePresetsFile::TestPreset;
 using ArchToolsetStrategy = cmCMakePresetsFile::ArchToolsetStrategy;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 2;
+constexpr int MAX_VERSION = 3;
 
 struct CMakeVersion
 {
@@ -326,6 +326,8 @@ auto const ConfigurePresetHelper =
     .Bind("architecture"_s, ArchitectureHelper, false)
     .Bind("toolset"_s, ToolsetHelper, false)
     .Bind("binaryDir"_s, &ConfigurePreset::BinaryDir, PresetStringHelper,
+          false)
+    .Bind("installDir"_s, &ConfigurePreset::InstallDir, PresetStringHelper,
           false)
     .Bind<std::string>("cmakeExecutable"_s, nullptr, PresetStringHelper, false)
     .Bind("cacheVariables"_s, &ConfigurePreset::CacheVariables,
@@ -872,6 +874,17 @@ bool ExpandMacros(const cmCMakePresetsFile& file,
   out->BinaryDir = cmSystemTools::CollapseFullPath(binaryDir);
   cmSystemTools::ConvertToUnixSlashes(out->BinaryDir);
 
+  if (!preset.InstallDir.empty()) {
+    std::string installDir = preset.InstallDir;
+    CHECK_EXPAND(out, installDir, macroExpanders)
+
+    if (!cmSystemTools::FileIsFullPath(installDir)) {
+      installDir = cmStrCat(file.SourceDir, '/', installDir);
+    }
+    out->InstallDir = cmSystemTools::CollapseFullPath(installDir);
+    cmSystemTools::ConvertToUnixSlashes(out->InstallDir);
+  }
+
   for (auto& variable : out->CacheVariables) {
     if (variable.second) {
       CHECK_EXPAND(out, variable.second->Value, macroExpanders)
@@ -1174,6 +1187,7 @@ cmCMakePresetsFile::ConfigurePreset::VisitPresetInherit(
     preset.ToolsetStrategy = parent.ToolsetStrategy;
   }
   InheritString(preset.BinaryDir, parent.BinaryDir);
+  InheritString(preset.InstallDir, parent.InstallDir);
   InheritOptionalValue(preset.WarnDev, parent.WarnDev);
   InheritOptionalValue(preset.ErrorDev, parent.ErrorDev);
   InheritOptionalValue(preset.WarnDeprecated, parent.WarnDeprecated);
@@ -1502,6 +1516,9 @@ const char* cmCMakePresetsFile::ResultToString(ReadFileResult result)
     case ReadFileResult::BUILD_TEST_PRESETS_UNSUPPORTED:
       return "File version must be 2 or higher for build and test preset "
              "support.";
+    case ReadFileResult::INSTALL_PREFIX_UNSUPPORTED:
+      return "File version must be 3 or higher for installDir preset "
+             "support.";
   }
 
   return "Unknown error";
@@ -1571,6 +1588,12 @@ cmCMakePresetsFile::ReadFileResult cmCMakePresetsFile::ReadJSONFile(
            .second) {
       return ReadFileResult::DUPLICATE_PRESETS;
     }
+
+    // Support for installDir presets added in version 3.
+    if (v < 3 && !preset.InstallDir.empty()) {
+      return ReadFileResult::INSTALL_PREFIX_UNSUPPORTED;
+    }
+
     this->ConfigurePresetOrder.push_back(preset.Name);
   }
 

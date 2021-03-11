@@ -61,6 +61,9 @@ run_cmake_command(build-bad-dir
 run_cmake_command(build-bad-generator
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-generator)
 
+
+run_cmake_command(install-prefix-no-arg ${CMAKE_COMMAND} -B DummyBuildDir --install-prefix)
+
 run_cmake_command(install-no-dir
   ${CMAKE_COMMAND} --install)
 run_cmake_command(install-bad-dir

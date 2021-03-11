@@ -712,6 +712,8 @@ private:
       "Specify toolset name if supported by generator." },                    \
     { "-A <platform-name>",                                                   \
       "Specify platform name if supported by generator." },                   \
+    { "--install-prefix <directory>",                                         \
+      "Specify install directory [CMAKE_INSTALL_PREFIX]." },                  \
     { "-Wdev", "Enable developer warnings." },                                \
     { "-Wno-dev", "Suppress developer warnings." },                           \
     { "-Werror=dev", "Make developer warnings errors." },                     \
