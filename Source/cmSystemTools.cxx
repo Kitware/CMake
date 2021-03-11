@@ -103,6 +103,10 @@
 #  include <malloc.h> /* for malloc/free on QNX */
 #endif
 
+#if !defined(_WIN32) && !defined(__ANDROID__)
+#  include <sys/utsname.h>
+#endif
+
 namespace {
 
 cmSystemTools::InterruptCallback s_InterruptCallback;
@@ -3206,4 +3210,47 @@ bool cmSystemTools::CreateLink(const std::string& origName,
   }
 
   return true;
+}
+
+cm::string_view cmSystemTools::GetSystemName()
+{
+#if defined(_WIN32)
+  return "Windows";
+#elif defined(__ANDROID__)
+  return "Android";
+#else
+  static struct utsname uts_name;
+  static bool initialized = false;
+  static cm::string_view systemName;
+  if (initialized) {
+    return systemName;
+  }
+  if (uname(&uts_name) >= 0) {
+    initialized = true;
+    systemName = uts_name.sysname;
+
+    if (cmIsOff(systemName)) {
+      systemName = "UnknownOS";
+    }
+
+    // fix for BSD/OS, remove the /
+    static const cmsys::RegularExpression bsdOsRegex("BSD.OS");
+    cmsys::RegularExpressionMatch match;
+    if (bsdOsRegex.find(uts_name.sysname, match)) {
+      systemName = "BSDOS";
+    }
+
+    // fix for GNU/kFreeBSD, remove the GNU/
+    if (systemName.find("kFreeBSD") != cm::string_view::npos) {
+      systemName = "kFreeBSD";
+    }
+
+    // fix for CYGWIN which has windows version in it
+    if (systemName.find("CYGWIN") != cm::string_view::npos) {
+      systemName = "CYGWIN";
+    }
+    return systemName;
+  }
+  return "";
+#endif
 }
