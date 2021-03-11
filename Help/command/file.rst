@@ -39,6 +39,7 @@ Synopsis
   `Filesystem`_
     file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] [<globbing-expr>...])
     file(`RENAME`_ <oldname> <newname> [...])
+    file(`COPY_FILE`_ <oldname> <newname> [...])
     file({`REMOVE`_ | `REMOVE_RECURSE`_ } [<files>...])
     file(`MAKE_DIRECTORY`_ [<dir>...])
     file({`COPY`_ | `INSTALL`_} <file>... DESTINATION <dir> [...])
@@ -682,6 +683,28 @@ The options are:
   If the ``<newname>`` path already exists, do not replace it.
   If ``RESULT <result>`` is used, the result variable will be
   set to ``NO_REPLACE``.  Otherwise, an error is emitted.
+
+.. _COPY_FILE:
+
+.. code-block:: cmake
+
+  file(COPY_FILE <oldname> <newname>
+       [RESULT <result>]
+       [ONLY_IF_DIFFERENT])
+
+Copy a file from ``<oldname>`` to ``<newname>``. Directories are not
+supported. Symlinks are ignored and ``<oldfile>``'s content is read and
+written to ``<newname>`` as a new file.
+
+The options are:
+
+``RESULT <result>``
+  Set ``<result>`` variable to ``0`` on success or an error message otherwise.
+  If ``RESULT`` is not specified and the operation fails, an error is emitted.
+
+``ONLY_IF_DIFFERENT``
+  If the ``<newname>`` path already exists, do not replace it if it is the
+  same as ``<oldname>``. Otherwise, an error is emitted.
 
 .. _REMOVE:
 .. _REMOVE_RECURSE:

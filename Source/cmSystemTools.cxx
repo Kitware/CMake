@@ -87,6 +87,7 @@
 #  include <unistd.h>
 
 #  include <sys/time.h>
+#  include <sys/types.h>
 #endif
 
 #if defined(_WIN32) &&                                                        \
@@ -989,6 +990,51 @@ bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname,
 }
 }
 #endif
+
+bool cmSystemTools::CopySingleFile(const std::string& oldname,
+                                   const std::string& newname)
+{
+  return cmSystemTools::CopySingleFile(oldname, newname, CopyWhen::Always) ==
+    CopyResult::Success;
+}
+
+cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
+  std::string const& oldname, std::string const& newname, CopyWhen when,
+  std::string* err)
+{
+  switch (when) {
+    case CopyWhen::Always:
+      break;
+    case CopyWhen::OnlyIfDifferent:
+      if (!FilesDiffer(oldname, newname)) {
+        return CopyResult::Success;
+      }
+      break;
+  }
+
+  mode_t perm = 0;
+  bool perms = SystemTools::GetPermissions(oldname, perm);
+
+  // If files are the same do not copy
+  if (SystemTools::SameFile(oldname, newname)) {
+    return CopyResult::Success;
+  }
+
+  if (!cmsys::SystemTools::CloneFileContent(oldname, newname)) {
+    // if cloning did not succeed, fall back to blockwise copy
+    if (!cmsys::SystemTools::CopyFileContentBlockwise(oldname, newname)) {
+      ReportError(err);
+      return CopyResult::Failure;
+    }
+  }
+  if (perms) {
+    if (!SystemTools::SetPermissions(newname, perm)) {
+      ReportError(err);
+      return CopyResult::Failure;
+    }
+  }
+  return CopyResult::Success;
+}
 
 bool cmSystemTools::RenameFile(const std::string& oldname,
                                const std::string& newname)

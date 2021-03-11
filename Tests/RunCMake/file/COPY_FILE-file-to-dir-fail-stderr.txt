@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/Tests/RunCMake/file/COPY_FILE-file-to-dir-fail.cmake:[0-9] \(file\):
+  file COPY_FILE cannot copy to a directory
+
+    [^
+]*/Tests/RunCMake/file/COPY_FILE-file-to-dir-fail-build/output
