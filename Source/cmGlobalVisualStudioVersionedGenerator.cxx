@@ -4,6 +4,9 @@
 
 #include <cmext/string_view>
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
@@ -438,6 +441,40 @@ cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
   std::string instancePath;
   this->GetVSInstance(instancePath);
   cmSystemTools::ConvertToUnixSlashes(instancePath);
+
+  // Translate three-component format accepted by "vcvarsall -vcvars_ver=".
+  cmsys::RegularExpression threeComponent(
+    "^([0-9]+\\.[0-9]+)\\.[0-9][0-9][0-9][0-9][0-9]$");
+  if (threeComponent.find(version)) {
+    // Load "VC/Auxiliary/Build/*/Microsoft.VCToolsVersion.*.txt" files
+    // with two matching components to check their three-component version.
+    std::string const& twoComponent = threeComponent.match(1);
+    std::string pattern =
+      cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s, twoComponent,
+               "*/Microsoft.VCToolsVersion."_s, twoComponent, "*.txt"_s);
+    cmsys::Glob glob;
+    glob.SetRecurseThroughSymlinks(false);
+    if (glob.FindFiles(pattern)) {
+      for (std::string const& txt : glob.GetFiles()) {
+        std::string ver;
+        cmsys::ifstream fin(txt.c_str());
+        if (fin && std::getline(fin, ver)) {
+          // Strip trailing whitespace.
+          ver = ver.substr(0, ver.find_first_not_of("0123456789."));
+          // If the three-component version matches, translate it to
+          // that used by the "Microsoft.VCToolsVersion.*.txt" file name.
+          if (ver == version) {
+            cmsys::RegularExpression extractVersion(
+              "VCToolsVersion\\.([0-9.]+)\\.txt$");
+            if (extractVersion.find(txt)) {
+              version = extractVersion.match(1);
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
 
   if (cmSystemTools::VersionCompareGreaterEq(version, "14.20")) {
     props = cmStrCat(instancePath, "/VC/Auxiliary/Build."_s, version,

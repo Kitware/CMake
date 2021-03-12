@@ -19,3 +19,15 @@ its ``Microsoft.VCToolsVersion.*.props`` file names.
 
    VS 16.9's toolset may also be specified as ``14.28.16.9`` because
    VS 16.10 uses the file name ``Microsoft.VCToolsVersion.14.28.16.9.props``.
+
+Three-Component MSVC Toolset Versions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.19.7
+
+The ``version=`` field may be given a three-component toolset version
+such as ``14.28.29910``, and CMake will convert it to the name used by
+MSBuild ``Microsoft.VCToolsVersion.*.props`` files.  This is useful
+to distinguish between VS 16.8's ``14.28.29333`` toolset and VS 16.9's
+``14.28.29910`` toolset.  It also matches ``vcvarsall``'s ``-vcvars_ver=``
+behavior.
