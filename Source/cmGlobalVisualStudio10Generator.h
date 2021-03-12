@@ -61,9 +61,8 @@ public:
   const char* GetPlatformToolset() const;
   std::string const& GetPlatformToolsetString() const;
 
-  /** The toolset version.  */
-  const char* GetPlatformToolsetVersion() const;
-  std::string const& GetPlatformToolsetVersionString() const;
+  /** The toolset version props file, if any.  */
+  std::string const& GetPlatformToolsetVersionProps() const;
 
   /** The toolset host architecture name (e.g. x64 for 64-bit host tools).  */
   const char* GetPlatformToolsetHostArchitecture() const;
@@ -120,9 +119,6 @@ public:
   std::string Encoding() override;
   const char* GetToolsVersion() const;
 
-  virtual bool IsDefaultToolset(const std::string& version) const;
-  virtual std::string GetAuxiliaryToolset() const;
-
   bool GetSupportsUnityBuilds() const { return this->SupportsUnityBuilds; }
 
   bool FindMakeProgram(cmMakefile* mf) override;
@@ -168,6 +164,16 @@ protected:
   virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;
   virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
 
+  enum class AuxToolset
+  {
+    None,
+    Default,
+    PropsExist,
+    PropsMissing
+  };
+  virtual AuxToolset FindAuxToolset(std::string& version,
+                                    std::string& props) const;
+
   std::string const& GetMSBuildCommand();
 
   cmIDEFlagTable const* LoadFlagTable(std::string const& optionsName,
@@ -176,7 +182,7 @@ protected:
                                       std::string const& table) const;
 
   std::string GeneratorToolset;
-  std::string GeneratorToolsetVersion;
+  std::string GeneratorToolsetVersionProps;
   std::string GeneratorToolsetHostArchitecture;
   std::string GeneratorToolsetCustomVCTargetsDir;
   std::string GeneratorToolsetCuda;
@@ -229,6 +235,8 @@ private:
   virtual std::string FindMSBuildCommand();
   std::string FindDevEnvCommand() override;
   std::string GetVSMakeProgram() override { return this->GetMSBuildCommand(); }
+
+  std::string GeneratorToolsetVersion;
 
   bool PlatformToolsetNeedsDebugEnum;
 
