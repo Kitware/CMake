@@ -302,16 +302,16 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     // If a specific minor version of the toolset was requested, verify that it
     // is compatible to the major version and that is exists on disk.
     // If not clear the value.
-    std::string version = this->GeneratorToolsetVersion;
+    std::string versionToolset = this->GeneratorToolsetVersion;
     cmsys::RegularExpression regex("[0-9][0-9]\\.[0-9][0-9]");
-    if (regex.find(version)) {
-      version = "v" + version.erase(2, 1);
+    if (regex.find(versionToolset)) {
+      versionToolset = "v" + versionToolset.erase(2, 1);
     } else {
       // Version not recognized. Clear it.
-      version.clear();
+      versionToolset.clear();
     }
 
-    if (!cmHasPrefix(version, this->GetPlatformToolsetString())) {
+    if (!cmHasPrefix(versionToolset, this->GetPlatformToolsetString())) {
       std::ostringstream e;
       /* clang-format off */
       e <<
