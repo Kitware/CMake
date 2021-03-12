@@ -253,7 +253,8 @@
     script:
         # Bootstrap.
         - mkdir -p build/
-        - cp -v Utilities/Release/linux/$CMAKE_ARCH/cache.txt build/CMakeCache.txt
+        # Exclude documentation.  A job dependency provides it for packaging.
+        - sed '/^# Build doc/,/^$/d' Utilities/Release/linux/$CMAKE_ARCH/cache.txt > build/CMakeCache.txt
         # Make sccache available.
         - .gitlab/ci/sccache.sh
         - export PATH=$PWD/.gitlab:$PATH
