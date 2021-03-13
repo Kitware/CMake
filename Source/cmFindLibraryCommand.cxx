@@ -374,7 +374,7 @@ void cmFindLibraryHelper::AddName(std::string const& name)
     regex += "(\\.[0-9]+\\.[0-9]+)?";
   }
   regex += "$";
-  entry.Regex.compile(regex.c_str());
+  entry.Regex.compile(regex);
   this->Names.push_back(std::move(entry));
 }
 

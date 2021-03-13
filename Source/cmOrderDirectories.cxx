@@ -359,7 +359,7 @@ void cmOrderDirectories::SetLinkExtensionInfo(
   std::string const& removeExtRegex)
 {
   this->LinkExtensions = linkExtensions;
-  this->RemoveLibraryExtension.compile(removeExtRegex.c_str());
+  this->RemoveLibraryExtension.compile(removeExtRegex);
 }
 
 void cmOrderDirectories::CollectOriginalDirectories()

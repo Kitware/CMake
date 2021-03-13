@@ -2221,7 +2221,7 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     cmCTestScriptHandler* ch = this->GetScriptHandler();
     // -SR is an internal argument, -SP should be ignored when it is passed
     if (!SRArgumentSpecified) {
-      ch->AddConfigurationScript(args[i].c_str(), false);
+      ch->AddConfigurationScript(args[i], false);
     }
   }
 
@@ -2231,7 +2231,7 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     this->Impl->RunConfigurationScript = true;
     i++;
     cmCTestScriptHandler* ch = this->GetScriptHandler();
-    ch->AddConfigurationScript(args[i].c_str(), true);
+    ch->AddConfigurationScript(args[i], true);
   }
 
   if (this->CheckArgument(arg, "-S"_s, "--script") && i < args.size() - 1) {
@@ -2240,7 +2240,7 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     cmCTestScriptHandler* ch = this->GetScriptHandler();
     // -SR is an internal argument, -S should be ignored when it is passed
     if (!SRArgumentSpecified) {
-      ch->AddConfigurationScript(args[i].c_str(), true);
+      ch->AddConfigurationScript(args[i], true);
     }
   }
 }
