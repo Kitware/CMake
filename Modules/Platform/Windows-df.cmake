@@ -27,8 +27,8 @@ set(CMAKE_Fortran_COMPILE_OBJECT
 set(CMAKE_Fortran_LINK_EXECUTABLE
     "<CMAKE_Fortran_COMPILER> ${CMAKE_CL_NOLOGO} ${CMAKE_START_TEMP_FILE} <FLAGS> /exe:<TARGET> <OBJECTS> /link <CMAKE_Fortran_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES>${CMAKE_END_TEMP_FILE}")
 
-set(CMAKE_CREATE_WIN32_EXE /winapp)
-set(CMAKE_CREATE_CONSOLE_EXE )
+set(CMAKE_Fortran_CREATE_WIN32_EXE /winapp)
+set(CMAKE_Fortran_CREATE_CONSOLE_EXE )
 
 # does the compiler support pdbtype and is it the newer compiler
 
