@@ -78,6 +78,13 @@ public:
   const char* GetPlatformToolsetCudaCustomDir() const;
   std::string const& GetPlatformToolsetCudaCustomDirString() const;
 
+  /** The nvcc subdirectory of a custom cuda install directory */
+  std::string const& GetPlatformToolsetCudaNvccSubdirString() const;
+
+  /** The visual studio integration subdirectory of a custom cuda install
+   * directory */
+  std::string const& GetPlatformToolsetCudaVSIntegrationSubdirString() const;
+
   /** Return whether we need to use No/Debug instead of false/true
       for GenerateDebugInformation.  */
   bool GetPlatformToolsetNeedsDebugEnum() const
@@ -188,6 +195,8 @@ protected:
   std::string GeneratorToolsetCustomVCTargetsDir;
   std::string GeneratorToolsetCuda;
   std::string GeneratorToolsetCudaCustomDir;
+  std::string GeneratorToolsetCudaNvccSubdir;
+  std::string GeneratorToolsetCudaVSIntegrationSubdir;
   std::string DefaultPlatformToolset;
   std::string DefaultPlatformToolsetHostArchitecture;
   std::string DefaultAndroidToolset;

@@ -263,8 +263,8 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
       bcDir = this->VCTargetsPath + "/BuildCustomizations";
     } else {
       bcDir = this->GetPlatformToolsetCudaCustomDirString() +
-        "CUDAVisualStudioIntegration\\extras\\"
-        "visual_studio_integration\\MSBuildExtensions";
+        this->GetPlatformToolsetCudaVSIntegrationSubdirString() +
+        "extras\\visual_studio_integration\\MSBuildExtensions";
       cmSystemTools::ConvertToUnixSlashes(bcDir);
     }
     cmsys::Glob gl;
@@ -469,6 +469,17 @@ bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
       /* ensure trailing backslash for easy path joining */
       if (this->GeneratorToolsetCudaCustomDir.back() != '\\') {
         this->GeneratorToolsetCudaCustomDir.push_back('\\');
+      }
+      /* check for legacy toolkit folder structure */
+      if (cmsys::SystemTools::FileIsDirectory(
+            cmStrCat(this->GeneratorToolsetCudaCustomDir, "nvcc"))) {
+        this->GeneratorToolsetCudaNvccSubdir = "nvcc\\";
+      }
+      if (cmsys::SystemTools::FileIsDirectory(
+            cmStrCat(this->GeneratorToolsetCudaCustomDir,
+                     "CUDAVisualStudioIntegration"))) {
+        this->GeneratorToolsetCudaVSIntegrationSubdir =
+          "CUDAVisualStudioIntegration\\";
       }
     } else {
       this->GeneratorToolsetCuda = value;
@@ -785,6 +796,18 @@ std::string const&
 cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaCustomDirString() const
 {
   return this->GeneratorToolsetCudaCustomDir;
+}
+
+std::string const&
+cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaNvccSubdirString() const
+{
+  return this->GeneratorToolsetCudaNvccSubdir;
+}
+
+std::string const& cmGlobalVisualStudio10Generator::
+  GetPlatformToolsetCudaVSIntegrationSubdirString() const
+{
+  return this->GeneratorToolsetCudaVSIntegrationSubdir;
 }
 
 cmGlobalVisualStudio10Generator::AuxToolset
