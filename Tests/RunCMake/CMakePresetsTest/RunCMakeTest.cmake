@@ -85,6 +85,8 @@ run_cmake_test_presets(Good
                        "${GoodTestPresets}")
 unset(CMakePresetsTest_ASSETS)
 
+run_cmake_test_presets(InvalidConfigurePreset "default" "" "badConfigurePreset")
+
 set(CMakePresetsTest_NO_CONFIGURE 1)
 set(CMakePresetsTest_FILE "${RunCMake_SOURCE_DIR}/Good.json.in")
 run_cmake_test_presets(ListPresets "" "" "x" "--list-presets")
@@ -92,7 +94,7 @@ unset(CMakePresetsTest_FILE)
 
 run_cmake_test_presets(NoConfigurePreset "" "" "noConfigurePreset")
 run_cmake_test_presets(NoTestsAction "default" "" "noTestsAction")
-run_cmake_test_presets(Invalid "" "" "hidden;vendorMacro;badConfigurePreset")
+run_cmake_test_presets(Invalid "" "" "hidden;vendorMacro")
 
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_test_presets(PresetsUnsupported "" "" "x")
