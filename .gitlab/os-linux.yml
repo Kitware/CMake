@@ -140,6 +140,21 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
+### Intel Compiler
+
+.intelcompiler:
+    image: "kitware/intelcompiler:$CMAKE_CI_INTELCOMPILER_IMAGE_TAG"
+    environment:
+        name: intel-compiler
+    variables:
+        CMAKE_ARCH: x86_64
+
+.intelclassic_makefiles:
+    extends: .intelcompiler
+    variables:
+        CMAKE_CONFIGURATION: intelclassic_makefiles
+        CMAKE_GENERATOR: "Unix Makefiles"
+
 ### CUDA builds
 
 .cuda10.2:
@@ -327,3 +342,13 @@
         - sccache --show-stats
 
     interruptible: true
+
+.cmake_test_linux_intelclassic_makefiles:
+    extends:
+        - .intelclassic_makefiles
+        - .cmake_test_linux_release
+        - .linux_builder_tags_qt
+        - .run_manually
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
