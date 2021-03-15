@@ -432,3 +432,11 @@ Changes made since CMake 3.19.0 include the following.
   ``CMakePresets.json`` or ``CMakeUserPresets.json`` files.
   This was mistakenly allowed by the implementation in CMake 3.19.0 through
   CMake 3.19.5, and was not documented.
+
+3.19.7
+------
+
+* With :ref:`Visual Studio Generators` for VS 2017 and higher, the
+  :variable:`CMAKE_GENERATOR_TOOLSET` field ``version=`` now accepts
+  three-component MSVC toolset versions such as ``14.28.29910``.
+  See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_VERSION` variable.
