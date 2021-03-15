@@ -1431,8 +1431,11 @@ cmCMakePresetsFile::ReadProjectPresetsInternal(bool allowNoFiles)
     if (!it.second.Unexpanded.Hidden) {
       const auto configurePreset =
         this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
-      if (it.second.Unexpanded.InheritConfigureEnvironment.value_or(true) &&
-          configurePreset != this->ConfigurePresets.end()) {
+      if (configurePreset == this->ConfigurePresets.end()) {
+        return ReadFileResult::INVALID_CONFIGURE_PRESET;
+      }
+
+      if (it.second.Unexpanded.InheritConfigureEnvironment.value_or(true)) {
         it.second.Unexpanded.Environment.insert(
           configurePreset->second.Unexpanded.Environment.begin(),
           configurePreset->second.Unexpanded.Environment.end());
@@ -1448,8 +1451,11 @@ cmCMakePresetsFile::ReadProjectPresetsInternal(bool allowNoFiles)
     if (!it.second.Unexpanded.Hidden) {
       const auto configurePreset =
         this->ConfigurePresets.find(it.second.Unexpanded.ConfigurePreset);
-      if (it.second.Unexpanded.InheritConfigureEnvironment.value_or(true) &&
-          configurePreset != this->ConfigurePresets.end()) {
+      if (configurePreset == this->ConfigurePresets.end()) {
+        return ReadFileResult::INVALID_CONFIGURE_PRESET;
+      }
+
+      if (it.second.Unexpanded.InheritConfigureEnvironment.value_or(true)) {
         it.second.Unexpanded.Environment.insert(
           configurePreset->second.Unexpanded.Environment.begin(),
           configurePreset->second.Unexpanded.Environment.end());
@@ -1502,6 +1508,8 @@ const char* cmCMakePresetsFile::ResultToString(ReadFileResult result)
     case ReadFileResult::BUILD_TEST_PRESETS_UNSUPPORTED:
       return "File version must be 2 or higher for build and test preset "
              "support.";
+    case ReadFileResult::INVALID_CONFIGURE_PRESET:
+      return "Invalid \"configurePreset\" field";
   }
 
   return "Unknown error";
