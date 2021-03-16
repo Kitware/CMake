@@ -588,8 +588,9 @@ void cmGlobalNinjaGenerator::CleanMetaData()
   // `build.ninja` to load for this in Ninja-Multi. This may be relaxed in the
   // future pending further investigation into how Ninja works upstream
   // (ninja#1721).
-  if (this->NinjaSupportsUnconditionalRecompactTool && expectBuildManifest &&
-      !missingBuildManifest) {
+  if (this->NinjaSupportsUnconditionalRecompactTool &&
+      !this->GetCMakeInstance()->GetRegenerateDuringBuild() &&
+      expectBuildManifest && !missingBuildManifest) {
     run_ninja_tool({ "recompact" });
   }
   if (this->NinjaSupportsRestatTool && this->OutputPathPrefix.empty()) {
