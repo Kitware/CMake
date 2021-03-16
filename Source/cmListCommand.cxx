@@ -34,7 +34,7 @@
 
 namespace {
 
-bool GetIndexArg(char const* arg, int* idx, cmMakefile& mf)
+bool GetIndexArg(const std::string& arg, int* idx, cmMakefile& mf)
 {
   long value;
   if (!cmStrToLong(arg, &value)) {
@@ -189,7 +189,7 @@ bool HandleGetCommand(std::vector<std::string> const& args,
   size_t nitem = varArgsExpanded.size();
   for (cc = 2; cc < args.size() - 1; cc++) {
     int item;
-    if (!GetIndexArg(args[cc].c_str(), &item, status.GetMakefile())) {
+    if (!GetIndexArg(args[cc], &item, status.GetMakefile())) {
       status.SetError(cmStrCat("index: ", args[cc], " is not a valid index"));
       return false;
     }
@@ -401,7 +401,7 @@ bool HandleInsertCommand(std::vector<std::string> const& args,
 
   // expand the variable
   int item;
-  if (!GetIndexArg(args[2].c_str(), &item, status.GetMakefile())) {
+  if (!GetIndexArg(args[2], &item, status.GetMakefile())) {
     status.SetError(cmStrCat("index: ", args[2], " is not a valid index"));
     return false;
   }
@@ -1326,11 +1326,11 @@ bool HandleSublistCommand(std::vector<std::string> const& args,
 
   int start;
   int length;
-  if (!GetIndexArg(args[2].c_str(), &start, status.GetMakefile())) {
+  if (!GetIndexArg(args[2], &start, status.GetMakefile())) {
     status.SetError(cmStrCat("index: ", args[2], " is not a valid index"));
     return false;
   }
-  if (!GetIndexArg(args[3].c_str(), &length, status.GetMakefile())) {
+  if (!GetIndexArg(args[3], &length, status.GetMakefile())) {
     status.SetError(cmStrCat("index: ", args[3], " is not a valid index"));
     return false;
   }
@@ -1389,7 +1389,7 @@ bool HandleRemoveAtCommand(std::vector<std::string> const& args,
   size_t nitem = varArgsExpanded.size();
   for (cc = 2; cc < args.size(); ++cc) {
     int item;
-    if (!GetIndexArg(args[cc].c_str(), &item, status.GetMakefile())) {
+    if (!GetIndexArg(args[cc], &item, status.GetMakefile())) {
       status.SetError(cmStrCat("index: ", args[cc], " is not a valid index"));
       return false;
     }
