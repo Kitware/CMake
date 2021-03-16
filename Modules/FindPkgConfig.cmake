@@ -37,7 +37,10 @@ if(CMAKE_HOST_WIN32)
   list(PREPEND PKG_CONFIG_NAMES "pkg-config.bat")
 endif()
 
-find_program(PKG_CONFIG_EXECUTABLE NAMES ${PKG_CONFIG_NAMES} DOC "pkg-config executable")
+find_program(PKG_CONFIG_EXECUTABLE
+  NAMES ${PKG_CONFIG_NAMES}
+  NAMES_PER_DIR
+  DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
 set(_PKG_CONFIG_FAILURE_MESSAGE "")
