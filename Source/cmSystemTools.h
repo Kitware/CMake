@@ -498,6 +498,9 @@ public:
                          const std::string& newName,
                          std::string* errorMessage = nullptr);
 
+  /** Get the system name. */
+  static cm::string_view GetSystemName();
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

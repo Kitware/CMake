@@ -261,6 +261,12 @@ set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Debug.json.in")
 run_cmake_presets(NoDebug)
 run_cmake_presets(Debug)
 
+# Test ${hostSystemName} macro
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/HostSystemName.json.in")
+run_cmake_presets(HostSystemName)
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/HostSystemNameFuture.json.in")
+run_cmake_presets(HostSystemNameFuture)
+
 # Test the example from the documentation
 file(READ "${RunCMake_SOURCE_DIR}/../../../Help/manual/presets/example.json" _example)
 string(REPLACE "\"generator\": \"Ninja\"" "\"generator\": \"@RunCMake_GENERATOR@\"" _example "${_example}")

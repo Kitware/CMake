@@ -9,6 +9,7 @@
 #include <iterator>
 #include <utility>
 
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include <cm3p/json/reader.h>
@@ -28,9 +29,9 @@
       return _result;                                                         \
   }
 
-#define CHECK_EXPAND(out, field, expanders)                                   \
+#define CHECK_EXPAND(out, field, expanders, version)                          \
   {                                                                           \
-    switch (ExpandMacros(field, expanders)) {                                 \
+    switch (ExpandMacros(field, expanders, version)) {                        \
       case ExpandMacroResult::Error:                                          \
         return false;                                                         \
       case ExpandMacroResult::Ignore:                                         \
@@ -849,16 +850,19 @@ enum class ExpandMacroResult
 };
 
 using MacroExpander = std::function<ExpandMacroResult(
-  const std::string&, const std::string&, std::string&)>;
+  const std::string&, const std::string&, std::string&, int version)>;
 
 ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
-                           const std::vector<MacroExpander>& macroExpanders);
+                           const std::vector<MacroExpander>& macroExpanders,
+                           int version);
 ExpandMacroResult ExpandMacros(
-  std::string& out, const std::vector<MacroExpander>& macroExpanders);
-ExpandMacroResult ExpandMacro(
-  std::string& out, const std::string& macroNamespace,
-  const std::string& macroName,
-  const std::vector<MacroExpander>& macroExpanders);
+  std::string& out, const std::vector<MacroExpander>& macroExpanders,
+  int version);
+ExpandMacroResult ExpandMacro(std::string& out,
+                              const std::string& macroNamespace,
+                              const std::string& macroName,
+                              const std::vector<MacroExpander>& macroExpanders,
+                              int version);
 
 bool ExpandMacros(const cmCMakePresetsFile& file,
                   const ConfigurePreset& preset,
@@ -866,7 +870,7 @@ bool ExpandMacros(const cmCMakePresetsFile& file,
                   const std::vector<MacroExpander>& macroExpanders)
 {
   std::string binaryDir = preset.BinaryDir;
-  CHECK_EXPAND(out, binaryDir, macroExpanders)
+  CHECK_EXPAND(out, binaryDir, macroExpanders, file.GetVersion(preset))
 
   if (!cmSystemTools::FileIsFullPath(binaryDir)) {
     binaryDir = cmStrCat(file.SourceDir, '/', binaryDir);
@@ -876,7 +880,7 @@ bool ExpandMacros(const cmCMakePresetsFile& file,
 
   if (!preset.InstallDir.empty()) {
     std::string installDir = preset.InstallDir;
-    CHECK_EXPAND(out, installDir, macroExpanders)
+    CHECK_EXPAND(out, installDir, macroExpanders, file.GetVersion(preset))
 
     if (!cmSystemTools::FileIsFullPath(installDir)) {
       installDir = cmStrCat(file.SourceDir, '/', installDir);
@@ -887,67 +891,76 @@ bool ExpandMacros(const cmCMakePresetsFile& file,
 
   for (auto& variable : out->CacheVariables) {
     if (variable.second) {
-      CHECK_EXPAND(out, variable.second->Value, macroExpanders)
+      CHECK_EXPAND(out, variable.second->Value, macroExpanders,
+                   file.GetVersion(preset))
     }
   }
 
   return true;
 }
 
-bool ExpandMacros(const cmCMakePresetsFile&, const BuildPreset&,
+bool ExpandMacros(const cmCMakePresetsFile& file, const BuildPreset& preset,
                   cm::optional<BuildPreset>& out,
                   const std::vector<MacroExpander>& macroExpanders)
 {
   for (auto& target : out->Targets) {
-    CHECK_EXPAND(out, target, macroExpanders)
+    CHECK_EXPAND(out, target, macroExpanders, file.GetVersion(preset))
   }
 
   for (auto& nativeToolOption : out->NativeToolOptions) {
-    CHECK_EXPAND(out, nativeToolOption, macroExpanders)
+    CHECK_EXPAND(out, nativeToolOption, macroExpanders,
+                 file.GetVersion(preset))
   }
 
   return true;
 }
 
-bool ExpandMacros(const cmCMakePresetsFile&, const TestPreset&,
+bool ExpandMacros(const cmCMakePresetsFile& file, const TestPreset& preset,
                   cm::optional<TestPreset>& out,
                   const std::vector<MacroExpander>& macroExpanders)
 {
   for (auto& overwrite : out->OverwriteConfigurationFile) {
-    CHECK_EXPAND(out, overwrite, macroExpanders);
+    CHECK_EXPAND(out, overwrite, macroExpanders, file.GetVersion(preset));
   }
 
   if (out->Output) {
-    CHECK_EXPAND(out, out->Output->OutputLogFile, macroExpanders)
+    CHECK_EXPAND(out, out->Output->OutputLogFile, macroExpanders,
+                 file.GetVersion(preset))
   }
 
   if (out->Filter) {
     if (out->Filter->Include) {
-      CHECK_EXPAND(out, out->Filter->Include->Name, macroExpanders)
-      CHECK_EXPAND(out, out->Filter->Include->Label, macroExpanders)
+      CHECK_EXPAND(out, out->Filter->Include->Name, macroExpanders,
+                   file.GetVersion(preset))
+      CHECK_EXPAND(out, out->Filter->Include->Label, macroExpanders,
+                   file.GetVersion(preset))
 
       if (out->Filter->Include->Index) {
         CHECK_EXPAND(out, out->Filter->Include->Index->IndexFile,
-                     macroExpanders);
+                     macroExpanders, file.GetVersion(preset));
       }
     }
 
     if (out->Filter->Exclude) {
-      CHECK_EXPAND(out, out->Filter->Exclude->Name, macroExpanders)
-      CHECK_EXPAND(out, out->Filter->Exclude->Label, macroExpanders)
+      CHECK_EXPAND(out, out->Filter->Exclude->Name, macroExpanders,
+                   file.GetVersion(preset))
+      CHECK_EXPAND(out, out->Filter->Exclude->Label, macroExpanders,
+                   file.GetVersion(preset))
 
       if (out->Filter->Exclude->Fixtures) {
-        CHECK_EXPAND(out, out->Filter->Exclude->Fixtures->Any, macroExpanders)
+        CHECK_EXPAND(out, out->Filter->Exclude->Fixtures->Any, macroExpanders,
+                     file.GetVersion(preset))
         CHECK_EXPAND(out, out->Filter->Exclude->Fixtures->Setup,
-                     macroExpanders)
+                     macroExpanders, file.GetVersion(preset))
         CHECK_EXPAND(out, out->Filter->Exclude->Fixtures->Cleanup,
-                     macroExpanders)
+                     macroExpanders, file.GetVersion(preset))
       }
     }
   }
 
   if (out->Execution) {
-    CHECK_EXPAND(out, out->Execution->ResourceSpecFile, macroExpanders)
+    CHECK_EXPAND(out, out->Execution->ResourceSpecFile, macroExpanders,
+                 file.GetVersion(preset))
   }
 
   return true;
@@ -968,8 +981,8 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const T& preset,
 
   MacroExpander defaultMacroExpander =
     [&file, &preset](const std::string& macroNamespace,
-                     const std::string& macroName,
-                     std::string& macroOut) -> ExpandMacroResult {
+                     const std::string& macroName, std::string& macroOut,
+                     int version) -> ExpandMacroResult {
     if (macroNamespace.empty()) {
       if (macroName == "sourceDir") {
         macroOut += file.SourceDir;
@@ -998,6 +1011,13 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const T& preset,
         macroOut += '$';
         return ExpandMacroResult::Ok;
       }
+      if (macroName == "hostSystemName") {
+        if (version < 3) {
+          return ExpandMacroResult::Error;
+        }
+        macroOut += cmSystemTools::GetSystemName();
+        return ExpandMacroResult::Ok;
+      }
     }
 
     return ExpandMacroResult::Ignore;
@@ -1006,11 +1026,12 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const T& preset,
   MacroExpander environmentMacroExpander =
     [&macroExpanders, &out, &envCycles](
       const std::string& macroNamespace, const std::string& macroName,
-      std::string& result) -> ExpandMacroResult {
+      std::string& result, int version) -> ExpandMacroResult {
     if (macroNamespace == "env" && !macroName.empty() && out) {
       auto v = out->Environment.find(macroName);
       if (v != out->Environment.end() && v->second) {
-        auto e = VisitEnv(*v->second, envCycles[macroName], macroExpanders);
+        auto e =
+          VisitEnv(*v->second, envCycles[macroName], macroExpanders, version);
         if (e != ExpandMacroResult::Ok) {
           return e;
         }
@@ -1038,7 +1059,8 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const T& preset,
 
   for (auto& v : out->Environment) {
     if (v.second) {
-      switch (VisitEnv(*v.second, envCycles[v.first], macroExpanders)) {
+      switch (VisitEnv(*v.second, envCycles[v.first], macroExpanders,
+                       file.GetVersion(preset))) {
         case ExpandMacroResult::Error:
           return false;
         case ExpandMacroResult::Ignore:
@@ -1054,7 +1076,8 @@ bool ExpandMacros(const cmCMakePresetsFile& file, const T& preset,
 }
 
 ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
-                           const std::vector<MacroExpander>& macroExpanders)
+                           const std::vector<MacroExpander>& macroExpanders,
+                           int version)
 {
   if (status == CycleStatus::Verified) {
     return ExpandMacroResult::Ok;
@@ -1064,7 +1087,7 @@ ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
   }
 
   status = CycleStatus::InProgress;
-  auto e = ExpandMacros(value, macroExpanders);
+  auto e = ExpandMacros(value, macroExpanders, version);
   if (e != ExpandMacroResult::Ok) {
     return e;
   }
@@ -1073,7 +1096,8 @@ ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
 }
 
 ExpandMacroResult ExpandMacros(
-  std::string& out, const std::vector<MacroExpander>& macroExpanders)
+  std::string& out, const std::vector<MacroExpander>& macroExpanders,
+  int version)
 {
   std::string result;
   std::string macroNamespace;
@@ -1120,8 +1144,8 @@ ExpandMacroResult ExpandMacros(
 
       case State::MacroName:
         if (c == '}') {
-          auto e =
-            ExpandMacro(result, macroNamespace, macroName, macroExpanders);
+          auto e = ExpandMacro(result, macroNamespace, macroName,
+                               macroExpanders, version);
           if (e != ExpandMacroResult::Ok) {
             return e;
           }
@@ -1153,10 +1177,11 @@ ExpandMacroResult ExpandMacros(
 ExpandMacroResult ExpandMacro(std::string& out,
                               const std::string& macroNamespace,
                               const std::string& macroName,
-                              const std::vector<MacroExpander>& macroExpanders)
+                              const std::vector<MacroExpander>& macroExpanders,
+                              int version)
 {
   for (auto const& macroExpander : macroExpanders) {
-    auto result = macroExpander(macroNamespace, macroName, out);
+    auto result = macroExpander(macroNamespace, macroName, out, version);
     if (result != ExpandMacroResult::Ignore) {
       return result;
     }
@@ -1548,6 +1573,11 @@ cmCMakePresetsFile::ReadFileResult cmCMakePresetsFile::ReadJSONFile(
   }
   if (v < MIN_VERSION || v > MAX_VERSION) {
     return ReadFileResult::UNRECOGNIZED_VERSION;
+  }
+  if (user) {
+    this->UserVersion = v;
+  } else {
+    this->Version = v;
   }
 
   // Support for build and test presets added in version 2.
