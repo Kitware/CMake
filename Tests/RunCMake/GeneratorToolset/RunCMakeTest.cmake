@@ -76,7 +76,7 @@ endif()
 
 set(RunCMake_GENERATOR_TOOLSET "")
 
-set(RunCMake_TEST_OPTIONS -T "Extra Toolset")
+set(RunCMake_TEST_OPTIONS -T "Test Toolset" -T "Extra Toolset")
 run_cmake(TwoToolsets)
 unset(RunCMake_TEST_OPTIONS)
 

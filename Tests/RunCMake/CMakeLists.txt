@@ -131,6 +131,7 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
 endif()
 add_RunCMake_test(CMP0118)
 add_RunCMake_test(CMP0119 -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
+add_RunCMake_test(CMP0121)
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -257,6 +258,7 @@ add_RunCMake_test(GenEx-HOST_LINK)
 add_RunCMake_test(GenEx-DEVICE_LINK)
 add_RunCMake_test(GenEx-TARGET_FILE -DLINKER_SUPPORTS_PDB=${LINKER_SUPPORTS_PDB})
 add_RunCMake_test(GenEx-GENEX_EVAL)
+add_RunCMake_test(GenEx-TARGET_RUNTIME_DLLS)
 add_RunCMake_test(GeneratorExpression)
 add_RunCMake_test(GeneratorInstance)
 add_RunCMake_test(GeneratorPlatform)
@@ -413,6 +415,15 @@ function(add_RunCMake_test_try_compile)
       set(CMAKE_C_STANDARD_DEFAULT 99)
     else()
       set(CMAKE_C_STANDARD_DEFAULT "")
+    endif()
+  endif()
+  if(CMAKE_VERSION VERSION_LESS 3.20.20210225 AND "x${CMAKE_C_COMPILER_ID}" STREQUAL "xClang")
+    # Older CMake versions do not know about Clang MSVC compatibility mode
+    # standards. Approximate the logic from Clang-C.cmake.
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0)
+      set(CMAKE_C_STANDARD_DEFAULT 17)
+    elseif(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.5.2)
+      set(CMAKE_C_STANDARD_DEFAULT 11)
     endif()
   endif()
   foreach(var

@@ -1589,13 +1589,13 @@ bool cmQtAutoMocUicT::JobEvalCacheUicT::FindIncludedUi(
   };
 
   // Vicinity of the source
-  if (findUi(cmStrCat(sourceDirPrefix, this->UiName))) {
-    return true;
-  }
   if (!includePrefix.empty()) {
     if (findUi(cmStrCat(sourceDirPrefix, includePrefix, this->UiName))) {
       return true;
     }
+  }
+  if (findUi(cmStrCat(sourceDirPrefix, this->UiName))) {
+    return true;
   }
   // Additional AUTOUIC search paths
   auto const& searchPaths = this->UicConst().SearchPaths;

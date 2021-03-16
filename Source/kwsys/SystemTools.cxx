@@ -244,7 +244,7 @@ inline int Chdir(const std::string& dir)
   return _wchdir(KWSYS_NAMESPACE::Encoding::ToWide(dir).c_str());
 }
 inline void Realpath(const std::string& path, std::string& resolved_path,
-                     std::string* errorMessage = 0)
+                     std::string* errorMessage = nullptr)
 {
   std::wstring tmp = KWSYS_NAMESPACE::Encoding::ToWide(path);
   wchar_t* ptemp;
@@ -2273,11 +2273,8 @@ bool SystemTools::TextFilesDiffer(const std::string& path1,
   return false;
 }
 
-/**
- * Blockwise copy source to destination file
- */
-static bool CopyFileContentBlockwise(const std::string& source,
-                                     const std::string& destination)
+bool SystemTools::CopyFileContentBlockwise(const std::string& source,
+                                           const std::string& destination)
 {
   // Open files
   kwsys::ifstream fin(source.c_str(), std::ios::in | std::ios::binary);
@@ -2341,8 +2338,8 @@ static bool CopyFileContentBlockwise(const std::string& source,
  * - The underlying filesystem does not support file cloning
  * - An unspecified error occurred
  */
-static bool CloneFileContent(const std::string& source,
-                             const std::string& destination)
+bool SystemTools::CloneFileContent(const std::string& source,
+                                   const std::string& destination)
 {
 #if defined(__linux) && defined(FICLONE)
   int in = open(source.c_str(), O_RDONLY);
@@ -2410,9 +2407,9 @@ bool SystemTools::CopyFileAlways(const std::string& source,
 
     SystemTools::MakeDirectory(destination_dir);
 
-    if (!CloneFileContent(source, real_destination)) {
+    if (!SystemTools::CloneFileContent(source, real_destination)) {
       // if cloning did not succeed, fall back to blockwise copy
-      if (!CopyFileContentBlockwise(source, real_destination)) {
+      if (!SystemTools::CopyFileContentBlockwise(source, real_destination)) {
         return false;
       }
     }

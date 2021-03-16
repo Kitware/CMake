@@ -11,8 +11,8 @@ The general signature is:
    |FIND_XXX| (
              <VAR>
              name | |NAMES|
-             [HINTS path1 [path2 ... ENV var]]
-             [PATHS path1 [path2 ... ENV var]]
+             [HINTS [path | ENV var]... ]
+             [PATHS [path | ENV var]... ]
              [PATH_SUFFIXES suffix1 [suffix2 ...]]
              [DOC "cache documentation string"]
              [REQUIRED]

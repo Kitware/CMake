@@ -25,14 +25,14 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/CheckSwift.cmake)
 
 # Fake a user home directory to avoid polluting the real one.
-if(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
+if(NOT CTEST_NO_TEST_HOME AND (NOT WIN32 OR DEFINED ENV{HOME}))
   set(TEST_HOME "${CMake_BINARY_DIR}/Tests/CMakeFiles/TestHome")
   file(MAKE_DIRECTORY "${TEST_HOME}")
   file(WRITE "${TEST_HOME}/.cvspass" ":pserver:anoncvs@www.cmake.org:/cvsroot/KWSys A\n")
   set(TEST_HOME_ENV_CODE "# Fake a user home directory to avoid polluting the real one.
 # But provide original ENV{HOME} value in ENV{CTEST_REAL_HOME} for tests that
 # need access to the real HOME directory.
-if(NOT DEFINED ENV{CTEST_REAL_HOME})
+if(DEFINED ENV{HOME} AND NOT DEFINED ENV{CTEST_REAL_HOME})
   set(ENV{CTEST_REAL_HOME} \"\$ENV{HOME}\")
 endif()
 set(ENV{HOME} \"${TEST_HOME}\")
@@ -96,7 +96,7 @@ if(BUILD_TESTING)
   # some old versions of make simply cannot handle spaces in paths
   if (MAKE_IS_GNU OR
       CMAKE_MAKE_PROGRAM MATCHES "nmake|gmake|wmake" OR
-      CMAKE_GENERATOR MATCHES "Visual Studio|Xcode|Borland")
+      CMAKE_GENERATOR MATCHES "Visual Studio|Xcode|Borland|Ninja")
     set(MAKE_SUPPORTS_SPACES 1)
   else()
     set(MAKE_SUPPORTS_SPACES 0)
@@ -804,6 +804,7 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project Framework
     --build-options
+      -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/Framework/Install"
     --test-command bar)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Framework")
@@ -828,6 +829,8 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project LibName
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LibName/lib"
+    --build-options
+      -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     --test-command foobar
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LibName")

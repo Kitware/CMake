@@ -101,7 +101,10 @@ function(cmake_print_properties)
   if(CPP_CACHE_ENTRIES)
     set(items ${CPP_CACHE_ENTRIES})
     set(mode ${mode} CACHE_ENTRIES)
-    set(keyword CACHE)
+    # This is a workaround for the fact that passing `CACHE` as an argument to
+    # set() causes a cache variable to be set.
+    set(keyword "")
+    string(APPEND keyword CACHE)
   endif()
 
   if(NOT mode)

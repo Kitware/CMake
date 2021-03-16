@@ -239,6 +239,8 @@ private:
     std::vector<UiFileT> UiFiles;
     ConfigStrings<std::vector<std::string>> Options;
     std::vector<std::string> SearchPaths;
+    std::vector<std::pair<ConfigString /*ui header*/, std::string /*genex*/>>
+      UiHeaders;
   } Uic;
 
   /** rcc variables.  */

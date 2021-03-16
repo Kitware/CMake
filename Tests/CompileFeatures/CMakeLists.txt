@@ -237,6 +237,8 @@ if (C_expected_features)
     if (std_flag_idx EQUAL -1)
       add_executable(default_dialect_C default_dialect.c)
       target_compile_definitions(default_dialect_C PRIVATE
+        DEFAULT_C23=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},23>
+        DEFAULT_C17=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},17>
         DEFAULT_C11=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},11>
         DEFAULT_C99=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},99>
         DEFAULT_C90=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},90>

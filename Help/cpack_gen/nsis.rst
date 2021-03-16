@@ -193,3 +193,9 @@ on Windows Nullsoft Scriptable Install System.
  .. versionadded:: 3.20
 
  If set, trim down the size of the control to the size of the branding text string.
+
+.. variable:: CPACK_NSIS_EXECUTABLE
+
+ .. versionadded:: 3.21
+
+ If set, specify the name of the NSIS executable. Default is ``makensis``.

@@ -1101,7 +1101,14 @@ function(_ExternalData_download_object name hash algo var_obj var_success var_er
 
   set(success 1)
   if(found)
-    file(RENAME "${tmp}" "${obj}")
+    # Atomically create the object.  If we lose a race with another process,
+    # do not replace it.  Content-addressing ensures it has what we expect.
+    file(RENAME "${tmp}" "${obj}" NO_REPLACE RESULT result)
+    if (result STREQUAL "NO_REPLACE")
+      file(REMOVE "${tmp}")
+    elseif (result)
+      message(FATAL_ERROR "Failed to rename:\n  \"${tmp}\"\nto:\n  \"${obj}\"\nwith error:\n  ${result}")
+    endif()
     message(STATUS "Downloaded object: \"${obj}\"")
   elseif(EXISTS "${staged}")
     set(obj "${staged}")
