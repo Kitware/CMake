@@ -141,14 +141,21 @@ bool cmSourceFile::FindFullPath(std::string* error,
   std::vector<std::string> exts =
     makefile->GetCMakeInstance()->GetAllExtensions();
   auto cmp0115 = makefile->GetPolicyStatus(cmPolicies::CMP0115);
+  auto cmp0118 = makefile->GetPolicyStatus(cmPolicies::CMP0118);
+  bool const cmp0118new =
+    cmp0118 != cmPolicies::OLD && cmp0118 != cmPolicies::WARN;
 
   // Tries to find the file in a given directory
-  auto findInDir = [this, &exts, &lPath, cmp0115, cmp0115Warning,
+  auto findInDir = [this, &exts, &lPath, cmp0115, cmp0115Warning, cmp0118new,
                     makefile](std::string const& dir) -> bool {
     // Compute full path
     std::string const fullPath = cmSystemTools::CollapseFullPath(lPath, dir);
     // Try full path
-    if (cmSystemTools::FileExists(fullPath)) {
+    if (cmp0118new &&
+        makefile->GetGlobalGenerator()->IsGeneratedFile(fullPath)) {
+      this->IsGenerated = true;
+    }
+    if (this->IsGenerated || cmSystemTools::FileExists(fullPath)) {
       this->FullPath = fullPath;
       return true;
     }
@@ -160,7 +167,11 @@ bool cmSourceFile::FindFullPath(std::string* error,
       for (std::string const& ext : exts) {
         if (!ext.empty()) {
           std::string extPath = cmStrCat(fullPath, '.', ext);
-          if (cmSystemTools::FileExists(extPath)) {
+          if (cmp0118new &&
+              makefile->GetGlobalGenerator()->IsGeneratedFile(extPath)) {
+            this->IsGenerated = true;
+          }
+          if (this->IsGenerated || cmSystemTools::FileExists(extPath)) {
             this->FullPath = extPath;
             if (cmp0115 == cmPolicies::WARN) {
               std::string warning =
