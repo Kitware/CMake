@@ -9,15 +9,8 @@
     ],
     "testPresets": [
         {
-            "name": "hidden",
-            "hidden": true
-        },
-        {
-            "name": "vendorMacro",
-            "configurePreset": "default",
-            "environment": {
-                "TEST": "$vendor{bad.TEST}"
-            }
+            "name": "badConfigurePreset",
+            "configurePreset": "dne"
         }
     ]
 }
