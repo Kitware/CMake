@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 project(MathFunctionsComponents)
 
+# make cache variables for install destinations
+include(GNUInstallDirs)
+
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -24,7 +27,7 @@ write_basic_package_version_file(
 # create config file
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/MathFunctionsConfig.cmake"
-  INSTALL_DESTINATION lib/cmake/MathFunctions
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MathFunctions
   NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
 
@@ -32,5 +35,5 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
 install(FILES
           "${CMAKE_CURRENT_BINARY_DIR}/MathFunctionsConfig.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/MathFunctionsConfigVersion.cmake"
-        DESTINATION lib/cmake/MathFunctions
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MathFunctions
 )
