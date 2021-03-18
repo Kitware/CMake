@@ -19,7 +19,7 @@
       "properties": {
         "version": {
           "const": 2,
-          "description": "A requVired integer representing the version of the JSON schema."
+          "description": "A required integer representing the version of the JSON schema."
         },
         "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
         "vendor": { "$ref": "#/definitions/vendor" },
