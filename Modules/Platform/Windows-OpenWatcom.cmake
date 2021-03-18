@@ -6,8 +6,6 @@ include_guard()
 
 set(CMAKE_BUILD_TYPE_INIT Debug)
 
-set(CMAKE_CREATE_WIN32_EXE "system nt_win" )
-set(CMAKE_CREATE_CONSOLE_EXE "system nt" )
 string(APPEND CMAKE_SHARED_LINKER_FLAGS_INIT " system nt_dll")
 string(APPEND CMAKE_MODULE_LINKER_FLAGS_INIT " system nt_dll")
 
@@ -30,3 +28,8 @@ if(CMAKE_CROSSCOMPILING)
     set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES $ENV{WATCOM}/h $ENV{WATCOM}/h/nt)
   endif()
 endif()
+
+macro(__windows_open_watcom lang)
+  set(CMAKE_${lang}_CREATE_WIN32_EXE "system nt_win")
+  set(CMAKE_${lang}_CREATE_CONSOLE_EXE "system nt")
+endmacro()

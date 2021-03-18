@@ -131,7 +131,7 @@ else()
   # as a language, cmake needs language specific versions
   # of these variables....
   if(WIN32 AND CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
-    set(CMAKE_CREATE_CONSOLE_EXE )
+    set(CMAKE_Fortran_CREATE_CONSOLE_EXE )
     set(CMAKE_LIBRARY_PATH_FLAG "-L")
     set(CMAKE_LINK_LIBRARY_FLAG "-l")
     set(CMAKE_LINK_LIBRARY_SUFFIX )

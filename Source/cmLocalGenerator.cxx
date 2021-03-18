@@ -1527,12 +1527,12 @@ void cmLocalGenerator::GetTargetFlags(
         }
 
         if (target->IsWin32Executable(config)) {
-          exeFlags +=
-            this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
+          exeFlags += this->Makefile->GetSafeDefinition(
+            cmStrCat("CMAKE_", linkLanguage, "_CREATE_WIN32_EXE"));
           exeFlags += " ";
         } else {
-          exeFlags +=
-            this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
+          exeFlags += this->Makefile->GetSafeDefinition(
+            cmStrCat("CMAKE_", linkLanguage, "_CREATE_CONSOLE_EXE"));
           exeFlags += " ";
         }
 
