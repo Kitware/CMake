@@ -30,6 +30,18 @@
     variables:
         BOOTSTRAP_ARGS: '-- "-DCMake_DOC_ARTIFACT_PREFIX=$CI_PROJECT_DIR/build/install-doc"'
 
+.needs_centos6_x86_64:
+    dependencies:
+        - build:centos6-x86_64
+    needs:
+        - build:centos6-x86_64
+
+.needs_centos7_aarch64:
+    dependencies:
+        - build:centos7-aarch64
+    needs:
+        - build:centos7-aarch64
+
 ### Debian
 
 .debian10:
@@ -128,6 +140,27 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
+### Intel Compiler
+
+.intelcompiler:
+    image: "kitware/intelcompiler:$CMAKE_CI_INTELCOMPILER_IMAGE_TAG"
+    environment:
+        name: intel-compiler
+    variables:
+        CMAKE_ARCH: x86_64
+
+.intelclassic_makefiles:
+    extends: .intelcompiler
+    variables:
+        CMAKE_CONFIGURATION: intelclassic_makefiles
+        CMAKE_GENERATOR: "Unix Makefiles"
+
+.inteloneapi_makefiles:
+    extends: .intelcompiler
+    variables:
+        CMAKE_CONFIGURATION: inteloneapi_makefiles
+        CMAKE_GENERATOR: "Unix Makefiles"
+
 ### CUDA builds
 
 .cuda10.2:
@@ -195,6 +228,7 @@
 ## Linux-specific scripts
 
 .before_script_linux: &before_script_linux
+    - source .gitlab/ci/env.sh
     - .gitlab/ci/cmake.sh
     - .gitlab/ci/ninja.sh
     - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
@@ -251,6 +285,7 @@
     stage: build
 
     script:
+        - source .gitlab/ci/env.sh
         # Bootstrap.
         - mkdir -p build/
         # Exclude documentation.  A job dependency provides it for packaging.
@@ -313,3 +348,23 @@
         - sccache --show-stats
 
     interruptible: true
+
+.cmake_test_linux_intelclassic_makefiles:
+    extends:
+        - .intelclassic_makefiles
+        - .cmake_test_linux_release
+        - .linux_builder_tags_qt
+        - .run_manually
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+.cmake_test_linux_inteloneapi_makefiles:
+    extends:
+        - .inteloneapi_makefiles
+        - .cmake_test_linux_release
+        - .linux_builder_tags_qt
+        - .run_manually
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
