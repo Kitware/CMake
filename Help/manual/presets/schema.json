@@ -362,7 +362,7 @@
           },
           "inheritConfigureEnvironment": {
             "type": "boolean",
-            "description": "An optional Boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited build preset environments, but before environment variables explicitly specified in this build preset."
+            "description": "An optional boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited build preset environments, but before environment variables explicitly specified in this build preset."
           },
           "environment": {
             "type": "object",
@@ -410,11 +410,11 @@
           },
           "cleanFirst": {
             "type": "boolean",
-            "description": "An optional bool. If true, equivalent to passing --clean-first on the command line."
+            "description": "An optional boolean. If true, equivalent to passing --clean-first on the command line."
           },
           "verbose": {
             "type": "boolean",
-            "description": "An optional bool. If true, equivalent to passing --verbose on the command line."
+            "description": "An optional boolean. If true, equivalent to passing --verbose on the command line."
           },
           "nativeToolOptions": {
             "type": "array",
@@ -484,7 +484,7 @@
           },
           "inheritConfigureEnvironment": {
             "type": "boolean",
-            "description": "An optional Boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited test preset environments, but before environment variables explicitly specified in this test preset."
+            "description": "An optional boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited test preset environments, but before environment variables explicitly specified in this test preset."
           },
           "environment": {
             "type": "object",
@@ -524,7 +524,7 @@
             "properties": {
               "shortProgress": {
                 "type": "boolean",
-                "description": "An optional bool. If true, equivalent to passing --progress on the command line."
+                "description": "An optional boolean. If true, equivalent to passing --progress on the command line."
               },
               "verbosity": {
                 "type": "string",
@@ -535,15 +535,15 @@
               },
               "debug": {
                 "type": "boolean",
-                "description": "An optional bool. If true, equivalent to passing --debug on the command line."
+                "description": "An optional boolean. If true, equivalent to passing --debug on the command line."
               },
               "outputOnFailure": {
                 "type": "boolean",
-                "description": "An optional bool. If true, equivalent to passing --output-on-failure on the command line."
+                "description": "An optional boolean. If true, equivalent to passing --output-on-failure on the command line."
               },
               "quiet": {
                 "type": "boolean",
-                "description": "An optional bool. If true, equivalent to passing --quiet on the command line."
+                "description": "An optional boolean. If true, equivalent to passing --quiet on the command line."
               },
               "outputLogFile": {
                 "type": "string",
@@ -551,11 +551,11 @@
               },
               "labelSummary": {
                 "type": "boolean",
-                "description": "An optional bool. If false, equivalent to passing --no-label-summary on the command line."
+                "description": "An optional boolean. If false, equivalent to passing --no-label-summary on the command line."
               },
               "subprojectSummary": {
                 "type": "boolean",
-                "description": "An optional bool. If false, equivalent to passing --no-subproject-summary on the command line."
+                "description": "An optional boolean. If false, equivalent to passing --no-subproject-summary on the command line."
               },
               "maxPassedTestOutputSize": {
                 "type": "integer",
@@ -625,7 +625,7 @@
                   },
                   "useUnion": {
                     "type": "boolean",
-                    "description": "An optional bool. Equivalent to passing --union on the command line."
+                    "description": "An optional boolean. Equivalent to passing --union on the command line."
                   }
                 },
                 "additionalProperties": false
@@ -672,11 +672,11 @@
             "properties": {
               "stopOnFailure": {
                 "type": "boolean",
-                "description": "An optional bool. If true, equivalent to passing --stop-on-failure on the command line."
+                "description": "An optional boolean. If true, equivalent to passing --stop-on-failure on the command line."
               },
               "enableFailover": {
                 "type": "boolean",
-                "description": "An optional bool. If true, equivalent to passing -F on the command line."
+                "description": "An optional boolean. If true, equivalent to passing -F on the command line."
               },
               "jobs": {
                 "type": "integer",
@@ -720,11 +720,11 @@
               },
               "interactiveDebugging": {
                 "type": "boolean",
-                "description": "An optional bool. If true, equivalent to passing --interactive-debug-mode 1 on the command line. If false, equivalent to passing --interactive-debug-mode 0 on the command line."
+                "description": "An optional boolean. If true, equivalent to passing --interactive-debug-mode 1 on the command line. If false, equivalent to passing --interactive-debug-mode 0 on the command line."
               },
               "scheduleRandom": {
                 "type": "boolean",
-                "description": "An optional bool. If true, equivalent to passing --schedule-random on the command line."
+                "description": "An optional boolean. If true, equivalent to passing --schedule-random on the command line."
               },
               "timeout": {
                 "type": "integer",
