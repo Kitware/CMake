@@ -9,15 +9,9 @@
 #include <iterator>
 #include <utility>
 
+#include "cmCMakePresetsFileInternal.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#define CHECK_OK(expr)                                                        \
-  {                                                                           \
-    auto _result = expr;                                                      \
-    if (_result != ReadFileResult::READ_OK)                                   \
-      return _result;                                                         \
-  }
 
 #define CHECK_EXPAND(out, field, expanders, version)                          \
   {                                                                           \
@@ -44,6 +38,8 @@ using ReadFileResult = cmCMakePresetsFile::ReadFileResult;
 using ConfigurePreset = cmCMakePresetsFile::ConfigurePreset;
 using BuildPreset = cmCMakePresetsFile::BuildPreset;
 using TestPreset = cmCMakePresetsFile::TestPreset;
+using ExpandMacroResult = cmCMakePresetsFileInternal::ExpandMacroResult;
+using MacroExpander = cmCMakePresetsFileInternal::MacroExpander;
 
 void InheritString(std::string& child, const std::string& parent)
 {
@@ -165,16 +161,6 @@ bool IsValidMacroNamespace(const std::string& str)
     std::begin(ValidPrefixes), std::end(ValidPrefixes),
     [&str](const char* prefix) -> bool { return str == prefix; });
 }
-
-enum class ExpandMacroResult
-{
-  Ok,
-  Ignore,
-  Error,
-};
-
-using MacroExpander = std::function<ExpandMacroResult(
-  const std::string&, const std::string&, std::string&, int version)>;
 
 ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
                            const std::vector<MacroExpander>& macroExpanders,

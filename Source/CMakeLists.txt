@@ -198,6 +198,7 @@ set(SRCS
   cmCMakePath.cxx
   cmCMakePresetsFile.cxx
   cmCMakePresetsFile.h
+  cmCMakePresetsFileInternal.h
   cmCMakePresetsFileReadJSON.cxx
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
