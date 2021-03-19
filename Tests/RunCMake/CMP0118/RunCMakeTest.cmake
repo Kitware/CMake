@@ -1,5 +1,9 @@
 include(RunCMake)
 
+run_cmake(GenInSubdir-OLD)
+run_cmake(GenInSubdir-WARN)
+run_cmake(GenInSubdir-NEW)
+
 run_cmake(CMP0118-OLD-Test1)
 run_cmake(CMP0118-OLD-Test2)
 run_cmake(CMP0118-OLD-Test3)
