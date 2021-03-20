@@ -155,7 +155,10 @@ Options
  Run tests with labels matching regular expression.
 
  This option tells CTest to run only the tests whose labels match the
- given regular expression.
+ given regular expression.  When more than one ``-L`` option is given,
+ a test will only be run if each regular expression matches at least one
+ of the test's labels (i.e. the multiple ``-L`` labels form an ``AND``
+ relationship).  See `Label Matching`_.
 
 ``-R <regex>, --tests-regex <regex>``
  Run tests matching regular expression.
@@ -173,7 +176,10 @@ Options
  Exclude tests with labels matching regular expression.
 
  This option tells CTest to NOT run the tests whose labels match the
- given regular expression.
+ given regular expression.  When more than one ``-LE`` option is given,
+ a test will only be excluded if each regular expression matches at least one
+ of the test's labels (i.e. the multiple ``-LE`` labels form an ``AND``
+ relationship).  See `Label Matching`_.
 
 ``-FA <regex>, --fixture-exclude-any <regex>``
  Exclude fixtures matching ``<regex>`` from automatically adding any tests to
@@ -397,6 +403,46 @@ Specify the directory in which to look for tests.
  were found or by ignoring it.
 
 .. include:: OPTIONS_HELP.txt
+
+.. _`Label Matching`:
+
+Label Matching
+==============
+
+Tests may have labels attached to them. Tests may be included
+or excluded from a test run by filtering on the labels.
+Each individual filter is a regular expression applied to
+the labels attached to a test.
+
+When ``-L`` is used, in order for a test to be included in a
+test run, each regular expression must match at least one
+label.  Using more than one ``-L`` option means "match **all**
+of these".
+
+The ``-LE`` option works just like ``-L``, but excludes tests
+rather than including them. A test is excluded if each regular
+expression matches at least one label.
+
+If a test has no labels attached to it, then ``-L`` will never
+include that test, and ``-LE`` will never exclude that test.
+As an example of tests with labels, consider five tests,
+with the following labels:
+
+* *test1* has labels *tuesday* and *production*
+* *test2* has labels *tuesday* and *test*
+* *test3* has labels *wednesday* and *production*
+* *test4* has label *wednesday*
+* *test5* has labels *friday* and *test*
+
+Running ``ctest`` with ``-L tuesday -L test`` will select *test2*, which has
+both labels. Running CTest with ``-L test`` will select *test2* and
+*test5*, because both of them have a label that matches that regular
+expression.
+
+Because the matching works with regular expressions, take note that
+running CTest with ``-L es`` will match all five tests.
+To select the *tuesday* and *wednesday* tests together, use a single
+regular expression that matches either of them, like ``-L "tue|wed"``.
 
 .. _`Label and Subproject Summary`:
 
