@@ -193,7 +193,7 @@ function(run_cmake test)
   if(msg)
     string(REGEX REPLACE "\n" "\n actual-out> " actual_out " actual-out> ${actual_stdout}")
     string(REGEX REPLACE "\n" "\n actual-err> " actual_err " actual-err> ${actual_stderr}")
-    message(SEND_ERROR "${test} - FAILED:\n"
+    message(SEND_ERROR "${test}${RunCMake_TEST_VARIANT_DESCRIPTION} - FAILED:\n"
       "${msg}"
       "${expect_out}"
       "Actual stdout:\n${actual_out}\n"
@@ -201,7 +201,7 @@ function(run_cmake test)
       "Actual stderr:\n${actual_err}\n"
       )
   else()
-    message(STATUS "${test} - PASSED")
+    message(STATUS "${test}${RunCMake_TEST_VARIANT_DESCRIPTION} - PASSED")
   endif()
 endfunction()
 
