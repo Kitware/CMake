@@ -262,6 +262,8 @@ private:
   cm::optional<std::string> FindFlagTable(cm::string_view toolsetName,
                                           cm::string_view table) const;
 
+  std::string CustomFlagTableDir;
+
   std::string CustomVCTargetsPath;
   std::string VCTargetsPath;
   bool FindVCTargetsPath(cmMakefile* mf);

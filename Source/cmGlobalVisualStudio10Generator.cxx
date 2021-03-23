@@ -231,6 +231,23 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     return false;
   }
 
+  if (!this->CustomFlagTableDir.empty() &&
+      !(cmSystemTools::FileIsFullPath(this->CustomFlagTableDir) &&
+        cmSystemTools::FileIsDirectory(this->CustomFlagTableDir))) {
+    std::ostringstream e;
+    /* clang-format off */
+    e <<
+      "Generator\n"
+      "  " << this->GetName() << "\n"
+      "given toolset\n"
+      "  customFlagTableDir=" << this->CustomFlagTableDir << "\n"
+      "that is not an absolute path to an existing directory.";
+    /* clang-format on */
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
   if (cmHasLiteralPrefix(this->GetPlatformToolsetString(), "v140")) {
     // The GenerateDebugInformation link setting for the v140 toolset
     // in VS 2015 was originally an enum with "No" and "Debug" values,
@@ -484,6 +501,11 @@ bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
     } else {
       this->GeneratorToolsetCuda = value;
     }
+    return true;
+  }
+  if (key == "customFlagTableDir") {
+    this->CustomFlagTableDir = value;
+    cmSystemTools::ConvertToUnixSlashes(this->CustomFlagTableDir);
     return true;
   }
   if (key == "version") {
@@ -1375,6 +1397,20 @@ static cmIDEFlagTable const* cmLoadFlagTableJson(
 cm::optional<std::string> cmGlobalVisualStudio10Generator::FindFlagTable(
   cm::string_view toolsetName, cm::string_view table) const
 {
+  if (!this->CustomFlagTableDir.empty()) {
+    std::string customFlagTableFile =
+      cmStrCat(this->CustomFlagTableDir, '/', this->GetPlatformName(), '_',
+               toolsetName, '_', table, ".json");
+    if (cmSystemTools::FileExists(customFlagTableFile)) {
+      return customFlagTableFile;
+    }
+    customFlagTableFile =
+      cmStrCat(this->CustomFlagTableDir, '/', this->GetPlatformName(), '_',
+               table, ".json");
+    if (cmSystemTools::FileExists(customFlagTableFile)) {
+      return customFlagTableFile;
+    }
+  }
   std::string fullPath =
     cmStrCat(cmSystemTools::GetCMakeRoot(), "/Templates/MSBuild/FlagTables/",
              toolsetName, '_', table, ".json");
