@@ -118,6 +118,8 @@ run_cmake_presets(EnvCycle)
 run_cmake_presets(EmptyEnv)
 run_cmake_presets(EmptyPenv)
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
+run_cmake_presets(ConditionFuture)
+run_cmake_presets(SubConditionNull)
 
 # Test cmakeMinimumRequired field
 run_cmake_presets(MinimumRequiredInvalid)
@@ -266,6 +268,12 @@ set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/HostSystemName.json.in")
 run_cmake_presets(HostSystemName)
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/HostSystemNameFuture.json.in")
 run_cmake_presets(HostSystemNameFuture)
+
+# Test conditions
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Conditions.json.in")
+run_cmake_presets(ListConditions --list-presets)
+run_cmake_presets(SimpleTrue)
+run_cmake_presets(SimpleFalse)
 
 # Test the example from the documentation
 file(READ "${RunCMake_SOURCE_DIR}/../../../Help/manual/presets/example.json" _example)

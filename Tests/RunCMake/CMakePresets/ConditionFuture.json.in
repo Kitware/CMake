@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "ConditionFuture",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "condition": true
+    }
+  ]
+}
