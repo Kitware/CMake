@@ -1697,7 +1697,7 @@ if(BUILD_TESTING)
       ${build_generator_args}
       --build-project ${import_name}
       --build-options
-      "-DCMAKE_PREFIX_PATH:PATH=${install_dir}/lib/cmake")
+      "-DCMAKE_PREFIX_PATH:PATH=${install_dir}")
     set_tests_properties(${import_test_name} PROPERTIES DEPENDS ${export_test_name})
     list(APPEND TEST_BUILD_DIRS "${import_build_dir}")
   endfunction()
