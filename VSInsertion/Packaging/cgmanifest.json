@@ -1,0 +1,14 @@
+{
+    "Registrations":[
+        {
+            "Component": {
+                "Type": "other",
+                "Other": {
+                    "Name": "cmake",
+                    "Version": "3.19.1",
+                    "DownloadUrl": "https://github.com/Kitware/CMake/releases/download/v3.19.1/cmake-3.19.1.tar.gz"
+                }
+            }
+        }
+    ]
+}

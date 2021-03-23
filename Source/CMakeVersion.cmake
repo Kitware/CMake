@@ -5,80 +5,33 @@ set(CMake_VERSION_PATCH 0)
 #set(CMake_VERSION_RC 0)
 set(CMake_VERSION_IS_DIRTY 0)
 
-# Start with the full version number used in tags.  It has no dev info.
-set(CMake_VERSION
-  "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
-if(DEFINED CMake_VERSION_RC)
-  set(CMake_VERSION "${CMake_VERSION}-rc${CMake_VERSION_RC}")
+# Our build definition sets this variable to control the patch part of the version number.
+if(Microsoft_CMake_VERSION_PATCH)
+  set(CMake_VERSION_PATCH ${Microsoft_CMake_VERSION_PATCH})
 endif()
 
-# Releases define a small patch level.
-if("${CMake_VERSION_PATCH}" VERSION_LESS 20000000)
-  set(CMake_VERSION_IS_RELEASE 1)
-else()
-  set(CMake_VERSION_IS_RELEASE 0)
-endif()
+# Compute the full version string.
+set(CMake_VERSION ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}-MSVC_2)
 
-if(NOT CMake_VERSION_NO_GIT)
-  # If this source was exported by 'git archive', use its commit info.
-  set(git_info [==[$Format:%h %s$]==])
+# Compute the binary version that goes into the RC file.
+# CMake version has the format major.minor.patch[-suffix] but for RC files
+# we need to split patch into two components because each component is a
+# 16-bit integer. Our patch numbers have the format yymmddbb so we split
+# that in half and append an "8" to identify a build coming from our branch.
+#
+# Example for build 02 generated on 12/1/2017
+# cmake version 3.10.17120102-MSVC_2
+# binary version that appears in file properties 3.10.1712.01028
+#
+# The reason we need consistency is for Watson crash dumps. It will report
+# the binary file version and we need to match it to our build.
 
-  # Otherwise, try to identify the current development source version.
-  if(NOT git_info MATCHES "^([0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]?[0-9a-f]?)[0-9a-f]* "
-      AND EXISTS ${CMake_SOURCE_DIR}/.git)
-    find_package(Git QUIET)
-    if(GIT_FOUND)
-      macro(_git)
-        execute_process(
-          COMMAND ${GIT_EXECUTABLE} ${ARGN}
-          WORKING_DIRECTORY ${CMake_SOURCE_DIR}
-          RESULT_VARIABLE _git_res
-          OUTPUT_VARIABLE _git_out OUTPUT_STRIP_TRAILING_WHITESPACE
-          ERROR_VARIABLE _git_err ERROR_STRIP_TRAILING_WHITESPACE
-          )
-      endmacro()
-    endif()
-    if(COMMAND _git)
-      # Get the commit checked out in this work tree.
-      _git(log -n 1 HEAD "--pretty=format:%h %s" --)
-      set(git_info "${_git_out}")
-    endif()
-  endif()
+# Each component of the RC version is a 16-bit integer. Our patch version
+# is of the form yymmddbb so we just split it in half.
+string(SUBSTRING ${CMake_VERSION_PATCH} 0 4 CMake_RCVERSION_PATCH)
+string(SUBSTRING ${CMake_VERSION_PATCH} 4 -1 CMake_RCVERSION_REV)
 
-  # Extract commit information if available.
-  if(git_info MATCHES "^([0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]?[0-9a-f]?)[0-9a-f]* (.*)$")
-    # Have commit information.
-    set(git_hash "${CMAKE_MATCH_1}")
-    set(git_subject "${CMAKE_MATCH_2}")
-
-    # If this is not the exact commit of a release, add dev info.
-    if(NOT "${git_subject}" MATCHES "^[Cc][Mm]ake ${CMake_VERSION}$")
-      set(CMake_VERSION "${CMake_VERSION}-g${git_hash}")
-    endif()
-
-    # If this is a work tree, check whether it is dirty.
-    if(COMMAND _git)
-      _git(update-index -q --refresh)
-      _git(diff-index --name-only HEAD --)
-      if(_git_out)
-        set(CMake_VERSION_IS_DIRTY 1)
-      endif()
-    endif()
-  else()
-    # No commit information.
-    if(NOT CMake_VERSION_IS_RELEASE)
-      # Generic development version.
-      set(CMake_VERSION "${CMake_VERSION}-git")
-    endif()
-  endif()
-endif()
-
-# Extract the version suffix component.
-if(CMake_VERSION MATCHES "-(.*)$")
-  set(CMake_VERSION_SUFFIX "${CMAKE_MATCH_1}")
-else()
-  set(CMake_VERSION_SUFFIX "")
-endif()
-if(CMake_VERSION_IS_DIRTY)
-  set(CMake_VERSION ${CMake_VERSION}-dirty)
-endif()
+# The '8' is an identifier to indicate it comes from our Microsoft/CMake fork. It gets appended
+# at the end to ensure the revision component is still a 16-bit number.
+set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMake_RCVERSION_PATCH},${CMake_RCVERSION_REV}8)
+set(CMake_RCVERSION_STR ${CMake_VERSION})
