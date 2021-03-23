@@ -209,9 +209,9 @@ cmake::cmake(Role role, cmState::Mode mode)
     };
 
     // The "c" extension MUST precede the "C" extension.
-    setupExts(
-      this->CLikeSourceFileExtensions,
-      { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "mpp", "m", "M", "mm" });
+    setupExts(this->CLikeSourceFileExtensions,
+              { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "mpp", "m", "M",
+                "mm", "ixx", "cppm" });
     setupExts(this->HeaderFileExtensions,
               { "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" });
     setupExts(this->CudaFileExtensions, { "cu" });
