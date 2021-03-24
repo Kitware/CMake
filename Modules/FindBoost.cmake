@@ -189,7 +189,7 @@ This module defines the following :prop_tgt:`IMPORTED` targets:
   (adds ``-DBOOST_ALL_NO_LIB``).
 
 ``Boost::dynamic_linking``
-  Interface target to enable dynamic linking linking with MSVC
+  Interface target to enable dynamic linking with MSVC
   (adds ``-DBOOST_ALL_DYN_LINK``).
 
 Implicit dependencies such as ``Boost::filesystem`` requiring

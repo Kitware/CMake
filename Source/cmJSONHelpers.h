@@ -239,7 +239,7 @@ cmJSONHelper<std::vector<T>, E> cmJSONVectorFilterHelper(E success, E fail,
       if (!filter(t)) {
         continue;
       }
-      out.push_back(t);
+      out.push_back(std::move(t));
     }
     return success;
   };

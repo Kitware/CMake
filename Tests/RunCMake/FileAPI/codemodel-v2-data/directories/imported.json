@@ -14,5 +14,6 @@
     ],
     "projectName": "Imported",
     "minimumCMakeVersion": "3.12",
-    "hasInstallRule": null
+    "hasInstallRule": null,
+    "installers": []
 }

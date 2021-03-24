@@ -838,16 +838,16 @@ cmProp cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(
-  std::string const& path, OutputFormat format, bool forceFullPaths)
+  std::string const& path, IncludePathStyle pathStyle, OutputFormat format)
 {
-  static_cast<void>(forceFullPaths);
+  static_cast<void>(pathStyle);
   return this->ConvertToOutputForExisting(path, format);
 }
 
 std::string cmLocalGenerator::GetIncludeFlags(
-  const std::vector<std::string>& includeDirs, cmGeneratorTarget* target,
-  const std::string& lang, bool forceFullPaths, bool forResponseFile,
-  const std::string& config)
+  std::vector<std::string> const& includeDirs, cmGeneratorTarget* target,
+  std::string const& lang, std::string const& config, bool forResponseFile,
+  IncludePathStyle pathStyle)
 {
   if (lang.empty()) {
     return "";
@@ -923,7 +923,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
       flagUsed = true;
     }
     std::string includePath =
-      this->ConvertToIncludeReference(i, shellFormat, forceFullPaths);
+      this->ConvertToIncludeReference(i, pathStyle, shellFormat);
     if (quotePaths && !includePath.empty() && includePath.front() != '\"') {
       includeFlags << "\"";
     }
@@ -1527,12 +1527,12 @@ void cmLocalGenerator::GetTargetFlags(
         }
 
         if (target->IsWin32Executable(config)) {
-          exeFlags +=
-            this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
+          exeFlags += this->Makefile->GetSafeDefinition(
+            cmStrCat("CMAKE_", linkLanguage, "_CREATE_WIN32_EXE"));
           exeFlags += " ";
         } else {
-          exeFlags +=
-            this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
+          exeFlags += this->Makefile->GetSafeDefinition(
+            cmStrCat("CMAKE_", linkLanguage, "_CREATE_CONSOLE_EXE"));
           exeFlags += " ";
         }
 
@@ -2701,8 +2701,9 @@ void cmLocalGenerator::CopyPchCompilePdb(
     }
 
     file << "foreach(retry RANGE 1 30)\n";
-    file << "  if (EXISTS \"" << from_file << "\" AND \"" << from_file
-         << "  \" IS_NEWER_THAN \"" << dest_file << "\")\n";
+    file << "  if (EXISTS \"" << from_file << "\" AND (NOT EXISTS \""
+         << dest_file << "\" OR NOT \"" << dest_file << "  \" IS_NEWER_THAN \""
+         << from_file << "\"))\n";
     file << "    execute_process(COMMAND ${CMAKE_COMMAND} -E copy";
     file << " \"" << from_file << "\""
          << " \"" << to_dir << "\" RESULT_VARIABLE result "

@@ -1705,18 +1705,16 @@ bool cmCTestTestHandler::ParseResourceGroupsProperty(
 bool cmCTestTestHandler::GetListOfTests()
 {
   if (!this->IncludeLabelRegExp.empty()) {
-    this->IncludeLabelRegularExpression.compile(
-      this->IncludeLabelRegExp.c_str());
+    this->IncludeLabelRegularExpression.compile(this->IncludeLabelRegExp);
   }
   if (!this->ExcludeLabelRegExp.empty()) {
-    this->ExcludeLabelRegularExpression.compile(
-      this->ExcludeLabelRegExp.c_str());
+    this->ExcludeLabelRegularExpression.compile(this->ExcludeLabelRegExp);
   }
   if (!this->IncludeRegExp.empty()) {
-    this->IncludeTestsRegularExpression.compile(this->IncludeRegExp.c_str());
+    this->IncludeTestsRegularExpression.compile(this->IncludeRegExp);
   }
   if (!this->ExcludeRegExp.empty()) {
-    this->ExcludeTestsRegularExpression.compile(this->ExcludeRegExp.c_str());
+    this->ExcludeTestsRegularExpression.compile(this->ExcludeRegExp);
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Constructing a list of tests" << std::endl, this->Quiet);

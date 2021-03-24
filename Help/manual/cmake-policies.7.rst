@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.21
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0121: The list command detects invalid indicies </policy/CMP0121>
+
 Policies Introduced by CMake 3.20
 =================================
 

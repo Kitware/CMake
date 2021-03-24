@@ -780,9 +780,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     vars.Target = target.c_str();
     vars.LinkLibraries = linkLibs.c_str();
     vars.ObjectsQuoted = buildObjs.c_str();
+    std::string targetOutSOName;
     if (this->GeneratorTarget->HasSOName(this->GetConfigName())) {
       vars.SONameFlag = this->Makefile->GetSONameFlag(linkLanguage);
-      vars.TargetSOName = this->TargetNames.SharedObject.c_str();
+      targetOutSOName = this->LocalGenerator->ConvertToOutputFormat(
+        this->TargetNames.SharedObject.c_str(), cmOutputConverter::SHELL);
+      vars.TargetSOName = targetOutSOName.c_str();
     }
     vars.LinkFlags = linkFlags.c_str();
 

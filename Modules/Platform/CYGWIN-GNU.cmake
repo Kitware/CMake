@@ -10,7 +10,6 @@ set(__CYGWIN_COMPILER_GNU 1)
 
 # TODO: Is -Wl,--enable-auto-import now always default?
 string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--enable-auto-import")
-set(CMAKE_CREATE_WIN32_EXE  "-mwindows")
 
 set(CMAKE_GNULD_IMAGE_VERSION
   "-Wl,--major-image-version,<TARGET_VERSION_MAJOR>,--minor-image-version,<TARGET_VERSION_MINOR>")
@@ -23,6 +22,7 @@ macro(__cygwin_compiler_gnu lang)
     "<CMAKE_${lang}_COMPILER> <LANGUAGE_COMPILE_FLAGS> <CMAKE_SHARED_LIBRARY_${lang}_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
+  set(CMAKE_${lang}_CREATE_WIN32_EXE "-mwindows")
 
    # No -fPIC on cygwin
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")

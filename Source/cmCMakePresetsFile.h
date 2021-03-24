@@ -2,8 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include "cmConfigure.h" // IWYU pragma: keep
+
 #include <functional>
 #include <map>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -33,6 +36,9 @@ public:
     INVALID_MACRO_EXPANSION,
     BUILD_TEST_PRESETS_UNSUPPORTED,
     INVALID_CONFIGURE_PRESET,
+    INSTALL_PREFIX_UNSUPPORTED,
+    INVALID_CONDITION,
+    CONDITION_UNSUPPORTED,
   };
 
   enum class ArchToolsetStrategy
@@ -47,6 +53,8 @@ public:
     std::string Type;
     std::string Value;
   };
+
+  class Condition;
 
   class Preset
   {
@@ -69,6 +77,9 @@ public:
     bool User;
     std::string DisplayName;
     std::string Description;
+
+    std::shared_ptr<Condition> ConditionEvaluator;
+    bool ConditionResult = true;
 
     std::map<std::string, cm::optional<std::string>> Environment;
 
@@ -103,6 +114,7 @@ public:
     std::string Toolset;
     cm::optional<ArchToolsetStrategy> ToolsetStrategy;
     std::string BinaryDir;
+    std::string InstallDir;
 
     std::map<std::string, cm::optional<CacheVariable>> CacheVariables;
 
@@ -293,6 +305,13 @@ public:
   std::vector<std::string> TestPresetOrder;
 
   std::string SourceDir;
+  int Version;
+  int UserVersion;
+
+  int GetVersion(const Preset& preset) const
+  {
+    return preset.User ? this->UserVersion : this->Version;
+  }
 
   static std::string GetFilename(const std::string& sourceDir);
   static std::string GetUserFilename(const std::string& sourceDir);

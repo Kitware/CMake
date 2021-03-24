@@ -1222,7 +1222,7 @@ void cmMakefile::AddCustomCommandOldStyle(
 
   // Each output must get its own copy of this rule.
   cmsys::RegularExpression sourceFiles(
-    "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|mpp|cu|m|mm|"
+    "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|mpp|ixx|cppm|cu|m|mm|"
     "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
     "hm|hpp|hxx|in|txx|inl)$");
 
@@ -4393,7 +4393,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 
   // Deprecate old policies, especially those that require a lot
   // of code to maintain the old behavior.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0075 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0081 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.

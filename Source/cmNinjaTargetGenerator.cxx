@@ -263,9 +263,10 @@ void cmNinjaTargetGenerator::AddIncludeFlags(std::string& languageFlags,
                                               language, config);
   // Add include directory flags.
   std::string includeFlags = this->LocalGenerator->GetIncludeFlags(
-    includes, this->GeneratorTarget, language,
-    language == "RC", // full include paths for RC needed by cmcldeps
-    false, config);
+    includes, this->GeneratorTarget, language, config, false,
+    // full include paths for RC needed by cmcldeps
+    language == "RC" ? cmLocalGenerator::IncludePathStyle::Absolute
+                     : cmLocalGenerator::IncludePathStyle::Default);
   if (this->GetGlobalGenerator()->IsGCCOnWindows()) {
     std::replace(includeFlags.begin(), includeFlags.end(), '\\', '/');
   }
@@ -324,7 +325,8 @@ std::string cmNinjaTargetGenerator::ComputeIncludes(
   }
 
   std::string includesString = this->LocalGenerator->GetIncludeFlags(
-    includes, this->GeneratorTarget, language, true, false, config);
+    includes, this->GeneratorTarget, language, config, false,
+    cmLocalGenerator::IncludePathStyle::Absolute);
   this->LocalGenerator->AppendFlags(includesString,
                                     this->GetIncludes(language, config));
 
@@ -1379,8 +1381,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
         cmSystemTools::GetParentDirectory(source->GetFullPath()));
 
       std::string sourceDirectoryFlag = this->LocalGenerator->GetIncludeFlags(
-        sourceDirectory, this->GeneratorTarget, language, false, false,
-        config);
+        sourceDirectory, this->GeneratorTarget, language, config, false,
+        cmLocalGenerator::IncludePathStyle::Default);
 
       vars["INCLUDES"] = cmStrCat(sourceDirectoryFlag, ' ', vars["INCLUDES"]);
     }

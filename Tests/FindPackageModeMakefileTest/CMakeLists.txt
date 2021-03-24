@@ -19,12 +19,16 @@ if(UNIX  AND  "${CMAKE_GENERATOR}" MATCHES "Makefile" AND
     # configure a FindFoo.cmake so it knows where the library can be found
     configure_file(FindFoo.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/FindFoo.cmake @ONLY)
 
-    # Need the -isysroot flag on recentish macOS after command line tools
-    # no longer provide headers in /usr/include
-    if(APPLE AND CMAKE_OSX_SYSROOT)
-      set(__EXTRA_OSX_SYSROOT_FLAGS "-isysroot ${CMAKE_OSX_SYSROOT}")
-    else()
-      set(__EXTRA_OSX_SYSROOT_FLAGS "")
+    set(EXTRA_FLAGS "")
+    if(APPLE)
+      # Need the -isysroot flag on recentish macOS after command line tools
+      # no longer provide headers in /usr/include
+      if(CMAKE_OSX_SYSROOT)
+        string(APPEND EXTRA_FLAGS " -isysroot ${CMAKE_OSX_SYSROOT}")
+      endif()
+      foreach(arch ${CMAKE_OSX_ARCHITECTURES})
+        string(APPEND EXTRA_FLAGS " -arch ${arch}")
+      endforeach()
     endif()
 
     # now set up the test:

@@ -198,6 +198,8 @@ set(SRCS
   cmCMakePath.cxx
   cmCMakePresetsFile.cxx
   cmCMakePresetsFile.h
+  cmCMakePresetsFileInternal.h
+  cmCMakePresetsFileReadJSON.cxx
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
@@ -785,8 +787,6 @@ if (WIN32)
       cmVisualStudioGeneratorOptions.cxx
       cmVisualStudio10TargetGenerator.h
       cmVisualStudio10TargetGenerator.cxx
-      cmVisualStudio10ToolsetOptions.h
-      cmVisualStudio10ToolsetOptions.cxx
       cmLocalVisualStudio10Generator.cxx
       cmLocalVisualStudio10Generator.h
       cmGlobalVisualStudio10Generator.h

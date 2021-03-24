@@ -110,6 +110,10 @@ struct cmCommandLineArgument
           }
         }
         if (parseState == ParseMode::Valid) {
+          if (possible_value[0] == ' ') {
+            possible_value.remove_prefix(1);
+          }
+
           parseState = this->StoreCall(std::string(possible_value),
                                        std::forward<CallState>(state)...)
             ? ParseMode::Valid

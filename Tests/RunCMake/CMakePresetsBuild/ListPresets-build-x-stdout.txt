@@ -1,5 +1,6 @@
-Available build presets:
+^Available build presets:
 
   "build-default" - build-default displayName
   "empty"
   "display"       - display displayName
+  "true"$

@@ -273,6 +273,11 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     ? this->GetOption("CPACK_DMG_FORMAT")
     : "UDZO";
 
+  const std::string cpack_dmg_filesystem =
+    this->GetOption("CPACK_DMG_FILESYSTEM")
+    ? this->GetOption("CPACK_DMG_FILESYSTEM")
+    : "HFS+";
+
   // Get optional arguments ...
   std::string cpack_license_file =
     this->GetOption("CPACK_RESOURCE_FILE_LICENSE")
@@ -418,7 +423,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   temp_image_command << " -ov";
   temp_image_command << " -srcfolder \"" << staging.str() << "\"";
   temp_image_command << " -volname \"" << cpack_dmg_volume_name << "\"";
-  temp_image_command << " -fs HFS+";
+  temp_image_command << " -fs \"" << cpack_dmg_filesystem << "\"";
   temp_image_command << " -format " << temp_image_format;
   temp_image_command << " \"" << temp_image << "\"";
 

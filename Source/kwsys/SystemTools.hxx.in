@@ -578,6 +578,17 @@ public:
                               const std::string& path2);
 
   /**
+   * Blockwise copy source to destination file
+   */
+  static bool CopyFileContentBlockwise(const std::string& source,
+                                       const std::string& destination);
+  /**
+   * Clone the source file to the destination file
+   */
+  static bool CloneFileContent(const std::string& source,
+                               const std::string& destination);
+
+  /**
    * Return true if the two files are the same file
    */
   static bool SameFile(const std::string& file1, const std::string& file2);

@@ -25,6 +25,24 @@ The following variables are provided to indicate iconv support:
 
   The iconv libraries to be linked.
 
+.. variable:: Iconv_VERSION
+
+  .. versionadded:: 3.21
+
+  The version of iconv found (x.y)
+
+.. variable:: Iconv_VERSION_MAJOR
+
+  .. versionadded:: 3.21
+
+  The major version of iconv
+
+.. variable:: Iconv_VERSION_MINOR
+
+  .. versionadded:: 3.21
+
+  The minor version of iconv
+
 .. variable:: Iconv_IS_BUILT_IN
 
   A variable indicating whether iconv support is stemming from the
@@ -50,6 +68,10 @@ The following cache variables may also be set:
 .. note::
   On POSIX platforms, iconv might be part of the C library and the cache
   variables ``Iconv_INCLUDE_DIR`` and ``Iconv_LIBRARY`` might be empty.
+
+.. note::
+  Some libiconv implementations don't embed the version number in their header files.
+  In this case the variables ``Iconv_VERSION*`` will be empty.
 
 #]=======================================================================]
 
@@ -118,9 +140,29 @@ find_library(Iconv_LIBRARY
 mark_as_advanced(Iconv_INCLUDE_DIR)
 mark_as_advanced(Iconv_LIBRARY)
 
+# NOTE: glibc's iconv.h does not define _LIBICONV_VERSION
+if(Iconv_INCLUDE_DIR AND NOT Iconv_IS_BUILT_IN)
+  file(STRINGS ${Iconv_INCLUDE_DIR}/iconv.h Iconv_VERSION_DEFINE REGEX "_LIBICONV_VERSION (.*)")
+
+  if(Iconv_VERSION_DEFINE MATCHES "(0x[A-Fa-f0-9]+)")
+    set(Iconv_VERSION_NUMBER "${CMAKE_MATCH_1}")
+    # encoding -> version number: (major<<8) + minor
+    math(EXPR Iconv_VERSION_MAJOR "${Iconv_VERSION_NUMBER} >> 8" OUTPUT_FORMAT HEXADECIMAL)
+    math(EXPR Iconv_VERSION_MINOR "${Iconv_VERSION_NUMBER} - (${Iconv_VERSION_MAJOR} << 8)" OUTPUT_FORMAT HEXADECIMAL)
+
+    math(EXPR Iconv_VERSION_MAJOR "${Iconv_VERSION_MAJOR}" OUTPUT_FORMAT DECIMAL)
+    math(EXPR Iconv_VERSION_MINOR "${Iconv_VERSION_MINOR}" OUTPUT_FORMAT DECIMAL)
+    set(Iconv_VERSION "${Iconv_VERSION_MAJOR}.${Iconv_VERSION_MINOR}")
+  endif()
+
+  unset(Iconv_VERSION_DEFINE)
+  unset(Iconv_VERSION_NUMBER)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 if(NOT Iconv_IS_BUILT_IN)
-  find_package_handle_standard_args(Iconv REQUIRED_VARS Iconv_LIBRARY Iconv_INCLUDE_DIR)
+  find_package_handle_standard_args(Iconv REQUIRED_VARS Iconv_LIBRARY Iconv_INCLUDE_DIR
+                                    VERSION_VAR Iconv_VERSION)
 else()
   find_package_handle_standard_args(Iconv REQUIRED_VARS Iconv_LIBRARY)
 endif()

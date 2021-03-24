@@ -545,7 +545,7 @@ void cmVisualStudio10TargetGenerator::Generate()
           e1.Element(
             "CudaToolkitCustomDir",
             this->GlobalGenerator->GetPlatformToolsetCudaCustomDirString() +
-              "nvcc");
+              this->GlobalGenerator->GetPlatformToolsetCudaNvccSubdirString());
         }
       }
 
@@ -654,8 +654,9 @@ void cmVisualStudio10TargetGenerator::Generate()
         std::string cudaPath = customDir.empty()
           ? "$(VCTargetsPath)\\BuildCustomizations\\"
           : customDir +
-            "CUDAVisualStudioIntegration\\extras\\"
-            "visual_studio_integration\\MSBuildExtensions\\";
+            this->GlobalGenerator
+              ->GetPlatformToolsetCudaVSIntegrationSubdirString() +
+            "extras\\visual_studio_integration\\MSBuildExtensions\\";
         Elem(e1, "Import")
           .Attribute("Project",
                      std::move(cudaPath) + "CUDA " +
@@ -747,8 +748,9 @@ void cmVisualStudio10TargetGenerator::Generate()
         std::string cudaPath = customDir.empty()
           ? "$(VCTargetsPath)\\BuildCustomizations\\"
           : customDir +
-            "CUDAVisualStudioIntegration\\extras\\"
-            "visual_studio_integration\\MSBuildExtensions\\";
+            this->GlobalGenerator
+              ->GetPlatformToolsetCudaVSIntegrationSubdirString() +
+            "extras\\visual_studio_integration\\MSBuildExtensions\\";
         Elem(e1, "Import")
           .Attribute("Project",
                      std::move(cudaPath) + "CUDA " +

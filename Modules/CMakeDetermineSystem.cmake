@@ -158,37 +158,14 @@ endif()
 
 include(Platform/${CMAKE_SYSTEM_NAME}-Determine OPTIONAL)
 
-macro(ADJUST_CMAKE_SYSTEM_VARIABLES _PREFIX)
-  if(NOT ${_PREFIX}_NAME)
-    set(${_PREFIX}_NAME "UnknownOS")
-  endif()
-
-  # fix for BSD/OS , remove the /
-  if(${_PREFIX}_NAME MATCHES BSD.OS)
-    set(${_PREFIX}_NAME BSDOS)
-  endif()
-
-  # fix for GNU/kFreeBSD, remove the GNU/
-  if(${_PREFIX}_NAME MATCHES kFreeBSD)
-    set(${_PREFIX}_NAME kFreeBSD)
-  endif()
-
-  # fix for CYGWIN which has windows version in it
-  if(${_PREFIX}_NAME MATCHES CYGWIN)
-    set(${_PREFIX}_NAME CYGWIN)
-  endif()
-
-  # set CMAKE_SYSTEM to the CMAKE_SYSTEM_NAME
-  set(${_PREFIX}  ${${_PREFIX}_NAME})
-  # if there is a CMAKE_SYSTEM_VERSION then add a -${CMAKE_SYSTEM_VERSION}
-  if(${_PREFIX}_VERSION)
-    set(${_PREFIX} ${${_PREFIX}}-${${_PREFIX}_VERSION})
-  endif()
-
-endmacro()
-
-ADJUST_CMAKE_SYSTEM_VARIABLES(CMAKE_SYSTEM)
-ADJUST_CMAKE_SYSTEM_VARIABLES(CMAKE_HOST_SYSTEM)
+set(CMAKE_SYSTEM ${CMAKE_SYSTEM_NAME})
+if(CMAKE_SYSTEM_VERSION)
+  string(APPEND CMAKE_SYSTEM -${CMAKE_SYSTEM_VERSION})
+endif()
+set(CMAKE_HOST_SYSTEM ${CMAKE_HOST_SYSTEM_NAME})
+if(CMAKE_HOST_SYSTEM_VERSION)
+  string(APPEND CMAKE_HOST_SYSTEM -${CMAKE_HOST_SYSTEM_VERSION})
+endif()
 
 # this file is also executed from cpack, then we don't need to generate these files
 # in this case there is no CMAKE_BINARY_DIR

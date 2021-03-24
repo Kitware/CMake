@@ -84,6 +84,7 @@ cmake_sphinx_info=""
 cmake_sphinx_man=""
 cmake_sphinx_html=""
 cmake_sphinx_qthelp=""
+cmake_sphinx_latexpdf=""
 cmake_sphinx_build=""
 cmake_sphinx_flags=""
 
@@ -662,6 +663,7 @@ Configuration:
   --sphinx-man            build man pages with Sphinx
   --sphinx-html           build html help with Sphinx
   --sphinx-qthelp         build qch help with Sphinx
+  --sphinx-latexpdf       build PDF with Sphinx using LaTeX
   --sphinx-build=<sb>     use <sb> as the sphinx-build executable
   --sphinx-flags=<flags>  pass <flags> to sphinx-build executable
 
@@ -926,6 +928,7 @@ while test $# != 0; do
   --sphinx-man) cmake_sphinx_man="1" ;;
   --sphinx-html) cmake_sphinx_html="1" ;;
   --sphinx-qthelp) cmake_sphinx_qthelp="1" ;;
+  --sphinx-latexpdf) cmake_sphinx_latexpdf="1" ;;
   --sphinx-build=*) cmake_sphinx_build=`cmake_arg "$1"` ;;
   --sphinx-flags=*) cmake_sphinx_flags=`cmake_arg "$1"` ;;
   --help) cmake_usage ;;
@@ -1915,6 +1918,11 @@ fi
 if test "x${cmake_sphinx_qthelp}" != "x"; then
   echo '
 set (SPHINX_QTHELP "'"${cmake_sphinx_qthelp}"'" CACHE BOOL "Build qch help with Sphinx" FORCE)
+' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
+fi
+if test "x${cmake_sphinx_latexpdf}" != "x"; then
+  echo '
+set (SPHINX_LATEXPDF "'"${cmake_sphinx_latexpdf}"'" CACHE BOOL "Build PDF help with Sphinx using LaTeX" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if test "x${cmake_sphinx_build}" != "x"; then

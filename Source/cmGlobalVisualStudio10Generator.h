@@ -5,8 +5,10 @@
 #include <memory>
 #include <set>
 
+#include <cm/optional>
+#include <cm/string_view>
+
 #include "cmGlobalVisualStudio8Generator.h"
-#include "cmVisualStudio10ToolsetOptions.h"
 
 /** \class cmGlobalVisualStudio10Generator
  * \brief Write a Unix makefiles.
@@ -75,6 +77,13 @@ public:
   /** The custom cuda install directory */
   const char* GetPlatformToolsetCudaCustomDir() const;
   std::string const& GetPlatformToolsetCudaCustomDirString() const;
+
+  /** The nvcc subdirectory of a custom cuda install directory */
+  std::string const& GetPlatformToolsetCudaNvccSubdirString() const;
+
+  /** The visual studio integration subdirectory of a custom cuda install
+   * directory */
+  std::string const& GetPlatformToolsetCudaVSIntegrationSubdirString() const;
 
   /** Return whether we need to use No/Debug instead of false/true
       for GenerateDebugInformation.  */
@@ -176,8 +185,7 @@ protected:
 
   std::string const& GetMSBuildCommand();
 
-  cmIDEFlagTable const* LoadFlagTable(std::string const& optionsName,
-                                      std::string const& toolsetName,
+  cmIDEFlagTable const* LoadFlagTable(std::string const& toolSpecificName,
                                       std::string const& defaultName,
                                       std::string const& table) const;
 
@@ -187,6 +195,8 @@ protected:
   std::string GeneratorToolsetCustomVCTargetsDir;
   std::string GeneratorToolsetCuda;
   std::string GeneratorToolsetCudaCustomDir;
+  std::string GeneratorToolsetCudaNvccSubdir;
+  std::string GeneratorToolsetCudaVSIntegrationSubdir;
   std::string DefaultPlatformToolset;
   std::string DefaultPlatformToolsetHostArchitecture;
   std::string DefaultAndroidToolset;
@@ -230,7 +240,6 @@ private:
 
   std::string MSBuildCommand;
   bool MSBuildCommandInitialized;
-  cmVisualStudio10ToolsetOptions ToolsetOptions;
   std::set<std::string> AndroidExecutableWarnings;
   virtual std::string FindMSBuildCommand();
   std::string FindDevEnvCommand() override;
@@ -241,6 +250,19 @@ private:
   bool PlatformToolsetNeedsDebugEnum;
 
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
+
+  std::string GetClFlagTableName() const;
+  std::string GetCSharpFlagTableName() const;
+  std::string GetRcFlagTableName() const;
+  std::string GetLibFlagTableName() const;
+  std::string GetLinkFlagTableName() const;
+  std::string GetMasmFlagTableName() const;
+  std::string CanonicalToolsetName(std::string const& toolset) const;
+
+  cm::optional<std::string> FindFlagTable(cm::string_view toolsetName,
+                                          cm::string_view table) const;
+
+  std::string CustomFlagTableDir;
 
   std::string CustomVCTargetsPath;
   std::string VCTargetsPath;
