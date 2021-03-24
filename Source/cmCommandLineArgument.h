@@ -76,8 +76,9 @@ struct cmCommandLineArgument
 
     } else if (this->Type == Values::One || this->Type == Values::ZeroOrOne) {
       if (input.size() == this->Name.size()) {
-        ++index;
-        if (index >= allArgs.size() || allArgs[index][0] == '-') {
+        auto nextValueIndex = index + 1;
+        if (nextValueIndex >= allArgs.size() ||
+            allArgs[nextValueIndex][0] == '-') {
           if (this->Type == Values::ZeroOrOne) {
             parseState =
               this->StoreCall(std::string{}, std::forward<CallState>(state)...)
@@ -87,10 +88,11 @@ struct cmCommandLineArgument
             parseState = ParseMode::ValueError;
           }
         } else {
-          parseState =
-            this->StoreCall(allArgs[index], std::forward<CallState>(state)...)
+          parseState = this->StoreCall(allArgs[nextValueIndex],
+                                       std::forward<CallState>(state)...)
             ? ParseMode::Valid
             : ParseMode::Invalid;
+          index = nextValueIndex;
         }
       } else {
         // parse the string to get the value
@@ -133,7 +135,8 @@ struct cmCommandLineArgument
     } else if (this->Type == Values::OneOrMore) {
       if (input.size() == this->Name.size()) {
         auto nextValueIndex = index + 1;
-        if (nextValueIndex >= allArgs.size() || allArgs[index + 1][0] == '-') {
+        if (nextValueIndex >= allArgs.size() ||
+            allArgs[nextValueIndex][0] == '-') {
           parseState = ParseMode::ValueError;
         } else {
           std::string buffer = allArgs[nextValueIndex++];
@@ -145,6 +148,7 @@ struct cmCommandLineArgument
             this->StoreCall(buffer, std::forward<CallState>(state)...)
             ? ParseMode::Valid
             : ParseMode::Invalid;
+          index = (nextValueIndex - 1);
         }
       }
     }
