@@ -179,203 +179,203 @@ test:intel2016-makefiles:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2016_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2016-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2016-el7
 
 test:intel2016u1-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2016u1_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2016u1-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2016u1-el7
 
 test:intel2016u2-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2016u2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2016u2-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2016u2-el7
 
 test:intel2017-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2017_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017-el7
 
 test:intel2017u1-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2017u1_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u1-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u1-el7
 
 test:intel2017u2-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2017u2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u2-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u2-el7
 
 test:intel2017u3-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2017u3_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u3-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u3-el7
 
 test:intel2017u4-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2017u4_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u4-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u4-el7
 
 test:intel2017u5-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2017u5_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u5-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u5-el7
 
 test:intel2017u6-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2017u6_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u6-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u6-el7
 
 test:intel2017u7-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2017u7_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u7-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u7-el7
 
 test:intel2017u8-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2017u8_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u8-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u8-el7
 
 test:intel2018-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2018_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018-el7
 
 test:intel2018u1-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2018u1_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u1-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u1-el7
 
 test:intel2018u2-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2018u2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u2-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u2-el7
 
 test:intel2018u3-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2018u3_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u3-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u3-el7
 
 test:intel2018u4-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2018u4_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u4-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u4-el7
 
 test:intel2019-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2019_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019-el7
 
 test:intel2019u1-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2019u1_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u1-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u1-el7
 
 test:intel2019u2-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2019u2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u2-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u2-el7
 
 test:intel2019u3-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2019u3_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u3-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u3-el7
 
 test:intel2019u4-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2019u4_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u4-centos7
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u4-el7
 
 test:intel2020-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2020_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2020-rhel8
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2020-el8
 
 test:intel2020u2-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2020u2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2020u2-rhel8
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2020u2-el8
 
 test:intel2020u4-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2020u4_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2020u4-rhel8
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2020u4-el8
 
 test:intel2021.1.1-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2021.1.1_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.1.1-rhel8
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.1.1-el8
 
 test:intel2021.1.2-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2021.1.2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.1.2-rhel8
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.1.2-el8
 
 test:oneapi2021.1.1-makefiles:
     extends:
         - .cmake_test_linux_inteloneapi_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: oneapi2021.1.1_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.1.1-rhel8
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.1.1-el8
 
 test:oneapi2021.1.2-makefiles:
     extends:
         - .cmake_test_linux_inteloneapi_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: oneapi2021.1.2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.1.2-rhel8
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.1.2-el8
 
 build:linux-x86_64-package:
     extends:
