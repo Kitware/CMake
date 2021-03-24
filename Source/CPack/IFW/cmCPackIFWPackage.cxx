@@ -31,7 +31,7 @@ cmCPackIFWPackage::DependenceStruct::DependenceStruct(
   const std::string& dependence)
 {
   // Search compare section
-  size_t pos = std::string::npos;
+  size_t pos;
   if ((pos = dependence.find("<=")) != std::string::npos) {
     this->Compare.Type = cmCPackIFWPackage::CompareLessOrEqual;
     this->Compare.Value = dependence.substr(pos + 2);
