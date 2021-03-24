@@ -28,6 +28,11 @@ Also sets the variables:
 :variable:`PROJECT_BINARY_DIR`, :variable:`<PROJECT-NAME>_BINARY_DIR`
   Absolute path to the binary directory for the project.
 
+:variable:`PROJECT_IS_TOP_LEVEL`, :variable:`<PROJECT-NAME>_IS_TOP_LEVEL`
+  .. versionadded:: 3.21
+
+  Boolean value indicating whether the project is top-level.
+
 Further variables are set by the optional arguments described in the following.
 If any of these arguments is not used, then the corresponding variables are
 set to the empty string.
