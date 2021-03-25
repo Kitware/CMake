@@ -80,8 +80,10 @@ The options are:
   :prop_sf:`GENERATED` files during ``make clean``.
 
   .. versionadded:: 3.20
-    Arguments to ``BYPRODUCTS`` may use
+    Arguments to ``BYPRODUCTS`` may use a restricted set of
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
+    :ref:`Target-dependent expressions <Target-Dependent Queries>` are not
+    permitted.
 
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
@@ -235,8 +237,10 @@ The options are:
   source file property.
 
   .. versionadded:: 3.20
-    Arguments to ``OUTPUT`` may use
+    Arguments to ``OUTPUT`` may use a restricted set of
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
+    :ref:`Target-dependent expressions <Target-Dependent Queries>` are not
+    permitted.
 
 ``USES_TERMINAL``
   .. versionadded:: 3.2

@@ -709,6 +709,8 @@ Variable Queries
     properties to avoid side-effects due to the double evaluation of
     these properties.
 
+.. _`Target-Dependent Queries`:
+
 Target-Dependent Queries
 ------------------------
 
