@@ -10,12 +10,14 @@
 
 cmInstallGenerator::cmInstallGenerator(
   std::string destination, std::vector<std::string> const& configurations,
-  std::string component, MessageLevel message, bool exclude_from_all)
+  std::string component, MessageLevel message, bool exclude_from_all,
+  cmListFileBacktrace backtrace)
   : cmScriptGenerator("CMAKE_INSTALL_CONFIG_NAME", configurations)
   , Destination(std::move(destination))
   , Component(std::move(component))
   , Message(message)
   , ExcludeFromAll(exclude_from_all)
+  , Backtrace(std::move(backtrace))
 {
 }
 

@@ -150,7 +150,7 @@ void cmCTestLaunchReporter::WriteXML()
   this->WriteXMLLabels(e2);
 }
 
-void cmCTestLaunchReporter::WriteXMLAction(cmXMLElement& e2)
+void cmCTestLaunchReporter::WriteXMLAction(cmXMLElement& e2) const
 {
   e2.Comment("Meta-information about the build action");
   cmXMLElement e3(e2, "Action");
@@ -284,7 +284,7 @@ void cmCTestLaunchReporter::DumpFileToXML(cmXMLElement& e3, const char* tag,
 
   cmXMLElement e4(e3, tag);
   while (cmSystemTools::GetLineFromStream(fin, line)) {
-    if (MatchesFilterPrefix(line)) {
+    if (this->MatchesFilterPrefix(line)) {
       continue;
     }
     if (this->Match(line, this->RegexWarningSuppress)) {

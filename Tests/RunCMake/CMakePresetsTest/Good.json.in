@@ -1,0 +1,175 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "default",
+            "generator": "@RunCMake_GENERATOR@",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "environment": {
+                "TEST_ENV": "Environment variable",
+                "TEST_ENV_OVERRIDE": "Overridden environment variable"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-default-debug",
+            "configurePreset": "default",
+            "configuration": "Debug"
+        },
+        {
+            "name": "build-default-release",
+            "inherits": "build-default-debug",
+            "configuration": "Release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "minimal",
+            "configurePreset": "default"
+        },
+        {
+            "name": "defaults",
+            "hidden": false,
+            "inherits": [],
+            "vendor": {},
+            "displayName": "",
+            "description": "",
+            "environment": {},
+            "configurePreset": "default",
+            "inheritConfigureEnvironment": true,
+            "configuration": "",
+            "overwriteConfigurationFile": [],
+            "output": {
+                "shortProgress": false,
+                "verbosity": "default",
+                "debug": false,
+                "outputOnFailure": false,
+                "quiet": false,
+                "outputLogFile": "",
+                "labelSummary": true,
+                "subprojectSummary": true
+            },
+            "filter": {
+                "include": {
+                    "name": "",
+                    "label": "",
+                    "useUnion": false,
+                    "index": ""
+                },
+                "exclude": {
+                    "name": "",
+                    "label": "",
+                    "fixtures": {
+                        "any": "",
+                        "setup": "",
+                        "cleanup": ""
+                    }
+                }
+            },
+            "execution": {
+                "stopOnFailure": false,
+                "enableFailover": false,
+                "jobs": 0,
+                "resourceSpecFile": "",
+                "showOnly": "human",
+                "repeat": {
+                    "mode": "until-pass",
+                    "count": 1
+                },
+                "interactiveDebugging": false,
+                "scheduleRandom": false,
+                "noTestsAction": "default"
+            }
+        },
+        {
+            "name": "noEnvironment",
+            "configurePreset": "default",
+            "inheritConfigureEnvironment": false,
+            "environment": {
+                "TEST_ENV_REF": "x$env{TEST_ENV}x"
+            },
+            "filter": {
+                "include": {
+                    "name": "test-env"
+                }
+            },
+            "output": {
+                "verbosity": "verbose"
+            }
+        },
+        {
+            "name": "withEnvironment",
+            "inherits": "noEnvironment",
+            "inheritConfigureEnvironment": true,
+            "environment": {
+                "TEST_ENV_OVERRIDE": "Override",
+                "TEST_ENV_OVERRIDE_REF": "x$env{TEST_ENV_OVERRIDE}x",
+                "TEST_ENV_REF": "x$env{TEST_ENV}x"
+            }
+        },
+        {
+            "name": "config-debug",
+            "inherits": "minimal",
+            "configuration": "Debug",
+            "filter": {
+                "include": {
+                    "label": "config"
+                }
+            }
+        },
+        {
+            "name": "config-release",
+            "inherits": "minimal",
+            "configuration": "Release",
+            "filter": {
+                "include": {
+                    "label": "config"
+                }
+            }
+        },
+        {
+            "name": "exclude",
+            "inherits": "minimal",
+            "filter": {
+                "exclude": {
+                    "name": "test-env",
+                    "label": "(ab|config)"
+                }
+            }
+        },
+        {
+            "name": "index",
+            "inherits": "minimal",
+            "filter": {
+                "include": {
+                    "index": {
+                        "end": 4,
+                        "stride": 2
+                    }
+                }
+            }
+        },
+        {
+            "name": "indexFile",
+            "inherits": "minimal",
+            "filter": {
+                "include": {
+                    "index": "${sourceDir}/Good-indexFile.txt"
+                }
+            }
+        },
+        {
+            "name": "showOnly",
+            "inherits": "minimal",
+            "filter": {
+                "include": {
+                    "label": "echo"
+                }
+            },
+            "execution": {
+                "showOnly": "human"
+            }
+        }
+    ]
+}

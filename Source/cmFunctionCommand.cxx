@@ -163,8 +163,11 @@ bool cmFunctionFunctionBlocker::Replay(
   f.FilePath = this->GetStartingContext().FilePath;
   f.Line = this->GetStartingContext().Line;
   mf.RecordPolicies(f.Policies);
-  mf.GetState()->AddScriptedCommand(this->Args.front(), std::move(f));
-  return true;
+  return mf.GetState()->AddScriptedCommand(
+    this->Args.front(),
+    BT<cmState::Command>(std::move(f),
+                         mf.GetBacktrace().Push(this->GetStartingContext())),
+    mf);
 }
 
 } // anonymous namespace

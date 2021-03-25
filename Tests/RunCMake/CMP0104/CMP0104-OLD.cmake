@@ -1,3 +1,5 @@
+set(ENV{CUDAARCHS})
+
 cmake_policy(SET CMP0104 OLD)
 include(CMP0104-Common.cmake)
 

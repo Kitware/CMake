@@ -13,7 +13,7 @@
 class cmXCode21Object : public cmXCodeObject
 {
 public:
-  cmXCode21Object(PBXType ptype, Type type);
+  cmXCode21Object(PBXType ptype, Type type, std::string id);
   void PrintComment(std::ostream&) override;
   static void PrintList(std::vector<std::unique_ptr<cmXCodeObject>> const&,
                         std::ostream& out, PBXType t);

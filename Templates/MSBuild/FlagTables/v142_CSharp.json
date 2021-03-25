@@ -201,6 +201,13 @@
     "flags": []
   },
   {
+    "name":  "DebugType",
+    "switch": "debug:portable",
+    "comment": "",
+    "value": "portable",
+    "flags": []
+  },
+  {
     "name":  "Optimize",
     "switch": "optimize",
     "comment": "",
@@ -262,6 +269,17 @@
     "comment": "",
     "value": "",
     "flags": []
+  },
+  {
+    "name":  "WarningsAsErrors",
+    "switch": "warnaserror:",
+    "comment": "",
+    "value": "",
+    "flags": [
+      "UserValue",
+      "UserRequired",
+      "CommaAppendable"
+    ]
   },
   {
     "name":  "WarningLevel",

@@ -34,7 +34,7 @@ Repeated calls for the same ``<target>`` will append items in the order called.
 
 Projects should generally avoid using ``PUBLIC`` or ``INTERFACE`` for targets
 that will be :ref:`exported <install(EXPORT)>`, or they should at least use
-the ``$<BUILD_INTERFACE:...>`` generator expression to prevent precompile
+the :genex:`$<BUILD_INTERFACE:...>` generator expression to prevent precompile
 headers from appearing in an installed exported target.  Consumers of a target
 should typically be in control of what precompile headers they use, not have
 precompile headers forced on them by the targets being consumed (since
@@ -74,7 +74,7 @@ Arguments to ``target_precompile_headers()`` may use "generator expressions"
 with the syntax ``$<...>``.
 See the :manual:`cmake-generator-expressions(7)` manual for available
 expressions.
-The ``$<COMPILE_LANGUAGE:...>`` generator expression is particularly
+The :genex:`$<COMPILE_LANGUAGE:...>` generator expression is particularly
 useful for specifying a language-specific header to precompile for
 only one language (e.g. ``CXX`` and not ``C``).  In this case, header
 file names that are not explicitly in double quotes or angle brackets

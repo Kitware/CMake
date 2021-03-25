@@ -10,4 +10,6 @@ if (NOT "$ENV{CMAKE_BUILD_TYPE}" STREQUAL "")
   set(CMAKE_BUILD_TYPE "$ENV{CMAKE_BUILD_TYPE}" CACHE STRING "")
 endif ()
 
-include("${CMAKE_CURRENT_LIST_DIR}/configure_sccache.cmake")
+if (NOT configure_no_sccache)
+  include("${CMAKE_CURRENT_LIST_DIR}/configure_sccache.cmake")
+endif()

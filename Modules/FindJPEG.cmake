@@ -10,6 +10,8 @@ Find the Joint Photographic Experts Group (JPEG) library (``libjpeg``)
 Imported targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.12
+
 This module defines the following :prop_tgt:`IMPORTED` targets:
 
 ``JPEG::JPEG``
@@ -27,7 +29,8 @@ This module will set the following variables in your project:
 ``JPEG_LIBRARIES``
   the libraries needed to use JPEG.
 ``JPEG_VERSION``
-  the version of the JPEG library found
+  .. versionadded:: 3.12
+    the version of the JPEG library found
 
 Cache variables
 ^^^^^^^^^^^^^^^
@@ -41,6 +44,9 @@ The following cache variables may also be set:
 ``JPEG_LIBRARY_DEBUG``
   where to find the JPEG library (debug).
 
+.. versionadded:: 3.12
+  Debug and Release variand are found separately.
+
 Obsolete variables
 ^^^^^^^^^^^^^^^^^^
 
@@ -52,7 +58,7 @@ Obsolete variables
 
 find_path(JPEG_INCLUDE_DIR jpeglib.h)
 
-set(jpeg_names ${JPEG_NAMES} jpeg jpeg-static libjpeg libjpeg-static)
+set(jpeg_names ${JPEG_NAMES} jpeg jpeg-static libjpeg libjpeg-static turbojpeg turbojpeg-static)
 foreach(name ${jpeg_names})
   list(APPEND jpeg_names_debug "${name}d")
 endforeach()

@@ -27,6 +27,12 @@ Environment variable :envvar:`SOME_ENV_VAR`.
 Environment variable :envvar:`some env var <SOME_ENV_VAR>` with space and target.
 Generator :generator:`Some Generator` with space.
 Generator :cpack_gen:`Some Generator` with space.
+Generator expression :genex:`SOME_GENEX`.
+Generator expression :genex:`$<SOME_GENEX>` with brackets.
+Generator expression :genex:`$<SOME_GENEX:...>` with brackets and parameter.
+Generator expression :genex:`some genex <SOME_GENEX>` with space and target.
+Generator expression :genex:`$<SOME_GENEX> <SOME_GENEX>` with brackets, space, and target.
+Generator expression :genex:`$<SOME_GENEX:...> <SOME_GENEX>` with brackets, parameter, space, and target.
 Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
 Inline link `Link Text <ExternalDest>`_.
 Inline link `Link Text \<With \\-escaped Brackets\> <ExternalDest>`_.
@@ -50,6 +56,22 @@ Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
 .. command:: other_cmd
 
    Command other_cmd description.
+
+.. cmake:envvar:: some_var
+
+   Environment variable some_var description.
+
+.. envvar:: other_var
+
+   Environment variable other_var description.
+
+.. cmake:genex:: SOME_GENEX
+
+   Generator expression SOME_GENEX description.
+
+.. genex:: $<OTHER_GENEX>
+
+   Generator expression $<OTHER_GENEX> description.
 
 .. cmake:variable:: some_var
 

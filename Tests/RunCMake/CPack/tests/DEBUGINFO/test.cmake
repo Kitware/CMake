@@ -1,7 +1,7 @@
 set(CMAKE_BUILD_WITH_INSTALL_RPATH 1)
 
-# PGI compiler doesn't add build id to binaries by default
-if(CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
+# Some compilers do not add build id to binaries by default.
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(IntelLLVM|PGI|NVHPC)$")
   string(APPEND CMAKE_EXE_LINKER_FLAGS "-Wl,--build-id")
   string(APPEND CMAKE_SHARED_LINKER_FLAGS "-Wl,--build-id")
 endif()
@@ -23,6 +23,7 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/main.cpp"
 add_executable(test_prog "${CMAKE_CURRENT_BINARY_DIR}/main.cpp")
 target_link_libraries(test_prog test_lib)
 
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/test_lib.hpp" DESTINATION include COMPONENT appheaders)
 install(TARGETS test_prog DESTINATION foo COMPONENT applications)
 install(FILES CMakeLists.txt DESTINATION bar COMPONENT headers)
 install(TARGETS test_lib DESTINATION bas COMPONENT libs)
@@ -39,6 +40,10 @@ set(CPACK_PACKAGE_FILE_NAME "TestDinfo-pkg")
 set(CPACK_RPM_LIBS_DEBUGINFO_PACKAGE ON)
 set(CPACK_DEBIAN_PACKAGE_NAME "Debuginfo")
 set(CPACK_DEBIAN_LIBS_DEBUGINFO_PACKAGE ON)
+
+# Test that a component with debug info requested but without any debug info produces none
+set(CPACK_RPM_APPHEADERS_DEBUGINFO_PACKAGE ON)
+set(CPACK_DEBIAN_APPHEADERS_DEBUGINFO_PACKAGE ON)
 
 # test debuginfo package rename
 set(CPACK_RPM_DEBUGINFO_FILE_NAME

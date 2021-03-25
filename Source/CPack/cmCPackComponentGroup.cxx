@@ -25,6 +25,6 @@ unsigned long cmCPackComponent::GetInstalledSize(
 unsigned long cmCPackComponent::GetInstalledSizeInKbytes(
   const std::string& installDir) const
 {
-  unsigned long result = (GetInstalledSize(installDir) + 512) / 1024;
+  unsigned long result = (this->GetInstalledSize(installDir) + 512) / 1024;
   return result ? result : 1;
 }

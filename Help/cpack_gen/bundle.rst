@@ -36,6 +36,8 @@ Bundle-specific parameters (``CPACK_BUNDLE_xxx``).
 
 .. variable:: CPACK_BUNDLE_APPLE_CERT_APP
 
+ .. versionadded:: 3.2
+
  The name of your Apple supplied code signing certificate for the application.
  The name usually takes the form ``Developer ID Application: [Name]`` or
  ``3rd Party Mac Developer Application: [Name]``. If this variable is not set
@@ -43,11 +45,15 @@ Bundle-specific parameters (``CPACK_BUNDLE_xxx``).
 
 .. variable:: CPACK_BUNDLE_APPLE_ENTITLEMENTS
 
+ .. versionadded:: 3.2
+
  The name of the Property List (``.plist``) file that contains your Apple
  entitlements for sandboxing your application. This file is required
  for submission to the macOS App Store.
 
 .. variable:: CPACK_BUNDLE_APPLE_CODESIGN_FILES
+
+ .. versionadded:: 3.2
 
  A list of additional files that you wish to be signed. You do not need to
  list the main application folder, or the main executable. You should
@@ -55,10 +61,14 @@ Bundle-specific parameters (``CPACK_BUNDLE_xxx``).
 
 .. variable:: CPACK_BUNDLE_APPLE_CODESIGN_PARAMETER
 
+ .. versionadded:: 3.3
+
  Additional parameter that will passed to ``codesign``.
  Default value: ``--deep -f``
 
 .. variable:: CPACK_COMMAND_CODESIGN
+
+ .. versionadded:: 3.2
 
  Path to the ``codesign(1)`` command used to sign applications with an
  Apple cert. This variable can be used to override the automatically

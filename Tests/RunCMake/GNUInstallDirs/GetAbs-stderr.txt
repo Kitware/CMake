@@ -1,0 +1,12 @@
+^PROJ1_FULL_BINDIR='/usr/bin'
+CMake Warning \(dev\) at [^
+]*/Modules/GNUInstallDirs.cmake:[0-9]+ \(message\):
+  GNUInstallDirs_get_absolute_install_dir called without third argument.
+  Using \${dir} from the caller's scope for compatibility with CMake 3.19 and
+  below.
+Call Stack \(most recent call first\):
+  GetAbs.cmake:10 \(GNUInstallDirs_get_absolute_install_dir\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+PROJ2_FULL_BINDIR='/usr/bin'$

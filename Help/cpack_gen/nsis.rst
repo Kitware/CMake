@@ -3,7 +3,8 @@ CPack NSIS Generator
 
 CPack Nullsoft Scriptable Install System (NSIS) generator specific options.
 
-The NSIS generator requires NSIS 3.0 or newer.
+.. versionchanged:: 3.17
+ The NSIS generator requires NSIS 3.0 or newer.
 
 Variables specific to CPack NSIS generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -33,9 +34,13 @@ on Windows Nullsoft Scriptable Install System.
 
 .. variable:: CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP
 
+ .. versionadded:: 3.5
+
  The filename of a bitmap to use as the NSIS ``MUI_WELCOMEFINISHPAGE_BITMAP``.
 
 .. variable:: CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP
+
+ .. versionadded:: 3.5
 
  The filename of a bitmap to use as the NSIS ``MUI_UNWELCOMEFINISHPAGE_BITMAP``.
 
@@ -99,6 +104,8 @@ on Windows Nullsoft Scriptable Install System.
 
 .. variable:: CPACK_NSIS_<compName>_INSTALL_DIRECTORY
 
+ .. versionadded:: 3.7
+
  Custom install directory for the specified component ``<compName>`` instead
  of ``$INSTDIR``.
 
@@ -133,29 +140,56 @@ on Windows Nullsoft Scriptable Install System.
 
 .. variable:: CPACK_NSIS_UNINSTALL_NAME
 
+ .. versionadded:: 3.17
+
  Specify the name of the program to uninstall the version.
  Default is ``Uninstall``.
 
 .. variable:: CPACK_NSIS_WELCOME_TITLE
 
+  .. versionadded:: 3.17
+
   The title to display on the top of the page for the welcome page.
 
 .. variable:: CPACK_NSIS_WELCOME_TITLE_3LINES
+
+ .. versionadded:: 3.17
 
  Display the title in the welcome page on 3 lines instead of 2.
 
 .. variable:: CPACK_NSIS_FINISH_TITLE
 
+ .. versionadded:: 3.17
+
  The title to display on the top of the page for the finish page.
 
 .. variable:: CPACK_NSIS_FINISH_TITLE_3LINES
+
+ .. versionadded:: 3.17
 
  Display the title in the finish page on 3 lines instead of 2.
 
 .. variable:: CPACK_NSIS_MUI_HEADERIMAGE
 
+ .. versionadded:: 3.17
+
  The image to display on the header of installers pages.
 
 .. variable:: CPACK_NSIS_MANIFEST_DPI_AWARE
 
+ .. versionadded:: 3.18
+
  If set, declares that the installer is DPI-aware.
+
+.. variable:: CPACK_NSIS_BRANDING_TEXT
+
+ .. versionadded:: 3.20
+
+ If set, updates the text at the bottom of the install window.
+ To set the string to blank, use a space (" ").
+
+.. variable:: CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION
+
+ .. versionadded:: 3.20
+
+ If set, trim down the size of the control to the size of the branding text string.

@@ -17,6 +17,9 @@ Try to find X11 on UNIX systems. The following values are defined
 
 and also the following more fine grained variables and targets:
 
+.. versionadded:: 3.14
+  Imported targets.
+
 ::
 
   X11_ICE_INCLUDE_PATH,          X11_ICE_LIB,        X11_ICE_FOUND,        X11::ICE
@@ -62,6 +65,23 @@ and also the following more fine grained variables and targets:
   X11_Xshape_INCLUDE_PATH,       (in X11_Xext_LIB),  X11_Xshape_FOUND
   X11_XSync_INCLUDE_PATH,        (in X11_Xext_LIB),  X11_XSync_FOUND
   X11_Xaw_INCLUDE_PATH,          X11_Xaw_LIB         X11_Xaw_FOUND         X11::Xaw
+
+.. versionadded:: 3.14
+  Renamed ``Xxf86misc``, ``X11_Xxf86misc``, ``X11_Xxf86vm``, ``X11_xkbfile``,
+  ``X11_Xtst``, and ``X11_Xss`` libraries to match their file names.
+  Deprecated the ``X11_Xinput`` library.  Old names are still available
+  for compatibility.
+
+.. versionadded:: 3.14
+  Added the ``X11_Xext_INCLUDE_PATH`` variable.
+
+.. versionadded:: 3.18
+  Added the ``xcb``, ``X11-xcb``, ``xcb-icccm``, ``xcb-xkb``, ``xkbcommon``,
+  and ``xkbcommon-X11`` libraries.
+
+.. versionadded:: 3.19
+  Added the ``Xaw``, ``xcb_util``, and ``xcb_xfixes`` libraries.
+
 #]=======================================================================]
 
 if (UNIX)

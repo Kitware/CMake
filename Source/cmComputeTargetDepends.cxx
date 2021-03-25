@@ -525,7 +525,7 @@ void cmComputeTargetDepends::DisplayGraph(Graph const& graph,
 void cmComputeTargetDepends::DisplaySideEffects()
 {
   fprintf(stderr, "The side effects are:\n");
-  int n = static_cast<int>(SideEffects.size());
+  int n = static_cast<int>(this->SideEffects.size());
   for (int depender_index = 0; depender_index < n; ++depender_index) {
     cmGeneratorTarget const* depender = this->Targets[depender_index];
     fprintf(stderr, "target %d is [%s]\n", depender_index,

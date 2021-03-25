@@ -1,0 +1,4 @@
+^\[1/2\] Generating depend_Debug\.txt
+depend_Debug\.txt
+\[2/2\] Generating echo_depend_cmd_Debug\.txt
+echo_depend_cmd_Debug\.txt$

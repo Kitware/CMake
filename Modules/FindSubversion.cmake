@@ -31,9 +31,12 @@ If the command line client executable is found two macros are defined:
 ``Subversion_WC_INFO`` extracts information of a subversion working copy at a
 given location.  This macro defines the following variables if running
 Subversion's ``info`` command on ``<dir>`` succeeds; otherwise a
-``SEND_ERROR`` message is generated. The error can be ignored by providing the
-``IGNORE_SVN_FAILURE`` option, which causes these variables to remain
-undefined.
+``SEND_ERROR`` message is generated.
+
+.. versionadded:: 3.13
+  The error can be ignored by providing the
+  ``IGNORE_SVN_FAILURE`` option, which causes these variables to remain
+  undefined.
 
 ::
 

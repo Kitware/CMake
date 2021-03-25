@@ -144,7 +144,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     this->RequiredCMakeVersion = CMake_VERSION_ENCODE(v[0], v[1], v[2]);
   }
 
-  this->DebugMode = ComputeIfDebugModeWanted();
+  this->DebugMode = this->ComputeIfDebugModeWanted();
   this->DebugBuffer.clear();
 
   // Lookup target architecture, if any.
@@ -534,7 +534,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         loadedPackage = true;
       } else {
         // The package was not loaded. Report errors.
-        if (HandlePackageMode(HandlePackageModeType::Module)) {
+        if (this->HandlePackageMode(HandlePackageModeType::Module)) {
           loadedPackage = true;
         }
       }
@@ -1145,34 +1145,27 @@ bool cmFindPackageCommand::FindConfig()
 bool cmFindPackageCommand::FindPrefixedConfig()
 {
   std::vector<std::string> const& prefixes = this->SearchPaths;
-  for (std::string const& p : prefixes) {
-    if (this->SearchPrefix(p)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+    prefixes.begin(), prefixes.end(),
+    [this](std::string const& p) -> bool { return this->SearchPrefix(p); });
 }
 
 bool cmFindPackageCommand::FindFrameworkConfig()
 {
   std::vector<std::string> const& prefixes = this->SearchPaths;
-  for (std::string const& p : prefixes) {
-    if (this->SearchFrameworkPrefix(p)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(prefixes.begin(), prefixes.end(),
+                     [this](std::string const& p) -> bool {
+                       return this->SearchFrameworkPrefix(p);
+                     });
 }
 
 bool cmFindPackageCommand::FindAppBundleConfig()
 {
   std::vector<std::string> const& prefixes = this->SearchPaths;
-  for (std::string const& p : prefixes) {
-    if (this->SearchAppBundlePrefix(p)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(prefixes.begin(), prefixes.end(),
+                     [this](std::string const& p) -> bool {
+                       return this->SearchAppBundlePrefix(p);
+                     });
 }
 
 bool cmFindPackageCommand::ReadListFile(const std::string& f,
@@ -2070,8 +2063,8 @@ public:
   void SetSort(cmFindPackageCommand::SortOrderType o,
                cmFindPackageCommand::SortDirectionType d)
   {
-    SortOrder = o;
-    SortDirection = d;
+    this->SortOrder = o;
+    this->SortDirection = d;
   }
 
 protected:
@@ -2102,8 +2095,8 @@ private:
     // before testing the matches check if there is a specific sorting order to
     // perform
     if (this->SortOrder != cmFindPackageCommand::None) {
-      cmFindPackageCommand::Sort(matches.begin(), matches.end(), SortOrder,
-                                 SortDirection);
+      cmFindPackageCommand::Sort(matches.begin(), matches.end(),
+                                 this->SortOrder, this->SortDirection);
     }
 
     for (std::string const& i : matches) {

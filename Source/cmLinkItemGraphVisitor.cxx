@@ -98,7 +98,8 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
                                              std::string const& config,
                                              DependencyMap& dependencies)
 {
-  auto implementationLibraries = target.GetLinkImplementationLibraries(config);
+  const auto* implementationLibraries =
+    target.GetLinkImplementationLibraries(config);
   if (implementationLibraries != nullptr) {
     for (auto const& lib : implementationLibraries->Libraries) {
       auto const& name = lib.AsStr();
@@ -106,7 +107,7 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
     }
   }
 
-  auto interfaceLibraries =
+  const auto* interfaceLibraries =
     target.GetLinkInterfaceLibraries(config, &target, true);
   if (interfaceLibraries != nullptr) {
     for (auto const& lib : interfaceLibraries->Libraries) {

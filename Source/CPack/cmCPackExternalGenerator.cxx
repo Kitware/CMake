@@ -95,7 +95,7 @@ int cmCPackExternalGenerator::InstallProjectViaInstallCommands(
   bool setDestDir, const std::string& tempInstallDirectory)
 {
   if (this->StagingEnabled()) {
-    return cmCPackGenerator::InstallProjectViaInstallCommands(
+    return this->cmCPackGenerator::InstallProjectViaInstallCommands(
       setDestDir, tempInstallDirectory);
   }
 
@@ -106,7 +106,7 @@ int cmCPackExternalGenerator::InstallProjectViaInstallScript(
   bool setDestDir, const std::string& tempInstallDirectory)
 {
   if (this->StagingEnabled()) {
-    return cmCPackGenerator::InstallProjectViaInstallScript(
+    return this->cmCPackGenerator::InstallProjectViaInstallScript(
       setDestDir, tempInstallDirectory);
   }
 
@@ -118,7 +118,7 @@ int cmCPackExternalGenerator::InstallProjectViaInstalledDirectories(
   const mode_t* default_dir_mode)
 {
   if (this->StagingEnabled()) {
-    return cmCPackGenerator::InstallProjectViaInstalledDirectories(
+    return this->cmCPackGenerator::InstallProjectViaInstalledDirectories(
       setDestDir, tempInstallDirectory, default_dir_mode);
   }
 
@@ -130,7 +130,7 @@ int cmCPackExternalGenerator::RunPreinstallTarget(
   cmGlobalGenerator* globalGenerator, const std::string& buildConfig)
 {
   if (this->StagingEnabled()) {
-    return cmCPackGenerator::RunPreinstallTarget(
+    return this->cmCPackGenerator::RunPreinstallTarget(
       installProjectName, installDirectory, globalGenerator, buildConfig);
   }
 
@@ -145,7 +145,7 @@ int cmCPackExternalGenerator::InstallCMakeProject(
   std::string& absoluteDestFiles)
 {
   if (this->StagingEnabled()) {
-    return cmCPackGenerator::InstallCMakeProject(
+    return this->cmCPackGenerator::InstallCMakeProject(
       setDestDir, installDirectory, baseTempInstallDirectory, default_dir_mode,
       component, componentInstall, installSubDirectory, buildConfig,
       absoluteDestFiles);

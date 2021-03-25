@@ -5,19 +5,41 @@
 TestBigEndian
 -------------
 
-Define macro to determine endian type
+.. deprecated:: 3.20
 
-Check if the system is big endian or little endian
+  Supserseded by the :variable:`CMAKE_<LANG>_BYTE_ORDER` variable.
 
-::
+Check if the target architecture is big endian or little endian.
 
-  TEST_BIG_ENDIAN(VARIABLE)
-  VARIABLE - variable to store the result to
+.. command:: test_big_endian
+
+  .. code-block:: cmake
+
+    test_big_endian(<var>)
+
+  Stores in variable ``<var>`` either 1 or 0 indicating whether the
+  target architecture is big or little endian.
+
 #]=======================================================================]
+include_guard()
 
 include(CheckTypeSize)
 
-macro(TEST_BIG_ENDIAN VARIABLE)
+function(TEST_BIG_ENDIAN VARIABLE)
+  if(";${CMAKE_C_BYTE_ORDER};${CMAKE_CXX_BYTE_ORDER};${CMAKE_CUDA_BYTE_ORDER};${CMAKE_OBJC_BYTE_ORDER};${CMAKE_OBJCXX_BYTE_ORDER};" MATCHES ";(BIG_ENDIAN|LITTLE_ENDIAN);")
+    set(order "${CMAKE_MATCH_1}")
+    if(order STREQUAL "BIG_ENDIAN")
+      set("${VARIABLE}" 1 PARENT_SCOPE)
+    else()
+      set("${VARIABLE}" 0 PARENT_SCOPE)
+    endif()
+  else()
+    __TEST_BIG_ENDIAN_LEGACY_IMPL(is_big)
+    set("${VARIABLE}" "${is_big}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+macro(__TEST_BIG_ENDIAN_LEGACY_IMPL VARIABLE)
   if(NOT DEFINED HAVE_${VARIABLE})
     message(CHECK_START "Check if the system is big endian")
     message(CHECK_START "Searching 16 bit integer")
@@ -119,5 +141,3 @@ macro(TEST_BIG_ENDIAN VARIABLE)
       endif()
   endif()
 endmacro()
-
-

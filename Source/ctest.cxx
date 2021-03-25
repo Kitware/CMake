@@ -26,6 +26,9 @@ static const char* cmDocumentationUsage[][2] = { { nullptr,
                                                  { nullptr, nullptr } };
 
 static const char* cmDocumentationOptions[][2] = {
+  { "--preset <preset>, --preset=<preset>",
+    "Read arguments from a test preset." },
+  { "--list-presets", "List available test presets." },
   { "-C <cfg>, --build-config <cfg>", "Choose configuration to test." },
   { "--progress", "Enable short progress output from tests." },
   { "-V,--verbose", "Enable verbose output from tests." },
@@ -111,6 +114,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "--no-subproject-summary",
     "Disable timing summary information for "
     "subprojects." },
+  { "--test-dir <dir>", "Specify the directory in which to look for tests." },
   { "--build-and-test", "Configure, build and run a test." },
   { "--build-target", "Specify a specific target to build." },
   { "--build-nocmake", "Run the build without running cmake first." },

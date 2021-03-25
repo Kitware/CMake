@@ -5,9 +5,10 @@
 FindLua
 -------
 
-
-
 Locate Lua library.
+
+.. versionadded:: 3.18
+  Support for Lua 5.4.
 
 This module defines::
 

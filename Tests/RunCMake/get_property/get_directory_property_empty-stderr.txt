@@ -1,0 +1,4 @@
+^CMake Error at get_directory_property_empty.cmake:1 \(get_directory_property\):
+  get_directory_property given empty string for the property name to get
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

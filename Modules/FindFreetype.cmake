@@ -10,6 +10,8 @@ Find the FreeType font renderer includes and library.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.10
+
 This module defines the following :prop_tgt:`IMPORTED` target:
 
 ``Freetype::Freetype``
@@ -33,7 +35,10 @@ This module will set the following variables in your project:
 ``FREETYPE_LIBRARIES``
   the library to link against
 ``FREETYPE_VERSION_STRING``
-  the version of freetype found (since CMake 2.8.8)
+  the version of freetype found
+
+.. versionadded:: 3.7
+  Debug and Release variants are found separately.
 
 Hints
 ^^^^^

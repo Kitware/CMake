@@ -11,6 +11,9 @@
 
 std::string cmTrimWhitespace(cm::string_view str)
 {
+  // XXX(clang-tidy): This declaration and the next cannot be `const auto*`
+  // because the qualification of `auto` is platform-dependent.
+  // NOLINTNEXTLINE(readability-qualified-auto)
   auto start = str.begin();
   while (start != str.end() && cmIsSpace(*start)) {
     ++start;
@@ -18,6 +21,7 @@ std::string cmTrimWhitespace(cm::string_view str)
   if (start == str.end()) {
     return std::string();
   }
+  // NOLINTNEXTLINE(readability-qualified-auto)
   auto stop = str.end() - 1;
   while (cmIsSpace(*stop)) {
     --stop;
@@ -161,42 +165,42 @@ inline void MakeDigits(cm::string_view& view, char (&digits)[N],
 
 cmAlphaNum::cmAlphaNum(int val)
 {
-  MakeDigits(View_, Digits_, "%i", val);
+  MakeDigits(this->View_, this->Digits_, "%i", val);
 }
 
 cmAlphaNum::cmAlphaNum(unsigned int val)
 {
-  MakeDigits(View_, Digits_, "%u", val);
+  MakeDigits(this->View_, this->Digits_, "%u", val);
 }
 
 cmAlphaNum::cmAlphaNum(long int val)
 {
-  MakeDigits(View_, Digits_, "%li", val);
+  MakeDigits(this->View_, this->Digits_, "%li", val);
 }
 
 cmAlphaNum::cmAlphaNum(unsigned long int val)
 {
-  MakeDigits(View_, Digits_, "%lu", val);
+  MakeDigits(this->View_, this->Digits_, "%lu", val);
 }
 
 cmAlphaNum::cmAlphaNum(long long int val)
 {
-  MakeDigits(View_, Digits_, "%lli", val);
+  MakeDigits(this->View_, this->Digits_, "%lli", val);
 }
 
 cmAlphaNum::cmAlphaNum(unsigned long long int val)
 {
-  MakeDigits(View_, Digits_, "%llu", val);
+  MakeDigits(this->View_, this->Digits_, "%llu", val);
 }
 
 cmAlphaNum::cmAlphaNum(float val)
 {
-  MakeDigits(View_, Digits_, "%g", static_cast<double>(val));
+  MakeDigits(this->View_, this->Digits_, "%g", static_cast<double>(val));
 }
 
 cmAlphaNum::cmAlphaNum(double val)
 {
-  MakeDigits(View_, Digits_, "%g", val);
+  MakeDigits(this->View_, this->Digits_, "%g", val);
 }
 
 std::string cmCatViews(std::initializer_list<cm::string_view> views)

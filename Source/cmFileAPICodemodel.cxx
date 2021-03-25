@@ -145,7 +145,7 @@ class JBTIndex
 {
 public:
   JBTIndex() = default;
-  explicit operator bool() const { return Index != None; }
+  explicit operator bool() const { return this->Index != None; }
   Json::ArrayIndex Index = None;
   static Json::ArrayIndex const None = static_cast<Json::ArrayIndex>(-1);
 };
@@ -1324,7 +1324,7 @@ Json::Value Target::DumpInstallDestinations()
 {
   Json::Value destinations = Json::arrayValue;
   auto installGens = this->GT->Target->GetInstallGenerators();
-  for (auto itGen : installGens) {
+  for (auto* itGen : installGens) {
     destinations.append(this->DumpInstallDestination(itGen));
   }
   return destinations;

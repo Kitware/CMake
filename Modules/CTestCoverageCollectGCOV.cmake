@@ -39,7 +39,10 @@ After generating this tar file, it can be sent to CDash for display with the
     upload to CDash.  Relative paths will be interpreted with respect
     to the top-level build directory.
 
-  ``TARBALL_COMPRESSION <option>`` Specify a compression algorithm for the
+  ``TARBALL_COMPRESSION <option>``
+    .. versionadded:: 3.18
+
+    Specify a compression algorithm for the
     ``TARBALL`` data file.  Using this option reduces the size of the data file
     before it is submitted to CDash.  ``<option>`` must be one of ``GZIP``,
     ``BZIP2``, ``XZ``, ``ZSTD``, ``FROM_EXT``, or an expression that CMake
@@ -68,15 +71,23 @@ After generating this tar file, it can be sent to CDash for display with the
     If not specified, the default option is just ``-b -x``.
 
   ``GLOB``
+    .. versionadded:: 3.6
+
     Recursively search for .gcda files in build_dir rather than
     determining search locations by reading TargetDirectories.txt.
 
   ``DELETE``
+    .. versionadded:: 3.6
+
     Delete coverage files after they've been packaged into the .tar.
 
   ``QUIET``
     Suppress non-error messages that otherwise would have been
     printed out by this function.
+
+  .. versionadded:: 3.3
+    Added support for the :variable:`CTEST_CUSTOM_COVERAGE_EXCLUDE` variable.
+
 #]=======================================================================]
 
 function(ctest_coverage_collect_gcov)

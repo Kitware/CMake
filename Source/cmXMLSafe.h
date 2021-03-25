@@ -24,7 +24,7 @@ public:
   cmXMLSafe& Quotes(bool b = true);
 
   /** Get the escaped data as a string.  */
-  std::string str();
+  std::string str() const;
 
 private:
   char const* Data;

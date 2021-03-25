@@ -50,7 +50,10 @@ The options are:
   for an example.
 
 ``PROJECT_NAME <project-name>``
-  Ignored.  This was once used but is no longer needed.
+  Ignored since CMake 3.0.
+
+  .. versionchanged:: 3.14
+    This value is no longer required.
 
 ``TARGET <target-name>``
   Specify the name of a target to build.  If not specified the
@@ -68,10 +71,14 @@ The options are:
   Store the return value of the native build tool in the given variable.
 
 ``CAPTURE_CMAKE_ERROR <result-var>``
+  .. versionadded:: 3.7
+
   Store in the ``<result-var>`` variable -1 if there are any errors running
   the command and prevent ctest from returning non-zero if an error occurs.
 
 ``QUIET``
+  .. versionadded:: 3.3
+
   Suppress any CTest-specific non-error output that would have been
   printed to the console otherwise.  The summary of warnings / errors,
   as well as the output from the native build tool is unaffected by

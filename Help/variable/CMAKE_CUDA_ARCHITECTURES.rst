@@ -5,7 +5,8 @@ CMAKE_CUDA_ARCHITECTURES
 
 Default value for :prop_tgt:`CUDA_ARCHITECTURES` property of targets.
 
-This is initialized as follows depending on :variable:`CMAKE_CUDA_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>`:
+Initialized by the :envvar:`CUDAARCHS` environment variable if set.
+Otherwise as follows depending on :variable:`CMAKE_CUDA_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>`:
 
 - For ``Clang``: the oldest architecture that works.
 
@@ -17,3 +18,18 @@ and compiler versions.
 
 This variable is used to initialize the :prop_tgt:`CUDA_ARCHITECTURES` property
 on all targets. See the target property for additional information.
+
+Examples
+^^^^^^^^
+
+.. code-block:: cmake
+
+  cmake_minimum_required(VERSION)
+
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES 75)
+  endif()
+
+  project(example LANGUAGES CUDA)
+
+``CMAKE_CUDA_ARCHITECTURES`` will default to ``75`` unless overridden by the user.

@@ -64,15 +64,22 @@ build tree. In some cases, for example for packaging and for system
 wide installations, it is not desirable to write the user package
 registry.
 
-By default the ``export(PACKAGE)`` command does nothing (see policy
-:policy:`CMP0090`) because populating the user package registry has effects
-outside the source and build trees.  Set the
-:variable:`CMAKE_EXPORT_PACKAGE_REGISTRY` variable to add build directories to
-the CMake user package registry.
+.. versionchanged:: 3.1
+  If the :variable:`CMAKE_EXPORT_NO_PACKAGE_REGISTRY` variable
+  is enabled, the ``export(PACKAGE)`` command will do nothing.
+
+.. versionchanged:: 3.15
+  By default the ``export(PACKAGE)`` command does nothing (see policy
+  :policy:`CMP0090`) because populating the user package registry has effects
+  outside the source and build trees.  Set the
+  :variable:`CMAKE_EXPORT_PACKAGE_REGISTRY` variable to add build directories
+  to the CMake user package registry.
 
 .. code-block:: cmake
 
   export(TARGETS [target1 [target2 [...]]]  [ANDROID_MK <filename>])
+
+.. versionadded:: 3.7
 
 This signature exports cmake built targets to the android ndk build system
 by creating an Android.mk file that references the prebuilt targets. The

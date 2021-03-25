@@ -10,6 +10,8 @@ Find the GNU Transport Layer Security library (gnutls)
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.16
+
 This module defines :prop_tgt:`IMPORTED` target ``GnuTLS::GnuTLS``, if
 gnutls has been found.
 

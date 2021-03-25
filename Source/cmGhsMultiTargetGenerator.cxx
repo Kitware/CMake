@@ -62,7 +62,7 @@ void cmGhsMultiTargetGenerator::Generate()
       // Get the name of the executable to generate.
       this->TargetNameReal =
         this->GeneratorTarget->GetExecutableNames(this->ConfigName).Real;
-      if (cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()) {
+      if (this->cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()) {
         this->TagType = GhsMultiGpj::INTERGRITY_APPLICATION;
       } else {
         this->TagType = GhsMultiGpj::PROGRAM;
@@ -356,7 +356,7 @@ void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
     } else {
       fout << fname << "\n    :outputName=\"" << fname << ".rule\"\n";
     }
-    for (auto& byp : ccg.GetByproducts()) {
+    for (const auto& byp : ccg.GetByproducts()) {
       fout << "    :extraOutputFile=\"" << byp << "\"\n";
     }
   }
@@ -528,7 +528,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
     }
   }
 
-  for (auto& n : groupNames) {
+  for (const auto& n : groupNames) {
     groupFilesList[i] = n;
     i += 1;
   }
@@ -631,7 +631,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       }
     } else {
       std::vector<cmSourceFile const*> customCommands;
-      if (ComputeCustomCommandOrder(customCommands)) {
+      if (this->ComputeCustomCommandOrder(customCommands)) {
         std::string message = "The custom commands for target [" +
           this->GeneratorTarget->GetName() + "] had a cycle.\n";
         cmSystemTools::Error(message);
@@ -691,14 +691,14 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandLine(
    * the outputs is manually deleted.
    */
   bool specifyExtra = true;
-  for (auto& out : ccg.GetOutputs()) {
+  for (const auto& out : ccg.GetOutputs()) {
     fout << fname << '\n';
     fout << "    :outputName=\"" << out << "\"\n";
     if (specifyExtra) {
-      for (auto& byp : ccg.GetByproducts()) {
+      for (const auto& byp : ccg.GetByproducts()) {
         fout << "    :extraOutputFile=\"" << byp << "\"\n";
       }
-      for (auto& dep : ccg.GetDepends()) {
+      for (const auto& dep : ccg.GetDepends()) {
         fout << "    :depends=\"" << dep << "\"\n";
       }
       specifyExtra = false;
@@ -721,18 +721,15 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
 
 bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
 {
-  cmProp p = this->GeneratorTarget->GetProperty("ghs_integrity_app");
-  if (p) {
+  if (cmProp p = this->GeneratorTarget->GetProperty("ghs_integrity_app")) {
     return cmIsOn(*p);
   }
   std::vector<cmSourceFile*> sources;
   this->GeneratorTarget->GetSourceFiles(sources, this->ConfigName);
-  for (const cmSourceFile* sf : sources) {
-    if ("int" == sf->GetExtension()) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(sources.begin(), sources.end(),
+                     [](cmSourceFile const* sf) -> bool {
+                       return "int" == sf->GetExtension();
+                     });
 }
 
 bool cmGhsMultiTargetGenerator::ComputeCustomCommandOrder(
@@ -746,7 +743,7 @@ bool cmGhsMultiTargetGenerator::ComputeCustomCommandOrder(
   this->GeneratorTarget->GetCustomCommands(customCommands, this->ConfigName);
 
   for (cmSourceFile const* si : customCommands) {
-    bool r = VisitCustomCommand(temp, perm, order, si);
+    bool r = this->VisitCustomCommand(temp, perm, order, si);
     if (r) {
       return r;
     }
@@ -762,10 +759,10 @@ bool cmGhsMultiTargetGenerator::VisitCustomCommand(
   if (perm.find(si) == perm.end()) {
     /* set temporary mark; check if revisit*/
     if (temp.insert(si).second) {
-      for (auto& di : si->GetCustomCommand()->GetDepends()) {
-        cmSourceFile const* sf = this->GeneratorTarget->GetLocalGenerator()
-                                   ->GetMakefile()
-                                   ->GetSourceFileWithOutput(di);
+      for (const auto& di : si->GetCustomCommand()->GetDepends()) {
+        cmSourceFile const* sf =
+          this->GeneratorTarget->GetLocalGenerator()->GetSourceFileWithOutput(
+            di);
         /* if sf exists then visit */
         if (sf && this->VisitCustomCommand(temp, perm, order, sf)) {
           return true;

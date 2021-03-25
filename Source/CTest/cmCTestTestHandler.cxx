@@ -122,7 +122,7 @@ bool cmCTestSubdirCommand(std::vector<std::string> const& args,
       readit = status.GetMakefile().ReadDependentFile(fname);
     }
     if (!readit) {
-      status.SetError(cmStrCat("Could not find include file: ", fname));
+      status.SetError(cmStrCat("Could not load include file: ", fname));
       return false;
     }
   }
@@ -340,7 +340,7 @@ void cmCTestTestHandler::Initialize()
   this->ExcludeFixtureSetupRegExp.clear();
   this->ExcludeFixtureCleanupRegExp.clear();
 
-  TestsToRunString.clear();
+  this->TestsToRunString.clear();
   this->UseUnion = false;
   this->TestList.clear();
 }
@@ -877,7 +877,7 @@ bool cmCTestTestHandler::ComputeTestList()
     finalList.push_back(tp);
   }
 
-  UpdateForFixtures(finalList);
+  this->UpdateForFixtures(finalList);
 
   // Save the total number of tests before exclusions
   this->TotalNumberOfTests = this->TestList.size();
@@ -906,7 +906,7 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
     finalList.push_back(tp);
   }
 
-  UpdateForFixtures(finalList);
+  this->UpdateForFixtures(finalList);
 
   // Save the total number of tests before exclusions
   this->TotalNumberOfTests = this->TestList.size();
@@ -1675,7 +1675,7 @@ std::string cmCTestTestHandler::FindExecutable(
   // if everything else failed, check the users path, but only if a full path
   // wasn't specified
   if (fullPath.empty() && filepath.empty()) {
-    std::string const path = cmSystemTools::FindProgram(filename.c_str());
+    std::string path = cmSystemTools::FindProgram(filename.c_str());
     if (!path.empty()) {
       resultingConfig.clear();
       return path;

@@ -287,6 +287,12 @@ public:
   // running cmake needs paths to be in its format
   static std::string ConvertToRunCommandPath(const std::string& path);
 
+  /**
+   * For windows computes the long path for the given path,
+   * For Unix, it is a noop
+   */
+  static void ConvertToLongPath(std::string& path);
+
   /** compute the relative path from local to remote.  local must
       be a directory.  remote can be a file or a directory.
       Both remote and local must be full paths.  Basically, if

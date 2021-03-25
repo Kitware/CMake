@@ -125,9 +125,9 @@ bool cmCreateTestSourceList(std::vector<std::string> const& args,
     mf.AddDefinition("CMAKE_TESTDRIVER_ARGVC_FUNCTION", function);
   }
   mf.AddDefinition("CMAKE_FORWARD_DECLARE_TESTS", forwardDeclareCode);
-  mf.AddDefinition("CMAKE_FUNCTION_TABLE_ENTIRES", functionMapCode);
+  mf.AddDefinition("CMAKE_FUNCTION_TABLE_ENTRIES", functionMapCode);
   bool res = true;
-  if (!mf.ConfigureFile(configFile, driver, false, true, false, true)) {
+  if (!mf.ConfigureFile(configFile, driver, false, true, false)) {
     res = false;
   }
 

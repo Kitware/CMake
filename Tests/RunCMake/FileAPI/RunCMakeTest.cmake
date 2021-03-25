@@ -24,6 +24,7 @@ function(check_python case)
   file(GLOB index ${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/reply/index-*.json)
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} "${RunCMake_SOURCE_DIR}/${case}-check.py" "${index}" "${CMAKE_CXX_COMPILER_ID}"
+      "${RunCMake_TEST_BINARY_DIR}"
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output
     ERROR_VARIABLE output
@@ -50,7 +51,9 @@ run_cmake(ClientStateful)
 
 function(run_object object)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${object}-build)
+  list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0118=NEW)
   run_cmake(${object})
+  list(POP_BACK RunCMake_TEST_OPTIONS)
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(${object}-SharedStateless ${CMAKE_COMMAND} .)
   run_cmake_command(${object}-ClientStateless ${CMAKE_COMMAND} .)
@@ -60,3 +63,4 @@ endfunction()
 run_object(codemodel-v2)
 run_object(cache-v2)
 run_object(cmakeFiles-v1)
+run_object(toolchains-v1)

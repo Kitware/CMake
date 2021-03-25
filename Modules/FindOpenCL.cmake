@@ -9,8 +9,13 @@ FindOpenCL
 
 Finds Open Computing Language (OpenCL)
 
+.. versionadded:: 3.10
+  Detection of OpenCL 2.1 and 2.2.
+
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.7
 
 This module defines :prop_tgt:`IMPORTED` target ``OpenCL::OpenCL``, if
 OpenCL has been found.

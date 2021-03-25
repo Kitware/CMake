@@ -9,7 +9,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.haxx.se/docs/copyright.html.
+# are also available at https://curl.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -39,7 +39,7 @@ list(APPEND HHEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h
   )
 
-if(MSVC AND NOT CURL_STATICLIB)
+if(WIN32 AND NOT CURL_STATICLIB)
   list(APPEND CSOURCES libcurl.rc)
 endif()
 
@@ -49,15 +49,6 @@ endif()
 # # strtok.c - specify later
 # # strtoofft.c - specify later
 # )
-
-# # if we have Kerberos 4, right now this is never on
-# #OPTION(CURL_KRB4 "Use Kerberos 4" OFF)
-# IF(CURL_KRB4)
-# SET(CSOURCES ${CSOURCES}
-# krb4.c
-# security.c
-# )
-# ENDIF(CURL_KRB4)
 
 # #OPTION(CURL_MALLOC_DEBUG "Debug mallocs in Curl" OFF)
 # MARK_AS_ADVANCED(CURL_MALLOC_DEBUG)

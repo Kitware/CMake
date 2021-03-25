@@ -7,7 +7,7 @@ endif()
 set (TEST_EXE_DIR "${CMAKE_CURRENT_BINARY_DIR}/TestExe")
 file(MAKE_DIRECTORY "${TEST_EXE_DIR}")
 file(COPY "${CMAKE_COMMAND}" DESTINATION "${TEST_EXE_DIR}")
-get_filename_component (cmake_exe "${CMAKE_COMMAND}" NAME)
+cmake_path (GET CMAKE_COMMAND FILENAME cmake_exe)
 
 set (ENV{PATH} "${TEST_EXE_DIR}")
 

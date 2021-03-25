@@ -17,12 +17,20 @@ Normal Executables
                  [source1] [source2 ...])
 
 Adds an executable target called ``<name>`` to be built from the source
-files listed in the command invocation.  (The source files can be omitted
-here if they are added later using :command:`target_sources`.)  The
+files listed in the command invocation.  The
 ``<name>`` corresponds to the logical target name and must be globally
 unique within a project.  The actual file name of the executable built is
 constructed based on conventions of the native platform (such as
 ``<name>.exe`` or just ``<name>``).
+
+.. versionadded:: 3.1
+  Source arguments to ``add_executable`` may use "generator expressions" with
+  the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
+  manual for available expressions.
+
+.. versionadded:: 3.11
+  The source files can be omitted if they are added later using
+  :command:`target_sources`.
 
 By default the executable file will be created in the build tree
 directory corresponding to the source tree directory in which the
@@ -43,10 +51,8 @@ If ``EXCLUDE_FROM_ALL`` is given the corresponding property will be set on
 the created target.  See documentation of the :prop_tgt:`EXCLUDE_FROM_ALL`
 target property for details.
 
-Source arguments to ``add_executable`` may use "generator expressions" with
-the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
-manual for more on defining buildsystem properties.
+See the :manual:`cmake-buildsystem(7)` manual for more on defining
+buildsystem properties.
 
 See also :prop_sf:`HEADER_FILE_ONLY` on what to do if some sources are
 pre-processed, and you want to have the original sources reachable from
@@ -85,10 +91,14 @@ be used to refer to ``<target>`` in subsequent commands.  The ``<name>``
 does not appear in the generated buildsystem as a make target.  The
 ``<target>`` may not be an ``ALIAS``.
 
-An ``ALIAS`` to a non-``GLOBAL`` :ref:`Imported Target <Imported Targets>`
-has scope in the directory in which the alias is created and below.
-The :prop_tgt:`ALIAS_GLOBAL` target property can be used to check if the
-alias is global or not.
+.. versionadded:: 3.11
+  An ``ALIAS`` can target a ``GLOBAL`` :ref:`Imported Target <Imported Targets>`
+
+.. versionadded:: 3.18
+  An ``ALIAS`` can target a non-``GLOBAL`` Imported Target. Such alias is
+  scoped to the directory in which it is created and subdirectories.
+  The :prop_tgt:`ALIAS_GLOBAL` target property can be used to check if the
+  alias is global or not.
 
 ``ALIAS`` targets can be used as targets to read properties
 from, executables for custom commands and custom targets.  They can also be

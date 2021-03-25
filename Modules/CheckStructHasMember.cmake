@@ -23,18 +23,23 @@ Check if the given struct or class has the specified member variable
     <language> - the compiler to use (C or CXX)
 
 
-
 The following variables may be set before calling this macro to modify
 the way the check is run:
 
-::
-
-  CMAKE_REQUIRED_FLAGS = string of compile command line flags
-  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-  CMAKE_REQUIRED_INCLUDES = list of include directories
-  CMAKE_REQUIRED_LINK_OPTIONS = list of options to pass to link command
-  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
-  CMAKE_REQUIRED_QUIET = execute quietly without messages
+``CMAKE_REQUIRED_FLAGS``
+  string of compile command line flags.
+``CMAKE_REQUIRED_DEFINITIONS``
+  list of macros to define (-DFOO=bar).
+``CMAKE_REQUIRED_INCLUDES``
+  list of include directories.
+``CMAKE_REQUIRED_LINK_OPTIONS``
+  .. versionadded:: 3.14
+    list of options to pass to link command.
+``CMAKE_REQUIRED_LIBRARIES``
+  list of libraries to link.
+``CMAKE_REQUIRED_QUIET``
+  .. versionadded:: 3.1
+    execute quietly without messages.
 
 
 Example:

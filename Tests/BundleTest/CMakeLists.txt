@@ -3,6 +3,15 @@ project(BundleTest)
 set(MACOSX_BUNDLE_INFO_STRING "bundle_info_string")
 set(CMAKE_MacOSX_Content_COMPILE_OBJECT "\"${CMAKE_COMMAND}\" -E copy_if_different <SOURCE> <OBJECT>")
 
+if(CMAKE_GENERATOR STREQUAL "Xcode" AND
+   "${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+  # Tell Xcode to pretend the linker signed binaries so that
+  # editing with install_name_tool preserves ad-hoc signatures.
+  # See CMake Issue 21854.
+  # This option is supported by codesign on macOS 11 or higher.
+  set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "-o linker-signed")
+endif()
+
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
   COMMAND /bin/cp
@@ -19,7 +28,7 @@ set_source_files_properties(
   SomeRandomFile.txt
   "${BundleTest_SOURCE_DIR}/../../README.rst"
   PROPERTIES
-  MACOSX_PACKAGE_LOCATION MacOS
+  MACOSX_PACKAGE_LOCATION Other
   )
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/foobar")
@@ -56,11 +65,7 @@ install(TARGETS BundleTest DESTINATION Applications)
 # installed into a location that uses this output name this will fail if the
 # bundle does not respect the name.  Also the executable will not be found by
 # the test driver if this does not work.
-set_target_properties(BundleTest PROPERTIES
-  OUTPUT_NAME BundleTestExe
-  XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
-  XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
-  )
+set_target_properties(BundleTest PROPERTIES OUTPUT_NAME BundleTestExe)
 
 # Test executable versioning if it is supported.
 if(NOT XCODE)

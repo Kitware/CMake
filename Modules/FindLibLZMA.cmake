@@ -11,6 +11,8 @@ Find LZMA compression algorithm headers and library.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.14
+
 This module defines :prop_tgt:`IMPORTED` target ``LibLZMA::LibLZMA``, if
 liblzma has been found.
 

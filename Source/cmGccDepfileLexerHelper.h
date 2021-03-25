@@ -29,7 +29,8 @@ private:
   enum class State
   {
     Rule,
-    Dependency
+    Dependency,
+    Failed,
   };
   State HelperState = State::Rule;
 };

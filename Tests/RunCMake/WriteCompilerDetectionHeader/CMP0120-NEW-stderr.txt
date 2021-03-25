@@ -1,0 +1,6 @@
+^CMake Error at CMP0120-NEW.cmake:[0-9]+ \(include\):
+  include could not find requested file:
+
+    WriteCompilerDetectionHeader
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "cmInstallGenerator.h"
+#include "cmListFileCache.h"
 #include "cmScriptGenerator.h"
 
 class cmExportInstallFileGenerator;
@@ -29,7 +30,7 @@ public:
                            std::string const& component, MessageLevel message,
                            bool exclude_from_all, std::string filename,
                            std::string name_space, bool exportOld,
-                           bool android);
+                           bool android, cmListFileBacktrace backtrace);
   cmInstallExportGenerator(const cmInstallExportGenerator&) = delete;
   ~cmInstallExportGenerator() override;
 
@@ -44,8 +45,11 @@ public:
 
   const std::string& GetNamespace() const { return this->Namespace; }
 
+  std::string const& GetMainImportFile() const { return this->MainImportFile; }
+
   std::string const& GetDestination() const { return this->Destination; }
   std::string GetDestinationFile() const;
+  std::string GetFileName() const { return this->FileName; }
 
 protected:
   void GenerateScript(std::ostream& os) override;

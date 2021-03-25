@@ -238,16 +238,6 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       status.SetError("called with IMPORTED argument but no library type.");
       return false;
     }
-    if (type == cmStateEnums::OBJECT_LIBRARY) {
-      std::string reason;
-      if (!mf.GetGlobalGenerator()->HasKnownObjectFileLocation(&reason)) {
-        mf.IssueMessage(
-          MessageType::FATAL_ERROR,
-          "The OBJECT library type may not be used for IMPORTED libraries" +
-            reason + ".");
-        return true;
-      }
-    }
     if (type == cmStateEnums::INTERFACE_LIBRARY) {
       if (!cmGeneratorExpression::IsValidTargetName(libName)) {
         status.SetError(cmStrCat(

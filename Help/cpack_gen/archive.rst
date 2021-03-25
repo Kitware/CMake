@@ -12,6 +12,12 @@ any of the following formats:
   - TZST (.tar.zst)
   - ZIP (.zip)
 
+.. versionadded:: 3.1
+  ``7Z`` and ``TXZ`` formats support.
+
+.. versionadded:: 3.16
+  ``TZST`` format support.
+
 When this generator is called from ``CPackSourceConfig.cmake`` (or through
 the ``package_source`` target), then the generated archive will contain all
 files in the project directory, except those specified in
@@ -46,6 +52,9 @@ Variables specific to CPack Archive generator
   The default is ``<CPACK_PACKAGE_FILE_NAME>[-<component>]``, with spaces
   replaced by '-'.
 
+  .. versionadded:: 3.9
+    Per-component ``CPACK_ARCHIVE_<component>_FILE_NAME`` variables.
+
 .. variable:: CPACK_ARCHIVE_COMPONENT_INSTALL
 
   Enable component packaging. If enabled (ON), then the archive generator
@@ -63,11 +72,15 @@ CPack generators which are essentially archives at their core. These include:
 
 .. variable:: CPACK_ARCHIVE_THREADS
 
+  .. versionadded:: 3.18
+
   The number of threads to use when performing the compression. If set to
   ``0``, the number of available cores on the machine will be used instead.
   The default is ``1`` which limits compression to a single thread. Note that
   not all compression modes support threading in all environments. Currently,
   only the XZ compression may support it.
+
+  See also the :variable:`CPACK_THREADS` variable.
 
 .. note::
 

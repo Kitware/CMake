@@ -22,7 +22,7 @@ cmFindPathCommand::cmFindPathCommand(cmExecutionStatus& status)
 // cmFindPathCommand
 bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
-  this->DebugMode = ComputeIfDebugModeWanted();
+  this->DebugMode = this->ComputeIfDebugModeWanted();
   this->VariableDocumentation = "Path to a file.";
   this->CMakePathName = "INCLUDE";
   if (!this->ParseArguments(argsIn)) {
@@ -80,8 +80,8 @@ std::string cmFindPathCommand::FindHeader()
   return header;
 }
 
-std::string cmFindPathCommand::FindHeaderInFramework(std::string const& file,
-                                                     std::string const& dir)
+std::string cmFindPathCommand::FindHeaderInFramework(
+  std::string const& file, std::string const& dir) const
 {
   std::string fileName = file;
   std::string frameWorkName;

@@ -60,7 +60,7 @@ struct TextContent : public cmGeneratorExpressionEvaluator
 
   void Extend(size_t length) { this->Length += length; }
 
-  size_t GetLength() { return this->Length; }
+  size_t GetLength() const { return this->Length; }
 
 private:
   const char* Content;
@@ -108,7 +108,6 @@ private:
     std::vector<cmGeneratorExpressionEvaluatorVector>::const_iterator pit)
     const;
 
-private:
   cmGeneratorExpressionEvaluatorVector IdentifierChildren;
   std::vector<cmGeneratorExpressionEvaluatorVector> ParamChildren;
   const char* StartContent;

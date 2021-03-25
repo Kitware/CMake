@@ -21,4 +21,5 @@ foreach(case
   unset(RunCMake-stderr-file)
 endforeach()
 
+run_cmake(GetAbs)
 run_cmake(NoSystem)

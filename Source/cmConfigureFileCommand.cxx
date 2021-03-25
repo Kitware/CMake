@@ -3,11 +3,15 @@
 #include "cmConfigureFileCommand.h"
 
 #include <set>
+#include <sstream>
 
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include <sys/types.h>
+
 #include "cmExecutionStatus.h"
+#include "cmFSPermissions.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmNewLineStyle.h"
@@ -60,7 +64,19 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
   }
   bool copyOnly = false;
   bool escapeQuotes = false;
-  bool use_source_permissions = true;
+  bool useSourcePermissions = false;
+  bool noSourcePermissions = false;
+  bool filePermissions = false;
+  std::vector<std::string> filePermissionOptions;
+
+  enum class Doing
+  {
+    DoingNone,
+    DoingFilePermissions,
+    DoneFilePermissions
+  };
+
+  Doing doing = Doing::DoingNone;
 
   static std::set<cm::string_view> noopOptions = {
     /* Legacy.  */
@@ -78,6 +94,9 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
   bool atOnly = false;
   for (unsigned int i = 2; i < args.size(); ++i) {
     if (args[i] == "COPYONLY") {
+      if (doing == Doing::DoingFilePermissions) {
+        doing = Doing::DoneFilePermissions;
+      }
       copyOnly = true;
       if (newLineStyle.IsValid()) {
         status.SetError("COPYONLY could not be used in combination "
@@ -85,13 +104,49 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
         return false;
       }
     } else if (args[i] == "ESCAPE_QUOTES") {
+      if (doing == Doing::DoingFilePermissions) {
+        doing = Doing::DoneFilePermissions;
+      }
       escapeQuotes = true;
     } else if (args[i] == "@ONLY") {
+      if (doing == Doing::DoingFilePermissions) {
+        doing = Doing::DoneFilePermissions;
+      }
       atOnly = true;
     } else if (args[i] == "NO_SOURCE_PERMISSIONS") {
-      use_source_permissions = false;
+      if (doing == Doing::DoingFilePermissions) {
+        status.SetError(" given both FILE_PERMISSIONS and "
+                        "NO_SOURCE_PERMISSIONS. Only one option allowed.");
+        return false;
+      }
+      noSourcePermissions = true;
+    } else if (args[i] == "USE_SOURCE_PERMISSIONS") {
+      if (doing == Doing::DoingFilePermissions) {
+        status.SetError(" given both FILE_PERMISSIONS and "
+                        "USE_SOURCE_PERMISSIONS. Only one option allowed.");
+        return false;
+      }
+      useSourcePermissions = true;
+    } else if (args[i] == "FILE_PERMISSIONS") {
+      if (useSourcePermissions) {
+        status.SetError(" given both FILE_PERMISSIONS and "
+                        "USE_SOURCE_PERMISSIONS. Only one option allowed.");
+        return false;
+      }
+      if (noSourcePermissions) {
+        status.SetError(" given both FILE_PERMISSIONS and "
+                        "NO_SOURCE_PERMISSIONS. Only one option allowed.");
+        return false;
+      }
+
+      if (doing == Doing::DoingNone) {
+        doing = Doing::DoingFilePermissions;
+        filePermissions = true;
+      }
     } else if (noopOptions.find(args[i]) != noopOptions.end()) {
       /* Ignore no-op options.  */
+    } else if (doing == Doing::DoingFilePermissions) {
+      filePermissionOptions.push_back(args[i]);
     } else {
       unknown_args += " ";
       unknown_args += args[i];
@@ -104,9 +159,53 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
     status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, msg);
   }
 
-  if (!status.GetMakefile().ConfigureFile(
-        inputFile, outputFile, copyOnly, atOnly, escapeQuotes,
-        use_source_permissions, newLineStyle)) {
+  if (useSourcePermissions && noSourcePermissions) {
+    status.SetError(" given both USE_SOURCE_PERMISSIONS and "
+                    "NO_SOURCE_PERMISSIONS. Only one option allowed.");
+    return false;
+  }
+
+  mode_t permisiions = 0;
+
+  if (filePermissions) {
+    if (filePermissionOptions.empty()) {
+      status.SetError(" given FILE_PERMISSIONS without any options.");
+      return false;
+    }
+
+    std::vector<std::string> invalidOptions;
+    for (auto const& e : filePermissionOptions) {
+      if (!cmFSPermissions::stringToModeT(e, permisiions)) {
+        invalidOptions.push_back(e);
+      }
+    }
+
+    if (!invalidOptions.empty()) {
+      std::ostringstream oss;
+      oss << " given invalid permission ";
+      for (auto i = 0u; i < invalidOptions.size(); i++) {
+        if (i == 0u) {
+          oss << "\"" << invalidOptions[i] << "\"";
+        } else {
+          oss << ",\"" << invalidOptions[i] << "\"";
+        }
+      }
+      oss << ".";
+      status.SetError(oss.str());
+      return false;
+    }
+  }
+
+  if (noSourcePermissions) {
+    permisiions |= cmFSPermissions::mode_owner_read;
+    permisiions |= cmFSPermissions::mode_owner_write;
+    permisiions |= cmFSPermissions::mode_group_read;
+    permisiions |= cmFSPermissions::mode_world_read;
+  }
+
+  if (!status.GetMakefile().ConfigureFile(inputFile, outputFile, copyOnly,
+                                          atOnly, escapeQuotes, permisiions,
+                                          newLineStyle)) {
     status.SetError("Problem configuring file");
     return false;
   }

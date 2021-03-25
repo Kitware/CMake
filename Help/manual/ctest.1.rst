@@ -25,8 +25,20 @@ CMake-generated build trees created for projects that use the
 :command:`enable_testing` and :command:`add_test` commands have testing support.
 This program will run the tests and report results.
 
+.. _`CTest Options`:
+
 Options
 =======
+
+``--preset <preset>``, ``--preset=<preset>``
+ Use a test preset to specify test options. The project binary directory
+ is inferred from the ``configurePreset`` key. The current working directory
+ must contain CMake preset files.
+ See :manual:`preset <cmake-presets(7)>` for more details.
+
+``--list-presets``
+ Lists the available test presets. The current working directory must contain
+ CMake preset files.
 
 ``-C <cfg>, --build-config <cfg>``
  Choose configuration to test.
@@ -323,6 +335,9 @@ Options
 
 ``--build-and-test``
 See `Build and Test Mode`_.
+
+``--test-dir <dir>``
+Specify the directory in which to look for tests.
 
 ``--test-output-size-passed <size>``
  Limit the output for passed tests to ``<size>`` bytes.

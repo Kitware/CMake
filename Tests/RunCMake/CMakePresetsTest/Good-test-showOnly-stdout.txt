@@ -1,0 +1,8 @@
+Test project [^
+]*/Tests/RunCMake/CMakePresetsTest/Good/build/default
+  Test #1: testa
+  Test #2: testb
+  Test #3: testc
+  Test #4: testd
+
+Total Tests: 4

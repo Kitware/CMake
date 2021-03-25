@@ -7,6 +7,12 @@ if(__ANDROID_DETERMINE_COMPILER)
 endif()
 set(__ANDROID_DETERMINE_COMPILER 1)
 
+# Include the NDK hook.
+# It can be used by NDK to inject necessary fixes for an earlier cmake.
+if(CMAKE_ANDROID_NDK)
+  include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/pre/Determine-Compiler.cmake OPTIONAL)
+endif()
+
 # Support for NVIDIA Nsight Tegra Visual Studio Edition was previously
 # implemented in the CMake VS IDE generators.  Avoid interfering with
 # that functionality for now.  Later we may try to integrate this.
@@ -83,3 +89,9 @@ set(CMAKE_${lang}_ANDROID_TOOLCHAIN_SUFFIX \"${_ANDROID_TOOL_${lang}_TOOLCHAIN_S
 ")
   endif()
 endmacro()
+
+# Include the NDK hook.
+# It can be used by NDK to inject necessary fixes for an earlier cmake.
+if(CMAKE_ANDROID_NDK)
+  include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/post/Determine-Compiler.cmake OPTIONAL)
+endif()

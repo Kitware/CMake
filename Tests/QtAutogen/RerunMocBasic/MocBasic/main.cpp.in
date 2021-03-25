@@ -1,4 +1,5 @@
 #include "test1.h"
+#include "plainobject.h"
 
 extern int qInitResources_res1();
 
@@ -16,6 +17,7 @@ int main()
 
   Test1 test1;
   Test2 test2;
+  PlainObject plainObject;
 
   return 0;
 }

@@ -253,6 +253,12 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersion(
     // If value is an invalid pointer, leave result unchanged.
   }
 
+  return this->GetWindows10SDKMaxVersionDefault(mf);
+}
+
+std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersionDefault(
+  cmMakefile*) const
+{
   // The last Windows 10 SDK version that VS 2015 can target is 10.0.14393.0.
   //
   // "VS 2015 Users: The Windows 10 SDK (15063, 16299, 17134, 17763) is

@@ -17,6 +17,9 @@ can also be used:
 * to retrieve various information from Matlab (mex extensions, versions and
   release queries, ...)
 
+.. versionadded:: 3.12
+  Added Matlab Compiler Runtime (MCR) support.
+
 The module supports the following components:
 
 * ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the ``ENG`` and ``MAT``
@@ -27,6 +30,17 @@ The module supports the following components:
 * ``MEX_COMPILER`` the MEX compiler.
 * ``MCC_COMPILER`` the MCC compiler, included with the Matlab Compiler add-on.
 * ``SIMULINK`` the Simulink environment.
+
+.. versionadded:: 3.7
+  Added the ``MAT_LIBRARY`` component.
+
+.. versionadded:: 3.13
+  Added the ``ENGINE_LIBRARY``, ``DATAARRAY_LIBRARY`` and ``MCC_COMPILER``
+  components.
+
+.. versionchanged:: 3.14
+  Removed the ``MX_LIBRARY``, ``ENGINE_LIBRARY`` and ``DATAARRAY_LIBRARY``
+  components.  These libraries are found unconditionally.
 
 .. note::
 
@@ -107,8 +121,12 @@ Result variables
   Matlab matrix library. Available only if the component ``MAT_LIBRARY``
   is requested.
 ``Matlab_ENGINE_LIBRARY``
+  .. versionadded:: 3.13
+
   Matlab C++ engine library, always available for R2018a and newer.
 ``Matlab_DATAARRAY_LIBRARY``
+  .. versionadded:: 3.13
+
   Matlab C++ data array library, always available for R2018a and newer.
 ``Matlab_LIBRARIES``
   the whole set of libraries of Matlab
@@ -116,6 +134,8 @@ Result variables
   the mex compiler of Matlab. Currently not used.
   Available only if the component ``MEX_COMPILER`` is requested.
 ``Matlab_MCC_COMPILER``
+  .. versionadded:: 3.13
+
   the mcc compiler of Matlab. Included with the Matlab Compiler add-on.
   Available only if the component ``MCC_COMPILER`` is requested.
 
@@ -241,6 +261,7 @@ if(NOT MATLAB_ADDITIONAL_VERSIONS)
 endif()
 
 set(MATLAB_VERSIONS_MAPPING
+  "R2021a=9.10"
   "R2020b=9.9"
   "R2020a=9.8"
   "R2019b=9.7"
@@ -389,12 +410,12 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
 
   set(matlabs_from_registry)
 
-  foreach(_installation_type IN ITEMS "MATLAB" "MATLAB Runtime")
+  foreach(_installation_type IN ITEMS "MATLAB" "MATLAB Runtime" "MATLAB Compiler Runtime")
 
     # /reg:64 should be added on 64 bits capable OSs in order to enable the
     # redirection of 64 bits applications
     execute_process(
-      COMMAND reg query HKEY_LOCAL_MACHINE\\SOFTWARE\\Mathworks\\${_installation_type} /f * /k ${APPEND_REG}
+      COMMAND reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\Mathworks\\${_installation_type}" /f * /k ${APPEND_REG}
       RESULT_VARIABLE resultMatlab
       OUTPUT_VARIABLE varMatlab
       ERROR_VARIABLE errMatlab
@@ -405,12 +426,12 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
     if(resultMatlab EQUAL 0)
 
       string(
-        REGEX MATCHALL "MATLAB\\\\([0-9]+(\\.[0-9]+)?)"
+        REGEX MATCHALL "${_installation_type}\\\\([0-9]+(\\.[0-9]+)?)"
         matlab_versions_regex ${varMatlab})
 
       foreach(match IN LISTS matlab_versions_regex)
         string(
-          REGEX MATCH "MATLAB\\\\(([0-9]+)(\\.([0-9]+))?)"
+          REGEX MATCH "${_installation_type}\\\\(([0-9]+)(\\.([0-9]+))?)"
           current_match ${match})
 
         set(_matlab_current_version ${CMAKE_MATCH_1})
@@ -517,7 +538,7 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB\\${_matlab_current_version};MATLABROOT]"
       ABSOLUTE)
 
-    if(EXISTS ${current_MATLAB_ROOT})
+    if(EXISTS "${current_MATLAB_ROOT}")
       list(APPEND _matlab_roots_list "MATLAB" ${_matlab_current_version} ${current_MATLAB_ROOT})
     endif()
 
@@ -533,7 +554,23 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
     # remove the dot
     string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
 
-    if(EXISTS ${current_MATLAB_ROOT})
+    if(EXISTS "${current_MATLAB_ROOT}")
+      list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
+    endif()
+
+  endforeach()
+
+  # Check for old MCR installations
+  foreach(_matlab_current_version ${matlab_versions})
+    get_filename_component(
+      current_MATLAB_ROOT
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB Compiler Runtime\\${_matlab_current_version};MATLABROOT]"
+      ABSOLUTE)
+
+    # remove the dot
+    string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
+
+    if(EXISTS "${current_MATLAB_ROOT}")
       list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
     endif()
 
@@ -923,14 +960,26 @@ endfunction()
     the same folder without any processing, with the same name as the final
     mex file, and with extension `.m`. In that case, typing ``help <name>``
     in Matlab prints the documentation contained in this file.
-  ``R2017b`` or ``R2018a`` may be given to specify the version of the C API
+  ``R2017b`` or ``R2018a``
+    .. versionadded:: 3.14
+
+    May be given to specify the version of the C API
     to use: ``R2017b`` specifies the traditional (separate complex) C API,
     and corresponds to the ``-R2017b`` flag for the `mex` command. ``R2018a``
     specifies the new interleaved complex C API, and corresponds to the
     ``-R2018a`` flag for the `mex` command. Ignored if MATLAB version prior
     to R2018a. Defaults to ``R2017b``.
-  ``MODULE`` or ``SHARED`` may be given to specify the type of library to be
-    created. ``EXECUTABLE`` may be given to create an executable instead of
+
+  ``MODULE`` or ``SHARED``
+    .. versionadded:: 3.7
+
+    May be given to specify the type of library to be
+    created.
+
+  ``EXECUTABLE``
+    .. versionadded:: 3.7
+
+    May be given to create an executable instead of
     a library. If no type is given explicitly, the type is ``SHARED``.
   ``EXCLUDE_FROM_ALL``
     This option has the same meaning as for :prop_tgt:`EXCLUDE_FROM_ALL` and
@@ -1035,7 +1084,12 @@ function(matlab_add_mex)
   target_include_directories(${${prefix}_NAME} PRIVATE ${Matlab_INCLUDE_DIRS})
 
   if(Matlab_HAS_CPP_API)
-    target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY} ${Matlab_DATAARRAY_LIBRARY})
+    if(Matlab_ENGINE_LIBRARY)
+      target_link_libraries(${${prefix}_NAME} ${Matlab_ENGINE_LIBRARY})
+    endif()
+    if(Matlab_DATAARRAY_LIBRARY)
+      target_link_libraries(${${prefix}_NAME} ${Matlab_DATAARRAY_LIBRARY})
+    endif()
   endif()
 
   target_link_libraries(${${prefix}_NAME} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY} ${${prefix}_LINK_TO})
@@ -1655,32 +1709,34 @@ find_path(
   )
 list(APPEND _matlab_required_variables Matlab_INCLUDE_DIRS)
 
-_Matlab_find_library(
-  ${_matlab_lib_prefix_for_search}
-  Matlab_MEX_LIBRARY
-  mex
-  PATHS ${_matlab_lib_dir_for_search}
-  NO_DEFAULT_PATH
-)
-list(APPEND _matlab_required_variables Matlab_MEX_LIBRARY)
+if(Matlab_Or_MCR STREQUAL "MATLAB" OR Matlab_Or_MCR STREQUAL "UNKNOWN")
+  _Matlab_find_library(
+    ${_matlab_lib_prefix_for_search}
+    Matlab_MEX_LIBRARY
+    mex
+    PATHS ${_matlab_lib_dir_for_search}
+    NO_DEFAULT_PATH
+  )
+  list(APPEND _matlab_required_variables Matlab_MEX_LIBRARY)
 
-# the MEX extension is required
-list(APPEND _matlab_required_variables Matlab_MEX_EXTENSION)
+  # the MEX extension is required
+  list(APPEND _matlab_required_variables Matlab_MEX_EXTENSION)
 
-# the matlab root is required
-list(APPEND _matlab_required_variables Matlab_ROOT_DIR)
+  # the matlab root is required
+  list(APPEND _matlab_required_variables Matlab_ROOT_DIR)
 
-# The MX library is required
-_Matlab_find_library(
-  ${_matlab_lib_prefix_for_search}
-  Matlab_MX_LIBRARY
-  mx
-  PATHS ${_matlab_lib_dir_for_search}
-  NO_DEFAULT_PATH
-)
-list(APPEND _matlab_required_variables Matlab_MX_LIBRARY)
-if(Matlab_MX_LIBRARY)
-  set(Matlab_MX_LIBRARY_FOUND TRUE)
+  # The MX library is required
+  _Matlab_find_library(
+    ${_matlab_lib_prefix_for_search}
+    Matlab_MX_LIBRARY
+    mx
+    PATHS ${_matlab_lib_dir_for_search}
+    NO_DEFAULT_PATH
+  )
+  list(APPEND _matlab_required_variables Matlab_MX_LIBRARY)
+  if(Matlab_MX_LIBRARY)
+    set(Matlab_MX_LIBRARY_FOUND TRUE)
+  endif()
 endif()
 
 if(Matlab_HAS_CPP_API)
@@ -1694,7 +1750,6 @@ if(Matlab_HAS_CPP_API)
     DOC "MatlabEngine Library"
     NO_DEFAULT_PATH
   )
-  list(APPEND _matlab_required_variables Matlab_ENGINE_LIBRARY)
   if(Matlab_ENGINE_LIBRARY)
     set(Matlab_ENGINE_LIBRARY_FOUND TRUE)
   endif()
@@ -1708,7 +1763,6 @@ if(Matlab_HAS_CPP_API)
     DOC "MatlabDataArray Library"
     NO_DEFAULT_PATH
   )
-  list(APPEND _matlab_required_variables Matlab_DATAARRAY_LIBRARY)
   if(Matlab_DATAARRAY_LIBRARY)
     set(Matlab_DATAARRAY_LIBRARY_FOUND TRUE)
   endif()
@@ -1801,8 +1855,15 @@ endif()
 
 set(Matlab_LIBRARIES
   ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY}
-  ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY}
-  ${Matlab_DATAARRAY_LIBRARY} ${Matlab_ENGINE_LIBRARY})
+  ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY})
+
+if(Matlab_ENGINE_LIBRARY)
+  list(APPEND Matlab_LIBRARIES ${Matlab_ENGINE_LIBRARY})
+endif()
+
+if(Matlab_DATAARRAY_LIBRARY)
+  list(APPEND Matlab_LIBRARIES ${Matlab_DATAARRAY_LIBRARY})
+endif()
 
 find_package_handle_standard_args(
   Matlab

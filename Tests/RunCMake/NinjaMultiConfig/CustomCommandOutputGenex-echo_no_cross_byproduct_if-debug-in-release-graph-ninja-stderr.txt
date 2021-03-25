@@ -1,0 +1,1 @@
+ninja: error: 'echo_no_cross_byproduct_if_Debug\.txt', needed by 'CMakeFiles/echo_no_cross_byproduct_if-Debug', missing and no known rule to make it

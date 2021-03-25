@@ -7,11 +7,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -72,12 +72,6 @@ struct pollfd
    therefore defined here */
 #define CURL_CSELECT_IN2 (CURL_CSELECT_ERR << 1)
 
-int Curl_select(curl_socket_t maxfd,
-                fd_set *fds_read,
-                fd_set *fds_write,
-                fd_set *fds_err,
-                timediff_t timeout_ms);
-
 int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
                       curl_socket_t writefd,
                       timediff_t timeout_ms);
@@ -94,12 +88,23 @@ int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
                        fd_set* excepts, struct timeval *tv);
 #endif
 
-/* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1], which
+/* TPF sockets are not in range [0..FD_SETSIZE-1], which
    unfortunately makes it impossible for us to easily check if they're valid
+
+   With Winsock the valid range is [0..INVALID_SOCKET-1] according to
+   https://docs.microsoft.com/en-us/windows/win32/winsock/socket-data-type-2
 */
-#if defined(USE_WINSOCK) || defined(TPF)
+#if defined(TPF)
 #define VALID_SOCK(x) 1
 #define VERIFY_SOCK(x) Curl_nop_stmt
+#elif defined(USE_WINSOCK)
+#define VALID_SOCK(s) ((s) < INVALID_SOCKET)
+#define VERIFY_SOCK(x) do { \
+  if(!VALID_SOCK(x)) { \
+    SET_SOCKERRNO(WSAEINVAL); \
+    return -1; \
+  } \
+} while(0)
 #else
 #define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
 #define VERIFY_SOCK(x) do { \

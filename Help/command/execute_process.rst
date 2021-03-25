@@ -62,6 +62,8 @@ Options:
  describing an error condition.
 
 ``RESULTS_VARIABLE <variable>``
+ .. versionadded:: 3.10
+
  The variable will be set to contain the result of all processes as a
  :ref:`semicolon-separated list <CMake Language Lists>`, in order of the
  given ``COMMAND`` arguments.  Each entry will be an integer return code
@@ -75,19 +77,26 @@ Options:
 ``INPUT_FILE, OUTPUT_FILE``, ``ERROR_FILE``
  The file named will be attached to the standard input of the first
  process, standard output of the last process, or standard error of
- all processes, respectively.  If the same file is named for both
- output and error then it will be used for both.
+ all processes, respectively.
+
+ .. versionadded:: 3.3
+  If the same file is named for both output and error then it will be used
+  for both.
 
 ``OUTPUT_QUIET``, ``ERROR_QUIET``
  The standard output or standard error results will be quietly ignored.
 
 ``COMMAND_ECHO <where>``
+ .. versionadded:: 3.15
+
  The command being run will be echo'ed to ``<where>`` with ``<where>``
  being set to one of ``STDERR``, ``STDOUT`` or ``NONE``.
  See the :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ECHO` variable for a way
  to control the default behavior when this option is not present.
 
 ``ENCODING <name>``
+ .. versionadded:: 3.8
+
  On Windows, the encoding that is used to decode output from the process.
  Ignored on other platforms.
  Valid encoding names are:
@@ -104,11 +113,15 @@ Options:
  ``OEM``
    Use the original equipment manufacturer (OEM) code page.
  ``UTF8`` or ``UTF-8``
-   Use the UTF-8 codepage. Prior to CMake 3.11.0, only ``UTF8`` was accepted
-   for this encoding. In CMake 3.11.0, ``UTF-8`` was added for consistency with
-   the `UTF-8 RFC <https://www.ietf.org/rfc/rfc3629>`_ naming convention.
+   Use the UTF-8 codepage.
+
+   .. versionadded:: 3.11
+     Accept ``UTF-8`` spelling for consistency with the
+     `UTF-8 RFC <https://www.ietf.org/rfc/rfc3629>`_ naming convention.
 
 ``ECHO_OUTPUT_VARIABLE``, ``ECHO_ERROR_VARIABLE``
+  .. versionadded:: 3.18
+
   The standard output or standard error will not be exclusively redirected to
   the configured variables.
 
@@ -118,6 +131,8 @@ Options:
   This is analogous to the ``tee`` Unix command.
 
 ``COMMAND_ERROR_IS_FATAL <ANY|LAST>``
+  .. versionadded:: 3.19
+
   The option following ``COMMAND_ERROR_IS_FATAL`` determines the behavior when
   an error is encountered:
 

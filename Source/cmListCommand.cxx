@@ -422,9 +422,10 @@ bool HandleJoinCommand(std::vector<std::string> const& args,
 bool HandleRemoveItemCommand(std::vector<std::string> const& args,
                              cmExecutionStatus& status)
 {
-  if (args.size() < 3) {
-    status.SetError("sub-command REMOVE_ITEM requires two or more arguments.");
-    return false;
+  assert(args.size() >= 2);
+
+  if (args.size() == 2) {
+    return true;
   }
 
   const std::string& listName = args[1];
@@ -609,9 +610,9 @@ public:
 
   bool Validate(std::size_t count) override
   {
-    decltype(Indexes) indexes;
+    decltype(this->Indexes) indexes;
 
-    for (auto index : Indexes) {
+    for (auto index : this->Indexes) {
       indexes.push_back(this->NormalizeIndex(index, count));
     }
     this->Indexes = std::move(indexes);
@@ -750,7 +751,7 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
     {
     }
 
-    operator const std::string&() const { return Name; }
+    operator const std::string&() const { return this->Name; }
 
     std::string Name;
     int Arity = 0;
@@ -1093,8 +1094,9 @@ protected:
 public:
   cmStringSorter(Compare compare, CaseSensitivity caseSensitivity,
                  Order desc = Order::ASCENDING)
-    : filters{ GetCompareFilter(compare), GetCaseFilter(caseSensitivity) }
-    , sortMethod(GetComparisonFunction(compare))
+    : filters{ this->GetCompareFilter(compare),
+               this->GetCaseFilter(caseSensitivity) }
+    , sortMethod(this->GetComparisonFunction(compare))
     , descending(desc == Order::DESCENDING)
   {
   }
@@ -1102,7 +1104,7 @@ public:
   std::string ApplyFilter(const std::string& argument)
   {
     std::string result = argument;
-    for (auto filter : filters) {
+    for (auto filter : this->filters) {
       if (filter != nullptr) {
         result = filter(result);
       }
@@ -1112,13 +1114,13 @@ public:
 
   bool operator()(const std::string& a, const std::string& b)
   {
-    std::string af = ApplyFilter(a);
-    std::string bf = ApplyFilter(b);
+    std::string af = this->ApplyFilter(a);
+    std::string bf = this->ApplyFilter(b);
     bool result;
-    if (descending) {
-      result = sortMethod(bf, af);
+    if (this->descending) {
+      result = this->sortMethod(bf, af);
     } else {
-      result = sortMethod(af, bf);
+      result = this->sortMethod(af, bf);
     }
     return result;
   }
@@ -1424,7 +1426,7 @@ public:
 
   bool operator()(const std::string& target)
   {
-    return regex.find(target) ^ includeMatches;
+    return this->regex.find(target) ^ this->includeMatches;
   }
 
 private:

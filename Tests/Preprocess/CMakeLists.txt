@@ -147,8 +147,13 @@ endif()
 #  - NMake is okay with just \\\"
 #  - The XL compiler does not re-escape \\\" when launching an
 #    internal tool to do preprocessing .
+#  - The IntelLLVM C and C++ compiler drivers do not re-escape the \\\" when
+#    launching the underlying compiler. FIXME: this bug is expected to be fixed
+#    in a future release.
 if((PP_NMAKE OR PP_UMAKE) AND
-    NOT CMAKE_C_COMPILER_ID STREQUAL "XL")
+    NOT CMAKE_C_COMPILER_ID STREQUAL "XL" AND
+    NOT CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM" AND
+    NOT CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
   string(APPEND STRING_EXTRA "\\\"")
 endif()
 

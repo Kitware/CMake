@@ -139,6 +139,12 @@ function(run_cmake test)
   if(NOT "${actual_result}" MATCHES "${expect_result}")
     string(APPEND msg "Result is [${actual_result}], not [${expect_result}].\n")
   endif()
+
+  # Special case: remove ninja no-op line from stderr, but not stdout.
+  # Test cases that look for it should use RunCMake_TEST_OUTPUT_MERGE.
+  string(REGEX REPLACE "(^|\r?\n)ninja: no work to do\\.\r?\n" "\\1" actual_stderr "${actual_stderr}")
+
+  # Remove incidental content from both stdout and stderr.
   string(CONCAT ignore_line_regex
     "(^|\n)((==[0-9]+=="
     "|BullseyeCoverage"

@@ -17,6 +17,9 @@ Dependencies added to an :ref:`imported target <Imported Targets>`
 or an :ref:`interface library <Interface Libraries>` are followed
 transitively in its place since the target itself does not build.
 
+.. versionadded:: 3.3
+  Allow adding dependencies to interface libraries.
+
 See the ``DEPENDS`` option of :command:`add_custom_target` and
 :command:`add_custom_command` commands for adding file-level
 dependencies in custom rules.  See the :prop_sf:`OBJECT_DEPENDS`

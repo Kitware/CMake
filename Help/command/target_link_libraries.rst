@@ -27,6 +27,10 @@ set to ``NEW`` then the target must have been created in the current
 directory.  Repeated calls for the same ``<target>`` append items in
 the order called.
 
+.. versionadded:: 3.13
+  The ``<target>`` doesn't have to be defined in the same directory as the
+  ``target_link_libraries`` call.
+
 Each ``<item>`` may be:
 
 * **A library target name**: The generated link line will have the
@@ -62,10 +66,11 @@ Each ``<item>`` may be:
   :ref:`usage requirement <Target Usage Requirements>`.  This has the same
   effect as passing the framework directory as an include directory.
 
-  On :ref:`Visual Studio Generators` for VS 2010 and above, library files
-  ending in ``.targets`` will be treated as MSBuild targets files and
-  imported into generated project files.  This is not supported by other
-  generators.
+  .. versionadded:: 3.8
+    On :ref:`Visual Studio Generators` for VS 2010 and above, library files
+    ending in ``.targets`` will be treated as MSBuild targets files and
+    imported into generated project files.  This is not supported by other
+    generators.
 
   The full path to the library file will be quoted/escaped for
   the shell automatically.
@@ -88,6 +93,11 @@ Each ``<item>`` may be:
   :command:`target_link_options` command to add link
   flags explicitly. The flags will then be placed at the toolchain-defined
   flag position in the link command.
+
+  .. versionadded:: 3.13
+    :prop_tgt:`LINK_OPTIONS` target property and :command:`target_link_options`
+    command.  For earlier versions of CMake, use :prop_tgt:`LINK_FLAGS`
+    property instead.
 
   The link flag is treated as a command-line string fragment and
   will be used with no extra quoting or escaping.
@@ -215,6 +225,8 @@ is not ``NEW``, they are also appended to the
 
 Linking Object Libraries
 ^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.12
 
 :ref:`Object Libraries` may be used as the ``<target>`` (first) argument
 of ``target_link_libraries`` to specify dependencies of their sources

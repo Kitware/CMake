@@ -1,0 +1,8 @@
+subdir/out1 \
+  /home/build/out2: \
+  subdir/in1 \
+  /home/build/in2
+subdir/out3 \
+  /home/build/out4: \
+  subdir/in3 \
+  /home/build/in4

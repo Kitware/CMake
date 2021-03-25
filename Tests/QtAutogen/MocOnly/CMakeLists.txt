@@ -11,6 +11,18 @@ add_executable(mocOnly
   IncA.cpp
   IncB.cpp
 )
+# XXX(xcode-per-cfg-src): Drop the NO_PER_CONFIG_SOURCES exclusion
+# when the Xcode generator supports per-config sources.
+if(NOT NO_PER_CONFIG_SOURCES)
+  target_sources(mocOnly PRIVATE
+    "$<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/CfgDebug.cpp>"
+    "$<$<NOT:$<CONFIG:Debug>>:${CMAKE_CURRENT_SOURCE_DIR}/CfgOther.cpp>"
+    )
+  target_compile_definitions(mocOnly PRIVATE
+    "$<$<CONFIG:Debug>:HAVE_CFG_DEBUG>"
+    "$<$<NOT:$<CONFIG:Debug>>:HAVE_CFG_OTHER>"
+    )
+endif()
 set_property(TARGET mocOnly PROPERTY AUTOMOC ON)
 target_link_libraries(mocOnly ${QT_LIBRARIES})
 # Add compile definitions with unusual characters

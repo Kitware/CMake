@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(TestFindPostgreSQL C)
 include(CTest)
 
-find_package(PostgreSQL REQUIRED)
+find_package(PostgreSQL REQUIRED COMPONENTS Server)
 
 add_definitions(-DCMAKE_EXPECTED_POSTGRESQL_VERSION="${PostgreSQL_VERSION_STRING}")
 

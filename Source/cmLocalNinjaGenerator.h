@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "cmListFileCache.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmNinjaTypes.h"
 #include "cmOutputConverter.h"
@@ -70,6 +71,13 @@ public:
                            const std::string& fileConfig,
                            cmNinjaTargetDepends depends);
 
+  std::string CreateUtilityOutput(std::string const& targetName,
+                                  std::vector<std::string> const& byproducts,
+                                  cmListFileBacktrace const& bt) override;
+
+  std::vector<cmCustomCommandGenerator> MakeCustomCommandGenerators(
+    cmCustomCommand const& cc, std::string const& config) override;
+
   void AddCustomCommandTarget(cmCustomCommand const* cc,
                               cmGeneratorTarget* target);
   void AppendCustomCommandLines(cmCustomCommandGenerator const& ccg,
@@ -77,6 +85,9 @@ public:
   void AppendCustomCommandDeps(cmCustomCommandGenerator const& ccg,
                                cmNinjaDeps& ninjaDeps,
                                const std::string& config);
+
+  bool HasUniqueByproducts(std::vector<std::string> const& byproducts,
+                           cmListFileBacktrace const& bt);
 
 protected:
   std::string ConvertToIncludeReference(
@@ -99,9 +110,9 @@ private:
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);
 
-  void WriteCustomCommandBuildStatement(cmCustomCommand const* cc,
-                                        const cmNinjaDeps& orderOnlyDeps,
-                                        const std::string& config);
+  void WriteCustomCommandBuildStatement(
+    cmCustomCommand const* cc, const std::set<cmGeneratorTarget*>& targets,
+    const std::string& config);
 
   void WriteCustomCommandBuildStatements(const std::string& config);
 

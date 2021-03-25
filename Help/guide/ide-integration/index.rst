@@ -82,8 +82,8 @@ as the include directories, compile definitions, etc. used to build the
 artifacts. Such information can be obtained by using the
 :manual:`File API <cmake-file-api(7)>`. The manual page for the File API
 contains more information about the API and how to invoke it.
-:manual:`Server mode <cmake-server(7)>` is deprecated and should not be
-used on CMake 3.14 or later.
+:manual:`Server mode <cmake-server(7)>` was removed as of CMake 3.20 and
+should not be used on CMake 3.14 or later.
 
 IDEs should avoid creating more build trees than necessary, and only create
 multiple build trees if the user wishes to switch to a different compiler,

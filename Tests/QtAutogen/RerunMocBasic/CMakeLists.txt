@@ -47,19 +47,38 @@ macro(require_change_not)
 endmacro()
 
 
-# Initial build
+# Configure the test project
 configure_file("${mocBasicSrcDir}/test1a.h.in" "${mocBasicBinDir}/test1.h" COPYONLY)
-try_compile(MOC_RERUN
-  "${mocBasicBinDir}"
-  "${mocBasicSrcDir}"
-  MocBasic
-  CMAKE_FLAGS "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
-              "-DCMAKE_AUTOGEN_VERBOSE=${CMAKE_AUTOGEN_VERBOSE}"
-              "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+configure_file("${mocBasicSrcDir}/myobject3a.h.in" "${mocBasicBinDir}/myobject3.h" @ONLY)
+if(CMAKE_GENERATOR_INSTANCE)
+    set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE}")
+else()
+    set(_D_CMAKE_GENERATOR_INSTANCE "")
+endif()
+execute_process(
+  COMMAND "${CMAKE_COMMAND}" -B "${mocBasicBinDir}" -S "${mocBasicSrcDir}"
+          -G "${CMAKE_GENERATOR}"
+          -A "${CMAKE_GENERATOR_PLATFORM}"
+          -T "${CMAKE_GENERATOR_TOOLSET}"
+          ${_D_CMAKE_GENERATOR_INSTANCE}
+          "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+          "-DCMAKE_AUTOGEN_VERBOSE=${CMAKE_AUTOGEN_VERBOSE}"
+          "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+  RESULT_VARIABLE exit_code
   OUTPUT_VARIABLE output
 )
-if (NOT MOC_RERUN)
-  message(FATAL_ERROR "Initial build of mocBasic failed. Output: ${output}")
+if(NOT exit_code EQUAL 0)
+  message(FATAL_ERROR "Initial configuration of mocBasic failed. Output: ${output}")
+endif()
+
+# Initial build
+execute_process(
+    COMMAND "${CMAKE_COMMAND}" --build "${mocBasicBinDir}"
+    RESULT_VARIABLE exit_code
+    OUTPUT_VARIABLE output
+)
+if(NOT exit_code EQUAL 0)
+    message(FATAL_ERROR "Initial build of mocBasic failed. Output: ${output}")
 endif()
 
 # Get name of the output binary
@@ -100,3 +119,43 @@ message(STATUS "Changing nothing for no MOC re-run")
 rebuild(3)
 acquire_timestamp(After)
 require_change_not()
+
+
+# - Ensure that the timestamp will change
+# - Remove Q_OBJECT from header
+# - Rebuild
+acquire_timestamp(Before)
+sleep()
+message(STATUS "Remove Q_OBJECT from header file for a MOC re-run")
+configure_file("${mocBasicSrcDir}/test1c.h.in" "${mocBasicBinDir}/test1.h" COPYONLY)
+sleep()
+rebuild(4)
+acquire_timestamp(After)
+require_change()
+
+
+# - Ensure that the timestamp will change
+# - Add Q_OBJECT to header again
+# - Rebuild
+acquire_timestamp(Before)
+sleep()
+message(STATUS "Add Q_OBJECT to test1.h for a MOC re-run")
+configure_file("${mocBasicSrcDir}/test1a.h.in" "${mocBasicBinDir}/test1.h" COPYONLY)
+sleep()
+rebuild(5)
+acquire_timestamp(After)
+require_change()
+
+
+# - Ensure that the timestamp will change
+# - Add Q_OBJECT to MyObject3
+# - Rebuild
+acquire_timestamp(Before)
+sleep()
+message(STATUS "Add Q_OBJECT to myobject3.h file for a MOC re-run")
+set(CLASS_CONTENT "Q_OBJECT")
+configure_file("${mocBasicSrcDir}/myobject3a.h.in" "${mocBasicBinDir}/myobject3.h" @ONLY)
+sleep()
+rebuild(6)
+acquire_timestamp(After)
+require_change()

@@ -76,8 +76,8 @@ public:
 
   bool PatchUpdatesXml();
 
-  void WriteRepositoryConfig(cmXMLWriter& xout);
-  void WriteRepositoryUpdate(cmXMLWriter& xout);
+  void WriteRepositoryConfig(cmXMLWriter& xout) const;
+  void WriteRepositoryUpdate(cmXMLWriter& xout) const;
   void WriteRepositoryUpdates(cmXMLWriter& xout);
 
   RepositoriesVector RepositoryUpdate;

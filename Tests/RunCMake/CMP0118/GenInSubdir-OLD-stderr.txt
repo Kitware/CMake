@@ -1,0 +1,8 @@
+^CMake Error at GenInSubdir-Common.cmake:[0-9]+ \(add_custom_target\):
+  Cannot find source file:
+
+    [^
+]*/Tests/RunCMake/CMP0118/GenInSubdir-OLD-build/GenInSubdir/sub.txt
+Call Stack \(most recent call first\):
+  GenInSubdir-OLD.cmake:[0-9]+ \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

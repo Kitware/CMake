@@ -42,6 +42,9 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     std::string sep;
     for (std::unique_ptr<cmTargetExport> const& te :
          this->IEGen->GetExportSet()->GetTargetExports()) {
+      if (te->NamelinkOnly) {
+        continue;
+      }
       expectedTargets += sep + this->Namespace + te->Target->GetExportName();
       sep = " ";
       if (this->ExportedTargets.insert(te->Target).second) {
@@ -287,6 +290,7 @@ bool cmExportInstallFileGenerator::GenerateImportFileConfig(
     cmSystemTools::Error(e.str());
     return false;
   }
+  exportFileStream.SetCopyIfDifferent(true);
   std::ostream& os = exportFileStream;
 
   // Start with the import file header.

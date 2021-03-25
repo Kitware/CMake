@@ -83,4 +83,30 @@ if(NOT XCODE OR NOT XCODE_VERSION VERSION_LESS 5)
   target_link_libraries(barStatic fooStatic)
 endif()
 
+if(XCODE)
+  add_library(space SHARED space.c)
+  set_target_properties(space PROPERTIES
+    FRAMEWORK TRUE
+    OUTPUT_NAME "space space"
+    )
+  add_executable(use_space use_space.c)
+  target_link_libraries(use_space PRIVATE space)
+endif()
+
 include(CPack)
+
+if(APPLE)
+  set(ExternalFramework_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/External")
+  file(REMOVE_RECURSE "${ExternalFramework_INSTALL_DIR}")
+
+  include(ExternalProject)
+  ExternalProject_Add(ExternalFramework
+    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/External"
+    INSTALL_DIR "${ExternalFramework_INSTALL_DIR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+  )
+
+  add_executable(useExternal useExternal.c)
+  target_link_libraries(useExternal PRIVATE "${ExternalFramework_INSTALL_DIR}/lib/External.framework")
+  add_dependencies(useExternal ExternalFramework)
+endif()

@@ -37,7 +37,10 @@ if(CMAKE_HOST_WIN32)
   list(PREPEND PKG_CONFIG_NAMES "pkg-config.bat")
 endif()
 
-find_program(PKG_CONFIG_EXECUTABLE NAMES ${PKG_CONFIG_NAMES} DOC "pkg-config executable")
+find_program(PKG_CONFIG_EXECUTABLE
+  NAMES ${PKG_CONFIG_NAMES}
+  NAMES_PER_DIR
+  DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
 set(_PKG_CONFIG_FAILURE_MESSAGE "")
@@ -632,19 +635,38 @@ endmacro()
 
   When the ``QUIET`` argument is given, no status messages will be printed.
 
-  By default, if :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` is 3.1 or
-  later, or if :variable:`PKG_CONFIG_USE_CMAKE_PREFIX_PATH` is set to a
-  boolean ``True`` value, then the :variable:`CMAKE_PREFIX_PATH`,
-  :variable:`CMAKE_FRAMEWORK_PATH`, and :variable:`CMAKE_APPBUNDLE_PATH` cache
-  and environment variables will be added to the ``pkg-config`` search path.
-  The ``NO_CMAKE_PATH`` and ``NO_CMAKE_ENVIRONMENT_PATH`` arguments
-  disable this behavior for the cache variables and environment variables
-  respectively.
+  .. versionadded:: 3.1
+    The :variable:`CMAKE_PREFIX_PATH`,
+    :variable:`CMAKE_FRAMEWORK_PATH`, and :variable:`CMAKE_APPBUNDLE_PATH` cache
+    and environment variables will be added to the ``pkg-config`` search path.
+    The ``NO_CMAKE_PATH`` and ``NO_CMAKE_ENVIRONMENT_PATH`` arguments
+    disable this behavior for the cache variables and environment variables
+    respectively.
+    The :variable:`PKG_CONFIG_USE_CMAKE_PREFIX_PATH` variable set to ``FALSE``
+    disables this behavior globally.
 
-  The ``IMPORTED_TARGET`` argument will create an imported target named
-  ``PkgConfig::<prefix>`` that can be passed directly as an argument to
-  :command:`target_link_libraries`. The ``GLOBAL`` argument will make the
-  imported target available in global scope.
+    .. This didn't actually work until 3.3.
+
+  .. versionadded:: 3.6
+    The ``IMPORTED_TARGET`` argument will create an imported target named
+    ``PkgConfig::<prefix>`` that can be passed directly as an argument to
+    :command:`target_link_libraries`.
+
+    .. This didn't actually work until 3.7.
+
+  .. versionadded:: 3.13
+    The ``GLOBAL`` argument will make the
+    imported target available in global scope.
+
+  .. versionadded:: 3.15
+    Non-library linker options reported by ``pkg-config`` are stored in the
+    :prop_tgt:`INTERFACE_LINK_OPTIONS` target property.
+
+  .. versionchanged:: 3.18
+    Include directories specified with ``-isystem`` are stored in the
+    :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property.  Previous
+    versions of CMake left them in the :prop_tgt:`INTERFACE_COMPILE_OPTIONS`
+    property.
 
   Each ``<moduleSpec>`` can be either a bare module name or it can be a
   module name with a version constraint (operators ``=``, ``<``, ``>``,
@@ -683,6 +705,11 @@ endmacro()
   All but ``<XXX>_FOUND`` may be a :ref:`;-list <CMake Language Lists>` if the
   associated variable returned from ``pkg-config`` has multiple values.
 
+  .. versionchanged:: 3.18
+    Include directories specified with ``-isystem`` are stored in the
+    ``<XXX>_INCLUDE_DIRS`` variable.  Previous versions of CMake left them
+    in ``<XXX>_CFLAGS_OTHER``.
+
   There are some special variables whose prefix depends on the number of
   ``<moduleSpec>`` given.  When there is only one ``<moduleSpec>``,
   ``<YYY>`` will simply be ``<prefix>``, but if two or more ``<moduleSpec>``
@@ -696,6 +723,16 @@ endmacro()
     include directory of the module
   ``<YYY>_LIBDIR``
     lib directory of the module
+
+  .. versionchanged:: 3.8
+    For any given ``<prefix>``, ``pkg_check_modules()`` can be called multiple
+    times with different parameters.  Previous versions of CMake cached and
+    returned the first successful result.
+
+  .. versionchanged:: 3.16
+    If a full path to the found library can't be determined, but it's still
+    visible to the linker, pass it through as ``-l<name>``.  Previous versions
+    of CMake failed in this case.
 
   Examples:
 
@@ -768,9 +805,10 @@ endmacro()
                       [IMPORTED_TARGET [GLOBAL]]
                       <moduleSpec> [<moduleSpec>...])
 
-  If a module is found, the ``<prefix>_MODULE_NAME`` variable will contain the
-  name of the matching module. This variable can be used if you need to run
-  :command:`pkg_get_variable`.
+  .. versionadded:: 3.16
+    If a module is found, the ``<prefix>_MODULE_NAME`` variable will contain the
+    name of the matching module. This variable can be used if you need to run
+    :command:`pkg_get_variable`.
 
   Example:
 
@@ -815,6 +853,8 @@ endmacro()
 #[========================================[.rst:
 .. command:: pkg_get_variable
 
+  .. versionadded:: 3.4
+
   Retrieves the value of a pkg-config variable ``varName`` and stores it in the
   result variable ``resultVar`` in the calling scope.
 
@@ -849,9 +889,14 @@ Variables Affecting Behavior
 
   This can be set to the path of the pkg-config executable.  If not provided,
   it will be set by the module as a result of calling :command:`find_program`
-  internally.  The ``PKG_CONFIG`` environment variable can be used as a hint.
+  internally.
+
+  .. versionadded:: 3.1
+    The ``PKG_CONFIG`` environment variable can be used as a hint.
 
 .. variable:: PKG_CONFIG_USE_CMAKE_PREFIX_PATH
+
+  .. versionadded:: 3.1
 
   Specifies whether :command:`pkg_check_modules` and
   :command:`pkg_search_module` should add the paths in the

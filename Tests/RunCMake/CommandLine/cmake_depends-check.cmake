@@ -3,8 +3,9 @@ if(EXISTS "${depend_make}")
   file(READ "${depend_make}" depend_make_content)
   string(REGEX REPLACE "\n+$" "" depend_make_content "${depend_make_content}")
   if(NOT depend_make_content MATCHES "
-CMakeFiles/DepTarget.dir/test.c.o: .*/Tests/RunCMake/CommandLine/cmake_depends/test.c
-CMakeFiles/DepTarget.dir/test.c.o: .*/Tests/RunCMake/CommandLine/cmake_depends/test.h$")
+CMakeFiles/DepTarget.dir/test.c.o: \\\\
+ .*/Tests/RunCMake/CommandLine/cmake_depends/test.c \\\\
+ .*/Tests/RunCMake/CommandLine/cmake_depends/test.h$")
     string(REPLACE "\n" "\n  " depend_make_content "  ${depend_make_content}")
     set(RunCMake_TEST_FAILED "depend.make does not have expected content:\n${depend_make_content}")
   endif()

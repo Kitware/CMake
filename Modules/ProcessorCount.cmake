@@ -15,6 +15,9 @@ Otherwise it is set to 0.  Currently this functionality is implemented
 for AIX, cygwin, FreeBSD, HPUX, Linux, macOS, QNX, Sun and
 Windows.
 
+.. versionchanged:: 3.15
+  On Linux, returns the container CPU count instead of the host CPU count.
+
 This function is guaranteed to return a positive integer (>=1) if it
 succeeds.  It returns 0 if there's a problem determining the processor
 count.

@@ -64,7 +64,7 @@ cmFileLockResult cmFileLock::LockWithTimeout(unsigned long seconds)
   }
 }
 
-int cmFileLock::LockFile(int cmd, int type)
+int cmFileLock::LockFile(int cmd, int type) const
 {
   struct ::flock lock;
   lock.l_start = 0;

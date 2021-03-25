@@ -5,8 +5,8 @@
                 "Type": "other",
                 "Other": {
                     "Name": "cmake",
-                    "Version": "3.19.1",
-                    "DownloadUrl": "https://github.com/Kitware/CMake/releases/download/v3.19.1/cmake-3.19.1.tar.gz"
+                    "Version": "3.20.0",
+                    "DownloadUrl": "https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0.tar.gz"
                 }
             }
         }

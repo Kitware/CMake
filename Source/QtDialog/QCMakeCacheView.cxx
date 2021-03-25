@@ -47,7 +47,11 @@ protected:
 
     // check all strings for a match
     foreach (QString const& str, strs) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+      if (str.contains(this->filterRegularExpression())) {
+#else
       if (str.contains(this->filterRegExp())) {
+#endif
         return true;
       }
     }
@@ -166,7 +170,11 @@ bool QCMakeCacheView::showAdvanced() const
 
 void QCMakeCacheView::setSearchFilter(const QString& s)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+  this->SearchFilter->setFilterRegularExpression(s);
+#else
   this->SearchFilter->setFilterFixedString(s);
+#endif
 }
 
 QCMakeCacheModel::QCMakeCacheModel(QObject* p)

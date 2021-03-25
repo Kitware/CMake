@@ -228,7 +228,7 @@ int cmCommandArgumentParserHelper::ParseString(std::string const& str,
 
   yyscan_t yyscanner;
   cmCommandArgument_yylex_init(&yyscanner);
-  auto scanBuf = cmCommandArgument_yy_scan_string(str.c_str(), yyscanner);
+  auto* scanBuf = cmCommandArgument_yy_scan_string(str.c_str(), yyscanner);
   cmCommandArgument_yyset_extra(this, yyscanner);
   cmCommandArgument_SetupEscapes(yyscanner, this->NoEscapeMode);
   int res = cmCommandArgument_yyparse(yyscanner);
@@ -240,7 +240,7 @@ int cmCommandArgumentParserHelper::ParseString(std::string const& str,
 
   this->CleanupParser();
 
-  if (Verbose) {
+  if (this->Verbose) {
     std::cerr << "Expanding [" << str << "] produced: [" << this->Result << "]"
               << std::endl;
   }

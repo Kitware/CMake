@@ -125,6 +125,12 @@ if(CMake_TEST_CUDA)
 endif()
 add_RunCMake_test(CMP0106)
 add_RunCMake_test(CMP0111)
+add_RunCMake_test(CMP0115)
+if(CMAKE_GENERATOR MATCHES "Ninja")
+  add_RunCMake_test(CMP0116)
+endif()
+add_RunCMake_test(CMP0118)
+add_RunCMake_test(CMP0119 -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -175,7 +181,14 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     )
 endif()
 
+add_RunCMake_test(ABI -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+set_property(TEST RunCMake.ABI APPEND
+  PROPERTY LABELS "CUDA")
+
 add_RunCMake_test(AndroidTestUtilities)
+if(CMake_TEST_APPLE_SILICON)
+  add_RunCMake_test(AppleSilicon)
+endif()
 set(autogen_with_qt5 FALSE)
 if(CMake_TEST_Qt5)
   find_package(Qt5Widgets QUIET NO_MODULE)
@@ -184,6 +197,9 @@ if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
   set(autogen_with_qt5 TRUE)
 endif ()
 add_RunCMake_test(Autogen -Dwith_qt5=${autogen_with_qt5})
+
+add_RunCMake_test(ArtifactOutputDirs)
+
 if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
     AND CMAKE_C_COMPILER_ID STREQUAL "GNU"
     AND CMAKE_GENERATOR MATCHES "^Ninja"
@@ -195,7 +211,10 @@ if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
     set(CMake_TEST_BuildDepends_GNU_AS "${_gnu_as}")
   endif()
 endif()
+
 add_RunCMake_test(BuildDepends
+  -DMSVC_VERSION=${MSVC_VERSION}
+  -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
   -DCMake_TEST_BuildDepends_GNU_AS=${CMake_TEST_BuildDepends_GNU_AS}
   )
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
@@ -220,6 +239,9 @@ add_RunCMake_test(FileAPI -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 add_RunCMake_test(FindBoost)
 add_RunCMake_test(FindLua)
 add_RunCMake_test(FindOpenGL)
+if(CMake_TEST_FindOpenSSL)
+  add_RunCMake_test(FindOpenSSL)
+endif()
 if(CMake_TEST_UseSWIG)
   add_RunCMake_test(FindSWIG)
   add_RunCMake_test(UseSWIG -DCMake_TEST_FindPython=${CMake_TEST_FindPython})
@@ -249,11 +271,12 @@ add_RunCMake_test(Graphviz)
 add_RunCMake_test(TargetPropertyGeneratorExpressions)
 add_RunCMake_test(Languages)
 add_RunCMake_test(LinkStatic)
-if(CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|XL|XLClang)$")
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang)$")
   add_RunCMake_test(MetaCompileFeatures)
 endif()
 if(MSVC)
   add_RunCMake_test(MSVCRuntimeLibrary)
+  add_RunCMake_test(MSVCRuntimeTypeInfo)
   add_RunCMake_test(MSVCWarningFlags)
 endif()
 add_RunCMake_test(ObjectLibrary)
@@ -271,6 +294,7 @@ add_RunCMake_test(ToolchainFile)
 add_RunCMake_test(find_dependency)
 add_RunCMake_test(CompileDefinitions)
 add_RunCMake_test(CompileFeatures)
+add_RunCMake_test(Policy)
 add_RunCMake_test(PolicyScope)
 add_RunCMake_test(WriteBasicConfigVersionFile)
 add_RunCMake_test(WriteCompilerDetectionHeader)
@@ -299,7 +323,10 @@ add_RunCMake_test(add_subdirectory)
 add_RunCMake_test(add_test)
 add_RunCMake_test(build_command)
 add_executable(exit_code exit_code.c)
-set(execute_process_ARGS -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>)
+set(execute_process_ARGS
+  -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
+  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  )
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   list(APPEND execute_process_ARGS -DTEST_ENCODING_EXE=$<TARGET_FILE:testEncoding>)
 endif()
@@ -308,7 +335,7 @@ add_RunCMake_test(export)
 add_RunCMake_test(cmake_language)
 add_RunCMake_test(cmake_minimum_required)
 add_RunCMake_test(cmake_parse_arguments)
-# add_RunCMake_test(cmake_path)
+add_RunCMake_test(cmake_path)
 add_RunCMake_test(continue)
 add_executable(color_warning color_warning.c)
 add_executable(fake_build_command fake_build_command.c)
@@ -331,6 +358,9 @@ add_RunCMake_test(ctest_upload)
 add_RunCMake_test(ctest_fixtures)
 add_RunCMake_test(file)
 add_RunCMake_test(file-CHMOD)
+if(HAVE_ELF_H OR CMAKE_SYSTEM_NAME STREQUAL "AIX")
+  add_RunCMake_test(file-RPATH -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DHAVE_ELF_H=${HAVE_ELF_H})
+endif()
 add_RunCMake_test(find_file)
 add_RunCMake_test(find_library -DCYGWIN=${CYGWIN})
 add_RunCMake_test(find_package)
@@ -504,6 +534,7 @@ endif()
 
 if(XCODE_VERSION)
   add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
+  add_RunCMake_test(XcodeProject-Embed)
 
   # This test can take a very long time due to lots of combinations.
   # Use a long default timeout and provide an option to customize it.
@@ -564,7 +595,8 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)"
 endif()
 
 
-add_RunCMake_test(CommandLine -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DCYGWIN=${CYGWIN} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
+add_executable(pseudo_llvm-rc pseudo_llvm-rc.c)
+add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DCYGWIN=${CYGWIN} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
 add_RunCMake_test(CommandLineTar)
 
 if(CMAKE_PLATFORM_NO_VERSIONED_SONAME OR (NOT CMAKE_SHARED_LIBRARY_SONAME_FLAG AND NOT CMAKE_SHARED_LIBRARY_SONAME_C_FLAG))
@@ -773,6 +805,12 @@ add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
 
 add_RunCMake_test("UnityBuild")
 add_RunCMake_test(CMakePresets -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
+add_RunCMake_test(CMakePresetsBuild -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
+add_RunCMake_test(CMakePresetsTest -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
+
+if(${CMAKE_GENERATOR} MATCHES "Make|Ninja")
+  add_RunCMake_test(TransformDepfile)
+endif()
 
 if(WIN32)
   add_RunCMake_test(Win32GenEx)

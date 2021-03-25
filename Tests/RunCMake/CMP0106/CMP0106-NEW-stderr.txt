@@ -1,4 +1,4 @@
-CMake Error at .*/Modules/Documentation.cmake:15 \(message\):
+CMake Error at .*/Modules/Documentation.cmake:[0-9]+ \(message\):
   Documentation.cmake is VTK-specific code and should not be used in non-VTK
   projects.  This logic in this module is best shipped with the project using
   it rather than with CMake.  This is now an error according to policy

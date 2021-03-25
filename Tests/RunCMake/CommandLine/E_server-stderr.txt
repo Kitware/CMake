@@ -1,0 +1,1 @@
+^CMake Error: CMake server mode has been removed in favor of the file-api\.$

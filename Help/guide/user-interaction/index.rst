@@ -228,7 +228,7 @@ The Visual Studio toolset can be specified with the
 .. code-block:: console
 
     $ # Build with the clang-cl toolset
-    $ cmake.exe .. -G "Visual Studio 16 2019" -A x64 -T LLVM
+    $ cmake.exe .. -G "Visual Studio 16 2019" -A x64 -T ClangCL
     $ # Build targeting Windows XP
     $ cmake.exe .. -G "Visual Studio 16 2019" -A x64 -T v120_xp
 

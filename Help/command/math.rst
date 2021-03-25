@@ -17,17 +17,18 @@ Supported operators are ``+``, ``-``, ``*``, ``/``, ``%``, ``|``, ``&``,
 ``^``, ``~``, ``<<``, ``>>``, and ``(...)``; they have the same meaning
 as in C code.
 
-Hexadecimal numbers are recognized when prefixed with ``0x``, as in C code.
+.. versionadded:: 3.13
+  Hexadecimal numbers are recognized when prefixed with ``0x``, as in C code.
 
-The result is formatted according to the option ``OUTPUT_FORMAT``,
-where ``<format>`` is one of
+.. versionadded:: 3.13
+  The result is formatted according to the option ``OUTPUT_FORMAT``,
+  where ``<format>`` is one of
 
-``HEXADECIMAL``
-  Hexadecimal notation as in C code, i. e. starting with "0x".
-``DECIMAL``
-  Decimal notation. Which is also used if no ``OUTPUT_FORMAT`` option
-  is specified.
-
+  ``HEXADECIMAL``
+    Hexadecimal notation as in C code, i. e. starting with "0x".
+  ``DECIMAL``
+    Decimal notation. Which is also used if no ``OUTPUT_FORMAT`` option
+    is specified.
 
 For example
 

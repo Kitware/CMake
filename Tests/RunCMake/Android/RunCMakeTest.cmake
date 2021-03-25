@@ -103,6 +103,13 @@ foreach(ndk IN LISTS TEST_ANDROID_NDK)
     set(ndk_arg)
   endif()
 
+  set(RunCMake_TEST_OPTIONS
+    -DCMAKE_SYSTEM_NAME=Android
+    -DCMAKE_FIND_ROOT_PATH=/tmp
+    ${ndk_arg}
+    )
+  run_cmake(ndk-search-order)
+
   # Test failure cases.
   message(STATUS "ndk='${ndk}'")
   if(RunCMake_GENERATOR MATCHES "Visual Studio")

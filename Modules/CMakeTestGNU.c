@@ -1,4 +1,5 @@
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+#if defined(__GNUC__) &&                                                      \
+  !(defined(__INTEL_COMPILER) || defined(__INTEL_LLVM_COMPILER))
 void THIS_IS_GNU();
 #endif
 #ifdef __MINGW32__

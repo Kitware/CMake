@@ -9,21 +9,7 @@ endif()
 
 set(RunCMake-check-file check.cmake)
 
-function(validate_schema file expected_result)
-  execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" "${RunCMake_SOURCE_DIR}/validate_schema.py" "${file}"
-    RESULT_VARIABLE _result
-    OUTPUT_VARIABLE _output
-    ERROR_VARIABLE _error
-    )
-  if(NOT _result STREQUAL expected_result)
-    string(REPLACE "\n" "\n" _output_p "${_output}")
-    string(REPLACE "\n" "\n" _error_p "${_error}")
-    string(APPEND RunCMake_TEST_FAILED "Expected result of validating ${file}: ${expected_result}\nActual result: ${_result}\nOutput:\n${_output_p}\nError:\n${_error_p}")
-  endif()
-
-  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
-endfunction()
+include("${RunCMake_SOURCE_DIR}/validate_schema.cmake")
 
 function(run_cmake_presets name)
   set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/${name}")
@@ -77,6 +63,7 @@ endfunction()
 # Test CMakePresets.json errors
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_presets(NoCMakePresets)
+run_cmake_presets(Comment)
 run_cmake_presets(JSONParseError)
 run_cmake_presets(InvalidRoot)
 run_cmake_presets(NoVersion)
@@ -157,7 +144,8 @@ run_cmake_presets(GoodBinaryUp)
 set(CMakePresets_SOURCE_ARG "../GoodBinaryRelative")
 run_cmake_presets(GoodBinaryRelative)
 unset(CMakePresets_SOURCE_ARG)
-run_cmake_presets(GoodSpaces "--preset=Good Spaces")
+run_cmake_presets(GoodSpaces "--preset" "Good Spaces")
+run_cmake_presets(GoodSpacesEq "--preset=Good Spaces")
 if(WIN32)
   run_cmake_presets(GoodWindowsBackslash)
 endif()
@@ -220,7 +208,8 @@ endif()
 
 # Test bad command line arguments
 run_cmake_presets(NoSuchPreset)
-run_cmake_presets(NoPresetArgument --preset=)
+run_cmake_presets(NoPresetArgument --preset)
+run_cmake_presets(NoPresetArgumentEq --preset= -DA=B)
 run_cmake_presets(UseHiddenPreset)
 
 # Test CMakeUserPresets.json

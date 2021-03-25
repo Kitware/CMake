@@ -30,6 +30,7 @@ run_cmake(FILTER-NotList)
 run_cmake(REMOVE_AT-NotList)
 run_cmake(REMOVE_DUPLICATES-NotList)
 run_cmake(REMOVE_ITEM-NotList)
+run_cmake(REMOVE_ITEM-NoItemArg)
 run_cmake(REVERSE-NotList)
 run_cmake(SORT-NotList)
 

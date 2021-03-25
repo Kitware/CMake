@@ -31,6 +31,7 @@ endif()
 set(CMAKE_Fortran_SUBMODULE_SEP ".")
 set(CMAKE_Fortran_SUBMODULE_EXT ".sub")
 set(CMAKE_Fortran_MODDIR_FLAG "-mdir ")
+set(CMAKE_Fortran_MODDIR_INCLUDE_FLAG "-I") # -mdir does not affect search path
 set(CMAKE_SHARED_LIBRARY_Fortran_FLAGS "-PIC")
 set(CMAKE_Fortran_FORMAT_FIXED_FLAG "-fixed")
 set(CMAKE_Fortran_FORMAT_FREE_FLAG "-free")

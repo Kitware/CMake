@@ -7,6 +7,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREA
   run_cmake(LanguageStandard)
 endif()
 
+run_cmake(CustomCommandGenex)
 run_cmake(VsCsharpSourceGroup)
 run_cmake(VsCSharpCompilerOpts)
 run_cmake(ExplicitCMakeLists)

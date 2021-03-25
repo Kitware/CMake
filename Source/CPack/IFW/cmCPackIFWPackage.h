@@ -53,7 +53,7 @@ public:
 
     bool operator<(const DependenceStruct& other) const
     {
-      return Name < other.Name;
+      return this->Name < other.Name;
     }
   };
 

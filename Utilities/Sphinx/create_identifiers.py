@@ -25,6 +25,7 @@ for line in lines:
              ("envvar", "envvar"),
              ("variable", "variable"),
              ("generator", "generator"),
+             ("genex", "genex"),
              ("guide", "guide"),
              ("target property", "prop_tgt"),
              ("test property", "prop_test"),

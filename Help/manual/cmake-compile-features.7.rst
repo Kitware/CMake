@@ -89,6 +89,8 @@ Feature requirements are evaluated transitively by consuming the link
 implementation.  See :manual:`cmake-buildsystem(7)` for more on
 transitive behavior of build properties and usage requirements.
 
+.. _`Requiring Language Standards`:
+
 Requiring Language Standards
 ----------------------------
 
@@ -358,6 +360,7 @@ versions specified for each:
 
 * ``Cray``: Cray Compiler Environment version 8.1+.
 * ``PGI``: PGI version 12.10+.
+* ``NVHPC``: NVIDIA HPC compilers version 11.0+.
 * ``TI``: Texas Instruments compiler.
 * ``XL``: IBM XL version 10.1+.
 
@@ -373,4 +376,5 @@ their associated meta-features (e.g. ``cuda_std_11``) available from the
 following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
 versions specified for each:
 
+* ``Clang``: Clang compiler 5.0+.
 * ``NVIDIA``: NVIDIA nvcc compiler 7.5+.

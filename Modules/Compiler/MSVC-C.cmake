@@ -27,6 +27,7 @@ else()
   set(CMAKE_C_STANDARD_DEFAULT "")
 endif()
 
+set(CMAKE_C_COMPILE_OPTIONS_EXPLICIT_LANGUAGE -TC)
 set(CMAKE_C_CLANG_TIDY_DRIVER_MODE "cl")
 
 # There are no C compiler modes so we hard-code the known compiler supported

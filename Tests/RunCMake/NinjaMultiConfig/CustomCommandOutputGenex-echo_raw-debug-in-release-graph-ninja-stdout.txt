@@ -1,0 +1,4 @@
+^\[1/3\] Building C object CMakeFiles[\/]echo.dir[\/]Release[\/]echo\.c\.(o|obj)
+\[2/3\] Linking C executable Release[\/]echo(\.exe)?
+\[3/3\] Generating echo_raw_Debug\.txt
+'[^']*[\/]Tests[\/]RunCMake[\/]NinjaMultiConfig[\/]CustomCommandOutputGenex-build[\/]Debug'\$ '[^']*[\/]Tests[\/]RunCMake[\/]NinjaMultiConfig[\/]CustomCommandOutputGenex-build[\/]Release[\/]echo(\.exe)?' 'Debug' 'echo_raw_Debug\.txt'$

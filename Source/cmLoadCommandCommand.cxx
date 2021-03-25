@@ -3,10 +3,12 @@
 
 #if !defined(_WIN32) && !defined(__sun)
 // POSIX APIs are needed
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _POSIX_C_SOURCE 200809L
 #endif
 #if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
 // For isascii
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 700
 #endif
 
@@ -24,19 +26,19 @@
 #include "cmCommand.h"
 #include "cmDynamicLoader.h"
 #include "cmExecutionStatus.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+// NOLINTNEXTLINE(bugprone-suspicious-include)
 #include "cmCPluginAPI.cxx"
 
 #ifdef __QNX__
 #  include <malloc.h> /* for malloc/free on QNX */
 #endif
-
-class cmListFileBacktrace;
 
 namespace {
 
@@ -256,10 +258,12 @@ bool cmLoadCommandCommand(std::vector<std::string> const& args,
   // if the symbol is found call it to set the name on the
   // function blocker
   if (initFunction) {
-    status.GetMakefile().GetState()->AddScriptedCommand(
+    return status.GetMakefile().GetState()->AddScriptedCommand(
       args[0],
-      cmLegacyCommandWrapper(cm::make_unique<cmLoadedCommand>(initFunction)));
-    return true;
+      BT<cmState::Command>(
+        cmLegacyCommandWrapper(cm::make_unique<cmLoadedCommand>(initFunction)),
+        status.GetMakefile().GetBacktrace()),
+      status.GetMakefile());
   }
   status.SetError("Attempt to load command failed. "
                   "No init function found.");

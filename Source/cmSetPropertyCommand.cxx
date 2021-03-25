@@ -10,9 +10,12 @@
 #include "cmGlobalGenerator.h"
 #include "cmInstalledFile.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocation.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -157,7 +160,7 @@ bool HandleSourceFileDirectoryScopeValidation(
   return true;
 }
 
-bool HandleAndValidateSourceFileDirectortoryScopes(
+bool HandleAndValidateSourceFileDirectoryScopes(
   cmExecutionStatus& status, bool source_file_directory_option_enabled,
   bool source_file_target_option_enabled,
   std::vector<std::string>& source_file_directories,
@@ -186,7 +189,7 @@ std::string MakeSourceFilePathAbsoluteIfNeeded(
   if (!needed) {
     return source_file_path;
   }
-  const std::string absolute_file_path = cmSystemTools::CollapseFullPath(
+  std::string absolute_file_path = cmSystemTools::CollapseFullPath(
     source_file_path, status.GetMakefile().GetCurrentSourceDirectory());
   return absolute_file_path;
 }
@@ -216,7 +219,91 @@ void MakeSourceFilePathsAbsoluteIfNeeded(
     source_files_absolute_paths.push_back(absolute_file_path);
   }
 }
+
+bool HandleAndValidateSourceFilePropertyGENERATED(
+  cmSourceFile* sf, std::string const& propertyValue, PropertyOp op)
+{
+  const auto& mf = *sf->GetLocation().GetMakefile();
+  auto policyStatus = mf.GetPolicyStatus(cmPolicies::CMP0118);
+
+  const bool policyWARN = policyStatus == cmPolicies::WARN;
+  const bool policyNEW = policyStatus != cmPolicies::OLD && !policyWARN;
+
+  if (policyWARN) {
+    if (!cmIsOn(propertyValue) && !cmIsOff(propertyValue)) {
+      mf.IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0118),
+                 "\nAttempt to set property 'GENERATED' with the following "
+                 "non-boolean value (which will be interpreted as \"0\"):\n",
+                 propertyValue,
+                 "\nThat exact value will not be retrievable. A value of "
+                 "\"0\" will be returned instead.\n"
+                 "This will be an error under policy CMP0118.\n"));
+    }
+    if (cmIsOff(propertyValue)) {
+      mf.IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0118),
+                 "\nUnsetting property 'GENERATED' will not be allowed under "
+                 "policy CMP0118!\n"));
+    }
+    if (op == PropertyOp::Append || op == PropertyOp::AppendAsString) {
+      mf.IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0118),
+                 "\nAppending to property 'GENERATED' will not be allowed "
+                 "under policy CMP0118!\n"));
+    }
+  } else if (policyNEW) {
+    if (!cmIsOn(propertyValue) && !cmIsOff(propertyValue)) {
+      mf.IssueMessage(
+        MessageType::AUTHOR_ERROR,
+        cmStrCat(
+          "Policy CMP0118 is set to NEW and the following non-boolean value "
+          "given for property 'GENERATED' is therefore not allowed:\n",
+          propertyValue, "\nReplace it with a boolean value!\n"));
+      return true;
+    }
+    if (cmIsOff(propertyValue)) {
+      mf.IssueMessage(
+        MessageType::AUTHOR_ERROR,
+        "Unsetting the 'GENERATED' property is not allowed under CMP0118!\n");
+      return true;
+    }
+    if (op == PropertyOp::Append || op == PropertyOp::AppendAsString) {
+      mf.IssueMessage(MessageType::AUTHOR_ERROR,
+                      "Policy CMP0118 is set to NEW and appending to the "
+                      "'GENERATED' property is therefore not allowed. Only "
+                      "setting it to \"1\" is allowed!\n");
+      return true;
+    }
+  }
+
+  // Set property.
+  if (!policyNEW) {
+    // Do it the traditional way.
+    switch (op) {
+      case PropertyOp::Append:
+        sf->AppendProperty("GENERATED", propertyValue, false);
+        break;
+      case PropertyOp::AppendAsString:
+        sf->AppendProperty("GENERATED", propertyValue, true);
+        break;
+      case PropertyOp::Remove:
+        sf->SetProperty("GENERATED", nullptr);
+        break;
+      case PropertyOp::Set:
+        sf->SetProperty("GENERATED", propertyValue.c_str());
+        break;
+    }
+  } else {
+    sf->MarkAsGenerated();
+  }
+  return true;
 }
+
+} // END: namespace SetPropertyCommand
 
 bool cmSetPropertyCommand(std::vector<std::string> const& args,
                           cmExecutionStatus& status)
@@ -324,7 +411,7 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
 
   std::vector<cmMakefile*> source_file_directory_makefiles;
   bool file_scopes_handled =
-    SetPropertyCommand::HandleAndValidateSourceFileDirectortoryScopes(
+    SetPropertyCommand::HandleAndValidateSourceFileDirectoryScopes(
       status, source_file_directory_option_enabled,
       source_file_target_option_enabled, source_file_directories,
       source_file_target_directories, source_file_directory_makefiles);
@@ -367,7 +454,7 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
   return true;
 }
 
-namespace {
+namespace /* anonymous */ {
 bool HandleGlobalMode(cmExecutionStatus& status,
                       const std::set<std::string>& names,
                       const std::string& propertyName,
@@ -502,7 +589,7 @@ bool HandleSourceMode(cmExecutionStatus& status,
     status, files_absolute, unique_files.begin(), unique_files.end(),
     source_file_paths_should_be_absolute);
 
-  for (const auto mf : directory_makefiles) {
+  for (auto* const mf : directory_makefiles) {
     for (std::string const& name : files_absolute) {
       // Get the source file.
       if (cmSourceFile* sf = mf->GetOrCreateSource(name)) {
@@ -525,6 +612,18 @@ bool HandleSource(cmSourceFile* sf, const std::string& propertyName,
                   const std::string& propertyValue, bool appendAsString,
                   bool appendMode, bool remove)
 {
+  // Special validation and handling of GENERATED flag?
+  if (propertyName == "GENERATED") {
+    SetPropertyCommand::PropertyOp op = (remove)
+      ? SetPropertyCommand::PropertyOp::Remove
+      : (appendAsString)
+        ? SetPropertyCommand::PropertyOp::AppendAsString
+        : (appendMode) ? SetPropertyCommand::PropertyOp::Append
+                       : SetPropertyCommand::PropertyOp::Set;
+    return SetPropertyCommand::HandleAndValidateSourceFilePropertyGENERATED(
+      sf, propertyValue, op);
+  }
+
   // Set or append the property.
   if (appendMode) {
     sf->AppendProperty(propertyName, propertyValue, appendAsString);

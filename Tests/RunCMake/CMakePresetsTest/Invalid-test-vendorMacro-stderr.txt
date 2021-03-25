@@ -1,0 +1,1 @@
+CMake Error: Could not evaluate test preset "vendorMacro": Invalid macro expansion

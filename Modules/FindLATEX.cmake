@@ -11,6 +11,10 @@ This module finds an installed LaTeX and determines the location
 of the compiler.  Additionally the module looks for Latex-related
 software like BibTeX.
 
+.. versionadded:: 3.2
+  Component processing; support for htlatex, pdftops, Biber, xindy, XeLaTeX,
+  LuaLaTeX.
+
 This module sets the following result variables::
 
   LATEX_FOUND:          whether found Latex and requested components

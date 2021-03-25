@@ -7,15 +7,13 @@ This file must be translated to C and modified to build everywhere.
 
 Run bison like this:
 
-  bison --yacc --name-prefix=cmExpr_yy --defines=cmExprParserTokens.h -ocmExprParser.cxx cmExprParser.y
-
-Modify cmExprParser.cxx:
-  - "#if 0" out yyerrorlab block in range ["goto yyerrlab1", "yyerrlab1:"]
+  bison --name-prefix=cmExpr_yy --defines=cmExprParserTokens.h -ocmExprParser.cxx cmExprParser.y
 
 */
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdexcept>
@@ -39,6 +37,12 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 #endif
 #if defined(__GNUC__) && __GNUC__ >= 8
 # pragma GCC diagnostic ignored "-Wconversion"
+# pragma GCC diagnostic ignored "-Wfree-nonheap-object"
+#endif
+#if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wused-but-marked-unused")
+#  pragma clang diagnostic ignored "-Wused-but-marked-unused"
+# endif
 #endif
 %}
 

@@ -16,15 +16,16 @@ cmFilePathChecksum::cmFilePathChecksum(std::string const& currentSrcDir,
                                        std::string const& projectSrcDir,
                                        std::string const& projectBinDir)
 {
-  setupParentDirs(currentSrcDir, currentBinDir, projectSrcDir, projectBinDir);
+  this->setupParentDirs(currentSrcDir, currentBinDir, projectSrcDir,
+                        projectBinDir);
 }
 
 cmFilePathChecksum::cmFilePathChecksum(cmMakefile* makefile)
 {
-  setupParentDirs(makefile->GetCurrentSourceDirectory(),
-                  makefile->GetCurrentBinaryDirectory(),
-                  makefile->GetHomeDirectory(),
-                  makefile->GetHomeOutputDirectory());
+  this->setupParentDirs(makefile->GetCurrentSourceDirectory(),
+                        makefile->GetCurrentBinaryDirectory(),
+                        makefile->GetHomeDirectory(),
+                        makefile->GetHomeOutputDirectory());
 }
 
 void cmFilePathChecksum::setupParentDirs(std::string const& currentSrcDir,
@@ -81,5 +82,5 @@ std::string cmFilePathChecksum::get(std::string const& filePath) const
 std::string cmFilePathChecksum::getPart(std::string const& filePath,
                                         size_t length) const
 {
-  return get(filePath).substr(0, length);
+  return this->get(filePath).substr(0, length);
 }

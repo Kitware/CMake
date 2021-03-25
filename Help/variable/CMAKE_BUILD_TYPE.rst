@@ -18,3 +18,8 @@ in a build tree configured to build type ``Debug``, CMake will see to
 having :variable:`CMAKE_C_FLAGS_DEBUG <CMAKE_<LANG>_FLAGS_DEBUG>` settings get
 added to the :variable:`CMAKE_C_FLAGS <CMAKE_<LANG>_FLAGS>` settings.  See
 also :variable:`CMAKE_CONFIGURATION_TYPES`.
+
+Note that configuration names are case-insensitive.  The value of this
+variable will be the same as it is specified when invoking CMake.
+For instance, if ``-DCMAKE_BUILD_TYPE=ReLeAsE`` is specified, then the
+value of ``CMAKE_BUILD_TYPE`` will be ``ReLeAsE``.

@@ -24,7 +24,8 @@ public:
     std::string input, std::string target,
     std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
     std::unique_ptr<cmCompiledGeneratorExpression> condition,
-    bool inputIsContent, cmPolicies::PolicyStatus policyStatusCMP0070);
+    bool inputIsContent, std::string newLineCharacter, mode_t permissions,
+    cmPolicies::PolicyStatus policyStatusCMP0070);
 
   void Generate(cmLocalGenerator* lg);
 
@@ -51,12 +52,13 @@ private:
   std::string FixRelativePath(std::string const& filePath, PathRole role,
                               cmLocalGenerator* lg);
 
-private:
   const std::string Input;
   const std::string Target;
   const std::unique_ptr<cmCompiledGeneratorExpression> OutputFileExpr;
   const std::unique_ptr<cmCompiledGeneratorExpression> Condition;
   std::vector<std::string> Files;
   const bool InputIsContent;
+  const std::string NewLineCharacter;
   cmPolicies::PolicyStatus PolicyStatusCMP0070;
+  mode_t Permissions;
 };

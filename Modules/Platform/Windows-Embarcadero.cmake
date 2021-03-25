@@ -35,8 +35,8 @@ else()
   set(_tR "-tR") # Target uses the dynamic RTL
   set(_tW "-tW") # Target is a Windows application
 endif()
-set(_COMPILE_C "-c")
-set(_COMPILE_CXX "-P -c")
+set(_COMPILE_C "")
+set(_COMPILE_CXX " -P")
 
 set(CMAKE_LIBRARY_PATH_FLAG "-L")
 set(CMAKE_LINK_LIBRARY_FLAG "")
@@ -87,7 +87,7 @@ macro(__embarcadero_language lang)
   # place <DEFINES> outside the response file because Borland refuses
   # to parse quotes from the response file.
   set(CMAKE_${lang}_COMPILE_OBJECT
-    "<CMAKE_${lang}_COMPILER> ${_tR} -DWIN32 <DEFINES> <INCLUDES> <FLAGS> -o<OBJECT> ${_COMPILE_${lang}} <SOURCE>"
+    "<CMAKE_${lang}_COMPILER> ${_tR} -DWIN32 <DEFINES> <INCLUDES> <FLAGS> -o<OBJECT>${_COMPILE_${lang}} -c <SOURCE>"
     )
 
   set(CMAKE_${lang}_LINK_EXECUTABLE
@@ -98,7 +98,7 @@ macro(__embarcadero_language lang)
   # place <DEFINES> outside the response file because Borland refuses
   # to parse quotes from the response file.
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE
-    "cpp32 -DWIN32 <DEFINES> <INCLUDES> <FLAGS> -o<PREPROCESSED_SOURCE> ${_COMPILE_${lang}} <SOURCE>"
+    "cpp32 -DWIN32 <DEFINES> <INCLUDES> <FLAGS> -o<PREPROCESSED_SOURCE>${_COMPILE_${lang}} -c <SOURCE>"
     )
   # Borland >= 5.6 allows -P option for cpp32, <= 5.5 does not
 

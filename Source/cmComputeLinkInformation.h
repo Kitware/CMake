@@ -55,6 +55,7 @@ public:
   std::vector<BT<std::string>> GetDirectoriesWithBacktraces();
   std::vector<std::string> const& GetDepends() const;
   std::vector<std::string> const& GetFrameworkPaths() const;
+  std::set<std::string> const& GetFrameworkPathsEmitted() const;
   std::string GetLinkLanguage() const { return this->LinkLanguage; }
   std::vector<std::string> const& GetRuntimeSearchPath() const;
   std::string const& GetRuntimeFlag() const { return this->RuntimeFlag; }
@@ -155,7 +156,6 @@ private:
   void AddFullItem(BT<std::string> const& item);
   bool CheckImplicitDirItem(std::string const& item);
   void AddUserItem(BT<std::string> const& item, bool pathNotKnown);
-  void AddDirectoryItem(std::string const& item);
   void AddFrameworkItem(std::string const& item);
   void DropDirectoryItem(std::string const& item);
   bool CheckSharedLibNoSOName(std::string const& item);
@@ -165,7 +165,7 @@ private:
   // Framework info.
   void ComputeFrameworkInfo();
   void AddFrameworkPath(std::string const& p);
-  std::set<std::string> FrameworkPathsEmmitted;
+  std::set<std::string> FrameworkPathsEmitted;
   cmsys::RegularExpression SplitFramework;
 
   // Linker search path computation.

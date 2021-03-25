@@ -11,6 +11,9 @@ This script locates the NVIDIA CUDA toolkit and the associated libraries, but
 does not require the ``CUDA`` language be enabled for a given project. This
 module does not search for the NVIDIA CUDA Samples.
 
+.. versionadded:: 3.19
+  QNX support.
+
 Search Behavior
 ^^^^^^^^^^^^^^^
 
@@ -426,6 +429,8 @@ Result variables
     Runtime library ``cudart``.
 
 ``CUDAToolkit_LIBRARY_ROOT``
+    .. versionadded:: 3.18
+
     The path to the CUDA Toolkit directory containing the nvvm directory and
     version.txt.
 
@@ -513,12 +518,24 @@ else()
         )
       endif()
 
-      if(CUDAToolkit_NVCC_EXECUTABLE)
-        get_filename_component(CUDAToolkit_BIN_DIR "${CUDAToolkit_NVCC_EXECUTABLE}" DIRECTORY)
+      if(EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
+        # If NVCC exists  then invoke it to find the toolkit location.
+        # This allows us to support wrapper scripts (e.g. ccache or colornvcc), CUDA Toolkit,
+        # NVIDIA HPC SDK, and distro's splayed layouts
+        execute_process(COMMAND ${CUDAToolkit_NVCC_EXECUTABLE} "-v" "__cmake_determine_cuda"
+          OUTPUT_VARIABLE _CUDA_NVCC_OUT ERROR_VARIABLE _CUDA_NVCC_OUT)
+        if(_CUDA_NVCC_OUT MATCHES "TOP=([^\r\n]*)")
+          get_filename_component(CUDAToolkit_BIN_DIR "${CMAKE_MATCH_1}/bin" ABSOLUTE)
+        else()
+          get_filename_component(CUDAToolkit_BIN_DIR "${CUDAToolkit_NVCC_EXECUTABLE}" DIRECTORY)
+        endif()
+        unset(_CUDA_NVCC_OUT)
 
-        set(CUDAToolkit_BIN_DIR "${CUDAToolkit_BIN_DIR}" CACHE PATH "" FORCE)
         mark_as_advanced(CUDAToolkit_BIN_DIR)
-      elseif(CUDAToolkit_SENTINEL_FILE)
+        set(CUDAToolkit_BIN_DIR "${CUDAToolkit_BIN_DIR}" CACHE PATH "" FORCE)
+      endif()
+
+      if(CUDAToolkit_SENTINEL_FILE)
         get_filename_component(CUDAToolkit_BIN_DIR ${CUDAToolkit_SENTINEL_FILE} DIRECTORY ABSOLUTE)
         set(CUDAToolkit_BIN_DIR "${CUDAToolkit_BIN_DIR}/bin")
 
@@ -561,7 +578,7 @@ else()
     _CUDAToolkit_find_root_dir(SEARCH_PATHS "${CUDAToolkit_ROOT}" FIND_FLAGS PATH_SUFFIXES bin NO_DEFAULT_PATH)
   endif()
   if(NOT CUDAToolkit_ROOT_DIR)
-    _CUDAToolkit_find_root_dir(FIND_FLAGS PATHS "ENV CUDA_PATH" PATH_SUFFIXES bin)
+    _CUDAToolkit_find_root_dir(FIND_FLAGS PATHS ENV CUDA_PATH PATH_SUFFIXES bin)
   endif()
 
   # If the user specified CUDAToolkit_ROOT but the toolkit could not be found, this is an error.
@@ -721,6 +738,7 @@ elseif(NOT CUDAToolkit_FIND_QUIETLY)
 endif()
 
 if(CUDAToolkit_NVCC_EXECUTABLE AND
+   CMAKE_CUDA_COMPILER_VERSION AND
    CUDAToolkit_NVCC_EXECUTABLE STREQUAL CMAKE_CUDA_COMPILER)
   # Need to set these based off the already computed CMAKE_CUDA_COMPILER_VERSION value
   # This if statement will always match, but is used to provide variables for MATCH 1,2,3...

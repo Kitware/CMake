@@ -19,6 +19,8 @@ This module defines the following variables:
 ``CURSES_LIBRARIES``
   The libraries needed to use Curses.
 ``CURSES_CFLAGS``
+  .. versionadded:: 3.16
+
   Parameters which ought be given to C/C++ compilers when using Curses.
 ``CURSES_HAVE_CURSES_H``
   True if curses.h is available.
@@ -31,8 +33,10 @@ This module defines the following variables:
 
 Set ``CURSES_NEED_NCURSES`` to ``TRUE`` before the
 ``find_package(Curses)`` call if NCurses functionality is required.
-Set ``CURSES_NEED_WIDE`` to ``TRUE`` before the
-``find_package(Curses)`` call if unicode functionality is required.
+
+.. versionadded:: 3.10
+  Set ``CURSES_NEED_WIDE`` to ``TRUE`` before the
+  ``find_package(Curses)`` call if unicode functionality is required.
 
 Backward Compatibility
 ^^^^^^^^^^^^^^^^^^^^^^

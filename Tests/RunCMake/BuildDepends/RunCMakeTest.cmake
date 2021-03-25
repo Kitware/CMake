@@ -30,7 +30,16 @@ function(run_BuildDepends CASE)
   include(${RunCMake_SOURCE_DIR}/${CASE}.step2.cmake OPTIONAL)
   set(check_step 2)
   run_cmake_command(${CASE}-build2 ${CMAKE_COMMAND} --build . --config Debug)
+  if(run_BuildDepends_skip_step_3)
+    return()
+  endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep ${fs_delay}) # handle 1s resolution
+  include(${RunCMake_SOURCE_DIR}/${CASE}.step3.cmake OPTIONAL)
+  set(check_step 3)
+  run_cmake_command(${CASE}-build3 ${CMAKE_COMMAND} --build . --config Debug)
 endfunction()
+
+set(run_BuildDepends_skip_step_3 1)
 
 run_BuildDepends(C-Exe)
 if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
@@ -69,6 +78,23 @@ if(RunCMake_GENERATOR MATCHES "Make")
     run_BuildDepends(MakeInProjectOnly)
   endif()
 endif()
+
+function(run_RepeatCMake CASE)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${CASE}-build)
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_CONFIGURATION_TYPES=Debug)
+  else()
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  run_cmake(${CASE})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${CASE}-build1 ${CMAKE_COMMAND} --build . --config Debug)
+  run_cmake_command(${CASE}-rerun1 ${CMAKE_COMMAND} .)
+  file(WRITE ${RunCMake_TEST_BINARY_DIR}/exists-for-build2 "")
+  run_cmake_command(${CASE}-build2 ${CMAKE_COMMAND} --build . --config Debug)
+endfunction()
+
+run_RepeatCMake(RepeatCMake-Custom)
 
 function(run_ReGeneration)
   # test re-generation of project even if CMakeLists.txt files disappeared
@@ -112,4 +138,29 @@ endif()
 if(CMake_TEST_BuildDepends_GNU_AS)
   set(ENV{ASM} "${CMake_TEST_BuildDepends_GNU_AS}")
   run_BuildDepends(GNU-AS)
+endif()
+
+if ((RunCMake_GENERATOR STREQUAL "Unix Makefiles"
+      AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"
+        OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
+        OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
+    OR (RunCMake_GENERATOR STREQUAL "NMake Makefiles"
+      AND MSVC_VERSION GREATER 1300
+      AND CMAKE_C_COMPILER_ID STREQUAL "MSVC"))
+  run_BuildDepends(CompilerDependencies)
+  run_BuildDepends(CustomCommandDependencies)
+endif()
+
+if (RunCMake_GENERATOR MATCHES "Makefiles")
+  run_cmake(CustomCommandDependencies-BadArgs)
+endif()
+
+if(RunCMake_GENERATOR MATCHES "Make|Ninja")
+  unset(run_BuildDepends_skip_step_3)
+  run_BuildDepends(CustomCommandDepfile)
+  set(run_BuildDepends_skip_step_3 1)
+endif()
+
+if(RunCMake_GENERATOR MATCHES "Make")
+  run_BuildDepends(MakeDependencies)
 endif()

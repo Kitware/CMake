@@ -21,6 +21,12 @@
 #  if HAVE_CXX_STD_17 && !defined(ALLOW_LATER_STANDARDS)
 #    error HAVE_CXX_STD_17 is true with CXX_STANDARD == 11
 #  endif
+#  if HAVE_CXX_STD_20 && !defined(ALLOW_LATER_STANDARDS)
+#    error HAVE_CXX_STD_20 is true with CXX_STANDARD == 11
+#  endif
+#  if HAVE_CXX_STD_23 && !defined(ALLOW_LATER_STANDARDS)
+#    error HAVE_CXX_STD_23 is true with CXX_STANDARD == 11
+#  endif
 #endif
 
 #if !HAVE_OVERRIDE_CONTROL

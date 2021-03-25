@@ -131,8 +131,8 @@ cmGraphVizWriter::~cmGraphVizWriter()
 
 void cmGraphVizWriter::VisitGraph(std::string const&)
 {
-  this->WriteHeader(GlobalFileStream, this->GraphName);
-  this->WriteLegend(GlobalFileStream);
+  this->WriteHeader(this->GlobalFileStream, this->GraphName);
+  this->WriteLegend(this->GlobalFileStream);
 }
 
 void cmGraphVizWriter::OnItem(cmLinkItem const& item)
@@ -141,8 +141,9 @@ void cmGraphVizWriter::OnItem(cmLinkItem const& item)
     return;
   }
 
-  NodeNames[item.AsStr()] = cmStrCat(GraphNodePrefix, NextNodeId);
-  ++NextNodeId;
+  this->NodeNames[item.AsStr()] =
+    cmStrCat(this->GraphNodePrefix, this->NextNodeId);
+  ++this->NextNodeId;
 
   this->WriteNode(this->GlobalFileStream, item);
 }
@@ -191,12 +192,13 @@ void cmGraphVizWriter::VisitLink(cmLinkItem const& depender,
   this->WriteConnection(this->GlobalFileStream, depender, dependee, scopeType);
 
   if (this->GeneratePerTarget) {
-    PerTargetConnections[depender].emplace_back(depender, dependee, scopeType);
+    this->PerTargetConnections[depender].emplace_back(depender, dependee,
+                                                      scopeType);
   }
 
   if (this->GenerateDependers) {
-    TargetDependersConnections[dependee].emplace_back(dependee, depender,
-                                                      scopeType);
+    this->TargetDependersConnections[dependee].emplace_back(dependee, depender,
+                                                            scopeType);
   }
 }
 
@@ -228,7 +230,7 @@ void cmGraphVizWriter::ReadSettings(
 
   std::cout << "Reading GraphViz options file: " << inFileName << std::endl;
 
-#define __set_if_set(var, cmakeDefinition)                                    \
+#define set_if_set(var, cmakeDefinition)                                      \
   do {                                                                        \
     cmProp value = mf.GetDefinition(cmakeDefinition);                         \
     if (value) {                                                              \
@@ -236,11 +238,11 @@ void cmGraphVizWriter::ReadSettings(
     }                                                                         \
   } while (false)
 
-  __set_if_set(this->GraphName, "GRAPHVIZ_GRAPH_NAME");
-  __set_if_set(this->GraphHeader, "GRAPHVIZ_GRAPH_HEADER");
-  __set_if_set(this->GraphNodePrefix, "GRAPHVIZ_NODE_PREFIX");
+  set_if_set(this->GraphName, "GRAPHVIZ_GRAPH_NAME");
+  set_if_set(this->GraphHeader, "GRAPHVIZ_GRAPH_HEADER");
+  set_if_set(this->GraphNodePrefix, "GRAPHVIZ_NODE_PREFIX");
 
-#define __set_bool_if_set(var, cmakeDefinition)                               \
+#define set_bool_if_set(var, cmakeDefinition)                                 \
   do {                                                                        \
     cmProp value = mf.GetDefinition(cmakeDefinition);                         \
     if (value) {                                                              \
@@ -248,20 +250,20 @@ void cmGraphVizWriter::ReadSettings(
     }                                                                         \
   } while (false)
 
-  __set_bool_if_set(this->GenerateForExecutables, "GRAPHVIZ_EXECUTABLES");
-  __set_bool_if_set(this->GenerateForStaticLibs, "GRAPHVIZ_STATIC_LIBS");
-  __set_bool_if_set(this->GenerateForSharedLibs, "GRAPHVIZ_SHARED_LIBS");
-  __set_bool_if_set(this->GenerateForModuleLibs, "GRAPHVIZ_MODULE_LIBS");
-  __set_bool_if_set(this->GenerateForInterfaceLibs, "GRAPHVIZ_INTERFACE_LIBS");
-  __set_bool_if_set(this->GenerateForObjectLibs, "GRAPHVIZ_OBJECT_LIBS");
-  __set_bool_if_set(this->GenerateForUnknownLibs, "GRAPHVIZ_UNKNOWN_LIBS");
-  __set_bool_if_set(this->GenerateForCustomTargets, "GRAPHVIZ_CUSTOM_TARGETS");
-  __set_bool_if_set(this->GenerateForExternals, "GRAPHVIZ_EXTERNAL_LIBS");
-  __set_bool_if_set(this->GeneratePerTarget, "GRAPHVIZ_GENERATE_PER_TARGET");
-  __set_bool_if_set(this->GenerateDependers, "GRAPHVIZ_GENERATE_DEPENDERS");
+  set_bool_if_set(this->GenerateForExecutables, "GRAPHVIZ_EXECUTABLES");
+  set_bool_if_set(this->GenerateForStaticLibs, "GRAPHVIZ_STATIC_LIBS");
+  set_bool_if_set(this->GenerateForSharedLibs, "GRAPHVIZ_SHARED_LIBS");
+  set_bool_if_set(this->GenerateForModuleLibs, "GRAPHVIZ_MODULE_LIBS");
+  set_bool_if_set(this->GenerateForInterfaceLibs, "GRAPHVIZ_INTERFACE_LIBS");
+  set_bool_if_set(this->GenerateForObjectLibs, "GRAPHVIZ_OBJECT_LIBS");
+  set_bool_if_set(this->GenerateForUnknownLibs, "GRAPHVIZ_UNKNOWN_LIBS");
+  set_bool_if_set(this->GenerateForCustomTargets, "GRAPHVIZ_CUSTOM_TARGETS");
+  set_bool_if_set(this->GenerateForExternals, "GRAPHVIZ_EXTERNAL_LIBS");
+  set_bool_if_set(this->GeneratePerTarget, "GRAPHVIZ_GENERATE_PER_TARGET");
+  set_bool_if_set(this->GenerateDependers, "GRAPHVIZ_GENERATE_DEPENDERS");
 
   std::string ignoreTargetsRegexes;
-  __set_if_set(ignoreTargetsRegexes, "GRAPHVIZ_IGNORE_TARGETS");
+  set_if_set(ignoreTargetsRegexes, "GRAPHVIZ_IGNORE_TARGETS");
 
   this->TargetsToIgnoreRegex.clear();
   if (!ignoreTargetsRegexes.empty()) {
@@ -280,7 +282,7 @@ void cmGraphVizWriter::ReadSettings(
 
 void cmGraphVizWriter::Write()
 {
-  auto gg = this->GlobalGenerator;
+  const auto* gg = this->GlobalGenerator;
 
   this->VisitGraph(gg->GetName());
 
@@ -301,18 +303,18 @@ void cmGraphVizWriter::Write()
   }
 
   // write global data and collect all connection data for per target graphs
-  for (auto const gt : sortedGeneratorTargets) {
+  for (const auto* const gt : sortedGeneratorTargets) {
     auto item = cmLinkItem(gt, false, gt->GetBacktrace());
     this->VisitItem(item);
   }
 
   if (this->GeneratePerTarget) {
-    WritePerTargetConnections<DependeesDir>(PerTargetConnections);
+    this->WritePerTargetConnections<DependeesDir>(this->PerTargetConnections);
   }
 
   if (this->GenerateDependers) {
-    WritePerTargetConnections<DependersDir>(TargetDependersConnections,
-                                            ".dependers");
+    this->WritePerTargetConnections<DependersDir>(
+      this->TargetDependersConnections, ".dependers");
   }
 }
 
@@ -336,7 +338,8 @@ void cmGraphVizWriter::FindAllConnections(const ConnectionsMap& connectionMap,
     bool const visited = visitedItems.find(dstItem) != visitedItems.cend();
     if (!visited) {
       visitedItems.insert(dstItem);
-      FindAllConnections(connectionMap, dstItem, extendedCons, visitedItems);
+      this->FindAllConnections(connectionMap, dstItem, extendedCons,
+                               visitedItems);
     }
   }
 }
@@ -346,7 +349,8 @@ void cmGraphVizWriter::FindAllConnections(const ConnectionsMap& connectionMap,
                                           Connections& extendedCons)
 {
   std::set<cmLinkItem> visitedItems = { rootItem };
-  FindAllConnections(connectionMap, rootItem, extendedCons, visitedItems);
+  this->FindAllConnections(connectionMap, rootItem, extendedCons,
+                           visitedItems);
 }
 
 template <typename DirFunc>
@@ -358,7 +362,7 @@ void cmGraphVizWriter::WritePerTargetConnections(
   for (auto const& conPerTarget : connections) {
     const cmLinkItem& rootItem = conPerTarget.first;
     Connections& extendedCons = extendedConnections[conPerTarget.first];
-    FindAllConnections(connections, rootItem, extendedCons);
+    this->FindAllConnections(connections, rootItem, extendedCons);
   }
 
   for (auto const& conPerTarget : extendedConnections) {
@@ -451,7 +455,7 @@ void cmGraphVizWriter::WriteNode(cmGeneratedFileStream& fs,
   auto const& itemName = item.AsStr();
   auto const& nodeName = this->NodeNames[itemName];
 
-  auto const itemNameWithAliases = ItemNameWithAliases(itemName);
+  auto const itemNameWithAliases = this->ItemNameWithAliases(itemName);
   auto const escapedLabel = EscapeForDotFile(itemNameWithAliases);
 
   fs << "    \"" << nodeName << "\" [ label = \"" << escapedLabel

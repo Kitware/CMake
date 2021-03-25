@@ -1,0 +1,12 @@
+Available test presets:
+
+  "minimal"
+  "defaults"
+  "noEnvironment"
+  "withEnvironment"
+  "config-debug"
+  "config-release"
+  "exclude"
+  "index"
+  "indexFile"
+  "showOnly"

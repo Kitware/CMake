@@ -14,9 +14,10 @@
 #include "cmSystemTools.h"
 
 cmInstallSubdirectoryGenerator::cmInstallSubdirectoryGenerator(
-  cmMakefile* makefile, std::string binaryDirectory, bool excludeFromAll)
+  cmMakefile* makefile, std::string binaryDirectory, bool excludeFromAll,
+  cmListFileBacktrace backtrace)
   : cmInstallGenerator("", std::vector<std::string>(), "", MessageDefault,
-                       excludeFromAll)
+                       excludeFromAll, std::move(backtrace))
   , Makefile(makefile)
   , BinaryDirectory(std::move(binaryDirectory))
 {

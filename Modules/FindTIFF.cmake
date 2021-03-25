@@ -17,12 +17,16 @@ imported target, as described below.
 Imported targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.5
+
 This module defines the following :prop_tgt:`IMPORTED` targets:
 
 ``TIFF::TIFF``
   The TIFF library, if found.
 
 ``TIFF::CXX``
+  .. versionadded:: 3.19
+
   The C++ wrapper libtiffxx, if requested by the `COMPONENTS CXX` option,
   if the compiler is not MSVC (which includes the C++ wrapper in libtiff),
   and if found.
@@ -56,6 +60,9 @@ The following cache variables may also be set:
   the path to the TIFFXX library for release configurations
 ``TIFFXX_LIBRARY_DEBUG``
   the path to the TIFFXX library for debug configurations
+
+.. versionadded:: 3.4
+  Debug and Release variants are found separately.
 #]=======================================================================]
 
 cmake_policy(PUSH)

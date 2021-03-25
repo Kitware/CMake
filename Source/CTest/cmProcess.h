@@ -67,8 +67,8 @@ public:
     Other
   };
 
-  Exception GetExitException();
-  std::string GetExitExceptionString();
+  Exception GetExitException() const;
+  std::string GetExitExceptionString() const;
 
   std::unique_ptr<cmCTestRunTest> GetRunner()
   {

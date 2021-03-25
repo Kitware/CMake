@@ -32,6 +32,9 @@ static link to a dynamic link for ``HDF5`` and all of it's dependencies.
 To use this feature, make sure that the ``HDF5_USE_STATIC_LIBRARIES``
 variable is set before the call to find_package.
 
+.. versionadded:: 3.10
+  Support for ``HDF5_USE_STATIC_LIBRARIES`` on Windows.
+
 Both the serial and parallel ``HDF5`` wrappers are considered and the first
 directory to contain either one will be used.  In the event that both appear
 in the same directory the serial version is preferentially selected. This
@@ -51,7 +54,8 @@ This module will set the following variables in your project:
 ``HDF5_FOUND``
   HDF5 was found on the system
 ``HDF5_VERSION``
-  HDF5 library version
+  .. versionadded:: 3.3
+    HDF5 library version
 ``HDF5_INCLUDE_DIRS``
   Location of the HDF5 header files
 ``HDF5_DEFINITIONS``
@@ -112,15 +116,22 @@ also be defined.  With all components enabled, the following variables will be d
 
 With all components enabled, the following targets will be defined:
 
-::
-
-  ``hdf5::hdf5``
-  ``hdf5::hdf5_hl_cpp``
-  ``hdf5::hdf5_fortran``
-  ``hdf5::hdf5_hl``
-  ``hdf5::hdf5_hl_cpp``
-  ``hdf5::hdf5_hl_fortran``
-  ``hdf5::h5diff``
+``HDF5::HDF5``
+  All detected ``HDF5_LIBRARIES``.
+``hdf5::hdf5``
+  C library.
+``hdf5::hdf5_cpp``
+  C++ library.
+``hdf5::hdf5_fortran``
+  Fortran library.
+``hdf5::hdf5_hl``
+  High-level C library.
+``hdf5::hdf5_hl_cpp``
+  High-level C++ library.
+``hdf5::hdf5_hl_fortran``
+  High-level Fortran library.
+``hdf5::h5diff``
+  ``h5diff`` executable.
 
 Hints
 ^^^^^
@@ -128,12 +139,18 @@ Hints
 The following variables can be set to guide the search for HDF5 libraries and includes:
 
 ``HDF5_PREFER_PARALLEL``
+  .. versionadded:: 3.4
+
   set ``true`` to prefer parallel HDF5 (by default, serial is preferred)
 
 ``HDF5_FIND_DEBUG``
+  .. versionadded:: 3.9
+
   Set ``true`` to get extra debugging output.
 
 ``HDF5_NO_FIND_PACKAGE_CONFIG_FILE``
+  .. versionadded:: 3.8
+
   Set ``true`` to skip trying to find ``hdf5-config.cmake``.
 #]=======================================================================]
 
@@ -195,22 +212,6 @@ else()
   set(HDF5_CXX_COMPILER_NAMES h5c++ h5pc++)
   set(HDF5_Fortran_COMPILER_NAMES h5fc h5pfc)
 endif()
-
-# We may have picked up some duplicates in various lists during the above
-# process for the language bindings (both the C and C++ bindings depend on
-# libz for example).  Remove the duplicates. It appears that the default
-# CMake behavior is to remove duplicates from the end of a list. However,
-# for link lines, this is incorrect since unresolved symbols are searched
-# for down the link line. Therefore, we reverse the list, remove the
-# duplicates, and then reverse it again to get the duplicates removed from
-# the beginning.
-macro(_HDF5_remove_duplicates_from_beginning _list_name)
-  if(${_list_name})
-    list(REVERSE ${_list_name})
-    list(REMOVE_DUPLICATES ${_list_name})
-    list(REVERSE ${_list_name})
-  endif()
-endmacro()
 
 # Test first if the current compilers automatically wrap HDF5
 function(_HDF5_test_regular_compiler_C success version is_parallel)
@@ -360,9 +361,11 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
   execute_process(
     COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} ${test_file}
     WORKING_DIRECTORY ${scratch_dir}
+    OUTPUT_VARIABLE output
+    ERROR_VARIABLE output
     RESULT_VARIABLE return_value
     )
-  if(return_value)
+  if(return_value AND NOT HDF5_FIND_QUIETLY)
     message(STATUS
       "HDF5 ${language} compiler wrapper is unable to compile a minimal HDF5 program.")
   else()
@@ -374,7 +377,7 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
       RESULT_VARIABLE return_value
       OUTPUT_STRIP_TRAILING_WHITESPACE
       )
-    if(return_value)
+    if(return_value AND NOT HDF5_FIND_QUIETLY)
       message(STATUS
         "Unable to determine HDF5 ${language} flags from HDF5 wrapper.")
     endif()
@@ -385,7 +388,7 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
       RESULT_VARIABLE return_value
       OUTPUT_STRIP_TRAILING_WHITESPACE
       )
-    if(return_value)
+    if(return_value AND NOT HDF5_FIND_QUIETLY)
       message(STATUS
         "Unable to determine HDF5 ${language} version_var from HDF5 wrapper.")
     endif()
@@ -714,10 +717,8 @@ if(NOT HDF5_FOUND)
           endif()
 
           set(HDF5_${_lang}_FOUND TRUE)
-          _HDF5_remove_duplicates_from_beginning(HDF5_${_lang}_DEFINITIONS)
-          _HDF5_remove_duplicates_from_beginning(HDF5_${_lang}_INCLUDE_DIRS)
-          _HDF5_remove_duplicates_from_beginning(HDF5_${_lang}_LIBRARIES)
-          _HDF5_remove_duplicates_from_beginning(HDF5_${_lang}_HL_LIBRARIES)
+          list(REMOVE_DUPLICATES HDF5_${_lang}_DEFINITIONS)
+          list(REMOVE_DUPLICATES HDF5_${_lang}_INCLUDE_DIRS)
         else()
           set(_HDF5_NEED_TO_SEARCH TRUE)
         endif()
@@ -770,10 +771,8 @@ elseif(NOT HDF5_FOUND AND NOT _HDF5_NEED_TO_SEARCH)
       endif()
     endif()
   endforeach()
-  _HDF5_remove_duplicates_from_beginning(HDF5_DEFINITIONS)
-  _HDF5_remove_duplicates_from_beginning(HDF5_INCLUDE_DIRS)
-  _HDF5_remove_duplicates_from_beginning(HDF5_LIBRARIES)
-  _HDF5_remove_duplicates_from_beginning(HDF5_HL_LIBRARIES)
+  list(REMOVE_DUPLICATES HDF5_DEFINITIONS)
+  list(REMOVE_DUPLICATES HDF5_INCLUDE_DIRS)
   set(HDF5_FOUND TRUE)
   set(HDF5_REQUIRED_VARS HDF5_LIBRARIES)
   if(HDF5_FIND_HL)
@@ -913,10 +912,8 @@ if( NOT HDF5_FOUND )
         set(HDF5_HL_FOUND TRUE)
     endif()
 
-    _HDF5_remove_duplicates_from_beginning(HDF5_DEFINITIONS)
-    _HDF5_remove_duplicates_from_beginning(HDF5_INCLUDE_DIRS)
-    _HDF5_remove_duplicates_from_beginning(HDF5_LIBRARIES)
-    _HDF5_remove_duplicates_from_beginning(HDF5_HL_LIBRARIES)
+    list(REMOVE_DUPLICATES HDF5_DEFINITIONS)
+    list(REMOVE_DUPLICATES HDF5_INCLUDE_DIRS)
 
     # If the HDF5 include directory was found, open H5pubconf.h to determine if
     # HDF5 was compiled with parallel IO support
@@ -991,10 +988,10 @@ if (HDF5_FOUND)
     add_library(HDF5::HDF5 INTERFACE IMPORTED)
     string(REPLACE "-D" "" _hdf5_definitions "${HDF5_DEFINITIONS}")
     set_target_properties(HDF5::HDF5 PROPERTIES
-      INTERFACE_LINK_LIBRARIES "${HDF5_LIBRARIES}"
       INTERFACE_INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIRS}"
       INTERFACE_COMPILE_DEFINITIONS "${_hdf5_definitions}")
     unset(_hdf5_definitions)
+    target_link_libraries(HDF5::HDF5 INTERFACE ${HDF5_LIBRARIES})
   endif ()
 
   foreach (hdf5_lang IN LISTS HDF5_LANGUAGE_BINDINGS)
@@ -1026,7 +1023,7 @@ if (HDF5_FOUND)
           # Error if we still don't have the location.
           message(SEND_ERROR
             "HDF5 was found, but a different variable was set which contains "
-            "its location.")
+            "the location of the `hdf5::${hdf5_target_name}` library.")
         endif ()
         add_library("hdf5::${hdf5_target_name}" UNKNOWN IMPORTED)
         string(REPLACE "-D" "" _hdf5_definitions "${HDF5_${hdf5_lang}_DEFINITIONS}")
@@ -1057,12 +1054,14 @@ if (HDF5_FOUND)
       continue ()
     endif ()
 
+    set(hdf5_alt_target_name "")
     if (hdf5_lang STREQUAL "C")
       set(hdf5_target_name "hdf5_hl")
     elseif (hdf5_lang STREQUAL "CXX")
       set(hdf5_target_name "hdf5_hl_cpp")
     elseif (hdf5_lang STREQUAL "Fortran")
       set(hdf5_target_name "hdf5_hl_fortran")
+      set(hdf5_alt_target_name "hdf5hl_fortran")
     else ()
       continue ()
     endif ()
@@ -1081,11 +1080,13 @@ if (HDF5_FOUND)
           set(_hdf5_location "${HDF5_${hdf5_lang}_HL_LIBRARY}")
         elseif (DEFINED "HDF5_${hdf5_lang}_LIBRARY_${hdf5_target_name}")
           set(_hdf5_location "${HDF5_${hdf5_lang}_LIBRARY_${hdf5_target_name}}")
+        elseif (hdf5_alt_target_name AND DEFINED "HDF5_${hdf5_lang}_LIBRARY_${hdf5_alt_target_name}")
+          set(_hdf5_location "${HDF5_${hdf5_lang}_LIBRARY_${hdf5_alt_target_name}}")
         else ()
           # Error if we still don't have the location.
           message(SEND_ERROR
             "HDF5 was found, but a different variable was set which contains "
-            "its location.")
+            "the location of the `hdf5::${hdf5_target_name}` library.")
         endif ()
         add_library("hdf5::${hdf5_target_name}" UNKNOWN IMPORTED)
         string(REPLACE "-D" "" _hdf5_definitions "${HDF5_${hdf5_lang}_HL_DEFINITIONS}")
@@ -1132,6 +1133,21 @@ if (HDF5_FIND_DEBUG)
     message(STATUS "HDF5_${_lang}_LIBRARIES: ${HDF5_${_lang}_LIBRARIES}")
     message(STATUS "HDF5_${_lang}_HL_LIBRARY: ${HDF5_${_lang}_HL_LIBRARY}")
     message(STATUS "HDF5_${_lang}_HL_LIBRARIES: ${HDF5_${_lang}_HL_LIBRARIES}")
+  endforeach()
+  message(STATUS "Defined targets (if any):")
+  foreach(_lang IN  ITEMS "" "_cpp" "_fortran")
+    foreach(_hl IN  ITEMS "" "_hl")
+      foreach(_prefix IN ITEMS "hdf5::" "")
+        foreach(_suffix IN ITEMS "-static" "-shared" "")
+          set (_target ${_prefix}hdf5${_hl}${_lang}${_suffix})
+          if (TARGET  ${_target})
+            message(STATUS "... ${_target}")
+          else()
+            #message(STATUS "... ${_target} does not exist")
+          endif()
+        endforeach()
+      endforeach()
+    endforeach()
   endforeach()
 endif()
 unset(_lang)

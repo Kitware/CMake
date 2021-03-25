@@ -5,12 +5,6 @@
 FindGit
 -------
 
-The module defines the following ``IMPORTED`` targets (when
-:prop_gbl:`CMAKE_ROLE` is ``PROJECT``):
-
-``Git::Git``
-  Executable of the Git command-line client.
-
 The module defines the following variables:
 
 ``GIT_EXECUTABLE``
@@ -19,6 +13,13 @@ The module defines the following variables:
   True if the Git command-line client was found.
 ``GIT_VERSION_STRING``
   The version of Git found.
+
+.. versionadded:: 3.14
+  The module defines the following ``IMPORTED`` targets (when
+  :prop_gbl:`CMAKE_ROLE` is ``PROJECT``):
+
+``Git::Git``
+  Executable of the Git command-line client.
 
 Example usage:
 
@@ -76,20 +77,51 @@ unset(git_names)
 unset(_git_sourcetree_path)
 
 if(GIT_EXECUTABLE)
-  execute_process(COMMAND ${GIT_EXECUTABLE} --version
-                  OUTPUT_VARIABLE git_version
-                  ERROR_QUIET
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if (git_version MATCHES "^git version [0-9]")
-    string(REPLACE "git version " "" GIT_VERSION_STRING "${git_version}")
+  # Avoid querying the version if we've already done that this run. For
+  # projects that use things like ExternalProject or FetchContent heavily,
+  # this saving can be measurable on some platforms.
+  #
+  # This is an internal property, projects must not try to use it.
+  # We don't want this stored in the cache because it might still change
+  # between CMake runs, but it shouldn't change during a run for a given
+  # git executable location.
+  set(__doGitVersionCheck TRUE)
+  get_property(__gitVersionProp GLOBAL
+    PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
+  )
+  if(__gitVersionProp)
+    list(GET __gitVersionProp 0 __gitExe)
+    list(GET __gitVersionProp 1 __gitVersion)
+    if(__gitExe STREQUAL GIT_EXECUTABLE AND NOT __gitVersion STREQUAL "")
+      set(GIT_VERSION_STRING "${__gitVersion}")
+      set(__doGitVersionCheck FALSE)
+    endif()
+    unset(__gitExe)
+    unset(__gitVersion)
   endif()
-  unset(git_version)
+  unset(__gitVersionProp)
+
+  if(__doGitVersionCheck)
+    execute_process(COMMAND ${GIT_EXECUTABLE} --version
+                    OUTPUT_VARIABLE git_version
+                    ERROR_QUIET
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (git_version MATCHES "^git version [0-9]")
+      string(REPLACE "git version " "" GIT_VERSION_STRING "${git_version}")
+      set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
+        "${GIT_EXECUTABLE};${GIT_VERSION_STRING}"
+      )
+    endif()
+    unset(git_version)
+  endif()
+  unset(__doGitVersionCheck)
 
   get_property(_findgit_role GLOBAL PROPERTY CMAKE_ROLE)
   if(_findgit_role STREQUAL "PROJECT" AND NOT TARGET Git::Git)
     add_executable(Git::Git IMPORTED)
     set_property(TARGET Git::Git PROPERTY IMPORTED_LOCATION "${GIT_EXECUTABLE}")
   endif()
+  unset(_findgit_role)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)

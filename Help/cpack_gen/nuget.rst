@@ -1,9 +1,11 @@
 CPack NuGet Generator
 ---------------------
 
+.. versionadded:: 3.12
+
 When build a NuGet package there is no direct way to control an output
 filename due a lack of the corresponding CLI option of NuGet, so there
-is no ``CPACK_NUGET_PACKAGE_FILENAME`` variable. To form the output filename
+is no ``CPACK_NUGET_PACKAGE_FILE_NAME`` variable. To form the output filename
 NuGet uses the package name and the version according to its built-in rules.
 
 Also, be aware that including a top level directory
@@ -35,7 +37,8 @@ List of CPack NuGet generator specific variables:
 .. variable:: CPACK_NUGET_PACKAGE_NAME
               CPACK_NUGET_<compName>_PACKAGE_NAME
 
- The NUGET package name.
+ The NUGET package name. ``CPACK_NUGET_PACKAGE_NAME`` is used as the
+ package ``id`` on nuget.org_
 
  * Mandatory : YES
  * Default   : :variable:`CPACK_PACKAGE_NAME`
@@ -95,7 +98,7 @@ List of CPack NuGet generator specific variables:
 .. variable:: CPACK_NUGET_PACKAGE_HOMEPAGE_URL
               CPACK_NUGET_<compName>_PACKAGE_HOMEPAGE_URL
 
- A URL for the package's home page, often shown in UI displays as well
+ An URL for the package's home page, often shown in UI displays as well
  as nuget.org_.
 
  * Mandatory : NO
@@ -104,8 +107,45 @@ List of CPack NuGet generator specific variables:
 .. variable:: CPACK_NUGET_PACKAGE_LICENSEURL
               CPACK_NUGET_<compName>_PACKAGE_LICENSEURL
 
- A URL for the package's license, often shown in UI displays as well
- as nuget.org_.
+ .. deprecated:: 3.20
+  Use a local license file
+  (:variable:`CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME`)
+  or a `(SPDX) license identifier`_
+  (:variable:`CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION`) instead.
+
+ An URL for the package's license, often shown in UI displays as well
+ as on nuget.org_.
+
+ * Mandatory : NO
+ * Default   : -
+
+.. variable:: CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION
+              CPACK_NUGET_<compName>_PACKAGE_LICENSE_EXPRESSION
+
+ .. versionadded:: 3.20
+
+ A Software Package Data Exchange `(SPDX) license identifier`_ such as
+ ``MIT``, ``BSD-3-Clause``, or ``LGPL-3.0-or-later``. In the case of a
+ choice of licenses or more complex restrictions, compound license
+ expressions may be formed using boolean operators, for example
+ ``MIT OR BSD-3-Clause``.  See the `SPDX specification`_ for guidance
+ on forming complex license expressions.
+
+ If ``CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME`` is specified,
+ ``CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION`` is ignored.
+
+ * Mandatory : NO
+ * Default   : -
+
+.. variable:: CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME
+              CPACK_NUGET_<compName>_PACKAGE_LICENSE_FILE_NAME
+
+ The package's license file in :file:`.txt` or :file:`.md` format.
+
+ If ``CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME`` is specified,
+ ``CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION`` is ignored.
+
+ .. versionadded:: 3.20
 
  * Mandatory : NO
  * Default   : -
@@ -113,7 +153,21 @@ List of CPack NuGet generator specific variables:
 .. variable:: CPACK_NUGET_PACKAGE_ICONURL
               CPACK_NUGET_<compName>_PACKAGE_ICONURL
 
- A URL for a 64x64 image with transparency background to use as the
+ .. deprecated:: 3.20
+  Use a local icon file (:variable:`CPACK_NUGET_PACKAGE_ICON`) instead.
+
+ An URL for a 64x64 image with transparency background to use as the
+ icon for the package in UI display.
+
+ * Mandatory : NO
+ * Default   : -
+
+.. variable:: CPACK_NUGET_PACKAGE_ICON
+              CPACK_NUGET_<compName>_PACKAGE_ICON
+
+ .. versionadded:: 3.20
+
+ The filename of a 64x64 image with transparency background to use as the
  icon for the package in UI display.
 
  * Mandatory : NO
@@ -142,6 +196,16 @@ List of CPack NuGet generator specific variables:
               CPACK_NUGET_<compName>_PACKAGE_COPYRIGHT
 
  Copyright details for the package.
+
+ * Mandatory : NO
+ * Default   : -
+
+.. variable:: CPACK_NUGET_PACKAGE_LANGUAGE
+              CPACK_NUGET_<compName>_PACKAGE_LANGUAGE
+
+ .. versionadded:: 3.20
+
+ Locale specifier for the package, for example ``en_CA``.
 
  * Mandatory : NO
  * Default   : -
@@ -185,5 +249,7 @@ List of CPack NuGet generator specific variables:
 
 .. _nuget.org: http://nuget.org
 .. _version specification: https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-ranges-and-wildcards
+.. _(SPDX) license identifier: https://spdx.org/licenses/
+.. _SPDX specification: https://spdx.github.io/spdx-spec/appendix-IV-SPDX-license-expressions/
 
 .. NuGet spec docs https://docs.microsoft.com/en-us/nuget/reference/nuspec

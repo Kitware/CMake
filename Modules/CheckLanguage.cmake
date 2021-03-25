@@ -68,6 +68,11 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
     else()
       set(_D_CMAKE_MAKE_PROGRAM "-DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM}")
     endif()
+    if(CMAKE_TOOLCHAIN_FILE)
+      set(_D_CMAKE_TOOLCHAIN_FILE "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_TOOLCHAIN_FILE}")
+    else()
+      set(_D_CMAKE_TOOLCHAIN_FILE "")
+    endif()
     execute_process(
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang}
       COMMAND ${CMAKE_COMMAND} . -G ${CMAKE_GENERATOR}
@@ -75,6 +80,7 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
                                  -T "${CMAKE_GENERATOR_TOOLSET}"
                                  ${_D_CMAKE_GENERATOR_INSTANCE}
                                  ${_D_CMAKE_MAKE_PROGRAM}
+                                 ${_D_CMAKE_TOOLCHAIN_FILE}
       OUTPUT_VARIABLE _cl_output
       ERROR_VARIABLE _cl_output
       RESULT_VARIABLE _cl_result

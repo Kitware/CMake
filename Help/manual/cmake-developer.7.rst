@@ -23,15 +23,14 @@ in turn link to developer guides for CMake itself.
 Find Modules
 ============
 
-A "find module" is a ``Find<PackageName>.cmake`` file to be loaded
-by the :command:`find_package` command when invoked for ``<PackageName>``.
+A "find module" is a ``Find<PackageName>.cmake`` file to be loaded by the
+:command:`find_package` command when invoked for ``<PackageName>``.
 
-The primary task of a find module is to determine whether a package
-exists on the system, set the ``<PackageName>_FOUND`` variable to reflect
-this and provide any variables, macros and imported targets required to
-use the package.  A find module is useful in cases where an upstream
-library does not provide a
-:ref:`config file package <Config File Packages>`.
+The primary task of a find module is to determine whether a package is
+available, set the ``<PackageName>_FOUND`` variable to reflect this and
+provide any variables, macros and imported targets required to use the
+package.  A find module is useful in cases where an upstream library does
+not provide a :ref:`config file package <Config File Packages>`.
 
 The traditional approach is to use variables for everything, including
 libraries and executables: see the `Standard Variable Names`_ section
@@ -91,55 +90,92 @@ Standard Variable Names
 For a ``FindXxx.cmake`` module that takes the approach of setting
 variables (either instead of or in addition to creating imported
 targets), the following variable names should be used to keep things
-consistent between find modules.  Note that all variables start with
-``Xxx_`` to make sure they do not interfere with other find modules; the
-same consideration applies to macros, functions and imported targets.
+consistent between Find modules.  Note that all variables start with
+``Xxx_``, which (unless otherwise noted) must match exactly the name
+of the ``FindXxx.cmake`` file, including upper/lowercase.
+This prefix on the variable names ensures that they do not conflict with
+variables of other Find modules.  The same pattern should also be followed
+for any macros, functions and imported targets defined by the Find module.
 
 ``Xxx_INCLUDE_DIRS``
   The final set of include directories listed in one variable for use by
-  client code.  This should not be a cache entry.
+  client code. This should not be a cache entry (note that this also means
+  this variable should not be used as the result variable of a
+  :command:`find_path` command - see ``Xxx_INCLUDE_DIR`` below for that).
 
 ``Xxx_LIBRARIES``
-  The libraries to link against to use Xxx. These should include full
-  paths.  This should not be a cache entry.
+  The libraries to use with the module.  These may be CMake targets, full
+  absolute paths to a library binary or the name of a library that the
+  linker must find in its search path.  This should not be a cache entry
+  (note that this also means this variable should not be used as the
+  result variable of a :command:`find_library` command - see
+  ``Xxx_LIBRARY`` below for that).
 
 ``Xxx_DEFINITIONS``
-  Definitions to use when compiling code that uses Xxx. This really
-  shouldn't include options such as ``-DHAS_JPEG`` that a client
+  The compile definitions to use when compiling code that uses the module.
+  This really shouldn't include options such as ``-DHAS_JPEG`` that a client
   source-code file uses to decide whether to ``#include <jpeg.h>``
 
 ``Xxx_EXECUTABLE``
-  Where to find the Xxx tool.
+  The full absolute path to an executable.  In this case, ``Xxx`` might not
+  be the name of the module, it might be the name of the tool (usually
+  converted to all uppercase), assuming that tool has such a well-known name
+  that it is unlikely that another tool with the same name exists.  It would
+  be appropriate to use this as the result variable of a
+  :command:`find_program` command.
 
-``Xxx_Yyy_EXECUTABLE``
-  Where to find the Yyy tool that comes with Xxx.
+``Xxx_YYY_EXECUTABLE``
+  Similar to ``Xxx_EXECUTABLE`` except here the ``Xxx`` is always the module
+  name and ``YYY`` is the tool name (again, usually fully uppercase).
+  Prefer this form if the tool name is not very widely known or has the
+  potential  to clash with another tool.  For greater consistency, also
+  prefer this form if the module provides more than one executable.
 
 ``Xxx_LIBRARY_DIRS``
   Optionally, the final set of library directories listed in one
-  variable for use by client code.  This should not be a cache entry.
+  variable for use by client code. This should not be a cache entry.
 
 ``Xxx_ROOT_DIR``
-  Where to find the base directory of Xxx.
+  Where to find the base directory of the module.
 
-``Xxx_VERSION_Yy``
-  Expect Version Yy if true. Make sure at most one of these is ever true.
+``Xxx_VERSION_VV``
+  Variables of this form specify whether the ``Xxx`` module being provided
+  is version ``VV`` of the module.  There should not be more than one
+  variable of this form set to true for a given module.  For example, a
+  module ``Barry`` might have evolved over many years and gone through a
+  number of different major versions.  Version 3 of the ``Barry`` module
+  might set the variable ``Barry_VERSION_3`` to true, whereas an older
+  version of the module might set ``Barry_VERSION_2`` to true instead.
+  It would be an error for both ``Barry_VERSION_3`` and ``Barry_VERSION_2``
+  to both be set to true.
 
-``Xxx_WRAP_Yy``
-  If False, do not try to use the relevant CMake wrapping command.
+``Xxx_WRAP_YY``
+  When a variable of this form is set to false, it indicates that the
+  relevant wrapping command should not be used.  The wrapping command
+  depends on the module, it may be implied by the module name or it might
+  be specified by the ``YY`` part of the variable.
 
 ``Xxx_Yy_FOUND``
-  If False, optional Yy part of Xxx system is not available.
+  For variables of this form, ``Yy`` is the name of a component for the
+  module.  It should match exactly one of the valid component names that
+  may be passed to the :command:`find_package` command for the module.
+  If a variable of this form is set to false, it means that the ``Yy``
+  component of module ``Xxx`` was not found or is not available.
+  Variables of this form would typically be used for optional components
+  so that the caller can check whether an optional component is available.
 
 ``Xxx_FOUND``
-  Set to false, or undefined, if we haven't found, or don't want to use
-  Xxx.
+  When the :command:`find_package` command returns to the caller, this
+  variable will be set to true if the module was deemed to have been found
+  successfully.
 
 ``Xxx_NOT_FOUND_MESSAGE``
   Should be set by config-files in the case that it has set
   ``Xxx_FOUND`` to FALSE.  The contained message will be printed by the
   :command:`find_package` command and by
-  ``find_package_handle_standard_args()`` to inform the user about the
-  problem.
+  :command:`find_package_handle_standard_args` to inform the user about the
+  problem.  Use this instead of calling :command:`message` directly to
+  report a reason for failing to find the module or package.
 
 ``Xxx_RUNTIME_LIBRARY_DIRS``
   Optionally, the runtime library search path for use when running an
@@ -160,23 +196,36 @@ same consideration applies to macros, functions and imported targets.
 ``Xxx_VERSION_PATCH``
   The patch version of the package found, if any.
 
-The following names should not usually be used in CMakeLists.txt files, but
-are typically cache variables for users to edit and control the
-behaviour of find modules (like entering the path to a library manually)
+The following names should not usually be used in ``CMakeLists.txt`` files.
+They are intended for use by Find modules to specify and cache the locations
+of specific files or directories.  Users are typically able to set and edit
+these variables to control the behavior of Find modules (like entering the
+path to a library manually):
 
 ``Xxx_LIBRARY``
-  The path of the Xxx library (as used with :command:`find_library`, for
-  example).
+  The path of the library.  Use this form only when the module provides a
+  single library.  It is appropriate to use this as the result variable
+  in a :command:`find_library` command.
 
 ``Xxx_Yy_LIBRARY``
-  The path of the Yy library that is part of the Xxx system. It may or
-  may not be required to use Xxx.
+  The path of library ``Yy`` provided by the module ``Xxx``.  Use this form
+  when the module provides more than one library or where other modules may
+  also provide a library of the same name. It is also appropriate to use
+  this form as the result variable in a :command:`find_library` command.
 
 ``Xxx_INCLUDE_DIR``
-  Where to find headers for using the Xxx library.
+  When the module provides only a single library, this variable can be used
+  to specify where to find headers for using the library (or more accurately,
+  the path that consumers of the library should add to their header search
+  path).  It would be appropriate to use this as the result variable in a
+  :command:`find_path` command.
 
 ``Xxx_Yy_INCLUDE_DIR``
-  Where to find headers for using the Yy library of the Xxx system.
+  If the module provides more than one library or where other modules may
+  also provide a library of the same name, this form is recommended for
+  specifying where to find headers for using library ``Yy`` provided by
+  the module.  Again, it would be appropriate to use this as the result
+  variable in a :command:`find_path` command.
 
 To prevent users being overwhelmed with settings to configure, try to
 keep as many options as possible out of the cache, leaving at least one
@@ -185,7 +234,8 @@ not-found library (e.g. ``Xxx_ROOT_DIR``).  For the same reason, mark
 most cache options as advanced.  For packages which provide both debug
 and release binaries, it is common to create cache variables with a
 ``_LIBRARY_<CONFIG>`` suffix, such as ``Foo_LIBRARY_RELEASE`` and
-``Foo_LIBRARY_DEBUG``.
+``Foo_LIBRARY_DEBUG``.  The :module:`SelectLibraryConfigurations` module
+can be helpful for such cases.
 
 While these are the standard variable names, you should provide
 backwards compatibility for any old names that were actually in use.

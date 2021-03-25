@@ -1,0 +1,24 @@
+# Add Qt Core dependencies missing from static Qt build.
+--- qt-install/lib/cmake/Qt5Core/Qt5CoreConfig.cmake.orig
++++ qt-install/lib/cmake/Qt5Core/Qt5CoreConfig.cmake
+@@ -111,7 +111,7 @@
+     list(REMOVE_DUPLICATES Qt5Core_COMPILE_DEFINITIONS)
+     list(REMOVE_DUPLICATES Qt5Core_EXECUTABLE_COMPILE_FLAGS)
+
+-    set(_Qt5Core_LIB_DEPENDENCIES "")
++    set(_Qt5Core_LIB_DEPENDENCIES "${_qt5Core_install_prefix}/lib/libqtpcre2.a")
+
+
+     add_library(Qt5::Core STATIC IMPORTED)
+# Add Qt Gui dependencies missing from static Qt build.
+--- qt-install/lib/cmake/Qt5Gui/Qt5GuiConfig.cmake.orig
++++ qt-install/lib/cmake/Qt5Gui/Qt5GuiConfig.cmake
+@@ -111,7 +111,7 @@
+     list(REMOVE_DUPLICATES Qt5Gui_COMPILE_DEFINITIONS)
+     list(REMOVE_DUPLICATES Qt5Gui_EXECUTABLE_COMPILE_FLAGS)
+
+-    set(_Qt5Gui_LIB_DEPENDENCIES "Qt5::Core")
++    set(_Qt5Gui_LIB_DEPENDENCIES "Qt5::Core;${_qt5Gui_install_prefix}/lib/libqtlibpng.a")
+
+
+     add_library(Qt5::Gui STATIC IMPORTED)

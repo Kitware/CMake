@@ -29,8 +29,9 @@ Graphviz package:
 
   dot -Tpng -o foo.png foo.dot
 
-The different dependency types ``PUBLIC``, ``INTERFACE`` and ``PRIVATE``
-are represented as solid, dashed and dotted edges.
+.. versionadded:: 3.10
+  The different dependency types ``PUBLIC``, ``INTERFACE`` and ``PRIVATE``
+  are represented as solid, dashed and dotted edges.
 
 Variables specific to the Graphviz support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

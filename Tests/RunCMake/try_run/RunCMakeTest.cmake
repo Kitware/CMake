@@ -8,3 +8,5 @@ if (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$" AND
   run_cmake(LinkOptions)
   unset (RunCMake_TEST_OPTIONS)
 endif()
+
+run_cmake(WorkingDirArg)

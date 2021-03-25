@@ -16,3 +16,9 @@ div.sphinxsidebarwrapper {
 .literal-block a.reference.internal {
   background-color: #dfdfdf;
 }
+
+/* Remove unwanted margin in case list item contains a div-wrapping
+   directive like `.. versionadded` or `.. deprecated`. */
+dd > :first-child > p {
+  margin-top: 0px;
+}

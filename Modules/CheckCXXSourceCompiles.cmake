@@ -44,6 +44,8 @@ Check if given C++ source compiles and links into an executable.
     directory property will be ignored.
 
   ``CMAKE_REQUIRED_LINK_OPTIONS``
+    .. versionadded:: 3.14
+
     A :ref:`;-list <CMake Language Lists>` of options to add to the link
     command (see :command:`try_compile` for further details).
 
@@ -54,6 +56,8 @@ Check if given C++ source compiles and links into an executable.
     further details).
 
   ``CMAKE_REQUIRED_QUIET``
+    .. versionadded:: 3.1
+
     If this variable evaluates to a boolean true value, all status messages
     associated with the check will be suppressed.
 

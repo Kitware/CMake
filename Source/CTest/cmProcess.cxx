@@ -152,7 +152,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 
 void cmProcess::StartTimer()
 {
-  auto properties = this->Runner->GetTestProperties();
+  auto* properties = this->Runner->GetTestProperties();
   auto msec =
     std::chrono::duration_cast<std::chrono::milliseconds>(this->Timeout);
 
@@ -177,7 +177,7 @@ bool cmProcess::Buffer::GetLine(std::string& line)
 
       // Start a new range for the next line.
       ++this->Last;
-      this->First = Last;
+      this->First = this->Last;
 
       // Return the line extracted.
       return true;
@@ -209,7 +209,7 @@ bool cmProcess::Buffer::GetLast(std::string& line)
 void cmProcess::OnReadCB(uv_stream_t* stream, ssize_t nread,
                          const uv_buf_t* buf)
 {
-  auto self = static_cast<cmProcess*>(stream->data);
+  auto* self = static_cast<cmProcess*>(stream->data);
   self->OnRead(nread, buf);
 }
 
@@ -256,7 +256,7 @@ void cmProcess::OnRead(ssize_t nread, const uv_buf_t* buf)
 void cmProcess::OnAllocateCB(uv_handle_t* handle, size_t suggested_size,
                              uv_buf_t* buf)
 {
-  auto self = static_cast<cmProcess*>(handle->data);
+  auto* self = static_cast<cmProcess*>(handle->data);
   self->OnAllocate(suggested_size, buf);
 }
 
@@ -272,7 +272,7 @@ void cmProcess::OnAllocate(size_t /*suggested_size*/, uv_buf_t* buf)
 
 void cmProcess::OnTimeoutCB(uv_timer_t* timer)
 {
-  auto self = static_cast<cmProcess*>(timer->data);
+  auto* self = static_cast<cmProcess*>(timer->data);
   self->OnTimeout();
 }
 
@@ -298,7 +298,7 @@ void cmProcess::OnTimeout()
 void cmProcess::OnExitCB(uv_process_t* process, int64_t exit_status,
                          int term_signal)
 {
-  auto self = static_cast<cmProcess*>(process->data);
+  auto* self = static_cast<cmProcess*>(process->data);
   self->OnExit(exit_status, term_signal);
 }
 
@@ -358,7 +358,7 @@ void cmProcess::ResetStartTime()
   this->StartTime = std::chrono::steady_clock::now();
 }
 
-cmProcess::Exception cmProcess::GetExitException()
+cmProcess::Exception cmProcess::GetExitException() const
 {
   auto exception = Exception::None;
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -430,7 +430,7 @@ cmProcess::Exception cmProcess::GetExitException()
   return exception;
 }
 
-std::string cmProcess::GetExitExceptionString()
+std::string cmProcess::GetExitExceptionString() const
 {
   std::string exception_str;
 #if defined(_WIN32)

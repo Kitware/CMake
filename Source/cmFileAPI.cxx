@@ -18,6 +18,7 @@
 #include "cmFileAPICMakeFiles.h"
 #include "cmFileAPICache.h"
 #include "cmFileAPICodemodel.h"
+#include "cmFileAPIToolchains.h"
 #include "cmGlobalGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -262,6 +263,17 @@ bool cmFileAPI::ReadQuery(std::string const& query,
     objects.push_back(o);
     return true;
   }
+  if (kindName == ObjectKindName(ObjectKind::Toolchains)) {
+    Object o;
+    o.Kind = ObjectKind::Toolchains;
+    if (verStr == "v1") {
+      o.Version = 1;
+    } else {
+      return false;
+    }
+    objects.push_back(o);
+    return true;
+  }
   if (kindName == ObjectKindName(ObjectKind::InternalTest)) {
     Object o;
     o.Kind = ObjectKind::InternalTest;
@@ -402,6 +414,7 @@ const char* cmFileAPI::ObjectKindName(ObjectKind kind)
     "codemodel",  //
     "cache",      //
     "cmakeFiles", //
+    "toolchains", //
     "__test"      //
   };
   return objectKindNames[size_t(kind)];
@@ -434,6 +447,9 @@ Json::Value cmFileAPI::BuildObject(Object const& object)
       break;
     case ObjectKind::CMakeFiles:
       value = this->BuildCMakeFiles(object);
+      break;
+    case ObjectKind::Toolchains:
+      value = this->BuildToolchains(object);
       break;
     case ObjectKind::InternalTest:
       value = this->BuildInternalTest(object);
@@ -491,6 +507,8 @@ cmFileAPI::ClientRequest cmFileAPI::BuildClientRequest(
     r.Kind = ObjectKind::Cache;
   } else if (kindName == this->ObjectKindName(ObjectKind::CMakeFiles)) {
     r.Kind = ObjectKind::CMakeFiles;
+  } else if (kindName == this->ObjectKindName(ObjectKind::Toolchains)) {
+    r.Kind = ObjectKind::Toolchains;
   } else if (kindName == this->ObjectKindName(ObjectKind::InternalTest)) {
     r.Kind = ObjectKind::InternalTest;
   } else {
@@ -517,6 +535,9 @@ cmFileAPI::ClientRequest cmFileAPI::BuildClientRequest(
       break;
     case ObjectKind::CMakeFiles:
       this->BuildClientRequestCMakeFiles(r, versions);
+      break;
+    case ObjectKind::Toolchains:
+      this->BuildClientRequestToolchains(r, versions);
       break;
     case ObjectKind::InternalTest:
       this->BuildClientRequestInternalTest(r, versions);
@@ -765,6 +786,40 @@ Json::Value cmFileAPI::BuildCMakeFiles(Object const& object)
   return cmakeFiles;
 }
 
+// The "toolchains" object kind.
+
+static unsigned int const ToolchainsV1Minor = 0;
+
+void cmFileAPI::BuildClientRequestToolchains(
+  ClientRequest& r, std::vector<RequestVersion> const& versions)
+{
+  // Select a known version from those requested.
+  for (RequestVersion const& v : versions) {
+    if ((v.Major == 1 && v.Minor <= ToolchainsV1Minor)) {
+      r.Version = v.Major;
+      break;
+    }
+  }
+  if (!r.Version) {
+    r.Error = NoSupportedVersion(versions);
+  }
+}
+
+Json::Value cmFileAPI::BuildToolchains(Object const& object)
+{
+  Json::Value toolchains = cmFileAPIToolchainsDump(*this, object.Version);
+  toolchains["kind"] = this->ObjectKindName(object.Kind);
+
+  Json::Value& version = toolchains["version"];
+  if (object.Version == 1) {
+    version = BuildVersion(1, ToolchainsV1Minor);
+  } else {
+    return toolchains; // should be unreachable
+  }
+
+  return toolchains;
+}
+
 // The "__test" object kind is for internal testing of CMake.
 
 static unsigned int const InternalTestV1Minor = 3;
@@ -825,6 +880,14 @@ Json::Value cmFileAPI::ReportCapabilities()
     request["kind"] = ObjectKindName(ObjectKind::CMakeFiles);
     Json::Value& versions = request["version"] = Json::arrayValue;
     versions.append(BuildVersion(1, CMakeFilesV1Minor));
+    requests.append(std::move(request)); // NOLINT(*)
+  }
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::Toolchains);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(1, ToolchainsV1Minor));
     requests.append(std::move(request)); // NOLINT(*)
   }
 

@@ -77,6 +77,10 @@ The following cache variables are also available to set or use:
 
 ``FLTK_IMAGES_LIBRARY_DEBUG``
   The FLTK Images library (debug)
+
+.. versionadded:: 3.11
+  Debug and Release variants are found separately and use per-configuration
+  variables.
 #]=======================================================================]
 
 if(NOT FLTK_SKIP_OPENGL)

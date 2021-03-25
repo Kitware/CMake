@@ -82,6 +82,18 @@ public:
   int Value = 0;
 };
 
+class NoMoveAssignEventLogger : public EventLogger
+{
+public:
+  using EventLogger::EventLogger;
+
+  NoMoveAssignEventLogger(const NoMoveAssignEventLogger&) = default;
+  NoMoveAssignEventLogger(NoMoveAssignEventLogger&&) = default;
+
+  NoMoveAssignEventLogger& operator=(const NoMoveAssignEventLogger&) = default;
+  NoMoveAssignEventLogger& operator=(NoMoveAssignEventLogger&&) = delete;
+};
+
 #define ASSERT_TRUE(x)                                                        \
   do {                                                                        \
     if (!(x)) {                                                               \
@@ -328,12 +340,28 @@ static bool testCopyAssign(std::vector<Event>& expected)
   o1 = o4; // Intentionally duplicated to test assigning an empty optional to
   // an empty optional
 
+  cm::optional<NoMoveAssignEventLogger> o5{ 1 };
+  auto const* v5 = &*o5;
+  const cm::optional<NoMoveAssignEventLogger> o6{ 2 };
+  auto const* v6 = &*o6;
+  o5 = std::move(o6);
+  const NoMoveAssignEventLogger e7{ 3 };
+  o5 = std::move(e7);
+
   expected = {
     { Event::VALUE_CONSTRUCT, v2, nullptr, 4 },
     { Event::COPY_CONSTRUCT, v1, v2, 4 },
     { Event::VALUE_CONSTRUCT, v3, nullptr, 5 },
     { Event::COPY_ASSIGN, v1, v3, 5 },
     { Event::DESTRUCT, v1, nullptr, 5 },
+    { Event::VALUE_CONSTRUCT, v5, nullptr, 1 },
+    { Event::VALUE_CONSTRUCT, v6, nullptr, 2 },
+    { Event::COPY_ASSIGN, v5, v6, 2 },
+    { Event::VALUE_CONSTRUCT, &e7, nullptr, 3 },
+    { Event::COPY_ASSIGN, v5, &e7, 3 },
+    { Event::DESTRUCT, &e7, nullptr, 3 },
+    { Event::DESTRUCT, v6, nullptr, 2 },
+    { Event::DESTRUCT, v5, nullptr, 3 },
     { Event::DESTRUCT, v3, nullptr, 5 },
     { Event::DESTRUCT, v2, nullptr, 4 },
   };

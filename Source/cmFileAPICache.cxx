@@ -44,7 +44,7 @@ Cache::Cache(cmFileAPI& fileAPI, unsigned long version)
 Json::Value Cache::Dump()
 {
   Json::Value cache = Json::objectValue;
-  cache["entries"] = DumpEntries();
+  cache["entries"] = this->DumpEntries();
   return cache;
 }
 

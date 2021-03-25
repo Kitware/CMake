@@ -1,0 +1,1 @@
+CMake Error: Could not evaluate build preset "vendorMacro": Invalid macro expansion

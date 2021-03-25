@@ -1,4 +1,6 @@
 ^CMake Error at CTestTestfile.cmake:[0-9]+ \(subdirs\):
   subdirs called with incorrect number of arguments
 +
-Errors while running CTest$
+Errors while running CTest
+Output from these tests are in: .*/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely.$

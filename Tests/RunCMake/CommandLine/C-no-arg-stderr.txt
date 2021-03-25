@@ -1,2 +1,2 @@
 ^CMake Error: -C must be followed by a file name.
-CMake Error: Problem processing arguments. Aborting.$
+CMake Error: Run 'cmake --help' for all supported options.$

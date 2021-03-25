@@ -1,0 +1,16 @@
+^(CMake Warning \(dev\) at Common\.cmake:[0-9]+ \(add_custom_command\):
+  Policy CMP0116 is not set: Ninja generators transform DEPFILEs from
+  add_custom_command\(\)\.  Run "cmake --help-policy CMP0116" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+Call Stack \(most recent call first\):
+  CMP0116-WARN-WARN\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++)+(CMake Warning \(dev\) at Subdirectory/CMakeLists\.txt:[0-9]+ \(add_custom_command\):
+  Policy CMP0116 is not set: Ninja generators transform DEPFILEs from
+  add_custom_command\(\)\.  Run "cmake --help-policy CMP0116" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+*)+$

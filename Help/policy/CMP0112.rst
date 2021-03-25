@@ -8,6 +8,7 @@ Target file component generator expressions do not add target dependencies.
 The following target-based generator expressions that query for directory or
 file name components no longer add a dependency on the evaluated target.
 
+    - ``TARGET_FILE_NAME``
     - ``TARGET_FILE_DIR``
     - ``TARGET_LINKER_FILE_BASE_NAME``
     - ``TARGET_LINKER_FILE_NAME``

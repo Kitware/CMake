@@ -21,8 +21,10 @@ specify the scope of the features.  ``PRIVATE`` and ``PUBLIC`` items will
 populate the :prop_tgt:`COMPILE_FEATURES` property of ``<target>``.
 ``PUBLIC`` and ``INTERFACE`` items will populate the
 :prop_tgt:`INTERFACE_COMPILE_FEATURES` property of ``<target>``.
-(:ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items.)
 Repeated calls for the same ``<target>`` append items.
+
+.. versionadded:: 3.11
+  Allow setting ``INTERFACE`` items on :ref:`IMPORTED targets <Imported Targets>`.
 
 The named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an

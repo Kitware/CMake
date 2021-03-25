@@ -30,6 +30,7 @@ struct cmListFileParser
   bool ParseFunction(const char* name, long line);
   bool AddArgument(cmListFileLexer_Token* token,
                    cmListFileArgument::Delimiter delim);
+  cm::optional<cmListFileContext> CheckNesting() const;
   cmListFile* ListFile;
   cmListFileBacktrace Backtrace;
   cmMessenger* Messenger;
@@ -104,7 +105,7 @@ bool cmListFileParser::ParseFile(const char* filename)
     return false;
   }
 
-  return Parse();
+  return this->Parse();
 }
 
 bool cmListFileParser::ParseString(const char* str,
@@ -117,7 +118,7 @@ bool cmListFileParser::ParseString(const char* str,
     return false;
   }
 
-  return Parse();
+  return this->Parse();
 }
 
 bool cmListFileParser::Parse()
@@ -158,6 +159,17 @@ bool cmListFileParser::Parse()
       return false;
     }
   }
+
+  // Check if all functions are nested properly.
+  if (auto badNesting = this->CheckNesting()) {
+    this->Messenger->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "Flow control statements are not properly nested.",
+      this->Backtrace.Push(*badNesting));
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
   return true;
 }
 
@@ -315,6 +327,112 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
   }
   this->Messenger->IssueMessage(MessageType::AUTHOR_WARNING, m.str(), lfbt);
   return true;
+}
+
+namespace {
+enum class NestingStateEnum
+{
+  If,
+  Else,
+  While,
+  Foreach,
+  Function,
+  Macro,
+};
+
+struct NestingState
+{
+  NestingStateEnum State;
+  cmListFileContext Context;
+};
+
+bool TopIs(std::vector<NestingState>& stack, NestingStateEnum state)
+{
+  return !stack.empty() && stack.back().State == state;
+}
+}
+
+cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
+{
+  std::vector<NestingState> stack;
+
+  for (auto const& func : this->ListFile->Functions) {
+    auto const& name = func.LowerCaseName();
+    if (name == "if") {
+      stack.push_back({
+        NestingStateEnum::If,
+        cmListFileContext::FromCommandContext(func, this->FileName),
+      });
+    } else if (name == "elseif") {
+      if (!TopIs(stack, NestingStateEnum::If)) {
+        return cmListFileContext::FromCommandContext(func, this->FileName);
+      }
+      stack.back() = {
+        NestingStateEnum::If,
+        cmListFileContext::FromCommandContext(func, this->FileName),
+      };
+    } else if (name == "else") {
+      if (!TopIs(stack, NestingStateEnum::If)) {
+        return cmListFileContext::FromCommandContext(func, this->FileName);
+      }
+      stack.back() = {
+        NestingStateEnum::Else,
+        cmListFileContext::FromCommandContext(func, this->FileName),
+      };
+    } else if (name == "endif") {
+      if (!TopIs(stack, NestingStateEnum::If) &&
+          !TopIs(stack, NestingStateEnum::Else)) {
+        return cmListFileContext::FromCommandContext(func, this->FileName);
+      }
+      stack.pop_back();
+    } else if (name == "while") {
+      stack.push_back({
+        NestingStateEnum::While,
+        cmListFileContext::FromCommandContext(func, this->FileName),
+      });
+    } else if (name == "endwhile") {
+      if (!TopIs(stack, NestingStateEnum::While)) {
+        return cmListFileContext::FromCommandContext(func, this->FileName);
+      }
+      stack.pop_back();
+    } else if (name == "foreach") {
+      stack.push_back({
+        NestingStateEnum::Foreach,
+        cmListFileContext::FromCommandContext(func, this->FileName),
+      });
+    } else if (name == "endforeach") {
+      if (!TopIs(stack, NestingStateEnum::Foreach)) {
+        return cmListFileContext::FromCommandContext(func, this->FileName);
+      }
+      stack.pop_back();
+    } else if (name == "function") {
+      stack.push_back({
+        NestingStateEnum::Function,
+        cmListFileContext::FromCommandContext(func, this->FileName),
+      });
+    } else if (name == "endfunction") {
+      if (!TopIs(stack, NestingStateEnum::Function)) {
+        return cmListFileContext::FromCommandContext(func, this->FileName);
+      }
+      stack.pop_back();
+    } else if (name == "macro") {
+      stack.push_back({
+        NestingStateEnum::Macro,
+        cmListFileContext::FromCommandContext(func, this->FileName),
+      });
+    } else if (name == "endmacro") {
+      if (!TopIs(stack, NestingStateEnum::Macro)) {
+        return cmListFileContext::FromCommandContext(func, this->FileName);
+      }
+      stack.pop_back();
+    }
+  }
+
+  if (!stack.empty()) {
+    return stack.back().Context;
+  }
+
+  return cm::nullopt;
 }
 
 // We hold either the bottom scope of a directory or a call/file context.

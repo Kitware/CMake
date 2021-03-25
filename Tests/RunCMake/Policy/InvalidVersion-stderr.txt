@@ -1,0 +1,5 @@
+CMake Error at InvalidVersion.cmake:[0-9]+ \(cmake_policy\):
+  Invalid policy version value "[A-Za-z0-9]+.[A-Za-z0-9]*.[A-Za-z0-9]*.[A-Za-z0-9]*"\.  A numeric
+  major\.minor\[\.patch\[\.tweak\]\] must be given\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

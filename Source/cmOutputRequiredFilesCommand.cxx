@@ -376,7 +376,7 @@ protected:
     }
     // Didn't find an instance.  Create a new one and save it.
     auto info = cm::make_unique<cmDependInformation>();
-    auto ptr = info.get();
+    auto* ptr = info.get();
     info->FullPath = fullPath;
     info->PathOnly = cmSystemTools::GetFilenamePath(fullPath);
     info->IncludeName = file;

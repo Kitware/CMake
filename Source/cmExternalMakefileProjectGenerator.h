@@ -52,8 +52,8 @@ public:
   //! Generate the project files, the Makefiles have already been generated
   virtual void Generate() = 0;
 
-  void SetName(const std::string& n) { Name = n; }
-  std::string GetName() const { return Name; }
+  void SetName(const std::string& n) { this->Name = n; }
+  std::string GetName() const { return this->Name; }
 
   virtual bool Open(const std::string& bindir, const std::string& projectName,
                     bool dryRun);
@@ -104,7 +104,7 @@ public:
   CreateExternalMakefileProjectGenerator() const override
   {
     std::unique_ptr<cmExternalMakefileProjectGenerator> p(new T);
-    p->SetName(GetName());
+    p->SetName(this->GetName());
     return p;
   }
 };

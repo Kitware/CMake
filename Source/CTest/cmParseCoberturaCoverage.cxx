@@ -66,7 +66,7 @@ protected:
 
           // Check if this is an absolute path that falls within our
           // source or binary directories.
-          for (std::string const& filePath : FilePaths) {
+          for (std::string const& filePath : this->FilePaths) {
             if (cmHasPrefix(filename, filePath)) {
               this->CurFileName = filename;
               break;
@@ -76,7 +76,7 @@ protected:
           if (this->CurFileName.empty()) {
             // Check if this is a path that is relative to our source or
             // binary directories.
-            for (std::string const& filePath : FilePaths) {
+            for (std::string const& filePath : this->FilePaths) {
               finalpath = cmStrCat(filePath, "/", filename);
               if (cmSystemTools::FileExists(finalpath)) {
                 this->CurFileName = finalpath;

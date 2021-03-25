@@ -24,6 +24,7 @@
 #include "cmNinjaTypes.h"
 #include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
+#include "cmTransformDepfile.h"
 
 class cmCustomCommand;
 class cmGeneratorTarget;
@@ -31,7 +32,6 @@ class cmLinkLineComputer;
 class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
-class cmState;
 class cmStateDirectory;
 class cmake;
 struct cmDocumentationEntry;
@@ -150,9 +150,8 @@ public:
   static void WriteDefault(std::ostream& os, const cmNinjaDeps& targets,
                            const std::string& comment = "");
 
-  bool IsGCCOnWindows() const { return UsingGCCOnWindows; }
+  bool IsGCCOnWindows() const { return this->UsingGCCOnWindows; }
 
-public:
   cmGlobalNinjaGenerator(cmake* cm);
 
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
@@ -170,6 +169,8 @@ public:
   }
 
   static std::string GetActualName() { return "Ninja"; }
+
+  bool IsNinja() const override { return true; }
 
   /** Get encoding used by generator for ninja files */
   codecvt::Encoding GetMakefileEncoding() const override;
@@ -211,6 +212,10 @@ public:
   const char* GetCleanTargetName() const override { return "clean"; }
 
   bool SupportsCustomCommandDepfile() const override { return true; }
+  cm::optional<cmDepfileFormat> DepfileFormat() const override
+  {
+    return cmDepfileFormat::GccDepfile;
+  }
 
   virtual cmGeneratedFileStream* GetImplFileStream(
     const std::string& /*config*/) const
@@ -248,7 +253,7 @@ public:
       : GG(gg)
     {
     }
-    std::string operator()(std::string const& path)
+    std::string operator()(std::string const& path) const
     {
       return this->GG->ConvertToNinjaPath(path);
     }
@@ -319,17 +324,21 @@ public:
 
   void AppendTargetOutputs(cmGeneratorTarget const* target,
                            cmNinjaDeps& outputs, const std::string& config,
-                           cmNinjaTargetDepends depends);
+                           cmNinjaTargetDepends depends) const;
   void AppendTargetDepends(cmGeneratorTarget const* target,
                            cmNinjaDeps& outputs, const std::string& config,
                            const std::string& fileConfig,
                            cmNinjaTargetDepends depends);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaDeps& outputs,
-                                  const std::string& config);
+                                  const std::string& config,
+                                  const std::string& fileConfig,
+                                  bool genexOutput);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaOuts& outputs,
-                                  const std::string& config, bool omit_self);
+                                  const std::string& config,
+                                  const std::string& fileConfig,
+                                  bool genexOutput, bool omit_self);
 
   void AppendDirectoryForConfig(const std::string& prefix,
                                 const std::string& config,
@@ -346,7 +355,10 @@ public:
     outputs.push_back(this->NinjaOutputPath(NINJA_BUILD_FILE));
   }
 
-  int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
+  int GetRuleCmdLength(const std::string& name)
+  {
+    return this->RuleCmdLength[name];
+  }
 
   void AddTargetAlias(const std::string& alias, cmGeneratorTarget* target,
                       const std::string& config);
@@ -368,7 +380,6 @@ public:
   {
     return "1.10";
   }
-  static std::string RequiredNinjaVersionForCleanDeadTool() { return "1.10"; }
   static std::string RequiredNinjaVersionForMultipleOutputs()
   {
     return "1.10";
@@ -386,15 +397,13 @@ public:
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
   void StripNinjaOutputPathPrefixAsSuffix(std::string& path);
 
-  bool WriteDyndepFile(std::string const& dir_top_src,
-                       std::string const& dir_top_bld,
-                       std::string const& dir_cur_src,
-                       std::string const& dir_cur_bld,
-                       std::string const& arg_dd,
-                       std::vector<std::string> const& arg_ddis,
-                       std::string const& module_dir,
-                       std::vector<std::string> const& linked_target_dirs,
-                       std::string const& arg_lang);
+  bool WriteDyndepFile(
+    std::string const& dir_top_src, std::string const& dir_top_bld,
+    std::string const& dir_cur_src, std::string const& dir_cur_bld,
+    std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
+    std::string const& module_dir,
+    std::vector<std::string> const& linked_target_dirs,
+    std::string const& arg_lang, std::string const& arg_modmapfmt);
 
   virtual std::string BuildAlias(const std::string& alias,
                                  const std::string& /*config*/) const
@@ -425,6 +434,20 @@ public:
   {
     return this->DefaultConfigs;
   }
+
+  const std::set<std::string>& GetPerConfigUtilityTargets() const
+  {
+    return this->PerConfigUtilityTargets;
+  }
+
+  void AddPerConfigUtilityTarget(const std::string& name)
+  {
+    this->PerConfigUtilityTargets.insert(name);
+  }
+
+  bool IsSingleConfigUtility(cmGeneratorTarget const* target) const;
+
+  bool CheckCxxModuleSupport();
 
 protected:
   void Generate() override;
@@ -463,7 +486,7 @@ private:
   void CleanMetaData();
 
   /// Write the common disclaimer text at the top of each build file.
-  void WriteDisclaimer(std::ostream& os);
+  void WriteDisclaimer(std::ostream& os) const;
 
   void WriteAssumedSourceDependencies();
 
@@ -519,6 +542,9 @@ private:
   /// The mapping from source file to assumed dependencies.
   std::map<std::string, std::set<std::string>> AssumedSourceDependencies;
 
+  /// Utility targets which have per-config outputs
+  std::set<std::string> PerConfigUtilityTargets;
+
   struct TargetAlias
   {
     cmGeneratorTarget* GeneratorTarget;
@@ -540,11 +566,11 @@ private:
   bool NinjaSupportsDyndeps = false;
   bool NinjaSupportsRestatTool = false;
   bool NinjaSupportsUnconditionalRecompactTool = false;
-  bool NinjaSupportsCleanDeadTool = false;
   bool NinjaSupportsMultipleOutputs = false;
   bool NinjaSupportsMetadataOnRegeneration = false;
 
-private:
+  bool DiagnosedCxxModuleSupport = false;
+
   void InitOutputPathPrefix();
 
   std::string OutputPathPrefix;
@@ -559,7 +585,14 @@ private:
     /// The set of custom commands we have seen.
     std::set<cmCustomCommand const*> CustomCommands;
 
-    std::map<cmGeneratorTarget const*, cmNinjaOuts> TargetDependsClosures;
+    struct TargetDependsClosureKey
+    {
+      cmGeneratorTarget const* Target;
+      std::string Config;
+      bool GenexOutput;
+    };
+
+    std::map<TargetDependsClosureKey, cmNinjaOuts> TargetDependsClosures;
 
     TargetAliasMap TargetAliases;
 
@@ -568,6 +601,19 @@ private:
   std::map<std::string, ByConfig> Configs;
 
   cmNinjaDeps ByproductsForCleanTarget;
+
+  friend bool operator==(const ByConfig::TargetDependsClosureKey& lhs,
+                         const ByConfig::TargetDependsClosureKey& rhs);
+  friend bool operator!=(const ByConfig::TargetDependsClosureKey& lhs,
+                         const ByConfig::TargetDependsClosureKey& rhs);
+  friend bool operator<(const ByConfig::TargetDependsClosureKey& lhs,
+                        const ByConfig::TargetDependsClosureKey& rhs);
+  friend bool operator>(const ByConfig::TargetDependsClosureKey& lhs,
+                        const ByConfig::TargetDependsClosureKey& rhs);
+  friend bool operator<=(const ByConfig::TargetDependsClosureKey& lhs,
+                         const ByConfig::TargetDependsClosureKey& rhs);
+  friend bool operator>=(const ByConfig::TargetDependsClosureKey& lhs,
+                         const ByConfig::TargetDependsClosureKey& rhs);
 };
 
 class cmGlobalNinjaMultiGenerator : public cmGlobalNinjaGenerator
@@ -652,8 +698,6 @@ public:
   bool InspectConfigTypeVariables() override;
 
   std::string GetDefaultBuildConfig() const override;
-
-  bool ReadCacheEntriesForBuild(const cmState& state) override;
 
   bool SupportsDefaultBuildType() const override { return true; }
   bool SupportsCrossConfigs() const override { return true; }

@@ -20,10 +20,13 @@ Introduction
 
 This command generates installation rules for a project.  Install rules
 specified by calls to the ``install()`` command within a source directory
-are executed in order during installation.  Install rules in subdirectories
-added by calls to the :command:`add_subdirectory` command are interleaved
-with those in the parent directory to run in the order declared (see
-policy :policy:`CMP0082`).
+are executed in order during installation.
+
+.. versionchanged:: 3.14
+  Install rules in subdirectories
+  added by calls to the :command:`add_subdirectory` command are interleaved
+  with those in the parent directory to run in the order declared (see
+  policy :policy:`CMP0082`).
 
 There are multiple signatures for this command.  Some of them define
 installation options for files and targets.  Options common to
@@ -85,6 +88,8 @@ signatures that specify them.  The common options are:
   :variable:`CMAKE_INSTALL_DEFAULT_COMPONENT_NAME` variable.
 
 ``EXCLUDE_FROM_ALL``
+  .. versionadded:: 3.6
+
   Specify that the file is excluded from a full installation and only
   installed as part of a component-specific installation
 
@@ -97,16 +102,18 @@ signatures that specify them.  The common options are:
   Specify that it is not an error if the file to be installed does
   not exist.
 
-Command signatures that install files may print messages during
-installation.  Use the :variable:`CMAKE_INSTALL_MESSAGE` variable
-to control which messages are printed.
+.. versionadded:: 3.1
+  Command signatures that install files may print messages during
+  installation.  Use the :variable:`CMAKE_INSTALL_MESSAGE` variable
+  to control which messages are printed.
 
-Many of the ``install()`` variants implicitly create the directories
-containing the installed files. If
-:variable:`CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS` is set, these
-directories will be created with the permissions specified. Otherwise,
-they will be created according to the uname rules on Unix-like platforms.
-Windows platforms are unaffected.
+.. versionadded:: 3.11
+  Many of the ``install()`` variants implicitly create the directories
+  containing the installed files. If
+  :variable:`CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS` is set, these
+  directories will be created with the permissions specified. Otherwise,
+  they will be created according to the uname rules on Unix-like platforms.
+  Windows platforms are unaffected.
 
 Installing Targets
 ^^^^^^^^^^^^^^^^^^
@@ -162,6 +169,8 @@ that may be installed:
     accompanying import libraries are of kind ``ARCHIVE``).
 
 ``OBJECTS``
+  .. versionadded:: 3.9
+
   Object files associated with *object libraries*.
 
 ``FRAMEWORK``
@@ -246,6 +255,8 @@ In addition to the common options listed above, each target can accept
 the following additional arguments:
 
 ``NAMELINK_COMPONENT``
+  .. versionadded:: 3.12
+
   On some platforms a versioned shared library has a symbolic link such
   as::
 
@@ -357,17 +368,19 @@ targets that link to the object libraries in their implementation.
 Installing a target with the :prop_tgt:`EXCLUDE_FROM_ALL` target property
 set to ``TRUE`` has undefined behavior.
 
-`install(TARGETS)`_ can install targets that were created in
-other directories.  When using such cross-directory install rules, running
-``make install`` (or similar) from a subdirectory will not guarantee that
-targets from other directories are up-to-date.  You can use
-:command:`target_link_libraries` or :command:`add_dependencies`
-to ensure that such out-of-directory targets are built before the
-subdirectory-specific install rules are run.
+.. versionadded:: 3.3
+  An install destination given as a ``DESTINATION`` argument may
+  use "generator expressions" with the syntax ``$<...>``.  See the
+  :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
-An install destination given as a ``DESTINATION`` argument may
-use "generator expressions" with the syntax ``$<...>``.  See the
-:manual:`cmake-generator-expressions(7)` manual for available expressions.
+.. versionadded:: 3.13
+  `install(TARGETS)`_ can install targets that were created in
+  other directories.  When using such cross-directory install rules, running
+  ``make install`` (or similar) from a subdirectory will not guarantee that
+  targets from other directories are up-to-date.  You can use
+  :command:`target_link_libraries` or :command:`add_dependencies`
+  to ensure that such out-of-directory targets are built before the
+  subdirectory-specific install rules are run.
 
 Installing Files
 ^^^^^^^^^^^^^^^^
@@ -455,9 +468,15 @@ this advice while installing headers to a project-specific subdirectory:
           DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/myproj
   )
 
-An install destination given as a ``DESTINATION`` argument may
-use "generator expressions" with the syntax ``$<...>``.  See the
-:manual:`cmake-generator-expressions(7)` manual for available expressions.
+.. versionadded:: 3.4
+  An install destination given as a ``DESTINATION`` argument may
+  use "generator expressions" with the syntax ``$<...>``.  See the
+  :manual:`cmake-generator-expressions(7)` manual for available expressions.
+
+.. versionadded:: 3.20
+  An install rename given as a ``RENAME`` argument may
+  use "generator expressions" with the syntax ``$<...>``.  See the
+  :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
 Installing Directories
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -495,7 +514,8 @@ permissions specified in the ``FILES`` form of the command, and the
 directories will be given the default permissions specified in the
 ``PROGRAMS`` form of the command.
 
-The ``MESSAGE_NEVER`` option disables file installation status output.
+.. versionadded:: 3.1
+  The ``MESSAGE_NEVER`` option disables file installation status output.
 
 Installation of directories may be controlled with fine granularity
 using the ``PATTERN`` or ``REGEX`` options.  These "match" options specify a
@@ -579,10 +599,14 @@ path that begins with the appropriate :module:`GNUInstallDirs` variable.
 This allows package maintainers to control the install destination by setting
 the appropriate cache variables.
 
-The list of ``dirs...`` given to ``DIRECTORY`` and an install destination
-given as a ``DESTINATION`` argument may use "generator expressions"
-with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.
+.. versionadded:: 3.4
+  An install destination given as a ``DESTINATION`` argument may
+  use "generator expressions" with the syntax ``$<...>``.  See the
+  :manual:`cmake-generator-expressions(7)` manual for available expressions.
+
+.. versionadded:: 3.5
+  The list of ``dirs...`` given to ``DIRECTORY`` may use
+  "generator expressions" too.
 
 Custom Installation Logic
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -610,10 +634,11 @@ example, the code
 
 will print a message during installation.
 
-``<file>`` or ``<code>`` may use "generator expressions" with the syntax
-``$<...>`` (in the case of ``<file>``, this refers to their use in the file
-name, not the file's contents).  See the
-:manual:`cmake-generator-expressions(7)` manual for available expressions.
+.. versionadded:: 3.14
+  ``<file>`` or ``<code>`` may use "generator expressions" with the syntax
+  ``$<...>`` (in the case of ``<file>``, this refers to their use in the file
+  name, not the file's contents).  See the
+  :manual:`cmake-generator-expressions(7)` manual for available expressions.
 
 Installing Exports
 ^^^^^^^^^^^^^^^^^^
@@ -673,13 +698,14 @@ RPM, typically handle this by listing the ``Runtime`` component as a dependency
 of the ``Development`` component in the package metadata, ensuring that the
 library is always installed if the headers and CMake export file are present.
 
-In addition to cmake language files, the ``EXPORT_ANDROID_MK`` mode maybe
-used to specify an export to the android ndk build system.  This mode
-accepts the same options as the normal export mode.  The Android
-NDK supports the use of prebuilt libraries, both static and shared. This
-allows cmake to build the libraries of a project and make them available
-to an ndk build system complete with transitive dependencies, include flags
-and defines required to use the libraries.
+.. versionadded:: 3.7
+  In addition to cmake language files, the ``EXPORT_ANDROID_MK`` mode maybe
+  used to specify an export to the android ndk build system.  This mode
+  accepts the same options as the normal export mode.  The Android
+  NDK supports the use of prebuilt libraries, both static and shared. This
+  allows cmake to build the libraries of a project and make them available
+  to an ndk build system complete with transitive dependencies, include flags
+  and defines required to use the libraries.
 
 The ``EXPORT`` form is useful to help outside projects use targets built
 and installed by the current project.  For example, the code

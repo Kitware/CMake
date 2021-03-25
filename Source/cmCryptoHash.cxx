@@ -36,7 +36,7 @@ static rhash cmCryptoHash_rhash_init(unsigned int id)
 
 cmCryptoHash::cmCryptoHash(Algo algo)
   : Id(cmCryptoHashAlgoToId[algo])
-  , CTX(cmCryptoHash_rhash_init(Id))
+  , CTX(cmCryptoHash_rhash_init(this->Id))
 {
 }
 

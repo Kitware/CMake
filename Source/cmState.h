@@ -9,6 +9,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "cmDefinitions.h"
@@ -24,6 +25,7 @@
 class cmCacheManager;
 class cmCommand;
 class cmGlobVerificationManager;
+class cmMakefile;
 class cmStateSnapshot;
 class cmMessenger;
 class cmExecutionStatus;
@@ -159,10 +161,13 @@ public:
                          std::unique_ptr<cmCommand> command);
   void AddBuiltinCommand(std::string const& name, Command command);
   void AddBuiltinCommand(std::string const& name, BuiltinCommand command);
+  void AddFlowControlCommand(std::string const& name, Command command);
+  void AddFlowControlCommand(std::string const& name, BuiltinCommand command);
   void AddDisallowedCommand(std::string const& name, BuiltinCommand command,
                             cmPolicies::PolicyID policy, const char* message);
   void AddUnexpectedCommand(std::string const& name, const char* error);
-  void AddScriptedCommand(std::string const& name, Command command);
+  bool AddScriptedCommand(std::string const& name, BT<Command> command,
+                          cmMakefile& mf);
   void RemoveBuiltinCommand(std::string const& name);
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;
@@ -225,6 +230,7 @@ private:
   std::vector<std::string> EnabledLanguages;
   std::unordered_map<std::string, Command> BuiltinCommands;
   std::unordered_map<std::string, Command> ScriptedCommands;
+  std::unordered_set<std::string> FlowControlCommands;
   cmPropertyMap GlobalProperties;
   std::unique_ptr<cmCacheManager> CacheManager;
   std::unique_ptr<cmGlobVerificationManager> GlobVerificationManager;

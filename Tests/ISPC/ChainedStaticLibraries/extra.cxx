@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "extra.ispc.h"
+#include "extra_ispc.h"
 
 int extra()
 {

@@ -4,6 +4,12 @@
 # When CMAKE_SYSTEM_NAME is "Android", CMakeSystemSpecificInitialize loads this
 # module.
 
+# Include the NDK hook.
+# It can be used by NDK to inject necessary fixes for an earlier cmake.
+if(CMAKE_ANDROID_NDK)
+  include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/pre/Android-Initialize.cmake OPTIONAL)
+endif()
+
 # Support for NVIDIA Nsight Tegra Visual Studio Edition was previously
 # implemented in the CMake VS IDE generators.  Avoid interfering with
 # that functionality for now.
@@ -17,7 +23,7 @@ if(CMAKE_SYSTEM_VERSION EQUAL 1)
   return()
 endif()
 
-set(CMAKE_BUILD_TYPE_INIT Debug)
+set(CMAKE_BUILD_TYPE_INIT "RelWithDebInfo")
 
 # Skip sysroot selection if the NDK has a unified toolchain.
 if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
@@ -52,4 +58,10 @@ else()
   message(FATAL_ERROR
     "Android: No CMAKE_SYSROOT was selected."
     )
+endif()
+
+# Include the NDK hook.
+# It can be used by NDK to inject necessary fixes for an earlier cmake.
+if(CMAKE_ANDROID_NDK)
+  include(${CMAKE_ANDROID_NDK}/build/cmake/hooks/post/Android-Initialize.cmake OPTIONAL)
 endif()

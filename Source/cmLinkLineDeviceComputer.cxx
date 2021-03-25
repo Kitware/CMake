@@ -3,6 +3,7 @@
 
 #include "cmLinkLineDeviceComputer.h"
 
+#include <algorithm>
 #include <set>
 #include <utility>
 
@@ -57,17 +58,15 @@ bool cmLinkLineDeviceComputer::ComputeRequiresDeviceLinking(
   using ItemVector = cmComputeLinkInformation::ItemVector;
   ItemVector const& items = cli.GetItems();
   std::string config = cli.GetConfig();
-  for (auto const& item : items) {
-    if (item.Target &&
-        item.Target->GetType() == cmStateEnums::STATIC_LIBRARY) {
-      if ((!item.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS")) &&
-          item.Target->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
+  return std::any_of(
+    items.begin(), items.end(),
+    [](cmComputeLinkInformation::Item const& item) -> bool {
+      return item.Target &&
+        item.Target->GetType() == cmStateEnums::STATIC_LIBRARY &&
         // this dependency requires us to device link it
-        return true;
-      }
-    }
-  }
-  return false;
+        !item.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS") &&
+        item.Target->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION");
+    });
 }
 
 void cmLinkLineDeviceComputer::ComputeLinkLibraries(

@@ -1,0 +1,4 @@
+CMake Error at MinVersionLargerThanMax.cmake:[0-9]+ \(cmake_policy\):
+  Policy VERSION range "3.12...3.8" specifies a larger minimum than maximum.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

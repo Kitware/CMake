@@ -15,6 +15,7 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmOSXBundleGenerator.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmMakefileUtilityTargetGenerator::cmMakefileUtilityTargetGenerator(
@@ -36,10 +37,42 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   *this->BuildFileStream << "# Utility rule file for "
                          << this->GeneratorTarget->GetName() << ".\n\n";
 
+  const char* root = (this->Makefile->IsOn("CMAKE_MAKE_INCLUDE_FROM_ROOT")
+                        ? "$(CMAKE_BINARY_DIR)/"
+                        : "");
+
+  // Include the dependencies for the target.
+  std::string dependFile =
+    cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.make");
+  *this->BuildFileStream
+    << "# Include any custom commands dependencies for this target.\n"
+    << this->GlobalGenerator->IncludeDirective << " " << root
+    << cmSystemTools::ConvertToOutputPath(
+         this->LocalGenerator->MaybeConvertToRelativePath(
+           this->LocalGenerator->GetBinaryDirectory(), dependFile))
+    << "\n\n";
+  if (!cmSystemTools::FileExists(dependFile)) {
+    // Write an empty dependency file.
+    cmGeneratedFileStream depFileStream(
+      dependFile, false, this->GlobalGenerator->GetMakefileEncoding());
+    depFileStream << "# Empty custom commands generated dependencies file for "
+                  << this->GeneratorTarget->GetName() << ".\n"
+                  << "# This may be replaced when dependencies are built.\n";
+  }
+
+  std::string dependTimestamp =
+    cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.ts");
+  if (!cmSystemTools::FileExists(dependTimestamp)) {
+    // Write a dependency timestamp file.
+    cmGeneratedFileStream depFileStream(
+      dependTimestamp, false, this->GlobalGenerator->GetMakefileEncoding());
+    depFileStream << "# CMAKE generated file: DO NOT EDIT!\n"
+                  << "# Timestamp file for custom commands dependencies "
+                     "management for "
+                  << this->GeneratorTarget->GetName() << ".\n";
+  }
+
   if (!this->NoRuleMessages) {
-    const char* root = (this->Makefile->IsOn("CMAKE_MAKE_INCLUDE_FROM_ROOT")
-                          ? "$(CMAKE_BINARY_DIR)/"
-                          : "");
     // Include the progress variables for the target.
     *this->BuildFileStream
       << "# Include the progress variables for this target.\n"

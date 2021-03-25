@@ -10,24 +10,31 @@ FindPython3
 Find Python 3 interpreter, compiler and development environment (include
 directories and libraries).
 
-When a version is requested, it can be specified as a simple value or as a
-range. For a detailed description of version range usage and capabilities,
-refer to the :command:`find_package` command.
+.. versionadded:: 3.19
+  When a version is requested, it can be specified as a simple value or as a
+  range. For a detailed description of version range usage and capabilities,
+  refer to the :command:`find_package` command.
 
 The following components are supported:
 
 * ``Interpreter``: search for Python 3 interpreter
 * ``Compiler``: search for Python 3 compiler. Only offered by IronPython.
 * ``Development``: search for development artifacts (include directories and
-  libraries). This component includes two sub-components which can be specified
-  independently:
+  libraries).
 
-  * ``Development.Module``: search for artifacts for Python 3 module
-    developments.
-  * ``Development.Embed``: search for artifacts for Python 3 embedding
-    developments.
+  .. versionadded:: 3.18
+    This component includes two sub-components which can be specified
+    independently:
+
+    * ``Development.Module``: search for artifacts for Python 3 module
+      developments.
+    * ``Development.Embed``: search for artifacts for Python 3 embedding
+      developments.
 
 * ``NumPy``: search for NumPy include directories.
+
+.. versionadded:: 3.14
+  Added the ``NumPy`` component.
 
 If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
@@ -57,20 +64,30 @@ for you.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :ref:`Imported Targets <Imported Targets>`
-(when :prop_gbl:`CMAKE_ROLE` is ``PROJECT``):
+This module defines the following :ref:`Imported Targets <Imported Targets>`:
+
+.. versionchanged:: 3.14
+  :ref:`Imported Targets <Imported Targets>` are only created when
+  :prop_gbl:`CMAKE_ROLE` is ``PROJECT``.
 
 ``Python3::Interpreter``
   Python 3 interpreter. Target defined if component ``Interpreter`` is found.
 ``Python3::Compiler``
   Python 3 compiler. Target defined if component ``Compiler`` is found.
+
 ``Python3::Module``
+  .. versionadded:: 3.15
+
   Python 3 library for Python module. Target defined if component
   ``Development.Module`` is found.
+
 ``Python3::Python``
   Python 3 library for Python embedding. Target defined if component
   ``Development.Embed`` is found.
+
 ``Python3::NumPy``
+  .. versionadded:: 3.14
+
   NumPy library for Python 3. Target defined if component ``NumPy`` is found.
 
 Result Variables
@@ -117,7 +134,10 @@ This module will set the following variables in your project
   Information returned by
   ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``
   or else ``sysconfig.get_path('platlib')``.
+
 ``Python3_SOABI``
+  .. versionadded:: 3.17
+
   Extension suffix for modules.
 
   Information returned by
@@ -126,6 +146,7 @@ This module will set the following variables in your project
   ``python3-config --extension-suffix``. If package ``distutils.sysconfig`` is
   not available, ``sysconfig.get_config_var('SOABI')`` or
   ``sysconfig.get_config_var('EXT_SUFFIX')`` are used.
+
 ``Python3_Compiler_FOUND``
   System has the Python 3 compiler.
 ``Python3_COMPILER``
@@ -133,19 +154,36 @@ This module will set the following variables in your project
 ``Python3_COMPILER_ID``
   A short string unique to the compiler. Possible values include:
     * IronPython
+
 ``Python3_DOTNET_LAUNCHER``
+  .. versionadded:: 3.18
+
   The ``.Net`` interpreter. Only used by ``IronPython`` implementation.
+
 ``Python3_Development_FOUND``
+
   System has the Python 3 development artifacts.
+
 ``Python3_Development.Module_FOUND``
+  .. versionadded:: 3.18
+
   System has the Python 3 development artifacts for Python module.
+
 ``Python3_Development.Embed_FOUND``
+  .. versionadded:: 3.18
+
   System has the Python 3 development artifacts for Python embedding.
+
 ``Python3_INCLUDE_DIRS``
+
   The Python 3 include directories.
+
 ``Python3_LINK_OPTIONS``
+  .. versionadded:: 3.19
+
   The Python 3 link options. Some configurations require specific link options
   for a correct build and execution.
+
 ``Python3_LIBRARIES``
   The Python 3 libraries.
 ``Python3_LIBRARY_DIRS``
@@ -160,13 +198,25 @@ This module will set the following variables in your project
   Python 3 minor version.
 ``Python3_VERSION_PATCH``
   Python 3 patch version.
+
 ``Python3_PyPy_VERSION``
+  .. versionadded:: 3.18
+
   Python 3 PyPy version.
+
 ``Python3_NumPy_FOUND``
+  .. versionadded:: 3.14
+
   System has the NumPy.
+
 ``Python3_NumPy_INCLUDE_DIRS``
+  .. versionadded:: 3.14
+
   The NumPy include directories.
+
 ``Python3_NumPy_VERSION``
+  .. versionadded:: 3.14
+
   The NumPy version.
 
 Hints
@@ -182,6 +232,8 @@ Hints
   * If set to FALSE, search **only** for shared libraries.
 
 ``Python3_FIND_ABI``
+  .. versionadded:: 3.16
+
   This variable defines which ABIs, as defined in
   `PEP 3149 <https://www.python.org/dev/peps/pep-3149/>`_, should be searched.
 
@@ -223,6 +275,8 @@ Hints
     each flag is ``OFF`` or ``ANY``.
 
 ``Python3_FIND_STRATEGY``
+  .. versionadded:: 3.15
+
   This variable defines how lookup will be done.
   The ``Python3_FIND_STRATEGY`` variable can be set to one of the following:
 
@@ -235,6 +289,8 @@ Hints
     This is the default if policy :policy:`CMP0094` is set to ``NEW``.
 
 ``Python3_FIND_REGISTRY``
+  .. versionadded:: 3.13
+
   On Windows the ``Python3_FIND_REGISTRY`` variable determine the order
   of preference between registry and environment variables.
   The ``Python3_FIND_REGISTRY`` variable can be set to one of the following:
@@ -245,6 +301,8 @@ Hints
   * ``NEVER``: Never try to use registry.
 
 ``Python3_FIND_FRAMEWORK``
+  .. versionadded:: 3.15
+
   On macOS the ``Python3_FIND_FRAMEWORK`` variable determine the order of
   preference between Apple-style and unix-style package components.
   This variable can take same values as :variable:`CMAKE_FIND_FRAMEWORK`
@@ -258,6 +316,8 @@ Hints
   variable will be used, if any.
 
 ``Python3_FIND_VIRTUALENV``
+  .. versionadded:: 3.15
+
   This variable defines the handling of virtual environments managed by
   ``virtualenv`` or ``conda``. It is meaningful only when a virtual environment
   is active (i.e. the ``activate`` script has been evaluated). In this case, it
@@ -276,6 +336,9 @@ Hints
     ``NEVER`` to select preferably the interpreter from the virtual
     environment.
 
+  .. versionadded:: 3.17
+    Added support for ``conda`` environments.
+
   .. note::
 
     If the component ``Development`` is requested, it is **strongly**
@@ -283,6 +346,8 @@ Hints
     result.
 
 ``Python3_FIND_IMPLEMENTATIONS``
+  .. versionadded:: 3.18
+
   This variable defines, in an ordered list, the different implementations
   which will be searched. The ``Python3_FIND_IMPLEMENTATIONS`` variable can
   hold the following values:
@@ -315,8 +380,25 @@ Hints
     ``.Net`` interpreter (i.e. ``mono`` command) is expected to be available
     through the ``PATH`` variable.
 
+``Python3_FIND_UNVERSIONED_NAMES``
+  .. versionadded:: 3.20
+
+  This variable defines how the generic names will be searched. Currently, it
+  only applies to the generic names of the interpreter, namely, ``python3`` and
+  ``python``.
+  The ``Python3_FIND_UNVERSIONED_NAMES`` variable can be set to one of the
+  following values:
+
+  * ``FIRST``: The generic names are searched before the more specialized ones
+    (such as ``python3.5`` for example).
+  * ``LAST``: The generic names are searched after the more specialized ones.
+    This is the default.
+  * ``NEVER``: The generic name are not searched at all.
+
 Artifacts Specification
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.16
 
 To solve special cases, it is possible to specify directly the artifacts by
 setting the following variables:
@@ -328,6 +410,8 @@ setting the following variables:
   The path to the compiler.
 
 ``Python3_DOTNET_LAUNCHER``
+  .. versionadded:: 3.18
+
   The ``.Net`` interpreter. Only used by ``IronPython`` implementation.
 
 ``Python3_LIBRARY``
@@ -364,6 +448,8 @@ specification. So, to enable also interactive specification, module behavior
 can be controlled with the following variable:
 
 ``Python3_ARTIFACTS_INTERACTIVE``
+  .. versionadded:: 3.18
+
   Selects the behavior of the module. This is a boolean variable:
 
   * If set to ``TRUE``: Create CMake cache entries for the above artifact
@@ -386,8 +472,9 @@ of Python module naming rules::
 
 If the library type is not specified, ``MODULE`` is assumed.
 
-For ``MODULE`` library type, if option ``WITH_SOABI`` is specified, the
-module suffix will include the ``Python3_SOABI`` value, if any.
+.. versionadded:: 3.17
+  For ``MODULE`` library type, if option ``WITH_SOABI`` is specified, the
+  module suffix will include the ``Python3_SOABI`` value, if any.
 #]=======================================================================]
 
 

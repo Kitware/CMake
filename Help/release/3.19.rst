@@ -53,6 +53,22 @@ Languages
 
 * ``CUDA`` language support now works on QNX.
 
+Platforms
+---------
+
+* Apple Silicon is now supported (since CMake 3.19.2):
+
+  * The :variable:`CMAKE_HOST_SYSTEM_PROCESSOR` is selected using ``uname -m``.
+    Since this may vary based on CMake's own architecture and that of
+    the invoking process tree, the :variable:`CMAKE_APPLE_SILICON_PROCESSOR`
+    variable or :envvar:`CMAKE_APPLE_SILICON_PROCESSOR` environment
+    variable may be set to specify a host architecture explicitly.
+
+  * If :variable:`CMAKE_OSX_ARCHITECTURES` is not set, CMake adds explicit
+    flags to tell the compiler to build for the
+    :variable:`CMAKE_HOST_SYSTEM_PROCESSOR` so the toolchain does not
+    have to guess based on the process tree's architecture.
+
 File-Based API
 --------------
 
@@ -348,3 +364,79 @@ Changes made since CMake 3.19.0 include the following.
   been reverted to restore behavior from CMake 3.18 and below.
 
 * CUDA 11.1 support for Clang.
+
+3.19.2
+------
+
+* The precompiled macOS binary provided on ``cmake.org`` is now a
+  universal binary with ``x86_64`` and ``arm64`` architectures.
+  It requires macOS 10.10 or newer.
+  The package file naming pattern has been changed from
+  ``cmake-$ver-Darwin-x86_64`` to ``cmake-$ver-macos-universal``.
+
+* Apple Silicon host architecture selection support was updated.
+  CMake 3.19.0 and 3.19.1 always chose ``arm64`` as the host architecture.
+  CMake 3.19.2 returns to using ``uname -m`` as CMake 3.18 and below did.
+  Since this may vary based on CMake's own architecture and that of
+  the invoking process tree, the :variable:`CMAKE_APPLE_SILICON_PROCESSOR`
+  variable or :envvar:`CMAKE_APPLE_SILICON_PROCESSOR` environment
+  variable may be set to specify a host architecture explicitly.
+
+* The :variable:`CMAKE_ISPC_HEADER_SUFFIX` variable and corresponding
+  :prop_tgt:`ISPC_HEADER_SUFFIX` target property were added to control
+  the header suffix used by ``ISPC`` compiler generated headers.
+
+3.19.3
+------
+
+* A precompiled Linux ``aarch64`` binary is now provided on ``cmake.org``.
+
+* Two precompiled macOS binaries are now provided on ``cmake.org``:
+
+  * The naming pattern ``cmake-$ver-macos-universal`` is a universal
+    binary with ``x86_64`` and ``arm64`` architectures.  It requires
+    macOS 10.13 or newer.
+
+  * The naming pattern ``cmake-$ver-macos10.10-universal`` is a universal
+    binary with ``x86_64`` and ``arm64`` architectures.  It requires
+    macOS 10.10 or newer.
+
+3.19.4
+------
+
+* The :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION_MAXIMUM`
+  variable introduced in 3.19.0 previously worked only with the
+  :generator:`Visual Studio 14 2015` generator.  It has now been fixed to
+  work with :ref:`Visual Studio Generators` for later VS versions too.
+
+3.19.5
+------
+
+* When :prop_tgt:`IOS_INSTALL_COMBINED` is enabled and the :generator:`Xcode`
+  generator is used, it is now possible to initiate an install or package
+  creation by running ``cmake --install`` or ``cpack`` from the command line.
+  When using the Xcode new build system, these are the only supported methods
+  due to a limitation of Xcode.  Initiating these operations by building the
+  ``install`` or ``package`` targets in Xcode is only supported when using
+  the legacy build system.
+
+* The framework handling introduced in 3.19.0 as part of supporting Xcode's
+  *Link Binaries With Libraries* build phase broke the ability to switch
+  between device and simulator builds without reconfiguring.  That capability
+  has now been restored.
+
+3.19.6
+------
+
+* The :manual:`cmake-presets(7)` feature no longer allows comments in
+  ``CMakePresets.json`` or ``CMakeUserPresets.json`` files.
+  This was mistakenly allowed by the implementation in CMake 3.19.0 through
+  CMake 3.19.5, and was not documented.
+
+3.19.7
+------
+
+* With :ref:`Visual Studio Generators` for VS 2017 and higher, the
+  :variable:`CMAKE_GENERATOR_TOOLSET` field ``version=`` now accepts
+  three-component MSVC toolset versions such as ``14.28.29910``.
+  See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_VERSION` variable.

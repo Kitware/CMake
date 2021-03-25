@@ -1,10 +1,14 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.19)
 project (ExportPTX CUDA)
 
 #Goal for this example:
 # How to generate PTX files instead of OBJECT files
 # How to reference PTX files for custom commands
 # How to install PTX files
+
+# PTX can be compiled only for a single virtual architecture at a time
+list(SUBLIST CMAKE_CUDA_ARCHITECTURES 0 1 CMAKE_CUDA_ARCHITECTURES)
+string(APPEND CMAKE_CUDA_ARCHITECTURES "-virtual")
 
 add_library(CudaPTX OBJECT kernelA.cu kernelB.cu)
 set_property(TARGET CudaPTX PROPERTY CUDA_PTX_COMPILATION ON)

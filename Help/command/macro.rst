@@ -48,8 +48,9 @@ and so on. However, it is strongly recommended to stay with the
 case chosen in the macro definition.  Typically macros use
 all-lowercase names.
 
-The :command:`cmake_language(CALL ...)` command can also be used to
-invoke the macro.
+.. versionadded:: 3.18
+  The :command:`cmake_language(CALL ...)` command can also be used to
+  invoke the macro.
 
 Arguments
 ^^^^^^^^^

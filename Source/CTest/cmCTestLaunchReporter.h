@@ -70,7 +70,7 @@ public:
 
   // Methods to generate the xml fragment.
   void WriteXML();
-  void WriteXMLAction(cmXMLElement&);
+  void WriteXMLAction(cmXMLElement&) const;
   void WriteXMLCommand(cmXMLElement&);
   void WriteXMLResult(cmXMLElement&);
   void WriteXMLLabels(cmXMLElement&);

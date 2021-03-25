@@ -1,7 +1,12 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 project(ExternalProjectUpdateTest NONE)
 if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12)
   cmake_policy(SET CMP0114 NEW)
+else()
+  # This test is very noisy with warnings about this policy if we don't
+  # explicitly set it. Projects shouldn't do this, but for test code this
+  # is reasonable.
+  cmake_policy(SET CMP0114 OLD)
 endif()
 cmake_policy(GET CMP0114 cmp0114)
 
@@ -51,15 +56,9 @@ set(do_git_tests 0)
 if(GIT_EXECUTABLE)
   set(do_git_tests 1)
 
-  execute_process(
-    COMMAND "${GIT_EXECUTABLE}" --version
-    OUTPUT_VARIABLE ov
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-  string(REGEX REPLACE "^git version (.+)$" "\\1" git_version "${ov}")
-  message(STATUS "git_version='${git_version}'")
+  message(STATUS "GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
 
-  if(git_version VERSION_LESS 1.6.5)
+  if("${GIT_VERSION_STRING}" VERSION_LESS 1.6.5)
     message(STATUS "No ExternalProject git tests with git client less than version 1.6.5")
     set(do_git_tests 0)
   endif()

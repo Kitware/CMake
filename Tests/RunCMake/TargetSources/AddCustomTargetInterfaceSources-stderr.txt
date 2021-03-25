@@ -1,0 +1,4 @@
+CMake Error at AddCustomTargetInterfaceSources.cmake:2 \(target_sources\):
+  target_sources may only set PRIVATE properties on custom targets
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

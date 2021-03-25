@@ -1,6 +1,6 @@
 #this is adapted from FireBreath (http://www.firebreath.org)
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(CFBundleTest)
 

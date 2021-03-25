@@ -10,6 +10,8 @@ Find the PostgreSQL installation.
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.14
+
 This module defines :prop_tgt:`IMPORTED` target ``PostgreSQL::PostgreSQL``
 if PostgreSQL has been found.
 
@@ -28,6 +30,16 @@ This module will set the following variables in your project:
   the link directories for PostgreSQL libraries
 ``PostgreSQL_VERSION_STRING``
   the version of PostgreSQL found
+``PostgreSQL_TYPE_INCLUDE_DIR``
+  the directories of the PostgreSQL server headers
+
+Components
+^^^^^^^^^^
+
+This module contains additional ``Server`` component, that forcibly checks
+for the presence of server headers. Note that ``PostgreSQL_TYPE_INCLUDE_DIR``
+is set regardless of the presence of the ``Server`` component in find_package call.
+
 #]=======================================================================]
 
 # ----------------------------------------------------------------------------
@@ -78,6 +90,9 @@ This module will set the following variables in your project:
 #    installed PostgreSQL, e.g. <Your Path>.
 #
 # ----------------------------------------------------------------------------
+
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 set(PostgreSQL_INCLUDE_PATH_DESCRIPTION "top-level directory containing the PostgreSQL include directories. E.g /usr/local/include/PostgreSQL/8.4 or C:/Program Files/PostgreSQL/8.4/include")
 set(PostgreSQL_INCLUDE_DIR_MESSAGE "Set the PostgreSQL_INCLUDE_DIR cmake cache entry to the ${PostgreSQL_INCLUDE_PATH_DESCRIPTION}")
@@ -242,10 +257,18 @@ if (PostgreSQL_INCLUDE_DIR)
   unset(pgsql_version_str)
 endif()
 
+if("Server" IN_LIST PostgreSQL_FIND_COMPONENTS)
+  set(PostgreSQL_Server_FOUND TRUE)
+  if(NOT PostgreSQL_TYPE_INCLUDE_DIR)
+    set(PostgreSQL_Server_FOUND FALSE)
+  endif()
+endif()
+
 # Did we find anything?
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PostgreSQL
-                                  REQUIRED_VARS PostgreSQL_LIBRARY PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR
+                                  REQUIRED_VARS PostgreSQL_LIBRARY PostgreSQL_INCLUDE_DIR
+                                  HANDLE_COMPONENTS
                                   VERSION_VAR PostgreSQL_VERSION_STRING)
 set(PostgreSQL_FOUND  ${POSTGRESQL_FOUND})
 
@@ -269,16 +292,21 @@ endfunction()
 
 # Now try to get the include and library path.
 if(PostgreSQL_FOUND)
+  set(PostgreSQL_INCLUDE_DIRS ${PostgreSQL_INCLUDE_DIR})
+  if(PostgreSQL_TYPE_INCLUDE_DIR)
+    list(APPEND PostgreSQL_INCLUDE_DIRS ${PostgreSQL_TYPE_INCLUDE_DIR})
+  endif()
+  set(PostgreSQL_LIBRARY_DIRS ${PostgreSQL_LIBRARY_DIR})
   if (NOT TARGET PostgreSQL::PostgreSQL)
     add_library(PostgreSQL::PostgreSQL UNKNOWN IMPORTED)
     set_target_properties(PostgreSQL::PostgreSQL PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${PostgreSQL_INCLUDE_DIR};${PostgreSQL_TYPE_INCLUDE_DIR}")
+      INTERFACE_INCLUDE_DIRECTORIES "${PostgreSQL_INCLUDE_DIRS}")
     __postgresql_import_library(PostgreSQL::PostgreSQL PostgreSQL_LIBRARY "")
     __postgresql_import_library(PostgreSQL::PostgreSQL PostgreSQL_LIBRARY "RELEASE")
     __postgresql_import_library(PostgreSQL::PostgreSQL PostgreSQL_LIBRARY "DEBUG")
   endif ()
-  set(PostgreSQL_INCLUDE_DIRS ${PostgreSQL_INCLUDE_DIR} ${PostgreSQL_TYPE_INCLUDE_DIR} )
-  set(PostgreSQL_LIBRARY_DIRS ${PostgreSQL_LIBRARY_DIR} )
 endif()
 
 mark_as_advanced(PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR)
+
+cmake_policy(POP)

@@ -10,12 +10,16 @@ Find the XML processing library (libxml2).
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.12
+
 The following :prop_tgt:`IMPORTED` targets may be defined:
 
 ``LibXml2::LibXml2``
-  If the libxml2 library has been found
+  libxml2 library.
 ``LibXml2::xmllint``
-  If the xmllint command-line executable has been found
+  .. versionadded:: 3.17
+
+  xmllint command-line executable.
 
 Result variables
 ^^^^^^^^^^^^^^^^

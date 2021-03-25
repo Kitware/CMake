@@ -91,46 +91,69 @@ build:fedora33-sphinx:
 
 # Linux builds
 
-build:centos6-release:
+build:centos6-x86_64:
     extends:
-        - .release_linux
-        - .cmake_build_release_linux
+        - .linux_release_x86_64
+        - .cmake_build_linux_release
         - .cmake_release_artifacts
         - .linux_builder_tags
         - .run_manually
 
+build:centos7-aarch64:
+    extends:
+        - .linux_release_aarch64
+        - .cmake_build_linux_release
+        - .cmake_release_artifacts
+        - .linux_builder_tags_aarch64
+        - .run_manually
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
 test:debian10-ninja:
     extends:
         - .debian10_ninja
-        - .cmake_test_linux_package
+        - .cmake_test_linux_release
         - .linux_builder_tags_qt
         - .run_dependent
     dependencies:
-        - build:centos6-release
+        - build:centos6-x86_64
     needs:
-        - build:centos6-release
+        - build:centos6-x86_64
+
+test:debian10-aarch64-ninja:
+    extends:
+        - .debian10_aarch64_ninja
+        - .cmake_test_linux_release
+        - .linux_builder_tags_aarch64_qt
+        - .run_dependent
+    dependencies:
+        - build:centos7-aarch64
+    needs:
+        - build:centos7-aarch64
+    variables:
+        CMAKE_CI_NO_MR: "true"
 
 test:fedora33-makefiles:
     extends:
         - .fedora33_makefiles
-        - .cmake_test_linux_package
+        - .cmake_test_linux_release
         - .linux_builder_tags_qt
         - .run_dependent
     dependencies:
-        - build:centos6-release
+        - build:centos6-x86_64
     needs:
-        - build:centos6-release
+        - build:centos6-x86_64
 
 test:cuda10.2-nvidia:
     extends:
         - .cuda10.2_nvidia
-        - .cmake_test_linux_package
+        - .cmake_test_linux_release
         - .linux_builder_tags_cuda
         - .run_dependent
     dependencies:
-        - build:centos6-release
+        - build:centos6-x86_64
     needs:
-        - build:centos6-release
+        - build:centos6-x86_64
 
 build:fedora33-ninja:
     extends:
@@ -165,8 +188,9 @@ test:fedora33-ninja-multi:
 
 build:linux-x86_64-package:
     extends:
-        - .linux_package_x86_64
-        - .cmake_build_linux_package
+        - .linux_package
+        - .linux_release_x86_64
+        - .cmake_build_linux_release
         - .cmake_release_artifacts
         - .linux_builder_tags
         - .run_only_for_package
@@ -186,64 +210,125 @@ build:linux-x86_64-package:
     variables:
         RSYNC_DESTINATION: dev
 
+build:linux-aarch64-package:
+    extends:
+        - .linux_package
+        - .linux_release_aarch64
+        - .cmake_build_linux_release
+        - .cmake_release_artifacts
+        - .linux_builder_tags_aarch64
+        - .run_only_for_package
+    dependencies:
+        - prep:doc-package
+    needs:
+        - prep:doc-package
+
+.upload:linux-aarch64-package:
+    extends:
+        - .rsync_upload
+        - .run_only_for_package
+    dependencies:
+        - build:linux-aarch64-package
+    needs:
+        - build:linux-aarch64-package
+    variables:
+        RSYNC_DESTINATION: dev
+
 # macOS builds
 
-build:macos-ninja:
+build:macos-x86_64-ninja:
     extends:
-        - .macos_ninja
+        - .macos_x86_64_ninja
         - .cmake_build_macos
         - .cmake_build_artifacts
-        - .macos_builder_tags
+        - .macos_x86_64_builder_tags
         - .run_manually
 
-test:macos-ninja:
+build:macos-arm64-ninja:
     extends:
-        - .macos_ninja
+        - .macos_arm64_ninja
+        - .cmake_build_macos
+        - .cmake_build_artifacts
+        - .macos_arm64_builder_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
+test:macos-x86_64-ninja:
+    extends:
+        - .macos_x86_64_ninja
         - .cmake_test_macos
         - .cmake_test_artifacts
-        - .macos_builder_tags
+        - .macos_x86_64_builder_tags
         - .run_dependent
     dependencies:
-        - build:macos-ninja
+        - build:macos-x86_64-ninja
     needs:
-        - build:macos-ninja
+        - build:macos-x86_64-ninja
 
-build:macos-makefiles:
+test:macos-arm64-ninja:
     extends:
-        - .macos_makefiles
+        - .macos_arm64_ninja
+        - .cmake_test_macos
+        - .cmake_test_artifacts
+        - .macos_arm64_builder_tags
+        - .run_dependent
+    dependencies:
+        - build:macos-arm64-ninja
+    needs:
+        - build:macos-arm64-ninja
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
+build:macos-x86_64-makefiles:
+    extends:
+        - .macos_x86_64_makefiles
         - .cmake_build_macos
         - .cmake_build_artifacts
-        - .macos_builder_tags
+        - .macos_x86_64_builder_tags
         - .run_manually
 
-test:macos-makefiles:
+test:macos-x86_64-makefiles:
     extends:
-        - .macos_makefiles
+        - .macos_x86_64_makefiles
         - .cmake_test_macos
-        - .macos_builder_tags
+        - .macos_x86_64_builder_tags
         - .run_dependent
     dependencies:
-        - build:macos-makefiles
+        - build:macos-x86_64-makefiles
     needs:
-        - build:macos-makefiles
+        - build:macos-x86_64-makefiles
 
-test:macos-xcode:
+test:macos-x86_64-xcode:
     extends:
-        - .macos_xcode
+        - .macos_x86_64_xcode
         - .cmake_test_macos_external
-        - .macos_builder_ext_tags
+        - .macos_x86_64_builder_ext_tags
         - .run_dependent
     dependencies:
-        - test:macos-ninja
+        - test:macos-x86_64-ninja
     needs:
-        - test:macos-ninja
+        - test:macos-x86_64-ninja
+
+test:macos-arm64-xcode:
+    extends:
+        - .macos_arm64_xcode
+        - .cmake_test_macos_external
+        - .macos_arm64_builder_ext_tags
+        - .run_dependent
+    dependencies:
+        - test:macos-arm64-ninja
+    needs:
+        - test:macos-arm64-ninja
+    variables:
+        CMAKE_CI_NO_MR: "true"
 
 build:macos-package:
     extends:
         - .macos_package
         - .cmake_build_macos_package
         - .cmake_release_artifacts
-        - .macos_builder_tags_package
+        - .macos_x86_64_builder_tags_package
         - .run_only_for_package
     dependencies:
         - prep:doc-package
@@ -258,6 +343,29 @@ build:macos-package:
         - build:macos-package
     needs:
         - build:macos-package
+    variables:
+        RSYNC_DESTINATION: dev
+
+build:macos10.10-package:
+    extends:
+        - .macos10.10_package
+        - .cmake_build_macos_package
+        - .cmake_release_artifacts
+        - .macos_x86_64_builder_tags_package
+        - .run_only_for_package
+    dependencies:
+        - prep:doc-package
+    needs:
+        - prep:doc-package
+
+.upload:macos10.10-package:
+    extends:
+        - .rsync_upload
+        - .run_only_for_package
+    dependencies:
+        - build:macos10.10-package
+    needs:
+        - build:macos10.10-package
     variables:
         RSYNC_DESTINATION: dev
 

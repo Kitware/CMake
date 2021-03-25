@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "simple.ispc.h"
+#include "simple_ispc.h"
 
 #ifdef _WIN32
 #  define EXPORT __declspec(dllexport)

@@ -78,7 +78,8 @@ Module Functions
   manage local instances of data files stored externally::
 
     ExternalData_Add_Target(
-      <target>   # Name of data management target
+      <target>                  # Name of data management target
+      [SHOW_PROGRESS <ON|OFF>]  # Show progress during the download
       )
 
   It creates custom commands in the target as necessary to make data
@@ -88,6 +89,12 @@ Module Functions
   the ``ExternalData_URL_TEMPLATES`` variable, or may be found locally
   in one of the paths specified in the ``ExternalData_OBJECT_STORES``
   variable.
+
+  .. versionadded:: 3.20
+    The ``SHOW_PROGRESS`` argument may be passed to suppress progress information
+    during the download of objects. If not provided, it defaults to ``OFF`` for
+    :generator:`Ninja` and :generator:`Ninja Multi-Config` generators and ``ON``
+    otherwise.
 
   Typically only one target is needed to manage all external data within
   a project.  Call this function once at the end of configuration after
@@ -108,6 +115,8 @@ calling any of the functions provided by this module.
 
 .. variable:: ExternalData_CUSTOM_SCRIPT_<key>
 
+  .. versionadded:: 3.2
+
   Specify a full path to a ``.cmake`` custom fetch script identified by
   ``<key>`` in entries of the ``ExternalData_URL_TEMPLATES`` list.
   See `Custom Fetch Scripts`_.
@@ -125,6 +134,8 @@ calling any of the functions provided by this module.
   object if it cannot be found using any URL template.
 
 .. variable:: ExternalData_NO_SYMLINKS
+
+  .. versionadded:: 3.3
 
   The real data files named by expanded ``DATA{}`` references may be made
   available under ``ExternalData_BINARY_ROOT`` using symbolic links on
@@ -171,6 +182,8 @@ calling any of the functions provided by this module.
 
 .. variable:: ExternalData_URL_ALGO_<algo>_<key>
 
+  .. versionadded:: 3.3
+
   Specify a custom URL component to be substituted for URL template
   placeholders of the form ``%(algo:<key>)``, where ``<key>`` is a
   valid C identifier, when fetching an object referenced via hash
@@ -201,10 +214,11 @@ For example, the argument ``DATA{img.png}`` may be satisfied by either a
 real ``img.png`` file in the current source directory or a ``img.png.md5``
 file containing its MD5 sum.
 
-Multiple content links of the same name with different hash algorithms
-are supported (e.g. ``img.png.sha256`` and ``img.png.sha1``) so long as
-they all correspond to the same real file.  This allows objects to be
-fetched from sources indexed by different hash algorithms.
+.. versionadded:: 3.8
+  Multiple content links of the same name with different hash algorithms
+  are supported (e.g. ``img.png.sha256`` and ``img.png.sha1``) so long as
+  they all correspond to the same real file.  This allows objects to be
+  fetched from sources indexed by different hash algorithms.
 
 Referencing File Series
 """""""""""""""""""""""
@@ -263,8 +277,11 @@ associated file options.  For example, the argument
 ``DATA{MyDataDir/,REGEX:.*}`` will pass the full path to a ``MyDataDir``
 directory on the command line and ensure that the directory contains
 files corresponding to every file or content link in the ``MyDataDir``
-source directory.  In order to match associated files in subdirectories,
-specify a ``RECURSE:`` option, e.g. ``DATA{MyDataDir/,RECURSE:,REGEX:.*}``.
+source directory.
+
+.. versionadded:: 3.3
+  In order to match associated files in subdirectories,
+  specify a ``RECURSE:`` option, e.g. ``DATA{MyDataDir/,RECURSE:,REGEX:.*}``.
 
 Hash Algorithms
 ^^^^^^^^^^^^^^^
@@ -284,6 +301,9 @@ The following hash algorithms are supported::
  SHA3_384    .sha3-384 Keccak SHA-3
  SHA3_512    .sha3-512 Keccak SHA-3
 
+.. versionadded:: 3.8
+  Added the ``SHA3_*`` hash algorithms.
+
 Note that the hashes are used only for unique data identification and
 download verification.
 
@@ -291,6 +311,8 @@ download verification.
 
 Custom Fetch Scripts
 ^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.2
 
 When a data file must be fetched from one of the URL templates
 specified in the ``ExternalData_URL_TEMPLATES`` variable, it is
@@ -343,6 +365,30 @@ function(ExternalData_add_target target)
     set(ExternalData_OBJECT_STORES ${CMAKE_BINARY_DIR}/ExternalData/Objects)
   endif()
   set(_ExternalData_CONFIG_CODE "")
+
+  cmake_parse_arguments(PARSE_ARGV 1 _ExternalData_add_target
+    ""
+    "SHOW_PROGRESS"
+    "")
+  if (_ExternalData_add_target_UNPARSED_ARGUMENTS)
+    message(AUTHOR_WARNING
+      "Ignoring unrecognized arguments passed to ExternalData_add_target: "
+      "`${_ExternalData_add_target_UNPARSED_ARGUMENTS}`")
+  endif ()
+
+  # Turn `SHOW_PROGRESS` into a boolean
+  if (NOT DEFINED _ExternalData_add_target_SHOW_PROGRESS)
+    # The default setting
+    if (CMAKE_GENERATOR MATCHES "Ninja")
+      set(_ExternalData_add_target_SHOW_PROGRESS OFF)
+    else ()
+      set(_ExternalData_add_target_SHOW_PROGRESS ON)
+    endif ()
+  elseif (_ExternalData_add_target_SHOW_PROGRESS)
+    set(_ExternalData_add_target_SHOW_PROGRESS ON)
+  else ()
+    set(_ExternalData_add_target_SHOW_PROGRESS OFF)
+  endif ()
 
   # Store custom script configuration.
   foreach(url_template IN LISTS ExternalData_URL_TEMPLATES)
@@ -423,6 +469,7 @@ function(ExternalData_add_target target)
           COMMAND ${CMAKE_COMMAND} -Drelative_top=${CMAKE_BINARY_DIR}
                                    -Dfile=${file} -Dname=${name}
                                    -DExternalData_ACTION=local
+                                   -DExternalData_SHOW_PROGRESS=${_ExternalData_add_target_SHOW_PROGRESS}
                                    -DExternalData_CONFIG=${config}
                                    -P ${_ExternalData_SELF}
           MAIN_DEPENDENCY "${name}"
@@ -459,6 +506,7 @@ function(ExternalData_add_target target)
           COMMAND ${CMAKE_COMMAND} -Drelative_top=${CMAKE_BINARY_DIR}
                                    -Dfile=${file} -Dname=${name} -Dexts=${exts}
                                    -DExternalData_ACTION=fetch
+                                   -DExternalData_SHOW_PROGRESS=${_ExternalData_add_target_SHOW_PROGRESS}
                                    -DExternalData_CONFIG=${config}
                                    -P ${_ExternalData_SELF}
           # Update whenever the object hash changes.
@@ -925,7 +973,11 @@ function(_ExternalData_download_file url file err_var msg_var)
     else()
       set(absolute_timeout "")
     endif()
-    file(DOWNLOAD "${url}" "${file}" STATUS status LOG log ${inactivity_timeout} ${absolute_timeout} SHOW_PROGRESS)
+    set(show_progress_args)
+    if (ExternalData_SHOW_PROGRESS)
+      list(APPEND show_progress_args SHOW_PROGRESS)
+    endif ()
+    file(DOWNLOAD "${url}" "${file}" STATUS status LOG log ${inactivity_timeout} ${absolute_timeout} ${show_progress_args})
     list(GET status 0 err)
     list(GET status 1 msg)
     if(err)

@@ -1,0 +1,2 @@
+CMake Error: Could not read presets from [^
+]*Tests/RunCMake/CMakePresetsTest/PresetsUnsupported: File version must be 2 or higher for build and test preset support.

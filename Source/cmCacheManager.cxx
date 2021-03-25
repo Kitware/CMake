@@ -183,7 +183,7 @@ bool cmCacheManager::ReadPropertyEntry(const std::string& entryKey,
     if (entryKey.size() > plen && *(end - plen) == '-' &&
         strcmp(end - plen + 1, p) == 0) {
       std::string key = entryKey.substr(0, entryKey.size() - plen);
-      if (auto entry = this->GetCacheEntry(key)) {
+      if (auto* entry = this->GetCacheEntry(key)) {
         // Store this property on its entry.
         entry->SetProperty(p, e.Value.c_str());
       } else {
@@ -498,7 +498,7 @@ const cmCacheManager::CacheEntry* cmCacheManager::GetCacheEntry(
 
 cmProp cmCacheManager::GetInitializedCacheValue(const std::string& key) const
 {
-  if (auto entry = this->GetCacheEntry(key)) {
+  if (const auto* entry = this->GetCacheEntry(key)) {
     if (entry->Initialized) {
       return &entry->GetValue();
     }

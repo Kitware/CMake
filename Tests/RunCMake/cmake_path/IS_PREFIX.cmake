@@ -18,5 +18,10 @@ if (NOT output)
   list (APPEND errors "'${path} is not prefix of 'a/b/d/e'")
 endif()
 
+set(path "/a/b/..")
+cmake_path(IS_PREFIX path "/a/c/../b" NORMALIZE output)
+if (NOT output)
+  list (APPEND errors "'${path} is not prefix of '/a/c/../b'")
+endif()
 
 check_errors (IS_PREFIX ${errors})

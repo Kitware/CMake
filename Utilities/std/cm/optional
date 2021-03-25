@@ -68,16 +68,22 @@ public:
 
   optional& operator=(nullopt_t) noexcept;
   optional& operator=(const optional& other);
-  optional& operator=(optional&& other) noexcept;
 
-  template <
-    typename U = T,
-    typename = typename std::enable_if<
-      !std::is_same<typename std::decay<U>::type, cm::optional<T>>::value &&
-      std::is_constructible<T, U>::value && std::is_assignable<T&, U>::value &&
+  template <typename U = T>
+  typename std::enable_if<std::is_constructible<T, U&&>::value &&
+                            std::is_assignable<T&, U&&>::value,
+                          optional&>::type
+  operator=(optional<U>&& other) noexcept;
+
+  template <typename U = T>
+  typename std::enable_if<
+    !std::is_same<typename std::decay<U>::type, cm::optional<T>>::value &&
+      std::is_constructible<T, U&&>::value &&
+      std::is_assignable<T&, U&&>::value &&
       (!std::is_scalar<T>::value ||
-       !std::is_same<typename std::decay<U>::type, T>::value)>::type>
-  optional& operator=(U&& v);
+       !std::is_same<typename std::decay<U>::type, T>::value),
+    optional&>::type
+  operator=(U&& v);
 
   const T* operator->() const;
   T* operator->();
@@ -134,19 +140,24 @@ optional<T> make_optional(Args&&... args)
 
 template <typename T>
 optional<T>::optional(nullopt_t) noexcept
+  : optional()
 {
 }
 
 template <typename T>
 optional<T>::optional(const optional& other)
 {
-  *this = other;
+  if (other.has_value()) {
+    this->emplace(*other);
+  }
 }
 
 template <typename T>
 optional<T>::optional(optional&& other) noexcept
 {
-  *this = std::move(other);
+  if (other.has_value()) {
+    this->emplace(std::move(*other));
+  }
 }
 
 template <typename T>
@@ -192,7 +203,11 @@ optional<T>& optional<T>::operator=(const optional& other)
 }
 
 template <typename T>
-optional<T>& optional<T>::operator=(optional&& other) noexcept
+template <typename U>
+typename std::enable_if<std::is_constructible<T, U&&>::value &&
+                          std::is_assignable<T&, U&&>::value,
+                        optional<T>&>::type
+optional<T>::operator=(optional<U>&& other) noexcept
 {
   if (other.has_value()) {
     if (this->has_value()) {
@@ -207,8 +222,15 @@ optional<T>& optional<T>::operator=(optional&& other) noexcept
 }
 
 template <typename T>
-template <typename U, typename>
-optional<T>& optional<T>::operator=(U&& v)
+template <typename U>
+typename std::enable_if<
+  !std::is_same<typename std::decay<U>::type, cm::optional<T>>::value &&
+    std::is_constructible<T, U&&>::value &&
+    std::is_assignable<T&, U&&>::value &&
+    (!std::is_scalar<T>::value ||
+     !std::is_same<typename std::decay<U>::type, T>::value),
+  optional<T>&>::type
+optional<T>::operator=(U&& v)
 {
   if (this->has_value()) {
     this->value() = v;
@@ -291,7 +313,7 @@ bool operator!=(const optional<T>& opt, nullopt_t) noexcept
 }
 
 template <typename T>
-bool operator<(const optional<T>& opt, nullopt_t) noexcept
+bool operator<(const optional<T>& /*opt*/, nullopt_t) noexcept
 {
   return false;
 }
@@ -309,7 +331,7 @@ bool operator>(const optional<T>& opt, nullopt_t) noexcept
 }
 
 template <typename T>
-bool operator>=(const optional<T>& opt, nullopt_t) noexcept
+bool operator>=(const optional<T>& /*opt*/, nullopt_t) noexcept
 {
   return true;
 }
@@ -333,13 +355,13 @@ bool operator<(nullopt_t, const optional<T>& opt) noexcept
 }
 
 template <typename T>
-bool operator<=(nullopt_t, const optional<T>& opt) noexcept
+bool operator<=(nullopt_t, const optional<T>& /*opt*/) noexcept
 {
   return true;
 }
 
 template <typename T>
-bool operator>(nullopt_t, const optional<T>& opt) noexcept
+bool operator>(nullopt_t, const optional<T>& /*opt*/) noexcept
 {
   return false;
 }

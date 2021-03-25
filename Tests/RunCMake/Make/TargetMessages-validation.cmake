@@ -1,0 +1,10 @@
+
+if (CHECK_TARGET_MESSAGES)
+  if (NOT actual_stdout MATCHES "Built target CustomTarget")
+    set (RunCMake_TEST_FAILED "Not found expected 'Built target' message.")
+  endif()
+else()
+  if (actual_stdout MATCHES "Built target CustomTarget")
+    set (RunCMake_TEST_FAILED "Found unexpected 'Built target' message.")
+  endif()
+endif()

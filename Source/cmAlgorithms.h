@@ -47,7 +47,8 @@ struct BinarySearcher
 
   bool operator()(argument_type const& item) const
   {
-    return std::binary_search(m_range.begin(), m_range.end(), item);
+    return std::binary_search(this->m_range.begin(), this->m_range.end(),
+                              item);
   }
 
 private:

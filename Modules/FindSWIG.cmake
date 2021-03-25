@@ -7,14 +7,17 @@ FindSWIG
 
 Find the Simplified Wrapper and Interface Generator (SWIG_) executable.
 
-This module finds an installed SWIG and determines its version. If a
-``COMPONENTS`` or ``OPTIONAL_COMPONENTS`` argument is given to the
-:command:`find_package` command, it will also determine supported target
-languages.
+This module finds an installed SWIG and determines its version.
 
-When a version is requested, it can be specified as a simple value or as a
-range. For a detailed description of version range usage and capabilities,
-refer to the :command:`find_package` command.
+.. versionadded:: 3.18
+  If a ``COMPONENTS`` or ``OPTIONAL_COMPONENTS`` argument is given to the
+  :command:`find_package` command, it will also determine supported target
+  languages.
+
+.. versionadded:: 3.19
+  When a version is requested, it can be specified as a simple value or as a
+  range. For a detailed description of version range usage and capabilities,
+  refer to the :command:`find_package` command.
 
 The module defines the following variables:
 

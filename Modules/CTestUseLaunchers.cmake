@@ -24,9 +24,12 @@ long as your CMakeLists uses include(CTest) or
 include(CTestUseLaunchers), it will use the value of the ENV variable
 to initialize a CTEST_USE_LAUNCHERS cache variable.  This cache
 variable initialization only occurs if CTEST_USE_LAUNCHERS is not
-already defined. If CTEST_USE_LAUNCHERS is on in a ctest -S script
-the ctest_configure command will add -DCTEST_USE_LAUNCHERS:BOOL=TRUE
-to the cmake command used to configure the project.
+already defined.
+
+.. versionadded:: 3.8
+  If CTEST_USE_LAUNCHERS is on in a ctest -S script
+  the ctest_configure command will add -DCTEST_USE_LAUNCHERS:BOOL=TRUE
+  to the cmake command used to configure the project.
 #]=======================================================================]
 
 if(NOT DEFINED CTEST_USE_LAUNCHERS AND DEFINED ENV{CTEST_USE_LAUNCHERS_DEFAULT})

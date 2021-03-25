@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/Modules/WriteCompilerDetectionHeader.cmake:[0-9]+ \(message\):
+  The WriteCompilerDetectionHeader module has been removed by policy CMP0120.
+Call Stack \(most recent call first\):
+  CMP0120-NEW-Direct.cmake:[0-9]+ \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)$

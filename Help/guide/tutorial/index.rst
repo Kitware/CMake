@@ -176,7 +176,7 @@ directory:
 To make use of the new library we will add an :command:`add_subdirectory`
 call in the top-level ``CMakeLists.txt`` file so that the library will get
 built. We add the new library to the executable, and add ``MathFunctions`` as
-an include directory so that the ``mqsqrt.h`` header file can be found. The
+an include directory so that the ``mysqrt.h`` header file can be found. The
 last few lines of the top-level ``CMakeLists.txt`` file should now look like:
 
 .. code-block:: cmake
@@ -414,27 +414,23 @@ tutorial assume that they are not common.
 
 If the platform has ``log`` and ``exp`` then we will use them to compute the
 square root in the ``mysqrt`` function. We first test for the availability of
-these functions using the :module:`CheckSymbolExists` module in the top-level
-``CMakeLists.txt``. On some platforms, we will need to link to the m library.
-If ``log`` and ``exp`` are not initially found, require the m library and try
-again.
-
-We're going to use the new defines in ``TutorialConfig.h.in``, so be sure to
-set them before that file is configured.
+these functions using the :module:`CheckSymbolExists` module in
+``MathFunctions/CMakeLists.txt``. On some platforms, we will need to link to
+the m library. If ``log`` and ``exp`` are not initially found, require the m
+library and try again.
 
 .. literalinclude:: Step6/MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # does this system provide the log and exp functions?
   :end-before: # add compile definitions
 
-Now let's add these defines to ``TutorialConfig.h.in`` so that we can use them
-from ``mysqrt.cxx``:
+If available, use :command:`target_compile_definitions` to specify
+``HAVE_LOG`` and ``HAVE_EXP`` as ``PRIVATE`` compile definitions.
 
-.. code-block:: console
-
-  // does the platform provide exp and log functions?
-  #cmakedefine HAVE_LOG
-  #cmakedefine HAVE_EXP
+.. literalinclude:: Step6/MathFunctions/CMakeLists.txt
+  :language: cmake
+  :start-after: # add compile definitions
+  :end-before: # install rules
 
 If ``log`` and ``exp`` are available on the system, then we will use them to
 compute the square root in the ``mysqrt`` function. Add the following code to
@@ -456,50 +452,7 @@ Run the :manual:`cmake  <cmake(1)>` executable or the
 :manual:`cmake-gui <cmake-gui(1)>` to configure the project and then build it
 with your chosen build tool and run the Tutorial executable.
 
-You will notice that we're not using ``log`` and ``exp``, even if we think they
-should be available. We should realize quickly that we have forgotten to
-include ``TutorialConfig.h`` in ``mysqrt.cxx``.
-
-We will also need to update ``MathFunctions/CMakeLists.txt`` so ``mysqrt.cxx``
-knows where this file is located:
-
-.. code-block:: cmake
-
-  target_include_directories(MathFunctions
-            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-            PRIVATE ${CMAKE_BINARY_DIR}
-            )
-
-After making this update, go ahead and build the project again and run the
-built Tutorial executable. If ``log`` and ``exp`` are still not being used,
-open the generated ``TutorialConfig.h`` file from the build directory. Maybe
-they aren't available on the current system?
-
 Which function gives better results now, sqrt or mysqrt?
-
-Specify Compile Definition
---------------------------
-
-Is there a better place for us to save the ``HAVE_LOG`` and ``HAVE_EXP`` values
-other than in ``TutorialConfig.h``? Let's try to use
-:command:`target_compile_definitions`.
-
-First, remove the defines from ``TutorialConfig.h.in``. We no longer need to
-include ``TutorialConfig.h`` from ``mysqrt.cxx`` or the extra include in
-``MathFunctions/CMakeLists.txt``.
-
-Next, we can move the check for ``HAVE_LOG`` and ``HAVE_EXP`` to
-``MathFunctions/CMakeLists.txt`` and then specify those values as ``PRIVATE``
-compile definitions.
-
-.. literalinclude:: Step6/MathFunctions/CMakeLists.txt
-  :language: cmake
-  :start-after: # does this system provide the log and exp functions?
-  :end-before: # install rules
-
-After making these updates, go ahead and build the project again. Run the
-built Tutorial executable and verify that the results are same as earlier in
-this step.
 
 Adding a Custom Command and Generated File (Step 6)
 ===================================================

@@ -4,26 +4,34 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmCustomCommandLines.h"
+#include "cmListFileCache.h"
 
 class cmCustomCommand;
 class cmLocalGenerator;
 
 class cmCustomCommandGenerator
 {
-  cmCustomCommand const& CC;
-  std::string Config;
+  cmCustomCommand const* CC;
+  std::string OutputConfig;
+  std::string CommandConfig;
   cmLocalGenerator* LG;
   bool OldStyle;
   bool MakeVars;
   cmCustomCommandLines CommandLines;
   std::vector<std::vector<std::string>> EmulatorsWithArguments;
+  std::vector<std::string> Outputs;
   std::vector<std::string> Byproducts;
   std::vector<std::string> Depends;
   std::string WorkingDirectory;
+  std::set<BT<std::pair<std::string, bool>>> Utilities;
 
   void FillEmulatorsWithArguments();
   std::vector<std::string> GetCrossCompilingEmulator(unsigned int c) const;
@@ -31,11 +39,14 @@ class cmCustomCommandGenerator
 
 public:
   cmCustomCommandGenerator(cmCustomCommand const& cc, std::string config,
-                           cmLocalGenerator* lg);
+                           cmLocalGenerator* lg, bool transformDepfile = true,
+                           cm::optional<std::string> crossConfig = {});
   cmCustomCommandGenerator(const cmCustomCommandGenerator&) = delete;
+  cmCustomCommandGenerator(cmCustomCommandGenerator&&) = default;
   cmCustomCommandGenerator& operator=(const cmCustomCommandGenerator&) =
     delete;
-  cmCustomCommand const& GetCC() const { return this->CC; }
+  cmCustomCommandGenerator& operator=(cmCustomCommandGenerator&&) = default;
+  cmCustomCommand const& GetCC() const { return *(this->CC); }
   unsigned int GetNumberOfCommands() const;
   std::string GetCommand(unsigned int c) const;
   void AppendArguments(unsigned int c, std::string& cmd) const;
@@ -44,5 +55,11 @@ public:
   std::vector<std::string> const& GetOutputs() const;
   std::vector<std::string> const& GetByproducts() const;
   std::vector<std::string> const& GetDepends() const;
+  std::set<BT<std::pair<std::string, bool>>> const& GetUtilities() const;
   bool HasOnlyEmptyCommandLines() const;
+  std::string GetFullDepfile() const;
+  std::string GetInternalDepfile() const;
+
+  const std::string& GetOutputConfig() const { return this->OutputConfig; }
+  const std::string& GetCommandConfig() const { return this->CommandConfig; }
 };

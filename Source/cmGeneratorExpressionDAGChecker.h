@@ -89,7 +89,6 @@ private:
   Result CheckGraph() const;
   void Initialize();
 
-private:
   const cmGeneratorExpressionDAGChecker* const Parent;
   cmGeneratorTarget const* Target;
   const std::string Property;

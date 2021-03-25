@@ -51,8 +51,6 @@ cmProcessOutput::cmProcessOutput(Encoding encoding, unsigned int maxSize)
 #endif
 }
 
-cmProcessOutput::~cmProcessOutput() = default;
-
 bool cmProcessOutput::DecodeText(std::string raw, std::string& decoded,
                                  size_t id)
 {
@@ -126,7 +124,7 @@ bool cmProcessOutput::DecodeText(std::string raw, std::string& decoded,
 bool cmProcessOutput::DecodeText(const char* data, size_t length,
                                  std::string& decoded, size_t id)
 {
-  return DecodeText(std::string(data, length), decoded, id);
+  return this->DecodeText(std::string(data, length), decoded, id);
 }
 
 bool cmProcessOutput::DecodeText(std::vector<char> raw,
@@ -134,7 +132,7 @@ bool cmProcessOutput::DecodeText(std::vector<char> raw,
 {
   std::string str;
   const bool success =
-    DecodeText(std::string(raw.begin(), raw.end()), str, id);
+    this->DecodeText(std::string(raw.begin(), raw.end()), str, id);
   decoded.assign(str.begin(), str.end());
   return success;
 }

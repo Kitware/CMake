@@ -49,4 +49,5 @@ private:
   std::string OutputVariable;
   std::string RunOutputVariable;
   std::string CompileOutputVariable;
+  std::string WorkingDirectory;
 };

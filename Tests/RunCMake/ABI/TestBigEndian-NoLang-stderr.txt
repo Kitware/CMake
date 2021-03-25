@@ -1,0 +1,8 @@
+^CMake Error at [^
+]*/Modules/TestBigEndian.cmake:[0-9]+ \(message\):
+  TEST_BIG_ENDIAN needs either C or CXX language enabled
+Call Stack \(most recent call first\):
+  [^
+]*/Modules/TestBigEndian.cmake:[0-9]+ \(__TEST_BIG_ENDIAN_LEGACY_IMPL\)
+  TestBigEndian-NoLang.cmake:[0-9]+ \(test_big_endian\)
+  CMakeLists.txt:3 \(include\)$

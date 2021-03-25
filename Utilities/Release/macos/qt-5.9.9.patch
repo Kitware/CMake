@@ -1,0 +1,20 @@
+--- qt-everywhere-opensource-src-5.9.9/qtbase/mkspecs/features/mac/default_post.prf.orig	2019-12-03 07:50:08.000000000 -0500
++++ qt-everywhere-opensource-src-5.9.9/qtbase/mkspecs/features/mac/default_post.prf	2020-12-14 09:45:11.000000000 -0500
+@@ -130,7 +130,7 @@
+                 -isysroot$$xcodeSDKInfo(Path, $$sdk)
+             QMAKE_XARCH_LFLAGS_$${arch} = $$version_min_flags \
+                 -Xarch_$${arch} \
+-                -Wl,-syslibroot,$$xcodeSDKInfo(Path, $$sdk)
++                -isysroot$$xcodeSDKInfo(Path, $$sdk)
+ 
+             QMAKE_XARCH_CFLAGS += $(EXPORT_QMAKE_XARCH_CFLAGS_$${arch})
+             QMAKE_XARCH_LFLAGS += $(EXPORT_QMAKE_XARCH_LFLAGS_$${arch})
+@@ -151,7 +151,7 @@
+         version_min_flag = -m$${version_identifier}-version-min=$$deployment_target
+         QMAKE_CFLAGS += -isysroot $$QMAKE_MAC_SDK_PATH $$version_min_flag
+         QMAKE_CXXFLAGS += -isysroot $$QMAKE_MAC_SDK_PATH $$version_min_flag
+-        QMAKE_LFLAGS += -Wl,-syslibroot,$$QMAKE_MAC_SDK_PATH $$version_min_flag
++        QMAKE_LFLAGS += -isysroot $$QMAKE_MAC_SDK_PATH $$version_min_flag
+     }
+ 
+     # Enable precompiled headers for multiple architectures

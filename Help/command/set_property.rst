@@ -28,10 +28,11 @@ It must be one of the following:
 ``DIRECTORY``
   Scope defaults to the current directory but other directories
   (already processed by CMake) may be named by full or relative path.
-  Each path may reference either a source directory, or since CMake 3.19,
-  a binary directory.
   Relative paths are treated as relative to the current source directory.
   See also the :command:`set_directory_properties` command.
+
+  .. versionadded:: 3.19
+    ``<dir>`` may reference a binary directory.
 
 ``TARGET``
   Scope may name zero or more existing targets.
@@ -40,25 +41,31 @@ It must be one of the following:
 ``SOURCE``
   Scope may name zero or more source files.  By default, source file properties
   are only visible to targets added in the same directory (``CMakeLists.txt``).
-  Visibility can be set in other directory scopes using one or both of the
-  following sub-options:
 
-  ``DIRECTORY <dirs>...``
-    The source file property will be set in each of the ``<dirs>``
-    directories' scopes.  Each path may reference either a source directory,
-    or since CMake 3.19, a binary directory.  CMake must already know about
-    each of these directories, either by having added them through a call to
-    :command:`add_subdirectory` or it being the top level source directory.
-    Relative paths are treated as relative to the current source directory.
+  .. versionadded:: 3.18
+    Visibility can be set in other directory scopes using one or both of the
+    following sub-options:
 
-  ``TARGET_DIRECTORY <targets>...``
-    The source file property will be set in each of the directory scopes
-    where any of the specified ``<targets>`` were created (the ``<targets>``
-    must therefore already exist).
+    ``DIRECTORY <dirs>...``
+      The source file property will be set in each of the ``<dirs>``
+      directories' scopes.  CMake must already know about
+      each of these directories, either by having added them through a call to
+      :command:`add_subdirectory` or it being the top level source directory.
+      Relative paths are treated as relative to the current source directory.
+
+      .. versionadded:: 3.19
+        ``<dirs>`` may reference a binary directory.
+
+    ``TARGET_DIRECTORY <targets>...``
+      The source file property will be set in each of the directory scopes
+      where any of the specified ``<targets>`` were created (the ``<targets>``
+      must therefore already exist).
 
   See also the :command:`set_source_files_properties` command.
 
 ``INSTALL``
+  .. versionadded:: 3.1
+
   Scope may name zero or more installed file paths.
   These are made available to CPack to influence deployment.
 
@@ -98,3 +105,8 @@ directly set in the nominated scope, the command will behave as though
 
 See the :manual:`cmake-properties(7)` manual for a list of properties
 in each scope.
+
+.. note::
+
+  The :prop_sf:`GENERATED` source file property may be globally visible.
+  See its documentation for details.

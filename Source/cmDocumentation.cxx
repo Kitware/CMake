@@ -194,7 +194,7 @@ void cmDocumentation::addCTestStandardDocSections()
 {
   // This is currently done for backward compatibility reason
   // We may suppress some of these.
-  addCMakeStandardDocSections();
+  this->addCMakeStandardDocSections();
 }
 
 void cmDocumentation::addCPackStandardDocSections()

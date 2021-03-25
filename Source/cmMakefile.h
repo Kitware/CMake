@@ -20,6 +20,8 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cm_sys_stat.h"
+
 #include "cmAlgorithms.h"
 #include "cmCustomCommandTypes.h"
 #include "cmListFileCache.h"
@@ -58,24 +60,6 @@ class cmTest;
 class cmTestGenerator;
 class cmVariableWatch;
 class cmake;
-
-/** Flag if byproducts shall also be considered.  */
-enum class cmSourceOutputKind
-{
-  OutputOnly,
-  OutputOrByproduct
-};
-
-/** Target and source file which have a specific output.  */
-struct cmSourcesWithOutput
-{
-  /** Target with byproduct.  */
-  cmTarget* Target = nullptr;
-
-  /** Source file with output or byproduct.  */
-  cmSourceFile* Source = nullptr;
-  bool SourceIsByproduct = false;
-};
 
 /** A type-safe wrapper for a string representing a directory id.  */
 class cmDirectoryId
@@ -185,7 +169,8 @@ public:
     const std::string& target, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, cmCustomCommandType type,
-    const char* comment, const char* workingDir, bool escapeOldStyle = true,
+    const char* comment, const char* workingDir,
+    cmPolicies::PolicyStatus cmp0116, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
     const std::string& job_pool = "", bool command_expand_lists = false,
     bool stdPipesUTF8 = false);
@@ -202,11 +187,11 @@ public:
     const std::string& output, const std::vector<std::string>& depends,
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, const CommandSourceCallback& callback = nullptr,
-    bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
+    const char* workingDir, cmPolicies::PolicyStatus cmp0116,
+    const CommandSourceCallback& callback = nullptr, bool replace = false,
+    bool escapeOldStyle = true, bool uses_terminal = false,
+    bool command_expand_lists = false, const std::string& depfile = "",
+    const std::string& job_pool = "", bool stdPipesUTF8 = false);
   void AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,
@@ -214,34 +199,22 @@ public:
     const std::string& main_dependency,
     const cmImplicitDependsList& implicit_depends,
     const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, const CommandSourceCallback& callback = nullptr,
-    bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
+    const char* workingDir, cmPolicies::PolicyStatus cmp0116,
+    const CommandSourceCallback& callback = nullptr, bool replace = false,
+    bool escapeOldStyle = true, bool uses_terminal = false,
+    bool command_expand_lists = false, const std::string& depfile = "",
+    const std::string& job_pool = "", bool stdPipesUTF8 = false);
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
                                 const std::string& source,
                                 const cmCustomCommandLines& commandLines,
-                                const char* comment);
-  bool AppendCustomCommandToOutput(
+                                const char* comment,
+                                cmPolicies::PolicyStatus cmp0116);
+  void AppendCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const cmImplicitDependsList& implicit_depends,
     const cmCustomCommandLines& commandLines);
-
-  /**
-   * Add target byproducts.
-   */
-  void AddTargetByproducts(cmTarget* target,
-                           const std::vector<std::string>& byproducts);
-
-  /**
-   * Add source file outputs.
-   */
-  void AddSourceOutputs(cmSourceFile* source,
-                        const std::vector<std::string>& outputs,
-                        const std::vector<std::string>& byproducts);
 
   /**
    * Add a define flag to the build.
@@ -272,11 +245,6 @@ public:
                           bool excludeFromAll = false);
 
   /**
-   * Return the utility target output source file name and the CMP0049 name.
-   */
-  cmUtilityOutput GetUtilityOutput(cmTarget* target);
-
-  /**
    * Dispatch adding a utility to the build.  A utility target is a command
    * that is run every time the target is built.
    */
@@ -284,10 +252,10 @@ public:
     const std::string& utilityName, bool excludeFromAll,
     const char* workingDir, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false, const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
+    const cmCustomCommandLines& commandLines, cmPolicies::PolicyStatus cmp0116,
+    bool escapeOldStyle = true, const char* comment = nullptr,
+    bool uses_terminal = false, bool command_expand_lists = false,
+    const std::string& job_pool = "", bool stdPipesUTF8 = false);
 
   /**
    * Add a subdirectory to the build.
@@ -326,7 +294,7 @@ public:
                           const char* doc, cmStateEnums::CacheEntryType type,
                           bool force = false)
   {
-    AddCacheDefinition(name, value.c_str(), doc, type, force);
+    this->AddCacheDefinition(name, value.c_str(), doc, type, force);
   }
 
   /**
@@ -335,7 +303,7 @@ public:
    */
   void RemoveDefinition(const std::string& name);
   //! Remove a definition from the cache.
-  void RemoveCacheDefinition(const std::string& name);
+  void RemoveCacheDefinition(const std::string& name) const;
 
   /**
    * Specify the name of the project for this build.
@@ -376,7 +344,7 @@ public:
                                            bool parent_scope = false) const;
   bool SetPolicyVersion(std::string const& version_min,
                         std::string const& version_max);
-  void RecordPolicies(cmPolicies::PolicyMap& pm);
+  void RecordPolicies(cmPolicies::PolicyMap& pm) const;
   //@}
 
   /** Helper class to push and pop policies automatically.  */
@@ -430,8 +398,7 @@ public:
   }
   const char* GetIncludeRegularExpression() const
   {
-    cmProp p = this->GetProperty("INCLUDE_REGULAR_EXPRESSION");
-    return p ? p->c_str() : nullptr;
+    return cmToCStr(this->GetProperty("INCLUDE_REGULAR_EXPRESSION"));
   }
 
   /**
@@ -690,8 +657,7 @@ public:
    */
   int ConfigureFile(const std::string& infile, const std::string& outfile,
                     bool copyonly, bool atOnly, bool escapeQuotes,
-                    bool use_source_permissions,
-                    cmNewLineStyle = cmNewLineStyle());
+                    mode_t permissions = 0, cmNewLineStyle = cmNewLineStyle());
 
   /**
    * Print a command's invocation
@@ -753,20 +719,10 @@ public:
     return this->SourceFiles;
   }
 
-  /**
-   * Return the target if the provided source name is a byproduct of a utility
-   * target or a PRE_BUILD, PRE_LINK, or POST_BUILD command.
-   * Return the source file which has the provided source name as output.
-   */
-  cmSourcesWithOutput GetSourcesWithOutput(const std::string& name) const;
-
-  /**
-   * Is there a source file that has the provided source name as an output?
-   * If so then return it.
-   */
-  cmSourceFile* GetSourceFileWithOutput(
-    const std::string& name,
-    cmSourceOutputKind kind = cmSourceOutputKind::OutputOnly) const;
+  std::vector<cmTarget*> const& GetOrderedTargets() const
+  {
+    return this->OrderedTargets;
+  }
 
   //! Add a new cmTest to the list of tests for this makefile.
   cmTest* CreateTest(const std::string& testName);
@@ -779,7 +735,7 @@ public:
   /**
    * Get all tests that run under the given configuration.
    */
-  void GetTests(const std::string& config, std::vector<cmTest*>& tests);
+  void GetTests(const std::string& config, std::vector<cmTest*>& tests) const;
 
   /**
    * Return a location of a file in cmake or custom modules directory
@@ -926,7 +882,7 @@ public:
     return this->SystemIncludeDirectories;
   }
 
-  bool PolicyOptionalWarningEnabled(std::string const& var);
+  bool PolicyOptionalWarningEnabled(std::string const& var) const;
 
   void PushLoopBlock();
   void PopLoopBlock();
@@ -945,6 +901,7 @@ public:
     const std::string& inputFile, const std::string& targetName,
     std::unique_ptr<cmCompiledGeneratorExpression> outputName,
     std::unique_ptr<cmCompiledGeneratorExpression> condition,
+    const std::string& newLineCharacter, mode_t permissions,
     bool inputIsContent);
   const std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>&
   GetEvaluationFiles() const;
@@ -967,7 +924,7 @@ public:
   int GetRecursionDepth() const;
   void SetRecursionDepth(int recursionDepth);
 
-  std::string NewDeferId();
+  std::string NewDeferId() const;
   bool DeferCall(std::string id, std::string fileName, cmListFileFunction lff);
   bool DeferCancelCall(std::string const& id);
   cm::optional<std::string> DeferGetCallIds() const;
@@ -983,8 +940,7 @@ protected:
   mutable cmTargetMap Targets;
   std::map<std::string, std::string> AliasTargets;
 
-  using TargetsVec = std::vector<cmTarget*>;
-  TargetsVec OrderedTargets;
+  std::vector<cmTarget*> OrderedTargets;
 
   std::vector<std::unique_ptr<cmSourceFile>> SourceFiles;
 
@@ -1129,48 +1085,9 @@ private:
   bool ValidateCustomCommand(const cmCustomCommandLines& commandLines) const;
 
   void CreateGeneratedOutputs(const std::vector<std::string>& outputs);
-  void CreateGeneratedByproducts(const std::vector<std::string>& byproducts);
 
   std::vector<BT<GeneratorAction>> GeneratorActions;
   bool GeneratorActionsInvoked = false;
-  bool DelayedOutputFilesHaveGenex = false;
-  std::vector<std::string> DelayedOutputFiles;
-
-  void AddDelayedOutput(std::string const& output);
-
-  /**
-   * See LinearGetSourceFileWithOutput for background information
-   */
-  cmTarget* LinearGetTargetWithOutput(const std::string& name) const;
-
-  /**
-   * Generalized old version of GetSourceFileWithOutput kept for
-   * backward-compatibility. It implements a linear search and supports
-   * relative file paths. It is used as a fall back by GetSourceFileWithOutput
-   * and GetSourcesWithOutput.
-   */
-  cmSourceFile* LinearGetSourceFileWithOutput(const std::string& name,
-                                              cmSourceOutputKind kind,
-                                              bool& byproduct) const;
-
-  struct SourceEntry
-  {
-    cmSourcesWithOutput Sources;
-    bool SourceMightBeOutput = false;
-  };
-
-  // A map for fast output to input look up.
-  using OutputToSourceMap = std::unordered_map<std::string, SourceEntry>;
-  OutputToSourceMap OutputToSource;
-
-  void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target);
-  void UpdateOutputToSourceMap(std::string const& output, cmSourceFile* source,
-                               bool byproduct);
-
-  /**
-   * Return if the provided source file might have a custom command.
-   */
-  bool MightHaveCustomCommand(const std::string& name) const;
 
   bool CheckSystemVars;
   bool CheckCMP0000;

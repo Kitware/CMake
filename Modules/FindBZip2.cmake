@@ -10,6 +10,8 @@ Try to find BZip2
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.12
+
 This module defines :prop_tgt:`IMPORTED` target ``BZip2::BZip2``, if
 BZip2 has been found.
 
@@ -21,7 +23,8 @@ This module defines the following variables:
 ``BZIP2_FOUND``
   system has BZip2
 ``BZIP2_INCLUDE_DIRS``
-  the BZip2 include directories
+  .. versionadded:: 3.12
+    the BZip2 include directories
 ``BZIP2_LIBRARIES``
   Link these to use BZip2
 ``BZIP2_NEED_PREFIX``

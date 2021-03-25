@@ -238,7 +238,7 @@ public:
   bool CreateAndSetGlobalGenerator(const std::string& name, bool allowArch);
 
 #ifndef CMAKE_BOOTSTRAP
-  //! Print list of presets
+  //! Print list of configure presets
   void PrintPresetList(const cmCMakePresetsFile& file) const;
 #endif
 
@@ -411,7 +411,7 @@ public:
   WorkingMode GetWorkingMode() { return this->CurrentWorkingMode; }
 
   //! Debug the try compile stuff by not deleting the files
-  bool GetDebugTryCompile() { return this->DebugTryCompile; }
+  bool GetDebugTryCompile() const { return this->DebugTryCompile; }
   void DebugTryCompileOn() { this->DebugTryCompile = true; }
 
   /**
@@ -456,11 +456,11 @@ public:
   void SetShowLogContext(bool b) { this->LogContext = b; }
 
   //! Do we want debug output during the cmake run.
-  bool GetDebugOutput() { return this->DebugOutput; }
+  bool GetDebugOutput() const { return this->DebugOutput; }
   void SetDebugOutputOn(bool b) { this->DebugOutput = b; }
 
   //! Do we want debug output from the find commands during the cmake run.
-  bool GetDebugFindOutput() { return this->DebugFindOutput; }
+  bool GetDebugFindOutput() const { return this->DebugFindOutput; }
   void SetDebugFindOutputOn(bool b) { this->DebugFindOutput = b; }
 
   //! Do we want trace output during the cmake run.
@@ -482,11 +482,11 @@ public:
   void SetTraceFile(std::string const& file);
   void PrintTraceFormatVersion();
 
-  bool GetWarnUninitialized() { return this->WarnUninitialized; }
+  bool GetWarnUninitialized() const { return this->WarnUninitialized; }
   void SetWarnUninitialized(bool b) { this->WarnUninitialized = b; }
-  bool GetWarnUnusedCli() { return this->WarnUnusedCli; }
+  bool GetWarnUnusedCli() const { return this->WarnUnusedCli; }
   void SetWarnUnusedCli(bool b) { this->WarnUnusedCli = b; }
-  bool GetCheckSystemVars() { return this->CheckSystemVars; }
+  bool GetCheckSystemVars() const { return this->CheckSystemVars; }
   void SetCheckSystemVars(bool b) { this->CheckSystemVars = b; }
 
   void MarkCliAsUsed(const std::string& variable);
@@ -556,10 +556,10 @@ public:
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
   //! run the --build option
-  int Build(int jobs, const std::string& dir,
-            const std::vector<std::string>& targets, const std::string& config,
-            const std::vector<std::string>& nativeOptions, bool clean,
-            bool verbose);
+  int Build(int jobs, std::string dir, std::vector<std::string> targets,
+            std::string config, std::vector<std::string> nativeOptions,
+            bool clean, bool verbose, const std::string& presetName,
+            bool listPresets);
 
   //! run the --open option
   bool Open(const std::string& dir, bool dryRun);
@@ -591,8 +591,8 @@ protected:
   using RegisteredExtraGeneratorsVector =
     std::vector<cmExternalMakefileProjectGeneratorFactory*>;
   RegisteredExtraGeneratorsVector ExtraGenerators;
-  void AddScriptingCommands();
-  void AddProjectCommands();
+  void AddScriptingCommands() const;
+  void AddProjectCommands() const;
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
 
@@ -811,6 +811,7 @@ private:
   F(cxx_std_14)                                                               \
   F(cxx_std_17)                                                               \
   F(cxx_std_20)                                                               \
+  F(cxx_std_23)                                                               \
   FOR_EACH_CXX98_FEATURE(F)                                                   \
   FOR_EACH_CXX11_FEATURE(F)                                                   \
   FOR_EACH_CXX14_FEATURE(F)
@@ -820,4 +821,5 @@ private:
   F(cuda_std_11)                                                              \
   F(cuda_std_14)                                                              \
   F(cuda_std_17)                                                              \
-  F(cuda_std_20)
+  F(cuda_std_20)                                                              \
+  F(cuda_std_23)

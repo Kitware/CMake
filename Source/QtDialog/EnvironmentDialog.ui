@@ -46,30 +46,24 @@
       </spacer>
      </item>
      <item>
-      <widget class="QToolButton" name="AddEntry">
+      <widget class="QPushButton" name="AddEntry">
        <property name="text">
         <string>&amp;Add Entry</string>
        </property>
        <property name="icon">
-        <iconset resource="CMakeSetup.qrc">
+        <iconset theme="list-add" resource="CMakeSetup.qrc">
          <normaloff>:/Icons/Plus16.png</normaloff>:/Icons/Plus16.png</iconset>
-       </property>
-       <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextBesideIcon</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="RemoveEntry">
+      <widget class="QPushButton" name="RemoveEntry">
        <property name="text">
         <string>&amp;Remove Entry</string>
        </property>
        <property name="icon">
-        <iconset resource="CMakeSetup.qrc">
+        <iconset theme="list-remove" resource="CMakeSetup.qrc">
          <normaloff>:/Icons/Delete16.png</normaloff>:/Icons/Delete16.png</iconset>
-       </property>
-       <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextBesideIcon</enum>
        </property>
       </widget>
      </item>

@@ -8,8 +8,6 @@ unset(ENV{https_proxy})
 
 run_cmake(BadIndependentStep1)
 run_cmake(BadIndependentStep2)
-run_cmake(IncludeScope-Add)
-run_cmake(IncludeScope-Add_Step)
 run_cmake(NoOptions)
 run_cmake(SourceEmpty)
 run_cmake(SourceMissing)
@@ -150,4 +148,43 @@ if(RunCMake_GENERATOR STREQUAL "MSYS Makefiles")
 endif()
 if(doSubstitutionTest)
     __ep_test_with_build(Substitutions)
+endif()
+
+function(__ep_test_CONFIGURE_HANDLED_BY_BUILD)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CONFIGURE_HANDLED_BY_BUILD-build)
+  run_cmake(CONFIGURE_HANDLED_BY_BUILD)
+
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(BUILD_CONFIG --config Debug)
+    set(STAMP_DIR "${RunCMake_TEST_BINARY_DIR}/stamp/Debug")
+  else()
+    set(BUILD_CONFIG "")
+    set(STAMP_DIR "${RunCMake_TEST_BINARY_DIR}/stamp")
+  endif()
+
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(CONFIGURE_HANDLED_BY_BUILD-build ${CMAKE_COMMAND} --build . ${BUILD_CONFIG})
+
+  # Calculate timestamps before rebuilding so we can compare before and after in
+  # CONFIGURE_HANDLED_BY_BUILD-rebuild-check.cmake
+
+  file(TIMESTAMP "${STAMP_DIR}/proj1-configure" PROJ1_CONFIGURE_TIMESTAMP_BEFORE "%s")
+  # When BUILD_ALWAYS is set, the build stamp is never created.
+  file(TIMESTAMP "${STAMP_DIR}/proj2-configure" PROJ2_CONFIGURE_TIMESTAMP_BEFORE "%s")
+  file(TIMESTAMP "${STAMP_DIR}/proj2-build" PROJ2_BUILD_TIMESTAMP_BEFORE "%s")
+
+  run_cmake_command(CONFIGURE_HANDLED_BY_BUILD-rebuild ${CMAKE_COMMAND} --build . ${BUILD_CONFIG})
+endfunction()
+
+if(NOT RunCMake_GENERATOR MATCHES "Visual Studio 9 ")
+  __ep_test_CONFIGURE_HANDLED_BY_BUILD()
+endif()
+
+find_package(Git QUIET)
+if(GIT_EXECUTABLE)
+  # Note that there appear to be differences in where git writes its output to
+  # on some platforms. It may go to stdout or stderr, so force it to be merged.
+  set(RunCMake_TEST_OUTPUT_MERGE TRUE)
+  run_cmake(FetchGitTags)
+  set(RunCMake_TEST_OUTPUT_MERGE FALSE)
 endif()

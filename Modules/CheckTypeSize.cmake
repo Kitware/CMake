@@ -57,19 +57,25 @@ member you can do something like this:
   check_type_size("((struct something*)0)->member" SIZEOF_MEMBER)
 
 
-
 The following variables may be set before calling this macro to modify
 the way the check is run:
 
-::
-
-  CMAKE_REQUIRED_FLAGS = string of compile command line flags
-  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-  CMAKE_REQUIRED_INCLUDES = list of include directories
-  CMAKE_REQUIRED_LINK_OPTIONS  = list of options to pass to link command
-  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
-  CMAKE_REQUIRED_QUIET = execute quietly without messages
-  CMAKE_EXTRA_INCLUDE_FILES = list of extra headers to include
+``CMAKE_REQUIRED_FLAGS``
+  string of compile command line flags.
+``CMAKE_REQUIRED_DEFINITIONS``
+  list of macros to define (-DFOO=bar).
+``CMAKE_REQUIRED_INCLUDES``
+  list of include directories.
+``CMAKE_REQUIRED_LINK_OPTIONS``
+  .. versionadded:: 3.14
+    list of options to pass to link command.
+``CMAKE_REQUIRED_LIBRARIES``
+  list of libraries to link.
+``CMAKE_REQUIRED_QUIET``
+  .. versionadded:: 3.1
+    execute quietly without messages.
+``CMAKE_EXTRA_INCLUDE_FILES``
+  list of extra headers to include.
 #]=======================================================================]
 
 include(CheckIncludeFile)

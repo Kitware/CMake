@@ -5,6 +5,10 @@ project(Toolkit CXX)
 # Validate that we can use CUDAToolkit to find cuda include paths
 find_package(CUDAToolkit REQUIRED)
 
+if(NOT DEFINED CUDAToolkit_VERSION)
+  message(FATAL_ERROR "expected CUDAToolkit variable CUDAToolkit_VERSION not found")
+endif()
+
 message(STATUS "CUDAToolkit_VERSION: ${CUDAToolkit_VERSION}")
 message(STATUS "CUDAToolkit_VERSION_MAJOR: ${CUDAToolkit_VERSION_MAJOR}")
 message(STATUS "CUDAToolkit_VERSION_MINOR: ${CUDAToolkit_VERSION_MINOR}")

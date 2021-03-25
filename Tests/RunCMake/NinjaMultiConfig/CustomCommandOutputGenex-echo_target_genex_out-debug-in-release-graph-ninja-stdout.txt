@@ -1,0 +1,4 @@
+^\[1/3\] Building C object CMakeFiles[\/]echo.dir[\/]Debug[\/]echo\.c\.(o|obj)
+\[2/3\] Linking C executable Debug[\/]echo(\.exe)?
+\[3/3\] echo_target_genex_out
+'[^']*[\/]Tests[\/]RunCMake[\/]NinjaMultiConfig[\/]CustomCommandOutputGenex-build[\/]Release'\$ '[^']*[\/]Tests[\/]RunCMake[\/]NinjaMultiConfig[\/]CustomCommandOutputGenex-build[\/]Debug[\/]echo(\.exe)?' 'Debug' 'echo_target_genex_out_Debug\.txt'$

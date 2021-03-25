@@ -37,6 +37,8 @@ but it does not necessarily imply complete conformance to that standard.
 ``cxx_std_20``
   Compiler mode is at least C++ 20.
 
+``cxx_std_23``
+  Compiler mode is at least C++ 23.
 
 Low level individual compile features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

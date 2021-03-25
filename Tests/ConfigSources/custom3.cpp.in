@@ -1,0 +1,13 @@
+#ifdef CUSTOM_CFG_DEBUG
+int custom3_debug()
+{
+  return 0;
+}
+#endif
+
+#ifdef CUSTOM_CFG_OTHER
+int custom3_other()
+{
+  return 0;
+}
+#endif

@@ -1,24 +1,4 @@
-set(CMake_DOC_ARTIFACT_PREFIX "$ENV{CI_PROJECT_DIR}/build/install-doc" CACHE PATH "")
+set(CPACK_SYSTEM_NAME "macos-universal" CACHE STRING "")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "")
 
-# Set up install destinations as expected by the packaging scripts.
-set(CMAKE_INSTALL_PREFIX "/" CACHE PATH "")
-set(CMAKE_DOC_DIR "doc/cmake" CACHE STRING "")
-
-# Settings for CMake packages for macOS.
-set(CPACK_DMG_FORMAT "UDBZ" CACHE STRING "")
-set(CMAKE_CXX_FLAGS "-stdlib=libc++" CACHE STRING "")
-set(CMAKE_C_STANDARD "11" CACHE STRING "")
-set(CMAKE_CXX_STANDARD "14" CACHE STRING "")
-set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "")
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.7" CACHE STRING "")
-set(CMAKE_SKIP_BOOTSTRAP_TEST "TRUE" CACHE STRING "")
-set(CPACK_SYSTEM_NAME "Darwin-x86_64" CACHE STRING "")
-set(BUILD_CursesDialog "ON" CACHE BOOL "")
-set(BUILD_QtDialog "TRUE" CACHE BOOL "")
-set(CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL "3" CACHE STRING "")
-set(CMake_INSTALL_DEPENDENCIES "ON" CACHE BOOL "")
-set(CMAKE_SKIP_RPATH "TRUE" CACHE BOOL "")
-set(CMake_TEST_NO_FindPackageModeMakefileTest "TRUE" CACHE BOOL "")
-
-include("${CMAKE_CURRENT_LIST_DIR}/configure_macos_common.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/configure_common.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/configure_macos_package_common.cmake")

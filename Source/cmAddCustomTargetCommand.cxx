@@ -4,13 +4,13 @@
 
 #include <utility>
 
-#include "cmCheckCustomOutputs.h"
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -120,12 +120,16 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
           break;
         case doing_byproducts: {
           std::string filename;
-          if (!cmSystemTools::FileIsFullPath(copy)) {
+          if (!cmSystemTools::FileIsFullPath(copy) &&
+              cmGeneratorExpression::Find(copy) != 0) {
             filename = cmStrCat(mf.GetCurrentBinaryDirectory(), '/');
           }
           filename += copy;
           cmSystemTools::ConvertToUnixSlashes(filename);
-          byproducts.push_back(cmSystemTools::CollapseFullPath(filename));
+          if (cmSystemTools::FileIsFullPath(filename)) {
+            filename = cmSystemTools::CollapseFullPath(filename);
+          }
+          byproducts.push_back(filename);
         } break;
         case doing_depends: {
           std::string dep = copy;
@@ -206,17 +210,12 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // Make sure the byproduct names and locations are safe.
-  if (!cmCheckCustomOutputs(byproducts, "BYPRODUCTS", status)) {
-    return false;
-  }
-
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
   cmTarget* target = mf.AddUtilityCommand(
     targetName, excludeFromAll, working_directory.c_str(), byproducts, depends,
-    commandLines, escapeOldStyle, comment, uses_terminal, command_expand_lists,
-    job_pool);
+    commandLines, mf.GetPolicyStatus(cmPolicies::CMP0116), escapeOldStyle,
+    comment, uses_terminal, command_expand_lists, job_pool);
 
   // Add additional user-specified source files to the target.
   target->AddSources(sources);

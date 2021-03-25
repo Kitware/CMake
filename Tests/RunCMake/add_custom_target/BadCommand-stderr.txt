@@ -1,0 +1,21 @@
+(CMake Error at BadCommand.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<OUTPUT_CONFIG:a>
+
+  Expression did not evaluate to a known generator expression
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+)+(CMake Error at BadCommand.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<COMMAND_CONFIG:b>
+
+  Expression did not evaluate to a known generator expression
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+
+
+)+

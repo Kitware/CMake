@@ -25,7 +25,6 @@ class cmDepends
 public:
   using DependencyMap = std::map<std::string, std::vector<std::string>>;
 
-public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
   cmDepends(cmLocalUnixMakefileGenerator3* lg = nullptr,
@@ -70,7 +69,7 @@ public:
              DependencyMap& validDeps);
 
   /** Clear dependencies for the target file so they will be regenerated.  */
-  void Clear(const std::string& file);
+  void Clear(const std::string& file) const;
 
   /** Set the file comparison object */
   void SetFileTimeCache(cmFileTimeCache* fc) { this->FileTimeCache = fc; }

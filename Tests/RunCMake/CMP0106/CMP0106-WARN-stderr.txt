@@ -8,7 +8,7 @@ Call Stack \(most recent call first\):
   CMakeLists.txt:7 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
-CMake Warning \(dev\) at .*/Modules/Documentation.cmake:27 \(message\):
+CMake Warning \(dev\) at .*/Modules/Documentation.cmake:[0-9]+ \(message\):
   Policy CMP0106 is not set: The Documentation module is removed.  Run "cmake
   --help-policy CMP0106" for policy details.  Use the cmake_policy command to
   set the policy and suppress this warning.
@@ -22,7 +22,7 @@ Call Stack \(most recent call first\):
   CMakeLists.txt:7 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
-CMake Warning \(dev\) at .*/Modules/Documentation.cmake:27 \(message\):
+CMake Warning \(dev\) at .*/Modules/Documentation.cmake:[0-9]+ \(message\):
   Policy CMP0106 is not set: The Documentation module is removed.  Run "cmake
   --help-policy CMP0106" for policy details.  Use the cmake_policy command to
   set the policy and suppress this warning.

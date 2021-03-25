@@ -84,6 +84,14 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
         }
         i++;
         this->CompileOutputVariable = argv[i];
+      } else if (argv[i] == "WORKING_DIRECTORY") {
+        if (argv.size() <= (i + 1)) {
+          cmSystemTools::Error(
+            "WORKING_DIRECTORY specified but there is no variable");
+          return false;
+        }
+        i++;
+        this->WorkingDirectory = argv[i];
       } else {
         tryCompile.push_back(argv[i]);
       }
@@ -100,6 +108,14 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
       "or RUN_OUTPUT_VARIABLE. Please use only COMPILE_OUTPUT_VARIABLE and/or "
       "RUN_OUTPUT_VARIABLE.");
     return false;
+  }
+
+  if (!this->WorkingDirectory.empty()) {
+    if (!cmSystemTools::MakeDirectory(this->WorkingDirectory)) {
+      cmSystemTools::Error(cmStrCat("Error creating working directory \"",
+                                    this->WorkingDirectory, "\"."));
+      return false;
+    }
   }
 
   bool captureRunOutput = false;
@@ -188,8 +204,9 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
     finalCommand += runArgs;
   }
   bool worked = cmSystemTools::RunSingleCommand(
-    finalCommand, out, out, &retVal, nullptr, cmSystemTools::OUTPUT_NONE,
-    cmDuration::zero());
+    finalCommand, out, out, &retVal,
+    this->WorkingDirectory.empty() ? nullptr : this->WorkingDirectory.c_str(),
+    cmSystemTools::OUTPUT_NONE, cmDuration::zero());
   // set the run var
   char retChar[16];
   const char* retStr;

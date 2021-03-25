@@ -7,14 +7,28 @@ FindOpenSSL
 
 Find the OpenSSL encryption library.
 
+This module finds an installed OpenSSL library and determines its version.
+
+.. versionadded:: 3.19
+  When a version is requested, it can be specified as a simple value or as a
+  range. For a detailed description of version range usage and capabilities,
+  refer to the :command:`find_package` command.
+
+.. versionadded:: 3.18
+  Support for OpenSSL 3.0.
+
 Optional COMPONENTS
 ^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.12
 
 This module supports two optional COMPONENTS: ``Crypto`` and ``SSL``.  Both
 components have associated imported targets, as described below.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.4
 
 This module defines the following :prop_tgt:`IMPORTED` targets:
 
@@ -23,6 +37,8 @@ This module defines the following :prop_tgt:`IMPORTED` targets:
 ``OpenSSL::Crypto``
   The OpenSSL ``crypto`` library, if found.
 ``OpenSSL::applink``
+  .. versionadded:: 3.18
+
   The OpenSSL ``applink`` components that might be need to be compiled into
   projects under MSVC. This target is available only if found OpenSSL version
   is not less than 0.9.8. By linking this target the above OpenSSL targets can
@@ -75,8 +91,12 @@ Hints
 ^^^^^
 
 Set ``OPENSSL_ROOT_DIR`` to the root directory of an OpenSSL installation.
-Set ``OPENSSL_USE_STATIC_LIBS`` to ``TRUE`` to look for static libraries.
-Set ``OPENSSL_MSVC_STATIC_RT`` set ``TRUE`` to choose the MT version of the lib.
+
+.. versionadded:: 3.4
+  Set ``OPENSSL_USE_STATIC_LIBS`` to ``TRUE`` to look for static libraries.
+
+.. versionadded:: 3.5
+  Set ``OPENSSL_MSVC_STATIC_RT`` set ``TRUE`` to choose the MT version of the lib.
 #]=======================================================================]
 
 macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
@@ -128,16 +148,30 @@ if (WIN32)
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
     ENV OPENSSL_ROOT_DIR
     )
-  file(TO_CMAKE_PATH "$ENV{PROGRAMFILES}" _programfiles)
+
+  if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    set(_arch "Win64")
+    file(TO_CMAKE_PATH "$ENV{PROGRAMFILES}" _programfiles)
+  else()
+    set(_arch "Win32")
+    set(_progfiles_x86 "ProgramFiles(x86)")
+    if(NOT "$ENV{${_progfiles_x86}}" STREQUAL "")
+      # under windows 64 bit machine
+      file(TO_CMAKE_PATH "$ENV{${_progfiles_x86}}" _programfiles)
+    else()
+      # under windows 32 bit machine
+      file(TO_CMAKE_PATH "$ENV{ProgramFiles}" _programfiles)
+    endif()
+  endif()
+
   set(_OPENSSL_ROOT_PATHS
     "${_programfiles}/OpenSSL"
-    "${_programfiles}/OpenSSL-Win32"
-    "${_programfiles}/OpenSSL-Win64"
+    "${_programfiles}/OpenSSL-${_arch}"
     "C:/OpenSSL/"
-    "C:/OpenSSL-Win32/"
-    "C:/OpenSSL-Win64/"
+    "C:/OpenSSL-${_arch}/"
     )
   unset(_programfiles)
+  unset(_arch)
 else ()
   set(_OPENSSL_ROOT_HINTS
     ${OPENSSL_ROOT_DIR}
@@ -539,6 +573,7 @@ find_package_handle_standard_args(OpenSSL
     OPENSSL_INCLUDE_DIR
   VERSION_VAR
     OPENSSL_VERSION
+  HANDLE_VERSION_RANGE
   HANDLE_COMPONENTS
   FAIL_MESSAGE
     "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"

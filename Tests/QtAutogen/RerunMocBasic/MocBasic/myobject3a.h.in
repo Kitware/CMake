@@ -1,0 +1,13 @@
+#ifndef MYOBJECT3_H
+#define MYOBJECT3_H
+
+#include <qobject.h>
+
+class MyObject3 : public QObject
+{
+    @CLASS_CONTENT@
+public:
+    MyObject3() {}
+};
+
+#endif

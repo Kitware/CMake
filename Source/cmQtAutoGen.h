@@ -29,13 +29,13 @@ public:
     {
     }
 
-    bool operator>(IntegerVersion const version)
+    bool operator>(IntegerVersion const version) const
     {
       return (this->Major > version.Major) ||
         ((this->Major == version.Major) && (this->Minor > version.Minor));
     }
 
-    bool operator>=(IntegerVersion const version)
+    bool operator>=(IntegerVersion const version) const
     {
       return (this->Major > version.Major) ||
         ((this->Major == version.Major) && (this->Minor >= version.Minor));
@@ -64,7 +64,6 @@ public:
   /// @brief Maximum number of parallel threads/processes in a generator
   static unsigned int const ParallelMax;
 
-public:
   /// @brief Returns the generator name
   static cm::string_view GeneratorName(GenT genType);
   /// @brief Returns the generator name in upper case
@@ -111,20 +110,20 @@ public:
     RccLister(std::string rccExecutable, std::vector<std::string> listOptions);
 
     //! The rcc executable
-    std::string const& RccExcutable() const { return RccExcutable_; }
+    std::string const& RccExcutable() const { return this->RccExcutable_; }
     void SetRccExecutable(std::string const& rccExecutable)
     {
-      RccExcutable_ = rccExecutable;
+      this->RccExcutable_ = rccExecutable;
     }
 
     //! The rcc executable list options
     std::vector<std::string> const& ListOptions() const
     {
-      return ListOptions_;
+      return this->ListOptions_;
     }
     void SetListOptions(std::vector<std::string> const& listOptions)
     {
-      ListOptions_ = listOptions;
+      this->ListOptions_ = listOptions;
     }
 
     /**

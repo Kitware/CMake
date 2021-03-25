@@ -26,7 +26,7 @@ public:
 
   bool SetDirectory(std::string const& newdir);
   void Pop();
-  bool Failed() const { return ResultCode != 0; }
+  bool Failed() const { return this->ResultCode != 0; }
 
   /** \return 0 if the last attempt to set the working directory was
    *          successful. If it failed, the value returned will be the
@@ -34,7 +34,7 @@ public:
    *          of the error code can be obtained by passing the result
    *          to \c std::strerror().
    */
-  int GetLastResult() const { return ResultCode; }
+  int GetLastResult() const { return this->ResultCode; }
 
   std::string const& GetOldDirectory() const { return this->OldDir; }
 

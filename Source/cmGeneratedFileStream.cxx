@@ -14,11 +14,11 @@
 #endif
 
 cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)
-  : OriginalLocale(getloc())
+  : OriginalLocale(this->getloc())
 {
 #ifndef CMAKE_BOOTSTRAP
   if (encoding != codecvt::None) {
-    imbue(std::locale(OriginalLocale, new codecvt(encoding)));
+    this->imbue(std::locale(this->OriginalLocale, new codecvt(encoding)));
   }
 #else
   static_cast<void>(encoding);
@@ -28,7 +28,7 @@ cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)
 cmGeneratedFileStream::cmGeneratedFileStream(std::string const& name,
                                              bool quiet, Encoding encoding)
   : cmGeneratedFileStreamBase(name)
-  , Stream(TempName.c_str())
+  , Stream(this->TempName.c_str())
 {
   // Check if the file opened.
   if (!*this && !quiet) {
@@ -37,7 +37,7 @@ cmGeneratedFileStream::cmGeneratedFileStream(std::string const& name,
   }
 #ifndef CMAKE_BOOTSTRAP
   if (encoding != codecvt::None) {
-    imbue(std::locale(getloc(), new codecvt(encoding)));
+    this->imbue(std::locale(this->getloc(), new codecvt(encoding)));
   }
 #else
   static_cast<void>(encoding);

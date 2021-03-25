@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 cmake_policy(SET CMP0054 NEW)
 project(PDBDirectoryAndName C)
 
@@ -9,8 +9,9 @@ endif()
 
 # Intel 11.1 does not support /Fd but Intel 14.0 does.
 # TODO: Did a version in between these add it?
-if(CMAKE_C_COMPILER_ID STREQUAL Intel AND
-   CMAKE_C_COMPILER_VERSION VERSION_LESS 14.0)
+if((CMAKE_C_COMPILER_ID STREQUAL Intel AND
+    CMAKE_C_COMPILER_VERSION VERSION_LESS 14.0) OR
+   CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM")
   set(NO_COMPILE_PDB 1)
 endif()
 

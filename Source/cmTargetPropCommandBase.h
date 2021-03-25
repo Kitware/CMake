@@ -23,8 +23,9 @@ public:
   {
     NO_FLAGS = 0x0,
     PROCESS_BEFORE = 0x1,
-    PROCESS_SYSTEM = 0x2,
-    PROCESS_REUSE_FROM = 0x3
+    PROCESS_AFTER = 0x2,
+    PROCESS_SYSTEM = 0x3,
+    PROCESS_REUSE_FROM = 0x4
   };
 
   bool HandleArguments(std::vector<std::string> const& args,

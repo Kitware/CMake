@@ -1,0 +1,25 @@
+CMP0118
+-------
+
+.. versionadded:: 3.20
+
+The :prop_sf:`GENERATED` source file property is now visible in all directories.
+
+Whether or not a source file is generated is an all-or-nothing global
+property of the source.  Consequently, the associated ``GENERATED``
+property is now visible from any directory scope, not only from the scope
+for which it was set.
+
+Additionally, the ``GENERATED`` property may now be set only to boolean
+values, and may not be turned off once turned on.
+
+The ``OLD`` behavior of this policy is to only allow ``GENERATED`` to be
+visible from the directory scope for which it was set.  The ``NEW``
+behavior on the other hand allows it to be visible from any scope.
+
+This policy was introduced in CMake version 3.20.  Use the
+:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+Unlike many policies, CMake version |release| does *not* warn
+when this policy is not set and simply uses ``OLD`` behavior with regard
+to visibility of the ``GENERATED`` property.  However, CMake does warn
+about setting the ``GENERATED`` property to a non-boolean value.

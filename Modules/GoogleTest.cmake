@@ -101,6 +101,8 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     with the list of discovered test cases.  This allows the caller to do
     things like manipulate test properties of the discovered tests.
 
+  Usage example:
+
   .. code-block:: cmake
 
     include(GoogleTest)
@@ -156,6 +158,8 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
                          [XML_OUTPUT_DIR dir]
                          [DISCOVERY_MODE <POST_BUILD|PRE_TEST>]
     )
+
+  .. versionadded:: 3.10
 
   ``gtest_discover_tests()`` sets up a post-build command on the test executable
   that generates the list of tests by parsing the output from running the test
@@ -223,6 +227,8 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     Note that this variable is only available in CTest.
 
   ``DISCOVERY_TIMEOUT num``
+    .. versionadded:: 3.10.3
+
     Specifies how long (in seconds) CMake will wait for the test to enumerate
     available tests.  If the test takes longer than this, discovery (and your
     build) will fail.  Most test executables will enumerate their tests very
@@ -241,6 +247,8 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
       and 3.10.2 has not been preserved.
 
   ``XML_OUTPUT_DIR dir``
+    .. versionadded:: 3.18
+
     If specified, the parameter is passed along with ``--gtest_output=xml:``
     to test executable. The actual file name is the same as the test target,
     including prefix and suffix. This should be used instead of
@@ -248,6 +256,8 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     XML result output when using parallel test execution.
 
   ``DISCOVERY_MODE``
+    .. versionadded:: 3.18
+
     Provides greater control over when ``gtest_discover_tests()`` performs test
     discovery. By default, ``POST_BUILD`` sets up a post-build command
     to perform test discovery at build time. In certain scenarios, like

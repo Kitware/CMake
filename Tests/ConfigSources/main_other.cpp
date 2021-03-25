@@ -7,7 +7,14 @@
 
 #include "iface.h"
 
+extern int custom1_other();
+extern int custom2_other();
+extern int custom3_other();
+extern int custom4_other();
+extern int custom5_other();
+
 int main(int argc, char** argv)
 {
-  return iface_src() + iface_other();
+  return iface_src() + iface_other() + custom1_other() + custom2_other() +
+    custom3_other() + custom4_other() + custom5_other();
 }

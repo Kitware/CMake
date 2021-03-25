@@ -1,4 +1,4 @@
-; CPack install script designed for a nmake build
+﻿; CPack install script designed for a nmake build
 
 ;--------------------------------
 ; You must define these values
@@ -42,6 +42,7 @@
 
 @CPACK_NSIS_DEFINES@
 @CPACK_NSIS_MANIFEST_DPI_AWARE_CODE@
+@CPACK_NSIS_BRANDING_TEXT_CODE@
 
   !include Sections.nsh
 

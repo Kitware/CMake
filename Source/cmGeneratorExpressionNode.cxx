@@ -677,7 +677,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
     }
     static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
 
-    for (auto& param : parameters) {
+    for (auto const& param : parameters) {
 
       if (!compilerIdValidator.find(param)) {
         reportError(context, content->GetOriginalExpression(),
@@ -805,7 +805,7 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
     }
 
-    for (auto& param : parameters) {
+    for (auto const& param : parameters) {
       if (param == platformId) {
         return "1";
       }
@@ -901,7 +901,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return std::string();
     }
     context->HadContextSensitiveCondition = true;
-    for (auto& param : parameters) {
+    for (auto const& param : parameters) {
       if (context->Config.empty()) {
         if (param.empty()) {
           return "1";
@@ -927,7 +927,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         if (cmProp mapValue = context->CurrentTarget->GetProperty(mapProp)) {
           cmExpandList(cmSystemTools::UpperCase(*mapValue), mappedConfigs);
 
-          for (auto& param : parameters) {
+          for (auto const& param : parameters) {
             if (cm::contains(mappedConfigs, cmSystemTools::UpperCase(param))) {
               return "1";
             }
@@ -995,7 +995,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
       return context->Language;
     }
 
-    for (auto& param : parameters) {
+    for (auto const& param : parameters) {
       if (context->Language == param) {
         return "1";
       }
@@ -1101,7 +1101,7 @@ static const struct LinkLanguageNode : public cmGeneratorExpressionNode
       return context->Language;
     }
 
-    for (auto& param : parameters) {
+    for (auto const& param : parameters) {
       if (context->Language == param) {
         return "1";
       }
@@ -1129,7 +1129,7 @@ struct LinkerId
     }
     static cmsys::RegularExpression linkerIdValidator("^[A-Za-z0-9_]*$");
 
-    for (auto& param : parameters) {
+    for (auto const& param : parameters) {
       if (!linkerIdValidator.find(param)) {
         reportError(context, content->GetOriginalExpression(),
                     "Expression syntax not recognized.");

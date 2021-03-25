@@ -194,6 +194,8 @@ installers.  The most commonly-used variables are:
 
 .. variable:: CPACK_PACKAGE_CHECKSUM
 
+  .. versionadded:: 3.7
+
   An algorithm that will be used to generate an additional file with the
   checksum of the package.  The output file name will be::
 
@@ -271,12 +273,36 @@ installers.  The most commonly-used variables are:
 
 .. variable:: CPACK_VERBATIM_VARIABLES
 
+  .. versionadded:: 3.4
+
   If set to ``TRUE``, values of variables prefixed with ``CPACK_`` will be
   escaped before being written to the configuration files, so that the cpack
   program receives them exactly as they were specified.  If not, characters
   like quotes and backslashes can cause parsing errors or alter the value
   received by the cpack program.  Defaults to ``FALSE`` for backwards
   compatibility.
+
+.. variable:: CPACK_THREADS
+
+  .. versionadded:: 3.20
+
+  Number of threads to use when performing parallelized operations, such
+  as compressing the installer package.
+
+  Some compression methods used by CPack generators such as Debian or Archive
+  may take advantage of multiple CPU cores to speed up compression.
+  ``CPACK_THREADS`` can be set to positive integer to specify how many threads
+  will be used for compression. If it is set to 0, CPack will set it so that
+  all available CPU cores are used.
+  By default ``CPACK_THREADS`` is set to ``1``.
+
+  Currently only ``xz`` compression *may* take advantage of multiple cores. Other
+  compression methods ignore this value and use only one thread.
+
+  .. note::
+
+     Official CMake binaries available on ``cmake.org`` ship with a ``liblzma``
+     that does not support parallel compression.
 
 Variables for Source Package Generators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -356,6 +382,8 @@ The following variables are for advanced uses of CPack:
 
 .. variable:: CPACK_INSTALL_SCRIPTS
 
+  .. versionadded:: 3.16
+
   Extra CMake scripts executed by CPack during its local staging
   installation.  They are executed before installing the files to be packaged.
   The scripts are not called by a standalone install (e.g.: ``make install``).
@@ -372,6 +400,8 @@ The following variables are for advanced uses of CPack:
 
 .. variable:: CPACK_PRE_BUILD_SCRIPTS
 
+  .. versionadded:: 3.19
+
   List of CMake scripts to execute after CPack has installed the files to
   be packaged into a staging directory and before producing the package(s)
   from those files. See also :variable:`CPACK_INSTALL_SCRIPTS` and
@@ -379,12 +409,16 @@ The following variables are for advanced uses of CPack:
 
 .. variable:: CPACK_POST_BUILD_SCRIPTS
 
+  .. versionadded:: 3.19
+
   List of CMake scripts to execute after CPack has produced the resultant
   packages and before copying them back to the build directory.
   See also :variable:`CPACK_INSTALL_SCRIPTS`,
   :variable:`CPACK_PRE_BUILD_SCRIPTS` and :variable:`CPACK_PACKAGE_FILES`.
 
 .. variable:: CPACK_PACKAGE_FILES
+
+  .. versionadded:: 3.19
 
   List of package files created in the staging directory, with each file
   provided as a full absolute path.  This variable is populated by CPack
@@ -734,6 +768,7 @@ _cpack_set_default(CPACK_INSTALL_CMAKE_PROJECTS
   "${CMAKE_BINARY_DIR};${CMAKE_PROJECT_NAME};ALL;/")
 _cpack_set_default(CPACK_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 _cpack_set_default(CPACK_TOPLEVEL_TAG "${CPACK_SYSTEM_NAME}")
+_cpack_set_default(CPACK_THREADS 1)
 # if the user has set CPACK_NSIS_DISPLAY_NAME remember it
 if(DEFINED CPACK_NSIS_DISPLAY_NAME)
   set(CPACK_NSIS_DISPLAY_NAME_SET TRUE)

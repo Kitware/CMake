@@ -62,7 +62,6 @@ public:
 private:
   bool MustSkip();
 
-private:
   cmGeneratorTarget* GT;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;

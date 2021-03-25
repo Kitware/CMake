@@ -51,6 +51,8 @@ via the :manual:`cmake(1)` ``-T`` option, to specify another toolset.
 Windows 10 SDK Maximum Version for VS 2015
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.19
+
 Microsoft stated in a "Windows 10 October 2018 Update" blog post that Windows
 10 SDK versions (15063, 16299, 17134, 17763) are not supported by VS 2015 and
 are only supported by VS 2017 and later.  Therefore by default CMake

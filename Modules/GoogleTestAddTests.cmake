@@ -136,7 +136,7 @@ function(gtest_discover_tests_impl)
           ${TEST_XML_OUTPUT_PARAM}
           ${extra_args}
         )
-        if(suite MATCHES "^DISABLED" OR test MATCHES "^DISABLED")
+        if(suite MATCHES "^DISABLED_" OR test MATCHES "^DISABLED_")
           add_command(set_tests_properties
             "${testname}"
             PROPERTIES DISABLED TRUE

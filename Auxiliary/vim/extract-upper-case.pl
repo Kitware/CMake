@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 use POSIX qw(strftime);
+use JSON;
+use File::Basename;
 
 #my $cmake = "/home/pboettch/devel/upstream/cmake/build/bin/cmake";
 my $cmake = "cmake";
@@ -95,6 +97,28 @@ close(CMAKE);
 
 # transform all properties in a hash
 my %properties = map { $_ => 1 } @properties;
+
+# read in manually written files
+my $modules_dir =  dirname(__FILE__) . "/modules";
+opendir(DIR, $modules_dir) || die "can't opendir $modules_dir: $!";
+my @json_files = grep { /\.json$/ && -f "$modules_dir/$_" } readdir(DIR);
+closedir DIR;
+
+foreach my $file (@json_files) {
+	local $/; # Enable 'slurp' mode
+	open my $fh, "<", $modules_dir."/".$file;
+	my $json = <$fh>;
+	close $fh;
+
+	my $mod = decode_json($json);
+	foreach my $var (@{$mod->{variables}}) {
+		$variables{$var} = 1;
+	}
+
+	while (my ($cmd, $keywords) = each %{$mod->{commands}}) {
+		$keywords{$cmd} = [ sort @{$keywords} ];
+	}
+}
 
 # version
 open(CMAKE, "$cmake --version|");

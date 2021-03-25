@@ -24,7 +24,6 @@ protected:
   std::string WorkspacePath;
   unsigned int CpuCount = 2;
 
-protected:
   std::string GetCodeLiteCompilerName(const cmMakefile* mf) const;
   std::string GetConfigurationName(const cmMakefile* mf) const;
   std::string GetBuildCommand(const cmMakefile* mf,

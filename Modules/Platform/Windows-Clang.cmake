@@ -27,7 +27,7 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_SHARED_MODULE_SUFFIX  ".dll")
   set(CMAKE_STATIC_LIBRARY_SUFFIX ".lib")
   if(NOT "${lang}" STREQUAL "ASM")
-    set(CMAKE_DEPFILE_FLAGS_${lang} "-MD -MT <OBJECT> -MF <DEPFILE>")
+    set(CMAKE_DEPFILE_FLAGS_${lang} "-MD -MT <DEP_TARGET> -MF <DEP_FILE>")
   endif()
 
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
@@ -71,6 +71,9 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> -fuse-ld=lld-link -nostartfiles -nostdlib <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> -Xlinker /implib:<TARGET_IMPLIB> -Xlinker /pdb:<TARGET_PDB> -Xlinker /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
 
+  set(CMAKE_CREATE_WIN32_EXE "-Xlinker /subsystem:windows")
+  set(CMAKE_CREATE_CONSOLE_EXE "-Xlinker /subsystem:console")
+
   if(NOT "${lang}" STREQUAL "ASM")
     set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         -Xclang -flto-visibility-public-std -D_MT -Xclang --dependent-lib=libcmt)
     set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      -D_DLL -D_MT -Xclang --dependent-lib=msvcrt)
@@ -105,7 +108,7 @@ macro(__windows_compiler_clang_gnu lang)
   enable_language(RC)
 endmacro()
 
-macro(__enable_llvm_rc_preprocessing clang_option_prefix)
+macro(__enable_llvm_rc_preprocessing clang_option_prefix extra_pp_flags)
   # Feed the preprocessed rc file to llvm-rc
   if(CMAKE_RC_COMPILER_INIT MATCHES "llvm-rc" OR CMAKE_RC_COMPILER MATCHES "llvm-rc")
     if(DEFINED CMAKE_C_COMPILER_ID)
@@ -114,8 +117,10 @@ macro(__enable_llvm_rc_preprocessing clang_option_prefix)
       set(CMAKE_RC_PREPROCESSOR CMAKE_CXX_COMPILER)
     endif()
     if(DEFINED CMAKE_RC_PREPROCESSOR)
-      set(CMAKE_DEPFILE_FLAGS_RC "${clang_option_prefix}-MD ${clang_option_prefix}-MF ${clang_option_prefix}<DEPFILE>")
-      set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_COMMAND> -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> -E -- <SOURCE> ++ <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> /fo <OBJECT> <OBJECT>.pp")
+      set(CMAKE_DEPFILE_FLAGS_RC "${clang_option_prefix}-MD ${clang_option_prefix}-MF ${clang_option_prefix}<DEP_FILE>")
+      # The <FLAGS> are passed to the preprocess and the resource compiler to pick
+      # up the eventual -D / -C options passed through the CMAKE_RC_FLAGS.
+      set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_COMMAND> -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> ${extra_pp_flags} -E -- <SOURCE> ++ <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> <FLAGS> /fo <OBJECT> <OBJECT>.pp")
       if(CMAKE_GENERATOR MATCHES "Ninja")
         set(CMAKE_NINJA_CMCLDEPS_RC 0)
         set(CMAKE_NINJA_DEP_TYPE_RC gcc)
@@ -165,10 +170,11 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
   if ( "x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC" OR "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC" )
     include(Platform/Windows-MSVC)
     # Set the clang option forwarding prefix for clang-cl usage in the llvm-rc processing stage
-    __enable_llvm_rc_preprocessing("-clang:")
+    __enable_llvm_rc_preprocessing("-clang:" "")
     macro(__windows_compiler_clang_base lang)
       set(_COMPILE_${lang} "${_COMPILE_${lang}_MSVC}")
       __windows_compiler_msvc(${lang})
+      set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc ")
     endmacro()
   else()
     cmake_policy(GET CMP0091 __WINDOWS_CLANG_CMP0091)
@@ -181,7 +187,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
 
     set(CMAKE_BUILD_TYPE_INIT Debug)
 
-    __enable_llvm_rc_preprocessing("")
+    __enable_llvm_rc_preprocessing("" "-x c")
     macro(__windows_compiler_clang_base lang)
       __windows_compiler_clang_gnu(${lang})
     endmacro()
@@ -189,7 +195,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
 
 else()
   include(Platform/Windows-GNU)
-  __enable_llvm_rc_preprocessing("")
+  __enable_llvm_rc_preprocessing("" "-x c")
   macro(__windows_compiler_clang_base lang)
     __windows_compiler_gnu(${lang})
   endmacro()

@@ -94,7 +94,7 @@ SET(CMAKE_REQUIRED_FLAGS)
 
 # Disable warnings to avoid changing 3rd party code.
 IF(CMAKE_C_COMPILER_ID MATCHES
-    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel)$")
+    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM)$")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
@@ -1475,9 +1475,15 @@ CHECK_C_SOURCE_COMPILES(
   "#include <sys/sysmacros.h>\nint main() { return major(256); }"
   MAJOR_IN_SYSMACROS)
 
+CMAKE_PUSH_CHECK_STATE()
+SET(CMAKE_REQUIRED_LIBRARIES ${LIBLZMA_LIBRARIES})
+SET(CMAKE_REQUIRED_INCLUDES ${LIBLZMA_INCLUDE_DIR})
+
 CHECK_C_SOURCE_COMPILES(
   "#include <lzma.h>\n#if LZMA_VERSION < 50020000\n#error unsupported\n#endif\nint main(void){lzma_stream_encoder_mt(0, 0); return 0;}"
-  HAVE_LZMA_STREAM_ENCODER_MT)
+HAVE_LZMA_STREAM_ENCODER_MT)
+
+CMAKE_POP_CHECK_STATE()
 
 IF(HAVE_STRERROR_R)
   SET(HAVE_DECL_STRERROR_R 1)

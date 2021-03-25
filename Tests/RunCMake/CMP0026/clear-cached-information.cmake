@@ -1,4 +1,4 @@
-
+cmake_policy(SET CMP0118 NEW)
 enable_language(C)
 
 cmake_policy(SET CMP0026 OLD)

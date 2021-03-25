@@ -32,10 +32,14 @@ be one of the following keywords:
   MSDN article `Parsing C Command-Line Arguments`_ for details.
 
 ``NATIVE_COMMAND``
+  .. versionadded:: 3.9
+
   Proceeds as in ``WINDOWS_COMMAND`` mode if the host system is Windows.
   Otherwise proceeds as in ``UNIX_COMMAND`` mode.
 
 ``PROGRAM``
+  .. versionadded:: 3.19
+
   The first item in ``<args>`` is assumed to be an executable and will be
   searched in the system search path or left as a full path. If not found,
   ``<variable>`` will be empty. Otherwise, ``<variable>`` is a list of 2

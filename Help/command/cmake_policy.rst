@@ -28,6 +28,9 @@ encourage projects to set policies based on CMake versions:
 
   cmake_policy(VERSION <min>[...<max>])
 
+.. versionadded:: 3.12
+  The optional ``<max>`` version.
+
 ``<min>`` and the optional ``<max>`` are each CMake versions of the form
 ``major.minor[.patch[.tweak]]``, and the ``...`` is literal.  The ``<min>``
 version must be at least ``2.4`` and at most the running version of CMake.

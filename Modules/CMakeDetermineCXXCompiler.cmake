@@ -58,7 +58,7 @@ else()
 
     # finally list compilers to try
     if(NOT CMAKE_CXX_COMPILER_INIT)
-      set(CMAKE_CXX_COMPILER_LIST CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC clang++)
+      set(CMAKE_CXX_COMPILER_LIST CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC icpx icx clang++)
     endif()
 
     _cmake_find_compiler(CXX)
@@ -131,7 +131,8 @@ else()
     # variable but are not aware of CMAKE_CXX_COMPILER_FRONTEND_VARIANT.
     # They pre-date our support for the GNU-like variant targeting the
     # MSVC ABI so we do not consider that here.
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
+      OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xIntelLLVM")
       if("x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
         set(CMAKE_CXX_COMPILER_FRONTEND_VARIANT "MSVC")
       else()
@@ -160,8 +161,9 @@ if (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
   if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang|QCC")
     get_filename_component(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
-    if (COMPILER_BASENAME MATCHES "^(.+-)(clan)?[gc]\\+\\+(-[0-9]+(\\.[0-9]+)*)?(-[^.]+)?(\\.exe)?$")
+    if (COMPILER_BASENAME MATCHES "^(.+-)?(clang\\+\\+|g\\+\\+|clang-cl)(-[0-9]+(\\.[0-9]+)*)?(-[^.]+)?(\\.exe)?$")
       set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
+      set(_CMAKE_TOOLCHAIN_SUFFIX ${CMAKE_MATCH_3})
       set(_CMAKE_COMPILER_SUFFIX ${CMAKE_MATCH_5})
     elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
       if(CMAKE_CXX_COMPILER_TARGET)

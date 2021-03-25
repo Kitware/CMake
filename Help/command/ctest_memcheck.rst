@@ -35,4 +35,6 @@ Most options are the same as those for the :command:`ctest_test` command.
 The options unique to this command are:
 
 ``DEFECT_COUNT <defect-count-var>``
+  .. versionadded:: 3.8
+
   Store in the ``<defect-count-var>`` the number of defects found.

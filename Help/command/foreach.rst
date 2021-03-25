@@ -88,6 +88,8 @@ yields
 
   foreach(<loop_var>... IN ZIP_LISTS <lists>)
 
+.. versionadded:: 3.17
+
 In this variant, ``<lists>`` is a whitespace or semicolon
 separated list of list-valued variables. The ``foreach``
 command iterates over each list simultaneously setting the

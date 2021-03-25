@@ -45,12 +45,11 @@ public:
     std::string ui;
   };
 
-public:
   cmQtAutoGenGlobalInitializer(
     std::vector<std::unique_ptr<cmLocalGenerator>> const& localGenerators);
   ~cmQtAutoGenGlobalInitializer();
 
-  Keywords const& kw() const { return Keywords_; };
+  Keywords const& kw() const { return this->Keywords_; };
 
   bool generate();
 
@@ -73,7 +72,6 @@ private:
     std::string const& generator, std::string const& executable,
     std::string& error);
 
-private:
   std::vector<std::unique_ptr<cmQtAutoGenInitializer>> Initializers_;
   std::map<cmLocalGenerator*, std::string> GlobalAutoGenTargets_;
   std::map<cmLocalGenerator*, std::string> GlobalAutoRccTargets_;

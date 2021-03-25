@@ -3,6 +3,11 @@ get_filename_component
 
 Get a specific component of a full filename.
 
+.. versionchanged:: 3.19
+  This command been superseded by :command:`cmake_path` command, except
+  ``REALPATH`` now offered by :ref:`file(REAL_PATH) <REAL_PATH>` command and
+  ``PROGRAM`` now available in :command:`separate_arguments(PROGRAM)` command.
+
 .. code-block:: cmake
 
   get_filename_component(<var> <FileName> <mode> [CACHE])
@@ -19,6 +24,9 @@ Sets ``<var>`` to a component of ``<FileName>``, where ``<mode>`` is one of:
  NAME_WLE  = File name with neither the directory nor the last extension
  PATH      = Legacy alias for DIRECTORY (use for CMake <= 2.8.11)
 
+.. versionadded:: 3.14
+  Added the ``LAST_EXT`` and ``NAME_WLE`` modes.
+
 Paths are returned with forward slashes and have no trailing slashes.
 If the optional ``CACHE`` argument is specified, the result variable is
 added to the cache.
@@ -26,6 +34,8 @@ added to the cache.
 .. code-block:: cmake
 
   get_filename_component(<var> <FileName> <mode> [BASE_DIR <dir>] [CACHE])
+
+.. versionadded:: 3.4
 
 Sets ``<var>`` to the absolute path of ``<FileName>``, where ``<mode>`` is one
 of:
@@ -53,9 +63,3 @@ left as a full path.  If ``PROGRAM_ARGS`` is present with ``PROGRAM``, then
 any command-line arguments present in the ``<FileName>`` string are split
 from the program name and stored in ``<arg_var>``.  This is used to
 separate a program name from its arguments in a command line string.
-
-.. note::
-
-  The ``REALPATH`` and ``PROGRAM`` subcommands had been superseded,
-  respectively, by :ref:`file(REAL_PATH) <REAL_PATH>` and
-  :command:`separate_arguments(PROGRAM)` commands.

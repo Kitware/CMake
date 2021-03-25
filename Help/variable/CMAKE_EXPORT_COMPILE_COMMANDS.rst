@@ -28,7 +28,8 @@ form.  The format of the JSON file looks like:
   ]
 
 This is initialized by the :envvar:`CMAKE_EXPORT_COMPILE_COMMANDS` environment
-variable.
+variable, and initializes the :prop_tgt:`EXPORT_COMPILE_COMMANDS` target
+property for all targets.
 
 .. note::
   This option is implemented only by :ref:`Makefile Generators`

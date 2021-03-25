@@ -34,17 +34,17 @@ public:
   /**
    * Compare \a version with QtIFW framework version
    */
-  bool IsVersionLess(const char* version);
+  bool IsVersionLess(const char* version) const;
 
   /**
    * Compare \a version with QtIFW framework version
    */
-  bool IsVersionGreater(const char* version);
+  bool IsVersionGreater(const char* version) const;
 
   /**
    * Compare \a version with QtIFW framework version
    */
-  bool IsVersionEqual(const char* version);
+  bool IsVersionEqual(const char* version) const;
 
   /** Expand the list argument containing the map of the key-value pairs.
    *  If the number of elements is odd, then the first value is used as the
@@ -64,7 +64,7 @@ public:
   cmCPackIFWGenerator* Generator;
 
 protected:
-  void WriteGeneratedByToStrim(cmXMLWriter& xout);
+  void WriteGeneratedByToStrim(cmXMLWriter& xout) const;
 };
 
 #define cmCPackIFWLogger(logType, msg)                                        \

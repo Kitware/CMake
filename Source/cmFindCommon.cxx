@@ -182,7 +182,7 @@ void cmFindCommon::SelectDefaultSearchModes()
       { this->NoCMakeSystemPath, "CMAKE_FIND_USE_CMAKE_SYSTEM_PATH" } }
   };
 
-  for (auto& path : search_paths) {
+  for (auto const& path : search_paths) {
     cmProp def = this->Makefile->GetDefinition(path.second);
     if (def) {
       path.first = !cmIsOn(*def);
@@ -289,7 +289,7 @@ void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 void cmFindCommon::GetIgnoredPaths(std::set<std::string>& ignore)
 {
   std::vector<std::string> ignoreVec;
-  GetIgnoredPaths(ignoreVec);
+  this->GetIgnoredPaths(ignoreVec);
   ignore.insert(ignoreVec.begin(), ignoreVec.end());
 }
 

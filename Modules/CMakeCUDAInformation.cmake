@@ -154,21 +154,6 @@ if(NOT CMAKE_CUDA_COMPILE_WHOLE_COMPILATION)
     "<CMAKE_CUDA_COMPILER> ${_CMAKE_CUDA_EXTRA_FLAGS} <DEFINES> <INCLUDES> <FLAGS> ${_CMAKE_COMPILE_AS_CUDA_FLAG} -c <SOURCE> -o <OBJECT>")
 endif()
 
-if(CMAKE_GENERATOR STREQUAL "Ninja" AND NOT CMAKE_DEPFILE_FLAGS_CUDA)
-  set(CMAKE_CUDA_COMPILE_DEPENDENCY_DETECTION
-    "<CMAKE_CUDA_COMPILER> ${_CMAKE_CUDA_EXTRA_FLAGS} <DEFINES> <INCLUDES> <FLAGS> ${_CMAKE_COMPILE_AS_CUDA_FLAG} -M <SOURCE> -MT <OBJECT> -o $DEP_FILE")
-  #The Ninja generator uses the make file dependency files to determine what
-  #files need to be recompiled. Unfortunately, nvcc < 10.2 doesn't support building
-  #a source file and generating the dependencies of said file in a single
-  #invocation. Instead we have to state that you need to chain two commands.
-  #
-  #The makefile generators uses the custom CMake dependency scanner, and thus
-  #it is exempt from this logic.
-  list(APPEND CMAKE_CUDA_COMPILE_PTX_COMPILATION "${CMAKE_CUDA_COMPILE_DEPENDENCY_DETECTION}")
-  list(APPEND CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION "${CMAKE_CUDA_COMPILE_DEPENDENCY_DETECTION}")
-  list(APPEND CMAKE_CUDA_COMPILE_WHOLE_COMPILATION "${CMAKE_CUDA_COMPILE_DEPENDENCY_DETECTION}")
-endif()
-
 # compile a cu file into an executable
 if(NOT CMAKE_CUDA_LINK_EXECUTABLE)
   set(CMAKE_CUDA_LINK_EXECUTABLE

@@ -337,7 +337,7 @@ int cmCPackIFWPackage::ConfigureFromGroup(const std::string& groupName)
 
   group.Name = groupName;
 
-  if (Generator) {
+  if (this->Generator) {
     this->Name = this->Generator->GetGroupPackageName(&group);
   } else {
     this->Name = group.Name;
@@ -530,7 +530,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
 
   xout.StartDocument();
 
-  WriteGeneratedByToStrim(xout);
+  this->WriteGeneratedByToStrim(xout);
 
   xout.StartElement("Package");
 
@@ -577,7 +577,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   }
 
   // User Interfaces (copy to meta dir)
-  std::vector<std::string> userInterfaces = UserInterfaces;
+  std::vector<std::string> userInterfaces = this->UserInterfaces;
   for (std::string& userInterface : userInterfaces) {
     std::string name = cmSystemTools::GetFilenameName(userInterface);
     std::string path = this->Directory + "/meta/" + name;
@@ -593,7 +593,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   }
 
   // Translations (copy to meta dir)
-  std::vector<std::string> translations = Translations;
+  std::vector<std::string> translations = this->Translations;
   for (std::string& translation : translations) {
     std::string name = cmSystemTools::GetFilenameName(translation);
     std::string path = this->Directory + "/meta/" + name;

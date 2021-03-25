@@ -29,6 +29,20 @@ set(expected_out
   uncovered/uncovered2.cpp
 )
 
+# A symbolic link in the path can cause tar to put an equivalent, but not
+# minimal file name to some files in the tar file.  Convert paths to absolute
+# then back to relative to get them in canonical form (or maybe this is a bug
+# in how the tarball is generated?)
+function(to_relative_paths real_paths paths)
+  foreach(file ${paths})
+    file(REAL_PATH "${file}" real_path BASE_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
+    file(RELATIVE_PATH relative_path "${CTEST_BINARY_DIRECTORY}" "${real_path}")
+    list(APPEND local_real_paths "${relative_path}")
+    message(DEBUG "${file} -> ${real_path} -> ${relative_path}")
+  endforeach()
+  set("${real_paths}" "${local_real_paths}" PARENT_SCOPE)
+endfunction()
+
 #------------------------------------------------------------------------------#
 # Test 1: with standard arguments
 #------------------------------------------------------------------------------#
@@ -50,6 +64,7 @@ execute_process(COMMAND
 )
 
 string(REPLACE "\n" ";" out "${out}")
+to_relative_paths(out "${out}")
 list(SORT out)
 
 if("${out}" STREQUAL "${expected_out}")
@@ -80,6 +95,7 @@ execute_process(COMMAND
 )
 
 string(REPLACE "\n" ";" out "${out}")
+to_relative_paths(out "${out}")
 list(SORT out)
 
 if("${out}" STREQUAL "${expected_out}")
@@ -110,6 +126,7 @@ execute_process(COMMAND
 )
 
 string(REPLACE "\n" ";" out "${out}")
+to_relative_paths(out "${out}")
 list(SORT out)
 
 if("${out}" STREQUAL "${expected_out}")
@@ -140,6 +157,7 @@ execute_process(COMMAND
 )
 
 string(REPLACE "\n" ";" out "${out}")
+to_relative_paths(out "${out}")
 list(SORT out)
 
 if("${out}" STREQUAL "${expected_out}")
@@ -170,6 +188,7 @@ execute_process(COMMAND
 )
 
 string(REPLACE "\n" ";" out "${out}")
+to_relative_paths(out "${out}")
 list(SORT out)
 
 if("${out}" STREQUAL "${expected_out}")

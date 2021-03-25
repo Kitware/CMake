@@ -36,5 +36,5 @@ std::string cmMSVC60LinkLineComputer::ConvertToLinkReference(
   }
 #endif
 
-  return cmLinkLineComputer::ConvertToLinkReference(lib);
+  return this->cmLinkLineComputer::ConvertToLinkReference(lib);
 }

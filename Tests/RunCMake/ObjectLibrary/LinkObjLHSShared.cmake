@@ -12,4 +12,10 @@ add_executable(LinkObjLHSShared LinkObjLHSShared.c)
 target_link_libraries(LinkObjLHSShared AnObjLib)
 
 # Verify that our dependency on OtherLib generated its versioning symlinks.
+if(CMAKE_GENERATOR STREQUAL "Xcode" AND
+   "${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+  # Xcode runs POST_BUILD before signing, so let the linker use ad-hoc signing.
+  # See CMake Issue 21845.
+  target_link_options(LinkObjLHSShared PRIVATE LINKER:-adhoc_codesign)
+endif()
 add_custom_command(TARGET LinkObjLHSShared POST_BUILD COMMAND LinkObjLHSShared)

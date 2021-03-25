@@ -70,6 +70,10 @@ elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "8051")
   __compiler_check_default_language_standard(C 6.10 90 8.10 99)
   set(CMAKE_C_OUTPUT_EXTENSION ".r51")
 
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "STM8")
+  __compiler_iar_ilink(C)
+  __compiler_check_default_language_standard(C 3.11 90 3.11 99)
+
 else()
   message(FATAL_ERROR "CMAKE_C_COMPILER_ARCHITECTURE_ID not detected. This should be automatic.")
 endif()

@@ -358,6 +358,17 @@ static bool IncludeByVariable(cmExecutionStatus& status,
     return true;
   }
 
+  std::string includeFile =
+    cmSystemTools::CollapseFullPath(*include, mf.GetCurrentSourceDirectory());
+  if (!cmSystemTools::FileExists(includeFile)) {
+    status.SetError(cmStrCat("could not find requested file:\n  ", *include));
+    return false;
+  }
+  if (cmSystemTools::FileIsDirectory(includeFile)) {
+    status.SetError(cmStrCat("requested file is a directory:\n  ", *include));
+    return false;
+  }
+
   const bool readit = mf.ReadDependentFile(*include);
   if (readit) {
     return true;
@@ -367,7 +378,7 @@ static bool IncludeByVariable(cmExecutionStatus& status,
     return true;
   }
 
-  status.SetError(cmStrCat("could not find file:\n  ", *include));
+  status.SetError(cmStrCat("could not load requested file:\n  ", *include));
   return false;
 }
 

@@ -47,7 +47,8 @@ to cmake using Squish >= 4.x:
      AUT targetName SUITE suiteName TEST squishTestName
      [SETTINGSGROUP group] [PRE_COMMAND command] [POST_COMMAND command] )
 
-
+.. versionchanged:: 3.18
+  In previous CMake versions, this function was named ``squish_v4_add_test``.
 
 The arguments have the following meaning:
 

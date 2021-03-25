@@ -12,6 +12,15 @@ variables that are created by the project command.  Example languages
 are ``CXX``, ``C``, ``CUDA``, ``OBJC``, ``OBJCXX``, ``Fortran``,
 ``ISPC``, and ``ASM``.
 
+.. versionadded:: 3.8
+  Added ``CUDA`` support.
+
+.. versionadded:: 3.16
+  Added ``OBJC`` and ``OBJCXX`` support.
+
+.. versionadded:: 3.18
+  Added ``ISPC`` support.
+
 If enabling ``ASM``, enable it last so that CMake can check whether
 compilers for other languages like ``C`` work for assembly too.
 

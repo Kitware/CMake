@@ -11,6 +11,8 @@ Expat is a stream-oriented XML parser library written in C.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.10
+
 This module defines the following :prop_tgt:`IMPORTED` targets:
 
 ``EXPAT::EXPAT``

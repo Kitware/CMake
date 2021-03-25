@@ -12,6 +12,10 @@ high-performance distributed-memory parallel applications, and is
 typically deployed on a cluster.  MPI is a standard interface (defined
 by the MPI forum) for which many implementations are available.
 
+.. versionadded:: 3.10
+  Major overhaul of the module: many new variables, per-language components,
+  support for a wider variety of runtimes.
+
 Variables for using MPI
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -50,7 +54,8 @@ project, where ``<lang>`` is one of C, CXX, or Fortran:
 ``MPI_<lang>_LIBRARIES``
   All libraries to link MPI programs against.
 
-Additionally, the following :prop_tgt:`IMPORTED` targets are defined:
+.. versionadded:: 3.9
+  Additionally, the following :prop_tgt:`IMPORTED` targets are defined:
 
 ``MPI::MPI_<lang>``
   Target for using MPI from ``<lang>``.
@@ -236,8 +241,10 @@ If the following variables are set to true, the respective search will be perfor
 Backward Compatibility
 ^^^^^^^^^^^^^^^^^^^^^^
 
+.. deprecated:: 3.10
+
 For backward compatibility with older versions of FindMPI, these
-variables are set, but deprecated:
+variables are set:
 
 ::
 
@@ -287,6 +294,11 @@ if(WIN32)
   set(_MPI_Intel_CXX_COMPILER_NAMES          mpiicpc.bat)
   set(_MPI_Intel_Fortran_COMPILER_NAMES      mpiifort.bat mpif77.bat mpif90.bat)
 
+  # Intel MPI compiler names
+  set(_MPI_IntelLLVM_C_COMPILER_NAMES            mpiicc.bat)
+  set(_MPI_IntelLLVM_CXX_COMPILER_NAMES          mpiicpc.bat)
+  set(_MPI_IntelLLVM_Fortran_COMPILER_NAMES      mpiifort.bat mpif77.bat mpif90.bat)
+
   # Intel MPI compiler names for MSMPI
   set(_MPI_MSVC_C_COMPILER_NAMES             mpicl.bat)
   set(_MPI_MSVC_CXX_COMPILER_NAMES           mpicl.bat)
@@ -295,6 +307,11 @@ else()
   set(_MPI_Intel_C_COMPILER_NAMES            mpiicc)
   set(_MPI_Intel_CXX_COMPILER_NAMES          mpiicpc  mpiicxx mpiic++)
   set(_MPI_Intel_Fortran_COMPILER_NAMES      mpiifort mpiif95 mpiif90 mpiif77)
+
+  # Intel compiler names
+  set(_MPI_IntelLLVM_C_COMPILER_NAMES            mpiicc)
+  set(_MPI_IntelLLVM_CXX_COMPILER_NAMES          mpiicpc  mpiicxx mpiic++)
+  set(_MPI_IntelLLVM_Fortran_COMPILER_NAMES      mpiifort mpiif95 mpiif90 mpiif77)
 endif()
 
 # PGI compiler names
@@ -320,7 +337,7 @@ set(_MPI_XL_Fortran_COMPILER_NAMES         mpixlf95   mpixlf95_r mpxlf95 mpxlf95
 # pick up the right settings for it.
 foreach (LANG IN ITEMS C CXX Fortran)
   set(_MPI_${LANG}_COMPILER_NAMES "")
-  foreach (id IN ITEMS GNU Intel MSVC PGI XL)
+  foreach (id IN ITEMS GNU Intel IntelLLVM MSVC PGI XL)
     if (NOT CMAKE_${LANG}_COMPILER_ID OR CMAKE_${LANG}_COMPILER_ID STREQUAL id)
       foreach(_COMPILER_NAME IN LISTS _MPI_${id}_${LANG}_COMPILER_NAMES)
         list(APPEND _MPI_${LANG}_COMPILER_NAMES ${_COMPILER_NAME}${MPI_EXECUTABLE_SUFFIX})
@@ -646,6 +663,7 @@ function (_MPI_interrogate_compiler LANG)
   foreach(_MPI_INCLUDE_PATH IN LISTS MPI_ALL_INCLUDE_PATHS)
     string(REGEX REPLACE "^ ?${_MPI_PREPROCESSOR_FLAG_REGEX}${CMAKE_INCLUDE_FLAG_${LANG}} *" "" _MPI_INCLUDE_PATH "${_MPI_INCLUDE_PATH}")
     string(REPLACE "\"" "" _MPI_INCLUDE_PATH "${_MPI_INCLUDE_PATH}")
+    string(REPLACE "'" "" _MPI_INCLUDE_PATH "${_MPI_INCLUDE_PATH}")
     get_filename_component(_MPI_INCLUDE_PATH "${_MPI_INCLUDE_PATH}" REALPATH)
     list(APPEND MPI_INCLUDE_DIRS_WORK "${_MPI_INCLUDE_PATH}")
   endforeach()
@@ -1410,7 +1428,9 @@ foreach(LANG IN ITEMS C CXX Fortran)
     endif()
   else()
     set(_MPI_FIND_${LANG} FALSE)
-    string(APPEND _MPI_FAIL_REASON "MPI component '${LANG}' was requested, but language ${LANG} is not enabled.  ")
+    if(${LANG} IN_LIST MPI_FIND_COMPONENTS)
+      string(APPEND _MPI_FAIL_REASON "MPI component '${LANG}' was requested, but language ${LANG} is not enabled.  ")
+    endif()
   endif()
   if(_MPI_FIND_${LANG})
     if( ${LANG} STREQUAL CXX AND NOT MPICXX IN_LIST MPI_FIND_COMPONENTS )

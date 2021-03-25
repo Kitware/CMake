@@ -707,7 +707,7 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
       break;
     }
     input.replace(pos, endPos - pos + 1, targetName);
-    lastPos = endPos;
+    lastPos = pos + targetName.size();
   }
 
   pos = 0;
@@ -924,13 +924,13 @@ void cmExportFileGenerator::GeneratePolicyHeaderCode(std::ostream& os)
 
   // Isolate the file policy level.
   // Support CMake versions as far back as 2.6 but also support using NEW
-  // policy settings for up to CMake 3.17 (this upper limit may be reviewed
+  // policy settings for up to CMake 3.18 (this upper limit may be reviewed
   // and increased from time to time). This reduces the opportunity for CMake
   // warnings when an older export file is later used with newer CMake
   // versions.
   /* clang-format off */
   os << "cmake_policy(PUSH)\n"
-     << "cmake_policy(VERSION 2.6...3.17)\n";
+     << "cmake_policy(VERSION 2.6...3.18)\n";
   /* clang-format on */
 }
 
@@ -1214,7 +1214,7 @@ bool cmExportFileGenerator::PopulateExportProperties(
   cmGeneratorTarget* gte, ImportPropertyMap& properties,
   std::string& errorMessage)
 {
-  auto& targetProperties = gte->Target->GetProperties();
+  const auto& targetProperties = gte->Target->GetProperties();
   if (cmProp exportProperties =
         targetProperties.GetPropertyValue("EXPORT_PROPERTIES")) {
     for (auto& prop : cmExpandedList(*exportProperties)) {

@@ -9,6 +9,9 @@ Function for generation of export macros for libraries
 
 This module provides the function ``GENERATE_EXPORT_HEADER()``.
 
+.. versionadded:: 3.12
+  Added support for C projects.  Previous versions supported C++ project only.
+
 The ``GENERATE_EXPORT_HEADER`` function can be used to generate a file
 suitable for preprocessor inclusion which contains EXPORT macros to be
 used in library classes::
@@ -26,7 +29,6 @@ used in library classes::
              [PREFIX_NAME <prefix_name>]
              [CUSTOM_CONTENT_FROM_VARIABLE <variable>]
    )
-
 
 The target properties :prop_tgt:`CXX_VISIBILITY_PRESET <<LANG>_VISIBILITY_PRESET>`
 and :prop_tgt:`VISIBILITY_INLINES_HIDDEN` can be used to add the appropriate
@@ -170,9 +172,23 @@ For example:
 
 Generates the macros ``VTK_SOMELIB_EXPORT`` etc.
 
+.. versionadded:: 3.1
+  Library target can be an ``OBJECT`` library.
+
+.. versionadded:: 3.7
+  Added the ``CUSTOM_CONTENT_FROM_VARIABLE`` option.
+
+.. versionadded:: 3.11
+  Added the ``INCLUDE_GUARD_NAME`` option.
+
 ::
 
    ADD_COMPILER_EXPORT_FLAGS( [<output_variable>] )
+
+.. deprecated:: 3.0
+  Set the target properties
+  :prop_tgt:`CXX_VISIBILITY_PRESET <<LANG>_VISIBILITY_PRESET>` and
+  :prop_tgt:`VISIBILITY_INLINES_HIDDEN` instead.
 
 The ``ADD_COMPILER_EXPORT_FLAGS`` function adds ``-fvisibility=hidden`` to
 :variable:`CMAKE_CXX_FLAGS <CMAKE_<LANG>_FLAGS>` if supported, and is a no-op
@@ -180,10 +196,6 @@ on Windows which does not need extra compiler flags for exporting support.
 You may optionally pass a single argument to ``ADD_COMPILER_EXPORT_FLAGS``
 that will be populated with the ``CXX_FLAGS`` required to enable visibility
 support for the compiler/architecture in use.
-
-This function is deprecated.  Set the target properties
-:prop_tgt:`CXX_VISIBILITY_PRESET <<LANG>_VISIBILITY_PRESET>` and
-:prop_tgt:`VISIBILITY_INLINES_HIDDEN` instead.
 #]=======================================================================]
 
 include(CheckCCompilerFlag)
@@ -209,7 +221,7 @@ macro(_test_compiler_hidden_visibility)
     set(GCC_TOO_OLD TRUE)
   elseif(CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER_VERSION VERSION_LESS "4.2")
     set(GCC_TOO_OLD TRUE)
-  elseif(CMAKE_CXX_COMPILER_ID MATCHES Intel AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.0")
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.0")
     set(_INTEL_TOO_OLD TRUE)
   endif()
 
@@ -220,7 +232,7 @@ macro(_test_compiler_hidden_visibility)
       AND NOT WIN32
       AND NOT CYGWIN
       AND NOT CMAKE_CXX_COMPILER_ID MATCHES XL
-      AND NOT CMAKE_CXX_COMPILER_ID MATCHES PGI
+      AND NOT CMAKE_CXX_COMPILER_ID MATCHES "^(PGI|NVHPC)$"
       AND NOT CMAKE_CXX_COMPILER_ID MATCHES Watcom)
     if (CMAKE_CXX_COMPILER_LOADED)
       check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
@@ -242,7 +254,7 @@ macro(_test_compiler_has_deprecated)
       OR CMAKE_CXX_COMPILER_ID MATCHES Embarcadero
       OR CMAKE_CXX_COMPILER_ID MATCHES HP
       OR GCC_TOO_OLD
-      OR CMAKE_CXX_COMPILER_ID MATCHES PGI
+      OR CMAKE_CXX_COMPILER_ID MATCHES "^(PGI|NVHPC)$"
       OR CMAKE_CXX_COMPILER_ID MATCHES Watcom)
     set(COMPILER_HAS_DEPRECATED "" CACHE INTERNAL
       "Compiler support for a deprecated attribute")

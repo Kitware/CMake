@@ -13,11 +13,15 @@ OpenMP support are returned in variables for the different languages.
 The variables may be empty if the compiler does not need a special
 flag to support OpenMP.
 
+.. versionadded:: 3.5
+  Clang support.
+
 Variables
 ^^^^^^^^^
 
-The module exposes the components ``C``, ``CXX``, and ``Fortran``.
-Each of these controls the various languages to search OpenMP support for.
+.. versionadded:: 3.10
+  The module exposes the components ``C``, ``CXX``, and ``Fortran``.
+  Each of these controls the various languages to search OpenMP support for.
 
 Depending on the enabled components the following variables will be set:
 
@@ -65,6 +69,8 @@ Specifically for Fortran, the module sets the following variables:
 The module will also try to provide the OpenMP version variables:
 
 ``OpenMP_<lang>_SPEC_DATE``
+  .. versionadded:: 3.7
+
   Date of the OpenMP specification implemented by the ``<lang>`` compiler.
 ``OpenMP_<lang>_VERSION_MAJOR``
   Major version of OpenMP implemented by the ``<lang>`` compiler.
@@ -107,10 +113,17 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     else()
       set(OMP_FLAG_Intel "-qopenmp")
     endif()
+    if(CMAKE_${LANG}_COMPILER_ID STREQUAL "IntelLLVM" AND
+      "x${CMAKE_${LANG}_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+      set(OMP_FLAG_IntelLLVM "-Qiopenmp")
+    else()
+      set(OMP_FLAG_IntelLLVM "-fiopenmp")
+    endif()
     set(OMP_FLAG_MSVC "-openmp")
     set(OMP_FLAG_PathScale "-openmp")
     set(OMP_FLAG_NAG "-openmp")
     set(OMP_FLAG_Absoft "-openmp")
+    set(OMP_FLAG_NVHPC "-mp")
     set(OMP_FLAG_PGI "-mp")
     set(OMP_FLAG_Flang "-fopenmp")
     set(OMP_FLAG_SunPro "-xopenmp")

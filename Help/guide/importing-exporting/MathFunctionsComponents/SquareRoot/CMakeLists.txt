@@ -26,5 +26,5 @@ install(FILES SquareRoot.h DESTINATION include)
 install(EXPORT SquareRootTargets
         FILE MathFunctionsSquareRootTargets.cmake
         NAMESPACE MathFunctions::
-        DESTINATION lib/cmake
+        DESTINATION lib/cmake/MathFunctions
 )

@@ -18,7 +18,7 @@ macro(__compiler_ti lang)
   set(CMAKE_${lang}_RESPONSE_FILE_FLAG "--cmd_file=")
 
   set(CMAKE_INCLUDE_FLAG_${lang} "--include_path=")
-  set(CMAKE_DEPFILE_FLAGS_${lang} "--preproc_with_compile --preproc_dependency=<DEPFILE>")
+  set(CMAKE_DEPFILE_FLAGS_${lang} "--preproc_with_compile --preproc_dependency=<DEP_FILE>")
 
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> --preproc_only ${__COMPILER_TI_SOURCE_FLAG_${lang}}=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<PREPROCESSED_SOURCE>")
   set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> --compile_only --skip_assembler ${__COMPILER_TI_SOURCE_FLAG_${lang}}=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<ASSEMBLY_SOURCE>")

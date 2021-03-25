@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -55,12 +55,7 @@ CURLcode Curl_win32_init(long flags)
     WSADATA wsaData;
     int res;
 
-#if defined(ENABLE_IPV6) && (USE_WINSOCK < 2)
-#error IPV6_requires_winsock2
-#endif
-
-    wVersionRequested = MAKEWORD(USE_WINSOCK, USE_WINSOCK);
-
+    wVersionRequested = MAKEWORD(2, 2);
     res = WSAStartup(wVersionRequested, &wsaData);
 
     if(res != 0)
@@ -83,9 +78,9 @@ CURLcode Curl_win32_init(long flags)
       return CURLE_FAILED_INIT;
     }
     /* The Windows Sockets DLL is acceptable. Proceed. */
-  #elif defined(USE_LWIPSOCK)
+#elif defined(USE_LWIPSOCK)
     lwip_init();
-  #endif
+#endif
   } /* CURL_GLOBAL_WIN32 */
 
 #ifdef USE_WINDOWS_SSPI
@@ -201,7 +196,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
       pLoadLibraryEx(filename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
       LoadLibrary(filename);
   }
-  /* Detect if KB2533623 is installed, as LOAD_LIBARY_SEARCH_SYSTEM32 is only
+  /* Detect if KB2533623 is installed, as LOAD_LIBRARY_SEARCH_SYSTEM32 is only
      supported on Windows Vista, Windows Server 2008, Windows 7 and Windows
      Server 2008 R2 with this patch or natively on Windows 8 and above */
   else if(pLoadLibraryEx && GetProcAddress(hKernel32, "AddDllDirectory")) {

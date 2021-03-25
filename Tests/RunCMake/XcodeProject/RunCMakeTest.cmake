@@ -3,6 +3,7 @@ include(RunCMake)
 run_cmake(ExplicitCMakeLists)
 run_cmake(ImplicitCMakeLists)
 run_cmake(InterfaceLibSources)
+run_cmake_with_options(SearchPaths -DCMAKE_CONFIGURATION_TYPES=Debug)
 
 run_cmake(XcodeFileType)
 run_cmake(XcodeAttributeLocation)
@@ -50,6 +51,35 @@ run_cmake(PerConfigPerSourceFlags)
 run_cmake(PerConfigPerSourceOptions)
 run_cmake(PerConfigPerSourceDefinitions)
 run_cmake(PerConfigPerSourceIncludeDirs)
+
+if(XCODE_VERSION VERSION_GREATER_EQUAL 12)
+
+  function(XcodeObjectLibsInTwoProjectsiOS)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeObjectLibsInTwoProjects-build-ios)
+    set(RunCMake_TEST_OPTIONS "-DCMAKE_SYSTEM_NAME=iOS")
+
+    run_cmake(XcodeObjectLibsInTwoProjects)
+
+    set(RunCMake_TEST_NO_CLEAN 1)
+
+    run_cmake_command(XcodeObjectLibsInTwoProjects-build-ios ${CMAKE_COMMAND} --build . --target shared_lib -- -sdk iphonesimulator)
+  endfunction()
+
+  XcodeObjectLibsInTwoProjectsiOS()
+
+  function(XcodeObjectLibsInTwoProjectsMacOS)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeObjectLibsInTwoProjects-build-macos)
+
+    run_cmake(XcodeObjectLibsInTwoProjects)
+
+    set(RunCMake_TEST_NO_CLEAN 1)
+
+    run_cmake_command(XcodeObjectLibsInTwoProjects-build-macos ${CMAKE_COMMAND} --build . --target shared_lib)
+  endfunction()
+
+  XcodeObjectLibsInTwoProjectsMacOS()
+
+endif()
 
 function(XcodeSchemaGeneration)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeSchemaGeneration-build)
@@ -206,7 +236,7 @@ if(NOT XCODE_VERSION VERSION_LESS 7)
   unset(RunCMake_TEST_OPTIONS)
 endif()
 
-if(XCODE_VERSION VERSION_GREATER_EQUAL 6 AND XCODE_VERSION VERSION_LESS 12)
+if(XCODE_VERSION VERSION_GREATER_EQUAL 6)
   # XcodeIOSInstallCombined
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeIOSInstallCombined-build)
   set(RunCMake_TEST_NO_CLEAN 1)
@@ -220,7 +250,14 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 6 AND XCODE_VERSION VERSION_LESS 12)
 
   run_cmake(XcodeIOSInstallCombined)
   run_cmake_command(XcodeIOSInstallCombined-build ${CMAKE_COMMAND} --build .)
-  run_cmake_command(XcodeIOSInstallCombined-install ${CMAKE_COMMAND} --build . --target install)
+  if(XCODE_VERSION VERSION_LESS 12)
+    run_cmake_command(XcodeIOSInstallCombined-install ${CMAKE_COMMAND} --build . --target install)
+  endif()
+  # --build defaults to Debug, --install defaults to Release, so we have to
+  # specify the configuration explicitly
+  run_cmake_command(XcodeIOSInstallCombined-cmakeinstall
+    ${CMAKE_COMMAND} --install . --config Debug
+  )
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
@@ -239,7 +276,14 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 6 AND XCODE_VERSION VERSION_LESS 12)
 
   run_cmake(XcodeIOSInstallCombinedPrune)
   run_cmake_command(XcodeIOSInstallCombinedPrune-build ${CMAKE_COMMAND} --build .)
-  run_cmake_command(XcodeIOSInstallCombinedPrune-install ${CMAKE_COMMAND} --build . --target install)
+  if(XCODE_VERSION VERSION_LESS 12)
+    run_cmake_command(XcodeIOSInstallCombinedPrune-install ${CMAKE_COMMAND} --build . --target install)
+  endif()
+  # --build defaults to Debug, --install defaults to Release, so we have to
+  # specify the configuration explicitly
+  run_cmake_command(XcodeIOSInstallCombinedPrune-cmakeinstall
+    ${CMAKE_COMMAND} --install . --config Debug
+  )
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
@@ -258,7 +302,14 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 6 AND XCODE_VERSION VERSION_LESS 12)
 
   run_cmake(XcodeIOSInstallCombinedSingleArch)
   run_cmake_command(XcodeIOSInstallCombinedSingleArch-build ${CMAKE_COMMAND} --build .)
-  run_cmake_command(XcodeIOSInstallCombinedSingleArch-install ${CMAKE_COMMAND} --build . --target install)
+  if(XCODE_VERSION VERSION_LESS 12)
+    run_cmake_command(XcodeIOSInstallCombinedSingleArch-install ${CMAKE_COMMAND} --build . --target install)
+  endif()
+  # --build defaults to Debug, --install defaults to Release, so we have to
+  # specify the configuration explicitly
+  run_cmake_command(XcodeIOSInstallCombinedSingleArch-cmakeinstall
+    ${CMAKE_COMMAND} --install . --config Debug
+  )
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)

@@ -29,8 +29,11 @@ The parameters are as follows:
 ``GROUP <group>``
   If ``GROUP`` is used, the submissions will go to the specified group on the
   CDash server. If no ``GROUP`` is specified, the name of the model is used by
-  default. This replaces the deprecated option ``TRACK``. Despite the name
-  change its behavior is unchanged.
+  default.
+
+  .. versionchanged:: 3.16
+    This replaces the deprecated option ``TRACK``. Despite the name
+    change its behavior is unchanged.
 
 ``APPEND``
   If ``APPEND`` is used, the existing ``TAG`` is used rather than creating a new
@@ -56,6 +59,8 @@ The parameters are as follows:
   new model and group will be used.
 
 ``QUIET``
+  .. versionadded:: 3.3
+
   If ``QUIET`` is used, CTest will suppress any non-error messages that it
   otherwise would have printed to the console.
 

@@ -7,8 +7,16 @@ FindOpenGL
 
 FindModule for OpenGL and OpenGL Utility Library (GLU).
 
+.. versionchanged:: 3.2
+  X11 is no longer added as a dependency on Unix/Linux systems.
+
+.. versionadded:: 3.10
+  GLVND support on Linux.  See the :ref:`Linux Specific` section below.
+
 Optional COMPONENTS
 ^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.10
 
 This module respects several optional COMPONENTS: ``EGL``, ``GLX``, and
 ``OpenGL``.  There are corresponding import targets for each of these flags.
@@ -16,18 +24,24 @@ This module respects several optional COMPONENTS: ``EGL``, ``GLX``, and
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.8
+
 This module defines the :prop_tgt:`IMPORTED` targets:
 
 ``OpenGL::GL``
- Defined to the platform-specific OpenGL libraries if the system has OpenGL.
-``OpenGL::OpenGL``
- Defined to libOpenGL if the system is GLVND-based.
+  Defined to the platform-specific OpenGL libraries if the system has OpenGL.
 ``OpenGL::GLU``
- Defined if the system has OpenGL Utility Library (GLU).
+  Defined if the system has OpenGL Utility Library (GLU).
+
+.. versionadded:: 3.10
+  Additionally, the following GLVND-specific library targets are defined:
+
+``OpenGL::OpenGL``
+  Defined to libOpenGL if the system is GLVND-based.
 ``OpenGL::GLX``
- Defined if the system has OpenGL Extension to the X Window System (GLX).
+  Defined if the system has OpenGL Extension to the X Window System (GLX).
 ``OpenGL::EGL``
- Defined if the system has EGL.
+  Defined if the system has EGL.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -55,6 +69,9 @@ This module sets the following variables:
  On Linux, this assumes GLX and is never correct for EGL-based targets.
  Clients are encouraged to use the ``OpenGL::*`` import targets instead.
 
+.. versionadded:: 3.10
+  Variables for GLVND-specific libraries ``OpenGL``, ``EGL`` and ``GLX``.
+
 Cache variables
 ^^^^^^^^^^^^^^^
 
@@ -71,6 +88,11 @@ The following cache variables may also be set:
 ``OPENGL_gl_LIBRARY``
  Path to the OpenGL library.  New code should prefer the ``OpenGL::*`` import
  targets.
+
+.. versionadded:: 3.10
+  Variables for GLVND-specific libraries ``OpenGL``, ``EGL`` and ``GLX``.
+
+.. _`Linux Specific`:
 
 Linux-specific
 ^^^^^^^^^^^^^^
@@ -97,14 +119,14 @@ The value may be one of:
 ``GLVND``
  If the GLVND OpenGL and GLX libraries are available, prefer them.
  This forces ``OPENGL_gl_LIBRARY`` to be empty.
- This is the default if components were requested (since components
- correspond to GLVND libraries) or if policy :policy:`CMP0072` is
- set to ``NEW``.
+
+ .. versionchanged:: 3.11
+  This is the default, unless policy :policy:`CMP0072` is set to ``OLD``
+  and no components are requeted (since components
+  correspond to GLVND libraries).
 
 ``LEGACY``
  Prefer to use the legacy libGL library, if available.
- This is the default if no components were requested and
- policy :policy:`CMP0072` is not set to ``NEW``.
 
 For EGL targets the client must rely on GLVND support on the user's system.
 Linking should use the ``OpenGL::OpenGL OpenGL::EGL`` targets.  Using GLES*
@@ -443,7 +465,7 @@ if(OPENGL_FOUND)
 
   # ::GLX is a GLVND library, and thus Linux-only: we don't bother checking
   # for a framework version of this library.
-  if(OpenGL_GLX_FOUND AND NOT TARGET OpenGL::GLX)
+  if(OpenGL_GLX_FOUND AND NOT TARGET OpenGL::GLX AND TARGET OpenGL::OpenGL)
     if(IS_ABSOLUTE "${OPENGL_glx_LIBRARY}")
       add_library(OpenGL::GLX UNKNOWN IMPORTED)
       set_target_properties(OpenGL::GLX PROPERTIES IMPORTED_LOCATION

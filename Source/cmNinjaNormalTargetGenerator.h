@@ -52,7 +52,6 @@ private:
   std::vector<std::string> ComputeLinkCmd(const std::string& config);
   std::vector<std::string> ComputeDeviceLinkCmd();
 
-private:
   // Target name info.
   cmGeneratorTarget::Names TargetNames(const std::string& config) const;
   std::string TargetLinkLanguage(const std::string& config) const;

@@ -22,12 +22,7 @@ do
 
     if [[ (${in_file} -nt ${cxx_file}) || (${in_file} -nt ${h_file}) || (${forced} -gt 0) ]]; then
         echo "Generating Parser ${parser}"
-          bison --yacc --name-prefix=${prefix} --defines=${h_file} -o${cxx_file}  ${in_file}
-          sed -i '/\/\* Else will try to reuse/ i\
-#if 0
-/^yyerrlab1:/ a\
-#endif
-' ${cxx_file}
+          bison --name-prefix=${prefix} --defines=${h_file} -o${cxx_file}  ${in_file}
     else
         echo "Skipped generating Parser ${parser}"
     fi

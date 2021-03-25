@@ -48,7 +48,7 @@ struct cmStrCmp
   {
   }
 
-  bool operator()(cm::string_view sv) const { return Test_ == sv; }
+  bool operator()(cm::string_view sv) const { return this->Test_ == sv; }
 
 private:
   std::string const Test_;
@@ -163,9 +163,9 @@ public:
   {
   }
   cmAlphaNum(char ch)
-    : View_(Digits_, 1)
+    : View_(this->Digits_, 1)
   {
-    Digits_[0] = ch;
+    this->Digits_[0] = ch;
   }
   cmAlphaNum(int val);
   cmAlphaNum(unsigned int val);
@@ -176,7 +176,7 @@ public:
   cmAlphaNum(float val);
   cmAlphaNum(double val);
 
-  cm::string_view View() const { return View_; }
+  cm::string_view View() const { return this->View_; }
 
 private:
   cm::string_view View_;

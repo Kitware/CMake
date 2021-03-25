@@ -81,7 +81,11 @@ bool EnvironmentSearchFilter::filterAcceptsRow(int row,
   auto* model = this->sourceModel();
   auto key =
     model->data(model->index(row, 0, parent), Qt::DisplayRole).toString();
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+  return key.contains(this->filterRegularExpression());
+#else
   return key.contains(this->filterRegExp());
+#endif
 }
 
 EnvironmentDialog::EnvironmentDialog(const QProcessEnvironment& environment,
@@ -102,12 +106,18 @@ EnvironmentDialog::EnvironmentDialog(const QProcessEnvironment& environment,
   this->Environment->setSelectionMode(QAbstractItemView::ExtendedSelection);
   this->Environment->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-  QObject::connect(this->AddEntry, &QToolButton::clicked, this,
+  QObject::connect(this->AddEntry, &QAbstractButton::clicked, this,
                    &EnvironmentDialog::addEntry);
-  QObject::connect(this->RemoveEntry, &QToolButton::clicked, this,
+  QObject::connect(this->RemoveEntry, &QAbstractButton::clicked, this,
                    &EnvironmentDialog::removeSelectedEntries);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+  QObject::connect(this->Search, &QLineEdit::textChanged, this->m_filter,
+                   QOverload<const QString&>::of(
+                     &EnvironmentSearchFilter::setFilterRegularExpression));
+#else
   QObject::connect(this->Search, &QLineEdit::textChanged, this->m_filter,
                    &EnvironmentSearchFilter::setFilterFixedString);
+#endif
   QObject::connect(this->Environment->selectionModel(),
                    &QItemSelectionModel::selectionChanged, this,
                    &EnvironmentDialog::selectionChanged);

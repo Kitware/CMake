@@ -28,6 +28,7 @@ Environment Variables that Control the Build
 .. toctree::
    :maxdepth: 1
 
+   /envvar/CMAKE_APPLE_SILICON_PROCESSOR
    /envvar/CMAKE_BUILD_PARALLEL_LEVEL
    /envvar/CMAKE_CONFIG_TYPE
    /envvar/CMAKE_EXPORT_COMPILE_COMMANDS
@@ -56,6 +57,7 @@ Environment Variables for Languages
    /envvar/CC
    /envvar/CFLAGS
    /envvar/CSFLAGS
+   /envvar/CUDAARCHS
    /envvar/CUDACXX
    /envvar/CUDAFLAGS
    /envvar/CUDAHOSTCXX

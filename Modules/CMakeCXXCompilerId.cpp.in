@@ -20,7 +20,7 @@ char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
 char const* qnxnto = "INFO" ":" "qnxnto[]";
 #endif
 
-#if defined(__CRAYXE) || defined(__CRAYXC)
+#if defined(__CRAYXT_COMPUTE_LINUX_TARGET)
 char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 #endif
 
@@ -44,7 +44,9 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 #endif
 
 const char* info_language_dialect_default = "INFO" ":" "dialect_default["
-#if CXX_STD > 201703L
+#if CXX_STD > 202002L
+  "23"
+#elif CXX_STD > 201703L
   "20"
 #elif CXX_STD >= 201703L
   "17"
@@ -76,7 +78,7 @@ int main(int argc, char* argv[])
 #ifdef SIMULATE_VERSION_MAJOR
   require += info_simulate_version[argc];
 #endif
-#if defined(__CRAYXE) || defined(__CRAYXC)
+#if defined(__CRAYXT_COMPUTE_LINUX_TARGET)
   require += info_cray[argc];
 #endif
   require += info_language_dialect_default[argc];

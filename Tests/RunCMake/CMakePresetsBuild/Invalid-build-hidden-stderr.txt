@@ -1,0 +1,2 @@
+CMake Error: Cannot use hidden build preset in [^
+]*/Tests/RunCMake/CMakePresetsBuild/Invalid: "hidden"

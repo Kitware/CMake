@@ -13,6 +13,8 @@ features this function (i.e. at least ``1.1.19``)
 Imported targets
 ^^^^^^^^^^^^^^^^
 
+.. versionadded:: 3.15
+
 This module defines :prop_tgt:`IMPORTED` target ``Cups::Cups``, if Cups has
 been found.
 
