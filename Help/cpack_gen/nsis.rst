@@ -193,6 +193,8 @@ on Windows Nullsoft Scriptable Install System.
  .. versionadded:: 3.20
 
  If set, trim down the size of the control to the size of the branding text string.
+ Allowed values for this variable are ``LEFT``, ``CENTER`` or ``RIGHT``.
+ If not specified, the default behavior is ``LEFT``.
 
 .. variable:: CPACK_NSIS_EXECUTABLE
 
