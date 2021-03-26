@@ -275,6 +275,11 @@ set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Conditions.json.in")
 run_cmake_presets(ListConditions --list-presets)
 run_cmake_presets(SimpleTrue)
 run_cmake_presets(SimpleFalse)
+unset(CMakePresets_FILE)
+
+# Test optional generator and buildDir fields
+run_cmake_presets(OptionalBinaryDirField -B "${RunCMake_BINARY_DIR}/OptionalBinaryDirField/build")
+run_cmake_presets(OptionalGeneratorField -G "${RunCMake_GENERATOR}")
 
 # Test the example from the documentation
 file(READ "${RunCMake_SOURCE_DIR}/../../../Help/manual/presets/example.json" _example)

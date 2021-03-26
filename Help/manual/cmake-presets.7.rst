@@ -145,7 +145,9 @@ that may contain the following fields:
 
   An optional string representing the generator to use for the preset. If
   ``generator`` is not specified, it must be inherited from the
-  ``inherits`` preset (unless this preset is ``hidden``).
+  ``inherits`` preset (unless this preset is ``hidden``). In version ``3``
+  or above, this field may be omitted to fall back to regular generator
+  discovery procedure.
 
   Note that for Visual Studio generators, unlike in the command line ``-G``
   argument, you cannot include the platform name in the generator name. Use
@@ -186,7 +188,8 @@ that may contain the following fields:
   This field supports `macro expansion`_. If a relative path is specified,
   it is calculated relative to the source directory. If ``binaryDir`` is not
   specified, it must be inherited from the ``inherits`` preset (unless this
-  preset is ``hidden``).
+  preset is ``hidden``). In version ``3`` or above, this field may be
+  omitted.
 
 ``installDir``
 

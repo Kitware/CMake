@@ -1223,10 +1223,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       return;
     }
 
-    if (!this->State->IsCacheLoaded() && !haveBArg) {
+    if (!this->State->IsCacheLoaded() && !haveBArg &&
+        !expandedPreset->BinaryDir.empty()) {
       this->SetHomeOutputDirectory(expandedPreset->BinaryDir);
     }
-    if (!this->GlobalGenerator) {
+    if (!this->GlobalGenerator && !expandedPreset->Generator.empty()) {
       if (!this->CreateAndSetGlobalGenerator(expandedPreset->Generator,
                                              false)) {
         return;
@@ -3203,7 +3204,9 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       return 1;
     }
 
-    dir = expandedConfigurePreset->BinaryDir;
+    if (!expandedConfigurePreset->BinaryDir.empty()) {
+      dir = expandedConfigurePreset->BinaryDir;
+    }
 
     this->UnprocessedPresetEnvironment = expandedPreset->Environment;
     this->ProcessPresetEnvironment();
