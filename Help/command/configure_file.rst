@@ -6,9 +6,9 @@ Copy a file to another location and modify its contents.
 .. code-block:: cmake
 
   configure_file(<input> <output>
-                 [FILE_PERMISSIONS <permissions>...]
+                 [NO_SOURCE_PERMISSIONS | USE_SOURCE_PERMISSIONS |
+                  FILE_PERMISSIONS <permissions>...]
                  [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
-                 [NO_SOURCE_PERMISSIONS] [USE_SOURCE_PERMISSIONS]
                  [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 
 Copies an ``<input>`` file to an ``<output>`` file and substitutes
@@ -75,8 +75,27 @@ The arguments are:
   If the path names an existing directory the output file is placed
   in that directory with the same file name as the input file.
 
+``NO_SOURCE_PERMISSIONS``
+  .. versionadded:: 3.19
+
+  Do not transfer the permissions of the input file to the output file.
+  The copied file permissions default to the standard 644 value
+  (-rw-r--r--).
+
+``USE_SOURCE_PERMISSIONS``
+  .. versionadded:: 3.20
+
+  Transfer the permissions of the input file to the output file.
+  This is already the default behavior if none of the three permissions-related
+  keywords are given (``NO_SOURCE_PERMISSIONS``, ``USE_SOURCE_PERMISSIONS``
+  or ``FILE_PERMISSIONS``).  The ``USE_SOURCE_PERMISSIONS`` keyword mostly
+  serves as a way of making the intended behavior clearer at the call site.
+
 ``FILE_PERMISSIONS <permissions>...``
-  Use user provided permissions for the output file.
+  .. versionadded:: 3.20
+
+  Ignore the input file's permissions and use the specified ``<permissions>``
+  for the output file instead.
 
 ``COPYONLY``
   Copy the file without replacing any variable references or other
@@ -88,18 +107,6 @@ The arguments are:
 ``@ONLY``
   Restrict variable replacement to references of the form ``@VAR@``.
   This is useful for configuring scripts that use ``${VAR}`` syntax.
-
-``NO_SOURCE_PERMISSIONS``
-  .. versionadded:: 3.19
-
-  Does not transfer the file permissions of the original file to the copy.
-  The copied file permissions default to the standard 644 value
-  (-rw-r--r--).
-
-``USE_SOURCE_PERMISSIONS``
-  .. versionadded:: 3.20
-
-  Transfer the file permissions of the original file to the output file.
 
 ``NEWLINE_STYLE <style>``
   Specify the newline style for the output file.  Specify

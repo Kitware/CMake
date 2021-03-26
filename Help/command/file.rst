@@ -480,8 +480,8 @@ modified.
   file(GENERATE OUTPUT output-file
        <INPUT input-file|CONTENT content>
        [CONDITION expression] [TARGET target]
-       [FILE_PERMISSIONS <permissions>...]
-       [NO_SOURCE_PERMISSIONS] [USE_SOURCE_PERMISSIONS]
+       [NO_SOURCE_PERMISSIONS | USE_SOURCE_PERMISSIONS |
+        FILE_PERMISSIONS <permissions>...]
        [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 
 Generate an output file for each build configuration supported by the current
@@ -523,16 +523,26 @@ from the input content to produce the output content.  The options are:
   require a target for evaluation (e.g. ``$<COMPILE_FEATURES:...>``,
   ``$<TARGET_PROPERTY:prop>``).
 
-``FILE_PERMISSIONS <permissions>...``
-  Use user provided permissions for the generated file.
-
 ``NO_SOURCE_PERMISSIONS``
+  .. versionadded:: 3.20
+
   The generated file permissions default to the standard 644 value
   (-rw-r--r--).
 
 ``USE_SOURCE_PERMISSIONS``
-  Transfer the file permissions of the original file to the generated file.
-  This option expects INPUT option.
+  .. versionadded:: 3.20
+
+  Transfer the file permissions of the ``INPUT`` file to the generated file.
+  This is already the default behavior if none of the three permissions-related
+  keywords are given (``NO_SOURCE_PERMISSIONS``, ``USE_SOURCE_PERMISSIONS``
+  or ``FILE_PERMISSIONS``).  The ``USE_SOURCE_PERMISSIONS`` keyword mostly
+  serves as a way of making the intended behavior clearer at the call site.
+  It is an error to specify this option without ``INPUT``.
+
+``FILE_PERMISSIONS <permissions>...``
+  .. versionadded:: 3.20
+
+  Use the specified permissions for the generated file.
 
 ``NEWLINE_STYLE <style>``
   .. versionadded:: 3.20
@@ -702,9 +712,9 @@ Create the given directories and their parents as needed.
 .. code-block:: cmake
 
   file(<COPY|INSTALL> <files>... DESTINATION <dir>
+       [NO_SOURCE_PERMISSIONS | USE_SOURCE_PERMISSIONS]
        [FILE_PERMISSIONS <permissions>...]
        [DIRECTORY_PERMISSIONS <permissions>...]
-       [NO_SOURCE_PERMISSIONS] [USE_SOURCE_PERMISSIONS]
        [FOLLOW_SYMLINK_CHAIN]
        [FILES_MATCHING]
        [[PATTERN <pattern> | REGEX <regex>]
