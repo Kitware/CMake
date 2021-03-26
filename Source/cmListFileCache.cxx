@@ -7,6 +7,10 @@
 #include <sstream>
 #include <utility>
 
+#ifdef _WIN32
+#  include <cmsys/Encoding.hxx>
+#endif
+
 #include "cmListFileLexer.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
@@ -83,9 +87,15 @@ bool cmListFileParser::ParseFile(const char* filename)
 {
   this->FileName = filename;
 
+#ifdef _WIN32
+  std::string expandedFileName = cmsys::Encoding::ToNarrow(
+    cmSystemTools::ConvertToWindowsExtendedPath(filename));
+  filename = expandedFileName.c_str();
+#endif
+
   // Open the file.
   cmListFileLexer_BOM bom;
-  if (!cmListFileLexer_SetFileName(this->Lexer, this->FileName, &bom)) {
+  if (!cmListFileLexer_SetFileName(this->Lexer, filename, &bom)) {
     this->IssueFileOpenError("cmListFileCache: error can not open file.");
     return false;
   }
