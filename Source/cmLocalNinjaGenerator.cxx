@@ -651,6 +651,12 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       gg->WriteBuild(this->GetImplFileStream(fileConfig), build);
     } else {
       std::string customStep = cmSystemTools::GetFilenameName(ninjaOutputs[0]);
+      if (this->GlobalGenerator->IsMultiConfig()) {
+        customStep += '-';
+        customStep += fileConfig;
+        customStep += '-';
+        customStep += ccg.GetOutputConfig();
+      }
       // Hash full path to make unique.
       customStep += '-';
       cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
