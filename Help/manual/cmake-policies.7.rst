@@ -57,7 +57,8 @@ Policies Introduced by CMake 3.21
 .. toctree::
    :maxdepth: 1
 
-   CMP0121: The list command detects invalid indicies </policy/CMP0121>
+   CMP0122: UseSWIG use standard library name conventions for csharp language. </policy/CMP0122>
+   CMP0121: The list command detects invalid indicies. </policy/CMP0121>
 
 Policies Introduced by CMake 3.20
 =================================

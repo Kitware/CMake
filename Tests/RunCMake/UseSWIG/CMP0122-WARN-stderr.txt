@@ -1,0 +1,10 @@
+CMake Warning \(dev\) at .*/Modules/UseSWIG.cmake:[0-9]+ \(message\):
+  Policy CMP0122 is not set: UseSWIG use standard library name conventions
+  for csharp language\.  Run "cmake --help-policy CMP0122" for policy details\.
+  Use the cmake_policy command to set the policy and suppress this warning\.
+
+Call Stack \(most recent call first\):
+  CMP0122-common.cmake:9 \(swig_add_library\)
+  CMP0122-WARN.cmake:1 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$
