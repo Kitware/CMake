@@ -95,9 +95,6 @@ The following cache variables may also be set:
   ``msgfmt``, etc.), use :module:`FindGettext`.
 #]=======================================================================]
 
-
-# Written by Roger Leigh <rleigh@codelibre.net>
-
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CheckSymbolExists.cmake)
 
