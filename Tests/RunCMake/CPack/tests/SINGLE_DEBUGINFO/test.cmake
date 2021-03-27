@@ -30,6 +30,9 @@ if(RunCMake_SUBTEST_SUFFIX STREQUAL "valid"
   OR RunCMake_SUBTEST_SUFFIX STREQUAL "no_debuginfo")
   install(FILES CMakeLists.txt DESTINATION bar COMPONENT headers)
   install(TARGETS test_lib DESTINATION bas COMPONENT libs)
+
+  # test that we correctly handle empty dir in non main component
+  install(DIRECTORY DESTINATION empty_dir COMPONENT libs)
 elseif(RunCMake_SUBTEST_SUFFIX STREQUAL "one_component"
   OR RunCMake_SUBTEST_SUFFIX STREQUAL "one_component_no_debuginfo")
   set(CPACK_COMPONENTS_ALL applications)
