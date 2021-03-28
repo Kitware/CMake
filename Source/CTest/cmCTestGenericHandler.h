@@ -13,7 +13,6 @@
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 
-class cmCTestCommand;
 class cmGeneratedFileStream;
 class cmMakefile;
 
@@ -107,8 +106,6 @@ public:
   void AddMultiOption(const std::string& optionName, const std::string& value);
   std::vector<std::string> GetMultiOption(const std::string& op) const;
 
-  void SetCommand(cmCTestCommand* command) { this->Command = command; }
-
   void SetSubmitIndex(int idx) { this->SubmitIndex = idx; }
   int GetSubmitIndex() { return this->SubmitIndex; }
 
@@ -134,6 +131,5 @@ protected:
   t_StringToMultiString PersistentMultiOptions;
   t_StringToString LogFileNames;
 
-  cmCTestCommand* Command;
   int SubmitIndex;
 };
