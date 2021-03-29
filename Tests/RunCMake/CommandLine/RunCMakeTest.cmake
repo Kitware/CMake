@@ -212,6 +212,10 @@ function(run_BuildDir)
       ${CMAKE_COMMAND} --build BuildDir-build -j)
     run_cmake_command(BuildDir--build-jobs-no-number-trailing--target ${CMAKE_COMMAND} -E chdir ..
       ${CMAKE_COMMAND} --build BuildDir-build -j --target CustomTarget)
+    if(RunCMake_GENERATOR MATCHES "Unix Makefiles" OR RunCMake_GENERATOR MATCHES "Ninja")
+      run_cmake_command(BuildDir--build-jobs-no-number-trailing--invalid-target ${CMAKE_COMMAND} -E chdir ..
+        ${CMAKE_COMMAND} --build BuildDir-build -j --target invalid-target)
+    endif()
     run_cmake_command(BuildDir--build--parallel-no-number ${CMAKE_COMMAND} -E chdir ..
       ${CMAKE_COMMAND} --build BuildDir-build --parallel)
     run_cmake_command(BuildDir--build--parallel-no-number-trailing--target ${CMAKE_COMMAND} -E chdir ..
