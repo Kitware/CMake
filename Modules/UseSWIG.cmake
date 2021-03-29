@@ -38,7 +38,13 @@ Defines the following command for use with ``SWIG``:
 
   .. versionchanged:: 3.15
     Alternate library name (set with the :prop_tgt:`OUTPUT_NAME` property,
-    for example) will be passed on to Python and CSharp wrapper libraries.
+    for example) will be passed on to ``Python`` and ``CSharp`` wrapper
+    libraries.
+
+  .. versionchanged:: 3.21
+    Generated library use standard naming conventions for ``CSharp`` language
+    when policy :policy:`CMP0122` is set to ``NEW``. Otherwise, the legacy
+    behavior is applied.
 
   .. note::
 
@@ -950,6 +956,17 @@ function(SWIG_ADD_LIBRARY name)
     endif ()
   elseif (swig_lowercase_language STREQUAL "fortran")
     # Do *not* override the target's library prefix
+  elseif (swig_lowercase_language STREQUAL "csharp")
+    cmake_policy(GET CMP0122 csharp_naming_policy)
+    if (csharp_naming_policy STREQUAL "NEW")
+      # Do *not* override the target's library prefix
+    else()
+      if (NOT csharp_naming_policy)
+        cmake_policy(GET_WARNING CMP0122 _cmp0122_warning)
+        message(AUTHOR_WARNING "${_cmp0122_warning}\n")
+      endif()
+      set_target_properties (${target_name} PROPERTIES PREFIX "")
+    endif()
   else()
     # assume empty prefix because we expect the module to be dynamically loaded
     set_target_properties (${target_name} PROPERTIES PREFIX "")
