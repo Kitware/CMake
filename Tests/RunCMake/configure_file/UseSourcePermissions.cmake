@@ -3,20 +3,20 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/sourcefile.txt
     USE_SOURCE_PERMISSIONS
 )
 
-if (UNIX)
+if (CMAKE_HOST_UNIX)
   find_program(STAT_EXECUTABLE NAMES stat)
   if(NOT STAT_EXECUTABLE)
     return()
   endif()
 
-  if (CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+  if (CMAKE_HOST_SYSTEM_NAME MATCHES "FreeBSD")
     execute_process(COMMAND "${STAT_EXECUTABLE}" -f %Lp "${CMAKE_CURRENT_SOURCE_DIR}/sourcefile.txt"
       OUTPUT_VARIABLE output1
     )
     execute_process(COMMAND "${STAT_EXECUTABLE}" -f %Lp "${CMAKE_CURRENT_BINARY_DIR}/sourcefile-use-source-permissions.txt"
       OUTPUT_VARIABLE output2
     )
-  elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+  elseif (CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     execute_process(COMMAND "${STAT_EXECUTABLE}" -f %A "${CMAKE_CURRENT_SOURCE_DIR}/sourcefile.txt"
       OUTPUT_VARIABLE output1
     )

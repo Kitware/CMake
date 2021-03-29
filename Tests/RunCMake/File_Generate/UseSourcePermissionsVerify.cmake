@@ -2,7 +2,7 @@ if(NOT EXISTS "${generatedFile}")
   message(SEND_ERROR "Missing generated file:\n  ${generatedFile}")
 endif()
 
-if (UNIX)
+if (CMAKE_HOST_UNIX)
   find_program(STAT_EXECUTABLE NAMES stat)
   if(NOT STAT_EXECUTABLE)
     return()

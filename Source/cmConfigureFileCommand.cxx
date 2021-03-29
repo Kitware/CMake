@@ -165,7 +165,7 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  mode_t permisiions = 0;
+  mode_t permissions = 0;
 
   if (filePermissions) {
     if (filePermissionOptions.empty()) {
@@ -175,7 +175,7 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
 
     std::vector<std::string> invalidOptions;
     for (auto const& e : filePermissionOptions) {
-      if (!cmFSPermissions::stringToModeT(e, permisiions)) {
+      if (!cmFSPermissions::stringToModeT(e, permissions)) {
         invalidOptions.push_back(e);
       }
     }
@@ -197,14 +197,14 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
   }
 
   if (noSourcePermissions) {
-    permisiions |= cmFSPermissions::mode_owner_read;
-    permisiions |= cmFSPermissions::mode_owner_write;
-    permisiions |= cmFSPermissions::mode_group_read;
-    permisiions |= cmFSPermissions::mode_world_read;
+    permissions |= cmFSPermissions::mode_owner_read;
+    permissions |= cmFSPermissions::mode_owner_write;
+    permissions |= cmFSPermissions::mode_group_read;
+    permissions |= cmFSPermissions::mode_world_read;
   }
 
   if (!status.GetMakefile().ConfigureFile(inputFile, outputFile, copyOnly,
-                                          atOnly, escapeQuotes, permisiions,
+                                          atOnly, escapeQuotes, permissions,
                                           newLineStyle)) {
     status.SetError("Problem configuring file");
     return false;

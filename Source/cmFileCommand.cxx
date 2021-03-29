@@ -2446,18 +2446,18 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     }
   }
 
-  mode_t permisiions = 0;
+  mode_t permissions = 0;
   if (arguments.NoSourcePermissions) {
-    permisiions |= cmFSPermissions::mode_owner_read;
-    permisiions |= cmFSPermissions::mode_owner_write;
-    permisiions |= cmFSPermissions::mode_group_read;
-    permisiions |= cmFSPermissions::mode_world_read;
+    permissions |= cmFSPermissions::mode_owner_read;
+    permissions |= cmFSPermissions::mode_owner_write;
+    permissions |= cmFSPermissions::mode_group_read;
+    permissions |= cmFSPermissions::mode_world_read;
   }
 
   if (!arguments.FilePermissions.empty()) {
     std::vector<std::string> invalidOptions;
     for (auto const& e : arguments.FilePermissions) {
-      if (!cmFSPermissions::stringToModeT(e, permisiions)) {
+      if (!cmFSPermissions::stringToModeT(e, permissions)) {
         invalidOptions.push_back(e);
       }
     }
@@ -2479,7 +2479,7 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
 
   AddEvaluationFile(input, arguments.Target, arguments.Output,
                     arguments.Condition, inputIsContent,
-                    newLineStyle.GetCharacters(), permisiions, status);
+                    newLineStyle.GetCharacters(), permissions, status);
   return true;
 }
 
