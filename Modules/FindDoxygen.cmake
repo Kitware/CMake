@@ -223,7 +223,8 @@ them to be separated by whitespace. CMake variables hold lists as a string with
 items separated by semi-colons, so a conversion needs to be performed. The
 ``doxygen_add_docs()`` command specifically checks the following Doxygen config
 options and will convert their associated CMake variable's contents into the
-required form if set.
+required form if set. CMake variables are named ``DOXYGEN_<name>`` for the
+Doxygen settings specified here.
 
 ::
 
