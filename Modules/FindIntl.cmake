@@ -10,27 +10,38 @@ FindIntl
 Find the Gettext libintl headers and libraries.
 
 This module reports information about the Gettext libintl
-installation in several variables.  General variables::
+installation in several variables.
 
-  Intl_FOUND - true if the libintl headers and libraries were found
-  Intl_INCLUDE_DIRS - the directory containing the libintl headers
-  Intl_LIBRARIES - libintl libraries to be linked
+.. variable:: Intl_FOUND
+
+  True if libintl is found.
+
+.. variable:: Intl_INCLUDE_DIRS
+
+  The directory containing the libintl headers.
+
+.. variable:: Intl_LIBRARIES
+
+  The intl libraries to be linked.
 
 .. versionadded:: 3.20
   This module defines :prop_tgt:`IMPORTED` target ``Intl::Intl``.
 
-The following cache variables may also be set::
+The following cache variables may also be set:
 
-  Intl_INCLUDE_DIR - the directory containing the libintl headers
-  Intl_LIBRARY - the libintl library (if any)
-  Intl_HAVE_GETTEXT_BUILTIN - check if gettext is in the C library
-  Intl_HAVE_DCGETTEXT_BUILTIN - check if dcgettext is in the C library
-  Intl_IS_BUILTIN - whether intl is a part of the C library determined
-      from the result of Intl_HAVE_GETTEXT_BUILTIN and Intl_HAVE_DCGETTEXT_BUILTIN
+.. variable:: Intl_INCLUDE_DIR
 
-.. versionadded:: 3.20
-  Added the ``Intl_HAVE_GETTEXT_BUILTIN``, ``Intl_HAVE_DCGETTEXT_BUILTIN`` and
-  ``Intl_IS_BUILTIN`` variables.
+  The directory containing the libintl headers
+
+.. variable:: Intl_LIBRARY
+
+  The libintl library (if any)
+
+.. variable:: Intl_IS_BUILT_IN
+
+  .. versionadded:: 3.20
+
+  whether ``intl`` is a part of the C library.
 
 .. note::
   On some platforms, such as Linux with GNU libc, the gettext
@@ -43,50 +54,74 @@ The following cache variables may also be set::
   ``msgfmt``, etc.), use :module:`FindGettext`.
 #]=======================================================================]
 
-
-# Written by Roger Leigh <rleigh@codelibre.net>
-
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/CheckSymbolExists.cmake)
-
-# Check if we have libintl is a part of libc
-cmake_push_check_state(RESET)
-set(CMAKE_REQUIRED_QUIET TRUE)
-check_symbol_exists(gettext libintl.h Intl_HAVE_GETTEXT_BUILTIN)
-check_symbol_exists(dcgettext libintl.h Intl_HAVE_DCGETTEXT_BUILTIN) # redundant check
-cmake_pop_check_state()
-
-if(Intl_HAVE_GETTEXT_BUILTIN AND Intl_HAVE_DCGETTEXT_BUILTIN)
-  set(Intl_IS_BUILTIN TRUE)
+if(CMAKE_C_COMPILER_LOADED)
+  include(${CMAKE_CURRENT_LIST_DIR}/CheckCSourceCompiles.cmake)
+elseif(CMAKE_CXX_COMPILER_LOADED)
+  include(${CMAKE_CURRENT_LIST_DIR}/CheckCXXSourceCompiles.cmake)
 else()
-  set(Intl_IS_BUILTIN FALSE)
+  # If neither C nor CXX are loaded, implicit intl makes no sense.
+  set(Intl_IS_BUILT_IN FALSE)
 endif()
 
-# Find include directory
-find_path(Intl_INCLUDE_DIR
-          NAMES "libintl.h"
-          DOC "libintl include directory")
-mark_as_advanced(Intl_INCLUDE_DIR)
+# Check if Intl is built in to the C library.
+if(NOT DEFINED Intl_IS_BUILT_IN)
+  if(NOT DEFINED Intl_INCLUDE_DIR AND NOT DEFINED Intl_LIBRARY)
+    cmake_push_check_state(RESET)
+    set(CMAKE_REQUIRED_QUIET TRUE)
+    set(Intl_IMPLICIT_TEST_CODE [[
+#include <libintl.h>
+int main(void) {
+  gettext("");
+  dgettext("", "");
+  dcgettext("", "", 0);
+  return 0;
+}
+]])
+    if(CMAKE_C_COMPILER_LOADED)
+      check_c_source_compiles("${Intl_IMPLICIT_TEST_CODE}" Intl_IS_BUILT_IN)
+    else()
+      check_cxx_source_compiles("${Intl_IMPLICIT_TEST_CODE}" Intl_IS_BUILT_IN)
+    endif()
+    cmake_pop_check_state()
+  else()
+    set(Intl_IS_BUILT_IN FALSE)
+  endif()
+endif()
 
-# Find all Intl libraries
-set(Intl_REQUIRED_VARS)
-if(NOT Intl_IS_BUILTIN)
+set(_Intl_REQUIRED_VARS)
+if(Intl_IS_BUILT_IN)
+  set(_Intl_REQUIRED_VARS _Intl_IS_BUILT_IN_MSG)
+  set(_Intl_IS_BUILT_IN_MSG "built in to C library")
+else()
+  set(_Intl_REQUIRED_VARS Intl_LIBRARY Intl_INCLUDE_DIR)
+
+  find_path(Intl_INCLUDE_DIR
+            NAMES "libintl.h"
+            DOC "libintl include directory")
+  mark_as_advanced(Intl_INCLUDE_DIR)
+
   find_library(Intl_LIBRARY "intl" "libintl" NAMES_PER_DIR
     DOC "libintl libraries (if not in the C library)")
   mark_as_advanced(Intl_LIBRARY)
-  list(APPEND Intl_REQUIRED_VARS Intl_LIBRARY)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Intl
                                   FOUND_VAR Intl_FOUND
-                                  REQUIRED_VARS Intl_INCLUDE_DIR ${Intl_REQUIRED_VARS}
+                                  REQUIRED_VARS ${_Intl_REQUIRED_VARS}
                                   FAIL_MESSAGE "Failed to find Gettext libintl")
-unset(Intl_REQUIRED_VARS)
+unset(_Intl_REQUIRED_VARS)
+unset(_Intl_IS_BUILT_IN_MSG)
 
 if(Intl_FOUND)
-  set(Intl_INCLUDE_DIRS "${Intl_INCLUDE_DIR}")
-  set(Intl_LIBRARIES "${Intl_LIBRARY}")
+  if(Intl_IS_BUILT_IN)
+    set(Intl_INCLUDE_DIRS "")
+    set(Intl_LIBRARIES "")
+  else()
+    set(Intl_INCLUDE_DIRS "${Intl_INCLUDE_DIR}")
+    set(Intl_LIBRARIES "${Intl_LIBRARY}")
+  endif()
   if(NOT TARGET Intl::Intl)
     add_library(Intl::Intl INTERFACE IMPORTED)
     set_target_properties(Intl::Intl PROPERTIES
