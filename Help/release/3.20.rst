@@ -327,3 +327,17 @@ Other Changes
   `cmake.org <https://cmake.org/download/>`_ have changed their naming pattern
   to ``cmake-$ver-windows-$arch``, where ``$arch`` is either ``x86_64`` or
   ``i386``.
+
+Updates
+=======
+
+Changes made since CMake 3.20.0 include the following.
+
+3.20.1
+------
+
+* The :module:`FindIntl` module in CMake 3.20.0 added checks
+  ``Intl_HAVE_GETTEXT_BUILTIN``, ``Intl_HAVE_DCGETTEXT_BUILTIN``,
+  and ``Intl_IS_BUILTIN``, but they were not implemented correctly.
+  These have been removed and replaced with a single ``Intl_IS_BUILT_IN``
+  check, whose name is consistent with the :module:`FindIconv` module.
