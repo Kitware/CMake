@@ -3926,7 +3926,7 @@ bool SystemTools::FileIsFullPath(const char* in_name)
 
 bool SystemToolsStatic::FileIsFullPath(const char* in_name, size_t len)
 {
-#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
   // On Windows, the name must be at least two characters long.
   if (len < 2) {
     return false;
