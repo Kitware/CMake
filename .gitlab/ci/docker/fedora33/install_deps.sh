@@ -25,6 +25,7 @@ dnf install --setopt=install_weak_deps=False -y \
 dnf install --setopt=install_weak_deps=False -y \
     findutils \
     file \
+    jq \
     which
 
 # Packages needed to test find modules.
@@ -34,6 +35,7 @@ dnf install --setopt=install_weak_deps=False -y \
     boost-devel boost-python3-devel \
     bzip2-devel \
     cups-devel \
+    DevIL-devel \
     doxygen \
     expat-devel \
     fontconfig-devel \
