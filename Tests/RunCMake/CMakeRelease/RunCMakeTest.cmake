@@ -1,0 +1,10 @@
+include(RunCMake)
+
+if(CMake_TEST_JQ)
+  set(JQ "${CMake_TEST_JQ}")
+else()
+  find_program(JQ NAMES jq)
+endif()
+if(JQ)
+  run_cmake_script(FileTable -DJQ=${JQ})
+endif()

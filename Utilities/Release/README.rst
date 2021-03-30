@@ -6,6 +6,17 @@ on ``cmake.org``.  See also the `CMake Source Code Guide`_.
 
 .. _`CMake Source Code Guide`: ../../Help/dev/source.rst
 
+File Table
+----------
+
+The set of package files distributed on ``cmake.org`` varies by CMake version.
+Clients providing automatic download functionality may query the set of
+package files available using a special file that lists them:
+
+* `File Table v1`_ Documentation
+
+.. _`File Table v1`: files-v1.rst
+
 Docker
 ------
 
