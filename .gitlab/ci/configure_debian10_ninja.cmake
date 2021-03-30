@@ -61,6 +61,7 @@ set(CMake_TEST_Fortran_SUBMODULES "ON" CACHE BOOL "")
 set(CMake_TEST_IPO_WORKS_C "ON" CACHE BOOL "")
 set(CMake_TEST_IPO_WORKS_CXX "ON" CACHE BOOL "")
 set(CMake_TEST_IPO_WORKS_Fortran "ON" CACHE BOOL "")
+set(CMake_TEST_JQ "/usr/bin/jq" CACHE PATH "")
 set(CMake_TEST_Qt5 "ON" CACHE BOOL "")
 set(CMake_TEST_UseSWIG "ON" CACHE BOOL "")
 
