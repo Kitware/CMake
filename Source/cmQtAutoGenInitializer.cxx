@@ -1494,14 +1494,14 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     headers.reserve(this->AutogenTarget.Headers.size());
     for (auto const& pair : this->AutogenTarget.Headers) {
       MUFile const* const muf = pair.second.get();
-      if (muf->Generated && !this->CMP0071Accept) {
-        continue;
-      }
       if (muf->SkipMoc) {
         moc_skip.insert(muf->FullPath);
       }
       if (muf->SkipUic) {
         uic_skip.insert(muf->FullPath);
+      }
+      if (muf->Generated && !this->CMP0071Accept) {
+        continue;
       }
       if (muf->MocIt || muf->UicIt) {
         headers.emplace_back(muf);
