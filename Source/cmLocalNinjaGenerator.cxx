@@ -582,6 +582,11 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 
   auto ccgs = this->MakeCustomCommandGenerators(*cc, fileConfig);
   for (cmCustomCommandGenerator const& ccg : ccgs) {
+    if (ccg.GetOutputs().empty() && ccg.GetByproducts().empty()) {
+      // Generator expressions evaluate to no output for this config.
+      continue;
+    }
+
     cmNinjaDeps orderOnlyDeps;
 
     // A custom command may appear on multiple targets.  However, some build
