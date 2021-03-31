@@ -5,10 +5,14 @@
 "rc4"
 "@version@"
 -- query: \.files\[\]\.name
+"cmake-@version@-Linux-aarch64\.sh"
+"cmake-@version@-Linux-aarch64\.tar\.gz"
 "cmake-@version@-Linux-x86_64\.sh"
 "cmake-@version@-Linux-x86_64\.tar\.gz"
 "cmake-@version@-macos-universal\.dmg"
 "cmake-@version@-macos-universal\.tar\.gz"
+"cmake-@version@-macos10\.10-universal\.dmg"
+"cmake-@version@-macos10\.10-universal\.tar\.gz"
 "cmake-@version@-win32-x86\.msi"
 "cmake-@version@-win32-x86\.zip"
 "cmake-@version@-win64-x64\.msi"
@@ -20,6 +24,8 @@
 "cmake-@version@\.zip"
 -- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "macOS"\) and \(\.class == "volume"\)\) \| \.name
 "cmake-@version@-macos-universal\.dmg"
+-- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "macos10\.10"\) and \(\.class == "archive"\)\) \| \.name
+"cmake-@version@-macos10\.10-universal\.tar\.gz"
 -- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "windows"\) and \(\.architecture\[\] \| \. == "i386"\) and \(\.class == "installer"\)\) \| \.name
 "cmake-@version@-win32-x86\.msi"
 -- query: \.files\[\] \| select\(\.architecture\[\] \| \. == "x86_64"\) \| \.name
@@ -27,10 +33,12 @@
 "cmake-@version@-Linux-x86_64\.tar\.gz"
 "cmake-@version@-macos-universal\.dmg"
 "cmake-@version@-macos-universal\.tar\.gz"
+"cmake-@version@-macos10\.10-universal\.dmg"
+"cmake-@version@-macos10\.10-universal\.tar\.gz"
 "cmake-@version@-win64-x64\.msi"
 "cmake-@version@-win64-x64\.zip"
 -- query: \.files\[\] \| select\(\[\.macOSmin\] \| inside\(\["10\.10", "10\.11", "10\.12"\]\)\) \| \.name
-"cmake-@version@-macos-universal\.dmg"
-"cmake-@version@-macos-universal\.tar\.gz"
+"cmake-@version@-macos10\.10-universal\.dmg"
+"cmake-@version@-macos10\.10-universal\.tar\.gz"
 -- query: \.hashFiles\[\] \| select\(\.algorithm\[\] \| \. == "SHA-256"\) \| \.name
 "cmake-@version@-SHA-256\.txt"$

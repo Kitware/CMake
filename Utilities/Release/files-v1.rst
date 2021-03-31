@@ -100,7 +100,7 @@ The members are:
   ``macOSmin``
     Optional member that is present on package files for macOS.
     The value is a JSON string specifying the minimum version of macOS
-    required to run the binary, e.g. ``"10.10"``.
+    required to run the binary, e.g. ``"10.13"``.
 
 ``hashFiles``
   A JSON array of entries corresponding to files containing cryptographic
@@ -142,10 +142,10 @@ For example, one may use ``jq`` queries:
                       (.architecture[] | . == "x86_64") and
                       (.class == "archive")) | .name
 
-* To select a Linux binary archive supporting ``x86_64`` hosts::
+* To select a Linux binary archive supporting ``aarch64`` hosts::
 
     .files[] | select((.os[] | . == "linux") and
-                      (.architecture[] | . == "x86_64") and
+                      (.architecture[] | . == "aarch64") and
                       (.class == "archive")) | .name
 
 * To select a macOS binary archive supporting ``arm64`` hosts::
@@ -153,6 +153,13 @@ For example, one may use ``jq`` queries:
     .files[] | select((.os[] | . == "macos") and
                       (.architecture[] | . == "arm64") and
                       (.class == "archive")) | .name
+
+* To select a macOS binary archive supporting macOS 10.12 on ``x86_64`` hosts::
+
+    .files[] | select((.os[] | contains("macOS")) and
+                      (.architecture[] | . == "x86_64") and
+                      ([.macOSmin] | inside(["10.10", "10.11", "10.12"]))
+                      ) | .name
 
 * To select a SHA-256 hash file::
 
