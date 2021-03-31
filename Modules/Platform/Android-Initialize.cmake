@@ -25,6 +25,56 @@ endif()
 
 set(CMAKE_BUILD_TYPE_INIT "RelWithDebInfo")
 
+if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
+  # Tell CMake not to search host sysroots for headers/libraries.
+
+  # All paths added to CMAKE_SYSTEM_*_PATH below will be rerooted under
+  # CMAKE_FIND_ROOT_PATH. This is set because:
+  # 1. Users may structure their libraries in a way similar to NDK. When they do that,
+  #    they can simply append another path to CMAKE_FIND_ROOT_PATH.
+  # 2. CMAKE_FIND_ROOT_PATH must be non-empty for CMAKE_FIND_ROOT_PATH_MODE_* == ONLY
+  #    to be meaningful. https://github.com/android-ndk/ndk/issues/890
+  list(APPEND CMAKE_FIND_ROOT_PATH "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/sysroot")
+
+  # Allow users to override these values in case they want more strict behaviors.
+  # For example, they may want to prevent the NDK's libz from being picked up so
+  # they can use their own.
+  # https://github.com/android-ndk/ndk/issues/517
+  if(NOT DEFINED CMAKE_FIND_ROOT_PATH_MODE_PROGRAM)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+  endif()
+
+  if(NOT DEFINED CMAKE_FIND_ROOT_PATH_MODE_LIBRARY)
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+  endif()
+
+  if(NOT DEFINED CMAKE_FIND_ROOT_PATH_MODE_INCLUDE)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+  endif()
+
+  if(NOT DEFINED CMAKE_FIND_ROOT_PATH_MODE_PACKAGE)
+    set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+  endif()
+
+  # Don't search paths in PATH environment variable.
+  if(NOT DEFINED CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH)
+    set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH OFF)
+  endif()
+
+  # Allows CMake to find headers in the architecture-specific include directories.
+  set(CMAKE_LIBRARY_ARCHITECTURE "${CMAKE_ANDROID_ARCH_TRIPLE}")
+
+  # Instructs CMake to search the correct API level for libraries.
+  # Besides the paths like <root>/<prefix>/lib/<arch>, cmake also searches <root>/<prefix>.
+  # So we can add the API level specific directory directly.
+  # https://github.com/android/ndk/issues/929
+  list(PREPEND CMAKE_SYSTEM_PREFIX_PATH
+    "/usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}/${CMAKE_SYSTEM_VERSION}"
+    )
+
+  list(APPEND CMAKE_SYSTEM_PROGRAM_PATH "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/bin")
+endif()
+
 # Skip sysroot selection if the NDK has a unified toolchain.
 if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
   return()
