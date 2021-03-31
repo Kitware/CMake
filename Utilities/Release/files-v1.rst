@@ -77,6 +77,8 @@ The members are:
     Binary packages have a non-empty list of architectures, with at least
     one name matching the output of ``uname -m`` on corresponding hosts.
     On Windows, architecture names include ``x86_64`` and ``i386``.
+    On macOS, universal binary packages list all architectures,
+    e.g. ``["arm64","x86_64"]``.
 
   ``class``
     A JSON string naming the class of package.  The value is one of:
@@ -98,7 +100,7 @@ The members are:
   ``macOSmin``
     Optional member that is present on package files for macOS.
     The value is a JSON string specifying the minimum version of macOS
-    required to run the binary, e.g. ``"10.7"``.
+    required to run the binary, e.g. ``"10.10"``.
 
 ``hashFiles``
   A JSON array of entries corresponding to files containing cryptographic
@@ -146,10 +148,10 @@ For example, one may use ``jq`` queries:
                       (.architecture[] | . == "x86_64") and
                       (.class == "archive")) | .name
 
-* To select a macOS binary archive supporting ``x86_64`` hosts::
+* To select a macOS binary archive supporting ``arm64`` hosts::
 
     .files[] | select((.os[] | . == "macos") and
-                      (.architecture[] | . == "x86_64") and
+                      (.architecture[] | . == "arm64") and
                       (.class == "archive")) | .name
 
 * To select a SHA-256 hash file::
