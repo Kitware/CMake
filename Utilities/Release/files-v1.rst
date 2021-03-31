@@ -14,8 +14,8 @@ The format is a JSON object:
 
   {
     "version": {
-      "major": 3, "minor": 18, "patch": 6,
-      "string": "3.18.6"
+      "major": 3, "minor": 20, "patch": 0,
+      "string": "3.20.0"
     },
     "files": [
       {

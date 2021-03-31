@@ -11,25 +11,25 @@
       "os": ["linux", "Linux"],
       "architecture": ["aarch64"],
       "class": "installer",
-      "name": "cmake-@version@-Linux-aarch64.sh"
+      "name": "cmake-@version@-linux-aarch64.sh"
     },
     {
       "os": ["linux", "Linux"],
       "architecture": ["aarch64"],
       "class": "archive",
-      "name": "cmake-@version@-Linux-aarch64.tar.gz"
+      "name": "cmake-@version@-linux-aarch64.tar.gz"
     },
     {
       "os": ["linux", "Linux"],
       "architecture": ["x86_64"],
       "class": "installer",
-      "name": "cmake-@version@-Linux-x86_64.sh"
+      "name": "cmake-@version@-linux-x86_64.sh"
     },
     {
       "os": ["linux", "Linux"],
       "architecture": ["x86_64"],
       "class": "archive",
-      "name": "cmake-@version@-Linux-x86_64.tar.gz"
+      "name": "cmake-@version@-linux-x86_64.tar.gz"
     },
     {
       "os": ["macos", "macOS"],
@@ -63,25 +63,25 @@
       "os": ["windows", "Windows"],
       "architecture": ["i386"],
       "class": "installer",
-      "name": "cmake-@version@-win32-x86.msi"
+      "name": "cmake-@version@-windows-i386.msi"
     },
     {
       "os": ["windows", "Windows"],
       "architecture": ["i386"],
       "class": "archive",
-      "name": "cmake-@version@-win32-x86.zip"
+      "name": "cmake-@version@-windows-i386.zip"
     },
     {
       "os": ["windows", "Windows"],
       "architecture": ["x86_64"],
       "class": "installer",
-      "name": "cmake-@version@-win64-x64.msi"
+      "name": "cmake-@version@-windows-x86_64.msi"
     },
     {
       "os": ["windows", "Windows"],
       "architecture": ["x86_64"],
       "class": "archive",
-      "name": "cmake-@version@-win64-x64.zip"
+      "name": "cmake-@version@-windows-x86_64.zip"
     },
     {
       "os": ["source"],
