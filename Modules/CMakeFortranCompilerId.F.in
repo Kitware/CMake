@@ -62,6 +62,9 @@
         PRINT *, 'INFO:compiler[Cray]'
 # define COMPILER_VERSION_MAJOR DEC(_RELEASE_MAJOR)
 # define COMPILER_VERSION_MINOR DEC(_RELEASE_MINOR)
+# if defined(_RELEASE_PATCHLEVEL)
+#  define COMPILER_VERSION_PATCH DEC(_RELEASE_PATCHLEVEL)
+# endif
 #elif defined(__G95__)
         PRINT *, 'INFO:compiler[G95]'
 # define COMPILER_VERSION_MAJOR DEC(__G95__)
