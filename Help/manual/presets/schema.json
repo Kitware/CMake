@@ -1114,6 +1114,54 @@
             "type": {
               "type": "string",
               "description": "A required string specifying the type of the condition.",
+              "const": "matches"
+            },
+            "string": {
+              "type": "string",
+              "description": "A required string to search. This field supports macro expansion."
+            },
+            "regex": {
+              "type": "string",
+              "description": "A required regular expression to search for. This field supports macro expansion."
+            }
+          },
+          "required": [
+            "type",
+            "string",
+            "regex"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "A required string specifying the type of the condition.",
+              "const": "notMatches"
+            },
+            "string": {
+              "type": "string",
+              "description": "A required string to search. This field supports macro expansion."
+            },
+            "regex": {
+              "type": "string",
+              "description": "A required regular expression to search for. This field supports macro expansion."
+            }
+          },
+          "required": [
+            "type",
+            "string",
+            "regex"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "A required string specifying the type of the condition.",
               "const": "anyOf"
             },
             "conditions": {

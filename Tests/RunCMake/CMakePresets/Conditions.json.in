@@ -181,6 +181,63 @@
       }
     },
     {
+      "name": "MatchesTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "matches",
+        "string": "aaa",
+        "regex": "^a*$"
+      }
+    },
+    {
+      "name": "MatchesFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "matches",
+        "string": "aab",
+        "regex": "^a*$"
+      }
+    },
+    {
+      "name": "MatchesMacroString",
+      "inherits": "Base",
+      "condition": {
+        "type": "matches",
+        "string": "${presetName}",
+        "regex": "^Matches"
+      }
+    },
+    {
+      "name": "MatchesMacroRegex",
+      "inherits": "Base",
+      "condition": {
+        "type": "matches",
+        "string": "stuff",
+        "regex": "$env{CONDITION_REGEX}"
+      },
+      "environment": {
+        "CONDITION_REGEX": "^stuf*$"
+      }
+    },
+    {
+      "name": "NotMatchesTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "notMatches",
+        "string": "aab",
+        "regex": "^a*$"
+      }
+    },
+    {
+      "name": "NotMatchesFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "notMatches",
+        "string": "aaa",
+        "regex": "^a*$"
+      }
+    },
+    {
       "name": "AnyOfTrue1",
       "inherits": "Base",
       "condition": {
