@@ -9,7 +9,7 @@ if(RunCMake_SUBTEST_SUFFIX STREQUAL "valid" OR RunCMake_SUBTEST_SUFFIX STREQUAL 
   set(EXPECTED_FILE_2 "single_debuginfo*-headers.rpm")
   set(EXPECTED_FILE_CONTENT_2_LIST "/bar;/bar/CMakeLists.txt")
   set(EXPECTED_FILE_3 "single_debuginfo*-libs.rpm")
-  set(EXPECTED_FILE_CONTENT_3_LIST "/bas;/bas/libtest_lib.so")
+  set(EXPECTED_FILE_CONTENT_3_LIST "/bas;/bas/libtest_lib.so;/empty_dir")
 
   set(EXPECTED_FILE_4_COMPONENT "debuginfo")
   set(EXPECTED_FILE_CONTENT_4 ".*/src${whitespaces_}/src/src_1${whitespaces_}/src/src_1/main.cpp${whitespaces_}/src/src_1/test_lib.cpp.*\.debug.*")

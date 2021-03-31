@@ -1349,14 +1349,20 @@ function(cpack_rpm_generate_package)
             continue()
           endif()
 
-          file(GLOB_RECURSE files_for_move_ LIST_DIRECTORIES false RELATIVE
+          file(GLOB_RECURSE files_for_move_ LIST_DIRECTORIES true RELATIVE
             "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}/${component_}"
             "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}/${component_}/*")
 
           foreach(f_ IN LISTS files_for_move_)
-            get_filename_component(dir_path_ "${f_}" DIRECTORY)
             set(src_file_
               "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}/${component_}/${f_}")
+
+            if(IS_DIRECTORY "${src_file_}")
+              file(MAKE_DIRECTORY "${WDIR}/${f_}")
+              continue()
+            endif()
+
+            get_filename_component(dir_path_ "${f_}" DIRECTORY)
 
             # check that we are not overriding an existing file that doesn't
             # match the file that we want to copy
