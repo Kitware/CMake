@@ -10,7 +10,7 @@
 #endif
 
 /* Configure support for this platform.  */
-#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32)
 #  define KWSYS_TERMINAL_SUPPORT_CONSOLE
 #endif
 #if !defined(_WIN32)
