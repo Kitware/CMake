@@ -90,10 +90,10 @@
         }
     ],
     "folder": null,
-    "nameOnDisk": "^(lib|cyg)?c_shared_lib(-1)?\\.(so|dylib|dll)$",
+    "nameOnDisk": "^(lib|cyg|msys-)?c_shared_lib(-1)?\\.(so|dylib|dll)$",
     "artifacts": [
         {
-            "path": "^lib/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg)?c_shared_lib(-1)?\\.(so|dylib|dll)$",
+            "path": "^lib/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg|msys-)?c_shared_lib(-1)?\\.(so|dylib|dll)$",
             "_dllExtra": false
         },
         {
@@ -101,7 +101,7 @@
             "_dllExtra": true
         },
         {
-            "path": "^lib/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg)?c_shared_lib(-1)?\\.pdb$",
+            "path": "^lib/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg|msys-)?c_shared_lib(-1)?\\.pdb$",
             "_dllExtra": true
         }
     ],

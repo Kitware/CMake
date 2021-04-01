@@ -27,6 +27,7 @@
 # Tru64                         Tru64
 # Ultrix                        ULTRIX
 # cygwin                        CYGWIN_NT-5.1
+# MSYS                          MSYS_NT-6.1
 # MacOSX                        Darwin
 
 
@@ -43,7 +44,7 @@ if(CMAKE_HOST_UNIX)
     else()
       exec_program(${CMAKE_UNAME} ARGS -r OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_VERSION)
     endif()
-    if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux|CYGWIN.*|^GNU$|Android")
+    if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux|CYGWIN.*|MSYS.*|^GNU$|Android")
       exec_program(${CMAKE_UNAME} ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
         RETURN_VALUE val)
     elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")

@@ -562,7 +562,7 @@ file(MAKE_DIRECTORY ${out})
 run_cmake_command(E_cat_non_existing_file
   ${CMAKE_COMMAND} -E cat ${out}/non-existing-file.txt)
 
-if(UNIX)
+if(UNIX AND NOT MSYS)
   # test non readable file only if not root
   execute_process(
     COMMAND id -u $ENV{USER}
@@ -801,7 +801,7 @@ function(reject_fifo)
     run_cmake_command(reject_fifo ${BASH_EXECUTABLE} -c ${BASH_COMMAND_ARGUMENT})
   endif()
 endfunction()
-if(CMAKE_HOST_UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
+if(CMAKE_HOST_UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN" AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
   reject_fifo()
   run_cmake_command(closed_stdin  sh -c "\"${CMAKE_COMMAND}\" --version <&-")
   run_cmake_command(closed_stdout sh -c "\"${CMAKE_COMMAND}\" --version >&-")

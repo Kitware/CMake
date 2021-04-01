@@ -119,7 +119,7 @@
             "type": "target",
             "destination": "lib",
             "paths": [
-                "^lib/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib|cyg)?c_shared_lib(-1)?\\.(dll|so)$"
+                "^lib/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib|cyg|msys-)?c_shared_lib(-1)?\\.(dll|so)$"
             ],
             "pathsNamelink": [
                 "^lib/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_shared_lib\\.(so\\.1\\.2\\.3|1\\.2\\.3\\.dylib)$",
@@ -210,7 +210,7 @@
             "type": "target",
             "destination": "lib",
             "paths": [
-                "^cxx/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib|cyg)?cxx_shared_lib\\.(dll|so|dylib)$"
+                "^cxx/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib|cyg|msys-)?cxx_shared_lib\\.(dll|so|dylib)$"
             ],
             "isExcludeFromAll": null,
             "isOptional": null,

@@ -87,7 +87,9 @@ run_cmake(GLOB-noexp-RELATIVE)
 run_cmake_command(GLOB-error-CONFIGURE_DEPENDS-SCRIPT_MODE ${CMAKE_COMMAND} -P
   ${RunCMake_SOURCE_DIR}/GLOB-error-CONFIGURE_DEPENDS-SCRIPT_MODE.cmake)
 
-if(NOT WIN32 OR CYGWIN)
+if(NOT WIN32
+    AND NOT MSYS # FIXME: This works on CYGWIN but not on MSYS
+    )
   run_cmake(CREATE_LINK-SYMBOLIC)
   run_cmake(CREATE_LINK-SYMBOLIC-noexist)
   run_cmake(GLOB_RECURSE-cyclic-recursion)
@@ -162,7 +164,9 @@ else()
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-rebuild_second ${CMAKE_COMMAND} --build .)
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-nowork ${CMAKE_COMMAND} --build .)
 
-  if(NOT WIN32 OR CYGWIN)
+  if(NOT WIN32
+      AND NOT MSYS # FIXME: This works on CYGWIN but not on MSYS
+      )
     message(STATUS "GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake: link the first test directory into a new directory...")
     file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/test2")
     execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${RunCMake_TEST_BINARY_DIR}/test" "${RunCMake_TEST_BINARY_DIR}/test2/test_folder_symlink")

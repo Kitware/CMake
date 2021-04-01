@@ -165,7 +165,7 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
   endif()
   add_RunCMake_test(Ninja)
   set(NinjaMultiConfig_ARGS
-    -DCYGWIN=${CYGWIN}
+    -DCYGWIN=${CYGWIN} -DMSYS=${MSYS}
     )
   if(CMake_TEST_Qt5 AND Qt5Core_FOUND)
     list(APPEND NinjaMultiConfig_ARGS -DCMake_TEST_Qt5=1 -DQt5Core_DIR=${Qt5Core_DIR} -DCMAKE_TEST_Qt5Core_Version=${Qt5Core_VERSION})
@@ -346,7 +346,7 @@ add_RunCMake_test(export)
 add_RunCMake_test(cmake_language)
 add_RunCMake_test(cmake_minimum_required)
 add_RunCMake_test(cmake_parse_arguments)
-add_RunCMake_test(cmake_path)
+add_RunCMake_test(cmake_path -DMSYS=${MSYS})
 add_RunCMake_test(continue)
 add_executable(color_warning color_warning.c)
 add_executable(fake_build_command fake_build_command.c)
@@ -367,14 +367,14 @@ add_RunCMake_test(ctest_skipped_test)
 add_RunCMake_test(ctest_update)
 add_RunCMake_test(ctest_upload)
 add_RunCMake_test(ctest_fixtures)
-add_RunCMake_test(file)
-add_RunCMake_test(file-CHMOD)
+add_RunCMake_test(file -DMSYS=${MSYS})
+add_RunCMake_test(file-CHMOD -DMSYS=${MSYS})
 if(HAVE_ELF_H OR CMAKE_SYSTEM_NAME STREQUAL "AIX")
   add_RunCMake_test(file-RPATH -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DHAVE_ELF_H=${HAVE_ELF_H})
 endif()
 add_RunCMake_test(find_file)
-add_RunCMake_test(find_library -DCYGWIN=${CYGWIN})
-add_RunCMake_test(find_package)
+add_RunCMake_test(find_library -DCYGWIN=${CYGWIN} -DMSYS=${MSYS})
+add_RunCMake_test(find_package -DMSYS=${MSYS})
 add_RunCMake_test(find_path)
 add_RunCMake_test(find_program -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(foreach)
@@ -512,7 +512,9 @@ else()
   message(STATUS "Could not find ctresalloc")
 endif()
 
-if(NOT WIN32)
+if(NOT WIN32
+    AND NOT MSYS # FIXME: This works on CYGWIN but not on MSYS
+    )
   add_RunCMake_test(SymlinkTrees)
 endif ()
 
@@ -616,7 +618,8 @@ endif()
 
 
 add_executable(pseudo_llvm-rc pseudo_llvm-rc.c)
-add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DCYGWIN=${CYGWIN} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
+add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                  -DCYGWIN=${CYGWIN} -DMSYS=${MSYS} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
 add_RunCMake_test(CommandLineTar)
 
 if(CMAKE_PLATFORM_NO_VERSIONED_SONAME OR (NOT CMAKE_SHARED_LIBRARY_SONAME_FLAG AND NOT CMAKE_SHARED_LIBRARY_SONAME_C_FLAG))
@@ -625,7 +628,7 @@ else()
   set(NO_NAMELINK 0)
 endif()
 
-add_RunCMake_test(install -DNO_NAMELINK=${NO_NAMELINK} -DCYGWIN=${CYGWIN}
+add_RunCMake_test(install -DNO_NAMELINK=${NO_NAMELINK} -DCYGWIN=${CYGWIN} -DMSYS=${MSYS}
   -DCMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN=${CMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN}
   -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
   -DCMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG=${CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG}
