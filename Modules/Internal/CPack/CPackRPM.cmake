@@ -6,6 +6,56 @@
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
+function(set_spec_script_if_enabled TYPE PACKAGE_NAME VAR)
+  if(NOT "${VAR}" STREQUAL "" AND NOT "${VAR}" STREQUAL "\n")
+    if(PACKAGE_NAME)
+      set(PACKAGE_NAME " -n ${PACKAGE_NAME}")
+    endif()
+    set(${TYPE}_
+      "%${TYPE}${PACKAGE_NAME}\n"
+      "${VAR}\n" PARENT_SCOPE)
+  else()
+    set(${TYPE} "" PARENT_SCOPE)
+  endif()
+endfunction()
+
+macro(set_spec_scripts PACKAGE_NAME)
+  # we should only set scripts that were provided
+  # as script announcement without content inside
+  # spec file will generate unneeded dependency
+  # on shell
+
+  set_spec_script_if_enabled(
+    "post"
+    "${PACKAGE_NAME}"
+    "${RPM_SYMLINK_POSTINSTALL}\n${CPACK_RPM_SPEC_POSTINSTALL}")
+
+  set_spec_script_if_enabled(
+    "posttrans"
+    "${PACKAGE_NAME}"
+    "${CPACK_RPM_SPEC_POSTTRANS}")
+
+  set_spec_script_if_enabled(
+    "postun"
+    "${PACKAGE_NAME}"
+    "${CPACK_RPM_SPEC_POSTUNINSTALL}")
+
+  set_spec_script_if_enabled(
+    "pre"
+    "${PACKAGE_NAME}"
+    "${CPACK_RPM_SPEC_PREINSTALL}")
+
+  set_spec_script_if_enabled(
+    "pretrans"
+    "${PACKAGE_NAME}"
+    "${CPACK_RPM_SPEC_PRETRANS}")
+
+  set_spec_script_if_enabled(
+    "preun"
+    "${PACKAGE_NAME}"
+    "${CPACK_RPM_SPEC_PREUNINSTALL}")
+endmacro()
+
 function(get_file_permissions FILE RETURN_VAR)
   execute_process(COMMAND ls -l ${FILE}
           OUTPUT_VARIABLE permissions_
@@ -1613,6 +1663,9 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
     )
 
   elseif(GENERATE_SPEC_PARTS) # binary rpm with single debuginfo package
+
+    set_spec_scripts("${CPACK_RPM_PACKAGE_NAME}")
+
     file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
         "# -*- rpm-spec -*-
 %package -n \@CPACK_RPM_PACKAGE_NAME\@
@@ -1643,24 +1696,12 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 %description -n \@CPACK_RPM_PACKAGE_NAME\@
 \@CPACK_RPM_PACKAGE_DESCRIPTION\@
 
-%post -n \@CPACK_RPM_PACKAGE_NAME\@
-\@RPM_SYMLINK_POSTINSTALL\@
-\@CPACK_RPM_SPEC_POSTINSTALL\@
-
-%posttrans -n \@CPACK_RPM_PACKAGE_NAME\@
-\@CPACK_RPM_SPEC_POSTTRANS\@
-
-%postun -n \@CPACK_RPM_PACKAGE_NAME\@
-\@CPACK_RPM_SPEC_POSTUNINSTALL\@
-
-%pre -n \@CPACK_RPM_PACKAGE_NAME\@
-\@CPACK_RPM_SPEC_PREINSTALL\@
-
-%pretrans -n \@CPACK_RPM_PACKAGE_NAME\@
-\@CPACK_RPM_SPEC_PRETRANS\@
-
-%preun -n \@CPACK_RPM_PACKAGE_NAME\@
-\@CPACK_RPM_SPEC_PREUNINSTALL\@
+\@post_\@
+\@posttrans_\@
+\@postun_\@
+\@pre_\@
+\@pretrans_\@
+\@preun_\@
 
 %files -n \@CPACK_RPM_PACKAGE_NAME\@
 %defattr(\@TMP_DEFAULT_FILE_PERMISSIONS\@,\@TMP_DEFAULT_USER\@,\@TMP_DEFAULT_GROUP\@,\@TMP_DEFAULT_DIR_PERMISSIONS\@)
@@ -1686,6 +1727,8 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
     #  - or the user did not provide one : NOT CPACK_RPM_USER_BINARY_SPECFILE
     set(RPMBUILD_FLAGS "-bb")
     if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
+
+      set_spec_scripts("")
 
       file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
         "# Restore old style debuginfo creation for rpm >= 4.14.
@@ -1750,24 +1793,12 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
 
 %clean
 
-%post
-\@RPM_SYMLINK_POSTINSTALL\@
-\@CPACK_RPM_SPEC_POSTINSTALL\@
-
-%posttrans
-\@CPACK_RPM_SPEC_POSTTRANS\@
-
-%postun
-\@CPACK_RPM_SPEC_POSTUNINSTALL\@
-
-%pre
-\@CPACK_RPM_SPEC_PREINSTALL\@
-
-%pretrans
-\@CPACK_RPM_SPEC_PRETRANS\@
-
-%preun
-\@CPACK_RPM_SPEC_PREUNINSTALL\@
+\@post_\@
+\@posttrans_\@
+\@postun_\@
+\@pre_\@
+\@pretrans_\@
+\@preun_\@
 
 %files
 %defattr(\@TMP_DEFAULT_FILE_PERMISSIONS\@,\@TMP_DEFAULT_USER\@,\@TMP_DEFAULT_GROUP\@,\@TMP_DEFAULT_DIR_PERMISSIONS\@)
