@@ -146,6 +146,21 @@ function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
     endif()
   endif()
 
+  # Fujitsu compiler
+  if(CMAKE_${lang}_COMPILER_ID STREQUAL "Fujitsu" AND
+     line MATCHES "/ccpcom")
+    string(REGEX MATCHALL " (-I *|--sys_include=|--preinclude +)(\"[^\"]+\"|[^ \"]+)" incs "${line}")
+    foreach(inc IN LISTS incs)
+      string(REGEX REPLACE " (-I *|--sys_include=|--preinclude +)(\"[^\"]+\"|[^ \"]+)" "\\2" idir "${inc}")
+      list(APPEND rv "${idir}")
+    endforeach()
+    if(rv)
+      string(APPEND log "  got implicit includes via fujitsu ccpcom parser!\n")
+    else()
+      string(APPEND log "  warning: fujitsu ccpcom parse failed!\n")
+    endif()
+  endif()
+
   if(log)
     set(${log_var} "${log}" PARENT_SCOPE)
   else()

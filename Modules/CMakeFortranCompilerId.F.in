@@ -139,6 +139,15 @@
 #define COMPILER_VERSION_MAJOR DEC(__NAG_COMPILER_RELEASE/10)
 #define COMPILER_VERSION_MINOR DEC(__NAG_COMPILER_RELEASE % 10)
 #define COMPILER_VERSION_PATCH DEC(__NAG_COMPILER_BUILD)
+#elif defined(__FUJITSU)
+        PRINT *, 'INFO:compiler[Fujitsu]'
+# if defined(__FRT_major__)
+#   define COMPILER_VERSION_MAJOR DEC(__FRT_major__)
+#   define COMPILER_VERSION_MINOR DEC(__FRT_minor__)
+#   define COMPILER_VERSION_PATCH DEC(__FRT_patchlevel__)
+# elif defined(__FRT_version__)
+        PRINT *, 'INFO:compiler_version['//__FRT_version__//']'
+# endif
 #else
         PRINT *, 'INFO:compiler[]'
 #endif
