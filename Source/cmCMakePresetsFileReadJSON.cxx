@@ -93,6 +93,16 @@ auto const InListConditionHelper =
     .Bind("list"_s, &cmCMakePresetsFileInternal::InListCondition::List,
           ConditionStringListHelper, true);
 
+auto const MatchesConditionHelper =
+  cmJSONObjectHelper<cmCMakePresetsFileInternal::MatchesCondition,
+                     ReadFileResult>(ReadFileResult::READ_OK,
+                                     ReadFileResult::INVALID_CONDITION, false)
+    .Bind<std::string>("type"_s, nullptr, ConditionStringHelper, true)
+    .Bind("string"_s, &cmCMakePresetsFileInternal::MatchesCondition::String,
+          ConditionStringHelper, true)
+    .Bind("regex"_s, &cmCMakePresetsFileInternal::MatchesCondition::Regex,
+          ConditionStringHelper, true);
+
 ReadFileResult SubConditionHelper(
   std::unique_ptr<cmCMakePresetsFile::Condition>& out,
   const Json::Value* value);
@@ -172,6 +182,16 @@ ReadFileResult ConditionHelper(
       CHECK_OK(InListConditionHelper(*c, value));
       out = std::move(c);
       if (type == "notInList") {
+        out = InvertCondition(std::move(out));
+      }
+      return ReadFileResult::READ_OK;
+    }
+
+    if (type == "matches" || type == "notMatches") {
+      auto c = cm::make_unique<cmCMakePresetsFileInternal::MatchesCondition>();
+      CHECK_OK(MatchesConditionHelper(*c, value));
+      out = std::move(c);
+      if (type == "notMatches") {
         out = InvertCondition(std::move(out));
       }
       return ReadFileResult::READ_OK;

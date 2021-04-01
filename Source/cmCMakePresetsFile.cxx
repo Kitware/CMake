@@ -11,6 +11,8 @@
 
 #include <cm/string_view>
 
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmCMakePresetsFileInternal.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -558,6 +560,24 @@ bool cmCMakePresetsFileInternal::InListCondition::Evaluate(
   }
 
   out = false;
+  return true;
+}
+
+bool cmCMakePresetsFileInternal::MatchesCondition::Evaluate(
+  const std::vector<MacroExpander>& expanders, int version,
+  cm::optional<bool>& out) const
+{
+  std::string str = this->String;
+  CHECK_EXPAND(out, str, expanders, version);
+  std::string regexStr = this->Regex;
+  CHECK_EXPAND(out, regexStr, expanders, version);
+
+  cmsys::RegularExpression regex;
+  if (!regex.compile(regexStr)) {
+    return false;
+  }
+
+  out = regex.find(str);
   return true;
 }
 

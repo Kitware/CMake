@@ -81,6 +81,16 @@ public:
   std::vector<std::string> List;
 };
 
+class MatchesCondition : public cmCMakePresetsFile::Condition
+{
+public:
+  bool Evaluate(const std::vector<MacroExpander>& expanders, int version,
+                cm::optional<bool>& out) const override;
+
+  std::string String;
+  std::string Regex;
+};
+
 class AnyAllOfCondition : public cmCMakePresetsFile::Condition
 {
 public:

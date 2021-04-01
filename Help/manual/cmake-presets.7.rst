@@ -864,6 +864,22 @@ object, it has the following fields:
       A required list of strings to search. This field supports macro
       expansion, and uses short-circuit evaluation.
 
+  ``"matches"``
+
+  ``"notMatches"``
+
+    Indicates that the condition searches for a regular expression in a string.
+    The condition object will have the following additional fields:
+
+    ``string``
+
+      A required string to search. This field supports macro expansion.
+
+    ``regex``
+
+      A required regular expression to search for. This field supports macro
+      expansion.
+
   ``"anyOf"``
 
   ``"allOf"``
