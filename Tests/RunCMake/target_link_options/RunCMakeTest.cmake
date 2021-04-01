@@ -17,6 +17,9 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
   if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Release)
   endif()
+  if (RunCMake_GENERATOR MATCHES "Ninja")
+    set(VERBOSE -- -v)
+  endif()
 
   run_cmake(LINK_OPTIONS)
 
@@ -56,6 +59,10 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
       run_cmake_target(genex_DEVICE_LINK CMP0105_OLD LinkOptions_CMP0105_OLD --config Release)
       run_cmake_target(genex_DEVICE_LINK CMP0105_NEW LinkOptions_CMP0105_NEW --config Release)
       run_cmake_target(genex_DEVICE_LINK device LinkOptions_device --config Release)
+
+      if (RunCMake_GENERATOR MATCHES "(Ninja|Unix Makefiles)")
+        run_cmake_target(genex_DEVICE_LINK host_link_options LinkOptions_host_link_options --config Release ${VERBOSE})
+      endif()
     endif()
 
     run_cmake_target(genex_DEVICE_LINK no_device LinkOptions_no_device --config Release)
