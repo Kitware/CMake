@@ -3641,13 +3641,58 @@ std::vector<BT<std::string>> wrapOptions(
     return result;
   }
 
-  if (wrapperFlag.empty() || cmHasLiteralPrefix(options.front(), "LINKER:")) {
-    // nothing specified or LINKER wrapper, insert elements as is
+  if (wrapperFlag.empty()) {
+    // nothing specified, insert elements as is
     result.reserve(options.size());
     for (std::string& o : options) {
       result.emplace_back(std::move(o), bt);
     }
-  } else {
+    return result;
+  }
+
+  for (std::vector<std::string>::size_type index = 0; index < options.size();
+       index++) {
+    if (cmHasLiteralPrefix(options[index], "LINKER:")) {
+      // LINKER wrapper specified, insert elements as is
+      result.emplace_back(std::move(options[index]), bt);
+      continue;
+    }
+    if (cmHasLiteralPrefix(options[index], "-Wl,")) {
+      // replace option by LINKER wrapper
+      result.emplace_back(options[index].replace(0, 4, "LINKER:"), bt);
+      continue;
+    }
+    if (cmHasLiteralPrefix(options[index], "-Xlinker=")) {
+      // replace option by LINKER wrapper
+      result.emplace_back(options[index].replace(0, 9, "LINKER:"), bt);
+      continue;
+    }
+    if (options[index] == "-Xlinker") {
+      // replace option by LINKER wrapper
+      if (index + 1 < options.size()) {
+        result.emplace_back("LINKER:" + options[++index], bt);
+      } else {
+        result.emplace_back(std::move(options[index]), bt);
+      }
+      continue;
+    }
+
+    // collect all options which must be transformed
+    std::vector<std::string> opts;
+    while (index < options.size()) {
+      if (!cmHasLiteralPrefix(options[index], "LINKER:") &&
+          !cmHasLiteralPrefix(options[index], "-Wl,") &&
+          !cmHasLiteralPrefix(options[index], "-Xlinker")) {
+        opts.emplace_back(std::move(options[index++]));
+      } else {
+        --index;
+        break;
+      }
+    }
+    if (opts.empty()) {
+      continue;
+    }
+
     if (!wrapperSep.empty()) {
       if (concatFlagAndArgs) {
         // insert flag elements except last one
@@ -3656,24 +3701,23 @@ std::vector<BT<std::string>> wrapOptions(
         }
         // concatenate last flag element and all list values
         // in one option
-        result.emplace_back(wrapperFlag.back() + cmJoin(options, wrapperSep),
-                            bt);
+        result.emplace_back(wrapperFlag.back() + cmJoin(opts, wrapperSep), bt);
       } else {
         for (std::string const& i : wrapperFlag) {
           result.emplace_back(i, bt);
         }
         // concatenate all list values in one option
-        result.emplace_back(cmJoin(options, wrapperSep), bt);
+        result.emplace_back(cmJoin(opts, wrapperSep), bt);
       }
     } else {
       // prefix each element of list with wrapper
       if (concatFlagAndArgs) {
-        std::transform(options.begin(), options.end(), options.begin(),
+        std::transform(opts.begin(), opts.end(), opts.begin(),
                        [&wrapperFlag](std::string const& o) -> std::string {
                          return wrapperFlag.back() + o;
                        });
       }
-      for (std::string& o : options) {
+      for (std::string& o : opts) {
         for (auto i = wrapperFlag.begin(),
                   e = concatFlagAndArgs ? wrapperFlag.end() - 1
                                         : wrapperFlag.end();
