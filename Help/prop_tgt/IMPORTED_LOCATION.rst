@@ -4,12 +4,12 @@ IMPORTED_LOCATION
 Full path to the main file on disk for an ``IMPORTED`` target.
 
 Set this to the location of an ``IMPORTED`` target file on disk.  For
-executables this is the location of the executable file.  For bundles
-on macOS this is the location of the executable file inside
-``Contents/MacOS`` under the application bundle folder.  For ``STATIC``
+executables this is the location of the executable file.  For ``STATIC``
 libraries and modules this is the location of the library or module.
 For ``SHARED`` libraries on non-DLL platforms this is the location of the
-shared library.  For frameworks on macOS this is the location of the
+shared library.  For application bundles on macOS this is the location of
+the executable file inside ``Contents/MacOS`` within the bundle folder.
+For frameworks on macOS this is the location of the
 library file symlink just inside the framework folder.  For DLLs this
 is the location of the ``.dll`` part of the library.  For ``UNKNOWN``
 libraries this is the location of the file to be linked.  Ignored for
