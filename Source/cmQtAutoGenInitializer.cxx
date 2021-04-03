@@ -936,7 +936,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           // Check if the .ui file has uic options
           std::string const uicOpts = sf->GetSafeProperty(kw.AUTOUIC_OPTIONS);
           if (!uicOpts.empty()) {
-            this->Uic.UiFiles.emplace_back(fullPath, cmExpandedList(uicOpts));
+            this->Uic.UiFilesWithOptions.emplace_back(fullPath,
+                                                      cmExpandedList(uicOpts));
           }
 
           auto uiHeaderRelativePath = cmSystemTools::RelativePath(
@@ -1626,7 +1627,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     uic_skip.insert(this->Uic.SkipUi.begin(), this->Uic.SkipUi.end());
 
     info.SetArray("UIC_SKIP", uic_skip);
-    info.SetArrayArray("UIC_UI_FILES", this->Uic.UiFiles,
+    info.SetArrayArray("UIC_UI_FILES", this->Uic.UiFilesWithOptions,
                        [](Json::Value& jval, UicT::UiFileT const& uiFile) {
                          jval.resize(2u);
                          jval[0u] = uiFile.first;

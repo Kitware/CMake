@@ -236,7 +236,7 @@ private:
       : GenVarsT(GenT::UIC){};
 
     std::set<std::string> SkipUi;
-    std::vector<UiFileT> UiFiles;
+    std::vector<UiFileT> UiFilesWithOptions;
     ConfigStrings<std::vector<std::string>> Options;
     std::vector<std::string> SearchPaths;
     std::vector<std::pair<ConfigString /*ui header*/, std::string /*genex*/>>
