@@ -294,6 +294,17 @@ bool InfoWriter::Save(std::string const& filename)
   return fileStream.Close();
 }
 
+void AddAutogenExecutableToDependencies(
+  cmQtAutoGenInitializer::GenVarsT const& genVars,
+  std::vector<std::string>& dependencies)
+{
+  if (genVars.ExecutableTarget != nullptr) {
+    dependencies.push_back(genVars.ExecutableTarget->Target->GetName());
+  } else if (!genVars.Executable.empty()) {
+    dependencies.push_back(genVars.Executable);
+  }
+}
+
 } // End of unnamed namespace
 
 cmQtAutoGenInitializer::cmQtAutoGenInitializer(
@@ -1279,16 +1290,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       dependencies.clear();
       dependencies.push_back(timestampTargetName);
 
-      if (this->Moc.ExecutableTarget != nullptr) {
-        dependencies.push_back(this->Moc.ExecutableTarget->Target->GetName());
-      } else if (!this->Moc.Executable.empty()) {
-        dependencies.push_back(this->Moc.Executable);
-      }
-      if (this->Uic.ExecutableTarget != nullptr) {
-        dependencies.push_back(this->Uic.ExecutableTarget->Target->GetName());
-      } else if (!this->Uic.Executable.empty()) {
-        dependencies.push_back(this->Uic.Executable);
-      }
+      AddAutogenExecutableToDependencies(this->Moc, dependencies);
+      AddAutogenExecutableToDependencies(this->Uic, dependencies);
 
       // Create the custom command that outputs the timestamp file.
       const char timestampFileName[] = "timestamp";
