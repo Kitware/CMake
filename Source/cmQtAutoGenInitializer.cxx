@@ -936,7 +936,9 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         if (!skipUic) {
           // Check if the .ui file has uic options
           std::string const uicOpts = sf->GetSafeProperty(kw.AUTOUIC_OPTIONS);
-          if (!uicOpts.empty()) {
+          if (uicOpts.empty()) {
+            this->Uic.UiFilesNoOptions.emplace_back(fullPath);
+          } else {
             this->Uic.UiFilesWithOptions.emplace_back(fullPath,
                                                       cmExpandedList(uicOpts));
           }
@@ -1179,6 +1181,42 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     for (cmTarget* depTarget : this->AutogenTarget.DependTargets) {
       this->GenTarget->Target->AddUtility(depTarget->GetName(), false,
                                           this->Makefile);
+    }
+
+    if (!this->Uic.UiFilesNoOptions.empty() ||
+        !this->Uic.UiFilesWithOptions.empty()) {
+      // Add a generated timestamp file
+      ConfigString timestampFile;
+      std::string timestampFileGenex;
+      ConfigFileNamesAndGenex(timestampFile, timestampFileGenex,
+                              cmStrCat(this->Dir.Build, "/autouic"_s),
+                              ".stamp"_s);
+      this->AddGeneratedSource(timestampFile, this->Uic);
+
+      // Add a step in the pre-build command to touch the timestamp file
+      commandLines.push_back(
+        cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E", "touch",
+                            timestampFileGenex }));
+
+      // UIC needs to be re-run if any of the known UI files change or the
+      // executable itself has been updated
+      auto uicDependencies = this->Uic.UiFilesNoOptions;
+      for (auto const& uiFile : this->Uic.UiFilesWithOptions) {
+        uicDependencies.push_back(uiFile.first);
+      }
+      AddAutogenExecutableToDependencies(this->Uic, uicDependencies);
+
+      // Add a rule file to cause the target to build if a dependency has
+      // changed, which will trigger the pre-build command to run autogen
+      std::string no_main_dependency;
+      cmCustomCommandLines no_command_lines;
+      this->LocalGen->AddCustomCommandToOutput(
+        timestampFileGenex, uicDependencies, no_main_dependency,
+        no_command_lines, /*comment=*/"", this->Dir.Work.c_str(),
+        /*cmp0116=*/cmPolicies::NEW, /*replace=*/false,
+        /*escapeOldStyle=*/false, /*uses_terminal=*/false,
+        /*command_expand_lists=*/false, /*depfile=*/"", /*job_pool=*/"",
+        stdPipesUTF8);
     }
 
     // Add the pre-build command directly to bypass the OBJECT_LIBRARY

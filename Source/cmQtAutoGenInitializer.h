@@ -238,6 +238,7 @@ private:
       : GenVarsT(GenT::UIC){};
 
     std::set<std::string> SkipUi;
+    std::vector<std::string> UiFilesNoOptions;
     std::vector<UiFileT> UiFilesWithOptions;
     ConfigStrings<std::vector<std::string>> Options;
     std::vector<std::string> SearchPaths;
