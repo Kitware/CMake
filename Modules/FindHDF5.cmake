@@ -811,6 +811,9 @@ if( NOT HDF5_FOUND )
     endif()
 
     foreach(_lang IN LISTS HDF5_LANGUAGE_BINDINGS)
+        # The "main" library.
+        set(_hdf5_main_library "")
+
         # find the HDF5 libraries
         foreach(LIB IN LISTS HDF5_${_lang}_LIBRARY_NAMES)
             if(HDF5_USE_STATIC_LIBRARIES)
@@ -841,6 +844,15 @@ if( NOT HDF5_FOUND )
                 ${_HDF5_SEARCH_OPTS}
             )
 
+            # Set the "main" library if not already set.
+            if (NOT _hdf5_main_library)
+              if (HDF5_${LIB}_LIBRARY_RELEASE)
+                set(_hdf5_main_library "${HDF5_${LIB}_LIBRARY_RELEASE}")
+              elseif (HDF5_${LIB}_LIBRARY_DEBUG)
+                set(_hdf5_main_library "${HDF5_${LIB}_LIBRARY_DEBUG}")
+              endif ()
+            endif ()
+
             select_library_configurations( HDF5_${LIB} )
             list(APPEND HDF5_${_lang}_LIBRARIES ${HDF5_${LIB}_LIBRARY})
         endforeach()
@@ -860,6 +872,8 @@ if( NOT HDF5_FOUND )
         else()
             set(HDF5_INCLUDE_FILENAME hdf5.h)
         endif()
+
+        unset(_hdf5_main_library)
 
         find_path(HDF5_${_lang}_INCLUDE_DIR ${HDF5_INCLUDE_FILENAME}
             HINTS ${HDF5_ROOT}
