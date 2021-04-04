@@ -92,6 +92,7 @@ syn keyword cmakeProperty contained
             \ AUTOUIC_EXECUTABLE
             \ AUTOUIC_OPTIONS
             \ AUTOUIC_SEARCH_PATHS
+            \ AUTOUIC_SOURCE_GROUP
             \ BINARY_DIR
             \ BUILDSYSTEM_TARGETS
             \ BUILD_RPATH
