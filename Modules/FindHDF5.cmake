@@ -811,26 +811,6 @@ if( NOT HDF5_FOUND )
     endif()
 
     foreach(_lang IN LISTS HDF5_LANGUAGE_BINDINGS)
-        # find the HDF5 include directories
-        if("${_lang}" STREQUAL "Fortran")
-            set(HDF5_INCLUDE_FILENAME hdf5.mod HDF5.mod)
-        elseif("${_lang}" STREQUAL "CXX")
-            set(HDF5_INCLUDE_FILENAME H5Cpp.h)
-        else()
-            set(HDF5_INCLUDE_FILENAME hdf5.h)
-        endif()
-
-        find_path(HDF5_${_lang}_INCLUDE_DIR ${HDF5_INCLUDE_FILENAME}
-            HINTS ${HDF5_ROOT}
-            PATHS $ENV{HOME}/.local/include
-            PATH_SUFFIXES include Include ${_inc_suffixes} ${_lib_suffixes}
-            ${_HDF5_SEARCH_OPTS}
-        )
-        mark_as_advanced(HDF5_${_lang}_INCLUDE_DIR)
-        # set the _DIRS variable as this is what the user will normally use
-        set(HDF5_${_lang}_INCLUDE_DIRS ${HDF5_${_lang}_INCLUDE_DIR})
-        list(APPEND HDF5_INCLUDE_DIRS ${HDF5_${_lang}_INCLUDE_DIR})
-
         # find the HDF5 libraries
         foreach(LIB IN LISTS HDF5_${_lang}_LIBRARY_NAMES)
             if(HDF5_USE_STATIC_LIBRARIES)
@@ -871,6 +851,26 @@ if( NOT HDF5_FOUND )
         # Append the libraries for this language binding to the list of all
         # required libraries.
         list(APPEND HDF5_LIBRARIES ${HDF5_${_lang}_LIBRARIES})
+
+        # find the HDF5 include directories
+        if("${_lang}" STREQUAL "Fortran")
+            set(HDF5_INCLUDE_FILENAME hdf5.mod HDF5.mod)
+        elseif("${_lang}" STREQUAL "CXX")
+            set(HDF5_INCLUDE_FILENAME H5Cpp.h)
+        else()
+            set(HDF5_INCLUDE_FILENAME hdf5.h)
+        endif()
+
+        find_path(HDF5_${_lang}_INCLUDE_DIR ${HDF5_INCLUDE_FILENAME}
+            HINTS ${HDF5_ROOT}
+            PATHS $ENV{HOME}/.local/include
+            PATH_SUFFIXES include Include ${_inc_suffixes} ${_lib_suffixes}
+            ${_HDF5_SEARCH_OPTS}
+        )
+        mark_as_advanced(HDF5_${_lang}_INCLUDE_DIR)
+        # set the _DIRS variable as this is what the user will normally use
+        set(HDF5_${_lang}_INCLUDE_DIRS ${HDF5_${_lang}_INCLUDE_DIR})
+        list(APPEND HDF5_INCLUDE_DIRS ${HDF5_${_lang}_INCLUDE_DIR})
 
         if(HDF5_FIND_HL)
             foreach(LIB IN LISTS HDF5_${_lang}_HL_LIBRARY_NAMES)
