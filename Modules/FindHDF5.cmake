@@ -865,8 +865,21 @@ if( NOT HDF5_FOUND )
         list(APPEND HDF5_LIBRARIES ${HDF5_${_lang}_LIBRARIES})
 
         # find the HDF5 include directories
+        set(_hdf5_inc_extra_paths)
+        set(_hdf5_inc_extra_suffixes)
         if("${_lang}" STREQUAL "Fortran")
             set(HDF5_INCLUDE_FILENAME hdf5.mod HDF5.mod)
+
+            # Add library-based search paths for Fortran modules.
+            if (NOT _hdf5_main_library STREQUAL "")
+              # gfortran module directory
+              if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+                get_filename_component(_hdf5_library_dir "${_hdf5_main_library}" DIRECTORY)
+                list(APPEND _hdf5_inc_extra_paths "${_hdf5_library_dir}")
+                unset(_hdf5_library_dir)
+                list(APPEND _hdf5_inc_extra_suffixes gfortran/modules)
+              endif ()
+            endif ()
         elseif("${_lang}" STREQUAL "CXX")
             set(HDF5_INCLUDE_FILENAME H5Cpp.h)
         else()
@@ -877,11 +890,13 @@ if( NOT HDF5_FOUND )
 
         find_path(HDF5_${_lang}_INCLUDE_DIR ${HDF5_INCLUDE_FILENAME}
             HINTS ${HDF5_ROOT}
-            PATHS $ENV{HOME}/.local/include
-            PATH_SUFFIXES include Include ${_inc_suffixes} ${_lib_suffixes}
+            PATHS $ENV{HOME}/.local/include ${_hdf5_inc_extra_paths}
+            PATH_SUFFIXES include Include ${_inc_suffixes} ${_lib_suffixes} ${_hdf5_inc_extra_suffixes}
             ${_HDF5_SEARCH_OPTS}
         )
         mark_as_advanced(HDF5_${_lang}_INCLUDE_DIR)
+        unset(_hdf5_inc_extra_paths)
+        unset(_hdf5_inc_extra_suffixes)
         # set the _DIRS variable as this is what the user will normally use
         set(HDF5_${_lang}_INCLUDE_DIRS ${HDF5_${_lang}_INCLUDE_DIR})
         list(APPEND HDF5_INCLUDE_DIRS ${HDF5_${_lang}_INCLUDE_DIR})
