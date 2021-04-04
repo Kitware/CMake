@@ -943,8 +943,14 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             this->LocalGen->GetCurrentSourceDirectory(),
             cmSystemTools::GetFilenamePath(fullPath));
 
+          // Avoid creating a path containing adjacent slashes
+          if (!uiHeaderRelativePath.empty() &&
+              uiHeaderRelativePath.back() != '/') {
+            uiHeaderRelativePath += '/';
+          }
+
           auto uiHeaderFilePath = cmStrCat(
-            '/', uiHeaderRelativePath, '/', "ui_"_s,
+            '/', uiHeaderRelativePath, "ui_"_s,
             cmSystemTools::GetFilenameWithoutLastExtension(fullPath), ".h"_s);
 
           ConfigString uiHeader;
