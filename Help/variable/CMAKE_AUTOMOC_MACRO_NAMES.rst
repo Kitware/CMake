@@ -11,7 +11,7 @@ This variable is used to initialize the :prop_tgt:`AUTOMOC_MACRO_NAMES`
 property on all the targets. See that target property for additional
 information.
 
-The default value is ``Q_OBJECT;Q_GADGET;Q_NAMESPACE``.
+The default value is ``Q_OBJECT;Q_GADGET;Q_NAMESPACE;Q_NAMESPACE_EXPORT``.
 
 Example
 ^^^^^^^
