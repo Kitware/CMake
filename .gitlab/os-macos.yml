@@ -7,7 +7,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
         # TODO: Factor this out so that each job selects the Xcode version to
         # use so that different versions can be tested in a single pipeline.
-        DEVELOPER_DIR: "/Applications/Xcode-12.2.app/Contents/Developer"
+        DEVELOPER_DIR: "/Applications/Xcode-12.3.app/Contents/Developer"
         # Avoid conflicting with other projects running on the same machine.
         SCCACHE_SERVER_PORT: 4227
 
@@ -47,6 +47,14 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMake_SKIP_INSTALL: 1
 
+.macos10.10_package:
+    extends: .macos_build
+
+    variables:
+        CMAKE_CONFIGURATION: macos10.10_package
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMake_SKIP_INSTALL: 1
+
 ### External testing
 
 .macos_xcode:
@@ -63,7 +71,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos
         - shell
-        - xcode-12.2
+        - xcode-12.3
         - nonconcurrent
 
 .macos_builder_tags_package:
@@ -71,7 +79,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos
         - shell
-        - xcode-12.2
+        - xcode-12.3
         - nonconcurrent
         - finder
 
@@ -80,7 +88,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos
         - shell
-        - xcode-12.2
+        - xcode-12.3
         - concurrent
 
 ## macOS-specific scripts

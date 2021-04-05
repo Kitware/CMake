@@ -991,10 +991,10 @@ if (HDF5_FOUND)
     add_library(HDF5::HDF5 INTERFACE IMPORTED)
     string(REPLACE "-D" "" _hdf5_definitions "${HDF5_DEFINITIONS}")
     set_target_properties(HDF5::HDF5 PROPERTIES
-      INTERFACE_LINK_LIBRARIES "${HDF5_LIBRARIES}"
       INTERFACE_INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIRS}"
       INTERFACE_COMPILE_DEFINITIONS "${_hdf5_definitions}")
     unset(_hdf5_definitions)
+    target_link_libraries(HDF5::HDF5 INTERFACE ${HDF5_LIBRARIES})
   endif ()
 
   foreach (hdf5_lang IN LISTS HDF5_LANGUAGE_BINDINGS)

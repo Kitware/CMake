@@ -1053,7 +1053,14 @@ function(FetchContent_Populate contentName)
     # so no population is required. The build directory may still be specified
     # by the declared details though.
 
-    if(NOT EXISTS "${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
+    if(NOT IS_ABSOLUTE "${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
+      # Don't check this directory because we don't know what location it is
+      # expected to be relative to. We can't make this a hard error for backward
+      # compatibility reasons.
+      message(WARNING "Relative source directory specified. This is not safe, "
+        "as it depends on the calling directory scope.\n"
+        "  FETCHCONTENT_SOURCE_DIR_${contentNameUpper} --> ${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
+    elseif(NOT EXISTS "${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
       message(FATAL_ERROR "Manually specified source directory is missing:\n"
         "  FETCHCONTENT_SOURCE_DIR_${contentNameUpper} --> ${FETCHCONTENT_SOURCE_DIR_${contentNameUpper}}")
     endif()

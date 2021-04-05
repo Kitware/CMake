@@ -17,18 +17,21 @@
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
 
-.linux_package:
-    variables:
-        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        LAUNCHER: "scl enable devtoolset-6 rh-python36 --"
-
 .linux_package_x86_64:
-    extends: .linux_package
-
     image: "kitware/cmake:build-linux-x86_64-deps-2020-04-02@sha256:77e9ab183f34680990db9da5945473e288f0d6556bce79ecc1589670d656e157"
 
     variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        LAUNCHER: "scl enable devtoolset-6 rh-python36 --"
         CMAKE_ARCH: x86_64
+
+.linux_package_aarch64:
+    image: "kitware/cmake:build-linux-aarch64-deps-2020-12-21@sha256:0bd7dfe4e45593b04e39cd21e44011034610cfd376900558c5ef959bb1af15af"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        LAUNCHER: "scl enable devtoolset-7 --"
+        CMAKE_ARCH: aarch64
 
 ### Debian
 
@@ -159,6 +162,13 @@
         - cuda-rt
         - docker
         - linux
+
+.linux_builder_tags_aarch64:
+    tags:
+        - cmake
+        - build
+        - docker
+        - linux-aarch64
 
 ## Linux-specific scripts
 

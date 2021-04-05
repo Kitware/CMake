@@ -186,6 +186,29 @@ build:linux-x86_64-package:
     variables:
         RSYNC_DESTINATION: dev
 
+build:linux-aarch64-package:
+    extends:
+        - .linux_package_aarch64
+        - .cmake_build_linux_package
+        - .cmake_release_artifacts
+        - .linux_builder_tags_aarch64
+        - .run_only_for_package
+    dependencies:
+        - prep:doc-package
+    needs:
+        - prep:doc-package
+
+.upload:linux-aarch64-package:
+    extends:
+        - .rsync_upload
+        - .run_only_for_package
+    dependencies:
+        - build:linux-aarch64-package
+    needs:
+        - build:linux-aarch64-package
+    variables:
+        RSYNC_DESTINATION: dev
+
 # macOS builds
 
 build:macos-ninja:
@@ -260,6 +283,18 @@ build:macos-package:
         - build:macos-package
     variables:
         RSYNC_DESTINATION: dev
+
+build:macos10.10-package:
+    extends:
+        - .macos10.10_package
+        - .cmake_build_macos_package
+        - .cmake_release_artifacts
+        - .macos_builder_tags_package
+        - .run_only_for_package
+    dependencies:
+        - prep:doc-package
+    needs:
+        - prep:doc-package
 
 # Windows builds
 

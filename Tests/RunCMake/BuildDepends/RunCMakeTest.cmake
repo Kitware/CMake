@@ -70,6 +70,23 @@ if(RunCMake_GENERATOR MATCHES "Make")
   endif()
 endif()
 
+function(run_RepeatCMake CASE)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${CASE}-build)
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_CONFIGURATION_TYPES=Debug)
+  else()
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  run_cmake(${CASE})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${CASE}-build1 ${CMAKE_COMMAND} --build . --config Debug)
+  run_cmake_command(${CASE}-rerun1 ${CMAKE_COMMAND} .)
+  file(WRITE ${RunCMake_TEST_BINARY_DIR}/exists-for-build2 "")
+  run_cmake_command(${CASE}-build2 ${CMAKE_COMMAND} --build . --config Debug)
+endfunction()
+
+run_RepeatCMake(RepeatCMake-Custom)
+
 function(run_ReGeneration)
   # test re-generation of project even if CMakeLists.txt files disappeared
 

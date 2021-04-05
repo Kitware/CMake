@@ -21,6 +21,11 @@ run_cmake_with_options(ManualSourceDirectory
 run_cmake_with_options(ManualSourceDirectoryMissing
   -D "FETCHCONTENT_SOURCE_DIR_WITHPROJECT=${CMAKE_CURRENT_LIST_DIR}/ADirThatDoesNotExist"
 )
+# Need to use :STRING to prevent CMake from automatically converting it to an
+# absolute path
+run_cmake_with_options(ManualSourceDirectoryRelative
+  -D "FETCHCONTENT_SOURCE_DIR_WITHPROJECT:STRING=WithProject"
+)
 
 function(run_FetchContent_DirOverrides)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/DirOverrides-build)

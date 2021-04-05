@@ -308,7 +308,7 @@ void cmMakefile::PrintCommandTrace(
 
   args.reserve(lff.Arguments().size());
   for (cmListFileArgument const& arg : lff.Arguments()) {
-    if (expand) {
+    if (expand && arg.Delim != cmListFileArgument::Bracket) {
       temp = arg.Value;
       this->ExpandVariablesInString(temp);
       args.push_back(temp);
