@@ -413,7 +413,14 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       endif()
       set(cuda_tools "CUDA ${CMAKE_VS_PLATFORM_TOOLSET_CUDA}")
       set(id_compile "CudaCompile")
-      set(id_ItemDefinitionGroup_entry "<CudaCompile><AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions></CudaCompile>")
+      if(CMAKE_VS_PLATFORM_NAME STREQUAL x64)
+        set(cuda_target "<TargetMachinePlatform>64</TargetMachinePlatform>")
+      endif()
+      foreach(arch ${CMAKE_CUDA_ARCHITECTURES})
+        string(REGEX MATCH "[0-9]+" arch_name "${arch}")
+        string(APPEND cuda_codegen "compute_${arch_name},sm_${arch_name};")
+      endforeach()
+      set(id_ItemDefinitionGroup_entry "<CudaCompile>${cuda_target}<AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions><CodeGeneration>${cuda_codegen}</CodeGeneration></CudaCompile>")
       set(id_PostBuildEvent_Command [[echo CMAKE_CUDA_COMPILER=$(CudaToolkitBinDir)\nvcc.exe]])
       if(CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR)
         set(id_CudaToolkitCustomDir "<CudaToolkitCustomDir>${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}nvcc</CudaToolkitCustomDir>")
@@ -422,9 +429,6 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       else()
         string(CONCAT id_Import_props [[<Import Project="$(VCTargetsPath)\BuildCustomizations\]] "${cuda_tools}" [[.props" />]])
         string(CONCAT id_Import_targets [[<Import Project="$(VCTargetsPath)\BuildCustomizations\]] "${cuda_tools}" [[.targets" />]])
-      endif()
-      if(CMAKE_VS_PLATFORM_NAME STREQUAL x64)
-        set(id_ItemDefinitionGroup_entry "<CudaCompile><TargetMachinePlatform>64</TargetMachinePlatform><AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions></CudaCompile>")
       endif()
       if(CMAKE_CUDA_FLAGS MATCHES "(^| )-cudart +shared( |$)")
         set(id_Link_AdditionalDependencies "<AdditionalDependencies>cudart.lib</AdditionalDependencies>")
@@ -748,19 +752,28 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
         break()
       endif()
     endforeach()
-    set(COMPILER_ID_TWICE)
+
     # With the IAR Compiler, some strings are found twice, first time as incomplete
     # list like "?<Constant "INFO:compiler[IAR]">".  Remove the incomplete copies.
     list(FILTER CMAKE_${lang}_COMPILER_ID_STRINGS EXCLUDE REGEX "\\?<Constant \\\"")
+
+    # The IAR-AVR compiler uses a binary format that places a '6'
+    # character (0x34) before each character in the string.  Strip
+    # out these characters without removing any legitimate characters.
+    if(CMAKE_${lang}_COMPILER_ID_STRINGS MATCHES "(.)I.N.F.O.:.")
+      string(REGEX REPLACE "${CMAKE_MATCH_1}([^;])" "\\1"
+        CMAKE_${lang}_COMPILER_ID_STRINGS "${CMAKE_${lang}_COMPILER_ID_STRINGS}")
+    endif()
+
+    # Remove arbitrary text that may appear before or after each INFO string.
+    string(REGEX MATCHALL "INFO:[A-Za-z0-9_]+\\[([^]\"]*)\\]"
+      CMAKE_${lang}_COMPILER_ID_STRINGS "${CMAKE_${lang}_COMPILER_ID_STRINGS}")
+
     # In C# binaries, some strings are found more than once.
     list(REMOVE_DUPLICATES CMAKE_${lang}_COMPILER_ID_STRINGS)
+
+    set(COMPILER_ID_TWICE)
     foreach(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
-      # The IAR-AVR compiler uses a binary format that places a '6'
-      # character (0x34) before each character in the string.  Strip
-      # out these characters without removing any legitimate characters.
-      if("${info}" MATCHES "(.)I.N.F.O.:.")
-        string(REGEX REPLACE "${CMAKE_MATCH_1}(.)" "\\1" info "${info}")
-      endif()
       if("${info}" MATCHES "INFO:compiler\\[([^]\"]*)\\]")
         if(COMPILER_ID)
           set(COMPILER_ID_TWICE 1)

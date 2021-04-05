@@ -43,24 +43,43 @@ if(CMAKE_HOST_UNIX)
     else()
       exec_program(${CMAKE_UNAME} ARGS -r OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_VERSION)
     endif()
-    if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux|CYGWIN.*|Darwin|^GNU$|Android")
+    if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux|CYGWIN.*|^GNU$|Android")
       exec_program(${CMAKE_UNAME} ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
         RETURN_VALUE val)
-      if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
-        if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
-          # Check whether we are running under Rosetta on arm64 hardware.
+    elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+      # If we are running on Apple Silicon, honor CMAKE_APPLE_SILICON_PROCESSOR.
+      if(DEFINED CMAKE_APPLE_SILICON_PROCESSOR)
+        set(_CMAKE_APPLE_SILICON_PROCESSOR "${CMAKE_APPLE_SILICON_PROCESSOR}")
+      elseif(DEFINED ENV{CMAKE_APPLE_SILICON_PROCESSOR})
+        set(_CMAKE_APPLE_SILICON_PROCESSOR "$ENV{CMAKE_APPLE_SILICON_PROCESSOR}")
+      else()
+        set(_CMAKE_APPLE_SILICON_PROCESSOR "")
+      endif()
+      if(_CMAKE_APPLE_SILICON_PROCESSOR)
+        if(";${_CMAKE_APPLE_SILICON_PROCESSOR};" MATCHES "^;(arm64|x86_64);$")
           execute_process(COMMAND sysctl -q hw.optional.arm64
             OUTPUT_VARIABLE _sysctl_stdout
             ERROR_VARIABLE _sysctl_stderr
             RESULT_VARIABLE _sysctl_result
             )
-          if(_sysctl_result EQUAL 0 AND _sysctl_stdout MATCHES "hw.optional.arm64: 1")
-            set(CMAKE_HOST_SYSTEM_PROCESSOR "arm64")
+          if(NOT _sysctl_result EQUAL 0 OR NOT _sysctl_stdout MATCHES "hw.optional.arm64: 1")
+            set(_CMAKE_APPLE_SILICON_PROCESSOR "")
           endif()
-        elseif(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "Power Macintosh")
-          # OS X ppc 'uname -m' may report 'Power Macintosh' instead of 'powerpc'
-          set(CMAKE_HOST_SYSTEM_PROCESSOR "powerpc")
+          unset(_sysctl_result)
+          unset(_sysctl_stderr)
+          unset(_sysctl_stdout)
         endif()
+      endif()
+      if(_CMAKE_APPLE_SILICON_PROCESSOR)
+        set(CMAKE_HOST_SYSTEM_PROCESSOR "${_CMAKE_APPLE_SILICON_PROCESSOR}")
+      else()
+        exec_program(${CMAKE_UNAME} ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
+          RETURN_VALUE val)
+      endif()
+      unset(_CMAKE_APPLE_SILICON_PROCESSOR)
+      if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "Power Macintosh")
+        # OS X ppc 'uname -m' may report 'Power Macintosh' instead of 'powerpc'
+        set(CMAKE_HOST_SYSTEM_PROCESSOR "powerpc")
       endif()
     elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "OpenBSD")
       exec_program(arch ARGS -s OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR

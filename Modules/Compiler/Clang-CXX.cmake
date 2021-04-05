@@ -2,9 +2,7 @@ include(Compiler/Clang)
 __compiler_clang(CXX)
 __compiler_clang_cxx_standards(CXX)
 
-
 if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
-  set(CMAKE_CXX_COMPILE_OPTIONS_EXPLICIT_LANGUAGE -x c++)
   set(CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN "-fvisibility-inlines-hidden")
 endif()
 

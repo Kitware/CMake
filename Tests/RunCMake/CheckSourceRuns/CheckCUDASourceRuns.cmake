@@ -2,6 +2,8 @@
 enable_language (CUDA)
 include(CheckSourceRuns)
 
+set(CUDA 1) # test that this is tolerated
+
 check_source_runs(CUDA "int main() {return 2;}" SHOULD_FAIL)
 if(SHOULD_FAIL)
   message(SEND_ERROR "CUDA check_source_runs succeeded, but should have failed.")

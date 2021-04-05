@@ -1,0 +1,1 @@
+-- WorkingDir='[^']*/Tests/RunCMake/add_custom_command/WorkingDirectory-build/Debug'

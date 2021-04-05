@@ -8,7 +8,7 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 4)
 endif()
 
 
-add_library(ispc_objects OBJECT simple.ispc extra.ispc)
+add_library(ispc_objects OBJECT simple.ispc subdir/extra.ispc)
 
 set_target_properties(ispc_objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(ispc_objects PROPERTIES ISPC_INSTRUCTION_SETS "sse2-i32x4;sse4-i8x16")

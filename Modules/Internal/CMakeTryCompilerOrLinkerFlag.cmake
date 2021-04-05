@@ -6,13 +6,13 @@
 NOTE: This function is used internally by CMake. Projects should not include
       this file directly.
 
-The cmake_check_compiler_flag() function can be used to compile and link a
+The cmake_try_compiler_or_linker_flag() function can be used to compile and link a
 source file to check whether a specific compiler or linker flag is supported.
 The function does not use the try_compile() command so as to avoid infinite
 recursion.  It may not work for all platforms or toolchains, the caller is
 responsible for ensuring it is only called in valid situations.
 
-  cmake_check_compiler_flag(<lang> <flag> <result>
+  cmake_try_compiler_or_linker_flag(<lang> <flag> <result>
                             [SRC_EXT <ext>] [COMMAND_PATTERN <pattern>]
                             [FAIL_REGEX <regex> ...]
                             [OUTPUT_VARIABLE <output>])
@@ -39,7 +39,7 @@ Optional parameters:
 include_guard(GLOBAL)
 include(CMakeCheckCompilerFlagCommonPatterns)
 
-function(CMAKE_CHECK_COMPILER_FLAG lang flag result)
+function(CMAKE_TRY_COMPILER_OR_LINKER_FLAG lang flag result)
   # Cache results between runs similar to check_<lang>_source_compiles()
   if(DEFINED ${result})
     return()

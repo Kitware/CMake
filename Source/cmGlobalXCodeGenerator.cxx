@@ -937,14 +937,6 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
     default:
       break;
   }
-
-  // explicitly add the explicit language flag before any other flag
-  // this way backwards compatibility with user flags is maintained
-  if (sf->GetProperty("LANGUAGE")) {
-    this->CurrentLocalGenerator->AppendFeatureOptions(flags, lang,
-                                                      "EXPLICIT_LANGUAGE");
-  }
-
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (cmProp cflags = sf->GetProperty(COMPILE_FLAGS)) {
     lg->AppendFlags(flags, genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS));
@@ -1973,6 +1965,15 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
   return buildPhase;
 }
 
+namespace {
+void ReplaceScriptVars(std::string& cmd)
+{
+  cmSystemTools::ReplaceString(cmd, "$(CONFIGURATION)", "$CONFIGURATION");
+  cmSystemTools::ReplaceString(cmd, "$(EFFECTIVE_PLATFORM_NAME)",
+                               "$EFFECTIVE_PLATFORM_NAME");
+}
+}
+
 std::string cmGlobalXCodeGenerator::ConstructScript(
   cmCustomCommandGenerator const& ccg)
 {
@@ -1983,6 +1984,7 @@ std::string cmGlobalXCodeGenerator::ConstructScript(
     wd = lg->GetCurrentBinaryDirectory();
   }
   wd = lg->ConvertToOutputFormat(wd, cmOutputConverter::SHELL);
+  ReplaceScriptVars(wd);
   script = cmStrCat(script, "  cd ", wd, "\n");
   for (unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c) {
     std::string cmd = ccg.GetCommand(c);
@@ -1992,9 +1994,7 @@ std::string cmGlobalXCodeGenerator::ConstructScript(
     cmSystemTools::ReplaceString(cmd, "/./", "/");
     cmd = lg->ConvertToOutputFormat(cmd, cmOutputConverter::SHELL);
     ccg.AppendArguments(c, cmd);
-    cmSystemTools::ReplaceString(cmd, "$(CONFIGURATION)", "$CONFIGURATION");
-    cmSystemTools::ReplaceString(cmd, "$(EFFECTIVE_PLATFORM_NAME)",
-                                 "$EFFECTIVE_PLATFORM_NAME");
+    ReplaceScriptVars(cmd);
     script = cmStrCat(script, "  ", cmd, '\n');
   }
   return script;

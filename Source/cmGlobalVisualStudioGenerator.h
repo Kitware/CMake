@@ -166,6 +166,11 @@ protected:
 
   void WriteSLNHeader(std::ostream& fout);
 
+  FindMakeProgramStage GetFindMakeProgramStage() const override
+  {
+    return FindMakeProgramStage::Early;
+  }
+
   bool ComputeTargetDepends() override;
   class VSDependSet : public std::set<std::string>
   {

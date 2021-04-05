@@ -31,4 +31,6 @@ public:
   cmInstallFilesGenerator* HeaderGenerator;
   std::string InterfaceIncludeDirectories;
   ///@}
+
+  bool NamelinkOnly = false;
 };

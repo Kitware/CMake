@@ -1879,7 +1879,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     target->GetAppleArchs(config, archs);
     if (!archs.empty() &&
         (lang == "C" || lang == "CXX" || lang == "OBJ" || lang == "OBJCXX" ||
-         cmHasLiteralPrefix(lang, "ASM"))) {
+         lang == "ASM")) {
       for (std::string const& arch : archs) {
         if (filterArch.empty() || filterArch == arch) {
           flags += " -arch ";
@@ -1940,9 +1940,11 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   this->AddConfigVariableFlags(flags, cmStrCat("CMAKE_", lang, "_FLAGS"),
                                config);
 
-  std::string const& compiler = this->Makefile->GetSafeDefinition(
+  std::string compiler = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
 
+  std::string compilerSimulateId = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", lang, "_SIMULATE_ID"));
   if (lang == "Swift") {
     if (cmProp v = target->GetProperty("Swift_LANGUAGE_VERSION")) {
       if (cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
@@ -1957,14 +1959,24 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     target->AddCUDAToolkitFlags(flags);
   } else if (lang == "ISPC") {
     target->AddISPCTargetFlags(flags);
+  } else if (lang == "RC" &&
+             this->Makefile->GetSafeDefinition("CMAKE_RC_COMPILER")
+                 .find("llvm-rc") != std::string::npos) {
+    compiler = this->Makefile->GetSafeDefinition("CMAKE_C_COMPILER_ID");
+    if (!compiler.empty()) {
+      compilerSimulateId =
+        this->Makefile->GetSafeDefinition("CMAKE_C_SIMULATE_ID");
+    } else {
+      compiler = this->Makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
+      compilerSimulateId =
+        this->Makefile->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID");
+    }
   }
+
   // Add VFS Overlay for Clang compiliers
   if (compiler == "Clang") {
     if (cmProp vfsOverlay =
           this->Makefile->GetDefinition("CMAKE_CLANG_VFS_OVERLAY")) {
-      std::string const& compilerSimulateId =
-        this->Makefile->GetSafeDefinition(
-          cmStrCat("CMAKE_", lang, "_SIMULATE_ID"));
       if (compilerSimulateId == "MSVC") {
         this->AppendCompileOptions(
           flags,
@@ -2426,17 +2438,21 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
     return;
   }
 
-  std::vector<std::string> ispcSuffixes =
+  cmProp ispcHeaderSuffixProp = target->GetProperty("ISPC_HEADER_SUFFIX");
+  assert(ispcHeaderSuffixProp != nullptr);
+
+  std::vector<std::string> ispcArchSuffixes =
     detail::ComputeISPCObjectSuffixes(target);
-  const bool extra_objects = (ispcSuffixes.size() > 1);
+  const bool extra_objects = (ispcArchSuffixes.size() > 1);
 
   std::vector<std::string> configsList =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   for (std::string const& config : configsList) {
 
-    std::string perConfigDir = target->GetObjectDirectory(config);
+    std::string rootObjectDir = target->GetObjectDirectory(config);
+    std::string headerDir = rootObjectDir;
     if (cmProp prop = target->GetProperty("ISPC_HEADER_DIRECTORY")) {
-      perConfigDir = cmSystemTools::CollapseFullPath(
+      headerDir = cmSystemTools::CollapseFullPath(
         cmStrCat(this->GetBinaryDirectory(), '/', *prop));
     }
 
@@ -2450,14 +2466,19 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
       const std::string& lang = sf->GetLanguage();
       if (lang == "ISPC") {
         std::string const& objectName = target->GetObjectName(sf);
+
+        // Drop both ".obj" and the source file extension
         std::string ispcSource =
           cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+        ispcSource =
+          cmSystemTools::GetFilenameWithoutLastExtension(ispcSource);
 
-        auto headerPath = cmStrCat(perConfigDir, '/', ispcSource, ".h");
+        auto headerPath =
+          cmStrCat(headerDir, '/', ispcSource, *ispcHeaderSuffixProp);
         target->AddISPCGeneratedHeader(headerPath, config);
         if (extra_objects) {
           std::vector<std::string> objs = detail::ComputeISPCExtraObjects(
-            objectName, perConfigDir, ispcSuffixes);
+            objectName, rootObjectDir, ispcArchSuffixes);
           target->AddISPCGeneratedObject(std::move(objs), config);
         }
       }
@@ -2506,8 +2527,10 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         }
 
         if (!useMultiArchPch.empty()) {
-          target->Target->SetProperty(
-            cmStrCat(lang, "_COMPILE_OPTIONS_USE_PCH"), useMultiArchPch);
+
+          target->Target->AppendProperty(
+            cmStrCat(lang, "_COMPILE_OPTIONS_USE_PCH"),
+            cmStrCat("$<$<CONFIG:", config, ">:", useMultiArchPch, ">"));
         }
       }
 
@@ -4074,15 +4097,23 @@ std::vector<std::string> ComputeISPCExtraObjects(
   std::string const& objectName, std::string const& buildDirectory,
   std::vector<std::string> const& ispcSuffixes)
 {
+  auto normalizedDir = cmSystemTools::CollapseFullPath(buildDirectory);
   std::vector<std::string> computedObjects;
   computedObjects.reserve(ispcSuffixes.size());
 
   auto extension = cmSystemTools::GetFilenameLastExtension(objectName);
-  auto objNameNoExt =
-    cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+
+  // We can't use cmSystemTools::GetFilenameWithoutLastExtension as it
+  // drops any directories in objectName
+  auto objNameNoExt = objectName;
+  std::string::size_type dot_pos = objectName.rfind('.');
+  if (dot_pos != std::string::npos) {
+    objNameNoExt.resize(dot_pos);
+  }
+
   for (const auto& ispcTarget : ispcSuffixes) {
     computedObjects.emplace_back(
-      cmStrCat(buildDirectory, "/", objNameNoExt, "_", ispcTarget, extension));
+      cmStrCat(normalizedDir, "/", objNameNoExt, "_", ispcTarget, extension));
   }
 
   return computedObjects;

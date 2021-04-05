@@ -1,8 +1,6 @@
 CTEST_CUSTOM_ERROR_MATCH
 ------------------------
 
-.. versionadded:: 3.4
-
 A list of regular expressions which will be used to detect error messages in
 build outputs by the :command:`ctest_test` command.
 

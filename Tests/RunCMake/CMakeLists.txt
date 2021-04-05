@@ -176,6 +176,9 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
 endif()
 
 add_RunCMake_test(AndroidTestUtilities)
+if(CMake_TEST_APPLE_SILICON)
+  add_RunCMake_test(AppleSilicon)
+endif()
 set(autogen_with_qt5 FALSE)
 if(CMake_TEST_Qt5)
   find_package(Qt5Widgets QUIET NO_MODULE)
@@ -300,7 +303,10 @@ add_RunCMake_test(add_subdirectory)
 add_RunCMake_test(add_test)
 add_RunCMake_test(build_command)
 add_executable(exit_code exit_code.c)
-set(execute_process_ARGS -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>)
+set(execute_process_ARGS
+  -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
+  -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+  )
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   list(APPEND execute_process_ARGS -DTEST_ENCODING_EXE=$<TARGET_FILE:testEncoding>)
 endif()
@@ -540,10 +546,13 @@ add_RunCMake_test(target_compile_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILE
 add_RunCMake_test(target_include_directories)
 add_RunCMake_test(target_sources)
 add_RunCMake_test(CheckCompilerFlag   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
-                                      -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
+                                      -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
+                                      -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID})
 add_RunCMake_test(CheckSourceCompiles -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
-                                      -DCMake_TEST_ISPC=${CMake_TEST_ISPC})
-add_RunCMake_test(CheckSourceRuns     -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+                                      -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
+                                      -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID})
+add_RunCMake_test(CheckSourceRuns     -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+                                      -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID})
 set_property(TEST RunCMake.CheckCompilerFlag
                   RunCMake.CheckSourceCompiles
                   RunCMake.CheckSourceRuns

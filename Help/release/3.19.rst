@@ -53,6 +53,22 @@ Languages
 
 * ``CUDA`` language support now works on QNX.
 
+Platforms
+---------
+
+* Apple Silicon is now supported (since CMake 3.19.2):
+
+  * The :variable:`CMAKE_HOST_SYSTEM_PROCESSOR` is selected using ``uname -m``.
+    Since this may vary based on CMake's own architecture and that of
+    the invoking process tree, the :variable:`CMAKE_APPLE_SILICON_PROCESSOR`
+    variable or :envvar:`CMAKE_APPLE_SILICON_PROCESSOR` environment
+    variable may be set to specify a host architecture explicitly.
+
+  * If :variable:`CMAKE_OSX_ARCHITECTURES` is not set, CMake adds explicit
+    flags to tell the compiler to build for the
+    :variable:`CMAKE_HOST_SYSTEM_PROCESSOR` so the toolchain does not
+    have to guess based on the process tree's architecture.
+
 File-Based API
 --------------
 
@@ -330,3 +346,42 @@ Other Changes
 * If ``CUDA`` compiler detection fails with user-specified
   :variable:`CMAKE_CUDA_ARCHITECTURES` or
   :variable:`CMAKE_CUDA_HOST_COMPILER`, an error is raised.
+
+Updates
+=======
+
+Changes made since CMake 3.19.0 include the following.
+
+3.19.1
+------
+
+* CMake 3.19.0 compiles source files with the :prop_sf:`LANGUAGE`
+  property by passing an explicit language flag such as ``-x c``.
+  This is consistent with the property's documented meaning that
+  the source file is written in the specified language.  However,
+  it can break projects that were using the property only to
+  cause the specified language's compiler to be used.  This has
+  been reverted to restore behavior from CMake 3.18 and below.
+
+* CUDA 11.1 support for Clang.
+
+3.19.2
+------
+
+* The precompiled macOS binary provided on ``cmake.org`` is now a
+  universal binary with ``x86_64`` and ``arm64`` architectures.
+  It requires macOS 10.10 or newer.
+  The package file naming pattern has been changed from
+  ``cmake-$ver-Darwin-x86_64`` to ``cmake-$ver-macos-universal``.
+
+* Apple Silicon host architecture selection support was updated.
+  CMake 3.19.0 and 3.19.1 always chose ``arm64`` as the host architecture.
+  CMake 3.19.2 returns to using ``uname -m`` as CMake 3.18 and below did.
+  Since this may vary based on CMake's own architecture and that of
+  the invoking process tree, the :variable:`CMAKE_APPLE_SILICON_PROCESSOR`
+  variable or :envvar:`CMAKE_APPLE_SILICON_PROCESSOR` environment
+  variable may be set to specify a host architecture explicitly.
+
+* The :variable:`CMAKE_ISPC_HEADER_SUFFIX` variable and corresponding
+  :prop_tgt:`ISPC_HEADER_SUFFIX` target property were added to control
+  the header suffix used by ``ISPC`` compiler generated headers.

@@ -19,6 +19,7 @@ These modules are loaded using the :command:`include` command.
    /module/AndroidTestUtilities
    /module/BundleUtilities
    /module/CheckCCompilerFlag
+   /module/CheckCompilerFlag
    /module/CheckCSourceCompiles
    /module/CheckCSourceRuns
    /module/CheckCXXCompilerFlag
@@ -30,10 +31,10 @@ These modules are loaded using the :command:`include` command.
    /module/CheckFortranSourceCompiles
    /module/CheckFortranSourceRuns
    /module/CheckFunctionExists
-   /module/CheckIPOSupported
    /module/CheckIncludeFileCXX
    /module/CheckIncludeFile
    /module/CheckIncludeFiles
+   /module/CheckIPOSupported
    /module/CheckLanguage
    /module/CheckLibraryExists
    /module/CheckLinkerFlag
@@ -45,7 +46,6 @@ These modules are loaded using the :command:`include` command.
    /module/CheckOBJCXXSourceRuns
    /module/CheckPIESupported
    /module/CheckPrototypeDefinition
-   /module/CheckCompilerFlag
    /module/CheckSourceCompiles
    /module/CheckSourceRuns
    /module/CheckStructHasMember
@@ -64,10 +64,10 @@ These modules are loaded using the :command:`include` command.
    /module/CMakePrintSystemInformation
    /module/CMakePushCheckState
    /module/CMakeVerifyManifest
+   /module/CPack
    /module/CPackComponent
    /module/CPackIFW
    /module/CPackIFWConfigureFile
-   /module/CPack
    /module/CSharpUtilities
    /module/CTest
    /module/CTestCoverageCollectGCOV
@@ -97,8 +97,8 @@ These modules are loaded using the :command:`include` command.
    /module/TestForSSTREAM
    /module/TestForSTDNamespace
    /module/UseEcos
-   /module/UseJavaClassFilelist
    /module/UseJava
+   /module/UseJavaClassFilelist
    /module/UseJavaSymlinks
    /module/UseSWIG
    /module/UsewxWidgets
@@ -117,16 +117,16 @@ They are normally called through the :command:`find_package` command.
    /module/FindArmadillo
    /module/FindASPELL
    /module/FindAVIFile
+   /module/FindBacktrace
    /module/FindBISON
    /module/FindBLAS
-   /module/FindBacktrace
    /module/FindBoost
    /module/FindBullet
    /module/FindBZip2
    /module/FindCABLE
    /module/FindCoin3D
-   /module/FindCups
    /module/FindCUDAToolkit
+   /module/FindCups
    /module/FindCURL
    /module/FindCurses
    /module/FindCVS
@@ -139,8 +139,8 @@ They are normally called through the :command:`find_package` command.
    /module/FindEnvModules
    /module/FindEXPAT
    /module/FindFLEX
-   /module/FindFLTK2
    /module/FindFLTK
+   /module/FindFLTK2
    /module/FindFontconfig
    /module/FindFreetype
    /module/FindGCCXML
@@ -154,17 +154,17 @@ They are normally called through the :command:`find_package` command.
    /module/FindGnuTLS
    /module/FindGSL
    /module/FindGTest
-   /module/FindGTK2
    /module/FindGTK
+   /module/FindGTK2
    /module/FindHDF5
    /module/FindHg
    /module/FindHSPELL
    /module/FindHTMLHelp
    /module/FindIce
+   /module/FindIconv
    /module/FindIcotool
    /module/FindICU
    /module/FindImageMagick
-   /module/FindIconv
    /module/FindIntl
    /module/FindITK
    /module/FindJasper
@@ -181,14 +181,14 @@ They are normally called through the :command:`find_package` command.
    /module/FindLibXml2
    /module/FindLibXslt
    /module/FindLTTngUST
+   /module/FindLua
    /module/FindLua50
    /module/FindLua51
-   /module/FindLua
    /module/FindMatlab
    /module/FindMFC
    /module/FindMotif
-   /module/FindMPEG2
    /module/FindMPEG
+   /module/FindMPEG2
    /module/FindMPI
    /module/FindODBC
    /module/FindOpenACC
@@ -199,9 +199,10 @@ They are normally called through the :command:`find_package` command.
    /module/FindOpenSceneGraph
    /module/FindOpenSSL
    /module/FindOpenThreads
+   /module/Findosg
+   /module/Findosg_functions
    /module/FindosgAnimation
    /module/FindosgDB
-   /module/Findosg_functions
    /module/FindosgFX
    /module/FindosgGA
    /module/FindosgIntrospection
@@ -210,7 +211,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindosgPresentation
    /module/FindosgProducer
    /module/FindosgQt
-   /module/Findosg
    /module/FindosgShadow
    /module/FindosgSim
    /module/FindosgTerrain
@@ -220,8 +220,8 @@ They are normally called through the :command:`find_package` command.
    /module/FindosgVolume
    /module/FindosgWidget
    /module/FindPatch
-   /module/FindPerlLibs
    /module/FindPerl
+   /module/FindPerlLibs
    /module/FindPHP4
    /module/FindPhysFS
    /module/FindPike
@@ -238,10 +238,10 @@ They are normally called through the :command:`find_package` command.
    /module/FindQuickTime
    /module/FindRTI
    /module/FindRuby
+   /module/FindSDL
    /module/FindSDL_image
    /module/FindSDL_mixer
    /module/FindSDL_net
-   /module/FindSDL
    /module/FindSDL_sound
    /module/FindSDL_ttf
    /module/FindSelfPackers
@@ -260,10 +260,10 @@ They are normally called through the :command:`find_package` command.
    /module/FindWget
    /module/FindWish
    /module/FindwxWidgets
-   /module/FindXCTest
-   /module/FindXalanC
-   /module/FindXercesC
    /module/FindX11
+   /module/FindXalanC
+   /module/FindXCTest
+   /module/FindXercesC
    /module/FindXMLRPC
    /module/FindZLIB
 

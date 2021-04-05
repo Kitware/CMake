@@ -159,10 +159,11 @@ If your project has more elaborated version matching rules, you will need to
 write your own custom ``ConfigVersion.cmake`` file instead of using this
 macro.
 
-.. note:: ``COMPATIBILITY_MODE`` ``AnyNewerVersion`` handles the version range
-  if any is specified (see :command:`find_package` command for the details).
-  All other modes are incompatible with version ranges and will display an
-  author warning if one is specified.
+.. note:: ``COMPATIBILITY_MODE`` ``AnyNewerVersion``, ``SameMajorVersion`` and
+  ``SameMinorVersion`` handle the version range if any is specified (see
+  :command:`find_package` command for the details). ``ExactVersion`` is
+  incompatible with version ranges and will display an author warning if one is
+  specified.
 
 If ``ARCH_INDEPENDENT`` is given, the installed package version will be
 considered compatible even if it was built for a different architecture than

@@ -190,16 +190,7 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
     }
   }
 
-  std::string flags;
-  // explicitly add the explicit language flag before any other flag
-  // this way backwards compatibility with user flags is maintained
-  if (source->GetProperty("LANGUAGE")) {
-    this->LocalGenerator->AppendFeatureOptions(flags, language,
-                                               "EXPLICIT_LANGUAGE");
-    flags += " ";
-  }
-
-  flags += this->GetFlags(language, config, filterArch);
+  std::string flags = this->GetFlags(language, config, filterArch);
 
   // Add Fortran format flags.
   if (language == "Fortran") {
@@ -1383,16 +1374,22 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       this->GeneratorTarget->GetObjectName(source);
     std::string ispcSource =
       cmSystemTools::GetFilenameWithoutLastExtension(objectName);
+    ispcSource = cmSystemTools::GetFilenameWithoutLastExtension(ispcSource);
 
-    std::string ispcDirectory = objectFileDir;
+    cmProp ispcSuffixProp =
+      this->GeneratorTarget->GetProperty("ISPC_HEADER_SUFFIX");
+    assert(ispcSuffixProp != nullptr);
+
+    std::string ispcHeaderDirectory =
+      this->GeneratorTarget->GetObjectDirectory(config);
     if (cmProp prop =
           this->GeneratorTarget->GetProperty("ISPC_HEADER_DIRECTORY")) {
-      ispcDirectory = *prop;
+      ispcHeaderDirectory =
+        cmStrCat(this->LocalGenerator->GetBinaryDirectory(), '/', *prop);
     }
-    ispcDirectory =
-      cmStrCat(this->LocalGenerator->GetBinaryDirectory(), '/', ispcDirectory);
 
-    std::string ispcHeader = cmStrCat(ispcDirectory, '/', ispcSource, ".h");
+    std::string ispcHeader =
+      cmStrCat(ispcHeaderDirectory, '/', ispcSource, *ispcSuffixProp);
     ispcHeader = this->ConvertToNinjaPath(ispcHeader);
 
     // Make sure ninja knows what command generates the header
@@ -1404,8 +1401,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     auto ispcSuffixes =
       detail::ComputeISPCObjectSuffixes(this->GeneratorTarget);
     if (ispcSuffixes.size() > 1) {
+      std::string rootObjectDir =
+        this->GeneratorTarget->GetObjectDirectory(config);
       auto ispcSideEfffectObjects = detail::ComputeISPCExtraObjects(
-        objectName, ispcDirectory, ispcSuffixes);
+        objectName, rootObjectDir, ispcSuffixes);
 
       for (auto sideEffect : ispcSideEfffectObjects) {
         sideEffect = this->ConvertToNinjaPath(sideEffect);

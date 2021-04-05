@@ -11,20 +11,20 @@ cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
 
 function(CMAKE_CHECK_COMPILER_FLAG _lang _flag _var)
 
-  if(_lang STREQUAL C)
+  if(_lang STREQUAL "C")
     set(_lang_src "int main(void) { return 0; }")
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C")
-  elseif(_lang STREQUAL CXX)
+  elseif(_lang STREQUAL "CXX")
     set(_lang_src "int main() { return 0; }")
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+")
-    elseif(_lang STREQUAL CUDA)
+  elseif(_lang STREQUAL "CUDA")
     set(_lang_src "__host__ int main() { return 0; }")
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+" # Host GNU
                          FAIL_REGEX "argument unused during compilation: .*") # Clang
-  elseif(_lang STREQUAL Fortran)
+  elseif(_lang STREQUAL "Fortran")
     set(_lang_src "       program test\n       stop\n       end program")
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for Fortran")
-  elseif(_lang STREQUAL OBJC)
+  elseif(_lang STREQUAL "OBJC")
     set(_lang_src [=[
 #ifndef __OBJC__
 #  error "Not an Objective-C compiler"
@@ -32,7 +32,7 @@ function(CMAKE_CHECK_COMPILER_FLAG _lang _flag _var)
 int main(void) { return 0; }]=])
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for Objective-C" # GNU
                          FAIL_REGEX "argument unused during compilation: .*") # Clang
-  elseif(_lang STREQUAL OBJCXX)
+  elseif(_lang STREQUAL "OBJCXX")
     set(_lang_src [=[
 #ifndef __OBJC__
 #  error "Not an Objective-C++ compiler"
@@ -40,7 +40,7 @@ int main(void) { return 0; }]=])
 int main(void) { return 0; }]=])
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for Objective-C\\+\\+" # GNU
                          FAIL_REGEX "argument unused during compilation: .*") # Clang
-  elseif(_lang STREQUAL ISPC)
+  elseif(_lang STREQUAL "ISPC")
     set(_lang_src "float func(uniform int32, float a) { return a / 2.25; }")
   else()
     message (SEND_ERROR "check_compiler_flag: ${_lang}: unknown language.")

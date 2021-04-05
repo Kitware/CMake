@@ -22,6 +22,9 @@ dots will be seen as version component separators, resulting in the
 ``...<max>`` part being ignored and preserving the pre-3.12 behavior
 of basing policies on ``<min>``.
 
+This command will set the value of the
+:variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable to ``<min>``.
+
 The ``FATAL_ERROR`` option is accepted but ignored by CMake 2.6 and
 higher.  It should be specified so CMake versions 2.4 and lower fail
 with an error instead of just a warning.

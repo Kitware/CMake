@@ -176,13 +176,15 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     # In a non-scattered installation the following are equivalent to CMAKE_CUDA_COMPILER_TOOLKIT_ROOT.
     # We first check for a non-scattered installation to prefer it over a scattered installation.
 
-    # CMAKE_CUDA_COMPILER_LIBRARY_ROOT contains the device library and version file.
-    if(EXISTS "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/version.txt")
+    # CMAKE_CUDA_COMPILER_LIBRARY_ROOT contains the device library.
+    if(EXISTS "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/nvvm/libdevice")
       set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}")
-    elseif(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/version.txt")
+    elseif(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/nvvm/libdevice")
       set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_SYSROOT_LINK}/usr/lib/cuda")
-    elseif(EXISTS "${CMAKE_SYSROOT}/usr/lib/cuda/version.txt")
+    elseif(EXISTS "${CMAKE_SYSROOT}/usr/lib/cuda/nvvm/libdevice")
       set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_SYSROOT}/usr/lib/cuda")
+    else()
+      message(FATAL_ERROR "Couldn't find CUDA library root.")
     endif()
 
     # CMAKE_CUDA_COMPILER_TOOLKIT_LIBRARY_ROOT contains the linking stubs necessary for device linking and other low-level library files.

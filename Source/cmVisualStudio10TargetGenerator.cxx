@@ -3944,7 +3944,8 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
       if (managedType != cmGeneratorTarget::ManagedType::Native &&
           this->GeneratorTarget->GetManagedType(config) !=
             cmGeneratorTarget::ManagedType::Native &&
-          l.Target->IsImported()) {
+          l.Target->IsImported() &&
+          l.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
         auto location = l.Target->GetFullPath(config);
         if (!location.empty()) {
           ConvertToWindowsSlash(location);

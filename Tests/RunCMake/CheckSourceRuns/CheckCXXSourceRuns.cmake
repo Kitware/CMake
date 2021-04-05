@@ -2,6 +2,8 @@
 enable_language (CXX)
 include(CheckSourceRuns)
 
+set(CXX 1) # test that this is tolerated
+
 check_source_runs(CXX "int main() {return 2;}" SHOULD_FAIL)
 if(SHOULD_FAIL)
   message(SEND_ERROR "CXX check_source_runs succeeded, but should have failed.")

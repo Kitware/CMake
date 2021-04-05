@@ -3,6 +3,8 @@
 enable_language (Fortran)
 include(CheckSourceRuns)
 
+set(Fortran 1) # test that this is tolerated
+
 check_source_runs(Fortran [=[
       PROGRAM TEST_HAVE_PRINT
         PRINT *, 'Hello'

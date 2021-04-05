@@ -9,7 +9,6 @@ endif()
 set(__COMPILER_GNU 1)
 
 include(Compiler/CMakeCommonCompilerMacros)
-include(Internal/CMakeCheckCompilerFlag)
 
 set(__pch_header_C "c-header")
 set(__pch_header_CXX "c++-header")

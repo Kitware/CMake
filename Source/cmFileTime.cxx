@@ -24,13 +24,13 @@ bool cmFileTime::Load(std::string const& fileName)
   }
 #  if CMake_STAT_HAS_ST_MTIM
   // Nanosecond resolution
-  this->NS = fst.st_mtim.tv_sec * NsPerS + fst.st_mtim.tv_nsec;
+  this->Time = fst.st_mtim.tv_sec * UtPerS + fst.st_mtim.tv_nsec;
 #  elif CMake_STAT_HAS_ST_MTIMESPEC
   // Nanosecond resolution
-  this->NS = fst.st_mtimespec.tv_sec * NsPerS + fst.st_mtimespec.tv_nsec;
+  this->Time = fst.st_mtimespec.tv_sec * UtPerS + fst.st_mtimespec.tv_nsec;
 #  else
   // Second resolution
-  this->NS = fst.st_mtime * NsPerS;
+  this->Time = fst.st_mtime * UtPerS;
 #  endif
 #else
   // Windows version.  Get the modification time from extended file attributes.
@@ -41,10 +41,11 @@ bool cmFileTime::Load(std::string const& fileName)
   }
 
   // Copy the file time to the output location.
-  this->NS = (static_cast<NSC>(fdata.ftLastWriteTime.dwHighDateTime) << 32) |
-    static_cast<NSC>(fdata.ftLastWriteTime.dwLowDateTime);
-  // The file time resolution is 100 ns.
-  this->NS *= 100;
+  using uint64 = unsigned long long;
+
+  this->Time = static_cast<TimeType>(
+    (uint64(fdata.ftLastWriteTime.dwHighDateTime) << 32) +
+    fdata.ftLastWriteTime.dwLowDateTime);
 #endif
   return true;
 }

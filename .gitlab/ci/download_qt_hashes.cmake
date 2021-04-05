@@ -10,4 +10,4 @@ set("5.15.1-0-202009071110qtwinextras-Windows-Windows_10-MSVC2015-Windows-Window
 
 set("5.15.1-0-202009071110qtbase-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64.7z_hash" df2813ce7c6cb4287abd7956cd1cb9d08312e4ac1208b6cb57af4df11b8ebba1)
 
-set("qt-5.6.2-macosx10.7-x86_64.tar.xz_hash" 2b60373ea60037ce356d4c9f5a8c1df9854127a2c55118252e1a2f5a5f4e0010)
+set("qt-5.9.9-macosx10.10-x86_64-arm64.tar.xz_hash" d4449771afa0bc6a809c14f1e6d939e7732494cf059503ae451e2bfe8fc60cc1)

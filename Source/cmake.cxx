@@ -286,6 +286,8 @@ void cmake::CleanupCommandsAndMacros()
   this->CurrentSnapshot = this->State->Reset();
   this->State->RemoveUserDefinedCommands();
   this->CurrentSnapshot.SetDefaultDefinitions();
+  // FIXME: InstalledFiles probably belongs in the global generator.
+  this->InstalledFiles.clear();
 }
 
 #ifndef CMAKE_BOOTSTRAP

@@ -1,6 +1,8 @@
 enable_language (OBJCXX)
 include(CheckSourceCompiles)
 
+set(OBJCXX 1) # test that this is tolerated
+
 check_source_compiles(OBJCXX [[
   #include <vector>
   #import <Foundation/Foundation.h>

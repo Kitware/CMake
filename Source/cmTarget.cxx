@@ -369,6 +369,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("JOB_POOL_PRECOMPILE_HEADER");
     initProp("ISPC_COMPILER_LAUNCHER");
     initProp("ISPC_HEADER_DIRECTORY");
+    initPropValue("ISPC_HEADER_SUFFIX", "_ispc.h");
     initProp("ISPC_INSTRUCTION_SETS");
     initProp("LINK_SEARCH_START_STATIC");
     initProp("LINK_SEARCH_END_STATIC");
@@ -2045,35 +2046,37 @@ std::string cmTarget::ImportedGetFullPath(
   }
 
   if (result.empty()) {
-    auto message = [&]() -> std::string {
-      std::string unset;
-      std::string configuration;
+    if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+      auto message = [&]() -> std::string {
+        std::string unset;
+        std::string configuration;
 
-      if (artifact == cmStateEnums::RuntimeBinaryArtifact) {
-        unset = "IMPORTED_LOCATION";
-      } else if (artifact == cmStateEnums::ImportLibraryArtifact) {
-        unset = "IMPORTED_IMPLIB";
+        if (artifact == cmStateEnums::RuntimeBinaryArtifact) {
+          unset = "IMPORTED_LOCATION";
+        } else if (artifact == cmStateEnums::ImportLibraryArtifact) {
+          unset = "IMPORTED_IMPLIB";
+        }
+
+        if (!config.empty()) {
+          configuration = cmStrCat(" configuration \"", config, "\"");
+        }
+
+        return cmStrCat(unset, " not set for imported target \"",
+                        this->GetName(), "\"", configuration, ".");
+      };
+
+      switch (this->GetPolicyStatus(cmPolicies::CMP0111)) {
+        case cmPolicies::WARN:
+          impl->Makefile->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0111) + "\n" +
+              message());
+          CM_FALLTHROUGH;
+        case cmPolicies::OLD:
+          break;
+        default:
+          impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, message());
       }
-
-      if (!config.empty()) {
-        configuration = cmStrCat(" configuration \"", config, "\"");
-      }
-
-      return cmStrCat(unset, " not set for imported target \"",
-                      this->GetName(), "\"", configuration, ".");
-    };
-
-    switch (this->GetPolicyStatus(cmPolicies::CMP0111)) {
-      case cmPolicies::WARN:
-        impl->Makefile->IssueMessage(
-          MessageType::AUTHOR_WARNING,
-          cmPolicies::GetPolicyWarning(cmPolicies::CMP0111) + "\n" +
-            message());
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        break;
-      default:
-        impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, message());
     }
 
     result = cmStrCat(this->GetName(), "-NOTFOUND");

@@ -6,8 +6,6 @@ string(APPEND CMAKE_C_FLAGS_MINSIZEREL_INIT " -DNDEBUG")
 # -qthreaded = Ensures that all optimizations will be thread-safe
 string(APPEND CMAKE_C_FLAGS_INIT " -qthreaded")
 
-set(CMAKE_C_COMPILE_OPTIONS_EXPLICIT_LANGUAGE -qsourcetype=c)
-
 if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.1)
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "-qlanglvl=stdc89")
   set(CMAKE_C90_EXTENSION_COMPILE_OPTION "-qlanglvl=extc89")

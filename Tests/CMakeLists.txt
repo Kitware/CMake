@@ -206,7 +206,7 @@ if(BUILD_TESTING)
         set(${reg} 0)
       endif()
     endforeach()
-    if(COMMAND cmake_host_system_information)
+    if(CMAKE_HOST_WIN32 AND COMMAND cmake_host_system_information)
       set(info_vs15 "VS_15_DIR")
       set(info_vs16 "VS_16_DIR")
       set(vs_versions)
@@ -226,6 +226,22 @@ if(BUILD_TESTING)
         endif()
       endforeach()
     endif()
+  endif()
+
+  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT DEFINED CMake_TEST_APPLE_SILICON)
+    execute_process(COMMAND sysctl -q hw.optional.arm64
+      OUTPUT_VARIABLE _sysctl_stdout
+      ERROR_VARIABLE  _sysctl_stderr
+      RESULT_VARIABLE _sysctl_result
+      )
+    if(_sysctl_result EQUAL 0 AND _sysctl_stdout MATCHES "hw.optional.arm64: 1")
+      set(CMake_TEST_APPLE_SILICON 1)
+    else()
+      set(CMake_TEST_APPLE_SILICON 0)
+    endif()
+    unset(_sysctl_result)
+    unset(_sysctl_stderr)
+    unset(_sysctl_stdout)
   endif()
 
   #---------------------------------------------------------------------------
@@ -301,18 +317,7 @@ if(BUILD_TESTING)
   set(CTEST_TEST_OSX_ARCH 0)
   set(CMake_TEST_XCODE_VERSION 0)
   if(APPLE)
-    execute_process(
-      COMMAND sw_vers -productVersion
-      OUTPUT_VARIABLE OSX_VERSION
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    if(OSX_VERSION VERSION_LESS 10.4)
-      message(STATUS "Forcing CTEST_TEST_CPACK=OFF on OSX < 10.4")
-      message(STATUS "OSX_VERSION='${OSX_VERSION}'")
-      set(CTEST_TEST_CPACK OFF)
-    else()
-      set(CTEST_TEST_OSX_ARCH 1)
-    endif()
+    set(CTEST_TEST_OSX_ARCH 1)
     if(XCODE_VERSION)
       set(CMake_TEST_XCODE_VERSION "${XCODE_VERSION}")
     else()
@@ -1833,11 +1838,22 @@ if(BUILD_TESTING)
       )
   endif()
 
-  if(CMake_TEST_XCODE_VERSION AND NOT CMake_TEST_XCODE_VERSION VERSION_LESS 5
-     AND OSX_VERSION MATCHES "^([0-9]+\\.[0-9]+)")
-    set(XCTest_CTEST_OPTIONS --build-config $<CONFIGURATION>)
-    set(XCTest_BUILD_OPTIONS -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_MATCH_1} -DCMAKE_OSX_SYSROOT=macosx)
-    ADD_TEST_MACRO(XCTest ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> -V)
+  if(CMake_TEST_XCODE_VERSION AND NOT CMake_TEST_XCODE_VERSION VERSION_LESS 5)
+    if(NOT CMake_TEST_XCTest_DEPLOYMENT_TARGET)
+      execute_process(
+        COMMAND sw_vers -productVersion
+        OUTPUT_VARIABLE OSX_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+      if(OSX_VERSION MATCHES "^([0-9]+\\.[0-9]+)")
+        set(CMake_TEST_XCTest_DEPLOYMENT_TARGET "${CMAKE_MATCH_1}")
+      endif()
+    endif()
+    if(CMake_TEST_XCTest_DEPLOYMENT_TARGET)
+      set(XCTest_CTEST_OPTIONS --build-config $<CONFIGURATION>)
+      set(XCTest_BUILD_OPTIONS -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMake_TEST_XCTest_DEPLOYMENT_TARGET} -DCMAKE_OSX_SYSROOT=macosx)
+      ADD_TEST_MACRO(XCTest ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> -V)
+    endif()
   endif()
 
   add_test(linkorder1 ${CMAKE_CTEST_COMMAND}
@@ -3326,9 +3342,17 @@ if(BUILD_TESTING)
     endif()
   endif()
 
-  find_package(Java COMPONENTS Development QUIET)
-  if(Java_JAVA_EXECUTABLE AND Java_JAVAC_EXECUTABLE AND Java_JAR_EXECUTABLE AND NOT MINGW
-      AND NOT "${CMAKE_GENERATOR}" MATCHES "Xcode")
+  if(NOT DEFINED CMake_TEST_Java)
+    if(APPLE OR MINGW)
+      set(CMake_TEST_Java 0)
+    else()
+      set(CMake_TEST_Java 1)
+    endif()
+  endif()
+  if(CMake_TEST_Java)
+    find_package(Java COMPONENTS Development QUIET)
+  endif()
+  if(Java_JAVA_EXECUTABLE AND Java_JAVAC_EXECUTABLE AND Java_JAR_EXECUTABLE)
 
     set(JavaExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
     ADD_TEST_MACRO(JavaExportImport JavaExportImport)

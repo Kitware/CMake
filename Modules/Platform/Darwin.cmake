@@ -216,6 +216,13 @@ set(CMAKE_SYSTEM_APPBUNDLE_PATH
 unset(_apps_paths)
 
 include(Platform/UnixPaths)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+  list(PREPEND CMAKE_SYSTEM_PREFIX_PATH
+    /opt/homebrew # Brew on Apple Silicon
+    )
+endif()
+
 if(_CMAKE_OSX_SYSROOT_PATH)
   if(EXISTS ${_CMAKE_OSX_SYSROOT_PATH}/usr/include)
     list(INSERT CMAKE_SYSTEM_PREFIX_PATH 0 ${_CMAKE_OSX_SYSROOT_PATH}/usr)

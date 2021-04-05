@@ -461,6 +461,13 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     std::unique_ptr<cmInstallFilesGenerator> publicHeaderGenerator;
     std::unique_ptr<cmInstallFilesGenerator> resourceGenerator;
 
+    // Avoid selecting default destinations for PUBLIC_HEADER and
+    // PRIVATE_HEADER if any artifacts are specified.
+    bool artifactsSpecified = false;
+
+    // Track whether this is a namelink-only rule.
+    bool namelinkOnly = false;
+
     auto addTargetExport = [&]() {
       // Add this install rule to an export if one was specified.
       if (!exports.empty()) {
@@ -475,19 +482,12 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         te->ObjectsGenerator = objectGenerator.get();
         te->InterfaceIncludeDirectories =
           cmJoin(includesArgs.GetIncludeDirs(), ";");
-
+        te->NamelinkOnly = namelinkOnly;
         helper.Makefile->GetGlobalGenerator()
           ->GetExportSets()[exports]
           .AddTargetExport(std::move(te));
       }
     };
-
-    // Avoid selecting default destinations for PUBLIC_HEADER and
-    // PRIVATE_HEADER if any artifacts are specified.
-    bool artifactsSpecified = false;
-
-    // Track whether this is a namelink-only rule.
-    bool namelinkOnly = false;
 
     switch (target.GetType()) {
       case cmStateEnums::SHARED_LIBRARY: {
@@ -497,6 +497,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         if (target.IsDLLPlatform()) {
           // When in namelink only mode skip all libraries on Windows.
           if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+            namelinkOnly = true;
             addTargetExport();
             continue;
           }
@@ -529,6 +530,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           if (target.IsFrameworkOnApple()) {
             // When in namelink only mode skip frameworks.
             if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+              namelinkOnly = true;
               addTargetExport();
               continue;
             }
@@ -574,6 +576,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         if (target.IsFrameworkOnApple()) {
           // When in namelink only mode skip frameworks.
           if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
+            namelinkOnly = true;
             addTargetExport();
             continue;
           }
