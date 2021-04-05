@@ -215,6 +215,11 @@ function(run_cmake_command test)
   run_cmake(${test})
 endfunction()
 
+function(run_cmake_script test)
+  set(RunCMake_TEST_COMMAND ${CMAKE_COMMAND} ${ARGN} -P ${RunCMake_SOURCE_DIR}/${test}.cmake)
+  run_cmake(${test})
+endfunction()
+
 function(run_cmake_with_options test)
   set(RunCMake_TEST_OPTIONS "${ARGN}")
   run_cmake(${test})
