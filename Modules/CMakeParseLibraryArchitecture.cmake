@@ -9,12 +9,21 @@ cmake_policy(SET CMP0054 NEW)
 # This is used internally by CMake and should not be included by user
 # code.
 
-function(cmake_parse_library_architecture implicit_dirs output_var)
+function(cmake_parse_library_architecture lang implicit_dirs implicit_objs output_var)
   unset(library_arch)
   # Detect library architecture directory name.
   if(CMAKE_LIBRARY_ARCHITECTURE_REGEX)
-    foreach(dir ${implicit_dirs})
+    foreach(dir IN LISTS implicit_dirs)
       if("${dir}" MATCHES "/lib/${CMAKE_LIBRARY_ARCHITECTURE_REGEX}$")
+        get_filename_component(arch "${dir}" NAME)
+        set(library_arch "${arch}")
+        break()
+      endif()
+    endforeach()
+
+    foreach(obj IN LISTS implicit_objs)
+      get_filename_component(dir "${obj}" DIRECTORY)
+      if("${dir}" MATCHES "(/usr)+/lib/${CMAKE_LIBRARY_ARCHITECTURE_REGEX}$")
         get_filename_component(arch "${dir}" NAME)
         set(library_arch "${arch}")
         break()

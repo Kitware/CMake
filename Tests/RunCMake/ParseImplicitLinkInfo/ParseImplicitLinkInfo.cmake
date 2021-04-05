@@ -28,6 +28,7 @@ set(targets
     linux-Fortran-PGI-18.10.1 linux_pgf77-Fortran-PGI-18.10.1
     linux_nostdinc-C-PGI-18.10.1 linux_nostdinc-CXX-PGI-18.10.1
     linux_nostdinc-Fortran-PGI-18.10.1
+  linux-C-NVHPC-21.1.0 linux-CXX-NVHPC-21.1.0
   linux-C-XL-12.1.0 linux-CXX-XL-12.1.0 linux-Fortran-XL-14.1.0
     linux_nostdinc-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
     linux_nostdinc_i-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
@@ -132,6 +133,7 @@ foreach(t ${targets})
   # Need to handle files with empty entries for both libs or dirs
   set(implicit_lib_output "")
   set(idirs_output "")
+  set(implicit_objs "")
   set(library_arch_output "")
   file(STRINGS ${outfile} outputs)
   foreach(line IN LISTS outputs)
@@ -147,10 +149,11 @@ foreach(t ${targets})
   endforeach()
 
   cmake_parse_implicit_link_info("${input}" implicit_libs idirs implicit_fwks log
-      "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}")
+      "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
+      COMPUTE_IMPLICIT_OBJECTS implicit_objs)
 
   set(library_arch)
-  cmake_parse_library_architecture("${idirs}" library_arch)
+  cmake_parse_library_architecture(${lang} "${idirs}" "${implicit_objs}" library_arch)
 
   # File format
   # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}")
