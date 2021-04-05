@@ -189,12 +189,24 @@ The ``<type>`` must be one of:
   References a library file located outside the project.  The
   :prop_tgt:`IMPORTED_LOCATION` target property (or its per-configuration
   variant :prop_tgt:`IMPORTED_LOCATION_<CONFIG>`) specifies the
-  location of the main library file on disk.  In the case of a ``SHARED``
-  library on Windows, the :prop_tgt:`IMPORTED_IMPLIB` target property
-  (or its per-configuration variant :prop_tgt:`IMPORTED_IMPLIB_<CONFIG>`)
-  specifies the location of the DLL import library file (``.lib`` or
-  ``.dll.a``) on disk, and the ``IMPORTED_LOCATION`` is the location of
-  the ``.dll`` runtime library (and is optional).
+  location of the main library file on disk:
+
+  * For a ``SHARED`` library on most non-Windows platforms, the main library
+    file is the ``.so`` or ``.dylib`` file used by both linkers and dynamic
+    loaders.  If the referenced library file has a ``SONAME`` (or on macOS,
+    has a ``LC_ID_DYLIB`` starting in ``@rpath/``), the value of that field
+    should be set in the :prop_tgt:`IMPORTED_SONAME` target property.
+    If the referenced library file does not have a ``SONAME``, but the
+    platform supports it, then  the :prop_tgt:`IMPORTED_NO_SONAME` target
+    property should be set.
+
+  * For a ``SHARED`` library on Windows, the :prop_tgt:`IMPORTED_IMPLIB`
+    target property (or its per-configuration variant
+    :prop_tgt:`IMPORTED_IMPLIB_<CONFIG>`) specifies the location of the
+    DLL import library file (``.lib`` or ``.dll.a``) on disk, and the
+    ``IMPORTED_LOCATION`` is the location of the ``.dll`` runtime
+    library (and is optional).
+
   Additional usage requirements may be specified in ``INTERFACE_*`` properties.
 
   An ``UNKNOWN`` library type is typically only used in the implementation of
