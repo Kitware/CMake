@@ -349,6 +349,8 @@ cmake_policy(PUSH)
 cmake_policy (SET CMP0012 NEW)
 # IN_LIST operator
 cmake_policy (SET CMP0057 NEW)
+# Ninja generator normalizes custom command depfile paths
+cmake_policy (SET CMP0116 NEW)
 
 set(SWIG_CXX_EXTENSION "cxx")
 set(SWIG_EXTRA_LIBRARIES "")
