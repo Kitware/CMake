@@ -561,7 +561,7 @@ else()
     _CUDAToolkit_find_root_dir(SEARCH_PATHS "${CUDAToolkit_ROOT}" FIND_FLAGS PATH_SUFFIXES bin NO_DEFAULT_PATH)
   endif()
   if(NOT CUDAToolkit_ROOT_DIR)
-    _CUDAToolkit_find_root_dir(FIND_FLAGS PATHS "ENV CUDA_PATH" PATH_SUFFIXES bin)
+    _CUDAToolkit_find_root_dir(FIND_FLAGS PATHS ENV CUDA_PATH PATH_SUFFIXES bin)
   endif()
 
   # If the user specified CUDAToolkit_ROOT but the toolkit could not be found, this is an error.

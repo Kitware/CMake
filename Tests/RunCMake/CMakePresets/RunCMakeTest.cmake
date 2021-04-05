@@ -77,6 +77,7 @@ endfunction()
 # Test CMakePresets.json errors
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_presets(NoCMakePresets)
+run_cmake_presets(Comment)
 run_cmake_presets(JSONParseError)
 run_cmake_presets(InvalidRoot)
 run_cmake_presets(NoVersion)

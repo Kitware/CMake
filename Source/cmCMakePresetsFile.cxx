@@ -839,6 +839,7 @@ cmCMakePresetsFile::ReadFileResult cmCMakePresetsFile::ReadJSONFile(
 
   Json::Value root;
   Json::CharReaderBuilder builder;
+  Json::CharReaderBuilder::strictMode(&builder.settings_);
   if (!Json::parseFromStream(builder, fin, &root, nullptr)) {
     return ReadFileResult::JSON_PARSE_ERROR;
   }

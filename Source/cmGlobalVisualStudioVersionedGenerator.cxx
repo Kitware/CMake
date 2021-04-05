@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudioVersionedGenerator.h"
 
+#include <cmext/string_view>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
@@ -391,27 +396,6 @@ bool cmGlobalVisualStudioVersionedGenerator::GetVSInstanceVersion(
   return vsSetupAPIHelper.GetVSInstanceVersion(vsInstanceVersion);
 }
 
-bool cmGlobalVisualStudioVersionedGenerator::IsDefaultToolset(
-  const std::string& version) const
-{
-  if (version.empty()) {
-    return true;
-  }
-
-  std::string vcToolsetVersion;
-  if (this->vsSetupAPIHelper.GetVCToolsetVersion(vcToolsetVersion)) {
-
-    cmsys::RegularExpression regex("[0-9][0-9]\\.[0-9]+");
-    if (regex.find(version) && regex.find(vcToolsetVersion)) {
-      const auto majorMinorEnd = vcToolsetVersion.find('.', 3);
-      const auto majorMinor = vcToolsetVersion.substr(0, majorMinorEnd);
-      return version == majorMinor;
-    }
-  }
-
-  return false;
-}
-
 bool cmGlobalVisualStudioVersionedGenerator::IsStdOutEncodingSupported() const
 {
   // Supported from Visual Studio 16.7 Preview 3.
@@ -446,29 +430,92 @@ cmGlobalVisualStudioVersionedGenerator::GetAndroidApplicationTypeRevision()
   return "";
 }
 
-std::string cmGlobalVisualStudioVersionedGenerator::GetAuxiliaryToolset() const
+cmGlobalVisualStudioVersionedGenerator::AuxToolset
+cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
+  std::string& version, std::string& props) const
 {
-  const char* version = this->GetPlatformToolsetVersion();
-  if (version) {
-    std::string instancePath;
-    GetVSInstance(instancePath);
-    std::string toolsetDir = instancePath + "/VC/Auxiliary/Build";
-    char sep = '/';
-    if (cmSystemTools::VersionCompareGreaterEq(version, "14.20")) {
-      std::string toolsetDot =
-        cmStrCat(toolsetDir, '.', version, "/Microsoft.VCToolsVersion.",
-                 version, ".props");
-      if (cmSystemTools::PathExists(toolsetDot)) {
-        sep = '.';
+  if (version.empty()) {
+    return AuxToolset::None;
+  }
+
+  std::string instancePath;
+  this->GetVSInstance(instancePath);
+  cmSystemTools::ConvertToUnixSlashes(instancePath);
+
+  // Translate three-component format accepted by "vcvarsall -vcvars_ver=".
+  cmsys::RegularExpression threeComponent(
+    "^([0-9]+\\.[0-9]+)\\.[0-9][0-9][0-9][0-9][0-9]$");
+  if (threeComponent.find(version)) {
+    // Load "VC/Auxiliary/Build/*/Microsoft.VCToolsVersion.*.txt" files
+    // with two matching components to check their three-component version.
+    std::string const& twoComponent = threeComponent.match(1);
+    std::string pattern =
+      cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s, twoComponent,
+               "*/Microsoft.VCToolsVersion."_s, twoComponent, "*.txt"_s);
+    cmsys::Glob glob;
+    glob.SetRecurseThroughSymlinks(false);
+    if (glob.FindFiles(pattern)) {
+      for (std::string const& txt : glob.GetFiles()) {
+        std::string ver;
+        cmsys::ifstream fin(txt.c_str());
+        if (fin && std::getline(fin, ver)) {
+          // Strip trailing whitespace.
+          ver = ver.substr(0, ver.find_first_not_of("0123456789."));
+          // If the three-component version matches, translate it to
+          // that used by the "Microsoft.VCToolsVersion.*.txt" file name.
+          if (ver == version) {
+            cmsys::RegularExpression extractVersion(
+              "VCToolsVersion\\.([0-9.]+)\\.txt$");
+            if (extractVersion.find(txt)) {
+              version = extractVersion.match(1);
+              break;
+            }
+          }
+        }
       }
     }
-    std::string toolsetPath =
-      cmStrCat(toolsetDir, sep, version, "/Microsoft.VCToolsVersion.", version,
-               ".props");
-    cmSystemTools::ConvertToUnixSlashes(toolsetPath);
-    return toolsetPath;
   }
-  return {};
+
+  if (cmSystemTools::VersionCompareGreaterEq(version, "14.20")) {
+    props = cmStrCat(instancePath, "/VC/Auxiliary/Build."_s, version,
+                     "/Microsoft.VCToolsVersion."_s, version, ".props"_s);
+    if (cmSystemTools::PathExists(props)) {
+      return AuxToolset::PropsExist;
+    }
+  }
+  props = cmStrCat(instancePath, "/VC/Auxiliary/Build/"_s, version,
+                   "/Microsoft.VCToolsVersion."_s, version, ".props"_s);
+  if (cmSystemTools::PathExists(props)) {
+    return AuxToolset::PropsExist;
+  }
+
+  // Accept the toolset version that is default in the current VS version
+  // by matching the name later VS versions will use for the SxS props files.
+  std::string vcToolsetVersion;
+  if (this->vsSetupAPIHelper.GetVCToolsetVersion(vcToolsetVersion)) {
+    // Accept an exact-match (three-component version).
+    if (version == vcToolsetVersion) {
+      return AuxToolset::Default;
+    }
+
+    // Accept known SxS props file names using four version components
+    // in VS versions later than the current.
+    if (version == "14.28.16.9" && vcToolsetVersion == "14.28.29910") {
+      return AuxToolset::Default;
+    }
+
+    // The first two components of the default toolset version typically
+    // match the name used by later VS versions for the SxS props files.
+    cmsys::RegularExpression twoComponent("^([0-9]+\\.[0-9]+)");
+    if (twoComponent.find(version)) {
+      std::string const versionPrefix = cmStrCat(twoComponent.match(1), '.');
+      if (cmHasPrefix(vcToolsetVersion, versionPrefix)) {
+        return AuxToolset::Default;
+      }
+    }
+  }
+
+  return AuxToolset::PropsMissing;
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::InitializeWindows(cmMakefile* mf)
@@ -540,7 +587,8 @@ bool cmGlobalVisualStudioVersionedGenerator::IsWin81SDKInstalled() const
   return false;
 }
 
-std::string cmGlobalVisualStudioVersionedGenerator::GetWindows10SDKMaxVersion(
+std::string
+cmGlobalVisualStudioVersionedGenerator::GetWindows10SDKMaxVersionDefault(
   cmMakefile*) const
 {
   return std::string();

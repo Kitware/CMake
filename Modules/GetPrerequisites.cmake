@@ -735,7 +735,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(gp_regex_cmp_count 1)
   elseif(gp_tool MATCHES "otool$")
     set(gp_cmd_args "-L")
-    set(gp_regex "^\t([^\t]+) \\(compatibility version ([0-9]+.[0-9]+.[0-9]+), current version ([0-9]+.[0-9]+.[0-9]+)\\)${eol_char}$")
+    set(gp_regex "^\t([^\t]+) \\(compatibility version ([0-9]+.[0-9]+.[0-9]+), current version ([0-9]+.[0-9]+.[0-9]+)(, weak)?\\)${eol_char}$")
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 3)

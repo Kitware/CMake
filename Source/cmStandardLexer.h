@@ -6,7 +6,7 @@
 /* Needed for glibc < 2.12 */
 #  define _XOPEN_SOURCE 600
 #endif
-#if !defined(_WIN32) && !defined(__sun)
+#if !defined(_POSIX_C_SOURCE) && !defined(_WIN32) && !defined(__sun)
 /* POSIX APIs are needed */
 #  define _POSIX_C_SOURCE 200809L
 #endif

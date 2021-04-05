@@ -26,7 +26,7 @@ char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
 char const* qnxnto = "INFO" ":" "qnxnto[]";
 #endif
 
-#if defined(_CRAYC) || defined(__cray__)
+#if defined(__CRAYXT_COMPUTE_LINUX_TARGET)
 char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 #endif
 
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 #ifdef SIMULATE_VERSION_MAJOR
   require += info_simulate_version[argc];
 #endif
-#if defined(_CRAYC) || defined(__cray__)
+#if defined(__CRAYXT_COMPUTE_LINUX_TARGET)
   require += info_cray[argc];
 #endif
   require += info_language_dialect_default[argc];

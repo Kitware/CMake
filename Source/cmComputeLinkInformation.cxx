@@ -474,6 +474,12 @@ std::vector<std::string> const& cmComputeLinkInformation::GetFrameworkPaths()
   return this->FrameworkPaths;
 }
 
+std::set<std::string> const&
+cmComputeLinkInformation::GetFrameworkPathsEmitted() const
+{
+  return this->FrameworkPathsEmitted;
+}
+
 const std::set<const cmGeneratorTarget*>&
 cmComputeLinkInformation::GetSharedLibrariesLinked() const
 {
@@ -699,9 +705,13 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
   } else {
     // This is not a CMake target.  Use the name given.
     if (cmSystemTools::FileIsFullPath(item.Value)) {
-      if (cmSystemTools::FileIsDirectory(item.Value)) {
+      if (cmSystemTools::IsPathToFramework(item.Value) &&
+          this->Makefile->IsOn("APPLE")) {
+        // This is a framework.
+        this->AddFrameworkItem(item.Value);
+      } else if (cmSystemTools::FileIsDirectory(item.Value)) {
         // This is a directory.
-        this->AddDirectoryItem(item.Value);
+        this->DropDirectoryItem(item.Value);
       } else {
         // Use the full path given to the library file.
         this->Depends.push_back(item.Value);
@@ -1306,16 +1316,6 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
   }
 }
 
-void cmComputeLinkInformation::AddDirectoryItem(std::string const& item)
-{
-  if (this->Makefile->IsOn("APPLE") &&
-      cmSystemTools::IsPathToFramework(item)) {
-    this->AddFrameworkItem(item);
-  } else {
-    this->DropDirectoryItem(item);
-  }
-}
-
 void cmComputeLinkInformation::DropDirectoryItem(std::string const& item)
 {
   // A full path to a directory was found as a link item.  Warn the
@@ -1342,8 +1342,8 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
     "CMAKE_", this->LinkLanguage, "_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES");
   this->Makefile->GetDefExpandList(implicitDirVar, implicitDirVec);
 
-  this->FrameworkPathsEmmitted.insert(implicitDirVec.begin(),
-                                      implicitDirVec.end());
+  this->FrameworkPathsEmitted.insert(implicitDirVec.begin(),
+                                     implicitDirVec.end());
 
   // Regular expression to extract a framework path and name.
   this->SplitFramework.compile("(.*)/(.*)\\.framework$");
@@ -1351,7 +1351,7 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
 
 void cmComputeLinkInformation::AddFrameworkPath(std::string const& p)
 {
-  if (this->FrameworkPathsEmmitted.insert(p).second) {
+  if (this->FrameworkPathsEmitted.insert(p).second) {
     this->FrameworkPaths.push_back(p);
   }
 }

@@ -17,7 +17,8 @@ find_file
 .. |CMAKE_XXX_PATH| replace:: :variable:`CMAKE_INCLUDE_PATH`
 .. |CMAKE_XXX_MAC_PATH| replace:: :variable:`CMAKE_FRAMEWORK_PATH`
 
-.. |SYSTEM_ENVIRONMENT_PATH_XXX| replace:: The directories in ``PATH`` and ``INCLUDE``.
+.. |SYSTEM_ENVIRONMENT_PATH_XXX| replace:: The directories in ``INCLUDE``
+   and ``PATH``.
 .. |SYSTEM_ENVIRONMENT_PATH_WINDOWS_XXX| replace:: On Windows hosts:
       ``<prefix>/include/<arch>`` if :variable:`CMAKE_LIBRARY_ARCHITECTURE`
       is set, and |SYSTEM_ENVIRONMENT_PREFIX_PATH_XXX_SUBDIR|.

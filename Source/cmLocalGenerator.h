@@ -493,6 +493,8 @@ protected:
     std::ostream& os, const std::string& config,
     std::vector<std::string> const& configurationTypes);
 
+  virtual void AddGeneratorSpecificInstallSetup(std::ostream&) {}
+
   std::string& CreateSafeUniqueObjectFileName(const std::string& sin,
                                               std::string const& dir_max);
 

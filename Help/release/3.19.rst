@@ -400,3 +400,43 @@ Changes made since CMake 3.19.0 include the following.
   * The naming pattern ``cmake-$ver-macos10.10-universal`` is a universal
     binary with ``x86_64`` and ``arm64`` architectures.  It requires
     macOS 10.10 or newer.
+
+3.19.4
+------
+
+* The :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION_MAXIMUM`
+  variable introduced in 3.19.0 previously worked only with the
+  :generator:`Visual Studio 14 2015` generator.  It has now been fixed to
+  work with :ref:`Visual Studio Generators` for later VS versions too.
+
+3.19.5
+------
+
+* When :prop_tgt:`IOS_INSTALL_COMBINED` is enabled and the :generator:`Xcode`
+  generator is used, it is now possible to initiate an install or package
+  creation by running ``cmake --install`` or ``cpack`` from the command line.
+  When using the Xcode new build system, these are the only supported methods
+  due to a limitation of Xcode.  Initiating these operations by building the
+  ``install`` or ``package`` targets in Xcode is only supported when using
+  the legacy build system.
+
+* The framework handling introduced in 3.19.0 as part of supporting Xcode's
+  *Link Binaries With Libraries* build phase broke the ability to switch
+  between device and simulator builds without reconfiguring.  That capability
+  has now been restored.
+
+3.19.6
+------
+
+* The :manual:`cmake-presets(7)` feature no longer allows comments in
+  ``CMakePresets.json`` or ``CMakeUserPresets.json`` files.
+  This was mistakenly allowed by the implementation in CMake 3.19.0 through
+  CMake 3.19.5, and was not documented.
+
+3.19.7
+------
+
+* With :ref:`Visual Studio Generators` for VS 2017 and higher, the
+  :variable:`CMAKE_GENERATOR_TOOLSET` field ``version=`` now accepts
+  three-component MSVC toolset versions such as ``14.28.29910``.
+  See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_VERSION` variable.

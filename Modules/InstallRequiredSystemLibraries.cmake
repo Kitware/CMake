@@ -291,6 +291,7 @@ if(MSVC)
         foreach(crt
             "${MSVC_CRT_DIR}/msvcp${v}_1.dll"
             "${MSVC_CRT_DIR}/msvcp${v}_2.dll"
+            "${MSVC_CRT_DIR}/msvcp${v}_atomic_wait.dll"
             "${MSVC_CRT_DIR}/msvcp${v}_codecvt_ids.dll"
             "${MSVC_CRT_DIR}/vcruntime${v}_1.dll"
             )
@@ -319,6 +320,7 @@ if(MSVC)
         foreach(crt
             "${MSVC_CRT_DIR}/msvcp${v}_1d.dll"
             "${MSVC_CRT_DIR}/msvcp${v}_2d.dll"
+            "${MSVC_CRT_DIR}/msvcp${v}d_atomic_wait.dll"
             "${MSVC_CRT_DIR}/msvcp${v}d_codecvt_ids.dll"
             "${MSVC_CRT_DIR}/vcruntime${v}_1d.dll"
             )

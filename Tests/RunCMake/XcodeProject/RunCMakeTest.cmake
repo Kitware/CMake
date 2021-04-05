@@ -206,7 +206,7 @@ if(NOT XCODE_VERSION VERSION_LESS 7)
   unset(RunCMake_TEST_OPTIONS)
 endif()
 
-if(XCODE_VERSION VERSION_GREATER_EQUAL 6 AND XCODE_VERSION VERSION_LESS 12)
+if(XCODE_VERSION VERSION_GREATER_EQUAL 6)
   # XcodeIOSInstallCombined
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeIOSInstallCombined-build)
   set(RunCMake_TEST_NO_CLEAN 1)
@@ -220,7 +220,14 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 6 AND XCODE_VERSION VERSION_LESS 12)
 
   run_cmake(XcodeIOSInstallCombined)
   run_cmake_command(XcodeIOSInstallCombined-build ${CMAKE_COMMAND} --build .)
-  run_cmake_command(XcodeIOSInstallCombined-install ${CMAKE_COMMAND} --build . --target install)
+  if(XCODE_VERSION VERSION_LESS 12)
+    run_cmake_command(XcodeIOSInstallCombined-install ${CMAKE_COMMAND} --build . --target install)
+  endif()
+  # --build defaults to Debug, --install defaults to Release, so we have to
+  # specify the configuration explicitly
+  run_cmake_command(XcodeIOSInstallCombined-cmakeinstall
+    ${CMAKE_COMMAND} --install . --config Debug
+  )
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
@@ -239,7 +246,14 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 6 AND XCODE_VERSION VERSION_LESS 12)
 
   run_cmake(XcodeIOSInstallCombinedPrune)
   run_cmake_command(XcodeIOSInstallCombinedPrune-build ${CMAKE_COMMAND} --build .)
-  run_cmake_command(XcodeIOSInstallCombinedPrune-install ${CMAKE_COMMAND} --build . --target install)
+  if(XCODE_VERSION VERSION_LESS 12)
+    run_cmake_command(XcodeIOSInstallCombinedPrune-install ${CMAKE_COMMAND} --build . --target install)
+  endif()
+  # --build defaults to Debug, --install defaults to Release, so we have to
+  # specify the configuration explicitly
+  run_cmake_command(XcodeIOSInstallCombinedPrune-cmakeinstall
+    ${CMAKE_COMMAND} --install . --config Debug
+  )
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
@@ -258,7 +272,14 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 6 AND XCODE_VERSION VERSION_LESS 12)
 
   run_cmake(XcodeIOSInstallCombinedSingleArch)
   run_cmake_command(XcodeIOSInstallCombinedSingleArch-build ${CMAKE_COMMAND} --build .)
-  run_cmake_command(XcodeIOSInstallCombinedSingleArch-install ${CMAKE_COMMAND} --build . --target install)
+  if(XCODE_VERSION VERSION_LESS 12)
+    run_cmake_command(XcodeIOSInstallCombinedSingleArch-install ${CMAKE_COMMAND} --build . --target install)
+  endif()
+  # --build defaults to Debug, --install defaults to Release, so we have to
+  # specify the configuration explicitly
+  run_cmake_command(XcodeIOSInstallCombinedSingleArch-cmakeinstall
+    ${CMAKE_COMMAND} --install . --config Debug
+  )
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)

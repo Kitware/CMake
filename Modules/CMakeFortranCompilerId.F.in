@@ -108,7 +108,7 @@
 #else
         PRINT *, 'INFO:compiler[]'
 #endif
-#if defined(_CRAYFTN)
+#if defined(__CRAYXT_COMPUTE_LINUX_TARGET)
         PRINT *, 'INFO:compiler_wrapper[CrayPrgEnv]'
 #endif
 
