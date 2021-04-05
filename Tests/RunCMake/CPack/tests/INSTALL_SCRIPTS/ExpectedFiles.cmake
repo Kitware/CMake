@@ -1,4 +1,4 @@
-if(RunCMake_SUBTEST_SUFFIX STREQUAL "single_debug_info")
+if(RunCMake_SUBTEST_SUFFIX MATCHES ".*single_debug_info")
   set(EXPECTED_FILE_1 "install_scripts-0.1.1-1.*.rpm")
 else()
   set(EXPECTED_FILE_1_COMPONENT "foo")

@@ -1,5 +1,5 @@
 function(get_test_prerequirements found_var config_file)
-  if(SUBTEST_SUFFIX STREQUAL "single_debug_info")
+  if(SUBTEST_SUFFIX MATCHES ".*single_debug_info")
     include(${config_file})
 
     if(OBJDUMP_EXECUTABLE)
