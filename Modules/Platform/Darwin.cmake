@@ -47,11 +47,7 @@ set(CMAKE_SHARED_MODULE_PREFIX "lib")
 set(CMAKE_SHARED_MODULE_SUFFIX ".so")
 set(CMAKE_MODULE_EXISTS 1)
 set(CMAKE_DL_LIBS "")
-
-# Enable rpath support for 10.5 and greater where it is known to work.
-if("${DARWIN_MAJOR_VERSION}" GREATER 8)
-  set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
-endif()
+set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
 
 foreach(lang C CXX OBJC OBJCXX)
   set(CMAKE_${lang}_OSX_COMPATIBILITY_VERSION_FLAG "-compatibility_version ")
