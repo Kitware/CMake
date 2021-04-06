@@ -28,6 +28,7 @@ set(targets
     linux-Fortran-PGI-18.10.1 linux_pgf77-Fortran-PGI-18.10.1
     linux_nostdinc-C-PGI-18.10.1 linux_nostdinc-CXX-PGI-18.10.1
     linux_nostdinc-Fortran-PGI-18.10.1
+  linux-C-NVHPC-21.1.0-empty linux-CXX-NVHPC-21.1.0-empty
   linux-C-XL-12.1.0 linux-CXX-XL-12.1.0 linux-Fortran-XL-14.1.0
     linux_nostdinc-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
     linux_nostdinc_i-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
