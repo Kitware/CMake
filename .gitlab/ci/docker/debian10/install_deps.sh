@@ -19,6 +19,10 @@ apt-get install -y \
     clang-6.0 \
     libncurses6
 
+# Tools needed for the test suite.
+apt-get install -y \
+    jq
+
 # Packages needed to test find modules.
 apt-get install -y \
     alsa-utils \
@@ -34,6 +38,7 @@ apt-get install -y \
     libbz2-dev \
     libcups2-dev \
     libcurl4-gnutls-dev \
+    libdevil-dev \
     libfontconfig1-dev \
     libfreetype6-dev \
     libgdal-dev \
