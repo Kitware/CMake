@@ -9,6 +9,18 @@
   "files": [
     {
       "os": ["linux", "Linux"],
+      "architecture": ["aarch64"],
+      "class": "installer",
+      "name": "cmake-@version@-Linux-aarch64.sh"
+    },
+    {
+      "os": ["linux", "Linux"],
+      "architecture": ["aarch64"],
+      "class": "archive",
+      "name": "cmake-@version@-Linux-aarch64.tar.gz"
+    },
+    {
+      "os": ["linux", "Linux"],
       "architecture": ["x86_64"],
       "class": "installer",
       "name": "cmake-@version@-Linux-x86_64.sh"
@@ -21,17 +33,31 @@
     },
     {
       "os": ["macos", "macOS"],
-      "architecture": ["x86_64"],
+      "architecture": ["arm64", "x86_64"],
       "class": "volume",
-      "name": "cmake-@version@-Darwin-x86_64.dmg",
-      "macOSmin": "10.7"
+      "name": "cmake-@version@-macos-universal.dmg",
+      "macOSmin": "10.13"
     },
     {
       "os": ["macos", "macOS"],
-      "architecture": ["x86_64"],
+      "architecture": ["arm64", "x86_64"],
       "class": "archive",
-      "name": "cmake-@version@-Darwin-x86_64.tar.gz",
-      "macOSmin": "10.7"
+      "name": "cmake-@version@-macos-universal.tar.gz",
+      "macOSmin": "10.13"
+    },
+    {
+      "os": ["macos10.10", "macOS10.10"],
+      "architecture": ["arm64", "x86_64"],
+      "class": "volume",
+      "name": "cmake-@version@-macos10.10-universal.dmg",
+      "macOSmin": "10.10"
+    },
+    {
+      "os": ["macos10.10", "macOS10.10"],
+      "architecture": ["arm64", "x86_64"],
+      "class": "archive",
+      "name": "cmake-@version@-macos10.10-universal.tar.gz",
+      "macOSmin": "10.10"
     },
     {
       "os": ["windows", "Windows"],
