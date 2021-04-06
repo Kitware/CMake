@@ -18,6 +18,7 @@ run_ctest_test(TestQuiet QUIET)
 #
 # Spoof a load average value to make these tests more reliable.
 set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 5)
+set(RunCTest_VERBOSE_FLAG -VV)
 
 # Verify that new tests are started when the load average falls below
 # our threshold.
@@ -53,6 +54,7 @@ run_ctest_test(TestLoadOrder TEST_LOAD "ERR4")
 
 unset(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING})
 unset(CASE_CTEST_TEST_LOAD)
+unset(RunCTest_VERBOSE_FLAG)
 
 function(run_TestChangeId)
   set(CASE_TEST_PREFIX_CODE [[
