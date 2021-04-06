@@ -338,20 +338,13 @@ as well as ``SWIG``:
   initialized with the value of this variable.
 #]=======================================================================]
 
-cmake_policy(GET CMP0078 target_name_policy)
-cmake_policy(GET CMP0086 module_name_policy)
-
-cmake_policy (VERSION 3.12)
-if (target_name_policy)
-  # respect user choice regarding CMP0078 policy
-  cmake_policy(SET CMP0078 ${target_name_policy})
-endif()
-if (module_name_policy)
-  # respect user choice regarding CMP0086 policy
-  cmake_policy(SET CMP0086 ${module_name_policy})
-endif()
-unset(target_name_policy)
-unset(module_name_policy)
+cmake_policy(PUSH)
+# numbers and boolean constants
+cmake_policy (SET CMP0012 NEW)
+# IN_LIST operator
+cmake_policy (SET CMP0057 NEW)
+# Ninja generator normalizes custom command depfile paths
+cmake_policy (SET CMP0116 NEW)
 
 set(SWIG_CXX_EXTENSION "cxx")
 set(SWIG_EXTRA_LIBRARIES "")
@@ -911,7 +904,7 @@ function(SWIG_ADD_LIBRARY name)
     if (APPLE)
       set_target_properties (${target_name} PROPERTIES SUFFIX ".jnilib")
     endif()
-    if ((WIN32 AND MINGW) OR CYGWIN OR CMAKE_SYSTEM_NAME STREQUAL MSYS)
+    if ((WIN32 AND MINGW) OR CYGWIN OR CMAKE_SYSTEM_NAME STREQUAL "MSYS")
       set_target_properties(${target_name} PROPERTIES PREFIX "")
     endif()
   elseif (swig_lowercase_language STREQUAL "lua")
@@ -1007,3 +1000,5 @@ function(SWIG_LINK_LIBRARIES name)
     endif()
   endif()
 endfunction()
+
+cmake_policy(POP)
