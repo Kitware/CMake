@@ -1,0 +1,3 @@
+libs=nvomp;dl;nvhpcatm;atomic;pthread;nvcpumath;nsnvc;nvc;m;gcc;c;gcc;gcc_s
+dirs=/opt/nvidia/hpc_sdk/Linux_x86_64/21.1/compilers/lib;/usr/lib64;/usr/lib/gcc/x86_64-linux-gnu/9
+library_arch=x86_64-linux-gnu
