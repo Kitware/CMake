@@ -712,6 +712,8 @@ private:
       "Specify toolset name if supported by generator." },                    \
     { "-A <platform-name>",                                                   \
       "Specify platform name if supported by generator." },                   \
+    { "--toolchain <file>",                                                   \
+      "Specify toolchain file [CMAKE_TOOLCHAIN_FILE]." },                     \
     { "--install-prefix <directory>",                                         \
       "Specify install directory [CMAKE_INSTALL_PREFIX]." },                  \
     { "-Wdev", "Enable developer warnings." },                                \

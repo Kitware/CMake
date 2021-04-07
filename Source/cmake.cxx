@@ -509,6 +509,16 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     return false;
   };
 
+  auto ToolchainLambda = [&](std::string const& path, cmake* state) -> bool {
+    const std::string var = "CMAKE_TOOLCHAIN_FILE";
+    cmStateEnums::CacheEntryType type = cmStateEnums::FILEPATH;
+#ifndef CMAKE_BOOTSTRAP
+    state->UnprocessedPresetVariables.erase(var);
+#endif
+    state->ProcessCacheArg(var, path, type);
+    return true;
+  };
+
   std::vector<CommandArgument> arguments = {
     CommandArgument{ "-D", "-D must be followed with VAR=VALUE.",
                      CommandArgument::Values::One, DefineLambda },
@@ -530,6 +540,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 
     CommandArgument{ "-P", "-P must be followed by a file name.",
                      CommandArgument::Values::One, ScriptLambda },
+    CommandArgument{ "--toolchain", "No file specified for --toolchain",
+                     CommandArgument::Values::One, ToolchainLambda },
     CommandArgument{ "--install-prefix",
                      "No install directory specified for --install-prefix",
                      CommandArgument::Values::One, PrefixLambda },
@@ -835,6 +847,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                      CommandArgument::Values::One, PlatformLambda },
     CommandArgument{ "-T", "No toolset specified for -T",
                      CommandArgument::Values::One, ToolsetLamda },
+    CommandArgument{ "--toolchain", "No file specified for --toolchain",
+                     CommandArgument::Values::One, IgnoreAndTrueLambda },
     CommandArgument{ "--install-prefix",
                      "No install directory specified for --install-prefix",
                      CommandArgument::Values::One, IgnoreAndTrueLambda },
