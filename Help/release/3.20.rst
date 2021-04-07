@@ -341,3 +341,9 @@ Changes made since CMake 3.20.0 include the following.
   and ``Intl_IS_BUILTIN``, but they were not implemented correctly.
   These have been removed and replaced with a single ``Intl_IS_BUILT_IN``
   check, whose name is consistent with the :module:`FindIconv` module.
+
+* The ``-rpath`` linker flag is now specified as supported on all Apple
+  platforms, not just macOS.  The ``install_name_dir`` used for
+  iOS, tvOS and watchOS should now default to ``@rpath`` instead of using
+  a full absolute path and failing at runtime when the library or framework
+  is embedded in an application bundle (see :prop_tgt:`XCODE_EMBED_<type>`).
