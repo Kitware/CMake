@@ -254,7 +254,8 @@ The preferred form for references to other commits is
   The author date of the commit, in its original time zone, formatted as
   ``CCYY-MM-DD``.  ``git-log(1)`` shows the original time zone by default.
 
-This may be generated with
+This may be generated with ``git show -s --pretty=reference <commit>`` with
+Git 2.25 and newer. Older versions of Git can generate the same format via
 ``git show -s --date=short --pretty="format:%h (%s, %ad)" <commit>``.
 
 If the commit is a fix for the mentioned commit, consider using a ``Fixes:``
