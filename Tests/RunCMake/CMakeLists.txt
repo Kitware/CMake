@@ -243,6 +243,7 @@ add_RunCMake_test(FileAPI -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 add_RunCMake_test(FindBoost)
 add_RunCMake_test(FindLua)
 add_RunCMake_test(FindOpenGL)
+add_RunCMake_test(InitialFlags)
 if(CMake_TEST_FindOpenSSL)
   add_RunCMake_test(FindOpenSSL)
 endif()
