@@ -202,7 +202,7 @@ function(run_TestLoad name load)
   add_test(TestLoad1 \"${CMAKE_COMMAND}\" -E echo \"test of --test-load\")
   add_test(TestLoad2 \"${CMAKE_COMMAND}\" -E echo \"test of --test-load\")
 ")
-  run_cmake_command(${name} ${CMAKE_CTEST_COMMAND} -j2 --test-load ${load})
+  run_cmake_command(${name} ${CMAKE_CTEST_COMMAND} -VV -j2 --test-load ${load})
 endfunction()
 
 # Tests for the --test-load feature of ctest
