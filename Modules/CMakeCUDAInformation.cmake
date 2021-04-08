@@ -111,6 +111,9 @@ include(CMakeCommonLanguageInclude)
 # CMAKE_CUDA_LINK_EXECUTABLE
 
 if(CMAKE_CUDA_HOST_COMPILER AND CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+  # FIXME: This is too late for the Platform/Windows-NVIDIA-CUDA module to
+  # see it, so we do not support CMAKE_CUDA_HOST_COMPILER on Windows.
+  # Move this to Compiler/NVIDIA-CUDA and update the VS generator too.
   string(APPEND _CMAKE_CUDA_EXTRA_FLAGS " -ccbin=<CMAKE_CUDA_HOST_COMPILER>")
 endif()
 
