@@ -1,0 +1,1 @@
+CMAKE_CXX_FLAGS='[^']*-Denv="a\\b"[^']+-Dvar="b\\c"[^']*'

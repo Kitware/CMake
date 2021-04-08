@@ -1,9 +1,9 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-macro(__determine_compiler_id_test testflags_in userflags)
-  separate_arguments(testflags UNIX_COMMAND "${testflags_in}")
-  CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${testflags}" "${userflags}" "${src}")
+macro(__determine_compiler_id_test testflags_var userflags_var)
+  separate_arguments(testflags UNIX_COMMAND "${${testflags_var}}")
+  CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${testflags}" "${${userflags_var}}" "${src}")
   CMAKE_DETERMINE_COMPILER_ID_MATCH_VENDOR("${lang}" "${COMPILER_${lang}_PRODUCED_OUTPUT}")
 
   if(NOT CMAKE_${lang}_COMPILER_ID)
@@ -44,7 +44,8 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
 
     foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
-      __determine_compiler_id_test("${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}" "${userflags}")
+      set(testflags "${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}")
+      __determine_compiler_id_test(testflags userflags)
       if(CMAKE_${lang}_COMPILER_ID)
         break()
       endif()
@@ -55,7 +56,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     # of helper flags.  Stop when the compiler is identified.
     foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
       foreach(testflags ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST} "" ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
-        __determine_compiler_id_test("${testflags}" "${userflags}")
+        __determine_compiler_id_test(testflags userflags)
         if(CMAKE_${lang}_COMPILER_ID)
           break()
         endif()
