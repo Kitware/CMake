@@ -89,7 +89,7 @@ public:
       return ReadFileResult::READ_OK;
     }
 
-    virtual ReadFileResult VisitPresetAfterInherit()
+    virtual ReadFileResult VisitPresetAfterInherit(int /* version */)
     {
       return ReadFileResult::READ_OK;
     }
@@ -132,7 +132,7 @@ public:
 
     ReadFileResult VisitPresetInherit(const Preset& parent) override;
     ReadFileResult VisitPresetBeforeInherit() override;
-    ReadFileResult VisitPresetAfterInherit() override;
+    ReadFileResult VisitPresetAfterInherit(int version) override;
   };
 
   class BuildPreset : public Preset
@@ -158,7 +158,7 @@ public:
     std::vector<std::string> NativeToolOptions;
 
     ReadFileResult VisitPresetInherit(const Preset& parent) override;
-    ReadFileResult VisitPresetAfterInherit() override;
+    ReadFileResult VisitPresetAfterInherit(int /* version */) override;
   };
 
   class TestPreset : public Preset
@@ -285,7 +285,7 @@ public:
     cm::optional<ExecutionOptions> Execution;
 
     ReadFileResult VisitPresetInherit(const Preset& parent) override;
-    ReadFileResult VisitPresetAfterInherit() override;
+    ReadFileResult VisitPresetAfterInherit(int /* version */) override;
   };
 
   template <class T>

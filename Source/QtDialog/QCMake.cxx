@@ -160,7 +160,7 @@ void QCMake::setPreset(const QString& name, bool setBinary)
       auto const& expandedPreset =
         this->CMakePresetsFile.ConfigurePresets[presetName].Expanded;
       if (expandedPreset) {
-        if (setBinary) {
+        if (setBinary && !expandedPreset->BinaryDir.empty()) {
           QString binaryDir =
             QString::fromLocal8Bit(expandedPreset->BinaryDir.data());
           this->setBinaryDirectory(binaryDir);
