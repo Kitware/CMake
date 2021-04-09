@@ -3,15 +3,15 @@ enable_language(C)
 
 add_custom_command(
   OUTPUT topcc.c
-  DEPFILE topcc.c.d
-  COMMAND ${CMAKE_COMMAND} -DOUTFILE=${CMAKE_CURRENT_BINARY_DIR}/topcc.c -DINFILE=topccdep.txt -DDEPFILE=topcc.c.d -P "${CMAKE_CURRENT_LIST_DIR}/WriteDepfile.cmake"
+  DEPFILE topcc_$<CONFIG>.c.d
+  COMMAND ${CMAKE_COMMAND} -DOUTFILE=${CMAKE_CURRENT_BINARY_DIR}/topcc.c -DINFILE=topccdep.txt -DDEPFILE=topcc_$<CONFIG>.c.d -P "${CMAKE_CURRENT_LIST_DIR}/WriteDepfile.cmake"
   )
 add_custom_target(topcc ALL DEPENDS topcc.c)
 
 add_custom_command(
   OUTPUT topexe.c
-  DEPFILE ${CMAKE_CURRENT_BINARY_DIR}/topexe.c.d
-  COMMAND ${CMAKE_COMMAND} -DOUTFILE=topexe.c "-DINFILE=${CMAKE_CURRENT_BINARY_DIR}/topexedep.txt" -DDEPFILE=topexe.c.d -P "${CMAKE_CURRENT_LIST_DIR}/WriteDepfile.cmake"
+  DEPFILE ${CMAKE_CURRENT_BINARY_DIR}/topexe_$<CONFIG>.c.d
+  COMMAND ${CMAKE_COMMAND} -DOUTFILE=topexe.c "-DINFILE=${CMAKE_CURRENT_BINARY_DIR}/topexedep.txt" -DDEPFILE=topexe_$<CONFIG>.c.d -P "${CMAKE_CURRENT_LIST_DIR}/WriteDepfile.cmake"
   )
 add_executable(topexe "${CMAKE_CURRENT_BINARY_DIR}/topexe.c")
 

@@ -272,7 +272,9 @@ The options are:
   .. versionadded:: 3.7
 
   Specify a ``.d`` depfile for the :generator:`Ninja` generator and
-  :ref:`Makefile Generators`.
+  :ref:`Makefile Generators`. The depfile may use "generator expressions" with
+  the syntax ``$<...>``. See the :manual:`generator-expressions(7)
+  <cmake-generator-expressions(7)>` manual for available expressions.
   A ``.d`` file holds dependencies usually emitted by the custom
   command itself.
   Using ``DEPFILE`` with other generators than :generator:`Ninja` or
@@ -280,6 +282,9 @@ The options are:
 
   .. versionadded:: 3.20
     Added the support of :ref:`Makefile Generators`.
+
+  .. versionadded:: 3.21
+    Added the support of :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
   If the ``DEPFILE`` argument is relative, it should be relative to
   :variable:`CMAKE_CURRENT_BINARY_DIR`, and any relative paths inside the
