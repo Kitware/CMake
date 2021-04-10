@@ -141,6 +141,8 @@ private:
 
   void ConfigFileNames(ConfigString& configString, cm::string_view prefix,
                        cm::string_view suffix);
+  void ConfigFileNamesAndGenex(ConfigString& configString, std::string& genex,
+                               cm::string_view prefix, cm::string_view suffix);
   void ConfigFileClean(ConfigString& configString);
 
   std::string GetMocBuildPath(MUFile const& muf);

@@ -430,12 +430,8 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Work);
 
     // Include directory
-    this->ConfigFileNames(this->Dir.Include,
-                          cmStrCat(this->Dir.Build, "/include"), "");
-    this->Dir.IncludeGenExp = this->Dir.Include.Default;
-    if (this->MultiConfig) {
-      this->Dir.IncludeGenExp += "_$<CONFIG>";
-    }
+    this->ConfigFileNamesAndGenex(this->Dir.Include, this->Dir.IncludeGenExp,
+                                  cmStrCat(this->Dir.Build, "/include"), "");
   }
 
   // Moc, Uic and _autogen target settings
@@ -586,15 +582,9 @@ bool cmQtAutoGenInitializer::InitMoc()
       cmStrCat(this->Dir.Build, "/mocs_compilation.cpp");
     this->Moc.CompilationFileGenex = this->Moc.CompilationFile.Default;
   } else {
-    this->ConfigFileNames(this->Moc.CompilationFile,
-                          cmStrCat(this->Dir.Build, "/mocs_compilation"),
-                          ".cpp");
-    if (this->MultiConfig) {
-      this->Moc.CompilationFileGenex =
-        cmStrCat(this->Dir.Build, "/mocs_compilation_$<CONFIG>.cpp"_s);
-    } else {
-      this->Moc.CompilationFileGenex = this->Moc.CompilationFile.Default;
-    }
+    this->ConfigFileNamesAndGenex(
+      this->Moc.CompilationFile, this->Moc.CompilationFileGenex,
+      cmStrCat(this->Dir.Build, "/mocs_compilation"_s), ".cpp"_s);
   }
 
   // Moc predefs
@@ -966,17 +956,10 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             cmSystemTools::GetFilenameWithoutLastExtension(fullPath), ".h"_s);
 
           ConfigString uiHeader;
-          uiHeader.Default =
-            cmStrCat(this->Dir.Build, "/include"_s, uiHeaderFilePath);
-          auto uiHeaderGenex = uiHeader.Default;
-          if (this->MultiConfig) {
-            uiHeaderGenex = cmStrCat(this->Dir.Build, "/include_$<CONFIG>"_s,
-                                     uiHeaderFilePath);
-            for (std::string const& cfg : this->ConfigsList) {
-              uiHeader.Config[cfg] = cmStrCat(this->Dir.Build, "/include_"_s,
-                                              cfg, uiHeaderFilePath);
-            }
-          }
+          std::string uiHeaderGenex;
+          this->ConfigFileNamesAndGenex(
+            uiHeader, uiHeaderGenex, cmStrCat(this->Dir.Build, "/include"_s),
+            uiHeaderFilePath);
 
           this->Uic.UiHeaders.emplace_back(
             std::make_pair(uiHeader, uiHeaderGenex));
@@ -1787,6 +1770,18 @@ void cmQtAutoGenInitializer::ConfigFileNames(ConfigString& configString,
     for (auto const& cfg : this->ConfigsList) {
       configString.Config[cfg] = cmStrCat(prefix, '_', cfg, suffix);
     }
+  }
+}
+
+void cmQtAutoGenInitializer::ConfigFileNamesAndGenex(
+  ConfigString& configString, std::string& genex, cm::string_view const prefix,
+  cm::string_view const suffix)
+{
+  this->ConfigFileNames(configString, prefix, suffix);
+  if (this->MultiConfig) {
+    genex = cmStrCat(prefix, "_$<CONFIG>"_s, suffix);
+  } else {
+    genex = configString.Default;
   }
 }
 
