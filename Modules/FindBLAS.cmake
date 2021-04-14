@@ -235,20 +235,21 @@ function(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlib
       # Respect linker flags as-is (required by MKL)
       list(APPEND _libraries "${_library}")
     else()
-      set(_combined_name ${_combined_name}_${_library})
+      string(REGEX REPLACE "[^A-Za-z0-9]" "_" _lib_var "${_library}")
+      set(_combined_name ${_combined_name}_${_lib_var})
       if(NOT "${_deps}" STREQUAL "")
         set(_combined_name ${_combined_name}_deps)
       endif()
       if(_libraries_work)
-        find_library(${_prefix}_${_library}_LIBRARY
+        find_library(${_prefix}_${_lib_var}_LIBRARY
           NAMES ${_library}
           NAMES_PER_DIR
           PATHS ${_extaddlibdir}
           PATH_SUFFIXES ${_subdirs}
         )
-        mark_as_advanced(${_prefix}_${_library}_LIBRARY)
-        list(APPEND _libraries ${${_prefix}_${_library}_LIBRARY})
-        set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
+        mark_as_advanced(${_prefix}_${_lib_var}_LIBRARY)
+        list(APPEND _libraries ${${_prefix}_${_lib_var}_LIBRARY})
+        set(_libraries_work ${${_prefix}_${_lib_var}_LIBRARY})
       endif()
     endif()
   endforeach()
