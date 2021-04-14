@@ -218,23 +218,25 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
   endif()
   list(APPEND _extaddlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
-  foreach(_library ${_list} ${_threadlibs})
+  foreach(_library ${_list})
     if(_library MATCHES "^-Wl,--(start|end)-group$")
       # Respect linker flags like --start/end-group (required by MKL)
       set(${LIBRARIES} ${${LIBRARIES}} "${_library}")
     else()
-      string(REGEX REPLACE "[^A-Za-z0-9]" "_" _lib_var "${_library}")
-      set(_combined_name ${_combined_name}_${_lib_var})
+      set(_combined_name ${_combined_name}_${_library})
+      if(NOT "${_threadlibs}" STREQUAL "")
+        set(_combined_name ${_combined_name}_threadlibs)
+      endif()
       if(_libraries_work)
-        find_library(${_prefix}_${_lib_var}_LIBRARY
+        find_library(${_prefix}_${_library}_LIBRARY
           NAMES ${_library}
           NAMES_PER_DIR
           PATHS ${_extaddlibdir}
           PATH_SUFFIXES ${_subdirs}
         )
-        mark_as_advanced(${_prefix}_${_lib_var}_LIBRARY)
-        set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_lib_var}_LIBRARY})
-        set(_libraries_work ${${_prefix}_${_lib_var}_LIBRARY})
+        mark_as_advanced(${_prefix}_${_library}_LIBRARY)
+        set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
+        set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
       endif()
     endif()
   endforeach()
