@@ -57,6 +57,7 @@ public:
   std::vector<std::string> const& GetDepends() const;
   std::set<BT<std::pair<std::string, bool>>> const& GetUtilities() const;
   bool HasOnlyEmptyCommandLines() const;
+  std::string GetDepfile() const;
   std::string GetFullDepfile() const;
   std::string GetInternalDepfile() const;
 

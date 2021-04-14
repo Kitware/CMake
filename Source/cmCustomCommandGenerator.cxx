@@ -139,6 +139,14 @@ std::vector<std::string> EvaluateOutputs(std::vector<std::string> const& paths,
   }
   return outputs;
 }
+
+std::string EvaluateDepfile(std::string const& path,
+                            cmGeneratorExpression const& ge,
+                            cmLocalGenerator* lg, std::string const& config)
+{
+  std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(path);
+  return cge->Evaluate(lg, config);
+}
 }
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(
@@ -381,9 +389,20 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
   }
 }
 
+std::string cmCustomCommandGenerator::GetDepfile() const
+{
+  const auto& depfile = this->CC->GetDepfile();
+  if (depfile.empty()) {
+    return "";
+  }
+
+  cmGeneratorExpression ge(this->CC->GetBacktrace());
+  return EvaluateDepfile(depfile, ge, this->LG, this->OutputConfig);
+}
+
 std::string cmCustomCommandGenerator::GetFullDepfile() const
 {
-  std::string depfile = this->CC->GetDepfile();
+  std::string depfile = this->GetDepfile();
   if (depfile.empty()) {
     return "";
   }

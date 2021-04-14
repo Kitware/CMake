@@ -670,7 +670,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
       customStep += hash.HashString(ninjaOutputs[0]).substr(0, 7);
 
-      std::string depfile = cc->GetDepfile();
+      std::string depfile = ccg.GetDepfile();
       if (!depfile.empty()) {
         switch (cc->GetCMP0116Status()) {
           case cmPolicies::WARN:
