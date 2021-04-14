@@ -3044,11 +3044,10 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
 bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
                                          cmExecutionStatus& status)
 {
-  static const std::set<std::string> supportedPlatforms = { "Windows", "Linux",
-                                                            "Darwin" };
   std::string platform =
     status.GetMakefile().GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
-  if (!supportedPlatforms.count(platform)) {
+  if (!cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
+        platform)) {
     status.SetError(
       cmStrCat("GET_RUNTIME_DEPENDENCIES is not supported on system \"",
                platform, "\""));

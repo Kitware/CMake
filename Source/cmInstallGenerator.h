@@ -50,7 +50,8 @@ public:
     std::vector<std::string> const& files, bool optional = false,
     const char* permissions_file = nullptr,
     const char* permissions_dir = nullptr, const char* rename = nullptr,
-    const char* literal_args = nullptr, Indent indent = Indent());
+    const char* literal_args = nullptr, Indent indent = Indent(),
+    const char* files_var = nullptr);
 
   /** Get the install destination as it should appear in the
       installation script.  */

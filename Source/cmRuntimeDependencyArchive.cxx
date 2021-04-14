@@ -397,3 +397,11 @@ cmRuntimeDependencyArchive::GetRPaths() const
 {
   return this->RPaths;
 }
+
+bool cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
+  const std::string& platform)
+{
+  static const std::set<std::string> supportedPlatforms = { "Windows", "Linux",
+                                                            "Darwin" };
+  return supportedPlatforms.count(platform);
+}

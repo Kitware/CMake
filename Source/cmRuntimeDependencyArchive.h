@@ -53,6 +53,8 @@ public:
   const std::set<std::string>& GetUnresolvedPaths() const;
   const std::map<std::string, std::vector<std::string>>& GetRPaths() const;
 
+  static bool PlatformSupportsRuntimeDependencies(const std::string& platform);
+
 private:
   cmExecutionStatus& Status;
   std::unique_ptr<cmBinUtilsLinker> Linker;

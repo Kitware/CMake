@@ -44,7 +44,7 @@ function(check_installed expect)
 do not match what we expected:
   ${expect}
 in directory:
-  ${CMAKE_INSTALL_PREFIX}" PARENT_SCOPE)
+  ${CMAKE_INSTALL_PREFIX}\n" PARENT_SCOPE)
   endif()
 endfunction()
 
@@ -173,6 +173,21 @@ run_install_test(TARGETS-Parts)
 run_install_test(FILES-PERMISSIONS)
 run_install_test(TARGETS-RPATH)
 run_install_test(InstallRequiredSystemLibraries)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  run_cmake(TARGETS-RUNTIME_DEPENDENCIES-macos-two-bundle)
+  run_cmake(TARGETS-RUNTIME_DEPENDENCIES-macos-no-framework)
+endif()
+
+if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$")
+  run_install_test(TARGETS-RUNTIME_DEPENDENCIES-nodep)
+  run_install_test(TARGETS-RUNTIME_DEPENDENCIES-empty)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_SYSTEM_NAME:STRING=${CMAKE_SYSTEM_NAME}")
+  run_cmake(TARGETS-RUNTIME_DEPENDENCIES-cross)
+  unset(RunCMake_TEST_OPTIONS)
+else()
+  run_cmake(TARGETS-RUNTIME_DEPENDENCIES-unsupported)
+endif()
 
 set(run_install_test_components 1)
 run_install_test(FILES-EXCLUDE_FROM_ALL)

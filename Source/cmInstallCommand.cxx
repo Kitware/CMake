@@ -2,8 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallCommand.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <iterator>
 #include <set>
 #include <sstream>
 #include <utility>
@@ -23,7 +25,10 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmInstallGetRuntimeDependenciesGenerator.h"
 #include "cmInstallImportedRuntimeArtifactsGenerator.h"
+#include "cmInstallRuntimeDependencySet.h"
+#include "cmInstallRuntimeDependencySetGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmListFileCache.h"
@@ -31,6 +36,7 @@
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
+#include "cmRuntimeDependencyArchive.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSubcommandTable.h"
@@ -39,6 +45,29 @@
 #include "cmTargetExport.h"
 
 namespace {
+
+struct RuntimeDependenciesArgs
+{
+  std::vector<std::string> Directories;
+  std::vector<std::string> PreIncludeRegexes;
+  std::vector<std::string> PreExcludeRegexes;
+  std::vector<std::string> PostIncludeRegexes;
+  std::vector<std::string> PostExcludeRegexes;
+  std::vector<std::string> PostIncludeFiles;
+  std::vector<std::string> PostExcludeFiles;
+};
+
+auto const RuntimeDependenciesArgHelper =
+  cmArgumentParser<RuntimeDependenciesArgs>{}
+    .Bind("DIRECTORIES"_s, &RuntimeDependenciesArgs::Directories)
+    .Bind("PRE_INCLUDE_REGEXES"_s, &RuntimeDependenciesArgs::PreIncludeRegexes)
+    .Bind("PRE_EXCLUDE_REGEXES"_s, &RuntimeDependenciesArgs::PreExcludeRegexes)
+    .Bind("POST_INCLUDE_REGEXES"_s,
+          &RuntimeDependenciesArgs::PostIncludeRegexes)
+    .Bind("POST_EXCLUDE_REGEXES"_s,
+          &RuntimeDependenciesArgs::PostExcludeRegexes)
+    .Bind("POST_INCLUDE_FILES"_s, &RuntimeDependenciesArgs::PostIncludeFiles)
+    .Bind("POST_EXCLUDE_FILES"_s, &RuntimeDependenciesArgs::PostExcludeFiles);
 
 class Helper
 {
@@ -147,11 +176,105 @@ std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
                                      args.GetDestination());
 }
 
+void AddInstallRuntimeDependenciesGenerator(
+  Helper& helper, cmInstallRuntimeDependencySet* runtimeDependencySet,
+  const cmInstallCommandArguments& runtimeArgs,
+  const cmInstallCommandArguments& libraryArgs,
+  const cmInstallCommandArguments& frameworkArgs,
+  RuntimeDependenciesArgs runtimeDependenciesArgs, bool& installsRuntime,
+  bool& installsLibrary, bool& installsFramework)
+{
+  bool dllPlatform =
+    !helper.Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
+  bool apple =
+    helper.Makefile->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME") == "Darwin";
+  auto const& runtimeDependenciesArgsRef =
+    dllPlatform ? runtimeArgs : libraryArgs;
+  std::vector<std::string> configurations =
+    runtimeDependenciesArgsRef.GetConfigurations();
+  if (apple) {
+    std::copy(frameworkArgs.GetConfigurations().begin(),
+              frameworkArgs.GetConfigurations().end(),
+              std::back_inserter(configurations));
+  }
+
+  // Create file(GET_RUNTIME_DEPENDENCIES) generator.
+  auto getRuntimeDependenciesGenerator =
+    cm::make_unique<cmInstallGetRuntimeDependenciesGenerator>(
+      runtimeDependencySet, std::move(runtimeDependenciesArgs.Directories),
+      std::move(runtimeDependenciesArgs.PreIncludeRegexes),
+      std::move(runtimeDependenciesArgs.PreExcludeRegexes),
+      std::move(runtimeDependenciesArgs.PostIncludeRegexes),
+      std::move(runtimeDependenciesArgs.PostExcludeRegexes),
+      std::move(runtimeDependenciesArgs.PostIncludeFiles),
+      std::move(runtimeDependenciesArgs.PostExcludeFiles),
+      runtimeDependenciesArgsRef.GetComponent(),
+      apple ? frameworkArgs.GetComponent() : "", true, "_CMAKE_DEPS",
+      "_CMAKE_RPATH", configurations,
+      cmInstallGenerator::SelectMessageLevel(helper.Makefile),
+      runtimeDependenciesArgsRef.GetExcludeFromAll() &&
+        (apple ? frameworkArgs.GetExcludeFromAll() : true),
+      helper.Makefile->GetBacktrace());
+  helper.Makefile->AddInstallGenerator(
+    std::move(getRuntimeDependenciesGenerator));
+
+  // Create the library dependencies generator.
+  auto libraryRuntimeDependenciesGenerator =
+    cm::make_unique<cmInstallRuntimeDependencySetGenerator>(
+      cmInstallRuntimeDependencySetGenerator::DependencyType::Library,
+      runtimeDependencySet, std::vector<std::string>{}, true, std::string{},
+      true, "_CMAKE_DEPS", "_CMAKE_RPATH", "_CMAKE_TMP",
+      dllPlatform ? helper.GetRuntimeDestination(&runtimeArgs)
+                  : helper.GetLibraryDestination(&libraryArgs),
+      runtimeDependenciesArgsRef.GetConfigurations(),
+      runtimeDependenciesArgsRef.GetComponent(),
+      runtimeDependenciesArgsRef.GetPermissions(),
+      cmInstallGenerator::SelectMessageLevel(helper.Makefile),
+      runtimeDependenciesArgsRef.GetExcludeFromAll(),
+      helper.Makefile->GetBacktrace());
+  helper.Makefile->AddInstallGenerator(
+    std::move(libraryRuntimeDependenciesGenerator));
+  if (dllPlatform) {
+    installsRuntime = true;
+  } else {
+    installsLibrary = true;
+  }
+
+  if (apple) {
+    // Create the framework dependencies generator.
+    auto frameworkRuntimeDependenciesGenerator =
+      cm::make_unique<cmInstallRuntimeDependencySetGenerator>(
+        cmInstallRuntimeDependencySetGenerator::DependencyType::Framework,
+        runtimeDependencySet, std::vector<std::string>{}, true, std::string{},
+        true, "_CMAKE_DEPS", "_CMAKE_RPATH", "_CMAKE_TMP",
+        frameworkArgs.GetDestination(), frameworkArgs.GetConfigurations(),
+        frameworkArgs.GetComponent(), frameworkArgs.GetPermissions(),
+        cmInstallGenerator::SelectMessageLevel(helper.Makefile),
+        frameworkArgs.GetExcludeFromAll(), helper.Makefile->GetBacktrace());
+    helper.Makefile->AddInstallGenerator(
+      std::move(frameworkRuntimeDependenciesGenerator));
+    installsFramework = true;
+  }
+}
+
 std::set<std::string> const allowedTypes{
   "BIN",         "SBIN",       "LIB",      "INCLUDE", "SYSCONF",
   "SHAREDSTATE", "LOCALSTATE", "RUNSTATE", "DATA",    "INFO",
   "LOCALE",      "MAN",        "DOC",
 };
+
+template <typename T>
+bool AddBundleExecutable(Helper& helper,
+                         cmInstallRuntimeDependencySet* runtimeDependencySet,
+                         T&& bundleExecutable)
+{
+  if (!runtimeDependencySet->AddBundleExecutable(bundleExecutable)) {
+    helper.SetError(
+      "A runtime dependency set may only have one bundle executable.");
+    return false;
+  }
+  return true;
+}
 
 bool HandleScriptMode(std::vector<std::string> const& args,
                       cmExecutionStatus& status)
@@ -289,12 +412,22 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   // These generic args also contain the targets and the export stuff
   std::vector<std::string> targetList;
   std::string exports;
+  std::vector<std::string> runtimeDependenciesArgVector;
   std::vector<std::string> unknownArgs;
+  std::vector<std::string> parsedArgs;
   cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
   genericArgs.Bind("TARGETS"_s, targetList);
   genericArgs.Bind("EXPORT"_s, exports);
-  genericArgs.Parse(genericArgVector, &unknownArgs);
+  genericArgs.Bind("RUNTIME_DEPENDENCIES"_s, runtimeDependenciesArgVector);
+  genericArgs.Parse(genericArgVector, &unknownArgs, nullptr, &parsedArgs);
   bool success = genericArgs.Finalize();
+
+  bool withRuntimeDependencies =
+    std::find(parsedArgs.begin(), parsedArgs.end(), "RUNTIME_DEPENDENCIES") !=
+    parsedArgs.end();
+  RuntimeDependenciesArgs runtimeDependenciesArgs =
+    RuntimeDependenciesArgHelper.Parse(runtimeDependenciesArgVector,
+                                       &unknownArgs);
 
   cmInstallCommandArguments archiveArgs(helper.DefaultComponentName);
   cmInstallCommandArguments libraryArgs(helper.DefaultComponentName);
@@ -400,6 +533,32 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       "TARGETS given TYPE option. The TYPE option may only be specified in "
       " install(FILES) and install(DIRECTORIES).");
     return false;
+  }
+
+  cmInstallRuntimeDependencySet* runtimeDependencySet = nullptr;
+  if (withRuntimeDependencies) {
+    auto system = helper.Makefile->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
+    if (!cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
+          system)) {
+      status.SetError(
+        cmStrCat("TARGETS RUNTIME_DEPENDENCIES is not supported on system \"",
+                 system, '"'));
+      return false;
+    }
+    if (helper.Makefile->IsOn("CMAKE_CROSSCOMPILING")) {
+      status.SetError("TARGETS RUNTIME_DEPENDENCIES is not supported "
+                      "when cross-compiling.");
+      return false;
+    }
+    if (helper.Makefile->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME") ==
+          "Darwin" &&
+        frameworkArgs.GetDestination().empty()) {
+      status.SetError(
+        "TARGETS RUNTIME_DEPENDENCIES given no FRAMEWORK DESTINATION");
+      return false;
+    }
+    runtimeDependencySet = helper.Makefile->GetGlobalGenerator()
+                             ->CreateAnonymousRuntimeDependencySet();
   }
 
   // Select the mode for installing symlinks to versioned shared libraries.
@@ -546,6 +705,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
               target, runtimeArgs, false, helper.Makefile->GetBacktrace(),
               helper.GetRuntimeDestination(nullptr));
           }
+          if (runtimeDependencySet && runtimeGenerator) {
+            runtimeDependencySet->AddLibrary(runtimeGenerator.get());
+          }
         } else {
           // This is a non-DLL platform.
           // If it is marked with FRAMEWORK property use the FRAMEWORK set of
@@ -591,6 +753,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
             namelinkOnly =
               (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
           }
+          if (runtimeDependencySet && libraryGenerator) {
+            runtimeDependencySet->AddLibrary(libraryGenerator.get());
+          }
         }
       } break;
       case cmStateEnums::STATIC_LIBRARY: {
@@ -633,6 +798,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           libraryGenerator->SetNamelinkMode(namelinkMode);
           namelinkOnly =
             (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
+          if (runtimeDependencySet) {
+            runtimeDependencySet->AddModule(libraryGenerator.get());
+          }
         } else {
           status.SetError(
             cmStrCat("TARGETS given no LIBRARY DESTINATION for module "
@@ -685,6 +853,12 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
                                      target.GetName(), "\"."));
             return false;
           }
+          if (runtimeDependencySet) {
+            if (!AddBundleExecutable(helper, runtimeDependencySet,
+                                     bundleGenerator.get())) {
+              return false;
+            }
+          }
         } else {
           // Executables use the RUNTIME properties.
           if (!runtimeArgs.GetDestination().empty()) {
@@ -693,6 +867,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           runtimeGenerator = CreateInstallTargetGenerator(
             target, runtimeArgs, false, helper.Makefile->GetBacktrace(),
             helper.GetRuntimeDestination(&runtimeArgs));
+          if (runtimeDependencySet) {
+            runtimeDependencySet->AddExecutable(runtimeGenerator.get());
+          }
         }
 
         // On DLL platforms an executable may also have an import
@@ -819,6 +996,13 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     helper.Makefile->AddInstallGenerator(std::move(privateHeaderGenerator));
     helper.Makefile->AddInstallGenerator(std::move(publicHeaderGenerator));
     helper.Makefile->AddInstallGenerator(std::move(resourceGenerator));
+  }
+
+  if (withRuntimeDependencies && !runtimeDependencySet->Empty()) {
+    AddInstallRuntimeDependenciesGenerator(
+      helper, runtimeDependencySet, runtimeArgs, libraryArgs, frameworkArgs,
+      std::move(runtimeDependenciesArgs), installsRuntime, installsLibrary,
+      installsFramework);
   }
 
   // Tell the global generator about any installation component names

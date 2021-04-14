@@ -43,7 +43,8 @@ void cmInstallGenerator::AddInstallRule(
   std::vector<std::string> const& files, bool optional /* = false */,
   const char* permissions_file /* = 0 */,
   const char* permissions_dir /* = 0 */, const char* rename /* = 0 */,
-  const char* literal_args /* = 0 */, Indent indent)
+  const char* literal_args /* = 0 */, Indent indent,
+  const char* files_var /* = 0 */)
 {
   // Use the FILE command to install the file.
   std::string stype;
@@ -70,37 +71,46 @@ void cmInstallGenerator::AddInstallRule(
       stype = "FILE";
       break;
   }
-  os << indent;
   if (cmSystemTools::FileIsFullPath(dest)) {
-    os << "list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES\n";
-    os << indent << " \"";
-    bool firstIteration = true;
-    for (std::string const& file : files) {
-      if (!firstIteration) {
-        os << ";";
+    if (!files.empty()) {
+      os << indent << "list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES\n";
+      os << indent << " \"";
+      bool firstIteration = true;
+      for (std::string const& file : files) {
+        if (!firstIteration) {
+          os << ";";
+        }
+        os << dest << "/";
+        if (rename && *rename) {
+          os << rename;
+        } else {
+          os << cmSystemTools::GetFilenameName(file);
+        }
+        firstIteration = false;
       }
-      os << dest << "/";
-      if (rename && *rename) {
-        os << rename;
-      } else {
-        os << cmSystemTools::GetFilenameName(file);
-      }
-      firstIteration = false;
+      os << "\")\n";
     }
-    os << "\")\n";
+    if (files_var) {
+      os << indent << "foreach(_f IN LISTS " << files_var << ")\n";
+      os << indent.Next() << "get_filename_component(_fn \"${_f}\" NAME)\n";
+      os << indent.Next() << "list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES \""
+         << dest << "/${_fn}\")\n";
+      os << indent << "endforeach()\n";
+    }
     os << indent << "if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
-    os << indent << indent << "message(WARNING \"ABSOLUTE path INSTALL "
+    os << indent.Next() << "message(WARNING \"ABSOLUTE path INSTALL "
        << "DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
     os << indent << "endif()\n";
 
     os << indent << "if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
-    os << indent << indent << "message(FATAL_ERROR \"ABSOLUTE path INSTALL "
+    os << indent.Next() << "message(FATAL_ERROR \"ABSOLUTE path INSTALL "
        << "DESTINATION forbidden (by caller): "
        << "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
     os << indent << "endif()\n";
   }
   std::string absDest = ConvertToAbsoluteDestination(dest);
-  os << "file(INSTALL DESTINATION \"" << absDest << "\" TYPE " << stype;
+  os << indent << "file(INSTALL DESTINATION \"" << absDest << "\" TYPE "
+     << stype;
   if (optional) {
     os << " OPTIONAL";
   }
@@ -132,6 +142,9 @@ void cmInstallGenerator::AddInstallRule(
   } else {
     for (std::string const& f : files) {
       os << "\n" << indent << "  \"" << f << "\"";
+    }
+    if (files_var) {
+      os << " ${" << files_var << "}";
     }
     os << "\n" << indent << " ";
     if (!(literal_args && *literal_args)) {
