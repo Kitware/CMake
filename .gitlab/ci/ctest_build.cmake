@@ -8,10 +8,18 @@ ctest_read_custom_files("${CTEST_BINARY_DIRECTORY}")
 # Pick up from where the configure left off.
 ctest_start(APPEND)
 
+include(ProcessorCount)
+ProcessorCount(nproc)
+if (NOT "$ENV{CTEST_MAX_PARALLELISM}" STREQUAL "")
+  if (nproc GREATER "$ENV{CTEST_MAX_PARALLELISM}")
+    set(nproc "$ENV{CTEST_MAX_PARALLELISM}")
+  endif ()
+endif ()
+
 if (CTEST_CMAKE_GENERATOR STREQUAL "Unix Makefiles")
-  include(ProcessorCount)
-  ProcessorCount(nproc)
-  set(CTEST_BUILD_FLAGS "-j${nproc}")
+  set(CTEST_BUILD_FLAGS "-j${nproc} -l${nproc}")
+elseif (CTEST_CMAKE_GENERATOR MATCHES "Ninja")
+  set(CTEST_BUILD_FLAGS "-l${nproc}")
 endif ()
 
 ctest_build(
