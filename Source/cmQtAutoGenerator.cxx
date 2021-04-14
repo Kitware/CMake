@@ -116,7 +116,7 @@ bool cmQtAutoGenerator::MakeParentDirectory(std::string const& filename)
   bool success = true;
   std::string const dirName = cmSystemTools::GetFilenamePath(filename);
   if (!dirName.empty()) {
-    success = cmSystemTools::MakeDirectory(dirName);
+    success = static_cast<bool>(cmSystemTools::MakeDirectory(dirName));
   }
   return success;
 }

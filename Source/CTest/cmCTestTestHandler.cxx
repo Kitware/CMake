@@ -1881,7 +1881,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   std::string dirName = this->CTest->GetBinaryDir() + "/Testing/Temporary";
 
   cmsys::Directory directory;
-  if (directory.Load(dirName) == 0) {
+  if (!directory.Load(dirName)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Unable to read the contents of " << dirName << std::endl);
     return;

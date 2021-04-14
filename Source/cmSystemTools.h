@@ -12,6 +12,7 @@
 #include <cm/string_view>
 
 #include "cmsys/Process.h"
+#include "cmsys/Status.hxx"      // IWYU pragma: export
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
 
 #include "cmCryptoHash.h"

@@ -1016,7 +1016,7 @@ cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
   }
 
   mode_t perm = 0;
-  bool perms = SystemTools::GetPermissions(oldname, perm);
+  cmsys::Status perms = SystemTools::GetPermissions(oldname, perm);
 
   // If files are the same do not copy
   if (SystemTools::SameFile(oldname, newname)) {
@@ -3130,7 +3130,7 @@ bool cmSystemTools::RepeatedRemoveDirectory(const std::string& dir)
   }
   return false;
 #else
-  return cmSystemTools::RemoveADirectory(dir);
+  return static_cast<bool>(cmSystemTools::RemoveADirectory(dir));
 #endif
 }
 
