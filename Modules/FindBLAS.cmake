@@ -208,7 +208,7 @@ endif()
 
 # TODO: move this stuff to a separate module
 
-macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _addlibdir _subdirs)
+macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlibdir _subdirs)
   # This macro checks for the existence of the combination of fortran libraries
   # given by _list.  If the combination is found, this macro checks (using the
   # Check_Fortran_Function_Exists macro) whether can link against that library
@@ -242,8 +242,8 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
       list(APPEND ${LIBRARIES} "${_library}")
     else()
       set(_combined_name ${_combined_name}_${_library})
-      if(NOT "${_threadlibs}" STREQUAL "")
-        set(_combined_name ${_combined_name}_threadlibs)
+      if(NOT "${_deps}" STREQUAL "")
+        set(_combined_name ${_combined_name}_deps)
       endif()
       if(_libraries_work)
         find_library(${_prefix}_${_library}_LIBRARY
@@ -265,7 +265,7 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
   endforeach()
   if(_libraries_work)
     # Test this combination of libraries.
-    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_threadlibs})
+    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_deps})
     if(CMAKE_Fortran_COMPILER_LOADED)
       check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
     else()
@@ -279,7 +279,7 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
     if("${_list}" STREQUAL "")
       set(${LIBRARIES} "${LIBRARIES}-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
     else()
-      list(APPEND ${LIBRARIES} ${_threadlibs})
+      list(APPEND ${LIBRARIES} ${_deps})
     endif()
   else()
     set(${LIBRARIES} FALSE)
