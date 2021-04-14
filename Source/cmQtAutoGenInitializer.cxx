@@ -294,6 +294,17 @@ bool InfoWriter::Save(std::string const& filename)
   return fileStream.Close();
 }
 
+void AddAutogenExecutableToDependencies(
+  cmQtAutoGenInitializer::GenVarsT const& genVars,
+  std::vector<std::string>& dependencies)
+{
+  if (genVars.ExecutableTarget != nullptr) {
+    dependencies.push_back(genVars.ExecutableTarget->Target->GetName());
+  } else if (!genVars.Executable.empty()) {
+    dependencies.push_back(genVars.Executable);
+  }
+}
+
 } // End of unnamed namespace
 
 cmQtAutoGenInitializer::cmQtAutoGenInitializer(
@@ -419,12 +430,8 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Work);
 
     // Include directory
-    this->ConfigFileNames(this->Dir.Include,
-                          cmStrCat(this->Dir.Build, "/include"), "");
-    this->Dir.IncludeGenExp = this->Dir.Include.Default;
-    if (this->MultiConfig) {
-      this->Dir.IncludeGenExp += "_$<CONFIG>";
-    }
+    this->ConfigFileNamesAndGenex(this->Dir.Include, this->Dir.IncludeGenExp,
+                                  cmStrCat(this->Dir.Build, "/include"), "");
   }
 
   // Moc, Uic and _autogen target settings
@@ -575,15 +582,9 @@ bool cmQtAutoGenInitializer::InitMoc()
       cmStrCat(this->Dir.Build, "/mocs_compilation.cpp");
     this->Moc.CompilationFileGenex = this->Moc.CompilationFile.Default;
   } else {
-    this->ConfigFileNames(this->Moc.CompilationFile,
-                          cmStrCat(this->Dir.Build, "/mocs_compilation"),
-                          ".cpp");
-    if (this->MultiConfig) {
-      this->Moc.CompilationFileGenex =
-        cmStrCat(this->Dir.Build, "/mocs_compilation_$<CONFIG>.cpp"_s);
-    } else {
-      this->Moc.CompilationFileGenex = this->Moc.CompilationFile.Default;
-    }
+    this->ConfigFileNamesAndGenex(
+      this->Moc.CompilationFile, this->Moc.CompilationFileGenex,
+      cmStrCat(this->Dir.Build, "/mocs_compilation"_s), ".cpp"_s);
   }
 
   // Moc predefs
@@ -935,8 +936,11 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         if (!skipUic) {
           // Check if the .ui file has uic options
           std::string const uicOpts = sf->GetSafeProperty(kw.AUTOUIC_OPTIONS);
-          if (!uicOpts.empty()) {
-            this->Uic.UiFiles.emplace_back(fullPath, cmExpandedList(uicOpts));
+          if (uicOpts.empty()) {
+            this->Uic.UiFilesNoOptions.emplace_back(fullPath);
+          } else {
+            this->Uic.UiFilesWithOptions.emplace_back(fullPath,
+                                                      cmExpandedList(uicOpts));
           }
 
           auto uiHeaderRelativePath = cmSystemTools::RelativePath(
@@ -954,17 +958,10 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             cmSystemTools::GetFilenameWithoutLastExtension(fullPath), ".h"_s);
 
           ConfigString uiHeader;
-          uiHeader.Default =
-            cmStrCat(this->Dir.Build, "/include"_s, uiHeaderFilePath);
-          auto uiHeaderGenex = uiHeader.Default;
-          if (this->MultiConfig) {
-            uiHeaderGenex = cmStrCat(this->Dir.Build, "/include_$<CONFIG>"_s,
-                                     uiHeaderFilePath);
-            for (std::string const& cfg : this->ConfigsList) {
-              uiHeader.Config[cfg] = cmStrCat(this->Dir.Build, "/include_"_s,
-                                              cfg, uiHeaderFilePath);
-            }
-          }
+          std::string uiHeaderGenex;
+          this->ConfigFileNamesAndGenex(
+            uiHeader, uiHeaderGenex, cmStrCat(this->Dir.Build, "/include"_s),
+            uiHeaderFilePath);
 
           this->Uic.UiHeaders.emplace_back(
             std::make_pair(uiHeader, uiHeaderGenex));
@@ -1186,6 +1183,42 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
                                           this->Makefile);
     }
 
+    if (!this->Uic.UiFilesNoOptions.empty() ||
+        !this->Uic.UiFilesWithOptions.empty()) {
+      // Add a generated timestamp file
+      ConfigString timestampFile;
+      std::string timestampFileGenex;
+      ConfigFileNamesAndGenex(timestampFile, timestampFileGenex,
+                              cmStrCat(this->Dir.Build, "/autouic"_s),
+                              ".stamp"_s);
+      this->AddGeneratedSource(timestampFile, this->Uic);
+
+      // Add a step in the pre-build command to touch the timestamp file
+      commandLines.push_back(
+        cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E", "touch",
+                            timestampFileGenex }));
+
+      // UIC needs to be re-run if any of the known UI files change or the
+      // executable itself has been updated
+      auto uicDependencies = this->Uic.UiFilesNoOptions;
+      for (auto const& uiFile : this->Uic.UiFilesWithOptions) {
+        uicDependencies.push_back(uiFile.first);
+      }
+      AddAutogenExecutableToDependencies(this->Uic, uicDependencies);
+
+      // Add a rule file to cause the target to build if a dependency has
+      // changed, which will trigger the pre-build command to run autogen
+      std::string no_main_dependency;
+      cmCustomCommandLines no_command_lines;
+      this->LocalGen->AddCustomCommandToOutput(
+        timestampFileGenex, uicDependencies, no_main_dependency,
+        no_command_lines, /*comment=*/"", this->Dir.Work.c_str(),
+        /*cmp0116=*/cmPolicies::NEW, /*replace=*/false,
+        /*escapeOldStyle=*/false, /*uses_terminal=*/false,
+        /*command_expand_lists=*/false, /*depfile=*/"", /*job_pool=*/"",
+        stdPipesUTF8);
+    }
+
     // Add the pre-build command directly to bypass the OBJECT_LIBRARY
     // rejection in cmMakefile::AddCustomCommandToTarget because we know
     // PRE_BUILD will work for an OBJECT_LIBRARY in this specific case.
@@ -1278,16 +1311,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       dependencies.clear();
       dependencies.push_back(timestampTargetName);
 
-      if (this->Moc.ExecutableTarget != nullptr) {
-        dependencies.push_back(this->Moc.ExecutableTarget->Target->GetName());
-      } else if (!this->Moc.Executable.empty()) {
-        dependencies.push_back(this->Moc.Executable);
-      }
-      if (this->Uic.ExecutableTarget != nullptr) {
-        dependencies.push_back(this->Uic.ExecutableTarget->Target->GetName());
-      } else if (!this->Uic.Executable.empty()) {
-        dependencies.push_back(this->Uic.Executable);
-      }
+      AddAutogenExecutableToDependencies(this->Moc, dependencies);
+      AddAutogenExecutableToDependencies(this->Uic, dependencies);
 
       // Create the custom command that outputs the timestamp file.
       const char timestampFileName[] = "timestamp";
@@ -1626,7 +1651,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     uic_skip.insert(this->Uic.SkipUi.begin(), this->Uic.SkipUi.end());
 
     info.SetArray("UIC_SKIP", uic_skip);
-    info.SetArrayArray("UIC_UI_FILES", this->Uic.UiFiles,
+    info.SetArrayArray("UIC_UI_FILES", this->Uic.UiFilesWithOptions,
                        [](Json::Value& jval, UicT::UiFileT const& uiFile) {
                          jval.resize(2u);
                          jval[0u] = uiFile.first;
@@ -1783,6 +1808,18 @@ void cmQtAutoGenInitializer::ConfigFileNames(ConfigString& configString,
     for (auto const& cfg : this->ConfigsList) {
       configString.Config[cfg] = cmStrCat(prefix, '_', cfg, suffix);
     }
+  }
+}
+
+void cmQtAutoGenInitializer::ConfigFileNamesAndGenex(
+  ConfigString& configString, std::string& genex, cm::string_view const prefix,
+  cm::string_view const suffix)
+{
+  this->ConfigFileNames(configString, prefix, suffix);
+  if (this->MultiConfig) {
+    genex = cmStrCat(prefix, "_$<CONFIG>"_s, suffix);
+  } else {
+    genex = configString.Default;
   }
 }
 

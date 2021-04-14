@@ -141,6 +141,8 @@ private:
 
   void ConfigFileNames(ConfigString& configString, cm::string_view prefix,
                        cm::string_view suffix);
+  void ConfigFileNamesAndGenex(ConfigString& configString, std::string& genex,
+                               cm::string_view prefix, cm::string_view suffix);
   void ConfigFileClean(ConfigString& configString);
 
   std::string GetMocBuildPath(MUFile const& muf);
@@ -236,7 +238,8 @@ private:
       : GenVarsT(GenT::UIC){};
 
     std::set<std::string> SkipUi;
-    std::vector<UiFileT> UiFiles;
+    std::vector<std::string> UiFilesNoOptions;
+    std::vector<UiFileT> UiFilesWithOptions;
     ConfigStrings<std::vector<std::string>> Options;
     std::vector<std::string> SearchPaths;
     std::vector<std::pair<ConfigString /*ui header*/, std::string /*genex*/>>
