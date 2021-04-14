@@ -190,22 +190,16 @@ endmacro()
 
 # TODO: move this stuff to a separate module
 
-macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlibdir _subdirs _blas)
-  # This macro checks for the existence of the combination of fortran libraries
-  # given by _list.  If the combination is found, this macro checks (using the
-  # Check_Fortran_Function_Exists macro) whether can link against that library
-  # combination using the name of a routine given by _name using the linker
-  # flags given by _flags.  If the combination of libraries is found and passes
-  # the link test, LIBRARIES is set to the list of complete library paths that
-  # have been found.  Otherwise, LIBRARIES is set to FALSE.
-
-  # N.B. _prefix is the prefix applied to the names of all cached variables that
-  # are generated internally and marked advanced by this macro.
-  # _addlibdir is a list of additional search paths. _subdirs is a list of path
-  # suffixes to be used by find_library().
+function(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlibdir _subdirs _blas)
+  # This function checks for the existence of the combination of libraries
+  # given by _list.  If the combination is found, this checks whether can link
+  # against that library combination using the name of a routine given by _name
+  # using the linker flags given by _flags.  If the combination of libraries is
+  # found and passes the link test, ${LIBRARIES} is set to the list of complete
+  # library paths that have been found.  Otherwise, ${LIBRARIES} is set to FALSE.
 
   set(_libraries_work TRUE)
-  set(${LIBRARIES})
+  set(_libraries)
   set(_combined_name)
 
   set(_extaddlibdir "${_addlibdir}")
@@ -221,7 +215,7 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlibd
   foreach(_library ${_list})
     if(_library MATCHES "^-Wl,--(start|end)-group$")
       # Respect linker flags like --start/end-group (required by MKL)
-      list(APPEND ${LIBRARIES} "${_library}")
+      list(APPEND _libraries "${_library}")
     else()
       set(_combined_name ${_combined_name}_${_library})
       if(NOT "${_deps}" STREQUAL "")
@@ -235,12 +229,11 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlibd
           PATH_SUFFIXES ${_subdirs}
         )
         mark_as_advanced(${_prefix}_${_library}_LIBRARY)
-        list(APPEND ${LIBRARIES} ${${_prefix}_${_library}_LIBRARY})
+        list(APPEND _libraries ${${_prefix}_${_library}_LIBRARY})
         set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
       endif()
     endif()
   endforeach()
-  unset(_library)
 
   foreach(_flag ${_flags})
     string(REGEX REPLACE "[^A-Za-z0-9]" "_" _flag_var "${_flag}")
@@ -248,7 +241,7 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlibd
   endforeach()
   if(_libraries_work)
     # Test this combination of libraries.
-    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_deps})
+    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${_libraries} ${_blas} ${_deps})
     if(CMAKE_Fortran_COMPILER_LOADED)
       check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
     else()
@@ -260,18 +253,15 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlibd
 
   if(_libraries_work)
     if("${_list}${_blas}" STREQUAL "")
-      set(${LIBRARIES} "${LIBRARIES}-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
+      set(_libraries "${LIBRARIES}-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
     else()
-      list(APPEND ${LIBRARIES} ${_blas} ${_deps})
+      list(APPEND _libraries ${_blas} ${_deps})
     endif()
   else()
-    set(${LIBRARIES} FALSE)
+    set(_libraries FALSE)
   endif()
-
-  unset(_extaddlibdir)
-  unset(_libraries_work)
-  unset(_combined_name)
-endmacro()
+  set(${LIBRARIES} "${_libraries}" PARENT_SCOPE)
+endfunction()
 
 macro(_lapack_find_dependency dep)
   set(_lapack_quiet_arg)
