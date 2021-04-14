@@ -213,8 +213,8 @@ function(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addl
   list(APPEND _extaddlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
   foreach(_library ${_list})
-    if(_library MATCHES "^-Wl,--(start|end)-group$")
-      # Respect linker flags like --start/end-group (required by MKL)
+    if(_library MATCHES "^-")
+      # Respect linker flags as-is (required by MKL)
       list(APPEND _libraries "${_library}")
     else()
       set(_combined_name ${_combined_name}_${_library})
