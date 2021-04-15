@@ -921,7 +921,7 @@ bool cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
     }
   }
 
-  return cmSystemTools::RemoveADirectory(directoryPath);
+  return static_cast<bool>(cmSystemTools::RemoveADirectory(directoryPath));
 }
 
 cmDuration cmCTestScriptHandler::GetRemainingTimeAllowed()

@@ -1635,7 +1635,7 @@ bool cmcmd::SymlinkInternal(std::string const& file, std::string const& link)
     cmSystemTools::RemoveFile(link);
   }
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  return cmSystemTools::CopyFileAlways(file, link);
+  return static_cast<bool>(cmSystemTools::CopyFileAlways(file, link));
 #else
   std::string linktext = cmSystemTools::GetFilenameName(file);
   return cmSystemTools::CreateSymlink(linktext, link);

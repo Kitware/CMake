@@ -2956,9 +2956,12 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
 
   // Check if copy-on-error is enabled in the arguments.
   if (!completed && arguments.CopyOnError) {
-    completed = cmsys::SystemTools::CopyFileAlways(fileName, newFileName);
-    if (!completed) {
-      result = "Copy failed: " + cmSystemTools::GetLastSystemError();
+    cmsys::Status copied =
+      cmsys::SystemTools::CopyFileAlways(fileName, newFileName);
+    if (copied) {
+      completed = true;
+    } else {
+      result = "Copy failed: " + copied.GetString();
     }
   }
 

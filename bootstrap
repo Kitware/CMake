@@ -525,6 +525,7 @@ KWSYS_CXX_SOURCES="\
   FStream \
   Glob \
   RegularExpression \
+  Status \
   SystemTools"
 
 KWSYS_FILES="\
@@ -535,6 +536,7 @@ KWSYS_FILES="\
   Glob.hxx \
   Process.h \
   RegularExpression.hxx \
+  Status.hxx \
   String.h \
   String.hxx \
   System.h \

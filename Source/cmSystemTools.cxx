@@ -153,27 +153,6 @@ static int cm_archive_read_open_file(struct archive* a, const char* file,
 #  define environ (*_NSGetEnviron())
 #endif
 
-namespace {
-void ReportError(std::string* err)
-{
-  if (!err) {
-    return;
-  }
-#ifdef _WIN32
-  LPSTR message = NULL;
-  DWORD size = FormatMessageA(
-    FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-      FORMAT_MESSAGE_IGNORE_INSERTS,
-    NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-    (LPSTR)&message, 0, NULL);
-  *err = std::string(message, size);
-  LocalFree(message);
-#else
-  *err = strerror(errno);
-#endif
-}
-}
-
 bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
@@ -1016,23 +995,31 @@ cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
   }
 
   mode_t perm = 0;
-  bool perms = SystemTools::GetPermissions(oldname, perm);
+  cmsys::Status perms = SystemTools::GetPermissions(oldname, perm);
 
   // If files are the same do not copy
   if (SystemTools::SameFile(oldname, newname)) {
     return CopyResult::Success;
   }
 
-  if (!cmsys::SystemTools::CloneFileContent(oldname, newname)) {
+  cmsys::Status status;
+  status = cmsys::SystemTools::CloneFileContent(oldname, newname);
+  if (!status) {
     // if cloning did not succeed, fall back to blockwise copy
-    if (!cmsys::SystemTools::CopyFileContentBlockwise(oldname, newname)) {
-      ReportError(err);
-      return CopyResult::Failure;
+    status = cmsys::SystemTools::CopyFileContentBlockwise(oldname, newname);
+  }
+  if (!status) {
+    if (err) {
+      *err = status.GetString();
     }
+    return CopyResult::Failure;
   }
   if (perms) {
-    if (!SystemTools::SetPermissions(newname, perm)) {
-      ReportError(err);
+    status = SystemTools::SetPermissions(newname, perm);
+    if (!status) {
+      if (err) {
+        *err = status.GetString();
+      }
       return CopyResult::Failure;
     }
   }
@@ -1090,7 +1077,9 @@ cmSystemTools::RenameResult cmSystemTools::RenameFile(
       if (replace == Replace::No && move_last_error == ERROR_ALREADY_EXISTS) {
         return RenameResult::NoReplace;
       }
-      ReportError(err);
+      if (err) {
+        *err = cmsys::Status::Windows(move_last_error).GetString();
+      }
       return RenameResult::Failure;
     }
 
@@ -1121,7 +1110,9 @@ cmSystemTools::RenameResult cmSystemTools::RenameFile(
   if (replace == Replace::No && GetLastError() == ERROR_ALREADY_EXISTS) {
     return RenameResult::NoReplace;
   }
-  ReportError(err);
+  if (err) {
+    *err = cmsys::Status::Windows_GetLastError().GetString();
+  }
   return RenameResult::Failure;
 #else
   // On UNIX we have OS-provided calls to create 'newname' atomically.
@@ -1132,13 +1123,17 @@ cmSystemTools::RenameResult cmSystemTools::RenameFile(
     if (errno == EEXIST) {
       return RenameResult::NoReplace;
     }
-    ReportError(err);
+    if (err) {
+      *err = cmsys::Status::POSIX_errno().GetString();
+    }
     return RenameResult::Failure;
   }
   if (rename(oldname.c_str(), newname.c_str()) == 0) {
     return RenameResult::Success;
   }
-  ReportError(err);
+  if (err) {
+    *err = cmsys::Status::POSIX_errno().GetString();
+  }
   return RenameResult::Failure;
 #endif
 }
@@ -3130,7 +3125,7 @@ bool cmSystemTools::RepeatedRemoveDirectory(const std::string& dir)
   }
   return false;
 #else
-  return cmSystemTools::RemoveADirectory(dir);
+  return static_cast<bool>(cmSystemTools::RemoveADirectory(dir));
 #endif
 }
 
