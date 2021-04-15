@@ -564,8 +564,7 @@ private:
   // -- Generation
   bool CreateDirectories();
   // -- Support for depfiles
-  static std::vector<std::string> dependenciesFromDepFile(
-    const char* filePath);
+  std::vector<std::string> dependenciesFromDepFile(const char* filePath);
 
   // -- Settings
   BaseSettingsT BaseConst_;
@@ -2066,7 +2065,8 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
                             " does not exist.");
       return;
     }
-    this->CacheEntry->Moc.Depends = dependenciesFromDepFile(depfile.c_str());
+    this->CacheEntry->Moc.Depends =
+      this->Gen()->dependenciesFromDepFile(depfile.c_str());
   }
 }
 
@@ -2223,12 +2223,12 @@ void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
                this->MessagePath(this->BaseConst().DepFile.c_str())));
   }
   auto processDepFile =
-    [](const std::string& mocOutputFile) -> std::vector<std::string> {
+    [this](const std::string& mocOutputFile) -> std::vector<std::string> {
     std::string f = mocOutputFile + ".d";
     if (!cmSystemTools::FileExists(f)) {
       return {};
     }
-    return dependenciesFromDepFile(f.c_str());
+    return this->Gen()->dependenciesFromDepFile(f.c_str());
   };
 
   std::vector<std::string> dependencies = this->initialDependencies();
@@ -2961,6 +2961,7 @@ bool cmQtAutoMocUicT::CreateDirectories()
 std::vector<std::string> cmQtAutoMocUicT::dependenciesFromDepFile(
   const char* filePath)
 {
+  std::lock_guard<std::mutex> guard(this->CMakeLibMutex_);
   auto const content = cmReadGccDepfile(filePath);
   if (!content || content->empty()) {
     return {};
