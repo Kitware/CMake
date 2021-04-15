@@ -2949,9 +2949,11 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
 
   // Check if the command requires a symbolic link.
   if (arguments.Symbolic) {
-    completed = cmSystemTools::CreateSymlink(fileName, newFileName, &result);
+    completed = static_cast<bool>(
+      cmSystemTools::CreateSymlink(fileName, newFileName, &result));
   } else {
-    completed = cmSystemTools::CreateLink(fileName, newFileName, &result);
+    completed = static_cast<bool>(
+      cmSystemTools::CreateLink(fileName, newFileName, &result));
   }
 
   // Check if copy-on-error is enabled in the arguments.

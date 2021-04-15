@@ -489,15 +489,15 @@ public:
 
   /** Create a symbolic link if the platform supports it.  Returns whether
       creation succeeded. */
-  static bool CreateSymlink(const std::string& origName,
-                            const std::string& newName,
-                            std::string* errorMessage = nullptr);
+  static cmsys::Status CreateSymlink(std::string const& origName,
+                                     std::string const& newName,
+                                     std::string* errorMessage = nullptr);
 
   /** Create a hard link if the platform supports it.  Returns whether
       creation succeeded. */
-  static bool CreateLink(const std::string& origName,
-                         const std::string& newName,
-                         std::string* errorMessage = nullptr);
+  static cmsys::Status CreateLink(std::string const& origName,
+                                  std::string const& newName,
+                                  std::string* errorMessage = nullptr);
 
   /** Get the system name. */
   static cm::string_view GetSystemName();

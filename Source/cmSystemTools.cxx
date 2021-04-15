@@ -3158,9 +3158,9 @@ std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
   return out;
 }
 
-bool cmSystemTools::CreateSymlink(const std::string& origName,
-                                  const std::string& newName,
-                                  std::string* errorMessage)
+cmsys::Status cmSystemTools::CreateSymlink(std::string const& origName,
+                                           std::string const& newName,
+                                           std::string* errorMessage)
 {
   uv_fs_t req;
   int flags = 0;
@@ -3171,7 +3171,9 @@ bool cmSystemTools::CreateSymlink(const std::string& origName,
 #endif
   int err = uv_fs_symlink(nullptr, &req, origName.c_str(), newName.c_str(),
                           flags, nullptr);
+  cmsys::Status status;
   if (err) {
+    status = cmsys::Status::POSIX(-err);
     std::string e =
       "failed to create symbolic link '" + newName + "': " + uv_strerror(err);
     if (errorMessage) {
@@ -3179,20 +3181,20 @@ bool cmSystemTools::CreateSymlink(const std::string& origName,
     } else {
       cmSystemTools::Error(e);
     }
-    return false;
   }
-
-  return true;
+  return status;
 }
 
-bool cmSystemTools::CreateLink(const std::string& origName,
-                               const std::string& newName,
-                               std::string* errorMessage)
+cmsys::Status cmSystemTools::CreateLink(std::string const& origName,
+                                        std::string const& newName,
+                                        std::string* errorMessage)
 {
   uv_fs_t req;
   int err =
     uv_fs_link(nullptr, &req, origName.c_str(), newName.c_str(), nullptr);
+  cmsys::Status status;
   if (err) {
+    status = cmsys::Status::POSIX(-err);
     std::string e =
       "failed to create link '" + newName + "': " + uv_strerror(err);
     if (errorMessage) {
@@ -3200,10 +3202,8 @@ bool cmSystemTools::CreateLink(const std::string& origName,
     } else {
       cmSystemTools::Error(e);
     }
-    return false;
   }
-
-  return true;
+  return status;
 }
 
 cm::string_view cmSystemTools::GetSystemName()
