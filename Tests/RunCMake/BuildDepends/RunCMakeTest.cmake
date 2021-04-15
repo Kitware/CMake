@@ -155,7 +155,8 @@ if (RunCMake_GENERATOR MATCHES "Makefiles")
   run_cmake(CustomCommandDependencies-BadArgs)
 endif()
 
-if(RunCMake_GENERATOR MATCHES "Make|Ninja")
+if(RunCMake_GENERATOR MATCHES "Make|Ninja" OR
+    (RunCMake_GENERATOR STREQUAL "Xcode" AND CMAKE_XCODE_BUILD_SYSTEM GREATER_EQUAL "12"))
   unset(run_BuildDepends_skip_step_3)
   run_BuildDepends(CustomCommandDepfile)
   set(run_BuildDepends_skip_step_3 1)

@@ -14,6 +14,7 @@
 #include <cm/string_view>
 
 #include "cmGlobalGenerator.h"
+#include "cmTransformDepfile.h"
 #include "cmXCodeObject.h"
 
 class cmCustomCommand;
@@ -110,6 +111,18 @@ public:
   bool UseEffectivePlatformName(cmMakefile* mf) const override;
 
   bool ShouldStripResourcePath(cmMakefile*) const override;
+
+  /**
+   * Used to determine if this generator supports DEPFILE option.
+   */
+  bool SupportsCustomCommandDepfile() const override
+  {
+    return this->XcodeBuildSystem >= BuildSystem::Twelve;
+  }
+  virtual cm::optional<cmDepfileFormat> DepfileFormat() const override
+  {
+    return cmDepfileFormat::GccDepfile;
+  }
 
   bool SetSystemName(std::string const& s, cmMakefile* mf) override;
   bool SetGeneratorToolset(std::string const& ts, bool build,
