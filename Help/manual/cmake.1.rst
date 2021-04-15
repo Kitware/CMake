@@ -105,6 +105,7 @@ Generator
   is already configured in the shell.  When using one of the
   :ref:`IDE Build Tool Generators`, no particular environment is needed.
 
+.. _`Generate a Project Buildsystem`:
 
 Generate a Project Buildsystem
 ==============================
