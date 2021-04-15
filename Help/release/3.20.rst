@@ -298,6 +298,10 @@ Deprecated and Removed Features
 Other Changes
 =============
 
+* When running :manual:`cmake(1)` to :ref:`Generate a Project Buildsystem`,
+  unknown command-line arguments starting with a hyphen (``-``) are now
+  rejected with an error.  Previously they were silently ignored.
+
 * Source file extensions must now be explicit.
   See policy :policy:`CMP0115` for details.
 
