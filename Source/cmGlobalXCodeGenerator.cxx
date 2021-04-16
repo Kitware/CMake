@@ -2213,9 +2213,33 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
     }
   }
   makefileStream << "\n\n";
+
+  auto depfilesDirectory =
+    cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(),
+             "/CMakeFiles/d/");
+
   for (auto const& command : commands) {
-    cmCustomCommandGenerator ccg(command, configName,
-                                 this->CurrentLocalGenerator);
+    cmCustomCommandGenerator ccg(
+      command, configName, this->CurrentLocalGenerator, true, {},
+      [this, &depfilesDirectory](const std::string& config,
+                                 const std::string& file) -> std::string {
+        return cmStrCat(
+          depfilesDirectory,
+          this->GetObjectId(cmXCodeObject::PBXShellScriptBuildPhase, file),
+          ".", config, ".d");
+      });
+
+    auto depfile = ccg.GetInternalDepfile();
+    if (!depfile.empty()) {
+      makefileStream << "include "
+                     << cmSystemTools::ConvertToOutputPath(depfile) << "\n\n";
+
+      cmSystemTools::MakeDirectory(depfilesDirectory);
+      if (!cmSystemTools::FileExists(depfile)) {
+        cmSystemTools::Touch(depfile, true);
+      }
+    }
+
     std::vector<std::string> realDepends;
     realDepends.reserve(ccg.GetDepends().size());
     for (auto const& d : ccg.GetDepends()) {
