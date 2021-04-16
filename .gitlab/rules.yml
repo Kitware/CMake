@@ -31,7 +31,8 @@
         - if: '$CI_MERGE_REQUEST_ID'
           when: on_success
         - if: '$CI_PROJECT_PATH == "cmake/cmake"'
-          when: on_success
+          when: delayed
+          start_in: 5 minutes
         - when: never
 
 .run_dependent:
