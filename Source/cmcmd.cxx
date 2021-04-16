@@ -1601,14 +1601,18 @@ int cmcmd::SymlinkLibrary(std::vector<std::string> const& args)
   cmSystemTools::ConvertToUnixSlashes(soName);
   cmSystemTools::ConvertToUnixSlashes(name);
   if (soName != realName) {
-    if (!cmcmd::SymlinkInternal(realName, soName)) {
-      cmSystemTools::ReportLastSystemError("cmake_symlink_library");
+    cmsys::Status status = cmcmd::SymlinkInternal(realName, soName);
+    if (!status) {
+      cmSystemTools::Error(
+        cmStrCat("cmake_symlink_library: System Error: ", status.GetString()));
       result = 1;
     }
   }
   if (name != soName) {
-    if (!cmcmd::SymlinkInternal(soName, name)) {
-      cmSystemTools::ReportLastSystemError("cmake_symlink_library");
+    cmsys::Status status = cmcmd::SymlinkInternal(soName, name);
+    if (!status) {
+      cmSystemTools::Error(
+        cmStrCat("cmake_symlink_library: System Error: ", status.GetString()));
       result = 1;
     }
   }
@@ -1621,21 +1625,24 @@ int cmcmd::SymlinkExecutable(std::vector<std::string> const& args)
   std::string const& realName = args[2];
   std::string const& name = args[3];
   if (name != realName) {
-    if (!cmcmd::SymlinkInternal(realName, name)) {
-      cmSystemTools::ReportLastSystemError("cmake_symlink_executable");
+    cmsys::Status status = cmcmd::SymlinkInternal(realName, name);
+    if (!status) {
+      cmSystemTools::Error(cmStrCat("cmake_symlink_executable: System Error: ",
+                                    status.GetString()));
       result = 1;
     }
   }
   return result;
 }
 
-bool cmcmd::SymlinkInternal(std::string const& file, std::string const& link)
+cmsys::Status cmcmd::SymlinkInternal(std::string const& file,
+                                     std::string const& link)
 {
   if (cmSystemTools::FileExists(link) || cmSystemTools::FileIsSymlink(link)) {
     cmSystemTools::RemoveFile(link);
   }
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  return static_cast<bool>(cmSystemTools::CopyFileAlways(file, link));
+  return cmSystemTools::CopyFileAlways(file, link);
 #else
   std::string linktext = cmSystemTools::GetFilenameName(file);
   return cmSystemTools::CreateSymlink(linktext, link);

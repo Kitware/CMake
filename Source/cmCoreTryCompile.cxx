@@ -1015,17 +1015,21 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
           // cannot delete them immediately.  Try a few times.
           cmSystemTools::WindowsFileRetry retry =
             cmSystemTools::GetWindowsFileRetry();
-          while (!cmSystemTools::RemoveFile(fullPath) && --retry.Count &&
-                 cmSystemTools::FileExists(fullPath)) {
+          cmsys::Status status;
+          while (!((status = cmSystemTools::RemoveFile(fullPath))) &&
+                 --retry.Count && cmSystemTools::FileExists(fullPath)) {
             cmSystemTools::Delay(retry.Delay);
           }
           if (retry.Count == 0)
 #else
-          if (!cmSystemTools::RemoveFile(fullPath))
+          cmsys::Status status = cmSystemTools::RemoveFile(fullPath);
+          if (!status)
 #endif
           {
-            std::string m = "Remove failed on file: " + fullPath;
-            cmSystemTools::ReportLastSystemError(m.c_str());
+            this->Makefile->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmStrCat("The file:\n  ", fullPath,
+                       "\ncould not be removed:\n  ", status.GetString()));
           }
         }
       }
