@@ -271,31 +271,41 @@ The options are:
 ``DEPFILE``
   .. versionadded:: 3.7
 
-  Specify a ``.d`` depfile for the :generator:`Ninja` generator and
-  :ref:`Makefile Generators`. The depfile may use "generator expressions" with
-  the syntax ``$<...>``. See the :manual:`generator-expressions(7)
-  <cmake-generator-expressions(7)>` manual for available expressions.
-  A ``.d`` file holds dependencies usually emitted by the custom
-  command itself.
-  Using ``DEPFILE`` with other generators than :generator:`Ninja` or
-  :ref:`Makefile Generators` is an error.
+  Specify a ``.d`` depfile for the :generator:`Ninja`, :generator:`Xcode` and
+  :ref:`Makefile <Makefile Generators>` generators. The depfile may use
+  "generator expressions" with the syntax ``$<...>``. See the
+  :manual:`generator-expressions(7) <cmake-generator-expressions(7)>` manual
+  for available expressions. A ``.d`` file holds dependencies usually emitted
+  by the custom command itself.
+
+  Using ``DEPFILE`` with other generators than :generator:`Ninja`,
+  :generator:`Xcode` or :ref:`Makefile <Makefile Generators>` is an error.
 
   .. versionadded:: 3.20
     Added the support of :ref:`Makefile Generators`.
 
   .. versionadded:: 3.21
-    Added the support of :manual:`generator expressions <cmake-generator-expressions(7)>`.
+    Added the support of  :generator:`Xcode` generator and
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
   If the ``DEPFILE`` argument is relative, it should be relative to
   :variable:`CMAKE_CURRENT_BINARY_DIR`, and any relative paths inside the
   ``DEPFILE`` should also be relative to :variable:`CMAKE_CURRENT_BINARY_DIR`
   (see policy :policy:`CMP0116`. This policy is always ``NEW`` for
-  :ref:`Makefile Generators`).
+  :ref:`Makefile <Makefile Generators>` and :generator:`Xcode` generators).
 
   .. note::
 
     For :ref:`Makefile Generators`, this option cannot be specified at the
     same time as ``IMPLICIT_DEPENDS`` option.
+
+  .. note::
+
+    For the :generator:`Xcode` generator, this option requires that the
+    :ref:`Xcode Build System Selection` uses the ``buildsystem=12`` variant
+    or higher.  This is the default when using Xcode 12 or above.
+    The :variable:`CMAKE_XCODE_BUILD_SYSTEM` variable indicates which variant
+    of the Xcode build system is used.
 
 Examples: Generating Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

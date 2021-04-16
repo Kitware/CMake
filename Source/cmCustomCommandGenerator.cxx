@@ -151,7 +151,9 @@ std::string EvaluateDepfile(std::string const& path,
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(
   cmCustomCommand const& cc, std::string config, cmLocalGenerator* lg,
-  bool transformDepfile, cm::optional<std::string> crossConfig)
+  bool transformDepfile, cm::optional<std::string> crossConfig,
+  std::function<std::string(const std::string&, const std::string&)>
+    computeInternalDepfile)
   : CC(&cc)
   , OutputConfig(crossConfig ? *crossConfig : config)
   , CommandConfig(std::move(config))
@@ -159,7 +161,15 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
   , OldStyle(cc.GetEscapeOldStyle())
   , MakeVars(cc.GetEscapeAllowMakeVars())
   , EmulatorsWithArguments(cc.GetCommandLines().size())
+  , ComputeInternalDepfile(std::move(computeInternalDepfile))
 {
+  if (!this->ComputeInternalDepfile) {
+    this->ComputeInternalDepfile =
+      [this](const std::string& cfg, const std::string& file) -> std::string {
+      return this->GetInternalDepfileName(cfg, file);
+    };
+  }
+
   cmGeneratorExpression ge(cc.GetBacktrace());
 
   const cmCustomCommandLines& cmdlines = this->CC->GetCommandLines();
@@ -413,13 +423,9 @@ std::string cmCustomCommandGenerator::GetFullDepfile() const
   return cmSystemTools::CollapseFullPath(depfile);
 }
 
-std::string cmCustomCommandGenerator::GetInternalDepfile() const
+std::string cmCustomCommandGenerator::GetInternalDepfileName(
+  const std::string& /*config*/, const std::string& depfile)
 {
-  std::string depfile = this->GetFullDepfile();
-  if (depfile.empty()) {
-    return "";
-  }
-
   cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
   std::string extension;
   switch (*this->LG->GetGlobalGenerator()->DepfileFormat()) {
@@ -432,6 +438,16 @@ std::string cmCustomCommandGenerator::GetInternalDepfile() const
   }
   return cmStrCat(this->LG->GetBinaryDirectory(), "/CMakeFiles/d/",
                   hash.HashString(depfile), extension);
+}
+
+std::string cmCustomCommandGenerator::GetInternalDepfile() const
+{
+  std::string depfile = this->GetFullDepfile();
+  if (depfile.empty()) {
+    return "";
+  }
+
+  return this->ComputeInternalDepfile(this->OutputConfig, depfile);
 }
 
 const char* cmCustomCommandGenerator::GetComment() const

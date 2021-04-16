@@ -17,6 +17,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCMakePath.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
@@ -1864,9 +1865,20 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
   std::set<std::string> allConfigInputs;
   std::set<std::string> allConfigOutputs;
 
+  cmXCodeObject* buildPhase =
+    this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase,
+                       cmStrCat(gt->GetName(), ':', sf->GetFullPath()));
+
+  auto depfilesDirectory = cmStrCat(
+    gt->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/CMakeFiles/d/");
+  auto depfilesPrefix = cmStrCat(depfilesDirectory, buildPhase->GetId(), ".");
+
   std::string shellScript = "set -e\n";
   for (std::string const& configName : this->CurrentConfigurationTypes) {
-    cmCustomCommandGenerator ccg(cc, configName, this->CurrentLocalGenerator);
+    cmCustomCommandGenerator ccg(
+      cc, configName, this->CurrentLocalGenerator, true, {},
+      [&depfilesPrefix](const std::string& config, const std::string&)
+        -> std::string { return cmStrCat(depfilesPrefix, config, ".d"); });
     std::vector<std::string> realDepends;
     realDepends.reserve(ccg.GetDepends().size());
     for (auto const& d : ccg.GetDepends()) {
@@ -1886,9 +1898,22 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
                "\"; then :\n", this->ConstructScript(ccg), "fi\n");
   }
 
-  cmXCodeObject* buildPhase =
-    this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase,
-                       cmStrCat(gt->GetName(), ':', sf->GetFullPath()));
+  if (!cc.GetDepfile().empty()) {
+    buildPhase->AddAttribute(
+      "dependencyFile",
+      this->CreateString(cmStrCat(depfilesDirectory, buildPhase->GetId(),
+                                  ".$(CONFIGURATION).d")));
+    // to avoid spurious errors during first build,  create empty dependency
+    // files
+    cmSystemTools::MakeDirectory(depfilesDirectory);
+    for (std::string const& configName : this->CurrentConfigurationTypes) {
+      auto file = cmStrCat(depfilesPrefix, configName, ".d");
+      if (!cmSystemTools::FileExists(file)) {
+        cmSystemTools::Touch(file, true);
+      }
+    }
+  }
+
   buildPhase->AddAttribute("buildActionMask",
                            this->CreateString("2147483647"));
   cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
