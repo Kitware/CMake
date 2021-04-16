@@ -579,6 +579,7 @@ macro (CMAKE_BUILD_UTILITIES)
       set(LIBLZMA_INCLUDE_DIR
         "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmliblzma/liblzma/api")
       set(LIBLZMA_LIBRARY cmliblzma)
+      set(HAVE_LZMA_STREAM_ENCODER_MT 1)
     endif()
   endif()
 

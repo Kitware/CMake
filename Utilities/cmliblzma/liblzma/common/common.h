@@ -14,6 +14,7 @@
 #define LZMA_COMMON_H
 
 #include "sysdefs.h"
+#include "mythread.h"
 #include "tuklib_integer.h"
 
 #if defined(_WIN32) || defined(__CYGWIN__)

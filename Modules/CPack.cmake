@@ -299,10 +299,11 @@ installers.  The most commonly-used variables are:
   Currently only ``xz`` compression *may* take advantage of multiple cores. Other
   compression methods ignore this value and use only one thread.
 
-  .. note::
+  .. versionadded:: 3.21
 
-     Official CMake binaries available on ``cmake.org`` ship with a ``liblzma``
-     that does not support parallel compression.
+    Official CMake binaries available on ``cmake.org`` now ship
+    with a ``liblzma`` that supports parallel compression.
+    Older versions did not.
 
 Variables for Source Package Generators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
