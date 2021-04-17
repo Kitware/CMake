@@ -9,4 +9,4 @@ specifies locations for compilers and toolchain utilities, and other target
 platform and compiler related information.
 
 Relative paths are allowed and are interpreted first as relative to the
-build directory, and if not found, relative to the soruce directory.
+build directory, and if not found, relative to the source directory.
