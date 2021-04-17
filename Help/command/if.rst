@@ -153,7 +153,16 @@ File Operations
  only for full paths.
 
 ``if(IS_ABSOLUTE path)``
- True if the given path is an absolute path.
+ True if the given path is an absolute path.  Note the following special
+ cases:
+
+ * An empty ``path`` evaluates to false.
+ * On Windows hosts, any ``path`` that begins with a drive letter and colon
+   (e.g. ``C:``), a forward slash or a backslash will evaluate to true.
+   This means a path like ``C:no\base\dir`` will evaluate to true, even
+   though the non-drive part of the path is relative.
+ * On non-Windows hosts, any ``path`` that begins with a tilde (``~``)
+   evaluates to true.
 
 Comparisons
 """""""""""
