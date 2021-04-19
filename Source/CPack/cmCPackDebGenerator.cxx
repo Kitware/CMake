@@ -130,11 +130,6 @@ DebGenerator::DebGenerator(
                   "Unrecognized number of threads: " << numThreads
                                                      << std::endl);
   }
-
-  if (this->NumThreads < 0) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Number of threads cannot be negative" << std::endl);
-  }
 }
 
 bool DebGenerator::generate() const
