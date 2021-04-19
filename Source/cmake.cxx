@@ -3210,8 +3210,8 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   }
   auto gen = this->CreateGlobalGenerator(*cachedGenerator);
   if (!gen) {
-    std::cerr << "Error: could create CMAKE_GENERATOR \"" << *cachedGenerator
-              << "\"\n";
+    std::cerr << "Error: could not create CMAKE_GENERATOR \""
+              << *cachedGenerator << "\"\n";
     return 1;
   }
   this->SetGlobalGenerator(std::move(gen));
@@ -3350,7 +3350,7 @@ bool cmake::Open(const std::string& dir, bool dryRun)
   std::unique_ptr<cmGlobalGenerator> gen =
     this->CreateGlobalGenerator(fullName);
   if (!gen) {
-    std::cerr << "Error: could create CMAKE_GENERATOR \"" << fullName
+    std::cerr << "Error: could not create CMAKE_GENERATOR \"" << fullName
               << "\"\n";
     return false;
   }
