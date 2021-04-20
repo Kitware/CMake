@@ -16,3 +16,8 @@ target_compile_features(b PRIVATE ${QT_COMPILE_FEATURES})
 # Executable with OBJECT library generator expressions
 add_executable(someProgram main.cpp $<TARGET_OBJECTS:a> $<TARGET_OBJECTS:b>)
 target_link_libraries(someProgram ${QT_LIBRARIES})
+
+# Executable without its own AUTOMOC.
+add_executable(someProgram2 main.cpp)
+target_link_libraries(someProgram2 PRIVATE a b ${QT_LIBRARIES})
+set_property(TARGET someProgram2 PROPERTY AUTOMOC OFF)
