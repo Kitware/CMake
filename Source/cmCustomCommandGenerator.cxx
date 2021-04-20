@@ -226,6 +226,9 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
       case cmDepfileFormat::VsTlog:
         argv.emplace_back("vstlog");
         break;
+      case cmDepfileFormat::MakeDepfile:
+        argv.emplace_back("makedepfile");
+        break;
     }
     argv.push_back(this->LG->GetSourceDirectory());
     argv.push_back(this->LG->GetCurrentSourceDirectory());
@@ -430,6 +433,7 @@ std::string cmCustomCommandGenerator::GetInternalDepfileName(
   std::string extension;
   switch (*this->LG->GetGlobalGenerator()->DepfileFormat()) {
     case cmDepfileFormat::GccDepfile:
+    case cmDepfileFormat::MakeDepfile:
       extension = ".d";
       break;
     case cmDepfileFormat::VsTlog:

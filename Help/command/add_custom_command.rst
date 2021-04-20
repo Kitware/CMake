@@ -299,14 +299,6 @@ The options are:
     For :ref:`Makefile Generators`, this option cannot be specified at the
     same time as ``IMPLICIT_DEPENDS`` option.
 
-  .. note::
-
-    For the :generator:`Xcode` generator, this option requires that the
-    :ref:`Xcode Build System Selection` uses the ``buildsystem=12`` variant
-    or higher.  This is the default when using Xcode 12 or above.
-    The :variable:`CMAKE_XCODE_BUILD_SYSTEM` variable indicates which variant
-    of the Xcode build system is used.
-
 Examples: Generating Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -36,8 +36,9 @@ void WriteFilenameGcc(cmsys::ofstream& fout, const std::string& filename)
   }
 }
 
-void WriteGccDepfile(cmsys::ofstream& fout, const cmLocalGenerator& lg,
-                     const cmGccDepfileContent& content)
+void WriteDepfile(cmDepfileFormat format, cmsys::ofstream& fout,
+                  const cmLocalGenerator& lg,
+                  const cmGccDepfileContent& content)
 {
   const auto& binDir = lg.GetBinaryDirectory();
   std::function<std::string(const std::string&)> formatPath =
@@ -64,6 +65,18 @@ void WriteGccDepfile(cmsys::ofstream& fout, const cmLocalGenerator& lg,
       WriteFilenameGcc(fout, formatPath(path));
     }
     fout << '\n';
+  }
+
+  if (format == cmDepfileFormat::MakeDepfile) {
+    // In this case, phony targets must be added for all dependencies
+    fout << "\n";
+    for (auto const& dep : content) {
+      for (auto const& path : dep.paths) {
+        fout << "\n";
+        WriteFilenameGcc(fout, formatPath(path));
+        fout << ":\n";
+      }
+    }
   }
 }
 
@@ -122,7 +135,8 @@ bool cmTransformDepfile(cmDepfileFormat format, const cmLocalGenerator& lg,
   }
   switch (format) {
     case cmDepfileFormat::GccDepfile:
-      WriteGccDepfile(fout, lg, content);
+    case cmDepfileFormat::MakeDepfile:
+      WriteDepfile(format, fout, lg, content);
       break;
     case cmDepfileFormat::VsTlog:
       WriteVsTlog(fout, lg, content);

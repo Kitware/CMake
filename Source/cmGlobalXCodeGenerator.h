@@ -115,13 +115,12 @@ public:
   /**
    * Used to determine if this generator supports DEPFILE option.
    */
-  bool SupportsCustomCommandDepfile() const override
-  {
-    return this->XcodeBuildSystem >= BuildSystem::Twelve;
-  }
+  bool SupportsCustomCommandDepfile() const override { return true; }
   virtual cm::optional<cmDepfileFormat> DepfileFormat() const override
   {
-    return cmDepfileFormat::GccDepfile;
+    return this->XcodeBuildSystem == BuildSystem::One
+      ? cmDepfileFormat::MakeDepfile
+      : cmDepfileFormat::GccDepfile;
   }
 
   bool SetSystemName(std::string const& s, cmMakefile* mf) override;
