@@ -5,21 +5,21 @@ Require a minimum version of cmake.
 
 .. code-block:: cmake
 
-  cmake_minimum_required(VERSION <min>[...<max>] [FATAL_ERROR])
+  cmake_minimum_required(VERSION <min>[...<policy_max>] [FATAL_ERROR])
 
 .. versionadded:: 3.12
-  The optional ``<max>`` version.
+  The optional ``<policy_max>`` version.
 
 Sets the minimum required version of cmake for a project.
 Also updates the policy settings as explained below.
 
-``<min>`` and the optional ``<max>`` are each CMake versions of the form
-``major.minor[.patch[.tweak]]``, and the ``...`` is literal.
+``<min>`` and the optional ``<policy_max>`` are each CMake versions of the
+form ``major.minor[.patch[.tweak]]``, and the ``...`` is literal.
 
 If the running version of CMake is lower than the ``<min>`` required
 version it will stop processing the project and report an error.
-The optional ``<max>`` version, if specified, must be at least the
-``<min>`` version and affects policy settings as described below.
+The optional ``<policy_max>`` version, if specified, must be at least the
+``<min>`` version and affects policy settings as described in `Policy Settings`_.
 If the running version of CMake is older than 3.12, the extra ``...``
 dots will be seen as version component separators, resulting in the
 ``...<max>`` part being ignored and preserving the pre-3.12 behavior
@@ -42,6 +42,8 @@ with an error instead of just a warning.
   Calling ``cmake_minimum_required()`` inside a :command:`function`
   limits some effects to the function scope when invoked.  Such calls
   should not be made with the intention of having global effects.
+
+.. _`Policy Settings`:
 
 Policy Settings
 ^^^^^^^^^^^^^^^
