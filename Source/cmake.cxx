@@ -3074,12 +3074,16 @@ static bool cmakeCheckStampFile(const std::string& stampName)
     cmsys::ofstream stamp(stampTemp.c_str());
     stamp << "# CMake generation timestamp file for this directory.\n";
   }
-  if (cmSystemTools::RenameFile(stampTemp, stampName)) {
+  std::string err;
+  if (cmSystemTools::RenameFile(stampTemp, stampName,
+                                cmSystemTools::Replace::Yes, &err) ==
+      cmSystemTools::RenameResult::Success) {
     // CMake does not need to re-run because the stamp file is up-to-date.
     return true;
   }
   cmSystemTools::RemoveFile(stampTemp);
-  cmSystemTools::Error("Cannot restore timestamp " + stampName);
+  cmSystemTools::Error(
+    cmStrCat("Cannot restore timestamp \"", stampName, "\": ", err));
   return false;
 }
 
