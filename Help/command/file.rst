@@ -958,7 +958,8 @@ system search path like ``$ENV{PATH}``.  A search path will be converted
 to a cmake-style list separated by ``;`` characters.
 
 The ``TO_NATIVE_PATH`` mode converts a cmake-style ``<path>`` into a native
-path with platform-specific slashes (``\`` on Windows and ``/`` elsewhere).
+path with platform-specific slashes (``\`` on Windows hosts and ``/``
+elsewhere).
 
 Always use double quotes around the ``<path>`` to be sure it is treated
 as a single argument to this command.
