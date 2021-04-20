@@ -198,25 +198,26 @@ void cmRuntimeDependencyArchive::SetError(const std::string& e)
   this->Status.SetError(e);
 }
 
-std::string cmRuntimeDependencyArchive::GetBundleExecutable()
+const std::string& cmRuntimeDependencyArchive::GetBundleExecutable() const
 {
   return this->BundleExecutable;
 }
 
 const std::vector<std::string>&
-cmRuntimeDependencyArchive::GetSearchDirectories()
+cmRuntimeDependencyArchive::GetSearchDirectories() const
 {
   return this->SearchDirectories;
 }
 
-std::string cmRuntimeDependencyArchive::GetGetRuntimeDependenciesTool()
+const std::string& cmRuntimeDependencyArchive::GetGetRuntimeDependenciesTool()
+  const
 {
   return this->GetMakefile()->GetSafeDefinition(
     "CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL");
 }
 
 bool cmRuntimeDependencyArchive::GetGetRuntimeDependenciesCommand(
-  const std::string& search, std::vector<std::string>& command)
+  const std::string& search, std::vector<std::string>& command) const
 {
   // First see if it was supplied by the user
   std::string toolCommand = this->GetMakefile()->GetSafeDefinition(
@@ -309,7 +310,7 @@ bool cmRuntimeDependencyArchive::GetGetRuntimeDependenciesCommand(
   return false;
 }
 
-bool cmRuntimeDependencyArchive::IsPreExcluded(const std::string& name)
+bool cmRuntimeDependencyArchive::IsPreExcluded(const std::string& name) const
 {
   cmsys::RegularExpressionMatch match;
   auto const regexMatch =
@@ -326,7 +327,7 @@ bool cmRuntimeDependencyArchive::IsPreExcluded(const std::string& name)
     regexSearch(this->PreExcludeRegexes);
 }
 
-bool cmRuntimeDependencyArchive::IsPostExcluded(const std::string& name)
+bool cmRuntimeDependencyArchive::IsPostExcluded(const std::string& name) const
 {
   cmsys::RegularExpressionMatch match;
   auto const regexMatch =
@@ -373,18 +374,19 @@ void cmRuntimeDependencyArchive::AddUnresolvedPath(const std::string& name)
   this->UnresolvedPaths.insert(name);
 }
 
-cmMakefile* cmRuntimeDependencyArchive::GetMakefile()
+cmMakefile* cmRuntimeDependencyArchive::GetMakefile() const
 {
   return &this->Status.GetMakefile();
 }
 
 const std::map<std::string, std::set<std::string>>&
-cmRuntimeDependencyArchive::GetResolvedPaths()
+cmRuntimeDependencyArchive::GetResolvedPaths() const
 {
   return this->ResolvedPaths;
 }
 
 const std::set<std::string>& cmRuntimeDependencyArchive::GetUnresolvedPaths()
+  const
 {
   return this->UnresolvedPaths;
 }

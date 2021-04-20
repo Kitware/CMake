@@ -36,21 +36,21 @@ public:
 
   void SetError(const std::string& e);
 
-  std::string GetBundleExecutable();
-  const std::vector<std::string>& GetSearchDirectories();
-  std::string GetGetRuntimeDependenciesTool();
-  bool GetGetRuntimeDependenciesCommand(const std::string& search,
-                                        std::vector<std::string>& command);
-  bool IsPreExcluded(const std::string& name);
-  bool IsPostExcluded(const std::string& name);
+  const std::string& GetBundleExecutable() const;
+  const std::vector<std::string>& GetSearchDirectories() const;
+  const std::string& GetGetRuntimeDependenciesTool() const;
+  bool GetGetRuntimeDependenciesCommand(
+    const std::string& search, std::vector<std::string>& command) const;
+  bool IsPreExcluded(const std::string& name) const;
+  bool IsPostExcluded(const std::string& name) const;
 
   void AddResolvedPath(const std::string& name, const std::string& path,
                        bool& unique);
   void AddUnresolvedPath(const std::string& name);
 
-  cmMakefile* GetMakefile();
-  const std::map<std::string, std::set<std::string>>& GetResolvedPaths();
-  const std::set<std::string>& GetUnresolvedPaths();
+  cmMakefile* GetMakefile() const;
+  const std::map<std::string, std::set<std::string>>& GetResolvedPaths() const;
+  const std::set<std::string>& GetUnresolvedPaths() const;
 
 private:
   cmExecutionStatus& Status;
