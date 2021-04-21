@@ -381,9 +381,9 @@ Options
 ``--preset <preset>``, ``--preset=<preset>``
  Reads a :manual:`preset <cmake-presets(7)>` from
  ``<path-to-source>/CMakePresets.json`` and
- ``<path-to-source>/CMakeUserPresets.json``. The preset specifies the
- generator and the build directory, and optionally a list of variables and
- other arguments to pass to CMake. The current working directory must contain
+ ``<path-to-source>/CMakeUserPresets.json``. The preset may specify the
+ generator and the build directory, and a list of variables and other
+ arguments to pass to CMake. The current working directory must contain
  CMake preset files. The :manual:`CMake GUI <cmake-gui(1)>` can
  also recognize ``CMakePresets.json`` and ``CMakeUserPresets.json`` files. For
  full details on these files, see :manual:`cmake-presets(7)`.
