@@ -361,7 +361,9 @@ if(COVERAGE_COMMAND)
 endif()
 add_RunCMake_test(ctest_start)
 add_RunCMake_test(ctest_submit)
-add_RunCMake_test(ctest_test)
+add_RunCMake_test(ctest_test
+  -DIMAGE_DIR=${CMAKE_SOURCE_DIR}/Utilities/Sphinx/static
+)
 add_RunCMake_test(ctest_disabled_test)
 add_RunCMake_test(ctest_skipped_test)
 add_RunCMake_test(ctest_update)

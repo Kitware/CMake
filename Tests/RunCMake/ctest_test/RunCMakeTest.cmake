@@ -149,3 +149,19 @@ run_environment()
 
 # test for OUTPUT_JUNIT
 run_ctest_test(OutputJUnit OUTPUT_JUNIT junit.xml REPEAT UNTIL_FAIL:2)
+
+# Verify that extra measurements get reported.
+function(run_measurements)
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(
+  NAME double_measurement
+  COMMAND ${CMAKE_COMMAND} -E
+  echo <DartMeasurement type="numeric/double" name="my_custom_value">1.4847</DartMeasurement>)
+add_test(
+  NAME img_measurement
+  COMMAND ${CMAKE_COMMAND} -E
+  echo <DartMeasurementFile name="TestImage" type="image/png">]] ${IMAGE_DIR}/cmake-logo-16.png [[</DartMeasurementFile>)
+  ]])
+  run_ctest(TestMeasurements)
+endfunction()
+run_measurements()
