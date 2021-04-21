@@ -409,6 +409,10 @@ suppression macro KWIML_ABI_NO_VERIFY was defined.
 #elif defined(__hppa) || defined(__hppa__)
 # define KWIML_ABI_ENDIAN_ID KWIML_ABI_ENDIAN_ID_BIG
 
+/* LoongArch64 */
+#elif defined(__loongarch64)
+# define KWIML_ABI_ENDIAN_ID KWIML_ABI_ENDIAN_ID_LITTLE
+
 /* Motorola 68k */
 #elif defined(__m68k__) || defined(M68000)
 # define KWIML_ABI_ENDIAN_ID KWIML_ABI_ENDIAN_ID_BIG
