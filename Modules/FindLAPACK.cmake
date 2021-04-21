@@ -620,17 +620,25 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       AND (BLA_VENDOR STREQUAL "Generic"
            OR BLA_VENDOR STREQUAL "ATLAS"
            OR BLA_VENDOR STREQUAL "All"))
+    if(BLA_STATIC)
+      # We do not know for sure how the LAPACK reference implementation
+      # is built on this host.  Guess typical dependencies.
+      set(_lapack_generic_deps "-lgfortran;-lm")
+    else()
+      set(_lapack_generic_deps "")
+    endif()
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
       cheev
       ""
       "lapack"
-      ""
+      "${_lapack_generic_deps}"
       ""
       ""
       "${BLAS_LIBRARIES}"
     )
+    unset(_lapack_generic_deps)
   endif()
 endif()
 
