@@ -189,20 +189,6 @@ if(BLA_PREFER_PKGCONFIG)
   endif()
 endif()
 
-set(_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-if(BLA_STATIC)
-  if(WIN32)
-    set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
-  else()
-    set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-  endif()
-else()
-  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    # for ubuntu's libblas3gf and liblapack3gf packages
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
-  endif()
-endif()
-
 # TODO: move this stuff to a separate module
 
 function(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlibdir _subdirs)
@@ -216,6 +202,19 @@ function(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlib
   set(_libraries_work TRUE)
   set(_libraries)
   set(_combined_name)
+
+  if(BLA_STATIC)
+    if(WIN32)
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    else()
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    endif()
+  else()
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      # for ubuntu's libblas3gf and liblapack3gf packages
+      set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
+    endif()
+  endif()
 
   set(_extaddlibdir "${_addlibdir}")
   if(WIN32)
@@ -626,8 +625,6 @@ if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
     endif()
     set(_threadlibs "${CMAKE_THREAD_LIBS_INIT}")
     if(BLA_STATIC)
-      set(_blas_STATIC_CMAKE_FIND_LIBRARY_SUFFIXES "${CMAKE_FIND_LIBRARY_SUFFIXES}")
-      set(CMAKE_FIND_LIBRARY_SUFFIXES "${_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES}")
       if (CMAKE_C_COMPILER_LOADED)
         find_package(OpenMP COMPONENTS C)
         list(PREPEND _threadlibs "${OpenMP_C_LIBRARIES}")
@@ -635,8 +632,6 @@ if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
         find_package(OpenMP COMPONENTS CXX)
         list(PREPEND _threadlibs "${OpenMP_CXX_LIBRARIES}")
       endif()
-      set(CMAKE_FIND_LIBRARY_SUFFIXES "${_blas_STATIC_CMAKE_FIND_LIBRARY_SUFFIXES}")
-      unset(_blas_STATIC_CMAKE_FIND_LIBRARY_SUFFIXES)
     endif()
     check_blas_libraries(
       BLAS_LIBRARIES
@@ -1084,4 +1079,3 @@ if(NOT BLA_F95)
 endif()
 
 _add_blas_target()
-set(CMAKE_FIND_LIBRARY_SUFFIXES ${_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
