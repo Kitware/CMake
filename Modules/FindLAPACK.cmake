@@ -127,7 +127,6 @@ if(CMAKE_Fortran_COMPILER_LOADED)
 else()
   include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 endif()
-include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 function(_add_lapack_target)
@@ -164,9 +163,6 @@ function(_add_lapack_target)
 endfunction()
 
 macro(_lapack_find_library_setup)
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_QUIET ${LAPACK_FIND_QUIETLY})
-
   set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
   if(BLA_STATIC)
     if(WIN32)
@@ -185,7 +181,6 @@ endmacro()
 macro(_lapack_find_library_teardown)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ${_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
   unset(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES)
-  cmake_pop_check_state()
 endmacro()
 
 # TODO: move this stuff to a separate module
@@ -243,6 +238,7 @@ function(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addl
   if(_libraries_work)
     # Test this combination of libraries.
     set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${_libraries} ${_blas} ${_deps})
+    set(CMAKE_REQUIRED_QUIET ${LAPACK_FIND_QUIETLY})
     if(CMAKE_Fortran_COMPILER_LOADED)
       check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
     else()
