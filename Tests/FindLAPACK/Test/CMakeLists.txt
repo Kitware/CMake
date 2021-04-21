@@ -13,7 +13,7 @@ target_link_libraries(test_var PRIVATE ${LAPACK_LIBRARIES})
 add_test(NAME test_var COMMAND test_var)
 
 if(BLA_VENDOR STREQUAL "Intel10_64lp")
-  if(NOT LAPACK_LIBRARIES MATCHES "^[^;]*mkl_intel_lp64")
+  if(NOT LAPACK_LIBRARIES MATCHES "^(-Wl,--start-group;)?[^;]*mkl_intel_lp64")
     message(FATAL_ERROR "LAPACK_LIBRARIES does not start in mkl_intel_lp64:\n ${LAPACK_LIBRARIES}")
   endif()
 endif()
