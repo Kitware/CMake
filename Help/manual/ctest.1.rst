@@ -1095,6 +1095,8 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_TEST_TIMEOUT`
   * :module:`CTest` module variable: ``DART_TESTING_TIMEOUT``
 
+To report extra test values to CDash, see :ref:`Additional Test Measurements`.
+
 .. _`CTest Coverage Step`:
 
 CTest Coverage Step
