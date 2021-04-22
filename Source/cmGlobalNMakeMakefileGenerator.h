@@ -31,7 +31,7 @@ public:
   /** Get encoding used by generator for makefile files */
   codecvt::Encoding GetMakefileEncoding() const override
   {
-    return codecvt::ANSI;
+    return this->NMakeSupportsUTF8 ? codecvt::UTF8_WITH_BOM : codecvt::ANSI;
   }
 
   /** Get the documentation entry for this generator.  */

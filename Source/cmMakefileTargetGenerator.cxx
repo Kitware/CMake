@@ -2058,7 +2058,8 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
   // Create the response file.
   std::string responseFileNameFull =
     cmStrCat(this->TargetBuildDirectoryFull, '/', name);
-  cmGeneratedFileStream responseStream(responseFileNameFull);
+  cmGeneratedFileStream responseStream(
+    responseFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
   responseStream.SetCopyIfDifferent(true);
   responseStream << options << "\n";
 

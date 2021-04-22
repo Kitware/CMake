@@ -31,6 +31,7 @@ codecvt::codecvt(Encoding e)
     // We don't know which ANSI encoding to use for other platforms than
     // Windows so we don't do any conversion there
     case codecvt::UTF8:
+    case codecvt::UTF8_WITH_BOM:
     // Assume internal encoding is UTF-8
     case codecvt::None:
     // No encoding
