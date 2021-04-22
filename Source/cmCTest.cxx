@@ -2069,6 +2069,17 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     }
     i++;
     this->Impl->TestDir = std::string(args[i]);
+  } else if (this->CheckArgument(arg, "--output-junit"_s)) {
+    if (i >= args.size() - 1) {
+      errormsg = "'--output-junit' requires an argument";
+      return false;
+    }
+    i++;
+    this->Impl->TestHandler.SetJUnitXMLFileName(std::string(args[i]));
+    // Turn test output compression off.
+    // This makes it easier to include test output in the resulting
+    // JUnit XML report.
+    this->Impl->CompressTestOutput = false;
   }
 
   cm::string_view noTestsPrefix = "--no-tests=";

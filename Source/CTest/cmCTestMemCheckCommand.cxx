@@ -14,7 +14,7 @@ void cmCTestMemCheckCommand::BindArguments()
   this->Bind("DEFECT_COUNT"_s, this->DefectCount);
 }
 
-cmCTestGenericHandler* cmCTestMemCheckCommand::InitializeActualHandler()
+cmCTestTestHandler* cmCTestMemCheckCommand::InitializeActualHandler()
 {
   cmCTestMemCheckHandler* handler = this->CTest->GetMemCheckHandler();
   handler->Initialize();

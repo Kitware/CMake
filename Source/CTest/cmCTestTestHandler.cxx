@@ -42,6 +42,7 @@
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTimestamp.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
@@ -299,6 +300,9 @@ cmCTestTestHandler::cmCTestTestHandler()
 
   this->LogFile = nullptr;
 
+  // Support for JUnit XML output.
+  this->JUnitXMLFileName = "";
+
   // regex to detect <DartMeasurement>...</DartMeasurement>
   this->DartStuff.compile("(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
   // regex to detect each individual <DartMeasurement>...</DartMeasurement>
@@ -453,6 +457,10 @@ int cmCTestTestHandler::ProcessHandler()
   }
 
   if (!this->GenerateXML()) {
+    return 1;
+  }
+
+  if (!this->WriteJUnitXML()) {
     return 1;
   }
 
@@ -2456,4 +2464,126 @@ bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator!=(
   const cmCTestTestResourceRequirement& other) const
 {
   return !(*this == other);
+}
+
+void cmCTestTestHandler::SetJUnitXMLFileName(const std::string& filename)
+{
+  this->JUnitXMLFileName = filename;
+}
+
+bool cmCTestTestHandler::WriteJUnitXML()
+{
+  if (this->JUnitXMLFileName.empty()) {
+    return true;
+  }
+
+  // Open new XML file for writing.
+  cmGeneratedFileStream xmlfile;
+  xmlfile.SetTempExt("tmp");
+  xmlfile.Open(this->JUnitXMLFileName);
+  if (!xmlfile) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Problem opening file: " << this->JUnitXMLFileName
+                                        << std::endl);
+    return false;
+  }
+  cmXMLWriter xml(xmlfile);
+
+  // Iterate over the test results to get the number of tests that
+  // passed, failed, etc.
+  auto num_tests = 0;
+  auto num_passed = 0;
+  auto num_failed = 0;
+  auto num_notrun = 0;
+  auto num_disabled = 0;
+  SetOfTests resultsSet(this->TestResults.begin(), this->TestResults.end());
+  for (cmCTestTestResult const& result : resultsSet) {
+    num_tests++;
+    if (result.Status == cmCTestTestHandler::COMPLETED) {
+      num_passed++;
+    } else if (result.Status == cmCTestTestHandler::NOT_RUN) {
+      if (result.CompletionStatus == "Disabled") {
+        num_disabled++;
+      } else {
+        num_notrun++;
+      }
+    } else {
+      num_failed++;
+    }
+  }
+
+  // Write <testsuite> element.
+  xml.StartDocument();
+  xml.StartElement("testsuite");
+
+  xml.Attribute("name",
+                cmCTest::SafeBuildIdField(
+                  this->CTest->GetCTestConfiguration("BuildName")));
+  xml.BreakAttributes();
+
+  xml.Attribute("tests", num_tests);
+  xml.Attribute("failures", num_failed);
+
+  // CTest disabled => JUnit disabled
+  xml.Attribute("disabled", num_disabled);
+
+  // Otherwise, CTest notrun => JUnit skipped.
+  // The distinction between JUnit disabled vs. skipped is that
+  // skipped tests can have a message associated with them
+  // (why the test was skipped).
+  xml.Attribute("skipped", num_notrun);
+
+  xml.Attribute("hostname", this->CTest->GetCTestConfiguration("Site"));
+  xml.Attribute(
+    "time",
+    std::chrono::duration_cast<std::chrono::seconds>(this->ElapsedTestingTime)
+      .count());
+  const std::time_t start_test_time_t =
+    std::chrono::system_clock::to_time_t(this->StartTestTime);
+  cmTimestamp cmts;
+  xml.Attribute("timestamp",
+                cmts.CreateTimestampFromTimeT(start_test_time_t,
+                                              "%Y-%m-%dT%H:%M:%S", false));
+
+  // Write <testcase> elements.
+  for (cmCTestTestResult const& result : resultsSet) {
+    xml.StartElement("testcase");
+    xml.Attribute("name", result.Name);
+    xml.Attribute("classname", result.Name);
+    xml.Attribute("time", result.ExecutionTime.count());
+
+    std::string status;
+    if (result.Status == cmCTestTestHandler::COMPLETED) {
+      status = "run";
+    } else if (result.Status == cmCTestTestHandler::NOT_RUN) {
+      if (result.CompletionStatus == "Disabled") {
+        status = "disabled";
+      } else {
+        status = "notrun";
+      }
+    } else {
+      status = "fail";
+    }
+    xml.Attribute("status", status);
+
+    if (status == "notrun") {
+      xml.StartElement("skipped");
+      xml.Attribute("message", result.CompletionStatus);
+      xml.EndElement(); // </skipped>
+    } else if (status == "fail") {
+      xml.StartElement("failure");
+      xml.Attribute("message", result.Reason);
+      xml.EndElement(); // </failure>
+    }
+
+    // Note: compressed test output is unconditionally disabled when
+    // --output-junit is specified.
+    xml.Element("system-out", result.Output);
+    xml.EndElement(); // </testcase>
+  }
+
+  xml.EndElement(); // </testsuite>
+  xml.EndDocument();
+
+  return true;
 }

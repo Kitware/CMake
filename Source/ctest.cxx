@@ -50,6 +50,7 @@ static const char* cmDocumentationOptions[][2] = {
     "given number of jobs." },
   { "-Q,--quiet", "Make ctest quiet." },
   { "-O <file>, --output-log <file>", "Output to log file" },
+  { "--output-junit <file>", "Output test results to JUnit XML file." },
   { "-N,--show-only[=format]",
     "Disable actual execution of tests. The optional 'format' defines the "
     "format of the test information and can be 'human' for the current text "
