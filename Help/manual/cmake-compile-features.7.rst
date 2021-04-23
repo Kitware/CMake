@@ -130,7 +130,7 @@ Optional Compile Features
 =========================
 
 Compile features may be preferred if available, without creating a hard
-requirement.  For example, a library may provides alternative
+requirement.  For example, a library may provide alternative
 implementations depending on whether the ``cxx_variadic_templates``
 feature is available:
 
@@ -207,11 +207,11 @@ symbol, and compiler support determines what it is expanded to:
 In this case, ``Foo_FINAL`` will expand to ``final`` if the
 compiler supports the keyword, or to empty otherwise.
 
-In this use-case, the CMake code will wish to enable a particular language
+In this use-case, the project code may wish to enable a particular language
 standard if available from the compiler. The :prop_tgt:`CXX_STANDARD`
-target property variable may be set to the desired language standard
-for a particular target, and the :variable:`CMAKE_CXX_STANDARD` may be
-set to influence all following targets:
+target property may be set to the desired language standard for a particular
+target, and the :variable:`CMAKE_CXX_STANDARD` variable may be set to
+influence all following targets:
 
 .. code-block:: cmake
 
@@ -284,7 +284,7 @@ while a header at ``no_variadics/interface.h`` may contain:
     static int accumulate() { return I1 + I2 + I3 + I4; }
   };
 
-It would be possible to write a abstraction ``interface.h`` header
+It may be possible to write an abstraction ``interface.h`` header
 containing something like:
 
 .. code-block:: c++
