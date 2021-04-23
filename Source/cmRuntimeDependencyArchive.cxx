@@ -354,9 +354,9 @@ bool cmRuntimeDependencyArchive::IsPostExcluded(const std::string& name) const
       fileSearch(this->PostExcludeFiles)));
 }
 
-void cmRuntimeDependencyArchive::AddResolvedPath(const std::string& name,
-                                                 const std::string& path,
-                                                 bool& unique)
+void cmRuntimeDependencyArchive::AddResolvedPath(
+  const std::string& name, const std::string& path, bool& unique,
+  std::vector<std::string> rpaths)
 {
   auto it = this->ResolvedPaths.emplace(name, std::set<std::string>{}).first;
   unique = true;
@@ -367,6 +367,7 @@ void cmRuntimeDependencyArchive::AddResolvedPath(const std::string& name,
     }
   }
   it->second.insert(path);
+  this->RPaths[path] = std::move(rpaths);
 }
 
 void cmRuntimeDependencyArchive::AddUnresolvedPath(const std::string& name)
@@ -389,4 +390,10 @@ const std::set<std::string>& cmRuntimeDependencyArchive::GetUnresolvedPaths()
   const
 {
   return this->UnresolvedPaths;
+}
+
+const std::map<std::string, std::vector<std::string>>&
+cmRuntimeDependencyArchive::GetRPaths() const
+{
+  return this->RPaths;
 }

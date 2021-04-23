@@ -45,12 +45,13 @@ public:
   bool IsPostExcluded(const std::string& name) const;
 
   void AddResolvedPath(const std::string& name, const std::string& path,
-                       bool& unique);
+                       bool& unique, std::vector<std::string> rpaths = {});
   void AddUnresolvedPath(const std::string& name);
 
   cmMakefile* GetMakefile() const;
   const std::map<std::string, std::set<std::string>>& GetResolvedPaths() const;
   const std::set<std::string>& GetUnresolvedPaths() const;
+  const std::map<std::string, std::vector<std::string>>& GetRPaths() const;
 
 private:
   cmExecutionStatus& Status;
@@ -70,4 +71,5 @@ private:
   std::vector<std::string> PostExcludeFilesStrict;
   std::map<std::string, std::set<std::string>> ResolvedPaths;
   std::set<std::string> UnresolvedPaths;
+  std::map<std::string, std::vector<std::string>> RPaths;
 };

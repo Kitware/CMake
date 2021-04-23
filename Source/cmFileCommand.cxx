@@ -3032,6 +3032,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     std::string ResolvedDependenciesVar;
     std::string UnresolvedDependenciesVar;
     std::string ConflictingDependenciesPrefix;
+    std::string RPathPrefix;
     std::string BundleExecutable;
     std::vector<std::string> Executables;
     std::vector<std::string> Libraries;
@@ -3053,6 +3054,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
             &Arguments::UnresolvedDependenciesVar)
       .Bind("CONFLICTING_DEPENDENCIES_PREFIX"_s,
             &Arguments::ConflictingDependenciesPrefix)
+      .Bind("RPATH_PREFIX"_s, &Arguments::RPathPrefix)
       .Bind("BUNDLE_EXECUTABLE"_s, &Arguments::BundleExecutable)
       .Bind("EXECUTABLES"_s, &Arguments::Executables)
       .Bind("LIBRARIES"_s, &Arguments::Libraries)
@@ -3135,6 +3137,11 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
 
     if (unique) {
       deps.push_back(firstPath);
+      if (!parsedArgs.RPathPrefix.empty()) {
+        status.GetMakefile().AddDefinition(
+          parsedArgs.RPathPrefix + "_" + firstPath,
+          cmJoin(archive.GetRPaths().at(firstPath), ";"));
+      }
     } else if (!parsedArgs.ConflictingDependenciesPrefix.empty()) {
       conflictingDeps.push_back(val.first);
       std::vector<std::string> paths;
