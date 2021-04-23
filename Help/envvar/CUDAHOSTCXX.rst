@@ -15,6 +15,10 @@ ignored if the :variable:`CMAKE_CUDA_HOST_COMPILER` variable is defined.
 This environment variable is primarily meant for use with projects that
 enable ``CUDA`` as a first-class language.
 
+.. note::
+
+  Ignored when using :ref:`Visual Studio Generators`.
+
 .. versionadded:: 3.13
   The :module:`FindCUDA`
   module will use this variable to initialize its ``CUDA_HOST_COMPILER`` setting.

@@ -23,3 +23,7 @@ is read-only and changes to it are undefined behavior.
   :variable:`CMAKE_CUDA_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>` is ``NVIDIA``,
   it does not make sense to set ``CMAKE_CUDA_HOST_COMPILER`` without also
   setting ``CMAKE_CUDA_COMPILER`` to NVCC.
+
+.. note::
+
+  Ignored when using :ref:`Visual Studio Generators`.
