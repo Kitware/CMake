@@ -949,7 +949,7 @@ function(_ExternalData_link_or_copy src dst)
   endif()
   if(result)
     file(REMOVE "${tmp}")
-    message(FATAL_ERROR "Failed to create\n  ${tmp}\nfrom\n  ${obj}")
+    message(FATAL_ERROR "Failed to create:\n  \"${tmp}\"\nfrom:\n  \"${obj}\"\nwith error:\n  ${result}")
   endif()
 
   # Atomically create/replace the real destination.
