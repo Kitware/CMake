@@ -2507,6 +2507,20 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
   return def != nullptr;
 }
 
+bool cmMakefile::IsNormalDefinitionSet(const std::string& name) const
+{
+  cmProp def = this->StateSnapshot.GetDefinition(name);
+#ifndef CMAKE_BOOTSTRAP
+  if (cmVariableWatch* vv = this->GetVariableWatch()) {
+    if (!def) {
+      vv->VariableAccessed(
+        name, cmVariableWatch::UNKNOWN_VARIABLE_DEFINED_ACCESS, nullptr, this);
+    }
+  }
+#endif
+  return def != nullptr;
+}
+
 cmProp cmMakefile::GetDefinition(const std::string& name) const
 {
   cmProp def = this->StateSnapshot.GetDefinition(name);
