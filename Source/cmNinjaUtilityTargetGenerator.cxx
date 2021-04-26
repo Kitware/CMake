@@ -173,7 +173,7 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
     std::string ccConfig;
     if (genTarget->Target->IsPerConfig() &&
         genTarget->GetType() != cmStateEnums::GLOBAL_TARGET) {
-      ccConfig = fileConfig;
+      ccConfig = config;
     }
     if (config == fileConfig ||
         gg->GetPerConfigUtilityTargets().count(genTarget->GetName())) {

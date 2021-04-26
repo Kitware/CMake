@@ -189,3 +189,11 @@ add_custom_target(target_no_cross_byproduct
   COMMAND echo $<CONFIG> target_no_cross_byproduct.txt
   WORKING_DIRECTORY $<CONFIG>
   )
+
+add_custom_target(target_post_build
+  COMMENT target_post_build
+  COMMAND ${CMAKE_COMMAND} -E echo "target main build"
+  )
+add_custom_command(TARGET target_post_build POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E echo "target post build"
+  )
