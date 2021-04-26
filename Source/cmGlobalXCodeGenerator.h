@@ -144,6 +144,13 @@ protected:
   }
 
 private:
+  enum EmbedActionFlags
+  {
+    NoActionOnCopyByDefault = 0,
+    CodeSignOnCopyByDefault = 1,
+    RemoveHeadersOnCopyByDefault = 2,
+  };
+
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
   bool ProcessGeneratorToolsetField(std::string const& key,
                                     std::string const& value, cmMakefile* mf);
@@ -208,7 +215,13 @@ private:
                                     const char* attribute);
   cmXCodeObject* CreateUtilityTarget(cmGeneratorTarget* gtgt);
   void AddDependAndLinkInformation(cmXCodeObject* target);
+  void AddEmbeddedObjects(cmXCodeObject* target,
+                          const std::string& copyFilesBuildPhaseName,
+                          const std::string& embedPropertyName,
+                          const std::string& dstSubfolderSpec,
+                          int actionsOnByDefault);
   void AddEmbeddedFrameworks(cmXCodeObject* target);
+  void AddEmbeddedAppExtensions(cmXCodeObject* target);
   void AddPositionIndependentLinkAttribute(cmGeneratorTarget* target,
                                            cmXCodeObject* buildSettings,
                                            const std::string& configName);

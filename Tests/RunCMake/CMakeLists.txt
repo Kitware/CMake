@@ -554,7 +554,7 @@ endif()
 
 if(XCODE_VERSION)
   add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
-  add_RunCMake_test(XcodeProject-Embed)
+  add_RunCMake_test(XcodeProject-Embed -DXCODE_VERSION=${XCODE_VERSION})
 
   # This test can take a very long time due to lots of combinations.
   # Use a long default timeout and provide an option to customize it.
