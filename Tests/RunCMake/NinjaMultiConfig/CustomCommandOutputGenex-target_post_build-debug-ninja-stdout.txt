@@ -1,0 +1,4 @@
+^\[1/2\] target_post_build
+target main build
+\[2/2\] Running utility command for target_post_build
+target post build$

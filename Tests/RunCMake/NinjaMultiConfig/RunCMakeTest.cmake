@@ -364,6 +364,8 @@ run_ninja(CustomCommandOutputGenex target_no_cross_byproduct-debug build-Debug.n
 run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
 run_ninja(CustomCommandOutputGenex target_no_cross_byproduct-debug-in-release-graph build-Release.ninja target_no_cross_byproduct:Debug)
 run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# target_post_build
+run_ninja(CustomCommandOutputGenex target_post_build-debug build-Debug.ninja target_post_build)
 unset(RunCMake_TEST_NO_CLEAN)
 
 unset(RunCMake_TEST_BINARY_DIR)
