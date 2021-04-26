@@ -98,9 +98,11 @@ public:
       , GenNameUpper(cmQtAutoGen::GeneratorNameUpper(gen)){};
   };
 
-  /** @return The detected Qt version and the required Qt major version.  */
+  /** @param mocExecutable The file path to the moc executable. Will be used as
+     fallback to query the version
+      @return The detected Qt version and the required Qt major version. */
   static std::pair<IntegerVersion, unsigned int> GetQtVersion(
-    cmGeneratorTarget const* genTarget);
+    cmGeneratorTarget const* genTarget, std::string mocExecutable);
 
   cmQtAutoGenInitializer(cmQtAutoGenGlobalInitializer* globalInitializer,
                          cmGeneratorTarget* genTarget,
