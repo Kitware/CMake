@@ -1246,9 +1246,12 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
   struct Arguments
   {
     std::string BaseDirectory;
+    bool ExpandTilde = false;
   };
-  static auto const parser = cmArgumentParser<Arguments>{}.Bind(
-    "BASE_DIRECTORY"_s, &Arguments::BaseDirectory);
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("BASE_DIRECTORY"_s, &Arguments::BaseDirectory)
+      .Bind("EXPAND_TILDE"_s, &Arguments::ExpandTilde);
 
   std::vector<std::string> unparsedArguments;
   std::vector<std::string> keywordsMissingValue;
@@ -1270,7 +1273,21 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
     arguments.BaseDirectory = status.GetMakefile().GetCurrentSourceDirectory();
   }
 
-  cmCMakePath path(args[1]);
+  auto input = args[1];
+  if (arguments.ExpandTilde && !input.empty()) {
+    if (input[0] == '~' && (input.length() == 1 || input[1] == '/')) {
+      std::string home;
+      if (
+#if defined(_WIN32) && !defined(__CYGWIN__)
+        cmSystemTools::GetEnv("USERPROFILE", home) ||
+#endif
+        cmSystemTools::GetEnv("HOME", home)) {
+        input.replace(0, 1, home);
+      }
+    }
+  }
+
+  cmCMakePath path(input, cmCMakePath::auto_format);
   path = path.Absolute(arguments.BaseDirectory).Normal();
   auto realPath = cmSystemTools::GetRealPath(path.GenericString());
 

@@ -96,10 +96,11 @@ if(NOT WIN32 OR CYGWIN)
   run_cmake(READ_SYMLINK-noexist)
   run_cmake(READ_SYMLINK-notsymlink)
   run_cmake(INSTALL-FOLLOW_SYMLINK_CHAIN)
-  run_cmake(REAL_PATH-unexpected-arg)
-  run_cmake(REAL_PATH-no-base-dir)
-  run_cmake(REAL_PATH)
 endif()
+
+run_cmake(REAL_PATH-unexpected-arg)
+run_cmake(REAL_PATH-no-base-dir)
+run_cmake(REAL_PATH)
 
 if(RunCMake_GENERATOR MATCHES "Ninja")
   # Detect ninja version so we know what tests can be supported.

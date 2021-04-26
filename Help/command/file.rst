@@ -50,7 +50,7 @@ Synopsis
     file(`CHMOD_RECURSE`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
 
   `Path Conversion`_
-    file(`REAL_PATH`_ <path> <out-var> [BASE_DIRECTORY <dir>])
+    file(`REAL_PATH`_ <path> <out-var> [BASE_DIRECTORY <dir>] [EXPAND_TILDE])
     file(`RELATIVE_PATH`_ <out-var> <directory> <file>)
     file({`TO_CMAKE_PATH`_ | `TO_NATIVE_PATH`_} <path> <out-var>)
 
@@ -924,16 +924,26 @@ Path Conversion
 
 .. code-block:: cmake
 
-  file(REAL_PATH <path> <out-var> [BASE_DIRECTORY <dir>])
+  file(REAL_PATH <path> <out-var> [BASE_DIRECTORY <dir>] [EXPAND_TILDE])
 
 .. versionadded:: 3.19
 
 Compute the absolute path to an existing file or directory with symlinks
 resolved.
 
-If the provided ``<path>`` is a relative path, it is evaluated relative to the
-given base directory ``<dir>``. If no base directory is provided, the default
-base directory will be :variable:`CMAKE_CURRENT_SOURCE_DIR`.
+``BASE_DIRECTORY <dir>``
+  If the provided ``<path>`` is a relative path, it is evaluated relative to the
+  given base directory ``<dir>``. If no base directory is provided, the default
+  base directory will be :variable:`CMAKE_CURRENT_SOURCE_DIR`.
+
+``EXPAND_TILDE``
+  .. versionadded:: 3.21
+
+  If the ``<path>`` is ``~`` or starts with ``~/``, the ``~`` is replaced by
+  the user's home directory.  The path to the home directory is obtained from
+  environment variables.  On Windows, the ``USERPROFILE`` environment variable
+  is used, falling back to the ``HOME`` environment variable if ``USERPROFILE``
+  is not defined.  On all other platforms, only ``HOME`` is used.
 
 .. _RELATIVE_PATH:
 
