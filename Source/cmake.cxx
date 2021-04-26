@@ -1257,6 +1257,13 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         "PATH", expandedPreset->InstallDir
       };
     }
+    if (!expandedPreset->ToolchainFile.empty() &&
+        this->State->GetInitializedCacheValue("CMAKE_TOOLCHAIN_FILE") ==
+          nullptr) {
+      this->UnprocessedPresetVariables["CMAKE_TOOLCHAIN_FILE"] = {
+        "FILEPATH", expandedPreset->ToolchainFile
+      };
+    }
 
     if (!expandedPreset->ArchitectureStrategy ||
         expandedPreset->ArchitectureStrategy ==

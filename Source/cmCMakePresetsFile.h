@@ -39,6 +39,7 @@ public:
     INSTALL_PREFIX_UNSUPPORTED,
     INVALID_CONDITION,
     CONDITION_UNSUPPORTED,
+    TOOLCHAIN_FILE_UNSUPPORTED,
   };
 
   enum class ArchToolsetStrategy
@@ -113,6 +114,7 @@ public:
     cm::optional<ArchToolsetStrategy> ArchitectureStrategy;
     std::string Toolset;
     cm::optional<ArchToolsetStrategy> ToolsetStrategy;
+    std::string ToolchainFile;
     std::string BinaryDir;
     std::string InstallDir;
 
