@@ -1222,12 +1222,5 @@
       "UserValue",
       "UserRequired"
     ]
-  },
-  {
-    "name": "EnableASAN",
-    "switch": "fsanitize=address",
-    "comment": "Enable Address Sanitizer",
-    "value": "true",
-    "flags": []
   }
 ]
