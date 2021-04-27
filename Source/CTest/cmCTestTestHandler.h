@@ -209,6 +209,9 @@ public:
 
   using ListOfTests = std::vector<cmCTestTestProperties>;
 
+  // Support for writing test results in JUnit XML format.
+  void SetJUnitXMLFileName(const std::string& id);
+
 protected:
   using SetOfTests =
     std::set<cmCTestTestHandler::cmCTestTestResult, cmCTestTestResultLess>;
@@ -273,6 +276,11 @@ private:
    * Generate the Dart compatible output
    */
   virtual void GenerateDartOutput(cmXMLWriter& xml);
+
+  /**
+   * Write test results in JUnit XML format
+   */
+  bool WriteJUnitXML();
 
   void PrintLabelOrSubprojectSummary(bool isSubProject);
 
@@ -354,4 +362,6 @@ private:
   cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
   int RepeatCount = 1;
   bool RerunFailed;
+
+  std::string JUnitXMLFileName;
 };

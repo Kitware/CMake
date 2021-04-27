@@ -21,6 +21,7 @@
   { include: [ "<wctype.h>", public, "<cwctype>", public ] },
 
   # HACK: check whether this can be removed with next iwyu release.
+  { include: [ "<bits/cxxabi_forced.h>", private, "<ctime>", public ] },
   { include: [ "<bits/shared_ptr.h>", private, "<memory>", public ] },
   { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
   { include: [ "<bits/refwrap.h>", private, "<functional>", public ] },

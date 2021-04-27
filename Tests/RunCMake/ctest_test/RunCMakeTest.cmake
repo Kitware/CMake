@@ -146,3 +146,6 @@ set_property(TEST RunCMakeVersion PROPERTY ENVIRONMENT "ENV1=env1;ENV2=env2")
   run_ctest(TestEnvironment)
 endfunction()
 run_environment()
+
+# test for OUTPUT_JUNIT
+run_ctest_test(OutputJUnit OUTPUT_JUNIT junit.xml REPEAT UNTIL_FAIL:2)
