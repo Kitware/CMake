@@ -76,7 +76,7 @@ endif()
 # cygwin ncurses stopped providing curses.h symlinks see above
 # message.  Cygwin is an ncurses package, so force ncurses on
 # cygwin if the curses.h is missing
-if(CYGWIN)
+if(CURSES_NCURSES_LIBRARY AND CYGWIN)
   if (CURSES_NEED_WIDE)
     if(NOT EXISTS /usr/include/ncursesw/curses.h)
       set(CURSES_USE_NCURSES TRUE)

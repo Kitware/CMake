@@ -655,7 +655,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     xml.EndElement(); // extension
   } else {
     std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
-    if (systemName == "CYGWIN") {
+    if (systemName == "CYGWIN" || systemName == "MSYS") {
       xml.StartElement("extension");
       xml.Attribute("id", "org.eclipse.cdt.core.Cygwin_PE");
       xml.Attribute("point", "org.eclipse.cdt.core.BinaryParser");

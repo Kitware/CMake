@@ -58,8 +58,8 @@ set_property (TARGET static3 PROPERTY ARCHIVE_OUTPUT_NAME static3_archive)
 string (APPEND GENERATE_CONTENT [[
 
 check_value ("TARGET_FILE_BASE_NAME executable all properties" "$<TARGET_FILE_BASE_NAME:exec3>" "exec3_runtime")
-check_value ("TARGET_FILE_BASE_NAME shared all properties" "$<TARGET_FILE_BASE_NAME:shared3>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN>,shared3_runtime,shared3_library>")
-check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker all properties" "$<TARGET_LINKER_FILE_BASE_NAME:shared3>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN>,shared3_archive,shared3_library>")
+check_value ("TARGET_FILE_BASE_NAME shared all properties" "$<TARGET_FILE_BASE_NAME:shared3>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared3_runtime,shared3_library>")
+check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker all properties" "$<TARGET_LINKER_FILE_BASE_NAME:shared3>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared3_archive,shared3_library>")
 check_value ("TARGET_FILE_BASE_NAME static all properties" "$<TARGET_FILE_BASE_NAME:static3>" "static3_archive")
 check_value ("TARGET_LINKER_FILE_BASE_NAME static linker all properties" "$<TARGET_LINKER_FILE_BASE_NAME:static3>" "static3_archive")
 ]])
@@ -95,8 +95,8 @@ set_property (TARGET static4 PROPERTY ${FIRST_CONFIG}_POSTFIX _postfix)
 string (APPEND GENERATE_CONTENT [[
 
 check_value ("TARGET_FILE_BASE_NAME executable all properties + postfix" "$<TARGET_FILE_BASE_NAME:exec4>" "exec4_runtime_postfix")
-check_value ("TARGET_FILE_BASE_NAME shared all properties + postfix" "$<TARGET_FILE_BASE_NAME:shared4>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN>,shared4_runtime,shared4_library>_postfix")
-check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker all properties + postfix" "$<TARGET_LINKER_FILE_BASE_NAME:shared4>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN>,shared4_archive,shared4_library>_postfix")
+check_value ("TARGET_FILE_BASE_NAME shared all properties + postfix" "$<TARGET_FILE_BASE_NAME:shared4>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared4_runtime,shared4_library>_postfix")
+check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker all properties + postfix" "$<TARGET_LINKER_FILE_BASE_NAME:shared4>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared4_archive,shared4_library>_postfix")
 check_value ("TARGET_FILE_BASE_NAME static all properties + postfix" "$<TARGET_FILE_BASE_NAME:static4>" "static4_archive_postfix")
 check_value ("TARGET_LINKER_FILE_BASE_NAME static linker all properties + postfix" "$<TARGET_LINKER_FILE_BASE_NAME:static4>" "static4_archive_postfix")
 ]])

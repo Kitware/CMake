@@ -3239,9 +3239,13 @@ cm::string_view cmSystemTools::GetSystemName()
       systemName = "kFreeBSD";
     }
 
-    // fix for CYGWIN which has windows version in it
+    // fix for CYGWIN and MSYS which have windows version in them
     if (systemName.find("CYGWIN") != cm::string_view::npos) {
       systemName = "CYGWIN";
+    }
+
+    if (systemName.find("MSYS") != cm::string_view::npos) {
+      systemName = "MSYS";
     }
     return systemName;
   }

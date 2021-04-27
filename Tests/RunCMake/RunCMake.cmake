@@ -23,9 +23,12 @@ function(run_cmake test)
   endif()
 
   string(TOLOWER ${CMAKE_HOST_SYSTEM_NAME} platform_name)
+  #remove all additional bits from cygwin/msys name
   if(platform_name MATCHES cygwin)
-    #remove all additional bits from cygwin name
     set(platform_name cygwin)
+  endif()
+  if(platform_name MATCHES msys)
+    set(platform_name msys)
   endif()
 
   foreach(o out err)

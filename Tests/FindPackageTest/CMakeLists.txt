@@ -189,7 +189,9 @@ find_package(ArchD 4.0 EXACT NAMES zot)
 unset(CMAKE_LIBRARY_ARCHITECTURE)
 
 # Test find_package() with CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS enabled
-if(UNIX)
+if(UNIX
+    AND NOT MSYS # FIXME: This works on CYGWIN but not on MSYS
+    )
   # Create ./symlink pointing back here.
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
       . "${CMAKE_CURRENT_SOURCE_DIR}/symlink")
