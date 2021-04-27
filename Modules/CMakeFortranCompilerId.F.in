@@ -36,6 +36,14 @@
 #  define COMPILER_VERSION_MINOR DEC(__INTEL_LLVM_COMPILER/100 % 100)
 #  define COMPILER_VERSION_PATCH DEC(__INTEL_LLVM_COMPILER     % 100)
 # endif
+#elif defined(__INTEL_COMPILER) && __INTEL_COMPILER == 201900
+        PRINT *, 'INFO:compiler[IntelLLVM]'
+! ifx 2021.1 forgot to define __INTEL_LLVM_COMPILER.
+! Instead it defines __INTEL_COMPILER == 201900.
+# define COMPILER_VERSION_MAJOR DEC(2021)
+# define COMPILER_VERSION_MINOR DEC(1)
+# define COMPILER_VERSION_PATCH DEC(__INTEL_COMPILER_UPDATE)
+# define COMPILER_VERSION_TWEAK DEC(__INTEL_COMPILER_BUILD_DATE)
 #elif defined(__INTEL_COMPILER) || defined(__ICC)
         PRINT *, 'INFO:compiler[Intel]'
 ! __INTEL_COMPILER = VRP prior to 2021, and then VVVV for 2021 and later.

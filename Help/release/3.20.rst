@@ -47,11 +47,7 @@ Compilers
   * The ``icx``/``icpx`` C/C++ compilers on Linux, and the ``icx``
     C/C++ compiler on Windows, are fully supported as of oneAPI 2021.1.
 
-  * The ``ifx`` Fortran compiler on Linux is partially supported.
-    As of oneAPI 2021.1, ``ifx`` does not define several identification
-    macros, so CMake identifies it as the classic ``Intel`` compiler.
-    This works in many cases because ``ifx`` accepts the same command line
-    parameters as ``ifort``.  A future version of oneAPI may fix this.
+  * The ``ifx`` Fortran compiler on Linux is supported as of oneAPI 2021.1.
 
   * The ``ifx`` Fortran compiler on Windows is not yet supported.
 
@@ -359,3 +355,10 @@ Changes made since CMake 3.20.0 include the following.
   as having major version 2021.  CMake 3.20.1 and below were not aware of a
   change to the identification macro version scheme made by Intel starting
   in version 2021, and detected the version as 20.2.
+
+* The Intel oneAPI Fortran compiler is now identified as ``IntelLLVM``.
+  The oneAPI 2021.1 Fortran compiler is missing an identification macro,
+  so CMake 3.20.1 and below identified it as ``Intel``.  CMake now has
+  a special case to recognize oneAPI 2021.1 Fortran as ``IntelLLVM``.
+  The oneAPI 2021.2 Fortran compiler defines the proper identification
+  macro and so is identified as ``IntelLLVM`` by all CMake 3.20 versions.
