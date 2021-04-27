@@ -122,26 +122,28 @@ if(NOT DEFINED Iconv_IS_BUILT_IN)
   endif()
 endif()
 
-if(NOT Iconv_IS_BUILT_IN)
+set(_Iconv_REQUIRED_VARS)
+if(Iconv_IS_BUILT_IN)
+  set(_Iconv_REQUIRED_VARS _Iconv_IS_BUILT_IN_MSG)
+  set(_Iconv_IS_BUILT_IN_MSG "built in to C library")
+else()
+  set(_Iconv_REQUIRED_VARS Iconv_LIBRARY Iconv_INCLUDE_DIR)
+
   find_path(Iconv_INCLUDE_DIR
     NAMES "iconv.h"
     DOC "iconv include directory")
   set(Iconv_LIBRARY_NAMES "iconv" "libiconv")
-else()
-  set(Iconv_INCLUDE_DIR "" CACHE FILEPATH "iconv include directory")
-  set(Iconv_LIBRARY_NAMES "c")
+  mark_as_advanced(Iconv_INCLUDE_DIR)
+
+  find_library(Iconv_LIBRARY
+    NAMES iconv libiconv
+    NAMES_PER_DIR
+    DOC "iconv library (if not in the C library)")
+  mark_as_advanced(Iconv_LIBRARY)
 endif()
 
-find_library(Iconv_LIBRARY
-  NAMES ${Iconv_LIBRARY_NAMES}
-  NAMES_PER_DIR
-  DOC "iconv library (potentially the C library)")
-
-mark_as_advanced(Iconv_INCLUDE_DIR)
-mark_as_advanced(Iconv_LIBRARY)
-
 # NOTE: glibc's iconv.h does not define _LIBICONV_VERSION
-if(Iconv_INCLUDE_DIR AND NOT Iconv_IS_BUILT_IN)
+if(Iconv_INCLUDE_DIR AND EXISTS "${Iconv_INCLUDE_DIR}/iconv.h")
   file(STRINGS ${Iconv_INCLUDE_DIR}/iconv.h Iconv_VERSION_DEFINE REGEX "_LIBICONV_VERSION (.*)")
 
   if(Iconv_VERSION_DEFINE MATCHES "(0x[A-Fa-f0-9]+)")
@@ -160,19 +162,21 @@ if(Iconv_INCLUDE_DIR AND NOT Iconv_IS_BUILT_IN)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-if(NOT Iconv_IS_BUILT_IN)
-  find_package_handle_standard_args(Iconv REQUIRED_VARS Iconv_LIBRARY Iconv_INCLUDE_DIR
-                                    VERSION_VAR Iconv_VERSION)
-else()
-  find_package_handle_standard_args(Iconv REQUIRED_VARS Iconv_LIBRARY)
-endif()
+find_package_handle_standard_args(Iconv
+                                  REQUIRED_VARS ${_Iconv_REQUIRED_VARS}
+                                  VERSION_VAR Iconv_VERSION)
 
 if(Iconv_FOUND)
-  set(Iconv_INCLUDE_DIRS "${Iconv_INCLUDE_DIR}")
-  set(Iconv_LIBRARIES "${Iconv_LIBRARY}")
+  if(Iconv_IS_BUILT_IN)
+    set(Iconv_INCLUDE_DIRS "")
+    set(Iconv_LIBRARIES "")
+  else()
+    set(Iconv_INCLUDE_DIRS "${Iconv_INCLUDE_DIR}")
+    set(Iconv_LIBRARIES "${Iconv_LIBRARY}")
+  endif()
   if(NOT TARGET Iconv::Iconv)
     add_library(Iconv::Iconv INTERFACE IMPORTED)
+    set_property(TARGET Iconv::Iconv PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${Iconv_INCLUDE_DIRS}")
+    set_property(TARGET Iconv::Iconv PROPERTY INTERFACE_LINK_LIBRARIES "${Iconv_LIBRARIES}")
   endif()
-  set_property(TARGET Iconv::Iconv PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${Iconv_INCLUDE_DIRS}")
-  set_property(TARGET Iconv::Iconv PROPERTY INTERFACE_LINK_LIBRARIES "${Iconv_LIBRARIES}")
 endif()
