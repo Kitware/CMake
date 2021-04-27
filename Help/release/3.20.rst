@@ -351,3 +351,11 @@ Changes made since CMake 3.20.0 include the following.
   iOS, tvOS and watchOS should now default to ``@rpath`` instead of using
   a full absolute path and failing at runtime when the library or framework
   is embedded in an application bundle (see :prop_tgt:`XCODE_EMBED_<type>`).
+
+3.20.2
+------
+
+* The Intel Classic 2021 compiler version numbers are now detected correctly
+  as having major version 2021.  CMake 3.20.1 and below were not aware of a
+  change to the identification macro version scheme made by Intel starting
+  in version 2021, and detected the version as 20.2.
