@@ -366,7 +366,10 @@ class cmMakefile;
   SELECT(                                                                     \
     POLICY, CMP0122,                                                          \
     "UseSWIG use standard library name conventions for csharp language.", 3,  \
-    21, 0, cmPolicies::WARN)
+    21, 0, cmPolicies::WARN)                                                  \
+  SELECT(POLICY, CMP0123,                                                     \
+         "ARMClang cpu/arch compile and link flags must be set explicitly.",  \
+         3, 21, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
