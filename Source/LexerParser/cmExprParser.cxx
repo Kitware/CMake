@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.7.4.  */
+/* A Bison parser, made by GNU Bison 3.7.5.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -46,10 +46,10 @@
    USER NAME SPACE" below.  */
 
 /* Identify Bison output, and Bison version.  */
-#define YYBISON 30704
+#define YYBISON 30705
 
 /* Bison version string.  */
-#define YYBISON_VERSION "3.7.4"
+#define YYBISON_VERSION "3.7.5"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -218,6 +218,18 @@ typedef int_least16_t yytype_int16;
 typedef short yytype_int16;
 #endif
 
+/* Work around bug in HP-UX 11.23, which defines these macros
+   incorrectly for preprocessor constants.  This workaround can likely
+   be removed in 2023, as HPE has promised support for HP-UX 11.23
+   (aka HP-UX 11i v2) only through the end of 2022; see Table 2 of
+   <https://h20195.www2.hpe.com/V2/getpdf.aspx/4AA4-7673ENW.pdf>.  */
+#ifdef __hpux
+# undef UINT_LEAST8_MAX
+# undef UINT_LEAST16_MAX
+# define UINT_LEAST8_MAX 255
+# define UINT_LEAST16_MAX 65535
+#endif
+
 #if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
 typedef __UINT_LEAST8_TYPE__ yytype_uint8;
 #elif (!defined __UINT_LEAST8_MAX__ && defined YY_STDINT_H \
@@ -315,9 +327,9 @@ typedef int yy_state_fast_t;
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define YY_USE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define YY_USE(E) /* empty */
 #endif
 
 #if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
@@ -629,7 +641,7 @@ static const yytype_int8 yypgoto[] =
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     6,     7,     8,     9,    10,    11,    12,    13,    14
+       0,     6,     7,     8,     9,    10,    11,    12,    13,    14
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -754,8 +766,8 @@ yy_symbol_value_print (FILE *yyo,
                        yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, yyscan_t yyscanner)
 {
   FILE *yyoutput = yyo;
-  YYUSE (yyoutput);
-  YYUSE (yyscanner);
+  YY_USE (yyoutput);
+  YY_USE (yyscanner);
   if (!yyvaluep)
     return;
 # ifdef YYPRINT
@@ -763,7 +775,7 @@ yy_symbol_value_print (FILE *yyo,
     YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
 # endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yykind);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1144,14 +1156,14 @@ static void
 yydestruct (const char *yymsg,
             yysymbol_kind_t yykind, YYSTYPE *yyvaluep, yyscan_t yyscanner)
 {
-  YYUSE (yyvaluep);
-  YYUSE (yyscanner);
+  YY_USE (yyvaluep);
+  YY_USE (yyscanner);
   if (!yymsg)
     yymsg = "Deleting";
   YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yykind);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1425,7 +1437,7 @@ yyreduce:
       {
     cmExpr_yyget_extra(yyscanner)->SetResult((yyvsp[0].Number));
   }
-#line 1429 "cmExprParser.cxx"
+#line 1441 "cmExprParser.cxx"
     break;
 
   case 3: /* exp: bitwiseor  */
@@ -1433,7 +1445,7 @@ yyreduce:
             {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1437 "cmExprParser.cxx"
+#line 1449 "cmExprParser.cxx"
     break;
 
   case 4: /* exp: exp exp_OR bitwiseor  */
@@ -1441,7 +1453,7 @@ yyreduce:
                        {
     (yyval.Number) = (yyvsp[-2].Number) | (yyvsp[0].Number);
   }
-#line 1445 "cmExprParser.cxx"
+#line 1457 "cmExprParser.cxx"
     break;
 
   case 5: /* bitwiseor: bitwisexor  */
@@ -1449,7 +1461,7 @@ yyreduce:
              {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1453 "cmExprParser.cxx"
+#line 1465 "cmExprParser.cxx"
     break;
 
   case 6: /* bitwiseor: bitwiseor exp_XOR bitwisexor  */
@@ -1457,7 +1469,7 @@ yyreduce:
                                {
     (yyval.Number) = (yyvsp[-2].Number) ^ (yyvsp[0].Number);
   }
-#line 1461 "cmExprParser.cxx"
+#line 1473 "cmExprParser.cxx"
     break;
 
   case 7: /* bitwisexor: bitwiseand  */
@@ -1465,7 +1477,7 @@ yyreduce:
              {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1469 "cmExprParser.cxx"
+#line 1481 "cmExprParser.cxx"
     break;
 
   case 8: /* bitwisexor: bitwisexor exp_AND bitwiseand  */
@@ -1473,7 +1485,7 @@ yyreduce:
                                 {
     (yyval.Number) = (yyvsp[-2].Number) & (yyvsp[0].Number);
   }
-#line 1477 "cmExprParser.cxx"
+#line 1489 "cmExprParser.cxx"
     break;
 
   case 9: /* bitwiseand: shift  */
@@ -1481,7 +1493,7 @@ yyreduce:
         {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1485 "cmExprParser.cxx"
+#line 1497 "cmExprParser.cxx"
     break;
 
   case 10: /* bitwiseand: bitwiseand exp_SHIFTLEFT shift  */
@@ -1489,7 +1501,7 @@ yyreduce:
                                  {
     (yyval.Number) = (yyvsp[-2].Number) << (yyvsp[0].Number);
   }
-#line 1493 "cmExprParser.cxx"
+#line 1505 "cmExprParser.cxx"
     break;
 
   case 11: /* bitwiseand: bitwiseand exp_SHIFTRIGHT shift  */
@@ -1497,7 +1509,7 @@ yyreduce:
                                   {
     (yyval.Number) = (yyvsp[-2].Number) >> (yyvsp[0].Number);
   }
-#line 1501 "cmExprParser.cxx"
+#line 1513 "cmExprParser.cxx"
     break;
 
   case 12: /* shift: term  */
@@ -1505,7 +1517,7 @@ yyreduce:
        {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1509 "cmExprParser.cxx"
+#line 1521 "cmExprParser.cxx"
     break;
 
   case 13: /* shift: shift exp_PLUS term  */
@@ -1513,7 +1525,7 @@ yyreduce:
                       {
     (yyval.Number) = (yyvsp[-2].Number) + (yyvsp[0].Number);
   }
-#line 1517 "cmExprParser.cxx"
+#line 1529 "cmExprParser.cxx"
     break;
 
   case 14: /* shift: shift exp_MINUS term  */
@@ -1521,7 +1533,7 @@ yyreduce:
                        {
     (yyval.Number) = (yyvsp[-2].Number) - (yyvsp[0].Number);
   }
-#line 1525 "cmExprParser.cxx"
+#line 1537 "cmExprParser.cxx"
     break;
 
   case 15: /* term: unary  */
@@ -1529,7 +1541,7 @@ yyreduce:
         {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1533 "cmExprParser.cxx"
+#line 1545 "cmExprParser.cxx"
     break;
 
   case 16: /* term: term exp_TIMES unary  */
@@ -1537,7 +1549,7 @@ yyreduce:
                        {
     (yyval.Number) = (yyvsp[-2].Number) * (yyvsp[0].Number);
   }
-#line 1541 "cmExprParser.cxx"
+#line 1553 "cmExprParser.cxx"
     break;
 
   case 17: /* term: term exp_DIVIDE unary  */
@@ -1548,7 +1560,7 @@ yyreduce:
     }
     (yyval.Number) = (yyvsp[-2].Number) / (yyvsp[0].Number);
   }
-#line 1552 "cmExprParser.cxx"
+#line 1564 "cmExprParser.cxx"
     break;
 
   case 18: /* term: term exp_MOD unary  */
@@ -1556,7 +1568,7 @@ yyreduce:
                      {
     (yyval.Number) = (yyvsp[-2].Number) % (yyvsp[0].Number);
   }
-#line 1560 "cmExprParser.cxx"
+#line 1572 "cmExprParser.cxx"
     break;
 
   case 19: /* unary: factor  */
@@ -1564,7 +1576,7 @@ yyreduce:
          {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1568 "cmExprParser.cxx"
+#line 1580 "cmExprParser.cxx"
     break;
 
   case 20: /* unary: exp_PLUS unary  */
@@ -1572,7 +1584,7 @@ yyreduce:
                  {
     (yyval.Number) = + (yyvsp[0].Number);
   }
-#line 1576 "cmExprParser.cxx"
+#line 1588 "cmExprParser.cxx"
     break;
 
   case 21: /* unary: exp_MINUS unary  */
@@ -1580,7 +1592,7 @@ yyreduce:
                   {
     (yyval.Number) = - (yyvsp[0].Number);
   }
-#line 1584 "cmExprParser.cxx"
+#line 1596 "cmExprParser.cxx"
     break;
 
   case 22: /* unary: exp_NOT unary  */
@@ -1588,7 +1600,7 @@ yyreduce:
                 {
     (yyval.Number) = ~ (yyvsp[0].Number);
   }
-#line 1592 "cmExprParser.cxx"
+#line 1604 "cmExprParser.cxx"
     break;
 
   case 23: /* factor: exp_NUMBER  */
@@ -1596,7 +1608,7 @@ yyreduce:
              {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1600 "cmExprParser.cxx"
+#line 1612 "cmExprParser.cxx"
     break;
 
   case 24: /* factor: exp_OPENPARENT exp exp_CLOSEPARENT  */
@@ -1604,11 +1616,11 @@ yyreduce:
                                      {
     (yyval.Number) = (yyvsp[-1].Number);
   }
-#line 1608 "cmExprParser.cxx"
+#line 1620 "cmExprParser.cxx"
     break;
 
 
-#line 1612 "cmExprParser.cxx"
+#line 1624 "cmExprParser.cxx"
 
       default: break;
     }
