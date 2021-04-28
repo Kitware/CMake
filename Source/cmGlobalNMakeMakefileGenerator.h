@@ -55,6 +55,9 @@ protected:
   void PrintBuildCommandAdvice(std::ostream& os, int jobs) const override;
 
 private:
+  std::string NMakeVersion;
+  bool FindMakeProgram(cmMakefile* mf) override;
+
   void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
                            const char* envVar) const override;
 };
