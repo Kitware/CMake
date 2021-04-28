@@ -63,9 +63,16 @@ bool cmGlobalNMakeMakefileGenerator::FindMakeProgram(cmMakefile* mf)
       "Program Maintenance Utility Version ([1-9][0-9.]+)");
     if (regex.find(err)) {
       this->NMakeVersion = regex.match(1);
+      this->CheckNMakeFeatures();
     }
   }
   return true;
+}
+
+void cmGlobalNMakeMakefileGenerator::CheckNMakeFeatures()
+{
+  this->NMakeSupportsUTF8 = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NMakeVersion.c_str(), "9");
 }
 
 void cmGlobalNMakeMakefileGenerator::GetDocumentation(
