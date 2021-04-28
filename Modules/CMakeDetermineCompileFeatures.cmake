@@ -4,7 +4,7 @@
 
 function(cmake_determine_compile_features lang)
 
-  if(lang STREQUAL C AND COMMAND cmake_record_c_compile_features)
+  if("x${lang}" STREQUAL "xC" AND COMMAND cmake_record_c_compile_features)
     message(CHECK_START "Detecting ${lang} compile features")
 
     set(CMAKE_C90_COMPILE_FEATURES)
@@ -54,7 +54,7 @@ function(cmake_determine_compile_features lang)
 
     message(CHECK_PASS "done")
 
-  elseif(lang STREQUAL CXX AND COMMAND cmake_record_cxx_compile_features)
+  elseif("x${lang}" STREQUAL "xCXX" AND COMMAND cmake_record_cxx_compile_features)
     message(CHECK_START "Detecting ${lang} compile features")
 
     set(CMAKE_CXX98_COMPILE_FEATURES)
@@ -110,7 +110,7 @@ function(cmake_determine_compile_features lang)
 
     message(CHECK_PASS "done")
 
-  elseif(lang STREQUAL CUDA AND COMMAND cmake_record_cuda_compile_features)
+  elseif("x${lang}" STREQUAL "xCUDA" AND COMMAND cmake_record_cuda_compile_features)
     message(CHECK_START "Detecting ${lang} compile features")
 
     set(CMAKE_CUDA03_COMPILE_FEATURES)
