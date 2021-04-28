@@ -23,6 +23,7 @@ GNUPLOT_VERSION_STRING will not work for old versions like 3.7.1.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindMsys.cmake)
 
 find_program(GNUPLOT_EXECUTABLE
   NAMES
@@ -31,6 +32,7 @@ find_program(GNUPLOT_EXECUTABLE
   wgnupl32
   PATHS
   ${CYGWIN_INSTALL_PATH}/bin
+  ${MSYS_INSTALL_PATH}/usr/bin
 )
 
 if (GNUPLOT_EXECUTABLE)

@@ -13,10 +13,12 @@ This module looks for the Unix commands ``bash``, ``cp``, ``gzip``,
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindMsys.cmake)
 
 find_program(BASH
   bash
   ${CYGWIN_INSTALL_PATH}/bin
+  ${MSYS_INSTALL_PATH}/usr/bin
 )
 mark_as_advanced(
   BASH
@@ -25,6 +27,7 @@ mark_as_advanced(
 find_program(CP
   cp
   ${CYGWIN_INSTALL_PATH}/bin
+  ${MSYS_INSTALL_PATH}/usr/bin
 )
 mark_as_advanced(
   CP
@@ -33,6 +36,7 @@ mark_as_advanced(
 find_program(GZIP
   gzip
   ${CYGWIN_INSTALL_PATH}/bin
+  ${MSYS_INSTALL_PATH}/usr/bin
 )
 mark_as_advanced(
   GZIP
@@ -41,6 +45,7 @@ mark_as_advanced(
 find_program(MV
   mv
   ${CYGWIN_INSTALL_PATH}/bin
+  ${MSYS_INSTALL_PATH}/usr/bin
 )
 mark_as_advanced(
   MV
@@ -49,6 +54,7 @@ mark_as_advanced(
 find_program(RM
   rm
   ${CYGWIN_INSTALL_PATH}/bin
+  ${MSYS_INSTALL_PATH}/usr/bin
 )
 mark_as_advanced(
   RM
@@ -60,6 +66,7 @@ find_program(TAR
   gtar
   PATH
   ${CYGWIN_INSTALL_PATH}/bin
+  ${MSYS_INSTALL_PATH}/usr/bin
 )
 mark_as_advanced(
   TAR
