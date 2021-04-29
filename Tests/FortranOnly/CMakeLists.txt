@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8.12)
 project(FortranOnly Fortran)
 message("CTEST_FULL_OUTPUT ")
 
+if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" MATCHES "^Intel(LLVM)?;MSVC$")
+  string(APPEND CMAKE_Fortran_FLAGS_DEBUG " -Z7")
+  string(APPEND CMAKE_Fortran_FLAGS_RELWITHDEBINFO " -Z7")
+endif()
+
 # create a library with hello and world functions
 add_library(FortranOnlylib hello.f world.f)
 set_property(TARGET FortranOnlylib PROPERTY Fortran_FORMAT FIXED)
