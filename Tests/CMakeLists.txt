@@ -1742,33 +1742,61 @@ if(BUILD_TESTING)
   add_test(testdriver1 ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TestDriver"
-    "${CMake_BINARY_DIR}/Tests/TestDriver"
+    "${CMake_BINARY_DIR}/Tests/TestDriver1"
     ${build_generator_args}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
     --test-command TestDriverTest test1
     )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver1")
 
   add_test(testdriver2 ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TestDriver"
-    "${CMake_BINARY_DIR}/Tests/TestDriver"
+    "${CMake_BINARY_DIR}/Tests/TestDriver2"
     ${build_generator_args}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
     --test-command TestDriverTest test2
     )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver2")
 
   add_test(testdriver3  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TestDriver"
-    "${CMake_BINARY_DIR}/Tests/TestDriver"
+    "${CMake_BINARY_DIR}/Tests/TestDriver3"
     ${build_generator_args}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
     --test-command TestDriverTest subdir/test3
     )
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver")
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver3")
+
+  add_test(testdriver4  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/TestDriver"
+    "${CMake_BINARY_DIR}/Tests/TestDriver4"
+    ${build_generator_args}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
+    --build-project TestDriverTest
+    --test-command TestDriverTest -A test2
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver4")
+
+  add_test(testdriver5  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/TestDriver"
+    "${CMake_BINARY_DIR}/Tests/TestDriver5"
+    ${build_generator_args}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
+    --build-project TestDriverTest
+    --test-command TestDriverTest -A test2
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver5")
+  set_tests_properties(testdriver5 PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "TAP version 13\n1\\.\\.3.+ok 1 test1 # [0-9]+\\.[0-9]+.*All tests finished."
+    )
 
   add_test(Dependency ${CMAKE_CTEST_COMMAND}
     --build-and-test
