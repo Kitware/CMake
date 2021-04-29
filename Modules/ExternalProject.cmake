@@ -212,7 +212,7 @@ External Project Definition
       ``TLS_VERIFY <bool>``
         Specifies whether certificate verification should be performed for
         https URLs. If this option is not provided, the default behavior is
-        determined by the ``CMAKE_TLS_VERIFY`` variable (see
+        determined by the :variable:`CMAKE_TLS_VERIFY` variable (see
         :command:`file(DOWNLOAD)`). If that is also not set, certificate
         verification will not be performed. In situations where ``URL_HASH``
         cannot be provided, this option can be an alternative verification
