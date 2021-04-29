@@ -10,7 +10,7 @@
 
 static void rtrim(std::string& str, char byte)
 {
-  const std::size_t size = str.size();
+  size_t const size = str.size();
   if (size && str[size - 1] == byte) {
     str.resize(size - 1);
   }
