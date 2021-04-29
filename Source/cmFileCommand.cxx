@@ -1490,9 +1490,6 @@ bool HandleCopyFile(std::vector<std::string> const& args,
 bool HandleRemoveImpl(std::vector<std::string> const& args, bool recurse,
                       cmExecutionStatus& status)
 {
-
-  std::string message;
-
   for (std::string const& arg :
        cmMakeRange(args).advance(1)) // Get rid of subcommand
   {

@@ -1797,7 +1797,7 @@ bool copy_data(struct archive* ar, struct archive* aw)
       return false;
     }
   }
-#  if !defined(__clang__) && !defined(__HP_aCC)
+#  if !defined(__clang__) && !defined(__NVCOMPILER) && !defined(__HP_aCC)
   return false; /* this should not happen but it quiets some compilers */
 #  endif
 }
