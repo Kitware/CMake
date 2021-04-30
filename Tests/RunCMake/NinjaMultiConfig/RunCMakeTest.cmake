@@ -198,8 +198,11 @@ run_cmake_build(PostBuild release Release Exe)
 run_cmake_build(PostBuild debug-in-release-graph Release Exe:Debug)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LongCommandLine-build)
+set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
 run_cmake_configure(LongCommandLine)
+unset(RunCMake_TEST_OPTIONS)
 run_cmake_build(LongCommandLine release Release custom)
+run_cmake_build(LongCommandLine release-config Release exe:Debug)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Framework-build)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")

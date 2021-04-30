@@ -287,7 +287,8 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
     // If there is no ranlib the command will be ":".  Skip it.
     cm::erase_if(linkCmds, cmNinjaRemoveNoOpCommands());
 
-    rule.Command = this->GetLocalGenerator()->BuildCommandLine(linkCmds);
+    rule.Command =
+      this->GetLocalGenerator()->BuildCommandLine(linkCmds, config, config);
 
     // Write the linker rule with response file if needed.
     rule.Comment =
@@ -310,7 +311,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRules(
   cmNinjaRule rule(this->LanguageLinkerCudaDeviceRule(config));
   rule.Command = this->GetLocalGenerator()->BuildCommandLine(
     { cmStrCat(mf->GetRequiredDefinition("CMAKE_CUDA_DEVICE_LINKER"),
-               " -arch=$ARCH $REGISTER -o=$out $in") });
+               " -arch=$ARCH $REGISTER -o=$out $in") },
+    config, config);
   rule.Comment = "Rule for CUDA device linking.";
   rule.Description = "Linking CUDA $out";
   this->GetGlobalGenerator()->AddRule(rule);
@@ -336,7 +338,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRules(
                                                compileCmd, vars);
 
   rule.Name = this->LanguageLinkerCudaDeviceCompileRule(config);
-  rule.Command = this->GetLocalGenerator()->BuildCommandLine({ compileCmd });
+  rule.Command = this->GetLocalGenerator()->BuildCommandLine({ compileCmd },
+                                                             config, config);
   rule.Comment = "Rule for compiling CUDA device stubs.";
   rule.Description = "Compiling CUDA device stub $out";
   this->GetGlobalGenerator()->AddRule(rule);
@@ -345,7 +348,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRules(
   rule.Command = this->GetLocalGenerator()->BuildCommandLine(
     { cmStrCat(mf->GetRequiredDefinition("CMAKE_CUDA_FATBINARY"),
                " -64 -cmdline=--compile-only -compress-all -link "
-               "--embedded-fatbin=$out $PROFILES") });
+               "--embedded-fatbin=$out $PROFILES") },
+    config, config);
   rule.Comment = "Rule for CUDA fatbinaries.";
   rule.Description = "Creating fatbinary $out";
   this->GetGlobalGenerator()->AddRule(rule);
@@ -475,7 +479,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
 
     linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
     linkCmds.emplace_back("$POST_BUILD");
-    rule.Command = this->GetLocalGenerator()->BuildCommandLine(linkCmds);
+    rule.Command =
+      this->GetLocalGenerator()->BuildCommandLine(linkCmds, config, config);
 
     // Write the linker rule with response file if needed.
     rule.Comment =
@@ -500,7 +505,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
         std::vector<std::string> cmd;
         cmd.push_back(cmakeCommand + " -E cmake_symlink_executable $in $out");
         cmd.emplace_back("$POST_BUILD");
-        rule.Command = this->GetLocalGenerator()->BuildCommandLine(cmd);
+        rule.Command =
+          this->GetLocalGenerator()->BuildCommandLine(cmd, config, config);
       }
       rule.Description = "Creating executable symlink $out";
       rule.Comment = "Rule for creating executable symlink.";
@@ -512,7 +518,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
         cmd.push_back(cmakeCommand +
                       " -E cmake_symlink_library $in $SONAME $out");
         cmd.emplace_back("$POST_BUILD");
-        rule.Command = this->GetLocalGenerator()->BuildCommandLine(cmd);
+        rule.Command =
+          this->GetLocalGenerator()->BuildCommandLine(cmd, config, config);
       }
       rule.Description = "Creating library symlink $out";
       rule.Comment = "Rule for creating library symlink.";
@@ -1310,10 +1317,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     preLinkCmdLines.push_back("cd " + homeOutDir);
   }
 
-  vars["PRE_LINK"] = localGen.BuildCommandLine(preLinkCmdLines, "pre-link",
-                                               this->GeneratorTarget);
-  std::string postBuildCmdLine = localGen.BuildCommandLine(
-    postBuildCmdLines, "post-build", this->GeneratorTarget);
+  vars["PRE_LINK"] = localGen.BuildCommandLine(
+    preLinkCmdLines, config, fileConfig, "pre-link", this->GeneratorTarget);
+  std::string postBuildCmdLine =
+    localGen.BuildCommandLine(postBuildCmdLines, config, fileConfig,
+                              "post-build", this->GeneratorTarget);
 
   cmNinjaVars symlinkVars;
   bool const symlinkNeeded =
