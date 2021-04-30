@@ -1,0 +1,8 @@
+syntax = "proto3";
+package example.msgs;
+
+import "google/protobuf/empty.proto";
+
+service ExampleService {
+    rpc nothing(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+}

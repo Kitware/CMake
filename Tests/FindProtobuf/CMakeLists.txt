@@ -6,5 +6,6 @@ add_test(NAME FindProtobuf.Test COMMAND
   ${build_generator_args}
   --build-project TestFindProtobuf
   --build-options ${build_options}
+  "-DCMake_TEST_FindProtobuf_gRPC=${CMake_TEST_FindProtobuf_gRPC}"
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
