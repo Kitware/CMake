@@ -7,6 +7,7 @@ Perform the :ref:`CTest Build Step` as a :ref:`Dashboard Client`.
 
   ctest_build([BUILD <build-dir>] [APPEND]
               [CONFIGURATION <config>]
+              [PARALLEL_LEVEL <parallel>]
               [FLAGS <flags>]
               [PROJECT_NAME <project-name>]
               [TARGET <target-name>]
@@ -41,6 +42,13 @@ The options are:
   specified the ``CTEST_BUILD_CONFIGURATION`` variable will be checked.
   Otherwise the ``-C <cfg>`` option given to the :manual:`ctest(1)`
   command will be used, if any.
+
+``PARALLEL_LEVEL <parallel>``
+  .. versionadded:: 3.21
+
+  Specify the parallel level of the underlying build system.  If not
+  specified, the :envvar:`CMAKE_BUILD_PARALLEL_LEVEL` environment
+  variable will be checked.
 
 ``FLAGS <flags>``
   Pass additional arguments to the underlying build command.

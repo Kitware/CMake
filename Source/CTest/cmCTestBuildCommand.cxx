@@ -27,6 +27,7 @@ void cmCTestBuildCommand::BindArguments()
   this->Bind("CONFIGURATION"_s, this->Configuration);
   this->Bind("FLAGS"_s, this->Flags);
   this->Bind("PROJECT_NAME"_s, this->ProjectName);
+  this->Bind("PARALLEL_LEVEL"_s, this->ParallelLevel);
 }
 
 cmCTestBuildCommand::~cmCTestBuildCommand() = default;
@@ -98,7 +99,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       std::string dir = this->CTest->GetCTestConfiguration("BuildDirectory");
       std::string buildCommand =
         this->GlobalGenerator->GenerateCMakeBuildCommand(
-          cmakeBuildTarget, cmakeBuildConfiguration, "",
+          cmakeBuildTarget, cmakeBuildConfiguration, this->ParallelLevel,
           cmakeBuildAdditionalFlags, this->Makefile->IgnoreErrorsCMP0061());
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          "SetMakeCommand:" << buildCommand << "\n",
