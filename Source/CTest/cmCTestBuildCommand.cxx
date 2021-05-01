@@ -98,8 +98,8 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       std::string dir = this->CTest->GetCTestConfiguration("BuildDirectory");
       std::string buildCommand =
         this->GlobalGenerator->GenerateCMakeBuildCommand(
-          cmakeBuildTarget, cmakeBuildConfiguration, cmakeBuildAdditionalFlags,
-          this->Makefile->IgnoreErrorsCMP0061());
+          cmakeBuildTarget, cmakeBuildConfiguration, "",
+          cmakeBuildAdditionalFlags, this->Makefile->IgnoreErrorsCMP0061());
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          "SetMakeCommand:" << buildCommand << "\n",
                          this->Quiet);

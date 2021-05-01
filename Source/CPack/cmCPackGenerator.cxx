@@ -694,7 +694,7 @@ int cmCPackGenerator::RunPreinstallTarget(
   // Does this generator require pre-install?
   if (const char* preinstall = globalGenerator->GetPreinstallTargetName()) {
     std::string buildCommand = globalGenerator->GenerateCMakeBuildCommand(
-      preinstall, buildConfig, "", false);
+      preinstall, buildConfig, "", "", false);
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "- Install command: " << buildCommand << std::endl);
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,

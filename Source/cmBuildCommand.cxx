@@ -77,7 +77,7 @@ bool MainSignature(std::vector<std::string> const& args,
   }
 
   std::string makecommand = mf.GetGlobalGenerator()->GenerateCMakeBuildCommand(
-    target, configuration, "", mf.IgnoreErrorsCMP0061());
+    target, configuration, "", "", mf.IgnoreErrorsCMP0061());
 
   mf.AddDefinition(variable, makecommand);
 
@@ -104,7 +104,7 @@ bool TwoArgsSignature(std::vector<std::string> const& args,
   }
 
   std::string makecommand = mf.GetGlobalGenerator()->GenerateCMakeBuildCommand(
-    "", configType, "", mf.IgnoreErrorsCMP0061());
+    "", configType, "", "", mf.IgnoreErrorsCMP0061());
 
   if (cacheValue) {
     return true;
