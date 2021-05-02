@@ -22,6 +22,7 @@ class cmFindPathCommand : public cmFindBase
 {
 public:
   cmFindPathCommand(cmExecutionStatus& status);
+  cmFindPathCommand(std::string findCommandName, cmExecutionStatus& status);
 
   bool InitialPass(std::vector<std::string> const& args);
 

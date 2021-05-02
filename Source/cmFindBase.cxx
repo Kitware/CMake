@@ -10,6 +10,7 @@
 #include <cmext/algorithm>
 
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
@@ -20,8 +21,9 @@
 
 class cmExecutionStatus;
 
-cmFindBase::cmFindBase(cmExecutionStatus& status)
+cmFindBase::cmFindBase(std::string findCommandName, cmExecutionStatus& status)
   : cmFindCommon(status)
+  , FindCommandName(std::move(findCommandName))
 {
 }
 
@@ -299,25 +301,67 @@ bool cmFindBase::CheckForVariableInCache()
     cmProp cacheEntry = state->GetCacheEntryValue(this->VariableName);
     bool found = !cmIsNOTFOUND(*cacheValue);
     bool cached = cacheEntry != nullptr;
+    auto cacheType = cached ? state->GetCacheEntryType(this->VariableName)
+                            : cmStateEnums::UNINITIALIZED;
+
+    if (cached && cacheType != cmStateEnums::UNINITIALIZED) {
+      this->VariableType = cacheType;
+      if (const auto* hs =
+            state->GetCacheEntryProperty(this->VariableName, "HELPSTRING")) {
+        this->VariableDocumentation = *hs;
+      }
+    }
+
     if (found) {
       // If the user specifies the entry on the command line without a
       // type we should add the type and docstring but keep the
       // original value.  Tell the subclass implementations to do
       // this.
-      if (cached &&
-          state->GetCacheEntryType(this->VariableName) ==
-            cmStateEnums::UNINITIALIZED) {
+      if (cached && cacheType == cmStateEnums::UNINITIALIZED) {
         this->AlreadyInCacheWithoutMetaInfo = true;
       }
       return true;
     }
-    if (cached) {
-      cmProp hs =
-        state->GetCacheEntryProperty(this->VariableName, "HELPSTRING");
-      this->VariableDocumentation = hs ? *hs : "(none)";
-    }
   }
   return false;
+}
+
+void cmFindBase::NormalizeFindResult()
+{
+  // If the user specifies the entry on the command line without a
+  // type we should add the type and docstring but keep the original
+  // value.
+  if (this->AlreadyInCacheWithoutMetaInfo) {
+    this->Makefile->AddCacheDefinition(this->VariableName, "",
+                                       this->VariableDocumentation.c_str(),
+                                       this->VariableType);
+  }
+}
+
+void cmFindBase::StoreFindResult(const std::string& value)
+{
+  if (!value.empty()) {
+    this->Makefile->AddCacheDefinition(this->VariableName, value,
+                                       this->VariableDocumentation.c_str(),
+                                       this->VariableType);
+    return;
+  }
+
+  this->Makefile->AddCacheDefinition(
+    this->VariableName, cmStrCat(this->VariableName, "-NOTFOUND"),
+    this->VariableDocumentation.c_str(), this->VariableType);
+
+  if (this->Required) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Could not find ", this->VariableName, " using the following ",
+               (this->FindCommandName == "find_file" ||
+                    this->FindCommandName == "find_path"
+                  ? "files"
+                  : "names"),
+               ": ", cmJoin(this->Names, ", ")));
+    cmSystemTools::SetFatalErrorOccured();
+  }
 }
 
 cmFindBaseDebugState::cmFindBaseDebugState(std::string commandName,
