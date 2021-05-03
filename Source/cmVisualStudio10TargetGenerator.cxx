@@ -2277,6 +2277,20 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
                           std::back_inserter(exclude_configs));
 
       Elem e2(e1, tool);
+      bool isCSharp = (si.Source->GetLanguage() == "CSharp");
+      if (isCSharp && exclude_configs.size() > 0) {
+        std::stringstream conditions;
+        bool firstConditionSet{ false };
+        for (const auto& ci : include_configs) {
+          if (firstConditionSet) {
+            conditions << " Or ";
+          }
+          conditions << "('$(Configuration)|$(Platform)'=='" +
+              this->Configurations[ci] + "|" + this->Platform + "')";
+          firstConditionSet = true;
+        }
+        e2.Attribute("Condition", conditions.str());
+      }
       this->WriteSource(e2, si.Source);
 
       bool useNativeUnityBuild = false;
@@ -2321,7 +2335,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       if (si.Source->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
         e2.Element("PrecompiledHeader", "NotUsing");
       }
-      if (!exclude_configs.empty()) {
+      if (!isCSharp && !exclude_configs.empty()) {
         this->WriteExcludeFromBuild(e2, exclude_configs);
       }
     }
