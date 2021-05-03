@@ -122,6 +122,10 @@ static inline void kwsysProcess_usleep(unsigned int msec)
 /* The maximum amount to read from a pipe at a time.  */
 #define KWSYSPE_PIPE_BUFFER_SIZE 1024
 
+#if defined(__NVCOMPILER)
+#  pragma diag_suppress 550 /* variable set but never used (in FD_ZERO) */
+#endif
+
 /* Keep track of times using a signed representation.  Switch to the
    native (possibly unsigned) representation only when calling native
    functions.  */
