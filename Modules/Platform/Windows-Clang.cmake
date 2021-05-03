@@ -57,8 +57,8 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "-flto")
   set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
   set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
-  set(CMAKE_${lang}_ARCHIVE_CREATE_IPO "<CMAKE_AR> cr <TARGET> <LINK_FLAGS> <OBJECTS>")
-  set(CMAKE_${lang}_ARCHIVE_APPEND_IPO "<CMAKE_AR> r <TARGET> <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_CREATE_IPO "<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_APPEND_IPO "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_FINISH_IPO "<CMAKE_RANLIB> <TARGET>")
 
   # Create archiving rules to support large object file lists for static libraries.
