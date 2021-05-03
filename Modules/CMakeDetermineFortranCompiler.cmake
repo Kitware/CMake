@@ -284,6 +284,9 @@ if(MSVC_Fortran_ARCHITECTURE_ID)
   set(SET_MSVC_Fortran_ARCHITECTURE_ID
     "set(MSVC_Fortran_ARCHITECTURE_ID ${MSVC_Fortran_ARCHITECTURE_ID})")
 endif()
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
+  set(CMAKE_Fortran_VENDOR_SOURCE_FILE_EXTENSIONS ";cuf;CUF")
+endif()
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeFortranCompiler.cmake
