@@ -121,7 +121,7 @@ macro(__windows_compiler_gnu lang)
         CMAKE_${lang}_${rule} "${CMAKE_${lang}_${rule}}")
       set(CMAKE_${lang}_${rule}
         "<CMAKE_COMMAND> -E rm -f <OBJECT_DIR>/objects.a"
-        "<CMAKE_AR> cr <OBJECT_DIR>/objects.a <OBJECTS>"
+        "<CMAKE_AR> qc <OBJECT_DIR>/objects.a <OBJECTS>"
         "${CMAKE_${lang}_${rule}}"
         )
     endforeach()
