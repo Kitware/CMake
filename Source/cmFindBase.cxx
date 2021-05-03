@@ -9,8 +9,10 @@
 
 #include <cmext/algorithm>
 
+#include "cmCMakePath.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
@@ -18,6 +20,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 class cmExecutionStatus;
 
@@ -328,28 +331,65 @@ bool cmFindBase::CheckForVariableInCache()
 
 void cmFindBase::NormalizeFindResult()
 {
-  // If the user specifies the entry on the command line without a
-  // type we should add the type and docstring but keep the original
-  // value.
-  if (this->AlreadyInCacheWithoutMetaInfo) {
-    this->Makefile->AddCacheDefinition(this->VariableName, "",
-                                       this->VariableDocumentation.c_str(),
-                                       this->VariableType);
+  if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0125) ==
+      cmPolicies::NEW) {
+    // ensure the path returned by find_* command is absolute
+    const auto* existingValue =
+      this->Makefile->GetDefinition(this->VariableName);
+    std::string value;
+    if (!existingValue->empty()) {
+      value =
+        cmCMakePath(*existingValue, cmCMakePath::auto_format)
+          .Absolute(cmCMakePath(
+            this->Makefile->GetCMakeInstance()->GetCMakeWorkingDirectory()))
+          .Normal()
+          .GenericString();
+      // value = cmSystemTools::CollapseFullPath(*existingValue);
+      if (!cmSystemTools::FileExists(value, false)) {
+        value = *existingValue;
+      }
+    }
+
+    // If the user specifies the entry on the command line without a
+    // type we should add the type and docstring but keep the original
+    // value.
+    if (value != *existingValue || this->AlreadyInCacheWithoutMetaInfo) {
+      this->Makefile->GetCMakeInstance()->AddCacheEntry(
+        this->VariableName, value.c_str(), this->VariableDocumentation.c_str(),
+        this->VariableType);
+      // if there was a definition then remove it
+      // This is required to ensure same behavior as
+      // cmMakefile::AddCacheDefinition.
+      // See #22038 for problems raised by this behavior.
+      this->Makefile->RemoveDefinition(this->VariableName);
+    }
+  } else {
+    // If the user specifies the entry on the command line without a
+    // type we should add the type and docstring but keep the original
+    // value.
+    if (this->AlreadyInCacheWithoutMetaInfo) {
+      this->Makefile->AddCacheDefinition(this->VariableName, "",
+                                         this->VariableDocumentation.c_str(),
+                                         this->VariableType);
+    }
   }
 }
 
 void cmFindBase::StoreFindResult(const std::string& value)
 {
+  bool force =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0125) == cmPolicies::NEW;
+
   if (!value.empty()) {
     this->Makefile->AddCacheDefinition(this->VariableName, value,
                                        this->VariableDocumentation.c_str(),
-                                       this->VariableType);
+                                       this->VariableType, force);
     return;
   }
 
   this->Makefile->AddCacheDefinition(
     this->VariableName, cmStrCat(this->VariableName, "-NOTFOUND"),
-    this->VariableDocumentation.c_str(), this->VariableType);
+    this->VariableDocumentation.c_str(), this->VariableType, force);
 
   if (this->Required) {
     this->Makefile->IssueMessage(
