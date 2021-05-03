@@ -844,6 +844,9 @@ if(CUDAToolkit_FOUND)
       HINTS ${CUDAToolkit_LIBRARY_DIR}
             ENV CUDA_PATH
       PATH_SUFFIXES lib64/stubs lib/x64/stubs lib/stubs stubs
+                    # Support NVHPC splayed math library layout
+                    ../../math_libs/${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}/lib64
+                    ../../math_libs/lib64
     )
 
     mark_as_advanced(CUDA_${lib_name}_LIBRARY)
