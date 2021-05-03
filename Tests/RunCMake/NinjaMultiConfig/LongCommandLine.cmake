@@ -14,3 +14,10 @@ add_custom_target(
   ALL
   DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gen.txt"
   )
+
+add_executable(exe main.c)
+
+add_custom_command(
+  TARGET exe POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E echo "Post-build $<CONFIG> $<COMMAND_CONFIG:$<CONFIG>> ${very_long}"
+  )

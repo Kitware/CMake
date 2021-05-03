@@ -139,8 +139,8 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
       gg->WriteBuild(this->GetCommonFileStream(), phonyBuild);
     }
   } else {
-    std::string command =
-      lg->BuildCommandLine(commands, "utility", this->GeneratorTarget);
+    std::string command = lg->BuildCommandLine(
+      commands, config, fileConfig, "utility", this->GeneratorTarget);
     std::string desc;
     cmProp echoStr = genTarget->GetProperty("EchoString");
     if (echoStr) {

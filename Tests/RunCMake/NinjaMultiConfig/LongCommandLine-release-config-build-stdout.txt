@@ -1,0 +1,2 @@
+
+Post-build Debug Release \.*$
