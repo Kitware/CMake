@@ -539,7 +539,8 @@ cmNinjaRule GetScanRule(
   cmRulePlaceholderExpander::RuleVariables const& vars,
   const std::string& responseFlag, const std::string& flags,
   cmRulePlaceholderExpander* const rulePlaceholderExpander,
-  cmLocalNinjaGenerator* generator, std::vector<std::string> scanCmds)
+  cmLocalNinjaGenerator* generator, std::vector<std::string> scanCmds,
+  const std::string& outputConfig)
 {
   cmNinjaRule rule(ruleName);
   // Scanning always uses a depfile for preprocessor dependencies.
@@ -580,7 +581,8 @@ cmNinjaRule GetScanRule(
   for (std::string& scanCmd : scanCmds) {
     rulePlaceholderExpander->ExpandRuleVariables(generator, scanCmd, scanVars);
   }
-  rule.Command = generator->BuildCommandLine(scanCmds);
+  rule.Command =
+    generator->BuildCommandLine(scanCmds, outputConfig, outputConfig);
 
   return rule;
 }
@@ -672,7 +674,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
       auto scanRule = GetScanRule(
         scanRuleName, vars, responseFlag, flags, rulePlaceholderExpander.get(),
-        this->GetLocalGenerator(), std::move(scanCommands));
+        this->GetLocalGenerator(), std::move(scanCommands), config);
 
       scanRule.Comment =
         cmStrCat("Rule for generating ", lang, " dependencies.");
@@ -702,7 +704,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
       auto scanRule = GetScanRule(
         scanRuleName, vars, "", flags, rulePlaceholderExpander.get(),
-        this->GetLocalGenerator(), std::move(scanCommands));
+        this->GetLocalGenerator(), std::move(scanCommands), config);
 
       // Write the rule for generating dependencies for the given language.
       scanRule.Comment = cmStrCat("Rule for generating ", lang,
@@ -734,7 +736,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
           ddModmapArg, " --dd=$out @", rule.RspFile);
         ddCmds.emplace_back(std::move(ccmd));
       }
-      rule.Command = this->GetLocalGenerator()->BuildCommandLine(ddCmds);
+      rule.Command =
+        this->GetLocalGenerator()->BuildCommandLine(ddCmds, config, config);
     }
     rule.Comment =
       cmStrCat("Rule to generate ninja dyndep files for ", lang, '.');
@@ -930,7 +933,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                                                  vars);
   }
 
-  rule.Command = this->GetLocalGenerator()->BuildCommandLine(compileCmds);
+  rule.Command =
+    this->GetLocalGenerator()->BuildCommandLine(compileCmds, config, config);
 
   // Write the rule for compiling file of the given language.
   rule.Comment = cmStrCat("Rule for compiling ", lang, " files.");
@@ -1248,7 +1252,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   this->ExportObjectCompileCommand(
     language, sourceFileName, objectDir, objectFileName, objectFileDir,
-    vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"]);
+    vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"], config);
 
   objBuild.Outputs.push_back(objectFileName);
   if (firstForConfig) {
@@ -1619,7 +1623,8 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::string const& language, std::string const& sourceFileName,
   std::string const& objectDir, std::string const& objectFileName,
   std::string const& objectFileDir, std::string const& flags,
-  std::string const& defines, std::string const& includes)
+  std::string const& defines, std::string const& includes,
+  std::string const& outputConfig)
 {
   if (!this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS")) {
     return;
@@ -1681,8 +1686,8 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
                                                  compileObjectVars);
   }
 
-  std::string cmdLine =
-    this->GetLocalGenerator()->BuildCommandLine(compileCmds);
+  std::string cmdLine = this->GetLocalGenerator()->BuildCommandLine(
+    compileCmds, outputConfig, outputConfig);
 
   this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine, sourceFileName);
 }

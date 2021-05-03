@@ -410,7 +410,8 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(
 }
 
 std::string cmLocalNinjaGenerator::WriteCommandScript(
-  std::vector<std::string> const& cmdLines, std::string const& customStep,
+  std::vector<std::string> const& cmdLines, std::string const& outputConfig,
+  std::string const& commandConfig, std::string const& customStep,
   cmGeneratorTarget const* target) const
 {
   std::string scriptPath;
@@ -419,9 +420,13 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
   } else {
     scriptPath = cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
   }
+  scriptPath += this->GetGlobalNinjaGenerator()->ConfigDirectory(outputConfig);
   cmSystemTools::MakeDirectory(scriptPath);
   scriptPath += '/';
   scriptPath += customStep;
+  if (this->GlobalGenerator->IsMultiConfig()) {
+    scriptPath += cmStrCat('-', commandConfig);
+  }
 #ifdef _WIN32
   scriptPath += ".bat";
 #else
@@ -464,7 +469,8 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
 }
 
 std::string cmLocalNinjaGenerator::BuildCommandLine(
-  std::vector<std::string> const& cmdLines, std::string const& customStep,
+  std::vector<std::string> const& cmdLines, std::string const& outputConfig,
+  std::string const& commandConfig, std::string const& customStep,
   cmGeneratorTarget const* target) const
 {
   // If we have no commands but we need to build a command anyway, use noop.
@@ -483,8 +489,8 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
       cmdLinesTotal += cmd.length() + 6;
     }
     if (cmdLinesTotal > cmSystemTools::CalculateCommandLineLengthLimit() / 2) {
-      std::string const scriptPath =
-        this->WriteCommandScript(cmdLines, customStep, target);
+      std::string const scriptPath = this->WriteCommandScript(
+        cmdLines, outputConfig, commandConfig, customStep, target);
       std::string cmd
 #ifndef _WIN32
         = "/bin/sh "
@@ -697,7 +703,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       }
 
       gg->WriteCustomCommandBuild(
-        this->BuildCommandLine(cmdLines, customStep),
+        this->BuildCommandLine(cmdLines, ccg.GetOutputConfig(), fileConfig,
+                               customStep),
         this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
         depfile, cc->GetJobPool(), cc->GetUsesTerminal(),
         /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, fileConfig,

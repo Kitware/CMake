@@ -61,7 +61,8 @@ public:
   }
 
   std::string BuildCommandLine(
-    std::vector<std::string> const& cmdLines,
+    std::vector<std::string> const& cmdLines, std::string const& outputConfig,
+    std::string const& commandConfig,
     std::string const& customStep = std::string(),
     cmGeneratorTarget const* target = nullptr) const;
 
@@ -119,6 +120,8 @@ private:
   std::string MakeCustomLauncher(cmCustomCommandGenerator const& ccg);
 
   std::string WriteCommandScript(std::vector<std::string> const& cmdLines,
+                                 std::string const& outputConfig,
+                                 std::string const& commandConfig,
                                  std::string const& customStep,
                                  cmGeneratorTarget const* target) const;
 
