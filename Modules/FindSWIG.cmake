@@ -91,7 +91,7 @@ unset(_SWIG_NAMES)
 
 if(SWIG_EXECUTABLE AND NOT SWIG_DIR)
   # Find default value for SWIG library directory
-  execute_process(COMMAND ${SWIG_EXECUTABLE} -swiglib
+  execute_process(COMMAND "${SWIG_EXECUTABLE}" -swiglib
     OUTPUT_VARIABLE _swig_output
     ERROR_VARIABLE _swig_error
     RESULT_VARIABLE _swig_result)
@@ -105,17 +105,17 @@ if(SWIG_EXECUTABLE AND NOT SWIG_DIR)
     endif()
     unset(_msg)
   else()
-    string(REGEX REPLACE "[\n\r]+" ";" _SWIGLIB ${_swig_output})
+    string(REGEX REPLACE "[\n\r]+" ";" _SWIG_LIB ${_swig_output})
   endif()
-endif()
 
-# Find SWIG library directory
-find_path(SWIG_DIR swig.swg PATHS ${_SWIGLIB} NO_CMAKE_FIND_ROOT_PATH)
-unset(_SWIGLIB)
+  # Find SWIG library directory
+  find_path(SWIG_DIR swig.swg PATHS ${_SWIG_LIB} NO_CMAKE_FIND_ROOT_PATH)
+  unset(_SWIG_LIB)
+endif()
 
 if(SWIG_EXECUTABLE AND SWIG_DIR AND NOT SWIG_VERSION)
   # Determine SWIG version
-  execute_process(COMMAND ${SWIG_EXECUTABLE} -version
+  execute_process(COMMAND "${SWIG_EXECUTABLE}" -version
     OUTPUT_VARIABLE _swig_output
     ERROR_VARIABLE _swig_output
     RESULT_VARIABLE _swig_result)
@@ -129,7 +129,7 @@ if(SWIG_EXECUTABLE AND SWIG_DIR AND NOT SWIG_VERSION)
 endif()
 
 if(SWIG_EXECUTABLE AND SWIG_FIND_COMPONENTS)
-  execute_process(COMMAND ${SWIG_EXECUTABLE} -help
+  execute_process(COMMAND "${SWIG_EXECUTABLE}" -help
     OUTPUT_VARIABLE _swig_output
     ERROR_VARIABLE _swig_error
     RESULT_VARIABLE _swig_result)
