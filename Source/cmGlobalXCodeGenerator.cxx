@@ -4318,6 +4318,9 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->InheritBuildSettingAttribute(t, "SYSTEM_FRAMEWORK_SEARCH_PATHS");
     this->InheritBuildSettingAttribute(t, "LIBRARY_SEARCH_PATHS");
     this->InheritBuildSettingAttribute(t, "LD_RUNPATH_SEARCH_PATHS");
+    this->InheritBuildSettingAttribute(t, "GCC_PREPROCESSOR_DEFINITIONS");
+    this->InheritBuildSettingAttribute(t, "OTHER_CFLAGS");
+    this->InheritBuildSettingAttribute(t, "OTHER_LDFLAGS");
   }
 
   if (this->XcodeBuildSystem == BuildSystem::One) {
