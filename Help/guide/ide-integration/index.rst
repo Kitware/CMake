@@ -69,9 +69,9 @@ While reading, parsing, and evaluating the contents of ``CMakePresets.json`` is
 straightforward, it is not trivial. In addition to the documentation, IDE
 vendors may also wish to refer to the CMake source code and test cases for a
 better understanding of how to implement the format.
-:download:`This file </manual/presets/schema.json>` provides a machine-readable
-JSON schema for the ``CMakePresets.json`` format that IDE vendors may find
-useful for validation and providing editing assistance.
+:download:`This file <../../manual/presets/schema.json>` provides a
+machine-readable JSON schema for the ``CMakePresets.json`` format that IDE
+vendors may find useful for validation and providing editing assistance.
 
 Configuring
 ===========
