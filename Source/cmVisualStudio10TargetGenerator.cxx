@@ -5037,7 +5037,9 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
 {
   // For out of source files, we first check if a matching source group
   // for this file exists, otherwise we check if the path relative to current
-  // source- or binary-dir is used within the link and return that
+  // source- or binary-dir is used within the link and return that.
+  // In case of .cs files we can't do that automatically for files in the
+  // binary directory, because this leads to compilation errors.
   std::string link;
   std::string sourceGroupedFile;
   std::string const& fullFileName = source->GetFullPath();
@@ -5059,7 +5061,8 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
     link = sourceGroupedFile;
   } else if (cmHasPrefix(fullFileName, srcDir)) {
     link = fullFileName.substr(srcDir.length() + 1);
-  } else if (cmHasPrefix(fullFileName, binDir)) {
+  } else if (!cmHasSuffix(fullFileName, ".cs") &&
+             cmHasPrefix(fullFileName, binDir)) {
     link = fullFileName.substr(binDir.length() + 1);
   } else if (cmProp l = source->GetProperty("VS_CSHARP_Link")) {
     link = *l;
