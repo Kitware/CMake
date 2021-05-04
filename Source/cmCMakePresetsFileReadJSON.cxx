@@ -491,6 +491,8 @@ auto const ConfigurePresetHelper =
           false)
     .Bind("architecture"_s, ArchitectureHelper, false)
     .Bind("toolset"_s, ToolsetHelper, false)
+    .Bind("toolchainFile"_s, &ConfigurePreset::ToolchainFile,
+          PresetStringHelper, false)
     .Bind("binaryDir"_s, &ConfigurePreset::BinaryDir, PresetStringHelper,
           false)
     .Bind("installDir"_s, &ConfigurePreset::InstallDir, PresetStringHelper,
@@ -971,6 +973,11 @@ cmCMakePresetsFile::ReadFileResult cmCMakePresetsFile::ReadJSONFile(
     // Support for conditions added in version 3.
     if (v < 3 && preset.ConditionEvaluator) {
       return ReadFileResult::CONDITION_UNSUPPORTED;
+    }
+
+    // Support for toolchainFile presets added in version 3.
+    if (v < 3 && !preset.ToolchainFile.empty()) {
+      return ReadFileResult::TOOLCHAIN_FILE_UNSUPPORTED;
     }
 
     this->ConfigurePresetOrder.push_back(preset.Name);

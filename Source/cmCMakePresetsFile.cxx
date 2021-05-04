@@ -214,6 +214,12 @@ bool ExpandMacros(const cmCMakePresetsFile& file,
     cmSystemTools::ConvertToUnixSlashes(out->InstallDir);
   }
 
+  if (!preset.ToolchainFile.empty()) {
+    std::string toolchain = preset.ToolchainFile;
+    CHECK_EXPAND(out, toolchain, macroExpanders, file.GetVersion(preset))
+    out->ToolchainFile = toolchain;
+  }
+
   for (auto& variable : out->CacheVariables) {
     if (variable.second) {
       CHECK_EXPAND(out, variable.second->Value, macroExpanders,
@@ -643,6 +649,7 @@ cmCMakePresetsFile::ConfigurePreset::VisitPresetInherit(
   }
   InheritString(preset.BinaryDir, parent.BinaryDir);
   InheritString(preset.InstallDir, parent.InstallDir);
+  InheritString(preset.ToolchainFile, parent.ToolchainFile);
   InheritOptionalValue(preset.WarnDev, parent.WarnDev);
   InheritOptionalValue(preset.ErrorDev, parent.ErrorDev);
   InheritOptionalValue(preset.WarnDeprecated, parent.WarnDeprecated);
@@ -989,6 +996,9 @@ const char* cmCMakePresetsFile::ResultToString(ReadFileResult result)
       return "Invalid preset condition";
     case ReadFileResult::CONDITION_UNSUPPORTED:
       return "File version must be 3 or higher for condition support";
+    case ReadFileResult::TOOLCHAIN_FILE_UNSUPPORTED:
+      return "File version must be 3 or higher for toolchainFile preset "
+             "support.";
   }
 
   return "Unknown error";

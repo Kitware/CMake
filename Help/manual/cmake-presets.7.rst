@@ -182,6 +182,14 @@ that may contain the following fields:
       ignore the field, but the IDE can use them to set up the environment
       before invoking CMake.
 
+``toolchainFile``
+
+  An optional string representing the path to the toolchain file.
+  This field supports `macro expansion`_. If a relative path is specified,
+  it is calculated relative to the build directory, and if not found,
+  relative to the source directory. Takes precedence over any `CMAKE_TOOLCHAIN_FILE`
+  value. This is allowed in preset files specifying version ``3`` or above.
+
 ``binaryDir``
 
   An optional string representing the path to the output binary directory.
