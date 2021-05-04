@@ -2744,6 +2744,24 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   return AdjustRPath(file, MakeEmptyCallback(newRPath), adjustCallback, emsg,
                      changed);
 }
+
+bool cmSystemTools::SetRPath(std::string const& file,
+                             std::string const& newRPath, std::string* emsg,
+                             bool* changed)
+{
+  auto adjustCallback = [newRPath](cm::optional<std::string>& outRPath,
+                                   const std::string& inRPath,
+                                   const char* /*se_name*/, std::string *
+                                   /*emsg*/) -> bool {
+    if (inRPath != newRPath) {
+      outRPath = newRPath;
+    }
+    return true;
+  };
+
+  return AdjustRPath(file, MakeEmptyCallback(newRPath), adjustCallback, emsg,
+                     changed);
+}
 #elif defined(CMake_USE_XCOFF_PARSER)
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
@@ -2813,12 +2831,26 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   }
   return true;
 }
+
+bool cmSystemTools::SetRPath(std::string const& /*file*/,
+                             std::string const& /*newRPath*/,
+                             std::string* /*emsg*/, bool* /*changed*/)
+{
+  return false;
+}
 #else
 bool cmSystemTools::ChangeRPath(std::string const& /*file*/,
                                 std::string const& /*oldRPath*/,
                                 std::string const& /*newRPath*/,
                                 bool /*removeEnvironmentRPath*/,
                                 std::string* /*emsg*/, bool* /*changed*/)
+{
+  return false;
+}
+
+bool cmSystemTools::SetRPath(std::string const& /*file*/,
+                             std::string const& /*newRPath*/,
+                             std::string* /*emsg*/, bool* /*changed*/)
 {
   return false;
 }

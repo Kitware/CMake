@@ -456,12 +456,16 @@ public:
   static bool GuessLibraryInstallName(std::string const& fullPath,
                                       std::string& soname);
 
-  /** Try to set the RPATH in an ELF binary.  */
+  /** Try to change the RPATH in an ELF binary.  */
   static bool ChangeRPath(std::string const& file, std::string const& oldRPath,
                           std::string const& newRPath,
                           bool removeEnvironmentRPath,
                           std::string* emsg = nullptr,
                           bool* changed = nullptr);
+
+  /** Try to set the RPATH in an ELF binary.  */
+  static bool SetRPath(std::string const& file, std::string const& newRPath,
+                       std::string* emsg = nullptr, bool* changed = nullptr);
 
   /** Try to remove the RPATH from an ELF binary.  */
   static bool RemoveRPath(std::string const& file, std::string* emsg = nullptr,
