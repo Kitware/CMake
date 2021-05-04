@@ -333,12 +333,21 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         if(CMAKE_Fortran_COMPILER_LOADED AND CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND NOT APPLE)
             set(BLAS_mkl_INTFACE "gf")
             set(BLAS_mkl_THREADING "gnu")
-            set(BLAS_mkl_OMP "gomp")
         else()
             set(BLAS_mkl_INTFACE "intel")
             set(BLAS_mkl_THREADING "intel")
-            set(BLAS_mkl_OMP "iomp5")
         endif()
+
+        foreach(lang IN ITEMS C CXX Fortran)
+          if(CMAKE_${lang}_COMPILER_LOADED)
+            find_package(OpenMP COMPONENTS ${lang})
+            if(${OpenMP_${lang}_FOUND})
+              set(BLAS_mkl_OMP ${OpenMP_${lang}_LIBRARIES})
+              break()
+            endif()
+          endif()
+        endforeach()
+
         set(BLAS_mkl_LM "-lm")
         set(BLAS_mkl_LDL "-ldl")
       endif()
@@ -403,7 +412,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
             # mkl >= 10.3
             list(APPEND BLAS_SEARCH_LIBS
-              "${BLAS_mkl_START_GROUP} mkl_blas95 mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP} ${BLAS_mkl_OMP}")
+              "${BLAS_mkl_START_GROUP} mkl_blas95 mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP}")
           endif()
           if(BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
             # old version
@@ -412,7 +421,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
             # mkl >= 10.3
             list(APPEND BLAS_SEARCH_LIBS
-              "${BLAS_mkl_START_GROUP} mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP} ${BLAS_mkl_OMP}")
+              "${BLAS_mkl_START_GROUP} mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP}")
           endif()
           if(BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
@@ -468,7 +477,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
             # mkl >= 10.3
             list(APPEND BLAS_SEARCH_LIBS
-              "${BLAS_mkl_START_GROUP} mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP} ${BLAS_mkl_OMP}")
+              "${BLAS_mkl_START_GROUP} mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP}")
           endif()
           if(BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
             # old version
@@ -477,7 +486,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
             # mkl >= 10.3
             list(APPEND BLAS_SEARCH_LIBS
-              "${BLAS_mkl_START_GROUP} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP} ${BLAS_mkl_OMP}")
+              "${BLAS_mkl_START_GROUP} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP}")
           endif()
           if(BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
@@ -540,7 +549,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
             ${BLAS_mkl_SEARCH_SYMBOL}
             ""
             "${SEARCH_LIBS}"
-            "${CMAKE_THREAD_LIBS_INIT};${BLAS_mkl_LM};${BLAS_mkl_LDL}"
+            "${BLAS_mkl_OMP};${CMAKE_THREAD_LIBS_INIT};${BLAS_mkl_LM};${BLAS_mkl_LDL}"
             "${BLAS_mkl_MKLROOT}"
             "${BLAS_mkl_LIB_PATH_SUFFIXES}"
             )
