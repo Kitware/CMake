@@ -363,6 +363,13 @@ test:intel2021.1.2-makefiles:
         CMAKE_CI_BUILD_NAME: intel2021.1.2_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.1.2-el8
 
+test:intel2021.2.0-makefiles:
+    extends:
+        - .cmake_test_linux_intelclassic_makefiles
+    variables:
+        CMAKE_CI_BUILD_NAME: intel2021.2.0_makefiles
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.2.0-el8
+
 test:oneapi2021.1.1-makefiles:
     extends:
         - .cmake_test_linux_inteloneapi_makefiles
@@ -376,6 +383,13 @@ test:oneapi2021.1.2-makefiles:
     variables:
         CMAKE_CI_BUILD_NAME: oneapi2021.1.2_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.1.2-el8
+
+test:oneapi2021.2.0-makefiles:
+    extends:
+        - .cmake_test_linux_inteloneapi_makefiles
+    variables:
+        CMAKE_CI_BUILD_NAME: oneapi2021.2.0_makefiles
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2021.2.0-el8
 
 build:linux-x86_64-package:
     extends:
