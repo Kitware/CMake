@@ -8,7 +8,7 @@
           when: on_success
         - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
           when: never
-        - if: '($CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != "" && $CI_COMMIT_BRANCH == $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true")'
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
           when: delayed
           start_in: 5 minutes
         - if: '($CMAKE_CI_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
@@ -28,7 +28,7 @@
           when: on_success
         - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
           when: never
-        - if: '($CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != "" && $CI_COMMIT_BRANCH == $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true")'
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
           when: on_success
         - if: '($CMAKE_CI_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
           when: never
