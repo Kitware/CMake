@@ -2077,7 +2077,7 @@ bool cmGlobalGenerator::Open(const std::string& bindir,
 
 std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
   const std::string& target, const std::string& config,
-  const std::string& native, bool ignoreErrors)
+  const std::string& parallel, const std::string& native, bool ignoreErrors)
 {
   std::string makeCommand = cmSystemTools::GetCMakeCommand();
   makeCommand =
@@ -2085,6 +2085,11 @@ std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
   if (!config.empty()) {
     makeCommand += " --config \"";
     makeCommand += config;
+    makeCommand += "\"";
+  }
+  if (!parallel.empty()) {
+    makeCommand += " --parallel \"";
+    makeCommand += parallel;
     makeCommand += "\"";
   }
   if (!target.empty()) {
