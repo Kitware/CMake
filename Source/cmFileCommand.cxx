@@ -1057,6 +1057,66 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
   return success;
 }
 
+bool HandleRPathSetCommand(std::vector<std::string> const& args,
+                           cmExecutionStatus& status)
+{
+  // Evaluate arguments.
+  std::string file;
+  std::string newRPath;
+  cmArgumentParser<void> parser;
+  std::vector<std::string> unknownArgs;
+  std::vector<std::string> missingArgs;
+  std::vector<std::string> parsedArgs;
+  parser.Bind("FILE"_s, file).Bind("NEW_RPATH"_s, newRPath);
+  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
+               &parsedArgs);
+  if (!unknownArgs.empty()) {
+    status.SetError(cmStrCat("RPATH_SET given unrecognized argument \"",
+                             unknownArgs.front(), "\"."));
+    return false;
+  }
+  if (!missingArgs.empty()) {
+    status.SetError(cmStrCat("RPATH_SET \"", missingArgs.front(),
+                             "\" argument not given value."));
+    return false;
+  }
+  if (file.empty()) {
+    status.SetError("RPATH_SET not given FILE option.");
+    return false;
+  }
+  if (newRPath.empty() &&
+      std::find(parsedArgs.begin(), parsedArgs.end(), "NEW_RPATH") ==
+        parsedArgs.end()) {
+    status.SetError("RPATH_SET not given NEW_RPATH option.");
+    return false;
+  }
+  if (!cmSystemTools::FileExists(file, true)) {
+    status.SetError(
+      cmStrCat("RPATH_SET given FILE \"", file, "\" that does not exist."));
+    return false;
+  }
+  bool success = true;
+  cmFileTimes const ft(file);
+  std::string emsg;
+  bool changed;
+
+  if (!cmSystemTools::SetRPath(file, newRPath, &emsg, &changed)) {
+    status.SetError(cmStrCat("RPATH_SET could not write new RPATH:\n  ",
+                             newRPath, "\nto the file:\n  ", file, "\n",
+                             emsg));
+    success = false;
+  }
+  if (success) {
+    if (changed) {
+      std::string message =
+        cmStrCat("Set runtime path of \"", file, "\" to \"", newRPath, '"');
+      status.GetMakefile().DisplayStatus(message, -1);
+    }
+    ft.Store(file);
+  }
+  return success;
+}
+
 bool HandleRPathRemoveCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
 {
@@ -3732,6 +3792,7 @@ bool cmFileCommand(std::vector<std::string> const& args,
     { "DIFFERENT"_s, HandleDifferentCommand },
     { "RPATH_CHANGE"_s, HandleRPathChangeCommand },
     { "CHRPATH"_s, HandleRPathChangeCommand },
+    { "RPATH_SET"_s, HandleRPathSetCommand },
     { "RPATH_CHECK"_s, HandleRPathCheckCommand },
     { "RPATH_REMOVE"_s, HandleRPathRemoveCommand },
     { "READ_ELF"_s, HandleReadElfCommand },
