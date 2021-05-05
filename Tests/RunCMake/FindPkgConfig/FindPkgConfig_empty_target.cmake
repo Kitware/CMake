@@ -11,3 +11,7 @@ pkg_search_module(Empty REQUIRED empty IMPORTED_TARGET)
 if(NOT Empty_MODULE_NAME STREQUAL "empty")
   message(FATAL_ERROR "Wrong value for Empty_MODULE_NAME. Expected: empty, got: ${Empty_MODULE_NAME}")
 endif()
+
+if(NOT TARGET PkgConfig::Empty)
+  message(FATAL_ERROR "PkgConfig::Empty target not created")
+endif()
