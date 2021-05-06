@@ -63,6 +63,18 @@ upload:source-package:
     variables:
         RSYNC_DESTINATION: dev
 
+# Documentation builds
+
+build:help:master:
+    extends:
+        - .cmake_org_help
+        - .run_only_for_continuous_master
+
+build:help:stage:
+    extends:
+        - .cmake_org_help
+        - .run_only_for_continuous_stage
+
 # Lint builds
 
 build:debian10-iwyu:
