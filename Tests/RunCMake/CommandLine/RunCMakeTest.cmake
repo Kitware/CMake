@@ -359,7 +359,7 @@ run_cmake_command(E_create_symlink-missing-dir
 # These tests are special on Windows since it will only fail if the user
 # running the test does not have the priveldge to create symlinks. If this
 # happens we clear the msg in the -check.cmake and say that the test passes
-set(RunCMake_DEFAULT_stderr "(operation not permitted)?")
+set(RunCMake_DEFAULT_stderr "(A required privilege is not held by the client)?")
 set(RunCMake_TEST_BINARY_DIR
   ${RunCMake_BINARY_DIR}/E_create_symlink-broken-build)
 set(RunCMake_TEST_NO_CLEAN 1)
@@ -403,7 +403,7 @@ run_cmake_command(E_create_hardlink-no-directory
 
 #On Windows, if the user does not have sufficient privileges
 #don't fail this test
-set(RunCMake_DEFAULT_stderr "(operation not permitted)?")
+set(RunCMake_DEFAULT_stderr "(A required privilege is not held by the client)?")
 run_cmake_command(E_create_hardlink-unresolved-symlink-prereq
   ${CMAKE_COMMAND} -E create_symlink ${dir}/1 ${dir}/1-symlink
   )
