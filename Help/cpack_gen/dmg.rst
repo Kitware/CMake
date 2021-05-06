@@ -51,7 +51,7 @@ on macOS:
 
  .. versionadded:: 3.6
 
- Default behaviour is to include a symlink to ``/Applications`` in the DMG.
+ Default behavior is to include a symlink to ``/Applications`` in the DMG.
  Set this option to ``ON`` to avoid adding the symlink.
 
 .. variable:: CPACK_DMG_SLA_DIR

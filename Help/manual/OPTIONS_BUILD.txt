@@ -77,7 +77,7 @@
  :variable:`CMAKE_GENERATOR_PLATFORM` variable for details.
 
 ``--toolchain <path-to-file>``
- Specify the cross compiling toolchain file, equivalant to setting
+ Specify the cross compiling toolchain file, equivalent to setting
  :variable:`CMAKE_TOOLCHAIN_FILE` variable.
 
 ``--install-prefix <directory>``

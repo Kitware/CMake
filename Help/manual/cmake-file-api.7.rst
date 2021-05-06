@@ -1437,7 +1437,7 @@ The members specific to ``toolchains`` objects are:
 
   ``language``
     A JSON string specifying the toolchain language, like C or CXX. Language
-    names are the same as langauge names that can be passed to the
+    names are the same as language names that can be passed to the
     :command:`project` command. Because CMake only supports a single toolchain
     per language, this field can be used as a key.
 
