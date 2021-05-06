@@ -167,9 +167,16 @@ static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
   /* Force color according to http://bixense.com/clicolors/ convention.  */
   {
     const char* clicolor_force = getenv("CLICOLOR_FORCE");
-    if (clicolor_force && *clicolor_force &&
-        strcmp(clicolor_force, "0") != 0) {
+    if (clicolor_force && strcmp(clicolor_force, "0") != 0) {
       return 1;
+    }
+  }
+
+  /* Disable color according to http://bixense.com/clicolors/ convention. */
+  {
+    const char* clicolor = getenv("CLICOLOR");
+    if (clicolor && strcmp(clicolor, "0") == 0) {
+      return 0;
     }
   }
 
