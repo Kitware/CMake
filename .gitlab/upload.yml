@@ -1,6 +1,6 @@
 # Steps for uploading artifacts
 
-.rsync_upload:
+.rsync_upload_binary:
     image: "fedora:32"
     stage: upload
     tags:

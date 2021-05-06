@@ -54,7 +54,7 @@ prep:doc-package:
 
 upload:source-package:
     extends:
-        - .rsync_upload
+        - .rsync_upload_binary
         - .run_only_for_package
     dependencies:
         - prep:source-package
@@ -406,7 +406,7 @@ build:linux-x86_64-package:
 
 upload:linux-x86_64-package:
     extends:
-        - .rsync_upload
+        - .rsync_upload_binary
         - .run_only_for_package
     dependencies:
         - build:linux-x86_64-package
@@ -430,7 +430,7 @@ build:linux-aarch64-package:
 
 upload:linux-aarch64-package:
     extends:
-        - .rsync_upload
+        - .rsync_upload_binary
         - .run_only_for_package
     dependencies:
         - build:linux-aarch64-package
@@ -542,7 +542,7 @@ build:macos-package:
 
 upload:macos-package:
     extends:
-        - .rsync_upload
+        - .rsync_upload_binary
         - .run_only_for_package
     dependencies:
         - build:macos-package
@@ -565,7 +565,7 @@ build:macos10.10-package:
 
 upload:macos10.10-package:
     extends:
-        - .rsync_upload
+        - .rsync_upload_binary
         - .run_only_for_package
     dependencies:
         - build:macos10.10-package
