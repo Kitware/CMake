@@ -1416,7 +1416,7 @@ function(_Matlab_find_instances_from_path matlab_roots)
   set(_matlab_possible_roots)
 
   # At this point, we have no other choice than trying to find it from PATH.
-  # If set by the user, this wont change
+  # If set by the user, this won't change.
   find_program(
     _matlab_main_tmp
     NAMES matlab)

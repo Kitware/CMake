@@ -1053,7 +1053,7 @@ function(FetchContent_Populate contentName)
     # Don't set global properties, or record that we did this population, since
     # this was a direct call outside of the normal declared details form.
     # We only want to save values in the global properties for content that
-    # honours the hierarchical details mechanism so that projects are not
+    # honors the hierarchical details mechanism so that projects are not
     # robbed of the ability to override details set in nested projects.
     return()
   endif()
