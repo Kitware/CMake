@@ -70,10 +70,32 @@ build:help:master:
         - .cmake_org_help
         - .run_only_for_continuous_master
 
+upload:help:master:
+    extends:
+        - .rsync_upload_help
+        - .run_only_for_continuous_master
+    variables:
+        RSYNC_DESTINATION: git-master
+    dependencies:
+        - build:help:master
+    needs:
+        - build:help:master
+
 build:help:stage:
     extends:
         - .cmake_org_help
         - .run_only_for_continuous_stage
+
+upload:help:stage:
+    extends:
+        - .rsync_upload_help
+        - .run_only_for_continuous_stage
+    variables:
+        RSYNC_DESTINATION: git-stage
+    dependencies:
+        - build:help:stage
+    needs:
+        - build:help:stage
 
 # Lint builds
 
