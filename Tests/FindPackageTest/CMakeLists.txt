@@ -24,7 +24,7 @@ find_package(VTK QUIET)
 
 add_executable(FindPackageTest FindPackageTest.cxx)
 
-# test behaviour of cmFindBase wrt. the CMAKE_PREFIX_PATH variable
+# test behavior of cmFindBase wrt. the CMAKE_PREFIX_PATH variable
 # foo.h should be found in ${CMAKE_CURRENT_SOURCE_DIR}/include:
 
 set(CMAKE_PREFIX_PATH /blub /blah "${CMAKE_CURRENT_SOURCE_DIR}")
