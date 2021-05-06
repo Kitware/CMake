@@ -181,7 +181,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     # itself, allowing us to support numerous different scattered toolkit layouts
     execute_process(COMMAND ${_CUDA_NVCC_EXECUTABLE} "-v" "__cmake_determine_cuda"
       OUTPUT_VARIABLE _CUDA_NVCC_OUT ERROR_VARIABLE _CUDA_NVCC_OUT)
-    if(_CUDA_NVCC_OUT MATCHES "TOP=([^\r\n]*)")
+    if(_CUDA_NVCC_OUT MATCHES "\\#\\$ TOP=([^\r\n]*)")
       get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_MATCH_1}" ABSOLUTE)
     else()
       get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${_CUDA_NVCC_EXECUTABLE}" DIRECTORY)

@@ -839,7 +839,7 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
     # itself, allowing us to support numerous different scattered toolkit layouts
     execute_process(COMMAND ${CUDA_TOOLKIT_ROOT_DIR_NVCC} "-v" "__cmake_determine_cuda"
       OUTPUT_VARIABLE _CUDA_NVCC_OUT ERROR_VARIABLE _CUDA_NVCC_OUT)
-    if(_CUDA_NVCC_OUT MATCHES "TOP=([^\r\n]*)")
+    if(_CUDA_NVCC_OUT MATCHES "\\#\\$ TOP=([^\r\n]*)")
       get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CMAKE_MATCH_1}" ABSOLUTE CACHE)
     else()
       get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CUDA_TOOLKIT_ROOT_DIR_NVCC}" DIRECTORY)
