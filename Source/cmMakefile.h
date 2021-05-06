@@ -993,7 +993,7 @@ private:
 
   struct DeferCommand
   {
-    // Id is empty for an already-executed or cancelled operation.
+    // Id is empty for an already-executed or canceled operation.
     std::string Id;
     std::string FilePath;
     cmListFileFunction Command;

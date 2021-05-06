@@ -800,7 +800,7 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
     for (size_t i = 0; i < defer->Commands.size(); ++i) {
       DeferCommand& d = defer->Commands[i];
       if (d.Id.empty()) {
-        // Cancelled.
+        // Canceled.
         continue;
       }
       // Mark as executed.

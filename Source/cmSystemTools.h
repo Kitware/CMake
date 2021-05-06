@@ -186,7 +186,7 @@ public:
    *
    * Output is controlled with outputflag. If outputflag is OUTPUT_NONE, no
    * user-viewable output from the program being run will be generated.
-   * OUTPUT_MERGE is the legacy behaviour where stdout and stderr are merged
+   * OUTPUT_MERGE is the legacy behavior where stdout and stderr are merged
    * into stdout.  OUTPUT_FORWARD copies the output to stdout/stderr as
    * it was received.  OUTPUT_PASSTHROUGH passes through the original handles.
    *

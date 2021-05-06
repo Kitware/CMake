@@ -1936,8 +1936,8 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
       skipNextArg = false;
       continue;
     }
-    // We use ++ as seperator between the preprocessing step definition and
-    // the rc compilation step becase we need to prepend a -- to seperate the
+    // We use ++ as separator between the preprocessing step definition and
+    // the rc compilation step because we need to prepend a -- to separate the
     // source file properly from other options when using clang-cl for
     // preprocessing.
     if (arg == "++") {
