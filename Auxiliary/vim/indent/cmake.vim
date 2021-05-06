@@ -5,7 +5,7 @@
 " Former Maintainer: Karthik Krishnan <karthik.krishnan@kitware.com>
 " Last Change:  2017 Aug 30
 "
-" Licence:      The CMake license applies to this file. See
+" License:      The CMake license applies to this file. See
 "               https://cmake.org/licensing
 "               This implies that distribution with Vim is allowed
 
