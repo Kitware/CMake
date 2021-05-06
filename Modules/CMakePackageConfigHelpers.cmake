@@ -143,12 +143,12 @@ The ``COMPATIBILITY`` mode ``AnyNewerVersion`` means that the installed
 package version will be considered compatible if it is newer or exactly the
 same as the requested version.  This mode should be used for packages which
 are fully backward compatible, also across major versions.
-If ``SameMajorVersion`` is used instead, then the behaviour differs from
+If ``SameMajorVersion`` is used instead, then the behavior differs from
 ``AnyNewerVersion`` in that the major version number must be the same as
 requested, e.g.  version 2.0 will not be considered compatible if 1.0 is
 requested.  This mode should be used for packages which guarantee backward
 compatibility within the same major version.
-If ``SameMinorVersion`` is used, the behaviour is the same as
+If ``SameMinorVersion`` is used, the behavior is the same as
 ``SameMajorVersion``, but both major and minor version must be the same as
 requested, e.g version 0.2 will not be compatible if 0.1 is requested.
 If ``ExactVersion`` is used, then the package is only considered compatible if
