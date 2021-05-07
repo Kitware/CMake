@@ -93,9 +93,43 @@
 #  ifndef INVALID_FILE_ATTRIBUTES
 #    define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
 #  endif
+#  ifndef SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE
+#    define SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE (0x2)
+#  endif
 #  if defined(_MSC_VER) && _MSC_VER >= 1800
 #    define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #  endif
+// from ntifs.h, which can only be used by drivers
+typedef struct _REPARSE_DATA_BUFFER
+{
+  ULONG ReparseTag;
+  USHORT ReparseDataLength;
+  USHORT Reserved;
+  union
+  {
+    struct
+    {
+      USHORT SubstituteNameOffset;
+      USHORT SubstituteNameLength;
+      USHORT PrintNameOffset;
+      USHORT PrintNameLength;
+      ULONG Flags;
+      WCHAR PathBuffer[1];
+    } SymbolicLinkReparseBuffer;
+    struct
+    {
+      USHORT SubstituteNameOffset;
+      USHORT SubstituteNameLength;
+      USHORT PrintNameOffset;
+      USHORT PrintNameLength;
+      WCHAR PathBuffer[1];
+    } MountPointReparseBuffer;
+    struct
+    {
+      UCHAR DataBuffer[1];
+    } GenericReparseBuffer;
+  } DUMMYUNIONNAME;
+} REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
 #endif
 
 #if !KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H
@@ -3008,7 +3042,7 @@ bool SystemTools::FileIsSymlink(const std::string& name)
       }
       CloseHandle(hFile);
       ULONG reparseTag =
-        reinterpret_cast<PREPARSE_GUID_DATA_BUFFER>(&buffer[0])->ReparseTag;
+        reinterpret_cast<PREPARSE_DATA_BUFFER>(&buffer[0])->ReparseTag;
       return (reparseTag == IO_REPARSE_TAG_SYMLINK) ||
         (reparseTag == IO_REPARSE_TAG_MOUNT_POINT);
     }
@@ -3048,31 +3082,90 @@ bool SystemTools::FileIsFIFO(const std::string& name)
 #endif
 }
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-Status SystemTools::CreateSymlink(std::string const&, std::string const&)
-{
-  return Status::Windows(ERROR_NOT_SUPPORTED);
-}
-#else
 Status SystemTools::CreateSymlink(std::string const& origName,
                                   std::string const& newName)
 {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  DWORD flags;
+  if (FileIsDirectory(origName)) {
+    flags = SYMBOLIC_LINK_FLAG_DIRECTORY;
+  } else {
+    flags = 0;
+  }
+
+  std::wstring origPath = Encoding::ToWindowsExtendedPath(origName);
+  std::wstring newPath = Encoding::ToWindowsExtendedPath(newName);
+
+  Status status;
+  if (!CreateSymbolicLinkW(newPath.c_str(), origPath.c_str(),
+                           flags |
+                             SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE)) {
+    status = Status::Windows_GetLastError();
+  }
+  // Older Windows versions do not understand
+  // SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE
+  if (status.GetWindows() == ERROR_INVALID_PARAMETER) {
+    status = Status::Success();
+    if (!CreateSymbolicLinkW(newPath.c_str(), origPath.c_str(), flags)) {
+      status = Status::Windows_GetLastError();
+    }
+  }
+
+  return status;
+#else
   if (symlink(origName.c_str(), newName.c_str()) < 0) {
     return Status::POSIX_errno();
   }
   return Status::Success();
-}
 #endif
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-Status SystemTools::ReadSymlink(std::string const&, std::string&)
-{
-  return Status::Windows(ERROR_NOT_SUPPORTED);
 }
-#else
+
 Status SystemTools::ReadSymlink(std::string const& newName,
                                 std::string& origName)
 {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  std::wstring newPath = Encoding::ToWindowsExtendedPath(newName);
+  // FILE_ATTRIBUTE_REPARSE_POINT means:
+  // * a file or directory that has an associated reparse point, or
+  // * a file that is a symbolic link.
+  HANDLE hFile = CreateFileW(
+    newPath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+    FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+  if (hFile == INVALID_HANDLE_VALUE) {
+    return Status::Windows_GetLastError();
+  }
+  byte buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
+  DWORD bytesReturned = 0;
+  Status status;
+  if (!DeviceIoControl(hFile, FSCTL_GET_REPARSE_POINT, nullptr, 0, buffer,
+                       MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &bytesReturned,
+                       nullptr)) {
+    status = Status::Windows_GetLastError();
+  }
+  CloseHandle(hFile);
+  if (!status) {
+    return status;
+  }
+  PREPARSE_DATA_BUFFER data =
+    reinterpret_cast<PREPARSE_DATA_BUFFER>(&buffer[0]);
+  USHORT substituteNameLength;
+  PCWSTR substituteNameData;
+  if (data->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
+    substituteNameLength =
+      data->SymbolicLinkReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
+    substituteNameData = data->SymbolicLinkReparseBuffer.PathBuffer +
+      data->SymbolicLinkReparseBuffer.SubstituteNameOffset / sizeof(WCHAR);
+  } else if (data->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
+    substituteNameLength =
+      data->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
+    substituteNameData = data->MountPointReparseBuffer.PathBuffer +
+      data->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR);
+  } else {
+    return Status::Windows(ERROR_REPARSE_TAG_MISMATCH);
+  }
+  std::wstring substituteName(substituteNameData, substituteNameLength);
+  origName = Encoding::ToNarrow(substituteName);
+#else
   char buf[KWSYS_SYSTEMTOOLS_MAXPATH + 1];
   int count = static_cast<int>(
     readlink(newName.c_str(), buf, KWSYS_SYSTEMTOOLS_MAXPATH));
@@ -3082,9 +3175,9 @@ Status SystemTools::ReadSymlink(std::string const& newName,
   // Add null-terminator.
   buf[count] = 0;
   origName = buf;
+#endif
   return Status::Success();
 }
-#endif
 
 Status SystemTools::ChangeDirectory(std::string const& dir)
 {
