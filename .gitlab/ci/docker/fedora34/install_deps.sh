@@ -23,6 +23,10 @@ dnf install --setopt=install_weak_deps=False -y \
     qt5-qttools-devel \
     qt6-qttools-devel
 
+# Install lint tools.
+dnf install --setopt=install_weak_deps=False -y \
+    codespell
+
 # Tools needed for the test suite.
 dnf install --setopt=install_weak_deps=False -y \
     findutils \
