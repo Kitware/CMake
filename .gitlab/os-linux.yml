@@ -368,3 +368,18 @@
         - .needs_centos6_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+
+### Documentation
+
+.cmake_org_help:
+    stage: build
+    extends:
+        - .fedora33
+        - .linux_builder_tags
+        - .cmake_org_help_artifacts
+    script:
+        - *before_script_linux
+        - mkdir -p build/
+        - cd build/
+        - cmake ../Utilities/Sphinx -GNinja -DSPHINX_HTML=ON -DSPHINX_FLAGS="-A versionswitch=1"
+        - ninja

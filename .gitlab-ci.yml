@@ -54,7 +54,7 @@ prep:doc-package:
 
 upload:source-package:
     extends:
-        - .rsync_upload
+        - .rsync_upload_binary
         - .run_only_for_package
     dependencies:
         - prep:source-package
@@ -62,6 +62,40 @@ upload:source-package:
         - prep:source-package
     variables:
         RSYNC_DESTINATION: dev
+
+# Documentation builds
+
+build:help:master:
+    extends:
+        - .cmake_org_help
+        - .run_only_for_continuous_master
+
+upload:help:master:
+    extends:
+        - .rsync_upload_help
+        - .run_only_for_continuous_master
+    variables:
+        RSYNC_DESTINATION: git-master
+    dependencies:
+        - build:help:master
+    needs:
+        - build:help:master
+
+build:help:stage:
+    extends:
+        - .cmake_org_help
+        - .run_only_for_continuous_stage
+
+upload:help:stage:
+    extends:
+        - .rsync_upload_help
+        - .run_only_for_continuous_stage
+    variables:
+        RSYNC_DESTINATION: git-stage
+    dependencies:
+        - build:help:stage
+    needs:
+        - build:help:stage
 
 # Lint builds
 
@@ -406,7 +440,7 @@ build:linux-x86_64-package:
 
 upload:linux-x86_64-package:
     extends:
-        - .rsync_upload
+        - .rsync_upload_binary
         - .run_only_for_package
     dependencies:
         - build:linux-x86_64-package
@@ -430,7 +464,7 @@ build:linux-aarch64-package:
 
 upload:linux-aarch64-package:
     extends:
-        - .rsync_upload
+        - .rsync_upload_binary
         - .run_only_for_package
     dependencies:
         - build:linux-aarch64-package
@@ -542,7 +576,7 @@ build:macos-package:
 
 upload:macos-package:
     extends:
-        - .rsync_upload
+        - .rsync_upload_binary
         - .run_only_for_package
     dependencies:
         - build:macos-package
@@ -565,7 +599,7 @@ build:macos10.10-package:
 
 upload:macos10.10-package:
     extends:
-        - .rsync_upload
+        - .rsync_upload_binary
         - .run_only_for_package
     dependencies:
         - build:macos10.10-package
