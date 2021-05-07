@@ -2894,10 +2894,10 @@ static void kwsysProcessesSignalHandler(int signum
   /* Re-Install our handler.  Repeat call until it is not interrupted.  */
   {
     struct sigaction newSigAction;
-    struct sigaction& oldSigAction;
+    struct sigaction* oldSigAction;
     memset(&newSigAction, 0, sizeof(struct sigaction));
-    newSigChldAction.sa_handler = kwsysProcessesSignalHandler;
-    newSigChldAction.sa_flags = SA_NOCLDSTOP;
+    newSigAction.sa_handler = kwsysProcessesSignalHandler;
+    newSigAction.sa_flags = SA_NOCLDSTOP;
     sigemptyset(&newSigAction.sa_mask);
     switch (signum) {
       case SIGCHLD:
@@ -2912,7 +2912,7 @@ static void kwsysProcessesSignalHandler(int signum
         oldSigAction = &kwsysProcessesOldSigTermAction;
         break;
       default:
-        return 0;
+        return;
     }
     while ((sigaction(signum, &newSigAction, oldSigAction) < 0) &&
            (errno == EINTR))

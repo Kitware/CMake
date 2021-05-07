@@ -70,7 +70,7 @@ public:
 #ifdef _WIN32
   /** If the kind is "Windows", returns the GetLastError()-style value.
       Otherwise, returns 0.  */
-  int GetWindows() const
+  unsigned int GetWindows() const
   {
     return this->Kind_ == Kind::Windows ? this->Windows_ : 0;
   }
