@@ -52,6 +52,7 @@ dnf install --setopt=install_weak_deps=False -y \
     glew-devel \
     gmock \
     gnutls-devel \
+    grpc-devel grpc-plugins \
     gsl-devel \
     gtest-devel \
     gtk2-devel \
