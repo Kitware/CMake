@@ -66,4 +66,4 @@ if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
   set(CMAKE_CXX20_EXTENSION_COMPILE_OPTION "-std=gnu++2a")
 endif()
 
-__compiler_check_default_language_standard(CXX 3.4 98 6.0 14)
+__compiler_check_default_language_standard(CXX 3.4 98 6.0 14 11.1 17)
