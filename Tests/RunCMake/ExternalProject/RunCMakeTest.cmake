@@ -185,6 +185,6 @@ if(GIT_EXECUTABLE)
   # Note that there appear to be differences in where git writes its output to
   # on some platforms. It may go to stdout or stderr, so force it to be merged.
   set(RunCMake_TEST_OUTPUT_MERGE TRUE)
-  run_cmake(FetchGitTags)
+  run_cmake(FetchGitRefs)
   set(RunCMake_TEST_OUTPUT_MERGE FALSE)
 endif()

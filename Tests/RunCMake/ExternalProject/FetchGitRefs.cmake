@@ -11,7 +11,7 @@ file(MAKE_DIRECTORY ${srcDir})
 file(GLOB entries ${srcRepo}/*)
 file(REMOVE_RECURSE ${entries} ${binDir})
 file(TOUCH ${srcRepo}/firstFile.txt)
-configure_file(${CMAKE_CURRENT_LIST_DIR}/FetchGitTags/CMakeLists.txt
+configure_file(${CMAKE_CURRENT_LIST_DIR}/FetchGitRefs/CMakeLists.txt
     ${srcDir}/CMakeLists.txt COPYONLY)
 
 function(execGitCommand)
@@ -63,5 +63,22 @@ execGitCommand(commit -m "Second file")
 execGitCommand(tag -a -m "Adding tag" tag_of_interest)
 execGitCommand(reset --hard HEAD~1)
 
-message(STATUS "Second configure-and-build")
+message(STATUS "Configure-and-build, update to tag")
 configureAndBuild(tag_of_interest)
+
+# Do the same, but this time for a commit hash
+file(TOUCH ${srcRepo}/thirdFile.txt)
+execGitCommand(add thirdFile.txt)
+execGitCommand(commit -m "Third file")
+execGitCommand(tag -a -m "Adding another tag" check_for_hash)
+execGitCommand(reset --hard HEAD~1)
+execute_process(
+  WORKING_DIRECTORY ${srcRepo}
+  COMMAND ${GIT_EXECUTABLE} rev-parse check_for_hash
+  COMMAND_ERROR_IS_FATAL ANY
+  OUTPUT_VARIABLE commit_hash
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+message(STATUS "Configure-and-build, update to commit hash ${commit_hash}")
+configureAndBuild(${commit_hash})
