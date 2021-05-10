@@ -67,7 +67,7 @@ dnf install --setopt=install_weak_deps=False -y \
     protobuf-devel protobuf-c-devel protobuf-lite-devel \
     pypy2 pypy2-devel \
     pypy3 pypy3-devel \
-    python2 python2-devel python2-numpy \
+    python2 python2-devel \
     python3 python3-devel python3-numpy \
     python3-jsmin python3-jsonschema \
     ruby rubygems ruby-devel \
@@ -80,3 +80,9 @@ dnf install --setopt=install_weak_deps=False -y \
     xz-devel
 
 dnf clean all
+
+# Fedora no longer packages python2 numpy.
+curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
+python2 get-pip.py
+rm get-pip.py
+pip2.7 install numpy
