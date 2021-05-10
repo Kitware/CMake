@@ -644,7 +644,11 @@ macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Build libuv library.
   if(CMAKE_USE_SYSTEM_LIBUV)
-    find_package(LibUV 1.10.0)
+    if(WIN32)
+      find_package(LibUV 1.38.0)
+    else()
+      find_package(LibUV 1.10.0)
+    endif()
     if(NOT LIBUV_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_LIBUV is ON but a libuv is not found!")

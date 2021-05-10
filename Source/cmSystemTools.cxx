@@ -3173,9 +3173,15 @@ cmsys::Status cmSystemTools::CreateSymlink(std::string const& origName,
                           flags, nullptr);
   cmsys::Status status;
   if (err) {
+#if defined(_WIN32)
+    status = cmsys::Status::Windows(uv_fs_get_system_error(&req));
+#elif UV_VERSION_MAJOR > 1 || (UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR >= 38)
+    status = cmsys::Status::POSIX(uv_fs_get_system_error(&req));
+#else
     status = cmsys::Status::POSIX(-err);
-    std::string e =
-      "failed to create symbolic link '" + newName + "': " + uv_strerror(err);
+#endif
+    std::string e = cmStrCat("failed to create symbolic link '", newName,
+                             "': ", status.GetString());
     if (errorMessage) {
       *errorMessage = std::move(e);
     } else {
@@ -3194,9 +3200,15 @@ cmsys::Status cmSystemTools::CreateLink(std::string const& origName,
     uv_fs_link(nullptr, &req, origName.c_str(), newName.c_str(), nullptr);
   cmsys::Status status;
   if (err) {
+#if defined(_WIN32)
+    status = cmsys::Status::Windows(uv_fs_get_system_error(&req));
+#elif UV_VERSION_MAJOR > 1 || (UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR >= 38)
+    status = cmsys::Status::POSIX(uv_fs_get_system_error(&req));
+#else
     status = cmsys::Status::POSIX(-err);
+#endif
     std::string e =
-      "failed to create link '" + newName + "': " + uv_strerror(err);
+      cmStrCat("failed to create link '", newName, "': ", status.GetString());
     if (errorMessage) {
       *errorMessage = std::move(e);
     } else {
