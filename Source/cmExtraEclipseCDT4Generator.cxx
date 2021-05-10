@@ -1097,7 +1097,7 @@ void cmExtraEclipseCDT4Generator::AppendStorageScanners(
     compiler = "gcc";
   }
 
-  // the following right now hardcodes gcc behaviour :-/
+  // the following right now hardcodes gcc behavior :-/
   std::string compilerArgs =
     "-E -P -v -dD ${plugin_state_location}/${specs_file}";
   if (!arg1.empty()) {

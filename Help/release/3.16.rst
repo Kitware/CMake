@@ -233,7 +233,7 @@ Deprecated and Removed Features
   instead.
 
 * The :module:`GetPrerequisites` module has been deprecated, as it has been
-  superceded by :command:`file(GET_RUNTIME_DEPENDENCIES)`.
+  superseded by :command:`file(GET_RUNTIME_DEPENDENCIES)`.
 
 * The ``CPACK_INSTALL_SCRIPT`` variable has been deprecated in favor of the
   new, more accurately named :variable:`CPACK_INSTALL_SCRIPTS` variable.

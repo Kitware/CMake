@@ -296,7 +296,7 @@ is simpler and provides additional features over the pattern above.
   The ``FetchContent_Populate()`` command also supports a syntax allowing the
   content details to be specified directly rather than using any saved
   details.  This is more low-level and use of this form is generally to be
-  avoided in favour of using saved content details as outlined above.
+  avoided in favor of using saved content details as outlined above.
   Nevertheless, in certain situations it can be useful to invoke the content
   population as an isolated operation (typically as part of implementing some
   other higher level feature or when using CMake in script mode):
@@ -1053,7 +1053,7 @@ function(FetchContent_Populate contentName)
     # Don't set global properties, or record that we did this population, since
     # this was a direct call outside of the normal declared details form.
     # We only want to save values in the global properties for content that
-    # honours the hierarchical details mechanism so that projects are not
+    # honors the hierarchical details mechanism so that projects are not
     # robbed of the ability to override details set in nested projects.
     return()
   endif()

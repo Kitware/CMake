@@ -1972,7 +1972,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     }
   }
 
-  // Add VFS Overlay for Clang compiliers
+  // Add VFS Overlay for Clang compilers
   if (compiler == "Clang") {
     if (cmProp vfsOverlay =
           this->Makefile->GetDefinition("CMAKE_CLANG_VFS_OVERLAY")) {
@@ -3931,7 +3931,7 @@ std::string ComputeCustomCommandRuleFileName(cmLocalGenerator& lg,
 
   // The output path contains a generator expression, but we must choose
   // a single source file path to which to attach the custom command.
-  // Use some heuristics to provie a nice-looking name when possible.
+  // Use some heuristics to provide a nice-looking name when possible.
 
   // If the only genex is $<CONFIG>, replace that gracefully.
   {
@@ -4219,7 +4219,7 @@ std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target)
       auto pos = ispcTarget.find('-');
       auto target_suffix = ispcTarget.substr(0, pos);
       if (target_suffix ==
-          "avx1") { // when targetting avx1 ISPC uses the 'avx' output string
+          "avx1") { // when targeting avx1 ISPC uses the 'avx' output string
         target_suffix = "avx";
       }
       ispcTarget = target_suffix;

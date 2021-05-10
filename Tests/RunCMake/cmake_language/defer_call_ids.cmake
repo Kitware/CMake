@@ -4,7 +4,7 @@ cmake_language(DEFER ID messageIds1 CALL cmake_language EVAL CODE [[message(STAT
 cmake_language(DEFER ID cancelCall CALL cmake_language DEFER CANCEL_CALL toBeCancelled)
 cmake_language(DEFER ID getCallIds2 CALL cmake_language DEFER GET_CALL_IDS ids)
 cmake_language(DEFER ID messageIds2 CALL cmake_language EVAL CODE [[message(STATUS "Deferred Message: ids='${ids}'")]])
-cmake_language(DEFER ID toBeCancelled CALL message STATUS "Cancelled Message")
+cmake_language(DEFER ID toBeCancelled CALL message STATUS "Canceled Message")
 cmake_language(DEFER ID message3 CALL message STATUS "Final Deferred Message")
 cmake_language(DEFER GET_CALL_IDS ids)
 message(STATUS "Immediate Message: ids='${ids}'")

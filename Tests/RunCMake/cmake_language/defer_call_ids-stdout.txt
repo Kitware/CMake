@@ -5,7 +5,7 @@
 -- Immediate Message: cancelCall='cmake_language;DEFER;CANCEL_CALL;toBeCancelled'
 -- Immediate Message: getCallIds2='cmake_language;DEFER;GET_CALL_IDS;ids'
 -- Immediate Message: messageIds2='cmake_language;EVAL;CODE;message\(STATUS "Deferred Message: ids='\${ids}'"\)'
--- Immediate Message: toBeCancelled='message;STATUS;Cancelled Message'
+-- Immediate Message: toBeCancelled='message;STATUS;Canceled Message'
 -- Immediate Message: message3='message;STATUS;Final Deferred Message'
 -- First Deferred Message
 -- Deferred Message: ids='messageIds1;cancelCall;getCallIds2;messageIds2;toBeCancelled;message3'

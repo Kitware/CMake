@@ -640,7 +640,7 @@ We can use the :command:`find_package` command:
   :start-after: # find MathFunctions
   :end-before: # create executable
 
-Create an exectuable:
+Create an executable:
 
 .. literalinclude:: Downstream/CMakeLists.txt
   :language: cmake

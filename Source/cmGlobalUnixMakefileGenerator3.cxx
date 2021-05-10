@@ -147,7 +147,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   // write each target's progress.make this loop is done twice. Basically the
   // Generate pass counts all the actions, the first loop below determines
   // how many actions have progress updates for each target and writes to
-  // corrrect variable values for everything except the all targets. The
+  // correct variable values for everything except the all targets. The
   // second loop actually writes out correct values for the all targets as
   // well. This is because the all targets require more information that is
   // computed in the first loop.

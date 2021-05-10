@@ -20,7 +20,7 @@
 # "component".  For each component, all the headers will be scanned to
 # determine the components it depends upon by following all the
 # possible includes from this component.  This is to match the
-# behaviour of autolinking.
+# behavior of autolinking.
 
 # Written by Roger Leigh <rleigh@codelibre.net>
 
@@ -86,7 +86,7 @@ function(_Boost_FIND_COMPONENT_DEPENDENCIES component includedir _ret_libs)
     set(library_component TRUE)
     set(_boost_unprocessed_headers "${BOOST_DIR}/test/test_exec_monitor.hpp")
   else()
-    # Default behaviour where header directory is the same as the library name.
+    # Default behavior where header directory is the same as the library name.
     file(GLOB_RECURSE _boost_unprocessed_headers
          RELATIVE "${includedir}"
          "${includedir}/boost/${component}/*")

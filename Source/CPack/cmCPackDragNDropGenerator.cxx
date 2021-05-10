@@ -324,7 +324,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   staging << src_dir;
 
   // Add a symlink to /Applications so users can drag-and-drop the bundle
-  // into it unless this behaviour was disabled
+  // into it unless this behavior was disabled
   if (!cpack_dmg_disable_applications_symlink) {
     std::ostringstream application_link;
     application_link << staging.str() << "/Applications";

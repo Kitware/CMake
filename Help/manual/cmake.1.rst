@@ -702,7 +702,7 @@ Available commands are:
 ``remove [-f] <file>...``
   .. deprecated:: 3.17
 
-  Remove the file(s). The planned behaviour was that if any of the
+  Remove the file(s). The planned behavior was that if any of the
   listed files already do not exist, the command returns a non-zero exit code,
   but no message is logged. The ``-f`` option changes the behavior to return a
   zero exit code (i.e. success) in such situations instead.

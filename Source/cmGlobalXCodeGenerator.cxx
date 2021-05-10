@@ -393,7 +393,7 @@ bool cmGlobalXCodeGenerator::ProcessGeneratorToolsetField(
         "  ",  this->GetName(), "\n"
         "toolset specification field\n"
         "  buildsystem=", value, "\n"
-        "value is unkonwn.  It must be '1' or '12'."
+        "value is unknown.  It must be '1' or '12'."
         );
       /* clang-format on */
       mf->IssueMessage(MessageType::FATAL_ERROR, e);
