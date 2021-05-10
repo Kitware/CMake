@@ -184,7 +184,7 @@ struct StanardLevelComputer
     auto needed = this->HighestStandardNeeded(makefile, feature);
 
     cmProp existingStandard = currentLangStandardValue;
-    if (existingStandard == nullptr) {
+    if (!existingStandard) {
       cmProp defaultStandard = makefile->GetDefinition(
         cmStrCat("CMAKE_", this->Language, "_STANDARD_DEFAULT"));
       if (cmNonempty(defaultStandard)) {

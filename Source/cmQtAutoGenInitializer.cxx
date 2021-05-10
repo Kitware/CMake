@@ -114,10 +114,10 @@ bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
       // Collect all static_library dependencies from the test target
       cmLinkImplementationLibraries const* libs =
         testTarget->GetLinkImplementationLibraries(config);
-      if (libs != nullptr) {
+      if (libs) {
         for (cmLinkItem const& item : libs->Libraries) {
           cmGeneratorTarget const* depTarget = item.Target;
-          if ((depTarget != nullptr) &&
+          if (depTarget &&
               (depTarget->GetType() == cmStateEnums::STATIC_LIBRARY) &&
               knownLibs.insert(depTarget).second) {
             testLibs.push_back(depTarget);
@@ -357,15 +357,15 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   {
     cmProp folder =
       this->Makefile->GetState()->GetGlobalProperty("AUTOMOC_TARGETS_FOLDER");
-    if (folder == nullptr) {
+    if (!folder) {
       folder = this->Makefile->GetState()->GetGlobalProperty(
         "AUTOGEN_TARGETS_FOLDER");
     }
     // Inherit FOLDER property from target (#13688)
-    if (folder == nullptr) {
+    if (!folder) {
       folder = this->GenTarget->GetProperty("FOLDER");
     }
-    if (folder != nullptr) {
+    if (folder) {
       this->TargetsFolder = *folder;
     }
   }
@@ -490,7 +490,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
         for (std::string const& depName : cmExpandedList(deps)) {
           // Allow target and file dependencies
           auto* depTarget = this->Makefile->FindTargetToUse(depName);
-          if (depTarget != nullptr) {
+          if (depTarget) {
             this->AutogenTarget.DependTargets.insert(depTarget);
           } else {
             this->AutogenTarget.DependFiles.insert(depName);
@@ -662,7 +662,7 @@ bool cmQtAutoGenInitializer::InitMoc()
       return false;
     }
     // Let the _autogen target depend on the moc executable
-    if (this->Moc.ExecutableTarget != nullptr) {
+    if (this->Moc.ExecutableTarget) {
       this->AutogenTarget.DependTargets.insert(
         this->Moc.ExecutableTarget->Target);
     }
@@ -710,7 +710,7 @@ bool cmQtAutoGenInitializer::InitUic()
       return false;
     }
     // Let the _autogen target depend on the uic executable
-    if (this->Uic.ExecutableTarget != nullptr) {
+    if (this->Uic.ExecutableTarget) {
       this->AutogenTarget.DependTargets.insert(
         this->Uic.ExecutableTarget->Target);
     }
@@ -865,7 +865,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             auto constexpr locationKind = cmSourceFileLocationKind::Known;
             cmSourceFile* sf =
               this->Makefile->GetSource(fullPath, locationKind);
-            if (sf != nullptr) {
+            if (sf) {
               // Check if we know about this header already
               if (cm::contains(this->AutogenTarget.Headers, sf)) {
                 continue;
@@ -880,7 +880,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
               sf = this->Makefile->CreateSource(fullPath, false, locationKind);
             }
 
-            if (sf != nullptr) {
+            if (sf) {
               auto eMuf = makeMUFile(sf, fullPath, muf.Configs, true);
               // Only process moc/uic when the parent is processed as well
               if (!muf.MocIt) {
@@ -1243,10 +1243,10 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       for (std::string const& config : this->ConfigsList) {
         cmLinkImplementationLibraries const* libs =
           this->GenTarget->GetLinkImplementationLibraries(config);
-        if (libs != nullptr) {
+        if (libs) {
           for (cmLinkItem const& item : libs->Libraries) {
             cmGeneratorTarget const* libTarget = item.Target;
-            if ((libTarget != nullptr) &&
+            if (libTarget &&
                 !StaticLibraryCycle(this->GenTarget, libTarget, config)) {
               // Increment target config count
               commonTargets[libTarget]++;
@@ -1780,7 +1780,7 @@ void cmQtAutoGenInitializer::AddToSourceGroup(std::string const& fileName,
     // Generate a source group on demand
     if (!groupName.empty()) {
       sourceGroup = this->Makefile->GetOrCreateSourceGroup(groupName);
-      if (sourceGroup == nullptr) {
+      if (!sourceGroup) {
         cmSystemTools::Error(
           cmStrCat(genNameUpper, " error in ", property,
                    ": Could not find or create the source group ",
@@ -1788,7 +1788,7 @@ void cmQtAutoGenInitializer::AddToSourceGroup(std::string const& fileName,
       }
     }
   }
-  if (sourceGroup != nullptr) {
+  if (sourceGroup) {
     sourceGroup->AddGroupFile(fileName);
   }
 }
@@ -1894,14 +1894,14 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target,
   // Converts a char ptr to an unsigned int value
   auto toUInt = [](const char* const input) -> unsigned int {
     unsigned long tmp = 0;
-    if (input != nullptr && cmStrToULong(input, &tmp)) {
+    if (input && cmStrToULong(input, &tmp)) {
       return static_cast<unsigned int>(tmp);
     }
     return 0u;
   };
   auto toUInt2 = [](cmProp input) -> unsigned int {
     unsigned long tmp = 0;
-    if (input != nullptr && cmStrToULong(*input, &tmp)) {
+    if (input && cmStrToULong(*input, &tmp)) {
       return static_cast<unsigned int>(tmp);
     }
     return 0u;
@@ -2073,7 +2073,7 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
     // Find target
     cmGeneratorTarget* genTarget =
       this->LocalGen->FindGeneratorTargetToUse(targetName);
-    if (genTarget != nullptr) {
+    if (genTarget) {
       genVars.ExecutableTargetName = targetName;
       genVars.ExecutableTarget = genTarget;
       if (genTarget->IsImported()) {

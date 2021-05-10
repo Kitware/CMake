@@ -710,7 +710,7 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
   std::ostream& fout, const cmSourceFile* sourceFile)
 {
   cmProp rawLangProp = sourceFile->GetProperty("LANGUAGE");
-  if (nullptr != rawLangProp) {
+  if (rawLangProp) {
     std::string sourceLangProp(*rawLangProp);
     std::string const& extension = sourceFile->GetExtension();
     if ("CXX" == sourceLangProp && ("c" == extension || "C" == extension)) {

@@ -1229,7 +1229,7 @@ bool cmExportFileGenerator::PopulateExportProperties(
         return false;
       }
       cmProp propertyValue = targetProperties.GetPropertyValue(prop);
-      if (propertyValue == nullptr) {
+      if (!propertyValue) {
         // Asked to export a property that isn't defined on the target. Do not
         // consider this an error, there's just nothing to export.
         continue;
