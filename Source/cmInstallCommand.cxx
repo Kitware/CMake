@@ -1482,7 +1482,8 @@ bool Helper::MakeFilesFullPath(const char* modeName,
     }
 
     // Make sure the file is not a directory.
-    if (gpos == std::string::npos && cmSystemTools::FileIsDirectory(file)) {
+    if (gpos == std::string::npos && !cmSystemTools::FileIsSymlink(file) &&
+        cmSystemTools::FileIsDirectory(file)) {
       this->SetError(
         cmStrCat(modeName, " given directory \"", relFile, "\" to install."));
       return false;
