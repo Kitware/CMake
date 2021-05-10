@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.5)
 
 function(get_hash_for_ref ref out_var err_var)
   execute_process(
-    COMMAND "@git_EXECUTABLE@" rev-parse "${ref}"
+    COMMAND "@git_EXECUTABLE@" rev-parse "${ref}^{commit}"
     WORKING_DIRECTORY "@work_dir@"
     RESULT_VARIABLE error_code
     OUTPUT_VARIABLE ref_hash
