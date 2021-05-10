@@ -29,6 +29,7 @@
 #  ifdef _MSC_VER
 #    define umask _umask
 #  endif
+#  include <windows.h>
 #endif
 #include <sys/stat.h> /* umask (POSIX), _S_I* constants (Windows) */
 // Visual C++ does not define mode_t.
@@ -425,21 +426,28 @@ static bool CheckFileOperations()
     res = false;
   }
 
-#if !defined(_WIN32)
   std::string const testBadSymlink(testNewDir + "/badSymlink.txt");
   std::string const testBadSymlinkTgt(testNewDir + "/missing/symlinkTgt.txt");
-  if (!kwsys::SystemTools::CreateSymlink(testBadSymlinkTgt, testBadSymlink)) {
-    std::cerr << "Problem with CreateSymlink for: " << testBadSymlink << " -> "
-              << testBadSymlinkTgt << std::endl;
-    res = false;
-  }
-
-  if (!kwsys::SystemTools::Touch(testBadSymlink, false)) {
-    std::cerr << "Problem with Touch (no create) for: " << testBadSymlink
-              << std::endl;
-    res = false;
-  }
+  kwsys::Status const symlinkStatus =
+    kwsys::SystemTools::CreateSymlink(testBadSymlinkTgt, testBadSymlink);
+#if defined(_WIN32)
+  // Under Windows, the user may not have enough privileges to create symlinks
+  if (symlinkStatus.GetWindows() != ERROR_PRIVILEGE_NOT_HELD)
 #endif
+  {
+    if (!symlinkStatus) {
+      std::cerr << "CreateSymlink for: " << testBadSymlink << " -> "
+                << testBadSymlinkTgt
+                << " failed: " << symlinkStatus.GetString() << std::endl;
+      res = false;
+    }
+
+    if (!kwsys::SystemTools::Touch(testBadSymlink, false)) {
+      std::cerr << "Problem with Touch (no create) for: " << testBadSymlink
+                << std::endl;
+      res = false;
+    }
+  }
 
   if (!kwsys::SystemTools::Touch(testNewDir, false)) {
     std::cerr << "Problem with Touch (no create) for: " << testNewDir
