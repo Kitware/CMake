@@ -43,9 +43,7 @@ bool cmGlobalNMakeMakefileGenerator::FindMakeProgram(cmMakefile* mf)
     return false;
   }
   if (cmProp nmakeCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
-    std::vector<std::string> command;
-    command.emplace_back(*nmakeCommand);
-    command.emplace_back("-?");
+    std::vector<std::string> command{ *nmakeCommand, "-?" };
     std::string out;
     std::string err;
     if (!cmSystemTools::RunSingleCommand(command, &out, &err, nullptr, nullptr,

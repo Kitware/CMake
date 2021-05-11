@@ -498,7 +498,7 @@ void cmVisualStudio10TargetGenerator::Generate()
         cmProp targetFramework =
           this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK");
         if (targetFramework) {
-          if (std::strchr(targetFramework->c_str(), ';') != nullptr) {
+          if (targetFramework->find(';') != std::string::npos) {
             e1.Element("TargetFrameworks", *targetFramework);
           } else {
             e1.Element("TargetFramework", *targetFramework);

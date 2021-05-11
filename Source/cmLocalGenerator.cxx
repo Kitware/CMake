@@ -2786,7 +2786,7 @@ void cmLocalGenerator::IncludeFileInUnitySources(
   cmGeneratedFileStream& unity_file, std::string const& sf_full_path,
   cmProp beforeInclude, cmProp afterInclude, cmProp uniqueIdName) const
 {
-  if (uniqueIdName && !uniqueIdName->empty()) {
+  if (cmNonempty(uniqueIdName)) {
     std::string pathToHash;
     auto PathEqOrSubDir = [](std::string const& a, std::string const& b) {
       return (cmSystemTools::ComparePath(a, b) ||
