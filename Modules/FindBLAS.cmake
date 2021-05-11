@@ -57,6 +57,7 @@ The following variables may be set to influence this module's behavior:
   * ``EML_mt``
   * ``Fujitsu_SSL2`` (Fujitsu serial blas / lapack)
   * ``Fujitsu_SSL2BLAMP`` (Fujitsu parallel blas / lapack)
+  * ``NVHPC``
   * ``Generic``
 
   .. versionadded:: 3.6
@@ -81,6 +82,9 @@ The following variables may be set to influence this module's behavior:
   .. versionadded:: 3.20
     Elbrus Math Library support (``EML``, ``EML_mt``).
     Fujitsu SSL2 Library support (``Fujitsu_SSL2``, ``Fujitsu_SSL2BLAMP``)
+
+  .. versionadded:: 3.21
+    NVHPC support
 
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95 interfaces
@@ -1062,7 +1066,9 @@ if(NOT BLAS_LIBRARIES AND
 endif()
 
 # Generic BLAS library?
-if(BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
+if(BLA_VENDOR STREQUAL "Generic" OR
+   BLA_VENDOR STREQUAL "NVHPC" OR
+   BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
