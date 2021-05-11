@@ -1182,11 +1182,11 @@ endfunction()
 # calls will be available to the caller.
 macro(FetchContent_MakeAvailable)
 
-  foreach(contentName IN ITEMS ${ARGV})
-    string(TOLOWER ${contentName} contentNameLower)
-    FetchContent_GetProperties(${contentName})
-    if(NOT ${contentNameLower}_POPULATED)
-      FetchContent_Populate(${contentName})
+  foreach(__cmake_contentName IN ITEMS ${ARGV})
+    string(TOLOWER ${__cmake_contentName} __cmake_contentNameLower)
+    FetchContent_GetProperties(${__cmake_contentName})
+    if(NOT ${__cmake_contentNameLower}_POPULATED)
+      FetchContent_Populate(${__cmake_contentName})
 
       # Only try to call add_subdirectory() if the populated content
       # can be treated that way. Protecting the call with the check
@@ -1197,22 +1197,28 @@ macro(FetchContent_MakeAvailable)
       # for ExternalProject. It won't matter if it was passed through
       # to the ExternalProject sub-build, since it would have been
       # ignored there.
-      set(__fc_srcdir "${${contentNameLower}_SOURCE_DIR}")
-      __FetchContent_getSavedDetails(${contentName} contentDetails)
-      if("${contentDetails}" STREQUAL "")
-        message(FATAL_ERROR "No details have been set for content: ${contentName}")
+      set(__cmake_srcdir "${${__cmake_contentNameLower}_SOURCE_DIR}")
+      __FetchContent_getSavedDetails(${__cmake_contentName} __cmake_contentDetails)
+      if("${__cmake_contentDetails}" STREQUAL "")
+        message(FATAL_ERROR "No details have been set for content: ${__cmake_contentName}")
       endif()
-      cmake_parse_arguments(__fc_arg "" "SOURCE_SUBDIR" "" ${contentDetails})
-      if(NOT "${__fc_arg_SOURCE_SUBDIR}" STREQUAL "")
-        string(APPEND __fc_srcdir "/${__fc_arg_SOURCE_SUBDIR}")
-      endif()
-
-      if(EXISTS ${__fc_srcdir}/CMakeLists.txt)
-        add_subdirectory(${__fc_srcdir} ${${contentNameLower}_BINARY_DIR})
+      cmake_parse_arguments(__cmake_arg "" "SOURCE_SUBDIR" "" ${__cmake_contentDetails})
+      if(NOT "${__cmake_arg_SOURCE_SUBDIR}" STREQUAL "")
+        string(APPEND __cmake_srcdir "/${__cmake_arg_SOURCE_SUBDIR}")
       endif()
 
-      unset(__fc_srcdir)
+      if(EXISTS ${__cmake_srcdir}/CMakeLists.txt)
+        add_subdirectory(${__cmake_srcdir} ${${__cmake_contentNameLower}_BINARY_DIR})
+      endif()
+
+      unset(__cmake_srcdir)
     endif()
   endforeach()
+
+  # clear local variables to prevent leaking into the caller's scope
+  unset(__cmake_contentName)
+  unset(__cmake_contentNameLower)
+  unset(__cmake_contentDetails)
+  unset(__cmake_arg_SOURCE_SUBDIR)
 
 endmacro()
