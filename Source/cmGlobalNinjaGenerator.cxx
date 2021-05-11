@@ -9,6 +9,7 @@
 
 #include <cm/iterator>
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/memory>
@@ -2255,7 +2256,7 @@ struct cmSourceInfo
   std::vector<std::string> Includes;
 };
 
-std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
+cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   std::string const& arg_tdi, std::string const& arg_pp);
 }
 
@@ -2312,7 +2313,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     return 1;
   }
 
-  std::unique_ptr<cmSourceInfo> info;
+  cm::optional<cmSourceInfo> info;
   if (arg_lang == "Fortran") {
     info = cmcmd_cmake_ninja_depends_fortran(arg_tdi, arg_pp);
   } else {
@@ -2348,9 +2349,10 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
 
 namespace {
 
-std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
+cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   std::string const& arg_tdi, std::string const& arg_pp)
 {
+  cm::optional<cmSourceInfo> info;
   cmFortranCompiler fc;
   std::vector<std::string> includes;
   {
@@ -2363,7 +2365,7 @@ std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
         cmSystemTools::Error(
           cmStrCat("-E cmake_ninja_depends failed to parse ", arg_tdi,
                    reader.getFormattedErrorMessages()));
-        return nullptr;
+        return info;
       }
     }
 
@@ -2390,14 +2392,14 @@ std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   if (!cmFortranParser_FilePush(&parser, arg_pp.c_str())) {
     cmSystemTools::Error(
       cmStrCat("-E cmake_ninja_depends failed to open ", arg_pp));
-    return nullptr;
+    return info;
   }
   if (cmFortran_yyparse(parser.Scanner) != 0) {
     // Failed to parse the file.
-    return nullptr;
+    return info;
   }
 
-  auto info = cm::make_unique<cmSourceInfo>();
+  info = cmSourceInfo();
   for (std::string const& provide : finfo.Provides) {
     cmSourceReqInfo src_info;
     src_info.LogicalName = provide;
