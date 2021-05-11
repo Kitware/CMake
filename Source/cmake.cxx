@@ -1258,15 +1258,13 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     this->UnprocessedPresetEnvironment = expandedPreset->Environment;
 
     if (!expandedPreset->InstallDir.empty() &&
-        this->State->GetInitializedCacheValue("CMAKE_INSTALL_PREFIX") ==
-          nullptr) {
+        !this->State->GetInitializedCacheValue("CMAKE_INSTALL_PREFIX")) {
       this->UnprocessedPresetVariables["CMAKE_INSTALL_PREFIX"] = {
         "PATH", expandedPreset->InstallDir
       };
     }
     if (!expandedPreset->ToolchainFile.empty() &&
-        this->State->GetInitializedCacheValue("CMAKE_TOOLCHAIN_FILE") ==
-          nullptr) {
+        !this->State->GetInitializedCacheValue("CMAKE_TOOLCHAIN_FILE")) {
       this->UnprocessedPresetVariables["CMAKE_TOOLCHAIN_FILE"] = {
         "FILEPATH", expandedPreset->ToolchainFile
       };

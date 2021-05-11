@@ -970,7 +970,7 @@ cmProp cmGeneratorTarget::GetPropertyWithPairedLanguageSupport(
   std::string const& lang, const char* suffix) const
 {
   cmProp propertyValue = this->Target->GetProperty(cmStrCat(lang, suffix));
-  if (propertyValue == nullptr) {
+  if (!propertyValue) {
     // Check if we should use the value set by another language.
     if (lang == "OBJC") {
       propertyValue = this->GetPropertyWithPairedLanguageSupport("C", suffix);
@@ -4715,21 +4715,20 @@ bool cmGeneratorTarget::ComputeCompileFeatures(
         cmStrCat(cmSystemTools::UpperCase(config), '-', language.first);
       BTs<std::string> const* standardToCopy =
         this->GetLanguageStandardProperty(language.second, config);
-      if (standardToCopy != nullptr) {
+      if (standardToCopy) {
         this->LanguageStandardMap[key] = *standardToCopy;
         generatorTargetLanguageStandard = &this->LanguageStandardMap[key];
       } else {
         cmProp defaultStandard = this->Makefile->GetDefinition(
           cmStrCat("CMAKE_", language.second, "_STANDARD_DEFAULT"));
-        if (defaultStandard != nullptr) {
+        if (defaultStandard) {
           this->LanguageStandardMap[key] = BTs<std::string>(*defaultStandard);
           generatorTargetLanguageStandard = &this->LanguageStandardMap[key];
         }
       }
 
       // Custom updates for the CUDA standard.
-      if (generatorTargetLanguageStandard != nullptr &&
-          language.first == "CUDA") {
+      if (generatorTargetLanguageStandard && language.first == "CUDA") {
         if (generatorTargetLanguageStandard->Value == "98") {
           this->LanguageStandardMap[key].Value = "03";
         }
@@ -6771,7 +6770,7 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     return;
   }
   iface.Exists = true;
-  iface.Explicit = cmp0022NEW || explicitLibraries != nullptr;
+  iface.Explicit = cmp0022NEW || explicitLibraries;
 
   if (explicitLibraries) {
     // The interface libraries have been explicitly set.

@@ -185,7 +185,7 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
     {
       cmProp folder =
         makefile->GetState()->GetGlobalProperty("AUTOGEN_TARGETS_FOLDER");
-      if (folder != nullptr) {
+      if (folder) {
         target->SetProperty("FOLDER", *folder);
       }
     }

@@ -663,7 +663,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
     cmProp ispcSuffixProp =
       this->GeneratorTarget->GetProperty("ISPC_HEADER_SUFFIX");
-    assert(ispcSuffixProp != nullptr);
+    assert(ispcSuffixProp);
 
     std::string directory = this->GeneratorTarget->GetObjectDirectory(config);
     if (cmProp prop =

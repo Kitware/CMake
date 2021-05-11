@@ -1444,7 +1444,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     cmProp ispcSuffixProp =
       this->GeneratorTarget->GetProperty("ISPC_HEADER_SUFFIX");
-    assert(ispcSuffixProp != nullptr);
+    assert(ispcSuffixProp);
 
     std::string ispcHeaderDirectory =
       this->GeneratorTarget->GetObjectDirectory(config);

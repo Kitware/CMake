@@ -1214,7 +1214,7 @@ void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
     cmProp additionalFiles =
       target->GetProperty("DEPLOYMENT_ADDITIONAL_FILES");
 
-    if (dir == nullptr && additionalFiles == nullptr) {
+    if (!dir && !additionalFiles) {
       return;
     }
 
@@ -1228,7 +1228,7 @@ void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
          << GetEscapedPropertyIfValueNotNULL(additionalFiles->c_str())
          << "\"/>\n";
 
-    if (dir != nullptr) {
+    if (dir) {
       std::string const exe = *dir + "\\" + target->GetFullName(config);
 
       fout << "\t\t\t<DebuggerTool\n"

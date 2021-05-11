@@ -2438,7 +2438,7 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
   }
 
   cmProp ispcHeaderSuffixProp = target->GetProperty("ISPC_HEADER_SUFFIX");
-  assert(ispcHeaderSuffixProp != nullptr);
+  assert(ispcHeaderSuffixProp);
 
   std::vector<std::string> ispcArchSuffixes =
     detail::ComputeISPCObjectSuffixes(target);
@@ -3001,7 +3001,7 @@ void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
 
   const std::string name = "CMAKE_" + lang + "_LINK_OPTIONS_IPO";
   cmProp rawFlagsList = this->Makefile->GetDefinition(name);
-  if (rawFlagsList == nullptr) {
+  if (!rawFlagsList) {
     return;
   }
 
@@ -3240,7 +3240,7 @@ void cmLocalGenerator::AppendFeatureOptions(std::string& flags,
 {
   cmProp optionList = this->Makefile->GetDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_", feature));
-  if (optionList != nullptr) {
+  if (optionList) {
     std::vector<std::string> options = cmExpandedList(*optionList);
     for (std::string const& o : options) {
       this->AppendFlagEscape(flags, o);
