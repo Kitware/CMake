@@ -775,7 +775,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         if (!resourceArgs.GetDestination().empty()) {
           resourceGenerator = CreateInstallFilesGenerator(
             helper.Makefile, absFiles, resourceArgs, false);
-        } else {
+        } else if (!target.IsAppBundleOnApple()) {
           cmSystemTools::Message(
             cmStrCat("INSTALL TARGETS - target ", target.GetName(),
                      " has RESOURCE files but no RESOURCE DESTINATION."),
