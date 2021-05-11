@@ -575,6 +575,12 @@ Available commands are:
       ``true`` if the generator supports toolsets and ``false`` otherwise.
     ``platformSupport``
       ``true`` if the generator supports platforms and ``false`` otherwise.
+    ``supportedPlatforms``
+      .. versionadded:: 3.21
+
+      Optional member that may be present when the generator supports
+      platform specification via :variable:`CMAKE_GENERATOR_PLATFORM`
+      (``-A ...``).  The value is a list of platforms known to be supported.
     ``extraGenerators``
       A list of strings with all the extra generators compatible with
       the generator.
