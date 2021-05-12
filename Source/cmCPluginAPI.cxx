@@ -734,7 +734,7 @@ void CCONV cmSourceFileSetName2(void* arg, const char* name, const char* dir,
   }
   sf->SourceName = name;
   std::string fname = sf->SourceName;
-  if (ext && strlen(ext)) {
+  if (cmNonempty(ext)) {
     fname += ".";
     fname += ext;
   }

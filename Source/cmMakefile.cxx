@@ -2479,7 +2479,7 @@ const std::string& cmMakefile::GetRequiredDefinition(
   const std::string& name) const
 {
   static std::string const empty;
-  const std::string* def = this->GetDefinition(name);
+  cmProp def = this->GetDefinition(name);
   if (!def) {
     cmSystemTools::Error("Error required internal CMake variable not "
                          "set, cmake may not be built correctly.\n"
@@ -2553,7 +2553,7 @@ cmProp cmMakefile::GetDefinition(const std::string& name) const
 const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
 {
   static std::string const empty;
-  const std::string* def = this->GetDefinition(name);
+  cmProp def = this->GetDefinition(name);
   if (!def) {
     return empty;
   }
@@ -3067,7 +3067,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
             if (filename && variable == lineVar) {
               varresult = std::to_string(line);
             } else {
-              const std::string* def = this->GetDefinition(variable);
+              cmProp def = this->GetDefinition(variable);
               if (def) {
                 varresult = *def;
               } else if (!this->SuppressSideEffects) {

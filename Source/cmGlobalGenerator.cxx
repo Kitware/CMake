@@ -2260,7 +2260,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 
     // Check whether the genex expansion of the property agrees in all
     // configurations.
-    if (trueCount && falseCount) {
+    if (trueCount > 0 && falseCount > 0) {
       std::ostringstream e;
       e << "The EXCLUDE_FROM_ALL property of target \"" << target->GetName()
         << "\" varies by configuration. This is not supported by the \""
