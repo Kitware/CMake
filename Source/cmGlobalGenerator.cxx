@@ -3029,7 +3029,7 @@ void cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
   // Shorten the output name (in expected use case).
   cmStateDirectory cmDir =
     this->GetMakefiles()[0]->GetStateSnapshot().GetDirectory();
-  std::string fname = cmDir.ConvertToRelPathIfNotContained(
+  std::string fname = cmDir.ConvertToRelPathIfContained(
     this->GetMakefiles()[0]->GetState()->GetBinaryDirectory(), outputs[0]);
 
   // Associate the hash with this output.

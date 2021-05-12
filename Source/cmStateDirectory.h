@@ -36,7 +36,7 @@ public:
   bool ContainsBoth(std::string const& local_path,
                     std::string const& remote_path) const;
 
-  std::string ConvertToRelPathIfNotContained(
+  std::string ConvertToRelPathIfContained(
     std::string const& local_path, std::string const& remote_path) const;
 
   cmStringRange GetIncludeDirectoriesEntries() const;

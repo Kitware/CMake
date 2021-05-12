@@ -3676,7 +3676,7 @@ std::string const& cmLocalGenerator::GetCurrentSourceDirectory() const
 std::string cmLocalGenerator::MaybeConvertToRelativePath(
   std::string const& local_path, std::string const& remote_path) const
 {
-  return this->StateSnapshot.GetDirectory().ConvertToRelPathIfNotContained(
+  return this->StateSnapshot.GetDirectory().ConvertToRelPathIfContained(
     local_path, remote_path);
 }
 

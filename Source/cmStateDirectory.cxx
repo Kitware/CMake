@@ -159,7 +159,7 @@ bool cmStateDirectory::ContainsBoth(std::string const& local_path,
   return bothInBinary || bothInSource;
 }
 
-std::string cmStateDirectory::ConvertToRelPathIfNotContained(
+std::string cmStateDirectory::ConvertToRelPathIfContained(
   std::string const& local_path, std::string const& remote_path) const
 {
   if (!this->ContainsBoth(local_path, remote_path)) {

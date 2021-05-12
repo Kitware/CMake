@@ -610,7 +610,7 @@ cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
         tname += "/fast";
       }
       tname =
-        mf->GetStateSnapshot().GetDirectory().ConvertToRelPathIfNotContained(
+        mf->GetStateSnapshot().GetDirectory().ConvertToRelPathIfContained(
           mf->GetState()->GetBinaryDirectory(), tname);
       cmSystemTools::ConvertToOutputSlashes(tname);
       makeCommand.Add(std::move(tname));
