@@ -27,7 +27,7 @@ cmLocalCommonGenerator::~cmLocalCommonGenerator() = default;
 std::string cmLocalCommonGenerator::MaybeRelativeToWorkDir(
   std::string const& path) const
 {
-  return this->MaybeConvertToRelativePath(this->WorkingDirectory, path);
+  return this->MaybeRelativeTo(this->WorkingDirectory, path);
 }
 
 std::string cmLocalCommonGenerator::GetTargetFortranFlags(

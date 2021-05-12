@@ -318,16 +318,13 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     const auto& lg = cm::static_reference_cast<cmLocalUnixMakefileGenerator3>(
       this->LocalGenerators[0]);
 
-    const std::string& currentBinDir = lg.GetCurrentBinaryDirectory();
     // Save the list to the cmake file.
     cmakefileStream
       << "# The top level Makefile was generated from the following files:\n"
       << "set(CMAKE_MAKEFILE_DEPENDS\n"
       << "  \"CMakeCache.txt\"\n";
     for (std::string const& f : lfiles) {
-      cmakefileStream << "  \""
-                      << lg.MaybeConvertToRelativePath(currentBinDir, f)
-                      << "\"\n";
+      cmakefileStream << "  \"" << lg.MaybeRelativeToCurBinDir(f) << "\"\n";
     }
     cmakefileStream << "  )\n\n";
 
@@ -339,16 +336,10 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     // Set the corresponding makefile in the cmake file.
     cmakefileStream << "# The corresponding makefile is:\n"
                     << "set(CMAKE_MAKEFILE_OUTPUTS\n"
-                    << "  \""
-                    << lg.MaybeConvertToRelativePath(currentBinDir,
-                                                     makefileName)
+                    << "  \"" << lg.MaybeRelativeToCurBinDir(makefileName)
                     << "\"\n"
-                    << "  \""
-                    << lg.MaybeConvertToRelativePath(currentBinDir, check)
-                    << "\"\n";
+                    << "  \"" << lg.MaybeRelativeToCurBinDir(check) << "\"\n";
     cmakefileStream << "  )\n\n";
-
-    const std::string& binDir = lg.GetBinaryDirectory();
 
     // CMake must rerun if a byproduct is missing.
     cmakefileStream << "# Byproducts of CMake generate step:\n"
@@ -359,14 +350,12 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     for (const auto& localGen : this->LocalGenerators) {
       for (std::string const& outfile :
            localGen->GetMakefile()->GetOutputFiles()) {
-        cmakefileStream << "  \""
-                        << lg.MaybeConvertToRelativePath(binDir, outfile)
+        cmakefileStream << "  \"" << lg.MaybeRelativeToTopBinDir(outfile)
                         << "\"\n";
       }
       tmpStr = cmStrCat(localGen->GetCurrentBinaryDirectory(),
                         "/CMakeFiles/CMakeDirectoryInformation.cmake");
-      cmakefileStream << "  \""
-                      << localGen->MaybeConvertToRelativePath(binDir, tmpStr)
+      cmakefileStream << "  \"" << localGen->MaybeRelativeToTopBinDir(tmpStr)
                       << "\"\n";
     }
     cmakefileStream << "  )\n\n";
@@ -458,9 +447,8 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   auto* lg = static_cast<cmLocalUnixMakefileGenerator3*>(dt.LG);
   // Begin the directory-level rules section.
   {
-    std::string dir =
-      cmSystemTools::ConvertToOutputPath(lg->MaybeConvertToRelativePath(
-        lg->GetBinaryDirectory(), lg->GetCurrentBinaryDirectory()));
+    std::string dir = cmSystemTools::ConvertToOutputPath(
+      lg->MaybeRelativeToTopBinDir(lg->GetCurrentBinaryDirectory()));
     lg->WriteDivider(ruleFileStream);
     if (lg->IsRootMakefile()) {
       ruleFileStream << "# Directory level rules for the build root directory";

@@ -4703,8 +4703,7 @@ std::string cmGlobalXCodeGenerator::RelativeToSource(const std::string& p)
 
 std::string cmGlobalXCodeGenerator::RelativeToBinary(const std::string& p)
 {
-  return this->CurrentRootGenerator->MaybeConvertToRelativePath(
-    this->CurrentRootGenerator->GetCurrentBinaryDirectory(), p);
+  return this->CurrentRootGenerator->MaybeRelativeToCurBinDir(p);
 }
 
 std::string cmGlobalXCodeGenerator::XCodeEscapePath(const std::string& p)

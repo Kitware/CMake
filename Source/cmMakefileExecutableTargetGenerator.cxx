@@ -104,13 +104,11 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     cmLocalUnixMakefileGenerator3::EchoProgress progress;
     this->MakeEchoProgress(progress);
     // Add the link message.
-    std::string buildEcho =
-      cmStrCat("Linking CUDA device code ",
-               this->LocalGenerator->ConvertToOutputFormat(
-                 this->LocalGenerator->MaybeConvertToRelativePath(
-                   this->LocalGenerator->GetCurrentBinaryDirectory(),
-                   this->DeviceLinkObject),
-                 cmOutputConverter::SHELL));
+    std::string buildEcho = cmStrCat(
+      "Linking CUDA device code ",
+      this->LocalGenerator->ConvertToOutputFormat(
+        this->LocalGenerator->MaybeRelativeToCurBinDir(this->DeviceLinkObject),
+        cmOutputConverter::SHELL));
     this->LocalGenerator->AppendEcho(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
@@ -152,8 +150,8 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;
-  exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutput));
+  exeCleanFiles.push_back(
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetOutput));
 
   // Determine whether a link script will be used.
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
@@ -203,17 +201,14 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
 
     objectDir = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), objectDir),
+      this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir),
       cmOutputConverter::SHELL);
 
     cmOutputConverter::OutputFormat output = (useWatcomQuote)
       ? cmOutputConverter::WATCOMQUOTE
       : cmOutputConverter::SHELL;
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutput),
-      output);
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetOutput), output);
 
     std::string targetFullPathCompilePDB =
       this->ComputeTargetCompilePDB(this->GetConfigName());
@@ -330,18 +325,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     targetFullPathPDB, cmOutputConverter::SHELL);
   // Convert to the output path to use in constructing commands.
   std::string targetOutPath = this->LocalGenerator->ConvertToOutputFormat(
-    this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath),
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPath),
     cmOutputConverter::SHELL);
   std::string targetOutPathReal = this->LocalGenerator->ConvertToOutputFormat(
-    this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal),
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathReal),
     cmOutputConverter::SHELL);
   std::string targetOutPathImport =
     this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(),
-        targetFullPathImport),
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathImport),
       cmOutputConverter::SHELL);
 
   // Get the language to use for linking this executable.
@@ -436,36 +427,34 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;
-  exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
+  exeCleanFiles.push_back(
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPath));
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
-  exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(),
+  exeCleanFiles.push_back(this->LocalGenerator->MaybeRelativeToCurBinDir(
     targetFullPath + ".manifest"));
 #endif
   if (this->TargetNames.Real != this->TargetNames.Output) {
-    exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
+    exeCleanFiles.push_back(
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathReal));
   }
   if (!this->TargetNames.ImportLibrary.empty()) {
-    exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(),
-      targetFullPathImport));
+    exeCleanFiles.push_back(
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathImport));
     std::string implib;
     if (this->GeneratorTarget->GetImplibGNUtoMS(
           this->GetConfigName(), targetFullPathImport, implib)) {
-      exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), implib));
+      exeCleanFiles.push_back(
+        this->LocalGenerator->MaybeRelativeToCurBinDir(implib));
     }
   }
 
   // List the PDB for cleaning only when the whole target is
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
-  this->CleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathPDB));
+  this->CleanFiles.insert(
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathPDB));
 
   // Add the pre-build and pre-link rules building but not when relinking.
   if (!relink) {
@@ -529,8 +518,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     if (!this->DeviceLinkObject.empty()) {
       buildObjs += " " +
         this->LocalGenerator->ConvertToOutputFormat(
-          this->LocalGenerator->MaybeConvertToRelativePath(
-            this->LocalGenerator->GetCurrentBinaryDirectory(),
+          this->LocalGenerator->MaybeRelativeToCurBinDir(
             this->DeviceLinkObject),
           cmOutputConverter::SHELL);
     }
@@ -549,16 +537,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
 
     objectDir = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), objectDir),
+      this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir),
       cmOutputConverter::SHELL);
     vars.ObjectDir = objectDir.c_str();
     cmOutputConverter::OutputFormat output = (useWatcomQuote)
       ? cmOutputConverter::WATCOMQUOTE
       : cmOutputConverter::SHELL;
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal),
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathReal),
       output);
     vars.Target = target.c_str();
     vars.TargetPDB = targetOutPathPDB.c_str();

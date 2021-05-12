@@ -1122,10 +1122,8 @@ std::string const& cmGlobalNinjaGenerator::ConvertToNinjaPath(
     return f->second;
   }
 
-  const auto& ng =
-    cm::static_reference_cast<cmLocalNinjaGenerator>(this->LocalGenerators[0]);
-  std::string const& bin_dir = ng.GetState()->GetBinaryDirectory();
-  std::string convPath = ng.MaybeConvertToRelativePath(bin_dir, path);
+  std::string convPath =
+    this->LocalGenerators[0]->MaybeRelativeToTopBinDir(path);
   convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
   std::replace(convPath.begin(), convPath.end(), '/', '\\');

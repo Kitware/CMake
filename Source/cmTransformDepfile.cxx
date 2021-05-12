@@ -40,10 +40,9 @@ void WriteDepfile(cmDepfileFormat format, cmsys::ofstream& fout,
                   const cmLocalGenerator& lg,
                   const cmGccDepfileContent& content)
 {
-  const auto& binDir = lg.GetBinaryDirectory();
   std::function<std::string(const std::string&)> formatPath =
-    [&lg, &binDir](const std::string& path) -> std::string {
-    return lg.MaybeConvertToRelativePath(binDir, path);
+    [&lg](const std::string& path) -> std::string {
+    return lg.MaybeRelativeToTopBinDir(path);
   };
   if (lg.GetGlobalGenerator()->GetName() == "Xcode") {
     // full paths must be preserved for Xcode compliance
@@ -93,8 +92,6 @@ std::string ConvertToTLogOutputPath(const std::string& path)
 void WriteVsTlog(cmsys::ofstream& fout, const cmLocalGenerator& lg,
                  const cmGccDepfileContent& content)
 {
-  const auto& binDir = lg.GetBinaryDirectory();
-
   for (auto const& dep : content) {
     fout << '^';
     bool first = true;
@@ -103,13 +100,11 @@ void WriteVsTlog(cmsys::ofstream& fout, const cmLocalGenerator& lg,
         fout << '|';
       }
       first = false;
-      fout << ConvertToTLogOutputPath(
-        lg.MaybeConvertToRelativePath(binDir, rule));
+      fout << ConvertToTLogOutputPath(lg.MaybeRelativeToTopBinDir(rule));
     }
     fout << "\r\n";
     for (auto const& path : dep.paths) {
-      fout << ConvertToTLogOutputPath(
-                lg.MaybeConvertToRelativePath(binDir, path))
+      fout << ConvertToTLogOutputPath(lg.MaybeRelativeToTopBinDir(path))
            << "\r\n";
     }
   }
