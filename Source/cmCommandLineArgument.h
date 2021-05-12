@@ -98,17 +98,11 @@ struct cmCommandLineArgument
         // parse the string to get the value
         auto possible_value = cm::string_view(input).substr(this->Name.size());
         if (possible_value.empty()) {
-          parseState = ParseMode::SyntaxError;
           parseState = ParseMode::ValueError;
         } else if (possible_value[0] == '=') {
           possible_value.remove_prefix(1);
           if (possible_value.empty()) {
             parseState = ParseMode::ValueError;
-          } else {
-            parseState = this->StoreCall(std::string(possible_value),
-                                         std::forward<CallState>(state)...)
-              ? ParseMode::Valid
-              : ParseMode::Invalid;
           }
         }
         if (parseState == ParseMode::Valid) {
@@ -150,6 +144,8 @@ struct cmCommandLineArgument
             : ParseMode::Invalid;
           index = (nextValueIndex - 1);
         }
+      } else {
+        parseState = ParseMode::SyntaxError;
       }
     }
 
