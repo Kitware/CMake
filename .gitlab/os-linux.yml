@@ -258,6 +258,13 @@
 
     interruptible: true
 
+.cmake_codespell_linux:
+    stage: build
+    extends: .fedora34
+    script:
+        - codespell
+    interruptible: true
+
 .cmake_build_linux:
     stage: build
 

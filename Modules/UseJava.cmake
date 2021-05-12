@@ -51,7 +51,7 @@ almost certainly result in confusion.
 
 .. note:: SOURCES
   Adding resources via the ``SOURCES`` parameter relies upon a hard-coded
-  list of file extensions which are tested to determine compilability
+  list of file extensions which are tested to determine whether they compile
   (e.g. File.java). ``SOURCES`` files which match the extensions are compiled.
   Files which do not match are treated as resources. To include uncompiled
   resources matching those file extensions use the ``RESOURCES`` parameter.
