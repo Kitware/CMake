@@ -54,6 +54,14 @@ run_cmake_command(build-no-dir
   ${CMAKE_COMMAND} --build)
 run_cmake_command(build-no-cache
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR})
+run_cmake_command(build-unknown-command-short
+  ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR} -invalid-command)
+run_cmake_command(build-unknown-command-long
+  ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR} --invalid-command)
+run_cmake_command(build-unknown-command-partial-match
+  ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR} --targetinvalid)
+run_cmake_command(build-invalid-target-syntax
+  ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR} --target=invalid)
 run_cmake_command(build-no-generator
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-no-generator)
 run_cmake_command(build-bad-dir
@@ -65,6 +73,10 @@ run_cmake_command(install-no-dir
   ${CMAKE_COMMAND} --install)
 run_cmake_command(install-bad-dir
   ${CMAKE_COMMAND} --install dir-does-not-exist)
+run_cmake_command(install-unknown-command-short
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR} -invalid-command)
+run_cmake_command(install-unknown-command-long
+  ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR} --invalid-command)
 run_cmake_command(install-options-to-vars
   ${CMAKE_COMMAND} --install ${RunCMake_SOURCE_DIR}/dir-install-options-to-vars
   --strip --prefix /var/test --config sample --component pack)

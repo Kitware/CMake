@@ -1,0 +1,2 @@
+^CMake Error: Invalid syntax used with --target
+Usage: cmake --build \[<dir> \| --preset <preset>\] \[options\] \[-- \[native-options\]\]
