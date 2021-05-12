@@ -32,6 +32,8 @@ public:
 
   std::string GetWorkingDirectory() const { return this->WorkingDirectory; }
 
+  std::string MaybeRelativeToWorkDir(std::string const& path) const;
+
   std::string GetTargetFortranFlags(cmGeneratorTarget const* target,
                                     std::string const& config) override;
 

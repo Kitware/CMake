@@ -24,6 +24,12 @@ cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
 
 cmLocalCommonGenerator::~cmLocalCommonGenerator() = default;
 
+std::string cmLocalCommonGenerator::MaybeRelativeToWorkDir(
+  std::string const& path) const
+{
+  return this->MaybeConvertToRelativePath(this->WorkingDirectory, path);
+}
+
 std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   cmGeneratorTarget const* target, std::string const& config)
 {
@@ -38,8 +44,7 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
     target->GetFortranModuleDirectory(this->WorkingDirectory);
   if (!mod_dir.empty()) {
     mod_dir = this->ConvertToOutputFormat(
-      this->MaybeConvertToRelativePath(this->WorkingDirectory, mod_dir),
-      cmOutputConverter::SHELL);
+      this->MaybeRelativeToWorkDir(mod_dir), cmOutputConverter::SHELL);
   } else {
     mod_dir =
       this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
