@@ -1775,7 +1775,7 @@ public:
   {
     // Construct the name of the next object.
     this->NextObject = this->OutputConverter->ConvertToOutputFormat(
-      this->MaybeConvertToRelativePath(obj), cmOutputConverter::RESPONSE);
+      this->MaybeRelativeToCurBinDir(obj), cmOutputConverter::RESPONSE);
 
     // Roll over to next string if the limit will be exceeded.
     if (this->LengthLimit != std::string::npos &&
@@ -1796,13 +1796,13 @@ public:
   void Done() { this->Strings.push_back(this->CurrentString); }
 
 private:
-  std::string MaybeConvertToRelativePath(std::string const& obj)
+  std::string MaybeRelativeToCurBinDir(std::string const& path)
   {
-    if (!this->StateDir.ContainsBoth(this->StateDir.GetCurrentBinary(), obj)) {
-      return obj;
+    std::string const& base = this->StateDir.GetCurrentBinary();
+    if (!this->StateDir.ContainsBoth(base, path)) {
+      return path;
     }
-    return cmSystemTools::ForceToRelativePath(
-      this->StateDir.GetCurrentBinary(), obj);
+    return cmSystemTools::ForceToRelativePath(base, path);
   }
 
   std::vector<std::string>& Strings;
