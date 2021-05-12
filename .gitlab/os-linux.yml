@@ -5,7 +5,7 @@
 ### Release
 
 .linux_prep_source:
-    image: "fedora:33"
+    image: "fedora:34"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -45,7 +45,7 @@
 ### Debian
 
 .debian10:
-    image: "kitware/cmake:ci-debian10-x86_64-2021-04-06"
+    image: "kitware/cmake:ci-debian10-x86_64-2021-05-11"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -60,7 +60,7 @@
         CMake_SKIP_INSTALL: 1
 
 .debian10_aarch64:
-    image: "kitware/cmake:ci-debian10-aarch64-2021-04-06"
+    image: "kitware/cmake:ci-debian10-aarch64-2021-05-11"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -68,8 +68,8 @@
 
 ### Fedora
 
-.fedora33:
-    image: "kitware/cmake:ci-fedora33-x86_64-2021-04-06"
+.fedora34:
+    image: "kitware/cmake:ci-fedora34-x86_64-2021-05-10"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
@@ -77,28 +77,28 @@
 
 #### Lint builds
 
-.fedora33_tidy:
-    extends: .fedora33
+.fedora34_tidy:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_tidy
+        CMAKE_CONFIGURATION: fedora34_tidy
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMake_SKIP_INSTALL: 1
 
-.fedora33_sphinx:
-    extends: .fedora33
+.fedora34_sphinx:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_sphinx
+        CMAKE_CONFIGURATION: fedora34_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
         CMake_SKIP_INSTALL: 1
 
-.fedora33_sphinx_package:
-    extends: .fedora33
+.fedora34_sphinx_package:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_sphinx_package
+        CMAKE_CONFIGURATION: fedora34_sphinx_package
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
 
 #### Build and test
@@ -117,26 +117,26 @@
         CMAKE_CONFIGURATION: debian10_aarch64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora33_ninja:
-    extends: .fedora33
+.fedora34_ninja:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_ninja
+        CMAKE_CONFIGURATION: fedora34_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora33_ninja_multi:
-    extends: .fedora33
+.fedora34_ninja_multi:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_ninja_multi
+        CMAKE_CONFIGURATION: fedora34_ninja_multi
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.fedora33_makefiles:
-    extends: .fedora33
+.fedora34_makefiles:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_makefiles
+        CMAKE_CONFIGURATION: fedora34_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
@@ -374,7 +374,7 @@
 .cmake_org_help:
     stage: build
     extends:
-        - .fedora33
+        - .fedora34
         - .linux_builder_tags
         - .cmake_org_help_artifacts
     script:
