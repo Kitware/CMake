@@ -586,13 +586,7 @@ void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
 {
   this->CurrentProject = root->GetProjectName();
   this->SetCurrentLocalGenerator(root);
-  cmSystemTools::SplitPath(
-    this->CurrentLocalGenerator->GetCurrentSourceDirectory(),
-    this->ProjectSourceDirectoryComponents);
-  cmSystemTools::SplitPath(
-    this->CurrentLocalGenerator->GetCurrentBinaryDirectory(),
-    this->ProjectOutputDirectoryComponents);
-
+  this->CurrentRootGenerator = root;
   this->CurrentXCodeHackMakefile =
     cmStrCat(root->GetCurrentBinaryDirectory(), "/CMakeScripts");
   cmSystemTools::MakeDirectory(this->CurrentXCodeHackMakefile);
@@ -4704,13 +4698,13 @@ std::string cmGlobalXCodeGenerator::RelativeToSource(const std::string& p)
   // We force conversion because Xcode breakpoints do not work unless
   // they are in a file named relative to the source tree.
   return cmSystemTools::ForceToRelativePath(
-    cmSystemTools::JoinPath(this->ProjectSourceDirectoryComponents), p);
+    this->CurrentRootGenerator->GetCurrentSourceDirectory(), p);
 }
 
 std::string cmGlobalXCodeGenerator::RelativeToBinary(const std::string& p)
 {
-  return this->CurrentLocalGenerator->MaybeConvertToRelativePath(
-    cmSystemTools::JoinPath(this->ProjectOutputDirectoryComponents), p);
+  return this->CurrentRootGenerator->MaybeConvertToRelativePath(
+    this->CurrentRootGenerator->GetCurrentBinaryDirectory(), p);
 }
 
 std::string cmGlobalXCodeGenerator::XCodeEscapePath(const std::string& p)
