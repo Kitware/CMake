@@ -25,7 +25,7 @@ struct cmCommandLineArgument
 
   template <typename FunctionType>
   cmCommandLineArgument(std::string n, Values t, FunctionType&& func)
-    : InvalidSyntaxMessage(cmStrCat("Invalid syntax used with ", n))
+    : InvalidSyntaxMessage(cmStrCat(" is invalid syntax for ", n))
     , InvalidValueMessage(cmStrCat("Invalid value used with ", n))
     , Name(std::move(n))
     , Type(t)
@@ -36,7 +36,7 @@ struct cmCommandLineArgument
   template <typename FunctionType>
   cmCommandLineArgument(std::string n, std::string failedMsg, Values t,
                         FunctionType&& func)
-    : InvalidSyntaxMessage(cmStrCat("Invalid syntax used with ", n))
+    : InvalidSyntaxMessage(cmStrCat(" is invalid syntax for ", n))
     , InvalidValueMessage(std::move(failedMsg))
     , Name(std::move(n))
     , Type(t)
@@ -150,7 +150,8 @@ struct cmCommandLineArgument
     }
 
     if (parseState == ParseMode::SyntaxError) {
-      cmSystemTools::Error(this->InvalidSyntaxMessage);
+      cmSystemTools::Error(
+        cmStrCat("'", input, "'", this->InvalidSyntaxMessage));
     } else if (parseState == ParseMode::ValueError) {
       cmSystemTools::Error(this->InvalidValueMessage);
     }
