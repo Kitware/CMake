@@ -1,0 +1,14 @@
+RELATIVE_PATH=relative
+RELATIVE_PATH_WITH_TYPE=relative
+ABSOLUTE_PATH=/absolute
+ABSOLUTE_PATH_WITH_TYPE=/absolute
+NOTFOUND_PATH=/.+/CMP0125/libfile\.(so|dylib)
+NOTFOUND_PATH_WITH_TYPE=/.+/CMP0125/libfile\.(so|dylib)
+FILE_NAME=/.+/CMP0125/CMP0125-find_library-NEW-build/libfile2\.(so|dylib)
+FILE_NAME_WITH_TYPE=/.+/CMP0125/CMP0125-find_library-NEW-build/libfile2\.(so|dylib)
+RELATIVE_PATH_AND_LOCAL=relative_local
+RELATIVE_PATH_WITH_TYPE_AND_LOCAL=relative_local
+ABSOLUTE_PATH_AND_LOCAL=/absolute_local
+ABSOLUTE_PATH_WITH_TYPE_AND_LOCAL=/absolute_local
+NOTFOUND_PATH_AND_LOCAL=/.+/CMP0125/libfile.(so|dylib)
+NOTFOUND_PATH_WITH_TYPE_AND_LOCAL=/.+/CMP0125/libfile.(so|dylib)

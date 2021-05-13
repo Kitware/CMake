@@ -194,6 +194,14 @@ public:
   //@}
 
   /**
+   * Working directory at CMake launch
+   */
+  std::string const& GetCMakeWorkingDirectory() const
+  {
+    return this->CMakeWorkingDirectory;
+  }
+
+  /**
    * Handle a command line invocation of cmake.
    */
   int Run(const std::vector<std::string>& args)
@@ -628,6 +636,7 @@ protected:
   void GenerateGraphViz(const std::string& fileName) const;
 
 private:
+  std::string CMakeWorkingDirectory;
   ProgressCallbackType ProgressCallback;
   WorkingMode CurrentWorkingMode = NORMAL_MODE;
   bool DebugOutput = false;

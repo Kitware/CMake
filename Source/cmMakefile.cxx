@@ -1963,6 +1963,8 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
   }
   this->GetCMakeInstance()->AddCacheEntry(name, value, doc, type);
   // if there was a definition then remove it
+  // The method cmFindBase::NormalizeFindResult also apply same workflow.
+  // See #22038 for problems raised by this behavior.
   this->StateSnapshot.RemoveDefinition(name);
 }
 
