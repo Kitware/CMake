@@ -9,14 +9,17 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
+#include "cmState.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 
 class cmGlobalGenerator;
 
 cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
-                                               cmMakefile* mf, std::string wd)
+                                               cmMakefile* mf, WorkDir wd)
   : cmLocalGenerator(gg, mf)
-  , WorkingDirectory(std::move(wd))
+  , WorkingDirectory(wd)
 {
   this->ConfigNames =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
@@ -24,10 +27,21 @@ cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
 
 cmLocalCommonGenerator::~cmLocalCommonGenerator() = default;
 
+std::string const& cmLocalCommonGenerator::GetWorkingDirectory() const
+{
+  if (this->WorkingDirectory == WorkDir::TopBin) {
+    return this->GetState()->GetBinaryDirectory();
+  }
+  return this->StateSnapshot.GetDirectory().GetCurrentBinary();
+}
+
 std::string cmLocalCommonGenerator::MaybeRelativeToWorkDir(
   std::string const& path) const
 {
-  return this->MaybeRelativeTo(this->WorkingDirectory, path);
+  if (this->WorkingDirectory == WorkDir::TopBin) {
+    return this->MaybeRelativeToTopBinDir(path);
+  }
+  return this->MaybeRelativeToCurBinDir(path);
 }
 
 std::string cmLocalCommonGenerator::GetTargetFortranFlags(
@@ -41,7 +55,7 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
 
   // Add a module output directory flag if necessary.
   std::string mod_dir =
-    target->GetFortranModuleDirectory(this->WorkingDirectory);
+    target->GetFortranModuleDirectory(this->GetWorkingDirectory());
   if (!mod_dir.empty()) {
     mod_dir = this->ConvertToOutputFormat(
       this->MaybeRelativeToWorkDir(mod_dir), cmOutputConverter::SHELL);
