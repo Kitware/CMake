@@ -69,7 +69,7 @@ static Json::Value EncodeFilename(std::string const& path)
       return false;                                                           \
     }                                                                         \
                                                                               \
-    if (!cmSystemTools::FileIsFullPath(res)) {                                \
+    if (!work_directory.empty() && !cmSystemTools::FileIsFullPath(res)) {     \
       res = cmStrCat(work_directory, '/', res);                               \
     }                                                                         \
   } while (0)
@@ -105,15 +105,16 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
     }
 
     for (auto const& rule : rules) {
+      std::string work_directory;
       Json::Value const& workdir = rule["work-directory"];
-      if (!workdir.isString()) {
+      if (workdir.isString()) {
+        PARSE_BLOB(workdir, work_directory);
+      } else if (!workdir.isNull()) {
         cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
                                       arg_pp,
                                       ": work-directory is not a string"));
         return false;
       }
-      std::string work_directory;
-      PARSE_BLOB(workdir, work_directory);
 
       Json::Value const& depends = rule["depends"];
       if (depends.isArray()) {
@@ -203,8 +204,6 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
   Json::Value& rules = ddi["rules"] = Json::arrayValue;
 
   Json::Value rule(Json::objectValue);
-  rule["work-directory"] =
-    EncodeFilename(cmSystemTools::GetCurrentWorkingDirectory());
   Json::Value& inputs = rule["inputs"] = Json::arrayValue;
   inputs.append(EncodeFilename(input));
 
