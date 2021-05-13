@@ -17,8 +17,6 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
-#include "cmStateDirectory.h"
-#include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -685,9 +683,5 @@ bool cmDependsFortran::ModulesDiffer(const std::string& modFile,
 std::string cmDependsFortran::MaybeConvertToRelativePath(
   std::string const& base, std::string const& path)
 {
-  if (!this->LocalGenerator->GetStateSnapshot().GetDirectory().ContainsBoth(
-        base, path)) {
-    return path;
-  }
-  return cmSystemTools::ForceToRelativePath(base, path);
+  return this->LocalGenerator->MaybeConvertToRelativePath(base, path);
 }
