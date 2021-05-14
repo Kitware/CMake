@@ -53,6 +53,7 @@ for fpath in cmake_manuals:
     except Exception as e:
         sys.stderr.write("ERROR: %s\n" % str(e))
 man_show_urls = False
+man_make_section_directory = False
 
 html_show_sourcelink = True
 html_static_path = ['@conf_path@/static']
