@@ -22,7 +22,6 @@
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
 #include "cmState.h"
-#include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -552,21 +551,6 @@ cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
   bool fast, int jobs, bool verbose,
   std::vector<std::string> const& makeOptions)
 {
-  std::unique_ptr<cmMakefile> mfu;
-  cmMakefile* mf;
-  if (!this->Makefiles.empty()) {
-    mf = this->Makefiles[0].get();
-  } else {
-    cmStateSnapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
-    snapshot.GetDirectory().SetCurrentSource(
-      this->CMakeInstance->GetHomeDirectory());
-    snapshot.GetDirectory().SetCurrentBinary(
-      this->CMakeInstance->GetHomeOutputDirectory());
-    snapshot.SetDefaultDefinitions();
-    mfu = cm::make_unique<cmMakefile>(this, snapshot);
-    mf = mfu.get();
-  }
-
   GeneratedMakeCommand makeCommand;
 
   // Make it possible to set verbosity also from command line
@@ -597,9 +581,6 @@ cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
       if (fast) {
         tname += "/fast";
       }
-      tname =
-        mf->GetStateSnapshot().GetDirectory().ConvertToRelPathIfContained(
-          mf->GetState()->GetBinaryDirectory(), tname);
       cmSystemTools::ConvertToOutputSlashes(tname);
       makeCommand.Add(std::move(tname));
     }
