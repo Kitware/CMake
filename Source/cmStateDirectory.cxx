@@ -44,6 +44,9 @@ void cmStateDirectory::ComputeRelativePathTopSource()
 
   std::string result = snapshots.front().GetDirectory().GetCurrentSource();
 
+  // Walk up the buildsystem directory tree to find the highest source
+  // directory that contains the current source directory and the
+  // intermediate ancestors.
   for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
     std::string currentSource = snp.GetDirectory().GetCurrentSource();
     if (cmSystemTools::IsSubDirectory(result, currentSource)) {
@@ -69,6 +72,9 @@ void cmStateDirectory::ComputeRelativePathTopBinary()
 
   std::string result = snapshots.front().GetDirectory().GetCurrentBinary();
 
+  // Walk up the buildsystem directory tree to find the highest binary
+  // directory that contains the current binary directory and the
+  // intermediate ancestors.
   for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
     std::string currentBinary = snp.GetDirectory().GetCurrentBinary();
     if (cmSystemTools::IsSubDirectory(result, currentBinary)) {
@@ -159,7 +165,7 @@ bool cmStateDirectory::ContainsBoth(std::string const& local_path,
   return bothInBinary || bothInSource;
 }
 
-std::string cmStateDirectory::ConvertToRelPathIfNotContained(
+std::string cmStateDirectory::ConvertToRelPathIfContained(
   std::string const& local_path, std::string const& remote_path) const
 {
   if (!this->ContainsBoth(local_path, remote_path)) {

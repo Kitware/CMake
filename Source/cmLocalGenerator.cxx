@@ -351,11 +351,10 @@ void cmLocalGenerator::GenerateTestFiles()
   }
   using vec_t = std::vector<cmStateSnapshot>;
   vec_t const& children = this->Makefile->GetStateSnapshot().GetChildren();
-  std::string parentBinDir = this->GetCurrentBinaryDirectory();
   for (cmStateSnapshot const& i : children) {
     // TODO: Use add_subdirectory instead?
     std::string outP = i.GetDirectory().GetCurrentBinary();
-    outP = this->MaybeConvertToRelativePath(parentBinDir, outP);
+    outP = this->MaybeRelativeToCurBinDir(outP);
     outP = cmOutputConverter::EscapeForCMake(outP);
     fout << "subdirs(" << outP << ")\n";
   }
@@ -3286,10 +3285,9 @@ std::string cmLocalGenerator::ConstructComment(
     std::string comment;
     comment = "Generating ";
     const char* sep = "";
-    std::string currentBinaryDir = this->GetCurrentBinaryDirectory();
     for (std::string const& o : ccg.GetOutputs()) {
       comment += sep;
-      comment += this->MaybeConvertToRelativePath(currentBinaryDir, o);
+      comment += this->MaybeRelativeToCurBinDir(o);
       sep = ", ";
     }
     return comment;
@@ -3550,15 +3548,13 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   std::string const& fullPath = source.GetFullPath();
 
   // Try referencing the source relative to the source tree.
-  std::string relFromSource = this->MaybeConvertToRelativePath(
-    this->GetCurrentSourceDirectory(), fullPath);
+  std::string relFromSource = this->MaybeRelativeToCurSrcDir(fullPath);
   assert(!relFromSource.empty());
   bool relSource = !cmSystemTools::FileIsFullPath(relFromSource);
   bool subSource = relSource && relFromSource[0] != '.';
 
   // Try referencing the source relative to the binary tree.
-  std::string relFromBinary = this->MaybeConvertToRelativePath(
-    this->GetCurrentBinaryDirectory(), fullPath);
+  std::string relFromBinary = this->MaybeRelativeToCurBinDir(fullPath);
   assert(!relFromBinary.empty());
   bool relBinary = !cmSystemTools::FileIsFullPath(relFromBinary);
   bool subBinary = relBinary && relFromBinary[0] != '.';
@@ -3673,11 +3669,29 @@ std::string const& cmLocalGenerator::GetCurrentSourceDirectory() const
   return this->StateSnapshot.GetDirectory().GetCurrentSource();
 }
 
-std::string cmLocalGenerator::MaybeConvertToRelativePath(
+std::string cmLocalGenerator::MaybeRelativeTo(
   std::string const& local_path, std::string const& remote_path) const
 {
-  return this->StateSnapshot.GetDirectory().ConvertToRelPathIfNotContained(
+  return this->StateSnapshot.GetDirectory().ConvertToRelPathIfContained(
     local_path, remote_path);
+}
+
+std::string cmLocalGenerator::MaybeRelativeToTopBinDir(
+  std::string const& path) const
+{
+  return this->MaybeRelativeTo(this->GetBinaryDirectory(), path);
+}
+
+std::string cmLocalGenerator::MaybeRelativeToCurBinDir(
+  std::string const& path) const
+{
+  return this->MaybeRelativeTo(this->GetCurrentBinaryDirectory(), path);
+}
+
+std::string cmLocalGenerator::MaybeRelativeToCurSrcDir(
+  std::string const& path) const
+{
+  return this->MaybeRelativeTo(this->GetCurrentSourceDirectory(), path);
 }
 
 std::string cmLocalGenerator::GetTargetDirectory(

@@ -85,8 +85,4 @@ protected:
 
   // Internal implementation details.
   std::unique_ptr<cmDependsFortranInternals> Internal;
-
-private:
-  std::string MaybeConvertToRelativePath(std::string const& base,
-                                         std::string const& path);
 };
