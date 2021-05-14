@@ -26,57 +26,37 @@ static std::string const kSUBDIRECTORIES = "SUBDIRECTORIES";
 
 void cmStateDirectory::ComputeRelativePathTopSource()
 {
-  cmStateSnapshot snapshot = this->Snapshot_;
-  std::vector<cmStateSnapshot> snapshots;
-  snapshots.push_back(snapshot);
-  while (true) {
-    snapshot = snapshot.GetBuildsystemDirectoryParent();
-    if (snapshot.IsValid()) {
-      snapshots.push_back(snapshot);
-    } else {
-      break;
-    }
-  }
-
-  std::string result = snapshots.front().GetDirectory().GetCurrentSource();
-
   // Walk up the buildsystem directory tree to find the highest source
   // directory that contains the current source directory.
-  for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
-    std::string currentSource = snp.GetDirectory().GetCurrentSource();
-    if (cmSystemTools::IsSubDirectory(result, currentSource)) {
-      result = currentSource;
+  cmStateSnapshot snapshot = this->Snapshot_;
+  for (cmStateSnapshot parent = snapshot.GetBuildsystemDirectoryParent();
+       parent.IsValid(); parent = parent.GetBuildsystemDirectoryParent()) {
+    if (cmSystemTools::IsSubDirectory(
+          snapshot.GetDirectory().GetCurrentSource(),
+          parent.GetDirectory().GetCurrentSource())) {
+      snapshot = parent;
     }
   }
-  this->DirectoryState->RelativePathTopSource = result;
+  this->DirectoryState->RelativePathTopSource =
+    snapshot.GetDirectory().GetCurrentSource();
 }
 
 void cmStateDirectory::ComputeRelativePathTopBinary()
 {
-  cmStateSnapshot snapshot = this->Snapshot_;
-  std::vector<cmStateSnapshot> snapshots;
-  snapshots.push_back(snapshot);
-  while (true) {
-    snapshot = snapshot.GetBuildsystemDirectoryParent();
-    if (snapshot.IsValid()) {
-      snapshots.push_back(snapshot);
-    } else {
-      break;
-    }
-  }
-
-  std::string result = snapshots.front().GetDirectory().GetCurrentBinary();
-
   // Walk up the buildsystem directory tree to find the highest binary
   // directory that contains the current binary directory.
-  for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
-    std::string currentBinary = snp.GetDirectory().GetCurrentBinary();
-    if (cmSystemTools::IsSubDirectory(result, currentBinary)) {
-      result = currentBinary;
+  cmStateSnapshot snapshot = this->Snapshot_;
+  for (cmStateSnapshot parent = snapshot.GetBuildsystemDirectoryParent();
+       parent.IsValid(); parent = parent.GetBuildsystemDirectoryParent()) {
+    if (cmSystemTools::IsSubDirectory(
+          snapshot.GetDirectory().GetCurrentBinary(),
+          parent.GetDirectory().GetCurrentBinary())) {
+      snapshot = parent;
     }
   }
 
-  this->DirectoryState->RelativePathTopBinary = result;
+  this->DirectoryState->RelativePathTopBinary =
+    snapshot.GetDirectory().GetCurrentBinary();
 }
 
 std::string const& cmStateDirectory::GetCurrentSource() const
