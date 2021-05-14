@@ -594,7 +594,6 @@ protected:
   virtual bool CheckDefinition(std::string const& define) const;
 
   cmMakefile* Makefile;
-  cmStateSnapshot StateSnapshot;
   cmListFileBacktrace DirectoryBacktrace;
   cmGlobalGenerator* GlobalGenerator;
   std::map<std::string, std::string> UniqueObjectNamesMap;

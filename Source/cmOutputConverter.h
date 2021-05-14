@@ -102,6 +102,9 @@ public:
   };
   static FortranPreprocess GetFortranPreprocess(cm::string_view value);
 
+protected:
+  cmStateSnapshot StateSnapshot;
+
 private:
   cmState* GetState() const;
 
@@ -110,8 +113,6 @@ private:
     cm::string_view::iterator begin, cm::string_view::iterator end);
   static bool Shell_ArgumentNeedsQuotes(cm::string_view in, int flags);
   static std::string Shell_GetArgument(cm::string_view in, int flags);
-
-  cmStateSnapshot StateSnapshot;
 
   bool LinkScriptShell;
 };

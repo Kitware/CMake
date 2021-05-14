@@ -88,7 +88,6 @@ static auto ruleReplaceVars = { "CMAKE_${LANG}_COMPILER",
 
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   : cmOutputConverter(makefile->GetStateSnapshot())
-  , StateSnapshot(makefile->GetStateSnapshot())
   , DirectoryBacktrace(makefile->GetBacktrace())
 {
   this->GlobalGenerator = gg;
