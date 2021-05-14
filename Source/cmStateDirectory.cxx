@@ -26,10 +26,6 @@ static std::string const kSUBDIRECTORIES = "SUBDIRECTORIES";
 
 void cmStateDirectory::ComputeRelativePathTopSource()
 {
-  // Relative path conversion inside the source tree is not used to
-  // construct relative paths passed to build tools so it is safe to use
-  // even when the source is a network path.
-
   cmStateSnapshot snapshot = this->Snapshot_;
   std::vector<cmStateSnapshot> snapshots;
   snapshots.push_back(snapshot);
@@ -80,14 +76,7 @@ void cmStateDirectory::ComputeRelativePathTopBinary()
     }
   }
 
-  // The current working directory on Windows cannot be a network
-  // path.  Therefore relative paths cannot work when the binary tree
-  // is a network path.
-  if (result.size() < 2 || result.substr(0, 2) != "//") {
-    this->DirectoryState->RelativePathTopBinary = result;
-  } else {
-    this->DirectoryState->RelativePathTopBinary.clear();
-  }
+  this->DirectoryState->RelativePathTopBinary = result;
 }
 
 std::string const& cmStateDirectory::GetCurrentSource() const
