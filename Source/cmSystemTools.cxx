@@ -1491,6 +1491,20 @@ std::string cmSystemTools::ForceToRelativePath(std::string const& local_path,
   return relative;
 }
 
+std::string cmSystemTools::RelativeIfUnder(std::string const& top,
+                                           std::string const& in)
+{
+  std::string out;
+  if (in == top) {
+    out = ".";
+  } else if (cmSystemTools::IsSubDirectory(in, top)) {
+    out = in.substr(top.size() + 1);
+  } else {
+    out = in;
+  }
+  return out;
+}
+
 #ifndef CMAKE_BOOTSTRAP
 bool cmSystemTools::UnsetEnv(const char* value)
 {
