@@ -24,41 +24,6 @@ static std::string const kBUILDSYSTEM_TARGETS = "BUILDSYSTEM_TARGETS";
 static std::string const kSOURCE_DIR = "SOURCE_DIR";
 static std::string const kSUBDIRECTORIES = "SUBDIRECTORIES";
 
-void cmStateDirectory::ComputeRelativePathTopSource()
-{
-  // Walk up the buildsystem directory tree to find the highest source
-  // directory that contains the current source directory.
-  cmStateSnapshot snapshot = this->Snapshot_;
-  for (cmStateSnapshot parent = snapshot.GetBuildsystemDirectoryParent();
-       parent.IsValid(); parent = parent.GetBuildsystemDirectoryParent()) {
-    if (cmSystemTools::IsSubDirectory(
-          snapshot.GetDirectory().GetCurrentSource(),
-          parent.GetDirectory().GetCurrentSource())) {
-      snapshot = parent;
-    }
-  }
-  this->DirectoryState->RelativePathTopSource =
-    snapshot.GetDirectory().GetCurrentSource();
-}
-
-void cmStateDirectory::ComputeRelativePathTopBinary()
-{
-  // Walk up the buildsystem directory tree to find the highest binary
-  // directory that contains the current binary directory.
-  cmStateSnapshot snapshot = this->Snapshot_;
-  for (cmStateSnapshot parent = snapshot.GetBuildsystemDirectoryParent();
-       parent.IsValid(); parent = parent.GetBuildsystemDirectoryParent()) {
-    if (cmSystemTools::IsSubDirectory(
-          snapshot.GetDirectory().GetCurrentBinary(),
-          parent.GetDirectory().GetCurrentBinary())) {
-      snapshot = parent;
-    }
-  }
-
-  this->DirectoryState->RelativePathTopBinary =
-    snapshot.GetDirectory().GetCurrentBinary();
-}
-
 std::string const& cmStateDirectory::GetCurrentSource() const
 {
   return this->DirectoryState->Location;
@@ -70,9 +35,6 @@ void cmStateDirectory::SetCurrentSource(std::string const& dir)
   loc = dir;
   cmSystemTools::ConvertToUnixSlashes(loc);
   loc = cmSystemTools::CollapseFullPath(loc);
-
-  this->ComputeRelativePathTopSource();
-
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_SOURCE_DIR", loc);
 }
 
@@ -87,58 +49,7 @@ void cmStateDirectory::SetCurrentBinary(std::string const& dir)
   loc = dir;
   cmSystemTools::ConvertToUnixSlashes(loc);
   loc = cmSystemTools::CollapseFullPath(loc);
-
-  this->ComputeRelativePathTopBinary();
-
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_BINARY_DIR", loc);
-}
-
-std::string const& cmStateDirectory::GetRelativePathTopSource() const
-{
-  return this->DirectoryState->RelativePathTopSource;
-}
-
-std::string const& cmStateDirectory::GetRelativePathTopBinary() const
-{
-  return this->DirectoryState->RelativePathTopBinary;
-}
-
-void cmStateDirectory::SetRelativePathTopSource(const char* dir)
-{
-  this->DirectoryState->RelativePathTopSource = dir;
-}
-
-void cmStateDirectory::SetRelativePathTopBinary(const char* dir)
-{
-  this->DirectoryState->RelativePathTopBinary = dir;
-}
-
-bool cmStateDirectory::ContainsBoth(std::string const& local_path,
-                                    std::string const& remote_path) const
-{
-  auto PathEqOrSubDir = [](std::string const& a, std::string const& b) {
-    return (cmSystemTools::ComparePath(a, b) ||
-            cmSystemTools::IsSubDirectory(a, b));
-  };
-
-  bool bothInBinary =
-    PathEqOrSubDir(local_path, this->GetRelativePathTopBinary()) &&
-    PathEqOrSubDir(remote_path, this->GetRelativePathTopBinary());
-
-  bool bothInSource =
-    PathEqOrSubDir(local_path, this->GetRelativePathTopSource()) &&
-    PathEqOrSubDir(remote_path, this->GetRelativePathTopSource());
-
-  return bothInBinary || bothInSource;
-}
-
-std::string cmStateDirectory::ConvertToRelPathIfContained(
-  std::string const& local_path, std::string const& remote_path) const
-{
-  if (!this->ContainsBoth(local_path, remote_path)) {
-    return remote_path;
-  }
-  return cmSystemTools::ForceToRelativePath(local_path, remote_path);
 }
 
 cmStateDirectory::cmStateDirectory(

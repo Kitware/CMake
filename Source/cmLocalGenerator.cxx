@@ -3678,25 +3678,6 @@ std::string const& cmLocalGenerator::GetCurrentSourceDirectory() const
   return this->StateSnapshot.GetDirectory().GetCurrentSource();
 }
 
-std::string cmLocalGenerator::MaybeRelativeTo(
-  std::string const& local_path, std::string const& remote_path) const
-{
-  return this->StateSnapshot.GetDirectory().ConvertToRelPathIfContained(
-    local_path, remote_path);
-}
-
-std::string cmLocalGenerator::MaybeRelativeToTopBinDir(
-  std::string const& path) const
-{
-  return this->MaybeRelativeTo(this->GetBinaryDirectory(), path);
-}
-
-std::string cmLocalGenerator::MaybeRelativeToCurBinDir(
-  std::string const& path) const
-{
-  return this->MaybeRelativeTo(this->GetCurrentBinaryDirectory(), path);
-}
-
 std::string cmLocalGenerator::GetTargetDirectory(
   const cmGeneratorTarget* /*unused*/) const
 {

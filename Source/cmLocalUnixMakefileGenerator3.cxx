@@ -38,7 +38,6 @@
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
-#include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -474,11 +473,9 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
   infoFileStream
     << "# Relative path conversion top directories.\n"
     << "set(CMAKE_RELATIVE_PATH_TOP_SOURCE \""
-    << this->StateSnapshot.GetDirectory().GetRelativePathTopSource()
-    << "\")\n"
+    << this->GetRelativePathTopSource() << "\")\n"
     << "set(CMAKE_RELATIVE_PATH_TOP_BINARY \""
-    << this->StateSnapshot.GetDirectory().GetRelativePathTopBinary()
-    << "\")\n"
+    << this->GetRelativePathTopBinary() << "\")\n"
     << "\n";
   /* clang-format on */
 
@@ -1513,13 +1510,11 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
     // Setup relative path top directories.
     if (cmProp relativePathTopSource =
           mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_SOURCE")) {
-      this->StateSnapshot.GetDirectory().SetRelativePathTopSource(
-        relativePathTopSource->c_str());
+      this->SetRelativePathTopSource(*relativePathTopSource);
     }
     if (cmProp relativePathTopBinary =
           mf->GetDefinition("CMAKE_RELATIVE_PATH_TOP_BINARY")) {
-      this->StateSnapshot.GetDirectory().SetRelativePathTopBinary(
-        relativePathTopBinary->c_str());
+      this->SetRelativePathTopBinary(*relativePathTopBinary);
     }
   } else {
     cmSystemTools::Error("Directory Information file not found");

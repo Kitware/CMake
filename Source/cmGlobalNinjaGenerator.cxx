@@ -2434,10 +2434,10 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     cmStateSnapshot snapshot = this->GetCMakeInstance()->GetCurrentSnapshot();
     snapshot.GetDirectory().SetCurrentSource(dir_cur_src);
     snapshot.GetDirectory().SetCurrentBinary(dir_cur_bld);
-    snapshot.GetDirectory().SetRelativePathTopSource(dir_top_src.c_str());
-    snapshot.GetDirectory().SetRelativePathTopBinary(dir_top_bld.c_str());
     auto mfd = cm::make_unique<cmMakefile>(this, snapshot);
     auto lgd = this->CreateLocalGenerator(mfd.get());
+    lgd->SetRelativePathTopSource(dir_top_src);
+    lgd->SetRelativePathTopBinary(dir_top_bld);
     this->Makefiles.push_back(std::move(mfd));
     this->LocalGenerators.push_back(std::move(lgd));
   }

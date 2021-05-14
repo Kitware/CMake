@@ -17,6 +17,21 @@ class cmOutputConverter
 public:
   cmOutputConverter(cmStateSnapshot const& snapshot);
 
+  /**
+   * Convert the given remote path to a relative path with respect to
+   * one of our common work directories.  The path must use forward
+   * slashes and not already be escaped or quoted.
+   * The conversion is skipped if the paths are not both in the source
+   * or both in the binary tree.
+   */
+  std::string MaybeRelativeToTopBinDir(std::string const& path) const;
+  std::string MaybeRelativeToCurBinDir(std::string const& path) const;
+
+  std::string const& GetRelativePathTopSource() const;
+  std::string const& GetRelativePathTopBinary() const;
+  void SetRelativePathTopSource(std::string const& top);
+  void SetRelativePathTopBinary(std::string const& top);
+
   enum OutputFormat
   {
     SHELL,
@@ -115,4 +130,16 @@ private:
   static std::string Shell_GetArgument(cm::string_view in, int flags);
 
   bool LinkScriptShell;
+
+  // The top-most directories for relative path conversion.  Both the
+  // source and destination location of a relative path conversion
+  // must be underneath one of these directories (both under source or
+  // both under binary) in order for the relative path to be evaluated
+  // safely by the build tools.
+  std::string RelativePathTopSource;
+  std::string RelativePathTopBinary;
+  void ComputeRelativePathTopSource();
+  void ComputeRelativePathTopBinary();
+  std::string MaybeRelativeTo(std::string const& local_path,
+                              std::string const& remote_path) const;
 };
