@@ -9,6 +9,7 @@
 
 #include <cm/iterator>
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/memory>
@@ -2247,14 +2248,22 @@ Compilation of source files within a target is split into the following steps:
    (because the latter consumes the module).
 */
 
-static std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
+namespace {
+
+struct cmSourceInfo
+{
+  cmScanDepInfo ScanDep;
+  std::vector<std::string> Includes;
+};
+
+cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   std::string const& arg_tdi, std::string const& arg_pp);
+}
 
 int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
                               std::vector<std::string>::const_iterator argEnd)
 {
   std::string arg_tdi;
-  std::string arg_src;
   std::string arg_pp;
   std::string arg_dep;
   std::string arg_obj;
@@ -2263,8 +2272,6 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
   for (std::string const& arg : cmMakeRange(argBeg, argEnd)) {
     if (cmHasLiteralPrefix(arg, "--tdi=")) {
       arg_tdi = arg.substr(6);
-    } else if (cmHasLiteralPrefix(arg, "--src=")) {
-      arg_src = arg.substr(6);
     } else if (cmHasLiteralPrefix(arg, "--pp=")) {
       arg_pp = arg.substr(5);
     } else if (cmHasLiteralPrefix(arg, "--dep=")) {
@@ -2305,11 +2312,8 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     cmSystemTools::Error("-E cmake_ninja_depends requires value for --lang=");
     return 1;
   }
-  if (arg_src.empty()) {
-    arg_src = cmStrCat("<", arg_obj, " input file>");
-  }
 
-  std::unique_ptr<cmSourceInfo> info;
+  cm::optional<cmSourceInfo> info;
   if (arg_lang == "Fortran") {
     info = cmcmd_cmake_ninja_depends_fortran(arg_tdi, arg_pp);
   } else {
@@ -2324,7 +2328,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     return 1;
   }
 
-  info->PrimaryOutput = arg_obj;
+  info->ScanDep.PrimaryOutput = arg_obj;
 
   {
     cmGeneratedFileStream depfile(arg_dep);
@@ -2335,7 +2339,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
     depfile << "\n";
   }
 
-  if (!cmScanDepFormat_P1689_Write(arg_ddi, arg_src, *info)) {
+  if (!cmScanDepFormat_P1689_Write(arg_ddi, info->ScanDep)) {
     cmSystemTools::Error(
       cmStrCat("-E cmake_ninja_depends failed to write ", arg_ddi));
     return 1;
@@ -2343,9 +2347,12 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
   return 0;
 }
 
-std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
+namespace {
+
+cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   std::string const& arg_tdi, std::string const& arg_pp)
 {
+  cm::optional<cmSourceInfo> info;
   cmFortranCompiler fc;
   std::vector<std::string> includes;
   {
@@ -2358,7 +2365,7 @@ std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
         cmSystemTools::Error(
           cmStrCat("-E cmake_ninja_depends failed to parse ", arg_tdi,
                    reader.getFormattedErrorMessages()));
-        return nullptr;
+        return info;
       }
     }
 
@@ -2385,19 +2392,19 @@ std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   if (!cmFortranParser_FilePush(&parser, arg_pp.c_str())) {
     cmSystemTools::Error(
       cmStrCat("-E cmake_ninja_depends failed to open ", arg_pp));
-    return nullptr;
+    return info;
   }
   if (cmFortran_yyparse(parser.Scanner) != 0) {
     // Failed to parse the file.
-    return nullptr;
+    return info;
   }
 
-  auto info = cm::make_unique<cmSourceInfo>();
+  info = cmSourceInfo();
   for (std::string const& provide : finfo.Provides) {
     cmSourceReqInfo src_info;
     src_info.LogicalName = provide;
     src_info.CompiledModulePath = provide;
-    info->Provides.emplace_back(src_info);
+    info->ScanDep.Provides.emplace_back(src_info);
   }
   for (std::string const& require : finfo.Requires) {
     // Require modules not provided in the same source.
@@ -2407,12 +2414,13 @@ std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
     cmSourceReqInfo src_info;
     src_info.LogicalName = require;
     src_info.CompiledModulePath = require;
-    info->Requires.emplace_back(src_info);
+    info->ScanDep.Requires.emplace_back(src_info);
   }
   for (std::string const& include : finfo.Includes) {
     info->Includes.push_back(include);
   }
   return info;
+}
 }
 
 bool cmGlobalNinjaGenerator::WriteDyndepFile(
@@ -2436,9 +2444,9 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     this->LocalGenerators.push_back(std::move(lgd));
   }
 
-  std::vector<cmSourceInfo> objects;
+  std::vector<cmScanDepInfo> objects;
   for (std::string const& arg_ddi : arg_ddis) {
-    cmSourceInfo info;
+    cmScanDepInfo info;
     if (!cmScanDepFormat_P1689_Parse(arg_ddi, &info)) {
       cmSystemTools::Error(
         cmStrCat("-E cmake_ninja_dyndep failed to parse ddi file ", arg_ddi));
@@ -2474,7 +2482,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // We do this after loading the modules provided by linked targets
   // in case we have one of the same name that must be preferred.
   Json::Value tm = Json::objectValue;
-  for (cmSourceInfo const& object : objects) {
+  for (cmScanDepInfo const& object : objects) {
     for (auto const& p : object.Provides) {
       std::string const mod = cmStrCat(
         module_dir, cmSystemTools::GetFilenameName(p.CompiledModulePath));
@@ -2489,7 +2497,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   {
     cmNinjaBuild build("dyndep");
     build.Outputs.emplace_back("");
-    for (cmSourceInfo const& object : objects) {
+    for (cmScanDepInfo const& object : objects) {
       build.Outputs[0] = this->ConvertToNinjaPath(object.PrimaryOutput);
       build.ImplicitOuts.clear();
       for (auto const& p : object.Provides) {
