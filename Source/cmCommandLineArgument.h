@@ -25,7 +25,7 @@ struct cmCommandLineArgument
 
   template <typename FunctionType>
   cmCommandLineArgument(std::string n, Values t, FunctionType&& func)
-    : InvalidSyntaxMessage(cmStrCat("Invalid syntax used with ", n))
+    : InvalidSyntaxMessage(cmStrCat(" is invalid syntax for ", n))
     , InvalidValueMessage(cmStrCat("Invalid value used with ", n))
     , Name(std::move(n))
     , Type(t)
@@ -36,7 +36,7 @@ struct cmCommandLineArgument
   template <typename FunctionType>
   cmCommandLineArgument(std::string n, std::string failedMsg, Values t,
                         FunctionType&& func)
-    : InvalidSyntaxMessage(cmStrCat("Invalid syntax used with ", n))
+    : InvalidSyntaxMessage(cmStrCat(" is invalid syntax for ", n))
     , InvalidValueMessage(std::move(failedMsg))
     , Name(std::move(n))
     , Type(t)
@@ -98,17 +98,11 @@ struct cmCommandLineArgument
         // parse the string to get the value
         auto possible_value = cm::string_view(input).substr(this->Name.size());
         if (possible_value.empty()) {
-          parseState = ParseMode::SyntaxError;
           parseState = ParseMode::ValueError;
         } else if (possible_value[0] == '=') {
           possible_value.remove_prefix(1);
           if (possible_value.empty()) {
             parseState = ParseMode::ValueError;
-          } else {
-            parseState = this->StoreCall(std::string(possible_value),
-                                         std::forward<CallState>(state)...)
-              ? ParseMode::Valid
-              : ParseMode::Invalid;
           }
         }
         if (parseState == ParseMode::Valid) {
@@ -150,11 +144,14 @@ struct cmCommandLineArgument
             : ParseMode::Invalid;
           index = (nextValueIndex - 1);
         }
+      } else {
+        parseState = ParseMode::SyntaxError;
       }
     }
 
     if (parseState == ParseMode::SyntaxError) {
-      cmSystemTools::Error(this->InvalidSyntaxMessage);
+      cmSystemTools::Error(
+        cmStrCat("'", input, "'", this->InvalidSyntaxMessage));
     } else if (parseState == ParseMode::ValueError) {
       cmSystemTools::Error(this->InvalidValueMessage);
     }
