@@ -532,10 +532,21 @@ int do_build(int ac, char const* const* av)
     for (; i < inputArgs.size() && !nativeOptionsPassed; ++i) {
 
       std::string const& arg = inputArgs[i];
+      bool matched = false;
+      bool parsed = false;
       for (auto const& m : arguments) {
-        if (m.matches(arg) && m.parse(arg, i, inputArgs)) {
+        matched = m.matches(arg);
+        if (matched) {
+          parsed = m.parse(arg, i, inputArgs);
           break;
         }
+      }
+      if (!(matched && parsed)) {
+        dir.clear();
+        if (!matched) {
+          std::cerr << "Unknown argument " << arg << std::endl;
+        }
+        break;
       }
     }
 
@@ -806,10 +817,21 @@ int do_install(int ac, char const* const* av)
     for (decltype(inputArgs.size()) i = 0; i < inputArgs.size(); ++i) {
 
       std::string const& arg = inputArgs[i];
+      bool matched = false;
+      bool parsed = false;
       for (auto const& m : arguments) {
-        if (m.matches(arg) && m.parse(arg, i, inputArgs)) {
+        matched = m.matches(arg);
+        if (matched) {
+          parsed = m.parse(arg, i, inputArgs);
           break;
         }
+      }
+      if (!(matched && parsed)) {
+        dir.clear();
+        if (!matched) {
+          std::cerr << "Unknown argument " << arg << std::endl;
+        }
+        break;
       }
     }
   }
