@@ -45,8 +45,7 @@ void cmStateDirectory::ComputeRelativePathTopSource()
   std::string result = snapshots.front().GetDirectory().GetCurrentSource();
 
   // Walk up the buildsystem directory tree to find the highest source
-  // directory that contains the current source directory and the
-  // intermediate ancestors.
+  // directory that contains the current source directory.
   for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
     std::string currentSource = snp.GetDirectory().GetCurrentSource();
     if (cmSystemTools::IsSubDirectory(result, currentSource)) {
@@ -73,8 +72,7 @@ void cmStateDirectory::ComputeRelativePathTopBinary()
   std::string result = snapshots.front().GetDirectory().GetCurrentBinary();
 
   // Walk up the buildsystem directory tree to find the highest binary
-  // directory that contains the current binary directory and the
-  // intermediate ancestors.
+  // directory that contains the current binary directory.
   for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
     std::string currentBinary = snp.GetDirectory().GetCurrentBinary();
     if (cmSystemTools::IsSubDirectory(result, currentBinary)) {
