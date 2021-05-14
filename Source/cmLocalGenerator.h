@@ -471,7 +471,6 @@ public:
    */
   std::string MaybeRelativeToTopBinDir(std::string const& path) const;
   std::string MaybeRelativeToCurBinDir(std::string const& path) const;
-  std::string MaybeRelativeToCurSrcDir(std::string const& path) const;
 
   /**
    * Generate a macOS application bundle Info.plist file.

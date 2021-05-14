@@ -3698,12 +3698,6 @@ std::string cmLocalGenerator::MaybeRelativeToCurBinDir(
   return this->MaybeRelativeTo(this->GetCurrentBinaryDirectory(), path);
 }
 
-std::string cmLocalGenerator::MaybeRelativeToCurSrcDir(
-  std::string const& path) const
-{
-  return this->MaybeRelativeTo(this->GetCurrentSourceDirectory(), path);
-}
-
 std::string cmLocalGenerator::GetTargetDirectory(
   const cmGeneratorTarget* /*unused*/) const
 {
