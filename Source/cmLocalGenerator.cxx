@@ -2306,13 +2306,6 @@ void cmLocalGenerator::AddCMP0018Flags(std::string& flags,
   if (this->GetShouldUseOldFlags(shared, lang)) {
     this->AddSharedFlags(flags, lang, shared);
   } else {
-    if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-      if (target->GetPropertyAsBool("POSITION_INDEPENDENT_CODE")) {
-        this->AddPositionIndependentFlags(flags, lang, targetType);
-      }
-      return;
-    }
-
     if (target->GetLinkInterfaceDependentBoolProperty(
           "POSITION_INDEPENDENT_CODE", config)) {
       this->AddPositionIndependentFlags(flags, lang, targetType);
