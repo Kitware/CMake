@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, Yann Collet, Facebook, Inc.
+ * Copyright (c) Yann Collet, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -77,6 +77,7 @@ typedef enum {
   ZSTD_error_frameIndex_tooLarge = 100,
   ZSTD_error_seekableIO          = 102,
   ZSTD_error_dstBuffer_wrong     = 104,
+  ZSTD_error_srcBuffer_wrong     = 105,
   ZSTD_error_maxCode = 120  /* never EVER use this value directly, it can change in future versions! Use ZSTD_isError() instead */
 } ZSTD_ErrorCode;
 
