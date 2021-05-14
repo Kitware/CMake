@@ -3532,6 +3532,21 @@ bool cmLocalGenerator::IsNinjaMulti() const
   return this->GetState()->UseNinjaMulti();
 }
 
+namespace {
+std::string relativeIfUnder(std::string const& top, std::string const& cur,
+                            std::string const& path)
+{
+  // Use a path relative to 'cur' if it can be expressed without
+  // a `../` sequence that leaves 'top'.
+  if (cmSystemTools::IsSubDirectory(path, cur) ||
+      (cmSystemTools::IsSubDirectory(cur, top) &&
+       cmSystemTools::IsSubDirectory(path, top))) {
+    return cmSystemTools::ForceToRelativePath(cur, path);
+  }
+  return path;
+}
+}
+
 std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   const cmSourceFile& source, std::string const& dir_max,
   bool* hasSourceExtension, char const* customOutputExtension)
@@ -3541,13 +3556,15 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   std::string const& fullPath = source.GetFullPath();
 
   // Try referencing the source relative to the source tree.
-  std::string relFromSource = this->MaybeRelativeToCurSrcDir(fullPath);
+  std::string relFromSource = relativeIfUnder(
+    this->GetSourceDirectory(), this->GetCurrentSourceDirectory(), fullPath);
   assert(!relFromSource.empty());
   bool relSource = !cmSystemTools::FileIsFullPath(relFromSource);
   bool subSource = relSource && relFromSource[0] != '.';
 
   // Try referencing the source relative to the binary tree.
-  std::string relFromBinary = this->MaybeRelativeToCurBinDir(fullPath);
+  std::string relFromBinary = relativeIfUnder(
+    this->GetBinaryDirectory(), this->GetCurrentBinaryDirectory(), fullPath);
   assert(!relFromBinary.empty());
   bool relBinary = !cmSystemTools::FileIsFullPath(relFromBinary);
   bool subBinary = relBinary && relFromBinary[0] != '.';
