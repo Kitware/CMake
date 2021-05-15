@@ -1,3 +1,6 @@
+Option De-duplication
+^^^^^^^^^^^^^^^^^^^^^
+
 The final set of options used for a target is constructed by
 accumulating options from the current target and the usage requirements of
 its dependencies.  The set of options is de-duplicated to avoid repetition.

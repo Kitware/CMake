@@ -1,3 +1,6 @@
+Handling Compiler Driver Differences
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 To pass options to the linker tool, each compiler driver has its own syntax.
 The ``LINKER:`` prefix and ``,`` separator can be used to specify, in a portable
 way, options to pass to the linker tool. ``LINKER:`` is replaced by the
