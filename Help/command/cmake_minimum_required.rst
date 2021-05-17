@@ -40,8 +40,13 @@ with an error instead of just a warning.
   they may affect.  See also policy :policy:`CMP0000`.
 
   Calling ``cmake_minimum_required()`` inside a :command:`function`
-  limits some effects to the function scope when invoked.  Such calls
-  should not be made with the intention of having global effects.
+  limits some effects to the function scope when invoked.  For example,
+  the :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable won't be set
+  in the calling scope.  Functions do not introduce their own policy
+  scope though, so policy settings of the caller *will* be affected
+  (see below).  Due to this mix of things that do and do not affect the
+  calling scope, calling ``cmake_minimum_required()`` inside a function
+  is generally discouraged.
 
 .. _`Policy Settings`:
 
