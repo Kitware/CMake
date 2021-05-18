@@ -463,17 +463,6 @@ public:
   std::string const& GetCurrentSourceDirectory() const;
 
   /**
-   * Convert the given remote path to a relative path with respect to
-   * one of our common work directories.  The path must use forward
-   * slashes and not already be escaped or quoted.
-   * The conversion is skipped if the paths are not both in the source
-   * or both in the binary tree.
-   */
-  std::string MaybeRelativeToTopBinDir(std::string const& path) const;
-  std::string MaybeRelativeToCurBinDir(std::string const& path) const;
-  std::string MaybeRelativeToCurSrcDir(std::string const& path) const;
-
-  /**
    * Generate a macOS application bundle Info.plist file.
    */
   void GenerateAppleInfoPList(cmGeneratorTarget* target,
@@ -559,9 +548,6 @@ public:
   cmProp GetRuleLauncher(cmGeneratorTarget* target, const std::string& prop);
 
 protected:
-  std::string MaybeRelativeTo(std::string const& local_path,
-                              std::string const& remote_path) const;
-
   // The default implementation ignores the IncludePathStyle and always
   // uses absolute paths.  A generator may override this to use relative
   // paths in some cases.
@@ -595,7 +581,6 @@ protected:
   virtual bool CheckDefinition(std::string const& define) const;
 
   cmMakefile* Makefile;
-  cmStateSnapshot StateSnapshot;
   cmListFileBacktrace DirectoryBacktrace;
   cmGlobalGenerator* GlobalGenerator;
   std::map<std::string, std::string> UniqueObjectNamesMap;

@@ -24,74 +24,6 @@ static std::string const kBUILDSYSTEM_TARGETS = "BUILDSYSTEM_TARGETS";
 static std::string const kSOURCE_DIR = "SOURCE_DIR";
 static std::string const kSUBDIRECTORIES = "SUBDIRECTORIES";
 
-void cmStateDirectory::ComputeRelativePathTopSource()
-{
-  // Relative path conversion inside the source tree is not used to
-  // construct relative paths passed to build tools so it is safe to use
-  // even when the source is a network path.
-
-  cmStateSnapshot snapshot = this->Snapshot_;
-  std::vector<cmStateSnapshot> snapshots;
-  snapshots.push_back(snapshot);
-  while (true) {
-    snapshot = snapshot.GetBuildsystemDirectoryParent();
-    if (snapshot.IsValid()) {
-      snapshots.push_back(snapshot);
-    } else {
-      break;
-    }
-  }
-
-  std::string result = snapshots.front().GetDirectory().GetCurrentSource();
-
-  // Walk up the buildsystem directory tree to find the highest source
-  // directory that contains the current source directory and the
-  // intermediate ancestors.
-  for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
-    std::string currentSource = snp.GetDirectory().GetCurrentSource();
-    if (cmSystemTools::IsSubDirectory(result, currentSource)) {
-      result = currentSource;
-    }
-  }
-  this->DirectoryState->RelativePathTopSource = result;
-}
-
-void cmStateDirectory::ComputeRelativePathTopBinary()
-{
-  cmStateSnapshot snapshot = this->Snapshot_;
-  std::vector<cmStateSnapshot> snapshots;
-  snapshots.push_back(snapshot);
-  while (true) {
-    snapshot = snapshot.GetBuildsystemDirectoryParent();
-    if (snapshot.IsValid()) {
-      snapshots.push_back(snapshot);
-    } else {
-      break;
-    }
-  }
-
-  std::string result = snapshots.front().GetDirectory().GetCurrentBinary();
-
-  // Walk up the buildsystem directory tree to find the highest binary
-  // directory that contains the current binary directory and the
-  // intermediate ancestors.
-  for (cmStateSnapshot const& snp : cmMakeRange(snapshots).advance(1)) {
-    std::string currentBinary = snp.GetDirectory().GetCurrentBinary();
-    if (cmSystemTools::IsSubDirectory(result, currentBinary)) {
-      result = currentBinary;
-    }
-  }
-
-  // The current working directory on Windows cannot be a network
-  // path.  Therefore relative paths cannot work when the binary tree
-  // is a network path.
-  if (result.size() < 2 || result.substr(0, 2) != "//") {
-    this->DirectoryState->RelativePathTopBinary = result;
-  } else {
-    this->DirectoryState->RelativePathTopBinary.clear();
-  }
-}
-
 std::string const& cmStateDirectory::GetCurrentSource() const
 {
   return this->DirectoryState->Location;
@@ -103,9 +35,6 @@ void cmStateDirectory::SetCurrentSource(std::string const& dir)
   loc = dir;
   cmSystemTools::ConvertToUnixSlashes(loc);
   loc = cmSystemTools::CollapseFullPath(loc);
-
-  this->ComputeRelativePathTopSource();
-
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_SOURCE_DIR", loc);
 }
 
@@ -120,58 +49,7 @@ void cmStateDirectory::SetCurrentBinary(std::string const& dir)
   loc = dir;
   cmSystemTools::ConvertToUnixSlashes(loc);
   loc = cmSystemTools::CollapseFullPath(loc);
-
-  this->ComputeRelativePathTopBinary();
-
   this->Snapshot_.SetDefinition("CMAKE_CURRENT_BINARY_DIR", loc);
-}
-
-std::string const& cmStateDirectory::GetRelativePathTopSource() const
-{
-  return this->DirectoryState->RelativePathTopSource;
-}
-
-std::string const& cmStateDirectory::GetRelativePathTopBinary() const
-{
-  return this->DirectoryState->RelativePathTopBinary;
-}
-
-void cmStateDirectory::SetRelativePathTopSource(const char* dir)
-{
-  this->DirectoryState->RelativePathTopSource = dir;
-}
-
-void cmStateDirectory::SetRelativePathTopBinary(const char* dir)
-{
-  this->DirectoryState->RelativePathTopBinary = dir;
-}
-
-bool cmStateDirectory::ContainsBoth(std::string const& local_path,
-                                    std::string const& remote_path) const
-{
-  auto PathEqOrSubDir = [](std::string const& a, std::string const& b) {
-    return (cmSystemTools::ComparePath(a, b) ||
-            cmSystemTools::IsSubDirectory(a, b));
-  };
-
-  bool bothInBinary =
-    PathEqOrSubDir(local_path, this->GetRelativePathTopBinary()) &&
-    PathEqOrSubDir(remote_path, this->GetRelativePathTopBinary());
-
-  bool bothInSource =
-    PathEqOrSubDir(local_path, this->GetRelativePathTopSource()) &&
-    PathEqOrSubDir(remote_path, this->GetRelativePathTopSource());
-
-  return bothInBinary || bothInSource;
-}
-
-std::string cmStateDirectory::ConvertToRelPathIfContained(
-  std::string const& local_path, std::string const& remote_path) const
-{
-  if (!this->ContainsBoth(local_path, remote_path)) {
-    return remote_path;
-  }
-  return cmSystemTools::ForceToRelativePath(local_path, remote_path);
 }
 
 cmStateDirectory::cmStateDirectory(

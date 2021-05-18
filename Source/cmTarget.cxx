@@ -929,12 +929,10 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   const char* sigString =
     (sig == cmTarget::KeywordTLLSignature ? "keyword" : "plain");
   s << "The uses of the " << sigString << " signature are here:\n";
-  cmStateDirectory cmDir =
-    this->impl->Makefile->GetStateSnapshot().GetDirectory();
   for (auto const& cmd : this->impl->TLLCommands) {
     if (cmd.first == sig) {
       cmListFileContext lfc = cmd.second;
-      lfc.FilePath = cmDir.ConvertToRelPathIfContained(
+      lfc.FilePath = cmSystemTools::RelativeIfUnder(
         this->impl->Makefile->GetState()->GetSourceDirectory(), lfc.FilePath);
       s << " * " << lfc << '\n';
     }

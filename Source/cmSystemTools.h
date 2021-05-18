@@ -346,6 +346,12 @@ public:
   static std::string ForceToRelativePath(std::string const& local_path,
                                          std::string const& remote_path);
 
+  /**
+   * Express the 'in' path relative to 'top' if it does not start in '../'.
+   */
+  static std::string RelativeIfUnder(std::string const& top,
+                                     std::string const& in);
+
 #ifndef CMAKE_BOOTSTRAP
   /** Remove an environment variable */
   static bool UnsetEnv(const char* value);

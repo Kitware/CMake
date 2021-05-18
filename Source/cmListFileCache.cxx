@@ -15,7 +15,6 @@
 #include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmState.h"
-#include "cmStateDirectory.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -550,7 +549,7 @@ void cmListFileBacktrace::PrintTitle(std::ostream& out) const
   cmListFileContext lfc = this->TopEntry->Context;
   cmStateSnapshot bottom = this->GetBottom();
   if (!bottom.GetState()->GetIsInTryCompile()) {
-    lfc.FilePath = bottom.GetDirectory().ConvertToRelPathIfContained(
+    lfc.FilePath = cmSystemTools::RelativeIfUnder(
       bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
   }
   out << (lfc.Line ? " at " : " in ") << lfc;
@@ -581,7 +580,7 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out) const
     }
     cmListFileContext lfc = cur->Context;
     if (!bottom.GetState()->GetIsInTryCompile()) {
-      lfc.FilePath = bottom.GetDirectory().ConvertToRelPathIfContained(
+      lfc.FilePath = cmSystemTools::RelativeIfUnder(
         bottom.GetState()->GetSourceDirectory(), lfc.FilePath);
     }
     out << "  " << lfc << "\n";
