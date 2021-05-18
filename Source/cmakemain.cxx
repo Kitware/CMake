@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <climits>
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <sstream>
@@ -23,6 +24,7 @@
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageMetadata.h"
 #include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -37,8 +39,7 @@
 #endif
 
 #include "cmsys/Encoding.hxx"
-
-struct cmMessageMetadata;
+#include "cmsys/Terminal.h"
 
 namespace {
 #ifndef CMAKE_BOOTSTRAP
@@ -150,9 +151,11 @@ std::string cmakemainGetStack(cmake* cm)
 }
 
 void cmakemainMessageCallback(const std::string& m,
-                              const cmMessageMetadata& /* unused */, cmake* cm)
+                              const cmMessageMetadata& md, cmake* cm)
 {
-  std::cerr << m << cmakemainGetStack(cm) << std::endl;
+  cmsysTerminal_cfprintf(md.desiredColor, stderr, "%s", m.c_str());
+  fflush(stderr); // stderr is buffered in some cases.
+  std::cerr << cmakemainGetStack(cm) << "\n";
 }
 
 void cmakemainProgressCallback(const std::string& m, float prog, cmake* cm)

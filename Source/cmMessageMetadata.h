@@ -2,7 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include "cmsys/Terminal.h"
+
 struct cmMessageMetadata
 {
   const char* title = nullptr;
+  int desiredColor = cmsysTerminal_Color_Normal;
 };
