@@ -319,6 +319,14 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
 {
   this->AddCustomCommandRule();
 
+  if (this->ComputingUnknownDependencies) {
+    // we need to track every dependency that comes in, since we are trying
+    // to find dependencies that are side effects of build commands
+    for (std::string const& dep : explicitDeps) {
+      this->CombinedCustomCommandExplicitDependencies.insert(dep);
+    }
+  }
+
   {
     cmNinjaBuild build("CUSTOM_COMMAND");
     build.Comment = comment;
@@ -352,14 +360,6 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
       this->WriteBuild(*this->GetCommonFileStream(), build);
     } else {
       this->WriteBuild(*this->GetImplFileStream(config), build);
-    }
-  }
-
-  if (this->ComputingUnknownDependencies) {
-    // we need to track every dependency that comes in, since we are trying
-    // to find dependencies that are side effects of build commands
-    for (std::string const& dep : explicitDeps) {
-      this->CombinedCustomCommandExplicitDependencies.insert(dep);
     }
   }
 }
