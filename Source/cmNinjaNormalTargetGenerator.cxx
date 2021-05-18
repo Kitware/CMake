@@ -368,7 +368,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     vars.CMTargetType = cmState::GetTargetTypeName(targetType).c_str();
 
     std::string lang = this->TargetLinkLanguage(config);
-    vars.Language = config.c_str();
+    vars.Language = lang.c_str();
     vars.AIXExports = "$AIX_EXPORTS";
 
     if (this->TargetLinkLanguage(config) == "Swift") {
