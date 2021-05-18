@@ -456,6 +456,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
       vars.LanguageCompileFlags = langFlags.c_str();
     }
 
+    std::string linkerLauncher = this->GetLinkerLauncher(config);
+    if (cmNonempty(linkerLauncher)) {
+      vars.Launcher = linkerLauncher.c_str();
+    }
+
     std::string launcher;
     cmProp val = this->GetLocalGenerator()->GetRuleLauncher(
       this->GetGeneratorTarget(), "RULE_LAUNCH_LINK");

@@ -212,6 +212,11 @@ if(NOT CMAKE_CXX_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_CXX_COMPILER_LAUNCHER})
     CACHE STRING "Compiler launcher for CXX.")
 endif()
 
+if(NOT CMAKE_CXX_LINKER_LAUNCHER AND DEFINED ENV{CMAKE_CXX_LINKER_LAUNCHER})
+  set(CMAKE_CXX_LINKER_LAUNCHER "$ENV{CMAKE_CXX_LINKER_LAUNCHER}"
+    CACHE STRING "Linker launcher for CXX.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 
 # now define the following rules:

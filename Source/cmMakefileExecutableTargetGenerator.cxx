@@ -571,6 +571,12 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     vars.LinkFlags = linkFlags.c_str();
     vars.Manifests = manifests.c_str();
 
+    std::string linkerLauncher =
+      this->GetLinkerLauncher(this->GetConfigName());
+    if (cmNonempty(linkerLauncher)) {
+      vars.Launcher = linkerLauncher.c_str();
+    }
+
     if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
       std::string cmakeCommand =
         cmStrCat(this->LocalGenerator->ConvertToOutputFormat(

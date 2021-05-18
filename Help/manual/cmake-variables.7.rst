@@ -424,6 +424,7 @@ Variables that Control the Build
    /variable/CMAKE_LANG_CPPCHECK
    /variable/CMAKE_LANG_CPPLINT
    /variable/CMAKE_LANG_INCLUDE_WHAT_YOU_USE
+   /variable/CMAKE_LANG_LINKER_LAUNCHER
    /variable/CMAKE_LANG_LINK_LIBRARY_FILE_FLAG
    /variable/CMAKE_LANG_LINK_LIBRARY_FLAG
    /variable/CMAKE_LANG_VISIBILITY_PRESET
