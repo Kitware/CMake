@@ -20,3 +20,5 @@ for more on defining buildsystem properties.
 
   This property must be used in preference to :prop_tgt:`STATIC_LIBRARY_FLAGS`
   property.
+
+.. include:: ../command/OPTIONS_SHELL.txt
