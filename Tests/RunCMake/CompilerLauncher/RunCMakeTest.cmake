@@ -1,7 +1,7 @@
 include(RunCMake)
 
 function(run_compiler_launcher lang)
-  # Use a single build tree for tests without cleaning.
+  # Preserve build tree so we can reuse it for the ${lang}-Build subtest below
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${lang}-build)
   set(RunCMake_TEST_NO_CLEAN 1)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
