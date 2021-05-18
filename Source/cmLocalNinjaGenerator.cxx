@@ -649,6 +649,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       gg->SeenCustomCommandOutput(ninjaOutput);
     }
 
+    std::string mainOutput = ninjaOutputs[0];
+
     cmNinjaDeps ninjaDeps;
     this->AppendCustomCommandDeps(ccg, ninjaDeps, fileConfig);
 
@@ -657,13 +659,13 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 
     if (cmdLines.empty()) {
       cmNinjaBuild build("phony");
-      build.Comment = "Phony custom command for " + ninjaOutputs[0];
+      build.Comment = cmStrCat("Phony custom command for ", mainOutput);
       build.Outputs = std::move(ninjaOutputs);
       build.ExplicitDeps = std::move(ninjaDeps);
       build.OrderOnlyDeps = orderOnlyDeps;
       gg->WriteBuild(this->GetImplFileStream(fileConfig), build);
     } else {
-      std::string customStep = cmSystemTools::GetFilenameName(ninjaOutputs[0]);
+      std::string customStep = cmSystemTools::GetFilenameName(mainOutput);
       if (this->GlobalGenerator->IsMultiConfig()) {
         customStep += '-';
         customStep += fileConfig;
@@ -673,7 +675,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       // Hash full path to make unique.
       customStep += '-';
       cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
-      customStep += hash.HashString(ninjaOutputs[0]).substr(0, 7);
+      customStep += hash.HashString(mainOutput).substr(0, 7);
 
       std::string depfile = ccg.GetDepfile();
       if (!depfile.empty()) {
@@ -701,11 +703,12 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
         }
       }
 
+      std::string comment = cmStrCat("Custom command for ", mainOutput);
       gg->WriteCustomCommandBuild(
         this->BuildCommandLine(cmdLines, ccg.GetOutputConfig(), fileConfig,
                                customStep),
-        this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
-        depfile, cc->GetJobPool(), cc->GetUsesTerminal(),
+        this->ConstructComment(ccg), comment, depfile, cc->GetJobPool(),
+        cc->GetUsesTerminal(),
         /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, fileConfig,
         ninjaDeps, orderOnlyDeps);
     }
