@@ -180,7 +180,7 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
       gg->WriteCustomCommandBuild(
         command, desc, "Utility command for " + this->GetTargetName(),
         /*depfile*/ "", /*job_pool*/ "", uses_terminal,
-        /*restat*/ true, util_outputs, ccConfig, deps);
+        /*restat*/ true, ccConfig, std::move(util_outputs), std::move(deps));
     }
 
     phonyBuild.ExplicitDeps.push_back(utilCommandName);

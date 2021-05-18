@@ -311,11 +311,11 @@ void cmGlobalNinjaGenerator::AddCustomCommandRule()
 }
 
 void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
-  const std::string& command, const std::string& description,
-  const std::string& comment, const std::string& depfile,
-  const std::string& job_pool, bool uses_terminal, bool restat,
-  const cmNinjaDeps& outputs, const std::string& config,
-  const cmNinjaDeps& explicitDeps, const cmNinjaDeps& orderOnlyDeps)
+  std::string const& command, std::string const& description,
+  std::string const& comment, std::string const& depfile,
+  std::string const& job_pool, bool uses_terminal, bool restat,
+  std::string const& config, cmNinjaDeps outputs, cmNinjaDeps explicitDeps,
+  cmNinjaDeps orderOnlyDeps)
 {
   this->AddCustomCommandRule();
 
@@ -330,9 +330,9 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   {
     cmNinjaBuild build("CUSTOM_COMMAND");
     build.Comment = comment;
-    build.Outputs = outputs;
-    build.ExplicitDeps = explicitDeps;
-    build.OrderOnlyDeps = orderOnlyDeps;
+    build.Outputs = std::move(outputs);
+    build.ExplicitDeps = std::move(explicitDeps);
+    build.OrderOnlyDeps = std::move(orderOnlyDeps);
 
     cmNinjaVars& vars = build.Variables;
     {
@@ -1209,8 +1209,8 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
       "Assume dependencies for generated source file.",
       /*depfile*/ "", /*job_pool*/ "",
       /*uses_terminal*/ false,
-      /*restat*/ true, cmNinjaDeps(1, asd.first), "", cmNinjaDeps(),
-      orderOnlyDeps);
+      /*restat*/ true, std::string(), cmNinjaDeps(1, asd.first), cmNinjaDeps(),
+      std::move(orderOnlyDeps));
   }
 }
 

@@ -709,8 +709,9 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
                                customStep),
         this->ConstructComment(ccg), comment, depfile, cc->GetJobPool(),
         cc->GetUsesTerminal(),
-        /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, fileConfig,
-        ninjaDeps, orderOnlyDeps);
+        /*restat*/ !symbolic || !byproducts.empty(), fileConfig,
+        std::move(ninjaOutputs), std::move(ninjaDeps),
+        std::move(orderOnlyDeps));
     }
   }
 }
