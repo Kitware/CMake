@@ -226,6 +226,9 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
       buildStr += " |";
       for (std::string const& implicitOut : build.ImplicitOuts) {
         buildStr += cmStrCat(' ', this->EncodePath(implicitOut));
+        if (this->ComputingUnknownDependencies) {
+          this->CombinedBuildOutputs.insert(implicitOut);
+        }
       }
     }
     buildStr += ':';
