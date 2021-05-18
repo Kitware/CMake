@@ -110,13 +110,26 @@ public:
   void WriteBuild(std::ostream& os, cmNinjaBuild const& build,
                   int cmdLineLimit = 0, bool* usedResponseFile = nullptr);
 
+  class CCOutputs
+  {
+    cmGlobalNinjaGenerator* GG;
+
+  public:
+    CCOutputs(cmGlobalNinjaGenerator* gg)
+      : GG(gg)
+    {
+    }
+    void Add(std::vector<std::string> const& outputs);
+    cmNinjaDeps ExplicitOuts;
+  };
+
   void WriteCustomCommandBuild(std::string const& command,
                                std::string const& description,
                                std::string const& comment,
                                std::string const& depfile,
                                std::string const& pool, bool uses_terminal,
                                bool restat, std::string const& config,
-                               cmNinjaDeps outputs,
+                               CCOutputs outputs,
                                cmNinjaDeps explicitDeps = cmNinjaDeps(),
                                cmNinjaDeps orderOnlyDeps = cmNinjaDeps());
 

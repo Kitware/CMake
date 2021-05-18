@@ -638,18 +638,11 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       }
     }
 
-    cmNinjaDeps ninjaOutputs(outputs.size() + byproducts.size());
-    std::transform(outputs.begin(), outputs.end(), ninjaOutputs.begin(),
-                   gg->MapToNinjaPath());
-    std::transform(byproducts.begin(), byproducts.end(),
-                   ninjaOutputs.begin() + outputs.size(),
-                   gg->MapToNinjaPath());
+    cmGlobalNinjaGenerator::CCOutputs ccOutputs(gg);
+    ccOutputs.Add(outputs);
+    ccOutputs.Add(byproducts);
 
-    for (std::string const& ninjaOutput : ninjaOutputs) {
-      gg->SeenCustomCommandOutput(ninjaOutput);
-    }
-
-    std::string mainOutput = ninjaOutputs[0];
+    std::string mainOutput = ccOutputs.ExplicitOuts[0];
 
     cmNinjaDeps ninjaDeps;
     this->AppendCustomCommandDeps(ccg, ninjaDeps, fileConfig);
@@ -660,7 +653,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     if (cmdLines.empty()) {
       cmNinjaBuild build("phony");
       build.Comment = cmStrCat("Phony custom command for ", mainOutput);
-      build.Outputs = std::move(ninjaOutputs);
+      build.Outputs = std::move(ccOutputs.ExplicitOuts);
       build.ExplicitDeps = std::move(ninjaDeps);
       build.OrderOnlyDeps = orderOnlyDeps;
       gg->WriteBuild(this->GetImplFileStream(fileConfig), build);
@@ -710,8 +703,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
         this->ConstructComment(ccg), comment, depfile, cc->GetJobPool(),
         cc->GetUsesTerminal(),
         /*restat*/ !symbolic || !byproducts.empty(), fileConfig,
-        std::move(ninjaOutputs), std::move(ninjaDeps),
-        std::move(orderOnlyDeps));
+        std::move(ccOutputs), std::move(ninjaDeps), std::move(orderOnlyDeps));
     }
   }
 }

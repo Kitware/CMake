@@ -310,11 +310,21 @@ void cmGlobalNinjaGenerator::AddCustomCommandRule()
   this->AddRule(rule);
 }
 
+void cmGlobalNinjaGenerator::CCOutputs::Add(
+  std::vector<std::string> const& paths)
+{
+  for (std::string const& path : paths) {
+    std::string out = this->GG->ConvertToNinjaPath(path);
+    this->GG->SeenCustomCommandOutput(out);
+    this->ExplicitOuts.emplace_back(std::move(out));
+  }
+}
+
 void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   std::string const& command, std::string const& description,
   std::string const& comment, std::string const& depfile,
   std::string const& job_pool, bool uses_terminal, bool restat,
-  std::string const& config, cmNinjaDeps outputs, cmNinjaDeps explicitDeps,
+  std::string const& config, CCOutputs outputs, cmNinjaDeps explicitDeps,
   cmNinjaDeps orderOnlyDeps)
 {
   this->AddCustomCommandRule();
@@ -330,7 +340,7 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   {
     cmNinjaBuild build("CUSTOM_COMMAND");
     build.Comment = comment;
-    build.Outputs = std::move(outputs);
+    build.Outputs = std::move(outputs.ExplicitOuts);
     build.ExplicitDeps = std::move(explicitDeps);
     build.OrderOnlyDeps = std::move(orderOnlyDeps);
 
@@ -1201,6 +1211,8 @@ void cmGlobalNinjaGenerator::WriteDisclaimer(std::ostream& os) const
 void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
 {
   for (auto const& asd : this->AssumedSourceDependencies) {
+    CCOutputs outputs(this);
+    outputs.ExplicitOuts.emplace_back(asd.first);
     cmNinjaDeps orderOnlyDeps;
     std::copy(asd.second.begin(), asd.second.end(),
               std::back_inserter(orderOnlyDeps));
@@ -1209,7 +1221,7 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
       "Assume dependencies for generated source file.",
       /*depfile*/ "", /*job_pool*/ "",
       /*uses_terminal*/ false,
-      /*restat*/ true, std::string(), cmNinjaDeps(1, asd.first), cmNinjaDeps(),
+      /*restat*/ true, std::string(), outputs, cmNinjaDeps(),
       std::move(orderOnlyDeps));
   }
 }
