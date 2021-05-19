@@ -209,9 +209,7 @@ std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
   cmOutputConverter::OutputFormat format)
 {
   if (pathStyle == IncludePathStyle::Absolute) {
-    return this->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(path, this->GetCurrentBinaryDirectory()),
-      format);
+    return this->ConvertToOutputFormat(path, format);
   }
   return this->ConvertToOutputFormat(this->MaybeRelativeToTopBinDir(path),
                                      format);
