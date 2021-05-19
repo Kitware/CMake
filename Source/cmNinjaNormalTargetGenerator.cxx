@@ -1072,8 +1072,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       cmLocalGenerator const* LocalGen = this->GetLocalGenerator();
       for (const auto& source : sources) {
         oss << " "
-            << LocalGen->ConvertToOutputFormat(this->GetSourceFilePath(source),
-                                               cmOutputConverter::SHELL);
+            << LocalGen->ConvertToOutputFormat(
+                 this->GetCompiledSourceNinjaPath(source),
+                 cmOutputConverter::SHELL);
       }
       return oss.str();
     }();
@@ -1093,7 +1094,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     for (const auto& source : sources) {
       linkBuild.Outputs.push_back(
         this->ConvertToNinjaPath(this->GetObjectFilePath(source, config)));
-      linkBuild.ExplicitDeps.emplace_back(this->GetSourceFilePath(source));
+      linkBuild.ExplicitDeps.emplace_back(
+        this->GetCompiledSourceNinjaPath(source));
     }
     linkBuild.Outputs.push_back(vars["SWIFT_MODULE"]);
   } else {

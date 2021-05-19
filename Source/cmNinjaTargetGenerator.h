@@ -116,7 +116,7 @@ protected:
                               bool ignoreType = false) const;
 
   /// @return the source file path for the given @a source.
-  std::string GetSourceFilePath(cmSourceFile const* source) const;
+  std::string GetCompiledSourceNinjaPath(cmSourceFile const* source) const;
 
   /// @return the object file path for the given @a source.
   std::string GetObjectFilePath(cmSourceFile const* source,

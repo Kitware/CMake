@@ -379,7 +379,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps(
   return result;
 }
 
-std::string cmNinjaTargetGenerator::GetSourceFilePath(
+std::string cmNinjaTargetGenerator::GetCompiledSourceNinjaPath(
   cmSourceFile const* source) const
 {
   return this->ConvertToNinjaPath(source->GetFullPath());
@@ -1199,8 +1199,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   const std::string& fileConfig, bool firstForConfig)
 {
   std::string const language = source->GetLanguage();
-  std::string const sourceFilePath =
-    language == "RC" ? source->GetFullPath() : this->GetSourceFilePath(source);
+  std::string const sourceFilePath = language == "RC"
+    ? source->GetFullPath()
+    : this->GetCompiledSourceNinjaPath(source);
   std::string const objectDir = this->ConvertToNinjaPath(
     cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
              this->GetGlobalGenerator()->ConfigDirectory(config)));
@@ -1575,7 +1576,7 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
 void cmNinjaTargetGenerator::EmitSwiftDependencyInfo(
   cmSourceFile const* source, const std::string& config)
 {
-  std::string const sourceFilePath = this->GetSourceFilePath(source);
+  std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(source);
   std::string const objectFilePath =
     this->ConvertToNinjaPath(this->GetObjectFilePath(source, config));
   std::string const swiftDepsPath = [source, objectFilePath]() -> std::string {
