@@ -902,6 +902,23 @@ int cmCPackGenerator::InstallCMakeProject(
       this->IsOn("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION")) {
     mf.AddDefinition("CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION", "1");
   }
+
+  std::vector<std::string> custom_variables;
+  this->MakefileMap->GetDefExpandList("CPACK_CUSTOM_INSTALL_VARIABLES",
+                                      custom_variables);
+
+  for (auto const& custom_variable : custom_variables) {
+    std::string value;
+
+    auto i = custom_variable.find('=');
+
+    if (i != std::string::npos) {
+      value = custom_variable.substr(i + 1);
+    }
+
+    mf.AddDefinition(custom_variable.substr(0, i), value);
+  }
+
   // do installation
   bool res = mf.ReadListFile(installFile);
   // forward definition of CMAKE_ABSOLUTE_DESTINATION_FILES
