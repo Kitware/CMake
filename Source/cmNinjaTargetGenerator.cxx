@@ -1199,7 +1199,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   const std::string& fileConfig, bool firstForConfig)
 {
   std::string const language = source->GetLanguage();
-  std::string const sourceFileName =
+  std::string const sourceFilePath =
     language == "RC" ? source->GetFullPath() : this->GetSourceFilePath(source);
   std::string const objectDir = this->ConvertToNinjaPath(
     cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
@@ -1251,7 +1251,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
 
   this->ExportObjectCompileCommand(
-    language, sourceFileName, objectDir, objectFileName, objectFileDir,
+    language, sourceFilePath, objectDir, objectFileName, objectFileDir,
     vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"], config);
 
   objBuild.Outputs.push_back(objectFileName);
@@ -1265,7 +1265,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
   }
 
-  objBuild.ExplicitDeps.push_back(sourceFileName);
+  objBuild.ExplicitDeps.push_back(sourceFilePath);
 
   // Add precompile headers dependencies
   std::vector<std::string> depList;
@@ -1323,9 +1323,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   if (source->GetIsGenerated() &&
       !source->GetPropertyAsBool("__CMAKE_GENERATED_BY_CMAKE") &&
       !source->GetCustomCommand() &&
-      !this->GetGlobalGenerator()->HasCustomCommandOutput(sourceFileName)) {
+      !this->GetGlobalGenerator()->HasCustomCommandOutput(sourceFilePath)) {
     this->GetGlobalGenerator()->AddAssumedSourceDependencies(
-      sourceFileName, objBuild.OrderOnlyDeps);
+      sourceFilePath, objBuild.OrderOnlyDeps);
   }
 
   // For some cases we scan to dynamically discover dependencies.
