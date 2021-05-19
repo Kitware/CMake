@@ -17,10 +17,17 @@ struct cmCommandLineArgument
     OneOrMore
   };
 
+  enum class RequiresSeparator
+  {
+    Yes,
+    No
+  };
+
   std::string InvalidSyntaxMessage;
   std::string InvalidValueMessage;
   std::string Name;
   Values Type;
+  RequiresSeparator SeparatorNeeded;
   std::function<FunctionSignature> StoreCall;
 
   template <typename FunctionType>
@@ -29,6 +36,19 @@ struct cmCommandLineArgument
     , InvalidValueMessage(cmStrCat("Invalid value used with ", n))
     , Name(std::move(n))
     , Type(t)
+    , SeparatorNeeded(RequiresSeparator::Yes)
+    , StoreCall(std::forward<FunctionType>(func))
+  {
+  }
+
+  template <typename FunctionType>
+  cmCommandLineArgument(std::string n, Values t, RequiresSeparator s,
+                        FunctionType&& func)
+    : InvalidSyntaxMessage(cmStrCat(" is invalid syntax for ", n))
+    , InvalidValueMessage(cmStrCat("Invalid value used with ", n))
+    , Name(std::move(n))
+    , Type(t)
+    , SeparatorNeeded(s)
     , StoreCall(std::forward<FunctionType>(func))
   {
   }
@@ -40,14 +60,38 @@ struct cmCommandLineArgument
     , InvalidValueMessage(std::move(failedMsg))
     , Name(std::move(n))
     , Type(t)
+    , SeparatorNeeded(RequiresSeparator::Yes)
+    , StoreCall(std::forward<FunctionType>(func))
+  {
+  }
+
+  template <typename FunctionType>
+  cmCommandLineArgument(std::string n, std::string failedMsg, Values t,
+                        RequiresSeparator s, FunctionType&& func)
+    : InvalidSyntaxMessage(cmStrCat(" is invalid syntax for ", n))
+    , InvalidValueMessage(std::move(failedMsg))
+    , Name(std::move(n))
+    , Type(t)
+    , SeparatorNeeded(s)
     , StoreCall(std::forward<FunctionType>(func))
   {
   }
 
   bool matches(std::string const& input) const
   {
-    return (this->Type == Values::Zero) ? (input == this->Name)
-                                        : cmHasPrefix(input, this->Name);
+    if (this->Type == Values::Zero) {
+      return input == this->Name;
+    } else if (this->SeparatorNeeded == RequiresSeparator::No) {
+      return cmHasPrefix(input, this->Name);
+    } else if (cmHasPrefix(input, this->Name)) {
+      if (input.size() == this->Name.size()) {
+        return true;
+      } else {
+        return (input[this->Name.size()] == '=' ||
+                input[this->Name.size()] == ' ');
+      }
+    }
+    return false;
   }
 
   template <typename T, typename... CallState>
