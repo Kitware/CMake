@@ -161,6 +161,7 @@ bool HandleScriptMode(std::vector<std::string> const& args,
   bool doing_script = false;
   bool doing_code = false;
   bool exclude_from_all = false;
+  bool all_components = false;
 
   // Scan the args once for COMPONENT. Only allow one.
   //
@@ -172,6 +173,8 @@ bool HandleScriptMode(std::vector<std::string> const& args,
     }
     if (args[i] == "EXCLUDE_FROM_ALL") {
       exclude_from_all = true;
+    } else if (args[i] == "ALL_COMPONENTS") {
+      all_components = true;
     }
   }
 
@@ -179,6 +182,11 @@ bool HandleScriptMode(std::vector<std::string> const& args,
     status.SetError("given more than one COMPONENT for the SCRIPT or CODE "
                     "signature of the INSTALL command. "
                     "Use multiple INSTALL commands with one COMPONENT each.");
+    return false;
+  }
+
+  if (all_components && componentCount == 1) {
+    status.SetError("ALL_COMPONENTS and COMPONENT are mutually exclusive");
     return false;
   }
 
@@ -208,14 +216,14 @@ bool HandleScriptMode(std::vector<std::string> const& args,
       }
       helper.Makefile->AddInstallGenerator(
         cm::make_unique<cmInstallScriptGenerator>(
-          script, false, component, exclude_from_all,
+          script, false, component, exclude_from_all, all_components,
           helper.Makefile->GetBacktrace()));
     } else if (doing_code) {
       doing_code = false;
       std::string const& code = arg;
       helper.Makefile->AddInstallGenerator(
         cm::make_unique<cmInstallScriptGenerator>(
-          code, true, component, exclude_from_all,
+          code, true, component, exclude_from_all, all_components,
           helper.Makefile->GetBacktrace()));
     }
   }

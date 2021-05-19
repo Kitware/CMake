@@ -3317,7 +3317,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
     // Include the user-specified pre-install script for this target.
     if (cmProp preinstall = l->GetProperty("PRE_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(*preinstall, false, "", false);
+      cmInstallScriptGenerator g(*preinstall, false, "", false, false);
       g.Generate(os, config, configurationTypes);
     }
 
@@ -3370,7 +3370,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
     // Include the user-specified post-install script for this target.
     if (cmProp postinstall = l->GetProperty("POST_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(*postinstall, false, "", false);
+      cmInstallScriptGenerator g(*postinstall, false, "", false, false);
       g.Generate(os, config, configurationTypes);
     }
   }

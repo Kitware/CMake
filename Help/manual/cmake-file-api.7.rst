@@ -751,6 +751,11 @@ with members:
     Optional member that is present with boolean value ``true`` when
     :command:`install` is called with the ``EXCLUDE_FROM_ALL`` option.
 
+  ``isForAllComponents``
+    Optional member that is present with boolean value ``true`` when
+    :command:`install(SCRIPT|CODE)` is called with the
+    ``ALL_COMPONENTS`` option.
+
   ``isOptional``
     Optional member that is present with boolean value ``true`` when
     :command:`install` is called with the ``OPTIONAL`` option.

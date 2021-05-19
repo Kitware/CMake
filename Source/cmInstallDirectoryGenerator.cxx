@@ -18,7 +18,7 @@ cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   MessageLevel message, bool exclude_from_all, std::string literal_args,
   bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all, std::move(backtrace))
+                       exclude_from_all, false, std::move(backtrace))
   , LocalGenerator(nullptr)
   , Directories(dirs)
   , FilePermissions(std::move(file_permissions))
