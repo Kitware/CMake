@@ -263,6 +263,7 @@ void cmLocalNinjaGenerator::WriteBuildFileTop()
                                           this->GetConfigNames().front());
   }
   this->WriteNinjaFilesInclusionCommon(this->GetCommonFileStream());
+  this->WriteNinjaWorkDir(this->GetCommonFileStream());
 
   // For the rule file.
   this->WriteProjectHeader(this->GetRulesFileStream());
@@ -362,6 +363,17 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusionCommon(std::ostream& os)
   cmGlobalNinjaGenerator::WriteInclude(os, rulesFilePath,
                                        "Include rules file.");
   os << "\n";
+}
+
+void cmLocalNinjaGenerator::WriteNinjaWorkDir(std::ostream& os)
+{
+  cmGlobalNinjaGenerator::WriteDivider(os);
+  cmGlobalNinjaGenerator::WriteComment(
+    os, "Logical path to working directory; prefix for absolute paths.");
+  cmGlobalNinjaGenerator* ng = this->GetGlobalNinjaGenerator();
+  std::string ninja_workdir = this->GetBinaryDirectory();
+  ng->StripNinjaOutputPathPrefixAsSuffix(ninja_workdir); // Also appends '/'.
+  os << "cmake_ninja_workdir = " << ng->EncodePath(ninja_workdir) << "\n";
 }
 
 void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
@@ -654,6 +666,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       cmNinjaBuild build("phony");
       build.Comment = cmStrCat("Phony custom command for ", mainOutput);
       build.Outputs = std::move(ccOutputs.ExplicitOuts);
+      build.WorkDirOuts = std::move(ccOutputs.WorkDirOuts);
       build.ExplicitDeps = std::move(ninjaDeps);
       build.OrderOnlyDeps = orderOnlyDeps;
       gg->WriteBuild(this->GetImplFileStream(fileConfig), build);

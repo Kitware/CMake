@@ -222,13 +222,21 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
       }
     }
     // Write implicit outputs
-    if (!build.ImplicitOuts.empty()) {
+    if (!build.ImplicitOuts.empty() || !build.WorkDirOuts.empty()) {
       buildStr = cmStrCat(buildStr, " |");
       for (std::string const& implicitOut : build.ImplicitOuts) {
         buildStr = cmStrCat(buildStr, ' ', this->EncodePath(implicitOut));
         if (this->ComputingUnknownDependencies) {
           this->CombinedBuildOutputs.insert(implicitOut);
         }
+      }
+      for (std::string const& workdirOut : build.WorkDirOuts) {
+        // Repeat some outputs, but expressed as absolute paths.
+        // This helps Ninja handle absolute paths found in a depfile.
+        // FIXME: Unfortunately this causes Ninja to stat the file twice.
+        // We could avoid this if Ninja Issue 1251 were fixed.
+        buildStr = cmStrCat(buildStr, " ${cmake_ninja_workdir}",
+                            this->EncodePath(workdirOut));
       }
     }
 
@@ -314,6 +322,12 @@ void cmGlobalNinjaGenerator::CCOutputs::Add(
 {
   for (std::string const& path : paths) {
     std::string out = this->GG->ConvertToNinjaPath(path);
+    if (this->GG->SupportsImplicitOuts() &&
+        !cmSystemTools::FileIsFullPath(out)) {
+      // This output is expressed as a relative path.  Repeat it,
+      // but expressed as an absolute path for Ninja Issue 1251.
+      this->WorkDirOuts.emplace_back(out);
+    }
     this->GG->SeenCustomCommandOutput(out);
     this->ExplicitOuts.emplace_back(std::move(out));
   }
@@ -340,6 +354,7 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
     cmNinjaBuild build("CUSTOM_COMMAND");
     build.Comment = comment;
     build.Outputs = std::move(outputs.ExplicitOuts);
+    build.WorkDirOuts = std::move(outputs.WorkDirOuts);
     build.ExplicitDeps = std::move(explicitDeps);
     build.OrderOnlyDeps = std::move(orderOnlyDeps);
 

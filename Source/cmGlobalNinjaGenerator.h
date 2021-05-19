@@ -121,6 +121,7 @@ public:
     }
     void Add(std::vector<std::string> const& outputs);
     cmNinjaDeps ExplicitOuts;
+    cmNinjaDeps WorkDirOuts;
   };
 
   void WriteCustomCommandBuild(std::string const& command,

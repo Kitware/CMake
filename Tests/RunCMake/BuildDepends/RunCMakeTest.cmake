@@ -183,7 +183,7 @@ if(RunCMake_GENERATOR MATCHES "Make")
 endif()
 
 if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 " OR
-   RunCMake_GENERATOR MATCHES "Ninja")
+   (RunCMake_GENERATOR MATCHES "Ninja" AND ninja_version VERSION_LESS 1.7))
   # This build tool misses the dependency.
   set(run_BuildDepends_skip_step_2 1)
 endif()
