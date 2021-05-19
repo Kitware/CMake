@@ -216,25 +216,24 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   {
     // Write explicit outputs
     for (std::string const& output : build.Outputs) {
-      buildStr += cmStrCat(' ', this->EncodePath(output));
+      buildStr = cmStrCat(buildStr, ' ', this->EncodePath(output));
       if (this->ComputingUnknownDependencies) {
         this->CombinedBuildOutputs.insert(output);
       }
     }
     // Write implicit outputs
     if (!build.ImplicitOuts.empty()) {
-      buildStr += " |";
+      buildStr = cmStrCat(buildStr, " |");
       for (std::string const& implicitOut : build.ImplicitOuts) {
-        buildStr += cmStrCat(' ', this->EncodePath(implicitOut));
+        buildStr = cmStrCat(buildStr, ' ', this->EncodePath(implicitOut));
         if (this->ComputingUnknownDependencies) {
           this->CombinedBuildOutputs.insert(implicitOut);
         }
       }
     }
-    buildStr += ':';
 
     // Write the rule.
-    buildStr += cmStrCat(' ', build.Rule);
+    buildStr = cmStrCat(buildStr, ": ", build.Rule);
   }
 
   std::string arguments;
