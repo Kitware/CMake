@@ -413,12 +413,14 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   std::vector<std::string> targetList;
   std::string exports;
   std::vector<std::string> runtimeDependenciesArgVector;
+  std::string runtimeDependencySetArg;
   std::vector<std::string> unknownArgs;
   std::vector<std::string> parsedArgs;
   cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
   genericArgs.Bind("TARGETS"_s, targetList);
   genericArgs.Bind("EXPORT"_s, exports);
   genericArgs.Bind("RUNTIME_DEPENDENCIES"_s, runtimeDependenciesArgVector);
+  genericArgs.Bind("RUNTIME_DEPENDENCY_SET"_s, runtimeDependencySetArg);
   genericArgs.Parse(genericArgVector, &unknownArgs, nullptr, &parsedArgs);
   bool success = genericArgs.Finalize();
 
@@ -537,6 +539,11 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
 
   cmInstallRuntimeDependencySet* runtimeDependencySet = nullptr;
   if (withRuntimeDependencies) {
+    if (!runtimeDependencySetArg.empty()) {
+      status.SetError("TARGETS cannot have both RUNTIME_DEPENDENCIES and "
+                      "RUNTIME_DEPENDENCY_SET.");
+      return false;
+    }
     auto system = helper.Makefile->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
     if (!cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
           system)) {
@@ -559,6 +566,18 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     }
     runtimeDependencySet = helper.Makefile->GetGlobalGenerator()
                              ->CreateAnonymousRuntimeDependencySet();
+  } else if (!runtimeDependencySetArg.empty()) {
+    auto system = helper.Makefile->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
+    if (!cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
+          system)) {
+      status.SetError(cmStrCat(
+        "TARGETS RUNTIME_DEPENDENCY_SET is not supported on system \"", system,
+        '"'));
+      return false;
+    }
+    runtimeDependencySet =
+      helper.Makefile->GetGlobalGenerator()->GetNamedRuntimeDependencySet(
+        runtimeDependencySetArg);
   }
 
   // Select the mode for installing symlinks to versioned shared libraries.
