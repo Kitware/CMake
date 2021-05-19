@@ -966,8 +966,9 @@ which is just the string ``tgt``.
 .. genex:: $<INSTALL_PREFIX>
 
   Content of the install prefix when the target is exported via
-  :command:`install(EXPORT)`, or when evaluated in
-  :prop_tgt:`INSTALL_NAME_DIR`, and empty otherwise.
+  :command:`install(EXPORT)`, or when evaluated in the
+  :prop_tgt:`INSTALL_NAME_DIR` property or the ``INSTALL_NAME_DIR`` argument of
+  :command:`install(RUNTIME_DEPENDENCY_SET)`, and empty otherwise.
 
 Output-Related Expressions
 --------------------------
