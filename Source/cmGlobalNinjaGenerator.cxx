@@ -335,6 +335,7 @@ void cmGlobalNinjaGenerator::CCOutputs::Add(
       // This output is expressed as a relative path.  Repeat it,
       // but expressed as an absolute path for Ninja Issue 1251.
       this->WorkDirOuts.emplace_back(out);
+      this->GG->SeenCustomCommandOutput(this->GG->ConvertToNinjaAbsPath(path));
     }
     this->GG->SeenCustomCommandOutput(out);
     this->ExplicitOuts.emplace_back(std::move(out));

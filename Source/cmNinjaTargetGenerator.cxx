@@ -382,7 +382,8 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps(
 std::string cmNinjaTargetGenerator::GetCompiledSourceNinjaPath(
   cmSourceFile const* source) const
 {
-  return this->ConvertToNinjaPath(source->GetFullPath());
+  // Pass source files to the compiler by absolute path.
+  return this->ConvertToNinjaAbsPath(source->GetFullPath());
 }
 
 std::string cmNinjaTargetGenerator::GetObjectFilePath(
@@ -1199,9 +1200,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   const std::string& fileConfig, bool firstForConfig)
 {
   std::string const language = source->GetLanguage();
-  std::string const sourceFilePath = language == "RC"
-    ? source->GetFullPath()
-    : this->GetCompiledSourceNinjaPath(source);
+  std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(source);
   std::string const objectDir = this->ConvertToNinjaPath(
     cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
              this->GetGlobalGenerator()->ConfigDirectory(config)));
