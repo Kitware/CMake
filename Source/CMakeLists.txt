@@ -352,6 +352,8 @@ set(SRCS
   cmInstallFilesGenerator.cxx
   cmInstallImportedRuntimeArtifactsGenerator.h
   cmInstallImportedRuntimeArtifactsGenerator.cxx
+  cmInstallRuntimeDependencySet.h
+  cmInstallRuntimeDependencySet.cxx
   cmInstallScriptGenerator.h
   cmInstallScriptGenerator.cxx
   cmInstallSubdirectoryGenerator.h

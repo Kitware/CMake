@@ -36,6 +36,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmInstallGenerator.h"
+#include "cmInstallRuntimeDependencySet.h"
 #include "cmLinkLineComputer.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -3331,4 +3332,27 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
   }
 
   return true;
+}
+
+cmInstallRuntimeDependencySet*
+cmGlobalGenerator::CreateAnonymousRuntimeDependencySet()
+{
+  auto set = cm::make_unique<cmInstallRuntimeDependencySet>();
+  auto* retval = set.get();
+  this->RuntimeDependencySets.push_back(std::move(set));
+  return retval;
+}
+
+cmInstallRuntimeDependencySet* cmGlobalGenerator::GetNamedRuntimeDependencySet(
+  const std::string& name)
+{
+  auto it = this->RuntimeDependencySetsByName.find(name);
+  if (it == this->RuntimeDependencySetsByName.end()) {
+    auto set = cm::make_unique<cmInstallRuntimeDependencySet>(name);
+    it =
+      this->RuntimeDependencySetsByName.insert(std::make_pair(name, set.get()))
+        .first;
+    this->RuntimeDependencySets.push_back(std::move(set));
+  }
+  return it->second;
 }
