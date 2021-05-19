@@ -1942,6 +1942,120 @@ bool HandleExportMode(std::vector<std::string> const& args,
   return true;
 }
 
+bool HandleRuntimeDependencySetMode(std::vector<std::string> const& args,
+                                    cmExecutionStatus& status)
+{
+  Helper helper(status);
+
+  auto system = helper.Makefile->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
+  if (!cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
+        system)) {
+    status.SetError(cmStrCat(
+      "RUNTIME_DEPENDENCY_SET is not supported on system \"", system, '"'));
+    return false;
+  }
+
+  // This is the RUNTIME_DEPENDENCY_SET mode.
+  cmInstallRuntimeDependencySet* runtimeDependencySet;
+
+  struct ArgVectors
+  {
+    std::vector<std::string> Library;
+    std::vector<std::string> Runtime;
+    std::vector<std::string> Framework;
+  };
+
+  static auto const argHelper = cmArgumentParser<ArgVectors>{}
+                                  .Bind("LIBRARY"_s, &ArgVectors::Library)
+                                  .Bind("RUNTIME"_s, &ArgVectors::Runtime)
+                                  .Bind("FRAMEWORK"_s, &ArgVectors::Framework);
+
+  std::vector<std::string> genericArgVector;
+  ArgVectors const argVectors = argHelper.Parse(args, &genericArgVector);
+
+  // now parse the generic args (i.e. the ones not specialized on LIBRARY,
+  // RUNTIME, FRAMEWORK etc. (see above)
+  // These generic args also contain the runtime dependency set
+  std::string runtimeDependencySetArg;
+  std::vector<std::string> runtimeDependencyArgVector;
+  std::vector<std::string> parsedArgs;
+  cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
+  genericArgs.Bind("RUNTIME_DEPENDENCY_SET"_s, runtimeDependencySetArg);
+  genericArgs.Parse(genericArgVector, &runtimeDependencyArgVector, nullptr,
+                    &parsedArgs);
+  bool success = genericArgs.Finalize();
+
+  cmInstallCommandArguments libraryArgs(helper.DefaultComponentName);
+  cmInstallCommandArguments runtimeArgs(helper.DefaultComponentName);
+  cmInstallCommandArguments frameworkArgs(helper.DefaultComponentName);
+
+  // Now also parse the file(GET_RUNTIME_DEPENDENCY) args
+  std::vector<std::string> unknownArgs;
+  auto runtimeDependencyArgs = RuntimeDependenciesArgHelper.Parse(
+    runtimeDependencyArgVector, &unknownArgs);
+
+  // now parse the args for specific parts of the target (e.g. LIBRARY,
+  // RUNTIME, FRAMEWORK etc.
+  libraryArgs.Parse(argVectors.Library, &unknownArgs);
+  runtimeArgs.Parse(argVectors.Runtime, &unknownArgs);
+  frameworkArgs.Parse(argVectors.Framework, &unknownArgs);
+
+  libraryArgs.SetGenericArguments(&genericArgs);
+  runtimeArgs.SetGenericArguments(&genericArgs);
+  frameworkArgs.SetGenericArguments(&genericArgs);
+
+  success = success && libraryArgs.Finalize();
+  success = success && runtimeArgs.Finalize();
+  success = success && frameworkArgs.Finalize();
+
+  if (!success) {
+    return false;
+  }
+
+  if (!unknownArgs.empty()) {
+    helper.SetError(
+      cmStrCat("RUNTIME_DEPENDENCY_SET given unknown argument \"",
+               unknownArgs.front(), "\"."));
+    return false;
+  }
+
+  if (runtimeDependencySetArg.empty()) {
+    helper.SetError(
+      "RUNTIME_DEPENDENCY_SET not given a runtime dependency set.");
+    return false;
+  }
+
+  runtimeDependencySet =
+    helper.Makefile->GetGlobalGenerator()->GetNamedRuntimeDependencySet(
+      runtimeDependencySetArg);
+
+  bool installsRuntime = false;
+  bool installsLibrary = false;
+  bool installsFramework = false;
+
+  AddInstallRuntimeDependenciesGenerator(
+    helper, runtimeDependencySet, runtimeArgs, libraryArgs, frameworkArgs,
+    std::move(runtimeDependencyArgs), installsRuntime, installsLibrary,
+    installsFramework);
+
+  // Tell the global generator about any installation component names
+  // specified
+  if (installsLibrary) {
+    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
+      libraryArgs.GetComponent());
+  }
+  if (installsRuntime) {
+    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
+      runtimeArgs.GetComponent());
+  }
+  if (installsFramework) {
+    helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
+      frameworkArgs.GetComponent());
+  }
+
+  return true;
+}
+
 bool Helper::MakeFilesFullPath(const char* modeName,
                                const std::vector<std::string>& relFiles,
                                std::vector<std::string>& absFiles)
@@ -2176,6 +2290,7 @@ bool cmInstallCommand(std::vector<std::string> const& args,
     { "DIRECTORY"_s, HandleDirectoryMode },
     { "EXPORT"_s, HandleExportMode },
     { "EXPORT_ANDROID_MK"_s, HandleExportAndroidMKMode },
+    { "RUNTIME_DEPENDENCY_SET"_s, HandleRuntimeDependencySetMode },
   };
 
   return subcommand(args[0], args, status);
