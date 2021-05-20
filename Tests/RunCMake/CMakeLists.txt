@@ -140,6 +140,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)")
   add_RunCMake_test(CMP0125 -DCMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}
                             -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
+add_RunCMake_test(CMP0126)
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
