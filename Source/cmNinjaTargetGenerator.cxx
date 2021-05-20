@@ -987,7 +987,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     this->GeneratorTarget->GetExternalObjects(externalObjects, config);
     for (cmSourceFile const* sf : externalObjects) {
       auto objectFileName = this->GetGlobalGenerator()->ExpandCFGIntDir(
-        this->GetSourceFilePath(sf), config);
+        this->ConvertToNinjaPath(sf->GetFullPath()), config);
       if (!cmSystemTools::StringEndsWith(objectFileName,
                                          cmToCStr(pchExtension))) {
         this->Configs[config].Objects.push_back(objectFileName);
