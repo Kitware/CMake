@@ -1575,8 +1575,7 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
 void cmNinjaTargetGenerator::EmitSwiftDependencyInfo(
   cmSourceFile const* source, const std::string& config)
 {
-  std::string const sourceFilePath =
-    this->ConvertToNinjaPath(this->GetSourceFilePath(source));
+  std::string const sourceFilePath = this->GetSourceFilePath(source);
   std::string const objectFilePath =
     this->ConvertToNinjaPath(this->GetObjectFilePath(source, config));
   std::string const swiftDepsPath = [source, objectFilePath]() -> std::string {
