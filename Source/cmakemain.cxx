@@ -271,6 +271,7 @@ int do_cmake(int ac, char const* const* av)
                      } },
     CommandArgument{ "-P", "No script specified for argument -P",
                      CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No,
                      [&](std::string const& value) -> bool {
                        workingMode = cmake::SCRIPT_MODE;
                        parsedArgs.emplace_back("-P");
@@ -476,9 +477,10 @@ int do_build(int ac, char const* const* av)
                        listPresets = true;
                        return true;
                      } },
-    CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne, jLambda },
+    CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne,
+                     CommandArgument::RequiresSeparator::No, jLambda },
     CommandArgument{ "--parallel", CommandArgument::Values::ZeroOrOne,
-                     parallelLambda },
+                     CommandArgument::RequiresSeparator::No, parallelLambda },
     CommandArgument{ "-t", CommandArgument::Values::OneOrMore, targetLambda },
     CommandArgument{ "--target", CommandArgument::Values::OneOrMore,
                      targetLambda },
