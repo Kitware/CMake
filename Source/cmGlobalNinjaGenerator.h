@@ -261,6 +261,7 @@ public:
   }
 
   std::string const& ConvertToNinjaPath(const std::string& path) const;
+  std::string ConvertToNinjaAbsPath(std::string path) const;
 
   struct MapToNinjaPathImpl
   {

@@ -110,6 +110,11 @@ protected:
     return this->GetGlobalGenerator()->MapToNinjaPath();
   }
 
+  std::string ConvertToNinjaAbsPath(std::string path) const
+  {
+    return this->GetGlobalGenerator()->ConvertToNinjaAbsPath(std::move(path));
+  }
+
   /// @return the list of link dependency for the given target @a target.
   cmNinjaDeps ComputeLinkDeps(const std::string& linkLanguage,
                               const std::string& config,

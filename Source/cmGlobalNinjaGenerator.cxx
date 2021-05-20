@@ -1160,6 +1160,15 @@ std::string const& cmGlobalNinjaGenerator::ConvertToNinjaPath(
     .first->second;
 }
 
+std::string cmGlobalNinjaGenerator::ConvertToNinjaAbsPath(
+  std::string path) const
+{
+#ifdef _WIN32
+  std::replace(path.begin(), path.end(), '/', '\\');
+#endif
+  return path;
+}
+
 void cmGlobalNinjaGenerator::AddAdditionalCleanFile(std::string fileName,
                                                     const std::string& config)
 {
