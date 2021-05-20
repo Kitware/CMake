@@ -136,6 +136,10 @@ def check_directory(c):
                 expected_keys.append("isExcludeFromAll")
                 assert is_bool(a["isExcludeFromAll"], e["isExcludeFromAll"])
 
+            if e["isForAllComponents"] is not None:
+                expected_keys.append("isForAllComponents")
+                assert is_bool(a["isForAllComponents"], e["isForAllComponents"])
+
             if e["isOptional"] is not None:
                 expected_keys.append("isOptional")
                 assert is_bool(a["isOptional"], e["isOptional"])

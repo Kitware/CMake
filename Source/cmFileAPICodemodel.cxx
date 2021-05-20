@@ -1016,6 +1016,11 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
   if (gen->GetExcludeFromAll()) {
     installer["isExcludeFromAll"] = true;
   }
+
+  if (gen->GetAllComponentsFlag()) {
+    installer["isForAllComponents"] = true;
+  }
+
   this->AddBacktrace(installer, gen->GetBacktrace());
 
   return installer;

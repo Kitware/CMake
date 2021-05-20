@@ -33,7 +33,8 @@ public:
   cmInstallGenerator(std::string destination,
                      std::vector<std::string> const& configurations,
                      std::string component, MessageLevel message,
-                     bool exclude_from_all, cmListFileBacktrace backtrace);
+                     bool exclude_from_all, bool all_components,
+                     cmListFileBacktrace backtrace);
   ~cmInstallGenerator() override;
 
   cmInstallGenerator(cmInstallGenerator const&) = delete;
@@ -65,6 +66,7 @@ public:
   std::string const& GetComponent() const { return this->Component; }
 
   bool GetExcludeFromAll() const { return this->ExcludeFromAll; }
+  bool GetAllComponentsFlag() const { return this->AllComponents; }
 
   cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
 
@@ -79,5 +81,6 @@ protected:
   std::string const Component;
   MessageLevel const Message;
   bool const ExcludeFromAll;
+  bool const AllComponents;
   cmListFileBacktrace const Backtrace;
 };

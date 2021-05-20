@@ -17,7 +17,7 @@ cmInstallSubdirectoryGenerator::cmInstallSubdirectoryGenerator(
   cmMakefile* makefile, std::string binaryDirectory, bool excludeFromAll,
   cmListFileBacktrace backtrace)
   : cmInstallGenerator("", std::vector<std::string>(), "", MessageDefault,
-                       excludeFromAll, std::move(backtrace))
+                       excludeFromAll, false, std::move(backtrace))
   , Makefile(makefile)
   , BinaryDirectory(std::move(binaryDirectory))
 {

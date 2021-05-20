@@ -23,6 +23,7 @@
                 "^object/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?c_object_exe(\\.exe)?$"
             ],
             "isExcludeFromAll": null,
+            "isForAllComponents": null,
             "isOptional": null,
             "targetId": "^c_object_exe::@5ed5358f70faf8d8af7a$",
             "targetIndex": "c_object_exe",
@@ -54,6 +55,7 @@
                 "^object/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?cxx_object_exe(\\.exe)?$"
             ],
             "isExcludeFromAll": null,
+            "isForAllComponents": null,
             "isOptional": null,
             "targetId": "^cxx_object_exe::@5ed5358f70faf8d8af7a$",
             "targetIndex": "cxx_object_exe",
