@@ -108,6 +108,7 @@ private:
                                        const std::string& config);
   void WriteNinjaFilesInclusionConfig(std::ostream& os);
   void WriteNinjaFilesInclusionCommon(std::ostream& os);
+  void WriteNinjaWorkDir(std::ostream& os);
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);
 

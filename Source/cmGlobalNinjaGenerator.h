@@ -110,13 +110,29 @@ public:
   void WriteBuild(std::ostream& os, cmNinjaBuild const& build,
                   int cmdLineLimit = 0, bool* usedResponseFile = nullptr);
 
-  void WriteCustomCommandBuild(
-    const std::string& command, const std::string& description,
-    const std::string& comment, const std::string& depfile,
-    const std::string& pool, bool uses_terminal, bool restat,
-    const cmNinjaDeps& outputs, const std::string& config,
-    const cmNinjaDeps& explicitDeps = cmNinjaDeps(),
-    const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps());
+  class CCOutputs
+  {
+    cmGlobalNinjaGenerator* GG;
+
+  public:
+    CCOutputs(cmGlobalNinjaGenerator* gg)
+      : GG(gg)
+    {
+    }
+    void Add(std::vector<std::string> const& outputs);
+    cmNinjaDeps ExplicitOuts;
+    cmNinjaDeps WorkDirOuts;
+  };
+
+  void WriteCustomCommandBuild(std::string const& command,
+                               std::string const& description,
+                               std::string const& comment,
+                               std::string const& depfile,
+                               std::string const& pool, bool uses_terminal,
+                               bool restat, std::string const& config,
+                               CCOutputs outputs,
+                               cmNinjaDeps explicitDeps = cmNinjaDeps(),
+                               cmNinjaDeps orderOnlyDeps = cmNinjaDeps());
 
   void WriteMacOSXContentBuild(std::string input, std::string output,
                                const std::string& config);

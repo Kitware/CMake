@@ -263,6 +263,7 @@ void cmLocalNinjaGenerator::WriteBuildFileTop()
                                           this->GetConfigNames().front());
   }
   this->WriteNinjaFilesInclusionCommon(this->GetCommonFileStream());
+  this->WriteNinjaWorkDir(this->GetCommonFileStream());
 
   // For the rule file.
   this->WriteProjectHeader(this->GetRulesFileStream());
@@ -362,6 +363,17 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusionCommon(std::ostream& os)
   cmGlobalNinjaGenerator::WriteInclude(os, rulesFilePath,
                                        "Include rules file.");
   os << "\n";
+}
+
+void cmLocalNinjaGenerator::WriteNinjaWorkDir(std::ostream& os)
+{
+  cmGlobalNinjaGenerator::WriteDivider(os);
+  cmGlobalNinjaGenerator::WriteComment(
+    os, "Logical path to working directory; prefix for absolute paths.");
+  cmGlobalNinjaGenerator* ng = this->GetGlobalNinjaGenerator();
+  std::string ninja_workdir = this->GetBinaryDirectory();
+  ng->StripNinjaOutputPathPrefixAsSuffix(ninja_workdir); // Also appends '/'.
+  os << "cmake_ninja_workdir = " << ng->EncodePath(ninja_workdir) << "\n";
 }
 
 void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
@@ -638,16 +650,11 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       }
     }
 
-    cmNinjaDeps ninjaOutputs(outputs.size() + byproducts.size());
-    std::transform(outputs.begin(), outputs.end(), ninjaOutputs.begin(),
-                   gg->MapToNinjaPath());
-    std::transform(byproducts.begin(), byproducts.end(),
-                   ninjaOutputs.begin() + outputs.size(),
-                   gg->MapToNinjaPath());
+    cmGlobalNinjaGenerator::CCOutputs ccOutputs(gg);
+    ccOutputs.Add(outputs);
+    ccOutputs.Add(byproducts);
 
-    for (std::string const& ninjaOutput : ninjaOutputs) {
-      gg->SeenCustomCommandOutput(ninjaOutput);
-    }
+    std::string mainOutput = ccOutputs.ExplicitOuts[0];
 
     cmNinjaDeps ninjaDeps;
     this->AppendCustomCommandDeps(ccg, ninjaDeps, fileConfig);
@@ -657,13 +664,14 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 
     if (cmdLines.empty()) {
       cmNinjaBuild build("phony");
-      build.Comment = "Phony custom command for " + ninjaOutputs[0];
-      build.Outputs = std::move(ninjaOutputs);
+      build.Comment = cmStrCat("Phony custom command for ", mainOutput);
+      build.Outputs = std::move(ccOutputs.ExplicitOuts);
+      build.WorkDirOuts = std::move(ccOutputs.WorkDirOuts);
       build.ExplicitDeps = std::move(ninjaDeps);
       build.OrderOnlyDeps = orderOnlyDeps;
       gg->WriteBuild(this->GetImplFileStream(fileConfig), build);
     } else {
-      std::string customStep = cmSystemTools::GetFilenameName(ninjaOutputs[0]);
+      std::string customStep = cmSystemTools::GetFilenameName(mainOutput);
       if (this->GlobalGenerator->IsMultiConfig()) {
         customStep += '-';
         customStep += fileConfig;
@@ -673,7 +681,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       // Hash full path to make unique.
       customStep += '-';
       cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
-      customStep += hash.HashString(ninjaOutputs[0]).substr(0, 7);
+      customStep += hash.HashString(mainOutput).substr(0, 7);
 
       std::string depfile = ccg.GetDepfile();
       if (!depfile.empty()) {
@@ -701,13 +709,14 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
         }
       }
 
+      std::string comment = cmStrCat("Custom command for ", mainOutput);
       gg->WriteCustomCommandBuild(
         this->BuildCommandLine(cmdLines, ccg.GetOutputConfig(), fileConfig,
                                customStep),
-        this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
-        depfile, cc->GetJobPool(), cc->GetUsesTerminal(),
-        /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, fileConfig,
-        ninjaDeps, orderOnlyDeps);
+        this->ConstructComment(ccg), comment, depfile, cc->GetJobPool(),
+        cc->GetUsesTerminal(),
+        /*restat*/ !symbolic || !byproducts.empty(), fileConfig,
+        std::move(ccOutputs), std::move(ninjaDeps), std::move(orderOnlyDeps));
     }
   }
 }
