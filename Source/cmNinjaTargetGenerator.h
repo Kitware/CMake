@@ -101,7 +101,7 @@ protected:
                               const std::string& language,
                               const std::string& config);
 
-  std::string ConvertToNinjaPath(const std::string& path) const
+  std::string const& ConvertToNinjaPath(const std::string& path) const
   {
     return this->GetGlobalGenerator()->ConvertToNinjaPath(path);
   }
