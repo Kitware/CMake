@@ -68,6 +68,7 @@ dnf install --setopt=install_weak_deps=False -y \
     libuv-devel \
     libxml2-devel \
     libxslt-devel \
+    mpich-devel \
     openmpi-devel \
     patch \
     perl \
