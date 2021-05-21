@@ -2680,9 +2680,11 @@ function(_ep_add_download_command name)
     get_property(git_progress TARGET ${name} PROPERTY _EP_GIT_PROGRESS)
     get_property(git_config TARGET ${name} PROPERTY _EP_GIT_CONFIG)
 
-    # Make checkouts quiet when checking out a git hash (this avoids the
-    # very noisy detached head message)
-    list(PREPEND git_config advice.detachedHead=false)
+    # If git supports it, make checkouts quiet when checking out a git hash.
+    # This avoids the very noisy detached head message.
+    if(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.7.7)
+      list(PREPEND git_config advice.detachedHead=false)
+    endif()
 
     # For the download step, and the git clone operation, only the repository
     # should be recorded in a configured RepositoryInfo file. If the repo
