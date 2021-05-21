@@ -19,6 +19,7 @@
 #include <cm3p/uv.h>
 
 #include "cmDuration.h"
+#include "cmMessageMetadata.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
@@ -263,8 +264,15 @@ void cmSystemTools::Stdout(const std::string& s)
 
 void cmSystemTools::Message(const std::string& m, const char* title)
 {
+  cmMessageMetadata md;
+  md.title = title;
+  Message(m, md);
+}
+
+void cmSystemTools::Message(const std::string& m, const cmMessageMetadata& md)
+{
   if (s_MessageCallback) {
-    s_MessageCallback(m, title);
+    s_MessageCallback(m, md);
   } else {
     std::cerr << m << std::endl;
   }

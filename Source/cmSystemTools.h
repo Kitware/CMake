@@ -19,6 +19,8 @@
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 
+struct cmMessageMetadata;
+
 /** \class cmSystemTools
  * \brief A collection of useful functions for CMake.
  *
@@ -40,7 +42,8 @@ public:
   /** Map help document name to file name.  */
   static std::string HelpFileName(cm::string_view);
 
-  using MessageCallback = std::function<void(const std::string&, const char*)>;
+  using MessageCallback =
+    std::function<void(const std::string&, const cmMessageMetadata&)>;
   /**
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
@@ -57,6 +60,7 @@ public:
    * Display a message.
    */
   static void Message(const std::string& m, const char* title = nullptr);
+  static void Message(const std::string& m, const cmMessageMetadata& md);
 
   using OutputCallback = std::function<void(std::string const&)>;
 

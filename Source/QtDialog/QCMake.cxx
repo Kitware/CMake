@@ -13,6 +13,7 @@
 
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmMessageMetadata.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -37,8 +38,8 @@ QCMake::QCMake(QObject* p)
   cmSystemTools::SetRunCommandHideConsole(true);
 
   cmSystemTools::SetMessageCallback(
-    [this](std::string const& msg, const char* title) {
-      this->messageCallback(msg, title);
+    [this](std::string const& msg, const cmMessageMetadata& md) {
+      this->messageCallback(msg, md.title);
     });
   cmSystemTools::SetStdoutCallback(
     [this](std::string const& msg) { this->stdoutCallback(msg); });
