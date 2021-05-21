@@ -52,6 +52,11 @@
 
 class cmMessenger;
 
+namespace {
+const cmsys::RegularExpression FrameworkRegularExpression(
+  "^(.*/)?([^/]*)\\.framework/(.*)$");
+}
+
 template <>
 cmProp cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
   cmGeneratorTarget const* tgt, cmMessenger* /* messenger */,
@@ -2257,8 +2262,16 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
         return cmSystemTools::GetFilenameName(info->Location);
       }
       // Use the soname given if any.
+      if (this->IsFrameworkOnApple()) {
+        cmsys::RegularExpressionMatch match;
+        if (FrameworkRegularExpression.find(info->SOName.c_str(), match)) {
+          auto frameworkName = match.match(2);
+          auto fileName = match.match(3);
+          return cmStrCat(frameworkName, ".framework/", fileName);
+        }
+      }
       if (cmHasLiteralPrefix(info->SOName, "@rpath/")) {
-        return info->SOName.substr(6);
+        return info->SOName.substr(cmStrLen("@rpath/"));
       }
       return info->SOName;
     }
@@ -6459,9 +6472,19 @@ std::string cmGeneratorTarget::GetDirectory(
   const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   if (this->IsImported()) {
+    auto fullPath = this->Target->ImportedGetFullPath(config, artifact);
+    if (this->IsFrameworkOnApple()) {
+      cmsys::RegularExpressionMatch match;
+      if (FrameworkRegularExpression.find(fullPath.c_str(), match)) {
+        auto path = match.match(1);
+        if (!path.empty()) {
+          path.erase(path.length() - 1);
+        }
+        return path;
+      }
+    }
     // Return the directory from which the target is imported.
-    return cmSystemTools::GetFilenamePath(
-      this->Target->ImportedGetFullPath(config, artifact));
+    return cmSystemTools::GetFilenamePath(fullPath);
   }
   if (OutputInfo const* info = this->GetOutputInfo(config)) {
     // Return the directory in which the target will be built.
