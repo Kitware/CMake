@@ -2,7 +2,7 @@
 FindCUDA
 --------
 
-.. deprecated:: 3.10
+.. warning:: *Deprecated since version 3.10.*
 
 It is no longer necessary to use this module or call ``find_package(CUDA)``
 for compiling CUDA code. Instead, list ``CUDA`` among the languages named
