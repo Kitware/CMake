@@ -241,7 +241,7 @@ bool RegexMatch(std::vector<std::string> const& args,
   status.GetMakefile().ClearMatches();
   // Compile the regular expression.
   cmsys::RegularExpression re;
-  if (!re.compile(regex.c_str())) {
+  if (!re.compile(regex)) {
     std::string e =
       "sub-command REGEX, mode MATCH failed to compile regex \"" + regex +
       "\".";
@@ -283,7 +283,7 @@ bool RegexMatchAll(std::vector<std::string> const& args,
   status.GetMakefile().ClearMatches();
   // Compile the regular expression.
   cmsys::RegularExpression re;
-  if (!re.compile(regex.c_str())) {
+  if (!re.compile(regex)) {
     std::string e =
       "sub-command REGEX, mode MATCHALL failed to compile regex \"" + regex +
       "\".";

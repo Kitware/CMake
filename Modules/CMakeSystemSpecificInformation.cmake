@@ -14,6 +14,7 @@
 set(APPLE  )
 set(UNIX   )
 set(CYGWIN )
+set(MSYS )
 set(WIN32  )
 
 

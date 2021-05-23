@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.12)
 project(LinkInterfaceLoop C)
 
 # Add a shared library that incorrectly names itself as a

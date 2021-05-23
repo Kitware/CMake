@@ -1,4 +1,3 @@
-
 #define assert(E)                                                             \
   if (!(E))                                                                   \
     return 1;
@@ -38,6 +37,7 @@ int someFunc()
   }
 
   int* vp = new int[i];
+  delete[] vp;
 
   return 0;
 }

@@ -941,14 +941,15 @@ function(_ExternalData_link_or_copy src dst)
         file(RELATIVE_PATH tgt "${dst_dir}" "${src}")
       endif()
     endif()
-    execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${tgt}" "${tmp}" RESULT_VARIABLE result)
+    # Create link (falling back to copying if there's a problem).
+    file(CREATE_LINK "${tgt}" "${tmp}" RESULT result COPY_ON_ERROR SYMBOLIC)
   else()
     # Create a copy.
-    execute_process(COMMAND "${CMAKE_COMMAND}" -E copy "${src}" "${tmp}" RESULT_VARIABLE result)
+    file(COPY_FILE "${src}" "${tmp}" RESULT result)
   endif()
   if(result)
     file(REMOVE "${tmp}")
-    message(FATAL_ERROR "Failed to create\n  ${tmp}\nfrom\n  ${obj}")
+    message(FATAL_ERROR "Failed to create:\n  \"${tmp}\"\nfrom:\n  \"${obj}\"\nwith error:\n  ${result}")
   endif()
 
   # Atomically create/replace the real destination.
@@ -1101,7 +1102,14 @@ function(_ExternalData_download_object name hash algo var_obj var_success var_er
 
   set(success 1)
   if(found)
-    file(RENAME "${tmp}" "${obj}")
+    # Atomically create the object.  If we lose a race with another process,
+    # do not replace it.  Content-addressing ensures it has what we expect.
+    file(RENAME "${tmp}" "${obj}" NO_REPLACE RESULT result)
+    if (result STREQUAL "NO_REPLACE")
+      file(REMOVE "${tmp}")
+    elseif (result)
+      message(FATAL_ERROR "Failed to rename:\n  \"${tmp}\"\nto:\n  \"${obj}\"\nwith error:\n  ${result}")
+    endif()
     message(STATUS "Downloaded object: \"${obj}\"")
   elseif(EXISTS "${staged}")
     set(obj "${staged}")

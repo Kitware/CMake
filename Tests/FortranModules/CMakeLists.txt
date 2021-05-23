@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 3.9)
 project(FortranModules Fortran)
 
+if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" MATCHES "^Intel(LLVM)?;MSVC$")
+  string(APPEND CMAKE_Fortran_FLAGS_DEBUG " -Z7")
+  string(APPEND CMAKE_Fortran_FLAGS_RELWITHDEBINFO " -Z7")
+endif()
+
 if(NOT DEFINED CMake_TEST_NESTED_MAKE_PROGRAM AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   set(CMake_TEST_NESTED_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
 endif()

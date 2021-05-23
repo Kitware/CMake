@@ -29,6 +29,7 @@
 #  ifdef _MSC_VER
 #    define umask _umask
 #  endif
+#  include <windows.h>
 #endif
 #include <sys/stat.h> /* umask (POSIX), _S_I* constants (Windows) */
 // Visual C++ does not define mode_t.
@@ -290,15 +291,17 @@ static bool CheckFileOperations()
     res = false;
   }
 
+  std::cerr << std::oct;
 // Reset umask
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#ifdef __MSYS__
+  mode_t fullMask = S_IWRITE;
+#elif defined(_WIN32) && !defined(__CYGWIN__)
   // NOTE:  Windows doesn't support toggling _S_IREAD.
   mode_t fullMask = _S_IWRITE;
 #else
   // On a normal POSIX platform, we can toggle all permissions.
   mode_t fullMask = S_IRWXU | S_IRWXG | S_IRWXO;
 #endif
-  mode_t orig_umask = umask(fullMask);
 
   // Test file permissions without umask
   mode_t origPerm, thisPerm;
@@ -370,6 +373,7 @@ static bool CheckFileOperations()
     res = false;
   }
 
+  mode_t orig_umask = umask(fullMask);
   // Test setting file permissions while honoring umask
   if (!kwsys::SystemTools::SetPermissions(testNewFile, fullMask, true)) {
     std::cerr << "Problem with SetPermissions (3) for: " << testNewFile
@@ -422,21 +426,28 @@ static bool CheckFileOperations()
     res = false;
   }
 
-#if !defined(_WIN32)
   std::string const testBadSymlink(testNewDir + "/badSymlink.txt");
   std::string const testBadSymlinkTgt(testNewDir + "/missing/symlinkTgt.txt");
-  if (!kwsys::SystemTools::CreateSymlink(testBadSymlinkTgt, testBadSymlink)) {
-    std::cerr << "Problem with CreateSymlink for: " << testBadSymlink << " -> "
-              << testBadSymlinkTgt << std::endl;
-    res = false;
-  }
-
-  if (!kwsys::SystemTools::Touch(testBadSymlink, false)) {
-    std::cerr << "Problem with Touch (no create) for: " << testBadSymlink
-              << std::endl;
-    res = false;
-  }
+  kwsys::Status const symlinkStatus =
+    kwsys::SystemTools::CreateSymlink(testBadSymlinkTgt, testBadSymlink);
+#if defined(_WIN32)
+  // Under Windows, the user may not have enough privileges to create symlinks
+  if (symlinkStatus.GetWindows() != ERROR_PRIVILEGE_NOT_HELD)
 #endif
+  {
+    if (!symlinkStatus) {
+      std::cerr << "CreateSymlink for: " << testBadSymlink << " -> "
+                << testBadSymlinkTgt
+                << " failed: " << symlinkStatus.GetString() << std::endl;
+      res = false;
+    }
+
+    if (!kwsys::SystemTools::Touch(testBadSymlink, false)) {
+      std::cerr << "Problem with Touch (no create) for: " << testBadSymlink
+                << std::endl;
+      res = false;
+    }
+  }
 
   if (!kwsys::SystemTools::Touch(testNewDir, false)) {
     std::cerr << "Problem with Touch (no create) for: " << testNewDir
@@ -496,6 +507,7 @@ static bool CheckFileOperations()
   }
 #endif
 
+  std::cerr << std::dec;
   return res;
 }
 
@@ -1093,7 +1105,7 @@ static bool CheckCopyFileIfDifferent()
       ret = false;
       continue;
     }
-    std::string bdata = readFile("file_b");
+    std::string bdata = readFile(cptarget);
     if (diff_test_cases[i].a != bdata) {
       std::cerr << "Incorrect CopyFileIfDifferent file contents in test case "
                 << i + 1 << "." << std::endl;

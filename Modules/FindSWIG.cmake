@@ -87,55 +87,67 @@ if (NOT _SWIG_NAMES)
 endif()
 
 find_program(SWIG_EXECUTABLE NAMES ${_SWIG_NAMES} swig)
+unset(_SWIG_NAMES)
 
-if(SWIG_EXECUTABLE)
-  execute_process(COMMAND ${SWIG_EXECUTABLE} -swiglib
-    OUTPUT_VARIABLE SWIG_swiglib_output
-    ERROR_VARIABLE SWIG_swiglib_error
-    RESULT_VARIABLE SWIG_swiglib_result)
+if(SWIG_EXECUTABLE AND NOT SWIG_DIR)
+  # Find default value for SWIG library directory
+  execute_process(COMMAND "${SWIG_EXECUTABLE}" -swiglib
+    OUTPUT_VARIABLE _swig_output
+    ERROR_VARIABLE _swig_error
+    RESULT_VARIABLE _swig_result)
 
-  if(SWIG_swiglib_result)
+  if(_swig_result)
+    set(_msg "Command \"${SWIG_EXECUTABLE} -swiglib\" failed with output:\n${_swig_error}")
     if(SWIG_FIND_REQUIRED)
-      message(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -swiglib\" failed with output:\n${SWIG_swiglib_error}")
+      message(SEND_ERROR "${_msg}")
     else()
-      message(STATUS "Command \"${SWIG_EXECUTABLE} -swiglib\" failed with output:\n${SWIG_swiglib_error}")
+      message(STATUS "${_msg}")
     endif()
+    unset(_msg)
   else()
-    string(REGEX REPLACE "[\n\r]+" ";" SWIG_swiglib_output ${SWIG_swiglib_output})
-    find_path(SWIG_DIR swig.swg PATHS ${SWIG_swiglib_output} NO_CMAKE_FIND_ROOT_PATH)
-    if(SWIG_DIR)
-      set(SWIG_USE_FILE ${CMAKE_CURRENT_LIST_DIR}/UseSWIG.cmake)
-      execute_process(COMMAND ${SWIG_EXECUTABLE} -version
-        OUTPUT_VARIABLE SWIG_version_output
-        ERROR_VARIABLE SWIG_version_output
-        RESULT_VARIABLE SWIG_version_result)
-      if(SWIG_version_result)
-        message(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -version\" failed with output:\n${SWIG_version_output}")
-      else()
-        string(REGEX REPLACE ".*SWIG Version[^0-9.]*\([0-9.]+\).*" "\\1"
-          SWIG_version_output "${SWIG_version_output}")
-        set(SWIG_VERSION ${SWIG_version_output} CACHE STRING "Swig version" FORCE)
-      endif()
-    endif()
+    string(REGEX REPLACE "[\n\r]+" ";" _SWIG_LIB ${_swig_output})
   endif()
 
-  if(SWIG_FIND_COMPONENTS)
-    execute_process(COMMAND ${SWIG_EXECUTABLE} -help
-      OUTPUT_VARIABLE SWIG_swighelp_output
-      ERROR_VARIABLE SWIG_swighelp_error
-      RESULT_VARIABLE SWIG_swighelp_result)
-    if(SWIG_swighelp_result)
-      message(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -help\" failed with output:\n${SWIG_swiglib_error}")
-    else()
-      string(REPLACE "\n" ";" SWIG_swighelp_output "${SWIG_swighelp_output}")
-      foreach(SWIG_line IN LISTS SWIG_swighelp_output)
-        if(SWIG_line MATCHES "-([A-Za-z0-9_]+) +- *Generate.*wrappers")
-          set(SWIG_${CMAKE_MATCH_1}_FOUND TRUE)
-        endif()
-      endforeach()
-    endif()
+  # Find SWIG library directory
+  find_path(SWIG_DIR swig.swg PATHS ${_SWIG_LIB} NO_CMAKE_FIND_ROOT_PATH)
+  unset(_SWIG_LIB)
+endif()
+
+if(SWIG_EXECUTABLE AND SWIG_DIR AND NOT SWIG_VERSION)
+  # Determine SWIG version
+  execute_process(COMMAND "${SWIG_EXECUTABLE}" -version
+    OUTPUT_VARIABLE _swig_output
+    ERROR_VARIABLE _swig_output
+    RESULT_VARIABLE _swig_result)
+  if(_swig_result)
+    message(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -version\" failed with output:\n${_swig_output}")
+  else()
+    string(REGEX REPLACE ".*SWIG Version[^0-9.]*\([0-9.]+\).*" "\\1"
+      _swig_output "${_swig_output}")
+    set(SWIG_VERSION ${_swig_output} CACHE STRING "Swig version" FORCE)
   endif()
 endif()
+
+if(SWIG_EXECUTABLE AND SWIG_FIND_COMPONENTS)
+  execute_process(COMMAND "${SWIG_EXECUTABLE}" -help
+    OUTPUT_VARIABLE _swig_output
+    ERROR_VARIABLE _swig_error
+    RESULT_VARIABLE _swig_result)
+  if(_swig_result)
+    message(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -help\" failed with output:\n${_swig_error}")
+  else()
+    string(REPLACE "\n" ";" _swig_output "${_swig_output}")
+    foreach(SWIG_line IN LISTS _swig_output)
+      if(SWIG_line MATCHES "-([A-Za-z0-9_]+) +- *Generate.*wrappers")
+        set(SWIG_${CMAKE_MATCH_1}_FOUND TRUE)
+      endif()
+    endforeach()
+  endif()
+endif()
+
+unset(_swig_output)
+unset(_swig_error)
+unset(_swig_result)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(
@@ -143,5 +155,9 @@ find_package_handle_standard_args(
   REQUIRED_VARS SWIG_EXECUTABLE SWIG_DIR
   VERSION_VAR SWIG_VERSION
   HANDLE_VERSION_RANGE)
+
+if(SWIG_FOUND)
+  set(SWIG_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/UseSWIG.cmake")
+endif()
 
 mark_as_advanced(SWIG_DIR SWIG_VERSION SWIG_EXECUTABLE)

@@ -13,7 +13,6 @@
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 
-class cmCTestCommand;
 class cmGeneratedFileStream;
 class cmMakefile;
 
@@ -72,12 +71,40 @@ public:
   virtual ~cmCTestGenericHandler();
 
   using t_StringToString = std::map<std::string, std::string>;
+  using t_StringToMultiString =
+    std::map<std::string, std::vector<std::string>>;
 
+  /**
+   * Options collect a single value from flags; passing the
+   * flag multiple times on the command-line *overwrites* values,
+   * and only the last one specified counts. Set an option to
+   * nullptr to "unset" it.
+   *
+   * The value is stored as a string. The values set for single
+   * and multi-options (see below) live in different spaces,
+   * so calling a single-getter for a key that has only been set
+   * as a multi-value will return nullptr.
+   */
   void SetPersistentOption(const std::string& op, const char* value);
   void SetOption(const std::string& op, const char* value);
   const char* GetOption(const std::string& op);
 
-  void SetCommand(cmCTestCommand* command) { this->Command = command; }
+  /**
+   * Multi-Options collect one or more values from flags; passing
+   * the flag multiple times on the command-line *adds* values,
+   * rather than overwriting the previous values.
+   *
+   * Adding an empty value does nothing.
+   *
+   * The value is stored as a vector of strings. The values set for single
+   * (see above) and multi-options live in different spaces,
+   * so calling a multi-getter for a key that has only been set
+   * as a single-value will return an empty vector.
+   */
+  void AddPersistentMultiOption(const std::string& optionName,
+                                const std::string& value);
+  void AddMultiOption(const std::string& optionName, const std::string& value);
+  std::vector<std::string> GetMultiOption(const std::string& op) const;
 
   void SetSubmitIndex(int idx) { this->SubmitIndex = idx; }
   int GetSubmitIndex() { return this->SubmitIndex; }
@@ -100,8 +127,9 @@ protected:
   cmCTest* CTest;
   t_StringToString Options;
   t_StringToString PersistentOptions;
+  t_StringToMultiString MultiOptions;
+  t_StringToMultiString PersistentMultiOptions;
   t_StringToString LogFileNames;
 
-  cmCTestCommand* Command;
   int SubmitIndex;
 };

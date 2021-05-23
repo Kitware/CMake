@@ -74,7 +74,8 @@ static Json::Value EncodeFilename(std::string const& path)
     }                                                                         \
   } while (0)
 
-bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
+bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
+                                 cmScanDepInfo* info)
 {
   Json::Value ppio;
   Json::Value const& ppi = ppio;
@@ -114,15 +115,6 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
                                       arg_pp,
                                       ": work-directory is not a string"));
         return false;
-      }
-
-      Json::Value const& depends = rule["depends"];
-      if (depends.isArray()) {
-        std::string depend_filename;
-        for (auto const& depend : depends) {
-          PARSE_FILENAME(depend, depend_filename);
-          info->Includes.push_back(depend_filename);
-        }
       }
 
       if (rule.isMember("future-compile")) {
@@ -194,8 +186,7 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp, cmSourceInfo* info)
 }
 
 bool cmScanDepFormat_P1689_Write(std::string const& path,
-                                 std::string const& input,
-                                 cmSourceInfo const& info)
+                                 cmScanDepInfo const& info)
 {
   Json::Value ddi(Json::objectValue);
   ddi["version"] = 0;
@@ -204,16 +195,6 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
   Json::Value& rules = ddi["rules"] = Json::arrayValue;
 
   Json::Value rule(Json::objectValue);
-  Json::Value& inputs = rule["inputs"] = Json::arrayValue;
-  inputs.append(EncodeFilename(input));
-
-  Json::Value& rule_outputs = rule["outputs"] = Json::arrayValue;
-  rule_outputs.append(EncodeFilename(path));
-
-  Json::Value& depends = rule["depends"] = Json::arrayValue;
-  for (auto const& include : info.Includes) {
-    depends.append(EncodeFilename(include));
-  }
 
   Json::Value& future_compile = rule["future-compile"] = Json::objectValue;
 

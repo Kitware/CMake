@@ -103,7 +103,7 @@ private:
   void WriteSubProjects(std::ostream& fout, std::string& all_target);
   void WriteTargets(cmLocalGenerator* root);
   void WriteProjectLine(std::ostream& fout, cmGeneratorTarget const* target,
-                        cmLocalGenerator* root, std::string& rootBinaryDir);
+                        std::string& rootBinaryDir);
   void WriteCustomRuleBOD(std::ostream& fout);
   void WriteCustomTargetBOD(std::ostream& fout);
   void WriteAllTarget(cmLocalGenerator* root,

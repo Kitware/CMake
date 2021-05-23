@@ -4,9 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <cstdio>
-#include <cstdlib> // required for atoi
 #include <functional>
 #include <iterator>
 #include <set>
@@ -35,6 +33,42 @@
 #include "cmSystemTools.h"
 
 namespace {
+
+bool GetIndexArg(const std::string& arg, int* idx, cmMakefile& mf)
+{
+  long value;
+  if (!cmStrToLong(arg, &value)) {
+    switch (mf.GetPolicyStatus(cmPolicies::CMP0121)) {
+      case cmPolicies::WARN: {
+        // Default is to warn and use old behavior OLD behavior is to allow
+        // compatibility, so issue a warning and use the previous behavior.
+        std::string warn =
+          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0121),
+                   " Invalid list index \"", arg, "\".");
+        mf.IssueMessage(MessageType::AUTHOR_WARNING, warn);
+        break;
+      }
+      case cmPolicies::OLD:
+        // OLD behavior is to allow compatibility, so just ignore the
+        // situation.
+        break;
+      case cmPolicies::NEW:
+        return false;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        std::string msg =
+          cmStrCat(cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0121),
+                   " Invalid list index \"", arg, "\".");
+        mf.IssueMessage(MessageType::FATAL_ERROR, msg);
+        break;
+    }
+  }
+
+  // Truncation is happening here, but it had always been happening here.
+  *idx = static_cast<int>(value);
+
+  return true;
+}
 
 bool FilterRegex(std::vector<std::string> const& args, bool includeMatches,
                  std::string const& listName,
@@ -154,7 +188,11 @@ bool HandleGetCommand(std::vector<std::string> const& args,
   const char* sep = "";
   size_t nitem = varArgsExpanded.size();
   for (cc = 2; cc < args.size() - 1; cc++) {
-    int item = atoi(args[cc].c_str());
+    int item;
+    if (!GetIndexArg(args[cc], &item, status.GetMakefile())) {
+      status.SetError(cmStrCat("index: ", args[cc], " is not a valid index"));
+      return false;
+    }
     value += sep;
     sep = ";";
     if (item < 0) {
@@ -362,7 +400,11 @@ bool HandleInsertCommand(std::vector<std::string> const& args,
   const std::string& listName = args[1];
 
   // expand the variable
-  int item = atoi(args[2].c_str());
+  int item;
+  if (!GetIndexArg(args[2], &item, status.GetMakefile())) {
+    status.SetError(cmStrCat("index: ", args[2], " is not a valid index"));
+    return false;
+  }
   std::vector<std::string> varArgsExpanded;
   if ((!GetList(varArgsExpanded, listName, status.GetMakefile()) ||
        varArgsExpanded.empty()) &&
@@ -1282,8 +1324,16 @@ bool HandleSublistCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  const int start = atoi(args[2].c_str());
-  const int length = atoi(args[3].c_str());
+  int start;
+  int length;
+  if (!GetIndexArg(args[2], &start, status.GetMakefile())) {
+    status.SetError(cmStrCat("index: ", args[2], " is not a valid index"));
+    return false;
+  }
+  if (!GetIndexArg(args[3], &length, status.GetMakefile())) {
+    status.SetError(cmStrCat("index: ", args[3], " is not a valid index"));
+    return false;
+  }
 
   using size_type = decltype(varArgsExpanded)::size_type;
 
@@ -1338,7 +1388,11 @@ bool HandleRemoveAtCommand(std::vector<std::string> const& args,
   std::vector<size_t> removed;
   size_t nitem = varArgsExpanded.size();
   for (cc = 2; cc < args.size(); ++cc) {
-    int item = atoi(args[cc].c_str());
+    int item;
+    if (!GetIndexArg(args[cc], &item, status.GetMakefile())) {
+      status.SetError(cmStrCat("index: ", args[cc], " is not a valid index"));
+      return false;
+    }
     if (item < 0) {
       item = static_cast<int>(nitem) + item;
     }

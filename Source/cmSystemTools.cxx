@@ -19,6 +19,7 @@
 #include <cm3p/uv.h>
 
 #include "cmDuration.h"
+#include "cmMessageMetadata.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
@@ -86,6 +87,7 @@
 #  include <unistd.h>
 
 #  include <sys/time.h>
+#  include <sys/types.h>
 #endif
 
 #if defined(_WIN32) &&                                                        \
@@ -99,6 +101,10 @@
 
 #ifdef __QNX__
 #  include <malloc.h> /* for malloc/free on QNX */
+#endif
+
+#if !defined(_WIN32) && !defined(__ANDROID__)
+#  include <sys/utsname.h>
 #endif
 
 namespace {
@@ -258,8 +264,15 @@ void cmSystemTools::Stdout(const std::string& s)
 
 void cmSystemTools::Message(const std::string& m, const char* title)
 {
+  cmMessageMetadata md;
+  md.title = title;
+  Message(m, md);
+}
+
+void cmSystemTools::Message(const std::string& m, const cmMessageMetadata& md)
+{
   if (s_MessageCallback) {
-    s_MessageCallback(m, title);
+    s_MessageCallback(m, md);
   } else {
     std::cerr << m << std::endl;
   }
@@ -951,20 +964,86 @@ void cmSystemTools::InitializeLibUV()
 
 #ifdef _WIN32
 namespace {
-bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname)
+bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname,
+                cmSystemTools::Replace replace)
 {
   // Not only ignore any previous error, but clear any memory of it.
   SetLastError(0);
 
-  // Use MOVEFILE_REPLACE_EXISTING to replace an existing destination file.
-  return MoveFileExW(oldname.c_str(), newname.c_str(),
-                     MOVEFILE_REPLACE_EXISTING);
+  DWORD flags = 0;
+  if (replace == cmSystemTools::Replace::Yes) {
+    // Use MOVEFILE_REPLACE_EXISTING to replace an existing destination file.
+    flags = flags | MOVEFILE_REPLACE_EXISTING;
+  }
+
+  return MoveFileExW(oldname.c_str(), newname.c_str(), flags);
 }
 }
 #endif
 
+bool cmSystemTools::CopySingleFile(const std::string& oldname,
+                                   const std::string& newname)
+{
+  return cmSystemTools::CopySingleFile(oldname, newname, CopyWhen::Always) ==
+    CopyResult::Success;
+}
+
+cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
+  std::string const& oldname, std::string const& newname, CopyWhen when,
+  std::string* err)
+{
+  switch (when) {
+    case CopyWhen::Always:
+      break;
+    case CopyWhen::OnlyIfDifferent:
+      if (!FilesDiffer(oldname, newname)) {
+        return CopyResult::Success;
+      }
+      break;
+  }
+
+  mode_t perm = 0;
+  cmsys::Status perms = SystemTools::GetPermissions(oldname, perm);
+
+  // If files are the same do not copy
+  if (SystemTools::SameFile(oldname, newname)) {
+    return CopyResult::Success;
+  }
+
+  cmsys::Status status;
+  status = cmsys::SystemTools::CloneFileContent(oldname, newname);
+  if (!status) {
+    // if cloning did not succeed, fall back to blockwise copy
+    status = cmsys::SystemTools::CopyFileContentBlockwise(oldname, newname);
+  }
+  if (!status) {
+    if (err) {
+      *err = status.GetString();
+    }
+    return CopyResult::Failure;
+  }
+  if (perms) {
+    status = SystemTools::SetPermissions(newname, perm);
+    if (!status) {
+      if (err) {
+        *err = status.GetString();
+      }
+      return CopyResult::Failure;
+    }
+  }
+  return CopyResult::Success;
+}
+
 bool cmSystemTools::RenameFile(const std::string& oldname,
                                const std::string& newname)
+{
+  return cmSystemTools::RenameFile(oldname, newname, Replace::Yes) ==
+    RenameResult::Success;
+}
+
+cmSystemTools::RenameResult cmSystemTools::RenameFile(
+  std::string const& oldname, std::string const& newname, Replace replace,
+  std::string* err)
 {
 #ifdef _WIN32
 #  ifndef INVALID_FILE_ATTRIBUTES
@@ -987,7 +1066,7 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
     oldname_wstr, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
 
   DWORD move_last_error = 0;
-  while (!cmMoveFile(oldname_wstr, newname_wstr) && --retry.Count) {
+  while (!cmMoveFile(oldname_wstr, newname_wstr, replace) && --retry.Count) {
     move_last_error = GetLastError();
 
     // There was no error ==> the operation is not yet complete.
@@ -1003,7 +1082,13 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
     // 3) Windows Explorer has an associated directory already opened.
     if (move_last_error != ERROR_ACCESS_DENIED &&
         move_last_error != ERROR_SHARING_VIOLATION) {
-      return false;
+      if (replace == Replace::No && move_last_error == ERROR_ALREADY_EXISTS) {
+        return RenameResult::NoReplace;
+      }
+      if (err) {
+        *err = cmsys::Status::Windows(move_last_error).GetString();
+      }
+      return RenameResult::Failure;
     }
 
     DWORD const attrs = GetFileAttributesW(newname_wstr.c_str());
@@ -1027,10 +1112,37 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
     save_restore_file_attributes.SetPath(newname_wstr);
   }
   SetLastError(move_last_error);
-  return retry.Count > 0;
+  if (retry.Count > 0) {
+    return RenameResult::Success;
+  }
+  if (replace == Replace::No && GetLastError() == ERROR_ALREADY_EXISTS) {
+    return RenameResult::NoReplace;
+  }
+  if (err) {
+    *err = cmsys::Status::Windows_GetLastError().GetString();
+  }
+  return RenameResult::Failure;
 #else
-  /* On UNIX we have an OS-provided call to do this atomically.  */
-  return rename(oldname.c_str(), newname.c_str()) == 0;
+  // On UNIX we have OS-provided calls to create 'newname' atomically.
+  if (replace == Replace::No) {
+    if (link(oldname.c_str(), newname.c_str()) == 0) {
+      return RenameResult::Success;
+    }
+    if (errno == EEXIST) {
+      return RenameResult::NoReplace;
+    }
+    if (err) {
+      *err = cmsys::Status::POSIX_errno().GetString();
+    }
+    return RenameResult::Failure;
+  }
+  if (rename(oldname.c_str(), newname.c_str()) == 0) {
+    return RenameResult::Success;
+  }
+  if (err) {
+    *err = cmsys::Status::POSIX_errno().GetString();
+  }
+  return RenameResult::Failure;
 #endif
 }
 
@@ -1387,6 +1499,20 @@ std::string cmSystemTools::ForceToRelativePath(std::string const& local_path,
   return relative;
 }
 
+std::string cmSystemTools::RelativeIfUnder(std::string const& top,
+                                           std::string const& in)
+{
+  std::string out;
+  if (in == top) {
+    out = ".";
+  } else if (cmSystemTools::IsSubDirectory(in, top)) {
+    out = in.substr(top.size() + 1);
+  } else {
+    out = in;
+  }
+  return out;
+}
+
 #ifndef CMAKE_BOOTSTRAP
 bool cmSystemTools::UnsetEnv(const char* value)
 {
@@ -1693,7 +1819,7 @@ bool copy_data(struct archive* ar, struct archive* aw)
       return false;
     }
   }
-#  if !defined(__clang__) && !defined(__HP_aCC)
+#  if !defined(__clang__) && !defined(__NVCOMPILER) && !defined(__HP_aCC)
   return false; /* this should not happen but it quiets some compilers */
 #  endif
 }
@@ -3021,7 +3147,7 @@ bool cmSystemTools::RepeatedRemoveDirectory(const std::string& dir)
   }
   return false;
 #else
-  return cmSystemTools::RemoveADirectory(dir);
+  return static_cast<bool>(cmSystemTools::RemoveADirectory(dir));
 #endif
 }
 
@@ -3054,9 +3180,9 @@ std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
   return out;
 }
 
-bool cmSystemTools::CreateSymlink(const std::string& origName,
-                                  const std::string& newName,
-                                  std::string* errorMessage)
+cmsys::Status cmSystemTools::CreateSymlink(std::string const& origName,
+                                           std::string const& newName,
+                                           std::string* errorMessage)
 {
   uv_fs_t req;
   int flags = 0;
@@ -3067,37 +3193,96 @@ bool cmSystemTools::CreateSymlink(const std::string& origName,
 #endif
   int err = uv_fs_symlink(nullptr, &req, origName.c_str(), newName.c_str(),
                           flags, nullptr);
+  cmsys::Status status;
   if (err) {
-    std::string e =
-      "failed to create symbolic link '" + newName + "': " + uv_strerror(err);
+#if defined(_WIN32)
+    status = cmsys::Status::Windows(uv_fs_get_system_error(&req));
+#elif UV_VERSION_MAJOR > 1 || (UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR >= 38)
+    status = cmsys::Status::POSIX(uv_fs_get_system_error(&req));
+#else
+    status = cmsys::Status::POSIX(-err);
+#endif
+    std::string e = cmStrCat("failed to create symbolic link '", newName,
+                             "': ", status.GetString());
     if (errorMessage) {
       *errorMessage = std::move(e);
     } else {
       cmSystemTools::Error(e);
     }
-    return false;
   }
-
-  return true;
+  return status;
 }
 
-bool cmSystemTools::CreateLink(const std::string& origName,
-                               const std::string& newName,
-                               std::string* errorMessage)
+cmsys::Status cmSystemTools::CreateLink(std::string const& origName,
+                                        std::string const& newName,
+                                        std::string* errorMessage)
 {
   uv_fs_t req;
   int err =
     uv_fs_link(nullptr, &req, origName.c_str(), newName.c_str(), nullptr);
+  cmsys::Status status;
   if (err) {
+#if defined(_WIN32)
+    status = cmsys::Status::Windows(uv_fs_get_system_error(&req));
+#elif UV_VERSION_MAJOR > 1 || (UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR >= 38)
+    status = cmsys::Status::POSIX(uv_fs_get_system_error(&req));
+#else
+    status = cmsys::Status::POSIX(-err);
+#endif
     std::string e =
-      "failed to create link '" + newName + "': " + uv_strerror(err);
+      cmStrCat("failed to create link '", newName, "': ", status.GetString());
     if (errorMessage) {
       *errorMessage = std::move(e);
     } else {
       cmSystemTools::Error(e);
     }
-    return false;
   }
+  return status;
+}
 
-  return true;
+cm::string_view cmSystemTools::GetSystemName()
+{
+#if defined(_WIN32)
+  return "Windows";
+#elif defined(__ANDROID__)
+  return "Android";
+#else
+  static struct utsname uts_name;
+  static bool initialized = false;
+  static cm::string_view systemName;
+  if (initialized) {
+    return systemName;
+  }
+  if (uname(&uts_name) >= 0) {
+    initialized = true;
+    systemName = uts_name.sysname;
+
+    if (cmIsOff(systemName)) {
+      systemName = "UnknownOS";
+    }
+
+    // fix for BSD/OS, remove the /
+    static const cmsys::RegularExpression bsdOsRegex("BSD.OS");
+    cmsys::RegularExpressionMatch match;
+    if (bsdOsRegex.find(uts_name.sysname, match)) {
+      systemName = "BSDOS";
+    }
+
+    // fix for GNU/kFreeBSD, remove the GNU/
+    if (systemName.find("kFreeBSD") != cm::string_view::npos) {
+      systemName = "kFreeBSD";
+    }
+
+    // fix for CYGWIN and MSYS which have windows version in them
+    if (systemName.find("CYGWIN") != cm::string_view::npos) {
+      systemName = "CYGWIN";
+    }
+
+    if (systemName.find("MSYS") != cm::string_view::npos) {
+      systemName = "MSYS";
+    }
+    return systemName;
+  }
+  return "";
+#endif
 }

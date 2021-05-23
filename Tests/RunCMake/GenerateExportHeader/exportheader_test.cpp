@@ -8,6 +8,14 @@
 #include "libshared.h"
 #include "libstatic.h"
 
+static void rtrim(std::string& str, char byte)
+{
+  size_t const size = str.size();
+  if (size && str[size - 1] == byte) {
+    str.resize(size - 1);
+  }
+}
+
 void compare(const char* refName, const char* testName)
 {
   std::ifstream ref;
@@ -31,16 +39,14 @@ void compare(const char* refName, const char* testName)
     // Some very old Borland runtimes (C++ Builder 5 WITHOUT Update 1) add a
     // trailing null to the string that we need to strip before testing for a
     // trailing space.
-    if (refLine.size() && refLine[refLine.size() - 1] == 0) {
-      refLine.resize(refLine.size() - 1);
-    }
-    if (testLine.size() && testLine[testLine.size() - 1] == 0) {
-      testLine.resize(testLine.size() - 1);
-    }
+    rtrim(refLine, 0);
+    rtrim(testLine, 0);
     // The reference files never have trailing spaces:
-    if (testLine.size() && testLine[testLine.size() - 1] == ' ') {
-      testLine.resize(testLine.size() - 1);
-    }
+    rtrim(testLine, ' ');
+    // Strip trailing CR. LF is not returned by getline, but CR is returned
+    // on some platforms.
+    rtrim(refLine, '\r');
+    rtrim(testLine, '\r');
     if (refLine != testLine) {
       std::cout << "Ref and test are not the same:\n  Ref:  \"" << refLine
                 << "\"\n  Test: \"" << testLine << "\"\n";

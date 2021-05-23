@@ -249,9 +249,13 @@ public:
 
   virtual void PrintBuildCommandAdvice(std::ostream& os, int jobs) const;
 
-  /** Generate a "cmake --build" call for a given target and config.  */
+  /**
+   * Generate a "cmake --build" call for a given target, config and parallel
+   * level.
+   */
   std::string GenerateCMakeBuildCommand(const std::string& target,
                                         const std::string& config,
+                                        const std::string& parallel,
                                         const std::string& native,
                                         bool ignoreErrors);
 

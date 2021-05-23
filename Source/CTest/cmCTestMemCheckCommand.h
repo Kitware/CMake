@@ -13,6 +13,7 @@
 #include "cmCommand.h"
 
 class cmCTestGenericHandler;
+class cmCTestTestHandler;
 
 /** \class cmCTestMemCheck
  * \brief Run a ctest script
@@ -36,7 +37,7 @@ public:
 protected:
   void BindArguments() override;
 
-  cmCTestGenericHandler* InitializeActualHandler() override;
+  cmCTestTestHandler* InitializeActualHandler() override;
 
   void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
 

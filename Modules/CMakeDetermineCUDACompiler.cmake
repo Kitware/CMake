@@ -11,6 +11,9 @@ if( NOT ( ("${CMAKE_GENERATOR}" MATCHES "Make") OR
 endif()
 
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  if(DEFINED ENV{CUDAHOSTCXX} OR DEFINED CMAKE_CUDA_HOST_COMPILER)
+    message(WARNING "Visual Studio does not support specifying CUDAHOSTCXX or CMAKE_CUDA_HOST_COMPILER. Using the C++ compiler provided by Visual Studio.")
+  endif()
 else()
   if(NOT CMAKE_CUDA_COMPILER)
     set(CMAKE_CUDA_COMPILER_INIT NOTFOUND)
@@ -31,19 +34,21 @@ else()
       set(CMAKE_CUDA_COMPILER_LIST nvcc)
     endif()
 
+    set(_CMAKE_CUDA_COMPILER_PATHS "$ENV{CUDA_PATH}/bin")
     _cmake_find_compiler(CUDA)
+    unset(_CMAKE_CUDA_COMPILER_PATHS)
   else()
     _cmake_find_compiler_path(CUDA)
   endif()
 
   mark_as_advanced(CMAKE_CUDA_COMPILER)
-endif()
 
-#Allow the user to specify a host compiler
-if(NOT $ENV{CUDAHOSTCXX} STREQUAL "")
-  get_filename_component(CMAKE_CUDA_HOST_COMPILER $ENV{CUDAHOSTCXX} PROGRAM)
-  if(NOT EXISTS ${CMAKE_CUDA_HOST_COMPILER})
-    message(FATAL_ERROR "Could not find compiler set in environment variable CUDAHOSTCXX:\n$ENV{CUDAHOSTCXX}.\n${CMAKE_CUDA_HOST_COMPILER}")
+  #Allow the user to specify a host compiler except for Visual Studio
+  if(NOT $ENV{CUDAHOSTCXX} STREQUAL "")
+    get_filename_component(CMAKE_CUDA_HOST_COMPILER $ENV{CUDAHOSTCXX} PROGRAM)
+    if(NOT EXISTS ${CMAKE_CUDA_HOST_COMPILER})
+      message(FATAL_ERROR "Could not find compiler set in environment variable CUDAHOSTCXX:\n$ENV{CUDAHOSTCXX}.\n${CMAKE_CUDA_HOST_COMPILER}")
+    endif()
   endif()
 endif()
 

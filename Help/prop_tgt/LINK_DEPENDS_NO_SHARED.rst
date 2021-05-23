@@ -10,5 +10,6 @@ to re-link this target.  Logical target-level dependencies will not be
 affected so the linked shared libraries will still be brought up to
 date before this target is built.
 
-This property is initialized by the value of the variable
-CMAKE_LINK_DEPENDS_NO_SHARED if it is set when a target is created.
+This property is initialized by the value of the
+:variable:`CMAKE_LINK_DEPENDS_NO_SHARED` variable if it is set when a
+target is created.

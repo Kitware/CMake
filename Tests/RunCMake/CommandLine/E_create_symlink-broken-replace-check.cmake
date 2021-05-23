@@ -1,4 +1,4 @@
-if(${actual_stderr_var} MATCHES "operation not permitted")
+if(${actual_stderr_var} MATCHES "A required privilege is not held by the client")
   unset(msg)
 else()
   if(NOT IS_DIRECTORY ${RunCMake_TEST_BINARY_DIR}/L)

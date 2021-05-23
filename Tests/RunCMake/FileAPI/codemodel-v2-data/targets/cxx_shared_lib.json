@@ -66,10 +66,10 @@
         }
     ],
     "folder": null,
-    "nameOnDisk": "^(lib|cyg)?cxx_shared_lib\\.(so|dylib|dll)$",
+    "nameOnDisk": "^(lib|cyg|msys-)?cxx_shared_lib\\.(so|dylib|dll)$",
     "artifacts": [
         {
-            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg)?cxx_shared_lib\\.(so|dylib|dll)$",
+            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg|msys-)?cxx_shared_lib\\.(so|dylib|dll)$",
             "_dllExtra": false
         },
         {
@@ -77,13 +77,106 @@
             "_dllExtra": true
         },
         {
-            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg)?cxx_shared_lib\\.pdb$",
+            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg|msys-)?cxx_shared_lib\\.pdb$",
             "_dllExtra": true
         }
     ],
     "build": "^cxx$",
     "source": "^cxx$",
-    "install": null,
+    "install": {
+        "prefix": "^(/usr/local|[A-Za-z]:.*/codemodel-v2)$",
+        "destinations": [
+            {
+                "path": "lib",
+                "backtrace": [
+                    {
+                        "file": "^codemodel-v2\\.cmake$",
+                        "line": 41,
+                        "command": "install",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^codemodel-v2\\.cmake$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^CMakeLists\\.txt$",
+                        "line": 3,
+                        "command": "include",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
+            },
+            {
+                "path": "lib",
+                "_dllExtra": true,
+                "backtrace": [
+                    {
+                        "file": "^codemodel-v2\\.cmake$",
+                        "line": 41,
+                        "command": "install",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^codemodel-v2\\.cmake$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^CMakeLists\\.txt$",
+                        "line": 3,
+                        "command": "include",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
+            },
+            {
+                "path": "lib",
+                "_namelink": true,
+                "backtrace": [
+                    {
+                        "file": "^codemodel-v2\\.cmake$",
+                        "line": 46,
+                        "command": "install",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^codemodel-v2\\.cmake$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^CMakeLists\\.txt$",
+                        "line": 3,
+                        "command": "include",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
+            }
+        ]
+    },
     "link": {
         "language": "CXX",
         "lto": null,

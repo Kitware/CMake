@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.7.4.  */
+/* A Bison parser, made by GNU Bison 3.7.5.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -46,10 +46,10 @@
    USER NAME SPACE" below.  */
 
 /* Identify Bison output, and Bison version.  */
-#define YYBISON 30704
+#define YYBISON 30705
 
 /* Bison version string.  */
-#define YYBISON_VERSION "3.7.4"
+#define YYBISON_VERSION "3.7.5"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -228,6 +228,18 @@ typedef int_least16_t yytype_int16;
 typedef short yytype_int16;
 #endif
 
+/* Work around bug in HP-UX 11.23, which defines these macros
+   incorrectly for preprocessor constants.  This workaround can likely
+   be removed in 2023, as HPE has promised support for HP-UX 11.23
+   (aka HP-UX 11i v2) only through the end of 2022; see Table 2 of
+   <https://h20195.www2.hpe.com/V2/getpdf.aspx/4AA4-7673ENW.pdf>.  */
+#ifdef __hpux
+# undef UINT_LEAST8_MAX
+# undef UINT_LEAST16_MAX
+# define UINT_LEAST8_MAX 255
+# define UINT_LEAST16_MAX 65535
+#endif
+
 #if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
 typedef __UINT_LEAST8_TYPE__ yytype_uint8;
 #elif (!defined __UINT_LEAST8_MAX__ && defined YY_STDINT_H \
@@ -325,9 +337,9 @@ typedef int yy_state_fast_t;
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define YY_USE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define YY_USE(E) /* empty */
 #endif
 
 #if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
@@ -635,7 +647,7 @@ static const yytype_int8 yypgoto[] =
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,    11,    12,    13,    14,    15,    19,    20,    21,    22
+       0,    11,    12,    13,    14,    15,    19,    20,    21,    22
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -761,8 +773,8 @@ yy_symbol_value_print (FILE *yyo,
                        yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, yyscan_t yyscanner)
 {
   FILE *yyoutput = yyo;
-  YYUSE (yyoutput);
-  YYUSE (yyscanner);
+  YY_USE (yyoutput);
+  YY_USE (yyscanner);
   if (!yyvaluep)
     return;
 # ifdef YYPRINT
@@ -770,7 +782,7 @@ yy_symbol_value_print (FILE *yyo,
     YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
 # endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yykind);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1151,14 +1163,14 @@ static void
 yydestruct (const char *yymsg,
             yysymbol_kind_t yykind, YYSTYPE *yyvaluep, yyscan_t yyscanner)
 {
-  YYUSE (yyvaluep);
-  YYUSE (yyscanner);
+  YY_USE (yyvaluep);
+  YY_USE (yyscanner);
   if (!yymsg)
     yymsg = "Deleting";
   YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yykind);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1433,7 +1445,7 @@ yyreduce:
     (yyval.str) = 0;
     yyGetParser->SetResult((yyvsp[0].str));
   }
-#line 1437 "cmCommandArgumentParser.cxx"
+#line 1449 "cmCommandArgumentParser.cxx"
     break;
 
   case 3: /* GoalWithOptionalBackSlash: Goal  */
@@ -1441,7 +1453,7 @@ yyreduce:
        {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1445 "cmCommandArgumentParser.cxx"
+#line 1457 "cmCommandArgumentParser.cxx"
     break;
 
   case 4: /* GoalWithOptionalBackSlash: Goal "\\"  */
@@ -1449,7 +1461,7 @@ yyreduce:
                   {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1453 "cmCommandArgumentParser.cxx"
+#line 1465 "cmCommandArgumentParser.cxx"
     break;
 
   case 5: /* Goal: %empty  */
@@ -1457,7 +1469,7 @@ yyreduce:
   {
     (yyval.str) = 0;
   }
-#line 1461 "cmCommandArgumentParser.cxx"
+#line 1473 "cmCommandArgumentParser.cxx"
     break;
 
   case 6: /* Goal: String Goal  */
@@ -1465,7 +1477,7 @@ yyreduce:
               {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1469 "cmCommandArgumentParser.cxx"
+#line 1481 "cmCommandArgumentParser.cxx"
     break;
 
   case 7: /* String: OuterText  */
@@ -1473,7 +1485,7 @@ yyreduce:
             {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1477 "cmCommandArgumentParser.cxx"
+#line 1489 "cmCommandArgumentParser.cxx"
     break;
 
   case 8: /* String: Variable  */
@@ -1481,7 +1493,7 @@ yyreduce:
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1485 "cmCommandArgumentParser.cxx"
+#line 1497 "cmCommandArgumentParser.cxx"
     break;
 
   case 9: /* OuterText: cal_NAME  */
@@ -1489,7 +1501,7 @@ yyreduce:
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1493 "cmCommandArgumentParser.cxx"
+#line 1505 "cmCommandArgumentParser.cxx"
     break;
 
   case 10: /* OuterText: "@"  */
@@ -1497,7 +1509,7 @@ yyreduce:
          {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1501 "cmCommandArgumentParser.cxx"
+#line 1513 "cmCommandArgumentParser.cxx"
     break;
 
   case 11: /* OuterText: "$"  */
@@ -1505,7 +1517,7 @@ yyreduce:
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1509 "cmCommandArgumentParser.cxx"
+#line 1521 "cmCommandArgumentParser.cxx"
     break;
 
   case 12: /* OuterText: "{"  */
@@ -1513,7 +1525,7 @@ yyreduce:
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1517 "cmCommandArgumentParser.cxx"
+#line 1529 "cmCommandArgumentParser.cxx"
     break;
 
   case 13: /* OuterText: "}"  */
@@ -1521,7 +1533,7 @@ yyreduce:
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1525 "cmCommandArgumentParser.cxx"
+#line 1537 "cmCommandArgumentParser.cxx"
     break;
 
   case 14: /* OuterText: cal_SYMBOL  */
@@ -1529,7 +1541,7 @@ yyreduce:
              {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1533 "cmCommandArgumentParser.cxx"
+#line 1545 "cmCommandArgumentParser.cxx"
     break;
 
   case 15: /* Variable: cal_ENVCURLY EnvVarName "}"  */
@@ -1537,7 +1549,7 @@ yyreduce:
                                      {
     (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[-2].str), (yyvsp[-1].str));
   }
-#line 1541 "cmCommandArgumentParser.cxx"
+#line 1553 "cmCommandArgumentParser.cxx"
     break;
 
   case 16: /* Variable: cal_NCURLY MultipleIds "}"  */
@@ -1545,7 +1557,7 @@ yyreduce:
                                     {
     (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[-2].str), (yyvsp[-1].str));
   }
-#line 1549 "cmCommandArgumentParser.cxx"
+#line 1561 "cmCommandArgumentParser.cxx"
     break;
 
   case 17: /* Variable: cal_DCURLY MultipleIds "}"  */
@@ -1553,7 +1565,7 @@ yyreduce:
                                     {
     (yyval.str) = yyGetParser->ExpandVariable((yyvsp[-1].str));
   }
-#line 1557 "cmCommandArgumentParser.cxx"
+#line 1569 "cmCommandArgumentParser.cxx"
     break;
 
   case 18: /* Variable: cal_ATNAME  */
@@ -1561,7 +1573,7 @@ yyreduce:
              {
     (yyval.str) = yyGetParser->ExpandVariableForAt((yyvsp[0].str));
   }
-#line 1565 "cmCommandArgumentParser.cxx"
+#line 1577 "cmCommandArgumentParser.cxx"
     break;
 
   case 19: /* EnvVarName: MultipleIds  */
@@ -1569,7 +1581,7 @@ yyreduce:
               {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1573 "cmCommandArgumentParser.cxx"
+#line 1585 "cmCommandArgumentParser.cxx"
     break;
 
   case 20: /* EnvVarName: cal_SYMBOL EnvVarName  */
@@ -1577,7 +1589,7 @@ yyreduce:
                         {
     (yyval.str) = (yyvsp[-1].str);
   }
-#line 1581 "cmCommandArgumentParser.cxx"
+#line 1593 "cmCommandArgumentParser.cxx"
     break;
 
   case 21: /* MultipleIds: %empty  */
@@ -1585,7 +1597,7 @@ yyreduce:
   {
     (yyval.str) = 0;
   }
-#line 1589 "cmCommandArgumentParser.cxx"
+#line 1601 "cmCommandArgumentParser.cxx"
     break;
 
   case 22: /* MultipleIds: ID MultipleIds  */
@@ -1593,7 +1605,7 @@ yyreduce:
                  {
     (yyval.str) = yyGetParser->CombineUnions((yyvsp[-1].str), (yyvsp[0].str));
   }
-#line 1597 "cmCommandArgumentParser.cxx"
+#line 1609 "cmCommandArgumentParser.cxx"
     break;
 
   case 23: /* ID: cal_NAME  */
@@ -1601,7 +1613,7 @@ yyreduce:
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1605 "cmCommandArgumentParser.cxx"
+#line 1617 "cmCommandArgumentParser.cxx"
     break;
 
   case 24: /* ID: Variable  */
@@ -1609,11 +1621,11 @@ yyreduce:
            {
     (yyval.str) = (yyvsp[0].str);
   }
-#line 1613 "cmCommandArgumentParser.cxx"
+#line 1625 "cmCommandArgumentParser.cxx"
     break;
 
 
-#line 1617 "cmCommandArgumentParser.cxx"
+#line 1629 "cmCommandArgumentParser.cxx"
 
       default: break;
     }

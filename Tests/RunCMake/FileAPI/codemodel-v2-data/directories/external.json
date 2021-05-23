@@ -10,5 +10,71 @@
     ],
     "projectName": "External",
     "minimumCMakeVersion": "3.12",
-    "hasInstallRule": null
+    "hasInstallRule": true,
+    "installers": [
+        {
+            "component": "Unspecified",
+            "type": "directory",
+            "destination": "dir3",
+            "paths": [
+                "^.*/Tests/RunCMake/FileAPIExternalSource/\\.$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                    "line": 15,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "directory",
+            "destination": "dir4",
+            "paths": [
+                "^.*/Tests/RunCMake/FileAPIExternalSource$"
+            ],
+            "isExcludeFromAll": true,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                    "line": 16,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ]
 }

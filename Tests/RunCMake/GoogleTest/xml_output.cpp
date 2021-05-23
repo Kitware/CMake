@@ -5,7 +5,7 @@
 int main(int argc, char** argv)
 {
   // Note: GoogleTestXML.cmake doesn't actually depend on Google Test as such;
-  // it only mimicks the output file creation using the path passed to this
+  // it only mimics the output file creation using the path passed to this
   // test without any content
   for (int i = 0; i < argc; i++) {
     std::string param(argv[i]);

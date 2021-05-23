@@ -40,7 +40,7 @@ Languages
     customize the Swift module name.
 
   * The :prop_sf:`Swift_DIAGNOSTICS_FILE` source property was added to
-    indicate where to write the serialised Swift diagnostics.
+    indicate where to write the serialized Swift diagnostics.
 
   The Swift support is experimental, not considered stable, and may change
   in future releases of CMake.

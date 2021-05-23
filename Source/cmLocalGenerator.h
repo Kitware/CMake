@@ -171,13 +171,19 @@ public:
                                             cmGeneratorTarget* target,
                                             const std::string& config,
                                             const std::string& lang);
+
+  enum class IncludePathStyle
+  {
+    Default,
+    Absolute,
+  };
+
   //! Get the include flags for the current makefile and language
-  std::string GetIncludeFlags(const std::vector<std::string>& includes,
-                              cmGeneratorTarget* target,
-                              const std::string& lang,
-                              bool forceFullPaths = false,
-                              bool forResponseFile = false,
-                              const std::string& config = "");
+  std::string GetIncludeFlags(
+    std::vector<std::string> const& includes, cmGeneratorTarget* target,
+    std::string const& lang, std::string const& config,
+    bool forResponseFile = false,
+    IncludePathStyle pathStyle = IncludePathStyle::Default);
 
   using GeneratorTargetVector =
     std::vector<std::unique_ptr<cmGeneratorTarget>>;
@@ -255,11 +261,6 @@ public:
    */
   bool GetRealDependency(const std::string& name, const std::string& config,
                          std::string& dep);
-
-  virtual std::string ConvertToIncludeReference(
-    std::string const& path,
-    cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL,
-    bool forceFullPaths = false);
 
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* /* mf */, bool /* verbose */) {}
@@ -462,16 +463,6 @@ public:
   std::string const& GetCurrentSourceDirectory() const;
 
   /**
-   * Convert the given remote path to a relative path with respect to
-   * the given local path.  Both paths must use forward slashes and not
-   * already be escaped or quoted.
-   * The conversion is skipped if the paths are not both in the source
-   * or both in the binary tree.
-   */
-  std::string MaybeConvertToRelativePath(std::string const& local_path,
-                                         std::string const& remote_path) const;
-
-  /**
    * Generate a macOS application bundle Info.plist file.
    */
   void GenerateAppleInfoPList(cmGeneratorTarget* target,
@@ -557,6 +548,13 @@ public:
   cmProp GetRuleLauncher(cmGeneratorTarget* target, const std::string& prop);
 
 protected:
+  // The default implementation ignores the IncludePathStyle and always
+  // uses absolute paths.  A generator may override this to use relative
+  // paths in some cases.
+  virtual std::string ConvertToIncludeReference(
+    std::string const& path, IncludePathStyle pathStyle,
+    cmOutputConverter::OutputFormat format);
+
   //! put all the libraries for a target on into the given stream
   void OutputLinkLibraries(cmComputeLinkInformation* pcli,
                            cmLinkLineComputer* linkLineComputer,
@@ -583,7 +581,6 @@ protected:
   virtual bool CheckDefinition(std::string const& define) const;
 
   cmMakefile* Makefile;
-  cmStateSnapshot StateSnapshot;
   cmListFileBacktrace DirectoryBacktrace;
   cmGlobalGenerator* GlobalGenerator;
   std::map<std::string, std::string> UniqueObjectNamesMap;

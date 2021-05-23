@@ -3,7 +3,7 @@ CMake Error at OutputNameMatchesObjects.cmake:[0-9]+ \(file\):
 
     \$<TARGET_OBJECTS:foo>
 
-  Objects of target "foo" referenced but is not an allowed library types
-  \(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT\).
+  Objects of target "foo" referenced but is not one of the allowed target
+  types \(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT\).
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)

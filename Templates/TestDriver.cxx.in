@@ -2,6 +2,7 @@
 #include <stdio.h>  /* NOLINT */
 #include <stdlib.h> /* NOLINT */
 #include <string.h> /* NOLINT */
+#include <time.h>
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4996) /* deprecation */
@@ -62,11 +63,23 @@ static char* lowercase(const char* string)
   return new_string;
 }
 
+int isTestSkipped(const char *name, int n_skipped_tests, char *skipped_tests[]) {
+  int i;
+  for (i = 0; i < n_skipped_tests; i++) {
+    if (strcmp(name, skipped_tests[i]) == 0) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
 int main(int ac, char* av[])
 {
   int i;
   int testNum = 0;
   int partial_match;
+  int run_all;
   char *arg;
   int testToRun = -1;
 
@@ -95,15 +108,43 @@ int main(int ac, char* av[])
     av++;
   }
   partial_match = 0;
+  run_all = 0;
   arg = CM_NULL; /* NOLINT */
-  /* If partial match is requested.  */
+  /* If partial match or running all tests are requested.  */
   if (testToRun == -1 && ac > 1) {
     partial_match = (strcmp(av[1], "-R") == 0) ? 1 : 0;
+    run_all = (strcmp(av[1], "-A") == 0) ? 1 : 0;
   }
   if (partial_match != 0 && ac < 3) {
     printf("-R needs an additional parameter.\n");
     return -1;
   }
+  if (run_all == 1) {
+    clock_t t;
+    int status = 0;
+    const char* status_message = NULL;
+    printf("TAP version 13\n");
+    printf("1..%d\n", NumTests);
+    for (i = 0; i < NumTests; ++i) {
+      const char *name = cmakeGeneratedFunctionMapEntries[i].name;
+      if (ac > 2) {
+        if (isTestSkipped(name, ac - 2, av + 2) == 1) {
+          printf("ok %d %s # SKIP\n", i + 1, name);
+          continue;
+        }
+      }
+      t = clock();
+      status = (*cmakeGeneratedFunctionMapEntries[i].func)(ac, av);
+      t = clock() - t;
+      double time_taken = ((double)t) / CLOCKS_PER_SEC;
+      status_message = (status == -1) ? "not ok" : "ok";
+      printf("%s %d %s # %f\n", status_message, i + 1, name, time_taken);
+    }
+    printf("All tests finished.\n");
+
+    return 0;
+  }
+
   if (testToRun == -1) {
     arg = lowercase(av[1 + partial_match]);
   }

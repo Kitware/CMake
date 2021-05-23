@@ -64,6 +64,10 @@ public:
   std::string GetRPathString(bool for_install) const;
   std::string GetChrpathString() const;
   std::set<cmGeneratorTarget const*> const& GetSharedLibrariesLinked() const;
+  std::vector<cmGeneratorTarget const*> const& GetRuntimeDLLs() const
+  {
+    return this->RuntimeDLLs;
+  }
 
   std::string const& GetLibLinkFileFlag() const
   {
@@ -81,6 +85,7 @@ private:
   void AddItem(BT<std::string> const& item, const cmGeneratorTarget* tgt);
   void AddSharedDepItem(BT<std::string> const& item,
                         cmGeneratorTarget const* tgt);
+  void AddRuntimeDLL(cmGeneratorTarget const* tgt);
 
   // Output information.
   ItemVector Items;
@@ -89,6 +94,7 @@ private:
   std::vector<std::string> FrameworkPaths;
   std::vector<std::string> RuntimeSearchPath;
   std::set<cmGeneratorTarget const*> SharedLibrariesLinked;
+  std::vector<cmGeneratorTarget const*> RuntimeDLLs;
 
   // Context information.
   cmGeneratorTarget const* const Target;

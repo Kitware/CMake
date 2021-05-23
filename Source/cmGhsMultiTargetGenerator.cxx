@@ -159,13 +159,11 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
                                                      const std::string& config)
 {
   std::string outpath;
-  std::string rootpath = this->LocalGenerator->GetCurrentBinaryDirectory();
 
   if (this->TagType != GhsMultiGpj::SUBPROJECT) {
     // set target binary file destination
     outpath = this->GeneratorTarget->GetDirectory(config);
-    outpath =
-      this->LocalGenerator->MaybeConvertToRelativePath(rootpath, outpath);
+    outpath = this->LocalGenerator->MaybeRelativeToCurBinDir(outpath);
     /* clang-format off */
     fout << "    :binDirRelative=\"" << outpath << "\"\n"
             "    -o \"" << this->TargetNameReal << "\"\n";
@@ -369,7 +367,6 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
 
   // if the command specified a working directory use it.
   std::string dir = this->LocalGenerator->GetCurrentBinaryDirectory();
-  std::string currentBinDir = dir;
   std::string workingDir = ccg.GetWorkingDirectory();
   if (!workingDir.empty()) {
     dir = workingDir;
@@ -427,8 +424,7 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
       // working directory will be the start-output directory.
       bool had_slash = cmd.find('/') != std::string::npos;
       if (workingDir.empty()) {
-        cmd =
-          this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir, cmd);
+        cmd = this->LocalGenerator->MaybeRelativeToCurBinDir(cmd);
       }
       bool has_slash = cmd.find('/') != std::string::npos;
       if (had_slash && !has_slash) {
@@ -710,7 +706,7 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
   std::ostream& fout, const cmSourceFile* sourceFile)
 {
   cmProp rawLangProp = sourceFile->GetProperty("LANGUAGE");
-  if (nullptr != rawLangProp) {
+  if (rawLangProp) {
     std::string sourceLangProp(*rawLangProp);
     std::string const& extension = sourceFile->GetExtension();
     if ("CXX" == sourceLangProp && ("c" == extension || "C" == extension)) {

@@ -90,13 +90,10 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   std::set<std::string> dependencies;
   bool haveDeps = false;
 
-  std::string binDir = this->LocalGenerator->GetBinaryDirectory();
-
   // Compute a path to the object file to write to the internal depend file.
   // Any existing content of the internal depend file has already been
   // loaded in ValidDeps with this path as a key.
-  std::string obj_i =
-    this->LocalGenerator->MaybeConvertToRelativePath(binDir, obj);
+  std::string obj_i = this->LocalGenerator->MaybeRelativeToTopBinDir(obj);
 
   if (this->ValidDeps != nullptr) {
     auto const tmpIt = this->ValidDeps->find(obj_i);
@@ -228,7 +225,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
     }
     for (std::string const& dep : dependencies) {
       std::string dependee = this->LocalGenerator->ConvertToMakefilePath(
-        this->LocalGenerator->MaybeConvertToRelativePath(binDir, dep));
+        this->LocalGenerator->MaybeRelativeToTopBinDir(dep));
       if (supportLongLineDepend) {
         makeDepends << ' ' << lineContinue << ' ' << dependee;
       } else {

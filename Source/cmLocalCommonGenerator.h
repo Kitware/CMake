@@ -20,9 +20,15 @@ class cmSourceFile;
  */
 class cmLocalCommonGenerator : public cmLocalGenerator
 {
+protected:
+  enum class WorkDir
+  {
+    TopBin,
+    CurBin,
+  };
+
 public:
-  cmLocalCommonGenerator(cmGlobalGenerator* gg, cmMakefile* mf,
-                         std::string wd);
+  cmLocalCommonGenerator(cmGlobalGenerator* gg, cmMakefile* mf, WorkDir wd);
   ~cmLocalCommonGenerator() override;
 
   std::vector<std::string> const& GetConfigNames() const
@@ -30,7 +36,9 @@ public:
     return this->ConfigNames;
   }
 
-  std::string GetWorkingDirectory() const { return this->WorkingDirectory; }
+  std::string const& GetWorkingDirectory() const;
+
+  std::string MaybeRelativeToWorkDir(std::string const& path) const;
 
   std::string GetTargetFortranFlags(cmGeneratorTarget const* target,
                                     std::string const& config) override;
@@ -40,7 +48,7 @@ public:
     cmGeneratorTarget const* gt = nullptr) override;
 
 protected:
-  std::string WorkingDirectory;
+  WorkDir WorkingDirectory;
 
   std::vector<std::string> ConfigNames;
 

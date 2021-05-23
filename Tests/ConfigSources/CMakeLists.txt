@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+
 if(NOT _isMultiConfig AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build" FORCE)
 endif()
@@ -74,10 +75,10 @@ add_custom_command(APPEND
   VERBATIM
   )
 foreach(n RANGE 1 5)
-  set_property(SOURCE custom${n}_Debug.cpp PROPERTY COMPILE_DEFINITIONS CUSTOM_CFG_DEBUG)
-  foreach(other Release RelWithDebInfo MinSizeRel)
+  foreach(other ${CMAKE_BUILD_TYPE} Release RelWithDebInfo MinSizeRel)
     set_property(SOURCE custom${n}_${other}.cpp PROPERTY COMPILE_DEFINITIONS CUSTOM_CFG_OTHER)
   endforeach()
+  set_property(SOURCE custom${n}_Debug.cpp PROPERTY COMPILE_DEFINITIONS CUSTOM_CFG_DEBUG)
 endforeach()
 add_library(Custom STATIC
   custom1_$<CONFIG>.cpp

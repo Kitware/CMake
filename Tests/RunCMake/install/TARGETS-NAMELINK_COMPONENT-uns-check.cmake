@@ -4,6 +4,12 @@ if(WIN32)
     [[lib/(lib)?namelink-uns-dev\.dll]]
     [[lib/(lib)?namelink-uns\.dll]]
   )
+elseif(MSYS)
+  set(_check_files
+    [[lib]]
+    [[lib/msys-namelink-uns-1\.dll]]
+    [[lib/msys-namelink-uns-dev-1\.dll]]
+  )
 elseif(CYGWIN)
   set(_check_files
     [[lib]]

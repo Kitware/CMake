@@ -41,7 +41,7 @@ Examples
 
 .. code-block:: cmake
 
-  set_property(TARGET tgt PROPERTY CUDA_ARCHITECTURES 35 50 72)
+  set_target_properties(tgt PROPERTIES CUDA_ARCHITECTURES "35;50;72")
 
 Generates code for real and virtual architectures ``30``, ``50`` and ``72``.
 

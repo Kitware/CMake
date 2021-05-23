@@ -25,5 +25,603 @@
     ],
     "projectName": "codemodel-v2",
     "minimumCMakeVersion": "3.12",
-    "hasInstallRule": true
+    "hasInstallRule": true,
+    "installers": [
+        {
+            "component": "Tools",
+            "type": "target",
+            "destination": "bin",
+            "paths": [
+                "^cxx/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?cxx_exe(\\.exe)?$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": "^cxx_exe::@a56b12a3f5c0529fb296$",
+            "targetIndex": "cxx_exe",
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 38,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "target",
+            "destination": "lib",
+            "paths": [
+                "^((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_shared_lib\\.(lib|dll\\.a)$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": "^c_shared_lib::@6890427a1f51a3e7e1df$",
+            "targetIndex": "c_shared_lib",
+            "targetIsImportLibrary": true,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "_dllExtra": true,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 41,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "target",
+            "destination": "lib",
+            "paths": [
+                "^lib/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib|cyg|msys-)?c_shared_lib(-1)?\\.(dll|so)$"
+            ],
+            "pathsNamelink": [
+                "^lib/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_shared_lib\\.(so\\.1\\.2\\.3|1\\.2\\.3\\.dylib)$",
+                "^lib/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_shared_lib\\.(so\\.1|1\\.dylib)$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": "^c_shared_lib::@6890427a1f51a3e7e1df$",
+            "targetIndex": "c_shared_lib",
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": "skip",
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 41,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "target",
+            "destination": "lib",
+            "paths": [
+                "^cxx/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?cxx_shared_lib\\.(lib|dll\\.a)$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": "^cxx_shared_lib::@a56b12a3f5c0529fb296$",
+            "targetIndex": "cxx_shared_lib",
+            "targetIsImportLibrary": true,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "_dllExtra": true,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 41,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "target",
+            "destination": "lib",
+            "paths": [
+                "^cxx/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib|cyg|msys-)?cxx_shared_lib\\.(dll|so|dylib)$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": "^cxx_shared_lib::@a56b12a3f5c0529fb296$",
+            "targetIndex": "cxx_shared_lib",
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 41,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "target",
+            "destination": "lib",
+            "paths": [
+                "^lib/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_shared_lib\\.(dll|so|dylib)$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": "^c_shared_lib::@6890427a1f51a3e7e1df$",
+            "targetIndex": "c_shared_lib",
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": "only",
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 46,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "file",
+            "destination": "include",
+            "paths": [
+                {
+                    "from": "^empty\\.h$",
+                    "to": "^empty-renamed\\.h$"
+                }
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": true,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 48,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "file",
+            "destination": "include",
+            "paths": [
+                "^codemodel-v2\\.cmake$",
+                "^empty\\.h$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 49,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "directory",
+            "destination": "dir1",
+            "paths": [
+                "^\\.$",
+                "^dir$",
+                {
+                    "from": "^cxx$",
+                    "to": "^\\.$"
+                }
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": true,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 50,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "directory",
+            "destination": "dir2",
+            "paths": [
+                {
+                    "from": "^\\.$",
+                    "to": "^FileAPI$"
+                },
+                "^dir$",
+                {
+                    "from": "^cxx$",
+                    "to": "^\\.$"
+                }
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 51,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "export",
+            "destination": "lib/cmake/foo",
+            "paths": [
+                "^CMakeFiles/Export/lib/cmake/foo/FooTargets\\.cmake$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": "FooTargets",
+            "exportTargets": [
+                {
+                    "id": "^cxx_exe::@a56b12a3f5c0529fb296$",
+                    "index": "cxx_exe"
+                }
+            ],
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 52,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "script",
+            "destination": null,
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": "InstallScript.cmake",
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 53,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "code",
+            "destination": null,
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": true,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": 54,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^codemodel-v2\\.cmake$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "include",
+                    "hasParent": true
+                },
+                {
+                    "file": "^CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ]
 }

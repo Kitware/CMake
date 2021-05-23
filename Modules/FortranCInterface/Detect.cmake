@@ -6,14 +6,17 @@ configure_file(${FortranCInterface_SOURCE_DIR}/Input.cmake.in
 
 # Detect the Fortran/C interface on the first run or when the
 # configuration changes.
-if(${FortranCInterface_BINARY_DIR}/Input.cmake
-    IS_NEWER_THAN ${FortranCInterface_BINARY_DIR}/Output.cmake
-    OR ${FortranCInterface_SOURCE_DIR}/Output.cmake.in
-    IS_NEWER_THAN ${FortranCInterface_BINARY_DIR}/Output.cmake
-    OR ${FortranCInterface_SOURCE_DIR}/CMakeLists.txt
-    IS_NEWER_THAN ${FortranCInterface_BINARY_DIR}/Output.cmake
-    OR ${CMAKE_CURRENT_LIST_FILE}
-    IS_NEWER_THAN ${FortranCInterface_BINARY_DIR}/Output.cmake
+if(NOT EXISTS ${FortranCInterface_BINARY_DIR}/Output.cmake
+    OR NOT EXISTS ${FortranCInterface_BINARY_DIR}/Input.cmake
+    OR NOT EXISTS ${FortranCInterface_BINARY_DIR}/Output.cmake.in
+    OR NOT ${FortranCInterface_BINARY_DIR}/Output.cmake
+      IS_NEWER_THAN ${FortranCInterface_BINARY_DIR}/Input.cmake
+    OR NOT ${FortranCInterface_SOURCE_DIR}/Output.cmake
+      IS_NEWER_THAN ${FortranCInterface_BINARY_DIR}/Output.cmake.in
+    OR NOT ${FortranCInterface_BINARY_DIR}/Output.cmake
+      IS_NEWER_THAN ${FortranCInterface_SOURCE_DIR}/CMakeLists.txt
+    OR NOT ${FortranCInterface_BINARY_DIR}/Output.cmake
+      IS_NEWER_THAN ${CMAKE_CURRENT_LIST_FILE}
     )
   message(CHECK_START "Detecting Fortran/C Interface")
 else()

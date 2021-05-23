@@ -875,7 +875,8 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
   if (genTarget->HasSOName(config)) {
     vars["SONAME_FLAG"] =
       this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage(config));
-    vars["SONAME"] = tgtNames.SharedObject;
+    vars["SONAME"] = localGen.ConvertToOutputFormat(tgtNames.SharedObject,
+                                                    cmOutputConverter::SHELL);
     if (genTarget->GetType() == cmStateEnums::SHARED_LIBRARY) {
       std::string install_dir =
         this->GetGeneratorTarget()->GetInstallNameDirForBuildTree(config);
@@ -1183,7 +1184,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   }
   if (gt->HasSOName(config)) {
     vars["SONAME_FLAG"] = mf->GetSONameFlag(this->TargetLinkLanguage(config));
-    vars["SONAME"] = tgtNames.SharedObject;
+    vars["SONAME"] = localGen.ConvertToOutputFormat(tgtNames.SharedObject,
+                                                    cmOutputConverter::SHELL);
     if (targetType == cmStateEnums::SHARED_LIBRARY) {
       std::string install_dir = gt->GetInstallNameDirForBuildTree(config);
       if (!install_dir.empty()) {

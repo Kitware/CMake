@@ -140,7 +140,7 @@ Example:
 
 function(protobuf_generate)
   set(_options APPEND_PATH DESCRIPTORS)
-  set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR)
+  set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR PLUGIN)
   if(COMMAND target_sources)
     list(APPEND _singleargs TARGET)
   endif()
@@ -169,6 +169,10 @@ function(protobuf_generate)
 
   if(protobuf_generate_EXPORT_MACRO AND protobuf_generate_LANGUAGE STREQUAL cpp)
     set(_dll_export_decl "dllexport_decl=${protobuf_generate_EXPORT_MACRO}:")
+  endif()
+
+  if(protobuf_generate_PLUGIN)
+    set(_plugin "--plugin=${protobuf_generate_PLUGIN}")
   endif()
 
   if(NOT protobuf_generate_GENERATE_EXTENSIONS)
@@ -245,7 +249,7 @@ function(protobuf_generate)
     add_custom_command(
       OUTPUT ${_generated_srcs}
       COMMAND  protobuf::protoc
-      ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_dll_desc_out} ${_protobuf_include_path} ${_abs_file}
+      ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_plugin} ${_dll_desc_out} ${_protobuf_include_path} ${_abs_file}
       DEPENDS ${_abs_file} protobuf::protoc
       COMMENT "Running ${protobuf_generate_LANGUAGE} protocol buffer compiler on ${_proto}"
       VERBATIM )

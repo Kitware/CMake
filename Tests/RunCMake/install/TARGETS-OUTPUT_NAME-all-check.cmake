@@ -4,6 +4,8 @@ if(WIN32)
   set(test45 [[bin/test4\.dll;bin/test4\.lib;bin/test5ar\.lib]])
 
   check_installed("^bin;(${libtest45};${test123})|(${test123};${test45})\$")
+elseif(MSYS)
+  check_installed([[^bin;bin/libtest4\.dll\.a;bin/libtest5ar\.a;bin/msys-test4\.dll;bin/test1out\.exe;bin/test2deb\.exe;bin/test3exc\.exe$]])
 elseif(CYGWIN)
   check_installed([[^bin;bin/cygtest4\.dll;bin/libtest4\.dll\.a;bin/libtest5ar\.a;bin/test1out\.exe;bin/test2deb\.exe;bin/test3exc\.exe$]])
 elseif(APPLE)

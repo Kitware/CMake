@@ -3,6 +3,7 @@ set(expect
   query/codemodel-v2
   reply
   reply/codemodel-v2-[0-9a-f]+\\.json
+  .*
   reply/index-[0-9.T-]+\\.json
   .*
   )

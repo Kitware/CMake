@@ -9,7 +9,6 @@
 #include <cmext/string_view>
 
 #include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
@@ -36,6 +35,7 @@ void cmCTestTestCommand::BindArguments()
   this->Bind("TEST_LOAD"_s, this->TestLoad);
   this->Bind("RESOURCE_SPEC_FILE"_s, this->ResourceSpecFile);
   this->Bind("STOP_ON_FAILURE"_s, this->StopOnFailure);
+  this->Bind("OUTPUT_JUNIT"_s, this->OutputJUnit);
 }
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
@@ -60,7 +60,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     this->ResourceSpecFile = *resourceSpecFile;
   }
 
-  cmCTestGenericHandler* handler = this->InitializeActualHandler();
+  cmCTestTestHandler* handler = this->InitializeActualHandler();
   if (!this->Start.empty() || !this->End.empty() || !this->Stride.empty()) {
     handler->SetOption(
       "TestsToRunInformation",
@@ -73,11 +73,11 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     handler->SetOption("IncludeRegularExpression", this->Include.c_str());
   }
   if (!this->ExcludeLabel.empty()) {
-    handler->SetOption("ExcludeLabelRegularExpression",
-                       this->ExcludeLabel.c_str());
+    handler->AddMultiOption("ExcludeLabelRegularExpression",
+                            this->ExcludeLabel);
   }
   if (!this->IncludeLabel.empty()) {
-    handler->SetOption("LabelRegularExpression", this->IncludeLabel.c_str());
+    handler->AddMultiOption("LabelRegularExpression", this->IncludeLabel);
   }
   if (!this->ExcludeFixture.empty()) {
     handler->SetOption("ExcludeFixtureRegularExpression",
@@ -140,11 +140,15 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
                                        *labelsForSubprojects, this->Quiet);
   }
 
+  if (!this->OutputJUnit.empty()) {
+    handler->SetJUnitXMLFileName(this->OutputJUnit);
+  }
+
   handler->SetQuiet(this->Quiet);
   return handler;
 }
 
-cmCTestGenericHandler* cmCTestTestCommand::InitializeActualHandler()
+cmCTestTestHandler* cmCTestTestCommand::InitializeActualHandler()
 {
   cmCTestTestHandler* handler = this->CTest->GetTestHandler();
   handler->Initialize();

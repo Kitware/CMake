@@ -350,6 +350,24 @@ look.
     PATHS ${PC_Foo_LIBRARY_DIRS}
   )
 
+Alternatively, if the library is available with multiple configurations, you can
+use :module:`SelectLibraryConfigurations` to automatically set the
+``Foo_LIBRARY`` variable instead:
+
+.. code-block:: cmake
+
+  find_library(Foo_LIBRARY_RELEASE
+    NAMES foo
+    PATHS ${PC_Foo_LIBRARY_DIRS}/Release
+  )
+  find_library(Foo_LIBRARY_DEBUG
+    NAMES foo
+    PATHS ${PC_Foo_LIBRARY_DIRS}/Debug
+  )
+
+  include(SelectLibraryConfigurations)
+  select_library_configurations(Foo)
+
 If you have a good way of getting the version (from a header file, for
 example), you can use that information to set ``Foo_VERSION`` (although
 note that find modules have traditionally used ``Foo_VERSION_STRING``,

@@ -22,7 +22,6 @@
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
 #include "cmState.h"
-#include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -147,7 +146,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   // write each target's progress.make this loop is done twice. Basically the
   // Generate pass counts all the actions, the first loop below determines
   // how many actions have progress updates for each target and writes to
-  // corrrect variable values for everything except the all targets. The
+  // correct variable values for everything except the all targets. The
   // second loop actually writes out correct values for the all targets as
   // well. This is because the all targets require more information that is
   // computed in the first loop.
@@ -318,16 +317,13 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     const auto& lg = cm::static_reference_cast<cmLocalUnixMakefileGenerator3>(
       this->LocalGenerators[0]);
 
-    const std::string& currentBinDir = lg.GetCurrentBinaryDirectory();
     // Save the list to the cmake file.
     cmakefileStream
       << "# The top level Makefile was generated from the following files:\n"
       << "set(CMAKE_MAKEFILE_DEPENDS\n"
       << "  \"CMakeCache.txt\"\n";
     for (std::string const& f : lfiles) {
-      cmakefileStream << "  \""
-                      << lg.MaybeConvertToRelativePath(currentBinDir, f)
-                      << "\"\n";
+      cmakefileStream << "  \"" << lg.MaybeRelativeToCurBinDir(f) << "\"\n";
     }
     cmakefileStream << "  )\n\n";
 
@@ -339,16 +335,10 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     // Set the corresponding makefile in the cmake file.
     cmakefileStream << "# The corresponding makefile is:\n"
                     << "set(CMAKE_MAKEFILE_OUTPUTS\n"
-                    << "  \""
-                    << lg.MaybeConvertToRelativePath(currentBinDir,
-                                                     makefileName)
+                    << "  \"" << lg.MaybeRelativeToCurBinDir(makefileName)
                     << "\"\n"
-                    << "  \""
-                    << lg.MaybeConvertToRelativePath(currentBinDir, check)
-                    << "\"\n";
+                    << "  \"" << lg.MaybeRelativeToCurBinDir(check) << "\"\n";
     cmakefileStream << "  )\n\n";
-
-    const std::string& binDir = lg.GetBinaryDirectory();
 
     // CMake must rerun if a byproduct is missing.
     cmakefileStream << "# Byproducts of CMake generate step:\n"
@@ -359,14 +349,12 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     for (const auto& localGen : this->LocalGenerators) {
       for (std::string const& outfile :
            localGen->GetMakefile()->GetOutputFiles()) {
-        cmakefileStream << "  \""
-                        << lg.MaybeConvertToRelativePath(binDir, outfile)
+        cmakefileStream << "  \"" << lg.MaybeRelativeToTopBinDir(outfile)
                         << "\"\n";
       }
       tmpStr = cmStrCat(localGen->GetCurrentBinaryDirectory(),
                         "/CMakeFiles/CMakeDirectoryInformation.cmake");
-      cmakefileStream << "  \""
-                      << localGen->MaybeConvertToRelativePath(binDir, tmpStr)
+      cmakefileStream << "  \"" << localGen->MaybeRelativeToTopBinDir(tmpStr)
                       << "\"\n";
     }
     cmakefileStream << "  )\n\n";
@@ -458,9 +446,8 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   auto* lg = static_cast<cmLocalUnixMakefileGenerator3*>(dt.LG);
   // Begin the directory-level rules section.
   {
-    std::string dir =
-      cmSystemTools::ConvertToOutputPath(lg->MaybeConvertToRelativePath(
-        lg->GetBinaryDirectory(), lg->GetCurrentBinaryDirectory()));
+    std::string dir = cmSystemTools::ConvertToOutputPath(
+      lg->MaybeRelativeToTopBinDir(lg->GetCurrentBinaryDirectory()));
     lg->WriteDivider(ruleFileStream);
     if (lg->IsRootMakefile()) {
       ruleFileStream << "# Directory level rules for the build root directory";
@@ -564,21 +551,6 @@ cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
   bool fast, int jobs, bool verbose,
   std::vector<std::string> const& makeOptions)
 {
-  std::unique_ptr<cmMakefile> mfu;
-  cmMakefile* mf;
-  if (!this->Makefiles.empty()) {
-    mf = this->Makefiles[0].get();
-  } else {
-    cmStateSnapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
-    snapshot.GetDirectory().SetCurrentSource(
-      this->CMakeInstance->GetHomeDirectory());
-    snapshot.GetDirectory().SetCurrentBinary(
-      this->CMakeInstance->GetHomeOutputDirectory());
-    snapshot.SetDefaultDefinitions();
-    mfu = cm::make_unique<cmMakefile>(this, snapshot);
-    mf = mfu.get();
-  }
-
   GeneratedMakeCommand makeCommand;
 
   // Make it possible to set verbosity also from command line
@@ -609,9 +581,6 @@ cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
       if (fast) {
         tname += "/fast";
       }
-      tname =
-        mf->GetStateSnapshot().GetDirectory().ConvertToRelPathIfNotContained(
-          mf->GetState()->GetBinaryDirectory(), tname);
       cmSystemTools::ConvertToOutputSlashes(tname);
       makeCommand.Add(std::move(tname));
     }

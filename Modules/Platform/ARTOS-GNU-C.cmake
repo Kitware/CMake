@@ -1,4 +1,4 @@
-# Define ARTOS to select proper behaviour and tell preprocessor to accept C++ style comments.
+# Define ARTOS to select proper behavior and tell preprocessor to accept C++ style comments.
 string(APPEND CMAKE_C_FLAGS_INIT " -DARTOS -Xp -+")
 # ac doesn't support -g properly and doesn't support the normal gcc optimization options. Just use the defaults set by ac.
 string(APPEND CMAKE_C_FLAGS_DEBUG_INIT " ")

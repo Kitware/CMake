@@ -1,0 +1,30 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "GoodInstallDefault",
+            "generator": "@RunCMake_GENERATOR@",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "installDir": "${sourceDir}/build/install_dir1"
+        },
+        {
+            "name": "GoodInstallInherit",
+            "inherits": "GoodInstallDefault",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": {
+                "type": "PATH",
+                "value": "${sourceDir}/build/bad_path"
+                }
+            }
+        },
+        {
+            "name": "GoodInstallOverride",
+            "inherits": "GoodInstallInherit",
+            "installDir": "${sourceDir}/build/install_dir2"
+        },
+        {
+            "name": "GoodInstallCommandLine",
+            "inherits": "GoodInstallOverride"
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+CMake Warning \(dev\) at CMP0121-INSERT-Common.cmake:3 \(list\):
+  Policy CMP0121 is not set: The list\(\) command now validates parsing of
+  index arguments.  Run "cmake --help-policy CMP0121" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+  Invalid list index "junk2".
+Call Stack \(most recent call first\):
+  CMP0121-INSERT-WARN.cmake:2 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+INSERT: -->new;a;b;c;d;e<--

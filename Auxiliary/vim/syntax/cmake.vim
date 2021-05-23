@@ -9,7 +9,7 @@
 " Former Maintainer: Karthik Krishnan <karthik.krishnan@kitware.com>
 " Last Change:  2020 oct. 28
 "
-" Licence:      The CMake license applies to this file. See
+" License:      The CMake license applies to this file. See
 "               https://cmake.org/licensing
 "               This implies that distribution with Vim is allowed
 
@@ -92,6 +92,7 @@ syn keyword cmakeProperty contained
             \ AUTOUIC_EXECUTABLE
             \ AUTOUIC_OPTIONS
             \ AUTOUIC_SEARCH_PATHS
+            \ AUTOUIC_SOURCE_GROUP
             \ BINARY_DIR
             \ BUILDSYSTEM_TARGETS
             \ BUILD_RPATH

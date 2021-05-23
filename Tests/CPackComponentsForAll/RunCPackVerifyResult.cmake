@@ -404,7 +404,7 @@ if(CPackGen MATCHES "RPM")
       elseif("${symlink_name}" STREQUAL "symlink_other_relocatable_path"
           OR "${symlink_name}" STREQUAL "symlink_from_non_relocatable_path"
           OR "${symlink_name}" STREQUAL "symlink_relocatable_subpath")
-        # these links were not canged - post install script only - ignore them
+        # these links were not changed - post install script only - ignore them
       else()
         message(FATAL_ERROR "error: unexpected rpm symbolic link '${check_symlink}'")
       endif()

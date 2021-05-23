@@ -654,10 +654,10 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           this->IsKeyword(keyIS_NEWER_THAN, *argP1)) {
         int fileIsNewer = 0;
-        bool success = cmSystemTools::FileTimeCompare(
+        cmsys::Status ftcStatus = cmSystemTools::FileTimeCompare(
           arg->GetValue(), (argP2)->GetValue(), &fileIsNewer);
         this->HandleBinaryOp(
-          (!success || fileIsNewer == 1 || fileIsNewer == 0), reducible, arg,
+          (!ftcStatus || fileIsNewer == 1 || fileIsNewer == 0), reducible, arg,
           newArgs, argP1, argP2);
       }
 

@@ -18,6 +18,7 @@ run_ctest_test(TestQuiet QUIET)
 #
 # Spoof a load average value to make these tests more reliable.
 set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 5)
+set(RunCTest_VERBOSE_FLAG -VV)
 
 # Verify that new tests are started when the load average falls below
 # our threshold.
@@ -53,6 +54,7 @@ run_ctest_test(TestLoadOrder TEST_LOAD "ERR4")
 
 unset(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING})
 unset(CASE_CTEST_TEST_LOAD)
+unset(RunCTest_VERBOSE_FLAG)
 
 function(run_TestChangeId)
   set(CASE_TEST_PREFIX_CODE [[
@@ -144,3 +146,22 @@ set_property(TEST RunCMakeVersion PROPERTY ENVIRONMENT "ENV1=env1;ENV2=env2")
   run_ctest(TestEnvironment)
 endfunction()
 run_environment()
+
+# test for OUTPUT_JUNIT
+run_ctest_test(OutputJUnit OUTPUT_JUNIT junit.xml REPEAT UNTIL_FAIL:2)
+
+# Verify that extra measurements get reported.
+function(run_measurements)
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(
+  NAME double_measurement
+  COMMAND ${CMAKE_COMMAND} -E
+  echo <DartMeasurement type="numeric/double" name="my_custom_value">1.4847</DartMeasurement>)
+add_test(
+  NAME img_measurement
+  COMMAND ${CMAKE_COMMAND} -E
+  echo <DartMeasurementFile name="TestImage" type="image/png">]] ${IMAGE_DIR}/cmake-logo-16.png [[</DartMeasurementFile>)
+  ]])
+  run_ctest(TestMeasurements)
+endfunction()
+run_measurements()

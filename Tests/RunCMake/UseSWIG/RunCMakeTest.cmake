@@ -23,3 +23,7 @@ if (CMake_TEST_FindPython)
   run_cmake_target(CMP0086-NEW build example)
 
 endif()
+
+run_cmake(CMP0122-WARN)
+run_cmake(CMP0122-OLD)
+run_cmake(CMP0122-NEW)

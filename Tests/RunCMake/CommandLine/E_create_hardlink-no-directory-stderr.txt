@@ -1,1 +1,1 @@
-^CMake Error: failed to create link .* no such file or directory
+^CMake Error: failed to create link '[^']+': [A-Za-z]

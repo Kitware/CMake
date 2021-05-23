@@ -1,0 +1,9 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "OptionalBinaryDirField",
+      "generator": "@RunCMake_GENERATOR@"
+    }
+  ]
+}

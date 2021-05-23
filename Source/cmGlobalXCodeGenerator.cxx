@@ -17,6 +17,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCMakePath.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
@@ -392,7 +393,7 @@ bool cmGlobalXCodeGenerator::ProcessGeneratorToolsetField(
         "  ",  this->GetName(), "\n"
         "toolset specification field\n"
         "  buildsystem=", value, "\n"
-        "value is unkonwn.  It must be '1' or '12'."
+        "value is unknown.  It must be '1' or '12'."
         );
       /* clang-format on */
       mf->IssueMessage(MessageType::FATAL_ERROR, e);
@@ -585,13 +586,7 @@ void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
 {
   this->CurrentProject = root->GetProjectName();
   this->SetCurrentLocalGenerator(root);
-  cmSystemTools::SplitPath(
-    this->CurrentLocalGenerator->GetCurrentSourceDirectory(),
-    this->ProjectSourceDirectoryComponents);
-  cmSystemTools::SplitPath(
-    this->CurrentLocalGenerator->GetCurrentBinaryDirectory(),
-    this->ProjectOutputDirectoryComponents);
-
+  this->CurrentRootGenerator = root;
   this->CurrentXCodeHackMakefile =
     cmStrCat(root->GetCurrentBinaryDirectory(), "/CMakeScripts");
   cmSystemTools::MakeDirectory(this->CurrentXCodeHackMakefile);
@@ -991,7 +986,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
       includes, genexInterpreter.Evaluate(*cincludes, INCLUDE_DIRECTORIES),
       *sf);
   }
-  lg->AppendFlags(flags, lg->GetIncludeFlags(includes, gtgt, lang, true));
+  lg->AppendFlags(flags,
+                  lg->GetIncludeFlags(includes, gtgt, lang, std::string()));
 
   cmXCodeObject* buildFile =
     this->CreateXCodeBuildFileFromPath(sf->ResolveFullPath(), gtgt, lang, sf);
@@ -1863,9 +1859,20 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
   std::set<std::string> allConfigInputs;
   std::set<std::string> allConfigOutputs;
 
+  cmXCodeObject* buildPhase =
+    this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase,
+                       cmStrCat(gt->GetName(), ':', sf->GetFullPath()));
+
+  auto depfilesDirectory = cmStrCat(
+    gt->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/CMakeFiles/d/");
+  auto depfilesPrefix = cmStrCat(depfilesDirectory, buildPhase->GetId(), ".");
+
   std::string shellScript = "set -e\n";
   for (std::string const& configName : this->CurrentConfigurationTypes) {
-    cmCustomCommandGenerator ccg(cc, configName, this->CurrentLocalGenerator);
+    cmCustomCommandGenerator ccg(
+      cc, configName, this->CurrentLocalGenerator, true, {},
+      [&depfilesPrefix](const std::string& config, const std::string&)
+        -> std::string { return cmStrCat(depfilesPrefix, config, ".d"); });
     std::vector<std::string> realDepends;
     realDepends.reserve(ccg.GetDepends().size());
     for (auto const& d : ccg.GetDepends()) {
@@ -1885,9 +1892,22 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
                "\"; then :\n", this->ConstructScript(ccg), "fi\n");
   }
 
-  cmXCodeObject* buildPhase =
-    this->CreateObject(cmXCodeObject::PBXShellScriptBuildPhase,
-                       cmStrCat(gt->GetName(), ':', sf->GetFullPath()));
+  if (!cc.GetDepfile().empty()) {
+    buildPhase->AddAttribute(
+      "dependencyFile",
+      this->CreateString(cmStrCat(depfilesDirectory, buildPhase->GetId(),
+                                  ".$(CONFIGURATION).d")));
+    // to avoid spurious errors during first build,  create empty dependency
+    // files
+    cmSystemTools::MakeDirectory(depfilesDirectory);
+    for (std::string const& configName : this->CurrentConfigurationTypes) {
+      auto file = cmStrCat(depfilesPrefix, configName, ".d");
+      if (!cmSystemTools::FileExists(file)) {
+        cmSystemTools::Touch(file, true);
+      }
+    }
+  }
+
   buildPhase->AddAttribute("buildActionMask",
                            this->CreateString("2147483647"));
   cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -2187,9 +2207,33 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
     }
   }
   makefileStream << "\n\n";
+
+  auto depfilesDirectory =
+    cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(),
+             "/CMakeFiles/d/");
+
   for (auto const& command : commands) {
-    cmCustomCommandGenerator ccg(command, configName,
-                                 this->CurrentLocalGenerator);
+    cmCustomCommandGenerator ccg(
+      command, configName, this->CurrentLocalGenerator, true, {},
+      [this, &depfilesDirectory](const std::string& config,
+                                 const std::string& file) -> std::string {
+        return cmStrCat(
+          depfilesDirectory,
+          this->GetObjectId(cmXCodeObject::PBXShellScriptBuildPhase, file),
+          ".", config, ".d");
+      });
+
+    auto depfile = ccg.GetInternalDepfile();
+    if (!depfile.empty()) {
+      makefileStream << "include "
+                     << cmSystemTools::ConvertToOutputPath(depfile) << "\n\n";
+
+      cmSystemTools::MakeDirectory(depfilesDirectory);
+      if (!cmSystemTools::FileExists(depfile)) {
+        cmSystemTools::Touch(depfile, true);
+      }
+    }
+
     std::vector<std::string> realDepends;
     realDepends.reserve(ccg.GetDepends().size());
     for (auto const& d : ccg.GetDepends()) {
@@ -2695,7 +2739,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     // GNU assembly files (#16449)
     for (auto const& language : languages) {
       std::string includeFlags = this->CurrentLocalGenerator->GetIncludeFlags(
-        includes, gtgt, language, true, false, configName);
+        includes, gtgt, language, configName);
 
       if (!includeFlags.empty()) {
         cflags[language] += " " + includeFlags;
@@ -3727,7 +3771,10 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
   }
 }
 
-void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
+void cmGlobalXCodeGenerator::AddEmbeddedObjects(
+  cmXCodeObject* target, const std::string& copyFilesBuildPhaseName,
+  const std::string& embedPropertyName, const std::string& dstSubfolderSpec,
+  int actionsOnByDefault)
 {
   cmGeneratorTarget* gt = target->GetTarget();
   if (!gt) {
@@ -3743,7 +3790,7 @@ void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
   if (!(isFrameworkTarget || isBundleTarget || isCFBundleTarget)) {
     return;
   }
-  cmProp files = gt->GetProperty("XCODE_EMBED_FRAMEWORKS");
+  cmProp files = gt->GetProperty(embedPropertyName);
   if (!files) {
     return;
   }
@@ -3751,16 +3798,15 @@ void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
   // Create an "Embedded Frameworks" build phase
   auto* copyFilesBuildPhase =
     this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
-  std::string copyFilesBuildPhaseName = "Embed Frameworks";
-  std::string destinationFrameworks = "10";
   copyFilesBuildPhase->SetComment(copyFilesBuildPhaseName);
   copyFilesBuildPhase->AddAttribute("buildActionMask",
                                     this->CreateString("2147483647"));
   copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
-                                    this->CreateString(destinationFrameworks));
+                                    this->CreateString(dstSubfolderSpec));
   copyFilesBuildPhase->AddAttribute(
     "name", this->CreateString(copyFilesBuildPhaseName));
-  if (cmProp fwEmbedPath = gt->GetProperty("XCODE_EMBED_FRAMEWORKS_PATH")) {
+  if (cmProp fwEmbedPath =
+        gt->GetProperty(cmStrCat(embedPropertyName, "_PATH"))) {
     copyFilesBuildPhase->AddAttribute("dstPath",
                                       this->CreateString(*fwEmbedPath));
   } else {
@@ -3774,10 +3820,10 @@ void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
   for (std::string const& relFile : relFiles) {
     cmXCodeObject* buildFile{ nullptr };
     std::string filePath = relFile;
-    auto* genTarget = FindGeneratorTarget(relFile);
+    auto* genTarget = this->FindGeneratorTarget(relFile);
     if (genTarget) {
       // This is a target - get it's product path reference
-      auto* xcTarget = FindXCodeTarget(genTarget);
+      auto* xcTarget = this->FindXCodeTarget(genTarget);
       if (!xcTarget) {
         cmSystemTools::Error("Can not find a target for " +
                              genTarget->GetName());
@@ -3791,18 +3837,18 @@ void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
                              " is missing product reference");
         continue;
       }
-      auto it = FileRefToEmbedBuildFileMap.find(fileRefObject);
-      if (it == FileRefToEmbedBuildFileMap.end()) {
+      auto it = this->FileRefToEmbedBuildFileMap.find(fileRefObject);
+      if (it == this->FileRefToEmbedBuildFileMap.end()) {
         buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
         buildFile->AddAttribute("fileRef", fileRefObject);
-        FileRefToEmbedBuildFileMap[fileRefObject] = buildFile;
+        this->FileRefToEmbedBuildFileMap[fileRefObject] = buildFile;
       } else {
         buildFile = it->second;
       }
     } else if (cmSystemTools::IsPathToFramework(relFile)) {
       // This is a regular string path - create file reference
-      auto it = EmbeddedLibRefs.find(relFile);
-      if (it == EmbeddedLibRefs.end()) {
+      auto it = this->EmbeddedLibRefs.find(relFile);
+      if (it == this->EmbeddedLibRefs.end()) {
         cmXCodeObject* fileRef =
           this->CreateXCodeFileReferenceFromPath(relFile, gt, "", nullptr);
         if (fileRef) {
@@ -3828,16 +3874,25 @@ void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
     cmXCodeObject* settings =
       this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
     cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-    const auto& rmHeadersProp =
-      gt->GetSafeProperty("XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY");
-    if (cmIsOn(rmHeadersProp)) {
+
+    bool removeHeaders = actionsOnByDefault & RemoveHeadersOnCopyByDefault;
+    if (auto prop = gt->GetProperty(
+          cmStrCat(embedPropertyName, "_REMOVE_HEADERS_ON_COPY"))) {
+      removeHeaders = cmIsOn(*prop);
+    }
+    if (removeHeaders) {
       attrs->AddObject(this->CreateString("RemoveHeadersOnCopy"));
     }
-    const auto& codeSignProp =
-      gt->GetSafeProperty("XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY");
-    if (cmIsOn(codeSignProp)) {
+
+    bool codeSign = actionsOnByDefault & CodeSignOnCopyByDefault;
+    if (auto prop =
+          gt->GetProperty(cmStrCat(embedPropertyName, "_CODE_SIGN_ON_COPY"))) {
+      codeSign = cmIsOn(*prop);
+    }
+    if (codeSign) {
       attrs->AddObject(this->CreateString("CodeSignOnCopy"));
     }
+
     settings->AddAttributeIfNotEmpty("ATTRIBUTES", attrs);
     buildFile->AddAttributeIfNotEmpty("settings", settings);
     if (!buildFiles->HasObject(buildFile)) {
@@ -3846,9 +3901,28 @@ void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
   }
   copyFilesBuildPhase->AddAttribute("files", buildFiles);
   auto* buildPhases = target->GetAttribute("buildPhases");
-  // Insert embed build phase right before the post-build command
+  // Embed-something build phases must be inserted before the post-build
+  // command because that command is expected to be last
   buildPhases->InsertObject(buildPhases->GetObjectCount() - 1,
                             copyFilesBuildPhase);
+}
+
+void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
+{
+  static const auto dstSubfolderSpec = "10";
+
+  this->AddEmbeddedObjects(target, "Embed Frameworks",
+                           "XCODE_EMBED_FRAMEWORKS", dstSubfolderSpec,
+                           NoActionOnCopyByDefault);
+}
+
+void cmGlobalXCodeGenerator::AddEmbeddedAppExtensions(cmXCodeObject* target)
+{
+  static const auto dstSubfolderSpec = "13";
+
+  this->AddEmbeddedObjects(target, "Embed App Extensions",
+                           "XCODE_EMBED_APP_EXTENSIONS", dstSubfolderSpec,
+                           RemoveHeadersOnCopyByDefault);
 }
 
 bool cmGlobalXCodeGenerator::CreateGroups(
@@ -4230,6 +4304,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   for (auto t : targets) {
     this->AddDependAndLinkInformation(t);
     this->AddEmbeddedFrameworks(t);
+    this->AddEmbeddedAppExtensions(t);
     // Inherit project-wide values for any target-specific search paths.
     this->InheritBuildSettingAttribute(t, "HEADER_SEARCH_PATHS");
     this->InheritBuildSettingAttribute(t, "SYSTEM_HEADER_SEARCH_PATHS");
@@ -4237,6 +4312,9 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->InheritBuildSettingAttribute(t, "SYSTEM_FRAMEWORK_SEARCH_PATHS");
     this->InheritBuildSettingAttribute(t, "LIBRARY_SEARCH_PATHS");
     this->InheritBuildSettingAttribute(t, "LD_RUNPATH_SEARCH_PATHS");
+    this->InheritBuildSettingAttribute(t, "GCC_PREPROCESSOR_DEFINITIONS");
+    this->InheritBuildSettingAttribute(t, "OTHER_CFLAGS");
+    this->InheritBuildSettingAttribute(t, "OTHER_LDFLAGS");
   }
 
   if (this->XcodeBuildSystem == BuildSystem::One) {
@@ -4620,13 +4698,12 @@ std::string cmGlobalXCodeGenerator::RelativeToSource(const std::string& p)
   // We force conversion because Xcode breakpoints do not work unless
   // they are in a file named relative to the source tree.
   return cmSystemTools::ForceToRelativePath(
-    cmSystemTools::JoinPath(this->ProjectSourceDirectoryComponents), p);
+    this->CurrentRootGenerator->GetCurrentSourceDirectory(), p);
 }
 
 std::string cmGlobalXCodeGenerator::RelativeToBinary(const std::string& p)
 {
-  return this->CurrentLocalGenerator->MaybeConvertToRelativePath(
-    cmSystemTools::JoinPath(this->ProjectOutputDirectoryComponents), p);
+  return this->CurrentRootGenerator->MaybeRelativeToCurBinDir(p);
 }
 
 std::string cmGlobalXCodeGenerator::XCodeEscapePath(const std::string& p)

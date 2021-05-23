@@ -18,6 +18,7 @@
 #include "cmCMakePath.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSubcommandTable.h"
@@ -149,8 +150,8 @@ public:
 bool getInputPath(const std::string& arg, cmExecutionStatus& status,
                   std::string& path)
 {
-  const auto* def = status.GetMakefile().GetDefinition(arg);
-  if (def == nullptr) {
+  cmProp def = status.GetMakefile().GetDefinition(arg);
+  if (!def) {
     status.SetError("undefined variable for input path.");
     return false;
   }

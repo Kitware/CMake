@@ -130,6 +130,7 @@ Variables that Provide Information
    /variable/PROJECT-NAME_BINARY_DIR
    /variable/PROJECT-NAME_DESCRIPTION
    /variable/PROJECT-NAME_HOMEPAGE_URL
+   /variable/PROJECT-NAME_IS_TOP_LEVEL
    /variable/PROJECT-NAME_SOURCE_DIR
    /variable/PROJECT-NAME_VERSION
    /variable/PROJECT-NAME_VERSION_MAJOR
@@ -139,6 +140,7 @@ Variables that Provide Information
    /variable/PROJECT_BINARY_DIR
    /variable/PROJECT_DESCRIPTION
    /variable/PROJECT_HOMEPAGE_URL
+   /variable/PROJECT_IS_TOP_LEVEL
    /variable/PROJECT_NAME
    /variable/PROJECT_SOURCE_DIR
    /variable/PROJECT_VERSION
@@ -243,6 +245,7 @@ Variables that Change Behavior
    /variable/CMAKE_SYSTEM_LIBRARY_PATH
    /variable/CMAKE_SYSTEM_PREFIX_PATH
    /variable/CMAKE_SYSTEM_PROGRAM_PATH
+   /variable/CMAKE_TLS_VERIFY
    /variable/CMAKE_USER_MAKE_RULES_OVERRIDE
    /variable/CMAKE_WARN_DEPRECATED
    /variable/CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION
@@ -644,6 +647,7 @@ Variables for CTest
    /variable/CTEST_RESOURCE_SPEC_FILE
    /variable/CTEST_RUN_CURRENT_SCRIPT
    /variable/CTEST_SCP_COMMAND
+   /variable/CTEST_SCRIPT_DIRECTORY
    /variable/CTEST_SITE
    /variable/CTEST_SUBMIT_URL
    /variable/CTEST_SOURCE_DIRECTORY

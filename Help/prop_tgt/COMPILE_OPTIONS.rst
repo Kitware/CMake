@@ -15,3 +15,5 @@ Contents of ``COMPILE_OPTIONS`` may use "generator expressions" with the
 syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual
 for available expressions.  See the :manual:`cmake-buildsystem(7)` manual
 for more on defining buildsystem properties.
+
+.. include:: ../command/OPTIONS_SHELL.txt
