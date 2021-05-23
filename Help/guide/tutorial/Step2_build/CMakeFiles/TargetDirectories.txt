@@ -1,0 +1,3 @@
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step2_build/CMakeFiles/rebuild_cache.dir
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step2_build/CMakeFiles/edit_cache.dir
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step2_build/CMakeFiles/Tutorial.dir

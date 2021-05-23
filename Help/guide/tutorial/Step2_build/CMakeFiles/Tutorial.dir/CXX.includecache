@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step2/tutorial.cxx
+cmath
+-
+iostream
+-
+string
+-
+TutorialConfig.h
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step2/TutorialConfig.h
+MathFunctions.h
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step2/MathFunctions.h
+
+TutorialConfig.h
+

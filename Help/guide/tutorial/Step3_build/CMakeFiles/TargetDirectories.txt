@@ -1,0 +1,6 @@
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step3_build/CMakeFiles/rebuild_cache.dir
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step3_build/CMakeFiles/edit_cache.dir
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step3_build/CMakeFiles/Tutorial.dir
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step3_build/MathFunctions/CMakeFiles/rebuild_cache.dir
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step3_build/MathFunctions/CMakeFiles/edit_cache.dir
+/Users/universeofhk/Documents/GitHub/CMake/Help/guide/tutorial/Step3_build/MathFunctions/CMakeFiles/MathFunctions.dir
