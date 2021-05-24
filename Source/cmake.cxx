@@ -28,6 +28,7 @@
 
 #include "cm_sys_stat.h"
 
+#include "cmCMakePath.h"
 #include "cmCMakePresetsFile.h"
 #include "cmCommandLineArgument.h"
 #include "cmCommands.h"
@@ -156,7 +157,8 @@ static void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
 #endif
 
 cmake::cmake(Role role, cmState::Mode mode)
-  : FileTimeCache(cm::make_unique<cmFileTimeCache>())
+  : CMakeWorkingDirectory(cmSystemTools::GetCurrentWorkingDirectory())
+  , FileTimeCache(cm::make_unique<cmFileTimeCache>())
 #ifndef CMAKE_BOOTSTRAP
   , VariableWatch(cm::make_unique<cmVariableWatch>())
 #endif
@@ -208,9 +210,9 @@ cmake::cmake(Role role, cmState::Mode mode)
     };
 
     // The "c" extension MUST precede the "C" extension.
-    setupExts(
-      this->CLikeSourceFileExtensions,
-      { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "mpp", "m", "M", "mm" });
+    setupExts(this->CLikeSourceFileExtensions,
+              { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "mpp", "m", "M",
+                "mm", "ixx", "cppm" });
     setupExts(this->HeaderFileExtensions,
               { "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" });
     setupExts(this->CudaFileExtensions, { "cu" });
@@ -258,6 +260,13 @@ Json::Value cmake::ReportCapabilitiesJson() const
       gen["name"] = gi.name;
       gen["toolsetSupport"] = gi.supportsToolset;
       gen["platformSupport"] = gi.supportsPlatform;
+      if (!gi.supportedPlatforms.empty()) {
+        Json::Value supportedPlatforms = Json::arrayValue;
+        for (std::string const& platform : gi.supportedPlatforms) {
+          supportedPlatforms.append(platform);
+        }
+        gen["supportedPlatforms"] = std::move(supportedPlatforms);
+      }
       gen["extraGenerators"] = Json::arrayValue;
       generatorMap[gi.name] = gen;
     } else {
@@ -484,7 +493,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
   auto ScriptLambda = [&](std::string const& path, cmake* state) -> bool {
     // Register fake project commands that hint misuse in script mode.
     GetProjectCommandsInScriptMode(state->GetState());
-    // Documented behaviour of CMAKE{,_CURRENT}_{SOURCE,BINARY}_DIR is to be
+    // Documented behavior of CMAKE{,_CURRENT}_{SOURCE,BINARY}_DIR is to be
     // set to $PWD for -P mode.
     state->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     state->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
@@ -493,26 +502,61 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     return true;
   };
 
+  auto PrefixLambda = [&](std::string const& path, cmake* state) -> bool {
+    const std::string var = "CMAKE_INSTALL_PREFIX";
+    cmStateEnums::CacheEntryType type = cmStateEnums::PATH;
+    cmCMakePath absolutePath(path);
+    if (absolutePath.IsAbsolute()) {
+#ifndef CMAKE_BOOTSTRAP
+      state->UnprocessedPresetVariables.erase(var);
+#endif
+      state->ProcessCacheArg(var, path, type);
+      return true;
+    }
+    cmSystemTools::Error("Absolute paths are required for --install-prefix");
+    return false;
+  };
+
+  auto ToolchainLambda = [&](std::string const& path, cmake* state) -> bool {
+    const std::string var = "CMAKE_TOOLCHAIN_FILE";
+    cmStateEnums::CacheEntryType type = cmStateEnums::FILEPATH;
+#ifndef CMAKE_BOOTSTRAP
+    state->UnprocessedPresetVariables.erase(var);
+#endif
+    state->ProcessCacheArg(var, path, type);
+    return true;
+  };
+
   std::vector<CommandArgument> arguments = {
     CommandArgument{ "-D", "-D must be followed with VAR=VALUE.",
-                     CommandArgument::Values::One, DefineLambda },
-    CommandArgument{ "-W", "-W must be followed with [no-]<name>.",
-                     CommandArgument::Values::One, WarningLambda },
-    CommandArgument{ "-U", "-U must be followed with VAR.",
-                     CommandArgument::Values::One, UnSetLambda },
-    CommandArgument{ "-C", "-C must be followed by a file name.",
                      CommandArgument::Values::One,
-                     [&](std::string const& value, cmake* state) -> bool {
-                       cmSystemTools::Stdout("loading initial cache file " +
-                                             value + "\n");
-                       // Resolve script path specified on command line
-                       // relative to $PWD.
-                       auto path = cmSystemTools::CollapseFullPath(value);
-                       state->ReadListFile(args, path);
-                       return true;
-                     } },
+                     CommandArgument::RequiresSeparator::No, DefineLambda },
+    CommandArgument{ "-W", "-W must be followed with [no-]<name>.",
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No, WarningLambda },
+    CommandArgument{ "-U", "-U must be followed with VAR.",
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No, UnSetLambda },
+    CommandArgument{
+      "-C", "-C must be followed by a file name.",
+      CommandArgument::Values::One, CommandArgument::RequiresSeparator::No,
+      [&](std::string const& value, cmake* state) -> bool {
+        cmSystemTools::Stdout("loading initial cache file " + value + "\n");
+        // Resolve script path specified on command line
+        // relative to $PWD.
+        auto path = cmSystemTools::CollapseFullPath(value);
+        state->ReadListFile(args, path);
+        return true;
+      } },
+
     CommandArgument{ "-P", "-P must be followed by a file name.",
-                     CommandArgument::Values::One, ScriptLambda },
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No, ScriptLambda },
+    CommandArgument{ "--toolchain", "No file specified for --toolchain",
+                     CommandArgument::Values::One, ToolchainLambda },
+    CommandArgument{ "--install-prefix",
+                     "No install directory specified for --install-prefix",
+                     CommandArgument::Values::One, PrefixLambda },
     CommandArgument{ "--find-package", CommandArgument::Values::Zero,
                      [&](std::string const&, cmake*) -> bool {
                        findPackageMode = true;
@@ -649,7 +693,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     this->GlobalGenerator->CreateGenerationObjects();
     const auto& lg = this->GlobalGenerator->LocalGenerators[0];
     std::string includeFlags =
-      lg->GetIncludeFlags(includeDirs, nullptr, language);
+      lg->GetIncludeFlags(includeDirs, nullptr, language, std::string());
 
     std::string definitions = mf->GetSafeDefinition("PACKAGE_DEFINITIONS");
     printf("%s %s\n", includeFlags.c_str(), definitions.c_str());
@@ -790,31 +834,49 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 
   std::vector<CommandArgument> arguments = {
     CommandArgument{ "-S", "No source directory specified for -S",
-                     CommandArgument::Values::One, SourceArgLambda },
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No, SourceArgLambda },
     CommandArgument{ "-H", "No source directory specified for -H",
-                     CommandArgument::Values::One, SourceArgLambda },
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No, SourceArgLambda },
     CommandArgument{ "-O", CommandArgument::Values::Zero,
                      IgnoreAndTrueLambda },
     CommandArgument{ "-B", "No build directory specified for -B",
-                     CommandArgument::Values::One, BuildArgLambda },
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No, BuildArgLambda },
     CommandArgument{ "-P", "-P must be followed by a file name.",
                      CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No,
                      [&](std::string const&, cmake*) -> bool {
                        scriptMode = true;
                        return true;
                      } },
     CommandArgument{ "-D", "-D must be followed with VAR=VALUE.",
-                     CommandArgument::Values::One, IgnoreAndTrueLambda },
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No,
+                     IgnoreAndTrueLambda },
     CommandArgument{ "-C", "-C must be followed by a file name.",
-                     CommandArgument::Values::One, IgnoreAndTrueLambda },
-    CommandArgument{ "-U", "-U must be followed with VAR.",
-                     CommandArgument::Values::One, IgnoreAndTrueLambda },
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No,
+                     IgnoreAndTrueLambda },
+    CommandArgument{
+      "-U", "-U must be followed with VAR.", CommandArgument::Values::One,
+      CommandArgument::RequiresSeparator::No, IgnoreAndTrueLambda },
     CommandArgument{ "-W", "-W must be followed with [no-]<name>.",
-                     CommandArgument::Values::One, IgnoreAndTrueLambda },
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No,
+                     IgnoreAndTrueLambda },
     CommandArgument{ "-A", "No platform specified for -A",
-                     CommandArgument::Values::One, PlatformLambda },
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No, PlatformLambda },
     CommandArgument{ "-T", "No toolset specified for -T",
-                     CommandArgument::Values::One, ToolsetLamda },
+                     CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No, ToolsetLamda },
+    CommandArgument{ "--toolchain", "No file specified for --toolchain",
+                     CommandArgument::Values::One, IgnoreAndTrueLambda },
+    CommandArgument{ "--install-prefix",
+                     "No install directory specified for --install-prefix",
+                     CommandArgument::Values::One, IgnoreAndTrueLambda },
 
     CommandArgument{ "--check-build-system", CommandArgument::Values::Two,
                      [](std::string const& value, cmake* state) -> bool {
@@ -1034,6 +1096,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
   bool badGeneratorName = false;
   CommandArgument generatorCommand(
     "-G", "No generator specified for -G", CommandArgument::Values::One,
+    CommandArgument::RequiresSeparator::No,
     [&](std::string const& value, cmake* state) -> bool {
       bool valid = state->CreateAndSetGlobalGenerator(value, true);
       badGeneratorName = !valid;
@@ -1194,11 +1257,17 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                                     "\": Invalid macro expansion"));
       return;
     }
+    if (!expandedPreset->ConditionResult) {
+      cmSystemTools::Error(cmStrCat("Could not use disabled preset \"",
+                                    preset->second.Unexpanded.Name, "\""));
+      return;
+    }
 
-    if (!this->State->IsCacheLoaded() && !haveBArg) {
+    if (!this->State->IsCacheLoaded() && !haveBArg &&
+        !expandedPreset->BinaryDir.empty()) {
       this->SetHomeOutputDirectory(expandedPreset->BinaryDir);
     }
-    if (!this->GlobalGenerator) {
+    if (!this->GlobalGenerator && !expandedPreset->Generator.empty()) {
       if (!this->CreateAndSetGlobalGenerator(expandedPreset->Generator,
                                              false)) {
         return;
@@ -1206,6 +1275,19 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     }
     this->UnprocessedPresetVariables = expandedPreset->CacheVariables;
     this->UnprocessedPresetEnvironment = expandedPreset->Environment;
+
+    if (!expandedPreset->InstallDir.empty() &&
+        !this->State->GetInitializedCacheValue("CMAKE_INSTALL_PREFIX")) {
+      this->UnprocessedPresetVariables["CMAKE_INSTALL_PREFIX"] = {
+        "PATH", expandedPreset->InstallDir
+      };
+    }
+    if (!expandedPreset->ToolchainFile.empty() &&
+        !this->State->GetInitializedCacheValue("CMAKE_TOOLCHAIN_FILE")) {
+      this->UnprocessedPresetVariables["CMAKE_TOOLCHAIN_FILE"] = {
+        "FILEPATH", expandedPreset->ToolchainFile
+      };
+    }
 
     if (!expandedPreset->ArchitectureStrategy ||
         expandedPreset->ArchitectureStrategy ==
@@ -3023,12 +3105,16 @@ static bool cmakeCheckStampFile(const std::string& stampName)
     cmsys::ofstream stamp(stampTemp.c_str());
     stamp << "# CMake generation timestamp file for this directory.\n";
   }
-  if (cmSystemTools::RenameFile(stampTemp, stampName)) {
+  std::string err;
+  if (cmSystemTools::RenameFile(stampTemp, stampName,
+                                cmSystemTools::Replace::Yes, &err) ==
+      cmSystemTools::RenameResult::Success) {
     // CMake does not need to re-run because the stamp file is up-to-date.
     return true;
   }
   cmSystemTools::RemoveFile(stampTemp);
-  cmSystemTools::Error("Cannot restore timestamp " + stampName);
+  cmSystemTools::Error(
+    cmStrCat("Cannot restore timestamp \"", stampName, "\": ", err));
   return false;
 }
 
@@ -3133,6 +3219,14 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       return 1;
     }
 
+    if (!expandedPreset->ConditionResult) {
+      cmSystemTools::Error(cmStrCat("Cannot use disabled build preset in ",
+                                    this->GetHomeDirectory(), ": \"",
+                                    presetName, '"'));
+      settingsFile.PrintBuildPresetList();
+      return 1;
+    }
+
     auto configurePresetPair =
       settingsFile.ConfigurePresets.find(expandedPreset->ConfigurePreset);
     if (configurePresetPair == settingsFile.ConfigurePresets.end()) {
@@ -3159,7 +3253,9 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       return 1;
     }
 
-    dir = expandedConfigurePreset->BinaryDir;
+    if (!expandedConfigurePreset->BinaryDir.empty()) {
+      dir = expandedConfigurePreset->BinaryDir;
+    }
 
     this->UnprocessedPresetEnvironment = expandedPreset->Environment;
     this->ProcessPresetEnvironment();

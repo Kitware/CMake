@@ -19,6 +19,8 @@
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
 
+struct cmMessageMetadata;
+
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 {
   this->BuildTwoConfig = false;
@@ -125,7 +127,7 @@ public:
     : CM(cm)
   {
     cmSystemTools::SetMessageCallback(
-      [&s](const std::string& msg, const char* /*unused*/) {
+      [&s](const std::string& msg, const cmMessageMetadata& /* unused */) {
         s += msg;
         s += "\n";
       });

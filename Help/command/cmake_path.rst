@@ -687,7 +687,8 @@ When the ``NORMALIZE`` option is specified, the path is :ref:`normalized
 <Normalization>` after the path computation.
 
 Because ``cmake_path()`` does not access the filesystem, symbolic links are
-not resolved.  To compute a real path with symbolic links resolved, use the
+not resolved and any leading tilde is not expanded.  To compute a real path
+with symbolic links resolved and leading tildes expanded, use the
 :command:`file(REAL_PATH)` command instead.
 
 Native Conversion

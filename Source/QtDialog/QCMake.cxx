@@ -13,6 +13,7 @@
 
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmMessageMetadata.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -37,8 +38,8 @@ QCMake::QCMake(QObject* p)
   cmSystemTools::SetRunCommandHideConsole(true);
 
   cmSystemTools::SetMessageCallback(
-    [this](std::string const& msg, const char* title) {
-      this->messageCallback(msg, title);
+    [this](std::string const& msg, const cmMessageMetadata& md) {
+      this->messageCallback(msg, md.title);
     });
   cmSystemTools::SetStdoutCallback(
     [this](std::string const& msg) { this->stdoutCallback(msg); });
@@ -160,7 +161,7 @@ void QCMake::setPreset(const QString& name, bool setBinary)
       auto const& expandedPreset =
         this->CMakePresetsFile.ConfigurePresets[presetName].Expanded;
       if (expandedPreset) {
-        if (setBinary) {
+        if (setBinary && !expandedPreset->BinaryDir.empty()) {
           QString binaryDir =
             QString::fromLocal8Bit(expandedPreset->BinaryDir.data());
           this->setBinaryDirectory(binaryDir);
@@ -334,7 +335,12 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
       toremove.append(QString::fromLocal8Bit(key.c_str()));
     } else {
       prop = props[idx];
-      if (prop.Value.type() == QVariant::Bool) {
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+      const bool isBool = prop.Value.type() == QVariant::Bool;
+#else
+      const bool isBool = prop.Value.metaType() == QMetaType::fromType<bool>();
+#endif
+      if (isBool) {
         state->SetCacheEntryValue(key, prop.Value.toBool() ? "ON" : "OFF");
       } else {
         state->SetCacheEntryValue(key,
@@ -557,7 +563,7 @@ void QCMake::loadPresets()
     preset.toolset = std::move(QString::fromLocal8Bit(p.Toolset.data()));
     preset.setToolset = !p.ToolsetStrategy ||
       p.ToolsetStrategy == cmCMakePresetsFile::ArchToolsetStrategy::Set;
-    preset.enabled = it.Expanded &&
+    preset.enabled = it.Expanded && it.Expanded->ConditionResult &&
       std::find_if(this->AvailableGenerators.begin(),
                    this->AvailableGenerators.end(),
                    [&p](const cmake::GeneratorInfo& g) {

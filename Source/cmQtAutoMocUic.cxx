@@ -1588,13 +1588,13 @@ bool cmQtAutoMocUicT::JobEvalCacheUicT::FindIncludedUi(
   };
 
   // Vicinity of the source
-  if (findUi(cmStrCat(sourceDirPrefix, this->UiName))) {
-    return true;
-  }
   if (!includePrefix.empty()) {
     if (findUi(cmStrCat(sourceDirPrefix, includePrefix, this->UiName))) {
       return true;
     }
+  }
+  if (findUi(cmStrCat(sourceDirPrefix, this->UiName))) {
+    return true;
   }
   // Additional AUTOUIC search paths
   auto const& searchPaths = this->UicConst().SearchPaths;
@@ -2723,6 +2723,9 @@ void cmQtAutoMocUicT::CreateParseJobs(SourceFileMapT const& sourceMap)
 std::string cmQtAutoMocUicT::CollapseFullPathTS(std::string const& path) const
 {
   std::lock_guard<std::mutex> guard(this->CMakeLibMutex_);
+#if defined(__NVCOMPILER)
+  static_cast<void>(guard); // convince compiler var is used
+#endif
   return cmSystemTools::CollapseFullPath(path,
                                          this->ProjectDirs().CurrentSource);
 }
@@ -2962,6 +2965,9 @@ std::vector<std::string> cmQtAutoMocUicT::dependenciesFromDepFile(
   const char* filePath)
 {
   std::lock_guard<std::mutex> guard(this->CMakeLibMutex_);
+#if defined(__NVCOMPILER)
+  static_cast<void>(guard); // convince compiler var is used
+#endif
   auto const content = cmReadGccDepfile(filePath);
   if (!content || content->empty()) {
     return {};

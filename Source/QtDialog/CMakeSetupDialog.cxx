@@ -178,7 +178,11 @@ CMakeSetupDialog::CMakeSetupDialog()
                    &CMakeSetupDialog::doOutputErrorNext);
   a->setShortcut(QKeySequence(Qt::Key_F8));
   auto* s = new QShortcut(this);
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
   s->setKey(QKeySequence(Qt::CTRL + Qt::Key_Period));
+#else
+  s->setKey(QKeySequence(Qt::CTRL | Qt::Key_Period));
+#endif
   QObject::connect(s, &QShortcut::activated, this,
                    &CMakeSetupDialog::doOutputErrorNext); // in Eclipse
 

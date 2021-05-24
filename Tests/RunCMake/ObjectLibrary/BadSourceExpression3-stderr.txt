@@ -3,7 +3,7 @@ CMake Error at BadSourceExpression3.cmake:2 \(add_library\):
 
     \$<TARGET_OBJECTS:NotObjLib>
 
-  Objects of target "NotObjLib" referenced but is not an allowed library
-  types \(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT\).
+  Objects of target "NotObjLib" referenced but is not one of the allowed
+  target types \(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT\).
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)

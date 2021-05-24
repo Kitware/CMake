@@ -38,7 +38,8 @@ Synopsis
 
   `Filesystem`_
     file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] [<globbing-expr>...])
-    file(`RENAME`_ <oldname> <newname>)
+    file(`RENAME`_ <oldname> <newname> [...])
+    file(`COPY_FILE`_ <oldname> <newname> [...])
     file({`REMOVE`_ | `REMOVE_RECURSE`_ } [<files>...])
     file(`MAKE_DIRECTORY`_ [<dir>...])
     file({`COPY`_ | `INSTALL`_} <file>... DESTINATION <dir> [...])
@@ -49,7 +50,7 @@ Synopsis
     file(`CHMOD_RECURSE`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
 
   `Path Conversion`_
-    file(`REAL_PATH`_ <path> <out-var> [BASE_DIRECTORY <dir>])
+    file(`REAL_PATH`_ <path> <out-var> [BASE_DIRECTORY <dir>] [EXPAND_TILDE])
     file(`RELATIVE_PATH`_ <out-var> <directory> <file>)
     file({`TO_CMAKE_PATH`_ | `TO_NATIVE_PATH`_} <path> <out-var>)
 
@@ -675,10 +676,45 @@ Examples of recursive globbing include::
 
 .. code-block:: cmake
 
-  file(RENAME <oldname> <newname>)
+  file(RENAME <oldname> <newname>
+       [RESULT <result>]
+       [NO_REPLACE])
 
 Move a file or directory within a filesystem from ``<oldname>`` to
 ``<newname>``, replacing the destination atomically.
+
+The options are:
+
+``RESULT <result>``
+  Set ``<result>`` variable to ``0`` on success or an error message otherwise.
+  If ``RESULT`` is not specified and the operation fails, an error is emitted.
+
+``NO_REPLACE``
+  If the ``<newname>`` path already exists, do not replace it.
+  If ``RESULT <result>`` is used, the result variable will be
+  set to ``NO_REPLACE``.  Otherwise, an error is emitted.
+
+.. _COPY_FILE:
+
+.. code-block:: cmake
+
+  file(COPY_FILE <oldname> <newname>
+       [RESULT <result>]
+       [ONLY_IF_DIFFERENT])
+
+Copy a file from ``<oldname>`` to ``<newname>``. Directories are not
+supported. Symlinks are ignored and ``<oldfile>``'s content is read and
+written to ``<newname>`` as a new file.
+
+The options are:
+
+``RESULT <result>``
+  Set ``<result>`` variable to ``0`` on success or an error message otherwise.
+  If ``RESULT`` is not specified and the operation fails, an error is emitted.
+
+``ONLY_IF_DIFFERENT``
+  If the ``<newname>`` path already exists, do not replace it if it is the
+  same as ``<oldname>``. Otherwise, an error is emitted.
 
 .. _REMOVE:
 .. _REMOVE_RECURSE:
@@ -888,16 +924,26 @@ Path Conversion
 
 .. code-block:: cmake
 
-  file(REAL_PATH <path> <out-var> [BASE_DIRECTORY <dir>])
+  file(REAL_PATH <path> <out-var> [BASE_DIRECTORY <dir>] [EXPAND_TILDE])
 
 .. versionadded:: 3.19
 
 Compute the absolute path to an existing file or directory with symlinks
 resolved.
 
-If the provided ``<path>`` is a relative path, it is evaluated relative to the
-given base directory ``<dir>``. If no base directory is provided, the default
-base directory will be :variable:`CMAKE_CURRENT_SOURCE_DIR`.
+``BASE_DIRECTORY <dir>``
+  If the provided ``<path>`` is a relative path, it is evaluated relative to the
+  given base directory ``<dir>``. If no base directory is provided, the default
+  base directory will be :variable:`CMAKE_CURRENT_SOURCE_DIR`.
+
+``EXPAND_TILDE``
+  .. versionadded:: 3.21
+
+  If the ``<path>`` is ``~`` or starts with ``~/``, the ``~`` is replaced by
+  the user's home directory.  The path to the home directory is obtained from
+  environment variables.  On Windows, the ``USERPROFILE`` environment variable
+  is used, falling back to the ``HOME`` environment variable if ``USERPROFILE``
+  is not defined.  On all other platforms, only ``HOME`` is used.
 
 .. _RELATIVE_PATH:
 
@@ -1024,7 +1070,7 @@ If neither ``NETRC`` option is given CMake will check variables
 For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
 certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
 check certificates. If neither ``TLS`` option is given CMake will check
-variables ``CMAKE_TLS_VERIFY`` and ``CMAKE_TLS_CAINFO``, respectively.
+variables :variable:`CMAKE_TLS_VERIFY` and ``CMAKE_TLS_CAINFO``, respectively.
 
 Additional options to ``DOWNLOAD`` are:
 

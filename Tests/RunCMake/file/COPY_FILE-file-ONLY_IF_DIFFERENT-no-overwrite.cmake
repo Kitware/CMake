@@ -1,0 +1,12 @@
+set(oldname "${CMAKE_CURRENT_BINARY_DIR}/input")
+set(newname "${CMAKE_CURRENT_BINARY_DIR}/output")
+file(WRITE "${oldname}" "")
+execute_process(COMMAND "${CMAKE_COMMAND} -E sleep 1")
+file(WRITE "${newname}" "")
+file(TIMESTAMP "${newname}" before_copy UTC)
+file(COPY_FILE "${oldname}" "${newname}" RESULT result ONLY_IF_DIFFERENT)
+file(TIMESTAMP "${newname}" after_copy UTC)
+if (NOT before_copy STREQUAL after_copy)
+  message(FATAL_ERROR
+    "${newname} was modified even though ONLY_IF_DIFFERENT was specified")
+endif ()

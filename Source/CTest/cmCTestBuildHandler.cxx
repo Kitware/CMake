@@ -3,7 +3,6 @@
 #include "cmCTestBuildHandler.h"
 
 #include <cstdlib>
-#include <cstring>
 #include <set>
 #include <utility>
 
@@ -657,14 +656,14 @@ bool cmCTestBuildHandler::IsLaunchedErrorFile(const char* fname)
 {
   // error-{hash}.xml
   return (cmHasLiteralPrefix(fname, "error-") &&
-          strcmp(fname + strlen(fname) - 4, ".xml") == 0);
+          cmHasLiteralSuffix(fname, ".xml"));
 }
 
 bool cmCTestBuildHandler::IsLaunchedWarningFile(const char* fname)
 {
   // warning-{hash}.xml
   return (cmHasLiteralPrefix(fname, "warning-") &&
-          strcmp(fname + strlen(fname) - 4, ".xml") == 0);
+          cmHasLiteralSuffix(fname, ".xml"));
 }
 
 //######################################################################

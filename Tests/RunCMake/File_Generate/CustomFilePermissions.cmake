@@ -11,5 +11,6 @@ file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/$<LOWER_CASE:$<CONFIG>>/custom
 add_custom_target(checkCustomFilePermissions ALL
   COMMAND ${CMAKE_COMMAND}
     -DgeneratedFile=${CMAKE_CURRENT_BINARY_DIR}/$<LOWER_CASE:$<CONFIG>>/customfilepermissions.txt
+    -DMSYS=${MSYS}
     -P "${CMAKE_CURRENT_SOURCE_DIR}/CustomFilePermissionsVerify.cmake"
   )

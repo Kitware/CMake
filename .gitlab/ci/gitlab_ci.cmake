@@ -17,7 +17,11 @@ if ("$ENV{CMAKE_CONFIGURATION}" STREQUAL "")
 endif ()
 
 # Set the build metadata.
-set(CTEST_BUILD_NAME "$ENV{CI_PROJECT_NAME}-$ENV{CMAKE_CONFIGURATION}")
+if(NOT "$ENV{CMAKE_CI_BUILD_NAME}" STREQUAL "")
+  set(CTEST_BUILD_NAME "$ENV{CI_PROJECT_NAME}-$ENV{CMAKE_CI_BUILD_NAME}")
+else()
+  set(CTEST_BUILD_NAME "$ENV{CI_PROJECT_NAME}-$ENV{CMAKE_CONFIGURATION}")
+endif()
 set(CTEST_SITE "gitlab-ci")
 set(ctest_model "Experimental")
 

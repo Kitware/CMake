@@ -141,9 +141,6 @@ public:
     this->Gname = "";
   }
 
-  //! Set an option on a filter;
-  bool SetFilterOption(const char* module, const char* key, const char* value);
-
 private:
   bool Okay() const { return this->Error.empty(); }
   bool AddPath(const char* path, size_t skip, const char* prefix,

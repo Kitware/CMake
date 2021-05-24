@@ -1,0 +1,9 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "OptionalGeneratorField",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

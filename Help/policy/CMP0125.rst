@@ -1,0 +1,25 @@
+CMP0125
+-------
+
+.. versionadded:: 3.21
+
+The :command:`find_file`, :command:`find_path`, :command:`find_library` and
+:command:`find_program` commands handle cache variables in the same way
+regardless of whether they are defined on the command line, with or without a
+type, or using the :command:`set` command.
+
+Starting with CMake 3.21, the :command:`find_file`, :command:`find_path`,
+:command:`find_library`, and :command:`find_program` commands ensure that the
+cache variables will be used in the same way regardless how they were defined
+and the result will be always successful if the searched artifact exists.
+
+The ``OLD`` behavior for this policy is to have the find commands' behaviors
+differ depending on how the cache variable is defined. The ``NEW`` behavior for
+this policy is to have consistent behavior.
+
+This policy was introduced in CMake version 3.21. Use the
+:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+Unlike many policies, CMake version |release| does *not* warn when the policy
+is not set and simply uses ``OLD`` behavior.
+
+.. include:: DEPRECATED.txt

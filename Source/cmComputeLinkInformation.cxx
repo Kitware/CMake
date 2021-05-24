@@ -701,6 +701,10 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
 
       this->AddTargetItem(lib, tgt);
       this->AddLibraryRuntimeInfo(lib.Value, tgt);
+      if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
+          this->Target->IsDLLPlatform()) {
+        this->AddRuntimeDLL(tgt);
+      }
     }
   } else {
     // This is not a CMake target.  Use the name given.
@@ -728,6 +732,13 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
 void cmComputeLinkInformation::AddSharedDepItem(BT<std::string> const& item,
                                                 const cmGeneratorTarget* tgt)
 {
+  // Record dependencies on DLLs.
+  if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
+      this->Target->IsDLLPlatform() &&
+      this->SharedDependencyMode != SharedDepModeLink) {
+    this->AddRuntimeDLL(tgt);
+  }
+
   // If dropping shared library dependencies, ignore them.
   if (this->SharedDependencyMode == SharedDepModeNone) {
     return;
@@ -796,6 +807,14 @@ void cmComputeLinkInformation::AddSharedDepItem(BT<std::string> const& item,
     } else {
       order->AddRuntimeLibrary(lib);
     }
+  }
+}
+
+void cmComputeLinkInformation::AddRuntimeDLL(cmGeneratorTarget const* tgt)
+{
+  if (std::find(this->RuntimeDLLs.begin(), this->RuntimeDLLs.end(), tgt) ==
+      this->RuntimeDLLs.end()) {
+    this->RuntimeDLLs.emplace_back(tgt);
   }
 }
 

@@ -6,6 +6,12 @@ include(CheckSymbolExists)
 include(CheckTypeSize)
 include(TestBigEndian)
 
+if(WIN32)
+  add_definitions(-DMYTHREAD_VISTA)
+else()
+  add_definitions(-DMYTHREAD_POSIX)
+endif()
+
 CHECK_INCLUDE_FILE(byteswap.h HAVE_BYTESWAP_H)
 CHECK_INCLUDE_FILE(limits.h HAVE_LIMITS_H)
 CHECK_INCLUDE_FILE(memory.h HAVE_MEMORY_H)
@@ -60,7 +66,10 @@ set(HAVE_MF_HC3 1)
 set(HAVE_MF_HC4 1)
 
 SET(LZMA_SRCS
+  common/mythread.h
   common/sysdefs.h
+  common/tuklib_cpucores.c
+  common/tuklib_cpucores.h
   common/tuklib_integer.h
   liblzma/check/check.c
   liblzma/check/crc32_fast.c
@@ -91,14 +100,17 @@ SET(LZMA_SRCS
   liblzma/common/filter_encoder.c
   liblzma/common/filter_flags_decoder.c
   liblzma/common/filter_flags_encoder.c
+  liblzma/common/hardware_cputhreads.c
   liblzma/common/index.c
   liblzma/common/index_decoder.c
   liblzma/common/index_encoder.c
   liblzma/common/index_hash.c
+  liblzma/common/outqueue.c
   liblzma/common/stream_buffer_decoder.c
   liblzma/common/stream_buffer_encoder.c
   liblzma/common/stream_decoder.c
   liblzma/common/stream_encoder.c
+  liblzma/common/stream_encoder_mt.c
   liblzma/common/stream_flags_common.c
   liblzma/common/stream_flags_decoder.c
   liblzma/common/stream_flags_encoder.c
@@ -148,7 +160,7 @@ INCLUDE_DIRECTORIES(
 
 # Disable warnings to avoid changing 3rd party code.
 IF(CMAKE_C_COMPILER_ID MATCHES
-    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM)$")
+    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM|NVHPC)$")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")

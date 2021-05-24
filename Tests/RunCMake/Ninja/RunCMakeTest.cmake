@@ -67,7 +67,7 @@ run_CMP0058(WARN-by)
 run_CMP0058(NEW-no)
 run_CMP0058(NEW-by)
 
-run_cmake(CustomCommandDepfile)
+run_cmake_with_options(CustomCommandDepfile -DCMAKE_BUILD_TYPE=Debug)
 run_cmake(CustomCommandJobPool)
 run_cmake(JobPoolUsesTerminal)
 

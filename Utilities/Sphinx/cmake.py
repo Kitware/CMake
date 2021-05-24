@@ -20,7 +20,7 @@ from pygments.lexer import bygroups
 # - [\.\+-] are needed for string constants like gtk+-2.0
 # - Unix paths are recognized by '/'; support for Windows paths may be added if needed
 # - (\\.) allows for \-escapes (used in manual/cmake-language.7)
-# - $<..$<..$>..> nested occurence in cmake-buildsystem
+# - $<..$<..$>..> nested occurrence in cmake-buildsystem
 # - Nested variable evaluations are only supported in a limited capacity. Only
 #   one level of nesting is supported and at most one nested variable can be present.
 

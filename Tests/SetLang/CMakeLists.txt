@@ -9,6 +9,10 @@ set_source_files_properties(foo.c bar.c PROPERTIES LANGUAGE CXX)
 target_link_libraries(SetLang foo)
 set_target_properties(SetLang PROPERTIES LINKER_LANGUAGE CXX)
 
+# Windows defender blocks SetLang executable (https://cygwin.com/pipermail/cygwin/2021-January/247508.html)
+# Coordinate this name with 'Tests/CMakeLists.txt'.
+set_target_properties(SetLang PROPERTIES OUTPUT_NAME "SetLangX")
+
 # VS generators historically tolerated target-wide -TP flags added
 # by project code, so cover that case to preserve the behavior.
 if(CMAKE_GENERATOR MATCHES "^Visual Studio" AND "x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC")

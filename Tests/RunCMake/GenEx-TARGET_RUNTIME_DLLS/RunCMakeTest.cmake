@@ -1,0 +1,7 @@
+include(RunCMake)
+
+run_cmake(TARGET_RUNTIME_DLLS)
+run_cmake(TARGET_RUNTIME_DLLS-static)
+run_cmake(TARGET_RUNTIME_DLLS-target_link_libraries)
+run_cmake(TARGET_RUNTIME_DLLS-target_link_libraries-cycle1)
+run_cmake(TARGET_RUNTIME_DLLS-target_link_libraries-cycle2)

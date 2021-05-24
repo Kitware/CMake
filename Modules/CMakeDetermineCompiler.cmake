@@ -68,6 +68,16 @@ macro(_cmake_find_compiler lang)
       )
   endif()
   find_program(CMAKE_${lang}_COMPILER NAMES ${CMAKE_${lang}_COMPILER_LIST} DOC "${lang} compiler")
+  if(_CMAKE_${lang}_COMPILER_PATHS)
+    # As a last fall-back, search in language-specific paths
+    find_program(CMAKE_${lang}_COMPILER
+      NAMES ${CMAKE_${lang}_COMPILER_LIST}
+      NAMES_PER_DIR
+      PATHS ${_CMAKE_${lang}_COMPILER_PATHS}
+      DOC "${lang} compiler"
+      NO_DEFAULT_PATH
+      )
+  endif()
   if(CMAKE_${lang}_COMPILER_INIT AND NOT CMAKE_${lang}_COMPILER)
     set_property(CACHE CMAKE_${lang}_COMPILER PROPERTY VALUE "${CMAKE_${lang}_COMPILER_INIT}")
   endif()

@@ -19,6 +19,7 @@
 #include "cmCursesStandardIncludes.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
+#include "cmMessageMetadata.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -181,8 +182,8 @@ int main(int argc, char const* const* argv)
     return msg;
   };
   cmSystemTools::SetMessageCallback(
-    [&](const std::string& message, const char* title) {
-      myform->AddError(cleanMessage(message), title);
+    [&](const std::string& message, const cmMessageMetadata& md) {
+      myform->AddError(cleanMessage(message), md.title);
     });
   cmSystemTools::SetStderrCallback([&](const std::string& message) {
     myform->AddError(cleanMessage(message), "");

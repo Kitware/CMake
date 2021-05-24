@@ -289,7 +289,7 @@ List of CPack DEB generator specific variables:
  * Default   : "optional"
 
  .. versionadded:: 3.5
-  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY`` varables.
+  Per-component ``CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY`` variables.
 
  See https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities
 

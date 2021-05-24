@@ -1,0 +1,5 @@
+^CMake Error at [^
+]*/Tests/RunCMake/file/RENAME-arg-unknown.cmake:1 \(file\):
+  file RENAME unknown argument:
+
+    unknown$

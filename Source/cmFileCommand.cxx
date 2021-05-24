@@ -1246,9 +1246,12 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
   struct Arguments
   {
     std::string BaseDirectory;
+    bool ExpandTilde = false;
   };
-  static auto const parser = cmArgumentParser<Arguments>{}.Bind(
-    "BASE_DIRECTORY"_s, &Arguments::BaseDirectory);
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("BASE_DIRECTORY"_s, &Arguments::BaseDirectory)
+      .Bind("EXPAND_TILDE"_s, &Arguments::ExpandTilde);
 
   std::vector<std::string> unparsedArguments;
   std::vector<std::string> keywordsMissingValue;
@@ -1270,7 +1273,21 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
     arguments.BaseDirectory = status.GetMakefile().GetCurrentSourceDirectory();
   }
 
-  cmCMakePath path(args[1]);
+  auto input = args[1];
+  if (arguments.ExpandTilde && !input.empty()) {
+    if (input[0] == '~' && (input.length() == 1 || input[1] == '/')) {
+      std::string home;
+      if (
+#if defined(_WIN32) && !defined(__CYGWIN__)
+        cmSystemTools::GetEnv("USERPROFILE", home) ||
+#endif
+        cmSystemTools::GetEnv("HOME", home)) {
+        input.replace(0, 1, home);
+      }
+    }
+  }
+
+  cmCMakePath path(input, cmCMakePath::auto_format);
   path = path.Absolute(arguments.BaseDirectory).Normal();
   auto realPath = cmSystemTools::GetRealPath(path.GenericString());
 
@@ -1313,8 +1330,9 @@ bool HandleRelativePathCommand(std::vector<std::string> const& args,
 bool HandleRename(std::vector<std::string> const& args,
                   cmExecutionStatus& status)
 {
-  if (args.size() != 3) {
-    status.SetError("RENAME given incorrect number of arguments.");
+  if (args.size() < 3) {
+    status.SetError("RENAME must be called with at least two additional "
+                    "arguments");
     return false;
   }
 
@@ -1330,21 +1348,148 @@ bool HandleRename(std::vector<std::string> const& args,
       cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', args[2]);
   }
 
-  if (!cmSystemTools::RenameFile(oldname, newname)) {
-    std::string err = cmSystemTools::GetLastSystemError();
-    status.SetError(cmStrCat("RENAME failed to rename\n  ", oldname,
-                             "\nto\n  ", newname, "\nbecause: ", err, "\n"));
+  struct Arguments
+  {
+    bool NoReplace = false;
+    std::string Result;
+  };
+
+  static auto const parser = cmArgumentParser<Arguments>{}
+                               .Bind("NO_REPLACE"_s, &Arguments::NoReplace)
+                               .Bind("RESULT"_s, &Arguments::Result);
+
+  std::vector<std::string> unconsumedArgs;
+  Arguments const arguments =
+    parser.Parse(cmMakeRange(args).advance(3), &unconsumedArgs);
+  if (!unconsumedArgs.empty()) {
+    status.SetError("RENAME unknown argument:\n  " + unconsumedArgs.front());
     return false;
   }
-  return true;
+
+  std::string err;
+  switch (cmSystemTools::RenameFile(oldname, newname,
+                                    arguments.NoReplace
+                                      ? cmSystemTools::Replace::No
+                                      : cmSystemTools::Replace::Yes,
+                                    &err)) {
+    case cmSystemTools::RenameResult::Success:
+      if (!arguments.Result.empty()) {
+        status.GetMakefile().AddDefinition(arguments.Result, "0");
+      }
+      return true;
+    case cmSystemTools::RenameResult::NoReplace:
+      if (!arguments.Result.empty()) {
+        err = "NO_REPLACE";
+      } else {
+        err = "path not replaced";
+      }
+      CM_FALLTHROUGH;
+    case cmSystemTools::RenameResult::Failure:
+      if (!arguments.Result.empty()) {
+        status.GetMakefile().AddDefinition(arguments.Result, err);
+        return true;
+      }
+      break;
+  }
+  status.SetError(cmStrCat("RENAME failed to rename\n  ", oldname, "\nto\n  ",
+                           newname, "\nbecause: ", err, "\n"));
+  return false;
+}
+
+bool HandleCopyFile(std::vector<std::string> const& args,
+                    cmExecutionStatus& status)
+{
+  if (args.size() < 3) {
+    status.SetError("COPY_FILE must be called with at least two additional "
+                    "arguments");
+    return false;
+  }
+
+  // Compute full path for old and new names.
+  std::string oldname = args[1];
+  if (!cmsys::SystemTools::FileIsFullPath(oldname)) {
+    oldname =
+      cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', args[1]);
+  }
+  std::string newname = args[2];
+  if (!cmsys::SystemTools::FileIsFullPath(newname)) {
+    newname =
+      cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', args[2]);
+  }
+
+  struct Arguments
+  {
+    bool OnlyIfDifferent = false;
+    std::string Result;
+  };
+
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("ONLY_IF_DIFFERENT"_s, &Arguments::OnlyIfDifferent)
+      .Bind("RESULT"_s, &Arguments::Result);
+
+  std::vector<std::string> unconsumedArgs;
+  Arguments const arguments =
+    parser.Parse(cmMakeRange(args).advance(3), &unconsumedArgs);
+  if (!unconsumedArgs.empty()) {
+    status.SetError("COPY_FILE unknown argument:\n  " +
+                    unconsumedArgs.front());
+    return false;
+  }
+
+  bool result = true;
+  if (cmsys::SystemTools::FileIsDirectory(oldname)) {
+    if (!arguments.Result.empty()) {
+      status.GetMakefile().AddDefinition(arguments.Result,
+                                         "cannot copy a directory");
+    } else {
+      status.SetError(
+        cmStrCat("COPY_FILE cannot copy a directory\n  ", oldname));
+      result = false;
+    }
+    return result;
+  }
+  if (cmsys::SystemTools::FileIsDirectory(newname)) {
+    if (!arguments.Result.empty()) {
+      status.GetMakefile().AddDefinition(arguments.Result,
+                                         "cannot copy to a directory");
+    } else {
+      status.SetError(
+        cmStrCat("COPY_FILE cannot copy to a directory\n  ", newname));
+      result = false;
+    }
+    return result;
+  }
+
+  cmSystemTools::CopyWhen when;
+  if (arguments.OnlyIfDifferent) {
+    when = cmSystemTools::CopyWhen::OnlyIfDifferent;
+  } else {
+    when = cmSystemTools::CopyWhen::Always;
+  }
+
+  std::string err;
+  if (cmSystemTools::CopySingleFile(oldname, newname, when, &err) ==
+      cmSystemTools::CopyResult::Success) {
+    if (!arguments.Result.empty()) {
+      status.GetMakefile().AddDefinition(arguments.Result, "0");
+    }
+  } else {
+    if (!arguments.Result.empty()) {
+      status.GetMakefile().AddDefinition(arguments.Result, err);
+    } else {
+      status.SetError(cmStrCat("COPY_FILE failed to copy\n  ", oldname,
+                               "\nto\n  ", newname, "\nbecause: ", err, "\n"));
+      result = false;
+    }
+  }
+
+  return result;
 }
 
 bool HandleRemoveImpl(std::vector<std::string> const& args, bool recurse,
                       cmExecutionStatus& status)
 {
-
-  std::string message;
-
   for (std::string const& arg :
        cmMakeRange(args).advance(1)) // Get rid of subcommand
   {
@@ -2818,16 +2963,21 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
 
   // Check if the command requires a symbolic link.
   if (arguments.Symbolic) {
-    completed = cmSystemTools::CreateSymlink(fileName, newFileName, &result);
+    completed = static_cast<bool>(
+      cmSystemTools::CreateSymlink(fileName, newFileName, &result));
   } else {
-    completed = cmSystemTools::CreateLink(fileName, newFileName, &result);
+    completed = static_cast<bool>(
+      cmSystemTools::CreateLink(fileName, newFileName, &result));
   }
 
   // Check if copy-on-error is enabled in the arguments.
   if (!completed && arguments.CopyOnError) {
-    completed = cmsys::SystemTools::CopyFileAlways(fileName, newFileName);
-    if (!completed) {
-      result = "Copy failed: " + cmSystemTools::GetLastSystemError();
+    cmsys::Status copied =
+      cmsys::SystemTools::CopyFileAlways(fileName, newFileName);
+    if (copied) {
+      completed = true;
+    } else {
+      result = "Copy failed: " + copied.GetString();
     }
   }
 
@@ -3569,6 +3719,7 @@ bool cmFileCommand(std::vector<std::string> const& args,
     { "GLOB_RECURSE"_s, HandleGlobRecurseCommand },
     { "MAKE_DIRECTORY"_s, HandleMakeDirectoryCommand },
     { "RENAME"_s, HandleRename },
+    { "COPY_FILE"_s, HandleCopyFile },
     { "REMOVE"_s, HandleRemove },
     { "REMOVE_RECURSE"_s, HandleRemoveRecurse },
     { "COPY"_s, HandleCopyCommand },

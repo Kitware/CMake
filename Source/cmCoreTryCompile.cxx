@@ -8,6 +8,7 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmsys/Directory.hxx"
@@ -217,6 +218,7 @@ std::string const kCMAKE_POSITION_INDEPENDENT_CODE =
 std::string const kCMAKE_SYSROOT = "CMAKE_SYSROOT";
 std::string const kCMAKE_SYSROOT_COMPILE = "CMAKE_SYSROOT_COMPILE";
 std::string const kCMAKE_SYSROOT_LINK = "CMAKE_SYSROOT_LINK";
+std::string const kCMAKE_ARMClang_CMP0123 = "CMAKE_ARMClang_CMP0123";
 std::string const kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES =
   "CMAKE_TRY_COMPILE_OSX_ARCHITECTURES";
 std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
@@ -550,6 +552,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         testLangs.find("CUDA") != testLangs.end() &&
         this->Makefile->GetSafeDefinition(kCMAKE_CUDA_ARCHITECTURES).empty()) {
       fprintf(fout, "cmake_policy(SET CMP0104 OLD)\n");
+    }
+
+    /* Set ARMClang cpu/arch policy to match outer project.  */
+    if (cmProp cmp0123 =
+          this->Makefile->GetDefinition(kCMAKE_ARMClang_CMP0123)) {
+      fprintf(fout, "cmake_policy(SET CMP0123 %s)\n",
+              *cmp0123 == "NEW"_s ? "NEW" : "OLD");
     }
 
     std::string projectLangs;
@@ -1015,17 +1024,21 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
           // cannot delete them immediately.  Try a few times.
           cmSystemTools::WindowsFileRetry retry =
             cmSystemTools::GetWindowsFileRetry();
-          while (!cmSystemTools::RemoveFile(fullPath) && --retry.Count &&
-                 cmSystemTools::FileExists(fullPath)) {
+          cmsys::Status status;
+          while (!((status = cmSystemTools::RemoveFile(fullPath))) &&
+                 --retry.Count && cmSystemTools::FileExists(fullPath)) {
             cmSystemTools::Delay(retry.Delay);
           }
           if (retry.Count == 0)
 #else
-          if (!cmSystemTools::RemoveFile(fullPath))
+          cmsys::Status status = cmSystemTools::RemoveFile(fullPath);
+          if (!status)
 #endif
           {
-            std::string m = "Remove failed on file: " + fullPath;
-            cmSystemTools::ReportLastSystemError(m.c_str());
+            this->Makefile->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmStrCat("The file:\n  ", fullPath,
+                       "\ncould not be removed:\n  ", status.GetString()));
           }
         }
       }

@@ -40,7 +40,14 @@ They may be set by end users to point at LibUUID components.
 #]=======================================================================]
 
 #-----------------------------------------------------------------------------
-if(CYGWIN)
+if(MSYS)
+  # Note: on current version of MSYS2, linking to libuuid.dll.a doesn't
+  #       import the right symbols sometimes. Fix this by linking directly
+  #       to the DLL that provides the symbols, instead.
+  find_library(LibUUID_LIBRARY
+    NAMES msys-uuid-1.dll
+    )
+elseif(CYGWIN)
   # Note: on current version of Cygwin, linking to libuuid.dll.a doesn't
   #       import the right symbols sometimes. Fix this by linking directly
   #       to the DLL that provides the symbols, instead.

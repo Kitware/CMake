@@ -130,11 +130,6 @@ DebGenerator::DebGenerator(
                   "Unrecognized number of threads: " << numThreads
                                                      << std::endl);
   }
-
-  if (this->NumThreads < 0) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Number of threads cannot be negative" << std::endl);
-  }
 }
 
 bool DebGenerator::generate() const
@@ -172,7 +167,6 @@ void DebGenerator::generateControlFile() const
 
   unsigned long totalSize = 0;
   {
-    std::string dirName = cmStrCat(this->TemporaryDir, '/');
     for (std::string const& file : this->PackageFiles) {
       totalSize += cmSystemTools::FileLength(file);
     }

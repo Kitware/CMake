@@ -42,6 +42,11 @@ cmGeneratedFileStream::cmGeneratedFileStream(std::string const& name,
 #else
   static_cast<void>(encoding);
 #endif
+  if (encoding == codecvt::UTF8_WITH_BOM) {
+    // Write the BOM encoding header into the file
+    char magic[] = { char(0xEF), char(0xBB), char(0xBF) };
+    this->write(magic, 3);
+  }
 }
 
 cmGeneratedFileStream::~cmGeneratedFileStream()

@@ -384,7 +384,8 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       for (std::string const& gf : this->files) {
         bool skip = false;
         std::string inFile = gf;
-        if (cmSystemTools::FileIsDirectory(gf)) {
+        if (cmSystemTools::FileIsDirectory(gf) &&
+            !cmSystemTools::FileIsSymlink(gf)) {
           inFile += '/';
         }
         for (cmsys::RegularExpression& reg : ignoreFilesRegex) {
@@ -693,7 +694,7 @@ int cmCPackGenerator::RunPreinstallTarget(
   // Does this generator require pre-install?
   if (const char* preinstall = globalGenerator->GetPreinstallTargetName()) {
     std::string buildCommand = globalGenerator->GenerateCMakeBuildCommand(
-      preinstall, buildConfig, "", false);
+      preinstall, buildConfig, "", "", false);
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "- Install command: " << buildCommand << std::endl);
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,

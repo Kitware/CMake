@@ -69,6 +69,8 @@ run_cmake_command(build-bad-dir
 run_cmake_command(build-bad-generator
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-generator)
 
+run_cmake_command(install-prefix-no-arg ${CMAKE_COMMAND} -B DummyBuildDir --install-prefix)
+
 run_cmake_command(install-no-dir
   ${CMAKE_COMMAND} --install)
 run_cmake_command(install-bad-dir
@@ -161,6 +163,29 @@ project(ExplicitDirsMissing LANGUAGES NONE)
   run_cmake_with_options(C_buildsrcdir -B DummyBuildDir -S ${RunCMake_SOURCE_DIR}/C_buildsrcdir/src -C ${RunCMake_TEST_BINARY_DIR}/initial-cache.txt)
 endfunction()
 run_ExplicitDirs()
+
+function(run_Toolchain)
+  set(RunCMake_TEST_NO_SOURCE_DIR 1)
+  set(source_dir ${RunCMake_SOURCE_DIR}/Toolchain)
+
+  run_cmake_with_options(toolchain-no-arg -S ${source_dir} --toolchain=)
+  run_cmake_with_options(toolchain-valid-abs-path -S ${source_dir} --toolchain "${source_dir}/toolchain.cmake")
+  run_cmake_with_options(toolchain-valid-rel-src-path -S ${source_dir} --toolchain=toolchain.cmake)
+
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(binary_dir ${RunCMake_BINARY_DIR}/Toolchain-build)
+  set(RunCMake_TEST_BINARY_DIR "${binary_dir}")
+  file(REMOVE_RECURSE "${binary_dir}")
+
+  # Test that we both search the binary dir for toolchain files, and it takes
+  # precedence over source dir
+  file(WRITE ${binary_dir}/toolchain.cmake [=[
+set(CMAKE_SYSTEM_NAME Linux)
+set(toolchain_file binary_dir)
+]=])
+  run_cmake_with_options(toolchain-valid-rel-build-path ${CMAKE_COMMAND} -S ${source_dir} -B ${binary_dir} --toolchain toolchain.cmake)
+endfunction()
+run_Toolchain()
 
 function(run_BuildDir)
   # Use a single build tree for a few tests without cleaning.
@@ -346,7 +371,7 @@ run_cmake_command(E_create_symlink-missing-dir
 # These tests are special on Windows since it will only fail if the user
 # running the test does not have the priveldge to create symlinks. If this
 # happens we clear the msg in the -check.cmake and say that the test passes
-set(RunCMake_DEFAULT_stderr "(operation not permitted)?")
+set(RunCMake_DEFAULT_stderr "(A required privilege is not held by the client)?")
 set(RunCMake_TEST_BINARY_DIR
   ${RunCMake_BINARY_DIR}/E_create_symlink-broken-build)
 set(RunCMake_TEST_NO_CLEAN 1)
@@ -390,7 +415,7 @@ run_cmake_command(E_create_hardlink-no-directory
 
 #On Windows, if the user does not have sufficient privileges
 #don't fail this test
-set(RunCMake_DEFAULT_stderr "(operation not permitted)?")
+set(RunCMake_DEFAULT_stderr "(A required privilege is not held by the client)?")
 run_cmake_command(E_create_hardlink-unresolved-symlink-prereq
   ${CMAKE_COMMAND} -E create_symlink ${dir}/1 ${dir}/1-symlink
   )
@@ -549,7 +574,7 @@ file(MAKE_DIRECTORY ${out})
 run_cmake_command(E_cat_non_existing_file
   ${CMAKE_COMMAND} -E cat ${out}/non-existing-file.txt)
 
-if(UNIX)
+if(UNIX AND NOT MSYS)
   # test non readable file only if not root
   execute_process(
     COMMAND id -u $ENV{USER}
@@ -788,7 +813,7 @@ function(reject_fifo)
     run_cmake_command(reject_fifo ${BASH_EXECUTABLE} -c ${BASH_COMMAND_ARGUMENT})
   endif()
 endfunction()
-if(CMAKE_HOST_UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
+if(CMAKE_HOST_UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN" AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
   reject_fifo()
   run_cmake_command(closed_stdin  sh -c "\"${CMAKE_COMMAND}\" --version <&-")
   run_cmake_command(closed_stdout sh -c "\"${CMAKE_COMMAND}\" --version >&-")

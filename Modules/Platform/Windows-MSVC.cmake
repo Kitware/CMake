@@ -27,12 +27,8 @@ else()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-  set(CMAKE_CREATE_WIN32_EXE "/entry:WinMainCRTStartup")
-  set(CMAKE_CREATE_CONSOLE_EXE "/entry:mainACRTStartup")
   set(_PLATFORM_LINK_FLAGS " /subsystem:windowsce")
 else()
-  set(CMAKE_CREATE_WIN32_EXE "/subsystem:windows")
-  set(CMAKE_CREATE_CONSOLE_EXE "/subsystem:console")
   set(_PLATFORM_LINK_FLAGS "")
 endif()
 
@@ -350,6 +346,14 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS 1)
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES>${CMAKE_END_TEMP_FILE}")
+
+  if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    set(CMAKE_${lang}_CREATE_WIN32_EXE "/entry:WinMainCRTStartup")
+    set(CMAKE_${lang}_CREATE_CONSOLE_EXE "/entry:mainACRTStartup")
+  else()
+    set(CMAKE_${lang}_CREATE_WIN32_EXE "/subsystem:windows")
+    set(CMAKE_${lang}_CREATE_CONSOLE_EXE "/subsystem:console")
+  endif()
 
   set(CMAKE_PCH_EXTENSION .pch)
   set(CMAKE_LINK_PCH ON)

@@ -94,7 +94,7 @@ void Directory::Clear()
 
 namespace KWSYS_NAMESPACE {
 
-bool Directory::Load(const std::string& name, std::string* errorMessage)
+Status Directory::Load(std::string const& name, std::string* errorMessage)
 {
   this->Clear();
   intptr_t srchHandle;
@@ -121,7 +121,11 @@ bool Directory::Load(const std::string& name, std::string* errorMessage)
   delete[] buf;
 
   if (srchHandle == -1) {
-    return 0;
+    Status status = Status::POSIX_errno();
+    if (errorMessage) {
+      *errorMessage = status.GetString();
+    }
+    return status;
   }
 
   // Loop through names
@@ -129,7 +133,14 @@ bool Directory::Load(const std::string& name, std::string* errorMessage)
     this->Internal->Files.push_back(Encoding::ToNarrow(data.name));
   } while (_wfindnext(srchHandle, &data) != -1);
   this->Internal->Path = name;
-  return _findclose(srchHandle) != -1;
+  if (_findclose(srchHandle) == -1) {
+    Status status = Status::POSIX_errno();
+    if (errorMessage) {
+      *errorMessage = status.GetString();
+    }
+    return status;
+  }
+  return Status::Success();
 }
 
 unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
@@ -152,6 +163,20 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
   delete[] buf;
 
   if (srchHandle == -1) {
+    if (errorMessage) {
+      if (unsigned int errorId = GetLastError()) {
+        LPSTR message = nullptr;
+        DWORD size = FormatMessageA(
+          FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+          nullptr, errorId, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+          (LPSTR)&message, 0, nullptr);
+        *errorMessage = std::string(message, size);
+        LocalFree(message);
+      } else {
+        *errorMessage = "Unknown error.";
+      }
+    }
     return 0;
   }
 
@@ -192,7 +217,7 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
 
 namespace KWSYS_NAMESPACE {
 
-bool Directory::Load(const std::string& name, std::string* errorMessage)
+Status Directory::Load(std::string const& name, std::string* errorMessage)
 {
   this->Clear();
 
@@ -203,7 +228,7 @@ bool Directory::Load(const std::string& name, std::string* errorMessage)
     if (errorMessage != nullptr) {
       *errorMessage = std::string(strerror(errno));
     }
-    return false;
+    return Status::POSIX_errno();
   }
 
   errno = 0;
@@ -214,12 +239,12 @@ bool Directory::Load(const std::string& name, std::string* errorMessage)
     if (errorMessage != nullptr) {
       *errorMessage = std::string(strerror(errno));
     }
-    return false;
+    return Status::POSIX_errno();
   }
 
   this->Internal->Path = name;
   closedir(dir);
-  return true;
+  return Status::Success();
 }
 
 unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,

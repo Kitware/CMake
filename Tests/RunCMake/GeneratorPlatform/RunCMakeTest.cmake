@@ -11,9 +11,9 @@ else()
   run_cmake(BadPlatform)
 endif()
 
-set(RunCMake_GENERATOR_TOOLSET "")
+set(RunCMake_GENERATOR_PLATFORM "")
 
-set(RunCMake_TEST_OPTIONS -A "Extra Platform")
+set(RunCMake_TEST_OPTIONS -A "Test Platform" -A "Extra Platform")
 run_cmake(TwoPlatforms)
 unset(RunCMake_TEST_OPTIONS)
 

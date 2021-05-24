@@ -248,17 +248,17 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
 
   // now we have both, decide which one to use
   std::string valueToUse;
-  if (!envVarSet && cacheValue == nullptr) {
+  if (!envVarSet && !cacheValue) {
     // nothing known, do nothing
     valueToUse.clear();
-  } else if (envVarSet && cacheValue == nullptr) {
+  } else if (envVarSet && !cacheValue) {
     // The variable is in the env, but not in the cache. Use it and put it
     // in the cache
     valueToUse = envVarValue;
     mf->AddCacheDefinition(cacheEntryName, valueToUse, cacheEntryName.c_str(),
                            cmStateEnums::STRING, true);
     mf->GetCMakeInstance()->SaveCache(lg.GetBinaryDirectory());
-  } else if (!envVarSet && cacheValue != nullptr) {
+  } else if (!envVarSet && cacheValue) {
     // It is already in the cache, but not in the env, so use it from the cache
     valueToUse = *cacheValue;
   } else {
@@ -655,7 +655,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     xml.EndElement(); // extension
   } else {
     std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
-    if (systemName == "CYGWIN") {
+    if (systemName == "CYGWIN" || systemName == "MSYS") {
       xml.StartElement("extension");
       xml.Attribute("id", "org.eclipse.cdt.core.Cygwin_PE");
       xml.Attribute("point", "org.eclipse.cdt.core.BinaryParser");
@@ -916,8 +916,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // and UTILITY targets
   for (const auto& lgen : this->GlobalGenerator->GetLocalGenerators()) {
     const auto& targets = lgen->GetGeneratorTargets();
-    std::string subdir = lgen->MaybeConvertToRelativePath(
-      this->HomeOutputDirectory, lgen->GetCurrentBinaryDirectory());
+    std::string subdir =
+      lgen->MaybeRelativeToTopBinDir(lgen->GetCurrentBinaryDirectory());
     if (subdir == ".") {
       subdir.clear();
     }
@@ -1097,7 +1097,7 @@ void cmExtraEclipseCDT4Generator::AppendStorageScanners(
     compiler = "gcc";
   }
 
-  // the following right now hardcodes gcc behaviour :-/
+  // the following right now hardcodes gcc behavior :-/
   std::string compilerArgs =
     "-E -P -v -dD ${plugin_state_location}/${specs_file}";
   if (!arg1.empty()) {

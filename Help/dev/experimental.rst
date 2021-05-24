@@ -39,7 +39,10 @@ to the file specified by the ``<DEP_FILE>`` placeholder, and write module
 dependencies to the file specified by the ``<DYNDEP_FILE>`` placeholder.
 
 The module dependencies should be written in the format described
-by the `P1689r3`_ paper.
+by the `P1689r3`_ paper, with the following updates:
+
+* Omit the ``outputs``, ``inputs``, and ``depends`` fields from
+  each entry in the ``rules`` array.  They are unused.
 
 Compiler writers may try out their scanning functionality using
 the `cxx-modules-sandbox`_ test project, modified to set variables

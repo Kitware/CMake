@@ -50,6 +50,30 @@ run_cmake(SIZE-error-does-not-exist)
 
 run_cmake(REMOVE-empty)
 
+run_cmake_script(COPY_FILE-file-replace)
+run_cmake_script(COPY_FILE-dir-to-file-capture)
+run_cmake_script(COPY_FILE-dir-to-file-fail)
+run_cmake_script(COPY_FILE-dirlink-to-file-capture)
+run_cmake_script(COPY_FILE-dirlink-to-file-fail)
+run_cmake_script(COPY_FILE-file-to-file)
+run_cmake_script(COPY_FILE-file-to-dir-capture)
+run_cmake_script(COPY_FILE-file-to-dir-fail)
+run_cmake_script(COPY_FILE-file-ONLY_IF_DIFFERENT-capture)
+run_cmake_script(COPY_FILE-file-ONLY_IF_DIFFERENT-fail)
+run_cmake_script(COPY_FILE-file-ONLY_IF_DIFFERENT-no-overwrite)
+run_cmake_script(COPY_FILE-link-to-file)
+run_cmake_script(COPY_FILE-arg-missing)
+run_cmake_script(COPY_FILE-arg-unknown)
+
+run_cmake_script(RENAME-file-replace)
+run_cmake_script(RENAME-file-to-file)
+run_cmake_script(RENAME-file-to-dir-capture)
+run_cmake_script(RENAME-file-to-dir-fail)
+run_cmake_script(RENAME-file-NO_REPLACE-capture)
+run_cmake_script(RENAME-file-NO_REPLACE-fail)
+run_cmake_script(RENAME-arg-missing)
+run_cmake_script(RENAME-arg-unknown)
+
 # tests are valid both for GLOB and GLOB_RECURSE
 run_cmake(GLOB-sort-dedup)
 run_cmake(GLOB-error-LIST_DIRECTORIES-not-boolean)
@@ -63,7 +87,9 @@ run_cmake(GLOB-noexp-RELATIVE)
 run_cmake_command(GLOB-error-CONFIGURE_DEPENDS-SCRIPT_MODE ${CMAKE_COMMAND} -P
   ${RunCMake_SOURCE_DIR}/GLOB-error-CONFIGURE_DEPENDS-SCRIPT_MODE.cmake)
 
-if(NOT WIN32 OR CYGWIN)
+if(NOT WIN32
+    AND NOT MSYS # FIXME: This works on CYGWIN but not on MSYS
+    )
   run_cmake(CREATE_LINK-SYMBOLIC)
   run_cmake(CREATE_LINK-SYMBOLIC-noexist)
   run_cmake(GLOB_RECURSE-cyclic-recursion)
@@ -72,10 +98,11 @@ if(NOT WIN32 OR CYGWIN)
   run_cmake(READ_SYMLINK-noexist)
   run_cmake(READ_SYMLINK-notsymlink)
   run_cmake(INSTALL-FOLLOW_SYMLINK_CHAIN)
-  run_cmake(REAL_PATH-unexpected-arg)
-  run_cmake(REAL_PATH-no-base-dir)
-  run_cmake(REAL_PATH)
 endif()
+
+run_cmake(REAL_PATH-unexpected-arg)
+run_cmake(REAL_PATH-no-base-dir)
+run_cmake(REAL_PATH)
 
 if(RunCMake_GENERATOR MATCHES "Ninja")
   # Detect ninja version so we know what tests can be supported.
@@ -137,7 +164,9 @@ else()
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-rebuild_second ${CMAKE_COMMAND} --build .)
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-nowork ${CMAKE_COMMAND} --build .)
 
-  if(NOT WIN32 OR CYGWIN)
+  if(NOT WIN32
+      AND NOT MSYS # FIXME: This works on CYGWIN but not on MSYS
+      )
     message(STATUS "GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake: link the first test directory into a new directory...")
     file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/test2")
     execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${RunCMake_TEST_BINARY_DIR}/test" "${RunCMake_TEST_BINARY_DIR}/test2/test_folder_symlink")

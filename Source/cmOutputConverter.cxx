@@ -9,14 +9,108 @@
 #include <vector>
 
 #include "cmState.h"
+#include "cmStateDirectory.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+
+namespace {
+bool PathEqOrSubDir(std::string const& a, std::string const& b)
+{
+  return (cmSystemTools::ComparePath(a, b) ||
+          cmSystemTools::IsSubDirectory(a, b));
+};
+}
 
 cmOutputConverter::cmOutputConverter(cmStateSnapshot const& snapshot)
   : StateSnapshot(snapshot)
   , LinkScriptShell(false)
 {
   assert(this->StateSnapshot.IsValid());
+  this->ComputeRelativePathTopSource();
+  this->ComputeRelativePathTopBinary();
+}
+
+void cmOutputConverter::ComputeRelativePathTopSource()
+{
+  // Walk up the buildsystem directory tree to find the highest source
+  // directory that contains the current source directory.
+  cmStateSnapshot snapshot = this->StateSnapshot;
+  for (cmStateSnapshot parent = snapshot.GetBuildsystemDirectoryParent();
+       parent.IsValid(); parent = parent.GetBuildsystemDirectoryParent()) {
+    if (cmSystemTools::IsSubDirectory(
+          snapshot.GetDirectory().GetCurrentSource(),
+          parent.GetDirectory().GetCurrentSource())) {
+      snapshot = parent;
+    }
+  }
+  this->RelativePathTopSource = snapshot.GetDirectory().GetCurrentSource();
+}
+
+void cmOutputConverter::ComputeRelativePathTopBinary()
+{
+  // Walk up the buildsystem directory tree to find the highest binary
+  // directory that contains the current binary directory.
+  cmStateSnapshot snapshot = this->StateSnapshot;
+  for (cmStateSnapshot parent = snapshot.GetBuildsystemDirectoryParent();
+       parent.IsValid(); parent = parent.GetBuildsystemDirectoryParent()) {
+    if (cmSystemTools::IsSubDirectory(
+          snapshot.GetDirectory().GetCurrentBinary(),
+          parent.GetDirectory().GetCurrentBinary())) {
+      snapshot = parent;
+    }
+  }
+
+  this->RelativePathTopBinary = snapshot.GetDirectory().GetCurrentBinary();
+}
+
+std::string const& cmOutputConverter::GetRelativePathTopSource() const
+{
+  return this->RelativePathTopSource;
+}
+
+std::string const& cmOutputConverter::GetRelativePathTopBinary() const
+{
+  return this->RelativePathTopBinary;
+}
+
+void cmOutputConverter::SetRelativePathTopSource(std::string const& top)
+{
+  this->RelativePathTopSource = top;
+}
+
+void cmOutputConverter::SetRelativePathTopBinary(std::string const& top)
+{
+  this->RelativePathTopBinary = top;
+}
+
+std::string cmOutputConverter::MaybeRelativeTo(
+  std::string const& local_path, std::string const& remote_path) const
+{
+  bool bothInBinary =
+    PathEqOrSubDir(local_path, this->RelativePathTopBinary) &&
+    PathEqOrSubDir(remote_path, this->RelativePathTopBinary);
+
+  bool bothInSource =
+    PathEqOrSubDir(local_path, this->RelativePathTopSource) &&
+    PathEqOrSubDir(remote_path, this->RelativePathTopSource);
+
+  if (bothInBinary || bothInSource) {
+    return cmSystemTools::ForceToRelativePath(local_path, remote_path);
+  }
+  return remote_path;
+}
+
+std::string cmOutputConverter::MaybeRelativeToTopBinDir(
+  std::string const& path) const
+{
+  return this->MaybeRelativeTo(this->GetState()->GetBinaryDirectory(), path);
+}
+
+std::string cmOutputConverter::MaybeRelativeToCurBinDir(
+  std::string const& path) const
+{
+  return this->MaybeRelativeTo(
+    this->StateSnapshot.GetDirectory().GetCurrentBinary(), path);
 }
 
 std::string cmOutputConverter::ConvertToOutputForExisting(

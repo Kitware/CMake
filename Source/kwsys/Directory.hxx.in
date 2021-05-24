@@ -4,6 +4,7 @@
 #define @KWSYS_NAMESPACE@_Directory_hxx
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
+#include <@KWSYS_NAMESPACE@/Status.hxx>
 
 #include <string>
 
@@ -32,10 +33,9 @@ public:
 
   /**
    * Load the specified directory and load the names of the files
-   * in that directory. 0 is returned if the directory can not be
-   * opened, 1 if it is opened.
+   * in that directory.
    */
-  bool Load(const std::string&, std::string* errorMessage = nullptr);
+  Status Load(std::string const&, std::string* errorMessage = nullptr);
 
   /**
    * Return the number of files in the current directory.

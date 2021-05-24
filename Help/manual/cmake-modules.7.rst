@@ -185,6 +185,7 @@ They are normally called through the :command:`find_package` command.
    /module/FindMPEG
    /module/FindMPEG2
    /module/FindMPI
+   /module/FindMsys
    /module/FindODBC
    /module/FindOpenACC
    /module/FindOpenAL

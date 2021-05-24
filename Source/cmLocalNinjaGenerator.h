@@ -12,6 +12,7 @@
 
 #include "cmListFileCache.h"
 #include "cmLocalCommonGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmNinjaTypes.h"
 #include "cmOutputConverter.h"
 
@@ -92,9 +93,8 @@ public:
 
 protected:
   std::string ConvertToIncludeReference(
-    std::string const& path,
-    cmOutputConverter::OutputFormat format = cmOutputConverter::SHELL,
-    bool forceFullPaths = false) override;
+    std::string const& path, IncludePathStyle pathStyle,
+    cmOutputConverter::OutputFormat format) override;
 
 private:
   cmGeneratedFileStream& GetImplFileStream(const std::string& config) const;
@@ -108,6 +108,7 @@ private:
                                        const std::string& config);
   void WriteNinjaFilesInclusionConfig(std::ostream& os);
   void WriteNinjaFilesInclusionCommon(std::ostream& os);
+  void WriteNinjaWorkDir(std::ostream& os);
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);
 

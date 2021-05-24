@@ -14,6 +14,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
@@ -49,6 +51,9 @@ public:
   bool IsImportedGloballyVisible() const;
   bool CanCompileSources() const;
   const std::string& GetLocation(const std::string& config) const;
+
+  /** Get the full path to the target's main artifact, if known.  */
+  cm::optional<std::string> MaybeGetLocation(std::string const& config) const;
 
   std::vector<cmCustomCommand> const& GetPreBuildCommands() const;
   std::vector<cmCustomCommand> const& GetPreLinkCommands() const;

@@ -5,7 +5,7 @@ install_files
 
   Use the :command:`install(FILES)` command instead.
 
-This command has been superceded by the :command:`install` command.  It is
+This command has been superseded by the :command:`install` command.  It is
 provided for compatibility with older CMake code.  The ``FILES`` form is
 directly replaced by the ``FILES`` form of the :command:`install`
 command.  The regexp form can be expressed more clearly using the ``GLOB``

@@ -18,6 +18,7 @@ Creating And Installing JARs
 
   add_jar(<target_name>
           [SOURCES] <source1> [<source2>...] [<resource1>...]
+          [RESOURCES NAMESPACE <ns1> <resource1>... [NAMESPACE <nsX> <resourceX>...]... ]
           [INCLUDE_JARS <jar1> [<jar2>...]]
           [ENTRY_POINT <entry>]
           [VERSION <version>]
@@ -31,7 +32,31 @@ This command creates a ``<target_name>.jar``.  It compiles the given
 ``<source>`` files and adds the given ``<resource>`` files to
 the jar file.  Source files can be java files or listing files
 (prefixed by ``@``).  If only resource files are given then just a jar file
-is created.  The list of ``INCLUDE_JARS`` are added to the classpath when
+is created.
+
+The ``RESOURCES`` parameter adds the named ``<resource>`` files to the jar
+by stripping the source file path and placing the file beneath ``<ns>``
+within the jar. For example::
+
+  RESOURCES NAMESPACE "/com/my/namespace" "a/path/to/resource.txt"
+
+results in a resource accessible via ``/com/my/namespace/resource.txt``
+within the jar.
+
+Resources may be added without adjusting the namespace by adding them to
+the list of ``SOURCES`` (original behavior), in this case, resource
+paths must be relative to ``CMAKE_CURRENT_SOURCE_DIR``.  Adding resources
+without using the ``RESOURCES`` parameter in out of source builds will
+almost certainly result in confusion.
+
+.. note:: SOURCES
+  Adding resources via the ``SOURCES`` parameter relies upon a hard-coded
+  list of file extensions which are tested to determine whether they compile
+  (e.g. File.java). ``SOURCES`` files which match the extensions are compiled.
+  Files which do not match are treated as resources. To include uncompiled
+  resources matching those file extensions use the ``RESOURCES`` parameter.
+
+The list of ``INCLUDE_JARS`` are added to the classpath when
 compiling the java sources and also to the dependencies of the target.
 ``INCLUDE_JARS`` also accepts other target names created by ``add_jar()``.
 For backwards compatibility, jar files listed as sources are ignored (as
@@ -449,6 +474,58 @@ function(__java_export_jar VAR TARGET PATH)
     set(${VAR} "${${VAR}}" PARENT_SCOPE)
 endfunction()
 
+function(__java_copy_resource_namespaces VAR DEST JAVA_RESOURCE_FILES JAVA_RESOURCE_FILES_RELATIVE)
+
+    set(_ns_ID "")
+    set(_ns_VAL "")
+
+    foreach(_item IN LISTS VAR)
+        if(NOT _ns_ID)
+            if(NOT _item STREQUAL "NAMESPACE")
+                message(FATAL_ERROR "UseJava: Expecting \"NAMESPACE\", got\t\"${_item}\"")
+                return()
+            endif()
+        endif()
+
+        if(_item STREQUAL "NAMESPACE")
+            set(_ns_VAL "")               # Prepare for next namespace
+            set(_ns_ID "${_item}")
+            continue()
+        endif()
+
+        if( NOT _ns_VAL)
+            # we're expecting the next token to be a namespace value
+            # whatever it is, we're treating it like a namespace
+            set(_ns_VAL "${_item}")
+            continue()
+        endif()
+
+        if(_ns_ID AND _ns_VAL)
+            # We're expecting a file name, check to see if we got one
+            cmake_path(ABSOLUTE_PATH _item OUTPUT_VARIABLE _test_file_name)
+            if (NOT EXISTS "${_test_file_name}")
+                message(FATAL_ERROR "UseJava: File does not exist:\t${_item}")
+                return()
+            endif()
+        endif()
+
+        cmake_path(ABSOLUTE_PATH _item OUTPUT_VARIABLE _abs_file_name)
+        cmake_path(GET _item FILENAME _resource_file_name)
+        set(_dest_resource_file_name "${_ns_VAL}/${_resource_file_name}" )
+
+        __java_copy_file( ${_abs_file_name}
+                          ${DEST}/${_dest_resource_file_name}
+                          "Copying ${_item} to the build directory")
+
+        list(APPEND RESOURCE_FILES_LIST           ${DEST}/${_dest_resource_file_name})
+        list(APPEND RELATIVE_RESOURCE_FILES_LIST  ${_dest_resource_file_name})
+
+    endforeach()
+
+    set(${JAVA_RESOURCE_FILES} "${RESOURCE_FILES_LIST}" PARENT_SCOPE)
+    set(${JAVA_RESOURCE_FILES_RELATIVE} "${RELATIVE_RESOURCE_FILES_LIST}" PARENT_SCOPE)
+endfunction()
+
 # define helper scripts
 set(_JAVA_EXPORT_TARGETS_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJava/javaTargets.cmake.in)
 set(_JAVA_SYMLINK_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJava/Symlinks.cmake)
@@ -461,12 +538,14 @@ endif()
 
 function(add_jar _TARGET_NAME)
 
-    cmake_parse_arguments(_add_jar
-      ""
-      "VERSION;OUTPUT_DIR;OUTPUT_NAME;ENTRY_POINT;MANIFEST"
-      "SOURCES;INCLUDE_JARS;GENERATE_NATIVE_HEADERS"
-      ${ARGN}
-    )
+    set(options)  # currently there are no zero value args (aka: options)
+    set(oneValueArgs "ENTRY_POINT;MANIFEST;OUTPUT_DIR;;OUTPUT_NAME;VERSION" )
+    set(multiValueArgs "GENERATE_NATIVE_HEADERS;INCLUDE_JARS;RESOURCES;SOURCES" )
+
+    cmake_parse_arguments(PARSE_ARGV 1 _add_jar
+                    "${options}"
+                    "${oneValueArgs}"
+                    "${multiValueArgs}" )
 
     # In CMake < 2.8.12, add_jar used variables which were set prior to calling
     # add_jar for customizing the behavior of add_jar. In order to be backwards
@@ -490,6 +569,9 @@ function(add_jar _TARGET_NAME)
         set(_add_jar_ENTRY_POINT "${CMAKE_JAVA_JAR_ENTRY_POINT}")
     endif()
 
+    # This *should* still work if <resources1>... are included without a
+    # named RESOURCES argument.  In that case, the old behavior of potentially
+    # misplacing the within the Jar will behave as previously (incorrectly)
     set(_JAVA_SOURCE_FILES ${_add_jar_SOURCES} ${_add_jar_UNPARSED_ARGUMENTS})
 
     if (NOT DEFINED _add_jar_OUTPUT_DIR)
@@ -638,6 +720,13 @@ function(add_jar _TARGET_NAME)
             list(APPEND _JAVA_RESOURCE_FILES_RELATIVE ${_JAVA_SOURCE_FILE})
         endif ()
     endforeach()
+
+    if(_add_jar_RESOURCES)         # Process RESOURCES if it exists
+        __java_copy_resource_namespaces("${_add_jar_RESOURCES}"
+                                        ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
+                                        _JAVA_RESOURCE_FILES
+                                        _JAVA_RESOURCE_FILES_RELATIVE)
+    endif()
 
     foreach(_JAVA_INCLUDE_JAR IN LISTS _add_jar_INCLUDE_JARS)
         if (TARGET ${_JAVA_INCLUDE_JAR})

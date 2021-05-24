@@ -241,8 +241,7 @@ std::string cmCommonTargetGenerator::GetManifests(const std::string& config)
   manifests.reserve(manifest_srcs.size());
   for (cmSourceFile const* manifest_src : manifest_srcs) {
     manifests.push_back(this->LocalCommonGenerator->ConvertToOutputFormat(
-      this->LocalCommonGenerator->MaybeConvertToRelativePath(
-        this->LocalCommonGenerator->GetWorkingDirectory(),
+      this->LocalCommonGenerator->MaybeRelativeToWorkDir(
         manifest_src->GetFullPath()),
       cmOutputConverter::SHELL));
   }

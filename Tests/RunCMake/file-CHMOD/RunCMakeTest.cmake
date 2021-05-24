@@ -14,6 +14,6 @@ if(UNIX)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
-if(NOT WIN32 AND NOT "${uid}" STREQUAL "0")
+if(NOT WIN32 AND NOT MSYS AND NOT "${uid}" STREQUAL "0")
   run_cmake(CHMOD-write-only)
 endif()

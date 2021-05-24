@@ -12,6 +12,9 @@ set_property(TARGET sharedlib PROPERTY DEFINE_SYMBOL PIC_TEST_BUILD_DLL)
 add_executable(test_iface_via_shared "${CMAKE_CURRENT_SOURCE_DIR}/../pic_main.cpp")
 target_link_libraries(test_iface_via_shared sharedlib)
 
+add_library(objectlib OBJECT "${CMAKE_CURRENT_SOURCE_DIR}/../pic_lib.cpp")
+target_link_libraries(objectlib piciface)
+
 add_library(sharedlibpic SHARED "${CMAKE_CURRENT_SOURCE_DIR}/../pic_lib.cpp")
 set_property(TARGET sharedlibpic PROPERTY INTERFACE_POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET sharedlibpic PROPERTY DEFINE_SYMBOL PIC_TEST_BUILD_DLL)

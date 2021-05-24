@@ -1,5 +1,13 @@
 
-#if DEFAULT_C11
+#if DEFAULT_C23
+#  if __STDC_VERSION__ <= 201710L
+#    error Unexpected value for __STDC_VERSION__.
+#  endif
+#elif DEFAULT_C17
+#  if __STDC_VERSION__ < 201710L
+#    error Unexpected value for __STDC_VERSION__.
+#  endif
+#elif DEFAULT_C11
 #  if __STDC_VERSION__ < 201112L
 #    error Unexpected value for __STDC_VERSION__.
 #  endif
