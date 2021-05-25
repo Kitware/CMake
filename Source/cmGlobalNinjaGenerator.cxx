@@ -222,7 +222,9 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
       }
     }
     // Write implicit outputs
-    if (!build.ImplicitOuts.empty() || !build.WorkDirOuts.empty()) {
+    if (!build.ImplicitOuts.empty()) {
+      // Assume Ninja is new enough to support implicit outputs.
+      // Callers should not populate this field otherwise.
       buildStr = cmStrCat(buildStr, " |");
       for (std::string const& implicitOut : build.ImplicitOuts) {
         buildStr = cmStrCat(buildStr, ' ', this->EncodePath(implicitOut));
@@ -230,11 +232,18 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
           this->CombinedBuildOutputs.insert(implicitOut);
         }
       }
+    }
+
+    // Repeat some outputs, but expressed as absolute paths.
+    // This helps Ninja handle absolute paths found in a depfile.
+    // FIXME: Unfortunately this causes Ninja to stat the file twice.
+    // We could avoid this if Ninja Issue 1251 were fixed.
+    if (!build.WorkDirOuts.empty()) {
+      if (this->SupportsImplicitOuts() && build.ImplicitOuts.empty()) {
+        // Make them implicit outputs if supported by this version of Ninja.
+        buildStr = cmStrCat(buildStr, " |");
+      }
       for (std::string const& workdirOut : build.WorkDirOuts) {
-        // Repeat some outputs, but expressed as absolute paths.
-        // This helps Ninja handle absolute paths found in a depfile.
-        // FIXME: Unfortunately this causes Ninja to stat the file twice.
-        // We could avoid this if Ninja Issue 1251 were fixed.
         buildStr = cmStrCat(buildStr, " ${cmake_ninja_workdir}",
                             this->EncodePath(workdirOut));
       }
@@ -322,8 +331,7 @@ void cmGlobalNinjaGenerator::CCOutputs::Add(
 {
   for (std::string const& path : paths) {
     std::string out = this->GG->ConvertToNinjaPath(path);
-    if (this->GG->SupportsImplicitOuts() &&
-        !cmSystemTools::FileIsFullPath(out)) {
+    if (!cmSystemTools::FileIsFullPath(out)) {
       // This output is expressed as a relative path.  Repeat it,
       // but expressed as an absolute path for Ninja Issue 1251.
       this->WorkDirOuts.emplace_back(out);
