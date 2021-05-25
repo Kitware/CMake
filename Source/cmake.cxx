@@ -1751,17 +1751,20 @@ void cmake::SetGlobalGenerator(std::unique_ptr<cmGlobalGenerator> gg)
   }
   if (this->GlobalGenerator) {
     // restore the original environment variables CXX and CC
-    // Restore CC
     std::string env = "CC=";
     if (!this->CCEnvironment.empty()) {
       env += this->CCEnvironment;
+      cmSystemTools::PutEnv(env);
+    } else {
+      cmSystemTools::UnPutEnv(env);
     }
-    cmSystemTools::PutEnv(env);
     env = "CXX=";
     if (!this->CXXEnvironment.empty()) {
       env += this->CXXEnvironment;
+      cmSystemTools::PutEnv(env);
+    } else {
+      cmSystemTools::UnPutEnv(env);
     }
-    cmSystemTools::PutEnv(env);
   }
 
   // set the new
