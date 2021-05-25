@@ -376,7 +376,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0125,                                                     \
          "find_(path|file|library|program) have consistent behavior for "     \
          "cache variables.",                                                  \
-         3, 21, 0, cmPolicies::WARN)
+         3, 21, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0126,                                                     \
+         "set(CACHE) does not remove a normal variable of the same name.", 3, \
+         21, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

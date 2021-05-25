@@ -1138,6 +1138,11 @@ bool cmFindPackageCommand::FindConfig()
   // We force the value since we do not get here if it was already set.
   this->Makefile->AddCacheDefinition(this->Variable, init, help.c_str(),
                                      cmStateEnums::PATH, true);
+  if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
+        cmPolicies::NEW &&
+      this->Makefile->IsNormalDefinitionSet(this->Variable)) {
+    this->Makefile->AddDefinition(this->Variable, init);
+  }
 
   return found;
 }
