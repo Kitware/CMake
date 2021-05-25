@@ -184,9 +184,8 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
                                                      Indent indent)
 {
   // Remove old per-configuration export files if the main changes.
-  std::string installedDir =
-    cmStrCat("$ENV{DESTDIR}",
-             this->ConvertToAbsoluteDestination(this->Destination), '/');
+  std::string installedDir = cmStrCat(
+    "$ENV{DESTDIR}", ConvertToAbsoluteDestination(this->Destination), '/');
   std::string installedFile = cmStrCat(installedDir, this->FileName);
   os << indent << "if(EXISTS \"" << installedFile << "\")\n";
   Indent indentN = indent.Next();
