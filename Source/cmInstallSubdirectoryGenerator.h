@@ -21,7 +21,6 @@ class cmInstallSubdirectoryGenerator : public cmInstallGenerator
 public:
   cmInstallSubdirectoryGenerator(cmMakefile* makefile,
                                  std::string binaryDirectory,
-                                 bool excludeFromAll,
                                  cmListFileBacktrace backtrace);
   ~cmInstallSubdirectoryGenerator() override;
 
