@@ -7,6 +7,8 @@ ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
 ENDIF()
 
 include(ConfigureChecks.cmake)
+configure_file(expat_config.h.cmake expat_config.h @ONLY)
+
 if(NOT WIN32)
   add_definitions(-DXML_DEV_URANDOM)
 endif()
