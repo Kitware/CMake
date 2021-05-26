@@ -16,14 +16,12 @@ set_property(
   )
 
 get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-if(_isMultiConfig)
-  set(NESTED_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
+if(_isMultiConfig OR CMAKE_BUILD_TYPE)
+  set(NESTED_CONFIG_TYPE -C "$<CONFIG>")
+  set(NESTED_CONFIG_INSTALL_TYPE --config "$<CONFIG>")
 else()
-  if(CMAKE_BUILD_TYPE)
-    set(NESTED_CONFIG_TYPE -C "${CMAKE_BUILD_TYPE}")
-  else()
-    set(NESTED_CONFIG_TYPE)
-  endif()
+  set(NESTED_CONFIG_TYPE)
+  set(NESTED_CONFIG_INSTALL_TYPE)
 endif()
 
 if(MINGW OR MSYS)
@@ -76,6 +74,22 @@ add_custom_target(ImportTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/ImportProj
 add_dependencies(ImportTarget ExportTarget)
 set_property(
   SOURCE ${ExportImport_BINARY_DIR}/ImportProject
+  PROPERTY SYMBOLIC 1
+  )
+
+# Install the imported targets.
+add_custom_command(
+  OUTPUT ${ExportImport_BINARY_DIR}/ImportInstall
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${ExportImport_BINARY_DIR}/Import/install
+  COMMAND ${CMAKE_COMMAND}
+    --install ${ExportImport_BINARY_DIR}/Import
+    --prefix ${ExportImport_BINARY_DIR}/Import/install
+    ${NESTED_CONFIG_INSTALL_TYPE}
+  )
+add_custom_target(ImportInstallTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/ImportInstall)
+add_dependencies(ImportInstallTarget ImportTarget)
+set_property(
+  SOURCE ${ExportImport_BINARY_DIR}/ImportInstall
   PROPERTY SYMBOLIC 1
   )
 
