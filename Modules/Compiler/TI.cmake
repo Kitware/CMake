@@ -16,6 +16,10 @@ set(__COMPILER_TI_SOURCE_FLAG_ASM "--asm_file")
 
 macro(__compiler_ti lang)
   set(CMAKE_${lang}_RESPONSE_FILE_FLAG "--cmd_file=")
+  # Using --cmd_file flag is not possible after the --run_linker flag.
+  # By using a whitespace only the filename is used without flag.
+  # That file is interpreted as linker command file which may contain files to link.
+  set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG " ")
 
   set(CMAKE_INCLUDE_FLAG_${lang} "--include_path=")
   set(CMAKE_DEPFILE_FLAGS_${lang} "--preproc_with_compile --preproc_dependency=<DEP_FILE>")
@@ -28,11 +32,6 @@ macro(__compiler_ti lang)
   set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> qr <TARGET> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> qa <TARGET> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_FINISH "")
-
-  # After the --run_linker flag a response file is not possible
-  set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "")
-  set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_LIBRARIES 0)
-  set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS 0)
 
   set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_${lang}_COMPILER> <FLAGS> --run_linker --output_file=<TARGET> --map_file=<TARGET_NAME>.map <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES>")
 endmacro()
