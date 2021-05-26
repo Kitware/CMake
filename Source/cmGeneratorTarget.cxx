@@ -6255,22 +6255,21 @@ bool cmGeneratorTarget::IsLinkLookupScope(std::string const& n,
   return false;
 }
 
-void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
-                                        cmListFileBacktrace const& bt,
-                                        std::vector<cmLinkItem>& items) const
+cm::optional<cmLinkItem> cmGeneratorTarget::LookupLinkItem(
+  std::string const& n, cmListFileBacktrace const& bt) const
 {
+  cm::optional<cmLinkItem> maybeItem;
   cmLocalGenerator const* lg = this->LocalGenerator;
-  for (std::string const& n : names) {
-    if (this->IsLinkLookupScope(n, lg)) {
-      continue;
-    }
-
-    std::string name = this->CheckCMP0004(n);
-    if (name == this->GetName() || name.empty()) {
-      continue;
-    }
-    items.push_back(this->ResolveLinkItem(name, bt, lg));
+  if (this->IsLinkLookupScope(n, lg)) {
+    return maybeItem;
   }
+
+  std::string name = this->CheckCMP0004(n);
+  if (name == this->GetName() || name.empty()) {
+    return maybeItem;
+  }
+  maybeItem = this->ResolveLinkItem(name, bt, lg);
+  return maybeItem;
 }
 
 void cmGeneratorTarget::ExpandLinkItems(
@@ -6295,7 +6294,12 @@ void cmGeneratorTarget::ExpandLinkItems(
   cmExpandList(cge->Evaluate(this->LocalGenerator, config, headTarget,
                              &dagChecker, this, headTarget->LinkerLanguage),
                libs);
-  this->LookupLinkItems(libs, cge->GetBacktrace(), items);
+  for (std::string const& lib : libs) {
+    if (cm::optional<cmLinkItem> maybeItem =
+          this->LookupLinkItem(lib, cge->GetBacktrace())) {
+      items.emplace_back(std::move(*maybeItem));
+    }
+  }
   hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
   hadContextSensitiveCondition = cge->GetHadContextSensitiveCondition();
   hadLinkLanguageSensitiveCondition =
@@ -6903,7 +6907,12 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
                           iface.HadContextSensitiveCondition,
                           iface.HadLinkLanguageSensitiveCondition);
     std::vector<std::string> deps = cmExpandedList(info->SharedDeps);
-    this->LookupLinkItems(deps, cmListFileBacktrace(), iface.SharedDeps);
+    for (std::string const& dep : deps) {
+      if (cm::optional<cmLinkItem> maybeItem =
+            this->LookupLinkItem(dep, cmListFileBacktrace())) {
+        iface.SharedDeps.emplace_back(std::move(*maybeItem));
+      }
+    }
   }
 
   return &iface;

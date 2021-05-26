@@ -1039,9 +1039,8 @@ private:
                        bool& hadHeadSensitiveCondition,
                        bool& hadContextSensitiveCondition,
                        bool& hadLinkLanguageSensitiveCondition) const;
-  void LookupLinkItems(std::vector<std::string> const& names,
-                       cmListFileBacktrace const& bt,
-                       std::vector<cmLinkItem>& items) const;
+  cm::optional<cmLinkItem> LookupLinkItem(std::string const& n,
+                                          cmListFileBacktrace const& bt) const;
 
   std::vector<BT<std::string>> GetSourceFilePaths(
     std::string const& config) const;
