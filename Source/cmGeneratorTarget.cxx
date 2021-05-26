@@ -7490,8 +7490,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
 
       // The entry is meant for this configuration.
-      impl.Libraries.emplace_back(this->ResolveLinkItem(name, *btIt, lg),
-                                  evaluated != *le);
+      cmLinkItem item = this->ResolveLinkItem(name, *btIt, lg);
+      impl.Libraries.emplace_back(std::move(item), evaluated != *le);
     }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
