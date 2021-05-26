@@ -20,6 +20,7 @@
 #include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocationKind.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -227,6 +228,12 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
             this->AddInterfaceDepends(depender_index, lib, it, emitted);
           }
         }
+        for (cmLinkItem const& obj : impl->Objects) {
+          if (cmSourceFile const* o = depender->Makefile->GetSource(
+                obj.AsStr(), cmSourceFileLocationKind::Known)) {
+            this->AddObjectDepends(depender_index, o, emitted);
+          }
+        }
       }
 
       // Add dependencies on object libraries not otherwise handled above.
@@ -272,6 +279,12 @@ void cmComputeTargetDepends::AddInterfaceDepends(
         libBT.Backtrace = dependee_backtrace;
         this->AddTargetDepend(depender_index, libBT, true, false);
         this->AddInterfaceDepends(depender_index, libBT, config, emitted);
+      }
+    }
+    for (cmLinkItem const& obj : iface->Objects) {
+      if (cmSourceFile const* o = depender->Makefile->GetSource(
+            obj.AsStr(), cmSourceFileLocationKind::Known)) {
+        this->AddObjectDepends(depender_index, o, emitted);
       }
     }
   }

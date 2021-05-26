@@ -1036,6 +1036,7 @@ private:
                        const cmGeneratorTarget* headTarget,
                        bool usage_requirements_only,
                        std::vector<cmLinkItem>& items,
+                       std::vector<cmLinkItem>& objects,
                        bool& hadHeadSensitiveCondition,
                        bool& hadContextSensitiveCondition,
                        bool& hadLinkLanguageSensitiveCondition) const;
