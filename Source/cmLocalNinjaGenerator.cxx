@@ -208,13 +208,9 @@ std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
   std::string const& path, IncludePathStyle pathStyle,
   cmOutputConverter::OutputFormat format)
 {
-  if (pathStyle == IncludePathStyle::Absolute) {
-    return this->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(path, this->GetCurrentBinaryDirectory()),
-      format);
-  }
-  return this->ConvertToOutputFormat(this->MaybeRelativeToTopBinDir(path),
-                                     format);
+  // FIXME: Remove IncludePathStyle infrastructure.  It is no longer used.
+  static_cast<void>(pathStyle);
+  return this->ConvertToOutputFormat(path, format);
 }
 
 // Private methods.
