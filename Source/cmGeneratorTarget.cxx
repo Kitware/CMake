@@ -6291,6 +6291,7 @@ void cmGeneratorTarget::ExpandLinkItems(
   }
   std::vector<std::string> libs;
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+  cge->SetEvaluateForBuildsystem(true);
   cmExpandList(cge->Evaluate(this->LocalGenerator, config, headTarget,
                              &dagChecker, this, headTarget->LinkerLanguage),
                libs);
@@ -7428,6 +7429,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
                                                nullptr);
     cmGeneratorExpression ge(*btIt);
     std::unique_ptr<cmCompiledGeneratorExpression> const cge = ge.Parse(*le);
+    cge->SetEvaluateForBuildsystem(true);
     std::string const& evaluated =
       cge->Evaluate(this->LocalGenerator, config, head, &dagChecker, nullptr,
                     this->LinkerLanguage);
