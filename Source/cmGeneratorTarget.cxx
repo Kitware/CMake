@@ -3419,6 +3419,12 @@ void cmGeneratorTarget::AddHIPArchitectureFlags(std::string& flags) const
 {
   const std::string& property = this->GetSafeProperty("HIP_ARCHITECTURES");
 
+  if (property.empty()) {
+    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 "HIP_ARCHITECTURES is empty for target \"" +
+                                   this->GetName() + "\".");
+  }
+
   // If HIP_ARCHITECTURES is false we don't add any architectures.
   if (cmIsOff(property)) {
     return;

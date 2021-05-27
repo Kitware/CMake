@@ -5,8 +5,9 @@ HIP_ARCHITECTURES
 
 List of AMD GPU architectures to generate device code for.
 
-An empty or false value (e.g. ``OFF``) defers architecture generation to compiler
-defaults.
+A non-empty false value (e.g. ``OFF``) disables adding architectures.
+This is intended to support packagers and rare cases where full control
+over the passed flags is required.
 
 This property is initialized by the value of the :variable:`CMAKE_HIP_ARCHITECTURES`
 variable if it is set when a target is created.

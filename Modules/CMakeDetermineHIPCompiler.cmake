@@ -85,7 +85,12 @@ if(MSVC_HIP_ARCHITECTURE_ID)
 endif()
 
 if(NOT DEFINED CMAKE_HIP_ARCHITECTURES)
-  set(CMAKE_HIP_ARCHITECTURES "OFF" CACHE STRING "HIP architectures")
+  # Analyze output from hipcc to get the current GPU architecture.
+  if(CMAKE_HIP_COMPILER_PRODUCED_OUTPUT MATCHES " -target-cpu ([a-z0-9]+) ")
+    set(CMAKE_HIP_ARCHITECTURES "${CMAKE_MATCH_1}" CACHE STRING "HIP architectures")
+  else()
+    message(FATAL_ERROR "Failed to find a working HIP architecture.")
+  endif()
 endif()
 
 # configure variables set in this file for fast reload later on

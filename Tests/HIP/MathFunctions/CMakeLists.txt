@@ -13,7 +13,6 @@ project(MathFunctions HIP)
 # 3. This makes sure CMake properly links to all the built-in libraries
 #    that hip needs that inject support for __half support
 #
-set(CMAKE_HIP_ARCHITECTURES "gfx900")
 add_executable(HIPOnlyMathFunctions main.hip)
 target_compile_options(HIPOnlyMathFunctions PRIVATE -Werror)
 target_compile_features(HIPOnlyMathFunctions PRIVATE hip_std_14)

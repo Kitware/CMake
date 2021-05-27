@@ -3,7 +3,6 @@ project (MixedLanguage C CXX HIP)
 
 set(CMAKE_HIP_STANDARD 14)
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_HIP_ARCHITECTURES "gfx900")
 
 #Goal for this example:
 #make sure that we can build multiple languages into targets
