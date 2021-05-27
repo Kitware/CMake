@@ -86,6 +86,11 @@ if(("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC" AND
 
   list(APPEND _CMAKE_TOOL_VARS LINKER MT AR)
 
+elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^x(Open)?Watcom$")
+  set(_CMAKE_LINKER_NAMES "wlink")
+  set(_CMAKE_AR_NAMES "wlib")
+  list(APPEND _CMAKE_TOOL_VARS LINKER AR)
+
 # in all other cases search for ar, ranlib, etc.
 else()
   if(CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN)
