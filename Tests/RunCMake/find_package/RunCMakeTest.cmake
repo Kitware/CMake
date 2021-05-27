@@ -38,6 +38,7 @@ run_cmake(VersionRange3)
 run_cmake(VersionRange4)
 run_cmake(VersionRangeConfig)
 run_cmake(VersionRangeConfig2)
+run_cmake(VersionRangeConfig02)
 run_cmake(VersionRangeConfigStd)
 run_cmake(VersionRangeConfigStd2)
 if(UNIX
