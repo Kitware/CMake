@@ -533,6 +533,41 @@
     "flags": []
   },
   {
+    "name": "ExternalWarningLevel",
+    "switch": "external:W0",
+    "comment": "Turn Off All Warnings",
+    "value": "TurnOffAllWarnings",
+    "flags": []
+  },
+  {
+    "name": "ExternalWarningLevel",
+    "switch": "external:W1",
+    "comment": "Level1",
+    "value": "Level1",
+    "flags": []
+  },
+  {
+    "name": "ExternalWarningLevel",
+    "switch": "external:W2",
+    "comment": "Level2",
+    "value": "Level2",
+    "flags": []
+  },
+  {
+    "name": "ExternalWarningLevel",
+    "switch": "external:W3",
+    "comment": "Level3",
+    "value": "Level3",
+    "flags": []
+  },
+  {
+    "name": "ExternalWarningLevel",
+    "switch": "external:W4",
+    "comment": "Level4",
+    "value": "Level4",
+    "flags": []
+  },
+  {
     "name": "CallingConvention",
     "switch": "Gd",
     "comment": "__cdecl",
