@@ -747,6 +747,11 @@ with members:
       An :command:`install(CODE)` call.
       This type has no additional members.
 
+    ``importedRuntimeArtifacts``
+      An :command:`install(IMPORTED_RUNTIME_ARTIFACTS)` call.
+      The ``destination`` member is populated. The ``isOptional`` member may
+      exist. This type has no additional members.
+
   ``isExcludeFromAll``
     Optional member that is present with boolean value ``true`` when
     :command:`install` is called with the ``EXCLUDE_FROM_ALL`` option.
