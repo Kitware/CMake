@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_ENDIAN_H
-#define HEADER_CURL_ENDIAN_H
+#ifndef HEADER_CURL_BUFREF_H
+#define HEADER_CURL_BUFREF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,22 +22,25 @@
  *
  ***************************************************************************/
 
-/* Converts a 16-bit integer from little endian */
-unsigned short Curl_read16_le(const unsigned char *buf);
-
-/* Converts a 32-bit integer from little endian */
-unsigned int Curl_read32_le(const unsigned char *buf);
-
-/* Converts a 16-bit integer from big endian */
-unsigned short Curl_read16_be(const unsigned char *buf);
-
-#if (SIZEOF_CURL_OFF_T > 4)
-/* Converts a 64-bit integer to little endian */
-#if defined(HAVE_LONGLONG)
-void Curl_write64_le(const long long value, unsigned char *buffer);
-#else
-void Curl_write64_le(const __int64 value, unsigned char *buffer);
+/*
+ * Generic buffer reference.
+ */
+struct bufref {
+  void (*dtor)(void *);         /* Associated destructor. */
+  const unsigned char *ptr;     /* Referenced data buffer. */
+  size_t len;                   /* The data size in bytes. */
+#ifdef DEBUGBUILD
+  int signature;                /* Detect API use mistakes. */
 #endif
-#endif
+};
 
-#endif /* HEADER_CURL_ENDIAN_H */
+
+void Curl_bufref_init(struct bufref *br);
+void Curl_bufref_set(struct bufref *br, const void *ptr, size_t len,
+                     void (*dtor)(void *));
+const unsigned char *Curl_bufref_ptr(const struct bufref *br);
+size_t Curl_bufref_len(const struct bufref *br);
+CURLcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len);
+void Curl_bufref_free(struct bufref *br);
+
+#endif

@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_ENDIAN_H
-#define HEADER_CURL_ENDIAN_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2020 - 2021, Jacob Hoffman-Andrews,
+ * <github@hoffman-andrews.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,23 +20,14 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#ifndef HEADER_CURL_RUSTLS_H
+#define HEADER_CURL_RUSTLS_H
 
-/* Converts a 16-bit integer from little endian */
-unsigned short Curl_read16_le(const unsigned char *buf);
+#include "curl_setup.h"
 
-/* Converts a 32-bit integer from little endian */
-unsigned int Curl_read32_le(const unsigned char *buf);
+#ifdef USE_RUSTLS
 
-/* Converts a 16-bit integer from big endian */
-unsigned short Curl_read16_be(const unsigned char *buf);
+extern const struct Curl_ssl Curl_ssl_rustls;
 
-#if (SIZEOF_CURL_OFF_T > 4)
-/* Converts a 64-bit integer to little endian */
-#if defined(HAVE_LONGLONG)
-void Curl_write64_le(const long long value, unsigned char *buffer);
-#else
-void Curl_write64_le(const __int64 value, unsigned char *buffer);
-#endif
-#endif
-
-#endif /* HEADER_CURL_ENDIAN_H */
+#endif /* USE_RUSTLS */
+#endif /* HEADER_CURL_RUSTLS_H */
