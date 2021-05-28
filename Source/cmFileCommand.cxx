@@ -3041,6 +3041,9 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     std::vector<std::string> PreExcludeRegexes;
     std::vector<std::string> PostIncludeRegexes;
     std::vector<std::string> PostExcludeRegexes;
+    std::vector<std::string> PostIncludeFiles;
+    std::vector<std::string> PostExcludeFiles;
+    std::vector<std::string> PostExcludeFilesStrict;
   };
 
   static auto const parser =
@@ -3058,7 +3061,10 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
       .Bind("PRE_INCLUDE_REGEXES"_s, &Arguments::PreIncludeRegexes)
       .Bind("PRE_EXCLUDE_REGEXES"_s, &Arguments::PreExcludeRegexes)
       .Bind("POST_INCLUDE_REGEXES"_s, &Arguments::PostIncludeRegexes)
-      .Bind("POST_EXCLUDE_REGEXES"_s, &Arguments::PostExcludeRegexes);
+      .Bind("POST_EXCLUDE_REGEXES"_s, &Arguments::PostExcludeRegexes)
+      .Bind("POST_INCLUDE_FILES"_s, &Arguments::PostIncludeFiles)
+      .Bind("POST_EXCLUDE_FILES"_s, &Arguments::PostExcludeFiles)
+      .Bind("POST_EXCLUDE_FILES_STRICT"_s, &Arguments::PostExcludeFilesStrict);
 
   std::vector<std::string> unrecognizedArguments;
   std::vector<std::string> keywordsMissingValues;
@@ -3072,14 +3078,19 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::vector<std::string> LIST_ARGS = { "DIRECTORIES",
-                                               "EXECUTABLES",
-                                               "LIBRARIES",
-                                               "MODULES",
-                                               "POST_EXCLUDE_REGEXES",
-                                               "POST_INCLUDE_REGEXES",
-                                               "PRE_EXCLUDE_REGEXES",
-                                               "PRE_INCLUDE_REGEXES" };
+  const std::vector<std::string> LIST_ARGS = {
+    "DIRECTORIES",
+    "EXECUTABLES",
+    "LIBRARIES",
+    "MODULES",
+    "POST_EXCLUDE_FILES",
+    "POST_EXCLUDE_FILES_STRICT",
+    "POST_EXCLUDE_REGEXES",
+    "POST_INCLUDE_FILES",
+    "POST_INCLUDE_REGEXES",
+    "PRE_EXCLUDE_REGEXES",
+    "PRE_INCLUDE_REGEXES",
+  };
   auto kwbegin = keywordsMissingValues.cbegin();
   auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
   if (kwend != kwbegin) {
@@ -3092,7 +3103,10 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
   cmRuntimeDependencyArchive archive(
     status, parsedArgs.Directories, parsedArgs.BundleExecutable,
     parsedArgs.PreIncludeRegexes, parsedArgs.PreExcludeRegexes,
-    parsedArgs.PostIncludeRegexes, parsedArgs.PostExcludeRegexes);
+    parsedArgs.PostIncludeRegexes, parsedArgs.PostExcludeRegexes,
+    std::move(parsedArgs.PostIncludeFiles),
+    std::move(parsedArgs.PostExcludeFiles),
+    std::move(parsedArgs.PostExcludeFilesStrict));
   if (!archive.Prepare()) {
     cmSystemTools::SetFatalErrorOccured();
     return false;

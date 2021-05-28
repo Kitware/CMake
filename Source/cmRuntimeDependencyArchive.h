@@ -25,7 +25,10 @@ public:
     const std::vector<std::string>& preIncludeRegexes,
     const std::vector<std::string>& preExcludeRegexes,
     const std::vector<std::string>& postIncludeRegexes,
-    const std::vector<std::string>& postExcludeRegexes);
+    const std::vector<std::string>& postExcludeRegexes,
+    std::vector<std::string> postIncludeFiles,
+    std::vector<std::string> postExcludeFiles,
+    std::vector<std::string> postExcludeFilesStrict);
   bool Prepare();
   bool GetRuntimeDependencies(const std::vector<std::string>& executables,
                               const std::vector<std::string>& libraries,
@@ -62,6 +65,9 @@ private:
   std::vector<cmsys::RegularExpression> PreExcludeRegexes;
   std::vector<cmsys::RegularExpression> PostIncludeRegexes;
   std::vector<cmsys::RegularExpression> PostExcludeRegexes;
+  std::vector<std::string> PostIncludeFiles;
+  std::vector<std::string> PostExcludeFiles;
+  std::vector<std::string> PostExcludeFilesStrict;
   std::map<std::string, std::set<std::string>> ResolvedPaths;
   std::set<std::string> UnresolvedPaths;
 };

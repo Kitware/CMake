@@ -179,6 +179,8 @@ the ``<format>`` and ``UTC`` options.
     [PRE_EXCLUDE_REGEXES [<regexes>...]]
     [POST_INCLUDE_REGEXES [<regexes>...]]
     [POST_EXCLUDE_REGEXES [<regexes>...]]
+    [POST_INCLUDE_FILES [<files>...]]
+    [POST_EXCLUDE_FILES [<files>...]]
     )
 
 .. versionadded:: 3.16
@@ -276,6 +278,18 @@ be resolved. See below for a full description of how they work.
   List of post-exclude regexes through which to filter the names of resolved
   dependencies.
 
+``POST_INCLUDE_FILES <files>``
+  .. versionadded:: 3.21
+
+  List of post-include filenames through which to filter the names of resolved
+  dependencies. Symlinks are resolved when attempting to match these filenames.
+
+``POST_EXCLUDE_FILES <files>``
+  .. versionadded:: 3.21
+
+  List of post-exclude filenames through which to filter the names of resolved
+  dependencies. Symlinks are resolved when attempting to match these filenames.
+
 These arguments can be used to exclude unwanted system libraries when
 resolving the dependencies, or to include libraries from a specific
 directory. The filtering works as follows:
@@ -289,16 +303,18 @@ directory. The filtering works as follows:
 4. ``file(GET_RUNTIME_DEPENDENCIES)`` searches for the dependency according to
    the linking rules of the platform (see below).
 5. If the dependency is found, and its full path matches one of the
-   ``POST_INCLUDE_REGEXES``, the full path is added to the resolved
-   dependencies, and ``file(GET_RUNTIME_DEPENDENCIES)`` recursively resolves
-   that library's own dependencies. Otherwise, resolution proceeds to step 6.
-6. If the dependency is found, but its full path matches one of the
-   ``POST_EXCLUDE_REGEXES``, it is not added to the resolved dependencies, and
-   dependency resolution stops for that dependency.
-7. If the dependency is found, and its full path does not match either
-   ``POST_INCLUDE_REGEXES`` or ``POST_EXCLUDE_REGEXES``, the full path is added
+   ``POST_INCLUDE_REGEXES`` or ``POST_INCLUDE_FILES``, the full path is added
    to the resolved dependencies, and ``file(GET_RUNTIME_DEPENDENCIES)``
-   recursively resolves that library's own dependencies.
+   recursively resolves that library's own dependencies. Otherwise, resolution
+   proceeds to step 6.
+6. If the dependency is found, but its full path matches one of the
+   ``POST_EXCLUDE_REGEXES`` or ``POST_EXCLUDE_FILES``, it is not added to the
+   resolved dependencies, and dependency resolution stops for that dependency.
+7. If the dependency is found, and its full path does not match either
+   ``POST_INCLUDE_REGEXES``, ``POST_INCLUDE_FILES``, ``POST_EXCLUDE_REGEXES``,
+   or ``POST_EXCLUDE_FILES``, the full path is added to the resolved
+   dependencies, and ``file(GET_RUNTIME_DEPENDENCIES)``  recursively resolves
+   that library's own dependencies.
 
 Different platforms have different rules for how dependencies are resolved.
 These specifics are described here.
