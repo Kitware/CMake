@@ -233,26 +233,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
       std::vector<cmSourceFile const*> objectFiles;
       depender->GetExternalObjects(objectFiles, it);
       for (cmSourceFile const* o : objectFiles) {
-        std::string const& objLib = o->GetObjectLibrary();
-        if (!objLib.empty()) {
-          cmLinkItem const& objItem =
-            depender->ResolveLinkItem(objLib, cmListFileBacktrace());
-          if (emitted.insert(objItem).second) {
-            if (depender->GetType() != cmStateEnums::EXECUTABLE &&
-                depender->GetType() != cmStateEnums::STATIC_LIBRARY &&
-                depender->GetType() != cmStateEnums::SHARED_LIBRARY &&
-                depender->GetType() != cmStateEnums::MODULE_LIBRARY &&
-                depender->GetType() != cmStateEnums::OBJECT_LIBRARY) {
-              this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-                MessageType::FATAL_ERROR,
-                "Only executables and libraries may reference target objects.",
-                depender->GetBacktrace());
-              return;
-            }
-            const_cast<cmGeneratorTarget*>(depender)->Target->AddUtility(
-              objLib, false);
-          }
-        }
+        this->AddObjectDepends(depender_index, o, emitted);
       }
     }
   }
@@ -316,6 +297,34 @@ void cmComputeTargetDepends::AddInterfaceDepends(
     emitted.insert(cmLinkItem(depender, true, cmListFileBacktrace()));
     this->AddInterfaceDepends(depender_index, dependee,
                               dependee_name.Backtrace, config, emitted);
+  }
+}
+
+void cmComputeTargetDepends::AddObjectDepends(int depender_index,
+                                              cmSourceFile const* o,
+                                              std::set<cmLinkItem>& emitted)
+{
+  std::string const& objLib = o->GetObjectLibrary();
+  if (objLib.empty()) {
+    return;
+  }
+  cmGeneratorTarget const* depender = this->Targets[depender_index];
+  cmLinkItem const& objItem =
+    depender->ResolveLinkItem(objLib, cmListFileBacktrace());
+  if (emitted.insert(objItem).second) {
+    if (depender->GetType() != cmStateEnums::EXECUTABLE &&
+        depender->GetType() != cmStateEnums::STATIC_LIBRARY &&
+        depender->GetType() != cmStateEnums::SHARED_LIBRARY &&
+        depender->GetType() != cmStateEnums::MODULE_LIBRARY &&
+        depender->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+      this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        "Only executables and libraries may reference target objects.",
+        depender->GetBacktrace());
+      return;
+    }
+    const_cast<cmGeneratorTarget*>(depender)->Target->AddUtility(objLib,
+                                                                 false);
   }
 }
 
