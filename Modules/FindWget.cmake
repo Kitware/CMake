@@ -16,10 +16,12 @@ This module looks for wget.  This module defines the following values:
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindMsys.cmake)
 
 find_program(WGET_EXECUTABLE
   wget
   ${CYGWIN_INSTALL_PATH}/bin
+  ${MSYS_INSTALL_PATH}/usr/bin
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)

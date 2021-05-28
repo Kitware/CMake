@@ -352,7 +352,7 @@ macro(GNUInstallDirs_get_absolute_install_dir absvar var)
   if(GGAID_extra_arg_count GREATER 0)
     list(GET GGAID_extra_args 0 GGAID_dir)
   else()
-    # Historical behaviour: use ${dir} from caller's scope
+    # Historical behavior: use ${dir} from caller's scope
     set(GGAID_dir "${dir}")
     message(AUTHOR_WARNING
       "GNUInstallDirs_get_absolute_install_dir called without third argument. "

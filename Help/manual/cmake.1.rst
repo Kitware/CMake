@@ -381,9 +381,9 @@ Options
 ``--preset <preset>``, ``--preset=<preset>``
  Reads a :manual:`preset <cmake-presets(7)>` from
  ``<path-to-source>/CMakePresets.json`` and
- ``<path-to-source>/CMakeUserPresets.json``. The preset specifies the
- generator and the build directory, and optionally a list of variables and
- other arguments to pass to CMake. The current working directory must contain
+ ``<path-to-source>/CMakeUserPresets.json``. The preset may specify the
+ generator and the build directory, and a list of variables and other
+ arguments to pass to CMake. The current working directory must contain
  CMake preset files. The :manual:`CMake GUI <cmake-gui(1)>` can
  also recognize ``CMakePresets.json`` and ``CMakeUserPresets.json`` files. For
  full details on these files, see :manual:`cmake-presets(7)`.
@@ -575,6 +575,12 @@ Available commands are:
       ``true`` if the generator supports toolsets and ``false`` otherwise.
     ``platformSupport``
       ``true`` if the generator supports platforms and ``false`` otherwise.
+    ``supportedPlatforms``
+      .. versionadded:: 3.21
+
+      Optional member that may be present when the generator supports
+      platform specification via :variable:`CMAKE_GENERATOR_PLATFORM`
+      (``-A ...``).  The value is a list of platforms known to be supported.
     ``extraGenerators``
       A list of strings with all the extra generators compatible with
       the generator.
@@ -702,7 +708,7 @@ Available commands are:
 ``remove [-f] <file>...``
   .. deprecated:: 3.17
 
-  Remove the file(s). The planned behaviour was that if any of the
+  Remove the file(s). The planned behavior was that if any of the
   listed files already do not exist, the command returns a non-zero exit code,
   but no message is logged. The ``-f`` option changes the behavior to return a
   zero exit code (i.e. success) in such situations instead.

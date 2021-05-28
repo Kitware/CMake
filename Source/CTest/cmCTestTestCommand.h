@@ -13,6 +13,7 @@
 #include "cmCommand.h"
 
 class cmCTestGenericHandler;
+class cmCTestTestHandler;
 
 /** \class cmCTestTest
  * \brief Run a ctest script
@@ -40,7 +41,7 @@ public:
 
 protected:
   void BindArguments() override;
-  virtual cmCTestGenericHandler* InitializeActualHandler();
+  virtual cmCTestTestHandler* InitializeActualHandler();
   cmCTestGenericHandler* InitializeHandler() override;
 
   std::string Start;
@@ -59,5 +60,6 @@ protected:
   std::string StopTime;
   std::string TestLoad;
   std::string ResourceSpecFile;
+  std::string OutputJUnit;
   bool StopOnFailure = false;
 };

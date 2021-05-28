@@ -6,7 +6,9 @@
           when: never
         - if: '$CMAKE_CI_NIGHTLY == "true"'
           when: on_success
-        - if: '($CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != "" && $CI_COMMIT_BRANCH == $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true")'
+        - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
+          when: never
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
           when: delayed
           start_in: 5 minutes
         - if: '($CMAKE_CI_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
@@ -24,7 +26,9 @@
           when: never
         - if: '$CMAKE_CI_NIGHTLY == "true"'
           when: on_success
-        - if: '($CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != "" && $CI_COMMIT_BRANCH == $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true")'
+        - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
+          when: never
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
           when: on_success
         - if: '($CMAKE_CI_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
           when: never
@@ -43,6 +47,8 @@
           when: always
         - if: '$CMAKE_CI_NIGHTLY == "true"'
           when: on_success
+        - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
+          when: never
         - if: '($CMAKE_CI_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
           when: never
         - if: '$CI_MERGE_REQUEST_ID'
@@ -54,5 +60,17 @@
 .run_only_for_package:
     rules:
         - if: '$CMAKE_CI_PACKAGE == "true"'
+          when: on_success
+        - when: never
+
+.run_only_for_continuous_master:
+    rules:
+        - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
+          when: on_success
+        - when: never
+
+.run_only_for_continuous_stage:
+    rules:
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH'
           when: on_success
         - when: never

@@ -1,0 +1,18 @@
+CMake Warning \(dev\) at CMP0121-ERANGE-Common.cmake:3 \(list\):
+  Policy CMP0121 is not set: The list\(\) command now validates parsing of
+  index arguments.  Run "cmake --help-policy CMP0121" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+  Invalid list index "18446744073709551616".
+Call Stack \(most recent call first\):
+  CMP0121-ERANGE-WARN.cmake:2 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Error at CMP0121-ERANGE-Common.cmake:3 \(list\):
+  list index: (-2147483643|2147483647) out of range \(-5, 4\)
+Call Stack \(most recent call first\):
+  CMP0121-ERANGE-WARN.cmake:2 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+ERANGE: --><--

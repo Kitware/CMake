@@ -83,7 +83,7 @@ to 1 all prerequisites will be found recursively, if set to 0 only
 direct prerequisites are listed.  <exclude_system> must be 0 or 1
 indicating whether to include or exclude "system" prerequisites.  With
 <verbose> set to 0 only the full path names of the prerequisites are
-printed, set to 1 extra informatin will be displayed.
+printed, set to 1 extra information will be displayed.
 
 ::
 

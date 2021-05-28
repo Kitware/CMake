@@ -15,3 +15,6 @@ This is initialized for each language from environment variables:
   Initialized by the :envvar:`CUDAFLAGS` environment variable.
 * ``CMAKE_Fortran_FLAGS``:
   Initialized by the :envvar:`FFLAGS` environment variable.
+
+This value is a command-line string fragment. Therefore, multiple options
+should be separated by spaces, and options with spaces should be quoted.

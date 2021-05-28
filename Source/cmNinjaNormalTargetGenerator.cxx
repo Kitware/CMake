@@ -875,7 +875,8 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
   if (genTarget->HasSOName(config)) {
     vars["SONAME_FLAG"] =
       this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage(config));
-    vars["SONAME"] = tgtNames.SharedObject;
+    vars["SONAME"] = localGen.ConvertToOutputFormat(tgtNames.SharedObject,
+                                                    cmOutputConverter::SHELL);
     if (genTarget->GetType() == cmStateEnums::SHARED_LIBRARY) {
       std::string install_dir =
         this->GetGeneratorTarget()->GetInstallNameDirForBuildTree(config);
@@ -1072,7 +1073,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       for (const auto& source : sources) {
         oss << " "
             << LocalGen->ConvertToOutputFormat(
-                 this->ConvertToNinjaPath(this->GetSourceFilePath(source)),
+                 this->GetCompiledSourceNinjaPath(source),
                  cmOutputConverter::SHELL);
       }
       return oss.str();
@@ -1093,8 +1094,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     for (const auto& source : sources) {
       linkBuild.Outputs.push_back(
         this->ConvertToNinjaPath(this->GetObjectFilePath(source, config)));
-      linkBuild.ExplicitDeps.push_back(
-        this->ConvertToNinjaPath(this->GetSourceFilePath(source)));
+      linkBuild.ExplicitDeps.emplace_back(
+        this->GetCompiledSourceNinjaPath(source));
     }
     linkBuild.Outputs.push_back(vars["SWIFT_MODULE"]);
   } else {
@@ -1183,7 +1184,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   }
   if (gt->HasSOName(config)) {
     vars["SONAME_FLAG"] = mf->GetSONameFlag(this->TargetLinkLanguage(config));
-    vars["SONAME"] = tgtNames.SharedObject;
+    vars["SONAME"] = localGen.ConvertToOutputFormat(tgtNames.SharedObject,
+                                                    cmOutputConverter::SHELL);
     if (targetType == cmStateEnums::SHARED_LIBRARY) {
       std::string install_dir = gt->GetInstallNameDirForBuildTree(config);
       if (!install_dir.empty()) {
@@ -1193,7 +1195,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     }
   }
 
-  cmNinjaDeps byproducts;
+  cmGlobalNinjaGenerator::CCOutputs byproducts(this->GetGlobalGenerator());
 
   if (!tgtNames.ImportLibrary.empty()) {
     const std::string impLibPath = localGen.ConvertToOutputFormat(
@@ -1201,7 +1203,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     vars["TARGET_IMPLIB"] = impLibPath;
     this->EnsureParentDirectoryExists(impLibPath);
     if (gt->HasImportLibrary(config)) {
-      byproducts.push_back(targetOutputImplib);
+      // Some linkers may update a binary without touching its import lib.
+      byproducts.ExplicitOuts.emplace_back(targetOutputImplib);
       if (firstForConfig) {
         globalGen->GetByproductsForCleanTarget(config).push_back(
           targetOutputImplib);
@@ -1259,8 +1262,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
                                      true, config);
         localGen.AppendCustomCommandLines(ccg, *cmdLineLists[i]);
         std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
-        std::transform(ccByproducts.begin(), ccByproducts.end(),
-                       std::back_inserter(byproducts), this->MapToNinjaPath());
+        byproducts.Add(ccByproducts);
         std::transform(
           ccByproducts.begin(), ccByproducts.end(),
           std::back_inserter(globalGen->GetByproductsForCleanTarget()),
@@ -1380,12 +1382,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   }
 
   // Ninja should restat after linking if and only if there are byproducts.
-  vars["RESTAT"] = byproducts.empty() ? "" : "1";
+  vars["RESTAT"] = byproducts.ExplicitOuts.empty() ? "" : "1";
 
-  for (std::string const& o : byproducts) {
-    globalGen->SeenCustomCommandOutput(o);
-    linkBuild.Outputs.push_back(o);
-  }
+  linkBuild.Outputs.reserve(linkBuild.Outputs.size() +
+                            byproducts.ExplicitOuts.size());
+  std::move(byproducts.ExplicitOuts.begin(), byproducts.ExplicitOuts.end(),
+            std::back_inserter(linkBuild.Outputs));
+  linkBuild.WorkDirOuts = std::move(byproducts.WorkDirOuts);
 
   // Write the build statement for this target.
   bool usedResponseFile = false;

@@ -18,7 +18,7 @@ function(compiler_id_detection outvar lang)
     file(GLOB lang_files
       "${CMAKE_ROOT}/Modules/Compiler/*-DetermineCompiler.cmake")
     set(nonlang CXX)
-    if (lang STREQUAL CXX)
+    if ("x${lang}" STREQUAL "xCXX")
       set(nonlang C)
     endif()
 
@@ -66,6 +66,7 @@ function(compiler_id_detection outvar lang)
       PGI
       Cray
       TI
+      FujitsuClang
       Fujitsu
       GHS
     )

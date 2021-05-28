@@ -85,7 +85,7 @@ private:
     return this->OutputExtension.c_str();
   }
 
-  bool SetArchiveOptions(cmArchiveWrite* archive);
+  int GetThreadCount() const;
 
 private:
   cmArchiveWrite::Compress Compress;

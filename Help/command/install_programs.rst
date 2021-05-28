@@ -5,7 +5,7 @@ install_programs
 
   Use the :command:`install(PROGRAMS)` command instead.
 
-This command has been superceded by the :command:`install` command.  It is
+This command has been superseded by the :command:`install` command.  It is
 provided for compatibility with older CMake code.  The ``FILES`` form is
 directly replaced by the ``PROGRAMS`` form of the :command:`install`
 command.  The regexp form can be expressed more clearly using the ``GLOB``

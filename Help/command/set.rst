@@ -68,9 +68,13 @@ users.
 
 If the cache entry does not exist prior to the call or the ``FORCE``
 option is given then the cache entry will be set to the given value.
-Furthermore, any normal variable binding in the current scope will
-be removed to expose the newly cached value to any immediately
-following evaluation.
+
+.. note::
+
+  The content of the cache variable will not be directly accessible if a normal
+  variable of the same name already exists (see :ref:`rules of variable
+  evaluation <CMake Language Variables>`). If policy :policy:`CMP0126` is set
+  to ``OLD``, any normal variable binding in the current scope will be removed.
 
 It is possible for the cache entry to exist prior to the call but
 have no type set if it was created on the :manual:`cmake(1)` command

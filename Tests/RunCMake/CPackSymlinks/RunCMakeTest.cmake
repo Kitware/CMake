@@ -15,6 +15,7 @@ function(run_cpack_symlink_test)
   run_cmake_command(SrcSymlinksCPack
     ${CMAKE_CPACK_COMMAND} --config CPackSourceConfig.cmake
     )
+  run_cmake_script(SrcSymlinksCheck)
 endfunction()
 
 run_cpack_symlink_test()

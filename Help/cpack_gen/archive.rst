@@ -82,7 +82,8 @@ CPack generators which are essentially archives at their core. These include:
 
   See also the :variable:`CPACK_THREADS` variable.
 
-.. note::
+  .. versionadded:: 3.21
 
-    Official CMake binaries available on ``cmake.org`` ship with a ``liblzma``
-    that does not support parallel compression.
+    Official CMake binaries available on ``cmake.org`` now ship
+    with a ``liblzma`` that supports parallel compression.
+    Older versions did not.

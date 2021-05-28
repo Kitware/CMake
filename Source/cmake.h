@@ -194,6 +194,14 @@ public:
   //@}
 
   /**
+   * Working directory at CMake launch
+   */
+  std::string const& GetCMakeWorkingDirectory() const
+  {
+    return this->CMakeWorkingDirectory;
+  }
+
+  /**
    * Handle a command line invocation of cmake.
    */
   int Run(const std::vector<std::string>& args)
@@ -628,6 +636,7 @@ protected:
   void GenerateGraphViz(const std::string& fileName) const;
 
 private:
+  std::string CMakeWorkingDirectory;
   ProgressCallbackType ProgressCallback;
   WorkingMode CurrentWorkingMode = NORMAL_MODE;
   bool DebugOutput = false;
@@ -712,6 +721,10 @@ private:
       "Specify toolset name if supported by generator." },                    \
     { "-A <platform-name>",                                                   \
       "Specify platform name if supported by generator." },                   \
+    { "--toolchain <file>",                                                   \
+      "Specify toolchain file [CMAKE_TOOLCHAIN_FILE]." },                     \
+    { "--install-prefix <directory>",                                         \
+      "Specify install directory [CMAKE_INSTALL_PREFIX]." },                  \
     { "-Wdev", "Enable developer warnings." },                                \
     { "-Wno-dev", "Suppress developer warnings." },                           \
     { "-Werror=dev", "Make developer warnings errors." },                     \
@@ -739,6 +752,8 @@ private:
   F(c_std_90)                                                                 \
   F(c_std_99)                                                                 \
   F(c_std_11)                                                                 \
+  F(c_std_17)                                                                 \
+  F(c_std_23)                                                                 \
   FOR_EACH_C90_FEATURE(F)                                                     \
   FOR_EACH_C99_FEATURE(F)                                                     \
   FOR_EACH_C11_FEATURE(F)

@@ -98,6 +98,16 @@ foreach(p
   endif()
 endforeach()
 
+# Some configure checks depend upon the deployment target. Clear checks when
+# the deployment target changes.
+if (APPLE)
+  if (NOT CMAKE_OSX_DEPLOYMENT_TARGET STREQUAL KWSYS_LAST_OSX_DEPLOYMENT_TARGET)
+    unset(KWSYS_CXX_HAS_UTIMENSAT CACHE)
+  endif ()
+  set(KWSYS_LAST_OSX_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}"
+    CACHE INTERNAL "remember the last deployment target to trigger configure rechecks")
+endif ()
+
 #-----------------------------------------------------------------------------
 # If a namespace is not specified, use "kwsys" and enable testing.
 # This should be the case only when kwsys is not included inside
@@ -142,6 +152,7 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   set(KWSYS_USE_MD5 1)
   set(KWSYS_USE_Process 1)
   set(KWSYS_USE_RegularExpression 1)
+  set(KWSYS_USE_Status 1)
   set(KWSYS_USE_System 1)
   set(KWSYS_USE_SystemTools 1)
   set(KWSYS_USE_CommandLineArguments 1)
@@ -157,6 +168,7 @@ if(KWSYS_USE_SystemTools)
   set(KWSYS_USE_Directory 1)
   set(KWSYS_USE_FStream 1)
   set(KWSYS_USE_Encoding 1)
+  set(KWSYS_USE_Status 1)
 endif()
 if(KWSYS_USE_Glob)
   set(KWSYS_USE_Directory 1)
@@ -177,6 +189,7 @@ if(KWSYS_USE_System)
 endif()
 if(KWSYS_USE_Directory)
   set(KWSYS_USE_Encoding 1)
+  set(KWSYS_USE_Status 1)
 endif()
 if(KWSYS_USE_DynamicLoader)
   set(KWSYS_USE_Encoding 1)
@@ -630,7 +643,7 @@ set(KWSYS_HXX_FILES Configure String)
 # Add selected C++ classes.
 set(cppclasses
   Directory DynamicLoader Encoding Glob RegularExpression SystemTools
-  CommandLineArguments FStream SystemInformation ConsoleBuf
+  CommandLineArguments FStream SystemInformation ConsoleBuf Status
   )
 foreach(cpp ${cppclasses})
   if(KWSYS_USE_${cpp})
@@ -963,6 +976,7 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     # C++ tests
     set(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
       testConfigure.cxx
+      testStatus.cxx
       testSystemTools.cxx
       testCommandLineArguments.cxx
       testCommandLineArguments1.cxx

@@ -68,6 +68,13 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   bool init = cmIsOn(initialValue);
   status.GetMakefile().AddCacheDefinition(args[0], init ? "ON" : "OFF",
                                           args[1].c_str(), cmStateEnums::BOOL);
+  if (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0077) !=
+        cmPolicies::NEW &&
+      status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0126) ==
+        cmPolicies::NEW) {
+    // if there was a definition then remove it
+    status.GetMakefile().GetStateSnapshot().RemoveDefinition(args[0]);
+  }
 
   if (checkAndWarn) {
     const auto* existsAfterSet =

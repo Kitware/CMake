@@ -5,7 +5,7 @@
 ### Release
 
 .linux_prep_source:
-    image: "fedora:33"
+    image: "fedora:34"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -30,10 +30,22 @@
     variables:
         BOOTSTRAP_ARGS: '-- "-DCMake_DOC_ARTIFACT_PREFIX=$CI_PROJECT_DIR/build/install-doc"'
 
+.needs_centos6_x86_64:
+    dependencies:
+        - build:centos6-x86_64
+    needs:
+        - build:centos6-x86_64
+
+.needs_centos7_aarch64:
+    dependencies:
+        - build:centos7-aarch64
+    needs:
+        - build:centos7-aarch64
+
 ### Debian
 
 .debian10:
-    image: "kitware/cmake:ci-debian10-x86_64-2021-04-06"
+    image: "kitware/cmake:ci-debian10-x86_64-2021-05-11"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -48,7 +60,7 @@
         CMake_SKIP_INSTALL: 1
 
 .debian10_aarch64:
-    image: "kitware/cmake:ci-debian10-aarch64-2021-04-06"
+    image: "kitware/cmake:ci-debian10-aarch64-2021-05-11"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -56,8 +68,8 @@
 
 ### Fedora
 
-.fedora33:
-    image: "kitware/cmake:ci-fedora33-x86_64-2021-04-06"
+.fedora34:
+    image: "kitware/cmake:ci-fedora34-x86_64-2021-05-21"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
@@ -65,28 +77,28 @@
 
 #### Lint builds
 
-.fedora33_tidy:
-    extends: .fedora33
+.fedora34_tidy:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_tidy
+        CMAKE_CONFIGURATION: fedora34_tidy
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMake_SKIP_INSTALL: 1
 
-.fedora33_sphinx:
-    extends: .fedora33
+.fedora34_sphinx:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_sphinx
+        CMAKE_CONFIGURATION: fedora34_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
         CMake_SKIP_INSTALL: 1
 
-.fedora33_sphinx_package:
-    extends: .fedora33
+.fedora34_sphinx_package:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_sphinx_package
+        CMAKE_CONFIGURATION: fedora34_sphinx_package
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
 
 #### Build and test
@@ -105,27 +117,48 @@
         CMAKE_CONFIGURATION: debian10_aarch64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora33_ninja:
-    extends: .fedora33
+.fedora34_ninja:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_ninja
+        CMAKE_CONFIGURATION: fedora34_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora33_ninja_multi:
-    extends: .fedora33
+.fedora34_ninja_multi:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_ninja_multi
+        CMAKE_CONFIGURATION: fedora34_ninja_multi
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.fedora33_makefiles:
-    extends: .fedora33
+.fedora34_makefiles:
+    extends: .fedora34
 
     variables:
-        CMAKE_CONFIGURATION: fedora33_makefiles
+        CMAKE_CONFIGURATION: fedora34_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "Unix Makefiles"
+
+### Intel Compiler
+
+.intelcompiler:
+    image: "kitware/intelcompiler:$CMAKE_CI_INTELCOMPILER_IMAGE_TAG"
+    environment:
+        name: intel-compiler
+    variables:
+        CMAKE_ARCH: x86_64
+
+.intelclassic_makefiles:
+    extends: .intelcompiler
+    variables:
+        CMAKE_CONFIGURATION: intelclassic_makefiles
+        CMAKE_GENERATOR: "Unix Makefiles"
+
+.inteloneapi_makefiles:
+    extends: .intelcompiler
+    variables:
+        CMAKE_CONFIGURATION: inteloneapi_makefiles
         CMAKE_GENERATOR: "Unix Makefiles"
 
 ### CUDA builds
@@ -195,6 +228,7 @@
 ## Linux-specific scripts
 
 .before_script_linux: &before_script_linux
+    - source .gitlab/ci/env.sh
     - .gitlab/ci/cmake.sh
     - .gitlab/ci/ninja.sh
     - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
@@ -224,6 +258,13 @@
 
     interruptible: true
 
+.cmake_codespell_linux:
+    stage: build
+    extends: .fedora34
+    script:
+        - codespell
+    interruptible: true
+
 .cmake_build_linux:
     stage: build
 
@@ -251,6 +292,7 @@
     stage: build
 
     script:
+        - source .gitlab/ci/env.sh
         # Bootstrap.
         - mkdir -p build/
         # Exclude documentation.  A job dependency provides it for packaging.
@@ -313,3 +355,38 @@
         - sccache --show-stats
 
     interruptible: true
+
+.cmake_test_linux_intelclassic_makefiles:
+    extends:
+        - .intelclassic_makefiles
+        - .cmake_test_linux_release
+        - .linux_builder_tags_qt
+        - .run_manually
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+.cmake_test_linux_inteloneapi_makefiles:
+    extends:
+        - .inteloneapi_makefiles
+        - .cmake_test_linux_release
+        - .linux_builder_tags_qt
+        - .run_manually
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+### Documentation
+
+.cmake_org_help:
+    stage: build
+    extends:
+        - .fedora34
+        - .linux_builder_tags
+        - .cmake_org_help_artifacts
+    script:
+        - *before_script_linux
+        - mkdir -p build/
+        - cd build/
+        - cmake ../Utilities/Sphinx -GNinja -DSPHINX_HTML=ON -DSPHINX_FLAGS="-A versionswitch=1"
+        - ninja

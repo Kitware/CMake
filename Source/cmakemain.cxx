@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <climits>
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <sstream>
@@ -23,6 +24,7 @@
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageMetadata.h"
 #include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -37,6 +39,7 @@
 #endif
 
 #include "cmsys/Encoding.hxx"
+#include "cmsys/Terminal.h"
 
 namespace {
 #ifndef CMAKE_BOOTSTRAP
@@ -147,10 +150,12 @@ std::string cmakemainGetStack(cmake* cm)
   return msg;
 }
 
-void cmakemainMessageCallback(const std::string& m, const char* /*unused*/,
-                              cmake* cm)
+void cmakemainMessageCallback(const std::string& m,
+                              const cmMessageMetadata& md, cmake* cm)
 {
-  std::cerr << m << cmakemainGetStack(cm) << std::endl;
+  cmsysTerminal_cfprintf(md.desiredColor, stderr, "%s", m.c_str());
+  fflush(stderr); // stderr is buffered in some cases.
+  std::cerr << cmakemainGetStack(cm) << "\n";
 }
 
 void cmakemainProgressCallback(const std::string& m, float prog, cmake* cm)
@@ -271,6 +276,7 @@ int do_cmake(int ac, char const* const* av)
                      } },
     CommandArgument{ "-P", "No script specified for argument -P",
                      CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No,
                      [&](std::string const& value) -> bool {
                        workingMode = cmake::SCRIPT_MODE;
                        parsedArgs.emplace_back("-P");
@@ -342,8 +348,8 @@ int do_cmake(int ac, char const* const* av)
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmSystemTools::SetMessageCallback(
-    [&cm](const std::string& msg, const char* title) {
-      cmakemainMessageCallback(msg, title, &cm);
+    [&cm](const std::string& msg, const cmMessageMetadata& md) {
+      cmakemainMessageCallback(msg, md, &cm);
     });
   cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
@@ -476,9 +482,10 @@ int do_build(int ac, char const* const* av)
                        listPresets = true;
                        return true;
                      } },
-    CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne, jLambda },
+    CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne,
+                     CommandArgument::RequiresSeparator::No, jLambda },
     CommandArgument{ "--parallel", CommandArgument::Values::ZeroOrOne,
-                     parallelLambda },
+                     CommandArgument::RequiresSeparator::No, parallelLambda },
     CommandArgument{ "-t", CommandArgument::Values::OneOrMore, targetLambda },
     CommandArgument{ "--target", CommandArgument::Values::OneOrMore,
                      targetLambda },
@@ -624,8 +631,8 @@ int do_build(int ac, char const* const* av)
 
   cmake cm(cmake::RoleInternal, cmState::Project);
   cmSystemTools::SetMessageCallback(
-    [&cm](const std::string& msg, const char* title) {
-      cmakemainMessageCallback(msg, title, &cm);
+    [&cm](const std::string& msg, const cmMessageMetadata& md) {
+      cmakemainMessageCallback(msg, md, &cm);
     });
   cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
@@ -857,8 +864,8 @@ int do_install(int ac, char const* const* av)
   cmake cm(cmake::RoleScript, cmState::Script);
 
   cmSystemTools::SetMessageCallback(
-    [&cm](const std::string& msg, const char* title) {
-      cmakemainMessageCallback(msg, title, &cm);
+    [&cm](const std::string& msg, const cmMessageMetadata& md) {
+      cmakemainMessageCallback(msg, md, &cm);
     });
   cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
@@ -938,8 +945,8 @@ int do_open(int ac, char const* const* av)
 
   cmake cm(cmake::RoleInternal, cmState::Unknown);
   cmSystemTools::SetMessageCallback(
-    [&cm](const std::string& msg, const char* title) {
-      cmakemainMessageCallback(msg, title, &cm);
+    [&cm](const std::string& msg, const cmMessageMetadata& md) {
+      cmakemainMessageCallback(msg, md, &cm);
     });
   cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);

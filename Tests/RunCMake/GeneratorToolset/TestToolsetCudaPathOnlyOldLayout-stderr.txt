@@ -1,0 +1,12 @@
+CMake Error at CMakeLists.txt:[0-9]+ \(project\):
+  Generator
+
+    Visual Studio .*
+
+  given toolset
+
+    cuda=.*/Tests/RunCMake/CudaStandaloneToolset\\
+
+  cannot detect Visual Studio integration files in path
+
+    .*/Tests/RunCMake/CudaStandaloneToolset/CUDAVisualStudioIntegration/extras/visual_studio_integration/MSBuildExtensions

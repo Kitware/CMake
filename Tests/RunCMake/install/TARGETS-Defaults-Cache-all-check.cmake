@@ -13,6 +13,21 @@ if(WIN32)
     [[mylib/(lib)?lib1\.(dll\.a|lib)]]
     [[mylib/(lib)?lib2\.(a|lib)]]
     )
+elseif(MSYS)
+  set(_check_files
+    [[lib3]]
+    [[lib3/liblib3\.dll\.a]]
+    [[lib4]]
+    [[lib4/msys-lib4\.dll]]
+    [[mybin]]
+    [[mybin/exe\.exe]]
+    [[mybin/msys-lib1\.dll]]
+    [[myinclude]]
+    [[myinclude/obj3\.h]]
+    [[mylib]]
+    [[mylib/liblib1\.dll\.a]]
+    [[mylib/liblib2\.a]]
+    )
 elseif(CYGWIN)
   set(_check_files
     [[lib3]]

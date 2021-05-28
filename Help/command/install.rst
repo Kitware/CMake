@@ -619,7 +619,7 @@ Custom Installation Logic
 .. code-block:: cmake
 
   install([[SCRIPT <file>] [CODE <code>]]
-          [COMPONENT <component>] [EXCLUDE_FROM_ALL] [...])
+          [COMPONENT <component>] [EXCLUDE_FROM_ALL] [ALL_COMPONENTS] [...])
 
 The ``SCRIPT`` form will invoke the given CMake script files during
 installation.  If the script file name is a relative path it will be
@@ -633,6 +633,12 @@ example, the code
   install(CODE "MESSAGE(\"Sample install message.\")")
 
 will print a message during installation.
+
+The option ``ALL_COMPONENTS``
+  .. versionadded:: 3.21
+
+  Run the custom installation script code for every component of a
+  component-specific installation.
 
 .. versionadded:: 3.14
   ``<file>`` or ``<code>`` may use "generator expressions" with the syntax
@@ -724,7 +730,7 @@ executable from the installation tree using the imported target name
 ``mp_myexe`` as if the target were built in its own tree.
 
 .. note::
-  This command supercedes the :command:`install_targets` command and
+  This command supersedes the :command:`install_targets` command and
   the :prop_tgt:`PRE_INSTALL_SCRIPT` and :prop_tgt:`POST_INSTALL_SCRIPT`
   target properties.  It also replaces the ``FILES`` forms of the
   :command:`install_files` and :command:`install_programs` commands.

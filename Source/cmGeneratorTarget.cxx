@@ -52,6 +52,11 @@
 
 class cmMessenger;
 
+namespace {
+const cmsys::RegularExpression FrameworkRegularExpression(
+  "^(.*/)?([^/]*)\\.framework/(.*)$");
+}
+
 template <>
 cmProp cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
   cmGeneratorTarget const* tgt, cmMessenger* /* messenger */,
@@ -970,7 +975,7 @@ cmProp cmGeneratorTarget::GetPropertyWithPairedLanguageSupport(
   std::string const& lang, const char* suffix) const
 {
   cmProp propertyValue = this->Target->GetProperty(cmStrCat(lang, suffix));
-  if (propertyValue == nullptr) {
+  if (!propertyValue) {
     // Check if we should use the value set by another language.
     if (lang == "OBJC") {
       propertyValue = this->GetPropertyWithPairedLanguageSupport("C", suffix);
@@ -1056,6 +1061,20 @@ const std::string& cmGeneratorTarget::GetLocation(
   if (this->IsImported()) {
     location = this->Target->ImportedGetFullPath(
       config, cmStateEnums::RuntimeBinaryArtifact);
+  } else {
+    location = this->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
+  }
+  return location;
+}
+
+cm::optional<std::string> cmGeneratorTarget::MaybeGetLocation(
+  std::string const& config) const
+{
+  cm::optional<std::string> location;
+  if (cmGeneratorTarget::ImportInfo const* imp = this->GetImportInfo(config)) {
+    if (!imp->Location.empty()) {
+      location = imp->Location;
+    }
   } else {
     location = this->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
   }
@@ -2243,8 +2262,16 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
         return cmSystemTools::GetFilenameName(info->Location);
       }
       // Use the soname given if any.
+      if (this->IsFrameworkOnApple()) {
+        cmsys::RegularExpressionMatch match;
+        if (FrameworkRegularExpression.find(info->SOName.c_str(), match)) {
+          auto frameworkName = match.match(2);
+          auto fileName = match.match(3);
+          return cmStrCat(frameworkName, ".framework/", fileName);
+        }
+      }
       if (cmHasLiteralPrefix(info->SOName, "@rpath/")) {
-        return info->SOName.substr(6);
+        return info->SOName.substr(cmStrLen("@rpath/"));
       }
       return info->SOName;
     }
@@ -4701,21 +4728,20 @@ bool cmGeneratorTarget::ComputeCompileFeatures(
         cmStrCat(cmSystemTools::UpperCase(config), '-', language.first);
       BTs<std::string> const* standardToCopy =
         this->GetLanguageStandardProperty(language.second, config);
-      if (standardToCopy != nullptr) {
+      if (standardToCopy) {
         this->LanguageStandardMap[key] = *standardToCopy;
         generatorTargetLanguageStandard = &this->LanguageStandardMap[key];
       } else {
         cmProp defaultStandard = this->Makefile->GetDefinition(
           cmStrCat("CMAKE_", language.second, "_STANDARD_DEFAULT"));
-        if (defaultStandard != nullptr) {
+        if (defaultStandard) {
           this->LanguageStandardMap[key] = BTs<std::string>(*defaultStandard);
           generatorTargetLanguageStandard = &this->LanguageStandardMap[key];
         }
       }
 
       // Custom updates for the CUDA standard.
-      if (generatorTargetLanguageStandard != nullptr &&
-          language.first == "CUDA") {
+      if (generatorTargetLanguageStandard && language.first == "CUDA") {
         if (generatorTargetLanguageStandard->Value == "98") {
           this->LanguageStandardMap[key].Value = "03";
         }
@@ -6265,6 +6291,7 @@ void cmGeneratorTarget::ExpandLinkItems(
   }
   std::vector<std::string> libs;
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+  cge->SetEvaluateForBuildsystem(true);
   cmExpandList(cge->Evaluate(this->LocalGenerator, config, headTarget,
                              &dagChecker, this, headTarget->LinkerLanguage),
                libs);
@@ -6446,9 +6473,19 @@ std::string cmGeneratorTarget::GetDirectory(
   const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   if (this->IsImported()) {
+    auto fullPath = this->Target->ImportedGetFullPath(config, artifact);
+    if (this->IsFrameworkOnApple()) {
+      cmsys::RegularExpressionMatch match;
+      if (FrameworkRegularExpression.find(fullPath.c_str(), match)) {
+        auto path = match.match(1);
+        if (!path.empty()) {
+          path.erase(path.length() - 1);
+        }
+        return path;
+      }
+    }
     // Return the directory from which the target is imported.
-    return cmSystemTools::GetFilenamePath(
-      this->Target->ImportedGetFullPath(config, artifact));
+    return cmSystemTools::GetFilenamePath(fullPath);
   }
   if (OutputInfo const* info = this->GetOutputInfo(config)) {
     // Return the directory in which the target will be built.
@@ -6757,7 +6794,7 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     return;
   }
   iface.Exists = true;
-  iface.Explicit = cmp0022NEW || explicitLibraries != nullptr;
+  iface.Explicit = cmp0022NEW || explicitLibraries;
 
   if (explicitLibraries) {
     // The interface libraries have been explicitly set.
@@ -7392,6 +7429,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
                                                nullptr);
     cmGeneratorExpression ge(*btIt);
     std::unique_ptr<cmCompiledGeneratorExpression> const cge = ge.Parse(*le);
+    cge->SetEvaluateForBuildsystem(true);
     std::string const& evaluated =
       cge->Evaluate(this->LocalGenerator, config, head, &dagChecker, nullptr,
                     this->LinkerLanguage);

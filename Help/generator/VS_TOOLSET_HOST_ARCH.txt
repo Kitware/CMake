@@ -8,4 +8,4 @@
   See the :variable:`CMAKE_GENERATOR_TOOLSET` variable for details.
 
 .. versionadded:: 3.14
-  Added suport for ``host=x86`` option.
+  Added support for ``host=x86`` option.

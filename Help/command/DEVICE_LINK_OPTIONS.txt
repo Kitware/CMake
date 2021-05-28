@@ -1,3 +1,5 @@
+Host And Device Specific Link Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.18
   When a device link step is involved, which is controlled by

@@ -14,6 +14,7 @@
 #include <utility>
 
 #include <cm/iterator>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cm/vector>
 #include <cmext/algorithm>
@@ -23,6 +24,7 @@
 #include "cmsys/String.h"
 
 #include "cmAlgorithms.h"
+#include "cmComputeLinkInformation.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -1627,8 +1629,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
         type != cmStateEnums::OBJECT_LIBRARY) {
       std::ostringstream e;
       e << "Objects of target \"" << tgtName
-        << "\" referenced but is not an allowed library types (EXECUTABLE, "
-        << "STATIC, SHARED, MODULE, OBJECT).";
+        << "\" referenced but is not one of the allowed target types "
+        << "(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT).";
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
     }
@@ -1686,6 +1688,54 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     return cmJoin(objects, ";");
   }
 } targetObjectsNode;
+
+static const struct TargetRuntimeDllsNode : public cmGeneratorExpressionNode
+{
+  TargetRuntimeDllsNode() {} // NOLINT(modernize-use-equals-default)
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    std::string tgtName = parameters.front();
+    cmGeneratorTarget* gt = context->LG->FindGeneratorTargetToUse(tgtName);
+    if (!gt) {
+      std::ostringstream e;
+      e << "Objects of target \"" << tgtName
+        << "\" referenced but no such target exists.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return std::string();
+    }
+    cmStateEnums::TargetType type = gt->GetType();
+    if (type != cmStateEnums::EXECUTABLE &&
+        type != cmStateEnums::SHARED_LIBRARY &&
+        type != cmStateEnums::MODULE_LIBRARY) {
+      std::ostringstream e;
+      e << "Objects of target \"" << tgtName
+        << "\" referenced but is not one of the allowed target types "
+        << "(EXECUTABLE, SHARED, MODULE).";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return std::string();
+    }
+
+    if (auto* cli = gt->GetLinkInformation(context->Config)) {
+      std::vector<std::string> dllPaths;
+      auto const& dlls = cli->GetRuntimeDLLs();
+
+      for (auto const& dll : dlls) {
+        if (auto loc = dll->MaybeGetLocation(context->Config)) {
+          dllPaths.emplace_back(*loc);
+        }
+      }
+
+      return cmJoin(dllPaths, ";");
+    }
+
+    return "";
+  }
+} targetRuntimeDllsNode;
 
 static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
 {
@@ -2603,6 +2653,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "TARGET_EXISTS", &targetExistsNode },
     { "TARGET_NAME_IF_EXISTS", &targetNameIfExistsNode },
     { "TARGET_GENEX_EVAL", &targetGenexEvalNode },
+    { "TARGET_RUNTIME_DLLS", &targetRuntimeDllsNode },
     { "GENEX_EVAL", &genexEvalNode },
     { "BUILD_INTERFACE", &buildInterfaceNode },
     { "INSTALL_INTERFACE", &installInterfaceNode },

@@ -1,0 +1,5 @@
+cmake_policy(SET CMP0061 NEW)
+build_command(cmd PARALLEL_LEVEL 1)
+if(NOT cmd MATCHES [[ --parallel "1"]])
+  message(FATAL_ERROR "Cannot find the --parallel flag")
+endif()

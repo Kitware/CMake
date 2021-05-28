@@ -1,0 +1,406 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "Base",
+      "hidden": true,
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "SimpleTrue",
+      "inherits": "Base",
+      "condition": true
+    },
+    {
+      "name": "SimpleFalse",
+      "inherits": "Base",
+      "condition": false
+    },
+    {
+      "name": "Null",
+      "inherits": "Base",
+      "condition": null
+    },
+    {
+      "name": "ConstTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "const",
+        "value": true
+      }
+    },
+    {
+      "name": "ConstFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "const",
+        "value": false
+      }
+    },
+    {
+      "name": "EqualsTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "equals",
+        "lhs": "abc",
+        "rhs": "abc"
+      }
+    },
+    {
+      "name": "EqualsFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "equals",
+        "lhs": "abc",
+        "rhs": "abcd"
+      }
+    },
+    {
+      "name": "EqualsMacroLeft",
+      "inherits": "Base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${presetName}",
+        "rhs": "EqualsMacroLeft"
+      }
+    },
+    {
+      "name": "EqualsMacroRight",
+      "inherits": "Base",
+      "condition": {
+        "type": "equals",
+        "lhs": "EqualsMacroRight",
+        "rhs": "${presetName}"
+      }
+    },
+    {
+      "name": "NotEqualsTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "abc",
+        "rhs": "abcd"
+      }
+    },
+    {
+      "name": "NotEqualsFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "abc",
+        "rhs": "abc"
+      }
+    },
+    {
+      "name": "InListTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "inList",
+        "string": "b",
+        "list": [
+          "a",
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "name": "InListFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "inList",
+        "string": "d",
+        "list": [
+          "a",
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "name": "InListMacroString",
+      "inherits": "Base",
+      "condition": {
+        "type": "inList",
+        "string": "${presetName}",
+        "list": [
+          "InListMacroString",
+          "AnotherString"
+        ]
+      }
+    },
+    {
+      "name": "InListMacroList",
+      "inherits": "Base",
+      "condition": {
+        "type": "inList",
+        "string": "InListMacroList",
+        "list": [
+          "${presetName}",
+          "AnotherString"
+        ]
+      }
+    },
+    {
+      "name": "InListShortCircuit",
+      "inherits": "Base",
+      "condition": {
+        "type": "inList",
+        "string": "a",
+        "list": [
+          "a",
+          "${invalidMacro}"
+        ]
+      }
+    },
+    {
+      "name": "NotInListTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "notInList",
+        "string": "d",
+        "list": [
+          "a",
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "name": "NotInListFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "notInList",
+        "string": "a",
+        "list": [
+          "a",
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "name": "MatchesTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "matches",
+        "string": "aaa",
+        "regex": "^a*$"
+      }
+    },
+    {
+      "name": "MatchesFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "matches",
+        "string": "aab",
+        "regex": "^a*$"
+      }
+    },
+    {
+      "name": "MatchesMacroString",
+      "inherits": "Base",
+      "condition": {
+        "type": "matches",
+        "string": "${presetName}",
+        "regex": "^Matches"
+      }
+    },
+    {
+      "name": "MatchesMacroRegex",
+      "inherits": "Base",
+      "condition": {
+        "type": "matches",
+        "string": "stuff",
+        "regex": "$env{CONDITION_REGEX}"
+      },
+      "environment": {
+        "CONDITION_REGEX": "^stuf*$"
+      }
+    },
+    {
+      "name": "NotMatchesTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "notMatches",
+        "string": "aab",
+        "regex": "^a*$"
+      }
+    },
+    {
+      "name": "NotMatchesFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "notMatches",
+        "string": "aaa",
+        "regex": "^a*$"
+      }
+    },
+    {
+      "name": "AnyOfTrue1",
+      "inherits": "Base",
+      "condition": {
+        "type": "anyOf",
+        "conditions": [
+          true,
+          false
+        ]
+      }
+    },
+    {
+      "name": "AnyOfTrue2",
+      "inherits": "Base",
+      "condition": {
+        "type": "anyOf",
+        "conditions": [
+          false,
+          true
+        ]
+      }
+    },
+    {
+      "name": "AnyOfFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "anyOf",
+        "conditions": [
+          false,
+          {
+            "type": "equals",
+            "lhs": "abc",
+            "rhs": "abcd"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AnyOfShortCircuit",
+      "inherits": "Base",
+      "condition": {
+        "type": "anyOf",
+        "conditions": [
+          true,
+          {
+            "type": "equals",
+            "lhs": "${invalidMacro}",
+            "rhs": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "AnyOfEmpty",
+      "inherits": "Base",
+      "condition": {
+        "type": "anyOf",
+        "conditions": []
+      }
+    },
+    {
+      "name": "AllOfTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          true,
+          {
+            "type": "equals",
+            "lhs": "abc",
+            "rhs": "abc"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllOfFalse1",
+      "inherits": "Base",
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          false,
+          true
+        ]
+      }
+    },
+    {
+      "name": "AllOfFalse2",
+      "inherits": "Base",
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          true,
+          false
+        ]
+      }
+    },
+    {
+      "name": "AllOfShortCircuit",
+      "inherits": "Base",
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          false,
+          {
+            "type": "equals",
+            "lhs": "${invalidMacro}",
+            "rhs": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllOfEmpty",
+      "inherits": "Base",
+      "condition": {
+        "type": "allOf",
+        "conditions": []
+      }
+    },
+    {
+      "name": "NotTrue",
+      "inherits": "Base",
+      "condition": {
+        "type": "not",
+        "condition": true
+      }
+    },
+    {
+      "name": "NotFalse",
+      "inherits": "Base",
+      "condition": {
+        "type": "not",
+        "condition": false
+      }
+    },
+    {
+      "name": "InheritanceBase",
+      "inherits": "Base",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${presetName}",
+        "rhs": "InheritanceChildTrue"
+      }
+    },
+    {
+      "name": "InheritanceChildTrue",
+      "inherits": "InheritanceBase"
+    },
+    {
+      "name": "InheritanceChildFalse",
+      "inherits": "InheritanceBase"
+    },
+    {
+      "name": "InheritanceNull",
+      "inherits": "Null"
+    },
+    {
+      "name": "InheritanceNullFalse",
+      "inherits": [
+        "Null",
+        "SimpleFalse"
+      ]
+    }
+  ]
+}

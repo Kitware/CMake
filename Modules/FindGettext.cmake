@@ -39,7 +39,7 @@ LANGUAGES <lang1> <lang2> ...  )
      If INSTALL_DESTINATION is given then automatically install rules will
      be created, the language subdirectory will be taken into account
      (by default use share/locale/).
-     If ALL is specified, the pot file is processed when building the all traget.
+     If ALL is specified, the pot file is processed when building the all target.
      It creates a custom target "potfile".
 
 GETTEXT_PROCESS_PO_FILES( <lang> [ALL] [INSTALL_DESTINATION <dir>]
@@ -51,7 +51,7 @@ PO_FILES <po1> <po2> ...  )
      If INSTALL_DESTINATION is given then automatically install rules will
      be created, the language subdirectory will be taken into account
      (by default use share/locale/).
-     If ALL is specified, the po files are processed when building the all traget.
+     If ALL is specified, the po files are processed when building the all target.
      It creates a custom target "pofiles".
 
 .. versionadded:: 3.2

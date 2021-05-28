@@ -24,6 +24,12 @@ The features known to this version of CMake are:
 ``c_std_11``
   Compiler mode is at least C 11.
 
+``c_std_17``
+  Compiler mode is at least C 17.
+
+``c_std_23``
+  Compiler mode is at least C 23.
+
 ``c_function_prototypes``
   Function prototypes, as defined in ``ISO/IEC 9899:1990``.
 

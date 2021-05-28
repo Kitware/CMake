@@ -39,7 +39,6 @@ public:
     NamelinkModeSkip
   };
   void SetNamelinkMode(NamelinkModeType mode) { this->NamelinkMode = mode; }
-  NamelinkModeType GetNamelinkMode() const { return this->NamelinkMode; }
 
   std::string GetInstallFilename(const std::string& config) const;
 
@@ -82,6 +81,7 @@ public:
     // Prefix for all files in To.
     std::string ToDir;
 
+    NamelinkModeType NamelinkMode = NamelinkModeNone;
     bool NoTweak = false;
     bool UseSourcePermissions = false;
     cmInstallType Type = cmInstallType();

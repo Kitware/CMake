@@ -1,7 +1,7 @@
 #
 # Wrapping
 #
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.12)
 project (CustomCommand)
 
 add_subdirectory(GeneratedHeader)
@@ -583,6 +583,6 @@ set_target_properties(mac_fw PROPERTIES
 add_custom_command(OUTPUT mac_fw.txt COMMAND ${CMAKE_COMMAND} -E touch mac_fw.txt DEPENDS mac_fw)
 add_custom_target(drive_mac_fw ALL DEPENDS mac_fw.txt)
 
-# Test empty COMMANDs are ommited
+# Test empty COMMANDs are omitted
 add_executable(empty_command empty_command.cxx)
 add_custom_command(TARGET empty_command POST_BUILD COMMAND $<0:date>)

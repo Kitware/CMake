@@ -43,4 +43,9 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES SunPro)
       target_link_libraries(hello PRIVATE sunquad)
     endif()
   endif()
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES Fujitsu)
+  # Fujitsu Fortran doesn't automatically link its runtime libraries into
+  # SOs
+  target_link_libraries(world PRIVATE fj90i fj90f fjsrcinfo)
+  target_link_libraries(hello PRIVATE fj90i fj90f fjsrcinfo)
 endif()

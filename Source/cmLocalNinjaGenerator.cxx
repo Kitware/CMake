@@ -39,7 +39,7 @@
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)
-  : cmLocalCommonGenerator(gg, mf, mf->GetState()->GetBinaryDirectory())
+  : cmLocalCommonGenerator(gg, mf, WorkDir::TopBin)
 {
 }
 
@@ -60,8 +60,8 @@ void cmLocalNinjaGenerator::Generate()
 {
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
-  this->HomeRelativeOutputPath = this->MaybeConvertToRelativePath(
-    this->GetBinaryDirectory(), this->GetCurrentBinaryDirectory());
+  this->HomeRelativeOutputPath =
+    this->MaybeRelativeToTopBinDir(this->GetCurrentBinaryDirectory());
   if (this->HomeRelativeOutputPath == ".") {
     this->HomeRelativeOutputPath.clear();
   }
@@ -97,9 +97,12 @@ void cmLocalNinjaGenerator::Generate()
       // contains any non-ASCII characters and dependency checking will fail.
       // As a workaround, leave the msvc_deps_prefix UTF-8 encoded even though
       // the rest of the file is ANSI encoded.
-      if (GetConsoleOutputCP() == CP_UTF8 && GetACP() != CP_UTF8) {
+      if (GetConsoleOutputCP() == CP_UTF8 && GetACP() != CP_UTF8 &&
+          this->GetGlobalGenerator()->GetMakefileEncoding() != codecvt::None) {
         this->GetRulesFileStream().WriteRaw(showIncludesPrefix);
       } else {
+        // Ninja 1.11 and above uses the UTF-8 code page if it's supported, so
+        // in that case we can write it normally without using raw bytes.
         this->GetRulesFileStream() << showIncludesPrefix;
       }
 #else
@@ -202,17 +205,12 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
 // Virtual protected methods.
 
 std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
-  std::string const& path, cmOutputConverter::OutputFormat format,
-  bool forceFullPaths)
+  std::string const& path, IncludePathStyle pathStyle,
+  cmOutputConverter::OutputFormat format)
 {
-  if (forceFullPaths) {
-    return this->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(path, this->GetCurrentBinaryDirectory()),
-      format);
-  }
-  return this->ConvertToOutputFormat(
-    this->MaybeConvertToRelativePath(this->GetBinaryDirectory(), path),
-    format);
+  // FIXME: Remove IncludePathStyle infrastructure.  It is no longer used.
+  static_cast<void>(pathStyle);
+  return this->ConvertToOutputFormat(path, format);
 }
 
 // Private methods.
@@ -261,6 +259,7 @@ void cmLocalNinjaGenerator::WriteBuildFileTop()
                                           this->GetConfigNames().front());
   }
   this->WriteNinjaFilesInclusionCommon(this->GetCommonFileStream());
+  this->WriteNinjaWorkDir(this->GetCommonFileStream());
 
   // For the rule file.
   this->WriteProjectHeader(this->GetRulesFileStream());
@@ -360,6 +359,17 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusionCommon(std::ostream& os)
   cmGlobalNinjaGenerator::WriteInclude(os, rulesFilePath,
                                        "Include rules file.");
   os << "\n";
+}
+
+void cmLocalNinjaGenerator::WriteNinjaWorkDir(std::ostream& os)
+{
+  cmGlobalNinjaGenerator::WriteDivider(os);
+  cmGlobalNinjaGenerator::WriteComment(
+    os, "Logical path to working directory; prefix for absolute paths.");
+  cmGlobalNinjaGenerator* ng = this->GetGlobalNinjaGenerator();
+  std::string ninja_workdir = this->GetBinaryDirectory();
+  ng->StripNinjaOutputPathPrefixAsSuffix(ninja_workdir); // Also appends '/'.
+  os << "cmake_ninja_workdir = " << ng->EncodePath(ninja_workdir) << "\n";
 }
 
 void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
@@ -636,16 +646,11 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       }
     }
 
-    cmNinjaDeps ninjaOutputs(outputs.size() + byproducts.size());
-    std::transform(outputs.begin(), outputs.end(), ninjaOutputs.begin(),
-                   gg->MapToNinjaPath());
-    std::transform(byproducts.begin(), byproducts.end(),
-                   ninjaOutputs.begin() + outputs.size(),
-                   gg->MapToNinjaPath());
+    cmGlobalNinjaGenerator::CCOutputs ccOutputs(gg);
+    ccOutputs.Add(outputs);
+    ccOutputs.Add(byproducts);
 
-    for (std::string const& ninjaOutput : ninjaOutputs) {
-      gg->SeenCustomCommandOutput(ninjaOutput);
-    }
+    std::string mainOutput = ccOutputs.ExplicitOuts[0];
 
     cmNinjaDeps ninjaDeps;
     this->AppendCustomCommandDeps(ccg, ninjaDeps, fileConfig);
@@ -655,13 +660,14 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 
     if (cmdLines.empty()) {
       cmNinjaBuild build("phony");
-      build.Comment = "Phony custom command for " + ninjaOutputs[0];
-      build.Outputs = std::move(ninjaOutputs);
+      build.Comment = cmStrCat("Phony custom command for ", mainOutput);
+      build.Outputs = std::move(ccOutputs.ExplicitOuts);
+      build.WorkDirOuts = std::move(ccOutputs.WorkDirOuts);
       build.ExplicitDeps = std::move(ninjaDeps);
       build.OrderOnlyDeps = orderOnlyDeps;
       gg->WriteBuild(this->GetImplFileStream(fileConfig), build);
     } else {
-      std::string customStep = cmSystemTools::GetFilenameName(ninjaOutputs[0]);
+      std::string customStep = cmSystemTools::GetFilenameName(mainOutput);
       if (this->GlobalGenerator->IsMultiConfig()) {
         customStep += '-';
         customStep += fileConfig;
@@ -671,9 +677,9 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       // Hash full path to make unique.
       customStep += '-';
       cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
-      customStep += hash.HashString(ninjaOutputs[0]).substr(0, 7);
+      customStep += hash.HashString(mainOutput).substr(0, 7);
 
-      std::string depfile = cc->GetDepfile();
+      std::string depfile = ccg.GetDepfile();
       if (!depfile.empty()) {
         switch (cc->GetCMP0116Status()) {
           case cmPolicies::WARN:
@@ -699,13 +705,14 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
         }
       }
 
+      std::string comment = cmStrCat("Custom command for ", mainOutput);
       gg->WriteCustomCommandBuild(
         this->BuildCommandLine(cmdLines, ccg.GetOutputConfig(), fileConfig,
                                customStep),
-        this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
-        depfile, cc->GetJobPool(), cc->GetUsesTerminal(),
-        /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, fileConfig,
-        ninjaDeps, orderOnlyDeps);
+        this->ConstructComment(ccg), comment, depfile, cc->GetJobPool(),
+        cc->GetUsesTerminal(),
+        /*restat*/ !symbolic || !byproducts.empty(), fileConfig,
+        std::move(ccOutputs), std::move(ninjaDeps), std::move(orderOnlyDeps));
     }
   }
 }
@@ -878,8 +885,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   if (!outputs.empty()) {
     output = outputs[0];
     if (ccg.GetWorkingDirectory().empty()) {
-      output = this->MaybeConvertToRelativePath(
-        this->GetCurrentBinaryDirectory(), output);
+      output = this->MaybeRelativeToCurBinDir(output);
     }
     output = this->ConvertToOutputFormat(output, cmOutputConverter::SHELL);
   }

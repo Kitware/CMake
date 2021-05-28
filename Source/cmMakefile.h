@@ -486,6 +486,7 @@ public:
   const std::string& GetSafeDefinition(const std::string&) const;
   const std::string& GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
+  bool IsNormalDefinitionSet(const std::string&) const;
   bool GetDefExpandList(const std::string& name, std::vector<std::string>& out,
                         bool emptyArgs = false) const;
   /**
@@ -992,7 +993,7 @@ private:
 
   struct DeferCommand
   {
-    // Id is empty for an already-executed or cancelled operation.
+    // Id is empty for an already-executed or canceled operation.
     std::string Id;
     std::string FilePath;
     cmListFileFunction Command;

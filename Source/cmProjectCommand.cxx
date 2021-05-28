@@ -59,6 +59,11 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 
   mf.AddDefinition("PROJECT_NAME", projectName);
 
+  mf.AddDefinitionBool("PROJECT_IS_TOP_LEVEL", mf.IsRootMakefile());
+  mf.AddCacheDefinition(projectName + "_IS_TOP_LEVEL",
+                        mf.IsRootMakefile() ? "ON" : "OFF",
+                        "Value Computed by CMake", cmStateEnums::STATIC);
+
   // Set the CMAKE_PROJECT_NAME variable to be the highest-level
   // project name in the tree. If there are two project commands
   // in the same CMakeLists.txt file, and it is the top level

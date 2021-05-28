@@ -1,0 +1,14 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "SubConditionNull",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "condition": {
+        "type": "not",
+        "condition": null
+      }
+    }
+  ]
+}

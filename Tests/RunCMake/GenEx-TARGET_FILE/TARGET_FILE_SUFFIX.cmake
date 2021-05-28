@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 
 enable_language (C)
 
-set (win_platforms Windows CYGWIN)
+set (win_platforms Windows CYGWIN MSYS)
 
 set (GENERATE_CONTENT [[
 macro (CHECK_VALUE test_msg value expected)

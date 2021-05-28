@@ -46,7 +46,7 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
   std::string const& component, MessageLevel message, bool exclude_from_all,
   bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all, std::move(backtrace))
+                       exclude_from_all, false, std::move(backtrace))
   , TargetName(std::move(targetName))
   , Target(nullptr)
   , FilePermissions(std::move(file_permissions))
@@ -338,6 +338,7 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
 
       // Add the names based on the current namelink mode.
       if (haveNamelink) {
+        files.NamelinkMode = this->NamelinkMode;
         // With a namelink we need to check the mode.
         if (this->NamelinkMode == NamelinkModeOnly) {
           // Install the namelink only.

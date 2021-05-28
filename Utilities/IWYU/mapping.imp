@@ -21,6 +21,7 @@
   { include: [ "<wctype.h>", public, "<cwctype>", public ] },
 
   # HACK: check whether this can be removed with next iwyu release.
+  { include: [ "<bits/cxxabi_forced.h>", private, "<ctime>", public ] },
   { include: [ "<bits/shared_ptr.h>", private, "<memory>", public ] },
   { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
   { include: [ "<bits/refwrap.h>", private, "<functional>", public ] },
@@ -96,6 +97,7 @@
   { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<1, 1> > >::type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<60, 1> > >::type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<1, 1000> > >::type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "__gnu_cxx::__enable_if<true, bool>::__type", private, "\"cmConfigure.h\"", public ] },
 
   # Wrappers for 3rd-party libraries
   { include: [ "@<.*curl/curlver.h>", private, "<cm3p/curl/curl.h>", public ] },
