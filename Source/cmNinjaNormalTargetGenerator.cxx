@@ -368,7 +368,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     vars.CMTargetType = cmState::GetTargetTypeName(targetType).c_str();
 
     std::string lang = this->TargetLinkLanguage(config);
-    vars.Language = config.c_str();
+    vars.Language = lang.c_str();
     vars.AIXExports = "$AIX_EXPORTS";
 
     if (this->TargetLinkLanguage(config) == "Swift") {
@@ -454,6 +454,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     if (targetType != cmStateEnums::EXECUTABLE) {
       langFlags += "$LANGUAGE_COMPILE_FLAGS $ARCH_FLAGS";
       vars.LanguageCompileFlags = langFlags.c_str();
+    }
+
+    std::string linkerLauncher = this->GetLinkerLauncher(config);
+    if (cmNonempty(linkerLauncher)) {
+      vars.Launcher = linkerLauncher.c_str();
     }
 
     std::string launcher;

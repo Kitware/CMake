@@ -354,11 +354,13 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("C_CPPLINT");
     initProp("C_CPPCHECK");
     initProp("C_INCLUDE_WHAT_YOU_USE");
+    initProp("C_LINKER_LAUNCHER");
     initProp("LINK_WHAT_YOU_USE");
     initProp("CXX_CLANG_TIDY");
     initProp("CXX_CPPLINT");
     initProp("CXX_CPPCHECK");
     initProp("CXX_INCLUDE_WHAT_YOU_USE");
+    initProp("CXX_LINKER_LAUNCHER");
     initProp("CUDA_SEPARABLE_COMPILATION");
     initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
     initProp("CUDA_RUNTIME_LIBRARY");
@@ -374,7 +376,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("LINK_SEARCH_START_STATIC");
     initProp("LINK_SEARCH_END_STATIC");
     initProp("OBJC_CLANG_TIDY");
+    initProp("OBJC_LINKER_LAUNCHER");
     initProp("OBJCXX_CLANG_TIDY");
+    initProp("OBJCXX_LINKER_LAUNCHER");
     initProp("Swift_LANGUAGE_VERSION");
     initProp("Swift_MODULE_DIRECTORY");
     initProp("VS_JUST_MY_CODE_DEBUGGING");

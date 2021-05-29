@@ -804,6 +804,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
     vars.LanguageCompileFlags = langFlags.c_str();
 
+    std::string linkerLauncher =
+      this->GetLinkerLauncher(this->GetConfigName());
+    if (cmNonempty(linkerLauncher)) {
+      vars.Launcher = linkerLauncher.c_str();
+    }
+
     std::string launcher;
     cmProp val = this->LocalGenerator->GetRuleLauncher(this->GeneratorTarget,
                                                        "RULE_LAUNCH_LINK");

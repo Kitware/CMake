@@ -64,6 +64,8 @@ protected:
     const std::string& config) const;
   std::string ComputeTargetCompilePDB(const std::string& config) const;
 
+  std::string GetLinkerLauncher(const std::string& config);
+
 private:
   using ByLanguageMap = std::map<std::string, std::string>;
   struct ByConfig

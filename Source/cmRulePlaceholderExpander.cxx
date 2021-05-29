@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "cmOutputConverter.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmRulePlaceholderExpander::cmRulePlaceholderExpander(
@@ -280,6 +281,13 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       this->VariableMappings["CMAKE_" + compIt->second +
                              "_COMPILE_OPTIONS_SYSROOT"];
 
+    if (compIt->second == replaceValues.Language && replaceValues.Launcher) {
+      // Add launcher as part of expansion so that it always appears
+      // immediately before the command itself, regardless of whether the
+      // overall rule template contains other content at the front.
+      ret = cmStrCat(replaceValues.Launcher, " ", ret);
+    }
+
     // if there are required arguments to the compiler add it
     // to the compiler string
     if (!compilerArg1.empty()) {
@@ -317,7 +325,17 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   auto mapIt = this->VariableMappings.find(variable);
   if (mapIt != this->VariableMappings.end()) {
     if (variable.find("_FLAG") == std::string::npos) {
-      return outputConverter->ConvertToOutputForExisting(mapIt->second);
+      std::string ret =
+        outputConverter->ConvertToOutputForExisting(mapIt->second);
+
+      if (replaceValues.Launcher && variable == "CMAKE_LINKER") {
+        // Add launcher as part of expansion so that it always appears
+        // immediately before the command itself, regardless of whether the
+        // overall rule template contains other content at the front.
+        ret = cmStrCat(replaceValues.Launcher, " ", ret);
+      }
+
+      return ret;
     }
     return mapIt->second;
   }

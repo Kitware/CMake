@@ -37,6 +37,7 @@ Environment Variables that Control the Build
    /envvar/CMAKE_GENERATOR_PLATFORM
    /envvar/CMAKE_GENERATOR_TOOLSET
    /envvar/CMAKE_LANG_COMPILER_LAUNCHER
+   /envvar/CMAKE_LANG_LINKER_LAUNCHER
    /envvar/CMAKE_MSVCIDE_RUN_PATH
    /envvar/CMAKE_NO_VERBOSE
    /envvar/CMAKE_OSX_ARCHITECTURES
