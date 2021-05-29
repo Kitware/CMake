@@ -382,7 +382,10 @@ class cmMakefile;
          21, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0127,                                                     \
          "cmake_dependent_option() supports full Condition Syntax.", 3, 22,   \
-         0, cmPolicies::WARN)
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0128,                                                     \
+         "Selection of language standard and extension flags improved.", 3,   \
+         22, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
