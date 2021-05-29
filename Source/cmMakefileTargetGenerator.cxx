@@ -909,8 +909,11 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
                                                    compileCommand, vars);
       std::string workingDirectory =
         this->LocalGenerator->GetCurrentBinaryDirectory();
-      compileCommand.replace(compileCommand.find(langFlags), langFlags.size(),
-                             this->GetFlags(lang, this->GetConfigName()));
+      std::string::size_type lfPos = compileCommand.find(langFlags);
+      if (lfPos != std::string::npos) {
+        compileCommand.replace(lfPos, langFlags.size(),
+                               this->GetFlags(lang, this->GetConfigName()));
+      }
       std::string langDefines = std::string("$(") + lang + "_DEFINES)";
       std::string::size_type ldPos = compileCommand.find(langDefines);
       if (ldPos != std::string::npos) {
