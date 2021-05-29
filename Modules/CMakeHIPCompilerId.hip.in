@@ -32,6 +32,14 @@ const char* info_language_standard_default = "INFO" ":" "standard_default["
 #endif
 "]";
 
+const char* info_language_extensions_default = "INFO" ":" "extensions_default["
+#if (defined(__clang__) || defined(__GNUC__)) && !defined(__STRICT_ANSI__)
+  "ON"
+#else
+  "OFF"
+#endif
+"]";
+
 /*--------------------------------------------------------------------------*/
 
 int main(int argc, char* argv[])
@@ -49,6 +57,7 @@ int main(int argc, char* argv[])
   require += info_simulate_version[argc];
 #endif
   require += info_language_standard_default[argc];
+  require += info_language_extensions_default[argc];
   (void)argv;
   return require;
 }
