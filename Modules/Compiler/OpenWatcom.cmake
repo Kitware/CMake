@@ -7,6 +7,7 @@ include_guard()
 set(CMAKE_LIBRARY_PATH_FLAG "libpath ")
 set(CMAKE_LINK_LIBRARY_FLAG "library ")
 set(CMAKE_LINK_LIBRARY_FILE_FLAG "library ")
+set(CMAKE_LINK_OBJECT_FILE_FLAG "file ")
 
 if(CMAKE_VERBOSE_MAKEFILE)
   set(CMAKE_WCL_QUIET)

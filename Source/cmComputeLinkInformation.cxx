@@ -309,6 +309,13 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->LibLinkSuffix =
       this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
   }
+  if (cmProp flag = this->Makefile->GetDefinition(
+        "CMAKE_" + this->LinkLanguage + "_LINK_OBJECT_FILE_FLAG")) {
+    this->ObjLinkFileFlag = *flag;
+  } else {
+    this->ObjLinkFileFlag =
+      this->Makefile->GetSafeDefinition("CMAKE_LINK_OBJECT_FILE_FLAG");
+  }
 
   // Get options needed to specify RPATHs.
   this->RuntimeUseChrpath = false;
@@ -514,7 +521,8 @@ bool cmComputeLinkInformation::Compute()
     if (linkEntry.IsSharedDep) {
       this->AddSharedDepItem(linkEntry.Item, linkEntry.Target);
     } else {
-      this->AddItem(linkEntry.Item, linkEntry.Target);
+      this->AddItem(linkEntry.Item, linkEntry.Target,
+                    linkEntry.IsObject ? ItemIsObject::Yes : ItemIsObject::No);
     }
   }
 
@@ -634,7 +642,8 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
 }
 
 void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
-                                       cmGeneratorTarget const* tgt)
+                                       cmGeneratorTarget const* tgt,
+                                       ItemIsObject isObject)
 {
   // Compute the proper name to use to link this library.
   const std::string& config = this->Config;
@@ -660,13 +669,14 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
       std::string exe = tgt->GetFullPath(config, artifact, true);
       linkItem += exe;
       this->Items.emplace_back(BT<std::string>(linkItem, item.Backtrace),
-                               ItemIsPath::Yes, tgt);
+                               ItemIsPath::Yes, ItemIsObject::No, tgt);
       this->Depends.push_back(std::move(exe));
     } else if (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Add the interface library as an item so it can be considered as part
       // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
       // this for the actual link line.
-      this->Items.emplace_back(std::string(), ItemIsPath::No, tgt);
+      this->Items.emplace_back(std::string(), ItemIsPath::No, ItemIsObject::No,
+                               tgt);
 
       // Also add the item the interface specifies to be used in its place.
       std::string const& libName = tgt->GetImportedLibName(config);
@@ -719,7 +729,7 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
       } else {
         // Use the full path given to the library file.
         this->Depends.push_back(item.Value);
-        this->AddFullItem(item);
+        this->AddFullItem(item, isObject);
         this->AddLibraryRuntimeInfo(item.Value);
       }
     } else {
@@ -1084,10 +1094,11 @@ void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
   }
 
   // Now add the full path to the library.
-  this->Items.emplace_back(item, ItemIsPath::Yes, target);
+  this->Items.emplace_back(item, ItemIsPath::Yes, ItemIsObject::No, target);
 }
 
-void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item)
+void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item,
+                                           ItemIsObject isObject)
 {
   // Check for the implicit link directory special case.
   if (this->CheckImplicitDirItem(item.Value)) {
@@ -1138,7 +1149,7 @@ void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item)
   }
 
   // Now add the full path to the library.
-  this->Items.emplace_back(item, ItemIsPath::Yes);
+  this->Items.emplace_back(item, ItemIsPath::Yes, isObject);
 }
 
 bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)

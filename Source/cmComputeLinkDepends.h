@@ -42,6 +42,7 @@ public:
     cmGeneratorTarget const* Target = nullptr;
     bool IsSharedDep = false;
     bool IsFlag = false;
+    bool IsObject = false;
   };
 
   using EntryVector = std::vector<LinkEntry>;
