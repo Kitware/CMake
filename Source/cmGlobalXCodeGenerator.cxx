@@ -3454,7 +3454,9 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
              libItem.Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
              libItem.Target->GetType() == cmStateEnums::MODULE_LIBRARY ||
              libItem.Target->GetType() == cmStateEnums::UNKNOWN_LIBRARY)) ||
-           (!libItem.Target && libItem.IsPath && forceLinkPhase))) {
+           (!libItem.Target &&
+            libItem.IsPath == cmComputeLinkInformation::ItemIsPath::Yes &&
+            forceLinkPhase))) {
         std::string libName;
         bool canUseLinkPhase = true;
         if (libItem.Target) {
@@ -3565,7 +3567,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     auto* libTarget = FindXCodeTarget(libItem->Target);
     cmXCodeObject* buildFile;
     if (!libTarget) {
-      if (libItem->IsPath) {
+      if (libItem->IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
         // Get or create a direct file ref in the root project
         auto cleanPath = libItem->Value.Value;
         if (cmSystemTools::FileIsFullPath(cleanPath)) {
@@ -3724,7 +3726,7 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       BuildObjectListOrString libPaths(this, true);
       for (auto const& libItem : configItemMap[configName]) {
         auto const& libName = *libItem;
-        if (libName.IsPath) {
+        if (libName.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
           auto cleanPath = libName.Value.Value;
           if (cmSystemTools::FileIsFullPath(cleanPath)) {
             cleanPath = cmSystemTools::CollapseFullPath(cleanPath);

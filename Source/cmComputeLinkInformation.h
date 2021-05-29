@@ -35,17 +35,24 @@ public:
   ~cmComputeLinkInformation();
   bool Compute();
 
+  enum class ItemIsPath
+  {
+    No,
+    Yes,
+  };
+
   struct Item
   {
     Item() = default;
-    Item(BT<std::string> v, bool p, cmGeneratorTarget const* target = nullptr)
+    Item(BT<std::string> v, ItemIsPath isPath,
+         cmGeneratorTarget const* target = nullptr)
       : Value(std::move(v))
-      , IsPath(p)
+      , IsPath(isPath)
       , Target(target)
     {
     }
     BT<std::string> Value;
-    bool IsPath = true;
+    ItemIsPath IsPath = ItemIsPath::Yes;
     cmGeneratorTarget const* Target = nullptr;
   };
   using ItemVector = std::vector<Item>;
