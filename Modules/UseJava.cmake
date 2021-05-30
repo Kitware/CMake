@@ -34,9 +34,12 @@ the jar file.  Source files can be java files or listing files
 (prefixed by ``@``).  If only resource files are given then just a jar file
 is created.
 
-The ``RESOURCES`` parameter adds the named ``<resource>`` files to the jar
-by stripping the source file path and placing the file beneath ``<ns>``
-within the jar. For example::
+.. versionadded:: 3.21
+  The ``RESOURCES`` parameter adds the named ``<resource>`` files to the jar
+  by stripping the source file path and placing the file beneath ``<ns>``
+  within the jar.
+
+For example::
 
   RESOURCES NAMESPACE "/com/my/namespace" "a/path/to/resource.txt"
 
@@ -49,7 +52,8 @@ paths must be relative to ``CMAKE_CURRENT_SOURCE_DIR``.  Adding resources
 without using the ``RESOURCES`` parameter in out of source builds will
 almost certainly result in confusion.
 
-.. note:: SOURCES
+.. note::
+
   Adding resources via the ``SOURCES`` parameter relies upon a hard-coded
   list of file extensions which are tested to determine whether they compile
   (e.g. File.java). ``SOURCES`` files which match the extensions are compiled.
