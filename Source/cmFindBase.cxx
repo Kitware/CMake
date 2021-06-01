@@ -39,12 +39,15 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 
   // copy argsIn into args so it can be modified,
   // in the process extract the DOC "documentation"
+  // and handle options NO_CACHE and ENV
   size_t size = argsIn.size();
   std::vector<std::string> args;
   bool foundDoc = false;
   for (unsigned int j = 0; j < size; ++j) {
     if (foundDoc || argsIn[j] != "DOC") {
-      if (argsIn[j] == "ENV") {
+      if (argsIn[j] == "NO_CACHE") {
+        this->StoreResultInCache = false;
+      } else if (argsIn[j] == "ENV") {
         if (j + 1 < size) {
           j++;
           cmSystemTools::GetPath(args, argsIn[j].c_str());
@@ -68,11 +71,10 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     return false;
   }
   this->VariableName = args[0];
-  if (this->CheckForVariableInCache()) {
-    this->AlreadyInCache = true;
+  if (this->CheckForVariableDefined()) {
+    this->AlreadyDefined = true;
     return true;
   }
-  this->AlreadyInCache = false;
 
   // Find what search path locations have been enabled/disable
   this->SelectDefaultSearchModes();
@@ -297,12 +299,12 @@ void cmFindBase::FillUserGuessPath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
-bool cmFindBase::CheckForVariableInCache()
+bool cmFindBase::CheckForVariableDefined()
 {
-  if (cmProp cacheValue = this->Makefile->GetDefinition(this->VariableName)) {
+  if (cmProp value = this->Makefile->GetDefinition(this->VariableName)) {
     cmState* state = this->Makefile->GetState();
     cmProp cacheEntry = state->GetCacheEntryValue(this->VariableName);
-    bool found = !cmIsNOTFOUND(*cacheValue);
+    bool found = !cmIsNOTFOUND(*value);
     bool cached = cacheEntry != nullptr;
     auto cacheType = cached ? state->GetCacheEntryType(this->VariableName)
                             : cmStateEnums::UNINITIALIZED;
@@ -350,41 +352,53 @@ void cmFindBase::NormalizeFindResult()
       }
     }
 
-    // If the user specifies the entry on the command line without a
-    // type we should add the type and docstring but keep the original
-    // value.
-    if (value != *existingValue || this->AlreadyInCacheWithoutMetaInfo) {
-      this->Makefile->GetCMakeInstance()->AddCacheEntry(
-        this->VariableName, value.c_str(), this->VariableDocumentation.c_str(),
-        this->VariableType);
-      if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
-          cmPolicies::NEW) {
-        if (this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
-          this->Makefile->AddDefinition(this->VariableName, value);
+    if (this->StoreResultInCache) {
+      // If the user specifies the entry on the command line without a
+      // type we should add the type and docstring but keep the original
+      // value.
+      if (value != *existingValue || this->AlreadyInCacheWithoutMetaInfo) {
+        this->Makefile->GetCMakeInstance()->AddCacheEntry(
+          this->VariableName, value.c_str(),
+          this->VariableDocumentation.c_str(), this->VariableType);
+        if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
+            cmPolicies::NEW) {
+          if (this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
+            this->Makefile->AddDefinition(this->VariableName, value);
+          }
+        } else {
+          // if there was a definition then remove it
+          // This is required to ensure same behavior as
+          // cmMakefile::AddCacheDefinition.
+          this->Makefile->RemoveDefinition(this->VariableName);
         }
-      } else {
-        // if there was a definition then remove it
-        // This is required to ensure same behavior as
-        // cmMakefile::AddCacheDefinition.
-        this->Makefile->RemoveDefinition(this->VariableName);
       }
+    } else {
+      // ensure a normal variable is defined.
+      this->Makefile->AddDefinition(this->VariableName, value);
     }
   } else {
     // If the user specifies the entry on the command line without a
     // type we should add the type and docstring but keep the original
     // value.
-    if (this->AlreadyInCacheWithoutMetaInfo) {
-      this->Makefile->AddCacheDefinition(this->VariableName, "",
-                                         this->VariableDocumentation.c_str(),
-                                         this->VariableType);
-      if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
-            cmPolicies::NEW &&
-          this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
-        this->Makefile->AddDefinition(
-          this->VariableName,
-          *this->Makefile->GetCMakeInstance()->GetCacheDefinition(
-            this->VariableName));
+    if (this->StoreResultInCache) {
+      if (this->AlreadyInCacheWithoutMetaInfo) {
+        this->Makefile->AddCacheDefinition(this->VariableName, "",
+                                           this->VariableDocumentation.c_str(),
+                                           this->VariableType);
+        if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
+              cmPolicies::NEW &&
+            this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
+          this->Makefile->AddDefinition(
+            this->VariableName,
+            *this->Makefile->GetCMakeInstance()->GetCacheDefinition(
+              this->VariableName));
+        }
       }
+    } else {
+      // ensure a normal variable is defined.
+      this->Makefile->AddDefinition(
+        this->VariableName,
+        this->Makefile->GetSafeDefinition(this->VariableName));
     }
   }
 }
@@ -397,23 +411,32 @@ void cmFindBase::StoreFindResult(const std::string& value)
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) == cmPolicies::NEW;
 
   if (!value.empty()) {
-    this->Makefile->AddCacheDefinition(this->VariableName, value,
+    if (this->StoreResultInCache) {
+      this->Makefile->AddCacheDefinition(this->VariableName, value,
+                                         this->VariableDocumentation.c_str(),
+                                         this->VariableType, force);
+      if (updateNormalVariable &&
+          this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
+        this->Makefile->AddDefinition(this->VariableName, value);
+      }
+    } else {
+      this->Makefile->AddDefinition(this->VariableName, value);
+    }
+
+    return;
+  }
+
+  auto notFound = cmStrCat(this->VariableName, "-NOTFOUND");
+  if (this->StoreResultInCache) {
+    this->Makefile->AddCacheDefinition(this->VariableName, notFound,
                                        this->VariableDocumentation.c_str(),
                                        this->VariableType, force);
     if (updateNormalVariable &&
         this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
-      this->Makefile->AddDefinition(this->VariableName, value);
+      this->Makefile->AddDefinition(this->VariableName, notFound);
     }
-    return;
-  }
-
-  this->Makefile->AddCacheDefinition(
-    this->VariableName, cmStrCat(this->VariableName, "-NOTFOUND"),
-    this->VariableDocumentation.c_str(), this->VariableType, force);
-  if (updateNormalVariable &&
-      this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
-    this->Makefile->AddDefinition(this->VariableName,
-                                  cmStrCat(this->VariableName, "-NOTFOUND"));
+  } else {
+    this->Makefile->AddDefinition(this->VariableName, notFound);
   }
 
   if (this->Required) {

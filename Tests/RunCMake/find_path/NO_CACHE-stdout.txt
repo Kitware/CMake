@@ -1,0 +1,18 @@
+-- PATH_exists='.+/Tests/RunCMake/find_path/include/'
+-- PATH_exists='PATH_doNotExists-NOTFOUND'
+--[ ]+
+-- Policy CMP0125 = OLD
+-- CACHED PATH_cache='unknown'
+-- PATH_cache='unknown'
+-- CACHED PATH_cache='include'
+-- PATH_cache='include'
+-- CACHED PATH_cache='include'
+-- PATH_cache='include'
+--[ ]+
+-- Policy CMP0125 = NEW
+-- CACHED PATH_cache='unknown'
+-- PATH_cache='unknown'
+-- CACHED PATH_cache='include'
+-- PATH_cache='include'
+-- CACHED PATH_cache='include'
+-- PATH_cache='.+/Tests/RunCMake/find_path/NO_CACHE-build/include'
