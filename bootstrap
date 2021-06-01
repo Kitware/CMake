@@ -387,6 +387,7 @@ CMAKE_CXX_SOURCES="\
   cmInstallFilesCommand \
   cmInstallFilesGenerator \
   cmInstallGenerator \
+  cmInstallImportedRuntimeArtifactsGenerator \
   cmInstallScriptGenerator \
   cmInstallSubdirectoryGenerator \
   cmInstallTargetGenerator \

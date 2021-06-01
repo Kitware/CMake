@@ -29,6 +29,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmInstallImportedRuntimeArtifactsGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallSubdirectoryGenerator.h"
 #include "cmInstallTargetGenerator.h"
@@ -1008,6 +1009,15 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
       installer["type"] = "script";
       installer["scriptFile"] = RelativeIfUnder(
         this->TopSource, installScript->GetScript(this->Config));
+    }
+  } else if (auto* installImportedRuntimeArtifacts =
+               dynamic_cast<cmInstallImportedRuntimeArtifactsGenerator*>(
+                 gen)) {
+    installer["type"] = "importedRuntimeArtifacts";
+    installer["destination"] =
+      installImportedRuntimeArtifacts->GetDestination(this->Config);
+    if (installImportedRuntimeArtifacts->GetOptional()) {
+      installer["isOptional"] = true;
     }
   }
 

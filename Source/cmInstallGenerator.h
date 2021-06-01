@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -53,7 +54,7 @@ public:
 
   /** Get the install destination as it should appear in the
       installation script.  */
-  std::string ConvertToAbsoluteDestination(std::string const& dest) const;
+  static std::string ConvertToAbsoluteDestination(std::string const& dest);
 
   /** Test if this generator installs something for a given configuration.  */
   bool InstallsForConfig(const std::string& config);
@@ -70,11 +71,24 @@ public:
 
   cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
 
+  static std::string GetDestDirPath(std::string const& file);
+
 protected:
   void GenerateScript(std::ostream& os) override;
 
   std::string CreateComponentTest(const std::string& component,
                                   bool exclude_from_all);
+
+  using TweakMethod =
+    std::function<void(std::ostream& os, Indent indent,
+                       const std::string& config, const std::string& file)>;
+  static void AddTweak(std::ostream& os, Indent indent,
+                       const std::string& config, std::string const& file,
+                       const TweakMethod& tweak);
+  static void AddTweak(std::ostream& os, Indent indent,
+                       const std::string& config, std::string const& dir,
+                       std::vector<std::string> const& files,
+                       const TweakMethod& tweak);
 
   // Information shared by most generator types.
   std::string const Destination;

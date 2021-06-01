@@ -644,7 +644,7 @@ def gen_check_directories(c, g):
 
     if sys.platform not in ("win32", "cygwin", "msys"):
         for e in expected:
-            e["installers"] = list(filter(lambda i: "_dllExtra" not in i or not i["_dllExtra"], e["installers"]))
+            e["installers"] = list(filter(lambda i: not i.get("_dllExtra", False), e["installers"]))
             if "aix" not in sys.platform:
                 for i in e["installers"]:
                     if "pathsNamelink" in i:
