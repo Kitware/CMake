@@ -263,6 +263,12 @@ cmComputeLinkDepends::Compute()
       this->FinalLinkEntries.push_back(e);
     }
   }
+  // Place explicitly linked object files in the front.  The linker will
+  // always use them anyway, and they may depend on symbols from libraries.
+  // Append in reverse order since we reverse the final order below.
+  for (int i : cmReverseRange(this->ObjectEntries)) {
+    this->FinalLinkEntries.emplace_back(this->EntryList[i]);
+  }
   // Reverse the resulting order since we iterated in reverse.
   std::reverse(this->FinalLinkEntries.begin(), this->FinalLinkEntries.end());
 
@@ -328,6 +334,27 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   return index;
 }
 
+void cmComputeLinkDepends::AddLinkObject(cmLinkItem const& item)
+{
+  // Check if the item entry has already been added.
+  auto lei = this->LinkEntryIndex.find(item);
+  if (lei != this->LinkEntryIndex.end()) {
+    return;
+  }
+
+  // Allocate a spot for the item entry.
+  lei = this->AllocateLinkEntry(item);
+
+  // Initialize the item entry.
+  int index = lei->second;
+  LinkEntry& entry = this->EntryList[index];
+  entry.Item = BT<std::string>(item.AsStr(), item.Backtrace);
+  entry.IsObject = true;
+
+  // Record explicitly linked object files separately.
+  this->ObjectEntries.emplace_back(index);
+}
+
 void cmComputeLinkDepends::FollowLinkEntry(BFSEntry qe)
 {
   // Get this entry representation.
@@ -343,6 +370,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry qe)
         entry.Target->GetType() == cmStateEnums::INTERFACE_LIBRARY;
       // This target provides its own link interface information.
       this->AddLinkEntries(depender_index, iface->Libraries);
+      this->AddLinkObjects(iface->Objects);
 
       if (isIface) {
         return;
@@ -487,6 +515,7 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
   cmLinkImplementation const* impl =
     this->Target->GetLinkImplementation(this->Config);
   this->AddLinkEntries(-1, impl->Libraries);
+  this->AddLinkObjects(impl->Objects);
   for (cmLinkItem const& wi : impl->WrongConfigLibraries) {
     this->CheckWrongConfigItem(wi);
   }
@@ -543,6 +572,13 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
   // Store the inferred dependency sets discovered for this list.
   for (auto const& dependSet : dependSets) {
     this->InferredDependSets[dependSet.first].push_back(dependSet.second);
+  }
+}
+
+void cmComputeLinkDepends::AddLinkObjects(std::vector<cmLinkItem> const& objs)
+{
+  for (cmLinkItem const& obj : objs) {
+    this->AddLinkObject(obj);
   }
 }
 

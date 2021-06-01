@@ -3391,7 +3391,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
         }
       }
 
-      if (l.IsPath) {
+      if (l.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
         std::string path =
           this->LocalGenerator->MaybeRelativeToCurBinDir(l.Value.Value);
         ConvertToWindowsSlash(path);
@@ -3945,7 +3945,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLibOptions(
   using ItemVector = cmComputeLinkInformation::ItemVector;
   const ItemVector& libs = cli.GetItems();
   for (cmComputeLinkInformation::Item const& l : libs) {
-    if (l.IsPath && cmVS10IsTargetsFile(l.Value.Value)) {
+    if (l.IsPath == cmComputeLinkInformation::ItemIsPath::Yes &&
+        cmVS10IsTargetsFile(l.Value.Value)) {
       std::string path =
         this->LocalGenerator->MaybeRelativeToCurBinDir(l.Value.Value);
       ConvertToWindowsSlash(path);
@@ -4028,7 +4029,7 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
       }
     }
 
-    if (l.IsPath) {
+    if (l.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
       std::string path =
         this->LocalGenerator->MaybeRelativeToCurBinDir(l.Value.Value);
       ConvertToWindowsSlash(path);

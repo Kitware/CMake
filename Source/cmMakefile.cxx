@@ -3454,7 +3454,8 @@ void cmMakefile::CreateGeneratedOutputs(
 void cmMakefile::AddTargetObject(std::string const& tgtName,
                                  std::string const& objFile)
 {
-  cmSourceFile* sf = this->GetOrCreateSource(objFile, true);
+  cmSourceFile* sf =
+    this->GetOrCreateSource(objFile, true, cmSourceFileLocationKind::Known);
   sf->SetObjectLibrary(tgtName);
   sf->SetProperty("EXTERNAL_OBJECT", "1");
 #if !defined(CMAKE_BOOTSTRAP)

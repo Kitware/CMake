@@ -35,17 +35,33 @@ public:
   ~cmComputeLinkInformation();
   bool Compute();
 
+  enum class ItemIsPath
+  {
+    No,
+    Yes,
+  };
+
+  enum class ItemIsObject
+  {
+    No,
+    Yes,
+  };
+
   struct Item
   {
     Item() = default;
-    Item(BT<std::string> v, bool p, cmGeneratorTarget const* target = nullptr)
+    Item(BT<std::string> v, ItemIsPath isPath,
+         ItemIsObject isObject = ItemIsObject::No,
+         cmGeneratorTarget const* target = nullptr)
       : Value(std::move(v))
-      , IsPath(p)
+      , IsPath(isPath)
+      , IsObject(isObject)
       , Target(target)
     {
     }
     BT<std::string> Value;
-    bool IsPath = true;
+    ItemIsPath IsPath = ItemIsPath::Yes;
+    ItemIsObject IsObject = ItemIsObject::No;
     cmGeneratorTarget const* Target = nullptr;
   };
   using ItemVector = std::vector<Item>;
@@ -74,6 +90,11 @@ public:
     return this->LibLinkFileFlag;
   }
 
+  std::string const& GetObjLinkFileFlag() const
+  {
+    return this->ObjLinkFileFlag;
+  }
+
   std::string const& GetRPathLinkFlag() const { return this->RPathLinkFlag; }
   std::string GetRPathLinkString() const;
 
@@ -82,7 +103,8 @@ public:
   const cmGeneratorTarget* GetTarget() { return this->Target; }
 
 private:
-  void AddItem(BT<std::string> const& item, const cmGeneratorTarget* tgt);
+  void AddItem(BT<std::string> const& item, const cmGeneratorTarget* tgt,
+               ItemIsObject isObject = ItemIsObject::No);
   void AddSharedDepItem(BT<std::string> const& item,
                         cmGeneratorTarget const* tgt);
   void AddRuntimeDLL(cmGeneratorTarget const* tgt);
@@ -118,6 +140,7 @@ private:
   const char* LoaderFlag;
   std::string LibLinkFlag;
   std::string LibLinkFileFlag;
+  std::string ObjLinkFileFlag;
   std::string LibLinkSuffix;
   std::string RuntimeFlag;
   std::string RuntimeSep;
@@ -159,7 +182,7 @@ private:
   // Handling of link items.
   void AddTargetItem(BT<std::string> const& item,
                      const cmGeneratorTarget* target);
-  void AddFullItem(BT<std::string> const& item);
+  void AddFullItem(BT<std::string> const& item, ItemIsObject isObject);
   bool CheckImplicitDirItem(std::string const& item);
   void AddUserItem(BT<std::string> const& item, bool pathNotKnown);
   void AddFrameworkItem(std::string const& item);

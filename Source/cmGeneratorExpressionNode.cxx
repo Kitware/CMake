@@ -1681,7 +1681,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
 
     // Create the cmSourceFile instances in the referencing directory.
     cmMakefile* mf = context->LG->GetMakefile();
-    for (std::string& o : objects) {
+    for (std::string const& o : objects) {
       mf->AddTargetObject(tgtName, o);
     }
 

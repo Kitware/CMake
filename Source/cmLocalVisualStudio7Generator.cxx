@@ -1254,7 +1254,7 @@ void cmLocalVisualStudio7GeneratorInternals::OutputLibraries(
 {
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
   for (auto const& lib : libs) {
-    if (lib.IsPath) {
+    if (lib.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
       std::string rel = lg->MaybeRelativeToCurBinDir(lib.Value.Value);
       fout << lg->ConvertToXMLOutputPath(rel) << " ";
     } else if (!lib.Target ||
