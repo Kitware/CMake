@@ -752,6 +752,12 @@ with members:
       The ``destination`` member is populated. The ``isOptional`` member may
       exist. This type has no additional members.
 
+    ``runtimeDependencySet``
+      An :command:`install(RUNTIME_DEPENDENCY_SET)` call or an
+      :command:`install(TARGETS)` call with ``RUNTIME_DEPENDENCIES``. The
+      ``destination`` member is populated. This type has additional members
+      ``runtimeDependencySetName`` and ``runtimeDependencySetType``.
+
   ``isExcludeFromAll``
     Optional member that is present with boolean value ``true`` when
     :command:`install` is called with the ``EXCLUDE_FROM_ALL`` option.
@@ -810,6 +816,24 @@ with members:
     ``index``
       An unsigned integer 0-based index into the main "codemodel"
       object's ``targets`` array for the target.
+
+  ``runtimeDependencySetName``
+    Optional member that is present when ``type`` is ``runtimeDependencySet``
+    and the installer was created by an
+    :command:`install(RUNTIME_DEPENDENCY_SET)` call. The value is a string
+    specifying the name of the runtime dependency set that was installed.
+
+  ``runtimeDependencySetType``
+    Optional member that is present when ``type`` is ``runtimeDependencySet``.
+    The value is a string with one of the following values:
+
+    ``library``
+      Indicates that this installer installs dependencies that are not macOS
+      frameworks.
+
+    ``framework``
+      Indicates that this installer installs dependencies that are macOS
+      frameworks.
 
   ``scriptFile``
     Optional member that is present when ``type`` is ``script``.

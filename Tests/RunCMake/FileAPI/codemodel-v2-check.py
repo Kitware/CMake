@@ -180,6 +180,14 @@ def check_directory(c):
                 expected_keys.append("scriptFile")
                 assert is_string(a["scriptFile"], e["scriptFile"])
 
+            if e.get("runtimeDependencySetName", None) is not None:
+                expected_keys.append("runtimeDependencySetName")
+                assert is_string(a["runtimeDependencySetName"], e["runtimeDependencySetName"])
+
+            if e.get("runtimeDependencySetType", None) is not None:
+                expected_keys.append("runtimeDependencySetType")
+                assert is_string(a["runtimeDependencySetType"], e["runtimeDependencySetType"])
+
             if e["backtrace"] is not None:
                 expected_keys.append("backtrace")
                 check_backtrace(d, a["backtrace"], e["backtrace"])
@@ -649,6 +657,14 @@ def gen_check_directories(c, g):
                 for i in e["installers"]:
                     if "pathsNamelink" in i:
                         i["paths"] = i["pathsNamelink"]
+
+    if sys.platform not in ("win32", "darwin") and "linux" not in sys.platform:
+        for e in expected:
+            e["installers"] = list(filter(lambda i: i["type"] != "runtimeDependencySet", e["installers"]))
+
+    if sys.platform != "darwin":
+        for e in expected:
+            e["installers"] = list(filter(lambda i: i.get("runtimeDependencySetType", None) != "framework", e["installers"]))
 
     return expected
 

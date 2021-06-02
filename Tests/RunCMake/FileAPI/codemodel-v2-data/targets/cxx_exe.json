@@ -115,6 +115,23 @@
         "prefix": "^(/usr/local|[A-Za-z]:.*/codemodel-v2)$",
         "destinations": [
             {
+                "path": "lib",
+                "backtrace": [
+                    {
+                        "file": "^cxx/CMakeLists\\.txt$",
+                        "line": 38,
+                        "command": "install",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^cxx/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
+            },
+            {
                 "path": "bin",
                 "backtrace": [
                     {
