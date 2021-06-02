@@ -6,9 +6,13 @@ project(SystemIncludeDirectories)
 add_library(systemlib systemlib.cpp)
 target_include_directories(systemlib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/systemlib")
 
+function (apply_error_flags target)
+  target_compile_options(${target} PRIVATE -Werror=unused-variable)
+endfunction ()
+
 add_library(upstream upstream.cpp)
 target_link_libraries(upstream LINK_PUBLIC systemlib)
-target_compile_options(upstream PRIVATE -Werror=unused-variable)
+apply_error_flags(upstream)
 
 target_include_directories(upstream SYSTEM PUBLIC
   $<TARGET_PROPERTY:systemlib,INTERFACE_INCLUDE_DIRECTORIES>
@@ -29,7 +33,7 @@ endif()
 
 add_library(consumer consumer.cpp)
 target_link_libraries(consumer upstream config_specific)
-target_compile_options(consumer PRIVATE -Werror=unused-variable)
+apply_error_flags(consumer)
 
 add_library(iface IMPORTED INTERFACE)
 set_property(TARGET iface PROPERTY INTERFACE_INCLUDE_DIRECTORIES
@@ -38,21 +42,21 @@ set_property(TARGET iface PROPERTY INTERFACE_INCLUDE_DIRECTORIES
 
 add_library(imported_consumer imported_consumer.cpp)
 target_link_libraries(imported_consumer iface)
-target_compile_options(imported_consumer PRIVATE -Werror=unused-variable)
+apply_error_flags(imported_consumer)
 
 add_library(imported_consumer2 imported_consumer.cpp)
 target_link_libraries(imported_consumer2 imported_consumer)
-target_compile_options(imported_consumer2 PRIVATE -Werror=unused-variable)
+apply_error_flags(imported_consumer2)
 
 # add a target which has a relative system include
 add_library(somelib imported_consumer.cpp)
 target_include_directories(somelib SYSTEM PUBLIC "systemlib_header_only")
-target_compile_options(somelib PRIVATE -Werror=unused-variable)
+apply_error_flags(somelib)
 
 # add a target which consumes a relative system include
 add_library(otherlib upstream.cpp)
 target_link_libraries(otherlib PUBLIC somelib)
-target_compile_options(otherlib PRIVATE -Werror=unused-variable)
+apply_error_flags(otherlib)
 
 macro(do_try_compile error_option)
   set(TC_ARGS
