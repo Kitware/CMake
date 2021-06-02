@@ -338,6 +338,8 @@ will re-run whenever ``in.txt`` changes.
   where ``<config>`` is the build configuration, and then compile the generated
   source as part of a library.
 
+.. _`add_custom_command(TARGET)`:
+
 Build Events
 ^^^^^^^^^^^^
 
@@ -387,6 +389,9 @@ of the following is specified:
   configuration and no "empty-string-command" will be added.
 
   This allows to add individual build events for every configuration.
+
+.. versionadded:: 3.21
+  Support for target-dependent generator expressions.
 
 Examples: Build Events
 ^^^^^^^^^^^^^^^^^^^^^^

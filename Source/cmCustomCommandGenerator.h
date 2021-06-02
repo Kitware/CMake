@@ -25,6 +25,7 @@ class cmCustomCommandGenerator
   cmCustomCommand const* CC;
   std::string OutputConfig;
   std::string CommandConfig;
+  std::string Target;
   cmLocalGenerator* LG;
   bool OldStyle;
   bool MakeVars;

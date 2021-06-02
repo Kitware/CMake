@@ -4096,6 +4096,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
   cc.SetDepfile(depfile);
   cc.SetJobPool(job_pool);
   cc.SetCMP0116Status(cmp0116);
+  cc.SetTarget(target->GetName());
   switch (type) {
     case cmCustomCommandType::PRE_BUILD:
       target->AddPreBuildCommand(std::move(cc));
