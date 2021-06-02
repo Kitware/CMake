@@ -1529,8 +1529,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       auto format = cmDepfileFormat::GccDepfile;
       if (args[3] == "gccdepfile") {
         format = cmDepfileFormat::GccDepfile;
-      } else if (args[3] == "vstlog") {
-        format = cmDepfileFormat::VsTlog;
       } else if (args[3] == "makedepfile") {
         format = cmDepfileFormat::MakeDepfile;
       } else {

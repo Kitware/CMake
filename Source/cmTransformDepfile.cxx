@@ -78,37 +78,6 @@ void WriteDepfile(cmDepfileFormat format, cmsys::ofstream& fout,
     }
   }
 }
-
-// tlog format : always windows paths on Windows regardless the generator
-std::string ConvertToTLogOutputPath(const std::string& path)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  return cmSystemTools::ConvertToWindowsOutputPath(path);
-#else
-  return cmSystemTools::ConvertToOutputPath(path);
-#endif
-}
-
-void WriteVsTlog(cmsys::ofstream& fout, const cmLocalGenerator& lg,
-                 const cmGccDepfileContent& content)
-{
-  for (auto const& dep : content) {
-    fout << '^';
-    bool first = true;
-    for (auto const& rule : dep.rules) {
-      if (!first) {
-        fout << '|';
-      }
-      first = false;
-      fout << ConvertToTLogOutputPath(lg.MaybeRelativeToTopBinDir(rule));
-    }
-    fout << "\r\n";
-    for (auto const& path : dep.paths) {
-      fout << ConvertToTLogOutputPath(lg.MaybeRelativeToTopBinDir(path))
-           << "\r\n";
-    }
-  }
-}
 }
 
 bool cmTransformDepfile(cmDepfileFormat format, const cmLocalGenerator& lg,
@@ -132,9 +101,6 @@ bool cmTransformDepfile(cmDepfileFormat format, const cmLocalGenerator& lg,
     case cmDepfileFormat::GccDepfile:
     case cmDepfileFormat::MakeDepfile:
       WriteDepfile(format, fout, lg, content);
-      break;
-    case cmDepfileFormat::VsTlog:
-      WriteVsTlog(fout, lg, content);
       break;
   }
   return true;

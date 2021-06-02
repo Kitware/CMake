@@ -227,9 +227,6 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
       case cmDepfileFormat::GccDepfile:
         argv.emplace_back("gccdepfile");
         break;
-      case cmDepfileFormat::VsTlog:
-        argv.emplace_back("vstlog");
-        break;
       case cmDepfileFormat::MakeDepfile:
         argv.emplace_back("makedepfile");
         break;
@@ -439,9 +436,6 @@ std::string cmCustomCommandGenerator::GetInternalDepfileName(
     case cmDepfileFormat::GccDepfile:
     case cmDepfileFormat::MakeDepfile:
       extension = ".d";
-      break;
-    case cmDepfileFormat::VsTlog:
-      extension = ".tlog";
       break;
   }
   return cmStrCat(this->LG->GetBinaryDirectory(), "/CMakeFiles/d/",
