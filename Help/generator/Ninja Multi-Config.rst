@@ -34,7 +34,9 @@ below for how to enable cross-config mode.
 The ``Ninja Multi-Config`` generator recognizes the following variables:
 
 :variable:`CMAKE_CONFIGURATION_TYPES`
-  Specifies the total set of configurations to build.
+  Specifies the total set of configurations to build. Unlike with other
+  multi-config generators, this variable has a value of
+  ``Debug;Release;RelWithDebInfo`` by default.
 
 :variable:`CMAKE_CROSS_CONFIGS`
   Specifies a :ref:`semicolon-separated list <CMake Language Lists>` of
