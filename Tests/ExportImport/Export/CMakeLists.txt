@@ -690,3 +690,5 @@ if(NOT XCODE)
   install(TARGETS testLibFromGeneratedSource EXPORT testLibFromGeneratedSource_Export)
   install(EXPORT testLibFromGeneratedSource_Export DESTINATION lib)
 endif()
+
+add_subdirectory(install-RUNTIME_DEPENDENCY_SET)

@@ -1,23 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
-
-function(check_installed expect)
-  file(GLOB_RECURSE actual
-    LIST_DIRECTORIES TRUE
-    RELATIVE ${CMAKE_INSTALL_PREFIX}
-    ${CMAKE_INSTALL_PREFIX}/*
-    )
-  if(actual)
-    list(SORT actual)
-  endif()
-  if(NOT "${actual}" MATCHES "${expect}")
-    message(FATAL_ERROR "Installed files:
-  ${actual}
-do not match what we expected:
-  ${expect}
-in directory:
-  ${CMAKE_INSTALL_PREFIX}")
-  endif()
-endfunction()
+include("${CMAKE_CURRENT_LIST_DIR}/../check_installed.cmake")
 
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
   set(_dirs [[aaa;aaa/executables;aaa/executables/testExe1-4;aaa/executables/testExe3;aaa/libraries;aaa/libraries/libtestExe2lib\.so;aaa/libraries/libtestLib3lib(-d|-r)?\.so\.1\.2;aaa/libraries/libtestLib3lib(-d|-r)?\.so\.3;aaa/libraries/libtestLib4\.so;aaa/libraries/libtestMod1\.so;aaa/libraries/libtestMod2\.so]])
