@@ -52,7 +52,7 @@ target_compile_options(somelib PRIVATE -Werror=unused-variable)
 # add a target which consumes a relative system include
 add_library(otherlib upstream.cpp)
 target_link_libraries(otherlib PUBLIC somelib)
-target_compile_options(somelib PRIVATE -Werror=unused-variable)
+target_compile_options(otherlib PRIVATE -Werror=unused-variable)
 
 macro(do_try_compile error_option)
   set(TC_ARGS
