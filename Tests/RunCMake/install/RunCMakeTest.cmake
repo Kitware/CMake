@@ -189,6 +189,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$")
 else()
   run_cmake(TARGETS-RUNTIME_DEPENDENCIES-unsupported)
   run_cmake(TARGETS-RUNTIME_DEPENDENCY_SET-unsupported)
+  run_cmake(IMPORTED_RUNTIME_ARTIFACTS-RUNTIME_DEPENDENCY_SET-unsupported)
 endif()
 
 set(run_install_test_components 1)

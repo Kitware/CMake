@@ -1098,9 +1098,11 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
   // now parse the generic args (i.e. the ones not specialized on LIBRARY,
   // RUNTIME etc. (see above)
   std::vector<std::string> targetList;
+  std::string runtimeDependencySetArg;
   std::vector<std::string> unknownArgs;
   cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
-  genericArgs.Bind("IMPORTED_RUNTIME_ARTIFACTS"_s, targetList);
+  genericArgs.Bind("IMPORTED_RUNTIME_ARTIFACTS"_s, targetList)
+    .Bind("RUNTIME_DEPENDENCY_SET"_s, runtimeDependencySetArg);
   genericArgs.Parse(genericArgVector, &unknownArgs);
   bool success = genericArgs.Finalize();
 
@@ -1137,6 +1139,22 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
 
   if (!success) {
     return false;
+  }
+
+  cmInstallRuntimeDependencySet* runtimeDependencySet = nullptr;
+  if (!runtimeDependencySetArg.empty()) {
+    auto system = helper.Makefile->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
+    if (!cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
+          system)) {
+      status.SetError(
+        cmStrCat("IMPORTED_RUNTIME_ARTIFACTS RUNTIME_DEPENDENCY_SET is not "
+                 "supported on system \"",
+                 system, '"'));
+      return false;
+    }
+    runtimeDependencySet =
+      helper.Makefile->GetGlobalGenerator()->GetNamedRuntimeDependencySet(
+        runtimeDependencySetArg);
   }
 
   // Check if there is something to do.
@@ -1217,6 +1235,9 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
         if (target.IsDLLPlatform()) {
           runtimeGenerator = createInstallGenerator(
             target, runtimeArgs, helper.GetRuntimeDestination(&runtimeArgs));
+          if (runtimeDependencySet) {
+            runtimeDependencySet->AddLibrary(runtimeGenerator.get());
+          }
         } else if (target.IsFrameworkOnApple()) {
           if (frameworkArgs.GetDestination().empty()) {
             status.SetError(cmStrCat("IMPORTED_RUNTIME_ARTIFACTS given no "
@@ -1227,14 +1248,23 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
           }
           frameworkGenerator = createInstallGenerator(
             target, frameworkArgs, frameworkArgs.GetDestination());
+          if (runtimeDependencySet) {
+            runtimeDependencySet->AddLibrary(frameworkGenerator.get());
+          }
         } else {
           libraryGenerator = createInstallGenerator(
             target, libraryArgs, helper.GetLibraryDestination(&libraryArgs));
+          if (runtimeDependencySet) {
+            runtimeDependencySet->AddLibrary(libraryGenerator.get());
+          }
         }
         break;
       case cmStateEnums::MODULE_LIBRARY:
         libraryGenerator = createInstallGenerator(
           target, libraryArgs, helper.GetLibraryDestination(&libraryArgs));
+        if (runtimeDependencySet) {
+          runtimeDependencySet->AddModule(libraryGenerator.get());
+        }
         break;
       case cmStateEnums::EXECUTABLE:
         if (target.IsAppBundleOnApple()) {
@@ -1247,9 +1277,18 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
           }
           bundleGenerator = createInstallGenerator(
             target, bundleArgs, bundleArgs.GetDestination());
+          if (runtimeDependencySet) {
+            if (!AddBundleExecutable(helper, runtimeDependencySet,
+                                     bundleGenerator.get())) {
+              return false;
+            }
+          }
         } else {
           runtimeGenerator = createInstallGenerator(
             target, runtimeArgs, helper.GetRuntimeDestination(&runtimeArgs));
+          if (runtimeDependencySet) {
+            runtimeDependencySet->AddExecutable(runtimeGenerator.get());
+          }
         }
         break;
       default:
