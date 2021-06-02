@@ -11,6 +11,7 @@ CMAKE_CXX_COMPILER_RANLIB=/usr/bin/gcc-ranlib-10
 CMAKE_CXX_COMPILER_TARGET=
 CMAKE_CXX_COMPILER_VERSION=10.2.1
 CMAKE_CXX_COMPILER_VERSION_INTERAL=
+CMAKE_CXX_IMPLICIT_LINK_LIBRARY_stdc++=/usr/lib/gcc/x86_64-linux-gnu/10/libstdc++.a
 Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
 
 Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_339dd/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_339dd.dir/build.make CMakeFiles/cmTC_339dd.dir/build
