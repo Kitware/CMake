@@ -129,6 +129,15 @@ lint:fedora34-sphinx:
         CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_HELP: "true"
 
+lint:fedora34-clang-analyzer:
+    extends:
+        - .fedora34_clang_analyzer
+        - .cmake_build_linux
+        - .linux_builder_tags_qt
+        - .run_automatically
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 # Linux builds
 
 build:centos6-x86_64:

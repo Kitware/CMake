@@ -85,6 +85,15 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMake_SKIP_INSTALL: 1
 
+.fedora34_clang_analyzer:
+    extends: .fedora34
+
+    variables:
+        CMAKE_CONFIGURATION: fedora34_clang_analyzer
+        CMAKE_BUILD_TYPE: Debug
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMake_SKIP_INSTALL: 1
+
 .fedora34_sphinx:
     extends: .fedora34
 
