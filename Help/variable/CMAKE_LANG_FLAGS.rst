@@ -18,3 +18,8 @@ This is initialized for each language from environment variables:
 
 This value is a command-line string fragment. Therefore, multiple options
 should be separated by spaces, and options with spaces should be quoted.
+
+The flags in this variable will be passed to the compiler before those
+in the per-configuration :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` variant,
+and before flags added by the :command:`add_compile_options` or
+:command:`target_compile_options` commands.
