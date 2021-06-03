@@ -25,6 +25,7 @@ dnf install --setopt=install_weak_deps=False -y \
 
 # Install lint tools.
 dnf install --setopt=install_weak_deps=False -y \
+    clang-analyzer \
     codespell
 
 # Tools needed for the test suite.
