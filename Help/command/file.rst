@@ -116,7 +116,8 @@ Parse a list of ASCII strings from ``<filename>`` and store it in
  binary while reading unless this option is given.
 
 ``REGEX <regex>``
- Consider only strings that match the given regular expression.
+ Consider only strings that match the given regular expression,
+ as described under :ref:`string(REGEX) <Regex Specification>`.
 
 ``ENCODING <encoding-type>``
  .. versionadded:: 3.1

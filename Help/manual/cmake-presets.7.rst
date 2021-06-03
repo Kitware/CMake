@@ -642,7 +642,8 @@ that may contain the following fields:
 
       An optional string specifying a regex for test names. Equivalent to
       passing ``--tests-regex`` on the command line. This field supports
-      macro expansion.
+      macro expansion. CMake regex syntax is described under
+      :ref:`string(REGEX) <Regex Specification>`.
 
 
     ``label``

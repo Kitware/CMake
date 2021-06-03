@@ -141,8 +141,8 @@ Appends elements to the list.
 Includes or removes items from the list that match the mode's pattern.
 In ``REGEX`` mode, items will be matched against the given regular expression.
 
-For more information on regular expressions see also the
-:command:`string` command.
+For more information on regular expressions look under
+:ref:`string(REGEX) <Regex Specification>`.
 
 .. _INSERT:
 
