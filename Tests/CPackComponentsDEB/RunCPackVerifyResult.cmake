@@ -146,7 +146,7 @@ endfunction()
 
 
 # This function runs dpkg-deb on a .deb and returns its output
-# the default behaviour it to run "--info" on the specified Debian package
+# the default behavior it to run "--info" on the specified Debian package
 # ACTION is one of the option accepted by dpkg-deb
 function(run_dpkgdeb dpkg_deb_output)
   set(${dpkg_deb_output} "" PARENT_SCOPE)

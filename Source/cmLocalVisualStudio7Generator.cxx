@@ -784,8 +784,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     cmProp target_mod_dir = target->GetProperty("Fortran_MODULE_DIRECTORY");
     std::string modDir;
     if (target_mod_dir) {
-      modDir = this->MaybeConvertToRelativePath(
-        this->GetCurrentBinaryDirectory(), *target_mod_dir);
+      modDir = this->MaybeRelativeToCurBinDir(*target_mod_dir);
     } else {
       modDir = ".";
     }
@@ -1214,7 +1213,7 @@ void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
     cmProp additionalFiles =
       target->GetProperty("DEPLOYMENT_ADDITIONAL_FILES");
 
-    if (dir == nullptr && additionalFiles == nullptr) {
+    if (!dir && !additionalFiles) {
       return;
     }
 
@@ -1228,7 +1227,7 @@ void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
          << GetEscapedPropertyIfValueNotNULL(additionalFiles->c_str())
          << "\"/>\n";
 
-    if (dir != nullptr) {
+    if (dir) {
       std::string const exe = *dir + "\\" + target->GetFullName(config);
 
       fout << "\t\t\t<DebuggerTool\n"
@@ -1254,11 +1253,9 @@ void cmLocalVisualStudio7GeneratorInternals::OutputLibraries(
   std::ostream& fout, ItemVector const& libs)
 {
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
-  std::string currentBinDir = lg->GetCurrentBinaryDirectory();
   for (auto const& lib : libs) {
-    if (lib.IsPath) {
-      std::string rel =
-        lg->MaybeConvertToRelativePath(currentBinDir, lib.Value.Value);
+    if (lib.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
+      std::string rel = lg->MaybeRelativeToCurBinDir(lib.Value.Value);
       fout << lg->ConvertToXMLOutputPath(rel) << " ";
     } else if (!lib.Target ||
                lib.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
@@ -1274,7 +1271,6 @@ void cmLocalVisualStudio7GeneratorInternals::OutputObjects(
   // VS < 8 does not support per-config source locations so we
   // list object library content on the link line instead.
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
-  std::string currentBinDir = lg->GetCurrentBinaryDirectory();
 
   std::vector<cmSourceFile const*> objs;
   gt->GetExternalObjects(objs, configName);
@@ -1283,7 +1279,7 @@ void cmLocalVisualStudio7GeneratorInternals::OutputObjects(
   for (cmSourceFile const* obj : objs) {
     if (!obj->GetObjectLibrary().empty()) {
       std::string const& objFile = obj->GetFullPath();
-      std::string rel = lg->MaybeConvertToRelativePath(currentBinDir, objFile);
+      std::string rel = lg->MaybeRelativeToCurBinDir(objFile);
       fout << sep << lg->ConvertToXMLOutputPath(rel);
       sep = " ";
     }
@@ -1294,7 +1290,6 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(
   std::ostream& fout, std::vector<std::string> const& dirs)
 {
   const char* comma = "";
-  std::string currentBinDir = this->GetCurrentBinaryDirectory();
   for (std::string dir : dirs) {
     // Remove any trailing slash and skip empty paths.
     if (dir.back() == '/') {
@@ -1306,7 +1301,7 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(
 
     // Switch to a relative path specification if it is shorter.
     if (cmSystemTools::FileIsFullPath(dir)) {
-      std::string rel = this->MaybeConvertToRelativePath(currentBinDir, dir);
+      std::string rel = this->MaybeRelativeToCurBinDir(dir);
       if (rel.size() < dir.size()) {
         dir = rel;
       }

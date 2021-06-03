@@ -1,5 +1,6 @@
 .git*            export-ignore
 .hooks*          export-ignore
+.codespellrc     export-ignore
 .editorconfig    export-ignore
 
 # Custom attribute to mark sources as using our C code style.

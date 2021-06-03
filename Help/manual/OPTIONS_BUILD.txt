@@ -76,6 +76,14 @@
  native build system to choose a compiler or SDK.  See the
  :variable:`CMAKE_GENERATOR_PLATFORM` variable for details.
 
+``--toolchain <path-to-file>``
+ Specify the cross compiling toolchain file, equivalent to setting
+ :variable:`CMAKE_TOOLCHAIN_FILE` variable.
+
+``--install-prefix <directory>``
+ Specify the installation directory, used by the
+ :variable:`CMAKE_INSTALL_PREFIX` variable. Must be an absolute path.
+
 ``-Wno-dev``
  Suppress developer warnings.
 

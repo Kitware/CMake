@@ -7,7 +7,7 @@
 enum class cmDepfileFormat
 {
   GccDepfile,
-  VsTlog,
+  MakeDepfile
 };
 
 class cmLocalGenerator;

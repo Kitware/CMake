@@ -20,11 +20,17 @@
 #include <cm3p/json/value.h>
 
 #include "cmCryptoHash.h"
+#include "cmExportSet.h"
 #include "cmFileAPI.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallDirectoryGenerator.h"
+#include "cmInstallExportGenerator.h"
+#include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmInstallImportedRuntimeArtifactsGenerator.h"
+#include "cmInstallScriptGenerator.h"
 #include "cmInstallSubdirectoryGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
@@ -42,103 +48,17 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
+#include "cmTargetExport.h"
 #include "cmake.h"
 
 namespace {
 
-class Codemodel
-{
-  cmFileAPI& FileAPI;
-  unsigned long Version;
-
-  Json::Value DumpPaths();
-  Json::Value DumpConfigurations();
-  Json::Value DumpConfiguration(std::string const& config);
-
-public:
-  Codemodel(cmFileAPI& fileAPI, unsigned long version);
-  Json::Value Dump();
-};
-
-class CodemodelConfig
-{
-  cmFileAPI& FileAPI;
-  unsigned long Version;
-  std::string const& Config;
-  std::string TopSource;
-  std::string TopBuild;
-
-  struct Directory
-  {
-    cmStateSnapshot Snapshot;
-    cmLocalGenerator const* LocalGenerator = nullptr;
-    Json::Value TargetIndexes = Json::arrayValue;
-    Json::ArrayIndex ProjectIndex;
-    bool HasInstallRule = false;
-  };
-  std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
-    DirectoryMap;
-  std::vector<Directory> Directories;
-
-  struct Project
-  {
-    cmStateSnapshot Snapshot;
-    static const Json::ArrayIndex NoParentIndex =
-      static_cast<Json::ArrayIndex>(-1);
-    Json::ArrayIndex ParentIndex = NoParentIndex;
-    Json::Value ChildIndexes = Json::arrayValue;
-    Json::Value DirectoryIndexes = Json::arrayValue;
-    Json::Value TargetIndexes = Json::arrayValue;
-  };
-  std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
-    ProjectMap;
-  std::vector<Project> Projects;
-
-  void ProcessDirectories();
-
-  Json::ArrayIndex GetDirectoryIndex(cmLocalGenerator const* lg);
-  Json::ArrayIndex GetDirectoryIndex(cmStateSnapshot s);
-
-  Json::ArrayIndex AddProject(cmStateSnapshot s);
-
-  Json::Value DumpTargets();
-  Json::Value DumpTarget(cmGeneratorTarget* gt, Json::ArrayIndex ti);
-
-  Json::Value DumpDirectories();
-  Json::Value DumpDirectory(Directory& d);
-
-  Json::Value DumpProjects();
-  Json::Value DumpProject(Project& p);
-
-  Json::Value DumpMinimumCMakeVersion(cmStateSnapshot s);
-
-public:
-  CodemodelConfig(cmFileAPI& fileAPI, unsigned long version,
-                  std::string const& config);
-  Json::Value Dump();
-};
+using TargetIndexMapType =
+  std::unordered_map<cmGeneratorTarget const*, Json::ArrayIndex>;
 
 std::string RelativeIfUnder(std::string const& top, std::string const& in)
 {
-  std::string out;
-  if (in == top) {
-    out = ".";
-  } else if (cmSystemTools::IsSubDirectory(in, top)) {
-    out = in.substr(top.size() + 1);
-  } else {
-    out = in;
-  }
-  return out;
-}
-
-std::string TargetId(cmGeneratorTarget const* gt, std::string const& topBuild)
-{
-  cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_256);
-  std::string path = RelativeIfUnder(
-    topBuild, gt->GetLocalGenerator()->GetCurrentBinaryDirectory());
-  std::string hash = hasher.HashString(path);
-  hash.resize(20, '0');
-  return gt->GetName() + CMAKE_DIRECTORY_ID_SEP + hash;
+  return cmSystemTools::RelativeIfUnder(top, in);
 }
 
 class JBTIndex
@@ -290,6 +210,91 @@ Json::Value BacktraceData::Dump()
   return backtraceGraph;
 }
 
+class Codemodel
+{
+  cmFileAPI& FileAPI;
+  unsigned long Version;
+
+  Json::Value DumpPaths();
+  Json::Value DumpConfigurations();
+  Json::Value DumpConfiguration(std::string const& config);
+
+public:
+  Codemodel(cmFileAPI& fileAPI, unsigned long version);
+  Json::Value Dump();
+};
+
+class CodemodelConfig
+{
+  cmFileAPI& FileAPI;
+  unsigned long Version;
+  std::string const& Config;
+  std::string TopSource;
+  std::string TopBuild;
+
+  struct Directory
+  {
+    cmStateSnapshot Snapshot;
+    cmLocalGenerator const* LocalGenerator = nullptr;
+    Json::Value TargetIndexes = Json::arrayValue;
+    Json::ArrayIndex ProjectIndex;
+    bool HasInstallRule = false;
+  };
+  std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
+    DirectoryMap;
+  std::vector<Directory> Directories;
+
+  struct Project
+  {
+    cmStateSnapshot Snapshot;
+    static const Json::ArrayIndex NoParentIndex =
+      static_cast<Json::ArrayIndex>(-1);
+    Json::ArrayIndex ParentIndex = NoParentIndex;
+    Json::Value ChildIndexes = Json::arrayValue;
+    Json::Value DirectoryIndexes = Json::arrayValue;
+    Json::Value TargetIndexes = Json::arrayValue;
+  };
+  std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
+    ProjectMap;
+  std::vector<Project> Projects;
+
+  TargetIndexMapType TargetIndexMap;
+
+  void ProcessDirectories();
+
+  Json::ArrayIndex GetDirectoryIndex(cmLocalGenerator const* lg);
+  Json::ArrayIndex GetDirectoryIndex(cmStateSnapshot s);
+
+  Json::ArrayIndex AddProject(cmStateSnapshot s);
+
+  Json::Value DumpTargets();
+  Json::Value DumpTarget(cmGeneratorTarget* gt, Json::ArrayIndex ti);
+
+  Json::Value DumpDirectories();
+  Json::Value DumpDirectory(Directory& d);
+  Json::Value DumpDirectoryObject(Directory& d);
+
+  Json::Value DumpProjects();
+  Json::Value DumpProject(Project& p);
+
+  Json::Value DumpMinimumCMakeVersion(cmStateSnapshot s);
+
+public:
+  CodemodelConfig(cmFileAPI& fileAPI, unsigned long version,
+                  std::string const& config);
+  Json::Value Dump();
+};
+
+std::string TargetId(cmGeneratorTarget const* gt, std::string const& topBuild)
+{
+  cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_256);
+  std::string path = RelativeIfUnder(
+    topBuild, gt->GetLocalGenerator()->GetCurrentBinaryDirectory());
+  std::string hash = hasher.HashString(path);
+  hash.resize(20, '0');
+  return gt->GetName() + CMAKE_DIRECTORY_ID_SEP + hash;
+}
+
 struct CompileData
 {
   struct IncludeEntry
@@ -367,6 +372,31 @@ struct hash<CompileData>
 } // namespace std
 
 namespace {
+class DirectoryObject
+{
+  cmLocalGenerator const* LG = nullptr;
+  std::string const& Config;
+  TargetIndexMapType& TargetIndexMap;
+  std::string TopSource;
+  std::string TopBuild;
+  BacktraceData Backtraces;
+
+  void AddBacktrace(Json::Value& object, cmListFileBacktrace const& bt);
+
+  Json::Value DumpPaths();
+  Json::Value DumpInstallers();
+  Json::Value DumpInstaller(cmInstallGenerator* gen);
+  Json::Value DumpInstallerExportTargets(cmExportSet* exp);
+  Json::Value DumpInstallerPath(std::string const& top,
+                                std::string const& fromPathIn,
+                                std::string const& toPath);
+
+public:
+  DirectoryObject(cmLocalGenerator const* lg, std::string const& config,
+                  TargetIndexMapType& targetIndexMap);
+  Json::Value Dump();
+};
+
 class Target
 {
   cmGeneratorTarget* GT;
@@ -663,6 +693,8 @@ Json::Value CodemodelConfig::DumpTarget(cmGeneratorTarget* gt,
   target["projectIndex"] = pi;
   this->Projects[pi].TargetIndexes.append(ti);
 
+  this->TargetIndexMap[gt] = ti;
+
   return target;
 }
 
@@ -677,7 +709,7 @@ Json::Value CodemodelConfig::DumpDirectories()
 
 Json::Value CodemodelConfig::DumpDirectory(Directory& d)
 {
-  Json::Value directory = Json::objectValue;
+  Json::Value directory = this->DumpDirectoryObject(d);
 
   std::string sourceDir = d.Snapshot.GetDirectory().GetCurrentSource();
   directory["source"] = RelativeIfUnder(this->TopSource, sourceDir);
@@ -715,6 +747,31 @@ Json::Value CodemodelConfig::DumpDirectory(Directory& d)
   }
 
   return directory;
+}
+
+Json::Value CodemodelConfig::DumpDirectoryObject(Directory& d)
+{
+  std::string prefix = "directory";
+  std::string sourceDirRel = RelativeIfUnder(
+    this->TopSource, d.Snapshot.GetDirectory().GetCurrentSource());
+  std::string buildDirRel = RelativeIfUnder(
+    this->TopBuild, d.Snapshot.GetDirectory().GetCurrentBinary());
+  if (!cmSystemTools::FileIsFullPath(buildDirRel)) {
+    prefix = cmStrCat(prefix, '-', buildDirRel);
+  } else if (!cmSystemTools::FileIsFullPath(sourceDirRel)) {
+    prefix = cmStrCat(prefix, '-', sourceDirRel);
+  }
+  for (char& c : prefix) {
+    if (c == '/' || c == '\\') {
+      c = '.';
+    }
+  }
+  if (!this->Config.empty()) {
+    prefix += "-" + this->Config;
+  }
+
+  DirectoryObject dir(d.LocalGenerator, this->Config, this->TargetIndexMap);
+  return this->FileAPI.MaybeJsonFile(dir.Dump(), prefix);
 }
 
 Json::Value CodemodelConfig::DumpProjects()
@@ -758,6 +815,260 @@ Json::Value CodemodelConfig::DumpMinimumCMakeVersion(cmStateSnapshot s)
     minimumCMakeVersion["string"] = *def;
   }
   return minimumCMakeVersion;
+}
+
+DirectoryObject::DirectoryObject(cmLocalGenerator const* lg,
+                                 std::string const& config,
+                                 TargetIndexMapType& targetIndexMap)
+  : LG(lg)
+  , Config(config)
+  , TargetIndexMap(targetIndexMap)
+  , TopSource(lg->GetGlobalGenerator()->GetCMakeInstance()->GetHomeDirectory())
+  , TopBuild(
+      lg->GetGlobalGenerator()->GetCMakeInstance()->GetHomeOutputDirectory())
+  , Backtraces(this->TopSource)
+{
+}
+
+Json::Value DirectoryObject::Dump()
+{
+  Json::Value directoryObject = Json::objectValue;
+  directoryObject["paths"] = this->DumpPaths();
+  directoryObject["installers"] = this->DumpInstallers();
+  directoryObject["backtraceGraph"] = this->Backtraces.Dump();
+  return directoryObject;
+}
+
+void DirectoryObject::AddBacktrace(Json::Value& object,
+                                   cmListFileBacktrace const& bt)
+{
+  if (JBTIndex backtrace = this->Backtraces.Add(bt)) {
+    object["backtrace"] = backtrace.Index;
+  }
+}
+
+Json::Value DirectoryObject::DumpPaths()
+{
+  Json::Value paths = Json::objectValue;
+
+  std::string const& sourceDir = this->LG->GetCurrentSourceDirectory();
+  paths["source"] = RelativeIfUnder(this->TopSource, sourceDir);
+
+  std::string const& buildDir = this->LG->GetCurrentBinaryDirectory();
+  paths["build"] = RelativeIfUnder(this->TopBuild, buildDir);
+
+  return paths;
+}
+
+Json::Value DirectoryObject::DumpInstallers()
+{
+  Json::Value installers = Json::arrayValue;
+  for (const auto& gen : this->LG->GetMakefile()->GetInstallGenerators()) {
+    Json::Value installer = this->DumpInstaller(gen.get());
+    if (!installer.empty()) {
+      installers.append(std::move(installer)); // NOLINT(*)
+    }
+  }
+  return installers;
+}
+
+Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
+{
+  Json::Value installer = Json::objectValue;
+
+  // Exclude subdirectory installers.  They are implementation details.
+  if (dynamic_cast<cmInstallSubdirectoryGenerator*>(gen)) {
+    return installer;
+  }
+
+  // Exclude installers not used in this configuration.
+  if (!gen->InstallsForConfig(this->Config)) {
+    return installer;
+  }
+
+  // Add fields specific to each kind of install generator.
+  if (auto* installTarget = dynamic_cast<cmInstallTargetGenerator*>(gen)) {
+    cmInstallTargetGenerator::Files const& files =
+      installTarget->GetFiles(this->Config);
+    if (files.From.empty()) {
+      return installer;
+    }
+
+    installer["type"] = "target";
+    installer["destination"] = installTarget->GetDestination(this->Config);
+    installer["targetId"] =
+      TargetId(installTarget->GetTarget(), this->TopBuild);
+    installer["targetIndex"] =
+      this->TargetIndexMap[installTarget->GetTarget()];
+
+    std::string fromDir = files.FromDir;
+    if (!fromDir.empty()) {
+      fromDir.push_back('/');
+    }
+
+    std::string toDir = files.ToDir;
+    if (!toDir.empty()) {
+      toDir.push_back('/');
+    }
+
+    Json::Value paths = Json::arrayValue;
+    for (size_t i = 0; i < files.From.size(); ++i) {
+      std::string const& fromPath = cmStrCat(fromDir, files.From[i]);
+      std::string const& toPath = cmStrCat(toDir, files.To[i]);
+      paths.append(this->DumpInstallerPath(this->TopBuild, fromPath, toPath));
+    }
+    installer["paths"] = std::move(paths);
+
+    if (installTarget->GetOptional()) {
+      installer["isOptional"] = true;
+    }
+
+    if (installTarget->IsImportLibrary()) {
+      installer["targetIsImportLibrary"] = true;
+    }
+
+    switch (files.NamelinkMode) {
+      case cmInstallTargetGenerator::NamelinkModeNone:
+        break;
+      case cmInstallTargetGenerator::NamelinkModeOnly:
+        installer["targetInstallNamelink"] = "only";
+        break;
+      case cmInstallTargetGenerator::NamelinkModeSkip:
+        installer["targetInstallNamelink"] = "skip";
+        break;
+    }
+
+    // FIXME: Parse FilePermissions to provide structured information.
+    // FIXME: Thread EXPORT name through from install() call.
+  } else if (auto* installFiles =
+               dynamic_cast<cmInstallFilesGenerator*>(gen)) {
+    std::vector<std::string> const& files =
+      installFiles->GetFiles(this->Config);
+    if (files.empty()) {
+      return installer;
+    }
+
+    installer["type"] = "file";
+    installer["destination"] = installFiles->GetDestination(this->Config);
+    Json::Value paths = Json::arrayValue;
+    std::string const& rename = installFiles->GetRename(this->Config);
+    if (!rename.empty() && files.size() == 1) {
+      paths.append(this->DumpInstallerPath(this->TopSource, files[0], rename));
+    } else {
+      for (std::string const& file : installFiles->GetFiles(this->Config)) {
+        paths.append(RelativeIfUnder(this->TopSource, file));
+      }
+    }
+    installer["paths"] = std::move(paths);
+    if (installFiles->GetOptional()) {
+      installer["isOptional"] = true;
+    }
+    // FIXME: Parse FilePermissions to provide structured information.
+  } else if (auto* installDir =
+               dynamic_cast<cmInstallDirectoryGenerator*>(gen)) {
+    std::vector<std::string> const& dirs =
+      installDir->GetDirectories(this->Config);
+    if (dirs.empty()) {
+      return installer;
+    }
+
+    installer["type"] = "directory";
+    installer["destination"] = installDir->GetDestination(this->Config);
+    Json::Value paths = Json::arrayValue;
+    for (std::string const& dir : dirs) {
+      if (cmHasLiteralSuffix(dir, "/")) {
+        paths.append(this->DumpInstallerPath(
+          this->TopSource, dir.substr(0, dir.size() - 1), "."));
+      } else {
+        paths.append(this->DumpInstallerPath(
+          this->TopSource, dir, cmSystemTools::GetFilenameName(dir)));
+      }
+    }
+    installer["paths"] = std::move(paths);
+    if (installDir->GetOptional()) {
+      installer["isOptional"] = true;
+    }
+    // FIXME: Parse FilePermissions, DirPermissions, and LiteralArguments.
+    // to provide structured information.
+  } else if (auto* installExport =
+               dynamic_cast<cmInstallExportGenerator*>(gen)) {
+    installer["type"] = "export";
+    installer["destination"] = installExport->GetDestination();
+    cmExportSet* exportSet = installExport->GetExportSet();
+    installer["exportName"] = exportSet->GetName();
+    installer["exportTargets"] = this->DumpInstallerExportTargets(exportSet);
+    Json::Value paths = Json::arrayValue;
+    paths.append(
+      RelativeIfUnder(this->TopBuild, installExport->GetMainImportFile()));
+    installer["paths"] = std::move(paths);
+  } else if (auto* installScript =
+               dynamic_cast<cmInstallScriptGenerator*>(gen)) {
+    if (installScript->IsCode()) {
+      installer["type"] = "code";
+    } else {
+      installer["type"] = "script";
+      installer["scriptFile"] = RelativeIfUnder(
+        this->TopSource, installScript->GetScript(this->Config));
+    }
+  } else if (auto* installImportedRuntimeArtifacts =
+               dynamic_cast<cmInstallImportedRuntimeArtifactsGenerator*>(
+                 gen)) {
+    installer["type"] = "importedRuntimeArtifacts";
+    installer["destination"] =
+      installImportedRuntimeArtifacts->GetDestination(this->Config);
+    if (installImportedRuntimeArtifacts->GetOptional()) {
+      installer["isOptional"] = true;
+    }
+  }
+
+  // Add fields common to all install generators.
+  installer["component"] = gen->GetComponent();
+  if (gen->GetExcludeFromAll()) {
+    installer["isExcludeFromAll"] = true;
+  }
+
+  if (gen->GetAllComponentsFlag()) {
+    installer["isForAllComponents"] = true;
+  }
+
+  this->AddBacktrace(installer, gen->GetBacktrace());
+
+  return installer;
+}
+
+Json::Value DirectoryObject::DumpInstallerExportTargets(cmExportSet* exp)
+{
+  Json::Value targets = Json::arrayValue;
+  for (auto const& targetExport : exp->GetTargetExports()) {
+    Json::Value target = Json::objectValue;
+    target["id"] = TargetId(targetExport->Target, this->TopBuild);
+    target["index"] = this->TargetIndexMap[targetExport->Target];
+    targets.append(std::move(target)); // NOLINT(*)
+  }
+  return targets;
+}
+
+Json::Value DirectoryObject::DumpInstallerPath(std::string const& top,
+                                               std::string const& fromPathIn,
+                                               std::string const& toPath)
+{
+  Json::Value installPath;
+
+  std::string fromPath = RelativeIfUnder(top, fromPathIn);
+
+  // If toPath is the last component of fromPath, use just fromPath.
+  if (toPath.find_first_of('/') == std::string::npos &&
+      cmHasSuffix(fromPath, toPath) &&
+      (fromPath.size() == toPath.size() ||
+       fromPath[fromPath.size() - toPath.size() - 1] == '/')) {
+    installPath = fromPath;
+  } else {
+    installPath = Json::objectValue;
+    installPath["from"] = fromPath;
+    installPath["to"] = toPath;
+  }
+
+  return installPath;
 }
 
 Target::Target(cmGeneratorTarget* gt, std::string const& config)

@@ -2,70 +2,53 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindPathCommand.h"
 
+#include <utility>
+
 #include "cmsys/Glob.hxx"
 
-#include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
 
-cmFindPathCommand::cmFindPathCommand(cmExecutionStatus& status)
-  : cmFindBase(status)
+cmFindPathCommand::cmFindPathCommand(std::string findCommandName,
+                                     cmExecutionStatus& status)
+  : cmFindBase(std::move(findCommandName), status)
 {
   this->EnvironmentPath = "INCLUDE";
   this->IncludeFileInPath = false;
+  this->VariableDocumentation = "Path to a file.";
+  this->VariableType = cmStateEnums::PATH;
+}
+cmFindPathCommand::cmFindPathCommand(cmExecutionStatus& status)
+  : cmFindPathCommand("find_path", status)
+{
 }
 
 // cmFindPathCommand
 bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
   this->DebugMode = this->ComputeIfDebugModeWanted();
-  this->VariableDocumentation = "Path to a file.";
   this->CMakePathName = "INCLUDE";
+
   if (!this->ParseArguments(argsIn)) {
     return false;
   }
-  if (this->AlreadyInCache) {
-    // If the user specifies the entry on the command line without a
-    // type we should add the type and docstring but keep the original
-    // value.
-    if (this->AlreadyInCacheWithoutMetaInfo) {
-      this->Makefile->AddCacheDefinition(
-        this->VariableName, "", this->VariableDocumentation.c_str(),
-        (this->IncludeFileInPath ? cmStateEnums::FILEPATH
-                                 : cmStateEnums::PATH));
-    }
+
+  if (this->AlreadyDefined) {
+    this->NormalizeFindResult();
     return true;
   }
 
   std::string result = this->FindHeader();
-  if (!result.empty()) {
-    this->Makefile->AddCacheDefinition(
-      this->VariableName, result, this->VariableDocumentation.c_str(),
-      (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
-    return true;
-  }
-  this->Makefile->AddCacheDefinition(
-    this->VariableName, this->VariableName + "-NOTFOUND",
-    this->VariableDocumentation.c_str(),
-    (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
-  if (this->Required) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      "Could not find " + this->VariableName +
-        " using the following files: " + cmJoin(this->Names, ", "));
-    cmSystemTools::SetFatalErrorOccured();
-  }
+  this->StoreFindResult(result);
   return true;
 }
 
 std::string cmFindPathCommand::FindHeader()
 {
-  std::string debug_name = this->IncludeFileInPath ? "find_file" : "find_path";
-  cmFindBaseDebugState debug(debug_name, this);
+  cmFindBaseDebugState debug(this->FindCommandName, this);
   std::string header;
   if (this->SearchFrameworkFirst || this->SearchFrameworkOnly) {
     header = this->FindFrameworkHeader(debug);

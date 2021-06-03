@@ -46,7 +46,7 @@ cmInstallTargetGenerator::cmInstallTargetGenerator(
   std::string const& component, MessageLevel message, bool exclude_from_all,
   bool optional, cmListFileBacktrace backtrace)
   : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all, std::move(backtrace))
+                       exclude_from_all, false, std::move(backtrace))
   , TargetName(std::move(targetName))
   , Target(nullptr)
   , FilePermissions(std::move(file_permissions))
@@ -77,12 +77,15 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   }
 
   // Tweak files located in the destination directory.
-  std::string toDir = cmStrCat(this->ConvertToAbsoluteDestination(dest), '/');
+  std::string toDir = cmStrCat(ConvertToAbsoluteDestination(dest), '/');
 
   // Add pre-installation tweaks.
   if (!files.NoTweak) {
-    this->AddTweak(os, indent, config, toDir, files.To,
-                   &cmInstallTargetGenerator::PreReplacementTweaks);
+    AddTweak(os, indent, config, toDir, files.To,
+             [this](std::ostream& o, Indent i, const std::string& c,
+                    const std::string& f) {
+               this->PreReplacementTweaks(o, i, c, f);
+             });
   }
 
   // Write code to install the target file.
@@ -102,8 +105,11 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
 
   // Add post-installation tweaks.
   if (!files.NoTweak) {
-    this->AddTweak(os, indent, config, toDir, files.To,
-                   &cmInstallTargetGenerator::PostReplacementTweaks);
+    AddTweak(os, indent, config, toDir, files.To,
+             [this](std::ostream& o, Indent i, const std::string& c,
+                    const std::string& f) {
+               this->PostReplacementTweaks(o, i, c, f);
+             });
   }
 }
 
@@ -338,6 +344,7 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
 
       // Add the names based on the current namelink mode.
       if (haveNamelink) {
+        files.NamelinkMode = this->NamelinkMode;
         // With a namelink we need to check the mode.
         if (this->NamelinkMode == NamelinkModeOnly) {
           // Install the namelink only.
@@ -458,63 +465,6 @@ bool cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
   }
 
   return true;
-}
-
-void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent indent,
-                                        const std::string& config,
-                                        std::string const& file,
-                                        TweakMethod tweak)
-{
-  std::ostringstream tw;
-  (this->*tweak)(tw, indent.Next(), config, file);
-  std::string tws = tw.str();
-  if (!tws.empty()) {
-    os << indent << "if(EXISTS \"" << file << "\" AND\n"
-       << indent << "   NOT IS_SYMLINK \"" << file << "\")\n";
-    os << tws;
-    os << indent << "endif()\n";
-  }
-}
-
-void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent indent,
-                                        const std::string& config,
-                                        std::string const& dir,
-                                        std::vector<std::string> const& files,
-                                        TweakMethod tweak)
-{
-  if (files.size() == 1) {
-    // Tweak a single file.
-    this->AddTweak(os, indent, config,
-                   this->GetDestDirPath(cmStrCat(dir, files[0])), tweak);
-  } else {
-    // Generate a foreach loop to tweak multiple files.
-    std::ostringstream tw;
-    this->AddTweak(tw, indent.Next(), config, "${file}", tweak);
-    std::string tws = tw.str();
-    if (!tws.empty()) {
-      Indent indent2 = indent.Next().Next();
-      os << indent << "foreach(file\n";
-      for (std::string const& f : files) {
-        os << indent2 << "\"" << this->GetDestDirPath(cmStrCat(dir, f))
-           << "\"\n";
-      }
-      os << indent2 << ")\n";
-      os << tws;
-      os << indent << "endforeach()\n";
-    }
-  }
-}
-
-std::string cmInstallTargetGenerator::GetDestDirPath(std::string const& file)
-{
-  // Construct the path of the file on disk after installation on
-  // which tweaks may be performed.
-  std::string toDestDirPath = "$ENV{DESTDIR}";
-  if (file[0] != '/' && file[0] != '$') {
-    toDestDirPath += "/";
-  }
-  toDestDirPath += file;
-  return toDestDirPath;
 }
 
 void cmInstallTargetGenerator::PreReplacementTweaks(std::ostream& os,

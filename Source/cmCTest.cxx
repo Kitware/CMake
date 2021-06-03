@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <cerrno>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -2070,6 +2069,17 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     }
     i++;
     this->Impl->TestDir = std::string(args[i]);
+  } else if (this->CheckArgument(arg, "--output-junit"_s)) {
+    if (i >= args.size() - 1) {
+      errormsg = "'--output-junit' requires an argument";
+      return false;
+    }
+    i++;
+    this->Impl->TestHandler.SetJUnitXMLFileName(std::string(args[i]));
+    // Turn test output compression off.
+    // This makes it easier to include test output in the resulting
+    // JUnit XML report.
+    this->Impl->CompressTestOutput = false;
   }
 
   cm::string_view noTestsPrefix = "--no-tests=";
@@ -2108,17 +2118,17 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   } else if (this->CheckArgument(arg, "-L"_s, "--label-regex") &&
              i < args.size() - 1) {
     i++;
-    this->GetTestHandler()->SetPersistentOption("LabelRegularExpression",
-                                                args[i].c_str());
-    this->GetMemCheckHandler()->SetPersistentOption("LabelRegularExpression",
-                                                    args[i].c_str());
+    this->GetTestHandler()->AddPersistentMultiOption("LabelRegularExpression",
+                                                     args[i]);
+    this->GetMemCheckHandler()->AddPersistentMultiOption(
+      "LabelRegularExpression", args[i]);
   } else if (this->CheckArgument(arg, "-LE"_s, "--label-exclude") &&
              i < args.size() - 1) {
     i++;
-    this->GetTestHandler()->SetPersistentOption(
-      "ExcludeLabelRegularExpression", args[i].c_str());
-    this->GetMemCheckHandler()->SetPersistentOption(
-      "ExcludeLabelRegularExpression", args[i].c_str());
+    this->GetTestHandler()->AddPersistentMultiOption(
+      "ExcludeLabelRegularExpression", args[i]);
+    this->GetMemCheckHandler()->AddPersistentMultiOption(
+      "ExcludeLabelRegularExpression", args[i]);
   }
 
   else if (this->CheckArgument(arg, "-E"_s, "--exclude-regex") &&
@@ -2205,6 +2215,10 @@ bool cmCTest::ColoredOutputSupportedByConsole()
       !clicolor_force.empty() && clicolor_force != "0") {
     return true;
   }
+  std::string clicolor;
+  if (cmSystemTools::GetEnv("CLICOLOR", clicolor) && clicolor == "0") {
+    return false;
+  }
   return ConsoleIsNotDumb();
 #endif
 }
@@ -2221,7 +2235,7 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     cmCTestScriptHandler* ch = this->GetScriptHandler();
     // -SR is an internal argument, -SP should be ignored when it is passed
     if (!SRArgumentSpecified) {
-      ch->AddConfigurationScript(args[i].c_str(), false);
+      ch->AddConfigurationScript(args[i], false);
     }
   }
 
@@ -2231,7 +2245,7 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     this->Impl->RunConfigurationScript = true;
     i++;
     cmCTestScriptHandler* ch = this->GetScriptHandler();
-    ch->AddConfigurationScript(args[i].c_str(), true);
+    ch->AddConfigurationScript(args[i], true);
   }
 
   if (this->CheckArgument(arg, "-S"_s, "--script") && i < args.size() - 1) {
@@ -2240,7 +2254,7 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     cmCTestScriptHandler* ch = this->GetScriptHandler();
     // -SR is an internal argument, -S should be ignored when it is passed
     if (!SRArgumentSpecified) {
-      ch->AddConfigurationScript(args[i].c_str(), true);
+      ch->AddConfigurationScript(args[i], true);
     }
   }
 }
@@ -2265,6 +2279,15 @@ void cmCTest::SetPersistentOptionIfNotEmpty(const std::string& value,
   if (!value.empty()) {
     this->GetTestHandler()->SetPersistentOption(optionName, value.c_str());
     this->GetMemCheckHandler()->SetPersistentOption(optionName, value.c_str());
+  }
+}
+
+void cmCTest::AddPersistentMultiOptionIfNotEmpty(const std::string& value,
+                                                 const std::string& optionName)
+{
+  if (!value.empty()) {
+    this->GetTestHandler()->AddPersistentMultiOption(optionName, value);
+    this->GetMemCheckHandler()->AddPersistentMultiOption(optionName, value);
   }
 }
 
@@ -2306,6 +2329,13 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
   if (!expandedPreset) {
     cmSystemTools::Error(cmStrCat("Could not evaluate test preset \"",
                                   presetName, "\": Invalid macro expansion"));
+    settingsFile.PrintTestPresetList();
+    return false;
+  }
+
+  if (!expandedPreset->ConditionResult) {
+    cmSystemTools::Error(cmStrCat("Cannot use disabled test preset in ",
+                                  workingDirectory, ": \"", presetName, '"'));
     settingsFile.PrintTestPresetList();
     return false;
   }
@@ -2412,7 +2442,7 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
     if (expandedPreset->Filter->Include) {
       this->SetPersistentOptionIfNotEmpty(
         expandedPreset->Filter->Include->Name, "IncludeRegularExpression");
-      this->SetPersistentOptionIfNotEmpty(
+      this->AddPersistentMultiOptionIfNotEmpty(
         expandedPreset->Filter->Include->Label, "LabelRegularExpression");
 
       if (expandedPreset->Filter->Include->Index) {
@@ -2445,7 +2475,7 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
     if (expandedPreset->Filter->Exclude) {
       this->SetPersistentOptionIfNotEmpty(
         expandedPreset->Filter->Exclude->Name, "ExcludeRegularExpression");
-      this->SetPersistentOptionIfNotEmpty(
+      this->AddPersistentMultiOptionIfNotEmpty(
         expandedPreset->Filter->Exclude->Label,
         "ExcludeLabelRegularExpression");
 
@@ -2826,9 +2856,10 @@ int cmCTest::ExecuteTests()
       cmCTestLog(this, OUTPUT,
                  "Internal ctest changing into directory: " << workDir
                                                             << std::endl);
-      if (cmSystemTools::ChangeDirectory(workDir) != 0) {
+      cmsys::Status status = cmSystemTools::ChangeDirectory(workDir);
+      if (!status) {
         auto msg = "Failed to change working directory to \"" + workDir +
-          "\" : " + std::strerror(errno) + "\n";
+          "\" : " + status.GetString() + "\n";
         cmCTestLog(this, ERROR_MESSAGE, msg);
         return 1;
       }

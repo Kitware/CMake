@@ -23,9 +23,12 @@ function(run_cmake test)
   endif()
 
   string(TOLOWER ${CMAKE_HOST_SYSTEM_NAME} platform_name)
+  #remove all additional bits from cygwin/msys name
   if(platform_name MATCHES cygwin)
-    #remove all additional bits from cygwin name
     set(platform_name cygwin)
+  endif()
+  if(platform_name MATCHES msys)
+    set(platform_name msys)
   endif()
 
   foreach(o out err)
@@ -64,15 +67,6 @@ function(run_cmake test)
   else()
     include(${top_src}/${test}-prep.cmake OPTIONAL)
   endif()
-  if(NOT DEFINED RunCMake_TEST_OPTIONS)
-    set(RunCMake_TEST_OPTIONS "")
-  endif()
-  if(APPLE)
-    list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0025=NEW)
-  endif()
-  if(RunCMake_MAKE_PROGRAM)
-    list(APPEND RunCMake_TEST_OPTIONS "-DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM}")
-  endif()
   if(RunCMake_TEST_OUTPUT_MERGE)
     set(actual_stderr_var actual_stdout)
     set(actual_stderr "")
@@ -91,50 +85,51 @@ function(run_cmake test)
   else()
     set(maybe_input_file "")
   endif()
-  if(RunCMake_TEST_COMMAND)
-    if(NOT RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
-      set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  if(NOT RunCMake_TEST_COMMAND)
+    if(NOT DEFINED RunCMake_TEST_OPTIONS)
+      set(RunCMake_TEST_OPTIONS "")
     endif()
-    execute_process(
-      COMMAND ${RunCMake_TEST_COMMAND}
-      WORKING_DIRECTORY "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}"
-      OUTPUT_VARIABLE actual_stdout
-      ERROR_VARIABLE ${actual_stderr_var}
-      RESULT_VARIABLE actual_result
-      ENCODING UTF8
-      ${maybe_timeout}
-      ${maybe_input_file}
+    if(APPLE)
+      list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0025=NEW)
+    endif()
+    if(RunCMake_MAKE_PROGRAM)
+      list(APPEND RunCMake_TEST_OPTIONS "-DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM}")
+    endif()
+    set(RunCMake_TEST_COMMAND ${CMAKE_COMMAND})
+    if(NOT RunCMake_TEST_NO_SOURCE_DIR)
+      list(APPEND RunCMake_TEST_COMMAND "${RunCMake_TEST_SOURCE_DIR}")
+    endif()
+    list(APPEND RunCMake_TEST_COMMAND -G "${RunCMake_GENERATOR}")
+    if(RunCMake_GENERATOR_PLATFORM)
+      list(APPEND RunCMake_TEST_COMMAND -A "${RunCMake_GENERATOR_PLATFORM}")
+    endif()
+    if(RunCMake_GENERATOR_TOOLSET)
+      list(APPEND RunCMake_TEST_COMMAND -T "${RunCMake_GENERATOR_TOOLSET}")
+    endif()
+    if(RunCMake_GENERATOR_INSTANCE)
+      list(APPEND RunCMake_TEST_COMMAND "-DCMAKE_GENERATOR_INSTANCE=${RunCMake_GENERATOR_INSTANCE}")
+    endif()
+    list(APPEND RunCMake_TEST_COMMAND
+      -DRunCMake_TEST=${test}
+      --no-warn-unused-cli
       )
   else()
-    if(RunCMake_GENERATOR_INSTANCE)
-      set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE=${RunCMake_GENERATOR_INSTANCE}")
-    else()
-      set(_D_CMAKE_GENERATOR_INSTANCE "")
-    endif()
-    if(NOT RunCMake_TEST_NO_SOURCE_DIR)
-      set(maybe_source_dir "${RunCMake_TEST_SOURCE_DIR}")
-    else()
-      set(maybe_source_dir "")
-    endif()
-    execute_process(
-      COMMAND ${CMAKE_COMMAND}
-                ${maybe_source_dir}
-                -G "${RunCMake_GENERATOR}"
-                -A "${RunCMake_GENERATOR_PLATFORM}"
-                -T "${RunCMake_GENERATOR_TOOLSET}"
-                ${_D_CMAKE_GENERATOR_INSTANCE}
-                -DRunCMake_TEST=${test}
-                --no-warn-unused-cli
-                ${RunCMake_TEST_OPTIONS}
-      WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
-      OUTPUT_VARIABLE actual_stdout
-      ERROR_VARIABLE ${actual_stderr_var}
-      RESULT_VARIABLE actual_result
-      ENCODING UTF8
-      ${maybe_timeout}
-      ${maybe_input_file}
-      )
+    set(RunCMake_TEST_OPTIONS "")
   endif()
+  if(NOT RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
+    set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  endif()
+  execute_process(
+    COMMAND ${RunCMake_TEST_COMMAND}
+            ${RunCMake_TEST_OPTIONS}
+    WORKING_DIRECTORY "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}"
+    OUTPUT_VARIABLE actual_stdout
+    ERROR_VARIABLE ${actual_stderr_var}
+    RESULT_VARIABLE actual_result
+    ENCODING UTF8
+    ${maybe_timeout}
+    ${maybe_input_file}
+    )
   set(msg "")
   if(NOT "${actual_result}" MATCHES "${expect_result}")
     string(APPEND msg "Result is [${actual_result}], not [${expect_result}].\n")
@@ -191,14 +186,18 @@ function(run_cmake test)
   if(RunCMake_TEST_FAILED)
     set(msg "${RunCMake_TEST_FAILED}\n${msg}")
   endif()
-  if(msg AND RunCMake_TEST_COMMAND)
+  if(msg)
     string(REPLACE ";" "\" \"" command "\"${RunCMake_TEST_COMMAND}\"")
+    if(RunCMake_TEST_OPTIONS)
+      string(REPLACE ";" "\" \"" options "\"${RunCMake_TEST_OPTIONS}\"")
+      string(APPEND command " ${options}")
+    endif()
     string(APPEND msg "Command was:\n command> ${command}\n")
   endif()
   if(msg)
     string(REGEX REPLACE "\n" "\n actual-out> " actual_out " actual-out> ${actual_stdout}")
     string(REGEX REPLACE "\n" "\n actual-err> " actual_err " actual-err> ${actual_stderr}")
-    message(SEND_ERROR "${test} - FAILED:\n"
+    message(SEND_ERROR "${test}${RunCMake_TEST_VARIANT_DESCRIPTION} - FAILED:\n"
       "${msg}"
       "${expect_out}"
       "Actual stdout:\n${actual_out}\n"
@@ -206,7 +205,7 @@ function(run_cmake test)
       "Actual stderr:\n${actual_err}\n"
       )
   else()
-    message(STATUS "${test} - PASSED")
+    message(STATUS "${test}${RunCMake_TEST_VARIANT_DESCRIPTION} - PASSED")
   endif()
 endfunction()
 

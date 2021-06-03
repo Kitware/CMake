@@ -170,7 +170,7 @@ CPack
   is used for dependency auto detection.
 
 * The :cpack_gen:`CPack DEB Generator` learned how to generate
-  ``DEBIAN/shlibs`` contorl file when package contains shared libraries.
+  ``DEBIAN/shlibs`` control file when package contains shared libraries.
 
 * The :cpack_gen:`CPack DEB Generator` learned how to generate
   ``DEBIAN/postinst`` and ``DEBIAN/postrm`` files if the package installs

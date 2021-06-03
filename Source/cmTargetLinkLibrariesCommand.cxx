@@ -565,7 +565,7 @@ void TLL::AffectsProperty(std::string const& prop)
   if (!this->EncodeRemoteReference) {
     return;
   }
-  // Add a wrapper to the expression to tell LookupLinkItems to look up
+  // Add a wrapper to the expression to tell LookupLinkItem to look up
   // names in the caller's directory.
   if (this->Props.insert(prop).second) {
     this->Target->AppendProperty(prop, this->DirectoryId);

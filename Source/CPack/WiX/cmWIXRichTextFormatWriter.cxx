@@ -79,7 +79,7 @@ void cmWIXRichTextFormatWriter::WriteHeader()
   ControlWord("ansi");
   ControlWord("ansicpg1252");
   ControlWord("deff0");
-  ControlWord("deflang1031");
+  ControlWord("deflang1033");
 
   WriteFontTable();
   WriteColorTable();
@@ -94,7 +94,7 @@ void cmWIXRichTextFormatWriter::WriteFontTable()
   StartGroup();
   ControlWord("f0");
   ControlWord("fswiss");
-  ControlWord("fcharset0 Arial;");
+  ControlWord("fcharset0 Consolas;");
   EndGroup();
 
   EndGroup();
@@ -130,7 +130,7 @@ void cmWIXRichTextFormatWriter::WriteDocumentPrefix()
   ControlWord("uc1");
   ControlWord("pard");
   ControlWord("f0");
-  ControlWord("fs20");
+  ControlWord("fs14");
 }
 
 void cmWIXRichTextFormatWriter::ControlWord(std::string const& keyword)

@@ -924,13 +924,13 @@ void cmExportFileGenerator::GeneratePolicyHeaderCode(std::ostream& os)
 
   // Isolate the file policy level.
   // Support CMake versions as far back as 2.6 but also support using NEW
-  // policy settings for up to CMake 3.18 (this upper limit may be reviewed
+  // policy settings for up to CMake 3.19 (this upper limit may be reviewed
   // and increased from time to time). This reduces the opportunity for CMake
   // warnings when an older export file is later used with newer CMake
   // versions.
   /* clang-format off */
   os << "cmake_policy(PUSH)\n"
-     << "cmake_policy(VERSION 2.6...3.18)\n";
+     << "cmake_policy(VERSION 2.6...3.19)\n";
   /* clang-format on */
 }
 
@@ -1229,7 +1229,7 @@ bool cmExportFileGenerator::PopulateExportProperties(
         return false;
       }
       cmProp propertyValue = targetProperties.GetPropertyValue(prop);
-      if (propertyValue == nullptr) {
+      if (!propertyValue) {
         // Asked to export a property that isn't defined on the target. Do not
         // consider this an error, there's just nothing to export.
         continue;

@@ -16,4 +16,6 @@ the test will be marked as skipped.  Example:
 
 ``SKIP_REGULAR_EXPRESSION`` expects a list of regular expressions.
 
-See also the :prop_test:`SKIP_RETURN_CODE` property.
+See also the :prop_test:`SKIP_RETURN_CODE`,
+:prop_test:`PASS_REGULAR_EXPRESSION`, and :prop_test:`FAIL_REGULAR_EXPRESSION`
+test properties.

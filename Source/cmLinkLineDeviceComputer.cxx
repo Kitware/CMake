@@ -111,7 +111,7 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
     }
 
     BT<std::string> linkLib;
-    if (item.IsPath) {
+    if (item.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
       // nvcc understands absolute paths to libraries ending in '.a' or '.lib'.
       // These should be passed to nvlink.  Other extensions need to be left
       // out because nvlink may not understand or need them.  Even though it

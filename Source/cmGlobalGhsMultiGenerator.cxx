@@ -375,7 +375,7 @@ void cmGlobalGhsMultiGenerator::WriteSubProjects(std::ostream& fout,
 }
 
 void cmGlobalGhsMultiGenerator::WriteProjectLine(
-  std::ostream& fout, cmGeneratorTarget const* target, cmLocalGenerator* root,
+  std::ostream& fout, cmGeneratorTarget const* target,
   std::string& rootBinaryDir)
 {
   cmProp projName = target->GetProperty("GENERATOR_FILE_NAME");
@@ -383,7 +383,7 @@ void cmGlobalGhsMultiGenerator::WriteProjectLine(
   if (projName && projType) {
     cmLocalGenerator* lg = target->GetLocalGenerator();
     std::string dir = lg->GetCurrentBinaryDirectory();
-    dir = root->MaybeConvertToRelativePath(rootBinaryDir, dir);
+    dir = cmSystemTools::ForceToRelativePath(rootBinaryDir, dir);
     if (dir == ".") {
       dir.clear();
     } else {
@@ -433,7 +433,7 @@ void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
                  target->GetName(), "] had a cycle.\n"));
     } else {
       for (auto& tgt : build) {
-        this->WriteProjectLine(fbld, tgt, root, rootBinaryDir);
+        this->WriteProjectLine(fbld, tgt, rootBinaryDir);
       }
     }
     fbld.Close();
@@ -490,7 +490,7 @@ void cmGlobalGhsMultiGenerator::WriteAllTarget(
           target->GetType() == cmStateEnums::SHARED_LIBRARY) {
         continue;
       }
-      this->WriteProjectLine(fbld, target, root, rootBinaryDir);
+      this->WriteProjectLine(fbld, target, rootBinaryDir);
     }
   }
   fbld.Close();

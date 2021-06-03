@@ -88,7 +88,6 @@ static auto ruleReplaceVars = { "CMAKE_${LANG}_COMPILER",
 
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   : cmOutputConverter(makefile->GetStateSnapshot())
-  , StateSnapshot(makefile->GetStateSnapshot())
   , DirectoryBacktrace(makefile->GetBacktrace())
 {
   this->GlobalGenerator = gg;
@@ -351,11 +350,10 @@ void cmLocalGenerator::GenerateTestFiles()
   }
   using vec_t = std::vector<cmStateSnapshot>;
   vec_t const& children = this->Makefile->GetStateSnapshot().GetChildren();
-  std::string parentBinDir = this->GetCurrentBinaryDirectory();
   for (cmStateSnapshot const& i : children) {
     // TODO: Use add_subdirectory instead?
     std::string outP = i.GetDirectory().GetCurrentBinary();
-    outP = this->MaybeConvertToRelativePath(parentBinDir, outP);
+    outP = this->MaybeRelativeToCurBinDir(outP);
     outP = cmOutputConverter::EscapeForCMake(outP);
     fout << "subdirs(" << outP << ")\n";
   }
@@ -838,16 +836,16 @@ cmProp cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(
-  std::string const& path, OutputFormat format, bool forceFullPaths)
+  std::string const& path, IncludePathStyle pathStyle, OutputFormat format)
 {
-  static_cast<void>(forceFullPaths);
+  static_cast<void>(pathStyle);
   return this->ConvertToOutputForExisting(path, format);
 }
 
 std::string cmLocalGenerator::GetIncludeFlags(
-  const std::vector<std::string>& includeDirs, cmGeneratorTarget* target,
-  const std::string& lang, bool forceFullPaths, bool forResponseFile,
-  const std::string& config)
+  std::vector<std::string> const& includeDirs, cmGeneratorTarget* target,
+  std::string const& lang, std::string const& config, bool forResponseFile,
+  IncludePathStyle pathStyle)
 {
   if (lang.empty()) {
     return "";
@@ -923,7 +921,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
       flagUsed = true;
     }
     std::string includePath =
-      this->ConvertToIncludeReference(i, shellFormat, forceFullPaths);
+      this->ConvertToIncludeReference(i, pathStyle, shellFormat);
     if (quotePaths && !includePath.empty() && includePath.front() != '\"') {
       includeFlags << "\"";
     }
@@ -1527,12 +1525,12 @@ void cmLocalGenerator::GetTargetFlags(
         }
 
         if (target->IsWin32Executable(config)) {
-          exeFlags +=
-            this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
+          exeFlags += this->Makefile->GetSafeDefinition(
+            cmStrCat("CMAKE_", linkLanguage, "_CREATE_WIN32_EXE"));
           exeFlags += " ";
         } else {
-          exeFlags +=
-            this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
+          exeFlags += this->Makefile->GetSafeDefinition(
+            cmStrCat("CMAKE_", linkLanguage, "_CREATE_CONSOLE_EXE"));
           exeFlags += " ";
         }
 
@@ -1972,7 +1970,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     }
   }
 
-  // Add VFS Overlay for Clang compiliers
+  // Add VFS Overlay for Clang compilers
   if (compiler == "Clang") {
     if (cmProp vfsOverlay =
           this->Makefile->GetDefinition("CMAKE_CLANG_VFS_OVERLAY")) {
@@ -2307,13 +2305,6 @@ void cmLocalGenerator::AddCMP0018Flags(std::string& flags,
   if (this->GetShouldUseOldFlags(shared, lang)) {
     this->AddSharedFlags(flags, lang, shared);
   } else {
-    if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-      if (target->GetPropertyAsBool("POSITION_INDEPENDENT_CODE")) {
-        this->AddPositionIndependentFlags(flags, lang, targetType);
-      }
-      return;
-    }
-
     if (target->GetLinkInterfaceDependentBoolProperty(
           "POSITION_INDEPENDENT_CODE", config)) {
       this->AddPositionIndependentFlags(flags, lang, targetType);
@@ -2438,7 +2429,7 @@ void cmLocalGenerator::AddISPCDependencies(cmGeneratorTarget* target)
   }
 
   cmProp ispcHeaderSuffixProp = target->GetProperty("ISPC_HEADER_SUFFIX");
-  assert(ispcHeaderSuffixProp != nullptr);
+  assert(ispcHeaderSuffixProp);
 
   std::vector<std::string> ispcArchSuffixes =
     detail::ComputeISPCObjectSuffixes(target);
@@ -2701,8 +2692,9 @@ void cmLocalGenerator::CopyPchCompilePdb(
     }
 
     file << "foreach(retry RANGE 1 30)\n";
-    file << "  if (EXISTS \"" << from_file << "\" AND \"" << from_file
-         << "  \" IS_NEWER_THAN \"" << dest_file << "\")\n";
+    file << "  if (EXISTS \"" << from_file << "\" AND (NOT EXISTS \""
+         << dest_file << "\" OR NOT \"" << dest_file << "  \" IS_NEWER_THAN \""
+         << from_file << "\"))\n";
     file << "    execute_process(COMMAND ${CMAKE_COMMAND} -E copy";
     file << " \"" << from_file << "\""
          << " \"" << to_dir << "\" RESULT_VARIABLE result "
@@ -2785,7 +2777,7 @@ void cmLocalGenerator::IncludeFileInUnitySources(
   cmGeneratedFileStream& unity_file, std::string const& sf_full_path,
   cmProp beforeInclude, cmProp afterInclude, cmProp uniqueIdName) const
 {
-  if (uniqueIdName && !uniqueIdName->empty()) {
+  if (cmNonempty(uniqueIdName)) {
     std::string pathToHash;
     auto PathEqOrSubDir = [](std::string const& a, std::string const& b) {
       return (cmSystemTools::ComparePath(a, b) ||
@@ -3000,7 +2992,7 @@ void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
 
   const std::string name = "CMAKE_" + lang + "_LINK_OPTIONS_IPO";
   cmProp rawFlagsList = this->Makefile->GetDefinition(name);
-  if (rawFlagsList == nullptr) {
+  if (!rawFlagsList) {
     return;
   }
 
@@ -3239,7 +3231,7 @@ void cmLocalGenerator::AppendFeatureOptions(std::string& flags,
 {
   cmProp optionList = this->Makefile->GetDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_", feature));
-  if (optionList != nullptr) {
+  if (optionList) {
     std::vector<std::string> options = cmExpandedList(*optionList);
     for (std::string const& o : options) {
       this->AppendFlagEscape(flags, o);
@@ -3285,10 +3277,9 @@ std::string cmLocalGenerator::ConstructComment(
     std::string comment;
     comment = "Generating ";
     const char* sep = "";
-    std::string currentBinaryDir = this->GetCurrentBinaryDirectory();
     for (std::string const& o : ccg.GetOutputs()) {
       comment += sep;
-      comment += this->MaybeConvertToRelativePath(currentBinaryDir, o);
+      comment += this->MaybeRelativeToCurBinDir(o);
       sep = ", ";
     }
     return comment;
@@ -3326,7 +3317,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
     // Include the user-specified pre-install script for this target.
     if (cmProp preinstall = l->GetProperty("PRE_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(*preinstall, false, "", false);
+      cmInstallScriptGenerator g(*preinstall, false, "", false, false);
       g.Generate(os, config, configurationTypes);
     }
 
@@ -3379,7 +3370,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
     // Include the user-specified post-install script for this target.
     if (cmProp postinstall = l->GetProperty("POST_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(*postinstall, false, "", false);
+      cmInstallScriptGenerator g(*postinstall, false, "", false, false);
       g.Generate(os, config, configurationTypes);
     }
   }
@@ -3540,6 +3531,21 @@ bool cmLocalGenerator::IsNinjaMulti() const
   return this->GetState()->UseNinjaMulti();
 }
 
+namespace {
+std::string relativeIfUnder(std::string const& top, std::string const& cur,
+                            std::string const& path)
+{
+  // Use a path relative to 'cur' if it can be expressed without
+  // a `../` sequence that leaves 'top'.
+  if (cmSystemTools::IsSubDirectory(path, cur) ||
+      (cmSystemTools::IsSubDirectory(cur, top) &&
+       cmSystemTools::IsSubDirectory(path, top))) {
+    return cmSystemTools::ForceToRelativePath(cur, path);
+  }
+  return path;
+}
+}
+
 std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   const cmSourceFile& source, std::string const& dir_max,
   bool* hasSourceExtension, char const* customOutputExtension)
@@ -3549,15 +3555,15 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   std::string const& fullPath = source.GetFullPath();
 
   // Try referencing the source relative to the source tree.
-  std::string relFromSource = this->MaybeConvertToRelativePath(
-    this->GetCurrentSourceDirectory(), fullPath);
+  std::string relFromSource = relativeIfUnder(
+    this->GetSourceDirectory(), this->GetCurrentSourceDirectory(), fullPath);
   assert(!relFromSource.empty());
   bool relSource = !cmSystemTools::FileIsFullPath(relFromSource);
   bool subSource = relSource && relFromSource[0] != '.';
 
   // Try referencing the source relative to the binary tree.
-  std::string relFromBinary = this->MaybeConvertToRelativePath(
-    this->GetCurrentBinaryDirectory(), fullPath);
+  std::string relFromBinary = relativeIfUnder(
+    this->GetBinaryDirectory(), this->GetCurrentBinaryDirectory(), fullPath);
   assert(!relFromBinary.empty());
   bool relBinary = !cmSystemTools::FileIsFullPath(relFromBinary);
   bool subBinary = relBinary && relFromBinary[0] != '.';
@@ -3670,13 +3676,6 @@ std::string const& cmLocalGenerator::GetCurrentBinaryDirectory() const
 std::string const& cmLocalGenerator::GetCurrentSourceDirectory() const
 {
   return this->StateSnapshot.GetDirectory().GetCurrentSource();
-}
-
-std::string cmLocalGenerator::MaybeConvertToRelativePath(
-  std::string const& local_path, std::string const& remote_path) const
-{
-  return this->StateSnapshot.GetDirectory().ConvertToRelPathIfNotContained(
-    local_path, remote_path);
 }
 
 std::string cmLocalGenerator::GetTargetDirectory(
@@ -3930,7 +3929,7 @@ std::string ComputeCustomCommandRuleFileName(cmLocalGenerator& lg,
 
   // The output path contains a generator expression, but we must choose
   // a single source file path to which to attach the custom command.
-  // Use some heuristics to provie a nice-looking name when possible.
+  // Use some heuristics to provide a nice-looking name when possible.
 
   // If the only genex is $<CONFIG>, replace that gracefully.
   {
@@ -4097,6 +4096,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
   cc.SetDepfile(depfile);
   cc.SetJobPool(job_pool);
   cc.SetCMP0116Status(cmp0116);
+  cc.SetTarget(target->GetName());
   switch (type) {
     case cmCustomCommandType::PRE_BUILD:
       target->AddPreBuildCommand(std::move(cc));
@@ -4218,7 +4218,7 @@ std::vector<std::string> ComputeISPCObjectSuffixes(cmGeneratorTarget* target)
       auto pos = ispcTarget.find('-');
       auto target_suffix = ispcTarget.substr(0, pos);
       if (target_suffix ==
-          "avx1") { // when targetting avx1 ISPC uses the 'avx' output string
+          "avx1") { // when targeting avx1 ISPC uses the 'avx' output string
         target_suffix = "avx";
       }
       ispcTarget = target_suffix;

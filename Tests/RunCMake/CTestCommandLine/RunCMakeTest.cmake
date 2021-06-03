@@ -202,7 +202,7 @@ function(run_TestLoad name load)
   add_test(TestLoad1 \"${CMAKE_COMMAND}\" -E echo \"test of --test-load\")
   add_test(TestLoad2 \"${CMAKE_COMMAND}\" -E echo \"test of --test-load\")
 ")
-  run_cmake_command(${name} ${CMAKE_CTEST_COMMAND} -j2 --test-load ${load})
+  run_cmake_command(${name} ${CMAKE_CTEST_COMMAND} -VV -j2 --test-load ${load})
 endfunction()
 
 # Tests for the --test-load feature of ctest
@@ -360,6 +360,10 @@ run_NoTests()
 # Check the configuration type variable is passed
 run_ctest(check-configuration-type)
 
+run_cmake_command(EmptyDirCoverage-ctest
+  ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T Coverage
+  )
+
 function(run_MemCheckSan case opts)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/MemCheckSan${case}-build)
@@ -397,3 +401,22 @@ function(run_testDir)
   run_cmake_command(testDir ${CMAKE_CTEST_COMMAND} --test-dir "${RunCMake_TEST_BINARY_DIR}/sub")
 endfunction()
 run_testDir()
+
+# Test --output-junit
+function(run_output_junit)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/output-junit)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E false)
+add_test(test2 \"${CMAKE_COMMAND}\" -E echo \"hello world\")
+add_test(test3 \"${CMAKE_COMMAND}\" -E true)
+set_tests_properties(test3 PROPERTIES  DISABLED \"ON\")
+add_test(test4 \"${CMAKE_COMMAND}/doesnt_exist\")
+add_test(test5 \"${CMAKE_COMMAND}\" -E echo \"please skip\")
+set_tests_properties(test5 PROPERTIES  SKIP_REGULAR_EXPRESSION \"please skip\")
+")
+  run_cmake_command(output-junit ${CMAKE_CTEST_COMMAND} --output-junit "${RunCMake_TEST_BINARY_DIR}/junit.xml")
+endfunction()
+run_output_junit()

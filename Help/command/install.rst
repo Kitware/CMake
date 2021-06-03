@@ -9,6 +9,7 @@ Synopsis
 .. parsed-literal::
 
   install(`TARGETS`_ <target>... [...])
+  install(`IMPORTED_RUNTIME_ARTIFACTS`_ <target>... [...])
   install({`FILES`_ | `PROGRAMS`_} <file>... [...])
   install(`DIRECTORY`_ <dir>... [...])
   install(`SCRIPT`_ <file> [...])
@@ -382,6 +383,38 @@ set to ``TRUE`` has undefined behavior.
   to ensure that such out-of-directory targets are built before the
   subdirectory-specific install rules are run.
 
+Installing Imported Runtime Artifacts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _`install(IMPORTED_RUNTIME_ARTIFACTS)`:
+.. _IMPORTED_RUNTIME_ARTIFACTS:
+
+.. versionadded:: 3.21
+
+.. code-block:: cmake
+
+  install(IMPORTED_RUNTIME_ARTIFACTS targets...
+          [[LIBRARY|RUNTIME|FRAMEWORK|BUNDLE]
+           [DESTINATION <dir>]
+           [PERMISSIONS permissions...]
+           [CONFIGURATIONS [Debug|Release|...]]
+           [COMPONENT <component>]
+           [OPTIONAL] [EXCLUDE_FROM_ALL]
+          ] [...]
+          )
+
+The ``IMPORTED_RUNTIME_ARTIFACTS`` form specifies rules for installing the
+runtime artifacts of imported targets. Projects may do this if they want to
+bundle outside executables or modules inside their installation. The
+``LIBRARY``, ``RUNTIME``, ``FRAMEWORK``, and ``BUNDLE`` arguments have the
+same semantics that they do in the `TARGETS`_ mode. Only the runtime artifacts
+of imported targets are installed (except in the case of :prop_tgt:`FRAMEWORK`
+libraries, :prop_tgt:`MACOSX_BUNDLE` executables, and :prop_tgt:`BUNDLE`
+CFBundles.) For example, headers and import libraries associated with DLLs are
+not installed. In the case of :prop_tgt:`FRAMEWORK` libraries,
+:prop_tgt:`MACOSX_BUNDLE` executables, and :prop_tgt:`BUNDLE` CFBundles, the
+entire directory is installed.
+
 Installing Files
 ^^^^^^^^^^^^^^^^
 
@@ -540,7 +573,8 @@ any expression.  For example, the code
 
 will extract and install header files from a source tree.
 
-Some options may follow a ``PATTERN`` or ``REGEX`` expression and are applied
+Some options may follow a ``PATTERN`` or ``REGEX`` expression as described
+under :ref:`string(REGEX) <Regex Specification>` and are applied
 only to files or directories matching them.  The ``EXCLUDE`` option will
 skip the matched file or directory.  The ``PERMISSIONS`` option overrides
 the permissions setting for the matched file or directory.  For
@@ -619,7 +653,7 @@ Custom Installation Logic
 .. code-block:: cmake
 
   install([[SCRIPT <file>] [CODE <code>]]
-          [COMPONENT <component>] [EXCLUDE_FROM_ALL] [...])
+          [COMPONENT <component>] [EXCLUDE_FROM_ALL] [ALL_COMPONENTS] [...])
 
 The ``SCRIPT`` form will invoke the given CMake script files during
 installation.  If the script file name is a relative path it will be
@@ -633,6 +667,12 @@ example, the code
   install(CODE "MESSAGE(\"Sample install message.\")")
 
 will print a message during installation.
+
+The option ``ALL_COMPONENTS``
+  .. versionadded:: 3.21
+
+  Run the custom installation script code for every component of a
+  component-specific installation.
 
 .. versionadded:: 3.14
   ``<file>`` or ``<code>`` may use "generator expressions" with the syntax
@@ -724,7 +764,7 @@ executable from the installation tree using the imported target name
 ``mp_myexe`` as if the target were built in its own tree.
 
 .. note::
-  This command supercedes the :command:`install_targets` command and
+  This command supersedes the :command:`install_targets` command and
   the :prop_tgt:`PRE_INSTALL_SCRIPT` and :prop_tgt:`POST_INSTALL_SCRIPT`
   target properties.  It also replaces the ``FILES`` forms of the
   :command:`install_files` and :command:`install_programs` commands.

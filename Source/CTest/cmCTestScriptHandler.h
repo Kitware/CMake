@@ -62,7 +62,7 @@ public:
   /**
    * Add a script to run, and if is should run in the current process
    */
-  void AddConfigurationScript(const char*, bool pscope);
+  void AddConfigurationScript(const std::string&, bool pscope);
 
   /**
    * Run a dashboard using a specified confiuration script
@@ -72,19 +72,21 @@ public:
   /*
    * Run a script
    */
-  static bool RunScript(cmCTest* ctest, cmMakefile* mf, const char* script,
-                        bool InProcess, int* returnValue);
+  static bool RunScript(cmCTest* ctest, cmMakefile* mf,
+                        const std::string& script, bool InProcess,
+                        int* returnValue);
   int RunCurrentScript();
 
   /*
    * Empty Binary Directory
    */
-  static bool EmptyBinaryDirectory(const char* dir);
+  static bool EmptyBinaryDirectory(const std::string& dir);
 
   /*
    * Write an initial CMakeCache.txt from the given contents.
    */
-  static bool WriteInitialCache(const char* directory, const char* text);
+  static bool WriteInitialCache(const std::string& directory,
+                                const std::string& text);
 
   /*
    * Some elapsed time handling functions

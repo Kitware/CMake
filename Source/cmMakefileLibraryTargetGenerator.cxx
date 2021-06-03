@@ -250,13 +250,11 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     cmLocalUnixMakefileGenerator3::EchoProgress progress;
     this->MakeEchoProgress(progress);
     // Add the link message.
-    std::string buildEcho =
-      cmStrCat("Linking CUDA device code ",
-               this->LocalGenerator->ConvertToOutputFormat(
-                 this->LocalGenerator->MaybeConvertToRelativePath(
-                   this->LocalGenerator->GetCurrentBinaryDirectory(),
-                   this->DeviceLinkObject),
-                 cmOutputConverter::SHELL));
+    std::string buildEcho = cmStrCat(
+      "Linking CUDA device code ",
+      this->LocalGenerator->ConvertToOutputFormat(
+        this->LocalGenerator->MaybeRelativeToCurBinDir(this->DeviceLinkObject),
+        cmOutputConverter::SHELL));
     this->LocalGenerator->AppendEcho(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
@@ -293,8 +291,8 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
 
   // Clean files associated with this library.
   std::set<std::string> libCleanFiles;
-  libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutput));
+  libCleanFiles.insert(
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetOutput));
 
   // Determine whether a link script will be used.
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
@@ -342,14 +340,11 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
 
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
     objectDir = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), objectDir),
+      this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir),
       cmOutputConverter::SHELL);
 
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutput),
-      output);
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetOutput), output);
 
     std::string targetFullPathCompilePDB =
       this->ComputeTargetCompilePDB(this->GetConfigName());
@@ -519,22 +514,17 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     targetFullPathPDB, cmOutputConverter::SHELL);
 
   std::string targetOutPath = this->LocalGenerator->ConvertToOutputFormat(
-    this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath),
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPath),
     cmOutputConverter::SHELL);
   std::string targetOutPathSO = this->LocalGenerator->ConvertToOutputFormat(
-    this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathSO),
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathSO),
     cmOutputConverter::SHELL);
   std::string targetOutPathReal = this->LocalGenerator->ConvertToOutputFormat(
-    this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal),
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathReal),
     cmOutputConverter::SHELL);
   std::string targetOutPathImport =
     this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(),
-        targetFullPathImport),
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathImport),
       cmOutputConverter::SHELL);
 
   this->NumberOfProgressActions++;
@@ -567,8 +557,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
   // Clean files associated with this library.
   std::set<std::string> libCleanFiles;
-  libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
+  libCleanFiles.insert(
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathReal));
 
   std::vector<std::string> commands1;
   // Add a command to remove any existing files for this library.
@@ -584,38 +574,36 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
 
   if (this->TargetNames.Output != this->TargetNames.Real) {
-    libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
+    libCleanFiles.insert(
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPath));
   }
   if (this->TargetNames.SharedObject != this->TargetNames.Real &&
       this->TargetNames.SharedObject != this->TargetNames.Output) {
-    libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathSO));
+    libCleanFiles.insert(
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathSO));
   }
   if (!this->TargetNames.ImportLibrary.empty()) {
-    libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(),
-      targetFullPathImport));
+    libCleanFiles.insert(
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathImport));
     std::string implib;
     if (this->GeneratorTarget->GetImplibGNUtoMS(
           this->GetConfigName(), targetFullPathImport, implib)) {
-      libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), implib));
+      libCleanFiles.insert(
+        this->LocalGenerator->MaybeRelativeToCurBinDir(implib));
     }
   }
 
   // List the PDB for cleaning only when the whole target is
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
-  this->CleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathPDB));
+  this->CleanFiles.insert(
+    this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathPDB));
 
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
   if (this->GeneratorTarget->GetType() != cmStateEnums::STATIC_LIBRARY) {
-    libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
-      this->LocalGenerator->GetCurrentBinaryDirectory(),
+    libCleanFiles.insert(this->LocalGenerator->MaybeRelativeToCurBinDir(
       targetFullPath + ".manifest"));
   }
 #endif
@@ -723,8 +711,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     if (!this->DeviceLinkObject.empty()) {
       buildObjs += " " +
         this->LocalGenerator->ConvertToOutputFormat(
-          this->LocalGenerator->MaybeConvertToRelativePath(
-            this->LocalGenerator->GetCurrentBinaryDirectory(),
+          this->LocalGenerator->MaybeRelativeToCurBinDir(
             this->DeviceLinkObject),
           cmOutputConverter::SHELL);
     }
@@ -765,8 +752,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
 
     objectDir = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), objectDir),
+      this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir),
       cmOutputConverter::SHELL);
 
     vars.ObjectDir = objectDir.c_str();
@@ -774,15 +760,17 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       ? cmOutputConverter::WATCOMQUOTE
       : cmOutputConverter::SHELL;
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal),
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathReal),
       output);
     vars.Target = target.c_str();
     vars.LinkLibraries = linkLibs.c_str();
     vars.ObjectsQuoted = buildObjs.c_str();
+    std::string targetOutSOName;
     if (this->GeneratorTarget->HasSOName(this->GetConfigName())) {
       vars.SONameFlag = this->Makefile->GetSONameFlag(linkLanguage);
-      vars.TargetSOName = this->TargetNames.SharedObject.c_str();
+      targetOutSOName = this->LocalGenerator->ConvertToOutputFormat(
+        this->TargetNames.SharedObject.c_str(), cmOutputConverter::SHELL);
+      vars.TargetSOName = targetOutSOName.c_str();
     }
     vars.LinkFlags = linkFlags.c_str();
 
@@ -816,6 +804,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
     vars.LanguageCompileFlags = langFlags.c_str();
 
+    std::string linkerLauncher =
+      this->GetLinkerLauncher(this->GetConfigName());
+    if (cmNonempty(linkerLauncher)) {
+      vars.Launcher = linkerLauncher.c_str();
+    }
+
     std::string launcher;
     cmProp val = this->LocalGenerator->GetRuleLauncher(this->GeneratorTarget,
                                                        "RULE_LAUNCH_LINK");
@@ -836,8 +830,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       // only occur on archives which have CUDA_RESOLVE_DEVICE_SYMBOLS enabled
       if (!this->DeviceLinkObject.empty()) {
         object_strings.push_back(this->LocalGenerator->ConvertToOutputFormat(
-          this->LocalGenerator->MaybeConvertToRelativePath(
-            this->LocalGenerator->GetCurrentBinaryDirectory(),
+          this->LocalGenerator->MaybeRelativeToCurBinDir(
             this->DeviceLinkObject),
           cmOutputConverter::SHELL));
       }

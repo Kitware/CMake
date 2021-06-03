@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-# Verify COMMAND keyword is recognised after various *_COMMAND options
+# Verify COMMAND keyword is recognized after various *_COMMAND options
 ExternalProject_Add(multiCommand
   DOWNLOAD_COMMAND  "${CMAKE_COMMAND}" -E echo "download 1"
            COMMAND  "${CMAKE_COMMAND}" -E echo "download 2"

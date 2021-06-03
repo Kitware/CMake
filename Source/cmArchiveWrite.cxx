@@ -2,11 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmArchiveWrite.h"
 
-#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <iostream>
+#include <limits>
 #include <sstream>
+#include <string>
+#include <thread>
+
+#include <cm/algorithm>
 
 #include <cm3p/archive.h>
 #include <cm3p/archive_entry.h>
@@ -144,16 +149,36 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
                                cm_archive_error_string(this->Archive));
         return;
       }
+
       {
-        char sNumThreads[8];
-        snprintf(sNumThreads, sizeof(sNumThreads), "%d", numThreads);
-        sNumThreads[7] = '\0'; // for safety
+#if ARCHIVE_VERSION_NUMBER >= 3004000
+        // Upstream fixed an issue with their integer parsing in 3.4.0
+        // which would cause spurious errors to be raised from `strtoull`.
+
+        if (numThreads < 1) {
+          int upperLimit = (numThreads == 0) ? std::numeric_limits<int>::max()
+                                             : std::abs(numThreads);
+
+          numThreads =
+            cm::clamp<int>(std::thread::hardware_concurrency(), 1, upperLimit);
+        }
+
+#  ifdef _AIX
+        // FIXME: Using more than 2 threads creates an empty archive.
+        // Enforce this limit pending further investigation.
+        numThreads = std::min(numThreads, 2);
+#  endif
+
+        std::string sNumThreads = std::to_string(numThreads);
+
         if (archive_write_set_filter_option(this->Archive, "xz", "threads",
-                                            sNumThreads) != ARCHIVE_OK) {
+                                            sNumThreads.c_str()) !=
+            ARCHIVE_OK) {
           this->Error = cmStrCat("archive_compressor_xz_options: ",
                                  cm_archive_error_string(this->Archive));
           return;
         }
+#endif
       }
 
       break;
@@ -423,18 +448,5 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
                            "\": ", cmSystemTools::GetLastSystemError());
     return false;
   }
-  return true;
-}
-
-bool cmArchiveWrite::SetFilterOption(const char* module, const char* key,
-                                     const char* value)
-{
-  if (archive_write_set_filter_option(this->Archive, module, key, value) !=
-      ARCHIVE_OK) {
-    this->Error = "archive_write_set_filter_option: ";
-    this->Error += cm_archive_error_string(this->Archive);
-    return false;
-  }
-
   return true;
 }

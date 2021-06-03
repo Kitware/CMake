@@ -1,0 +1,8 @@
+CMake Error at CMP0121-INSERT-Common.cmake:3 \(list\):
+  list index: junk2 is not a valid index
+Call Stack \(most recent call first\):
+  CMP0121-INSERT-NEW.cmake:2 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+INSERT: -->a;b;c;d;e<--

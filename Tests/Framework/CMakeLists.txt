@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.12)
 project(Framework)
 
 add_library(foo SHARED
@@ -83,7 +83,7 @@ if(NOT XCODE OR NOT XCODE_VERSION VERSION_LESS 5)
   target_link_libraries(barStatic fooStatic)
 endif()
 
-if(XCODE)
+if(MAKE_SUPPORTS_SPACES AND NOT CMAKE_GENERATOR STREQUAL "Watcom WMake")
   add_library(space SHARED space.c)
   set_target_properties(space PROPERTIES
     FRAMEWORK TRUE

@@ -800,7 +800,7 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
     for (size_t i = 0; i < defer->Commands.size(); ++i) {
       DeferCommand& d = defer->Commands[i];
       if (d.Id.empty()) {
-        // Cancelled.
+        // Canceled.
         continue;
       }
       // Mark as executed.
@@ -1222,7 +1222,7 @@ void cmMakefile::AddCustomCommandOldStyle(
 
   // Each output must get its own copy of this rule.
   cmsys::RegularExpression sourceFiles(
-    "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|mpp|cu|m|mm|"
+    "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|mpp|ixx|cppm|cu|m|mm|"
     "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
     "hm|hpp|hxx|in|txx|inl)$");
 
@@ -1844,7 +1844,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   }
 
   this->AddInstallGenerator(cm::make_unique<cmInstallSubdirectoryGenerator>(
-    subMf, binPath, excludeFromAll, this->GetBacktrace()));
+    subMf, binPath, this->GetBacktrace()));
 }
 
 const std::string& cmMakefile::GetCurrentSourceDirectory() const
@@ -1962,8 +1962,10 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
     }
   }
   this->GetCMakeInstance()->AddCacheEntry(name, value, doc, type);
-  // if there was a definition then remove it
-  this->StateSnapshot.RemoveDefinition(name);
+  if (this->GetPolicyStatus(cmPolicies::CMP0126) != cmPolicies::NEW) {
+    // if there was a definition then remove it
+    this->StateSnapshot.RemoveDefinition(name);
+  }
 }
 
 void cmMakefile::MarkVariableAsUsed(const std::string& var)
@@ -2479,7 +2481,7 @@ const std::string& cmMakefile::GetRequiredDefinition(
   const std::string& name) const
 {
   static std::string const empty;
-  const std::string* def = this->GetDefinition(name);
+  cmProp def = this->GetDefinition(name);
   if (!def) {
     cmSystemTools::Error("Error required internal CMake variable not "
                          "set, cmake may not be built correctly.\n"
@@ -2496,6 +2498,20 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
   if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
+#ifndef CMAKE_BOOTSTRAP
+  if (cmVariableWatch* vv = this->GetVariableWatch()) {
+    if (!def) {
+      vv->VariableAccessed(
+        name, cmVariableWatch::UNKNOWN_VARIABLE_DEFINED_ACCESS, nullptr, this);
+    }
+  }
+#endif
+  return def != nullptr;
+}
+
+bool cmMakefile::IsNormalDefinitionSet(const std::string& name) const
+{
+  cmProp def = this->StateSnapshot.GetDefinition(name);
 #ifndef CMAKE_BOOTSTRAP
   if (cmVariableWatch* vv = this->GetVariableWatch()) {
     if (!def) {
@@ -2539,7 +2555,7 @@ cmProp cmMakefile::GetDefinition(const std::string& name) const
 const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
 {
   static std::string const empty;
-  const std::string* def = this->GetDefinition(name);
+  cmProp def = this->GetDefinition(name);
   if (!def) {
     return empty;
   }
@@ -3053,7 +3069,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
             if (filename && variable == lineVar) {
               varresult = std::to_string(line);
             } else {
-              const std::string* def = this->GetDefinition(variable);
+              cmProp def = this->GetDefinition(variable);
               if (def) {
                 varresult = *def;
               } else if (!this->SuppressSideEffects) {
@@ -3438,7 +3454,8 @@ void cmMakefile::CreateGeneratedOutputs(
 void cmMakefile::AddTargetObject(std::string const& tgtName,
                                  std::string const& objFile)
 {
-  cmSourceFile* sf = this->GetOrCreateSource(objFile, true);
+  cmSourceFile* sf =
+    this->GetOrCreateSource(objFile, true, cmSourceFileLocationKind::Known);
   sf->SetObjectLibrary(tgtName);
   sf->SetProperty("EXTERNAL_OBJECT", "1");
 #if !defined(CMAKE_BOOTSTRAP)
@@ -4393,7 +4410,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 
   // Deprecate old policies, especially those that require a lot
   // of code to maintain the old behavior.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0075 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0081 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.

@@ -43,3 +43,20 @@ if(NOT RunCMake_GENERATOR STREQUAL "Ninja Multi-Config")
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
+
+function(test_genex name)
+  run_cmake(${name})
+
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${name}-build")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${name}-build ${CMAKE_COMMAND} --build .)
+
+  if(NOT EXISTS "${RunCMake_TEST_BINARY_DIR}/wdir/touched")
+    message(SEND_ERROR "File not created by target-dependent add_custom_command()!")
+  endif()
+
+  unset(RunCMake_TEST_NO_CLEAN)
+  unset(RunCMake_TEST_BINARY_DIR)
+endfunction()
+
+test_genex(TargetGenexEvent)

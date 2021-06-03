@@ -81,3 +81,15 @@ function(framework_multi_config_postfix_test)
 endfunction()
 
 framework_multi_config_postfix_test()
+
+function(imported_framework_test)
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/ImportedFrameworkTest-build")
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake(ImportedFrameworkTest)
+  run_cmake_command(ImportedFrameworkTest-build ${CMAKE_COMMAND} --build .)
+endfunction()
+
+imported_framework_test()

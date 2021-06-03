@@ -26,7 +26,7 @@
         PRINT *, 'INFO:compiler[IntelLLVM]'
 ! __INTEL_LLVM_COMPILER = VVVVRP prior to 2021.2.0, VVVVRRPP for 2021.2.0 and
 ! later.  Look for 6 digit vs. 8 digit version number to decide encoding.
-! VVVV is no smaller than the current year when a versio is released.
+! VVVV is no smaller than the current year when a version is released.
 # if __INTEL_LLVM_COMPILER < 1000000
 #  define COMPILER_VERSION_MAJOR DEC(__INTEL_LLVM_COMPILER/100)
 #  define COMPILER_VERSION_MINOR DEC(__INTEL_LLVM_COMPILER/10 % 10)
@@ -156,6 +156,15 @@
 #define COMPILER_VERSION_MAJOR DEC(__NAG_COMPILER_RELEASE/10)
 #define COMPILER_VERSION_MINOR DEC(__NAG_COMPILER_RELEASE % 10)
 #define COMPILER_VERSION_PATCH DEC(__NAG_COMPILER_BUILD)
+#elif defined(__FUJITSU)
+        PRINT *, 'INFO:compiler[Fujitsu]'
+# if defined(__FRT_major__)
+#   define COMPILER_VERSION_MAJOR DEC(__FRT_major__)
+#   define COMPILER_VERSION_MINOR DEC(__FRT_minor__)
+#   define COMPILER_VERSION_PATCH DEC(__FRT_patchlevel__)
+# elif defined(__FRT_version__)
+        PRINT *, 'INFO:compiler_version['//__FRT_version__//']'
+# endif
 #else
         PRINT *, 'INFO:compiler[]'
 #endif

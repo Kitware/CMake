@@ -42,6 +42,7 @@ public:
     cmGeneratorTarget const* Target = nullptr;
     bool IsSharedDep = false;
     bool IsFlag = false;
+    bool IsObject = false;
   };
 
   using EntryVector = std::vector<LinkEntry>;
@@ -65,10 +66,12 @@ private:
   std::map<cmLinkItem, int>::iterator AllocateLinkEntry(
     cmLinkItem const& item);
   int AddLinkEntry(cmLinkItem const& item);
+  void AddLinkObject(cmLinkItem const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddDirectLinkEntries();
   template <typename T>
   void AddLinkEntries(int depender_index, std::vector<T> const& libs);
+  void AddLinkObjects(std::vector<cmLinkItem> const& objs);
   cmLinkItem ResolveLinkItem(int depender_index, const std::string& name);
 
   // One entry for each unique item.
@@ -152,6 +155,9 @@ private:
   std::vector<int> OriginalEntries;
   std::set<cmGeneratorTarget const*> OldWrongConfigItems;
   void CheckWrongConfigItem(cmLinkItem const& item);
+
+  // Record of explicitly linked object files.
+  std::vector<int> ObjectEntries;
 
   int ComponentOrderId;
   cmTargetLinkLibraryType LinkType;

@@ -1,0 +1,101 @@
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
+#ifndef @KWSYS_NAMESPACE@_Status_hxx
+#define @KWSYS_NAMESPACE@_Status_hxx
+
+#include <@KWSYS_NAMESPACE@/Configure.hxx>
+
+#include <string>
+
+namespace @KWSYS_NAMESPACE@ {
+
+/** \class Status
+ * \brief OS-specific status of a system operation.
+ */
+class @KWSYS_NAMESPACE@_EXPORT Status
+{
+public:
+  enum class Kind
+  {
+    Success,
+    POSIX,
+#ifdef _WIN32
+    Windows,
+#endif
+  };
+
+  /** Construct with kind "Success".  */
+  Status() = default;
+
+  /** Construct with kind "Success".  */
+  static Status Success() { return Status(); }
+
+  /** Construct with kind "POSIX" using given errno-style value.  */
+  static Status POSIX(int e)
+  {
+    Status s(Kind::POSIX);
+    s.POSIX_ = e;
+    return s;
+  }
+
+  /** Construct with kind "POSIX" using errno.  */
+  static Status POSIX_errno();
+
+#ifdef _WIN32
+  /** Construct with kind "Windows" using given GetLastError()-style value.  */
+  static Status Windows(unsigned int e)
+  {
+    Status s(Kind::Windows);
+    s.Windows_ = e;
+    return s;
+  }
+
+  /** Construct with kind "Windows" using GetLastError().  */
+  static Status Windows_GetLastError();
+#endif
+
+  /** Return true on "Success", false otherwise.  */
+  explicit operator bool() const { return this->Kind_ == Kind::Success; }
+
+  /** Return the kind of status.  */
+  Kind GetKind() const { return this->Kind_; }
+
+  /** If the kind is "POSIX", returns the errno-style value.
+      Otherwise, returns 0.  */
+  int GetPOSIX() const
+  {
+    return this->Kind_ == Kind::POSIX ? this->POSIX_ : 0;
+  }
+
+#ifdef _WIN32
+  /** If the kind is "Windows", returns the GetLastError()-style value.
+      Otherwise, returns 0.  */
+  unsigned int GetWindows() const
+  {
+    return this->Kind_ == Kind::Windows ? this->Windows_ : 0;
+  }
+#endif
+
+  /** Return a human-readable description of the status.  */
+  std::string GetString() const;
+
+private:
+  Status(Kind kind)
+    : Kind_(kind)
+  {
+  }
+
+  Kind Kind_ = Kind::Success;
+
+  union
+  {
+    int POSIX_;
+#ifdef _WIN32
+    unsigned int Windows_;
+#endif
+  };
+};
+
+} // namespace @KWSYS_NAMESPACE@
+
+#endif

@@ -14,6 +14,7 @@ public:
   {
     None,
     UTF8,
+    UTF8_WITH_BOM,
     ANSI
   };
 

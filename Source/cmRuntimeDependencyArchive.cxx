@@ -115,7 +115,10 @@ cmRuntimeDependencyArchive::cmRuntimeDependencyArchive(
   const std::vector<std::string>& preIncludeRegexes,
   const std::vector<std::string>& preExcludeRegexes,
   const std::vector<std::string>& postIncludeRegexes,
-  const std::vector<std::string>& postExcludeRegexes)
+  const std::vector<std::string>& postExcludeRegexes,
+  std::vector<std::string> postIncludeFiles,
+  std::vector<std::string> postExcludeFiles,
+  std::vector<std::string> postExcludeFilesStrict)
   : Status(status)
   , SearchDirectories(std::move(searchDirectories))
   , BundleExecutable(std::move(bundleExecutable))
@@ -123,6 +126,9 @@ cmRuntimeDependencyArchive::cmRuntimeDependencyArchive(
   , PreExcludeRegexes(preExcludeRegexes.size())
   , PostIncludeRegexes(postIncludeRegexes.size())
   , PostExcludeRegexes(postExcludeRegexes.size())
+  , PostIncludeFiles(std::move(postIncludeFiles))
+  , PostExcludeFiles(std::move(postExcludeFiles))
+  , PostExcludeFilesStrict(std::move(postExcludeFilesStrict))
 {
   std::transform(preIncludeRegexes.begin(), preIncludeRegexes.end(),
                  this->PreIncludeRegexes.begin(), TransformCompile);
@@ -306,39 +312,45 @@ bool cmRuntimeDependencyArchive::GetGetRuntimeDependenciesCommand(
 bool cmRuntimeDependencyArchive::IsPreExcluded(const std::string& name)
 {
   cmsys::RegularExpressionMatch match;
+  auto const regexMatch =
+    [&match, name](const cmsys::RegularExpression& regex) -> bool {
+    return regex.find(name.c_str(), match);
+  };
+  auto const regexSearch =
+    [&regexMatch](
+      const std::vector<cmsys::RegularExpression>& regexes) -> bool {
+    return std::any_of(regexes.begin(), regexes.end(), regexMatch);
+  };
 
-  for (auto const& regex : this->PreIncludeRegexes) {
-    if (regex.find(name.c_str(), match)) {
-      return false;
-    }
-  }
-
-  for (auto const& regex : this->PreExcludeRegexes) {
-    if (regex.find(name.c_str(), match)) {
-      return true;
-    }
-  }
-
-  return false;
+  return !regexSearch(this->PreIncludeRegexes) &&
+    regexSearch(this->PreExcludeRegexes);
 }
 
 bool cmRuntimeDependencyArchive::IsPostExcluded(const std::string& name)
 {
   cmsys::RegularExpressionMatch match;
+  auto const regexMatch =
+    [&match, name](const cmsys::RegularExpression& regex) -> bool {
+    return regex.find(name.c_str(), match);
+  };
+  auto const regexSearch =
+    [&regexMatch](
+      const std::vector<cmsys::RegularExpression>& regexes) -> bool {
+    return std::any_of(regexes.begin(), regexes.end(), regexMatch);
+  };
+  auto const fileMatch = [name](const std::string& file) -> bool {
+    return cmSystemTools::SameFile(file, name);
+  };
+  auto const fileSearch =
+    [&fileMatch](const std::vector<std::string>& files) -> bool {
+    return std::any_of(files.begin(), files.end(), fileMatch);
+  };
 
-  for (auto const& regex : this->PostIncludeRegexes) {
-    if (regex.find(name.c_str(), match)) {
-      return false;
-    }
-  }
-
-  for (auto const& regex : this->PostExcludeRegexes) {
-    if (regex.find(name.c_str(), match)) {
-      return true;
-    }
-  }
-
-  return false;
+  return fileSearch(this->PostExcludeFilesStrict) ||
+    (!(regexSearch(this->PostIncludeRegexes) ||
+       fileSearch(this->PostIncludeFiles)) &&
+     (regexSearch(this->PostExcludeRegexes) ||
+      fileSearch(this->PostExcludeFiles)));
 }
 
 void cmRuntimeDependencyArchive::AddResolvedPath(const std::string& name,

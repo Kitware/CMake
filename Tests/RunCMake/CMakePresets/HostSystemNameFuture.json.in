@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "HostSystemNameFuture",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "TEST_HOST_SYSTEM_NAME": "${hostSystemName}"
+      }
+    }
+  ]
+}

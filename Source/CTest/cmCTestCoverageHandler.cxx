@@ -289,6 +289,13 @@ int cmCTestCoverageHandler::ProcessHandler()
     this->CTest->GetCTestConfiguration("SourceDirectory");
   std::string binaryDir = this->CTest->GetCTestConfiguration("BuildDirectory");
 
+  if (binaryDir.empty()) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Binary directory is not set.  "
+               "No coverage checking will be performed."
+                 << std::endl);
+    return 0;
+  }
   this->LoadLabels();
 
   cmGeneratedFileStream ofs;

@@ -20,8 +20,10 @@ creating a *merge request* ("MR").  The new MR will appear on the
 process is managed by the merge request page for the change.
 
 During the review process, the MR submitter should address review comments
-or test failures by updating the MR with a (force-)push of the topic
-branch.  The update initiates a new round of review.
+or test failures by updating their local topic branch to fix their commits
+(e.g. via ``git commit --amend`` or ``git rebase -i``), and then issuing a
+(force-)push of the topic branch to their remote (e.g. ``git push --force``).
+This will automatically initiate a new round of review on the existing MR.
 
 We recommend that users enable the "Remove source branch when merge
 request is accepted" option when creating the MR or by editing it.
@@ -254,7 +256,8 @@ The preferred form for references to other commits is
   The author date of the commit, in its original time zone, formatted as
   ``CCYY-MM-DD``.  ``git-log(1)`` shows the original time zone by default.
 
-This may be generated with
+This may be generated with ``git show -s --pretty=reference <commit>`` with
+Git 2.25 and newer. Older versions of Git can generate the same format via
 ``git show -s --date=short --pretty="format:%h (%s, %ad)" <commit>``.
 
 If the commit is a fix for the mentioned commit, consider using a ``Fixes:``

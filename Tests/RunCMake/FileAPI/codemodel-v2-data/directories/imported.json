@@ -14,5 +14,67 @@
     ],
     "projectName": "Imported",
     "minimumCMakeVersion": "3.12",
-    "hasInstallRule": null
+    "hasInstallRule": true,
+    "installers": [
+        {
+            "component": "Unspecified",
+            "type": "importedRuntimeArtifacts",
+            "destination": "lib",
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": 32,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "importedRuntimeArtifacts",
+            "destination": "lib2",
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": true,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": 35,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ]
 }

@@ -8,7 +8,7 @@ CMP0110
 :command:`add_test` can now (officially) create tests with whitespace and
 other special characters in its name.  Before CMake version 3.19 that was not
 allowed, however, it was possible to work around this limitation by explicitly
-putting escaped quotes arount the test's name in the ``add_test`` command.
+putting escaped quotes around the test's name in the ``add_test`` command.
 
 Although never officially supported several projects in the wild found and
 implemented this workaround.  However, the new change which officially allows

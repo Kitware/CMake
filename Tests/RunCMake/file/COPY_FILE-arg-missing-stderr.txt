@@ -1,0 +1,3 @@
+^CMake Error at [^
+]*/Tests/RunCMake/file/COPY_FILE-arg-missing.cmake:1 \(file\):
+  file COPY_FILE must be called with at least two additional arguments

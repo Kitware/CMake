@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <string>
+#include <utility>
 
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -20,8 +21,9 @@ class cmExecutionStatus;
 
 struct cmFindProgramHelper
 {
-  cmFindProgramHelper(cmMakefile* makefile, cmFindBase const* base)
-    : DebugSearches("find_program", base)
+  cmFindProgramHelper(std::string debugName, cmMakefile* makefile,
+                      cmFindBase const* base)
+    : DebugSearches(std::move(debugName), base)
     , Makefile(makefile)
     , PolicyCMP0109(makefile->GetPolicyStatus(cmPolicies::CMP0109))
   {
@@ -145,52 +147,31 @@ struct cmFindProgramHelper
 };
 
 cmFindProgramCommand::cmFindProgramCommand(cmExecutionStatus& status)
-  : cmFindBase(status)
+  : cmFindBase("find_program", status)
 {
   this->NamesPerDirAllowed = true;
+  this->VariableDocumentation = "Path to a program.";
+  this->VariableType = cmStateEnums::FILEPATH;
 }
 
 // cmFindProgramCommand
 bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
   this->DebugMode = this->ComputeIfDebugModeWanted();
-  this->VariableDocumentation = "Path to a program.";
   this->CMakePathName = "PROGRAM";
+
   // call cmFindBase::ParseArguments
   if (!this->ParseArguments(argsIn)) {
     return false;
   }
-  if (this->AlreadyInCache) {
-    // If the user specifies the entry on the command line without a
-    // type we should add the type and docstring but keep the original
-    // value.
-    if (this->AlreadyInCacheWithoutMetaInfo) {
-      this->Makefile->AddCacheDefinition(this->VariableName, "",
-                                         this->VariableDocumentation.c_str(),
-                                         cmStateEnums::FILEPATH);
-    }
+
+  if (this->AlreadyDefined) {
+    this->NormalizeFindResult();
     return true;
   }
 
   std::string const result = this->FindProgram();
-  if (!result.empty()) {
-    // Save the value in the cache
-    this->Makefile->AddCacheDefinition(this->VariableName, result,
-                                       this->VariableDocumentation.c_str(),
-                                       cmStateEnums::FILEPATH);
-
-    return true;
-  }
-  this->Makefile->AddCacheDefinition(
-    this->VariableName, this->VariableName + "-NOTFOUND",
-    this->VariableDocumentation.c_str(), cmStateEnums::FILEPATH);
-  if (this->Required) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      "Could not find " + this->VariableName +
-        " using the following names: " + cmJoin(this->Names, ", "));
-    cmSystemTools::SetFatalErrorOccured();
-  }
+  this->StoreFindResult(result);
   return true;
 }
 
@@ -222,7 +203,7 @@ std::string cmFindProgramCommand::FindNormalProgram()
 std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
 {
   // Search for all names in each directory.
-  cmFindProgramHelper helper(this->Makefile, this);
+  cmFindProgramHelper helper(this->FindCommandName, this->Makefile, this);
   for (std::string const& n : this->Names) {
     helper.AddName(n);
   }
@@ -245,7 +226,7 @@ std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
 std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
 {
   // Search the entire path for each name.
-  cmFindProgramHelper helper(this->Makefile, this);
+  cmFindProgramHelper helper(this->FindCommandName, this->Makefile, this);
   for (std::string const& n : this->Names) {
     // Switch to searching for this name.
     helper.SetName(n);

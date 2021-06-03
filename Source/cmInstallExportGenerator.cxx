@@ -26,7 +26,7 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   std::string filename, std::string name_space, bool exportOld, bool android,
   cmListFileBacktrace backtrace)
   : cmInstallGenerator(destination, configurations, component, message,
-                       exclude_from_all, std::move(backtrace))
+                       exclude_from_all, false, std::move(backtrace))
   , ExportSet(exportSet)
   , FilePermissions(std::move(file_permissions))
   , FileName(std::move(filename))
@@ -184,9 +184,8 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
                                                      Indent indent)
 {
   // Remove old per-configuration export files if the main changes.
-  std::string installedDir =
-    cmStrCat("$ENV{DESTDIR}",
-             this->ConvertToAbsoluteDestination(this->Destination), '/');
+  std::string installedDir = cmStrCat(
+    "$ENV{DESTDIR}", ConvertToAbsoluteDestination(this->Destination), '/');
   std::string installedFile = cmStrCat(installedDir, this->FileName);
   os << indent << "if(EXISTS \"" << installedFile << "\")\n";
   Indent indentN = indent.Next();

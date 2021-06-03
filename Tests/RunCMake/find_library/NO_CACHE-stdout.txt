@@ -1,0 +1,18 @@
+-- LIB_exists='.+/Tests/RunCMake/find_library/lib/libPrefixInPATH.a'
+-- LIB_doNotExists='LIB_doNotExists-NOTFOUND'
+--[ ]+
+-- Policy CMP0125 = OLD
+-- CACHED LIB_cache='unknown'
+-- LIB_cache='unknown'
+-- CACHED LIB_cache='libPrefixInPATH.a'
+-- LIB_cache='libPrefixInPATH.a'
+-- CACHED LIB_cache='libPrefixInPATH.a'
+-- LIB_cache='libPrefixInPATH.a'
+--[ ]+
+-- Policy CMP0125 = NEW
+-- CACHED LIB_cache='unknown'
+-- LIB_cache='unknown'
+-- CACHED LIB_cache='libPrefixInPATH.a'
+-- LIB_cache='libPrefixInPATH.a'
+-- CACHED LIB_cache='libPrefixInPATH.a'
+-- LIB_cache='.+/Tests/RunCMake/find_library/NO_CACHE-build/libPrefixInPATH.a'

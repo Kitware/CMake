@@ -51,6 +51,19 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.21
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0126: set(CACHE) does not remove a normal variable of the same name. </policy/CMP0126>
+   CMP0125: find_(path|file|library|program) have consistent behavior for cache variables. </policy/CMP0125>
+   CMP0124: foreach() loop variables are only available in the loop scope. </policy/CMP0124>
+   CMP0123: ARMClang cpu/arch compile and link flags must be set explicitly. </policy/CMP0123>
+   CMP0122: UseSWIG use standard library name conventions for csharp language. </policy/CMP0122>
+   CMP0121: The list command detects invalid indices. </policy/CMP0121>
+
 Policies Introduced by CMake 3.20
 =================================
 

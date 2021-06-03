@@ -49,9 +49,7 @@
 
 // Some pre-C99 systems have SIZE_MAX in limits.h instead of stdint.h. The
 // limits are also used to figure out some macros missing from pre-C99 systems.
-#ifdef HAVE_LIMITS_H
-#	include <limits.h>
-#endif
+#include <limits.h>
 
 
 #if defined(_MSC_VER) && (_MSC_VER < 1310)
@@ -164,9 +162,7 @@ typedef unsigned char _Bool;
 
 // string.h should be enough but let's include strings.h and memory.h too if
 // they exists, since that shouldn't do any harm, but may improve portability.
-#ifdef HAVE_STRING_H
-#	include <string.h>
-#endif
+#include <string.h>
 
 #ifdef HAVE_STRINGS_H
 #	include <strings.h>
@@ -204,7 +200,8 @@ typedef unsigned char _Bool;
 #	define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
 #endif
 
-#if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __GNUC__ > 4
+#if defined(__GNUC__) \
+		&& ((__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __GNUC__ > 4)
 #	define lzma_attr_alloc_size(x) __attribute__((__alloc_size__(x)))
 #else
 #	define lzma_attr_alloc_size(x)

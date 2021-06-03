@@ -6,5 +6,6 @@
     "targetIds": null,
     "projectName": "codemodel-v2",
     "minimumCMakeVersion": "3.12",
-    "hasInstallRule": null
+    "hasInstallRule": null,
+    "installers": []
 }

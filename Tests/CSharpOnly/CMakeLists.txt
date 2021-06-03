@@ -9,8 +9,13 @@ source_group(nested FILES nested/lib1.cs)
 add_library(lib2 SHARED lib2.cs)
 
 add_executable(CSharpOnly csharponly.cs)
-
 target_link_libraries(CSharpOnly lib1 lib2)
+
+add_executable(CSharpConfigSpecific
+  $<$<CONFIG:Debug>:config_specific_main_debug.cs>
+  $<$<NOT:$<CONFIG:Debug>>:config_specific_main_not_debug.cs>
+  $<$<CONFIG:NotAConfig>:config_specific_main_no_exist.cs>
+  )
 
 add_custom_target(CSharpCustom ALL SOURCES empty.cs)
 add_custom_target(custom.cs ALL DEPENDS empty.txt)

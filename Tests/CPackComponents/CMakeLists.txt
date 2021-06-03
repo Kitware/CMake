@@ -4,7 +4,7 @@
 # application (mylibapp). We create a binary installer that allows
 # users to select which pieces will be installed: the example
 # application, the library binaries, and/or the header file.
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.12)
 project(CPackComponents)
 
 # Create the mylib library

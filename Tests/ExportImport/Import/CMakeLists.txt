@@ -26,3 +26,6 @@ add_subdirectory(Interface)
 
 # Test package version range
 add_subdirectory(version_range)
+
+# Test install(IMPORTED_RUNTIME_ARTIFACTS)
+add_subdirectory(install-IMPORTED_RUNTIME_ARTIFACTS)

@@ -38,7 +38,8 @@ Synopsis
 
   `Filesystem`_
     file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] [<globbing-expr>...])
-    file(`RENAME`_ <oldname> <newname>)
+    file(`RENAME`_ <oldname> <newname> [...])
+    file(`COPY_FILE`_ <oldname> <newname> [...])
     file({`REMOVE`_ | `REMOVE_RECURSE`_ } [<files>...])
     file(`MAKE_DIRECTORY`_ [<dir>...])
     file({`COPY`_ | `INSTALL`_} <file>... DESTINATION <dir> [...])
@@ -49,7 +50,7 @@ Synopsis
     file(`CHMOD_RECURSE`_ <files>... <directories>... PERMISSIONS <permissions>... [...])
 
   `Path Conversion`_
-    file(`REAL_PATH`_ <path> <out-var> [BASE_DIRECTORY <dir>])
+    file(`REAL_PATH`_ <path> <out-var> [BASE_DIRECTORY <dir>] [EXPAND_TILDE])
     file(`RELATIVE_PATH`_ <out-var> <directory> <file>)
     file({`TO_CMAKE_PATH`_ | `TO_NATIVE_PATH`_} <path> <out-var>)
 
@@ -115,7 +116,8 @@ Parse a list of ASCII strings from ``<filename>`` and store it in
  binary while reading unless this option is given.
 
 ``REGEX <regex>``
- Consider only strings that match the given regular expression.
+ Consider only strings that match the given regular expression,
+ as described under :ref:`string(REGEX) <Regex Specification>`.
 
 ``ENCODING <encoding-type>``
  .. versionadded:: 3.1
@@ -178,6 +180,8 @@ the ``<format>`` and ``UTC`` options.
     [PRE_EXCLUDE_REGEXES [<regexes>...]]
     [POST_INCLUDE_REGEXES [<regexes>...]]
     [POST_EXCLUDE_REGEXES [<regexes>...]]
+    [POST_INCLUDE_FILES [<files>...]]
+    [POST_EXCLUDE_FILES [<files>...]]
     )
 
 .. versionadded:: 3.16
@@ -275,6 +279,18 @@ be resolved. See below for a full description of how they work.
   List of post-exclude regexes through which to filter the names of resolved
   dependencies.
 
+``POST_INCLUDE_FILES <files>``
+  .. versionadded:: 3.21
+
+  List of post-include filenames through which to filter the names of resolved
+  dependencies. Symlinks are resolved when attempting to match these filenames.
+
+``POST_EXCLUDE_FILES <files>``
+  .. versionadded:: 3.21
+
+  List of post-exclude filenames through which to filter the names of resolved
+  dependencies. Symlinks are resolved when attempting to match these filenames.
+
 These arguments can be used to exclude unwanted system libraries when
 resolving the dependencies, or to include libraries from a specific
 directory. The filtering works as follows:
@@ -288,16 +304,18 @@ directory. The filtering works as follows:
 4. ``file(GET_RUNTIME_DEPENDENCIES)`` searches for the dependency according to
    the linking rules of the platform (see below).
 5. If the dependency is found, and its full path matches one of the
-   ``POST_INCLUDE_REGEXES``, the full path is added to the resolved
-   dependencies, and ``file(GET_RUNTIME_DEPENDENCIES)`` recursively resolves
-   that library's own dependencies. Otherwise, resolution proceeds to step 6.
-6. If the dependency is found, but its full path matches one of the
-   ``POST_EXCLUDE_REGEXES``, it is not added to the resolved dependencies, and
-   dependency resolution stops for that dependency.
-7. If the dependency is found, and its full path does not match either
-   ``POST_INCLUDE_REGEXES`` or ``POST_EXCLUDE_REGEXES``, the full path is added
+   ``POST_INCLUDE_REGEXES`` or ``POST_INCLUDE_FILES``, the full path is added
    to the resolved dependencies, and ``file(GET_RUNTIME_DEPENDENCIES)``
-   recursively resolves that library's own dependencies.
+   recursively resolves that library's own dependencies. Otherwise, resolution
+   proceeds to step 6.
+6. If the dependency is found, but its full path matches one of the
+   ``POST_EXCLUDE_REGEXES`` or ``POST_EXCLUDE_FILES``, it is not added to the
+   resolved dependencies, and dependency resolution stops for that dependency.
+7. If the dependency is found, and its full path does not match either
+   ``POST_INCLUDE_REGEXES``, ``POST_INCLUDE_FILES``, ``POST_EXCLUDE_REGEXES``,
+   or ``POST_EXCLUDE_FILES``, the full path is added to the resolved
+   dependencies, and ``file(GET_RUNTIME_DEPENDENCIES)``  recursively resolves
+   that library's own dependencies.
 
 Different platforms have different rules for how dependencies are resolved.
 These specifics are described here.
@@ -675,10 +693,45 @@ Examples of recursive globbing include::
 
 .. code-block:: cmake
 
-  file(RENAME <oldname> <newname>)
+  file(RENAME <oldname> <newname>
+       [RESULT <result>]
+       [NO_REPLACE])
 
 Move a file or directory within a filesystem from ``<oldname>`` to
 ``<newname>``, replacing the destination atomically.
+
+The options are:
+
+``RESULT <result>``
+  Set ``<result>`` variable to ``0`` on success or an error message otherwise.
+  If ``RESULT`` is not specified and the operation fails, an error is emitted.
+
+``NO_REPLACE``
+  If the ``<newname>`` path already exists, do not replace it.
+  If ``RESULT <result>`` is used, the result variable will be
+  set to ``NO_REPLACE``.  Otherwise, an error is emitted.
+
+.. _COPY_FILE:
+
+.. code-block:: cmake
+
+  file(COPY_FILE <oldname> <newname>
+       [RESULT <result>]
+       [ONLY_IF_DIFFERENT])
+
+Copy a file from ``<oldname>`` to ``<newname>``. Directories are not
+supported. Symlinks are ignored and ``<oldfile>``'s content is read and
+written to ``<newname>`` as a new file.
+
+The options are:
+
+``RESULT <result>``
+  Set ``<result>`` variable to ``0`` on success or an error message otherwise.
+  If ``RESULT`` is not specified and the operation fails, an error is emitted.
+
+``ONLY_IF_DIFFERENT``
+  If the ``<newname>`` path already exists, do not replace it if it is the
+  same as ``<oldname>``. Otherwise, an error is emitted.
 
 .. _REMOVE:
 .. _REMOVE_RECURSE:
@@ -888,16 +941,26 @@ Path Conversion
 
 .. code-block:: cmake
 
-  file(REAL_PATH <path> <out-var> [BASE_DIRECTORY <dir>])
+  file(REAL_PATH <path> <out-var> [BASE_DIRECTORY <dir>] [EXPAND_TILDE])
 
 .. versionadded:: 3.19
 
 Compute the absolute path to an existing file or directory with symlinks
 resolved.
 
-If the provided ``<path>`` is a relative path, it is evaluated relative to the
-given base directory ``<dir>``. If no base directory is provided, the default
-base directory will be :variable:`CMAKE_CURRENT_SOURCE_DIR`.
+``BASE_DIRECTORY <dir>``
+  If the provided ``<path>`` is a relative path, it is evaluated relative to the
+  given base directory ``<dir>``. If no base directory is provided, the default
+  base directory will be :variable:`CMAKE_CURRENT_SOURCE_DIR`.
+
+``EXPAND_TILDE``
+  .. versionadded:: 3.21
+
+  If the ``<path>`` is ``~`` or starts with ``~/``, the ``~`` is replaced by
+  the user's home directory.  The path to the home directory is obtained from
+  environment variables.  On Windows, the ``USERPROFILE`` environment variable
+  is used, falling back to the ``HOME`` environment variable if ``USERPROFILE``
+  is not defined.  On all other platforms, only ``HOME`` is used.
 
 .. _RELATIVE_PATH:
 
@@ -1024,7 +1087,7 @@ If neither ``NETRC`` option is given CMake will check variables
 For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
 certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
 check certificates. If neither ``TLS`` option is given CMake will check
-variables ``CMAKE_TLS_VERIFY`` and ``CMAKE_TLS_CAINFO``, respectively.
+variables :variable:`CMAKE_TLS_VERIFY` and ``CMAKE_TLS_CAINFO``, respectively.
 
 Additional options to ``DOWNLOAD`` are:
 

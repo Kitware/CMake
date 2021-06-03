@@ -60,4 +60,5 @@ protected:
   std::string Configuration;
   std::string Flags;
   std::string ProjectName;
+  std::string ParallelLevel;
 };

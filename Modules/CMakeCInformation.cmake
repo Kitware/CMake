@@ -115,6 +115,11 @@ if(NOT CMAKE_C_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_C_COMPILER_LAUNCHER})
     CACHE STRING "Compiler launcher for C.")
 endif()
 
+if(NOT CMAKE_C_LINKER_LAUNCHER AND DEFINED ENV{CMAKE_C_LINKER_LAUNCHER})
+  set(CMAKE_C_LINKER_LAUNCHER "$ENV{CMAKE_C_LINKER_LAUNCHER}"
+    CACHE STRING "Linker launcher for C.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 
 # now define the following rule variables

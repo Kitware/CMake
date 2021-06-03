@@ -289,6 +289,91 @@ treated as :ref:`Interface Libraries`, but when they appear in
 a target's :prop_tgt:`LINK_LIBRARIES` property their object files
 will be included in the link too.
 
+.. _`Linking Object Libraries via $<TARGET_OBJECTS>`:
+
+Linking Object Libraries via $<TARGET_OBJECTS>
+""""""""""""""""""""""""""""""""""""""""""""""
+
+.. versionadded:: 3.21
+
+The object files associated with an object library may be referenced
+by the :genex:`$<TARGET_OBJECTS>` generator expression.  Such object
+files are placed on the link line *before* all libraries, regardless
+of their relative order.  Additionally, an ordering dependency will be
+added to the build sysstem to make sure the object library is up-to-date
+before the dependent target links.  For example, the code
+
+.. code-block:: cmake
+
+  add_library(obj3 OBJECT obj3.c)
+  target_compile_definitions(obj3 PUBLIC OBJ3)
+
+  add_executable(main3 main3.c)
+  target_link_libraries(main3 PRIVATE a3 $<TARGET_OBJECTS:obj3> b3)
+
+links executable ``main3`` with object files from ``main3.c``
+and ``obj3.c`` followed by the ``a3`` and ``b3`` libraries.
+``main3.c`` is *not* compiled with usage requirements from ``obj3``,
+such as ``-DOBJ3``.
+
+This approach can be used to achieve transitive inclusion of object
+files in link lines as usage requirements.  Continuing the above
+example, the code
+
+.. code-block:: cmake
+
+  add_library(iface_obj3 INTERFACE)
+  target_link_libraries(iface_obj3 INTERFACE obj3 $<TARGET_OBJECTS:obj3>)
+
+creates an interface library ``iface_obj3`` that forwards the ``obj3``
+usage requirements and adds the ``obj3`` object files to dependents'
+link lines.  The code
+
+.. code-block:: cmake
+
+  add_executable(use_obj3 use_obj3.c)
+  target_link_libraries(use_obj3 PRIVATE iface_obj3)
+
+compiles ``use_obj3.c`` with ``-DOBJ3`` and links executable ``use_obj3``
+with object files from ``use_obj3.c`` and ``obj3.c``.
+
+This also works transitively through a static library.  Since a static
+library does not link, it does not consume the object files from
+object libraries referenced this way.  Instead, the object files
+become transitive link dependencies of the static library.
+Continuing the above example, the code
+
+.. code-block:: cmake
+
+  add_library(static3 STATIC static3.c)
+  target_link_libraries(static3 PRIVATE iface_obj3)
+
+  add_executable(use_static3 use_static3.c)
+  target_link_libraries(use_static3 PRIVATE static3)
+
+compiles ``static3.c`` with ``-DOBJ3`` and creates ``libstatic3.a``
+using only its own object file.  ``use_static3.c`` is compiled *without*
+``-DOBJ3`` because the usage requirement is not transitive through
+the private dependency of ``static3``.  However, the link dependencies
+of ``static3`` are propagated, including the ``iface_obj3`` reference
+to ``$<TARGET_OBJECTS:obj3>``.  The ``use_static3`` executable is
+created with object files from ``use_static3.c`` and ``obj3.c``, and
+linked to library ``libstatic3.a``.
+
+When using this approach, it is the project's responsibility to avoid
+linking multiple dependent binaries to ``iface_obj3``, because they will
+all get the ``obj3`` object files on their link lines.
+
+.. note::
+
+  Referencing :genex:`$<TARGET_OBJECTS>` in ``target_link_libraries``
+  calls worked in versions of CMake prior to 3.21 for some cases,
+  but was not fully supported:
+
+  * It did not place the object files before libraries on link lines.
+  * It did not add an ordering dependency on the object library.
+  * It did not work in Xcode with multiple architectures.
+
 Cyclic Dependencies of Static Libraries
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

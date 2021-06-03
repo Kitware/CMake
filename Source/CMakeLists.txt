@@ -44,7 +44,7 @@ endif()
 if(NOT CMake_DEFAULT_RECURSION_LIMIT)
   if(DEFINED ENV{DASHBOARD_TEST_FROM_CTEST})
     set(CMake_DEFAULT_RECURSION_LIMIT 100)
-  elseif(MINGW)
+  elseif(MINGW OR MSYS)
     set(CMake_DEFAULT_RECURSION_LIMIT 400)
   elseif(WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM")
     set(CMake_DEFAULT_RECURSION_LIMIT 600)
@@ -198,6 +198,8 @@ set(SRCS
   cmCMakePath.cxx
   cmCMakePresetsFile.cxx
   cmCMakePresetsFile.h
+  cmCMakePresetsFileInternal.h
+  cmCMakePresetsFileReadJSON.cxx
   cmCommandArgumentParserHelper.cxx
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
@@ -348,6 +350,8 @@ set(SRCS
   cmInstalledFile.cxx
   cmInstallFilesGenerator.h
   cmInstallFilesGenerator.cxx
+  cmInstallImportedRuntimeArtifactsGenerator.h
+  cmInstallImportedRuntimeArtifactsGenerator.cxx
   cmInstallScriptGenerator.h
   cmInstallScriptGenerator.cxx
   cmInstallSubdirectoryGenerator.h
@@ -636,6 +640,7 @@ set(SRCS
   cmMathCommand.h
   cmMessageCommand.cxx
   cmMessageCommand.h
+  cmMessageMetadata.h
   cmOptionCommand.cxx
   cmOptionCommand.h
   cmOutputRequiredFilesCommand.cxx
@@ -785,8 +790,6 @@ if (WIN32)
       cmVisualStudioGeneratorOptions.cxx
       cmVisualStudio10TargetGenerator.h
       cmVisualStudio10TargetGenerator.cxx
-      cmVisualStudio10ToolsetOptions.h
-      cmVisualStudio10ToolsetOptions.cxx
       cmLocalVisualStudio10Generator.cxx
       cmLocalVisualStudio10Generator.h
       cmGlobalVisualStudio10Generator.h

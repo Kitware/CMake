@@ -67,6 +67,7 @@ public:
     const char* ISPCHeader = nullptr;
     const char* Fatbinary = nullptr;
     const char* RegisterFile = nullptr;
+    const char* Launcher = nullptr;
   };
 
   // Expand rule variables in CMake of the type found in language rules

@@ -4,7 +4,7 @@ set(_compiler_id_pp_test "(defined(__clang__) && defined(__INTEL_CLANG_COMPILER)
 set(_compiler_id_version_compute "
 /* __INTEL_LLVM_COMPILER = VVVVRP prior to 2021.2.0, VVVVRRPP for 2021.2.0 and
  * later.  Look for 6 digit vs. 8 digit version number to decide encoding.
- * VVVV is no smaller than the current year when a versio is released.
+ * VVVV is no smaller than the current year when a version is released.
  */
 #if __INTEL_LLVM_COMPILER < 1000000L
 # define @PREFIX@COMPILER_VERSION_MAJOR @MACRO_DEC@(__INTEL_LLVM_COMPILER/100)

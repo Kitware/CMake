@@ -80,7 +80,9 @@ if(CMake_HAVE_CXX_MAKE_UNIQUE)
   set(CMake_HAVE_CXX_UNIQUE_PTR 1)
 endif()
 cm_check_cxx_feature(unique_ptr)
-if (NOT CMAKE_CXX_STANDARD LESS "17")
+if (NOT CMAKE_CXX_STANDARD LESS "17"
+    AND NOT MSYS # FIXME: RunCMake.cmake_path cases crash with MSYS std::filesystem
+    )
   if (NOT CMAKE_CROSSCOMPILING OR CMAKE_CROSSCOMPILING_EMULATOR)
     cm_check_cxx_feature(filesystem TRY_RUN)
   else()

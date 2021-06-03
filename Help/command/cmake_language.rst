@@ -190,7 +190,7 @@ For example, the code:
 .. code-block:: cmake
 
   cmake_language(DEFER CALL message "${deferred_message}")
-  cmake_language(DEFER ID_VAR id CALL message "Cancelled Message")
+  cmake_language(DEFER ID_VAR id CALL message "Canceled Message")
   cmake_language(DEFER CANCEL_CALL ${id})
   message("Immediate Message")
   set(deferred_message "Deferred Message")
@@ -201,7 +201,7 @@ prints::
   Deferred Message
 
 The ``Cancelled Message`` is never printed because its command is
-cancelled.  The ``deferred_message`` variable reference is not evaluated
+canceled.  The ``deferred_message`` variable reference is not evaluated
 until the call site, so it can be set after the deferred call is scheduled.
 
 In order to evaluate variable references immediately when scheduling a

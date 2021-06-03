@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTransformDepfile.h"
 
+#include <functional>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -13,6 +14,7 @@
 
 #include "cmGccDepfileReader.h"
 #include "cmGccDepfileReaderTypes.h"
+#include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmSystemTools.h"
 
@@ -34,10 +36,18 @@ void WriteFilenameGcc(cmsys::ofstream& fout, const std::string& filename)
   }
 }
 
-void WriteGccDepfile(cmsys::ofstream& fout, const cmLocalGenerator& lg,
-                     const cmGccDepfileContent& content)
+void WriteDepfile(cmDepfileFormat format, cmsys::ofstream& fout,
+                  const cmLocalGenerator& lg,
+                  const cmGccDepfileContent& content)
 {
-  const auto& binDir = lg.GetBinaryDirectory();
+  std::function<std::string(const std::string&)> formatPath =
+    [&lg](const std::string& path) -> std::string {
+    return lg.MaybeRelativeToTopBinDir(path);
+  };
+  if (lg.GetGlobalGenerator()->GetName() == "Xcode") {
+    // full paths must be preserved for Xcode compliance
+    formatPath = [](const std::string& path) -> std::string { return path; };
+  }
 
   for (auto const& dep : content) {
     bool first = true;
@@ -46,48 +56,25 @@ void WriteGccDepfile(cmsys::ofstream& fout, const cmLocalGenerator& lg,
         fout << " \\\n  ";
       }
       first = false;
-      WriteFilenameGcc(fout, lg.MaybeConvertToRelativePath(binDir, rule));
+      WriteFilenameGcc(fout, formatPath(rule));
     }
     fout << ':';
     for (auto const& path : dep.paths) {
       fout << " \\\n  ";
-      WriteFilenameGcc(fout, lg.MaybeConvertToRelativePath(binDir, path));
+      WriteFilenameGcc(fout, formatPath(path));
     }
     fout << '\n';
   }
-}
 
-// tlog format : always windows paths on Windows regardless the generator
-std::string ConvertToTLogOutputPath(const std::string& path)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  return cmSystemTools::ConvertToWindowsOutputPath(path);
-#else
-  return cmSystemTools::ConvertToOutputPath(path);
-#endif
-}
-
-void WriteVsTlog(cmsys::ofstream& fout, const cmLocalGenerator& lg,
-                 const cmGccDepfileContent& content)
-{
-  const auto& binDir = lg.GetBinaryDirectory();
-
-  for (auto const& dep : content) {
-    fout << '^';
-    bool first = true;
-    for (auto const& rule : dep.rules) {
-      if (!first) {
-        fout << '|';
+  if (format == cmDepfileFormat::MakeDepfile) {
+    // In this case, phony targets must be added for all dependencies
+    fout << "\n";
+    for (auto const& dep : content) {
+      for (auto const& path : dep.paths) {
+        fout << "\n";
+        WriteFilenameGcc(fout, formatPath(path));
+        fout << ":\n";
       }
-      first = false;
-      fout << ConvertToTLogOutputPath(
-        lg.MaybeConvertToRelativePath(binDir, rule));
-    }
-    fout << "\r\n";
-    for (auto const& path : dep.paths) {
-      fout << ConvertToTLogOutputPath(
-                lg.MaybeConvertToRelativePath(binDir, path))
-           << "\r\n";
     }
   }
 }
@@ -112,10 +99,8 @@ bool cmTransformDepfile(cmDepfileFormat format, const cmLocalGenerator& lg,
   }
   switch (format) {
     case cmDepfileFormat::GccDepfile:
-      WriteGccDepfile(fout, lg, content);
-      break;
-    case cmDepfileFormat::VsTlog:
-      WriteVsTlog(fout, lg, content);
+    case cmDepfileFormat::MakeDepfile:
+      WriteDepfile(format, fout, lg, content);
       break;
   }
   return true;

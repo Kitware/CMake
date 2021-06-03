@@ -4,6 +4,7 @@
 #define @KWSYS_NAMESPACE@_SystemTools_hxx
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
+#include <@KWSYS_NAMESPACE@/Status.hxx>
 
 #include <iosfwd>
 #include <map>
@@ -339,7 +340,7 @@ public:
   /**
      Change the modification time or create a file
   */
-  static bool Touch(const std::string& filename, bool create);
+  static Status Touch(std::string const& filename, bool create);
 
   /**
    *  Compare file modification times.
@@ -347,8 +348,8 @@ public:
    *  When true is returned, result has -1, 0, +1 for
    *  f1 older, same, or newer than f2.
    */
-  static bool FileTimeCompare(const std::string& f1, const std::string& f2,
-                              int* result);
+  static Status FileTimeCompare(std::string const& f1, std::string const& f2,
+                                int* result);
 
   /**
    *  Get the file extension (including ".") needed for an executable
@@ -507,7 +508,7 @@ public:
    * For windows return the short path for the given path,
    * Unix just a pass through
    */
-  static bool GetShortPath(const std::string& path, std::string& result);
+  static Status GetShortPath(std::string const& path, std::string& result);
 
   /**
    * Read line from file. Make sure to read a full line and truncates it if
@@ -553,16 +554,16 @@ public:
    * can make a full path even if none of the directories existed
    * prior to calling this function.
    */
-  static bool MakeDirectory(const char* path, const mode_t* mode = nullptr);
-  static bool MakeDirectory(const std::string& path,
-                            const mode_t* mode = nullptr);
+  static Status MakeDirectory(const char* path, const mode_t* mode = nullptr);
+  static Status MakeDirectory(std::string const& path,
+                              const mode_t* mode = nullptr);
 
   /**
    * Copy the source file to the destination file only
    * if the two files differ.
    */
-  static bool CopyFileIfDifferent(const std::string& source,
-                                  const std::string& destination);
+  static Status CopyFileIfDifferent(std::string const& source,
+                                    std::string const& destination);
 
   /**
    * Compare the contents of two files.  Return true if different
@@ -578,6 +579,17 @@ public:
                               const std::string& path2);
 
   /**
+   * Blockwise copy source to destination file
+   */
+  static Status CopyFileContentBlockwise(std::string const& source,
+                                         std::string const& destination);
+  /**
+   * Clone the source file to the destination file
+   */
+  static Status CloneFileContent(std::string const& source,
+                                 std::string const& destination);
+
+  /**
    * Return true if the two files are the same file
    */
   static bool SameFile(const std::string& file1, const std::string& file2);
@@ -585,16 +597,16 @@ public:
   /**
    * Copy a file.
    */
-  static bool CopyFileAlways(const std::string& source,
-                             const std::string& destination);
+  static Status CopyFileAlways(std::string const& source,
+                               std::string const& destination);
 
   /**
    * Copy a file.  If the "always" argument is true the file is always
    * copied.  If it is false, the file is copied only if it is new or
    * has changed.
    */
-  static bool CopyAFile(const std::string& source,
-                        const std::string& destination, bool always = true);
+  static Status CopyAFile(std::string const& source,
+                          std::string const& destination, bool always = true);
 
   /**
    * Copy content directory to another directory with all files and
@@ -602,19 +614,19 @@ public:
    * always copied.  If it is false, only files that have changed or
    * are new are copied.
    */
-  static bool CopyADirectory(const std::string& source,
-                             const std::string& destination,
-                             bool always = true);
+  static Status CopyADirectory(std::string const& source,
+                               std::string const& destination,
+                               bool always = true);
 
   /**
    * Remove a file
    */
-  static bool RemoveFile(const std::string& source);
+  static Status RemoveFile(std::string const& source);
 
   /**
    * Remove a directory
    */
-  static bool RemoveADirectory(const std::string& source);
+  static Status RemoveADirectory(std::string const& source);
 
   /**
    * Get the maximum full file path length
@@ -708,14 +720,14 @@ public:
    * Create a symbolic link if the platform supports it.  Returns whether
    * creation succeeded.
    */
-  static bool CreateSymlink(const std::string& origName,
-                            const std::string& newName);
+  static Status CreateSymlink(std::string const& origName,
+                              std::string const& newName);
 
   /**
    * Read the contents of a symbolic link.  Returns whether reading
    * succeeded.
    */
-  static bool ReadSymlink(const std::string& newName, std::string& origName);
+  static Status ReadSymlink(std::string const& newName, std::string& origName);
 
   /**
    * Try to locate the file 'filename' in the directory 'dir'.
@@ -765,12 +777,12 @@ public:
    * WARNING:  A non-thread-safe method is currently used to get the umask
    * if a honor_umask parameter is set to true.
    */
-  static bool GetPermissions(const char* file, mode_t& mode);
-  static bool GetPermissions(const std::string& file, mode_t& mode);
-  static bool SetPermissions(const char* file, mode_t mode,
-                             bool honor_umask = false);
-  static bool SetPermissions(const std::string& file, mode_t mode,
-                             bool honor_umask = false);
+  static Status GetPermissions(const char* file, mode_t& mode);
+  static Status GetPermissions(std::string const& file, mode_t& mode);
+  static Status SetPermissions(const char* file, mode_t mode,
+                               bool honor_umask = false);
+  static Status SetPermissions(std::string const& file, mode_t mode,
+                               bool honor_umask = false);
 
   /** -----------------------------------------------------------------
    *               Time Manipulation Routines
@@ -867,7 +879,7 @@ public:
   /**
    * Change directory to the directory specified
    */
-  static int ChangeDirectory(const std::string& dir);
+  static Status ChangeDirectory(std::string const& dir);
 
   /**
    * Get the result of strerror(errno)

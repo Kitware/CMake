@@ -11,10 +11,11 @@ The general signature is:
    |FIND_XXX| (
              <VAR>
              name | |NAMES|
-             [HINTS path1 [path2 ... ENV var]]
-             [PATHS path1 [path2 ... ENV var]]
+             [HINTS [path | ENV var]... ]
+             [PATHS [path | ENV var]... ]
              [PATH_SUFFIXES suffix1 [suffix2 ...]]
              [DOC "cache documentation string"]
+             [NO_CACHE]
              [REQUIRED]
              [NO_DEFAULT_PATH]
              [NO_PACKAGE_ROOT_PATH]
@@ -28,8 +29,8 @@ The general signature is:
             )
 
 This command is used to find a |SEARCH_XXX_DESC|.
-A cache entry named by ``<VAR>`` is created to store the result
-of this command.
+A cache entry, or a normal variable if ``NO_CACHE`` is specified,
+named by ``<VAR>`` is created to store the result of this command.
 If the |SEARCH_XXX| is found the result is stored in the variable
 and the search will not be repeated unless the variable is cleared.
 If nothing is found, the result will be ``<VAR>-NOTFOUND``.
@@ -55,6 +56,22 @@ Options include:
 
 ``DOC``
   Specify the documentation string for the ``<VAR>`` cache entry.
+
+``NO_CACHE``
+  .. versionadded:: 3.21
+
+  The result of the search will be stored in a normal variable rather than
+  a cache entry.
+
+  .. note::
+
+    If the variable is already set before the call (as a normal or cache
+    variable) then the search will not occur.
+
+  .. warning::
+
+    This option should be used with caution because it can greatly increase
+    the cost of repeated configure steps.
 
 ``REQUIRED``
   .. versionadded:: 3.18

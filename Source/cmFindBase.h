@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cmFindCommon.h"
+#include "cmStateTypes.h"
 
 class cmExecutionStatus;
 
@@ -21,7 +22,7 @@ class cmExecutionStatus;
 class cmFindBase : public cmFindCommon
 {
 public:
-  cmFindBase(cmExecutionStatus& status);
+  cmFindBase(std::string findCommandName, cmExecutionStatus& status);
   virtual ~cmFindBase() = default;
 
   /**
@@ -34,13 +35,20 @@ protected:
   friend class cmFindBaseDebugState;
   void ExpandPaths();
 
-  // see if the VariableName is already set in the cache,
+  // see if the VariableName is already set,
   // also copy the documentation from the cache to VariableDocumentation
   // if it has documentation in the cache
-  bool CheckForVariableInCache();
+  bool CheckForVariableDefined();
+
+  void NormalizeFindResult();
+  void StoreFindResult(const std::string& value);
+
+  // actual find command name
+  std::string FindCommandName;
 
   // use by command during find
   std::string VariableDocumentation;
+  cmStateEnums::CacheEntryType VariableType = cmStateEnums::UNINITIALIZED;
   std::string VariableName;
   std::vector<std::string> Names;
   bool NamesPerDir = false;
@@ -49,8 +57,9 @@ protected:
   // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
   std::string EnvironmentPath; // LIB,INCLUDE
 
-  bool AlreadyInCache = false;
+  bool AlreadyDefined = false;
   bool AlreadyInCacheWithoutMetaInfo = false;
+  bool StoreResultInCache = true;
 
   bool Required = false;
 

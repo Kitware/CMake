@@ -10,6 +10,7 @@ function(run_ctest_build CASE_NAME)
 endfunction()
 
 run_ctest_build(BuildQuiet QUIET)
+run_ctest_build(ParallelLevel PARALLEL_LEVEL 1)
 
 function(run_BuildFailure)
   set(CASE_CMAKELISTS_SUFFIX_CODE [[

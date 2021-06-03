@@ -212,7 +212,7 @@ External Project Definition
       ``TLS_VERIFY <bool>``
         Specifies whether certificate verification should be performed for
         https URLs. If this option is not provided, the default behavior is
-        determined by the ``CMAKE_TLS_VERIFY`` variable (see
+        determined by the :variable:`CMAKE_TLS_VERIFY` variable (see
         :command:`file(DOWNLOAD)`). If that is also not set, certificate
         verification will not be performed. In situations where ``URL_HASH``
         cannot be provided, this option can be an alternative verification
@@ -456,9 +456,16 @@ External Project Definition
     overridden if required.
 
     ``CONFIGURE_COMMAND <cmd>...``
-      The default configure command runs CMake with options based on the main
-      project. For non-CMake external projects, the ``CONFIGURE_COMMAND``
-      option must be used to override this behavior
+      The default configure command runs CMake with a few options based on
+      the main project.  The options added are typically only those needed to
+      use the same generator as the main project, but the ``CMAKE_GENERATOR``
+      option can be given to override this.  The project is responsible for
+      adding any toolchain details, flags or other settings it wants to
+      re-use from the main project or otherwise specify (see ``CMAKE_ARGS``,
+      ``CMAKE_CACHE_ARGS`` and ``CMAKE_CACHE_DEFAULT_ARGS`` below).
+
+      For non-CMake external projects, the ``CONFIGURE_COMMAND`` option must
+      be used to override the default configure command
       (:manual:`generator expressions <cmake-generator-expressions(7)>` are
       supported). For projects that require no configure step, specify this
       option with an empty string as the command to execute.
@@ -563,6 +570,16 @@ External Project Definition
     Makefile-based build and simply run ``make`` with no arguments as the
     default build step. This can be overridden with custom build commands if
     required.
+
+    If both the main project and the external project use make as their build
+    tool, the build step of the external project is invoked as a recursive
+    make using ``$(MAKE)``.  This will communicate some build tool settings
+    from the main project to the external project.  If either the main project
+    or external project is not using make, no build tool settings will be
+    passed to the external project other than those established by the
+    configure step (i.e. running ``ninja -v`` in the main project will not
+    pass ``-v`` to the external project's build step, even if it also uses
+    ``ninja`` as its build tool).
 
     ``BUILD_COMMAND <cmd>...``
       Overrides the default build command

@@ -13,5 +13,71 @@
     ],
     "projectName": "Object",
     "minimumCMakeVersion": "3.13",
-    "hasInstallRule": true
+    "hasInstallRule": true,
+    "installers": [
+        {
+            "component": "Unspecified",
+            "type": "target",
+            "destination": "bin",
+            "paths": [
+                "^object/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?c_object_exe(\\.exe)?$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": "^c_object_exe::@5ed5358f70faf8d8af7a$",
+            "targetIndex": "c_object_exe",
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 13,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "target",
+            "destination": "bin",
+            "paths": [
+                "^object/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?cxx_object_exe(\\.exe)?$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": "^cxx_object_exe::@5ed5358f70faf8d8af7a$",
+            "targetIndex": "cxx_object_exe",
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 13,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ]
 }

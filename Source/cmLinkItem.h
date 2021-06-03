@@ -50,6 +50,9 @@ struct cmLinkImplementationLibraries
   // Libraries linked directly in this configuration.
   std::vector<cmLinkImplItem> Libraries;
 
+  // Object files linked directly in this configuration.
+  std::vector<cmLinkItem> Objects;
+
   // Libraries linked directly in other configurations.
   // Needed only for OLD behavior of CMP0003.
   std::vector<cmLinkItem> WrongConfigLibraries;
@@ -62,6 +65,9 @@ struct cmLinkInterfaceLibraries
 {
   // Libraries listed in the interface.
   std::vector<cmLinkItem> Libraries;
+
+  // Object files listed in the interface.
+  std::vector<cmLinkItem> Objects;
 
   // Whether the list depends on a genex referencing the head target.
   bool HadHeadSensitiveCondition = false;

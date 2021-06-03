@@ -44,6 +44,10 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 #  pragma clang diagnostic ignored "-Wused-but-marked-unused"
 # endif
 #endif
+
+#if defined(__NVCOMPILER)
+#  pragma diag_suppress 550 /* variable set but never used */
+#endif
 %}
 
 /* Generate a reentrant parser object.  */

@@ -9,7 +9,10 @@
 
 #include <cmext/algorithm>
 
+#include "cmCMakePath.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
@@ -17,11 +20,13 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 class cmExecutionStatus;
 
-cmFindBase::cmFindBase(cmExecutionStatus& status)
+cmFindBase::cmFindBase(std::string findCommandName, cmExecutionStatus& status)
   : cmFindCommon(status)
+  , FindCommandName(std::move(findCommandName))
 {
 }
 
@@ -34,12 +39,15 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 
   // copy argsIn into args so it can be modified,
   // in the process extract the DOC "documentation"
+  // and handle options NO_CACHE and ENV
   size_t size = argsIn.size();
   std::vector<std::string> args;
   bool foundDoc = false;
   for (unsigned int j = 0; j < size; ++j) {
     if (foundDoc || argsIn[j] != "DOC") {
-      if (argsIn[j] == "ENV") {
+      if (argsIn[j] == "NO_CACHE") {
+        this->StoreResultInCache = false;
+      } else if (argsIn[j] == "ENV") {
         if (j + 1 < size) {
           j++;
           cmSystemTools::GetPath(args, argsIn[j].c_str());
@@ -63,11 +71,10 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     return false;
   }
   this->VariableName = args[0];
-  if (this->CheckForVariableInCache()) {
-    this->AlreadyInCache = true;
+  if (this->CheckForVariableDefined()) {
+    this->AlreadyDefined = true;
     return true;
   }
-  this->AlreadyInCache = false;
 
   // Find what search path locations have been enabled/disable
   this->SelectDefaultSearchModes();
@@ -292,32 +299,157 @@ void cmFindBase::FillUserGuessPath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
-bool cmFindBase::CheckForVariableInCache()
+bool cmFindBase::CheckForVariableDefined()
 {
-  if (cmProp cacheValue = this->Makefile->GetDefinition(this->VariableName)) {
+  if (cmProp value = this->Makefile->GetDefinition(this->VariableName)) {
     cmState* state = this->Makefile->GetState();
     cmProp cacheEntry = state->GetCacheEntryValue(this->VariableName);
-    bool found = !cmIsNOTFOUND(*cacheValue);
+    bool found = !cmIsNOTFOUND(*value);
     bool cached = cacheEntry != nullptr;
+    auto cacheType = cached ? state->GetCacheEntryType(this->VariableName)
+                            : cmStateEnums::UNINITIALIZED;
+
+    if (cached && cacheType != cmStateEnums::UNINITIALIZED) {
+      this->VariableType = cacheType;
+      if (const auto* hs =
+            state->GetCacheEntryProperty(this->VariableName, "HELPSTRING")) {
+        this->VariableDocumentation = *hs;
+      }
+    }
+
     if (found) {
       // If the user specifies the entry on the command line without a
       // type we should add the type and docstring but keep the
       // original value.  Tell the subclass implementations to do
       // this.
-      if (cached &&
-          state->GetCacheEntryType(this->VariableName) ==
-            cmStateEnums::UNINITIALIZED) {
+      if (cached && cacheType == cmStateEnums::UNINITIALIZED) {
         this->AlreadyInCacheWithoutMetaInfo = true;
       }
       return true;
     }
-    if (cached) {
-      cmProp hs =
-        state->GetCacheEntryProperty(this->VariableName, "HELPSTRING");
-      this->VariableDocumentation = hs ? *hs : "(none)";
-    }
   }
   return false;
+}
+
+void cmFindBase::NormalizeFindResult()
+{
+  if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0125) ==
+      cmPolicies::NEW) {
+    // ensure the path returned by find_* command is absolute
+    const auto* existingValue =
+      this->Makefile->GetDefinition(this->VariableName);
+    std::string value;
+    if (!existingValue->empty()) {
+      value =
+        cmCMakePath(*existingValue, cmCMakePath::auto_format)
+          .Absolute(cmCMakePath(
+            this->Makefile->GetCMakeInstance()->GetCMakeWorkingDirectory()))
+          .Normal()
+          .GenericString();
+      // value = cmSystemTools::CollapseFullPath(*existingValue);
+      if (!cmSystemTools::FileExists(value, false)) {
+        value = *existingValue;
+      }
+    }
+
+    if (this->StoreResultInCache) {
+      // If the user specifies the entry on the command line without a
+      // type we should add the type and docstring but keep the original
+      // value.
+      if (value != *existingValue || this->AlreadyInCacheWithoutMetaInfo) {
+        this->Makefile->GetCMakeInstance()->AddCacheEntry(
+          this->VariableName, value.c_str(),
+          this->VariableDocumentation.c_str(), this->VariableType);
+        if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
+            cmPolicies::NEW) {
+          if (this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
+            this->Makefile->AddDefinition(this->VariableName, value);
+          }
+        } else {
+          // if there was a definition then remove it
+          // This is required to ensure same behavior as
+          // cmMakefile::AddCacheDefinition.
+          this->Makefile->RemoveDefinition(this->VariableName);
+        }
+      }
+    } else {
+      // ensure a normal variable is defined.
+      this->Makefile->AddDefinition(this->VariableName, value);
+    }
+  } else {
+    // If the user specifies the entry on the command line without a
+    // type we should add the type and docstring but keep the original
+    // value.
+    if (this->StoreResultInCache) {
+      if (this->AlreadyInCacheWithoutMetaInfo) {
+        this->Makefile->AddCacheDefinition(this->VariableName, "",
+                                           this->VariableDocumentation.c_str(),
+                                           this->VariableType);
+        if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
+              cmPolicies::NEW &&
+            this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
+          this->Makefile->AddDefinition(
+            this->VariableName,
+            *this->Makefile->GetCMakeInstance()->GetCacheDefinition(
+              this->VariableName));
+        }
+      }
+    } else {
+      // ensure a normal variable is defined.
+      this->Makefile->AddDefinition(
+        this->VariableName,
+        this->Makefile->GetSafeDefinition(this->VariableName));
+    }
+  }
+}
+
+void cmFindBase::StoreFindResult(const std::string& value)
+{
+  bool force =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0125) == cmPolicies::NEW;
+  bool updateNormalVariable =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) == cmPolicies::NEW;
+
+  if (!value.empty()) {
+    if (this->StoreResultInCache) {
+      this->Makefile->AddCacheDefinition(this->VariableName, value,
+                                         this->VariableDocumentation.c_str(),
+                                         this->VariableType, force);
+      if (updateNormalVariable &&
+          this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
+        this->Makefile->AddDefinition(this->VariableName, value);
+      }
+    } else {
+      this->Makefile->AddDefinition(this->VariableName, value);
+    }
+
+    return;
+  }
+
+  auto notFound = cmStrCat(this->VariableName, "-NOTFOUND");
+  if (this->StoreResultInCache) {
+    this->Makefile->AddCacheDefinition(this->VariableName, notFound,
+                                       this->VariableDocumentation.c_str(),
+                                       this->VariableType, force);
+    if (updateNormalVariable &&
+        this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
+      this->Makefile->AddDefinition(this->VariableName, notFound);
+    }
+  } else {
+    this->Makefile->AddDefinition(this->VariableName, notFound);
+  }
+
+  if (this->Required) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Could not find ", this->VariableName, " using the following ",
+               (this->FindCommandName == "find_file" ||
+                    this->FindCommandName == "find_path"
+                  ? "files"
+                  : "names"),
+               ": ", cmJoin(this->Names, ", ")));
+    cmSystemTools::SetFatalErrorOccured();
+  }
 }
 
 cmFindBaseDebugState::cmFindBaseDebugState(std::string commandName,

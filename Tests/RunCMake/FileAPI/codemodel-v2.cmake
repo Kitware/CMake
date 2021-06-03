@@ -35,4 +35,20 @@ if(_ipo)
   file(WRITE "${CMAKE_BINARY_DIR}/ipo_enabled.txt" "")
 endif()
 
-install(TARGETS cxx_exe)
+install(TARGETS cxx_exe COMPONENT Tools EXPORT FooTargets)
+
+set_target_properties(c_shared_lib PROPERTIES VERSION 1.2.3 SOVERSION 1)
+install(TARGETS c_shared_lib cxx_shared_lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION lib
+  LIBRARY DESTINATION lib NAMELINK_SKIP
+  )
+install(TARGETS c_shared_lib cxx_shared_lib LIBRARY NAMELINK_ONLY)
+
+install(FILES empty.h TYPE INCLUDE RENAME empty-renamed.h OPTIONAL)
+install(FILES codemodel-v2.cmake empty.h DESTINATION include)
+install(DIRECTORY . dir cxx/ OPTIONAL DESTINATION dir1)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/dir" "${CMAKE_CURRENT_SOURCE_DIR}/cxx/" DESTINATION dir2)
+install(EXPORT FooTargets DESTINATION lib/cmake/foo)
+install(SCRIPT InstallScript.cmake)
+install(CODE "message(foo)" ALL_COMPONENTS)

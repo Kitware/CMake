@@ -1,5 +1,10 @@
 set(log "${RunCMake_BINARY_DIR}/CustomCommandDepfile-build/build.ninja")
 file(READ "${log}" build_file)
+
+set(RunCMake_TEST_FAILED)
 if(NOT "${build_file}" MATCHES "depfile = test\\.d")
-  set(RunCMake_TEST_FAILED "Log file:\n ${log}\ndoes not have expected line: depfile = test.d")
+  list(APPEND RunCMake_TEST_FAILED "Log file:\n ${log}\ndoes not have expected line: depfile = test.d")
+endif()
+if(NOT "${build_file}" MATCHES "depfile = test_Debug\\.d")
+  list(APPEND RunCMake_TEST_FAILED "\nLog file:\n ${log}\ndoes not have expected line: depfile = test_Debug.d")
 endif()

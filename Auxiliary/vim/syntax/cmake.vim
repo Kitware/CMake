@@ -9,7 +9,7 @@
 " Former Maintainer: Karthik Krishnan <karthik.krishnan@kitware.com>
 " Last Change:  2020 oct. 28
 "
-" Licence:      The CMake license applies to this file. See
+" License:      The CMake license applies to this file. See
 "               https://cmake.org/licensing
 "               This implies that distribution with Vim is allowed
 
@@ -92,6 +92,7 @@ syn keyword cmakeProperty contained
             \ AUTOUIC_EXECUTABLE
             \ AUTOUIC_OPTIONS
             \ AUTOUIC_SEARCH_PATHS
+            \ AUTOUIC_SOURCE_GROUP
             \ BINARY_DIR
             \ BUILDSYSTEM_TARGETS
             \ BUILD_RPATH
@@ -904,6 +905,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_CXX_INCLUDE_WHAT_YOU_USE
             \ CMAKE_CXX_INIT
             \ CMAKE_CXX_LIBRARY_ARCHITECTURE
+            \ CMAKE_CXX_LINKER_LAUNCHER
             \ CMAKE_CXX_LINKER_PREFERENCE
             \ CMAKE_CXX_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_CXX_LINKER_WRAPPER_FLAG
@@ -969,6 +971,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_C_INCLUDE_WHAT_YOU_USE
             \ CMAKE_C_INIT
             \ CMAKE_C_LIBRARY_ARCHITECTURE
+            \ CMAKE_C_LINKER_LAUNCHER
             \ CMAKE_C_LINKER_PREFERENCE
             \ CMAKE_C_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_C_LINKER_WRAPPER_FLAG
@@ -1262,10 +1265,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_NO_SYSTEM_FROM_IMPORTED
             \ CMAKE_OBJCXX_CLANG_TIDY
             \ CMAKE_OBJCXX_EXTENSIONS
+            \ CMAKE_OBJCXX_LINKER_LAUNCHER
             \ CMAKE_OBJCXX_STANDARD
             \ CMAKE_OBJCXX_STANDARD_REQUIRED
             \ CMAKE_OBJC_CLANG_TIDY
             \ CMAKE_OBJC_EXTENSIONS
+            \ CMAKE_OBJC_LINKER_LAUNCHER
             \ CMAKE_OBJC_STANDARD
             \ CMAKE_OBJC_STANDARD_REQUIRED
             \ CMAKE_OBJECT_PATH_MAX

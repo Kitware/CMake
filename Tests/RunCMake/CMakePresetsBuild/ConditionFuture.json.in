@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "default",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "conditionFuture",
+      "configurePreset": "default",
+      "condition": true
+    }
+  ]
+}

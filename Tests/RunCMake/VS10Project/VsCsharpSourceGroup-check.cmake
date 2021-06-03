@@ -13,6 +13,7 @@ set(SOURCE_GROUPS_TO_FIND
   "CSharpSourceGroup\\\\nested\\\\baz\\.cs"
   "CSharpSourceGroup\\\\images\\\\empty\\.bmp"
   "VsCsharpSourceGroup\\.png"
+  "AssemblyInfo\\.cs"
 )
 
 foreach(GROUP_NAME IN LISTS SOURCE_GROUPS_TO_FIND)

@@ -498,7 +498,7 @@ void cmVisualStudio10TargetGenerator::Generate()
         cmProp targetFramework =
           this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK");
         if (targetFramework) {
-          if (std::strchr(targetFramework->c_str(), ';') != nullptr) {
+          if (targetFramework->find(';') != std::string::npos) {
             e1.Element("TargetFrameworks", *targetFramework);
           } else {
             e1.Element("TargetFramework", *targetFramework);
@@ -545,7 +545,7 @@ void cmVisualStudio10TargetGenerator::Generate()
           e1.Element(
             "CudaToolkitCustomDir",
             this->GlobalGenerator->GetPlatformToolsetCudaCustomDirString() +
-              "nvcc");
+              this->GlobalGenerator->GetPlatformToolsetCudaNvccSubdirString());
         }
       }
 
@@ -654,8 +654,9 @@ void cmVisualStudio10TargetGenerator::Generate()
         std::string cudaPath = customDir.empty()
           ? "$(VCTargetsPath)\\BuildCustomizations\\"
           : customDir +
-            "CUDAVisualStudioIntegration\\extras\\"
-            "visual_studio_integration\\MSBuildExtensions\\";
+            this->GlobalGenerator
+              ->GetPlatformToolsetCudaVSIntegrationSubdirString() +
+            "extras\\visual_studio_integration\\MSBuildExtensions\\";
         Elem(e1, "Import")
           .Attribute("Project",
                      std::move(cudaPath) + "CUDA " +
@@ -747,8 +748,9 @@ void cmVisualStudio10TargetGenerator::Generate()
         std::string cudaPath = customDir.empty()
           ? "$(VCTargetsPath)\\BuildCustomizations\\"
           : customDir +
-            "CUDAVisualStudioIntegration\\extras\\"
-            "visual_studio_integration\\MSBuildExtensions\\";
+            this->GlobalGenerator
+              ->GetPlatformToolsetCudaVSIntegrationSubdirString() +
+            "extras\\visual_studio_integration\\MSBuildExtensions\\";
         Elem(e1, "Import")
           .Attribute("Project",
                      std::move(cudaPath) + "CUDA " +
@@ -2275,6 +2277,20 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
                           std::back_inserter(exclude_configs));
 
       Elem e2(e1, tool);
+      bool isCSharp = (si.Source->GetLanguage() == "CSharp");
+      if (isCSharp && exclude_configs.size() > 0) {
+        std::stringstream conditions;
+        bool firstConditionSet{ false };
+        for (const auto& ci : include_configs) {
+          if (firstConditionSet) {
+            conditions << " Or ";
+          }
+          conditions << "('$(Configuration)|$(Platform)'=='" +
+              this->Configurations[ci] + "|" + this->Platform + "')";
+          firstConditionSet = true;
+        }
+        e2.Attribute("Condition", conditions.str());
+      }
       this->WriteSource(e2, si.Source);
 
       bool useNativeUnityBuild = false;
@@ -2319,7 +2335,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       if (si.Source->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
         e2.Element("PrecompiledHeader", "NotUsing");
       }
-      if (!exclude_configs.empty()) {
+      if (!isCSharp && !exclude_configs.empty()) {
         this->WriteExcludeFromBuild(e2, exclude_configs);
       }
     }
@@ -3340,8 +3356,6 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
     // cmLinkLineDeviceComputer
     cmComputeLinkInformation& cli = *pcli;
     std::vector<std::string> libVec;
-    const std::string currentBinDir =
-      this->LocalGenerator->GetCurrentBinaryDirectory();
     const auto& libs = cli.GetItems();
     for (cmComputeLinkInformation::Item const& l : libs) {
 
@@ -3377,9 +3391,9 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
         }
       }
 
-      if (l.IsPath) {
-        std::string path = this->LocalGenerator->MaybeConvertToRelativePath(
-          currentBinDir, l.Value.Value);
+      if (l.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
+        std::string path =
+          this->LocalGenerator->MaybeRelativeToCurBinDir(l.Value.Value);
         ConvertToWindowsSlash(path);
         if (!cmVS10IsTargetsFile(l.Value.Value)) {
           libVec.push_back(path);
@@ -3930,12 +3944,11 @@ bool cmVisualStudio10TargetGenerator::ComputeLibOptions(
   cmComputeLinkInformation& cli = *pcli;
   using ItemVector = cmComputeLinkInformation::ItemVector;
   const ItemVector& libs = cli.GetItems();
-  std::string currentBinDir =
-    this->LocalGenerator->GetCurrentBinaryDirectory();
   for (cmComputeLinkInformation::Item const& l : libs) {
-    if (l.IsPath && cmVS10IsTargetsFile(l.Value.Value)) {
-      std::string path = this->LocalGenerator->MaybeConvertToRelativePath(
-        currentBinDir, l.Value.Value);
+    if (l.IsPath == cmComputeLinkInformation::ItemIsPath::Yes &&
+        cmVS10IsTargetsFile(l.Value.Value)) {
+      std::string path =
+        this->LocalGenerator->MaybeRelativeToCurBinDir(l.Value.Value);
       ConvertToWindowsSlash(path);
       this->AddTargetsFileAndConfigPair(path, config);
     }
@@ -3975,8 +3988,6 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
 {
   using ItemVector = cmComputeLinkInformation::ItemVector;
   ItemVector const& libs = cli.GetItems();
-  std::string currentBinDir =
-    this->LocalGenerator->GetCurrentBinaryDirectory();
   for (cmComputeLinkInformation::Item const& l : libs) {
     if (l.Target) {
       auto managedType = l.Target->GetManagedType(config);
@@ -4018,9 +4029,9 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
       }
     }
 
-    if (l.IsPath) {
-      std::string path = this->LocalGenerator->MaybeConvertToRelativePath(
-        currentBinDir, l.Value.Value);
+    if (l.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
+      std::string path =
+        this->LocalGenerator->MaybeRelativeToCurBinDir(l.Value.Value);
       ConvertToWindowsSlash(path);
       if (cmVS10IsTargetsFile(l.Value.Value)) {
         vsTargetVec.push_back(path);
@@ -4237,11 +4248,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
     if (dt->IsCSharpOnly() || cmHasLiteralSuffix(path, "csproj")) {
       e2.Element("SkipGetTargetFrameworkProperties", "true");
     }
-
     // Don't reference targets that don't produce any output.
-    if (this->Configurations.empty() ||
-        dt->GetManagedType(this->Configurations[0]) ==
-          cmGeneratorTarget::ManagedType::Undefined) {
+    else if (this->Configurations.empty() ||
+             dt->GetManagedType(this->Configurations[0]) ==
+               cmGeneratorTarget::ManagedType::Undefined) {
       e2.Element("ReferenceOutputAssembly", "false");
       e2.Element("CopyToOutputDirectory", "Never");
     }
@@ -5035,7 +5045,9 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
 {
   // For out of source files, we first check if a matching source group
   // for this file exists, otherwise we check if the path relative to current
-  // source- or binary-dir is used within the link and return that
+  // source- or binary-dir is used within the link and return that.
+  // In case of .cs files we can't do that automatically for files in the
+  // binary directory, because this leads to compilation errors.
   std::string link;
   std::string sourceGroupedFile;
   std::string const& fullFileName = source->GetFullPath();
@@ -5057,7 +5069,8 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
     link = sourceGroupedFile;
   } else if (cmHasPrefix(fullFileName, srcDir)) {
     link = fullFileName.substr(srcDir.length() + 1);
-  } else if (cmHasPrefix(fullFileName, binDir)) {
+  } else if (!cmHasSuffix(fullFileName, ".cs") &&
+             cmHasPrefix(fullFileName, binDir)) {
     link = fullFileName.substr(binDir.length() + 1);
   } else if (cmProp l = source->GetProperty("VS_CSHARP_Link")) {
     link = *l;

@@ -8,22 +8,28 @@ This is mainly intended for internal use by the :module:`CTest` module.
 
   build_command(<variable>
                 [CONFIGURATION <config>]
+                [PARALLEL_LEVEL <parallel>]
                 [TARGET <target>]
                 [PROJECT_NAME <projname>] # legacy, causes warning
                )
 
 Sets the given ``<variable>`` to a command-line string of the form::
 
- <cmake> --build . [--config <config>] [--target <target>...] [-- -i]
+ <cmake> --build . [--config <config>] [--parallel <parallel>] [--target <target>...] [-- -i]
 
 where ``<cmake>`` is the location of the :manual:`cmake(1)` command-line
-tool, and ``<config>`` and ``<target>`` are the values provided to the
-``CONFIGURATION`` and ``TARGET`` options, if any.  The trailing ``-- -i``
-option is added for :ref:`Makefile Generators` if policy :policy:`CMP0061`
-is not set to ``NEW``.
+tool, and ``<config>``, ``<parallel>`` and ``<target>`` are the values
+provided to the ``CONFIGURATION``, ``PARALLEL_LEVEL`` and ``TARGET``
+options, if any.  The trailing ``-- -i`` option is added for
+:ref:`Makefile Generators` if policy :policy:`CMP0061` is not set to
+``NEW``.
 
 When invoked, this ``cmake --build`` command line will launch the
 underlying build system tool.
+
+.. versionadded:: 3.21
+  The ``PARALLEL_LEVEL`` argument can be used to set the ``--parallel``
+  flag.
 
 .. code-block:: cmake
 
