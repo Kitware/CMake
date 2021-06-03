@@ -62,7 +62,7 @@ struct StanardLevelComputer
     , Levels(std::move(levels))
     , LevelsAsStrings(std::move(levelsStr))
   {
-    assert(levels.size() == levelsStr.size());
+    assert(this->Levels.size() == this->LevelsAsStrings.size());
   }
 
   std::string GetCompileOptionDef(cmMakefile* makefile,
