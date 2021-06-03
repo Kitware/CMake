@@ -332,9 +332,10 @@ static bool CheckFileOperations()
 
   // While we're at it, check proper TestFileAccess functionality.
   bool do_write_test = true;
-#if defined(__linux__)
-  // If we are running as root on linux ignore this check, as
-  // root can always write to files
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) ||     \
+  defined(__NetBSD__) || defined(__DragonFly__)
+  // If we are running as root on POSIX-ish systems (Linux and the BSDs,
+  // at least), ignore this check, as root can always write to files.
   do_write_test = (getuid() != 0);
 #endif
   if (do_write_test &&
