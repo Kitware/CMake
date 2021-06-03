@@ -350,8 +350,8 @@ auto const PresetVectorStringHelper =
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET,
     PresetStringHelper);
 
-ReadFileResult PresetInheritsHelper(std::vector<std::string>& out,
-                                    const Json::Value* value)
+ReadFileResult PresetVectorOneOrMoreStringHelper(std::vector<std::string>& out,
+                                                 const Json::Value* value)
 {
   out.clear();
   if (!value) {
@@ -478,8 +478,8 @@ auto const ConfigurePresetHelper =
   cmJSONObjectHelper<ConfigurePreset, ReadFileResult>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
     .Bind("name"_s, &ConfigurePreset::Name, PresetStringHelper)
-    .Bind("inherits"_s, &ConfigurePreset::Inherits, PresetInheritsHelper,
-          false)
+    .Bind("inherits"_s, &ConfigurePreset::Inherits,
+          PresetVectorOneOrMoreStringHelper, false)
     .Bind("hidden"_s, &ConfigurePreset::Hidden, PresetBoolHelper, false)
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           VendorHelper(ReadFileResult::INVALID_PRESET), false)
@@ -512,7 +512,8 @@ auto const BuildPresetHelper =
   cmJSONObjectHelper<BuildPreset, ReadFileResult>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
     .Bind("name"_s, &BuildPreset::Name, PresetStringHelper)
-    .Bind("inherits"_s, &BuildPreset::Inherits, PresetInheritsHelper, false)
+    .Bind("inherits"_s, &BuildPreset::Inherits,
+          PresetVectorOneOrMoreStringHelper, false)
     .Bind("hidden"_s, &BuildPreset::Hidden, PresetBoolHelper, false)
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           VendorHelper(ReadFileResult::INVALID_PRESET), false)
@@ -528,7 +529,8 @@ auto const BuildPresetHelper =
           &BuildPreset::InheritConfigureEnvironment, PresetOptionalBoolHelper,
           false)
     .Bind("jobs"_s, &BuildPreset::Jobs, PresetOptionalIntHelper, false)
-    .Bind("targets"_s, &BuildPreset::Targets, PresetVectorStringHelper, false)
+    .Bind("targets"_s, &BuildPreset::Targets,
+          PresetVectorOneOrMoreStringHelper, false)
     .Bind("configuration"_s, &BuildPreset::Configuration, PresetStringHelper,
           false)
     .Bind("cleanFirst"_s, &BuildPreset::CleanFirst, PresetOptionalBoolHelper,
@@ -831,7 +833,8 @@ auto const TestPresetHelper =
   cmJSONObjectHelper<TestPreset, ReadFileResult>(
     ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
     .Bind("name"_s, &TestPreset::Name, PresetStringHelper)
-    .Bind("inherits"_s, &TestPreset::Inherits, PresetInheritsHelper, false)
+    .Bind("inherits"_s, &TestPreset::Inherits,
+          PresetVectorOneOrMoreStringHelper, false)
     .Bind("hidden"_s, &TestPreset::Hidden, PresetBoolHelper, false)
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           VendorHelper(ReadFileResult::INVALID_PRESET), false)

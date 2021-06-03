@@ -62,7 +62,7 @@ endfunction()
 
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
 
-run_cmake_build_presets(Good "default;other" "build-other;withEnvironment;noEnvironment;macros;vendorObject")
+run_cmake_build_presets(Good "default;other" "build-other;withEnvironment;noEnvironment;macros;vendorObject;singleTarget")
 run_cmake_build_presets(InvalidConfigurePreset "default" "badConfigurePreset")
 run_cmake_build_presets(Condition "default" "enabled;disabled")
 
