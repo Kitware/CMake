@@ -1,5 +1,11 @@
-cmake_minimum_required(VERSION 2.8.12)
-
+cmake_minimum_required(VERSION 3.0)
+if(POLICY CMP0092)
+  cmake_policy(SET CMP0092 NEW)
+endif()
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(NOT _isMultiConfig AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build" FORCE)
+endif()
 project(CompileOptions)
 
 add_library(testlib other.cpp)
@@ -47,6 +53,24 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Borland|Embarcadero" AND NOT "${CMAK
   set_property(TARGET CompileOptions APPEND PROPERTY COMPILE_OPTIONS
     "-DTEST_OCTOTHORPE=\"#\""
     )
+endif()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|AppleClang|MSVC)$")
+  target_compile_definitions(CompileOptions PRIVATE "DO_FLAG_TESTS")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|AppleClang)$")
+    string(APPEND CMAKE_CXX_FLAGS " -w")
+  endif()
+  string(APPEND CMAKE_CXX_FLAGS                " -DFLAG_A=1 -DFLAG_B=1")
+  string(APPEND CMAKE_CXX_FLAGS_DEBUG          " -DFLAG_A=2 -DFLAG_C=1")
+  string(APPEND CMAKE_CXX_FLAGS_RELEASE        " -DFLAG_A=2 -DFLAG_C=1")
+  string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -DFLAG_A=2 -DFLAG_C=1")
+  string(APPEND CMAKE_CXX_FLAGS_MINSIZEREL     " -DFLAG_A=2 -DFLAG_C=1")
+  set_property(TARGET CompileOptions APPEND PROPERTY COMPILE_OPTIONS "-DFLAG_B=2" "-DFLAG_C=2" "-DFLAG_D=1")
+  set_property(TARGET testlib APPEND PROPERTY INTERFACE_COMPILE_OPTIONS "-DFLAG_D=2")
+  if(NOT CMAKE_GENERATOR MATCHES "^Visual Studio 9")
+    set_property(TARGET testlib APPEND PROPERTY INTERFACE_COMPILE_OPTIONS "-DFLAG_E=1")
+    set_property(SOURCE main.cpp PROPERTY COMPILE_OPTIONS "-DFLAG_E=2")
+  endif()
 endif()
 
 target_link_libraries(CompileOptions testlib)
