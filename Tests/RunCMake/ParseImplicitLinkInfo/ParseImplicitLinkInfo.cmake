@@ -23,6 +23,9 @@ set(targets
   hand-C-empty hand-CXX-empty
   hand-C-relative hand-CXX-relative
   linux-C-GNU-7.3.0 linux-CXX-GNU-7.3.0 linux-Fortran-GNU-7.3.0
+  linux-C-GNU-10.2.1-static-libgcc
+    linux-CXX-GNU-10.2.1-static-libstdc++
+    linux-Fortran-GNU-10.2.1-static-libgfortran
   linux-C-Intel-18.0.0.20170811 linux-CXX-Intel-18.0.0.20170811
   linux-C-PGI-18.10.1 linux-CXX-PGI-18.10.1
     linux-Fortran-PGI-18.10.1 linux_pgf77-Fortran-PGI-18.10.1
