@@ -36,7 +36,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
   }
 
-  if (this->AlreadyInCache) {
+  if (this->AlreadyDefined) {
     this->NormalizeFindResult();
     return true;
   }

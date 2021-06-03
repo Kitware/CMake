@@ -1,0 +1,18 @@
+-- FILE_exists='.+/Tests/RunCMake/find_file/include/PrefixInPATH.h'
+-- FILE_doNotExists='FILE_doNotExists-NOTFOUND'
+--[ ]+
+-- Policy CMP0125 = OLD
+-- CACHED FILE_cache='unknown'
+-- FILE_cache='unknown'
+-- CACHED FILE_cache='PrefixInPATH.h'
+-- FILE_cache='PrefixInPATH.h'
+-- CACHED FILE_cache='PrefixInPATH.h'
+-- FILE_cache='PrefixInPATH.h'
+--[ ]+
+-- Policy CMP0125 = NEW
+-- CACHED FILE_cache='unknown'
+-- FILE_cache='unknown'
+-- CACHED FILE_cache='PrefixInPATH.h'
+-- FILE_cache='PrefixInPATH.h'
+-- CACHED FILE_cache='PrefixInPATH.h'
+-- FILE_cache='.+/Tests/RunCMake/find_file/NO_CACHE-build/PrefixInPATH.h'

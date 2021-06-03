@@ -1,0 +1,18 @@
+-- PROG_A='.+/Tests/RunCMake/find_program/A/testA'
+-- PROG_AandB='PROG_AandB-NOTFOUND'
+--[ ]+
+-- Policy CMP0125 = OLD
+-- CACHED PROG_cache='unknown'
+-- PROG_cache='unknown'
+-- CACHED PROG_cache='testA'
+-- PROG_cache='testA'
+-- CACHED PROG_cache='testA'
+-- PROG_cache='testA'
+--[ ]+
+-- Policy CMP0125 = NEW
+-- CACHED PROG_cache='unknown'
+-- PROG_cache='unknown'
+-- CACHED PROG_cache='testA'
+-- PROG_cache='testA'
+-- CACHED PROG_cache='testA'
+-- PROG_cache='.+/Tests/RunCMake/find_program/NO_CACHE-build/testA'
