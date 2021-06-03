@@ -83,7 +83,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "compilation completed with warnings" # PGI
   "[0-9]+ Warning\\(s\\) detected" # SunPro
 
-  # scanbuild exceptions
+  # clang-analyzer exceptions
   "char_traits.h:.*: warning: Null pointer argument in call to string length function"
   "stl_construct.h:.*: warning: Forming reference to null pointer"
   ".*stl_uninitialized.h:75:19: warning: Forming reference to null pointer.*"
