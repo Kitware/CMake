@@ -360,6 +360,10 @@ run_NoTests()
 # Check the configuration type variable is passed
 run_ctest(check-configuration-type)
 
+run_cmake_command(EmptyDirCoverage-ctest
+  ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T Coverage
+  )
+
 function(run_MemCheckSan case opts)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/MemCheckSan${case}-build)

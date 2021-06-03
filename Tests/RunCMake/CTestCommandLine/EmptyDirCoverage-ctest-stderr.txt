@@ -1,0 +1,3 @@
+Cannot find file: [^
+]*/Tests/RunCMake/CTestCommandLine/EmptyDirCoverage-ctest-build/DartConfiguration.tcl
+Binary directory is not set.  No coverage checking will be performed.$
