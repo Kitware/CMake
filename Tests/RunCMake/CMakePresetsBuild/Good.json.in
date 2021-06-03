@@ -73,6 +73,11 @@
             "vendor": {
                 "example.com": "value"
             }
+        },
+        {
+            "name": "singleTarget",
+            "inherits": "build-default",
+            "targets": "good"
         }
     ]
 }

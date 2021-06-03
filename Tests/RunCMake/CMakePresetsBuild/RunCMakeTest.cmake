@@ -70,7 +70,7 @@ else()
   set(Good_json_jobs [["jobs": 0,]])
 endif()
 
-run_cmake_build_presets(Good "default;other" "build-other;withEnvironment;noEnvironment;macros;vendorObject")
+run_cmake_build_presets(Good "default;other" "build-other;withEnvironment;noEnvironment;macros;vendorObject;singleTarget")
 run_cmake_build_presets(InvalidConfigurePreset "default" "badConfigurePreset")
 
 set(CMakePresetsBuild_BUILD_ONLY 1)
