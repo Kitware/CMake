@@ -10,3 +10,6 @@ platform and compiler related information.
 
 Relative paths are allowed and are interpreted first as relative to the
 build directory, and if not found, relative to the source directory.
+
+This is initialized by the :envvar:`CMAKE_TOOLCHAIN_FILE` environment
+variable if it is set when a new build tree is first created.

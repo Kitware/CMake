@@ -2040,6 +2040,16 @@ int cmake::ActualConfigure()
                         this->GlobalGenerator->GetExtraGeneratorName().c_str(),
                         "Name of external makefile project generator.",
                         cmStateEnums::INTERNAL);
+
+    if (!this->State->GetInitializedCacheValue("CMAKE_TOOLCHAIN_FILE")) {
+      std::string envToolchain;
+      if (cmSystemTools::GetEnv("CMAKE_TOOLCHAIN_FILE", envToolchain) &&
+          !envToolchain.empty()) {
+        this->AddCacheEntry("CMAKE_TOOLCHAIN_FILE", envToolchain.c_str(),
+                            "The CMake toolchain file",
+                            cmStateEnums::FILEPATH);
+      }
+    }
   }
 
   if (cmProp instance =
