@@ -301,12 +301,14 @@ static bool testMoveConstruct(std::vector<Event>& expected)
   cm::optional<EventLogger> o3{};
   const cm::optional<EventLogger> o4{ std::move(o3) };
 
+#ifndef __clang_analyzer__ /* cplusplus.Move */
   expected = {
     { Event::VALUE_CONSTRUCT, &*o1, nullptr, 4 },
     { Event::MOVE_CONSTRUCT, &*o2, &*o1, 4 },
     { Event::DESTRUCT, &*o2, nullptr, 4 },
     { Event::DESTRUCT, &*o1, nullptr, 4 },
   };
+#endif
   return true;
 }
 
