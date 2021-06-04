@@ -645,7 +645,7 @@ static const flex_int16_t yy_chk[46] =
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
-#ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
+#ifndef __clang_analyzer__ /* Suppress clang-analyzer warnings */
 
 #include <cmGccDepfileLexerHelper.h>
 #include <string>

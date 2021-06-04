@@ -659,7 +659,7 @@ Modify cmCTestResourceGroupsLexer.cxx:
 
 /* IWYU pragma: no_forward_declare yyguts_t */
 
-#ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
+#ifndef __clang_analyzer__ /* Suppress clang-analyzer warnings */
 
 #include "cmCTestResourceGroupsLexerHelper.h"
 
