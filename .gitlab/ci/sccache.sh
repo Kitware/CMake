@@ -2,57 +2,42 @@
 
 set -e
 
-readonly kernel="$(uname -s)-$(uname -m)"
-case $kernel in
-    Linux-x86_64)
-        version="v0.2.15"
-        shatool="sha256sum"
-        sha256sum="e5d03a9aa3b9fac7e490391bbe22d4f42c840d31ef9eaf127a03101930cbb7ca"
-        platform="x86_64-unknown-linux-musl"
-        ;;
+readonly version="0.2.15-background-init"
+readonly build_date="20210602.0"
+
+case "$( uname -s )-$(uname -m)" in
     Linux-aarch64)
-        version="v0.2.15"
         shatool="sha256sum"
-        sha256sum="90d91d21a767e3f558196dbd52395f6475c08de5c4951a4c8049575fa6894489"
+        sha256sum="28b9ad3f591874551a3f4c5c1ff32456d3328c15d7bd8bc63b4e5948a94f1def"
         platform="aarch64-unknown-linux-musl"
         ;;
-    Darwin-x86_64)
-        version="gfe63078"
-        shatool="shasum -a 256"
-        sha256sum="60a0302b1d7227f7ef56abd82266353f570d27c6e850c56c6448bf62def38888"
-        platform="x86_64-apple-darwin"
-        url="https://paraview.org/files/dependencies"
+    Linux-x86_64)
+        shatool="sha256sum"
+        sha256sum="34d62d30eae1a4145f00d62b01ad21c3456e28f11f8246c936b00cccf4855016"
+        platform="x86_64-unknown-linux-musl"
         ;;
-    Darwin-arm64)
-        version="0.2.15-1-disk_cache_init"
+    Darwin-x86_64|Darwin-arm64)
         shatool="shasum -a 256"
-        sha256sum="f7c9ff78e701810b8b1dbc2a163c7fda1177fc3f69c71f46e7a38242657a99fd"
-        platform="aarch64-apple-darwin"
-        url="https://cmake.org/files/dependencies/sccache"
+        sha256sum="2fa396e98cc8d07e39429b187a77386db63d35409902251d462080bdd0087c22"
+        platform="universal-apple-darwin"
         ;;
     *)
-        echo "Unrecognized platform $kernel"
+        echo "Unrecognized platform $( uname -s )-$( uname -m )"
         exit 1
         ;;
 esac
-readonly version
 readonly shatool
 readonly sha256sum
 readonly platform
 
-readonly filename="sccache-$version-$platform"
-readonly tarball="$filename.tar.gz"
+readonly filename="sccache-v$version-$platform"
 
-if [ -z "$url" ]; then
-    url="https://github.com/mozilla/sccache/releases/download/$version"
-fi
-readonly url
+readonly url="https://gitlab.kitware.com/api/v4/projects/6955/packages/generic/sccache/v$version-$build_date/"
 
 cd .gitlab
 
-echo "$sha256sum  $tarball" > sccache.sha256sum
-curl -OL "$url/$tarball"
+echo "$sha256sum  $filename" > sccache.sha256sum
+curl -OL "$url/$filename"
 $shatool --check sccache.sha256sum
-tar xf "$tarball"
-mv "$filename/sccache" .
+mv "$filename" sccache
 chmod +x sccache
