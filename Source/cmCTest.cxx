@@ -1612,8 +1612,33 @@ int cmCTest::GenerateDoneFile()
   return 0;
 }
 
+bool cmCTest::TryToChangeDirectory(std::string const& dir)
+{
+  cmCTestLog(this, OUTPUT,
+             "Internal ctest changing into directory: " << dir << std::endl);
+  cmsys::Status status = cmSystemTools::ChangeDirectory(dir);
+  if (!status) {
+    auto msg = "Failed to change working directory to \"" + dir +
+      "\" : " + status.GetString() + "\n";
+    cmCTestLog(this, ERROR_MESSAGE, msg);
+    return false;
+  }
+  return true;
+}
+
 std::string cmCTest::Base64GzipEncodeFile(std::string const& file)
 {
+  const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
+  std::string parentDir = cmSystemTools::GetParentDirectory(file);
+
+  // Temporarily change to the file's directory so the tar gets created
+  // with a flat directory structure.
+  if (currDir != parentDir) {
+    if (!this->TryToChangeDirectory(parentDir)) {
+      return "";
+    }
+  }
+
   std::string tarFile = file + "_temp.tar.gz";
   std::vector<std::string> files;
   files.push_back(file);
@@ -1628,6 +1653,12 @@ std::string cmCTest::Base64GzipEncodeFile(std::string const& file)
   }
   std::string base64 = this->Base64EncodeFile(tarFile);
   cmSystemTools::RemoveFile(tarFile);
+
+  // Change back to the directory we started in.
+  if (currDir != parentDir) {
+    cmSystemTools::ChangeDirectory(currDir);
+  }
+
   return base64;
 }
 
@@ -2853,14 +2884,7 @@ int cmCTest::ExecuteTests()
     }
 
     if (currDir != workDir) {
-      cmCTestLog(this, OUTPUT,
-                 "Internal ctest changing into directory: " << workDir
-                                                            << std::endl);
-      cmsys::Status status = cmSystemTools::ChangeDirectory(workDir);
-      if (!status) {
-        auto msg = "Failed to change working directory to \"" + workDir +
-          "\" : " + status.GetString() + "\n";
-        cmCTestLog(this, ERROR_MESSAGE, msg);
+      if (!this->TryToChangeDirectory(workDir)) {
         return 1;
       }
     }
