@@ -697,6 +697,7 @@ void cmGeneratorTarget::ClearSourcesCache()
   this->SourcesAreContextDependent = Tribool::Indeterminate;
   this->Objects.clear();
   this->VisitedConfigsForObjects.clear();
+  this->LinkImplMap.clear();
 }
 
 void cmGeneratorTarget::AddSourceCommon(const std::string& src, bool before)
