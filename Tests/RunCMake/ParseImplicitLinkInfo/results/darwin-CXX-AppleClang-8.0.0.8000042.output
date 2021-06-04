@@ -1,2 +1,2 @@
-libs=c++
+libs=c\+\+
 dirs=/usr/lib;/usr/local/lib

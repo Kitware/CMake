@@ -2,6 +2,9 @@
 # test it.
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 
+set(CMAKE_FIND_LIBRARY_PREFIXES "disabled-for-test-")
+set(CMAKE_FIND_LIBRARY_SUFFIXES "-disabled-for-test")
+
 #-----------------------------------------------------------------------------
 # Linux
 

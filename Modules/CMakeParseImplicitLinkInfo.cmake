@@ -72,6 +72,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
       endif()
     endif()
     set(is_msvc 0)
+    set(search_static 0)
     if("${cmd}" MATCHES "${linker_regex}")
       string(APPEND log "  link line: [${line}]\n")
       string(REGEX REPLACE ";-([LYz]);" ";-\\1" args "${args}")
@@ -103,6 +104,10 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
         elseif("${arg}" MATCHES "^-l([^:].*)$")
           # Unix library.
           set(lib "${CMAKE_MATCH_1}")
+          if(search_static AND lib MATCHES "^(gfortran|stdc\\+\\+)$")
+            # Search for the static library later, once all link dirs are known.
+            set(lib "SEARCH_STATIC:${lib}")
+          endif()
           list(APPEND implicit_libs_tmp ${lib})
           string(APPEND log "    arg [${arg}] ==> lib [${lib}]\n")
         elseif("${arg}" MATCHES "^(.:)?[/\\].*\\.a$")
@@ -129,6 +134,12 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
           string(REPLACE ":" ";" dirs "${dirs}")
           list(APPEND implicit_dirs_tmp ${dirs})
           string(APPEND log "    arg [${arg}] ==> dirs [${dirs}]\n")
+        elseif("${arg}" STREQUAL "-Bstatic")
+          set(search_static 1)
+          string(APPEND log "    arg [${arg}] ==> search static\n" )
+        elseif("${arg}" STREQUAL "-Bdynamic")
+          set(search_static 0)
+          string(APPEND log "    arg [${arg}] ==> search dynamic\n" )
         elseif("${arg}" MATCHES "^-l:")
           # HP named library.
           list(APPEND implicit_libs_tmp ${arg})
@@ -172,8 +183,29 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   # We remove items that are not language-specific.
   set(implicit_libs "")
   foreach(lib IN LISTS implicit_libs_tmp)
+    if("x${lib}" MATCHES "^xSEARCH_STATIC:(.*)")
+      set(search_static 1)
+      set(lib "${CMAKE_MATCH_1}")
+    else()
+      set(search_static 0)
+    endif()
     if("x${lib}" MATCHES "^x(crt.*\\.o|gcc_eh.*|.*libgcc_eh.*|System.*|.*libclang_rt.*|msvcrt.*|libvcruntime.*|libucrt.*|libcmt.*)$")
       string(APPEND log "  remove lib [${lib}]\n")
+    elseif(search_static)
+      # This library appears after a -Bstatic flag.  Due to ordering
+      # and filtering for mixed-language link lines, we do not preserve
+      # the -Bstatic flag itself.  Instead, use an absolute path.
+      # Search using a temporary variable with a distinct name
+      # so that our test suite does not depend on disk content.
+      find_library("CMAKE_${lang}_IMPLICIT_LINK_LIBRARY_${lib}" NO_CACHE NAMES "lib${lib}.a" NO_DEFAULT_PATH PATHS ${implicit_dirs_tmp})
+      set(_lib_static "${CMAKE_${lang}_IMPLICIT_LINK_LIBRARY_${lib}}")
+      if(_lib_static)
+        string(APPEND log "  search lib [SEARCH_STATIC:${lib}] ==> [${_lib_static}]\n")
+        list(APPEND implicit_libs "${_lib_static}")
+      else()
+        string(APPEND log "  search lib [SEARCH_STATIC:${lib}] ==> [${lib}]\n")
+        list(APPEND implicit_libs "${lib}")
+      endif()
     elseif(IS_ABSOLUTE "${lib}")
       get_filename_component(abs "${lib}" ABSOLUTE)
       if(NOT "x${lib}" STREQUAL "x${abs}")

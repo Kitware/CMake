@@ -1,0 +1,3 @@
+libs=gcc;c;gcc
+dirs=/usr/lib/gcc/x86_64-linux-gnu/10;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib
+library_arch=x86_64-linux-gnu
