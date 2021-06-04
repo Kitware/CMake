@@ -1,0 +1,4 @@
+-- ENV{CMAKE_TOOLCHAIN_FILE}='EnvToolchain-toolchain.cmake'
+-- CMAKE_TOOLCHAIN_FILE='[^
+]*/Tests/RunCMake/CommandLine/EnvToolchainRelative-build/EnvToolchain-toolchain.cmake'
+-- ENV_TOOLCHAIN='1'

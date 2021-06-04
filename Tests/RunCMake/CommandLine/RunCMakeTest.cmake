@@ -344,6 +344,33 @@ if(RunCMake_GENERATOR MATCHES "Unix Makefiles" OR RunCMake_GENERATOR MATCHES "Ni
   run_EnvironmentExportCompileCommands()
 endif()
 
+function(run_EnvironmentToolchain)
+  set(ENV{CMAKE_TOOLCHAIN_FILE} "${RunCMake_SOURCE_DIR}/EnvToolchain-toolchain.cmake")
+  run_cmake(EnvToolchainAbsolute)
+  run_cmake_with_options(EnvToolchainIgnore -DCMAKE_TOOLCHAIN_FILE=)
+  unset(ENV{CMAKE_TOOLCHAIN_FILE})
+
+  set(ENV{CMAKE_TOOLCHAIN_FILE} "EnvToolchain-toolchain.cmake")
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/EnvToolchainRelative-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  configure_file("${RunCMake_SOURCE_DIR}/EnvToolchain-toolchain.cmake" "${RunCMake_TEST_BINARY_DIR}/EnvToolchain-toolchain.cmake" COPYONLY)
+  run_cmake(EnvToolchainRelative)
+  unset(ENV{CMAKE_TOOLCHAIN_FILE})
+  unset(RunCMake_TEST_NO_CLEAN)
+
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/EnvToolchainNone-build)
+  run_cmake(EnvToolchainNone)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}/CMakeFiles")
+  set(ENV{CMAKE_TOOLCHAIN_FILE} "${RunCMake_SOURCE_DIR}/EnvToolchain-toolchain.cmake")
+  run_cmake_command(EnvToolchainNoneExisting ${CMAKE_COMMAND} .)
+  unset(ENV{CMAKE_TOOLCHAIN_FILE})
+  unset(RunCMake_TEST_NO_CLEAN)
+endfunction()
+run_EnvironmentToolchain()
+
 if(RunCMake_GENERATOR STREQUAL "Ninja")
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Build-build)
