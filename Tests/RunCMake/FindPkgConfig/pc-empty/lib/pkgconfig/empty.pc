@@ -1,0 +1,5 @@
+Name: Empty
+Description: Dummy package to test empty target
+Version: 1.0
+Libs:
+Cflags:
