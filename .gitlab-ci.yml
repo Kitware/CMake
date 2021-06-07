@@ -176,6 +176,16 @@ test:debian10-aarch64-ninja:
     variables:
         CMAKE_CI_NO_MR: "true"
 
+test:debian10-makefiles-clang:
+    extends:
+        - .debian10_makefiles_clang
+        - .cmake_test_linux_release
+        - .linux_builder_tags_qt
+        - .run_manually
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 test:fedora34-makefiles:
     extends:
         - .fedora34_makefiles

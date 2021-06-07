@@ -149,6 +149,15 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
+### Clang Compiler
+
+.debian10_makefiles_clang:
+    extends: .debian10
+
+    variables:
+        CMAKE_CONFIGURATION: debian10_makefiles_clang
+        CMAKE_GENERATOR: "Unix Makefiles"
+
 ### Intel Compiler
 
 .intelcompiler:
