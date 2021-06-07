@@ -498,6 +498,31 @@ upload:linux-aarch64-package:
     variables:
         RSYNC_DESTINATION: dev
 
+## Sanitizer builds
+
+build:fedora34-asan:
+    extends:
+        - .fedora34_asan
+        - .cmake_build_linux
+        - .cmake_build_artifacts
+        - .linux_builder_tags_qt
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+test:fedora34-asan:
+    extends:
+        - .fedora34_asan
+        - .cmake_memcheck_linux
+        - .linux_builder_tags_qt
+        - .run_automatically
+    dependencies:
+        - build:fedora34-asan
+    needs:
+        - build:fedora34-asan
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 # macOS builds
 
 build:macos-x86_64-ninja:
