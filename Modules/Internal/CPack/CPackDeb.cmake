@@ -557,7 +557,7 @@ function(cpack_deb_prepare_package_vars)
         string(APPEND _description_failure_message
           " or CPACK_DEBIAN_${_local_component_name}_DESCRIPTION")
       endif()
-      message(FATAL_ERROR _description_failure_message)
+      message(FATAL_ERROR "${_description_failure_message}")
     endif()
 
   # Ok, description has set. According to the `Debian Policy Manual`_ the first
