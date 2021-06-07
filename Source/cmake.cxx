@@ -3263,7 +3263,9 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
     this->UnprocessedPresetEnvironment = expandedPreset->Environment;
     this->ProcessPresetEnvironment();
 
-    if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL && expandedPreset->Jobs) {
+    if ((jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL ||
+         jobs == cmake::NO_BUILD_PARALLEL_LEVEL) &&
+        expandedPreset->Jobs) {
       jobs = *expandedPreset->Jobs;
     }
 
