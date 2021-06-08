@@ -117,65 +117,61 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
         return false;
       }
 
-      if (rule.isMember("future-compile")) {
-        Json::Value const& future_compile = rule["future-compile"];
+      if (rule.isMember("outputs")) {
+        Json::Value const& outputs = rule["outputs"];
+        if (outputs.isArray()) {
+          if (outputs.empty()) {
+            cmSystemTools::Error(
+              cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
+                       ": expected at least one 1 output"));
+            return false;
+          }
 
-        if (future_compile.isMember("outputs")) {
-          Json::Value const& outputs = future_compile["outputs"];
-          if (outputs.isArray()) {
-            if (outputs.empty()) {
-              cmSystemTools::Error(
-                cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
-                         ": expected at least one 1 output"));
-              return false;
+          PARSE_FILENAME(outputs[0], info->PrimaryOutput);
+        }
+      }
+
+      if (rule.isMember("provides")) {
+        Json::Value const& provides = rule["provides"];
+        if (provides.isArray()) {
+          for (auto const& provide : provides) {
+            cmSourceReqInfo provide_info;
+
+            Json::Value const& logical_name = provide["logical-name"];
+            PARSE_BLOB(logical_name, provide_info.LogicalName);
+
+            if (provide.isMember("compiled-module-path")) {
+              Json::Value const& compiled_module_path =
+                provide["compiled-module-path"];
+              PARSE_FILENAME(compiled_module_path,
+                             provide_info.CompiledModulePath);
+            } else {
+              provide_info.CompiledModulePath =
+                cmStrCat(provide_info.LogicalName, ".mod");
             }
 
-            PARSE_FILENAME(outputs[0], info->PrimaryOutput);
+            info->Provides.push_back(provide_info);
           }
         }
+      }
 
-        if (future_compile.isMember("provides")) {
-          Json::Value const& provides = future_compile["provides"];
-          if (provides.isArray()) {
-            for (auto const& provide : provides) {
-              cmSourceReqInfo provide_info;
+      if (rule.isMember("requires")) {
+        Json::Value const& reqs = rule["requires"];
+        if (reqs.isArray()) {
+          for (auto const& require : reqs) {
+            cmSourceReqInfo require_info;
 
-              Json::Value const& logical_name = provide["logical-name"];
-              PARSE_BLOB(logical_name, provide_info.LogicalName);
+            Json::Value const& logical_name = require["logical-name"];
+            PARSE_BLOB(logical_name, require_info.LogicalName);
 
-              if (provide.isMember("compiled-module-path")) {
-                Json::Value const& compiled_module_path =
-                  provide["compiled-module-path"];
-                PARSE_FILENAME(compiled_module_path,
-                               provide_info.CompiledModulePath);
-              } else {
-                provide_info.CompiledModulePath =
-                  cmStrCat(provide_info.LogicalName, ".mod");
-              }
-
-              info->Provides.push_back(provide_info);
+            if (require.isMember("compiled-module-path")) {
+              Json::Value const& compiled_module_path =
+                require["compiled-module-path"];
+              PARSE_FILENAME(compiled_module_path,
+                             require_info.CompiledModulePath);
             }
-          }
-        }
 
-        if (future_compile.isMember("requires")) {
-          Json::Value const& reqs = future_compile["requires"];
-          if (reqs.isArray()) {
-            for (auto const& require : reqs) {
-              cmSourceReqInfo require_info;
-
-              Json::Value const& logical_name = require["logical-name"];
-              PARSE_BLOB(logical_name, require_info.LogicalName);
-
-              if (require.isMember("compiled-module-path")) {
-                Json::Value const& compiled_module_path =
-                  require["compiled-module-path"];
-                PARSE_FILENAME(compiled_module_path,
-                               require_info.CompiledModulePath);
-              }
-
-              info->Requires.push_back(require_info);
-            }
+            info->Requires.push_back(require_info);
           }
         }
       }
@@ -196,12 +192,10 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
 
   Json::Value rule(Json::objectValue);
 
-  Json::Value& future_compile = rule["future-compile"] = Json::objectValue;
-
-  Json::Value& outputs = future_compile["outputs"] = Json::arrayValue;
+  Json::Value& outputs = rule["outputs"] = Json::arrayValue;
   outputs.append(info.PrimaryOutput);
 
-  Json::Value& provides = future_compile["provides"] = Json::arrayValue;
+  Json::Value& provides = rule["provides"] = Json::arrayValue;
   for (auto const& provide : info.Provides) {
     Json::Value provide_obj(Json::objectValue);
     auto const encoded = EncodeFilename(provide.LogicalName);
@@ -218,7 +212,7 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
     provides.append(provide_obj);
   }
 
-  Json::Value& reqs = future_compile["requires"] = Json::arrayValue;
+  Json::Value& reqs = rule["requires"] = Json::arrayValue;
   for (auto const& require : info.Requires) {
     Json::Value require_obj(Json::objectValue);
     auto const encoded = EncodeFilename(require.LogicalName);
