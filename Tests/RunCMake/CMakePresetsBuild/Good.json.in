@@ -30,7 +30,7 @@
             "description": "",
             "inheritConfigureEnvironment": true,
             "environment": {},
-            "jobs": 0,
+            @Good_json_jobs@
             "targets": [],
             "configuration": "",
             "verbose": true,
