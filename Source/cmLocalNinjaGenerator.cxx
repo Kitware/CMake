@@ -698,8 +698,6 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
           case cmPolicies::REQUIRED_IF_USED:
           case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::NEW:
-            cmSystemTools::MakeDirectory(
-              cmStrCat(this->GetBinaryDirectory(), "/CMakeFiles/d"));
             depfile = ccg.GetInternalDepfile();
             break;
         }
