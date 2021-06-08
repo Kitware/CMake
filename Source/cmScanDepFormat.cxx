@@ -133,46 +133,56 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
 
       if (rule.isMember("provides")) {
         Json::Value const& provides = rule["provides"];
-        if (provides.isArray()) {
-          for (auto const& provide : provides) {
-            cmSourceReqInfo provide_info;
+        if (!provides.isArray()) {
+          cmSystemTools::Error(
+            cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
+                     ": provides is not an array"));
+          return false;
+        }
 
-            Json::Value const& logical_name = provide["logical-name"];
-            PARSE_BLOB(logical_name, provide_info.LogicalName);
+        for (auto const& provide : provides) {
+          cmSourceReqInfo provide_info;
 
-            if (provide.isMember("compiled-module-path")) {
-              Json::Value const& compiled_module_path =
-                provide["compiled-module-path"];
-              PARSE_FILENAME(compiled_module_path,
-                             provide_info.CompiledModulePath);
-            } else {
-              provide_info.CompiledModulePath =
-                cmStrCat(provide_info.LogicalName, ".mod");
-            }
+          Json::Value const& logical_name = provide["logical-name"];
+          PARSE_BLOB(logical_name, provide_info.LogicalName);
 
-            info->Provides.push_back(provide_info);
+          if (provide.isMember("compiled-module-path")) {
+            Json::Value const& compiled_module_path =
+              provide["compiled-module-path"];
+            PARSE_FILENAME(compiled_module_path,
+                           provide_info.CompiledModulePath);
+          } else {
+            provide_info.CompiledModulePath =
+              cmStrCat(provide_info.LogicalName, ".mod");
           }
+
+          info->Provides.push_back(provide_info);
         }
       }
 
       if (rule.isMember("requires")) {
         Json::Value const& reqs = rule["requires"];
-        if (reqs.isArray()) {
-          for (auto const& require : reqs) {
-            cmSourceReqInfo require_info;
+        if (!reqs.isArray()) {
+          cmSystemTools::Error(
+            cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
+                     ": requires is not an array"));
+          return false;
+        }
 
-            Json::Value const& logical_name = require["logical-name"];
-            PARSE_BLOB(logical_name, require_info.LogicalName);
+        for (auto const& require : reqs) {
+          cmSourceReqInfo require_info;
 
-            if (require.isMember("compiled-module-path")) {
-              Json::Value const& compiled_module_path =
-                require["compiled-module-path"];
-              PARSE_FILENAME(compiled_module_path,
-                             require_info.CompiledModulePath);
-            }
+          Json::Value const& logical_name = require["logical-name"];
+          PARSE_BLOB(logical_name, require_info.LogicalName);
 
-            info->Requires.push_back(require_info);
+          if (require.isMember("compiled-module-path")) {
+            Json::Value const& compiled_module_path =
+              require["compiled-module-path"];
+            PARSE_FILENAME(compiled_module_path,
+                           require_info.CompiledModulePath);
           }
+
+          info->Requires.push_back(require_info);
         }
       }
     }
