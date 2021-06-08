@@ -478,6 +478,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(Preprocess Preprocess)
   set(ExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
                                  -DCMake_TEST_CUDA:BOOL=${CMake_TEST_CUDA}
+                                 -DCMake_INSTALL_NAME_TOOL_BUG:BOOL=${CMake_INSTALL_NAME_TOOL_BUG}
                                  )
   ADD_TEST_MACRO(ExportImport ExportImport)
   set_property(TEST ExportImport APPEND

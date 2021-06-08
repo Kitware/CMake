@@ -36,21 +36,24 @@ public:
 
   void SetError(const std::string& e);
 
-  std::string GetBundleExecutable();
-  const std::vector<std::string>& GetSearchDirectories();
-  std::string GetGetRuntimeDependenciesTool();
-  bool GetGetRuntimeDependenciesCommand(const std::string& search,
-                                        std::vector<std::string>& command);
-  bool IsPreExcluded(const std::string& name);
-  bool IsPostExcluded(const std::string& name);
+  const std::string& GetBundleExecutable() const;
+  const std::vector<std::string>& GetSearchDirectories() const;
+  const std::string& GetGetRuntimeDependenciesTool() const;
+  bool GetGetRuntimeDependenciesCommand(
+    const std::string& search, std::vector<std::string>& command) const;
+  bool IsPreExcluded(const std::string& name) const;
+  bool IsPostExcluded(const std::string& name) const;
 
   void AddResolvedPath(const std::string& name, const std::string& path,
-                       bool& unique);
+                       bool& unique, std::vector<std::string> rpaths = {});
   void AddUnresolvedPath(const std::string& name);
 
-  cmMakefile* GetMakefile();
-  const std::map<std::string, std::set<std::string>>& GetResolvedPaths();
-  const std::set<std::string>& GetUnresolvedPaths();
+  cmMakefile* GetMakefile() const;
+  const std::map<std::string, std::set<std::string>>& GetResolvedPaths() const;
+  const std::set<std::string>& GetUnresolvedPaths() const;
+  const std::map<std::string, std::vector<std::string>>& GetRPaths() const;
+
+  static bool PlatformSupportsRuntimeDependencies(const std::string& platform);
 
 private:
   cmExecutionStatus& Status;
@@ -70,4 +73,5 @@ private:
   std::vector<std::string> PostExcludeFilesStrict;
   std::map<std::string, std::set<std::string>> ResolvedPaths;
   std::set<std::string> UnresolvedPaths;
+  std::map<std::string, std::vector<std::string>> RPaths;
 };

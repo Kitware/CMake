@@ -345,6 +345,8 @@ set(SRCS
   cmGraphVizWriter.h
   cmInstallGenerator.h
   cmInstallGenerator.cxx
+  cmInstallGetRuntimeDependenciesGenerator.h
+  cmInstallGetRuntimeDependenciesGenerator.cxx
   cmInstallExportGenerator.cxx
   cmInstalledFile.h
   cmInstalledFile.cxx
@@ -352,6 +354,10 @@ set(SRCS
   cmInstallFilesGenerator.cxx
   cmInstallImportedRuntimeArtifactsGenerator.h
   cmInstallImportedRuntimeArtifactsGenerator.cxx
+  cmInstallRuntimeDependencySet.h
+  cmInstallRuntimeDependencySet.cxx
+  cmInstallRuntimeDependencySetGenerator.h
+  cmInstallRuntimeDependencySetGenerator.cxx
   cmInstallScriptGenerator.h
   cmInstallScriptGenerator.cxx
   cmInstallSubdirectoryGenerator.h

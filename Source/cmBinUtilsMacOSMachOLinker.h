@@ -27,6 +27,8 @@ private:
   std::unique_ptr<cmBinUtilsMacOSMachOGetRuntimeDependenciesTool> Tool;
 
   bool ScanDependencies(std::string const& file,
+                        std::vector<std::string> const& libs,
+                        std::vector<std::string> const& rpaths,
                         std::string const& executablePath);
 
   bool GetFileDependencies(std::vector<std::string> const& names,

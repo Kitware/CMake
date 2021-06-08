@@ -1,0 +1,4 @@
+^CMake Error at TARGETS-RUNTIME_DEPENDENCIES-cross\.cmake:[0-9]+ \(install\):
+  install TARGETS RUNTIME_DEPENDENCIES is not supported when cross-compiling\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

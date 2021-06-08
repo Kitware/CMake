@@ -990,50 +990,42 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
 {
   // Evaluate arguments.
   std::string file;
-  const char* oldRPath = nullptr;
-  const char* newRPath = nullptr;
+  std::string oldRPath;
+  std::string newRPath;
   bool removeEnvironmentRPath = false;
-  enum Doing
-  {
-    DoingNone,
-    DoingFile,
-    DoingOld,
-    DoingNew
-  };
-  Doing doing = DoingNone;
-  for (unsigned int i = 1; i < args.size(); ++i) {
-    if (args[i] == "OLD_RPATH") {
-      doing = DoingOld;
-    } else if (args[i] == "NEW_RPATH") {
-      doing = DoingNew;
-    } else if (args[i] == "FILE") {
-      doing = DoingFile;
-    } else if (args[i] == "INSTALL_REMOVE_ENVIRONMENT_RPATH") {
-      removeEnvironmentRPath = true;
-    } else if (doing == DoingFile) {
-      file = args[i];
-      doing = DoingNone;
-    } else if (doing == DoingOld) {
-      oldRPath = args[i].c_str();
-      doing = DoingNone;
-    } else if (doing == DoingNew) {
-      newRPath = args[i].c_str();
-      doing = DoingNone;
-    } else {
-      status.SetError(
-        cmStrCat("RPATH_CHANGE given unknown argument ", args[i]));
-      return false;
-    }
+  cmArgumentParser<void> parser;
+  std::vector<std::string> unknownArgs;
+  std::vector<std::string> missingArgs;
+  std::vector<std::string> parsedArgs;
+  parser.Bind("FILE"_s, file)
+    .Bind("OLD_RPATH"_s, oldRPath)
+    .Bind("NEW_RPATH"_s, newRPath)
+    .Bind("INSTALL_REMOVE_ENVIRONMENT_RPATH"_s, removeEnvironmentRPath);
+  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
+               &parsedArgs);
+  if (!unknownArgs.empty()) {
+    status.SetError(
+      cmStrCat("RPATH_CHANGE given unknown argument ", unknownArgs.front()));
+    return false;
+  }
+  if (!missingArgs.empty()) {
+    status.SetError(cmStrCat("RPATH_CHANGE \"", missingArgs.front(),
+                             "\" argument not given value."));
+    return false;
   }
   if (file.empty()) {
     status.SetError("RPATH_CHANGE not given FILE option.");
     return false;
   }
-  if (!oldRPath) {
+  if (oldRPath.empty() &&
+      std::find(parsedArgs.begin(), parsedArgs.end(), "OLD_RPATH") ==
+        parsedArgs.end()) {
     status.SetError("RPATH_CHANGE not given OLD_RPATH option.");
     return false;
   }
-  if (!newRPath) {
+  if (newRPath.empty() &&
+      std::find(parsedArgs.begin(), parsedArgs.end(), "NEW_RPATH") ==
+        parsedArgs.end()) {
     status.SetError("RPATH_CHANGE not given NEW_RPATH option.");
     return false;
   }
@@ -1065,28 +1057,85 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
   return success;
 }
 
+bool HandleRPathSetCommand(std::vector<std::string> const& args,
+                           cmExecutionStatus& status)
+{
+  // Evaluate arguments.
+  std::string file;
+  std::string newRPath;
+  cmArgumentParser<void> parser;
+  std::vector<std::string> unknownArgs;
+  std::vector<std::string> missingArgs;
+  std::vector<std::string> parsedArgs;
+  parser.Bind("FILE"_s, file).Bind("NEW_RPATH"_s, newRPath);
+  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
+               &parsedArgs);
+  if (!unknownArgs.empty()) {
+    status.SetError(cmStrCat("RPATH_SET given unrecognized argument \"",
+                             unknownArgs.front(), "\"."));
+    return false;
+  }
+  if (!missingArgs.empty()) {
+    status.SetError(cmStrCat("RPATH_SET \"", missingArgs.front(),
+                             "\" argument not given value."));
+    return false;
+  }
+  if (file.empty()) {
+    status.SetError("RPATH_SET not given FILE option.");
+    return false;
+  }
+  if (newRPath.empty() &&
+      std::find(parsedArgs.begin(), parsedArgs.end(), "NEW_RPATH") ==
+        parsedArgs.end()) {
+    status.SetError("RPATH_SET not given NEW_RPATH option.");
+    return false;
+  }
+  if (!cmSystemTools::FileExists(file, true)) {
+    status.SetError(
+      cmStrCat("RPATH_SET given FILE \"", file, "\" that does not exist."));
+    return false;
+  }
+  bool success = true;
+  cmFileTimes const ft(file);
+  std::string emsg;
+  bool changed;
+
+  if (!cmSystemTools::SetRPath(file, newRPath, &emsg, &changed)) {
+    status.SetError(cmStrCat("RPATH_SET could not write new RPATH:\n  ",
+                             newRPath, "\nto the file:\n  ", file, "\n",
+                             emsg));
+    success = false;
+  }
+  if (success) {
+    if (changed) {
+      std::string message =
+        cmStrCat("Set runtime path of \"", file, "\" to \"", newRPath, '"');
+      status.GetMakefile().DisplayStatus(message, -1);
+    }
+    ft.Store(file);
+  }
+  return success;
+}
+
 bool HandleRPathRemoveCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
 {
   // Evaluate arguments.
   std::string file;
-  enum Doing
-  {
-    DoingNone,
-    DoingFile
-  };
-  Doing doing = DoingNone;
-  for (unsigned int i = 1; i < args.size(); ++i) {
-    if (args[i] == "FILE") {
-      doing = DoingFile;
-    } else if (doing == DoingFile) {
-      file = args[i];
-      doing = DoingNone;
-    } else {
-      status.SetError(
-        cmStrCat("RPATH_REMOVE given unknown argument ", args[i]));
-      return false;
-    }
+  cmArgumentParser<void> parser;
+  std::vector<std::string> unknownArgs;
+  std::vector<std::string> missingArgs;
+  parser.Bind("FILE"_s, file);
+  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs);
+  if (!unknownArgs.empty()) {
+    status.SetError(
+      cmStrCat("RPATH_REMOVE given unknown argument ", unknownArgs.front()));
+    return false;
+  }
+  if (!missingArgs.empty()) {
+    status.SetError(cmStrCat("RPATH_REMOVE \"", missingArgs.front(),
+                             "\" argument not given value."));
+    return false;
   }
   if (file.empty()) {
     status.SetError("RPATH_REMOVE not given FILE option.");
@@ -1123,36 +1172,31 @@ bool HandleRPathCheckCommand(std::vector<std::string> const& args,
 {
   // Evaluate arguments.
   std::string file;
-  const char* rpath = nullptr;
-  enum Doing
-  {
-    DoingNone,
-    DoingFile,
-    DoingRPath
-  };
-  Doing doing = DoingNone;
-  for (unsigned int i = 1; i < args.size(); ++i) {
-    if (args[i] == "RPATH") {
-      doing = DoingRPath;
-    } else if (args[i] == "FILE") {
-      doing = DoingFile;
-    } else if (doing == DoingFile) {
-      file = args[i];
-      doing = DoingNone;
-    } else if (doing == DoingRPath) {
-      rpath = args[i].c_str();
-      doing = DoingNone;
-    } else {
-      status.SetError(
-        cmStrCat("RPATH_CHECK given unknown argument ", args[i]));
-      return false;
-    }
+  std::string rpath;
+  cmArgumentParser<void> parser;
+  std::vector<std::string> unknownArgs;
+  std::vector<std::string> missingArgs;
+  std::vector<std::string> parsedArgs;
+  parser.Bind("FILE"_s, file).Bind("RPATH"_s, rpath);
+  parser.Parse(cmMakeRange(args).advance(1), &unknownArgs, &missingArgs,
+               &parsedArgs);
+  if (!unknownArgs.empty()) {
+    status.SetError(
+      cmStrCat("RPATH_CHECK given unknown argument ", unknownArgs.front()));
+    return false;
+  }
+  if (!missingArgs.empty()) {
+    status.SetError(cmStrCat("RPATH_CHECK \"", missingArgs.front(),
+                             "\" argument not given value."));
+    return false;
   }
   if (file.empty()) {
     status.SetError("RPATH_CHECK not given FILE option.");
     return false;
   }
-  if (!rpath) {
+  if (rpath.empty() &&
+      std::find(parsedArgs.begin(), parsedArgs.end(), "RPATH") ==
+        parsedArgs.end()) {
     status.SetError("RPATH_CHECK not given RPATH option.");
     return false;
   }
@@ -3000,11 +3044,10 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
 bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
                                          cmExecutionStatus& status)
 {
-  static const std::set<std::string> supportedPlatforms = { "Windows", "Linux",
-                                                            "Darwin" };
   std::string platform =
     status.GetMakefile().GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
-  if (!supportedPlatforms.count(platform)) {
+  if (!cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
+        platform)) {
     status.SetError(
       cmStrCat("GET_RUNTIME_DEPENDENCIES is not supported on system \"",
                platform, "\""));
@@ -3032,6 +3075,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     std::string ResolvedDependenciesVar;
     std::string UnresolvedDependenciesVar;
     std::string ConflictingDependenciesPrefix;
+    std::string RPathPrefix;
     std::string BundleExecutable;
     std::vector<std::string> Executables;
     std::vector<std::string> Libraries;
@@ -3053,6 +3097,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
             &Arguments::UnresolvedDependenciesVar)
       .Bind("CONFLICTING_DEPENDENCIES_PREFIX"_s,
             &Arguments::ConflictingDependenciesPrefix)
+      .Bind("RPATH_PREFIX"_s, &Arguments::RPathPrefix)
       .Bind("BUNDLE_EXECUTABLE"_s, &Arguments::BundleExecutable)
       .Bind("EXECUTABLES"_s, &Arguments::Executables)
       .Bind("LIBRARIES"_s, &Arguments::Libraries)
@@ -3135,6 +3180,11 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
 
     if (unique) {
       deps.push_back(firstPath);
+      if (!parsedArgs.RPathPrefix.empty()) {
+        status.GetMakefile().AddDefinition(
+          parsedArgs.RPathPrefix + "_" + firstPath,
+          cmJoin(archive.GetRPaths().at(firstPath), ";"));
+      }
     } else if (!parsedArgs.ConflictingDependenciesPrefix.empty()) {
       conflictingDeps.push_back(val.first);
       std::vector<std::string> paths;
@@ -3741,6 +3791,7 @@ bool cmFileCommand(std::vector<std::string> const& args,
     { "DIFFERENT"_s, HandleDifferentCommand },
     { "RPATH_CHANGE"_s, HandleRPathChangeCommand },
     { "CHRPATH"_s, HandleRPathChangeCommand },
+    { "RPATH_SET"_s, HandleRPathSetCommand },
     { "RPATH_CHECK"_s, HandleRPathCheckCommand },
     { "RPATH_REMOVE"_s, HandleRPathRemoveCommand },
     { "READ_ELF"_s, HandleReadElfCommand },
