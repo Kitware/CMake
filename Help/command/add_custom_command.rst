@@ -282,17 +282,19 @@ The options are:
   :generator:`Xcode` or :ref:`Makefile <Makefile Generators>` is an error.
 
   .. versionadded:: 3.20
-    Added the support of :ref:`Makefile Generators`.
+    Added support for :ref:`Makefile Generators`.
 
   .. versionadded:: 3.21
-    Added the support of  :generator:`Xcode` generator and
+    Added support for :ref:`Visual Studio Generators` with VS 2012 and above,
+    for the :generator:`Xcode` generator, and for
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
   If the ``DEPFILE`` argument is relative, it should be relative to
   :variable:`CMAKE_CURRENT_BINARY_DIR`, and any relative paths inside the
   ``DEPFILE`` should also be relative to :variable:`CMAKE_CURRENT_BINARY_DIR`
   (see policy :policy:`CMP0116`. This policy is always ``NEW`` for
-  :ref:`Makefile <Makefile Generators>` and :generator:`Xcode` generators).
+  :ref:`Makefile Generators`, :ref:`Visual Studio Generators`,
+  and the :generator:`Xcode` generator).
 
   .. note::
 

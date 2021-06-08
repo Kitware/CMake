@@ -768,6 +768,11 @@ void cmVisualStudio10TargetGenerator::Generate()
         Elem(e1, "Import").Attribute("Project", nasmTargets);
       }
     }
+    if (this->ProjectType == vcxproj && this->HaveCustomCommandDepfile) {
+      std::string depfileTargets =
+        GetCMakeFilePath("Templates/MSBuild/CustomBuildDepFile.targets");
+      Elem(e0, "Import").Attribute("Project", depfileTargets);
+    }
     if (this->ProjectType == csproj) {
       for (std::string const& c : this->Configurations) {
         Elem e1(e0, "PropertyGroup");
@@ -1460,7 +1465,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     e2.SetHasElements();
   }
   for (std::string const& c : this->Configurations) {
-    cmCustomCommandGenerator ccg(command, c, lg);
+    cmCustomCommandGenerator ccg(command, c, lg, true);
     std::string comment = lg->ConstructComment(ccg);
     comment = cmVS10EscapeComment(comment);
     std::string script = lg->ConstructScript(ccg);
@@ -1524,10 +1529,10 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
       std::string name = "CustomCommand_" + c + "_" +
         cmSystemTools::ComputeStringMD5(sourcePath);
       this->WriteCustomRuleCSharp(e0, c, name, script, additional_inputs.str(),
-                                  outputs.str(), comment);
+                                  outputs.str(), comment, ccg);
     } else {
       this->WriteCustomRuleCpp(*spe2, c, script, additional_inputs.str(),
-                               outputs.str(), comment, symbolic);
+                               outputs.str(), comment, ccg, symbolic);
     }
   }
 }
@@ -1535,7 +1540,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
 void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   Elem& e2, std::string const& config, std::string const& script,
   std::string const& additional_inputs, std::string const& outputs,
-  std::string const& comment, bool symbolic)
+  std::string const& comment, cmCustomCommandGenerator const& ccg,
+  bool symbolic)
 {
   const std::string cond = this->CalcCondition(config);
   e2.WritePlatformConfigTag("Message", cond, comment);
@@ -1554,13 +1560,29 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
     // outputs is marked SYMBOLIC and not expected to be created.
     e2.WritePlatformConfigTag("VerifyInputsAndOutputsExist", cond, "false");
   }
+
+  std::string depfile = ccg.GetFullDepfile();
+  if (!depfile.empty()) {
+    this->HaveCustomCommandDepfile = true;
+    std::string internal_depfile = ccg.GetInternalDepfile();
+    ConvertToWindowsSlash(internal_depfile);
+    e2.WritePlatformConfigTag("DepFileAdditionalInputsFile", cond,
+                              internal_depfile);
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WriteCustomRuleCSharp(
   Elem& e0, std::string const& config, std::string const& name,
   std::string const& script, std::string const& inputs,
-  std::string const& outputs, std::string const& comment)
+  std::string const& outputs, std::string const& comment,
+  cmCustomCommandGenerator const& ccg)
 {
+  if (!ccg.GetFullDepfile().empty()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("CSharp target \"", this->GeneratorTarget->GetName(),
+               "\" does not support add_custom_command DEPFILE."));
+  }
   this->CSharpCustomCommandNames.insert(name);
   Elem e1(e0, "Target");
   e1.Attribute("Condition", this->CalcCondition(config));

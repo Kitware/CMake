@@ -172,7 +172,8 @@ if (RunCMake_GENERATOR MATCHES "Makefiles")
   run_cmake(CustomCommandDependencies-BadArgs)
 endif()
 
-if(RunCMake_GENERATOR MATCHES "Make|Ninja|Xcode")
+if(RunCMake_GENERATOR MATCHES "Make|Ninja|Visual Studio|Xcode" AND
+    NOT RunCMake_GENERATOR MATCHES "Visual Studio (9|10)( |$)")
   unset(run_BuildDepends_skip_step_3)
   run_BuildDepends(CustomCommandDepfile)
   set(run_BuildDepends_skip_step_3 1)
