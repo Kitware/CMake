@@ -5,6 +5,9 @@
 
 #include <cctype>
 #include <cstdio>
+#include <utility>
+
+#include <cm/optional>
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
@@ -69,8 +72,9 @@ static Json::Value EncodeFilename(std::string const& path)
       return false;                                                           \
     }                                                                         \
                                                                               \
-    if (!work_directory.empty() && !cmSystemTools::FileIsFullPath(res)) {     \
-      res = cmStrCat(work_directory, '/', res);                               \
+    if (work_directory && !work_directory->empty() &&                         \
+        !cmSystemTools::FileIsFullPath(res)) {                                \
+      res = cmStrCat(*work_directory, '/', res);                              \
     }                                                                         \
   } while (0)
 
@@ -106,10 +110,12 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
     }
 
     for (auto const& rule : rules) {
-      std::string work_directory;
+      cm::optional<std::string> work_directory;
       Json::Value const& workdir = rule["work-directory"];
       if (workdir.isString()) {
-        PARSE_BLOB(workdir, work_directory);
+        std::string wd;
+        PARSE_BLOB(workdir, wd);
+        work_directory = std::move(wd);
       } else if (!workdir.isNull()) {
         cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
                                       arg_pp,
