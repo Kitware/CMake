@@ -230,6 +230,9 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
       case cmDepfileFormat::MakeDepfile:
         argv.emplace_back("makedepfile");
         break;
+      case cmDepfileFormat::MSBuildAdditionalInputs:
+        argv.emplace_back("MSBuildAdditionalInputs");
+        break;
     }
     argv.push_back(this->LG->GetSourceDirectory());
     argv.push_back(this->LG->GetCurrentSourceDirectory());
@@ -436,6 +439,9 @@ std::string cmCustomCommandGenerator::GetInternalDepfileName(
     case cmDepfileFormat::GccDepfile:
     case cmDepfileFormat::MakeDepfile:
       extension = ".d";
+      break;
+    case cmDepfileFormat::MSBuildAdditionalInputs:
+      extension = ".AdditionalInputs";
       break;
   }
   return cmStrCat(this->LG->GetBinaryDirectory(), "/CMakeFiles/d/",
