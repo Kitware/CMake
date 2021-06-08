@@ -5,10 +5,20 @@
 #include <string>
 #include <vector>
 
+enum class LookupMethod
+{
+  ByName,
+  IncludeAngle,
+  IncludeQuote,
+};
+
 struct cmSourceReqInfo
 {
   std::string LogicalName;
+  std::string SourcePath;
   std::string CompiledModulePath;
+  bool UseSourcePath = false;
+  LookupMethod Method = LookupMethod::ByName;
 };
 
 struct cmScanDepInfo

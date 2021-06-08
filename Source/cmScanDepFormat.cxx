@@ -3,11 +3,14 @@
 
 #include "cmScanDepFormat.h"
 
+#include <cassert>
 #include <cctype>
 #include <cstdio>
 #include <utility>
 
 #include <cm/optional>
+#include <cm/string_view>
+#include <cmext/string_view>
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
@@ -165,6 +168,30 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
               cmStrCat(provide_info.LogicalName, ".mod");
           }
 
+          if (provide.isMember("unique-on-source-path")) {
+            Json::Value const& unique_on_source_path =
+              provide["unique-on-source-path"];
+            if (!unique_on_source_path.isBool()) {
+              cmSystemTools::Error(
+                cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
+                         ": unique-on-source-path is not a boolean"));
+              return false;
+            }
+            provide_info.UseSourcePath = unique_on_source_path.asBool();
+          } else {
+            provide_info.UseSourcePath = false;
+          }
+
+          if (provide.isMember("source-path")) {
+            Json::Value const& source_path = provide["source-path"];
+            PARSE_FILENAME(source_path, provide_info.SourcePath);
+          } else if (provide_info.UseSourcePath) {
+            cmSystemTools::Error(
+              cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
+                       ": source-path is missing"));
+            return false;
+          }
+
           info->Provides.push_back(provide_info);
         }
       }
@@ -189,6 +216,56 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
               require["compiled-module-path"];
             PARSE_FILENAME(compiled_module_path,
                            require_info.CompiledModulePath);
+          }
+
+          if (require.isMember("unique-on-source-path")) {
+            Json::Value const& unique_on_source_path =
+              require["unique-on-source-path"];
+            if (!unique_on_source_path.isBool()) {
+              cmSystemTools::Error(
+                cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
+                         ": unique-on-source-path is not a boolean"));
+              return false;
+            }
+            require_info.UseSourcePath = unique_on_source_path.asBool();
+          } else {
+            require_info.UseSourcePath = false;
+          }
+
+          if (require.isMember("source-path")) {
+            Json::Value const& source_path = require["source-path"];
+            PARSE_FILENAME(source_path, require_info.SourcePath);
+          } else if (require_info.UseSourcePath) {
+            cmSystemTools::Error(
+              cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
+                       ": source-path is missing"));
+            return false;
+          }
+
+          if (require.isMember("lookup-method")) {
+            Json::Value const& lookup_method = require["lookup-method"];
+            if (!lookup_method.isString()) {
+              cmSystemTools::Error(
+                cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
+                         ": lookup-method is not a string"));
+              return false;
+            }
+
+            std::string lookup_method_str = lookup_method.asString();
+            if (lookup_method_str == "by-name"_s) {
+              require_info.Method = LookupMethod::ByName;
+            } else if (lookup_method_str == "include-angle"_s) {
+              require_info.Method = LookupMethod::IncludeAngle;
+            } else if (lookup_method_str == "include-quote"_s) {
+              require_info.Method = LookupMethod::IncludeQuote;
+            } else {
+              cmSystemTools::Error(cmStrCat(
+                "-E cmake_ninja_dyndep failed to parse ", arg_pp,
+                ": lookup-method is not a valid: ", lookup_method_str));
+              return false;
+            }
+          } else if (require_info.UseSourcePath) {
+            require_info.Method = LookupMethod::ByName;
           }
 
           info->Requires.push_back(require_info);
@@ -230,7 +307,12 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
         EncodeFilename(provide.CompiledModulePath);
     }
 
-    // TODO: Source file tracking. See below.
+    if (provide.UseSourcePath) {
+      provide_obj["unique-on-source-path"] = true;
+      provide_obj["source-path"] = EncodeFilename(provide.SourcePath);
+    } else if (!provide.SourcePath.empty()) {
+      provide_obj["source-path"] = EncodeFilename(provide.SourcePath);
+    }
 
     provides.append(provide_obj);
   }
@@ -247,8 +329,27 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
         EncodeFilename(require.CompiledModulePath);
     }
 
-    // TODO: Source filename inclusion. Requires collating with the provides
-    // filenames (as a sanity check if available on both sides).
+    if (require.UseSourcePath) {
+      require_obj["unique-on-source-path"] = true;
+      require_obj["source-path"] = EncodeFilename(require.SourcePath);
+    } else if (!require.SourcePath.empty()) {
+      require_obj["source-path"] = EncodeFilename(require.SourcePath);
+    }
+
+    const char* lookup_method = nullptr;
+    switch (require.Method) {
+      case LookupMethod::ByName:
+        lookup_method = "by-name";
+        break;
+      case LookupMethod::IncludeAngle:
+        lookup_method = "include-angle";
+        break;
+      case LookupMethod::IncludeQuote:
+        lookup_method = "include-quote";
+        break;
+    }
+    assert(lookup_method);
+    require_obj["lookup-method"] = lookup_method;
 
     reqs.append(require_obj);
   }
