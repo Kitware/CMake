@@ -44,6 +44,7 @@ by the `P1689r3`_ paper, with the following updates:
 * Omit the ``outputs``, ``inputs``, and ``depends`` fields from
   each entry in the ``rules`` array.  They are unused.
 * Flatten ``future-compile`` members directly into each rule.
+* Factor a ``primary-output`` field out of the now-flattened ``outputs``.
 
 Compiler writers may try out their scanning functionality using
 the `cxx-modules-sandbox`_ test project, modified to set variables

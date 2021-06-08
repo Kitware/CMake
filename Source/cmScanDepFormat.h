@@ -14,6 +14,7 @@ struct cmSourceReqInfo
 struct cmScanDepInfo
 {
   std::string PrimaryOutput;
+  std::vector<std::string> ExtraOutputs;
 
   // Set of provided and required modules.
   std::vector<cmSourceReqInfo> Provides;

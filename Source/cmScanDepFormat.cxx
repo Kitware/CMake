@@ -117,17 +117,20 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
         return false;
       }
 
+      if (rule.isMember("primary-output")) {
+        Json::Value const& primary_output = rule["primary-output"];
+        PARSE_FILENAME(primary_output, info->PrimaryOutput);
+      }
+
       if (rule.isMember("outputs")) {
         Json::Value const& outputs = rule["outputs"];
         if (outputs.isArray()) {
-          if (outputs.empty()) {
-            cmSystemTools::Error(
-              cmStrCat("-E cmake_ninja_dyndep failed to parse ", arg_pp,
-                       ": expected at least one 1 output"));
-            return false;
-          }
+          for (auto const& output : outputs) {
+            std::string extra_output;
+            PARSE_FILENAME(output, extra_output);
 
-          PARSE_FILENAME(outputs[0], info->PrimaryOutput);
+            info->ExtraOutputs.emplace_back(extra_output);
+          }
         }
       }
 
@@ -202,8 +205,12 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
 
   Json::Value rule(Json::objectValue);
 
-  Json::Value& outputs = rule["outputs"] = Json::arrayValue;
-  outputs.append(info.PrimaryOutput);
+  rule["primary-output"] = EncodeFilename(info.PrimaryOutput);
+
+  Json::Value& rule_outputs = rule["outputs"] = Json::arrayValue;
+  for (auto const& output : info.ExtraOutputs) {
+    rule_outputs.append(EncodeFilename(output));
+  }
 
   Json::Value& provides = rule["provides"] = Json::arrayValue;
   for (auto const& provide : info.Provides) {
