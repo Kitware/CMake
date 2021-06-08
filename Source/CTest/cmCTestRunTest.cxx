@@ -40,6 +40,22 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              this->GetIndex() << ": " << line << std::endl);
+
+  // Check for special CTest XML tags in this line of output.
+  // If any are found, this line is excluded from ProcessOutput.
+  if (!line.empty() && line.find("<CTest") != std::string::npos) {
+    if (this->TestHandler->CustomCompletionStatusRegex.find(line)) {
+      this->TestResult.CustomCompletionStatus =
+        this->TestHandler->CustomCompletionStatusRegex.match(1);
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                 this->GetIndex() << ": "
+                                  << "Test Details changed to '"
+                                  << this->TestResult.CustomCompletionStatus
+                                  << "'" << std::endl);
+      return;
+    }
+  }
+
   this->ProcessOutput += line;
   this->ProcessOutput += "\n";
 

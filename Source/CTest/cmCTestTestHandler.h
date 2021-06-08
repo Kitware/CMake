@@ -175,6 +175,7 @@ public:
     std::string ExceptionStatus;
     bool CompressOutput;
     std::string CompletionStatus;
+    std::string CustomCompletionStatus;
     std::string Output;
     std::string DartString;
     int TestCount;
@@ -358,6 +359,7 @@ private:
   ListOfTests TestList;
   size_t TotalNumberOfTests;
   cmsys::RegularExpression DartStuff;
+  cmsys::RegularExpression CustomCompletionStatusRegex;
 
   std::ostream* LogFile;
 

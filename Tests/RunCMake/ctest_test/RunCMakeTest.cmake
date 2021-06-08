@@ -169,3 +169,15 @@ add_test(
   run_ctest(TestMeasurements)
 endfunction()
 run_measurements()
+
+# Verify that test output can override the Completion Status.
+function(run_completion_status)
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(
+  NAME custom_details
+  COMMAND ${CMAKE_COMMAND} -E
+  echo test output\n<CTestDetails>CustomDetails</CTestDetails>\nmore output)
+  ]])
+  run_ctest(TestCompletionStatus)
+endfunction()
+run_completion_status()

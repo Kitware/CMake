@@ -308,6 +308,10 @@ cmCTestTestHandler::cmCTestTestHandler()
   // regex to detect each individual <DartMeasurement>...</DartMeasurement>
   this->DartStuff1.compile(
     "(<DartMeasurement[^<]*</DartMeasurement[a-zA-Z]*>)");
+
+  // regex to detect <CTestDetails>...</CTestDetails>
+  this->CustomCompletionStatusRegex.compile(
+    "<CTestDetails>(.*)</CTestDetails>");
 }
 
 void cmCTestTestHandler::Initialize()
@@ -1460,7 +1464,11 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
     xml.StartElement("NamedMeasurement");
     xml.Attribute("type", "text/string");
     xml.Attribute("name", "Completion Status");
-    xml.Element("Value", result.CompletionStatus);
+    if (result.CustomCompletionStatus.empty()) {
+      xml.Element("Value", result.CompletionStatus);
+    } else {
+      xml.Element("Value", result.CustomCompletionStatus);
+    }
     xml.EndElement(); // NamedMeasurement
 
     xml.StartElement("NamedMeasurement");
