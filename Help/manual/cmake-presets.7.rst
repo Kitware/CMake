@@ -401,6 +401,19 @@ that may contain the following fields:
   are applied. Setting a variable to ``null`` causes it to not be set,
   even if a value was inherited from another preset.
 
+  .. note::
+
+    For a CMake project using ExternalProject with a configuration preset
+    having environment variables needed in the ExternalProject, use a build
+    preset that inherits that configuration preset or the ExternalProject
+    will not have the environment variables set in the configuration preset.
+    Example: suppose the host defaults to one compiler (say Clang)
+    and the user wishes to use another compiler (say GCC). Set configuration
+    preset environment variables ``CC`` and ``CXX`` and use a build preset
+    that inherits that configuration preset. Otherwise the ExternalProject
+    may use a different (system default) compiler than the top-level CMake
+    project.
+
 ``configurePreset``
 
   An optional string specifying the name of a configure preset to
