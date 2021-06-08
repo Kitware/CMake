@@ -418,7 +418,9 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   }
 
   std::ostringstream oss;
-  const char* sep = "";
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+    oss << "%(" << tag << ")";
+  }
   std::vector<std::string>::const_iterator de =
     cmRemoveDuplicates(this->Defines);
   for (std::string const& di : cmMakeRange(this->Defines.cbegin(), de)) {
@@ -437,11 +439,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
       }
     }
     // Store the flag in the project file.
-    oss << sep << define;
-    sep = ";";
-  }
-  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    oss << ";%(" << tag << ")";
+    oss << ';' << define;
   }
 
   this->OutputFlag(fout, indent, tag, oss.str());
