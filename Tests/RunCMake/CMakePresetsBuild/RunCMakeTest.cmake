@@ -62,7 +62,15 @@ endfunction()
 
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
 
-run_cmake_build_presets(Good "default;other" "build-other;withEnvironment;noEnvironment;macros;vendorObject")
+if(RunCMake_GENERATOR MATCHES "NMake|Borland|Watcom")
+  set(Good_json_jobs [[]])
+elseif(RunCMake_GENERATOR MATCHES "Make" AND CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+  set(Good_json_jobs [["jobs": 1,]])
+else()
+  set(Good_json_jobs [["jobs": 0,]])
+endif()
+
+run_cmake_build_presets(Good "default;other" "build-other;withEnvironment;noEnvironment;macros;vendorObject;singleTarget")
 run_cmake_build_presets(InvalidConfigurePreset "default" "badConfigurePreset")
 run_cmake_build_presets(Condition "default" "enabled;disabled")
 
