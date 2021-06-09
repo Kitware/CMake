@@ -13,6 +13,13 @@ if (CTEST_CMAKE_GENERATOR MATCHES "Visual Studio")
     "^ExternalProjectUpdateSetup$")
 endif ()
 
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_asan")
+  list(APPEND test_exclusions
+    CTestTest2 # crashes on purpose
+    BootstrapTest # no need to cover this for asan
+    )
+endif()
+
 string(REPLACE ";" "|" test_exclusions "${test_exclusions}")
 if (test_exclusions)
   set(test_exclusions "(${test_exclusions})")
