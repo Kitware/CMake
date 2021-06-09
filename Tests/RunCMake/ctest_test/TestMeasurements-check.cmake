@@ -15,3 +15,8 @@ if(NOT _test_contents MATCHES [[NamedMeasurement name="TestImage" type="image/pn
   string(APPEND RunCMake_TEST_FAILED
     "Could not find expected <NamedMeasurement> tag for type='image/png' in Test.xml")
 endif()
+# Check file measurement.
+if(NOT _test_contents MATCHES [[NamedMeasurement name="my_test_input_data" encoding="base64" compression="tar/gzip" filename="cmake-logo-16.png" type="file"]])
+  string(APPEND RunCMake_TEST_FAILED
+    "Could not find expected <NamedMeasurement> tag for type='file' in Test.xml")
+endif()

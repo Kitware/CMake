@@ -161,6 +161,10 @@ add_test(
   NAME img_measurement
   COMMAND ${CMAKE_COMMAND} -E
   echo <DartMeasurementFile name="TestImage" type="image/png">]] ${IMAGE_DIR}/cmake-logo-16.png [[</DartMeasurementFile>)
+add_test(
+  NAME file_measurement
+  COMMAND ${CMAKE_COMMAND} -E
+  echo <DartMeasurementFile name="my_test_input_data" type="file">]] ${IMAGE_DIR}/cmake-logo-16.png [[</DartMeasurementFile>)
   ]])
   run_ctest(TestMeasurements)
 endfunction()

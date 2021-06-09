@@ -1550,17 +1550,27 @@ void cmCTestTestHandler::AttachFiles(cmXMLWriter& xml,
       result.Properties->AttachOnFail.end());
   }
   for (std::string const& file : result.Properties->AttachedFiles) {
-    const std::string& base64 = this->CTest->Base64GzipEncodeFile(file);
-    std::string const fname = cmSystemTools::GetFilenameName(file);
-    xml.StartElement("NamedMeasurement");
-    xml.Attribute("name", "Attached File");
-    xml.Attribute("encoding", "base64");
-    xml.Attribute("compression", "tar/gzip");
-    xml.Attribute("filename", fname);
-    xml.Attribute("type", "file");
-    xml.Element("Value", base64);
-    xml.EndElement(); // NamedMeasurement
+    this->AttachFile(xml, file, "");
   }
+}
+
+void cmCTestTestHandler::AttachFile(cmXMLWriter& xml, std::string const& file,
+                                    std::string const& name)
+{
+  const std::string& base64 = this->CTest->Base64GzipEncodeFile(file);
+  std::string const fname = cmSystemTools::GetFilenameName(file);
+  xml.StartElement("NamedMeasurement");
+  std::string measurement_name = name;
+  if (measurement_name.empty()) {
+    measurement_name = "Attached File";
+  }
+  xml.Attribute("name", measurement_name);
+  xml.Attribute("encoding", "base64");
+  xml.Attribute("compression", "tar/gzip");
+  xml.Attribute("filename", fname);
+  xml.Attribute("type", "file");
+  xml.Element("Value", base64);
+  xml.EndElement(); // NamedMeasurement
 }
 
 int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
@@ -2041,11 +2051,11 @@ void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
         cmCTest::CleanString(measurementfile.match(5));
       if (cmSystemTools::FileExists(filename)) {
         long len = cmSystemTools::FileLength(filename);
+        std::string k1 = measurementfile.match(1);
+        std::string v1 = measurementfile.match(2);
+        std::string k2 = measurementfile.match(3);
+        std::string v2 = measurementfile.match(4);
         if (len == 0) {
-          std::string k1 = measurementfile.match(1);
-          std::string v1 = measurementfile.match(2);
-          std::string k2 = measurementfile.match(3);
-          std::string v2 = measurementfile.match(4);
           if (cmSystemTools::LowerCase(k1) == "type") {
             v1 = "text/string";
           }
@@ -2060,35 +2070,53 @@ void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
           xml.Element("Value", "Image " + filename + " is empty");
           xml.EndElement();
         } else {
-          cmsys::ifstream ifs(filename.c_str(),
-                              std::ios::in
-#ifdef _WIN32
-                                | std::ios::binary
-#endif
-          );
-          auto file_buffer = cm::make_unique<unsigned char[]>(len + 1);
-          ifs.read(reinterpret_cast<char*>(file_buffer.get()), len);
-          auto encoded_buffer = cm::make_unique<unsigned char[]>(
-            static_cast<int>(static_cast<double>(len) * 1.5 + 5.0));
-
-          size_t rlen = cmsysBase64_Encode(file_buffer.get(), len,
-                                           encoded_buffer.get(), 1);
-
-          xml.StartElement("NamedMeasurement");
-          xml.Attribute(measurementfile.match(1).c_str(),
-                        measurementfile.match(2));
-          xml.Attribute(measurementfile.match(3).c_str(),
-                        measurementfile.match(4));
-          xml.Attribute("encoding", "base64");
-          std::ostringstream ostr;
-          for (size_t cc = 0; cc < rlen; cc++) {
-            ostr << encoded_buffer[cc];
-            if (cc % 60 == 0 && cc) {
-              ostr << std::endl;
-            }
+          std::string type;
+          std::string name;
+          if (cmSystemTools::LowerCase(k1) == "type") {
+            type = v1;
+          } else if (cmSystemTools::LowerCase(k2) == "type") {
+            type = v2;
           }
-          xml.Element("Value", ostr.str());
-          xml.EndElement(); // NamedMeasurement
+          if (cmSystemTools::LowerCase(k1) == "name") {
+            name = v1;
+          } else if (cmSystemTools::LowerCase(k2) == "name") {
+            name = v2;
+          }
+          if (type == "file") {
+            // Treat this measurement like an "ATTACHED_FILE" when the type
+            // is explicitly "file" (not an image).
+            this->AttachFile(xml, filename, name);
+          } else {
+            cmsys::ifstream ifs(filename.c_str(),
+                                std::ios::in
+#ifdef _WIN32
+                                  | std::ios::binary
+#endif
+            );
+            auto file_buffer = cm::make_unique<unsigned char[]>(len + 1);
+            ifs.read(reinterpret_cast<char*>(file_buffer.get()), len);
+            auto encoded_buffer = cm::make_unique<unsigned char[]>(
+              static_cast<int>(static_cast<double>(len) * 1.5 + 5.0));
+
+            size_t rlen = cmsysBase64_Encode(file_buffer.get(), len,
+                                             encoded_buffer.get(), 1);
+
+            xml.StartElement("NamedMeasurement");
+            xml.Attribute(measurementfile.match(1).c_str(),
+                          measurementfile.match(2));
+            xml.Attribute(measurementfile.match(3).c_str(),
+                          measurementfile.match(4));
+            xml.Attribute("encoding", "base64");
+            std::ostringstream ostr;
+            for (size_t cc = 0; cc < rlen; cc++) {
+              ostr << encoded_buffer[cc];
+              if (cc % 60 == 0 && cc) {
+                ostr << std::endl;
+              }
+            }
+            xml.Element("Value", ostr.str());
+            xml.EndElement(); // NamedMeasurement
+          }
         }
       } else {
         int idx = 4;

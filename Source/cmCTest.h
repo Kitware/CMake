@@ -536,6 +536,9 @@ private:
   int RunCMakeAndTest(std::string* output);
   int ExecuteTests();
 
+  /** return true iff change directory was successful */
+  bool TryToChangeDirectory(std::string const& dir);
+
   struct Private;
   std::unique_ptr<Private> Impl;
 };
