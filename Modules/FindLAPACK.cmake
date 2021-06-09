@@ -387,7 +387,9 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
         "compiler/lib/${LAPACK_mkl_ARCH_NAME}"
         "mkl/lib" "mkl/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
         "mkl/lib/${LAPACK_mkl_ARCH_NAME}"
-        "lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}")
+        "lib" "lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
+        "lib/${LAPACK_mkl_ARCH_NAME}"
+        )
 
     # First try empty lapack libs
     if(NOT ${_LIBRARIES})
