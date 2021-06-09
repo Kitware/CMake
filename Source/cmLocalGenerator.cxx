@@ -780,9 +780,9 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   using LanguagePair = std::pair<std::string, std::string>;
-  std::vector<LanguagePair> pairedLanguages{ { "OBJC", "C" },
-                                             { "OBJCXX", "CXX" },
-                                             { "CUDA", "CXX" } };
+  std::vector<LanguagePair> pairedLanguages{
+    { "OBJC", "C" }, { "OBJCXX", "CXX" }, { "CUDA", "CXX" }, { "HIP", "CXX" }
+  };
   std::set<LanguagePair> inferredEnabledLanguages;
   for (auto const& lang : pairedLanguages) {
     if (this->Makefile->GetState()->GetLanguageEnabled(lang.first)) {
@@ -1404,8 +1404,8 @@ void cmLocalGenerator::GetDeviceLinkFlags(
     linkLineComputer->GetLinkerLanguage(target, config);
 
   if (pcli) {
-    // Compute the required cuda device link libraries when
-    // resolving cuda device symbols
+    // Compute the required device link libraries when
+    // resolving gpu lang device symbols
     this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs, frameworkPath,
                               linkPath);
   }
@@ -1968,6 +1968,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       compilerSimulateId =
         this->Makefile->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID");
     }
+  } else if (lang == "HIP") {
+    target->AddHIPArchitectureFlags(flags);
   }
 
   // Add VFS Overlay for Clang compilers

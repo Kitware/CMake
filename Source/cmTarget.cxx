@@ -288,6 +288,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     SETUP_COMMON_LANGUAGE_PROPERTIES(CXX);
     SETUP_COMMON_LANGUAGE_PROPERTIES(OBJCXX);
     SETUP_COMMON_LANGUAGE_PROPERTIES(CUDA);
+    SETUP_COMMON_LANGUAGE_PROPERTIES(HIP);
 
     initProp("ANDROID_API");
     initProp("ANDROID_API_MIN");
@@ -365,6 +366,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
     initProp("CUDA_RUNTIME_LIBRARY");
     initProp("CUDA_ARCHITECTURES");
+    initProp("HIP_RUNTIME_LIBRARY");
+    initProp("HIP_ARCHITECTURES");
     initProp("VISIBILITY_INLINES_HIDDEN");
     initProp("JOB_POOL_COMPILE");
     initProp("JOB_POOL_LINK");
@@ -1168,6 +1171,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   MAKE_STATIC_PROP(C_STANDARD);
   MAKE_STATIC_PROP(CXX_STANDARD);
   MAKE_STATIC_PROP(CUDA_STANDARD);
+  MAKE_STATIC_PROP(HIP_STANDARD);
   MAKE_STATIC_PROP(OBJC_STANDARD);
   MAKE_STATIC_PROP(OBJCXX_STANDARD);
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
@@ -1354,8 +1358,8 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     this->SetProperty("COMPILE_PDB_NAME", cmToCStr(tmp));
     this->AddUtility(reusedFrom, false, this->impl->Makefile);
   } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
-             prop == propCUDA_STANDARD || prop == propOBJC_STANDARD ||
-             prop == propOBJCXX_STANDARD) {
+             prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||
+             prop == propOBJC_STANDARD || prop == propOBJCXX_STANDARD) {
     if (value) {
       this->impl->LanguageStandardProperties[prop] =
         BTs<std::string>(value, this->impl->Makefile->GetBacktrace());
@@ -1461,8 +1465,8 @@ void cmTarget::AppendProperty(const std::string& prop,
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be APPENDed.");
   } else if (prop == "C_STANDARD" || prop == "CXX_STANDARD" ||
-             prop == "CUDA_STANDARD" || prop == "OBJC_STANDARD" ||
-             prop == "OBJCXX_STANDARD") {
+             prop == "CUDA_STANDARD" || prop == "HIP_STANDARD" ||
+             prop == "OBJC_STANDARD" || prop == "OBJCXX_STANDARD") {
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be appended.");
   } else {

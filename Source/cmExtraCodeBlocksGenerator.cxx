@@ -366,10 +366,11 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
               continue;
             }
 
-            // check whether it is a C/C++/CUDA implementation file
+            // check whether it is a C/C++/CUDA/HIP implementation file
             bool isCFile = false;
             std::string lang = s->GetOrDetermineLanguage();
-            if (lang == "C" || lang == "CXX" || lang == "CUDA") {
+            if (lang == "C" || lang == "CXX" || lang == "CUDA" ||
+                lang == "HIP") {
               std::string const& srcext = s->GetExtension();
               isCFile = cm->IsACLikeSourceExtension(srcext);
             }

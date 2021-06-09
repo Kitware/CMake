@@ -19,3 +19,7 @@ endif()
 if (CMake_TEST_CUDA)
   run_cmake(CheckCUDASourceRuns)
 endif()
+
+if (CMake_TEST_HIP)
+  run_cmake(CheckHIPSourceRuns)
+endif()

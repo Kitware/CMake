@@ -459,6 +459,8 @@ public:
   void AddCUDAArchitectureFlags(std::string& flags) const;
   void AddCUDAToolkitFlags(std::string& flags) const;
 
+  void AddHIPArchitectureFlags(std::string& flags) const;
+
   void AddISPCTargetFlags(std::string& flags) const;
 
   std::string GetFeatureSpecificLinkRuleVariable(
@@ -1108,6 +1110,12 @@ private:
 
   cmProp GetPropertyWithPairedLanguageSupport(std::string const& lang,
                                               const char* suffix) const;
+
+  void ComputeLinkImplementationRuntimeLibraries(
+    const std::string& config, cmOptionalLinkImplementation& impl) const;
+
+  void ComputeLinkInterfaceRuntimeLibraries(
+    const std::string& config, cmOptionalLinkInterface& iface) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(

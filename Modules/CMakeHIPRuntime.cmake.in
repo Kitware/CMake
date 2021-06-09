@@ -1,0 +1,99 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
+
+function(_CMAKE_FIND_HIP_RUNTIME )
+  # Determined when hipcc is the HIP compiler
+  set(_CMAKE_HIP_COMPILER_ROCM_ROOT "@_CMAKE_HIP_COMPILER_ROCM_ROOT@")
+
+  # Forward facing value that can be provided by the user
+  set(CMAKE_HIP_COMPILER_TOOLKIT_ROOT @CMAKE_HIP_COMPILER_TOOLKIT_ROOT@)
+
+  if(NOT DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET)
+    set(message_on_found TRUE)
+  endif()
+
+  set(explicit_search_only FALSE)
+  set(rocm_root_dirs )
+  if(DEFINED CMAKE_HIP_COMPILER_TOOLKIT_ROOT)
+    set(rocm_root_dirs "${CMAKE_HIP_COMPILER_TOOLKIT_ROOT}")
+    set(explicit_search_only TRUE)
+    set(error_message_location "the variable CMAKE_HIP_COMPILER_TOOLKIT_ROOT [\"${CMAKE_HIP_COMPILER_TOOLKIT_ROOT}\"]")
+  elseif(DEFINED ENV{CMAKE_HIP_COMPILER_TOOLKIT_ROOT})
+    set(rocm_root_dirs "$ENV{CMAKE_HIP_COMPILER_TOOLKIT_ROOT}")
+    set(explicit_search_only TRUE)
+    set(error_message_location "CMAKE_HIP_COMPILER_TOOLKIT_ROOT")
+    set(error_message_location "the environment variable CMAKE_HIP_COMPILER_TOOLKIT_ROOT [\"$ENV{CMAKE_HIP_COMPILER_TOOLKIT_ROOT}\"]")
+  elseif(DEFINED _CMAKE_HIP_COMPILER_ROCM_ROOT)
+    set(rocm_root_dirs "${_CMAKE_HIP_COMPILER_ROCM_ROOT}")
+    set(explicit_search_only TRUE)
+    set(error_message_location "the associated hipconfig --rocmpath [\"${_CMAKE_HIP_COMPILER_ROCM_ROOT}\"]")
+  endif()
+
+  # Guess on where rocm is installed
+  if(NOT rocm_root_dirs AND (UNIX AND NOT APPLE))
+    set(platform_base "/opt/rocm-")
+
+    # Finad all default rocm installations
+    file(GLOB possible_paths "${platform_base}*")
+
+    set(versions)
+    foreach(p ${possible_paths})
+      # Extract version number from end of string
+      string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+$" p_version ${p})
+      if(IS_DIRECTORY ${p} AND p_version)
+        list(APPEND versions ${p_version})
+      endif()
+    endforeach()
+
+    # Sort numerically in descending order, so we try the newest versions first.
+    list(SORT versions COMPARE NATURAL ORDER DESCENDING)
+
+    # With a descending list of versions, populate possible paths to search.
+    set(rocm_root_dirs "/opt/rocm")
+    foreach(v IN LISTS versions)
+      list(APPEND rocm_root_dirs "${platform_base}${v}")
+    endforeach()
+  endif()
+
+  set(search_rel_path "/lib/cmake/hip-lang/")
+  list(TRANSFORM rocm_root_dirs APPEND "${search_rel_path}")
+
+  find_package(hip-lang
+    CONFIG
+    PATHS ${rocm_root_dirs}
+    QUIET
+    NO_DEFAULT_PATH
+  )
+  if(NOT DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET AND NOT explicit_search_only)
+    find_package(hip-lang CONFIG QUIET)
+  endif()
+
+  if(DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET)
+    set(CMAKE_HIP_RUNTIME_LIBRARIES_STATIC
+      ${CMAKE_HIP_RUNTIME_LIBRARIES_STATIC}
+      ${_CMAKE_HIP_DEVICE_RUNTIME_TARGET} PARENT_SCOPE)
+    set(CMAKE_HIP_RUNTIME_LIBRARIES_SHARED
+      ${CMAKE_HIP_RUNTIME_LIBRARIES_SHARED}
+      ${_CMAKE_HIP_DEVICE_RUNTIME_TARGET} PARENT_SCOPE)
+  endif()
+
+  if(DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET AND message_on_found)
+    message(STATUS "Found HIP runtime: ${hip-lang_DIR}")
+  elseif(NOT DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET)
+    if(explicit_search_only)
+      set(error_message "Failed to find the HIP runtime, Could not find hip-lang-config.cmake at the following location(s):\n")
+      foreach(p IN LISTS rocm_root_dirs)
+        string(APPEND error_message "\t${p}\n")
+      endforeach()
+      string(APPEND "which are computed from the location specified by ${error_message_location}. \
+        Please specify CMAKE_HIP_COMPILER_TOOLKIT_ROOT to the location of")
+      message(FATAL_ERROR "${error_message}")
+    else()
+      message(FATAL_ERROR
+        "Failed to find the HIP runtime, Could not find hip-lang-config.cmake.\
+        Try setting CMAKE_HIP_COMPILER_TOOLKIT_ROOT")
+    endif()
+  endif()
+
+endfunction()
