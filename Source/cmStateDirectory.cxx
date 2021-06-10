@@ -546,3 +546,8 @@ void cmStateDirectory::AddNormalTargetName(std::string const& name)
 {
   this->DirectoryState->NormalTargetNames.push_back(name);
 }
+
+void cmStateDirectory::AddImportedTargetName(std::string const& name)
+{
+  this->DirectoryState->ImportedTargetNames.emplace_back(name);
+}

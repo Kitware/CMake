@@ -4134,6 +4134,7 @@ cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
   // Add to the set of available imported targets.
   this->ImportedTargets[name] = target.get();
   this->GetGlobalGenerator()->IndexTarget(target.get());
+  this->GetStateSnapshot().GetDirectory().AddImportedTargetName(name);
 
   // Transfer ownership to this cmMakefile object.
   this->ImportedTargetsOwned.push_back(std::move(target));

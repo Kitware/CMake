@@ -286,6 +286,7 @@ cmStateSnapshot cmState::Reset()
     it->LinkDirectoriesBacktraces.clear();
     it->DirectoryEnd = pos;
     it->NormalTargetNames.clear();
+    it->ImportedTargetNames.clear();
     it->Properties.Clear();
     it->Children.clear();
   }

@@ -83,6 +83,7 @@ struct cmStateDetail::BuildsystemDirectoryStateType
   std::vector<cmListFileBacktrace> LinkDirectoriesBacktraces;
 
   std::vector<std::string> NormalTargetNames;
+  std::vector<std::string> ImportedTargetNames;
 
   std::string ProjectName;
 
