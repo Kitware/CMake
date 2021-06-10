@@ -36,6 +36,10 @@ dnf install --setopt=install_weak_deps=False -y \
     jq \
     which
 
+# Packages needed to test CPack.
+dnf install --setopt=install_weak_deps=False -y \
+    rpm-build
+
 # Packages needed to test find modules.
 dnf install --setopt=install_weak_deps=False -y \
     alsa-lib-devel \
