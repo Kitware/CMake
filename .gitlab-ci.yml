@@ -194,6 +194,18 @@ test:fedora34-makefiles:
         - .run_dependent
         - .needs_centos6_x86_64
 
+test:fedora34-makefiles-nospace:
+    extends:
+        - .fedora34_makefiles
+        - .cmake_test_linux_release
+        - .linux_builder_tags_qt
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
+        CMAKE_CI_BUILD_NAME: fedora34_makefiles_nospace
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 test:cuda10.2-nvidia:
     extends:
         - .cuda10.2_nvidia
