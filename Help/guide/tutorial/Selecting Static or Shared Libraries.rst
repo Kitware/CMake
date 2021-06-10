@@ -8,12 +8,13 @@ and allow control over how libraries without an explicit type (``STATIC``,
 
 To accomplish this we need to add :variable:`BUILD_SHARED_LIBS` to the
 top-level ``CMakeLists.txt``. We use the :command:`option` command as it allows
-users to optionally select if the value should be ON or OFF.
+users to optionally select if the value should be ``ON`` or ``OFF``.
 
-Next we are going to refactor MathFunctions to become a real library that
+Next we are going to refactor ``MathFunctions`` to become a real library that
 encapsulates using ``mysqrt`` or ``sqrt``, instead of requiring the calling
 code to do this logic. This will also mean that ``USE_MYMATH`` will not control
-building MathFunctions, but instead will control the behavior of this library.
+building ``MathFunctions``, but instead will control the behavior of this
+library.
 
 The first step is to update the starting section of the top-level
 ``CMakeLists.txt`` to look like:
@@ -22,7 +23,7 @@ The first step is to update the starting section of the top-level
   :language: cmake
   :end-before: # add the binary tree
 
-Now that we have made MathFunctions always be used, we will need to update
+Now that we have made ``MathFunctions`` always be used, we will need to update
 the logic of that library. So, in ``MathFunctions/CMakeLists.txt`` we need to
 create a SqrtLibrary that will conditionally be built and installed when
 ``USE_MYMATH`` is enabled. Now, since this is a tutorial, we are going to
@@ -45,7 +46,7 @@ uses ``USE_MYMATH``:
 
 #. Always include ``MathFunctions.h``
 #. Always use ``mathfunctions::sqrt``
-#. Don't include cmath
+#. Don't include ``cmath``
 
 Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
 
@@ -56,7 +57,7 @@ At this point, if you build everything, you may notice that linking fails
 as we are combining a static library without position independent code with a
 library that has position independent code. The solution to this is to
 explicitly set the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property of
-SqrtLibrary to be True no matter the build type.
+SqrtLibrary to be ``True`` no matter the build type.
 
 .. literalinclude:: Step10/MathFunctions/CMakeLists.txt
   :language: cmake

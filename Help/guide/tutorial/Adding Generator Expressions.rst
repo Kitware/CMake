@@ -23,9 +23,9 @@ There are different types of
 Logical, Informational, and Output expressions.
 
 Logical expressions are used to create conditional output. The basic
-expressions are the 0 and 1 expressions. A ``$<0:...>`` results in the empty
-string, and ``<1:...>`` results in the content of "...".  They can also be
-nested.
+expressions are the ``0`` and ``1`` expressions. A ``$<0:...>`` results in the
+empty string, and ``<1:...>`` results in the content of ``...``.  They can also
+be nested.
 
 A common usage of
 :manual:`generator expressions <cmake-generator-expressions(7)>` is to
@@ -63,7 +63,6 @@ of compiler ids as seen below:
 Looking at this we see that the warning flags are encapsulated inside a
 ``BUILD_INTERFACE`` condition. This is done so that consumers of our installed
 project will not inherit our warning flags.
-
 
 **Exercise**: Modify ``MathFunctions/CMakeLists.txt`` so that all targets have
 a :command:`target_link_libraries` call to ``tutorial_compiler_flags``.

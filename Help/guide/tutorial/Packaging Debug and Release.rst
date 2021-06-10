@@ -28,7 +28,7 @@ And the :prop_tgt:`DEBUG_POSTFIX` property on the tutorial executable:
   :start-after: # add the executable
   :end-before: # add the binary tree to the search path for include files
 
-Let's also add version numbering to the MathFunctions library. In
+Let's also add version numbering to the ``MathFunctions`` library. In
 ``MathFunctions/CMakeLists.txt``, set the :prop_tgt:`VERSION` and
 :prop_tgt:`SOVERSION` properties:
 

@@ -57,7 +57,7 @@ directories so that ``Table.h`` can be found and included by ``mysqrt.cxx``.
   :end-before: # install rules
 
 Now let's use the generated table. First, modify ``mysqrt.cxx`` to include
-``Table.h``. Next, we can rewrite the mysqrt function to use the table:
+``Table.h``. Next, we can rewrite the ``mysqrt`` function to use the table:
 
 .. literalinclude:: Step7/MathFunctions/mysqrt.cxx
   :language: c++
@@ -69,7 +69,7 @@ with your chosen build tool.
 
 When this project is built it will first build the ``MakeTable`` executable.
 It will then run ``MakeTable`` to produce ``Table.h``. Finally, it will
-compile ``mysqrt.cxx`` which includes ``Table.h`` to produce the MathFunctions
-library.
+compile ``mysqrt.cxx`` which includes ``Table.h`` to produce the
+``MathFunctions`` library.
 
 Run the Tutorial executable and verify that it is using the table.

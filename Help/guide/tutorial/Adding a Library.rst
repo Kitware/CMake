@@ -41,7 +41,7 @@ last few lines of the top-level ``CMakeLists.txt`` file should now look like:
                                   "${PROJECT_SOURCE_DIR}/MathFunctions"
                                   )
 
-Now let us make the MathFunctions library optional. While for the tutorial
+Now let us make the ``MathFunctions`` library optional. While for the tutorial
 there really isn't any need to do so, for larger projects this is a common
 occurrence. The first step is to add an option to the top-level
 ``CMakeLists.txt`` file.
@@ -53,11 +53,11 @@ occurrence. The first step is to add an option to the top-level
 
 This option will be displayed in the :manual:`cmake-gui <cmake-gui(1)>` and
 :manual:`ccmake <ccmake(1)>`
-with a default value of ON that can be changed by the user. This setting will
-be stored in the cache so that the user does not need to set the value each
-time they run CMake on a build directory.
+with a default value of ``ON`` that can be changed by the user. This setting
+will be stored in the cache so that the user does not need to set the value
+each time they run CMake on a build directory.
 
-The next change is to make building and linking the MathFunctions library
+The next change is to make building and linking the ``MathFunctions`` library
 conditional. To do this we change the end of the top-level ``CMakeLists.txt``
 file to look like the following:
 
@@ -92,7 +92,7 @@ Since the source code now requires ``USE_MYMATH`` we can add it to
 ``TutorialConfig.h.in`` with the following line:
 
 .. literalinclude:: Step3/TutorialConfig.h.in
-  :language: c
+  :language: c++
   :lines: 4
 
 **Exercise**: Why is it important that we configure ``TutorialConfig.h.in``
@@ -113,4 +113,4 @@ command-line, try:
 
 Rebuild and run the tutorial again.
 
-Which function gives better results, sqrt or mysqrt?
+Which function gives better results, ``sqrt`` or ``mysqrt``?

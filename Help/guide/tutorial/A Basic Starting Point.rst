@@ -56,7 +56,7 @@ Using your favorite editor, create ``TutorialConfig.h.in`` in the source
 directory with the following contents:
 
 .. literalinclude:: Step2/TutorialConfig.h.in
-  :language: cmake
+  :language: c++
 
 When CMake configures this header file the values for
 ``@Tutorial_VERSION_MAJOR@`` and ``@Tutorial_VERSION_MINOR@`` will be
@@ -89,9 +89,9 @@ We will need to explicitly state in the CMake code that it should use the
 correct flags. The easiest way to enable support for a specific C++ standard
 in CMake is by using the :variable:`CMAKE_CXX_STANDARD` variable. For this
 tutorial, set the :variable:`CMAKE_CXX_STANDARD` variable in the
-``CMakeLists.txt`` file to 11 and :variable:`CMAKE_CXX_STANDARD_REQUIRED` to
-True. Make sure to add the ``CMAKE_CXX_STANDARD`` declarations above the call
-to ``add_executable``.
+``CMakeLists.txt`` file to ``11`` and :variable:`CMAKE_CXX_STANDARD_REQUIRED`
+to ``True``. Make sure to add the ``CMAKE_CXX_STANDARD`` declarations above the
+call to ``add_executable``.
 
 .. literalinclude:: Step2/CMakeLists.txt
   :language: cmake

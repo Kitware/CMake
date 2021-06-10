@@ -6,8 +6,8 @@ Now we can start adding install rules and testing support to our project.
 Install Rules
 -------------
 
-The install rules are fairly simple: for MathFunctions we want to install the
-library and header file and for the application we want to install the
+The install rules are fairly simple: for ``MathFunctions`` we want to install
+the library and header file and for the application we want to install the
 executable and configured header.
 
 So to the end of ``MathFunctions/CMakeLists.txt`` we add:

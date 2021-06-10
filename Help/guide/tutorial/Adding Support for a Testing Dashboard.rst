@@ -37,10 +37,14 @@ executable or the :manual:`cmake-gui <cmake-gui(1)>` to configure the project,
 but do not build it yet. Instead, change directory to the binary tree, and then
 run:
 
+.. code-block:: console
+
   ctest [-VV] -D Experimental
 
 Remember, for multi-config generators (e.g. Visual Studio), the configuration
-type must be specified::
+type must be specified:
+
+.. code-block:: console
 
   ctest [-VV] -C Debug -D Experimental
 

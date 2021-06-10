@@ -13,8 +13,8 @@ requirements are:
 
 Let's refactor our code from :guide:`tutorial/Adding a Library` to use the
 modern CMake approach of usage requirements. We first state that anybody
-linking to MathFunctions needs to include the current source directory,
-while MathFunctions itself doesn't. So this can become an ``INTERFACE``
+linking to ``MathFunctions`` needs to include the current source directory,
+while ``MathFunctions`` itself doesn't. So this can become an ``INTERFACE``
 usage requirement.
 
 Remember ``INTERFACE`` means things that consumers require but the producer
@@ -25,7 +25,7 @@ doesn't. Add the following lines to the end of
   :language: cmake
   :start-after: # to find MathFunctions.h
 
-Now that we've specified usage requirements for MathFunctions we can safely
+Now that we've specified usage requirements for ``MathFunctions`` we can safely
 remove our uses of the ``EXTRA_INCLUDES`` variable from the top-level
 ``CMakeLists.txt``, here:
 

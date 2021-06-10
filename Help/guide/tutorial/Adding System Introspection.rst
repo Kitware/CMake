@@ -11,8 +11,8 @@ If the platform has ``log`` and ``exp`` then we will use them to compute the
 square root in the ``mysqrt`` function. We first test for the availability of
 these functions using the :module:`CheckSymbolExists` module in
 ``MathFunctions/CMakeLists.txt``. On some platforms, we will need to link to
-the m library. If ``log`` and ``exp`` are not initially found, require the m
-library and try again.
+the ``m`` library. If ``log`` and ``exp`` are not initially found, require the
+``m`` library and try again.
 
 .. literalinclude:: Step6/MathFunctions/CMakeLists.txt
   :language: cmake
@@ -47,4 +47,4 @@ Run the :manual:`cmake  <cmake(1)>` executable or the
 :manual:`cmake-gui <cmake-gui(1)>` to configure the project and then build it
 with your chosen build tool and run the Tutorial executable.
 
-Which function gives better results now, sqrt or mysqrt?
+Which function gives better results now, ``sqrt`` or ``mysqrt``?

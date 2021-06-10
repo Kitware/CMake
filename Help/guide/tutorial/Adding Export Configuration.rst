@@ -14,14 +14,14 @@ The first step is to update our :command:`install(TARGETS)` commands to not
 only specify a ``DESTINATION`` but also an ``EXPORT``. The ``EXPORT`` keyword
 generates and installs a CMake file containing code to import all targets
 listed in the install command from the installation tree. So let's go ahead and
-explicitly ``EXPORT`` the MathFunctions library by updating the ``install``
+explicitly ``EXPORT`` the ``MathFunctions`` library by updating the ``install``
 command in ``MathFunctions/CMakeLists.txt`` to look like:
 
 .. literalinclude:: Complete/MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # install rules
 
-Now that we have MathFunctions being exported, we also need to explicitly
+Now that we have ``MathFunctions`` being exported, we also need to explicitly
 install the generated ``MathFunctionsTargets.cmake`` file. This is done by
 adding the following to the bottom of the top-level ``CMakeLists.txt``:
 
@@ -45,10 +45,10 @@ you will see that CMake will generate an error that looks like:
 What CMake is trying to say is that during generating the export information
 it will export a path that is intrinsically tied to the current machine and
 will not be valid on other machines. The solution to this is to update the
-MathFunctions :command:`target_include_directories` to understand that it needs
-different ``INTERFACE`` locations when being used from within the build
+``MathFunctions`` :command:`target_include_directories` to understand that it
+needs different ``INTERFACE`` locations when being used from within the build
 directory and from an install / package. This means converting the
-:command:`target_include_directories` call for MathFunctions to look like:
+:command:`target_include_directories` call for ``MathFunctions`` to look like:
 
 .. literalinclude:: Step12/MathFunctions/CMakeLists.txt
   :language: cmake
