@@ -87,7 +87,7 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
           "which does not match:${msg_expected}\n"
           "${output_error_message}")
       endif()
-    elseif(foundFilescount_ EQUAL 0)
+    elseif(foundFilesCount_ EQUAL 0)
       message(FATAL_ERROR
         "Found no files for file ${file_no_}!\n"
         "Globbing expression:\n '${EXPECTED_FILE_${file_no_}}'\n"
