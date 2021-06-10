@@ -8,7 +8,9 @@
 #include <vector>
 
 #include <cm/iterator>
+#include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmAlgorithms.h"
 #include "cmProperty.h"
@@ -473,6 +475,10 @@ cmProp cmStateDirectory::GetProperty(const std::string& prop, bool chain) const
   }
   if (prop == kBUILDSYSTEM_TARGETS) {
     output = cmJoin(this->DirectoryState->NormalTargetNames, ";");
+    return &output;
+  }
+  if (prop == "IMPORTED_TARGETS"_s) {
+    output = cmJoin(this->DirectoryState->ImportedTargetNames, ";");
     return &output;
   }
 
