@@ -52,6 +52,8 @@ argument. For example:
 
 Navigate to the install directory and verify that the installed Tutorial runs.
 
+.. _`Tutorial Testing Support`:
+
 Testing Support
 ---------------
 

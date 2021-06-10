@@ -1,10 +1,10 @@
 Step 11: Adding Export Configuration
 ====================================
 
-During `Installing and Testing (Step 4)`_ of the tutorial we added the ability
-for CMake to install the library and headers of the project. During
-`Building an Installer (Step 7)`_ we added the ability to package up this
-information so it could be distributed to other people.
+During :guide:`tutorial/Installing and Testing` of the tutorial we added the
+ability for CMake to install the library and headers of the project. During
+:guide:`tutorial/Packaging an Installer` we added the ability to package up
+this information so it could be distributed to other people.
 
 The next step is to add the necessary information so that other CMake projects
 can use our project, be it from a build directory, a local install or when

@@ -4,7 +4,7 @@ Step 7: Packaging an Installer
 Next suppose that we want to distribute our project to other people so that
 they can use it. We want to provide both binary and source distributions on a
 variety of platforms. This is a little different from the install we did
-previously in `Installing and Testing (Step 4)`_ , where we were
+previously in :guide:`tutorial/Installing and Testing`, where we were
 installing the binaries that we had built from the source code. In this
 example we will be building installation packages that support binary
 installations and package management features. To accomplish this we will use

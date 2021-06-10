@@ -2,10 +2,10 @@ Step 8: Adding Support for a Testing Dashboard
 ==============================================
 
 Adding support for submitting our test results to a dashboard is simple. We
-already defined a number of tests for our project in `Testing Support`_. Now we
-just have to run those tests and submit them to a dashboard. To include support
-for dashboards we include the :module:`CTest` module in our top-level
-``CMakeLists.txt``.
+already defined a number of tests for our project in
+:ref:`Testing Support <Tutorial Testing Support>`. Now we just have to run
+those tests and submit them to a dashboard. To include support for dashboards
+we include the :module:`CTest` module in our top-level ``CMakeLists.txt``.
 
 Replace:
 
