@@ -7,7 +7,8 @@
 enum class cmDepfileFormat
 {
   GccDepfile,
-  MakeDepfile
+  MakeDepfile,
+  MSBuildAdditionalInputs,
 };
 
 class cmLocalGenerator;

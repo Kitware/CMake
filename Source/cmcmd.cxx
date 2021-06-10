@@ -1531,6 +1531,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         format = cmDepfileFormat::GccDepfile;
       } else if (args[3] == "makedepfile") {
         format = cmDepfileFormat::MakeDepfile;
+      } else if (args[3] == "MSBuildAdditionalInputs") {
+        format = cmDepfileFormat::MSBuildAdditionalInputs;
       } else {
         return 1;
       }

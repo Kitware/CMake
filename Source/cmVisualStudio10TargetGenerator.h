@@ -16,6 +16,7 @@
 
 class cmComputeLinkInformation;
 class cmCustomCommand;
+class cmCustomCommandGenerator;
 class cmGeneratedFileStream;
 class cmGlobalVisualStudio10Generator;
 class cmLocalVisualStudio10Generator;
@@ -143,13 +144,15 @@ private:
                           std::string const& script,
                           std::string const& additional_inputs,
                           std::string const& outputs,
-                          std::string const& comment, bool symbolic);
+                          std::string const& comment,
+                          cmCustomCommandGenerator const& ccg, bool symbolic);
   void WriteCustomRuleCSharp(Elem& e0, std::string const& config,
                              std::string const& commandName,
                              std::string const& script,
                              std::string const& inputs,
                              std::string const& outputs,
-                             std::string const& comment);
+                             std::string const& comment,
+                             cmCustomCommandGenerator const& ccg);
   void WriteCustomCommands(Elem& e0);
   void WriteCustomCommand(Elem& e0, cmSourceFile const* sf);
   void WriteGroups();
@@ -216,6 +219,7 @@ private:
   bool Managed;
   bool NsightTegra;
   bool Android;
+  bool HaveCustomCommandDepfile = false;
   unsigned int NsightTegraVersion[4];
   bool TargetCompileAsWinRT;
   std::set<std::string> IPOEnabledConfigurations;
