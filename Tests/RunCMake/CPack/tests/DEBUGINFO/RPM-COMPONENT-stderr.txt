@@ -1,0 +1,17 @@
+^CMake Warning \(dev\) at [^
+]*/Modules/Internal/CPack/CPackRPM.cmake:[0-9]+ \(message\):
+  CPackRPM:Warning: debuginfo package was requested but will not be generated
+  as no source files were found! Component: 'appheaders'.
+Call Stack \(most recent call first\):
+  [^
+]*/Modules/Internal/CPack/CPackRPM.cmake:[0-9]+ \(cpack_rpm_generate_package\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
++
+CPackRPM: Will use GENERATED spec file: [^
+]*/Tests/RunCMake/RPM.DEBUGINFO/CPack/DEBUGINFO-build/_CPack_Packages/Linux/RPM/SPECS/Debuginfo-appheaders.spec
+CPackRPM: Will use GENERATED spec file: [^
+]*/Tests/RunCMake/RPM.DEBUGINFO/CPack/DEBUGINFO-build/_CPack_Packages/Linux/RPM/SPECS/Debuginfo-applications.spec
+CPackRPM: Will use GENERATED spec file: [^
+]*/Tests/RunCMake/RPM.DEBUGINFO/CPack/DEBUGINFO-build/_CPack_Packages/Linux/RPM/SPECS/Debuginfo-headers.spec
+CPackRPM: Will use GENERATED spec file: [^
+]*/Tests/RunCMake/RPM.DEBUGINFO/CPack/DEBUGINFO-build/_CPack_Packages/Linux/RPM/SPECS/Debuginfo-libs.spec$
