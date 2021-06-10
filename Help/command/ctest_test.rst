@@ -259,3 +259,14 @@ The following example demonstrates how to upload non-image files to CDash.
 If the name of the file to upload is known at configure time, you can use the
 :prop_test:`ATTACHED_FILES` or :prop_test:`ATTACHED_FILES_ON_FAIL` test
 properties instead.
+
+Custom Details
+""""""""""""""
+
+The following example demonstrates how to specify a custom value for the
+``Test Details`` field displayed on CDash.
+
+.. code-block:: c++
+
+   std::cout <<
+     "<CTestDetails>My Custom Details Value</CTestDetails>" << std::endl;
