@@ -18,6 +18,7 @@ explicitly ``EXPORT`` the ``MathFunctions`` library by updating the ``install``
 command in ``MathFunctions/CMakeLists.txt`` to look like:
 
 .. literalinclude:: Complete/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # install rules
 
@@ -26,6 +27,7 @@ install the generated ``MathFunctionsTargets.cmake`` file. This is done by
 adding the following to the bottom of the top-level ``CMakeLists.txt``:
 
 .. literalinclude:: Complete/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # install the configuration targets
   :end-before: include(CMakePackageConfigHelpers)
@@ -51,6 +53,7 @@ directory and from an install / package. This means converting the
 :command:`target_include_directories` call for ``MathFunctions`` to look like:
 
 .. literalinclude:: Step12/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # to find MathFunctions.h, while we don't.
   :end-before: # should we use our own math functions
@@ -65,11 +68,13 @@ ahead and add a new file to the top-level of the project called
 ``Config.cmake.in`` with the following contents:
 
 .. literalinclude:: Step12/Config.cmake.in
+  :caption: Config.cmake.in
 
 Then, to properly configure and install that file, add the following to the
 bottom of the top-level ``CMakeLists.txt``:
 
 .. literalinclude:: Step12/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # install the configuration targets
   :end-before: # generate the export
@@ -80,6 +85,7 @@ we want our project to also be used from a build directory we only have to add
 the following to the bottom of the top level ``CMakeLists.txt``:
 
 .. literalinclude:: Step12/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # needs to be after the install(TARGETS ) command
 

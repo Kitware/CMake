@@ -12,6 +12,7 @@ CPack to create platform specific installers. Specifically we need to add a
 few lines to the bottom of our top-level ``CMakeLists.txt`` file.
 
 .. literalinclude:: Step8/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # setup installer
 

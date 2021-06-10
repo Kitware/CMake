@@ -10,6 +10,7 @@ we include the :module:`CTest` module in our top-level ``CMakeLists.txt``.
 Replace:
 
 .. code-block:: cmake
+  :caption: CMakeLists.txt
 
   # enable testing
   enable_testing()
@@ -17,6 +18,7 @@ Replace:
 With:
 
 .. code-block:: cmake
+  :caption: CMakeLists.txt
 
   # enable dashboard scripting
   include(CTest)
@@ -29,6 +31,7 @@ directory where we can specify the name of the project and where to submit the
 dashboard.
 
 .. literalinclude:: Step9/CTestConfig.cmake
+  :caption: CTestConfig.cmake
   :language: cmake
 
 The :manual:`ctest <ctest(1)>` executable will read in this file when it runs.

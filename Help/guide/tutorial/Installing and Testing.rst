@@ -13,12 +13,14 @@ executable and configured header.
 So to the end of ``MathFunctions/CMakeLists.txt`` we add:
 
 .. literalinclude:: Step5/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # install rules
 
 And to the end of the top-level ``CMakeLists.txt`` we add:
 
 .. literalinclude:: Step5/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # add the install targets
   :end-before: # enable testing
@@ -62,6 +64,7 @@ file we can enable testing and then add a number of basic tests to verify that
 the application is working correctly.
 
 .. literalinclude:: Step5/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # enable testing
 

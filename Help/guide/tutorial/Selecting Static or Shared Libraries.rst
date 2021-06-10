@@ -20,6 +20,7 @@ The first step is to update the starting section of the top-level
 ``CMakeLists.txt`` to look like:
 
 .. literalinclude:: Step10/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :end-before: # add the binary tree
 
@@ -32,6 +33,7 @@ explicitly require that SqrtLibrary is built statically.
 The end result is that ``MathFunctions/CMakeLists.txt`` should look like:
 
 .. literalinclude:: Step10/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
   :language: cmake
   :lines: 1-36,42-
 
@@ -39,6 +41,7 @@ Next, update ``MathFunctions/mysqrt.cxx`` to use the ``mathfunctions`` and
 ``detail`` namespaces:
 
 .. literalinclude:: Step10/MathFunctions/mysqrt.cxx
+  :caption: MathFunctions/mysqrt.cxx
   :language: c++
 
 We also need to make some changes in ``tutorial.cxx``, so that it no longer
@@ -51,6 +54,7 @@ uses ``USE_MYMATH``:
 Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
 
 .. literalinclude:: Step10/MathFunctions/MathFunctions.h
+  :caption: MathFunctions/MathFunctions.h
   :language: c++
 
 At this point, if you build everything, you may notice that linking fails
@@ -60,6 +64,7 @@ explicitly set the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property of
 SqrtLibrary to be ``True`` no matter the build type.
 
 .. literalinclude:: Step10/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
   :language: cmake
   :lines: 37-42
 

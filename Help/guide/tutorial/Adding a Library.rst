@@ -16,6 +16,7 @@ Add the following one line ``CMakeLists.txt`` file to the ``MathFunctions``
 directory:
 
 .. literalinclude:: Step3/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
   :language: cmake
 
 To make use of the new library we will add an :command:`add_subdirectory`
@@ -25,6 +26,7 @@ an include directory so that the ``mysqrt.h`` header file can be found. The
 last few lines of the top-level ``CMakeLists.txt`` file should now look like:
 
 .. code-block:: cmake
+        :caption: CMakeLists.txt
 
         # add the MathFunctions library
         add_subdirectory(MathFunctions)
@@ -47,6 +49,7 @@ occurrence. The first step is to add an option to the top-level
 ``CMakeLists.txt`` file.
 
 .. literalinclude:: Step3/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # should we use our own math functions
   :end-before: # add the MathFunctions library
@@ -62,6 +65,7 @@ conditional. To do this we change the end of the top-level ``CMakeLists.txt``
 file to look like the following:
 
 .. literalinclude:: Step3/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # add the MathFunctions library
 
@@ -76,6 +80,7 @@ First, in ``tutorial.cxx``, include the ``MathFunctions.h`` header if we
 need it:
 
 .. literalinclude:: Step3/tutorial.cxx
+  :caption: tutorial.cxx
   :language: c++
   :start-after: // should we include the MathFunctions header
   :end-before: int main
@@ -84,6 +89,7 @@ Then, in the same file, make ``USE_MYMATH`` control which square root
 function is used:
 
 .. literalinclude:: Step3/tutorial.cxx
+  :caption: tutorial.cxx
   :language: c++
   :start-after: // which square root function should we use?
   :end-before: std::cout << "The square root of
@@ -92,6 +98,7 @@ Since the source code now requires ``USE_MYMATH`` we can add it to
 ``TutorialConfig.h.in`` with the following line:
 
 .. literalinclude:: Step3/TutorialConfig.h.in
+  :caption: TutorialConfig.h.in
   :language: c++
   :lines: 4
 

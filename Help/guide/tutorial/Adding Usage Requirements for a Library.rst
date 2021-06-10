@@ -22,6 +22,7 @@ doesn't. Add the following lines to the end of
 ``MathFunctions/CMakeLists.txt``:
 
 .. literalinclude:: Step4/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # to find MathFunctions.h
 
@@ -30,6 +31,7 @@ remove our uses of the ``EXTRA_INCLUDES`` variable from the top-level
 ``CMakeLists.txt``, here:
 
 .. literalinclude:: Step4/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # add the MathFunctions library
   :end-before: # add the executable
@@ -37,6 +39,7 @@ remove our uses of the ``EXTRA_INCLUDES`` variable from the top-level
 And here:
 
 .. literalinclude:: Step4/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # so that we will find TutorialConfig.h
 

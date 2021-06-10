@@ -38,6 +38,7 @@ instead of using :variable:`CMAKE_CXX_STANDARD`.
 So the following code:
 
 .. literalinclude:: Step10/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: project(Tutorial VERSION 1.0)
   :end-before: # control where the static and shared libraries are built so that on windows
@@ -45,6 +46,7 @@ So the following code:
 Would be replaced with:
 
 .. literalinclude:: Step11/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: project(Tutorial VERSION 1.0)
   :end-before: # add compiler warning flags just when building this project via
@@ -56,6 +58,7 @@ generator expression to control which flags to apply given a language and a set
 of compiler ids as seen below:
 
 .. literalinclude:: Step11/CMakeLists.txt
+  :caption: CMakeLists.txt
   :language: cmake
   :start-after: # the BUILD_INTERFACE genex
   :end-before: # control where the static and shared libraries are built so that on windows

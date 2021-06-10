@@ -15,6 +15,7 @@ the ``m`` library. If ``log`` and ``exp`` are not initially found, require the
 ``m`` library and try again.
 
 .. literalinclude:: Step6/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # does this system provide the log and exp functions?
   :end-before: # add compile definitions
@@ -23,6 +24,7 @@ If available, use :command:`target_compile_definitions` to specify
 ``HAVE_LOG`` and ``HAVE_EXP`` as ``PRIVATE`` compile definitions.
 
 .. literalinclude:: Step6/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # add compile definitions
   :end-before: # install rules
@@ -33,6 +35,7 @@ the ``mysqrt`` function in ``MathFunctions/mysqrt.cxx`` (don't forget the
 ``#endif`` before returning the result!):
 
 .. literalinclude:: Step6/MathFunctions/mysqrt.cxx
+  :caption: MathFunctions/mysqrt.cxx
   :language: c++
   :start-after: // if we have both log and exp then use them
   :end-before: // do ten iterations
@@ -40,6 +43,7 @@ the ``mysqrt`` function in ``MathFunctions/mysqrt.cxx`` (don't forget the
 We will also need to modify ``mysqrt.cxx`` to include ``cmath``.
 
 .. literalinclude:: Step6/MathFunctions/mysqrt.cxx
+  :caption: MathFunctions/mysqrt.cxx
   :language: c++
   :end-before: #include <iostream>
 
