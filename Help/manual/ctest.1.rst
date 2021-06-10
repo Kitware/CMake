@@ -322,11 +322,13 @@ Options
  Set the interactive mode to ``0`` or ``1``.
 
  This option causes CTest to run tests in either an interactive mode
- or a non-interactive mode.  On Windows this means that in
- non-interactive mode, all system debug pop up windows are blocked.
- In dashboard mode (``Experimental``, ``Nightly``, ``Continuous``), the default
- is non-interactive.  When just running tests not for a dashboard the
- default is to allow popups and interactive debugging.
+ or a non-interactive mode.  In dashboard mode (``Experimental``, ``Nightly``,
+ ``Continuous``), the default is non-interactive.  In non-interactive mode,
+ the environment variable :envvar:`DASHBOARD_TEST_FROM_CTEST` is set.
+
+ Prior to CMake 3.11, interactive mode on Windows allowed system debug
+ popup windows to appear.  Now, due to CTest's use of ``libuv`` to launch
+ test processes, all system debug popup windows are always blocked.
 
 ``--no-label-summary``
  Disable timing summary information for labels.
