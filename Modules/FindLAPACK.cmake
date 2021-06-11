@@ -23,58 +23,8 @@ The following variables may be set to influence this module's behavior:
   if ``ON`` use static linkage
 
 ``BLA_VENDOR``
-  If set, checks only the specified vendor, if not set checks all the
-  possibilities.  List of vendors valid in this module:
-
-  * ``FlexiBLAS``
-  * ``OpenBLAS``
-  * ``FLAME``
-  * ``Intel10_32`` (intel mkl v10 32 bit, threaded code)
-  * ``Intel10_64lp`` (intel mkl v10+ 64 bit, threaded code, lp64 model)
-  * ``Intel10_64lp_seq`` (intel mkl v10+ 64 bit, sequential code, lp64 model)
-  * ``Intel10_64ilp`` (intel mkl v10+ 64 bit, threaded code, ilp64 model)
-  * ``Intel10_64ilp_seq`` (intel mkl v10+ 64 bit, sequential code, ilp64 model)
-  * ``Intel10_64_dyn`` (intel mkl v10+ 64 bit, single dynamic library)
-  * ``Intel`` (obsolete versions of mkl 32 and 64 bit)
-  * ``ACML``
-  * ``Apple``
-  * ``NAS``
-  * ``Arm``
-  * ``Arm_mp``
-  * ``Arm_ilp64``
-  * ``Arm_ilp64_mp``
-  * ``EML``
-  * ``EML_mt``
-  * ``Fujitsu_SSL2`` (Fujitsu serial blas / lapack)
-  * ``Fujitsu_SSL2BLAMP`` (Fujitsu parallel blas / lapack)
-  * ``NVHPC``
-  * ``Generic``
-
-  .. versionadded:: 3.6
-    ``OpenBLAS`` support.
-
-  .. versionadded:: 3.11
-    ``FLAME`` support.
-
-    .. versionadded:: 3.13
-      Added ILP64 MKL variants (``Intel10_64ilp``, ``Intel10_64ilp_seq``).
-
-  .. versionadded:: 3.17
-    Added single dynamic library MKL variant (``Intel10_64_dyn``).
-
-  .. versionadded:: 3.18
-    Arm Performance Libraries support (``Arm``, ``Arm_mp``, ``Arm_ilp64``,
-    ``Arm_ilp64_mp``).
-
-  .. versionadded:: 3.19
-    ``FlexiBLAS`` support.
-
-  .. versionadded:: 3.20
-    Elbrus Math Library support (``EML``, ``EML_mt``).
-    Fujitsu SSL2 Library support (``Fujitsu_SSL2``, ``Fujitsu_SSL2BLAMP``)
-
-  .. versionadded:: 3.21
-    NVHPC support
+  Set to one of the :ref:`BLAS/LAPACK Vendors` to search for BLAS only
+  from the specified vendor.  If not set, all vendors are considered.
 
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95/LAPACK95 interfaces
