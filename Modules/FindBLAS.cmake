@@ -63,17 +63,6 @@ This module defines the following variables:
 ``BLAS95_FOUND``
   library implementing the BLAS95 interface is found
 
-.. note::
-
-  C or CXX must be enabled to use Intel Math Kernel Library (MKL).
-
-  For example, to use Intel MKL libraries and/or Intel compiler:
-
-  .. code-block:: cmake
-
-    set(BLA_VENDOR Intel10_64lp)
-    find_package(BLAS)
-
 .. _`BLAS/LAPACK Vendors`:
 
 BLAS/LAPACK Vendors
@@ -170,16 +159,66 @@ BLAS/LAPACK Vendors
 ``SunPerf``
   Sun Performance Library
 
-Hints
-^^^^^
+.. _`Intel MKL`:
 
-``MKLROOT``
-  .. versionadded:: 3.15
+Intel MKL
+^^^^^^^^^
 
-  Set this environment variable to a directory that contains an MKL
-  installation, or add the directory to the dynamic library loader environment
-  variable for your platform (``LIB``, ``DYLD_LIBRARY_PATH`` or
-  ``LD_LIBRARY_PATH``).
+To use the Intel MKL implementation of BLAS, a project must enable at least
+one of the ``C`` or ``CXX`` languages.  Set ``BLA_VENDOR`` to an Intel MKL
+variant either on the command-line as ``-DBLA_VENDOR=Intel10_64lp`` or in
+project code:
+
+.. code-block:: cmake
+
+  set(BLA_VENDOR Intel10_64lp)
+  find_package(BLAS)
+
+In order to build a project using Intel MKL, and end user must first
+establish an Intel MKL environment:
+
+Intel oneAPI
+  Source the full Intel environment script:
+
+  .. code-block:: shell
+
+    . /opt/intel/oneapi/setvars.sh
+
+  Or, source the MKL component environment script:
+
+  .. code-block:: shell
+
+    . /opt/intel/oneapi/mkl/latest/env/vars.sh
+
+Intel Classic
+  Source the full Intel environment script:
+
+  .. code-block:: shell
+
+    . /opt/intel/bin/compilervars.sh intel64
+
+  Or, source the MKL component environment script:
+
+  .. code-block:: shell
+
+    . /opt/intel/mkl/bin/mklvars.sh intel64
+
+The above environment scripts set the ``MKLROOT`` environment variable
+to the top of the MKL installation.  They also add the location of the
+runtime libraries to the dynamic library loader environment variable for
+your platform (e.g. ``LD_LIBRARY_PATH``).  This is necessary for programs
+linked against MKL to run.
+
+.. note::
+
+  As of Intel oneAPI 2021.2, loading only the MKL component does not
+  make all of its dependencies available.  In particular, the ``iomp5``
+  library must be available separately, or provided by also loading
+  the compiler component environment:
+
+  .. code-block:: shell
+
+    . /opt/intel/oneapi/compiler/latest/env/vars.sh
 
 #]=======================================================================]
 

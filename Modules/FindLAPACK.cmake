@@ -63,16 +63,23 @@ This module defines the following variables:
 ``LAPACK95_FOUND``
   library implementing the LAPACK95 interface is found
 
-.. note::
+Intel MKL
+^^^^^^^^^
 
-  C or CXX must be enabled to use Intel Math Kernel Library (MKL).
+To use the Intel MKL implementation of LAPACK, a project must enable at least
+one of the ``C`` or ``CXX`` languages.  Set ``BLA_VENDOR`` to an Intel MKL
+variant either on the command-line as ``-DBLA_VENDOR=Intel10_64lp`` or in
+project code:
 
-  For example, to use Intel MKL libraries and/or Intel compiler:
+.. code-block:: cmake
 
-  .. code-block:: cmake
+  set(BLA_VENDOR Intel10_64lp)
+  find_package(LAPACK)
 
-    set(BLA_VENDOR Intel10_64lp)
-    find_package(LAPACK)
+In order to build a project using Intel MKL, and end user must first
+establish an Intel MKL environment.  See the :module:`FindBLAS` module
+section on :ref:`Intel MKL` for details.
+
 #]=======================================================================]
 
 # The approach follows that of the ``autoconf`` macro file, ``acx_lapack.m4``
