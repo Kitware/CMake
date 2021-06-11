@@ -38,11 +38,11 @@ The following variables may be set to influence this module's behavior:
 Imported targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.18
-
-This module defines the following :prop_tgt:`IMPORTED` target:
+This module defines the following :prop_tgt:`IMPORTED` targets:
 
 ``LAPACK::LAPACK``
+  .. versionadded:: 3.18
+
   The libraries to use for LAPACK, if found.
 
 Result Variables
