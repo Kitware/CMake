@@ -270,7 +270,7 @@ if(CPackGen MATCHES "RPM")
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*${CPACK_COMPONENT_APPLICATIONS_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
-        set(check_file_match_expected_architecture "armv7hf")
+        set(check_file_match_expected_architecture "armv7hl")
         set(spec_regex "*applications*")
         set(check_content_list "^/usr/foo/bar
 /usr/foo/bar/bin
