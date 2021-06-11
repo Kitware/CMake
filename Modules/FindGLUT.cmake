@@ -41,6 +41,41 @@ Also defined, but not for general use are:
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
+function(_add_glut_target_simple)
+  if(TARGET GLUT::GLUT)
+    return()
+  endif()
+  add_library(GLUT::GLUT INTERFACE IMPORTED)
+  if(GLUT_INCLUDE_DIRS)
+    target_include_directories(GLUT::GLUT SYSTEM
+      INTERFACE "${GLUT_INCLUDE_DIRS}")
+  endif()
+  if(GLUT_LIBRARIES)
+    target_link_libraries(GLUT::GLUT INTERFACE ${GLUT_LIBRARIES})
+  endif()
+  if(GLUT_LDFLAGS)
+    target_link_options(GLUT::GLUT INTERFACE ${GLUT_LDFLAGS})
+  endif()
+  if(GLUT_CFLAGS)
+    separate_arguments(GLUT_CFLAGS_SPLIT UNIX_COMMAND "${GLUT_CFLAGS}")
+    target_compile_options(GLUT::GLUT INTERFACE ${GLUT_CFLAGS_SPLIT})
+  endif()
+
+  set_property(TARGET GLUT::GLUT APPEND PROPERTY
+    IMPORTED_LOCATION "${GLUT_glut_LIBRARY}")
+endfunction()
+
+find_package(PkgConfig)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(GLUT glut)
+  if(GLUT_FOUND)
+    _add_glut_target_simple()
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_FOUND)
+    return()
+  endif()
+endif()
 
 if(WIN32)
   find_path( GLUT_INCLUDE_DIR NAMES GL/glut.h
@@ -126,7 +161,6 @@ else()
 endif()
 mark_as_advanced(GLUT_glut_LIBRARY)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_glut_LIBRARY GLUT_INCLUDE_DIR)
 
 if (GLUT_FOUND)
