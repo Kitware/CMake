@@ -10,6 +10,8 @@ Find Linear Algebra PACKage (LAPACK) library
 This module finds an installed Fortran library that implements the
 `LAPACK linear-algebra interface`_.
 
+At least one of the ``C``, ``CXX``, or ``Fortran`` languages must be enabled.
+
 .. _`LAPACK linear-algebra interface`: http://www.netlib.org/lapack/
 
 Input Variables
@@ -63,7 +65,6 @@ This module defines the following variables:
 
 .. note::
 
-  C, CXX or Fortran must be enabled to detect a BLAS/LAPACK library.
   C or CXX must be enabled to use Intel Math Kernel Library (MKL).
 
   For example, to use Intel MKL libraries and/or Intel compiler:
