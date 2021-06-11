@@ -27,7 +27,7 @@
 #include "cmInstallGenerator.h"
 #include "cmInstallSubdirectoryGenerator.h"
 #include "cmInstallTargetGenerator.h"
-#include "cmLinkLineComputer.h"
+#include "cmLinkLineComputer.h" // IWYU pragma: keep
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -1444,9 +1444,10 @@ Json::Value Target::DumpLinkCommandFragments()
   std::vector<BT<std::string>> linkPath;
   std::vector<BT<std::string>> linkLibs;
   cmLocalGenerator* lg = this->GT->GetLocalGenerator();
-  cmLinkLineComputer linkLineComputer(lg,
-                                      lg->GetStateSnapshot().GetDirectory());
-  lg->GetTargetFlags(&linkLineComputer, this->Config, linkLibs,
+  cmGlobalGenerator* gg = this->GT->GetGlobalGenerator();
+  std::unique_ptr<cmLinkLineComputer> linkLineComputer =
+    gg->CreateLinkLineComputer(lg, lg->GetStateSnapshot().GetDirectory());
+  lg->GetTargetFlags(linkLineComputer.get(), this->Config, linkLibs,
                      linkLanguageFlags, linkFlags, frameworkPath, linkPath,
                      this->GT);
   linkLanguageFlags = cmTrimWhitespace(linkLanguageFlags);
