@@ -74,6 +74,7 @@ Properties on Directories
    /prop_dir/DEFINITIONS
    /prop_dir/EXCLUDE_FROM_ALL
    /prop_dir/IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
+   /prop_dir/IMPORTED_TARGETS
    /prop_dir/INCLUDE_DIRECTORIES
    /prop_dir/INCLUDE_REGULAR_EXPRESSION
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION

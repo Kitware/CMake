@@ -8,7 +8,9 @@
 #include <vector>
 
 #include <cm/iterator>
+#include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmAlgorithms.h"
 #include "cmProperty.h"
@@ -475,6 +477,10 @@ cmProp cmStateDirectory::GetProperty(const std::string& prop, bool chain) const
     output = cmJoin(this->DirectoryState->NormalTargetNames, ";");
     return &output;
   }
+  if (prop == "IMPORTED_TARGETS"_s) {
+    output = cmJoin(this->DirectoryState->ImportedTargetNames, ";");
+    return &output;
+  }
 
   if (prop == "LISTFILE_STACK") {
     std::vector<std::string> listFiles;
@@ -545,4 +551,9 @@ std::vector<std::string> cmStateDirectory::GetPropertyKeys() const
 void cmStateDirectory::AddNormalTargetName(std::string const& name)
 {
   this->DirectoryState->NormalTargetNames.push_back(name);
+}
+
+void cmStateDirectory::AddImportedTargetName(std::string const& name)
+{
+  this->DirectoryState->ImportedTargetNames.emplace_back(name);
 }
