@@ -322,8 +322,9 @@ std::unordered_map<std::string, StanardLevelComputer> StandardComputerMapping =
         "CUDA", std::vector<int>{ 03, 11, 14, 17, 20, 23 },
         std::vector<std::string>{ "03", "11", "14", "17", "20", "23" } } },
     { "OBJC",
-      StanardLevelComputer{ "OBJC", std::vector<int>{ 90, 99, 11 },
-                            std::vector<std::string>{ "90", "99", "11" } } },
+      StanardLevelComputer{
+        "OBJC", std::vector<int>{ 90, 99, 11, 17, 23 },
+        std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
     { "OBJCXX",
       StanardLevelComputer{
         "OBJCXX", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
