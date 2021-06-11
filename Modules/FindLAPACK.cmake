@@ -8,7 +8,9 @@ FindLAPACK
 Find Linear Algebra PACKage (LAPACK) library
 
 This module finds an installed Fortran library that implements the
-LAPACK linear-algebra interface (see http://www.netlib.org/lapack/).
+`LAPACK linear-algebra interface`_.
+
+.. _`LAPACK linear-algebra interface`: http://www.netlib.org/lapack/
 
 Input Variables
 ^^^^^^^^^^^^^^^

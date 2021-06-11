@@ -8,7 +8,9 @@ FindBLAS
 Find Basic Linear Algebra Subprograms (BLAS) library
 
 This module finds an installed Fortran library that implements the
-BLAS linear-algebra interface (see http://www.netlib.org/blas/).
+`BLAS linear-algebra interface`_.
+
+.. _`BLAS linear-algebra interface`: http://www.netlib.org/blas/
 
 Input Variables
 ^^^^^^^^^^^^^^^
