@@ -10,10 +10,6 @@ Find Basic Linear Algebra Subprograms (BLAS) library
 This module finds an installed Fortran library that implements the
 BLAS linear-algebra interface (see http://www.netlib.org/blas/).
 
-The approach follows that taken for the ``autoconf`` macro file,
-``acx_blas.m4`` (distributed at
-http://ac-archive.sourceforge.net/ac-archive/acx_blas.html).
-
 Input Variables
 ^^^^^^^^^^^^^^^
 
@@ -183,6 +179,9 @@ Hints
   ``LD_LIBRARY_PATH``).
 
 #]=======================================================================]
+
+# The approach follows that of the ``autoconf`` macro file, ``acx_blas.m4``
+# (distributed at http://ac-archive.sourceforge.net/ac-archive/acx_blas.html).
 
 # Check the language being used
 if(NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_COMPILER_LOADED))

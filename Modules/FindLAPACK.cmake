@@ -10,10 +10,6 @@ Find Linear Algebra PACKage (LAPACK) library
 This module finds an installed Fortran library that implements the
 LAPACK linear-algebra interface (see http://www.netlib.org/lapack/).
 
-The approach follows that taken for the ``autoconf`` macro file,
-``acx_lapack.m4`` (distributed at
-http://ac-archive.sourceforge.net/ac-archive/acx_lapack.html).
-
 Input Variables
 ^^^^^^^^^^^^^^^
 
@@ -75,6 +71,9 @@ This module defines the following variables:
     set(BLA_VENDOR Intel10_64lp)
     find_package(LAPACK)
 #]=======================================================================]
+
+# The approach follows that of the ``autoconf`` macro file, ``acx_lapack.m4``
+# (distributed at http://ac-archive.sourceforge.net/ac-archive/acx_lapack.html).
 
 if(CMAKE_Fortran_COMPILER_LOADED)
   include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
