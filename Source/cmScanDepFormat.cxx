@@ -3,7 +3,6 @@
 
 #include "cmScanDepFormat.h"
 
-#include <cassert>
 #include <cctype>
 #include <cstdio>
 #include <utility>
@@ -339,7 +338,7 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
     const char* lookup_method = nullptr;
     switch (require.Method) {
       case LookupMethod::ByName:
-        lookup_method = "by-name";
+        // No explicit value needed for the default.
         break;
       case LookupMethod::IncludeAngle:
         lookup_method = "include-angle";
@@ -348,8 +347,9 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
         lookup_method = "include-quote";
         break;
     }
-    assert(lookup_method);
-    require_obj["lookup-method"] = lookup_method;
+    if (lookup_method) {
+      require_obj["lookup-method"] = lookup_method;
+    }
 
     reqs.append(require_obj);
   }
