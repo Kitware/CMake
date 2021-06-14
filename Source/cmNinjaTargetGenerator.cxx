@@ -1162,7 +1162,7 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
   scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
 
   // Outputs of the scan/preprocessor build statement.
-  if (!ppFileName.empty()) {
+  if (compilePP) {
     scanBuild.Outputs.push_back(ppFileName);
     scanBuild.ImplicitOuts.push_back(ddiFile);
   } else {
