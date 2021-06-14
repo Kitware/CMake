@@ -2448,7 +2448,6 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   for (std::string const& provide : finfo.Provides) {
     cmSourceReqInfo src_info;
     src_info.LogicalName = provide;
-    src_info.CompiledModulePath = provide;
     info->ScanDep.Provides.emplace_back(src_info);
   }
   for (std::string const& require : finfo.Requires) {
@@ -2458,7 +2457,6 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
     }
     cmSourceReqInfo src_info;
     src_info.LogicalName = require;
-    src_info.CompiledModulePath = require;
     info->ScanDep.Requires.emplace_back(src_info);
   }
   for (std::string const& include : finfo.Includes) {
@@ -2529,8 +2527,18 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   Json::Value tm = Json::objectValue;
   for (cmScanDepInfo const& object : objects) {
     for (auto const& p : object.Provides) {
-      std::string const mod = cmStrCat(
-        module_dir, cmSystemTools::GetFilenameName(p.CompiledModulePath));
+      std::string mod;
+      if (!p.CompiledModulePath.empty()) {
+        // The scanner provided the path to the module file.
+        mod = p.CompiledModulePath;
+        if (!cmSystemTools::FileIsFullPath(mod)) {
+          // Treat relative to work directory (top of build tree).
+          mod = cmSystemTools::CollapseFullPath(mod, dir_top_bld);
+        }
+      } else {
+        // Assume the module file path matches the logical module name.
+        mod = cmStrCat(module_dir, p.LogicalName);
+      }
       mod_files[p.LogicalName] = mod;
       tm[p.LogicalName] = mod;
     }

@@ -162,9 +162,6 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
               provide["compiled-module-path"];
             PARSE_FILENAME(compiled_module_path,
                            provide_info.CompiledModulePath);
-          } else {
-            provide_info.CompiledModulePath =
-              cmStrCat(provide_info.LogicalName, ".mod");
           }
 
           if (provide.isMember("unique-on-source-path")) {
@@ -299,9 +296,7 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
     Json::Value provide_obj(Json::objectValue);
     auto const encoded = EncodeFilename(provide.LogicalName);
     provide_obj["logical-name"] = encoded;
-    if (provide.CompiledModulePath.empty()) {
-      provide_obj["compiled-module-path"] = encoded;
-    } else {
+    if (!provide.CompiledModulePath.empty()) {
       provide_obj["compiled-module-path"] =
         EncodeFilename(provide.CompiledModulePath);
     }
@@ -321,9 +316,7 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
     Json::Value require_obj(Json::objectValue);
     auto const encoded = EncodeFilename(require.LogicalName);
     require_obj["logical-name"] = encoded;
-    if (require.CompiledModulePath.empty()) {
-      require_obj["compiled-module-path"] = encoded;
-    } else {
+    if (!require.CompiledModulePath.empty()) {
       require_obj["compiled-module-path"] =
         EncodeFilename(require.CompiledModulePath);
     }
