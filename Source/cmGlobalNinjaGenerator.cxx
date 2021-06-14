@@ -6,6 +6,7 @@
 #include <cctype>
 #include <cstdio>
 #include <sstream>
+#include <utility>
 
 #include <cm/iterator>
 #include <cm/memory>
@@ -2400,6 +2401,8 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   cm::optional<cmSourceInfo> info;
   cmFortranCompiler fc;
   std::vector<std::string> includes;
+  std::string dir_top_bld;
+  std::string module_dir;
   {
     Json::Value tdio;
     Json::Value const& tdi = tdio;
@@ -2414,11 +2417,22 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
       }
     }
 
+    dir_top_bld = tdi["dir-top-bld"].asString();
+    if (!dir_top_bld.empty() && !cmHasLiteralSuffix(dir_top_bld, "/")) {
+      dir_top_bld += '/';
+    }
+
     Json::Value const& tdi_include_dirs = tdi["include-dirs"];
     if (tdi_include_dirs.isArray()) {
       for (auto const& tdi_include_dir : tdi_include_dirs) {
         includes.push_back(tdi_include_dir.asString());
       }
+    }
+
+    Json::Value const& tdi_module_dir = tdi["module-dir"];
+    module_dir = tdi_module_dir.asString();
+    if (!module_dir.empty() && !cmHasLiteralSuffix(module_dir, "/")) {
+      module_dir += '/';
     }
 
     Json::Value const& tdi_compiler_id = tdi["compiler-id"];
@@ -2448,6 +2462,13 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
   for (std::string const& provide : finfo.Provides) {
     cmSourceReqInfo src_info;
     src_info.LogicalName = provide;
+    if (!module_dir.empty()) {
+      std::string mod = cmStrCat(module_dir, provide);
+      if (!dir_top_bld.empty() && cmHasPrefix(mod, dir_top_bld)) {
+        mod = mod.substr(dir_top_bld.size());
+      }
+      src_info.CompiledModulePath = std::move(mod);
+    }
     info->ScanDep.Provides.emplace_back(src_info);
   }
   for (std::string const& require : finfo.Requires) {
