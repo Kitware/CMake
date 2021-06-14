@@ -1118,11 +1118,7 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
 {
   cmNinjaBuild scanBuild(ruleName);
 
-  if (!ppFileName.empty()) {
-    scanBuild.RspFile = cmStrCat(ppFileName, ".rsp");
-  } else {
-    scanBuild.RspFile = "$out.rsp";
-  }
+  scanBuild.RspFile = "$out.rsp";
 
   if (compilePP) {
     // Move compilation dependencies to the scan/preprocessing build statement.
