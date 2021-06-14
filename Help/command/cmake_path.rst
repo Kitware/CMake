@@ -459,9 +459,10 @@ are :ref:`normalized <Normalization>` before the check.
 
 .. code-block:: cmake
 
-  set(path "/a/b/c/d")
-  cmake_path(IS_PREFIX path "/a/b" result)    # result = true
-  cmake_path(IS_PREFIX path "/x/y/z" result)  # result = false
+  set(path "/a/b/c")
+  cmake_path(IS_PREFIX path "/a/b/c/d" result) # result = true
+  cmake_path(IS_PREFIX path "/a/b" result)     # result = false
+  cmake_path(IS_PREFIX path "/x/y/z" result)   # result = false
 
   set(path "/a/b")
   cmake_path(IS_PREFIX path "/a/c/../b" NORMALIZE result)   # result = true
