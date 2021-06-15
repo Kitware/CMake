@@ -536,7 +536,7 @@ std::string GetScanCommand(const std::string& cmakeCmd, const std::string& tdi,
 // Helper function to create dependency scanning rule that may or may
 // not perform explicit preprocessing too.
 cmNinjaRule GetScanRule(
-  const std::string& ruleName,
+  std::string const& ruleName, std::string const& ppFileName,
   cmRulePlaceholderExpander::RuleVariables const& vars,
   const std::string& responseFlag, const std::string& flags,
   cmRulePlaceholderExpander* const rulePlaceholderExpander,
@@ -553,7 +553,7 @@ cmNinjaRule GetScanRule(
   scanVars.CMTargetType = vars.CMTargetType;
   scanVars.Language = vars.Language;
   scanVars.Object = "$OBJ_FILE";
-  scanVars.PreprocessedSource = "$out";
+  scanVars.PreprocessedSource = ppFileName.c_str();
   scanVars.DynDepFile = "$DYNDEP_INTERMEDIATE_FILE";
   scanVars.DependencyFile = rule.DepFile.c_str();
   scanVars.DependencyTarget = "$out";
@@ -653,8 +653,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     {
       std::vector<std::string> scanCommands;
       std::string scanRuleName;
+      std::string ppFileName;
       if (compilationPreprocesses) {
         scanRuleName = this->LanguageScanRule(lang, config);
+        ppFileName = "$PREPROCESSED_OUTPUT_FILE";
         std::string const& scanCommand = mf->GetRequiredDefinition(
           cmStrCat("CMAKE_EXPERIMENTAL_", lang, "_SCANDEP_SOURCE"));
         cmExpandList(scanCommand, scanCommands);
@@ -663,6 +665,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
         }
       } else {
         scanRuleName = this->LanguagePreprocessAndScanRule(lang, config);
+        ppFileName = "$out";
         std::string const& ppCommmand = mf->GetRequiredDefinition(
           cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE"));
         cmExpandList(ppCommmand, scanCommands);
@@ -673,9 +676,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                                                  "$DYNDEP_INTERMEDIATE_FILE"));
       }
 
-      auto scanRule = GetScanRule(
-        scanRuleName, vars, responseFlag, flags, rulePlaceholderExpander.get(),
-        this->GetLocalGenerator(), std::move(scanCommands), config);
+      auto scanRule =
+        GetScanRule(scanRuleName, ppFileName, vars, responseFlag, flags,
+                    rulePlaceholderExpander.get(), this->GetLocalGenerator(),
+                    std::move(scanCommands), config);
 
       scanRule.Comment =
         cmStrCat("Rule for generating ", lang, " dependencies.");
@@ -704,7 +708,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
         GetScanCommand(cmakeCmd, tdi, lang, "$in", "$out"));
 
       auto scanRule = GetScanRule(
-        scanRuleName, vars, "", flags, rulePlaceholderExpander.get(),
+        scanRuleName, "", vars, "", flags, rulePlaceholderExpander.get(),
         this->GetLocalGenerator(), std::move(scanCommands), config);
 
       // Write the rule for generating dependencies for the given language.
@@ -1118,11 +1122,7 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
 {
   cmNinjaBuild scanBuild(ruleName);
 
-  if (!ppFileName.empty()) {
-    scanBuild.RspFile = cmStrCat(ppFileName, ".rsp");
-  } else {
-    scanBuild.RspFile = "$out.rsp";
-  }
+  scanBuild.RspFile = "$out.rsp";
 
   if (compilePP) {
     // Move compilation dependencies to the scan/preprocessing build statement.
@@ -1166,11 +1166,12 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
   scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
 
   // Outputs of the scan/preprocessor build statement.
-  if (!ppFileName.empty()) {
+  if (compilePP) {
     scanBuild.Outputs.push_back(ppFileName);
     scanBuild.ImplicitOuts.push_back(ddiFile);
   } else {
     scanBuild.Outputs.push_back(ddiFile);
+    scanBuild.Variables["PREPROCESSED_OUTPUT_FILE"] = ppFileName;
   }
 
   // Scanning always uses a depfile for preprocessor dependencies.
@@ -1366,6 +1367,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
         this->GetPreprocessedFilePath(source, config));
     } else {
       scanRuleName = this->LanguageScanRule(language, config);
+      ppFileName = cmStrCat(objectFileName, ".ddi.i");
     }
 
     cmNinjaBuild ppBuild = GetScanBuildStatement(
