@@ -260,6 +260,8 @@ class CMakeTransform(Transform):
             # Insert the object link target.
             if objtype == 'command':
                 targetname = title.lower()
+            elif objtype == 'guide' and not tail.endswith('/index'):
+                targetname = tail
             else:
                 if objtype == 'genex':
                     m = CMakeXRefRole._re_genex.match(title)
@@ -312,6 +314,7 @@ class CMakeXRefRole(XRefRole):
     _re = re.compile(r'^(.+?)(\s*)(?<!\x00)<(.*?)>$', re.DOTALL)
     _re_sub = re.compile(r'^([^()\s]+)\s*\(([^()]*)\)$', re.DOTALL)
     _re_genex = re.compile(r'^\$<([^<>:]+)(:[^<>]+)?>$', re.DOTALL)
+    _re_guide = re.compile(r'^([^<>/]+)/([^<>]*)$', re.DOTALL)
 
     def __call__(self, typ, rawtext, text, *args, **keys):
         # Translate CMake command cross-references of the form:
@@ -326,6 +329,10 @@ class CMakeXRefRole(XRefRole):
             m = CMakeXRefRole._re_genex.match(text)
             if m:
                 text = '%s <%s>' % (text, m.group(1))
+        elif typ == 'cmake:guide':
+            m = CMakeXRefRole._re_guide.match(text)
+            if m:
+                text = '%s <%s>' % (m.group(2), text)
         # CMake cross-reference targets frequently contain '<' so escape
         # any explicit `<target>` with '<' not preceded by whitespace.
         while True:
@@ -369,6 +376,10 @@ class CMakeXRefTransform(Transform):
                 continue
 
             objname = ref['reftarget']
+            if objtype == 'guide' and CMakeXRefRole._re_guide.match(objname):
+                # Do not index cross-references to guide sections.
+                continue
+
             targetnum = env.new_serialno('index-%s:%s' % (objtype, objname))
 
             targetid = 'index-%s-%s:%s' % (targetnum, objtype, objname)
