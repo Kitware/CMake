@@ -217,6 +217,13 @@
         CMAKE_CONFIGURATION: cuda10.2_nvidia
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.cuda10.2_clang:
+    extends: .cuda10.2
+
+    variables:
+        CMAKE_CONFIGURATION: cuda10.2_clang
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 ## Tags
 
 .linux_builder_tags:
