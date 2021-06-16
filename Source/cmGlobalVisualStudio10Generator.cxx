@@ -1361,7 +1361,10 @@ static unsigned int cmLoadFlagTableSpecial(Json::Value entry,
 
 namespace {
 
-cmIDEFlagTable const* cmLoadFlagTableJson(std::string const& flagJsonPath)
+unsigned long long const vsVer16_10_0 = 4503644629696790;
+
+cmIDEFlagTable const* cmLoadFlagTableJson(
+  std::string const& flagJsonPath, cm::optional<unsigned long long> vsver)
 {
   cmIDEFlagTable* ret = nullptr;
   auto savedFlagIterator = loadedFlagJsonFiles.find(flagJsonPath);
@@ -1383,6 +1386,11 @@ cmIDEFlagTable const* cmLoadFlagTableJson(std::string const& flagJsonPath)
           flagEntry.comment = cmLoadFlagTableString(flag, "comment");
           flagEntry.value = cmLoadFlagTableString(flag, "value");
           flagEntry.special = cmLoadFlagTableSpecial(flag, "flags");
+          // FIXME: Port this version check to a Json field.
+          if (vsver && *vsver < vsVer16_10_0 &&
+              flagEntry.IDEName == "ExternalWarningLevel") {
+            continue;
+          }
           flagTable.push_back(flagEntry);
         }
         cmIDEFlagTable endFlag{ "", "", "", "", 0 };
@@ -1458,7 +1466,8 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
     }
   }
 
-  if (cmIDEFlagTable const* ret = cmLoadFlagTableJson(filename)) {
+  cm::optional<unsigned long long> vsver = this->GetVSInstanceVersion();
+  if (cmIDEFlagTable const* ret = cmLoadFlagTableJson(filename, vsver)) {
     return ret;
   }
 
