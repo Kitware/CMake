@@ -61,6 +61,10 @@ if (WIN32)
   # Try to find the MikTex binary path (look for its package manager).
   find_path(MIKTEX_BINARY_PATH mpm.exe
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MiK\\MiKTeX\\CurrentVersion\\MiKTeX;Install Root]/miktex/bin"
+     "$ENV{LOCALAPPDATA}/Programs/MiKTeX/miktex/bin"
+     "$ENV{LOCALAPPDATA}/Programs/MiKTeX/miktex/bin/x64"
+     "$ENV{APPDATA}/Programs/MiKTeX/miktex/bin"
+     "$ENV{APPDATA}/Programs/MiKTeX/miktex/bin/x64"
     DOC
     "Path to the MikTex binary directory."
   )
