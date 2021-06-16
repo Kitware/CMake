@@ -203,7 +203,7 @@
 ### CUDA builds
 
 .cuda10.2:
-    image: "kitware/cmake:ci-cuda10.2-x86_64-2020-06-11"
+    image: "kitware/cmake:ci-cuda10.2-x86_64-2021-06-16"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
