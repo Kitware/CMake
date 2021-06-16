@@ -261,6 +261,8 @@ set(SRCS
   cmFileLockResult.h
   cmFilePathChecksum.cxx
   cmFilePathChecksum.h
+  cmFileSet.cxx
+  cmFileSet.h
   cmFileTime.cxx
   cmFileTime.h
   cmFileTimeCache.cxx

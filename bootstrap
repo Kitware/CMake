@@ -341,6 +341,7 @@ CMAKE_CXX_SOURCES="\
   cmFileCommand \
   cmFileCopier \
   cmFileInstaller \
+  cmFileSet \
   cmFileTime \
   cmFileTimeCache \
   cmFileTimes \
