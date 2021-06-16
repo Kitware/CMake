@@ -360,6 +360,7 @@ private:
   size_t TotalNumberOfTests;
   cmsys::RegularExpression DartStuff;
   cmsys::RegularExpression CustomCompletionStatusRegex;
+  cmsys::RegularExpression CustomLabelRegex;
 
   std::ostream* LogFile;
 

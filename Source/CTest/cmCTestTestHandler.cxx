@@ -312,6 +312,8 @@ cmCTestTestHandler::cmCTestTestHandler()
   // regex to detect <CTestDetails>...</CTestDetails>
   this->CustomCompletionStatusRegex.compile(
     "<CTestDetails>(.*)</CTestDetails>");
+  // regex to detect <CTestLabel>...</CTestLabel>
+  this->CustomLabelRegex.compile("<CTestLabel>(.*)</CTestLabel>");
 }
 
 void cmCTestTestHandler::Initialize()

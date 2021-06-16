@@ -181,3 +181,16 @@ add_test(
   run_ctest(TestCompletionStatus)
 endfunction()
 run_completion_status()
+
+# Verify that test output can add additional labels
+function(run_extra_labels)
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(
+  NAME custom_labels
+  COMMAND ${CMAKE_COMMAND} -E
+  echo before\n<CTestLabel>label2</CTestLabel>\n<CTestLabel>label1</CTestLabel>\n<CTestLabel>label3</CTestLabel>\n<CTestLabel>label2</CTestLabel>\nafter)
+set_tests_properties(custom_labels PROPERTIES LABELS "label1")
+  ]])
+  run_ctest(TestExtraLabels)
+endfunction()
+run_extra_labels()
