@@ -1359,8 +1359,9 @@ static unsigned int cmLoadFlagTableSpecial(Json::Value entry,
   return value;
 }
 
-static cmIDEFlagTable const* cmLoadFlagTableJson(
-  std::string const& flagJsonPath)
+namespace {
+
+cmIDEFlagTable const* cmLoadFlagTableJson(std::string const& flagJsonPath)
 {
   cmIDEFlagTable* ret = nullptr;
   auto savedFlagIterator = loadedFlagJsonFiles.find(flagJsonPath);
@@ -1393,6 +1394,7 @@ static cmIDEFlagTable const* cmLoadFlagTableJson(
     }
   }
   return ret;
+}
 }
 
 cm::optional<std::string> cmGlobalVisualStudio10Generator::FindFlagTable(
