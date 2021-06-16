@@ -128,6 +128,11 @@ public:
   std::string Encoding() override;
   const char* GetToolsVersion() const;
 
+  virtual cm::optional<unsigned long long> GetVSInstanceVersion() const
+  {
+    return {};
+  }
+
   bool GetSupportsUnityBuilds() const { return this->SupportsUnityBuilds; }
 
   bool FindMakeProgram(cmMakefile* mf) override;
