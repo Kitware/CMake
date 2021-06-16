@@ -1313,8 +1313,9 @@ static unsigned int cmLoadFlagTableSpecial(Json::Value entry,
   return value;
 }
 
-static cmIDEFlagTable const* cmLoadFlagTableJson(
-  std::string const& flagJsonPath)
+namespace {
+
+cmIDEFlagTable const* cmLoadFlagTableJson(std::string const& flagJsonPath)
 {
   cmIDEFlagTable* ret = nullptr;
   auto savedFlagIterator = loadedFlagJsonFiles.find(flagJsonPath);
@@ -1349,11 +1350,12 @@ static cmIDEFlagTable const* cmLoadFlagTableJson(
   return ret;
 }
 
-static std::string cmGetFlagTableName(std::string const& toolsetName,
-                                      std::string const& table)
+std::string cmGetFlagTableName(std::string const& toolsetName,
+                               std::string const& table)
 {
   return cmSystemTools::GetCMakeRoot() + "/Templates/MSBuild/FlagTables/" +
     toolsetName + "_" + table + ".json";
+}
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
