@@ -32,3 +32,12 @@ provides the complete solution for the previous step.
   Adding Generator Expressions
   Adding Export Configuration
   Packaging Debug and Release
+
+..
+  Whenever a step above is renamed or removed, leave forwarding text in
+  its original document file, and list it below to preserve old links
+  to cmake.org/cmake/help/latest/ URLs.
+
+.. toctree::
+  :maxdepth: 1
+  :hidden:
