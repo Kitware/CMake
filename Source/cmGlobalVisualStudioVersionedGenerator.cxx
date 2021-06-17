@@ -391,10 +391,15 @@ bool cmGlobalVisualStudioVersionedGenerator::GetVSInstance(
   return vsSetupAPIHelper.GetVSInstanceInfo(dir);
 }
 
-bool cmGlobalVisualStudioVersionedGenerator::GetVSInstanceVersion(
-  unsigned long long& vsInstanceVersion) const
+cm::optional<unsigned long long>
+cmGlobalVisualStudioVersionedGenerator::GetVSInstanceVersion() const
 {
-  return vsSetupAPIHelper.GetVSInstanceVersion(vsInstanceVersion);
+  cm::optional<unsigned long long> result;
+  unsigned long long vsInstanceVersion;
+  if (vsSetupAPIHelper.GetVSInstanceVersion(vsInstanceVersion)) {
+    result = vsInstanceVersion;
+  }
+  return result;
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::IsStdOutEncodingSupported() const
@@ -407,9 +412,9 @@ bool cmGlobalVisualStudioVersionedGenerator::IsStdOutEncodingSupported() const
     return false;
   }
   unsigned long long const vsInstanceVersion16_7_P2 = 4503631666610212;
-  unsigned long long vsInstanceVersion;
-  return (this->GetVSInstanceVersion(vsInstanceVersion) &&
-          vsInstanceVersion > vsInstanceVersion16_7_P2);
+  cm::optional<unsigned long long> vsInstanceVersion =
+    this->GetVSInstanceVersion();
+  return (vsInstanceVersion && *vsInstanceVersion > vsInstanceVersion16_7_P2);
 }
 
 const char*
