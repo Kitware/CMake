@@ -1361,8 +1361,6 @@ static unsigned int cmLoadFlagTableSpecial(Json::Value entry,
 
 namespace {
 
-std::string const vsVer16_10_0 = "16.10.31321.278";
-
 cmIDEFlagTable const* cmLoadFlagTableJson(std::string const& flagJsonPath,
                                           cm::optional<std::string> vsVer)
 {
@@ -1380,18 +1378,22 @@ cmIDEFlagTable const* cmLoadFlagTableJson(std::string const& flagJsonPath,
       if (reader.parse(stream, flags, false) && flags.isArray()) {
         std::vector<cmIDEFlagTable> flagTable;
         for (auto const& flag : flags) {
+          Json::Value const& vsminJson = flag["vsmin"];
+          if (vsminJson.isString()) {
+            std::string const& vsmin = vsminJson.asString();
+            if (!vsmin.empty()) {
+              if (!vsVer ||
+                  cmSystemTools::VersionCompareGreater(vsmin, *vsVer)) {
+                continue;
+              }
+            }
+          }
           cmIDEFlagTable flagEntry;
           flagEntry.IDEName = cmLoadFlagTableString(flag, "name");
           flagEntry.commandFlag = cmLoadFlagTableString(flag, "switch");
           flagEntry.comment = cmLoadFlagTableString(flag, "comment");
           flagEntry.value = cmLoadFlagTableString(flag, "value");
           flagEntry.special = cmLoadFlagTableSpecial(flag, "flags");
-          // FIXME: Port this version check to a Json field.
-          if (vsVer &&
-              !cmSystemTools::VersionCompareGreaterEq(*vsVer, vsVer16_10_0) &&
-              flagEntry.IDEName == "ExternalWarningLevel") {
-            continue;
-          }
           flagTable.push_back(flagEntry);
         }
         cmIDEFlagTable endFlag{ "", "", "", "", 0 };
