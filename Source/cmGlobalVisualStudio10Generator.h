@@ -5,6 +5,8 @@
 #include <memory>
 #include <set>
 
+#include <cm/optional>
+
 #include "cmGlobalVisualStudio8Generator.h"
 #include "cmVisualStudio10ToolsetOptions.h"
 
@@ -118,6 +120,11 @@ public:
 
   std::string Encoding() override;
   const char* GetToolsVersion() const;
+
+  virtual cm::optional<unsigned long long> GetVSInstanceVersion() const
+  {
+    return {};
+  }
 
   bool GetSupportsUnityBuilds() const { return this->SupportsUnityBuilds; }
 

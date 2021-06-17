@@ -28,7 +28,7 @@ public:
 
   bool GetVSInstance(std::string& dir) const;
 
-  bool GetVSInstanceVersion(unsigned long long& vsInstanceVersion) const;
+  cm::optional<unsigned long long> GetVSInstanceVersion() const override;
 
   AuxToolset FindAuxToolset(std::string& version,
                             std::string& props) const override;

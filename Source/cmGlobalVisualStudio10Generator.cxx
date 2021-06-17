@@ -1313,8 +1313,12 @@ static unsigned int cmLoadFlagTableSpecial(Json::Value entry,
   return value;
 }
 
-static cmIDEFlagTable const* cmLoadFlagTableJson(
-  std::string const& flagJsonPath)
+namespace {
+
+unsigned long long const vsVer16_10_0 = 4503644629696790;
+
+cmIDEFlagTable const* cmLoadFlagTableJson(
+  std::string const& flagJsonPath, cm::optional<unsigned long long> vsver)
 {
   cmIDEFlagTable* ret = nullptr;
   auto savedFlagIterator = loadedFlagJsonFiles.find(flagJsonPath);
@@ -1336,6 +1340,11 @@ static cmIDEFlagTable const* cmLoadFlagTableJson(
           flagEntry.comment = cmLoadFlagTableString(flag, "comment");
           flagEntry.value = cmLoadFlagTableString(flag, "value");
           flagEntry.special = cmLoadFlagTableSpecial(flag, "flags");
+          // FIXME: Port this version check to a Json field.
+          if (vsver && *vsver < vsVer16_10_0 &&
+              flagEntry.IDEName == "ExternalWarningLevel") {
+            continue;
+          }
           flagTable.push_back(flagEntry);
         }
         cmIDEFlagTable endFlag{ "", "", "", "", 0 };
@@ -1349,11 +1358,12 @@ static cmIDEFlagTable const* cmLoadFlagTableJson(
   return ret;
 }
 
-static std::string cmGetFlagTableName(std::string const& toolsetName,
-                                      std::string const& table)
+std::string cmGetFlagTableName(std::string const& toolsetName,
+                               std::string const& table)
 {
   return cmSystemTools::GetCMakeRoot() + "/Templates/MSBuild/FlagTables/" +
     toolsetName + "_" + table + ".json";
+}
 }
 
 cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
@@ -1362,17 +1372,19 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
 {
   cmIDEFlagTable const* ret = nullptr;
 
+  cm::optional<unsigned long long> vsver = this->GetVSInstanceVersion();
+
   std::string filename;
   if (!optionsName.empty()) {
     filename = cmGetFlagTableName(optionsName, table);
-    ret = cmLoadFlagTableJson(filename);
+    ret = cmLoadFlagTableJson(filename, vsver);
   } else {
     filename = cmGetFlagTableName(toolsetName, table);
     if (cmSystemTools::FileExists(filename)) {
-      ret = cmLoadFlagTableJson(filename);
+      ret = cmLoadFlagTableJson(filename, vsver);
     } else {
       filename = cmGetFlagTableName(defaultName, table);
-      ret = cmLoadFlagTableJson(filename);
+      ret = cmLoadFlagTableJson(filename, vsver);
     }
   }
 
