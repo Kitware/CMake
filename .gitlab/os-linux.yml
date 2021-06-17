@@ -158,6 +158,12 @@
         CMAKE_CONFIGURATION: debian10_makefiles_clang
         CMAKE_GENERATOR: "Unix Makefiles"
 
+.debian10_ninja_clang:
+    extends: .debian10
+
+    variables:
+        CMAKE_CONFIGURATION: debian10_ninja_clang
+
 ### Sanitizers
 
 .fedora_memcheck:
