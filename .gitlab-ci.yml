@@ -214,6 +214,16 @@ test:cuda10.2-nvidia:
         - .run_dependent
         - .needs_centos6_x86_64
 
+test:cuda10.2-clang:
+    extends:
+        - .cuda10.2_clang
+        - .cmake_test_linux_release
+        - .linux_builder_tags_cuda
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 build:fedora34-ninja:
     extends:
         - .fedora34_ninja
