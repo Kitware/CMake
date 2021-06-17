@@ -10,10 +10,6 @@
 #include <utility>
 #include <vector>
 
-#if !defined(CMake_USE_ELF_PARSER)
-#  error "This file may be included only if CMake_USE_ELF_PARSER is enabled."
-#endif
-
 class cmELFInternal;
 
 /** \class cmELF

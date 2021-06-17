@@ -324,6 +324,7 @@ CMAKE_CXX_SOURCES="\
   cmDefinePropertyCommand \
   cmDefinitions \
   cmDocumentationFormatter \
+  cmELF \
   cmEnableLanguageCommand \
   cmEnableTestingCommand \
   cmExecProgramCommand \

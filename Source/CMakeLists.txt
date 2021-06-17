@@ -11,8 +11,6 @@ endif()
 
 include(CheckIncludeFile)
 
-set(CMake_USE_ELF_PARSER 1)
-
 if(NOT CMake_DEFAULT_RECURSION_LIMIT)
   if(DEFINED ENV{DASHBOARD_TEST_FROM_CTEST})
     set(CMake_DEFAULT_RECURSION_LIMIT 100)
@@ -82,11 +80,6 @@ include_directories(
   ${CMAKE_TAR_INCLUDES}
   ${CMake_HAIKU_INCLUDE_DIRS}
   )
-
-# The ELF parser can be built on all platforms.
-if(CMake_USE_ELF_PARSER)
-  set(ELF_SRCS cmELF.h cmELF.cxx)
-endif()
 
 # Check if we can build the Mach-O parser.
 if(CMake_USE_MACH_PARSER)
@@ -217,7 +210,8 @@ set(SRCS
   cmDocumentationSection.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
-  ${ELF_SRCS}
+  cmELF.h
+  cmELF.cxx
   cmExprParserHelper.cxx
   cmExportBuildAndroidMKGenerator.h
   cmExportBuildAndroidMKGenerator.cxx
