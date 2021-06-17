@@ -6,11 +6,13 @@
 #include <cassert>
 #include <cstddef>
 #include <iterator>
+#include <map>
 #include <set>
 #include <sstream>
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmsys/Glob.hxx"
@@ -18,11 +20,13 @@
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
 #include "cmExportSet.h"
+#include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallCommandArguments.h"
 #include "cmInstallDirectoryGenerator.h"
 #include "cmInstallExportGenerator.h"
+#include "cmInstallFileSetGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
 #include "cmInstallGetRuntimeDependenciesGenerator.h"
@@ -87,6 +91,9 @@ public:
   void SetError(std::string const& err) { this->Status.SetError(err); }
 
   bool MakeFilesFullPath(const char* modeName,
+                         const std::vector<std::string>& relFiles,
+                         std::vector<std::string>& absFiles);
+  bool MakeFilesFullPath(const char* modeName, const std::string& basePath,
                          const std::vector<std::string>& relFiles,
                          std::vector<std::string>& absFiles);
   bool CheckCMP0006(bool& failure) const;
@@ -175,6 +182,19 @@ std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
 {
   return CreateInstallFilesGenerator(mf, absFiles, args, programs,
                                      args.GetDestination());
+}
+
+std::unique_ptr<cmInstallFileSetGenerator> CreateInstallFileSetGenerator(
+  Helper& helper, cmTarget& target, cmFileSet* fileSet,
+  const std::string& destination, const cmInstallCommandArguments& args)
+{
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::SelectMessageLevel(helper.Makefile);
+  return cm::make_unique<cmInstallFileSetGenerator>(
+    target.GetName(), fileSet, destination, args.GetPermissions(),
+    args.GetConfigurations(), args.GetComponent(), message,
+    args.GetExcludeFromAll(), args.GetOptional(),
+    helper.Makefile->GetBacktrace());
 }
 
 void AddInstallRuntimeDependenciesGenerator(
@@ -390,6 +410,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     std::vector<std::string> PrivateHeader;
     std::vector<std::string> PublicHeader;
     std::vector<std::string> Resource;
+    std::vector<std::vector<std::string>> FileSets;
   };
 
   static auto const argHelper =
@@ -403,7 +424,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       .Bind("INCLUDES"_s, &ArgVectors::Includes)
       .Bind("PRIVATE_HEADER"_s, &ArgVectors::PrivateHeader)
       .Bind("PUBLIC_HEADER"_s, &ArgVectors::PublicHeader)
-      .Bind("RESOURCE"_s, &ArgVectors::Resource);
+      .Bind("RESOURCE"_s, &ArgVectors::Resource)
+      .Bind("FILE_SET"_s, &ArgVectors::FileSets);
 
   std::vector<std::string> genericArgVector;
   ArgVectors const argVectors = argHelper.Parse(args, &genericArgVector);
@@ -442,6 +464,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   cmInstallCommandArguments publicHeaderArgs(helper.DefaultComponentName);
   cmInstallCommandArguments resourceArgs(helper.DefaultComponentName);
   cmInstallCommandIncludesArgument includesArgs;
+  std::vector<cmInstallCommandFileSetArguments> fileSetArgs(
+    argVectors.FileSets.size(), { helper.DefaultComponentName });
 
   // now parse the args for specific parts of the target (e.g. LIBRARY,
   // RUNTIME, ARCHIVE etc.
@@ -455,6 +479,15 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   publicHeaderArgs.Parse(argVectors.PublicHeader, &unknownArgs);
   resourceArgs.Parse(argVectors.Resource, &unknownArgs);
   includesArgs.Parse(&argVectors.Includes, &unknownArgs);
+  for (std::size_t i = 0; i < argVectors.FileSets.size(); i++) {
+    // We have to create a separate object for the parsing because
+    // cmArgumentParser<void>::Bind() binds to a specific address, but the
+    // objects in the vector can move around. So we parse in an object with a
+    // fixed address and then copy the data into the vector.
+    cmInstallCommandFileSetArguments fileSetArg(helper.DefaultComponentName);
+    fileSetArg.Parse(argVectors.FileSets[i], &unknownArgs);
+    fileSetArgs[i] = std::move(fileSetArg);
+  }
 
   if (!unknownArgs.empty()) {
     // Unknown argument.
@@ -473,6 +506,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   privateHeaderArgs.SetGenericArguments(&genericArgs);
   publicHeaderArgs.SetGenericArguments(&genericArgs);
   resourceArgs.SetGenericArguments(&genericArgs);
+  for (auto& fileSetArg : fileSetArgs) {
+    fileSetArg.SetGenericArguments(&genericArgs);
+  }
 
   success = success && archiveArgs.Finalize();
   success = success && libraryArgs.Finalize();
@@ -483,6 +519,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   success = success && privateHeaderArgs.Finalize();
   success = success && publicHeaderArgs.Finalize();
   success = success && resourceArgs.Finalize();
+  for (auto& fileSetArg : fileSetArgs) {
+    success = success && fileSetArg.Finalize();
+  }
 
   if (!success) {
     return false;
@@ -493,7 +532,10 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   if (archiveArgs.GetNamelinkOnly() || runtimeArgs.GetNamelinkOnly() ||
       objectArgs.GetNamelinkOnly() || frameworkArgs.GetNamelinkOnly() ||
       bundleArgs.GetNamelinkOnly() || privateHeaderArgs.GetNamelinkOnly() ||
-      publicHeaderArgs.GetNamelinkOnly() || resourceArgs.GetNamelinkOnly()) {
+      publicHeaderArgs.GetNamelinkOnly() || resourceArgs.GetNamelinkOnly() ||
+      std::any_of(fileSetArgs.begin(), fileSetArgs.end(),
+                  [](const cmInstallCommandFileSetArguments& fileSetArg)
+                    -> bool { return fileSetArg.GetNamelinkOnly(); })) {
     status.SetError(
       "TARGETS given NAMELINK_ONLY option not in LIBRARY group.  "
       "The NAMELINK_ONLY option may be specified only following LIBRARY.");
@@ -502,7 +544,10 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   if (archiveArgs.GetNamelinkSkip() || runtimeArgs.GetNamelinkSkip() ||
       objectArgs.GetNamelinkSkip() || frameworkArgs.GetNamelinkSkip() ||
       bundleArgs.GetNamelinkSkip() || privateHeaderArgs.GetNamelinkSkip() ||
-      publicHeaderArgs.GetNamelinkSkip() || resourceArgs.GetNamelinkSkip()) {
+      publicHeaderArgs.GetNamelinkSkip() || resourceArgs.GetNamelinkSkip() ||
+      std::any_of(fileSetArgs.begin(), fileSetArgs.end(),
+                  [](const cmInstallCommandFileSetArguments& fileSetArg)
+                    -> bool { return fileSetArg.GetNamelinkSkip(); })) {
     status.SetError(
       "TARGETS given NAMELINK_SKIP option not in LIBRARY group.  "
       "The NAMELINK_SKIP option may be specified only following LIBRARY.");
@@ -515,7 +560,10 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       bundleArgs.HasNamelinkComponent() ||
       privateHeaderArgs.HasNamelinkComponent() ||
       publicHeaderArgs.HasNamelinkComponent() ||
-      resourceArgs.HasNamelinkComponent()) {
+      resourceArgs.HasNamelinkComponent() ||
+      std::any_of(fileSetArgs.begin(), fileSetArgs.end(),
+                  [](const cmInstallCommandFileSetArguments& fileSetArg)
+                    -> bool { return fileSetArg.HasNamelinkComponent(); })) {
     status.SetError(
       "TARGETS given NAMELINK_COMPONENT option not in LIBRARY group.  "
       "The NAMELINK_COMPONENT option may be specified only following "
@@ -531,10 +579,19 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       !libraryArgs.GetType().empty() || !runtimeArgs.GetType().empty() ||
       !objectArgs.GetType().empty() || !frameworkArgs.GetType().empty() ||
       !bundleArgs.GetType().empty() || !privateHeaderArgs.GetType().empty() ||
-      !publicHeaderArgs.GetType().empty() || !resourceArgs.GetType().empty()) {
+      !publicHeaderArgs.GetType().empty() || !resourceArgs.GetType().empty() ||
+      std::any_of(fileSetArgs.begin(), fileSetArgs.end(),
+                  [](const cmInstallCommandFileSetArguments& fileSetArg)
+                    -> bool { return !fileSetArg.GetType().empty(); })) {
     status.SetError(
       "TARGETS given TYPE option. The TYPE option may only be specified in "
       " install(FILES) and install(DIRECTORIES).");
+    return false;
+  }
+  if (std::any_of(fileSetArgs.begin(), fileSetArgs.end(),
+                  [](const cmInstallCommandFileSetArguments& fileSetArg)
+                    -> bool { return fileSetArg.GetFileSet().empty(); })) {
+    status.SetError("TARGETS given FILE_SET option without file set name.");
     return false;
   }
 
@@ -647,6 +704,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   bool installsPrivateHeader = false;
   bool installsPublicHeader = false;
   bool installsResource = false;
+  std::vector<bool> installsFileSet(fileSetArgs.size(), false);
 
   // Generate install script code to install the given targets.
   for (cmTarget* ti : targets) {
@@ -662,6 +720,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     std::unique_ptr<cmInstallFilesGenerator> privateHeaderGenerator;
     std::unique_ptr<cmInstallFilesGenerator> publicHeaderGenerator;
     std::unique_ptr<cmInstallFilesGenerator> resourceGenerator;
+    std::vector<std::unique_ptr<cmInstallFileSetGenerator>> fileSetGenerators;
 
     // Avoid selecting default destinations for PUBLIC_HEADER and
     // PRIVATE_HEADER if any artifacts are specified.
@@ -991,6 +1050,35 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       }
     }
 
+    if (!namelinkOnly) {
+      for (std::size_t i = 0; i < fileSetArgs.size(); i++) {
+        auto* fileSet = target.GetFileSet(fileSetArgs[i].GetFileSet());
+        auto interfaceFileSetEntries = cmExpandedList(target.GetSafeProperty(
+          cmTarget::GetInterfaceFileSetsPropertyName(fileSet->GetType())));
+        if (fileSet &&
+            std::find(
+              interfaceFileSetEntries.begin(), interfaceFileSetEntries.end(),
+              fileSetArgs[i].GetFileSet()) != interfaceFileSetEntries.end()) {
+          std::string destination;
+          if (fileSet->GetType() == "HEADERS"_s) {
+            destination = helper.GetIncludeDestination(&fileSetArgs[i]);
+          } else {
+            destination = fileSetArgs[i].GetDestination();
+            if (destination.empty()) {
+              status.SetError(
+                cmStrCat("TARGETS given no FILE_SET DESTINATION for target \"",
+                         target.GetName(), "\" file set \"",
+                         fileSet->GetName(), "\"."));
+              return false;
+            }
+          }
+          fileSetGenerators.push_back(CreateInstallFileSetGenerator(
+            helper, target, fileSet, destination, fileSetArgs[i]));
+          installsFileSet[i] = true;
+        }
+      }
+    }
+
     // Add this install rule to an export if one was specified.
     addTargetExport();
 
@@ -1016,6 +1104,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     helper.Makefile->AddInstallGenerator(std::move(privateHeaderGenerator));
     helper.Makefile->AddInstallGenerator(std::move(publicHeaderGenerator));
     helper.Makefile->AddInstallGenerator(std::move(resourceGenerator));
+    for (auto& gen : fileSetGenerators) {
+      helper.Makefile->AddInstallGenerator(std::move(gen));
+    }
   }
 
   if (withRuntimeDependencies && !runtimeDependencySet->Empty()) {
@@ -1066,6 +1157,12 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
   if (installsResource) {
     helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
       resourceArgs.GetComponent());
+  }
+  for (std::size_t i = 0; i < fileSetArgs.size(); i++) {
+    if (installsFileSet[i]) {
+      helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
+        fileSetArgs[i].GetComponent());
+    }
   }
 
   return true;
@@ -2063,12 +2160,20 @@ bool Helper::MakeFilesFullPath(const char* modeName,
                                const std::vector<std::string>& relFiles,
                                std::vector<std::string>& absFiles)
 {
+  return this->MakeFilesFullPath(
+    modeName, this->Makefile->GetCurrentSourceDirectory(), relFiles, absFiles);
+}
+
+bool Helper::MakeFilesFullPath(const char* modeName,
+                               const std::string& basePath,
+                               const std::vector<std::string>& relFiles,
+                               std::vector<std::string>& absFiles)
+{
   for (std::string const& relFile : relFiles) {
     std::string file = relFile;
     std::string::size_type gpos = cmGeneratorExpression::Find(file);
     if (gpos != 0 && !cmSystemTools::FileIsFullPath(file)) {
-      file =
-        cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', relFile);
+      file = cmStrCat(basePath, '/', relFile);
     }
 
     // Make sure the file is not a directory.

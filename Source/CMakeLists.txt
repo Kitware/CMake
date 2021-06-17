@@ -318,6 +318,8 @@ set(SRCS
   cmInstallExportGenerator.cxx
   cmInstalledFile.h
   cmInstalledFile.cxx
+  cmInstallFileSetGenerator.h
+  cmInstallFileSetGenerator.cxx
   cmInstallFilesGenerator.h
   cmInstallFilesGenerator.cxx
   cmInstallImportedRuntimeArtifactsGenerator.h
