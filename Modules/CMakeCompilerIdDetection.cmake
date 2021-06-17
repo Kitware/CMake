@@ -13,8 +13,8 @@ endfunction()
 
 function(compiler_id_detection outvar lang)
 
-  if (NOT lang STREQUAL Fortran AND NOT lang STREQUAL CSharp
-      AND NOT lang STREQUAL ISPC)
+  if (NOT lang STREQUAL "Fortran" AND NOT lang STREQUAL "CSharp"
+      AND NOT lang STREQUAL "ISPC")
     file(GLOB lang_files
       "${CMAKE_ROOT}/Modules/Compiler/*-DetermineCompiler.cmake")
     set(nonlang CXX)
@@ -42,7 +42,7 @@ function(compiler_id_detection outvar lang)
 
     # Order is relevant here. For example, compilers which pretend to be
     # GCC must appear before the actual GCC.
-    if (lang STREQUAL CXX)
+    if (lang STREQUAL "CXX")
       list(APPEND ordered_compilers
         Comeau
       )
@@ -70,7 +70,7 @@ function(compiler_id_detection outvar lang)
       Fujitsu
       GHS
     )
-    if (lang STREQUAL C)
+    if (lang STREQUAL "C")
       list(APPEND ordered_compilers
         TinyCC
         Bruce
@@ -92,13 +92,13 @@ function(compiler_id_detection outvar lang)
       ADSP
       IAR
     )
-    if (lang STREQUAL C)
+    if (lang STREQUAL "C")
       list(APPEND ordered_compilers
         SDCC
       )
     endif()
 
-    if(lang STREQUAL CUDA)
+    if(lang STREQUAL "CUDA")
       set(ordered_compilers NVIDIA Clang)
     endif()
 
