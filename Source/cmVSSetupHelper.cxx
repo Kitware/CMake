@@ -258,15 +258,13 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(std::string& vsInstallLocation)
   return isInstalled;
 }
 
-bool cmVSSetupAPIHelper::GetVSInstanceVersion(
-  unsigned long long& vsInstanceVersion)
+bool cmVSSetupAPIHelper::GetVSInstanceVersion(std::string& vsInstanceVersion)
 {
-  vsInstanceVersion = 0;
+  vsInstanceVersion.clear();
   bool isInstalled = this->EnumerateAndChooseVSInstance();
 
   if (isInstalled) {
-    vsInstanceVersion =
-      static_cast<unsigned long long>(chosenInstanceInfo.ullVersion);
+    vsInstanceVersion = cmsys::Encoding::ToNarrow(chosenInstanceInfo.Version);
   }
 
   return isInstalled;
