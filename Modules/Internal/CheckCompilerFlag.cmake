@@ -13,10 +13,12 @@ function(CMAKE_CHECK_COMPILER_FLAG _lang _flag _var)
 
   if(_lang STREQUAL "C")
     set(_lang_src "int main(void) { return 0; }")
-    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C")
+    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C"
+                         FAIL_REGEX "-Werror=.* argument .* is not valid for C")
   elseif(_lang STREQUAL "CXX")
     set(_lang_src "int main() { return 0; }")
-    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+")
+    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+"
+                         FAIL_REGEX "-Werror=.* argument .* is not valid for C\\+\\+")
   elseif(_lang STREQUAL "CUDA")
     set(_lang_src "__host__ int main() { return 0; }")
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+" # Host GNU
