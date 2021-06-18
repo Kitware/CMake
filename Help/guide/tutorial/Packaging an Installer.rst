@@ -13,6 +13,7 @@ few lines to the bottom of our top-level ``CMakeLists.txt`` file.
 
 .. literalinclude:: Step8/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-include-CPack
   :language: cmake
   :start-after: # setup installer
 

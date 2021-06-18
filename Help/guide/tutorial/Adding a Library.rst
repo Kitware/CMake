@@ -17,6 +17,7 @@ directory:
 
 .. literalinclude:: Step3/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt
   :language: cmake
 
 To make use of the new library we will add an :command:`add_subdirectory`
@@ -27,6 +28,7 @@ last few lines of the top-level ``CMakeLists.txt`` file should now look like:
 
 .. code-block:: cmake
         :caption: CMakeLists.txt
+        :name: CMakeLists.txt-add_subdirectory
 
         # add the MathFunctions library
         add_subdirectory(MathFunctions)
@@ -50,6 +52,7 @@ occurrence. The first step is to add an option to the top-level
 
 .. literalinclude:: Step3/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-option
   :language: cmake
   :start-after: # should we use our own math functions
   :end-before: # add the MathFunctions library
@@ -66,6 +69,7 @@ file to look like the following:
 
 .. literalinclude:: Step3/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-target_link_libraries-EXTRA_LIBS
   :language: cmake
   :start-after: # add the MathFunctions library
 
@@ -81,6 +85,7 @@ need it:
 
 .. literalinclude:: Step3/tutorial.cxx
   :caption: tutorial.cxx
+  :name: tutorial.cxx-ifdef-include
   :language: c++
   :start-after: // should we include the MathFunctions header
   :end-before: int main
@@ -90,6 +95,7 @@ function is used:
 
 .. literalinclude:: Step3/tutorial.cxx
   :caption: tutorial.cxx
+  :name: tutorial.cxx-ifdef-const
   :language: c++
   :start-after: // which square root function should we use?
   :end-before: std::cout << "The square root of
@@ -99,6 +105,7 @@ Since the source code now requires ``USE_MYMATH`` we can add it to
 
 .. literalinclude:: Step3/TutorialConfig.h.in
   :caption: TutorialConfig.h.in
+  :name: TutorialConfig.h.in-cmakedefine
   :language: c++
   :lines: 4
 

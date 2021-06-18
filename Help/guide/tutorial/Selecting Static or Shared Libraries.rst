@@ -21,6 +21,7 @@ The first step is to update the starting section of the top-level
 
 .. literalinclude:: Step10/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-option-BUILD_SHARED_LIBS
   :language: cmake
   :end-before: # add the binary tree
 
@@ -34,6 +35,7 @@ The end result is that ``MathFunctions/CMakeLists.txt`` should look like:
 
 .. literalinclude:: Step10/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-add_library-STATIC
   :language: cmake
   :lines: 1-36,42-
 
@@ -42,6 +44,7 @@ Next, update ``MathFunctions/mysqrt.cxx`` to use the ``mathfunctions`` and
 
 .. literalinclude:: Step10/MathFunctions/mysqrt.cxx
   :caption: MathFunctions/mysqrt.cxx
+  :name: MathFunctions/mysqrt.cxx-namespace
   :language: c++
 
 We also need to make some changes in ``tutorial.cxx``, so that it no longer
@@ -55,6 +58,7 @@ Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
 
 .. literalinclude:: Step10/MathFunctions/MathFunctions.h
   :caption: MathFunctions/MathFunctions.h
+  :name: MathFunctions/MathFunctions.h
   :language: c++
 
 At this point, if you build everything, you may notice that linking fails
@@ -65,6 +69,7 @@ SqrtLibrary to be ``True`` no matter the build type.
 
 .. literalinclude:: Step10/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-POSITION_INDEPENDENT_CODE
   :language: cmake
   :lines: 37-42
 

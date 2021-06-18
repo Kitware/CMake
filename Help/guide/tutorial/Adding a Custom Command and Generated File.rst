@@ -28,6 +28,7 @@ First, at the top of ``MathFunctions/CMakeLists.txt``, the executable for
 
 .. literalinclude:: Step7/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-add_executable-MakeTable
   :language: cmake
   :start-after: # first we add the executable that generates the table
   :end-before: # add the command to generate the source code
@@ -37,6 +38,7 @@ by running MakeTable.
 
 .. literalinclude:: Step7/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-add_custom_command-Table.h
   :language: cmake
   :start-after: # add the command to generate the source code
   :end-before: # add the main library
@@ -47,6 +49,7 @@ of sources for the library MathFunctions.
 
 .. literalinclude:: Step7/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-add_library-Table.h
   :language: cmake
   :start-after: # add the main library
   :end-before: # state that anybody linking
@@ -56,6 +59,7 @@ directories so that ``Table.h`` can be found and included by ``mysqrt.cxx``.
 
 .. literalinclude:: Step7/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-target_include_directories-Table.h
   :language: cmake
   :start-after: # state that we depend on our bin
   :end-before: # install rules
@@ -65,6 +69,7 @@ Now let's use the generated table. First, modify ``mysqrt.cxx`` to include
 
 .. literalinclude:: Step7/MathFunctions/mysqrt.cxx
   :caption: MathFunctions/mysqrt.cxx
+  :name: MathFunctions/mysqrt.cxx
   :language: c++
   :start-after: // a hack square root calculation using simple operations
 
