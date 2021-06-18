@@ -35,6 +35,8 @@ public:
 
   bool IsStdOutEncodingSupported() const override;
 
+  bool IsUtf8EncodingSupported() const override;
+
   const char* GetAndroidApplicationTypeRevision() const override;
 
 protected:
