@@ -5115,7 +5115,9 @@ std::string cmVisualStudio10TargetGenerator::GetCMakeFilePath(
 
 void cmVisualStudio10TargetGenerator::WriteStdOutEncodingUtf8(Elem& e1)
 {
-  if (this->GlobalGenerator->IsStdOutEncodingSupported()) {
+  if (this->GlobalGenerator->IsUtf8EncodingSupported()) {
+    e1.Element("UseUtf8Encoding", "Always");
+  } else if (this->GlobalGenerator->IsStdOutEncodingSupported()) {
     e1.Element("StdOutEncoding", "UTF-8");
   }
 }

@@ -417,6 +417,21 @@ bool cmGlobalVisualStudioVersionedGenerator::IsStdOutEncodingSupported() const
           cmSystemTools::VersionCompareGreaterEq(*vsVer, vsVer16_7_P2));
 }
 
+bool cmGlobalVisualStudioVersionedGenerator::IsUtf8EncodingSupported() const
+{
+  // Supported from Visual Studio 16.10 Preview 2.
+  if (this->Version > cmGlobalVisualStudioGenerator::VSVersion::VS16) {
+    return true;
+  }
+  if (this->Version < cmGlobalVisualStudioGenerator::VSVersion::VS16) {
+    return false;
+  }
+  static std::string const vsVer16_10_P2 = "16.10.31213.239";
+  cm::optional<std::string> vsVer = this->GetVSInstanceVersion();
+  return (vsVer &&
+          cmSystemTools::VersionCompareGreaterEq(*vsVer, vsVer16_10_P2));
+}
+
 const char*
 cmGlobalVisualStudioVersionedGenerator::GetAndroidApplicationTypeRevision()
   const
