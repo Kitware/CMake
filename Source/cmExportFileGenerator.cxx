@@ -12,6 +12,7 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmComputeLinkInformation.h"
+#include "cmFileSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -1255,4 +1256,40 @@ bool cmExportFileGenerator::PopulateExportProperties(
     }
   }
   return true;
+}
+
+void cmExportFileGenerator::GenerateTargetFileSets(cmGeneratorTarget* gte,
+                                                   std::ostream& os,
+                                                   cmTargetExport* te)
+{
+  auto interfaceFileSets = gte->Target->GetAllInterfaceFileSets();
+  if (!interfaceFileSets.empty()) {
+    std::string targetName = cmStrCat(this->Namespace, gte->GetExportName());
+    os << "if(NOT CMAKE_VERSION VERSION_LESS \"" << DEVEL_CMAKE_VERSION(3, 23)
+       << "\")\n"
+          "  target_sources("
+       << targetName << "\n";
+
+    for (auto const& name : interfaceFileSets) {
+      auto* fileSet = gte->Target->GetFileSet(name);
+      if (!fileSet) {
+        gte->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("File set \"", name,
+                   "\" is listed in interface file sets of ", gte->GetName(),
+                   " but has not been created"));
+        return;
+      }
+
+      os << "    INTERFACE"
+         << "\n      FILE_SET " << cmOutputConverter::EscapeForCMake(name)
+         << "\n      TYPE "
+         << cmOutputConverter::EscapeForCMake(fileSet->GetType())
+         << "\n      BASE_DIRS "
+         << this->GetFileSetDirectories(gte, fileSet, te) << "\n      FILES "
+         << this->GetFileSetFiles(gte, fileSet, te) << "\n";
+    }
+
+    os << "  )\nendif()\n\n";
+  }
 }

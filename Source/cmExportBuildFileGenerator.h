@@ -15,9 +15,11 @@
 #include "cmStateTypes.h"
 
 class cmExportSet;
+class cmFileSet;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmLocalGenerator;
+class cmTargetExport;
 
 /** \class cmExportBuildFileGenerator
  * \brief Generate a file exporting targets from a build tree.
@@ -75,6 +77,11 @@ protected:
 
   std::string InstallNameDir(cmGeneratorTarget const* target,
                              const std::string& config) override;
+
+  std::string GetFileSetDirectories(cmGeneratorTarget* gte, cmFileSet* fileSet,
+                                    cmTargetExport* te) override;
+  std::string GetFileSetFiles(cmGeneratorTarget* gte, cmFileSet* fileSet,
+                              cmTargetExport* te) override;
 
   std::pair<std::vector<std::string>, std::string> FindBuildExportInfo(
     cmGlobalGenerator* gg, const std::string& name);

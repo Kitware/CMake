@@ -7,16 +7,21 @@
 
 #include <cm/memory>
 
+#include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmValue.h"
+
+class cmTargetExport;
 
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
   cmGlobalGenerator* gg, const std::vector<std::string>& targets,
@@ -136,4 +141,18 @@ std::string cmExportTryCompileFileGenerator::InstallNameDir(
   }
 
   return install_name_dir;
+}
+
+std::string cmExportTryCompileFileGenerator::GetFileSetDirectories(
+  cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport* /*te*/)
+{
+  return cmOutputConverter::EscapeForCMake(
+    cmJoin(fileSet->GetDirectoryEntries(), ";"));
+}
+
+std::string cmExportTryCompileFileGenerator::GetFileSetFiles(
+  cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport* /*te*/)
+{
+  return cmOutputConverter::EscapeForCMake(
+    cmJoin(fileSet->GetFileEntries(), ";"));
 }
