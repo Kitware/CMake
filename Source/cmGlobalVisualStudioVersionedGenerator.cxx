@@ -391,11 +391,11 @@ bool cmGlobalVisualStudioVersionedGenerator::GetVSInstance(
   return vsSetupAPIHelper.GetVSInstanceInfo(dir);
 }
 
-cm::optional<unsigned long long>
+cm::optional<std::string>
 cmGlobalVisualStudioVersionedGenerator::GetVSInstanceVersion() const
 {
-  cm::optional<unsigned long long> result;
-  unsigned long long vsInstanceVersion;
+  cm::optional<std::string> result;
+  std::string vsInstanceVersion;
   if (vsSetupAPIHelper.GetVSInstanceVersion(vsInstanceVersion)) {
     result = vsInstanceVersion;
   }
@@ -411,10 +411,10 @@ bool cmGlobalVisualStudioVersionedGenerator::IsStdOutEncodingSupported() const
   if (this->Version < cmGlobalVisualStudioGenerator::VSVersion::VS16) {
     return false;
   }
-  unsigned long long const vsInstanceVersion16_7_P2 = 4503631666610212;
-  cm::optional<unsigned long long> vsInstanceVersion =
-    this->GetVSInstanceVersion();
-  return (vsInstanceVersion && *vsInstanceVersion > vsInstanceVersion16_7_P2);
+  static std::string const vsVer16_7_P2 = "16.7.30128.36";
+  cm::optional<std::string> vsVer = this->GetVSInstanceVersion();
+  return (vsVer &&
+          cmSystemTools::VersionCompareGreaterEq(*vsVer, vsVer16_7_P2));
 }
 
 const char*
