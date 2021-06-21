@@ -39,6 +39,7 @@ So the following code:
 
 .. literalinclude:: Step10/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-CXX_STANDARD-variable-remove
   :language: cmake
   :start-after: project(Tutorial VERSION 1.0)
   :end-before: # control where the static and shared libraries are built so that on windows
@@ -47,6 +48,7 @@ Would be replaced with:
 
 .. literalinclude:: Step11/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-cxx_std-feature
   :language: cmake
   :start-after: project(Tutorial VERSION 1.0)
   :end-before: # add compiler warning flags just when building this project via
@@ -59,6 +61,7 @@ of compiler ids as seen below:
 
 .. literalinclude:: Step11/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-target_compile_options-genex
   :language: cmake
   :start-after: # the BUILD_INTERFACE genex
   :end-before: # control where the static and shared libraries are built so that on windows
