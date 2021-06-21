@@ -270,3 +270,18 @@ The following example demonstrates how to specify a custom value for the
 
    std::cout <<
      "<CTestDetails>My Custom Details Value</CTestDetails>" << std::endl;
+
+Additional Labels
+"""""""""""""""""
+
+The following example demonstrates how to add additional labels to a test
+at runtime.
+
+.. code-block:: c++
+
+   std::cout <<
+     "<CTestLabel>Custom Label 1</CTestLabel>\n" <<
+     "<CTestLabel>Custom Label 2</CTestLabel>"   << std::endl;
+
+Use the :prop_test:`LABELS` test property instead for labels that can be
+determined at configure time.
