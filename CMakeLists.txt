@@ -812,8 +812,12 @@ CMAKE_SETUP_TESTING()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(NOT CMake_VERSION_IS_RELEASE)
-    if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
-        NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 4.2)
+    if((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
+        NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 4.2) OR
+       (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
+        NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 3.0 AND
+        NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC") OR
+       CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
       set(C_FLAGS_LIST -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts
                        -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security
                        -Wmissing-format-attribute -fno-common -Wundef
