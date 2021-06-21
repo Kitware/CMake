@@ -239,6 +239,7 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
   endif()
   if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
       AND NOT CMAKE_CROSSCOMPILING
+      AND NOT EXISTS "/etc/alpine-release"
       AND NOT EXISTS "/etc/arch-release")
     if (EXISTS "/etc/debian_version") # is this a debian system ?
       if(CMAKE_LIBRARY_ARCHITECTURE)
