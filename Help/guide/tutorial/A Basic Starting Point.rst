@@ -8,6 +8,7 @@ required. This will be the starting point for our tutorial. Create a
 
 .. code-block:: cmake
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-start
 
   cmake_minimum_required(VERSION 3.10)
 
@@ -35,6 +36,7 @@ to set the project name and version number.
 
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-project-VERSION
   :language: cmake
   :end-before: # specify the C++ standard
 
@@ -43,6 +45,7 @@ code:
 
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-configure_file
   :language: cmake
   :start-after: # to the source code
   :end-before: # add the executable
@@ -53,6 +56,7 @@ files. Add the following lines to the end of the ``CMakeLists.txt`` file:
 
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-target_include_directories
   :language: cmake
   :start-after: # so that we will find TutorialConfig.h
 
@@ -61,6 +65,7 @@ directory with the following contents:
 
 .. literalinclude:: Step2/TutorialConfig.h.in
   :caption: TutorialConfig.h.in
+  :name: TutorialConfig.h.in
   :language: c++
 
 When CMake configures this header file the values for
@@ -75,6 +80,7 @@ Finally, let's print out the executable name and version number by updating
 
 .. literalinclude:: Step2/tutorial.cxx
   :caption: tutorial.cxx
+  :name: tutorial.cxx-print-version
   :language: c++
   :start-after: {
   :end-before: // convert input to double
@@ -88,6 +94,7 @@ Next let's add some C++11 features to our project by replacing ``atof`` with
 
 .. literalinclude:: Step2/tutorial.cxx
   :caption: tutorial.cxx
+  :name: tutorial.cxx-cxx11
   :language: c++
   :start-after: // convert input to double
   :end-before: // calculate square root
@@ -102,6 +109,7 @@ call to ``add_executable``.
 
 .. literalinclude:: Step2/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-CXX_STANDARD
   :language: cmake
   :end-before: # configure a header file to pass some of the CMake settings
 

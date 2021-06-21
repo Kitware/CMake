@@ -11,6 +11,7 @@ Replace:
 
 .. code-block:: cmake
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-enable_testing-remove
 
   # enable testing
   enable_testing()
@@ -19,6 +20,7 @@ With:
 
 .. code-block:: cmake
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-include-CTest
 
   # enable dashboard scripting
   include(CTest)
@@ -32,6 +34,7 @@ dashboard.
 
 .. literalinclude:: Step9/CTestConfig.cmake
   :caption: CTestConfig.cmake
+  :name: CTestConfig.cmake
   :language: cmake
 
 The :manual:`ctest <ctest(1)>` executable will read in this file when it runs.

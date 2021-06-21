@@ -14,6 +14,7 @@ So to the end of ``MathFunctions/CMakeLists.txt`` we add:
 
 .. literalinclude:: Step5/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-install-TARGETS
   :language: cmake
   :start-after: # install rules
 
@@ -21,6 +22,7 @@ And to the end of the top-level ``CMakeLists.txt`` we add:
 
 .. literalinclude:: Step5/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-install-TARGETS
   :language: cmake
   :start-after: # add the install targets
   :end-before: # enable testing
@@ -65,6 +67,7 @@ the application is working correctly.
 
 .. literalinclude:: Step5/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-enable_testing
   :language: cmake
   :start-after: # enable testing
 

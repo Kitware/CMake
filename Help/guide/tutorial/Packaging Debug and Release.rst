@@ -18,6 +18,7 @@ Set :variable:`CMAKE_DEBUG_POSTFIX` near the beginning of the top-level
 
 .. literalinclude:: Complete/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-CMAKE_DEBUG_POSTFIX-variable
   :language: cmake
   :start-after: project(Tutorial VERSION 1.0)
   :end-before: target_compile_features(tutorial_compiler_flags
@@ -26,6 +27,7 @@ And the :prop_tgt:`DEBUG_POSTFIX` property on the tutorial executable:
 
 .. literalinclude:: Complete/CMakeLists.txt
   :caption: CMakeLists.txt
+  :name: CMakeLists.txt-DEBUG_POSTFIX-property
   :language: cmake
   :start-after: # add the executable
   :end-before: # add the binary tree to the search path for include files
@@ -36,6 +38,7 @@ Let's also add version numbering to the ``MathFunctions`` library. In
 
 .. literalinclude:: Complete/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-VERSION-properties
   :language: cmake
   :start-after: # setup the version numbering
   :end-before: # install rules
@@ -72,6 +75,7 @@ projects to install. In this case, we want to install both debug and release.
 
 .. literalinclude:: Complete/MultiCPackConfig.cmake
   :caption: MultiCPackConfig.cmake
+  :name: MultiCPackConfig.cmake
   :language: cmake
 
 From the ``Step12`` directory, run :manual:`cpack <cpack(1)>` specifying our
