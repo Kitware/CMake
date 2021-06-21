@@ -11,6 +11,9 @@ There are two different signatures to create source groups.
 
 Defines a group into which sources will be placed in project files.
 This is intended to set up file tabs in Visual Studio.
+The group is scoped in the directory where the command is called,
+and applies to sources in targets created in that directory.
+
 The options are:
 
 ``TREE``
