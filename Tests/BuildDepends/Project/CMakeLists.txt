@@ -8,7 +8,7 @@ if(APPLE)
   else()
     execute_process(
       COMMAND xcodebuild -version
-      OUTPUT_VARIABLE _version ERROR_VARIABLE _version
+      OUTPUT_VARIABLE _version ERROR_VARIABLE _version_err
       )
     if(_version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
       set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
