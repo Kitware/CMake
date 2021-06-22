@@ -1041,11 +1041,8 @@ private:
                        std::string const& config,
                        const cmGeneratorTarget* headTarget,
                        bool usage_requirements_only,
-                       std::vector<cmLinkItem>& items,
-                       std::vector<cmLinkItem>& objects,
-                       bool& hadHeadSensitiveCondition,
-                       bool& hadContextSensitiveCondition,
-                       bool& hadLinkLanguageSensitiveCondition) const;
+                       cmLinkInterface& iface) const;
+
   struct LookupLinkItemScope
   {
     cmLocalGenerator const* LG;
