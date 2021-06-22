@@ -7628,6 +7628,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     std::string const& evaluated =
       cge->Evaluate(this->LocalGenerator, config, head, &dagChecker, nullptr,
                     this->LinkerLanguage);
+    bool const fromGenex = evaluated != *le;
     cmExpandList(evaluated, llibs);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;
@@ -7699,7 +7700,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         }
       }
 
-      impl.Libraries.emplace_back(std::move(item), evaluated != *le);
+      impl.Libraries.emplace_back(std::move(item), fromGenex);
     }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
