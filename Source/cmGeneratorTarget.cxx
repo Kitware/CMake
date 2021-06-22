@@ -6399,19 +6399,22 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
   for (std::string const& lib : libs) {
     if (cm::optional<cmLinkItem> maybeItem =
           this->LookupLinkItem(lib, cge->GetBacktrace(), &scope)) {
-      if (!maybeItem->Target) {
+      cmLinkItem item = std::move(*maybeItem);
+
+      if (!item.Target) {
         // Report explicitly linked object files separately.
-        std::string const& maybeObj = maybeItem->AsStr();
+        std::string const& maybeObj = item.AsStr();
         if (cmSystemTools::FileIsFullPath(maybeObj)) {
           cmSourceFile const* sf =
             mf->GetSource(maybeObj, cmSourceFileLocationKind::Known);
           if (sf && sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
-            iface.Objects.emplace_back(std::move(*maybeItem));
+            iface.Objects.emplace_back(std::move(item));
             continue;
           }
         }
       }
-      iface.Libraries.emplace_back(std::move(*maybeItem));
+
+      iface.Libraries.emplace_back(std::move(item));
     }
   }
   iface.HadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
