@@ -550,17 +550,14 @@ void QCMake::loadPresets()
     }
 
     QCMakePreset preset;
-    preset.name = std::move(QString::fromLocal8Bit(p.Name.data()));
-    preset.displayName =
-      std::move(QString::fromLocal8Bit(p.DisplayName.data()));
-    preset.description =
-      std::move(QString::fromLocal8Bit(p.Description.data()));
-    preset.generator = std::move(QString::fromLocal8Bit(p.Generator.data()));
-    preset.architecture =
-      std::move(QString::fromLocal8Bit(p.Architecture.data()));
+    preset.name = QString::fromLocal8Bit(p.Name.data());
+    preset.displayName = QString::fromLocal8Bit(p.DisplayName.data());
+    preset.description = QString::fromLocal8Bit(p.Description.data());
+    preset.generator = QString::fromLocal8Bit(p.Generator.data());
+    preset.architecture = QString::fromLocal8Bit(p.Architecture.data());
     preset.setArchitecture = !p.ArchitectureStrategy ||
       p.ArchitectureStrategy == cmCMakePresetsFile::ArchToolsetStrategy::Set;
-    preset.toolset = std::move(QString::fromLocal8Bit(p.Toolset.data()));
+    preset.toolset = QString::fromLocal8Bit(p.Toolset.data());
     preset.setToolset = !p.ToolsetStrategy ||
       p.ToolsetStrategy == cmCMakePresetsFile::ArchToolsetStrategy::Set;
     preset.enabled = it.Expanded && it.Expanded->ConditionResult &&
