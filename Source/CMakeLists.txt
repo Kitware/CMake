@@ -10,36 +10,8 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "QNX")
 endif()
 
 include(CheckIncludeFile)
-# Check if we can build support for ELF parsing.
-if(WIN32)
-  set(HAVE_ELF_H 0)
-elseif(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
-  CHECK_INCLUDE_FILES("stdint.h;elf_abi.h" HAVE_ELF_H)
-else()
-  CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
-endif()
-if(HAVE_ELF_H)
-  set(CMake_USE_ELF_PARSER 1)
-elseif(HAIKU)
-  # On Haiku, we need to include elf32.h from the private headers
-  set(CMake_HAIKU_INCLUDE_DIRS
-    /boot/system/develop/headers/private/system
-    /boot/system/develop/headers/private/system/arch/x86
-    )
 
-  set(CMAKE_REQUIRED_INCLUDES ${CMake_HAIKU_INCLUDE_DIRS})
-  CHECK_INCLUDE_FILE("elf32.h" HAVE_ELF32_H)
-  unset(CMAKE_REQUIRED_INCLUDES)
-
-  if(HAVE_ELF32_H)
-    set(CMake_USE_ELF_PARSER 1)
-  else()
-    unset(CMake_HAIKU_INCLUDE_DIRS)
-    set(CMake_USE_ELF_PARSER)
-  endif()
-else()
-  set(CMake_USE_ELF_PARSER)
-endif()
+set(CMake_USE_ELF_PARSER 1)
 
 if(NOT CMake_DEFAULT_RECURSION_LIMIT)
   if(DEFINED ENV{DASHBOARD_TEST_FROM_CTEST})
@@ -111,7 +83,7 @@ include_directories(
   ${CMake_HAIKU_INCLUDE_DIRS}
   )
 
-# Check if we can build the ELF parser.
+# The ELF parser can be built on all platforms.
 if(CMake_USE_ELF_PARSER)
   set(ELF_SRCS cmELF.h cmELF.cxx)
 endif()

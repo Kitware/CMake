@@ -17,41 +17,9 @@
 
 #include "cmsys/FStream.hxx"
 
-// Include the ELF format information system header.
-#if defined(__OpenBSD__)
-#  include <elf_abi.h>
-#elif defined(__HAIKU__)
-#  include <elf32.h>
-#  include <elf64.h>
-using Elf32_Ehdr = struct Elf32_Ehdr;
-using Elf32_Shdr = struct Elf32_Shdr;
-using Elf32_Sym = struct Elf32_Sym;
-using Elf32_Rel = struct Elf32_Rel;
-using Elf32_Rela = struct Elf32_Rela;
-#  define ELFMAG0 0x7F
-#  define ELFMAG1 'E'
-#  define ELFMAG2 'L'
-#  define ELFMAG3 'F'
-#  define ET_NONE 0
-#  define ET_REL 1
-#  define ET_EXEC 2
-#  define ET_DYN 3
-#  define ET_CORE 4
-#  define EM_386 3
-#  define EM_SPARC 2
-#  define EM_PPC 20
-#else
-#  include <elf.h>
-#endif
-#if defined(__sun)
-#  include <sys/link.h> // For dynamic section information
-#endif
-#ifdef _SCO_DS
-#  include <link.h> // For DT_SONAME etc.
-#endif
-#ifndef DT_RUNPATH
-#  define DT_RUNPATH 29
-#endif
+#include "cmelf/elf32.h"
+#include "cmelf/elf64.h"
+#include "cmelf/elf_common.h"
 
 // Low-level byte swapping implementation.
 template <size_t s>
@@ -213,7 +181,6 @@ struct cmELFTypes32
 };
 
 // Configure the implementation template for 64-bit ELF files.
-#ifndef _SCO_DS
 struct cmELFTypes64
 {
   using ELF_Ehdr = Elf64_Ehdr;
@@ -223,7 +190,6 @@ struct cmELFTypes64
   using tagtype = ::uint64_t;
   static const char* GetName() { return "64-bit"; }
 };
-#endif
 
 // Parser implementation template.
 template <class Types>
@@ -257,11 +223,7 @@ public:
   // Lookup a string from the dynamic section with the given tag.
   StringEntry const* GetDynamicSectionString(unsigned int tag) override;
 
-#ifdef EM_MIPS
   bool IsMips() const override { return this->ELFHeader.e_machine == EM_MIPS; }
-#else
-  bool IsMips() const override { false; }
-#endif
 
   // Print information about the ELF file.
   void PrintInfo(std::ostream& os) const override
@@ -346,16 +308,12 @@ private:
         eti == ET_CORE) {
       return true;
     }
-#if defined(ET_LOOS) && defined(ET_HIOS)
     if (eti >= ET_LOOS && eti <= ET_HIOS) {
       return true;
     }
-#endif
-#if defined(ET_LOPROC) && defined(ET_HIPROC)
     if (eti >= ET_LOPROC && eti <= ET_HIPROC) {
       return true;
     }
-#endif
     return false;
   }
 
@@ -466,18 +424,14 @@ cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
       break;
     default: {
       unsigned int eti = static_cast<unsigned int>(this->ELFHeader.e_type);
-#if defined(ET_LOOS) && defined(ET_HIOS)
       if (eti >= ET_LOOS && eti <= ET_HIOS) {
         this->ELFType = cmELF::FileTypeSpecificOS;
         break;
       }
-#endif
-#if defined(ET_LOPROC) && defined(ET_HIPROC)
       if (eti >= ET_LOPROC && eti <= ET_HIPROC) {
         this->ELFType = cmELF::FileTypeSpecificProc;
         break;
       }
-#endif
       std::ostringstream e;
       e << "Unknown ELF file type " << eti;
       this->SetErrorMessage(e.str().c_str());
@@ -680,12 +634,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
 
 const long cmELF::TagRPath = DT_RPATH;
 const long cmELF::TagRunPath = DT_RUNPATH;
-
-#ifdef DT_MIPS_RLD_MAP_REL
 const long cmELF::TagMipsRldMapRel = DT_MIPS_RLD_MAP_REL;
-#else
-const long cmELF::TagMipsRldMapRel = 0;
-#endif
 
 cmELF::cmELF(const char* fname)
 {
@@ -735,15 +684,11 @@ cmELF::cmELF(const char* fname)
     // 32-bit ELF
     this->Internal = cm::make_unique<cmELFInternalImpl<cmELFTypes32>>(
       this, std::move(fin), order);
-  }
-#ifndef _SCO_DS
-  else if (ident[EI_CLASS] == ELFCLASS64) {
+  } else if (ident[EI_CLASS] == ELFCLASS64) {
     // 64-bit ELF
     this->Internal = cm::make_unique<cmELFInternalImpl<cmELFTypes64>>(
       this, std::move(fin), order);
-  }
-#endif
-  else {
+  } else {
     this->ErrorMessage = "ELF file class is not 32-bit or 64-bit.";
     return;
   }

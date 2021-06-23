@@ -1,6 +1,6 @@
 include(RunCMake)
 
-if(HAVE_ELF_H)
+if(CMake_USE_ELF_PARSER)
   run_cmake_command(ELF ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/ELF.cmake)
 endif()
 
