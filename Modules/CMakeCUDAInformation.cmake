@@ -36,6 +36,25 @@ if(CMAKE_CUDA_COMPILER_ID)
 endif()
 
 
+# This should be included before the _INIT variables are
+# used to initialize the cache.  Since the rule variables
+# have if blocks on them, users can still define them here.
+# But, it should still be after the platform file so changes can
+# be made to those values.
+
+if(CMAKE_USER_MAKE_RULES_OVERRIDE)
+  # Save the full path of the file so try_compile can use it.
+  include(${CMAKE_USER_MAKE_RULES_OVERRIDE} RESULT_VARIABLE _override)
+  set(CMAKE_USER_MAKE_RULES_OVERRIDE "${_override}")
+endif()
+
+if(CMAKE_USER_MAKE_RULES_OVERRIDE_CUDA)
+  # Save the full path of the file so try_compile can use it.
+  include(${CMAKE_USER_MAKE_RULES_OVERRIDE_CUDA} RESULT_VARIABLE _override)
+  set(CMAKE_USER_MAKE_RULES_OVERRIDE_CUDA "${_override}")
+endif()
+
+
 if(NOT CMAKE_SHARED_LIBRARY_RUNTIME_CUDA_FLAG)
   set(CMAKE_SHARED_LIBRARY_RUNTIME_CUDA_FLAG ${CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG})
 endif()
