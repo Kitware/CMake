@@ -110,7 +110,7 @@ std::string cmGlobalCommonGenerator::GetEditCacheCommand() const
   std::string editCacheCommand = cm->GetCMakeEditCommand();
   if (!cm->GetCacheDefinition("CMAKE_EDIT_COMMAND") ||
       !editCacheCommand.empty()) {
-    if (editCacheCommand.empty()) {
+    if (this->SupportsDirectConsole() && editCacheCommand.empty()) {
       editCacheCommand = cmSystemTools::GetCMakeCursesCommand();
     }
     if (editCacheCommand.empty()) {

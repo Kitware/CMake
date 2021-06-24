@@ -488,7 +488,6 @@ protected:
   std::string DefaultFileConfig;
 
 private:
-  std::string GetEditCacheCommand() const override;
   bool FindMakeProgram(cmMakefile* mf) override;
   void CheckNinjaFeatures();
   void CheckNinjaCodePage();
