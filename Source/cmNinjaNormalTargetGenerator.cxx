@@ -1156,16 +1156,15 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
   this->AddModuleDefinitionFlag(linkLineComputer.get(), vars["LINK_FLAGS"],
                                 config);
+  if (gt->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
+    vars["LINK_FLAGS"] += " -Wl,--no-as-needed";
+  }
   vars["LINK_FLAGS"] = globalGen->EncodeLiteral(vars["LINK_FLAGS"]);
 
   vars["MANIFESTS"] = this->GetManifests(config);
   vars["AIX_EXPORTS"] = this->GetAIXExports(config);
 
   vars["LINK_PATH"] = frameworkPath + linkPath;
-  std::string lwyuFlags;
-  if (gt->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
-    lwyuFlags = " -Wl,--no-as-needed";
-  }
 
   // Compute architecture specific link flags.  Yes, these go into a different
   // variable for executables, probably due to a mistake made when duplicating
@@ -1174,7 +1173,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     std::string t = vars["FLAGS"];
     localGen.AddArchitectureFlags(t, gt, this->TargetLinkLanguage(config),
                                   config);
-    t += lwyuFlags;
     vars["FLAGS"] = t;
   } else {
     std::string t = vars["ARCH_FLAGS"];
@@ -1182,7 +1180,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
                                   config);
     vars["ARCH_FLAGS"] = t;
     t.clear();
-    t += lwyuFlags;
     localGen.AddLanguageFlagsForLinking(
       t, gt, this->TargetLinkLanguage(config), config);
     vars["LANGUAGE_COMPILE_FLAGS"] = t;
