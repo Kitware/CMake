@@ -683,7 +683,7 @@ const long cmELF::TagMipsRldMapRel = 0;
 cmELF::cmELF(const char* fname)
 {
   // Try to open the file.
-  auto fin = cm::make_unique<cmsys::ifstream>(fname);
+  auto fin = cm::make_unique<cmsys::ifstream>(fname, std::ios::binary);
 
   // Quit now if the file could not be opened.
   if (!fin || !*fin) {
