@@ -26,6 +26,10 @@ Presets
 Generators
 ----------
 
+* The :generator:`Visual Studio 17 2022` generator was added.  This is
+  experimental and based on "Visual Studio 2022 Preview 1.1" because this
+  version of VS has not been released.
+
 * The :ref:`Makefile Generators` and the :generator:`Ninja` generator
   learned to add linker launcher tools along with the linker for ``C``,
   ``CXX``, ``OBJC``, and ``OBJCXX`` languages.

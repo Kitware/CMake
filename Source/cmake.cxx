@@ -2201,7 +2201,9 @@ std::unique_ptr<cmGlobalGenerator> cmake::EvaluateDefaultGlobalGenerator()
     "\\Setup\\VC;ProductDir", //
     ";InstallDir"             //
   };
-  if (cmVSSetupAPIHelper(16).IsVSInstalled()) {
+  if (cmVSSetupAPIHelper(17).IsVSInstalled()) {
+    found = "Visual Studio 17 2022";
+  } else if (cmVSSetupAPIHelper(16).IsVSInstalled()) {
     found = "Visual Studio 16 2019";
   } else if (cmVSSetupAPIHelper(15).IsVSInstalled()) {
     found = "Visual Studio 15 2017";
@@ -2505,6 +2507,8 @@ void cmake::AddDefaultGenerators()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  if !defined(CMAKE_BOOT_MINGW)
+  this->Generators.push_back(
+    cmGlobalVisualStudioVersionedGenerator::NewFactory17());
   this->Generators.push_back(
     cmGlobalVisualStudioVersionedGenerator::NewFactory16());
   this->Generators.push_back(
