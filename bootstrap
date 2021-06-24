@@ -1747,6 +1747,16 @@ if test "x${cmake_ansi_cxx_flags}" != "x"; then
   cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags}"
 fi
 
+system_flags=''
+case "${cmake_system}" in
+  # Ensure filesystem access uses 64-bit offsets even on 32-bit hosts.
+  *Linux*) system_flags='-D_FILE_OFFSET_BITS=64' ;;
+esac
+if test "x${system_flags}" != "x"; then
+  cmake_c_flags="${cmake_c_flags} ${system_flags}"
+  cmake_cxx_flags="${cmake_cxx_flags} ${system_flags}"
+fi
+
 if test "x${cmake_c_flags}" != "x"; then
   cmake_c_flags="${cmake_c_flags} "
 fi
