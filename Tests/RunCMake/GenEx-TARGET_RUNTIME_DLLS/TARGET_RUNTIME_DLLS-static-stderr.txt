@@ -1,9 +1,0 @@
-CMake Error at TARGET_RUNTIME_DLLS-static\.cmake:[0-9]+ \(file\):
-  Error evaluating generator expression:
-
-    \$<TARGET_RUNTIME_DLLS:static>
-
-  Objects of target "static" referenced but is not one of the allowed target
-  types \(EXECUTABLE, SHARED, MODULE\)\.
-Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)

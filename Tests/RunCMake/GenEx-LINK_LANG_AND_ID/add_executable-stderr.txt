@@ -1,0 +1,9 @@
+CMake Error at add_executable.cmake:1 \(add_executable\):
+  Error evaluating generator expression:
+
+    \$<LINK_LANG_AND_ID:C,MSVC>
+
+  \$<LINK_LANG_AND_ID:lang,id> may only be used with binary targets to specify
+  link libraries, link directories, link options, and link depends.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
