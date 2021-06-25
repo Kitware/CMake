@@ -570,6 +570,10 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
         separate_arguments(_OpenMP_${LANG}_OPTIONS NATIVE_COMMAND "${OpenMP_${LANG}_FLAGS}")
         set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
           INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:${LANG}>:${_OpenMP_${LANG}_OPTIONS}>")
+        if(CMAKE_${LANG}_COMPILER_ID STREQUAL "Fujitsu")
+          set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
+            INTERFACE_LINK_OPTIONS "${OpenMP_${LANG}_FLAGS}")
+        endif()
         unset(_OpenMP_${LANG}_OPTIONS)
       endif()
       if(OpenMP_${LANG}_INCLUDE_DIRS)
