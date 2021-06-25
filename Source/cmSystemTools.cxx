@@ -20,6 +20,7 @@
 #include <cm3p/uv.h>
 
 #include "cmDuration.h"
+#include "cmELF.h"
 #include "cmMessageMetadata.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
@@ -44,12 +45,6 @@
 #    include <cm/memory>
 #  endif
 #  include "cmCryptoHash.h"
-#endif
-
-#if defined(CMake_USE_ELF_PARSER)
-#  include "cmELF.h"
-#else
-class cmELF;
 #endif
 
 #if defined(CMake_USE_MACH_PARSER)
@@ -2448,14 +2443,12 @@ void cmSystemTools::MakefileColorEcho(int color, const char* message,
 bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
                                        std::string& soname)
 {
-// For ELF shared libraries use a real parser to get the correct
-// soname.
-#if defined(CMake_USE_ELF_PARSER)
+  // For ELF shared libraries use a real parser to get the correct
+  // soname.
   cmELF elf(fullPath.c_str());
   if (elf) {
     return elf.GetSOName(soname);
   }
-#endif
 
   // If the file is not a symlink we have no guess for its soname.
   if (!cmSystemTools::FileIsSymlink(fullPath)) {
@@ -2543,14 +2536,6 @@ cm::optional<bool> AdjustRPathELF(std::string const& file,
                                   const AdjustCallback& adjustCallback,
                                   std::string* emsg, bool* changed)
 {
-#if !defined(CMake_USE_ELF_PARSER)
-  (void)file;
-  (void)emptyCallback;
-  (void)adjustCallback;
-  (void)emsg;
-  (void)changed;
-  return cm::nullopt; // Cannot handle ELF files.
-#else
   if (changed) {
     *changed = false;
   }
@@ -2678,7 +2663,6 @@ cm::optional<bool> AdjustRPathELF(std::string const& file,
     *changed = true;
   }
   return true;
-#endif
 }
 
 std::function<bool(std::string*, const cmELF&)> MakeEmptyCallback(
@@ -2690,16 +2674,11 @@ std::function<bool(std::string*, const cmELF&)> MakeEmptyCallback(
       // okay.
       return true;
     }
-#if defined(CMake_USE_ELF_PARSER)
     if (emsg) {
       *emsg =
         cmStrCat("No valid ELF RPATH or RUNPATH entry exists in the file; ",
                  elf.GetErrorMessage());
     }
-#else
-    static_cast<void>(emsg);
-    static_cast<void>(elf);
-#endif
     return false;
   };
 }
@@ -3033,12 +3012,6 @@ int cmSystemTools::strverscmp(std::string const& lhs, std::string const& rhs)
 static cm::optional<bool> RemoveRPathELF(std::string const& file,
                                          std::string* emsg, bool* removed)
 {
-#if !defined(CMake_USE_ELF_PARSER)
-  (void)file;
-  (void)emsg;
-  (void)removed;
-  return cm::nullopt; // Cannot handle ELF files.
-#else
   if (removed) {
     *removed = false;
   }
@@ -3102,8 +3075,7 @@ static cm::optional<bool> RemoveRPathELF(std::string const& file,
         entriesErased++;
         continue;
       }
-      if (cmELF::TagMipsRldMapRel != 0 &&
-          it->first == cmELF::TagMipsRldMapRel) {
+      if (it->first == cmELF::TagMipsRldMapRel && elf.IsMIPS()) {
         // Background: debuggers need to know the "linker map" which contains
         // the addresses each dynamic object is loaded at. Most arches use
         // the DT_DEBUG tag which the dynamic linker writes to (directly) and
@@ -3178,7 +3150,6 @@ static cm::optional<bool> RemoveRPathELF(std::string const& file,
     *removed = true;
   }
   return true;
-#endif
 }
 
 static cm::optional<bool> RemoveRPathXCOFF(std::string const& file,
@@ -3225,7 +3196,6 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
 bool cmSystemTools::CheckRPath(std::string const& file,
                                std::string const& newRPath)
 {
-#if defined(CMake_USE_ELF_PARSER)
   // Parse the ELF binary.
   cmELF elf(file.c_str());
   if (elf) {
@@ -3248,7 +3218,6 @@ bool cmSystemTools::CheckRPath(std::string const& file,
     }
     return false;
   }
-#endif
 #if defined(CMake_USE_XCOFF_PARSER)
   // Parse the XCOFF binary.
   cmXCOFF xcoff(file.c_str());
