@@ -26,6 +26,16 @@ macro(__compiler_fujitsu lang)
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
 
+  # IPO flag
+  set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
+  if ("${lang}" STREQUAL "Fortran")
+    # Supported by Fortran compiler only
+    set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "-Klto")
+  else()
+    set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER NO)
+  endif()
+
   # How to actually call the compiler
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE
   "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E $<$<COMPILE_LANGUAGE:Fortran>:-Cpp> <SOURCE> > <PREPROCESSED_SOURCE>")
