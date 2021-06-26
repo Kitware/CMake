@@ -94,6 +94,8 @@ String Comparisons
 
 .. genex:: $<IN_LIST:string,list>
 
+  .. versionadded:: 3.12
+
   ``1`` if ``string`` is member of the semicolon-separated ``list``, else ``0``.
   Uses case-sensitive comparisons.
 
@@ -111,9 +113,13 @@ String Comparisons
 
 .. genex:: $<VERSION_LESS_EQUAL:v1,v2>
 
+  .. versionadded:: 3.7
+
   ``1`` if ``v1`` is a version less than or equal to ``v2``, else ``0``.
 
 .. genex:: $<VERSION_GREATER_EQUAL:v1,v2>
+
+  .. versionadded:: 3.7
 
   ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
 
@@ -121,6 +127,8 @@ Variable Queries
 ----------------
 
 .. genex:: $<TARGET_EXISTS:target>
+
+  .. versionadded:: 3.12
 
   ``1`` if ``target`` exists, else ``0``.
 
@@ -155,6 +163,8 @@ Variable Queries
 
 .. genex:: $<CUDA_COMPILER_ID:compiler_ids>
 
+  .. versionadded:: 3.15
+
   where ``compiler_ids`` is a comma-separated list.
   ``1`` if the CMake's compiler id of the CUDA compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
@@ -162,12 +172,16 @@ Variable Queries
 
 .. genex:: $<OBJC_COMPILER_ID:compiler_ids>
 
+  .. versionadded:: 3.16
+
   where ``compiler_ids`` is a comma-separated list.
   ``1`` if the CMake's compiler id of the Objective-C compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<OBJCXX_COMPILER_ID:compiler_ids>
+
+  .. versionadded:: 3.16
 
   where ``compiler_ids`` is a comma-separated list.
   ``1`` if the CMake's compiler id of the Objective-C++ compiler matches any one
@@ -190,6 +204,8 @@ Variable Queries
 
 .. genex:: $<ISPC_COMPILER_ID:compiler_ids>
 
+  .. versionadded:: 3.19
+
   where ``compiler_ids`` is a comma-separated list.
   ``1`` if the CMake's compiler id of the ISPC compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
@@ -207,15 +223,21 @@ Variable Queries
 
 .. genex:: $<CUDA_COMPILER_VERSION:version>
 
+  .. versionadded:: 3.15
+
   ``1`` if the version of the CXX compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 
 .. genex:: $<OBJC_COMPILER_VERSION:version>
 
+  .. versionadded:: 3.16
+
   ``1`` if the version of the OBJC compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 
 .. genex:: $<OBJCXX_COMPILER_VERSION:version>
+
+  .. versionadded:: 3.16
 
   ``1`` if the version of the OBJCXX compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
@@ -232,6 +254,8 @@ Variable Queries
 
 .. genex:: $<ISPC_COMPILER_VERSION:version>
 
+  .. versionadded:: 3.19
+
   ``1`` if the version of the ISPC compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 
@@ -243,6 +267,8 @@ Variable Queries
   policies.
 
 .. genex:: $<COMPILE_FEATURES:features>
+
+  .. versionadded:: 3.1
 
   where ``features`` is a comma-spearated list.
   Evaluates to ``1`` if all of the ``features`` are available for the 'head'
@@ -256,6 +282,8 @@ Variable Queries
 .. _`Boolean COMPILE_LANGUAGE Generator Expression`:
 
 .. genex:: $<COMPILE_LANG_AND_ID:language,compiler_ids>
+
+  .. versionadded:: 3.15
 
   ``1`` when the language used for compilation unit matches ``language`` and
   the CMake's compiler id of the language compiler matches any one of the
@@ -293,6 +321,8 @@ Variable Queries
     )
 
 .. genex:: $<COMPILE_LANGUAGE:languages>
+
+  .. versionadded:: 3.3
 
   ``1`` when the language used for compilation unit matches any of the entries
   in ``languages``, otherwise ``0``.  This expression may be used to specify
@@ -340,6 +370,8 @@ Variable Queries
 
 .. genex:: $<LINK_LANG_AND_ID:language,compiler_ids>
 
+  .. versionadded:: 3.18
+
   ``1`` when the language used for link step matches ``language`` and the
   CMake's compiler id of the language linker matches any one of the entries
   in ``compiler_ids``, otherwise ``0``. This expression is a short form for the
@@ -379,6 +411,8 @@ Variable Queries
   generator expression.
 
 .. genex:: $<LINK_LANGUAGE:languages>
+
+  .. versionadded:: 3.18
 
   ``1`` when the language used for link step matches any of the entries
   in ``languages``, otherwise ``0``.  This expression may be used to specify
@@ -443,6 +477,8 @@ Variable Queries
 
 .. genex:: $<DEVICE_LINK:list>
 
+  .. versionadded:: 3.18
+
   Returns the list if it is the device link step, an empty list otherwise.
   The device link step is controlled by :prop_tgt:`CUDA_SEPARABLE_COMPILATION`
   and :prop_tgt:`CUDA_RESOLVE_DEVICE_SYMBOLS` properties and
@@ -450,6 +486,8 @@ Variable Queries
   options.
 
 .. genex:: $<HOST_LINK:list>
+
+  .. versionadded:: 3.18
 
   Returns the list if it is the normal link step, an empty list otherwise.
   This expression is mainly useful when a device link step is also involved
@@ -533,6 +571,8 @@ that must be ``0`` or ``1``.
 
 .. genex:: $<IF:condition,true_string,false_string>
 
+  .. versionadded:: 3.8
+
   Evaluates to ``true_string`` if ``condition`` is ``1``.
   Otherwise evaluates to ``false_string``.
 
@@ -557,9 +597,13 @@ String Transformations
 
 .. genex:: $<REMOVE_DUPLICATES:list>
 
+  .. versionadded:: 3.15
+
   Removes duplicated items in the given ``list``.
 
 .. genex:: $<FILTER:list,INCLUDE|EXCLUDE,regex>
+
+  .. versionadded:: 3.15
 
   Includes or removes items from ``list`` that match the regular expression ``regex``.
 
@@ -573,11 +617,15 @@ String Transformations
 
 .. genex:: $<GENEX_EVAL:expr>
 
+  .. versionadded:: 3.12
+
   Content of ``expr`` evaluated as a generator expression in the current
   context. This enables consumption of generator expressions whose
   evaluation results itself in generator expressions.
 
 .. genex:: $<TARGET_GENEX_EVAL:tgt,expr>
+
+  .. versionadded:: 3.12
 
   Content of ``expr`` evaluated as a generator expression in the context of
   ``tgt`` target. This enables consumption of custom target properties that
@@ -647,10 +695,14 @@ Variable Queries
 
 .. genex:: $<OBJC_COMPILER_ID>
 
+  .. versionadded:: 3.16
+
   The CMake's compiler id of the OBJC compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<OBJCXX_COMPILER_ID>
+
+  .. versionadded:: 3.16
 
   The CMake's compiler id of the OBJCXX compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
@@ -666,6 +718,8 @@ Variable Queries
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 
 .. genex:: $<ISPC_COMPILER_ID>
+
+  .. versionadded:: 3.19
 
   The CMake's compiler id of the ISPC compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
@@ -687,10 +741,14 @@ Variable Queries
 
 .. genex:: $<OBJC_COMPILER_VERSION>
 
+  .. versionadded:: 3.16
+
   The version of the OBJC compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 
 .. genex:: $<OBJCXX_COMPILER_VERSION>
+
+  .. versionadded:: 3.16
 
   The version of the OBJCXX compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
@@ -707,10 +765,14 @@ Variable Queries
 
 .. genex:: $<ISPC_COMPILER_VERSION>
 
+  .. versionadded:: 3.19
+
   The version of the ISPC compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 
 .. genex:: $<COMPILE_LANGUAGE>
+
+  .. versionadded:: 3.3
 
   The compile language of source files when evaluating compile options.
   See :ref:`the related boolean expression
@@ -719,6 +781,8 @@ Variable Queries
   for notes about the portability of this generator expression.
 
 .. genex:: $<LINK_LANGUAGE>
+
+  .. versionadded:: 3.18
 
   The link language of target when evaluating link options.
   See :ref:`the related boolean expression
@@ -750,6 +814,8 @@ which is just the string ``tgt``.
 
 .. genex:: $<TARGET_NAME_IF_EXISTS:tgt>
 
+  .. versionadded:: 3.12
+
   The target name ``tgt`` if the target exists, an empty string otherwise.
 
   Note that ``tgt`` is not added as a dependency of the target this
@@ -760,6 +826,8 @@ which is just the string ``tgt``.
   Full path to the ``tgt`` binary file.
 
 .. genex:: $<TARGET_FILE_BASE_NAME:tgt>
+
+  .. versionadded:: 3.15
 
   Base name of ``tgt``, i.e. ``$<TARGET_FILE_NAME:tgt>`` without prefix and
   suffix.
@@ -780,6 +848,8 @@ which is just the string ``tgt``.
 
 .. genex:: $<TARGET_FILE_PREFIX:tgt>
 
+  .. versionadded:: 3.15
+
   Prefix of the ``tgt`` filename (such as ``lib``).
 
   See also the :prop_tgt:`PREFIX` target property.
@@ -788,6 +858,8 @@ which is just the string ``tgt``.
   expression is evaluated on.
 
 .. genex:: $<TARGET_FILE_SUFFIX:tgt>
+
+  .. versionadded:: 3.15
 
   Suffix of the ``tgt`` filename (extension such as ``.so`` or ``.exe``).
 
@@ -819,6 +891,8 @@ which is just the string ``tgt``.
 
 .. genex:: $<TARGET_LINKER_FILE_BASE_NAME:tgt>
 
+  .. versionadded:: 3.15
+
   Base name of file used to link the target ``tgt``, i.e.
   ``$<TARGET_LINKER_FILE_NAME:tgt>`` without prefix and suffix. For example,
   if target file name is ``libbase.a``, the base name is ``base``.
@@ -837,6 +911,8 @@ which is just the string ``tgt``.
 
 .. genex:: $<TARGET_LINKER_FILE_PREFIX:tgt>
 
+  .. versionadded:: 3.15
+
   Prefix of file used to link target ``tgt``.
 
   See also the :prop_tgt:`PREFIX` and :prop_tgt:`IMPORT_PREFIX` target
@@ -846,6 +922,8 @@ which is just the string ``tgt``.
   expression is evaluated on.
 
 .. genex:: $<TARGET_LINKER_FILE_SUFFIX:tgt>
+
+  .. versionadded:: 3.15
 
   Suffix of file used to link where ``tgt`` is the name of a target.
 
@@ -890,6 +968,8 @@ which is just the string ``tgt``.
 
 .. genex:: $<TARGET_PDB_FILE:tgt>
 
+  .. versionadded:: 3.1
+
   Full path to the linker generated program database file (.pdb)
   where ``tgt`` is the name of a target.
 
@@ -898,6 +978,8 @@ which is just the string ``tgt``.
   :prop_tgt:`PDB_NAME_<CONFIG>` and :prop_tgt:`PDB_OUTPUT_DIRECTORY_<CONFIG>`.
 
 .. genex:: $<TARGET_PDB_FILE_BASE_NAME:tgt>
+
+  .. versionadded:: 3.15
 
   Base name of the linker generated program database file (.pdb)
   where ``tgt`` is the name of a target.
@@ -917,12 +999,16 @@ which is just the string ``tgt``.
 
 .. genex:: $<TARGET_PDB_FILE_NAME:tgt>
 
+  .. versionadded:: 3.1
+
   Name of the linker generated program database file (.pdb).
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on (see policy :policy:`CMP0112`).
 
 .. genex:: $<TARGET_PDB_FILE_DIR:tgt>
+
+  .. versionadded:: 3.1
 
   Directory of the linker generated program database file (.pdb).
 
@@ -931,6 +1017,8 @@ which is just the string ``tgt``.
 
 .. genex:: $<TARGET_BUNDLE_DIR:tgt>
 
+  .. versionadded:: 3.9
+
   Full path to the bundle directory (``my.app``, ``my.framework``, or
   ``my.bundle``) where ``tgt`` is the name of a target.
 
@@ -938,6 +1026,8 @@ which is just the string ``tgt``.
   expression is evaluated on (see policy :policy:`CMP0112`).
 
 .. genex:: $<TARGET_BUNDLE_CONTENT_DIR:tgt>
+
+  .. versionadded:: 3.9
 
   Full path to the bundle content directory where ``tgt`` is the name of a
   target. For the macOS SDK it leads to ``my.app/Contents``, ``my.framework``,
@@ -963,6 +1053,8 @@ which is just the string ``tgt``.
   than the target specifying the requirement.
 
 .. genex:: $<TARGET_RUNTIME_DLLS:tgt>
+
+  .. versionadded:: 3.21
 
   List of DLLs that the target depends on at runtime. This is determined by
   the locations of all the ``SHARED`` and ``MODULE`` targets in the target's
@@ -1003,6 +1095,8 @@ Output-Related Expressions
 
 .. genex:: $<LINK_ONLY:...>
 
+  .. versionadded:: 3.1
+
   Content of ``...`` except when evaluated in a link interface while
   propagating :ref:`Target Usage Requirements`, in which case it is the
   empty string.
@@ -1028,18 +1122,24 @@ Output-Related Expressions
 
 .. genex:: $<TARGET_OBJECTS:objLib>
 
+  .. versionadded:: 3.1
+
   List of objects resulting from build of ``objLib``.
 
 .. genex:: $<SHELL_PATH:...>
 
+  .. versionadded:: 3.4
+
   Content of ``...`` converted to shell path style. For example, slashes are
   converted to backslashes in Windows shells and drive letters are converted
   to posix paths in MSYS shells. The ``...`` must be an absolute path.
-  The ``...`` may be a :ref:`semicolon-separated list <CMake Language Lists>`
-  of paths, in which case each path is converted individually and a result
-  list is generated using the shell path separator (``:`` on POSIX and
-  ``;`` on Windows).  Be sure to enclose the argument containing this genex
-  in double quotes in CMake source code so that ``;`` does not split arguments.
+
+  .. versionadded:: 3.14
+    The ``...`` may be a :ref:`semicolon-separated list <CMake Language Lists>`
+    of paths, in which case each path is converted individually and a result
+    list is generated using the shell path separator (``:`` on POSIX and
+    ``;`` on Windows).  Be sure to enclose the argument containing this genex
+    in double quotes in CMake source code so that ``;`` does not split arguments.
 
 .. genex:: $<OUTPUT_CONFIG:...>
 
