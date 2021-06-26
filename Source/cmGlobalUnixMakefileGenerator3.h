@@ -277,7 +277,6 @@ protected:
 
 private:
   const char* GetBuildIgnoreErrorsFlag() const override { return "-i"; }
-  std::string GetEditCacheCommand() const override;
 
   std::map<cmStateSnapshot, std::set<cmGeneratorTarget const*>,
            cmStateSnapshot::StrictWeakOrder>
