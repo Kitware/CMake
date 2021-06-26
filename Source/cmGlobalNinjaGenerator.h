@@ -220,7 +220,6 @@ public:
   {
     return "package_source";
   }
-  const char* GetEditCacheTargetName() const override { return "edit_cache"; }
   const char* GetRebuildCacheTargetName() const override
   {
     return "rebuild_cache";

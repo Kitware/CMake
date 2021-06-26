@@ -45,4 +45,5 @@ public:
 
 protected:
   virtual bool SupportsDirectConsole() const { return true; }
+  const char* GetEditCacheTargetName() const override { return "edit_cache"; }
 };
