@@ -20,5 +20,8 @@ Known version numbers are::
   1910-1919 = VS 15.0 (v141 toolset)
   1920-1929 = VS 16.0 (v142 toolset)
 
+..
+  1930-1939 = VS 17.0 (v143 toolset)
+
 See also the  :variable:`CMAKE_<LANG>_COMPILER_VERSION` and
 :variable:`MSVC_TOOLSET_VERSION` variable.
