@@ -27,6 +27,7 @@ apt-get install -y \
 apt-get install -y \
     alsa-utils \
     doxygen graphviz \
+    freeglut3-dev \
     gnutls-dev \
     libarchive-dev \
     libblas-dev \
