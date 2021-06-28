@@ -1383,7 +1383,7 @@ void SymbolProperties::Initialize(void* address)
   }
 #  else
 // second fallback use builtin backtrace_symbols
-// to decode the bactrace.
+// to decode the backtrace.
 #  endif
 }
 #endif // don't define this class if we're not using it
