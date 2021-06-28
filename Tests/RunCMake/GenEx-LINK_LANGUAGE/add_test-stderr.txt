@@ -1,0 +1,9 @@
+CMake Error at add_test.cmake:5 \(add_test\):
+  Error evaluating generator expression:
+
+    \$<LINK_LANGUAGE>
+
+  \$<LINK_LANGUAGE:...> may only be used with binary targets to specify link
+  libraries, link directories, link options and link depends.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

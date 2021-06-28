@@ -1,0 +1,9 @@
+CMake Error at add_custom_command.cmake:[0-9]+ \(add_custom_command\):
+  Error evaluating generator expression:
+
+    \$<HOST_LINK>
+
+  \$<HOST_LINK:...> may only be used with binary targets to specify link
+  options.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
