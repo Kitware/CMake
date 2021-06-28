@@ -1,0 +1,9 @@
+CMake Error at wrong-usage1.cmake:4 \(target_compile_definitions\):
+  Error evaluating generator expression:
+
+    \$<LINK_LANG_AND_ID:C,GNU>
+
+  \$<LINK_LANG_AND_ID:lang,id> may only be used with binary targets to specify
+  link libraries, link directories, link options, and link depends.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
