@@ -57,9 +57,9 @@ Command-Line
 * :manual:`cmake(1)` gained the ``--toolchain <path/to/file>``
   command-line option to specify a toolchain file.
 
-* :manual:`cmake(1)` ``-E capabilities`` output now contains for each
-  generator a ``supportedPlatforms`` field listing platforms known to
-  be supported in :variable:`CMAKE_GENERATOR_PLATFORM`.
+* :manual:`cmake(1)` ``-E capabilities`` output, for some generators,
+  may now contain a ``supportedPlatforms`` field listing platforms
+  known to be supported in :variable:`CMAKE_GENERATOR_PLATFORM`.
 
 * Messages printed to a terminal now may be colored by message type.
 
