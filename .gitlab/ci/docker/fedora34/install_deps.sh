@@ -51,6 +51,7 @@ dnf install --setopt=install_weak_deps=False -y \
     doxygen \
     expat-devel \
     fontconfig-devel \
+    freeglut-devel \
     freetype-devel \
     gdal-devel \
     gettext \
