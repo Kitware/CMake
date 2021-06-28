@@ -703,10 +703,14 @@ Move a file or directory within a filesystem from ``<oldname>`` to
 The options are:
 
 ``RESULT <result>``
+  .. versionadded:: 3.21
+
   Set ``<result>`` variable to ``0`` on success or an error message otherwise.
   If ``RESULT`` is not specified and the operation fails, an error is emitted.
 
 ``NO_REPLACE``
+  .. versionadded:: 3.21
+
   If the ``<newname>`` path already exists, do not replace it.
   If ``RESULT <result>`` is used, the result variable will be
   set to ``NO_REPLACE``.  Otherwise, an error is emitted.
