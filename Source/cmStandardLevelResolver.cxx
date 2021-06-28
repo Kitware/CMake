@@ -387,6 +387,10 @@ bool cmStandardLevelResolver::CheckCompileFeaturesAvailable(
     return false;
   }
 
+  if (!this->Makefile->GetGlobalGenerator()->GetLanguageEnabled(lang)) {
+    return true;
+  }
+
   const char* features = this->CompileFeaturesAvailable(lang, error);
   if (!features) {
     return false;
