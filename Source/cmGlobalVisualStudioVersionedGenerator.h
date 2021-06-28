@@ -21,6 +21,7 @@ class cmGlobalVisualStudioVersionedGenerator
 public:
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory15();
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory16();
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory17();
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
@@ -68,5 +69,7 @@ private:
   friend class Factory15;
   class Factory16;
   friend class Factory16;
+  class Factory17;
+  friend class Factory17;
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
 };

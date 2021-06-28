@@ -171,6 +171,22 @@ bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
     if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
       cmSystemTools::ConvertToUnixSlashes(value);
     }
+  } else if (key == "VS_17_DIR") {
+    // If generating for the VS 17 IDE, use the same instance.
+    cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
+    if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 17 ")) {
+      cmGlobalVisualStudioVersionedGenerator* vs17gen =
+        static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
+      if (vs17gen->GetVSInstance(value)) {
+        return true;
+      }
+    }
+
+    // Otherwise, find a VS 17 instance ourselves.
+    cmVSSetupAPIHelper vsSetupAPIHelper(17);
+    if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
+      cmSystemTools::ConvertToUnixSlashes(value);
+    }
 #endif
   } else {
     std::string e = "does not recognize <key> " + key;

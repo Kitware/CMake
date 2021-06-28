@@ -313,7 +313,7 @@ function(run_EnvironmentGenerator)
       unset(ENV{CMAKE_GENERATOR_PLATFORM})
     endif()
     # Instance is available since VS 2017.
-    if(RunCMake_GENERATOR MATCHES "Visual Studio (15|16).*")
+    if(RunCMake_GENERATOR MATCHES "Visual Studio 1[567].*")
       set(ENV{CMAKE_GENERATOR_INSTANCE} "invalid")
       # Envvar shouldn't affect existing build tree
       run_cmake_command(Envgen-instance-existing ${CMAKE_COMMAND} -E chdir ..
