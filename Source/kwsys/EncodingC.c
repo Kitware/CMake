@@ -60,7 +60,7 @@ size_t kwsysEncoding_wcstombs(char* dest, const wchar_t* str, size_t n)
 char* kwsysEncoding_DupToNarrow(const wchar_t* str)
 {
   char* ret = NULL;
-  size_t length = kwsysEncoding_wcstombs(0, str, 0) + 1;
+  size_t length = kwsysEncoding_wcstombs(NULL, str, 0) + 1;
   if (length > 0) {
     ret = (char*)malloc(length);
     if (ret) {
