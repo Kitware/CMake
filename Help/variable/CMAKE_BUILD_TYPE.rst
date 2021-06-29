@@ -26,8 +26,9 @@ value of ``CMAKE_BUILD_TYPE`` will be ``ReLeAsE``.
 
 This variable is initialized by the first :command:`project` or
 :command:`enable_language` command called in a project when a new build
-tree is first created.  A toolchain-specific default is chosen when a
-language is enabled.
+tree is first created.  If the :envvar:`CMAKE_BUILD_TYPE` environment
+variable is set, its value is used.  Otherwise, a toolchain-specific
+default is chosen when a language is enabled.
 
 See :variable:`CMAKE_CONFIGURATION_TYPES` for specifying the configuration
 with multi-config generators.

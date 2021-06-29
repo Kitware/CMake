@@ -30,6 +30,7 @@ Environment Variables that Control the Build
 
    /envvar/CMAKE_APPLE_SILICON_PROCESSOR
    /envvar/CMAKE_BUILD_PARALLEL_LEVEL
+   /envvar/CMAKE_BUILD_TYPE
    /envvar/CMAKE_CONFIG_TYPE
    /envvar/CMAKE_EXPORT_COMPILE_COMMANDS
    /envvar/CMAKE_GENERATOR

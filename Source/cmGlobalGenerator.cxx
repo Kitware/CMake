@@ -498,6 +498,18 @@ bool cmGlobalGenerator::CheckLanguages(
 void cmGlobalGenerator::EnableLanguage(
   std::vector<std::string> const& languages, cmMakefile* mf, bool optional)
 {
+  if (!this->IsMultiConfig()) {
+    std::string envBuildType;
+    if (!mf->GetDefinition("CMAKE_BUILD_TYPE") &&
+        cmSystemTools::GetEnv("CMAKE_BUILD_TYPE", envBuildType)) {
+      mf->AddCacheDefinition(
+        "CMAKE_BUILD_TYPE", envBuildType,
+        "Choose the type of build.  Options include: empty, "
+        "Debug, Release, RelWithDebInfo, MinSizeRel.",
+        cmStateEnums::STRING);
+    }
+  }
+
   if (languages.empty()) {
     cmSystemTools::Error("EnableLanguage must have a lang specified!");
     cmSystemTools::SetFatalErrorOccured();
