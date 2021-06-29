@@ -693,7 +693,8 @@ Custom Installation Logic
 .. code-block:: cmake
 
   install([[SCRIPT <file>] [CODE <code>]]
-          [COMPONENT <component>] [EXCLUDE_FROM_ALL] [ALL_COMPONENTS] [...])
+          [ALL_COMPONENTS | COMPONENT <component>]
+          [EXCLUDE_FROM_ALL] [...])
 
 The ``SCRIPT`` form will invoke the given CMake script files during
 installation.  If the script file name is a relative path it will be
@@ -708,11 +709,11 @@ example, the code
 
 will print a message during installation.
 
-The option ``ALL_COMPONENTS``
-  .. versionadded:: 3.21
-
-  Run the custom installation script code for every component of a
-  component-specific installation.
+.. versionadded:: 3.21
+  When the ``ALL_COMPONENTS`` option is given, the custom installation
+  script code will be executed for every component of a component-specific
+  installation.  This option is mutually exclusive with the ``COMPONENT``
+  option.
 
 .. versionadded:: 3.14
   ``<file>`` or ``<code>`` may use "generator expressions" with the syntax
