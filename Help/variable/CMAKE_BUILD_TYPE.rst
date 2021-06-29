@@ -23,3 +23,6 @@ Note that configuration names are case-insensitive.  The value of this
 variable will be the same as it is specified when invoking CMake.
 For instance, if ``-DCMAKE_BUILD_TYPE=ReLeAsE`` is specified, then the
 value of ``CMAKE_BUILD_TYPE`` will be ``ReLeAsE``.
+
+See :variable:`CMAKE_CONFIGURATION_TYPES` for specifying the configuration
+with multi-config generators.
