@@ -136,9 +136,11 @@ int main(int ac, char* av[])
       t = clock();
       status = (*cmakeGeneratedFunctionMapEntries[i].func)(ac, av);
       t = clock() - t;
-      double time_taken = ((double)t) / CLOCKS_PER_SEC;
       status_message = (status == -1) ? "not ok" : "ok";
-      printf("%s %d %s # %f\n", status_message, i + 1, name, time_taken);
+      {
+        double time_taken = ((double)t) / CLOCKS_PER_SEC;
+        printf("%s %d %s # %f\n", status_message, i + 1, name, time_taken);
+      }
     }
     printf("All tests finished.\n");
 
