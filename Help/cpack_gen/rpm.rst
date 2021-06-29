@@ -394,8 +394,10 @@ List of CPack RPM generator specific variables:
  * Mandatory : NO
  * Default   : -
 
- May be used to set weak RPM dependencies (suggests). Note that you must
- enclose the complete requires string between quotes.
+ May be used to set weak RPM dependencies (suggests). If ``rpmbuild`` doesn't
+ support the ``Suggests`` tag, CPack will emit a warning and ignore this
+ variable. Note that you must enclose the complete requires string between
+ quotes.
 
 .. variable:: CPACK_RPM_PACKAGE_PROVIDES
               CPACK_RPM_<component>_PACKAGE_PROVIDES
