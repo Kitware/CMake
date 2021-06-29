@@ -351,8 +351,17 @@ function(run_EnvironmentBuildType)
   unset(ENV{CMAKE_BUILD_TYPE})
 endfunction()
 
+function(run_EnvironmentConfigTypes)
+  set(ENV{CMAKE_CONFIGURATION_TYPES} "ConfigTypesEnv")
+  run_cmake(EnvConfigTypes)
+  run_cmake_with_options(EnvConfigTypesIgnore -DCMAKE_CONFIGURATION_TYPES=ConfigTypesOpt)
+  unset(ENV{CMAKE_CONFIGURATION_TYPES})
+endfunction()
+
 if(RunCMake_GENERATOR MATCHES "Make|^Ninja$")
   run_EnvironmentBuildType()
+elseif(RunCMake_GENERATOR MATCHES "Ninja Multi-Config|Visual Studio|Xcode")
+  run_EnvironmentConfigTypes()
 endif()
 
 function(run_EnvironmentToolchain)
