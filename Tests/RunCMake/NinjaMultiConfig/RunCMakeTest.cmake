@@ -5,6 +5,9 @@ include(RunCMake)
 set(RunCMake_GENERATOR "Ninja Multi-Config")
 set(RunCMake_GENERATOR_IS_MULTI_CONFIG 1)
 
+# Sanitize NINJA_STATUS since we expect default behavior.
+unset(ENV{NINJA_STATUS})
+
 function(check_files dir)
   cmake_parse_arguments(_check_files "" "" "INCLUDE;EXCLUDE" ${ARGN})
 
