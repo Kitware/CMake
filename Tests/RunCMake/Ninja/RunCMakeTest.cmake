@@ -18,6 +18,9 @@ else()
   message(FATAL_ERROR "'ninja --version' reported:\n${ninja_out}")
 endif()
 
+# Sanitize NINJA_STATUS since we expect default behavior.
+unset(ENV{NINJA_STATUS})
+
 if(CMAKE_HOST_WIN32)
   run_cmake(SelectCompilerWindows)
 else()
