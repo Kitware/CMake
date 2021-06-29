@@ -406,7 +406,7 @@ public:
     return "1.10.2";
   }
   static std::string RequiredNinjaVersionForCodePage() { return "1.11"; }
-  bool SupportsConsolePool() const;
+  bool SupportsDirectConsole() const;
   bool SupportsImplicitOuts() const;
   bool SupportsManifestRestat() const;
   bool SupportsMultilineDepfile() const;
