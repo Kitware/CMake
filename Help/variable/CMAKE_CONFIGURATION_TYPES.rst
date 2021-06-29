@@ -8,5 +8,9 @@ such as ``Debug``, ``Release``, ``RelWithDebInfo`` etc.  This has reasonable
 defaults on most platforms, but can be extended to provide other build
 types.
 
+This variable is initialized by the first :command:`project` or
+:command:`enable_language` command called in a project when a new build
+tree is first created.  The default value is generator-specific.
+
 See :variable:`CMAKE_BUILD_TYPE` for specifying the configuration with
 single-config generators.
