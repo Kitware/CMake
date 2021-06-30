@@ -1962,9 +1962,26 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
     }
   }
   this->GetCMakeInstance()->AddCacheEntry(name, value, doc, type);
-  if (this->GetPolicyStatus(cmPolicies::CMP0126) != cmPolicies::NEW) {
-    // if there was a definition then remove it
-    this->StateSnapshot.RemoveDefinition(name);
+  switch (this->GetPolicyStatus(cmPolicies::CMP0126)) {
+    case cmPolicies::WARN:
+      if (this->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0126") &&
+          this->IsNormalDefinitionSet(name)) {
+        this->IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0126),
+                   "\nFor compatibility with older versions of CMake, normal "
+                   "variable \"",
+                   name, "\" will be removed from the current scope."));
+      }
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      // if there was a definition then remove it
+      this->StateSnapshot.RemoveDefinition(name);
+      break;
+    case cmPolicies::NEW:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      break;
   }
 }
 
