@@ -208,6 +208,21 @@
 
 ### CUDA builds
 
+.cuda9.2:
+    image: "kitware/cmake:ci-cuda9.2-x86_64-2021-07-01"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: x86_64
+        CTEST_LABELS: "CUDA"
+
+.cuda9.2_nvidia:
+    extends: .cuda9.2
+
+    variables:
+        CMAKE_CONFIGURATION: cuda9.2_nvidia
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+
 .cuda10.2:
     image: "kitware/cmake:ci-cuda10.2-x86_64-2021-06-16"
 
