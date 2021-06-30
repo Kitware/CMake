@@ -56,6 +56,7 @@ else()
     set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
 
     string(COMPARE EQUAL "${CMAKE_${lang}_COMPILER_ID}" "AppleClang" __is_apple_clang)
+    string(COMPARE EQUAL "${CMAKE_${lang}_COMPILER_ID}" "FujitsuClang" __is_fujitsu_clang)
 
     # '-flto=thin' available since Clang 3.9 and Xcode 8
     # * http://clang.llvm.org/docs/ThinLTO.html#clang-llvm
@@ -65,6 +66,8 @@ else()
       if(CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 8.0)
         set(_CMAKE_LTO_THIN FALSE)
       endif()
+    elseif(__is_fujitsu_clang)
+      set(_CMAKE_LTO_THIN FALSE)
     else()
       if(CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.9)
         set(_CMAKE_LTO_THIN FALSE)
