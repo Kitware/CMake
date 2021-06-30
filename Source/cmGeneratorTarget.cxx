@@ -6349,11 +6349,11 @@ bool cmGeneratorTarget::IsLinkLookupScope(std::string const& n,
 }
 
 cm::optional<cmLinkItem> cmGeneratorTarget::LookupLinkItem(
-  std::string const& n, cmListFileBacktrace const& bt) const
+  std::string const& n, cmListFileBacktrace const& bt,
+  LookupLinkItemScope* scope) const
 {
   cm::optional<cmLinkItem> maybeItem;
-  cmLocalGenerator const* lg = this->LocalGenerator;
-  if (this->IsLinkLookupScope(n, lg)) {
+  if (this->IsLinkLookupScope(n, scope->LG)) {
     return maybeItem;
   }
 
@@ -6361,7 +6361,7 @@ cm::optional<cmLinkItem> cmGeneratorTarget::LookupLinkItem(
   if (name == this->GetName() || name.empty()) {
     return maybeItem;
   }
-  maybeItem = this->ResolveLinkItem(name, bt, lg);
+  maybeItem = this->ResolveLinkItem(name, bt, scope->LG);
   return maybeItem;
 }
 
@@ -6388,9 +6388,10 @@ void cmGeneratorTarget::ExpandLinkItems(
                              &dagChecker, this, headTarget->LinkerLanguage),
                libs);
   cmMakefile const* mf = this->LocalGenerator->GetMakefile();
+  LookupLinkItemScope scope{ this->LocalGenerator };
   for (std::string const& lib : libs) {
     if (cm::optional<cmLinkItem> maybeItem =
-          this->LookupLinkItem(lib, cge->GetBacktrace())) {
+          this->LookupLinkItem(lib, cge->GetBacktrace(), &scope)) {
       if (!maybeItem->Target) {
         // Report explicitly linked object files separately.
         std::string const& maybeObj = maybeItem->AsStr();
@@ -7092,9 +7093,10 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
                           iface.HadContextSensitiveCondition,
                           iface.HadLinkLanguageSensitiveCondition);
     std::vector<std::string> deps = cmExpandedList(info->SharedDeps);
+    LookupLinkItemScope scope{ this->LocalGenerator };
     for (std::string const& dep : deps) {
       if (cm::optional<cmLinkItem> maybeItem =
-            this->LookupLinkItem(dep, cmListFileBacktrace())) {
+            this->LookupLinkItem(dep, cmListFileBacktrace(), &scope)) {
         iface.SharedDeps.emplace_back(std::move(*maybeItem));
       }
     }
