@@ -1042,8 +1042,13 @@ private:
                        bool& hadHeadSensitiveCondition,
                        bool& hadContextSensitiveCondition,
                        bool& hadLinkLanguageSensitiveCondition) const;
+  struct LookupLinkItemScope
+  {
+    cmLocalGenerator const* LG;
+  };
   cm::optional<cmLinkItem> LookupLinkItem(std::string const& n,
-                                          cmListFileBacktrace const& bt) const;
+                                          cmListFileBacktrace const& bt,
+                                          LookupLinkItemScope* scope) const;
 
   std::vector<BT<std::string>> GetSourceFilePaths(
     std::string const& config) const;

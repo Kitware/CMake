@@ -4,6 +4,12 @@
 #ifndef DEF_SameNameImportedSubDirB
 #  error "DEF_SameNameImportedSubDirB is not defined but should be!"
 #endif
+#ifndef DEF_SameNameImported2SubDirA
+#  error "DEF_SameNameImported2SubDirA is not defined but should be!"
+#endif
+#ifndef DEF_SameNameImported2SubDirB
+#  error "DEF_SameNameImported2SubDirB is not defined but should be!"
+#endif
 #ifdef DEF_TopDirImported
 #  error "DEF_TopDirImported is defined but should not be!"
 #endif
