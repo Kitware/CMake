@@ -4426,13 +4426,12 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
     return false;
   }
 
-  // Deprecate old policies, especially those that require a lot
-  // of code to maintain the old behavior.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0081 &&
+  // Deprecate old policies.
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0088 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
-          id == cmPolicies::CMP0065))) {
+          id == cmPolicies::CMP0065 || id == cmPolicies::CMP0083))) {
     this->IssueMessage(MessageType::DEPRECATION_WARNING,
                        cmPolicies::GetPolicyDeprecatedWarning(id));
   }
