@@ -1,15 +1,13 @@
-execute_process(COMMAND ${RPMBUILD_EXECUTABLE} --querytags
-                OUTPUT_VARIABLE RPMBUILD_CAPS
-                RESULT_VARIABLE RPMBUILD_CAPS_RESULT)
+# CPack uses `rpm --suggests` to check if rpmbuild supports the "Suggests:" tag.
+# This test intentionally uses a different method (build a test .spec) so any
+# problems will be caught early if functionality should change in the future.
+execute_process(
+  COMMAND ${RPMBUILD_EXECUTABLE} --nobuild test_suggests.spec
+  ERROR_QUIET
+  RESULT_VARIABLE RPMBUILD_SUGGESTS_RESULT)
 
-if(NOT RPMBUILD_CAPS_RESULT)
-  string(REPLACE "\n" ";" RPMBUILD_CAPS "${RPMBUILD_CAPS}")
-  cmake_policy(PUSH)
-    cmake_policy(SET CMP0057 NEW)
-    if(SUGGESTS IN_LIST RPMBUILD_CAPS)
-      set(should_contain_suggests_tag_ true)
-    endif()
-  cmake_policy(POP)
+if(RPMBUILD_SUGGESTS_RESULT EQUAL 0)
+  set(should_contain_suggests_tag_ true)
 endif()
 
 # Only verify that suggests tag is present only if that tag is supported.

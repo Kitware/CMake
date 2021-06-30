@@ -1074,6 +1074,21 @@ function(cpack_rpm_generate_package)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   string(REPLACE "\n" ";" RPMBUILD_TAG_LIST "${RPMBUILD_TAG_LIST}")
 
+  # In some versions of RPM, weak dependency tags are present in the --querytags
+  # list, but unsupported by rpmbuild. A different method must be used to check
+  # if they are supported.
+
+  execute_process(
+    COMMAND ${RPM_EXECUTABLE} --suggests
+    ERROR_QUIET
+    RESULT_VARIABLE RPMBUILD_SUGGESTS_RESULT)
+
+  if(NOT RPMBUILD_SUGGESTS_RESULT EQUAL 0)
+    foreach(_WEAK_DEP SUGGESTS RECOMMENDS SUPPLEMENTS ENHANCES)
+      list(REMOVE_ITEM RPMBUILD_TAG_LIST ${_WEAK_DEP})
+    endforeach()
+  endif()
+
   if(CPACK_RPM_PACKAGE_EPOCH)
     set(TMP_RPM_EPOCH "Epoch: ${CPACK_RPM_PACKAGE_EPOCH}")
   endif()
