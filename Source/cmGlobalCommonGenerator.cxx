@@ -16,8 +16,8 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-
-class cmake;
+#include "cmSystemTools.h"
+#include "cmake.h"
 
 cmGlobalCommonGenerator::cmGlobalCommonGenerator(cmake* cm)
   : cmGlobalGenerator(cm)
@@ -94,4 +94,34 @@ bool cmGlobalCommonGenerator::IsExcludedFromAllInConfig(
     return cm::contains(t.ExcludedFromAllInConfigs, config);
   }
   return !t.ExcludedFromAllInConfigs.empty();
+}
+
+std::string cmGlobalCommonGenerator::GetEditCacheCommand() const
+{
+  // If generating for an extra IDE, the edit_cache target cannot
+  // launch a terminal-interactive tool, so always use cmake-gui.
+  if (!this->GetExtraGeneratorName().empty()) {
+    return cmSystemTools::GetCMakeGUICommand();
+  }
+
+  // Use an internal cache entry to track the latest dialog used
+  // to edit the cache, and use that for the edit_cache target.
+  cmake* cm = this->GetCMakeInstance();
+  std::string editCacheCommand = cm->GetCMakeEditCommand();
+  if (!cm->GetCacheDefinition("CMAKE_EDIT_COMMAND") ||
+      !editCacheCommand.empty()) {
+    if (this->SupportsDirectConsole() && editCacheCommand.empty()) {
+      editCacheCommand = cmSystemTools::GetCMakeCursesCommand();
+    }
+    if (editCacheCommand.empty()) {
+      editCacheCommand = cmSystemTools::GetCMakeGUICommand();
+    }
+    if (!editCacheCommand.empty()) {
+      cm->AddCacheEntry("CMAKE_EDIT_COMMAND", editCacheCommand.c_str(),
+                        "Path to cache edit program executable.",
+                        cmStateEnums::INTERNAL);
+    }
+  }
+  cmProp edit_cmd = cm->GetCacheDefinition("CMAKE_EDIT_COMMAND");
+  return edit_cmd ? *edit_cmd : std::string();
 }
