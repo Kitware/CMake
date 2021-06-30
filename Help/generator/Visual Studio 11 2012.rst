@@ -9,8 +9,9 @@ generator using the name "Visual Studio 11" without the year component.
 Project Types
 ^^^^^^^^^^^^^
 
-Only Visual C++ and C# projects may be generated.  Other types of
-projects (JavaScript, Database, Website, etc.) are not supported.
+Only Visual C++ and C# projects may be generated (and Fortran with
+Intel compiler integration).  Other types of projects (JavaScript,
+Database, Website, etc.) are not supported.
 
 Platform Selection
 ^^^^^^^^^^^^^^^^^^
