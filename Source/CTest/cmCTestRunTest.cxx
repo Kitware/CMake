@@ -262,7 +262,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     *this->TestHandler->LogFile << "Test time = " << buf << std::endl;
   }
 
-  this->DartProcessing();
+  this->ParseOutputForMeasurements();
 
   // if this is doing MemCheck then all the output needs to be put into
   // Output since that is what is parsed by cmCTestMemCheckHandler
@@ -698,18 +698,22 @@ void cmCTestRunTest::ComputeArguments()
   }
 }
 
-void cmCTestRunTest::DartProcessing()
+void cmCTestRunTest::ParseOutputForMeasurements()
 {
   if (!this->ProcessOutput.empty() &&
-      this->ProcessOutput.find("<DartMeasurement") != std::string::npos) {
-    if (this->TestHandler->DartStuff.find(this->ProcessOutput)) {
-      this->TestResult.DartString = this->TestHandler->DartStuff.match(1);
+      (this->ProcessOutput.find("<DartMeasurement") != std::string::npos ||
+       this->ProcessOutput.find("<CTestMeasurement") != std::string::npos)) {
+    if (this->TestHandler->AllTestMeasurementsRegex.find(
+          this->ProcessOutput)) {
+      this->TestResult.TestMeasurementsOutput =
+        this->TestHandler->AllTestMeasurementsRegex.match(1);
       // keep searching and replacing until none are left
-      while (this->TestHandler->DartStuff1.find(this->ProcessOutput)) {
+      while (this->TestHandler->SingleTestMeasurementRegex.find(
+        this->ProcessOutput)) {
         // replace the exact match for the string
         cmSystemTools::ReplaceString(
-          this->ProcessOutput, this->TestHandler->DartStuff1.match(1).c_str(),
-          "");
+          this->ProcessOutput,
+          this->TestHandler->SingleTestMeasurementRegex.match(1).c_str(), "");
       }
     }
   }

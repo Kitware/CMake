@@ -109,7 +109,7 @@ public:
 
 private:
   bool NeedsToRepeat();
-  void DartProcessing();
+  void ParseOutputForMeasurements();
   void ExeNotFound(std::string exe);
   bool ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
                    std::vector<std::string>* environment,

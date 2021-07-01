@@ -960,6 +960,7 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestSubmitHandler.cxx
   CTest/cmCTestTestCommand.cxx
   CTest/cmCTestTestHandler.cxx
+  CTest/cmCTestTestMeasurementXMLParser.cxx
   CTest/cmCTestUpdateCommand.cxx
   CTest/cmCTestUpdateHandler.cxx
   CTest/cmCTestUploadCommand.cxx
