@@ -3182,6 +3182,23 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
   }
 }
 
+void cmMakefile::InitCMAKE_CONFIGURATION_TYPES(std::string const& genDefault)
+{
+  if (this->GetDefinition("CMAKE_CONFIGURATION_TYPES")) {
+    return;
+  }
+  std::string initConfigs;
+  if (!cmSystemTools::GetEnv("CMAKE_CONFIGURATION_TYPES", initConfigs)) {
+    initConfigs = genDefault;
+  }
+  this->AddCacheDefinition(
+    "CMAKE_CONFIGURATION_TYPES", initConfigs,
+    "Semicolon separated list of supported configuration types, "
+    "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
+    "anything else will be ignored.",
+    cmStateEnums::STRING);
+}
+
 std::string cmMakefile::GetDefaultConfiguration() const
 {
   if (this->GetGlobalGenerator()->IsMultiConfig()) {

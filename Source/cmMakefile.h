@@ -310,6 +310,8 @@ public:
    */
   void SetProjectName(std::string const& name);
 
+  void InitCMAKE_CONFIGURATION_TYPES(std::string const& genDefault);
+
   /* Get the default configuration */
   std::string GetDefaultConfiguration() const;
 
