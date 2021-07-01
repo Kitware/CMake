@@ -88,7 +88,8 @@ else()
 
     # MSVC needs at least one include directory for __has_include to function,
     # but custom toolchains may run MSVC with no INCLUDE env var and no -I flags.
-    "-I__does_not_exist__"
+    # Also avoid linking so this works with no LIB env var.
+    "-c -I__does_not_exist__"
     )
 endif()
 if(CMAKE_C_COMPILER_TARGET)
