@@ -257,8 +257,10 @@ The following example demonstrates how to upload non-image files to CDash.
 .. code-block:: c++
 
    std::cout <<
-     "<CTestMeasurementFile type=\"file\" name=\"MyTestInputData\">" <<
-     "/dir/to/data.csv</CTestMeasurementFile>" << std::endl;
+     "<CTestMeasurementFile type=\"file\" name=\"TestInputData1\">" <<
+     "/dir/to/data1.csv</CTestMeasurementFile>\n"                   <<
+     "<CTestMeasurementFile type=\"file\" name=\"TestInputData2\">" <<
+     "/dir/to/data2.csv</CTestMeasurementFile>"                     << std::endl;
 
 If the name of the file to upload is known at configure time, you can use the
 :prop_test:`ATTACHED_FILES` or :prop_test:`ATTACHED_FILES_ON_FAIL` test
