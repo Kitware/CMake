@@ -8,11 +8,13 @@ Debug/discovery_timeout_test_NOT_BUILT
 Debug/discovery_timeout_test_NOT_BUILT(\.exe)?
 Debug/discovery_timeout_test_NOT_BUILT
 Debug/discovery_timeout_test_NOT_BUILT(\.exe)?
-[^\n]+discovery_timeout_test_NOT_BUILT +\.+\*\*\*Not Run +[0-9.]+ sec
+[^
+]+discovery_timeout_test_NOT_BUILT +\.+\*\*\*Not Run +[0-9.]+ sec
 +
 0% tests passed, 1 tests failed out of 1
 +
 Total Test time \(real\) =   +[0-9.]+ sec
 +
 The following tests FAILED:
-[^\n]+discovery_timeout_test_NOT_BUILT \(Not Run\)
+[^
+]+discovery_timeout_test_NOT_BUILT \(Not Run\)
