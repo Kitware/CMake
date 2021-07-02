@@ -45,7 +45,13 @@ public:
     CPack,
   };
 
-  cmState(Mode mode);
+  enum class ProjectKind
+  {
+    Normal,
+    TryCompile,
+  };
+
+  cmState(Mode mode, ProjectKind projectKind = ProjectKind::Normal);
   ~cmState();
 
   cmState(const cmState&) = delete;
@@ -141,9 +147,6 @@ public:
   void SetEnabledLanguages(std::vector<std::string> const& langs);
   void ClearEnabledLanguages();
 
-  bool GetIsInTryCompile() const;
-  void SetIsInTryCompile(bool b);
-
   bool GetIsGeneratorMultiConfig() const;
   void SetIsGeneratorMultiConfig(bool b);
 
@@ -210,6 +213,8 @@ public:
 
   static std::string ModeToString(Mode mode);
 
+  ProjectKind GetProjectKind() const;
+
 private:
   friend class cmake;
   void AddCacheEntry(const std::string& key, const char* value,
@@ -247,7 +252,6 @@ private:
 
   std::string SourceDirectory;
   std::string BinaryDirectory;
-  bool IsInTryCompile = false;
   bool IsGeneratorMultiConfig = false;
   bool WindowsShell = false;
   bool WindowsVSIDE = false;
@@ -258,4 +262,5 @@ private:
   bool MSYSShell = false;
   bool NinjaMulti = false;
   Mode StateMode = Unknown;
+  ProjectKind StateProjectKind = ProjectKind::Normal;
 };

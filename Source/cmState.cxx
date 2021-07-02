@@ -26,8 +26,9 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cmState::cmState(Mode mode)
+cmState::cmState(Mode mode, ProjectKind projectKind)
   : StateMode(mode)
+  , StateProjectKind(projectKind)
 {
   this->CacheManager = cm::make_unique<cmCacheManager>();
   this->GlobVerificationManager = cm::make_unique<cmGlobVerificationManager>();
@@ -382,16 +383,6 @@ void cmState::ClearEnabledLanguages()
   this->EnabledLanguages.clear();
 }
 
-bool cmState::GetIsInTryCompile() const
-{
-  return this->IsInTryCompile;
-}
-
-void cmState::SetIsInTryCompile(bool b)
-{
-  this->IsInTryCompile = b;
-}
-
 bool cmState::GetIsGeneratorMultiConfig() const
 {
   return this->IsGeneratorMultiConfig;
@@ -594,8 +585,9 @@ cmProp cmState::GetGlobalProperty(const std::string& prop)
     std::vector<std::string> commands = this->GetCommandNames();
     this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";").c_str());
   } else if (prop == "IN_TRY_COMPILE") {
-    this->SetGlobalProperty("IN_TRY_COMPILE",
-                            this->IsInTryCompile ? "1" : "0");
+    this->SetGlobalProperty(
+      "IN_TRY_COMPILE",
+      this->StateProjectKind == ProjectKind::TryCompile ? "1" : "0");
   } else if (prop == "GENERATOR_IS_MULTI_CONFIG") {
     this->SetGlobalProperty("GENERATOR_IS_MULTI_CONFIG",
                             this->IsGeneratorMultiConfig ? "1" : "0");
@@ -797,6 +789,11 @@ std::string cmState::ModeToString(cmState::Mode mode)
       return "UNKNOWN";
   }
   return "UNKNOWN";
+}
+
+cmState::ProjectKind cmState::GetProjectKind() const
+{
+  return this->StateProjectKind;
 }
 
 std::string const& cmState::GetBinaryDirectory() const

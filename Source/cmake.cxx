@@ -156,13 +156,13 @@ static void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
 }
 #endif
 
-cmake::cmake(Role role, cmState::Mode mode)
+cmake::cmake(Role role, cmState::Mode mode, cmState::ProjectKind projectKind)
   : CMakeWorkingDirectory(cmSystemTools::GetCurrentWorkingDirectory())
   , FileTimeCache(cm::make_unique<cmFileTimeCache>())
 #ifndef CMAKE_BOOTSTRAP
   , VariableWatch(cm::make_unique<cmVariableWatch>())
 #endif
-  , State(cm::make_unique<cmState>(mode))
+  , State(cm::make_unique<cmState>(mode, projectKind))
   , Messenger(cm::make_unique<cmMessenger>())
 {
   this->TraceFile.close();
@@ -1842,7 +1842,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   std::vector<std::string> argsSplit = cmExpandedList(var, true);
   // erase the property to avoid infinite recursion
   this->State->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
-  if (this->State->GetIsInTryCompile()) {
+  if (this->GetIsInTryCompile()) {
     return 0;
   }
   std::vector<SaveCacheEntry> saved;
@@ -2110,7 +2110,7 @@ int cmake::ActualConfigure()
   // reset any system configuration information, except for when we are
   // InTryCompile. With TryCompile the system info is taken from the parent's
   // info to save time
-  if (!this->State->GetIsInTryCompile()) {
+  if (!this->GetIsInTryCompile()) {
     this->GlobalGenerator->ClearEnabledLanguages();
 
     this->TruncateOutputLog("CMakeOutput.log");
@@ -2621,19 +2621,14 @@ void cmake::SetProgressCallback(ProgressCallbackType f)
 
 void cmake::UpdateProgress(const std::string& msg, float prog)
 {
-  if (this->ProgressCallback && !this->State->GetIsInTryCompile()) {
+  if (this->ProgressCallback && !this->GetIsInTryCompile()) {
     this->ProgressCallback(msg, prog);
   }
 }
 
 bool cmake::GetIsInTryCompile() const
 {
-  return this->State->GetIsInTryCompile();
-}
-
-void cmake::SetIsInTryCompile(bool b)
-{
-  this->State->SetIsInTryCompile(b);
+  return this->State->GetProjectKind() == cmState::ProjectKind::TryCompile;
 }
 
 void cmake::AppendGlobalGeneratorsDocumentation(
