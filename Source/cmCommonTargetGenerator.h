@@ -40,6 +40,7 @@ protected:
   cmLocalCommonGenerator* LocalCommonGenerator;
   cmGlobalCommonGenerator* GlobalCommonGenerator;
   std::vector<std::string> ConfigNames;
+  bool UseLWYU = false;
 
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);

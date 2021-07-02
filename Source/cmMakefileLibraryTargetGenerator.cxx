@@ -178,9 +178,9 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   this->AddModuleDefinitionFlag(linkLineComputer.get(), extraFlags,
                                 this->GetConfigName());
 
-  if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
-    this->LocalGenerator->AppendFlags(extraFlags, " -Wl,--no-as-needed");
-  }
+  this->UseLWYU = this->LocalGenerator->AppendLWYUFlags(
+    extraFlags, this->GeneratorTarget, linkLanguage);
+
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
 
@@ -871,13 +871,18 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       // Get the set of commands.
       std::string linkRule = this->GetLinkRule(linkRuleVar);
       cmExpandList(linkRule, real_link_commands);
-      if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE") &&
-          (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY)) {
-        std::string cmakeCommand = cmStrCat(
-          this->LocalGenerator->ConvertToOutputFormat(
-            cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL),
-          " -E __run_co_compile --lwyu=", targetOutPathReal);
-        real_link_commands.push_back(std::move(cmakeCommand));
+      if (this->UseLWYU) {
+        cmProp lwyuCheck =
+          this->Makefile->GetDefinition("CMAKE_LINK_WHAT_YOU_USE_CHECK");
+        if (lwyuCheck) {
+          std::string cmakeCommand = cmStrCat(
+            this->LocalGenerator->ConvertToOutputFormat(
+              cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL),
+            " -E __run_co_compile --lwyu=");
+          cmakeCommand += this->LocalGenerator->EscapeForShell(*lwyuCheck);
+          cmakeCommand += cmStrCat(" --source=", targetOutPathReal);
+          real_link_commands.push_back(std::move(cmakeCommand));
+        }
       }
 
       // Expand placeholders.
