@@ -163,6 +163,7 @@ test:debian10-ninja:
         - .debian10_ninja
         - .cmake_test_linux_release
         - .linux_builder_tags_qt
+        - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos6_x86_64
 
@@ -171,6 +172,7 @@ test:debian10-aarch64-ninja:
         - .debian10_aarch64_ninja
         - .cmake_test_linux_release
         - .linux_builder_tags_aarch64_qt
+        - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_aarch64
     variables:
@@ -209,6 +211,7 @@ test:fedora34-makefiles-nospace:
         - .fedora34_makefiles
         - .cmake_test_linux_release
         - .linux_builder_tags_qt
+        - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos6_x86_64
     variables:
@@ -231,6 +234,7 @@ test:cuda10.2-nvidia:
         - .cuda10.2_nvidia
         - .cmake_test_linux_release
         - .linux_builder_tags_cuda
+        - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos6_x86_64
 
@@ -269,6 +273,7 @@ test:fedora34-ninja-multi:
         - .fedora34_ninja_multi
         - .cmake_test_linux_external
         - .linux_builder_tags_qt
+        - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
         - test:fedora34-ninja
@@ -635,6 +640,7 @@ test:macos-x86_64-xcode:
         - .macos_x86_64_xcode
         - .cmake_test_macos_external
         - .macos_x86_64_builder_ext_tags
+        - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
         - test:macos-x86_64-ninja
@@ -646,6 +652,7 @@ test:macos-arm64-xcode:
         - .macos_arm64_xcode
         - .cmake_test_macos_external
         - .macos_arm64_builder_ext_tags
+        - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
         - test:macos-arm64-ninja
@@ -727,6 +734,7 @@ test:windows-vs2019-x64:
         - .windows_vs2019_x64
         - .cmake_test_windows_external
         - .windows_builder_ext_tags
+        - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
         - test:windows-vs2019-x64-ninja
