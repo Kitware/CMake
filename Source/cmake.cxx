@@ -162,11 +162,10 @@ cmake::cmake(Role role, cmState::Mode mode)
 #ifndef CMAKE_BOOTSTRAP
   , VariableWatch(cm::make_unique<cmVariableWatch>())
 #endif
-  , State(cm::make_unique<cmState>())
+  , State(cm::make_unique<cmState>(mode))
   , Messenger(cm::make_unique<cmMessenger>())
 {
   this->TraceFile.close();
-  this->State->SetMode(mode);
   this->CurrentSnapshot = this->State->CreateBaseSnapshot();
 
 #ifdef __APPLE__

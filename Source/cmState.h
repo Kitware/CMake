@@ -35,12 +35,6 @@ class cmState
   friend class cmStateSnapshot;
 
 public:
-  cmState();
-  ~cmState();
-
-  cmState(const cmState&) = delete;
-  cmState& operator=(const cmState&) = delete;
-
   enum Mode
   {
     Unknown,
@@ -50,6 +44,12 @@ public:
     CTest,
     CPack,
   };
+
+  cmState(Mode mode);
+  ~cmState();
+
+  cmState(const cmState&) = delete;
+  cmState& operator=(const cmState&) = delete;
 
   static const std::string& GetTargetTypeName(
     cmStateEnums::TargetType targetType);
@@ -207,7 +207,6 @@ public:
 
   Mode GetMode() const;
   std::string GetModeString() const;
-  void SetMode(Mode mode);
 
   static std::string ModeToString(Mode mode);
 
@@ -258,5 +257,5 @@ private:
   bool NMake = false;
   bool MSYSShell = false;
   bool NinjaMulti = false;
-  Mode CurrentMode = Unknown;
+  Mode StateMode = Unknown;
 };

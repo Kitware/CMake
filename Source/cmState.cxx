@@ -26,7 +26,8 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cmState::cmState()
+cmState::cmState(Mode mode)
+  : StateMode(mode)
 {
   this->CacheManager = cm::make_unique<cmCacheManager>();
   this->GlobVerificationManager = cm::make_unique<cmGlobVerificationManager>();
@@ -771,17 +772,12 @@ unsigned int cmState::GetCacheMinorVersion() const
 
 cmState::Mode cmState::GetMode() const
 {
-  return this->CurrentMode;
+  return this->StateMode;
 }
 
 std::string cmState::GetModeString() const
 {
-  return ModeToString(this->CurrentMode);
-}
-
-void cmState::SetMode(cmState::Mode mode)
-{
-  this->CurrentMode = mode;
+  return ModeToString(this->StateMode);
 }
 
 std::string cmState::ModeToString(cmState::Mode mode)
