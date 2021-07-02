@@ -216,6 +216,16 @@ test:fedora34-makefiles-nospace:
         CMAKE_CI_BUILD_NAME: fedora34_makefiles_nospace
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+test:cuda9.2-nvidia:
+    extends:
+        - .cuda9.2_nvidia
+        - .cmake_test_linux_release
+        - .linux_builder_tags_cuda
+        - .run_dependent
+        - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 test:cuda10.2-nvidia:
     extends:
         - .cuda10.2_nvidia
