@@ -8,8 +8,15 @@
 
 #include "cmGccDepfileReaderTypes.h"
 
+enum class GccDepfilePrependPaths
+{
+  All,
+  Deps,
+};
+
 /*
- * Read dependencies file and append prefix to all relative paths
+ * Read dependencies file and prepend prefix to all relative paths
  */
 cm::optional<cmGccDepfileContent> cmReadGccDepfile(
-  const char* filePath, const std::string& prefix = {});
+  const char* filePath, const std::string& prefix = {},
+  GccDepfilePrependPaths prependPaths = GccDepfilePrependPaths::All);

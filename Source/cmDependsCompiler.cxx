@@ -131,7 +131,9 @@ bool cmDependsCompiler::CheckDependencies(
             depends.emplace_back(std::move(line));
           }
         } else if (format == "gcc"_s) {
-          auto deps = cmReadGccDepfile(depFile.c_str());
+          auto deps = cmReadGccDepfile(
+            depFile.c_str(), this->LocalGenerator->GetCurrentBinaryDirectory(),
+            GccDepfilePrependPaths::Deps);
           if (!deps) {
             continue;
           }
