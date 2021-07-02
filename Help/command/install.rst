@@ -132,7 +132,7 @@ Installing Targets
   install(TARGETS targets... [EXPORT <export-name>]
           [RUNTIME_DEPENDENCIES args...|RUNTIME_DEPENDENCY_SET <set-name>]
           [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
-            PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE]
+            PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set-name>]
            [DESTINATION <dir>]
            [PERMISSIONS permissions...]
            [CONFIGURATIONS [Debug|Release|...]]
@@ -204,6 +204,13 @@ that may be installed:
   Similar to ``PUBLIC_HEADER`` and ``PRIVATE_HEADER``, but for
   ``RESOURCE`` files. See :prop_tgt:`RESOURCE` for details.
 
+``FILE_SET <set>``
+  If the file set ``<set>`` exists and is ``PUBLIC`` or ``INTERFACE``, any
+  files added to the file set ``<set>`` created by
+  :command:`target_sources(FILE_SET)` are installed in the specified
+  destination, preserving their directory structure relative to the file set's
+  base directories.
+
 For each of these arguments given, the arguments following them only apply
 to the target or file type specified in the argument. If none is given, the
 installation properties apply to all target types. If only one is given then
@@ -225,15 +232,16 @@ end of this section).
 The following table shows the target types with their associated variables and
 built-in defaults that apply when no destination is given:
 
-================== =============================== ======================
-   Target Type         GNUInstallDirs Variable        Built-In Default
-================== =============================== ======================
-``RUNTIME``        ``${CMAKE_INSTALL_BINDIR}``     ``bin``
-``LIBRARY``        ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
-``ARCHIVE``        ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
-``PRIVATE_HEADER`` ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
-``PUBLIC_HEADER``  ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
-================== =============================== ======================
+=============================== =============================== ======================
+   Target Type                      GNUInstallDirs Variable        Built-In Default
+=============================== =============================== ======================
+``RUNTIME``                     ``${CMAKE_INSTALL_BINDIR}``     ``bin``
+``LIBRARY``                     ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
+``ARCHIVE``                     ``${CMAKE_INSTALL_LIBDIR}``     ``lib``
+``PRIVATE_HEADER``              ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
+``PUBLIC_HEADER``               ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
+``FILE_SET`` (type ``HEADERS``) ``${CMAKE_INSTALL_INCLUDEDIR}`` ``include``
+=============================== =============================== ======================
 
 Projects wishing to follow the common practice of installing headers into a
 project-specific subdirectory will need to provide a destination rather than
@@ -337,6 +345,11 @@ top level:
   install the export file itself, call `install(EXPORT)`_, documented below.
   See documentation of the :prop_tgt:`EXPORT_NAME` target property to change
   the name of the exported target.
+
+  If ``EXPORT`` is used and the targets include ``PUBLIC`` or ``INTERFACE``
+  file sets, all of them must be specified with ``FILE_SET`` arguments. All
+  ``PUBLIC`` or ``INTERFACE`` file sets associated with a target are included
+  in the export.
 
 ``INCLUDES DESTINATION``
   This option specifies a list of directories which will be added to the
