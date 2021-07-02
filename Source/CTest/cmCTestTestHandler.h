@@ -151,6 +151,7 @@ public:
     // return code of test which will mark test as "not run"
     int SkipReturnCode;
     std::vector<std::string> Environment;
+    std::vector<std::string> EnvironmentModification;
     std::vector<std::string> Labels;
     std::set<std::string> LockedResources;
     std::set<std::string> FixturesSetup;

@@ -2245,6 +2245,8 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmExpandList(val, rt.Depends);
           } else if (key == "ENVIRONMENT"_s) {
             cmExpandList(val, rt.Environment);
+          } else if (key == "ENVIRONMENT_MODIFICATION"_s) {
+            cmExpandList(val, rt.EnvironmentModification);
           } else if (key == "LABELS"_s) {
             std::vector<std::string> Labels = cmExpandedList(val);
             rt.Labels.insert(rt.Labels.end(), Labels.begin(), Labels.end());

@@ -1026,6 +1026,11 @@ static Json::Value DumpCTestProperties(
     properties.append(DumpCTestProperty(
       "ENVIRONMENT", DumpToJsonArray(testProperties.Environment)));
   }
+  if (!testProperties.EnvironmentModification.empty()) {
+    properties.append(DumpCTestProperty(
+      "ENVIRONMENT_MODIFICATION",
+      DumpToJsonArray(testProperties.EnvironmentModification)));
+  }
   if (!testProperties.ErrorRegularExpressions.empty()) {
     properties.append(DumpCTestProperty(
       "FAIL_REGULAR_EXPRESSION",
