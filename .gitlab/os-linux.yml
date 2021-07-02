@@ -90,7 +90,7 @@
 
     variables:
         CMAKE_CONFIGURATION: fedora34_clang_analyzer
-        CMAKE_BUILD_TYPE: Debug
+        CMAKE_CI_BUILD_TYPE: Debug
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMake_SKIP_INSTALL: 1
 
@@ -168,7 +168,7 @@
 
 .fedora_memcheck:
     variables:
-        CMAKE_BUILD_TYPE: RelWithDebInfo
+        CMAKE_CI_BUILD_TYPE: RelWithDebInfo
 
 .fedora_asan_addon:
     extends: .fedora_memcheck
