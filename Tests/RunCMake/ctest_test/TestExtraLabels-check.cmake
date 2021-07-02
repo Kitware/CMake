@@ -20,9 +20,6 @@ if(NOT n_matches EQUAL 1)
 endif()
 
 # Check test output.
-if(NOT _test_contents MATCHES "before")
-  string(APPEND RunCMake_TEST_FAILED "Could not find expected string 'before' in Test.xml")
-endif()
-if(NOT _test_contents MATCHES "after")
-  string(APPEND RunCMake_TEST_FAILED "Could not find expected string 'after' in Test.xml")
+if(NOT _test_contents MATCHES "<Value>before\nafter\n</Value>")
+  string(APPEND RunCMake_TEST_FAILED "Could not find expected output in Test.xml")
 endif()

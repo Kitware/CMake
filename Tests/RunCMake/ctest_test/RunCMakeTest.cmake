@@ -158,13 +158,25 @@ add_test(
   COMMAND ${CMAKE_COMMAND} -E
   echo <DartMeasurement type="numeric/double" name="my_custom_value">1.4847</DartMeasurement>)
 add_test(
+  NAME double_measurement2
+  COMMAND ${CMAKE_COMMAND} -E
+  echo <CTestMeasurement type="numeric/double" name="another_custom_value">1.8474</CTestMeasurement>)
+add_test(
   NAME img_measurement
   COMMAND ${CMAKE_COMMAND} -E
   echo <DartMeasurementFile name="TestImage" type="image/png">]] ${IMAGE_DIR}/cmake-logo-16.png [[</DartMeasurementFile>)
 add_test(
+  NAME img_measurement2
+  COMMAND ${CMAKE_COMMAND} -E
+  echo <CTestMeasurementFile name="TestImage2" type="image/png">]] ${IMAGE_DIR}/cmake-logo-16.png [[</CTestMeasurementFile>)
+add_test(
   NAME file_measurement
   COMMAND ${CMAKE_COMMAND} -E
   echo <DartMeasurementFile name="my_test_input_data" type="file">]] ${IMAGE_DIR}/cmake-logo-16.png [[</DartMeasurementFile>)
+add_test(
+  NAME file_measurement2
+  COMMAND ${CMAKE_COMMAND} -E
+  echo <CTestMeasurementFile name="another_test_input_data" type="file">]] ${IMAGE_DIR}/cmake-logo-16.png [[</CTestMeasurementFile>)
   ]])
   run_ctest(TestMeasurements)
 endfunction()

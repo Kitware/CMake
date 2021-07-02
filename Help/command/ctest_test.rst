@@ -186,29 +186,33 @@ Check the `CDash test measurement documentation
 <https://github.com/Kitware/CDash/blob/master/docs/test_measurements.md>`_
 for more information on the types of test measurements that CDash recognizes.
 
+Starting in version 3.22, CTest can parse custom measurements from tags named
+``<CTestMeasurement>`` or ``<CTestMeasurementFile>``. The older names
+``<DartMeasurement>`` and ``<DartMeasurementFile>`` are still supported.
+
 The following example demonstrates how to output a variety of custom test
 measurements.
 
 .. code-block:: c++
 
    std::cout <<
-     "<DartMeasurement type=\"numeric/double\" name=\"score\">28.3</DartMeasurement>"
+     "<CTestMeasurement type=\"numeric/double\" name=\"score\">28.3</CTestMeasurement>"
      << std::endl;
 
    std::cout <<
-     "<DartMeasurement type=\"text/string\" name=\"color\">red</DartMeasurement>"
+     "<CTestMeasurement type=\"text/string\" name=\"color\">red</CTestMeasurement>"
      << std::endl;
 
    std::cout <<
-     "<DartMeasurement type=\"text/link\" name=\"CMake URL\">https://cmake.org</DartMeasurement>"
+     "<CTestMeasurement type=\"text/link\" name=\"CMake URL\">https://cmake.org</CTestMeasurement>"
      << std::endl;
 
    std::cout <<
-     "<DartMeasurement type=\"text/preformatted\" name=\"Console Output\">" <<
+     "<CTestMeasurement type=\"text/preformatted\" name=\"Console Output\">" <<
      "line 1.\n" <<
      "  \033[31;1m line 2. Bold red, and indented!\033[0;0ml\n" <<
      "line 3. Not bold or indented...\n" <<
-     "</DartMeasurement>" << std::endl;
+     "</CTestMeasurement>" << std::endl;
 
 Image Measurements
 """"""""""""""""""
@@ -218,16 +222,16 @@ The following example demonstrates how to upload test images to CDash.
 .. code-block:: c++
 
    std::cout <<
-     "<DartMeasurementFile type=\"image/jpg\" name=\"TestImage\">" <<
-     "/dir/to/test_img.jpg</DartMeasurementFile>" << std::endl;
+     "<CTestMeasurementFile type=\"image/jpg\" name=\"TestImage\">" <<
+     "/dir/to/test_img.jpg</CTestMeasurementFile>" << std::endl;
 
    std::cout <<
-     "<DartMeasurementFile type=\"image/gif\" name=\"ValidImage\">" <<
-     "/dir/to/valid_img.gif</DartMeasurementFile>" << std::endl;
+     "<CTestMeasurementFile type=\"image/gif\" name=\"ValidImage\">" <<
+     "/dir/to/valid_img.gif</CTestMeasurementFile>" << std::endl;
 
    std::cout <<
-     "<DartMeasurementFile type=\"image/png\" name=\"AlgoResult\"> <<
-     "/dir/to/img.png</DartMeasurementFile>"
+     "<CTestMeasurementFile type=\"image/png\" name=\"AlgoResult\"> <<
+     "/dir/to/img.png</CTestMeasurementFile>"
      << std::endl;
 
 Images will be displayed together in an interactive comparison mode on CDash
@@ -253,8 +257,10 @@ The following example demonstrates how to upload non-image files to CDash.
 .. code-block:: c++
 
    std::cout <<
-     "<DartMeasurementFile type=\"file\" name=\"MyTestInputData\">" <<
-     "/dir/to/data.csv</DartMeasurementFile>" << std::endl;
+     "<CTestMeasurementFile type=\"file\" name=\"TestInputData1\">" <<
+     "/dir/to/data1.csv</CTestMeasurementFile>\n"                   <<
+     "<CTestMeasurementFile type=\"file\" name=\"TestInputData2\">" <<
+     "/dir/to/data2.csv</CTestMeasurementFile>"                     << std::endl;
 
 If the name of the file to upload is known at configure time, you can use the
 :prop_test:`ATTACHED_FILES` or :prop_test:`ATTACHED_FILES_ON_FAIL` test
