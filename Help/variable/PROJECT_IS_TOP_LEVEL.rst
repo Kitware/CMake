@@ -19,3 +19,13 @@ options:
   if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
   endif()
+
+The variable value will be true in:
+
+* the top-level directory of the project
+* the top-level directory of an external project added by :module:`ExternalProject`
+
+The variable value will be false in:
+
+* a directory added by :command:`add_subdirectory`
+* a directory added by :module:`FetchContent`
