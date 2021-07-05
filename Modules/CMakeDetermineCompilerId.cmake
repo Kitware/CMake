@@ -722,7 +722,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
   # Check the result of compilation.
   if(CMAKE_${lang}_COMPILER_ID_RESULT
      # Intel Fortran warns and ignores preprocessor lines without /fpp
-     OR CMAKE_${lang}_COMPILER_ID_OUTPUT MATCHES "Bad # preprocessor line"
+     OR CMAKE_${lang}_COMPILER_ID_OUTPUT MATCHES "warning #5117: Bad # preprocessor line"
      )
     # Compilation failed.
     set(MSG
@@ -733,7 +733,10 @@ ${CMAKE_${lang}_COMPILER_ID_RESULT}
 ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
 ")
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log "${MSG}")
+    # Log the output unless we recognize it as a known-bad case.
+    if(NOT CMAKE_${lang}_COMPILER_ID_OUTPUT MATCHES "warning #5117: Bad # preprocessor line")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log "${MSG}")
+    endif()
 
     # Some languages may know the correct/desired set of flags and want to fail right away if they don't work.
     # This is currently only used by CUDA.
