@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 3,
   "configurePresets": [
     {
       "name": "zzzzzz",
@@ -17,6 +17,9 @@
       "name": "mmmmmm",
       "generator": "@RunCMake_GENERATOR@",
       "binaryDir": "${sourceDir}/build/mmmmmm"
+    },
+    {
+      "name": "no-generator"
     },
     {
       "name": "invalid-generator",
