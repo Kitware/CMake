@@ -1247,9 +1247,11 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     }
   }
 
+  bool const isCorCxx = (lang == "C" || lang == "CXX");
+
   // Checks if this is not an excluded (implicit) include directory.
   auto notExcluded = [this, &implicitSet, &implicitExclude,
-                      &lang](std::string const& dir) {
+                      isCorCxx](std::string const& dir) {
     return (
       // Do not exclude directories that are not in an excluded set.
       ((!cm::contains(implicitSet, this->GlobalGenerator->GetRealPath(dir))) &&
@@ -1258,8 +1260,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
       // they are implicitly searched by the compiler.  They are meant to be
       // user-specified directories that can be re-ordered or converted to
       // -isystem without breaking real compiler builtin headers.
-      ||
-      ((lang == "C" || lang == "CXX") && cm::contains(this->EnvCPATH, dir)));
+      || (isCorCxx && cm::contains(this->EnvCPATH, dir)));
   };
 
   // Get the target-specific include directories.
