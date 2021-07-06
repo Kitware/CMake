@@ -1,3 +1,4 @@
-^-- Install configuration: "[^\n]*"
+^-- Install configuration: "[^
+]*"
 -- top
 -- sub$

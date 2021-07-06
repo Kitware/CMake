@@ -28,7 +28,7 @@
         # Debug and RelWithDebinfo build types use the `/Zi` which results in
         # uncacheable compiations.
         # https://github.com/mozilla/sccache/issues/242
-        CMAKE_BUILD_TYPE: Release
+        CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
 .windows_vs2019_x64_ninja:
