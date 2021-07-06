@@ -587,7 +587,7 @@ protected:
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
 
-  std::set<std::string> EnvCPATH;
+  std::vector<std::string> EnvCPATH;
 
   using GeneratorTargetMap =
     std::unordered_map<std::string, cmGeneratorTarget*>;

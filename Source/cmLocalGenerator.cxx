@@ -109,7 +109,7 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
     cmSystemTools::GetPath(cpath, "CPATH");
     for (std::string const& cp : cpath) {
       if (cmSystemTools::FileIsFullPath(cp)) {
-        this->EnvCPATH.emplace(cmSystemTools::CollapseFullPath(cp));
+        this->EnvCPATH.emplace_back(cmSystemTools::CollapseFullPath(cp));
       }
     }
   }
@@ -1248,8 +1248,18 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
 
   bool const isCorCxx = (lang == "C" || lang == "CXX");
 
+  // Resolve symlinks in CPATH for comparison with resolved include paths.
+  // We do this here instead of when EnvCPATH is populated in case symlinks
+  // on disk have changed in the meantime.
+  std::set<std::string> resolvedEnvCPATH;
+  if (isCorCxx) {
+    for (std::string const& i : this->EnvCPATH) {
+      resolvedEnvCPATH.emplace(this->GlobalGenerator->GetRealPath(i));
+    }
+  }
+
   // Checks if this is not an excluded (implicit) include directory.
-  auto notExcluded = [this, &implicitSet, &implicitExclude,
+  auto notExcluded = [this, &implicitSet, &implicitExclude, &resolvedEnvCPATH,
                       isCorCxx](std::string const& dir) -> bool {
     std::string const& real_dir = this->GlobalGenerator->GetRealPath(dir);
     return
@@ -1260,7 +1270,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
       // they are implicitly searched by the compiler.  They are meant to be
       // user-specified directories that can be re-ordered or converted to
       // -isystem without breaking real compiler builtin headers.
-      || (isCorCxx && cm::contains(this->EnvCPATH, dir));
+      || (isCorCxx && cm::contains(resolvedEnvCPATH, real_dir));
   };
 
   // Get the target-specific include directories.
