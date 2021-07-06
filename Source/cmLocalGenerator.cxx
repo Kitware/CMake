@@ -107,10 +107,9 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   {
     std::vector<std::string> cpath;
     cmSystemTools::GetPath(cpath, "CPATH");
-    for (std::string& cp : cpath) {
+    for (std::string const& cp : cpath) {
       if (cmSystemTools::FileIsFullPath(cp)) {
-        cp = cmSystemTools::CollapseFullPath(cp);
-        this->EnvCPATH.emplace(std::move(cp));
+        this->EnvCPATH.emplace(cmSystemTools::CollapseFullPath(cp));
       }
     }
   }
