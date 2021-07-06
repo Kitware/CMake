@@ -1254,9 +1254,9 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
                       isCorCxx](std::string const& dir) -> bool {
     std::string const& real_dir = this->GlobalGenerator->GetRealPath(dir);
     return
-      // Do not exclude directories that are not in an excluded set.
-      (!cm::contains(implicitSet, real_dir) &&
-       !cm::contains(implicitExclude, dir))
+      // Do not exclude directories that are not in any excluded set.
+      !(cm::contains(implicitSet, real_dir) ||
+        cm::contains(implicitExclude, dir))
       // Do not exclude entries of the CPATH environment variable even though
       // they are implicitly searched by the compiler.  They are meant to be
       // user-specified directories that can be re-ordered or converted to
