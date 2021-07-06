@@ -346,10 +346,10 @@ top level:
 
   This option causes all runtime dependencies of installed executable, shared
   library, and module targets to be added to the specified runtime dependency
-  set. This set can then be installed later on with an
+  set. This set can then be installed with an
   `install(RUNTIME_DEPENDENCY_SET)`_ command.
 
-  This argument and the ``RUNTIME_DEPENDENCIES`` argument are mutually
+  This keyword and the ``RUNTIME_DEPENDENCIES`` keyword are mutually
   exclusive.
 
 ``RUNTIME_DEPENDENCIES``
@@ -361,13 +361,28 @@ top level:
   arguments are used to determine the properties (``DESTINATION``,
   ``COMPONENT``, etc.) of the installation of these dependencies.
 
-  ``RUNTIME_DEPENDENCIES`` is semantically equivalent to calling
-  ``install(TARGETS ... RUNTIME_DEPENDENCY_SET)`` and then
-  `install(RUNTIME_DEPENDENCY_SET)`_ with a randomly generated name. It accepts
-  all of the same options as `install(RUNTIME_DEPENDENCY_SET)`_.
+  ``RUNTIME_DEPENDENCIES`` is semantically equivalent to the following pair
+  of calls:
 
-  This argument and the ``RUNTIME_DEPENDENCY_SET`` argument are mutually
-  exclusive.
+  .. code-block:: cmake
+
+    install(TARGETS ... RUNTIME_DEPENDENCY_SET <set-name>)
+    install(RUNTIME_DEPENDENCY_SET <set-name> args...)
+
+  where ``<set-name>`` will be a randomly generated set name.
+  The ``args...`` may include any of the following keywords supported by
+  the `install(RUNTIME_DEPENDENCY_SET)`_ command:
+
+  * ``DIRECTORIES``
+  * ``PRE_INCLUDE_REGEXES``
+  * ``PRE_EXCLUDE_REGEXES``
+  * ``POST_INCLUDE_REGEXES``
+  * ``POST_EXCLUDE_REGEXES``
+  * ``POST_INCLUDE_FILES``
+  * ``POST_EXCLUDE_FILES``
+
+  The ``RUNTIME_DEPENDENCIES`` and ``RUNTIME_DEPENDENCY_SET`` keywords are
+  mutually exclusive.
 
 One or more groups of properties may be specified in a single call to
 the ``TARGETS`` form of this command.  A target may be installed more than
@@ -446,14 +461,10 @@ not installed. In the case of :prop_tgt:`FRAMEWORK` libraries,
 :prop_tgt:`MACOSX_BUNDLE` executables, and :prop_tgt:`BUNDLE` CFBundles, the
 entire directory is installed.
 
-``IMPORTED_RUNTIME_ARTIFACTS`` accepts the following additional arguments:
-
-``RUNTIME_DEPENDENCY_SET``
-
-  This option causes all runtime dependencies of installed executable, shared
-  library, and module targets to be added to the specified runtime dependency
-  set. This set can then be installed later on with an
-  `install(RUNTIME_DEPENDENCY_SET)`_ command.
+The ``RUNTIME_DEPENDENCY_SET`` option causes the runtime artifacts of the
+imported executable, shared library, and module library ``targets`` to be
+added to the ``<set-name>`` runtime dependency set. This set can then be
+installed with an `install(RUNTIME_DEPENDENCY_SET)`_ command.
 
 Installing Files
 ^^^^^^^^^^^^^^^^
@@ -693,7 +704,8 @@ Custom Installation Logic
 .. code-block:: cmake
 
   install([[SCRIPT <file>] [CODE <code>]]
-          [COMPONENT <component>] [EXCLUDE_FROM_ALL] [ALL_COMPONENTS] [...])
+          [ALL_COMPONENTS | COMPONENT <component>]
+          [EXCLUDE_FROM_ALL] [...])
 
 The ``SCRIPT`` form will invoke the given CMake script files during
 installation.  If the script file name is a relative path it will be
@@ -708,11 +720,11 @@ example, the code
 
 will print a message during installation.
 
-The option ``ALL_COMPONENTS``
-  .. versionadded:: 3.21
-
-  Run the custom installation script code for every component of a
-  component-specific installation.
+.. versionadded:: 3.21
+  When the ``ALL_COMPONENTS`` option is given, the custom installation
+  script code will be executed for every component of a component-specific
+  installation.  This option is mutually exclusive with the ``COMPONENT``
+  option.
 
 .. versionadded:: 3.14
   ``<file>`` or ``<code>`` may use "generator expressions" with the syntax
@@ -836,50 +848,46 @@ Installing Runtime Dependencies
           [PRE_EXCLUDE_REGEXES regexes...]
           [POST_INCLUDE_REGEXES regexes...]
           [POST_EXCLUDE_REGEXES regexes...]
+          [POST_INCLUDE_FILES files...]
+          [POST_EXCLUDE_FILES files...]
           [DIRECTORIES directories...]
           )
 
-Installs a runtime dependency set created by one or more
+Installs a runtime dependency set previously created by one or more
 `install(TARGETS)`_ or `install(IMPORTED_RUNTIME_ARTIFACTS)`_ commands. The
 dependencies of targets belonging to a runtime dependency set are installed in
 the ``RUNTIME`` destination and component on DLL platforms, and in the
 ``LIBRARY`` destination and component on non-DLL platforms. macOS frameworks
-are installed in the ``FRAMEWORK`` destination and component. The generated
-install script calls :command:`file(GET_RUNTIME_DEPENDENCIES)` on the
-build-tree files to calculate the runtime dependencies, with the build-tree
-executable files as the ``EXECUTABLES`` argument, the build-tree shared
-libraries as the ``LIBRARIES`` argument, and the build-tree modules as the
-``MODULES`` argument. If one of the executables is a :prop_tgt:`MACOSX_BUNDLE`
-executable on a macOS platform, that executable is passed as the
-``BUNDLE_EXECUTABLE`` argument. If ``RUNTIME_DEPENDENCY_SET`` is specified on
-a macOS platform, at most one :prop_tgt:`MACOSX_BUNDLE` executable may be in
-the runtime dependency set. The :prop_tgt:`MACOSX_BUNDLE` property has no
-effect on non-macOS platforms. Targets built within the build tree will never
-be installed as runtime dependencies, nor will their own dependencies, unless
-the targets themselves are installed with `install(TARGETS)`_.
+are installed in the ``FRAMEWORK`` destination and component.
+Targets built within the build tree will never be installed as runtime
+dependencies, nor will their own dependencies, unless the targets themselves
+are installed with `install(TARGETS)`_.
 
-This argument accepts the following sub-arguments:
+The generated install script calls :command:`file(GET_RUNTIME_DEPENDENCIES)`
+on the build-tree files to calculate the runtime dependencies. The build-tree
+executable files are passed as the ``EXECUTABLES`` argument, the build-tree
+shared libraries as the ``LIBRARIES`` argument, and the build-tree modules as
+the ``MODULES`` argument. On macOS, if one of the executables is a
+:prop_tgt:`MACOSX_BUNDLE`, that executable is passed as the
+``BUNDLE_EXECUTABLE`` argument. At most one such bundle executable may be in
+the runtime dependency set on macOS. The :prop_tgt:`MACOSX_BUNDLE` property
+has no effect on other platforms. Note that
+:command:`file(GET_RUNTIME_DEPENDENCIES)` only supports collecting the runtime
+dependencies for Windows, Linux and macOS platforms, so
+``install(RUNTIME_DEPENDENCY_SET)`` has the same limitation.
 
-``DIRECTORIES <directories>``
-  List of directories to be passed as the ``DIRECTORIES`` argument of
-  :command:`file(GET_RUNTIME_DEPENDENCIES)`. This argument supports
-  :manual:`generator expressions <cmake-generator-expressions(7)>`. If a
-  ``DIRECTORIES`` argument evaluates to an empty string, it is not passed to
-  :command:`file(GET_RUNTIME_DEPENDENCIES)`.
+The following sub-arguments are forwarded through as the corresponding
+arguments to :command:`file(GET_RUNTIME_DEPENDENCIES)` (for those that provide
+a non-empty list of directories, regular expressions or files).  They all
+support :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
-``PRE_INCLUDE_REGEXES <regexes>``, ``PRE_EXCLUDE_REGEXES <regexes>``, ``POST_INCLUDE_REGEXES <regexes>``, ``POST_EXCLUDE_REGEXES <regexes>``
-  List of regular expressions to be passed as their respective arguments to
-  :command:`file(GET_RUNTIME_DEPENDENCIES)`. These arguments support
-  :manual:`generator expressions <cmake-generator-expressions(7)>`. If an
-  argument evaluates to an empty string, it is not passed to
-  :command:`file(GET_RUNTIME_DEPENDENCIES)`.
-
-``POST_INCLUDE_FILES <files>``, ``POST_EXCLUDE_FILES <files>``
-  List of files to be passed as their respective arguments to
-  :command:`file(GET_RUNTIME_DEPENDENCIES)`. These arguments support
-  :manual:`generator expressions <cmake-generator-expressions(7)>`. If an
-  argument evaluates to an empty string, it is not passed to
-  :command:`file(GET_RUNTIME_DEPENDENCIES)`.
+* ``DIRECTORIES <directories>``
+* ``PRE_INCLUDE_REGEXES <regexes>``
+* ``PRE_EXCLUDE_REGEXES <regexes>``
+* ``POST_INCLUDE_REGEXES <regexes>``
+* ``POST_EXCLUDE_REGEXES <regexes>``
+* ``POST_INCLUDE_FILES <files>``
+* ``POST_EXCLUDE_FILES <files>``
 
 Generated Installation Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
