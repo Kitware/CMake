@@ -410,7 +410,7 @@ Result variables
 ``CUDAToolkit_VERSION_MAJOR``
     The major version of the CUDA Toolkit.
 
-``CUDAToolkit_VERSION_MAJOR``
+``CUDAToolkit_VERSION_MINOR``
     The minor version of the CUDA Toolkit.
 
 ``CUDAToolkit_VERSION_PATCH``
