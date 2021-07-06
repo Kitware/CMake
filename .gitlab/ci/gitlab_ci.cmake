@@ -26,8 +26,8 @@ set(CTEST_SITE "gitlab-ci")
 set(ctest_model "Experimental")
 
 # Default to Release builds.
-if (NOT "$ENV{CMAKE_BUILD_TYPE}" STREQUAL "")
-  set(CTEST_BUILD_CONFIGURATION "$ENV{CMAKE_BUILD_TYPE}")
+if (NOT "$ENV{CMAKE_CI_BUILD_TYPE}" STREQUAL "")
+  set(CTEST_BUILD_CONFIGURATION "$ENV{CMAKE_CI_BUILD_TYPE}")
 endif ()
 if (NOT CTEST_BUILD_CONFIGURATION)
   set(CTEST_BUILD_CONFIGURATION "Release")
