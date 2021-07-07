@@ -75,11 +75,16 @@ The CUDA Toolkit search behavior uses the following order:
        (2) ensure that the correct ``nvcc`` executable shows up in ``$PATH`` for
        :command:`find_program` to find.
 
+Arguments
+^^^^^^^^^
+
+``[<version>]``
+    The ``[<version>]`` argument requests a version with which the package found
+    should be compatible. See :ref:`find_package version format <FIND_PACKAGE_VERSION_FORMAT>`
+    for more details.
+
 Options
 ^^^^^^^
-
-``VERSION``
-    If specified, describes the version of the CUDA Toolkit to search for.
 
 ``REQUIRED``
     If specified, configuration will error if a suitable CUDA Toolkit is not
