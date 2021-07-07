@@ -1687,6 +1687,9 @@ void cmake::PrintPresetList(const cmCMakePresetsFile& file) const
   this->GetRegisteredGenerators(generators, false);
   auto filter =
     [&generators](const cmCMakePresetsFile::ConfigurePreset& preset) -> bool {
+    if (preset.Generator.empty()) {
+      return true;
+    }
     auto condition = [&preset](const GeneratorInfo& info) -> bool {
       return info.name == preset.Generator;
     };
