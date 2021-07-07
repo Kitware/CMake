@@ -4610,7 +4610,11 @@ void cmGlobalXCodeGenerator::OutputXCodeWorkspaceSettings(
     switch (this->XcodeBuildSystem) {
       case BuildSystem::One:
         xout.Element("string", "Original");
-        xout.Element("key", "DisableBuildSystemDeprecationWarning");
+        if (this->XcodeVersion >= 130) {
+          xout.Element("key", "DisableBuildSystemDeprecationDiagnostic");
+        } else {
+          xout.Element("key", "DisableBuildSystemDeprecationWarning");
+        }
         xout.Element("true");
         break;
       case BuildSystem::Twelve:
