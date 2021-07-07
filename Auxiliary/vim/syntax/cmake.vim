@@ -2807,6 +2807,7 @@ syn keyword cmakeKWfind_package contained
             \ ABI
             \ BUNDLE
             \ CMAKE_DISABLE_FIND_PACKAGE_
+            \ CMAKE_REQUIRE_FIND_PACKAGE_
             \ CMAKE_FIND_ROOT_PATH_BOTH
             \ COMPONENTS
             \ CONFIG
