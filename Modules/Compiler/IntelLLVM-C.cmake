@@ -49,10 +49,6 @@ else()
   set(CMAKE_C11_EXTENSION_COMPILE_OPTION "")
 endif()
 
-if(NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
-  # FIXME: The compiler actually defaults to C17, but
-  # CMake does not yet model or detect that standard.
-  __compiler_check_default_language_standard(C 2020 11)
-else()
-  set(CMAKE_C_STANDARD_DEFAULT "")
-endif()
+# FIXME: The compiler actually defaults to C17, but
+# CMake does not yet model or detect that standard.
+__compiler_check_default_language_standard(C 2020 11)
