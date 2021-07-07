@@ -11,7 +11,31 @@ flag such as ``-std=gnu++11`` to the compile line.  For compilers that
 have no notion of a standard level, such as Microsoft Visual C++ before
 2015 Update 3, this has no effect.
 
-Supported values are ``98``, ``11``, ``14``, ``17``, ``20``, ``23``.
+Supported values are:
+
+``98``
+  C++98
+
+``11``
+  C++11
+
+``14``
+  C++14
+
+``17``
+  .. versionadded:: 3.8
+
+  C++17
+
+``20``
+  .. versionadded:: 3.12
+
+  C++20
+
+``23``
+  .. versionadded:: 3.20
+
+  C++23
 
 If the value requested does not result in a compile flag being added for
 the compiler in use, a previous standard flag will be added instead.  This
