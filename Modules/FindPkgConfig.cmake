@@ -46,6 +46,7 @@ set(PKG_CONFIG_NAMES "pkg-config")
 if(CMAKE_HOST_WIN32)
   list(PREPEND PKG_CONFIG_NAMES "pkg-config.bat")
 endif()
+list(PREPEND PKG_CONFIG_NAMES "pkgconf")
 
 find_program(PKG_CONFIG_EXECUTABLE
   NAMES ${PKG_CONFIG_NAMES}
