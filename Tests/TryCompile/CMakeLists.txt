@@ -305,11 +305,21 @@ unset(C_BOGUS_FLAG CACHE)
 include(CheckCCompilerFlag)
 CHECK_C_COMPILER_FLAG(${C_DD}-_this_is_not_a_flag_ C_BOGUS_FLAG)
 TEST_FAIL(C_BOGUS_FLAG "CHECK_C_COMPILER_FLAG() succeeded, but should have failed")
+unset(C_BOGUS_FLAG CACHE)
+if(DEFINED C_BOGUS_FLAG)
+  # Verify that CHECK_C_COMPILER_FLAG didn't construct a normal variable
+  message(SEND_ERROR "CHECK_C_COMPILER_FLAG shouldn't construct C_BOGUS_FLAG as a normal variable")
+endif()
 
 unset(CXX_BOGUS_FLAG CACHE)
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG(${CXX_DD}-_this_is_not_a_flag_ CXX_BOGUS_FLAG)
 TEST_FAIL(CXX_BOGUS_FLAG "CHECK_CXX_COMPILER_FLAG() succeeded, but should have failed")
+unset(CXX_BOGUS_FLAG CACHE)
+if(DEFINED CXX_BOGUS_FLAG)
+  # Verify that CHECK_C_COMPILER_FLAG didn't construct a normal variable
+  message(SEND_ERROR "CHECK_CXX_COMPILER_FLAG shouldn't construct CXX_BOGUS_FLAG as a normal variable")
+endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   unset(C_STRICT_PROTOTYPES CACHE)
