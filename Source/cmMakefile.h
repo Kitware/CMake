@@ -13,6 +13,7 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -229,6 +230,10 @@ public:
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const std::string& name,
                               cmStateEnums::TargetType type, bool global);
+
+  std::pair<cmTarget&, bool> CreateNewTarget(
+    const std::string& name, cmStateEnums::TargetType type,
+    cmTarget::PerConfig perConfig = cmTarget::PerConfig::Yes);
 
   cmTarget* AddNewTarget(cmStateEnums::TargetType type,
                          const std::string& name);

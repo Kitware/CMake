@@ -2118,15 +2118,23 @@ cmTarget* cmMakefile::AddExecutable(const std::string& exeName,
 cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
                                    const std::string& name)
 {
-  auto it = this->Targets
-              .emplace(name,
-                       cmTarget(name, type, cmTarget::VisibilityNormal, this,
-                                cmTarget::PerConfig::Yes))
-              .first;
+  return &this->CreateNewTarget(name, type).first;
+}
+
+std::pair<cmTarget&, bool> cmMakefile::CreateNewTarget(
+  const std::string& name, cmStateEnums::TargetType type,
+  cmTarget::PerConfig perConfig)
+{
+  auto ib = this->Targets.emplace(
+    name, cmTarget(name, type, cmTarget::VisibilityNormal, this, perConfig));
+  auto it = ib.first;
+  if (!ib.second) {
+    return std::make_pair(std::ref(it->second), false);
+  }
   this->OrderedTargets.push_back(&it->second);
   this->GetGlobalGenerator()->IndexTarget(&it->second);
   this->GetStateSnapshot().GetDirectory().AddNormalTargetName(name);
-  return &it->second;
+  return std::make_pair(std::ref(it->second), true);
 }
 
 cmTarget* cmMakefile::AddNewUtilityTarget(const std::string& utilityName,
