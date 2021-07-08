@@ -78,7 +78,6 @@ int main(void) { return 0; }]=])
   foreach(v IN LISTS _locale_vars)
     set(ENV{${v}} ${_locale_vars_saved_${v}})
   endforeach()
-  set(${_var} "${${_var}}" PARENT_SCOPE)
 endfunction ()
 
 cmake_policy(POP)
