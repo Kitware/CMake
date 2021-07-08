@@ -1162,6 +1162,16 @@ function(cpack_rpm_generate_package)
     set(TMP_RPM_SPEC_INSTALL_POST "%define __spec_install_post ${CPACK_RPM_SPEC_INSTALL_POST}")
   endif()
 
+  # CPACK_RPM_REQUIRES_EXCLUDE_FROM
+  # May be defined to keep the dependency generator from
+  # scanning specific files or directories for deps.
+  if(CPACK_RPM_REQUIRES_EXCLUDE_FROM)
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: User defined CPACK_RPM_REQUIRES_EXCLUDE_FROM = ${CPACK_RPM_REQUIRES_EXCLUDE_FROM}")
+    endif()
+    set(TMP_RPM_REQUIRES_EXCLUDE_FROM "%global __requires_exclude_from ${CPACK_RPM_REQUIRES_EXCLUDE_FROM}")
+  endif()
+
   # CPACK_RPM_POST_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE)
   # CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE)
   # CPACK_RPM_POST_TRANS_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_TRANS_SCRIPT_FILE)
@@ -1650,6 +1660,7 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@FILE_NAME_DEFINE\@
 %define _unpackaged_files_terminate_build 0
 \@TMP_RPM_SPEC_INSTALL_POST\@
+\@TMP_RPM_REQUIRES_EXCLUDE_FROM\@
 \@CPACK_RPM_SPEC_MORE_DEFINE\@
 \@CPACK_RPM_COMPRESSION_TYPE_TMP\@
 
@@ -1784,6 +1795,7 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@FILE_NAME_DEFINE\@
 %define _unpackaged_files_terminate_build 0
 \@TMP_RPM_SPEC_INSTALL_POST\@
+\@TMP_RPM_REQUIRES_EXCLUDE_FROM\@
 \@CPACK_RPM_SPEC_MORE_DEFINE\@
 \@CPACK_RPM_COMPRESSION_TYPE_TMP\@
 

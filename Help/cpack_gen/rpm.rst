@@ -1035,3 +1035,14 @@ Source RPM packaging has its own set of variables:
  example::
 
   set(CPACK_RPM_BUILDREQUIRES "python >= 2.5.0, cmake >= 2.8")
+
+.. VARIABLE:: CPACK_RPM_REQUIRES_EXCLUDE_FROM
+
+ * Mandatory : NO
+ * Default   : -
+
+ May be used to keep the dependency generator from scanning specific files
+ or directories for dependencies.  Note that you can use a regular
+ expression that matches all of the directories or files, for example::
+
+  set(CPACK_RPM_REQUIRES_EXCLUDE_FROM "bin/libqsqloci.*\\.so.*")
