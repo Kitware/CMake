@@ -9,7 +9,16 @@ This property specifies the OBJC standard whose features are requested
 to build this target.  For some compilers, this results in adding a
 flag such as ``-std=gnu11`` to the compile line.
 
-Supported values are ``90``, ``99`` and ``11``.
+Supported values are:
+
+``90``
+  Objective C89/C90
+
+``99``
+  Objective C99
+
+``11``
+  Objective C11
 
 If the value requested does not result in a compile flag being added for
 the compiler in use, a previous standard flag will be added instead.  This
