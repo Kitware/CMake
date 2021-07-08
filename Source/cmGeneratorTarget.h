@@ -498,6 +498,9 @@ public:
   std::vector<BT<std::string>> GetLinkOptions(
     std::string const& config, std::string const& language) const;
 
+  std::vector<BT<std::string>>& ResolveLinkerWrapper(
+    std::vector<BT<std::string>>& result, const std::string& language) const;
+
   void GetStaticLibraryLinkOptions(std::vector<std::string>& result,
                                    const std::string& config,
                                    const std::string& language) const;
