@@ -18,7 +18,8 @@ include:
   Clang = LLVM Clang (clang.llvm.org)
   Cray = Cray Compiler (cray.com)
   Embarcadero, Borland = Embarcadero (embarcadero.com)
-  Flang = Flang LLVM Fortran Compiler
+  Flang = Classic Flang Fortran Compiler (https://github.com/flang-compiler/flang)
+  LLVMFlang = LLVM Flang Fortran Compiler (https://github.com/llvm/llvm-project/tree/main/flang)
   Fujitsu = Fujitsu HPC compiler (Trad mode)
   FujitsuClang = Fujitsu HPC compiler (Clang mode)
   G95 = G95 Fortran (g95.org)
