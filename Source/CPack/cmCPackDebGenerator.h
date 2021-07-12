@@ -63,8 +63,8 @@ protected:
     const std::string& componentName) override;
 
 private:
-  int createDeb();
-  int createDbgsymDDeb();
+  bool createDeb();
+  bool createDbgsymDDeb();
 
   std::vector<std::string> packageFiles;
 };

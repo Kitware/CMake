@@ -481,7 +481,6 @@ int cmCPackDebGenerator::InitializeInternal()
 int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
                                         std::string const& packageName)
 {
-  int retval = 1;
   // Begin the archive for this pack
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(
@@ -529,10 +528,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     std::sort(this->packageFiles.begin(), this->packageFiles.end());
   }
 
-  int res = this->createDeb();
-  if (res != 1) {
-    retval = 0;
-  }
+  bool retval = this->createDeb();
   // add the generated package to package file names list
   packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
                              this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
@@ -556,10 +552,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     // Sort files so that they have a reproducible order
     std::sort(this->packageFiles.begin(), this->packageFiles.end());
 
-    res = this->createDbgsymDDeb();
-    if (res != 1) {
-      retval = 0;
-    }
+    retval = this->createDbgsymDDeb() || retval;
     // add the generated package to package file names list
     packageFileName =
       cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
@@ -567,7 +560,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     this->packageFileNames.push_back(std::move(packageFileName));
   }
 
-  return retval;
+  return int(retval);
 }
 
 int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
@@ -616,7 +609,6 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
 int cmCPackDebGenerator::PackageComponentsAllInOne(
   const std::string& compInstDirName)
 {
-  int retval = 1;
   /* Reset package file name list it will be populated during the
    * component packaging run*/
   this->packageFileNames.clear();
@@ -678,15 +670,12 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   // Sort files so that they have a reproducible order
   std::sort(this->packageFiles.begin(), this->packageFiles.end());
 
-  int res = this->createDeb();
-  if (res != 1) {
-    retval = 0;
-  }
+  bool retval = this->createDeb();
   // add the generated package to package file names list
   packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
                              this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
   this->packageFileNames.push_back(std::move(packageFileName));
-  return retval;
+  return int(retval);
 }
 
 int cmCPackDebGenerator::PackageFiles()
@@ -710,7 +699,7 @@ int cmCPackDebGenerator::PackageFiles()
   return this->PackageComponentsAllInOne("");
 }
 
-int cmCPackDebGenerator::createDeb()
+bool cmCPackDebGenerator::createDeb()
 {
   std::map<std::string, std::string> controlValues;
 
@@ -837,7 +826,7 @@ int cmCPackDebGenerator::createDeb()
   return gen.generate();
 }
 
-int cmCPackDebGenerator::createDbgsymDDeb()
+bool cmCPackDebGenerator::createDbgsymDDeb()
 {
   // Packages containing debug symbols follow the same structure as .debs
   // but have different metadata and content.
