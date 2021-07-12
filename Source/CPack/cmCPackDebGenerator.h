@@ -63,6 +63,7 @@ protected:
     const std::string& componentName) override;
 
 private:
+  bool createDebPackages();
   bool createDeb();
   bool createDbgsymDDeb();
 

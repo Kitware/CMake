@@ -528,37 +528,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     return 0;
   }
 
-  try {
-    this->packageFiles = findFilesIn(this->GetOption("GEN_WDIR"));
-  } catch (const std::runtime_error& ex) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
-    return 0;
-  }
-
-  bool retval = this->createDeb();
-  // add the generated package to package file names list
-  packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
-                             this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
-  this->packageFileNames.emplace_back(std::move(packageFileName));
-
-  if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") &&
-      this->GetOption("GEN_DBGSYMDIR")) {
-    try {
-      this->packageFiles = findFilesIn(this->GetOption("GEN_DBGSYMDIR"));
-    } catch (const std::runtime_error& ex) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
-      return 0;
-    }
-
-    retval = this->createDbgsymDDeb() || retval;
-    // add the generated package to package file names list
-    packageFileName =
-      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
-               this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME"));
-    this->packageFileNames.emplace_back(std::move(packageFileName));
-  }
-
-  return int(retval);
+  return this->createDebPackages();
 }
 
 int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
@@ -652,19 +622,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
     return 0;
   }
 
-  try {
-    this->packageFiles = findFilesIn(this->GetOption("GEN_WDIR"));
-  } catch (const std::runtime_error& ex) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
-    return 0;
-  }
-
-  bool retval = this->createDeb();
-  // add the generated package to package file names list
-  packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
-                             this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
-  this->packageFileNames.emplace_back(std::move(packageFileName));
-  return int(retval);
+  return this->createDebPackages();
 }
 
 int cmCPackDebGenerator::PackageFiles()
@@ -686,6 +644,40 @@ int cmCPackDebGenerator::PackageFiles()
   }
   // CASE 3 : NON COMPONENT package.
   return this->PackageComponentsAllInOne("");
+}
+
+bool cmCPackDebGenerator::createDebPackages()
+{
+  try {
+    this->packageFiles = findFilesIn(this->GetOption("GEN_WDIR"));
+  } catch (const std::runtime_error& ex) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
+    return 0;
+  }
+
+  bool retval = this->createDeb();
+  // add the generated package to package file names list
+  this->packageFileNames.emplace_back(
+    cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+             this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME")));
+
+  if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") &&
+      this->GetOption("GEN_DBGSYMDIR")) {
+    try {
+      this->packageFiles = findFilesIn(this->GetOption("GEN_DBGSYMDIR"));
+    } catch (const std::runtime_error& ex) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
+      return 0;
+    }
+
+    retval = this->createDbgsymDDeb() || retval;
+    // add the generated package to package file names list
+    this->packageFileNames.emplace_back(
+      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+               this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME")));
+  }
+
+  return int(retval);
 }
 
 bool cmCPackDebGenerator::createDeb()
@@ -855,7 +847,6 @@ bool cmCPackDebGenerator::createDbgsymDDeb()
   DebGenerator gen(
     this->Logger, this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME"),
     this->GetOption("GEN_DBGSYMDIR"),
-
     this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
     this->GetOption("CPACK_TEMPORARY_DIRECTORY"),
     this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_TYPE"),
