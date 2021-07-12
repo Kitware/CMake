@@ -441,6 +441,17 @@ function(add_RunCMake_test_try_compile)
       set(CMAKE_C_STANDARD_DEFAULT 11)
     endif()
   endif()
+  if(CMAKE_VERSION VERSION_LESS 3.20.6 AND "x${CMAKE_C_COMPILER_ID}" STREQUAL "xIntelLLVM" AND "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
+    # Older CMake versions accidentally set the default standards to empty when
+    # IntelLLVM targets the MSVC ABI, thus not activating standard selection.
+    # Approximate the logic from IntelLLVM-{C,CXX}.cmake.
+    if(DEFINED CMAKE_C_STANDARD_DEFAULT AND "${CMAKE_C_STANDARD_DEFAULT}" STREQUAL "")
+      set(CMAKE_C_STANDARD_DEFAULT 17)
+    endif()
+    if(DEFINED CMAKE_CXX_STANDARD_DEFAULT AND "${CMAKE_CXX_STANDARD_DEFAULT}" STREQUAL "")
+      set(CMAKE_CXX_STANDARD_DEFAULT 14)
+    endif()
+  endif()
   foreach(var
       CMAKE_SYSTEM_NAME
       CMAKE_C_COMPILER_ID
