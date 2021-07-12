@@ -508,8 +508,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackDeb.cmake" << std::endl);
-    retval = 0;
-    return retval;
+    return 0;
   }
 
   { // Isolate globbing of binaries vs. dbgsyms
@@ -660,8 +659,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackDeb.cmake" << std::endl);
-    retval = 0;
-    return retval;
+    return 0;
   }
 
   cmsys::Glob gl;
