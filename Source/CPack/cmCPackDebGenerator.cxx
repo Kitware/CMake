@@ -8,6 +8,7 @@
 #include <map>
 #include <ostream>
 #include <set>
+#include <stdexcept>
 #include <utility>
 
 #include "cmsys/Glob.hxx"
@@ -463,6 +464,23 @@ bool DebGenerator::generateDeb() const
   return true;
 }
 
+std::vector<std::string> findFilesIn(const std::string& path)
+{
+  cmsys::Glob gl;
+  std::string findExpr = path + "/*";
+  gl.RecurseOn();
+  gl.SetRecurseListDirs(true);
+  gl.SetRecurseThroughSymlinks(false);
+  if (!gl.FindFiles(findExpr)) {
+    throw std::runtime_error(
+      "Cannot find any files in the installed directory");
+  }
+  std::vector<std::string> files{ gl.GetFiles() };
+  // Sort files so that they have a reproducible order
+  std::sort(files.begin(), files.end());
+  return files;
+}
+
 } // end anonymous namespace
 
 cmCPackDebGenerator::cmCPackDebGenerator() = default;
@@ -510,54 +528,34 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     return 0;
   }
 
-  { // Isolate globbing of binaries vs. dbgsyms
-    cmsys::Glob gl;
-    std::string findExpr(this->GetOption("GEN_WDIR"));
-    findExpr += "/*";
-    gl.RecurseOn();
-    gl.SetRecurseListDirs(true);
-    gl.SetRecurseThroughSymlinks(false);
-    if (!gl.FindFiles(findExpr)) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Cannot find any files in the installed directory"
-                      << std::endl);
-      return 0;
-    }
-    this->packageFiles = gl.GetFiles();
-    // Sort files so that they have a reproducible order
-    std::sort(this->packageFiles.begin(), this->packageFiles.end());
+  try {
+    this->packageFiles = findFilesIn(this->GetOption("GEN_WDIR"));
+  } catch (const std::runtime_error& ex) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
+    return 0;
   }
 
   bool retval = this->createDeb();
   // add the generated package to package file names list
   packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
                              this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
-  this->packageFileNames.push_back(std::move(packageFileName));
+  this->packageFileNames.emplace_back(std::move(packageFileName));
 
   if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") &&
       this->GetOption("GEN_DBGSYMDIR")) {
-    cmsys::Glob gl;
-    std::string findExpr(this->GetOption("GEN_DBGSYMDIR"));
-    findExpr += "/*";
-    gl.RecurseOn();
-    gl.SetRecurseListDirs(true);
-    gl.SetRecurseThroughSymlinks(false);
-    if (!gl.FindFiles(findExpr)) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Cannot find any files in the installed directory"
-                      << std::endl);
+    try {
+      this->packageFiles = findFilesIn(this->GetOption("GEN_DBGSYMDIR"));
+    } catch (const std::runtime_error& ex) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
       return 0;
     }
-    this->packageFiles = gl.GetFiles();
-    // Sort files so that they have a reproducible order
-    std::sort(this->packageFiles.begin(), this->packageFiles.end());
 
     retval = this->createDbgsymDDeb() || retval;
     // add the generated package to package file names list
     packageFileName =
       cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
                this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME"));
-    this->packageFileNames.push_back(std::move(packageFileName));
+    this->packageFileNames.emplace_back(std::move(packageFileName));
   }
 
   return int(retval);
@@ -654,27 +652,18 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
     return 0;
   }
 
-  cmsys::Glob gl;
-  std::string findExpr(this->GetOption("GEN_WDIR"));
-  findExpr += "/*";
-  gl.RecurseOn();
-  gl.SetRecurseListDirs(true);
-  gl.SetRecurseThroughSymlinks(false);
-  if (!gl.FindFiles(findExpr)) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Cannot find any files in the installed directory"
-                    << std::endl);
+  try {
+    this->packageFiles = findFilesIn(this->GetOption("GEN_WDIR"));
+  } catch (const std::runtime_error& ex) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
     return 0;
   }
-  this->packageFiles = gl.GetFiles();
-  // Sort files so that they have a reproducible order
-  std::sort(this->packageFiles.begin(), this->packageFiles.end());
 
   bool retval = this->createDeb();
   // add the generated package to package file names list
   packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
                              this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
-  this->packageFileNames.push_back(std::move(packageFileName));
+  this->packageFileNames.emplace_back(std::move(packageFileName));
   return int(retval);
 }
 
