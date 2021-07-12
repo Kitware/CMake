@@ -385,18 +385,15 @@ int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   return ret;
 }
 
-int HandleLWYU(const std::string& runCmd, const std::string& /* sourceFile */,
+int HandleLWYU(const std::string& runCmd, const std::string& sourceFile,
                const std::vector<std::string>&)
 {
   // Construct the ldd -r -u (link what you use lwyu) command line
   // ldd -u -r lwuy target
-  std::vector<std::string> lwyu_cmd;
-  lwyu_cmd.emplace_back("ldd");
-  lwyu_cmd.emplace_back("-u");
-  lwyu_cmd.emplace_back("-r");
-  lwyu_cmd.push_back(runCmd);
+  std::vector<std::string> lwyu_cmd = cmExpandedList(runCmd, true);
+  lwyu_cmd.push_back(sourceFile);
 
-  // Run the ldd -u -r command line.
+  // Run the lwyu check command line,  currently ldd is expected.
   // Capture its stdout and hide its stderr.
   // Ignore its return code because the tool always returns non-zero
   // if there are any warnings, but we just want to warn.

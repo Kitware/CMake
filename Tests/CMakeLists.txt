@@ -1442,6 +1442,7 @@ if(BUILD_TESTING)
             GIF
             Git
             GLEW
+            GLUT
             GnuTLS
             GSL
             GTK2

@@ -498,6 +498,18 @@ bool cmGlobalGenerator::CheckLanguages(
 void cmGlobalGenerator::EnableLanguage(
   std::vector<std::string> const& languages, cmMakefile* mf, bool optional)
 {
+  if (!this->IsMultiConfig()) {
+    std::string envBuildType;
+    if (!mf->GetDefinition("CMAKE_BUILD_TYPE") &&
+        cmSystemTools::GetEnv("CMAKE_BUILD_TYPE", envBuildType)) {
+      mf->AddCacheDefinition(
+        "CMAKE_BUILD_TYPE", envBuildType,
+        "Choose the type of build.  Options include: empty, "
+        "Debug, Release, RelWithDebInfo, MinSizeRel.",
+        cmStateEnums::STRING);
+    }
+  }
+
   if (languages.empty()) {
     cmSystemTools::Error("EnableLanguage must have a lang specified!");
     cmSystemTools::SetFatalErrorOccured();
@@ -1251,10 +1263,8 @@ void cmGlobalGenerator::Configure()
     this->CreateDefaultGlobalTargets(globalTargets);
 
     for (const auto& mf : this->Makefiles) {
-      auto& targets = mf->GetTargets();
       for (GlobalTargetInfo const& globalTarget : globalTargets) {
-        targets.emplace(globalTarget.Name,
-                        this->CreateGlobalTarget(globalTarget, mf.get()));
+        this->CreateGlobalTarget(globalTarget, mf.get());
       }
     }
   }
@@ -1771,9 +1781,8 @@ void cmGlobalGenerator::CreateGeneratorTargets(
   std::map<cmTarget*, cmGeneratorTarget*> const& importedMap)
 {
   if (targetTypes == AllTargets) {
-    for (auto& target : mf->GetTargets()) {
-      cmTarget* t = &target.second;
-      lg->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(t, lg));
+    for (cmTarget* target : mf->GetOrderedTargets()) {
+      lg->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(target, lg));
     }
   }
 
@@ -2812,12 +2821,19 @@ bool cmGlobalGenerator::UseFolderProperty() const
   return false;
 }
 
-cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
-                                               cmMakefile* mf)
+void cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
+                                           cmMakefile* mf)
 {
   // Package
-  cmTarget target(gti.Name, cmStateEnums::GLOBAL_TARGET,
-                  cmTarget::VisibilityNormal, mf, gti.PerConfig);
+  auto tb =
+    mf->CreateNewTarget(gti.Name, cmStateEnums::GLOBAL_TARGET, gti.PerConfig);
+
+  // Do nothing if gti.Name is already used
+  if (!tb.second) {
+    return;
+  }
+
+  cmTarget& target = tb.first;
   target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
 
   std::vector<std::string> no_outputs;
@@ -2841,8 +2857,6 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   if (this->UseFolderProperty()) {
     target.SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
   }
-
-  return target;
 }
 
 std::string cmGlobalGenerator::GenerateRuleFile(

@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestRunTest.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef> // IWYU pragma: keep
 #include <cstdint>
@@ -44,7 +45,9 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
   // Check for special CTest XML tags in this line of output.
   // If any are found, this line is excluded from ProcessOutput.
   if (!line.empty() && line.find("<CTest") != std::string::npos) {
+    bool ctest_tag_found = false;
     if (this->TestHandler->CustomCompletionStatusRegex.find(line)) {
+      ctest_tag_found = true;
       this->TestResult.CustomCompletionStatus =
         this->TestHandler->CustomCompletionStatusRegex.match(1);
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -52,6 +55,20 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
                                   << "Test Details changed to '"
                                   << this->TestResult.CustomCompletionStatus
                                   << "'" << std::endl);
+    } else if (this->TestHandler->CustomLabelRegex.find(line)) {
+      ctest_tag_found = true;
+      auto label = this->TestHandler->CustomLabelRegex.match(1);
+      auto& labels = this->TestProperties->Labels;
+      if (std::find(labels.begin(), labels.end(), label) == labels.end()) {
+        labels.push_back(label);
+        std::sort(labels.begin(), labels.end());
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                   this->GetIndex()
+                     << ": "
+                     << "Test Label added: '" << label << "'" << std::endl);
+      }
+    }
+    if (ctest_tag_found) {
       return;
     }
   }
@@ -245,7 +262,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     *this->TestHandler->LogFile << "Test time = " << buf << std::endl;
   }
 
-  this->DartProcessing();
+  this->ParseOutputForMeasurements();
 
   // if this is doing MemCheck then all the output needs to be put into
   // Output since that is what is parsed by cmCTestMemCheckHandler
@@ -681,18 +698,22 @@ void cmCTestRunTest::ComputeArguments()
   }
 }
 
-void cmCTestRunTest::DartProcessing()
+void cmCTestRunTest::ParseOutputForMeasurements()
 {
   if (!this->ProcessOutput.empty() &&
-      this->ProcessOutput.find("<DartMeasurement") != std::string::npos) {
-    if (this->TestHandler->DartStuff.find(this->ProcessOutput)) {
-      this->TestResult.DartString = this->TestHandler->DartStuff.match(1);
+      (this->ProcessOutput.find("<DartMeasurement") != std::string::npos ||
+       this->ProcessOutput.find("<CTestMeasurement") != std::string::npos)) {
+    if (this->TestHandler->AllTestMeasurementsRegex.find(
+          this->ProcessOutput)) {
+      this->TestResult.TestMeasurementsOutput =
+        this->TestHandler->AllTestMeasurementsRegex.match(1);
       // keep searching and replacing until none are left
-      while (this->TestHandler->DartStuff1.find(this->ProcessOutput)) {
+      while (this->TestHandler->SingleTestMeasurementRegex.find(
+        this->ProcessOutput)) {
         // replace the exact match for the string
         cmSystemTools::ReplaceString(
-          this->ProcessOutput, this->TestHandler->DartStuff1.match(1).c_str(),
-          "");
+          this->ProcessOutput,
+          this->TestHandler->SingleTestMeasurementRegex.match(1).c_str(), "");
       }
     }
   }

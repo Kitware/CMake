@@ -107,10 +107,9 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   {
     std::vector<std::string> cpath;
     cmSystemTools::GetPath(cpath, "CPATH");
-    for (std::string& cp : cpath) {
+    for (std::string const& cp : cpath) {
       if (cmSystemTools::FileIsFullPath(cp)) {
-        cp = cmSystemTools::CollapseFullPath(cp);
-        this->EnvCPATH.emplace(std::move(cp));
+        this->EnvCPATH.emplace_back(cmSystemTools::CollapseFullPath(cp));
       }
     }
   }
@@ -878,9 +877,12 @@ std::string cmLocalGenerator::GetIncludeFlags(
   // Support special system include flag if it is available and the
   // normal flag is repeated for each directory.
   cmProp sysIncludeFlag = nullptr;
+  cmProp sysIncludeFlagWarning = nullptr;
   if (repeatFlag) {
     sysIncludeFlag = this->Makefile->GetDefinition(
       cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", lang));
+    sysIncludeFlagWarning = this->Makefile->GetDefinition(
+      cmStrCat("_CMAKE_INCLUDE_SYSTEM_FLAG_", lang, "_WARNING"));
   }
 
   cmProp fwSearchFlag = this->Makefile->GetDefinition(
@@ -889,6 +891,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
     cmStrCat("CMAKE_", lang, "_SYSTEM_FRAMEWORK_SEARCH_FLAG"));
 
   bool flagUsed = false;
+  bool sysIncludeFlagUsed = false;
   std::set<std::string> emitted;
 #ifdef __APPLE__
   emitted.insert("/System/Library/Frameworks");
@@ -915,6 +918,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
       if (sysIncludeFlag && target &&
           target->IsSystemIncludeDirectory(i, config, lang)) {
         includeFlags << *sysIncludeFlag;
+        sysIncludeFlagUsed = true;
       } else {
         includeFlags << includeFlag;
       }
@@ -930,6 +934,9 @@ std::string cmLocalGenerator::GetIncludeFlags(
       includeFlags << "\"";
     }
     includeFlags << sep;
+  }
+  if (sysIncludeFlagUsed && sysIncludeFlagWarning) {
+    includeFlags << *sysIncludeFlagWarning;
   }
   std::string flags = includeFlags.str();
   // remove trailing separators
@@ -1239,19 +1246,31 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     }
   }
 
+  bool const isCorCxx = (lang == "C" || lang == "CXX");
+
+  // Resolve symlinks in CPATH for comparison with resolved include paths.
+  // We do this here instead of when EnvCPATH is populated in case symlinks
+  // on disk have changed in the meantime.
+  std::set<std::string> resolvedEnvCPATH;
+  if (isCorCxx) {
+    for (std::string const& i : this->EnvCPATH) {
+      resolvedEnvCPATH.emplace(this->GlobalGenerator->GetRealPath(i));
+    }
+  }
+
   // Checks if this is not an excluded (implicit) include directory.
-  auto notExcluded = [this, &implicitSet, &implicitExclude,
-                      &lang](std::string const& dir) {
-    return (
-      // Do not exclude directories that are not in an excluded set.
-      ((!cm::contains(implicitSet, this->GlobalGenerator->GetRealPath(dir))) &&
-       (!cm::contains(implicitExclude, dir)))
+  auto notExcluded = [this, &implicitSet, &implicitExclude, &resolvedEnvCPATH,
+                      isCorCxx](std::string const& dir) -> bool {
+    std::string const& real_dir = this->GlobalGenerator->GetRealPath(dir);
+    return
+      // Do not exclude directories that are not in any excluded set.
+      !(cm::contains(implicitSet, real_dir) ||
+        cm::contains(implicitExclude, dir))
       // Do not exclude entries of the CPATH environment variable even though
       // they are implicitly searched by the compiler.  They are meant to be
       // user-specified directories that can be re-ordered or converted to
       // -isystem without breaking real compiler builtin headers.
-      ||
-      ((lang == "C" || lang == "CXX") && cm::contains(this->EnvCPATH, dir)));
+      || (isCorCxx && cm::contains(resolvedEnvCPATH, real_dir));
   };
 
   // Get the target-specific include directories.
@@ -3037,6 +3056,30 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   for (const auto& flag : flagsList) {
     this->AppendFlagEscape(flags, flag);
   }
+}
+
+bool cmLocalGenerator::AppendLWYUFlags(std::string& flags,
+                                       const cmGeneratorTarget* target,
+                                       const std::string& lang)
+{
+  auto useLWYU = target->GetPropertyAsBool("LINK_WHAT_YOU_USE") &&
+    (target->GetType() == cmStateEnums::TargetType::EXECUTABLE ||
+     target->GetType() == cmStateEnums::TargetType::SHARED_LIBRARY ||
+     target->GetType() == cmStateEnums::TargetType::MODULE_LIBRARY);
+
+  if (useLWYU) {
+    const auto& lwyuFlag = this->GetMakefile()->GetSafeDefinition(
+      cmStrCat("CMAKE_", lang, "_LINK_WHAT_YOU_USE_FLAG"));
+    useLWYU = !lwyuFlag.empty();
+
+    if (useLWYU) {
+      std::vector<BT<std::string>> lwyuOpts;
+      lwyuOpts.emplace_back(lwyuFlag);
+      this->AppendFlags(flags, target->ResolveLinkerWrapper(lwyuOpts, lang));
+    }
+  }
+
+  return useLWYU;
 }
 
 void cmLocalGenerator::AppendCompileOptions(std::string& options,

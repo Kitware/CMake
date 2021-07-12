@@ -202,6 +202,7 @@ Properties on Targets
    /prop_tgt/EXPORT_NAME
    /prop_tgt/EXPORT_PROPERTIES
    /prop_tgt/FOLDER
+   /prop_tgt/Fortran_BUILDING_INSTRINSIC_MODULES
    /prop_tgt/Fortran_FORMAT
    /prop_tgt/Fortran_MODULE_DIRECTORY
    /prop_tgt/Fortran_PREPROCESS

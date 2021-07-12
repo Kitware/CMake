@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackDebGenerator.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <map>
@@ -525,6 +526,8 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
       return 0;
     }
     this->packageFiles = gl.GetFiles();
+    // Sort files so that they have a reproducible order
+    std::sort(this->packageFiles.begin(), this->packageFiles.end());
   }
 
   int res = this->createDeb();
@@ -551,6 +554,8 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
       return 0;
     }
     this->packageFiles = gl.GetFiles();
+    // Sort files so that they have a reproducible order
+    std::sort(this->packageFiles.begin(), this->packageFiles.end());
 
     res = this->createDbgsymDDeb();
     if (res != 1) {
@@ -672,6 +677,8 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
     return 0;
   }
   this->packageFiles = gl.GetFiles();
+  // Sort files so that they have a reproducible order
+  std::sort(this->packageFiles.begin(), this->packageFiles.end());
 
   int res = this->createDeb();
   if (res != 1) {

@@ -32,6 +32,7 @@
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmCTestResourceGroupsLexerHelper.h"
+#include "cmCTestTestMeasurementXMLParser.h"
 #include "cmDuration.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
@@ -303,15 +304,24 @@ cmCTestTestHandler::cmCTestTestHandler()
   // Support for JUnit XML output.
   this->JUnitXMLFileName = "";
 
-  // regex to detect <DartMeasurement>...</DartMeasurement>
-  this->DartStuff.compile("(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
-  // regex to detect each individual <DartMeasurement>...</DartMeasurement>
-  this->DartStuff1.compile(
-    "(<DartMeasurement[^<]*</DartMeasurement[a-zA-Z]*>)");
+  // Regular expressions to scan test output for custom measurements.
 
-  // regex to detect <CTestDetails>...</CTestDetails>
+  // Capture the whole section of test output from the first opening
+  // <(CTest|Dart)Measurement*> tag to the last </(CTest|Dart)Measurement*>
+  // closing tag.
+  this->AllTestMeasurementsRegex.compile(
+    "(<(CTest|Dart)Measurement.*/(CTest|Dart)Measurement[a-zA-Z]*>)");
+
+  // Capture a single <(CTest|Dart)Measurement*> XML element.
+  this->SingleTestMeasurementRegex.compile(
+    "(<(CTest|Dart)Measurement[^<]*</(CTest|Dart)Measurement[a-zA-Z]*>)");
+
+  // Capture content from <CTestDetails>...</CTestDetails>
   this->CustomCompletionStatusRegex.compile(
     "<CTestDetails>(.*)</CTestDetails>");
+
+  // Capture content from <CTestLabel>...</CTestLabel>
+  this->CustomLabelRegex.compile("<CTestLabel>(.*)</CTestLabel>");
 }
 
 void cmCTestTestHandler::Initialize()
@@ -692,7 +702,7 @@ bool cmCTestTestHandler::GenerateXML()
       return false;
     }
     cmXMLWriter xml(xmlfile);
-    this->GenerateDartOutput(xml);
+    this->GenerateCTestXML(xml);
   }
 
   return true;
@@ -1400,7 +1410,7 @@ void cmCTestTestHandler::GenerateTestCommand(
 {
 }
 
-void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
+void cmCTestTestHandler::GenerateCTestXML(cmXMLWriter& xml)
 {
   if (!this->CTest->GetProduceXML()) {
     return;
@@ -1436,7 +1446,7 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
         xml.Element("Value", result.ReturnValue);
         xml.EndElement(); // NamedMeasurement
       }
-      this->GenerateRegressionImages(xml, result.DartString);
+      this->RecordCustomTestMeasurements(xml, result.TestMeasurementsOutput);
       xml.StartElement("NamedMeasurement");
       xml.Attribute("type", "numeric/double");
       xml.Attribute("name", "Execution Time");
@@ -1976,124 +1986,48 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   }
 }
 
-// Just for convenience
-#define SPACE_REGEX "[ \t\r\n]"
-void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
-                                                  const std::string& dart)
+void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
+                                                      std::string content)
 {
-  cmsys::RegularExpression twoattributes(
-    "<DartMeasurement" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*>([^<]*)</DartMeasurement>");
-  cmsys::RegularExpression threeattributes(
-    "<DartMeasurement" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*>([^<]*)</DartMeasurement>");
-  cmsys::RegularExpression fourattributes(
-    "<DartMeasurement" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*>([^<]*)</DartMeasurement>");
-  cmsys::RegularExpression cdatastart(
-    "<DartMeasurement" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*>" SPACE_REGEX "*<!\\[CDATA\\[");
-  cmsys::RegularExpression cdataend("]]>" SPACE_REGEX "*</DartMeasurement>");
-  cmsys::RegularExpression measurementfile(
-    "<DartMeasurementFile" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*(name|type|encoding|compression)=\"([^\"]*)\"" SPACE_REGEX
-    "*>([^<]*)</DartMeasurementFile>");
+  while (this->SingleTestMeasurementRegex.find(content)) {
+    // Extract regex match from content and parse it as an XML element.
+    auto measurement_str = this->SingleTestMeasurementRegex.match(1);
+    auto parser = cmCTestTestMeasurementXMLParser();
+    parser.Parse(measurement_str.c_str());
 
-  bool done = false;
-  std::string cxml = dart;
-  while (!done) {
-    if (twoattributes.find(cxml)) {
+    if (parser.ElementName == "CTestMeasurement" ||
+        parser.ElementName == "DartMeasurement") {
       xml.StartElement("NamedMeasurement");
-      xml.Attribute(twoattributes.match(1).c_str(), twoattributes.match(2));
-      xml.Attribute(twoattributes.match(3).c_str(), twoattributes.match(4));
-      xml.Element("Value", twoattributes.match(5));
+      xml.Attribute("type", parser.MeasurementType);
+      xml.Attribute("name", parser.MeasurementName);
+      xml.Element("Value", parser.CharacterData);
       xml.EndElement();
-      cxml.erase(twoattributes.start(),
-                 twoattributes.end() - twoattributes.start());
-    } else if (threeattributes.find(cxml)) {
-      xml.StartElement("NamedMeasurement");
-      xml.Attribute(threeattributes.match(1).c_str(),
-                    threeattributes.match(2));
-      xml.Attribute(threeattributes.match(3).c_str(),
-                    threeattributes.match(4));
-      xml.Attribute(threeattributes.match(5).c_str(),
-                    threeattributes.match(6));
-      xml.Element("Value", twoattributes.match(7));
-      xml.EndElement();
-      cxml.erase(threeattributes.start(),
-                 threeattributes.end() - threeattributes.start());
-    } else if (fourattributes.find(cxml)) {
-      xml.StartElement("NamedMeasurement");
-      xml.Attribute(fourattributes.match(1).c_str(), fourattributes.match(2));
-      xml.Attribute(fourattributes.match(3).c_str(), fourattributes.match(4));
-      xml.Attribute(fourattributes.match(5).c_str(), fourattributes.match(6));
-      xml.Attribute(fourattributes.match(7).c_str(), fourattributes.match(8));
-      xml.Element("Value", twoattributes.match(9));
-      xml.EndElement();
-      cxml.erase(fourattributes.start(),
-                 fourattributes.end() - fourattributes.start());
-    } else if (cdatastart.find(cxml) && cdataend.find(cxml)) {
-      xml.StartElement("NamedMeasurement");
-      xml.Attribute(cdatastart.match(1).c_str(), cdatastart.match(2));
-      xml.Attribute(cdatastart.match(3).c_str(), cdatastart.match(4));
-      xml.StartElement("Value");
-      xml.CData(
-        cxml.substr(cdatastart.end(), cdataend.start() - cdatastart.end()));
-      xml.EndElement(); // Value
-      xml.EndElement(); // NamedMeasurement
-      cxml.erase(cdatastart.start(), cdataend.end() - cdatastart.start());
-    } else if (measurementfile.find(cxml)) {
-      const std::string& filename =
-        cmCTest::CleanString(measurementfile.match(5));
-      if (cmSystemTools::FileExists(filename)) {
+    } else if (parser.ElementName == "CTestMeasurementFile" ||
+               parser.ElementName == "DartMeasurementFile") {
+      const std::string& filename = cmCTest::CleanString(parser.CharacterData);
+      if (!cmSystemTools::FileExists(filename)) {
+        xml.StartElement("NamedMeasurement");
+        xml.Attribute("name", parser.MeasurementName);
+        xml.Attribute("text", "text/string");
+        xml.Element("Value", "File " + filename + " not found");
+        xml.EndElement();
+        cmCTestOptionalLog(
+          this->CTest, HANDLER_OUTPUT,
+          "File \"" << filename << "\" not found." << std::endl, this->Quiet);
+      } else {
         long len = cmSystemTools::FileLength(filename);
-        std::string k1 = measurementfile.match(1);
-        std::string v1 = measurementfile.match(2);
-        std::string k2 = measurementfile.match(3);
-        std::string v2 = measurementfile.match(4);
         if (len == 0) {
-          if (cmSystemTools::LowerCase(k1) == "type") {
-            v1 = "text/string";
-          }
-          if (cmSystemTools::LowerCase(k2) == "type") {
-            v2 = "text/string";
-          }
-
           xml.StartElement("NamedMeasurement");
-          xml.Attribute(k1.c_str(), v1);
-          xml.Attribute(k2.c_str(), v2);
+          xml.Attribute("name", parser.MeasurementName);
+          xml.Attribute("type", "text/string");
           xml.Attribute("encoding", "none");
           xml.Element("Value", "Image " + filename + " is empty");
           xml.EndElement();
         } else {
-          std::string type;
-          std::string name;
-          if (cmSystemTools::LowerCase(k1) == "type") {
-            type = v1;
-          } else if (cmSystemTools::LowerCase(k2) == "type") {
-            type = v2;
-          }
-          if (cmSystemTools::LowerCase(k1) == "name") {
-            name = v1;
-          } else if (cmSystemTools::LowerCase(k2) == "name") {
-            name = v2;
-          }
-          if (type == "file") {
+          if (parser.MeasurementType == "file") {
             // Treat this measurement like an "ATTACHED_FILE" when the type
             // is explicitly "file" (not an image).
-            this->AttachFile(xml, filename, name);
+            this->AttachFile(xml, filename, parser.MeasurementName);
           } else {
             cmsys::ifstream ifs(filename.c_str(),
                                 std::ios::in
@@ -2110,10 +2044,8 @@ void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
                                              encoded_buffer.get(), 1);
 
             xml.StartElement("NamedMeasurement");
-            xml.Attribute(measurementfile.match(1).c_str(),
-                          measurementfile.match(2));
-            xml.Attribute(measurementfile.match(3).c_str(),
-                          measurementfile.match(4));
+            xml.Attribute("name", parser.MeasurementName);
+            xml.Attribute("type", parser.MeasurementType);
             xml.Attribute("encoding", "base64");
             std::ostringstream ostr;
             for (size_t cc = 0; cc < rlen; cc++) {
@@ -2126,25 +2058,11 @@ void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
             xml.EndElement(); // NamedMeasurement
           }
         }
-      } else {
-        int idx = 4;
-        if (measurementfile.match(1) == "name") {
-          idx = 2;
-        }
-        xml.StartElement("NamedMeasurement");
-        xml.Attribute("name", measurementfile.match(idx));
-        xml.Attribute("text", "text/string");
-        xml.Element("Value", "File " + filename + " not found");
-        xml.EndElement();
-        cmCTestOptionalLog(
-          this->CTest, HANDLER_OUTPUT,
-          "File \"" << filename << "\" not found." << std::endl, this->Quiet);
       }
-      cxml.erase(measurementfile.start(),
-                 measurementfile.end() - measurementfile.start());
-    } else {
-      done = true;
     }
+
+    // Remove this element from content.
+    cmSystemTools::ReplaceString(content, measurement_str.c_str(), "");
   }
 }
 

@@ -2,17 +2,25 @@ cmake_minimum_required (VERSION 2.6)
 project(IncludeDirectories)
 
 if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.4)
-    OR (CMAKE_C_COMPILER_ID STREQUAL Clang AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC") OR CMAKE_C_COMPILER_ID STREQUAL AppleClang)
+    OR (CMAKE_C_COMPILER_ID STREQUAL Clang AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+    OR CMAKE_C_COMPILER_ID STREQUAL AppleClang
+    OR ("x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC" AND
+       CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "19.29.30036.3" AND
+       NOT CMAKE_GENERATOR MATCHES "Visual Studio")) # No support for VS generators yet.
     AND (CMAKE_GENERATOR STREQUAL "Unix Makefiles"
       OR CMAKE_GENERATOR STREQUAL "Ninja"
       OR (CMAKE_GENERATOR STREQUAL "Xcode" AND NOT XCODE_VERSION VERSION_LESS 6.0)))
-  include(CheckCXXCompilerFlag)
-  check_cxx_compiler_flag(-Wunused-variable run_sys_includes_test)
-  if(run_sys_includes_test)
-    # The Bullseye wrapper appears to break the -isystem effect.
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version OUTPUT_VARIABLE out ERROR_VARIABLE out)
-    if("x${out}" MATCHES "Bullseye")
-      set(run_sys_includes_test 0)
+  if ("x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC")
+    set(run_sys_includes_test 1)
+  else ()
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag(-Wunused-variable run_sys_includes_test)
+    if(run_sys_includes_test)
+      # The Bullseye wrapper appears to break the -isystem effect.
+      execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version OUTPUT_VARIABLE out ERROR_VARIABLE out)
+      if("x${out}" MATCHES "Bullseye")
+        set(run_sys_includes_test 0)
+      endif()
     endif()
   endif()
   if (run_sys_includes_test)

@@ -2142,7 +2142,6 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
     return true;
   }
 
-#if defined(CMake_USE_ELF_PARSER) || defined(CMake_USE_XCOFF_PARSER)
   // Enable if the rpath flag uses a separator and the target uses
   // binaries we know how to edit.
   std::string ll = this->GetLinkerLanguage(config);
@@ -2155,21 +2154,17 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
       // CMAKE_EXECUTABLE_FORMAT.
       if (cmProp fmt =
             this->Makefile->GetDefinition("CMAKE_EXECUTABLE_FORMAT")) {
-#  if defined(CMake_USE_ELF_PARSER)
         if (*fmt == "ELF") {
           return true;
         }
-#  endif
-#  if defined(CMake_USE_XCOFF_PARSER)
+#if defined(CMake_USE_XCOFF_PARSER)
         if (*fmt == "XCOFF") {
           return true;
         }
-#  endif
+#endif
       }
     }
   }
-#endif
-  static_cast<void>(config);
   return false;
 }
 
@@ -4466,6 +4461,13 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
 
   // Last step: replace "LINKER:" prefixed elements by
   // actual linker wrapper
+  return this->ResolveLinkerWrapper(result, language);
+}
+
+std::vector<BT<std::string>>& cmGeneratorTarget::ResolveLinkerWrapper(
+  std::vector<BT<std::string>>& result, const std::string& language) const
+{
+  // replace "LINKER:" prefixed elements by actual linker wrapper
   const std::string wrapper(this->Makefile->GetSafeDefinition(
     "CMAKE_" + language +
     (this->IsDeviceLink() ? "_DEVICE_LINKER_WRAPPER_FLAG"
@@ -6173,6 +6175,14 @@ std::string cmGeneratorTarget::GetFortranModuleDirectory(
   }
 
   return this->FortranModuleDirectory;
+}
+
+bool cmGeneratorTarget::IsFortranBuildingInstrinsicModules() const
+{
+  if (cmProp prop = this->GetProperty("Fortran_BUILDING_INSTRINSIC_MODULES")) {
+    return cmIsOn(*prop);
+  }
+  return false;
 }
 
 std::string cmGeneratorTarget::CreateFortranModuleDirectory(

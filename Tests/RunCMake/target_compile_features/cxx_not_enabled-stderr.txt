@@ -1,4 +1,2 @@
-^CMake Error at cxx_not_enabled.cmake:[0-9]+ \(target_compile_features\):
-  target_compile_features cannot use features from non-enabled language CXX
-Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)$
+^CMake Error:.*CMake can not determine linker language for target: main.*
+CMake Generate step failed.  Build files cannot be regenerated correctly.$

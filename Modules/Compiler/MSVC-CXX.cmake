@@ -79,3 +79,9 @@ endif()
 if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
   set(CMAKE_CXX_COMPILE_OPTIONS_JMC "-JMC")
 endif()
+
+# The `/external:I` flag was made non-experimental in 19.29.30036.3.
+if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.29.30036.3)
+  set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-external:I ")
+  set(_CMAKE_INCLUDE_SYSTEM_FLAG_CXX_WARNING "-external:W0 ")
+endif ()

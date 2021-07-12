@@ -163,12 +163,17 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
     mod_dir = this->LocalGenerator->GetCurrentBinaryDirectory();
   }
 
+  bool building_intrinsics =
+    !mf->GetSafeDefinition("CMAKE_Fortran_TARGET_BUILDING_INSTRINSIC_MODULES")
+       .empty();
+
   // Actually write dependencies to the streams.
   using ObjectInfoMap = cmDependsFortranInternals::ObjectInfoMap;
   ObjectInfoMap const& objInfo = this->Internal->ObjectInfo;
   for (auto const& i : objInfo) {
     if (!this->WriteDependenciesReal(i.first, i.second, mod_dir, stamp_dir,
-                                     makeDepends, internalDepends)) {
+                                     makeDepends, internalDepends,
+                                     building_intrinsics)) {
       return false;
     }
   }
@@ -307,7 +312,8 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
                                              std::string const& mod_dir,
                                              std::string const& stamp_dir,
                                              std::ostream& makeDepends,
-                                             std::ostream& internalDepends)
+                                             std::ostream& internalDepends,
+                                             bool buildingIntrinsics)
 {
   // Get the source file for this object.
   std::string const& src = info.Source;
@@ -339,8 +345,13 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
     makeDepends << '\n';
   }
 
+  std::set<std::string> req = info.Requires;
+  if (buildingIntrinsics) {
+    req.insert(info.Intrinsics.begin(), info.Intrinsics.end());
+  }
+
   // Write module requirements to the output stream.
-  for (std::string const& i : info.Requires) {
+  for (std::string const& i : req) {
     // Require only modules not provided in the same source.
     if (info.Provides.find(i) != info.Provides.cend()) {
       continue;

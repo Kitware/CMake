@@ -279,7 +279,7 @@ void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
   std::string requiredVersion = cmGlobalNinjaGenerator::RequiredNinjaVersion();
 
   // Ninja generator uses the 'console' pool if available (>= 1.5)
-  if (this->GetGlobalNinjaGenerator()->SupportsConsolePool()) {
+  if (this->GetGlobalNinjaGenerator()->SupportsDirectConsole()) {
     requiredVersion =
       cmGlobalNinjaGenerator::RequiredNinjaVersionForConsolePool();
   }

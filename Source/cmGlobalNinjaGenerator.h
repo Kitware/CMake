@@ -220,7 +220,6 @@ public:
   {
     return "package_source";
   }
-  const char* GetEditCacheTargetName() const override { return "edit_cache"; }
   const char* GetRebuildCacheTargetName() const override
   {
     return "rebuild_cache";
@@ -406,7 +405,7 @@ public:
     return "1.10.2";
   }
   static std::string RequiredNinjaVersionForCodePage() { return "1.11"; }
-  bool SupportsConsolePool() const;
+  bool SupportsDirectConsole() const override;
   bool SupportsImplicitOuts() const;
   bool SupportsManifestRestat() const;
   bool SupportsMultilineDepfile() const;
@@ -489,7 +488,6 @@ protected:
   std::string DefaultFileConfig;
 
 private:
-  std::string GetEditCacheCommand() const override;
   bool FindMakeProgram(cmMakefile* mf) override;
   void CheckNinjaFeatures();
   void CheckNinjaCodePage();

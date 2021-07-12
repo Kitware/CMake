@@ -2118,15 +2118,23 @@ cmTarget* cmMakefile::AddExecutable(const std::string& exeName,
 cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
                                    const std::string& name)
 {
-  auto it = this->Targets
-              .emplace(name,
-                       cmTarget(name, type, cmTarget::VisibilityNormal, this,
-                                cmTarget::PerConfig::Yes))
-              .first;
+  return &this->CreateNewTarget(name, type).first;
+}
+
+std::pair<cmTarget&, bool> cmMakefile::CreateNewTarget(
+  const std::string& name, cmStateEnums::TargetType type,
+  cmTarget::PerConfig perConfig)
+{
+  auto ib = this->Targets.emplace(
+    name, cmTarget(name, type, cmTarget::VisibilityNormal, this, perConfig));
+  auto it = ib.first;
+  if (!ib.second) {
+    return std::make_pair(std::ref(it->second), false);
+  }
   this->OrderedTargets.push_back(&it->second);
   this->GetGlobalGenerator()->IndexTarget(&it->second);
   this->GetStateSnapshot().GetDirectory().AddNormalTargetName(name);
-  return &it->second;
+  return std::make_pair(std::ref(it->second), true);
 }
 
 cmTarget* cmMakefile::AddNewUtilityTarget(const std::string& utilityName,
@@ -3180,6 +3188,23 @@ void cmMakefile::RemoveVariablesInString(std::string& source,
   while (var2.find(source)) {
     source.erase(var2.start(), var2.end() - var2.start());
   }
+}
+
+void cmMakefile::InitCMAKE_CONFIGURATION_TYPES(std::string const& genDefault)
+{
+  if (this->GetDefinition("CMAKE_CONFIGURATION_TYPES")) {
+    return;
+  }
+  std::string initConfigs;
+  if (!cmSystemTools::GetEnv("CMAKE_CONFIGURATION_TYPES", initConfigs)) {
+    initConfigs = genDefault;
+  }
+  this->AddCacheDefinition(
+    "CMAKE_CONFIGURATION_TYPES", initConfigs,
+    "Semicolon separated list of supported configuration types, "
+    "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
+    "anything else will be ignored.",
+    cmStateEnums::STRING);
 }
 
 std::string cmMakefile::GetDefaultConfiguration() const
@@ -4426,13 +4451,12 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
     return false;
   }
 
-  // Deprecate old policies, especially those that require a lot
-  // of code to maintain the old behavior.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0081 &&
+  // Deprecate old policies.
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0088 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
-          id == cmPolicies::CMP0065))) {
+          id == cmPolicies::CMP0065 || id == cmPolicies::CMP0083))) {
     this->IssueMessage(MessageType::DEPRECATION_WARNING,
                        cmPolicies::GetPolicyDeprecatedWarning(id));
   }

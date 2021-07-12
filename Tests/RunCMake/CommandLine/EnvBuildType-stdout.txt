@@ -1,0 +1,2 @@
+-- ENV{CMAKE_BUILD_TYPE}='BuildTypeEnv'
+-- CMAKE_BUILD_TYPE='BuildTypeEnv'

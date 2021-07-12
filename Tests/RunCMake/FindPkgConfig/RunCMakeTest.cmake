@@ -12,6 +12,7 @@ run_cmake(FindPkgConfig_PKGCONFIG_PATH)
 run_cmake(FindPkgConfig_PKGCONFIG_PATH_NO_CMAKE_PATH)
 run_cmake(FindPkgConfig_PKGCONFIG_PATH_NO_CMAKE_ENVIRONMENT_PATH)
 run_cmake(FindPkgConfig_extract_frameworks)
+run_cmake(FindPkgConfig_GET_MATCHING_ARGN)
 
 if(APPLE)
   run_cmake(FindPkgConfig_extract_frameworks_target)

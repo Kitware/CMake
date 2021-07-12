@@ -344,6 +344,26 @@ if(RunCMake_GENERATOR MATCHES "Unix Makefiles" OR RunCMake_GENERATOR MATCHES "Ni
   run_EnvironmentExportCompileCommands()
 endif()
 
+function(run_EnvironmentBuildType)
+  set(ENV{CMAKE_BUILD_TYPE} "BuildTypeEnv")
+  run_cmake(EnvBuildType)
+  run_cmake_with_options(EnvBuildTypeIgnore -DCMAKE_BUILD_TYPE=BuildTypeOpt)
+  unset(ENV{CMAKE_BUILD_TYPE})
+endfunction()
+
+function(run_EnvironmentConfigTypes)
+  set(ENV{CMAKE_CONFIGURATION_TYPES} "ConfigTypesEnv")
+  run_cmake(EnvConfigTypes)
+  run_cmake_with_options(EnvConfigTypesIgnore -DCMAKE_CONFIGURATION_TYPES=ConfigTypesOpt)
+  unset(ENV{CMAKE_CONFIGURATION_TYPES})
+endfunction()
+
+if(RunCMake_GENERATOR MATCHES "Make|^Ninja$")
+  run_EnvironmentBuildType()
+elseif(RunCMake_GENERATOR MATCHES "Ninja Multi-Config|Visual Studio|Xcode")
+  run_EnvironmentConfigTypes()
+endif()
+
 function(run_EnvironmentToolchain)
   set(ENV{CMAKE_TOOLCHAIN_FILE} "${RunCMake_SOURCE_DIR}/EnvToolchain-toolchain.cmake")
   run_cmake(EnvToolchainAbsolute)

@@ -208,6 +208,21 @@
 
 ### CUDA builds
 
+.cuda9.2:
+    image: "kitware/cmake:ci-cuda9.2-x86_64-2021-07-01"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: x86_64
+        CTEST_LABELS: "CUDA"
+
+.cuda9.2_nvidia:
+    extends: .cuda9.2
+
+    variables:
+        CMAKE_CONFIGURATION: cuda9.2_nvidia
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+
 .cuda10.2:
     image: "kitware/cmake:ci-cuda10.2-x86_64-2021-06-16"
 
@@ -229,6 +244,23 @@
     variables:
         CMAKE_CONFIGURATION: cuda10.2_clang
         CTEST_NO_WARNINGS_ALLOWED: 1
+
+### HIP builds
+
+.hip4.2:
+    image: "kitware/cmake:ci-hip4.2-x86_64-2021-07-09"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: x86_64
+        CTEST_LABELS: "HIP"
+
+.hip4.2_radeon:
+    extends: .hip4.2
+
+    variables:
+        CMAKE_CONFIGURATION: hip4.2_radeon
+        CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ## Tags
 
@@ -259,6 +291,13 @@
     tags:
         - cmake
         - cuda-rt
+        - docker
+        - linux
+
+.linux_builder_tags_radeon:
+    tags:
+        - cmake
+        - radeon
         - docker
         - linux
 

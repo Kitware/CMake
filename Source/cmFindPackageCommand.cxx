@@ -478,17 +478,35 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->VersionMaxPatch, this->VersionMaxTweak);
   }
 
+  const std::string makePackageRequiredVar =
+    cmStrCat("CMAKE_REQUIRE_FIND_PACKAGE_", this->Name);
+  const bool makePackageRequiredSet =
+    this->Makefile->IsOn(makePackageRequiredVar);
+  if (makePackageRequiredSet) {
+    if (this->Required) {
+      this->Makefile->IssueMessage(
+        MessageType::WARNING,
+        cmStrCat("for module ", this->Name,
+                 " already called with REQUIRED, thus ",
+                 makePackageRequiredVar, " has no effect."));
+    } else {
+      this->Required = true;
+    }
+  }
+
   std::string disableFindPackageVar =
     cmStrCat("CMAKE_DISABLE_FIND_PACKAGE_", this->Name);
   if (this->Makefile->IsOn(disableFindPackageVar)) {
     if (this->Required) {
       this->SetError(
-        cmStrCat("for module ", this->Name, " called with REQUIRED, but ",
-                 disableFindPackageVar,
+        cmStrCat("for module ", this->Name,
+                 (makePackageRequiredSet
+                    ? " was made REQUIRED with " + makePackageRequiredVar
+                    : " called with REQUIRED, "),
+                 " but ", disableFindPackageVar,
                  " is enabled. A REQUIRED package cannot be disabled."));
       return false;
     }
-
     return true;
   }
 
