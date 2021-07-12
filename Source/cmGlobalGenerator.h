@@ -596,7 +596,7 @@ protected:
   void AddGlobalTarget_RebuildCache(
     std::vector<GlobalTargetInfo>& targets) const;
   void AddGlobalTarget_Install(std::vector<GlobalTargetInfo>& targets);
-  cmTarget CreateGlobalTarget(GlobalTargetInfo const& gti, cmMakefile* mf);
+  void CreateGlobalTarget(GlobalTargetInfo const& gti, cmMakefile* mf);
 
   std::string FindMakeProgramFile;
   std::string ConfiguredFilesPath;
