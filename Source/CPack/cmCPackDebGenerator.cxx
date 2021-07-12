@@ -834,10 +834,7 @@ int cmCPackDebGenerator::createDeb()
     this->IsSet("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION"),
     this->packageFiles);
 
-  if (!gen.generate()) {
-    return 0;
-  }
-  return 1;
+  return gen.generate();
 }
 
 int cmCPackDebGenerator::createDbgsymDDeb()
@@ -890,10 +887,7 @@ int cmCPackDebGenerator::createDbgsymDDeb()
     this->IsSet("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION"),
     this->packageFiles);
 
-  if (!gen.generate()) {
-    return 0;
-  }
-  return 1;
+  return gen.generate();
 }
 
 bool cmCPackDebGenerator::SupportsComponentInstallation() const
