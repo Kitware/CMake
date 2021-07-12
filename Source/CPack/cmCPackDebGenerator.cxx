@@ -565,40 +565,40 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
 
 int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
 {
-  int retval = 1;
-  /* Reset package file name list it will be populated during the
-   * component packaging run*/
+  // Reset package file name list it will be populated during the
+  // component packaging run
   this->packageFileNames.clear();
   std::string initialTopLevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
 
+  int retval = 1;
   // The default behavior is to have one package by component group
   // unless CPACK_COMPONENTS_IGNORE_GROUP is specified.
-  if (!ignoreGroup) {
-    for (auto const& compG : this->ComponentGroups) {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                    "Packaging component group: " << compG.first << std::endl);
-      // Begin the archive for this group
-      retval &= this->PackageOnePack(initialTopLevel, compG.first);
-    }
-    // Handle Orphan components (components not belonging to any groups)
+  if (ignoreGroup) {
+    // CPACK_COMPONENTS_IGNORE_GROUPS is set
+    // We build 1 package per component
     for (auto const& comp : this->Components) {
-      // Does the component belong to a group?
-      if (comp.second.Group == nullptr) {
-        cmCPackLogger(
-          cmCPackLog::LOG_VERBOSE,
-          "Component <"
-            << comp.second.Name
-            << "> does not belong to any group, package it separately."
-            << std::endl);
-        // Begin the archive for this orphan component
-        retval &= this->PackageOnePack(initialTopLevel, comp.first);
-      }
+      retval &= this->PackageOnePack(initialTopLevel, comp.first);
     }
+    return retval;
   }
-  // CPACK_COMPONENTS_IGNORE_GROUPS is set
-  // We build 1 package per component
-  else {
-    for (auto const& comp : this->Components) {
+
+  for (auto const& compG : this->ComponentGroups) {
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                  "Packaging component group: " << compG.first << std::endl);
+    // Begin the archive for this group
+    retval &= this->PackageOnePack(initialTopLevel, compG.first);
+  }
+  // Handle Orphan components (components not belonging to any groups)
+  for (auto const& comp : this->Components) {
+    // Does the component belong to a group?
+    if (comp.second.Group == nullptr) {
+      cmCPackLogger(
+        cmCPackLog::LOG_VERBOSE,
+        "Component <"
+          << comp.second.Name
+          << "> does not belong to any group, package it separately."
+          << std::endl);
+      // Begin the archive for this orphan component
       retval &= this->PackageOnePack(initialTopLevel, comp.first);
     }
   }
