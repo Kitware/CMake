@@ -1,1 +1,1 @@
-^Usage: cmake --build \[<dir> \| --preset <preset>\] \[options\] \[-- \[native-options\]\]
+^Usage: cmake --build <dir> +\[options\] \[-- \[native-options\]\]
