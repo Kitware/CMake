@@ -31,4 +31,8 @@ if (PKG_CONFIG_FOUND)
   run_cmake(FindPkgConfig_VERSION_OPERATORS)
   run_cmake(FindPkgConfig_GET_MATCHING_MODULE_NAME)
   run_cmake(FindPkgConfig_empty_target)
+
+  if(NOT RunCMake_BINARY_DIR MATCHES " ")
+    run_cmake(FindPkgConfig_LIBRARY_PATH)
+  endif()
 endif ()

@@ -403,12 +403,24 @@ macro(_pkg_set_path_internal)
     unset(_lib_dirs)
     unset(_pkgconfig_path)
   endif()
+
+  # Tell pkg-config not to strip any -L paths so we can search them all.
+  if(DEFINED ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS})
+    set(_pkgconfig_allow_system_libs_old "$ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS}")
+  else()
+    unset(_pkgconfig_allow_system_libs_old)
+  endif()
+  set(ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS} 0)
 endmacro()
 
 macro(_pkg_restore_path_internal)
   if(NOT _extra_paths STREQUAL "")
     # Restore the environment variable
     set(ENV{PKG_CONFIG_PATH} "${_pkgconfig_path_old}")
+  endif()
+  if(DEFINED _pkgconfig_allow_system_libs_old)
+    set(ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS} "${_pkgconfig_allow_system_libs_old}")
+    unset(_pkgconfig_allow_system_libs_old)
   endif()
 
   unset(_extra_paths)
