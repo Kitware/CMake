@@ -648,29 +648,31 @@ int cmCPackDebGenerator::PackageFiles()
 
 bool cmCPackDebGenerator::createDebPackages()
 {
-  auto make_package = [this](const char* const path, const char* const output,
+  auto make_package = [this](const char* const path,
+                             const char* const output_var,
                              bool (cmCPackDebGenerator::*creator)()) -> bool {
     try {
-      this->packageFiles = findFilesIn(this->GetOption(path));
+      this->packageFiles = findFilesIn(path);
     } catch (const std::runtime_error& ex) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
-      return 0;
+      return false;
     }
 
     if ((this->*creator)()) {
       // add the generated package to package file names list
       this->packageFileNames.emplace_back(
         cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
-                 this->GetOption(output)));
+                 this->GetOption(output_var)));
       return true;
     }
     return false;
   };
-  bool retval = make_package("GEN_WDIR", "GEN_CPACK_OUTPUT_FILE_NAME",
-                             &cmCPackDebGenerator::createDeb);
-  if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") &&
-      this->GetOption("GEN_DBGSYMDIR")) {
-    retval = make_package("GEN_DBGSYMDIR", "GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME",
+  bool retval =
+    make_package(this->GetOption("GEN_WDIR"), "GEN_CPACK_OUTPUT_FILE_NAME",
+                 &cmCPackDebGenerator::createDeb);
+  const char* const dbgsymdir_path = this->GetOption("GEN_DBGSYMDIR");
+  if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") && dbgsymdir_path) {
+    retval = make_package(dbgsymdir_path, "GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME",
                           &cmCPackDebGenerator::createDbgsymDDeb) &&
       retval;
   }
