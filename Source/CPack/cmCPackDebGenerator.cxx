@@ -648,35 +648,32 @@ int cmCPackDebGenerator::PackageFiles()
 
 bool cmCPackDebGenerator::createDebPackages()
 {
-  try {
-    this->packageFiles = findFilesIn(this->GetOption("GEN_WDIR"));
-  } catch (const std::runtime_error& ex) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
-    return 0;
-  }
-
-  bool retval = this->createDeb();
-  // add the generated package to package file names list
-  this->packageFileNames.emplace_back(
-    cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
-             this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME")));
-
-  if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") &&
-      this->GetOption("GEN_DBGSYMDIR")) {
+  auto make_package = [this](const char* const path, const char* const output,
+                             bool (cmCPackDebGenerator::*creator)()) -> bool {
     try {
-      this->packageFiles = findFilesIn(this->GetOption("GEN_DBGSYMDIR"));
+      this->packageFiles = findFilesIn(this->GetOption(path));
     } catch (const std::runtime_error& ex) {
       cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
       return 0;
     }
 
-    retval = this->createDbgsymDDeb() || retval;
-    // add the generated package to package file names list
-    this->packageFileNames.emplace_back(
-      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
-               this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME")));
+    if ((this->*creator)()) {
+      // add the generated package to package file names list
+      this->packageFileNames.emplace_back(
+        cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+                 this->GetOption(output)));
+      return true;
+    }
+    return false;
+  };
+  bool retval = make_package("GEN_WDIR", "GEN_CPACK_OUTPUT_FILE_NAME",
+                             &cmCPackDebGenerator::createDeb);
+  if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") &&
+      this->GetOption("GEN_DBGSYMDIR")) {
+    retval = make_package("GEN_DBGSYMDIR", "GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME",
+                          &cmCPackDebGenerator::createDbgsymDDeb) &&
+      retval;
   }
-
   return int(retval);
 }
 
