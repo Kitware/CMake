@@ -1,0 +1,203 @@
+{
+  "source": "^fileset$",
+  "build": "^fileset$",
+  "parentSource": "^\\.$",
+  "childSources": null,
+  "targetIds": [
+    "^c_headers_1::@6b8db101d64c125f29fe$",
+    "^c_headers_2::@6b8db101d64c125f29fe$"
+  ],
+  "projectName": "codemodel-v2",
+  "minimumCMakeVersion": "3.12",
+  "hasInstallRule": true,
+  "installers": [
+    {
+      "component": "Unspecified",
+      "type": "target",
+      "destination": "lib",
+      "paths": [
+        "^fileset/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_headers_1\\.(a|lib)?$"
+      ],
+      "isExcludeFromAll": null,
+      "isForAllComponents": null,
+      "isOptional": null,
+      "targetId": "^c_headers_1::@6b8db101d64c125f29fe$",
+      "targetIndex": "c_headers_1",
+      "targetIsImportLibrary": null,
+      "targetInstallNamelink": null,
+      "exportName": null,
+      "exportTargets": null,
+      "scriptFile": null,
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 20,
+          "command": "install",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "component": "Headers",
+      "type": "fileSet",
+      "destination": "include",
+      "paths": [
+        "^fileset/error\\.c$",
+        "^fileset/other\\.c$"
+      ],
+      "isExcludeFromAll": null,
+      "isForAllComponents": null,
+      "isOptional": null,
+      "targetId": null,
+      "targetIndex": null,
+      "targetIsImportLibrary": null,
+      "targetInstallNamelink": null,
+      "exportName": null,
+      "exportTargets": null,
+      "scriptFile": null,
+      "fileSetName": "HEADERS",
+      "fileSetType": "HEADERS",
+      "fileSetDirectories": [
+        "^fileset$"
+      ],
+      "fileSetTarget": {
+        "id": "^c_headers_1::@6b8db101d64c125f29fe$",
+        "index": "c_headers_1"
+      },
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 20,
+          "command": "install",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "component": "Unspecified",
+      "type": "fileSet",
+      "destination": "include/dir",
+      "paths": [
+        "^fileset/dir/h2\\.h$"
+      ],
+      "isExcludeFromAll": null,
+      "isForAllComponents": null,
+      "isOptional": null,
+      "targetId": null,
+      "targetIndex": null,
+      "targetIsImportLibrary": null,
+      "targetInstallNamelink": null,
+      "exportName": null,
+      "exportTargets": null,
+      "scriptFile": null,
+      "fileSetName": "b",
+      "fileSetType": "HEADERS",
+      "fileSetDirectories": [
+        "^fileset/dir$"
+      ],
+      "fileSetTarget": {
+        "id": "^c_headers_1::@6b8db101d64c125f29fe$",
+        "index": "c_headers_1"
+      },
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 20,
+          "command": "install",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "component": "Unspecified",
+      "type": "fileSet",
+      "destination": "include",
+      "paths": [
+        "^fileset/h3\\.h$"
+      ],
+      "isExcludeFromAll": null,
+      "isForAllComponents": null,
+      "isOptional": null,
+      "targetId": null,
+      "targetIndex": null,
+      "targetIsImportLibrary": null,
+      "targetInstallNamelink": null,
+      "exportName": null,
+      "exportTargets": null,
+      "scriptFile": null,
+      "fileSetName": "c",
+      "fileSetType": "HEADERS",
+      "fileSetDirectories": [
+        "^fileset$"
+      ],
+      "fileSetTarget": {
+        "id": "^c_headers_1::@6b8db101d64c125f29fe$",
+        "index": "c_headers_1"
+      },
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 20,
+          "command": "install",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "component": "Unspecified",
+      "type": "target",
+      "destination": "lib",
+      "paths": [
+        "^fileset/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_headers_2\\.(a|lib)?$"
+      ],
+      "isExcludeFromAll": null,
+      "isForAllComponents": null,
+      "isOptional": null,
+      "targetId": "^c_headers_2::@6b8db101d64c125f29fe$",
+      "targetIndex": "c_headers_2",
+      "targetIsImportLibrary": null,
+      "targetInstallNamelink": null,
+      "exportName": null,
+      "exportTargets": null,
+      "scriptFile": null,
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 25,
+          "command": "install",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    }
+  ]
+}
