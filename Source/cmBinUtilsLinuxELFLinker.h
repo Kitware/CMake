@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "cmConfigure.h" // IWYU pragma: keep
+
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -29,6 +32,7 @@ private:
   std::unique_ptr<cmLDConfigTool> LDConfigTool;
   bool HaveLDConfigPaths = false;
   std::vector<std::string> LDConfigPaths;
+  std::uint16_t Machine = 0;
 
   bool ScanDependencies(std::string const& file,
                         std::vector<std::string> const& parentRpaths);
