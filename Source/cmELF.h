@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstdint>
 #include <iosfwd>
 #include <memory>
 #include <string>
@@ -67,6 +68,9 @@ public:
 
   /** Get the type of the file opened.  */
   FileType GetFileType() const;
+
+  /** Get the machine of the file opened.  */
+  std::uint16_t GetMachine() const;
 
   /** Get the number of ELF sections present.  */
   unsigned int GetNumberOfSections() const;
