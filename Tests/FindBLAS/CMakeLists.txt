@@ -6,6 +6,11 @@ foreach(variant IN LISTS CMake_TEST_FindBLAS)
     set(vendor "${variant}")
     set(alt_compiler "")
   endif()
+  if(vendor STREQUAL "All" AND CMake_TEST_FindBLAS_All)
+    set(EXPECT_All "-DEXPECT_All=${CMake_TEST_FindBLAS_All}")
+  else()
+    set(EXPECT_All "")
+  endif()
   add_test(NAME FindBLAS.Test_${variant} COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -13,7 +18,7 @@ foreach(variant IN LISTS CMake_TEST_FindBLAS)
     "${CMake_BINARY_DIR}/Tests/FindBLAS/Test_${variant}"
     ${build_generator_args}
     --build-project TestFindBLAS
-    --build-options ${build_options} ${alt_compiler} -DBLA_VENDOR=${vendor}
+    --build-options ${build_options} ${alt_compiler} ${EXPECT_All} -DBLA_VENDOR=${vendor}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 endforeach()
@@ -26,6 +31,11 @@ foreach(variant IN LISTS CMake_TEST_FindBLAS_STATIC)
     set(vendor "${variant}")
     set(alt_compiler "")
   endif()
+  if(vendor STREQUAL "All" AND CMake_TEST_FindBLAS_STATIC_All)
+    set(EXPECT_All "-DEXPECT_All=${CMake_TEST_FindBLAS_STATIC_All}")
+  else()
+    set(EXPECT_All "")
+  endif()
   add_test(NAME FindBLAS.Test_${variant}_Static COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -33,7 +43,7 @@ foreach(variant IN LISTS CMake_TEST_FindBLAS_STATIC)
     "${CMake_BINARY_DIR}/Tests/FindBLAS/Test_${variant}_Static"
     ${build_generator_args}
     --build-project TestFindBLAS
-    --build-options ${build_options} ${alt_compiler} -DBLA_VENDOR=${vendor} -DBLA_STATIC=ON
+    --build-options ${build_options} ${alt_compiler} ${EXPECT_All} -DBLA_VENDOR=${vendor} -DBLA_STATIC=ON
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 endforeach()
