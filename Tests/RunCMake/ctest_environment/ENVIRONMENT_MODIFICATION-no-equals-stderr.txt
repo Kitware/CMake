@@ -1,0 +1,1 @@
+Error: Missing `=` after the variable name in: MISSING_EQUAL

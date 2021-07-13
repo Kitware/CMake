@@ -160,6 +160,7 @@ syn keyword cmakeProperty contained
             \ ENABLED_LANGUAGES
             \ ENABLE_EXPORTS
             \ ENVIRONMENT
+            \ ENVIRONMENT_MODIFICATION
             \ EXCLUDE_FROM_ALL
             \ EXCLUDE_FROM_DEFAULT_BUILD
             \ EXPORT_NAME

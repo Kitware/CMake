@@ -451,6 +451,7 @@ Properties on Tests
    /prop_test/DEPENDS
    /prop_test/DISABLED
    /prop_test/ENVIRONMENT
+   /prop_test/ENVIRONMENT_MODIFICATION
    /prop_test/FAIL_REGULAR_EXPRESSION
    /prop_test/FIXTURES_CLEANUP
    /prop_test/FIXTURES_REQUIRED
