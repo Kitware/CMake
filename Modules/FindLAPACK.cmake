@@ -350,7 +350,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
         "lib/${LAPACK_mkl_ARCH_NAME}"
         )
 
-    # First try empty lapack libs
+    # First try empty lapack libs (implicitly linked or automatic from BLAS)
     if(NOT ${_LIBRARIES})
       check_lapack_libraries(
         ${_LIBRARIES}
@@ -363,6 +363,11 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
         "${LAPACK_mkl_LIB_PATH_SUFFIXES}"
         "${_BLAS_LIBRARIES}"
       )
+      if(LAPACK_WORKS AND NOT _BLAS_LIBRARIES)
+        # Give a more helpful "found" message
+        set(LAPACK_WORKS "implicitly linked")
+        set(_lapack_fphsa_req_var LAPACK_WORKS)
+      endif()
     endif()
 
     # Then try the search libs

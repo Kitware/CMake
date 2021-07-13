@@ -386,6 +386,8 @@ if(BLA_VENDOR STREQUAL "All")
       )
   endif()
   if(BLAS_WORKS)
+    # Give a more helpful "found" message
+    set(BLAS_WORKS "implicitly linked")
     set(_blas_fphsa_req_var BLAS_WORKS)
   endif()
 endif()
