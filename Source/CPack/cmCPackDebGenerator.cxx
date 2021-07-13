@@ -3,7 +3,6 @@
 #include "cmCPackDebGenerator.h"
 
 #include <algorithm>
-#include <cstdlib>
 #include <cstring>
 #include <map>
 #include <ostream>
@@ -56,7 +55,7 @@ private:
   const std::string TopLevelDir;
   const std::string TemporaryDir;
   const char* DebianArchiveType;
-  int NumThreads;
+  long NumThreads;
   const std::map<std::string, std::string> ControlValues;
   const bool GenShLibs;
   const std::string ShLibsFilename;
@@ -100,19 +99,19 @@ DebGenerator::DebGenerator(
     debianCompressionType = "gzip";
   }
 
-  if (!strcmp(debianCompressionType, "lzma")) {
+  if (!std::strcmp(debianCompressionType, "lzma")) {
     this->CompressionSuffix = ".lzma";
     this->TarCompressionType = cmArchiveWrite::CompressLZMA;
-  } else if (!strcmp(debianCompressionType, "xz")) {
+  } else if (!std::strcmp(debianCompressionType, "xz")) {
     this->CompressionSuffix = ".xz";
     this->TarCompressionType = cmArchiveWrite::CompressXZ;
-  } else if (!strcmp(debianCompressionType, "bzip2")) {
+  } else if (!std::strcmp(debianCompressionType, "bzip2")) {
     this->CompressionSuffix = ".bz2";
     this->TarCompressionType = cmArchiveWrite::CompressBZip2;
-  } else if (!strcmp(debianCompressionType, "gzip")) {
+  } else if (!std::strcmp(debianCompressionType, "gzip")) {
     this->CompressionSuffix = ".gz";
     this->TarCompressionType = cmArchiveWrite::CompressGZip;
-  } else if (!strcmp(debianCompressionType, "none")) {
+  } else if (!std::strcmp(debianCompressionType, "none")) {
     this->CompressionSuffix.clear();
     this->TarCompressionType = cmArchiveWrite::CompressNone;
   } else {
@@ -121,16 +120,15 @@ DebGenerator::DebGenerator(
                     << debianCompressionType << std::endl);
   }
 
-  if (numThreads == nullptr) {
-    numThreads = "1";
-  }
-
-  char* endptr;
-  this->NumThreads = static_cast<int>(strtol(numThreads, &endptr, 10));
-  if (numThreads != endptr && *endptr != '\0') {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Unrecognized number of threads: " << numThreads
-                                                     << std::endl);
+  if (numThreads != nullptr) {
+    if (!cmStrToLong(numThreads, &this->NumThreads)) {
+      this->NumThreads = 1;
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Unrecognized number of threads: " << numThreads
+                                                       << std::endl);
+    }
+  } else {
+    this->NumThreads = 1;
   }
 }
 
@@ -189,7 +187,8 @@ bool DebGenerator::generateDataTar() const
     return false;
   }
   cmArchiveWrite data_tar(fileStream_data_tar, this->TarCompressionType,
-                          this->DebianArchiveType, 0, this->NumThreads);
+                          this->DebianArchiveType, 0,
+                          static_cast<int>(this->NumThreads));
   data_tar.Open();
 
   // uid/gid should be the one of the root user, and this root user has
