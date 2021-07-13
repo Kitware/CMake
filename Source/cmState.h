@@ -35,12 +35,6 @@ class cmState
   friend class cmStateSnapshot;
 
 public:
-  cmState();
-  ~cmState();
-
-  cmState(const cmState&) = delete;
-  cmState& operator=(const cmState&) = delete;
-
   enum Mode
   {
     Unknown,
@@ -50,6 +44,18 @@ public:
     CTest,
     CPack,
   };
+
+  enum class ProjectKind
+  {
+    Normal,
+    TryCompile,
+  };
+
+  cmState(Mode mode, ProjectKind projectKind = ProjectKind::Normal);
+  ~cmState();
+
+  cmState(const cmState&) = delete;
+  cmState& operator=(const cmState&) = delete;
 
   static const std::string& GetTargetTypeName(
     cmStateEnums::TargetType targetType);
@@ -141,9 +147,6 @@ public:
   void SetEnabledLanguages(std::vector<std::string> const& langs);
   void ClearEnabledLanguages();
 
-  bool GetIsInTryCompile() const;
-  void SetIsInTryCompile(bool b);
-
   bool GetIsGeneratorMultiConfig() const;
   void SetIsGeneratorMultiConfig(bool b);
 
@@ -207,9 +210,10 @@ public:
 
   Mode GetMode() const;
   std::string GetModeString() const;
-  void SetMode(Mode mode);
 
   static std::string ModeToString(Mode mode);
+
+  ProjectKind GetProjectKind() const;
 
 private:
   friend class cmake;
@@ -248,7 +252,6 @@ private:
 
   std::string SourceDirectory;
   std::string BinaryDirectory;
-  bool IsInTryCompile = false;
   bool IsGeneratorMultiConfig = false;
   bool WindowsShell = false;
   bool WindowsVSIDE = false;
@@ -258,5 +261,6 @@ private:
   bool NMake = false;
   bool MSYSShell = false;
   bool NinjaMulti = false;
-  Mode CurrentMode = Unknown;
+  Mode StateMode = Unknown;
+  ProjectKind StateProjectKind = ProjectKind::Normal;
 };

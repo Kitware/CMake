@@ -168,7 +168,8 @@ public:
   static const int DEFAULT_BUILD_PARALLEL_LEVEL = 0;
 
   /// Default constructor
-  cmake(Role role, cmState::Mode mode);
+  cmake(Role role, cmState::Mode mode,
+        cmState::ProjectKind projectKind = cmState::ProjectKind::Normal);
   /// Destructor
   ~cmake();
 
@@ -356,7 +357,6 @@ public:
 
   //! Is this cmake running as a result of a TRY_COMPILE command
   bool GetIsInTryCompile() const;
-  void SetIsInTryCompile(bool b);
 
 #ifndef CMAKE_BOOTSTRAP
   void SetWarningFromPreset(const std::string& name,
