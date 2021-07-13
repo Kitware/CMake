@@ -249,11 +249,15 @@ bool DebGenerator::generateDataTar() const
     // do not recurse because the loop will do it
     if (!data_tar.Add(file, topLevelLength, ".", false)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Problem adding file to tar:"
-                      << std::endl
-                      << "#top level directory: " << this->WorkDir << std::endl
-                      << "#file: " << file << std::endl
-                      << "#error:" << data_tar.GetError() << std::endl);
+                    "Problem adding file to tar:\n"
+                    "#top level directory: "
+                      << this->WorkDir
+                      << "\n"
+                         "#file: "
+                      << file
+                      << "\n"
+                         "#error:"
+                      << data_tar.GetError() << std::endl);
       return false;
     }
   }
@@ -335,11 +339,13 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
       !control_tar.Add(this->WorkDir + "/control", this->WorkDir.length(),
                        ".")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Error adding file to tar:"
-                    << std::endl
-                    << "#top level directory: " << this->WorkDir << std::endl
-                    << "#file: \"control\" or \"md5sums\"" << std::endl
-                    << "#error:" << control_tar.GetError() << std::endl);
+                  "Error adding file to tar:\n"
+                  "#top level directory: "
+                    << this->WorkDir
+                    << "\n"
+                       "#file: \"control\" or \"md5sums\"\n"
+                       "#error:"
+                    << control_tar.GetError() << std::endl);
     return false;
   }
 
@@ -347,11 +353,13 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
   if (this->GenShLibs) {
     if (!control_tar.Add(this->ShLibsFilename, this->WorkDir.length(), ".")) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error adding file to tar:"
-                      << std::endl
-                      << "#top level directory: " << this->WorkDir << std::endl
-                      << "#file: \"shlibs\"" << std::endl
-                      << "#error:" << control_tar.GetError() << std::endl);
+                    "Error adding file to tar:\n"
+                    "#top level directory: "
+                      << this->WorkDir
+                      << "\n"
+                         "#file: \"shlibs\"\n"
+                         "#error:"
+                      << control_tar.GetError() << std::endl);
       return false;
     }
   }
@@ -361,11 +369,13 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     control_tar.SetPermissions(permission755);
     if (!control_tar.Add(this->PostInst, this->WorkDir.length(), ".")) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error adding file to tar:"
-                      << std::endl
-                      << "#top level directory: " << this->WorkDir << std::endl
-                      << "#file: \"postinst\"" << std::endl
-                      << "#error:" << control_tar.GetError() << std::endl);
+                    "Error adding file to tar:\n"
+                    "#top level directory: "
+                      << this->WorkDir
+                      << "\n"
+                         "#file: \"postinst\"\n"
+                         "#error:"
+                      << control_tar.GetError() << std::endl);
       return false;
     }
     control_tar.SetPermissions(permission644);
@@ -375,11 +385,13 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     control_tar.SetPermissions(permission755);
     if (!control_tar.Add(this->PostRm, this->WorkDir.length(), ".")) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error adding file to tar:"
-                      << std::endl
-                      << "#top level directory: " << this->WorkDir << std::endl
-                      << "#file: \"postinst\"" << std::endl
-                      << "#error:" << control_tar.GetError() << std::endl);
+                    "Error adding file to tar:\n"
+                    "#top level directory: "
+                      << this->WorkDir
+                      << "\n"
+                         "#file: \"postinst\"\n"
+                         "#error:"
+                      << control_tar.GetError() << std::endl);
       return false;
     }
     control_tar.SetPermissions(permission644);
@@ -413,11 +425,12 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
       // if we can copy the file, it means it does exist, let's add it:
       if (!cmsys::SystemTools::FileExists(i)) {
         cmCPackLogger(cmCPackLog::LOG_WARNING,
-                      "Adding file to tar:" << std::endl
-                                            << "#top level directory: "
-                                            << this->WorkDir << std::endl
-                                            << "#missing file: " << i
-                                            << std::endl);
+                      "Adding file to tar:\n"
+                      "#top level directory: "
+                        << this->WorkDir
+                        << "\n"
+                           "#missing file: "
+                        << i << std::endl);
       }
 
       if (cmsys::SystemTools::CopyFileIfDifferent(i, localcopy)) {
@@ -452,12 +465,15 @@ bool DebGenerator::generateDeb() const
       !deb.Add(tlDir + "control.tar.gz", tlDir.length()) ||
       !deb.Add(tlDir + "data.tar" + this->CompressionSuffix, tlDir.length())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Error creating debian package:"
-                    << std::endl
-                    << "#top level directory: " << this->TopLevelDir
-                    << std::endl
-                    << "#file: " << this->OutputName << std::endl
-                    << "#error:" << deb.GetError() << std::endl);
+                  "Error creating debian package:\n"
+                  "#top level directory: "
+                    << this->TopLevelDir
+                    << "\n"
+                       "#file: "
+                    << this->OutputName
+                    << "\n"
+                       "#error:"
+                    << deb.GetError() << std::endl);
     return false;
   }
   return true;
