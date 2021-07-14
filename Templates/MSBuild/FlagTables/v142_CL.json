@@ -477,16 +477,16 @@
   },
   {
     "name": "LanguageStandard",
-    "switch": "std:c++20",
-    "comment": "ISO C++20 Standard",
-    "value": "stdcpp20",
+    "switch": "std:c++17",
+    "comment": "ISO C++17 Standard",
+    "value": "stdcpp17",
     "flags": []
   },
   {
     "name": "LanguageStandard",
-    "switch": "std:c++17",
-    "comment": "ISO C++17 Standard",
-    "value": "stdcpp17",
+    "switch": "std:c++20",
+    "comment": "ISO C++20 Standard",
+    "value": "stdcpp20",
     "flags": []
   },
   {
