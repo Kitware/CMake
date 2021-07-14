@@ -470,13 +470,6 @@
   },
   {
     "name": "LanguageStandard",
-    "switch": "",
-    "comment": "Default (ISO C++14 Standard)",
-    "value": "Default",
-    "flags": []
-  },
-  {
-    "name": "LanguageStandard",
     "switch": "std:c++14",
     "comment": "ISO C++14 Standard",
     "value": "stdcpp14",
@@ -501,13 +494,6 @@
     "switch": "std:c++latest",
     "comment": "Preview - Features from the Latest C++ Working Draft",
     "value": "stdcpplatest",
-    "flags": []
-  },
-  {
-    "name": "LanguageStandard_C",
-    "switch": "",
-    "comment": "Default (Legacy MSVC)",
-    "value": "Default",
     "flags": []
   },
   {
