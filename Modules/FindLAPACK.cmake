@@ -298,7 +298,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
 
     if(BLA_F95)
       set(LAPACK_mkl_SEARCH_SYMBOL "cheev_f95")
-      set(_LIBRARIES LAPACK95_LIBRARIES)
+      set(_LAPACK_LIBRARIES LAPACK95_LIBRARIES)
       set(_BLAS_LIBRARIES ${BLAS95_LIBRARIES})
 
       # old
@@ -311,7 +311,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
         "mkl_lapack95_${LAPACK_mkl_ILP_MODE}")
     else()
       set(LAPACK_mkl_SEARCH_SYMBOL "cheev")
-      set(_LIBRARIES LAPACK_LIBRARIES)
+      set(_LAPACK_LIBRARIES LAPACK_LIBRARIES)
       set(_BLAS_LIBRARIES ${BLAS_LIBRARIES})
 
       # old and new >= 10.3
@@ -351,9 +351,9 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
         )
 
     # First try empty lapack libs (implicitly linked or automatic from BLAS)
-    if(NOT ${_LIBRARIES})
+    if(NOT ${_LAPACK_LIBRARIES})
       check_lapack_libraries(
-        ${_LIBRARIES}
+        ${_LAPACK_LIBRARIES}
         LAPACK
         ${LAPACK_mkl_SEARCH_SYMBOL}
         ""
@@ -371,15 +371,15 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     endif()
 
     # Then try the search libs
-    foreach(IT ${LAPACK_SEARCH_LIBS})
-      string(REPLACE " " ";" SEARCH_LIBS ${IT})
-      if(NOT ${_LIBRARIES})
+    foreach(_search ${LAPACK_SEARCH_LIBS})
+      string(REPLACE " " ";" _search ${_search})
+      if(NOT ${_LAPACK_LIBRARIES})
         check_lapack_libraries(
-          ${_LIBRARIES}
+          ${_LAPACK_LIBRARIES}
           LAPACK
           ${LAPACK_mkl_SEARCH_SYMBOL}
           ""
-          "${SEARCH_LIBS}"
+          "${_search}"
           "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM};${LAPACK_mkl_LDL}"
           "${LAPACK_mkl_MKLROOT}"
           "${LAPACK_mkl_LIB_PATH_SUFFIXES}"
@@ -388,6 +388,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       endif()
     endforeach()
 
+    unset(_search)
     unset(LAPACK_mkl_ILP_MODE)
     unset(LAPACK_mkl_SEARCH_SYMBOL)
     unset(LAPACK_mkl_LM)
@@ -651,3 +652,5 @@ if(LAPACK_LIBRARIES STREQUAL "LAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
 endif()
 
 _add_lapack_target()
+unset(_lapack_fphsa_req_var)
+unset(_LAPACK_LIBRARIES)
