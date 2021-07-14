@@ -456,13 +456,6 @@
   },
   {
     "name": "ConformanceMode",
-    "switch": "",
-    "comment": "Default",
-    "value": "Default",
-    "flags": []
-  },
-  {
-    "name": "ConformanceMode",
     "switch": "permissive-",
     "comment": "Yes",
     "value": "true",
