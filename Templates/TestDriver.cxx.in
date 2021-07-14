@@ -2,7 +2,7 @@
 #include <stdio.h>  /* NOLINT */
 #include <stdlib.h> /* NOLINT */
 #include <string.h> /* NOLINT */
-#include <time.h>
+#include <time.h>   /* NOLINT */
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4996) /* deprecation */
