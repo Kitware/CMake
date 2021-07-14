@@ -610,13 +610,6 @@
     "flags": []
   },
   {
-    "name": "ExternalWarningLevel",
-    "switch": "",
-    "comment": "Inherit Project Warning Level",
-    "value": "InheritWarningLevel",
-    "flags": []
-  },
-  {
     "name": "CallingConvention",
     "switch": "Gd",
     "comment": "__cdecl",
