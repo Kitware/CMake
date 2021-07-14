@@ -1063,6 +1063,13 @@
   },
   {
     "name": "RemoveUnreferencedCodeData",
+    "switch": "Zc:inline-",
+    "comment": "Remove unreferenced code and data",
+    "value": "false",
+    "flags": []
+  },
+  {
+    "name": "RemoveUnreferencedCodeData",
     "switch": "Zc:inline",
     "comment": "Remove unreferenced code and data",
     "value": "true",
