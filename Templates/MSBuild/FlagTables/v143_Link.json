@@ -652,24 +652,13 @@
   },
   {
     "name": "EnableUAC",
-    "switch": "MANIFESTUAC:NO",
-    "comment": "Enable User Account Control (UAC)",
-    "value": "false",
-    "flags": [
-      "UserValue",
-      "UserIgnored",
-      "Continue"
-    ]
-  },
-  {
-    "name": "EnableUAC",
     "switch": "MANIFESTUAC:",
-    "comment": "Enable User Account Control (UAC)",
-    "value": "true",
+    "comment": "",
+    "value": "",
     "flags": [
       "UserValue",
-      "UserIgnored",
-      "Continue"
+      "UserRequired",
+      "SpaceAppendable"
     ]
   },
   {
@@ -677,16 +666,6 @@
     "switch": "uiAccess='false'",
     "comment": "UAC Bypass UI Protection",
     "value": "false",
-    "flags": [
-      "UserValue",
-      "UserRequired"
-    ]
-  },
-  {
-    "name": "UACUIAccess",
-    "switch": "MANIFESTUAC:",
-    "comment": "UAC Bypass UI Protection",
-    "value": "true",
     "flags": [
       "UserValue",
       "UserRequired"
