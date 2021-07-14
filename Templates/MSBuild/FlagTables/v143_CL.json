@@ -744,6 +744,13 @@
   },
   {
     "name": "SupportJustMyCode",
+    "switch": "JMC-",
+    "comment": "Support Just My Code Debugging",
+    "value": "false",
+    "flags": []
+  },
+  {
+    "name": "SupportJustMyCode",
     "switch": "JMC",
     "comment": "Support Just My Code Debugging",
     "value": "true",
