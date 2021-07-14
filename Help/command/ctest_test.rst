@@ -29,6 +29,10 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [QUIET]
              )
 
+..
+   _note: If updating the argument list here, please also update the argument
+   list documentation for :command:`ctest_memcheck` as well.
+
 Run tests in the project build tree and store results in
 ``Test.xml`` for submission with the :command:`ctest_submit` command.
 
