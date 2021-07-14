@@ -600,7 +600,10 @@ int do_build(int ac, char const* const* av)
   if (dir.empty() && presetName.empty() && !listPresets) {
     /* clang-format off */
     std::cerr <<
-      "Usage: cmake --build [<dir> | --preset <preset>] [options] [-- [native-options]]\n"
+      "Usage: cmake --build <dir>            "
+      " [options] [-- [native-options]]\n"
+      "       cmake --build --preset <preset>"
+      " [options] [-- [native-options]]\n"
       "Options:\n"
       "  <dir>          = Project binary directory to be built.\n"
       "  --preset <preset>, --preset=<preset>\n"

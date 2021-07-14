@@ -408,7 +408,8 @@ project binary tree:
 
 .. code-block:: shell
 
-  cmake --build [<dir> | --preset <preset>] [<options>] [-- <build-tool-options>]
+  cmake --build <dir>             [<options>] [-- <build-tool-options>]
+  cmake --build --preset <preset> [<options>] [-- <build-tool-options>]
 
 This abstracts a native build tool's command-line interface with the
 following options:
