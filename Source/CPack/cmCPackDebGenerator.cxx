@@ -3,11 +3,11 @@
 #include "cmCPackDebGenerator.h"
 
 #include <algorithm>
-#include <cstdlib>
 #include <cstring>
 #include <map>
 #include <ostream>
 #include <set>
+#include <stdexcept>
 #include <utility>
 
 #include "cmsys/Glob.hxx"
@@ -55,7 +55,7 @@ private:
   const std::string TopLevelDir;
   const std::string TemporaryDir;
   const char* DebianArchiveType;
-  int NumThreads;
+  long NumThreads;
   const std::map<std::string, std::string> ControlValues;
   const bool GenShLibs;
   const std::string ShLibsFilename;
@@ -99,19 +99,19 @@ DebGenerator::DebGenerator(
     debianCompressionType = "gzip";
   }
 
-  if (!strcmp(debianCompressionType, "lzma")) {
+  if (!std::strcmp(debianCompressionType, "lzma")) {
     this->CompressionSuffix = ".lzma";
     this->TarCompressionType = cmArchiveWrite::CompressLZMA;
-  } else if (!strcmp(debianCompressionType, "xz")) {
+  } else if (!std::strcmp(debianCompressionType, "xz")) {
     this->CompressionSuffix = ".xz";
     this->TarCompressionType = cmArchiveWrite::CompressXZ;
-  } else if (!strcmp(debianCompressionType, "bzip2")) {
+  } else if (!std::strcmp(debianCompressionType, "bzip2")) {
     this->CompressionSuffix = ".bz2";
     this->TarCompressionType = cmArchiveWrite::CompressBZip2;
-  } else if (!strcmp(debianCompressionType, "gzip")) {
+  } else if (!std::strcmp(debianCompressionType, "gzip")) {
     this->CompressionSuffix = ".gz";
     this->TarCompressionType = cmArchiveWrite::CompressGZip;
-  } else if (!strcmp(debianCompressionType, "none")) {
+  } else if (!std::strcmp(debianCompressionType, "none")) {
     this->CompressionSuffix.clear();
     this->TarCompressionType = cmArchiveWrite::CompressNone;
   } else {
@@ -120,16 +120,15 @@ DebGenerator::DebGenerator(
                     << debianCompressionType << std::endl);
   }
 
-  if (numThreads == nullptr) {
-    numThreads = "1";
-  }
-
-  char* endptr;
-  this->NumThreads = static_cast<int>(strtol(numThreads, &endptr, 10));
-  if (numThreads != endptr && *endptr != '\0') {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Unrecognized number of threads: " << numThreads
-                                                     << std::endl);
+  if (numThreads != nullptr) {
+    if (!cmStrToLong(numThreads, &this->NumThreads)) {
+      this->NumThreads = 1;
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Unrecognized number of threads: " << numThreads
+                                                       << std::endl);
+    }
+  } else {
+    this->NumThreads = 1;
   }
 }
 
@@ -188,7 +187,8 @@ bool DebGenerator::generateDataTar() const
     return false;
   }
   cmArchiveWrite data_tar(fileStream_data_tar, this->TarCompressionType,
-                          this->DebianArchiveType, 0, this->NumThreads);
+                          this->DebianArchiveType, 0,
+                          static_cast<int>(this->NumThreads));
   data_tar.Open();
 
   // uid/gid should be the one of the root user, and this root user has
@@ -249,11 +249,15 @@ bool DebGenerator::generateDataTar() const
     // do not recurse because the loop will do it
     if (!data_tar.Add(file, topLevelLength, ".", false)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Problem adding file to tar:"
-                      << std::endl
-                      << "#top level directory: " << this->WorkDir << std::endl
-                      << "#file: " << file << std::endl
-                      << "#error:" << data_tar.GetError() << std::endl);
+                    "Problem adding file to tar:\n"
+                    "#top level directory: "
+                      << this->WorkDir
+                      << "\n"
+                         "#file: "
+                      << file
+                      << "\n"
+                         "#error:"
+                      << data_tar.GetError() << std::endl);
       return false;
     }
   }
@@ -335,11 +339,13 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
       !control_tar.Add(this->WorkDir + "/control", this->WorkDir.length(),
                        ".")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Error adding file to tar:"
-                    << std::endl
-                    << "#top level directory: " << this->WorkDir << std::endl
-                    << "#file: \"control\" or \"md5sums\"" << std::endl
-                    << "#error:" << control_tar.GetError() << std::endl);
+                  "Error adding file to tar:\n"
+                  "#top level directory: "
+                    << this->WorkDir
+                    << "\n"
+                       "#file: \"control\" or \"md5sums\"\n"
+                       "#error:"
+                    << control_tar.GetError() << std::endl);
     return false;
   }
 
@@ -347,11 +353,13 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
   if (this->GenShLibs) {
     if (!control_tar.Add(this->ShLibsFilename, this->WorkDir.length(), ".")) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error adding file to tar:"
-                      << std::endl
-                      << "#top level directory: " << this->WorkDir << std::endl
-                      << "#file: \"shlibs\"" << std::endl
-                      << "#error:" << control_tar.GetError() << std::endl);
+                    "Error adding file to tar:\n"
+                    "#top level directory: "
+                      << this->WorkDir
+                      << "\n"
+                         "#file: \"shlibs\"\n"
+                         "#error:"
+                      << control_tar.GetError() << std::endl);
       return false;
     }
   }
@@ -361,11 +369,13 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     control_tar.SetPermissions(permission755);
     if (!control_tar.Add(this->PostInst, this->WorkDir.length(), ".")) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error adding file to tar:"
-                      << std::endl
-                      << "#top level directory: " << this->WorkDir << std::endl
-                      << "#file: \"postinst\"" << std::endl
-                      << "#error:" << control_tar.GetError() << std::endl);
+                    "Error adding file to tar:\n"
+                    "#top level directory: "
+                      << this->WorkDir
+                      << "\n"
+                         "#file: \"postinst\"\n"
+                         "#error:"
+                      << control_tar.GetError() << std::endl);
       return false;
     }
     control_tar.SetPermissions(permission644);
@@ -375,11 +385,13 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     control_tar.SetPermissions(permission755);
     if (!control_tar.Add(this->PostRm, this->WorkDir.length(), ".")) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Error adding file to tar:"
-                      << std::endl
-                      << "#top level directory: " << this->WorkDir << std::endl
-                      << "#file: \"postinst\"" << std::endl
-                      << "#error:" << control_tar.GetError() << std::endl);
+                    "Error adding file to tar:\n"
+                    "#top level directory: "
+                      << this->WorkDir
+                      << "\n"
+                         "#file: \"postinst\"\n"
+                         "#error:"
+                      << control_tar.GetError() << std::endl);
       return false;
     }
     control_tar.SetPermissions(permission644);
@@ -413,11 +425,12 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
       // if we can copy the file, it means it does exist, let's add it:
       if (!cmsys::SystemTools::FileExists(i)) {
         cmCPackLogger(cmCPackLog::LOG_WARNING,
-                      "Adding file to tar:" << std::endl
-                                            << "#top level directory: "
-                                            << this->WorkDir << std::endl
-                                            << "#missing file: " << i
-                                            << std::endl);
+                      "Adding file to tar:\n"
+                      "#top level directory: "
+                        << this->WorkDir
+                        << "\n"
+                           "#missing file: "
+                        << i << std::endl);
       }
 
       if (cmsys::SystemTools::CopyFileIfDifferent(i, localcopy)) {
@@ -452,15 +465,35 @@ bool DebGenerator::generateDeb() const
       !deb.Add(tlDir + "control.tar.gz", tlDir.length()) ||
       !deb.Add(tlDir + "data.tar" + this->CompressionSuffix, tlDir.length())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Error creating debian package:"
-                    << std::endl
-                    << "#top level directory: " << this->TopLevelDir
-                    << std::endl
-                    << "#file: " << this->OutputName << std::endl
-                    << "#error:" << deb.GetError() << std::endl);
+                  "Error creating debian package:\n"
+                  "#top level directory: "
+                    << this->TopLevelDir
+                    << "\n"
+                       "#file: "
+                    << this->OutputName
+                    << "\n"
+                       "#error:"
+                    << deb.GetError() << std::endl);
     return false;
   }
   return true;
+}
+
+std::vector<std::string> findFilesIn(const std::string& path)
+{
+  cmsys::Glob gl;
+  std::string findExpr = path + "/*";
+  gl.RecurseOn();
+  gl.SetRecurseListDirs(true);
+  gl.SetRecurseThroughSymlinks(false);
+  if (!gl.FindFiles(findExpr)) {
+    throw std::runtime_error(
+      "Cannot find any files in the installed directory");
+  }
+  std::vector<std::string> files{ gl.GetFiles() };
+  // Sort files so that they have a reproducible order
+  std::sort(files.begin(), files.end());
+  return files;
 }
 
 } // end anonymous namespace
@@ -481,7 +514,6 @@ int cmCPackDebGenerator::InitializeInternal()
 int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
                                         std::string const& packageName)
 {
-  int retval = 1;
   // Begin the archive for this pack
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(
@@ -508,105 +540,48 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackDeb.cmake" << std::endl);
-    retval = 0;
-    return retval;
+    return 0;
   }
 
-  { // Isolate globbing of binaries vs. dbgsyms
-    cmsys::Glob gl;
-    std::string findExpr(this->GetOption("GEN_WDIR"));
-    findExpr += "/*";
-    gl.RecurseOn();
-    gl.SetRecurseListDirs(true);
-    gl.SetRecurseThroughSymlinks(false);
-    if (!gl.FindFiles(findExpr)) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Cannot find any files in the installed directory"
-                      << std::endl);
-      return 0;
-    }
-    this->packageFiles = gl.GetFiles();
-    // Sort files so that they have a reproducible order
-    std::sort(this->packageFiles.begin(), this->packageFiles.end());
-  }
-
-  int res = this->createDeb();
-  if (res != 1) {
-    retval = 0;
-  }
-  // add the generated package to package file names list
-  packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
-                             this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
-  this->packageFileNames.push_back(std::move(packageFileName));
-
-  if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") &&
-      this->GetOption("GEN_DBGSYMDIR")) {
-    cmsys::Glob gl;
-    std::string findExpr(this->GetOption("GEN_DBGSYMDIR"));
-    findExpr += "/*";
-    gl.RecurseOn();
-    gl.SetRecurseListDirs(true);
-    gl.SetRecurseThroughSymlinks(false);
-    if (!gl.FindFiles(findExpr)) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Cannot find any files in the installed directory"
-                      << std::endl);
-      return 0;
-    }
-    this->packageFiles = gl.GetFiles();
-    // Sort files so that they have a reproducible order
-    std::sort(this->packageFiles.begin(), this->packageFiles.end());
-
-    res = this->createDbgsymDDeb();
-    if (res != 1) {
-      retval = 0;
-    }
-    // add the generated package to package file names list
-    packageFileName =
-      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
-               this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME"));
-    this->packageFileNames.push_back(std::move(packageFileName));
-  }
-
-  return retval;
+  return this->createDebPackages();
 }
 
 int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
 {
-  int retval = 1;
-  /* Reset package file name list it will be populated during the
-   * component packaging run*/
+  // Reset package file name list it will be populated during the
+  // component packaging run
   this->packageFileNames.clear();
   std::string initialTopLevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
 
+  int retval = 1;
   // The default behavior is to have one package by component group
   // unless CPACK_COMPONENTS_IGNORE_GROUP is specified.
-  if (!ignoreGroup) {
-    for (auto const& compG : this->ComponentGroups) {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                    "Packaging component group: " << compG.first << std::endl);
-      // Begin the archive for this group
-      retval &= this->PackageOnePack(initialTopLevel, compG.first);
-    }
-    // Handle Orphan components (components not belonging to any groups)
+  if (ignoreGroup) {
+    // CPACK_COMPONENTS_IGNORE_GROUPS is set
+    // We build 1 package per component
     for (auto const& comp : this->Components) {
-      // Does the component belong to a group?
-      if (comp.second.Group == nullptr) {
-        cmCPackLogger(
-          cmCPackLog::LOG_VERBOSE,
-          "Component <"
-            << comp.second.Name
-            << "> does not belong to any group, package it separately."
-            << std::endl);
-        // Begin the archive for this orphan component
-        retval &= this->PackageOnePack(initialTopLevel, comp.first);
-      }
+      retval &= this->PackageOnePack(initialTopLevel, comp.first);
     }
+    return retval;
   }
-  // CPACK_COMPONENTS_IGNORE_GROUPS is set
-  // We build 1 package per component
-  else {
-    for (auto const& comp : this->Components) {
+
+  for (auto const& compG : this->ComponentGroups) {
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                  "Packaging component group: " << compG.first << std::endl);
+    // Begin the archive for this group
+    retval &= this->PackageOnePack(initialTopLevel, compG.first);
+  }
+  // Handle Orphan components (components not belonging to any groups)
+  for (auto const& comp : this->Components) {
+    // Does the component belong to a group?
+    if (comp.second.Group == nullptr) {
+      cmCPackLogger(
+        cmCPackLog::LOG_VERBOSE,
+        "Component <"
+          << comp.second.Name
+          << "> does not belong to any group, package it separately."
+          << std::endl);
+      // Begin the archive for this orphan component
       retval &= this->PackageOnePack(initialTopLevel, comp.first);
     }
   }
@@ -617,7 +592,6 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
 int cmCPackDebGenerator::PackageComponentsAllInOne(
   const std::string& compInstDirName)
 {
-  int retval = 1;
   /* Reset package file name list it will be populated during the
    * component packaging run*/
   this->packageFileNames.clear();
@@ -660,35 +634,10 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackDeb.cmake" << std::endl);
-    retval = 0;
-    return retval;
-  }
-
-  cmsys::Glob gl;
-  std::string findExpr(this->GetOption("GEN_WDIR"));
-  findExpr += "/*";
-  gl.RecurseOn();
-  gl.SetRecurseListDirs(true);
-  gl.SetRecurseThroughSymlinks(false);
-  if (!gl.FindFiles(findExpr)) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Cannot find any files in the installed directory"
-                    << std::endl);
     return 0;
   }
-  this->packageFiles = gl.GetFiles();
-  // Sort files so that they have a reproducible order
-  std::sort(this->packageFiles.begin(), this->packageFiles.end());
 
-  int res = this->createDeb();
-  if (res != 1) {
-    retval = 0;
-  }
-  // add the generated package to package file names list
-  packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
-                             this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
-  this->packageFileNames.push_back(std::move(packageFileName));
-  return retval;
+  return this->createDebPackages();
 }
 
 int cmCPackDebGenerator::PackageFiles()
@@ -712,7 +661,40 @@ int cmCPackDebGenerator::PackageFiles()
   return this->PackageComponentsAllInOne("");
 }
 
-int cmCPackDebGenerator::createDeb()
+bool cmCPackDebGenerator::createDebPackages()
+{
+  auto make_package = [this](const char* const path,
+                             const char* const output_var,
+                             bool (cmCPackDebGenerator::*creator)()) -> bool {
+    try {
+      this->packageFiles = findFilesIn(path);
+    } catch (const std::runtime_error& ex) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
+      return false;
+    }
+
+    if ((this->*creator)()) {
+      // add the generated package to package file names list
+      this->packageFileNames.emplace_back(
+        cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+                 this->GetOption(output_var)));
+      return true;
+    }
+    return false;
+  };
+  bool retval =
+    make_package(this->GetOption("GEN_WDIR"), "GEN_CPACK_OUTPUT_FILE_NAME",
+                 &cmCPackDebGenerator::createDeb);
+  const char* const dbgsymdir_path = this->GetOption("GEN_DBGSYMDIR");
+  if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") && dbgsymdir_path) {
+    retval = make_package(dbgsymdir_path, "GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME",
+                          &cmCPackDebGenerator::createDbgsymDDeb) &&
+      retval;
+  }
+  return int(retval);
+}
+
+bool cmCPackDebGenerator::createDeb()
 {
   std::map<std::string, std::string> controlValues;
 
@@ -836,13 +818,10 @@ int cmCPackDebGenerator::createDeb()
     this->IsSet("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION"),
     this->packageFiles);
 
-  if (!gen.generate()) {
-    return 0;
-  }
-  return 1;
+  return gen.generate();
 }
 
-int cmCPackDebGenerator::createDbgsymDDeb()
+bool cmCPackDebGenerator::createDbgsymDDeb()
 {
   // Packages containing debug symbols follow the same structure as .debs
   // but have different metadata and content.
@@ -882,7 +861,6 @@ int cmCPackDebGenerator::createDbgsymDDeb()
   DebGenerator gen(
     this->Logger, this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME"),
     this->GetOption("GEN_DBGSYMDIR"),
-
     this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
     this->GetOption("CPACK_TEMPORARY_DIRECTORY"),
     this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_TYPE"),
@@ -892,10 +870,7 @@ int cmCPackDebGenerator::createDbgsymDDeb()
     this->IsSet("GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION"),
     this->packageFiles);
 
-  if (!gen.generate()) {
-    return 0;
-  }
-  return 1;
+  return gen.generate();
 }
 
 bool cmCPackDebGenerator::SupportsComponentInstallation() const
