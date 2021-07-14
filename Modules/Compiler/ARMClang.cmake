@@ -1,6 +1,12 @@
 if(_ARMClang_CMAKE_LOADED)
   return()
 endif()
+
+# This file requires CMAKE_LINKER and CMAKE_AR set by CMakeFindBinUtils.cmake.
+if(NOT (DEFINED CMAKE_LINKER AND DEFINED CMAKE_AR))
+  return()
+endif()
+
 set(_ARMClang_CMAKE_LOADED TRUE)
 
 # Save the CMP0123 setting in a variable used both below and by try_compile.
@@ -9,18 +15,7 @@ cmake_policy(GET CMP0123 CMAKE_ARMClang_CMP0123)
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
-get_filename_component(_CMAKE_C_TOOLCHAIN_LOCATION "${CMAKE_C_COMPILER}" PATH)
-get_filename_component(_CMAKE_CXX_TOOLCHAIN_LOCATION "${CMAKE_CXX_COMPILER}" PATH)
-
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")
-
-find_program(CMAKE_ARMClang_LINKER armlink HINTS "${_CMAKE_C_TOOLCHAIN_LOCATION}" "${_CMAKE_CXX_TOOLCHAIN_LOCATION}" )
-find_program(CMAKE_ARMClang_AR     armar   HINTS "${_CMAKE_C_TOOLCHAIN_LOCATION}" "${_CMAKE_CXX_TOOLCHAIN_LOCATION}" )
-
-set(CMAKE_LINKER "${CMAKE_ARMClang_LINKER}" CACHE FILEPATH "The ARMClang linker" FORCE)
-mark_as_advanced(CMAKE_ARMClang_LINKER)
-set(CMAKE_AR "${CMAKE_ARMClang_AR}" CACHE FILEPATH "The ARMClang archiver" FORCE)
-mark_as_advanced(CMAKE_ARMClang_AR)
 
 if (CMAKE_LINKER MATCHES "armlink")
   set(__CMAKE_ARMClang_USING_armlink TRUE)
