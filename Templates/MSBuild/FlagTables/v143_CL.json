@@ -1116,8 +1116,6 @@
     "comment": "Generate Module Dependenices File",
     "value": "true",
     "flags": [
-      "UserValue",
-      "UserIgnored",
       "Continue"
     ]
   },
@@ -1138,8 +1136,6 @@
     "comment": "Generate Source Dependencies File",
     "value": "true",
     "flags": [
-      "UserValue",
-      "UserIgnored",
       "Continue"
     ]
   },
@@ -1430,8 +1426,7 @@
     "comment": "Module Dependencies File Name",
     "value": "",
     "flags": [
-      "UserValue",
-      "UserRequired"
+      "UserFollowing"
     ]
   },
   {
@@ -1468,8 +1463,7 @@
     "comment": "Source Dependencies File Name",
     "value": "",
     "flags": [
-      "UserValue",
-      "UserRequired"
+      "UserFollowing"
     ]
   },
   {
