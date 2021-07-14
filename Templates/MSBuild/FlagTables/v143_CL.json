@@ -428,9 +428,9 @@
   },
   {
     "name": "SpectreMitigation",
-    "switch": "Qspectre",
-    "comment": "Enabled",
-    "value": "Spectre",
+    "switch": "Qspectre-load-cf",
+    "comment": "All Control Flow Loads",
+    "value": "SpectreLoadCF",
     "flags": []
   },
   {
@@ -442,16 +442,16 @@
   },
   {
     "name": "SpectreMitigation",
-    "switch": "Qspectre-load-cf",
-    "comment": "All Control Flow Loads",
-    "value": "SpectreLoadCF",
+    "switch": "Qspectre-",
+    "comment": "Disabled",
+    "value": "false",
     "flags": []
   },
   {
     "name": "SpectreMitigation",
-    "switch": "",
-    "comment": "Disabled",
-    "value": "false",
+    "switch": "Qspectre",
+    "comment": "Enabled",
+    "value": "Spectre",
     "flags": []
   },
   {
