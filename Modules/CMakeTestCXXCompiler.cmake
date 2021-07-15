@@ -43,6 +43,9 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
     "# error \"The CMAKE_CXX_COMPILER is set to a C compiler\"\n"
     "#endif\n"
     "int main(){return 0;}\n")
+  # Clear result from normal variable.
+  unset(CMAKE_CXX_COMPILER_WORKS)
+  # Puts test result in cache variable.
   try_compile(CMAKE_CXX_COMPILER_WORKS ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
     OUTPUT_VARIABLE __CMAKE_CXX_COMPILER_OUTPUT)
