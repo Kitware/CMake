@@ -2248,12 +2248,20 @@ void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
   std::for_each(this->MocEval().SourceMappings.begin(),
                 this->MocEval().SourceMappings.end(), processMappingEntry);
 
-  // Remove SKIP_AUTOMOC files
-  dependencies.erase(std::remove_if(dependencies.begin(), dependencies.end(),
-                                    [this](const std::string& dep) {
-                                      return this->MocConst().skipped(dep);
-                                    }),
-                     dependencies.end());
+  // Remove SKIP_AUTOMOC files.
+  // Also remove AUTOUIC header files to avoid cyclic dependency.
+  dependencies.erase(
+    std::remove_if(dependencies.begin(), dependencies.end(),
+                   [this](const std::string& dep) {
+                     return this->MocConst().skipped(dep) ||
+                       std::any_of(
+                              this->UicEval().Includes.begin(),
+                              this->UicEval().Includes.end(),
+                              [&dep](MappingMapT::value_type const& mapping) {
+                                return dep == mapping.second->OutputFile;
+                              });
+                   }),
+    dependencies.end());
 
   // Remove duplicates to make the depfile smaller
   std::sort(dependencies.begin(), dependencies.end());
