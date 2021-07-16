@@ -1,0 +1,4 @@
+^CMake Error at FileSetNoScope\.cmake:[0-9]+ \(target_sources\):
+  target_sources File set "a" is not in HEADER_SETS or INTERFACE_HEADER_SETS
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$
