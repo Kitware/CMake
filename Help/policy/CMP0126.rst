@@ -3,16 +3,25 @@ CMP0126
 
 .. versionadded:: 3.21
 
-The :command:`set(CACHE)` does not remove a normal variable of the same name.
+When this policy is set to ``NEW``, the :command:`set(CACHE)` command does not
+remove any normal variable of the same name from the current scope.
+The ``OLD`` behavior removes any normal variable of the same name from the
+current scope in the following situations:
 
-Starting with CMake 3.21, the :command:`set(CACHE)` does not remove, in the
-current scope, any normal variable with the same name.
+* No cache variable of that name existed previously.
 
-The ``OLD`` behavior for this policy is to have the :command:`set(CACHE)`
-command removing the normal variable of the same name, if any. The ``NEW``
-behavior for this policy is to keep the normal variable of the same name.
+* A cache variable of that name existed previously, but it had no type.
+  This can occur when the variable was set on the command line using a form
+  like ``cmake -DMYVAR=blah`` instead of ``cmake -DMYVAR:STRING=blah``.
 
-This policy was introduced in CMake version 3.21. Use the
+Note that the ``NEW`` behavior has an important difference to the similar
+``NEW`` behavior of policy :policy:`CMP0077`.  The :command:`set(CACHE)`
+command always sets the cache variable if it did not exist previously,
+regardless of the ``CMP0126`` policy setting.  The :command:`option` command
+will *not* set the cache variable if a non-cache variable of the same name
+already exists and :policy:`CMP0077` is set to ``NEW``.
+
+Policy ``CMP0126`` was introduced in CMake version 3.21. Use the
 :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
 Unlike many policies, CMake version |release| does *not* warn when the policy
 is not set and simply uses ``OLD`` behavior.  See documentation of the
