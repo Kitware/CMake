@@ -751,6 +751,8 @@ The options are:
        [RESULT <result>]
        [ONLY_IF_DIFFERENT])
 
+.. versionadded:: 3.21
+
 Copy a file from ``<oldname>`` to ``<newname>``. Directories are not
 supported. Symlinks are ignored and ``<oldfile>``'s content is read and
 written to ``<newname>`` as a new file.
@@ -762,8 +764,17 @@ The options are:
   If ``RESULT`` is not specified and the operation fails, an error is emitted.
 
 ``ONLY_IF_DIFFERENT``
-  If the ``<newname>`` path already exists, do not replace it if it is the
-  same as ``<oldname>``. Otherwise, an error is emitted.
+  If the ``<newname>`` path already exists, do not replace it if the file's
+  contents are already the same as ``<oldname>`` (this avoids updating
+  ``<newname>``'s timestamp).
+
+This sub-command has some similarities to :command:`configure_file` with the
+``COPYONLY`` option.  An important difference is that :command:`configure_file`
+creates a dependency on the source file, so CMake will be re-run if it changes.
+The ``file(COPY_FILE)`` sub-command does not create such a dependency.
+
+See also the ``file(COPY)`` sub-command just below which provides
+further file-copying capabilities.
 
 .. _COPY:
 .. _INSTALL:
@@ -778,6 +789,11 @@ The options are:
        [FILES_MATCHING]
        [[PATTERN <pattern> | REGEX <regex>]
         [EXCLUDE] [PERMISSIONS <permissions>...]] [...])
+
+.. note::
+
+  For a simple file copying operation, the ``file(COPY_FILE)`` sub-command
+  just above may be easier to use.
 
 The ``COPY`` signature copies files, directories, and symlinks to a
 destination folder.  Relative input paths are evaluated with respect
