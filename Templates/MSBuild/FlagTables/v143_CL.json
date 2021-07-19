@@ -579,7 +579,6 @@
     "switch": "external:W0",
     "comment": "Turn Off All Warnings",
     "value": "TurnOffAllWarnings",
-    "vsmin": "16.10.31321.278",
     "flags": []
   },
   {
@@ -587,7 +586,6 @@
     "switch": "external:W1",
     "comment": "Level1",
     "value": "Level1",
-    "vsmin": "16.10.31321.278",
     "flags": []
   },
   {
@@ -595,7 +593,6 @@
     "switch": "external:W2",
     "comment": "Level2",
     "value": "Level2",
-    "vsmin": "16.10.31321.278",
     "flags": []
   },
   {
@@ -603,7 +600,6 @@
     "switch": "external:W3",
     "comment": "Level3",
     "value": "Level3",
-    "vsmin": "16.10.31321.278",
     "flags": []
   },
   {
@@ -611,7 +607,6 @@
     "switch": "external:W4",
     "comment": "Level4",
     "value": "Level4",
-    "vsmin": "16.10.31321.278",
     "flags": []
   },
   {
@@ -710,6 +705,13 @@
     "switch": "errorReport:send",
     "comment": "Send Automatically",
     "value": "Send",
+    "flags": []
+  },
+  {
+    "name": "TranslateIncludes",
+    "switch": "translateInclude",
+    "comment": "Translate Includes to Imports",
+    "value": "true",
     "flags": []
   },
   {
@@ -1153,7 +1155,6 @@
     "switch": "external:anglebrackets",
     "comment": "Treat Files Included with Angle Brackets as External",
     "value": "true",
-    "vsmin": "16.10.31321.278",
     "flags": []
   },
   {
@@ -1161,7 +1162,6 @@
     "switch": "external:templates-",
     "comment": "Template Diagnostics in External Headers",
     "value": "true",
-    "vsmin": "16.10.31321.278",
     "flags": []
   },
   {
@@ -1291,7 +1291,6 @@
     "switch": "external:env:",
     "comment": "External Directories Environment Variables",
     "value": "",
-    "vsmin": "16.10.31321.278",
     "flags": [
       "UserValue",
       "SemicolonAppendable"
@@ -1475,6 +1474,33 @@
     "flags": [
       "UserValue",
       "UserRequired"
+    ]
+  },
+  {
+    "name": "PREfastProjectDirectory",
+    "switch": "analyze:projectdirectory",
+    "comment": "Code Analysis Project Directory",
+    "value": "",
+    "flags": [
+      "UserValue"
+    ]
+  },
+  {
+    "name": "PREfastRulesetDirectories",
+    "switch": "analyze:rulesetdirectory",
+    "comment": "Code Analysis Ruleset Directories",
+    "value": "",
+    "flags": [
+      "UserValue"
+    ]
+  },
+  {
+    "name": "PREfastRulesetFile",
+    "switch": "analyze:ruleset",
+    "comment": "Code Analysis Ruleset File",
+    "value": "",
+    "flags": [
+      "UserValue"
     ]
   },
   {

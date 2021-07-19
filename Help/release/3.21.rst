@@ -27,7 +27,7 @@ Generators
 ----------
 
 * The :generator:`Visual Studio 17 2022` generator was added.  This is
-  experimental and based on "Visual Studio 2022 Preview 1.1" because this
+  experimental and based on "Visual Studio 2022 Preview 2" because this
   version of VS has not been released.
 
 * The :ref:`Makefile Generators` and the :generator:`Ninja` generator
@@ -293,3 +293,14 @@ Other Changes
   `cmake.org <https://cmake.org/download/>`_ now support
   ``liblzma`` multi-threading.  See the :variable:`CPACK_THREADS` and
   :variable:`CPACK_ARCHIVE_THREADS` variables.
+
+Updates
+=======
+
+Changes made since CMake 3.21.0 include the following.
+
+3.21.1
+------
+
+* The :generator:`Visual Studio 17 2022` generator is now based on
+  "Visual Studio 2022 Preview 2".  Previously it was based on "Preview 1.1".
