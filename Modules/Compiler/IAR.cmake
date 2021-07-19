@@ -71,9 +71,6 @@ macro(__compiler_iar_ilink lang)
   set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> <TARGET> --create <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> <TARGET> --replace <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_FINISH "")
-
-  set(CMAKE_LINKER "${CMAKE_IAR_LINKER}" CACHE FILEPATH "The IAR linker" FORCE)
-  set(CMAKE_AR "${CMAKE_IAR_ARCHIVE}" CACHE FILEPATH "The IAR archiver" FORCE)
 endmacro()
 
 macro(__compiler_iar_xlink lang)
@@ -109,7 +106,4 @@ macro(__compiler_iar_xlink lang)
   set(CMAKE_${lang}_ARCHIVE_FINISH "")
 
   set(CMAKE_LIBRARY_PATH_FLAG "-I")
-
-  set(CMAKE_LINKER "${CMAKE_IAR_LINKER}" CACHE FILEPATH "The IAR linker" FORCE)
-  set(CMAKE_AR "${CMAKE_IAR_AR}" CACHE FILEPATH "The IAR archiver" FORCE)
 endmacro()
