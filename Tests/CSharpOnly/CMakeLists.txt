@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
+if(POLICY CMP0126)
+  cmake_policy(SET CMP0126 NEW)
+endif()
 # a simple CSharp only test case
 project (CSharpOnly CSharp)
 

@@ -47,6 +47,9 @@ if(NOT CMAKE_OBJC_COMPILER_WORKS)
     "#endif\n"
     "int main(int argc, char* argv[])\n"
     "{ (void)argv; return argc-1;}\n")
+  # Clear result from normal variable.
+  unset(CMAKE_OBJC_COMPILER_WORKS)
+  # Puts test result in cache variable.
   try_compile(CMAKE_OBJC_COMPILER_WORKS ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testOBJCCompiler.m
     OUTPUT_VARIABLE __CMAKE_OBJC_COMPILER_OUTPUT)
