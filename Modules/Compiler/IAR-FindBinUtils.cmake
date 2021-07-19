@@ -20,19 +20,31 @@ if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUAL "A
   string(TOLOWER "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" _archid_lower)
 
   # Find linker
-  find_program(CMAKE_IAR_LINKER ilink${_archid_lower} HINTS ${__iar_hints}
+  find_program(CMAKE_IAR_LINKER
+      NAMES ilink${_archid_lower} ilink${_archid_lower}.exe
+      HINTS ${__iar_hints}
       DOC "The IAR ILINK linker")
-  find_program(CMAKE_IAR_ARCHIVE iarchive HINTS ${__iar_hints}
+  find_program(CMAKE_IAR_ARCHIVE
+      NAMES iarchive iarchive.exe
+      HINTS ${__iar_hints}
       DOC "The IAR archiver")
 
   # Find utility tools
-  find_program(CMAKE_IAR_ELFTOOL ielftool HINTS ${__iar_hints}
+  find_program(CMAKE_IAR_ELFTOOL
+      NAMES ielftool ielftool.exe
+      HINTS ${__iar_hints}
       DOC "The IAR ELF Tool")
-    find_program(CMAKE_IAR_ELFDUMP ielfdump${_archid_lower} HINTS ${__iar_hints}
+    find_program(CMAKE_IAR_ELFDUMP
+      NAMES ielfdump${_archid_lower} ielfdump${_archid_lower}.exe
+      HINTS ${__iar_hints}
       DOC "The IAR ELF Dumper")
-  find_program(CMAKE_IAR_OBJMANIP iobjmanip HINTS ${__iar_hints}
+  find_program(CMAKE_IAR_OBJMANIP
+      NAMES iobjmanip iobjmanip.exe
+      HINTS ${__iar_hints}
       DOC "The IAR ELF Object Tool")
-  find_program(CMAKE_IAR_SYMEXPORT isymexport HINTS ${__iar_hints}
+  find_program(CMAKE_IAR_SYMEXPORT
+      NAMES isymexport
+      HINTS ${__iar_hints}
       DOC "The IAR Absolute Symbol Exporter")
   mark_as_advanced(CMAKE_IAR_LINKER CMAKE_IAR_ARCHIVE CMAKE_IAR_ELFTOOL CMAKE_IAR_ELFDUMP CMAKE_IAR_OBJMANIP CMAKE_IAR_SYMEXPORT)
 
@@ -51,9 +63,13 @@ elseif("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUA
        "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUAL "8051")
 
   # Find the "xlink" linker and "xar" archiver:
-  find_program(CMAKE_IAR_LINKER xlink HINTS ${__iar_hints}
+  find_program(CMAKE_IAR_LINKER
+      NAMES xlink xlink.exe
+      HINTS ${__iar_hints}
       DOC "The IAR XLINK linker")
-  find_program(CMAKE_IAR_AR xar HINTS ${__iar_hints}
+  find_program(CMAKE_IAR_AR
+      NAMES xar xar.exe
+      HINTS ${__iar_hints}
       DOC "The IAR archiver")
   mark_as_advanced(CMAKE_IAR_LINKER CMAKE_IAR_AR)
 
