@@ -36,6 +36,10 @@ if(NOT CMAKE_CUDA_COMPILER_WORKS)
     "#endif\n"
     "int main(){return 0;}\n")
 
+  # Clear result from normal variable.
+  unset(CMAKE_CUDA_COMPILER_WORKS)
+
+  # Puts test result in cache variable.
   try_compile(CMAKE_CUDA_COMPILER_WORKS ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.cu
     OUTPUT_VARIABLE __CMAKE_CUDA_COMPILER_OUTPUT)

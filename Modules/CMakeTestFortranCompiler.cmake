@@ -43,6 +43,9 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS)
         PRINT *, 'Hello'
         END
   ")
+  # Clear result from normal variable.
+  unset(CMAKE_Fortran_COMPILER_WORKS)
+  # Puts test result in cache variable.
   try_compile(CMAKE_Fortran_COMPILER_WORKS ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
     OUTPUT_VARIABLE OUTPUT)
