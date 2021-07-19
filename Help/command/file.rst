@@ -38,10 +38,10 @@ Synopsis
 
   `Filesystem`_
     file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] [<globbing-expr>...])
+    file(`MAKE_DIRECTORY`_ [<dir>...])
+    file({`REMOVE`_ | `REMOVE_RECURSE`_ } [<files>...])
     file(`RENAME`_ <oldname> <newname> [...])
     file(`COPY_FILE`_ <oldname> <newname> [...])
-    file({`REMOVE`_ | `REMOVE_RECURSE`_ } [<files>...])
-    file(`MAKE_DIRECTORY`_ [<dir>...])
     file({`COPY`_ | `INSTALL`_} <file>... DESTINATION <dir> [...])
     file(`SIZE`_ <filename> <out-var>)
     file(`READ_SYMLINK`_ <linkname> <out-var>)
@@ -691,6 +691,32 @@ Examples of recursive globbing include::
 
   /dir/*.py  - match all python files in /dir and subdirectories
 
+.. _MAKE_DIRECTORY:
+
+.. code-block:: cmake
+
+  file(MAKE_DIRECTORY [<directories>...])
+
+Create the given directories and their parents as needed.
+
+.. _REMOVE:
+.. _REMOVE_RECURSE:
+
+.. code-block:: cmake
+
+  file(REMOVE [<files>...])
+  file(REMOVE_RECURSE [<files>...])
+
+Remove the given files.  The ``REMOVE_RECURSE`` mode will remove the given
+files and directories, also non-empty directories. No error is emitted if a
+given file does not exist.  Relative input paths are evaluated with respect
+to the current source directory.
+
+.. versionchanged:: 3.15
+  Empty input paths are ignored with a warning.  Previous versions of CMake
+  interpreted empty strings as a relative path with respect to the current
+  directory and removed its contents.
+
 .. _RENAME:
 
 .. code-block:: cmake
@@ -738,32 +764,6 @@ The options are:
 ``ONLY_IF_DIFFERENT``
   If the ``<newname>`` path already exists, do not replace it if it is the
   same as ``<oldname>``. Otherwise, an error is emitted.
-
-.. _REMOVE:
-.. _REMOVE_RECURSE:
-
-.. code-block:: cmake
-
-  file(REMOVE [<files>...])
-  file(REMOVE_RECURSE [<files>...])
-
-Remove the given files.  The ``REMOVE_RECURSE`` mode will remove the given
-files and directories, also non-empty directories. No error is emitted if a
-given file does not exist.  Relative input paths are evaluated with respect
-to the current source directory.
-
-.. versionchanged:: 3.15
-  Empty input paths are ignored with a warning.  Previous versions of CMake
-  interpreted empty string as a relative path with respect to the current
-  directory and removed its contents.
-
-.. _MAKE_DIRECTORY:
-
-.. code-block:: cmake
-
-  file(MAKE_DIRECTORY [<directories>...])
-
-Create the given directories and their parents as needed.
 
 .. _COPY:
 .. _INSTALL:
