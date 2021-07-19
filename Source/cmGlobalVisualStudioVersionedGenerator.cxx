@@ -104,8 +104,7 @@ static const char* VSVersionToToolset(
     case cmGlobalVisualStudioGenerator::VS16:
       return "v142";
     case cmGlobalVisualStudioGenerator::VS17:
-      // FIXME: VS 2022 Preview 1 uses v142.  Will it be v143 later?
-      return "v142";
+      return "v143";
   }
   return "";
 }
