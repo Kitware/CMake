@@ -2,7 +2,7 @@
 #include <stdio.h>  /* NOLINT */
 #include <stdlib.h> /* NOLINT */
 #include <string.h> /* NOLINT */
-#include <time.h>
+#include <time.h>   /* NOLINT */
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4996) /* deprecation */
@@ -122,7 +122,7 @@ int main(int ac, char* av[])
   if (run_all == 1) {
     clock_t t;
     int status = 0;
-    const char* status_message = NULL;
+    const char* status_message = CM_NULL;
     printf("TAP version 13\n");
     printf("1..%d\n", NumTests);
     for (i = 0; i < NumTests; ++i) {
