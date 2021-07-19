@@ -197,11 +197,13 @@ bool ExpandMacros(const cmCMakePresetsFile& file,
   std::string binaryDir = preset.BinaryDir;
   CHECK_EXPAND(out, binaryDir, macroExpanders, file.GetVersion(preset))
 
-  if (!cmSystemTools::FileIsFullPath(binaryDir)) {
-    binaryDir = cmStrCat(file.SourceDir, '/', binaryDir);
+  if (!binaryDir.empty()) {
+    if (!cmSystemTools::FileIsFullPath(binaryDir)) {
+      binaryDir = cmStrCat(file.SourceDir, '/', binaryDir);
+    }
+    out->BinaryDir = cmSystemTools::CollapseFullPath(binaryDir);
+    cmSystemTools::ConvertToUnixSlashes(out->BinaryDir);
   }
-  out->BinaryDir = cmSystemTools::CollapseFullPath(binaryDir);
-  cmSystemTools::ConvertToUnixSlashes(out->BinaryDir);
 
   if (!preset.InstallDir.empty()) {
     std::string installDir = preset.InstallDir;
