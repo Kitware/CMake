@@ -41,7 +41,7 @@
 include_guard()
 
 macro(__compiler_iar_ilink lang)
-  set(CMAKE_EXECUTABLE_SUFFIX ".elf")
+  set(CMAKE_EXECUTABLE_SUFFIX_${lang} ".elf")
   set(CMAKE_${lang}_OUTPUT_EXTENSION ".o")
   if (${lang} STREQUAL "C" OR ${lang} STREQUAL "CXX")
     set(CMAKE_${lang}_COMPILE_OBJECT             "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT>")
@@ -77,7 +77,7 @@ macro(__compiler_iar_ilink lang)
 endmacro()
 
 macro(__compiler_iar_xlink lang)
-  set(CMAKE_EXECUTABLE_SUFFIX ".bin")
+  set(CMAKE_EXECUTABLE_SUFFIX_${lang} ".bin")
   if (${lang} STREQUAL "C" OR ${lang} STREQUAL "CXX")
 
     set(CMAKE_${lang}_COMPILE_OBJECT             "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT>")
