@@ -1665,7 +1665,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       gt->GetTargetObjectNames(context->Config, objects);
 
       std::string obj_dir;
-      if (context->EvaluateForBuildsystem) {
+      if (context->EvaluateForBuildsystem && !gg->SupportsCrossConfigs()) {
         // Use object file directory with buildsystem placeholder.
         obj_dir = gt->ObjectDirectory;
         context->HadContextSensitiveCondition =
