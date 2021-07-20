@@ -1,3 +1,3 @@
 include(RunCMake)
 
-run_cmake_script(Parentheses)
+run_cmake_script(Regex)
