@@ -38,10 +38,10 @@ Synopsis
 
   `Filesystem`_
     file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] [<globbing-expr>...])
+    file(`MAKE_DIRECTORY`_ [<dir>...])
+    file({`REMOVE`_ | `REMOVE_RECURSE`_ } [<files>...])
     file(`RENAME`_ <oldname> <newname> [...])
     file(`COPY_FILE`_ <oldname> <newname> [...])
-    file({`REMOVE`_ | `REMOVE_RECURSE`_ } [<files>...])
-    file(`MAKE_DIRECTORY`_ [<dir>...])
     file({`COPY`_ | `INSTALL`_} <file>... DESTINATION <dir> [...])
     file(`SIZE`_ <filename> <out-var>)
     file(`READ_SYMLINK`_ <linkname> <out-var>)
@@ -691,6 +691,32 @@ Examples of recursive globbing include::
 
   /dir/*.py  - match all python files in /dir and subdirectories
 
+.. _MAKE_DIRECTORY:
+
+.. code-block:: cmake
+
+  file(MAKE_DIRECTORY [<directories>...])
+
+Create the given directories and their parents as needed.
+
+.. _REMOVE:
+.. _REMOVE_RECURSE:
+
+.. code-block:: cmake
+
+  file(REMOVE [<files>...])
+  file(REMOVE_RECURSE [<files>...])
+
+Remove the given files.  The ``REMOVE_RECURSE`` mode will remove the given
+files and directories, also non-empty directories. No error is emitted if a
+given file does not exist.  Relative input paths are evaluated with respect
+to the current source directory.
+
+.. versionchanged:: 3.15
+  Empty input paths are ignored with a warning.  Previous versions of CMake
+  interpreted empty strings as a relative path with respect to the current
+  directory and removed its contents.
+
 .. _RENAME:
 
 .. code-block:: cmake
@@ -725,6 +751,8 @@ The options are:
        [RESULT <result>]
        [ONLY_IF_DIFFERENT])
 
+.. versionadded:: 3.21
+
 Copy a file from ``<oldname>`` to ``<newname>``. Directories are not
 supported. Symlinks are ignored and ``<oldfile>``'s content is read and
 written to ``<newname>`` as a new file.
@@ -736,34 +764,17 @@ The options are:
   If ``RESULT`` is not specified and the operation fails, an error is emitted.
 
 ``ONLY_IF_DIFFERENT``
-  If the ``<newname>`` path already exists, do not replace it if it is the
-  same as ``<oldname>``. Otherwise, an error is emitted.
+  If the ``<newname>`` path already exists, do not replace it if the file's
+  contents are already the same as ``<oldname>`` (this avoids updating
+  ``<newname>``'s timestamp).
 
-.. _REMOVE:
-.. _REMOVE_RECURSE:
+This sub-command has some similarities to :command:`configure_file` with the
+``COPYONLY`` option.  An important difference is that :command:`configure_file`
+creates a dependency on the source file, so CMake will be re-run if it changes.
+The ``file(COPY_FILE)`` sub-command does not create such a dependency.
 
-.. code-block:: cmake
-
-  file(REMOVE [<files>...])
-  file(REMOVE_RECURSE [<files>...])
-
-Remove the given files.  The ``REMOVE_RECURSE`` mode will remove the given
-files and directories, also non-empty directories. No error is emitted if a
-given file does not exist.  Relative input paths are evaluated with respect
-to the current source directory.
-
-.. versionchanged:: 3.15
-  Empty input paths are ignored with a warning.  Previous versions of CMake
-  interpreted empty string as a relative path with respect to the current
-  directory and removed its contents.
-
-.. _MAKE_DIRECTORY:
-
-.. code-block:: cmake
-
-  file(MAKE_DIRECTORY [<directories>...])
-
-Create the given directories and their parents as needed.
+See also the ``file(COPY)`` sub-command just below which provides
+further file-copying capabilities.
 
 .. _COPY:
 .. _INSTALL:
@@ -778,6 +789,11 @@ Create the given directories and their parents as needed.
        [FILES_MATCHING]
        [[PATTERN <pattern> | REGEX <regex>]
         [EXCLUDE] [PERMISSIONS <permissions>...]] [...])
+
+.. note::
+
+  For a simple file copying operation, the ``file(COPY_FILE)`` sub-command
+  just above may be easier to use.
 
 The ``COPY`` signature copies files, directories, and symlinks to a
 destination folder.  Relative input paths are evaluated with respect
