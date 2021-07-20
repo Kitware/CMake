@@ -36,6 +36,7 @@
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
+#include "cmRange.h"
 #include "cmRuntimeDependencyArchive.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -681,8 +682,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         te->LibraryGenerator = libraryGenerator.get();
         te->RuntimeGenerator = runtimeGenerator.get();
         te->ObjectsGenerator = objectGenerator.get();
-        te->InterfaceIncludeDirectories =
-          cmJoin(includesArgs.GetIncludeDirs(), ";");
+        target.AddInstallIncludeDirectories(
+          cmMakeRange(includesArgs.GetIncludeDirs()));
         te->NamelinkOnly = namelinkOnly;
         helper.Makefile->GetGlobalGenerator()
           ->GetExportSets()[exports]
