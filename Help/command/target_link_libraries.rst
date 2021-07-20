@@ -300,7 +300,7 @@ The object files associated with an object library may be referenced
 by the :genex:`$<TARGET_OBJECTS>` generator expression.  Such object
 files are placed on the link line *before* all libraries, regardless
 of their relative order.  Additionally, an ordering dependency will be
-added to the build sysstem to make sure the object library is up-to-date
+added to the build system to make sure the object library is up-to-date
 before the dependent target links.  For example, the code
 
 .. code-block:: cmake
