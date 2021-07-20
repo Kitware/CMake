@@ -3,14 +3,12 @@ CMP0124
 
 .. versionadded:: 3.21
 
-The loop variables created by :command:`foreach` command have now their scope
-restricted to the loop scope.
+When this policy is set to ``NEW``, the scope of loop variables defined by the
+:command:`foreach` command is restricted to the loop only.  They will be unset
+at the end of the loop.
 
-Starting with CMake 3.21, the :command:`foreach` command ensures that the loop
-variables have their scope restricted to the loop scope.
-
-The ``OLD`` behavior for this policy let the loop variables to exist, with an
-empty value, in the outer scope of loop scope.
+The ``OLD`` behavior for this policy still clears the loop variables at the end
+of the loop, but does not unset them.  This leaves them as defined, but empty.
 
 This policy was introduced in CMake version 3.21. Use the
 :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
