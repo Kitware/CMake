@@ -153,9 +153,20 @@ std::string cmakemainGetStack(cmake* cm)
 void cmakemainMessageCallback(const std::string& m,
                               const cmMessageMetadata& md, cmake* cm)
 {
+#if defined(_WIN32)
+  // FIXME: On Windows we replace cerr's streambuf with a custom
+  // implementation that converts our internal UTF-8 encoding to the
+  // console's encoding.  It also does *not* replace LF with CRLF.
+  // Since stderr does not convert encoding and does convert LF, we
+  // cannot use it to print messages.  Another implementation will
+  // be needed to print colored messages on Windows.
+  static_cast<void>(md);
+  std::cerr << m << cmakemainGetStack(cm) << "\n";
+#else
   cmsysTerminal_cfprintf(md.desiredColor, stderr, "%s", m.c_str());
   fflush(stderr); // stderr is buffered in some cases.
   std::cerr << cmakemainGetStack(cm) << "\n";
+#endif
 }
 
 void cmakemainProgressCallback(const std::string& m, float prog, cmake* cm)
