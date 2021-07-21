@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
+if(POLICY CMP0126)
+  cmake_policy(SET CMP0126 NEW)
+endif()
 
 # NOTE: Force the Release mode configuration as there are some issues with the
 # debug information handling on macOS on certain Xcode builds.
