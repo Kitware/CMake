@@ -570,6 +570,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               *cmp0123 == "NEW"_s ? "NEW" : "OLD");
     }
 
+    /* Set cache/normal variable policy to match outer project.
+       It may affect toolchain files.  */
+    if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) !=
+        cmPolicies::NEW) {
+      fprintf(fout, "cmake_policy(SET CMP0126 OLD)\n");
+    }
+
     std::string projectLangs;
     for (std::string const& li : testLangs) {
       projectLangs += " " + li;

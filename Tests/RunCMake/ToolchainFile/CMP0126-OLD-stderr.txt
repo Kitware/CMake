@@ -1,0 +1,1 @@
+^try_compile CMP0126='OLD' VAR='2'
