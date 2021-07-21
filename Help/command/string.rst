@@ -493,6 +493,11 @@ specifiers:
 ``%U``
   The week number of the current year (00-53).
 
+``%V``
+  .. versionadded:: 3.22
+
+  The ISO 8601 week number of the current year (01-53).
+
 ``%w``
   The day of the current week. 0 is Sunday. (0-6)
 
