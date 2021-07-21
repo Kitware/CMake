@@ -1,5 +1,7 @@
 include(RunCMake)
 
+run_cmake_script(newline)
+
 run_cmake(defaultmessage)
 run_cmake(nomessage)
 run_cmake(message-internal-warning)
