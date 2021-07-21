@@ -1,0 +1,7 @@
+get_property(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
+if(_IN_TC)
+  cmake_policy(GET CMP0126 cmp0126)
+  set(VAR 1)
+  set(VAR 2 CACHE STRING "")
+  message("try_compile CMP0126='${cmp0126}' VAR='${VAR}'")
+endif()
