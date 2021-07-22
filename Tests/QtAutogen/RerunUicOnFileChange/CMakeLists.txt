@@ -27,10 +27,12 @@ endmacro()
 
 configure_file("${testProjectTemplateDir}/mocwidget.h" "${testProjectSrc}/mocwidget.h" COPYONLY)
 configure_file("${testProjectTemplateDir}/main.cpp" "${testProjectSrc}/main.cpp" COPYONLY)
+configure_file("${testProjectTemplateDir}/subdir/subdircheck.cpp" "${testProjectSrc}/subdir/subdircheck.cpp" COPYONLY)
 configure_file("${testProjectTemplateDir}/CMakeLists.txt.in" "${testProjectSrc}/CMakeLists.txt" @ONLY)
 
 set(Num 1)
 configure_file("${testProjectTemplateDir}/mainwindow.ui.in" "${testProjectSrc}/mainwindow.ui" @ONLY)
+configure_file("${testProjectTemplateDir}/subdir/mainwindowsubdir.ui.in" "${testProjectSrc}/subdir/mainwindowsubdir.ui" @ONLY)
 
 if(CMAKE_GENERATOR_INSTANCE)
     set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE}")
@@ -94,6 +96,7 @@ sleep()
 
 set(Num 2)
 configure_file("${testProjectTemplateDir}/mainwindow.ui.in" "${testProjectSrc}/mainwindow.ui" @ONLY)
+configure_file("${testProjectTemplateDir}/subdir/mainwindowsubdir.ui.in" "${testProjectSrc}/subdir/mainwindowsubdir.ui" @ONLY)
 rebuild(2)
 
 execute_process(COMMAND "${testProjectBinDir}/${extra_bin_path}UicOnFileChange" RESULT_VARIABLE result)
