@@ -1635,10 +1635,11 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       reportError(context, content->GetOriginalExpression(), e.str());
       return std::string();
     }
-    if (!context->EvaluateForBuildsystem) {
-      cmGlobalGenerator* gg = context->LG->GetGlobalGenerator();
+    cmGlobalGenerator* gg = context->LG->GetGlobalGenerator();
+    {
       std::string reason;
-      if (!gg->HasKnownObjectFileLocation(&reason)) {
+      if (!context->EvaluateForBuildsystem &&
+          !gg->HasKnownObjectFileLocation(&reason)) {
         std::ostringstream e;
         e << "The evaluation of the TARGET_OBJECTS generator expression "
              "is only suitable for consumption by CMake (limited"
@@ -1664,7 +1665,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       gt->GetTargetObjectNames(context->Config, objects);
 
       std::string obj_dir;
-      if (context->EvaluateForBuildsystem) {
+      if (context->EvaluateForBuildsystem && !gg->SupportsCrossConfigs()) {
         // Use object file directory with buildsystem placeholder.
         obj_dir = gt->ObjectDirectory;
         context->HadContextSensitiveCondition =
