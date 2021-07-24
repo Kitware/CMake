@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmExpandedCommandArgument.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
@@ -36,7 +38,7 @@ private:
 
   cmProp GetVariableOrString(const cmExpandedCommandArgument& argument) const;
 
-  bool IsKeyword(std::string const& keyword,
+  bool IsKeyword(cm::string_view keyword,
                  cmExpandedCommandArgument& argument) const;
 
   bool GetBooleanValue(cmExpandedCommandArgument& arg) const;

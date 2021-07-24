@@ -9,6 +9,7 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/string_view>
 #include <cmext/algorithm>
 
 #include "cmsys/RegularExpression.hxx"
@@ -24,38 +25,38 @@
 class cmTest;
 
 namespace {
-std::string const keyAND = "AND";
-std::string const keyCOMMAND = "COMMAND";
-std::string const keyDEFINED = "DEFINED";
-std::string const keyEQUAL = "EQUAL";
-std::string const keyEXISTS = "EXISTS";
-std::string const keyGREATER = "GREATER";
-std::string const keyGREATER_EQUAL = "GREATER_EQUAL";
-std::string const keyIN_LIST = "IN_LIST";
-std::string const keyIS_ABSOLUTE = "IS_ABSOLUTE";
-std::string const keyIS_DIRECTORY = "IS_DIRECTORY";
-std::string const keyIS_NEWER_THAN = "IS_NEWER_THAN";
-std::string const keyIS_SYMLINK = "IS_SYMLINK";
-std::string const keyLESS = "LESS";
-std::string const keyLESS_EQUAL = "LESS_EQUAL";
-std::string const keyMATCHES = "MATCHES";
-std::string const keyNOT = "NOT";
-std::string const keyOR = "OR";
-std::string const keyParenL = "(";
-std::string const keyParenR = ")";
-std::string const keyPOLICY = "POLICY";
-std::string const keySTREQUAL = "STREQUAL";
-std::string const keySTRGREATER = "STRGREATER";
-std::string const keySTRGREATER_EQUAL = "STRGREATER_EQUAL";
-std::string const keySTRLESS = "STRLESS";
-std::string const keySTRLESS_EQUAL = "STRLESS_EQUAL";
-std::string const keyTARGET = "TARGET";
-std::string const keyTEST = "TEST";
-std::string const keyVERSION_EQUAL = "VERSION_EQUAL";
-std::string const keyVERSION_GREATER = "VERSION_GREATER";
-std::string const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL";
-std::string const keyVERSION_LESS = "VERSION_LESS";
-std::string const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL";
+auto const keyAND = "AND"_s;
+auto const keyCOMMAND = "COMMAND"_s;
+auto const keyDEFINED = "DEFINED"_s;
+auto const keyEQUAL = "EQUAL"_s;
+auto const keyEXISTS = "EXISTS"_s;
+auto const keyGREATER = "GREATER"_s;
+auto const keyGREATER_EQUAL = "GREATER_EQUAL"_s;
+auto const keyIN_LIST = "IN_LIST"_s;
+auto const keyIS_ABSOLUTE = "IS_ABSOLUTE"_s;
+auto const keyIS_DIRECTORY = "IS_DIRECTORY"_s;
+auto const keyIS_NEWER_THAN = "IS_NEWER_THAN"_s;
+auto const keyIS_SYMLINK = "IS_SYMLINK"_s;
+auto const keyLESS = "LESS"_s;
+auto const keyLESS_EQUAL = "LESS_EQUAL"_s;
+auto const keyMATCHES = "MATCHES"_s;
+auto const keyNOT = "NOT"_s;
+auto const keyOR = "OR"_s;
+auto const keyParenL = "("_s;
+auto const keyParenR = ")"_s;
+auto const keyPOLICY = "POLICY"_s;
+auto const keySTREQUAL = "STREQUAL"_s;
+auto const keySTRGREATER = "STRGREATER"_s;
+auto const keySTRGREATER_EQUAL = "STRGREATER_EQUAL"_s;
+auto const keySTRLESS = "STRLESS"_s;
+auto const keySTRLESS_EQUAL = "STRLESS_EQUAL"_s;
+auto const keyTARGET = "TARGET"_s;
+auto const keyTEST = "TEST"_s;
+auto const keyVERSION_EQUAL = "VERSION_EQUAL"_s;
+auto const keyVERSION_GREATER = "VERSION_GREATER"_s;
+auto const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL"_s;
+auto const keyVERSION_LESS = "VERSION_LESS"_s;
+auto const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL"_s;
 
 std::array<const char* const, 2> const ZERO_ONE_XLAT = { "0", "1" };
 
@@ -181,7 +182,7 @@ cmProp cmConditionEvaluator::GetVariableOrString(
 }
 
 //=========================================================================
-bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
+bool cmConditionEvaluator::IsKeyword(cm::string_view keyword,
                                      cmExpandedCommandArgument& argument) const
 {
   if ((this->Policy54Status != cmPolicies::WARN &&
@@ -190,7 +191,7 @@ bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
     return false;
   }
 
-  bool isKeyword = argument.GetValue() == keyword;
+  const bool isKeyword = argument.GetValue() == keyword;
 
   if (isKeyword && argument.WasQuoted() &&
       this->Policy54Status == cmPolicies::WARN) {
@@ -580,13 +581,13 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         if (std::sscanf(def->c_str(), "%lg", &lhs) != 1 ||
             std::sscanf(def2->c_str(), "%lg", &rhs) != 1) {
           result = false;
-        } else if (*(argP1) == keyLESS) {
+        } else if (argP1->GetValue() == keyLESS) {
           result = (lhs < rhs);
-        } else if (*(argP1) == keyLESS_EQUAL) {
+        } else if (argP1->GetValue() == keyLESS_EQUAL) {
           result = (lhs <= rhs);
-        } else if (*(argP1) == keyGREATER) {
+        } else if (argP1->GetValue() == keyGREATER) {
           result = (lhs > rhs);
-        } else if (*(argP1) == keyGREATER_EQUAL) {
+        } else if (argP1->GetValue() == keyGREATER_EQUAL) {
           result = (lhs >= rhs);
         } else {
           result = (lhs == rhs);
@@ -604,13 +605,13 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         def2 = this->GetVariableOrString(*argP2);
         const int val = (*def).compare(*def2);
         bool result;
-        if (*(argP1) == keySTRLESS) {
+        if (argP1->GetValue() == keySTRLESS) {
           result = (val < 0);
-        } else if (*(argP1) == keySTRLESS_EQUAL) {
+        } else if (argP1->GetValue() == keySTRLESS_EQUAL) {
           result = (val <= 0);
-        } else if (*(argP1) == keySTRGREATER) {
+        } else if (argP1->GetValue() == keySTRGREATER) {
           result = (val > 0);
-        } else if (*(argP1) == keySTRGREATER_EQUAL) {
+        } else if (argP1->GetValue() == keySTRGREATER_EQUAL) {
           result = (val >= 0);
         } else // strequal
         {
@@ -628,13 +629,13 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
         cmSystemTools::CompareOp op;
-        if (*argP1 == keyVERSION_LESS) {
+        if (argP1->GetValue() == keyVERSION_LESS) {
           op = cmSystemTools::OP_LESS;
-        } else if (*argP1 == keyVERSION_LESS_EQUAL) {
+        } else if (argP1->GetValue() == keyVERSION_LESS_EQUAL) {
           op = cmSystemTools::OP_LESS_EQUAL;
-        } else if (*argP1 == keyVERSION_GREATER) {
+        } else if (argP1->GetValue() == keyVERSION_GREATER) {
           op = cmSystemTools::OP_GREATER;
-        } else if (*argP1 == keyVERSION_GREATER_EQUAL) {
+        } else if (argP1->GetValue() == keyVERSION_GREATER_EQUAL) {
           op = cmSystemTools::OP_GREATER_EQUAL;
         } else { // version_equal
           op = cmSystemTools::OP_EQUAL;
