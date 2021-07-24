@@ -51,10 +51,6 @@ private:
                                           MessageType& status,
                                           bool oneArg = false) const;
 
-  void IncrementArguments(cmArgumentList& newArgs,
-                          cmArgumentList::iterator& argP1,
-                          cmArgumentList::iterator& argP2) const;
-
   void HandlePredicate(bool value, bool& reducible,
                        cmArgumentList::iterator& arg, cmArgumentList& newArgs,
                        cmArgumentList::iterator& argP1,

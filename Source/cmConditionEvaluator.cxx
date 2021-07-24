@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
+#include <iterator>
 #include <sstream>
 #include <utility>
 
@@ -59,6 +60,19 @@ auto const keyVERSION_LESS = "VERSION_LESS"_s;
 auto const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL"_s;
 
 std::array<const char* const, 2> const ZERO_ONE_XLAT = { "0", "1" };
+
+inline void IncrementArguments(
+  cmConditionEvaluator::cmArgumentList& newArgs,
+  cmConditionEvaluator::cmArgumentList::iterator& argP1,
+  cmConditionEvaluator::cmArgumentList::iterator& argP2)
+{
+  if (argP1 != newArgs.end()) {
+    argP2 = ++argP1;
+    using difference_type =
+      cmConditionEvaluator::cmArgumentList::difference_type;
+    std::advance(argP2, difference_type(argP1 != newArgs.end()));
+  }
+}
 
 } // anonymous namespace
 
@@ -312,19 +326,6 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
 }
 
 //=========================================================================
-void cmConditionEvaluator::IncrementArguments(
-  cmArgumentList& newArgs, cmArgumentList::iterator& argP1,
-  cmArgumentList::iterator& argP2) const
-{
-  if (argP1 != newArgs.end()) {
-    argP2 = ++argP1;
-    if (argP1 != newArgs.end()) {
-      ++argP2;
-    }
-  }
-}
-
-//=========================================================================
 // helper function to reduce code duplication
 void cmConditionEvaluator::HandlePredicate(
   const bool value, bool& reducible, cmArgumentList::iterator& arg,
@@ -334,7 +335,7 @@ void cmConditionEvaluator::HandlePredicate(
   *arg = cmExpandedCommandArgument(ZERO_ONE_XLAT[value], true);
   newArgs.erase(argP1);
   argP1 = arg;
-  this->IncrementArguments(newArgs, argP1, argP2);
+  IncrementArguments(newArgs, argP1, argP2);
   reducible = true;
 }
 
@@ -350,7 +351,7 @@ void cmConditionEvaluator::HandleBinaryOp(const bool value, bool& reducible,
   newArgs.erase(argP2);
   newArgs.erase(argP1);
   argP1 = arg;
-  this->IncrementArguments(newArgs, argP1, argP2);
+  IncrementArguments(newArgs, argP1, argP2);
   reducible = true;
 }
 
@@ -416,7 +417,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     reducible = false;
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
-      this->IncrementArguments(newArgs, argP1, argP2);
+      IncrementArguments(newArgs, argP1, argP2);
       // does a file exist
       if (this->IsKeyword(keyEXISTS, *arg) && argP1 != newArgs.end()) {
         this->HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()),
@@ -514,7 +515,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
     reducible = false;
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
-      this->IncrementArguments(newArgs, argP1, argP2);
+      IncrementArguments(newArgs, argP1, argP2);
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           this->IsKeyword(keyMATCHES, *argP1)) {
         def = this->GetDefinitionIfUnquoted(*arg);
@@ -545,7 +546,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
-        this->IncrementArguments(newArgs, argP1, argP2);
+        IncrementArguments(newArgs, argP1, argP2);
         reducible = true;
       }
 
@@ -553,7 +554,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         *arg = cmExpandedCommandArgument("0", true);
         newArgs.erase(argP1);
         argP1 = arg;
-        this->IncrementArguments(newArgs, argP1, argP2);
+        IncrementArguments(newArgs, argP1, argP2);
         reducible = true;
       }
 
@@ -687,7 +688,7 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
     reducible = false;
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
-      this->IncrementArguments(newArgs, argP1, argP2);
+      IncrementArguments(newArgs, argP1, argP2);
       if (argP1 != newArgs.end() && this->IsKeyword(keyNOT, *arg)) {
         bool rhs = this->GetBooleanValueWithAutoDereference(
           *argP1, errorString, status);
@@ -711,7 +712,7 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
     reducible = false;
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
-      this->IncrementArguments(newArgs, argP1, argP2);
+      IncrementArguments(newArgs, argP1, argP2);
       if (argP1 != newArgs.end() && this->IsKeyword(keyAND, *argP1) &&
           argP2 != newArgs.end()) {
         lhs =
