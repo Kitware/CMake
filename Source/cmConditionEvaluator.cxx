@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmConditionEvaluator.h"
 
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
@@ -55,6 +56,9 @@ std::string const keyVERSION_GREATER = "VERSION_GREATER";
 std::string const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL";
 std::string const keyVERSION_LESS = "VERSION_LESS";
 std::string const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL";
+
+std::array<const char* const, 2> const ZERO_ONE_XLAT = { "0", "1" };
+
 } // anonymous namespace
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
@@ -312,10 +316,10 @@ void cmConditionEvaluator::IncrementArguments(
   cmArgumentList::iterator& argP2) const
 {
   if (argP1 != newArgs.end()) {
-    argP1++;
+    ++argP1;
     argP2 = argP1;
     if (argP1 != newArgs.end()) {
-      argP2++;
+      ++argP2;
     }
   }
 }
@@ -327,11 +331,7 @@ void cmConditionEvaluator::HandlePredicate(
   cmArgumentList& newArgs, cmArgumentList::iterator& argP1,
   cmArgumentList::iterator& argP2) const
 {
-  if (value) {
-    *arg = cmExpandedCommandArgument("1", true);
-  } else {
-    *arg = cmExpandedCommandArgument("0", true);
-  }
+  *arg = cmExpandedCommandArgument(ZERO_ONE_XLAT[value], true);
   newArgs.erase(argP1);
   argP1 = arg;
   this->IncrementArguments(newArgs, argP1, argP2);
@@ -346,11 +346,7 @@ void cmConditionEvaluator::HandleBinaryOp(const bool value, int& reducible,
                                           cmArgumentList::iterator& argP1,
                                           cmArgumentList::iterator& argP2)
 {
-  if (value) {
-    *arg = cmExpandedCommandArgument("1", true);
-  } else {
-    *arg = cmExpandedCommandArgument("0", true);
-  }
+  *arg = cmExpandedCommandArgument(ZERO_ONE_XLAT[value], true);
   newArgs.erase(argP2);
   newArgs.erase(argP1);
   argP1 = arg;
@@ -399,12 +395,8 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
         newArgs2.pop_back();
         // now recursively invoke IsTrue to handle the values inside the
         // parenthetical expression
-        bool value = this->IsTrue(newArgs2, errorString, status);
-        if (value) {
-          *arg = cmExpandedCommandArgument("1", true);
-        } else {
-          *arg = cmExpandedCommandArgument("0", true);
-        }
+        const bool value = this->IsTrue(newArgs2, errorString, status);
+        *arg = cmExpandedCommandArgument(ZERO_ONE_XLAT[value], true);
         argP1 = arg;
         argP1++;
         // remove the now evaluated parenthetical expression
