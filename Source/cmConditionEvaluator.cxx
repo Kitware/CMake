@@ -22,38 +22,40 @@
 
 class cmTest;
 
-static std::string const keyAND = "AND";
-static std::string const keyCOMMAND = "COMMAND";
-static std::string const keyDEFINED = "DEFINED";
-static std::string const keyEQUAL = "EQUAL";
-static std::string const keyEXISTS = "EXISTS";
-static std::string const keyGREATER = "GREATER";
-static std::string const keyGREATER_EQUAL = "GREATER_EQUAL";
-static std::string const keyIN_LIST = "IN_LIST";
-static std::string const keyIS_ABSOLUTE = "IS_ABSOLUTE";
-static std::string const keyIS_DIRECTORY = "IS_DIRECTORY";
-static std::string const keyIS_NEWER_THAN = "IS_NEWER_THAN";
-static std::string const keyIS_SYMLINK = "IS_SYMLINK";
-static std::string const keyLESS = "LESS";
-static std::string const keyLESS_EQUAL = "LESS_EQUAL";
-static std::string const keyMATCHES = "MATCHES";
-static std::string const keyNOT = "NOT";
-static std::string const keyOR = "OR";
-static std::string const keyParenL = "(";
-static std::string const keyParenR = ")";
-static std::string const keyPOLICY = "POLICY";
-static std::string const keySTREQUAL = "STREQUAL";
-static std::string const keySTRGREATER = "STRGREATER";
-static std::string const keySTRGREATER_EQUAL = "STRGREATER_EQUAL";
-static std::string const keySTRLESS = "STRLESS";
-static std::string const keySTRLESS_EQUAL = "STRLESS_EQUAL";
-static std::string const keyTARGET = "TARGET";
-static std::string const keyTEST = "TEST";
-static std::string const keyVERSION_EQUAL = "VERSION_EQUAL";
-static std::string const keyVERSION_GREATER = "VERSION_GREATER";
-static std::string const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL";
-static std::string const keyVERSION_LESS = "VERSION_LESS";
-static std::string const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL";
+namespace {
+std::string const keyAND = "AND";
+std::string const keyCOMMAND = "COMMAND";
+std::string const keyDEFINED = "DEFINED";
+std::string const keyEQUAL = "EQUAL";
+std::string const keyEXISTS = "EXISTS";
+std::string const keyGREATER = "GREATER";
+std::string const keyGREATER_EQUAL = "GREATER_EQUAL";
+std::string const keyIN_LIST = "IN_LIST";
+std::string const keyIS_ABSOLUTE = "IS_ABSOLUTE";
+std::string const keyIS_DIRECTORY = "IS_DIRECTORY";
+std::string const keyIS_NEWER_THAN = "IS_NEWER_THAN";
+std::string const keyIS_SYMLINK = "IS_SYMLINK";
+std::string const keyLESS = "LESS";
+std::string const keyLESS_EQUAL = "LESS_EQUAL";
+std::string const keyMATCHES = "MATCHES";
+std::string const keyNOT = "NOT";
+std::string const keyOR = "OR";
+std::string const keyParenL = "(";
+std::string const keyParenR = ")";
+std::string const keyPOLICY = "POLICY";
+std::string const keySTREQUAL = "STREQUAL";
+std::string const keySTRGREATER = "STRGREATER";
+std::string const keySTRGREATER_EQUAL = "STRGREATER_EQUAL";
+std::string const keySTRLESS = "STRLESS";
+std::string const keySTRLESS_EQUAL = "STRLESS_EQUAL";
+std::string const keyTARGET = "TARGET";
+std::string const keyTEST = "TEST";
+std::string const keyVERSION_EQUAL = "VERSION_EQUAL";
+std::string const keyVERSION_GREATER = "VERSION_GREATER";
+std::string const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL";
+std::string const keyVERSION_LESS = "VERSION_LESS";
+std::string const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL";
+} // anonymous namespace
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
                                            cmListFileBacktrace bt)
