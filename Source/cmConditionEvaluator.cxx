@@ -317,8 +317,7 @@ void cmConditionEvaluator::IncrementArguments(
   cmArgumentList::iterator& argP2) const
 {
   if (argP1 != newArgs.end()) {
-    ++argP1;
-    argP2 = argP1;
+    argP2 = ++argP1;
     if (argP1 != newArgs.end()) {
       ++argP2;
     }
@@ -364,8 +363,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
   bool reducible;
   do {
     reducible = false;
-    auto arg = newArgs.begin();
-    while (arg != newArgs.end()) {
+    for (auto arg = newArgs.begin(); arg != newArgs.end(); ++arg) {
       if (this->IsKeyword(keyParenL, *arg)) {
         // search for the closing paren for this opening one
         cmArgumentList::iterator argClose;
@@ -403,7 +401,6 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
         // remove the now evaluated parenthetical expression
         newArgs.erase(argP1, argClose);
       }
-      ++arg;
     }
   } while (reducible);
   return true;
@@ -417,11 +414,8 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
   bool reducible;
   do {
     reducible = false;
-    auto arg = newArgs.begin();
-    cmArgumentList::iterator argP1;
-    cmArgumentList::iterator argP2;
-    while (arg != newArgs.end()) {
-      argP1 = arg;
+    for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
+         arg != newArgs.end(); argP1 = ++arg) {
       this->IncrementArguments(newArgs, argP1, argP2);
       // does a file exist
       if (this->IsKeyword(keyEXISTS, *arg) && argP1 != newArgs.end()) {
@@ -501,7 +495,6 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
         }
         this->HandlePredicate(bdef, reducible, arg, newArgs, argP1, argP2);
       }
-      ++arg;
     }
   } while (reducible);
   return true;
@@ -519,11 +512,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
   cmProp def2;
   do {
     reducible = false;
-    auto arg = newArgs.begin();
-    cmArgumentList::iterator argP1;
-    cmArgumentList::iterator argP2;
-    while (arg != newArgs.end()) {
-      argP1 = arg;
+    for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
+         arg != newArgs.end(); argP1 = ++arg) {
       this->IncrementArguments(newArgs, argP1, argP2);
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           this->IsKeyword(keyMATCHES, *argP1)) {
@@ -681,8 +671,6 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
         }
       }
-
-      ++arg;
     }
   } while (reducible);
   return true;
@@ -697,18 +685,14 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
   bool reducible;
   do {
     reducible = false;
-    auto arg = newArgs.begin();
-    cmArgumentList::iterator argP1;
-    cmArgumentList::iterator argP2;
-    while (arg != newArgs.end()) {
-      argP1 = arg;
+    for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
+         arg != newArgs.end(); argP1 = ++arg) {
       this->IncrementArguments(newArgs, argP1, argP2);
       if (argP1 != newArgs.end() && this->IsKeyword(keyNOT, *arg)) {
         bool rhs = this->GetBooleanValueWithAutoDereference(
           *argP1, errorString, status);
         this->HandlePredicate(!rhs, reducible, arg, newArgs, argP1, argP2);
       }
-      ++arg;
     }
   } while (reducible);
   return true;
@@ -725,11 +709,8 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
   bool rhs;
   do {
     reducible = false;
-    auto arg = newArgs.begin();
-    cmArgumentList::iterator argP1;
-    cmArgumentList::iterator argP2;
-    while (arg != newArgs.end()) {
-      argP1 = arg;
+    for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
+         arg != newArgs.end(); argP1 = ++arg) {
       this->IncrementArguments(newArgs, argP1, argP2);
       if (argP1 != newArgs.end() && this->IsKeyword(keyAND, *argP1) &&
           argP2 != newArgs.end()) {
@@ -750,7 +731,6 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
         this->HandleBinaryOp((lhs || rhs), reducible, arg, newArgs, argP1,
                              argP2);
       }
-      ++arg;
     }
   } while (reducible);
   return true;
