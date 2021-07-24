@@ -229,7 +229,7 @@ bool cmConditionEvaluator::GetBooleanValue(
   // Check for numbers.
   if (!arg.empty()) {
     char* end;
-    double d = strtod(arg.GetValue().c_str(), &end);
+    const double d = std::strtod(arg.GetValue().c_str(), &end);
     if (*end == '\0') {
       // The whole string is a number.  Use C conversion to bool.
       return static_cast<bool>(d);
@@ -280,8 +280,8 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
   }
 
   // Check policy only if old and new results differ.
-  bool newResult = this->GetBooleanValue(newArg);
-  bool oldResult = this->GetBooleanValueOld(newArg, oneArg);
+  const bool newResult = this->GetBooleanValue(newArg);
+  const bool oldResult = this->GetBooleanValueOld(newArg, oneArg);
   if (newResult != oldResult) {
     switch (this->Policy12Status) {
       case cmPolicies::WARN:
@@ -323,7 +323,7 @@ void cmConditionEvaluator::IncrementArguments(
 //=========================================================================
 // helper function to reduce code duplication
 void cmConditionEvaluator::HandlePredicate(
-  bool value, int& reducible, cmArgumentList::iterator& arg,
+  const bool value, int& reducible, cmArgumentList::iterator& arg,
   cmArgumentList& newArgs, cmArgumentList::iterator& argP1,
   cmArgumentList::iterator& argP2) const
 {
@@ -340,7 +340,7 @@ void cmConditionEvaluator::HandlePredicate(
 
 //=========================================================================
 // helper function to reduce code duplication
-void cmConditionEvaluator::HandleBinaryOp(bool value, int& reducible,
+void cmConditionEvaluator::HandleBinaryOp(const bool value, int& reducible,
                                           cmArgumentList::iterator& arg,
                                           cmArgumentList& newArgs,
                                           cmArgumentList::iterator& argP1,
@@ -491,7 +491,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       }
       // is a variable defined
       if (this->IsKeyword(keyDEFINED, *arg) && argP1 != newArgs.end()) {
-        size_t argP1len = argP1->GetValue().size();
+        const size_t argP1len = argP1->GetValue().size();
         bool bdef = false;
         if (argP1len > 4 && cmHasLiteralPrefix(argP1->GetValue(), "ENV{") &&
             argP1->GetValue().operator[](argP1len - 1) == '}') {
@@ -585,8 +585,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         double lhs;
         double rhs;
         bool result;
-        if (sscanf(def->c_str(), "%lg", &lhs) != 1 ||
-            sscanf(def2->c_str(), "%lg", &rhs) != 1) {
+        if (std::sscanf(def->c_str(), "%lg", &lhs) != 1 ||
+            std::sscanf(def2->c_str(), "%lg", &rhs) != 1) {
           result = false;
         } else if (*(argP1) == keyLESS) {
           result = (lhs < rhs);
@@ -610,7 +610,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
            this->IsKeyword(keySTREQUAL, *argP1))) {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
-        int val = (*def).compare(*def2);
+        const int val = (*def).compare(*def2);
         bool result;
         if (*(argP1) == keySTRLESS) {
           result = (val < 0);
@@ -647,7 +647,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         } else { // version_equal
           op = cmSystemTools::OP_EQUAL;
         }
-        bool result =
+        const bool result =
           cmSystemTools::VersionCompare(op, def->c_str(), def2->c_str());
         this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
       }
