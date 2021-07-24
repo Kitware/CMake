@@ -55,12 +55,12 @@ private:
                           cmArgumentList::iterator& argP1,
                           cmArgumentList::iterator& argP2) const;
 
-  void HandlePredicate(bool value, int& reducible,
+  void HandlePredicate(bool value, bool& reducible,
                        cmArgumentList::iterator& arg, cmArgumentList& newArgs,
                        cmArgumentList::iterator& argP1,
                        cmArgumentList::iterator& argP2) const;
 
-  void HandleBinaryOp(bool value, int& reducible,
+  void HandleBinaryOp(bool value, bool& reducible,
                       cmArgumentList::iterator& arg, cmArgumentList& newArgs,
                       cmArgumentList::iterator& argP1,
                       cmArgumentList::iterator& argP2);

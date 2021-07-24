@@ -328,7 +328,7 @@ void cmConditionEvaluator::IncrementArguments(
 //=========================================================================
 // helper function to reduce code duplication
 void cmConditionEvaluator::HandlePredicate(
-  const bool value, int& reducible, cmArgumentList::iterator& arg,
+  const bool value, bool& reducible, cmArgumentList::iterator& arg,
   cmArgumentList& newArgs, cmArgumentList::iterator& argP1,
   cmArgumentList::iterator& argP2) const
 {
@@ -336,12 +336,12 @@ void cmConditionEvaluator::HandlePredicate(
   newArgs.erase(argP1);
   argP1 = arg;
   this->IncrementArguments(newArgs, argP1, argP2);
-  reducible = 1;
+  reducible = true;
 }
 
 //=========================================================================
 // helper function to reduce code duplication
-void cmConditionEvaluator::HandleBinaryOp(const bool value, int& reducible,
+void cmConditionEvaluator::HandleBinaryOp(const bool value, bool& reducible,
                                           cmArgumentList::iterator& arg,
                                           cmArgumentList& newArgs,
                                           cmArgumentList::iterator& argP1,
@@ -352,7 +352,7 @@ void cmConditionEvaluator::HandleBinaryOp(const bool value, int& reducible,
   newArgs.erase(argP1);
   argP1 = arg;
   this->IncrementArguments(newArgs, argP1, argP2);
-  reducible = 1;
+  reducible = true;
 }
 
 //=========================================================================
@@ -361,9 +361,9 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  int reducible;
+  bool reducible;
   do {
-    reducible = 0;
+    reducible = false;
     auto arg = newArgs.begin();
     while (arg != newArgs.end()) {
       if (this->IsKeyword(keyParenL, *arg)) {
@@ -414,9 +414,9 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
 bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
                                         MessageType&)
 {
-  int reducible;
+  bool reducible;
   do {
-    reducible = 0;
+    reducible = false;
     auto arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
@@ -513,12 +513,12 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  int reducible;
+  bool reducible;
   std::string def_buf;
   cmProp def;
   cmProp def2;
   do {
-    reducible = 0;
+    reducible = false;
     auto arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
@@ -556,7 +556,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         newArgs.erase(argP1);
         argP1 = arg;
         this->IncrementArguments(newArgs, argP1, argP2);
-        reducible = 1;
+        reducible = true;
       }
 
       if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg)) {
@@ -564,7 +564,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         newArgs.erase(argP1);
         argP1 = arg;
         this->IncrementArguments(newArgs, argP1, argP2);
-        reducible = 1;
+        reducible = true;
       }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
@@ -694,9 +694,9 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  int reducible;
+  bool reducible;
   do {
-    reducible = 0;
+    reducible = false;
     auto arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
@@ -720,11 +720,11 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  int reducible;
+  bool reducible;
   bool lhs;
   bool rhs;
   do {
-    reducible = 0;
+    reducible = false;
     auto arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
