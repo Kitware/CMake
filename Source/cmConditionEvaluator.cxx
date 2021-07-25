@@ -687,29 +687,22 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
                                         MessageType& status)
 {
   bool reducible;
-  bool lhs;
-  bool rhs;
   do {
     reducible = false;
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
       IncrementArguments(newArgs, argP1, argP2);
-      if (argP1 != newArgs.end() && this->IsKeyword(keyAND, *argP1) &&
+      if (argP1 != newArgs.end() &&
+          (this->IsKeyword(keyAND, *argP1) ||
+           this->IsKeyword(keyOR, *argP1)) &&
           argP2 != newArgs.end()) {
-        lhs =
+        const auto lhs =
           this->GetBooleanValueWithAutoDereference(*arg, errorString, status);
-        rhs = this->GetBooleanValueWithAutoDereference(*argP2, errorString,
-                                                       status);
-        HandleBinaryOp((lhs && rhs), reducible, arg, newArgs, argP1, argP2);
-      }
-
-      if (argP1 != newArgs.end() && this->IsKeyword(keyOR, *argP1) &&
-          argP2 != newArgs.end()) {
-        lhs =
-          this->GetBooleanValueWithAutoDereference(*arg, errorString, status);
-        rhs = this->GetBooleanValueWithAutoDereference(*argP2, errorString,
-                                                       status);
-        HandleBinaryOp((lhs || rhs), reducible, arg, newArgs, argP1, argP2);
+        const auto rhs = this->GetBooleanValueWithAutoDereference(
+          *argP2, errorString, status);
+        HandleBinaryOp(this->IsKeyword(keyAND, *argP1) ? (lhs && rhs)
+                                                       : (lhs || rhs),
+                       reducible, arg, newArgs, argP1, argP2);
       }
     }
   } while (reducible);
