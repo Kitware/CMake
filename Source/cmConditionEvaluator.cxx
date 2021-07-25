@@ -78,7 +78,7 @@ void IncrementArguments(cmConditionEvaluator::cmArgumentList& newArgs,
   std::advance(argP2, difference_type(argP1 != newArgs.end()));
 }
 
-void HandlePredicate(const bool value, bool& reducible,
+void HandlePredicate(const bool value,
                      cmConditionEvaluator::cmArgumentList::iterator& arg,
                      cmConditionEvaluator::cmArgumentList& newArgs,
                      cmConditionEvaluator::cmArgumentList::iterator& argP1)
@@ -87,10 +87,9 @@ void HandlePredicate(const bool value, bool& reducible,
   newArgs.erase(argP1);
   argP1 = arg;
   IncrementArguments(newArgs, argP1);
-  reducible = true;
 }
 
-void HandleBinaryOp(const bool value, bool& reducible,
+void HandleBinaryOp(const bool value,
                     cmConditionEvaluator::cmArgumentList::iterator& arg,
                     cmConditionEvaluator::cmArgumentList& newArgs,
                     cmConditionEvaluator::cmArgumentList::iterator& argP1,
@@ -101,7 +100,6 @@ void HandleBinaryOp(const bool value, bool& reducible,
   newArgs.erase(argP1);
   argP1 = arg;
   IncrementArguments(newArgs, argP1, argP2);
-  reducible = true;
 }
 } // anonymous namespace
 
@@ -354,9 +352,10 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  bool reducible;
+  std::size_t beginSize;
   do {
-    reducible = false;
+    beginSize = newArgs.size();
+
     for (auto arg = newArgs.begin(); arg != newArgs.end(); ++arg) {
       if (this->IsKeyword(keyParenL, *arg)) {
         // search for the closing paren for this opening one
@@ -385,7 +384,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
         newArgs.erase(argP1, argClose);
       }
     }
-  } while (reducible);
+  } while (beginSize != newArgs.size());
   return true;
 }
 
@@ -397,9 +396,10 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
   const auto policy64IsOld = this->Policy64Status == cmPolicies::OLD ||
     this->Policy64Status == cmPolicies::WARN;
 
-  bool reducible;
+  std::size_t beginSize;
   do {
-    reducible = false;
+    beginSize = newArgs.size();
+
     for (auto arg = newArgs.begin(), argP1 = arg; arg != newArgs.end();
          argP1 = ++arg) {
 
@@ -431,42 +431,42 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
 
       // does a file exist
       if (this->IsKeyword(keyEXISTS, *arg)) {
-        HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1);
+        HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()), arg,
+                        newArgs, argP1);
       }
       // does a directory with this name exist
       else if (this->IsKeyword(keyIS_DIRECTORY, *arg)) {
-        HandlePredicate(cmSystemTools::FileIsDirectory(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1);
+        HandlePredicate(cmSystemTools::FileIsDirectory(argP1->GetValue()), arg,
+                        newArgs, argP1);
       }
       // does a symlink with this name exist
       else if (this->IsKeyword(keyIS_SYMLINK, *arg)) {
-        HandlePredicate(cmSystemTools::FileIsSymlink(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1);
+        HandlePredicate(cmSystemTools::FileIsSymlink(argP1->GetValue()), arg,
+                        newArgs, argP1);
       }
       // is the given path an absolute path ?
       else if (this->IsKeyword(keyIS_ABSOLUTE, *arg)) {
-        HandlePredicate(cmSystemTools::FileIsFullPath(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1);
+        HandlePredicate(cmSystemTools::FileIsFullPath(argP1->GetValue()), arg,
+                        newArgs, argP1);
       }
       // does a command exist
       else if (this->IsKeyword(keyCOMMAND, *arg)) {
         HandlePredicate(
           this->Makefile.GetState()->GetCommand(argP1->GetValue()) != nullptr,
-          reducible, arg, newArgs, argP1);
+          arg, newArgs, argP1);
       }
       // does a policy exist
       else if (this->IsKeyword(keyPOLICY, *arg)) {
         cmPolicies::PolicyID pid;
         HandlePredicate(
-          cmPolicies::GetPolicyID(argP1->GetValue().c_str(), pid), reducible,
-          arg, newArgs, argP1);
+          cmPolicies::GetPolicyID(argP1->GetValue().c_str(), pid), arg,
+          newArgs, argP1);
       }
       // does a target exist
       else if (this->IsKeyword(keyTARGET, *arg)) {
         HandlePredicate(this->Makefile.FindTargetToUse(argP1->GetValue()) !=
                           nullptr,
-                        reducible, arg, newArgs, argP1);
+                        arg, newArgs, argP1);
       }
       // is a variable defined
       else if (this->IsKeyword(keyDEFINED, *arg)) {
@@ -485,7 +485,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
         } else {
           bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
         }
-        HandlePredicate(bdef, reducible, arg, newArgs, argP1);
+        HandlePredicate(bdef, arg, newArgs, argP1);
       }
       // does a test exist
       else if (this->IsKeyword(keyTEST, *arg)) {
@@ -493,10 +493,10 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
           continue;
         }
         HandlePredicate(this->Makefile.GetTest(argP1->GetValue()) != nullptr,
-                        reducible, arg, newArgs, argP1);
+                        arg, newArgs, argP1);
       }
     }
-  } while (reducible);
+  } while (beginSize != newArgs.size());
   return true;
 }
 
@@ -506,12 +506,13 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  bool reducible;
   std::string def_buf;
   cmProp def;
   cmProp def2;
+  std::size_t beginSize;
   do {
-    reducible = false;
+    beginSize = newArgs.size();
+
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
 
@@ -553,7 +554,6 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         newArgs.erase(argP1);
         argP1 = arg;
         IncrementArguments(newArgs, argP1, argP2);
-        reducible = true;
       }
 
       else if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg)) {
@@ -561,7 +561,6 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         newArgs.erase(argP1);
         argP1 = arg;
         IncrementArguments(newArgs, argP1, argP2);
-        reducible = true;
       }
 
       // NOTE Fail fast: All the binary ops below require 2 arguments.
@@ -595,7 +594,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         } else {
           result = (lhs == rhs);
         }
-        HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
+        HandleBinaryOp(result, arg, newArgs, argP1, argP2);
       }
 
       else if (this->IsKeyword(keySTRLESS, *argP1) ||
@@ -621,7 +620,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         {
           result = (val == 0);
         }
-        HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
+        HandleBinaryOp(result, arg, newArgs, argP1, argP2);
       }
 
       else if (this->IsKeyword(keyVERSION_LESS, *argP1) ||
@@ -647,7 +646,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         }
         const auto result =
           cmSystemTools::VersionCompare(op, def->c_str(), def2->c_str());
-        HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
+        HandleBinaryOp(result, arg, newArgs, argP1, argP2);
       }
 
       // is file A newer than file B
@@ -656,7 +655,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         cmsys::Status ftcStatus = cmSystemTools::FileTimeCompare(
           arg->GetValue(), argP2->GetValue(), &fileIsNewer);
         HandleBinaryOp((!ftcStatus || fileIsNewer == 1 || fileIsNewer == 0),
-                       reducible, arg, newArgs, argP1, argP2);
+                       arg, newArgs, argP1, argP2);
       }
 
       else if (this->IsKeyword(keyIN_LIST, *argP1)) {
@@ -672,7 +671,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
             result = cm::contains(cmExpandedList(*def2, true), *def);
           }
 
-          HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
+          HandleBinaryOp(result, arg, newArgs, argP1, argP2);
         } else if (this->Policy57Status == cmPolicies::WARN) {
           std::ostringstream e;
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057) << "\n";
@@ -684,7 +683,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         }
       }
     }
-  } while (reducible);
+  } while (beginSize != newArgs.size());
   return true;
 }
 
@@ -694,9 +693,10 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  bool reducible;
+  std::size_t beginSize;
   do {
-    reducible = false;
+    beginSize = newArgs.size();
+
     for (auto arg = newArgs.begin(), argP1 = arg; arg != newArgs.end();
          argP1 = ++arg) {
 
@@ -705,10 +705,10 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
       if (argP1 != newArgs.end() && this->IsKeyword(keyNOT, *arg)) {
         const auto rhs = this->GetBooleanValueWithAutoDereference(
           *argP1, errorString, status);
-        HandlePredicate(!rhs, reducible, arg, newArgs, argP1);
+        HandlePredicate(!rhs, arg, newArgs, argP1);
       }
     }
-  } while (reducible);
+  } while (beginSize != newArgs.size());
   return true;
 }
 
@@ -718,27 +718,27 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  bool reducible;
+  std::size_t beginSize;
   do {
-    reducible = false;
+    beginSize = newArgs.size();
+
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
 
       IncrementArguments(newArgs, argP1, argP2);
 
-      if (argP1 != newArgs.end() &&
+      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           (this->IsKeyword(keyAND, *argP1) ||
-           this->IsKeyword(keyOR, *argP1)) &&
-          argP2 != newArgs.end()) {
+           this->IsKeyword(keyOR, *argP1))) {
         const auto lhs =
           this->GetBooleanValueWithAutoDereference(*arg, errorString, status);
         const auto rhs = this->GetBooleanValueWithAutoDereference(
           *argP2, errorString, status);
         HandleBinaryOp(this->IsKeyword(keyAND, *argP1) ? (lhs && rhs)
                                                        : (lhs || rhs),
-                       reducible, arg, newArgs, argP1, argP2);
+                       arg, newArgs, argP1, argP2);
       }
     }
-  } while (reducible);
+  } while (beginSize != newArgs.size());
   return true;
 }
