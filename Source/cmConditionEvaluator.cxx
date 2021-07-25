@@ -403,7 +403,9 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     reducible = false;
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
+
       IncrementArguments(newArgs, argP1, argP2);
+
       // does a file exist
       if (this->IsKeyword(keyEXISTS, *arg) && argP1 != newArgs.end()) {
         HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()),
@@ -498,10 +500,14 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
     reducible = false;
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
+
       IncrementArguments(newArgs, argP1, argP2);
+
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           this->IsKeyword(keyMATCHES, *argP1)) {
+
         def = this->GetDefinitionIfUnquoted(*arg);
+
         if (!def) {
           def = &arg->GetValue();
         } else if (cmHasLiteralPrefix(arg->GetValue(), "CMAKE_MATCH_")) {
@@ -510,6 +516,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           def_buf = *def;
           def = &def_buf;
         }
+
         const auto& rex = argP2->GetValue();
         this->Makefile.ClearMatches();
         cmsys::RegularExpression regEntry;
@@ -520,12 +527,14 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           status = MessageType::FATAL_ERROR;
           return false;
         }
+
         if (regEntry.find(*def)) {
           this->Makefile.StoreMatches(regEntry);
           *arg = cmExpandedCommandArgument("1", true);
         } else {
           *arg = cmExpandedCommandArgument("0", true);
         }
+
         newArgs.erase(argP2);
         newArgs.erase(argP1);
         argP1 = arg;
@@ -547,8 +556,10 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
            this->IsKeyword(keyGREATER, *argP1) ||
            this->IsKeyword(keyGREATER_EQUAL, *argP1) ||
            this->IsKeyword(keyEQUAL, *argP1))) {
+
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
+
         double lhs;
         double rhs;
         bool result;
@@ -575,9 +586,11 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
            this->IsKeyword(keySTRGREATER, *argP1) ||
            this->IsKeyword(keySTRGREATER_EQUAL, *argP1) ||
            this->IsKeyword(keySTREQUAL, *argP1))) {
+
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
         const int val = (*def).compare(*def2);
+
         bool result;
         if (argP1->GetValue() == keySTRLESS) {
           result = (val < 0);
@@ -600,8 +613,10 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
            this->IsKeyword(keyVERSION_GREATER, *argP1) ||
            this->IsKeyword(keyVERSION_GREATER_EQUAL, *argP1) ||
            this->IsKeyword(keyVERSION_EQUAL, *argP1))) {
+
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
+
         cmSystemTools::CompareOp op;
         if (argP1->GetValue() == keyVERSION_LESS) {
           op = cmSystemTools::OP_LESS;
@@ -631,6 +646,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
           this->IsKeyword(keyIN_LIST, *argP1)) {
+
         if (this->Policy57Status != cmPolicies::OLD &&
             this->Policy57Status != cmPolicies::WARN) {
           auto result = false;
@@ -669,7 +685,9 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
     reducible = false;
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
+
       IncrementArguments(newArgs, argP1, argP2);
+
       if (argP1 != newArgs.end() && this->IsKeyword(keyNOT, *arg)) {
         const auto rhs = this->GetBooleanValueWithAutoDereference(
           *argP1, errorString, status);
@@ -691,7 +709,9 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
     reducible = false;
     for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
          arg != newArgs.end(); argP1 = ++arg) {
+
       IncrementArguments(newArgs, argP1, argP2);
+
       if (argP1 != newArgs.end() &&
           (this->IsKeyword(keyAND, *argP1) ||
            this->IsKeyword(keyOR, *argP1)) &&
