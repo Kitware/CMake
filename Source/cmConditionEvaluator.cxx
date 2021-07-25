@@ -374,12 +374,10 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
           return false;
         }
         // store the reduced args in this vector
-        std::vector<cmExpandedCommandArgument> newArgs2;
-
-        // copy to the list structure
         auto argP1 = std::next(arg);
-        cm::append(newArgs2, argP1, argClose);
+        std::vector<cmExpandedCommandArgument> newArgs2{ argP1, argClose };
         newArgs2.pop_back();
+
         // now recursively invoke IsTrue to handle the values inside the
         // parenthetical expression
         const auto value = this->IsTrue(newArgs2, errorString, status);
