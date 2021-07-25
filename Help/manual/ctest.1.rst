@@ -137,8 +137,10 @@ Options
 ``--output-junit <file>``
  Write test results in JUnit format.
 
- This option tells CTest to write test results to a ``<file>`` JUnit XML file.
- If ``<file>`` already exists it will be overwritten.
+ This option tells CTest to write test results to ``<file>`` in JUnit XML
+ format. If ``<file>`` already exists, it will be overwritten. If using the
+ ``-S`` option to run a dashboard script, use the ``OUTPUT_JUNIT`` keyword
+ with the :command:`ctest_test` command instead.
 
 ``-N,--show-only[=<format>]``
  Disable actual execution of tests.

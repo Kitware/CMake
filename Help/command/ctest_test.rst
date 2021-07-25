@@ -155,12 +155,12 @@ The options are:
   Store in the ``<result-var>`` variable -1 if there are any errors running
   the command and prevent ctest from returning non-zero if an error occurs.
 
-``OUTPUT_JUNIT``
+``OUTPUT_JUNIT <file>``
   .. versionadded:: 3.21
 
   Write test results to ``<file>`` in JUnit XML format. If ``<file>`` is a
-  relative path it will be placed in the build directory. If ``<file>>``
-  already exists it will be overwritten. Note that the resulting JUnit XML
+  relative path, it will be placed in the build directory. If ``<file>``
+  already exists, it will be overwritten. Note that the resulting JUnit XML
   file is **not** uploaded to CDash because it would be redundant with
   CTest's ``Test.xml`` file.
 
