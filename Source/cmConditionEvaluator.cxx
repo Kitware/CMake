@@ -149,25 +149,19 @@ bool cmConditionEvaluator::IsTrue(
   // now loop through the arguments and see if we can reduce any of them
   // we do this multiple times. Once for each level of precedence
   // parens
-  if (!this->HandleLevel0(newArgs, errorString, status)) {
-    return false;
-  }
-  // predicates
-  if (!this->HandleLevel1(newArgs, errorString, status)) {
-    return false;
-  }
-  // binary ops
-  if (!this->HandleLevel2(newArgs, errorString, status)) {
-    return false;
-  }
-
-  // NOT
-  if (!this->HandleLevel3(newArgs, errorString, status)) {
-    return false;
-  }
-  // AND OR
-  if (!this->HandleLevel4(newArgs, errorString, status)) {
-    return false;
+  using handlerFn_t = bool (cmConditionEvaluator::*)(
+    cmArgumentList&, std::string&, MessageType&);
+  const std::array<handlerFn_t, 5> handlers = { {
+    &cmConditionEvaluator::HandleLevel0, // parenthesis
+    &cmConditionEvaluator::HandleLevel1, // predicates
+    &cmConditionEvaluator::HandleLevel2, // binary ops
+    &cmConditionEvaluator::HandleLevel3, // NOT
+    &cmConditionEvaluator::HandleLevel4  // AND OR
+  } };
+  for (auto fn : handlers) {
+    if (!(this->*fn)(newArgs, errorString, status)) {
+      return false;
+    }
   }
 
   // now at the end there should only be one argument left
