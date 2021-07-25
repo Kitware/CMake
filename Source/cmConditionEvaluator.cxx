@@ -362,18 +362,11 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
     for (auto arg = newArgs.begin(); arg != newArgs.end(); ++arg) {
       if (this->IsKeyword(keyParenL, *arg)) {
         // search for the closing paren for this opening one
-        cmArgumentList::iterator argClose;
-        argClose = arg;
-        argClose++;
-        auto depth = 1u;
-        while (argClose != newArgs.end() && depth) {
-          if (this->IsKeyword(keyParenL, *argClose)) {
-            depth++;
-          }
-          if (this->IsKeyword(keyParenR, *argClose)) {
-            depth--;
-          }
-          argClose++;
+        auto depth = 1;
+        auto argClose = std::next(arg);
+        for (; argClose != newArgs.end() && depth; ++argClose) {
+          depth += int(this->IsKeyword(keyParenL, *argClose)) -
+            int(this->IsKeyword(keyParenR, *argClose));
         }
         if (depth) {
           errorString = "mismatched parenthesis in condition";
