@@ -82,27 +82,23 @@ void IncrementArguments(cmConditionEvaluator::cmArgumentList& newArgs,
 }
 
 void HandlePredicate(const bool value,
-                     cmConditionEvaluator::cmArgumentList::iterator& arg,
                      cmConditionEvaluator::cmArgumentList& newArgs,
-                     cmConditionEvaluator::cmArgumentList::iterator& argP1)
+                     cmConditionEvaluator::cmArgumentList::iterator arg,
+                     cmConditionEvaluator::cmArgumentList::iterator argP1)
 {
   *arg = cmExpandedCommandArgument(bool2string(value), true);
   newArgs.erase(argP1);
-  argP1 = arg;
-  IncrementArguments(newArgs, argP1);
 }
 
 void HandleBinaryOp(const bool value,
-                    cmConditionEvaluator::cmArgumentList::iterator& arg,
                     cmConditionEvaluator::cmArgumentList& newArgs,
-                    cmConditionEvaluator::cmArgumentList::iterator& argP1,
-                    cmConditionEvaluator::cmArgumentList::iterator& argP2)
+                    cmConditionEvaluator::cmArgumentList::iterator arg,
+                    cmConditionEvaluator::cmArgumentList::iterator argP1,
+                    cmConditionEvaluator::cmArgumentList::iterator argP2)
 {
   *arg = cmExpandedCommandArgument(bool2string(value), true);
   newArgs.erase(argP2);
   newArgs.erase(argP1);
-  argP1 = arg;
-  IncrementArguments(newArgs, argP1, argP2);
 }
 } // anonymous namespace
 
@@ -435,41 +431,41 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
 
     // does a file exist
     if (this->IsKeyword(keyEXISTS, *arg)) {
-      HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()), arg,
-                      newArgs, argP1);
+      HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()), newArgs,
+                      arg, argP1);
     }
     // does a directory with this name exist
     else if (this->IsKeyword(keyIS_DIRECTORY, *arg)) {
-      HandlePredicate(cmSystemTools::FileIsDirectory(argP1->GetValue()), arg,
-                      newArgs, argP1);
+      HandlePredicate(cmSystemTools::FileIsDirectory(argP1->GetValue()),
+                      newArgs, arg, argP1);
     }
     // does a symlink with this name exist
     else if (this->IsKeyword(keyIS_SYMLINK, *arg)) {
-      HandlePredicate(cmSystemTools::FileIsSymlink(argP1->GetValue()), arg,
-                      newArgs, argP1);
+      HandlePredicate(cmSystemTools::FileIsSymlink(argP1->GetValue()), newArgs,
+                      arg, argP1);
     }
     // is the given path an absolute path ?
     else if (this->IsKeyword(keyIS_ABSOLUTE, *arg)) {
-      HandlePredicate(cmSystemTools::FileIsFullPath(argP1->GetValue()), arg,
-                      newArgs, argP1);
+      HandlePredicate(cmSystemTools::FileIsFullPath(argP1->GetValue()),
+                      newArgs, arg, argP1);
     }
     // does a command exist
     else if (this->IsKeyword(keyCOMMAND, *arg)) {
       HandlePredicate(
         this->Makefile.GetState()->GetCommand(argP1->GetValue()) != nullptr,
-        arg, newArgs, argP1);
+        newArgs, arg, argP1);
     }
     // does a policy exist
     else if (this->IsKeyword(keyPOLICY, *arg)) {
       cmPolicies::PolicyID pid;
       HandlePredicate(cmPolicies::GetPolicyID(argP1->GetValue().c_str(), pid),
-                      arg, newArgs, argP1);
+                      newArgs, arg, argP1);
     }
     // does a target exist
     else if (this->IsKeyword(keyTARGET, *arg)) {
       HandlePredicate(this->Makefile.FindTargetToUse(argP1->GetValue()) !=
                         nullptr,
-                      arg, newArgs, argP1);
+                      newArgs, arg, argP1);
     }
     // is a variable defined
     else if (this->IsKeyword(keyDEFINED, *arg)) {
@@ -487,7 +483,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       } else {
         bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
       }
-      HandlePredicate(bdef, arg, newArgs, argP1);
+      HandlePredicate(bdef, newArgs, arg, argP1);
     }
     // does a test exist
     else if (this->IsKeyword(keyTEST, *arg)) {
@@ -495,7 +491,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
         continue;
       }
       HandlePredicate(this->Makefile.GetTest(argP1->GetValue()) != nullptr,
-                      arg, newArgs, argP1);
+                      newArgs, arg, argP1);
     }
   }
   return true;
@@ -516,10 +512,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
     // (i.e., w/o regex to match which is possibly result of
     // variable expansion to an empty string)
     if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg)) {
-      *arg = cmExpandedCommandArgument("0", true);
-      newArgs.erase(argP1);
-      argP1 = arg;
-      IncrementArguments(newArgs, argP1, argP2);
+      HandlePredicate(false, newArgs, arg, argP1);
     }
 
     // NOTE Fail fast: All the binary ops below require 2 arguments.
@@ -556,12 +549,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       if (match) {
         this->Makefile.StoreMatches(regEntry);
       }
-      *arg = cmExpandedCommandArgument(bool2string(match), true);
-
-      newArgs.erase(argP2);
-      newArgs.erase(argP1);
-      argP1 = arg;
-      IncrementArguments(newArgs, argP1, argP2);
+      HandleBinaryOp(match, newArgs, arg, argP1, argP2);
     }
 
     else if (this->IsKeyword(keyLESS, *argP1) ||
@@ -590,7 +578,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       } else {
         result = (lhs == rhs);
       }
-      HandleBinaryOp(result, arg, newArgs, argP1, argP2);
+      HandleBinaryOp(result, newArgs, arg, argP1, argP2);
     }
 
     else if (this->IsKeyword(keySTRLESS, *argP1) ||
@@ -616,7 +604,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       {
         result = (val == 0);
       }
-      HandleBinaryOp(result, arg, newArgs, argP1, argP2);
+      HandleBinaryOp(result, newArgs, arg, argP1, argP2);
     }
 
     else if (this->IsKeyword(keyVERSION_LESS, *argP1) ||
@@ -642,7 +630,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       }
       const auto result =
         cmSystemTools::VersionCompare(op, def->c_str(), def2->c_str());
-      HandleBinaryOp(result, arg, newArgs, argP1, argP2);
+      HandleBinaryOp(result, newArgs, arg, argP1, argP2);
     }
 
     // is file A newer than file B
@@ -650,8 +638,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       auto fileIsNewer = 0;
       cmsys::Status ftcStatus = cmSystemTools::FileTimeCompare(
         arg->GetValue(), argP2->GetValue(), &fileIsNewer);
-      HandleBinaryOp((!ftcStatus || fileIsNewer == 1 || fileIsNewer == 0), arg,
-                     newArgs, argP1, argP2);
+      HandleBinaryOp((!ftcStatus || fileIsNewer == 1 || fileIsNewer == 0),
+                     newArgs, arg, argP1, argP2);
     }
 
     else if (this->IsKeyword(keyIN_LIST, *argP1)) {
@@ -663,7 +651,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         cmProp def2 = this->Makefile.GetDefinition(argP2->GetValue());
 
         HandleBinaryOp(def2 && cm::contains(cmExpandedList(*def2, true), *def),
-                       arg, newArgs, argP1, argP2);
+                       newArgs, arg, argP1, argP2);
       } else if (this->Policy57Status == cmPolicies::WARN) {
         std::ostringstream e;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057)
@@ -693,7 +681,7 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
     if (argP1 != newArgs.end() && this->IsKeyword(keyNOT, *arg)) {
       const auto rhs =
         this->GetBooleanValueWithAutoDereference(*argP1, errorString, status);
-      HandlePredicate(!rhs, arg, newArgs, argP1);
+      HandlePredicate(!rhs, newArgs, arg, argP1);
     }
   }
   return true;
@@ -718,7 +706,7 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
         this->GetBooleanValueWithAutoDereference(*argP2, errorString, status);
       HandleBinaryOp(this->IsKeyword(keyAND, *argP1) ? (lhs && rhs)
                                                      : (lhs || rhs),
-                     arg, newArgs, argP1, argP2);
+                     newArgs, arg, argP1, argP2);
     }
   }
   return true;
