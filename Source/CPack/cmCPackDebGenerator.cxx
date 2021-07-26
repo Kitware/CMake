@@ -111,6 +111,9 @@ DebGenerator::DebGenerator(
   } else if (!std::strcmp(debianCompressionType, "gzip")) {
     this->CompressionSuffix = ".gz";
     this->TarCompressionType = cmArchiveWrite::CompressGZip;
+  } else if (!std::strcmp(debianCompressionType, "zstd")) {
+    this->CompressionSuffix = ".zst";
+    this->TarCompressionType = cmArchiveWrite::CompressZstd;
   } else if (!std::strcmp(debianCompressionType, "none")) {
     this->CompressionSuffix.clear();
     this->TarCompressionType = cmArchiveWrite::CompressNone;
