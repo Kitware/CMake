@@ -8,6 +8,7 @@
 #include <functional>
 #include <iterator>
 #include <sstream>
+#include <string>
 #include <utility>
 
 #include <cm/string_view>
@@ -57,8 +58,6 @@ auto const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL"_s;
 auto const keyVERSION_LESS = "VERSION_LESS"_s;
 auto const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL"_s;
 
-std::array<const char* const, 2> const ZERO_ONE_XLAT = { "0", "1" };
-
 void IncrementArguments(cmConditionEvaluator::cmArgumentList& newArgs,
                         cmConditionEvaluator::cmArgumentList::iterator& argP1)
 {
@@ -83,7 +82,7 @@ void HandlePredicate(const bool value,
                      cmConditionEvaluator::cmArgumentList& newArgs,
                      cmConditionEvaluator::cmArgumentList::iterator& argP1)
 {
-  *arg = cmExpandedCommandArgument(ZERO_ONE_XLAT[value], true);
+  *arg = cmExpandedCommandArgument(std::to_string(int(value)), true);
   newArgs.erase(argP1);
   argP1 = arg;
   IncrementArguments(newArgs, argP1);
@@ -95,7 +94,7 @@ void HandleBinaryOp(const bool value,
                     cmConditionEvaluator::cmArgumentList::iterator& argP1,
                     cmConditionEvaluator::cmArgumentList::iterator& argP2)
 {
-  *arg = cmExpandedCommandArgument(ZERO_ONE_XLAT[value], true);
+  *arg = cmExpandedCommandArgument(std::to_string(int(value)), true);
   newArgs.erase(argP2);
   newArgs.erase(argP1);
   argP1 = arg;
@@ -383,7 +382,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
       // now recursively invoke IsTrue to handle the values inside the
       // parenthetical expression
       const auto value = this->IsTrue(newArgs2, errorString, status);
-      *arg = cmExpandedCommandArgument(ZERO_ONE_XLAT[value], true);
+      *arg = cmExpandedCommandArgument(std::to_string(int(value)), true);
       argP1 = std::next(arg);
       // remove the now evaluated parenthetical expression
       newArgs.erase(argP1, argClose);
