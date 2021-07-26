@@ -157,8 +157,12 @@ bool cmConditionEvaluator::IsTrue(
     &cmConditionEvaluator::HandleLevel4  // AND OR
   } };
   for (auto fn : handlers) {
-    if (!(this->*fn)(newArgs, errorString, status)) {
-      return false;
+    // Call the reducer 'till there is anything to reduce...
+    // (i.e., if after an iteration the size becomes smaller)
+    for (auto beginSize = newArgs.size();
+         (this->*fn)(newArgs, errorString, status) &&
+         newArgs.size() < beginSize;
+         beginSize = newArgs.size()) {
     }
   }
 
@@ -352,39 +356,34 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  std::size_t beginSize;
-  do {
-    beginSize = newArgs.size();
-
-    for (auto arg = newArgs.begin(); arg != newArgs.end(); ++arg) {
-      if (this->IsKeyword(keyParenL, *arg)) {
-        // search for the closing paren for this opening one
-        auto depth = 1;
-        auto argClose = std::next(arg);
-        for (; argClose != newArgs.end() && depth; ++argClose) {
-          depth += int(this->IsKeyword(keyParenL, *argClose)) -
-            int(this->IsKeyword(keyParenR, *argClose));
-        }
-        if (depth) {
-          errorString = "mismatched parenthesis in condition";
-          status = MessageType::FATAL_ERROR;
-          return false;
-        }
-        // store the reduced args in this vector
-        auto argP1 = std::next(arg);
-        std::vector<cmExpandedCommandArgument> newArgs2{ argP1, argClose };
-        newArgs2.pop_back();
-
-        // now recursively invoke IsTrue to handle the values inside the
-        // parenthetical expression
-        const auto value = this->IsTrue(newArgs2, errorString, status);
-        *arg = cmExpandedCommandArgument(ZERO_ONE_XLAT[value], true);
-        argP1 = std::next(arg);
-        // remove the now evaluated parenthetical expression
-        newArgs.erase(argP1, argClose);
+  for (auto arg = newArgs.begin(); arg != newArgs.end(); ++arg) {
+    if (this->IsKeyword(keyParenL, *arg)) {
+      // search for the closing paren for this opening one
+      auto depth = 1;
+      auto argClose = std::next(arg);
+      for (; argClose != newArgs.end() && depth; ++argClose) {
+        depth += int(this->IsKeyword(keyParenL, *argClose)) -
+          int(this->IsKeyword(keyParenR, *argClose));
       }
+      if (depth) {
+        errorString = "mismatched parenthesis in condition";
+        status = MessageType::FATAL_ERROR;
+        return false;
+      }
+      // store the reduced args in this vector
+      auto argP1 = std::next(arg);
+      std::vector<cmExpandedCommandArgument> newArgs2{ argP1, argClose };
+      newArgs2.pop_back();
+
+      // now recursively invoke IsTrue to handle the values inside the
+      // parenthetical expression
+      const auto value = this->IsTrue(newArgs2, errorString, status);
+      *arg = cmExpandedCommandArgument(ZERO_ONE_XLAT[value], true);
+      argP1 = std::next(arg);
+      // remove the now evaluated parenthetical expression
+      newArgs.erase(argP1, argClose);
     }
-  } while (beginSize != newArgs.size());
+  }
   return true;
 }
 
@@ -396,107 +395,101 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
   const auto policy64IsOld = this->Policy64Status == cmPolicies::OLD ||
     this->Policy64Status == cmPolicies::WARN;
 
-  std::size_t beginSize;
-  do {
-    beginSize = newArgs.size();
+  for (auto arg = newArgs.begin(), argP1 = arg; arg != newArgs.end();
+       argP1 = ++arg) {
 
-    for (auto arg = newArgs.begin(), argP1 = arg; arg != newArgs.end();
-         argP1 = ++arg) {
+    IncrementArguments(newArgs, argP1);
 
-      IncrementArguments(newArgs, argP1);
-      auto policyCheck = [&, this](const cmPolicies::PolicyID id,
-                                   const cmPolicies::PolicyStatus status,
-                                   const cm::static_string_view kw) {
-        if (status == cmPolicies::WARN && this->IsKeyword(kw, *arg)) {
-          std::ostringstream e;
-          e << cmPolicies::GetPolicyWarning(id) << "\n"
-            << kw
-            << " will be interpreted as an operator "
-               "when the policy is set to NEW.  "
-               "Since the policy is not set the OLD behavior will be used.";
+    auto policyCheck = [&, this](const cmPolicies::PolicyID id,
+                                 const cmPolicies::PolicyStatus status,
+                                 const cm::static_string_view kw) {
+      if (status == cmPolicies::WARN && this->IsKeyword(kw, *arg)) {
+        std::ostringstream e;
+        e << cmPolicies::GetPolicyWarning(id) << "\n"
+          << kw
+          << " will be interpreted as an operator "
+             "when the policy is set to NEW.  "
+             "Since the policy is not set the OLD behavior will be used.";
 
-          this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-        }
-      };
+        this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+      }
+    };
 
-      // NOTE Checking policies for warnings are not require an access to the
-      // next arg. Check them first!
-      policyCheck(cmPolicies::CMP0064, this->Policy64Status, keyTEST);
+    // NOTE Checking policies for warnings are not require an access to the
+    // next arg. Check them first!
+    policyCheck(cmPolicies::CMP0064, this->Policy64Status, keyTEST);
 
-      // NOTE Fail fast: All the predicates below require the next arg to be
-      // valid
-      if (argP1 == newArgs.end()) {
+    // NOTE Fail fast: All the predicates below require the next arg to be
+    // valid
+    if (argP1 == newArgs.end()) {
+      continue;
+    }
+
+    // does a file exist
+    if (this->IsKeyword(keyEXISTS, *arg)) {
+      HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()), arg,
+                      newArgs, argP1);
+    }
+    // does a directory with this name exist
+    else if (this->IsKeyword(keyIS_DIRECTORY, *arg)) {
+      HandlePredicate(cmSystemTools::FileIsDirectory(argP1->GetValue()), arg,
+                      newArgs, argP1);
+    }
+    // does a symlink with this name exist
+    else if (this->IsKeyword(keyIS_SYMLINK, *arg)) {
+      HandlePredicate(cmSystemTools::FileIsSymlink(argP1->GetValue()), arg,
+                      newArgs, argP1);
+    }
+    // is the given path an absolute path ?
+    else if (this->IsKeyword(keyIS_ABSOLUTE, *arg)) {
+      HandlePredicate(cmSystemTools::FileIsFullPath(argP1->GetValue()), arg,
+                      newArgs, argP1);
+    }
+    // does a command exist
+    else if (this->IsKeyword(keyCOMMAND, *arg)) {
+      HandlePredicate(
+        this->Makefile.GetState()->GetCommand(argP1->GetValue()) != nullptr,
+        arg, newArgs, argP1);
+    }
+    // does a policy exist
+    else if (this->IsKeyword(keyPOLICY, *arg)) {
+      cmPolicies::PolicyID pid;
+      HandlePredicate(cmPolicies::GetPolicyID(argP1->GetValue().c_str(), pid),
+                      arg, newArgs, argP1);
+    }
+    // does a target exist
+    else if (this->IsKeyword(keyTARGET, *arg)) {
+      HandlePredicate(this->Makefile.FindTargetToUse(argP1->GetValue()) !=
+                        nullptr,
+                      arg, newArgs, argP1);
+    }
+    // is a variable defined
+    else if (this->IsKeyword(keyDEFINED, *arg)) {
+      const auto argP1len = argP1->GetValue().size();
+      auto bdef = false;
+      if (argP1len > 4 && cmHasLiteralPrefix(argP1->GetValue(), "ENV{") &&
+          argP1->GetValue().operator[](argP1len - 1) == '}') {
+        const auto env = argP1->GetValue().substr(4, argP1len - 5);
+        bdef = cmSystemTools::HasEnv(env);
+      } else if (argP1len > 6 &&
+                 cmHasLiteralPrefix(argP1->GetValue(), "CACHE{") &&
+                 argP1->GetValue().operator[](argP1len - 1) == '}') {
+        const auto cache = argP1->GetValue().substr(6, argP1len - 7);
+        bdef = this->Makefile.GetState()->GetCacheEntryValue(cache) != nullptr;
+      } else {
+        bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
+      }
+      HandlePredicate(bdef, arg, newArgs, argP1);
+    }
+    // does a test exist
+    else if (this->IsKeyword(keyTEST, *arg)) {
+      if (policy64IsOld) {
         continue;
       }
-
-      // does a file exist
-      if (this->IsKeyword(keyEXISTS, *arg)) {
-        HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()), arg,
-                        newArgs, argP1);
-      }
-      // does a directory with this name exist
-      else if (this->IsKeyword(keyIS_DIRECTORY, *arg)) {
-        HandlePredicate(cmSystemTools::FileIsDirectory(argP1->GetValue()), arg,
-                        newArgs, argP1);
-      }
-      // does a symlink with this name exist
-      else if (this->IsKeyword(keyIS_SYMLINK, *arg)) {
-        HandlePredicate(cmSystemTools::FileIsSymlink(argP1->GetValue()), arg,
-                        newArgs, argP1);
-      }
-      // is the given path an absolute path ?
-      else if (this->IsKeyword(keyIS_ABSOLUTE, *arg)) {
-        HandlePredicate(cmSystemTools::FileIsFullPath(argP1->GetValue()), arg,
-                        newArgs, argP1);
-      }
-      // does a command exist
-      else if (this->IsKeyword(keyCOMMAND, *arg)) {
-        HandlePredicate(
-          this->Makefile.GetState()->GetCommand(argP1->GetValue()) != nullptr,
-          arg, newArgs, argP1);
-      }
-      // does a policy exist
-      else if (this->IsKeyword(keyPOLICY, *arg)) {
-        cmPolicies::PolicyID pid;
-        HandlePredicate(
-          cmPolicies::GetPolicyID(argP1->GetValue().c_str(), pid), arg,
-          newArgs, argP1);
-      }
-      // does a target exist
-      else if (this->IsKeyword(keyTARGET, *arg)) {
-        HandlePredicate(this->Makefile.FindTargetToUse(argP1->GetValue()) !=
-                          nullptr,
-                        arg, newArgs, argP1);
-      }
-      // is a variable defined
-      else if (this->IsKeyword(keyDEFINED, *arg)) {
-        const auto argP1len = argP1->GetValue().size();
-        auto bdef = false;
-        if (argP1len > 4 && cmHasLiteralPrefix(argP1->GetValue(), "ENV{") &&
-            argP1->GetValue().operator[](argP1len - 1) == '}') {
-          const auto env = argP1->GetValue().substr(4, argP1len - 5);
-          bdef = cmSystemTools::HasEnv(env);
-        } else if (argP1len > 6 &&
-                   cmHasLiteralPrefix(argP1->GetValue(), "CACHE{") &&
-                   argP1->GetValue().operator[](argP1len - 1) == '}') {
-          const auto cache = argP1->GetValue().substr(6, argP1len - 7);
-          bdef =
-            this->Makefile.GetState()->GetCacheEntryValue(cache) != nullptr;
-        } else {
-          bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
-        }
-        HandlePredicate(bdef, arg, newArgs, argP1);
-      }
-      // does a test exist
-      else if (this->IsKeyword(keyTEST, *arg)) {
-        if (policy64IsOld) {
-          continue;
-        }
-        HandlePredicate(this->Makefile.GetTest(argP1->GetValue()) != nullptr,
-                        arg, newArgs, argP1);
-      }
+      HandlePredicate(this->Makefile.GetTest(argP1->GetValue()) != nullptr,
+                      arg, newArgs, argP1);
     }
-  } while (beginSize != newArgs.size());
+  }
   return true;
 }
 
@@ -509,181 +502,177 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
   std::string def_buf;
   cmProp def;
   cmProp def2;
-  std::size_t beginSize;
-  do {
-    beginSize = newArgs.size();
 
-    for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
-         arg != newArgs.end(); argP1 = ++arg) {
+  for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
+       arg != newArgs.end(); argP1 = ++arg) {
 
-      IncrementArguments(newArgs, argP1, argP2);
+    IncrementArguments(newArgs, argP1, argP2);
 
-      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          this->IsKeyword(keyMATCHES, *argP1)) {
+    if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
+        this->IsKeyword(keyMATCHES, *argP1)) {
 
-        def = this->GetDefinitionIfUnquoted(*arg);
+      def = this->GetDefinitionIfUnquoted(*arg);
 
-        if (!def) {
-          def = &arg->GetValue();
-        } else if (cmHasLiteralPrefix(arg->GetValue(), "CMAKE_MATCH_")) {
-          // The string to match is owned by our match result variables.
-          // Move it to our own buffer before clearing them.
-          def_buf = *def;
-          def = &def_buf;
-        }
-
-        const auto& rex = argP2->GetValue();
-        this->Makefile.ClearMatches();
-        cmsys::RegularExpression regEntry;
-        if (!regEntry.compile(rex)) {
-          std::ostringstream error;
-          error << "Regular expression \"" << rex << "\" cannot compile";
-          errorString = error.str();
-          status = MessageType::FATAL_ERROR;
-          return false;
-        }
-
-        if (regEntry.find(*def)) {
-          this->Makefile.StoreMatches(regEntry);
-          *arg = cmExpandedCommandArgument("1", true);
-        } else {
-          *arg = cmExpandedCommandArgument("0", true);
-        }
-
-        newArgs.erase(argP2);
-        newArgs.erase(argP1);
-        argP1 = arg;
-        IncrementArguments(newArgs, argP1, argP2);
+      if (!def) {
+        def = &arg->GetValue();
+      } else if (cmHasLiteralPrefix(arg->GetValue(), "CMAKE_MATCH_")) {
+        // The string to match is owned by our match result variables.
+        // Move it to our own buffer before clearing them.
+        def_buf = *def;
+        def = &def_buf;
       }
 
-      else if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg)) {
+      const auto& rex = argP2->GetValue();
+      this->Makefile.ClearMatches();
+      cmsys::RegularExpression regEntry;
+      if (!regEntry.compile(rex)) {
+        std::ostringstream error;
+        error << "Regular expression \"" << rex << "\" cannot compile";
+        errorString = error.str();
+        status = MessageType::FATAL_ERROR;
+        return false;
+      }
+
+      if (regEntry.find(*def)) {
+        this->Makefile.StoreMatches(regEntry);
+        *arg = cmExpandedCommandArgument("1", true);
+      } else {
         *arg = cmExpandedCommandArgument("0", true);
-        newArgs.erase(argP1);
-        argP1 = arg;
-        IncrementArguments(newArgs, argP1, argP2);
       }
 
-      // NOTE Fail fast: All the binary ops below require 2 arguments.
-      else if (argP1 == newArgs.end() || argP2 == newArgs.end()) {
-        continue;
-      }
+      newArgs.erase(argP2);
+      newArgs.erase(argP1);
+      argP1 = arg;
+      IncrementArguments(newArgs, argP1, argP2);
+    }
 
-      else if (this->IsKeyword(keyLESS, *argP1) ||
-               this->IsKeyword(keyLESS_EQUAL, *argP1) ||
-               this->IsKeyword(keyGREATER, *argP1) ||
-               this->IsKeyword(keyGREATER_EQUAL, *argP1) ||
-               this->IsKeyword(keyEQUAL, *argP1)) {
+    else if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg)) {
+      *arg = cmExpandedCommandArgument("0", true);
+      newArgs.erase(argP1);
+      argP1 = arg;
+      IncrementArguments(newArgs, argP1, argP2);
+    }
+
+    // NOTE Fail fast: All the binary ops below require 2 arguments.
+    else if (argP1 == newArgs.end() || argP2 == newArgs.end()) {
+      continue;
+    }
+
+    else if (this->IsKeyword(keyLESS, *argP1) ||
+             this->IsKeyword(keyLESS_EQUAL, *argP1) ||
+             this->IsKeyword(keyGREATER, *argP1) ||
+             this->IsKeyword(keyGREATER_EQUAL, *argP1) ||
+             this->IsKeyword(keyEQUAL, *argP1)) {
+
+      def = this->GetVariableOrString(*arg);
+      def2 = this->GetVariableOrString(*argP2);
+
+      double lhs;
+      double rhs;
+      bool result;
+      if (std::sscanf(def->c_str(), "%lg", &lhs) != 1 ||
+          std::sscanf(def2->c_str(), "%lg", &rhs) != 1) {
+        result = false;
+      } else if (argP1->GetValue() == keyLESS) {
+        result = (lhs < rhs);
+      } else if (argP1->GetValue() == keyLESS_EQUAL) {
+        result = (lhs <= rhs);
+      } else if (argP1->GetValue() == keyGREATER) {
+        result = (lhs > rhs);
+      } else if (argP1->GetValue() == keyGREATER_EQUAL) {
+        result = (lhs >= rhs);
+      } else {
+        result = (lhs == rhs);
+      }
+      HandleBinaryOp(result, arg, newArgs, argP1, argP2);
+    }
+
+    else if (this->IsKeyword(keySTRLESS, *argP1) ||
+             this->IsKeyword(keySTRLESS_EQUAL, *argP1) ||
+             this->IsKeyword(keySTRGREATER, *argP1) ||
+             this->IsKeyword(keySTRGREATER_EQUAL, *argP1) ||
+             this->IsKeyword(keySTREQUAL, *argP1)) {
+
+      def = this->GetVariableOrString(*arg);
+      def2 = this->GetVariableOrString(*argP2);
+      const int val = (*def).compare(*def2);
+
+      bool result;
+      if (argP1->GetValue() == keySTRLESS) {
+        result = (val < 0);
+      } else if (argP1->GetValue() == keySTRLESS_EQUAL) {
+        result = (val <= 0);
+      } else if (argP1->GetValue() == keySTRGREATER) {
+        result = (val > 0);
+      } else if (argP1->GetValue() == keySTRGREATER_EQUAL) {
+        result = (val >= 0);
+      } else // strequal
+      {
+        result = (val == 0);
+      }
+      HandleBinaryOp(result, arg, newArgs, argP1, argP2);
+    }
+
+    else if (this->IsKeyword(keyVERSION_LESS, *argP1) ||
+             this->IsKeyword(keyVERSION_LESS_EQUAL, *argP1) ||
+             this->IsKeyword(keyVERSION_GREATER, *argP1) ||
+             this->IsKeyword(keyVERSION_GREATER_EQUAL, *argP1) ||
+             this->IsKeyword(keyVERSION_EQUAL, *argP1)) {
+
+      def = this->GetVariableOrString(*arg);
+      def2 = this->GetVariableOrString(*argP2);
+
+      cmSystemTools::CompareOp op;
+      if (argP1->GetValue() == keyVERSION_LESS) {
+        op = cmSystemTools::OP_LESS;
+      } else if (argP1->GetValue() == keyVERSION_LESS_EQUAL) {
+        op = cmSystemTools::OP_LESS_EQUAL;
+      } else if (argP1->GetValue() == keyVERSION_GREATER) {
+        op = cmSystemTools::OP_GREATER;
+      } else if (argP1->GetValue() == keyVERSION_GREATER_EQUAL) {
+        op = cmSystemTools::OP_GREATER_EQUAL;
+      } else { // version_equal
+        op = cmSystemTools::OP_EQUAL;
+      }
+      const auto result =
+        cmSystemTools::VersionCompare(op, def->c_str(), def2->c_str());
+      HandleBinaryOp(result, arg, newArgs, argP1, argP2);
+    }
+
+    // is file A newer than file B
+    else if (this->IsKeyword(keyIS_NEWER_THAN, *argP1)) {
+      auto fileIsNewer = 0;
+      cmsys::Status ftcStatus = cmSystemTools::FileTimeCompare(
+        arg->GetValue(), argP2->GetValue(), &fileIsNewer);
+      HandleBinaryOp((!ftcStatus || fileIsNewer == 1 || fileIsNewer == 0), arg,
+                     newArgs, argP1, argP2);
+    }
+
+    else if (this->IsKeyword(keyIN_LIST, *argP1)) {
+
+      if (this->Policy57Status != cmPolicies::OLD &&
+          this->Policy57Status != cmPolicies::WARN) {
+        auto result = false;
 
         def = this->GetVariableOrString(*arg);
-        def2 = this->GetVariableOrString(*argP2);
+        def2 = this->Makefile.GetDefinition(argP2->GetValue());
 
-        double lhs;
-        double rhs;
-        bool result;
-        if (std::sscanf(def->c_str(), "%lg", &lhs) != 1 ||
-            std::sscanf(def2->c_str(), "%lg", &rhs) != 1) {
-          result = false;
-        } else if (argP1->GetValue() == keyLESS) {
-          result = (lhs < rhs);
-        } else if (argP1->GetValue() == keyLESS_EQUAL) {
-          result = (lhs <= rhs);
-        } else if (argP1->GetValue() == keyGREATER) {
-          result = (lhs > rhs);
-        } else if (argP1->GetValue() == keyGREATER_EQUAL) {
-          result = (lhs >= rhs);
-        } else {
-          result = (lhs == rhs);
+        if (def2) {
+          result = cm::contains(cmExpandedList(*def2, true), *def);
         }
+
         HandleBinaryOp(result, arg, newArgs, argP1, argP2);
-      }
+      } else if (this->Policy57Status == cmPolicies::WARN) {
+        std::ostringstream e;
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057) << "\n";
+        e << "IN_LIST will be interpreted as an operator "
+             "when the policy is set to NEW.  "
+             "Since the policy is not set the OLD behavior will be used.";
 
-      else if (this->IsKeyword(keySTRLESS, *argP1) ||
-               this->IsKeyword(keySTRLESS_EQUAL, *argP1) ||
-               this->IsKeyword(keySTRGREATER, *argP1) ||
-               this->IsKeyword(keySTRGREATER_EQUAL, *argP1) ||
-               this->IsKeyword(keySTREQUAL, *argP1)) {
-
-        def = this->GetVariableOrString(*arg);
-        def2 = this->GetVariableOrString(*argP2);
-        const int val = (*def).compare(*def2);
-
-        bool result;
-        if (argP1->GetValue() == keySTRLESS) {
-          result = (val < 0);
-        } else if (argP1->GetValue() == keySTRLESS_EQUAL) {
-          result = (val <= 0);
-        } else if (argP1->GetValue() == keySTRGREATER) {
-          result = (val > 0);
-        } else if (argP1->GetValue() == keySTRGREATER_EQUAL) {
-          result = (val >= 0);
-        } else // strequal
-        {
-          result = (val == 0);
-        }
-        HandleBinaryOp(result, arg, newArgs, argP1, argP2);
-      }
-
-      else if (this->IsKeyword(keyVERSION_LESS, *argP1) ||
-               this->IsKeyword(keyVERSION_LESS_EQUAL, *argP1) ||
-               this->IsKeyword(keyVERSION_GREATER, *argP1) ||
-               this->IsKeyword(keyVERSION_GREATER_EQUAL, *argP1) ||
-               this->IsKeyword(keyVERSION_EQUAL, *argP1)) {
-
-        def = this->GetVariableOrString(*arg);
-        def2 = this->GetVariableOrString(*argP2);
-
-        cmSystemTools::CompareOp op;
-        if (argP1->GetValue() == keyVERSION_LESS) {
-          op = cmSystemTools::OP_LESS;
-        } else if (argP1->GetValue() == keyVERSION_LESS_EQUAL) {
-          op = cmSystemTools::OP_LESS_EQUAL;
-        } else if (argP1->GetValue() == keyVERSION_GREATER) {
-          op = cmSystemTools::OP_GREATER;
-        } else if (argP1->GetValue() == keyVERSION_GREATER_EQUAL) {
-          op = cmSystemTools::OP_GREATER_EQUAL;
-        } else { // version_equal
-          op = cmSystemTools::OP_EQUAL;
-        }
-        const auto result =
-          cmSystemTools::VersionCompare(op, def->c_str(), def2->c_str());
-        HandleBinaryOp(result, arg, newArgs, argP1, argP2);
-      }
-
-      // is file A newer than file B
-      else if (this->IsKeyword(keyIS_NEWER_THAN, *argP1)) {
-        auto fileIsNewer = 0;
-        cmsys::Status ftcStatus = cmSystemTools::FileTimeCompare(
-          arg->GetValue(), argP2->GetValue(), &fileIsNewer);
-        HandleBinaryOp((!ftcStatus || fileIsNewer == 1 || fileIsNewer == 0),
-                       arg, newArgs, argP1, argP2);
-      }
-
-      else if (this->IsKeyword(keyIN_LIST, *argP1)) {
-
-        if (this->Policy57Status != cmPolicies::OLD &&
-            this->Policy57Status != cmPolicies::WARN) {
-          auto result = false;
-
-          def = this->GetVariableOrString(*arg);
-          def2 = this->Makefile.GetDefinition(argP2->GetValue());
-
-          if (def2) {
-            result = cm::contains(cmExpandedList(*def2, true), *def);
-          }
-
-          HandleBinaryOp(result, arg, newArgs, argP1, argP2);
-        } else if (this->Policy57Status == cmPolicies::WARN) {
-          std::ostringstream e;
-          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057) << "\n";
-          e << "IN_LIST will be interpreted as an operator "
-               "when the policy is set to NEW.  "
-               "Since the policy is not set the OLD behavior will be used.";
-
-          this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-        }
+        this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       }
     }
-  } while (beginSize != newArgs.size());
+  }
   return true;
 }
 
@@ -693,22 +682,17 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  std::size_t beginSize;
-  do {
-    beginSize = newArgs.size();
+  for (auto arg = newArgs.begin(), argP1 = arg; arg != newArgs.end();
+       argP1 = ++arg) {
 
-    for (auto arg = newArgs.begin(), argP1 = arg; arg != newArgs.end();
-         argP1 = ++arg) {
+    IncrementArguments(newArgs, argP1);
 
-      IncrementArguments(newArgs, argP1);
-
-      if (argP1 != newArgs.end() && this->IsKeyword(keyNOT, *arg)) {
-        const auto rhs = this->GetBooleanValueWithAutoDereference(
-          *argP1, errorString, status);
-        HandlePredicate(!rhs, arg, newArgs, argP1);
-      }
+    if (argP1 != newArgs.end() && this->IsKeyword(keyNOT, *arg)) {
+      const auto rhs =
+        this->GetBooleanValueWithAutoDereference(*argP1, errorString, status);
+      HandlePredicate(!rhs, arg, newArgs, argP1);
     }
-  } while (beginSize != newArgs.size());
+  }
   return true;
 }
 
@@ -718,27 +702,21 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  std::size_t beginSize;
-  do {
-    beginSize = newArgs.size();
+  for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
+       arg != newArgs.end(); argP1 = ++arg) {
 
-    for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
-         arg != newArgs.end(); argP1 = ++arg) {
+    IncrementArguments(newArgs, argP1, argP2);
 
-      IncrementArguments(newArgs, argP1, argP2);
-
-      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          (this->IsKeyword(keyAND, *argP1) ||
-           this->IsKeyword(keyOR, *argP1))) {
-        const auto lhs =
-          this->GetBooleanValueWithAutoDereference(*arg, errorString, status);
-        const auto rhs = this->GetBooleanValueWithAutoDereference(
-          *argP2, errorString, status);
-        HandleBinaryOp(this->IsKeyword(keyAND, *argP1) ? (lhs && rhs)
-                                                       : (lhs || rhs),
-                       arg, newArgs, argP1, argP2);
-      }
+    if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
+        (this->IsKeyword(keyAND, *argP1) || this->IsKeyword(keyOR, *argP1))) {
+      const auto lhs =
+        this->GetBooleanValueWithAutoDereference(*arg, errorString, status);
+      const auto rhs =
+        this->GetBooleanValueWithAutoDereference(*argP2, errorString, status);
+      HandleBinaryOp(this->IsKeyword(keyAND, *argP1) ? (lhs && rhs)
+                                                     : (lhs || rhs),
+                     arg, newArgs, argP1, argP2);
     }
-  } while (beginSize != newArgs.size());
+  }
   return true;
 }
