@@ -840,6 +840,10 @@ Debuginfo RPM packaging has its own set of variables:
  Binaries must contain debug symbols before packaging so use either ``Debug``
  or ``RelWithDebInfo`` for :variable:`CMAKE_BUILD_TYPE` variable value.
 
+ Additionally, if :variable:`CPACK_STRIP_FILES` is set, the files will be stripped before
+ they get to the RPM generator, so will not contain debug symbols and
+ a debuginfo package will not get built. Do not use with :variable:`CPACK_STRIP_FILES`.
+
 .. note::
 
  Packages generated from packages without binary files, with binary files but
