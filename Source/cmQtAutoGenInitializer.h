@@ -17,6 +17,7 @@
 
 #include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
+#include "cmQtAutoUicHelpers.h"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;
@@ -170,6 +171,7 @@ private:
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;
   std::string TargetsFolder;
+  cmQtAutoUicHelpers AutoUicHelpers;
 
   /** Common directories.  */
   struct
