@@ -657,16 +657,12 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       if (this->Policy57Status != cmPolicies::OLD &&
           this->Policy57Status != cmPolicies::WARN) {
-        auto result = false;
 
         def = this->GetVariableOrString(*arg);
         def2 = this->Makefile.GetDefinition(argP2->GetValue());
 
-        if (def2) {
-          result = cm::contains(cmExpandedList(*def2, true), *def);
-        }
-
-        HandleBinaryOp(result, arg, newArgs, argP1, argP2);
+        HandleBinaryOp(def2 && cm::contains(cmExpandedList(*def2, true), *def),
+                       arg, newArgs, argP1, argP2);
       } else if (this->Policy57Status == cmPolicies::WARN) {
         std::ostringstream e;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057)
