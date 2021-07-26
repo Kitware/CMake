@@ -2,6 +2,9 @@ check_files("${RunCMake_TEST_BINARY_DIR}"
   INCLUDE
     ${GENERATED_FILES}
 
+    ${TARGET_FILE_simpleexe_Debug}
+    ${TARGET_OBJECT_FILES_simpleexe_Debug}
+
     ${TARGET_FILE_simpleexe2_Debug}
     ${TARGET_OBJECT_FILES_simpleexe2_Debug}
 
@@ -12,9 +15,6 @@ check_files("${RunCMake_TEST_BINARY_DIR}"
     ${TARGET_OBJECT_FILES_simpleobj_Debug}
 
   EXCLUDE
-    ${TARGET_FILE_simpleexe_Debug}
-
-    ${TARGET_OBJECT_FILES_simpleexe_Debug}
     ${TARGET_OBJECT_FILES_simplestatic_Debug}
 
     ${TARGET_OBJECT_FILES_simpleexe_Release}

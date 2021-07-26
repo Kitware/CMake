@@ -5,6 +5,9 @@ check_files("${RunCMake_TEST_BINARY_DIR}"
     ${TARGET_FILE_simpleexe_RelWithDebInfo}
     ${TARGET_OBJECT_FILES_simpleexe_RelWithDebInfo}
 
+    ${TARGET_FILE_simpleexe2_RelWithDebInfo}
+    ${TARGET_OBJECT_FILES_simpleexe2_RelWithDebInfo}
+
     ${TARGET_FILE_simpleshared_RelWithDebInfo}
     ${TARGET_LINKER_FILE_simpleshared_RelWithDebInfo}
     ${TARGET_OBJECT_FILES_simpleshared_RelWithDebInfo}

@@ -5,6 +5,9 @@ check_files("${RunCMake_TEST_BINARY_DIR}"
     ${TARGET_FILE_simpleexe_Debug}
     ${TARGET_OBJECT_FILES_simpleexe_Debug}
 
+    ${TARGET_FILE_simpleexe2_Debug}
+    ${TARGET_OBJECT_FILES_simpleexe2_Debug}
+
     ${TARGET_FILE_simpleshared_Debug}
     ${TARGET_LINKER_FILE_simpleshared_Debug}
     ${TARGET_OBJECT_FILES_simpleshared_Debug}
@@ -17,6 +20,9 @@ check_files("${RunCMake_TEST_BINARY_DIR}"
 
     ${TARGET_FILE_simpleexe_Release}
     ${TARGET_OBJECT_FILES_simpleexe_Release}
+
+    ${TARGET_FILE_simpleexe2_Release}
+    ${TARGET_OBJECT_FILES_simpleexe2_Release}
 
     ${TARGET_FILE_simpleshared_Release}
     ${TARGET_LINKER_FILE_simpleshared_Release}
@@ -31,6 +37,9 @@ check_files("${RunCMake_TEST_BINARY_DIR}"
     ${TARGET_FILE_simpleexe_MinSizeRel}
     ${TARGET_OBJECT_FILES_simpleexe_MinSizeRel}
 
+    ${TARGET_FILE_simpleexe2_MinSizeRel}
+    ${TARGET_OBJECT_FILES_simpleexe2_MinSizeRel}
+
     ${TARGET_FILE_simpleshared_MinSizeRel}
     ${TARGET_LINKER_FILE_simpleshared_MinSizeRel}
     ${TARGET_OBJECT_FILES_simpleshared_MinSizeRel}
@@ -43,6 +52,9 @@ check_files("${RunCMake_TEST_BINARY_DIR}"
 
     ${TARGET_FILE_simpleexe_RelWithDebInfo}
     ${TARGET_OBJECT_FILES_simpleexe_RelWithDebInfo}
+
+    ${TARGET_FILE_simpleexe2_RelWithDebInfo}
+    ${TARGET_OBJECT_FILES_simpleexe2_RelWithDebInfo}
 
     ${TARGET_FILE_simpleshared_RelWithDebInfo}
     ${TARGET_LINKER_FILE_simpleshared_RelWithDebInfo}

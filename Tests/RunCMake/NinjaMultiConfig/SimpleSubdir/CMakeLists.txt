@@ -6,4 +6,3 @@ target_link_libraries(simpleexe PRIVATE simpleshared)
 
 add_executable(simpleexe2 ../main.c)
 target_link_libraries(simpleexe2 PRIVATE simpleshared $<TARGET_OBJECTS:simpleobj>)
-set_property(TARGET simpleexe2 PROPERTY EXCLUDE_FROM_ALL 1)
