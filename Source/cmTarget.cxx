@@ -189,6 +189,7 @@ public:
   std::map<std::string, BTs<std::string>> LanguageStandardProperties;
   std::vector<std::string> IncludeDirectoriesEntries;
   std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
+  std::vector<std::string> InstallIncludeDirectoriesEntries;
   std::vector<std::string> CompileOptionsEntries;
   std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
   std::vector<std::string> CompileFeaturesEntries;
@@ -1073,6 +1074,17 @@ void cmTarget::AddSystemIncludeDirectories(const std::set<std::string>& incs)
 std::set<std::string> const& cmTarget::GetSystemIncludeDirectories() const
 {
   return this->impl->SystemIncludeDirectories;
+}
+
+void cmTarget::AddInstallIncludeDirectories(cmStringRange const& incs)
+{
+  std::copy(incs.begin(), incs.end(),
+            std::back_inserter(this->impl->InstallIncludeDirectoriesEntries));
+}
+
+cmStringRange cmTarget::GetInstallIncludeDirectoriesEntries() const
+{
+  return cmMakeRange(this->impl->InstallIncludeDirectoriesEntries);
 }
 
 cmStringRange cmTarget::GetIncludeDirectoriesEntries() const
