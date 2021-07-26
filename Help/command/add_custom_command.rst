@@ -271,35 +271,40 @@ The options are:
 ``DEPFILE``
   .. versionadded:: 3.7
 
-  Specify a ``.d`` depfile for the :generator:`Ninja`, :generator:`Xcode` and
-  :ref:`Makefile <Makefile Generators>` generators. The depfile may use
-  "generator expressions" with the syntax ``$<...>``. See the
-  :manual:`generator-expressions(7) <cmake-generator-expressions(7)>` manual
-  for available expressions. A ``.d`` file holds dependencies usually emitted
-  by the custom command itself.
+  Specify a ``.d`` depfile which holds dependencies for the custom command.
+  It is usually emitted by the custom command itself.  This keyword may only
+  be used if the generator supports it, as detailed below.
 
-  Using ``DEPFILE`` with other generators than :generator:`Ninja`,
-  :generator:`Xcode` or :ref:`Makefile <Makefile Generators>` is an error.
+  .. versionadded:: 3.7
+    The :generator:`Ninja` generator supports ``DEPFILE`` since the keyword
+    was first added.
+
+  .. versionadded:: 3.17
+    Added the :generator:`Ninja Multi-Config` generator, which included
+    support for the ``DEPFILE`` keyword.
 
   .. versionadded:: 3.20
     Added support for :ref:`Makefile Generators`.
 
+    .. note::
+
+      ``DEPFILE`` cannot be specified at the same time as the
+      ``IMPLICIT_DEPENDS`` option for :ref:`Makefile Generators`.
+
   .. versionadded:: 3.21
     Added support for :ref:`Visual Studio Generators` with VS 2012 and above,
-    for the :generator:`Xcode` generator, and for
-    :manual:`generator expressions <cmake-generator-expressions(7)>`.
+    and for the :generator:`Xcode` generator.  Support for
+    :manual:`generator expressions <cmake-generator-expressions(7)>` was also
+    added.
+
+  Using ``DEPFILE`` with generators other than those listed above is an error.
 
   If the ``DEPFILE`` argument is relative, it should be relative to
   :variable:`CMAKE_CURRENT_BINARY_DIR`, and any relative paths inside the
-  ``DEPFILE`` should also be relative to :variable:`CMAKE_CURRENT_BINARY_DIR`
-  (see policy :policy:`CMP0116`. This policy is always ``NEW`` for
+  ``DEPFILE`` should also be relative to :variable:`CMAKE_CURRENT_BINARY_DIR`.
+  See policy :policy:`CMP0116`, which is always ``NEW`` for
   :ref:`Makefile Generators`, :ref:`Visual Studio Generators`,
-  and the :generator:`Xcode` generator).
-
-  .. note::
-
-    For :ref:`Makefile Generators`, this option cannot be specified at the
-    same time as ``IMPLICIT_DEPENDS`` option.
+  and the :generator:`Xcode` generator.
 
 Examples: Generating Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
