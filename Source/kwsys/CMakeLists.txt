@@ -46,6 +46,8 @@
 #                               Set to empty string to use no default value.
 #  KWSYS_CXX_COMPILE_FEATURES = target_compile_features arguments for KWSys.
 #
+#  KWSYS_NO_EXECINFO          = Do not use execinfo.
+#
 # Optional settings to setup install rules are as follows:
 #
 #  KWSYS_INSTALL_BIN_DIR     = The installation target directories into
@@ -526,7 +528,7 @@ if(KWSYS_USE_SystemInformation)
     set_property(SOURCE SystemInformation.cxx APPEND PROPERTY
       COMPILE_DEFINITIONS KWSYS_CXX_HAS_RLIMIT64=1)
   endif()
-  if(UNIX)
+  if(UNIX AND NOT KWSYS_NO_EXECINFO)
     include(CheckIncludeFileCXX)
     # check for simple stack trace
     # usually it's in libc but on FreeBSD
