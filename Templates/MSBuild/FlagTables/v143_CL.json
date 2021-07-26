@@ -789,13 +789,6 @@
     ]
   },
   {
-    "name": "ForceSynchronousPDBWrites",
-    "switch": "FS",
-    "comment": "Force Synchronous PDB Writes",
-    "value": "true",
-    "flags": []
-  },
-  {
     "name": "IntrinsicFunctions",
     "switch": "Oi",
     "comment": "Enable Intrinsic Functions",
