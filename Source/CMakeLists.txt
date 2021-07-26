@@ -398,6 +398,8 @@ set(SRCS
   cmQtAutoMocUic.h
   cmQtAutoRcc.cxx
   cmQtAutoRcc.h
+  cmQtAutoUicHelpers.cxx
+  cmQtAutoUicHelpers.h
   cmRST.cxx
   cmRST.h
   cmRuntimeDependencyArchive.cxx
