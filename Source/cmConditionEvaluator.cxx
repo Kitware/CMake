@@ -8,7 +8,6 @@
 #include <functional>
 #include <iterator>
 #include <sstream>
-#include <string>
 #include <utility>
 
 #include <cm/string_view>
@@ -58,6 +57,11 @@ auto const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL"_s;
 auto const keyVERSION_LESS = "VERSION_LESS"_s;
 auto const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL"_s;
 
+std::string bool2string(bool const value)
+{
+  return std::string(std::size_t(1), static_cast<char>('0' + int(value)));
+}
+
 void IncrementArguments(cmConditionEvaluator::cmArgumentList& newArgs,
                         cmConditionEvaluator::cmArgumentList::iterator& argP1)
 {
@@ -82,7 +86,7 @@ void HandlePredicate(const bool value,
                      cmConditionEvaluator::cmArgumentList& newArgs,
                      cmConditionEvaluator::cmArgumentList::iterator& argP1)
 {
-  *arg = cmExpandedCommandArgument(std::to_string(int(value)), true);
+  *arg = cmExpandedCommandArgument(bool2string(value), true);
   newArgs.erase(argP1);
   argP1 = arg;
   IncrementArguments(newArgs, argP1);
@@ -94,7 +98,7 @@ void HandleBinaryOp(const bool value,
                     cmConditionEvaluator::cmArgumentList::iterator& argP1,
                     cmConditionEvaluator::cmArgumentList::iterator& argP2)
 {
-  *arg = cmExpandedCommandArgument(std::to_string(int(value)), true);
+  *arg = cmExpandedCommandArgument(bool2string(value), true);
   newArgs.erase(argP2);
   newArgs.erase(argP1);
   argP1 = arg;
@@ -382,7 +386,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
       // now recursively invoke IsTrue to handle the values inside the
       // parenthetical expression
       const auto value = this->IsTrue(newArgs2, errorString, status);
-      *arg = cmExpandedCommandArgument(std::to_string(int(value)), true);
+      *arg = cmExpandedCommandArgument(bool2string(value), true);
       argP1 = std::next(arg);
       // remove the now evaluated parenthetical expression
       newArgs.erase(argP1, argClose);
@@ -552,7 +556,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       if (match) {
         this->Makefile.StoreMatches(regEntry);
       }
-      *arg = cmExpandedCommandArgument(std::to_string(int(match)), true);
+      *arg = cmExpandedCommandArgument(bool2string(match), true);
 
       newArgs.erase(argP2);
       newArgs.erase(argP1);
