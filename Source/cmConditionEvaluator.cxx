@@ -508,9 +508,22 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
     IncrementArguments(newArgs, argP1, argP2);
 
-    if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        this->IsKeyword(keyMATCHES, *argP1)) {
+    // NOTE Handle special case `if(... BLAH_BAH MATCHES)`
+    // (i.e., w/o regex to match which is possibly result of
+    // variable expansion to an empty string)
+    if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg)) {
+      *arg = cmExpandedCommandArgument("0", true);
+      newArgs.erase(argP1);
+      argP1 = arg;
+      IncrementArguments(newArgs, argP1, argP2);
+    }
 
+    // NOTE Fail fast: All the binary ops below require 2 arguments.
+    else if (argP1 == newArgs.end() || argP2 == newArgs.end()) {
+      continue;
+    }
+
+    else if (this->IsKeyword(keyMATCHES, *argP1)) {
       cmProp def = this->GetDefinitionIfUnquoted(*arg);
 
       std::string def_buf;
@@ -535,29 +548,16 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         return false;
       }
 
-      if (regEntry.find(*def)) {
+      const auto match = regEntry.find(*def);
+      if (match) {
         this->Makefile.StoreMatches(regEntry);
-        *arg = cmExpandedCommandArgument("1", true);
-      } else {
-        *arg = cmExpandedCommandArgument("0", true);
       }
+      *arg = cmExpandedCommandArgument(std::to_string(int(match)), true);
 
       newArgs.erase(argP2);
       newArgs.erase(argP1);
       argP1 = arg;
       IncrementArguments(newArgs, argP1, argP2);
-    }
-
-    else if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg)) {
-      *arg = cmExpandedCommandArgument("0", true);
-      newArgs.erase(argP1);
-      argP1 = arg;
-      IncrementArguments(newArgs, argP1, argP2);
-    }
-
-    // NOTE Fail fast: All the binary ops below require 2 arguments.
-    else if (argP1 == newArgs.end() || argP2 == newArgs.end()) {
-      continue;
     }
 
     else if (this->IsKeyword(keyLESS, *argP1) ||
