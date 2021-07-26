@@ -400,6 +400,9 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
 bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
                                         MessageType&)
 {
+  const auto policy64IsOld = this->Policy64Status == cmPolicies::OLD ||
+    this->Policy64Status == cmPolicies::WARN;
+
   bool reducible;
   do {
     reducible = false;
@@ -407,20 +410,24 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
          argP1 = ++arg) {
 
       IncrementArguments(newArgs, argP1);
+      auto policyCheck = [&, this](const cmPolicies::PolicyID id,
+                                   const cmPolicies::PolicyStatus status,
+                                   const cm::static_string_view kw) {
+        if (status == cmPolicies::WARN && this->IsKeyword(kw, *arg)) {
+          std::ostringstream e;
+          e << cmPolicies::GetPolicyWarning(id) << "\n"
+            << kw
+            << " will be interpreted as an operator "
+               "when the policy is set to NEW.  "
+               "Since the policy is not set the OLD behavior will be used.";
 
-      // NOTE This is the only predicate that dones't need the next argument...
-      // Check it first!
-      // does a test exist (CMP0064 == WARN case)
-      if (this->Policy64Status == cmPolicies::WARN &&
-          this->IsKeyword(keyTEST, *arg)) {
-        std::ostringstream e;
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0064) << "\n";
-        e << "TEST will be interpreted as an operator "
-             "when the policy is set to NEW.  "
-             "Since the policy is not set the OLD behavior will be used.";
+          this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+        }
+      };
 
-        this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-      }
+      // NOTE Checking policies for warnings are not require an access to the
+      // next arg. Check them first!
+      policyCheck(cmPolicies::CMP0064, this->Policy64Status, keyTEST);
 
       // NOTE Fail fast: All the predicates below require the next arg to be
       // valid
@@ -487,12 +494,12 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
         HandlePredicate(bdef, reducible, arg, newArgs, argP1);
       }
       // does a test exist
-      else if (this->Policy64Status != cmPolicies::OLD &&
-               this->Policy64Status != cmPolicies::WARN) {
-        if (this->IsKeyword(keyTEST, *arg)) {
-          HandlePredicate(this->Makefile.GetTest(argP1->GetValue()) != nullptr,
-                          reducible, arg, newArgs, argP1);
+      else if (this->IsKeyword(keyTEST, *arg)) {
+        if (policy64IsOld) {
+          continue;
         }
+        HandlePredicate(this->Makefile.GetTest(argP1->GetValue()) != nullptr,
+                        reducible, arg, newArgs, argP1);
       }
     }
   } while (reducible);
