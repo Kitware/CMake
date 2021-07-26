@@ -4360,7 +4360,7 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
 #  endif
   bOsVersionInfoEx = GetVersionExA((OSVERSIONINFOA*)&osvi);
   if (!bOsVersionInfoEx) {
-    return 0;
+    return "";
   }
 #  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #    ifdef __clang__
@@ -4499,14 +4499,14 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
                         L"SYSTEM\\CurrentControlSet\\Control\\ProductOptions",
                         0, KEY_QUERY_VALUE, &hKey);
         if (lRet != ERROR_SUCCESS) {
-          return 0;
+          return "";
         }
 
         lRet = RegQueryValueExW(hKey, L"ProductType", nullptr, nullptr,
                                 (LPBYTE)szProductType, &dwBufLen);
 
         if ((lRet != ERROR_SUCCESS) || (dwBufLen > BUFSIZE)) {
-          return 0;
+          return "";
         }
 
         RegCloseKey(hKey);
