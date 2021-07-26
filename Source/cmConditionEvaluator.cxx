@@ -221,7 +221,7 @@ cmProp cmConditionEvaluator::GetVariableOrString(
 }
 
 //=========================================================================
-bool cmConditionEvaluator::IsKeyword(cm::string_view keyword,
+bool cmConditionEvaluator::IsKeyword(cm::static_string_view keyword,
                                      cmExpandedCommandArgument& argument) const
 {
   if ((this->Policy54Status != cmPolicies::WARN &&
@@ -406,54 +406,11 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
 
       IncrementArguments(newArgs, argP1, argP2);
 
-      // does a file exist
-      if (this->IsKeyword(keyEXISTS, *arg) && argP1 != newArgs.end()) {
-        HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1, argP2);
-      }
-      // does a directory with this name exist
-      if (this->IsKeyword(keyIS_DIRECTORY, *arg) && argP1 != newArgs.end()) {
-        HandlePredicate(cmSystemTools::FileIsDirectory(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1, argP2);
-      }
-      // does a symlink with this name exist
-      if (this->IsKeyword(keyIS_SYMLINK, *arg) && argP1 != newArgs.end()) {
-        HandlePredicate(cmSystemTools::FileIsSymlink(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1, argP2);
-      }
-      // is the given path an absolute path ?
-      if (this->IsKeyword(keyIS_ABSOLUTE, *arg) && argP1 != newArgs.end()) {
-        HandlePredicate(cmSystemTools::FileIsFullPath(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1, argP2);
-      }
-      // does a command exist
-      if (this->IsKeyword(keyCOMMAND, *arg) && argP1 != newArgs.end()) {
-        HandlePredicate(
-          this->Makefile.GetState()->GetCommand(argP1->GetValue()) != nullptr,
-          reducible, arg, newArgs, argP1, argP2);
-      }
-      // does a policy exist
-      if (this->IsKeyword(keyPOLICY, *arg) && argP1 != newArgs.end()) {
-        cmPolicies::PolicyID pid;
-        HandlePredicate(
-          cmPolicies::GetPolicyID(argP1->GetValue().c_str(), pid), reducible,
-          arg, newArgs, argP1, argP2);
-      }
-      // does a target exist
-      if (this->IsKeyword(keyTARGET, *arg) && argP1 != newArgs.end()) {
-        HandlePredicate(this->Makefile.FindTargetToUse(argP1->GetValue()) !=
-                          nullptr,
-                        reducible, arg, newArgs, argP1, argP2);
-      }
-      // does a test exist
-      if (this->Policy64Status != cmPolicies::OLD &&
-          this->Policy64Status != cmPolicies::WARN) {
-        if (this->IsKeyword(keyTEST, *arg) && argP1 != newArgs.end()) {
-          HandlePredicate(this->Makefile.GetTest(argP1->GetValue()) != nullptr,
-                          reducible, arg, newArgs, argP1, argP2);
-        }
-      } else if (this->Policy64Status == cmPolicies::WARN &&
-                 this->IsKeyword(keyTEST, *arg)) {
+      // NOTE This is the only predicate that dones't need the next argument...
+      // Check it first!
+      // does a test exist (CMP0064 == WARN case)
+      if (this->Policy64Status == cmPolicies::WARN &&
+          this->IsKeyword(keyTEST, *arg)) {
         std::ostringstream e;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0064) << "\n";
         e << "TEST will be interpreted as an operator "
@@ -462,8 +419,54 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
 
         this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       }
+
+      // NOTE Fail fast: All the predicates below require the next arg to be
+      // valid
+      if (argP1 == newArgs.end()) {
+        continue;
+      }
+
+      // does a file exist
+      if (this->IsKeyword(keyEXISTS, *arg)) {
+        HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()),
+                        reducible, arg, newArgs, argP1, argP2);
+      }
+      // does a directory with this name exist
+      else if (this->IsKeyword(keyIS_DIRECTORY, *arg)) {
+        HandlePredicate(cmSystemTools::FileIsDirectory(argP1->GetValue()),
+                        reducible, arg, newArgs, argP1, argP2);
+      }
+      // does a symlink with this name exist
+      else if (this->IsKeyword(keyIS_SYMLINK, *arg)) {
+        HandlePredicate(cmSystemTools::FileIsSymlink(argP1->GetValue()),
+                        reducible, arg, newArgs, argP1, argP2);
+      }
+      // is the given path an absolute path ?
+      else if (this->IsKeyword(keyIS_ABSOLUTE, *arg)) {
+        HandlePredicate(cmSystemTools::FileIsFullPath(argP1->GetValue()),
+                        reducible, arg, newArgs, argP1, argP2);
+      }
+      // does a command exist
+      else if (this->IsKeyword(keyCOMMAND, *arg)) {
+        HandlePredicate(
+          this->Makefile.GetState()->GetCommand(argP1->GetValue()) != nullptr,
+          reducible, arg, newArgs, argP1, argP2);
+      }
+      // does a policy exist
+      else if (this->IsKeyword(keyPOLICY, *arg)) {
+        cmPolicies::PolicyID pid;
+        HandlePredicate(
+          cmPolicies::GetPolicyID(argP1->GetValue().c_str(), pid), reducible,
+          arg, newArgs, argP1, argP2);
+      }
+      // does a target exist
+      else if (this->IsKeyword(keyTARGET, *arg)) {
+        HandlePredicate(this->Makefile.FindTargetToUse(argP1->GetValue()) !=
+                          nullptr,
+                        reducible, arg, newArgs, argP1, argP2);
+      }
       // is a variable defined
-      if (this->IsKeyword(keyDEFINED, *arg) && argP1 != newArgs.end()) {
+      else if (this->IsKeyword(keyDEFINED, *arg)) {
         const auto argP1len = argP1->GetValue().size();
         auto bdef = false;
         if (argP1len > 4 && cmHasLiteralPrefix(argP1->GetValue(), "ENV{") &&
@@ -480,6 +483,14 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
           bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
         }
         HandlePredicate(bdef, reducible, arg, newArgs, argP1, argP2);
+      }
+      // does a test exist
+      else if (this->Policy64Status != cmPolicies::OLD &&
+               this->Policy64Status != cmPolicies::WARN) {
+        if (this->IsKeyword(keyTEST, *arg)) {
+          HandlePredicate(this->Makefile.GetTest(argP1->GetValue()) != nullptr,
+                          reducible, arg, newArgs, argP1, argP2);
+        }
       }
     }
   } while (reducible);
@@ -542,7 +553,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         reducible = true;
       }
 
-      if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg)) {
+      else if (argP1 != newArgs.end() && this->IsKeyword(keyMATCHES, *arg)) {
         *arg = cmExpandedCommandArgument("0", true);
         newArgs.erase(argP1);
         argP1 = arg;
@@ -550,12 +561,16 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         reducible = true;
       }
 
-      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          (this->IsKeyword(keyLESS, *argP1) ||
-           this->IsKeyword(keyLESS_EQUAL, *argP1) ||
-           this->IsKeyword(keyGREATER, *argP1) ||
-           this->IsKeyword(keyGREATER_EQUAL, *argP1) ||
-           this->IsKeyword(keyEQUAL, *argP1))) {
+      // NOTE Fail fast: All the binary ops below require 2 arguments.
+      else if (argP1 == newArgs.end() || argP2 == newArgs.end()) {
+        continue;
+      }
+
+      else if (this->IsKeyword(keyLESS, *argP1) ||
+               this->IsKeyword(keyLESS_EQUAL, *argP1) ||
+               this->IsKeyword(keyGREATER, *argP1) ||
+               this->IsKeyword(keyGREATER_EQUAL, *argP1) ||
+               this->IsKeyword(keyEQUAL, *argP1)) {
 
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
@@ -580,12 +595,11 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
       }
 
-      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          (this->IsKeyword(keySTRLESS, *argP1) ||
-           this->IsKeyword(keySTRLESS_EQUAL, *argP1) ||
-           this->IsKeyword(keySTRGREATER, *argP1) ||
-           this->IsKeyword(keySTRGREATER_EQUAL, *argP1) ||
-           this->IsKeyword(keySTREQUAL, *argP1))) {
+      else if (this->IsKeyword(keySTRLESS, *argP1) ||
+               this->IsKeyword(keySTRLESS_EQUAL, *argP1) ||
+               this->IsKeyword(keySTRGREATER, *argP1) ||
+               this->IsKeyword(keySTRGREATER_EQUAL, *argP1) ||
+               this->IsKeyword(keySTREQUAL, *argP1)) {
 
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
@@ -607,12 +621,11 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);
       }
 
-      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          (this->IsKeyword(keyVERSION_LESS, *argP1) ||
-           this->IsKeyword(keyVERSION_LESS_EQUAL, *argP1) ||
-           this->IsKeyword(keyVERSION_GREATER, *argP1) ||
-           this->IsKeyword(keyVERSION_GREATER_EQUAL, *argP1) ||
-           this->IsKeyword(keyVERSION_EQUAL, *argP1))) {
+      else if (this->IsKeyword(keyVERSION_LESS, *argP1) ||
+               this->IsKeyword(keyVERSION_LESS_EQUAL, *argP1) ||
+               this->IsKeyword(keyVERSION_GREATER, *argP1) ||
+               this->IsKeyword(keyVERSION_GREATER_EQUAL, *argP1) ||
+               this->IsKeyword(keyVERSION_EQUAL, *argP1)) {
 
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
@@ -635,8 +648,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       }
 
       // is file A newer than file B
-      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          this->IsKeyword(keyIS_NEWER_THAN, *argP1)) {
+      else if (this->IsKeyword(keyIS_NEWER_THAN, *argP1)) {
         auto fileIsNewer = 0;
         cmsys::Status ftcStatus = cmSystemTools::FileTimeCompare(
           arg->GetValue(), argP2->GetValue(), &fileIsNewer);
@@ -644,8 +656,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                        reducible, arg, newArgs, argP1, argP2);
       }
 
-      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          this->IsKeyword(keyIN_LIST, *argP1)) {
+      else if (this->IsKeyword(keyIN_LIST, *argP1)) {
 
         if (this->Policy57Status != cmPolicies::OLD &&
             this->Policy57Status != cmPolicies::WARN) {
