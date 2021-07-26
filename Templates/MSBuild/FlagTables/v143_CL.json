@@ -659,27 +659,6 @@
     "flags": []
   },
   {
-    "name": "CompileAs",
-    "switch": "interface",
-    "comment": "Compile as C++ Module Code",
-    "value": "CompileAsCppModule",
-    "flags": []
-  },
-  {
-    "name": "CompileAs",
-    "switch": "internalPartition",
-    "comment": "Compile as C++ Module Internal Partition",
-    "value": "CompileAsCppModuleInternalPartition",
-    "flags": []
-  },
-  {
-    "name": "CompileAs",
-    "switch": "exportHeader",
-    "comment": "Compile as C++ Header Unit",
-    "value": "CompileAsHeaderUnit",
-    "flags": []
-  },
-  {
     "name": "ErrorReporting",
     "switch": "errorReport:none",
     "comment": "Do Not Send Report",
