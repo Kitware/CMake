@@ -193,11 +193,13 @@ cmProp cmConditionEvaluator::GetDefinitionIfUnquoted(
       this->Policy54Status == cmPolicies::WARN) {
     if (!this->Makefile.HasCMP0054AlreadyBeenReported(this->Backtrace.Top())) {
       std::ostringstream e;
-      e << (cmPolicies::GetPolicyWarning(cmPolicies::CMP0054)) << "\n";
-      e << "Quoted variables like \"" << argument.GetValue()
-        << "\" will no longer be dereferenced "
-           "when the policy is set to NEW.  "
+      // clang-format off
+      e << (cmPolicies::GetPolicyWarning(cmPolicies::CMP0054))
+        << "\n"
+           "Quoted variables like \"" << argument.GetValue() << "\" "
+           "will no longer be dereferenced when the policy is set to NEW.  "
            "Since the policy is not set the OLD behavior will be used.";
+      // clang-format on
 
       this->Makefile.GetCMakeInstance()->IssueMessage(
         MessageType::AUTHOR_WARNING, e.str(), this->Backtrace);
@@ -236,11 +238,14 @@ bool cmConditionEvaluator::IsKeyword(cm::static_string_view keyword,
       this->Policy54Status == cmPolicies::WARN) {
     if (!this->Makefile.HasCMP0054AlreadyBeenReported(this->Backtrace.Top())) {
       std::ostringstream e;
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0054) << "\n";
-      e << "Quoted keywords like \"" << argument.GetValue()
-        << "\" will no longer be interpreted as keywords "
+      // clang-format off
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0054)
+        << "\n"
+           "Quoted keywords like \"" << argument.GetValue() << "\" "
+           "will no longer be interpreted as keywords "
            "when the policy is set to NEW.  "
            "Since the policy is not set the OLD behavior will be used.";
+      // clang-format on
 
       this->Makefile.GetCMakeInstance()->IssueMessage(
         MessageType::AUTHOR_WARNING, e.str(), this->Backtrace);
@@ -664,8 +669,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         HandleBinaryOp(result, arg, newArgs, argP1, argP2);
       } else if (this->Policy57Status == cmPolicies::WARN) {
         std::ostringstream e;
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057) << "\n";
-        e << "IN_LIST will be interpreted as an operator "
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057)
+          << "\n"
+             "IN_LIST will be interpreted as an operator "
              "when the policy is set to NEW.  "
              "Since the policy is not set the OLD behavior will be used.";
 
