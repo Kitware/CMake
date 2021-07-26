@@ -503,10 +503,6 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                                         std::string& errorString,
                                         MessageType& status)
 {
-  std::string def_buf;
-  cmProp def;
-  cmProp def2;
-
   for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
        arg != newArgs.end(); argP1 = ++arg) {
 
@@ -515,8 +511,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
     if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
         this->IsKeyword(keyMATCHES, *argP1)) {
 
-      def = this->GetDefinitionIfUnquoted(*arg);
+      cmProp def = this->GetDefinitionIfUnquoted(*arg);
 
+      std::string def_buf;
       if (!def) {
         def = &arg->GetValue();
       } else if (cmHasLiteralPrefix(arg->GetValue(), "CMAKE_MATCH_")) {
@@ -526,8 +523,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         def = &def_buf;
       }
 
-      const auto& rex = argP2->GetValue();
       this->Makefile.ClearMatches();
+
+      const auto& rex = argP2->GetValue();
       cmsys::RegularExpression regEntry;
       if (!regEntry.compile(rex)) {
         std::ostringstream error;
@@ -568,8 +566,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
              this->IsKeyword(keyGREATER_EQUAL, *argP1) ||
              this->IsKeyword(keyEQUAL, *argP1)) {
 
-      def = this->GetVariableOrString(*arg);
-      def2 = this->GetVariableOrString(*argP2);
+      cmProp def = this->GetVariableOrString(*arg);
+      cmProp def2 = this->GetVariableOrString(*argP2);
 
       double lhs;
       double rhs;
@@ -597,8 +595,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
              this->IsKeyword(keySTRGREATER_EQUAL, *argP1) ||
              this->IsKeyword(keySTREQUAL, *argP1)) {
 
-      def = this->GetVariableOrString(*arg);
-      def2 = this->GetVariableOrString(*argP2);
+      cmProp def = this->GetVariableOrString(*arg);
+      cmProp def2 = this->GetVariableOrString(*argP2);
       const int val = (*def).compare(*def2);
 
       bool result;
@@ -623,8 +621,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
              this->IsKeyword(keyVERSION_GREATER_EQUAL, *argP1) ||
              this->IsKeyword(keyVERSION_EQUAL, *argP1)) {
 
-      def = this->GetVariableOrString(*arg);
-      def2 = this->GetVariableOrString(*argP2);
+      cmProp def = this->GetVariableOrString(*arg);
+      cmProp def2 = this->GetVariableOrString(*argP2);
 
       cmSystemTools::CompareOp op;
       if (argP1->GetValue() == keyVERSION_LESS) {
@@ -657,8 +655,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       if (this->Policy57Status != cmPolicies::OLD &&
           this->Policy57Status != cmPolicies::WARN) {
 
-        def = this->GetVariableOrString(*arg);
-        def2 = this->Makefile.GetDefinition(argP2->GetValue());
+        cmProp def = this->GetVariableOrString(*arg);
+        cmProp def2 = this->Makefile.GetDefinition(argP2->GetValue());
 
         HandleBinaryOp(def2 && cm::contains(cmExpandedList(*def2, true), *def),
                        arg, newArgs, argP1, argP2);
