@@ -59,29 +59,34 @@ auto const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL"_s;
 
 std::array<const char* const, 2> const ZERO_ONE_XLAT = { "0", "1" };
 
-inline void IncrementArguments(
-  cmConditionEvaluator::cmArgumentList& newArgs,
-  cmConditionEvaluator::cmArgumentList::iterator& argP1,
-  cmConditionEvaluator::cmArgumentList::iterator& argP2)
+void IncrementArguments(cmConditionEvaluator::cmArgumentList& newArgs,
+                        cmConditionEvaluator::cmArgumentList::iterator& argP1)
 {
-  if (argP1 != newArgs.end()) {
-    argP2 = ++argP1;
-    using difference_type =
-      cmConditionEvaluator::cmArgumentList::difference_type;
-    std::advance(argP2, difference_type(argP1 != newArgs.end()));
-  }
+  using difference_type =
+    cmConditionEvaluator::cmArgumentList::difference_type;
+  std::advance(argP1, difference_type(argP1 != newArgs.end()));
+}
+
+void IncrementArguments(cmConditionEvaluator::cmArgumentList& newArgs,
+                        cmConditionEvaluator::cmArgumentList::iterator& argP1,
+                        cmConditionEvaluator::cmArgumentList::iterator& argP2)
+{
+  IncrementArguments(newArgs, argP1);
+  argP2 = argP1;
+  using difference_type =
+    cmConditionEvaluator::cmArgumentList::difference_type;
+  std::advance(argP2, difference_type(argP1 != newArgs.end()));
 }
 
 void HandlePredicate(const bool value, bool& reducible,
                      cmConditionEvaluator::cmArgumentList::iterator& arg,
                      cmConditionEvaluator::cmArgumentList& newArgs,
-                     cmConditionEvaluator::cmArgumentList::iterator& argP1,
-                     cmConditionEvaluator::cmArgumentList::iterator& argP2)
+                     cmConditionEvaluator::cmArgumentList::iterator& argP1)
 {
   *arg = cmExpandedCommandArgument(ZERO_ONE_XLAT[value], true);
   newArgs.erase(argP1);
   argP1 = arg;
-  IncrementArguments(newArgs, argP1, argP2);
+  IncrementArguments(newArgs, argP1);
   reducible = true;
 }
 
@@ -98,7 +103,6 @@ void HandleBinaryOp(const bool value, bool& reducible,
   IncrementArguments(newArgs, argP1, argP2);
   reducible = true;
 }
-
 } // anonymous namespace
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
@@ -399,10 +403,10 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
   bool reducible;
   do {
     reducible = false;
-    for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
-         arg != newArgs.end(); argP1 = ++arg) {
+    for (auto arg = newArgs.begin(), argP1 = arg; arg != newArgs.end();
+         argP1 = ++arg) {
 
-      IncrementArguments(newArgs, argP1, argP2);
+      IncrementArguments(newArgs, argP1);
 
       // NOTE This is the only predicate that dones't need the next argument...
       // Check it first!
@@ -427,41 +431,41 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       // does a file exist
       if (this->IsKeyword(keyEXISTS, *arg)) {
         HandlePredicate(cmSystemTools::FileExists(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1, argP2);
+                        reducible, arg, newArgs, argP1);
       }
       // does a directory with this name exist
       else if (this->IsKeyword(keyIS_DIRECTORY, *arg)) {
         HandlePredicate(cmSystemTools::FileIsDirectory(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1, argP2);
+                        reducible, arg, newArgs, argP1);
       }
       // does a symlink with this name exist
       else if (this->IsKeyword(keyIS_SYMLINK, *arg)) {
         HandlePredicate(cmSystemTools::FileIsSymlink(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1, argP2);
+                        reducible, arg, newArgs, argP1);
       }
       // is the given path an absolute path ?
       else if (this->IsKeyword(keyIS_ABSOLUTE, *arg)) {
         HandlePredicate(cmSystemTools::FileIsFullPath(argP1->GetValue()),
-                        reducible, arg, newArgs, argP1, argP2);
+                        reducible, arg, newArgs, argP1);
       }
       // does a command exist
       else if (this->IsKeyword(keyCOMMAND, *arg)) {
         HandlePredicate(
           this->Makefile.GetState()->GetCommand(argP1->GetValue()) != nullptr,
-          reducible, arg, newArgs, argP1, argP2);
+          reducible, arg, newArgs, argP1);
       }
       // does a policy exist
       else if (this->IsKeyword(keyPOLICY, *arg)) {
         cmPolicies::PolicyID pid;
         HandlePredicate(
           cmPolicies::GetPolicyID(argP1->GetValue().c_str(), pid), reducible,
-          arg, newArgs, argP1, argP2);
+          arg, newArgs, argP1);
       }
       // does a target exist
       else if (this->IsKeyword(keyTARGET, *arg)) {
         HandlePredicate(this->Makefile.FindTargetToUse(argP1->GetValue()) !=
                           nullptr,
-                        reducible, arg, newArgs, argP1, argP2);
+                        reducible, arg, newArgs, argP1);
       }
       // is a variable defined
       else if (this->IsKeyword(keyDEFINED, *arg)) {
@@ -480,14 +484,14 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
         } else {
           bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
         }
-        HandlePredicate(bdef, reducible, arg, newArgs, argP1, argP2);
+        HandlePredicate(bdef, reducible, arg, newArgs, argP1);
       }
       // does a test exist
       else if (this->Policy64Status != cmPolicies::OLD &&
                this->Policy64Status != cmPolicies::WARN) {
         if (this->IsKeyword(keyTEST, *arg)) {
           HandlePredicate(this->Makefile.GetTest(argP1->GetValue()) != nullptr,
-                          reducible, arg, newArgs, argP1, argP2);
+                          reducible, arg, newArgs, argP1);
         }
       }
     }
@@ -692,15 +696,15 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
   bool reducible;
   do {
     reducible = false;
-    for (auto arg = newArgs.begin(), argP1 = arg, argP2 = arg;
-         arg != newArgs.end(); argP1 = ++arg) {
+    for (auto arg = newArgs.begin(), argP1 = arg; arg != newArgs.end();
+         argP1 = ++arg) {
 
-      IncrementArguments(newArgs, argP1, argP2);
+      IncrementArguments(newArgs, argP1);
 
       if (argP1 != newArgs.end() && this->IsKeyword(keyNOT, *arg)) {
         const auto rhs = this->GetBooleanValueWithAutoDereference(
           *argP1, errorString, status);
-        HandlePredicate(!rhs, reducible, arg, newArgs, argP1, argP2);
+        HandlePredicate(!rhs, reducible, arg, newArgs, argP1);
       }
     }
   } while (reducible);
