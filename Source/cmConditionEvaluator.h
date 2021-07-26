@@ -51,16 +51,6 @@ private:
                                           MessageType& status,
                                           bool oneArg = false) const;
 
-  void HandlePredicate(bool value, bool& reducible,
-                       cmArgumentList::iterator& arg, cmArgumentList& newArgs,
-                       cmArgumentList::iterator& argP1,
-                       cmArgumentList::iterator& argP2) const;
-
-  void HandleBinaryOp(bool value, bool& reducible,
-                      cmArgumentList::iterator& arg, cmArgumentList& newArgs,
-                      cmArgumentList::iterator& argP1,
-                      cmArgumentList::iterator& argP2);
-
   bool HandleLevel0(cmArgumentList& newArgs, std::string& errorString,
                     MessageType& status);
 
