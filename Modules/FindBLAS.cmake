@@ -759,7 +759,7 @@ if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
       ""
       )
   endif()
-  set(_blas_armpl_lib)
+  unset(_blas_armpl_lib)
 endif()
 
 # FLAME's blis library? (https://github.com/flame/blis)
@@ -1109,7 +1109,7 @@ if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
       ""
       )
   endif()
-  set(_blas_eml_lib)
+  unset(_blas_eml_lib)
 endif()
 
 # Fujitsu SSL2 Library?
