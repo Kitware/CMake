@@ -222,8 +222,9 @@ cmProp cmConditionEvaluator::GetVariableOrString(
 }
 
 //=========================================================================
-bool cmConditionEvaluator::IsKeyword(cm::static_string_view keyword,
-                                     cmExpandedCommandArgument& argument) const
+bool cmConditionEvaluator::IsKeyword(
+  cm::static_string_view keyword,
+  const cmExpandedCommandArgument& argument) const
 {
   if ((this->Policy54Status != cmPolicies::WARN &&
        this->Policy54Status != cmPolicies::OLD) &&

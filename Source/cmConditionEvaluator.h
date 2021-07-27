@@ -39,7 +39,7 @@ private:
   cmProp GetVariableOrString(const cmExpandedCommandArgument& argument) const;
 
   bool IsKeyword(cm::static_string_view keyword,
-                 cmExpandedCommandArgument& argument) const;
+                 const cmExpandedCommandArgument& argument) const;
 
   bool GetBooleanValue(cmExpandedCommandArgument& arg) const;
 
