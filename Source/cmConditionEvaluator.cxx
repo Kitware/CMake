@@ -91,6 +91,16 @@ std::string bool2string(bool const value)
 {
   return std::string(std::size_t(1), static_cast<char>('0' + int(value)));
 }
+
+bool looksLikeSpecialVariable(const std::string& var,
+                              cm::static_string_view prefix,
+                              const std::size_t varNameLen)
+{
+  // NOTE Expecting a variable name at least 1 char length:
+  // <prefix> + `{` + <varname> + `}`
+  return ((prefix.size() + 3) <= varNameLen) &&
+    cmHasPrefix(var, cmStrCat(prefix, '{')) && var[varNameLen - 1] == '}';
+}
 } // anonymous namespace
 
 #if defined(__SUNPRO_CC)
@@ -580,21 +590,24 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     }
     // is a variable defined
     else if (this->IsKeyword(keyDEFINED, *args.current)) {
-      const auto argP1len = args.next->GetValue().size();
-      auto bdef = false;
-      if (argP1len > 4 && cmHasLiteralPrefix(args.next->GetValue(), "ENV{") &&
-          args.next->GetValue().operator[](argP1len - 1) == '}') {
-        const auto env = args.next->GetValue().substr(4, argP1len - 5);
-        bdef = cmSystemTools::HasEnv(env);
-      } else if (argP1len > 6 &&
-                 cmHasLiteralPrefix(args.next->GetValue(), "CACHE{") &&
-                 args.next->GetValue().operator[](argP1len - 1) == '}') {
-        const auto cache = args.next->GetValue().substr(6, argP1len - 7);
-        bdef = bool(this->Makefile.GetState()->GetCacheEntryValue(cache));
-      } else {
-        bdef = this->Makefile.IsDefinitionSet(args.next->GetValue());
+      const auto& var = args.next->GetValue();
+      const auto varNameLen = var.size();
+
+      auto result = false;
+      if (looksLikeSpecialVariable(var, "ENV"_s, varNameLen)) {
+        const auto env = args.next->GetValue().substr(4, varNameLen - 5);
+        result = cmSystemTools::HasEnv(env);
       }
-      newArgs.ReduceOneArg(bdef, args);
+
+      else if (looksLikeSpecialVariable(var, "CACHE"_s, varNameLen)) {
+        const auto cache = args.next->GetValue().substr(6, varNameLen - 7);
+        result = bool(this->Makefile.GetState()->GetCacheEntryValue(cache));
+      }
+
+      else {
+        result = this->Makefile.IsDefinitionSet(args.next->GetValue());
+      }
+      newArgs.ReduceOneArg(result, args);
     }
     // does a test exist
     else if (this->IsKeyword(keyTEST, *args.current)) {
