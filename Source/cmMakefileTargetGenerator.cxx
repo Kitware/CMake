@@ -1519,6 +1519,20 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
 
   // Link device code for each architecture.
   for (const std::string& architectureKind : architectures) {
+    std::string registerFileCmd;
+
+    // The generated register file contains macros that when expanded
+    // register the device routines. Because the routines are the same for
+    // all architectures the register file will be the same too. Thus
+    // generate it only on the first invocation to reduce overhead.
+    if (fatbinaryDepends.empty()) {
+      std::string const registerFileRel =
+        cmStrCat(relPath, relObjectDir, "cmake_cuda_register.h");
+      registerFileCmd =
+        cmStrCat(" --register-link-binaries=", registerFileRel);
+      cleanFiles.push_back(registerFileRel);
+    }
+
     // Clang always generates real code, so strip the specifier.
     const std::string architecture =
       architectureKind.substr(0, architectureKind.find('-'));
@@ -1527,20 +1541,6 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
 
     profiles += cmStrCat(" -im=profile=sm_", architecture, ",file=", cubin);
     fatbinaryDepends.emplace_back(cubin);
-
-    std::string registerFileCmd;
-
-    // The generated register file contains macros that when expanded
-    // register the device routines. Because the routines are the same for
-    // all architectures the register file will be the same too. Thus
-    // generate it only on the first invocation to reduce overhead.
-    if (fatbinaryDepends.size() == 1) {
-      std::string const registerFileRel =
-        cmStrCat(relPath, relObjectDir, "cmake_cuda_register.h");
-      registerFileCmd =
-        cmStrCat(" --register-link-binaries=", registerFileRel);
-      cleanFiles.push_back(registerFileRel);
-    }
 
     std::string command = cmStrCat(
       this->Makefile->GetRequiredDefinition("CMAKE_CUDA_DEVICE_LINKER"),
