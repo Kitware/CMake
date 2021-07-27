@@ -1484,14 +1484,18 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   }
 
   std::vector<std::string> architectures = cmExpandedList(architecturesStr);
+  std::string const& relPath =
+    this->LocalGenerator->GetHomeRelativeOutputPath();
 
   // Ensure there are no duplicates.
   const std::vector<std::string> linkDeps = [&]() -> std::vector<std::string> {
     std::vector<std::string> deps;
     this->AppendTargetDepends(deps, true);
     this->GeneratorTarget->GetLinkDepends(deps, this->GetConfigName(), "CUDA");
-    std::copy(this->Objects.begin(), this->Objects.end(),
-              std::back_inserter(deps));
+
+    for (std::string const& obj : this->Objects) {
+      deps.emplace_back(cmStrCat(relPath, obj));
+    }
 
     std::unordered_set<std::string> depsSet(deps.begin(), deps.end());
     deps.clear();
@@ -1510,7 +1514,8 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
 
   std::string profiles;
   std::vector<std::string> fatbinaryDepends;
-  std::string registerFile = cmStrCat(objectDir, "cmake_cuda_register.h");
+  std::string const registerFile =
+    cmStrCat(objectDir, "cmake_cuda_register.h");
 
   // Link device code for each architecture.
   for (const std::string& architectureKind : architectures) {
@@ -1518,7 +1523,7 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
     const std::string architecture =
       architectureKind.substr(0, architectureKind.find('-'));
     const std::string cubin =
-      cmStrCat(relObjectDir, "sm_", architecture, ".cubin");
+      cmStrCat(objectDir, "sm_", architecture, ".cubin");
 
     profiles += cmStrCat(" -im=profile=sm_", architecture, ",file=", cubin);
     fatbinaryDepends.emplace_back(cubin);
@@ -1530,8 +1535,8 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
     // all architectures the register file will be the same too. Thus
     // generate it only on the first invocation to reduce overhead.
     if (fatbinaryDepends.size() == 1) {
-      std::string registerFileRel =
-        this->LocalGenerator->MaybeRelativeToCurBinDir(registerFile);
+      std::string const registerFileRel =
+        cmStrCat(relPath, relObjectDir, "cmake_cuda_register.h");
       registerFileCmd =
         cmStrCat(" --register-link-binaries=", registerFileRel);
       cleanFiles.push_back(registerFileRel);
@@ -1555,7 +1560,7 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   const std::string fatbinaryOutput =
     cmStrCat(objectDir, "cmake_cuda_fatbin.h");
   const std::string fatbinaryOutputRel =
-    this->LocalGenerator->MaybeRelativeToCurBinDir(fatbinaryOutput);
+    cmStrCat(relPath, relObjectDir, "cmake_cuda_fatbin.h");
 
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
                                       fatbinaryOutputRel, fatbinaryDepends,
@@ -1583,9 +1588,8 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
                                                compileCmd, vars);
 
   commands.emplace_back(compileCmd);
-  this->LocalGenerator->WriteMakeRule(
-    *this->BuildFileStream, nullptr, output,
-    { cmStrCat(relObjectDir, "cmake_cuda_fatbin.h") }, commands, false);
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr, output,
+                                      { fatbinaryOutputRel }, commands, false);
 
   // Clean all the possible executable names and symlinks.
   this->CleanFiles.insert(cleanFiles.begin(), cleanFiles.end());
