@@ -109,7 +109,8 @@ BLAS/LAPACK Vendors
 ``Goto``
   GotoBLAS
 
-``IBMESSL``
+``IBMESSL``, ``IBMESSL_SMP``
+
   IBM Engineering and Scientific Subroutine Library
 
 ``Intel``
@@ -894,19 +895,26 @@ if(BLA_VENDOR STREQUAL "SGIMATH" OR BLA_VENDOR STREQUAL "All")
 endif()
 
 # BLAS in IBM ESSL library?
-if(BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
+if(BLA_VENDOR MATCHES "IBMESSL" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_essl_lib "essl")
+
+  if(BLA_VENDOR MATCHES "_SMP")
+    set(_blas_essl_lib "${_blas_essl_lib}smp")
+  endif()
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "essl"
+      "${_blas_essl_lib}"
       ""
       ""
       ""
       )
   endif()
+
+  unset(_blas_essl_lib)
 endif()
 
 # BLAS in acml library?
