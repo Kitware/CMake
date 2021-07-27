@@ -4,25 +4,22 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <list>
 #include <string>
 #include <vector>
 
 #include <cmext/string_view>
 
-#include "cmExpandedCommandArgument.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
 
+class cmExpandedCommandArgument;
 class cmMakefile;
 
 class cmConditionEvaluator
 {
 public:
-  using cmArgumentList = std::list<cmExpandedCommandArgument>;
-
   cmConditionEvaluator(cmMakefile& makefile, cmListFileBacktrace bt);
 
   // this is a shared function for both If and Else to determine if the
@@ -32,6 +29,8 @@ public:
               std::string& errorString, MessageType& status);
 
 private:
+  class cmArgumentList;
+
   // Filter the given variable definition based on policy CMP0054.
   cmProp GetDefinitionIfUnquoted(
     const cmExpandedCommandArgument& argument) const;
@@ -51,6 +50,15 @@ private:
                                           MessageType& status,
                                           bool oneArg = false) const;
 
+  template <int N>
+  int matchKeysImpl(const cmExpandedCommandArgument&);
+
+  template <int N, typename T, typename... Keys>
+  int matchKeysImpl(const cmExpandedCommandArgument&, T, Keys...);
+
+  template <typename... Keys>
+  int matchKeys(const cmExpandedCommandArgument&, Keys...);
+
   bool HandleLevel0(cmArgumentList& newArgs, std::string& errorString,
                     MessageType& status);
 
@@ -64,15 +72,6 @@ private:
 
   bool HandleLevel4(cmArgumentList& newArgs, std::string& errorString,
                     MessageType& status);
-
-  template <int N>
-  int matchKeysImpl(const cmExpandedCommandArgument&);
-
-  template <int N, typename T, typename... Keys>
-  int matchKeysImpl(const cmExpandedCommandArgument&, T, Keys...);
-
-  template <typename... Keys>
-  int matchKeys(const cmExpandedCommandArgument&, Keys...);
 
   cmMakefile& Makefile;
   cmListFileBacktrace Backtrace;
