@@ -751,12 +751,14 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       if (this->Policy57Status != cmPolicies::OLD &&
           this->Policy57Status != cmPolicies::WARN) {
 
-        cmProp def = this->GetVariableOrString(*args.current);
-        cmProp def2 = this->Makefile.GetDefinition(args.nextnext->GetValue());
+        cmProp lhs = this->GetVariableOrString(*args.current);
+        cmProp rhs = this->Makefile.GetDefinition(args.nextnext->GetValue());
 
         newArgs.ReduceTwoArgs(
-          def2 && cm::contains(cmExpandedList(*def2, true), *def), args);
-      } else if (this->Policy57Status == cmPolicies::WARN) {
+          rhs && cm::contains(cmExpandedList(*rhs, true), *lhs), args);
+      }
+
+      else if (this->Policy57Status == cmPolicies::WARN) {
         std::ostringstream e;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057)
           << "\n"
