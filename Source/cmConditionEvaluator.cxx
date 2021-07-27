@@ -619,18 +619,18 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       double lhs;
       double rhs;
-      bool result;
-      if (std::sscanf(ldef->c_str(), "%lg", &lhs) != 1 ||
-          std::sscanf(rdef->c_str(), "%lg", &rhs) != 1) {
-        result = false;
-      } else {
+      auto parseDoubles = [&]() {
+        return std::sscanf(ldef->c_str(), "%lg", &lhs) == 1 &&
+          std::sscanf(rdef->c_str(), "%lg", &rhs) == 1;
+      };
+      const auto result = parseDoubles() &&
         // clang-format off
-        result = cmRt2CtSelector<
-            std::less, std::less_equal, std::greater,
-            std::greater_equal, std::equal_to
+        cmRt2CtSelector<
+            std::less, std::less_equal,
+            std::greater, std::greater_equal,
+            std::equal_to
           >::eval(matchNo, lhs, rhs);
-        // clang-format on
-      }
+      // clang-format on
       HandleBinaryOp(result, newArgs, arg, argP1, argP2);
     }
 
@@ -643,8 +643,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       const auto val = (*lhs).compare(*rhs);
       // clang-format off
       const auto result = cmRt2CtSelector<
-            std::less, std::less_equal, std::greater,
-            std::greater_equal, std::equal_to
+            std::less, std::less_equal,
+            std::greater, std::greater_equal,
+            std::equal_to
           >::eval(matchNo, val, 0);
       // clang-format on
       HandleBinaryOp(result, newArgs, arg, argP1, argP2);
