@@ -65,6 +65,15 @@ private:
   bool HandleLevel4(cmArgumentList& newArgs, std::string& errorString,
                     MessageType& status);
 
+  template <int N>
+  int matchKeysImpl(const cmExpandedCommandArgument&);
+
+  template <int N, typename T, typename... Keys>
+  int matchKeysImpl(const cmExpandedCommandArgument&, T, Keys...);
+
+  template <typename... Keys>
+  int matchKeys(const cmExpandedCommandArgument&, Keys...);
+
   cmMakefile& Makefile;
   cmListFileBacktrace Backtrace;
   cmPolicies::PolicyStatus Policy12Status;

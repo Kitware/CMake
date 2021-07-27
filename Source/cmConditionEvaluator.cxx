@@ -57,6 +57,34 @@ auto const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL"_s;
 auto const keyVERSION_LESS = "VERSION_LESS"_s;
 auto const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL"_s;
 
+// Run-Time to Compile-Time template selector
+template <template <typename> class Comp, template <typename> class... Ops>
+struct cmRt2CtSelector
+{
+  template <typename T>
+  static bool eval(int r, T lhs, T rhs)
+  {
+    switch (r) {
+      case 0:
+        return false;
+      case 1:
+        return Comp<T>()(lhs, rhs);
+      default:
+        return cmRt2CtSelector<Ops...>::eval(r - 1, lhs, rhs);
+    }
+  }
+};
+
+template <template <typename> class Comp>
+struct cmRt2CtSelector<Comp>
+{
+  template <typename T>
+  static bool eval(int r, T lhs, T rhs)
+  {
+    return r == 1 && Comp<T>()(lhs, rhs);
+  }
+};
+
 std::string bool2string(bool const value)
 {
   return std::string(std::size_t(1), static_cast<char>('0' + int(value)));
@@ -355,6 +383,33 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
   return newResult;
 }
 
+template <int N>
+inline int cmConditionEvaluator::matchKeysImpl(
+  const cmExpandedCommandArgument&)
+{
+  // Zero means "not found"
+  return 0;
+}
+
+template <int N, typename T, typename... Keys>
+inline int cmConditionEvaluator::matchKeysImpl(
+  const cmExpandedCommandArgument& arg, T current, Keys... key)
+{
+  if (this->IsKeyword(current, arg)) {
+    // Stop searching as soon as smth has found
+    return N;
+  }
+  return matchKeysImpl<N + 1>(arg, key...);
+}
+
+template <typename... Keys>
+inline int cmConditionEvaluator::matchKeys(
+  const cmExpandedCommandArgument& arg, Keys... key)
+{
+  // Get index of the matched key (1-based)
+  return matchKeysImpl<1>(arg, key...);
+}
+
 //=========================================================================
 // level 0 processes parenthetical expressions
 bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
@@ -509,6 +564,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
     IncrementArguments(newArgs, argP1, argP2);
 
+    int matchNo;
+
     // NOTE Handle special case `if(... BLAH_BAH MATCHES)`
     // (i.e., w/o regex to match which is possibly result of
     // variable expansion to an empty string)
@@ -553,84 +610,60 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       HandleBinaryOp(match, newArgs, arg, argP1, argP2);
     }
 
-    else if (this->IsKeyword(keyLESS, *argP1) ||
-             this->IsKeyword(keyLESS_EQUAL, *argP1) ||
-             this->IsKeyword(keyGREATER, *argP1) ||
-             this->IsKeyword(keyGREATER_EQUAL, *argP1) ||
-             this->IsKeyword(keyEQUAL, *argP1)) {
+    else if ((matchNo =
+                this->matchKeys(*argP1, keyLESS, keyLESS_EQUAL, keyGREATER,
+                                keyGREATER_EQUAL, keyEQUAL))) {
 
-      cmProp def = this->GetVariableOrString(*arg);
-      cmProp def2 = this->GetVariableOrString(*argP2);
+      cmProp ldef = this->GetVariableOrString(*arg);
+      cmProp rdef = this->GetVariableOrString(*argP2);
 
       double lhs;
       double rhs;
       bool result;
-      if (std::sscanf(def->c_str(), "%lg", &lhs) != 1 ||
-          std::sscanf(def2->c_str(), "%lg", &rhs) != 1) {
+      if (std::sscanf(ldef->c_str(), "%lg", &lhs) != 1 ||
+          std::sscanf(rdef->c_str(), "%lg", &rhs) != 1) {
         result = false;
-      } else if (argP1->GetValue() == keyLESS) {
-        result = (lhs < rhs);
-      } else if (argP1->GetValue() == keyLESS_EQUAL) {
-        result = (lhs <= rhs);
-      } else if (argP1->GetValue() == keyGREATER) {
-        result = (lhs > rhs);
-      } else if (argP1->GetValue() == keyGREATER_EQUAL) {
-        result = (lhs >= rhs);
       } else {
-        result = (lhs == rhs);
+        // clang-format off
+        result = cmRt2CtSelector<
+            std::less, std::less_equal, std::greater,
+            std::greater_equal, std::equal_to
+          >::eval(matchNo, lhs, rhs);
+        // clang-format on
       }
       HandleBinaryOp(result, newArgs, arg, argP1, argP2);
     }
 
-    else if (this->IsKeyword(keySTRLESS, *argP1) ||
-             this->IsKeyword(keySTRLESS_EQUAL, *argP1) ||
-             this->IsKeyword(keySTRGREATER, *argP1) ||
-             this->IsKeyword(keySTRGREATER_EQUAL, *argP1) ||
-             this->IsKeyword(keySTREQUAL, *argP1)) {
+    else if ((matchNo = this->matchKeys(*argP1, keySTRLESS, keySTRLESS_EQUAL,
+                                        keySTRGREATER, keySTRGREATER_EQUAL,
+                                        keySTREQUAL))) {
 
-      cmProp def = this->GetVariableOrString(*arg);
-      cmProp def2 = this->GetVariableOrString(*argP2);
-      const int val = (*def).compare(*def2);
-
-      bool result;
-      if (argP1->GetValue() == keySTRLESS) {
-        result = (val < 0);
-      } else if (argP1->GetValue() == keySTRLESS_EQUAL) {
-        result = (val <= 0);
-      } else if (argP1->GetValue() == keySTRGREATER) {
-        result = (val > 0);
-      } else if (argP1->GetValue() == keySTRGREATER_EQUAL) {
-        result = (val >= 0);
-      } else // strequal
-      {
-        result = (val == 0);
-      }
+      const cmProp lhs = this->GetVariableOrString(*arg);
+      const cmProp rhs = this->GetVariableOrString(*argP2);
+      const auto val = (*lhs).compare(*rhs);
+      // clang-format off
+      const auto result = cmRt2CtSelector<
+            std::less, std::less_equal, std::greater,
+            std::greater_equal, std::equal_to
+          >::eval(matchNo, val, 0);
+      // clang-format on
       HandleBinaryOp(result, newArgs, arg, argP1, argP2);
     }
 
-    else if (this->IsKeyword(keyVERSION_LESS, *argP1) ||
-             this->IsKeyword(keyVERSION_LESS_EQUAL, *argP1) ||
-             this->IsKeyword(keyVERSION_GREATER, *argP1) ||
-             this->IsKeyword(keyVERSION_GREATER_EQUAL, *argP1) ||
-             this->IsKeyword(keyVERSION_EQUAL, *argP1)) {
-
-      cmProp def = this->GetVariableOrString(*arg);
-      cmProp def2 = this->GetVariableOrString(*argP2);
-
-      cmSystemTools::CompareOp op;
-      if (argP1->GetValue() == keyVERSION_LESS) {
-        op = cmSystemTools::OP_LESS;
-      } else if (argP1->GetValue() == keyVERSION_LESS_EQUAL) {
-        op = cmSystemTools::OP_LESS_EQUAL;
-      } else if (argP1->GetValue() == keyVERSION_GREATER) {
-        op = cmSystemTools::OP_GREATER;
-      } else if (argP1->GetValue() == keyVERSION_GREATER_EQUAL) {
-        op = cmSystemTools::OP_GREATER_EQUAL;
-      } else { // version_equal
-        op = cmSystemTools::OP_EQUAL;
-      }
+    else if ((matchNo =
+                this->matchKeys(*argP1, keyVERSION_LESS, keyVERSION_LESS_EQUAL,
+                                keyVERSION_GREATER, keyVERSION_GREATER_EQUAL,
+                                keyVERSION_EQUAL))) {
+      const cmSystemTools::CompareOp xlat[5] = {
+        cmSystemTools::OP_LESS, cmSystemTools::OP_LESS_EQUAL,
+        cmSystemTools::OP_GREATER, cmSystemTools::OP_GREATER_EQUAL,
+        cmSystemTools::OP_EQUAL
+      };
+      const auto op = xlat[matchNo - 1];
+      const cmProp lhs = this->GetVariableOrString(*arg);
+      const cmProp rhs = this->GetVariableOrString(*argP2);
       const auto result =
-        cmSystemTools::VersionCompare(op, def->c_str(), def2->c_str());
+        cmSystemTools::VersionCompare(op, lhs->c_str(), rhs->c_str());
       HandleBinaryOp(result, newArgs, arg, argP1, argP2);
     }
 
