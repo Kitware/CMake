@@ -759,7 +759,7 @@ if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
       ""
       )
   endif()
-  set(_blas_armpl_lib)
+  unset(_blas_armpl_lib)
 endif()
 
 # FLAME's blis library? (https://github.com/flame/blis)
@@ -1094,7 +1094,7 @@ if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
 
    # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
    if(BLA_VENDOR MATCHES "_mt")
-     set(_blas_eml_lib "${BLAS_EML_LIB}_mt")
+     set(_blas_eml_lib "${_blas_eml_lib}_mt")
    endif()
 
    if(NOT BLAS_LIBRARIES)
@@ -1109,7 +1109,7 @@ if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
       ""
       )
   endif()
-  set(_blas_eml_lib)
+  unset(_blas_eml_lib)
 endif()
 
 # Fujitsu SSL2 Library?
