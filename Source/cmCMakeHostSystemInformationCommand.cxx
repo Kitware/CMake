@@ -45,10 +45,14 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  cmsys::SystemInformation info;
-  info.RunCPUCheck();
-  info.RunOSCheck();
-  info.RunMemoryCheck();
+  static cmsys::SystemInformation info;
+  static auto initialized = false;
+  if (!initialized) {
+    info.RunCPUCheck();
+    info.RunOSCheck();
+    info.RunMemoryCheck();
+    initialized = true;
+  }
 
   std::string result_list;
   for (size_t i = current_index + 1; i < args.size(); ++i) {
