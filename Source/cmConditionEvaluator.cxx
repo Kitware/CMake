@@ -498,18 +498,19 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
         status = MessageType::FATAL_ERROR;
         return false;
       }
+
       // store the reduced args in this vector
-      auto argP1 = std::next(arg);
-      std::vector<cmExpandedCommandArgument> newArgs2{ argP1, argClose };
-      newArgs2.pop_back();
+      auto argOpen = std::next(arg);
+      const std::vector<cmExpandedCommandArgument> subExpr(
+        argOpen, std::prev(argClose));
 
       // now recursively invoke IsTrue to handle the values inside the
       // parenthetical expression
-      const auto value = this->IsTrue(newArgs2, errorString, status);
+      const auto value = this->IsTrue(subExpr, errorString, status);
       *arg = cmExpandedCommandArgument(bool2string(value), true);
-      argP1 = std::next(arg);
+      argOpen = std::next(arg);
       // remove the now evaluated parenthetical expression
-      newArgs.erase(argP1, argClose);
+      newArgs.erase(argOpen, argClose);
     }
   }
   return true;
