@@ -1,8 +1,3 @@
-# process only once
-if(HAIKU)
-  return()
-endif()
-
 set(HAIKU 1)
 set(UNIX 1)
 
