@@ -9,7 +9,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
 #  include "cmAlgorithms.h"
 #  include "cmGlobalGenerator.h"
 #  include "cmGlobalVisualStudioVersionedGenerator.h"
@@ -19,60 +19,21 @@
 #endif
 
 namespace {
-bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
-              std::string const& key, std::string& value);
-std::string ValueToString(size_t value);
-std::string ValueToString(const char* value);
-std::string ValueToString(std::string const& value);
-}
-
-// cmCMakeHostSystemInformation
-bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
-                                         cmExecutionStatus& status)
+// BEGIN Private functions
+std::string ValueToString(std::size_t const value)
 {
-  size_t current_index = 0;
-
-  if (args.size() < (current_index + 2) || args[current_index] != "RESULT") {
-    status.SetError("missing RESULT specification.");
-    return false;
-  }
-
-  std::string const& variable = args[current_index + 1];
-  current_index += 2;
-
-  if (args.size() < (current_index + 2) || args[current_index] != "QUERY") {
-    status.SetError("missing QUERY specification");
-    return false;
-  }
-
-  static cmsys::SystemInformation info;
-  static auto initialized = false;
-  if (!initialized) {
-    info.RunCPUCheck();
-    info.RunOSCheck();
-    info.RunMemoryCheck();
-    initialized = true;
-  }
-
-  std::string result_list;
-  for (size_t i = current_index + 1; i < args.size(); ++i) {
-    std::string const& key = args[i];
-    if (i != current_index + 1) {
-      result_list += ";";
-    }
-    std::string value;
-    if (!GetValue(status, info, key, value)) {
-      return false;
-    }
-    result_list += value;
-  }
-
-  status.GetMakefile().AddDefinition(variable, result_list);
-
-  return true;
+  return std::to_string(value);
 }
 
-namespace {
+std::string ValueToString(const char* const value)
+{
+  return value ? value : std::string{};
+}
+
+std::string ValueToString(std::string const& value)
+{
+  return value;
+}
 
 bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
               std::string const& key, std::string& value)
@@ -200,20 +161,51 @@ bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
 
   return true;
 }
+// END Private functions
+} // anonymous namespace
 
-std::string ValueToString(size_t value)
+// cmCMakeHostSystemInformation
+bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
+                                         cmExecutionStatus& status)
 {
-  return std::to_string(value);
-}
+  std::size_t current_index = 0;
 
-std::string ValueToString(const char* value)
-{
-  std::string safe_string = value ? value : "";
-  return safe_string;
-}
+  if (args.size() < (current_index + 2) || args[current_index] != "RESULT") {
+    status.SetError("missing RESULT specification.");
+    return false;
+  }
 
-std::string ValueToString(std::string const& value)
-{
-  return value;
-}
+  std::string const& variable = args[current_index + 1];
+  current_index += 2;
+
+  if (args.size() < (current_index + 2) || args[current_index] != "QUERY") {
+    status.SetError("missing QUERY specification");
+    return false;
+  }
+
+  static cmsys::SystemInformation info;
+  static auto initialized = false;
+  if (!initialized) {
+    info.RunCPUCheck();
+    info.RunOSCheck();
+    info.RunMemoryCheck();
+    initialized = true;
+  }
+
+  std::string result_list;
+  for (auto i = current_index + 1; i < args.size(); ++i) {
+    std::string const& key = args[i];
+    if (i != current_index + 1) {
+      result_list += ";";
+    }
+    std::string value;
+    if (!GetValue(status, info, key, value)) {
+      return false;
+    }
+    result_list += value;
+  }
+
+  status.GetMakefile().AddDefinition(variable, result_list);
+
+  return true;
 }
