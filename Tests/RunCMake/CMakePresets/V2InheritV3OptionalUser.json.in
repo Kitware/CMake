@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "V2InheritV3Optional",
+      "inherits": "default",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}
