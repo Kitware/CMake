@@ -4,6 +4,8 @@
 
 #include <cstddef>
 
+#include <cm/optional>
+
 #include "cmsys/SystemInformation.hxx"
 
 #include "cmExecutionStatus.h"
@@ -35,83 +37,117 @@ std::string ValueToString(std::string const& value)
   return value;
 }
 
-bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
-              std::string const& key, std::string& value)
+cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
+                                   std::string const& key)
 {
   if (key == "NUMBER_OF_LOGICAL_CORES") {
-    value = ValueToString(info.GetNumberOfLogicalCPU());
-  } else if (key == "NUMBER_OF_PHYSICAL_CORES") {
-    value = ValueToString(info.GetNumberOfPhysicalCPU());
-  } else if (key == "HOSTNAME") {
-    value = ValueToString(info.GetHostname());
-  } else if (key == "FQDN") {
-    value = ValueToString(info.GetFullyQualifiedDomainName());
-  } else if (key == "TOTAL_VIRTUAL_MEMORY") {
-    value = ValueToString(info.GetTotalVirtualMemory());
-  } else if (key == "AVAILABLE_VIRTUAL_MEMORY") {
-    value = ValueToString(info.GetAvailableVirtualMemory());
-  } else if (key == "TOTAL_PHYSICAL_MEMORY") {
-    value = ValueToString(info.GetTotalPhysicalMemory());
-  } else if (key == "AVAILABLE_PHYSICAL_MEMORY") {
-    value = ValueToString(info.GetAvailablePhysicalMemory());
-  } else if (key == "IS_64BIT") {
-    value = ValueToString(info.Is64Bits());
-  } else if (key == "HAS_FPU") {
-    value = ValueToString(
+    return ValueToString(info.GetNumberOfLogicalCPU());
+  }
+  if (key == "NUMBER_OF_PHYSICAL_CORES") {
+    return ValueToString(info.GetNumberOfPhysicalCPU());
+  }
+  if (key == "HOSTNAME") {
+    return ValueToString(info.GetHostname());
+  }
+  if (key == "FQDN") {
+    return ValueToString(info.GetFullyQualifiedDomainName());
+  }
+  if (key == "TOTAL_VIRTUAL_MEMORY") {
+    return ValueToString(info.GetTotalVirtualMemory());
+  }
+  if (key == "AVAILABLE_VIRTUAL_MEMORY") {
+    return ValueToString(info.GetAvailableVirtualMemory());
+  }
+  if (key == "TOTAL_PHYSICAL_MEMORY") {
+    return ValueToString(info.GetTotalPhysicalMemory());
+  }
+  if (key == "AVAILABLE_PHYSICAL_MEMORY") {
+    return ValueToString(info.GetAvailablePhysicalMemory());
+  }
+  if (key == "IS_64BIT") {
+    return ValueToString(info.Is64Bits());
+  }
+  if (key == "HAS_FPU") {
+    return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_FPU));
-  } else if (key == "HAS_MMX") {
-    value = ValueToString(
+  }
+  if (key == "HAS_MMX") {
+    return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_MMX));
-  } else if (key == "HAS_MMX_PLUS") {
-    value = ValueToString(info.DoesCPUSupportFeature(
+  }
+  if (key == "HAS_MMX_PLUS") {
+    return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_MMX_PLUS));
-  } else if (key == "HAS_SSE") {
-    value = ValueToString(
+  }
+  if (key == "HAS_SSE") {
+    return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE));
-  } else if (key == "HAS_SSE2") {
-    value = ValueToString(
+  }
+  if (key == "HAS_SSE2") {
+    return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE2));
-  } else if (key == "HAS_SSE_FP") {
-    value = ValueToString(info.DoesCPUSupportFeature(
+  }
+  if (key == "HAS_SSE_FP") {
+    return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SSE_FP));
-  } else if (key == "HAS_SSE_MMX") {
-    value = ValueToString(info.DoesCPUSupportFeature(
+  }
+  if (key == "HAS_SSE_MMX") {
+    return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SSE_MMX));
-  } else if (key == "HAS_AMD_3DNOW") {
-    value = ValueToString(info.DoesCPUSupportFeature(
+  }
+  if (key == "HAS_AMD_3DNOW") {
+    return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW));
-  } else if (key == "HAS_AMD_3DNOW_PLUS") {
-    value = ValueToString(info.DoesCPUSupportFeature(
+  }
+  if (key == "HAS_AMD_3DNOW_PLUS") {
+    return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW_PLUS));
-  } else if (key == "HAS_IA64") {
-    value = ValueToString(
+  }
+  if (key == "HAS_IA64") {
+    return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_IA64));
-  } else if (key == "HAS_SERIAL_NUMBER") {
-    value = ValueToString(info.DoesCPUSupportFeature(
+  }
+  if (key == "HAS_SERIAL_NUMBER") {
+    return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SERIALNUMBER));
-  } else if (key == "PROCESSOR_NAME") {
-    value = ValueToString(info.GetExtendedProcessorName());
-  } else if (key == "PROCESSOR_DESCRIPTION") {
-    value = info.GetCPUDescription();
-  } else if (key == "PROCESSOR_SERIAL_NUMBER") {
-    value = ValueToString(info.GetProcessorSerialNumber());
-  } else if (key == "OS_NAME") {
-    value = ValueToString(info.GetOSName());
-  } else if (key == "OS_RELEASE") {
-    value = ValueToString(info.GetOSRelease());
-  } else if (key == "OS_VERSION") {
-    value = ValueToString(info.GetOSVersion());
-  } else if (key == "OS_PLATFORM") {
-    value = ValueToString(info.GetOSPlatform());
+  }
+  if (key == "PROCESSOR_NAME") {
+    return ValueToString(info.GetExtendedProcessorName());
+  }
+  if (key == "PROCESSOR_DESCRIPTION") {
+    return info.GetCPUDescription();
+  }
+  if (key == "PROCESSOR_SERIAL_NUMBER") {
+    return ValueToString(info.GetProcessorSerialNumber());
+  }
+  if (key == "OS_NAME") {
+    return ValueToString(info.GetOSName());
+  }
+  if (key == "OS_RELEASE") {
+    return ValueToString(info.GetOSRelease());
+  }
+  if (key == "OS_VERSION") {
+    return ValueToString(info.GetOSVersion());
+  }
+  if (key == "OS_PLATFORM") {
+    return ValueToString(info.GetOSPlatform());
+  }
+  return {};
+}
+
 #ifdef HAVE_VS_SETUP_HELPER
-  } else if (key == "VS_15_DIR") {
+cm::optional<std::string> GetValue(cmExecutionStatus& status,
+                                   std::string const& key)
+{
+  std::string value;
+  if (key == "VS_15_DIR") {
     // If generating for the VS 15 IDE, use the same instance.
     cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
     if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 15 ")) {
       cmGlobalVisualStudioVersionedGenerator* vs15gen =
         static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
       if (vs15gen->GetVSInstance(value)) {
-        return true;
+        return value;
       }
     }
 
@@ -120,6 +156,7 @@ bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
     if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
       cmSystemTools::ConvertToUnixSlashes(value);
     }
+    return value;
   } else if (key == "VS_16_DIR") {
     // If generating for the VS 16 IDE, use the same instance.
     cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
@@ -127,7 +164,7 @@ bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
       cmGlobalVisualStudioVersionedGenerator* vs16gen =
         static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
       if (vs16gen->GetVSInstance(value)) {
-        return true;
+        return value;
       }
     }
 
@@ -136,6 +173,7 @@ bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
     if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
       cmSystemTools::ConvertToUnixSlashes(value);
     }
+    return value;
   } else if (key == "VS_17_DIR") {
     // If generating for the VS 17 IDE, use the same instance.
     cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
@@ -143,7 +181,7 @@ bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
       cmGlobalVisualStudioVersionedGenerator* vs17gen =
         static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
       if (vs17gen->GetVSInstance(value)) {
-        return true;
+        return value;
       }
     }
 
@@ -152,15 +190,12 @@ bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
     if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
       cmSystemTools::ConvertToUnixSlashes(value);
     }
-#endif
-  } else {
-    std::string e = "does not recognize <key> " + key;
-    status.SetError(e);
-    return false;
+    return value;
   }
 
-  return true;
+  return {};
 }
+#endif
 // END Private functions
 } // anonymous namespace
 
@@ -175,7 +210,7 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::string const& variable = args[current_index + 1];
+  auto const& variable = args[current_index + 1];
   current_index += 2;
 
   if (args.size() < (current_index + 2) || args[current_index] != "QUERY") {
@@ -194,15 +229,24 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
 
   std::string result_list;
   for (auto i = current_index + 1; i < args.size(); ++i) {
-    std::string const& key = args[i];
+    auto const& key = args[i];
     if (i != current_index + 1) {
       result_list += ";";
     }
-    std::string value;
-    if (!GetValue(status, info, key, value)) {
+    auto value = GetValue(info, key);
+    if (!value) {
+#ifdef HAVE_VS_SETUP_HELPER
+      value = GetValue(status, key);
+      if (!value) {
+        status.SetError("does not recognize <key> " + key);
+        return false;
+      }
+#else
+      status.SetError("does not recognize <key> " + key);
       return false;
+#endif
     }
-    result_list += value;
+    result_list += value.value();
   }
 
   status.GetMakefile().AddDefinition(variable, result_list);
