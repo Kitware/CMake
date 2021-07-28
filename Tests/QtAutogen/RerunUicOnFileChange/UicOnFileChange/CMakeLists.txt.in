@@ -5,9 +5,13 @@ include("@CMAKE_CURRENT_LIST_DIR@/../AutogenGuiTest.cmake")
 
 # Enable CMAKE_AUTOUIC for all targets
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
 
-add_executable(UicOnFileChange main.cpp mainwindow.ui
+add_executable(UicOnFileChange main.cpp mainwindow.ui mainwindow.h
     subdir/subdircheck.cpp subdir/mainwindowsubdir.ui
 )
-target_include_directories(UicOnFileChange PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(UicOnFileChange PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_BINARY_DIR}/UicOnFileChange_autogen/include"
+)
 target_link_libraries(UicOnFileChange ${QT_QTCORE_TARGET} ${QT_LIBRARIES})
