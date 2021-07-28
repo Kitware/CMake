@@ -237,6 +237,9 @@ public:
   void AddSystemIncludeDirectories(std::set<std::string> const& incs);
   std::set<std::string> const& GetSystemIncludeDirectories() const;
 
+  void AddInstallIncludeDirectories(cmStringRange const& incs);
+  cmStringRange GetInstallIncludeDirectoriesEntries() const;
+
   BTs<std::string> const* GetLanguageStandardProperty(
     const std::string& propertyName) const;
 

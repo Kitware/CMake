@@ -31,6 +31,7 @@
 #include "cmArgumentParser.h"
 #include "cmCMakePath.h"
 #include "cmCryptoHash.h"
+#include "cmELF.h"
 #include "cmExecutionStatus.h"
 #include "cmFSPermissions.h"
 #include "cmFileCopier.h"
@@ -62,10 +63,6 @@
 
 #  include "cmCurl.h"
 #  include "cmFileLockResult.h"
-#endif
-
-#if defined(CMake_USE_ELF_PARSER)
-#  include "cmELF.h"
 #endif
 
 #if defined(_WIN32)
@@ -1242,8 +1239,12 @@ bool HandleReadElfCommand(std::vector<std::string> const& args,
     return false;
   }
 
-#if defined(CMake_USE_ELF_PARSER)
   cmELF elf(fileNameArg.c_str());
+  if (!elf) {
+    status.SetError(cmStrCat("READ_ELF given FILE \"", fileNameArg,
+                             "\" that is not a valid ELF file."));
+    return false;
+  }
 
   if (!arguments.RPath.empty()) {
     if (cmELF::StringEntry const* se_rpath = elf.GetRPath()) {
@@ -1261,15 +1262,6 @@ bool HandleReadElfCommand(std::vector<std::string> const& args,
   }
 
   return true;
-#else
-  std::string error = "ELF parser not available on this platform.";
-  if (arguments.Error.empty()) {
-    status.SetError(error);
-    return false;
-  }
-  status.GetMakefile().AddDefinition(arguments.Error, error);
-  return true;
-#endif
 }
 
 bool HandleInstallCommand(std::vector<std::string> const& args,

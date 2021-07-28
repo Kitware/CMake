@@ -397,9 +397,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                     this->LocalGenerator->GetLinkLibsCMP0065(
                                       linkLanguage, *this->GeneratorTarget));
 
-  if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
-    this->LocalGenerator->AppendFlags(linkFlags, " -Wl,--no-as-needed");
-  }
+  this->UseLWYU = this->LocalGenerator->AppendLWYUFlags(
+    linkFlags, this->GeneratorTarget, linkLanguage);
 
   // Add language feature flags.
   this->LocalGenerator->AddLanguageFlagsForLinking(
@@ -577,12 +576,18 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       vars.Launcher = linkerLauncher.c_str();
     }
 
-    if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
-      std::string cmakeCommand =
-        cmStrCat(this->LocalGenerator->ConvertToOutputFormat(
-                   cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL),
-                 " -E __run_co_compile --lwyu=", targetOutPathReal);
-      real_link_commands.push_back(std::move(cmakeCommand));
+    if (this->UseLWYU) {
+      cmProp lwyuCheck =
+        this->Makefile->GetDefinition("CMAKE_LINK_WHAT_YOU_USE_CHECK");
+      if (lwyuCheck) {
+        std::string cmakeCommand = cmStrCat(
+          this->LocalGenerator->ConvertToOutputFormat(
+            cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL),
+          " -E __run_co_compile --lwyu=");
+        cmakeCommand += this->LocalGenerator->EscapeForShell(*lwyuCheck);
+        cmakeCommand += cmStrCat(" --source=", targetOutPathReal);
+        real_link_commands.push_back(std::move(cmakeCommand));
+      }
     }
 
     std::string launcher;

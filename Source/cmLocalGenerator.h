@@ -171,6 +171,8 @@ public:
                                             cmGeneratorTarget* target,
                                             const std::string& config,
                                             const std::string& lang);
+  bool AppendLWYUFlags(std::string& flags, const cmGeneratorTarget* target,
+                       const std::string& lang);
 
   enum class IncludePathStyle
   {
@@ -587,7 +589,7 @@ protected:
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
 
-  std::set<std::string> EnvCPATH;
+  std::vector<std::string> EnvCPATH;
 
   using GeneratorTargetMap =
     std::unordered_map<std::string, cmGeneratorTarget*>;

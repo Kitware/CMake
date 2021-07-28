@@ -13,6 +13,7 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -230,6 +231,10 @@ public:
   cmTarget* AddImportedTarget(const std::string& name,
                               cmStateEnums::TargetType type, bool global);
 
+  std::pair<cmTarget&, bool> CreateNewTarget(
+    const std::string& name, cmStateEnums::TargetType type,
+    cmTarget::PerConfig perConfig = cmTarget::PerConfig::Yes);
+
   cmTarget* AddNewTarget(cmStateEnums::TargetType type,
                          const std::string& name);
 
@@ -309,6 +314,8 @@ public:
    * Specify the name of the project for this build.
    */
   void SetProjectName(std::string const& name);
+
+  void InitCMAKE_CONFIGURATION_TYPES(std::string const& genDefault);
 
   /* Get the default configuration */
   std::string GetDefaultConfiguration() const;

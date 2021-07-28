@@ -29,7 +29,6 @@ public:
   cmInstallTargetGenerator* FrameworkGenerator;
   cmInstallTargetGenerator* BundleGenerator;
   cmInstallFilesGenerator* HeaderGenerator;
-  std::string InterfaceIncludeDirectories;
   ///@}
 
   bool NamelinkOnly = false;

@@ -386,6 +386,8 @@ if(BLA_VENDOR STREQUAL "All")
       )
   endif()
   if(BLAS_WORKS)
+    # Give a more helpful "found" message
+    set(BLAS_WORKS "implicitly linked")
     set(_blas_fphsa_req_var BLAS_WORKS)
   endif()
 endif()
@@ -439,7 +441,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
       if(BLA_F95)
         set(BLAS_mkl_SEARCH_SYMBOL "sgemm_f95")
-        set(_LIBRARIES BLAS95_LIBRARIES)
+        set(_BLAS_LIBRARIES BLAS95_LIBRARIES)
         if(WIN32)
           # Find the main file (32-bit or 64-bit)
           set(BLAS_SEARCH_LIBS_WIN_MAIN "")
@@ -501,7 +503,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         endif()
       else()
         set(BLAS_mkl_SEARCH_SYMBOL sgemm)
-        set(_LIBRARIES BLAS_LIBRARIES)
+        set(_BLAS_LIBRARIES BLAS_LIBRARIES)
         if(WIN32)
           # Find the main file (32-bit or 64-bit)
           set(BLAS_SEARCH_LIBS_WIN_MAIN "")
@@ -613,15 +615,15 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           "lib/${BLAS_mkl_ARCH_NAME}"
           )
 
-      foreach(IT ${BLAS_SEARCH_LIBS})
-        string(REPLACE " " ";" SEARCH_LIBS ${IT})
-        if(NOT ${_LIBRARIES})
+      foreach(_search ${BLAS_SEARCH_LIBS})
+        string(REPLACE " " ";" _search ${_search})
+        if(NOT ${_BLAS_LIBRARIES})
           check_blas_libraries(
-            ${_LIBRARIES}
+            ${_BLAS_LIBRARIES}
             BLAS
             ${BLAS_mkl_SEARCH_SYMBOL}
             ""
-            "${SEARCH_LIBS}"
+            "${_search}"
             "${CMAKE_THREAD_LIBS_INIT};${BLAS_mkl_LM};${BLAS_mkl_LDL}"
             "${BLAS_mkl_MKLROOT}"
             "${BLAS_mkl_LIB_PATH_SUFFIXES}"
@@ -629,6 +631,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         endif()
       endforeach()
 
+      unset(_search)
       unset(BLAS_mkl_ILP_MODE)
       unset(BLAS_mkl_INTFACE)
       unset(BLAS_mkl_THREADING)
@@ -734,14 +737,14 @@ if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
 
    # Check for 64bit Integer support
    if(BLA_VENDOR MATCHES "_ilp64")
-     set(BLAS_armpl_LIB "armpl_ilp64")
+     set(_blas_armpl_lib "armpl_ilp64")
    else()
-     set(BLAS_armpl_LIB "armpl_lp64")
+     set(_blas_armpl_lib "armpl_lp64")
    endif()
 
    # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
    if(BLA_VENDOR MATCHES "_mp")
-     set(BLAS_armpl_LIB "${BLAS_armpl_LIB}_mp")
+     set(_blas_armpl_lib "${_blas_armpl_lib}_mp")
    endif()
 
    if(NOT BLAS_LIBRARIES)
@@ -750,13 +753,13 @@ if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
       BLAS
       sgemm
       ""
-      "${BLAS_armpl_LIB}"
+      "${_blas_armpl_lib}"
       ""
       ""
       ""
       )
   endif()
-
+  unset(_blas_armpl_lib)
 endif()
 
 # FLAME's blis library? (https://github.com/flame/blis)
@@ -1087,11 +1090,11 @@ endif()
 # Elbrus Math Library?
 if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
 
-   set(BLAS_EML_LIB "eml")
+   set(_blas_eml_lib "eml")
 
    # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
    if(BLA_VENDOR MATCHES "_mt")
-     set(BLAS_EML_LIB "${BLAS_EML_LIB}_mt")
+     set(_blas_eml_lib "${_blas_eml_lib}_mt")
    endif()
 
    if(NOT BLAS_LIBRARIES)
@@ -1100,13 +1103,13 @@ if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
       BLAS
       sgemm
       ""
-      "${BLAS_EML_LIB}"
+      "${_blas_eml_lib}"
       ""
       ""
       ""
       )
   endif()
-
+  unset(_blas_eml_lib)
 endif()
 
 # Fujitsu SSL2 Library?
@@ -1163,3 +1166,5 @@ if(NOT BLA_F95)
 endif()
 
 _add_blas_target()
+unset(_blas_fphsa_req_var)
+unset(_BLAS_LIBRARIES)

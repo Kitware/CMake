@@ -202,6 +202,7 @@ Properties on Targets
    /prop_tgt/EXPORT_NAME
    /prop_tgt/EXPORT_PROPERTIES
    /prop_tgt/FOLDER
+   /prop_tgt/Fortran_BUILDING_INSTRINSIC_MODULES
    /prop_tgt/Fortran_FORMAT
    /prop_tgt/Fortran_MODULE_DIRECTORY
    /prop_tgt/Fortran_PREPROCESS
@@ -450,6 +451,7 @@ Properties on Tests
    /prop_test/DEPENDS
    /prop_test/DISABLED
    /prop_test/ENVIRONMENT
+   /prop_test/ENVIRONMENT_MODIFICATION
    /prop_test/FAIL_REGULAR_EXPRESSION
    /prop_test/FIXTURES_CLEANUP
    /prop_test/FIXTURES_REQUIRED

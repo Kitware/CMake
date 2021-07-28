@@ -74,7 +74,9 @@ package.
 
 By setting the :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable to
 ``TRUE``, the ``<PackageName>`` package will not be searched, and will always
-be ``NOTFOUND``.
+be ``NOTFOUND``. Likewise, setting the
+:variable:`CMAKE_REQUIRE_FIND_PACKAGE_<PackageName>` to ``TRUE`` will make the
+package REQUIRED.
 
 .. _`Config File Packages`:
 

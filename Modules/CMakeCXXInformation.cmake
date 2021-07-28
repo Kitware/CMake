@@ -193,6 +193,15 @@ foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
   endif()
 endforeach()
 
+if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
+  if(NOT DEFINED CMAKE_CXX_LINK_WHAT_YOU_USE_FLAG)
+    set(CMAKE_CXX_LINK_WHAT_YOU_USE_FLAG "LINKER:--no-as-needed")
+  endif()
+  if(NOT DEFINED CMAKE_LINK_WHAT_YOU_USE_CHECK)
+    set(CMAKE_LINK_WHAT_YOU_USE_CHECK ldd -u -r)
+  endif()
+endif()
+
 # add the flags to the cache based
 # on the initial values computed in the platform/*.cmake files
 # use _INIT variables so that this only happens the first time

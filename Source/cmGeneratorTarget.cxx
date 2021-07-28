@@ -2142,7 +2142,6 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
     return true;
   }
 
-#if defined(CMake_USE_ELF_PARSER) || defined(CMake_USE_XCOFF_PARSER)
   // Enable if the rpath flag uses a separator and the target uses
   // binaries we know how to edit.
   std::string ll = this->GetLinkerLanguage(config);
@@ -2155,21 +2154,17 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
       // CMAKE_EXECUTABLE_FORMAT.
       if (cmProp fmt =
             this->Makefile->GetDefinition("CMAKE_EXECUTABLE_FORMAT")) {
-#  if defined(CMake_USE_ELF_PARSER)
         if (*fmt == "ELF") {
           return true;
         }
-#  endif
-#  if defined(CMake_USE_XCOFF_PARSER)
+#if defined(CMake_USE_XCOFF_PARSER)
         if (*fmt == "XCOFF") {
           return true;
         }
-#  endif
+#endif
       }
     }
   }
-#endif
-  static_cast<void>(config);
   return false;
 }
 
@@ -4466,6 +4461,13 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
 
   // Last step: replace "LINKER:" prefixed elements by
   // actual linker wrapper
+  return this->ResolveLinkerWrapper(result, language);
+}
+
+std::vector<BT<std::string>>& cmGeneratorTarget::ResolveLinkerWrapper(
+  std::vector<BT<std::string>>& result, const std::string& language) const
+{
+  // replace "LINKER:" prefixed elements by actual linker wrapper
   const std::string wrapper(this->Makefile->GetSafeDefinition(
     "CMAKE_" + language +
     (this->IsDeviceLink() ? "_DEVICE_LINKER_WRAPPER_FLAG"
@@ -6175,6 +6177,14 @@ std::string cmGeneratorTarget::GetFortranModuleDirectory(
   return this->FortranModuleDirectory;
 }
 
+bool cmGeneratorTarget::IsFortranBuildingInstrinsicModules() const
+{
+  if (cmProp prop = this->GetProperty("Fortran_BUILDING_INSTRINSIC_MODULES")) {
+    return cmIsOn(*prop);
+  }
+  return false;
+}
+
 std::string cmGeneratorTarget::CreateFortranModuleDirectory(
   std::string const& working_dir) const
 {
@@ -6362,12 +6372,12 @@ cm::optional<cmLinkItem> cmGeneratorTarget::LookupLinkItem(
   return maybeItem;
 }
 
-void cmGeneratorTarget::ExpandLinkItems(
-  std::string const& prop, std::string const& value, std::string const& config,
-  cmGeneratorTarget const* headTarget, bool usage_requirements_only,
-  std::vector<cmLinkItem>& items, std::vector<cmLinkItem>& objects,
-  bool& hadHeadSensitiveCondition, bool& hadContextSensitiveCondition,
-  bool& hadLinkLanguageSensitiveCondition) const
+void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
+                                        std::string const& value,
+                                        std::string const& config,
+                                        cmGeneratorTarget const* headTarget,
+                                        bool usage_requirements_only,
+                                        cmLinkInterface& iface) const
 {
   // Keep this logic in sync with ComputeLinkImplementationLibraries.
   cmGeneratorExpression ge;
@@ -6389,24 +6399,27 @@ void cmGeneratorTarget::ExpandLinkItems(
   for (std::string const& lib : libs) {
     if (cm::optional<cmLinkItem> maybeItem =
           this->LookupLinkItem(lib, cge->GetBacktrace(), &scope)) {
-      if (!maybeItem->Target) {
+      cmLinkItem item = std::move(*maybeItem);
+
+      if (!item.Target) {
         // Report explicitly linked object files separately.
-        std::string const& maybeObj = maybeItem->AsStr();
+        std::string const& maybeObj = item.AsStr();
         if (cmSystemTools::FileIsFullPath(maybeObj)) {
           cmSourceFile const* sf =
             mf->GetSource(maybeObj, cmSourceFileLocationKind::Known);
           if (sf && sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
-            objects.emplace_back(std::move(*maybeItem));
+            iface.Objects.emplace_back(std::move(item));
             continue;
           }
         }
       }
-      items.emplace_back(std::move(*maybeItem));
+
+      iface.Libraries.emplace_back(std::move(item));
     }
   }
-  hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
-  hadContextSensitiveCondition = cge->GetHadContextSensitiveCondition();
-  hadLinkLanguageSensitiveCondition =
+  iface.HadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
+  iface.HadContextSensitiveCondition = cge->GetHadContextSensitiveCondition();
+  iface.HadLinkLanguageSensitiveCondition =
     cge->GetHadLinkLanguageSensitiveCondition();
 }
 
@@ -6903,23 +6916,20 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     return;
   }
   iface.Exists = true;
+
+  // If CMP0022 is NEW then the plain tll signature sets the
+  // INTERFACE_LINK_LIBRARIES property.  Even if the project
+  // clears it, the link interface is still explicit.
   iface.Explicit = cmp0022NEW || explicitLibraries;
 
   if (explicitLibraries) {
     // The interface libraries have been explicitly set.
     this->ExpandLinkItems(linkIfaceProp, *explicitLibraries, config,
-                          headTarget, usage_requirements_only, iface.Libraries,
-                          iface.Objects, iface.HadHeadSensitiveCondition,
-                          iface.HadContextSensitiveCondition,
-                          iface.HadLinkLanguageSensitiveCondition);
-    return;
+                          headTarget, usage_requirements_only, iface);
   }
 
-  // If CMP0022 is NEW then the plain tll signature sets the
-  // INTERFACE_LINK_LIBRARIES, so if we get here then the project
-  // cleared the property explicitly and we should not fall back
-  // to the link implementation.
-  if (cmp0022NEW) {
+  // If the link interface is explicit, do not fall back to the link impl.
+  if (iface.Explicit) {
     return;
   }
 
@@ -6932,22 +6942,15 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
         !this->PolicyWarnedCMP0022 && !usage_requirements_only) {
       // Compare the link implementation fallback link interface to the
       // preferred new link interface property and warn if different.
-      std::vector<cmLinkItem> ifaceLibs;
-      std::vector<cmLinkItem> ifaceObjects;
+      cmLinkInterface ifaceNew;
       static const std::string newProp = "INTERFACE_LINK_LIBRARIES";
       if (cmProp newExplicitLibraries = this->GetProperty(newProp)) {
-        bool hadHeadSensitiveConditionDummy = false;
-        bool hadContextSensitiveConditionDummy = false;
-        bool hadLinkLanguageSensitiveConditionDummy = false;
         this->ExpandLinkItems(newProp, *newExplicitLibraries, config,
-                              headTarget, usage_requirements_only, ifaceLibs,
-                              ifaceObjects, hadHeadSensitiveConditionDummy,
-                              hadContextSensitiveConditionDummy,
-                              hadLinkLanguageSensitiveConditionDummy);
+                              headTarget, usage_requirements_only, ifaceNew);
       }
-      if (ifaceLibs != iface.Libraries) {
+      if (ifaceNew.Libraries != iface.Libraries) {
         std::string oldLibraries = cmJoin(impl->Libraries, ";");
-        std::string newLibraries = cmJoin(ifaceLibs, ";");
+        std::string newLibraries = cmJoin(ifaceNew.Libraries, ";");
         if (oldLibraries.empty()) {
           oldLibraries = "(empty)";
         }
@@ -7085,10 +7088,7 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
     iface.Multiplicity = info->Multiplicity;
     cmExpandList(info->Languages, iface.Languages);
     this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
-                          headTarget, usage_requirements_only, iface.Libraries,
-                          iface.Objects, iface.HadHeadSensitiveCondition,
-                          iface.HadContextSensitiveCondition,
-                          iface.HadLinkLanguageSensitiveCondition);
+                          headTarget, usage_requirements_only, iface);
     std::vector<std::string> deps = cmExpandedList(info->SharedDeps);
     LookupLinkItemScope scope{ this->LocalGenerator };
     for (std::string const& dep : deps) {
@@ -7628,6 +7628,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     std::string const& evaluated =
       cge->Evaluate(this->LocalGenerator, config, head, &dagChecker, nullptr,
                     this->LinkerLanguage);
+    bool const fromGenex = evaluated != *le;
     cmExpandList(evaluated, llibs);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;
@@ -7699,7 +7700,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         }
       }
 
-      impl.Libraries.emplace_back(std::move(item), evaluated != *le);
+      impl.Libraries.emplace_back(std::move(item), fromGenex);
     }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();

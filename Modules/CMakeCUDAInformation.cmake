@@ -100,6 +100,15 @@ if(NOT CMAKE_MODULE_EXISTS)
   set(CMAKE_SHARED_MODULE_CREATE_CUDA_FLAGS ${CMAKE_SHARED_LIBRARY_CREATE_CUDA_FLAGS})
 endif()
 
+if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
+  if(NOT DEFINED CMAKE_CUDA_LINK_WHAT_YOU_USE_FLAG)
+    set(CMAKE_CUDA_LINK_WHAT_YOU_USE_FLAG "LINKER:--no-as-needed")
+  endif()
+  if(NOT DEFINED CMAKE_LINK_WHAT_YOU_USE_CHECK)
+    set(CMAKE_LINK_WHAT_YOU_USE_CHECK ldd -u -r)
+  endif()
+endif()
+
 # add the flags to the cache based
 # on the initial values computed in the platform/*.cmake files
 # use _INIT variables so that this only happens the first time

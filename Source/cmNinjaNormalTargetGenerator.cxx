@@ -581,17 +581,23 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
         }
       }
       cmExpandList(linkCmdStr, linkCmds);
-      if (this->GetGeneratorTarget()->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
-        std::string cmakeCommand = cmStrCat(
-          this->GetLocalGenerator()->ConvertToOutputFormat(
-            cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL),
-          " -E __run_co_compile --lwyu=");
-        cmGeneratorTarget& gt = *this->GetGeneratorTarget();
-        std::string targetOutputReal = this->ConvertToNinjaPath(
-          gt.GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact,
-                         /*realname=*/true));
-        cmakeCommand += targetOutputReal;
-        linkCmds.push_back(std::move(cmakeCommand));
+      if (this->UseLWYU) {
+        cmProp lwyuCheck = mf->GetDefinition("CMAKE_LINK_WHAT_YOU_USE_CHECK");
+        if (lwyuCheck) {
+          std::string cmakeCommand = cmStrCat(
+            this->GetLocalGenerator()->ConvertToOutputFormat(
+              cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL),
+            " -E __run_co_compile --lwyu=");
+          cmakeCommand +=
+            this->GetLocalGenerator()->EscapeForShell(*lwyuCheck);
+
+          std::string targetOutputReal =
+            this->ConvertToNinjaPath(this->GetGeneratorTarget()->GetFullPath(
+              config, cmStateEnums::RuntimeBinaryArtifact,
+              /*realname=*/true));
+          cmakeCommand += cmStrCat(" --source=", targetOutputReal);
+          linkCmds.push_back(std::move(cmakeCommand));
+        }
       }
       return linkCmds;
     }
@@ -1156,9 +1162,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
   this->AddModuleDefinitionFlag(linkLineComputer.get(), vars["LINK_FLAGS"],
                                 config);
-  if (gt->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
-    vars["LINK_FLAGS"] += " -Wl,--no-as-needed";
-  }
+
+  this->UseLWYU = this->GetLocalGenerator()->AppendLWYUFlags(
+    vars["LINK_FLAGS"], this->GetGeneratorTarget(),
+    this->TargetLinkLanguage(config));
+
   vars["LINK_FLAGS"] = globalGen->EncodeLiteral(vars["LINK_FLAGS"]);
 
   vars["MANIFESTS"] = this->GetManifests(config);

@@ -382,7 +382,7 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
     if (restat) {
       vars["restat"] = "1";
     }
-    if (uses_terminal && this->SupportsConsolePool()) {
+    if (uses_terminal && this->SupportsDirectConsole()) {
       vars["pool"] = "console";
     } else if (!job_pool.empty()) {
       vars["pool"] = job_pool;
@@ -920,14 +920,7 @@ void cmGlobalNinjaGenerator::EnableLanguage(
   std::vector<std::string> const& langs, cmMakefile* mf, bool optional)
 {
   if (this->IsMultiConfig()) {
-    if (!mf->GetDefinition("CMAKE_CONFIGURATION_TYPES")) {
-      mf->AddCacheDefinition(
-        "CMAKE_CONFIGURATION_TYPES", "Debug;Release;RelWithDebInfo",
-        "Semicolon separated list of supported configuration types, only "
-        "supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything "
-        "else will be ignored",
-        cmStateEnums::STRING);
-    }
+    mf->InitCMAKE_CONFIGURATION_TYPES("Debug;Release;RelWithDebInfo");
   }
 
   this->cmGlobalGenerator::EnableLanguage(langs, mf, optional);
@@ -1018,13 +1011,6 @@ bool cmGlobalNinjaGenerator::HasRule(const std::string& name)
 }
 
 // Private virtual overrides
-
-std::string cmGlobalNinjaGenerator::GetEditCacheCommand() const
-{
-  // Ninja by design does not run interactive tools in the terminal,
-  // so our only choice is cmake-gui.
-  return cmSystemTools::GetCMakeGUICommand();
-}
 
 void cmGlobalNinjaGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
@@ -1847,7 +1833,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
 
   // Use 'console' pool to get non buffered output of the CMake re-run call
   // Available since Ninja 1.5
-  if (this->SupportsConsolePool()) {
+  if (this->SupportsDirectConsole()) {
     reBuild.Variables["pool"] = "console";
   }
 
@@ -1941,7 +1927,7 @@ std::string cmGlobalNinjaGenerator::NinjaCmd() const
   return "ninja";
 }
 
-bool cmGlobalNinjaGenerator::SupportsConsolePool() const
+bool cmGlobalNinjaGenerator::SupportsDirectConsole() const
 {
   return this->NinjaSupportsConsolePool;
 }

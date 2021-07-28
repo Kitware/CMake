@@ -105,7 +105,7 @@ This module performs a four step search for an MPI implementation:
 
 1. Search for ``MPIEXEC_EXECUTABLE`` and, if found, use its base directory.
 2. Check if the compiler has MPI support built-in. This is the case if the user passed a
-   compiler wrapper as ``CMAKE_<LANG>_COMPILER`` or if they're on a Cray system.
+   compiler wrapper as ``CMAKE_<LANG>_COMPILER`` or if they use Cray system compiler wrappers.
 3. Attempt to find an MPI compiler wrapper and determine the compiler information from it.
 4. Try to find an MPI implementation that does not ship such a wrapper by guessing settings.
    Currently, only Microsoft MPI and MPICH2 on Windows are supported.
@@ -333,6 +333,11 @@ set(_MPI_XL_Fortran_COMPILER_NAMES         mpixlf95   mpixlf95_r mpxlf95 mpxlf95
                                            mpixlf77   mpixlf77_r mpxlf77 mpxlf77_r
                                            mpixlf     mpixlf_r   mpxlf   mpxlf_r)
 
+# Cray Compiler names
+set(_MPI_Cray_C_COMPILER_NAMES             cc)
+set(_MPI_Cray_CXX_COMPILER_NAMES           CC)
+set(_MPI_Cray_Fortran_COMPILER_NAMES       ftn)
+
 # Prepend vendor-specific compiler wrappers to the list. If we don't know the compiler,
 # attempt all of them.
 # By attempting vendor-specific compiler names first, we should avoid situations where the compiler wrapper
@@ -484,6 +489,26 @@ function (_MPI_interrogate_compiler LANG)
 
       if (NOT MPI_COMPILER_RETURN EQUAL 0)
         unset(MPI_COMPILE_CMDLINE)
+      endif()
+    endif()
+  endif()
+
+  # Cray compiler wrappers come usually without a separate mpicc/c++/ftn, but offer
+  # --cray-print-opts=...
+  if (NOT MPI_COMPILER_RETURN EQUAL 0)
+    _MPI_check_compiler(${LANG} "--cray-print-opts=cflags"
+                        MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
+
+    if (MPI_COMPILER_RETURN EQUAL 0)
+      # Pass --no-as-needed so the mpi library is always linked. Otherwise, the
+      # Cray compiler wrapper puts an --as-needed flag around the mpi library,
+      # and it is not linked unless code directly refers to it.
+      _MPI_check_compiler(${LANG} "--no-as-needed;--cray-print-opts=libs"
+                          MPI_LINK_CMDLINE MPI_COMPILER_RETURN)
+
+      if (NOT MPI_COMPILER_RETURN EQUAL 0)
+        unset(MPI_COMPILE_CMDLINE)
+        unset(MPI_LINK_CMDLINE)
       endif()
     endif()
   endif()
@@ -1440,9 +1465,10 @@ foreach(LANG IN ITEMS C CXX Fortran)
   endif()
   if(_MPI_FIND_${LANG})
     if( ${LANG} STREQUAL CXX AND NOT MPICXX IN_LIST MPI_FIND_COMPONENTS )
-      set(MPI_CXX_SKIP_MPICXX FALSE CACHE BOOL "If true, the MPI-2 C++ bindings are disabled using definitions.")
+      option(MPI_CXX_SKIP_MPICXX "If true, the MPI-2 C++ bindings are disabled using definitions." FALSE)
       mark_as_advanced(MPI_CXX_SKIP_MPICXX)
     endif()
+    _MPI_adjust_compile_definitions(${LANG})
     if(NOT (MPI_${LANG}_LIB_NAMES AND (MPI_${LANG}_INCLUDE_PATH OR MPI_${LANG}_INCLUDE_DIRS OR MPI_${LANG}_COMPILER_INCLUDE_DIRS)))
       set(MPI_${LANG}_TRIED_IMPLICIT FALSE)
       set(MPI_${LANG}_WORKS_IMPLICIT FALSE)
@@ -1519,6 +1545,29 @@ foreach(LANG IN ITEMS C CXX Fortran)
           endif()
         endif()
 
+        # We are on a Cray, environment identfier: PE_ENV is set (CRAY), and
+        # have NOT found an mpic++-like compiler wrapper (previous block),
+        # and we do NOT use the Cray cc/CC compiler wrappers as CC/CXX CMake
+        # compiler.
+        # So as a last resort, we now interrogate cc/CC/ftn for MPI flags.
+        if(DEFINED ENV{PE_ENV} AND NOT "${MPI_${LANG}_COMPILER}")
+          set(MPI_PINNED_COMPILER TRUE)
+          find_program(MPI_${LANG}_COMPILER
+            NAMES  ${_MPI_Cray_${LANG}_COMPILER_NAMES}
+            PATH_SUFFIXES bin sbin
+            DOC    "MPI compiler for ${LANG}"
+          )
+
+          # If we haven't made the implicit compiler test yet, perform it now.
+          if(NOT MPI_${LANG}_TRIED_IMPLICIT)
+            _MPI_create_imported_target(${LANG})
+            _MPI_check_lang_works(${LANG} TRUE)
+          endif()
+
+          set(MPI_${LANG}_WORKS_IMPLICIT TRUE)
+          _MPI_interrogate_compiler(${LANG})
+        endif()
+
         if(NOT MPI_PINNED_COMPILER AND NOT MPI_${LANG}_WRAPPER_FOUND)
           # If MPI_PINNED_COMPILER wasn't given, and the MPI compiler we potentially found didn't work, we withdraw it.
           set(MPI_${LANG}_COMPILER "MPI_${LANG}_COMPILER-NOTFOUND" CACHE FILEPATH "MPI compiler for ${LANG}" FORCE)
@@ -1547,7 +1596,6 @@ foreach(LANG IN ITEMS C CXX Fortran)
     endif()
     _MPI_assemble_libraries(${LANG})
 
-    _MPI_adjust_compile_definitions(${LANG})
     # We always create imported targets even if they're empty
     _MPI_create_imported_target(${LANG})
 

@@ -192,17 +192,31 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
       get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${_CUDA_NVCC_EXECUTABLE}" DIRECTORY)
       get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}" DIRECTORY)
     endif()
+
+    if(_CUDA_NVCC_OUT MATCHES "\\#\\$ NVVMIR_LIBRARY_DIR=([^\r\n]*)")
+      get_filename_component(_CUDA_NVVMIR_LIBRARY_DIR "${CMAKE_MATCH_1}" ABSOLUTE)
+
+      #We require the path to end in `/nvvm/libdevice'
+      if(_CUDA_NVVMIR_LIBRARY_DIR MATCHES "nvvm/libdevice$")
+        get_filename_component(_CUDA_NVVMIR_LIBRARY_DIR "${_CUDA_NVVMIR_LIBRARY_DIR}/../.." ABSOLUTE)
+        set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR "${_CUDA_NVVMIR_LIBRARY_DIR}")
+      endif()
+
+      unset(_CUDA_NVVMIR_LIBRARY_DIR)
+      unset(_cuda_nvvmir_dir_name)
+    endif()
     unset(_CUDA_NVCC_OUT)
 
     set(CMAKE_CUDA_DEVICE_LINKER "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/bin/nvlink${CMAKE_EXECUTABLE_SUFFIX}")
     set(CMAKE_CUDA_FATBINARY "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/bin/fatbinary${CMAKE_EXECUTABLE_SUFFIX}")
 
-
     # In a non-scattered installation the following are equivalent to CMAKE_CUDA_COMPILER_TOOLKIT_ROOT.
     # We first check for a non-scattered installation to prefer it over a scattered installation.
 
     # CMAKE_CUDA_COMPILER_LIBRARY_ROOT contains the device library.
-    if(EXISTS "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/nvvm/libdevice")
+    if(DEFINED CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR)
+      set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR}")
+    elseif(EXISTS "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/nvvm/libdevice")
       set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}")
     elseif(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/nvvm/libdevice")
       set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_SYSROOT_LINK}/usr/lib/cuda")
@@ -211,6 +225,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     else()
       message(FATAL_ERROR "Couldn't find CUDA library root.")
     endif()
+    unset(CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR)
 
     # CMAKE_CUDA_COMPILER_TOOLKIT_LIBRARY_ROOT contains the linking stubs necessary for device linking and other low-level library files.
     if(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/nvidia-cuda-toolkit/bin/crt/link.stub")
