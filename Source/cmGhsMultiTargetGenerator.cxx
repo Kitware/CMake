@@ -376,7 +376,7 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
 #ifdef _WIN32
   std::string check_error = "if %errorlevel% neq 0 exit /b %errorlevel%";
 #else
-  std::string check_error = "if [[ $? -ne 0 ]]; then exit 1; fi";
+  std::string check_error = "if [ $? -ne 0 ]; then exit 1; fi";
 #endif
 
 #ifdef _WIN32
