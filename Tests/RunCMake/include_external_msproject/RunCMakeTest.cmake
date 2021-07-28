@@ -8,4 +8,5 @@ run_cmake(CustomConfig)
 
 if(RunCMake_GENERATOR MATCHES "Visual Studio ([^9]|9[0-9])")
   run_cmake(SkipGetTargetFrameworkProperties)
+  run_cmake(VSCSharpReference)
 endif()

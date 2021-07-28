@@ -9,7 +9,29 @@ This property specifies the CUDA/C++ standard whose features are requested
 to build this target.  For some compilers, this results in adding a
 flag such as ``-std=gnu++11`` to the compile line.
 
-Supported values are ``98``, ``03``, ``11``, ``14``, ``17``, ``20``, ``23``.
+Supported values are:
+
+``98``
+  CUDA C++98
+
+``11``
+  CUDA C++11
+
+``14``
+  CUDA C++14
+
+``17``
+  CUDA C++17
+
+``20``
+  .. versionadded:: 3.12
+
+  CUDA C++20
+
+``23``
+  .. versionadded:: 3.20
+
+  CUDA C++23
 
 If the value requested does not result in a compile flag being added for
 the compiler in use, a previous standard flag will be added instead.  This

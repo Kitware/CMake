@@ -24,3 +24,11 @@ set_target_properties(verFoo PROPERTIES VERSION 3.1.4 SOVERSION 3)
 
 add_executable(verFoobar foobar.c)
 target_link_libraries(verFoobar verFoo)
+
+if(MAKE_SUPPORTS_SPACES AND NOT CMAKE_GENERATOR STREQUAL "Watcom WMake")
+  # check with lib version and space
+  add_library(ver_space SHARED ver_space.c)
+  set_target_properties(ver_space PROPERTIES VERSION 3.1.4 SOVERSION 3 OUTPUT_NAME "ver space")
+  add_executable(use_ver_space use_ver_space.c)
+  target_link_libraries(use_ver_space ver_space)
+endif()

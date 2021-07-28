@@ -12,11 +12,14 @@
 #include <cm/string_view>
 
 #include "cmsys/Process.h"
+#include "cmsys/Status.hxx"      // IWYU pragma: export
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
 
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
+
+struct cmMessageMetadata;
 
 /** \class cmSystemTools
  * \brief A collection of useful functions for CMake.
@@ -39,7 +42,8 @@ public:
   /** Map help document name to file name.  */
   static std::string HelpFileName(cm::string_view);
 
-  using MessageCallback = std::function<void(const std::string&, const char*)>;
+  using MessageCallback =
+    std::function<void(const std::string&, const cmMessageMetadata&)>;
   /**
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
@@ -56,6 +60,7 @@ public:
    * Display a message.
    */
   static void Message(const std::string& m, const char* title = nullptr);
+  static void Message(const std::string& m, const cmMessageMetadata& md);
 
   using OutputCallback = std::function<void(std::string const&)>;
 
@@ -128,10 +133,43 @@ public:
   static bool SimpleGlob(const std::string& glob,
                          std::vector<std::string>& files, int type = 0);
 
+  enum class CopyWhen
+  {
+    Always,
+    OnlyIfDifferent,
+  };
+  enum class CopyResult
+  {
+    Success,
+    Failure,
+  };
+
+  /** Copy a file. */
+  static bool CopySingleFile(const std::string& oldname,
+                             const std::string& newname);
+  static CopyResult CopySingleFile(std::string const& oldname,
+                                   std::string const& newname, CopyWhen when,
+                                   std::string* err = nullptr);
+
+  enum class Replace
+  {
+    Yes,
+    No,
+  };
+  enum class RenameResult
+  {
+    Success,
+    NoReplace,
+    Failure,
+  };
+
   /** Rename a file or directory within a single disk volume (atomic
       if possible).  */
   static bool RenameFile(const std::string& oldname,
                          const std::string& newname);
+  static RenameResult RenameFile(std::string const& oldname,
+                                 std::string const& newname, Replace replace,
+                                 std::string* err = nullptr);
 
   //! Rename a file if contents are different, delete the source otherwise
   static void MoveFileIfDifferent(const std::string& source,
@@ -152,7 +190,7 @@ public:
    *
    * Output is controlled with outputflag. If outputflag is OUTPUT_NONE, no
    * user-viewable output from the program being run will be generated.
-   * OUTPUT_MERGE is the legacy behaviour where stdout and stderr are merged
+   * OUTPUT_MERGE is the legacy behavior where stdout and stderr are merged
    * into stdout.  OUTPUT_FORWARD copies the output to stdout/stderr as
    * it was received.  OUTPUT_PASSTHROUGH passes through the original handles.
    *
@@ -312,6 +350,12 @@ public:
   static std::string ForceToRelativePath(std::string const& local_path,
                                          std::string const& remote_path);
 
+  /**
+   * Express the 'in' path relative to 'top' if it does not start in '../'.
+   */
+  static std::string RelativeIfUnder(std::string const& top,
+                                     std::string const& in);
+
 #ifndef CMAKE_BOOTSTRAP
   /** Remove an environment variable */
   static bool UnsetEnv(const char* value);
@@ -412,12 +456,16 @@ public:
   static bool GuessLibraryInstallName(std::string const& fullPath,
                                       std::string& soname);
 
-  /** Try to set the RPATH in an ELF binary.  */
+  /** Try to change the RPATH in an ELF binary.  */
   static bool ChangeRPath(std::string const& file, std::string const& oldRPath,
                           std::string const& newRPath,
                           bool removeEnvironmentRPath,
                           std::string* emsg = nullptr,
                           bool* changed = nullptr);
+
+  /** Try to set the RPATH in an ELF binary.  */
+  static bool SetRPath(std::string const& file, std::string const& newRPath,
+                       std::string* emsg = nullptr, bool* changed = nullptr);
 
   /** Try to remove the RPATH from an ELF binary.  */
   static bool RemoveRPath(std::string const& file, std::string* emsg = nullptr,
@@ -455,15 +503,18 @@ public:
 
   /** Create a symbolic link if the platform supports it.  Returns whether
       creation succeeded. */
-  static bool CreateSymlink(const std::string& origName,
-                            const std::string& newName,
-                            std::string* errorMessage = nullptr);
+  static cmsys::Status CreateSymlink(std::string const& origName,
+                                     std::string const& newName,
+                                     std::string* errorMessage = nullptr);
 
   /** Create a hard link if the platform supports it.  Returns whether
       creation succeeded. */
-  static bool CreateLink(const std::string& origName,
-                         const std::string& newName,
-                         std::string* errorMessage = nullptr);
+  static cmsys::Status CreateLink(std::string const& origName,
+                                  std::string const& newName,
+                                  std::string* errorMessage = nullptr);
+
+  /** Get the system name. */
+  static cm::string_view GetSystemName();
 
 private:
   static bool s_ForceUnixPaths;

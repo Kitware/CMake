@@ -92,6 +92,8 @@ static void cmFortran_yyerror(yyscan_t yyscanner, const char* message)
 %token SUBMODULE
 %token USE
 
+%destructor { free($$); } WORD STRING CPP_INCLUDE_ANGLE
+
 /*-------------------------------------------------------------------------*/
 /* grammar */
 %%

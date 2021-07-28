@@ -1,12 +1,12 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#if !defined(_WIN32) && !defined(__sun)
+#if !defined(_WIN32) && !defined(__sun) && !defined(__OpenBSD__)
 // POSIX APIs are needed
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _POSIX_C_SOURCE 200809L
 #endif
-#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 // For isascii
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 700
@@ -90,6 +90,9 @@ struct LoadedCommandImpl : cmLoadedCommandInfo
   {
     if (this->Destructor) {
       SignalHandlerGuard guard(this->Name);
+#if defined(__NVCOMPILER)
+      static_cast<void>(guard); // convince compiler var is used
+#endif
       this->Destructor(this);
     }
     if (this->Error != nullptr) {
@@ -103,12 +106,18 @@ struct LoadedCommandImpl : cmLoadedCommandInfo
   int DoInitialPass(cmMakefile* mf, int argc, char* argv[])
   {
     SignalHandlerGuard guard(this->Name);
+#if defined(__NVCOMPILER)
+    static_cast<void>(guard); // convince compiler var is used
+#endif
     return this->InitialPass(this, mf, argc, argv);
   }
 
   void DoFinalPass(cmMakefile* mf)
   {
     SignalHandlerGuard guard(this->Name);
+#if defined(__NVCOMPILER)
+    static_cast<void>(guard); // convince compiler var is used
+#endif
     this->FinalPass(this, mf);
   }
 };

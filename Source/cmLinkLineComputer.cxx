@@ -11,10 +11,8 @@
 #include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
 #include "cmOutputConverter.h"
-#include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
 
 cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
                                        cmStateDirectory const& stateDir)
@@ -52,13 +50,7 @@ void cmLinkLineComputer::SetRelink(bool relink)
 std::string cmLinkLineComputer::ConvertToLinkReference(
   std::string const& lib) const
 {
-  std::string relLib = lib;
-
-  if (this->StateDir.ContainsBoth(this->StateDir.GetCurrentBinary(), lib)) {
-    relLib = cmSystemTools::ForceToRelativePath(
-      this->StateDir.GetCurrentBinary(), lib);
-  }
-  return relLib;
+  return this->OutputConverter->MaybeRelativeToCurBinDir(lib);
 }
 
 std::string cmLinkLineComputer::ComputeLinkLibs(cmComputeLinkInformation& cli)
@@ -82,8 +74,12 @@ void cmLinkLineComputer::ComputeLinkLibs(
     }
 
     BT<std::string> linkLib;
-    if (item.IsPath) {
-      linkLib.Value += cli.GetLibLinkFileFlag();
+    if (item.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
+      if (item.IsObject == cmComputeLinkInformation::ItemIsObject::Yes) {
+        linkLib.Value += cli.GetObjLinkFileFlag();
+      } else {
+        linkLib.Value += cli.GetLibLinkFileFlag();
+      }
       linkLib.Value += this->ConvertToOutputFormat(
         this->ConvertToLinkReference(item.Value.Value));
       linkLib.Backtrace = item.Value.Backtrace;

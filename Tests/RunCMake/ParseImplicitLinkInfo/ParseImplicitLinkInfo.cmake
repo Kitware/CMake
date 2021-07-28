@@ -23,11 +23,15 @@ set(targets
   hand-C-empty hand-CXX-empty
   hand-C-relative hand-CXX-relative
   linux-C-GNU-7.3.0 linux-CXX-GNU-7.3.0 linux-Fortran-GNU-7.3.0
+  linux-C-GNU-10.2.1-static-libgcc
+    linux-CXX-GNU-10.2.1-static-libstdc++
+    linux-Fortran-GNU-10.2.1-static-libgfortran
   linux-C-Intel-18.0.0.20170811 linux-CXX-Intel-18.0.0.20170811
   linux-C-PGI-18.10.1 linux-CXX-PGI-18.10.1
     linux-Fortran-PGI-18.10.1 linux_pgf77-Fortran-PGI-18.10.1
     linux_nostdinc-C-PGI-18.10.1 linux_nostdinc-CXX-PGI-18.10.1
     linux_nostdinc-Fortran-PGI-18.10.1
+  linux-C-NVHPC-21.1.0 linux-CXX-NVHPC-21.1.0
   linux-C-XL-12.1.0 linux-CXX-XL-12.1.0 linux-Fortran-XL-14.1.0
     linux_nostdinc-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
     linux_nostdinc_i-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
@@ -66,7 +70,7 @@ function(load_compiler_info infile lang_var outcmvars_var outstr_var)
   string(REGEX REPLACE "\r?\n" ";" in_lines "${in}")
   foreach(line IN LISTS in_lines)
     # check for special CMAKE variable lines and parse them if found
-    if("${line}" MATCHES "^CMAKE_([_A-Za-z0-9]+)=(.*)$")
+    if("${line}" MATCHES "^CMAKE_([_A-Za-z0-9+]+)=(.*)$")
       if("${CMAKE_MATCH_1}" STREQUAL "LANG")   # handle CMAKE_LANG here
         set(lang "${CMAKE_MATCH_2}")
       else()
@@ -104,10 +108,8 @@ endfunction()
 function(load_platform_info target)
   if(target MATCHES "linux-")
     set(CMAKE_LIBRARY_ARCHITECTURE_REGEX "[a-z0-9_]+(-[a-z0-9_]+)?-linux-gnu[a-z0-9_]*" PARENT_SCOPE)
-    set(CMAKE_LIBRARY_ARCHITECTURE_REGEX_VERSIONED "gcc/[a-z0-9_]+(-[a-z0-9_]+)?-linux(-gnu)?/[0-9]+(\\.[0-9]+\\.[0-9]+)*" PARENT_SCOPE)
   else()
     unset(CMAKE_LIBRARY_ARCHITECTURE_REGEX PARENT_SCOPE)
-    unset(CMAKE_LIBRARY_ARCHITECTURE_REGEX_VERSIONED PARENT_SCOPE)
   endif()
 endfunction()
 
@@ -134,6 +136,7 @@ foreach(t ${targets})
   # Need to handle files with empty entries for both libs or dirs
   set(implicit_lib_output "")
   set(idirs_output "")
+  set(implicit_objs "")
   set(library_arch_output "")
   file(STRINGS ${outfile} outputs)
   foreach(line IN LISTS outputs)
@@ -149,10 +152,11 @@ foreach(t ${targets})
   endforeach()
 
   cmake_parse_implicit_link_info("${input}" implicit_libs idirs implicit_fwks log
-      "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}")
+      "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
+      COMPUTE_IMPLICIT_OBJECTS implicit_objs)
 
   set(library_arch)
-  cmake_parse_library_architecture("${idirs}" library_arch)
+  cmake_parse_library_architecture(${lang} "${idirs}" "${implicit_objs}" library_arch)
 
   # File format
   # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}")
@@ -161,12 +165,12 @@ foreach(t ${targets})
     if("${state}" STREQUAL "done")
       message("empty parse failed: ${idirs}, log=${log}")
     endif()
-  elseif(NOT "${idirs}" STREQUAL "${idirs_output}")
-    message("${t} parse failed: state=${state}, '${idirs}' does not match '${idirs_output}'")
-  elseif(NOT "${implicit_libs}" STREQUAL "${implicit_lib_output}")
-    message("${t} parse failed: state=${state}, '${implicit_libs}' does not match '${implicit_lib_output}'")
-  elseif(library_arch AND NOT "${library_arch}" STREQUAL "${library_arch_output}")
-    message("${t} parse failed: state=${state}, '${library_arch}' does not match '${library_arch_output}'")
+  elseif(NOT "${idirs}" MATCHES "^${idirs_output}$")
+    message("${t} parse failed: state=${state}, '${idirs}' does not match '^${idirs_output}$'")
+  elseif(NOT "${implicit_libs}" MATCHES "^${implicit_lib_output}$")
+    message("${t} parse failed: state=${state}, '${implicit_libs}' does not match '^${implicit_lib_output}$'")
+  elseif((library_arch OR library_arch_output) AND NOT "${library_arch}" MATCHES "^${library_arch_output}$")
+    message("${t} parse failed: state=${state}, '${library_arch}' does not match '^${library_arch_output}$'")
   endif()
 
   unload_compiler_info("${cmvars}")

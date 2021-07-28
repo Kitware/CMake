@@ -80,7 +80,7 @@ macro(java_append_library_directories _var)
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
         set(_java_libarch "ppc" "ppc64")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^sparc")
-        # Both flavours can run on the same processor
+        # Both flavors can run on the same processor
         set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "sparc" "sparcv9")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(parisc|hppa)")
         set(_java_libarch "parisc" "parisc64")

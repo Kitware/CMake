@@ -1,0 +1,5 @@
+CMake Error at target_link_libraries-cycle2\.cmake:[0-9]+ \(add_library\):
+  The SOURCES of "(lib1|lib2)" use a generator expression that depends on the
+  SOURCES themselves\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

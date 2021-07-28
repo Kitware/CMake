@@ -115,7 +115,10 @@ cmRuntimeDependencyArchive::cmRuntimeDependencyArchive(
   const std::vector<std::string>& preIncludeRegexes,
   const std::vector<std::string>& preExcludeRegexes,
   const std::vector<std::string>& postIncludeRegexes,
-  const std::vector<std::string>& postExcludeRegexes)
+  const std::vector<std::string>& postExcludeRegexes,
+  std::vector<std::string> postIncludeFiles,
+  std::vector<std::string> postExcludeFiles,
+  std::vector<std::string> postExcludeFilesStrict)
   : Status(status)
   , SearchDirectories(std::move(searchDirectories))
   , BundleExecutable(std::move(bundleExecutable))
@@ -123,6 +126,9 @@ cmRuntimeDependencyArchive::cmRuntimeDependencyArchive(
   , PreExcludeRegexes(preExcludeRegexes.size())
   , PostIncludeRegexes(postIncludeRegexes.size())
   , PostExcludeRegexes(postExcludeRegexes.size())
+  , PostIncludeFiles(std::move(postIncludeFiles))
+  , PostExcludeFiles(std::move(postExcludeFiles))
+  , PostExcludeFilesStrict(std::move(postExcludeFilesStrict))
 {
   std::transform(preIncludeRegexes.begin(), preIncludeRegexes.end(),
                  this->PreIncludeRegexes.begin(), TransformCompile);
@@ -192,25 +198,26 @@ void cmRuntimeDependencyArchive::SetError(const std::string& e)
   this->Status.SetError(e);
 }
 
-std::string cmRuntimeDependencyArchive::GetBundleExecutable()
+const std::string& cmRuntimeDependencyArchive::GetBundleExecutable() const
 {
   return this->BundleExecutable;
 }
 
 const std::vector<std::string>&
-cmRuntimeDependencyArchive::GetSearchDirectories()
+cmRuntimeDependencyArchive::GetSearchDirectories() const
 {
   return this->SearchDirectories;
 }
 
-std::string cmRuntimeDependencyArchive::GetGetRuntimeDependenciesTool()
+const std::string& cmRuntimeDependencyArchive::GetGetRuntimeDependenciesTool()
+  const
 {
   return this->GetMakefile()->GetSafeDefinition(
     "CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL");
 }
 
 bool cmRuntimeDependencyArchive::GetGetRuntimeDependenciesCommand(
-  const std::string& search, std::vector<std::string>& command)
+  const std::string& search, std::vector<std::string>& command) const
 {
   // First see if it was supplied by the user
   std::string toolCommand = this->GetMakefile()->GetSafeDefinition(
@@ -303,47 +310,53 @@ bool cmRuntimeDependencyArchive::GetGetRuntimeDependenciesCommand(
   return false;
 }
 
-bool cmRuntimeDependencyArchive::IsPreExcluded(const std::string& name)
+bool cmRuntimeDependencyArchive::IsPreExcluded(const std::string& name) const
 {
   cmsys::RegularExpressionMatch match;
+  auto const regexMatch =
+    [&match, name](const cmsys::RegularExpression& regex) -> bool {
+    return regex.find(name.c_str(), match);
+  };
+  auto const regexSearch =
+    [&regexMatch](
+      const std::vector<cmsys::RegularExpression>& regexes) -> bool {
+    return std::any_of(regexes.begin(), regexes.end(), regexMatch);
+  };
 
-  for (auto const& regex : this->PreIncludeRegexes) {
-    if (regex.find(name.c_str(), match)) {
-      return false;
-    }
-  }
-
-  for (auto const& regex : this->PreExcludeRegexes) {
-    if (regex.find(name.c_str(), match)) {
-      return true;
-    }
-  }
-
-  return false;
+  return !regexSearch(this->PreIncludeRegexes) &&
+    regexSearch(this->PreExcludeRegexes);
 }
 
-bool cmRuntimeDependencyArchive::IsPostExcluded(const std::string& name)
+bool cmRuntimeDependencyArchive::IsPostExcluded(const std::string& name) const
 {
   cmsys::RegularExpressionMatch match;
+  auto const regexMatch =
+    [&match, name](const cmsys::RegularExpression& regex) -> bool {
+    return regex.find(name.c_str(), match);
+  };
+  auto const regexSearch =
+    [&regexMatch](
+      const std::vector<cmsys::RegularExpression>& regexes) -> bool {
+    return std::any_of(regexes.begin(), regexes.end(), regexMatch);
+  };
+  auto const fileMatch = [name](const std::string& file) -> bool {
+    return cmSystemTools::SameFile(file, name);
+  };
+  auto const fileSearch =
+    [&fileMatch](const std::vector<std::string>& files) -> bool {
+    return std::any_of(files.begin(), files.end(), fileMatch);
+  };
 
-  for (auto const& regex : this->PostIncludeRegexes) {
-    if (regex.find(name.c_str(), match)) {
-      return false;
-    }
-  }
-
-  for (auto const& regex : this->PostExcludeRegexes) {
-    if (regex.find(name.c_str(), match)) {
-      return true;
-    }
-  }
-
-  return false;
+  return fileSearch(this->PostExcludeFilesStrict) ||
+    (!(regexSearch(this->PostIncludeRegexes) ||
+       fileSearch(this->PostIncludeFiles)) &&
+     (regexSearch(this->PostExcludeRegexes) ||
+      fileSearch(this->PostExcludeFiles)));
 }
 
-void cmRuntimeDependencyArchive::AddResolvedPath(const std::string& name,
-                                                 const std::string& path,
-                                                 bool& unique)
+void cmRuntimeDependencyArchive::AddResolvedPath(
+  const std::string& name, const std::string& path, bool& unique,
+  std::vector<std::string> rpaths)
 {
   auto it = this->ResolvedPaths.emplace(name, std::set<std::string>{}).first;
   unique = true;
@@ -354,6 +367,7 @@ void cmRuntimeDependencyArchive::AddResolvedPath(const std::string& name,
     }
   }
   it->second.insert(path);
+  this->RPaths[path] = std::move(rpaths);
 }
 
 void cmRuntimeDependencyArchive::AddUnresolvedPath(const std::string& name)
@@ -361,18 +375,33 @@ void cmRuntimeDependencyArchive::AddUnresolvedPath(const std::string& name)
   this->UnresolvedPaths.insert(name);
 }
 
-cmMakefile* cmRuntimeDependencyArchive::GetMakefile()
+cmMakefile* cmRuntimeDependencyArchive::GetMakefile() const
 {
   return &this->Status.GetMakefile();
 }
 
 const std::map<std::string, std::set<std::string>>&
-cmRuntimeDependencyArchive::GetResolvedPaths()
+cmRuntimeDependencyArchive::GetResolvedPaths() const
 {
   return this->ResolvedPaths;
 }
 
 const std::set<std::string>& cmRuntimeDependencyArchive::GetUnresolvedPaths()
+  const
 {
   return this->UnresolvedPaths;
+}
+
+const std::map<std::string, std::vector<std::string>>&
+cmRuntimeDependencyArchive::GetRPaths() const
+{
+  return this->RPaths;
+}
+
+bool cmRuntimeDependencyArchive::PlatformSupportsRuntimeDependencies(
+  const std::string& platform)
+{
+  static const std::set<std::string> supportedPlatforms = { "Windows", "Linux",
+                                                            "Darwin" };
+  return supportedPlatforms.count(platform);
 }

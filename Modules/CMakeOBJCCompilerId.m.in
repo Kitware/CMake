@@ -27,6 +27,10 @@ char const* qnxnto = "INFO" ":" "qnxnto[]";
 # else
 #  define C_DIALECT
 # endif
+#elif __STDC_VERSION__ > 201710L
+# define C_DIALECT "23"
+#elif __STDC_VERSION__ >= 201710L
+# define C_DIALECT "17"
 #elif __STDC_VERSION__ >= 201000L
 # define C_DIALECT "11"
 #elif __STDC_VERSION__ >= 199901L

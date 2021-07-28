@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "cmsys/Status.hxx"
+
 #include "cmCryptoHash.h"
 
 class cmConsoleBuf;
@@ -28,8 +30,8 @@ protected:
                          cmCryptoHash::Algo algo);
   static int SymlinkLibrary(std::vector<std::string> const& args);
   static int SymlinkExecutable(std::vector<std::string> const& args);
-  static bool SymlinkInternal(std::string const& file,
-                              std::string const& link);
+  static cmsys::Status SymlinkInternal(std::string const& file,
+                                       std::string const& link);
   static int ExecuteEchoColor(std::vector<std::string> const& args);
   static int ExecuteLinkScript(std::vector<std::string> const& args);
   static int WindowsCEEnvironment(const char* version,

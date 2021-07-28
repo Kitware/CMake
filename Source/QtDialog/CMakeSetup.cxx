@@ -112,7 +112,10 @@ int main(int argc, char** argv)
   cmAddPluginPath();
 #endif
 
-#if QT_VERSION >= 0x050600
+// HighDpiScaling is always enabled starting with Qt6, but will still issue a
+// deprecation warning if you try to set the attribute for it
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0) &&                               \
+     QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 
@@ -132,9 +135,9 @@ int main(int argc, char** argv)
   translationsDir.cd(QString::fromLocal8Bit(".." CMAKE_DATA_DIR));
   translationsDir.cd("i18n");
   QTranslator translator;
-  QString transfile = QString("cmake_%1").arg(QLocale::system().name());
-  translator.load(transfile, translationsDir.path());
-  QApplication::installTranslator(&translator);
+  if (translator.load(QLocale(), "cmake", "_", translationsDir.path())) {
+    QApplication::installTranslator(&translator);
+  }
 
   // app setup
   QApplication::setApplicationName("CMakeSetup");

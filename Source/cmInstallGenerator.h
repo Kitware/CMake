@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -33,7 +34,8 @@ public:
   cmInstallGenerator(std::string destination,
                      std::vector<std::string> const& configurations,
                      std::string component, MessageLevel message,
-                     bool exclude_from_all, cmListFileBacktrace backtrace);
+                     bool exclude_from_all, bool all_components,
+                     cmListFileBacktrace backtrace);
   ~cmInstallGenerator() override;
 
   cmInstallGenerator(cmInstallGenerator const&) = delete;
@@ -48,11 +50,12 @@ public:
     std::vector<std::string> const& files, bool optional = false,
     const char* permissions_file = nullptr,
     const char* permissions_dir = nullptr, const char* rename = nullptr,
-    const char* literal_args = nullptr, Indent indent = Indent());
+    const char* literal_args = nullptr, Indent indent = Indent(),
+    const char* files_var = nullptr);
 
   /** Get the install destination as it should appear in the
       installation script.  */
-  std::string ConvertToAbsoluteDestination(std::string const& dest) const;
+  static std::string ConvertToAbsoluteDestination(std::string const& dest);
 
   /** Test if this generator installs something for a given configuration.  */
   bool InstallsForConfig(const std::string& config);
@@ -65,8 +68,11 @@ public:
   std::string const& GetComponent() const { return this->Component; }
 
   bool GetExcludeFromAll() const { return this->ExcludeFromAll; }
+  bool GetAllComponentsFlag() const { return this->AllComponents; }
 
   cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
+
+  static std::string GetDestDirPath(std::string const& file);
 
 protected:
   void GenerateScript(std::ostream& os) override;
@@ -74,10 +80,22 @@ protected:
   std::string CreateComponentTest(const std::string& component,
                                   bool exclude_from_all);
 
+  using TweakMethod =
+    std::function<void(std::ostream& os, Indent indent,
+                       const std::string& config, const std::string& file)>;
+  static void AddTweak(std::ostream& os, Indent indent,
+                       const std::string& config, std::string const& file,
+                       const TweakMethod& tweak);
+  static void AddTweak(std::ostream& os, Indent indent,
+                       const std::string& config, std::string const& dir,
+                       std::vector<std::string> const& files,
+                       const TweakMethod& tweak);
+
   // Information shared by most generator types.
   std::string const Destination;
   std::string const Component;
   MessageLevel const Message;
   bool const ExcludeFromAll;
+  bool const AllComponents;
   cmListFileBacktrace const Backtrace;
 };

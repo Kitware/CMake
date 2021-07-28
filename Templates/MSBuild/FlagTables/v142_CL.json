@@ -386,6 +386,13 @@
   },
   {
     "name": "EnableEnhancedInstructionSet",
+    "switch": "arch:AVX512",
+    "comment": "Advanced Vector Extensions 512",
+    "value": "AdvancedVectorExtensions512",
+    "flags": []
+  },
+  {
+    "name": "EnableEnhancedInstructionSet",
     "switch": "arch:IA32",
     "comment": "No Enhanced Instructions",
     "value": "NoExtensions",
@@ -421,16 +428,44 @@
   },
   {
     "name": "SpectreMitigation",
+    "switch": "Qspectre-load-cf",
+    "comment": "All Control Flow Loads",
+    "value": "SpectreLoadCF",
+    "flags": []
+  },
+  {
+    "name": "SpectreMitigation",
+    "switch": "Qspectre-load",
+    "comment": "All Loads",
+    "value": "SpectreLoad",
+    "flags": []
+  },
+  {
+    "name": "SpectreMitigation",
     "switch": "Qspectre-",
-    "comment": "Spectre mitigations disabled",
+    "comment": "Disabled",
     "value": "false",
     "flags": []
   },
   {
     "name": "SpectreMitigation",
     "switch": "Qspectre",
-    "comment": "Spectre mitigations enabled",
+    "comment": "Enabled",
     "value": "Spectre",
+    "flags": []
+  },
+  {
+    "name": "ConformanceMode",
+    "switch": "permissive-",
+    "comment": "Yes",
+    "value": "true",
+    "flags": []
+  },
+  {
+    "name": "ConformanceMode",
+    "switch": "permissive",
+    "comment": "No",
+    "value": "false",
     "flags": []
   },
   {
@@ -445,6 +480,13 @@
     "switch": "std:c++17",
     "comment": "ISO C++17 Standard",
     "value": "stdcpp17",
+    "flags": []
+  },
+  {
+    "name": "LanguageStandard",
+    "switch": "std:c++20",
+    "comment": "ISO C++20 Standard",
+    "value": "stdcpp20",
     "flags": []
   },
   {
@@ -530,6 +572,46 @@
     "switch": "FAcs",
     "comment": "Assembly, Machine Code and Source",
     "value": "All",
+    "flags": []
+  },
+  {
+    "name": "ExternalWarningLevel",
+    "switch": "external:W0",
+    "comment": "Turn Off All Warnings",
+    "value": "TurnOffAllWarnings",
+    "vsmin": "16.10.31321.278",
+    "flags": []
+  },
+  {
+    "name": "ExternalWarningLevel",
+    "switch": "external:W1",
+    "comment": "Level1",
+    "value": "Level1",
+    "vsmin": "16.10.31321.278",
+    "flags": []
+  },
+  {
+    "name": "ExternalWarningLevel",
+    "switch": "external:W2",
+    "comment": "Level2",
+    "value": "Level2",
+    "vsmin": "16.10.31321.278",
+    "flags": []
+  },
+  {
+    "name": "ExternalWarningLevel",
+    "switch": "external:W3",
+    "comment": "Level3",
+    "value": "Level3",
+    "vsmin": "16.10.31321.278",
+    "flags": []
+  },
+  {
+    "name": "ExternalWarningLevel",
+    "switch": "external:W4",
+    "comment": "Level4",
+    "value": "Level4",
+    "vsmin": "16.10.31321.278",
     "flags": []
   },
   {
@@ -754,6 +836,20 @@
     "flags": []
   },
   {
+    "name": "UseStandardPreprocessor",
+    "switch": "Zc:preprocessor-",
+    "comment": "Use Standard Conforming Preprocessor",
+    "value": "false",
+    "flags": []
+  },
+  {
+    "name": "UseStandardPreprocessor",
+    "switch": "Zc:preprocessor",
+    "comment": "Use Standard Conforming Preprocessor",
+    "value": "true",
+    "flags": []
+  },
+  {
     "name": "StringPooling",
     "switch": "GF-",
     "comment": "Enable String Pooling",
@@ -838,24 +934,45 @@
     "flags": []
   },
   {
+    "name": "IntelJCCErratum",
+    "switch": "QIntel-jcc-erratum",
+    "comment": "Enable Intel JCC Erratum Mitigation",
+    "value": "true",
+    "flags": []
+  },
+  {
+    "name": "GuardEHContMetadata",
+    "switch": "guard:ehcont-",
+    "comment": "Enable EH Continuation Metadata",
+    "value": "false",
+    "flags": []
+  },
+  {
+    "name": "GuardEHContMetadata",
+    "switch": "guard:ehcont",
+    "comment": "Enable EH Continuation Metadata",
+    "value": "true",
+    "flags": []
+  },
+  {
+    "name": "GuardSignedReturns",
+    "switch": "guard:signret-",
+    "comment": "Enable Signed Returns",
+    "value": "false",
+    "flags": []
+  },
+  {
+    "name": "GuardSignedReturns",
+    "switch": "guard:signret",
+    "comment": "Enable Signed Returns",
+    "value": "true",
+    "flags": []
+  },
+  {
     "name": "DisableLanguageExtensions",
     "switch": "Za",
     "comment": "Disable Language Extensions",
     "value": "true",
-    "flags": []
-  },
-  {
-    "name": "ConformanceMode",
-    "switch": "permissive-",
-    "comment": "Conformance mode enabled",
-    "value": "true",
-    "flags": []
-  },
-  {
-    "name": "ConformanceMode",
-    "switch": "permissive",
-    "comment": "Conformance mode disabled",
-    "value": "false",
     "flags": []
   },
   {
@@ -945,7 +1062,7 @@
   {
     "name": "EnableModules",
     "switch": "experimental:module",
-    "comment": "Enable C++ Modules (experimental)",
+    "comment": "Enable Experimental C++ Standard Library Modules",
     "value": "true",
     "flags": []
   },
@@ -964,6 +1081,15 @@
     "flags": []
   },
   {
+    "name": "GenerateModuleDependencies",
+    "switch": "sourceDependencies:directives",
+    "comment": "Generate Module Dependenices File",
+    "value": "true",
+    "flags": [
+      "Continue"
+    ]
+  },
+  {
     "name": "GenerateXMLDocumentationFiles",
     "switch": "doc",
     "comment": "Generate XML Documentation Files",
@@ -971,6 +1097,15 @@
     "flags": [
       "UserValue",
       "UserIgnored",
+      "Continue"
+    ]
+  },
+  {
+    "name": "GenerateSourceDependencies",
+    "switch": "sourceDependencies",
+    "comment": "Generate Source Dependencies File",
+    "value": "true",
+    "flags": [
       "Continue"
     ]
   },
@@ -984,6 +1119,29 @@
       "UserIgnored",
       "Continue"
     ]
+  },
+  {
+    "name": "TreatAngleIncludeAsExternal",
+    "switch": "external:anglebrackets",
+    "comment": "Treat Files Included with Angle Brackets as External",
+    "value": "true",
+    "vsmin": "16.10.31321.278",
+    "flags": []
+  },
+  {
+    "name": "ExternalTemplatesDiagnostics",
+    "switch": "external:templates-",
+    "comment": "Template Diagnostics in External Headers",
+    "value": "true",
+    "vsmin": "16.10.31321.278",
+    "flags": []
+  },
+  {
+    "name": "DisableAnalyzeExternal",
+    "switch": "analyze:external-",
+    "comment": "Disable Code Analysis for External Headers",
+    "value": "true",
+    "flags": []
   },
   {
     "name": "ShowIncludes",
@@ -1041,6 +1199,36 @@
     ]
   },
   {
+    "name": "AdditionalBMIDirectories",
+    "switch": "ifcSearchDir",
+    "comment": "Additional BMI Directories",
+    "value": "",
+    "flags": [
+      "UserValue",
+      "SemicolonAppendable"
+    ]
+  },
+  {
+    "name": "AdditionalModuleDependencies",
+    "switch": "reference",
+    "comment": "Additional Module Dependencies",
+    "value": "",
+    "flags": [
+      "UserValue",
+      "SemicolonAppendable"
+    ]
+  },
+  {
+    "name": "AdditionalHeaderUnitDependencies",
+    "switch": "headerUnit",
+    "comment": "Additional Header Unit Dependencies",
+    "value": "",
+    "flags": [
+      "UserValue",
+      "SemicolonAppendable"
+    ]
+  },
+  {
     "name": "PreprocessorDefinitions",
     "switch": "D",
     "comment": "Preprocessor Definitions",
@@ -1055,6 +1243,27 @@
     "switch": "U",
     "comment": "Undefine Preprocessor Definitions",
     "value": "",
+    "flags": [
+      "UserValue",
+      "SemicolonAppendable"
+    ]
+  },
+  {
+    "name": "StdIfcDirectory",
+    "switch": "stdIfcDir",
+    "comment": "",
+    "value": "",
+    "flags": [
+      "UserValue",
+      "SemicolonAppendable"
+    ]
+  },
+  {
+    "name": "ExternalDirectoriesEnv",
+    "switch": "external:env:",
+    "comment": "External Directories Environment Variables",
+    "value": "",
+    "vsmin": "16.10.31321.278",
     "flags": [
       "UserValue",
       "SemicolonAppendable"
@@ -1176,6 +1385,24 @@
     ]
   },
   {
+    "name": "ModuleOutputFile",
+    "switch": "ifcOutput",
+    "comment": "Module Output File Name",
+    "value": "",
+    "flags": [
+      "UserValue"
+    ]
+  },
+  {
+    "name": "ModuleDependenciesFile",
+    "switch": "sourceDependencies:directives",
+    "comment": "Module Dependencies File Name",
+    "value": "",
+    "flags": [
+      "UserFollowing"
+    ]
+  },
+  {
     "name": "ObjectFileName",
     "switch": "Fo",
     "comment": "Object File Name",
@@ -1201,6 +1428,15 @@
     "flags": [
       "UserValue",
       "UserRequired"
+    ]
+  },
+  {
+    "name": "SourceDependenciesFile",
+    "switch": "sourceDependencies",
+    "comment": "Source Dependencies File Name",
+    "value": "",
+    "flags": [
+      "UserFollowing"
     ]
   },
   {

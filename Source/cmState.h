@@ -166,6 +166,8 @@ public:
   void AddDisallowedCommand(std::string const& name, BuiltinCommand command,
                             cmPolicies::PolicyID policy, const char* message);
   void AddUnexpectedCommand(std::string const& name, const char* error);
+  void AddUnexpectedFlowControlCommand(std::string const& name,
+                                       const char* error);
   bool AddScriptedCommand(std::string const& name, BT<Command> command,
                           cmMakefile& mf);
   void RemoveBuiltinCommand(std::string const& name);

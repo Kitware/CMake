@@ -463,6 +463,8 @@ public:
 private:
   void SetPersistentOptionIfNotEmpty(const std::string& value,
                                      const std::string& optionName);
+  void AddPersistentMultiOptionIfNotEmpty(const std::string& value,
+                                          const std::string& optionName);
 
   int GenerateNotesFile(const std::string& files);
 
@@ -533,6 +535,9 @@ private:
 
   int RunCMakeAndTest(std::string* output);
   int ExecuteTests();
+
+  /** return true iff change directory was successful */
+  bool TryToChangeDirectory(std::string const& dir);
 
   struct Private;
   std::unique_ptr<Private> Impl;

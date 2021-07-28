@@ -587,24 +587,24 @@ void cmCTestMultiProcessHandler::StartNextTests()
         onlyRunSerialTestsLeft = false;
       }
     }
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***** WAITING, ");
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "***** WAITING, ");
 
     if (this->SerialTestRunning) {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "Waiting for RUN_SERIAL test to finish.");
     } else if (onlyRunSerialTestsLeft) {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "Only RUN_SERIAL tests remain, awaiting available slot.");
     } else {
       /* clang-format off */
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "System Load: " << systemLoad << ", "
                  "Max Allowed Load: " << this->TestLoad << ", "
                  "Smallest test " << testWithMinProcessors <<
                  " requires " << minProcessorsRequired);
       /* clang-format on */
     }
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "*****" << std::endl);
 
     // Wait between 1 and 5 seconds before trying again.
     unsigned int milliseconds = (cmSystemTools::RandomSeed() % 5 + 1) * 1000;

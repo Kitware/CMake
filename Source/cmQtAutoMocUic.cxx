@@ -30,6 +30,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
+#include "cmQtAutoUicHelpers.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkerPool.h"
@@ -281,7 +282,7 @@ public:
     std::vector<std::string> Options;
     std::unordered_map<std::string, UiFile> UiFiles;
     std::vector<std::string> SearchPaths;
-    cmsys::RegularExpression RegExpInclude;
+    cmQtAutoUicHelpers AutoUicHelpers;
   };
 
   /** Uic shared variables.  */
@@ -564,8 +565,7 @@ private:
   // -- Generation
   bool CreateDirectories();
   // -- Support for depfiles
-  static std::vector<std::string> dependenciesFromDepFile(
-    const char* filePath);
+  std::vector<std::string> dependenciesFromDepFile(const char* filePath);
 
   // -- Settings
   BaseSettingsT BaseConst_;
@@ -762,11 +762,7 @@ std::string cmQtAutoMocUicT::MocSettingsT::MacrosString() const
   return res;
 }
 
-cmQtAutoMocUicT::UicSettingsT::UicSettingsT()
-{
-  this->RegExpInclude.compile("(^|\n)[ \t]*#[ \t]*include[ \t]+"
-                              "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
-}
+cmQtAutoMocUicT::UicSettingsT::UicSettingsT() = default;
 
 cmQtAutoMocUicT::UicSettingsT::~UicSettingsT() = default;
 
@@ -1057,16 +1053,7 @@ void cmQtAutoMocUicT::JobParseT::UicIncludes()
   }
 
   std::set<std::string> includes;
-  {
-    const char* contentChars = this->Content.c_str();
-    cmsys::RegularExpression const& regExp = this->UicConst().RegExpInclude;
-    cmsys::RegularExpressionMatch match;
-    while (regExp.find(contentChars, match)) {
-      includes.emplace(match.match(2));
-      // Forward content pointer
-      contentChars += match.end();
-    }
-  }
+  this->UicConst().AutoUicHelpers.CollectUicIncludes(includes, this->Content);
   this->CreateKeys(this->FileHandle->ParseData->Uic.Include, includes,
                    UiUnderscoreLength);
 }
@@ -1589,13 +1576,13 @@ bool cmQtAutoMocUicT::JobEvalCacheUicT::FindIncludedUi(
   };
 
   // Vicinity of the source
-  if (findUi(cmStrCat(sourceDirPrefix, this->UiName))) {
-    return true;
-  }
   if (!includePrefix.empty()) {
     if (findUi(cmStrCat(sourceDirPrefix, includePrefix, this->UiName))) {
       return true;
     }
+  }
+  if (findUi(cmStrCat(sourceDirPrefix, this->UiName))) {
+    return true;
   }
   // Additional AUTOUIC search paths
   auto const& searchPaths = this->UicConst().SearchPaths;
@@ -2066,7 +2053,8 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
                             " does not exist.");
       return;
     }
-    this->CacheEntry->Moc.Depends = dependenciesFromDepFile(depfile.c_str());
+    this->CacheEntry->Moc.Depends =
+      this->Gen()->dependenciesFromDepFile(depfile.c_str());
   }
 }
 
@@ -2223,12 +2211,12 @@ void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
                this->MessagePath(this->BaseConst().DepFile.c_str())));
   }
   auto processDepFile =
-    [](const std::string& mocOutputFile) -> std::vector<std::string> {
+    [this](const std::string& mocOutputFile) -> std::vector<std::string> {
     std::string f = mocOutputFile + ".d";
     if (!cmSystemTools::FileExists(f)) {
       return {};
     }
-    return dependenciesFromDepFile(f.c_str());
+    return this->Gen()->dependenciesFromDepFile(f.c_str());
   };
 
   std::vector<std::string> dependencies = this->initialDependencies();
@@ -2247,6 +2235,21 @@ void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
                 this->MocEval().HeaderMappings.end(), processMappingEntry);
   std::for_each(this->MocEval().SourceMappings.begin(),
                 this->MocEval().SourceMappings.end(), processMappingEntry);
+
+  // Remove SKIP_AUTOMOC files.
+  // Also remove AUTOUIC header files to avoid cyclic dependency.
+  dependencies.erase(
+    std::remove_if(dependencies.begin(), dependencies.end(),
+                   [this](const std::string& dep) {
+                     return this->MocConst().skipped(dep) ||
+                       std::any_of(
+                              this->UicEval().Includes.begin(),
+                              this->UicEval().Includes.end(),
+                              [&dep](MappingMapT::value_type const& mapping) {
+                                return dep == mapping.second->OutputFile;
+                              });
+                   }),
+    dependencies.end());
 
   // Remove duplicates to make the depfile smaller
   std::sort(dependencies.begin(), dependencies.end());
@@ -2716,6 +2719,9 @@ void cmQtAutoMocUicT::CreateParseJobs(SourceFileMapT const& sourceMap)
 std::string cmQtAutoMocUicT::CollapseFullPathTS(std::string const& path) const
 {
   std::lock_guard<std::mutex> guard(this->CMakeLibMutex_);
+#if defined(__NVCOMPILER)
+  static_cast<void>(guard); // convince compiler var is used
+#endif
   return cmSystemTools::CollapseFullPath(path,
                                          this->ProjectDirs().CurrentSource);
 }
@@ -2954,6 +2960,10 @@ bool cmQtAutoMocUicT::CreateDirectories()
 std::vector<std::string> cmQtAutoMocUicT::dependenciesFromDepFile(
   const char* filePath)
 {
+  std::lock_guard<std::mutex> guard(this->CMakeLibMutex_);
+#if defined(__NVCOMPILER)
+  static_cast<void>(guard); // convince compiler var is used
+#endif
   auto const content = cmReadGccDepfile(filePath);
   if (!content || content->empty()) {
     return {};

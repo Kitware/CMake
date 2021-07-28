@@ -326,12 +326,14 @@ static bool testConstructMove()
   std::cout << "testConstructMove()\n";
   cm::String s1 = std::string("abc");
   cm::String s2 = std::move(s1);
+#ifndef __clang_analyzer__ /* cplusplus.Move */
   ASSERT_TRUE(s1.data() == nullptr);
   ASSERT_TRUE(s1.size() == 0);
   ASSERT_TRUE(s2.size() == 3);
   ASSERT_TRUE(std::strncmp(s2.data(), "abc", 3) == 0);
   ASSERT_TRUE(s1.is_stable());
   ASSERT_TRUE(s2.is_stable());
+#endif
   return true;
 }
 
@@ -356,12 +358,14 @@ static bool testAssignMove()
   cm::String s1 = std::string("abc");
   cm::String s2;
   s2 = std::move(s1);
+#ifndef __clang_analyzer__ /* cplusplus.Move */
   ASSERT_TRUE(s1.data() == nullptr);
   ASSERT_TRUE(s1.size() == 0);
   ASSERT_TRUE(s2.size() == 3);
   ASSERT_TRUE(std::strncmp(s2.data(), "abc", 3) == 0);
   ASSERT_TRUE(s1.is_stable());
   ASSERT_TRUE(s2.is_stable());
+#endif
   return true;
 }
 

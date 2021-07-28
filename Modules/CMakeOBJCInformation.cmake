@@ -115,6 +115,11 @@ if(NOT CMAKE_OBJC_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_OBJC_COMPILER_LAUNCHER
     CACHE STRING "Compiler launcher for OBJC.")
 endif()
 
+if(NOT CMAKE_OBJC_LINKER_LAUNCHER AND DEFINED ENV{CMAKE_OBJC_LINKER_LAUNCHER})
+  set(CMAKE_OBJC_LINKER_LAUNCHER "$ENV{CMAKE_OBJC_LINKER_LAUNCHER}"
+    CACHE STRING "Linker launcher for OBJC.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 
 # now define the following rule variables

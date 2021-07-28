@@ -1,0 +1,1 @@
+^CMake Error: No install directory specified for --install-prefix

@@ -37,9 +37,11 @@ Environment Variables that Control the Build
    /envvar/CMAKE_GENERATOR_PLATFORM
    /envvar/CMAKE_GENERATOR_TOOLSET
    /envvar/CMAKE_LANG_COMPILER_LAUNCHER
+   /envvar/CMAKE_LANG_LINKER_LAUNCHER
    /envvar/CMAKE_MSVCIDE_RUN_PATH
    /envvar/CMAKE_NO_VERBOSE
    /envvar/CMAKE_OSX_ARCHITECTURES
+   /envvar/CMAKE_TOOLCHAIN_FILE
    /envvar/DESTDIR
    /envvar/LDFLAGS
    /envvar/MACOSX_DEPLOYMENT_TARGET
@@ -65,6 +67,8 @@ Environment Variables for Languages
    /envvar/CXXFLAGS
    /envvar/FC
    /envvar/FFLAGS
+   /envvar/HIPCXX
+   /envvar/HIPFLAGS
    /envvar/ISPC
    /envvar/ISPCFLAGS
    /envvar/OBJC

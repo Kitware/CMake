@@ -13,7 +13,7 @@ function(run_single_config_test label config exclude_from_all_value expectation)
     run_cmake_command(${case}-build ${CMAKE_COMMAND} --build . --config ${config})
 endfunction()
 
-run_single_config_test("explictly not excluded" Debug 0 "should_exist")
+run_single_config_test("explicitly not excluded" Debug 0 "should_exist")
 run_single_config_test("excluded" Debug 1 "should_not_exist")
 
 if(RunCMake_GENERATOR MATCHES "^(Xcode|Visual Studio)")

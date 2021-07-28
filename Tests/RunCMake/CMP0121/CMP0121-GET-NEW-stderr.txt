@@ -1,0 +1,8 @@
+CMake Error at CMP0121-GET-Common.cmake:3 \(list\):
+  list index: 2junk is not a valid index
+Call Stack \(most recent call first\):
+  CMP0121-GET-NEW.cmake:2 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+GET: --><--

@@ -51,7 +51,7 @@ on macOS:
 
  .. versionadded:: 3.6
 
- Default behaviour is to include a symlink to ``/Applications`` in the DMG.
+ Default behavior is to include a symlink to ``/Applications`` in the DMG.
  Set this option to ``ON`` to avoid adding the symlink.
 
 .. variable:: CPACK_DMG_SLA_DIR
@@ -102,6 +102,12 @@ on macOS:
  (``CPACK_COMPONENTS_GROUPING`` set to IGNORE).
 
  - Default: ``CPACK_PACKAGE_FILE_NAME-<component>``
+
+.. variable:: CPACK_DMG_FILESYSTEM
+
+ The filesystem format. Common values are ``APFS`` and ``HFS+``.
+ See ``man hdiutil`` for a full list of supported formats.
+ Defaults to ``HFS+``.
 
 .. variable:: CPACK_COMMAND_HDIUTIL
 

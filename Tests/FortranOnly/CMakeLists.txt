@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8.12)
 project(FortranOnly Fortran)
 message("CTEST_FULL_OUTPUT ")
 
+if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" MATCHES "^Intel(LLVM)?;MSVC$")
+  string(APPEND CMAKE_Fortran_FLAGS_DEBUG " -Z7")
+  string(APPEND CMAKE_Fortran_FLAGS_RELWITHDEBINFO " -Z7")
+endif()
+
 # create a library with hello and world functions
 add_library(FortranOnlylib hello.f world.f)
 set_property(TARGET FortranOnlylib PROPERTY Fortran_FORMAT FIXED)
@@ -117,15 +122,9 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
   target_compile_definitions(IntelIfDef PRIVATE SOME_DEF)
 endif()
 
-# Skip these tests if compiler/version doesn't have preprocessing flags
-if((CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 4.4)
-  OR (CMAKE_Fortran_COMPILER_ID STREQUAL "XL" AND CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 15.1.6))
-  set(test_pp_flags 0)
-else()
-  set(test_pp_flags 1)
-endif()
-
-if(test_pp_flags)
+# Skip these tests if compiler/version does enable and disable preprocessing
+if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON AND
+   CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF)
   # Test that we can always preprocess a target
   add_executable(preprocess_target preprocess2.f)
   set_property(TARGET preprocess_target PROPERTY Fortran_PREPROCESS ON)
@@ -145,17 +144,22 @@ set_property(SOURCE no_preprocess_source_lower.f PROPERTY Fortran_PREPROCESS OFF
 
 # Test that we can explicitly not preprocess a target or source.
 # This will not work on certain compilers due to either missing a
-# "don't preprocess" flag, or due to choice of file extension.
-if(test_pp_flags AND NOT CMAKE_Fortran_COMPILER_ID MATCHES "(Flang|NAG|PGI|NVHPC|SunPro|XL)")
+# "don't preprocess" flag, or due to the flags being ignored for
+# extensions like '.F' and '.fpp'.
+if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF AND
+    NOT CMAKE_Fortran_COMPILER_ID MATCHES "(Flang|NAG|PGI|NVHPC|SunPro|XL)")
   add_library(no_preprocess_target STATIC no_preprocess_target_upper.F)
   target_compile_options(no_preprocess_target PRIVATE -DINTEGER=nonsense)
+
   add_library(no_preprocess_source STATIC no_preprocess_source_upper.F)
   target_compile_options(no_preprocess_source PRIVATE -DINTEGER=nonsense)
+
   if(NOT CMAKE_Fortran_COMPILER_ID STREQUAL "Cray"
       AND NOT "${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" MATCHES "Intel(LLVM)?;MSVC")
     target_sources(no_preprocess_target PRIVATE no_preprocess_target_fpp.fpp)
     target_sources(no_preprocess_source PRIVATE no_preprocess_source_fpp.fpp)
   endif()
+
   set_property(TARGET no_preprocess_target PROPERTY Fortran_PREPROCESS OFF)
   set_property(SOURCE no_preprocess_source_upper.F no_preprocess_source_fpp.fpp PROPERTY Fortran_PREPROCESS OFF)
 endif()

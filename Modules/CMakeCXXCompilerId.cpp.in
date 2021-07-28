@@ -5,6 +5,12 @@
 # error "A C compiler has been selected for C++."
 #endif
 
+#if !defined(__has_include)
+/* If the compiler does not have __has_include, pretend the answer is
+   always no.  */
+#  define __has_include(x) 0
+#endif
+
 @CMAKE_CXX_COMPILER_ID_CONTENT@
 
 /* Construct the string literal in pieces to prevent the source from

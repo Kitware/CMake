@@ -17,5 +17,165 @@
     ],
     "projectName": "Cxx",
     "minimumCMakeVersion": "3.12",
-    "hasInstallRule": null
+    "hasInstallRule": true,
+    "installers": [
+        {
+            "component": "Unspecified",
+            "type": "target",
+            "destination": "lib",
+            "paths": [
+                "^cxx/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?cxx_exe(\\.exe)?$"
+            ],
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": "^cxx_exe::@a56b12a3f5c0529fb296$",
+            "targetIndex": "cxx_exe",
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": 38,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "runtimeDependencySet",
+            "destination": "lib",
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "runtimeDependencySetType": "library",
+            "backtrace": [
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": 38,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "runtimeDependencySet",
+            "destination": "fw",
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "runtimeDependencySetType": "framework",
+            "backtrace": [
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": 38,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "runtimeDependencySet",
+            "destination": "lib",
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "runtimeDependencySetType": "library",
+            "runtimeDependencySetName": "deps",
+            "backtrace": [
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": 43,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "runtimeDependencySet",
+            "destination": "fw",
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "runtimeDependencySetType": "framework",
+            "runtimeDependencySetName": "deps",
+            "backtrace": [
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": 43,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ]
 }

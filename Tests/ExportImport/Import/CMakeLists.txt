@@ -26,3 +26,12 @@ add_subdirectory(Interface)
 
 # Test package version range
 add_subdirectory(version_range)
+
+# Test install(IMPORTED_RUNTIME_ARTIFACTS)
+add_subdirectory(install-IMPORTED_RUNTIME_ARTIFACTS)
+
+# Test install(RUNTIME_DEPENDENCIES) and install(RUNTIME_DEPENDENCY_SET)
+if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Windows|Darwin)$")
+  add_subdirectory(install-RUNTIME_DEPENDENCIES)
+  add_subdirectory(install-RUNTIME_DEPENDENCY_SET)
+endif()

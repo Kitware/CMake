@@ -16,14 +16,12 @@ set_property(
   )
 
 get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-if(_isMultiConfig)
-  set(NESTED_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
+if(_isMultiConfig OR CMAKE_BUILD_TYPE)
+  set(NESTED_CONFIG_TYPE -C "$<CONFIG>")
+  set(NESTED_CONFIG_INSTALL_TYPE --config "$<CONFIG>")
 else()
-  if(CMAKE_BUILD_TYPE)
-    set(NESTED_CONFIG_TYPE -C "${CMAKE_BUILD_TYPE}")
-  else()
-    set(NESTED_CONFIG_TYPE)
-  endif()
+  set(NESTED_CONFIG_TYPE)
+  set(NESTED_CONFIG_INSTALL_TYPE)
 endif()
 
 if(MINGW OR MSYS)
@@ -78,6 +76,30 @@ set_property(
   SOURCE ${ExportImport_BINARY_DIR}/ImportProject
   PROPERTY SYMBOLIC 1
   )
+
+# Run the install tests.
+set(install_deps)
+set(rdep_tests)
+if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Windows|Darwin)$" AND NOT CMake_INSTALL_NAME_TOOL_BUG)
+  set(rdep_tests RUNTIME_DEPENDENCIES RUNTIME_DEPENDENCY_SET)
+endif()
+foreach(name IMPORTED_RUNTIME_ARTIFACTS ${rdep_tests})
+  add_custom_command(
+    OUTPUT ${ExportImport_BINARY_DIR}/ImportInstall-${name}
+    COMMAND ${CMAKE_COMMAND} -E rm -rf ${ExportImport_BINARY_DIR}/Import/install-${name}/install
+    COMMAND ${CMAKE_COMMAND}
+      --install ${ExportImport_BINARY_DIR}/Import/install-${name}
+      --prefix ${ExportImport_BINARY_DIR}/Import/install-${name}/install
+      ${NESTED_CONFIG_INSTALL_TYPE}
+    )
+  list(APPEND install_deps ${ExportImport_BINARY_DIR}/ImportInstall-${name})
+  set_property(
+    SOURCE ${ExportImport_BINARY_DIR}/ImportInstall-${name}
+    PROPERTY SYMBOLIC 1
+    )
+endforeach()
+add_custom_target(ImportInstallTarget ALL DEPENDS ${install_deps})
+add_dependencies(ImportInstallTarget ImportTarget)
 
 add_executable(ExportImport main.c)
 add_dependencies(ExportImport ImportTarget)

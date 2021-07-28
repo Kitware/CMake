@@ -459,9 +459,10 @@ are :ref:`normalized <Normalization>` before the check.
 
 .. code-block:: cmake
 
-  set(path "/a/b/c/d")
-  cmake_path(IS_PREFIX path "/a/b" result)    # result = true
-  cmake_path(IS_PREFIX path "/x/y/z" result)  # result = false
+  set(path "/a/b/c")
+  cmake_path(IS_PREFIX path "/a/b/c/d" result) # result = true
+  cmake_path(IS_PREFIX path "/a/b" result)     # result = false
+  cmake_path(IS_PREFIX path "/x/y/z" result)   # result = false
 
   set(path "/a/b")
   cmake_path(IS_PREFIX path "/a/c/../b" NORMALIZE result)   # result = true
@@ -687,7 +688,8 @@ When the ``NORMALIZE`` option is specified, the path is :ref:`normalized
 <Normalization>` after the path computation.
 
 Because ``cmake_path()`` does not access the filesystem, symbolic links are
-not resolved.  To compute a real path with symbolic links resolved, use the
+not resolved and any leading tilde is not expanded.  To compute a real path
+with symbolic links resolved and leading tildes expanded, use the
 :command:`file(REAL_PATH)` command instead.
 
 Native Conversion

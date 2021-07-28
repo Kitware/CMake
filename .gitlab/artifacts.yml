@@ -82,11 +82,22 @@
             - build/cmake-*.tar.gz
             - build/cmake-*.zip
 
+.cmake_junit_artifacts:
+    artifacts:
+        expire_in: 1d
+        when: always
+        reports:
+            junit:
+                - build/junit.xml
+
 .cmake_test_artifacts:
     artifacts:
         expire_in: 1d
         # External testing can be useful even if test jobs fail.
         when: always
+        reports:
+            junit:
+                - build/junit.xml
         paths:
             # Take the install tree.
             - build/install/
@@ -97,3 +108,12 @@
         paths:
             # Take the install tree.
             - build/install-doc/
+
+.cmake_org_help_artifacts:
+    artifacts:
+        expire_in: 1d
+        paths:
+            - build/html
+        exclude:
+            - build/html/.buildinfo
+            - build/html/objects.inv

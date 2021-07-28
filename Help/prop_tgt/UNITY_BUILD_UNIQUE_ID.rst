@@ -50,6 +50,6 @@ be used to avoid that with code like the following:
     return MY_UNITY_ID::i;
   }
 
-The pseudononymous namespace is used within a truly anonymous namespace.
+The pseudonymous namespace is used within a truly anonymous namespace.
 On many platforms, this maintains the invariant that the symbols within
 do not get external linkage when performing a unity build.

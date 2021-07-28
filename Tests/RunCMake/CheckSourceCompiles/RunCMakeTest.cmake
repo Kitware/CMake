@@ -23,3 +23,7 @@ endif()
 if(CMake_TEST_ISPC)
   run_cmake(CheckISPCSourceCompiles)
 endif()
+
+if(CMake_TEST_HIP)
+  run_cmake(CheckHIPSourceCompiles)
+endif()

@@ -25,14 +25,14 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/CheckSwift.cmake)
 
 # Fake a user home directory to avoid polluting the real one.
-if(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
+if(NOT CTEST_NO_TEST_HOME AND (NOT WIN32 OR DEFINED ENV{HOME}))
   set(TEST_HOME "${CMake_BINARY_DIR}/Tests/CMakeFiles/TestHome")
   file(MAKE_DIRECTORY "${TEST_HOME}")
   file(WRITE "${TEST_HOME}/.cvspass" ":pserver:anoncvs@www.cmake.org:/cvsroot/KWSys A\n")
   set(TEST_HOME_ENV_CODE "# Fake a user home directory to avoid polluting the real one.
 # But provide original ENV{HOME} value in ENV{CTEST_REAL_HOME} for tests that
 # need access to the real HOME directory.
-if(NOT DEFINED ENV{CTEST_REAL_HOME})
+if(DEFINED ENV{HOME} AND NOT DEFINED ENV{CTEST_REAL_HOME})
   set(ENV{CTEST_REAL_HOME} \"\$ENV{HOME}\")
 endif()
 set(ENV{HOME} \"${TEST_HOME}\")
@@ -96,7 +96,7 @@ if(BUILD_TESTING)
   # some old versions of make simply cannot handle spaces in paths
   if (MAKE_IS_GNU OR
       CMAKE_MAKE_PROGRAM MATCHES "nmake|gmake|wmake" OR
-      CMAKE_GENERATOR MATCHES "Visual Studio|Xcode|Borland")
+      CMAKE_GENERATOR MATCHES "Visual Studio|Xcode|Borland|Ninja")
     set(MAKE_SUPPORTS_SPACES 1)
   else()
     set(MAKE_SUPPORTS_SPACES 0)
@@ -209,9 +209,12 @@ if(BUILD_TESTING)
     if(CMAKE_HOST_WIN32 AND COMMAND cmake_host_system_information)
       set(info_vs15 "VS_15_DIR")
       set(info_vs16 "VS_16_DIR")
+      set(info_vs17 "VS_17_DIR")
       set(vs_versions)
       if(WIN32)
-        if(NOT CMAKE_VERSION VERSION_LESS 3.14)
+        if(NOT CMAKE_VERSION VERSION_LESS 3.21.20210624)
+          set(vs_versions vs15 vs16 vs17)
+        elseif(NOT CMAKE_VERSION VERSION_LESS 3.14)
           set(vs_versions vs15 vs16)
         elseif(NOT CMAKE_VERSION VERSION_LESS 3.8)
           set(vs_versions vs15)
@@ -321,7 +324,7 @@ if(BUILD_TESTING)
     else()
       execute_process(
         COMMAND xcodebuild -version
-        OUTPUT_VARIABLE _version ERROR_VARIABLE _version
+        OUTPUT_VARIABLE _version ERROR_VARIABLE _version_err
         )
       if(_version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
         set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
@@ -460,7 +463,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(OutName exe.OutName.exe)
   ADD_TEST_MACRO(ObjectLibrary UseCshared)
   ADD_TEST_MACRO(NewlineArgs NewlineArgs)
-  ADD_TEST_MACRO(SetLang SetLang)
+  ADD_TEST_MACRO(SetLang SetLangX)
   ADD_TEST_MACRO(EmptyProperty EmptyProperty)
   ADD_TEST_MACRO(ExternalOBJ ExternalOBJ)
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
@@ -478,6 +481,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(Preprocess Preprocess)
   set(ExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
                                  -DCMake_TEST_CUDA:BOOL=${CMake_TEST_CUDA}
+                                 -DCMake_INSTALL_NAME_TOOL_BUG:BOOL=${CMake_INSTALL_NAME_TOOL_BUG}
                                  )
   ADD_TEST_MACRO(ExportImport ExportImport)
   set_property(TEST ExportImport APPEND
@@ -488,6 +492,11 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(CompileDefinitions CompileDefinitions)
   if(CMAKE_Fortran_COMPILER)
     set(CompileOptions_BUILD_OPTIONS -DTEST_FORTRAN=1)
+  endif()
+  if(_isMultiConfig)
+    set(CompileOptions_CTEST_OPTIONS --build-config $<CONFIGURATION>)
+  else()
+    set(CompileOptions_BUILD_OPTIONS -DCMAKE_BUILD_TYPE=$<CONFIGURATION>)
   endif()
   ADD_TEST_MACRO(CompileOptions CompileOptions)
   ADD_TEST_MACRO(CompatibleInterface CompatibleInterface)
@@ -532,7 +541,7 @@ if(BUILD_TESTING)
   if(CTEST_TEST_OSX_ARCH)
     ADD_TEST_MACRO(Architecture Architecture)
     set_tests_properties(Architecture PROPERTIES
-      PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype|not the architecture being linked)")
+      PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype|not the architecture being linked|but attempting to link with file built for)")
   endif()
 
   list(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
@@ -804,6 +813,7 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project Framework
     --build-options
+      -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/Framework/Install"
     --test-command bar)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Framework")
@@ -828,6 +838,8 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project LibName
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LibName/lib"
+    --build-options
+      -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     --test-command foobar
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LibName")
@@ -1421,6 +1433,7 @@ if(BUILD_TESTING)
             CURL
             Cups
             Doxygen
+            DevIL
             EnvModules
             EXPAT
             Fontconfig
@@ -1473,6 +1486,10 @@ if(BUILD_TESTING)
   if(CMake_TEST_CUDA)
     add_subdirectory(Cuda)
     add_subdirectory(CudaOnly)
+  endif()
+
+  if(CMake_TEST_HIP)
+    add_subdirectory(HIP)
   endif()
 
   if(CMake_TEST_ISPC)
@@ -1693,7 +1710,7 @@ if(BUILD_TESTING)
       ${build_generator_args}
       --build-project ${import_name}
       --build-options
-      "-DCMAKE_PREFIX_PATH:PATH=${install_dir}/lib/cmake")
+      "-DCMAKE_PREFIX_PATH:PATH=${install_dir}")
     set_tests_properties(${import_test_name} PROPERTIES DEPENDS ${export_test_name})
     list(APPEND TEST_BUILD_DIRS "${import_build_dir}")
   endfunction()
@@ -1738,33 +1755,61 @@ if(BUILD_TESTING)
   add_test(testdriver1 ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TestDriver"
-    "${CMake_BINARY_DIR}/Tests/TestDriver"
+    "${CMake_BINARY_DIR}/Tests/TestDriver1"
     ${build_generator_args}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
     --test-command TestDriverTest test1
     )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver1")
 
   add_test(testdriver2 ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TestDriver"
-    "${CMake_BINARY_DIR}/Tests/TestDriver"
+    "${CMake_BINARY_DIR}/Tests/TestDriver2"
     ${build_generator_args}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
     --test-command TestDriverTest test2
     )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver2")
 
   add_test(testdriver3  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TestDriver"
-    "${CMake_BINARY_DIR}/Tests/TestDriver"
+    "${CMake_BINARY_DIR}/Tests/TestDriver3"
     ${build_generator_args}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
     --test-command TestDriverTest subdir/test3
     )
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver")
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver3")
+
+  add_test(testdriver4  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/TestDriver"
+    "${CMake_BINARY_DIR}/Tests/TestDriver4"
+    ${build_generator_args}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
+    --build-project TestDriverTest
+    --test-command TestDriverTest -A test2
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver4")
+
+  add_test(testdriver5  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/TestDriver"
+    "${CMake_BINARY_DIR}/Tests/TestDriver5"
+    ${build_generator_args}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
+    --build-project TestDriverTest
+    --test-command TestDriverTest -A test2
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver5")
+  set_tests_properties(testdriver5 PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "TAP version 13\n1\\.\\.3.+ok 1 test1 # [0-9]+\\.[0-9]+.*All tests finished."
+    )
 
   add_test(Dependency ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -2416,6 +2461,9 @@ if(BUILD_TESTING)
   endif()
   if(vs16 AND CMake_TEST_ANDROID_VS16)
     add_test_VSAndroid(vs16 "Visual Studio 16 2019" "ARM")
+  endif()
+  if(vs17 AND CMake_TEST_ANDROID_VS17)
+    add_test_VSAndroid(vs17 "Visual Studio 17 2022" "ARM")
   endif()
 
   if (APPLE)

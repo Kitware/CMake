@@ -8,8 +8,9 @@ Generates Visual Studio 16 (VS 2019) project files.
 Project Types
 ^^^^^^^^^^^^^
 
-Only Visual C++ and C# projects may be generated.  Other types of
-projects (JavaScript, Powershell, Python, etc.) are not supported.
+Only Visual C++ and C# projects may be generated (and Fortran with
+Intel compiler integration).  Other types of projects (JavaScript,
+Powershell, Python, etc.) are not supported.
 
 Instance Selection
 ^^^^^^^^^^^^^^^^^^

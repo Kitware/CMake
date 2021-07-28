@@ -30,7 +30,7 @@ cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator(cmake* cm)
   /*
    * Borland Make does not support long line depend rule, as we have tested
    * generate one source file includes 40000 header files, and generate
-   * depend.make in one line(use line continued tag), and error occured:
+   * depend.make in one line(use line continued tag), and error occurred:
    * ** Fatal CMakeFiles\main.dir\depend.make 1224: Rule line too long **
    * we disable long line dependencies rule generation for Borland make
    */

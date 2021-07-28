@@ -1,13 +1,12 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#if !defined(_WIN32) && !defined(__sun)
+#if !defined(_WIN32) && !defined(__sun) && !defined(__OpenBSD__)
 // POSIX APIs are needed
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _POSIX_C_SOURCE 200809L
 #endif
-#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) ||    \
-  defined(__QNX__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__QNX__)
 // For isascii
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 700
@@ -15,11 +14,13 @@
 
 #include "cmSystemTools.h"
 
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include <cm3p/uv.h>
 
 #include "cmDuration.h"
+#include "cmMessageMetadata.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
@@ -65,6 +66,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <functional>
 #include <iostream>
 #include <sstream>
 #include <utility>
@@ -87,6 +89,7 @@
 #  include <unistd.h>
 
 #  include <sys/time.h>
+#  include <sys/types.h>
 #endif
 
 #if defined(_WIN32) &&                                                        \
@@ -100,6 +103,10 @@
 
 #ifdef __QNX__
 #  include <malloc.h> /* for malloc/free on QNX */
+#endif
+
+#if !defined(_WIN32) && !defined(__ANDROID__)
+#  include <sys/utsname.h>
 #endif
 
 namespace {
@@ -259,8 +266,15 @@ void cmSystemTools::Stdout(const std::string& s)
 
 void cmSystemTools::Message(const std::string& m, const char* title)
 {
+  cmMessageMetadata md;
+  md.title = title;
+  Message(m, md);
+}
+
+void cmSystemTools::Message(const std::string& m, const cmMessageMetadata& md)
+{
   if (s_MessageCallback) {
-    s_MessageCallback(m, title);
+    s_MessageCallback(m, md);
   } else {
     std::cerr << m << std::endl;
   }
@@ -952,20 +966,86 @@ void cmSystemTools::InitializeLibUV()
 
 #ifdef _WIN32
 namespace {
-bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname)
+bool cmMoveFile(std::wstring const& oldname, std::wstring const& newname,
+                cmSystemTools::Replace replace)
 {
   // Not only ignore any previous error, but clear any memory of it.
   SetLastError(0);
 
-  // Use MOVEFILE_REPLACE_EXISTING to replace an existing destination file.
-  return MoveFileExW(oldname.c_str(), newname.c_str(),
-                     MOVEFILE_REPLACE_EXISTING);
+  DWORD flags = 0;
+  if (replace == cmSystemTools::Replace::Yes) {
+    // Use MOVEFILE_REPLACE_EXISTING to replace an existing destination file.
+    flags = flags | MOVEFILE_REPLACE_EXISTING;
+  }
+
+  return MoveFileExW(oldname.c_str(), newname.c_str(), flags);
 }
 }
 #endif
 
+bool cmSystemTools::CopySingleFile(const std::string& oldname,
+                                   const std::string& newname)
+{
+  return cmSystemTools::CopySingleFile(oldname, newname, CopyWhen::Always) ==
+    CopyResult::Success;
+}
+
+cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
+  std::string const& oldname, std::string const& newname, CopyWhen when,
+  std::string* err)
+{
+  switch (when) {
+    case CopyWhen::Always:
+      break;
+    case CopyWhen::OnlyIfDifferent:
+      if (!FilesDiffer(oldname, newname)) {
+        return CopyResult::Success;
+      }
+      break;
+  }
+
+  mode_t perm = 0;
+  cmsys::Status perms = SystemTools::GetPermissions(oldname, perm);
+
+  // If files are the same do not copy
+  if (SystemTools::SameFile(oldname, newname)) {
+    return CopyResult::Success;
+  }
+
+  cmsys::Status status;
+  status = cmsys::SystemTools::CloneFileContent(oldname, newname);
+  if (!status) {
+    // if cloning did not succeed, fall back to blockwise copy
+    status = cmsys::SystemTools::CopyFileContentBlockwise(oldname, newname);
+  }
+  if (!status) {
+    if (err) {
+      *err = status.GetString();
+    }
+    return CopyResult::Failure;
+  }
+  if (perms) {
+    status = SystemTools::SetPermissions(newname, perm);
+    if (!status) {
+      if (err) {
+        *err = status.GetString();
+      }
+      return CopyResult::Failure;
+    }
+  }
+  return CopyResult::Success;
+}
+
 bool cmSystemTools::RenameFile(const std::string& oldname,
                                const std::string& newname)
+{
+  return cmSystemTools::RenameFile(oldname, newname, Replace::Yes) ==
+    RenameResult::Success;
+}
+
+cmSystemTools::RenameResult cmSystemTools::RenameFile(
+  std::string const& oldname, std::string const& newname, Replace replace,
+  std::string* err)
 {
 #ifdef _WIN32
 #  ifndef INVALID_FILE_ATTRIBUTES
@@ -988,7 +1068,7 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
     oldname_wstr, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
 
   DWORD move_last_error = 0;
-  while (!cmMoveFile(oldname_wstr, newname_wstr) && --retry.Count) {
+  while (!cmMoveFile(oldname_wstr, newname_wstr, replace) && --retry.Count) {
     move_last_error = GetLastError();
 
     // There was no error ==> the operation is not yet complete.
@@ -1004,7 +1084,13 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
     // 3) Windows Explorer has an associated directory already opened.
     if (move_last_error != ERROR_ACCESS_DENIED &&
         move_last_error != ERROR_SHARING_VIOLATION) {
-      return false;
+      if (replace == Replace::No && move_last_error == ERROR_ALREADY_EXISTS) {
+        return RenameResult::NoReplace;
+      }
+      if (err) {
+        *err = cmsys::Status::Windows(move_last_error).GetString();
+      }
+      return RenameResult::Failure;
     }
 
     DWORD const attrs = GetFileAttributesW(newname_wstr.c_str());
@@ -1028,10 +1114,37 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
     save_restore_file_attributes.SetPath(newname_wstr);
   }
   SetLastError(move_last_error);
-  return retry.Count > 0;
+  if (retry.Count > 0) {
+    return RenameResult::Success;
+  }
+  if (replace == Replace::No && GetLastError() == ERROR_ALREADY_EXISTS) {
+    return RenameResult::NoReplace;
+  }
+  if (err) {
+    *err = cmsys::Status::Windows_GetLastError().GetString();
+  }
+  return RenameResult::Failure;
 #else
-  /* On UNIX we have an OS-provided call to do this atomically.  */
-  return rename(oldname.c_str(), newname.c_str()) == 0;
+  // On UNIX we have OS-provided calls to create 'newname' atomically.
+  if (replace == Replace::No) {
+    if (link(oldname.c_str(), newname.c_str()) == 0) {
+      return RenameResult::Success;
+    }
+    if (errno == EEXIST) {
+      return RenameResult::NoReplace;
+    }
+    if (err) {
+      *err = cmsys::Status::POSIX_errno().GetString();
+    }
+    return RenameResult::Failure;
+  }
+  if (rename(oldname.c_str(), newname.c_str()) == 0) {
+    return RenameResult::Success;
+  }
+  if (err) {
+    *err = cmsys::Status::POSIX_errno().GetString();
+  }
+  return RenameResult::Failure;
 #endif
 }
 
@@ -1388,6 +1501,20 @@ std::string cmSystemTools::ForceToRelativePath(std::string const& local_path,
   return relative;
 }
 
+std::string cmSystemTools::RelativeIfUnder(std::string const& top,
+                                           std::string const& in)
+{
+  std::string out;
+  if (in == top) {
+    out = ".";
+  } else if (cmSystemTools::IsSubDirectory(in, top)) {
+    out = in.substr(top.size() + 1);
+  } else {
+    out = in;
+  }
+  return out;
+}
+
 #ifndef CMAKE_BOOTSTRAP
 bool cmSystemTools::UnsetEnv(const char* value)
 {
@@ -1694,7 +1821,7 @@ bool copy_data(struct archive* ar, struct archive* aw)
       return false;
     }
   }
-#  if !defined(__clang__) && !defined(__HP_aCC)
+#  if !defined(__clang__) && !defined(__NVCOMPILER) && !defined(__HP_aCC)
   return false; /* this should not happen but it quiets some compilers */
 #  endif
 }
@@ -2399,6 +2526,7 @@ std::string::size_type cmSystemToolsFindRPath(cm::string_view const& have,
 #endif
 
 #if defined(CMake_USE_ELF_PARSER)
+namespace {
 struct cmSystemToolsRPathInfo
 {
   unsigned long Position;
@@ -2406,15 +2534,15 @@ struct cmSystemToolsRPathInfo
   std::string Name;
   std::string Value;
 };
-#endif
+
+using EmptyCallback = std::function<bool(std::string*, const cmELF&)>;
+using AdjustCallback = std::function<bool(
+  cm::optional<std::string>&, const std::string&, const char*, std::string*)>;
 
 // FIXME: Dispatch if multiple formats are supported.
-#if defined(CMake_USE_ELF_PARSER)
-bool cmSystemTools::ChangeRPath(std::string const& file,
-                                std::string const& oldRPath,
-                                std::string const& newRPath,
-                                bool removeEnvironmentRPath, std::string* emsg,
-                                bool* changed)
+bool AdjustRPath(std::string const& file, const EmptyCallback& emptyCallback,
+                 const AdjustCallback& adjustCallback, std::string* emsg,
+                 bool* changed)
 {
   if (changed) {
     *changed = false;
@@ -2441,17 +2569,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       ++se_count;
     }
     if (se_count == 0) {
-      if (newRPath.empty()) {
-        // The new rpath is empty and there is no rpath anyway so it is
-        // okay.
-        return true;
-      }
-      if (emsg) {
-        *emsg =
-          cmStrCat("No valid ELF RPATH or RUNPATH entry exists in the file; ",
-                   elf.GetErrorMessage());
-      }
-      return false;
+      return emptyCallback(emsg, elf);
     }
 
     for (int i = 0; i < se_count; ++i) {
@@ -2461,68 +2579,38 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
         continue;
       }
 
-      // Make sure the current rpath contains the old rpath.
-      std::string::size_type pos =
-        cmSystemToolsFindRPath(se[i]->Value, oldRPath);
-      if (pos == std::string::npos) {
-        // If it contains the new rpath instead then it is okay.
-        if (cmSystemToolsFindRPath(se[i]->Value, newRPath) !=
-            std::string::npos) {
-          remove_rpath = false;
-          continue;
-        }
-        if (emsg) {
-          std::ostringstream e;
-          /* clang-format off */
-        e << "The current " << se_name[i] << " is:\n"
-          << "  " << se[i]->Value << "\n"
-          << "which does not contain:\n"
-          << "  " << oldRPath << "\n"
-          << "as was expected.";
-          /* clang-format on */
-          *emsg = e.str();
-        }
-        return false;
-      }
-
       // Store information about the entry in the file.
       rp[rp_count].Position = se[i]->Position;
       rp[rp_count].Size = se[i]->Size;
       rp[rp_count].Name = se_name[i];
 
-      std::string::size_type prefix_len = pos;
-
-      // If oldRPath was at the end of the file's RPath, and newRPath is empty,
-      // we should remove the unnecessary ':' at the end.
-      if (newRPath.empty() && pos > 0 && se[i]->Value[pos - 1] == ':' &&
-          pos + oldRPath.length() == se[i]->Value.length()) {
-        prefix_len--;
-      }
-
-      // Construct the new value which preserves the part of the path
-      // not being changed.
-      if (!removeEnvironmentRPath) {
-        rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
-      }
-      rp[rp_count].Value += newRPath;
-      rp[rp_count].Value += se[i]->Value.substr(pos + oldRPath.length());
-
-      if (!rp[rp_count].Value.empty()) {
-        remove_rpath = false;
-      }
-
-      // Make sure there is enough room to store the new rpath and at
-      // least one null terminator.
-      if (rp[rp_count].Size < rp[rp_count].Value.length() + 1) {
-        if (emsg) {
-          *emsg = cmStrCat("The replacement path is too long for the ",
-                           se_name[i], " entry.");
-        }
+      // Adjust the rpath.
+      cm::optional<std::string> outRPath;
+      if (!adjustCallback(outRPath, se[i]->Value, se_name[i], emsg)) {
         return false;
       }
 
-      // This entry is ready for update.
-      ++rp_count;
+      if (outRPath) {
+        if (!outRPath->empty()) {
+          remove_rpath = false;
+        }
+
+        // Make sure there is enough room to store the new rpath and at
+        // least one null terminator.
+        if (rp[rp_count].Size < outRPath->length() + 1) {
+          if (emsg) {
+            *emsg = cmStrCat("The replacement path is too long for the ",
+                             se_name[i], " entry.");
+          }
+          return false;
+        }
+
+        // This entry is ready for update.
+        rp[rp_count].Value = std::move(*outRPath);
+        ++rp_count;
+      } else {
+        remove_rpath = false;
+      }
     }
   }
 
@@ -2580,6 +2668,99 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     *changed = true;
   }
   return true;
+}
+
+std::function<bool(std::string*, const cmELF&)> MakeEmptyCallback(
+  const std::string& newRPath)
+{
+  return [newRPath](std::string* emsg, const cmELF& elf) -> bool {
+    if (newRPath.empty()) {
+      // The new rpath is empty and there is no rpath anyway so it is
+      // okay.
+      return true;
+    }
+    if (emsg) {
+      *emsg =
+        cmStrCat("No valid ELF RPATH or RUNPATH entry exists in the file; ",
+                 elf.GetErrorMessage());
+    }
+    return false;
+  };
+};
+}
+
+bool cmSystemTools::ChangeRPath(std::string const& file,
+                                std::string const& oldRPath,
+                                std::string const& newRPath,
+                                bool removeEnvironmentRPath, std::string* emsg,
+                                bool* changed)
+{
+  auto adjustCallback = [oldRPath, newRPath, removeEnvironmentRPath](
+                          cm::optional<std::string>& outRPath,
+                          const std::string& inRPath, const char* se_name,
+                          std::string* emsg2) -> bool {
+    // Make sure the current rpath contains the old rpath.
+    std::string::size_type pos = cmSystemToolsFindRPath(inRPath, oldRPath);
+    if (pos == std::string::npos) {
+      // If it contains the new rpath instead then it is okay.
+      if (cmSystemToolsFindRPath(inRPath, newRPath) != std::string::npos) {
+        return true;
+      }
+      if (emsg2) {
+        std::ostringstream e;
+        /* clang-format off */
+        e << "The current " << se_name << " is:\n"
+          << "  " << inRPath << "\n"
+          << "which does not contain:\n"
+          << "  " << oldRPath << "\n"
+          << "as was expected.";
+        /* clang-format on */
+        *emsg2 = e.str();
+      }
+      return false;
+    }
+
+    std::string::size_type prefix_len = pos;
+
+    // If oldRPath was at the end of the file's RPath, and newRPath is empty,
+    // we should remove the unnecessary ':' at the end.
+    if (newRPath.empty() && pos > 0 && inRPath[pos - 1] == ':' &&
+        pos + oldRPath.length() == inRPath.length()) {
+      prefix_len--;
+    }
+
+    // Construct the new value which preserves the part of the path
+    // not being changed.
+    outRPath.emplace();
+    if (!removeEnvironmentRPath) {
+      *outRPath += inRPath.substr(0, prefix_len);
+    }
+    *outRPath += newRPath;
+    *outRPath += inRPath.substr(pos + oldRPath.length());
+
+    return true;
+  };
+
+  return AdjustRPath(file, MakeEmptyCallback(newRPath), adjustCallback, emsg,
+                     changed);
+}
+
+bool cmSystemTools::SetRPath(std::string const& file,
+                             std::string const& newRPath, std::string* emsg,
+                             bool* changed)
+{
+  auto adjustCallback = [newRPath](cm::optional<std::string>& outRPath,
+                                   const std::string& inRPath,
+                                   const char* /*se_name*/, std::string *
+                                   /*emsg*/) -> bool {
+    if (inRPath != newRPath) {
+      outRPath = newRPath;
+    }
+    return true;
+  };
+
+  return AdjustRPath(file, MakeEmptyCallback(newRPath), adjustCallback, emsg,
+                     changed);
 }
 #elif defined(CMake_USE_XCOFF_PARSER)
 bool cmSystemTools::ChangeRPath(std::string const& file,
@@ -2650,12 +2831,26 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   }
   return true;
 }
+
+bool cmSystemTools::SetRPath(std::string const& /*file*/,
+                             std::string const& /*newRPath*/,
+                             std::string* /*emsg*/, bool* /*changed*/)
+{
+  return false;
+}
 #else
 bool cmSystemTools::ChangeRPath(std::string const& /*file*/,
                                 std::string const& /*oldRPath*/,
                                 std::string const& /*newRPath*/,
                                 bool /*removeEnvironmentRPath*/,
                                 std::string* /*emsg*/, bool* /*changed*/)
+{
+  return false;
+}
+
+bool cmSystemTools::SetRPath(std::string const& /*file*/,
+                             std::string const& /*newRPath*/,
+                             std::string* /*emsg*/, bool* /*changed*/)
 {
   return false;
 }
@@ -3022,7 +3217,7 @@ bool cmSystemTools::RepeatedRemoveDirectory(const std::string& dir)
   }
   return false;
 #else
-  return cmSystemTools::RemoveADirectory(dir);
+  return static_cast<bool>(cmSystemTools::RemoveADirectory(dir));
 #endif
 }
 
@@ -3055,9 +3250,9 @@ std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
   return out;
 }
 
-bool cmSystemTools::CreateSymlink(const std::string& origName,
-                                  const std::string& newName,
-                                  std::string* errorMessage)
+cmsys::Status cmSystemTools::CreateSymlink(std::string const& origName,
+                                           std::string const& newName,
+                                           std::string* errorMessage)
 {
   uv_fs_t req;
   int flags = 0;
@@ -3068,37 +3263,96 @@ bool cmSystemTools::CreateSymlink(const std::string& origName,
 #endif
   int err = uv_fs_symlink(nullptr, &req, origName.c_str(), newName.c_str(),
                           flags, nullptr);
+  cmsys::Status status;
   if (err) {
-    std::string e =
-      "failed to create symbolic link '" + newName + "': " + uv_strerror(err);
+#if defined(_WIN32)
+    status = cmsys::Status::Windows(uv_fs_get_system_error(&req));
+#elif UV_VERSION_MAJOR > 1 || (UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR >= 38)
+    status = cmsys::Status::POSIX(uv_fs_get_system_error(&req));
+#else
+    status = cmsys::Status::POSIX(-err);
+#endif
+    std::string e = cmStrCat("failed to create symbolic link '", newName,
+                             "': ", status.GetString());
     if (errorMessage) {
       *errorMessage = std::move(e);
     } else {
       cmSystemTools::Error(e);
     }
-    return false;
   }
-
-  return true;
+  return status;
 }
 
-bool cmSystemTools::CreateLink(const std::string& origName,
-                               const std::string& newName,
-                               std::string* errorMessage)
+cmsys::Status cmSystemTools::CreateLink(std::string const& origName,
+                                        std::string const& newName,
+                                        std::string* errorMessage)
 {
   uv_fs_t req;
   int err =
     uv_fs_link(nullptr, &req, origName.c_str(), newName.c_str(), nullptr);
+  cmsys::Status status;
   if (err) {
+#if defined(_WIN32)
+    status = cmsys::Status::Windows(uv_fs_get_system_error(&req));
+#elif UV_VERSION_MAJOR > 1 || (UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR >= 38)
+    status = cmsys::Status::POSIX(uv_fs_get_system_error(&req));
+#else
+    status = cmsys::Status::POSIX(-err);
+#endif
     std::string e =
-      "failed to create link '" + newName + "': " + uv_strerror(err);
+      cmStrCat("failed to create link '", newName, "': ", status.GetString());
     if (errorMessage) {
       *errorMessage = std::move(e);
     } else {
       cmSystemTools::Error(e);
     }
-    return false;
   }
+  return status;
+}
 
-  return true;
+cm::string_view cmSystemTools::GetSystemName()
+{
+#if defined(_WIN32)
+  return "Windows";
+#elif defined(__ANDROID__)
+  return "Android";
+#else
+  static struct utsname uts_name;
+  static bool initialized = false;
+  static cm::string_view systemName;
+  if (initialized) {
+    return systemName;
+  }
+  if (uname(&uts_name) >= 0) {
+    initialized = true;
+    systemName = uts_name.sysname;
+
+    if (cmIsOff(systemName)) {
+      systemName = "UnknownOS";
+    }
+
+    // fix for BSD/OS, remove the /
+    static const cmsys::RegularExpression bsdOsRegex("BSD.OS");
+    cmsys::RegularExpressionMatch match;
+    if (bsdOsRegex.find(uts_name.sysname, match)) {
+      systemName = "BSDOS";
+    }
+
+    // fix for GNU/kFreeBSD, remove the GNU/
+    if (systemName.find("kFreeBSD") != cm::string_view::npos) {
+      systemName = "kFreeBSD";
+    }
+
+    // fix for CYGWIN and MSYS which have windows version in them
+    if (systemName.find("CYGWIN") != cm::string_view::npos) {
+      systemName = "CYGWIN";
+    }
+
+    if (systemName.find("MSYS") != cm::string_view::npos) {
+      systemName = "MSYS";
+    }
+    return systemName;
+  }
+  return "";
+#endif
 }

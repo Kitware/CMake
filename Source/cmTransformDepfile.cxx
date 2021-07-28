@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTransformDepfile.h"
 
+#include <algorithm>
+#include <functional>
+#include <memory>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -13,6 +16,7 @@
 
 #include "cmGccDepfileReader.h"
 #include "cmGccDepfileReaderTypes.h"
+#include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmSystemTools.h"
 
@@ -34,10 +38,18 @@ void WriteFilenameGcc(cmsys::ofstream& fout, const std::string& filename)
   }
 }
 
-void WriteGccDepfile(cmsys::ofstream& fout, const cmLocalGenerator& lg,
-                     const cmGccDepfileContent& content)
+void WriteDepfile(cmDepfileFormat format, cmsys::ofstream& fout,
+                  const cmLocalGenerator& lg,
+                  const cmGccDepfileContent& content)
 {
-  const auto& binDir = lg.GetBinaryDirectory();
+  std::function<std::string(const std::string&)> formatPath =
+    [&lg](const std::string& path) -> std::string {
+    return lg.MaybeRelativeToTopBinDir(path);
+  };
+  if (lg.GetGlobalGenerator()->GetName() == "Xcode") {
+    // full paths must be preserved for Xcode compliance
+    formatPath = [](const std::string& path) -> std::string { return path; };
+  }
 
   for (auto const& dep : content) {
     bool first = true;
@@ -46,50 +58,53 @@ void WriteGccDepfile(cmsys::ofstream& fout, const cmLocalGenerator& lg,
         fout << " \\\n  ";
       }
       first = false;
-      WriteFilenameGcc(fout, lg.MaybeConvertToRelativePath(binDir, rule));
+      WriteFilenameGcc(fout, formatPath(rule));
     }
     fout << ':';
     for (auto const& path : dep.paths) {
       fout << " \\\n  ";
-      WriteFilenameGcc(fout, lg.MaybeConvertToRelativePath(binDir, path));
+      WriteFilenameGcc(fout, formatPath(path));
     }
     fout << '\n';
   }
-}
 
-// tlog format : always windows paths on Windows regardless the generator
-std::string ConvertToTLogOutputPath(const std::string& path)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  return cmSystemTools::ConvertToWindowsOutputPath(path);
-#else
-  return cmSystemTools::ConvertToOutputPath(path);
-#endif
-}
-
-void WriteVsTlog(cmsys::ofstream& fout, const cmLocalGenerator& lg,
-                 const cmGccDepfileContent& content)
-{
-  const auto& binDir = lg.GetBinaryDirectory();
-
-  for (auto const& dep : content) {
-    fout << '^';
-    bool first = true;
-    for (auto const& rule : dep.rules) {
-      if (!first) {
-        fout << '|';
+  if (format == cmDepfileFormat::MakeDepfile) {
+    // In this case, phony targets must be added for all dependencies
+    fout << "\n";
+    for (auto const& dep : content) {
+      for (auto const& path : dep.paths) {
+        fout << "\n";
+        WriteFilenameGcc(fout, formatPath(path));
+        fout << ":\n";
       }
-      first = false;
-      fout << ConvertToTLogOutputPath(
-        lg.MaybeConvertToRelativePath(binDir, rule));
-    }
-    fout << "\r\n";
-    for (auto const& path : dep.paths) {
-      fout << ConvertToTLogOutputPath(
-                lg.MaybeConvertToRelativePath(binDir, path))
-           << "\r\n";
     }
   }
+}
+
+void WriteMSBuildAdditionalInputs(cmsys::ofstream& fout,
+                                  cmLocalGenerator const& lg,
+                                  cmGccDepfileContent const& content)
+{
+  if (content.empty()) {
+    return;
+  }
+
+  // Write a UTF-8 BOM so MSBuild knows the encoding when reading the file.
+  static const char utf8bom[] = { char(0xEF), char(0xBB), char(0xBF) };
+  fout.write(utf8bom, sizeof(utf8bom));
+
+  // Write the format expected by MSBuild CustomBuild AdditionalInputs.
+  const char* sep = "";
+  for (std::string path : content.front().paths) {
+    if (!cmSystemTools::FileIsFullPath(path)) {
+      path =
+        cmSystemTools::CollapseFullPath(path, lg.GetCurrentBinaryDirectory());
+    }
+    std::replace(path.begin(), path.end(), '/', '\\');
+    fout << sep << path;
+    sep = ";";
+  }
+  fout << "\n";
 }
 }
 
@@ -106,16 +121,18 @@ bool cmTransformDepfile(cmDepfileFormat format, const cmLocalGenerator& lg,
     content = *std::move(result);
   }
 
+  cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(outfile));
   cmsys::ofstream fout(outfile.c_str());
   if (!fout) {
     return false;
   }
   switch (format) {
     case cmDepfileFormat::GccDepfile:
-      WriteGccDepfile(fout, lg, content);
+    case cmDepfileFormat::MakeDepfile:
+      WriteDepfile(format, fout, lg, content);
       break;
-    case cmDepfileFormat::VsTlog:
-      WriteVsTlog(fout, lg, content);
+    case cmDepfileFormat::MSBuildAdditionalInputs:
+      WriteMSBuildAdditionalInputs(fout, lg, content);
       break;
   }
   return true;

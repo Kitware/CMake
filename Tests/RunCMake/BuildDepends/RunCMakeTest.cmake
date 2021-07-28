@@ -1,5 +1,22 @@
 include(RunCMake)
 
+if(RunCMake_GENERATOR MATCHES "Ninja")
+  # Detect ninja version so we know what tests can be supported.
+  execute_process(
+    COMMAND "${RunCMake_MAKE_PROGRAM}" --version
+    OUTPUT_VARIABLE ninja_out
+    ERROR_VARIABLE ninja_out
+    RESULT_VARIABLE ninja_res
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  if(ninja_res EQUAL 0 AND "x${ninja_out}" MATCHES "^x[0-9]+\\.[0-9]+")
+    set(ninja_version "${ninja_out}")
+    message(STATUS "ninja version: ${ninja_version}")
+  else()
+    message(FATAL_ERROR "'ninja --version' reported:\n${ninja_out}")
+  endif()
+endif()
+
 if(RunCMake_GENERATOR STREQUAL "Borland Makefiles" OR
    RunCMake_GENERATOR STREQUAL "Watcom WMake")
   set(fs_delay 3)
@@ -155,7 +172,8 @@ if (RunCMake_GENERATOR MATCHES "Makefiles")
   run_cmake(CustomCommandDependencies-BadArgs)
 endif()
 
-if(RunCMake_GENERATOR MATCHES "Make|Ninja")
+if(RunCMake_GENERATOR MATCHES "Make|Ninja|Visual Studio|Xcode" AND
+    NOT RunCMake_GENERATOR MATCHES "Visual Studio (9|10)( |$)")
   unset(run_BuildDepends_skip_step_3)
   run_BuildDepends(CustomCommandDepfile)
   set(run_BuildDepends_skip_step_3 1)
@@ -164,3 +182,11 @@ endif()
 if(RunCMake_GENERATOR MATCHES "Make")
   run_BuildDepends(MakeDependencies)
 endif()
+
+if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 " OR
+   (RunCMake_GENERATOR MATCHES "Ninja" AND ninja_version VERSION_LESS 1.7))
+  # This build tool misses the dependency.
+  set(run_BuildDepends_skip_step_2 1)
+endif()
+run_BuildDepends(CustomCommandUnityBuild)
+unset(run_BuildDepends_skip_step_2)

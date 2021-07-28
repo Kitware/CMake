@@ -1,2 +1,2 @@
-libs=stdc++;m;gcc_s;gcc;c;gcc_s;gcc
+libs=stdc\+\+;m;gcc_s;gcc;c;gcc_s;gcc
 dirs=

@@ -46,6 +46,9 @@ if(NOT CMAKE_OBJCXX_COMPILER_WORKS)
     "# error \"The CMAKE_OBJCXX_COMPILER is not an Objective-C++ compiler\"\n"
     "#endif\n"
     "int main(){return 0;}\n")
+  # Clear result from normal variable.
+  unset(CMAKE_OBJCXX_COMPILER_WORKS)
+  # Puts test result in cache variable.
   try_compile(CMAKE_OBJCXX_COMPILER_WORKS ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testOBJCXXCompiler.mm
     OUTPUT_VARIABLE __CMAKE_OBJCXX_COMPILER_OUTPUT)

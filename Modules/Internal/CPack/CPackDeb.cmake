@@ -557,7 +557,7 @@ function(cpack_deb_prepare_package_vars)
         string(APPEND _description_failure_message
           " or CPACK_DEBIAN_${_local_component_name}_DESCRIPTION")
       endif()
-      message(FATAL_ERROR _description_failure_message)
+      message(FATAL_ERROR "${_description_failure_message}")
     endif()
 
   # Ok, description has set. According to the `Debian Policy Manual`_ the first
@@ -673,7 +673,7 @@ function(cpack_deb_prepare_package_vars)
   if(CPACK_ADD_LDCONFIG_CALL)
     set(CPACK_DEBIAN_GENERATE_POSTINST 1)
     set(CPACK_DEBIAN_GENERATE_POSTRM 1)
-    foreach(f IN LISTS PACKAGE_CONTROL_EXTRA)
+    foreach(f IN LISTS CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA)
       get_filename_component(n "${f}" NAME)
       if(n STREQUAL "postinst")
         set(CPACK_DEBIAN_GENERATE_POSTINST 0)

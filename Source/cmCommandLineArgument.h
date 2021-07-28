@@ -17,18 +17,46 @@ struct cmCommandLineArgument
     OneOrMore
   };
 
+  enum class RequiresSeparator
+  {
+    Yes,
+    No
+  };
+
+  enum class ParseMode
+  {
+    Valid,
+    Invalid,
+    SyntaxError,
+    ValueError
+  };
+
   std::string InvalidSyntaxMessage;
   std::string InvalidValueMessage;
   std::string Name;
   Values Type;
+  RequiresSeparator SeparatorNeeded;
   std::function<FunctionSignature> StoreCall;
 
   template <typename FunctionType>
   cmCommandLineArgument(std::string n, Values t, FunctionType&& func)
-    : InvalidSyntaxMessage(cmStrCat("Invalid syntax used with ", n))
+    : InvalidSyntaxMessage(cmStrCat(" is invalid syntax for ", n))
     , InvalidValueMessage(cmStrCat("Invalid value used with ", n))
     , Name(std::move(n))
     , Type(t)
+    , SeparatorNeeded(RequiresSeparator::Yes)
+    , StoreCall(std::forward<FunctionType>(func))
+  {
+  }
+
+  template <typename FunctionType>
+  cmCommandLineArgument(std::string n, Values t, RequiresSeparator s,
+                        FunctionType&& func)
+    : InvalidSyntaxMessage(cmStrCat(" is invalid syntax for ", n))
+    , InvalidValueMessage(cmStrCat("Invalid value used with ", n))
+    , Name(std::move(n))
+    , Type(t)
+    , SeparatorNeeded(s)
     , StoreCall(std::forward<FunctionType>(func))
   {
   }
@@ -36,18 +64,43 @@ struct cmCommandLineArgument
   template <typename FunctionType>
   cmCommandLineArgument(std::string n, std::string failedMsg, Values t,
                         FunctionType&& func)
-    : InvalidSyntaxMessage(cmStrCat("Invalid syntax used with ", n))
+    : InvalidSyntaxMessage(cmStrCat(" is invalid syntax for ", n))
     , InvalidValueMessage(std::move(failedMsg))
     , Name(std::move(n))
     , Type(t)
+    , SeparatorNeeded(RequiresSeparator::Yes)
+    , StoreCall(std::forward<FunctionType>(func))
+  {
+  }
+
+  template <typename FunctionType>
+  cmCommandLineArgument(std::string n, std::string failedMsg, Values t,
+                        RequiresSeparator s, FunctionType&& func)
+    : InvalidSyntaxMessage(cmStrCat(" is invalid syntax for ", n))
+    , InvalidValueMessage(std::move(failedMsg))
+    , Name(std::move(n))
+    , Type(t)
+    , SeparatorNeeded(s)
     , StoreCall(std::forward<FunctionType>(func))
   {
   }
 
   bool matches(std::string const& input) const
   {
-    return (this->Type == Values::Zero) ? (input == this->Name)
-                                        : cmHasPrefix(input, this->Name);
+    bool matched = false;
+    if (this->Type == Values::Zero) {
+      matched = (input == this->Name);
+    } else if (this->SeparatorNeeded == RequiresSeparator::No) {
+      matched = cmHasPrefix(input, this->Name);
+    } else if (cmHasPrefix(input, this->Name)) {
+      if (input.size() == this->Name.size()) {
+        matched = true;
+      } else {
+        matched =
+          (input[this->Name.size()] == '=' || input[this->Name.size()] == ' ');
+      }
+    }
+    return matched;
   }
 
   template <typename T, typename... CallState>
@@ -55,13 +108,6 @@ struct cmCommandLineArgument
              std::vector<std::string> const& allArgs,
              CallState&&... state) const
   {
-    enum class ParseMode
-    {
-      Valid,
-      Invalid,
-      SyntaxError,
-      ValueError
-    };
     ParseMode parseState = ParseMode::Valid;
 
     if (this->Type == Values::Zero) {
@@ -76,8 +122,9 @@ struct cmCommandLineArgument
 
     } else if (this->Type == Values::One || this->Type == Values::ZeroOrOne) {
       if (input.size() == this->Name.size()) {
-        ++index;
-        if (index >= allArgs.size() || allArgs[index][0] == '-') {
+        auto nextValueIndex = index + 1;
+        if (nextValueIndex >= allArgs.size() ||
+            allArgs[nextValueIndex][0] == '-') {
           if (this->Type == Values::ZeroOrOne) {
             parseState =
               this->StoreCall(std::string{}, std::forward<CallState>(state)...)
@@ -87,31 +134,17 @@ struct cmCommandLineArgument
             parseState = ParseMode::ValueError;
           }
         } else {
-          parseState =
-            this->StoreCall(allArgs[index], std::forward<CallState>(state)...)
+          parseState = this->StoreCall(allArgs[nextValueIndex],
+                                       std::forward<CallState>(state)...)
             ? ParseMode::Valid
             : ParseMode::Invalid;
+          index = nextValueIndex;
         }
       } else {
-        // parse the string to get the value
-        auto possible_value = cm::string_view(input).substr(this->Name.size());
-        if (possible_value.empty()) {
-          parseState = ParseMode::SyntaxError;
-          parseState = ParseMode::ValueError;
-        } else if (possible_value[0] == '=') {
-          possible_value.remove_prefix(1);
-          if (possible_value.empty()) {
-            parseState = ParseMode::ValueError;
-          } else {
-            parseState = this->StoreCall(std::string(possible_value),
-                                         std::forward<CallState>(state)...)
-              ? ParseMode::Valid
-              : ParseMode::Invalid;
-          }
-        }
+        auto value = this->extract_single_value(input, parseState);
         if (parseState == ParseMode::Valid) {
-          parseState = this->StoreCall(std::string(possible_value),
-                                       std::forward<CallState>(state)...)
+          parseState =
+            this->StoreCall(value, std::forward<CallState>(state)...)
             ? ParseMode::Valid
             : ParseMode::Invalid;
         }
@@ -133,7 +166,8 @@ struct cmCommandLineArgument
     } else if (this->Type == Values::OneOrMore) {
       if (input.size() == this->Name.size()) {
         auto nextValueIndex = index + 1;
-        if (nextValueIndex >= allArgs.size() || allArgs[index + 1][0] == '-') {
+        if (nextValueIndex >= allArgs.size() ||
+            allArgs[nextValueIndex][0] == '-') {
           parseState = ParseMode::ValueError;
         } else {
           std::string buffer = allArgs[nextValueIndex++];
@@ -145,15 +179,45 @@ struct cmCommandLineArgument
             this->StoreCall(buffer, std::forward<CallState>(state)...)
             ? ParseMode::Valid
             : ParseMode::Invalid;
+          index = (nextValueIndex - 1);
+        }
+      } else {
+        auto value = this->extract_single_value(input, parseState);
+        if (parseState == ParseMode::Valid) {
+          parseState =
+            this->StoreCall(value, std::forward<CallState>(state)...)
+            ? ParseMode::Valid
+            : ParseMode::Invalid;
         }
       }
     }
 
     if (parseState == ParseMode::SyntaxError) {
-      cmSystemTools::Error(this->InvalidSyntaxMessage);
+      cmSystemTools::Error(
+        cmStrCat("'", input, "'", this->InvalidSyntaxMessage));
     } else if (parseState == ParseMode::ValueError) {
       cmSystemTools::Error(this->InvalidValueMessage);
     }
     return (parseState == ParseMode::Valid);
+  }
+
+private:
+  std::string extract_single_value(std::string const& input,
+                                   ParseMode& parseState) const
+  {
+    // parse the string to get the value
+    auto possible_value = cm::string_view(input).substr(this->Name.size());
+    if (possible_value.empty()) {
+      parseState = ParseMode::ValueError;
+    } else if (possible_value[0] == '=') {
+      possible_value.remove_prefix(1);
+      if (possible_value.empty()) {
+        parseState = ParseMode::ValueError;
+      }
+    }
+    if (parseState == ParseMode::Valid && possible_value[0] == ' ') {
+      possible_value.remove_prefix(1);
+    }
+    return std::string(possible_value);
   }
 };

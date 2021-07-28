@@ -6,6 +6,14 @@ if(WIN32)
     [[lib/(lib)?namelink-sep\.dll]]
     [[lib/(lib)?namelink-skip\.dll]]
   )
+elseif(MSYS)
+  set(_check_files
+    [[lib]]
+    [[lib/msys-namelink-none\.dll]]
+    [[lib/msys-namelink-same-1\.dll]]
+    [[lib/msys-namelink-sep-1\.dll]]
+    [[lib/msys-namelink-skip-1\.dll]]
+  )
 elseif(CYGWIN)
   set(_check_files
     [[lib]]

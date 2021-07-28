@@ -48,7 +48,6 @@ endif()
 
 # Match multiarch library directory names.
 set(CMAKE_LIBRARY_ARCHITECTURE_REGEX "[a-z0-9_]+(-[a-z0-9_]+)?-linux-gnu[a-z0-9_]*")
-set(CMAKE_LIBRARY_ARCHITECTURE_REGEX_VERSIONED "gcc/[a-z0-9_]+(-[a-z0-9_]+)?-linux(-gnu)?/[0-9]+(\\.[0-9]+\\.[0-9]+)*")
 
 include(Platform/UnixPaths)
 

@@ -809,6 +809,10 @@ public:
 
   path& remove_filename()
   {
+#  if defined(__CYGWIN__)
+    // FIXME: Avoid crash due to CYGWIN/MSYS bug(?).  See CMake Issue 22090.
+    static_cast<void>(this->path_.data());
+#  endif
     auto fname = this->get_filename();
     if (!fname.empty()) {
       this->path_.erase(fname.data() - this->path_.data());
@@ -825,6 +829,10 @@ public:
 
   path& replace_extension(const path& replacement = path())
   {
+#  if defined(__CYGWIN__)
+    // FIXME: Avoid crash due to CYGWIN/MSYS bug(?).  See CMake Issue 22090.
+    static_cast<void>(this->path_.data());
+#  endif
     auto ext = this->get_filename_fragment(filename_fragment::extension);
     if (!ext.empty()) {
       this->path_.erase(ext.data() - this->path_.data());

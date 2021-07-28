@@ -341,7 +341,7 @@ int main(int argc, char const* const* argv)
         cmMakefile* mf = &globalMF;
         cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
                     "Specified generator: " << gen << std::endl);
-        if (parsed && !mf->GetDefinition("CPACK_PACKAGE_NAME")) {
+        if (!mf->GetDefinition("CPACK_PACKAGE_NAME")) {
           cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                       "CPack project name not specified" << std::endl);
           parsed = 0;

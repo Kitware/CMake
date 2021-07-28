@@ -134,6 +134,14 @@ Options
 
  This option tells CTest to write all its output to a ``<file>`` log file.
 
+``--output-junit <file>``
+ Write test results in JUnit format.
+
+ This option tells CTest to write test results to ``<file>`` in JUnit XML
+ format. If ``<file>`` already exists, it will be overwritten. If using the
+ ``-S`` option to run a dashboard script, use the ``OUTPUT_JUNIT`` keyword
+ with the :command:`ctest_test` command instead.
+
 ``-N,--show-only[=<format>]``
  Disable actual execution of tests.
 
@@ -152,10 +160,14 @@ Options
      See `Show as JSON Object Model`_.
 
 ``-L <regex>, --label-regex <regex>``
- Run tests with labels matching regular expression.
+ Run tests with labels matching regular expression as described under
+ :ref:`string(REGEX) <Regex Specification>`.
 
  This option tells CTest to run only the tests whose labels match the
- given regular expression.
+ given regular expression.  When more than one ``-L`` option is given,
+ a test will only be run if each regular expression matches at least one
+ of the test's labels (i.e. the multiple ``-L`` labels form an ``AND``
+ relationship).  See `Label Matching`_.
 
 ``-R <regex>, --tests-regex <regex>``
  Run tests matching regular expression.
@@ -173,7 +185,10 @@ Options
  Exclude tests with labels matching regular expression.
 
  This option tells CTest to NOT run the tests whose labels match the
- given regular expression.
+ given regular expression.  When more than one ``-LE`` option is given,
+ a test will only be excluded if each regular expression matches at least one
+ of the test's labels (i.e. the multiple ``-LE`` labels form an ``AND``
+ relationship).  See `Label Matching`_.
 
 ``-FA <regex>, --fixture-exclude-any <regex>``
  Exclude fixtures matching ``<regex>`` from automatically adding any tests to
@@ -309,11 +324,13 @@ Options
  Set the interactive mode to ``0`` or ``1``.
 
  This option causes CTest to run tests in either an interactive mode
- or a non-interactive mode.  On Windows this means that in
- non-interactive mode, all system debug pop up windows are blocked.
- In dashboard mode (``Experimental``, ``Nightly``, ``Continuous``), the default
- is non-interactive.  When just running tests not for a dashboard the
- default is to allow popups and interactive debugging.
+ or a non-interactive mode.  In dashboard mode (``Experimental``, ``Nightly``,
+ ``Continuous``), the default is non-interactive.  In non-interactive mode,
+ the environment variable :envvar:`DASHBOARD_TEST_FROM_CTEST` is set.
+
+ Prior to CMake 3.11, interactive mode on Windows allowed system debug
+ popup windows to appear.  Now, due to CTest's use of ``libuv`` to launch
+ test processes, all system debug popup windows are always blocked.
 
 ``--no-label-summary``
  Disable timing summary information for labels.
@@ -397,6 +414,46 @@ Specify the directory in which to look for tests.
  were found or by ignoring it.
 
 .. include:: OPTIONS_HELP.txt
+
+.. _`Label Matching`:
+
+Label Matching
+==============
+
+Tests may have labels attached to them. Tests may be included
+or excluded from a test run by filtering on the labels.
+Each individual filter is a regular expression applied to
+the labels attached to a test.
+
+When ``-L`` is used, in order for a test to be included in a
+test run, each regular expression must match at least one
+label.  Using more than one ``-L`` option means "match **all**
+of these".
+
+The ``-LE`` option works just like ``-L``, but excludes tests
+rather than including them. A test is excluded if each regular
+expression matches at least one label.
+
+If a test has no labels attached to it, then ``-L`` will never
+include that test, and ``-LE`` will never exclude that test.
+As an example of tests with labels, consider five tests,
+with the following labels:
+
+* *test1* has labels *tuesday* and *production*
+* *test2* has labels *tuesday* and *test*
+* *test3* has labels *wednesday* and *production*
+* *test4* has label *wednesday*
+* *test5* has labels *friday* and *test*
+
+Running ``ctest`` with ``-L tuesday -L test`` will select *test2*, which has
+both labels. Running CTest with ``-L test`` will select *test2* and
+*test5*, because both of them have a label that matches that regular
+expression.
+
+Because the matching works with regular expressions, take note that
+running CTest with ``-L es`` will match all five tests.
+To select the *tuesday* and *wednesday* tests together, use a single
+regular expression that matches either of them, like ``-L "tue|wed"``.
 
 .. _`Label and Subproject Summary`:
 
@@ -1043,6 +1100,8 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_TEST_TIMEOUT`
   * :module:`CTest` module variable: ``DART_TESTING_TIMEOUT``
 
+To report extra test values to CDash, see :ref:`Additional Test Measurements`.
+
 .. _`CTest Coverage Step`:
 
 CTest Coverage Step
@@ -1619,4 +1678,4 @@ See Also
 
 .. include:: LINKS.txt
 
-.. _`CDash`: http://cdash.org/
+_`CDash`: https://cdash.org

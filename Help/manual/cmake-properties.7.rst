@@ -21,6 +21,7 @@ Properties of Global Scope
    /prop_gbl/AUTOMOC_SOURCE_GROUP
    /prop_gbl/AUTOMOC_TARGETS_FOLDER
    /prop_gbl/AUTORCC_SOURCE_GROUP
+   /prop_gbl/AUTOUIC_SOURCE_GROUP
    /prop_gbl/CMAKE_C_KNOWN_FEATURES
    /prop_gbl/CMAKE_CUDA_KNOWN_FEATURES
    /prop_gbl/CMAKE_CXX_KNOWN_FEATURES
@@ -73,6 +74,7 @@ Properties on Directories
    /prop_dir/DEFINITIONS
    /prop_dir/EXCLUDE_FROM_ALL
    /prop_dir/IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
+   /prop_dir/IMPORTED_TARGETS
    /prop_dir/INCLUDE_DIRECTORIES
    /prop_dir/INCLUDE_REGULAR_EXPRESSION
    /prop_dir/INTERPROCEDURAL_OPTIMIZATION
@@ -211,6 +213,7 @@ Properties on Targets
    /prop_tgt/GHS_NO_SOURCE_GROUP_FILE
    /prop_tgt/GNUtoMS
    /prop_tgt/HAS_CXX
+   /prop_tgt/HIP_ARCHITECTURES
    /prop_tgt/IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
    /prop_tgt/IMPORTED
    /prop_tgt/IMPORTED_COMMON_LANGUAGE_RUNTIME
@@ -271,6 +274,7 @@ Properties on Targets
    /prop_tgt/LANG_CPPCHECK
    /prop_tgt/LANG_CPPLINT
    /prop_tgt/LANG_INCLUDE_WHAT_YOU_USE
+   /prop_tgt/LANG_LINKER_LAUNCHER
    /prop_tgt/LANG_VISIBILITY_PRESET
    /prop_tgt/LIBRARY_OUTPUT_DIRECTORY
    /prop_tgt/LIBRARY_OUTPUT_DIRECTORY_CONFIG
@@ -402,7 +406,9 @@ Properties on Targets
    /prop_tgt/XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY
    /prop_tgt/XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY
    /prop_tgt/XCODE_EMBED_type
+   /prop_tgt/XCODE_EMBED_type_CODE_SIGN_ON_COPY
    /prop_tgt/XCODE_EMBED_type_PATH
+   /prop_tgt/XCODE_EMBED_type_REMOVE_HEADERS_ON_COPY
    /prop_tgt/XCODE_EXPLICIT_FILE_TYPE
    /prop_tgt/XCODE_GENERATE_SCHEME
    /prop_tgt/XCODE_LINK_BUILD_PHASE_MODE

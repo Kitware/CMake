@@ -8,11 +8,11 @@ FindLAPACK
 Find Linear Algebra PACKage (LAPACK) library
 
 This module finds an installed Fortran library that implements the
-LAPACK linear-algebra interface (see http://www.netlib.org/lapack/).
+`LAPACK linear-algebra interface`_.
 
-The approach follows that taken for the ``autoconf`` macro file,
-``acx_lapack.m4`` (distributed at
-http://ac-archive.sourceforge.net/ac-archive/acx_lapack.html).
+At least one of the ``C``, ``CXX``, or ``Fortran`` languages must be enabled.
+
+.. _`LAPACK linear-algebra interface`: http://www.netlib.org/lapack/
 
 Input Variables
 ^^^^^^^^^^^^^^^
@@ -23,51 +23,8 @@ The following variables may be set to influence this module's behavior:
   if ``ON`` use static linkage
 
 ``BLA_VENDOR``
-  If set, checks only the specified vendor, if not set checks all the
-  possibilities.  List of vendors valid in this module:
-
-  * ``FlexiBLAS``
-  * ``OpenBLAS``
-  * ``FLAME``
-  * ``Intel10_32`` (intel mkl v10 32 bit, threaded code)
-  * ``Intel10_64lp`` (intel mkl v10+ 64 bit, threaded code, lp64 model)
-  * ``Intel10_64lp_seq`` (intel mkl v10+ 64 bit, sequential code, lp64 model)
-  * ``Intel10_64ilp`` (intel mkl v10+ 64 bit, threaded code, ilp64 model)
-  * ``Intel10_64ilp_seq`` (intel mkl v10+ 64 bit, sequential code, ilp64 model)
-  * ``Intel10_64_dyn`` (intel mkl v10+ 64 bit, single dynamic library)
-  * ``Intel`` (obsolete versions of mkl 32 and 64 bit)
-  * ``ACML``
-  * ``Apple``
-  * ``NAS``
-  * ``Arm``
-  * ``Arm_mp``
-  * ``Arm_ilp64``
-  * ``Arm_ilp64_mp``
-  * ``EML``
-  * ``EML_mt``
-  * ``Generic``
-
-  .. versionadded:: 3.6
-    ``OpenBLAS`` support.
-
-  .. versionadded:: 3.11
-    ``FLAME`` support.
-
-    .. versionadded:: 3.13
-      Added ILP64 MKL variants (``Intel10_64ilp``, ``Intel10_64ilp_seq``).
-
-  .. versionadded:: 3.17
-    Added single dynamic library MKL variant (``Intel10_64_dyn``).
-
-  .. versionadded:: 3.18
-    Arm Performance Libraries support (``Arm``, ``Arm_mp``, ``Arm_ilp64``,
-    ``Arm_ilp64_mp``).
-
-  .. versionadded:: 3.19
-    ``FlexiBLAS`` support.
-
-  .. versionadded:: 3.20
-    Elbrus Math Library support (``EML``, ``EML_mt``).
+  Set to one of the :ref:`BLAS/LAPACK Vendors` to search for BLAS only
+  from the specified vendor.  If not set, all vendors are considered.
 
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95/LAPACK95 interfaces
@@ -81,11 +38,11 @@ The following variables may be set to influence this module's behavior:
 Imported targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.18
-
-This module defines the following :prop_tgt:`IMPORTED` target:
+This module defines the following :prop_tgt:`IMPORTED` targets:
 
 ``LAPACK::LAPACK``
+  .. versionadded:: 3.18
+
   The libraries to use for LAPACK, if found.
 
 Result Variables
@@ -106,52 +63,82 @@ This module defines the following variables:
 ``LAPACK95_FOUND``
   library implementing the LAPACK95 interface is found
 
-.. note::
+Intel MKL
+^^^^^^^^^
 
-  C, CXX or Fortran must be enabled to detect a BLAS/LAPACK library.
-  C or CXX must be enabled to use Intel Math Kernel Library (MKL).
+To use the Intel MKL implementation of LAPACK, a project must enable at least
+one of the ``C`` or ``CXX`` languages.  Set ``BLA_VENDOR`` to an Intel MKL
+variant either on the command-line as ``-DBLA_VENDOR=Intel10_64lp`` or in
+project code:
 
-  For example, to use Intel MKL libraries and/or Intel compiler:
+.. code-block:: cmake
 
-  .. code-block:: cmake
+  set(BLA_VENDOR Intel10_64lp)
+  find_package(LAPACK)
 
-    set(BLA_VENDOR Intel10_64lp)
-    find_package(LAPACK)
+In order to build a project using Intel MKL, and end user must first
+establish an Intel MKL environment.  See the :module:`FindBLAS` module
+section on :ref:`Intel MKL` for details.
+
 #]=======================================================================]
+
+# The approach follows that of the ``autoconf`` macro file, ``acx_lapack.m4``
+# (distributed at http://ac-archive.sourceforge.net/ac-archive/acx_lapack.html).
 
 if(CMAKE_Fortran_COMPILER_LOADED)
   include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
 else()
   include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 endif()
-include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 function(_add_lapack_target)
   if(LAPACK_FOUND AND NOT TARGET LAPACK::LAPACK)
     add_library(LAPACK::LAPACK INTERFACE IMPORTED)
+
+    # Filter out redundant BLAS info and replace with the BLAS target
     set(_lapack_libs "${LAPACK_LIBRARIES}")
-    if(_lapack_libs AND TARGET BLAS::BLAS)
-      # remove the ${BLAS_LIBRARIES} from the interface and replace it
-      # with the BLAS::BLAS target
-      list(REMOVE_ITEM _lapack_libs "${BLAS_LIBRARIES}")
+    set(_lapack_flags "${LAPACK_LINKER_FLAGS}")
+    if(TARGET BLAS::BLAS)
+      if(_lapack_libs AND BLAS_LIBRARIES)
+        foreach(_blas_lib IN LISTS BLAS_LIBRARIES)
+          list(REMOVE_ITEM _lapack_libs "${_blas_lib}")
+        endforeach()
+      endif()
+      if(_lapack_flags AND BLAS_LINKER_FLAGS)
+        foreach(_blas_flag IN LISTS BLAS_LINKER_FLAGS)
+          list(REMOVE_ITEM _lapack_flags "${_blas_flag}")
+        endforeach()
+      endif()
       list(APPEND _lapack_libs BLAS::BLAS)
     endif()
-
     if(_lapack_libs)
       set_target_properties(LAPACK::LAPACK PROPERTIES
         INTERFACE_LINK_LIBRARIES "${_lapack_libs}"
       )
     endif()
-    unset(_lapack_libs)
+    if(_lapack_flags)
+      set_target_properties(LAPACK::LAPACK PROPERTIES
+        INTERFACE_LINK_OPTIONS "${_lapack_flags}"
+      )
+    endif()
   endif()
 endfunction()
 
-macro(_lapack_find_library_setup)
-  cmake_push_check_state()
-  set(CMAKE_REQUIRED_QUIET ${LAPACK_FIND_QUIETLY})
+# TODO: move this stuff to a separate module
 
-  set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+function(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlibdir _subdirs _blas)
+  # This function checks for the existence of the combination of libraries
+  # given by _list.  If the combination is found, this checks whether can link
+  # against that library combination using the name of a routine given by _name
+  # using the linker flags given by _flags.  If the combination of libraries is
+  # found and passes the link test, ${LIBRARIES} is set to the list of complete
+  # library paths that have been found.  Otherwise, ${LIBRARIES} is set to FALSE.
+
+  set(_libraries_work TRUE)
+  set(_libraries)
+  set(_combined_name)
+
   if(BLA_STATIC)
     if(WIN32)
       set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
@@ -164,33 +151,6 @@ macro(_lapack_find_library_setup)
       set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
     endif()
   endif()
-endmacro()
-
-macro(_lapack_find_library_teardown)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ${_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
-  unset(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES)
-  cmake_pop_check_state()
-endmacro()
-
-# TODO: move this stuff to a separate module
-
-macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _addlibdir _subdirs _blas)
-  # This macro checks for the existence of the combination of fortran libraries
-  # given by _list.  If the combination is found, this macro checks (using the
-  # Check_Fortran_Function_Exists macro) whether can link against that library
-  # combination using the name of a routine given by _name using the linker
-  # flags given by _flags.  If the combination of libraries is found and passes
-  # the link test, LIBRARIES is set to the list of complete library paths that
-  # have been found.  Otherwise, LIBRARIES is set to FALSE.
-
-  # N.B. _prefix is the prefix applied to the names of all cached variables that
-  # are generated internally and marked advanced by this macro.
-  # _addlibdir is a list of additional search paths. _subdirs is a list of path
-  # suffixes to be used by find_library().
-
-  set(_libraries_work TRUE)
-  set(${LIBRARIES})
-  set(_combined_name)
 
   set(_extaddlibdir "${_addlibdir}")
   if(WIN32)
@@ -203,31 +163,37 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
   list(APPEND _extaddlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
   foreach(_library ${_list})
-    if(_library MATCHES "^-Wl,--(start|end)-group$")
-      # Respect linker flags like --start/end-group (required by MKL)
-      set(${LIBRARIES} ${${LIBRARIES}} "${_library}")
+    if(_library MATCHES "^-")
+      # Respect linker flags as-is (required by MKL)
+      list(APPEND _libraries "${_library}")
     else()
-      set(_combined_name ${_combined_name}_${_library})
+      string(REGEX REPLACE "[^A-Za-z0-9]" "_" _lib_var "${_library}")
+      set(_combined_name ${_combined_name}_${_lib_var})
+      if(NOT "${_deps}" STREQUAL "")
+        set(_combined_name ${_combined_name}_deps)
+      endif()
       if(_libraries_work)
-        find_library(${_prefix}_${_library}_LIBRARY
+        find_library(${_prefix}_${_lib_var}_LIBRARY
           NAMES ${_library}
           NAMES_PER_DIR
           PATHS ${_extaddlibdir}
           PATH_SUFFIXES ${_subdirs}
         )
-        #message("DEBUG: find_library(${_library}) got ${${_prefix}_${_library}_LIBRARY}")
-        mark_as_advanced(${_prefix}_${_library}_LIBRARY)
-        set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
-        set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
+        mark_as_advanced(${_prefix}_${_lib_var}_LIBRARY)
+        list(APPEND _libraries ${${_prefix}_${_lib_var}_LIBRARY})
+        set(_libraries_work ${${_prefix}_${_lib_var}_LIBRARY})
       endif()
     endif()
   endforeach()
-  unset(_library)
 
+  foreach(_flag ${_flags})
+    string(REGEX REPLACE "[^A-Za-z0-9]" "_" _flag_var "${_flag}")
+    set(_combined_name ${_combined_name}_${_flag_var})
+  endforeach()
   if(_libraries_work)
     # Test this combination of libraries.
-    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_threadlibs})
-    #message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
+    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${_libraries} ${_blas} ${_deps})
+    set(CMAKE_REQUIRED_QUIET ${LAPACK_FIND_QUIETLY})
     if(CMAKE_Fortran_COMPILER_LOADED)
       check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
     else()
@@ -239,19 +205,15 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
 
   if(_libraries_work)
     if("${_list}${_blas}" STREQUAL "")
-      set(${LIBRARIES} "${LIBRARIES}-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
+      set(_libraries "${LIBRARIES}-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
     else()
-      set(${LIBRARIES} ${${LIBRARIES}} ${_blas} ${_threadlibs})
+      list(APPEND _libraries ${_blas} ${_deps})
     endif()
   else()
-    set(${LIBRARIES} FALSE)
+    set(_libraries FALSE)
   endif()
-
-  unset(_extaddlibdir)
-  unset(_libraries_work)
-  unset(_combined_name)
-  #message("DEBUG: ${LIBRARIES} = ${${LIBRARIES}}")
-endmacro()
+  set(${LIBRARIES} "${_libraries}" PARENT_SCOPE)
+endfunction()
 
 macro(_lapack_find_dependency dep)
   set(_lapack_quiet_arg)
@@ -274,11 +236,10 @@ macro(_lapack_find_dependency dep)
   set(_lapack_quiet_arg)
 endmacro()
 
-_lapack_find_library_setup()
-
 set(LAPACK_LINKER_FLAGS)
 set(LAPACK_LIBRARIES)
 set(LAPACK95_LIBRARIES)
+set(_lapack_fphsa_req_var LAPACK_LIBRARIES)
 
 # Check the language being used
 if(NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_COMPILER_LOADED))
@@ -385,7 +346,9 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
         "compiler/lib/${LAPACK_mkl_ARCH_NAME}"
         "mkl/lib" "mkl/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
         "mkl/lib/${LAPACK_mkl_ARCH_NAME}"
-        "lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}")
+        "lib" "lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
+        "lib/${LAPACK_mkl_ARCH_NAME}"
+        )
 
     # First try empty lapack libs
     if(NOT ${_LIBRARIES})
@@ -585,22 +548,78 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     )
   endif()
 
-  # Generic LAPACK library?
+  # Fujitsu SSL2 Library?
   if(NOT LAPACK_LIBRARIES
-      AND (BLA_VENDOR STREQUAL "Generic"
-           OR BLA_VENDOR STREQUAL "ATLAS"
-           OR BLA_VENDOR STREQUAL "All"))
+      AND (BLA_VENDOR MATCHES "Fujitsu_SSL2" OR BLA_VENDOR STREQUAL "All"))
+    if(BLA_VENDOR STREQUAL "Fujitsu_SSL2BLAMP")
+      set(_ssl2_suffix BLAMP)
+    else()
+      set(_ssl2_suffix)
+    endif()
+    set(_ssl2_blas)
+    if(BLAS_LIBRARIES STREQUAL "")
+      set(_ssl2_blas "${BLAS_LINKER_FLAGS}")
+    else()
+      set(_ssl2_blas "${BLAS_LIBRARIES} ${BLAS_LINKER_FLAGS}")
+    endif()
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      "-SSL2${_ssl2_suffix}"
+      ""
+      ""
+      ""
+      ""
+      "${_ssl2_blas}"
+    )
+    if(LAPACK_LIBRARIES)
+      set(LAPACK_LINKER_FLAGS "-SSL2${_ssl2_suffix}")
+      set(_lapack_fphsa_req_var LAPACK_LINKER_FLAGS)
+    endif()
+    unset(_ssl2_suffix)
+  endif()
+
+  # NVHPC Library?
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR MATCHES "NVHPC" OR BLA_VENDOR STREQUAL "All"))
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
       cheev
       ""
       "lapack"
-      ""
+      "-fortranlibs"
       ""
       ""
       "${BLAS_LIBRARIES}"
     )
+  endif()
+
+  # Generic LAPACK library?
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR STREQUAL "Generic"
+           OR BLA_VENDOR STREQUAL "ATLAS"
+           OR BLA_VENDOR STREQUAL "All"))
+    if(BLA_STATIC)
+      # We do not know for sure how the LAPACK reference implementation
+      # is built on this host.  Guess typical dependencies.
+      set(_lapack_generic_deps "-lgfortran;-lm")
+    else()
+      set(_lapack_generic_deps "")
+    endif()
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "lapack"
+      "${_lapack_generic_deps}"
+      ""
+      ""
+      "${BLAS_LIBRARIES}"
+    )
+    unset(_lapack_generic_deps)
   endif()
 endif()
 
@@ -612,7 +631,7 @@ if(LAPACK_NOT_FOUND_MESSAGE)
   set(LAPACK_NOT_FOUND_MESSAGE
     REASON_FAILURE_MESSAGE ${LAPACK_NOT_FOUND_MESSAGE})
 endif()
-find_package_handle_standard_args(LAPACK REQUIRED_VARS LAPACK_LIBRARIES
+find_package_handle_standard_args(LAPACK REQUIRED_VARS ${_lapack_fphsa_req_var}
   ${LAPACK_NOT_FOUND_MESSAGE})
 unset(LAPACK_NOT_FOUND_MESSAGE)
 
@@ -627,5 +646,3 @@ if(LAPACK_LIBRARIES STREQUAL "LAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
 endif()
 
 _add_lapack_target()
-
-_lapack_find_library_teardown()

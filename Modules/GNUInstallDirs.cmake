@@ -21,7 +21,10 @@ Inclusion of this module defines the following variables:
 
   Destination for files of a given type.  This value may be passed to
   the ``DESTINATION`` options of :command:`install` commands for the
-  corresponding file type.
+  corresponding file type.  It should typically be a path relative to
+  the installation prefix so that it can be converted to an absolute
+  path in a relocatable way (see ``CMAKE_INSTALL_FULL_<dir>``).
+  However, an absolute path is also allowed.
 
 ``CMAKE_INSTALL_FULL_<dir>``
 
@@ -236,6 +239,7 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
   endif()
   if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
       AND NOT CMAKE_CROSSCOMPILING
+      AND NOT EXISTS "/etc/alpine-release"
       AND NOT EXISTS "/etc/arch-release")
     if (EXISTS "/etc/debian_version") # is this a debian system ?
       if(CMAKE_LIBRARY_ARCHITECTURE)
@@ -349,7 +353,7 @@ macro(GNUInstallDirs_get_absolute_install_dir absvar var)
   if(GGAID_extra_arg_count GREATER 0)
     list(GET GGAID_extra_args 0 GGAID_dir)
   else()
-    # Historical behaviour: use ${dir} from caller's scope
+    # Historical behavior: use ${dir} from caller's scope
     set(GGAID_dir "${dir}")
     message(AUTHOR_WARNING
       "GNUInstallDirs_get_absolute_install_dir called without third argument. "

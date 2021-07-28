@@ -1,0 +1,2 @@
+^CMake Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsBuild/ConditionFuture: File version must be 3 or higher for condition support$

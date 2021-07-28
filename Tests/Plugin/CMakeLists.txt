@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.12)
 cmake_policy(SET CMP0054 NEW)
 project(Plugin)
 
@@ -46,7 +46,7 @@ target_link_libraries(example_mod_1 example_exe)
 if(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG AND
     "${CMAKE_C_CREATE_SHARED_MODULE}" MATCHES "SONAME_FLAG")
   # Verify that targets export with proper IMPORTED SONAME properties.
-  export(TARGETS example_mod_1 NAMESPACE exp_
+  export(TARGETS example_mod_1 example_exe NAMESPACE exp_
     FILE ${CMAKE_CURRENT_BINARY_DIR}/mods.cmake)
 
   include(ExternalProject)

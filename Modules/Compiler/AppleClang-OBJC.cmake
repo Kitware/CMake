@@ -23,4 +23,18 @@ if(NOT CMAKE_OBJC_COMPILER_VERSION VERSION_LESS 4.0)
   set(CMAKE_OBJC11_STANDARD__HAS_FULL_SUPPORT ON)
 endif()
 
-__compiler_check_default_language_standard(OBJC 4.0 99)
+# AppleClang 10.0 was the oldest compiler available to test C17 support
+if(NOT CMAKE_OBJC_COMPILER_VERSION VERSION_LESS 10.0)
+  set(CMAKE_OBJC17_STANDARD_COMPILE_OPTION "-std=c17")
+  set(CMAKE_OBJC17_EXTENSION_COMPILE_OPTION "-std=gnu17")
+  set(CMAKE_OBJC17_STANDARD__HAS_FULL_SUPPORT ON)
+endif()
+
+if(NOT CMAKE_OBJC_COMPILER_VERSION VERSION_LESS 11.0)
+  set(CMAKE_OBJC23_STANDARD_COMPILE_OPTION "-std=c2x")
+  set(CMAKE_OBJC23_EXTENSION_COMPILE_OPTION "-std=gnu2x")
+  set(CMAKE_OBJC23_STANDARD__HAS_FULL_SUPPORT ON)
+endif()
+
+# AppleClang 10.0 was the oldest compiler available to test default C11 support
+__compiler_check_default_language_standard(OBJC 4.0 99 10.0 11)

@@ -1,0 +1,5 @@
+^CMake Error at TARGETS-RUNTIME_DEPENDENCY_SET-unsupported\.cmake:[0-9]+ \(install\):
+  install TARGETS RUNTIME_DEPENDENCY_SET is not supported on system "[^
+]*"
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

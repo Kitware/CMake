@@ -7,6 +7,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "warning LNK4221"
   "warning LNK4204" # Occurs by race condition with objects in small libs
   "variable .var_args[2]*. is used before its value is set"
+  "warning: variable .__d[01]. was set but never used" # FD_ZERO on NVHPC
   "jobserver unavailable"
   "warning: \\(Long double usage is reported only once for each file"
   "warning: To disable this warning use"
@@ -82,28 +83,21 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "compilation completed with warnings" # PGI
   "[0-9]+ Warning\\(s\\) detected" # SunPro
 
-  # scanbuild exceptions
-  "char_traits.h:.*: warning: Null pointer argument in call to string length function"
-  "stl_construct.h:.*: warning: Forming reference to null pointer"
-  ".*stl_uninitialized.h:75:19: warning: Forming reference to null pointer.*"
-  ".*stl_vector.h:.*: warning: Returning null reference.*"
-  "warning: Value stored to 'yymsg' is never read"
-  "warning: Value stored to 'yytoken' is never read"
-  "index_encoder.c.241.2. warning: Value stored to .out_start. is never read"
-  "index.c.*warning: Access to field.*results in a dereference of a null pointer.*loaded from variable.*"
-  "cmCommandArgumentLexer.cxx:[0-9]+:[0-9]+: warning: Call to 'realloc' has an allocation size of 0 bytes"
-  "cmDependsJavaLexer.cxx:[0-9]+:[0-9]+: warning: Call to 'realloc' has an allocation size of 0 bytes"
-  "cmExprLexer.cxx:[0-9]+:[0-9]+: warning: Call to 'realloc' has an allocation size of 0 bytes"
-  "cmListFileLexer.c:[0-9]+:[0-9]+: warning: Call to 'realloc' has an allocation size of 0 bytes"
-  "cmFortranLexer.cxx:[0-9]+:[0-9]+: warning: Call to 'realloc' has an allocation size of 0 bytes"
-  "testProcess.*warning: Dereference of null pointer .loaded from variable .invalidAddress.."
+  # clang-analyzer exceptions
+  "cmListFileLexer.c:[0-9]+:[0-9]+: warning: Array subscript is undefined"
+  "jsoncpp/src/.*:[0-9]+:[0-9]+: warning: Value stored to .* is never read"
+  "liblzma/common/index_encoder.c:[0-9]+:[0-9]+: warning: Value stored to '[^']+' during its initialization is never read"
+  "liblzma/liblzma/common/index.c:[0-9]+:[0-9]+: warning: Access to field '[^']+' results in a dereference of a null pointer"
   "liblzma/simple/x86.c:[0-9]+:[0-9]+: warning: The result of the '<<' expression is undefined"
-  "liblzma/common/index_encoder.c:[0-9]+:[0-9]+: warning: Value stored to .* during its initialization is never read"
-  "libuv/src/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
-  "libuv/src/.*:[0-9]+:[0-9]+: warning: The left operand of '==' is a garbage value"
+  "librhash/librhash/.*:[0-9]+:[0-9]+: warning: The left operand of '[^']+' is a garbage value"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: 1st function call argument is an uninitialized value"
+  "libuv/src/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
+  "libuv/src/.*:[0-9]+:[0-9]+: warning: The left operand of '[^']+' is a garbage value"
+  "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Access to field '[^']+' results in a dereference of a null pointer"
   "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
-  "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Value stored to .* is never read"
+  "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Value stored to '[^']+' is never read"
+  "zstd/lib/.*:[0-9]+:[0-9]+: warning: Assigned value is garbage or undefined"
+  "zstd/lib/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
   )
 
 if(NOT "@CMAKE_GENERATOR@" MATCHES "Xcode")

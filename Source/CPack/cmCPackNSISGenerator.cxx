@@ -215,9 +215,16 @@ int cmCPackNSISGenerator::PackageFiles()
     if (this->IsSet("CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION")) {
       std::string wantedPosition =
         this->GetOption("CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION");
-      const std::set<std::string> possiblePositions{ "CENTER", "LEFT",
-                                                     "RIGHT" };
-      if (possiblePositions.find(wantedPosition) != possiblePositions.end()) {
+      if (!wantedPosition.empty()) {
+        const std::set<std::string> possiblePositions{ "CENTER", "LEFT",
+                                                       "RIGHT" };
+        if (possiblePositions.find(wantedPosition) ==
+            possiblePositions.end()) {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+                        "Unsupported branding text trim position "
+                          << wantedPosition << std::endl);
+          return false;
+        }
         brandingTextPosition = wantedPosition;
       }
     }
@@ -430,7 +437,9 @@ int cmCPackNSISGenerator::InitializeInternal()
   }
 #endif
 
-  nsisPath = cmSystemTools::FindProgram("makensis", path, false);
+  this->SetOptionIfNotSet("CPACK_NSIS_EXECUTABLE", "makensis");
+  nsisPath = cmSystemTools::FindProgram(
+    this->GetOption("CPACK_NSIS_EXECUTABLE"), path, false);
 
   if (nsisPath.empty()) {
     cmCPackLogger(

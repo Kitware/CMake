@@ -3,6 +3,7 @@
 #include "cmMessenger.h"
 
 #include "cmDocumentationFormatter.h"
+#include "cmMessageMetadata.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -11,6 +12,8 @@
 #endif
 
 #include <sstream>
+
+#include "cmsys/Terminal.h"
 
 MessageType cmMessenger::ConvertMessageType(MessageType t) const
 {
@@ -84,6 +87,21 @@ static bool printMessagePreamble(MessageType t, std::ostream& msg)
   return true;
 }
 
+static int getMessageColor(MessageType t)
+{
+  switch (t) {
+    case MessageType::INTERNAL_ERROR:
+    case MessageType::FATAL_ERROR:
+    case MessageType::AUTHOR_ERROR:
+      return cmsysTerminal_Color_ForegroundRed;
+    case MessageType::AUTHOR_WARNING:
+    case MessageType::WARNING:
+      return cmsysTerminal_Color_ForegroundYellow;
+    default:
+      return cmsysTerminal_Color_Normal;
+  }
+}
+
 void printMessageText(std::ostream& msg, std::string const& text)
 {
   msg << ":\n";
@@ -120,12 +138,16 @@ void displayMessage(MessageType t, std::ostringstream& msg)
 #endif
 
   // Output the message.
+  cmMessageMetadata md;
+  md.desiredColor = getMessageColor(t);
   if (t == MessageType::FATAL_ERROR || t == MessageType::INTERNAL_ERROR ||
       t == MessageType::DEPRECATION_ERROR || t == MessageType::AUTHOR_ERROR) {
     cmSystemTools::SetErrorOccured();
-    cmSystemTools::Message(msg.str(), "Error");
+    md.title = "Error";
+    cmSystemTools::Message(msg.str(), md);
   } else {
-    cmSystemTools::Message(msg.str(), "Warning");
+    md.title = "Warning";
+    cmSystemTools::Message(msg.str(), md);
   }
 }
 

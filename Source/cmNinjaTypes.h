@@ -53,6 +53,7 @@ public:
   std::string Rule;
   cmNinjaDeps Outputs;
   cmNinjaDeps ImplicitOuts;
+  cmNinjaDeps WorkDirOuts; // For cmake_ninja_workdir.
   cmNinjaDeps ExplicitDeps;
   cmNinjaDeps ImplicitDeps;
   cmNinjaDeps OrderOnlyDeps;

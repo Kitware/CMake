@@ -130,6 +130,8 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     set(OMP_FLAG_XL "-qsmp=omp")
     # Cray compiler activate OpenMP with -h omp, which is enabled by default.
     set(OMP_FLAG_Cray " " "-h omp")
+    set(OMP_FLAG_Fujitsu "-Kopenmp" "-KOMP")
+    set(OMP_FLAG_FujitsuClang "-fopenmp" "-Kopenmp")
 
     # If we know the correct flags, use those
     if(DEFINED OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID})
@@ -568,6 +570,10 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
         separate_arguments(_OpenMP_${LANG}_OPTIONS NATIVE_COMMAND "${OpenMP_${LANG}_FLAGS}")
         set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
           INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:${LANG}>:${_OpenMP_${LANG}_OPTIONS}>")
+        if(CMAKE_${LANG}_COMPILER_ID STREQUAL "Fujitsu")
+          set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
+            INTERFACE_LINK_OPTIONS "${OpenMP_${LANG}_FLAGS}")
+        endif()
         unset(_OpenMP_${LANG}_OPTIONS)
       endif()
       if(OpenMP_${LANG}_INCLUDE_DIRS)

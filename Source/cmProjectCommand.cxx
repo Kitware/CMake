@@ -59,6 +59,11 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 
   mf.AddDefinition("PROJECT_NAME", projectName);
 
+  mf.AddDefinitionBool("PROJECT_IS_TOP_LEVEL", mf.IsRootMakefile());
+  mf.AddCacheDefinition(projectName + "_IS_TOP_LEVEL",
+                        mf.IsRootMakefile() ? "ON" : "OFF",
+                        "Value Computed by CMake", cmStateEnums::STATIC);
+
   // Set the CMAKE_PROJECT_NAME variable to be the highest-level
   // project name in the tree. If there are two project commands
   // in the same CMakeLists.txt file, and it is the top level
@@ -66,7 +71,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   // CMAKE_PROJECT_NAME will match PROJECT_NAME, and cmake --build
   // will work.
   if (!mf.GetDefinition("CMAKE_PROJECT_NAME") || mf.IsRootMakefile()) {
-    mf.AddDefinition("CMAKE_PROJECT_NAME", projectName);
+    mf.RemoveDefinition("CMAKE_PROJECT_NAME");
     mf.AddCacheDefinition("CMAKE_PROJECT_NAME", projectName,
                           "Value Computed by CMake", cmStateEnums::STATIC);
   }
@@ -390,7 +395,7 @@ static void TopLevelCMakeVarCondSet(cmMakefile& mf, std::string const& name,
   // in the same CMakeLists.txt file, and it is the top level
   // CMakeLists.txt file, then go with the last one.
   if (!mf.GetDefinition(name) || mf.IsRootMakefile()) {
-    mf.AddDefinition(name, value);
+    mf.RemoveDefinition(name);
     mf.AddCacheDefinition(name, value, "Value Computed by CMake",
                           cmStateEnums::STATIC);
   }

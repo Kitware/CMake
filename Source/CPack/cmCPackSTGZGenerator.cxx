@@ -51,15 +51,16 @@ int cmCPackSTGZGenerator::PackageFiles()
    * so we must iterate over generated packages.
    */
   for (std::string const& pfn : this->packageFileNames) {
-    retval &= cmSystemTools::SetPermissions(pfn.c_str(),
+    retval &= static_cast<bool>(
+      cmSystemTools::SetPermissions(pfn.c_str(),
 #if defined(_MSC_VER) || defined(__MINGW32__)
-                                            S_IREAD | S_IWRITE | S_IEXEC
+                                    S_IREAD | S_IWRITE | S_IEXEC
 #else
-                                            S_IRUSR | S_IWUSR | S_IXUSR |
-                                              S_IRGRP | S_IWGRP | S_IXGRP |
-                                              S_IROTH | S_IWOTH | S_IXOTH
+                                    S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |
+                                      S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH |
+                                      S_IXOTH
 #endif
-    );
+                                    ));
   }
   return retval;
 }

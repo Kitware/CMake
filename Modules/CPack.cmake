@@ -291,18 +291,27 @@ installers.  The most commonly-used variables are:
 
   Some compression methods used by CPack generators such as Debian or Archive
   may take advantage of multiple CPU cores to speed up compression.
-  ``CPACK_THREADS`` can be set to positive integer to specify how many threads
-  will be used for compression. If it is set to 0, CPack will set it so that
-  all available CPU cores are used.
+  ``CPACK_THREADS`` can be set to specify how many threads will be
+  used for compression.
+
+  A positive integer can be used to specify an exact desired thread count.
+
+  When given a negative integer CPack will use the absolute value
+  as the upper limit but may choose a lower value based on
+  the available hardware concurrency.
+
+  Given 0 CPack will try to use all available CPU cores.
+
   By default ``CPACK_THREADS`` is set to ``1``.
 
-  Currently only ``xz`` compression *may* take advantage of multiple cores. Other
-  compression methods ignore this value and use only one thread.
+  Currently only ``xz`` compression *may* take advantage of multiple cores.
+  Other compression methods ignore this value and use only one thread.
 
-  .. note::
+  .. versionadded:: 3.21
 
-     Official CMake binaries available on ``cmake.org`` ship with a ``liblzma``
-     that does not support parallel compression.
+    Official CMake binaries available on ``cmake.org`` now ship
+    with a ``liblzma`` that supports parallel compression.
+    Older versions did not.
 
 Variables for Source Package Generators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

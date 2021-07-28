@@ -7,7 +7,8 @@
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 600
 #endif
-#if !defined(_POSIX_C_SOURCE) && !defined(_WIN32) && !defined(__sun)
+#if !defined(_POSIX_C_SOURCE) && !defined(_WIN32) && !defined(__sun) &&       \
+  !defined(__OpenBSD__)
 /* POSIX APIs are needed */
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _POSIX_C_SOURCE 200809L
@@ -17,7 +18,7 @@
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 600
 #endif
-#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 /* For isascii */
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 700
@@ -47,6 +48,11 @@
 #  if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 403
 #    pragma GCC diagnostic ignored "-Wsign-conversion"
 #  endif
+#endif
+
+#if defined(__NVCOMPILER)
+#  pragma diag_suppress 111 /* statement is unreachable */
+#  pragma diag_suppress 550 /* variable set but never used */
 #endif
 
 /* Make sure isatty is available. */

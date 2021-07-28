@@ -42,6 +42,7 @@
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTimestamp.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
@@ -287,8 +288,6 @@ cmCTestTestHandler::cmCTestTestHandler()
 {
   this->UseUnion = false;
 
-  this->UseIncludeLabelRegExpFlag = false;
-  this->UseExcludeLabelRegExpFlag = false;
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
@@ -301,11 +300,18 @@ cmCTestTestHandler::cmCTestTestHandler()
 
   this->LogFile = nullptr;
 
+  // Support for JUnit XML output.
+  this->JUnitXMLFileName = "";
+
   // regex to detect <DartMeasurement>...</DartMeasurement>
   this->DartStuff.compile("(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
   // regex to detect each individual <DartMeasurement>...</DartMeasurement>
   this->DartStuff1.compile(
     "(<DartMeasurement[^<]*</DartMeasurement[a-zA-Z]*>)");
+
+  // regex to detect <CTestDetails>...</CTestDetails>
+  this->CustomCompletionStatusRegex.compile(
+    "<CTestDetails>(.*)</CTestDetails>");
 }
 
 void cmCTestTestHandler::Initialize()
@@ -327,13 +333,11 @@ void cmCTestTestHandler::Initialize()
 
   this->TestsToRun.clear();
 
-  this->UseIncludeLabelRegExpFlag = false;
-  this->UseExcludeLabelRegExpFlag = false;
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
-  this->IncludeLabelRegularExpression = "";
-  this->ExcludeLabelRegularExpression = "";
+  this->IncludeLabelRegularExpressions.clear();
+  this->ExcludeLabelRegularExpressions.clear();
   this->IncludeRegExp.clear();
   this->ExcludeRegExp.clear();
   this->ExcludeFixtureRegExp.clear();
@@ -460,6 +464,10 @@ int cmCTestTestHandler::ProcessHandler()
     return 1;
   }
 
+  if (!this->WriteJUnitXML()) {
+    return 1;
+  }
+
   if (!this->PostProcessHandler()) {
     this->LogFile = nullptr;
     return -1;
@@ -477,6 +485,22 @@ int cmCTestTestHandler::ProcessHandler()
 
   this->LogFile = nullptr;
   return 0;
+}
+
+/* Given a multi-option value `parts`, compile those parts into
+ * regular expressions in `expressions`. Skip empty values.
+ * Returns true if there were any expressions.
+ */
+static bool BuildLabelRE(const std::vector<std::string>& parts,
+                         std::vector<cmsys::RegularExpression>& expressions)
+{
+  expressions.clear();
+  for (const auto& p : parts) {
+    if (!p.empty()) {
+      expressions.emplace_back(p);
+    }
+  }
+  return !expressions.empty();
 }
 
 bool cmCTestTestHandler::ProcessOptions()
@@ -519,18 +543,11 @@ bool cmCTestTestHandler::ProcessOptions()
     this->CTest->SetStopOnFailure(true);
   }
 
-  const char* val;
-  val = this->GetOption("LabelRegularExpression");
-  if (val) {
-    this->UseIncludeLabelRegExpFlag = true;
-    this->IncludeLabelRegExp = val;
-  }
-  val = this->GetOption("ExcludeLabelRegularExpression");
-  if (val) {
-    this->UseExcludeLabelRegExpFlag = true;
-    this->ExcludeLabelRegExp = val;
-  }
-  val = this->GetOption("IncludeRegularExpression");
+  BuildLabelRE(this->GetMultiOption("LabelRegularExpression"),
+               this->IncludeLabelRegularExpressions);
+  BuildLabelRE(this->GetMultiOption("ExcludeLabelRegularExpression"),
+               this->ExcludeLabelRegularExpressions);
+  const char* val = this->GetOption("IncludeRegularExpression");
   if (val) {
     this->UseIncludeRegExp();
     this->SetIncludeRegExp(val);
@@ -763,10 +780,40 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "\n", this->Quiet);
 }
 
+/**
+ * Check if the labels (from a test) match all the expressions.
+ *
+ * Each of the RE's must match at least one label
+ * (e.g. all of the REs must match **some** label,
+ * in order for the filter to apply to the test).
+ */
+static bool MatchLabelsAgainstFilterRE(
+  const std::vector<std::string>& labels,
+  const std::vector<cmsys::RegularExpression>& expressions)
+{
+  for (const auto& re : expressions) {
+    // check to see if the label regular expression matches
+    bool found = false; // assume it does not match
+    cmsys::RegularExpressionMatch match;
+    // loop over all labels and look for match
+    for (std::string const& l : labels) {
+      if (re.find(l.c_str(), match)) {
+        found = true;
+        break;
+      }
+    }
+    // if no match was found, exclude the test
+    if (!found) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
 {
   // if not using Labels to filter then return
-  if (!this->UseIncludeLabelRegExpFlag) {
+  if (this->IncludeLabelRegularExpressions.empty()) {
     return;
   }
   // if there are no labels and we are filtering by labels
@@ -775,16 +822,9 @@ void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
     it.IsInBasedOnREOptions = false;
     return;
   }
-  // check to see if the label regular expression matches
-  bool found = false; // assume it does not match
-  // loop over all labels and look for match
-  for (std::string const& l : it.Labels) {
-    if (this->IncludeLabelRegularExpression.find(l)) {
-      found = true;
-    }
-  }
   // if no match was found, exclude the test
-  if (!found) {
+  if (!MatchLabelsAgainstFilterRE(it.Labels,
+                                  this->IncludeLabelRegularExpressions)) {
     it.IsInBasedOnREOptions = false;
   }
 }
@@ -792,7 +832,7 @@ void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
 void cmCTestTestHandler::CheckLabelFilterExclude(cmCTestTestProperties& it)
 {
   // if not using Labels to filter then return
-  if (!this->UseExcludeLabelRegExpFlag) {
+  if (this->ExcludeLabelRegularExpressions.empty()) {
     return;
   }
   // if there are no labels and we are excluding by labels
@@ -800,16 +840,9 @@ void cmCTestTestHandler::CheckLabelFilterExclude(cmCTestTestProperties& it)
   if (it.Labels.empty()) {
     return;
   }
-  // check to see if the label regular expression matches
-  bool found = false; // assume it does not match
-  // loop over all labels and look for match
-  for (std::string const& l : it.Labels) {
-    if (this->ExcludeLabelRegularExpression.find(l)) {
-      found = true;
-    }
-  }
   // if match was found, exclude the test
-  if (found) {
+  if (MatchLabelsAgainstFilterRE(it.Labels,
+                                 this->ExcludeLabelRegularExpressions)) {
     it.IsInBasedOnREOptions = false;
   }
 }
@@ -1431,7 +1464,11 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
     xml.StartElement("NamedMeasurement");
     xml.Attribute("type", "text/string");
     xml.Attribute("name", "Completion Status");
-    xml.Element("Value", result.CompletionStatus);
+    if (result.CustomCompletionStatus.empty()) {
+      xml.Element("Value", result.CompletionStatus);
+    } else {
+      xml.Element("Value", result.CustomCompletionStatus);
+    }
     xml.EndElement(); // NamedMeasurement
 
     xml.StartElement("NamedMeasurement");
@@ -1521,17 +1558,27 @@ void cmCTestTestHandler::AttachFiles(cmXMLWriter& xml,
       result.Properties->AttachOnFail.end());
   }
   for (std::string const& file : result.Properties->AttachedFiles) {
-    const std::string& base64 = this->CTest->Base64GzipEncodeFile(file);
-    std::string const fname = cmSystemTools::GetFilenameName(file);
-    xml.StartElement("NamedMeasurement");
-    xml.Attribute("name", "Attached File");
-    xml.Attribute("encoding", "base64");
-    xml.Attribute("compression", "tar/gzip");
-    xml.Attribute("filename", fname);
-    xml.Attribute("type", "file");
-    xml.Element("Value", base64);
-    xml.EndElement(); // NamedMeasurement
+    this->AttachFile(xml, file, "");
   }
+}
+
+void cmCTestTestHandler::AttachFile(cmXMLWriter& xml, std::string const& file,
+                                    std::string const& name)
+{
+  const std::string& base64 = this->CTest->Base64GzipEncodeFile(file);
+  std::string const fname = cmSystemTools::GetFilenameName(file);
+  xml.StartElement("NamedMeasurement");
+  std::string measurement_name = name;
+  if (measurement_name.empty()) {
+    measurement_name = "Attached File";
+  }
+  xml.Attribute("name", measurement_name);
+  xml.Attribute("encoding", "base64");
+  xml.Attribute("compression", "tar/gzip");
+  xml.Attribute("filename", fname);
+  xml.Attribute("type", "file");
+  xml.Element("Value", base64);
+  xml.EndElement(); // NamedMeasurement
 }
 
 int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
@@ -1704,19 +1751,11 @@ bool cmCTestTestHandler::ParseResourceGroupsProperty(
 
 bool cmCTestTestHandler::GetListOfTests()
 {
-  if (!this->IncludeLabelRegExp.empty()) {
-    this->IncludeLabelRegularExpression.compile(
-      this->IncludeLabelRegExp.c_str());
-  }
-  if (!this->ExcludeLabelRegExp.empty()) {
-    this->ExcludeLabelRegularExpression.compile(
-      this->ExcludeLabelRegExp.c_str());
-  }
   if (!this->IncludeRegExp.empty()) {
-    this->IncludeTestsRegularExpression.compile(this->IncludeRegExp.c_str());
+    this->IncludeTestsRegularExpression.compile(this->IncludeRegExp);
   }
   if (!this->ExcludeRegExp.empty()) {
-    this->ExcludeTestsRegularExpression.compile(this->ExcludeRegExp.c_str());
+    this->ExcludeTestsRegularExpression.compile(this->ExcludeRegExp);
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Constructing a list of tests" << std::endl, this->Quiet);
@@ -1868,7 +1907,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   std::string dirName = this->CTest->GetBinaryDir() + "/Testing/Temporary";
 
   cmsys::Directory directory;
-  if (directory.Load(dirName) == 0) {
+  if (!directory.Load(dirName)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Unable to read the contents of " << dirName << std::endl);
     return;
@@ -2020,11 +2059,11 @@ void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
         cmCTest::CleanString(measurementfile.match(5));
       if (cmSystemTools::FileExists(filename)) {
         long len = cmSystemTools::FileLength(filename);
+        std::string k1 = measurementfile.match(1);
+        std::string v1 = measurementfile.match(2);
+        std::string k2 = measurementfile.match(3);
+        std::string v2 = measurementfile.match(4);
         if (len == 0) {
-          std::string k1 = measurementfile.match(1);
-          std::string v1 = measurementfile.match(2);
-          std::string k2 = measurementfile.match(3);
-          std::string v2 = measurementfile.match(4);
           if (cmSystemTools::LowerCase(k1) == "type") {
             v1 = "text/string";
           }
@@ -2039,35 +2078,53 @@ void cmCTestTestHandler::GenerateRegressionImages(cmXMLWriter& xml,
           xml.Element("Value", "Image " + filename + " is empty");
           xml.EndElement();
         } else {
-          cmsys::ifstream ifs(filename.c_str(),
-                              std::ios::in
-#ifdef _WIN32
-                                | std::ios::binary
-#endif
-          );
-          auto file_buffer = cm::make_unique<unsigned char[]>(len + 1);
-          ifs.read(reinterpret_cast<char*>(file_buffer.get()), len);
-          auto encoded_buffer = cm::make_unique<unsigned char[]>(
-            static_cast<int>(static_cast<double>(len) * 1.5 + 5.0));
-
-          size_t rlen = cmsysBase64_Encode(file_buffer.get(), len,
-                                           encoded_buffer.get(), 1);
-
-          xml.StartElement("NamedMeasurement");
-          xml.Attribute(measurementfile.match(1).c_str(),
-                        measurementfile.match(2));
-          xml.Attribute(measurementfile.match(3).c_str(),
-                        measurementfile.match(4));
-          xml.Attribute("encoding", "base64");
-          std::ostringstream ostr;
-          for (size_t cc = 0; cc < rlen; cc++) {
-            ostr << encoded_buffer[cc];
-            if (cc % 60 == 0 && cc) {
-              ostr << std::endl;
-            }
+          std::string type;
+          std::string name;
+          if (cmSystemTools::LowerCase(k1) == "type") {
+            type = v1;
+          } else if (cmSystemTools::LowerCase(k2) == "type") {
+            type = v2;
           }
-          xml.Element("Value", ostr.str());
-          xml.EndElement(); // NamedMeasurement
+          if (cmSystemTools::LowerCase(k1) == "name") {
+            name = v1;
+          } else if (cmSystemTools::LowerCase(k2) == "name") {
+            name = v2;
+          }
+          if (type == "file") {
+            // Treat this measurement like an "ATTACHED_FILE" when the type
+            // is explicitly "file" (not an image).
+            this->AttachFile(xml, filename, name);
+          } else {
+            cmsys::ifstream ifs(filename.c_str(),
+                                std::ios::in
+#ifdef _WIN32
+                                  | std::ios::binary
+#endif
+            );
+            auto file_buffer = cm::make_unique<unsigned char[]>(len + 1);
+            ifs.read(reinterpret_cast<char*>(file_buffer.get()), len);
+            auto encoded_buffer = cm::make_unique<unsigned char[]>(
+              static_cast<int>(static_cast<double>(len) * 1.5 + 5.0));
+
+            size_t rlen = cmsysBase64_Encode(file_buffer.get(), len,
+                                             encoded_buffer.get(), 1);
+
+            xml.StartElement("NamedMeasurement");
+            xml.Attribute(measurementfile.match(1).c_str(),
+                          measurementfile.match(2));
+            xml.Attribute(measurementfile.match(3).c_str(),
+                          measurementfile.match(4));
+            xml.Attribute("encoding", "base64");
+            std::ostringstream ostr;
+            for (size_t cc = 0; cc < rlen; cc++) {
+              ostr << encoded_buffer[cc];
+              if (cc % 60 == 0 && cc) {
+                ostr << std::endl;
+              }
+            }
+            xml.Element("Value", ostr.str());
+            xml.EndElement(); // NamedMeasurement
+          }
         }
       } else {
         int idx = 4;
@@ -2443,4 +2500,126 @@ bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator!=(
   const cmCTestTestResourceRequirement& other) const
 {
   return !(*this == other);
+}
+
+void cmCTestTestHandler::SetJUnitXMLFileName(const std::string& filename)
+{
+  this->JUnitXMLFileName = filename;
+}
+
+bool cmCTestTestHandler::WriteJUnitXML()
+{
+  if (this->JUnitXMLFileName.empty()) {
+    return true;
+  }
+
+  // Open new XML file for writing.
+  cmGeneratedFileStream xmlfile;
+  xmlfile.SetTempExt("tmp");
+  xmlfile.Open(this->JUnitXMLFileName);
+  if (!xmlfile) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Problem opening file: " << this->JUnitXMLFileName
+                                        << std::endl);
+    return false;
+  }
+  cmXMLWriter xml(xmlfile);
+
+  // Iterate over the test results to get the number of tests that
+  // passed, failed, etc.
+  auto num_tests = 0;
+  auto num_passed = 0;
+  auto num_failed = 0;
+  auto num_notrun = 0;
+  auto num_disabled = 0;
+  SetOfTests resultsSet(this->TestResults.begin(), this->TestResults.end());
+  for (cmCTestTestResult const& result : resultsSet) {
+    num_tests++;
+    if (result.Status == cmCTestTestHandler::COMPLETED) {
+      num_passed++;
+    } else if (result.Status == cmCTestTestHandler::NOT_RUN) {
+      if (result.CompletionStatus == "Disabled") {
+        num_disabled++;
+      } else {
+        num_notrun++;
+      }
+    } else {
+      num_failed++;
+    }
+  }
+
+  // Write <testsuite> element.
+  xml.StartDocument();
+  xml.StartElement("testsuite");
+
+  xml.Attribute("name",
+                cmCTest::SafeBuildIdField(
+                  this->CTest->GetCTestConfiguration("BuildName")));
+  xml.BreakAttributes();
+
+  xml.Attribute("tests", num_tests);
+  xml.Attribute("failures", num_failed);
+
+  // CTest disabled => JUnit disabled
+  xml.Attribute("disabled", num_disabled);
+
+  // Otherwise, CTest notrun => JUnit skipped.
+  // The distinction between JUnit disabled vs. skipped is that
+  // skipped tests can have a message associated with them
+  // (why the test was skipped).
+  xml.Attribute("skipped", num_notrun);
+
+  xml.Attribute("hostname", this->CTest->GetCTestConfiguration("Site"));
+  xml.Attribute(
+    "time",
+    std::chrono::duration_cast<std::chrono::seconds>(this->ElapsedTestingTime)
+      .count());
+  const std::time_t start_test_time_t =
+    std::chrono::system_clock::to_time_t(this->StartTestTime);
+  cmTimestamp cmts;
+  xml.Attribute("timestamp",
+                cmts.CreateTimestampFromTimeT(start_test_time_t,
+                                              "%Y-%m-%dT%H:%M:%S", false));
+
+  // Write <testcase> elements.
+  for (cmCTestTestResult const& result : resultsSet) {
+    xml.StartElement("testcase");
+    xml.Attribute("name", result.Name);
+    xml.Attribute("classname", result.Name);
+    xml.Attribute("time", result.ExecutionTime.count());
+
+    std::string status;
+    if (result.Status == cmCTestTestHandler::COMPLETED) {
+      status = "run";
+    } else if (result.Status == cmCTestTestHandler::NOT_RUN) {
+      if (result.CompletionStatus == "Disabled") {
+        status = "disabled";
+      } else {
+        status = "notrun";
+      }
+    } else {
+      status = "fail";
+    }
+    xml.Attribute("status", status);
+
+    if (status == "notrun") {
+      xml.StartElement("skipped");
+      xml.Attribute("message", result.CompletionStatus);
+      xml.EndElement(); // </skipped>
+    } else if (status == "fail") {
+      xml.StartElement("failure");
+      xml.Attribute("message", result.Reason);
+      xml.EndElement(); // </failure>
+    }
+
+    // Note: compressed test output is unconditionally disabled when
+    // --output-junit is specified.
+    xml.Element("system-out", result.Output);
+    xml.EndElement(); // </testcase>
+  }
+
+  xml.EndElement(); // </testsuite>
+  xml.EndDocument();
+
+  return true;
 }

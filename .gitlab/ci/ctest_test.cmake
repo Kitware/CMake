@@ -19,6 +19,8 @@ endif ()
 include("${CMAKE_CURRENT_LIST_DIR}/ctest_exclusions.cmake")
 ctest_test(
   PARALLEL_LEVEL "${nproc}"
+  TEST_LOAD "${nproc}"
+  OUTPUT_JUNIT "${CTEST_BINARY_DIRECTORY}/junit.xml"
   RETURN_VALUE test_result
   EXCLUDE "${test_exclusions}")
 ctest_submit(PARTS Test)

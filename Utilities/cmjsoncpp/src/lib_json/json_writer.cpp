@@ -1,115 +1,111 @@
 // Copyright 2011 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
-// See file LICENSE for detail or copy at
-// http://jsoncpp.sourceforge.net/LICENSE
+// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 #if !defined(JSON_IS_AMALGAMATION)
-#  include <json/writer.h>
-
-#  include "json_tool.h"
+#include <json/writer.h>
+#include "json_tool.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
-#include <cassert>
-#include <cstdio>
-#include <cstring>
 #include <iomanip>
 #include <memory>
-#include <set>
 #include <sstream>
 #include <utility>
+#include <set>
+#include <cassert>
+#include <cstring>
+#include <cstdio>
 
-#if defined(_MSC_VER) && _MSC_VER >= 1200 &&                                  \
-  _MSC_VER < 1800 // Between VC++ 6.0 and VC++ 11.0
-#  include <float.h>
-#  define isfinite _finite
-#elif defined(__sun) && defined(__SVR4) // Solaris
-#  if !defined(isfinite)
-#    include <ieeefp.h>
-#    define isfinite finite
-#  endif
+#if defined(_MSC_VER) && _MSC_VER >= 1200 && _MSC_VER < 1800 // Between VC++ 6.0 and VC++ 11.0
+#include <float.h>
+#define isfinite _finite
+#elif defined(__sun) && defined(__SVR4) //Solaris
+#if !defined(isfinite)
+#include <ieeefp.h>
+#define isfinite finite
+#endif
 #elif defined(_AIX)
-#  if !defined(isfinite)
-#    include <math.h>
-#    define isfinite finite
-#  endif
+#if !defined(isfinite)
+#include <math.h>
+#define isfinite finite
+#endif
 #elif defined(__hpux)
-#  if !defined(isfinite) && !defined(__GNUC__)
-#    if defined(__ia64) && !defined(finite)
-#      define isfinite(x)                                                     \
-        ((sizeof(x) == sizeof(float) ? _Isfinitef(x) : _IsFinite(x)))
-#    else
-#      include <math.h>
-#      define isfinite finite
-#    endif
-#  endif
+#if !defined(isfinite) && !defined(__GNUC__)
+#if defined(__ia64) && !defined(finite)
+#define isfinite(x) ((sizeof(x) == sizeof(float) ? \
+                     _Isfinitef(x) : _IsFinite(x)))
 #else
-#  include <cmath>
-#  if !(defined(__QNXNTO__)) // QNX already defines isfinite
-#    define isfinite std::isfinite
-#  endif
+#include <math.h>
+#define isfinite finite
+#endif
+#endif
+#else
+#include <cmath>
+#if !(defined(__QNXNTO__)) // QNX already defines isfinite
+#define isfinite std::isfinite
+#endif
 #endif
 
 #if defined(_MSC_VER)
-#  if !defined(WINCE) && defined(__STDC_SECURE_LIB__) &&                      \
-    _MSC_VER >= 1500 // VC++ 9.0 and above
-#    define snprintf sprintf_s
-#  elif _MSC_VER >= 1900 // VC++ 14.0 and above
-#    define snprintf std::snprintf
-#  else
-#    define snprintf _snprintf
-#  endif
+#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above
+#define snprintf sprintf_s
+#elif _MSC_VER >= 1900 // VC++ 14.0 and above
+#define snprintf std::snprintf
+#else
+#define snprintf _snprintf
+#endif
 #elif defined(__ANDROID__) || defined(__QNXNTO__)
-#  define snprintf snprintf
+#define snprintf snprintf
 #elif __cplusplus >= 201103L
-#  if !defined(__MINGW32__) && !defined(__CYGWIN__)
-#    define snprintf std::snprintf
-#  endif
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
+#define snprintf std::snprintf
+#endif
 #endif
 
-#if defined(__BORLANDC__)
-#  include <float.h>
-#  define isfinite _finite
-#  define snprintf _snprintf
+#if defined(__BORLANDC__)  
+#include <float.h>
+#define isfinite _finite
+#define snprintf _snprintf
 #endif
 
 // Solaris
 #if defined(__sun)
-#  include <ieeefp.h>
-#  if !defined(isfinite)
-#    define isfinite finite
-#  endif
+# include <ieeefp.h>
+# if !defined(isfinite)
+#  define isfinite finite
+# endif
 #endif
 
 // AIX
 #if defined(_AIX)
-#  if !defined(isfinite)
-#    define isfinite finite
-#  endif
+# if !defined(isfinite)
+#  define isfinite finite
+# endif
 #endif
 
 // HP-UX
 #if defined(__hpux)
-#  if !defined(isfinite)
-#    if defined(__ia64) && !defined(finite) && !defined(__GNUC__)
-#      define isfinite(x)                                                     \
-        ((sizeof(x) == sizeof(float) ? _Isfinitef(x) : _Isfinite(x)))
-#    else
-#      include <math.h>
-#      define isfinite finite
-#    endif
+# if !defined(isfinite)
+#  if defined(__ia64) && !defined(finite) && !defined(__GNUC__)
+#   define isfinite(x) ((sizeof(x) == sizeof(float) ? \
+                        _Isfinitef(x) : _Isfinite(x)))
+#  else
+#   include <math.h>
+#   define isfinite finite
 #  endif
+# endif
 #endif
 
 // Ancient glibc
 #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ < 2
-#  if !defined(isfinite)
-#    define isfinite __finite
-#  endif
+# if !defined(isfinite)
+#  define isfinite __finite
+# endif
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
 // Disable warning about strdup being deprecated.
-#  pragma warning(disable : 4996)
+#pragma warning(disable : 4996)
 #endif
 
 namespace Json {
@@ -117,11 +113,10 @@ namespace Json {
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
 typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
 #else
-typedef std::auto_ptr<StreamWriter> StreamWriterPtr;
+typedef std::auto_ptr<StreamWriter>   StreamWriterPtr;
 #endif
 
-static bool containsControlCharacter(const char* str)
-{
+static bool containsControlCharacter(const char* str) {
   while (*str) {
     if (isControlCharacter(*(str++)))
       return true;
@@ -129,19 +124,17 @@ static bool containsControlCharacter(const char* str)
   return false;
 }
 
-static bool containsControlCharacter0(const char* str, unsigned len)
-{
+static bool containsControlCharacter0(const char* str, unsigned len) {
   char const* end = str + len;
   while (end != str) {
-    if (isControlCharacter(*str) || 0 == *str)
+    if (isControlCharacter(*str) || 0==*str)
       return true;
     ++str;
   }
   return false;
 }
 
-JSONCPP_STRING valueToString(LargestInt value)
-{
+JSONCPP_STRING valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
   if (value == Value::minLargestInt) {
@@ -157,8 +150,7 @@ JSONCPP_STRING valueToString(LargestInt value)
   return current;
 }
 
-JSONCPP_STRING valueToString(LargestUInt value)
-{
+JSONCPP_STRING valueToString(LargestUInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
   uintToString(value, current);
@@ -168,22 +160,18 @@ JSONCPP_STRING valueToString(LargestUInt value)
 
 #if defined(JSON_HAS_INT64)
 
-JSONCPP_STRING valueToString(Int value)
-{
+JSONCPP_STRING valueToString(Int value) {
   return valueToString(LargestInt(value));
 }
 
-JSONCPP_STRING valueToString(UInt value)
-{
+JSONCPP_STRING valueToString(UInt value) {
   return valueToString(LargestUInt(value));
 }
 
 #endif // # if defined(JSON_HAS_INT64)
 
 namespace {
-JSONCPP_STRING valueToString(double value, bool useSpecialFloats,
-                             unsigned int precision)
-{
+JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int precision) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
   char buffer[36];
@@ -199,8 +187,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats,
     len = snprintf(buffer, sizeof(buffer), formatString, value);
     fixNumericLocale(buffer, buffer + len);
 
-    // try to ensure we preserve the fact that this was given to us as a double
-    // on input
+    // try to ensure we preserve the fact that this was given to us as a double on input
     if (!strchr(buffer, '.') && !strchr(buffer, 'e')) {
       strcat(buffer, ".0");
     }
@@ -208,14 +195,11 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats,
   } else {
     // IEEE standard states that NaN values will not compare to themselves
     if (value != value) {
-      len =
-        snprintf(buffer, sizeof(buffer), useSpecialFloats ? "NaN" : "null");
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "NaN" : "null");
     } else if (value < 0) {
-      len = snprintf(buffer, sizeof(buffer),
-                     useSpecialFloats ? "-Infinity" : "-1e+9999");
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "-Infinity" : "-1e+9999");
     } else {
-      len = snprintf(buffer, sizeof(buffer),
-                     useSpecialFloats ? "Infinity" : "1e+9999");
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "Infinity" : "1e+9999");
     }
   }
   assert(len >= 0);
@@ -223,18 +207,11 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats,
 }
 }
 
-JSONCPP_STRING valueToString(double value)
-{
-  return valueToString(value, false, 17);
-}
+JSONCPP_STRING valueToString(double value) { return valueToString(value, false, 17); }
 
-JSONCPP_STRING valueToString(bool value)
-{
-  return value ? "true" : "false";
-}
+JSONCPP_STRING valueToString(bool value) { return value ? "true" : "false"; }
 
-JSONCPP_STRING valueToQuotedString(const char* value)
-{
+JSONCPP_STRING valueToQuotedString(const char* value) {
   if (value == NULL)
     return "";
   // Not sure how to handle unicode...
@@ -245,50 +222,51 @@ JSONCPP_STRING valueToQuotedString(const char* value)
   // Appending to JSONCPP_STRING is not efficient, but this should be rare.
   // (Note: forward slashes are *not* rare, but I am not escaping them.)
   JSONCPP_STRING::size_type maxsize =
-    strlen(value) * 2 + 3; // allescaped+quotes+NULL
+      strlen(value) * 2 + 3; // allescaped+quotes+NULL
   JSONCPP_STRING result;
   result.reserve(maxsize); // to avoid lots of mallocs
   result += "\"";
   for (const char* c = value; *c != 0; ++c) {
     switch (*c) {
-      case '\"':
-        result += "\\\"";
-        break;
-      case '\\':
-        result += "\\\\";
-        break;
-      case '\b':
-        result += "\\b";
-        break;
-      case '\f':
-        result += "\\f";
-        break;
-      case '\n':
-        result += "\\n";
-        break;
-      case '\r':
-        result += "\\r";
-        break;
-      case '\t':
-        result += "\\t";
-        break;
-      // case '/':
-      // Even though \/ is considered a legal escape in JSON, a bare
-      // slash is also legal, so I see no reason to escape it.
-      // (I hope I am not misunderstanding something.
-      // blep notes: actually escaping \/ may be useful in javascript to avoid
-      // </ sequence. Should add a flag to allow this compatibility mode and
-      // prevent this sequence from occurring.
-      default:
-        if (isControlCharacter(*c)) {
-          JSONCPP_OSTRINGSTREAM oss;
-          oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
-              << std::setw(4) << static_cast<int>(*c);
-          result += oss.str();
-        } else {
-          result += *c;
-        }
-        break;
+    case '\"':
+      result += "\\\"";
+      break;
+    case '\\':
+      result += "\\\\";
+      break;
+    case '\b':
+      result += "\\b";
+      break;
+    case '\f':
+      result += "\\f";
+      break;
+    case '\n':
+      result += "\\n";
+      break;
+    case '\r':
+      result += "\\r";
+      break;
+    case '\t':
+      result += "\\t";
+      break;
+    // case '/':
+    // Even though \/ is considered a legal escape in JSON, a bare
+    // slash is also legal, so I see no reason to escape it.
+    // (I hope I am not misunderstanding something.
+    // blep notes: actually escaping \/ may be useful in javascript to avoid </
+    // sequence.
+    // Should add a flag to allow this compatibility mode and prevent this
+    // sequence from occurring.
+    default:
+      if (isControlCharacter(*c)) {
+        JSONCPP_OSTRINGSTREAM oss;
+        oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
+            << std::setw(4) << static_cast<int>(*c);
+        result += oss.str();
+      } else {
+        result += *c;
+      }
+      break;
     }
   }
   result += "\"";
@@ -296,8 +274,7 @@ JSONCPP_STRING valueToQuotedString(const char* value)
 }
 
 // https://github.com/upcaste/upcaste/blob/master/src/upcore/src/cstring/strnpbrk.cpp
-static char const* strnpbrk(char const* s, char const* accept, size_t n)
-{
+static char const* strnpbrk(char const* s, char const* accept, size_t n) {
   assert((s || !n) && accept);
 
   char const* const end = s + n;
@@ -311,8 +288,7 @@ static char const* strnpbrk(char const* s, char const* accept, size_t n)
   }
   return NULL;
 }
-static JSONCPP_STRING valueToQuotedStringN(const char* value, unsigned length)
-{
+static JSONCPP_STRING valueToQuotedStringN(const char* value, unsigned length) {
   if (value == NULL)
     return "";
   // Not sure how to handle unicode...
@@ -322,51 +298,53 @@ static JSONCPP_STRING valueToQuotedStringN(const char* value, unsigned length)
   // We have to walk value and escape any special characters.
   // Appending to JSONCPP_STRING is not efficient, but this should be rare.
   // (Note: forward slashes are *not* rare, but I am not escaping them.)
-  JSONCPP_STRING::size_type maxsize = length * 2 + 3; // allescaped+quotes+NULL
+  JSONCPP_STRING::size_type maxsize =
+      length * 2 + 3; // allescaped+quotes+NULL
   JSONCPP_STRING result;
   result.reserve(maxsize); // to avoid lots of mallocs
   result += "\"";
   char const* end = value + length;
   for (const char* c = value; c != end; ++c) {
     switch (*c) {
-      case '\"':
-        result += "\\\"";
-        break;
-      case '\\':
-        result += "\\\\";
-        break;
-      case '\b':
-        result += "\\b";
-        break;
-      case '\f':
-        result += "\\f";
-        break;
-      case '\n':
-        result += "\\n";
-        break;
-      case '\r':
-        result += "\\r";
-        break;
-      case '\t':
-        result += "\\t";
-        break;
-      // case '/':
-      // Even though \/ is considered a legal escape in JSON, a bare
-      // slash is also legal, so I see no reason to escape it.
-      // (I hope I am not misunderstanding something.)
-      // blep notes: actually escaping \/ may be useful in javascript to avoid
-      // </ sequence. Should add a flag to allow this compatibility mode and
-      // prevent this sequence from occurring.
-      default:
-        if ((isControlCharacter(*c)) || (*c == 0)) {
-          JSONCPP_OSTRINGSTREAM oss;
-          oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
-              << std::setw(4) << static_cast<int>(*c);
-          result += oss.str();
-        } else {
-          result += *c;
-        }
-        break;
+    case '\"':
+      result += "\\\"";
+      break;
+    case '\\':
+      result += "\\\\";
+      break;
+    case '\b':
+      result += "\\b";
+      break;
+    case '\f':
+      result += "\\f";
+      break;
+    case '\n':
+      result += "\\n";
+      break;
+    case '\r':
+      result += "\\r";
+      break;
+    case '\t':
+      result += "\\t";
+      break;
+    // case '/':
+    // Even though \/ is considered a legal escape in JSON, a bare
+    // slash is also legal, so I see no reason to escape it.
+    // (I hope I am not misunderstanding something.)
+    // blep notes: actually escaping \/ may be useful in javascript to avoid </
+    // sequence.
+    // Should add a flag to allow this compatibility mode and prevent this
+    // sequence from occurring.
+    default:
+      if ((isControlCharacter(*c)) || (*c == 0)) {
+        JSONCPP_OSTRINGSTREAM oss;
+        oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
+            << std::setw(4) << static_cast<int>(*c);
+        result += oss.str();
+      } else {
+        result += *c;
+      }
+      break;
     }
   }
   result += "\"";
@@ -375,98 +353,80 @@ static JSONCPP_STRING valueToQuotedStringN(const char* value, unsigned length)
 
 // Class Writer
 // //////////////////////////////////////////////////////////////////
-Writer::~Writer()
-{
-}
+Writer::~Writer() {}
 
 // Class FastWriter
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
-  : yamlCompatiblityEnabled_(false)
-  , dropNullPlaceholders_(false)
-  , omitEndingLineFeed_(false)
-{
+    : yamlCompatiblityEnabled_(false), dropNullPlaceholders_(false),
+      omitEndingLineFeed_(false) {}
+
+void FastWriter::enableYAMLCompatibility() { yamlCompatiblityEnabled_ = true; }
+
+void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
+
+void FastWriter::omitEndingLineFeed() { omitEndingLineFeed_ = true; }
+
+JSONCPP_STRING FastWriter::write(const Value& root) {
+  document_.clear();
+  writeValue(root);
+  if (!omitEndingLineFeed_)
+    document_ += "\n";
+  return document_;
 }
 
-void FastWriter::enableYAMLCompatibility()
-{
-  this->yamlCompatiblityEnabled_ = true;
-}
-
-void FastWriter::dropNullPlaceholders()
-{
-  this->dropNullPlaceholders_ = true;
-}
-
-void FastWriter::omitEndingLineFeed()
-{
-  this->omitEndingLineFeed_ = true;
-}
-
-JSONCPP_STRING FastWriter::write(const Value& root)
-{
-  this->document_.clear();
-  this->writeValue(root);
-  if (!this->omitEndingLineFeed_)
-    this->document_ += "\n";
-  return this->document_;
-}
-
-void FastWriter::writeValue(const Value& value)
-{
+void FastWriter::writeValue(const Value& value) {
   switch (value.type()) {
-    case nullValue:
-      if (!this->dropNullPlaceholders_)
-        this->document_ += "null";
-      break;
-    case intValue:
-      this->document_ += valueToString(value.asLargestInt());
-      break;
-    case uintValue:
-      this->document_ += valueToString(value.asLargestUInt());
-      break;
-    case realValue:
-      this->document_ += valueToString(value.asDouble());
-      break;
-    case stringValue: {
-      // Is NULL possible for value.string_? No.
-      char const* str;
-      char const* end;
-      bool ok = value.getString(&str, &end);
-      if (ok)
-        this->document_ +=
-          valueToQuotedStringN(str, static_cast<unsigned>(end - str));
-      break;
+  case nullValue:
+    if (!dropNullPlaceholders_)
+      document_ += "null";
+    break;
+  case intValue:
+    document_ += valueToString(value.asLargestInt());
+    break;
+  case uintValue:
+    document_ += valueToString(value.asLargestUInt());
+    break;
+  case realValue:
+    document_ += valueToString(value.asDouble());
+    break;
+  case stringValue:
+  {
+    // Is NULL possible for value.string_? No.
+    char const* str;
+    char const* end;
+    bool ok = value.getString(&str, &end);
+    if (ok) document_ += valueToQuotedStringN(str, static_cast<unsigned>(end-str));
+    break;
+  }
+  case booleanValue:
+    document_ += valueToString(value.asBool());
+    break;
+  case arrayValue: {
+    document_ += '[';
+    ArrayIndex size = value.size();
+    for (ArrayIndex index = 0; index < size; ++index) {
+      if (index > 0)
+        document_ += ',';
+      writeValue(value[index]);
     }
-    case booleanValue:
-      this->document_ += valueToString(value.asBool());
-      break;
-    case arrayValue: {
-      this->document_ += '[';
-      ArrayIndex size = value.size();
-      for (ArrayIndex index = 0; index < size; ++index) {
-        if (index > 0)
-          this->document_ += ',';
-        this->writeValue(value[index]);
-      }
-      this->document_ += ']';
-    } break;
-    case objectValue: {
-      Value::Members members(value.getMemberNames());
-      this->document_ += '{';
-      for (Value::Members::iterator it = members.begin(); it != members.end();
-           ++it) {
-        const JSONCPP_STRING& name = *it;
-        if (it != members.begin())
-          this->document_ += ',';
-        this->document_ += valueToQuotedStringN(
-          name.data(), static_cast<unsigned>(name.length()));
-        this->document_ += this->yamlCompatiblityEnabled_ ? ": " : ":";
-        this->writeValue(value[name]);
-      }
-      this->document_ += '}';
-    } break;
+    document_ += ']';
+  } break;
+  case objectValue: {
+    Value::Members members(value.getMemberNames());
+    document_ += '{';
+    for (Value::Members::iterator it = members.begin(); it != members.end();
+         ++it) {
+      const JSONCPP_STRING& name = *it;
+      if (it != members.begin())
+        document_ += ',';
+      document_ += valueToQuotedStringN(name.data(), static_cast<unsigned>(name.length()));
+      document_ += yamlCompatiblityEnabled_ ? ": " : ":";
+      writeValue(value[name]);
+    }
+    document_ += '}';
+  } break;
   }
 }
 
@@ -474,498 +434,454 @@ void FastWriter::writeValue(const Value& value)
 // //////////////////////////////////////////////////////////////////
 
 StyledWriter::StyledWriter()
-  : rightMargin_(74)
-  , indentSize_(3)
-  , addChildValues_()
-{
+    : rightMargin_(74), indentSize_(3), addChildValues_() {}
+
+JSONCPP_STRING StyledWriter::write(const Value& root) {
+  document_.clear();
+  addChildValues_ = false;
+  indentString_.clear();
+  writeCommentBeforeValue(root);
+  writeValue(root);
+  writeCommentAfterValueOnSameLine(root);
+  document_ += "\n";
+  return document_;
 }
 
-JSONCPP_STRING StyledWriter::write(const Value& root)
-{
-  this->document_.clear();
-  this->addChildValues_ = false;
-  this->indentString_.clear();
-  this->writeCommentBeforeValue(root);
-  this->writeValue(root);
-  this->writeCommentAfterValueOnSameLine(root);
-  this->document_ += "\n";
-  return this->document_;
-}
-
-void StyledWriter::writeValue(const Value& value)
-{
+void StyledWriter::writeValue(const Value& value) {
   switch (value.type()) {
-    case nullValue:
-      this->pushValue("null");
-      break;
-    case intValue:
-      this->pushValue(valueToString(value.asLargestInt()));
-      break;
-    case uintValue:
-      this->pushValue(valueToString(value.asLargestUInt()));
-      break;
-    case realValue:
-      this->pushValue(valueToString(value.asDouble()));
-      break;
-    case stringValue: {
-      // Is NULL possible for value.string_? No.
-      char const* str;
-      char const* end;
-      bool ok = value.getString(&str, &end);
-      if (ok)
-        this->pushValue(
-          valueToQuotedStringN(str, static_cast<unsigned>(end - str)));
-      else
-        this->pushValue("");
-      break;
-    }
-    case booleanValue:
-      this->pushValue(valueToString(value.asBool()));
-      break;
-    case arrayValue:
-      this->writeArrayValue(value);
-      break;
-    case objectValue: {
-      Value::Members members(value.getMemberNames());
-      if (members.empty())
-        this->pushValue("{}");
-      else {
-        this->writeWithIndent("{");
-        this->indent();
-        Value::Members::iterator it = members.begin();
-        for (;;) {
-          const JSONCPP_STRING& name = *it;
-          const Value& childValue = value[name];
-          this->writeCommentBeforeValue(childValue);
-          this->writeWithIndent(valueToQuotedString(name.c_str()));
-          this->document_ += " : ";
-          this->writeValue(childValue);
-          if (++it == members.end()) {
-            this->writeCommentAfterValueOnSameLine(childValue);
-            break;
-          }
-          this->document_ += ',';
-          this->writeCommentAfterValueOnSameLine(childValue);
+  case nullValue:
+    pushValue("null");
+    break;
+  case intValue:
+    pushValue(valueToString(value.asLargestInt()));
+    break;
+  case uintValue:
+    pushValue(valueToString(value.asLargestUInt()));
+    break;
+  case realValue:
+    pushValue(valueToString(value.asDouble()));
+    break;
+  case stringValue:
+  {
+    // Is NULL possible for value.string_? No.
+    char const* str;
+    char const* end;
+    bool ok = value.getString(&str, &end);
+    if (ok) pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end-str)));
+    else pushValue("");
+    break;
+  }
+  case booleanValue:
+    pushValue(valueToString(value.asBool()));
+    break;
+  case arrayValue:
+    writeArrayValue(value);
+    break;
+  case objectValue: {
+    Value::Members members(value.getMemberNames());
+    if (members.empty())
+      pushValue("{}");
+    else {
+      writeWithIndent("{");
+      indent();
+      Value::Members::iterator it = members.begin();
+      for (;;) {
+        const JSONCPP_STRING& name = *it;
+        const Value& childValue = value[name];
+        writeCommentBeforeValue(childValue);
+        writeWithIndent(valueToQuotedString(name.c_str()));
+        document_ += " : ";
+        writeValue(childValue);
+        if (++it == members.end()) {
+          writeCommentAfterValueOnSameLine(childValue);
+          break;
         }
-        this->unindent();
-        this->writeWithIndent("}");
+        document_ += ',';
+        writeCommentAfterValueOnSameLine(childValue);
       }
-    } break;
+      unindent();
+      writeWithIndent("}");
+    }
+  } break;
   }
 }
 
-void StyledWriter::writeArrayValue(const Value& value)
-{
+void StyledWriter::writeArrayValue(const Value& value) {
   unsigned size = value.size();
   if (size == 0)
-    this->pushValue("[]");
+    pushValue("[]");
   else {
-    bool isArrayMultiLine = this->isMultineArray(value);
+    bool isArrayMultiLine = isMultineArray(value);
     if (isArrayMultiLine) {
-      this->writeWithIndent("[");
-      this->indent();
-      bool hasChildValue = !this->childValues_.empty();
+      writeWithIndent("[");
+      indent();
+      bool hasChildValue = !childValues_.empty();
       unsigned index = 0;
       for (;;) {
         const Value& childValue = value[index];
-        this->writeCommentBeforeValue(childValue);
+        writeCommentBeforeValue(childValue);
         if (hasChildValue)
-          this->writeWithIndent(this->childValues_[index]);
+          writeWithIndent(childValues_[index]);
         else {
-          this->writeIndent();
-          this->writeValue(childValue);
+          writeIndent();
+          writeValue(childValue);
         }
         if (++index == size) {
-          this->writeCommentAfterValueOnSameLine(childValue);
+          writeCommentAfterValueOnSameLine(childValue);
           break;
         }
-        this->document_ += ',';
-        this->writeCommentAfterValueOnSameLine(childValue);
+        document_ += ',';
+        writeCommentAfterValueOnSameLine(childValue);
       }
-      this->unindent();
-      this->writeWithIndent("]");
+      unindent();
+      writeWithIndent("]");
     } else // output on a single line
     {
-      assert(this->childValues_.size() == size);
-      this->document_ += "[ ";
+      assert(childValues_.size() == size);
+      document_ += "[ ";
       for (unsigned index = 0; index < size; ++index) {
         if (index > 0)
-          this->document_ += ", ";
-        this->document_ += this->childValues_[index];
+          document_ += ", ";
+        document_ += childValues_[index];
       }
-      this->document_ += " ]";
+      document_ += " ]";
     }
   }
 }
 
-bool StyledWriter::isMultineArray(const Value& value)
-{
+bool StyledWriter::isMultineArray(const Value& value) {
   ArrayIndex const size = value.size();
-  bool isMultiLine = size * 3 >= this->rightMargin_;
-  this->childValues_.clear();
+  bool isMultiLine = size * 3 >= rightMargin_;
+  childValues_.clear();
   for (ArrayIndex index = 0; index < size && !isMultiLine; ++index) {
     const Value& childValue = value[index];
     isMultiLine = ((childValue.isArray() || childValue.isObject()) &&
-                   childValue.size() > 0);
+                        childValue.size() > 0);
   }
   if (!isMultiLine) // check if line length > max line length
   {
-    this->childValues_.reserve(size);
-    this->addChildValues_ = true;
+    childValues_.reserve(size);
+    addChildValues_ = true;
     ArrayIndex lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
     for (ArrayIndex index = 0; index < size; ++index) {
-      if (this->hasCommentForValue(value[index])) {
+      if (hasCommentForValue(value[index])) {
         isMultiLine = true;
       }
-      this->writeValue(value[index]);
-      lineLength +=
-        static_cast<ArrayIndex>(this->childValues_[index].length());
+      writeValue(value[index]);
+      lineLength += static_cast<ArrayIndex>(childValues_[index].length());
     }
-    this->addChildValues_ = false;
-    isMultiLine = isMultiLine || lineLength >= this->rightMargin_;
+    addChildValues_ = false;
+    isMultiLine = isMultiLine || lineLength >= rightMargin_;
   }
   return isMultiLine;
 }
 
-void StyledWriter::pushValue(const JSONCPP_STRING& value)
-{
-  if (this->addChildValues_)
-    this->childValues_.push_back(value);
+void StyledWriter::pushValue(const JSONCPP_STRING& value) {
+  if (addChildValues_)
+    childValues_.push_back(value);
   else
-    this->document_ += value;
+    document_ += value;
 }
 
-void StyledWriter::writeIndent()
-{
-  if (!this->document_.empty()) {
-    char last = this->document_[this->document_.length() - 1];
+void StyledWriter::writeIndent() {
+  if (!document_.empty()) {
+    char last = document_[document_.length() - 1];
     if (last == ' ') // already indented
       return;
     if (last != '\n') // Comments may add new-line
-      this->document_ += '\n';
+      document_ += '\n';
   }
-  this->document_ += this->indentString_;
+  document_ += indentString_;
 }
 
-void StyledWriter::writeWithIndent(const JSONCPP_STRING& value)
-{
-  this->writeIndent();
-  this->document_ += value;
+void StyledWriter::writeWithIndent(const JSONCPP_STRING& value) {
+  writeIndent();
+  document_ += value;
 }
 
-void StyledWriter::indent()
-{
-  this->indentString_ += JSONCPP_STRING(this->indentSize_, ' ');
+void StyledWriter::indent() { indentString_ += JSONCPP_STRING(indentSize_, ' '); }
+
+void StyledWriter::unindent() {
+  assert(indentString_.size() >= indentSize_);
+  indentString_.resize(indentString_.size() - indentSize_);
 }
 
-void StyledWriter::unindent()
-{
-  assert(this->indentString_.size() >= this->indentSize_);
-  this->indentString_.resize(this->indentString_.size() - this->indentSize_);
-}
-
-void StyledWriter::writeCommentBeforeValue(const Value& root)
-{
+void StyledWriter::writeCommentBeforeValue(const Value& root) {
   if (!root.hasComment(commentBefore))
     return;
 
-  this->document_ += "\n";
-  this->writeIndent();
+  document_ += "\n";
+  writeIndent();
   const JSONCPP_STRING& comment = root.getComment(commentBefore);
   JSONCPP_STRING::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
-    this->document_ += *iter;
-    if (*iter == '\n' && (iter != comment.end() && *(iter + 1) == '/'))
-      this->writeIndent();
+    document_ += *iter;
+    if (*iter == '\n' &&
+       (iter != comment.end() && *(iter + 1) == '/'))
+      writeIndent();
     ++iter;
   }
 
   // Comments are stripped of trailing newlines, so add one here
-  this->document_ += "\n";
+  document_ += "\n";
 }
 
-void StyledWriter::writeCommentAfterValueOnSameLine(const Value& root)
-{
+void StyledWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   if (root.hasComment(commentAfterOnSameLine))
-    this->document_ += " " + root.getComment(commentAfterOnSameLine);
+    document_ += " " + root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
-    this->document_ += "\n";
-    this->document_ += root.getComment(commentAfter);
-    this->document_ += "\n";
+    document_ += "\n";
+    document_ += root.getComment(commentAfter);
+    document_ += "\n";
   }
 }
 
-bool StyledWriter::hasCommentForValue(const Value& value)
-{
+bool StyledWriter::hasCommentForValue(const Value& value) {
   return value.hasComment(commentBefore) ||
-    value.hasComment(commentAfterOnSameLine) || value.hasComment(commentAfter);
+         value.hasComment(commentAfterOnSameLine) ||
+         value.hasComment(commentAfter);
 }
 
 // Class StyledStreamWriter
 // //////////////////////////////////////////////////////////////////
 
 StyledStreamWriter::StyledStreamWriter(JSONCPP_STRING indentation)
-  : document_(NULL)
-  , rightMargin_(74)
-  , indentation_(indentation)
-  , addChildValues_()
-{
+    : document_(NULL), rightMargin_(74), indentation_(indentation),
+      addChildValues_() {}
+
+void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root) {
+  document_ = &out;
+  addChildValues_ = false;
+  indentString_.clear();
+  indented_ = true;
+  writeCommentBeforeValue(root);
+  if (!indented_) writeIndent();
+  indented_ = true;
+  writeValue(root);
+  writeCommentAfterValueOnSameLine(root);
+  *document_ << "\n";
+  document_ = NULL; // Forget the stream, for safety.
 }
 
-void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root)
-{
-  this->document_ = &out;
-  this->addChildValues_ = false;
-  this->indentString_.clear();
-  this->indented_ = true;
-  this->writeCommentBeforeValue(root);
-  if (!this->indented_)
-    this->writeIndent();
-  this->indented_ = true;
-  this->writeValue(root);
-  this->writeCommentAfterValueOnSameLine(root);
-  *this->document_ << "\n";
-  this->document_ = NULL; // Forget the stream, for safety.
-}
-
-void StyledStreamWriter::writeValue(const Value& value)
-{
+void StyledStreamWriter::writeValue(const Value& value) {
   switch (value.type()) {
-    case nullValue:
-      this->pushValue("null");
-      break;
-    case intValue:
-      this->pushValue(valueToString(value.asLargestInt()));
-      break;
-    case uintValue:
-      this->pushValue(valueToString(value.asLargestUInt()));
-      break;
-    case realValue:
-      this->pushValue(valueToString(value.asDouble()));
-      break;
-    case stringValue: {
-      // Is NULL possible for value.string_? No.
-      char const* str;
-      char const* end;
-      bool ok = value.getString(&str, &end);
-      if (ok)
-        this->pushValue(
-          valueToQuotedStringN(str, static_cast<unsigned>(end - str)));
-      else
-        this->pushValue("");
-      break;
-    }
-    case booleanValue:
-      this->pushValue(valueToString(value.asBool()));
-      break;
-    case arrayValue:
-      this->writeArrayValue(value);
-      break;
-    case objectValue: {
-      Value::Members members(value.getMemberNames());
-      if (members.empty())
-        this->pushValue("{}");
-      else {
-        this->writeWithIndent("{");
-        this->indent();
-        Value::Members::iterator it = members.begin();
-        for (;;) {
-          const JSONCPP_STRING& name = *it;
-          const Value& childValue = value[name];
-          this->writeCommentBeforeValue(childValue);
-          this->writeWithIndent(valueToQuotedString(name.c_str()));
-          *this->document_ << " : ";
-          this->writeValue(childValue);
-          if (++it == members.end()) {
-            this->writeCommentAfterValueOnSameLine(childValue);
-            break;
-          }
-          *this->document_ << ",";
-          this->writeCommentAfterValueOnSameLine(childValue);
+  case nullValue:
+    pushValue("null");
+    break;
+  case intValue:
+    pushValue(valueToString(value.asLargestInt()));
+    break;
+  case uintValue:
+    pushValue(valueToString(value.asLargestUInt()));
+    break;
+  case realValue:
+    pushValue(valueToString(value.asDouble()));
+    break;
+  case stringValue:
+  {
+    // Is NULL possible for value.string_? No.
+    char const* str;
+    char const* end;
+    bool ok = value.getString(&str, &end);
+    if (ok) pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end-str)));
+    else pushValue("");
+    break;
+  }
+  case booleanValue:
+    pushValue(valueToString(value.asBool()));
+    break;
+  case arrayValue:
+    writeArrayValue(value);
+    break;
+  case objectValue: {
+    Value::Members members(value.getMemberNames());
+    if (members.empty())
+      pushValue("{}");
+    else {
+      writeWithIndent("{");
+      indent();
+      Value::Members::iterator it = members.begin();
+      for (;;) {
+        const JSONCPP_STRING& name = *it;
+        const Value& childValue = value[name];
+        writeCommentBeforeValue(childValue);
+        writeWithIndent(valueToQuotedString(name.c_str()));
+        *document_ << " : ";
+        writeValue(childValue);
+        if (++it == members.end()) {
+          writeCommentAfterValueOnSameLine(childValue);
+          break;
         }
-        this->unindent();
-        this->writeWithIndent("}");
+        *document_ << ",";
+        writeCommentAfterValueOnSameLine(childValue);
       }
-    } break;
+      unindent();
+      writeWithIndent("}");
+    }
+  } break;
   }
 }
 
-void StyledStreamWriter::writeArrayValue(const Value& value)
-{
+void StyledStreamWriter::writeArrayValue(const Value& value) {
   unsigned size = value.size();
   if (size == 0)
-    this->pushValue("[]");
+    pushValue("[]");
   else {
-    bool isArrayMultiLine = this->isMultineArray(value);
+    bool isArrayMultiLine = isMultineArray(value);
     if (isArrayMultiLine) {
-      this->writeWithIndent("[");
-      this->indent();
-      bool hasChildValue = !this->childValues_.empty();
+      writeWithIndent("[");
+      indent();
+      bool hasChildValue = !childValues_.empty();
       unsigned index = 0;
       for (;;) {
         const Value& childValue = value[index];
-        this->writeCommentBeforeValue(childValue);
+        writeCommentBeforeValue(childValue);
         if (hasChildValue)
-          this->writeWithIndent(this->childValues_[index]);
+          writeWithIndent(childValues_[index]);
         else {
-          if (!this->indented_)
-            this->writeIndent();
-          this->indented_ = true;
-          this->writeValue(childValue);
-          this->indented_ = false;
+          if (!indented_) writeIndent();
+          indented_ = true;
+          writeValue(childValue);
+          indented_ = false;
         }
         if (++index == size) {
-          this->writeCommentAfterValueOnSameLine(childValue);
+          writeCommentAfterValueOnSameLine(childValue);
           break;
         }
-        *this->document_ << ",";
-        this->writeCommentAfterValueOnSameLine(childValue);
+        *document_ << ",";
+        writeCommentAfterValueOnSameLine(childValue);
       }
-      this->unindent();
-      this->writeWithIndent("]");
+      unindent();
+      writeWithIndent("]");
     } else // output on a single line
     {
-      assert(this->childValues_.size() == size);
-      *this->document_ << "[ ";
+      assert(childValues_.size() == size);
+      *document_ << "[ ";
       for (unsigned index = 0; index < size; ++index) {
         if (index > 0)
-          *this->document_ << ", ";
-        *this->document_ << this->childValues_[index];
+          *document_ << ", ";
+        *document_ << childValues_[index];
       }
-      *this->document_ << " ]";
+      *document_ << " ]";
     }
   }
 }
 
-bool StyledStreamWriter::isMultineArray(const Value& value)
-{
+bool StyledStreamWriter::isMultineArray(const Value& value) {
   ArrayIndex const size = value.size();
-  bool isMultiLine = size * 3 >= this->rightMargin_;
-  this->childValues_.clear();
+  bool isMultiLine = size * 3 >= rightMargin_;
+  childValues_.clear();
   for (ArrayIndex index = 0; index < size && !isMultiLine; ++index) {
     const Value& childValue = value[index];
     isMultiLine = ((childValue.isArray() || childValue.isObject()) &&
-                   childValue.size() > 0);
+                        childValue.size() > 0);
   }
   if (!isMultiLine) // check if line length > max line length
   {
-    this->childValues_.reserve(size);
-    this->addChildValues_ = true;
+    childValues_.reserve(size);
+    addChildValues_ = true;
     ArrayIndex lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
     for (ArrayIndex index = 0; index < size; ++index) {
-      if (this->hasCommentForValue(value[index])) {
+      if (hasCommentForValue(value[index])) {
         isMultiLine = true;
       }
-      this->writeValue(value[index]);
-      lineLength +=
-        static_cast<ArrayIndex>(this->childValues_[index].length());
+      writeValue(value[index]);
+      lineLength += static_cast<ArrayIndex>(childValues_[index].length());
     }
-    this->addChildValues_ = false;
-    isMultiLine = isMultiLine || lineLength >= this->rightMargin_;
+    addChildValues_ = false;
+    isMultiLine = isMultiLine || lineLength >= rightMargin_;
   }
   return isMultiLine;
 }
 
-void StyledStreamWriter::pushValue(const JSONCPP_STRING& value)
-{
-  if (this->addChildValues_)
-    this->childValues_.push_back(value);
+void StyledStreamWriter::pushValue(const JSONCPP_STRING& value) {
+  if (addChildValues_)
+    childValues_.push_back(value);
   else
-    *this->document_ << value;
+    *document_ << value;
 }
 
-void StyledStreamWriter::writeIndent()
-{
+void StyledStreamWriter::writeIndent() {
   // blep intended this to look at the so-far-written string
   // to determine whether we are already indented, but
   // with a stream we cannot do that. So we rely on some saved state.
   // The caller checks indented_.
-  *this->document_ << '\n' << this->indentString_;
+  *document_ << '\n' << indentString_;
 }
 
-void StyledStreamWriter::writeWithIndent(const JSONCPP_STRING& value)
-{
-  if (!this->indented_)
-    this->writeIndent();
-  *this->document_ << value;
-  this->indented_ = false;
+void StyledStreamWriter::writeWithIndent(const JSONCPP_STRING& value) {
+  if (!indented_) writeIndent();
+  *document_ << value;
+  indented_ = false;
 }
 
-void StyledStreamWriter::indent()
-{
-  this->indentString_ += this->indentation_;
+void StyledStreamWriter::indent() { indentString_ += indentation_; }
+
+void StyledStreamWriter::unindent() {
+  assert(indentString_.size() >= indentation_.size());
+  indentString_.resize(indentString_.size() - indentation_.size());
 }
 
-void StyledStreamWriter::unindent()
-{
-  assert(this->indentString_.size() >= this->indentation_.size());
-  this->indentString_.resize(this->indentString_.size() -
-                             this->indentation_.size());
-}
-
-void StyledStreamWriter::writeCommentBeforeValue(const Value& root)
-{
+void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
   if (!root.hasComment(commentBefore))
     return;
 
-  if (!this->indented_)
-    this->writeIndent();
+  if (!indented_) writeIndent();
   const JSONCPP_STRING& comment = root.getComment(commentBefore);
   JSONCPP_STRING::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
-    *this->document_ << *iter;
-    if (*iter == '\n' && (iter != comment.end() && *(iter + 1) == '/'))
+    *document_ << *iter;
+    if (*iter == '\n' &&
+       (iter != comment.end() && *(iter + 1) == '/'))
       // writeIndent();  // would include newline
-      *this->document_ << this->indentString_;
+      *document_ << indentString_;
     ++iter;
   }
-  this->indented_ = false;
+  indented_ = false;
 }
 
-void StyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root)
-{
+void StyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   if (root.hasComment(commentAfterOnSameLine))
-    *this->document_ << ' ' << root.getComment(commentAfterOnSameLine);
+    *document_ << ' ' << root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
-    this->writeIndent();
-    *this->document_ << root.getComment(commentAfter);
+    writeIndent();
+    *document_ << root.getComment(commentAfter);
   }
-  this->indented_ = false;
+  indented_ = false;
 }
 
-bool StyledStreamWriter::hasCommentForValue(const Value& value)
-{
+bool StyledStreamWriter::hasCommentForValue(const Value& value) {
   return value.hasComment(commentBefore) ||
-    value.hasComment(commentAfterOnSameLine) || value.hasComment(commentAfter);
+         value.hasComment(commentAfterOnSameLine) ||
+         value.hasComment(commentAfter);
 }
 
 //////////////////////////
 // BuiltStyledStreamWriter
 
 /// Scoped enums are not available until C++11.
-struct CommentStyle
-{
+struct CommentStyle {
   /// Decide whether to write comments.
-  enum Enum
-  {
-    None, ///< Drop all comments.
-    Most, ///< Recover odd behavior of previous versions (not implemented yet).
-    All   ///< Keep all comments.
+  enum Enum {
+    None,  ///< Drop all comments.
+    Most,  ///< Recover odd behavior of previous versions (not implemented yet).
+    All  ///< Keep all comments.
   };
 };
 
 struct BuiltStyledStreamWriter : public StreamWriter
 {
-  BuiltStyledStreamWriter(JSONCPP_STRING const& indentation,
-                          CommentStyle::Enum cs,
-                          JSONCPP_STRING const& colonSymbol,
-                          JSONCPP_STRING const& nullSymbol,
-                          JSONCPP_STRING const& endingLineFeedSymbol,
-                          bool useSpecialFloats, unsigned int precision);
+  BuiltStyledStreamWriter(
+      JSONCPP_STRING const& indentation,
+      CommentStyle::Enum cs,
+      JSONCPP_STRING const& colonSymbol,
+      JSONCPP_STRING const& nullSymbol,
+      JSONCPP_STRING const& endingLineFeedSymbol,
+      bool useSpecialFloats,
+      unsigned int precision);
   int write(Value const& root, JSONCPP_OSTREAM* sout) JSONCPP_OVERRIDE;
-
 private:
   void writeValue(Value const& value);
   void writeArrayValue(Value const& value);
@@ -995,10 +911,13 @@ private:
   unsigned int precision_;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
-  JSONCPP_STRING const& indentation, CommentStyle::Enum cs,
-  JSONCPP_STRING const& colonSymbol, JSONCPP_STRING const& nullSymbol,
-  JSONCPP_STRING const& endingLineFeedSymbol, bool useSpecialFloats,
-  unsigned int precision)
+      JSONCPP_STRING const& indentation,
+      CommentStyle::Enum cs,
+      JSONCPP_STRING const& colonSymbol,
+      JSONCPP_STRING const& nullSymbol,
+      JSONCPP_STRING const& endingLineFeedSymbol,
+      bool useSpecialFloats,
+      unsigned int precision)
   : rightMargin_(74)
   , indentation_(indentation)
   , cs_(cs)
@@ -1013,276 +932,247 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
 }
 int BuiltStyledStreamWriter::write(Value const& root, JSONCPP_OSTREAM* sout)
 {
-  this->sout_ = sout;
-  this->addChildValues_ = false;
-  this->indented_ = true;
-  this->indentString_.clear();
-  this->writeCommentBeforeValue(root);
-  if (!this->indented_)
-    this->writeIndent();
-  this->indented_ = true;
-  this->writeValue(root);
-  this->writeCommentAfterValueOnSameLine(root);
-  *this->sout_ << this->endingLineFeedSymbol_;
-  this->sout_ = NULL;
+  sout_ = sout;
+  addChildValues_ = false;
+  indented_ = true;
+  indentString_.clear();
+  writeCommentBeforeValue(root);
+  if (!indented_) writeIndent();
+  indented_ = true;
+  writeValue(root);
+  writeCommentAfterValueOnSameLine(root);
+  *sout_ << endingLineFeedSymbol_;
+  sout_ = NULL;
   return 0;
 }
-void BuiltStyledStreamWriter::writeValue(Value const& value)
-{
+void BuiltStyledStreamWriter::writeValue(Value const& value) {
   switch (value.type()) {
-    case nullValue:
-      this->pushValue(this->nullSymbol_);
-      break;
-    case intValue:
-      this->pushValue(valueToString(value.asLargestInt()));
-      break;
-    case uintValue:
-      this->pushValue(valueToString(value.asLargestUInt()));
-      break;
-    case realValue:
-      this->pushValue(valueToString(value.asDouble(), this->useSpecialFloats_,
-                                    this->precision_));
-      break;
-    case stringValue: {
-      // Is NULL is possible for value.string_? No.
-      char const* str;
-      char const* end;
-      bool ok = value.getString(&str, &end);
-      if (ok)
-        this->pushValue(
-          valueToQuotedStringN(str, static_cast<unsigned>(end - str)));
-      else
-        this->pushValue("");
-      break;
-    }
-    case booleanValue:
-      this->pushValue(valueToString(value.asBool()));
-      break;
-    case arrayValue:
-      this->writeArrayValue(value);
-      break;
-    case objectValue: {
-      Value::Members members(value.getMemberNames());
-      if (members.empty())
-        this->pushValue("{}");
-      else {
-        this->writeWithIndent("{");
-        this->indent();
-        Value::Members::iterator it = members.begin();
-        for (;;) {
-          JSONCPP_STRING const& name = *it;
-          Value const& childValue = value[name];
-          this->writeCommentBeforeValue(childValue);
-          this->writeWithIndent(valueToQuotedStringN(
-            name.data(), static_cast<unsigned>(name.length())));
-          *this->sout_ << this->colonSymbol_;
-          this->writeValue(childValue);
-          if (++it == members.end()) {
-            this->writeCommentAfterValueOnSameLine(childValue);
-            break;
-          }
-          *this->sout_ << ",";
-          this->writeCommentAfterValueOnSameLine(childValue);
+  case nullValue:
+    pushValue(nullSymbol_);
+    break;
+  case intValue:
+    pushValue(valueToString(value.asLargestInt()));
+    break;
+  case uintValue:
+    pushValue(valueToString(value.asLargestUInt()));
+    break;
+  case realValue:
+    pushValue(valueToString(value.asDouble(), useSpecialFloats_, precision_));
+    break;
+  case stringValue:
+  {
+    // Is NULL is possible for value.string_? No.
+    char const* str;
+    char const* end;
+    bool ok = value.getString(&str, &end);
+    if (ok) pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end-str)));
+    else pushValue("");
+    break;
+  }
+  case booleanValue:
+    pushValue(valueToString(value.asBool()));
+    break;
+  case arrayValue:
+    writeArrayValue(value);
+    break;
+  case objectValue: {
+    Value::Members members(value.getMemberNames());
+    if (members.empty())
+      pushValue("{}");
+    else {
+      writeWithIndent("{");
+      indent();
+      Value::Members::iterator it = members.begin();
+      for (;;) {
+        JSONCPP_STRING const& name = *it;
+        Value const& childValue = value[name];
+        writeCommentBeforeValue(childValue);
+        writeWithIndent(valueToQuotedStringN(name.data(), static_cast<unsigned>(name.length())));
+        *sout_ << colonSymbol_;
+        writeValue(childValue);
+        if (++it == members.end()) {
+          writeCommentAfterValueOnSameLine(childValue);
+          break;
         }
-        this->unindent();
-        this->writeWithIndent("}");
+        *sout_ << ",";
+        writeCommentAfterValueOnSameLine(childValue);
       }
-    } break;
+      unindent();
+      writeWithIndent("}");
+    }
+  } break;
   }
 }
 
-void BuiltStyledStreamWriter::writeArrayValue(Value const& value)
-{
+void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
   unsigned size = value.size();
   if (size == 0)
-    this->pushValue("[]");
+    pushValue("[]");
   else {
-    bool isMultiLine =
-      (this->cs_ == CommentStyle::All) || this->isMultineArray(value);
+    bool isMultiLine = (cs_ == CommentStyle::All) || isMultineArray(value);
     if (isMultiLine) {
-      this->writeWithIndent("[");
-      this->indent();
-      bool hasChildValue = !this->childValues_.empty();
+      writeWithIndent("[");
+      indent();
+      bool hasChildValue = !childValues_.empty();
       unsigned index = 0;
       for (;;) {
         Value const& childValue = value[index];
-        this->writeCommentBeforeValue(childValue);
+        writeCommentBeforeValue(childValue);
         if (hasChildValue)
-          this->writeWithIndent(this->childValues_[index]);
+          writeWithIndent(childValues_[index]);
         else {
-          if (!this->indented_)
-            this->writeIndent();
-          this->indented_ = true;
-          this->writeValue(childValue);
-          this->indented_ = false;
+          if (!indented_) writeIndent();
+          indented_ = true;
+          writeValue(childValue);
+          indented_ = false;
         }
         if (++index == size) {
-          this->writeCommentAfterValueOnSameLine(childValue);
+          writeCommentAfterValueOnSameLine(childValue);
           break;
         }
-        *this->sout_ << ",";
-        this->writeCommentAfterValueOnSameLine(childValue);
+        *sout_ << ",";
+        writeCommentAfterValueOnSameLine(childValue);
       }
-      this->unindent();
-      this->writeWithIndent("]");
+      unindent();
+      writeWithIndent("]");
     } else // output on a single line
     {
-      assert(this->childValues_.size() == size);
-      *this->sout_ << "[";
-      if (!this->indentation_.empty())
-        *this->sout_ << " ";
+      assert(childValues_.size() == size);
+      *sout_ << "[";
+      if (!indentation_.empty()) *sout_ << " ";
       for (unsigned index = 0; index < size; ++index) {
         if (index > 0)
-          *this->sout_ << ((!this->indentation_.empty()) ? ", " : ",");
-        *this->sout_ << this->childValues_[index];
+          *sout_ << ((!indentation_.empty()) ? ", " : ",");
+        *sout_ << childValues_[index];
       }
-      if (!this->indentation_.empty())
-        *this->sout_ << " ";
-      *this->sout_ << "]";
+      if (!indentation_.empty()) *sout_ << " ";
+      *sout_ << "]";
     }
   }
 }
 
-bool BuiltStyledStreamWriter::isMultineArray(Value const& value)
-{
+bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
   ArrayIndex const size = value.size();
-  bool isMultiLine = size * 3 >= this->rightMargin_;
-  this->childValues_.clear();
+  bool isMultiLine = size * 3 >= rightMargin_;
+  childValues_.clear();
   for (ArrayIndex index = 0; index < size && !isMultiLine; ++index) {
     Value const& childValue = value[index];
     isMultiLine = ((childValue.isArray() || childValue.isObject()) &&
-                   childValue.size() > 0);
+                        childValue.size() > 0);
   }
   if (!isMultiLine) // check if line length > max line length
   {
-    this->childValues_.reserve(size);
-    this->addChildValues_ = true;
+    childValues_.reserve(size);
+    addChildValues_ = true;
     ArrayIndex lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
     for (ArrayIndex index = 0; index < size; ++index) {
       if (hasCommentForValue(value[index])) {
         isMultiLine = true;
       }
-      this->writeValue(value[index]);
-      lineLength +=
-        static_cast<ArrayIndex>(this->childValues_[index].length());
+      writeValue(value[index]);
+      lineLength += static_cast<ArrayIndex>(childValues_[index].length());
     }
-    this->addChildValues_ = false;
-    isMultiLine = isMultiLine || lineLength >= this->rightMargin_;
+    addChildValues_ = false;
+    isMultiLine = isMultiLine || lineLength >= rightMargin_;
   }
   return isMultiLine;
 }
 
-void BuiltStyledStreamWriter::pushValue(JSONCPP_STRING const& value)
-{
-  if (this->addChildValues_)
-    this->childValues_.push_back(value);
+void BuiltStyledStreamWriter::pushValue(JSONCPP_STRING const& value) {
+  if (addChildValues_)
+    childValues_.push_back(value);
   else
-    *this->sout_ << value;
+    *sout_ << value;
 }
 
-void BuiltStyledStreamWriter::writeIndent()
-{
+void BuiltStyledStreamWriter::writeIndent() {
   // blep intended this to look at the so-far-written string
   // to determine whether we are already indented, but
   // with a stream we cannot do that. So we rely on some saved state.
   // The caller checks indented_.
 
-  if (!this->indentation_.empty()) {
+  if (!indentation_.empty()) {
     // In this case, drop newlines too.
-    *this->sout_ << '\n' << this->indentString_;
+    *sout_ << '\n' << indentString_;
   }
 }
 
-void BuiltStyledStreamWriter::writeWithIndent(JSONCPP_STRING const& value)
-{
-  if (!this->indented_)
-    this->writeIndent();
-  *this->sout_ << value;
-  this->indented_ = false;
+void BuiltStyledStreamWriter::writeWithIndent(JSONCPP_STRING const& value) {
+  if (!indented_) writeIndent();
+  *sout_ << value;
+  indented_ = false;
 }
 
-void BuiltStyledStreamWriter::indent()
-{
-  this->indentString_ += this->indentation_;
+void BuiltStyledStreamWriter::indent() { indentString_ += indentation_; }
+
+void BuiltStyledStreamWriter::unindent() {
+  assert(indentString_.size() >= indentation_.size());
+  indentString_.resize(indentString_.size() - indentation_.size());
 }
 
-void BuiltStyledStreamWriter::unindent()
-{
-  assert(this->indentString_.size() >= this->indentation_.size());
-  this->indentString_.resize(this->indentString_.size() -
-                             this->indentation_.size());
-}
-
-void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root)
-{
-  if (this->cs_ == CommentStyle::None)
-    return;
+void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
+  if (cs_ == CommentStyle::None) return;
   if (!root.hasComment(commentBefore))
     return;
 
-  if (!this->indented_)
-    this->writeIndent();
+  if (!indented_) writeIndent();
   const JSONCPP_STRING& comment = root.getComment(commentBefore);
   JSONCPP_STRING::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
-    *this->sout_ << *iter;
-    if (*iter == '\n' && (iter != comment.end() && *(iter + 1) == '/'))
+    *sout_ << *iter;
+    if (*iter == '\n' &&
+       (iter != comment.end() && *(iter + 1) == '/'))
       // writeIndent();  // would write extra newline
-      *this->sout_ << this->indentString_;
+      *sout_ << indentString_;
     ++iter;
   }
-  this->indented_ = false;
+  indented_ = false;
 }
 
-void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(
-  Value const& root)
-{
-  if (this->cs_ == CommentStyle::None)
-    return;
+void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root) {
+  if (cs_ == CommentStyle::None) return;
   if (root.hasComment(commentAfterOnSameLine))
-    *this->sout_ << " " + root.getComment(commentAfterOnSameLine);
+    *sout_ << " " + root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
-    this->writeIndent();
-    *this->sout_ << root.getComment(commentAfter);
+    writeIndent();
+    *sout_ << root.getComment(commentAfter);
   }
 }
 
 // static
-bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value)
-{
+bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
   return value.hasComment(commentBefore) ||
-    value.hasComment(commentAfterOnSameLine) || value.hasComment(commentAfter);
+         value.hasComment(commentAfterOnSameLine) ||
+         value.hasComment(commentAfter);
 }
 
 ///////////////
 // StreamWriter
 
 StreamWriter::StreamWriter()
-  : sout_(NULL)
+    : sout_(NULL)
 {
 }
 StreamWriter::~StreamWriter()
 {
 }
 StreamWriter::Factory::~Factory()
-{
-}
+{}
 StreamWriterBuilder::StreamWriterBuilder()
 {
-  setDefaults(&this->settings_);
+  setDefaults(&settings_);
 }
 StreamWriterBuilder::~StreamWriterBuilder()
-{
-}
+{}
 StreamWriter* StreamWriterBuilder::newStreamWriter() const
 {
-  JSONCPP_STRING indentation = this->settings_["indentation"].asString();
-  JSONCPP_STRING cs_str = this->settings_["commentStyle"].asString();
-  bool eyc = this->settings_["enableYAMLCompatibility"].asBool();
-  bool dnp = this->settings_["dropNullPlaceholders"].asBool();
-  bool usf = this->settings_["useSpecialFloats"].asBool();
-  unsigned int pre = this->settings_["precision"].asUInt();
+  JSONCPP_STRING indentation = settings_["indentation"].asString();
+  JSONCPP_STRING cs_str = settings_["commentStyle"].asString();
+  bool eyc = settings_["enableYAMLCompatibility"].asBool();
+  bool dnp = settings_["dropNullPlaceholders"].asBool();
+  bool usf = settings_["useSpecialFloats"].asBool(); 
+  unsigned int pre = settings_["precision"].asUInt();
   CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
     cs = CommentStyle::All;
@@ -1301,11 +1191,11 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   if (dnp) {
     nullSymbol.clear();
   }
-  if (pre > 17)
-    pre = 17;
+  if (pre > 17) pre = 17;
   JSONCPP_STRING endingLineFeedSymbol;
-  return new BuiltStyledStreamWriter(indentation, cs, colonSymbol, nullSymbol,
-                                     endingLineFeedSymbol, usf, pre);
+  return new BuiltStyledStreamWriter(
+      indentation, cs,
+      colonSymbol, nullSymbol, endingLineFeedSymbol, usf, pre);
 }
 static void getValidWriterKeys(std::set<JSONCPP_STRING>* valid_keys)
 {
@@ -1320,24 +1210,23 @@ static void getValidWriterKeys(std::set<JSONCPP_STRING>* valid_keys)
 bool StreamWriterBuilder::validate(Json::Value* invalid) const
 {
   Json::Value my_invalid;
-  if (!invalid)
-    invalid = &my_invalid; // so we do not need to test for NULL
+  if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
   Json::Value& inv = *invalid;
   std::set<JSONCPP_STRING> valid_keys;
   getValidWriterKeys(&valid_keys);
-  Value::Members keys = this->settings_.getMemberNames();
+  Value::Members keys = settings_.getMemberNames();
   size_t n = keys.size();
   for (size_t i = 0; i < n; ++i) {
     JSONCPP_STRING const& key = keys[i];
     if (valid_keys.find(key) == valid_keys.end()) {
-      inv[key] = this->settings_[key];
+      inv[key] = settings_[key];
     }
   }
   return 0u == inv.size();
 }
 Value& StreamWriterBuilder::operator[](JSONCPP_STRING key)
 {
-  return this->settings_[key];
+  return settings_[key];
 }
 // static
 void StreamWriterBuilder::setDefaults(Json::Value* settings)
@@ -1352,17 +1241,14 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
   //! [StreamWriterBuilderDefaults]
 }
 
-JSONCPP_STRING writeString(StreamWriter::Factory const& builder,
-                           Value const& root)
-{
+JSONCPP_STRING writeString(StreamWriter::Factory const& builder, Value const& root) {
   JSONCPP_OSTRINGSTREAM sout;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);
   return sout.str();
 }
 
-JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM& sout, Value const& root)
-{
+JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM& sout, Value const& root) {
   StreamWriterBuilder builder;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);

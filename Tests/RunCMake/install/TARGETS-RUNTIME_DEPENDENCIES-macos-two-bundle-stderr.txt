@@ -1,0 +1,4 @@
+^CMake Error at TARGETS-RUNTIME_DEPENDENCIES-macos-two-bundle\.cmake:[0-9]+ \(install\):
+  install A runtime dependency set may only have one bundle executable\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

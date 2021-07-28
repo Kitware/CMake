@@ -37,6 +37,24 @@
 #  endif
 #endif
 
+#ifdef DO_FLAG_TESTS
+#  if FLAG_A != 2
+#    error "FLAG_A is not 2"
+#  endif
+#  if FLAG_B != 2
+#    error "FLAG_B is not 2"
+#  endif
+#  if FLAG_C != 2
+#    error "FLAG_C is not 2"
+#  endif
+#  if FLAG_D != 2
+#    error "FLAG_D is not 2"
+#  endif
+#  if defined(FLAG_E) && FLAG_E != 2
+#    error "FLAG_E is not 2"
+#  endif
+#endif
+
 #include <string.h>
 
 int main()

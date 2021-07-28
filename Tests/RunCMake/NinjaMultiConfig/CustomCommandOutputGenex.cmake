@@ -119,6 +119,30 @@ foreach(case
   add_custom_target(${case} DEPENDS ${case}_$<CONFIG>.txt)
 endforeach()
 
+# An OUTPUT in only one configuration.
+add_custom_command(
+  OUTPUT "$<$<CONFIG:Debug>:echo_dbg_Debug.txt>"
+  COMMAND echo $<CONFIG> "$<$<CONFIG:Debug>:echo_dbg_Debug.txt>"
+  )
+set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/echo_dbg_Debug.txt PROPERTY SYMBOLIC 1)
+add_custom_target(echo_dbg DEPENDS "$<$<CONFIG:Debug>:echo_dbg_Debug.txt>")
+
+# An OUTPUT in only one configuration with BYPRODUCTS in every configuration.
+add_custom_command(
+  OUTPUT "$<$<CONFIG:Debug>:echo_dbgx_Debug.txt>"
+  BYPRODUCTS echo_dbgx_byproduct_$<CONFIG>.txt
+  COMMAND echo $<CONFIG> "$<$<CONFIG:Debug>:echo_dbgx_Debug.txt>" echo_dbgx_byproduct_$<CONFIG>.txt
+  COMMAND_EXPAND_LISTS
+  )
+  set_property(SOURCE
+    ${CMAKE_CURRENT_BINARY_DIR}/echo_dbgx_Debug.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/echo_dbgx_byproduct_Debug.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/echo_dbgx_byproduct_Release.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/echo_dbgx_byproduct_MinSizeRel.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/echo_dbgx_byproduct_RelWithDebInfo.txt
+    PROPERTY SYMBOLIC 1)
+add_custom_target(echo_dbgx DEPENDS "$<$<CONFIG:Debug>:echo_dbgx_Debug.txt>")
+
 add_custom_target(echo_target_raw
   BYPRODUCTS echo_target_raw_$<CONFIG>.txt
   COMMENT echo_target_raw
@@ -164,4 +188,12 @@ add_custom_target(target_no_cross_byproduct
   COMMENT target_no_cross_byproduct
   COMMAND echo $<CONFIG> target_no_cross_byproduct.txt
   WORKING_DIRECTORY $<CONFIG>
+  )
+
+add_custom_target(target_post_build
+  COMMENT target_post_build
+  COMMAND ${CMAKE_COMMAND} -E echo "target main build"
+  )
+add_custom_command(TARGET target_post_build POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E echo "target post build"
   )

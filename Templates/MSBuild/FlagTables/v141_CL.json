@@ -421,8 +421,29 @@
   },
   {
     "name": "SpectreMitigation",
+    "switch": "Qspectre-load-cf",
+    "comment": "All Control Flow Loads",
+    "value": "SpectreLoadCF",
+    "flags": []
+  },
+  {
+    "name": "SpectreMitigation",
+    "switch": "Qspectre-load",
+    "comment": "All Loads",
+    "value": "SpectreLoad",
+    "flags": []
+  },
+  {
+    "name": "SpectreMitigation",
+    "switch": "Qspectre-",
+    "comment": "Disabled",
+    "value": "false",
+    "flags": []
+  },
+  {
+    "name": "SpectreMitigation",
     "switch": "Qspectre",
-    "comment": "Spectre mitigations",
+    "comment": "Enabled",
     "value": "Spectre",
     "flags": []
   },
@@ -586,6 +607,20 @@
     "switch": "errorReport:send",
     "comment": "Send Automatically",
     "value": "Send",
+    "flags": []
+  },
+  {
+    "name": "SupportJustMyCode",
+    "switch": "JMC-",
+    "comment": "",
+    "value": "false",
+    "flags": []
+  },
+  {
+    "name": "SupportJustMyCode",
+    "switch": "JMC",
+    "comment": "",
+    "value": "true",
     "flags": []
   },
   {
@@ -812,7 +847,7 @@
   {
     "name": "ConformanceMode",
     "switch": "permissive-",
-    "comment": "Conformance mode enabled",
+    "comment": "Conformance mode",
     "value": "true",
     "flags": []
   },
@@ -1249,20 +1284,6 @@
     "switch": "std=gnu++14",
     "comment": "C++14 (GNU Dialect)",
     "value": "gnu++1y",
-    "flags": []
-  },
-  {
-    "name": "SupportJustMyCode",
-    "switch": "JMC-",
-    "comment": "",
-    "value": "false",
-    "flags": []
-  },
-  {
-    "name": "SupportJustMyCode",
-    "switch": "JMC",
-    "comment": "",
-    "value": "true",
     "flags": []
   }
 ]

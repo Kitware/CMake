@@ -14,3 +14,5 @@ if(RunCMake_GENERATOR MATCHES "Make")
 else()
   run_cmake(CMP0061-OLD-other)
 endif()
+
+run_cmake(ParallelLevel)

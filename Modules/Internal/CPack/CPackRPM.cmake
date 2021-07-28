@@ -6,6 +6,56 @@
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
+function(set_spec_script_if_enabled TYPE PACKAGE_NAME VAR)
+  if(NOT "${VAR}" STREQUAL "" AND NOT "${VAR}" STREQUAL "\n")
+    if(PACKAGE_NAME)
+      set(PACKAGE_NAME " -n ${PACKAGE_NAME}")
+    endif()
+    set(${TYPE}_
+      "%${TYPE}${PACKAGE_NAME}\n"
+      "${VAR}\n" PARENT_SCOPE)
+  else()
+    set(${TYPE} "" PARENT_SCOPE)
+  endif()
+endfunction()
+
+macro(set_spec_scripts PACKAGE_NAME)
+  # we should only set scripts that were provided
+  # as script announcement without content inside
+  # spec file will generate unneeded dependency
+  # on shell
+
+  set_spec_script_if_enabled(
+    "post"
+    "${PACKAGE_NAME}"
+    "${RPM_SYMLINK_POSTINSTALL}\n${CPACK_RPM_SPEC_POSTINSTALL}")
+
+  set_spec_script_if_enabled(
+    "posttrans"
+    "${PACKAGE_NAME}"
+    "${CPACK_RPM_SPEC_POSTTRANS}")
+
+  set_spec_script_if_enabled(
+    "postun"
+    "${PACKAGE_NAME}"
+    "${CPACK_RPM_SPEC_POSTUNINSTALL}")
+
+  set_spec_script_if_enabled(
+    "pre"
+    "${PACKAGE_NAME}"
+    "${CPACK_RPM_SPEC_PREINSTALL}")
+
+  set_spec_script_if_enabled(
+    "pretrans"
+    "${PACKAGE_NAME}"
+    "${CPACK_RPM_SPEC_PRETRANS}")
+
+  set_spec_script_if_enabled(
+    "preun"
+    "${PACKAGE_NAME}"
+    "${CPACK_RPM_SPEC_PREUNINSTALL}")
+endmacro()
+
 function(get_file_permissions FILE RETURN_VAR)
   execute_process(COMMAND ls -l ${FILE}
           OUTPUT_VARIABLE permissions_
@@ -1024,6 +1074,21 @@ function(cpack_rpm_generate_package)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   string(REPLACE "\n" ";" RPMBUILD_TAG_LIST "${RPMBUILD_TAG_LIST}")
 
+  # In some versions of RPM, weak dependency tags are present in the --querytags
+  # list, but unsupported by rpmbuild. A different method must be used to check
+  # if they are supported.
+
+  execute_process(
+    COMMAND ${RPM_EXECUTABLE} --suggests
+    ERROR_QUIET
+    RESULT_VARIABLE RPMBUILD_SUGGESTS_RESULT)
+
+  if(NOT RPMBUILD_SUGGESTS_RESULT EQUAL 0)
+    foreach(_WEAK_DEP SUGGESTS RECOMMENDS SUPPLEMENTS ENHANCES)
+      list(REMOVE_ITEM RPMBUILD_TAG_LIST ${_WEAK_DEP})
+    endforeach()
+  endif()
+
   if(CPACK_RPM_PACKAGE_EPOCH)
     set(TMP_RPM_EPOCH "Epoch: ${CPACK_RPM_PACKAGE_EPOCH}")
   endif()
@@ -1349,14 +1414,20 @@ function(cpack_rpm_generate_package)
             continue()
           endif()
 
-          file(GLOB_RECURSE files_for_move_ LIST_DIRECTORIES false RELATIVE
+          file(GLOB_RECURSE files_for_move_ LIST_DIRECTORIES true RELATIVE
             "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}/${component_}"
             "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}/${component_}/*")
 
           foreach(f_ IN LISTS files_for_move_)
-            get_filename_component(dir_path_ "${f_}" DIRECTORY)
             set(src_file_
               "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}/${component_}/${f_}")
+
+            if(IS_DIRECTORY "${src_file_}")
+              file(MAKE_DIRECTORY "${WDIR}/${f_}")
+              continue()
+            endif()
+
+            get_filename_component(dir_path_ "${f_}" DIRECTORY)
 
             # check that we are not overriding an existing file that doesn't
             # match the file that we want to copy
@@ -1607,6 +1678,9 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
     )
 
   elseif(GENERATE_SPEC_PARTS) # binary rpm with single debuginfo package
+
+    set_spec_scripts("${CPACK_RPM_PACKAGE_NAME}")
+
     file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
         "# -*- rpm-spec -*-
 %package -n \@CPACK_RPM_PACKAGE_NAME\@
@@ -1637,6 +1711,13 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 %description -n \@CPACK_RPM_PACKAGE_NAME\@
 \@CPACK_RPM_PACKAGE_DESCRIPTION\@
 
+\@post_\@
+\@posttrans_\@
+\@postun_\@
+\@pre_\@
+\@pretrans_\@
+\@preun_\@
+
 %files -n \@CPACK_RPM_PACKAGE_NAME\@
 %defattr(\@TMP_DEFAULT_FILE_PERMISSIONS\@,\@TMP_DEFAULT_USER\@,\@TMP_DEFAULT_GROUP\@,\@TMP_DEFAULT_DIR_PERMISSIONS\@)
 \@CPACK_RPM_INSTALL_FILES\@
@@ -1661,6 +1742,8 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
     #  - or the user did not provide one : NOT CPACK_RPM_USER_BINARY_SPECFILE
     set(RPMBUILD_FLAGS "-bb")
     if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
+
+      set_spec_scripts("")
 
       file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
         "# Restore old style debuginfo creation for rpm >= 4.14.
@@ -1725,24 +1808,12 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
 
 %clean
 
-%post
-\@RPM_SYMLINK_POSTINSTALL\@
-\@CPACK_RPM_SPEC_POSTINSTALL\@
-
-%posttrans
-\@CPACK_RPM_SPEC_POSTTRANS\@
-
-%postun
-\@CPACK_RPM_SPEC_POSTUNINSTALL\@
-
-%pre
-\@CPACK_RPM_SPEC_PREINSTALL\@
-
-%pretrans
-\@CPACK_RPM_SPEC_PRETRANS\@
-
-%preun
-\@CPACK_RPM_SPEC_PREUNINSTALL\@
+\@post_\@
+\@posttrans_\@
+\@postun_\@
+\@pre_\@
+\@pretrans_\@
+\@preun_\@
 
 %files
 %defattr(\@TMP_DEFAULT_FILE_PERMISSIONS\@,\@TMP_DEFAULT_USER\@,\@TMP_DEFAULT_GROUP\@,\@TMP_DEFAULT_DIR_PERMISSIONS\@)

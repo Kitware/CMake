@@ -74,7 +74,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
                              std::vector<std::string>::const_iterator argEnd);
 
 namespace {
-void CMakeCommandUsage(const char* program)
+void CMakeCommandUsage(std::string const& program)
 {
   std::ostringstream errorStream;
 
@@ -704,7 +704,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       } else if (args[2] == "--ignore-eol") {
         filesDiffer = cmsys::SystemTools::TextFilesDiffer(args[3], args[4]);
       } else {
-        CMakeCommandUsage(args[0].c_str());
+        CMakeCommandUsage(args[0]);
         return 2;
       }
 
@@ -1085,7 +1085,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       std::string const& directory = args[2];
       if (!cmSystemTools::FileExists(directory)) {
         cmSystemTools::Error("Directory does not exist for chdir command: " +
-                             args[2]);
+                             directory);
         return 1;
       }
 
@@ -1152,7 +1152,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
                   << "\n";
         return 1;
       }
-      if (!cmSystemTools::CreateSymlink(args[2], args[3])) {
+      if (!cmSystemTools::CreateSymlink(args[2], destinationFileName)) {
         return 1;
       }
       return 0;
@@ -1161,12 +1161,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     // Command to create a hard link.  Fails on platforms not
     // supporting them.
     if (args[1] == "create_hardlink" && args.size() == 4) {
-      const char* SouceFileName = args[2].c_str();
-      const char* destinationFileName = args[3].c_str();
+      std::string const& sourceFileName = args[2];
+      std::string const& destinationFileName = args[3];
 
-      if (!cmSystemTools::FileExists(SouceFileName)) {
+      if (!cmSystemTools::FileExists(sourceFileName)) {
         std::cerr << "failed to create hard link because source path '"
-                  << SouceFileName << "' does not exist \n";
+                  << sourceFileName << "' does not exist \n";
         return 1;
       }
 
@@ -1180,7 +1180,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         return 1;
       }
 
-      if (!cmSystemTools::CreateLink(args[2], args[3])) {
+      if (!cmSystemTools::CreateLink(sourceFileName, destinationFileName)) {
         return 1;
       }
       return 0;
@@ -1270,10 +1270,14 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
         snapshot.GetDirectory().SetCurrentBinary(startOutDir);
         snapshot.GetDirectory().SetCurrentSource(startDir);
-        snapshot.GetDirectory().SetRelativePathTopSource(homeDir.c_str());
-        snapshot.GetDirectory().SetRelativePathTopBinary(homeOutDir.c_str());
         cmMakefile mf(cm.GetGlobalGenerator(), snapshot);
         auto lgd = cm.GetGlobalGenerator()->CreateLocalGenerator(&mf);
+
+        // FIXME: With advanced add_subdirectory usage, these are
+        // not necessarily the same as the generator originally used.
+        // We should pass all these directories through an info file.
+        lgd->SetRelativePathTopSource(homeDir);
+        lgd->SetRelativePathTopBinary(homeOutDir);
 
         // Actually scan dependencies.
         return lgd->UpdateDependencies(depInfo, verbose, color) ? 0 : 2;
@@ -1525,8 +1529,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       auto format = cmDepfileFormat::GccDepfile;
       if (args[3] == "gccdepfile") {
         format = cmDepfileFormat::GccDepfile;
-      } else if (args[3] == "vstlog") {
-        format = cmDepfileFormat::VsTlog;
+      } else if (args[3] == "makedepfile") {
+        format = cmDepfileFormat::MakeDepfile;
+      } else if (args[3] == "MSBuildAdditionalInputs") {
+        format = cmDepfileFormat::MSBuildAdditionalInputs;
       } else {
         return 1;
       }
@@ -1549,10 +1555,14 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
         snapshot.GetDirectory().SetCurrentBinary(startOutDir);
         snapshot.GetDirectory().SetCurrentSource(startDir);
-        snapshot.GetDirectory().SetRelativePathTopSource(homeDir.c_str());
-        snapshot.GetDirectory().SetRelativePathTopBinary(homeOutDir.c_str());
         cmMakefile mf(cm.GetGlobalGenerator(), snapshot);
         auto lgd = cm.GetGlobalGenerator()->CreateLocalGenerator(&mf);
+
+        // FIXME: With advanced add_subdirectory usage, these are
+        // not necessarily the same as the generator originally used.
+        // We should pass all these directories through an info file.
+        lgd->SetRelativePathTopSource(homeDir);
+        lgd->SetRelativePathTopBinary(homeOutDir);
 
         return cmTransformDepfile(format, *lgd, args[8], args[9]) ? 0 : 2;
       }
@@ -1560,7 +1570,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
   }
 
-  CMakeCommandUsage(args[0].c_str());
+  CMakeCommandUsage(args[0]);
   return 1;
 }
 
@@ -1601,14 +1611,18 @@ int cmcmd::SymlinkLibrary(std::vector<std::string> const& args)
   cmSystemTools::ConvertToUnixSlashes(soName);
   cmSystemTools::ConvertToUnixSlashes(name);
   if (soName != realName) {
-    if (!cmcmd::SymlinkInternal(realName, soName)) {
-      cmSystemTools::ReportLastSystemError("cmake_symlink_library");
+    cmsys::Status status = cmcmd::SymlinkInternal(realName, soName);
+    if (!status) {
+      cmSystemTools::Error(
+        cmStrCat("cmake_symlink_library: System Error: ", status.GetString()));
       result = 1;
     }
   }
   if (name != soName) {
-    if (!cmcmd::SymlinkInternal(soName, name)) {
-      cmSystemTools::ReportLastSystemError("cmake_symlink_library");
+    cmsys::Status status = cmcmd::SymlinkInternal(soName, name);
+    if (!status) {
+      cmSystemTools::Error(
+        cmStrCat("cmake_symlink_library: System Error: ", status.GetString()));
       result = 1;
     }
   }
@@ -1621,23 +1635,37 @@ int cmcmd::SymlinkExecutable(std::vector<std::string> const& args)
   std::string const& realName = args[2];
   std::string const& name = args[3];
   if (name != realName) {
-    if (!cmcmd::SymlinkInternal(realName, name)) {
-      cmSystemTools::ReportLastSystemError("cmake_symlink_executable");
+    cmsys::Status status = cmcmd::SymlinkInternal(realName, name);
+    if (!status) {
+      cmSystemTools::Error(cmStrCat("cmake_symlink_executable: System Error: ",
+                                    status.GetString()));
       result = 1;
     }
   }
   return result;
 }
 
-bool cmcmd::SymlinkInternal(std::string const& file, std::string const& link)
+cmsys::Status cmcmd::SymlinkInternal(std::string const& file,
+                                     std::string const& link)
 {
   if (cmSystemTools::FileExists(link) || cmSystemTools::FileIsSymlink(link)) {
     cmSystemTools::RemoveFile(link);
   }
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  return cmSystemTools::CopyFileAlways(file, link);
-#else
   std::string linktext = cmSystemTools::GetFilenameName(file);
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  std::string errorMessage;
+  cmsys::Status status =
+    cmSystemTools::CreateSymlink(linktext, link, &errorMessage);
+  // Creating a symlink will fail with ERROR_PRIVILEGE_NOT_HELD if the user
+  // does not have SeCreateSymbolicLinkPrivilege, or if developer mode is not
+  // active. In that case, we try to copy the file.
+  if (status.GetWindows() == ERROR_PRIVILEGE_NOT_HELD) {
+    status = cmSystemTools::CopyFileAlways(file, link);
+  } else if (!status) {
+    cmSystemTools::Error(errorMessage);
+  }
+  return status;
+#else
   return cmSystemTools::CreateSymlink(linktext, link);
 #endif
 }
@@ -1927,8 +1955,8 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
       skipNextArg = false;
       continue;
     }
-    // We use ++ as seperator between the preprocessing step definition and
-    // the rc compilation step becase we need to prepend a -- to seperate the
+    // We use ++ as separator between the preprocessing step definition and
+    // the rc compilation step because we need to prepend a -- to separate the
     // source file properly from other options when using clang-cl for
     // preprocessing.
     if (arg == "++") {

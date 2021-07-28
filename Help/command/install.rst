@@ -9,11 +9,13 @@ Synopsis
 .. parsed-literal::
 
   install(`TARGETS`_ <target>... [...])
+  install(`IMPORTED_RUNTIME_ARTIFACTS`_ <target>... [...])
   install({`FILES`_ | `PROGRAMS`_} <file>... [...])
   install(`DIRECTORY`_ <dir>... [...])
   install(`SCRIPT`_ <file> [...])
   install(`CODE`_ <code> [...])
   install(`EXPORT`_ <export-name> [...])
+  install(`RUNTIME_DEPENDENCY_SET`_ <set-name> [...])
 
 Introduction
 ^^^^^^^^^^^^
@@ -124,6 +126,7 @@ Installing Targets
 .. code-block:: cmake
 
   install(TARGETS targets... [EXPORT <export-name>]
+          [RUNTIME_DEPENDENCIES args...|RUNTIME_DEPENDENCY_SET <set-name>]
           [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
             PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE]
            [DESTINATION <dir>]
@@ -338,6 +341,49 @@ top level:
   relative path is specified, it is treated as relative to the
   ``$<INSTALL_PREFIX>``.
 
+``RUNTIME_DEPENDENCY_SET``
+  .. versionadded:: 3.21
+
+  This option causes all runtime dependencies of installed executable, shared
+  library, and module targets to be added to the specified runtime dependency
+  set. This set can then be installed with an
+  `install(RUNTIME_DEPENDENCY_SET)`_ command.
+
+  This keyword and the ``RUNTIME_DEPENDENCIES`` keyword are mutually
+  exclusive.
+
+``RUNTIME_DEPENDENCIES``
+  .. versionadded:: 3.21
+
+  This option causes all runtime dependencies of installed executable, shared
+  library, and module targets to be installed along with the targets
+  themselves. The ``RUNTIME``, ``LIBRARY``, ``FRAMEWORK``, and generic
+  arguments are used to determine the properties (``DESTINATION``,
+  ``COMPONENT``, etc.) of the installation of these dependencies.
+
+  ``RUNTIME_DEPENDENCIES`` is semantically equivalent to the following pair
+  of calls:
+
+  .. code-block:: cmake
+
+    install(TARGETS ... RUNTIME_DEPENDENCY_SET <set-name>)
+    install(RUNTIME_DEPENDENCY_SET <set-name> args...)
+
+  where ``<set-name>`` will be a randomly generated set name.
+  The ``args...`` may include any of the following keywords supported by
+  the `install(RUNTIME_DEPENDENCY_SET)`_ command:
+
+  * ``DIRECTORIES``
+  * ``PRE_INCLUDE_REGEXES``
+  * ``PRE_EXCLUDE_REGEXES``
+  * ``POST_INCLUDE_REGEXES``
+  * ``POST_EXCLUDE_REGEXES``
+  * ``POST_INCLUDE_FILES``
+  * ``POST_EXCLUDE_FILES``
+
+  The ``RUNTIME_DEPENDENCIES`` and ``RUNTIME_DEPENDENCY_SET`` keywords are
+  mutually exclusive.
+
 One or more groups of properties may be specified in a single call to
 the ``TARGETS`` form of this command.  A target may be installed more than
 once to different locations.  Consider hypothetical targets ``myExe``,
@@ -381,6 +427,44 @@ set to ``TRUE`` has undefined behavior.
   :command:`target_link_libraries` or :command:`add_dependencies`
   to ensure that such out-of-directory targets are built before the
   subdirectory-specific install rules are run.
+
+Installing Imported Runtime Artifacts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _`install(IMPORTED_RUNTIME_ARTIFACTS)`:
+.. _IMPORTED_RUNTIME_ARTIFACTS:
+
+.. versionadded:: 3.21
+
+.. code-block:: cmake
+
+  install(IMPORTED_RUNTIME_ARTIFACTS targets...
+          [RUNTIME_DEPENDENCY_SET <set-name>]
+          [[LIBRARY|RUNTIME|FRAMEWORK|BUNDLE]
+           [DESTINATION <dir>]
+           [PERMISSIONS permissions...]
+           [CONFIGURATIONS [Debug|Release|...]]
+           [COMPONENT <component>]
+           [OPTIONAL] [EXCLUDE_FROM_ALL]
+          ] [...]
+          )
+
+The ``IMPORTED_RUNTIME_ARTIFACTS`` form specifies rules for installing the
+runtime artifacts of imported targets. Projects may do this if they want to
+bundle outside executables or modules inside their installation. The
+``LIBRARY``, ``RUNTIME``, ``FRAMEWORK``, and ``BUNDLE`` arguments have the
+same semantics that they do in the `TARGETS`_ mode. Only the runtime artifacts
+of imported targets are installed (except in the case of :prop_tgt:`FRAMEWORK`
+libraries, :prop_tgt:`MACOSX_BUNDLE` executables, and :prop_tgt:`BUNDLE`
+CFBundles.) For example, headers and import libraries associated with DLLs are
+not installed. In the case of :prop_tgt:`FRAMEWORK` libraries,
+:prop_tgt:`MACOSX_BUNDLE` executables, and :prop_tgt:`BUNDLE` CFBundles, the
+entire directory is installed.
+
+The ``RUNTIME_DEPENDENCY_SET`` option causes the runtime artifacts of the
+imported executable, shared library, and module library ``targets`` to be
+added to the ``<set-name>`` runtime dependency set. This set can then be
+installed with an `install(RUNTIME_DEPENDENCY_SET)`_ command.
 
 Installing Files
 ^^^^^^^^^^^^^^^^
@@ -540,7 +624,8 @@ any expression.  For example, the code
 
 will extract and install header files from a source tree.
 
-Some options may follow a ``PATTERN`` or ``REGEX`` expression and are applied
+Some options may follow a ``PATTERN`` or ``REGEX`` expression as described
+under :ref:`string(REGEX) <Regex Specification>` and are applied
 only to files or directories matching them.  The ``EXCLUDE`` option will
 skip the matched file or directory.  The ``PERMISSIONS`` option overrides
 the permissions setting for the matched file or directory.  For
@@ -619,7 +704,8 @@ Custom Installation Logic
 .. code-block:: cmake
 
   install([[SCRIPT <file>] [CODE <code>]]
-          [COMPONENT <component>] [EXCLUDE_FROM_ALL] [...])
+          [ALL_COMPONENTS | COMPONENT <component>]
+          [EXCLUDE_FROM_ALL] [...])
 
 The ``SCRIPT`` form will invoke the given CMake script files during
 installation.  If the script file name is a relative path it will be
@@ -633,6 +719,12 @@ example, the code
   install(CODE "MESSAGE(\"Sample install message.\")")
 
 will print a message during installation.
+
+.. versionadded:: 3.21
+  When the ``ALL_COMPONENTS`` option is given, the custom installation
+  script code will be executed for every component of a component-specific
+  installation.  This option is mutually exclusive with the ``COMPONENT``
+  option.
 
 .. versionadded:: 3.14
   ``<file>`` or ``<code>`` may use "generator expressions" with the syntax
@@ -724,7 +816,7 @@ executable from the installation tree using the imported target name
 ``mp_myexe`` as if the target were built in its own tree.
 
 .. note::
-  This command supercedes the :command:`install_targets` command and
+  This command supersedes the :command:`install_targets` command and
   the :prop_tgt:`PRE_INSTALL_SCRIPT` and :prop_tgt:`POST_INSTALL_SCRIPT`
   target properties.  It also replaces the ``FILES`` forms of the
   :command:`install_files` and :command:`install_programs` commands.
@@ -732,6 +824,70 @@ executable from the installation tree using the imported target name
   those generated by :command:`install_targets`,
   :command:`install_files`, and :command:`install_programs` commands
   is not defined.
+
+Installing Runtime Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _`install(RUNTIME_DEPENDENCY_SET)`:
+.. _RUNTIME_DEPENDENCY_SET:
+
+.. versionadded:: 3.21
+
+.. code-block:: cmake
+
+  install(RUNTIME_DEPENDENCY_SET <set-name>
+          [[LIBRARY|RUNTIME|FRAMEWORK]
+           [DESTINATION <dir>]
+           [PERMISSIONS permissions...]
+           [CONFIGURATIONS [Debug|Release|...]]
+           [COMPONENT <component>]
+           [NAMELINK_COMPONENT <component>]
+           [OPTIONAL] [EXCLUDE_FROM_ALL]
+          ] [...]
+          [PRE_INCLUDE_REGEXES regexes...]
+          [PRE_EXCLUDE_REGEXES regexes...]
+          [POST_INCLUDE_REGEXES regexes...]
+          [POST_EXCLUDE_REGEXES regexes...]
+          [POST_INCLUDE_FILES files...]
+          [POST_EXCLUDE_FILES files...]
+          [DIRECTORIES directories...]
+          )
+
+Installs a runtime dependency set previously created by one or more
+`install(TARGETS)`_ or `install(IMPORTED_RUNTIME_ARTIFACTS)`_ commands. The
+dependencies of targets belonging to a runtime dependency set are installed in
+the ``RUNTIME`` destination and component on DLL platforms, and in the
+``LIBRARY`` destination and component on non-DLL platforms. macOS frameworks
+are installed in the ``FRAMEWORK`` destination and component.
+Targets built within the build tree will never be installed as runtime
+dependencies, nor will their own dependencies, unless the targets themselves
+are installed with `install(TARGETS)`_.
+
+The generated install script calls :command:`file(GET_RUNTIME_DEPENDENCIES)`
+on the build-tree files to calculate the runtime dependencies. The build-tree
+executable files are passed as the ``EXECUTABLES`` argument, the build-tree
+shared libraries as the ``LIBRARIES`` argument, and the build-tree modules as
+the ``MODULES`` argument. On macOS, if one of the executables is a
+:prop_tgt:`MACOSX_BUNDLE`, that executable is passed as the
+``BUNDLE_EXECUTABLE`` argument. At most one such bundle executable may be in
+the runtime dependency set on macOS. The :prop_tgt:`MACOSX_BUNDLE` property
+has no effect on other platforms. Note that
+:command:`file(GET_RUNTIME_DEPENDENCIES)` only supports collecting the runtime
+dependencies for Windows, Linux and macOS platforms, so
+``install(RUNTIME_DEPENDENCY_SET)`` has the same limitation.
+
+The following sub-arguments are forwarded through as the corresponding
+arguments to :command:`file(GET_RUNTIME_DEPENDENCIES)` (for those that provide
+a non-empty list of directories, regular expressions or files).  They all
+support :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
+* ``DIRECTORIES <directories>``
+* ``PRE_INCLUDE_REGEXES <regexes>``
+* ``PRE_EXCLUDE_REGEXES <regexes>``
+* ``POST_INCLUDE_REGEXES <regexes>``
+* ``POST_EXCLUDE_REGEXES <regexes>``
+* ``POST_INCLUDE_FILES <files>``
+* ``POST_EXCLUDE_FILES <files>``
 
 Generated Installation Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

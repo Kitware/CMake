@@ -286,6 +286,7 @@ cmStateSnapshot cmState::Reset()
     it->LinkDirectoriesBacktraces.clear();
     it->DirectoryEnd = pos;
     it->NormalTargetNames.clear();
+    it->ImportedTargetNames.clear();
     it->Properties.Clear();
     it->Children.clear();
   }
@@ -480,7 +481,7 @@ void cmState::AddDisallowedCommand(std::string const& name,
 
 void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
 {
-  this->AddFlowControlCommand(
+  this->AddBuiltinCommand(
     name,
     [name, error](std::vector<cmListFileArgument> const&,
                   cmExecutionStatus& status) -> bool {
@@ -493,6 +494,13 @@ void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
       status.SetError(error);
       return false;
     });
+}
+
+void cmState::AddUnexpectedFlowControlCommand(std::string const& name,
+                                              const char* error)
+{
+  this->FlowControlCommands.insert(name);
+  this->AddUnexpectedCommand(name, error);
 }
 
 bool cmState::AddScriptedCommand(std::string const& name, BT<Command> command,

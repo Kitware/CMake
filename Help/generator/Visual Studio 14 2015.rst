@@ -8,8 +8,9 @@ Generates Visual Studio 14 (VS 2015) project files.
 Project Types
 ^^^^^^^^^^^^^
 
-Only Visual C++ and C# projects may be generated.  Other types of
-projects (JavaScript, Powershell, Python, etc.) are not supported.
+Only Visual C++ and C# projects may be generated (and Fortran with
+Intel compiler integration).  Other types of projects (JavaScript,
+Powershell, Python, etc.) are not supported.
 
 Platform Selection
 ^^^^^^^^^^^^^^^^^^
@@ -44,7 +45,7 @@ via the :manual:`cmake(1)` ``-T`` option, to specify another toolset.
 .. |VS_TOOLSET_HOST_ARCH_DEFAULT| replace::
    By default this generator uses the 32-bit variant even on a 64-bit host.
 
-.. include:: VS_TOOLSET_HOST_ARCH.txt
+.. include:: VS_TOOLSET_HOST_ARCH_LEGACY.txt
 
 .. _`Windows 10 SDK Maximum Version for VS 2015`:
 

@@ -20,12 +20,18 @@ Sets the name of the project, and stores it in the variable
 ``CMakeLists.txt`` also stores the project name in the
 variable :variable:`CMAKE_PROJECT_NAME`.
 
-Also sets the variables
+Also sets the variables:
 
-* :variable:`PROJECT_SOURCE_DIR`,
-  :variable:`<PROJECT-NAME>_SOURCE_DIR`
-* :variable:`PROJECT_BINARY_DIR`,
-  :variable:`<PROJECT-NAME>_BINARY_DIR`
+:variable:`PROJECT_SOURCE_DIR`, :variable:`<PROJECT-NAME>_SOURCE_DIR`
+  Absolute path to the source directory for the project.
+
+:variable:`PROJECT_BINARY_DIR`, :variable:`<PROJECT-NAME>_BINARY_DIR`
+  Absolute path to the binary directory for the project.
+
+:variable:`PROJECT_IS_TOP_LEVEL`, :variable:`<PROJECT-NAME>_IS_TOP_LEVEL`
+  .. versionadded:: 3.21
+
+  Boolean value indicating whether the project is top-level.
 
 Further variables are set by the optional arguments described in the following.
 If any of these arguments is not used, then the corresponding variables are
@@ -97,7 +103,7 @@ The options are:
 
   Selects which programming languages are needed to build the project.
   Supported languages include ``C``, ``CXX`` (i.e.  C++), ``CUDA``,
-  ``OBJC`` (i.e. Objective-C), ``OBJCXX``, ``Fortran``, ``ISPC``, and ``ASM``.
+  ``OBJC`` (i.e. Objective-C), ``OBJCXX``, ``Fortran``, ``HIP``, ``ISPC``, and ``ASM``.
   By default ``C`` and ``CXX`` are enabled if no language options are given.
   Specify language ``NONE``, or use the ``LANGUAGES`` keyword and list no languages,
   to skip enabling any languages.

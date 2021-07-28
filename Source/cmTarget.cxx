@@ -288,6 +288,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     SETUP_COMMON_LANGUAGE_PROPERTIES(CXX);
     SETUP_COMMON_LANGUAGE_PROPERTIES(OBJCXX);
     SETUP_COMMON_LANGUAGE_PROPERTIES(CUDA);
+    SETUP_COMMON_LANGUAGE_PROPERTIES(HIP);
 
     initProp("ANDROID_API");
     initProp("ANDROID_API_MIN");
@@ -354,15 +355,19 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("C_CPPLINT");
     initProp("C_CPPCHECK");
     initProp("C_INCLUDE_WHAT_YOU_USE");
+    initProp("C_LINKER_LAUNCHER");
     initProp("LINK_WHAT_YOU_USE");
     initProp("CXX_CLANG_TIDY");
     initProp("CXX_CPPLINT");
     initProp("CXX_CPPCHECK");
     initProp("CXX_INCLUDE_WHAT_YOU_USE");
+    initProp("CXX_LINKER_LAUNCHER");
     initProp("CUDA_SEPARABLE_COMPILATION");
     initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
     initProp("CUDA_RUNTIME_LIBRARY");
     initProp("CUDA_ARCHITECTURES");
+    initProp("HIP_RUNTIME_LIBRARY");
+    initProp("HIP_ARCHITECTURES");
     initProp("VISIBILITY_INLINES_HIDDEN");
     initProp("JOB_POOL_COMPILE");
     initProp("JOB_POOL_LINK");
@@ -374,7 +379,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("LINK_SEARCH_START_STATIC");
     initProp("LINK_SEARCH_END_STATIC");
     initProp("OBJC_CLANG_TIDY");
+    initProp("OBJC_LINKER_LAUNCHER");
     initProp("OBJCXX_CLANG_TIDY");
+    initProp("OBJCXX_LINKER_LAUNCHER");
     initProp("Swift_LANGUAGE_VERSION");
     initProp("Swift_MODULE_DIRECTORY");
     initProp("VS_JUST_MY_CODE_DEBUGGING");
@@ -929,12 +936,10 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
   const char* sigString =
     (sig == cmTarget::KeywordTLLSignature ? "keyword" : "plain");
   s << "The uses of the " << sigString << " signature are here:\n";
-  cmStateDirectory cmDir =
-    this->impl->Makefile->GetStateSnapshot().GetDirectory();
   for (auto const& cmd : this->impl->TLLCommands) {
     if (cmd.first == sig) {
       cmListFileContext lfc = cmd.second;
-      lfc.FilePath = cmDir.ConvertToRelPathIfNotContained(
+      lfc.FilePath = cmSystemTools::RelativeIfUnder(
         this->impl->Makefile->GetState()->GetSourceDirectory(), lfc.FilePath);
       s << " * " << lfc << '\n';
     }
@@ -1166,6 +1171,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   MAKE_STATIC_PROP(C_STANDARD);
   MAKE_STATIC_PROP(CXX_STANDARD);
   MAKE_STATIC_PROP(CUDA_STANDARD);
+  MAKE_STATIC_PROP(HIP_STANDARD);
   MAKE_STATIC_PROP(OBJC_STANDARD);
   MAKE_STATIC_PROP(OBJCXX_STANDARD);
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
@@ -1352,8 +1358,8 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     this->SetProperty("COMPILE_PDB_NAME", cmToCStr(tmp));
     this->AddUtility(reusedFrom, false, this->impl->Makefile);
   } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
-             prop == propCUDA_STANDARD || prop == propOBJC_STANDARD ||
-             prop == propOBJCXX_STANDARD) {
+             prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||
+             prop == propOBJC_STANDARD || prop == propOBJCXX_STANDARD) {
     if (value) {
       this->impl->LanguageStandardProperties[prop] =
         BTs<std::string>(value, this->impl->Makefile->GetBacktrace());
@@ -1459,8 +1465,8 @@ void cmTarget::AppendProperty(const std::string& prop,
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be APPENDed.");
   } else if (prop == "C_STANDARD" || prop == "CXX_STANDARD" ||
-             prop == "CUDA_STANDARD" || prop == "OBJC_STANDARD" ||
-             prop == "OBJCXX_STANDARD") {
+             prop == "CUDA_STANDARD" || prop == "HIP_STANDARD" ||
+             prop == "OBJC_STANDARD" || prop == "OBJCXX_STANDARD") {
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be appended.");
   } else {

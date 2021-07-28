@@ -2,7 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalNMakeMakefileGenerator.h"
 
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmDocumentationEntry.h"
+#include "cmDuration.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmState.h"
@@ -32,6 +35,42 @@ void cmGlobalNMakeMakefileGenerator::EnableLanguage(
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
+}
+
+bool cmGlobalNMakeMakefileGenerator::FindMakeProgram(cmMakefile* mf)
+{
+  if (!this->cmGlobalGenerator::FindMakeProgram(mf)) {
+    return false;
+  }
+  if (cmProp nmakeCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
+    std::vector<std::string> command{ *nmakeCommand, "-?" };
+    std::string out;
+    std::string err;
+    if (!cmSystemTools::RunSingleCommand(command, &out, &err, nullptr, nullptr,
+                                         cmSystemTools::OUTPUT_NONE,
+                                         cmDuration(30))) {
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Running\n '", cmJoin(command, "' '"),
+                                "'\n"
+                                "failed with:\n ",
+                                err));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+    cmsys::RegularExpression regex(
+      "Program Maintenance Utility Version ([1-9][0-9.]+)");
+    if (regex.find(err)) {
+      this->NMakeVersion = regex.match(1);
+      this->CheckNMakeFeatures();
+    }
+  }
+  return true;
+}
+
+void cmGlobalNMakeMakefileGenerator::CheckNMakeFeatures()
+{
+  this->NMakeSupportsUTF8 = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NMakeVersion.c_str(), "9");
 }
 
 void cmGlobalNMakeMakefileGenerator::GetDocumentation(

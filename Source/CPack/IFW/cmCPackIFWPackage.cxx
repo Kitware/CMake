@@ -7,6 +7,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/string_view>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackIFWCommon.h"
 #include "cmCPackIFWGenerator.h"
@@ -30,44 +32,67 @@ cmCPackIFWPackage::DependenceStruct::DependenceStruct() = default;
 cmCPackIFWPackage::DependenceStruct::DependenceStruct(
   const std::string& dependence)
 {
-  // Search compare section
-  size_t pos = std::string::npos;
-  if ((pos = dependence.find("<=")) != std::string::npos) {
-    this->Compare.Type = cmCPackIFWPackage::CompareLessOrEqual;
-    this->Compare.Value = dependence.substr(pos + 2);
-  } else if ((pos = dependence.find(">=")) != std::string::npos) {
-    this->Compare.Type = cmCPackIFWPackage::CompareGreaterOrEqual;
-    this->Compare.Value = dependence.substr(pos + 2);
-  } else if ((pos = dependence.find('<')) != std::string::npos) {
-    this->Compare.Type = cmCPackIFWPackage::CompareLess;
-    this->Compare.Value = dependence.substr(pos + 1);
-  } else if ((pos = dependence.find('=')) != std::string::npos) {
-    this->Compare.Type = cmCPackIFWPackage::CompareEqual;
-    this->Compare.Value = dependence.substr(pos + 1);
-  } else if ((pos = dependence.find('>')) != std::string::npos) {
-    this->Compare.Type = cmCPackIFWPackage::CompareGreater;
-    this->Compare.Value = dependence.substr(pos + 1);
-  } else if ((pos = dependence.find('-')) != std::string::npos) {
-    this->Compare.Type = cmCPackIFWPackage::CompareNone;
-    this->Compare.Value = dependence.substr(pos + 1);
+  // Preferred format is name and version are separated by a colon (:), but
+  // note that this is only supported with QtIFW 3.1 or later. Backward
+  // compatibility allows a hyphen (-) as a separator instead, but names then
+  // cannot contain a hyphen.
+  size_t pos;
+  if ((pos = dependence.find(':')) == std::string::npos) {
+    pos = dependence.find('-');
   }
-  size_t dashPos = dependence.find('-');
-  if (dashPos != std::string::npos) {
-    pos = dashPos;
+
+  if (pos != std::string::npos) {
+    this->Name = dependence.substr(0, pos);
+    ++pos;
+    if (pos == dependence.size()) {
+      // Nothing after the separator. Treat this as no version constraint.
+      return;
+    }
+
+    const auto versionPart =
+      cm::string_view(dependence.data() + pos, dependence.size() - pos);
+
+    if (cmHasLiteralPrefix(versionPart, "<=")) {
+      this->Compare.Type = cmCPackIFWPackage::CompareLessOrEqual;
+      this->Compare.Value = std::string(versionPart.substr(2));
+    } else if (cmHasLiteralPrefix(versionPart, ">=")) {
+      this->Compare.Type = cmCPackIFWPackage::CompareGreaterOrEqual;
+      this->Compare.Value = std::string(versionPart.substr(2));
+    } else if (cmHasPrefix(versionPart, '<')) {
+      this->Compare.Type = cmCPackIFWPackage::CompareLess;
+      this->Compare.Value = std::string(versionPart.substr(1));
+    } else if (cmHasPrefix(versionPart, '=')) {
+      this->Compare.Type = cmCPackIFWPackage::CompareEqual;
+      this->Compare.Value = std::string(versionPart.substr(1));
+    } else if (cmHasPrefix(versionPart, '>')) {
+      this->Compare.Type = cmCPackIFWPackage::CompareGreater;
+      this->Compare.Value = std::string(versionPart.substr(1));
+    } else {
+      // We found no operator but a version specification is still expected to
+      // follow. The default behavior is to treat this the same as =. We
+      // explicitly record that as our type (it simplifies our logic a little
+      // and is also clearer).
+      this->Compare.Type = cmCPackIFWPackage::CompareEqual;
+      this->Compare.Value = std::string(versionPart);
+    }
+  } else {
+    this->Name = dependence;
   }
-  this->Name = dependence.substr(0, pos);
 }
 
 std::string cmCPackIFWPackage::DependenceStruct::NameWithCompare() const
 {
-  if (this->Compare.Type == cmCPackIFWPackage::CompareNone) {
-    return this->Name;
-  }
-
   std::string result = this->Name;
-
-  if (this->Compare.Type != cmCPackIFWPackage::CompareNone ||
-      !this->Compare.Value.empty()) {
+  if (this->Name.find('-') != std::string::npos) {
+    // When a name contains a hyphen, we must use a colon after the name to
+    // prevent the hyphen from being parsed by QtIFW as the separator between
+    // the name and the version. Note that a colon is only supported with
+    // QtIFW 3.1 or later.
+    result += ":";
+  } else if (this->Compare.Type != cmCPackIFWPackage::CompareNone ||
+             !this->Compare.Value.empty()) {
+    // No hyphen in the name and we know a version part will follow. Use a
+    // hyphen as a separator since this works for all QtIFW versions.
     result += "-";
   }
 
@@ -609,6 +634,9 @@ void cmCPackIFWPackage::GeneratePackageFile()
   }
 
   // Dependencies
+  const bool hyphensInNamesUnsupported = this->Generator &&
+    !this->Generator->FrameworkVersion.empty() && this->IsVersionLess("3.1");
+  bool warnUnsupportedNames = false;
   std::set<DependenceStruct> compDepSet;
   for (DependenceStruct* ad : this->AlienDependencies) {
     compDepSet.insert(*ad);
@@ -620,9 +648,13 @@ void cmCPackIFWPackage::GeneratePackageFile()
   if (!compDepSet.empty()) {
     std::ostringstream dependencies;
     auto it = compDepSet.begin();
+    warnUnsupportedNames |=
+      hyphensInNamesUnsupported && it->Name.find('-') != std::string::npos;
     dependencies << it->NameWithCompare();
     ++it;
     while (it != compDepSet.end()) {
+      warnUnsupportedNames |=
+        hyphensInNamesUnsupported && it->Name.find('-') != std::string::npos;
       dependencies << "," << it->NameWithCompare();
       ++it;
     }
@@ -638,13 +670,26 @@ void cmCPackIFWPackage::GeneratePackageFile()
   if (!compAutoDepSet.empty()) {
     std::ostringstream dependencies;
     auto it = compAutoDepSet.begin();
+    warnUnsupportedNames |=
+      hyphensInNamesUnsupported && it->Name.find('-') != std::string::npos;
     dependencies << it->NameWithCompare();
     ++it;
     while (it != compAutoDepSet.end()) {
+      warnUnsupportedNames |=
+        hyphensInNamesUnsupported && it->Name.find('-') != std::string::npos;
       dependencies << "," << it->NameWithCompare();
       ++it;
     }
     xout.Element("AutoDependOn", dependencies.str());
+  }
+
+  if (warnUnsupportedNames) {
+    cmCPackIFWLogger(
+      WARNING,
+      "The dependencies for component \""
+        << this->Name << "\" specify names that contain hyphens. "
+        << "This requires QtIFW 3.1 or later, but you are using version "
+        << this->Generator->FrameworkVersion << std::endl);
   }
 
   // Licenses (copy to meta dir)

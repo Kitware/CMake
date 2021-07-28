@@ -1,0 +1,2 @@
+add_executable(exe IMPORTED)
+install(IMPORTED_RUNTIME_ARTIFACTS exe RUNTIME_DEPENDENCY_SET deps)

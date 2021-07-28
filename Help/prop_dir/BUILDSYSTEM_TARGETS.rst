@@ -11,3 +11,5 @@ and :command:`add_custom_target` commands.  The list does not include any
 :ref:`Interface Libraries`.  Each entry in the list is the logical name
 of a target, suitable to pass to the :command:`get_property` command
 ``TARGET`` option.
+
+See also the :prop_dir:`IMPORTED_TARGETS` directory property.

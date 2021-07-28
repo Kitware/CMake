@@ -202,6 +202,10 @@ project. Start by specifying the :command:`cmake_minimum_required` version and
   :language: cmake
   :end-before: # create library
 
+The :module:`GNUInstallDirs` module is included in order to provide the
+project with the flexibility to install into different platform layouts by
+making the directories available as cache variables.
+
 Create a library called ``MathFunctions`` with the :command:`add_library`
 command:
 
@@ -636,7 +640,7 @@ We can use the :command:`find_package` command:
   :start-after: # find MathFunctions
   :end-before: # create executable
 
-Create an exectuable:
+Create an executable:
 
 .. literalinclude:: Downstream/CMakeLists.txt
   :language: cmake

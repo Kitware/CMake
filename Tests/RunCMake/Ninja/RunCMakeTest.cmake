@@ -18,6 +18,9 @@ else()
   message(FATAL_ERROR "'ninja --version' reported:\n${ninja_out}")
 endif()
 
+# Sanitize NINJA_STATUS since we expect default behavior.
+unset(ENV{NINJA_STATUS})
+
 if(CMAKE_HOST_WIN32)
   run_cmake(SelectCompilerWindows)
 else()
@@ -67,7 +70,7 @@ run_CMP0058(WARN-by)
 run_CMP0058(NEW-no)
 run_CMP0058(NEW-by)
 
-run_cmake(CustomCommandDepfile)
+run_cmake_with_options(CustomCommandDepfile -DCMAKE_BUILD_TYPE=Debug)
 run_cmake(CustomCommandJobPool)
 run_cmake(JobPoolUsesTerminal)
 
@@ -163,12 +166,12 @@ run_LooseObjectDepends()
 function (run_AssumedSources)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/AssumedSources-build)
   run_cmake(AssumedSources)
-  run_ninja("${RunCMake_TEST_BINARY_DIR}" "target.c")
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" "${RunCMake_TEST_BINARY_DIR}/target.c")
   if (NOT EXISTS "${RunCMake_TEST_BINARY_DIR}/target.c")
     message(FATAL_ERROR
       "Dependencies for an assumed source did not hook up properly for 'target.c'.")
   endif ()
-  run_ninja("${RunCMake_TEST_BINARY_DIR}" "target-no-depends.c")
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" "${RunCMake_TEST_BINARY_DIR}/target-no-depends.c")
   if (EXISTS "${RunCMake_TEST_BINARY_DIR}/target-no-depends.c")
     message(FATAL_ERROR
       "Dependencies for an assumed source were magically hooked up for 'target-no-depends.c'.")
@@ -185,16 +188,6 @@ function(sleep delay)
     message(FATAL_ERROR "failed to sleep for ${delay} second.")
   endif()
 endfunction(sleep)
-
-function(touch path)
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} -E touch ${path}
-    RESULT_VARIABLE result
-    )
-  if(NOT result EQUAL 0)
-    message(FATAL_ERROR "failed to touch main ${path} file.")
-  endif()
-endfunction(touch)
 
 macro(ninja_escape_path path out)
   string(REPLACE "\$ " "\$\$" "${out}" "${path}")
@@ -264,8 +257,8 @@ build build.ninja: RERUN ${escaped_build_ninja_dep} || ${escaped_ninja_output_pa
   # Test regeneration rules run in order.
   set(main_cmakelists "${RunCMake_SOURCE_DIR}/CMakeLists.txt")
   sleep(${fs_delay})
-  touch("${main_cmakelists}")
-  touch("${build_ninja_dep}")
+  file(TOUCH "${main_cmakelists}")
+  file(TOUCH "${build_ninja_dep}")
   run_ninja("${top_build_dir}")
   file(TIMESTAMP "${main_cmakelists}" mtime_main_cmakelists UTC)
   file(TIMESTAMP "${sub_build_ninja}" mtime_sub_build_ninja UTC)
@@ -329,14 +322,14 @@ run_ChangeBuildType()
 function(run_Qt5AutoMocDeps)
   if(CMake_TEST_Qt5 AND CMAKE_TEST_Qt5Core_Version VERSION_GREATER_EQUAL 5.15.0)
     set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Qt5AutoMocDeps-build)
-    set(RunCMake_TEST_OPTIONS "-DQt5Core_DIR=${Qt5Core_DIR}")
+    set(RunCMake_TEST_OPTIONS "-DQt5Core_DIR=${Qt5Core_DIR}" "-DQt5Widgets_DIR=${Qt5Widgets_DIR}")
     run_cmake(Qt5AutoMocDeps)
     unset(RunCMake_TEST_OPTIONS)
     # Build the project.
     run_ninja("${RunCMake_TEST_BINARY_DIR}")
     # Touch just the library source file, which shouldn't cause a rerun of AUTOMOC
     # for app_with_qt target.
-    touch("${RunCMake_SOURCE_DIR}/simple_lib.cpp")
+    file(TOUCH "${RunCMake_SOURCE_DIR}/simple_lib.cpp")
     # Build and assert that AUTOMOC was not run for app_with_qt.
     run_ninja("${RunCMake_TEST_BINARY_DIR}")
     if(ninja_stdout MATCHES "Automatic MOC for target app_with_qt")
@@ -352,6 +345,11 @@ function(run_Qt5AutoMocDeps)
       message(FATAL_ERROR
         "AUTOMOC should not have executed for 'sub_exe_2' target:\nstdout:\n${ninja_stdout}")
     endif()
+    # Touch a header file to make sure an automoc dependency cycle is not introduced.
+    file(TOUCH "${RunCMake_SOURCE_DIR}/MyWindow.h")
+    run_ninja("${RunCMake_TEST_BINARY_DIR}")
+    # Need to run a second time to hit the dependency cycle.
+    run_ninja("${RunCMake_TEST_BINARY_DIR}")
   endif()
 endfunction()
 run_Qt5AutoMocDeps()

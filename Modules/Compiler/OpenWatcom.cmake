@@ -7,6 +7,7 @@ include_guard()
 set(CMAKE_LIBRARY_PATH_FLAG "libpath ")
 set(CMAKE_LINK_LIBRARY_FLAG "library ")
 set(CMAKE_LINK_LIBRARY_FILE_FLAG "library ")
+set(CMAKE_LINK_OBJECT_FILE_FLAG "file ")
 
 if(CMAKE_VERBOSE_MAKEFILE)
   set(CMAKE_WCL_QUIET)
@@ -43,13 +44,13 @@ endforeach()
 
 # C create import library
 set(CMAKE_C_CREATE_IMPORT_LIBRARY
-  "wlib -c -q -n -b <TARGET_IMPLIB> +<TARGET_QUOTED>")
+  "<CMAKE_AR> -c -q -n -b <TARGET_IMPLIB> +<TARGET_QUOTED>")
 # C++ create import library
 set(CMAKE_CXX_CREATE_IMPORT_LIBRARY ${CMAKE_C_CREATE_IMPORT_LIBRARY})
 
 # C link a object files into an executable file
 set(CMAKE_C_LINK_EXECUTABLE
-  "wlink ${CMAKE_WLINK_QUIET} name <TARGET> <LINK_FLAGS> file {<OBJECTS>} <LINK_LIBRARIES>")
+  "<CMAKE_LINKER> ${CMAKE_WLINK_QUIET} name <TARGET> <LINK_FLAGS> file {<OBJECTS>} <LINK_LIBRARIES>")
 # C++ link a object files into an executable file
 set(CMAKE_CXX_LINK_EXECUTABLE ${CMAKE_C_LINK_EXECUTABLE})
 
@@ -69,19 +70,19 @@ set(CMAKE_CXX_CREATE_PREPROCESSED_SOURCE
 
 # C create a shared library
 set(CMAKE_C_CREATE_SHARED_LIBRARY
-  "wlink ${CMAKE_WLINK_QUIET} name <TARGET> <LINK_FLAGS> option implib=<TARGET_IMPLIB> file {<OBJECTS>} <LINK_LIBRARIES>")
+  "<CMAKE_LINKER> ${CMAKE_WLINK_QUIET} name <TARGET> <LINK_FLAGS> option implib=<TARGET_IMPLIB> file {<OBJECTS>} <LINK_LIBRARIES>")
 # C++ create a shared library
 set(CMAKE_CXX_CREATE_SHARED_LIBRARY ${CMAKE_C_CREATE_SHARED_LIBRARY})
 
 # C create a shared module
 set(CMAKE_C_CREATE_SHARED_MODULE
-  "wlink ${CMAKE_WLINK_QUIET} name <TARGET> <LINK_FLAGS> file {<OBJECTS>} <LINK_LIBRARIES>")
+  "<CMAKE_LINKER> ${CMAKE_WLINK_QUIET} name <TARGET> <LINK_FLAGS> file {<OBJECTS>} <LINK_LIBRARIES>")
 # C++ create a shared module
 set(CMAKE_CXX_CREATE_SHARED_MODULE ${CMAKE_C_CREATE_SHARED_MODULE})
 
 # C create a static library
 set(CMAKE_C_CREATE_STATIC_LIBRARY
-  "wlib ${CMAKE_LIB_QUIET} -c -n -b <TARGET_QUOTED> <LINK_FLAGS> <OBJECTS> ")
+  "<CMAKE_AR> ${CMAKE_LIB_QUIET} -c -n -b <TARGET_QUOTED> <LINK_FLAGS> <OBJECTS> ")
 # C++ create a static library
 set(CMAKE_CXX_CREATE_STATIC_LIBRARY ${CMAKE_C_CREATE_STATIC_LIBRARY})
 

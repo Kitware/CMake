@@ -1,0 +1,18 @@
+CMP0124
+-------
+
+.. versionadded:: 3.21
+
+When this policy is set to ``NEW``, the scope of loop variables defined by the
+:command:`foreach` command is restricted to the loop only.  They will be unset
+at the end of the loop.
+
+The ``OLD`` behavior for this policy still clears the loop variables at the end
+of the loop, but does not unset them.  This leaves them as defined, but empty.
+
+This policy was introduced in CMake version 3.21. Use the
+:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+Unlike many policies, CMake version |release| does *not* warn when the policy
+is not set and simply uses ``OLD`` behavior.
+
+.. include:: DEPRECATED.txt

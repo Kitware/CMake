@@ -2,6 +2,9 @@
 # test it.
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 
+set(CMAKE_FIND_LIBRARY_PREFIXES "disabled-for-test-")
+set(CMAKE_FIND_LIBRARY_SUFFIXES "-disabled-for-test")
+
 #-----------------------------------------------------------------------------
 # Linux
 
@@ -459,7 +462,28 @@ set(msys_g77_dirs "C:/some-mingw/lib/gcc/mingw32/3.4.5;C:/some-mingw/lib/gcc;/so
 list(APPEND platforms msys_g77)
 
 #-----------------------------------------------------------------------------
-# MSYS2
+# MSYS2-runtime
+
+# gcc dummy.c -v
+set(msys2rt_gcc_text " /usr/lib/gcc/i686-pc-msys/6.4.0/collect2.exe -Bdynamic --dll-search-prefix=msys- /usr/lib/gcc/i686-pc-msys/6.4.0/../../../crt0.o -L/usr/lib/gcc/i686-pc-msys/6.4.0 -L/usr/lib/gcc/i686-pc-msys/6.4.0 -L/usr/lib/gcc/i686-pc-msys/6.4.0/../../.. /home/user/AppData/Local/Temp/cczg1Arh.o -lgcc -lmsys-2.0 -luser32 -lkernel32 -ladvapi32 -lshell32 -lgcc")
+set(msys2rt_gcc_libs "msys-2.0;user32;kernel32;advapi32;shell32")
+set(msys2rt_gcc_dirs "/usr/lib/gcc/i686-pc-msys/6.4.0;/usr/lib")
+list(APPEND platforms msysrt_gcc)
+
+# g++ dummy.cxx -v
+set(msys2rt_g++_text " /usr/lib/gcc/i686-pc-msys/6.4.0/collect2.exe -Bdynamic --dll-search-prefix=msys- /usr/lib/gcc/i686-pc-msys/6.4.0/../../../crt0.o -L/usr/lib/gcc/i686-pc-msys/6.4.0 -L/usr/lib/gcc/i686-pc-msys/6.4.0 -L/usr/lib/gcc/i686-pc-msys/6.4.0/../../.. /home/user/AppData/Local/Temp/ccsvcDO6.o -lstdc++ -lgcc -lmsys-2.0 -luser32 -lkernel32 -ladvapi32 -lshell32 -lgcc")
+set(msys2rt_g++_libs "stdc++;msys-2.0;user32;kernel32;advapi32;shell32")
+set(msys2rt_g++_dirs "/usr/lib/gcc/i686-pc-msys/6.4.0;/usr/lib")
+list(APPEND platforms msysrt_g++)
+
+# g77 dummy.f -v
+set(msys2rt_g77_text "Configured with: ... LD=/opt/gcc-tools/bin/ld.exe /usr/lib/gcc/i686-pc-msys/6.4.0/collect2.exe -Bdynamic --dll-search-prefix=msys- -u ___register_frame_info -u ___deregister_frame_info /usr/lib/gcc/i686-pc-msys/6.4.0/../../../crt0.o /usr/lib/gcc/i686-pc-msys/6.4.0/crtbegin.o -L/usr/lib/gcc/i686-pc-msys/6.4.0 -L/usr/lib/gcc/i686-pc-msys/6.4.0 -L/usr/lib/gcc/i686-pc-msys/6.4.0/../../.. /home/user/AppData/Local/Temp/ccqRWKWg.o -lgfortranbegin -lgfortran -lgcc_s -lgcc_s -lgcc -lmsys-2.0 -luser32 -lkernel32 -ladvapi32 -lshell32 -lgcc_s -lgcc_s -lgcc /usr/lib/gcc/i686-pc-msys/6.4.0/crtend.o")
+set(msys2rt_g77_libs "stdc++;msys-2.0;user32;kernel32;advapi32;shell32")
+set(msys2rt_g77_dirs "/usr/lib/gcc/i686-pc-msys/6.4.0;/usr/lib")
+list(APPEND platforms msysrt_g77)
+
+#-----------------------------------------------------------------------------
+# MSYS2-mingw
 
 # gcc dummy.c -v
 set(msys2_gcc_text " C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/collect2.exe -plugin C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/liblto_plugin-0.dll -plugin-opt=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/lto-wrapper.exe -plugin-opt=-fresolution=C:/msys64/tmp/ccikz9Wf.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmoldname -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -m i386pep -Bdynamic C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/../../../../x86_64-w64-mingw32/lib/../lib/crt2.o C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/crtbegin.o -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0 -LC:/msys64/mingw64/bin/../lib/gcc -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/../../../../x86_64-w64-mingw32/lib/../lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/../../../../lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/../../../../x86_64-w64-mingw32/lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/../../.. C:/msys64/tmp/ccK0dTUv.o -lmingw32 -lgcc -lgcc_eh -lmoldname -lmingwex -lmsvcrt -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc -lgcc_eh -lmoldname -lmingwex -lmsvcrt C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/../../../../x86_64-w64-mingw32/lib/../lib/default-manifest.o C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/7.2.0/crtend.o")

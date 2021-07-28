@@ -16,3 +16,7 @@ endif()
 if (CMake_TEST_CUDA)
   run_cmake(CheckCUDALinkerFlag)
 endif()
+
+if (CMake_TEST_HIP)
+  run_cmake(CheckHIPLinkerFlag)
+endif()

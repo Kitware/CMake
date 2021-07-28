@@ -6,17 +6,17 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/sourcefile.txt
         WORLD_READ
 )
 
-if (UNIX)
+if (CMAKE_HOST_UNIX AND NOT MSYS)
   find_program(STAT_EXECUTABLE NAMES stat)
   if(NOT STAT_EXECUTABLE)
     return()
   endif()
 
-  if (CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+  if (CMAKE_HOST_SYSTEM_NAME MATCHES "FreeBSD")
     execute_process(COMMAND "${STAT_EXECUTABLE}" -f %Lp "${CMAKE_CURRENT_BINARY_DIR}/sourcefile-source-permissions.txt"
       OUTPUT_VARIABLE output
     )
-  elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+  elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     execute_process(COMMAND "${STAT_EXECUTABLE}" -f %A "${CMAKE_CURRENT_BINARY_DIR}/sourcefile-source-permissions.txt"
       OUTPUT_VARIABLE output
     )

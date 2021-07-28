@@ -1,9 +1,9 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-macro(__determine_compiler_id_test testflags_in userflags)
-  separate_arguments(testflags UNIX_COMMAND "${testflags_in}")
-  CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${testflags}" "${userflags}" "${src}")
+macro(__determine_compiler_id_test testflags_var userflags_var)
+  separate_arguments(testflags UNIX_COMMAND "${${testflags_var}}")
+  CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${testflags}" "${${userflags_var}}" "${src}")
   CMAKE_DETERMINE_COMPILER_ID_MATCH_VENDOR("${lang}" "${COMPILER_${lang}_PRODUCED_OUTPUT}")
 
   if(NOT CMAKE_${lang}_COMPILER_ID)
@@ -44,7 +44,8 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
 
     foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
-      __determine_compiler_id_test("${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}" "${userflags}")
+      set(testflags "${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}")
+      __determine_compiler_id_test(testflags userflags)
       if(CMAKE_${lang}_COMPILER_ID)
         break()
       endif()
@@ -55,7 +56,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     # of helper flags.  Stop when the compiler is identified.
     foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
       foreach(testflags ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST} "" ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
-        __determine_compiler_id_test("${testflags}" "${userflags}")
+        __determine_compiler_id_test(testflags userflags)
         if(CMAKE_${lang}_COMPILER_ID)
           break()
         endif()
@@ -149,6 +150,40 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   endif()
 
+  # When invoked with HIPCC we need to extract the path to the underlying
+  # clang compiler when possible. This fixes the following issues:
+  #   env variables can change how hipcc behaves
+  #   allows us to properly find the binutils bundled with hip
+  if(CMAKE_${lang}_COMPILER_ID STREQUAL "ROCMClang"
+     AND CMAKE_${lang}_COMPILER MATCHES ".*hipcc")
+    get_filename_component(_hipcc_dir "${CMAKE_${lang}_COMPILER}" DIRECTORY)
+    execute_process(
+      COMMAND "${_hipcc_dir}/hipconfig"
+      --hipclangpath
+      OUTPUT_VARIABLE output
+      RESULT_VARIABLE result
+    )
+    if(result EQUAL 0 AND EXISTS "${output}")
+      if(lang STREQUAL "C")
+        set_property(CACHE CMAKE_${lang}_COMPILER PROPERTY VALUE "${output}/clang")
+        set(CMAKE_${lang}_COMPILER "${output}/clang" PARENT_SCOPE)
+      else()
+        set_property(CACHE CMAKE_${lang}_COMPILER PROPERTY VALUE "${output}/clang++")
+        set(CMAKE_${lang}_COMPILER "${output}/clang++" PARENT_SCOPE)
+      endif()
+    endif()
+    if(lang STREQUAL "HIP")
+      execute_process(
+        COMMAND "${_hipcc_dir}/hipconfig"
+        --rocmpath
+        OUTPUT_VARIABLE output
+        RESULT_VARIABLE result
+      )
+      if(result EQUAL 0)
+        set(_CMAKE_HIP_COMPILER_ROCM_ROOT "${output}" PARENT_SCOPE)
+      endif()
+    endif()
+  endif()
 
   if (COMPILER_QNXNTO AND CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
     execute_process(
@@ -162,6 +197,25 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       set(CMAKE_${lang}_COMPILER_ID QCC)
       # http://community.qnx.com/sf/discussion/do/listPosts/projects.community/discussion.qnx_momentics_community_support.topc3555?_pagenum=2
       # The qcc driver does not itself have a version.
+    endif()
+  endif()
+
+  # The Fujitsu compiler does not always convey version information through
+  # preprocessor symbols so we extract through command line info
+  if (CMAKE_${lang}_COMPILER_ID STREQUAL "Fujitsu")
+    if(NOT CMAKE_${lang}_COMPILER_VERSION)
+      execute_process(
+        COMMAND "${CMAKE_${lang}_COMPILER}" -V
+        OUTPUT_VARIABLE output
+        ERROR_VARIABLE output
+        RESULT_VARIABLE result
+        TIMEOUT 10
+      )
+      if (result EQUAL 0)
+        if (output MATCHES [[Fujitsu [^ ]* Compiler ([0-9]+\.[0-9]+\.[0-9]+)]])
+          set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_MATCH_1}")
+        endif()
+      endif()
     endif()
   endif()
 
@@ -203,6 +257,8 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     else()
       set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "GNU")
     endif()
+  elseif("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xFujitsuClang")
+    set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "GNU")
   else()
     set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "")
   endif()
@@ -298,7 +354,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       set(id_cl "$(CLToolExe)")
     elseif(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v[0-9]+_clang_.*")
       set(id_cl clang.exe)
-    # Executable names have choosen according documentation
+    # Executable names have been chosen according documentation
     # URL: (https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-dpcpp-compiler/top.html#top_GUID-A9B4C91D-97AC-450D-9742-9D895BC8AEE1)
     elseif(CMAKE_VS_PLATFORM_TOOLSET MATCHES "Intel")
       if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "DPC\\+\\+ Compiler")
@@ -452,9 +508,19 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       set(id_ItemDefinitionGroup_entry "<CudaCompile>${cuda_target}<AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions><CodeGeneration>${cuda_codegen}</CodeGeneration></CudaCompile>")
       set(id_PostBuildEvent_Command [[echo CMAKE_CUDA_COMPILER=$(CudaToolkitBinDir)\nvcc.exe]])
       if(CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR)
-        set(id_CudaToolkitCustomDir "<CudaToolkitCustomDir>${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}nvcc</CudaToolkitCustomDir>")
-        string(CONCAT id_Import_props "<Import Project=\"${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}\\CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\${cuda_tools}.props\" />")
-        string(CONCAT id_Import_targets "<Import Project=\"${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}\\CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\${cuda_tools}.targets\" />")
+        # check for legacy cuda custom toolkit folder structure
+        if(EXISTS ${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}nvcc)
+            set(id_CudaToolkitCustomDir "<CudaToolkitCustomDir>${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}nvcc</CudaToolkitCustomDir>")
+        else()
+            set(id_CudaToolkitCustomDir "<CudaToolkitCustomDir>${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}</CudaToolkitCustomDir>")
+        endif()
+        if(EXISTS ${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}CUDAVisualStudioIntegration)
+            string(CONCAT id_Import_props "<Import Project=\"${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\${cuda_tools}.props\" />")
+            string(CONCAT id_Import_targets "<Import Project=\"${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\${cuda_tools}.targets\" />")
+        else()
+            string(CONCAT id_Import_props "<Import Project=\"${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}\\extras\\visual_studio_integration\\MSBuildExtensions\\${cuda_tools}.props\" />")
+            string(CONCAT id_Import_targets "<Import Project=\"${CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR}\\extras\\visual_studio_integration\\MSBuildExtensions\\${cuda_tools}.targets\" />")
+        endif()
       else()
         string(CONCAT id_Import_props [[<Import Project="$(VCTargetsPath)\BuildCustomizations\]] "${cuda_tools}" [[.props" />]])
         string(CONCAT id_Import_targets [[<Import Project="$(VCTargetsPath)\BuildCustomizations\]] "${cuda_tools}" [[.targets" />]])
@@ -820,8 +886,10 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
         string(REGEX REPLACE "\\.0+([0-9])" ".\\1" COMPILER_VERSION "${COMPILER_VERSION}")
       endif()
       if("${info}" MATCHES "INFO:compiler_version_internal\\[([^]\"]*)\\]")
-        string(REGEX REPLACE "^0+([0-9])" "\\1" COMPILER_VERSION_INTERNAL "${CMAKE_MATCH_1}")
-        string(REGEX REPLACE "\\.0+([0-9])" ".\\1" COMPILER_VERSION_INTERNAL "${COMPILER_VERSION_INTERNAL}")
+        set(COMPILER_VERSION_INTERNAL "${CMAKE_MATCH_1}")
+        string(REGEX REPLACE "^0+([0-9]+)" "\\1" COMPILER_VERSION_INTERNAL "${COMPILER_VERSION_INTERNAL}")
+        string(REGEX REPLACE "\\.0+([0-9]+)" ".\\1" COMPILER_VERSION_INTERNAL "${COMPILER_VERSION_INTERNAL}")
+        string(STRIP "${COMPILER_VERSION_INTERNAL}" COMPILER_VERSION_INTERNAL)
       endif()
       foreach(comp MAJOR MINOR PATCH TWEAK)
         foreach(digit 1 2 3 4 5 6 7 8 9)
@@ -944,9 +1012,6 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     endif()
 
   endif()
-  if(NOT DEFINED CMAKE_EXECUTABLE_FORMAT)
-    set(CMAKE_EXECUTABLE_FORMAT)
-  endif()
   # Return the information extracted.
   set(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
@@ -958,7 +1023,6 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
   set(CMAKE_${lang}_COMPILER_WRAPPER "${COMPILER_WRAPPER}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_ID "${CMAKE_${lang}_SIMULATE_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_${lang}_SIMULATE_VERSION}" PARENT_SCOPE)
-  set(CMAKE_EXECUTABLE_FORMAT "${CMAKE_EXECUTABLE_FORMAT}" PARENT_SCOPE)
   set(COMPILER_QNXNTO "${COMPILER_QNXNTO}" PARENT_SCOPE)
   set(CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT "${CMAKE_${lang}_STANDARD_COMPUTED_DEFAULT}" PARENT_SCOPE)
 endfunction()

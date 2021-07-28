@@ -42,6 +42,7 @@ class cmDirectoryId;
 class cmExportBuildFileGenerator;
 class cmExternalMakefileProjectGenerator;
 class cmGeneratorTarget;
+class cmInstallRuntimeDependencySet;
 class cmLinkLineComputer;
 class cmLocalGenerator;
 class cmMakefile;
@@ -249,9 +250,13 @@ public:
 
   virtual void PrintBuildCommandAdvice(std::ostream& os, int jobs) const;
 
-  /** Generate a "cmake --build" call for a given target and config.  */
+  /**
+   * Generate a "cmake --build" call for a given target, config and parallel
+   * level.
+   */
   std::string GenerateCMakeBuildCommand(const std::string& target,
                                         const std::string& config,
+                                        const std::string& parallel,
                                         const std::string& native,
                                         bool ignoreErrors);
 
@@ -524,6 +529,11 @@ public:
 
   std::string NewDeferId();
 
+  cmInstallRuntimeDependencySet* CreateAnonymousRuntimeDependencySet();
+
+  cmInstallRuntimeDependencySet* GetNamedRuntimeDependencySet(
+    const std::string& name);
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -742,6 +752,11 @@ private:
   std::map<std::string, std::string> RealPaths;
 
   std::unordered_set<std::string> GeneratedFiles;
+
+  std::vector<std::unique_ptr<cmInstallRuntimeDependencySet>>
+    RuntimeDependencySets;
+  std::map<std::string, cmInstallRuntimeDependencySet*>
+    RuntimeDependencySetsByName;
 
 #if !defined(CMAKE_BOOTSTRAP)
   // Pool of file locks

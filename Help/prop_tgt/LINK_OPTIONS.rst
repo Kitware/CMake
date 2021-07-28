@@ -28,3 +28,9 @@ for more on defining buildsystem properties.
 .. note::
 
   This property must be used in preference to :prop_tgt:`LINK_FLAGS` property.
+
+.. include:: ../command/DEVICE_LINK_OPTIONS.txt
+
+.. include:: ../command/OPTIONS_SHELL.txt
+
+.. include:: ../command/LINK_OPTIONS_LINKER.txt

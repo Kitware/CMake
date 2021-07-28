@@ -309,6 +309,13 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->LibLinkSuffix =
       this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
   }
+  if (cmProp flag = this->Makefile->GetDefinition(
+        "CMAKE_" + this->LinkLanguage + "_LINK_OBJECT_FILE_FLAG")) {
+    this->ObjLinkFileFlag = *flag;
+  } else {
+    this->ObjLinkFileFlag =
+      this->Makefile->GetSafeDefinition("CMAKE_LINK_OBJECT_FILE_FLAG");
+  }
 
   // Get options needed to specify RPATHs.
   this->RuntimeUseChrpath = false;
@@ -514,7 +521,8 @@ bool cmComputeLinkInformation::Compute()
     if (linkEntry.IsSharedDep) {
       this->AddSharedDepItem(linkEntry.Item, linkEntry.Target);
     } else {
-      this->AddItem(linkEntry.Item, linkEntry.Target);
+      this->AddItem(linkEntry.Item, linkEntry.Target,
+                    linkEntry.IsObject ? ItemIsObject::Yes : ItemIsObject::No);
     }
   }
 
@@ -577,10 +585,10 @@ void cmComputeLinkInformation::AddImplicitLinkInfo()
     this->Target->GetLinkClosure(this->Config);
   for (std::string const& li : lc->Languages) {
 
-    if (li == "CUDA") {
+    if (li == "CUDA" || li == "HIP") {
       // These need to go before the other implicit link information
       // as they could require symbols from those other library
-      // Currently restricted to CUDA as it is the only language
+      // Currently restricted as CUDA and HIP are the only languages
       // we have documented runtime behavior controls for
       this->AddRuntimeLinkLibrary(li);
     }
@@ -634,7 +642,8 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
 }
 
 void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
-                                       cmGeneratorTarget const* tgt)
+                                       cmGeneratorTarget const* tgt,
+                                       ItemIsObject isObject)
 {
   // Compute the proper name to use to link this library.
   const std::string& config = this->Config;
@@ -659,14 +668,15 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
 
       std::string exe = tgt->GetFullPath(config, artifact, true);
       linkItem += exe;
-      this->Items.emplace_back(BT<std::string>(linkItem, item.Backtrace), true,
-                               tgt);
+      this->Items.emplace_back(BT<std::string>(linkItem, item.Backtrace),
+                               ItemIsPath::Yes, ItemIsObject::No, tgt);
       this->Depends.push_back(std::move(exe));
     } else if (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Add the interface library as an item so it can be considered as part
       // of COMPATIBLE_INTERFACE_ enforcement.  The generators will ignore
       // this for the actual link line.
-      this->Items.emplace_back(std::string(), false, tgt);
+      this->Items.emplace_back(std::string(), ItemIsPath::No, ItemIsObject::No,
+                               tgt);
 
       // Also add the item the interface specifies to be used in its place.
       std::string const& libName = tgt->GetImportedLibName(config);
@@ -701,6 +711,10 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
 
       this->AddTargetItem(lib, tgt);
       this->AddLibraryRuntimeInfo(lib.Value, tgt);
+      if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
+          this->Target->IsDLLPlatform()) {
+        this->AddRuntimeDLL(tgt);
+      }
     }
   } else {
     // This is not a CMake target.  Use the name given.
@@ -715,7 +729,7 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
       } else {
         // Use the full path given to the library file.
         this->Depends.push_back(item.Value);
-        this->AddFullItem(item);
+        this->AddFullItem(item, isObject);
         this->AddLibraryRuntimeInfo(item.Value);
       }
     } else {
@@ -728,6 +742,13 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
 void cmComputeLinkInformation::AddSharedDepItem(BT<std::string> const& item,
                                                 const cmGeneratorTarget* tgt)
 {
+  // Record dependencies on DLLs.
+  if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
+      this->Target->IsDLLPlatform() &&
+      this->SharedDependencyMode != SharedDepModeLink) {
+    this->AddRuntimeDLL(tgt);
+  }
+
   // If dropping shared library dependencies, ignore them.
   if (this->SharedDependencyMode == SharedDepModeNone) {
     return;
@@ -796,6 +817,14 @@ void cmComputeLinkInformation::AddSharedDepItem(BT<std::string> const& item,
     } else {
       order->AddRuntimeLibrary(lib);
     }
+  }
+}
+
+void cmComputeLinkInformation::AddRuntimeDLL(cmGeneratorTarget const* tgt)
+{
+  if (std::find(this->RuntimeDLLs.begin(), this->RuntimeDLLs.end(), tgt) ==
+      this->RuntimeDLLs.end()) {
+    this->RuntimeDLLs.emplace_back(tgt);
   }
 }
 
@@ -1019,10 +1048,10 @@ void cmComputeLinkInformation::SetCurrentLinkType(LinkType lt)
     if (this->LinkTypeEnabled) {
       switch (this->CurrentLinkType) {
         case LinkStatic:
-          this->Items.emplace_back(this->StaticLinkTypeFlag, false);
+          this->Items.emplace_back(this->StaticLinkTypeFlag, ItemIsPath::No);
           break;
         case LinkShared:
-          this->Items.emplace_back(this->SharedLinkTypeFlag, false);
+          this->Items.emplace_back(this->SharedLinkTypeFlag, ItemIsPath::No);
           break;
         default:
           break;
@@ -1065,10 +1094,11 @@ void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
   }
 
   // Now add the full path to the library.
-  this->Items.emplace_back(item, true, target);
+  this->Items.emplace_back(item, ItemIsPath::Yes, ItemIsObject::No, target);
 }
 
-void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item)
+void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item,
+                                           ItemIsObject isObject)
 {
   // Check for the implicit link directory special case.
   if (this->CheckImplicitDirItem(item.Value)) {
@@ -1119,7 +1149,7 @@ void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item)
   }
 
   // Now add the full path to the library.
-  this->Items.emplace_back(item, true);
+  this->Items.emplace_back(item, ItemIsPath::Yes, isObject);
 }
 
 bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
@@ -1207,7 +1237,7 @@ void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
     this->SetCurrentLinkType(this->StartLinkType);
 
     // Use the item verbatim.
-    this->Items.emplace_back(item, false);
+    this->Items.emplace_back(item, ItemIsPath::No);
     return;
   }
 
@@ -1277,7 +1307,8 @@ void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
 
   // Create an option to ask the linker to search for the library.
   std::string out = cmStrCat(this->LibLinkFlag, lib, this->LibLinkSuffix);
-  this->Items.emplace_back(BT<std::string>(out, item.Backtrace), false);
+  this->Items.emplace_back(BT<std::string>(out, item.Backtrace),
+                           ItemIsPath::No);
 
   // Here we could try to find the library the linker will find and
   // add a runtime information entry for it.  It would probably not be
@@ -1309,13 +1340,13 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
   if (this->GlobalGenerator->IsXcode()) {
     // Add framework path - it will be handled by Xcode after it's added to
     // "Link Binary With Libraries" build phase
-    this->Items.emplace_back(item, true);
+    this->Items.emplace_back(item, ItemIsPath::Yes);
   } else {
     // Add the item using the -framework option.
-    this->Items.emplace_back(std::string("-framework"), false);
+    this->Items.emplace_back(std::string("-framework"), ItemIsPath::No);
     cmOutputConverter converter(this->Makefile->GetStateSnapshot());
     fw = converter.EscapeForShell(fw);
-    this->Items.emplace_back(fw, false);
+    this->Items.emplace_back(fw, ItemIsPath::No);
   }
 }
 

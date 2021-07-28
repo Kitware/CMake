@@ -175,6 +175,7 @@ public:
     std::string ExceptionStatus;
     bool CompressOutput;
     std::string CompletionStatus;
+    std::string CustomCompletionStatus;
     std::string Output;
     std::string DartString;
     int TestCount;
@@ -209,6 +210,9 @@ public:
 
   using ListOfTests = std::vector<cmCTestTestProperties>;
 
+  // Support for writing test results in JUnit XML format.
+  void SetJUnitXMLFileName(const std::string& id);
+
 protected:
   using SetOfTests =
     std::set<cmCTestTestHandler::cmCTestTestResult, cmCTestTestResultLess>;
@@ -234,6 +238,8 @@ protected:
                              cmCTestTestResult const& result);
   // Write attached test files into the xml
   void AttachFiles(cmXMLWriter& xml, cmCTestTestResult& result);
+  void AttachFile(cmXMLWriter& xml, std::string const& file,
+                  std::string const& name);
 
   //! Clean test output to specified length
   void CleanTestOutput(std::string& output, size_t length);
@@ -273,6 +279,11 @@ private:
    * Generate the Dart compatible output
    */
   virtual void GenerateDartOutput(cmXMLWriter& xml);
+
+  /**
+   * Write test results in JUnit XML format
+   */
+  bool WriteJUnitXML();
 
   void PrintLabelOrSubprojectSummary(bool isSubProject);
 
@@ -320,20 +331,16 @@ private:
 
   std::vector<int> TestsToRun;
 
-  bool UseIncludeLabelRegExpFlag;
-  bool UseExcludeLabelRegExpFlag;
   bool UseIncludeRegExpFlag;
   bool UseExcludeRegExpFlag;
   bool UseExcludeRegExpFirst;
-  std::string IncludeLabelRegExp;
-  std::string ExcludeLabelRegExp;
   std::string IncludeRegExp;
   std::string ExcludeRegExp;
   std::string ExcludeFixtureRegExp;
   std::string ExcludeFixtureSetupRegExp;
   std::string ExcludeFixtureCleanupRegExp;
-  cmsys::RegularExpression IncludeLabelRegularExpression;
-  cmsys::RegularExpression ExcludeLabelRegularExpression;
+  std::vector<cmsys::RegularExpression> IncludeLabelRegularExpressions;
+  std::vector<cmsys::RegularExpression> ExcludeLabelRegularExpressions;
   cmsys::RegularExpression IncludeTestsRegularExpression;
   cmsys::RegularExpression ExcludeTestsRegularExpression;
 
@@ -352,10 +359,13 @@ private:
   ListOfTests TestList;
   size_t TotalNumberOfTests;
   cmsys::RegularExpression DartStuff;
+  cmsys::RegularExpression CustomCompletionStatusRegex;
 
   std::ostream* LogFile;
 
   cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
   int RepeatCount = 1;
   bool RerunFailed;
+
+  std::string JUnitXMLFileName;
 };

@@ -18,6 +18,10 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+#ifdef CMake_USE_ELF_PARSER
+#  include "cmELF.h"
+#endif
+
 static std::string ReplaceOrigin(const std::string& rpath,
                                  const std::string& origin)
 {
@@ -86,6 +90,24 @@ bool cmBinUtilsLinuxELFLinker::ScanDependencies(
   std::string const& file, cmStateEnums::TargetType /* unused */)
 {
   std::vector<std::string> parentRpaths;
+
+#ifdef CMake_USE_ELF_PARSER
+  cmELF elf(file.c_str());
+  if (!elf) {
+    return false;
+  }
+  if (elf.GetMachine() != 0) {
+    if (this->Machine != 0) {
+      if (elf.GetMachine() != this->Machine) {
+        this->SetError("All files must have the same architecture.");
+        return false;
+      }
+    } else {
+      this->Machine = elf.GetMachine();
+    }
+  }
+#endif
+
   return this->ScanDependencies(file, parentRpaths);
 }
 
@@ -150,13 +172,29 @@ bool cmBinUtilsLinuxELFLinker::ScanDependencies(
   return true;
 }
 
+namespace {
+bool FileHasArchitecture(const char* filename, std::uint16_t machine)
+{
+#ifdef CMake_USE_ELF_PARSER
+  cmELF elf(filename);
+  if (!elf) {
+    return false;
+  }
+  return machine == 0 || machine == elf.GetMachine();
+#else
+  return true;
+#endif
+}
+}
+
 bool cmBinUtilsLinuxELFLinker::ResolveDependency(
   std::string const& name, std::vector<std::string> const& searchPaths,
   std::string& path, bool& resolved)
 {
   for (auto const& searchPath : searchPaths) {
     path = cmStrCat(searchPath, '/', name);
-    if (cmSystemTools::PathExists(path)) {
+    if (cmSystemTools::PathExists(path) &&
+        FileHasArchitecture(path.c_str(), this->Machine)) {
       resolved = true;
       return true;
     }
@@ -164,7 +202,8 @@ bool cmBinUtilsLinuxELFLinker::ResolveDependency(
 
   for (auto const& searchPath : this->Archive->GetSearchDirectories()) {
     path = cmStrCat(searchPath, '/', name);
-    if (cmSystemTools::PathExists(path)) {
+    if (cmSystemTools::PathExists(path) &&
+        FileHasArchitecture(path.c_str(), this->Machine)) {
       std::ostringstream warning;
       warning << "Dependency " << name << " found in search directory:\n  "
               << searchPath

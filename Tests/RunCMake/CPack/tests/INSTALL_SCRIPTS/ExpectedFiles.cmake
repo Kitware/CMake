@@ -1,5 +1,10 @@
+if(RunCMake_SUBTEST_SUFFIX MATCHES ".*single_debug_info")
+  set(EXPECTED_FILE_1 "install_scripts-0.1.1-1.*.rpm")
+else()
+  set(EXPECTED_FILE_1_COMPONENT "foo")
+endif()
+
 set(EXPECTED_FILES_COUNT "2")
-set(EXPECTED_FILE_1_COMPONENT "foo")
 set(EXPECTED_FILE_CONTENT_1_LIST "/foo;/foo/CMakeLists.txt")
 set(EXPECTED_FILE_2_COMPONENT "bar")
 set(EXPECTED_FILE_CONTENT_2_LIST "/bar;/bar/CMakeLists.txt")

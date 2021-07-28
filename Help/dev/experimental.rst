@@ -39,7 +39,7 @@ to the file specified by the ``<DEP_FILE>`` placeholder, and write module
 dependencies to the file specified by the ``<DYNDEP_FILE>`` placeholder.
 
 The module dependencies should be written in the format described
-by the `P1689r3`_ paper.
+by the `P1689r4`_ paper.
 
 Compiler writers may try out their scanning functionality using
 the `cxx-modules-sandbox`_ test project, modified to set variables
@@ -66,5 +66,5 @@ the GCC documentation, but the relevant section for the purposes of CMake is:
     -- GCC module mapper documentation
 
 .. _`D1483r1`: https://mathstuf.fedorapeople.org/fortran-modules/fortran-modules.html
-.. _`P1689r3`: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1689r3.html
+.. _`P1689r4`: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1689r4.html
 .. _`cxx-modules-sandbox`: https://github.com/mathstuf/cxx-modules-sandbox

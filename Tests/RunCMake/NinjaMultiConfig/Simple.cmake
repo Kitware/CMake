@@ -10,6 +10,6 @@ add_subdirectory(SimpleSubdir)
 add_library(simplestatic STATIC simplelib.c)
 
 include(${CMAKE_CURRENT_LIST_DIR}/Common.cmake)
-generate_output_files(simpleexe simpleshared simplestatic simpleobj)
+generate_output_files(simpleexe simpleexe2 simpleshared simplestatic simpleobj)
 
 file(APPEND "${CMAKE_BINARY_DIR}/target_files.cmake" "set(GENERATED_FILES [==[${CMAKE_BINARY_DIR}/empty.cmake]==])\n")

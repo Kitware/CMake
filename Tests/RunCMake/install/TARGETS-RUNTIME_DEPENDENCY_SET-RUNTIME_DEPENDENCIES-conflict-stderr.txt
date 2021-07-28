@@ -1,0 +1,5 @@
+^CMake Error at TARGETS-RUNTIME_DEPENDENCY_SET-RUNTIME_DEPENDENCIES-conflict\.cmake:[0-9]+ \(install\):
+  install TARGETS cannot have both RUNTIME_DEPENDENCIES and
+  RUNTIME_DEPENDENCY_SET\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

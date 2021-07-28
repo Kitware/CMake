@@ -1,0 +1,2 @@
+^\[1/2\] Building C object CMakeFiles[\/]echo.dir[\/]Release[\/]echo\.c\.(o|obj)
+\[2/2\] Linking C executable Release[\/]echo(\.exe)?$

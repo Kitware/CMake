@@ -29,8 +29,16 @@ file(READ "${bin_dir}/test_output.txt" output)
 file(READ "${bin_dir}/test_error.txt" error)
 file(READ "${config_file}" config_file_content)
 
-set(output_error_message
-    "\nCPack output: '${output}'\nCPack error: '${error}';\nCPack result: '${PACKAGING_RESULT}';\nconfig file: '${config_file_content}'")
+string(REPLACE "\n" "\n cpack-out> " cpack_out "\n${output}")
+string(REPLACE "\n" "\n cpack-err> " cpack_err "\n${error}")
+string(REPLACE "\n" "\n cpack-res> " cpack_res "\n${PACKAGING_RESULT}")
+string(REPLACE "\n" "\n cpack-cfg> " cpack_cfg "\n${config_file_content}")
+string(CONCAT output_error_message
+  "CPack output:${cpack_out}\n"
+  "CPack error:${cpack_err}\n"
+  "CPack result:${cpack_res}\n"
+  "CPack config file:${cpack_cfg}"
+  )
 
 # generate default expected files data
 include("${src_dir}/tests/${RunCMake_TEST_FILE_PREFIX}/ExpectedFiles.cmake")
@@ -74,22 +82,22 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
         string(REPLACE "\n" "\n actual> " msg_actual "\n${PACKAGE_CONTENT}")
         string(REPLACE "\n" "\n expect> " msg_expected "\n${EXPECTED_FILE_CONTENT_${file_no_}}")
         message(FATAL_ERROR
-          "Unexpected file content for file No. '${file_no_}'!\n"
+          "Unexpected file content for file ${file_no_}!\n"
           "The content was:${msg_actual}\n"
           "which does not match:${msg_expected}\n"
           "${output_error_message}")
       endif()
-    elseif(foundFilescount_ EQUAL 0)
+    elseif(foundFilesCount_ EQUAL 0)
       message(FATAL_ERROR
-        "Found no files for file No. '${file_no_}'!"
-        " Globbing expression: '${EXPECTED_FILE_${file_no_}}'"
+        "Found no files for file ${file_no_}!\n"
+        "Globbing expression:\n '${EXPECTED_FILE_${file_no_}}'\n"
         "${output_error_message}")
     else()
       message(FATAL_ERROR
-        "Found more than one file for file No. '${file_no_}'!"
-        " Found files count '${foundFilesCount_}'."
-        " Files: '${FOUND_FILE_${file_no_}}'"
-        " Globbing expression: '${EXPECTED_FILE_${file_no_}}'"
+        "Found more than one file for file ${file_no_}!\n"
+        "Found files count '${foundFilesCount_}'.\n"
+        "Files:\n '${FOUND_FILE_${file_no_}}'\n"
+        "Globbing expression:\n '${EXPECTED_FILE_${file_no_}}'\n"
         "${output_error_message}")
     endif()
   endforeach()
@@ -105,7 +113,8 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
 
   if(NOT foundFilesCount_ EQUAL allFoundFilesCount_)
     message(FATAL_ERROR
-        "Found more files than expected! Found files: '${allFoundFiles_}'"
+        "Found more files than expected!\n"
+        "Found files:\n '${allFoundFiles_}'\n"
         "${output_error_message}")
   endif()
 
@@ -116,8 +125,9 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
 
     if(found_ EQUAL -1)
       message(FATAL_ERROR
-          "Expected files don't match found files! Found files:"
-          " '${allFoundFiles_}'"
+          "Expected files don't match found files!\n"
+          "Found files:\n"
+          " '${allFoundFiles_}'\n"
           "${output_error_message}")
     endif()
   endforeach()
@@ -127,7 +137,7 @@ else()
     file(GLOB checkMissingFiles_ RELATIVE "${bin_dir}" "${missing_file_glob_}")
 
     if(checkMissingFiles_)
-      message(FATAL_ERROR "Unexpected files found: '${checkMissingFiles_}'"
+      message(FATAL_ERROR "Unexpected files found:\n '${checkMissingFiles_}'\n"
           "${output_error_message}")
     endif()
   endforeach()

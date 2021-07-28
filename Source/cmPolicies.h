@@ -359,7 +359,27 @@ class cmMakefile;
          3, 20, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0120,                                                     \
          "The WriteCompilerDetectionHeader module is removed.", 3, 20, 0,     \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0121,                                                     \
+         "The list() command now validates parsing of index arguments.", 3,   \
+         21, 0, cmPolicies::WARN)                                             \
+  SELECT(                                                                     \
+    POLICY, CMP0122,                                                          \
+    "UseSWIG use standard library name conventions for csharp language.", 3,  \
+    21, 0, cmPolicies::WARN)                                                  \
+  SELECT(POLICY, CMP0123,                                                     \
+         "ARMClang cpu/arch compile and link flags must be set explicitly.",  \
+         3, 21, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0124,                                                     \
+         "foreach() loop variables are only available in the loop scope.", 3, \
+         21, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0125,                                                     \
+         "find_(path|file|library|program) have consistent behavior for "     \
+         "cache variables.",                                                  \
+         3, 21, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0126,                                                     \
+         "set(CACHE) does not remove a normal variable of the same name.", 3, \
+         21, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

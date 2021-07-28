@@ -435,7 +435,7 @@ endif()
 
 
 # Determine the list of possible names for the ruby library
-set(_Ruby_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_Ruby_VERSION_SHORT} ruby${_Ruby_VERSION_SHORT_NODOT} ruby-${_Ruby_VERSION_SHORT} ruby-${Ruby_VERSION})
+set(_Ruby_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_Ruby_VERSION_SHORT} ruby${_Ruby_VERSION_SHORT_NODOT} ruby${_Ruby_NODOT_VERSION} ruby-${_Ruby_VERSION_SHORT} ruby-${Ruby_VERSION})
 
 if(WIN32)
   set(_Ruby_POSSIBLE_MSVC_RUNTIMES "msvcrt;vcruntime140;vcruntime140_1")

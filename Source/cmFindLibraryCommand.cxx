@@ -12,7 +12,6 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -22,30 +21,26 @@
 class cmExecutionStatus;
 
 cmFindLibraryCommand::cmFindLibraryCommand(cmExecutionStatus& status)
-  : cmFindBase(status)
+  : cmFindBase("find_library", status)
 {
   this->EnvironmentPath = "LIB";
   this->NamesPerDirAllowed = true;
+  this->VariableDocumentation = "Path to a library.";
+  this->VariableType = cmStateEnums::FILEPATH;
 }
 
 // cmFindLibraryCommand
 bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
   this->DebugMode = this->ComputeIfDebugModeWanted();
-  this->VariableDocumentation = "Path to a library.";
   this->CMakePathName = "LIBRARY";
+
   if (!this->ParseArguments(argsIn)) {
     return false;
   }
-  if (this->AlreadyInCache) {
-    // If the user specifies the entry on the command line without a
-    // type we should add the type and docstring but keep the original
-    // value.
-    if (this->AlreadyInCacheWithoutMetaInfo) {
-      this->Makefile->AddCacheDefinition(this->VariableName, "",
-                                         this->VariableDocumentation.c_str(),
-                                         cmStateEnums::FILEPATH);
-    }
+
+  if (this->AlreadyDefined) {
+    this->NormalizeFindResult();
     return true;
   }
 
@@ -75,24 +70,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
   }
 
   std::string const library = this->FindLibrary();
-  if (!library.empty()) {
-    // Save the value in the cache
-    this->Makefile->AddCacheDefinition(this->VariableName, library,
-                                       this->VariableDocumentation.c_str(),
-                                       cmStateEnums::FILEPATH);
-    return true;
-  }
-  std::string notfound = this->VariableName + "-NOTFOUND";
-  this->Makefile->AddCacheDefinition(this->VariableName, notfound,
-                                     this->VariableDocumentation.c_str(),
-                                     cmStateEnums::FILEPATH);
-  if (this->Required) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      "Could not find " + this->VariableName +
-        " using the following names: " + cmJoin(this->Names, ", "));
-    cmSystemTools::SetFatalErrorOccured();
-  }
+  this->StoreFindResult(library);
   return true;
 }
 
@@ -208,7 +186,8 @@ std::string cmFindLibraryCommand::FindLibrary()
 
 struct cmFindLibraryHelper
 {
-  cmFindLibraryHelper(cmMakefile* mf, cmFindBase const* findBase);
+  cmFindLibraryHelper(std::string debugName, cmMakefile* mf,
+                      cmFindBase const* findBase);
 
   // Context information.
   cmMakefile* Makefile;
@@ -280,11 +259,11 @@ struct cmFindLibraryHelper
   };
 };
 
-cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf,
+cmFindLibraryHelper::cmFindLibraryHelper(std::string debugName, cmMakefile* mf,
                                          cmFindBase const* base)
   : Makefile(mf)
   , DebugMode(base->DebugModeEnabled())
-  , DebugSearches("find_library", base)
+  , DebugSearches(std::move(debugName), base)
 {
   this->GG = this->Makefile->GetGlobalGenerator();
 
@@ -374,7 +353,7 @@ void cmFindLibraryHelper::AddName(std::string const& name)
     regex += "(\\.[0-9]+\\.[0-9]+)?";
   }
   regex += "$";
-  entry.Regex.compile(regex.c_str());
+  entry.Regex.compile(regex);
   this->Names.push_back(std::move(entry));
 }
 
@@ -485,7 +464,7 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
 std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
 {
   // Search for all names in each directory.
-  cmFindLibraryHelper helper(this->Makefile, this);
+  cmFindLibraryHelper helper(this->FindCommandName, this->Makefile, this);
   for (std::string const& n : this->Names) {
     helper.AddName(n);
   }
@@ -502,7 +481,7 @@ std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
 std::string cmFindLibraryCommand::FindNormalLibraryDirsPerName()
 {
   // Search the entire path for each name.
-  cmFindLibraryHelper helper(this->Makefile, this);
+  cmFindLibraryHelper helper(this->FindCommandName, this->Makefile, this);
   for (std::string const& n : this->Names) {
     // Switch to searching for this name.
     helper.SetName(n);

@@ -24,6 +24,10 @@ else()
   set(_CMAKE_CUDA_EXTRA_DEVICE_LINK_FLAGS "")
 endif()
 
+if(CMAKE_CUDA_HOST_COMPILER AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+  string(APPEND _CMAKE_CUDA_EXTRA_FLAGS " -ccbin=<CMAKE_CUDA_HOST_COMPILER>")
+endif()
+
 if (CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 10.2.89)
   # The -MD flag was only added to nvcc in 10.2 so
   # before that we had to invoke the compiler twice

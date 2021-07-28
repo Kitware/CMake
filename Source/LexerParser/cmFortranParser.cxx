@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.7.4.  */
+/* A Bison parser, made by GNU Bison 3.7.5.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -46,10 +46,10 @@
    USER NAME SPACE" below.  */
 
 /* Identify Bison output, and Bison version.  */
-#define YYBISON 30704
+#define YYBISON 30705
 
 /* Bison version string.  */
-#define YYBISON_VERSION "3.7.4"
+#define YYBISON_VERSION "3.7.5"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -259,6 +259,18 @@ typedef int_least16_t yytype_int16;
 typedef short yytype_int16;
 #endif
 
+/* Work around bug in HP-UX 11.23, which defines these macros
+   incorrectly for preprocessor constants.  This workaround can likely
+   be removed in 2023, as HPE has promised support for HP-UX 11.23
+   (aka HP-UX 11i v2) only through the end of 2022; see Table 2 of
+   <https://h20195.www2.hpe.com/V2/getpdf.aspx/4AA4-7673ENW.pdf>.  */
+#ifdef __hpux
+# undef UINT_LEAST8_MAX
+# undef UINT_LEAST16_MAX
+# define UINT_LEAST8_MAX 255
+# define UINT_LEAST16_MAX 65535
+#endif
+
 #if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
 typedef __UINT_LEAST8_TYPE__ yytype_uint8;
 #elif (!defined __UINT_LEAST8_MAX__ && defined YY_STDINT_H \
@@ -356,9 +368,9 @@ typedef int yy_state_fast_t;
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define YY_USE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define YY_USE(E) /* empty */
 #endif
 
 #if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
@@ -587,13 +599,13 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    99,    99,    99,   102,   106,   111,   120,   126,   133,
-     138,   142,   147,   155,   160,   165,   170,   175,   180,   185,
-     190,   195,   199,   203,   207,   211,   212,   217,   217,   217,
-     218,   218,   219,   219,   220,   220,   221,   221,   222,   222,
-     223,   223,   224,   224,   225,   225,   226,   226,   229,   230,
-     231,   232,   233,   234,   235,   236,   237,   238,   239,   240,
-     241,   242,   243,   244,   245
+       0,   101,   101,   101,   104,   108,   113,   122,   128,   135,
+     140,   144,   149,   157,   162,   167,   172,   177,   182,   187,
+     192,   197,   201,   205,   209,   213,   214,   219,   219,   219,
+     220,   220,   221,   221,   222,   222,   223,   223,   224,   224,
+     225,   225,   226,   226,   227,   227,   228,   228,   231,   232,
+     233,   234,   235,   236,   237,   238,   239,   240,   241,   242,
+     243,   244,   245,   246,   247
 };
 #endif
 
@@ -701,7 +713,7 @@ static const yytype_int8 yypgoto[] =
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1,    32,    33,    34,    35,    36,    37,    38,    39,
+       0,     1,    32,    33,    34,    35,    36,    37,    38,    39,
       40,    41,    44,    82
 };
 
@@ -955,8 +967,8 @@ yy_symbol_value_print (FILE *yyo,
                        yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, yyscan_t yyscanner)
 {
   FILE *yyoutput = yyo;
-  YYUSE (yyoutput);
-  YYUSE (yyscanner);
+  YY_USE (yyoutput);
+  YY_USE (yyscanner);
   if (!yyvaluep)
     return;
 # ifdef YYPRINT
@@ -964,7 +976,7 @@ yy_symbol_value_print (FILE *yyo,
     YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
 # endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yykind);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1345,14 +1357,36 @@ static void
 yydestruct (const char *yymsg,
             yysymbol_kind_t yykind, YYSTYPE *yyvaluep, yyscan_t yyscanner)
 {
-  YYUSE (yyvaluep);
-  YYUSE (yyscanner);
+  YY_USE (yyvaluep);
+  YY_USE (yyscanner);
   if (!yymsg)
     yymsg = "Deleting";
   YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yykind);
+  switch (yykind)
+    {
+    case YYSYMBOL_STRING: /* STRING  */
+#line 95 "cmFortranParser.y"
+            { free(((*yyvaluep).string)); }
+#line 1373 "cmFortranParser.cxx"
+        break;
+
+    case YYSYMBOL_WORD: /* WORD  */
+#line 95 "cmFortranParser.y"
+            { free(((*yyvaluep).string)); }
+#line 1379 "cmFortranParser.cxx"
+        break;
+
+    case YYSYMBOL_CPP_INCLUDE_ANGLE: /* CPP_INCLUDE_ANGLE  */
+#line 95 "cmFortranParser.y"
+            { free(((*yyvaluep).string)); }
+#line 1385 "cmFortranParser.cxx"
+        break;
+
+      default:
+        break;
+    }
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1622,26 +1656,26 @@ yyreduce:
   switch (yyn)
     {
   case 4: /* stmt: INTERFACE EOSTMT  */
-#line 102 "cmFortranParser.y"
+#line 104 "cmFortranParser.y"
                    {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_SetInInterface(parser, true);
   }
-#line 1631 "cmFortranParser.cxx"
+#line 1665 "cmFortranParser.cxx"
     break;
 
   case 5: /* stmt: USE WORD other EOSTMT  */
-#line 106 "cmFortranParser.y"
+#line 108 "cmFortranParser.y"
                         {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleUse(parser, (yyvsp[-2].string));
     free((yyvsp[-2].string));
   }
-#line 1641 "cmFortranParser.cxx"
+#line 1675 "cmFortranParser.cxx"
     break;
 
   case 6: /* stmt: MODULE WORD other EOSTMT  */
-#line 111 "cmFortranParser.y"
+#line 113 "cmFortranParser.y"
                            {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     if (cmsysString_strcasecmp((yyvsp[-2].string), "function") != 0 &&
@@ -1651,22 +1685,22 @@ yyreduce:
     }
     free((yyvsp[-2].string));
   }
-#line 1655 "cmFortranParser.cxx"
+#line 1689 "cmFortranParser.cxx"
     break;
 
   case 7: /* stmt: SUBMODULE LPAREN WORD RPAREN WORD other EOSTMT  */
-#line 120 "cmFortranParser.y"
+#line 122 "cmFortranParser.y"
                                                  {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleSubmodule(parser, (yyvsp[-4].string), (yyvsp[-2].string));
     free((yyvsp[-4].string));
     free((yyvsp[-2].string));
   }
-#line 1666 "cmFortranParser.cxx"
+#line 1700 "cmFortranParser.cxx"
     break;
 
   case 8: /* stmt: SUBMODULE LPAREN WORD COLON WORD RPAREN WORD other EOSTMT  */
-#line 126 "cmFortranParser.y"
+#line 128 "cmFortranParser.y"
                                                             {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleSubmoduleNested(parser, (yyvsp[-6].string), (yyvsp[-4].string), (yyvsp[-2].string));
@@ -1674,40 +1708,40 @@ yyreduce:
     free((yyvsp[-4].string));
     free((yyvsp[-2].string));
   }
-#line 1678 "cmFortranParser.cxx"
+#line 1712 "cmFortranParser.cxx"
     break;
 
   case 9: /* stmt: INTERFACE WORD other EOSTMT  */
-#line 133 "cmFortranParser.y"
+#line 135 "cmFortranParser.y"
                               {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_SetInInterface(parser, true);
     free((yyvsp[-2].string));
   }
-#line 1688 "cmFortranParser.cxx"
+#line 1722 "cmFortranParser.cxx"
     break;
 
   case 10: /* stmt: END INTERFACE other EOSTMT  */
-#line 138 "cmFortranParser.y"
+#line 140 "cmFortranParser.y"
                              {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_SetInInterface(parser, false);
   }
-#line 1697 "cmFortranParser.cxx"
+#line 1731 "cmFortranParser.cxx"
     break;
 
   case 11: /* stmt: USE DCOLON WORD other EOSTMT  */
-#line 142 "cmFortranParser.y"
+#line 144 "cmFortranParser.y"
                                {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleUse(parser, (yyvsp[-2].string));
     free((yyvsp[-2].string));
   }
-#line 1707 "cmFortranParser.cxx"
+#line 1741 "cmFortranParser.cxx"
     break;
 
   case 12: /* stmt: USE COMMA WORD DCOLON WORD other EOSTMT  */
-#line 147 "cmFortranParser.y"
+#line 149 "cmFortranParser.y"
                                           {
     if (cmsysString_strcasecmp((yyvsp[-4].string), "non_intrinsic") == 0) {
       cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
@@ -1716,139 +1750,139 @@ yyreduce:
     free((yyvsp[-4].string));
     free((yyvsp[-2].string));
   }
-#line 1720 "cmFortranParser.cxx"
+#line 1754 "cmFortranParser.cxx"
     break;
 
   case 13: /* stmt: INCLUDE STRING other EOSTMT  */
-#line 155 "cmFortranParser.y"
+#line 157 "cmFortranParser.y"
                               {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleInclude(parser, (yyvsp[-2].string));
     free((yyvsp[-2].string));
   }
-#line 1730 "cmFortranParser.cxx"
+#line 1764 "cmFortranParser.cxx"
     break;
 
   case 14: /* stmt: CPP_LINE_DIRECTIVE STRING other EOSTMT  */
-#line 160 "cmFortranParser.y"
+#line 162 "cmFortranParser.y"
                                          {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleLineDirective(parser, (yyvsp[-2].string));
     free((yyvsp[-2].string));
   }
-#line 1740 "cmFortranParser.cxx"
+#line 1774 "cmFortranParser.cxx"
     break;
 
   case 15: /* stmt: CPP_INCLUDE_ANGLE other EOSTMT  */
-#line 165 "cmFortranParser.y"
+#line 167 "cmFortranParser.y"
                                  {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleInclude(parser, (yyvsp[-2].string));
     free((yyvsp[-2].string));
   }
-#line 1750 "cmFortranParser.cxx"
+#line 1784 "cmFortranParser.cxx"
     break;
 
   case 16: /* stmt: include STRING other EOSTMT  */
-#line 170 "cmFortranParser.y"
+#line 172 "cmFortranParser.y"
                               {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleInclude(parser, (yyvsp[-2].string));
     free((yyvsp[-2].string));
   }
-#line 1760 "cmFortranParser.cxx"
+#line 1794 "cmFortranParser.cxx"
     break;
 
   case 17: /* stmt: define WORD other EOSTMT  */
-#line 175 "cmFortranParser.y"
+#line 177 "cmFortranParser.y"
                            {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleDefine(parser, (yyvsp[-2].string));
     free((yyvsp[-2].string));
   }
-#line 1770 "cmFortranParser.cxx"
+#line 1804 "cmFortranParser.cxx"
     break;
 
   case 18: /* stmt: undef WORD other EOSTMT  */
-#line 180 "cmFortranParser.y"
+#line 182 "cmFortranParser.y"
                           {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleUndef(parser, (yyvsp[-2].string));
     free((yyvsp[-2].string));
   }
-#line 1780 "cmFortranParser.cxx"
+#line 1814 "cmFortranParser.cxx"
     break;
 
   case 19: /* stmt: ifdef WORD other EOSTMT  */
-#line 185 "cmFortranParser.y"
+#line 187 "cmFortranParser.y"
                           {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleIfdef(parser, (yyvsp[-2].string));
     free((yyvsp[-2].string));
   }
-#line 1790 "cmFortranParser.cxx"
+#line 1824 "cmFortranParser.cxx"
     break;
 
   case 20: /* stmt: ifndef WORD other EOSTMT  */
-#line 190 "cmFortranParser.y"
+#line 192 "cmFortranParser.y"
                            {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleIfndef(parser, (yyvsp[-2].string));
     free((yyvsp[-2].string));
   }
-#line 1800 "cmFortranParser.cxx"
+#line 1834 "cmFortranParser.cxx"
     break;
 
   case 21: /* stmt: if other EOSTMT  */
-#line 195 "cmFortranParser.y"
+#line 197 "cmFortranParser.y"
                   {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleIf(parser);
   }
-#line 1809 "cmFortranParser.cxx"
+#line 1843 "cmFortranParser.cxx"
     break;
 
   case 22: /* stmt: elif other EOSTMT  */
-#line 199 "cmFortranParser.y"
+#line 201 "cmFortranParser.y"
                     {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleElif(parser);
   }
-#line 1818 "cmFortranParser.cxx"
+#line 1852 "cmFortranParser.cxx"
     break;
 
   case 23: /* stmt: else other EOSTMT  */
-#line 203 "cmFortranParser.y"
+#line 205 "cmFortranParser.y"
                     {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleElse(parser);
   }
-#line 1827 "cmFortranParser.cxx"
+#line 1861 "cmFortranParser.cxx"
     break;
 
   case 24: /* stmt: endif other EOSTMT  */
-#line 207 "cmFortranParser.y"
+#line 209 "cmFortranParser.y"
                      {
     cmFortranParser* parser = cmFortran_yyget_extra(yyscanner);
     cmFortranParser_RuleEndif(parser);
   }
-#line 1836 "cmFortranParser.cxx"
+#line 1870 "cmFortranParser.cxx"
     break;
 
   case 48: /* misc_code: WORD  */
-#line 229 "cmFortranParser.y"
+#line 231 "cmFortranParser.y"
                       { free ((yyvsp[0].string)); }
-#line 1842 "cmFortranParser.cxx"
+#line 1876 "cmFortranParser.cxx"
     break;
 
   case 55: /* misc_code: STRING  */
-#line 236 "cmFortranParser.y"
+#line 238 "cmFortranParser.y"
                       { free ((yyvsp[0].string)); }
-#line 1848 "cmFortranParser.cxx"
+#line 1882 "cmFortranParser.cxx"
     break;
 
 
-#line 1852 "cmFortranParser.cxx"
+#line 1886 "cmFortranParser.cxx"
 
       default: break;
     }
@@ -2073,6 +2107,6 @@ yyreturn:
   return yyresult;
 }
 
-#line 248 "cmFortranParser.y"
+#line 250 "cmFortranParser.y"
 
 /* End of grammar */

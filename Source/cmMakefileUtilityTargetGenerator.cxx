@@ -48,8 +48,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
     << "# Include any custom commands dependencies for this target.\n"
     << this->GlobalGenerator->IncludeDirective << " " << root
     << cmSystemTools::ConvertToOutputPath(
-         this->LocalGenerator->MaybeConvertToRelativePath(
-           this->LocalGenerator->GetBinaryDirectory(), dependFile))
+         this->LocalGenerator->MaybeRelativeToTopBinDir(dependFile))
     << "\n\n";
   if (!cmSystemTools::FileExists(dependFile)) {
     // Write an empty dependency file.
@@ -78,8 +77,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
       << "# Include the progress variables for this target.\n"
       << this->GlobalGenerator->IncludeDirective << " " << root
       << cmSystemTools::ConvertToOutputPath(
-           this->LocalGenerator->MaybeConvertToRelativePath(
-             this->LocalGenerator->GetBinaryDirectory(),
+           this->LocalGenerator->MaybeRelativeToTopBinDir(
              this->ProgressFileNameFull))
       << "\n\n";
   }

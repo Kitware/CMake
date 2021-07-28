@@ -97,6 +97,11 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
       }
       std::set<std::string> const& languages =
         target->GetAllConfigCompileLanguages();
+      // cmGeneratorTarget::GetAllConfigCompileLanguages caches the target's
+      // sources. Clear it so that OBJECT library targets that are AUTOGEN
+      // initialized after this target get their added mocs_compilation.cpp
+      // source acknowledged by this target.
+      target->ClearSourcesCache();
       if (languages.count("CSharp")) {
         // Don't process target if it's a CSharp target
         continue;
@@ -114,7 +119,8 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
           target->GetSafeProperty(this->kw().AUTORCC_EXECUTABLE);
 
         // We support Qt4, Qt5 and Qt6
-        auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target.get());
+        auto qtVersion =
+          cmQtAutoGenInitializer::GetQtVersion(target.get(), mocExec);
         bool const validQt = (qtVersion.first.Major == 4) ||
           (qtVersion.first.Major == 5) || (qtVersion.first.Major == 6);
 
@@ -179,7 +185,7 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
     {
       cmProp folder =
         makefile->GetState()->GetGlobalProperty("AUTOGEN_TARGETS_FOLDER");
-      if (folder != nullptr) {
+      if (folder) {
         target->SetProperty("FOLDER", *folder);
       }
     }

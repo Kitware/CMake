@@ -43,6 +43,7 @@ macro(ADD_AUTOGEN_TEST NAME)
     --build-options ${build_options} ${Autogen_BUILD_OPTIONS}
     ${_TestCommand}
   )
+  set_tests_properties("${_QtXAutogen}.${NAME}" PROPERTIES LABELS "Qt${QT_TEST_VERSION}")
   list(APPEND TEST_BUILD_DIRS "${_BuildDir}")
   unset(_TestCommand)
   unset(_QtXAutogen)

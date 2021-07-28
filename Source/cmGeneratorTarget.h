@@ -14,6 +14,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
@@ -49,6 +51,9 @@ public:
   bool IsImportedGloballyVisible() const;
   bool CanCompileSources() const;
   const std::string& GetLocation(const std::string& config) const;
+
+  /** Get the full path to the target's main artifact, if known.  */
+  cm::optional<std::string> MaybeGetLocation(std::string const& config) const;
 
   std::vector<cmCustomCommand> const& GetPreBuildCommands() const;
   std::vector<cmCustomCommand> const& GetPreLinkCommands() const;
@@ -453,6 +458,8 @@ public:
 
   void AddCUDAArchitectureFlags(std::string& flags) const;
   void AddCUDAToolkitFlags(std::string& flags) const;
+
+  void AddHIPArchitectureFlags(std::string& flags) const;
 
   void AddISPCTargetFlags(std::string& flags) const;
 
@@ -1031,12 +1038,17 @@ private:
                        const cmGeneratorTarget* headTarget,
                        bool usage_requirements_only,
                        std::vector<cmLinkItem>& items,
+                       std::vector<cmLinkItem>& objects,
                        bool& hadHeadSensitiveCondition,
                        bool& hadContextSensitiveCondition,
                        bool& hadLinkLanguageSensitiveCondition) const;
-  void LookupLinkItems(std::vector<std::string> const& names,
-                       cmListFileBacktrace const& bt,
-                       std::vector<cmLinkItem>& items) const;
+  struct LookupLinkItemScope
+  {
+    cmLocalGenerator const* LG;
+  };
+  cm::optional<cmLinkItem> LookupLinkItem(std::string const& n,
+                                          cmListFileBacktrace const& bt,
+                                          LookupLinkItemScope* scope) const;
 
   std::vector<BT<std::string>> GetSourceFilePaths(
     std::string const& config) const;
@@ -1103,6 +1115,12 @@ private:
 
   cmProp GetPropertyWithPairedLanguageSupport(std::string const& lang,
                                               const char* suffix) const;
+
+  void ComputeLinkImplementationRuntimeLibraries(
+    const std::string& config, cmOptionalLinkImplementation& impl) const;
+
+  void ComputeLinkInterfaceRuntimeLibraries(
+    const std::string& config, cmOptionalLinkInterface& iface) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(

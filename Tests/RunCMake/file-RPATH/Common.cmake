@@ -62,3 +62,40 @@ foreach(f ${files})
     message(FATAL_ERROR "RPATH_CHECK did not remove ${f}")
   endif()
 endforeach()
+
+# TODO Implement RPATH_SET in XCOFF.
+if(format STREQUAL "ELF")
+  foreach(f ${names})
+    file(COPY ${in}/${f} DESTINATION ${out} NO_SOURCE_PERMISSIONS)
+  endforeach()
+
+  foreach(f ${files})
+    # Set the RPATH.
+    file(RPATH_SET FILE "${f}"
+      NEW_RPATH "/new/rpath")
+    set(rpath)
+    file(STRINGS "${f}" rpath REGEX "/new/rpath" LIMIT_COUNT 1)
+    if(NOT rpath)
+      message(FATAL_ERROR "RPATH not set in ${f}")
+    endif()
+    file(STRINGS "${f}" rpath REGEX "/rpath/sample" LIMIT_COUNT 1)
+    if(rpath)
+      message(FATAL_EROR "RPATH not removed in ${f}")
+    endif()
+
+    # Remove the RPATH.
+    file(RPATH_SET FILE "${f}"
+      NEW_RPATH "")
+    set(rpath)
+    file(STRINGS "${f}" rpath REGEX "/new/rpath" LIMIT_COUNT 1)
+    if(rpath)
+      message(FATAL_ERROR "RPATH not removed from ${f}")
+    endif()
+
+    # Check again...this should remove the file.
+    file(RPATH_CHECK FILE "${f}" RPATH "/new/rpath")
+    if(EXISTS "${f}")
+      message(FATAL_ERROR "RPATH_CHECK did not remove ${f}")
+    endif()
+  endforeach()
+endif()

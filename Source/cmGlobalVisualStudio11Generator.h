@@ -24,6 +24,13 @@ public:
 
   bool MatchesGeneratorName(const std::string& name) const override;
 
+  bool SupportsCustomCommandDepfile() const override { return true; }
+
+  cm::optional<cmDepfileFormat> DepfileFormat() const override
+  {
+    return cmDepfileFormat::MSBuildAdditionalInputs;
+  }
+
 protected:
   cmGlobalVisualStudio11Generator(cmake* cm, const std::string& name,
                                   std::string const& platformInGeneratorName);

@@ -28,17 +28,6 @@ public:
   std::string const& GetCurrentBinary() const;
   void SetCurrentBinary(std::string const& dir);
 
-  std::string const& GetRelativePathTopSource() const;
-  std::string const& GetRelativePathTopBinary() const;
-  void SetRelativePathTopSource(const char* dir);
-  void SetRelativePathTopBinary(const char* dir);
-
-  bool ContainsBoth(std::string const& local_path,
-                    std::string const& remote_path) const;
-
-  std::string ConvertToRelPathIfNotContained(
-    std::string const& local_path, std::string const& remote_path) const;
-
   cmStringRange GetIncludeDirectoriesEntries() const;
   cmBacktraceRange GetIncludeDirectoriesEntryBacktraces() const;
   void AppendIncludeDirectoriesEntry(std::string const& vec,
@@ -92,11 +81,9 @@ public:
   std::vector<std::string> GetPropertyKeys() const;
 
   void AddNormalTargetName(std::string const& name);
+  void AddImportedTargetName(std::string const& name);
 
 private:
-  void ComputeRelativePathTopSource();
-  void ComputeRelativePathTopBinary();
-
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator
     DirectoryState;
   cmStateSnapshot Snapshot_;

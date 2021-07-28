@@ -1,21 +1,3 @@
-function(check_contents filename contents_regex)
-  if(EXISTS "${CMAKE_INSTALL_PREFIX}/${filename}")
-    file(READ "${CMAKE_INSTALL_PREFIX}/${filename}" contents)
-    if(NOT contents MATCHES "${contents_regex}")
-      string(APPEND RunCMake_TEST_FAILED "File contents:
-  ${contents}
-do not match what we expected:
-  ${contents_regex}
-in file:
-  ${CMAKE_INSTALL_PREFIX}/${filename}\n")
-      set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
-    endif()
-  else()
-    string(APPEND RunCMake_TEST_FAILED "File ${CMAKE_INSTALL_PREFIX}/${filename} does not exist")
-    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
-  endif()
-endfunction()
-
 set(_check
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/linux-build/root-all/lib/libtest_rpath\.so]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/linux-build/root-all/lib/libtest_runpath\.so]]

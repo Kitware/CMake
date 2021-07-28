@@ -13,10 +13,12 @@ function(CMAKE_CHECK_COMPILER_FLAG _lang _flag _var)
 
   if(_lang STREQUAL "C")
     set(_lang_src "int main(void) { return 0; }")
-    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C")
+    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C"
+                         FAIL_REGEX "-Werror=.* argument .* is not valid for C")
   elseif(_lang STREQUAL "CXX")
     set(_lang_src "int main() { return 0; }")
-    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+")
+    set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+"
+                         FAIL_REGEX "-Werror=.* argument .* is not valid for C\\+\\+")
   elseif(_lang STREQUAL "CUDA")
     set(_lang_src "__host__ int main() { return 0; }")
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for C\\+\\+" # Host GNU
@@ -24,6 +26,9 @@ function(CMAKE_CHECK_COMPILER_FLAG _lang _flag _var)
   elseif(_lang STREQUAL "Fortran")
     set(_lang_src "       program test\n       stop\n       end program")
     set(_lang_fail_regex FAIL_REGEX "command[ -]line option .* is valid for .* but not for Fortran")
+  elseif(_lang STREQUAL "HIP")
+    set(_lang_src "__host__ int main() { return 0; }")
+    set(_lang_fail_regex FAIL_REGEX "argument unused during compilation: .*") # Clang
   elseif(_lang STREQUAL "OBJC")
     set(_lang_src [=[
 #ifndef __OBJC__
@@ -73,7 +78,6 @@ int main(void) { return 0; }]=])
   foreach(v IN LISTS _locale_vars)
     set(ENV{${v}} ${_locale_vars_saved_${v}})
   endforeach()
-  set(${_var} "${${_var}}" PARENT_SCOPE)
 endfunction ()
 
 cmake_policy(POP)

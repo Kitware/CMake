@@ -36,6 +36,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmInstallGenerator.h"
+#include "cmInstallRuntimeDependencySet.h"
 #include "cmLinkLineComputer.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -2077,7 +2078,7 @@ bool cmGlobalGenerator::Open(const std::string& bindir,
 
 std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
   const std::string& target, const std::string& config,
-  const std::string& native, bool ignoreErrors)
+  const std::string& parallel, const std::string& native, bool ignoreErrors)
 {
   std::string makeCommand = cmSystemTools::GetCMakeCommand();
   makeCommand =
@@ -2085,6 +2086,11 @@ std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
   if (!config.empty()) {
     makeCommand += " --config \"";
     makeCommand += config;
+    makeCommand += "\"";
+  }
+  if (!parallel.empty()) {
+    makeCommand += " --parallel \"";
+    makeCommand += parallel;
     makeCommand += "\"";
   }
   if (!target.empty()) {
@@ -2255,7 +2261,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 
     // Check whether the genex expansion of the property agrees in all
     // configurations.
-    if (trueCount && falseCount) {
+    if (trueCount > 0 && falseCount > 0) {
       std::ostringstream e;
       e << "The EXCLUDE_FROM_ALL property of target \"" << target->GetName()
         << "\" varies by configuration. This is not supported by the \""
@@ -3022,10 +3028,8 @@ void cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
   }
 
   // Shorten the output name (in expected use case).
-  cmStateDirectory cmDir =
-    this->GetMakefiles()[0]->GetStateSnapshot().GetDirectory();
-  std::string fname = cmDir.ConvertToRelPathIfNotContained(
-    this->GetMakefiles()[0]->GetState()->GetBinaryDirectory(), outputs[0]);
+  std::string fname =
+    this->LocalGenerators[0]->MaybeRelativeToTopBinDir(outputs[0]);
 
   // Associate the hash with this output.
   this->RuleHashes[fname] = hash;
@@ -3328,4 +3332,27 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
   }
 
   return true;
+}
+
+cmInstallRuntimeDependencySet*
+cmGlobalGenerator::CreateAnonymousRuntimeDependencySet()
+{
+  auto set = cm::make_unique<cmInstallRuntimeDependencySet>();
+  auto* retval = set.get();
+  this->RuntimeDependencySets.push_back(std::move(set));
+  return retval;
+}
+
+cmInstallRuntimeDependencySet* cmGlobalGenerator::GetNamedRuntimeDependencySet(
+  const std::string& name)
+{
+  auto it = this->RuntimeDependencySetsByName.find(name);
+  if (it == this->RuntimeDependencySetsByName.end()) {
+    auto set = cm::make_unique<cmInstallRuntimeDependencySet>(name);
+    it =
+      this->RuntimeDependencySetsByName.insert(std::make_pair(name, set.get()))
+        .first;
+    this->RuntimeDependencySets.push_back(std::move(set));
+  }
+  return it->second;
 }

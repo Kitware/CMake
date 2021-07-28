@@ -75,6 +75,7 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
     case cmGlobalVisualStudioGenerator::VS14:
     case cmGlobalVisualStudioGenerator::VS15:
     case cmGlobalVisualStudioGenerator::VS16:
+    case cmGlobalVisualStudioGenerator::VS17:
       // by default VS puts <ExceptionHandling></ExceptionHandling> empty
       // for a project, to make our projects look the same put a new line
       // and space over for the closing </ExceptionHandling> as the default
@@ -418,7 +419,9 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   }
 
   std::ostringstream oss;
-  const char* sep = "";
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
+    oss << "%(" << tag << ")";
+  }
   std::vector<std::string>::const_iterator de =
     cmRemoveDuplicates(this->Defines);
   for (std::string const& di : cmMakeRange(this->Defines.cbegin(), de)) {
@@ -437,11 +440,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
       }
     }
     // Store the flag in the project file.
-    oss << sep << define;
-    sep = ";";
-  }
-  if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {
-    oss << ";%(" << tag << ")";
+    oss << ';' << define;
   }
 
   this->OutputFlag(fout, indent, tag, oss.str());

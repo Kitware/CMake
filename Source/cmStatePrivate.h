@@ -67,14 +67,6 @@ struct cmStateDetail::BuildsystemDirectoryStateType
   std::string Location;
   std::string OutputLocation;
 
-  // The top-most directories for relative path conversion.  Both the
-  // source and destination location of a relative path conversion
-  // must be underneath one of these directories (both under source or
-  // both under binary) in order for the relative path to be evaluated
-  // safely by the build tools.
-  std::string RelativePathTopSource;
-  std::string RelativePathTopBinary;
-
   std::vector<std::string> IncludeDirectories;
   std::vector<cmListFileBacktrace> IncludeDirectoryBacktraces;
 
@@ -91,6 +83,7 @@ struct cmStateDetail::BuildsystemDirectoryStateType
   std::vector<cmListFileBacktrace> LinkDirectoriesBacktraces;
 
   std::vector<std::string> NormalTargetNames;
+  std::vector<std::string> ImportedTargetNames;
 
   std::string ProjectName;
 

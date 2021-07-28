@@ -1,0 +1,5 @@
+^CMake Error at [^
+]*/Tests/RunCMake/file/COPY_FILE-arg-unknown.cmake:1 \(file\):
+  file COPY_FILE unknown argument:
+
+    unknown$

@@ -1,0 +1,11 @@
+include("${CMAKE_CURRENT_LIST_DIR}/../check_installed.cmake")
+
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+  check_installed([[^bin;bin/exe;lib;lib/libdep1\.so;lib/libdep3\.so;lib/libdeplib\.so;yyy;yyy/lib;yyy/lib/libdep1\.so;yyy/lib/libdep3\.so;yyy/lib/libdep4\.so;zzz;zzz/libdep1\.so;zzz/libdep3\.so;zzz/libdep4\.so$]])
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+  set(_msvc_check [[bin;bin/dep1\.dll;bin/dep3\.dll;bin/deplib\.dll;bin/exe\.exe;yyy;yyy/bin;yyy/bin/dep1\.dll;yyy/bin/dep3\.dll;yyy/bin/dep4\.dll;zzz;zzz/dep1\.dll;zzz/dep3\.dll;zzz/dep4\.dll]])
+  set(_mingw_check [[bin;bin/exe\.exe;bin/libdep1\.dll;bin/libdep3\.dll;bin/libdeplib\.dll;yyy;yyy/bin;yyy/bin/libdep1\.dll;yyy/bin/libdep3\.dll;yyy/bin/libdep4\.dll;zzz;zzz/libdep1\.dll;zzz/libdep3\.dll;zzz/libdep4\.dll]])
+  check_installed("^(${_msvc_check}|${_mingw_check})$")
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+  check_installed([[^bin;bin/exe;lib;lib/libdep1\.dylib;lib/libdep3\.dylib;lib/libdeplib\.dylib;yyy;yyy/lib;yyy/lib/libdep1\.dylib;yyy/lib/libdep3\.dylib;yyy/lib/libdep4\.dylib;zzz;zzz/libdep1\.dylib;zzz/libdep3\.dylib;zzz/libdep4\.dylib$]])
+endif()

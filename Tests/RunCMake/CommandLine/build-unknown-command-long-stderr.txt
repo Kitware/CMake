@@ -1,0 +1,2 @@
+^Unknown argument --invalid-command
+Usage: cmake --build <dir> +\[options\] \[-- \[native-options\]\]

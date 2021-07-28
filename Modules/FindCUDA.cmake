@@ -2,19 +2,19 @@
 FindCUDA
 --------
 
-.. deprecated:: 3.10
+.. warning:: *Deprecated since version 3.10.*
 
 It is no longer necessary to use this module or call ``find_package(CUDA)``
 for compiling CUDA code. Instead, list ``CUDA`` among the languages named
 in the top-level call to the :command:`project` command, or call the
 :command:`enable_language` command with ``CUDA``.
-Then one can add CUDA (``.cu``) sources to programs directly
-in calls to :command:`add_library` and :command:`add_executable`.
+Then one can add CUDA (``.cu``) sources directly to targets similar to other
+languages.
 
 .. versionadded:: 3.17
-  To find and use the CUDA toolkit libraries the :module:`FindCUDAToolkit`
-  module has superseded this module.  It works whether or not the ``CUDA``
-  language is enabled.
+  To find and use the CUDA toolkit libraries manually, use the
+  :module:`FindCUDAToolkit` module instead.  It works regardless of the
+  ``CUDA`` language being enabled.
 
 Documentation of Deprecated Usage
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -839,7 +839,7 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
     # itself, allowing us to support numerous different scattered toolkit layouts
     execute_process(COMMAND ${CUDA_TOOLKIT_ROOT_DIR_NVCC} "-v" "__cmake_determine_cuda"
       OUTPUT_VARIABLE _CUDA_NVCC_OUT ERROR_VARIABLE _CUDA_NVCC_OUT)
-    if(_CUDA_NVCC_OUT MATCHES "TOP=([^\r\n]*)")
+    if(_CUDA_NVCC_OUT MATCHES "\\#\\$ TOP=([^\r\n]*)")
       get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CMAKE_MATCH_1}" ABSOLUTE CACHE)
     else()
       get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CUDA_TOOLKIT_ROOT_DIR_NVCC}" DIRECTORY)

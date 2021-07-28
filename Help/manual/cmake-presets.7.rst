@@ -39,7 +39,7 @@ The root object recognizes the following fields:
 ``version``
 
   A required integer representing the version of the JSON schema.
-  The supported versions are ``1`` and ``2``.
+  The supported versions are ``1``, ``2``, and ``3``.
 
 ``cmakeMinimumRequired``
 
@@ -70,17 +70,17 @@ The root object recognizes the following fields:
 ``configurePresets``
 
   An optional array of `Configure Preset`_ objects.
-  This is allowed in preset files specifying version 1 or above.
+  This is allowed in preset files specifying version ``1`` or above.
 
 ``buildPresets``
 
   An optional array of `Build Preset`_ objects.
-  This is allowed in preset files specifying version 2 or above.
+  This is allowed in preset files specifying version ``2`` or above.
 
 ``testPresets``
 
   An optional array of `Test Preset`_ objects.
-  This is allowed in preset files specifying version 2 or above.
+  This is allowed in preset files specifying version ``2`` or above.
 
 Configure Preset
 ^^^^^^^^^^^^^^^^
@@ -119,6 +119,11 @@ that may contain the following fields:
   This field can also be a string, which is equivalent to an array
   containing one string.
 
+``condition``
+
+  An optional `Condition`_ object. This is allowed in preset files specifying
+  version ``3`` or above.
+
 ``vendor``
 
   An optional map containing vendor-specific information. CMake does not
@@ -140,7 +145,9 @@ that may contain the following fields:
 
   An optional string representing the generator to use for the preset. If
   ``generator`` is not specified, it must be inherited from the
-  ``inherits`` preset (unless this preset is ``hidden``).
+  ``inherits`` preset (unless this preset is ``hidden``). In version ``3``
+  or above, this field may be omitted to fall back to regular generator
+  discovery procedure.
 
   Note that for Visual Studio generators, unlike in the command line ``-G``
   argument, you cannot include the platform name in the generator name. Use
@@ -175,13 +182,29 @@ that may contain the following fields:
       ignore the field, but the IDE can use them to set up the environment
       before invoking CMake.
 
+``toolchainFile``
+
+  An optional string representing the path to the toolchain file.
+  This field supports `macro expansion`_. If a relative path is specified,
+  it is calculated relative to the build directory, and if not found,
+  relative to the source directory. Takes precedence over any `CMAKE_TOOLCHAIN_FILE`
+  value. This is allowed in preset files specifying version ``3`` or above.
+
 ``binaryDir``
 
   An optional string representing the path to the output binary directory.
   This field supports `macro expansion`_. If a relative path is specified,
   it is calculated relative to the source directory. If ``binaryDir`` is not
   specified, it must be inherited from the ``inherits`` preset (unless this
-  preset is ``hidden``).
+  preset is ``hidden``). In version ``3`` or above, this field may be
+  omitted.
+
+``installDir``
+
+  An optional string representing the path to the installation directory.
+  This field supports `macro expansion`_. If a relative path is specified,
+  it is calculated relative to the source directory. This is allowed in
+  preset files specifying version ``3`` or above.
 
 ``cmakeExecutable``
 
@@ -338,6 +361,11 @@ that may contain the following fields:
   This field can also be a string, which is equivalent to an array
   containing one string.
 
+``condition``
+
+  An optional `Condition`_ object. This is allowed in preset files specifying
+  version ``3`` or above.
+
 ``vendor``
 
   An optional map containing vendor-specific information. CMake does not
@@ -372,6 +400,19 @@ that may contain the following fields:
   this union define the same variable, the standard rules of ``inherits``
   are applied. Setting a variable to ``null`` causes it to not be set,
   even if a value was inherited from another preset.
+
+  .. note::
+
+    For a CMake project using ExternalProject with a configuration preset
+    having environment variables needed in the ExternalProject, use a build
+    preset that inherits that configuration preset or the ExternalProject
+    will not have the environment variables set in the configuration preset.
+    Example: suppose the host defaults to one compiler (say Clang)
+    and the user wishes to use another compiler (say GCC). Set configuration
+    preset environment variables ``CC`` and ``CXX`` and use a build preset
+    that inherits that configuration preset. Otherwise the ExternalProject
+    may use a different (system default) compiler than the top-level CMake
+    project.
 
 ``configurePreset``
 
@@ -456,6 +497,11 @@ that may contain the following fields:
 
   This field can also be a string, which is equivalent to an array
   containing one string.
+
+``condition``
+
+  An optional `Condition`_ object. This is allowed in preset files specifying
+  version ``3`` or above.
 
 ``vendor``
 
@@ -609,7 +655,8 @@ that may contain the following fields:
 
       An optional string specifying a regex for test names. Equivalent to
       passing ``--tests-regex`` on the command line. This field supports
-      macro expansion.
+      macro expansion. CMake regex syntax is described under
+      :ref:`string(REGEX) <Regex Specification>`.
 
 
     ``label``
@@ -782,6 +829,103 @@ that may contain the following fields:
 
       Equivalent to passing ``--no-tests=ignore`` on the command line.
 
+Condition
+^^^^^^^^^
+
+The ``condition`` field of a preset, allowed in preset files specifying version
+``3`` or above, is used to determine whether or not the preset is enabled. For
+example, this can be used to disable a preset on platforms other than Windows.
+``condition`` may be either a boolean, ``null``, or an object. If it is a
+boolean, the boolean indicates whether the preset is enabled or disabled. If it
+is ``null``, the preset is enabled, but the ``null`` condition is not inherited
+by any presets that may inherit from the preset. Sub-conditions (for example in
+a ``not``, ``anyOf``, or ``allOf`` condition) may not be ``null``. If it is an
+object, it has the following fields:
+
+``type``
+
+  A required string with one of the following values:
+
+  ``"const"``
+
+    Indicates that the condition is constant. This is equivalent to using a
+    boolean in place of the object. The condition object will have the
+    following additional fields:
+
+    ``value``
+
+      A required boolean which provides a constant value for the condition's
+      evaluation.
+
+  ``"equals"``
+
+  ``"notEquals"``
+
+    Indicates that the condition compares two strings to see if they are equal
+    (or not equal). The condition object will have the following additional
+    fields:
+
+    ``lhs``
+
+      First string to compare. This field supports macro expansion.
+
+    ``rhs``
+
+      Second string to compare. This field supports macro expansion.
+
+  ``"inList"``
+
+  ``"notInList"``
+
+    Indicates that the condition searches for a string in a list of strings.
+    The condition object will have the following additional fields:
+
+    ``string``
+
+      A required string to search for. This field supports macro expansion.
+
+    ``list``
+
+      A required list of strings to search. This field supports macro
+      expansion, and uses short-circuit evaluation.
+
+  ``"matches"``
+
+  ``"notMatches"``
+
+    Indicates that the condition searches for a regular expression in a string.
+    The condition object will have the following additional fields:
+
+    ``string``
+
+      A required string to search. This field supports macro expansion.
+
+    ``regex``
+
+      A required regular expression to search for. This field supports macro
+      expansion.
+
+  ``"anyOf"``
+
+  ``"allOf"``
+
+    Indicates that the condition is an aggregation of zero or more nested
+    conditions. The condition object will have the following additional fields:
+
+    ``conditions``
+
+      A required array of condition objects. These conditions use short-circuit
+      evaluation.
+
+  ``"not"``
+
+    Indicates that the condition is an inversion of another condition. The
+    condition object will have the following additional fields:
+
+    ``condition``
+
+      A required condition object.
+
 Macro Expansion
 ^^^^^^^^^^^^^^^
 
@@ -822,6 +966,12 @@ Recognized macros include:
   Generator specified in the preset's ``generator`` field. For build and
   test presets, this will evaluate to the generator specified by
   ``configurePreset``.
+
+``${hostSystemName}``
+
+  The name of the host operating system. Contains the same value as
+  :variable:`CMAKE_HOST_SYSTEM_NAME`. This is allowed in preset files
+  specifying version ``3`` or above.
 
 ``${dollar}``
 

@@ -11,15 +11,36 @@ function(run_install_test case)
   run_cmake_command(${case}-build ${CMAKE_COMMAND} --build . --config Debug)
   # Check "all" components.
   set(CMAKE_INSTALL_PREFIX ${RunCMake_TEST_BINARY_DIR}/root-all)
-  run_cmake_command(${case}-all ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DBUILD_TYPE=Debug -P cmake_install.cmake)
+  run_cmake_command(${case}-all ${CMAKE_COMMAND} --install . --prefix ${CMAKE_INSTALL_PREFIX} --config Debug)
+endfunction()
+
+# Function to check the contents of the output files.
+function(check_contents filename contents_regex)
+  if(EXISTS "${CMAKE_INSTALL_PREFIX}/${filename}")
+    file(READ "${CMAKE_INSTALL_PREFIX}/${filename}" contents)
+    if(NOT contents MATCHES "${contents_regex}")
+      string(APPEND RunCMake_TEST_FAILED "File contents:
+  ${contents}
+do not match what we expected:
+  ${contents_regex}
+in file:
+  ${CMAKE_INSTALL_PREFIX}/${filename}\n")
+      set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+    endif()
+  else()
+    string(APPEND RunCMake_TEST_FAILED "File ${CMAKE_INSTALL_PREFIX}/${filename} does not exist")
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+  endif()
 endfunction()
 
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
   if(NOT CMake_INSTALL_NAME_TOOL_BUG)
     run_install_test(macos)
+    run_install_test(macos-rpath)
     run_install_test(macos-unresolved)
     run_install_test(macos-conflict)
     run_install_test(macos-notfile)
+    run_install_test(file-filter)
   endif()
   run_cmake(project)
   run_cmake(badargs1)
@@ -29,6 +50,7 @@ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   run_install_test(windows-unresolved)
   run_install_test(windows-conflict)
   run_install_test(windows-notfile)
+  run_install_test(file-filter)
   run_cmake(project)
   run_cmake(badargs1)
   run_cmake(badargs2)
@@ -41,6 +63,7 @@ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
 
   if(NOT CMAKE_C_COMPILER_ID MATCHES "^XL")
     run_install_test(linux)
+    run_install_test(file-filter)
   endif()
   run_install_test(linux-unresolved)
   run_install_test(linux-conflict)

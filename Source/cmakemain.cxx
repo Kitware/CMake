@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <climits>
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <sstream>
@@ -23,6 +24,7 @@
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageMetadata.h"
 #include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -37,6 +39,7 @@
 #endif
 
 #include "cmsys/Encoding.hxx"
+#include "cmsys/Terminal.h"
 
 namespace {
 #ifndef CMAKE_BOOTSTRAP
@@ -147,10 +150,23 @@ std::string cmakemainGetStack(cmake* cm)
   return msg;
 }
 
-void cmakemainMessageCallback(const std::string& m, const char* /*unused*/,
-                              cmake* cm)
+void cmakemainMessageCallback(const std::string& m,
+                              const cmMessageMetadata& md, cmake* cm)
 {
-  std::cerr << m << cmakemainGetStack(cm) << std::endl;
+#if defined(_WIN32)
+  // FIXME: On Windows we replace cerr's streambuf with a custom
+  // implementation that converts our internal UTF-8 encoding to the
+  // console's encoding.  It also does *not* replace LF with CRLF.
+  // Since stderr does not convert encoding and does convert LF, we
+  // cannot use it to print messages.  Another implementation will
+  // be needed to print colored messages on Windows.
+  static_cast<void>(md);
+  std::cerr << m << cmakemainGetStack(cm) << "\n";
+#else
+  cmsysTerminal_cfprintf(md.desiredColor, stderr, "%s", m.c_str());
+  fflush(stderr); // stderr is buffered in some cases.
+  std::cerr << cmakemainGetStack(cm) << "\n";
+#endif
 }
 
 void cmakemainProgressCallback(const std::string& m, float prog, cmake* cm)
@@ -271,6 +287,7 @@ int do_cmake(int ac, char const* const* av)
                      } },
     CommandArgument{ "-P", "No script specified for argument -P",
                      CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No,
                      [&](std::string const& value) -> bool {
                        workingMode = cmake::SCRIPT_MODE;
                        parsedArgs.emplace_back("-P");
@@ -342,8 +359,8 @@ int do_cmake(int ac, char const* const* av)
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmSystemTools::SetMessageCallback(
-    [&cm](const std::string& msg, const char* title) {
-      cmakemainMessageCallback(msg, title, &cm);
+    [&cm](const std::string& msg, const cmMessageMetadata& md) {
+      cmakemainMessageCallback(msg, md, &cm);
     });
   cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
@@ -476,9 +493,10 @@ int do_build(int ac, char const* const* av)
                        listPresets = true;
                        return true;
                      } },
-    CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne, jLambda },
+    CommandArgument{ "-j", CommandArgument::Values::ZeroOrOne,
+                     CommandArgument::RequiresSeparator::No, jLambda },
     CommandArgument{ "--parallel", CommandArgument::Values::ZeroOrOne,
-                     parallelLambda },
+                     CommandArgument::RequiresSeparator::No, parallelLambda },
     CommandArgument{ "-t", CommandArgument::Values::OneOrMore, targetLambda },
     CommandArgument{ "--target", CommandArgument::Values::OneOrMore,
                      targetLambda },
@@ -532,10 +550,21 @@ int do_build(int ac, char const* const* av)
     for (; i < inputArgs.size() && !nativeOptionsPassed; ++i) {
 
       std::string const& arg = inputArgs[i];
+      bool matched = false;
+      bool parsed = false;
       for (auto const& m : arguments) {
-        if (m.matches(arg) && m.parse(arg, i, inputArgs)) {
+        matched = m.matches(arg);
+        if (matched) {
+          parsed = m.parse(arg, i, inputArgs);
           break;
         }
+      }
+      if (!(matched && parsed)) {
+        dir.clear();
+        if (!matched) {
+          std::cerr << "Unknown argument " << arg << std::endl;
+        }
+        break;
       }
     }
 
@@ -582,7 +611,10 @@ int do_build(int ac, char const* const* av)
   if (dir.empty() && presetName.empty() && !listPresets) {
     /* clang-format off */
     std::cerr <<
-      "Usage: cmake --build [<dir> | --preset <preset>] [options] [-- [native-options]]\n"
+      "Usage: cmake --build <dir>            "
+      " [options] [-- [native-options]]\n"
+      "       cmake --build --preset <preset>"
+      " [options] [-- [native-options]]\n"
       "Options:\n"
       "  <dir>          = Project binary directory to be built.\n"
       "  --preset <preset>, --preset=<preset>\n"
@@ -613,8 +645,8 @@ int do_build(int ac, char const* const* av)
 
   cmake cm(cmake::RoleInternal, cmState::Project);
   cmSystemTools::SetMessageCallback(
-    [&cm](const std::string& msg, const char* title) {
-      cmakemainMessageCallback(msg, title, &cm);
+    [&cm](const std::string& msg, const cmMessageMetadata& md) {
+      cmakemainMessageCallback(msg, md, &cm);
     });
   cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
@@ -806,10 +838,21 @@ int do_install(int ac, char const* const* av)
     for (decltype(inputArgs.size()) i = 0; i < inputArgs.size(); ++i) {
 
       std::string const& arg = inputArgs[i];
+      bool matched = false;
+      bool parsed = false;
       for (auto const& m : arguments) {
-        if (m.matches(arg) && m.parse(arg, i, inputArgs)) {
+        matched = m.matches(arg);
+        if (matched) {
+          parsed = m.parse(arg, i, inputArgs);
           break;
         }
+      }
+      if (!(matched && parsed)) {
+        dir.clear();
+        if (!matched) {
+          std::cerr << "Unknown argument " << arg << std::endl;
+        }
+        break;
       }
     }
   }
@@ -835,8 +878,8 @@ int do_install(int ac, char const* const* av)
   cmake cm(cmake::RoleScript, cmState::Script);
 
   cmSystemTools::SetMessageCallback(
-    [&cm](const std::string& msg, const char* title) {
-      cmakemainMessageCallback(msg, title, &cm);
+    [&cm](const std::string& msg, const cmMessageMetadata& md) {
+      cmakemainMessageCallback(msg, md, &cm);
     });
   cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
@@ -916,8 +959,8 @@ int do_open(int ac, char const* const* av)
 
   cmake cm(cmake::RoleInternal, cmState::Unknown);
   cmSystemTools::SetMessageCallback(
-    [&cm](const std::string& msg, const char* title) {
-      cmakemainMessageCallback(msg, title, &cm);
+    [&cm](const std::string& msg, const cmMessageMetadata& md) {
+      cmakemainMessageCallback(msg, md, &cm);
     });
   cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);

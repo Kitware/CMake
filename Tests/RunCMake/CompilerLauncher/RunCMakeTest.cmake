@@ -1,7 +1,7 @@
 include(RunCMake)
 
 function(run_compiler_launcher lang)
-  # Use a single build tree for tests without cleaning.
+  # Preserve build tree so we can reuse it for the ${lang}-Build subtest below
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${lang}-build)
   set(RunCMake_TEST_NO_CLEAN 1)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
@@ -28,6 +28,9 @@ if(CMake_TEST_CUDA)
 endif()
 if(CMake_TEST_Fortran)
   list(APPEND langs Fortran)
+endif()
+if(CMake_TEST_HIP)
+  list(APPEND langs HIP)
 endif()
 if(CMake_TEST_ISPC)
   list(APPEND langs ISPC)

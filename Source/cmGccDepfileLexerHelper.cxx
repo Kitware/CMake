@@ -12,6 +12,8 @@
 #include "LexerParser/cmGccDepfileLexer.h"
 
 #ifdef _WIN32
+#  include <cctype>
+
 #  include "cmsys/Encoding.h"
 #endif
 
@@ -123,11 +125,21 @@ void cmGccDepfileLexerHelper::sanitizeContent()
     if (it->rules.empty()) {
       it = this->Content.erase(it);
     } else {
-      // Remove empty paths
+      // Remove empty paths and normalize windows paths
       for (auto pit = it->paths.begin(); pit != it->paths.end();) {
         if (pit->empty()) {
           pit = it->paths.erase(pit);
         } else {
+#if defined(_WIN32)
+          // Unescape the colon following the drive letter.
+          // Some versions of GNU compilers can escape this character.
+          // c\:\path must be transformed to c:\path
+          if (pit->size() >= 3 && std::toupper((*pit)[0]) >= 'A' &&
+              std::toupper((*pit)[0]) <= 'Z' && (*pit)[1] == '\\' &&
+              (*pit)[2] == ':') {
+            pit->erase(1, 1);
+          }
+#endif
           ++pit;
         }
       }

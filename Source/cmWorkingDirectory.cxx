@@ -19,7 +19,7 @@ cmWorkingDirectory::~cmWorkingDirectory()
 
 bool cmWorkingDirectory::SetDirectory(std::string const& newdir)
 {
-  if (cmSystemTools::ChangeDirectory(newdir) == 0) {
+  if (cmSystemTools::ChangeDirectory(newdir)) {
     this->ResultCode = 0;
     return true;
   }

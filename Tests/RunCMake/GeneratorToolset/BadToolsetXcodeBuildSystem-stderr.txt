@@ -7,4 +7,4 @@ CMake Error at CMakeLists.txt:[0-9]+ \(project\):
 
     buildsystem=bad
 
-  value is unkonwn.  It must be '1' or '12'\.$
+  value is unknown.  It must be '1' or '12'\.$

@@ -74,7 +74,7 @@ the RPM information (e.g. package license).
   * Default:
 
     - :variable:`CPACK_DEBIAN_PACKAGE_DESCRIPTION` (this may be set already
-      for Debian packaging, so we may as well re-use it).
+      for Debian packaging, so it is used as a fallback).
 
 .. variable:: CPACK_FREEBSD_PACKAGE_WWW
 
@@ -87,7 +87,7 @@ the RPM information (e.g. package license).
 
    - :variable:`CMAKE_PROJECT_HOMEPAGE_URL`, or if that is not set,
      :variable:`CPACK_DEBIAN_PACKAGE_HOMEPAGE` (this may be set already
-     for Debian packaging, so we may as well re-use it).
+     for Debian packaging, so it is used as a fallback).
 
   .. versionadded:: 3.12
     The ``CMAKE_PROJECT_HOMEPAGE_URL`` variable.
