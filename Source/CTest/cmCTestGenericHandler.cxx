@@ -68,10 +68,8 @@ void cmCTestGenericHandler::Initialize()
 {
   this->AppendXML = false;
   this->TestLoad = 0;
-  this->Options.clear();
-  for (auto const& po : this->PersistentOptions) {
-    this->Options[po.first] = po.second;
-  }
+  this->Options = this->PersistentOptions;
+  this->MultiOptions = this->PersistentMultiOptions;
 }
 
 const char* cmCTestGenericHandler::GetOption(const std::string& op)
