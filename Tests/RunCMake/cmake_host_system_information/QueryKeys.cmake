@@ -1,18 +1,7 @@
-set(BadArg1-RESULT 1)
-set(BadArg1-STDERR "missing RESULT specification")
-set(BadArg2-RESULT 1)
-set(BadArg2-STDERR "missing QUERY specification")
-set(BadArg3-RESULT 1)
-set(BadArg3-STDERR "does not recognize <key> FOOBAR")
-set(QueryList-RESULT 0)
-set(QueryList-STDERR "\\[[0-9]+;[0-9]+\\]")
-
 function(try_and_print key)
-	cmake_host_system_information(RESULT RESULT QUERY ${key})
-	message(STATUS "[${key}] [${RESULT}]")
+  cmake_host_system_information(RESULT RESULT QUERY ${key})
+  message(STATUS "${key}=`${RESULT}`")
 endfunction()
-
-message("CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
 
 try_and_print(NUMBER_OF_LOGICAL_CORES)
 try_and_print(NUMBER_OF_PHYSICAL_CORES)
@@ -41,12 +30,3 @@ try_and_print(OS_NAME)
 try_and_print(OS_RELEASE)
 try_and_print(OS_VERSION)
 try_and_print(OS_PLATFORM)
-
-include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
-
-check_cmake_test(CMakeHostSystemInformation
-	BadArg1
-	BadArg2
-	BadArg3
-	QueryList
-)
