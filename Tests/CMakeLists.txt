@@ -39,6 +39,13 @@ set(ENV{HOME} \"${TEST_HOME}\")
 ")
 endif()
 
+# Suppress generator deprecation warnings in test suite.
+if(CMAKE_GENERATOR MATCHES "^Visual Studio 10 2010")
+  set(TEST_WARN_VS10_CODE "set(ENV{CMAKE_WARN_VS10} OFF)")
+else()
+  set(TEST_WARN_VS10_CODE "")
+endif()
+
 # 3.9 or later provides a definitive answer to whether we are multi-config
 # through a global property. Prior to 3.9, CMAKE_CONFIGURATION_TYPES being set
 # is assumed to mean multi-config, but developers might modify it so it is

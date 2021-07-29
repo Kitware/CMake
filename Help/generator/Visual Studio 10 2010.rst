@@ -1,7 +1,14 @@
 Visual Studio 10 2010
 ---------------------
 
-Generates Visual Studio 10 (VS 2010) project files.
+Deprecated.  Generates Visual Studio 10 (VS 2010) project files.
+
+.. note::
+  This generator is deprecated and will be removed in a future version
+  of CMake.  It will still be possible to build with VS 10 2010 tools
+  using the :generator:`Visual Studio 11 2012` (or above) generator
+  with :variable:`CMAKE_GENERATOR_TOOLSET` set to ``v100``, or by
+  using the :generator:`NMake Makefiles` generator.
 
 For compatibility with CMake versions prior to 3.0, one may specify this
 generator using the name ``Visual Studio 10`` without the year component.
