@@ -194,6 +194,19 @@ add_test(
 endfunction()
 run_completion_status()
 
+# Verify that running ctest_test() multiple times with different label arguments
+# doesn't break.
+function(run_changing_labels)
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME a COMMAND ${CMAKE_COMMAND} -E true)
+set_property(TEST a PROPERTY LABELS a)
+add_test(NAME b COMMAND ${CMAKE_COMMAND} -E true)
+set_property(TEST b PROPERTY LABELS b)
+  ]])
+  run_ctest(TestChangingLabels)
+endfunction()
+run_changing_labels()
+
 # Verify that test output can add additional labels
 function(run_extra_labels)
   set(CASE_CMAKELISTS_SUFFIX_CODE [[
