@@ -287,6 +287,8 @@ std::map<std::string, std::string> GetOSReleaseVariables(
 
   // Ugh, it could be some pre-os-release distro.
   // Lets try some fallback getters.
+  // See also:
+  //  - http://linuxmafia.com/faq/Admin/release-files.html
 
   // 1. CMake provided
   cmsys::Glob gl;
@@ -358,8 +360,9 @@ std::map<std::string, std::string> GetOSReleaseVariables(
       data.emplace(std::move(key), std::move(value));
     }
 
+    // Try 'till some script can get anything
     if (!data.empty()) {
-      // Try 'till some script can get anything
+      data.emplace("USED_FALLBACK_SCRIPT", script);
       break;
     }
   }
