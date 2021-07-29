@@ -151,7 +151,7 @@ BLAS/LAPACK Vendors
 ``PhiPACK``
   Portable High Performance ANSI C (PHiPAC)
 
-``SCSL``
+``SCSL``, ``SCSL_mp``
   Scientific Computing Software Library
 
 ``SGIMATH``
@@ -863,19 +863,27 @@ if(BLA_VENDOR STREQUAL "SunPerf" OR BLA_VENDOR STREQUAL "All")
 endif()
 
 # BLAS in SCSL library?  (SGI/Cray Scientific Library)
-if(BLA_VENDOR STREQUAL "SCSL" OR BLA_VENDOR STREQUAL "All")
+if(BLA_VENDOR MATCHES "SCSL" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_scsl_lib "scs")
+
+  if(BLA_VENDOR MATCHES "_mp")
+    set(_blas_scsl_lib "${_blas_scsl_lib}_mp")
+  endif()
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "scsl"
+      "${_blas_scsl_lib}"
       ""
       ""
       ""
       )
   endif()
+
+  unset(_blas_scsl_lib)
 endif()
 
 # BLAS in SGIMATH library?
