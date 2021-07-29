@@ -17,6 +17,7 @@
 #  include "cmAlgorithms.h"
 #  include "cmGlobalGenerator.h"
 #  include "cmGlobalVisualStudioVersionedGenerator.h"
+#  include "cmStringAlgorithms.h"
 #  include "cmSystemTools.h"
 #  include "cmVSSetupHelper.h"
 #  define HAVE_VS_SETUP_HELPER
@@ -141,58 +142,27 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
 cm::optional<std::string> GetValue(cmExecutionStatus& status,
                                    std::string const& key)
 {
-  std::string value;
-  if (key == "VS_15_DIR") {
-    // If generating for the VS 15 IDE, use the same instance.
-    cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
-    if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 15 ")) {
-      cmGlobalVisualStudioVersionedGenerator* vs15gen =
-        static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
-      if (vs15gen->GetVSInstance(value)) {
-        return value;
-      }
-    }
+  auto* const gg = status.GetMakefile().GetGlobalGenerator();
+  for (auto vs : { 15, 16, 17 }) {
+    if (key == cmStrCat("VS_"_s, vs, "_DIR"_s)) {
+      std::string value;
+      // If generating for the VS nn IDE, use the same instance.
 
-    // Otherwise, find a VS 15 instance ourselves.
-    cmVSSetupAPIHelper vsSetupAPIHelper(15);
-    if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
-      cmSystemTools::ConvertToUnixSlashes(value);
-    }
-    return value;
-  } else if (key == "VS_16_DIR") {
-    // If generating for the VS 16 IDE, use the same instance.
-    cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
-    if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 16 ")) {
-      cmGlobalVisualStudioVersionedGenerator* vs16gen =
-        static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
-      if (vs16gen->GetVSInstance(value)) {
-        return value;
+      if (cmHasPrefix(gg->GetName(), cmStrCat("Visual Studio "_s, vs, ' '))) {
+        cmGlobalVisualStudioVersionedGenerator* vsNNgen =
+          static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
+        if (vsNNgen->GetVSInstance(value)) {
+          return value;
+        }
       }
-    }
 
-    // Otherwise, find a VS 16 instance ourselves.
-    cmVSSetupAPIHelper vsSetupAPIHelper(16);
-    if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
-      cmSystemTools::ConvertToUnixSlashes(value);
-    }
-    return value;
-  } else if (key == "VS_17_DIR") {
-    // If generating for the VS 17 IDE, use the same instance.
-    cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
-    if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 17 ")) {
-      cmGlobalVisualStudioVersionedGenerator* vs17gen =
-        static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
-      if (vs17gen->GetVSInstance(value)) {
-        return value;
+      // Otherwise, find a VS nn instance ourselves.
+      cmVSSetupAPIHelper vsSetupAPIHelper(vs);
+      if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
+        cmSystemTools::ConvertToUnixSlashes(value);
       }
+      return value;
     }
-
-    // Otherwise, find a VS 17 instance ourselves.
-    cmVSSetupAPIHelper vsSetupAPIHelper(17);
-    if (vsSetupAPIHelper.GetVSInstanceInfo(value)) {
-      cmSystemTools::ConvertToUnixSlashes(value);
-    }
-    return value;
   }
 
   return {};
