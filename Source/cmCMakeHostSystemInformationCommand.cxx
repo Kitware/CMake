@@ -5,6 +5,8 @@
 #include <cstddef>
 
 #include <cm/optional>
+#include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmsys/SystemInformation.hxx"
 
@@ -40,96 +42,96 @@ std::string ValueToString(std::string const& value)
 cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
                                    std::string const& key)
 {
-  if (key == "NUMBER_OF_LOGICAL_CORES") {
+  if (key == "NUMBER_OF_LOGICAL_CORES"_s) {
     return ValueToString(info.GetNumberOfLogicalCPU());
   }
-  if (key == "NUMBER_OF_PHYSICAL_CORES") {
+  if (key == "NUMBER_OF_PHYSICAL_CORES"_s) {
     return ValueToString(info.GetNumberOfPhysicalCPU());
   }
-  if (key == "HOSTNAME") {
+  if (key == "HOSTNAME"_s) {
     return ValueToString(info.GetHostname());
   }
-  if (key == "FQDN") {
+  if (key == "FQDN"_s) {
     return ValueToString(info.GetFullyQualifiedDomainName());
   }
-  if (key == "TOTAL_VIRTUAL_MEMORY") {
+  if (key == "TOTAL_VIRTUAL_MEMORY"_s) {
     return ValueToString(info.GetTotalVirtualMemory());
   }
-  if (key == "AVAILABLE_VIRTUAL_MEMORY") {
+  if (key == "AVAILABLE_VIRTUAL_MEMORY"_s) {
     return ValueToString(info.GetAvailableVirtualMemory());
   }
-  if (key == "TOTAL_PHYSICAL_MEMORY") {
+  if (key == "TOTAL_PHYSICAL_MEMORY"_s) {
     return ValueToString(info.GetTotalPhysicalMemory());
   }
-  if (key == "AVAILABLE_PHYSICAL_MEMORY") {
+  if (key == "AVAILABLE_PHYSICAL_MEMORY"_s) {
     return ValueToString(info.GetAvailablePhysicalMemory());
   }
-  if (key == "IS_64BIT") {
+  if (key == "IS_64BIT"_s) {
     return ValueToString(info.Is64Bits());
   }
-  if (key == "HAS_FPU") {
+  if (key == "HAS_FPU"_s) {
     return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_FPU));
   }
-  if (key == "HAS_MMX") {
+  if (key == "HAS_MMX"_s) {
     return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_MMX));
   }
-  if (key == "HAS_MMX_PLUS") {
+  if (key == "HAS_MMX_PLUS"_s) {
     return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_MMX_PLUS));
   }
-  if (key == "HAS_SSE") {
+  if (key == "HAS_SSE"_s) {
     return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE));
   }
-  if (key == "HAS_SSE2") {
+  if (key == "HAS_SSE2"_s) {
     return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE2));
   }
-  if (key == "HAS_SSE_FP") {
+  if (key == "HAS_SSE_FP"_s) {
     return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SSE_FP));
   }
-  if (key == "HAS_SSE_MMX") {
+  if (key == "HAS_SSE_MMX"_s) {
     return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SSE_MMX));
   }
-  if (key == "HAS_AMD_3DNOW") {
+  if (key == "HAS_AMD_3DNOW"_s) {
     return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW));
   }
-  if (key == "HAS_AMD_3DNOW_PLUS") {
+  if (key == "HAS_AMD_3DNOW_PLUS"_s) {
     return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW_PLUS));
   }
-  if (key == "HAS_IA64") {
+  if (key == "HAS_IA64"_s) {
     return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_IA64));
   }
-  if (key == "HAS_SERIAL_NUMBER") {
+  if (key == "HAS_SERIAL_NUMBER"_s) {
     return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SERIALNUMBER));
   }
-  if (key == "PROCESSOR_NAME") {
+  if (key == "PROCESSOR_NAME"_s) {
     return ValueToString(info.GetExtendedProcessorName());
   }
-  if (key == "PROCESSOR_DESCRIPTION") {
+  if (key == "PROCESSOR_DESCRIPTION"_s) {
     return info.GetCPUDescription();
   }
-  if (key == "PROCESSOR_SERIAL_NUMBER") {
+  if (key == "PROCESSOR_SERIAL_NUMBER"_s) {
     return ValueToString(info.GetProcessorSerialNumber());
   }
-  if (key == "OS_NAME") {
+  if (key == "OS_NAME"_s) {
     return ValueToString(info.GetOSName());
   }
-  if (key == "OS_RELEASE") {
+  if (key == "OS_RELEASE"_s) {
     return ValueToString(info.GetOSRelease());
   }
-  if (key == "OS_VERSION") {
+  if (key == "OS_VERSION"_s) {
     return ValueToString(info.GetOSVersion());
   }
-  if (key == "OS_PLATFORM") {
+  if (key == "OS_PLATFORM"_s) {
     return ValueToString(info.GetOSPlatform());
   }
   return {};
@@ -205,7 +207,7 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
 {
   std::size_t current_index = 0;
 
-  if (args.size() < (current_index + 2) || args[current_index] != "RESULT") {
+  if (args.size() < (current_index + 2) || args[current_index] != "RESULT"_s) {
     status.SetError("missing RESULT specification.");
     return false;
   }
@@ -213,7 +215,7 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
   auto const& variable = args[current_index + 1];
   current_index += 2;
 
-  if (args.size() < (current_index + 2) || args[current_index] != "QUERY") {
+  if (args.size() < (current_index + 2) || args[current_index] != "QUERY"_s) {
     status.SetError("missing QUERY specification");
     return false;
   }
