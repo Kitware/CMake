@@ -1,0 +1,9 @@
+# Comment string gonna be ignored
+NON_SPACE_VALUE=Blah-blah-blah
+QUOTED_VALUE='\'The\' value in single \'quotes\''
+QUOTED_VALUE_STIPPED_COMMENT='The value in single quotes'# The comment right after `'`
+DBL_QUOTED_VALUE="\"The\" value in double \"quotes\""
+DBL_QUOTED_VALUE_STIPPED_COMMENT="Blah blah blah"# The comment right after `'`
+THE_URL_WITH_ANCHOR_TEST="https://blah.blah/resource#anchor" # And a comment after
+A_LIST_LIKE_VARIABLE='satu;dua;tiga'
+INCORRECT_ESCAPE_IGNORED=\'This line gonna be ignored'

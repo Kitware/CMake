@@ -1,0 +1,7 @@
+-- UNIT_TEST_A_LIST_LIKE_VARIABLE=`satu;dua;tiga`
+-- UNIT_TEST_DBL_QUOTED_VALUE=`"The" value in double "quotes"`
+-- UNIT_TEST_DBL_QUOTED_VALUE_STIPPED_COMMENT=`Blah blah blah`
+-- UNIT_TEST_NON_SPACE_VALUE=`Blah-blah-blah`
+-- UNIT_TEST_QUOTED_VALUE=`'The' value in single 'quotes'`
+-- UNIT_TEST_QUOTED_VALUE_STIPPED_COMMENT=`The value in single quotes`
+-- UNIT_TEST_THE_URL_WITH_ANCHOR_TEST=`https://blah.blah/resource#anchor`

@@ -132,7 +132,52 @@ queried.  The list of queried values is stored in ``<variable>``.
 
   See :variable:`CMAKE_HOST_SYSTEM_PROCESSOR`
 
+For Linux distributions additional ``<key>`` values are available to get operating
+system identification as described in the `man 5 os-release`_.
+
+``DISTRIB_INFO``
+  .. versionadded:: 3.22
+
+  Read :file:`/etc/os-release` file and define the given ``<variable>``
+  into a list of read variables
+
+``DISTRIB_<name>``
+  .. versionadded:: 3.22
+
+  Get the ``<name>`` variable if it exists in the :file:`/etc/os-release` file
+
+  Example:
+
+  .. code-block:: cmake
+
+      cmake_host_system_information(RESULT PRETTY_NAME QUERY DISTRIB_PRETTY_NAME)
+      message(STATUS "${PRETTY_NAME}")
+
+      cmake_host_system_information(RESULT DISTRO QUERY DISTRIB_INFO)
+
+      foreach(VAR IN LISTS DISTRO)
+        message(STATUS "${VAR}=`${${VAR}}`")
+      endforeach()
+
+
+  Output::
+
+    -- Ubuntu 20.04.2 LTS
+    -- DISTRO_BUG_REPORT_URL=`https://bugs.launchpad.net/ubuntu/`
+    -- DISTRO_HOME_URL=`https://www.ubuntu.com/`
+    -- DISTRO_ID=`ubuntu`
+    -- DISTRO_ID_LIKE=`debian`
+    -- DISTRO_NAME=`Ubuntu`
+    -- DISTRO_PRETTY_NAME=`Ubuntu 20.04.2 LTS`
+    -- DISTRO_PRIVACY_POLICY_URL=`https://www.ubuntu.com/legal/terms-and-policies/privacy-policy`
+    -- DISTRO_SUPPORT_URL=`https://help.ubuntu.com/`
+    -- DISTRO_UBUNTU_CODENAME=`focal`
+    -- DISTRO_VERSION=`20.04.2 LTS (Focal Fossa)`
+    -- DISTRO_VERSION_CODENAME=`focal`
+    -- DISTRO_VERSION_ID=`20.04`
 
 .. rubric:: Footnotes
 
 .. [#mebibytes] One MiB (mebibyte) is equal to 1024x1024 bytes.
+
+.. _man 5 os-release: https://www.freedesktop.org/software/systemd/man/os-release.html

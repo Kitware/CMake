@@ -2,28 +2,37 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeHostSystemInformationCommand.h"
 
-#include <cstddef>
+#include <cassert>
+#include <cctype>
+#include <initializer_list>
+#include <map>
+#include <string>
+#include <type_traits>
+#include <utility>
 
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 #ifdef _WIN32
 #  include "cmAlgorithms.h"
 #  include "cmGlobalGenerator.h"
 #  include "cmGlobalVisualStudioVersionedGenerator.h"
-#  include "cmStringAlgorithms.h"
-#  include "cmSystemTools.h"
 #  include "cmVSSetupHelper.h"
 #  define HAVE_VS_SETUP_HELPER
 #endif
 
 namespace {
+std::string const DELIM[2] = { {}, ";" };
+
 // BEGIN Private functions
 std::string ValueToString(std::size_t const value)
 {
@@ -138,6 +147,177 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
   return {};
 }
 
+#ifdef __linux__
+cm::optional<std::pair<std::string, std::string>> ParseOSReleaseLine(
+  std::string const& line)
+{
+  std::string key;
+  std::string value;
+
+  char prev = 0;
+  enum ParserState
+  {
+    PARSE_KEY_1ST,
+    PARSE_KEY,
+    FOUND_EQ,
+    PARSE_SINGLE_QUOTE_VALUE,
+    PARSE_DBL_QUOTE_VALUE,
+    PARSE_VALUE,
+    IGNORE_REST
+  } state = PARSE_KEY_1ST;
+
+  for (auto ch : line) {
+    switch (state) {
+      case PARSE_KEY_1ST:
+        if (std::isalpha(ch) || ch == '_') {
+          key += ch;
+          state = PARSE_KEY;
+        } else if (!std::isspace(ch)) {
+          state = IGNORE_REST;
+        }
+        break;
+
+      case PARSE_KEY:
+        if (ch == '=') {
+          state = FOUND_EQ;
+        } else if (std::isalnum(ch) || ch == '_') {
+          key += ch;
+        } else {
+          state = IGNORE_REST;
+        }
+        break;
+
+      case FOUND_EQ:
+        switch (ch) {
+          case '\'':
+            state = PARSE_SINGLE_QUOTE_VALUE;
+            break;
+          case '"':
+            state = PARSE_DBL_QUOTE_VALUE;
+            break;
+          case '#':
+          case '\\':
+            state = IGNORE_REST;
+            break;
+          default:
+            value += ch;
+            state = PARSE_VALUE;
+        }
+        break;
+
+      case PARSE_SINGLE_QUOTE_VALUE:
+        if (ch == '\'') {
+          if (prev != '\\') {
+            state = IGNORE_REST;
+          } else {
+            assert(!value.empty());
+            value[value.size() - 1] = ch;
+          }
+        } else {
+          value += ch;
+        }
+        break;
+
+      case PARSE_DBL_QUOTE_VALUE:
+        if (ch == '"') {
+          if (prev != '\\') {
+            state = IGNORE_REST;
+          } else {
+            assert(!value.empty());
+            value[value.size() - 1] = ch;
+          }
+        } else {
+          value += ch;
+        }
+        break;
+
+      case PARSE_VALUE:
+        if (ch == '#' || std::isspace(ch)) {
+          state = IGNORE_REST;
+        } else {
+          value += ch;
+        }
+        break;
+
+      default:
+        // Unexpected os-release parser state!
+        state = IGNORE_REST;
+        break;
+    }
+
+    if (state == IGNORE_REST) {
+      break;
+    }
+    prev = ch;
+  }
+  if (!(key.empty() || value.empty())) {
+    return std::make_pair(key, value);
+  }
+  return {};
+}
+
+std::map<std::string, std::string> GetOSReleaseVariables(
+  cmExecutionStatus& status)
+{
+  const auto& sysroot =
+    status.GetMakefile().GetSafeDefinition("CMAKE_SYSROOT");
+
+  std::map<std::string, std::string> data;
+  // Based on
+  // https://www.freedesktop.org/software/systemd/man/os-release.html
+  for (auto name : { "/etc/os-release"_s, "/usr/lib/os-release"_s }) {
+    const auto& filename = cmStrCat(sysroot, name);
+    if (cmSystemTools::FileExists(filename)) {
+      cmsys::ifstream fin(filename.c_str());
+      for (std::string line; !std::getline(fin, line).fail();) {
+        auto kv = ParseOSReleaseLine(line);
+        if (kv.has_value()) {
+          data.emplace(kv.value());
+        }
+      }
+      break;
+    }
+  }
+  return data;
+}
+
+cm::optional<std::string> GetValue(cmExecutionStatus& status,
+                                   std::string const& key,
+                                   std::string const& variable)
+{
+  const auto prefix = "DISTRIB_"_s;
+  if (!cmHasPrefix(key, prefix)) {
+    return {};
+  }
+
+  static const std::map<std::string, std::string> s_os_release =
+    GetOSReleaseVariables(status);
+
+  auto& makefile = status.GetMakefile();
+
+  const std::string subkey =
+    key.substr(prefix.size(), key.size() - prefix.size());
+  if (subkey == "INFO"_s) {
+    std::string vars;
+    for (const auto& kv : s_os_release) {
+      auto cmake_var_name = cmStrCat(variable, '_', kv.first);
+      vars += DELIM[!vars.empty()] + cmake_var_name;
+      makefile.AddDefinition(cmake_var_name, kv.second);
+    }
+    return cm::optional<std::string>(std::move(vars));
+  }
+
+  // Query individual variable
+  const auto it = s_os_release.find(subkey);
+  if (it != s_os_release.cend()) {
+    return it->second;
+  }
+
+  // NOTE Empty string means requested variable not set
+  return std::string{};
+}
+#endif
+
 #ifdef HAVE_VS_SETUP_HELPER
 cm::optional<std::string> GetValue(cmExecutionStatus& status,
                                    std::string const& key)
@@ -201,14 +381,19 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
 
   std::string result_list;
   for (auto i = current_index + 1; i < args.size(); ++i) {
+    result_list += DELIM[!result_list.empty()];
+
     auto const& key = args[i];
-    if (i != current_index + 1) {
-      result_list += ";";
-    }
     auto value = GetValue(info, key);
     if (!value) {
 #ifdef HAVE_VS_SETUP_HELPER
       value = GetValue(status, key);
+      if (!value) {
+        status.SetError("does not recognize <key> " + key);
+        return false;
+      }
+#elif defined(__linux__)
+      value = GetValue(status, key, variable);
       if (!value) {
         status.SetError("does not recognize <key> " + key);
         return false;
