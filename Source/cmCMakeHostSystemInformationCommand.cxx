@@ -439,6 +439,21 @@ cm::optional<std::string> GetValue(cmExecutionStatus& status,
   return {};
 }
 #endif
+
+cm::optional<std::string> GetValueChained()
+{
+  return {};
+}
+
+template <typename GetterFn, typename... Next>
+cm::optional<std::string> GetValueChained(GetterFn current, Next... chain)
+{
+  auto value = current();
+  if (value.has_value()) {
+    return value;
+  }
+  return GetValueChained(chain...);
+}
 // END Private functions
 } // anonymous namespace
 
@@ -475,24 +490,21 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
     result_list += DELIM[!result_list.empty()];
 
     auto const& key = args[i];
-    auto value = GetValue(info, key);
-    if (!value) {
+    // clang-format off
+    auto value =
+      GetValueChained(
+          [&]() { return GetValue(info, key); }
+#ifdef __linux__
+        , [&]() { return GetValue(status, key, variable); }
+#endif
 #ifdef HAVE_VS_SETUP_HELPER
-      value = GetValue(status, key);
-      if (!value) {
-        status.SetError("does not recognize <key> " + key);
-        return false;
-      }
-#elif defined(__linux__)
-      value = GetValue(status, key, variable);
-      if (!value) {
-        status.SetError("does not recognize <key> " + key);
-        return false;
-      }
-#else
+        , [&]() { return GetValue(status, key); }
+#endif
+        );
+    // clang-format on
+    if (!value) {
       status.SetError("does not recognize <key> " + key);
       return false;
-#endif
     }
     result_list += value.value();
   }
