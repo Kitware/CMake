@@ -11,9 +11,7 @@ function(set_spec_script_if_enabled TYPE PACKAGE_NAME VAR)
     if(PACKAGE_NAME)
       set(PACKAGE_NAME " -n ${PACKAGE_NAME}")
     endif()
-    set(${TYPE}_
-      "%${TYPE}${PACKAGE_NAME}\n"
-      "${VAR}\n" PARENT_SCOPE)
+    set(${TYPE}_ "%${TYPE}${PACKAGE_NAME}\n${VAR}\n" PARENT_SCOPE)
   else()
     set(${TYPE} "" PARENT_SCOPE)
   endif()
