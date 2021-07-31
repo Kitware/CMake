@@ -105,6 +105,8 @@ on macOS:
 
 .. variable:: CPACK_DMG_FILESYSTEM
 
+ .. versionadded:: 3.21
+
  The filesystem format. Common values are ``APFS`` and ``HFS+``.
  See ``man hdiutil`` for a full list of supported formats.
  Defaults to ``HFS+``.
