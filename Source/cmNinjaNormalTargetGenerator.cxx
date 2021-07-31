@@ -1156,7 +1156,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
   this->AddModuleDefinitionFlag(linkLineComputer.get(), vars["LINK_FLAGS"],
                                 config);
-  if (gt->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
+  if (gt->GetPropertyAsBool("LINK_WHAT_YOU_USE") &&
+      (gt->GetType() == cmStateEnums::TargetType::EXECUTABLE ||
+       gt->GetType() == cmStateEnums::TargetType::SHARED_LIBRARY ||
+       gt->GetType() == cmStateEnums::TargetType::MODULE_LIBRARY)) {
     vars["LINK_FLAGS"] += " -Wl,--no-as-needed";
   }
   vars["LINK_FLAGS"] = globalGen->EncodeLiteral(vars["LINK_FLAGS"]);
