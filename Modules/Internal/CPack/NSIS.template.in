@@ -540,7 +540,7 @@ FunctionEnd
   @CPACK_NSIS_INSTALLER_WELCOME_TITLE_3LINES_CODE@
   !insertmacro MUI_PAGE_WELCOME
 
-  !insertmacro MUI_PAGE_LICENSE "@CPACK_RESOURCE_FILE_LICENSE@"
+  @CPACK_NSIS_LICENSE_PAGE@
   Page custom InstallOptionsPage
   !insertmacro MUI_PAGE_DIRECTORY
 
