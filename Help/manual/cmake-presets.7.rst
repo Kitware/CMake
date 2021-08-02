@@ -187,8 +187,9 @@ that may contain the following fields:
   An optional string representing the path to the toolchain file.
   This field supports `macro expansion`_. If a relative path is specified,
   it is calculated relative to the build directory, and if not found,
-  relative to the source directory. Takes precedence over any `CMAKE_TOOLCHAIN_FILE`
-  value. This is allowed in preset files specifying version ``3`` or above.
+  relative to the source directory. This field takes precedence over any
+  :variable:`CMAKE_TOOLCHAIN_FILE` value. It is allowed in preset files
+  specifying version ``3`` or above.
 
 ``binaryDir``
 
