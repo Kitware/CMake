@@ -355,15 +355,7 @@ bool cmConditionEvaluator::IsKeyword(
 bool cmConditionEvaluator::GetBooleanValue(
   cmExpandedCommandArgument& arg) const
 {
-  // Check basic constants.
-  if (arg == "0") {
-    return false;
-  }
-  if (arg == "1") {
-    return true;
-  }
-
-  // Check named constants.
+  // Check basic and named constants.
   if (cmIsOn(arg.GetValue())) {
     return true;
   }
