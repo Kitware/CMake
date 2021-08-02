@@ -3,7 +3,12 @@
 
 #include "cmFileInstaller.h"
 
+#include <map>
 #include <sstream>
+#include <utility>
+
+#include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cm_sys_stat.h"
 
@@ -18,6 +23,7 @@ using namespace cmFSPermissions;
 cmFileInstaller::cmFileInstaller(cmExecutionStatus& status)
   : cmFileCopier(status, "INSTALL")
   , InstallType(cmInstallType_FILES)
+  , InstallMode(cmInstallMode::COPY)
   , Optional(false)
   , MessageAlways(false)
   , MessageLazy(false)
@@ -82,6 +88,93 @@ bool cmFileInstaller::Install(const std::string& fromFile,
   return this->cmFileCopier::Install(fromFile, toFile);
 }
 
+bool cmFileInstaller::InstallFile(const std::string& fromFile,
+                                  const std::string& toFile,
+                                  MatchProperties match_properties)
+{
+  if (this->InstallMode == cmInstallMode::COPY) {
+    return this->cmFileCopier::InstallFile(fromFile, toFile, match_properties);
+  }
+
+  std::string newFromFile;
+
+  if (this->InstallMode == cmInstallMode::REL_SYMLINK ||
+      this->InstallMode == cmInstallMode::REL_SYMLINK_OR_COPY ||
+      this->InstallMode == cmInstallMode::SYMLINK ||
+      this->InstallMode == cmInstallMode::SYMLINK_OR_COPY) {
+    // Try to get a relative path.
+    std::string toDir = cmSystemTools::GetParentDirectory(toFile);
+    newFromFile = cmSystemTools::ForceToRelativePath(toDir, fromFile);
+
+    // Double check that we can restore the original path.
+    std::string reassembled =
+      cmSystemTools::CollapseFullPath(newFromFile, toDir);
+    if (!cmSystemTools::ComparePath(reassembled, fromFile)) {
+      if (this->InstallMode == cmInstallMode::SYMLINK ||
+          this->InstallMode == cmInstallMode::SYMLINK_OR_COPY) {
+        // User does not mind, silently proceed with absolute path.
+        newFromFile = fromFile;
+      } else if (this->InstallMode == cmInstallMode::REL_SYMLINK_OR_COPY) {
+        // User expects a relative symbolic link or a copy.
+        // Since an absolute symlink won't do, copy instead.
+        return this->cmFileCopier::InstallFile(fromFile, toFile,
+                                               match_properties);
+      } else {
+        // We cannot meet user's expectation (REL_SYMLINK)
+        auto e = cmStrCat(this->Name,
+                          " cannot determine relative path for symlink to \"",
+                          newFromFile, "\" at \"", toFile, "\".");
+        this->Status.SetError(e);
+        return false;
+      }
+    }
+  } else {
+    newFromFile = fromFile; // stick with absolute path
+  }
+
+  // Compare the symlink value to that at the destination if not
+  // always installing.
+  bool copy = true;
+  if (!this->Always) {
+    std::string oldSymlinkTarget;
+    if (cmSystemTools::ReadSymlink(toFile, oldSymlinkTarget)) {
+      if (newFromFile == oldSymlinkTarget) {
+        copy = false;
+      }
+    }
+  }
+
+  // Inform the user about this file installation.
+  this->ReportCopy(toFile, TypeLink, copy);
+
+  if (copy) {
+    // Remove the destination file so we can always create the symlink.
+    cmSystemTools::RemoveFile(toFile);
+
+    // Create destination directory if it doesn't exist
+    cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(toFile));
+
+    // Create the symlink.
+    if (!cmSystemTools::CreateSymlink(newFromFile, toFile)) {
+      if (this->InstallMode == cmInstallMode::ABS_SYMLINK_OR_COPY ||
+          this->InstallMode == cmInstallMode::REL_SYMLINK_OR_COPY ||
+          this->InstallMode == cmInstallMode::SYMLINK_OR_COPY) {
+        // Failed to create a symbolic link, fall back to copying.
+        return this->cmFileCopier::InstallFile(newFromFile, toFile,
+                                               match_properties);
+      }
+
+      auto e = cmStrCat(this->Name, " cannot create symlink to \"",
+                        newFromFile, "\" at \"", toFile,
+                        "\": ", cmSystemTools::GetLastSystemError(), "\".");
+      this->Status.SetError(e);
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void cmFileInstaller::DefaultFilePermissions()
 {
   this->cmFileCopier::DefaultFilePermissions();
@@ -139,6 +232,31 @@ bool cmFileInstaller::Parse(std::vector<std::string> const& args)
                           "MESSAGE_LAZY, and MESSAGE_NEVER "
                           "are mutually exclusive.");
     return false;
+  }
+
+  static const std::map<cm::string_view, cmInstallMode> install_mode_dict{
+    { "ABS_SYMLINK"_s, cmInstallMode::ABS_SYMLINK },
+    { "ABS_SYMLINK_OR_COPY"_s, cmInstallMode::ABS_SYMLINK_OR_COPY },
+    { "REL_SYMLINK"_s, cmInstallMode::REL_SYMLINK },
+    { "REL_SYMLINK_OR_COPY"_s, cmInstallMode::REL_SYMLINK_OR_COPY },
+    { "SYMLINK"_s, cmInstallMode::SYMLINK },
+    { "SYMLINK_OR_COPY"_s, cmInstallMode::SYMLINK_OR_COPY }
+  };
+
+  std::string install_mode;
+  cmSystemTools::GetEnv("CMAKE_INSTALL_MODE", install_mode);
+  if (install_mode.empty() || install_mode == "COPY"_s) {
+    this->InstallMode = cmInstallMode::COPY;
+  } else {
+    auto it = install_mode_dict.find(install_mode);
+    if (it != install_mode_dict.end()) {
+      this->InstallMode = it->second;
+    } else {
+      auto e = cmStrCat("Unrecognized value '", install_mode,
+                        "' for environment variable CMAKE_INSTALL_MODE");
+      this->Status.SetError(e);
+      return false;
+    }
   }
 
   return true;
