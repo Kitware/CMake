@@ -26,6 +26,7 @@ macro(rebuild buildName)
 endmacro()
 
 configure_file("${testProjectTemplateDir}/mocwidget.h" "${testProjectSrc}/mocwidget.h" COPYONLY)
+configure_file("${testProjectTemplateDir}/mainwindow.h" "${testProjectSrc}/mainwindow.h" COPYONLY)
 configure_file("${testProjectTemplateDir}/main.cpp" "${testProjectSrc}/main.cpp" COPYONLY)
 configure_file("${testProjectTemplateDir}/subdir/subdircheck.cpp" "${testProjectSrc}/subdir/subdircheck.cpp" COPYONLY)
 configure_file("${testProjectTemplateDir}/CMakeLists.txt.in" "${testProjectSrc}/CMakeLists.txt" @ONLY)
@@ -103,3 +104,15 @@ execute_process(COMMAND "${testProjectBinDir}/${extra_bin_path}UicOnFileChange" 
 if(NOT result EQUAL "0")
   message(FATAL_ERROR "Rebuild of UicOnFileChange test result is: ${result}")
 endif()
+
+# Check if the generated ui_mainwindow.h rules introduce circular dependency between the generated
+# ui_mainwinow.h and timestamp.
+#
+# The first rebuild updates a timestamp dependency file after "touching" mainwindow.h.
+sleep()
+execute_process(COMMAND ${CMAKE_COMMAND} -E touch "${testProjectSrc}/mainwindow.h")
+rebuild(3)
+
+# The second rebuild detects if cycling dependency is introduced by deps file.
+sleep()
+rebuild(4)
