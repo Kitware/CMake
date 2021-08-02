@@ -57,10 +57,10 @@ int ParseStd(std::string const& level)
   return -1;
 }
 
-struct StanardLevelComputer
+struct StandardLevelComputer
 {
-  explicit StanardLevelComputer(std::string lang, std::vector<int> levels,
-                                std::vector<std::string> levelsStr)
+  explicit StandardLevelComputer(std::string lang, std::vector<int> levels,
+                                 std::vector<std::string> levelsStr)
     : Language(std::move(lang))
     , Levels(std::move(levels))
     , LevelsAsStrings(std::move(levelsStr))
@@ -308,31 +308,33 @@ struct StanardLevelComputer
   std::vector<std::string> LevelsAsStrings;
 };
 
-std::unordered_map<std::string, StanardLevelComputer> StandardComputerMapping =
-  { { "C",
-      StanardLevelComputer{
+std::unordered_map<std::string, StandardLevelComputer>
+  StandardComputerMapping = {
+    { "C",
+      StandardLevelComputer{
         "C", std::vector<int>{ 90, 99, 11, 17, 23 },
         std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
     { "CXX",
-      StanardLevelComputer{
+      StandardLevelComputer{
         "CXX", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
         std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } },
     { "CUDA",
-      StanardLevelComputer{
+      StandardLevelComputer{
         "CUDA", std::vector<int>{ 03, 11, 14, 17, 20, 23 },
         std::vector<std::string>{ "03", "11", "14", "17", "20", "23" } } },
     { "OBJC",
-      StanardLevelComputer{
+      StandardLevelComputer{
         "OBJC", std::vector<int>{ 90, 99, 11, 17, 23 },
         std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
     { "OBJCXX",
-      StanardLevelComputer{
+      StandardLevelComputer{
         "OBJCXX", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
         std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } },
     { "HIP",
-      StanardLevelComputer{
+      StandardLevelComputer{
         "HIP", std::vector<int>{ 98, 11, 14, 17, 20, 23 },
-        std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } } };
+        std::vector<std::string>{ "98", "11", "14", "17", "20", "23" } } }
+  };
 }
 
 std::string cmStandardLevelResolver::GetCompileOptionDef(
