@@ -4091,6 +4091,9 @@ void cmVisualStudio10TargetGenerator::WriteMidlOptions(
   if (this->ProjectType == csproj) {
     return;
   }
+  if (this->GeneratorTarget->GetType() > cmStateEnums::UTILITY) {
+    return;
+  }
 
   // This processes *any* of the .idl files specified in the project's file
   // list (and passed as the item metadata %(Filename) expressing the rule
