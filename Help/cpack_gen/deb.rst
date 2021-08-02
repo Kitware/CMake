@@ -652,8 +652,17 @@ Dbgsym packaging has its own set of variables:
 
 .. note::
 
+ Setting this also strips the ELF files in the generated non-dbgsym package,
+ which results in debuginfo only being available in the dbgsym package.
+
+.. note::
+
  Binaries must contain debug symbols before packaging so use either ``Debug``
  or ``RelWithDebInfo`` for :variable:`CMAKE_BUILD_TYPE` variable value.
+
+ Additionally, if :variable:`CPACK_STRIP_FILES` is set, the files will be stripped before
+ they get to the DEB generator, so will not contain debug symbols and
+ a dbgsym package will not get built. Do not use with :variable:`CPACK_STRIP_FILES`.
 
 Building Debian packages on Windows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
