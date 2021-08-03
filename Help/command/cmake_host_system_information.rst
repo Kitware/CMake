@@ -132,9 +132,6 @@ queried.  The list of queried values is stored in ``<variable>``.
 
   See :variable:`CMAKE_HOST_SYSTEM_PROCESSOR`
 
-For Linux distributions additional ``<key>`` values are available to get operating
-system identification as described in the `man 5 os-release`_.
-
 ``DISTRIB_INFO``
   .. versionadded:: 3.22
 
@@ -144,7 +141,8 @@ system identification as described in the `man 5 os-release`_.
 ``DISTRIB_<name>``
   .. versionadded:: 3.22
 
-  Get the ``<name>`` variable if it exists in the :file:`/etc/os-release` file
+  Get the ``<name>`` variable (see `man 5 os-release`_) if it exists in the
+  :file:`/etc/os-release` file
 
   Example:
 

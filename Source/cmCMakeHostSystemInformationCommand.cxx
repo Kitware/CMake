@@ -149,7 +149,6 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
   return {};
 }
 
-#ifdef __linux__
 cm::optional<std::pair<std::string, std::string>> ParseOSReleaseLine(
   std::string const& line)
 {
@@ -407,7 +406,6 @@ cm::optional<std::string> GetValue(cmExecutionStatus& status,
   // NOTE Empty string means requested variable not set
   return std::string{};
 }
-#endif
 
 #ifdef HAVE_VS_SETUP_HELPER
 cm::optional<std::string> GetValue(cmExecutionStatus& status,
@@ -494,9 +492,7 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
     auto value =
       GetValueChained(
           [&]() { return GetValue(info, key); }
-#ifdef __linux__
         , [&]() { return GetValue(status, key, variable); }
-#endif
 #ifdef HAVE_VS_SETUP_HELPER
         , [&]() { return GetValue(status, key); }
 #endif
