@@ -235,6 +235,13 @@ int cmCPackNSISGenerator::PackageFiles()
                             brandingTextCode.c_str());
   }
 
+  if (!this->IsSet("CPACK_NSIS_IGNORE_LICENSE_PAGE")) {
+    std::string licenceCode =
+      cmStrCat("!insertmacro MUI_PAGE_LICENSE \"",
+               this->GetOption("CPACK_RESOURCE_FILE_LICENSE"), "\"\n");
+    this->SetOptionIfNotSet("CPACK_NSIS_LICENSE_PAGE", licenceCode.c_str());
+  }
+
   // Setup all of the component sections
   if (this->Components.empty()) {
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLATION_TYPES", "");

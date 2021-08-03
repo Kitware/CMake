@@ -201,3 +201,9 @@ on Windows Nullsoft Scriptable Install System.
  .. versionadded:: 3.21
 
  If set, specify the name of the NSIS executable. Default is ``makensis``.
+
+.. variable:: CPACK_NSIS_IGNORE_LICENSE_PAGE
+
+ .. versionadded:: 3.22
+
+ If set, do not display the page containing the license during installation.
