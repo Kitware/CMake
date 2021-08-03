@@ -176,8 +176,75 @@ system identification as described in the `man 5 os-release`_.
     -- DISTRO_VERSION_CODENAME=`focal`
     -- DISTRO_VERSION_ID=`20.04`
 
+If :file:`/etc/os-release` file is not found, the command tries to gather OS
+identification via fallback scripts.  The fallback script can use `various
+distribution-specific files`_ to collect OS identification data and map it
+into `man 5 os-release`_ variables.
+
+Fallback Interface Variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. variable:: CMAKE_GET_OS_RELEASE_FALLBACK_SCRIPTS
+
+  In addition to the scripts shipped with CMake, a user may append full
+  paths to his script(s) to the this list.  The script filename has the
+  following format: ``NNN-<name>.cmake``, where ``NNN`` is three digits
+  used to apply collected scripts in a specific order.
+
+.. variable:: CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_<varname>
+
+  Variables collected by the user provided fallback script
+  ought to be assigned to CMake variables using this naming
+  convention.  Example, the ``ID`` variable from the manual becomes
+  ``CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_ID``.
+
+.. variable:: CMAKE_GET_OS_RELEASE_FALLBACK_RESULT
+
+  The fallback script ought to store names of all assigned
+  ``CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_<varname>`` variables in this list.
+
+Example:
+
+.. code-block:: cmake
+
+  # Try to detect some old distribution
+  # See also
+  # - http://linuxmafia.com/faq/Admin/release-files.html
+  #
+  if(NOT EXISTS "${CMAKE_SYSROOT}/etc/foobar-release")
+    return()
+  endif()
+  # Get the first string only
+  file(
+      STRINGS "${CMAKE_SYSROOT}/etc/foobar-release" CMAKE_GET_OS_RELEASE_FALLBACK_CONTENT
+      LIMIT_COUNT 1
+    )
+  #
+  # Example:
+  #
+  #   Foobar distribution release 1.2.3 (server)
+  #
+  if(CMAKE_GET_OS_RELEASE_FALLBACK_CONTENT MATCHES "Foobar distribution release ([0-9\.]+) .*")
+    set(CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_NAME Foobar)
+    set(CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_PRETTY_NAME "${CMAKE_GET_OS_RELEASE_FALLBACK_CONTENT}")
+    set(CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_ID foobar)
+    set(CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_VERSION ${CMAKE_MATCH_1})
+    set(CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_VERSION_ID ${CMAKE_MATCH_1})
+    list(
+        APPEND CMAKE_GET_OS_RELEASE_FALLBACK_RESULT
+        CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_NAME
+        CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_PRETTY_NAME
+        CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_ID
+        CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_VERSION
+        CMAKE_GET_OS_RELEASE_FALLBACK_RESULT_VERSION_ID
+      )
+  endif()
+  unset(CMAKE_GET_OS_RELEASE_FALLBACK_CONTENT)
+
+
 .. rubric:: Footnotes
 
 .. [#mebibytes] One MiB (mebibyte) is equal to 1024x1024 bytes.
 
 .. _man 5 os-release: https://www.freedesktop.org/software/systemd/man/os-release.html
+.. _various distribution-specific files: http://linuxmafia.com/faq/Admin/release-files.html

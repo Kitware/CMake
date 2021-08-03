@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeHostSystemInformationCommand.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <initializer_list>
@@ -15,6 +16,7 @@
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
 #include "cmsys/SystemInformation.hxx"
 
 #include "cmExecutionStatus.h"
@@ -259,8 +261,8 @@ cm::optional<std::pair<std::string, std::string>> ParseOSReleaseLine(
 std::map<std::string, std::string> GetOSReleaseVariables(
   cmExecutionStatus& status)
 {
-  const auto& sysroot =
-    status.GetMakefile().GetSafeDefinition("CMAKE_SYSROOT");
+  auto& makefile = status.GetMakefile();
+  const auto& sysroot = makefile.GetSafeDefinition("CMAKE_SYSROOT");
 
   std::map<std::string, std::string> data;
   // Based on
@@ -278,6 +280,92 @@ std::map<std::string, std::string> GetOSReleaseVariables(
       break;
     }
   }
+  // Got smth?
+  if (!data.empty()) {
+    return data;
+  }
+
+  // Ugh, it could be some pre-os-release distro.
+  // Lets try some fallback getters.
+
+  // 1. CMake provided
+  cmsys::Glob gl;
+  std::vector<std::string> scripts;
+  auto const findExpr = cmStrCat(cmSystemTools::GetCMakeRoot(),
+                                 "/Modules/Internal/OSRelease/*.cmake");
+  if (gl.FindFiles(findExpr)) {
+    scripts = gl.GetFiles();
+  }
+
+  // 2. User provided (append to the CMake prvided)
+  makefile.GetDefExpandList("CMAKE_GET_OS_RELEASE_FALLBACK_SCRIPTS", scripts);
+
+  // Filter out files that are not in format `NNN-name.cmake`
+  auto checkName = [](std::string const& filepath) -> bool {
+    auto const& filename = cmSystemTools::GetFilenameName(filepath);
+    // NOTE Minimum filename length expected:
+    //   NNN-<at-least-one-char-name>.cmake  --> 11
+    return (filename.size() < 11) || !std::isdigit(filename[0]) ||
+      !std::isdigit(filename[1]) || !std::isdigit(filename[2]) ||
+      filename[3] != '-';
+  };
+  scripts.erase(std::remove_if(scripts.begin(), scripts.end(), checkName),
+                scripts.end());
+
+  // Make sure scripts are running in desired order
+  std::sort(scripts.begin(), scripts.end(),
+            [](std::string const& lhs, std::string const& rhs) -> bool {
+              long lhs_order;
+              cmStrToLong(cmSystemTools::GetFilenameName(lhs).substr(0u, 3u),
+                          &lhs_order);
+              long rhs_order;
+              cmStrToLong(cmSystemTools::GetFilenameName(rhs).substr(0u, 3u),
+                          &rhs_order);
+              return lhs_order < rhs_order;
+            });
+
+  // Name of the variable to put the results
+  auto const result_variable = "CMAKE_GET_OS_RELEASE_FALLBACK_RESULT"_s;
+
+  for (auto const& script : scripts) {
+    // Unset the result variable
+    makefile.RemoveDefinition(result_variable.data());
+
+    // include FATAL_ERROR and ERROR in the return status
+    if (!makefile.ReadListFile(script) ||
+        cmSystemTools::GetErrorOccuredFlag()) {
+      // Ok, no worries... go try the next script.
+      continue;
+    }
+
+    std::vector<std::string> variables;
+    if (!makefile.GetDefExpandList(result_variable.data(), variables)) {
+      // Heh, this script didn't found anything... go try the next one.
+      continue;
+    }
+
+    for (auto const& variable : variables) {
+      auto value = makefile.GetSafeDefinition(variable);
+      makefile.RemoveDefinition(variable);
+
+      if (!cmHasPrefix(variable, cmStrCat(result_variable, '_'))) {
+        // Ignore unknown variable set by the script
+        continue;
+      }
+
+      auto key = variable.substr(result_variable.size() + 1,
+                                 variable.size() - result_variable.size() - 1);
+      data.emplace(std::move(key), std::move(value));
+    }
+
+    if (!data.empty()) {
+      // Try 'till some script can get anything
+      break;
+    }
+  }
+
+  makefile.RemoveDefinition(result_variable.data());
+
   return data;
 }
 

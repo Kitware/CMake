@@ -1,0 +1,6 @@
+-- UFS_ID=`unittest`
+-- UFS_ID_LIKE=`nothing`
+-- UFS_NAME=`UnitTest`
+-- UFS_PRETTY_NAME=`Just a Unit Test`
+-- UFS_VERSION=`0\.0\.1`
+-- UFS_VERSION_ID=`0\.0\.1`

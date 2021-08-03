@@ -1,0 +1,4 @@
+-- DEBIAN6_ID=`debian`
+-- DEBIAN6_NAME=`Debian`
+-- DEBIAN6_VERSION=`6\.0\.10`
+-- DEBIAN6_VERSION_ID=`6\.0\.10`
