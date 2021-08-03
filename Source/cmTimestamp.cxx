@@ -18,6 +18,10 @@
 #include <cstring>
 #include <sstream>
 
+#ifdef __MINGW32__
+#  include <libloaderapi.h>
+#endif
+
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -159,6 +163,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
     case 'M':
     case 'S':
     case 'U':
+    case 'V':
     case 'w':
     case 'y':
     case 'Y':
@@ -186,6 +191,24 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
       return formatString;
     }
   }
+
+#ifdef __MINGW32__
+  /* See a bug in MinGW: https://sourceforge.net/p/mingw-w64/bugs/793/. A work
+   * around is to try to use strftime() from ucrtbase.dll. */
+  using T = size_t(WINAPI*)(char*, size_t, const char*, const struct tm*);
+  auto loadStrftime = [] {
+    auto handle =
+      LoadLibraryExA("ucrtbase.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+    if (handle) {
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wcast-function-type"
+      return reinterpret_cast<T>(GetProcAddress(handle, "strftime"));
+#  pragma GCC diagnostic pop
+    }
+    return strftime;
+  };
+  static T strftime = loadStrftime();
+#endif
 
   char buffer[16];
 
