@@ -88,7 +88,7 @@ public:
   void GetDocumentation(cmDocumentationEntry& entry) const override
   {
     entry.Name = std::string(vs10generatorName) + " [arch]";
-    entry.Brief = "Generates Visual Studio 2010 project files.  "
+    entry.Brief = "Deprecated.  Generates Visual Studio 2010 project files.  "
                   "Optional [arch] can be \"Win64\" or \"IA64\".";
   }
 
