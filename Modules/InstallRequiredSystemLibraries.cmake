@@ -80,19 +80,34 @@ foreach(LANG IN ITEMS C CXX Fortran)
         set(_Intel_archdir ia32)
       endif()
       set(_Intel_compiler_ver ${CMAKE_${LANG}_COMPILER_VERSION})
-      if(WIN32 AND EXISTS "${_Intel_basedir}/../redist/${_Intel_archdir}_win/compiler")
-        get_filename_component(_Intel_redistdir "${_Intel_basedir}/../redist/${_Intel_archdir}_win/compiler" ABSOLUTE)
-      elseif(WIN32)
-        get_filename_component(_Intel_redistdir "${_Intel_basedir}/../../redist/${_Intel_archdir}/compiler" ABSOLUTE)
+      if(WIN32)
+        set(_Intel_possible_redistdirs
+          "${_Intel_basedir}/../redist/${_Intel_archdir}_win/compiler"
+          "${_Intel_basedir}/../../redist/${_Intel_archdir}/compiler"
+          )
       elseif(APPLE)
-        get_filename_component(_Intel_redistdir "${_Intel_basedir}/../../compiler/lib" ABSOLUTE)
+        set(_Intel_possible_redistdirs
+          "${_Intel_basedir}/../../compiler/lib"
+          )
       else()
-        if(EXISTS "${_Intel_basedir}/../lib/${_Intel_archdir}_lin")
-          get_filename_component(_Intel_redistdir "${_Intel_basedir}/../lib/${_Intel_archdir}" ABSOLUTE)
-        else()
-          get_filename_component(_Intel_redistdir "${_Intel_basedir}/../../compiler/lib/${_Intel_archdir}_lin" ABSOLUTE)
-        endif()
+        set(_Intel_possible_redistdirs
+          "${_Intel_basedir}/../lib/${_Intel_archdir}"
+          "${_Intel_basedir}/../../compiler/lib/${_Intel_archdir}_lin"
+          )
       endif()
+
+      set(_Intel_redistdir NOT-FOUND)
+      foreach(dir IN LISTS _Intel_possible_redistdirs)
+        if(EXISTS "${dir}")
+          set(_Intel_redistdir "${dir}")
+          break()
+        endif()
+      endforeach()
+      # Fall back to last dir
+      if(NOT _Intel_redistdir)
+        list(POP_BACK _Intel_possible_redistdirs _Intel_redistdir)
+      endif()
+      unset(_Intel_possible_redistdirs)
       set(_IRSL_HAVE_Intel TRUE)
     endif()
   elseif("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "MSVC")
