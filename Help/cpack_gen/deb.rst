@@ -274,10 +274,23 @@ List of CPack DEB generator specific variables:
 
  Possible values are:
 
- - lzma
- - xz
- - bzip2
- - gzip
+  ``lzma``
+    Lempel–Ziv–Markov chain algorithm
+
+  ``xz``
+    XZ Utils compression
+
+  ``bzip2``
+    bzip2 Burrows–Wheeler algorithm
+
+  ``gzip``
+    GNU Gzip compression
+
+  ``zstd``
+    .. versionadded:: 3.22
+
+    Zstandard compression
+
 
 .. variable:: CPACK_DEBIAN_PACKAGE_PRIORITY
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_PRIORITY
