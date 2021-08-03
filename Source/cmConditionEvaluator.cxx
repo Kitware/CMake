@@ -59,6 +59,12 @@ auto const keyVERSION_GREATER_EQUAL = "VERSION_GREATER_EQUAL"_s;
 auto const keyVERSION_LESS = "VERSION_LESS"_s;
 auto const keyVERSION_LESS_EQUAL = "VERSION_LESS_EQUAL"_s;
 
+cmSystemTools::CompareOp const MATCH2CMPOP[5] = {
+  cmSystemTools::OP_LESS, cmSystemTools::OP_LESS_EQUAL,
+  cmSystemTools::OP_GREATER, cmSystemTools::OP_GREATER_EQUAL,
+  cmSystemTools::OP_EQUAL
+};
+
 // Run-Time to Compile-Time template selector
 template <template <typename> class Comp, template <typename> class... Ops>
 struct cmRt2CtSelector
@@ -716,13 +722,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                 this->matchKeys(*args.next, keyVERSION_LESS,
                                 keyVERSION_LESS_EQUAL, keyVERSION_GREATER,
                                 keyVERSION_GREATER_EQUAL, keyVERSION_EQUAL))) {
-
-      const cmSystemTools::CompareOp xlat[5] = {
-        cmSystemTools::OP_LESS, cmSystemTools::OP_LESS_EQUAL,
-        cmSystemTools::OP_GREATER, cmSystemTools::OP_GREATER_EQUAL,
-        cmSystemTools::OP_EQUAL
-      };
-      const auto op = xlat[matchNo - 1];
+      const auto op = MATCH2CMPOP[matchNo - 1];
       const cmProp lhs = this->GetVariableOrString(*args.current);
       const cmProp rhs = this->GetVariableOrString(*args.nextnext);
       const auto result =
