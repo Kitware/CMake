@@ -170,6 +170,10 @@ endif()
 
 if (RunCMake_GENERATOR MATCHES "Makefiles")
   run_cmake(CustomCommandDependencies-BadArgs)
+  run_cmake_with_options(CustomCommandDependencies-compiler-deps-legacy -DCMAKE_DEPENDS_USE_COMPILER=FALSE)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(CustomCommandDependencies-compiler-deps-legacy ${CMAKE_COMMAND} --build . --config Debug)
+  unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
 if(RunCMake_GENERATOR MATCHES "Make|Ninja|Visual Studio|Xcode" AND
