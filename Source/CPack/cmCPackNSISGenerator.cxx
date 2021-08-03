@@ -487,12 +487,12 @@ int cmCPackNSISGenerator::InitializeInternal()
   }
   if (versionRex.find(output)) {
     double nsisVersion = atof(versionRex.match(1).c_str());
-    double minNSISVersion = 3.0;
+    double minNSISVersion = 3.03;
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "NSIS Version: " << nsisVersion << std::endl);
     if (nsisVersion < minNSISVersion) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "CPack requires NSIS Version 3.0 or greater.  "
+                    "CPack requires NSIS Version 3.03 or greater. "
                     "NSIS found on the system was: "
                       << nsisVersion << std::endl);
       return 0;
