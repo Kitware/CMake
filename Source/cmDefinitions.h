@@ -12,6 +12,7 @@
 #include <cm/string_view>
 
 #include "cmLinkedTree.h"
+#include "cmProperty.h"
 #include "cmString.hxx"
 
 /** \class cmDefinitions
@@ -28,8 +29,7 @@ class cmDefinitions
 public:
   // -- Static member functions
 
-  static const std::string* Get(const std::string& key, StackIter begin,
-                                StackIter end);
+  static cmProp Get(const std::string& key, StackIter begin, StackIter end);
 
   static void Raise(const std::string& key, StackIter begin, StackIter end);
 

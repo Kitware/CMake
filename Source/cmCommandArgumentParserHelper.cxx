@@ -113,7 +113,7 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
   if (this->EscapeQuotes && value) {
     return this->AddString(cmEscapeQuotes(*value));
   }
-  return this->AddString(cmToCStrSafe(value));
+  return this->AddString(value);
 }
 
 const char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)

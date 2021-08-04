@@ -65,7 +65,7 @@ private:
                                           context)) {
           return nullptr;
         }
-        return &ComputeLocationForBuild(tgt);
+        return cmProp(ComputeLocationForBuild(tgt));
       }
 
       // Support "LOCATION_<CONFIG>".
@@ -76,7 +76,7 @@ private:
           return nullptr;
         }
         std::string configName = prop.substr(9);
-        return &ComputeLocation(tgt, configName);
+        return cmProp(ComputeLocation(tgt, configName));
       }
 
       // Support "<CONFIG>_LOCATION".
@@ -89,7 +89,7 @@ private:
                                             context)) {
             return nullptr;
           }
-          return &ComputeLocation(tgt, configName);
+          return cmProp(ComputeLocation(tgt, configName));
         }
       }
     }

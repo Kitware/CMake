@@ -426,6 +426,7 @@ CMAKE_CXX_SOURCES="\
   cmPolicies \
   cmProcessOutput \
   cmProjectCommand \
+  cmProperty \
   cmPropertyDefinition \
   cmPropertyMap \
   cmGccDepfileLexerHelper \

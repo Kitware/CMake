@@ -12,6 +12,7 @@
 
 #include "cmLinkedTree.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 
 class cmState;
@@ -23,7 +24,7 @@ public:
   cmStateSnapshot(cmState* state = nullptr);
   cmStateSnapshot(cmState* state, cmStateDetail::PositionType position);
 
-  std::string const* GetDefinition(std::string const& name) const;
+  cmProp GetDefinition(std::string const& name) const;
   bool IsInitialized(std::string const& name) const;
   void SetDefinition(std::string const& name, cm::string_view value);
   void RemoveDefinition(std::string const& name);

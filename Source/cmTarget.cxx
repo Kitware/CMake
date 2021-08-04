@@ -157,7 +157,7 @@ cmProp cmTargetPropertyComputer::GetSources<cmTarget>(
   }
   static std::string srcs;
   srcs = ss.str();
-  return &srcs;
+  return cmProp(srcs);
 }
 
 class cmTargetInternals
@@ -1749,7 +1749,7 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
       if (propertyIter == this->impl->LanguageStandardProperties.end()) {
         return nullptr;
       }
-      return &(propertyIter->second.Value);
+      return cmProp(propertyIter->second.Value);
     }
     if (prop == propLINK_LIBRARIES) {
       if (this->impl->LinkImplementationPropertyEntries.empty()) {
@@ -1758,11 +1758,11 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->impl->LinkImplementationPropertyEntries, ";");
-      return &output;
+      return cmProp(output);
     }
     // the type property returns what type the target is
     if (prop == propTYPE) {
-      return &cmState::GetTargetTypeName(this->GetType());
+      return cmProp(cmState::GetTargetTypeName(this->GetType()));
     }
     if (prop == propINCLUDE_DIRECTORIES) {
       if (this->impl->IncludeDirectoriesEntries.empty()) {
@@ -1771,7 +1771,7 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->impl->IncludeDirectoriesEntries, ";");
-      return &output;
+      return cmProp(output);
     }
     if (prop == propCOMPILE_FEATURES) {
       if (this->impl->CompileFeaturesEntries.empty()) {
@@ -1780,7 +1780,7 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->impl->CompileFeaturesEntries, ";");
-      return &output;
+      return cmProp(output);
     }
     if (prop == propCOMPILE_OPTIONS) {
       if (this->impl->CompileOptionsEntries.empty()) {
@@ -1789,7 +1789,7 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->impl->CompileOptionsEntries, ";");
-      return &output;
+      return cmProp(output);
     }
     if (prop == propCOMPILE_DEFINITIONS) {
       if (this->impl->CompileDefinitionsEntries.empty()) {
@@ -1798,7 +1798,7 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->impl->CompileDefinitionsEntries, ";");
-      return &output;
+      return cmProp(output);
     }
     if (prop == propLINK_OPTIONS) {
       if (this->impl->LinkOptionsEntries.empty()) {
@@ -1807,7 +1807,7 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->impl->LinkOptionsEntries, ";");
-      return &output;
+      return cmProp(output);
     }
     if (prop == propLINK_DIRECTORIES) {
       if (this->impl->LinkDirectoriesEntries.empty()) {
@@ -1817,7 +1817,7 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
       static std::string output;
       output = cmJoin(this->impl->LinkDirectoriesEntries, ";");
 
-      return &output;
+      return cmProp(output);
     }
     if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
       if (this->impl->Utilities.empty()) {
@@ -1834,7 +1834,7 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
           return item.Value.first;
         });
       output = cmJoin(utilities, ";");
-      return &output;
+      return cmProp(output);
     }
     if (prop == propPRECOMPILE_HEADERS) {
       if (this->impl->PrecompileHeadersEntries.empty()) {
@@ -1843,26 +1843,27 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(this->impl->PrecompileHeadersEntries, ";");
-      return &output;
+      return cmProp(output);
     }
     if (prop == propIMPORTED) {
-      return this->IsImported() ? &propTRUE : &propFALSE;
+      return this->IsImported() ? cmProp(propTRUE) : cmProp(propFALSE);
     }
     if (prop == propIMPORTED_GLOBAL) {
-      return this->IsImportedGloballyVisible() ? &propTRUE : &propFALSE;
+      return this->IsImportedGloballyVisible() ? cmProp(propTRUE)
+                                               : cmProp(propFALSE);
     }
     if (prop == propNAME) {
-      return &this->GetName();
+      return cmProp(this->GetName());
     }
     if (prop == propBINARY_DIR) {
-      return &this->impl->Makefile->GetStateSnapshot()
-                .GetDirectory()
-                .GetCurrentBinary();
+      return cmProp(this->impl->Makefile->GetStateSnapshot()
+                      .GetDirectory()
+                      .GetCurrentBinary());
     }
     if (prop == propSOURCE_DIR) {
-      return &this->impl->Makefile->GetStateSnapshot()
-                .GetDirectory()
-                .GetCurrentSource();
+      return cmProp(this->impl->Makefile->GetStateSnapshot()
+                      .GetDirectory()
+                      .GetCurrentSource());
     }
   }
 

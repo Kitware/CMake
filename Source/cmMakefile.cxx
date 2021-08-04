@@ -2579,12 +2579,7 @@ cmProp cmMakefile::GetDefinition(const std::string& name) const
 
 const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
 {
-  static std::string const empty;
-  cmProp def = this->GetDefinition(name);
-  if (!def) {
-    return empty;
-  }
-  return *def;
+  return this->GetDefinition(name);
 }
 
 bool cmMakefile::GetDefExpandList(const std::string& name,
@@ -2967,7 +2962,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
               break;
             case ENVIRONMENT:
               if (cmSystemTools::GetEnv(lookup, svalue)) {
-                value = &svalue;
+                value = cmProp(svalue);
               }
               break;
             case CACHE:
@@ -4012,7 +4007,7 @@ cmProp cmMakefile::GetProperty(const std::string& prop) const
                      return pair.first;
                    });
     output = cmJoin(keys, ";");
-    return &output;
+    return cmProp(output);
   }
 
   return this->StateSnapshot.GetDirectory().GetProperty(prop);

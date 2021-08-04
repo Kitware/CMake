@@ -62,7 +62,7 @@ cmProp cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
   cmGeneratorTarget const* tgt, cmMessenger* /* messenger */,
   cmListFileBacktrace const& /* context */)
 {
-  return &tgt->GetSourcesProperty();
+  return cmProp(tgt->GetSourcesProperty());
 }
 
 template <>
@@ -396,13 +396,7 @@ cmProp cmGeneratorTarget::GetProperty(const std::string& prop) const
 std::string const& cmGeneratorTarget::GetSafeProperty(
   std::string const& prop) const
 {
-  cmProp ret = this->GetProperty(prop);
-  if (ret) {
-    return *ret;
-  }
-
-  static std::string const s_empty;
-  return s_empty;
+  return this->GetProperty(prop);
 }
 
 const char* cmGeneratorTarget::GetOutputTargetType(
@@ -564,7 +558,7 @@ std::string cmGeneratorTarget::GetFilePostfix(const std::string& config) const
     // framework postfix.
     frameworkPostfix = this->GetFrameworkMultiConfigPostfix(config);
     if (!frameworkPostfix.empty()) {
-      postfix = &frameworkPostfix;
+      postfix = cmProp(frameworkPostfix);
     }
   }
   return postfix ? *postfix : std::string();
@@ -966,7 +960,7 @@ cmProp cmGeneratorTarget::GetLanguageStandard(std::string const& lang,
     this->GetLanguageStandardProperty(lang, config);
 
   if (languageStandard) {
-    return &(languageStandard->Value);
+    return cmProp(languageStandard->Value);
   }
 
   return nullptr;
@@ -5121,13 +5115,13 @@ void cmGeneratorTarget::GetFullNameInternal(
   if (this->IsFrameworkOnApple()) {
     fw_prefix =
       cmStrCat(this->GetFrameworkDirectory(config, ContentLevel), '/');
-    targetPrefix = &fw_prefix;
+    targetPrefix = cmProp(fw_prefix);
     targetSuffix = nullptr;
   }
 
   if (this->IsCFBundleOnApple()) {
     fw_prefix = cmStrCat(this->GetCFBundleDirectory(config, FullLevel), '/');
-    targetPrefix = &fw_prefix;
+    targetPrefix = cmProp(fw_prefix);
     targetSuffix = nullptr;
   }
 
@@ -5143,7 +5137,7 @@ void cmGeneratorTarget::GetFullNameInternal(
   // EXECUTABLE_SUFFIX attribute.
   if (this->IsFrameworkOnApple() &&
       this->GetGlobalGenerator()->GetName() == "Xcode") {
-    targetSuffix = &configPostfix;
+    targetSuffix = cmProp(configPostfix);
   } else {
     outBase += configPostfix;
   }
@@ -5674,6 +5668,11 @@ std::string valueAsString<std::string>(std::string value)
   return value;
 }
 template <>
+std::string valueAsString<cmProp>(cmProp value)
+{
+  return value ? value : std::string("(unset)");
+}
+template <>
 std::string valueAsString<std::nullptr_t>(std::nullptr_t /*unused*/)
 {
   return "(unset)";
@@ -5749,7 +5748,7 @@ std::string getTypedProperty<std::string>(
   cmProp value = tgt->GetProperty(prop);
 
   if (genexInterpreter == nullptr) {
-    return valueAsString(cmToCStr(value));
+    return valueAsString(value);
   }
 
   return genexInterpreter->Evaluate(value ? *value : "", prop);

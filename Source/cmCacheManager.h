@@ -75,7 +75,7 @@ public:
   cmProp GetCacheEntryValue(const std::string& key) const
   {
     if (const auto* entry = this->GetCacheEntry(key)) {
-      return &entry->GetValue();
+      return cmProp(entry->GetValue());
     }
     return nullptr;
   }

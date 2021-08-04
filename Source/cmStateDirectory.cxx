@@ -450,17 +450,17 @@ cmProp cmStateDirectory::GetProperty(const std::string& prop, bool chain) const
   if (prop == "PARENT_DIRECTORY") {
     cmStateSnapshot parent = this->Snapshot_.GetBuildsystemDirectoryParent();
     if (parent.IsValid()) {
-      return &parent.GetDirectory().GetCurrentSource();
+      return cmProp(parent.GetDirectory().GetCurrentSource());
     }
-    return &output;
+    return cmProp(output);
   }
   if (prop == kBINARY_DIR) {
     output = this->GetCurrentBinary();
-    return &output;
+    return cmProp(output);
   }
   if (prop == kSOURCE_DIR) {
     output = this->GetCurrentSource();
-    return &output;
+    return cmProp(output);
   }
   if (prop == kSUBDIRECTORIES) {
     std::vector<std::string> child_dirs;
@@ -471,15 +471,15 @@ cmProp cmStateDirectory::GetProperty(const std::string& prop, bool chain) const
       child_dirs.push_back(ci.GetDirectory().GetCurrentSource());
     }
     output = cmJoin(child_dirs, ";");
-    return &output;
+    return cmProp(output);
   }
   if (prop == kBUILDSYSTEM_TARGETS) {
     output = cmJoin(this->DirectoryState->NormalTargetNames, ";");
-    return &output;
+    return cmProp(output);
   }
   if (prop == "IMPORTED_TARGETS"_s) {
     output = cmJoin(this->DirectoryState->ImportedTargetNames, ";");
-    return &output;
+    return cmProp(output);
   }
 
   if (prop == "LISTFILE_STACK") {
@@ -491,38 +491,38 @@ cmProp cmStateDirectory::GetProperty(const std::string& prop, bool chain) const
     }
     std::reverse(listFiles.begin(), listFiles.end());
     output = cmJoin(listFiles, ";");
-    return &output;
+    return cmProp(output);
   }
   if (prop == "CACHE_VARIABLES") {
     output = cmJoin(this->Snapshot_.State->GetCacheEntryKeys(), ";");
-    return &output;
+    return cmProp(output);
   }
   if (prop == "VARIABLES") {
     std::vector<std::string> res = this->Snapshot_.ClosureKeys();
     cm::append(res, this->Snapshot_.State->GetCacheEntryKeys());
     std::sort(res.begin(), res.end());
     output = cmJoin(res, ";");
-    return &output;
+    return cmProp(output);
   }
   if (prop == "INCLUDE_DIRECTORIES") {
     output = cmJoin(this->GetIncludeDirectoriesEntries(), ";");
-    return &output;
+    return cmProp(output);
   }
   if (prop == "COMPILE_OPTIONS") {
     output = cmJoin(this->GetCompileOptionsEntries(), ";");
-    return &output;
+    return cmProp(output);
   }
   if (prop == "COMPILE_DEFINITIONS") {
     output = cmJoin(this->GetCompileDefinitionsEntries(), ";");
-    return &output;
+    return cmProp(output);
   }
   if (prop == "LINK_OPTIONS") {
     output = cmJoin(this->GetLinkOptionsEntries(), ";");
-    return &output;
+    return cmProp(output);
   }
   if (prop == "LINK_DIRECTORIES") {
     output = cmJoin(this->GetLinkDirectoriesEntries(), ";");
-    return &output;
+    return cmProp(output);
   }
 
   cmProp retVal = this->DirectoryState->Properties.GetPropertyValue(prop);
