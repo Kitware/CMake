@@ -10,6 +10,8 @@ run_cmake(elseif-message)
 run_cmake(misplaced-elseif)
 
 run_cmake(MatchesSelf)
+run_cmake(IncompleteMatches)
+run_cmake(IncompleteMatchesFail)
 
 run_cmake(TestNameThatExists)
 run_cmake(TestNameThatDoesNotExist)
