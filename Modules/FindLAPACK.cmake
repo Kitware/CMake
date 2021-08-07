@@ -580,19 +580,24 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
   endif()
 
   # NVHPC Library?
+
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR MATCHES "NVHPC" OR BLA_VENDOR STREQUAL "All"))
+    set(_lapack_nvhpc_lib "lapack")
+
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
       cheev
       ""
-      "lapack"
+      "${_lapack_nvhpc_lib}"
       "-fortranlibs"
       ""
       ""
       "${BLAS_LIBRARIES}"
     )
+
+    unset(_lapack_nvhpc_lib)
   endif()
 
   # Generic LAPACK library?
