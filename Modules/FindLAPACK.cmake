@@ -418,17 +418,21 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
   # FlexiBLAS? (http://www.mpi-magdeburg.mpg.de/mpcsc/software/FlexiBLAS/)
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR STREQUAL "FlexiBLAS" OR BLA_VENDOR STREQUAL "All"))
+    set(_lapack_flexiblas_lib "flexiblas")
+
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
       cheev
       ""
-      "flexiblas"
+      "${_lapack_flexiblas_lib}"
       ""
       ""
       ""
       "${BLAS_LIBRARIES}"
     )
+
+    unset(_lapack_flexiblas_lib)
   endif()
 
   # OpenBLAS? (http://www.openblas.net)
