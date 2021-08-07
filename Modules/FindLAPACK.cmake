@@ -581,33 +581,10 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
   # Fujitsu SSL2 Library?
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR MATCHES "Fujitsu_SSL2" OR BLA_VENDOR STREQUAL "All"))
-    if(BLA_VENDOR STREQUAL "Fujitsu_SSL2BLAMP")
-      set(_ssl2_suffix BLAMP)
-    else()
-      set(_ssl2_suffix)
+    if(BLAS_LIBRARIES MATCHES "fjlapack.+")
+      set(LAPACK_LIBRARIES ${BLAS_LIBRARIES})
+      set(LAPACK_LINKER_FLAGS ${BLAS_LINKER_FLAGS})
     endif()
-    set(_ssl2_blas)
-    if(BLAS_LIBRARIES STREQUAL "")
-      set(_ssl2_blas "${BLAS_LINKER_FLAGS}")
-    else()
-      set(_ssl2_blas "${BLAS_LIBRARIES} ${BLAS_LINKER_FLAGS}")
-    endif()
-    check_lapack_libraries(
-      LAPACK_LIBRARIES
-      LAPACK
-      cheev
-      "-SSL2${_ssl2_suffix}"
-      ""
-      ""
-      ""
-      ""
-      "${_ssl2_blas}"
-    )
-    if(LAPACK_LIBRARIES)
-      set(LAPACK_LINKER_FLAGS "-SSL2${_ssl2_suffix}")
-      set(_lapack_fphsa_req_var LAPACK_LINKER_FLAGS)
-    endif()
-    unset(_ssl2_suffix)
   endif()
 
   # LAPACK in IBM ESSL library?
