@@ -765,18 +765,22 @@ endif()
 
 # FLAME's blis library? (https://github.com/flame/blis)
 if(BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_flame_lib "blis")
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "blis"
+      "${_blas_flame_lib}"
       ""
       ""
       ""
       )
   endif()
+
+  unset(_blas_flame_lib)
 endif()
 
 # BLAS in the ATLAS library? (http://math-atlas.sourceforge.net/)
