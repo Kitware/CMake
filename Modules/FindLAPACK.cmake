@@ -434,17 +434,21 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
   # OpenBLAS? (http://www.openblas.net)
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All"))
+    set(_lapack_openblas_lib "openblas")
+
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
       cheev
       ""
-      "openblas"
+      "${_lapack_openblas_lib}"
       ""
       ""
       ""
       "${BLAS_LIBRARIES}"
     )
+
+    unset(_lapack_openblas_lib)
   endif()
 
   # ArmPL? (https://developer.arm.com/tools-and-software/server-and-hpc/compile/arm-compiler-for-linux/arm-performance-libraries)
