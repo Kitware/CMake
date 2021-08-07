@@ -101,10 +101,10 @@ BLAS/LAPACK Vendors
 ``FlexiBLAS``
   .. versionadded:: 3.19
 
-``Fujitsu_SSL2``, ``Fujitsu_SSL2BLAMP``
+``Fujitsu_SSL2``, ``Fujitsu_SSL2BLAMP``, ``Fujitsu_SSL2SVE``, ``Fujitsu_SSL2BLAMPSVE``
   .. versionadded:: 3.20
 
-  Fujitsu SSL2 serial and parallel blas/lapack
+  Fujitsu SSL2 serial and parallel blas/lapack with SVE instructions
 
 ``Goto``
   GotoBLAS
@@ -1142,27 +1142,35 @@ endif()
 
 # Fujitsu SSL2 Library?
 if(NOT BLAS_LIBRARIES
-    AND (BLA_VENDOR MATCHES "Fujitsu_SSL2" OR BLA_VENDOR STREQUAL "All"))
-  if(BLA_VENDOR STREQUAL "Fujitsu_SSL2BLAMP")
-    set(_ssl2_suffix BLAMP)
-  else()
-    set(_ssl2_suffix)
+    AND (BLA_VENDOR MATCHES "^Fujitsu_SSL2" OR BLA_VENDOR STREQUAL "All"))
+  set(_blas_fjlapack_lib "fjlapack")
+  set(_blas_fjlapack_flags "-Kopenmp")
+
+  if(BLA_VENDOR MATCHES "BLAMP")
+    string(APPEND _blas_fjlapack_lib "ex")
   endif()
-  check_blas_libraries(
-    BLAS_LIBRARIES
-    BLAS
-    sgemm
-    "-SSL2${_ssl2_suffix}"
-    ""
-    ""
-    ""
-    ""
-    )
-  if(BLAS_LIBRARIES)
-    set(BLAS_LINKER_FLAGS "-SSL2${_ssl2_suffix}")
-    set(_blas_fphsa_req_var BLAS_LINKER_FLAGS)
+  if(BLA_VENDOR MATCHES "SVE")
+    string(APPEND _blas_fjlapack_lib "sve")
   endif()
-  unset(_ssl2_suffix)
+
+  if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      "${_blas_fjlapack_flags}"
+      "${_blas_fjlapack_lib}"
+      ""
+      ""
+      ""
+      )
+    if(BLAS_LIBRARIES)
+      set(BLAS_LINKER_FLAGS ${_blas_fjlapack_flags})
+    endif()
+  endif()
+
+  unset(_blas_fjlapack_flags)
+  unset(_blas_fjlapack_lib)
 endif()
 
 # BLAS in nVidia HPC SDK? (https://developer.nvidia.com/hpc-sdk)
