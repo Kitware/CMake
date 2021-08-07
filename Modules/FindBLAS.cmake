@@ -1153,9 +1153,28 @@ if(NOT BLAS_LIBRARIES
   unset(_ssl2_suffix)
 endif()
 
+# BLAS in nVidia HPC SDK? (https://developer.nvidia.com/hpc-sdk)
+if(BLA_VENDOR STREQUAL "NVHPC" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_nvhpc_lib "blas")
+
+  if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${_blas_nvhpc_lib}"
+      ""
+      ""
+      ""
+      )
+  endif()
+
+  unset(_blas_nvhpc_lib)
+endif()
+
 # Generic BLAS library?
 if(BLA_VENDOR STREQUAL "Generic" OR
-   BLA_VENDOR STREQUAL "NVHPC" OR
    BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
