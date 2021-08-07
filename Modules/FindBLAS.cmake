@@ -873,33 +873,45 @@ endif()
 
 # BLAS in Alpha CXML library?
 if(BLA_VENDOR STREQUAL "CXML" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      sgemm
-      ""
-      "cxml"
-      ""
-      ""
-      ""
-      )
+  if(_blas_sizeof_integer EQUAL 8)
+    if(BLA_VENDOR STREQUAL "CXML")
+      message(FATAL_ERROR "CXML does not support Int64 type")
+    endif()
+  else()
+    if(NOT BLAS_LIBRARIES)
+      check_blas_libraries(
+        BLAS_LIBRARIES
+        BLAS
+        sgemm
+        ""
+        "cxml"
+        ""
+        ""
+        ""
+        )
+    endif()
   endif()
 endif()
 
 # BLAS in Alpha DXML library? (now called CXML, see above)
 if(BLA_VENDOR STREQUAL "DXML" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      sgemm
-      ""
-      "dxml"
-      ""
-      ""
-      ""
-      )
+  if(_blas_sizeof_integer EQUAL 8)
+    if(BLA_VENDOR STREQUAL "DXML")
+      message(FATAL_ERROR "DXML does not support Int64 type")
+    endif()
+  else()
+    if(NOT BLAS_LIBRARIES)
+      check_blas_libraries(
+        BLAS_LIBRARIES
+        BLAS
+        sgemm
+        ""
+        "dxml"
+        ""
+        ""
+        ""
+        )
+    endif()
   endif()
 endif()
 
@@ -1140,33 +1152,45 @@ endif() # ACML
 
 # Apple BLAS library?
 if(BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      dgemm
-      ""
-      "Accelerate"
-      ""
-      ""
-      ""
-      )
+  if(_blas_sizeof_integer EQUAL 8)
+    if(BLA_VENDOR STREQUAL "Apple")
+      message(FATAL_ERROR "Accelerate Framework does not support Int64 type")
+    endif()
+  else()
+    if(NOT BLAS_LIBRARIES)
+      check_blas_libraries(
+        BLAS_LIBRARIES
+        BLAS
+        dgemm
+        ""
+        "Accelerate"
+        ""
+        ""
+        ""
+        )
+    endif()
   endif()
 endif()
 
 # Apple NAS (vecLib) library?
 if(BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
-  if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      dgemm
-      ""
-      "vecLib"
-      ""
-      ""
-      ""
-      )
+  if(_blas_sizeof_integer EQUAL 8)
+    if(BLA_VENDOR STREQUAL "NAS")
+      message(FATAL_ERROR "Accelerate Framework does not support Int64 type")
+    endif()
+  else()
+    if(NOT BLAS_LIBRARIES)
+      check_blas_libraries(
+        BLAS_LIBRARIES
+        BLAS
+        dgemm
+        ""
+        "vecLib"
+        ""
+        ""
+        ""
+        )
+    endif()
   endif()
 endif()
 
