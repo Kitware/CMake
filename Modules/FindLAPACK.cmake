@@ -530,17 +530,23 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
   # FLAME's blis library? (https://github.com/flame/blis)
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All"))
-    check_lapack_libraries(
-      LAPACK_LIBRARIES
-      LAPACK
-      cheev
-      ""
-      "flame"
-      ""
-      ""
-      ""
-      "${BLAS_LIBRARIES}"
-    )
+    if(_lapack_sizeof_integer EQUAL 8)
+      if(BLA_VENDOR STREQUAL "FLAME")
+        message(FATAL_ERROR "libFLAME does not support Int64 type")
+      endif()
+    else()
+      check_lapack_libraries(
+        LAPACK_LIBRARIES
+        LAPACK
+        cheev
+        ""
+        "flame"
+        ""
+        ""
+        ""
+        "${BLAS_LIBRARIES}"
+      )
+    endif()
   endif()
 
   # LAPACK in SCSL library? (SGI/Cray Scientific Library)
@@ -580,33 +586,45 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
   # Apple LAPACK library?
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All"))
-    check_lapack_libraries(
-      LAPACK_LIBRARIES
-      LAPACK
-      cheev
-      ""
-      "Accelerate"
-      ""
-      ""
-      ""
-      "${BLAS_LIBRARIES}"
-    )
+    if(_lapack_sizeof_integer EQUAL 8)
+      if(BLA_VENDOR STREQUAL "Apple")
+        message(FATAL_ERROR "Accelerate Framework does not support Int64 type")
+      endif()
+    else()
+      check_lapack_libraries(
+        LAPACK_LIBRARIES
+        LAPACK
+        cheev
+        ""
+        "Accelerate"
+        ""
+        ""
+        ""
+        "${BLAS_LIBRARIES}"
+      )
+    endif()
   endif()
 
   # Apple NAS (vecLib) library?
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All"))
-    check_lapack_libraries(
-      LAPACK_LIBRARIES
-      LAPACK
-      cheev
-      ""
-      "vecLib"
-      ""
-      ""
-      ""
-      "${BLAS_LIBRARIES}"
-    )
+    if(_lapack_sizeof_integer EQUAL 8)
+      if(BLA_VENDOR STREQUAL "NAS")
+        message(FATAL_ERROR "Accelerate Framework does not support Int64 type")
+      endif()
+    else()
+      check_lapack_libraries(
+        LAPACK_LIBRARIES
+        LAPACK
+        cheev
+        ""
+        "vecLib"
+        ""
+        ""
+        ""
+        "${BLAS_LIBRARIES}"
+      )
+    endif()
   endif()
 
   # Elbrus Math Library?
