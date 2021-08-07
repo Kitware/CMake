@@ -35,6 +35,19 @@ The following variables may be set to influence this module's behavior:
   if set ``pkg-config`` will be used to search for a LAPACK library first
   and if one is found that is preferred
 
+``BLA_SIZEOF_INTEGER``
+  .. versionadded:: 3.22
+
+  Specify the BLAS/LAPACK library integer size:
+
+  ``4``
+    Search for a BLAS/LAPACK with 32-bit integer interfaces.
+  ``8``
+    Search for a BLAS/LAPACK with 64-bit integer interfaces.
+  ``ANY``
+    Search for any BLAS/LAPACK.
+    Most likely, a BLAS/LAPACK with 32-bit integer interfaces will be found.
+
 Imported targets
 ^^^^^^^^^^^^^^^^
 
@@ -247,6 +260,17 @@ if(NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_CO
     "FindLAPACK requires Fortran, C, or C++ to be enabled.")
 endif()
 
+if(NOT BLA_SIZEOF_INTEGER)
+  # in the reality we do not know which API of BLAS/LAPACK is masked in library
+  set(_lapack_sizeof_integer "ANY")
+elseif((BLA_SIZEOF_INTEGER STREQUAL "ANY") OR
+       (BLA_SIZEOF_INTEGER STREQUAL "4") OR
+       (BLA_SIZEOF_INTEGER STREQUAL "8"))
+  set(_lapack_sizeof_integer ${BLA_SIZEOF_INTEGER})
+else()
+  message(FATAL_ERROR "BLA_SIZEOF_INTEGER can have only <no value>, ANY, 4, or 8 values")
+endif()
+
 # Load BLAS
 if(NOT LAPACK_NOT_FOUND_MESSAGE)
   _lapack_find_dependency(BLAS)
@@ -288,10 +312,16 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
 
     _lapack_find_dependency(Threads)
 
-    if(BLA_VENDOR MATCHES "_64ilp")
+    if(_lapack_sizeof_integer EQUAL 8)
       set(LAPACK_mkl_ILP_MODE "ilp64")
-    else()
+    elseif(_lapack_sizeof_integer EQUAL 4)
       set(LAPACK_mkl_ILP_MODE "lp64")
+    else()
+      if(BLA_VENDOR MATCHES "_64ilp")
+        set(LAPACK_mkl_ILP_MODE "ilp64")
+      else()
+        set(LAPACK_mkl_ILP_MODE "lp64")
+      endif()
     endif()
 
     set(LAPACK_SEARCH_LIBS "")
@@ -420,6 +450,10 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       AND (BLA_VENDOR STREQUAL "FlexiBLAS" OR BLA_VENDOR STREQUAL "All"))
     set(_lapack_flexiblas_lib "flexiblas")
 
+    if(_lapack_sizeof_integer EQUAL 8)
+      string(APPEND _lapack_flexiblas_lib "64")
+    endif()
+
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
@@ -440,6 +474,10 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       AND (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All"))
     set(_lapack_openblas_lib "openblas")
 
+    if(_lapack_sizeof_integer EQUAL 8)
+      string(APPEND _lapack_openblas_lib "64")
+    endif()
+
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
@@ -459,10 +497,16 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All"))
     # Check for 64bit Integer support
-    if(BLA_VENDOR MATCHES "_ilp64")
+    if(_lapack_sizeof_integer EQUAL 8)
       set(LAPACK_armpl_LIB "armpl_ilp64")
-    else()
+    elseif(_lapack_sizeof_integer EQUAL 4)
       set(LAPACK_armpl_LIB "armpl_lp64")
+    else()
+      if(BLA_VENDOR MATCHES "_ilp64")
+        set(LAPACK_armpl_LIB "armpl_ilp64")
+      else()
+        set(LAPACK_armpl_LIB "armpl_lp64")
+      endif()
     endif()
 
     # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
@@ -504,6 +548,9 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       AND (BLA_VENDOR MATCHES "SCSL" OR BLA_VENDOR STREQUAL "All"))
     set(_lapack_scsl_lib "scs")
 
+    if(_lapack_sizeof_integer EQUAL 8)
+      string(APPEND _lapack_scsl_lib "_i8")
+    endif()
     # Check for OpenMP support, VIA BLA_VENDOR of scs_mp
     if(BLA_VENDOR MATCHES "_mp")
       set(_lapack_scsl_lib "${_lapack_scsl_lib}_mp")
@@ -593,6 +640,12 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       AND (BLA_VENDOR MATCHES "NVHPC" OR BLA_VENDOR STREQUAL "All"))
     set(_lapack_nvhpc_lib "lapack")
 
+    if(_lapack_sizeof_integer EQUAL 8)
+      string(APPEND _lapack_nvhpc_lib "_ilp64")
+    elseif(_lapack_sizeof_integer EQUAL 4)
+      string(APPEND _lapack_nvhpc_lib "_lp64")
+    endif()
+
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
@@ -604,6 +657,25 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       ""
       "${BLAS_LIBRARIES}"
     )
+
+    # an additional check for NVHPC 2020
+    # which does not have differentiation
+    # between lp64 and ilp64 modes
+    if(NOT LAPACK_LIBRARIES AND NOT _lapack_sizeof_integer EQUAL 8)
+      set(_lapack_nvhpc_lib "lapack")
+
+      check_lapack_libraries(
+        LAPACK_LIBRARIES
+        LAPACK
+        cheev
+        ""
+        "${_lapack_nvhpc_lib}"
+        "-fortranlibs"
+        ""
+        ""
+        "${BLAS_LIBRARIES}"
+      )
+    endif()
 
     unset(_lapack_nvhpc_lib)
   endif()
@@ -621,6 +693,11 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     else()
       set(_lapack_generic_deps "")
     endif()
+
+    if(_lapack_sizeof_integer EQUAL 8)
+      string(APPEND _lapack_generic_lib "64")
+    endif()
+
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
@@ -662,4 +739,5 @@ endif()
 
 _add_lapack_target()
 unset(_lapack_fphsa_req_var)
+unset(_lapack_sizeof_integer)
 unset(_LAPACK_LIBRARIES)
