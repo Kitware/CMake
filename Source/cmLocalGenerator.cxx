@@ -2512,6 +2512,16 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
     static const std::array<std::string, 4> langs = { { "C", "CXX", "OBJC",
                                                         "OBJCXX" } };
 
+    bool haveAnyPch = false;
+    if (this->GetGlobalGenerator()->IsXcode()) {
+      for (const std::string& lang : langs) {
+        const std::string pchHeader = target->GetPchHeader(config, lang, "");
+        if (!pchHeader.empty()) {
+          haveAnyPch = true;
+        }
+      }
+    }
+
     for (const std::string& lang : langs) {
       auto langSources = std::count_if(
         sources.begin(), sources.end(), [lang](cmSourceFile* sf) {
@@ -2552,6 +2562,11 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         const std::string pchHeader = target->GetPchHeader(config, lang, arch);
 
         if (pchSource.empty() || pchHeader.empty()) {
+          if (this->GetGlobalGenerator()->IsXcode() && haveAnyPch) {
+            for (auto* sf : sources) {
+              sf->SetProperty("SKIP_PRECOMPILE_HEADERS", "ON");
+            }
+          }
           continue;
         }
 
