@@ -691,13 +691,15 @@ endif()
 
 # OpenBLAS? (http://www.openblas.net)
 if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_openblas_lib "openblas")
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "openblas"
+      "${_blas_openblas_lib}"
       ""
       ""
       ""
@@ -724,13 +726,15 @@ if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
       BLAS
       sgemm
       ""
-      "openblas"
+      "${_blas_openblas_lib}"
       "${_threadlibs}"
       ""
       ""
       )
     unset(_threadlibs)
   endif()
+
+  unset(_blas_openblas_lib)
 endif()
 
 # ArmPL blas library? (https://developer.arm.com/tools-and-software/server-and-hpc/compile/arm-compiler-for-linux/arm-performance-libraries)
