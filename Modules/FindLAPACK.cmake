@@ -557,25 +557,9 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
   # Elbrus Math Library?
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All"))
-
-    set(LAPACK_EML_LIB "eml")
-
-    # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
-    if(BLA_VENDOR MATCHES "_mt")
-     set(LAPACK_EML_LIB "${LAPACK_EML_LIB}_mt")
+    if(BLAS_LIBRARIES MATCHES "eml.+")
+      set(LAPACK_LIBRARIES ${BLAS_LIBRARIES})
     endif()
-
-    check_lapack_libraries(
-      LAPACK_LIBRARIES
-      LAPACK
-      cheev
-      ""
-      "${LAPACK_EML_LIB}"
-      ""
-      ""
-      ""
-      "${BLAS_LIBRARIES}"
-    )
   endif()
 
   # Fujitsu SSL2 Library?
