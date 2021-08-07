@@ -675,18 +675,22 @@ endif()
 
 # FlexiBLAS? (http://www.mpi-magdeburg.mpg.de/mpcsc/software/FlexiBLAS/)
 if(BLA_VENDOR STREQUAL "FlexiBLAS" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_flexiblas_lib "flexiblas")
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "flexiblas"
+      "${_blas_flexiblas_lib}"
       ""
       ""
       ""
       )
   endif()
+
+  unset(_blas_flexiblas_lib)
 endif()
 
 # OpenBLAS? (http://www.openblas.net)
