@@ -35,6 +35,19 @@ The following variables may be set to influence this module's behavior:
   if set ``pkg-config`` will be used to search for a BLAS library first
   and if one is found that is preferred
 
+``BLA_SIZEOF_INTEGER``
+  .. versionadded:: 3.22
+
+  Specify the BLAS/LAPACK library integer size:
+
+  ``4``
+    Search for a BLAS/LAPACK with 32-bit integer interfaces.
+  ``8``
+    Search for a BLAS/LAPACK with 64-bit integer interfaces.
+  ``ANY``
+    Search for any BLAS/LAPACK.
+    Most likely, a BLAS/LAPACK with 32-bit integer interfaces will be found.
+
 Imported targets
 ^^^^^^^^^^^^^^^^
 
@@ -372,6 +385,17 @@ else()
   endif()
 endif()
 
+if(NOT BLA_SIZEOF_INTEGER)
+  # in the reality we do not know which API of BLAS/LAPACK is masked in library
+  set(_blas_sizeof_integer "ANY")
+elseif((BLA_SIZEOF_INTEGER STREQUAL "ANY") OR
+       (BLA_SIZEOF_INTEGER STREQUAL "4") OR
+       (BLA_SIZEOF_INTEGER STREQUAL "8"))
+  set(_blas_sizeof_integer ${BLA_SIZEOF_INTEGER})
+else()
+  message(FATAL_ERROR "BLA_SIZEOF_INTEGER can have only <no value>, ANY, 4, or 8 values")
+endif()
+
 # Implicitly linked BLAS libraries?
 if(BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
@@ -432,10 +456,16 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         find_package(Threads REQUIRED)
       endif()
 
-      if(BLA_VENDOR MATCHES "_64ilp")
+      if(_blas_sizeof_integer EQUAL 8)
         set(BLAS_mkl_ILP_MODE "ilp64")
-      else()
+      elseif(_blas_sizeof_integer EQUAL 4)
         set(BLAS_mkl_ILP_MODE "lp64")
+      else()
+        if(BLA_VENDOR MATCHES "_64ilp")
+          set(BLAS_mkl_ILP_MODE "ilp64")
+        else()
+          set(BLAS_mkl_ILP_MODE "lp64")
+        endif()
       endif()
 
       set(BLAS_SEARCH_LIBS "")
@@ -677,6 +707,10 @@ endif()
 if(BLA_VENDOR STREQUAL "FlexiBLAS" OR BLA_VENDOR STREQUAL "All")
   set(_blas_flexiblas_lib "flexiblas")
 
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_flexiblas_lib "64")
+  endif()
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
@@ -696,6 +730,10 @@ endif()
 # OpenBLAS? (http://www.openblas.net)
 if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
   set(_blas_openblas_lib "openblas")
+
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_openblas_lib "64")
+  endif()
 
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
@@ -745,11 +783,17 @@ endif()
 if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
 
    # Check for 64bit Integer support
-   if(BLA_VENDOR MATCHES "_ilp64")
-     set(_blas_armpl_lib "armpl_ilp64")
-   else()
-     set(_blas_armpl_lib "armpl_lp64")
-   endif()
+  if(_blas_sizeof_integer EQUAL 8)
+    set(_blas_armpl_lib "armpl_ilp64")
+  elseif(_blas_sizeof_integer EQUAL 4)
+    set(_blas_armpl_lib "armpl_lp64")
+  else()
+    if(BLA_VENDOR MATCHES "_ilp64")
+      set(_blas_armpl_lib "armpl_ilp64")
+    else()
+      set(_blas_armpl_lib "armpl_lp64")
+    endif()
+  endif()
 
    # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
    if(BLA_VENDOR MATCHES "_mp")
@@ -774,6 +818,10 @@ endif()
 # FLAME's blis library? (https://github.com/flame/blis)
 if(BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All")
   set(_blas_flame_lib "blis")
+
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_flame_lib "64")
+  endif()
 
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
@@ -878,6 +926,9 @@ endif()
 if(BLA_VENDOR MATCHES "SCSL" OR BLA_VENDOR STREQUAL "All")
   set(_blas_scsl_lib "scs")
 
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_scsl_lib "_i8")
+  endif()
   if(BLA_VENDOR MATCHES "_mp")
     set(_blas_scsl_lib "${_blas_scsl_lib}_mp")
   endif()
@@ -921,6 +972,10 @@ if(BLA_VENDOR MATCHES "IBMESSL" OR BLA_VENDOR STREQUAL "All")
   if(BLA_VENDOR MATCHES "_SMP")
     set(_blas_essl_lib "${_blas_essl_lib}smp")
   endif()
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_essl_lib "6464")
+  endif()
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
@@ -958,7 +1013,7 @@ if(BLA_VENDOR MATCHES "ACML" OR BLA_VENDOR STREQUAL "All")
   list(GET _ACML_GPU_ROOT 0 _ACML_GPU_ROOT)
   if(_ACML_ROOT)
     get_filename_component(_ACML_ROOT ${_ACML_ROOT} PATH)
-    if(SIZEOF_INTEGER EQUAL 8)
+    if(_blas_sizeof_integer EQUAL 8)
       set(_ACML_PATH_SUFFIX "_int64")
     else()
       set(_ACML_PATH_SUFFIX "")
@@ -1120,6 +1175,9 @@ if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
 
    set(_blas_eml_lib "eml")
 
+   if(_blas_sizeof_integer EQUAL 8)
+     string(APPEND _blas_eml_lib "_ilp64")
+   endif()
    # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
    if(BLA_VENDOR MATCHES "_mt")
      set(_blas_eml_lib "${_blas_eml_lib}_mt")
@@ -1152,6 +1210,9 @@ if(NOT BLAS_LIBRARIES
   if(BLA_VENDOR MATCHES "SVE")
     string(APPEND _blas_fjlapack_lib "sve")
   endif()
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_fjlapack_lib "_ilp64")
+  endif()
 
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
@@ -1177,7 +1238,31 @@ endif()
 if(BLA_VENDOR STREQUAL "NVHPC" OR BLA_VENDOR STREQUAL "All")
   set(_blas_nvhpc_lib "blas")
 
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_nvhpc_lib "_ilp64")
+  elseif(_blas_sizeof_integer EQUAL 4)
+    string(APPEND _blas_nvhpc_lib "_lp64")
+  endif()
+
   if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${_blas_nvhpc_lib}"
+      ""
+      ""
+      ""
+      )
+  endif()
+
+  # an additional check for NVHPC 2020
+  # which does not have differentiation
+  # between lp64 and ilp64 modes
+  if(NOT BLAS_LIBRARIES AND NOT _blas_sizeof_integer EQUAL 8)
+    set(_blas_nvhpc_lib "blas")
+
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
@@ -1197,6 +1282,10 @@ endif()
 if(BLA_VENDOR STREQUAL "Generic" OR
    BLA_VENDOR STREQUAL "All")
   set(_blas_generic_lib "blas")
+
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_generic_lib "64")
+  endif()
 
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
@@ -1226,4 +1315,5 @@ endif()
 
 _add_blas_target()
 unset(_blas_fphsa_req_var)
+unset(_blas_sizeof_integer)
 unset(_BLAS_LIBRARIES)
