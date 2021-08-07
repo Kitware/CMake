@@ -1176,18 +1176,22 @@ endif()
 # Generic BLAS library?
 if(BLA_VENDOR STREQUAL "Generic" OR
    BLA_VENDOR STREQUAL "All")
+  set(_blas_generic_lib "blas")
+
   if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
       ""
-      "blas"
+      "${_blas_generic_lib}"
       ""
       ""
       ""
       )
   endif()
+
+  unset(_blas_generic_lib)
 endif()
 
 # On compilers that implicitly link BLAS (i.e. CrayPrgEnv) we used a
