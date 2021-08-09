@@ -317,7 +317,7 @@ cmProp cmConditionEvaluator::GetVariableOrString(
   cmProp def = this->GetDefinitionIfUnquoted(argument);
 
   if (!def) {
-    def = &argument.GetValue();
+    def = cmProp(argument.GetValue());
   }
 
   return def;
@@ -403,7 +403,7 @@ bool cmConditionEvaluator::GetBooleanValueOld(
   // Old GetVariableOrNumber behavior.
   cmProp def = this->GetDefinitionIfUnquoted(arg);
   if (!def && std::atoi(arg.GetValue().c_str())) {
-    def = &arg.GetValue();
+    def = cmProp(arg.GetValue());
   }
   return !cmIsOff(def);
 }
@@ -649,13 +649,13 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       std::string def_buf;
       if (!def) {
-        def = &args.current->GetValue();
+        def = cmProp(args.current->GetValue());
       } else if (cmHasLiteralPrefix(args.current->GetValue(),
                                     "CMAKE_MATCH_")) {
         // The string to match is owned by our match result variables.
         // Move it to our own buffer before clearing them.
         def_buf = *def;
-        def = &def_buf;
+        def = cmProp(def_buf);
       }
 
       this->Makefile.ClearMatches();

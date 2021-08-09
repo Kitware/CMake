@@ -46,7 +46,7 @@ cmProp cmPropertyMap::GetPropertyValue(const std::string& name) const
 {
   auto it = this->Map_.find(name);
   if (it != this->Map_.end()) {
-    return &it->second;
+    return cmProp(it->second);
   }
   return nullptr;
 }

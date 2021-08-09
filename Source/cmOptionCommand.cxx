@@ -29,7 +29,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   {
     auto policyStatus =
       status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0077);
-    const auto* existsBeforeSet =
+    const auto& existsBeforeSet =
       status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     switch (policyStatus) {
       case cmPolicies::WARN:
@@ -77,7 +77,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   }
 
   if (checkAndWarn) {
-    const auto* existsAfterSet =
+    const auto& existsAfterSet =
       status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     if (!existsAfterSet) {
       status.GetMakefile().IssueMessage(

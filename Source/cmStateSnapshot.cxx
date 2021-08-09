@@ -201,8 +201,7 @@ bool cmStateSnapshot::HasDefinedPolicyCMP0011()
   return !this->Position->Policies->IsEmpty();
 }
 
-std::string const* cmStateSnapshot::GetDefinition(
-  std::string const& name) const
+cmProp cmStateSnapshot::GetDefinition(std::string const& name) const
 {
   assert(this->Position->Vars.IsValid());
   return cmDefinitions::Get(name, this->Position->Vars, this->Position->Root);

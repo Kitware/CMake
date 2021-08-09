@@ -813,8 +813,7 @@ Json::Value CodemodelConfig::DumpProject(Project& p)
 Json::Value CodemodelConfig::DumpMinimumCMakeVersion(cmStateSnapshot s)
 {
   Json::Value minimumCMakeVersion;
-  if (std::string const* def =
-        s.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
+  if (cmProp def = s.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
     minimumCMakeVersion = Json::objectValue;
     minimumCMakeVersion["string"] = *def;
   }

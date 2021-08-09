@@ -242,7 +242,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
   std::vector<std::string> cnameArgVec;
   if (cname && !cname->empty()) {
     cmExpandList(*cname, cnameArgVec);
-    cname = &cnameArgVec.front();
+    cname = cmProp(cnameArgVec.front());
   }
 
   std::string changeVars;
@@ -2749,7 +2749,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
         singleLine.push_back(cfgArg);
         cfgArg = "-DEFFECTIVE_PLATFORM_NAME=$(EFFECTIVE_PLATFORM_NAME)";
       } else {
-        cfgArg += cmToCStr(mf->GetDefinition("CMAKE_CFG_INTDIR"));
+        cfgArg += *mf->GetDefinition("CMAKE_CFG_INTDIR");
       }
       singleLine.push_back(cfgArg);
     }

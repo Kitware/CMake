@@ -490,10 +490,7 @@ void cmVisualStudio10TargetGenerator::Generate()
 
       e1.Element("Platform", this->Platform);
       cmProp projLabel = this->GeneratorTarget->GetProperty("PROJECT_LABEL");
-      if (!projLabel) {
-        projLabel = &this->Name;
-      }
-      e1.Element("ProjectName", *projLabel);
+      e1.Element("ProjectName", projLabel ? projLabel : this->Name);
       {
         cmProp targetFramework =
           this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK");

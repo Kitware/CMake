@@ -500,7 +500,7 @@ cmProp cmCacheManager::GetInitializedCacheValue(const std::string& key) const
 {
   if (const auto* entry = this->GetCacheEntry(key)) {
     if (entry->Initialized) {
-      return &entry->GetValue();
+      return cmProp(entry->GetValue());
     }
   }
   return nullptr;
@@ -568,10 +568,10 @@ std::vector<std::string> cmCacheManager::CacheEntry::GetPropertyList() const
 cmProp cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
 {
   if (prop == "TYPE") {
-    return &cmState::CacheEntryTypeToString(this->Type);
+    return cmProp(cmState::CacheEntryTypeToString(this->Type));
   }
   if (prop == "VALUE") {
-    return &this->Value;
+    return cmProp(this->Value);
   }
   return this->Properties.GetPropertyValue(prop);
 }

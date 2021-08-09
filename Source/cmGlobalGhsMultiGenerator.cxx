@@ -186,8 +186,7 @@ void cmGlobalGhsMultiGenerator::EnableLanguage(
 
   mf->AddDefinition("GHSMULTI", "1"); // identifier for user CMake files
 
-  const char* tgtPlatform =
-    cmToCStrSafe(mf->GetDefinition("GHS_TARGET_PLATFORM"));
+  const char* tgtPlatform = mf->GetDefinition("GHS_TARGET_PLATFORM")->c_str();
   if (!tgtPlatform) {
     cmSystemTools::Message("Green Hills MULTI: GHS_TARGET_PLATFORM not "
                            "specified; defaulting to \"integrity\"");

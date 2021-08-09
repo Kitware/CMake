@@ -36,8 +36,8 @@ std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
 
 cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {
-  const std::string* submitURL = !this->SubmitURL.empty()
-    ? &this->SubmitURL
+  cmProp submitURL = !this->SubmitURL.empty()
+    ? cmProp(this->SubmitURL)
     : this->Makefile->GetDefinition("CTEST_SUBMIT_URL");
 
   if (submitURL) {
