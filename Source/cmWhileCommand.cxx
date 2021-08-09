@@ -75,24 +75,6 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     conditionEvaluator.IsTrue(expandedArguments, errorString, messageType);
 
   while (isTrue) {
-    if (!errorString.empty()) {
-      std::string err = "had incorrect arguments: ";
-      for (cmListFileArgument const& arg : this->Args) {
-        err += (arg.Delim ? "\"" : "");
-        err += arg.Value;
-        err += (arg.Delim ? "\"" : "");
-        err += " ";
-      }
-      err += "(";
-      err += errorString;
-      err += ").";
-      mf.GetCMakeInstance()->IssueMessage(messageType, err, whileBT);
-      if (messageType == MessageType::FATAL_ERROR) {
-        cmSystemTools::SetFatalErrorOccured();
-        return true;
-      }
-    }
-
     // Invoke all the functions that were collected in the block.
     for (cmListFileFunction const& fn : functions) {
       cmExecutionStatus status(mf);
@@ -116,6 +98,24 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
     isTrue =
       conditionEvaluator.IsTrue(expandedArguments, errorString, messageType);
   }
+
+  if (!isTrue && !errorString.empty()) {
+    std::string err = "had incorrect arguments: ";
+    for (cmListFileArgument const& arg : this->Args) {
+      err += (arg.Delim ? "\"" : "");
+      err += arg.Value;
+      err += (arg.Delim ? "\"" : "");
+      err += " ";
+    }
+    err += "(";
+    err += errorString;
+    err += ").";
+    mf.GetCMakeInstance()->IssueMessage(messageType, err, whileBT);
+    if (messageType == MessageType::FATAL_ERROR) {
+      cmSystemTools::SetFatalErrorOccured();
+    }
+  }
+
   return true;
 }
 
