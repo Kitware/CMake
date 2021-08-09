@@ -28,11 +28,26 @@ that the package cannot be found if it is not ``REQUIRED``.  The ``REQUIRED``
 option stops processing with an error message if the package cannot be found.
 
 A package-specific list of required components may be listed after the
-``COMPONENTS`` option (or after the ``REQUIRED`` option if present).
+``COMPONENTS`` keyword.  If any of these components are not able to be
+satisfied, the package overall is considered to be not found.  If the
+``REQUIRED`` option is also present, this is treated as a fatal error,
+otherwise execution still continues.  As a form of shorthand, if the
+``REQUIRED`` option is present, the ``COMPONENTS`` keyword can be omitted
+and the required components can be listed directly after ``REQUIRED``.
+
 Additional optional components may be listed after
-``OPTIONAL_COMPONENTS``.  Available components and their influence on
-whether a package is considered to be found are defined by the target
-package.
+``OPTIONAL_COMPONENTS``.  If these cannot be satisfied, the package overall
+can still be considered found, as long as all required components are
+satisfied.
+
+The set of available components and their meaning are defined by the
+target package.  Formally, it is up to the target package how to
+interpret the component information given to it, but it should follow
+the expectations stated above.  For calls where no components are specified,
+there is no single expected behavior and target packages should clearly
+define what occurs in such cases.  Common arrangements include assuming it
+should find all components, no components or some well-defined subset of the
+available components.
 
 .. _FIND_PACKAGE_VERSION_FORMAT:
 
@@ -486,7 +501,7 @@ restores their original state before returning):
 ``<PackageName>_FIND_VERSION_EXACT``
   True if ``EXACT`` option was given
 ``<PackageName>_FIND_COMPONENTS``
-  List of requested components
+  List of specified components (required and optional)
 ``<PackageName>_FIND_REQUIRED_<c>``
   True if component ``<c>`` is required,
   false if component ``<c>`` is optional
