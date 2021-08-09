@@ -837,7 +837,7 @@ public:
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
   bool IsFortranBuildingInstrinsicModules() const;
 
-  const std::string& GetSourcesProperty() const;
+  cmProp GetSourcesProperty() const;
 
   void AddISPCGeneratedHeader(std::string const& header,
                               std::string const& config);
