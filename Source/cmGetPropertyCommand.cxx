@@ -268,6 +268,11 @@ bool StoreResult(OutType infoType, cmMakefile& makefile,
   }
   return true;
 }
+bool StoreResult(OutType infoType, cmMakefile& makefile,
+                 const std::string& variable, cmProp value)
+{
+  return StoreResult(infoType, makefile, variable, value.GetCStr());
+}
 
 bool HandleGlobalMode(cmExecutionStatus& status, const std::string& name,
                       OutType infoType, const std::string& variable,
@@ -280,9 +285,8 @@ bool HandleGlobalMode(cmExecutionStatus& status, const std::string& name,
 
   // Get the property.
   cmake* cm = status.GetMakefile().GetCMakeInstance();
-  return StoreResult(
-    infoType, status.GetMakefile(), variable,
-    cmToCStr(cm->GetState()->GetGlobalProperty(propertyName)));
+  return StoreResult(infoType, status.GetMakefile(), variable,
+                     cm->GetState()->GetGlobalProperty(propertyName));
 }
 
 bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
@@ -329,7 +333,7 @@ bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
 
   // Get the property.
   return StoreResult(infoType, status.GetMakefile(), variable,
-                     cmToCStr(mf->GetProperty(propertyName)));
+                     mf->GetProperty(propertyName));
 }
 
 bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
@@ -365,8 +369,7 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
     if (!prop) {
       prop = target->GetProperty(propertyName);
     }
-    return StoreResult(infoType, status.GetMakefile(), variable,
-                       cmToCStr(prop));
+    return StoreResult(infoType, status.GetMakefile(), variable, prop);
   }
   status.SetError(cmStrCat("could not find TARGET ", name,
                            ".  Perhaps it has not yet been created."));
@@ -391,7 +394,7 @@ bool HandleSourceMode(cmExecutionStatus& status, const std::string& name,
   if (cmSourceFile* sf =
         directory_makefile.GetOrCreateSource(source_file_absolute_path)) {
     return StoreResult(infoType, status.GetMakefile(), variable,
-                       cmToCStr(sf->GetPropertyForUser(propertyName)));
+                       sf->GetPropertyForUser(propertyName));
   }
   status.SetError(
     cmStrCat("given SOURCE name that could not be found or created: ",
@@ -447,7 +450,7 @@ bool HandleCacheMode(cmExecutionStatus& status, const std::string& name,
     value = status.GetMakefile().GetState()->GetCacheEntryProperty(
       name, propertyName);
   }
-  StoreResult(infoType, status.GetMakefile(), variable, cmToCStr(value));
+  StoreResult(infoType, status.GetMakefile(), variable, value);
   return true;
 }
 
