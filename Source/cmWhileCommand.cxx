@@ -16,6 +16,7 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -100,16 +101,13 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
   }
 
   if (!isTrue && !errorString.empty()) {
-    std::string err = "had incorrect arguments: ";
-    for (cmListFileArgument const& arg : this->Args) {
-      err += (arg.Delim ? "\"" : "");
-      err += arg.Value;
-      err += (arg.Delim ? "\"" : "");
+    std::string err = "had incorrect arguments:\n ";
+    for (cmExpandedCommandArgument const& i : expandedArguments) {
       err += " ";
+      err += cmOutputConverter::EscapeForCMake(i.GetValue());
     }
-    err += "(";
+    err += "\n";
     err += errorString;
-    err += ").";
     mf.GetCMakeInstance()->IssueMessage(messageType, err, whileBT);
     if (messageType == MessageType::FATAL_ERROR) {
       cmSystemTools::SetFatalErrorOccured();
