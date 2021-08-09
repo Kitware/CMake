@@ -23,7 +23,7 @@
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmWhileFunctionBlocker(cmMakefile* mf);
+  cmWhileFunctionBlocker(cmMakefile* mf, std::vector<cmListFileArgument> args);
   ~cmWhileFunctionBlocker() override;
 
   cm::string_view StartCommandName() const override { return "while"_s; }
@@ -35,14 +35,15 @@ public:
   bool Replay(std::vector<cmListFileFunction> functions,
               cmExecutionStatus& inStatus) override;
 
-  std::vector<cmListFileArgument> Args;
-
 private:
   cmMakefile* Makefile;
+  std::vector<cmListFileArgument> Args;
 };
 
-cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
-  : Makefile(mf)
+cmWhileFunctionBlocker::cmWhileFunctionBlocker(
+  cmMakefile* const mf, std::vector<cmListFileArgument> args)
+  : Makefile{ mf }
+  , Args{ std::move(args) }
 {
   this->Makefile->PushLoopBlock();
 }
@@ -132,11 +133,9 @@ bool cmWhileCommand(std::vector<cmListFileArgument> const& args,
   }
 
   // create a function blocker
-  {
-    auto& makefile = status.GetMakefile();
-    auto fb = cm::make_unique<cmWhileFunctionBlocker>(&makefile);
-    fb->Args = args;
-    makefile.AddFunctionBlocker(std::move(fb));
-  }
+  auto& makefile = status.GetMakefile();
+  makefile.AddFunctionBlocker(
+    cm::make_unique<cmWhileFunctionBlocker>(&makefile, args));
+
   return true;
 }
