@@ -109,6 +109,9 @@ public:
   /// uninstalling
   std::string RemoveTargetDir;
 
+  /// Set to true if command line interface features should be disabled
+  std::string DisableCommandLineInterface;
+
   /// Set to false if the installation path cannot contain space characters
   std::string AllowSpaceInPath;
 
