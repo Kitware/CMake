@@ -62,7 +62,7 @@ cmProp cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
   cmGeneratorTarget const* tgt, cmMessenger* /* messenger */,
   cmListFileBacktrace const& /* context */)
 {
-  return cmProp(tgt->GetSourcesProperty());
+  return tgt->GetSourcesProperty();
 }
 
 template <>
@@ -332,7 +332,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
 
 cmGeneratorTarget::~cmGeneratorTarget() = default;
 
-const std::string& cmGeneratorTarget::GetSourcesProperty() const
+cmProp cmGeneratorTarget::GetSourcesProperty() const
 {
   std::vector<std::string> values;
   for (auto const& se : this->SourceEntries) {
@@ -341,7 +341,7 @@ const std::string& cmGeneratorTarget::GetSourcesProperty() const
   static std::string value;
   value.clear();
   value = cmJoin(values, ";");
-  return value;
+  return cmProp(value);
 }
 
 cmGlobalGenerator* cmGeneratorTarget::GetGlobalGenerator() const
