@@ -20,6 +20,12 @@ Check if a Fortran function exists.
   ``<result>``
     variable to store the result; will be created as an internal cache variable.
 
+.. note::
+
+  This command does not detect functions in Fortran modules. In general it is
+  recommended to use :module:`CheckSourceCompiles` instead to determine if a
+  Fortran function or subroutine is available.
+
 The following variables may be set before calling this macro to modify
 the way the check is run:
 
