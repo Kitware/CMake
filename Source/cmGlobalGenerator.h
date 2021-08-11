@@ -23,6 +23,7 @@
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
 #include "cmExportSet.h"
+#include "cmProperty.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -308,7 +309,7 @@ public:
 
   cmExportSetMap& GetExportSets() { return this->ExportSets; }
 
-  const char* GetGlobalSetting(std::string const& name) const;
+  cmProp GetGlobalSetting(std::string const& name) const;
   bool GlobalSettingIsOn(std::string const& name) const;
   std::string GetSafeGlobalSetting(std::string const& name) const;
 

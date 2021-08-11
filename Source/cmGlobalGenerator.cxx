@@ -1179,10 +1179,10 @@ void cmGlobalGenerator::FillExtensionToLanguageMap(const std::string& l,
   }
 }
 
-const char* cmGlobalGenerator::GetGlobalSetting(std::string const& name) const
+cmProp cmGlobalGenerator::GetGlobalSetting(std::string const& name) const
 {
   assert(!this->Makefiles.empty());
-  return cmToCStr(this->Makefiles[0]->GetDefinition(name));
+  return this->Makefiles[0]->GetDefinition(name);
 }
 
 bool cmGlobalGenerator::GlobalSettingIsOn(std::string const& name) const
@@ -1195,7 +1195,7 @@ std::string cmGlobalGenerator::GetSafeGlobalSetting(
   std::string const& name) const
 {
   assert(!this->Makefiles.empty());
-  return this->Makefiles[0]->GetSafeDefinition(name);
+  return this->Makefiles[0]->GetDefinition(name);
 }
 
 bool cmGlobalGenerator::IgnoreFile(const char* ext) const
