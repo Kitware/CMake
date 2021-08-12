@@ -9,17 +9,8 @@ run_cmake(NotAFeature_OriginDebugGenex)
 run_cmake(NotAFeature_OriginDebugTransitive)
 run_cmake(NotAFeature_OriginDebugCommand)
 
-run_cmake(generate_feature_list)
-file(READ
-  "${RunCMake_BINARY_DIR}/generate_feature_list-build/c_features.txt"
-  C_FEATURES
-)
-file(READ
-  "${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx_features.txt"
-  CXX_FEATURES
-)
-include("${RunCMake_BINARY_DIR}/generate_feature_list-build/c_standard_default.cmake")
-include("${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx_standard_default.cmake")
+run_cmake(compiler_introspection)
+include("${RunCMake_BINARY_DIR}/compiler_introspection-build/info.cmake")
 
 if (NOT C_FEATURES)
   run_cmake(NoSupportedCFeatures)
@@ -47,15 +38,11 @@ if(CXX_STANDARD_DEFAULT)
   run_cmake(NotAStandard)
 
   foreach(standard 98 11)
-    file(READ
-      "${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx${standard}_flag.txt"
-      CXX${standard}_FLAG
-    )
     if (CXX${standard}_FLAG STREQUAL NOTFOUND)
       run_cmake(RequireCXX${standard})
       run_cmake(RequireCXX${standard}Variable)
     endif()
-    if (CXX${standard}EXT_FLAG STREQUAL NOTFOUND)
+    if (CXX${standard}_EXT_FLAG STREQUAL NOTFOUND)
       run_cmake(RequireCXX${standard}Ext)
       run_cmake(RequireCXX${standard}ExtVariable)
     endif()
