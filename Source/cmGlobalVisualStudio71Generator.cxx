@@ -157,11 +157,11 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteExternalProject(
   std::ostream& fout, const std::string& name, const std::string& location,
-  const char* typeGuid,
-  const std::set<BT<std::pair<std::string, bool>>>& depends)
+  cmProp typeGuid, const std::set<BT<std::pair<std::string, bool>>>& depends)
 {
   fout << "Project(\"{"
-       << (typeGuid ? typeGuid : this->ExternalProjectType(location))
+       << (typeGuid ? typeGuid
+                    : std::string(this->ExternalProjectType(location)))
        << "}\") = \"" << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name) << "}\"\n";

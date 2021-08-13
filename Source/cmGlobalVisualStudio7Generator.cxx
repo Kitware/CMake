@@ -391,10 +391,9 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       std::string project = target->GetName();
       std::string location = *expath;
 
-      this->WriteExternalProject(
-        fout, project, location,
-        cmToCStr(target->GetProperty("VS_PROJECT_TYPE")),
-        target->GetUtilities());
+      this->WriteExternalProject(fout, project, location,
+                                 target->GetProperty("VS_PROJECT_TYPE"),
+                                 target->GetUtilities());
       written = true;
     } else {
       cmProp vcprojName = target->GetProperty("GENERATOR_FILE_NAME");

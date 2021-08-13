@@ -13,6 +13,8 @@
 namespace {
 void StoreResult(cmMakefile& makefile, std::string const& variable,
                  const char* prop);
+void StoreResult(cmMakefile& makefile, std::string const& variable,
+                 cmProp prop);
 }
 
 // cmGetDirectoryPropertyCommand
@@ -76,7 +78,6 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const char* prop = nullptr;
   if (*i == "DEFINITIONS") {
     switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0059)) {
       case cmPolicies::WARN:
@@ -94,8 +95,7 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
         break;
     }
   }
-  prop = cmToCStr(dir->GetProperty(*i));
-  StoreResult(status.GetMakefile(), variable, prop);
+  StoreResult(status.GetMakefile(), variable, dir->GetProperty(*i));
   return true;
 }
 
@@ -104,5 +104,10 @@ void StoreResult(cmMakefile& makefile, std::string const& variable,
                  const char* prop)
 {
   makefile.AddDefinition(variable, prop ? prop : "");
+}
+void StoreResult(cmMakefile& makefile, std::string const& variable,
+                 cmProp prop)
+{
+  makefile.AddDefinition(variable, prop);
 }
 }

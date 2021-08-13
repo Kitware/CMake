@@ -994,8 +994,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     for (cmSourceFile const* sf : externalObjects) {
       auto objectFileName = this->GetGlobalGenerator()->ExpandCFGIntDir(
         this->ConvertToNinjaPath(sf->GetFullPath()), config);
-      if (!cmSystemTools::StringEndsWith(objectFileName,
-                                         cmToCStr(pchExtension))) {
+      if (!cmHasSuffix(objectFileName, pchExtension)) {
         this->Configs[config].Objects.push_back(objectFileName);
       }
     }
@@ -1260,8 +1259,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   if (firstForConfig) {
     cmProp pchExtension =
       this->GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
-    if (!cmSystemTools::StringEndsWith(objectFileName,
-                                       cmToCStr(pchExtension))) {
+    if (!cmHasSuffix(objectFileName, pchExtension)) {
       // Add this object to the list of object files.
       this->Configs[config].Objects.push_back(objectFileName);
     }

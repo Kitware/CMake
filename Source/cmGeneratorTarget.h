@@ -905,8 +905,7 @@ private:
 
   void ComputeVersionedName(std::string& vName, std::string const& prefix,
                             std::string const& base, std::string const& suffix,
-                            std::string const& name,
-                            const char* version) const;
+                            std::string const& name, cmProp version) const;
 
   struct CompatibleInterfacesBase
   {

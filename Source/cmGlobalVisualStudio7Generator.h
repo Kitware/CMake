@@ -6,6 +6,7 @@
 
 #include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalVisualStudioGenerator.h"
+#include "cmProperty.h"
 
 class cmTarget;
 struct cmIDEFlagTable;
@@ -142,7 +143,7 @@ protected:
 
   virtual void WriteExternalProject(
     std::ostream& fout, const std::string& name, const std::string& path,
-    const char* typeGuid,
+    cmProp typeGuid,
     const std::set<BT<std::pair<std::string, bool>>>& dependencies) = 0;
 
   std::string ConvertToSolutionPath(const std::string& path);
