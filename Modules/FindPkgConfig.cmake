@@ -79,10 +79,18 @@ set(PKG_CONFIG_FOUND "${PKGCONFIG_FOUND}")
 
 # Unsets the given variables
 macro(_pkgconfig_unset var)
+  # Clear normal variable (possibly set by project code).
+  unset(${var})
+  # Store as cache variable.
+  # FIXME: Add a policy to switch to a normal variable.
   set(${var} "" CACHE INTERNAL "")
 endmacro()
 
 macro(_pkgconfig_set var value)
+  # Clear normal variable (possibly set by project code).
+  unset(${var})
+  # Store as cache variable.
+  # FIXME: Add a policy to switch to a normal variable.
   set(${var} ${value} CACHE INTERNAL "")
 endmacro()
 
