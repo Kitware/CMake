@@ -30,8 +30,8 @@ public:
                            const std::string& feature, std::string& lang,
                            std::string* error) const;
 
-  const char* CompileFeaturesAvailable(const std::string& lang,
-                                       std::string* error) const;
+  cmProp CompileFeaturesAvailable(const std::string& lang,
+                                  std::string* error) const;
 
   bool GetNewRequiredStandard(const std::string& targetName,
                               const std::string& feature,

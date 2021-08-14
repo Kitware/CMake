@@ -1777,7 +1777,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       testedFeatures[lang].push_back(p);
 
       if (availableFeatures.find(lang) == availableFeatures.end()) {
-        const char* featuresKnown =
+        cmProp featuresKnown =
           standardResolver.CompileFeaturesAvailable(lang, &error);
         if (!featuresKnown) {
           reportError(context, content->GetOriginalExpression(), error);
