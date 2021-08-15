@@ -291,6 +291,16 @@ inline bool cmHasPrefix(cm::string_view str, cm::string_view prefix)
 }
 
 /** Returns true if string @a str starts with string @a prefix.  */
+inline bool cmHasPrefix(cm::string_view str, cmProp prefix)
+{
+  if (!prefix) {
+    return false;
+  }
+
+  return str.compare(0, prefix->size(), prefix) == 0;
+}
+
+/** Returns true if string @a str starts with string @a prefix.  */
 template <size_t N>
 inline bool cmHasLiteralPrefix(cm::string_view str, const char (&prefix)[N])
 {
@@ -308,6 +318,17 @@ inline bool cmHasSuffix(cm::string_view str, cm::string_view suffix)
 {
   return str.size() >= suffix.size() &&
     str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+/** Returns true if string @a str ends with string @a suffix.  */
+inline bool cmHasSuffix(cm::string_view str, cmProp suffix)
+{
+  if (!suffix) {
+    return false;
+  }
+
+  return str.size() >= suffix->size() &&
+    str.compare(str.size() - suffix->size(), suffix->size(), suffix) == 0;
 }
 
 /** Returns true if string @a str ends with string @a suffix.  */
