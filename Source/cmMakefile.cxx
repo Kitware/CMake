@@ -3986,6 +3986,10 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
 {
   this->StateSnapshot.GetDirectory().SetProperty(prop, value, this->Backtrace);
 }
+void cmMakefile::SetProperty(const std::string& prop, cmProp value)
+{
+  this->StateSnapshot.GetDirectory().SetProperty(prop, value, this->Backtrace);
+}
 
 void cmMakefile::AppendProperty(const std::string& prop,
                                 const std::string& value, bool asString)

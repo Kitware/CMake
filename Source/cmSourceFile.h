@@ -42,6 +42,11 @@ public:
 
   //! Set/Get a property of this source file
   void SetProperty(const std::string& prop, const char* value);
+  void SetProperty(const std::string& prop, cmProp value);
+  void SetProperty(const std::string& prop, const std::string& value)
+  {
+    this->SetProperty(prop, cmProp(value));
+  }
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
   //! Might return a nullptr if the property is not set or invalid
@@ -145,6 +150,9 @@ public:
   std::string GetObjectLibrary() const;
 
 private:
+  template <typename ValueType>
+  void StoreProperty(const std::string& prop, ValueType value);
+
   cmSourceFileLocation Location;
   cmPropertyMap Properties;
   std::unique_ptr<cmCustomCommand> CustomCommand;

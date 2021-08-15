@@ -73,6 +73,8 @@ public:
 
   void SetProperty(const std::string& prop, const char* value,
                    cmListFileBacktrace const& lfbt);
+  void SetProperty(const std::string& prop, cmProp value,
+                   cmListFileBacktrace const& lfbt);
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString, cmListFileBacktrace const& lfbt);
   cmProp GetProperty(const std::string& prop) const;
@@ -84,6 +86,10 @@ public:
   void AddImportedTargetName(std::string const& name);
 
 private:
+  template <typename ValueType>
+  void StoreProperty(const std::string& prop, ValueType value,
+                     cmListFileBacktrace const& lfbt);
+
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator
     DirectoryState;
   cmStateSnapshot Snapshot_;

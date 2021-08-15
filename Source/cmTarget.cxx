@@ -1177,32 +1177,59 @@ cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
   return cmMakeRange(this->impl->LinkImplementationPropertyBacktraces);
 }
 
-void cmTarget::SetProperty(const std::string& prop, const char* value)
+namespace {
+#define MAKE_PROP(PROP) const std::string prop##PROP = #PROP
+MAKE_PROP(C_STANDARD);
+MAKE_PROP(CXX_STANDARD);
+MAKE_PROP(CUDA_STANDARD);
+MAKE_PROP(HIP_STANDARD);
+MAKE_PROP(OBJC_STANDARD);
+MAKE_PROP(OBJCXX_STANDARD);
+MAKE_PROP(COMPILE_DEFINITIONS);
+MAKE_PROP(COMPILE_FEATURES);
+MAKE_PROP(COMPILE_OPTIONS);
+MAKE_PROP(PRECOMPILE_HEADERS);
+MAKE_PROP(PRECOMPILE_HEADERS_REUSE_FROM);
+MAKE_PROP(CUDA_PTX_COMPILATION);
+MAKE_PROP(EXPORT_NAME);
+MAKE_PROP(IMPORTED);
+MAKE_PROP(IMPORTED_GLOBAL);
+MAKE_PROP(INCLUDE_DIRECTORIES);
+MAKE_PROP(LINK_OPTIONS);
+MAKE_PROP(LINK_DIRECTORIES);
+MAKE_PROP(LINK_LIBRARIES);
+MAKE_PROP(MANUALLY_ADDED_DEPENDENCIES);
+MAKE_PROP(NAME);
+MAKE_PROP(SOURCES);
+MAKE_PROP(TYPE);
+MAKE_PROP(BINARY_DIR);
+MAKE_PROP(SOURCE_DIR);
+MAKE_PROP(FALSE);
+MAKE_PROP(TRUE);
+#undef MAKE_PROP
+}
+
+namespace {
+// to workaround bug on GCC/AIX
+// Define a template to force conversion to std::string
+template <typename ValueType>
+std::string ConvertToString(ValueType value);
+
+template <>
+std::string ConvertToString<const char*>(const char* value)
 {
-#define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
-  MAKE_STATIC_PROP(C_STANDARD);
-  MAKE_STATIC_PROP(CXX_STANDARD);
-  MAKE_STATIC_PROP(CUDA_STANDARD);
-  MAKE_STATIC_PROP(HIP_STANDARD);
-  MAKE_STATIC_PROP(OBJC_STANDARD);
-  MAKE_STATIC_PROP(OBJCXX_STANDARD);
-  MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
-  MAKE_STATIC_PROP(COMPILE_FEATURES);
-  MAKE_STATIC_PROP(COMPILE_OPTIONS);
-  MAKE_STATIC_PROP(PRECOMPILE_HEADERS);
-  MAKE_STATIC_PROP(PRECOMPILE_HEADERS_REUSE_FROM);
-  MAKE_STATIC_PROP(CUDA_PTX_COMPILATION);
-  MAKE_STATIC_PROP(EXPORT_NAME);
-  MAKE_STATIC_PROP(IMPORTED_GLOBAL);
-  MAKE_STATIC_PROP(INCLUDE_DIRECTORIES);
-  MAKE_STATIC_PROP(LINK_OPTIONS);
-  MAKE_STATIC_PROP(LINK_DIRECTORIES);
-  MAKE_STATIC_PROP(LINK_LIBRARIES);
-  MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
-  MAKE_STATIC_PROP(NAME);
-  MAKE_STATIC_PROP(SOURCES);
-  MAKE_STATIC_PROP(TYPE);
-#undef MAKE_STATIC_PROP
+  return std::string(value);
+}
+template <>
+std::string ConvertToString<cmProp>(cmProp value)
+{
+  return std::string(*value);
+}
+}
+
+template <typename ValueType>
+void cmTarget::StoreProperty(const std::string& prop, ValueType value)
+{
   if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
@@ -1327,7 +1354,8 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->GetGlobalGenerator()->IndexTarget(this);
     }
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME") &&
-             !this->impl->CheckImportedLibName(prop, value ? value : "")) {
+             !this->impl->CheckImportedLibName(
+               prop, value ? value : std::string{})) {
     /* error was reported by check method */
   } else if (prop == propCUDA_PTX_COMPILATION &&
              this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
@@ -1357,7 +1385,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
 
     std::string reusedFrom = reusedTarget->GetSafeProperty(prop);
     if (reusedFrom.empty()) {
-      reusedFrom = value;
+      reusedFrom = ConvertToString(value);
     }
 
     this->impl->Properties.SetProperty(prop, reusedFrom.c_str());
@@ -1484,6 +1512,15 @@ void cmTarget::AppendProperty(const std::string& prop,
   } else {
     this->impl->Properties.AppendProperty(prop, value, asString);
   }
+}
+
+void cmTarget::SetProperty(const std::string& prop, const char* value)
+{
+  this->StoreProperty(prop, value);
+}
+void cmTarget::SetProperty(const std::string& prop, cmProp value)
+{
+  this->StoreProperty(prop, value);
 }
 
 void cmTarget::AppendBuildInterfaceIncludes()
@@ -1693,31 +1730,6 @@ cmProp cmTarget::GetComputedProperty(const std::string& prop,
 
 cmProp cmTarget::GetProperty(const std::string& prop) const
 {
-#define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
-  MAKE_STATIC_PROP(C_STANDARD);
-  MAKE_STATIC_PROP(CXX_STANDARD);
-  MAKE_STATIC_PROP(CUDA_STANDARD);
-  MAKE_STATIC_PROP(OBJC_STANDARD);
-  MAKE_STATIC_PROP(OBJCXX_STANDARD);
-  MAKE_STATIC_PROP(LINK_LIBRARIES);
-  MAKE_STATIC_PROP(TYPE);
-  MAKE_STATIC_PROP(INCLUDE_DIRECTORIES);
-  MAKE_STATIC_PROP(COMPILE_FEATURES);
-  MAKE_STATIC_PROP(COMPILE_OPTIONS);
-  MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
-  MAKE_STATIC_PROP(LINK_OPTIONS);
-  MAKE_STATIC_PROP(LINK_DIRECTORIES);
-  MAKE_STATIC_PROP(PRECOMPILE_HEADERS);
-  MAKE_STATIC_PROP(IMPORTED);
-  MAKE_STATIC_PROP(IMPORTED_GLOBAL);
-  MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
-  MAKE_STATIC_PROP(NAME);
-  MAKE_STATIC_PROP(BINARY_DIR);
-  MAKE_STATIC_PROP(SOURCE_DIR);
-  MAKE_STATIC_PROP(SOURCES);
-  MAKE_STATIC_PROP(FALSE);
-  MAKE_STATIC_PROP(TRUE);
-#undef MAKE_STATIC_PROP
   static std::unordered_set<std::string> const specialProps{
     propC_STANDARD,
     propCXX_STANDARD,

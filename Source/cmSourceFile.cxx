@@ -269,7 +269,8 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
   return this->Location.Matches(loc);
 }
 
-void cmSourceFile::SetProperty(const std::string& prop, const char* value)
+template <typename ValueType>
+void cmSourceFile::StoreProperty(const std::string& prop, ValueType value)
 {
   if (prop == propINCLUDE_DIRECTORIES) {
     this->IncludeDirectories.clear();
@@ -292,6 +293,15 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
   } else {
     this->Properties.SetProperty(prop, value);
   }
+}
+
+void cmSourceFile::SetProperty(const std::string& prop, const char* value)
+{
+  this->StoreProperty(prop, value);
+}
+void cmSourceFile::SetProperty(const std::string& prop, cmProp value)
+{
+  this->StoreProperty(prop, value);
 }
 
 void cmSourceFile::AppendProperty(const std::string& prop,

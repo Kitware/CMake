@@ -57,6 +57,10 @@ void cmTest::SetProperty(const std::string& prop, const char* value)
 {
   this->Properties.SetProperty(prop, value);
 }
+void cmTest::SetProperty(const std::string& prop, cmProp value)
+{
+  this->Properties.SetProperty(prop, value);
+}
 
 void cmTest::AppendProperty(const std::string& prop, const std::string& value,
                             bool asString)
