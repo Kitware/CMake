@@ -37,7 +37,7 @@ bool cmSetTestsPropertiesCommand(std::vector<std::string> const& args,
       // loop through all the props and set them
       for (auto k = propsIter + 1; k != args.end(); k += 2) {
         if (!k->empty()) {
-          test->SetProperty(*k, (k + 1)->c_str());
+          test->SetProperty(*k, *(k + 1));
         }
       }
     } else {

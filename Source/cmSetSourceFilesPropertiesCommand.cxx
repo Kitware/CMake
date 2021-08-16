@@ -173,7 +173,7 @@ static bool RunCommandForScope(
           SetPropertyCommand::HandleAndValidateSourceFilePropertyGENERATED(
             sf, *(k + 1));
         } else {
-          sf->SetProperty(*k, (k + 1)->c_str());
+          sf->SetProperty(*k, *(k + 1));
         }
       }
     }

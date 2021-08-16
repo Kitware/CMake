@@ -2553,10 +2553,10 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
           continue;
         }
 
-        const std::string pchExtension =
-          this->Makefile->GetSafeDefinition("CMAKE_PCH_EXTENSION");
+        cmProp pchExtension =
+          this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
 
-        if (pchExtension.empty()) {
+        if (pchExtension.IsEmpty()) {
           continue;
         }
 
@@ -2647,7 +2647,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
               }
             }
           } else {
-            pch_sf->SetProperty("PCH_EXTENSION", pchExtension.c_str());
+            pch_sf->SetProperty("PCH_EXTENSION", pchExtension);
           }
 
           // Add pchHeader to source files, which will
@@ -2788,7 +2788,7 @@ inline void RegisterUnitySources(cmGeneratorTarget* target, cmSourceFile* sf,
                                  std::string const& filename)
 {
   target->AddSourceFileToUnityBatch(sf->ResolveFullPath());
-  sf->SetProperty("UNITY_SOURCE_FILE", filename.c_str());
+  sf->SetProperty("UNITY_SOURCE_FILE", filename);
 }
 }
 
@@ -2986,7 +2986,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
       auto* unity = this->GetMakefile()->GetOrCreateSource(file);
       target->AddSource(file, true);
       unity->SetProperty("SKIP_UNITY_BUILD_INCLUSION", "ON");
-      unity->SetProperty("UNITY_SOURCE_FILE", file.c_str());
+      unity->SetProperty("UNITY_SOURCE_FILE", file);
     }
   }
 }

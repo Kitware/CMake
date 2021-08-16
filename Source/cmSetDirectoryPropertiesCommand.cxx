@@ -32,7 +32,7 @@ bool cmSetDirectoryPropertiesCommand(std::vector<std::string> const& args,
         "Commands and macros cannot be set using SET_CMAKE_PROPERTIES");
       return false;
     }
-    status.GetMakefile().SetProperty(prop, (iter + 1)->c_str());
+    status.GetMakefile().SetProperty(prop, *(iter + 1));
   }
 
   return true;

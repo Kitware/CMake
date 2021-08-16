@@ -1667,7 +1667,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
     fout << "\n";
   }
   if (cmSourceFile* sf = mf->GetOrCreateSource(fname)) {
-    sf->SetProperty("LANGUAGE", llang.c_str());
+    sf->SetProperty("LANGUAGE", llang);
     gtgt->AddSource(fname);
   }
 }

@@ -267,7 +267,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     // Replace everything after "CMAKE_"
     defKey.replace(defKey.begin() + 6, defKey.end(), property);
     if (cmProp value = mf->GetDefinition(defKey)) {
-      this->SetProperty(property, *value);
+      this->SetProperty(property, value);
     }
   };
   auto initPropValue = [this, mf, &defKey](const std::string& property,
@@ -275,7 +275,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     // Replace everything after "CMAKE_"
     defKey.replace(defKey.begin() + 6, defKey.end(), property);
     if (cmProp value = mf->GetDefinition(defKey)) {
-      this->SetProperty(property, *value);
+      this->SetProperty(property, value);
     } else if (default_value) {
       this->SetProperty(property, default_value);
     }
@@ -1388,14 +1388,14 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
       reusedFrom = ConvertToString(value);
     }
 
-    this->impl->Properties.SetProperty(prop, reusedFrom.c_str());
+    this->impl->Properties.SetProperty(prop, reusedFrom);
 
     reusedTarget->SetProperty("COMPILE_PDB_NAME", reusedFrom);
     reusedTarget->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
                               cmStrCat(reusedFrom, ".dir/"));
 
     cmProp tmp = reusedTarget->GetProperty("COMPILE_PDB_NAME");
-    this->SetProperty("COMPILE_PDB_NAME", cmToCStr(tmp));
+    this->SetProperty("COMPILE_PDB_NAME", tmp);
     this->AddUtility(reusedFrom, false, this->impl->Makefile);
   } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
              prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||

@@ -1444,7 +1444,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
       std::string ndefs = cmJoin(cmMakeRange(defBegin, defEnd), ";");
 
       // Store the new list.
-      this->SetProperty("COMPILE_DEFINITIONS", ndefs.c_str());
+      this->SetProperty("COMPILE_DEFINITIONS", ndefs);
     }
   } else {
     // Append the definition to the directory property.
@@ -1465,30 +1465,29 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   // Include transform property.  There is no per-config version.
   {
     const char* prop = "IMPLICIT_DEPENDS_INCLUDE_TRANSFORM";
-    this->SetProperty(prop, cmToCStr(parent->GetProperty(prop)));
+    this->SetProperty(prop, parent->GetProperty(prop));
   }
 
   // compile definitions property and per-config versions
   cmPolicies::PolicyStatus polSt = this->GetPolicyStatus(cmPolicies::CMP0043);
   if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
     this->SetProperty("COMPILE_DEFINITIONS",
-                      cmToCStr(parent->GetProperty("COMPILE_DEFINITIONS")));
+                      parent->GetProperty("COMPILE_DEFINITIONS"));
     std::vector<std::string> configs =
       this->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
     for (std::string const& config : configs) {
       std::string defPropName =
         cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
       cmProp prop = parent->GetProperty(defPropName);
-      this->SetProperty(defPropName, cmToCStr(prop));
+      this->SetProperty(defPropName, prop);
     }
   }
 
   // labels
-  this->SetProperty("LABELS", cmToCStr(parent->GetProperty("LABELS")));
+  this->SetProperty("LABELS", parent->GetProperty("LABELS"));
 
   // link libraries
-  this->SetProperty("LINK_LIBRARIES",
-                    cmToCStr(parent->GetProperty("LINK_LIBRARIES")));
+  this->SetProperty("LINK_LIBRARIES", parent->GetProperty("LINK_LIBRARIES"));
 
   // the initial project name
   this->StateSnapshot.SetProjectName(parent->StateSnapshot.GetProjectName());
@@ -2308,7 +2307,7 @@ void cmMakefile::ExpandVariablesCMP0019()
         << "  " << dirs << "\n";
       /* clang-format on */
     }
-    this->SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
+    this->SetProperty("INCLUDE_DIRECTORIES", dirs);
   }
 
   // Also for each target's INCLUDE_DIRECTORIES property:

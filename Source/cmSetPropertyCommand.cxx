@@ -294,7 +294,7 @@ bool HandleAndValidateSourceFilePropertyGENERATED(
         sf->SetProperty("GENERATED", nullptr);
         break;
       case PropertyOp::Set:
-        sf->SetProperty("GENERATED", propertyValue.c_str());
+        sf->SetProperty("GENERATED", propertyValue);
         break;
     }
   } else {
@@ -474,7 +474,7 @@ bool HandleGlobalMode(cmExecutionStatus& status,
     if (remove) {
       cm->SetProperty(propertyName, nullptr);
     } else {
-      cm->SetProperty(propertyName, propertyValue.c_str());
+      cm->SetProperty(propertyName, propertyValue);
     }
   }
 
@@ -520,7 +520,7 @@ bool HandleDirectoryMode(cmExecutionStatus& status,
     if (remove) {
       mf->SetProperty(propertyName, nullptr);
     } else {
-      mf->SetProperty(propertyName, propertyValue.c_str());
+      mf->SetProperty(propertyName, propertyValue);
     }
   }
 
@@ -631,7 +631,7 @@ bool HandleSource(cmSourceFile* sf, const std::string& propertyName,
     if (remove) {
       sf->SetProperty(propertyName, nullptr);
     } else {
-      sf->SetProperty(propertyName, propertyValue.c_str());
+      sf->SetProperty(propertyName, propertyValue);
     }
   }
   return true;
@@ -681,7 +681,7 @@ bool HandleTest(cmTest* test, const std::string& propertyName,
     if (remove) {
       test->SetProperty(propertyName, nullptr);
     } else {
-      test->SetProperty(propertyName, propertyValue.c_str());
+      test->SetProperty(propertyName, propertyValue);
     }
   }
 
