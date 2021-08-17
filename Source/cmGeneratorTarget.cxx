@@ -3317,6 +3317,22 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
     return;
   }
 
+  std::string const& compiler =
+    this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
+
+  // Check for special modes: `all`, `all-major`.
+  if (property == "all") {
+    if (compiler == "NVIDIA") {
+      flags += " -arch=all";
+      return;
+    }
+  } else if (property == "all-major") {
+    if (compiler == "NVIDIA") {
+      flags += " -arch=all-major";
+      return;
+    }
+  }
+
   struct CudaArchitecture
   {
     std::string name;
@@ -3357,9 +3373,6 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
       architectures.emplace_back(architecture);
     }
   }
-
-  std::string const& compiler =
-    this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
 
   if (compiler == "NVIDIA") {
     for (CudaArchitecture& architecture : architectures) {
