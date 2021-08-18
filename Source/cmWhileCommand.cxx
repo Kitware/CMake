@@ -16,13 +16,14 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmWhileFunctionBlocker(cmMakefile* mf);
+  cmWhileFunctionBlocker(cmMakefile* mf, std::vector<cmListFileArgument> args);
   ~cmWhileFunctionBlocker() override;
 
   cm::string_view StartCommandName() const override { return "while"_s; }
@@ -34,14 +35,15 @@ public:
   bool Replay(std::vector<cmListFileFunction> functions,
               cmExecutionStatus& inStatus) override;
 
-  std::vector<cmListFileArgument> Args;
-
 private:
   cmMakefile* Makefile;
+  std::vector<cmListFileArgument> Args;
 };
 
-cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
-  : Makefile(mf)
+cmWhileFunctionBlocker::cmWhileFunctionBlocker(
+  cmMakefile* const mf, std::vector<cmListFileArgument> args)
+  : Makefile{ mf }
+  , Args{ std::move(args) }
 {
   this->Makefile->PushLoopBlock();
 }
@@ -60,39 +62,29 @@ bool cmWhileFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
 bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
                                     cmExecutionStatus& inStatus)
 {
-  cmMakefile& mf = inStatus.GetMakefile();
-  std::string errorString;
-
-  std::vector<cmExpandedCommandArgument> expandedArguments;
-  mf.ExpandArguments(this->Args, expandedArguments);
-  MessageType messageType;
+  auto& mf = inStatus.GetMakefile();
 
   cmListFileBacktrace whileBT =
     mf.GetBacktrace().Push(this->GetStartingContext());
-  cmConditionEvaluator conditionEvaluator(mf, whileBT);
 
-  bool isTrue =
-    conditionEvaluator.IsTrue(expandedArguments, errorString, messageType);
+  std::vector<cmExpandedCommandArgument> expandedArguments;
+  // At least same size expected for `expandedArguments` as `Args`
+  expandedArguments.reserve(this->Args.size());
 
-  while (isTrue) {
-    if (!errorString.empty()) {
-      std::string err = "had incorrect arguments: ";
-      for (cmListFileArgument const& arg : this->Args) {
-        err += (arg.Delim ? "\"" : "");
-        err += arg.Value;
-        err += (arg.Delim ? "\"" : "");
-        err += " ";
-      }
-      err += "(";
-      err += errorString;
-      err += ").";
-      mf.GetCMakeInstance()->IssueMessage(messageType, err, whileBT);
-      if (messageType == MessageType::FATAL_ERROR) {
-        cmSystemTools::SetFatalErrorOccured();
-        return true;
-      }
-    }
+  auto expandArgs = [&mf](std::vector<cmListFileArgument> const& args,
+                          std::vector<cmExpandedCommandArgument>& out)
+    -> std::vector<cmExpandedCommandArgument>& {
+    out.clear();
+    mf.ExpandArguments(args, out);
+    return out;
+  };
 
+  std::string errorString;
+  MessageType messageType;
+
+  for (cmConditionEvaluator conditionEvaluator(mf, whileBT);
+       conditionEvaluator.IsTrue(expandArgs(this->Args, expandedArguments),
+                                 errorString, messageType);) {
     // Invoke all the functions that were collected in the block.
     for (cmListFileFunction const& fn : functions) {
       cmExecutionStatus status(mf);
@@ -111,11 +103,22 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         return true;
       }
     }
-    expandedArguments.clear();
-    mf.ExpandArguments(this->Args, expandedArguments);
-    isTrue =
-      conditionEvaluator.IsTrue(expandedArguments, errorString, messageType);
   }
+
+  if (!errorString.empty()) {
+    std::string err = "had incorrect arguments:\n ";
+    for (auto const& i : expandedArguments) {
+      err += " ";
+      err += cmOutputConverter::EscapeForCMake(i.GetValue());
+    }
+    err += "\n";
+    err += errorString;
+    mf.GetCMakeInstance()->IssueMessage(messageType, err, whileBT);
+    if (messageType == MessageType::FATAL_ERROR) {
+      cmSystemTools::SetFatalErrorOccured();
+    }
+  }
+
   return true;
 }
 
@@ -128,11 +131,9 @@ bool cmWhileCommand(std::vector<cmListFileArgument> const& args,
   }
 
   // create a function blocker
-  {
-    cmMakefile& makefile = status.GetMakefile();
-    auto fb = cm::make_unique<cmWhileFunctionBlocker>(&makefile);
-    fb->Args = args;
-    makefile.AddFunctionBlocker(std::move(fb));
-  }
+  auto& makefile = status.GetMakefile();
+  makefile.AddFunctionBlocker(
+    cm::make_unique<cmWhileFunctionBlocker>(&makefile, args));
+
   return true;
 }

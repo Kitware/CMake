@@ -260,10 +260,16 @@ bool cmConditionEvaluator::IsTrue(
   for (auto fn : handlers) {
     // Call the reducer 'till there is anything to reduce...
     // (i.e., if after an iteration the size becomes smaller)
+    auto levelResult = true;
     for (auto beginSize = newArgs.size();
-         (this->*fn)(newArgs, errorString, status) &&
+         (levelResult = (this->*fn)(newArgs, errorString, status)) &&
          newArgs.size() < beginSize;
          beginSize = newArgs.size()) {
+    }
+
+    if (!levelResult) {
+      // NOTE `errorString` supposed to be set already
+      return false;
     }
   }
 

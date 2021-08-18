@@ -9,6 +9,8 @@ run_cmake(duplicate-else-after-elseif)
 run_cmake(elseif-message)
 run_cmake(misplaced-elseif)
 
+run_cmake(unbalanced-parenthesis)
+
 run_cmake(MatchesSelf)
 run_cmake(IncompleteMatches)
 run_cmake(IncompleteMatchesFail)
