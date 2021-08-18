@@ -24,6 +24,7 @@
 
 #include "cmsys/SystemInformation.hxx"
 
+#include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmGeneratedFileStream.h"
@@ -522,6 +523,8 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
       // Filters
       cmExpandList(this->GenTarget->GetSafeProperty("AUTOMOC_MACRO_NAMES"),
                    this->Moc.MacroNames);
+      this->Moc.MacroNames.erase(cmRemoveDuplicates(this->Moc.MacroNames),
+                                 this->Moc.MacroNames.end());
       {
         auto filterList = cmExpandedList(
           this->GenTarget->GetSafeProperty("AUTOMOC_DEPEND_FILTERS"));
