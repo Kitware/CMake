@@ -384,39 +384,3 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
   }
   return true;
 }
-
-bool cmQtAutoGen::FileRead(std::string& content, std::string const& filename,
-                           std::string* error)
-{
-  content.clear();
-  if (!cmSystemTools::FileExists(filename, true)) {
-    if (error != nullptr) {
-      *error = "Not a file.";
-    }
-    return false;
-  }
-
-  unsigned long const length = cmSystemTools::FileLength(filename);
-  cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
-
-  // Use lambda to save destructor calls of ifs
-  return [&ifs, length, &content, error]() -> bool {
-    if (!ifs) {
-      if (error != nullptr) {
-        *error = "Opening the file for reading failed.";
-      }
-      return false;
-    }
-    content.reserve(length);
-    using IsIt = std::istreambuf_iterator<char>;
-    content.assign(IsIt{ ifs }, IsIt{});
-    if (!ifs) {
-      content.clear();
-      if (error != nullptr) {
-        *error = "Reading from the file failed.";
-      }
-      return false;
-    }
-    return true;
-  }();
-}
