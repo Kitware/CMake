@@ -36,6 +36,9 @@ Example:
 
 include_guard(GLOBAL)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0126 NEW)
+
 macro(check_language lang)
   if(NOT DEFINED CMAKE_${lang}_COMPILER)
     set(_desc "Looking for a ${lang} compiler")
@@ -110,3 +113,5 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
 
   endif()
 endmacro()
+
+cmake_policy(POP)
