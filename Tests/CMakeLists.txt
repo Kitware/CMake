@@ -1649,15 +1649,14 @@ if(BUILD_TESTING)
     DEPENDS ExternalProjectUpdateSetup )
 
   execute_process(
-    COMMAND ${CMAKE_CMAKE_COMMAND}
+    COMMAND ${CMAKE_COMMAND}
     "-E" create_symlink
     "${CMake_SOURCE_DIR}/Tests/CMakeLists.txt"        # random source file that exists
     "${CMake_BINARY_DIR}/Tests/try_to_create_symlink" # random target file in existing directory
-    RESULT_VARIABLE _failed
+    RESULT_VARIABLE _symlink_result
     )
-  if(_failed)
-    message("Failed to create a simple symlink on this machine. Skipping InstallMode tests.")
-  else()
+  if(_symlink_result EQUAL 0)
+    file(REMOVE "${CMake_BINARY_DIR}/Tests/try_to_create_symlink")
     function(add_installmode_test _mode)
       set(ENV{CMAKE_INSTALL_MODE} _mode)
       set(_maybe_InstallMode_CTEST_OPTIONS)
