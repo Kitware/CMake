@@ -27,7 +27,7 @@ Generators
 ----------
 
 * The :generator:`Visual Studio 17 2022` generator was added.  This is
-  experimental and based on "Visual Studio 2022 Preview 2" because this
+  experimental and based on "Visual Studio 2022 Preview 3.1" because this
   version of VS has not been released.
 
 * The :ref:`Makefile Generators` and the :generator:`Ninja` generator
@@ -310,3 +310,6 @@ Changes made since CMake 3.21.0 include the following.
 
 * ``CUDA`` targets with :prop_tgt:`CUDA_SEPARABLE_COMPILATION` enabled are now
   correctly generated in non-root directories.
+
+* The :generator:`Visual Studio 17 2022` generator is now based on
+  "Visual Studio 2022 Preview 3.1".  Previously it was based on "Preview 2".
