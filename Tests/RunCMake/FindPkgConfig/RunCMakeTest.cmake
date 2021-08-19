@@ -7,6 +7,7 @@ set(ENV{CMAKE_FRAMEWORK_PATH} "")
 
 run_cmake(PkgConfigDoesNotExist)
 
+run_cmake(FindPkgConfig_CMP0126_NEW)
 run_cmake(FindPkgConfig_NO_PKGCONFIG_PATH)
 run_cmake(FindPkgConfig_PKGCONFIG_PATH)
 run_cmake(FindPkgConfig_PKGCONFIG_PATH_NO_CMAKE_PATH)
