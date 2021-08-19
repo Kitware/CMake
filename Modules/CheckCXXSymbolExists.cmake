@@ -25,7 +25,7 @@ Check if a symbol exists as a function, variable, or macro in ``C++``.
   as a function or variable then the symbol must also be available for
   linking.  If the symbol is a type, enum value, or C++ template it will
   not be recognized: consider using the :module:`CheckTypeSize`
-  or :module:`CheckCXXSourceCompiles` module instead.
+  or :module:`CheckSourceCompiles` module instead.
 
 .. note::
 
