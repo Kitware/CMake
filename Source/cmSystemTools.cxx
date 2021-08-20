@@ -1629,7 +1629,10 @@ bool cmSystemTools::CreateTar(const std::string& outFileName,
   cmArchiveWrite a(fout, compress, format.empty() ? "paxr" : format,
                    compressionLevel);
 
-  a.Open();
+  if (!a.Open()) {
+    cmSystemTools::Error(a.GetError());
+    return false;
+  }
   a.SetMTime(mtime);
   a.SetVerbose(verbose);
   bool tarCreatedSuccessfully = true;
