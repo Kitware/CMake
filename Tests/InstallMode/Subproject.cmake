@@ -10,12 +10,7 @@ function(add_subproject _name)
 
   set(_maybe_NO_INSTALL)
   if(_arg_NO_INSTALL)
-    set(_maybe_NO_INSTALL "INSTALL_COMMAND")
-  else()
-    # This is a trick to get a valid call.
-    # Since we set UPDATE_COMMAND to ""
-    # explicitly below, this won't harm.
-    set(_maybe_NO_INSTALL "UPDATE_COMMAND")
+    set(_maybe_NO_INSTALL INSTALL_COMMAND "")
   endif()
 
   if(CMAKE_GENERATOR MATCHES "Ninja Multi-Config")
@@ -35,7 +30,9 @@ function(add_subproject _name)
   ExternalProject_Add("${_name}"
     DOWNLOAD_COMMAND      ""
     UPDATE_COMMAND        ""
-    ${_maybe_NO_INSTALL}  ""
+    UPDATE_DISCONNECTED   ON
+
+    "${_maybe_NO_INSTALL}"
 
     BUILD_ALWAYS          ON
 
@@ -67,7 +64,7 @@ function(add_subproject _name)
       # however, we need to explicitly inherit other parent
       # project's build settings.
       "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}"
-      ${_maybe_NINJA_MULTICONFIG_ARGS}
+      "${_maybe_NINJA_MULTICONFIG_ARGS}"
 
       # Subproject progress reports clutter up the output, disable
       "-DCMAKE_TARGET_MESSAGES:BOOL=OFF"

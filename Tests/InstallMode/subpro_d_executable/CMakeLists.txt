@@ -17,6 +17,9 @@ target_link_libraries(the_executable PRIVATE
   the_c2_lib
 )
 
+# This is to fix an issue on AIX/GCC (see commit 4fc47424)
+set_property(TARGET the_executable PROPERTY NO_SYSTEM_FROM_IMPORTED 1)
+
 install(
   TARGETS
     the_executable
