@@ -1,0 +1,7 @@
+-- UFS_ID=`unittest`
+-- UFS_ID_LIKE=`nothing`
+-- UFS_NAME=`UnitTest`
+-- UFS_PRETTY_NAME=`Just a Unit Test`
+-- UFS_USED_FALLBACK_SCRIPT=`.*/999-LastFallbackScript\.cmake`
+-- UFS_VERSION=`0\.0\.1`
+-- UFS_VERSION_ID=`0\.0\.1`

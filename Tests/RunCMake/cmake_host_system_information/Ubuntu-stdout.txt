@@ -1,0 +1,14 @@
+-- TEST1_BUG_REPORT_URL=`https://bugs\.launchpad\.net/ubuntu/`
+-- TEST1_HOME_URL=`https://www\.ubuntu\.com/`
+-- TEST1_ID=`ubuntu`
+-- TEST1_ID_LIKE=`debian`
+-- TEST1_NAME=`Ubuntu`
+-- TEST1_PRETTY_NAME=`Ubuntu 20\.04\.2 LTS`
+-- TEST1_PRIVACY_POLICY_URL=`https://www\.ubuntu\.com/legal/terms-and-policies/privacy-policy`
+-- TEST1_SUPPORT_URL=`https://help\.ubuntu\.com/`
+-- TEST1_UBUNTU_CODENAME=`focal`
+-- TEST1_VERSION=`20\.04\.2 LTS \(Focal Fossa\)`
+-- TEST1_VERSION_CODENAME=`focal`
+-- TEST1_VERSION_ID=`20\.04`
+-- TEST2_ID=`ubuntu`
+-- TEST2_VERSION=`20\.04\.2 LTS \(Focal Fossa\)`
