@@ -36,7 +36,7 @@ __FBSDID("$FreeBSD$");
 #elif HAVE_BSDXML_H
 #include <bsdxml.h>
 #elif HAVE_EXPAT_H
-#include <expat.h>
+#include <cm3p/expat.h>
 #endif
 #ifdef HAVE_BZLIB_H
 #include <cm3p/bzlib.h>

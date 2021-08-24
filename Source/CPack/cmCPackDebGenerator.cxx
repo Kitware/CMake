@@ -192,7 +192,13 @@ bool DebGenerator::generateDataTar() const
   cmArchiveWrite data_tar(fileStream_data_tar, this->TarCompressionType,
                           this->DebianArchiveType, 0,
                           static_cast<int>(this->NumThreads));
-  data_tar.Open();
+  if (!data_tar.Open()) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Error opening the archive \""
+                    << filename_data_tar
+                    << "\", ERROR = " << data_tar.GetError() << std::endl);
+    return false;
+  }
 
   // uid/gid should be the one of the root user, and this root user has
   // always uid/gid equal to 0.
@@ -317,7 +323,13 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
   cmArchiveWrite control_tar(fileStream_control_tar,
                              cmArchiveWrite::CompressGZip,
                              this->DebianArchiveType);
-  control_tar.Open();
+  if (!control_tar.Open()) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Error opening the archive \""
+                    << filename_control_tar
+                    << "\", ERROR = " << control_tar.GetError() << std::endl);
+    return false;
+  }
 
   // sets permissions and uid/gid for the files
   control_tar.SetUIDAndGID(0u, 0u);
@@ -457,7 +469,13 @@ bool DebGenerator::generateDeb() const
   cmGeneratedFileStream debStream;
   debStream.Open(outputPath, false, true);
   cmArchiveWrite deb(debStream, cmArchiveWrite::CompressNone, "arbsd");
-  deb.Open();
+  if (!deb.Open()) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Error opening the archive \""
+                    << outputPath << "\", ERROR = " << deb.GetError()
+                    << std::endl);
+    return false;
+  }
 
   // uid/gid should be the one of the root user, and this root user has
   // always uid/gid equal to 0.

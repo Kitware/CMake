@@ -53,10 +53,10 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_read_support_format_zip.c 201102
 #include <cm3p/zlib.h>
 #endif
 #ifdef HAVE_BZLIB_H
-#include <bzlib.h>
+#include <cm3p/bzlib.h>
 #endif
 #ifdef HAVE_LZMA_H
-#include <lzma.h>
+#include <cm3p/lzma.h>
 #endif
 
 #include "archive.h"
