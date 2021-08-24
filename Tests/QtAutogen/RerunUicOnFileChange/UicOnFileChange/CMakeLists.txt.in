@@ -8,7 +8,6 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 
 add_executable(UicOnFileChange main.cpp mainwindow.ui mainwindow.h
-    subdir/subdircheck.cpp subdir/mainwindowsubdir.ui
 )
 target_include_directories(UicOnFileChange PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"

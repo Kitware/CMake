@@ -902,13 +902,6 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   // The reason is that their file names might be discovered from source files
   // at generation time.
   if (this->MocOrUicEnabled()) {
-    std::set<std::string> uicIncludes;
-    auto collectUicIncludes = [&](std::unique_ptr<cmSourceFile> const& sf) {
-      std::string content;
-      FileRead(content, sf->GetFullPath());
-      this->AutoUicHelpers.CollectUicIncludes(uicIncludes, content);
-    };
-
     for (const auto& sf : this->Makefile->GetSourceFiles()) {
       // sf->GetExtension() is only valid after sf->ResolveFullPath() ...
       // Since we're iterating over source files that might be not in the
@@ -921,19 +914,12 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       std::string const& extLower =
         cmSystemTools::LowerCase(sf->GetExtension());
 
-      bool const skipAutogen = sf->GetPropertyAsBool(kw.SKIP_AUTOGEN);
-      bool const skipUic =
-        (skipAutogen || sf->GetPropertyAsBool(kw.SKIP_AUTOUIC) ||
-         !this->Uic.Enabled);
       if (cm->IsAHeaderExtension(extLower)) {
         if (!cm::contains(this->AutogenTarget.Headers, sf.get())) {
           auto muf = makeMUFile(sf.get(), fullPath, {}, false);
           if (muf->SkipMoc || muf->SkipUic) {
             addMUHeader(std::move(muf), extLower);
           }
-        }
-        if (!skipUic && !sf->GetIsGenerated()) {
-          collectUicIncludes(sf);
         }
       } else if (cm->IsACLikeSourceExtension(extLower)) {
         if (!cm::contains(this->AutogenTarget.Sources, sf.get())) {
@@ -942,11 +928,11 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             addMUSource(std::move(muf));
           }
         }
-        if (!skipUic && !sf->GetIsGenerated()) {
-          collectUicIncludes(sf);
-        }
       } else if (this->Uic.Enabled && (extLower == kw.ui)) {
         // .ui file
+        bool const skipAutogen = sf->GetPropertyAsBool(kw.SKIP_AUTOGEN);
+        bool const skipUic =
+          (skipAutogen || sf->GetPropertyAsBool(kw.SKIP_AUTOUIC));
         if (!skipUic) {
           // Check if the .ui file has uic options
           std::string const uicOpts = sf->GetSafeProperty(kw.AUTOUIC_OPTIONS);
@@ -956,21 +942,34 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             this->Uic.UiFilesWithOptions.emplace_back(fullPath,
                                                       cmExpandedList(uicOpts));
           }
+
+          auto uiHeaderRelativePath = cmSystemTools::RelativePath(
+            this->LocalGen->GetCurrentSourceDirectory(),
+            cmSystemTools::GetFilenamePath(fullPath));
+
+          // Avoid creating a path containing adjacent slashes
+          if (!uiHeaderRelativePath.empty() &&
+              uiHeaderRelativePath.back() != '/') {
+            uiHeaderRelativePath += '/';
+          }
+
+          auto uiHeaderFilePath = cmStrCat(
+            '/', uiHeaderRelativePath, "ui_"_s,
+            cmSystemTools::GetFilenameWithoutLastExtension(fullPath), ".h"_s);
+
+          ConfigString uiHeader;
+          std::string uiHeaderGenex;
+          this->ConfigFileNamesAndGenex(
+            uiHeader, uiHeaderGenex, cmStrCat(this->Dir.Build, "/include"_s),
+            uiHeaderFilePath);
+
+          this->Uic.UiHeaders.emplace_back(
+            std::make_pair(uiHeader, uiHeaderGenex));
         } else {
           // Register skipped .ui file
           this->Uic.SkipUi.insert(fullPath);
         }
       }
-    }
-
-    for (const auto& include : uicIncludes) {
-      ConfigString uiHeader;
-      std::string uiHeaderGenex;
-      this->ConfigFileNamesAndGenex(uiHeader, uiHeaderGenex,
-                                    cmStrCat(this->Dir.Build, "/include"_s),
-                                    cmStrCat("/"_s, include));
-      this->Uic.UiHeaders.emplace_back(
-        std::make_pair(uiHeader, uiHeaderGenex));
     }
   }
 
