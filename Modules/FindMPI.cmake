@@ -624,7 +624,8 @@ function (_MPI_interrogate_compiler LANG)
       # we won't match the accompanying --param-ssp-size and -Wp,-D_FORTIFY_SOURCE flags and therefore
       # produce inconsistent results with the regularly flags.
       # Similarly, aliasing flags do not belong into our flag array.
-      if(NOT "${_MPI_COMPILE_OPTION}" MATCHES "^-f((no-|)(stack-protector|strict-aliasing)|PI[CE]|pi[ce])")
+      # Also strip out `-framework` flags.
+      if(NOT "${_MPI_COMPILE_OPTION}" MATCHES "^-f((no-|)(stack-protector|strict-aliasing)|PI[CE]|pi[ce]|ramework)")
         list(APPEND MPI_COMPILE_OPTIONS_WORK "${_MPI_COMPILE_OPTION}")
       endif()
     endforeach()
