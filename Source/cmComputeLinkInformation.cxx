@@ -278,13 +278,11 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   // On platforms without import libraries there may be a special flag
   // to use when creating a plugin (module) that obtains symbols from
   // the program that will load it.
-  this->LoaderFlag = nullptr;
   if (!this->Target->IsDLLPlatform() &&
       this->Target->GetType() == cmStateEnums::MODULE_LIBRARY) {
     std::string loader_flag_var =
       cmStrCat("CMAKE_SHARED_MODULE_LOADER_", this->LinkLanguage, "_FLAG");
-    this->LoaderFlag =
-      cmToCStr(this->Makefile->GetDefinition(loader_flag_var));
+    this->LoaderFlag = this->Makefile->GetDefinition(loader_flag_var);
   }
 
   // Get options needed to link libraries.
@@ -660,8 +658,7 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
       // This link item is an executable that may provide symbols
       // used by this target.  A special flag is needed on this
       // platform.  Add it now.
-      std::string linkItem;
-      linkItem = this->LoaderFlag;
+      std::string linkItem = this->LoaderFlag;
       cmStateEnums::ArtifactType artifact = tgt->HasImportLibrary(config)
         ? cmStateEnums::ImportLibraryArtifact
         : cmStateEnums::RuntimeBinaryArtifact;

@@ -431,9 +431,8 @@ bool HandleVariableMode(cmExecutionStatus& status, const std::string& name,
     return false;
   }
 
-  return StoreResult(
-    infoType, status.GetMakefile(), variable,
-    cmToCStr(status.GetMakefile().GetDefinition(propertyName)));
+  return StoreResult(infoType, status.GetMakefile(), variable,
+                     status.GetMakefile().GetDefinition(propertyName));
 }
 
 bool HandleCacheMode(cmExecutionStatus& status, const std::string& name,

@@ -399,13 +399,13 @@ public:
    * Set a regular expression that include files must match
    * in order to be considered as part of the depend information.
    */
-  void SetIncludeRegularExpression(const char* regex)
+  void SetIncludeRegularExpression(const std::string& regex)
   {
-    this->SetProperty("INCLUDE_REGULAR_EXPRESSION", regex);
+    this->SetProperty("INCLUDE_REGULAR_EXPRESSION", regex.c_str());
   }
-  const char* GetIncludeRegularExpression() const
+  const std::string& GetIncludeRegularExpression() const
   {
-    return cmToCStr(this->GetProperty("INCLUDE_REGULAR_EXPRESSION"));
+    return this->GetProperty("INCLUDE_REGULAR_EXPRESSION");
   }
 
   /**

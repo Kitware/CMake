@@ -425,27 +425,25 @@ void cmLocalGenerator::ProcessEvaluationFiles(
 void cmLocalGenerator::GenerateInstallRules()
 {
   // Compute the install prefix.
-  const char* prefix =
-    cmToCStr(this->Makefile->GetDefinition("CMAKE_INSTALL_PREFIX"));
+  cmProp installPrefix = this->Makefile->GetDefinition("CMAKE_INSTALL_PREFIX");
+  std::string prefix = installPrefix;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  std::string prefix_win32;
-  if (!prefix) {
-    if (!cmSystemTools::GetEnv("SystemDrive", prefix_win32)) {
-      prefix_win32 = "C:";
+  if (!installPrefix) {
+    if (!cmSystemTools::GetEnv("SystemDrive", prefix)) {
+      prefix = "C:";
     }
     cmProp project_name = this->Makefile->GetDefinition("PROJECT_NAME");
     if (cmNonempty(project_name)) {
-      prefix_win32 += "/Program Files/";
-      prefix_win32 += *project_name;
+      prefix += "/Program Files/";
+      prefix += *project_name;
     } else {
-      prefix_win32 += "/InstalledCMakeProject";
+      prefix += "/InstalledCMakeProject";
     }
-    prefix = prefix_win32.c_str();
   }
 #elif defined(__HAIKU__)
   char dir[B_PATH_NAME_LENGTH];
-  if (!prefix) {
+  if (!installPrefix) {
     if (find_directory(B_SYSTEM_DIRECTORY, -1, false, dir, sizeof(dir)) ==
         B_OK) {
       prefix = dir;
@@ -454,13 +452,13 @@ void cmLocalGenerator::GenerateInstallRules()
     }
   }
 #else
-  if (!prefix) {
+  if (!installPrefix) {
     prefix = "/usr/local";
   }
 #endif
   if (cmProp stagingPrefix =
         this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX")) {
-    prefix = stagingPrefix->c_str();
+    prefix = *stagingPrefix;
   }
 
   // Compute the set of configurations.
@@ -1869,17 +1867,17 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
 }
 
 bool cmLocalGenerator::AllAppleArchSysrootsAreTheSame(
-  const std::vector<std::string>& archs, const char* sysroot)
+  const std::vector<std::string>& archs, cmProp sysroot)
 {
   if (!sysroot) {
     return false;
   }
 
   return std::all_of(archs.begin(), archs.end(),
-                     [this, &sysroot](std::string const& arch) -> bool {
+                     [this, sysroot](std::string const& arch) -> bool {
                        std::string const& archSysroot =
                          this->AppleArchSysroots[arch];
-                       return cmIsOff(archSysroot) || archSysroot == sysroot;
+                       return cmIsOff(archSysroot) || sysroot == archSysroot;
                      });
 }
 
@@ -1912,7 +1910,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     cmProp sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
     if (cmNonempty(sysrootFlag)) {
       if (!this->AppleArchSysroots.empty() &&
-          !this->AllAppleArchSysrootsAreTheSame(archs, cmToCStr(sysroot))) {
+          !this->AllAppleArchSysrootsAreTheSame(archs, sysroot)) {
         for (std::string const& arch : archs) {
           std::string const& archSysroot = this->AppleArchSysroots[arch];
           if (cmIsOff(archSysroot)) {

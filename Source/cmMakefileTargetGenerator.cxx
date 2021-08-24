@@ -293,8 +293,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
                                             this->GetConfigName());
   for (cmSourceFile const* sf : externalObjects) {
     auto const& objectFileName = sf->GetFullPath();
-    if (!cmSystemTools::StringEndsWith(objectFileName,
-                                       cmToCStr(pchExtension))) {
+    if (!cmHasSuffix(objectFileName, pchExtension)) {
       this->ExternalObjects.push_back(objectFileName);
     }
   }
@@ -1732,7 +1731,7 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
   cmProp pchExtension = this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
 
   for (std::string const& obj : this->Objects) {
-    if (cmSystemTools::StringEndsWith(obj, cmToCStr(pchExtension))) {
+    if (cmHasSuffix(obj, pchExtension)) {
       continue;
     }
     *this->BuildFileStream << " " << lineContinue;
@@ -1822,7 +1821,7 @@ void cmMakefileTargetGenerator::WriteObjectsStrings(
     objStrings, this->LocalGenerator,
     this->LocalGenerator->GetStateSnapshot().GetDirectory(), limit);
   for (std::string const& obj : this->Objects) {
-    if (cmSystemTools::StringEndsWith(obj, cmToCStr(pchExtension))) {
+    if (cmHasSuffix(obj, pchExtension)) {
       continue;
     }
     helper.Feed(obj);

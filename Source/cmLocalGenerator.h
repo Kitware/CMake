@@ -651,7 +651,7 @@ private:
 
   void ComputeObjectMaxPath();
   bool AllAppleArchSysrootsAreTheSame(const std::vector<std::string>& archs,
-                                      const char* sysroot);
+                                      cmProp sysroot);
 
   void CopyPchCompilePdb(const std::string& config, cmGeneratorTarget* target,
                          const std::string& ReuseFrom,

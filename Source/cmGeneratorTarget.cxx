@@ -4962,11 +4962,11 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
     // The library's soname.
     this->ComputeVersionedName(targetNames.SharedObject, prefix,
                                targetNames.Base, suffix, targetNames.Output,
-                               cmToCStr(soversion));
+                               soversion);
 
     // The library's real name on disk.
     this->ComputeVersionedName(targetNames.Real, prefix, targetNames.Base,
-                               suffix, targetNames.Output, cmToCStr(version));
+                               suffix, targetNames.Output, version);
   }
 
   // The import library name.
@@ -4999,10 +4999,10 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
 // This versioning is supported only for executables and then only
 // when the platform supports symbolic links.
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  const char* version = nullptr;
+  cmProp version;
 #else
   // Check for executable version properties.
-  const char* version = cmToCStr(this->GetProperty("VERSION"));
+  cmProp version = this->GetProperty("VERSION");
   if (this->GetType() != cmStateEnums::EXECUTABLE ||
       this->Makefile->IsOn("XCODE")) {
     version = nullptr;
@@ -5026,7 +5026,7 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
 #endif
   if (version) {
     targetNames.Real += "-";
-    targetNames.Real += version;
+    targetNames.Real += *version;
   }
 #if defined(__CYGWIN__)
   targetNames.Real += suffix;
@@ -6290,17 +6290,14 @@ std::string cmGeneratorTarget::GetFrameworkVersion() const
   return "A";
 }
 
-void cmGeneratorTarget::ComputeVersionedName(std::string& vName,
-                                             std::string const& prefix,
-                                             std::string const& base,
-                                             std::string const& suffix,
-                                             std::string const& name,
-                                             const char* version) const
+void cmGeneratorTarget::ComputeVersionedName(
+  std::string& vName, std::string const& prefix, std::string const& base,
+  std::string const& suffix, std::string const& name, cmProp version) const
 {
   vName = this->Makefile->IsOn("APPLE") ? (prefix + base) : name;
   if (version) {
     vName += ".";
-    vName += version;
+    vName += *version;
   }
   vName += this->Makefile->IsOn("APPLE") ? suffix : std::string();
 }
