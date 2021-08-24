@@ -21,13 +21,14 @@ supported by the :module:`ExternalProject` module.  Whereas
 configure step to use the content in commands like :command:`add_subdirectory`,
 :command:`include` or :command:`file` operations.
 
-Content population details would normally be defined separately from the
-command that performs the actual population.  This separation ensures that
-all of the dependency details are defined before anything may try to use those
-details to populate content.  This is particularly important in more complex
-project hierarchies where dependencies may be shared between multiple projects.
+Content population details should be defined separately from the command that
+performs the actual population.  This separation ensures that all the
+dependency details are defined before anything might try to use them to
+populate content.  This is particularly important in more complex project
+hierarchies where dependencies may be shared between multiple projects.
 
-The following shows a typical example of declaring content details:
+The following shows a typical example of declaring content details for some
+dependencies and then ensuring they are populated with a separate call:
 
 .. code-block:: cmake
 
@@ -36,56 +37,66 @@ The following shows a typical example of declaring content details:
     GIT_REPOSITORY https://github.com/google/googletest.git
     GIT_TAG        703bd9caab50b139428cea1aaff9974ebee5742e # release-1.10.0
   )
+  FetchContent_Declare(
+    myCompanyIcons
+    URL      https://intranet.mycompany.com/assets/iconset_1.12.tar.gz
+    URL_HASH MD5=5588a7b18261c20068beabfb4f530b87
+  )
 
-For most typical cases, populating the content can then be done with a single
-command like so:
+  FetchContent_MakeAvailable(googletest secret_sauce)
 
-.. code-block:: cmake
+The :command:`FetchContent_MakeAvailable` command ensures the named
+dependencies have been populated, either by an earlier call or by populating
+them itself.  When performing the population, it will also add them to the
+main build, if possible, so that the main build can use the populated
+projects' targets, etc.  See the command's documentation for how these steps
+are performed.
 
-  FetchContent_MakeAvailable(googletest)
-
-The above command not only populates the content, it also adds it to the main
-build (if possible) so that the main build can use the populated project's
-targets, etc.  In some cases, the main project may need to have more precise
-control over the population or may be required to explicitly define the
-population steps (e.g. if CMake versions earlier than 3.14 need to be
-supported).  The typical pattern of such custom steps looks like this:
-
-.. code-block:: cmake
-
-  FetchContent_GetProperties(googletest)
-  if(NOT googletest_POPULATED)
-    FetchContent_Populate(googletest)
-    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
-  endif()
-
-Regardless of which population method is used, when using the
-declare-populate pattern with a hierarchical project arrangement, projects at
-higher levels in the hierarchy are able to override the population details of
-content specified anywhere lower in the project hierarchy.  The ability to
-detect whether content has already been populated ensures that even if
-multiple child projects want certain content to be available, the first one
-to populate it wins.  The other child project can simply make use of the
-already available content instead of repeating the population for itself.
-See the :ref:`Examples <fetch-content-examples>` section which demonstrates
+When using a hierarchical project arrangement, projects at higher levels in
+the hierarchy are able to override the declared details of content specified
+anywhere lower in the project hierarchy.  The first details to be declared
+for a given dependency take precedence, regardless of where in the project
+hierarchy that occurs.  Similarly, the first call that tries to populate a
+dependency "wins", with subsequent populations reusing the result of the
+first instead of repeating the population again.
+See the :ref:`Examples <fetch-content-examples>` which demonstrate
 this scenario.
+
+In some cases, the main project may need to have more precise control over
+the population, or it may be required to explicitly define the population
+steps in a way that cannot be captured by the declared details alone.
+For such situations, the lower level :command:`FetchContent_GetProperties` and
+:command:`FetchContent_Populate` commands can be used.  These lack the richer
+features provided by :command:`FetchContent_MakeAvailable` though, so their
+direct use should be considered a last resort.  The typical pattern of such
+custom steps looks like this:
+
+.. code-block:: cmake
+
+  # NOTE: Where possible, prefer to use FetchContent_MakeAvailable()
+  #       instead of custom logic like this
+
+  # Check if population has already been performed
+  FetchContent_GetProperties(depname)
+  if(NOT depname_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(depname)
+
+    # Set custom variables, policies, etc.
+    # ...
+
+    # Bring the populated content into the build
+    add_subdirectory(${depname_SOURCE_DIR} ${depname_BINARY_DIR})
+  endif()
 
 The ``FetchContent`` module also supports defining and populating
 content in a single call, with no check for whether the content has been
-populated elsewhere in the project already.  This is a more low level
-operation and would not normally be the way the module is used, but it is
-sometimes useful as part of implementing some higher level feature or to
-populate some content in CMake's script mode.
-
-.. versionchanged:: 3.14
-  ``FetchContent`` commands can access the terminal. This is necessary
-  for password prompts and real-time progress displays to work.
+populated elsewhere already.  This should not be done in projects, but may
+be appropriate for populating content in CMake's script mode.
+See :command:`FetchContent_Populate` for details.
 
 Commands
 ^^^^^^^^
-
-Declaring Content Details
-"""""""""""""""""""""""""
 
 .. command:: FetchContent_Declare
 
@@ -94,7 +105,7 @@ Declaring Content Details
     FetchContent_Declare(<name> <contentOptions>...)
 
   The ``FetchContent_Declare()`` function records the options that describe
-  how to populate the specified content, but if such details have already
+  how to populate the specified content.  If such details have already
   been recorded earlier in this project (regardless of where in the project
   hierarchy), this and all later calls for the same content ``<name>`` are
   ignored.  This "first to record, wins" approach is what allows hierarchical
@@ -110,7 +121,7 @@ Declaring Content Details
   projects needing that same content will use the same name, leading to
   the content being populated multiple times.
 
-  The ``<contentOptions>`` can be any of the download or update/patch options
+  The ``<contentOptions>`` can be any of the download, update or patch options
   that the :command:`ExternalProject_Add` command understands.  The configure,
   build, install and test steps are explicitly disabled and therefore options
   related to them will be ignored.  The ``SOURCE_SUBDIR`` option is an
@@ -146,47 +157,88 @@ Declaring Content Details
   than a branch or tag name.  A commit hash is more secure and helps to
   confirm that the downloaded contents are what you expected.
 
-Populating The Content
-""""""""""""""""""""""
+  .. versionchanged:: 3.14
+    Commands for the download, update or patch steps can access the terminal.
+    This may be needed for things like password prompts or real-time display
+    of command progress.
 
-For most common scenarios, population means making content available to the
-main build according to previously declared details for that dependency.
-There are two main patterns for populating content, one based on calling
-:command:`FetchContent_GetProperties` and
-:command:`FetchContent_Populate` for more precise control and the other on
-calling :command:`FetchContent_MakeAvailable` for a simpler, more automated
-approach.  The former generally follows this canonical pattern:
+.. command:: FetchContent_MakeAvailable
 
-.. _`fetch-content-canonical-pattern`:
-
-.. code-block:: cmake
-
-  # Check if population has already been performed
-  FetchContent_GetProperties(<name>)
-  string(TOLOWER "<name>" lcName)
-  if(NOT ${lcName}_POPULATED)
-    # Fetch the content using previously declared details
-    FetchContent_Populate(<name>)
-
-    # Set custom variables, policies, etc.
-    # ...
-
-    # Bring the populated content into the build
-    add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
-  endif()
-
-The above is such a common pattern that, where no custom steps are needed
-between the calls to :command:`FetchContent_Populate` and
-:command:`add_subdirectory`, equivalent logic can be obtained by calling
-:command:`FetchContent_MakeAvailable` instead.  Where it meets the needs of
-the project, :command:`FetchContent_MakeAvailable` should be preferred, as it
-is simpler and provides additional features over the pattern above.
-
-.. command:: FetchContent_Populate
+  .. versionadded:: 3.14
 
   .. code-block:: cmake
 
-    FetchContent_Populate( <name> )
+    FetchContent_MakeAvailable(<name1> [<name2>...])
+
+  This command ensures that each of the named dependencies are populated and
+  potentially added to the build by the time it returns.  It iterates over
+  the list, and for each dependency, the following logic is applied:
+
+  * If the dependency has already been populated earlier in this run, set
+    the ``<lowercaseName>_POPULATED``, ``<lowercaseName>_SOURCE_DIR`` and
+    ``<lowercaseName>_BINARY_DIR`` variables in the same way as a call to
+    :command:`FetchContent_GetProperties`, then skip the remaining steps
+    below and move on to the next dependency in the list.
+
+  * Call :command:`FetchContent_Populate` to populate the dependency using
+    the details recorded by an earlier call to :command:`FetchContent_Declare`.
+    Halt with a fatal error if no such details have been recorded.
+    :variable:`FETCHCONTENT_SOURCE_DIR_<uppercaseName>` can be used to override
+    the declared details and use content provided at the specified location
+    instead.
+
+  * If the top directory of the populated content contains a ``CMakeLists.txt``
+    file, call :command:`add_subdirectory` to add it to the main build.
+    It is not an error for there to be no ``CMakeLists.txt`` file, which
+    allows the command to be used for dependencies that make downloaded
+    content available at a known location, but which do not need or support
+    being added directly to the build.
+
+    .. versionadded:: 3.18
+      The ``SOURCE_SUBDIR`` option can be given in the declared details to
+      look somewhere below the top directory instead (i.e. the same way that
+      ``SOURCE_SUBDIR`` is used by the :command:`ExternalProject_Add`
+      command).  The path provided with ``SOURCE_SUBDIR`` must be relative
+      and will be treated as relative to the top directory.  It can also
+      point to a directory that does not contain a ``CMakeLists.txt`` file
+      or even to a directory that doesn't exist.  This can be used to avoid
+      adding a project that contains a ``CMakeLists.txt`` file in its top
+      directory.
+
+  Projects should aim to declare the details of all dependencies they might
+  use before they call ``FetchContent_MakeAvailable()`` for any of them.
+  This ensures that if any of the dependencies are also sub-dependencies of
+  one or more of the others, the main project still controls the details
+  that will be used (because it will declare them first before the
+  dependencies get a chance to).  In the following code samples, assume that
+  the ``uses_other`` dependency also uses ``FetchContent`` to add the ``other``
+  dependency internally:
+
+  .. code-block:: cmake
+
+    # WRONG: Should declare all details first
+    FetchContent_Declare(uses_other ...)
+    FetchContent_MakeAvailable(uses_other)
+
+    FetchContent_Declare(other ...)    # Will be ignored, uses_other beat us to it
+    FetchContent_MakeAvailable(other)  # Would use details declared by uses_other
+
+  .. code-block:: cmake
+
+    # CORRECT: All details declared first, so they will take priority
+    FetchContent_Declare(uses_other ...)
+    FetchContent_Declare(other ...)
+    FetchContent_MakeAvailable(uses_other other)
+
+.. command:: FetchContent_Populate
+
+  .. note::
+    Where possible, prefer to use :command:`FetchContent_MakeAvailable`
+    instead of implementing population manually with this command.
+
+  .. code-block:: cmake
+
+    FetchContent_Populate(<name>)
 
   In most cases, the only argument given to ``FetchContent_Populate()`` is the
   ``<name>``.  When used this way, the command assumes the content details have
@@ -211,87 +263,28 @@ is simpler and provides additional features over the pattern above.
   ``FetchContent_Populate()``.
 
   ``FetchContent_Populate()`` will set three variables in the scope of the
-  caller; ``<lcName>_POPULATED``, ``<lcName>_SOURCE_DIR`` and
-  ``<lcName>_BINARY_DIR``, where ``<lcName>`` is the lowercased ``<name>``.
-  ``<lcName>_POPULATED`` will always be set to ``True`` by the call.
-  ``<lcName>_SOURCE_DIR`` is the location where the
-  content can be found upon return (it will have already been populated), while
-  ``<lcName>_BINARY_DIR`` is a directory intended for use as a corresponding
-  build directory.  The main use case for the two directory variables is to
-  call :command:`add_subdirectory` immediately after population, i.e.:
+  caller:
+
+  ``<lowercaseName>_POPULATED``
+    This will always be set to ``TRUE`` by the call.
+
+  ``<lowercaseName>_SOURCE_DIR``
+    The location where the populated content can be found upon return.
+
+  ``<lowercaseName>_BINARY_DIR``
+    A directory intended for use as a corresponding build directory.
+
+  The main use case for the ``<lowercaseName>_SOURCE_DIR`` and
+  ``<lowercaseName>_BINARY_DIR`` variables is to call
+  :command:`add_subdirectory` immediately after population:
 
   .. code-block:: cmake
 
-    FetchContent_Populate(FooBar ...)
+    FetchContent_Populate(FooBar)
     add_subdirectory(${foobar_SOURCE_DIR} ${foobar_BINARY_DIR})
 
   The values of the three variables can also be retrieved from anywhere in the
   project hierarchy using the :command:`FetchContent_GetProperties` command.
-
-  A number of cache variables influence the behavior of all content population
-  performed using details saved from a :command:`FetchContent_Declare` call:
-
-  ``FETCHCONTENT_BASE_DIR``
-    In most cases, the saved details do not specify any options relating to the
-    directories to use for the internal sub-build, final source and build areas.
-    It is generally best to leave these decisions up to the ``FetchContent``
-    module to handle on the project's behalf.  The ``FETCHCONTENT_BASE_DIR``
-    cache variable controls the point under which all content population
-    directories are collected, but in most cases developers would not need to
-    change this.  The default location is ``${CMAKE_BINARY_DIR}/_deps``, but if
-    developers change this value, they should aim to keep the path short and
-    just below the top level of the build tree to avoid running into path
-    length problems on Windows.
-
-  ``FETCHCONTENT_QUIET``
-    The logging output during population can be quite verbose, making the
-    configure stage quite noisy.  This cache option (``ON`` by default) hides
-    all population output unless an error is encountered.  If experiencing
-    problems with hung downloads, temporarily switching this option off may
-    help diagnose which content population is causing the issue.
-
-  ``FETCHCONTENT_FULLY_DISCONNECTED``
-    When this option is enabled, no attempt is made to download or update
-    any content.  It is assumed that all content has already been populated in
-    a previous run or the source directories have been pointed at existing
-    contents the developer has provided manually (using options described
-    further below).  When the developer knows that no changes have been made to
-    any content details, turning this option ``ON`` can significantly speed up
-    the configure stage.  It is ``OFF`` by default.
-
-  ``FETCHCONTENT_UPDATES_DISCONNECTED``
-    This is a less severe download/update control compared to
-    ``FETCHCONTENT_FULLY_DISCONNECTED``.  Instead of bypassing all download and
-    update logic, the ``FETCHCONTENT_UPDATES_DISCONNECTED`` only disables the
-    update stage.  Therefore, if content has not been downloaded previously,
-    it will still be downloaded when this option is enabled.  This can speed up
-    the configure stage, but not as much as
-    ``FETCHCONTENT_FULLY_DISCONNECTED``.  It is ``OFF`` by default.
-
-  In addition to the above cache variables, the following cache variables are
-  also defined for each content name (``<ucName>`` is the uppercased value of
-  ``<name>``):
-
-  ``FETCHCONTENT_SOURCE_DIR_<ucName>``
-    If this is set, no download or update steps are performed for the specified
-    content and the ``<lcName>_SOURCE_DIR`` variable returned to the caller is
-    pointed at this location.  This gives developers a way to have a separate
-    checkout of the content that they can modify freely without interference
-    from the build.  The build simply uses that existing source, but it still
-    defines ``<lcName>_BINARY_DIR`` to point inside its own build area.
-    Developers are strongly encouraged to use this mechanism rather than
-    editing the sources populated in the default location, as changes to
-    sources in the default location can be lost when content population details
-    are changed by the project.
-
-  ``FETCHCONTENT_UPDATES_DISCONNECTED_<ucName>``
-    This is the per-content equivalent of
-    ``FETCHCONTENT_UPDATES_DISCONNECTED``. If the global option or this option
-    is ``ON``, then updates will be disabled for the named content.
-    Disabling updates for individual content can be useful for content whose
-    details rarely change, while still leaving other frequently changing
-    content with updates enabled.
-
 
   The ``FetchContent_Populate()`` command also supports a syntax allowing the
   content details to be specified directly rather than using any saved
@@ -303,7 +296,8 @@ is simpler and provides additional features over the pattern above.
 
   .. code-block:: cmake
 
-    FetchContent_Populate( <name>
+    FetchContent_Populate(
+      <name>
       [QUIET]
       [SUBBUILD_DIR <subBuildDir>]
       [SOURCE_DIR <srcDir>]
@@ -325,16 +319,17 @@ is simpler and provides additional features over the pattern above.
   - The ``FETCHCONTENT_FULLY_DISCONNECTED`` and
     ``FETCHCONTENT_UPDATES_DISCONNECTED`` cache variables are ignored.
 
-  The ``<lcName>_SOURCE_DIR`` and ``<lcName>_BINARY_DIR`` variables are still
-  returned to the caller, but since these locations are not stored as global
-  properties when this form is used, they are only available to the calling
-  scope and below rather than the entire project hierarchy.  No
-  ``<lcName>_POPULATED`` variable is set in the caller's scope with this form.
+  The ``<lowercaseName>_SOURCE_DIR`` and ``<lowercaseName>_BINARY_DIR``
+  variables are still returned to the caller, but since these locations are
+  not stored as global properties when this form is used, they are only
+  available to the calling scope and below rather than the entire project
+  hierarchy.  No ``<lowercaseName>_POPULATED`` variable is set in the caller's
+  scope with this form.
 
   The supported options for ``FetchContent_Populate()`` are the same as those
   for :command:`FetchContent_Declare()`.  Those few options shown just
   above are either specific to ``FetchContent_Populate()`` or their behavior is
-  slightly modified from how :command:`ExternalProject_Add` treats them.
+  slightly modified from how :command:`ExternalProject_Add` treats them:
 
   ``QUIET``
     The ``QUIET`` option can be given to hide the output associated with
@@ -347,9 +342,9 @@ is simpler and provides additional features over the pattern above.
   ``SUBBUILD_DIR``
     The ``SUBBUILD_DIR`` argument can be provided to change the location of the
     sub-build created to perform the population.  The default value is
-    ``${CMAKE_CURRENT_BINARY_DIR}/<lcName>-subbuild`` and it would be unusual
-    to need to override this default.  If a relative path is specified, it will
-    be interpreted as relative to :variable:`CMAKE_CURRENT_BINARY_DIR`.
+    ``${CMAKE_CURRENT_BINARY_DIR}/<lowercaseName>-subbuild`` and it would be
+    unusual to need to override this default.  If a relative path is specified,
+    it will be interpreted as relative to :variable:`CMAKE_CURRENT_BINARY_DIR`.
     This option should not be confused with the ``SOURCE_SUBDIR`` option which
     only affects the :command:`FetchContent_MakeAvailable` command.
 
@@ -357,9 +352,9 @@ is simpler and provides additional features over the pattern above.
     The ``SOURCE_DIR`` and ``BINARY_DIR`` arguments are supported by
     :command:`ExternalProject_Add`, but different default values are used by
     ``FetchContent_Populate()``.  ``SOURCE_DIR`` defaults to
-    ``${CMAKE_CURRENT_BINARY_DIR}/<lcName>-src`` and ``BINARY_DIR`` defaults to
-    ``${CMAKE_CURRENT_BINARY_DIR}/<lcName>-build``.  If a relative path is
-    specified, it will be interpreted as relative to
+    ``${CMAKE_CURRENT_BINARY_DIR}/<lowercaseName>-src`` and ``BINARY_DIR``
+    defaults to ``${CMAKE_CURRENT_BINARY_DIR}/<lowercaseName>-build``.
+    If a relative path is specified, it will be interpreted as relative to
     :variable:`CMAKE_CURRENT_BINARY_DIR`.
 
   In addition to the above explicit options, any other unrecognized options are
@@ -380,11 +375,12 @@ is simpler and provides additional features over the pattern above.
   on the command line invoking the script.
 
   .. versionadded:: 3.18
-    Added support for ``DOWNLOAD_NO_EXTRACT`` and ``SOURCE_SUBDIR`` options.
+    Added support for the ``DOWNLOAD_NO_EXTRACT`` option.
 
 .. command:: FetchContent_GetProperties
 
-  When using saved content details, a call to :command:`FetchContent_Populate`
+  When using saved content details, a call to
+  :command:`FetchContent_MakeAvailable` or :command:`FetchContent_Populate`
   records information in global properties which can be queried at any time.
   This information includes the source and binary directories associated with
   the content and also whether or not the content population has been processed
@@ -392,7 +388,8 @@ is simpler and provides additional features over the pattern above.
 
   .. code-block:: cmake
 
-    FetchContent_GetProperties( <name>
+    FetchContent_GetProperties(
+      <name>
       [SOURCE_DIR <srcDirVar>]
       [BINARY_DIR <binDirVar>]
       [POPULATED <doneVar>]
@@ -403,49 +400,104 @@ is simpler and provides additional features over the pattern above.
   which is the name of the variable in which to store that property.  Most of
   the time though, only ``<name>`` is given, in which case the call will then
   set the same variables as a call to
-  :command:`FetchContent_Populate(name) <FetchContent_Populate>`.  This allows
-  the following canonical pattern to be used, which ensures that the relevant
-  variables will always be defined regardless of whether or not the population
-  has been performed elsewhere in the project already:
+  :command:`FetchContent_MakeAvailable(name) <FetchContent_MakeAvailable>` or
+  :command:`FetchContent_Populate(name) <FetchContent_Populate>`.
+
+  This command is rarely needed when using
+  :command:`FetchContent_MakeAvailable`.  It is more commonly used as part of
+  implementing the following pattern with :command:`FetchContent_Populate`,
+  which ensures that the relevant variables will always be defined regardless
+  of whether or not the population has been performed elsewhere in the project
+  already:
 
   .. code-block:: cmake
 
-    FetchContent_GetProperties(foobar)
-    if(NOT foobar_POPULATED)
-      FetchContent_Populate(foobar)
-      ...
+    # Check if population has already been performed
+    FetchContent_GetProperties(depname)
+    if(NOT depname_POPULATED)
+      # Fetch the content using previously declared details
+      FetchContent_Populate(depname)
+
+      # Set custom variables, policies, etc.
+      # ...
+
+      # Bring the populated content into the build
+      add_subdirectory(${depname_SOURCE_DIR} ${depname_BINARY_DIR})
     endif()
 
-  The above pattern allows other parts of the overall project hierarchy to
-  re-use the same content and ensure that it is only populated once.
+Variables
+^^^^^^^^^
 
+A number of cache variables can influence the behavior where details from a
+:command:`FetchContent_Declare` call are used to populate content.
+The variables are all intended for the developer to customize behavior and
+should not normally be set by the project.
 
-.. command:: FetchContent_MakeAvailable
+.. variable:: FETCHCONTENT_BASE_DIR
 
-  .. code-block:: cmake
+  In most cases, the saved details do not specify any options relating to the
+  directories to use for the internal sub-build, final source and build areas.
+  It is generally best to leave these decisions up to the ``FetchContent``
+  module to handle on the project's behalf.  The ``FETCHCONTENT_BASE_DIR``
+  cache variable controls the point under which all content population
+  directories are collected, but in most cases, developers would not need to
+  change this.  The default location is ``${CMAKE_BINARY_DIR}/_deps``, but if
+  developers change this value, they should aim to keep the path short and
+  just below the top level of the build tree to avoid running into path
+  length problems on Windows.
 
-    FetchContent_MakeAvailable( <name1> [<name2>...] )
+.. variable:: FETCHCONTENT_QUIET
 
-  .. versionadded:: 3.14
+  The logging output during population can be quite verbose, making the
+  configure stage quite noisy.  This cache option (``ON`` by default) hides
+  all population output unless an error is encountered.  If experiencing
+  problems with hung downloads, temporarily switching this option off may
+  help diagnose which content population is causing the issue.
 
-  This command implements the common pattern typically needed for most
-  dependencies.  It iterates over each of the named dependencies in turn
-  and for each one it loosely follows the
-  :ref:`canonical pattern <fetch-content-canonical-pattern>` as
-  presented at the beginning of this section.  An important difference is
-  that :command:`add_subdirectory` will only be called on the
-  populated content if there is a ``CMakeLists.txt`` file in its top level
-  source directory.  This allows the command to be used for dependencies
-  that make downloaded content available at a known location but which do
-  not need or support being added directly to the build.
+.. variable:: FETCHCONTENT_FULLY_DISCONNECTED
 
-  The ``SOURCE_SUBDIR`` option can be given in the declared details to
-  instruct ``FetchContent_MakeAvailable()`` to look for a ``CMakeLists.txt``
-  file in a subdirectory below the top level (i.e. the same way that
-  ``SOURCE_SUBDIR`` is used by the :command:`ExternalProject_Add` command).
-  ``SOURCE_SUBDIR`` must always be a relative path.  See the next section
-  for an example of this option.
+  When this option is enabled, no attempt is made to download or update
+  any content.  It is assumed that all content has already been populated in
+  a previous run or the source directories have been pointed at existing
+  contents the developer has provided manually (using options described
+  further below).  When the developer knows that no changes have been made to
+  any content details, turning this option ``ON`` can significantly speed up
+  the configure stage.  It is ``OFF`` by default.
 
+.. variable:: FETCHCONTENT_UPDATES_DISCONNECTED
+
+  This is a less severe download/update control compared to
+  :variable:`FETCHCONTENT_FULLY_DISCONNECTED`.  Instead of bypassing all
+  download and update logic, ``FETCHCONTENT_UPDATES_DISCONNECTED`` only
+  disables the update stage.  Therefore, if content has not been downloaded
+  previously, it will still be downloaded when this option is enabled.
+  This can speed up the configure stage, but not as much as
+  :variable:`FETCHCONTENT_FULLY_DISCONNECTED`.  It is ``OFF`` by default.
+
+In addition to the above cache variables, the following cache variables are
+also defined for each content name:
+
+.. variable:: FETCHCONTENT_SOURCE_DIR_<uppercaseName>
+
+  If this is set, no download or update steps are performed for the specified
+  content and the ``<lowercaseName>_SOURCE_DIR`` variable returned to the
+  caller is pointed at this location.  This gives developers a way to have a
+  separate checkout of the content that they can modify freely without
+  interference from the build.  The build simply uses that existing source,
+  but it still defines ``<lowercaseName>_BINARY_DIR`` to point inside its own
+  build area.  Developers are strongly encouraged to use this mechanism rather
+  than editing the sources populated in the default location, as changes to
+  sources in the default location can be lost when content population details
+  are changed by the project.
+
+.. variable:: FETCHCONTENT_UPDATES_DISCONNECTED_<uppercaseName>
+
+  This is the per-content equivalent of
+  :variable:`FETCHCONTENT_UPDATES_DISCONNECTED`.  If the global option or
+  this option is ``ON``, then updates will be disabled for the named content.
+  Disabling updates for individual content can be useful for content whose
+  details rarely change, while still leaving other frequently changing content
+  with updates enabled.
 
 .. _`fetch-content-examples`:
 
@@ -470,7 +522,7 @@ frameworks are available to the main build:
   )
 
   # After the following call, the CMake targets defined by googletest and
-  # Catch2 will be defined and available to the rest of the build
+  # Catch2 will be available to the rest of the build
   FetchContent_MakeAvailable(googletest Catch2)
 
 If the sub-project's ``CMakeLists.txt`` file is not at the top level of its
