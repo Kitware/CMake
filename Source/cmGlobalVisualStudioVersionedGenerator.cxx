@@ -618,6 +618,9 @@ cmGlobalVisualStudioVersionedGenerator::FindAuxToolset(
     if (version == "14.29.16.10" && vcToolsetVersion == "14.29.30037") {
       return AuxToolset::Default;
     }
+    if (version == "14.29.16.11" && vcToolsetVersion == "14.29.30133") {
+      return AuxToolset::Default;
+    }
 
     // The first two components of the default toolset version typically
     // match the name used by later VS versions for the SxS props files.
