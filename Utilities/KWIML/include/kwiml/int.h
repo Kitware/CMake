@@ -162,7 +162,11 @@ An includer may test the following macros after inclusion:
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L /* C99 */
 # define KWIML_INT_HAVE_INTTYPES_H 1
 #elif defined(_MSC_VER) /* MSVC */
-# define KWIML_INT_NO_INTTYPES_H 1
+# if _MSC_VER >= 1800
+#  define KWIML_INT_HAVE_INTTYPES_H 1
+# else
+#  define KWIML_INT_NO_INTTYPES_H 1
+# endif
 #elif defined(__BORLANDC__) /* Borland */
 # define KWIML_INT_NO_INTTYPES_H 1
 #elif defined(__WATCOMC__) /* Watcom */
@@ -272,6 +276,15 @@ An includer may test the following macros after inclusion:
 # define KWIML_INT_BROKEN_PRIXPTR 1
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER < 1900
+  /* MSVC scanf seems broken on 8-bit sizes until 19.00 */
+# define KWIML_INT_BROKEN_SCNd8 1
+# define KWIML_INT_BROKEN_SCNi8 1
+# define KWIML_INT_BROKEN_SCNo8 1
+# define KWIML_INT_BROKEN_SCNu8 1
+# define KWIML_INT_BROKEN_SCNx8 1
+#endif
+
 #if (defined(__SUNPRO_C)||defined(__SUNPRO_CC)) && defined(_CHAR_IS_UNSIGNED)
 # define KWIML_INT_BROKEN_INT8_T 1 /* system type defined incorrectly */
 #elif defined(__BORLANDC__) && defined(_CHAR_UNSIGNED)
@@ -303,7 +316,7 @@ An includer may test the following macros after inclusion:
 #elif defined(__BORLANDC__)
 # define KWIML_INT_private_NO_SCN8
 # define KWIML_INT_private_NO_SCN64
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && _MSC_VER < 1900
 # define KWIML_INT_private_NO_SCN8
 #elif defined(__WATCOMC__)
 # define KWIML_INT_private_NO_SCN8
