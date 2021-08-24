@@ -100,9 +100,6 @@ public:
                               std::vector<std::string> const& newOpts,
                               bool isQt5);
 
-  static bool FileRead(std::string& content, std::string const& filename,
-                       std::string* error = nullptr);
-
   /** @class RccLister
    * @brief Lists files in qrc resource files
    */

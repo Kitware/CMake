@@ -30,7 +30,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
-#include "cmQtAutoUicHelpers.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkerPool.h"
@@ -282,7 +281,7 @@ public:
     std::vector<std::string> Options;
     std::unordered_map<std::string, UiFile> UiFiles;
     std::vector<std::string> SearchPaths;
-    cmQtAutoUicHelpers AutoUicHelpers;
+    cmsys::RegularExpression RegExpInclude;
   };
 
   /** Uic shared variables.  */
@@ -762,7 +761,11 @@ std::string cmQtAutoMocUicT::MocSettingsT::MacrosString() const
   return res;
 }
 
-cmQtAutoMocUicT::UicSettingsT::UicSettingsT() = default;
+cmQtAutoMocUicT::UicSettingsT::UicSettingsT()
+{
+  this->RegExpInclude.compile("(^|\n)[ \t]*#[ \t]*include[ \t]+"
+                              "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
+}
 
 cmQtAutoMocUicT::UicSettingsT::~UicSettingsT() = default;
 
@@ -1053,7 +1056,16 @@ void cmQtAutoMocUicT::JobParseT::UicIncludes()
   }
 
   std::set<std::string> includes;
-  this->UicConst().AutoUicHelpers.CollectUicIncludes(includes, this->Content);
+  {
+    const char* contentChars = this->Content.c_str();
+    cmsys::RegularExpression const& regExp = this->UicConst().RegExpInclude;
+    cmsys::RegularExpressionMatch match;
+    while (regExp.find(contentChars, match)) {
+      includes.emplace(match.match(2));
+      // Forward content pointer
+      contentChars += match.end();
+    }
+  }
   this->CreateKeys(this->FileHandle->ParseData->Uic.Include, includes,
                    UiUnderscoreLength);
 }
