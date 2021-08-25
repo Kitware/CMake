@@ -350,7 +350,7 @@ mark_as_advanced(
 macro(GNUInstallDirs_get_absolute_install_dir absvar var)
   set(GGAID_extra_args ${ARGN})
   list(LENGTH GGAID_extra_args GGAID_extra_arg_count)
-  if(GGAID_extra_arg_count GREATER 0)
+  if(GGAID_extra_arg_count GREATER "0")
     list(GET GGAID_extra_args 0 GGAID_dir)
   else()
     # Historical behavior: use ${dir} from caller's scope
