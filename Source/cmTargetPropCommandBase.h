@@ -40,6 +40,9 @@ protected:
   virtual void HandleInterfaceContent(cmTarget* tgt,
                                       const std::vector<std::string>& content,
                                       bool prepend, bool system);
+  virtual bool PopulateTargetProperties(
+    const std::string& scope, const std::vector<std::string>& content,
+    bool prepend, bool system);
 
 private:
   virtual void HandleMissingTarget(const std::string& name) = 0;
@@ -52,9 +55,6 @@ private:
 
   bool ProcessContentArgs(std::vector<std::string> const& args,
                           unsigned int& argIndex, bool prepend, bool system);
-  bool PopulateTargetProperies(const std::string& scope,
-                               const std::vector<std::string>& content,
-                               bool prepend, bool system);
 
   cmExecutionStatus& Status;
 };

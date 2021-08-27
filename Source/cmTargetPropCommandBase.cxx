@@ -155,10 +155,10 @@ bool cmTargetPropCommandBase::ProcessContentArgs(
       return false;
     }
   }
-  return this->PopulateTargetProperies(scope, content, prepend, system);
+  return this->PopulateTargetProperties(scope, content, prepend, system);
 }
 
-bool cmTargetPropCommandBase::PopulateTargetProperies(
+bool cmTargetPropCommandBase::PopulateTargetProperties(
   const std::string& scope, const std::vector<std::string>& content,
   bool prepend, bool system)
 {
