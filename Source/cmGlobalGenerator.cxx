@@ -1718,10 +1718,8 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 
   // Construct per-target generator information.
   for (const auto& mf : this->Makefiles) {
-    const cmStringRange noconfig_compile_definitions =
+    const cmBTStringRange noconfig_compile_definitions =
       mf->GetCompileDefinitionsEntries();
-    const cmBacktraceRange noconfig_compile_definitions_bts =
-      mf->GetCompileDefinitionsBacktraces();
 
     for (auto& target : mf->GetTargets()) {
       cmTarget* t = &target.second;
@@ -1735,12 +1733,8 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         continue;
       }
 
-      {
-        auto btIt = noconfig_compile_definitions_bts.begin();
-        auto it = noconfig_compile_definitions.begin();
-        for (; it != noconfig_compile_definitions.end(); ++it, ++btIt) {
-          t->InsertCompileDefinition(*it, *btIt);
-        }
+      for (auto const& def : noconfig_compile_definitions) {
+        t->InsertCompileDefinition(def);
       }
 
       cmPolicies::PolicyStatus polSt =

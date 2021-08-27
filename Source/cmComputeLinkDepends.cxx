@@ -607,7 +607,7 @@ cmLinkItem cmComputeLinkDepends::ResolveLinkItem(int depender_index,
       from = depender;
     }
   }
-  return from->ResolveLinkItem(name, cmListFileBacktrace());
+  return from->ResolveLinkItem(BT<std::string>(name));
 }
 
 void cmComputeLinkDepends::InferDependencies()

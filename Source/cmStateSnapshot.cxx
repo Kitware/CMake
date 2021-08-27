@@ -19,6 +19,10 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
+#if defined(__CYGWIN__)
+#  include "cmStringAlgorithms.h"
+#endif
+
 cmStateSnapshot::cmStateSnapshot(cmState* state)
   : State(state)
 {
@@ -259,12 +263,10 @@ bool cmStateSnapshot::RaiseScope(std::string const& var, const char* varDef)
   return true;
 }
 
-template <typename T, typename U, typename V>
+template <typename T, typename U>
 void InitializeContentFromParent(T& parentContent, T& thisContent,
-                                 U& parentBacktraces, U& thisBacktraces,
-                                 V& contentEndPosition)
+                                 U& contentEndPosition)
 {
-  auto parentBegin = parentContent.begin();
   auto parentEnd = parentContent.end();
 
   auto parentRbegin = cm::make_reverse_iterator(parentEnd);
@@ -272,12 +274,7 @@ void InitializeContentFromParent(T& parentContent, T& thisContent,
   parentRbegin = std::find(parentRbegin, parentRend, cmPropertySentinal);
   auto parentIt = parentRbegin.base();
 
-  thisContent = std::vector<std::string>(parentIt, parentEnd);
-
-  auto btIt = parentBacktraces.begin() + std::distance(parentBegin, parentIt);
-  auto btEnd = parentBacktraces.end();
-
-  thisBacktraces = std::vector<cmListFileBacktrace>(btIt, btEnd);
+  thisContent = std::vector<BT<std::string>>(parentIt, parentEnd);
 
   contentEndPosition = thisContent.size();
 }
@@ -359,36 +356,26 @@ void cmStateSnapshot::InitializeFromParent()
   InitializeContentFromParent(
     parent->BuildSystemDirectory->IncludeDirectories,
     this->Position->BuildSystemDirectory->IncludeDirectories,
-    parent->BuildSystemDirectory->IncludeDirectoryBacktraces,
-    this->Position->BuildSystemDirectory->IncludeDirectoryBacktraces,
     this->Position->IncludeDirectoryPosition);
 
   InitializeContentFromParent(
     parent->BuildSystemDirectory->CompileDefinitions,
     this->Position->BuildSystemDirectory->CompileDefinitions,
-    parent->BuildSystemDirectory->CompileDefinitionsBacktraces,
-    this->Position->BuildSystemDirectory->CompileDefinitionsBacktraces,
     this->Position->CompileDefinitionsPosition);
 
   InitializeContentFromParent(
     parent->BuildSystemDirectory->CompileOptions,
     this->Position->BuildSystemDirectory->CompileOptions,
-    parent->BuildSystemDirectory->CompileOptionsBacktraces,
-    this->Position->BuildSystemDirectory->CompileOptionsBacktraces,
     this->Position->CompileOptionsPosition);
 
   InitializeContentFromParent(
     parent->BuildSystemDirectory->LinkOptions,
     this->Position->BuildSystemDirectory->LinkOptions,
-    parent->BuildSystemDirectory->LinkOptionsBacktraces,
-    this->Position->BuildSystemDirectory->LinkOptionsBacktraces,
     this->Position->LinkOptionsPosition);
 
   InitializeContentFromParent(
     parent->BuildSystemDirectory->LinkDirectories,
     this->Position->BuildSystemDirectory->LinkDirectories,
-    parent->BuildSystemDirectory->LinkDirectoriesBacktraces,
-    this->Position->BuildSystemDirectory->LinkDirectoriesBacktraces,
     this->Position->LinkDirectoriesPosition);
 
   cmProp include_regex =

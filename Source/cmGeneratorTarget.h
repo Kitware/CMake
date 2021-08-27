@@ -409,10 +409,8 @@ public:
   TargetOrString ResolveTargetReference(std::string const& name,
                                         cmLocalGenerator const* lg) const;
 
-  cmLinkItem ResolveLinkItem(std::string const& name,
-                             cmListFileBacktrace const& bt) const;
-  cmLinkItem ResolveLinkItem(std::string const& name,
-                             cmListFileBacktrace const& bt,
+  cmLinkItem ResolveLinkItem(BT<std::string> const& name) const;
+  cmLinkItem ResolveLinkItem(BT<std::string> const& name,
                              cmLocalGenerator const* lg) const;
 
   // Compute the set of languages compiled by the target.  This is

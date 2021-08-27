@@ -323,7 +323,7 @@ void cmComputeTargetDepends::AddObjectDepends(int depender_index,
   }
   cmGeneratorTarget const* depender = this->Targets[depender_index];
   cmLinkItem const& objItem =
-    depender->ResolveLinkItem(objLib, cmListFileBacktrace());
+    depender->ResolveLinkItem(BT<std::string>(objLib));
   if (emitted.insert(objItem).second) {
     if (depender->GetType() != cmStateEnums::EXECUTABLE &&
         depender->GetType() != cmStateEnums::STATIC_LIBRARY &&

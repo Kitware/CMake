@@ -212,57 +212,29 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& pkg)
   }
 }
 
-cmStringRange cmMakefile::GetIncludeDirectoriesEntries() const
+cmBTStringRange cmMakefile::GetIncludeDirectoriesEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetIncludeDirectoriesEntries();
 }
 
-cmBacktraceRange cmMakefile::GetIncludeDirectoriesBacktraces() const
-{
-  return this->StateSnapshot.GetDirectory()
-    .GetIncludeDirectoriesEntryBacktraces();
-}
-
-cmStringRange cmMakefile::GetCompileOptionsEntries() const
+cmBTStringRange cmMakefile::GetCompileOptionsEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetCompileOptionsEntries();
 }
 
-cmBacktraceRange cmMakefile::GetCompileOptionsBacktraces() const
-{
-  return this->StateSnapshot.GetDirectory().GetCompileOptionsEntryBacktraces();
-}
-
-cmStringRange cmMakefile::GetCompileDefinitionsEntries() const
+cmBTStringRange cmMakefile::GetCompileDefinitionsEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetCompileDefinitionsEntries();
 }
 
-cmBacktraceRange cmMakefile::GetCompileDefinitionsBacktraces() const
-{
-  return this->StateSnapshot.GetDirectory()
-    .GetCompileDefinitionsEntryBacktraces();
-}
-
-cmStringRange cmMakefile::GetLinkOptionsEntries() const
+cmBTStringRange cmMakefile::GetLinkOptionsEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetLinkOptionsEntries();
 }
 
-cmBacktraceRange cmMakefile::GetLinkOptionsBacktraces() const
-{
-  return this->StateSnapshot.GetDirectory().GetLinkOptionsEntryBacktraces();
-}
-
-cmStringRange cmMakefile::GetLinkDirectoriesEntries() const
+cmBTStringRange cmMakefile::GetLinkDirectoriesEntries() const
 {
   return this->StateSnapshot.GetDirectory().GetLinkDirectoriesEntries();
-}
-
-cmBacktraceRange cmMakefile::GetLinkDirectoriesBacktraces() const
-{
-  return this->StateSnapshot.GetDirectory()
-    .GetLinkDirectoriesEntryBacktraces();
 }
 
 cmListFileBacktrace cmMakefile::GetBacktrace() const
@@ -1386,10 +1358,10 @@ void cmMakefile::AddLinkDirectory(std::string const& directory, bool before)
 {
   if (before) {
     this->StateSnapshot.GetDirectory().PrependLinkDirectoriesEntry(
-      directory, this->Backtrace);
+      BT<std::string>(directory, this->Backtrace));
   } else {
     this->StateSnapshot.GetDirectory().AppendLinkDirectoriesEntry(
-      directory, this->Backtrace);
+      BT<std::string>(directory, this->Backtrace));
   }
 }
 
@@ -1876,16 +1848,16 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string>& incs,
   std::string entryString = cmJoin(incs, ";");
   if (before) {
     this->StateSnapshot.GetDirectory().PrependIncludeDirectoriesEntry(
-      entryString, this->Backtrace);
+      BT<std::string>(entryString, this->Backtrace));
   } else {
     this->StateSnapshot.GetDirectory().AppendIncludeDirectoriesEntry(
-      entryString, this->Backtrace);
+      BT<std::string>(entryString, this->Backtrace));
   }
 
   // Property on each target:
   for (auto& target : this->Targets) {
     cmTarget& t = target.second;
-    t.InsertInclude(entryString, this->Backtrace, before);
+    t.InsertInclude(BT<std::string>(entryString, this->Backtrace), before);
   }
 }
 
