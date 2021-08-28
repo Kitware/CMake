@@ -215,6 +215,9 @@ Properties on Targets
    /prop_tgt/GNUtoMS
    /prop_tgt/HAS_CXX
    /prop_tgt/HIP_ARCHITECTURES
+   /prop_tgt/HIP_EXTENSIONS
+   /prop_tgt/HIP_STANDARD
+   /prop_tgt/HIP_STANDARD_REQUIRED
    /prop_tgt/IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
    /prop_tgt/IMPORTED
    /prop_tgt/IMPORTED_COMMON_LANGUAGE_RUNTIME
