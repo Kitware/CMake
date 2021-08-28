@@ -171,7 +171,7 @@ Comparisons
 
 ``if(<variable|string> MATCHES regex)``
  True if the given string or variable's value matches the given regular
- condition.  See :ref:`Regex Specification` for regex format.
+ expression.  See :ref:`Regex Specification` for regex format.
 
  .. versionadded:: 3.9
   ``()`` groups are captured in :variable:`CMAKE_MATCH_<n>` variables.
