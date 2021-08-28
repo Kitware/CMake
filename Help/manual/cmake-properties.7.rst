@@ -274,8 +274,11 @@ Properties on Targets
    /prop_tgt/LANG_COMPILER_LAUNCHER
    /prop_tgt/LANG_CPPCHECK
    /prop_tgt/LANG_CPPLINT
+   /prop_tgt/LANG_EXTENSIONS
    /prop_tgt/LANG_INCLUDE_WHAT_YOU_USE
    /prop_tgt/LANG_LINKER_LAUNCHER
+   /prop_tgt/LANG_STANDARD
+   /prop_tgt/LANG_STANDARD_REQUIRED
    /prop_tgt/LANG_VISIBILITY_PRESET
    /prop_tgt/LIBRARY_OUTPUT_DIRECTORY
    /prop_tgt/LIBRARY_OUTPUT_DIRECTORY_CONFIG
