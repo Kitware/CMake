@@ -705,6 +705,21 @@ bool cmCTestTestHandler::GenerateXML()
     this->GenerateCTestXML(xml);
   }
 
+  if (this->MemCheck) {
+    cmGeneratedFileStream xmlfile;
+    if (!this->StartResultingXML(cmCTest::PartTest, "DynamicAnalysis-Test",
+                                 xmlfile)) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Cannot create testing XML file" << std::endl);
+      this->LogFile = nullptr;
+      return false;
+    }
+    cmXMLWriter xml(xmlfile);
+    // Explicitly call this class' `GenerateCTestXML` method to make `Test.xml`
+    // as well.
+    this->cmCTestTestHandler::GenerateCTestXML(xml);
+  }
+
   return true;
 }
 
