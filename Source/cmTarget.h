@@ -170,9 +170,10 @@ public:
 
   //! Set/Get a property of this target file
   void SetProperty(const std::string& prop, const char* value);
+  void SetProperty(const std::string& prop, cmProp value);
   void SetProperty(const std::string& prop, const std::string& value)
   {
-    this->SetProperty(prop, value.c_str());
+    this->SetProperty(prop, cmProp(value));
   }
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
@@ -283,6 +284,9 @@ public:
   };
 
 private:
+  template <typename ValueType>
+  void StoreProperty(const std::string& prop, ValueType value);
+
   // Internal representation details.
   friend class cmGeneratorTarget;
 

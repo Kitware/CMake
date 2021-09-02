@@ -35,6 +35,11 @@ public:
 
   //! Set/Get a property of this source file
   void SetProperty(const std::string& prop, const char* value);
+  void SetProperty(const std::string& prop, cmProp value);
+  void SetProperty(const std::string& prop, const std::string& value)
+  {
+    this->SetProperty(prop, cmProp(value));
+  }
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
   cmProp GetProperty(const std::string& prop) const;

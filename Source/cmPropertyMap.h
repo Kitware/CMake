@@ -26,6 +26,11 @@ public:
 
   //! Set the property value
   void SetProperty(const std::string& name, const char* value);
+  void SetProperty(const std::string& name, cmProp value);
+  void SetProperty(const std::string& name, const std::string& value)
+  {
+    this->SetProperty(name, cmProp(value));
+  }
 
   //! Append to the property value
   void AppendProperty(const std::string& name, const std::string& value,
