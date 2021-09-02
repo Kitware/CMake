@@ -3241,9 +3241,8 @@ std::string cmGlobalXCodeGenerator::GetOrCreateId(const std::string& name,
     return *storedGUID;
   }
 
-  this->CMakeInstance->AddCacheEntry(guidStoreName, id.c_str(),
-                                     "Stored Xcode object GUID",
-                                     cmStateEnums::INTERNAL);
+  this->CMakeInstance->AddCacheEntry(
+    guidStoreName, id, "Stored Xcode object GUID", cmStateEnums::INTERNAL);
 
   return id;
 }

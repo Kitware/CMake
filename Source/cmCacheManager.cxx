@@ -232,17 +232,17 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
   // before writing the cache, update the version numbers
   // to the
   this->AddCacheEntry("CMAKE_CACHE_MAJOR_VERSION",
-                      std::to_string(cmVersion::GetMajorVersion()).c_str(),
+                      std::to_string(cmVersion::GetMajorVersion()),
                       "Major version of cmake used to create the "
                       "current loaded cache",
                       cmStateEnums::INTERNAL);
   this->AddCacheEntry("CMAKE_CACHE_MINOR_VERSION",
-                      std::to_string(cmVersion::GetMinorVersion()).c_str(),
+                      std::to_string(cmVersion::GetMinorVersion()),
                       "Minor version of cmake used to create the "
                       "current loaded cache",
                       cmStateEnums::INTERNAL);
   this->AddCacheEntry("CMAKE_CACHE_PATCH_VERSION",
-                      std::to_string(cmVersion::GetPatchVersion()).c_str(),
+                      std::to_string(cmVersion::GetPatchVersion()),
                       "Patch version of cmake used to create the "
                       "current loaded cache",
                       cmStateEnums::INTERNAL);
@@ -256,7 +256,7 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
     currentcwd[0] = static_cast<char>(currentcwd[0] - 'A' + 'a');
   }
   cmSystemTools::ConvertToUnixSlashes(currentcwd);
-  this->AddCacheEntry("CMAKE_CACHEFILE_DIR", currentcwd.c_str(),
+  this->AddCacheEntry("CMAKE_CACHEFILE_DIR", currentcwd,
                       "This is the directory where this CMakeCache.txt"
                       " was created",
                       cmStateEnums::INTERNAL);

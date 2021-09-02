@@ -1955,7 +1955,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
         nvalue += files[cc];
       }
 
-      this->GetCMakeInstance()->AddCacheEntry(name, nvalue.c_str(), doc, type);
+      this->GetCMakeInstance()->AddCacheEntry(name, nvalue, doc, type);
       nvalue = *this->GetState()->GetInitializedCacheValue(name);
       value = nvalue.c_str();
     }
@@ -3589,13 +3589,13 @@ int cmMakefile::TryCompile(const std::string& srcdir,
       // Tell the single-configuration generator which one to use.
       // Add this before the user-provided CMake arguments in case
       // one of the arguments is -DCMAKE_BUILD_TYPE=...
-      cm.AddCacheEntry("CMAKE_BUILD_TYPE", config->c_str(),
-                       "Build configuration", cmStateEnums::STRING);
+      cm.AddCacheEntry("CMAKE_BUILD_TYPE", config, "Build configuration",
+                       cmStateEnums::STRING);
     }
   }
   cmProp recursionDepth = this->GetDefinition("CMAKE_MAXIMUM_RECURSION_DEPTH");
   if (recursionDepth) {
-    cm.AddCacheEntry("CMAKE_MAXIMUM_RECURSION_DEPTH", recursionDepth->c_str(),
+    cm.AddCacheEntry("CMAKE_MAXIMUM_RECURSION_DEPTH", recursionDepth,
                      "Maximum recursion depth", cmStateEnums::STRING);
   }
   // if cmake args were provided then pass them in
