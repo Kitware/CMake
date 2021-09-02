@@ -2416,7 +2416,7 @@ int cmake::Generate()
   return 0;
 }
 
-void cmake::AddCacheEntry(const std::string& key, const char* value,
+void cmake::AddCacheEntry(const std::string& key, cmProp value,
                           const char* helpString, int type)
 {
   this->State->AddCacheEntry(key, value, helpString,

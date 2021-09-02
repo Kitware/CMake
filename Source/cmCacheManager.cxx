@@ -521,7 +521,7 @@ void cmCacheManager::PrintCache(std::ostream& out) const
          "=================================================\n";
 }
 
-void cmCacheManager::AddCacheEntry(const std::string& key, const char* value,
+void cmCacheManager::AddCacheEntry(const std::string& key, cmProp value,
                                    const char* helpString,
                                    cmStateEnums::CacheEntryType type)
 {
@@ -550,10 +550,10 @@ void cmCacheManager::AddCacheEntry(const std::string& key, const char* value,
                   : "(This variable does not exist and should not be used)");
 }
 
-void cmCacheManager::CacheEntry::SetValue(const char* value)
+void cmCacheManager::CacheEntry::SetValue(cmProp value)
 {
   if (value) {
-    this->Value = value;
+    this->Value = *value;
     this->Initialized = true;
   } else {
     this->Value.clear();

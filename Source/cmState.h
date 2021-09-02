@@ -219,6 +219,18 @@ public:
 private:
   friend class cmake;
   void AddCacheEntry(const std::string& key, const char* value,
+                     const char* helpString, cmStateEnums::CacheEntryType type)
+  {
+    this->AddCacheEntry(key,
+                        value ? cmProp(std::string(value)) : cmProp(nullptr),
+                        helpString, type);
+  }
+  void AddCacheEntry(const std::string& key, const std::string& value,
+                     const char* helpString, cmStateEnums::CacheEntryType type)
+  {
+    this->AddCacheEntry(key, cmProp(value), helpString, type);
+  }
+  void AddCacheEntry(const std::string& key, cmProp value,
                      const char* helpString,
                      cmStateEnums::CacheEntryType type);
 

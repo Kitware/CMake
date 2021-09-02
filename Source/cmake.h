@@ -332,6 +332,18 @@ public:
   cmProp GetCacheDefinition(const std::string&) const;
   //! Add an entry into the cache
   void AddCacheEntry(const std::string& key, const char* value,
+                     const char* helpString, int type)
+  {
+    this->AddCacheEntry(key,
+                        value ? cmProp(std::string(value)) : cmProp(nullptr),
+                        helpString, type);
+  }
+  void AddCacheEntry(const std::string& key, const std::string& value,
+                     const char* helpString, int type)
+  {
+    this->AddCacheEntry(key, cmProp(value), helpString, type);
+  }
+  void AddCacheEntry(const std::string& key, cmProp value,
                      const char* helpString, int type);
 
   bool DoWriteGlobVerifyTarget() const;
