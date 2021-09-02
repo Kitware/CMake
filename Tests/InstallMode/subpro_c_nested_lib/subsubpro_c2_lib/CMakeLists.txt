@@ -18,6 +18,9 @@ target_link_libraries(the_c2_lib
     the_c1_lib
 )
 
+# This is to fix an issue on AIX/GCC (see commit 4fc47424)
+set_property(TARGET the_c2_lib PROPERTY NO_SYSTEM_FROM_IMPORTED 1)
+
 target_include_directories(the_c2_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>

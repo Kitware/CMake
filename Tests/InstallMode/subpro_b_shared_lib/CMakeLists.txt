@@ -4,10 +4,16 @@ cmake_minimum_required(VERSION 3.20)
 project(shared_lib_project VERSION 2.3.4 LANGUAGES CXX)
 
 include(GNUInstallDirs)
+include(GenerateExportHeader)
 
 add_library(the_shared_lib SHARED
   "include/shared_lib.h"
   "src/shared_lib.cpp"
+)
+
+generate_export_header(the_shared_lib
+  BASE_NAME shared_lib
+  EXPORT_FILE_NAME include/shared_lib_export.h
 )
 
 set_target_properties(the_shared_lib
@@ -18,11 +24,14 @@ set_target_properties(the_shared_lib
 
 target_include_directories(the_shared_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 install(
-  DIRECTORY   "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+  DIRECTORY
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+    "${CMAKE_CURRENT_BINARY_DIR}/include/"
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
