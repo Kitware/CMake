@@ -945,6 +945,8 @@ void cmGlobalNinjaGenerator::EnableLanguage(
         (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "GNU") ||
         (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "Clang") ||
         (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "Clang") ||
+        (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "ARMClang") ||
+        (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "ARMClang") ||
         (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "QCC") ||
         (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "QCC")))) {
     this->UsingGCCOnWindows = true;
