@@ -31,7 +31,13 @@ public:
   virtual ~cmLocalVisualStudioGenerator();
 
   /** Construct a script from the given list of command lines.  */
+  enum IsManaged
+  {
+    unmanaged,
+    managed
+  };
   std::string ConstructScript(cmCustomCommandGenerator const& ccg,
+                              IsManaged isManaged,
                               const std::string& newline = "\n");
 
   /** Label to which to jump in a batch file after a failed step in a

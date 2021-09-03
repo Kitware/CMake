@@ -566,7 +566,7 @@ public:
     } else {
       this->Stream << this->LG->EscapeForXML("\n");
     }
-    std::string script = this->LG->ConstructScript(ccg);
+    std::string script = this->LG->ConstructScript(ccg, unmanaged);
     this->Stream << this->LG->EscapeForXML(script);
   }
 
@@ -1779,7 +1779,7 @@ void cmLocalVisualStudio7Generator::WriteCustomRule(
     }
 
     std::string comment = this->ConstructComment(ccg);
-    std::string script = this->ConstructScript(ccg);
+    std::string script = this->ConstructScript(ccg, unmanaged);
     if (this->FortranProject) {
       cmSystemTools::ReplaceString(script, "$(Configuration)", config);
     }
