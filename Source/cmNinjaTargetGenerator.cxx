@@ -774,8 +774,11 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       cmProp d = mf->GetDefinition("CMAKE_C_COMPILER");
       const std::string cl =
         d ? *d : mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
-      cldeps = cmStrCat('"', cmSystemTools::GetCMClDepsCommand(), "\" ", lang,
-                        ' ', vars.Source, " $DEP_FILE $out \"",
+      std::string cmcldepsPath;
+      cmSystemTools::GetShortPath(cmSystemTools::GetCMClDepsCommand(),
+                                  cmcldepsPath);
+      cldeps = cmStrCat(cmcldepsPath, ' ', lang, ' ', vars.Source,
+                        " $DEP_FILE $out \"",
                         mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX"),
                         "\" \"", cl, "\" ");
     }
