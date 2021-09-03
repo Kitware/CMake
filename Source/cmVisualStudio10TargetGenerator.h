@@ -58,6 +58,10 @@ private:
   struct Elem;
   struct OptionsHelper;
 
+  using ConfigToSettings =
+    std::unordered_map<std::string,
+                       std::unordered_map<std::string, std::string>>;
+
   std::string ConvertPath(std::string const& path, bool forceRelative);
   std::string CalcCondition(const std::string& config) const;
   void WriteProjectConfigurations(Elem& e0);
@@ -67,11 +71,13 @@ private:
   void WriteMSToolConfigurationValuesManaged(Elem& e1,
                                              std::string const& config);
   void WriteHeaderSource(Elem& e1, cmSourceFile const* sf);
-  void WriteExtraSource(Elem& e1, cmSourceFile const* sf);
+  void WriteExtraSource(Elem& e1, cmSourceFile const* sf,
+                        ConfigToSettings& toolSettings);
   void WriteNsightTegraConfigurationValues(Elem& e1,
                                            std::string const& config);
   void WriteAndroidConfigurationValues(Elem& e1, std::string const& config);
   void WriteSource(Elem& e2, cmSourceFile const* sf);
+  void FinishWritingSource(Elem& e2, ConfigToSettings const& toolSettings);
   void WriteExcludeFromBuild(Elem& e2,
                              std::vector<size_t> const& exclude_configs);
   void WriteAllSources(Elem& e0);
@@ -252,9 +258,6 @@ private:
   void ClassifyAllConfigSources();
   void ClassifyAllConfigSource(cmGeneratorTarget::AllConfigSource const& acs);
 
-  using ConfigToSettings =
-    std::unordered_map<std::string,
-                       std::unordered_map<std::string, std::string>>;
   std::unordered_map<std::string, ConfigToSettings> ParsedToolTargetSettings;
   bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,
                                   const std::string& propName);
