@@ -70,7 +70,8 @@ private:
   void WriteCEDebugProjectConfigurationValues(Elem& e0);
   void WriteMSToolConfigurationValuesManaged(Elem& e1,
                                              std::string const& config);
-  void WriteHeaderSource(Elem& e1, cmSourceFile const* sf);
+  void WriteHeaderSource(Elem& e1, cmSourceFile const* sf,
+                         ConfigToSettings const& toolSettings);
   void WriteExtraSource(Elem& e1, cmSourceFile const* sf,
                         ConfigToSettings& toolSettings);
   void WriteNsightTegraConfigurationValues(Elem& e1,

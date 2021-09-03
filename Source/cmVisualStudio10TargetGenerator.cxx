@@ -1796,8 +1796,8 @@ void cmVisualStudio10TargetGenerator::WriteGroupSources(
   }
 }
 
-void cmVisualStudio10TargetGenerator::WriteHeaderSource(Elem& e1,
-                                                        cmSourceFile const* sf)
+void cmVisualStudio10TargetGenerator::WriteHeaderSource(
+  Elem& e1, cmSourceFile const* sf, ConfigToSettings const& toolSettings)
 {
   std::string const& fileName = sf->GetFullPath();
   Elem e2(e1, "ClInclude");
@@ -1808,6 +1808,7 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(Elem& e1,
     e2.Element("DependentUpon",
                fileName.substr(0, fileName.find_last_of(".")));
   }
+  this->FinishWritingSource(e2, toolSettings);
 }
 
 void cmVisualStudio10TargetGenerator::ParseSettingsProperty(
@@ -2228,7 +2229,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         this->WriteExtraSource(e1, si.Source, toolSettings);
         break;
       case cmGeneratorTarget::SourceKindHeader:
-        this->WriteHeaderSource(e1, si.Source);
+        this->WriteHeaderSource(e1, si.Source, toolSettings);
         break;
       case cmGeneratorTarget::SourceKindIDL:
         tool = "Midl";
@@ -2338,6 +2339,8 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       if (!isCSharp && !exclude_configs.empty()) {
         this->WriteExcludeFromBuild(e2, exclude_configs);
       }
+
+      this->FinishWritingSource(e2, toolSettings);
     }
   }
 
