@@ -133,7 +133,13 @@ ForwardIterator cmRemoveDuplicates(ForwardIterator first, ForwardIterator last)
 }
 
 template <typename Range>
-typename Range::const_iterator cmRemoveDuplicates(Range& r)
+typename Range::iterator cmRemoveDuplicates(Range& r)
+{
+  return cmRemoveDuplicates(r.begin(), r.end());
+}
+
+template <typename Range>
+typename Range::const_iterator cmRemoveDuplicates(Range const& r)
 {
   return cmRemoveDuplicates(r.begin(), r.end());
 }
