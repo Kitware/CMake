@@ -4,12 +4,18 @@ include(CTest)
 
 find_package(LAPACK REQUIRED)
 
+if(NOT BLA_SIZEOF_INTEGER)
+  set(BLA_SIZEOF_INTEGER 4)
+endif()
+
 add_executable(test_tgt main.c)
 target_link_libraries(test_tgt LAPACK::LAPACK)
+target_compile_definitions(test_tgt PUBLIC BLA_SIZEOF_INTEGER=${BLA_SIZEOF_INTEGER})
 add_test(NAME test_tgt COMMAND test_tgt)
 
 add_executable(test_var main.c)
 target_link_libraries(test_var PRIVATE ${LAPACK_LIBRARIES})
+target_compile_definitions(test_var PUBLIC BLA_SIZEOF_INTEGER=${BLA_SIZEOF_INTEGER})
 add_test(NAME test_var COMMAND test_var)
 
 if((BLA_VENDOR STREQUAL "Intel10_64lp") OR

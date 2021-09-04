@@ -1,7 +1,14 @@
 #include <assert.h>
+#include <stdint.h>
 #include <string.h>
 
-typedef int blas_int;
+#if BLA_SIZEOF_INTEGER == 4
+typedef int32_t blas_int;
+#elif BLA_SIZEOF_INTEGER == 8
+typedef int64_t blas_int;
+#else
+#  error BLA_SIZEOF_INTEGER is not declared!
+#endif
 
 // declare what parts of the lapack C-API we need
 void dgesv_(blas_int*, blas_int*, double*, blas_int*, blas_int*, double*,
