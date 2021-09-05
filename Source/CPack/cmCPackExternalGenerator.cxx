@@ -16,6 +16,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -60,7 +61,7 @@ int cmCPackExternalGenerator::PackageFiles()
     return 0;
   }
 
-  const char* packageScript = this->GetOption("CPACK_EXTERNAL_PACKAGE_SCRIPT");
+  cmProp packageScript = this->GetOption("CPACK_EXTERNAL_PACKAGE_SCRIPT");
   if (cmNonempty(packageScript)) {
     if (!cmSystemTools::FileIsFullPath(packageScript)) {
       cmCPackLogger(
@@ -76,10 +77,9 @@ int cmCPackExternalGenerator::PackageFiles()
       return 0;
     }
 
-    const char* builtPackagesStr =
-      this->GetOption("CPACK_EXTERNAL_BUILT_PACKAGES");
-    if (builtPackagesStr) {
-      cmExpandList(builtPackagesStr, this->packageFileNames, false);
+    cmProp builtPackages = this->GetOption("CPACK_EXTERNAL_BUILT_PACKAGES");
+    if (builtPackages) {
+      cmExpandList(builtPackages, this->packageFileNames, false);
     }
   }
 
@@ -181,43 +181,42 @@ int cmCPackExternalGenerator::cmCPackExternalVersionGenerator::WriteToJSON(
     return 0;
   }
 
-  const char* packageName = this->Parent->GetOption("CPACK_PACKAGE_NAME");
+  cmProp packageName = this->Parent->GetOption("CPACK_PACKAGE_NAME");
   if (packageName) {
-    root["packageName"] = packageName;
+    root["packageName"] = *packageName;
   }
 
-  const char* packageVersion =
-    this->Parent->GetOption("CPACK_PACKAGE_VERSION");
+  cmProp packageVersion = this->Parent->GetOption("CPACK_PACKAGE_VERSION");
   if (packageVersion) {
-    root["packageVersion"] = packageVersion;
+    root["packageVersion"] = *packageVersion;
   }
 
-  const char* packageDescriptionFile =
+  cmProp packageDescriptionFile =
     this->Parent->GetOption("CPACK_PACKAGE_DESCRIPTION_FILE");
   if (packageDescriptionFile) {
-    root["packageDescriptionFile"] = packageDescriptionFile;
+    root["packageDescriptionFile"] = *packageDescriptionFile;
   }
 
-  const char* packageDescriptionSummary =
+  cmProp packageDescriptionSummary =
     this->Parent->GetOption("CPACK_PACKAGE_DESCRIPTION_SUMMARY");
   if (packageDescriptionSummary) {
-    root["packageDescriptionSummary"] = packageDescriptionSummary;
+    root["packageDescriptionSummary"] = *packageDescriptionSummary;
   }
 
-  const char* buildConfigCstr = this->Parent->GetOption("CPACK_BUILD_CONFIG");
+  cmProp buildConfigCstr = this->Parent->GetOption("CPACK_BUILD_CONFIG");
   if (buildConfigCstr) {
-    root["buildConfig"] = buildConfigCstr;
+    root["buildConfig"] = *buildConfigCstr;
   }
 
-  const char* defaultDirectoryPermissions =
+  cmProp defaultDirectoryPermissions =
     this->Parent->GetOption("CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
   if (cmNonempty(defaultDirectoryPermissions)) {
-    root["defaultDirectoryPermissions"] = defaultDirectoryPermissions;
+    root["defaultDirectoryPermissions"] = *defaultDirectoryPermissions;
   }
   if (cmIsInternallyOn(this->Parent->GetOption("CPACK_SET_DESTDIR"))) {
     root["setDestdir"] = true;
     root["packagingInstallPrefix"] =
-      this->Parent->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
+      *this->Parent->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
   } else {
     root["setDestdir"] = false;
   }

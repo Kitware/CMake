@@ -14,6 +14,7 @@
 #include "cmArchiveWrite.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmProperty.h"
 #include "cmSystemTools.h"
 
 cmCPackSTGZGenerator::cmCPackSTGZGenerator()

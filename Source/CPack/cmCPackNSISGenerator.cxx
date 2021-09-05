@@ -19,6 +19,7 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -142,9 +143,9 @@ int cmCPackNSISGenerator::PackageFiles()
   }
   std::string installerHeaderImage;
   if (this->IsSet("CPACK_NSIS_MUI_HEADERIMAGE")) {
-    installerHeaderImage = this->GetOption("CPACK_NSIS_MUI_HEADERIMAGE");
+    installerHeaderImage = *this->GetOption("CPACK_NSIS_MUI_HEADERIMAGE");
   } else if (this->IsSet("CPACK_PACKAGE_ICON")) {
-    installerHeaderImage = this->GetOption("CPACK_PACKAGE_ICON");
+    installerHeaderImage = *this->GetOption("CPACK_PACKAGE_ICON");
   }
   if (!installerHeaderImage.empty()) {
     std::string installerIconCode = cmStrCat(
@@ -479,8 +480,8 @@ int cmCPackNSISGenerator::InitializeInternal()
   cmsys::RegularExpression versionRexCVS("v(.*)\\.cvs");
   if (!resS || retVal ||
       (!versionRex.find(output) && !versionRexCVS.find(output))) {
-    const char* topDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    std::string tmpFile = cmStrCat(topDir ? topDir : ".", "/NSISOutput.log");
+    cmProp topDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    std::string tmpFile = cmStrCat(topDir ? *topDir : ".", "/NSISOutput.log");
     cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << nsisCmd << std::endl
         << "# Output:" << std::endl
@@ -512,11 +513,11 @@ int cmCPackNSISGenerator::InitializeInternal()
   }
   this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", nsisPath.c_str());
   this->SetOptionIfNotSet("CPACK_NSIS_EXECUTABLES_DIRECTORY", "bin");
-  const char* cpackPackageExecutables =
+  cmProp cpackPackageExecutables =
     this->GetOption("CPACK_PACKAGE_EXECUTABLES");
-  const char* cpackPackageDeskTopLinks =
+  cmProp cpackPackageDeskTopLinks =
     this->GetOption("CPACK_CREATE_DESKTOP_LINKS");
-  const char* cpackNsisExecutablesDirectory =
+  cmProp cpackNsisExecutablesDirectory =
     this->GetOption("CPACK_NSIS_EXECUTABLES_DIRECTORY");
   std::vector<std::string> cpackPackageDesktopLinksVector;
   if (cpackPackageDeskTopLinks) {
@@ -589,7 +590,7 @@ int cmCPackNSISGenerator::InitializeInternal()
 void cmCPackNSISGenerator::CreateMenuLinks(std::ostream& str,
                                            std::ostream& deleteStr)
 {
-  const char* cpackMenuLinks = this->GetOption("CPACK_NSIS_MENU_LINKS");
+  cmProp cpackMenuLinks = this->GetOption("CPACK_NSIS_MENU_LINKS");
   if (!cpackMenuLinks) {
     return;
   }
@@ -728,11 +729,10 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     }
 
     // Create the directory for the upload area
-    const char* userUploadDirectory =
-      this->GetOption("CPACK_UPLOAD_DIRECTORY");
+    cmProp userUploadDirectory = this->GetOption("CPACK_UPLOAD_DIRECTORY");
     std::string uploadDirectory;
     if (cmNonempty(userUploadDirectory)) {
-      uploadDirectory = userUploadDirectory;
+      uploadDirectory = *userUploadDirectory;
     } else {
       uploadDirectory =
         cmStrCat(this->GetOption("CPACK_PACKAGE_DIRECTORY"), "/CPackUploads");
@@ -968,9 +968,9 @@ std::string cmCPackNSISGenerator::CreateComponentGroupDescription(
 std::string cmCPackNSISGenerator::CustomComponentInstallDirectory(
   cm::string_view componentName)
 {
-  const char* outputDir = this->GetOption(
+  cmProp outputDir = this->GetOption(
     cmStrCat("CPACK_NSIS_", componentName, "_INSTALL_DIRECTORY"));
-  return outputDir ? outputDir : "$INSTDIR";
+  return outputDir ? *outputDir : "$INSTDIR";
 }
 
 std::string cmCPackNSISGenerator::TranslateNewlines(std::string str)

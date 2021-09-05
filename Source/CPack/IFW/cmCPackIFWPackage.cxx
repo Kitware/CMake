@@ -15,6 +15,7 @@
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackLog.h" // IWYU pragma: keep
 #include "cmGeneratedFileStream.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
@@ -124,10 +125,10 @@ std::string cmCPackIFWPackage::GetComponentName(cmCPackComponent* component)
   if (!component) {
     return "";
   }
-  const char* option =
+  cmProp option =
     this->GetOption("CPACK_IFW_COMPONENT_" +
                     cmsys::SystemTools::UpperCase(component->Name) + "_NAME");
-  return option ? option : component->Name;
+  return option ? *option : component->Name;
 }
 
 void cmCPackIFWPackage::DefaultConfiguration()
@@ -159,23 +160,22 @@ int cmCPackIFWPackage::ConfigureFromOptions()
   this->Name = this->Generator->GetRootPackageName();
 
   // Display name
-  if (const char* option = this->GetOption("CPACK_PACKAGE_NAME")) {
-    this->DisplayName[""] = option;
+  if (cmProp option = this->GetOption("CPACK_PACKAGE_NAME")) {
+    this->DisplayName[""] = *option;
   } else {
     this->DisplayName[""] = "Your package";
   }
 
   // Description
-  if (const char* option =
-        this->GetOption("CPACK_PACKAGE_DESCRIPTION_SUMMARY")) {
-    this->Description[""] = option;
+  if (cmProp option = this->GetOption("CPACK_PACKAGE_DESCRIPTION_SUMMARY")) {
+    this->Description[""] = *option;
   } else {
     this->Description[""] = "Your package description";
   }
 
   // Version
-  if (const char* option = this->GetOption("CPACK_PACKAGE_VERSION")) {
-    this->Version = option;
+  if (cmProp option = this->GetOption("CPACK_PACKAGE_VERSION")) {
+    this->Version = *option;
   } else {
     this->Version = "1.0.0";
   }
@@ -204,22 +204,22 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   this->Description[""] = component->Description;
 
   // Version
-  if (const char* optVERSION = this->GetOption(prefix + "VERSION")) {
-    this->Version = optVERSION;
-  } else if (const char* optPACKAGE_VERSION =
+  if (cmProp optVERSION = this->GetOption(prefix + "VERSION")) {
+    this->Version = *optVERSION;
+  } else if (cmProp optPACKAGE_VERSION =
                this->GetOption("CPACK_PACKAGE_VERSION")) {
-    this->Version = optPACKAGE_VERSION;
+    this->Version = *optPACKAGE_VERSION;
   } else {
     this->Version = "1.0.0";
   }
 
   // Script
-  if (const char* option = this->GetOption(prefix + "SCRIPT")) {
-    this->Script = option;
+  if (cmProp option = this->GetOption(prefix + "SCRIPT")) {
+    this->Script = *option;
   }
 
   // User interfaces
-  if (const char* option = this->GetOption(prefix + "USER_INTERFACES")) {
+  if (cmProp option = this->GetOption(prefix + "USER_INTERFACES")) {
     this->UserInterfaces.clear();
     cmExpandList(option, this->UserInterfaces);
   }
@@ -232,7 +232,7 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   }
 
   // Licenses
-  if (const char* option = this->GetOption(prefix + "LICENSES")) {
+  if (cmProp option = this->GetOption(prefix + "LICENSES")) {
     this->Licenses.clear();
     cmExpandList(option, this->Licenses);
     if (this->Licenses.size() % 2 != 0) {
@@ -246,8 +246,8 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent* component)
   }
 
   // Priority
-  if (const char* option = this->GetOption(prefix + "PRIORITY")) {
-    this->SortingPriority = option;
+  if (cmProp option = this->GetOption(prefix + "PRIORITY")) {
+    this->SortingPriority = *option;
     cmCPackIFWLogger(
       WARNING,
       "The \"PRIORITY\" option is set "
@@ -289,28 +289,28 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
   this->Description[""] = group->Description;
 
   // Version
-  if (const char* optVERSION = this->GetOption(prefix + "VERSION")) {
-    this->Version = optVERSION;
-  } else if (const char* optPACKAGE_VERSION =
+  if (cmProp optVERSION = this->GetOption(prefix + "VERSION")) {
+    this->Version = *optVERSION;
+  } else if (cmProp optPACKAGE_VERSION =
                this->GetOption("CPACK_PACKAGE_VERSION")) {
-    this->Version = optPACKAGE_VERSION;
+    this->Version = *optPACKAGE_VERSION;
   } else {
     this->Version = "1.0.0";
   }
 
   // Script
-  if (const char* option = this->GetOption(prefix + "SCRIPT")) {
-    this->Script = option;
+  if (cmProp option = this->GetOption(prefix + "SCRIPT")) {
+    this->Script = *option;
   }
 
   // User interfaces
-  if (const char* option = this->GetOption(prefix + "USER_INTERFACES")) {
+  if (cmProp option = this->GetOption(prefix + "USER_INTERFACES")) {
     this->UserInterfaces.clear();
     cmExpandList(option, this->UserInterfaces);
   }
 
   // Licenses
-  if (const char* option = this->GetOption(prefix + "LICENSES")) {
+  if (cmProp option = this->GetOption(prefix + "LICENSES")) {
     this->Licenses.clear();
     cmExpandList(option, this->Licenses);
     if (this->Licenses.size() % 2 != 0) {
@@ -324,8 +324,8 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
   }
 
   // Priority
-  if (const char* option = this->GetOption(prefix + "PRIORITY")) {
-    this->SortingPriority = option;
+  if (cmProp option = this->GetOption(prefix + "PRIORITY")) {
+    this->SortingPriority = *option;
     cmCPackIFWLogger(
       WARNING,
       "The \"PRIORITY\" option is set "
@@ -346,14 +346,14 @@ int cmCPackIFWPackage::ConfigureFromGroup(const std::string& groupName)
   std::string prefix =
     "CPACK_COMPONENT_GROUP_" + cmsys::SystemTools::UpperCase(groupName) + "_";
 
-  if (const char* option = this->GetOption(prefix + "DISPLAY_NAME")) {
-    group.DisplayName = option;
+  if (cmProp option = this->GetOption(prefix + "DISPLAY_NAME")) {
+    group.DisplayName = *option;
   } else {
     group.DisplayName = group.Name;
   }
 
-  if (const char* option = this->GetOption(prefix + "DESCRIPTION")) {
-    group.Description = option;
+  if (cmProp option = this->GetOption(prefix + "DESCRIPTION")) {
+    group.Description = *option;
   }
   group.IsBold = this->IsOn(prefix + "BOLD_TITLE");
   group.IsExpandedByDefault = this->IsOn(prefix + "EXPANDED");
@@ -381,7 +381,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   option = prefix + "DISPLAY_NAME";
   if (this->IsSetToEmpty(option)) {
     this->DisplayName.clear();
-  } else if (const char* value = this->GetOption(option)) {
+  } else if (cmProp value = this->GetOption(option)) {
     cmCPackIFWPackage::ExpandListArgument(value, this->DisplayName);
   }
 
@@ -389,7 +389,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   option = prefix + "DESCRIPTION";
   if (this->IsSetToEmpty(option)) {
     this->Description.clear();
-  } else if (const char* value = this->GetOption(option)) {
+  } else if (cmProp value = this->GetOption(option)) {
     cmCPackIFWPackage::ExpandListArgument(value, this->Description);
   }
 
@@ -397,31 +397,31 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   option = prefix + "RELEASE_DATE";
   if (this->IsSetToEmpty(option)) {
     this->ReleaseDate.clear();
-  } else if (const char* value = this->GetOption(option)) {
-    this->ReleaseDate = value;
+  } else if (cmProp value = this->GetOption(option)) {
+    this->ReleaseDate = *value;
   }
 
   // Sorting priority
   option = prefix + "SORTING_PRIORITY";
   if (this->IsSetToEmpty(option)) {
     this->SortingPriority.clear();
-  } else if (const char* value = this->GetOption(option)) {
-    this->SortingPriority = value;
+  } else if (cmProp value = this->GetOption(option)) {
+    this->SortingPriority = *value;
   }
 
   // Update text
   option = prefix + "UPDATE_TEXT";
   if (this->IsSetToEmpty(option)) {
     this->UpdateText.clear();
-  } else if (const char* value = this->GetOption(option)) {
-    this->UpdateText = value;
+  } else if (cmProp value = this->GetOption(option)) {
+    this->UpdateText = *value;
   }
 
   // Translations
   option = prefix + "TRANSLATIONS";
   if (this->IsSetToEmpty(option)) {
     this->Translations.clear();
-  } else if (const char* value = this->GetOption(option)) {
+  } else if (cmProp value = this->GetOption(option)) {
     this->Translations.clear();
     cmExpandList(value, this->Translations);
   }
@@ -429,11 +429,11 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   // QtIFW dependencies
   std::vector<std::string> deps;
   option = prefix + "DEPENDS";
-  if (const char* value = this->GetOption(option)) {
+  if (cmProp value = this->GetOption(option)) {
     cmExpandList(value, deps);
   }
   option = prefix + "DEPENDENCIES";
-  if (const char* value = this->GetOption(option)) {
+  if (cmProp value = this->GetOption(option)) {
     cmExpandList(value, deps);
   }
   for (std::string const& d : deps) {
@@ -454,7 +454,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   option = prefix + "AUTO_DEPEND_ON";
   if (this->IsSetToEmpty(option)) {
     this->AlienAutoDependOn.clear();
-  } else if (const char* value = this->GetOption(option)) {
+  } else if (cmProp value = this->GetOption(option)) {
     std::vector<std::string> depsOn = cmExpandedList(value);
     for (std::string const& d : depsOn) {
       DependenceStruct dep(d);
@@ -483,7 +483,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   option = prefix + "DEFAULT";
   if (this->IsSetToEmpty(option)) {
     this->Default.clear();
-  } else if (const char* value = this->GetOption(option)) {
+  } else if (cmProp value = this->GetOption(option)) {
     std::string lowerValue = cmsys::SystemTools::LowerCase(value);
     if (lowerValue == "true") {
       this->Default = "true";
@@ -492,7 +492,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
     } else if (lowerValue == "script") {
       this->Default = "script";
     } else {
-      this->Default = value;
+      this->Default = *value;
     }
   }
 
@@ -510,7 +510,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   option = prefix + "REPLACES";
   if (this->IsSetToEmpty(option)) {
     this->Replaces.clear();
-  } else if (const char* value = this->GetOption(option)) {
+  } else if (cmProp value = this->GetOption(option)) {
     this->Replaces.clear();
     cmExpandList(value, this->Replaces);
   }
