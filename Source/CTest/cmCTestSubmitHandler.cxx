@@ -357,12 +357,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       // If curl failed for any reason, or checksum fails, wait and retry
       //
       if (res != CURLE_OK || this->HasErrors) {
-        std::string retryDelay = this->GetOption("RetryDelay") == nullptr
-          ? ""
-          : this->GetOption("RetryDelay");
-        std::string retryCount = this->GetOption("RetryCount") == nullptr
-          ? ""
-          : this->GetOption("RetryCount");
+        std::string retryDelay = *this->GetOption("RetryDelay");
+        std::string retryCount = *this->GetOption("RetryCount");
 
         auto delay = cmDuration(
           retryDelay.empty()
@@ -522,12 +518,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   bool internalTest = cmIsOn(this->GetOption("InternalTest"));
 
   // Get RETRY_COUNT and RETRY_DELAY values if they were set.
-  std::string retryDelayString = this->GetOption("RetryDelay") == nullptr
-    ? ""
-    : this->GetOption("RetryDelay");
-  std::string retryCountString = this->GetOption("RetryCount") == nullptr
-    ? ""
-    : this->GetOption("RetryCount");
+  std::string retryDelayString = *this->GetOption("RetryDelay");
+  std::string retryCountString = *this->GetOption("RetryCount");
   auto retryDelay = std::chrono::seconds(0);
   if (!retryDelayString.empty()) {
     unsigned long retryDelayValue = 0;
@@ -716,8 +708,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
 
 int cmCTestSubmitHandler::ProcessHandler()
 {
-  const char* cdashUploadFile = this->GetOption("CDashUploadFile");
-  const char* cdashUploadType = this->GetOption("CDashUploadType");
+  cmProp cdashUploadFile = this->GetOption("CDashUploadFile");
+  cmProp cdashUploadType = this->GetOption("CDashUploadType");
   if (cdashUploadFile && cdashUploadType) {
     return this->HandleCDashUploadFile(cdashUploadFile, cdashUploadType);
   }
