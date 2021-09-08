@@ -216,6 +216,7 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
   # Override this default 'lib' with 'lib64' iff:
   #  - we are on Linux system but NOT cross-compiling
   #  - we are NOT on debian
+  #  - we are NOT building for conda
   #  - we are on a 64 bits system
   # reason is: amd64 ABI: https://github.com/hjl-tools/x86-psABI/wiki/X86-psABI
   # For Debian with multiarch, use 'lib/${CMAKE_LIBRARY_ARCHITECTURE}' if
@@ -237,11 +238,34 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
       "Unable to determine default CMAKE_INSTALL_LIBDIR directory because no target architecture is known. "
       "Please enable at least one language before including GNUInstallDirs.")
   endif()
+
   if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
-      AND NOT CMAKE_CROSSCOMPILING
-      AND NOT EXISTS "/etc/alpine-release"
-      AND NOT EXISTS "/etc/arch-release")
-    if (EXISTS "/etc/debian_version") # is this a debian system ?
+      AND NOT CMAKE_CROSSCOMPILING)
+    unset(__system_type_for_install)
+    if(DEFINED ENV{CONDA_BUILD} AND DEFINED ENV{PREFIX})
+      set(conda_prefix "$ENV{PREFIX}")
+      cmake_path(ABSOLUTE_PATH conda_prefix NORMALIZE)
+      if("${CMAKE_INSTALL_PREFIX}" STREQUAL conda_prefix)
+        set(__system_type_for_install "conda")
+      endif()
+    elseif(DEFINED ENV{CONDA_PREFIX})
+      set(conda_prefix "$ENV{CONDA_PREFIX}")
+      cmake_path(ABSOLUTE_PATH conda_prefix NORMALIZE)
+      if("${CMAKE_INSTALL_PREFIX}" STREQUAL conda_prefix)
+        set(__system_type_for_install "conda")
+      endif()
+    endif()
+    if(NOT __system_type_for_install)
+      if (EXISTS "/etc/alpine-release")
+        set(__system_type_for_install "alpine")
+      elseif (EXISTS "/etc/arch-release")
+        set(__system_type_for_install "arch linux")
+      elseif (EXISTS "/etc/debian_version")
+        set(__system_type_for_install "debian")
+      endif()
+    endif()
+
+    if(__system_type_for_install STREQUAL "debian")
       if(CMAKE_LIBRARY_ARCHITECTURE)
         if("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
           set(_LIBDIR_DEFAULT "lib/${CMAKE_LIBRARY_ARCHITECTURE}")
@@ -251,7 +275,8 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
           set(__LAST_LIBDIR_DEFAULT "lib/${CMAKE_LIBRARY_ARCHITECTURE}")
         endif()
       endif()
-    else() # not debian, rely on CMAKE_SIZEOF_VOID_P:
+    elseif(NOT DEFINED __system_type_for_install)
+      # not debian, alpine, arch, or conda so rely on CMAKE_SIZEOF_VOID_P:
       if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
         set(_LIBDIR_DEFAULT "lib64")
         if(DEFINED _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX)
@@ -260,6 +285,8 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
       endif()
     endif()
   endif()
+  unset(__system_type_for_install)
+
   if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
     set(CMAKE_INSTALL_LIBDIR "${_LIBDIR_DEFAULT}" CACHE PATH "Object code libraries (${_LIBDIR_DEFAULT})")
   elseif(DEFINED __LAST_LIBDIR_DEFAULT
