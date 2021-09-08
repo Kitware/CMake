@@ -29,6 +29,7 @@ endif()
 
 set(CMAKE_C_COMPILE_OPTIONS_EXPLICIT_LANGUAGE -TC)
 set(CMAKE_C_CLANG_TIDY_DRIVER_MODE "cl")
+set(CMAKE_C_INCLUDE_WHAT_YOU_USE_DRIVER_MODE "cl")
 
 # There are no C compiler modes so we hard-code the known compiler supported
 # features. Override the default macro for this special case.  Pretend that

@@ -999,7 +999,25 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         }
         if (cmNonempty(iwyu)) {
           run_iwyu += " --iwyu=";
-          run_iwyu += this->LocalGenerator->EscapeForShell(*iwyu);
+
+          // Only add --driver-mode if it is not already specified, as adding
+          // it unconditionally might override a user-specified driver-mode
+          if (iwyu.Get()->find("--driver-mode=") == std::string::npos) {
+            cmProp p = this->Makefile->GetDefinition(
+              cmStrCat("CMAKE_", lang, "_INCLUDE_WHAT_YOU_USE_DRIVER_MODE"));
+            std::string driverMode;
+
+            if (cmNonempty(p)) {
+              driverMode = *p;
+            } else {
+              driverMode = lang == "C" ? "gcc" : "g++";
+            }
+
+            run_iwyu += this->LocalGenerator->EscapeForShell(
+              cmStrCat(*iwyu, ";--driver-mode=", driverMode));
+          } else {
+            run_iwyu += this->LocalGenerator->EscapeForShell(*iwyu);
+          }
         }
         if (cmNonempty(tidy)) {
           run_iwyu += " --tidy=";
