@@ -38,7 +38,7 @@
         CMAKE_CONFIGURATION: windows_vs2019_x64_ninja
         VCVARSALL: "${VS160COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
-        VCVARSVERSION: "14.29.30037"
+        VCVARSVERSION: "14.29.30133"
 
 ### External testing
 
@@ -49,7 +49,7 @@
         CMAKE_CONFIGURATION: windows_vs2019_x64
         CMAKE_GENERATOR: "Visual Studio 16 2019"
         CMAKE_GENERATOR_PLATFORM: "x64"
-        CMAKE_GENERATOR_TOOLSET: "v142,version=14.29.30037"
+        CMAKE_GENERATOR_TOOLSET: "v142,version=14.29.30133"
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 ## Tags
@@ -60,7 +60,7 @@
         - windows
         - shell
         - vs2019
-        - msvc-19.29-16.10
+        - msvc-19.29-16.11
         - nonconcurrent
 
 .windows_builder_ext_tags:
@@ -69,7 +69,7 @@
         - windows
         - shell
         - vs2019
-        - msvc-19.29-16.10
+        - msvc-19.29-16.11
         - concurrent
 
 ## Windows-specific scripts
