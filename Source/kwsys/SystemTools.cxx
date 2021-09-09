@@ -14,6 +14,10 @@
 #  endif
 #endif
 
+#if defined(_WIN32) && !defined(_WIN32_WINNT)
+#  define _WIN32_WINNT _WIN32_WINNT_VISTA
+#endif
+
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(RegularExpression.hxx)
 #include KWSYS_HEADER(SystemTools.hxx)
