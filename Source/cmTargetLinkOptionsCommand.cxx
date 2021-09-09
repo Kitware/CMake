@@ -30,7 +30,7 @@ private:
                            bool prepend, bool /*system*/) override
   {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    tgt->InsertLinkOption(this->Join(content), lfbt, prepend);
+    tgt->InsertLinkOption(BT<std::string>(this->Join(content), lfbt), prepend);
     return true; // Successfully handled.
   }
 

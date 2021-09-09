@@ -60,6 +60,10 @@ class cmListFileBacktrace;
 using cmBacktraceRange =
   cmRange<std::vector<cmListFileBacktrace>::const_iterator>;
 
+template <typename T>
+class BT;
+using cmBTStringRange = cmRange<std::vector<BT<std::string>>::const_iterator>;
+
 template <typename Range>
 typename Range::const_iterator cmRemoveN(Range& r, size_t n)
 {

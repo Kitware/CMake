@@ -83,15 +83,15 @@ cmProp cmTargetPropertyComputer::GetSources<cmTarget>(
   cmTarget const* tgt, cmMessenger* messenger,
   cmListFileBacktrace const& context)
 {
-  cmStringRange entries = tgt->GetSourceEntries();
+  cmBTStringRange entries = tgt->GetSourceEntries();
   if (entries.empty()) {
     return nullptr;
   }
 
   std::ostringstream ss;
   const char* sep = "";
-  for (std::string const& entry : entries) {
-    std::vector<std::string> files = cmExpandedList(entry);
+  for (auto const& entry : entries) {
+    std::vector<std::string> files = cmExpandedList(entry.Value);
     for (std::string const& file : files) {
       if (cmHasLiteralPrefix(file, "$<TARGET_OBJECTS:") &&
           file.back() == '>') {
@@ -187,25 +187,16 @@ public:
   std::set<std::string> SystemIncludeDirectories;
   cmTarget::LinkLibraryVectorType OriginalLinkLibraries;
   std::map<std::string, BTs<std::string>> LanguageStandardProperties;
-  std::vector<std::string> IncludeDirectoriesEntries;
-  std::vector<cmListFileBacktrace> IncludeDirectoriesBacktraces;
+  std::vector<BT<std::string>> IncludeDirectoriesEntries;
   std::vector<std::string> InstallIncludeDirectoriesEntries;
-  std::vector<std::string> CompileOptionsEntries;
-  std::vector<cmListFileBacktrace> CompileOptionsBacktraces;
-  std::vector<std::string> CompileFeaturesEntries;
-  std::vector<cmListFileBacktrace> CompileFeaturesBacktraces;
-  std::vector<std::string> CompileDefinitionsEntries;
-  std::vector<cmListFileBacktrace> CompileDefinitionsBacktraces;
-  std::vector<std::string> PrecompileHeadersEntries;
-  std::vector<cmListFileBacktrace> PrecompileHeadersBacktraces;
-  std::vector<std::string> SourceEntries;
-  std::vector<cmListFileBacktrace> SourceBacktraces;
-  std::vector<std::string> LinkOptionsEntries;
-  std::vector<cmListFileBacktrace> LinkOptionsBacktraces;
-  std::vector<std::string> LinkDirectoriesEntries;
-  std::vector<cmListFileBacktrace> LinkDirectoriesBacktraces;
-  std::vector<std::string> LinkImplementationPropertyEntries;
-  std::vector<cmListFileBacktrace> LinkImplementationPropertyBacktraces;
+  std::vector<BT<std::string>> CompileOptionsEntries;
+  std::vector<BT<std::string>> CompileFeaturesEntries;
+  std::vector<BT<std::string>> CompileDefinitionsEntries;
+  std::vector<BT<std::string>> PrecompileHeadersEntries;
+  std::vector<BT<std::string>> SourceEntries;
+  std::vector<BT<std::string>> LinkOptionsEntries;
+  std::vector<BT<std::string>> LinkDirectoriesEntries;
+  std::vector<BT<std::string>> LinkImplementationPropertyEntries;
   std::vector<std::pair<cmTarget::TLLSignature, cmListFileContext>>
     TLLCommands;
   cmListFileBacktrace Backtrace;
@@ -482,8 +473,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     // of the same directory property:
     cm::append(this->impl->IncludeDirectoriesEntries,
                this->impl->Makefile->GetIncludeDirectoriesEntries());
-    cm::append(this->impl->IncludeDirectoriesBacktraces,
-               this->impl->Makefile->GetIncludeDirectoriesBacktraces());
 
     {
       auto const& sysInc = this->impl->Makefile->GetSystemIncludeDirectories();
@@ -493,18 +482,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
     cm::append(this->impl->CompileOptionsEntries,
                this->impl->Makefile->GetCompileOptionsEntries());
-    cm::append(this->impl->CompileOptionsBacktraces,
-               this->impl->Makefile->GetCompileOptionsBacktraces());
 
     cm::append(this->impl->LinkOptionsEntries,
                this->impl->Makefile->GetLinkOptionsEntries());
-    cm::append(this->impl->LinkOptionsBacktraces,
-               this->impl->Makefile->GetLinkOptionsBacktraces());
 
     cm::append(this->impl->LinkDirectoriesEntries,
                this->impl->Makefile->GetLinkDirectoriesEntries());
-    cm::append(this->impl->LinkDirectoriesBacktraces,
-               this->impl->Makefile->GetLinkDirectoriesBacktraces());
   }
 
   if (this->impl->TargetType == cmStateEnums::EXECUTABLE) {
@@ -613,11 +596,9 @@ void cmTarget::SetLanguageStandardProperty(std::string const& lang,
                                            const std::string& feature)
 {
   cmListFileBacktrace featureBacktrace;
-  for (size_t i = 0; i < this->impl->CompileFeaturesEntries.size(); i++) {
-    if (this->impl->CompileFeaturesEntries[i] == feature) {
-      if (i < this->impl->CompileFeaturesBacktraces.size()) {
-        featureBacktrace = this->impl->CompileFeaturesBacktraces[i];
-      }
+  for (auto const& entry : this->impl->CompileFeaturesEntries) {
+    if (entry.Value == feature) {
+      featureBacktrace = entry.Backtrace;
       break;
     }
   }
@@ -729,8 +710,7 @@ void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 {
   if (!srcs.empty()) {
     cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-    this->impl->SourceEntries.push_back(cmJoin(srcs, ";"));
-    this->impl->SourceBacktraces.push_back(lfbt);
+    this->impl->SourceEntries.emplace_back(cmJoin(srcs, ";"), lfbt);
   }
 }
 
@@ -754,8 +734,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
   }
   if (!srcFiles.empty()) {
     cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-    this->impl->SourceEntries.push_back(std::move(srcFiles));
-    this->impl->SourceBacktraces.push_back(lfbt);
+    this->impl->SourceEntries.emplace_back(std::move(srcFiles), lfbt);
   }
 }
 
@@ -843,9 +822,9 @@ public:
   {
   }
 
-  bool operator()(std::string const& entry)
+  bool operator()(BT<std::string> const& entry)
   {
-    std::vector<std::string> files = cmExpandedList(entry);
+    std::vector<std::string> files = cmExpandedList(entry.Value);
     std::vector<cmSourceFileLocation> locations;
     locations.reserve(files.size());
     std::transform(files.begin(), files.end(), std::back_inserter(locations),
@@ -866,11 +845,7 @@ cmSourceFile* cmTarget::AddSource(const std::string& src, bool before)
     cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
     this->impl->SourceEntries.insert(before ? this->impl->SourceEntries.begin()
                                             : this->impl->SourceEntries.end(),
-                                     src);
-    this->impl->SourceBacktraces.insert(
-      before ? this->impl->SourceBacktraces.begin()
-             : this->impl->SourceBacktraces.end(),
-      lfbt);
+                                     BT<std::string>(src, lfbt));
   }
   if (cmGeneratorExpression::Find(src) != std::string::npos) {
     return nullptr;
@@ -1087,94 +1062,49 @@ cmStringRange cmTarget::GetInstallIncludeDirectoriesEntries() const
   return cmMakeRange(this->impl->InstallIncludeDirectoriesEntries);
 }
 
-cmStringRange cmTarget::GetIncludeDirectoriesEntries() const
+cmBTStringRange cmTarget::GetIncludeDirectoriesEntries() const
 {
   return cmMakeRange(this->impl->IncludeDirectoriesEntries);
 }
 
-cmBacktraceRange cmTarget::GetIncludeDirectoriesBacktraces() const
-{
-  return cmMakeRange(this->impl->IncludeDirectoriesBacktraces);
-}
-
-cmStringRange cmTarget::GetCompileOptionsEntries() const
+cmBTStringRange cmTarget::GetCompileOptionsEntries() const
 {
   return cmMakeRange(this->impl->CompileOptionsEntries);
 }
 
-cmBacktraceRange cmTarget::GetCompileOptionsBacktraces() const
-{
-  return cmMakeRange(this->impl->CompileOptionsBacktraces);
-}
-
-cmStringRange cmTarget::GetCompileFeaturesEntries() const
+cmBTStringRange cmTarget::GetCompileFeaturesEntries() const
 {
   return cmMakeRange(this->impl->CompileFeaturesEntries);
 }
 
-cmBacktraceRange cmTarget::GetCompileFeaturesBacktraces() const
-{
-  return cmMakeRange(this->impl->CompileFeaturesBacktraces);
-}
-
-cmStringRange cmTarget::GetCompileDefinitionsEntries() const
+cmBTStringRange cmTarget::GetCompileDefinitionsEntries() const
 {
   return cmMakeRange(this->impl->CompileDefinitionsEntries);
 }
 
-cmBacktraceRange cmTarget::GetCompileDefinitionsBacktraces() const
-{
-  return cmMakeRange(this->impl->CompileDefinitionsBacktraces);
-}
-
-cmStringRange cmTarget::GetPrecompileHeadersEntries() const
+cmBTStringRange cmTarget::GetPrecompileHeadersEntries() const
 {
   return cmMakeRange(this->impl->PrecompileHeadersEntries);
 }
 
-cmBacktraceRange cmTarget::GetPrecompileHeadersBacktraces() const
-{
-  return cmMakeRange(this->impl->PrecompileHeadersBacktraces);
-}
-
-cmStringRange cmTarget::GetSourceEntries() const
+cmBTStringRange cmTarget::GetSourceEntries() const
 {
   return cmMakeRange(this->impl->SourceEntries);
 }
 
-cmBacktraceRange cmTarget::GetSourceBacktraces() const
-{
-  return cmMakeRange(this->impl->SourceBacktraces);
-}
-
-cmStringRange cmTarget::GetLinkOptionsEntries() const
+cmBTStringRange cmTarget::GetLinkOptionsEntries() const
 {
   return cmMakeRange(this->impl->LinkOptionsEntries);
 }
 
-cmBacktraceRange cmTarget::GetLinkOptionsBacktraces() const
-{
-  return cmMakeRange(this->impl->LinkOptionsBacktraces);
-}
-
-cmStringRange cmTarget::GetLinkDirectoriesEntries() const
+cmBTStringRange cmTarget::GetLinkDirectoriesEntries() const
 {
   return cmMakeRange(this->impl->LinkDirectoriesEntries);
 }
 
-cmBacktraceRange cmTarget::GetLinkDirectoriesBacktraces() const
-{
-  return cmMakeRange(this->impl->LinkDirectoriesBacktraces);
-}
-
-cmStringRange cmTarget::GetLinkImplementationEntries() const
+cmBTStringRange cmTarget::GetLinkImplementationEntries() const
 {
   return cmMakeRange(this->impl->LinkImplementationPropertyEntries);
-}
-
-cmBacktraceRange cmTarget::GetLinkImplementationBacktraces() const
-{
-  return cmMakeRange(this->impl->LinkImplementationPropertyBacktraces);
 }
 
 namespace {
@@ -1270,75 +1200,57 @@ void cmTarget::StoreProperty(const std::string& prop, ValueType value)
 
   if (prop == propINCLUDE_DIRECTORIES) {
     this->impl->IncludeDirectoriesEntries.clear();
-    this->impl->IncludeDirectoriesBacktraces.clear();
     if (value) {
-      this->impl->IncludeDirectoriesEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->IncludeDirectoriesBacktraces.push_back(lfbt);
+      this->impl->IncludeDirectoriesEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propCOMPILE_OPTIONS) {
     this->impl->CompileOptionsEntries.clear();
-    this->impl->CompileOptionsBacktraces.clear();
     if (value) {
-      this->impl->CompileOptionsEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->CompileOptionsBacktraces.push_back(lfbt);
+      this->impl->CompileOptionsEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propCOMPILE_FEATURES) {
     this->impl->CompileFeaturesEntries.clear();
-    this->impl->CompileFeaturesBacktraces.clear();
     if (value) {
-      this->impl->CompileFeaturesEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->CompileFeaturesBacktraces.push_back(lfbt);
+      this->impl->CompileFeaturesEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propCOMPILE_DEFINITIONS) {
     this->impl->CompileDefinitionsEntries.clear();
-    this->impl->CompileDefinitionsBacktraces.clear();
     if (value) {
-      this->impl->CompileDefinitionsEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->CompileDefinitionsBacktraces.push_back(lfbt);
+      this->impl->CompileDefinitionsEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propLINK_OPTIONS) {
     this->impl->LinkOptionsEntries.clear();
-    this->impl->LinkOptionsBacktraces.clear();
     if (value) {
-      this->impl->LinkOptionsEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkOptionsBacktraces.push_back(lfbt);
+      this->impl->LinkOptionsEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propLINK_DIRECTORIES) {
     this->impl->LinkDirectoriesEntries.clear();
-    this->impl->LinkDirectoriesBacktraces.clear();
     if (value) {
-      this->impl->LinkDirectoriesEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkDirectoriesBacktraces.push_back(lfbt);
+      this->impl->LinkDirectoriesEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propPRECOMPILE_HEADERS) {
     this->impl->PrecompileHeadersEntries.clear();
-    this->impl->PrecompileHeadersBacktraces.clear();
     if (value) {
-      this->impl->PrecompileHeadersEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->PrecompileHeadersBacktraces.push_back(lfbt);
+      this->impl->PrecompileHeadersEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propLINK_LIBRARIES) {
     this->impl->LinkImplementationPropertyEntries.clear();
-    this->impl->LinkImplementationPropertyBacktraces.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkImplementationPropertyEntries.emplace_back(value);
-      this->impl->LinkImplementationPropertyBacktraces.push_back(lfbt);
+      this->impl->LinkImplementationPropertyEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propSOURCES) {
     this->impl->SourceEntries.clear();
-    this->impl->SourceBacktraces.clear();
     if (value) {
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->SourceEntries.emplace_back(value);
-      this->impl->SourceBacktraces.push_back(lfbt);
+      this->impl->SourceEntries.emplace_back(value, lfbt);
     }
   } else if (prop == propIMPORTED_GLOBAL) {
     if (!cmIsOn(value)) {
@@ -1443,39 +1355,33 @@ void cmTarget::AppendProperty(const std::string& prop,
   }
   if (prop == "INCLUDE_DIRECTORIES") {
     if (!value.empty()) {
-      this->impl->IncludeDirectoriesEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->IncludeDirectoriesBacktraces.push_back(lfbt);
+      this->impl->IncludeDirectoriesEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "COMPILE_OPTIONS") {
     if (!value.empty()) {
-      this->impl->CompileOptionsEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->CompileOptionsBacktraces.push_back(lfbt);
+      this->impl->CompileOptionsEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "COMPILE_FEATURES") {
     if (!value.empty()) {
-      this->impl->CompileFeaturesEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->CompileFeaturesBacktraces.push_back(lfbt);
+      this->impl->CompileFeaturesEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "COMPILE_DEFINITIONS") {
     if (!value.empty()) {
-      this->impl->CompileDefinitionsEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->CompileDefinitionsBacktraces.push_back(lfbt);
+      this->impl->CompileDefinitionsEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "LINK_OPTIONS") {
     if (!value.empty()) {
-      this->impl->LinkOptionsEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkOptionsBacktraces.push_back(lfbt);
+      this->impl->LinkOptionsEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "LINK_DIRECTORIES") {
     if (!value.empty()) {
-      this->impl->LinkDirectoriesEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkDirectoriesBacktraces.push_back(lfbt);
+      this->impl->LinkDirectoriesEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "PRECOMPILE_HEADERS") {
     if (this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
@@ -1487,20 +1393,17 @@ void cmTarget::AppendProperty(const std::string& prop,
       return;
     }
     if (!value.empty()) {
-      this->impl->PrecompileHeadersEntries.emplace_back(value);
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->PrecompileHeadersBacktraces.push_back(lfbt);
+      this->impl->PrecompileHeadersEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "LINK_LIBRARIES") {
     if (!value.empty()) {
       cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-      this->impl->LinkImplementationPropertyEntries.emplace_back(value);
-      this->impl->LinkImplementationPropertyBacktraces.push_back(lfbt);
+      this->impl->LinkImplementationPropertyEntries.emplace_back(value, lfbt);
     }
   } else if (prop == "SOURCES") {
     cmListFileBacktrace lfbt = this->impl->Makefile->GetBacktrace();
-    this->impl->SourceEntries.emplace_back(value);
-    this->impl->SourceBacktraces.push_back(lfbt);
+    this->impl->SourceEntries.emplace_back(value, lfbt);
   } else if (cmHasLiteralPrefix(prop, "IMPORTED_LIBNAME")) {
     this->impl->Makefile->IssueMessage(
       MessageType::FATAL_ERROR, prop + " property may not be APPENDed.");
@@ -1550,70 +1453,46 @@ void cmTarget::AppendBuildInterfaceIncludes()
   }
 }
 
-void cmTarget::InsertInclude(std::string const& entry,
-                             cmListFileBacktrace const& bt, bool before)
+void cmTarget::InsertInclude(BT<std::string> const& entry, bool before)
 {
   auto position = before ? this->impl->IncludeDirectoriesEntries.begin()
                          : this->impl->IncludeDirectoriesEntries.end();
 
-  auto btPosition = before ? this->impl->IncludeDirectoriesBacktraces.begin()
-                           : this->impl->IncludeDirectoriesBacktraces.end();
-
   this->impl->IncludeDirectoriesEntries.insert(position, entry);
-  this->impl->IncludeDirectoriesBacktraces.insert(btPosition, bt);
 }
 
-void cmTarget::InsertCompileOption(std::string const& entry,
-                                   cmListFileBacktrace const& bt, bool before)
+void cmTarget::InsertCompileOption(BT<std::string> const& entry, bool before)
 {
   auto position = before ? this->impl->CompileOptionsEntries.begin()
                          : this->impl->CompileOptionsEntries.end();
 
-  auto btPosition = before ? this->impl->CompileOptionsBacktraces.begin()
-                           : this->impl->CompileOptionsBacktraces.end();
-
   this->impl->CompileOptionsEntries.insert(position, entry);
-  this->impl->CompileOptionsBacktraces.insert(btPosition, bt);
 }
 
-void cmTarget::InsertCompileDefinition(std::string const& entry,
-                                       cmListFileBacktrace const& bt)
+void cmTarget::InsertCompileDefinition(BT<std::string> const& entry)
 {
   this->impl->CompileDefinitionsEntries.push_back(entry);
-  this->impl->CompileDefinitionsBacktraces.push_back(bt);
 }
 
-void cmTarget::InsertLinkOption(std::string const& entry,
-                                cmListFileBacktrace const& bt, bool before)
+void cmTarget::InsertLinkOption(BT<std::string> const& entry, bool before)
 {
   auto position = before ? this->impl->LinkOptionsEntries.begin()
                          : this->impl->LinkOptionsEntries.end();
 
-  auto btPosition = before ? this->impl->LinkOptionsBacktraces.begin()
-                           : this->impl->LinkOptionsBacktraces.end();
-
   this->impl->LinkOptionsEntries.insert(position, entry);
-  this->impl->LinkOptionsBacktraces.insert(btPosition, bt);
 }
 
-void cmTarget::InsertLinkDirectory(std::string const& entry,
-                                   cmListFileBacktrace const& bt, bool before)
+void cmTarget::InsertLinkDirectory(BT<std::string> const& entry, bool before)
 {
   auto position = before ? this->impl->LinkDirectoriesEntries.begin()
                          : this->impl->LinkDirectoriesEntries.end();
 
-  auto btPosition = before ? this->impl->LinkDirectoriesBacktraces.begin()
-                           : this->impl->LinkDirectoriesBacktraces.end();
-
   this->impl->LinkDirectoriesEntries.insert(position, entry);
-  this->impl->LinkDirectoriesBacktraces.insert(btPosition, bt);
 }
 
-void cmTarget::InsertPrecompileHeader(std::string const& entry,
-                                      cmListFileBacktrace const& bt)
+void cmTarget::InsertPrecompileHeader(BT<std::string> const& entry)
 {
   this->impl->PrecompileHeadersEntries.push_back(entry);
-  this->impl->PrecompileHeadersBacktraces.push_back(bt);
 }
 
 static void cmTargetCheckLINK_INTERFACE_LIBRARIES(const std::string& prop,

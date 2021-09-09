@@ -217,18 +217,12 @@ public:
   //! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
 
-  void InsertInclude(std::string const& entry, cmListFileBacktrace const& bt,
-                     bool before = false);
-  void InsertCompileOption(std::string const& entry,
-                           cmListFileBacktrace const& bt, bool before = false);
-  void InsertCompileDefinition(std::string const& entry,
-                               cmListFileBacktrace const& bt);
-  void InsertLinkOption(std::string const& entry,
-                        cmListFileBacktrace const& bt, bool before = false);
-  void InsertLinkDirectory(std::string const& entry,
-                           cmListFileBacktrace const& bt, bool before = false);
-  void InsertPrecompileHeader(std::string const& entry,
-                              cmListFileBacktrace const& bt);
+  void InsertInclude(BT<std::string> const& entry, bool before = false);
+  void InsertCompileOption(BT<std::string> const& entry, bool before = false);
+  void InsertCompileDefinition(BT<std::string> const& entry);
+  void InsertLinkOption(BT<std::string> const& entry, bool before = false);
+  void InsertLinkDirectory(BT<std::string> const& entry, bool before = false);
+  void InsertPrecompileHeader(BT<std::string> const& entry);
 
   void AppendBuildInterfaceIncludes();
 
@@ -248,32 +242,23 @@ public:
                                    std::string const& value,
                                    const std::string& feature);
 
-  cmStringRange GetIncludeDirectoriesEntries() const;
-  cmBacktraceRange GetIncludeDirectoriesBacktraces() const;
+  cmBTStringRange GetIncludeDirectoriesEntries() const;
 
-  cmStringRange GetCompileOptionsEntries() const;
-  cmBacktraceRange GetCompileOptionsBacktraces() const;
+  cmBTStringRange GetCompileOptionsEntries() const;
 
-  cmStringRange GetCompileFeaturesEntries() const;
-  cmBacktraceRange GetCompileFeaturesBacktraces() const;
+  cmBTStringRange GetCompileFeaturesEntries() const;
 
-  cmStringRange GetCompileDefinitionsEntries() const;
-  cmBacktraceRange GetCompileDefinitionsBacktraces() const;
+  cmBTStringRange GetCompileDefinitionsEntries() const;
 
-  cmStringRange GetPrecompileHeadersEntries() const;
-  cmBacktraceRange GetPrecompileHeadersBacktraces() const;
+  cmBTStringRange GetPrecompileHeadersEntries() const;
 
-  cmStringRange GetSourceEntries() const;
-  cmBacktraceRange GetSourceBacktraces() const;
+  cmBTStringRange GetSourceEntries() const;
 
-  cmStringRange GetLinkOptionsEntries() const;
-  cmBacktraceRange GetLinkOptionsBacktraces() const;
+  cmBTStringRange GetLinkOptionsEntries() const;
 
-  cmStringRange GetLinkDirectoriesEntries() const;
-  cmBacktraceRange GetLinkDirectoriesBacktraces() const;
+  cmBTStringRange GetLinkDirectoriesEntries() const;
 
-  cmStringRange GetLinkImplementationEntries() const;
-  cmBacktraceRange GetLinkImplementationBacktraces() const;
+  cmBTStringRange GetLinkImplementationEntries() const;
 
   std::string ImportedGetFullPath(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;

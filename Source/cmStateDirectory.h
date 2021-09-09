@@ -14,7 +14,6 @@
 #include "cmProperty.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
-#include "cmStringAlgorithms.h"
 
 class cmStateDirectory
 {
@@ -28,47 +27,31 @@ public:
   std::string const& GetCurrentBinary() const;
   void SetCurrentBinary(std::string const& dir);
 
-  cmStringRange GetIncludeDirectoriesEntries() const;
-  cmBacktraceRange GetIncludeDirectoriesEntryBacktraces() const;
-  void AppendIncludeDirectoriesEntry(std::string const& vec,
-                                     cmListFileBacktrace const& lfbt);
-  void PrependIncludeDirectoriesEntry(std::string const& vec,
-                                      cmListFileBacktrace const& lfbt);
-  void SetIncludeDirectories(std::string const& vec,
-                             cmListFileBacktrace const& lfbt);
+  cmBTStringRange GetIncludeDirectoriesEntries() const;
+  void AppendIncludeDirectoriesEntry(BT<std::string> const& vec);
+  void PrependIncludeDirectoriesEntry(BT<std::string> const& vec);
+  void SetIncludeDirectories(BT<std::string> const& vec);
   void ClearIncludeDirectories();
 
-  cmStringRange GetCompileDefinitionsEntries() const;
-  cmBacktraceRange GetCompileDefinitionsEntryBacktraces() const;
-  void AppendCompileDefinitionsEntry(std::string const& vec,
-                                     cmListFileBacktrace const& lfbt);
-  void SetCompileDefinitions(std::string const& vec,
-                             cmListFileBacktrace const& lfbt);
+  cmBTStringRange GetCompileDefinitionsEntries() const;
+  void AppendCompileDefinitionsEntry(BT<std::string> const& vec);
+  void SetCompileDefinitions(BT<std::string> const& vec);
   void ClearCompileDefinitions();
 
-  cmStringRange GetCompileOptionsEntries() const;
-  cmBacktraceRange GetCompileOptionsEntryBacktraces() const;
-  void AppendCompileOptionsEntry(std::string const& vec,
-                                 cmListFileBacktrace const& lfbt);
-  void SetCompileOptions(std::string const& vec,
-                         cmListFileBacktrace const& lfbt);
+  cmBTStringRange GetCompileOptionsEntries() const;
+  void AppendCompileOptionsEntry(BT<std::string> const& vec);
+  void SetCompileOptions(BT<std::string> const& vec);
   void ClearCompileOptions();
 
-  cmStringRange GetLinkOptionsEntries() const;
-  cmBacktraceRange GetLinkOptionsEntryBacktraces() const;
-  void AppendLinkOptionsEntry(std::string const& vec,
-                              cmListFileBacktrace const& lfbt);
-  void PrependLinkDirectoriesEntry(std::string const& vec,
-                                   cmListFileBacktrace const& lfbt);
-  void SetLinkOptions(std::string const& vec, cmListFileBacktrace const& lfbt);
+  cmBTStringRange GetLinkOptionsEntries() const;
+  void AppendLinkOptionsEntry(BT<std::string> const& vec);
+  void PrependLinkDirectoriesEntry(BT<std::string> const& vec);
+  void SetLinkOptions(BT<std::string> const& vec);
   void ClearLinkOptions();
 
-  cmStringRange GetLinkDirectoriesEntries() const;
-  cmBacktraceRange GetLinkDirectoriesEntryBacktraces() const;
-  void AppendLinkDirectoriesEntry(std::string const& vec,
-                                  cmListFileBacktrace const& lfbt);
-  void SetLinkDirectories(std::string const& vec,
-                          cmListFileBacktrace const& lfbt);
+  cmBTStringRange GetLinkDirectoriesEntries() const;
+  void AppendLinkDirectoriesEntry(BT<std::string> const& vec);
+  void SetLinkDirectories(BT<std::string> const& vecs);
   void ClearLinkDirectories();
 
   void SetProperty(const std::string& prop, const char* value,

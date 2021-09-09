@@ -277,15 +277,10 @@ cmStateSnapshot cmState::Reset()
     cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator it =
       this->BuildsystemDirectory.Truncate();
     it->IncludeDirectories.clear();
-    it->IncludeDirectoryBacktraces.clear();
     it->CompileDefinitions.clear();
-    it->CompileDefinitionsBacktraces.clear();
     it->CompileOptions.clear();
-    it->CompileOptionsBacktraces.clear();
     it->LinkOptions.clear();
-    it->LinkOptionsBacktraces.clear();
     it->LinkDirectories.clear();
-    it->LinkDirectoriesBacktraces.clear();
     it->DirectoryEnd = pos;
     it->NormalTargetNames.clear();
     it->ImportedTargetNames.clear();

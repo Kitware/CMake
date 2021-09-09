@@ -145,12 +145,10 @@ private:
 class TargetPropertyEntryString : public cmGeneratorTarget::TargetPropertyEntry
 {
 public:
-  TargetPropertyEntryString(std::string propertyValue,
-                            cmListFileBacktrace backtrace,
+  TargetPropertyEntryString(BT<std::string> propertyValue,
                             cmLinkImplItem const& item = NoLinkImplItem)
     : cmGeneratorTarget::TargetPropertyEntry(item)
     , PropertyValue(std::move(propertyValue))
-    , Backtrace(std::move(backtrace))
   {
   }
 
@@ -159,46 +157,46 @@ public:
                               cmGeneratorExpressionDAGChecker*,
                               std::string const&) const override
   {
-    return this->PropertyValue;
+    return this->PropertyValue.Value;
   }
 
-  cmListFileBacktrace GetBacktrace() const override { return this->Backtrace; }
-  std::string const& GetInput() const override { return this->PropertyValue; }
+  cmListFileBacktrace GetBacktrace() const override
+  {
+    return this->PropertyValue.Backtrace;
+  }
+  std::string const& GetInput() const override
+  {
+    return this->PropertyValue.Value;
+  }
 
 private:
-  std::string PropertyValue;
-  cmListFileBacktrace Backtrace;
+  BT<std::string> PropertyValue;
 };
 
 std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>
-CreateTargetPropertyEntry(
-  const std::string& propertyValue,
-  cmListFileBacktrace backtrace = cmListFileBacktrace(),
-  bool evaluateForBuildsystem = false)
+CreateTargetPropertyEntry(const BT<std::string>& propertyValue,
+                          bool evaluateForBuildsystem = false)
 {
-  if (cmGeneratorExpression::Find(propertyValue) != std::string::npos) {
-    cmGeneratorExpression ge(std::move(backtrace));
+  if (cmGeneratorExpression::Find(propertyValue.Value) != std::string::npos) {
+    cmGeneratorExpression ge(propertyValue.Backtrace);
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(propertyValue);
+      ge.Parse(propertyValue.Value);
     cge->SetEvaluateForBuildsystem(evaluateForBuildsystem);
     return std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>(
       cm::make_unique<TargetPropertyEntryGenex>(std::move(cge)));
   }
 
   return std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>(
-    cm::make_unique<TargetPropertyEntryString>(propertyValue,
-                                               std::move(backtrace)));
+    cm::make_unique<TargetPropertyEntryString>(propertyValue));
 }
 
 void CreatePropertyGeneratorExpressions(
-  cmStringRange entries, cmBacktraceRange backtraces,
+  cmBTStringRange entries,
   std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>>& items,
   bool evaluateForBuildsystem = false)
 {
-  auto btIt = backtraces.begin();
-  for (auto it = entries.begin(); it != entries.end(); ++it, ++btIt) {
-    items.push_back(
-      CreateTargetPropertyEntry(*it, *btIt, evaluateForBuildsystem));
+  for (auto const& entry : entries) {
+    items.push_back(CreateTargetPropertyEntry(entry, evaluateForBuildsystem));
   }
 }
 
@@ -289,35 +287,27 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   this->GlobalGenerator->ComputeTargetObjectDirectory(this);
 
   CreatePropertyGeneratorExpressions(t->GetIncludeDirectoriesEntries(),
-                                     t->GetIncludeDirectoriesBacktraces(),
                                      this->IncludeDirectoriesEntries);
 
   CreatePropertyGeneratorExpressions(t->GetCompileOptionsEntries(),
-                                     t->GetCompileOptionsBacktraces(),
                                      this->CompileOptionsEntries);
 
   CreatePropertyGeneratorExpressions(t->GetCompileFeaturesEntries(),
-                                     t->GetCompileFeaturesBacktraces(),
                                      this->CompileFeaturesEntries);
 
   CreatePropertyGeneratorExpressions(t->GetCompileDefinitionsEntries(),
-                                     t->GetCompileDefinitionsBacktraces(),
                                      this->CompileDefinitionsEntries);
 
   CreatePropertyGeneratorExpressions(t->GetLinkOptionsEntries(),
-                                     t->GetLinkOptionsBacktraces(),
                                      this->LinkOptionsEntries);
 
   CreatePropertyGeneratorExpressions(t->GetLinkDirectoriesEntries(),
-                                     t->GetLinkDirectoriesBacktraces(),
                                      this->LinkDirectoriesEntries);
 
   CreatePropertyGeneratorExpressions(t->GetPrecompileHeadersEntries(),
-                                     t->GetPrecompileHeadersBacktraces(),
                                      this->PrecompileHeadersEntries);
 
   CreatePropertyGeneratorExpressions(t->GetSourceEntries(),
-                                     t->GetSourceBacktraces(),
                                      this->SourceEntries, true);
 
   this->PolicyMap = t->GetPolicyMap();
@@ -698,7 +688,8 @@ void cmGeneratorTarget::AddSourceCommon(const std::string& src, bool before)
 {
   this->SourceEntries.insert(
     before ? this->SourceEntries.begin() : this->SourceEntries.end(),
-    CreateTargetPropertyEntry(src, this->Makefile->GetBacktrace(), true));
+    CreateTargetPropertyEntry(
+      BT<std::string>(src, this->Makefile->GetBacktrace()), true));
   this->ClearSourcesCache();
 }
 
@@ -719,11 +710,13 @@ void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
 void cmGeneratorTarget::AddIncludeDirectory(const std::string& src,
                                             bool before)
 {
-  this->Target->InsertInclude(src, this->Makefile->GetBacktrace(), before);
+  this->Target->InsertInclude(
+    BT<std::string>(src, this->Makefile->GetBacktrace()), before);
   this->IncludeDirectoriesEntries.insert(
     before ? this->IncludeDirectoriesEntries.begin()
            : this->IncludeDirectoriesEntries.end(),
-    CreateTargetPropertyEntry(src, this->Makefile->GetBacktrace(), true));
+    CreateTargetPropertyEntry(
+      BT<std::string>(src, this->Makefile->GetBacktrace()), true));
 }
 
 std::vector<cmSourceFile*> const* cmGeneratorTarget::GetSourceDepends(
@@ -1675,9 +1668,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
     // for TARGET_OBJECTS instead for backwards compatibility with OLD
     // behavior of CMP0024 and CMP0026 only.
 
-    cmStringRange sourceEntries = this->Target->GetSourceEntries();
-    for (std::string const& entry : sourceEntries) {
-      std::vector<std::string> items = cmExpandedList(entry);
+    cmBTStringRange sourceEntries = this->Target->GetSourceEntries();
+    for (auto const& entry : sourceEntries) {
+      std::vector<std::string> items = cmExpandedList(entry.Value);
       for (std::string const& item : items) {
         if (cmHasLiteralPrefix(item, "$<TARGET_OBJECTS:") &&
             item.back() == '>') {
@@ -6364,7 +6357,7 @@ cm::optional<cmLinkItem> cmGeneratorTarget::LookupLinkItem(
   if (name == this->GetName() || name.empty()) {
     return maybeItem;
   }
-  maybeItem = this->ResolveLinkItem(name, bt, scope->LG);
+  maybeItem = this->ResolveLinkItem(BT<std::string>(name, bt), scope->LG);
   return maybeItem;
 }
 
@@ -7377,9 +7370,9 @@ void cmGeneratorTarget::GetObjectLibrariesCMP0026(
   // there is no cmGeneratorTarget at configure-time, so search the SOURCES
   // for TARGET_OBJECTS instead for backwards compatibility with OLD
   // behavior of CMP0024 and CMP0026 only.
-  cmStringRange rng = this->Target->GetSourceEntries();
-  for (std::string const& entry : rng) {
-    std::vector<std::string> files = cmExpandedList(entry);
+  cmBTStringRange rng = this->Target->GetSourceEntries();
+  for (auto const& entry : rng) {
+    std::vector<std::string> files = cmExpandedList(entry.Value);
     for (std::string const& li : files) {
       if (cmHasLiteralPrefix(li, "$<TARGET_OBJECTS:") && li.back() == '>') {
         std::string objLibName = li.substr(17, li.size() - 18);
@@ -7607,24 +7600,21 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
 {
   cmLocalGenerator const* lg = this->LocalGenerator;
   cmMakefile const* mf = lg->GetMakefile();
-  cmStringRange entryRange = this->Target->GetLinkImplementationEntries();
-  cmBacktraceRange btRange = this->Target->GetLinkImplementationBacktraces();
-  cmBacktraceRange::const_iterator btIt = btRange.begin();
+  cmBTStringRange entryRange = this->Target->GetLinkImplementationEntries();
   // Collect libraries directly linked in this configuration.
-  for (cmStringRange::const_iterator le = entryRange.begin(),
-                                     end = entryRange.end();
-       le != end; ++le, ++btIt) {
+  for (auto const& entry : entryRange) {
     std::vector<std::string> llibs;
     // Keep this logic in sync with ExpandLinkItems.
     cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_LIBRARIES", nullptr,
                                                nullptr);
-    cmGeneratorExpression ge(*btIt);
-    std::unique_ptr<cmCompiledGeneratorExpression> const cge = ge.Parse(*le);
+    cmGeneratorExpression ge(entry.Backtrace);
+    std::unique_ptr<cmCompiledGeneratorExpression> const cge =
+      ge.Parse(entry.Value);
     cge->SetEvaluateForBuildsystem(true);
     std::string const& evaluated =
       cge->Evaluate(this->LocalGenerator, config, head, &dagChecker, nullptr,
                     this->LinkerLanguage);
-    bool const fromGenex = evaluated != *le;
+    bool const fromGenex = evaluated != entry.Value;
     cmExpandList(evaluated, llibs);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;
@@ -7682,7 +7672,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
 
       // The entry is meant for this configuration.
-      cmLinkItem item = this->ResolveLinkItem(name, *btIt, lg);
+      cmLinkItem item =
+        this->ResolveLinkItem(BT<std::string>(name, entry.Backtrace), lg);
       if (!item.Target) {
         // Report explicitly linked object files separately.
         std::string const& maybeObj = item.AsStr();
@@ -7724,7 +7715,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
       // Support OLD behavior for CMP0003.
       impl.WrongConfigLibraries.push_back(
-        this->ResolveLinkItem(name, cmListFileBacktrace()));
+        this->ResolveLinkItem(BT<std::string>(name)));
     }
   }
 }
@@ -7750,16 +7741,16 @@ cmGeneratorTarget::TargetOrString cmGeneratorTarget::ResolveTargetReference(
 }
 
 cmLinkItem cmGeneratorTarget::ResolveLinkItem(
-  std::string const& name, cmListFileBacktrace const& bt) const
+  BT<std::string> const& name) const
 {
-  return this->ResolveLinkItem(name, bt, this->LocalGenerator);
+  return this->ResolveLinkItem(name, this->LocalGenerator);
 }
 
-cmLinkItem cmGeneratorTarget::ResolveLinkItem(std::string const& name,
-                                              cmListFileBacktrace const& bt,
+cmLinkItem cmGeneratorTarget::ResolveLinkItem(BT<std::string> const& name,
                                               cmLocalGenerator const* lg) const
 {
-  TargetOrString resolved = this->ResolveTargetReference(name, lg);
+  auto bt = name.Backtrace;
+  TargetOrString resolved = this->ResolveTargetReference(name.Value, lg);
 
   if (!resolved.Target) {
     return cmLinkItem(resolved.String, false, bt);

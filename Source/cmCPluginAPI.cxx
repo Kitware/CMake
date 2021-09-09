@@ -173,7 +173,7 @@ void CCONV cmAddLinkDirectoryForTarget(void* arg, const char* tgt,
       std::string(tgt) + " for directory " + std::string(d));
     return;
   }
-  t->InsertLinkDirectory(d, mf->GetBacktrace());
+  t->InsertLinkDirectory(BT<std::string>(d, mf->GetBacktrace()));
 }
 
 void CCONV cmAddExecutable(void* arg, const char* exename, int numSrcs,
