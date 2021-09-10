@@ -31,7 +31,7 @@ class cmCacheManager
 
   public:
     const std::string& GetValue() const { return this->Value; }
-    void SetValue(const char*);
+    void SetValue(cmProp);
 
     cmStateEnums::CacheEntryType GetType() const { return this->Type; }
     void SetType(cmStateEnums::CacheEntryType ty) { this->Type = ty; }
@@ -83,7 +83,7 @@ public:
   void SetCacheEntryValue(std::string const& key, std::string const& value)
   {
     if (auto* entry = this->GetCacheEntry(key)) {
-      entry->SetValue(value.c_str());
+      entry->SetValue(cmProp(value));
     }
   }
 
@@ -173,6 +173,18 @@ public:
 
   //! Add an entry into the cache
   void AddCacheEntry(const std::string& key, const char* value,
+                     const char* helpString, cmStateEnums::CacheEntryType type)
+  {
+    this->AddCacheEntry(key,
+                        value ? cmProp(std::string(value)) : cmProp(nullptr),
+                        helpString, type);
+  }
+  void AddCacheEntry(const std::string& key, const std::string& value,
+                     const char* helpString, cmStateEnums::CacheEntryType type)
+  {
+    this->AddCacheEntry(key, cmProp(value), helpString, type);
+  }
+  void AddCacheEntry(const std::string& key, cmProp value,
                      const char* helpString,
                      cmStateEnums::CacheEntryType type);
 

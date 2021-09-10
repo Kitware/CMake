@@ -117,7 +117,7 @@ std::string cmGlobalCommonGenerator::GetEditCacheCommand() const
       editCacheCommand = cmSystemTools::GetCMakeGUICommand();
     }
     if (!editCacheCommand.empty()) {
-      cm->AddCacheEntry("CMAKE_EDIT_COMMAND", editCacheCommand.c_str(),
+      cm->AddCacheEntry("CMAKE_EDIT_COMMAND", editCacheCommand,
                         "Path to cache edit program executable.",
                         cmStateEnums::INTERNAL);
     }

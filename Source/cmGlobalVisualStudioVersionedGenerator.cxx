@@ -467,9 +467,9 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   // Save the selected instance persistently.
   std::string genInstance = mf->GetSafeDefinition("CMAKE_GENERATOR_INSTANCE");
   if (vsInstance != genInstance) {
-    this->CMakeInstance->AddCacheEntry(
-      "CMAKE_GENERATOR_INSTANCE", vsInstance.c_str(),
-      "Generator instance identifier.", cmStateEnums::INTERNAL);
+    this->CMakeInstance->AddCacheEntry("CMAKE_GENERATOR_INSTANCE", vsInstance,
+                                       "Generator instance identifier.",
+                                       cmStateEnums::INTERNAL);
   }
 
   return true;

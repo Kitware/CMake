@@ -358,8 +358,8 @@ void cmFindBase::NormalizeFindResult()
       // value.
       if (value != *existingValue || this->AlreadyInCacheWithoutMetaInfo) {
         this->Makefile->GetCMakeInstance()->AddCacheEntry(
-          this->VariableName, value.c_str(),
-          this->VariableDocumentation.c_str(), this->VariableType);
+          this->VariableName, value, this->VariableDocumentation.c_str(),
+          this->VariableType);
         if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
             cmPolicies::NEW) {
           if (this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
