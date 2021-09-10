@@ -804,6 +804,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     }
   }
   this->CTest->AddIfExists(cmCTest::PartMemCheck, "DynamicAnalysis.xml");
+  this->CTest->AddIfExists(cmCTest::PartMemCheck, "DynamicAnalysis-Test.xml");
   this->CTest->AddIfExists(cmCTest::PartMemCheck, "Purify.xml");
   this->CTest->AddIfExists(cmCTest::PartNotes, "Notes.xml");
   this->CTest->AddIfExists(cmCTest::PartUpload, "Upload.xml");
