@@ -1592,6 +1592,12 @@ bool cmSystemTools::IsPathToFramework(const std::string& path)
           cmHasLiteralSuffix(path, ".framework"));
 }
 
+bool cmSystemTools::IsPathToMacOSSharedLibrary(const std::string& path)
+{
+  return (cmSystemTools::FileIsFullPath(path) &&
+          cmHasLiteralSuffix(path, ".dylib"));
+}
+
 bool cmSystemTools::CreateTar(const std::string& outFileName,
                               const std::vector<std::string>& files,
                               cmTarCompression compressType, bool verbose,

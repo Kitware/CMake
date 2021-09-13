@@ -1,47 +1,49 @@
 include(RunCMake)
 
-# Build a framework that the other tests will use and treat as external.
+# Build dependencies that the other tests will use and treat as external.
 # Always build in the Debug configuration so that the path to the framework
 # is predictable.
-function(ExternalFramework)
+function(ExternalDependencies)
   set(RunCMake_TEST_NO_CLEAN 1)
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ExternalFramework-build)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ExternalDependencies-build)
   set(externalFramework ${RunCMake_TEST_BINARY_DIR}/Debug/sharedFrameworkExt.framework PARENT_SCOPE)
+  set(externalDylib ${RunCMake_TEST_BINARY_DIR}/Debug/libsharedDylibExt.dylib PARENT_SCOPE)
 
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
-  run_cmake(ExternalFramework)
-  run_cmake_command(ExternalFramework-build
+  run_cmake(ExternalDependencies)
+  run_cmake_command(ExternalDependencies-build
     ${CMAKE_COMMAND} --build ${RunCMake_TEST_BINARY_DIR}
                      --config Debug
-                     --target sharedFrameworkExt
+                     --target sharedFrameworkExt sharedDylibExt
   )
 endfunction()
-ExternalFramework()
+ExternalDependencies()
 
-set(RunCMake_TEST_OPTIONS -DEXTERNAL_FWK=${externalFramework})
-
-run_cmake(EmbedFrameworksFlagsOff)
-
-function(TestFlagsOn testName)
+function(TestFlagsOn testName dependencyName)
   set(RunCMake_TEST_NO_CLEAN 1)
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${testName}-build)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${testName}-${dependencyName}-build)
 
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
   run_cmake(${testName})
-  run_cmake_command(${testName}-build
+  run_cmake_command(${testName}-${dependencyName}-build
     ${CMAKE_COMMAND} --build ${RunCMake_TEST_BINARY_DIR}
                      --config Debug
                      --target app
   )
 endfunction()
 
-TestFlagsOn(EmbedFrameworksFlagsOnNoSubdir)
-TestFlagsOn(EmbedFrameworksFlagsOnWithSubdir)
-
+foreach(dependency ${externalFramework} ${externalDylib})
+  cmake_path(GET dependency FILENAME dependencyName)
+  set(RunCMake_TEST_OPTIONS -DEXTERNAL_DEPENDENCY=${dependency} -DEXTERNAL_DEPENDENCY_NAME=${dependencyName})
+  run_cmake(EmbedFrameworksFlagsOff)
+  TestFlagsOn(EmbedFrameworksFlagsOnNoSubdir ${dependencyName})
+  TestFlagsOn(EmbedFrameworksFlagsOnWithSubdir ${dependencyName})
+endforeach()
+unset(RunCMake_TEST_OPTIONS)
 
 function(TestAppExtension platform)
   set(testName EmbedAppExtensions-${platform})
