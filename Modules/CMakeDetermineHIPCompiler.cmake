@@ -15,6 +15,13 @@ if(NOT CMAKE_HIP_COMPILER)
 
   # prefer the environment variable HIPCXX
   if(NOT $ENV{HIPCXX} STREQUAL "")
+    if("$ENV{HIPCXX}" MATCHES "hipcc")
+      message(FATAL_ERROR
+        "The HIPCXX environment variable is set to the hipcc wrapper:\n"
+        " $ENV{HIPCXX}\n"
+        "This is not supported.  Use Clang directly, or let CMake pick a default."
+        )
+    endif()
     get_filename_component(CMAKE_HIP_COMPILER_INIT $ENV{HIPCXX} PROGRAM PROGRAM_ARGS CMAKE_HIP_FLAGS_ENV_INIT)
     if(CMAKE_HIP_FLAGS_ENV_INIT)
       set(CMAKE_HIP_COMPILER_ARG1 "${CMAKE_HIP_FLAGS_ENV_INIT}" CACHE STRING "Arguments to CXX compiler")
@@ -26,10 +33,25 @@ if(NOT CMAKE_HIP_COMPILER)
 
   # finally list compilers to try
   if(NOT CMAKE_HIP_COMPILER_INIT)
-    set(CMAKE_HIP_COMPILER_LIST hipcc clang++)
+    set(CMAKE_HIP_COMPILER_LIST clang++)
+
+    # Look for the Clang coming with ROCm to support HIP.
+    execute_process(COMMAND hipconfig --hipclangpath
+      OUTPUT_VARIABLE _CMAKE_HIPCONFIG_CLANGPATH
+      RESULT_VARIABLE _CMAKE_HIPCONFIG_RESULT
+    )
+    if(_CMAKE_HIPCONFIG_RESULT EQUAL 0 AND EXISTS "${_CMAKE_HIPCONFIG_CLANGPATH}")
+      set(CMAKE_HIP_COMPILER_HINTS "${_CMAKE_HIPCONFIG_CLANGPATH}")
+    endif()
   endif()
 
   _cmake_find_compiler(HIP)
+elseif(CMAKE_HIP_COMPILER MATCHES "hipcc")
+  message(FATAL_ERROR
+    "CMAKE_HIP_COMPILER is set to the hipcc wrapper:\n"
+    " ${CMAKE_HIP_COMPILER}\n"
+    "This is not supported.  Use Clang directly, or let CMake pick a default."
+    )
 else()
   _cmake_find_compiler_path(HIP)
 endif()

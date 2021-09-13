@@ -32,7 +32,7 @@ macro(_cmake_find_compiler lang)
   endif()
 
   # Look for directories containing compilers of reference languages.
-  set(_${lang}_COMPILER_HINTS)
+  set(_${lang}_COMPILER_HINTS "${CMAKE_${lang}_COMPILER_HINTS}")
   foreach(l ${_languages})
     if(CMAKE_${l}_COMPILER AND IS_ABSOLUTE "${CMAKE_${l}_COMPILER}")
       get_filename_component(_hint "${CMAKE_${l}_COMPILER}" PATH)
