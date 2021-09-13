@@ -286,6 +286,10 @@ public:
    * can be used in CMake to refer to lists, directories, etc.
    */
   void AddDefinition(const std::string& name, cm::string_view value);
+  void AddDefinition(const std::string& name, cmProp value)
+  {
+    this->AddDefinition(name, *value);
+  }
   /**
    * Add bool variable definition to the build.
    */

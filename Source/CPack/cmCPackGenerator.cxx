@@ -167,7 +167,7 @@ int cmCPackGenerator::PrepareNames()
   }
   cmProp algoSignature = this->GetOption("CPACK_PACKAGE_CHECKSUM");
   if (algoSignature) {
-    if (!cmCryptoHash::New(algoSignature)) {
+    if (!cmCryptoHash::New(*algoSignature)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Cannot recognize algorithm: " << algoSignature
                                                    << std::endl);
@@ -1129,7 +1129,7 @@ int cmCPackGenerator::DoPackage()
 
   /* Prepare checksum algorithm*/
   cmProp algo = this->GetOption("CPACK_PACKAGE_CHECKSUM");
-  std::unique_ptr<cmCryptoHash> crypto = cmCryptoHash::New(algo);
+  std::unique_ptr<cmCryptoHash> crypto = cmCryptoHash::New(*algo);
 
   /*
    * Copy the generated packages to final destination

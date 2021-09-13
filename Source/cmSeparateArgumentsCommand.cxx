@@ -4,6 +4,7 @@
 
 #include <algorithm>
 
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
@@ -81,7 +82,7 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
   }
 
   if (unparsedArguments.empty()) {
-    status.GetMakefile().AddDefinition(var, {});
+    status.GetMakefile().AddDefinition(var, cm::string_view{});
     return true;
   }
 
