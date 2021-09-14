@@ -4087,7 +4087,7 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
         if (this->GetGlobalGenerator()->IsXcode()) {
           file << "#ifndef CMAKE_SKIP_PRECOMPILE_HEADERS\n";
         }
-        if (language == "CXX") {
+        if (language == "CXX" && !this->GetGlobalGenerator()->IsXcode()) {
           file << "#ifdef __cplusplus\n";
         }
         for (auto const& header_bt : headers) {
@@ -4105,7 +4105,7 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
             firstHeaderOnDisk = header_bt.Value;
           }
         }
-        if (language == "CXX") {
+        if (language == "CXX" && !this->GetGlobalGenerator()->IsXcode()) {
           file << "#endif // __cplusplus\n";
         }
         if (this->GetGlobalGenerator()->IsXcode()) {
