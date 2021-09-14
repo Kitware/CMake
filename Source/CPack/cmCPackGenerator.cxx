@@ -994,17 +994,29 @@ bool cmCPackGenerator::ReadListFile(const char* moduleName)
   return retval;
 }
 
-void cmCPackGenerator::SetOptionIfNotSet(const std::string& op,
-                                         const char* value)
+template <typename ValueType>
+void cmCPackGenerator::StoreOptionIfNotSet(const std::string& op,
+                                           ValueType value)
 {
   cmProp def = this->MakefileMap->GetDefinition(op);
   if (cmNonempty(def)) {
     return;
   }
-  this->SetOption(op, value);
+  this->StoreOption(op, value);
 }
 
-void cmCPackGenerator::SetOption(const std::string& op, const char* value)
+void cmCPackGenerator::SetOptionIfNotSet(const std::string& op,
+                                         const char* value)
+{
+  this->StoreOptionIfNotSet(op, value);
+}
+void cmCPackGenerator::SetOptionIfNotSet(const std::string& op, cmProp value)
+{
+  this->StoreOptionIfNotSet(op, value);
+}
+
+template <typename ValueType>
+void cmCPackGenerator::StoreOption(const std::string& op, ValueType value)
 {
   if (!value) {
     this->MakefileMap->RemoveDefinition(op);
@@ -1014,6 +1026,15 @@ void cmCPackGenerator::SetOption(const std::string& op, const char* value)
                 this->GetNameOfClass() << "::SetOption(" << op << ", " << value
                                        << ")" << std::endl);
   this->MakefileMap->AddDefinition(op, value);
+}
+
+void cmCPackGenerator::SetOption(const std::string& op, const char* value)
+{
+  this->StoreOption(op, value);
+}
+void cmCPackGenerator::SetOption(const std::string& op, cmProp value)
+{
+  this->StoreOption(op, value);
 }
 
 int cmCPackGenerator::DoPackage()
