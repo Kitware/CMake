@@ -33,61 +33,91 @@
 /* Location of default ca path */
 #cmakedefine CURL_CA_PATH "${CURL_CA_PATH}"
 
-/* to disable cookies support */
+/* disables alt-svc */
+#cmakedefine CURL_DISABLE_ALTSVC 1
+
+/* disables cookies support */
 #cmakedefine CURL_DISABLE_COOKIES 1
 
-/* to disable cryptographic authentication */
+/* disables cryptographic authentication */
 #cmakedefine CURL_DISABLE_CRYPTO_AUTH 1
 
-/* to disable DICT */
+/* disables DICT */
 #cmakedefine CURL_DISABLE_DICT 1
 
-/* to disable FILE */
+/* disables DNS-over-HTTPS */
+#cmakedefine CURL_DISABLE_DOH 1
+
+/* disables FILE */
 #cmakedefine CURL_DISABLE_FILE 1
 
-/* to disable FTP */
+/* disables FTP */
 #cmakedefine CURL_DISABLE_FTP 1
 
-/* to disable GOPHER */
+/* disables GOPHER */
 #cmakedefine CURL_DISABLE_GOPHER 1
 
-/* to disable IMAP */
-#cmakedefine CURL_DISABLE_IMAP 1
+/* disables HSTS support */
+#cmakedefine CURL_DISABLE_HSTS 1
 
-/* to disable HTTP */
+/* disables HTTP */
 #cmakedefine CURL_DISABLE_HTTP 1
 
-/* to disable LDAP */
+/* disables IMAP */
+#cmakedefine CURL_DISABLE_IMAP 1
+
+/* disables LDAP */
 #cmakedefine CURL_DISABLE_LDAP 1
 
-/* to disable LDAPS */
+/* disables LDAPS */
 #cmakedefine CURL_DISABLE_LDAPS 1
 
-/* to disable MQTT */
+/* disables --libcurl option from the curl tool */
+#cmakedefine CURL_DISABLE_LIBCURL_OPTION 1
+
+/* disables MIME support */
+#cmakedefine CURL_DISABLE_MIME 1
+
+/* disables MQTT */
 #cmakedefine CURL_DISABLE_MQTT 1
 
-/* to disable POP3 */
+/* disables netrc parser */
+#cmakedefine CURL_DISABLE_NETRC 1
+
+/* disables NTLM support */
+#cmakedefine CURL_DISABLE_NTLM 1
+
+/* disables date parsing */
+#cmakedefine CURL_DISABLE_PARSEDATE 1
+
+/* disables POP3 */
 #cmakedefine CURL_DISABLE_POP3 1
 
-/* to disable proxies */
+/* disables built-in progress meter */
+#cmakedefine CURL_DISABLE_PROGRESS_METER 1
+
+/* disables proxies */
 #cmakedefine CURL_DISABLE_PROXY 1
 
-/* to disable RTSP */
+/* disables RTSP */
 #cmakedefine CURL_DISABLE_RTSP 1
 
-/* to disable SMB */
+/* disables SMB */
 #cmakedefine CURL_DISABLE_SMB 1
 
-/* to disable SMTP */
+/* disables SMTP */
 #cmakedefine CURL_DISABLE_SMTP 1
 
-/* to disable TELNET */
+/* disables use of socketpair for curl_multi_poll */
+#cmakedefine CURL_DISABLE_SOCKETPAIR 1
+
+/* disables TELNET */
 #cmakedefine CURL_DISABLE_TELNET 1
 
-/* to disable TFTP */
+/* disables TFTP */
 #cmakedefine CURL_DISABLE_TFTP 1
 
-/* to disable verbose strings */
+/* disables verbose strings */
 #cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1
 
 /* to make a symbol visible */
@@ -111,12 +141,6 @@
 
 /* Define if you want to enable IPv6 support */
 #cmakedefine ENABLE_IPV6 1
-
-/* Specifies the number of arguments to getservbyport_r */
-#cmakedefine GETSERVBYPORT_R_ARGS ${GETSERVBYPORT_R_ARGS}
-
-/* Specifies the size of the buffer to pass to getservbyport_r */
-#cmakedefine GETSERVBYPORT_R_BUFSIZE ${GETSERVBYPORT_R_BUFSIZE}
 
 /* Define to 1 if you have the alarm function. */
 #cmakedefine HAVE_ALARM 1
@@ -151,17 +175,11 @@
 /* Define to 1 if you have the `CRYPTO_cleanup_all_ex_data' function. */
 #cmakedefine HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
 
-/* Define to 1 if you have the <crypto.h> header file. */
-#cmakedefine HAVE_CRYPTO_H 1
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine HAVE_DLFCN_H 1
 
 /* Define to 1 if you have the <errno.h> header file. */
 #cmakedefine HAVE_ERRNO_H 1
-
-/* Define to 1 if you have the <err.h> header file. */
-#cmakedefine HAVE_ERR_H 1
 
 /* Define to 1 if you have the fcntl function. */
 #cmakedefine HAVE_FCNTL 1
@@ -172,17 +190,8 @@
 /* Define to 1 if you have a working fcntl O_NONBLOCK function. */
 #cmakedefine HAVE_FCNTL_O_NONBLOCK 1
 
-/* Define to 1 if you have the fdopen function. */
-#cmakedefine HAVE_FDOPEN 1
-
-/* Define to 1 if you have the `fork' function. */
-#cmakedefine HAVE_FORK 1
-
 /* Define to 1 if you have the freeaddrinfo function. */
 #cmakedefine HAVE_FREEADDRINFO 1
-
-/* Define to 1 if you have the freeifaddrs function. */
-#cmakedefine HAVE_FREEIFADDRS 1
 
 /* Define to 1 if you have the ftruncate function. */
 #cmakedefine HAVE_FTRUNCATE 1
@@ -195,21 +204,6 @@
 
 /* Define to 1 if you have the `getppid' function. */
 #cmakedefine HAVE_GETPPID 1
-
-/* Define to 1 if you have the gethostbyaddr function. */
-#cmakedefine HAVE_GETHOSTBYADDR 1
-
-/* Define to 1 if you have the gethostbyaddr_r function. */
-#cmakedefine HAVE_GETHOSTBYADDR_R 1
-
-/* gethostbyaddr_r() takes 5 args */
-#cmakedefine HAVE_GETHOSTBYADDR_R_5 1
-
-/* gethostbyaddr_r() takes 7 args */
-#cmakedefine HAVE_GETHOSTBYADDR_R_7 1
-
-/* gethostbyaddr_r() takes 8 args */
-#cmakedefine HAVE_GETHOSTBYADDR_R_8 1
 
 /* Define to 1 if you have the gethostbyname function. */
 #cmakedefine HAVE_GETHOSTBYNAME 1
@@ -258,9 +252,6 @@
 
 /* Define to 1 if you have the `getrlimit' function. */
 #cmakedefine HAVE_GETRLIMIT 1
-
-/* Define to 1 if you have the getservbyport_r function. */
-#cmakedefine HAVE_GETSERVBYPORT_R 1
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #cmakedefine HAVE_GETTIMEOFDAY 1
@@ -395,21 +386,6 @@
 /* Define to 1 if you have the `ssh2' library (-lssh2). */
 #cmakedefine HAVE_LIBSSH2 1
 
-/* Define to 1 if libssh2 provides `libssh2_version'. */
-#cmakedefine HAVE_LIBSSH2_VERSION 1
-
-/* Define to 1 if libssh2 provides `libssh2_init'. */
-#cmakedefine HAVE_LIBSSH2_INIT 1
-
-/* Define to 1 if libssh2 provides `libssh2_exit'. */
-#cmakedefine HAVE_LIBSSH2_EXIT 1
-
-/* Define to 1 if libssh2 provides `libssh2_scp_send64'. */
-#cmakedefine HAVE_LIBSSH2_SCP_SEND64 1
-
-/* Define to 1 if libssh2 provides `libssh2_session_handshake'. */
-#cmakedefine HAVE_LIBSSH2_SESSION_HANDSHAKE 1
-
 /* Define to 1 if you have the <libssh2.h> header file. */
 #cmakedefine HAVE_LIBSSH2_H 1
 
@@ -527,9 +503,6 @@
 /* Define to 1 if you have the recvfrom function. */
 #cmakedefine HAVE_RECVFROM 1
 
-/* Define to 1 if you have the <rsa.h> header file. */
-#cmakedefine HAVE_RSA_H 1
-
 /* Define to 1 if you have the select function. */
 #cmakedefine HAVE_SELECT 1
 
@@ -563,9 +536,6 @@
 /* Define to 1 if you have a working setsockopt SO_NONBLOCK function. */
 #cmakedefine HAVE_SETSOCKOPT_SO_NONBLOCK 1
 
-/* Define to 1 if you have the <sgtty.h> header file. */
-#cmakedefine HAVE_SGTTY_H 1
-
 /* Define to 1 if you have the sigaction function. */
 #cmakedefine HAVE_SIGACTION 1
 
@@ -580,12 +550,6 @@
 
 /* Define to 1 if you have the sigsetjmp function or macro. */
 #cmakedefine HAVE_SIGSETJMP 1
-
-/* Define to 1 if sig_atomic_t is an available typedef. */
-#cmakedefine HAVE_SIG_ATOMIC_T 1
-
-/* Define to 1 if sig_atomic_t is already defined as volatile. */
-#cmakedefine HAVE_SIG_ATOMIC_T_VOLATILE 1
 
 /* Define to 1 if struct sockaddr_in6 has the sin6_scope_id member */
 #cmakedefine HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
@@ -990,9 +954,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if Unix domain sockets are enabled  */
 #cmakedefine USE_UNIX_SOCKETS
-
-/* to disable alt-svc */
-#cmakedefine CURL_DISABLE_ALTSVC 1
 
 /* Define to 1 if you are building a Windows target with large file support. */
 #cmakedefine USE_WIN32_LARGE_FILES 1
