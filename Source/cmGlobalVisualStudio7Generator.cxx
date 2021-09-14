@@ -37,6 +37,7 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] = {
     cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue },
   { "PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
     cmVS7FlagTable::UserValueRequired },
+  { "UsePrecompiledHeader", "Y-", "Don't use precompiled header", "0", 0 },
   { "WholeProgramOptimization", "LTCG", "WholeProgramOptimization", "true",
     0 },
 
