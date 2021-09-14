@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackArchiveGenerator.h"
 
-#include <cstdlib>
 #include <cstring>
 #include <map>
 #include <ostream>
@@ -13,6 +12,7 @@
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
@@ -77,7 +77,7 @@ std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
 
   if (this->IsSet("CPACK_ARCHIVE_" + componentUpper + "_FILE_NAME")) {
     packageFileName +=
-      this->GetOption("CPACK_ARCHIVE_" + componentUpper + "_FILE_NAME");
+      *this->GetOption("CPACK_ARCHIVE_" + componentUpper + "_FILE_NAME");
   } else if (this->IsSet("CPACK_ARCHIVE_FILE_NAME")) {
     packageFileName += this->GetComponentPackageFileName(
       this->GetOption("CPACK_ARCHIVE_FILE_NAME"), component, isGroupName);
@@ -118,11 +118,11 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY")) {
     filePrefix = cmStrCat(this->GetOption("CPACK_PACKAGE_FILE_NAME"), '/');
   }
-  const char* installPrefix =
-    this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
-  if (installPrefix && installPrefix[0] == '/' && installPrefix[1] != 0) {
+  cmProp installPrefix = this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
+  if (installPrefix && installPrefix->size() > 1 &&
+      (*installPrefix)[0] == '/') {
     // add to file prefix and remove the leading '/'
-    filePrefix += installPrefix + 1;
+    filePrefix += installPrefix->substr(1);
     filePrefix += "/";
   }
   for (std::string const& file : component->Files) {
@@ -257,9 +257,9 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne()
   this->packageFileNames[0] += "/";
 
   if (this->IsSet("CPACK_ARCHIVE_FILE_NAME")) {
-    this->packageFileNames[0] += this->GetOption("CPACK_ARCHIVE_FILE_NAME");
+    this->packageFileNames[0] += *this->GetOption("CPACK_ARCHIVE_FILE_NAME");
   } else {
-    this->packageFileNames[0] += this->GetOption("CPACK_PACKAGE_FILE_NAME");
+    this->packageFileNames[0] += *this->GetOption("CPACK_PACKAGE_FILE_NAME");
   }
 
   this->packageFileNames[0] += this->GetOutputExtension();
@@ -345,9 +345,9 @@ int cmCPackArchiveGenerator::GetThreadCount() const
 
   // CPACK_ARCHIVE_THREADS overrides CPACK_THREADS
   if (this->IsSet("CPACK_ARCHIVE_THREADS")) {
-    threads = std::atoi(this->GetOption("CPACK_ARCHIVE_THREADS"));
+    threads = std::stoi(this->GetOption("CPACK_ARCHIVE_THREADS"));
   } else if (this->IsSet("CPACK_THREADS")) {
-    threads = std::atoi(this->GetOption("CPACK_THREADS"));
+    threads = std::stoi(this->GetOption("CPACK_THREADS"));
   }
 
   return threads;

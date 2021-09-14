@@ -16,6 +16,7 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
@@ -79,9 +80,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     resDir += "/en.lproj";
   }
 
-  const char* preflight = this->GetOption("CPACK_PREFLIGHT_SCRIPT");
-  const char* postflight = this->GetOption("CPACK_POSTFLIGHT_SCRIPT");
-  const char* postupgrade = this->GetOption("CPACK_POSTUPGRADE_SCRIPT");
+  cmProp preflight = this->GetOption("CPACK_PREFLIGHT_SCRIPT");
+  cmProp postflight = this->GetOption("CPACK_POSTFLIGHT_SCRIPT");
+  cmProp postupgrade = this->GetOption("CPACK_POSTUPGRADE_SCRIPT");
 
   if (this->Components.empty()) {
     // Create directory structure
@@ -167,10 +168,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
 
     // Create the directory where downloaded component packages will
     // be placed.
-    const char* userUploadDirectory =
-      this->GetOption("CPACK_UPLOAD_DIRECTORY");
+    cmProp userUploadDirectory = this->GetOption("CPACK_UPLOAD_DIRECTORY");
     std::string uploadDirectory;
-    if (userUploadDirectory && *userUploadDirectory) {
+    if (userUploadDirectory && !userUploadDirectory->empty()) {
       uploadDirectory = userUploadDirectory;
     } else {
       uploadDirectory =
@@ -352,8 +352,8 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
                      "/PackageMaker.app/Contents/MacOS");
 
   std::string pkgPath;
-  const char* inst_program = this->GetOption("CPACK_INSTALLER_PROGRAM");
-  if (inst_program && *inst_program) {
+  cmProp inst_program = this->GetOption("CPACK_INSTALLER_PROGRAM");
+  if (inst_program && !inst_program->empty()) {
     pkgPath = inst_program;
   } else {
     pkgPath = cmSystemTools::FindProgram("PackageMaker", paths, false);
@@ -427,11 +427,12 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   // Determine the package compatibility version. If it wasn't
   // specified by the user, we define it based on which features the
   // user requested.
-  const char* packageCompat = this->GetOption("CPACK_OSX_PACKAGE_VERSION");
-  if (packageCompat && *packageCompat) {
+  cmProp packageCompat = this->GetOption("CPACK_OSX_PACKAGE_VERSION");
+  if (packageCompat && !packageCompat->empty()) {
     unsigned int majorVersion = 10;
     unsigned int minorVersion = 5;
-    int res = sscanf(packageCompat, "%u.%u", &majorVersion, &minorVersion);
+    int res =
+      sscanf(packageCompat->c_str(), "%u.%u", &majorVersion, &minorVersion);
     if (res == 2) {
       this->PackageCompatibilityVersion =
         getVersion(majorVersion, minorVersion);

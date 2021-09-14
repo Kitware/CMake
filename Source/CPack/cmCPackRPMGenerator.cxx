@@ -12,6 +12,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -103,7 +104,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
   this->packageFileNames.clear();
   std::string initialTopLevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
 
-  const char* mainComponent = this->GetOption("CPACK_RPM_MAIN_COMPONENT");
+  cmProp mainComponent = this->GetOption("CPACK_RPM_MAIN_COMPONENT");
 
   if (this->IsOn("CPACK_RPM_DEBUGINFO_SINGLE_PACKAGE") &&
       !this->IsOn("CPACK_RPM_DEBUGINFO_PACKAGE")) {

@@ -10,6 +10,7 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -22,7 +23,7 @@ int cmCPackOSXX11Generator::PackageFiles()
   // TODO: Use toplevel ?
   //       It is used! Is this an obsolete comment?
 
-  const char* cpackPackageExecutables =
+  cmProp cpackPackageExecutables =
     this->GetOption("CPACK_PACKAGE_EXECUTABLES");
   if (cpackPackageExecutables) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
@@ -70,7 +71,7 @@ int cmCPackOSXX11Generator::PackageFiles()
   const char* scrDir = scriptDirectory.c_str();
   const char* contDir = contentsDirectory.c_str();
   const char* rsrcFile = resourceFileName.c_str();
-  const char* iconFile = this->GetOption("CPACK_PACKAGE_ICON");
+  cmProp iconFile = this->GetOption("CPACK_PACKAGE_ICON");
   if (iconFile) {
     std::string iconFileName = cmsys::SystemTools::GetFilenameName(iconFile);
     if (!cmSystemTools::FileExists(iconFile)) {
@@ -103,9 +104,9 @@ int cmCPackOSXX11Generator::PackageFiles()
                                    true) ||
       !this->CopyResourcePlistFile("OSXScriptLauncher.rsrc", dir, rsrcFile,
                                    true) ||
-      !this->CopyResourcePlistFile("OSXScriptLauncher", appdir,
-                                   this->GetOption("CPACK_PACKAGE_FILE_NAME"),
-                                   true)) {
+      !this->CopyResourcePlistFile(
+        "OSXScriptLauncher", appdir,
+        this->GetOption("CPACK_PACKAGE_FILE_NAME").GetCStr(), true)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Problem copying the resource files" << std::endl);
     return 0;

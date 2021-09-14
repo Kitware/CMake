@@ -12,6 +12,7 @@
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
+#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -120,7 +121,7 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
 
 void cmCPackNuGetGenerator::AddGeneratedPackageNames()
 {
-  const char* const files_list = this->GetOption("GEN_CPACK_OUTPUT_FILES");
+  cmProp const files_list = this->GetOption("GEN_CPACK_OUTPUT_FILES");
   if (!files_list) {
     cmCPackLogger(
       cmCPackLog::LOG_ERROR,
@@ -129,7 +130,7 @@ void cmCPackNuGetGenerator::AddGeneratedPackageNames()
     return;
   }
   // add the generated packages to package file names list
-  std::string fileNames{ files_list };
+  const std::string& fileNames = *files_list;
   const char sep = ';';
   std::string::size_type pos1 = 0;
   std::string::size_type pos2 = fileNames.find(sep, pos1 + 1);

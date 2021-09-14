@@ -12,6 +12,7 @@
 #include "cm_sys_stat.h"
 
 #include "cmCPackComponentGroup.h"
+#include "cmProperty.h"
 #include "cmSystemTools.h"
 
 class cmCPackLog;
@@ -85,7 +86,7 @@ public:
   //! Set and get the options
   void SetOption(const std::string& op, const char* value);
   void SetOptionIfNotSet(const std::string& op, const char* value);
-  const char* GetOption(const std::string& op) const;
+  cmProp GetOption(const std::string& op) const;
   std::vector<std::string> GetOptions() const;
   bool IsSet(const std::string& name) const;
   bool IsOn(const std::string& name) const;
