@@ -132,8 +132,11 @@ endif()
 set(CMAKE_HIP_INFORMATION_LOADED 1)
 
 # Load the file and find the relevant HIP runtime.
-# This file will only exist after all compiler detection has finished
-include(${CMAKE_PLATFORM_INFO_DIR}/CMakeHIPRuntime.cmake OPTIONAL)
-if(COMMAND _CMAKE_FIND_HIP_RUNTIME)
-  _CMAKE_FIND_HIP_RUNTIME()
+if(NOT DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET)
+  set(hip-lang_DIR "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib/cmake/hip-lang")
+  find_package(hip-lang CONFIG QUIET NO_DEFAULT_PATH)
+endif()
+if(DEFINED _CMAKE_HIP_DEVICE_RUNTIME_TARGET)
+  list(APPEND CMAKE_HIP_RUNTIME_LIBRARIES_STATIC ${_CMAKE_HIP_DEVICE_RUNTIME_TARGET})
+  list(APPEND CMAKE_HIP_RUNTIME_LIBRARIES_SHARED ${_CMAKE_HIP_DEVICE_RUNTIME_TARGET})
 endif()

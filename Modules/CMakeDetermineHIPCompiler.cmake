@@ -76,6 +76,18 @@ if(NOT CMAKE_HIP_COMPILER_ID_RUN)
   _cmake_find_compiler_sysroot(HIP)
 endif()
 
+if(NOT CMAKE_HIP_COMPILER_ROCM_ROOT AND CMAKE_HIP_COMPILER_ID STREQUAL "Clang")
+   execute_process(COMMAND "${CMAKE_HIP_COMPILER}" -v -print-targets
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _CMAKE_HIP_COMPILER_RESULT
+    OUTPUT_VARIABLE _CMAKE_HIP_COMPILER_STDOUT
+    ERROR_VARIABLE _CMAKE_HIP_COMPILER_STDERR
+    )
+
+  if(_CMAKE_HIP_COMPILER_RESULT EQUAL 0 AND _CMAKE_HIP_COMPILER_STDERR MATCHES "Found HIP installation: *([^,]*)[,\n]")
+    set(CMAKE_HIP_COMPILER_ROCM_ROOT "${CMAKE_MATCH_1}")
+  endif()
+endif()
 if(NOT CMAKE_HIP_COMPILER_ROCM_ROOT)
   execute_process(
     COMMAND hipconfig --rocmpath
@@ -88,6 +100,14 @@ if(NOT CMAKE_HIP_COMPILER_ROCM_ROOT)
 endif()
 if(NOT CMAKE_HIP_COMPILER_ROCM_ROOT)
   message(FATAL_ERROR "Failed to find ROCm root directory.")
+endif()
+if(NOT EXISTS "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib/cmake/hip-lang/hip-lang-config.cmake")
+  message(FATAL_ERROR
+    "The ROCm root directory:\n"
+    " ${CMAKE_HIP_COMPILER_ROCM_ROOT}\n"
+    "does not contain the HIP runtime CMake package, expected at:\n"
+    " ${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib/cmake/hip-lang/hip-lang-config.cmake\n"
+    )
 endif()
 
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)
