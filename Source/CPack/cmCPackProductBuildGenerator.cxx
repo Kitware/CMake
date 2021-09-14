@@ -123,7 +123,7 @@ int cmCPackProductBuildGenerator::InitializeInternal()
                   "Cannot find pkgbuild executable" << std::endl);
     return 0;
   }
-  this->SetOptionIfNotSet("CPACK_COMMAND_PKGBUILD", program.c_str());
+  this->SetOptionIfNotSet("CPACK_COMMAND_PKGBUILD", program);
 
   program = cmSystemTools::FindProgram("productbuild", no_paths, false);
   if (program.empty()) {
@@ -131,7 +131,7 @@ int cmCPackProductBuildGenerator::InitializeInternal()
                   "Cannot find productbuild executable" << std::endl);
     return 0;
   }
-  this->SetOptionIfNotSet("CPACK_COMMAND_PRODUCTBUILD", program.c_str());
+  this->SetOptionIfNotSet("CPACK_COMMAND_PRODUCTBUILD", program);
 
   return this->Superclass::InitializeInternal();
 }

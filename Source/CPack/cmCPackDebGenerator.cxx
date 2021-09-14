@@ -547,19 +547,17 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
 
   localToplevel += "/" + packageName;
   /* replace the TEMP DIRECTORY with the component one */
-  this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel.c_str());
+  this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
   packageFileName += "/" + outputFileName;
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
-  this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName.c_str());
+  this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName);
   /* replace the TEMPORARY package file name */
-  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
-                  packageFileName.c_str());
+  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME", packageFileName);
   // Tell CPackDeb.cmake the name of the component GROUP.
-  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT", packageName.c_str());
+  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT", packageName);
   // Tell CPackDeb.cmake the path where the component is.
   std::string component_path = cmStrCat('/', packageName);
-  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
-                  component_path.c_str());
+  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH", component_path);
   if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackDeb.cmake" << std::endl);
@@ -639,19 +637,17 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   }
 
   /* replace the TEMP DIRECTORY with the component one */
-  this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel.c_str());
+  this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
   packageFileName += "/" + outputFileName;
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
-  this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName.c_str());
+  this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName);
   /* replace the TEMPORARY package file name */
-  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
-                  packageFileName.c_str());
+  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME", packageFileName);
 
   if (!compInstDirName.empty()) {
     // Tell CPackDeb.cmake the path where the component is.
     std::string component_path = cmStrCat('/', compInstDirName);
-    this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
-                    component_path.c_str());
+    this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH", component_path);
   }
   if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,

@@ -362,7 +362,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
                     "Cannot find PackageMaker compiler" << std::endl);
       return 0;
     }
-    this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
+    this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath);
   }
 
   // Get path to the real PackageMaker, not a symlink:
@@ -455,8 +455,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
                   "Cannot find hdiutil compiler" << std::endl);
     return 0;
   }
-  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE",
-                          pkgPath.c_str());
+  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", pkgPath);
 
   return this->Superclass::InitializeInternal();
 }
@@ -544,8 +543,7 @@ bool cmCPackPackageMakerGenerator::GenerateComponentPackage(
 
     // Create the Info.plist file for this component
     std::string moduleVersionSuffix = cmStrCat('.', component.Name);
-    this->SetOption("CPACK_MODULE_VERSION_SUFFIX",
-                    moduleVersionSuffix.c_str());
+    this->SetOption("CPACK_MODULE_VERSION_SUFFIX", moduleVersionSuffix);
     std::string infoFileName = cmStrCat(component.Name, "-Info.plist");
     if (!this->CopyResourcePlistFile("Info.plist", infoFileName.c_str())) {
       return false;

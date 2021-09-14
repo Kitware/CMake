@@ -249,7 +249,7 @@ const char* cmCPackIFWGenerator::GetPackagingInstallPrefix()
     tmpPref += "packages/" + this->GetRootPackageName() + "/data";
   }
 
-  this->SetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX", tmpPref.c_str());
+  this->SetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX", tmpPref);
 
   return this->GetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX")->c_str();
 }

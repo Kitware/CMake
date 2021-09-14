@@ -33,13 +33,13 @@ int cmCPackRPMGenerator::InitializeInternal()
   if (this->GetOption("CPACK_PACKAGE_NAME")) {
     std::string packageName = this->GetOption("CPACK_PACKAGE_NAME");
     std::replace(packageName.begin(), packageName.end(), ' ', '-');
-    this->SetOption("CPACK_PACKAGE_NAME", packageName.c_str());
+    this->SetOption("CPACK_PACKAGE_NAME", packageName);
   }
   /* same for CPACK_PACKAGE_FILE_NAME */
   if (this->GetOption("CPACK_PACKAGE_FILE_NAME")) {
     std::string packageName = this->GetOption("CPACK_PACKAGE_FILE_NAME");
     std::replace(packageName.begin(), packageName.end(), ' ', '-');
-    this->SetOption("CPACK_PACKAGE_FILE_NAME", packageName.c_str());
+    this->SetOption("CPACK_PACKAGE_FILE_NAME", packageName);
   }
   return this->Superclass::InitializeInternal();
 }
@@ -74,19 +74,17 @@ int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
 
   localToplevel += "/" + packageName;
   /* replace the TEMP DIRECTORY with the component one */
-  this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel.c_str());
+  this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
   packageFileName += "/" + outputFileName;
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
-  this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName.c_str());
+  this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName);
   /* replace the TEMPORARY package file name */
-  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
-                  packageFileName.c_str());
+  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME", packageFileName);
   // Tell CPackRPM.cmake the name of the component NAME.
-  this->SetOption("CPACK_RPM_PACKAGE_COMPONENT", packageName.c_str());
+  this->SetOption("CPACK_RPM_PACKAGE_COMPONENT", packageName);
   // Tell CPackRPM.cmake the path where the component is.
   std::string component_path = cmStrCat('/', packageName);
-  this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
-                  component_path.c_str());
+  this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH", component_path);
   if (!this->ReadListFile("Internal/CPack/CPackRPM.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackRPM.cmake" << std::endl);
@@ -365,19 +363,17 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne(
   localToplevel += "/" + compInstDirName;
 
   /* replace the TEMP DIRECTORY with the component one */
-  this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel.c_str());
+  this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
   packageFileName += "/" + outputFileName;
   /* replace proposed CPACK_OUTPUT_FILE_NAME */
-  this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName.c_str());
+  this->SetOption("CPACK_OUTPUT_FILE_NAME", outputFileName);
   /* replace the TEMPORARY package file name */
-  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
-                  packageFileName.c_str());
+  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME", packageFileName);
 
   if (!compInstDirName.empty()) {
     // Tell CPackRPM.cmake the path where the component is.
     std::string component_path = cmStrCat('/', compInstDirName);
-    this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
-                    component_path.c_str());
+    this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH", component_path);
   }
 
   if (this->ReadListFile("Internal/CPack/CPackRPM.cmake")) {
