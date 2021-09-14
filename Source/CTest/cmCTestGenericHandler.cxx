@@ -72,13 +72,13 @@ void cmCTestGenericHandler::Initialize()
   this->MultiOptions = this->PersistentMultiOptions;
 }
 
-const char* cmCTestGenericHandler::GetOption(const std::string& op)
+cmProp cmCTestGenericHandler::GetOption(const std::string& op)
 {
   auto remit = this->Options.find(op);
   if (remit == this->Options.end()) {
     return nullptr;
   }
-  return remit->second.c_str();
+  return cmProp(remit->second);
 }
 
 std::vector<std::string> cmCTestGenericHandler::GetMultiOption(

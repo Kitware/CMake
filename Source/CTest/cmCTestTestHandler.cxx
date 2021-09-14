@@ -521,7 +521,7 @@ bool cmCTestTestHandler::ProcessOptions()
   if (cmIsOn(this->GetOption("ScheduleRandom"))) {
     this->CTest->SetScheduleType("Random");
   }
-  if (const char* repeat = this->GetOption("Repeat")) {
+  if (cmProp repeat = this->GetOption("Repeat")) {
     cmsys::RegularExpression repeatRegex(
       "^(UNTIL_FAIL|UNTIL_PASS|AFTER_TIMEOUT):([0-9]+)$");
     if (repeatRegex.find(repeat)) {
@@ -546,7 +546,7 @@ bool cmCTestTestHandler::ProcessOptions()
     }
   }
   if (this->GetOption("ParallelLevel")) {
-    this->CTest->SetParallelLevel(atoi(this->GetOption("ParallelLevel")));
+    this->CTest->SetParallelLevel(std::stoi(this->GetOption("ParallelLevel")));
   }
 
   if (this->GetOption("StopOnFailure")) {
@@ -557,7 +557,7 @@ bool cmCTestTestHandler::ProcessOptions()
                this->IncludeLabelRegularExpressions);
   BuildLabelRE(this->GetMultiOption("ExcludeLabelRegularExpression"),
                this->ExcludeLabelRegularExpressions);
-  const char* val = this->GetOption("IncludeRegularExpression");
+  cmProp val = this->GetOption("IncludeRegularExpression");
   if (val) {
     this->UseIncludeRegExp();
     this->SetIncludeRegExp(val);
@@ -569,19 +569,19 @@ bool cmCTestTestHandler::ProcessOptions()
   }
   val = this->GetOption("ExcludeFixtureRegularExpression");
   if (val) {
-    this->ExcludeFixtureRegExp = val;
+    this->ExcludeFixtureRegExp = *val;
   }
   val = this->GetOption("ExcludeFixtureSetupRegularExpression");
   if (val) {
-    this->ExcludeFixtureSetupRegExp = val;
+    this->ExcludeFixtureSetupRegExp = *val;
   }
   val = this->GetOption("ExcludeFixtureCleanupRegularExpression");
   if (val) {
-    this->ExcludeFixtureCleanupRegExp = val;
+    this->ExcludeFixtureCleanupRegExp = *val;
   }
   val = this->GetOption("ResourceSpecFile");
   if (val) {
-    this->ResourceSpecFile = val;
+    this->ResourceSpecFile = *val;
   }
   this->SetRerunFailed(cmIsOn(this->GetOption("RerunFailed")));
 
@@ -2081,26 +2081,26 @@ void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
   }
 }
 
-void cmCTestTestHandler::SetIncludeRegExp(const char* arg)
+void cmCTestTestHandler::SetIncludeRegExp(const std::string& arg)
 {
   this->IncludeRegExp = arg;
 }
 
-void cmCTestTestHandler::SetExcludeRegExp(const char* arg)
+void cmCTestTestHandler::SetExcludeRegExp(const std::string& arg)
 {
   this->ExcludeRegExp = arg;
 }
 
-void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
+void cmCTestTestHandler::SetTestsToRunInformation(cmProp in)
 {
   if (!in) {
     return;
   }
-  this->TestsToRunString = in;
+  this->TestsToRunString = *in;
   // if the argument is a file, then read it and use the contents as the
   // string
   if (cmSystemTools::FileExists(in)) {
-    cmsys::ifstream fin(in);
+    cmsys::ifstream fin(in->c_str());
     unsigned long filelen = cmSystemTools::FileLength(in);
     auto buff = cm::make_unique<char[]>(filelen + 1);
     fin.getline(buff.get(), filelen);
