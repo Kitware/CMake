@@ -674,7 +674,7 @@ Section "-Core installation"
   Push "@CPACK_PACKAGE_VENDOR@"
   Call ConditionalAddToRegisty
   Push "UninstallString"
-  Push "$INSTDIR\@CPACK_NSIS_UNINSTALL_NAME@.exe"
+  Push "$\"$INSTDIR\@CPACK_NSIS_UNINSTALL_NAME@.exe$\""
   Call ConditionalAddToRegisty
   Push "NoRepair"
   Push "1"
