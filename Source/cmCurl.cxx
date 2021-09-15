@@ -5,9 +5,9 @@
 #if !defined(CMAKE_USE_SYSTEM_CURL) && !defined(_WIN32) &&                    \
   !defined(__APPLE__) && !defined(CURL_CA_BUNDLE) && !defined(CURL_CA_PATH)
 #  define CMAKE_FIND_CAFILE
-#  include "cmSystemTools.h"
 #endif
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 #if defined(_WIN32)
 #  include <vector>
@@ -109,6 +109,11 @@ std::string cmCurlFixFileURL(std::string url)
   if (!cmHasLiteralPrefix(url, "file://")) {
     return url;
   }
+
+  // libcurl 7.77 and below accidentally allowed spaces in URLs in some cases.
+  // One such case was file:// URLs, which CMake has long accepted as a result.
+  // Explicitly encode spaces for a URL.
+  cmSystemTools::ReplaceString(url, " ", "%20");
 
 #if defined(_WIN32)
   // libcurl doesn't support file:// urls for unicode filenames on Windows.
