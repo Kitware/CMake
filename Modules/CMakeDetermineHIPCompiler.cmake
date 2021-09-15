@@ -85,12 +85,43 @@ if(MSVC_HIP_ARCHITECTURE_ID)
 endif()
 
 if(NOT DEFINED CMAKE_HIP_ARCHITECTURES)
-  # Analyze output from hipcc to get the current GPU architecture.
-  if(CMAKE_HIP_COMPILER_PRODUCED_OUTPUT MATCHES " -target-cpu ([a-z0-9]+) ")
+  # Use 'rocm_agent_enumerator' to get the current GPU architecture.
+  set(_CMAKE_HIP_ARCHITECTURES)
+  find_program(_CMAKE_HIP_ROCM_AGENT_ENUMERATOR
+    NAMES rocm_agent_enumerator
+    NO_CACHE)
+  if(_CMAKE_HIP_ROCM_AGENT_ENUMERATOR)
+    execute_process(COMMAND "${_CMAKE_HIP_ROCM_AGENT_ENUMERATOR}" -t GPU
+      RESULT_VARIABLE _CMAKE_ROCM_AGENT_ENUMERATOR_RESULT
+      OUTPUT_VARIABLE _CMAKE_ROCM_AGENT_ENUMERATOR_STDOUT
+      ERROR_VARIABLE  _CMAKE_ROCM_AGENT_ENUMERATOR_STDERR
+    )
+    if(_CMAKE_ROCM_AGENT_ENUMERATOR_RESULT EQUAL 0)
+      separate_arguments(_hip_archs NATIVE_COMMAND "${_CMAKE_ROCM_AGENT_ENUMERATOR_STDOUT}")
+      foreach(_hip_arch ${_hip_archs})
+        if(_hip_arch STREQUAL "gfx000")
+          continue()
+        endif()
+        string(FIND ${_hip_arch} ":" pos)
+        if(NOT pos STREQUAL "-1")
+          string(SUBSTRING ${_hip_arch} 0 ${pos} _hip_arch)
+        endif()
+        list(APPEND _CMAKE_HIP_ARCHITECTURES "${_hip_arch}")
+      endforeach()
+    endif()
+    unset(_CMAKE_ROCM_AGENT_ENUMERATOR_RESULT)
+    unset(_CMAKE_ROCM_AGENT_ENUMERATOR_STDOUT)
+    unset(_CMAKE_ROCM_AGENT_ENUMERATOR_STDERR)
+  endif()
+  unset(_CMAKE_HIP_ROCM_AGENT_ENUMERATOR)
+  if(_CMAKE_HIP_ARCHITECTURES)
+    set(CMAKE_HIP_ARCHITECTURES "${_CMAKE_HIP_ARCHITECTURES}" CACHE STRING "HIP architectures")
+  elseif(CMAKE_HIP_COMPILER_PRODUCED_OUTPUT MATCHES " -target-cpu ([a-z0-9]+) ")
     set(CMAKE_HIP_ARCHITECTURES "${CMAKE_MATCH_1}" CACHE STRING "HIP architectures")
   else()
-    message(FATAL_ERROR "Failed to find a working HIP architecture.")
+    message(FATAL_ERROR "Failed to find a default HIP architecture.")
   endif()
+  unset(_CMAKE_HIP_ARCHITECTURES)
 endif()
 
 # configure variables set in this file for fast reload later on
