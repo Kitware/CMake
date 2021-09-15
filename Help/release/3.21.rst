@@ -27,7 +27,7 @@ Generators
 ----------
 
 * The :generator:`Visual Studio 17 2022` generator was added.  This is
-  experimental and based on "Visual Studio 2022 Preview 3.1" because this
+  experimental and based on "Visual Studio 2022 Preview 4" because this
   version of VS has not been released.
 
 * The :ref:`Makefile Generators` and the :generator:`Ninja` generator
@@ -313,3 +313,9 @@ Changes made since CMake 3.21.0 include the following.
 
 * The :generator:`Visual Studio 17 2022` generator is now based on
   "Visual Studio 2022 Preview 3.1".  Previously it was based on "Preview 2".
+
+3.21.3
+------
+
+* The :generator:`Visual Studio 17 2022` generator is now based on
+  "Visual Studio 2022 Preview 4".  Previously it was based on "Preview 3.1".
