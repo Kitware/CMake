@@ -75,7 +75,6 @@
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "connect.h"
-#include "strerror.h"
 #include "select.h"
 #include "multiif.h"
 #include "url.h"
@@ -308,7 +307,7 @@ static void state(struct Curl_easy *data, pop3state newstate)
   };
 
   if(pop3c->state != newstate)
-    infof(data, "POP3 %p state change from %s to %s\n",
+    infof(data, "POP3 %p state change from %s to %s",
           (void *)pop3c, names[pop3c->state], names[newstate]);
 #endif
 
@@ -370,8 +369,9 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
 {
   /* Start the SSL connection */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  CURLcode result = Curl_ssl_connect_nonblocking(data, conn, FIRSTSOCKET,
-                                                 &pop3c->ssldone);
+  CURLcode result =
+    Curl_ssl_connect_nonblocking(data, conn, FALSE, FIRSTSOCKET,
+                                 &pop3c->ssldone);
 
   if(!result) {
     if(pop3c->state != POP3_UPGRADETLS)
@@ -551,7 +551,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
       result = pop3_perform_user(data, conn);
     else {
       /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported!\n");
+      infof(data, "No known authentication mechanisms supported!");
       result = CURLE_LOGIN_DENIED;
     }
   }
@@ -740,28 +740,23 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
       }
     }
   }
-  else if(pop3code == '+') {
-    if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
-      /* We don't have a SSL/TLS connection yet, but SSL is requested */
-      if(pop3c->tls_supported)
-        /* Switch to TLS connection now */
-        result = pop3_perform_starttls(data, conn);
-      else if(data->set.use_ssl == CURLUSESSL_TRY)
-        /* Fallback and carry on with authentication */
-        result = pop3_perform_authentication(data, conn);
-      else {
-        failf(data, "STLS not supported.");
-        result = CURLE_USE_SSL_FAILED;
-      }
-    }
-    else
-      result = pop3_perform_authentication(data, conn);
-  }
   else {
     /* Clear text is supported when CAPA isn't recognised */
-    pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
+    if(pop3code != '+')
+      pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
-    result = pop3_perform_authentication(data, conn);
+    if(!data->set.use_ssl || conn->ssl[FIRSTSOCKET].use)
+      result = pop3_perform_authentication(data, conn);
+    else if(pop3code == '+' && pop3c->tls_supported)
+      /* Switch to TLS connection now */
+      result = pop3_perform_starttls(data, conn);
+    else if(data->set.use_ssl <= CURLUSESSL_TRY)
+      /* Fallback and carry on with authentication */
+      result = pop3_perform_authentication(data, conn);
+    else {
+      failf(data, "STLS not supported.");
+      result = CURLE_USE_SSL_FAILED;
+    }
   }
 
   return result;
@@ -775,6 +770,10 @@ static CURLcode pop3_state_starttls_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   (void)instate; /* no use for this yet */
+
+  /* Pipelining in response is forbidden. */
+  if(data->conn->proto.pop3c.pp.cache_size)
+    return CURLE_WEIRD_SERVER_REPLY;
 
   if(pop3code != '+') {
     if(data->set.use_ssl != CURLUSESSL_TRY) {
@@ -1031,7 +1030,7 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone) {
-    result = Curl_ssl_connect_nonblocking(data, conn,
+    result = Curl_ssl_connect_nonblocking(data, conn, FALSE,
                                           FIRSTSOCKET, &pop3c->ssldone);
     if(result || !pop3c->ssldone)
       return result;
@@ -1172,7 +1171,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
   struct connectdata *conn = data->conn;
   struct POP3 *pop3 = data->req.p.pop3;
 
-  DEBUGF(infof(data, "DO phase starts\n"));
+  DEBUGF(infof(data, "DO phase starts"));
 
   if(data->set.opt_no_body) {
     /* Requested no body means no transfer */
@@ -1191,7 +1190,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done)
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
 
   return result;
 }
@@ -1274,11 +1273,11 @@ static CURLcode pop3_doing(struct Curl_easy *data, bool *dophase_done)
   CURLcode result = pop3_multi_statemach(data, dophase_done);
 
   if(result)
-    DEBUGF(infof(data, "DO phase failed\n"));
+    DEBUGF(infof(data, "DO phase failed"));
   else if(*dophase_done) {
     result = pop3_dophase_done(data, FALSE /* not connected */);
 
-    DEBUGF(infof(data, "DO phase is complete\n"));
+    DEBUGF(infof(data, "DO phase is complete"));
   }
 
   return result;
