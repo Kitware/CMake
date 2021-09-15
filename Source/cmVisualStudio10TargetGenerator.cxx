@@ -581,6 +581,10 @@ void cmVisualStudio10TargetGenerator::Generate()
       }
 
       if (this->Managed) {
+        if (this->LocalGenerator->GetVersion() >=
+            cmGlobalVisualStudioGenerator::VS17) {
+          e1.Element("ManagedAssembly", "true");
+        }
         std::string outputType;
         switch (this->GeneratorTarget->GetType()) {
           case cmStateEnums::OBJECT_LIBRARY:
