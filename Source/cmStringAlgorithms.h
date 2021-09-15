@@ -94,6 +94,13 @@ std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
  */
 void cmExpandList(cm::string_view arg, std::vector<std::string>& argsOut,
                   bool emptyArgs = false);
+inline void cmExpandList(cmProp arg, std::vector<std::string>& argsOut,
+                         bool emptyArgs = false)
+{
+  if (arg) {
+    cmExpandList(*arg, argsOut, emptyArgs);
+  }
+}
 
 /**
  * Expand out any arguments in the string range [@a first, @a last) that have
@@ -115,6 +122,14 @@ void cmExpandLists(InputIt first, InputIt last,
  */
 std::vector<std::string> cmExpandedList(cm::string_view arg,
                                         bool emptyArgs = false);
+inline std::vector<std::string> cmExpandedList(cmProp arg,
+                                               bool emptyArgs = false)
+{
+  if (!arg) {
+    return {};
+  }
+  return cmExpandedList(*arg, emptyArgs);
+}
 
 /**
  * Same as cmExpandList but a new vector is created containing the expanded
@@ -217,6 +232,13 @@ inline bool cmIsInternallyOn(const char* val)
   }
   return cmIsInternallyOn(cm::string_view(val));
 }
+inline bool cmIsInternallyOn(cmProp val)
+{
+  if (!val) {
+    return false;
+  }
+  return cmIsInternallyOn(*val);
+}
 
 /** Check for non-empty Property/Variable value.  */
 inline bool cmNonempty(cm::string_view val)
@@ -297,7 +319,7 @@ inline bool cmHasPrefix(cm::string_view str, cmProp prefix)
     return false;
   }
 
-  return str.compare(0, prefix->size(), prefix) == 0;
+  return str.compare(0, prefix->size(), *prefix) == 0;
 }
 
 /** Returns true if string @a str starts with string @a prefix.  */
@@ -328,7 +350,7 @@ inline bool cmHasSuffix(cm::string_view str, cmProp suffix)
   }
 
   return str.size() >= suffix->size() &&
-    str.compare(str.size() - suffix->size(), suffix->size(), suffix) == 0;
+    str.compare(str.size() - suffix->size(), suffix->size(), *suffix) == 0;
 }
 
 /** Returns true if string @a str ends with string @a suffix.  */

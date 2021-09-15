@@ -66,7 +66,10 @@ public:
 
   explicit operator bool() const noexcept { return this->Value != nullptr; }
   operator const std::string&() const noexcept { return this->operator*(); }
-  operator cm::string_view() const noexcept { return this->operator*(); }
+  explicit operator cm::string_view() const noexcept
+  {
+    return this->operator*();
+  }
 
   /**
    * Does the value indicate a true or ON value?
