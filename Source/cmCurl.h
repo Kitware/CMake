@@ -11,3 +11,4 @@
 std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile = nullptr);
 std::string cmCurlSetNETRCOption(::CURL* curl, const std::string& netrc_level,
                                  const std::string& netrc_file);
+std::string cmCurlFixFileURL(std::string url);
