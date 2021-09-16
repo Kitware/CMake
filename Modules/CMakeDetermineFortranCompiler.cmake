@@ -237,8 +237,6 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   endif()
   if(CMAKE_Fortran_PLATFORM_ID MATCHES "MinGW")
     set(CMAKE_COMPILER_IS_MINGW 1)
-  elseif(CMAKE_Fortran_PLATFORM_ID MATCHES "Cygwin")
-    set(CMAKE_COMPILER_IS_CYGWIN 1)
   endif()
 endif()
 
