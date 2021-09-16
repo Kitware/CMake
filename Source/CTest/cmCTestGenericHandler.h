@@ -87,7 +87,17 @@ public:
    * as a multi-value will return nullptr.
    */
   void SetPersistentOption(const std::string& op, const char* value);
+  void SetPersistentOption(const std::string& op, const std::string& value)
+  {
+    this->SetPersistentOption(op, cmProp(value));
+  }
+  void SetPersistentOption(const std::string& op, cmProp value);
   void SetOption(const std::string& op, const char* value);
+  void SetOption(const std::string& op, const std::string& value)
+  {
+    this->SetOption(op, cmProp(value));
+  }
+  void SetOption(const std::string& op, cmProp value);
   cmProp GetOption(const std::string& op);
 
   /**
