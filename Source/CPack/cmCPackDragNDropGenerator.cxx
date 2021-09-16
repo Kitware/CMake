@@ -77,7 +77,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
                   "Cannot locate hdiutil command" << std::endl);
     return 0;
   }
-  this->SetOptionIfNotSet("CPACK_COMMAND_HDIUTIL", hdiutil_path.c_str());
+  this->SetOptionIfNotSet("CPACK_COMMAND_HDIUTIL", hdiutil_path);
 
   const std::string setfile_path =
     cmSystemTools::FindProgram("SetFile", paths, false);
@@ -86,7 +86,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
                   "Cannot locate SetFile command" << std::endl);
     return 0;
   }
-  this->SetOptionIfNotSet("CPACK_COMMAND_SETFILE", setfile_path.c_str());
+  this->SetOptionIfNotSet("CPACK_COMMAND_SETFILE", setfile_path);
 
   const std::string rez_path = cmSystemTools::FindProgram("Rez", paths, false);
   if (rez_path.empty()) {
@@ -94,7 +94,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
                   "Cannot locate Rez command" << std::endl);
     return 0;
   }
-  this->SetOptionIfNotSet("CPACK_COMMAND_REZ", rez_path.c_str());
+  this->SetOptionIfNotSet("CPACK_COMMAND_REZ", rez_path);
 
   if (this->IsSet("CPACK_DMG_SLA_DIR")) {
     slaDirectory = this->GetOption("CPACK_DMG_SLA_DIR");

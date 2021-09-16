@@ -159,7 +159,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 
   if (!GetOption("CPACK_WIX_PRODUCT_GUID")) {
     std::string guid = GenerateGUID();
-    SetOption("CPACK_WIX_PRODUCT_GUID", guid.c_str());
+    SetOption("CPACK_WIX_PRODUCT_GUID", guid);
 
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                   "CPACK_WIX_PRODUCT_GUID implicitly set to " << guid << " . "
@@ -168,7 +168,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 
   if (!GetOption("CPACK_WIX_UPGRADE_GUID")) {
     std::string guid = GenerateGUID();
-    SetOption("CPACK_WIX_UPGRADE_GUID", guid.c_str());
+    SetOption("CPACK_WIX_UPGRADE_GUID", guid);
 
     cmCPackLogger(cmCPackLog::LOG_WARNING,
                   "CPACK_WIX_UPGRADE_GUID implicitly set to "
@@ -185,7 +185,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 
   if (!GetOption("CPACK_WIX_LICENSE_RTF")) {
     std::string licenseFilename = this->CPackTopLevel + "/License.rtf";
-    SetOption("CPACK_WIX_LICENSE_RTF", licenseFilename.c_str());
+    SetOption("CPACK_WIX_LICENSE_RTF", licenseFilename);
 
     if (!CreateLicenseFile()) {
       return false;
@@ -194,7 +194,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 
   if (!GetOption("CPACK_PACKAGE_VENDOR")) {
     std::string defaultVendor = "Humanity";
-    SetOption("CPACK_PACKAGE_VENDOR", defaultVendor.c_str());
+    SetOption("CPACK_PACKAGE_VENDOR", defaultVendor);
 
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                   "CPACK_PACKAGE_VENDOR implicitly set to "
@@ -208,12 +208,12 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
       defaultRef = "WixUI_FeatureTree";
     }
 
-    SetOption("CPACK_WIX_UI_REF", defaultRef.c_str());
+    SetOption("CPACK_WIX_UI_REF", defaultRef);
   }
 
   cmProp packageContact = GetOption("CPACK_PACKAGE_CONTACT");
   if (packageContact && !GetOption("CPACK_WIX_PROPERTY_ARPCONTACT")) {
-    SetOption("CPACK_WIX_PROPERTY_ARPCONTACT", packageContact->c_str());
+    SetOption("CPACK_WIX_PROPERTY_ARPCONTACT", packageContact);
   }
 
   CollectExtensions("CPACK_WIX_EXTENSIONS", this->CandleExtensions);
@@ -336,7 +336,7 @@ void cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
   CopyDefinition(includeFile, "CPACK_WIX_UI_BANNER", DefinitionType::PATH);
   CopyDefinition(includeFile, "CPACK_WIX_UI_DIALOG", DefinitionType::PATH);
   SetOptionIfNotSet("CPACK_WIX_PROGRAM_MENU_FOLDER",
-                    GetOption("CPACK_PACKAGE_NAME").GetCStr());
+                    GetOption("CPACK_PACKAGE_NAME"));
   CopyDefinition(includeFile, "CPACK_WIX_PROGRAM_MENU_FOLDER");
   CopyDefinition(includeFile, "CPACK_WIX_UI_REF");
 }
@@ -1177,7 +1177,7 @@ void cmCPackWIXGenerator::CollectXmlNamespaces(std::string const& variableName,
     oss << " xmlns:" << ns.first << "=\""
         << cmWIXSourceWriter::EscapeAttributeValue(ns.second) << '"';
   }
-  SetOption("CPACK_WIX_CUSTOM_XMLNS_EXPANDED", oss.str().c_str());
+  SetOption("CPACK_WIX_CUSTOM_XMLNS_EXPANDED", oss.str());
 }
 
 void cmCPackWIXGenerator::AddCustomFlags(std::string const& variableName,

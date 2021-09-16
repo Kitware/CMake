@@ -34,7 +34,7 @@ int cmCPackBundleGenerator::InitializeInternal()
                     "Cannot locate codesign command" << std::endl);
       return 0;
     }
-    this->SetOptionIfNotSet("CPACK_COMMAND_CODESIGN", codesign_path.c_str());
+    this->SetOptionIfNotSet("CPACK_COMMAND_CODESIGN", codesign_path);
   }
 
   return this->Superclass::InitializeInternal();

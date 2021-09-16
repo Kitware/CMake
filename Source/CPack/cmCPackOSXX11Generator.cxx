@@ -46,8 +46,7 @@ int cmCPackOSXX11Generator::PackageFiles()
          it != cpackPackageExecutablesVector.end(); ++it) {
       std::string cpackExecutableName = *it;
       ++it;
-      this->SetOptionIfNotSet("CPACK_EXECUTABLE_NAME",
-                              cpackExecutableName.c_str());
+      this->SetOptionIfNotSet("CPACK_EXECUTABLE_NAME", cpackExecutableName);
     }
   }
 
@@ -84,7 +83,7 @@ int cmCPackOSXX11Generator::PackageFiles()
     }
     std::string destFileName = resourcesDirectory + "/" + iconFileName;
     this->ConfigureFile(iconFile, destFileName, true);
-    this->SetOptionIfNotSet("CPACK_APPLE_GUI_ICON", iconFileName.c_str());
+    this->SetOptionIfNotSet("CPACK_APPLE_GUI_ICON", iconFileName);
   }
 
   std::string applicationsLinkName = diskImageDirectory + "/Applications";
@@ -191,8 +190,7 @@ int cmCPackOSXX11Generator::InitializeInternal()
                   "Cannot find hdiutil compiler" << std::endl);
     return 0;
   }
-  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE",
-                          pkgPath.c_str());
+  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", pkgPath);
 
   return this->Superclass::InitializeInternal();
 }

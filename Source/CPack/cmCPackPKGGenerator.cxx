@@ -167,7 +167,7 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
   // Dark Aqua
   this->CreateBackground("darkAqua", metapackageFile, genName, xout);
 
-  this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str().c_str());
+  this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str());
 
   // Create the distribution.dist file in the metapackage to turn it
   // into a distribution package.
@@ -348,8 +348,7 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
 
   // Set this so that distribution.dist gets the right name (without
   // the path).
-  this->SetOption("CPACK_RESOURCE_FILE_" + uname + "_NOPATH",
-                  (name + ext).c_str());
+  this->SetOption("CPACK_RESOURCE_FILE_" + uname + "_NOPATH", (name + ext));
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Configure file: " << (inFileName ? *inFileName : "(NULL)")
