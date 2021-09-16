@@ -138,6 +138,11 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
   struct stsentry *sts;
   time_t now = time(NULL);
 
+  if(Curl_host_is_ipnum(hostname))
+    /* "explicit IP address identification of all forms is excluded."
+       / RFC 6797 */
+    return CURLE_OK;
+
   do {
     while(*p && ISSPACE(*p))
       p++;
@@ -521,7 +526,9 @@ CURLcode Curl_hsts_loadfile(struct Curl_easy *data,
  */
 CURLcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
 {
-  return hsts_pull(data, h);
+  if(h)
+    return hsts_pull(data, h);
+  return CURLE_OK;
 }
 
 #endif /* CURL_DISABLE_HTTP || CURL_DISABLE_HSTS */

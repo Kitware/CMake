@@ -65,36 +65,7 @@
 #  include "cmFileLockResult.h"
 #endif
 
-#if defined(_WIN32)
-#  include <windows.h>
-#endif
-
 namespace {
-
-#if defined(_WIN32)
-// libcurl doesn't support file:// urls for unicode filenames on Windows.
-// Convert string from UTF-8 to ACP if this is a file:// URL.
-std::string fix_file_url_windows(const std::string& url)
-{
-  std::string ret = url;
-  if (strncmp(url.c_str(), "file://", 7) == 0) {
-    std::wstring wurl = cmsys::Encoding::ToWide(url);
-    if (!wurl.empty()) {
-      int mblen =
-        WideCharToMultiByte(CP_ACP, 0, wurl.c_str(), -1, NULL, 0, NULL, NULL);
-      if (mblen > 0) {
-        std::vector<char> chars(mblen);
-        mblen = WideCharToMultiByte(CP_ACP, 0, wurl.c_str(), -1, &chars[0],
-                                    mblen, NULL, NULL);
-        if (mblen > 0) {
-          ret = &chars[0];
-        }
-      }
-    }
-  }
-  return ret;
-}
-#endif
 
 bool HandleWriteImpl(std::vector<std::string> const& args, bool append,
                      cmExecutionStatus& status)
@@ -1976,9 +1947,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     }
   }
 
-#  if defined(_WIN32)
-  url = fix_file_url_windows(url);
-#  endif
+  url = cmCurlFixFileURL(url);
 
   ::CURL* curl;
   ::curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -2292,9 +2261,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
 
   unsigned long file_size = cmsys::SystemTools::FileLength(filename);
 
-#  if defined(_WIN32)
-  url = fix_file_url_windows(url);
-#  endif
+  url = cmCurlFixFileURL(url);
 
   ::CURL* curl;
   ::curl_global_init(CURL_GLOBAL_DEFAULT);

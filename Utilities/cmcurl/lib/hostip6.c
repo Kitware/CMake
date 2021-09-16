@@ -50,7 +50,6 @@
 #include "hostip.h"
 #include "hash.h"
 #include "share.h"
-#include "strerror.h"
 #include "url.h"
 #include "inet_pton.h"
 #include "connect.h"
@@ -58,34 +57,6 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-/*
- * Curl_ipv6works() returns TRUE if IPv6 seems to work.
- */
-bool Curl_ipv6works(struct Curl_easy *data)
-{
-  if(data) {
-    /* the nature of most system is that IPv6 status doesn't come and go
-       during a program's lifetime so we only probe the first time and then we
-       have the info kept for fast re-use */
-    DEBUGASSERT(data);
-    DEBUGASSERT(data->multi);
-    return data->multi->ipv6_works;
-  }
-  else {
-    int ipv6_works = -1;
-    /* probe to see if we have a working IPv6 stack */
-    curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
-    if(s == CURL_SOCKET_BAD)
-      /* an IPv6 address was requested but we can't get/use one */
-      ipv6_works = 0;
-    else {
-      ipv6_works = 1;
-      sclose(s);
-    }
-    return (ipv6_works>0)?TRUE:FALSE;
-  }
-}
 
 /*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
@@ -172,7 +143,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   error = Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &res);
   if(error) {
-    infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);
+    infof(data, "getaddrinfo(3) failed for %s:%d", hostname, port);
     return NULL;
   }
 

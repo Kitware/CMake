@@ -50,7 +50,6 @@
 #include "hostip.h"
 #include "hash.h"
 #include "share.h"
-#include "strerror.h"
 #include "url.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -104,7 +103,7 @@ struct Curl_addrinfo *Curl_getaddrinfo(struct Curl_easy *data,
 
   ai = Curl_ipv4_resolve_r(hostname, port);
   if(!ai)
-    infof(data, "Curl_ipv4_resolve_r failed for %s\n", hostname);
+    infof(data, "Curl_ipv4_resolve_r failed for %s", hostname);
 
   return ai;
 }
