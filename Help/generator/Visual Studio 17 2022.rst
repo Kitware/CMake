@@ -7,7 +7,7 @@ Generates Visual Studio 17 (VS 2022) project files.
 
 .. warning::
 
-  This is experimental and based on "Visual Studio 2022 Preview 3.1".
+  This is experimental and based on "Visual Studio 2022 Preview 4".
   As of this version of CMake, VS 2022 has not been released.
 
 Project Types
@@ -51,7 +51,7 @@ name (architecture).  For example:
 Toolset Selection
 ^^^^^^^^^^^^^^^^^
 
-The ``v143`` toolset that comes with VS 17 2022 Preview 3.1 is selected by
+The ``v143`` toolset that comes with VS 17 2022 Preview 4 is selected by
 default.  The :variable:`CMAKE_GENERATOR_TOOLSET` option may be set, perhaps
 via the :manual:`cmake(1)` ``-T`` option, to specify another toolset.
 
