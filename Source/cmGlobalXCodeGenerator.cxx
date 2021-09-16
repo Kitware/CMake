@@ -3809,7 +3809,7 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
   copyFilesBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
                                     this->CreateString("0"));
   cmXCodeObject* buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  // Collect all embedded frameworks and add them to build phase
+  // Collect all embedded frameworks and dylibs and add them to build phase
   std::vector<std::string> relFiles = cmExpandedList(*files);
   for (std::string const& relFile : relFiles) {
     cmXCodeObject* buildFile{ nullptr };
@@ -3839,7 +3839,8 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
       } else {
         buildFile = it->second;
       }
-    } else if (cmSystemTools::IsPathToFramework(relFile)) {
+    } else if (cmSystemTools::IsPathToFramework(relFile) ||
+               cmSystemTools::IsPathToMacOSSharedLibrary(relFile)) {
       // This is a regular string path - create file reference
       auto it = this->EmbeddedLibRefs.find(relFile);
       if (it == this->EmbeddedLibRefs.end()) {
@@ -3905,6 +3906,8 @@ void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
 {
   static const auto dstSubfolderSpec = "10";
 
+  // Despite the name, by default Xcode uses "Embed Frameworks" build phase for
+  // both frameworks and dynamic libraries
   this->AddEmbeddedObjects(target, "Embed Frameworks",
                            "XCODE_EMBED_FRAMEWORKS", dstSubfolderSpec,
                            NoActionOnCopyByDefault);
