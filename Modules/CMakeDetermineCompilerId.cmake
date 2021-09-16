@@ -172,17 +172,6 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
         set(CMAKE_${lang}_COMPILER "${output}/clang++" PARENT_SCOPE)
       endif()
     endif()
-    if(lang STREQUAL "HIP")
-      execute_process(
-        COMMAND "${_hipcc_dir}/hipconfig"
-        --rocmpath
-        OUTPUT_VARIABLE output
-        RESULT_VARIABLE result
-      )
-      if(result EQUAL 0)
-        set(_CMAKE_HIP_COMPILER_ROCM_ROOT "${output}" PARENT_SCOPE)
-      endif()
-    endif()
   endif()
 
   if (COMPILER_QNXNTO AND CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
