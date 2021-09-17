@@ -558,9 +558,8 @@ void cmGlobalNinjaGenerator::GetDocumentation(cmDocumentationEntry& entry)
 void cmGlobalNinjaGenerator::Generate()
 {
   // Check minimum Ninja version.
-  if (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                    this->NinjaVersion.c_str(),
-                                    RequiredNinjaVersion().c_str())) {
+  if (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                    RequiredNinjaVersion())) {
     std::ostringstream msg;
     msg << "The detected version of Ninja (" << this->NinjaVersion;
     msg << ") is less than the version of Ninja required by CMake (";
@@ -721,21 +720,21 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
 
 void cmGlobalNinjaGenerator::CheckNinjaFeatures()
 {
-  this->NinjaSupportsConsolePool = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForConsolePool().c_str());
+  this->NinjaSupportsConsolePool =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForConsolePool());
   this->NinjaSupportsImplicitOuts = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    cmGlobalNinjaGenerator::RequiredNinjaVersionForImplicitOuts().c_str());
-  this->NinjaSupportsManifestRestat = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForManifestRestat().c_str());
-  this->NinjaSupportsMultilineDepfile = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForMultilineDepfile().c_str());
-  this->NinjaSupportsDyndeps = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForDyndeps().c_str());
+    cmSystemTools::OP_LESS, this->NinjaVersion,
+    cmGlobalNinjaGenerator::RequiredNinjaVersionForImplicitOuts());
+  this->NinjaSupportsManifestRestat =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForManifestRestat());
+  this->NinjaSupportsMultilineDepfile =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForMultilineDepfile());
+  this->NinjaSupportsDyndeps =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForDyndeps());
   if (!this->NinjaSupportsDyndeps) {
     // The ninja version number is not new enough to have upstream support.
     // Our ninja branch adds ".dyndep-#" to its version number,
@@ -753,21 +752,21 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
   }
   this->NinjaSupportsUnconditionalRecompactTool =
     !cmSystemTools::VersionCompare(
-      cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-      RequiredNinjaVersionForUnconditionalRecompactTool().c_str());
-  this->NinjaSupportsRestatTool = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForRestatTool().c_str());
-  this->NinjaSupportsMultipleOutputs = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForMultipleOutputs().c_str());
+      cmSystemTools::OP_LESS, this->NinjaVersion,
+      RequiredNinjaVersionForUnconditionalRecompactTool());
+  this->NinjaSupportsRestatTool =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForRestatTool());
+  this->NinjaSupportsMultipleOutputs =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForMultipleOutputs());
   this->NinjaSupportsMetadataOnRegeneration = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForMetadataOnRegeneration().c_str());
+    cmSystemTools::OP_LESS, this->NinjaVersion,
+    RequiredNinjaVersionForMetadataOnRegeneration());
 #ifdef _WIN32
-  this->NinjaSupportsCodePage = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
-    RequiredNinjaVersionForCodePage().c_str());
+  this->NinjaSupportsCodePage =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForCodePage());
   if (this->NinjaSupportsCodePage) {
     this->CheckNinjaCodePage();
   } else {

@@ -771,8 +771,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
     }
 
     return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
-                                         parameters.front().c_str(),
-                                         compilerVersion.c_str())
+                                         parameters.front(), compilerVersion)
       ? "1"
       : "0";
   }
@@ -830,8 +829,7 @@ struct VersionNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return cmSystemTools::VersionCompare(Op, parameters.front().c_str(),
-                                         parameters[1].c_str())
+    return cmSystemTools::VersionCompare(Op, parameters.front(), parameters[1])
       ? "1"
       : "0";
   }

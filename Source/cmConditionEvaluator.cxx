@@ -729,10 +729,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                                 keyVERSION_LESS_EQUAL, keyVERSION_GREATER,
                                 keyVERSION_GREATER_EQUAL, keyVERSION_EQUAL))) {
       const auto op = MATCH2CMPOP[matchNo - 1];
-      const cmProp lhs = this->GetVariableOrString(*args.current);
-      const cmProp rhs = this->GetVariableOrString(*args.nextnext);
-      const auto result =
-        cmSystemTools::VersionCompare(op, lhs->c_str(), rhs->c_str());
+      const std::string& lhs = this->GetVariableOrString(*args.current);
+      const std::string& rhs = this->GetVariableOrString(*args.nextnext);
+      const auto result = cmSystemTools::VersionCompare(op, lhs, rhs);
       newArgs.ReduceTwoArgs(result, args);
     }
 
