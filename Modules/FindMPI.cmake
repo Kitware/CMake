@@ -267,6 +267,7 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPkgConfig.cmake)
 
 # Generic compiler names
 set(_MPI_C_GENERIC_COMPILER_NAMES          mpicc    mpcc      mpicc_r mpcc_r)
@@ -1572,7 +1573,40 @@ foreach(LANG IN ITEMS C CXX Fortran)
         if(NOT MPI_PINNED_COMPILER AND NOT MPI_${LANG}_WRAPPER_FOUND)
           # If MPI_PINNED_COMPILER wasn't given, and the MPI compiler we potentially found didn't work, we withdraw it.
           set(MPI_${LANG}_COMPILER "MPI_${LANG}_COMPILER-NOTFOUND" CACHE FILEPATH "MPI compiler for ${LANG}" FORCE)
-          if(NOT MPI_SKIP_GUESSING)
+
+          if(LANG STREQUAL "C")
+            set(_MPI_PKG "mpi-c")
+          elseif(LANG STREQUAL "CXX")
+            set(_MPI_PKG "mpi-cxx")
+          elseif(LANG STREQUAL "Fortran")
+            set(_MPI_PKG "mpi-fort")
+          else()
+            set(_MPI_PKG "")
+          endif()
+          if(_MPI_PKG)
+            pkg_check_modules("MPI_${LANG}_PKG" "${_MPI_PKG}")
+            if("${MPI_${LANG}_PKG_FOUND}")
+              set(MPI_${LANG}_COMPILE_OPTIONS  ${MPI_${LANG}_PKG_CFLAGS}        CACHE STRING "MPI ${LANG} compilation options"       FORCE)
+              set(MPI_${LANG}_INCLUDE_PATH     ${MPI_${LANG}_PKG_INCLUDE_DIRS}  CACHE STRING "MPI ${LANG} include directories"       FORCE)
+              set(MPI_${LANG}_LINK_FLAGS       ${MPI_${LANG}_PKG_LDFLAGS}       CACHE STRING "MPI ${LANG} linker flags"              FORCE)
+              set(MPI_${LANG}_LIB_NAMES        ${MPI_${LANG}_PKG_LIBRARIES}     CACHE STRING "MPI ${LANG} libraries to link against" FORCE)
+              foreach(_MPI_LIB IN LISTS MPI_${LANG}_LIB_NAMES)
+                if(_MPI_LIB)
+                  get_filename_component(_MPI_PLAIN_LIB_NAME "${_MPI_LIB}" NAME_WE)
+                  get_filename_component(_MPI_LIB_NAME "${_MPI_LIB}" NAME)
+                  get_filename_component(_MPI_LIB_DIR "${_MPI_LIB}" DIRECTORY)
+                  find_library(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY
+                    NAMES "${_MPI_LIB_NAME}" "lib${_MPI_LIB_NAME}"
+                    HINTS ${_MPI_LIB_DIR}
+                    DOC "Location of the ${_MPI_PLAIN_LIB_NAME} library for MPI"
+                  )
+                  mark_as_advanced(MPI_${_MPI_PLAIN_LIB_NAME}_LIBRARY)
+                endif()
+              endforeach()
+            endif()
+          endif()
+
+          if(NOT MPI_SKIP_GUESSING AND NOT "${MPI_${LANG}_PKG_FOUND}")
             # For C++, we may use the settings for C. Should a given compiler wrapper for C++ not exist, but one for C does, we copy over the
             # settings for C. An MPI distribution that is in this situation would be IBM Platform MPI.
             if("${LANG}" STREQUAL "CXX" AND MPI_C_WRAPPER_FOUND)
