@@ -56,11 +56,6 @@ if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
     set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
   endif()
 
-  # Don't search paths in PATH environment variable.
-  if(NOT DEFINED CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH)
-    set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH OFF)
-  endif()
-
   # Allows CMake to find headers in the architecture-specific include directories.
   set(CMAKE_LIBRARY_ARCHITECTURE "${CMAKE_ANDROID_ARCH_TRIPLE}")
 
