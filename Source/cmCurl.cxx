@@ -31,11 +31,11 @@
     }                                                                         \
   } while (false)
 
-std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile)
+std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile)
 {
   std::string e;
-  if (cafile && *cafile) {
-    ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cafile);
+  if (!cafile.empty()) {
+    ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cafile.c_str());
     check_curl_result(res, "Unable to set TLS/SSL Verify CAINFO: ");
   }
 #ifdef CMAKE_FIND_CAFILE
