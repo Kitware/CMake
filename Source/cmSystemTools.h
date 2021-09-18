@@ -284,7 +284,10 @@ public:
   /**
    * Compare versions
    */
-  static bool VersionCompare(CompareOp op, const char* lhs, const char* rhs);
+  static bool VersionCompare(CompareOp op, const std::string& lhs,
+                             const std::string& rhs);
+  static bool VersionCompare(CompareOp op, const std::string& lhs,
+                             const char rhs[]);
   static bool VersionCompareEqual(std::string const& lhs,
                                   std::string const& rhs);
   static bool VersionCompareGreater(std::string const& lhs,

@@ -1961,10 +1961,10 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     cmStrCat("CMAKE_", lang, "_SIMULATE_ID"));
   if (lang == "Swift") {
     if (cmProp v = target->GetProperty("Swift_LANGUAGE_VERSION")) {
-      if (cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
-                                        cmToCStr(this->Makefile->GetDefinition(
-                                          "CMAKE_Swift_COMPILER_VERSION")),
-                                        "4.2")) {
+      if (cmSystemTools::VersionCompare(
+            cmSystemTools::OP_GREATER_EQUAL,
+            this->Makefile->GetDefinition("CMAKE_Swift_COMPILER_VERSION"),
+            "4.2")) {
         this->AppendFlags(flags, "-swift-version " + *v);
       }
     }
@@ -2622,8 +2622,8 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
                 // MSVC 2008 is producing both .pdb and .idb files with /Zi.
                 bool msvc2008OrLess =
-                  cmSystemTools::VersionCompare(
-                    cmSystemTools::OP_LESS, compilerVersion.c_str(), "16.0") &&
+                  cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                                compilerVersion, "16.0") &&
                   compilerId == "MSVC";
                 // but not when used via toolset -Tv90
                 if (this->Makefile->GetSafeDefinition(

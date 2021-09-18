@@ -70,7 +70,7 @@ bool cmGlobalNMakeMakefileGenerator::FindMakeProgram(cmMakefile* mf)
 void cmGlobalNMakeMakefileGenerator::CheckNMakeFeatures()
 {
   this->NMakeSupportsUTF8 = !cmSystemTools::VersionCompare(
-    cmSystemTools::OP_LESS, this->NMakeVersion.c_str(), "9");
+    cmSystemTools::OP_LESS, this->NMakeVersion, "9");
 }
 
 void cmGlobalNMakeMakefileGenerator::GetDocumentation(

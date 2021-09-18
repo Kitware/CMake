@@ -2885,8 +2885,9 @@ bool cmSystemTools::SetRPath(std::string const& file,
   return false;
 }
 
-bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
-                                   const char* lhss, const char* rhss)
+namespace {
+bool VersionCompare(cmSystemTools::CompareOp op, const char* lhss,
+                    const char* rhss)
 {
   const char* endl = lhss;
   const char* endr = rhss;
@@ -2919,26 +2920,37 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
   // lhs == rhs, so true if operation is EQUAL
   return (op & cmSystemTools::OP_EQUAL) != 0;
 }
+}
+
+bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
+                                   const std::string& lhs,
+                                   const std::string& rhs)
+{
+  return ::VersionCompare(op, lhs.c_str(), rhs.c_str());
+}
+bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
+                                   const std::string& lhs, const char rhs[])
+{
+  return ::VersionCompare(op, lhs.c_str(), rhs);
+}
 
 bool cmSystemTools::VersionCompareEqual(std::string const& lhs,
                                         std::string const& rhs)
 {
-  return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL, lhs.c_str(),
-                                       rhs.c_str());
+  return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL, lhs, rhs);
 }
 
 bool cmSystemTools::VersionCompareGreater(std::string const& lhs,
                                           std::string const& rhs)
 {
-  return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER, lhs.c_str(),
-                                       rhs.c_str());
+  return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER, lhs, rhs);
 }
 
 bool cmSystemTools::VersionCompareGreaterEq(std::string const& lhs,
                                             std::string const& rhs)
 {
-  return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
-                                       lhs.c_str(), rhs.c_str());
+  return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL, lhs,
+                                       rhs);
 }
 
 static size_t cm_strverscmp_find_first_difference_or_end(const char* lhs,
