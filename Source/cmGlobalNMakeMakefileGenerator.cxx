@@ -81,7 +81,7 @@ void cmGlobalNMakeMakefileGenerator::GetDocumentation(
 }
 
 void cmGlobalNMakeMakefileGenerator::PrintCompilerAdvice(
-  std::ostream& os, std::string const& lang, const char* envVar) const
+  std::ostream& os, std::string const& lang, cmProp envVar) const
 {
   if (lang == "CXX" || lang == "C") {
     /* clang-format off */

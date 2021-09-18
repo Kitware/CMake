@@ -61,5 +61,5 @@ private:
   void CheckNMakeFeatures();
 
   void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
-                           const char* envVar) const override;
+                           cmProp envVar) const override;
 };

@@ -838,7 +838,7 @@ void cmGlobalGenerator::EnableLanguage(
         cmSystemTools::RemoveFile(compilerLangFile);
         if (!this->CMakeInstance->GetIsInTryCompile()) {
           this->PrintCompilerAdvice(noCompiler, lang,
-                                    cmToCStr(mf->GetDefinition(compilerEnv)));
+                                    mf->GetDefinition(compilerEnv));
           mf->IssueMessage(MessageType::FATAL_ERROR, noCompiler.str());
           fatalError = true;
         }
@@ -922,7 +922,7 @@ void cmGlobalGenerator::EnableLanguage(
 
 void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
                                             std::string const& lang,
-                                            const char* envVar) const
+                                            cmProp envVar) const
 {
   // Subclasses override this method if they do not support this advice.
   os << "Tell CMake where to find the compiler by setting ";

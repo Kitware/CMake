@@ -550,7 +550,7 @@ protected:
   virtual bool CheckLanguages(std::vector<std::string> const& languages,
                               cmMakefile* mf) const;
   virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
-                                   const char* envVar) const;
+                                   cmProp envVar) const;
 
   virtual bool ComputeTargetDepends();
 
