@@ -229,11 +229,3 @@ inline bool operator>=(cmProp l, std::nullptr_t) noexcept
 {
   return l.Compare(cmProp{}) >= 0;
 }
-
-/**
- * Temporary wrapper
- */
-inline const char* cmToCStr(cmProp p)
-{
-  return p.GetCStr();
-}
