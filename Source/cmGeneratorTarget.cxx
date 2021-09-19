@@ -2170,6 +2170,21 @@ bool cmGeneratorTarget::IsImportedSharedLibWithoutSOName(
 bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
   const std::string& config) const
 {
+  TargetPtrToBoolMap& cache = this->MacOSXRpathInstallNameDirCache[config];
+  const auto lookup = cache.find(this->Target);
+
+  if (lookup != cache.cend()) {
+    return lookup->second;
+  }
+
+  const bool result = this->DetermineHasMacOSXRpathInstallNameDir(config);
+  cache[this->Target] = result;
+  return result;
+}
+
+bool cmGeneratorTarget::DetermineHasMacOSXRpathInstallNameDir(
+  const std::string& config) const
+{
   bool install_name_is_rpath = false;
   bool macosx_rpath = false;
 
