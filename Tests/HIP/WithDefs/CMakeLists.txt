@@ -19,7 +19,7 @@ target_compile_options(HIPOnlyWithDefs
   PRIVATE
     --offload-arch=gfx900
     -DFLAG_COMPILE_LANG_$<COMPILE_LANGUAGE>
-    $<$<HIP_COMPILER_ID:ROCMClang>:-DFLAG_LANG_IS_HIP=$<COMPILE_LANGUAGE:HIP>> # Host-only defines are possible only on NVCC.
+    $<$<HIP_COMPILER_ID:Clang>:-DFLAG_LANG_IS_HIP=$<COMPILE_LANGUAGE:HIP>> # Host-only defines are possible only on NVCC.
   )
 
 target_compile_definitions(HIPOnlyWithDefs

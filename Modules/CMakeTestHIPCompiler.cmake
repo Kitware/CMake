@@ -81,20 +81,6 @@ unset(__CMAKE_HIP_FLAGS)
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompileFeatures.cmake)
 CMAKE_DETERMINE_COMPILE_FEATURES(HIP)
 
-
-# Setup the following:
-# Configure the new template file CMakeHipRuntime.cmake to
-# - ${CMAKE_PLATFORM_INFO_DIR}/
-# This file will do the actual find_package query. We than have
-# CMakeHIPInformation.cmake include `CMakeHipRuntime`
-# So it is included once system information has been finished
-#
-configure_file(
- ${CMAKE_ROOT}/Modules/CMakeHIPRuntime.cmake.in
- ${CMAKE_PLATFORM_INFO_DIR}/CMakeHIPRuntime.cmake
- @ONLY
-)
-
 # Re-configure to save learned information.
 configure_file(
   ${CMAKE_ROOT}/Modules/CMakeHIPCompiler.cmake.in
@@ -113,10 +99,3 @@ endif()
 set(CMAKE_TRY_COMPILE_TARGET_TYPE ${__CMAKE_SAVED_TRY_COMPILE_TARGET_TYPE})
 unset(__CMAKE_SAVED_TRY_COMPILE_TARGET_TYPE)
 unset(__CMAKE_HIP_COMPILER_OUTPUT)
-
-# Load the file and find the relevant HIP runtime.
-# This file will only exist after all compiler detection has finished
-include(${CMAKE_PLATFORM_INFO_DIR}/CMakeHIPRuntime.cmake)
-if(COMMAND _CMAKE_FIND_HIP_RUNTIME)
-  _CMAKE_FIND_HIP_RUNTIME()
-endif()
