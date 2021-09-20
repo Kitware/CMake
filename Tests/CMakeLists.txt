@@ -1656,6 +1656,8 @@ if(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/CMakeLists.txt"        # random source file that exists
     "${CMake_BINARY_DIR}/Tests/try_to_create_symlink" # random target file in existing directory
     RESULT_VARIABLE _symlink_result
+    OUTPUT_VARIABLE _symlink_stdout
+    ERROR_VARIABLE _symlink_stderr
     )
   if(_symlink_result EQUAL 0)
     file(REMOVE "${CMake_BINARY_DIR}/Tests/try_to_create_symlink")
