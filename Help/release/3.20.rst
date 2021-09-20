@@ -363,8 +363,8 @@ Changes made since CMake 3.20.0 include the following.
   The oneAPI 2021.2 Fortran compiler defines the proper identification
   macro and so is identified as ``IntelLLVM`` by all CMake 3.20 versions.
 
-3.20.3, 3.20.4, 3.20.5
-----------------------
+3.20.3, 3.20.4, 3.20.5, 3.20.6
+------------------------------
 
 These versions made no changes to documented features or interfaces.
 Some implementation updates were made to support ecosystem changes
