@@ -21,12 +21,14 @@
 
 #include <sys/stat.h>
 
-// Suffix including the '.', used to tell libpkg what compression to use
-static const char FreeBSDPackageSuffix[] = ".txz";
+// Suffix used to tell libpkg what compression to use
+static const char FreeBSDPackageCompression[] = "txz";
+// Resulting package file-suffix, for < 1.17 and >= 1.17 versions of libpkg
+static const char FreeBSDPackageSuffix_10[] = ".txz";
+static const char FreeBSDPackageSuffix_17[] = ".pkg";
 
 cmCPackFreeBSDGenerator::cmCPackFreeBSDGenerator()
-  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr",
-                            FreeBSDPackageSuffix)
+  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr", FreeBSDPackageSuffix_17 /* old-style, updated if an old-style package is created */)
 {
 }
 
@@ -61,7 +63,7 @@ public:
 
   {
     if (d) {
-      pkg_create_set_format(d, FreeBSDPackageSuffix + 1); // Skip over the '.'
+      pkg_create_set_format(d, FreeBSDPackageCompression); // Skip over the '.'
       pkg_create_set_compression_level(d, 0); // Explicitly set default
       pkg_create_set_overwrite(d, false);
       pkg_create_set_rootdir(d, toplevel_dir.c_str());
@@ -387,7 +389,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
          ? std::string(currentPackage, 0, lastSlash + 1)
          : std::string()) +
       var_lookup("CPACK_FREEBSD_PACKAGE_NAME") + '-' +
-      var_lookup("CPACK_FREEBSD_PACKAGE_VERSION") + FreeBSDPackageSuffix;
+      var_lookup("CPACK_FREEBSD_PACKAGE_VERSION") + FreeBSDPackageSuffix_17;
 
     this->packageFileNames.clear();
     this->packageFileNames.emplace_back(actualPackage);
@@ -416,14 +418,32 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     return 0;
   }
 
-  std::string broken_suffix =
-    cmStrCat('-', var_lookup("CPACK_TOPLEVEL_TAG"), FreeBSDPackageSuffix);
+  // Specifically looking for packages suffixed with the TAG, either extension
+  std::string broken_suffix_10 =
+    cmStrCat('-', var_lookup("CPACK_TOPLEVEL_TAG"), FreeBSDPackageSuffix_10);
+  std::string broken_suffix_17 =
+    cmStrCat('-', var_lookup("CPACK_TOPLEVEL_TAG"), FreeBSDPackageSuffix_17);
   for (std::string& name : packageFileNames) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Packagefile " << name << std::endl);
-    if (cmHasSuffix(name, broken_suffix)) {
-      name.replace(name.size() - broken_suffix.size(), std::string::npos,
-                   FreeBSDPackageSuffix);
+    if (cmHasSuffix(name, broken_suffix_10)) {
+      name.replace(name.size() - broken_suffix_10.size(), std::string::npos,
+                   FreeBSDPackageSuffix_10);
       break;
+    }
+    if (cmHasSuffix(name, broken_suffix_17)) {
+      name.replace(name.size() - broken_suffix_17.size(), std::string::npos,
+                   FreeBSDPackageSuffix_17);
+      break;
+    }
+  }
+  // If the name uses a *new* style name, which doesn't exist, but there
+  // is an *old* style name, then use that instead. This indicates we used
+  // an older libpkg, which still creates .txz instead of .pkg files.
+  for (std::string& name : packageFileNames) {
+    if (cmHasSuffix(name, FreeBSDPackageSuffix_17) &&
+        !cmSystemTools::FileExists(name)) {
+      const std::string suffix(FreeBSDPackageSuffix_17);
+      name.replace(name.size() - suffix.size(), std::string::npos, suffix);
     }
   }
 
