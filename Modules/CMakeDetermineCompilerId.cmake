@@ -150,41 +150,6 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   endif()
 
-  # When invoked with HIPCC we need to extract the path to the underlying
-  # clang compiler when possible. This fixes the following issues:
-  #   env variables can change how hipcc behaves
-  #   allows us to properly find the binutils bundled with hip
-  if(CMAKE_${lang}_COMPILER_ID STREQUAL "ROCMClang"
-     AND CMAKE_${lang}_COMPILER MATCHES ".*hipcc")
-    get_filename_component(_hipcc_dir "${CMAKE_${lang}_COMPILER}" DIRECTORY)
-    execute_process(
-      COMMAND "${_hipcc_dir}/hipconfig"
-      --hipclangpath
-      OUTPUT_VARIABLE output
-      RESULT_VARIABLE result
-    )
-    if(result EQUAL 0 AND EXISTS "${output}")
-      if(lang STREQUAL "C")
-        set_property(CACHE CMAKE_${lang}_COMPILER PROPERTY VALUE "${output}/clang")
-        set(CMAKE_${lang}_COMPILER "${output}/clang" PARENT_SCOPE)
-      else()
-        set_property(CACHE CMAKE_${lang}_COMPILER PROPERTY VALUE "${output}/clang++")
-        set(CMAKE_${lang}_COMPILER "${output}/clang++" PARENT_SCOPE)
-      endif()
-    endif()
-    if(lang STREQUAL "HIP")
-      execute_process(
-        COMMAND "${_hipcc_dir}/hipconfig"
-        --rocmpath
-        OUTPUT_VARIABLE output
-        RESULT_VARIABLE result
-      )
-      if(result EQUAL 0)
-        set(_CMAKE_HIP_COMPILER_ROCM_ROOT "${output}" PARENT_SCOPE)
-      endif()
-    endif()
-  endif()
-
   if (COMPILER_QNXNTO AND CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
     execute_process(
       COMMAND "${CMAKE_${lang}_COMPILER}"

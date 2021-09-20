@@ -34,7 +34,6 @@ include:
   OpenWatcom = Open Watcom (openwatcom.org)
   PGI = The Portland Group (pgroup.com)
   PathScale = PathScale (pathscale.com)
-  ROCMClang = ROCm Toolkit Clang-based Compiler (rocmdocs.amd.com)
   SDCC = Small Device C Compiler (sdcc.sourceforge.net)
   SunPro = Oracle Solaris Studio (oracle.com)
   TI = Texas Instruments (ti.com)

@@ -82,9 +82,6 @@ function(compiler_id_detection outvar lang)
       AppleClang
       ARMClang
     )
-    if(NOT __skip_rocmclang)
-      list(APPEND ordered_compilers ROCMClang)
-    endif()
     list(APPEND ordered_compilers
       Clang
       GNU
