@@ -2453,7 +2453,7 @@ const char* cmMakefile::GetSONameFlag(const std::string& language) const
     name += language;
   }
   name += "_FLAG";
-  return cmToCStr(this->GetDefinition(name));
+  return this->GetDefinition(name).GetCStr();
 }
 
 bool cmMakefile::CanIWriteThisFile(std::string const& fileName) const
@@ -2531,7 +2531,7 @@ cmProp cmMakefile::GetDefinition(const std::string& name) const
       vv->VariableAccessed(name,
                            def ? cmVariableWatch::VARIABLE_READ_ACCESS
                                : cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS,
-                           cmToCStr(def), this);
+                           def.GetCStr(), this);
 
     if (watch_function_executed) {
       // A callback was executed and may have caused re-allocation of the

@@ -5727,7 +5727,7 @@ const char* getTypedProperty<const char*>(
   cmProp value = tgt->GetProperty(prop);
 
   if (genexInterpreter == nullptr) {
-    return cmToCStr(value);
+    return value.GetCStr();
   }
 
   return genexInterpreter->Evaluate(value ? *value : "", prop).c_str();

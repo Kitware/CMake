@@ -856,19 +856,18 @@ std::string cmLocalGenerator::GetIncludeFlags(
 
   std::string const& includeFlag =
     this->Makefile->GetSafeDefinition(cmStrCat("CMAKE_INCLUDE_FLAG_", lang));
-  const char* sep = cmToCStr(
-    this->Makefile->GetDefinition(cmStrCat("CMAKE_INCLUDE_FLAG_SEP_", lang)));
   bool quotePaths = false;
   if (this->Makefile->GetDefinition("CMAKE_QUOTE_INCLUDE_PATHS")) {
     quotePaths = true;
   }
+  std::string sep = " ";
   bool repeatFlag = true;
   // should the include flag be repeated like ie. -IA -IB
-  if (!sep) {
-    sep = " ";
-  } else {
+  if (cmProp incSep = this->Makefile->GetDefinition(
+        cmStrCat("CMAKE_INCLUDE_FLAG_SEP_", lang))) {
     // if there is a separator then the flag is not repeated but is only
     // given once i.e.  -classpath a:b:c
+    sep = incSep;
     repeatFlag = false;
   }
 

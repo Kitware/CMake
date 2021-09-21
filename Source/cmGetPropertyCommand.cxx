@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetPropertyCommand.h"
 
+#include <cstddef>
+
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstalledFile.h"
@@ -31,10 +33,6 @@ enum OutType
   OutFullDoc,
   OutSet
 };
-
-// Implementation of result storage.
-bool StoreResult(OutType infoType, cmMakefile& makefile,
-                 const std::string& variable, const char* value);
 
 // Implementation of each property type.
 bool HandleGlobalMode(cmExecutionStatus& status, const std::string& name,
@@ -253,8 +251,10 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
 
 namespace {
 
+// Implementation of result storage.
+template <typename ValueType>
 bool StoreResult(OutType infoType, cmMakefile& makefile,
-                 const std::string& variable, const char* value)
+                 const std::string& variable, ValueType value)
 {
   if (infoType == OutSet) {
     makefile.AddDefinition(variable, value ? "1" : "0");
@@ -268,10 +268,11 @@ bool StoreResult(OutType infoType, cmMakefile& makefile,
   }
   return true;
 }
+template <>
 bool StoreResult(OutType infoType, cmMakefile& makefile,
-                 const std::string& variable, cmProp value)
+                 const std::string& variable, std::nullptr_t value)
 {
-  return StoreResult(infoType, makefile, variable, value.GetCStr());
+  return StoreResult(infoType, makefile, variable, cmProp(value));
 }
 
 bool HandleGlobalMode(cmExecutionStatus& status, const std::string& name,

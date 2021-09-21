@@ -1986,7 +1986,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
 
   // check to see if a CAINFO file has been specified
   // command arg comes first
-  std::string const& cainfo_err = cmCurlSetCAInfo(curl, cmToCStr(cainfo));
+  std::string const& cainfo_err = cmCurlSetCAInfo(curl, cainfo);
   if (!cainfo_err.empty()) {
     status.SetError(cainfo_err);
     return false;
@@ -2304,7 +2304,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
 
   // check to see if a CAINFO file has been specified
   // command arg comes first
-  std::string const& cainfo_err = cmCurlSetCAInfo(curl, cmToCStr(cainfo));
+  std::string const& cainfo_err = cmCurlSetCAInfo(curl, cainfo);
   if (!cainfo_err.empty()) {
     status.SetError(cainfo_err);
     return false;
