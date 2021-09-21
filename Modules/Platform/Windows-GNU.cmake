@@ -8,6 +8,8 @@ if(__WINDOWS_GNU)
 endif()
 set(__WINDOWS_GNU 1)
 
+set(MINGW 1)
+
 set(CMAKE_IMPORT_LIBRARY_PREFIX "lib")
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 set(CMAKE_SHARED_MODULE_PREFIX  "lib")
@@ -19,16 +21,12 @@ set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
 set(CMAKE_SHARED_MODULE_SUFFIX  ".dll")
 set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
 
-if(MSYS OR MINGW)
-  set(CMAKE_EXTRA_LINK_EXTENSIONS ".lib") # MinGW can also link to a MS .lib
-endif()
+set(CMAKE_EXTRA_LINK_EXTENSIONS ".lib") # MinGW can also link to a MS .lib
 
-if(MINGW)
-  set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
-  set(CMAKE_C_STANDARD_LIBRARIES_INIT "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32")
-  set(CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
-endif()
+set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
+set(CMAKE_C_STANDARD_LIBRARIES_INIT "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32")
+set(CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
 
 set(CMAKE_DL_LIBS "")
 set(CMAKE_LIBRARY_PATH_FLAG "-L")
@@ -48,21 +46,19 @@ endif()
 
 macro(__windows_compiler_gnu lang)
 
-  if(MSYS OR MINGW)
-    # Create archiving rules to support large object file lists for static libraries.
-    set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>")
-    set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
-    set(CMAKE_${lang}_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
+  # Create archiving rules to support large object file lists for static libraries.
+  set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
 
-    # Initialize C link type selection flags.  These flags are used when
-    # building a shared library, shared module, or executable that links
-    # to other libraries to select whether to use the static or shared
-    # versions of the libraries.
-    foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
-      set(CMAKE_${type}_LINK_STATIC_${lang}_FLAGS "-Wl,-Bstatic")
-      set(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-Bdynamic")
-    endforeach()
-  endif()
+  # Initialize C link type selection flags.  These flags are used when
+  # building a shared library, shared module, or executable that links
+  # to other libraries to select whether to use the static or shared
+  # versions of the libraries.
+  foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
+    set(CMAKE_${type}_LINK_STATIC_${lang}_FLAGS "-Wl,-Bstatic")
+    set(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-Bdynamic")
+  endforeach()
 
   # No -fPIC on Windows
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")

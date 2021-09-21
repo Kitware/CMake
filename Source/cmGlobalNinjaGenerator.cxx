@@ -928,29 +928,21 @@ void cmGlobalNinjaGenerator::EnableLanguage(
       continue;
     }
     this->ResolveLanguageCompiler(l, mf, optional);
-  }
 #ifdef _WIN32
-  const bool clangGnuMode =
-    ((mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "Clang") &&
-     (mf->GetSafeDefinition("CMAKE_C_COMPILER_FRONTEND_VARIANT") == "GNU")) ||
-    ((mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "Clang") &&
-     (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_FRONTEND_VARIANT") == "GNU"));
-
-  if (clangGnuMode ||
-      ((mf->GetSafeDefinition("CMAKE_C_SIMULATE_ID") != "MSVC") &&
-       (mf->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID") != "MSVC") &&
-       (mf->IsOn("CMAKE_COMPILER_IS_MINGW") ||
-        (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "GNU") ||
-        (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "GNU") ||
-        (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "Clang") ||
-        (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "Clang") ||
-        (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "ARMClang") ||
-        (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "ARMClang") ||
-        (mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") == "QCC") ||
-        (mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID") == "QCC")))) {
-    this->UsingGCCOnWindows = true;
-  }
+    std::string const& compilerId =
+      mf->GetSafeDefinition(cmStrCat("CMAKE_", l, "_COMPILER_ID"));
+    std::string const& simulateId =
+      mf->GetSafeDefinition(cmStrCat("CMAKE_", l, "_SIMULATE_ID"));
+    std::string const& compilerFrontendVariant = mf->GetSafeDefinition(
+      cmStrCat("CMAKE_", l, "_COMPILER_FRONTEND_VARIANT"));
+    if ((compilerId == "Clang" && compilerFrontendVariant == "GNU") ||
+        (simulateId != "MSVC" &&
+         (compilerId == "GNU" || compilerId == "QCC" ||
+          cmHasLiteralSuffix(compilerId, "Clang")))) {
+      this->UsingGCCOnWindows = true;
+    }
 #endif
+  }
 }
 
 // Implemented by:
