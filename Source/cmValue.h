@@ -85,6 +85,17 @@ public:
     return this->Value == nullptr || this->Value->empty();
   }
 
+  /**
+   * Does a string indicates that CMake/CPack/CTest internally
+   *  forced this value. This is not the same as On, but this
+   * may be considered as "internally switched on".
+   */
+  bool IsInternallyOn() const noexcept
+  {
+    return this->Value != nullptr &&
+      cmValue::IsInternallyOn(cm::string_view(*this->Value));
+  }
+
   bool IsSet() const noexcept
   {
     return !this->IsEmpty() && !this->IsNOTFOUND();
@@ -130,6 +141,17 @@ public:
     return value == nullptr || *value == '\0';
   }
   static bool IsEmpty(cm::string_view value) noexcept { return value.empty(); }
+
+  /**
+   * Does a string indicates that CMake/CPack/CTest internally
+   * forced this value. This is not the same as On, but this
+   * may be considered as "internally switched on".
+   */
+  static bool IsInternallyOn(const char* value) noexcept
+  {
+    return value != nullptr && IsInternallyOn(cm::string_view(value));
+  }
+  static bool IsInternallyOn(cm::string_view) noexcept;
 
 private:
   static std::string Empty;

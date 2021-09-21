@@ -73,9 +73,19 @@ bool cmValue::IsOff(cm::string_view value) noexcept
 
   return IsNOTFOUND(value);
 }
+
 bool cmValue::IsNOTFOUND(cm::string_view value) noexcept
 {
   return (value == "NOTFOUND"_s) || cmHasSuffix(value, "-NOTFOUND"_s);
+}
+
+bool cmValue::IsInternallyOn(cm::string_view value) noexcept
+{
+  return (value.size() == 4) &&             //
+    (value[0] == 'I' || value[0] == 'i') && //
+    (value[1] == '_') &&                    //
+    (value[2] == 'O' || value[2] == 'o') && //
+    (value[3] == 'N' || value[3] == 'n');
 }
 
 int cmValue::Compare(cmValue value) const noexcept

@@ -218,15 +218,6 @@ std::string cmCatViews(std::initializer_list<cm::string_view> views)
   return result;
 }
 
-bool cmIsInternallyOn(cm::string_view val)
-{
-  return (val.size() == 4) &&           //
-    (val[0] == 'I' || val[0] == 'i') && //
-    (val[1] == '_') &&                  //
-    (val[2] == 'O' || val[2] == 'o') && //
-    (val[3] == 'N' || val[3] == 'n');
-}
-
 bool cmStrToLong(const char* str, long* value)
 {
   errno = 0;

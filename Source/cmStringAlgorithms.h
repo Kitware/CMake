@@ -224,20 +224,17 @@ std::string cmWrap(char prefix, Range const& rng, char suffix,
  * forced this value. This is not the same as On, but this
  * may be considered as "internally switched on".
  */
-bool cmIsInternallyOn(cm::string_view val);
+inline bool cmIsInternallyOn(cm::string_view val)
+{
+  return cmValue::IsInternallyOn(val);
+}
 inline bool cmIsInternallyOn(const char* val)
 {
-  if (!val) {
-    return false;
-  }
-  return cmIsInternallyOn(cm::string_view(val));
+  return cmValue::IsInternallyOn(val);
 }
 inline bool cmIsInternallyOn(cmValue val)
 {
-  if (!val) {
-    return false;
-  }
-  return cmIsInternallyOn(*val);
+  return val.IsInternallyOn();
 }
 
 /** Check for non-empty Property/Variable value.  */
