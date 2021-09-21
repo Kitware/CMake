@@ -240,11 +240,16 @@ std::string cmCommonTargetGenerator::GetManifests(const std::string& config)
 
   std::vector<std::string> manifests;
   manifests.reserve(manifest_srcs.size());
+
+  std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
+  std::string const& manifestFlag =
+    this->Makefile->GetDefinition("CMAKE_" + lang + "_LINKER_MANIFEST_FLAG");
   for (cmSourceFile const* manifest_src : manifest_srcs) {
-    manifests.push_back(this->LocalCommonGenerator->ConvertToOutputFormat(
-      this->LocalCommonGenerator->MaybeRelativeToWorkDir(
-        manifest_src->GetFullPath()),
-      cmOutputConverter::SHELL));
+    manifests.push_back(manifestFlag +
+                        this->LocalCommonGenerator->ConvertToOutputFormat(
+                          this->LocalCommonGenerator->MaybeRelativeToWorkDir(
+                            manifest_src->GetFullPath()),
+                          cmOutputConverter::SHELL));
   }
 
   return cmJoin(manifests, " ");
