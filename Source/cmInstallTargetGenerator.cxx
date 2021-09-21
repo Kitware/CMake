@@ -18,11 +18,11 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -208,7 +208,7 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
 
         // Get App Bundle Extension
         std::string ext;
-        if (cmProp p = this->Target->GetProperty("BUNDLE_EXTENSION")) {
+        if (cmValue p = this->Target->GetProperty("BUNDLE_EXTENSION")) {
           ext = *p;
         } else {
           ext = "app";
@@ -825,7 +825,7 @@ void cmInstallTargetGenerator::AddUniversalInstallRule(
     return;
   }
 
-  cmProp xcodeVersion = mf->GetDefinition("XCODE_VERSION");
+  cmValue xcodeVersion = mf->GetDefinition("XCODE_VERSION");
   if (!xcodeVersion ||
       cmSystemTools::VersionCompareGreater("6", *xcodeVersion)) {
     return;

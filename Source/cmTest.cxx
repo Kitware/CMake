@@ -6,6 +6,7 @@
 #include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 cmTest::cmTest(cmMakefile* mf)
   : CommandExpandLists(false)
@@ -32,14 +33,14 @@ void cmTest::SetCommand(std::vector<std::string> const& command)
   this->Command = command;
 }
 
-cmProp cmTest::GetProperty(const std::string& prop) const
+cmValue cmTest::GetProperty(const std::string& prop) const
 {
-  cmProp retVal = this->Properties.GetPropertyValue(prop);
+  cmValue retVal = this->Properties.GetPropertyValue(prop);
   if (!retVal) {
     const bool chain =
       this->Makefile->GetState()->IsPropertyChained(prop, cmProperty::TEST);
     if (chain) {
-      if (cmProp p = this->Makefile->GetProperty(prop, chain)) {
+      if (cmValue p = this->Makefile->GetProperty(prop, chain)) {
         return p;
       }
     }
@@ -57,7 +58,7 @@ void cmTest::SetProperty(const std::string& prop, const char* value)
 {
   this->Properties.SetProperty(prop, value);
 }
-void cmTest::SetProperty(const std::string& prop, cmProp value)
+void cmTest::SetProperty(const std::string& prop, cmValue value)
 {
   this->Properties.SetProperty(prop, value);
 }

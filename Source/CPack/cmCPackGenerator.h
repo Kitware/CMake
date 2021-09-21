@@ -12,8 +12,8 @@
 #include "cm_sys_stat.h"
 
 #include "cmCPackComponentGroup.h"
-#include "cmProperty.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 class cmCPackLog;
 class cmGlobalGenerator;
@@ -87,16 +87,16 @@ public:
   void SetOption(const std::string& op, const char* value);
   void SetOption(const std::string& op, const std::string& value)
   {
-    this->SetOption(op, cmProp(value));
+    this->SetOption(op, cmValue(value));
   }
-  void SetOption(const std::string& op, cmProp value);
+  void SetOption(const std::string& op, cmValue value);
   void SetOptionIfNotSet(const std::string& op, const char* value);
   void SetOptionIfNotSet(const std::string& op, const std::string& value)
   {
-    this->SetOptionIfNotSet(op, cmProp(value));
+    this->SetOptionIfNotSet(op, cmValue(value));
   }
-  void SetOptionIfNotSet(const std::string& op, cmProp value);
-  cmProp GetOption(const std::string& op) const;
+  void SetOptionIfNotSet(const std::string& op, cmValue value);
+  cmValue GetOption(const std::string& op) const;
   std::vector<std::string> GetOptions() const;
   bool IsSet(const std::string& name) const;
   bool IsOn(const std::string& name) const;

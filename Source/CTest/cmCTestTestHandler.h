@@ -22,7 +22,7 @@
 #include "cmCTestResourceSpec.h"
 #include "cmDuration.h"
 #include "cmListFileCache.h"
-#include "cmProperty.h"
+#include "cmValue.h"
 
 class cmMakefile;
 class cmXMLWriter;
@@ -82,7 +82,7 @@ public:
   }
 
   //! pass the -I argument down
-  void SetTestsToRunInformation(cmProp);
+  void SetTestsToRunInformation(cmValue);
 
   cmCTestTestHandler();
 

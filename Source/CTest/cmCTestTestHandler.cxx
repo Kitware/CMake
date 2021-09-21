@@ -38,12 +38,12 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
+#include "cmValue.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
@@ -521,7 +521,7 @@ bool cmCTestTestHandler::ProcessOptions()
   if (cmIsOn(this->GetOption("ScheduleRandom"))) {
     this->CTest->SetScheduleType("Random");
   }
-  if (cmProp repeat = this->GetOption("Repeat")) {
+  if (cmValue repeat = this->GetOption("Repeat")) {
     cmsys::RegularExpression repeatRegex(
       "^(UNTIL_FAIL|UNTIL_PASS|AFTER_TIMEOUT):([0-9]+)$");
     if (repeatRegex.find(repeat)) {
@@ -557,7 +557,7 @@ bool cmCTestTestHandler::ProcessOptions()
                this->IncludeLabelRegularExpressions);
   BuildLabelRE(this->GetMultiOption("ExcludeLabelRegularExpression"),
                this->ExcludeLabelRegularExpressions);
-  cmProp val = this->GetOption("IncludeRegularExpression");
+  cmValue val = this->GetOption("IncludeRegularExpression");
   if (val) {
     this->UseIncludeRegExp();
     this->SetIncludeRegExp(val);
@@ -1829,7 +1829,7 @@ bool cmCTestTestHandler::GetListOfTests()
     // SEND_ERROR or FATAL_ERROR in CTestTestfile or TEST_INCLUDE_FILES
     return false;
   }
-  cmProp specFile = mf.GetDefinition("CTEST_RESOURCE_SPEC_FILE");
+  cmValue specFile = mf.GetDefinition("CTEST_RESOURCE_SPEC_FILE");
   if (this->ResourceSpecFile.empty() && specFile) {
     this->ResourceSpecFile = *specFile;
   }
@@ -2091,7 +2091,7 @@ void cmCTestTestHandler::SetExcludeRegExp(const std::string& arg)
   this->ExcludeRegExp = arg;
 }
 
-void cmCTestTestHandler::SetTestsToRunInformation(cmProp in)
+void cmCTestTestHandler::SetTestsToRunInformation(cmValue in)
 {
   if (!in) {
     return;

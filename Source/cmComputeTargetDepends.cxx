@@ -17,7 +17,6 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocationKind.h"
@@ -27,6 +26,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 /*
@@ -469,7 +469,7 @@ void cmComputeTargetDepends::ComputeIntermediateGraph()
         gt->GetType() != cmStateEnums::OBJECT_LIBRARY) {
       intermediateEdges = initialEdges;
     } else {
-      if (cmProp optimizeDependencies =
+      if (cmValue optimizeDependencies =
             gt->GetProperty("OPTIMIZE_DEPENDENCIES")) {
         if (cmIsOn(optimizeDependencies)) {
           this->OptimizeLinkDependencies(gt, intermediateEdges, initialEdges);

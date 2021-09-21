@@ -17,11 +17,11 @@
 #include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -232,7 +232,7 @@ void cmGraphVizWriter::ReadSettings(
 
 #define set_if_set(var, cmakeDefinition)                                      \
   do {                                                                        \
-    cmProp value = mf.GetDefinition(cmakeDefinition);                         \
+    cmValue value = mf.GetDefinition(cmakeDefinition);                        \
     if (value) {                                                              \
       (var) = *value;                                                         \
     }                                                                         \
@@ -244,7 +244,7 @@ void cmGraphVizWriter::ReadSettings(
 
 #define set_bool_if_set(var, cmakeDefinition)                                 \
   do {                                                                        \
-    cmProp value = mf.GetDefinition(cmakeDefinition);                         \
+    cmValue value = mf.GetDefinition(cmakeDefinition);                        \
     if (value) {                                                              \
       (var) = cmIsOn(*value);                                                 \
     }                                                                         \

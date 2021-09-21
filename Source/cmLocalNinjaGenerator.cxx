@@ -27,7 +27,6 @@
 #include "cmMessageType.h"
 #include "cmNinjaTargetGenerator.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -35,6 +34,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
@@ -311,7 +311,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
 
-  cmProp jobpools =
+  cmValue jobpools =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("JOB_POOLS");
   if (!jobpools) {
     jobpools = this->GetMakefile()->GetDefinition("CMAKE_JOB_POOLS");
@@ -869,7 +869,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements(
 std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   cmCustomCommandGenerator const& ccg)
 {
-  cmProp property_value = this->Makefile->GetProperty("RULE_LAUNCH_CUSTOM");
+  cmValue property_value = this->Makefile->GetProperty("RULE_LAUNCH_CUSTOM");
 
   if (!cmNonempty(property_value)) {
     return std::string();
@@ -903,7 +903,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
 
 void cmLocalNinjaGenerator::AdditionalCleanFiles(const std::string& config)
 {
-  if (cmProp prop_value =
+  if (cmValue prop_value =
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     std::vector<std::string> cleanFiles;
     {

@@ -21,7 +21,7 @@ cmCPackIFWCommon::cmCPackIFWCommon()
 {
 }
 
-cmProp cmCPackIFWCommon::GetOption(const std::string& op) const
+cmValue cmCPackIFWCommon::GetOption(const std::string& op) const
 {
   return this->Generator ? this->Generator->cmCPackGenerator::GetOption(op)
                          : nullptr;

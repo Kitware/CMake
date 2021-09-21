@@ -18,11 +18,11 @@
 #include "cmLocalGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
@@ -99,7 +99,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
   /* set the build tool to use */
   std::string gbuild(tsp + ((tsp.back() == '/') ? "" : "/") +
                      DEFAULT_BUILD_PROGRAM);
-  cmProp prevTool = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
+  cmValue prevTool = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
 
   /* check if the toolset changed from last generate */
   if (prevTool && (gbuild != *prevTool)) {
@@ -215,7 +215,7 @@ bool cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* /*mf*/)
 void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsd,
                                            const std::string& ts)
 {
-  cmProp ghsRoot = mf->GetDefinition("GHS_TOOLSET_ROOT");
+  cmValue ghsRoot = mf->GetDefinition("GHS_TOOLSET_ROOT");
 
   if (cmNonempty(ghsRoot)) {
     tsd = *ghsRoot;
@@ -333,7 +333,7 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
   fout << "# Top Level Project File\n";
 
   // Specify BSP option if supplied by user
-  cmProp bspName =
+  cmValue bspName =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_BSP_NAME");
   if (!cmIsOff(bspName)) {
     fout << "    -bsp " << *bspName << '\n';
@@ -342,7 +342,7 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
   // Specify OS DIR if supplied by user
   // -- not all platforms require this entry in the project file
   if (!cmIsOff(this->OsDir)) {
-    cmProp osDirOption =
+    cmValue osDirOption =
       this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR_OPTION");
     std::replace(this->OsDir.begin(), this->OsDir.end(), '\\', '/');
     fout << "    ";
@@ -377,8 +377,8 @@ void cmGlobalGhsMultiGenerator::WriteProjectLine(
   std::ostream& fout, cmGeneratorTarget const* target,
   std::string& rootBinaryDir)
 {
-  cmProp projName = target->GetProperty("GENERATOR_FILE_NAME");
-  cmProp projType = target->GetProperty("GENERATOR_FILE_NAME_EXT");
+  cmValue projName = target->GetProperty("GENERATOR_FILE_NAME");
+  cmValue projType = target->GetProperty("GENERATOR_FILE_NAME_EXT");
   if (projName && projType) {
     cmLocalGenerator* lg = target->GetLocalGenerator();
     std::string dir = lg->GetCurrentBinaryDirectory();
@@ -563,7 +563,7 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
 {
   GeneratedMakeCommand makeCommand = {};
   std::string gbuild;
-  if (cmProp gbuildCached =
+  if (cmValue gbuildCached =
         this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM")) {
     gbuild = *gbuildCached;
   }
@@ -616,7 +616,7 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
                                             cmLocalGenerator* root)
 {
   fout << "macro PROJ_NAME=" << root->GetProjectName() << '\n';
-  cmProp ghsGpjMacros =
+  cmValue ghsGpjMacros =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_GPJ_MACROS");
   if (ghsGpjMacros) {
     std::vector<std::string> expandedList = cmExpandedList(*ghsGpjMacros);
@@ -631,15 +631,15 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
 {
   /* set primary target */
   std::string tgt;
-  cmProp t =
+  cmValue t =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_PRIMARY_TARGET");
   if (cmNonempty(t)) {
     tgt = *t;
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_PRIMARY_TARGET");
   } else {
-    cmProp a =
+    cmValue a =
       this->GetCMakeInstance()->GetCacheDefinition("CMAKE_GENERATOR_PLATFORM");
-    cmProp p =
+    cmValue p =
       this->GetCMakeInstance()->GetCacheDefinition("GHS_TARGET_PLATFORM");
     tgt = cmStrCat((a ? *a : ""), '_', (p ? *p : ""), ".tgt");
   }
@@ -652,7 +652,7 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
        << "/CMakeFiles/custom_target.bod" << '\n';
   /* clang-format on */
 
-  cmProp const customization =
+  cmValue const customization =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");
   if (cmNonempty(customization)) {
     fout << "customization="

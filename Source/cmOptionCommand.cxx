@@ -6,11 +6,11 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 // cmOptionCommand
 bool cmOptionCommand(std::vector<std::string> const& args,
@@ -53,7 +53,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   // See if a cache variable with this name already exists
   // If so just make sure the doc state is correct
   cmState* state = status.GetMakefile().GetState();
-  cmProp existingValue = state->GetCacheEntryValue(args[0]);
+  cmValue existingValue = state->GetCacheEntryValue(args[0]);
   if (existingValue &&
       (state->GetCacheEntryType(args[0]) != cmStateEnums::UNINITIALIZED)) {
     state->SetCacheEntryProperty(args[0], "HELPSTRING", args[1]);

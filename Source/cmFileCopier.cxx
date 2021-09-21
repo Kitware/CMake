@@ -10,9 +10,9 @@
 #include "cmFSPermissions.h"
 #include "cmFileTimes.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 #ifdef _WIN32
 #  include "cmsys/FStream.hxx"
@@ -172,7 +172,7 @@ void cmFileCopier::DefaultDirectoryPermissions()
 bool cmFileCopier::GetDefaultDirectoryPermissions(mode_t** mode)
 {
   // check if default dir creation permissions were set
-  cmProp default_dir_install_permissions = this->Makefile->GetDefinition(
+  cmValue default_dir_install_permissions = this->Makefile->GetDefinition(
     "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
   if (cmNonempty(default_dir_install_permissions)) {
     std::vector<std::string> items =

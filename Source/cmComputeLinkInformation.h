@@ -14,7 +14,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmListFileCache.h"
-#include "cmProperty.h"
+#include "cmValue.h"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;
@@ -138,7 +138,7 @@ private:
     SharedDepModeLink    // List file on link line
   };
 
-  cmProp LoaderFlag;
+  cmValue LoaderFlag;
   std::string LibLinkFlag;
   std::string LibLinkFileFlag;
   std::string ObjLinkFileFlag;

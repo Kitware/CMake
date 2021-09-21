@@ -8,9 +8,9 @@
 
 #include "cmFindCommon.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
   : FC(findCmd)
@@ -78,7 +78,7 @@ void cmSearchPath::AddCMakePath(const std::string& variable)
   assert(this->FC != nullptr);
 
   // Get a path from a CMake variable.
-  if (cmProp value = this->FC->Makefile->GetDefinition(variable)) {
+  if (cmValue value = this->FC->Makefile->GetDefinition(variable)) {
     std::vector<std::string> expanded = cmExpandedList(*value);
 
     for (std::string const& p : expanded) {
@@ -102,7 +102,7 @@ void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
   assert(this->FC != nullptr);
 
   // Get a path from a CMake variable.
-  if (cmProp value = this->FC->Makefile->GetDefinition(variable)) {
+  if (cmValue value = this->FC->Makefile->GetDefinition(variable)) {
     std::vector<std::string> expanded = cmExpandedList(*value);
 
     this->AddPrefixPaths(
@@ -179,7 +179,7 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
       dir += "/";
     }
     if (subdir == "include" || subdir == "lib") {
-      cmProp arch =
+      cmValue arch =
         this->FC->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE");
       if (cmNonempty(arch)) {
         if (this->FC->Makefile->IsDefinitionSet("CMAKE_SYSROOT") &&

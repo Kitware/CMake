@@ -33,7 +33,7 @@ protected:
     const std::string& platformMapping = "") override;
   void WriteExternalProject(
     std::ostream& fout, const std::string& name, const std::string& path,
-    cmProp typeGuid,
+    cmValue typeGuid,
     const std::set<BT<std::pair<std::string, bool>>>& depends) override;
 
   // Folders are not supported by VS 7.1.

@@ -29,10 +29,10 @@
 #include "cmMessageType.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmValue.h"
 
 // IWYU does not see that 'std::unordered_map<std::string, cmTarget>'
 // will not compile without the complete type.
@@ -286,7 +286,7 @@ public:
    * can be used in CMake to refer to lists, directories, etc.
    */
   void AddDefinition(const std::string& name, cm::string_view value);
-  void AddDefinition(const std::string& name, cmProp value)
+  void AddDefinition(const std::string& name, cmValue value)
   {
     this->AddDefinition(name, *value);
   }
@@ -492,7 +492,7 @@ public:
    * If the variable is not found in this makefile instance, the
    * cache is then queried.
    */
-  cmProp GetDefinition(const std::string&) const;
+  cmValue GetDefinition(const std::string&) const;
   const std::string& GetSafeDefinition(const std::string&) const;
   const std::string& GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
@@ -772,15 +772,15 @@ public:
 
   //! Set/Get a property of this directory
   void SetProperty(const std::string& prop, const char* value);
-  void SetProperty(const std::string& prop, cmProp value);
+  void SetProperty(const std::string& prop, cmValue value);
   void SetProperty(const std::string& prop, const std::string& value)
   {
-    this->SetProperty(prop, cmProp(value));
+    this->SetProperty(prop, cmValue(value));
   }
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
-  cmProp GetProperty(const std::string& prop) const;
-  cmProp GetProperty(const std::string& prop, bool chain) const;
+  cmValue GetProperty(const std::string& prop) const;
+  cmValue GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
 

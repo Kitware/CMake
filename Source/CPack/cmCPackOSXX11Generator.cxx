@@ -10,9 +10,9 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmCPackOSXX11Generator::cmCPackOSXX11Generator() = default;
 
@@ -23,7 +23,7 @@ int cmCPackOSXX11Generator::PackageFiles()
   // TODO: Use toplevel ?
   //       It is used! Is this an obsolete comment?
 
-  cmProp cpackPackageExecutables =
+  cmValue cpackPackageExecutables =
     this->GetOption("CPACK_PACKAGE_EXECUTABLES");
   if (cpackPackageExecutables) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
@@ -70,7 +70,7 @@ int cmCPackOSXX11Generator::PackageFiles()
   const char* scrDir = scriptDirectory.c_str();
   const char* contDir = contentsDirectory.c_str();
   const char* rsrcFile = resourceFileName.c_str();
-  cmProp iconFile = this->GetOption("CPACK_PACKAGE_ICON");
+  cmValue iconFile = this->GetOption("CPACK_PACKAGE_ICON");
   if (iconFile) {
     std::string iconFileName = cmsys::SystemTools::GetFilenameName(iconFile);
     if (!cmSystemTools::FileExists(iconFile)) {

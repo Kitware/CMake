@@ -42,7 +42,7 @@ bool cmGlobalNMakeMakefileGenerator::FindMakeProgram(cmMakefile* mf)
   if (!this->cmGlobalGenerator::FindMakeProgram(mf)) {
     return false;
   }
-  if (cmProp nmakeCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
+  if (cmValue nmakeCommand = mf->GetDefinition("CMAKE_MAKE_PROGRAM")) {
     std::vector<std::string> command{ *nmakeCommand, "-?" };
     std::string out;
     std::string err;
@@ -81,7 +81,7 @@ void cmGlobalNMakeMakefileGenerator::GetDocumentation(
 }
 
 void cmGlobalNMakeMakefileGenerator::PrintCompilerAdvice(
-  std::ostream& os, std::string const& lang, cmProp envVar) const
+  std::ostream& os, std::string const& lang, cmValue envVar) const
 {
   if (lang == "CXX" || lang == "C") {
     /* clang-format off */

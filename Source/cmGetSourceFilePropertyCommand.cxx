@@ -4,9 +4,9 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmSetPropertyCommand.h"
 #include "cmSourceFile.h"
+#include "cmValue.h"
 
 bool cmGetSourceFilePropertyCommand(std::vector<std::string> const& args,
                                     cmExecutionStatus& status)
@@ -58,7 +58,7 @@ bool cmGetSourceFilePropertyCommand(std::vector<std::string> const& args,
   }
 
   if (sf) {
-    cmProp prop = nullptr;
+    cmValue prop = nullptr;
     if (!args[property_arg_index].empty()) {
       prop = sf->GetPropertyForUser(args[property_arg_index]);
     }

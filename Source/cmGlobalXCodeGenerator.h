@@ -327,7 +327,7 @@ private:
   bool XcodeBuildCommandInitialized;
 
   void PrintCompilerAdvice(std::ostream&, std::string const&,
-                           cmProp) const override
+                           cmValue) const override
   {
   }
 

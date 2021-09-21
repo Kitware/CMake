@@ -519,7 +519,7 @@ std::string cmGlobalVisualStudioGenerator::GetUtilityDepend(
 std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
   cmLocalGenerator const* root) const
 {
-  cmProp n = root->GetMakefile()->GetProperty("VS_STARTUP_PROJECT");
+  cmValue n = root->GetMakefile()->GetProperty("VS_STARTUP_PROJECT");
   if (cmNonempty(n)) {
     std::string startup = *n;
     if (this->FindTarget(startup)) {
@@ -820,7 +820,7 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   // This allows the project to control the language choice in
   // a target with none of its own sources, e.g. when also using
   // object libraries.
-  cmProp linkLang = gt->GetProperty("LINKER_LANGUAGE");
+  cmValue linkLang = gt->GetProperty("LINKER_LANGUAGE");
   if (cmNonempty(linkLang)) {
     languages.insert(*linkLang);
   }

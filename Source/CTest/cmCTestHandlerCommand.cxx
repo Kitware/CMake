@@ -14,9 +14,9 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmWorkingDirectory.h"
 
 namespace {
@@ -126,7 +126,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   // CTEST_CONFIGURATION_TYPE script variable if it is defined.
   // The current script value trumps the -C argument on the command
   // line.
-  cmProp ctestConfigType =
+  cmValue ctestConfigType =
     this->Makefile->GetDefinition("CTEST_CONFIGURATION_TYPE");
   if (ctestConfigType) {
     this->CTest->SetConfigType(*ctestConfigType);
@@ -161,7 +161,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
       this->Quiet);
   }
 
-  if (cmProp changeId = this->Makefile->GetDefinition("CTEST_CHANGE_ID")) {
+  if (cmValue changeId = this->Makefile->GetDefinition("CTEST_CHANGE_ID")) {
     this->CTest->SetCTestConfiguration("ChangeId", *changeId, this->Quiet);
   }
 

@@ -20,12 +20,12 @@
 #include "cmMakefile.h"
 #include "cmMakefileTargetGenerator.h"
 #include "cmOutputConverter.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetDepend.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3(cmake* cm)
@@ -684,7 +684,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       }
 
       bool targetMessages = true;
-      if (cmProp tgtMsg =
+      if (cmValue tgtMsg =
             this->GetCMakeInstance()->GetState()->GetGlobalProperty(
               "TARGET_MESSAGES")) {
         targetMessages = cmIsOn(*tgtMsg);

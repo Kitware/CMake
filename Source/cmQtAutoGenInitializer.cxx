@@ -37,7 +37,6 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenGlobalInitializer.h"
 #include "cmSourceFile.h"
@@ -48,6 +47,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -356,7 +356,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
   // Targets FOLDER
   {
-    cmProp folder =
+    cmValue folder =
       this->Makefile->GetState()->GetGlobalProperty("AUTOMOC_TARGETS_FOLDER");
     if (!folder) {
       folder = this->Makefile->GetState()->GetGlobalProperty(
@@ -1790,7 +1790,7 @@ void cmQtAutoGenInitializer::AddToSourceGroup(std::string const& fileName,
         cmStrCat(genNameUpper, "_SOURCE_GROUP"), "AUTOGEN_SOURCE_GROUP"
       };
       for (std::string const& prop : props) {
-        cmProp propName = this->Makefile->GetState()->GetGlobalProperty(prop);
+        cmValue propName = this->Makefile->GetState()->GetGlobalProperty(prop);
         if (cmNonempty(propName)) {
           groupName = *propName;
           property = prop;
@@ -1920,7 +1920,7 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target,
     }
     return 0u;
   };
-  auto toUInt2 = [](cmProp input) -> unsigned int {
+  auto toUInt2 = [](cmValue input) -> unsigned int {
     unsigned long tmp = 0;
     if (input && cmStrToULong(*input, &tmp)) {
       return static_cast<unsigned int>(tmp);
@@ -1948,8 +1948,8 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target,
     knownQtVersions.reserve(keys.size() * 2);
 
     // Adds a version to the result (nullptr safe)
-    auto addVersion = [&knownQtVersions, &toUInt2](cmProp major,
-                                                   cmProp minor) {
+    auto addVersion = [&knownQtVersions, &toUInt2](cmValue major,
+                                                   cmValue minor) {
       cmQtAutoGen::IntegerVersion ver(toUInt2(major), toUInt2(minor));
       if (ver.Major != 0) {
         knownQtVersions.emplace_back(ver);

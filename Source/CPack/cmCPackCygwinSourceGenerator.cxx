@@ -8,8 +8,8 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 // Includes needed for implementation of RenameFile.  This is not in
@@ -95,7 +95,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   }
   std::string outerTarFile =
     cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), '-');
-  cmProp patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
+  cmValue patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
   if (!patch) {
     cmCPackLogger(cmCPackLog::LOG_WARNING,
                   "CPACK_CYGWIN_PATCH_NUMBER"
@@ -147,7 +147,7 @@ const char* cmCPackCygwinSourceGenerator::GetPackagingInstallPrefix()
 const char* cmCPackCygwinSourceGenerator::GetOutputExtension()
 {
   this->OutputExtension = "-";
-  cmProp patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
+  cmValue patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
   if (!patch) {
     cmCPackLogger(cmCPackLog::LOG_WARNING,
                   "CPACK_CYGWIN_PATCH_NUMBER"

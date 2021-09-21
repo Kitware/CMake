@@ -1,5 +1,5 @@
 
-#include "cmProperty.h"
+#include "cmValue.h"
 
 #include <string>
 
@@ -7,9 +7,9 @@
 
 #include "cmStringAlgorithms.h"
 
-std::string cmProp::Empty;
+std::string cmValue::Empty;
 
-bool cmProp::IsOn(cm::string_view value) noexcept
+bool cmValue::IsOn(cm::string_view value) noexcept
 {
   switch (value.size()) {
     case 1:
@@ -36,7 +36,7 @@ bool cmProp::IsOn(cm::string_view value) noexcept
   return false;
 }
 
-bool cmProp::IsOff(cm::string_view value) noexcept
+bool cmValue::IsOff(cm::string_view value) noexcept
 {
   switch (value.size()) {
     case 0:
@@ -73,12 +73,12 @@ bool cmProp::IsOff(cm::string_view value) noexcept
 
   return IsNOTFOUND(value);
 }
-bool cmProp::IsNOTFOUND(cm::string_view value) noexcept
+bool cmValue::IsNOTFOUND(cm::string_view value) noexcept
 {
   return (value == "NOTFOUND"_s) || cmHasSuffix(value, "-NOTFOUND"_s);
 }
 
-int cmProp::Compare(cmProp value) const noexcept
+int cmValue::Compare(cmValue value) const noexcept
 {
   if (this->Value == nullptr && !value) {
     return 0;
@@ -92,7 +92,7 @@ int cmProp::Compare(cmProp value) const noexcept
   return this->Value->compare(*value);
 }
 
-int cmProp::Compare(cm::string_view value) const noexcept
+int cmValue::Compare(cm::string_view value) const noexcept
 {
   if (this->Value == nullptr && value.data() == nullptr) {
     return 0;
@@ -106,7 +106,7 @@ int cmProp::Compare(cm::string_view value) const noexcept
   return cm::string_view(*this->Value).compare(value);
 }
 
-std::ostream& operator<<(std::ostream& o, cmProp v)
+std::ostream& operator<<(std::ostream& o, cmValue v)
 {
   o << *v;
   return o;

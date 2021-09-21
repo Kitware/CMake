@@ -14,8 +14,8 @@
 #include "cmArchiveWrite.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
-#include "cmProperty.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmCPackSTGZGenerator::cmCPackSTGZGenerator()
   : cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip, "paxr", ".sh")

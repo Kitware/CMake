@@ -7,9 +7,9 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmXMLWriter.h"
 
 cmCPackPKGGenerator::cmCPackPKGGenerator()
@@ -57,7 +57,7 @@ void cmCPackPKGGenerator::CreateBackground(const char* themeName,
   std::string opt = (themeName == nullptr)
     ? cmStrCat("CPACK_", genName, "_BACKGROUND")
     : cmStrCat("CPACK_", genName, "_BACKGROUND_", paramSuffix);
-  cmProp bgFileName = this->GetOption(opt);
+  cmValue bgFileName = this->GetOption(opt);
   if (bgFileName == nullptr) {
     return;
   }
@@ -79,7 +79,7 @@ void cmCPackPKGGenerator::CreateBackground(const char* themeName,
 
   xout.Attribute("file", bgFileName);
 
-  cmProp param = this->GetOption(cmStrCat(opt, "_ALIGNMENT"));
+  cmValue param = this->GetOption(cmStrCat(opt, "_ALIGNMENT"));
   if (param != nullptr) {
     xout.Attribute("alignment", param);
   }
@@ -316,7 +316,7 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
 {
   std::string uname = cmSystemTools::UpperCase(name);
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
-  cmProp inFileName = this->GetOption(cpackVar);
+  cmValue inFileName = this->GetOption(cpackVar);
   if (!inFileName) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "CPack option: " << cpackVar.c_str()

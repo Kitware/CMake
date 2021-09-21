@@ -19,7 +19,7 @@ void cmPropertyMap::SetProperty(const std::string& name, const char* value)
 
   this->Map_[name] = value;
 }
-void cmPropertyMap::SetProperty(const std::string& name, cmProp value)
+void cmPropertyMap::SetProperty(const std::string& name, cmValue value)
 {
   if (!value) {
     this->Map_.erase(name);
@@ -51,11 +51,11 @@ void cmPropertyMap::RemoveProperty(const std::string& name)
   this->Map_.erase(name);
 }
 
-cmProp cmPropertyMap::GetPropertyValue(const std::string& name) const
+cmValue cmPropertyMap::GetPropertyValue(const std::string& name) const
 {
   auto it = this->Map_.find(name);
   if (it != this->Map_.end()) {
-    return cmProp(it->second);
+    return cmValue(it->second);
   }
   return nullptr;
 }

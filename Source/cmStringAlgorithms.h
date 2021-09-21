@@ -14,8 +14,8 @@
 
 #include <cm/string_view>
 
-#include "cmProperty.h"
 #include "cmRange.h"
+#include "cmValue.h"
 
 /** String range type.  */
 using cmStringRange = cmRange<std::vector<std::string>::const_iterator>;
@@ -94,7 +94,7 @@ std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
  */
 void cmExpandList(cm::string_view arg, std::vector<std::string>& argsOut,
                   bool emptyArgs = false);
-inline void cmExpandList(cmProp arg, std::vector<std::string>& argsOut,
+inline void cmExpandList(cmValue arg, std::vector<std::string>& argsOut,
                          bool emptyArgs = false)
 {
   if (arg) {
@@ -122,7 +122,7 @@ void cmExpandLists(InputIt first, InputIt last,
  */
 std::vector<std::string> cmExpandedList(cm::string_view arg,
                                         bool emptyArgs = false);
-inline std::vector<std::string> cmExpandedList(cmProp arg,
+inline std::vector<std::string> cmExpandedList(cmValue arg,
                                                bool emptyArgs = false)
 {
   if (!arg) {
@@ -177,7 +177,7 @@ public:
   cmAlphaNum(unsigned long long int val);
   cmAlphaNum(float val);
   cmAlphaNum(double val);
-  cmAlphaNum(cmProp value)
+  cmAlphaNum(cmValue value)
     : View_(*value)
   {
   }
@@ -232,7 +232,7 @@ inline bool cmIsInternallyOn(const char* val)
   }
   return cmIsInternallyOn(cm::string_view(val));
 }
-inline bool cmIsInternallyOn(cmProp val)
+inline bool cmIsInternallyOn(cmValue val)
 {
   if (!val) {
     return false;
@@ -243,13 +243,13 @@ inline bool cmIsInternallyOn(cmProp val)
 /** Check for non-empty Property/Variable value.  */
 inline bool cmNonempty(cm::string_view val)
 {
-  return !cmProp::IsEmpty(val);
+  return !cmValue::IsEmpty(val);
 }
 inline bool cmNonempty(const char* val)
 {
-  return !cmProp::IsEmpty(val);
+  return !cmValue::IsEmpty(val);
 }
-inline bool cmNonempty(cmProp val)
+inline bool cmNonempty(cmValue val)
 {
   return !val.IsEmpty();
 }
@@ -257,9 +257,9 @@ inline bool cmNonempty(cmProp val)
 /** Return true if value is NOTFOUND or ends in -NOTFOUND.  */
 inline bool cmIsNOTFOUND(cm::string_view val)
 {
-  return cmProp::IsNOTFOUND(val);
+  return cmValue::IsNOTFOUND(val);
 }
-inline bool cmIsNOTFOUND(cmProp val)
+inline bool cmIsNOTFOUND(cmValue val)
 {
   return val.IsNOTFOUND();
 }
@@ -269,13 +269,13 @@ inline bool cmIsNOTFOUND(cmProp val)
  */
 inline bool cmIsOn(cm::string_view val)
 {
-  return cmProp::IsOn(val);
+  return cmValue::IsOn(val);
 }
 inline bool cmIsOn(const char* val)
 {
-  return cmProp::IsOn(val);
+  return cmValue::IsOn(val);
 }
-inline bool cmIsOn(cmProp val)
+inline bool cmIsOn(cmValue val)
 {
   return val.IsOn();
 }
@@ -289,13 +289,13 @@ inline bool cmIsOn(cmProp val)
  */
 inline bool cmIsOff(cm::string_view val)
 {
-  return cmProp::IsOff(val);
+  return cmValue::IsOff(val);
 }
 inline bool cmIsOff(const char* val)
 {
-  return cmProp::IsOff(val);
+  return cmValue::IsOff(val);
 }
-inline bool cmIsOff(cmProp val)
+inline bool cmIsOff(cmValue val)
 {
   return val.IsOff();
 }
@@ -313,7 +313,7 @@ inline bool cmHasPrefix(cm::string_view str, cm::string_view prefix)
 }
 
 /** Returns true if string @a str starts with string @a prefix.  */
-inline bool cmHasPrefix(cm::string_view str, cmProp prefix)
+inline bool cmHasPrefix(cm::string_view str, cmValue prefix)
 {
   if (!prefix) {
     return false;
@@ -343,7 +343,7 @@ inline bool cmHasSuffix(cm::string_view str, cm::string_view suffix)
 }
 
 /** Returns true if string @a str ends with string @a suffix.  */
-inline bool cmHasSuffix(cm::string_view str, cmProp suffix)
+inline bool cmHasSuffix(cm::string_view str, cmValue suffix)
 {
   if (!suffix) {
     return false;

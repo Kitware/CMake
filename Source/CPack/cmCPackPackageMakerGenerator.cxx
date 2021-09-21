@@ -16,9 +16,9 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmXMLWriter.h"
 
 static inline unsigned int getVersion(unsigned int major, unsigned int minor)
@@ -80,9 +80,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     resDir += "/en.lproj";
   }
 
-  cmProp preflight = this->GetOption("CPACK_PREFLIGHT_SCRIPT");
-  cmProp postflight = this->GetOption("CPACK_POSTFLIGHT_SCRIPT");
-  cmProp postupgrade = this->GetOption("CPACK_POSTUPGRADE_SCRIPT");
+  cmValue preflight = this->GetOption("CPACK_PREFLIGHT_SCRIPT");
+  cmValue postflight = this->GetOption("CPACK_POSTFLIGHT_SCRIPT");
+  cmValue postupgrade = this->GetOption("CPACK_POSTUPGRADE_SCRIPT");
 
   if (this->Components.empty()) {
     // Create directory structure
@@ -168,7 +168,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
 
     // Create the directory where downloaded component packages will
     // be placed.
-    cmProp userUploadDirectory = this->GetOption("CPACK_UPLOAD_DIRECTORY");
+    cmValue userUploadDirectory = this->GetOption("CPACK_UPLOAD_DIRECTORY");
     std::string uploadDirectory;
     if (userUploadDirectory && !userUploadDirectory->empty()) {
       uploadDirectory = userUploadDirectory;
@@ -352,7 +352,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
                      "/PackageMaker.app/Contents/MacOS");
 
   std::string pkgPath;
-  cmProp inst_program = this->GetOption("CPACK_INSTALLER_PROGRAM");
+  cmValue inst_program = this->GetOption("CPACK_INSTALLER_PROGRAM");
   if (inst_program && !inst_program->empty()) {
     pkgPath = inst_program;
   } else {
@@ -427,7 +427,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   // Determine the package compatibility version. If it wasn't
   // specified by the user, we define it based on which features the
   // user requested.
-  cmProp packageCompat = this->GetOption("CPACK_OSX_PACKAGE_VERSION");
+  cmValue packageCompat = this->GetOption("CPACK_OSX_PACKAGE_VERSION");
   if (packageCompat && !packageCompat->empty()) {
     unsigned int majorVersion = 10;
     unsigned int minorVersion = 5;

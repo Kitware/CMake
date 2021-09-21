@@ -36,7 +36,7 @@ void SetMapValue(cmCTestGenericHandler::t_StringToString& map,
   map[op] = value;
 }
 void SetMapValue(cmCTestGenericHandler::t_StringToString& map,
-                 const std::string& op, cmProp value)
+                 const std::string& op, cmValue value)
 {
   if (!value) {
     map.erase(op);
@@ -51,7 +51,7 @@ void cmCTestGenericHandler::SetOption(const std::string& op, const char* value)
 {
   SetMapValue(this->Options, op, value);
 }
-void cmCTestGenericHandler::SetOption(const std::string& op, cmProp value)
+void cmCTestGenericHandler::SetOption(const std::string& op, cmValue value)
 {
   SetMapValue(this->Options, op, value);
 }
@@ -63,7 +63,7 @@ void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
   SetMapValue(this->PersistentOptions, op, value);
 }
 void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
-                                                cmProp value)
+                                                cmValue value)
 {
   this->SetOption(op, value);
   SetMapValue(this->PersistentOptions, op, value);
@@ -94,13 +94,13 @@ void cmCTestGenericHandler::Initialize()
   this->MultiOptions = this->PersistentMultiOptions;
 }
 
-cmProp cmCTestGenericHandler::GetOption(const std::string& op)
+cmValue cmCTestGenericHandler::GetOption(const std::string& op)
 {
   auto remit = this->Options.find(op);
   if (remit == this->Options.end()) {
     return nullptr;
   }
-  return cmProp(remit->second);
+  return cmValue(remit->second);
 }
 
 std::vector<std::string> cmCTestGenericHandler::GetMultiOption(

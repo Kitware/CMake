@@ -19,13 +19,13 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
@@ -189,7 +189,7 @@ void cmExtraEclipseCDT4Generator::CreateSettingsResourcePrefsFile()
   }
 
   fout << "eclipse.preferences.version=1\n";
-  cmProp encoding = mf->GetDefinition("CMAKE_ECLIPSE_RESOURCE_ENCODING");
+  cmValue encoding = mf->GetDefinition("CMAKE_ECLIPSE_RESOURCE_ENCODING");
   if (encoding) {
     fout << "encoding/<project>=" << *encoding << '\n';
   }
@@ -244,7 +244,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
   const bool envVarSet = cmSystemTools::GetEnv(envVar, envVarValue);
 
   std::string cacheEntryName = cmStrCat("CMAKE_ECLIPSE_ENVVAR_", envVar);
-  cmProp cacheValue = lg.GetState()->GetInitializedCacheValue(cacheEntryName);
+  cmValue cacheValue = lg.GetState()->GetInitializedCacheValue(cacheEntryName);
 
   // now we have both, decide which one to use
   std::string valueToUse;
@@ -415,7 +415,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     xml.Element("nature", n);
   }
 
-  if (cmProp extraNaturesProp =
+  if (cmValue extraNaturesProp =
         mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_NATURES")) {
     std::vector<std::string> extraNatures = cmExpandedList(*extraNaturesProp);
     for (std::string const& n : extraNatures) {
@@ -754,7 +754,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   emitted.clear();
   for (const auto& lgen : this->GlobalGenerator->GetLocalGenerators()) {
 
-    if (cmProp cdefs =
+    if (cmValue cdefs =
           lgen->GetMakefile()->GetProperty("COMPILE_DEFINITIONS")) {
       // Expand the list.
       std::vector<std::string> defs;
@@ -793,7 +793,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     }
   }
   // add system defined c macros
-  cmProp cDefs =
+  cmValue cDefs =
     mf->GetDefinition("CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS");
   if (this->CEnabled && cDefs) {
     // Expand the list.
@@ -825,7 +825,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     }
   }
   // add system defined c++ macros
-  cmProp cxxDefs =
+  cmValue cxxDefs =
     mf->GetDefinition("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_DEFINED_MACROS");
   if (this->CXXEnabled && cxxDefs) {
     // Expand the list.
@@ -1032,7 +1032,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   xml.EndElement(); // storageModule
 
   // Append additional cproject contents without applying any XML formatting
-  if (cmProp extraCProjectContents =
+  if (cmValue extraCProjectContents =
         mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_CPROJECT_CONTENTS")) {
     fout << *extraCProjectContents;
   }

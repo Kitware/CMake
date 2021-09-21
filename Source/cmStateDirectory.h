@@ -11,9 +11,9 @@
 #include "cmAlgorithms.h"
 #include "cmLinkedTree.h"
 #include "cmListFileCache.h"
-#include "cmProperty.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
+#include "cmValue.h"
 
 class cmStateDirectory
 {
@@ -56,12 +56,12 @@ public:
 
   void SetProperty(const std::string& prop, const char* value,
                    cmListFileBacktrace const& lfbt);
-  void SetProperty(const std::string& prop, cmProp value,
+  void SetProperty(const std::string& prop, cmValue value,
                    cmListFileBacktrace const& lfbt);
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString, cmListFileBacktrace const& lfbt);
-  cmProp GetProperty(const std::string& prop) const;
-  cmProp GetProperty(const std::string& prop, bool chain) const;
+  cmValue GetProperty(const std::string& prop) const;
+  cmValue GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
 

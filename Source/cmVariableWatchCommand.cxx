@@ -10,9 +10,9 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmVariableWatch.h"
 #include "cmake.h"
 
@@ -45,7 +45,7 @@ void cmVariableWatchCommandVariableAccessed(const std::string& variable,
 
   std::string stack = *mf->GetProperty("LISTFILE_STACK");
   if (!data->Command.empty()) {
-    cmProp const currentListFile =
+    cmValue const currentListFile =
       mf->GetDefinition("CMAKE_CURRENT_LIST_FILE");
     const auto fakeLineNo =
       std::numeric_limits<decltype(cmListFileArgument::Line)>::max();

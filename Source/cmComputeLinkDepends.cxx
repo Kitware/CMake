@@ -18,11 +18,11 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 /*
@@ -322,7 +322,7 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   } else {
     // Look for an old-style <item>_LIB_DEPENDS variable.
     std::string var = cmStrCat(entry.Item.Value, "_LIB_DEPENDS");
-    if (cmProp val = this->Makefile->GetDefinition(var)) {
+    if (cmValue val = this->Makefile->GetDefinition(var)) {
       // The item dependencies are known.  Follow them.
       BFSEntry qe = { index, val->c_str() };
       this->BFSQueue.push(qe);
@@ -489,7 +489,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
       // lower.
       if (!haveLLT) {
         std::string var = cmStrCat(d, "_LINK_TYPE");
-        if (cmProp val = this->Makefile->GetDefinition(var)) {
+        if (cmValue val = this->Makefile->GetDefinition(var)) {
           if (*val == "debug") {
             llt = DEBUG_LibraryType;
           } else if (*val == "optimized") {

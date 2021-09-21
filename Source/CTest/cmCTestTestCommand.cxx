@@ -12,8 +12,8 @@
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
+#include "cmValue.h"
 
 void cmCTestTestCommand::BindArguments()
 {
@@ -40,7 +40,7 @@ void cmCTestTestCommand::BindArguments()
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 {
-  cmProp ctestTimeout = this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
+  cmValue ctestTimeout = this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
 
   cmDuration timeout;
   if (ctestTimeout) {
@@ -54,7 +54,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
   this->CTest->SetTimeOut(timeout);
 
-  cmProp resourceSpecFile =
+  cmValue resourceSpecFile =
     this->Makefile->GetDefinition("CTEST_RESOURCE_SPEC_FILE");
   if (this->ResourceSpecFile.empty() && resourceSpecFile) {
     this->ResourceSpecFile = *resourceSpecFile;
@@ -114,7 +114,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   // or CTEST_TEST_LOAD script variable, or ctest --test-load
   // command line argument... in that order.
   unsigned long testLoad;
-  cmProp ctestTestLoad = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
+  cmValue ctestTestLoad = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
   if (!this->TestLoad.empty()) {
     if (!cmStrToULong(this->TestLoad, &testLoad)) {
       testLoad = 0;
@@ -134,7 +134,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
   handler->SetTestLoad(testLoad);
 
-  if (cmProp labelsForSubprojects =
+  if (cmValue labelsForSubprojects =
         this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
                                        *labelsForSubprojects, this->Quiet);

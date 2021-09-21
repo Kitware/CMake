@@ -18,9 +18,9 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmXMLWriter.h"
 
 #ifdef HAVE_CoreServices
@@ -261,7 +261,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
                                          const std::string& output_file)
 {
   // Get optional arguments ...
-  cmProp cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON");
+  cmValue cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON");
 
   const std::string cpack_dmg_volume_name =
     this->GetOption("CPACK_DMG_VOLUME_NAME")
@@ -281,14 +281,14 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   std::string cpack_license_file =
     *this->GetOption("CPACK_RESOURCE_FILE_LICENSE");
 
-  cmProp cpack_dmg_background_image =
+  cmValue cpack_dmg_background_image =
     this->GetOption("CPACK_DMG_BACKGROUND_IMAGE");
 
-  cmProp cpack_dmg_ds_store = this->GetOption("CPACK_DMG_DS_STORE");
+  cmValue cpack_dmg_ds_store = this->GetOption("CPACK_DMG_DS_STORE");
 
-  cmProp cpack_dmg_languages = this->GetOption("CPACK_DMG_SLA_LANGUAGES");
+  cmValue cpack_dmg_languages = this->GetOption("CPACK_DMG_SLA_LANGUAGES");
 
-  cmProp cpack_dmg_ds_store_setup_script =
+  cmValue cpack_dmg_ds_store_setup_script =
     this->GetOption("CPACK_DMG_DS_STORE_SETUP_SCRIPT");
 
   const bool cpack_dmg_disable_applications_symlink =
@@ -706,7 +706,7 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
     // the current COMPONENT belongs to.
     std::string groupVar =
       "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
-    cmProp _groupName = this->GetOption(groupVar);
+    cmValue _groupName = this->GetOption(groupVar);
     if (_groupName) {
       std::string groupName = _groupName;
 

@@ -12,11 +12,11 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 class cmExecutionStatus;
 
@@ -46,7 +46,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 
   // add custom lib<qual> paths instead of using fixed lib32, lib64 or
   // libx32
-  if (cmProp customLib = this->Makefile->GetDefinition(
+  if (cmValue customLib = this->Makefile->GetDefinition(
         "CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX")) {
     this->AddArchitecturePaths(customLib->c_str());
   }
@@ -268,7 +268,7 @@ std::string const& get_prefixes(cmMakefile* mf)
 #else
   static std::string defaultPrefix = "lib";
 #endif
-  cmProp prefixProp = mf->GetDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
+  cmValue prefixProp = mf->GetDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
   return (prefixProp) ? *prefixProp : defaultPrefix;
 }
 
@@ -283,7 +283,7 @@ std::string const& get_suffixes(cmMakefile* mf)
 #else
   static std::string defaultSuffix = ".so;.a";
 #endif
-  cmProp suffixProp = mf->GetDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
+  cmValue suffixProp = mf->GetDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
   return (suffixProp) ? *suffixProp : defaultSuffix;
 }
 }

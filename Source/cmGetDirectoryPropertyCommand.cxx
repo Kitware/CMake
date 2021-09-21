@@ -7,14 +7,14 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 namespace {
 void StoreResult(cmMakefile& makefile, std::string const& variable,
                  const char* prop);
 void StoreResult(cmMakefile& makefile, std::string const& variable,
-                 cmProp prop);
+                 cmValue prop);
 }
 
 // cmGetDirectoryPropertyCommand
@@ -106,7 +106,7 @@ void StoreResult(cmMakefile& makefile, std::string const& variable,
   makefile.AddDefinition(variable, prop ? prop : "");
 }
 void StoreResult(cmMakefile& makefile, std::string const& variable,
-                 cmProp prop)
+                 cmValue prop)
 {
   makefile.AddDefinition(variable, prop);
 }

@@ -47,7 +47,6 @@
 #include "cmMessageType.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmRuntimeDependencyArchive.h"
 #include "cmState.h"
@@ -55,6 +54,7 @@
 #include "cmSubcommandTable.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
+#include "cmValue.h"
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
 
@@ -1766,7 +1766,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   std::string logVar;
   std::string statusVar;
   bool tls_verify = status.GetMakefile().IsOn("CMAKE_TLS_VERIFY");
-  cmProp cainfo = status.GetMakefile().GetDefinition("CMAKE_TLS_CAINFO");
+  cmValue cainfo = status.GetMakefile().GetDefinition("CMAKE_TLS_CAINFO");
   std::string netrc_level =
     status.GetMakefile().GetSafeDefinition("CMAKE_NETRC");
   std::string netrc_file =
@@ -1821,7 +1821,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     } else if (*i == "TLS_CAINFO") {
       ++i;
       if (i != args.end()) {
-        cainfo = cmProp(*i);
+        cainfo = cmValue(*i);
       } else {
         status.SetError("DOWNLOAD missing file value for TLS_CAINFO.");
         return false;
@@ -2152,7 +2152,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   std::string statusVar;
   bool showProgress = false;
   bool tls_verify = status.GetMakefile().IsOn("CMAKE_TLS_VERIFY");
-  cmProp cainfo = status.GetMakefile().GetDefinition("CMAKE_TLS_CAINFO");
+  cmValue cainfo = status.GetMakefile().GetDefinition("CMAKE_TLS_CAINFO");
   std::string userpwd;
   std::string netrc_level =
     status.GetMakefile().GetSafeDefinition("CMAKE_NETRC");
@@ -2205,7 +2205,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
     } else if (*i == "TLS_CAINFO") {
       ++i;
       if (i != args.end()) {
-        cainfo = cmProp(*i);
+        cainfo = cmValue(*i);
       } else {
         status.SetError("UPLOAD missing file value for TLS_CAINFO.");
         return false;

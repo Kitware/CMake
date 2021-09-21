@@ -239,7 +239,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKMaxVersion(
 {
   // if the given value is set, it can either be OFF/FALSE or a valid SDK
   // string
-  if (cmProp value = mf->GetDefinition(
+  if (cmValue value = mf->GetDefinition(
         "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION_MAXIMUM")) {
 
     // If the value is some off/false value, then there is NO maximum set.
