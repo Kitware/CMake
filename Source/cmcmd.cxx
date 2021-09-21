@@ -1068,6 +1068,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         } else if (!cmSystemTools::FileExists(arg)) {
           cmSystemTools::Error(arg + ": no such file or directory (ignoring)");
           return_value = 1;
+        } else if (cmSystemTools::FileLength(arg) == 0) {
+          // Ignore empty files, this is not an error
         } else {
           // Destroy console buffers to drop cout/cerr encoding transform.
           consoleBuf.reset();
