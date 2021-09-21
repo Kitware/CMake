@@ -7,7 +7,6 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 

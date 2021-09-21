@@ -234,3 +234,81 @@ inline bool operator>=(cmValue l, std::nullptr_t) noexcept
 {
   return l.Compare(cmValue{}) >= 0;
 }
+
+/**
+ * Does a string indicate a true or ON value? This is not the same as ifdef.
+ */
+inline bool cmIsOn(cm::string_view val)
+{
+  return cmValue::IsOn(val);
+}
+inline bool cmIsOn(const char* val)
+{
+  return cmValue::IsOn(val);
+}
+inline bool cmIsOn(cmValue val)
+{
+  return val.IsOn();
+}
+
+/**
+ * Does a string indicate a false or off value ? Note that this is
+ * not the same as !IsOn(...) because there are a number of
+ * ambiguous values such as "/usr/local/bin" a path will result in
+ * IsON and IsOff both returning false. Note that the special path
+ * NOTFOUND, *-NOTFOUND or IGNORE will cause IsOff to return true.
+ */
+inline bool cmIsOff(cm::string_view val)
+{
+  return cmValue::IsOff(val);
+}
+inline bool cmIsOff(const char* val)
+{
+  return cmValue::IsOff(val);
+}
+inline bool cmIsOff(cmValue val)
+{
+  return val.IsOff();
+}
+
+/** Return true if value is NOTFOUND or ends in -NOTFOUND.  */
+inline bool cmIsNOTFOUND(cm::string_view val)
+{
+  return cmValue::IsNOTFOUND(val);
+}
+inline bool cmIsNOTFOUND(cmValue val)
+{
+  return val.IsNOTFOUND();
+}
+
+/** Check for non-empty Property/Variable value.  */
+inline bool cmNonempty(cm::string_view val)
+{
+  return !cmValue::IsEmpty(val);
+}
+inline bool cmNonempty(const char* val)
+{
+  return !cmValue::IsEmpty(val);
+}
+inline bool cmNonempty(cmValue val)
+{
+  return !val.IsEmpty();
+}
+
+/**
+ * Does a string indicates that CMake/CPack/CTest internally
+ * forced this value. This is not the same as On, but this
+ * may be considered as "internally switched on".
+ */
+inline bool cmIsInternallyOn(cm::string_view val)
+{
+  return cmValue::IsInternallyOn(val);
+}
+inline bool cmIsInternallyOn(const char* val)
+{
+  return cmValue::IsInternallyOn(val);
+}
+inline bool cmIsInternallyOn(cmValue val)
+{
+  return val.IsInternallyOn();
+}

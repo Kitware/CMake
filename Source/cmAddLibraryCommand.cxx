@@ -12,6 +12,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 bool cmAddLibraryCommand(std::vector<std::string> const& args,
                          cmExecutionStatus& status)

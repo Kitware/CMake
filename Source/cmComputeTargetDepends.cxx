@@ -22,7 +22,6 @@
 #include "cmSourceFileLocationKind.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
