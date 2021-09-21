@@ -866,6 +866,11 @@ private:
   mutable std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
 
+  using TargetPtrToBoolMap = std::unordered_map<cmTarget*, bool>;
+  mutable std::unordered_map<std::string, TargetPtrToBoolMap>
+    MacOSXRpathInstallNameDirCache;
+  bool DetermineHasMacOSXRpathInstallNameDir(const std::string& config) const;
+
   // "config/language" is the key
   mutable std::map<std::string, std::vector<std::string>> SystemIncludesCache;
 
