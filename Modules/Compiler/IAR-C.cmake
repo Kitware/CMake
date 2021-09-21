@@ -28,7 +28,7 @@ endif()
 # Architecture specific
 if("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
   if(CMAKE_C_COMPILER_VERSION_INTERNAL VERSION_LESS 7)
-    # IAR ARM 4.X uses xlink.exe, detection is not yet implemented
+    # IAR ARM 4.X uses xlink.exe, detection is not implemented
     message(FATAL_ERROR "CMAKE_C_COMPILER_VERSION = ${CMAKE_C_COMPILER_VERSION} not supported by CMake.")
   endif()
   __compiler_iar_ilink(C)
@@ -43,8 +43,12 @@ elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "RH850")
   __compiler_check_default_language_standard(C 1.10 90 1.10 99 2.10 11)
 
 elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "RL78")
+  if(CMAKE_C_COMPILER_VERSION VERSION_LESS 2)
+    # IAR RL78 1.X uses xlink.exe, detection is not implemented
+    message(FATAL_ERROR "CMAKE_C_COMPILER_VERSION = ${CMAKE_C_COMPILER_VERSION} not supported by CMake.")
+  endif()
   __compiler_iar_ilink(C)
-  __compiler_check_default_language_standard(C 1.10 90 1.10 99 4.10 11)
+  __compiler_check_default_language_standard(C 2.10 90 1.10 99 4.10 11)
 
 elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "RISCV")
   __compiler_iar_ilink(C)
