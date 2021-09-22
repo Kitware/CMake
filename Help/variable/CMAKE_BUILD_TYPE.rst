@@ -1,34 +1,21 @@
 CMAKE_BUILD_TYPE
 ----------------
 
-Specifies the build type on single-configuration generators.
-
-This statically specifies what build type (configuration) will be
-built in this build tree.  Possible values are empty, ``Debug``, ``Release``,
-``RelWithDebInfo``, ``MinSizeRel``, ...  This variable is only meaningful to
-single-configuration generators (such as :ref:`Makefile Generators` and
-:generator:`Ninja`) i.e.  those which choose a single configuration when CMake
-runs to generate a build tree as opposed to multi-configuration generators
-which offer selection of the build configuration within the generated build
-environment.  There are many per-config properties and variables
-(usually following clean ``SOME_VAR_<CONFIG>`` order conventions), such as
-``CMAKE_C_FLAGS_<CONFIG>``, specified as uppercase:
-``CMAKE_C_FLAGS_[DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL|...]``.  For example,
-in a build tree configured to build type ``Debug``, CMake will see to
-having :variable:`CMAKE_C_FLAGS_DEBUG <CMAKE_<LANG>_FLAGS_DEBUG>` settings get
-added to the :variable:`CMAKE_C_FLAGS <CMAKE_<LANG>_FLAGS>` settings.  See
-also :variable:`CMAKE_CONFIGURATION_TYPES`.
-
-Note that configuration names are case-insensitive.  The value of this
-variable will be the same as it is specified when invoking CMake.
-For instance, if ``-DCMAKE_BUILD_TYPE=ReLeAsE`` is specified, then the
-value of ``CMAKE_BUILD_TYPE`` will be ``ReLeAsE``.
+Specifies the build type on single-configuration generators (e.g.
+:ref:`Makefile Generators` or :generator:`Ninja`).  Typical values include
+``Debug``, ``Release``, ``RelWithDebInfo`` and ``MinSizeRel``, but custom
+build types can also be defined.
 
 This variable is initialized by the first :command:`project` or
 :command:`enable_language` command called in a project when a new build
 tree is first created.  If the :envvar:`CMAKE_BUILD_TYPE` environment
 variable is set, its value is used.  Otherwise, a toolchain-specific
-default is chosen when a language is enabled.
+default is chosen when a language is enabled.  The default value is often
+an empty string, but this is usually not desirable and one of the other
+standard build types is usually more appropriate.
 
-See :variable:`CMAKE_CONFIGURATION_TYPES` for specifying the configuration
-with multi-config generators.
+Depending on the situation, the value of this variable may be treated
+case-sensitively or case-insensitively.  See :ref:`Build Configurations`
+for discussion of this and other related topics.
+
+For multi-config generators, see :variable:`CMAKE_CONFIGURATION_TYPES`.
