@@ -477,7 +477,7 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
 
   if(matlabs_from_registry)
     list(REMOVE_DUPLICATES matlabs_from_registry)
-    list(SORT matlabs_from_registry)
+    list(SORT matlabs_from_registry COMPARE NATURAL)
     list(REVERSE matlabs_from_registry)
   endif()
 
@@ -521,7 +521,7 @@ macro(extract_matlab_versions_from_registry_brute_force matlab_versions)
   # we order from more recent to older
   if(matlab_supported_versions)
     list(REMOVE_DUPLICATES matlab_supported_versions)
-    list(SORT matlab_supported_versions)
+    list(SORT matlab_supported_versions COMPARE NATURAL)
     list(REVERSE matlab_supported_versions)
   endif()
 
