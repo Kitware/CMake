@@ -20,9 +20,9 @@
 #include "cmCPackLog.h"
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 namespace {
 
@@ -31,12 +31,12 @@ class DebGenerator
 public:
   DebGenerator(cmCPackLog* logger, std::string outputName, std::string workDir,
                std::string topLevelDir, std::string temporaryDir,
-               cmProp debianCompressionType, cmProp numThreads,
-               cmProp debianArchiveType,
+               cmValue debianCompressionType, cmValue numThreads,
+               cmValue debianArchiveType,
                std::map<std::string, std::string> controlValues,
                bool genShLibs, std::string shLibsFilename, bool genPostInst,
                std::string postInst, bool genPostRm, std::string postRm,
-               cmProp controlExtra, bool permissionStrctPolicy,
+               cmValue controlExtra, bool permissionStrctPolicy,
                std::vector<std::string> packageFiles);
 
   bool generate() const;
@@ -64,22 +64,20 @@ private:
   const std::string PostInst;
   const bool GenPostRm;
   const std::string PostRm;
-  cmProp ControlExtra;
+  cmValue ControlExtra;
   const bool PermissionStrictPolicy;
   const std::vector<std::string> PackageFiles;
   cmArchiveWrite::Compress TarCompressionType;
 };
 
-DebGenerator::DebGenerator(cmCPackLog* logger, std::string outputName,
-                           std::string workDir, std::string topLevelDir,
-                           std::string temporaryDir, cmProp debCompressionType,
-                           cmProp numThreads, cmProp debianArchiveType,
-                           std::map<std::string, std::string> controlValues,
-                           bool genShLibs, std::string shLibsFilename,
-                           bool genPostInst, std::string postInst,
-                           bool genPostRm, std::string postRm,
-                           cmProp controlExtra, bool permissionStrictPolicy,
-                           std::vector<std::string> packageFiles)
+DebGenerator::DebGenerator(
+  cmCPackLog* logger, std::string outputName, std::string workDir,
+  std::string topLevelDir, std::string temporaryDir,
+  cmValue debCompressionType, cmValue numThreads, cmValue debianArchiveType,
+  std::map<std::string, std::string> controlValues, bool genShLibs,
+  std::string shLibsFilename, bool genPostInst, std::string postInst,
+  bool genPostRm, std::string postRm, cmValue controlExtra,
+  bool permissionStrictPolicy, std::vector<std::string> packageFiles)
   : Logger(logger)
   , OutputName(std::move(outputName))
   , WorkDir(std::move(workDir))
@@ -703,7 +701,7 @@ bool cmCPackDebGenerator::createDebPackages()
   bool retval =
     make_package(this->GetOption("GEN_WDIR"), "GEN_CPACK_OUTPUT_FILE_NAME",
                  &cmCPackDebGenerator::createDeb);
-  cmProp dbgsymdir_path = this->GetOption("GEN_DBGSYMDIR");
+  cmValue dbgsymdir_path = this->GetOption("GEN_DBGSYMDIR");
   if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE") && dbgsymdir_path) {
     retval = make_package(dbgsymdir_path, "GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME",
                           &cmCPackDebGenerator::createDbgsymDDeb) &&
@@ -732,54 +730,56 @@ bool cmCPackDebGenerator::createDeb()
   controlValues["Description"] =
     *this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_DESCRIPTION");
 
-  cmProp debian_pkg_source =
+  cmValue debian_pkg_source =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SOURCE");
   if (cmNonempty(debian_pkg_source)) {
     controlValues["Source"] = *debian_pkg_source;
   }
-  cmProp debian_pkg_dep = this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_DEPENDS");
+  cmValue debian_pkg_dep = this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_DEPENDS");
   if (cmNonempty(debian_pkg_dep)) {
     controlValues["Depends"] = *debian_pkg_dep;
   }
-  cmProp debian_pkg_rec =
+  cmValue debian_pkg_rec =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_RECOMMENDS");
   if (cmNonempty(debian_pkg_rec)) {
     controlValues["Recommends"] = *debian_pkg_rec;
   }
-  cmProp debian_pkg_sug = this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SUGGESTS");
+  cmValue debian_pkg_sug =
+    this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SUGGESTS");
   if (cmNonempty(debian_pkg_sug)) {
     controlValues["Suggests"] = *debian_pkg_sug;
   }
-  cmProp debian_pkg_url = this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_HOMEPAGE");
+  cmValue debian_pkg_url =
+    this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_HOMEPAGE");
   if (cmNonempty(debian_pkg_url)) {
     controlValues["Homepage"] = *debian_pkg_url;
   }
-  cmProp debian_pkg_predep =
+  cmValue debian_pkg_predep =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_PREDEPENDS");
   if (cmNonempty(debian_pkg_predep)) {
     controlValues["Pre-Depends"] = *debian_pkg_predep;
   }
-  cmProp debian_pkg_enhances =
+  cmValue debian_pkg_enhances =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_ENHANCES");
   if (cmNonempty(debian_pkg_enhances)) {
     controlValues["Enhances"] = *debian_pkg_enhances;
   }
-  cmProp debian_pkg_breaks =
+  cmValue debian_pkg_breaks =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_BREAKS");
   if (cmNonempty(debian_pkg_breaks)) {
     controlValues["Breaks"] = *debian_pkg_breaks;
   }
-  cmProp debian_pkg_conflicts =
+  cmValue debian_pkg_conflicts =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_CONFLICTS");
   if (cmNonempty(debian_pkg_conflicts)) {
     controlValues["Conflicts"] = *debian_pkg_conflicts;
   }
-  cmProp debian_pkg_provides =
+  cmValue debian_pkg_provides =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_PROVIDES");
   if (cmNonempty(debian_pkg_provides)) {
     controlValues["Provides"] = *debian_pkg_provides;
   }
-  cmProp debian_pkg_replaces =
+  cmValue debian_pkg_replaces =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_REPLACES");
   if (cmNonempty(debian_pkg_replaces)) {
     controlValues["Replaces"] = *debian_pkg_replaces;
@@ -788,7 +788,7 @@ bool cmCPackDebGenerator::createDeb()
   const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
   const std::string shlibsfilename = strGenWDIR + "/shlibs";
 
-  cmProp debian_pkg_shlibs =
+  cmValue debian_pkg_shlibs =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SHLIBS");
   const bool gen_shibs = this->IsOn("CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS") &&
     cmNonempty(debian_pkg_shlibs);
@@ -845,7 +845,7 @@ bool cmCPackDebGenerator::createDbgsymDDeb()
   // debian policy enforce lower case for package name
   std::string packageNameLower = cmsys::SystemTools::LowerCase(
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_NAME"));
-  cmProp debian_pkg_version =
+  cmValue debian_pkg_version =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_VERSION");
 
   controlValues["Package"] = packageNameLower + "-dbgsym";
@@ -864,12 +864,12 @@ bool cmCPackDebGenerator::createDbgsymDDeb()
   controlValues["Description"] =
     std::string("debug symbols for ") + packageNameLower;
 
-  cmProp debian_pkg_source =
+  cmValue debian_pkg_source =
     this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SOURCE");
   if (cmNonempty(debian_pkg_source)) {
     controlValues["Source"] = *debian_pkg_source;
   }
-  cmProp debian_build_ids = this->GetOption("GEN_BUILD_IDS");
+  cmValue debian_build_ids = this->GetOption("GEN_BUILD_IDS");
   if (cmNonempty(debian_build_ids)) {
     controlValues["Build-Ids"] = *debian_build_ids;
   }

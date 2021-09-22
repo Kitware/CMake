@@ -16,9 +16,9 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 // TODO: Test compiler for the case of the mod file.  Some always
 // use lower case and some always use upper case.  I do not know if any
@@ -416,7 +416,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod " << modFile
                   << ' ' << stampFileForShell;
       cmMakefile* mf = this->LocalGenerator->GetMakefile();
-      cmProp cid = mf->GetDefinition("CMAKE_Fortran_COMPILER_ID");
+      cmValue cid = mf->GetDefinition("CMAKE_Fortran_COMPILER_ID");
       if (cmNonempty(cid)) {
         makeDepends << ' ' << *cid;
       }

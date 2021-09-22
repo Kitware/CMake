@@ -16,12 +16,12 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
@@ -499,12 +499,12 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
     if (target->GetType() == cmStateEnums::EXECUTABLE) {
       // Determine the directory where the executable target is created, and
       // set the working directory to this dir.
-      cmProp runtimeOutputDir =
+      cmValue runtimeOutputDir =
         makefile->GetDefinition("CMAKE_RUNTIME_OUTPUT_DIRECTORY");
       if (runtimeOutputDir) {
         workingDir = *runtimeOutputDir;
       } else {
-        cmProp executableOutputDir =
+        cmValue executableOutputDir =
           makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH");
         if (executableOutputDir) {
           workingDir = *executableOutputDir;

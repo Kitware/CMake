@@ -19,11 +19,11 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTransformDepfile.h"
+#include "cmValue.h"
 
 namespace {
 std::string EvaluateSplitConfigGenex(
@@ -284,7 +284,7 @@ void cmCustomCommandGenerator::FillEmulatorsWithArguments()
     if (target && target->GetType() == cmStateEnums::EXECUTABLE &&
         !target->IsImported()) {
 
-      cmProp emulator_property =
+      cmValue emulator_property =
         target->GetProperty("CROSSCOMPILING_EMULATOR");
       if (!emulator_property) {
         continue;

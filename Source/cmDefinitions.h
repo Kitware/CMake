@@ -12,8 +12,8 @@
 #include <cm/string_view>
 
 #include "cmLinkedTree.h"
-#include "cmProperty.h"
 #include "cmString.hxx"
+#include "cmValue.h"
 
 /** \class cmDefinitions
  * \brief Store a scope of variable definitions for CMake language.
@@ -29,7 +29,7 @@ class cmDefinitions
 public:
   // -- Static member functions
 
-  static cmProp Get(const std::string& key, StackIter begin, StackIter end);
+  static cmValue Get(const std::string& key, StackIter begin, StackIter end);
 
   static void Raise(const std::string& key, StackIter begin, StackIter end);
 

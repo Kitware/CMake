@@ -7,10 +7,10 @@
 #include <string>
 
 #include "cmListFileCache.h"
-#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 class cmMessenger;
 
@@ -18,11 +18,11 @@ class cmTargetPropertyComputer
 {
 public:
   template <typename Target>
-  static cmProp GetProperty(Target const* tgt, const std::string& prop,
-                            cmMessenger* messenger,
-                            cmListFileBacktrace const& context)
+  static cmValue GetProperty(Target const* tgt, const std::string& prop,
+                             cmMessenger* messenger,
+                             cmListFileBacktrace const& context)
   {
-    if (cmProp loc = GetLocation(tgt, prop, messenger, context)) {
+    if (cmValue loc = GetLocation(tgt, prop, messenger, context)) {
       return loc;
     }
     if (cmSystemTools::GetFatalErrorOccured()) {
@@ -46,9 +46,9 @@ private:
                                             std::string const& config);
 
   template <typename Target>
-  static cmProp GetLocation(Target const* tgt, std::string const& prop,
-                            cmMessenger* messenger,
-                            cmListFileBacktrace const& context)
+  static cmValue GetLocation(Target const* tgt, std::string const& prop,
+                             cmMessenger* messenger,
+                             cmListFileBacktrace const& context)
 
   {
     // Watch for special "computed" properties that are dependent on
@@ -65,7 +65,7 @@ private:
                                           context)) {
           return nullptr;
         }
-        return cmProp(ComputeLocationForBuild(tgt));
+        return cmValue(ComputeLocationForBuild(tgt));
       }
 
       // Support "LOCATION_<CONFIG>".
@@ -76,7 +76,7 @@ private:
           return nullptr;
         }
         std::string configName = prop.substr(9);
-        return cmProp(ComputeLocation(tgt, configName));
+        return cmValue(ComputeLocation(tgt, configName));
       }
 
       // Support "<CONFIG>_LOCATION".
@@ -89,7 +89,7 @@ private:
                                             context)) {
             return nullptr;
           }
-          return cmProp(ComputeLocation(tgt, configName));
+          return cmValue(ComputeLocation(tgt, configName));
         }
       }
     }
@@ -97,6 +97,6 @@ private:
   }
 
   template <typename Target>
-  static cmProp GetSources(Target const* tgt, cmMessenger* messenger,
-                           cmListFileBacktrace const& context);
+  static cmValue GetSources(Target const* tgt, cmMessenger* messenger,
+                            cmListFileBacktrace const& context);
 };

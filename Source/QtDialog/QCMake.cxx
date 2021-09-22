@@ -122,13 +122,13 @@ void QCMake::setBinaryDirectory(const QString& _dir)
 
     QCMakePropertyList props = this->properties();
     emit this->propertiesChanged(props);
-    cmProp homeDir = state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
+    cmValue homeDir = state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
     if (homeDir) {
       setSourceDirectory(QString::fromLocal8Bit(homeDir->c_str()));
     }
-    cmProp gen = state->GetCacheEntryValue("CMAKE_GENERATOR");
+    cmValue gen = state->GetCacheEntryValue("CMAKE_GENERATOR");
     if (gen) {
-      cmProp extraGen =
+      cmValue extraGen =
         state->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
       std::string curGen =
         cmExternalMakefileProjectGenerator::CreateFullGeneratorName(*gen,
@@ -136,12 +136,12 @@ void QCMake::setBinaryDirectory(const QString& _dir)
       this->setGenerator(QString::fromLocal8Bit(curGen.c_str()));
     }
 
-    cmProp platform = state->GetCacheEntryValue("CMAKE_GENERATOR_PLATFORM");
+    cmValue platform = state->GetCacheEntryValue("CMAKE_GENERATOR_PLATFORM");
     if (platform) {
       this->setPlatform(QString::fromLocal8Bit(platform->c_str()));
     }
 
-    cmProp toolset = state->GetCacheEntryValue("CMAKE_GENERATOR_TOOLSET");
+    cmValue toolset = state->GetCacheEntryValue("CMAKE_GENERATOR_TOOLSET");
     if (toolset) {
       this->setToolset(QString::fromLocal8Bit(toolset->c_str()));
     }
@@ -396,11 +396,11 @@ QCMakePropertyList QCMake::properties() const
       continue;
     }
 
-    cmProp cachedValue = state->GetCacheEntryValue(key);
+    cmValue cachedValue = state->GetCacheEntryValue(key);
 
     QCMakeProperty prop;
     prop.Key = QString::fromLocal8Bit(key.c_str());
-    if (cmProp hs = state->GetCacheEntryProperty(key, "HELPSTRING")) {
+    if (cmValue hs = state->GetCacheEntryProperty(key, "HELPSTRING")) {
       prop.Help = QString::fromLocal8Bit(hs->c_str());
     }
     prop.Value = QString::fromLocal8Bit(cachedValue->c_str());
@@ -414,7 +414,7 @@ QCMakePropertyList QCMake::properties() const
       prop.Type = QCMakeProperty::FILEPATH;
     } else if (t == cmStateEnums::STRING) {
       prop.Type = QCMakeProperty::STRING;
-      cmProp stringsProperty = state->GetCacheEntryProperty(key, "STRINGS");
+      cmValue stringsProperty = state->GetCacheEntryProperty(key, "STRINGS");
       if (stringsProperty) {
         prop.Strings =
           QString::fromLocal8Bit(stringsProperty->c_str()).split(";");

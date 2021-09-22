@@ -203,7 +203,7 @@ cmGeneratedFileStream& operator<<(cmGeneratedFileStream& s,
 // basically a wrapper that handles the NULL-ptr return from GetOption().
 std::string cmCPackFreeBSDGenerator::var_lookup(const char* var_name)
 {
-  cmProp pv = this->GetOption(var_name);
+  cmValue pv = this->GetOption(var_name);
   if (!pv) {
     return std::string();
   }

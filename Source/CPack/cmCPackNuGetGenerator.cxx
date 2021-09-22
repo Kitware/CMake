@@ -12,9 +12,9 @@
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 bool cmCPackNuGetGenerator::SupportsComponentInstallation() const
 {
@@ -120,7 +120,7 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
 
 void cmCPackNuGetGenerator::AddGeneratedPackageNames()
 {
-  cmProp const files_list = this->GetOption("GEN_CPACK_OUTPUT_FILES");
+  cmValue const files_list = this->GetOption("GEN_CPACK_OUTPUT_FILES");
   if (!files_list) {
     cmCPackLogger(
       cmCPackLog::LOG_ERROR,

@@ -9,6 +9,7 @@
 #include "cmQtAutoGen.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmQtAutoGenerator::Logger::Logger()
 {

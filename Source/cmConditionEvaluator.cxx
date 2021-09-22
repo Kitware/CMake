@@ -19,10 +19,10 @@
 #include "cmExpandedCommandArgument.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -285,7 +285,7 @@ bool cmConditionEvaluator::IsTrue(
 }
 
 //=========================================================================
-cmProp cmConditionEvaluator::GetDefinitionIfUnquoted(
+cmValue cmConditionEvaluator::GetDefinitionIfUnquoted(
   cmExpandedCommandArgument const& argument) const
 {
   if ((this->Policy54Status != cmPolicies::WARN &&
@@ -294,7 +294,7 @@ cmProp cmConditionEvaluator::GetDefinitionIfUnquoted(
     return nullptr;
   }
 
-  cmProp def = this->Makefile.GetDefinition(argument.GetValue());
+  cmValue def = this->Makefile.GetDefinition(argument.GetValue());
 
   if (def && argument.WasQuoted() &&
       this->Policy54Status == cmPolicies::WARN) {
@@ -317,13 +317,13 @@ cmProp cmConditionEvaluator::GetDefinitionIfUnquoted(
 }
 
 //=========================================================================
-cmProp cmConditionEvaluator::GetVariableOrString(
+cmValue cmConditionEvaluator::GetVariableOrString(
   const cmExpandedCommandArgument& argument) const
 {
-  cmProp def = this->GetDefinitionIfUnquoted(argument);
+  cmValue def = this->GetDefinitionIfUnquoted(argument);
 
   if (!def) {
-    def = cmProp(argument.GetValue());
+    def = cmValue(argument.GetValue());
   }
 
   return def;
@@ -386,7 +386,7 @@ bool cmConditionEvaluator::GetBooleanValue(
   }
 
   // Check definition.
-  cmProp def = this->GetDefinitionIfUnquoted(arg);
+  cmValue def = this->GetDefinitionIfUnquoted(arg);
   return !cmIsOff(def);
 }
 
@@ -403,13 +403,13 @@ bool cmConditionEvaluator::GetBooleanValueOld(
     if (arg == "1") {
       return true;
     }
-    cmProp def = this->GetDefinitionIfUnquoted(arg);
+    cmValue def = this->GetDefinitionIfUnquoted(arg);
     return !cmIsOff(def);
   }
   // Old GetVariableOrNumber behavior.
-  cmProp def = this->GetDefinitionIfUnquoted(arg);
+  cmValue def = this->GetDefinitionIfUnquoted(arg);
   if (!def && std::atoi(arg.GetValue().c_str())) {
-    def = cmProp(arg.GetValue());
+    def = cmValue(arg.GetValue());
   }
   return !cmIsOff(def);
 }
@@ -651,17 +651,17 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
     }
 
     else if (this->IsKeyword(keyMATCHES, *args.next)) {
-      cmProp def = this->GetDefinitionIfUnquoted(*args.current);
+      cmValue def = this->GetDefinitionIfUnquoted(*args.current);
 
       std::string def_buf;
       if (!def) {
-        def = cmProp(args.current->GetValue());
+        def = cmValue(args.current->GetValue());
       } else if (cmHasLiteralPrefix(args.current->GetValue(),
                                     "CMAKE_MATCH_")) {
         // The string to match is owned by our match result variables.
         // Move it to our own buffer before clearing them.
         def_buf = *def;
-        def = cmProp(def_buf);
+        def = cmValue(def_buf);
       }
 
       this->Makefile.ClearMatches();
@@ -687,8 +687,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                 this->matchKeys(*args.next, keyLESS, keyLESS_EQUAL, keyGREATER,
                                 keyGREATER_EQUAL, keyEQUAL))) {
 
-      cmProp ldef = this->GetVariableOrString(*args.current);
-      cmProp rdef = this->GetVariableOrString(*args.nextnext);
+      cmValue ldef = this->GetVariableOrString(*args.current);
+      cmValue rdef = this->GetVariableOrString(*args.nextnext);
 
       double lhs;
       double rhs;
@@ -711,8 +711,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                                         keySTRLESS_EQUAL, keySTRGREATER,
                                         keySTRGREATER_EQUAL, keySTREQUAL))) {
 
-      const cmProp lhs = this->GetVariableOrString(*args.current);
-      const cmProp rhs = this->GetVariableOrString(*args.nextnext);
+      const cmValue lhs = this->GetVariableOrString(*args.current);
+      const cmValue rhs = this->GetVariableOrString(*args.nextnext);
       const auto val = (*lhs).compare(*rhs);
       // clang-format off
       const auto result = cmRt2CtSelector<
@@ -749,8 +749,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
       if (this->Policy57Status != cmPolicies::OLD &&
           this->Policy57Status != cmPolicies::WARN) {
 
-        cmProp lhs = this->GetVariableOrString(*args.current);
-        cmProp rhs = this->Makefile.GetDefinition(args.nextnext->GetValue());
+        cmValue lhs = this->GetVariableOrString(*args.current);
+        cmValue rhs = this->Makefile.GetDefinition(args.nextnext->GetValue());
 
         newArgs.ReduceTwoArgs(
           rhs && cm::contains(cmExpandedList(*rhs, true), *lhs), args);

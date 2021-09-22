@@ -12,7 +12,7 @@
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
+#include "cmValue.h"
 
 class cmExpandedCommandArgument;
 class cmMakefile;
@@ -32,10 +32,10 @@ private:
   class cmArgumentList;
 
   // Filter the given variable definition based on policy CMP0054.
-  cmProp GetDefinitionIfUnquoted(
+  cmValue GetDefinitionIfUnquoted(
     const cmExpandedCommandArgument& argument) const;
 
-  cmProp GetVariableOrString(const cmExpandedCommandArgument& argument) const;
+  cmValue GetVariableOrString(const cmExpandedCommandArgument& argument) const;
 
   bool IsKeyword(cm::static_string_view keyword,
                  const cmExpandedCommandArgument& argument) const;

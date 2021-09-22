@@ -19,8 +19,8 @@
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmStateTypes.h"
+#include "cmValue.h"
 
 class cmComputeLinkInformation;
 class cmCustomCommand;
@@ -89,7 +89,7 @@ public:
 
   std::vector<std::string> GetPropertyKeys() const;
   //! Might return a nullptr if the property is not set or invalid
-  cmProp GetProperty(const std::string& prop) const;
+  cmValue GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer
   std::string const& GetSafeProperty(std::string const& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
@@ -163,10 +163,10 @@ public:
   BTs<std::string> const* GetLanguageStandardProperty(
     std::string const& lang, std::string const& config) const;
 
-  cmProp GetLanguageStandard(std::string const& lang,
-                             std::string const& config) const;
+  cmValue GetLanguageStandard(std::string const& lang,
+                              std::string const& config) const;
 
-  cmProp GetLanguageExtensions(std::string const& lang) const;
+  cmValue GetLanguageExtensions(std::string const& lang) const;
 
   bool GetLanguageStandardRequired(std::string const& lang) const;
 
@@ -187,8 +187,8 @@ public:
 
   void ComputeObjectMapping();
 
-  cmProp GetFeature(const std::string& feature,
-                    const std::string& config) const;
+  cmValue GetFeature(const std::string& feature,
+                     const std::string& config) const;
 
   const char* GetLinkPIEProperty(const std::string& config) const;
 
@@ -835,7 +835,7 @@ public:
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
   bool IsFortranBuildingInstrinsicModules() const;
 
-  cmProp GetSourcesProperty() const;
+  cmValue GetSourcesProperty() const;
 
   void AddISPCGeneratedHeader(std::string const& header,
                               std::string const& config);
@@ -884,12 +884,12 @@ private:
 
   bool NeedImportLibraryName(std::string const& config) const;
 
-  cmProp GetFilePrefixInternal(std::string const& config,
-                               cmStateEnums::ArtifactType artifact,
-                               const std::string& language = "") const;
-  cmProp GetFileSuffixInternal(std::string const& config,
-                               cmStateEnums::ArtifactType artifact,
-                               const std::string& language = "") const;
+  cmValue GetFilePrefixInternal(std::string const& config,
+                                cmStateEnums::ArtifactType artifact,
+                                const std::string& language = "") const;
+  cmValue GetFileSuffixInternal(std::string const& config,
+                                cmStateEnums::ArtifactType artifact,
+                                const std::string& language = "") const;
 
   std::string GetFullNameInternal(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;
@@ -908,7 +908,7 @@ private:
 
   void ComputeVersionedName(std::string& vName, std::string const& prefix,
                             std::string const& base, std::string const& suffix,
-                            std::string const& name, cmProp version) const;
+                            std::string const& name, cmValue version) const;
 
   struct CompatibleInterfacesBase
   {
@@ -1116,8 +1116,8 @@ private:
 
   mutable std::map<std::string, BTs<std::string>> LanguageStandardMap;
 
-  cmProp GetPropertyWithPairedLanguageSupport(std::string const& lang,
-                                              const char* suffix) const;
+  cmValue GetPropertyWithPairedLanguageSupport(std::string const& lang,
+                                               const char* suffix) const;
 
   void ComputeLinkImplementationRuntimeLibraries(
     const std::string& config, cmOptionalLinkImplementation& impl) const;

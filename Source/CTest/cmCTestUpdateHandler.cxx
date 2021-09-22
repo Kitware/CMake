@@ -17,9 +17,9 @@
 #include "cmCTestSVN.h"
 #include "cmCTestVC.h"
 #include "cmGeneratedFileStream.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
@@ -109,7 +109,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   static_cast<void>(fixLocale);
 
   // Get source dir
-  cmProp sourceDirectory = this->GetOption("SourceDirectory");
+  cmValue sourceDirectory = this->GetOption("SourceDirectory");
   if (!sourceDirectory) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot find SourceDirectory  key in the DartConfiguration.tcl"

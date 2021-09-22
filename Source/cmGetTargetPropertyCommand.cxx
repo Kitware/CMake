@@ -10,8 +10,8 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 class cmMessenger;
 
@@ -42,7 +42,7 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
         }
       }
     } else if (!args[2].empty()) {
-      cmProp prop_cstr = nullptr;
+      cmValue prop_cstr = nullptr;
       cmListFileBacktrace bt = mf.GetBacktrace();
       cmMessenger* messenger = mf.GetMessenger();
       prop_cstr = tgt->GetComputedProperty(args[2], messenger, bt);

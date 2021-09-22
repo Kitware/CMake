@@ -14,13 +14,13 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -278,7 +278,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
       // with old versions of CMake and new)
       llt = GENERAL_LibraryType;
       std::string linkType = cmStrCat(args[0], "_LINK_TYPE");
-      cmProp linkTypeString = mf.GetDefinition(linkType);
+      cmValue linkTypeString = mf.GetDefinition(linkType);
       if (linkTypeString) {
         if (*linkTypeString == "debug") {
           llt = DEBUG_LibraryType;

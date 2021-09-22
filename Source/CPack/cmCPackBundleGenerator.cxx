@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "cmCPackLog.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmCPackBundleGenerator::cmCPackBundleGenerator() = default;
 
@@ -16,7 +16,7 @@ cmCPackBundleGenerator::~cmCPackBundleGenerator() = default;
 
 int cmCPackBundleGenerator::InitializeInternal()
 {
-  cmProp name = this->GetOption("CPACK_BUNDLE_NAME");
+  cmValue name = this->GetOption("CPACK_BUNDLE_NAME");
   if (!name) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "CPACK_BUNDLE_NAME must be set to use the Bundle generator."
@@ -52,7 +52,7 @@ int cmCPackBundleGenerator::ConstructBundle()
 {
 
   // Get required arguments ...
-  cmProp cpack_bundle_name = this->GetOption("CPACK_BUNDLE_NAME");
+  cmValue cpack_bundle_name = this->GetOption("CPACK_BUNDLE_NAME");
   if (cpack_bundle_name->empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "CPACK_BUNDLE_NAME must be set." << std::endl);
@@ -60,7 +60,7 @@ int cmCPackBundleGenerator::ConstructBundle()
     return 0;
   }
 
-  cmProp cpack_bundle_plist = this->GetOption("CPACK_BUNDLE_PLIST");
+  cmValue cpack_bundle_plist = this->GetOption("CPACK_BUNDLE_PLIST");
   if (cpack_bundle_plist->empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "CPACK_BUNDLE_PLIST must be set." << std::endl);
@@ -68,7 +68,7 @@ int cmCPackBundleGenerator::ConstructBundle()
     return 0;
   }
 
-  cmProp cpack_bundle_icon = this->GetOption("CPACK_BUNDLE_ICON");
+  cmValue cpack_bundle_icon = this->GetOption("CPACK_BUNDLE_ICON");
   if (cpack_bundle_icon->empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "CPACK_BUNDLE_ICON must be set." << std::endl);
@@ -77,7 +77,7 @@ int cmCPackBundleGenerator::ConstructBundle()
   }
 
   // Get optional arguments ...
-  cmProp cpack_bundle_startup_command =
+  cmValue cpack_bundle_startup_command =
     this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND");
 
   // The staging directory contains everything that will end-up inside the
@@ -173,7 +173,8 @@ bool cmCPackBundleGenerator::SupportsComponentInstallation() const
 
 int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
 {
-  cmProp cpack_apple_cert_app = this->GetOption("CPACK_BUNDLE_APPLE_CERT_APP");
+  cmValue cpack_apple_cert_app =
+    this->GetOption("CPACK_BUNDLE_APPLE_CERT_APP");
 
   // codesign the application.
   if (!cpack_apple_cert_app->empty()) {
@@ -188,7 +189,7 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
       ? *this->GetOption("CPACK_BUNDLE_APPLE_CODESIGN_PARAMETER")
       : "--deep -f";
 
-    cmProp sign_files = this->GetOption("CPACK_BUNDLE_APPLE_CODESIGN_FILES");
+    cmValue sign_files = this->GetOption("CPACK_BUNDLE_APPLE_CODESIGN_FILES");
 
     std::vector<std::string> relFiles = cmExpandedList(sign_files);
 

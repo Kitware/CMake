@@ -10,10 +10,10 @@
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 // cmSeparateArgumentsCommand
 bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
@@ -28,7 +28,7 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
 
   if (args.size() == 1) {
     // Original space-replacement version of command.
-    if (cmProp def = status.GetMakefile().GetDefinition(var)) {
+    if (cmValue def = status.GetMakefile().GetDefinition(var)) {
       std::string value = *def;
       std::replace(value.begin(), value.end(), ' ', ';');
       status.GetMakefile().AddDefinition(var, value);

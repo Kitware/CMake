@@ -201,7 +201,7 @@ protected:
 private:
   virtual std::string GetVSMakeProgram() = 0;
   void PrintCompilerAdvice(std::ostream&, std::string const&,
-                           cmProp) const override
+                           cmValue) const override
   {
   }
 

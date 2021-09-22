@@ -16,9 +16,9 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 int cmCPackExternalGenerator::InitializeInternal()
 {
@@ -61,7 +61,7 @@ int cmCPackExternalGenerator::PackageFiles()
     return 0;
   }
 
-  cmProp packageScript = this->GetOption("CPACK_EXTERNAL_PACKAGE_SCRIPT");
+  cmValue packageScript = this->GetOption("CPACK_EXTERNAL_PACKAGE_SCRIPT");
   if (cmNonempty(packageScript)) {
     if (!cmSystemTools::FileIsFullPath(packageScript)) {
       cmCPackLogger(
@@ -77,7 +77,7 @@ int cmCPackExternalGenerator::PackageFiles()
       return 0;
     }
 
-    cmProp builtPackages = this->GetOption("CPACK_EXTERNAL_BUILT_PACKAGES");
+    cmValue builtPackages = this->GetOption("CPACK_EXTERNAL_BUILT_PACKAGES");
     if (builtPackages) {
       cmExpandList(builtPackages, this->packageFileNames, false);
     }
@@ -181,34 +181,34 @@ int cmCPackExternalGenerator::cmCPackExternalVersionGenerator::WriteToJSON(
     return 0;
   }
 
-  cmProp packageName = this->Parent->GetOption("CPACK_PACKAGE_NAME");
+  cmValue packageName = this->Parent->GetOption("CPACK_PACKAGE_NAME");
   if (packageName) {
     root["packageName"] = *packageName;
   }
 
-  cmProp packageVersion = this->Parent->GetOption("CPACK_PACKAGE_VERSION");
+  cmValue packageVersion = this->Parent->GetOption("CPACK_PACKAGE_VERSION");
   if (packageVersion) {
     root["packageVersion"] = *packageVersion;
   }
 
-  cmProp packageDescriptionFile =
+  cmValue packageDescriptionFile =
     this->Parent->GetOption("CPACK_PACKAGE_DESCRIPTION_FILE");
   if (packageDescriptionFile) {
     root["packageDescriptionFile"] = *packageDescriptionFile;
   }
 
-  cmProp packageDescriptionSummary =
+  cmValue packageDescriptionSummary =
     this->Parent->GetOption("CPACK_PACKAGE_DESCRIPTION_SUMMARY");
   if (packageDescriptionSummary) {
     root["packageDescriptionSummary"] = *packageDescriptionSummary;
   }
 
-  cmProp buildConfigCstr = this->Parent->GetOption("CPACK_BUILD_CONFIG");
+  cmValue buildConfigCstr = this->Parent->GetOption("CPACK_BUILD_CONFIG");
   if (buildConfigCstr) {
     root["buildConfig"] = *buildConfigCstr;
   }
 
-  cmProp defaultDirectoryPermissions =
+  cmValue defaultDirectoryPermissions =
     this->Parent->GetOption("CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
   if (cmNonempty(defaultDirectoryPermissions)) {
     root["defaultDirectoryPermissions"] = *defaultDirectoryPermissions;

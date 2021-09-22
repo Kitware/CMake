@@ -21,6 +21,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTest.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -116,7 +117,7 @@ bool HandleSourceFileDirectoryScopes(
           "given non-existent target for TARGET_DIRECTORY ", target_name));
         return false;
       }
-      cmProp target_source_dir = target->GetProperty("BINARY_DIR");
+      cmValue target_source_dir = target->GetProperty("BINARY_DIR");
       cmMakefile* target_dir_mf =
         status.GetMakefile().GetGlobalGenerator()->FindMakefile(
           *target_source_dir);
@@ -719,7 +720,7 @@ bool HandleCacheMode(cmExecutionStatus& status,
   for (std::string const& name : names) {
     // Get the source file.
     cmake* cm = status.GetMakefile().GetCMakeInstance();
-    cmProp existingValue = cm->GetState()->GetCacheEntryValue(name);
+    cmValue existingValue = cm->GetState()->GetCacheEntryValue(name);
     if (existingValue) {
       if (!HandleCacheEntry(name, status.GetMakefile(), propertyName,
                             propertyValue, appendAsString, appendMode,

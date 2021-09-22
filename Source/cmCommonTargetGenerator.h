@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "cmProperty.h"
+#include "cmValue.h"
 
 class cmGeneratorTarget;
 class cmGlobalCommonGenerator;
@@ -30,7 +30,7 @@ public:
 
 protected:
   // Feature query methods.
-  cmProp GetFeature(const std::string& feature, const std::string& config);
+  cmValue GetFeature(const std::string& feature, const std::string& config);
 
   // Helper to add flag for windows .def file.
   void AddModuleDefinitionFlag(cmLinkLineComputer* linkLineComputer,

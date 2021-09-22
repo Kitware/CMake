@@ -12,6 +12,7 @@
 #include "cmStateDirectory.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 namespace {
 bool PathEqOrSubDir(std::string const& a, std::string const& b)

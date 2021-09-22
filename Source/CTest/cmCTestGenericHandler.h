@@ -11,8 +11,8 @@
 #include <stddef.h>
 
 #include "cmCTest.h"
-#include "cmProperty.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 class cmGeneratedFileStream;
 class cmMakefile;
@@ -89,16 +89,16 @@ public:
   void SetPersistentOption(const std::string& op, const char* value);
   void SetPersistentOption(const std::string& op, const std::string& value)
   {
-    this->SetPersistentOption(op, cmProp(value));
+    this->SetPersistentOption(op, cmValue(value));
   }
-  void SetPersistentOption(const std::string& op, cmProp value);
+  void SetPersistentOption(const std::string& op, cmValue value);
   void SetOption(const std::string& op, const char* value);
   void SetOption(const std::string& op, const std::string& value)
   {
-    this->SetOption(op, cmProp(value));
+    this->SetOption(op, cmValue(value));
   }
-  void SetOption(const std::string& op, cmProp value);
-  cmProp GetOption(const std::string& op);
+  void SetOption(const std::string& op, cmValue value);
+  cmValue GetOption(const std::string& op);
 
   /**
    * Multi-Options collect one or more values from flags; passing

@@ -23,13 +23,13 @@
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
 #include "cmExportSet.h"
-#include "cmProperty.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmTransformDepfile.h"
+#include "cmValue.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <cm3p/json/value.h>
@@ -309,7 +309,7 @@ public:
 
   cmExportSetMap& GetExportSets() { return this->ExportSets; }
 
-  cmProp GetGlobalSetting(std::string const& name) const;
+  cmValue GetGlobalSetting(std::string const& name) const;
   bool GlobalSettingIsOn(std::string const& name) const;
   std::string GetSafeGlobalSetting(std::string const& name) const;
 
@@ -550,7 +550,7 @@ protected:
   virtual bool CheckLanguages(std::vector<std::string> const& languages,
                               cmMakefile* mf) const;
   virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
-                                   cmProp envVar) const;
+                                   cmValue envVar) const;
 
   virtual bool ComputeTargetDepends();
 

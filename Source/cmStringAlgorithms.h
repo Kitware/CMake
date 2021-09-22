@@ -14,8 +14,8 @@
 
 #include <cm/string_view>
 
-#include "cmProperty.h"
 #include "cmRange.h"
+#include "cmValue.h"
 
 /** String range type.  */
 using cmStringRange = cmRange<std::vector<std::string>::const_iterator>;
@@ -94,7 +94,7 @@ std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
  */
 void cmExpandList(cm::string_view arg, std::vector<std::string>& argsOut,
                   bool emptyArgs = false);
-inline void cmExpandList(cmProp arg, std::vector<std::string>& argsOut,
+inline void cmExpandList(cmValue arg, std::vector<std::string>& argsOut,
                          bool emptyArgs = false)
 {
   if (arg) {
@@ -122,7 +122,7 @@ void cmExpandLists(InputIt first, InputIt last,
  */
 std::vector<std::string> cmExpandedList(cm::string_view arg,
                                         bool emptyArgs = false);
-inline std::vector<std::string> cmExpandedList(cmProp arg,
+inline std::vector<std::string> cmExpandedList(cmValue arg,
                                                bool emptyArgs = false)
 {
   if (!arg) {
@@ -177,7 +177,7 @@ public:
   cmAlphaNum(unsigned long long int val);
   cmAlphaNum(float val);
   cmAlphaNum(double val);
-  cmAlphaNum(cmProp value)
+  cmAlphaNum(cmValue value)
     : View_(*value)
   {
   }
@@ -219,87 +219,6 @@ std::string cmWrap(char prefix, Range const& rng, char suffix,
                 sep);
 }
 
-/**
- * Does a string indicates that CMake/CPack/CTest internally
- * forced this value. This is not the same as On, but this
- * may be considered as "internally switched on".
- */
-bool cmIsInternallyOn(cm::string_view val);
-inline bool cmIsInternallyOn(const char* val)
-{
-  if (!val) {
-    return false;
-  }
-  return cmIsInternallyOn(cm::string_view(val));
-}
-inline bool cmIsInternallyOn(cmProp val)
-{
-  if (!val) {
-    return false;
-  }
-  return cmIsInternallyOn(*val);
-}
-
-/** Check for non-empty Property/Variable value.  */
-inline bool cmNonempty(cm::string_view val)
-{
-  return !cmProp::IsEmpty(val);
-}
-inline bool cmNonempty(const char* val)
-{
-  return !cmProp::IsEmpty(val);
-}
-inline bool cmNonempty(cmProp val)
-{
-  return !val.IsEmpty();
-}
-
-/** Return true if value is NOTFOUND or ends in -NOTFOUND.  */
-inline bool cmIsNOTFOUND(cm::string_view val)
-{
-  return cmProp::IsNOTFOUND(val);
-}
-inline bool cmIsNOTFOUND(cmProp val)
-{
-  return val.IsNOTFOUND();
-}
-
-/**
- * Does a string indicate a true or ON value? This is not the same as ifdef.
- */
-inline bool cmIsOn(cm::string_view val)
-{
-  return cmProp::IsOn(val);
-}
-inline bool cmIsOn(const char* val)
-{
-  return cmProp::IsOn(val);
-}
-inline bool cmIsOn(cmProp val)
-{
-  return val.IsOn();
-}
-
-/**
- * Does a string indicate a false or off value ? Note that this is
- * not the same as !IsOn(...) because there are a number of
- * ambiguous values such as "/usr/local/bin" a path will result in
- * IsON and IsOff both returning false. Note that the special path
- * NOTFOUND, *-NOTFOUND or IGNORE will cause IsOff to return true.
- */
-inline bool cmIsOff(cm::string_view val)
-{
-  return cmProp::IsOff(val);
-}
-inline bool cmIsOff(const char* val)
-{
-  return cmProp::IsOff(val);
-}
-inline bool cmIsOff(cmProp val)
-{
-  return val.IsOff();
-}
-
 /** Returns true if string @a str starts with the character @a prefix.  */
 inline bool cmHasPrefix(cm::string_view str, char prefix)
 {
@@ -313,7 +232,7 @@ inline bool cmHasPrefix(cm::string_view str, cm::string_view prefix)
 }
 
 /** Returns true if string @a str starts with string @a prefix.  */
-inline bool cmHasPrefix(cm::string_view str, cmProp prefix)
+inline bool cmHasPrefix(cm::string_view str, cmValue prefix)
 {
   if (!prefix) {
     return false;
@@ -343,7 +262,7 @@ inline bool cmHasSuffix(cm::string_view str, cm::string_view suffix)
 }
 
 /** Returns true if string @a str ends with string @a suffix.  */
-inline bool cmHasSuffix(cm::string_view str, cmProp suffix)
+inline bool cmHasSuffix(cm::string_view str, cmValue suffix)
 {
   if (!suffix) {
     return false;

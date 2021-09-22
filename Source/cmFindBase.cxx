@@ -13,13 +13,13 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 class cmExecutionStatus;
@@ -301,9 +301,9 @@ void cmFindBase::FillUserGuessPath()
 
 bool cmFindBase::CheckForVariableDefined()
 {
-  if (cmProp value = this->Makefile->GetDefinition(this->VariableName)) {
+  if (cmValue value = this->Makefile->GetDefinition(this->VariableName)) {
     cmState* state = this->Makefile->GetState();
-    cmProp cacheEntry = state->GetCacheEntryValue(this->VariableName);
+    cmValue cacheEntry = state->GetCacheEntryValue(this->VariableName);
     bool found = !cmIsNOTFOUND(*value);
     bool cached = cacheEntry != nullptr;
     auto cacheType = cached ? state->GetCacheEntryType(this->VariableName)

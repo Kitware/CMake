@@ -11,12 +11,12 @@
 
 #include "cmDefinitions.h"
 #include "cmListFileCache.h"
-#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStatePrivate.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmVersion.h"
 
 #if defined(__CYGWIN__)
@@ -205,7 +205,7 @@ bool cmStateSnapshot::HasDefinedPolicyCMP0011()
   return !this->Position->Policies->IsEmpty();
 }
 
-cmProp cmStateSnapshot::GetDefinition(std::string const& name) const
+cmValue cmStateSnapshot::GetDefinition(std::string const& name) const
 {
   assert(this->Position->Vars.IsValid());
   return cmDefinitions::Get(name, this->Position->Vars, this->Position->Root);
@@ -378,7 +378,7 @@ void cmStateSnapshot::InitializeFromParent()
     this->Position->BuildSystemDirectory->LinkDirectories,
     this->Position->LinkDirectoriesPosition);
 
-  cmProp include_regex =
+  cmValue include_regex =
     parent->BuildSystemDirectory->Properties.GetPropertyValue(
       "INCLUDE_REGULAR_EXPRESSION");
   this->Position->BuildSystemDirectory->Properties.SetProperty(

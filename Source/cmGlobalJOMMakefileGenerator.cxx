@@ -41,7 +41,7 @@ void cmGlobalJOMMakefileGenerator::GetDocumentation(
 
 void cmGlobalJOMMakefileGenerator::PrintCompilerAdvice(std::ostream& os,
                                                        std::string const& lang,
-                                                       cmProp envVar) const
+                                                       cmValue envVar) const
 {
   if (lang == "CXX" || lang == "C") {
     /* clang-format off */

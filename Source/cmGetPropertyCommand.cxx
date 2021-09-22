@@ -20,6 +20,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTest.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 class cmMessenger;
@@ -272,7 +273,7 @@ template <>
 bool StoreResult(OutType infoType, cmMakefile& makefile,
                  const std::string& variable, std::nullptr_t value)
 {
-  return StoreResult(infoType, makefile, variable, cmProp(value));
+  return StoreResult(infoType, makefile, variable, cmValue(value));
 }
 
 bool HandleGlobalMode(cmExecutionStatus& status, const std::string& name,
@@ -366,7 +367,7 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
     }
     cmListFileBacktrace bt = status.GetMakefile().GetBacktrace();
     cmMessenger* messenger = status.GetMakefile().GetMessenger();
-    cmProp prop = target->GetComputedProperty(propertyName, messenger, bt);
+    cmValue prop = target->GetComputedProperty(propertyName, messenger, bt);
     if (!prop) {
       prop = target->GetProperty(propertyName);
     }
@@ -445,7 +446,7 @@ bool HandleCacheMode(cmExecutionStatus& status, const std::string& name,
     return false;
   }
 
-  cmProp value = nullptr;
+  cmValue value = nullptr;
   if (status.GetMakefile().GetState()->GetCacheEntryValue(name)) {
     value = status.GetMakefile().GetState()->GetCacheEntryProperty(
       name, propertyName);

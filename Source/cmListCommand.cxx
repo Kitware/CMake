@@ -25,12 +25,12 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSubcommandTable.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 namespace {
 
@@ -79,7 +79,7 @@ bool GetListString(std::string& listString, const std::string& var,
                    const cmMakefile& makefile)
 {
   // get the old value
-  cmProp cacheValue = makefile.GetDefinition(var);
+  cmValue cacheValue = makefile.GetDefinition(var);
   if (!cacheValue) {
     return false;
   }

@@ -18,11 +18,11 @@
 #include "cmCMakePath.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSubcommandTable.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 namespace {
 // Helper classes for argument parsing
@@ -150,7 +150,7 @@ public:
 bool getInputPath(const std::string& arg, cmExecutionStatus& status,
                   std::string& path)
 {
-  cmProp def = status.GetMakefile().GetDefinition(arg);
+  cmValue def = status.GetMakefile().GetDefinition(arg);
   if (!def) {
     status.SetError("undefined variable for input path.");
     return false;

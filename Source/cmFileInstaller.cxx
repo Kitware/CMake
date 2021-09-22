@@ -17,6 +17,7 @@
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 using namespace cmFSPermissions;
 

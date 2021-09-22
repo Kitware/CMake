@@ -21,7 +21,6 @@
 #include "cmMakefile.h"
 #include "cmOSXBundleGenerator.h"
 #include "cmOutputConverter.h"
-#include "cmProperty.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -29,6 +28,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator(
   cmGeneratorTarget* target)
@@ -362,8 +362,8 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
     vars.TargetCompilePDB = targetOutPathCompilePDB.c_str();
 
     std::string launcher;
-    cmProp val = this->LocalGenerator->GetRuleLauncher(this->GeneratorTarget,
-                                                       "RULE_LAUNCH_LINK");
+    cmValue val = this->LocalGenerator->GetRuleLauncher(this->GeneratorTarget,
+                                                        "RULE_LAUNCH_LINK");
     if (cmNonempty(val)) {
       launcher = cmStrCat(*val, ' ');
     }
@@ -811,8 +811,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     }
 
     std::string launcher;
-    cmProp val = this->LocalGenerator->GetRuleLauncher(this->GeneratorTarget,
-                                                       "RULE_LAUNCH_LINK");
+    cmValue val = this->LocalGenerator->GetRuleLauncher(this->GeneratorTarget,
+                                                        "RULE_LAUNCH_LINK");
     if (cmNonempty(val)) {
       launcher = cmStrCat(*val, ' ');
     }
@@ -872,7 +872,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       std::string linkRule = this->GetLinkRule(linkRuleVar);
       cmExpandList(linkRule, real_link_commands);
       if (this->UseLWYU) {
-        cmProp lwyuCheck =
+        cmValue lwyuCheck =
           this->Makefile->GetDefinition("CMAKE_LINK_WHAT_YOU_USE_CHECK");
         if (lwyuCheck) {
           std::string cmakeCommand = cmStrCat(

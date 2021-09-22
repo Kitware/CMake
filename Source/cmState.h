@@ -21,6 +21,7 @@
 #include "cmPropertyMap.h"
 #include "cmStatePrivate.h"
 #include "cmStateTypes.h"
+#include "cmValue.h"
 
 class cmCacheManager;
 class cmCommand;
@@ -98,9 +99,9 @@ public:
   bool IsCacheLoaded() const;
 
   std::vector<std::string> GetCacheEntryKeys() const;
-  cmProp GetCacheEntryValue(std::string const& key) const;
+  cmValue GetCacheEntryValue(std::string const& key) const;
   std::string GetSafeCacheEntryValue(std::string const& key) const;
-  cmProp GetInitializedCacheValue(std::string const& key) const;
+  cmValue GetInitializedCacheValue(std::string const& key) const;
   cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const;
   void SetCacheEntryValue(std::string const& key, std::string const& value);
 
@@ -112,8 +113,8 @@ public:
   void SetCacheEntryBoolProperty(std::string const& key,
                                  std::string const& propertyName, bool value);
   std::vector<std::string> GetCacheEntryPropertyList(std::string const& key);
-  cmProp GetCacheEntryProperty(std::string const& key,
-                               std::string const& propertyName);
+  cmValue GetCacheEntryProperty(std::string const& key,
+                                std::string const& propertyName);
   bool GetCacheEntryPropertyAsBool(std::string const& key,
                                    std::string const& propertyName);
   void AppendCacheEntryProperty(std::string const& key,
@@ -178,10 +179,10 @@ public:
   std::vector<std::string> GetCommandNames() const;
 
   void SetGlobalProperty(const std::string& prop, const char* value);
-  void SetGlobalProperty(const std::string& prop, cmProp value);
+  void SetGlobalProperty(const std::string& prop, cmValue value);
   void AppendGlobalProperty(const std::string& prop, const std::string& value,
                             bool asString = false);
-  cmProp GetGlobalProperty(const std::string& prop);
+  cmValue GetGlobalProperty(const std::string& prop);
   bool GetGlobalPropertyAsBool(const std::string& prop);
 
   std::string const& GetSourceDirectory() const;
@@ -222,15 +223,15 @@ private:
                      const char* helpString, cmStateEnums::CacheEntryType type)
   {
     this->AddCacheEntry(key,
-                        value ? cmProp(std::string(value)) : cmProp(nullptr),
+                        value ? cmValue(std::string(value)) : cmValue(nullptr),
                         helpString, type);
   }
   void AddCacheEntry(const std::string& key, const std::string& value,
                      const char* helpString, cmStateEnums::CacheEntryType type)
   {
-    this->AddCacheEntry(key, cmProp(value), helpString, type);
+    this->AddCacheEntry(key, cmValue(value), helpString, type);
   }
-  void AddCacheEntry(const std::string& key, cmProp value,
+  void AddCacheEntry(const std::string& key, cmValue value,
                      const char* helpString,
                      cmStateEnums::CacheEntryType type);
 

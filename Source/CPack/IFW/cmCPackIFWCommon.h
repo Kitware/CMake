@@ -7,7 +7,7 @@
 #include <map>
 #include <string>
 
-#include "cmProperty.h"
+#include "cmValue.h"
 
 class cmCPackIFWGenerator;
 class cmXMLWriter;
@@ -28,7 +28,7 @@ public:
 public:
   // Internal implementation
 
-  cmProp GetOption(const std::string& op) const;
+  cmValue GetOption(const std::string& op) const;
   bool IsOn(const std::string& op) const;
   bool IsSetToOff(const std::string& op) const;
   bool IsSetToEmpty(const std::string& op) const;

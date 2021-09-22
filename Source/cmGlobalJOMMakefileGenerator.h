@@ -50,5 +50,5 @@ protected:
 
 private:
   void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
-                           cmProp envVar) const override;
+                           cmValue envVar) const override;
 };

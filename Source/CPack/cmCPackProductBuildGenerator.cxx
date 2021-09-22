@@ -10,9 +10,9 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmCPackProductBuildGenerator::cmCPackProductBuildGenerator()
 {
@@ -88,11 +88,11 @@ int cmCPackProductBuildGenerator::PackageFiles()
   std::string version = this->GetOption("CPACK_PACKAGE_VERSION");
   std::string productbuild = this->GetOption("CPACK_COMMAND_PRODUCTBUILD");
   std::string identityName;
-  if (cmProp n = this->GetOption("CPACK_PRODUCTBUILD_IDENTITY_NAME")) {
+  if (cmValue n = this->GetOption("CPACK_PRODUCTBUILD_IDENTITY_NAME")) {
     identityName = n;
   }
   std::string keychainPath;
-  if (cmProp p = this->GetOption("CPACK_PRODUCTBUILD_KEYCHAIN_PATH")) {
+  if (cmValue p = this->GetOption("CPACK_PRODUCTBUILD_KEYCHAIN_PATH")) {
     keychainPath = p;
   }
 
@@ -174,8 +174,8 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
 
   const char* comp_name = component ? component->Name.c_str() : nullptr;
 
-  cmProp preflight = this->GetComponentScript("PREFLIGHT", comp_name);
-  cmProp postflight = this->GetComponentScript("POSTFLIGHT", comp_name);
+  cmValue preflight = this->GetComponentScript("PREFLIGHT", comp_name);
+  cmValue postflight = this->GetComponentScript("POSTFLIGHT", comp_name);
 
   std::string resDir = packageFileDir;
   if (component) {
@@ -214,11 +214,11 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
   std::string version = this->GetOption("CPACK_PACKAGE_VERSION");
   std::string pkgbuild = this->GetOption("CPACK_COMMAND_PKGBUILD");
   std::string identityName;
-  if (cmProp n = this->GetOption("CPACK_PKGBUILD_IDENTITY_NAME")) {
+  if (cmValue n = this->GetOption("CPACK_PKGBUILD_IDENTITY_NAME")) {
     identityName = n;
   }
   std::string keychainPath;
-  if (cmProp p = this->GetOption("CPACK_PKGBUILD_KEYCHAIN_PATH")) {
+  if (cmValue p = this->GetOption("CPACK_PKGBUILD_KEYCHAIN_PATH")) {
     keychainPath = p;
   }
 
@@ -240,7 +240,7 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
   return RunProductBuild(pkgCmd.str());
 }
 
-cmProp cmCPackProductBuildGenerator::GetComponentScript(
+cmValue cmCPackProductBuildGenerator::GetComponentScript(
   const char* script, const char* component_name)
 {
   std::string scriptname = std::string("CPACK_") + script + "_";

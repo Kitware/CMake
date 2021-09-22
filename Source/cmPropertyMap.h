@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "cmProperty.h"
+#include "cmValue.h"
 
 /** \class cmPropertyMap
  * \brief String property map.
@@ -26,10 +26,10 @@ public:
 
   //! Set the property value
   void SetProperty(const std::string& name, const char* value);
-  void SetProperty(const std::string& name, cmProp value);
+  void SetProperty(const std::string& name, cmValue value);
   void SetProperty(const std::string& name, const std::string& value)
   {
-    this->SetProperty(name, cmProp(value));
+    this->SetProperty(name, cmValue(value));
   }
 
   //! Append to the property value
@@ -37,7 +37,7 @@ public:
                       bool asString = false);
 
   //! Get the property value
-  cmProp GetPropertyValue(const std::string& name) const;
+  cmValue GetPropertyValue(const std::string& name) const;
 
   //! Remove the property @a name from the map
   void RemoveProperty(const std::string& name);

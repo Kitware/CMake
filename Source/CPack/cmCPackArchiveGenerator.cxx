@@ -12,9 +12,9 @@
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
-#include "cmProperty.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmWorkingDirectory.h"
 
 cmCPackGenerator* cmCPackArchiveGenerator::Create7ZGenerator()
@@ -118,7 +118,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY")) {
     filePrefix = cmStrCat(this->GetOption("CPACK_PACKAGE_FILE_NAME"), '/');
   }
-  cmProp installPrefix = this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
+  cmValue installPrefix = this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
   if (installPrefix && installPrefix->size() > 1 &&
       (*installPrefix)[0] == '/') {
     // add to file prefix and remove the leading '/'

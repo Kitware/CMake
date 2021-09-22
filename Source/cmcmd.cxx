@@ -23,6 +23,7 @@
 #include "cmTransformDepfile.h"
 #include "cmUVProcessChain.h"
 #include "cmUtils.hxx"
+#include "cmValue.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
