@@ -73,6 +73,8 @@ set(_IRSL_HAVE_MSVC FALSE)
 foreach(LANG IN ITEMS C CXX Fortran)
   if("${CMAKE_${LANG}_COMPILER_ID}" MATCHES "Intel")
     if(NOT _IRSL_HAVE_Intel)
+      # The oneAPI icx/ifx compilers are under ${os}/bin.
+      # The classic icc/icpc/icl/ifort compilers may be under ${os}/bin/intel64.
       get_filename_component(_Intel_basedir "${CMAKE_${LANG}_COMPILER}" PATH)
       if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(_Intel_archdir intel64)
@@ -83,6 +85,8 @@ foreach(LANG IN ITEMS C CXX Fortran)
       if(WIN32)
         set(_Intel_possible_redistdirs
           "${_Intel_basedir}/../redist/${_Intel_archdir}_win/compiler"
+          "${_Intel_basedir}/../redist/${_Intel_archdir}/compiler"
+          "${_Intel_basedir}/../../redist/${_Intel_archdir}_win/compiler"
           "${_Intel_basedir}/../../redist/${_Intel_archdir}/compiler"
           )
       elseif(APPLE)
