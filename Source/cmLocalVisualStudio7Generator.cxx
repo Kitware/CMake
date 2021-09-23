@@ -402,6 +402,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] = {
     cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue },
   { "PrecompiledHeaderThrough", "Yc", "Precompiled Header Name", "",
     cmVS7FlagTable::UserValueRequired },
+  { "UsePrecompiledHeader", "Y-", "Don't use precompiled header", "0", 0 },
   { "PrecompiledHeaderFile", "Fp", "Generated Precompiled Header", "",
     cmVS7FlagTable::UserValue },
   // The YX and Yu options are in a per-global-generator table because
