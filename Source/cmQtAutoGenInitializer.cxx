@@ -1306,7 +1306,16 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       // Add additional autogen target dependencies to
       // '_autogen_timestamp_deps'.
       for (const cmTarget* t : this->AutogenTarget.DependTargets) {
-        dependencies.push_back(t->GetName());
+        std::string depname = t->GetName();
+        if (t->IsImported()) {
+          auto ttype = t->GetType();
+          if (ttype == cmStateEnums::TargetType::STATIC_LIBRARY ||
+              ttype == cmStateEnums::TargetType::SHARED_LIBRARY ||
+              ttype == cmStateEnums::TargetType::UNKNOWN_LIBRARY) {
+            depname = cmStrCat("$<TARGET_LINKER_FILE:", t->GetName(), ">");
+          }
+        }
+        dependencies.push_back(depname);
       }
 
       cmTarget* timestampTarget = this->LocalGen->AddUtilityCommand(
