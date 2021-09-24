@@ -117,7 +117,7 @@ bool looksLikeSpecialVariable(const std::string& var,
     {                                                                         \
     }
 #else
-#  define CM_INHERIT_CTOR(Class, Base, Tpl) using Base Tpl ::Base;
+#  define CM_INHERIT_CTOR(Class, Base, Tpl) using Base Tpl ::Base
 #endif
 
 // BEGIN cmConditionEvaluator::cmArgumentList

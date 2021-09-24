@@ -95,7 +95,9 @@ public:
 
     GenVarsT(GenT gen)
       : Gen(gen)
-      , GenNameUpper(cmQtAutoGen::GeneratorNameUpper(gen)){};
+      , GenNameUpper(cmQtAutoGen::GeneratorNameUpper(gen))
+    {
+    }
   };
 
   /** @param mocExecutable The file path to the moc executable. Will be used as
@@ -209,7 +211,9 @@ private:
   struct MocT : public GenVarsT
   {
     MocT()
-      : GenVarsT(GenT::MOC){};
+      : GenVarsT(GenT::MOC)
+    {
+    }
 
     bool RelaxedMode = false;
     bool PathPrefix = false;
@@ -237,7 +241,9 @@ private:
     using UiFileT = std::pair<std::string, std::vector<std::string>>;
 
     UicT()
-      : GenVarsT(GenT::UIC){};
+      : GenVarsT(GenT::UIC)
+    {
+    }
 
     std::set<std::string> SkipUi;
     std::vector<std::string> UiFilesNoOptions;
@@ -252,7 +258,9 @@ private:
   struct RccT : public GenVarsT
   {
     RccT()
-      : GenVarsT(GenT::RCC){};
+      : GenVarsT(GenT::RCC)
+    {
+    }
 
     bool GlobalTarget = false;
     std::vector<Qrc> Qrcs;

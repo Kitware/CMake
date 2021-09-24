@@ -87,7 +87,7 @@ public:
      * Get the user data.
      * Only valid during the JobT::Process() call!
      */
-    void* UserData() const { return this->Pool_->UserData(); };
+    void* UserData() const { return this->Pool_->UserData(); }
 
     /**
      * Get the worker index.
@@ -138,7 +138,7 @@ public:
     {
     }
     //! Does nothing
-    void Process() override{};
+    void Process() override {}
   };
 
   /**

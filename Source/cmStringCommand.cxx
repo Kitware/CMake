@@ -1054,7 +1054,7 @@ Json::Value& ResolvePath(Json::Value& json, Args path)
     }
   }
   return *search;
-};
+}
 
 Json::Value ReadJson(const std::string& jsonstr)
 {
