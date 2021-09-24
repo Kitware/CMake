@@ -626,6 +626,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           /* clang-format on */
           this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
         }
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is to do nothing.
         break;
@@ -663,6 +664,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           /* clang-format on */
           this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
         }
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior is to do nothing.
         break;
@@ -878,6 +880,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           this->Makefile->IssueMessage(
             MessageType::FATAL_ERROR,
             cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0067));
+          break;
         case cmPolicies::NEW:
           // NEW behavior is to honor the language standard variables.
           // We already initialized honorStandard to true.

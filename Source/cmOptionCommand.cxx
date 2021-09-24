@@ -34,7 +34,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
     switch (policyStatus) {
       case cmPolicies::WARN:
         checkAndWarn = (existsBeforeSet != nullptr);
-        break;
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         // OLD behavior does not warn.
         break;

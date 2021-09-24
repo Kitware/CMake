@@ -1263,7 +1263,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
         break;
       }
     }
-    // FALLTHROUGH
+      CM_FALLTHROUGH;
     case cmStateEnums::EXECUTABLE: {
       outputs.push_back(this->ConvertToNinjaPath(target->GetFullPath(
         config, cmStateEnums::RuntimeBinaryArtifact, realname)));
@@ -1275,7 +1275,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
         break;
       }
     }
-    // FALLTHROUGH
+      CM_FALLTHROUGH;
     case cmStateEnums::GLOBAL_TARGET:
     case cmStateEnums::INTERFACE_LIBRARY:
     case cmStateEnums::UTILITY: {

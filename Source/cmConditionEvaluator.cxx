@@ -447,6 +447,7 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
           "\" appears in a conditional statement.  " +
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0012);
         status = MessageType::FATAL_ERROR;
+        break;
       }
       case cmPolicies::NEW:
         break;

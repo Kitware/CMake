@@ -453,7 +453,7 @@ void cmState::AddDisallowedCommand(std::string const& name,
         case cmPolicies::WARN:
           mf.IssueMessage(MessageType::AUTHOR_WARNING,
                           cmPolicies::GetPolicyWarning(policy));
-          break;
+          CM_FALLTHROUGH;
         case cmPolicies::OLD:
           break;
         case cmPolicies::REQUIRED_IF_USED:

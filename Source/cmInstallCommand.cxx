@@ -1391,6 +1391,7 @@ bool HandleFilesMode(std::vector<std::string> const& args,
         case cmPolicies::WARN:
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0062) << "\n";
           modal = "should";
+          CM_FALLTHROUGH;
         case cmPolicies::OLD:
           break;
         case cmPolicies::REQUIRED_IF_USED:
@@ -1398,6 +1399,7 @@ bool HandleFilesMode(std::vector<std::string> const& args,
         case cmPolicies::NEW:
           modal = "may";
           messageType = MessageType::FATAL_ERROR;
+          break;
       }
       if (modal) {
         e << "The file\n  " << file

@@ -1185,6 +1185,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
           this->CMP0060WarnItems.insert(item);
         }
       }
+      CM_FALLTHROUGH;
     case cmPolicies::OLD:
       break;
     case cmPolicies::REQUIRED_ALWAYS:
@@ -1454,8 +1455,10 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
                                           this->Target->GetBacktrace());
       }
     }
-    case cmPolicies::OLD:
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD: // NOLINT(bugprone-branch-clone)
       // OLD behavior does not warn.
+      break;
     case cmPolicies::NEW:
       // NEW behavior will not get here.
       break;
@@ -1494,6 +1497,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
         this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
                                           this->Target->GetBacktrace());
       }
+      CM_FALLTHROUGH;
     case cmPolicies::OLD:
       // OLD behavior is to add the paths containing libraries with
       // known full paths as link directories.

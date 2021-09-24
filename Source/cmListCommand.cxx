@@ -46,7 +46,7 @@ bool GetIndexArg(const std::string& arg, int* idx, cmMakefile& mf)
           cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0121),
                    " Invalid list index \"", arg, "\".");
         mf.IssueMessage(MessageType::AUTHOR_WARNING, warn);
-        break;
+        CM_FALLTHROUGH;
       }
       case cmPolicies::OLD:
         // OLD behavior is to allow compatibility, so just ignore the

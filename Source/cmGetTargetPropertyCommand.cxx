@@ -62,6 +62,7 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
       case cmPolicies::WARN:
         issueMessage = true;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0045) << "\n";
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::REQUIRED_IF_USED:
@@ -69,6 +70,7 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
       case cmPolicies::NEW:
         issueMessage = true;
         messageType = MessageType::FATAL_ERROR;
+        break;
     }
     if (issueMessage) {
       e << "get_target_property() called with non-existent target \""
