@@ -28,9 +28,23 @@ With:
 The :module:`CTest` module will automatically call ``enable_testing()``, so we
 can remove it from our CMake files.
 
-We will also need to create a ``CTestConfig.cmake`` file in the top-level
-directory where we can specify the name of the project and where to submit the
-dashboard.
+We will also need to acquire a ``CTestConfig.cmake`` file to be placed in the
+top-level directory where we can specify information to CTest about the
+project. It contains:
+
+* The project name
+
+* The project "Nightly" start time
+
+  *  The time when a 24 hour "day" starts for this project.
+
+* The URL of the CDash instance where the submission's generated documents
+  will be sent
+
+One has been provided for you in this directory.  It would normally be
+downloaded from the ``Settings`` page of the project on the CDash
+instance that will host and display the test results.  Once downloaded from
+CDash, the file should not be modified locally.
 
 .. literalinclude:: Step9/CTestConfig.cmake
   :caption: CTestConfig.cmake
