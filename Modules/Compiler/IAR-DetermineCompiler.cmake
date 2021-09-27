@@ -1,28 +1,26 @@
-# IAR Systems compiler for ARM embedded systems.
-#   http://www.iar.com
-#   http://supp.iar.com/FilesPublic/UPDINFO/004916/arm/doc/EWARM_DevelopmentGuide.ENU.pdf
+# IAR C/C++ Compiler (https://www.iar.com)
+# CPU <arch> supported in CMake: 8051, Arm, AVR, MSP430, RH850, RISC-V, RL78, RX and V850
 #
-# __IAR_SYSTEMS_ICC__ An integer that identifies the IAR compiler platform:
-#                       9 and higher means C11 and C++14 as language default
-#                       8 means C99 and C++03 as language default
-#                       7 and lower means C89 and EC++ as language default.
-# __ICCARM__          An integer that is set to 1 when the code is compiled with the IAR C/C++ Compiler for ARM
-# __VER__             An integer that identifies the version number of the IAR compiler in use. For example,
-#                     version 5.11.3 is returned as 5011003.
+# IAR C/C++ Compiler for <arch> internal integer symbols used in CMake:
 #
-# IAR Systems Compiler for AVR embedded systems
-#  http://supp.iar.com/FilesPublic/UPDINFO/007051/ew/doc/EWAVR_CompilerReference.pdf
+# __IAR_SYSTEMS_ICC__
+#           Provides the compiler internal platform version
+# __ICC<arch>__
+#           Provides 1 for the current <arch> in use
+# __VER__
+#           Provides the current version in use
+#            The semantic version of the compiler is architecture-dependent
+#            When <arch> is ARM:
+#               CMAKE_<LANG>_COMPILER_VERSION_MAJOR = (__VER__ / 1E6)
+#               CMAKE_<LANG>_COMPILER_VERSION_MINOR = (__VER__ / 1E3) % 1E3
+#               CMAKE_<LANG>_COMPILER_VERSION_PATCH = (__VER__ % 1E3)
+#            When <arch> is non-ARM:
+#               CMAKE_<LANG>_COMPILER_VERSION_MAJOR = (__VER__ / 1E2)
+#               CMAKE_<LANG>_COMPILER_VERSION_MINOR = (__VER__ - ((__VER__/ 1E2) * 1E2))
+#               CMAKE_<LANG>_COMPILER_VERSION_PATCH = (__SUBVERSION__)
+# __SUBVERSION__
+#           Provides the version's patch level for non-ARM <arch>
 #
-# __IAR_SYSTEMS_ICC__ An integer that identifies the IAR compiler platform.
-# __ICCAVR__          An integer that is set to 1 when the code is compiled with the IAR C/C++ Compiler for AVR
-# __VER__             An integer that identifies the version number of the IAR compiler in use.
-#                     The value is calculated by (100 * VERSION_MAJOR + VERSION_MINOR). For example the version
-#                     3.34 is given as 334
-# __SUBVERSION__      An integer that identifies the subversion number of the compiler version number
-#                     for example 3 in 1.2.3.4.  THis is used as the patch version, as seen when running iccavr
-#                     from the command line
-#
-
 set(_compiler_id_pp_test "defined(__IAR_SYSTEMS_ICC__) || defined(__IAR_SYSTEMS_ICC)")
 
 set(_compiler_id_version_compute "
