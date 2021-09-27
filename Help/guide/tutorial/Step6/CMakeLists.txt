@@ -54,7 +54,7 @@ function(do_test target arg result)
   set_tests_properties(Comp${arg}
     PROPERTIES PASS_REGULAR_EXPRESSION ${result}
     )
-endfunction(do_test)
+endfunction()
 
 # do a bunch of result based tests
 do_test(Tutorial 4 "4 is 2")
