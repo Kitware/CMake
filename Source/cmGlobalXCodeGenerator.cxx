@@ -1756,9 +1756,6 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
       if (sourceFile->GetCustomCommand() &&
           visited.insert(sourceFile).second) {
         commands.push_back(*sourceFile->GetCustomCommand());
-        if (this->XcodeBuildSystem >= BuildSystem::Twelve) {
-          this->CustomCommandRoots[sourceFile].insert(gtgt);
-        }
       }
     }
     // create custom commands phase
