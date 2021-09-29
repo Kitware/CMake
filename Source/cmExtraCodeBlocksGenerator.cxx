@@ -396,8 +396,8 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             CbpUnit& cbpUnit = allFiles[fullPath];
             cbpUnit.Targets.push_back(target.get());
           }
-        }
-        default: // intended fallthrough
+        } break;
+        default:
           break;
       }
     }

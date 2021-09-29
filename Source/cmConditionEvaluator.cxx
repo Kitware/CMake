@@ -117,7 +117,7 @@ bool looksLikeSpecialVariable(const std::string& var,
     {                                                                         \
     }
 #else
-#  define CM_INHERIT_CTOR(Class, Base, Tpl) using Base Tpl ::Base;
+#  define CM_INHERIT_CTOR(Class, Base, Tpl) using Base Tpl ::Base
 #endif
 
 // BEGIN cmConditionEvaluator::cmArgumentList
@@ -447,6 +447,7 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
           "\" appears in a conditional statement.  " +
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0012);
         status = MessageType::FATAL_ERROR;
+        break;
       }
       case cmPolicies::NEW:
         break;

@@ -247,7 +247,7 @@ struct cmFindLibraryHelper
         cmStrCat(this->PrefixRegexStr, name, this->SuffixRegexStr);
       this->DebugSearches.FailedAt(path, regexName);
     }
-  };
+  }
 
   void DebugLibraryFound(std::string const& name, std::string const& path)
   {
@@ -256,7 +256,7 @@ struct cmFindLibraryHelper
         cmStrCat(this->PrefixRegexStr, name, this->SuffixRegexStr);
       this->DebugSearches.FoundAt(path, regexName);
     }
-  };
+  }
 };
 
 namespace {

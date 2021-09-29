@@ -796,8 +796,9 @@ cmLocalNinjaGenerator::MakeCustomCommandGenerators(
 
   bool transformDepfile = false;
   switch (cc.GetCMP0116Status()) {
-    case cmPolicies::OLD:
     case cmPolicies::WARN:
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
       break;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:

@@ -143,6 +143,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0039) << "\n";
         modal = "should";
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::REQUIRED_ALWAYS:
@@ -150,6 +151,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
       case cmPolicies::NEW:
         modal = "must";
         messageType = MessageType::FATAL_ERROR;
+        break;
     }
     if (modal) {
       e << "Utility target \"" << target->GetName() << "\" " << modal
@@ -395,6 +397,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0023) << "\n";
         modal = "should";
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::REQUIRED_ALWAYS:
@@ -402,6 +405,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
       case cmPolicies::NEW:
         modal = "must";
         messageType = MessageType::FATAL_ERROR;
+        break;
     }
 
     if (modal) {

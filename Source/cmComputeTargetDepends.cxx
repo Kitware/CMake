@@ -359,6 +359,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0046) << "\n";
         issueMessage = true;
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::NEW:
@@ -366,6 +367,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
       case cmPolicies::REQUIRED_ALWAYS:
         issueMessage = true;
         messageType = MessageType::FATAL_ERROR;
+        break;
     }
     if (issueMessage) {
       cmake* cm = this->GlobalGenerator->GetCMakeInstance();

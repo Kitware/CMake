@@ -113,12 +113,14 @@ cmValue cmTargetPropertyComputer::GetSources<cmTarget>(
           case cmPolicies::WARN:
             e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0051) << "\n";
             noMessage = false;
+            CM_FALLTHROUGH;
           case cmPolicies::OLD:
             break;
           case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::REQUIRED_IF_USED:
           case cmPolicies::NEW:
             addContent = true;
+            break;
         }
         if (!noMessage) {
           e << "Target \"" << tgt->GetName()

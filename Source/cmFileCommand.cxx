@@ -640,8 +640,9 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
       case cmPolicies::NEW:
         g.RecurseThroughSymlinksOff();
         break;
-      case cmPolicies::OLD:
       case cmPolicies::WARN:
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
         g.RecurseThroughSymlinksOn();
         break;
     }

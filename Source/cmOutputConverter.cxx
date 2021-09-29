@@ -19,7 +19,7 @@ bool PathEqOrSubDir(std::string const& a, std::string const& b)
 {
   return (cmSystemTools::ComparePath(a, b) ||
           cmSystemTools::IsSubDirectory(a, b));
-};
+}
 }
 
 cmOutputConverter::cmOutputConverter(cmStateSnapshot const& snapshot)

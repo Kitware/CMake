@@ -221,7 +221,7 @@ public:
     {
       this->PreviousState = target.SetDeviceLink(true);
     }
-    ~DeviceLinkSetter() { this->Target.SetDeviceLink(this->PreviousState); };
+    ~DeviceLinkSetter() { this->Target.SetDeviceLink(this->PreviousState); }
 
   private:
     cmGeneratorTarget& Target;

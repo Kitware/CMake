@@ -2425,7 +2425,7 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
         case cmCMakePresetsFile::TestPreset::OutputOptions::VerbosityEnum::
           Extra:
           this->Impl->ExtraVerbose = true;
-          // intentional fallthrough
+          CM_FALLTHROUGH;
         case cmCMakePresetsFile::TestPreset::OutputOptions::VerbosityEnum::
           Verbose:
           this->Impl->Verbose = true;

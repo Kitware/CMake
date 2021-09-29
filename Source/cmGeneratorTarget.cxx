@@ -1137,6 +1137,7 @@ bool cmGeneratorTarget::IsInBuildSystem() const
       if (!this->SourceEntries.empty()) {
         return true;
       }
+      break;
     case cmStateEnums::UNKNOWN_LIBRARY:
       break;
   }
@@ -2558,6 +2559,7 @@ public:
           } break;
           case cmPolicies::OLD:
             noMessage = true;
+            break;
           case cmPolicies::REQUIRED_IF_USED:
           case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::NEW:
@@ -3267,6 +3269,7 @@ void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,
 
   switch (this->GetPolicyStatusCMP0119()) {
     case cmPolicies::WARN:
+      CM_FALLTHROUGH;
     case cmPolicies::OLD:
       // The OLD behavior is to not add explicit language flags.
       return;
@@ -3565,6 +3568,7 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
             } break;
             case cmPolicies::OLD:
               noMessage = true;
+              break;
             case cmPolicies::REQUIRED_IF_USED:
             case cmPolicies::REQUIRED_ALWAYS:
             case cmPolicies::NEW:
@@ -7433,6 +7437,7 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
         cm->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
                          this->GetBacktrace());
       }
+        CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
       case cmPolicies::NEW: {
@@ -7670,6 +7675,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
             } break;
             case cmPolicies::OLD:
               noMessage = true;
+              break;
             case cmPolicies::REQUIRED_IF_USED:
             case cmPolicies::REQUIRED_ALWAYS:
             case cmPolicies::NEW:

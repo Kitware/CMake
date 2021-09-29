@@ -21,6 +21,7 @@ bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
     case cmPolicies::WARN:
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0026) << "\n";
       modal = "should";
+      CM_FALLTHROUGH;
     case cmPolicies::OLD:
       break;
     case cmPolicies::REQUIRED_ALWAYS:
@@ -28,6 +29,7 @@ bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
     case cmPolicies::NEW:
       modal = "may";
       messageType = MessageType::FATAL_ERROR;
+      break;
   }
 
   if (modal) {

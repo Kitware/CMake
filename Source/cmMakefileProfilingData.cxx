@@ -29,7 +29,7 @@ cmMakefileProfilingData::cmMakefileProfilingData(
   }
 
   this->ProfileStream << "[";
-};
+}
 
 cmMakefileProfilingData::~cmMakefileProfilingData() noexcept
 {

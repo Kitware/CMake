@@ -3780,8 +3780,9 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
   // variable.
   switch (this->GetPolicyStatus(cmPolicies::CMP0001)) {
     case cmPolicies::WARN:
-    // WARN is just OLD without warning because user code does not
-    // always affect whether this check is done.
+      // WARN is just OLD without warning because user code does not
+      // always affect whether this check is done.
+      CM_FALLTHROUGH;
     case cmPolicies::OLD:
       // Old behavior is to check the variable.
       break;
