@@ -1097,7 +1097,7 @@ std::string GetSourcecodeValueFromFileExtension(
   } else if (ext == "h") {
     sourcecode += ".c.h";
   } else if (ext == "hxx" || ext == "hpp" || ext == "txx" || ext == "pch" ||
-             ext == "hh") {
+             ext == "hh" || ext == "inl") {
     sourcecode += ".cpp.h";
   } else if (ext == "png" || ext == "gif" || ext == "jpg") {
     keepLastKnownFileType = true;
