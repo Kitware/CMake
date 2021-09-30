@@ -9,8 +9,8 @@ function(verify_architectures file)
     return()
   endif()
 
-  string(REGEX MATCHALL "architecture [^ \n\t]+" architectures ${otool_out})
-  string(REPLACE "architecture " "" actual "${architectures}")
+  string(REGEX MATCHALL "\narchitecture [^ \n\t()]+" architectures ${otool_out})
+  string(REPLACE "\narchitecture " "" actual "${architectures}")
   list(SORT actual)
 
   set(expected armv7 x86_64)
