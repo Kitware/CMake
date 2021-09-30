@@ -12,10 +12,10 @@ packaged.
 
 The first step is to update our :command:`install(TARGETS)` commands to not
 only specify a ``DESTINATION`` but also an ``EXPORT``. The ``EXPORT`` keyword
-generates and installs a CMake file containing code to import all targets
-listed in the install command from the installation tree. So let's go ahead and
-explicitly ``EXPORT`` the ``MathFunctions`` library by updating the ``install``
-command in ``MathFunctions/CMakeLists.txt`` to look like:
+generates a CMake file containing code to import all targets listed in the
+install command from the installation tree. So let's go ahead and explicitly
+``EXPORT`` the ``MathFunctions`` library by updating the ``install`` command
+in ``MathFunctions/CMakeLists.txt`` to look like:
 
 .. literalinclude:: Complete/MathFunctions/CMakeLists.txt
   :caption: MathFunctions/CMakeLists.txt
