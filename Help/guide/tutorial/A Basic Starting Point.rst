@@ -24,6 +24,45 @@ Upper, lower, and mixed case commands are supported by CMake. The source
 code for ``tutorial.cxx`` is provided in the ``Step1`` directory and can be
 used to compute the square root of a number.
 
+Build and Run
+-------------
+
+That's all that is needed - we can build and run our project now! First, run
+the :manual:`cmake <cmake(1)>` executable or the
+:manual:`cmake-gui <cmake-gui(1)>` to configure the project and then build it
+with your chosen build tool.
+
+For example, from the command line we could navigate to the
+``Help/guide/tutorial`` directory of the CMake source code tree and create a
+build directory:
+
+.. code-block:: console
+
+  mkdir Step1_build
+
+Next, navigate to the build directory and run CMake to configure the project
+and generate a native build system:
+
+.. code-block:: console
+
+  cd Step1_build
+  cmake ../Step1
+
+Then call that build system to actually compile/link the project:
+
+.. code-block:: console
+
+  cmake --build .
+
+Finally, try to use the newly built ``Tutorial`` with these commands:
+
+.. code-block:: console
+
+  Tutorial 4294967296
+  Tutorial 10
+  Tutorial
+
+
 Adding a Version Number and Configured Header File
 --------------------------------------------------
 
@@ -113,39 +152,24 @@ call to ``add_executable``.
   :language: cmake
   :end-before: # configure a header file to pass some of the CMake settings
 
-Build and Test
---------------
+Rebuild
+-------
 
-Run the :manual:`cmake <cmake(1)>` executable or the
-:manual:`cmake-gui <cmake-gui(1)>` to configure the project and then build it
-with your chosen build tool.
-
-For example, from the command line we could navigate to the
-``Help/guide/tutorial`` directory of the CMake source code tree and create a
-build directory:
-
-.. code-block:: console
-
-  mkdir Step1_build
-
-Next, navigate to the build directory and run CMake to configure the project
-and generate a native build system:
+Let's build our project again. We already created a build directory and ran
+CMake, so we can skip to the build step:
 
 .. code-block:: console
 
   cd Step1_build
-  cmake ../Step1
-
-Then call that build system to actually compile/link the project:
-
-.. code-block:: console
-
   cmake --build .
 
-Finally, try to use the newly built ``Tutorial`` with these commands:
+Now we can try to use the newly built ``Tutorial`` with same commands as before:
 
 .. code-block:: console
 
   Tutorial 4294967296
   Tutorial 10
   Tutorial
+
+Check that the version number is now reported when running the executable without
+any arguments.
