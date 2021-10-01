@@ -63,6 +63,7 @@ private:
   void ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk);
 
   std::string GetSubmitResultsPrefix();
+  int GetSubmitInactivityTimeout();
 
   class ResponseParser;
 

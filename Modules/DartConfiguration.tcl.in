@@ -21,6 +21,7 @@ LabelsForSubprojects: @CTEST_LABELS_FOR_SUBPROJECTS@
 
 # Submission information
 SubmitURL: @SUBMIT_URL@
+SubmitInactivityTimeout: @CTEST_SUBMIT_INACTIVITY_TIMEOUT@
 
 # Dashboard start time
 NightlyStartTime: @NIGHTLY_START_TIME@
