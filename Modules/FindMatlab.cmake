@@ -769,6 +769,10 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
     set(devnull INPUT_FILE NUL)
   endif()
 
+  # we first try to run a simple program using the -r option, and then we use the
+  # -batch option that is supported and recommended since R2019a
+  set(_matlab_get_version_failed_with_r_option FALSE)
+
   # timeout set to 120 seconds, in case it does not start
   # note as said before OUTPUT_VARIABLE cannot be used in a platform
   # independent manner however, not setting it would flush the output of Matlab
@@ -786,21 +790,57 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
   if(_matlab_result_version_call MATCHES "timeout")
     if(MATLAB_FIND_DEBUG)
       message(WARNING "[MATLAB] Unable to determine the version of Matlab."
-        " Matlab call timed out after 120 seconds.")
+        " Matlab call with -r option timed out after 120 seconds.")
     endif()
-    return()
+    set(_matlab_get_version_failed_with_r_option TRUE)
   endif()
 
-  if(${_matlab_result_version_call})
+  if(NOT ${_matlab_get_version_failed_with_r_option} AND ${_matlab_result_version_call})
     if(MATLAB_FIND_DEBUG)
-      message(WARNING "[MATLAB] Unable to determine the version of Matlab. Matlab call returned with error ${_matlab_result_version_call}.")
+      message(WARNING "[MATLAB] Unable to determine the version of Matlab. Matlab call with -r option returned with error ${_matlab_result_version_call}.")
     endif()
-    return()
-  elseif(NOT EXISTS "${_matlab_temporary_folder}/matlabVersionLog.cmaketmp")
+    set(_matlab_get_version_failed_with_r_option TRUE)
+  elseif(NOT ${_matlab_get_version_failed_with_r_option} AND NOT EXISTS "${_matlab_temporary_folder}/matlabVersionLog.cmaketmp")
     if(MATLAB_FIND_DEBUG)
       message(WARNING "[MATLAB] Unable to determine the version of Matlab. The log file does not exist.")
     endif()
-    return()
+    set(_matlab_get_version_failed_with_r_option TRUE)
+  endif()
+
+  if(_matlab_get_version_failed_with_r_option)
+    execute_process(
+      COMMAND "${matlab_binary_program}" -nosplash -nojvm ${_matlab_additional_commands} -logfile "matlabVersionLog.cmaketmp" -nodesktop -nodisplay -batch "version, exit"
+      OUTPUT_VARIABLE _matlab_version_from_cmd_dummy_batch
+      RESULT_VARIABLE _matlab_result_version_call_batch
+      ERROR_VARIABLE _matlab_result_version_call_error_batch
+      TIMEOUT 120
+      WORKING_DIRECTORY "${_matlab_temporary_folder}"
+      ${devnull}
+      )
+
+    if(_matlab_result_version_call_batch MATCHES "timeout")
+      if(MATLAB_FIND_DEBUG)
+        message(WARNING "[MATLAB] Unable to determine the version of Matlab."
+          " Matlab call with -batch option timed out after 120 seconds.")
+      endif()
+      return()
+    endif()
+
+    if(${_matlab_result_version_call_batch})
+      if(MATLAB_FIND_DEBUG)
+        message(WARNING "[MATLAB] Command executed \"${matlab_binary_program}\" -nosplash -nojvm ${_matlab_additional_commands} -logfile \"matlabVersionLog.cmaketmp\" -nodesktop -nodisplay -batch \"version, exit\"")
+        message(WARNING "_matlab_version_from_cmd_dummy_batch (OUTPUT_VARIABLE): ${_matlab_version_from_cmd_dummy_batch}")
+        message(WARNING "_matlab_result_version_call_batch (RESULT_VARIABLE): ${_matlab_result_version_call_batch}")
+        message(WARNING "_matlab_result_version_call_error_batch (ERROR_VARIABLE): ${_matlab_result_version_call_error_batch}")
+        message(WARNING "[MATLAB] Unable to determine the version of Matlab. Matlab call with -batch option returned with error ${_matlab_result_version_call_batch}.")
+      endif()
+      return()
+    elseif(NOT ${_matlab_get_version_failed_with_r_option} AND NOT EXISTS "${_matlab_temporary_folder}/matlabVersionLog.cmaketmp")
+      if(MATLAB_FIND_DEBUG)
+        message(WARNING "[MATLAB] Unable to determine the version of Matlab. The log file does not exist.")
+      endif()
+      return()
+    endif()
   endif()
 
   # if successful, read back the log
