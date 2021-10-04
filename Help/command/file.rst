@@ -1073,7 +1073,7 @@ Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
   .. versionadded:: 3.11
 
   Specify whether the .netrc file is to be used for operation.  If this
-  option is not specified, the value of the ``CMAKE_NETRC`` variable
+  option is not specified, the value of the :variable:`CMAKE_NETRC` variable
   will be used instead.
   Valid levels are:
 
@@ -1092,30 +1092,28 @@ Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 
   Specify an alternative .netrc file to the one in your home directory,
   if the ``NETRC`` level is ``OPTIONAL`` or ``REQUIRED``. If this option
-  is not specified, the value of the ``CMAKE_NETRC_FILE`` variable will
+  is not specified, the value of the :variable:`CMAKE_NETRC_FILE` variable will
   be used instead.
-
-If neither ``NETRC`` option is given CMake will check variables
-``CMAKE_NETRC`` and ``CMAKE_NETRC_FILE``, respectively.
 
 ``TLS_VERIFY <ON|OFF>``
   Specify whether to verify the server certificate for ``https://`` URLs.
-  The default is to *not* verify.
+  The default is to *not* verify. If this option is not specified, the value
+  of the :variable:`CMAKE_TLS_VERIFY` variable will be used instead.
 
   .. versionadded:: 3.18
     Added support to ``file(UPLOAD)``.
 
 ``TLS_CAINFO <file>``
-  Specify a custom Certificate Authority file for ``https://`` URLs.
+  Specify a custom Certificate Authority file for ``https://`` URLs. If this
+  option is not specified, the value of the :variable:`CMAKE_TLS_CAINFO`
+  variable will be used instead.
 
   .. versionadded:: 3.18
     Added support to ``file(UPLOAD)``.
 
 For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
 certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
-check certificates. If neither ``TLS`` option is given, CMake will use the
-settings from the :variable:`CMAKE_TLS_VERIFY` and :variable:`CMAKE_TLS_CAINFO`
-variables instead.
+check certificates.
 
 Additional options to ``DOWNLOAD`` are:
 
