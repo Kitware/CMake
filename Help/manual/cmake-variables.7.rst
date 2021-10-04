@@ -247,6 +247,7 @@ Variables that Change Behavior
    /variable/CMAKE_SYSTEM_LIBRARY_PATH
    /variable/CMAKE_SYSTEM_PREFIX_PATH
    /variable/CMAKE_SYSTEM_PROGRAM_PATH
+   /variable/CMAKE_TLS_CAINFO
    /variable/CMAKE_TLS_VERIFY
    /variable/CMAKE_USER_MAKE_RULES_OVERRIDE
    /variable/CMAKE_WARN_DEPRECATED

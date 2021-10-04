@@ -1113,8 +1113,9 @@ If neither ``NETRC`` option is given CMake will check variables
 
 For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
 certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
-check certificates. If neither ``TLS`` option is given CMake will check
-variables :variable:`CMAKE_TLS_VERIFY` and ``CMAKE_TLS_CAINFO``, respectively.
+check certificates. If neither ``TLS`` option is given, CMake will use the
+settings from the :variable:`CMAKE_TLS_VERIFY` and :variable:`CMAKE_TLS_CAINFO`
+variables instead.
 
 Additional options to ``DOWNLOAD`` are:
 

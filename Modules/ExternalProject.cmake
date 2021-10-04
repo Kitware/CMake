@@ -224,14 +224,14 @@ External Project Definition
       ``TLS_CAINFO <file>``
         Specify a custom certificate authority file to use if ``TLS_VERIFY``
         is enabled. If this option is not specified, the value of the
-        ``CMAKE_TLS_CAINFO`` variable will be used instead (see
+        :variable:`CMAKE_TLS_CAINFO` variable will be used instead (see
         :command:`file(DOWNLOAD)`)
 
       ``NETRC <level>``
         .. versionadded:: 3.11
 
         Specify whether the ``.netrc`` file is to be used for operation.
-        If this option is not specified, the value of the ``CMAKE_NETRC``
+        If this option is not specified, the value of the :variable:`CMAKE_NETRC`
         variable will be used instead (see :command:`file(DOWNLOAD)`)
         Valid levels are:
 
@@ -251,8 +251,8 @@ External Project Definition
 
         Specify an alternative ``.netrc`` file to the one in your home directory
         if the ``NETRC`` level is ``OPTIONAL`` or ``REQUIRED``. If this option
-        is not specified, the value of the ``CMAKE_NETRC_FILE`` variable will
-        be used instead (see :command:`file(DOWNLOAD)`)
+        is not specified, the value of the :variable:`CMAKE_NETRC_FILE` variable
+        will be used instead (see :command:`file(DOWNLOAD)`)
 
       .. versionadded:: 3.1
         Added support for `tbz2`, `.tar.xz`, `.txz`, and `.7z` extensions.
