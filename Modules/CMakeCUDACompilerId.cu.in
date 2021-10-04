@@ -16,7 +16,7 @@ char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
 @CMAKE_CUDA_COMPILER_ID_PLATFORM_CONTENT@
 @CMAKE_CUDA_COMPILER_ID_ERROR_FOR_TEST@
 
-const char* info_language_dialect_default = "INFO" ":" "dialect_default["
+const char* info_language_standard_default = "INFO" ":" "standard_default["
 #if __cplusplus > 202002L
   "23"
 #elif __cplusplus > 201703L
@@ -29,6 +29,16 @@ const char* info_language_dialect_default = "INFO" ":" "dialect_default["
   "11"
 #else
   "03"
+#endif
+"]";
+
+const char* info_language_extensions_default = "INFO" ":" "extensions_default["
+// !defined(_MSC_VER) to exclude Clang's MSVC compatibility mode.
+#if (defined(__clang__) || defined(__GNUC__)) && !defined(__STRICT_ANSI__) && \
+  !defined(_MSC_VER)
+  "ON"
+#else
+  "OFF"
 #endif
 "]";
 
@@ -48,7 +58,8 @@ int main(int argc, char* argv[])
 #ifdef SIMULATE_VERSION_MAJOR
   require += info_simulate_version[argc];
 #endif
-  require += info_language_dialect_default[argc];
+  require += info_language_standard_default[argc];
+  require += info_language_extensions_default[argc];
   (void)argv;
   return require;
 }

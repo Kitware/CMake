@@ -9,17 +9,8 @@ run_cmake(NotAFeature_OriginDebugGenex)
 run_cmake(NotAFeature_OriginDebugTransitive)
 run_cmake(NotAFeature_OriginDebugCommand)
 
-run_cmake(generate_feature_list)
-file(READ
-  "${RunCMake_BINARY_DIR}/generate_feature_list-build/c_features.txt"
-  C_FEATURES
-)
-file(READ
-  "${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx_features.txt"
-  CXX_FEATURES
-)
-include("${RunCMake_BINARY_DIR}/generate_feature_list-build/c_standard_default.cmake")
-include("${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx_standard_default.cmake")
+run_cmake(compiler_introspection)
+include("${RunCMake_BINARY_DIR}/compiler_introspection-build/info.cmake")
 
 if (NOT C_FEATURES)
   run_cmake(NoSupportedCFeatures)
@@ -43,21 +34,133 @@ elseif (cxx_std_98 IN_LIST CXX_FEATURES AND cxx_std_11 IN_LIST CXX_FEATURES)
   unset(RunCMake_TEST_OPTIONS)
 endif()
 
+configure_file("${RunCMake_SOURCE_DIR}/CMakeLists.txt" "${RunCMake_BINARY_DIR}/CMakeLists.txt" COPYONLY)
+
+macro(test_build)
+  set(test ${name}-${lang})
+
+  configure_file("${RunCMake_SOURCE_DIR}/${name}.cmake" "${RunCMake_BINARY_DIR}/${test}.cmake" @ONLY)
+  if(EXISTS "${RunCMake_SOURCE_DIR}/${name}-build-check.cmake")
+    configure_file("${RunCMake_SOURCE_DIR}/${name}-build-check.cmake" "${RunCMake_BINARY_DIR}/${test}-build-check.cmake" @ONLY)
+  endif()
+  if(EXISTS "${RunCMake_SOURCE_DIR}/${name}-stderr.txt")
+    configure_file("${RunCMake_SOURCE_DIR}/${name}-stderr.txt" "${RunCMake_BINARY_DIR}/${test}-stderr.txt" @ONLY)
+  endif()
+
+  set(RunCMake_SOURCE_DIR "${RunCMake_BINARY_DIR}")
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${test}-build")
+  run_cmake(${test})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${test}-build ${CMAKE_COMMAND} --build . ${ARGN})
+endmacro()
+
+# Mangle flags such as they're in verbose build output.
+macro(mangle_flags variable)
+  set(result "${${variable}}")
+
+  if(RunCMake_GENERATOR MATCHES "Visual Studio" AND MSVC_TOOLSET_VERSION GREATER_EQUAL 141)
+    string(REPLACE "-" "/" result "${result}")
+  elseif(RunCMake_GENERATOR STREQUAL "Xcode" AND CMAKE_XCODE_BUILD_SYSTEM GREATER_EQUAL 12)
+    string(REPLACE "=" [[\\=]] result "${result}")
+  endif()
+
+  string(REPLACE ";" " " result "${result}")
+  list(APPEND flags "${result}")
+endmacro()
+
+function(test_unset_standard)
+  if(extensions_opposite)
+    set(flag_ext "_EXT")
+  endif()
+
+  set(flag "${${lang}${${lang}_STANDARD_DEFAULT}${flag_ext}_FLAG}")
+
+  if(NOT flag)
+    return()
+  endif()
+
+  mangle_flags(flag)
+
+  set(name UnsetStandard)
+  set(RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0128=NEW)
+  test_build(--verbose)
+endfunction()
+
+function(test_no_unnecessary_flag)
+  set(standard_flag "${${lang}${${lang}_STANDARD_DEFAULT}_FLAG}")
+  set(extension_flag "${${lang}${${lang}_STANDARD_DEFAULT}_EXT_FLAG}")
+
+  if(NOT standard_flag AND NOT extension_flag)
+    return()
+  endif()
+
+  mangle_flags(standard_flag)
+  mangle_flags(extension_flag)
+
+  set(name NoUnnecessaryFlag)
+  set(RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0128=NEW)
+  test_build(--verbose)
+endfunction()
+
+function(test_cmp0128_warn_match)
+  set(name CMP0128WarnMatch)
+  test_build()
+endfunction()
+
+function(test_cmp0128_warn_unset)
+  # For compilers that had CMAKE_<LANG>_EXTENSION_COMPILE_OPTION (only IAR)
+  # there is no behavioural change and thus no warning.
+  if(NOT "${${lang}_EXT_FLAG}" STREQUAL "")
+    return()
+  endif()
+
+  if(extensions_opposite)
+    set(opposite "enabled")
+  else()
+    set(opposite "disabled")
+  endif()
+
+  set(name CMP0128WarnUnset)
+  test_build()
+endfunction()
+
+function(test_lang lang ext)
+  if(CMake_NO_${lang}_STANDARD)
+    return()
+  endif()
+
+  set(extensions_default "${${lang}_EXTENSIONS_DEFAULT}")
+  set(standard_default "${${lang}_STANDARD_DEFAULT}")
+
+  if(extensions_default)
+    set(extensions_opposite OFF)
+  else()
+    set(extensions_opposite ON)
+  endif()
+
+  test_unset_standard()
+  test_no_unnecessary_flag()
+  test_cmp0128_warn_match()
+  test_cmp0128_warn_unset()
+endfunction()
+
+if(C_STANDARD_DEFAULT)
+  test_lang(C c)
+endif()
+
 if(CXX_STANDARD_DEFAULT)
   run_cmake(NotAStandard)
 
   foreach(standard 98 11)
-    file(READ
-      "${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx${standard}_flag.txt"
-      CXX${standard}_FLAG
-    )
     if (CXX${standard}_FLAG STREQUAL NOTFOUND)
       run_cmake(RequireCXX${standard})
       run_cmake(RequireCXX${standard}Variable)
     endif()
-    if (CXX${standard}EXT_FLAG STREQUAL NOTFOUND)
+    if (CXX${standard}_EXT_FLAG STREQUAL NOTFOUND)
       run_cmake(RequireCXX${standard}Ext)
       run_cmake(RequireCXX${standard}ExtVariable)
     endif()
   endforeach()
+
+  test_lang(CXX cpp)
 endif()
