@@ -1,6 +1,6 @@
 enable_language(CXX)
 
-find_package(Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${with_qt_version} REQUIRED COMPONENTS Core)
 
 # Detect `-NOTFOUND` libraries at generate time.
 cmake_policy(SET CMP0111 NEW)

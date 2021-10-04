@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(RerunMocBasic)
 include("../AutogenCoreTest.cmake")
 
@@ -63,6 +63,7 @@ execute_process(
           ${_D_CMAKE_GENERATOR_INSTANCE}
           "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
           "-DCMAKE_AUTOGEN_VERBOSE=${CMAKE_AUTOGEN_VERBOSE}"
+          "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
           "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
   RESULT_VARIABLE exit_code
   OUTPUT_VARIABLE output

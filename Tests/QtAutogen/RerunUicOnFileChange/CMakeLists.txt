@@ -66,6 +66,7 @@ execute_process(
           "${build_type_extra}"
           "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
           "-DCMAKE_AUTOGEN_VERBOSE=${CMAKE_AUTOGEN_VERBOSE}"
+          "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
           "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
   RESULT_VARIABLE exit_code
   OUTPUT_VARIABLE output

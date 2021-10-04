@@ -9,7 +9,7 @@ set(MACOS_FW_LIB_HDRS
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${Qt5Core_INCLUDE_DIRS}
+  ${Qt${QT_TEST_VERSION}Core_INCLUDE_DIRS}
 )
 
 add_library(macos_fw_lib SHARED
@@ -28,6 +28,4 @@ set_target_properties(macos_fw_lib PROPERTIES
   POSITION_INDEPENDENT_CODE ON
   PUBLIC_HEADER "${MACOS_FW_LIB_HDRS}"
 )
-target_link_libraries(macos_fw_lib
-  Qt5::Core
-)
+target_link_libraries(macos_fw_lib PRIVATE ${QT_QTCORE_TARGET})

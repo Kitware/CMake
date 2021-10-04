@@ -151,8 +151,23 @@ endif()
 if(CMAKE_GENERATOR MATCHES "Make")
   add_RunCMake_test(Make -DMAKE_IS_GNU=${MAKE_IS_GNU})
 endif()
-if(CMake_TEST_Qt5)
+unset(ninja_test_with_qt_version)
+unset(ninja_qt_args)
+if(CMake_TEST_Qt6)
+  find_package(Qt6Widgets QUIET NO_MODULE)
+  if(Qt6Widgets_FOUND)
+    set(ninja_test_with_qt_version 6)
+    # Work around Qt6 not finding sibling dependencies without CMAKE_PREFIX_PATH
+    cmake_path(GET Qt6_DIR  PARENT_PATH base_dir)  # <base>/lib/cmake
+    cmake_path(GET base_dir PARENT_PATH base_dir)  # <base>/lib
+    cmake_path(GET base_dir PARENT_PATH base_dir)  # <base>
+    set(ninja_qt_args -DCMAKE_PREFIX_PATH=${base_dir})
+  endif()
+elseif(CMake_TEST_Qt5)
   find_package(Qt5Widgets QUIET NO_MODULE)
+  if(Qt5Widgets_FOUND)
+    set(ninja_test_with_qt_version 5)
+  endif()
 endif()
 if(CMAKE_GENERATOR MATCHES "Ninja")
   set(Ninja_ARGS
@@ -162,18 +177,27 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
   if(CMAKE_Fortran_COMPILER)
     list(APPEND Ninja_ARGS -DTEST_Fortran=1)
   endif()
-  if(CMake_TEST_Qt5 AND Qt5Core_FOUND)
-    list(APPEND Ninja_ARGS -DCMake_TEST_Qt5=1 -DQt5Core_DIR=${Qt5Core_DIR} -DCMAKE_TEST_Qt5Core_Version=${Qt5Core_VERSION})
-    if(Qt5Widgets_FOUND)
-      list(APPEND Ninja_ARGS -DQt5Widgets_DIR=${Qt5Widgets_DIR})
-    endif()
+  if(ninja_test_with_qt_version)
+    list(APPEND Ninja_ARGS
+      -DCMake_TEST_Qt_version=${ninja_test_with_qt_version}
+      -DQt${ninja_test_with_qt_version}_DIR=${Qt${ninja_test_with_qt_version}_DIR}
+      -DQt${ninja_test_with_qt_version}Core_DIR=${Qt${ninja_test_with_qt_version}Core_DIR}
+      -DCMake_TEST_Qt${ninja_test_with_qt_version}Core_Version=${Qt${ninja_test_with_qt_version}Core_VERSION}
+      -DQt${ninja_test_with_qt_version}Widgets_DIR=${Qt${ninja_test_with_qt_version}Widgets_DIR}
+      ${ninja_qt_args}
+    )
   endif()
   add_RunCMake_test(Ninja)
   set(NinjaMultiConfig_ARGS
     -DCYGWIN=${CYGWIN} -DMSYS=${MSYS}
     )
-  if(CMake_TEST_Qt5 AND Qt5Core_FOUND)
-    list(APPEND NinjaMultiConfig_ARGS -DCMake_TEST_Qt5=1 -DQt5Core_DIR=${Qt5Core_DIR} -DCMAKE_TEST_Qt5Core_Version=${Qt5Core_VERSION})
+  if(ninja_test_with_qt_version)
+    list(APPEND NinjaMultiConfig_ARGS
+      -DCMake_TEST_Qt_version=${ninja_test_with_qt_version}
+      -DQt${ninja_test_with_qt_version}Core_DIR=${Qt${ninja_test_with_qt_version}Core_DIR}
+      -DCMake_TEST_Qt${ninja_test_with_qt_version}Core_Version=${Qt${ninja_test_with_qt_version}Core_VERSION}
+      ${ninja_qt_args}
+    )
   endif()
   if(DEFINED CMake_TEST_CUDA)
     list(APPEND NinjaMultiConfig_ARGS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
@@ -205,11 +229,29 @@ add_RunCMake_test(AndroidTestUtilities)
 if(CMake_TEST_APPLE_SILICON)
   add_RunCMake_test(AppleSilicon)
 endif()
-set(autogen_with_qt5 FALSE)
-if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
-  set(autogen_with_qt5 TRUE)
+set(want_NoQt_test TRUE)
+if(CMake_TEST_Qt6 AND Qt6Widgets_FOUND)
+  # Work around Qt6 not finding sibling dependencies without CMAKE_PREFIX_PATH
+  cmake_path(GET Qt6_DIR  PARENT_PATH base_dir)  # <base>/lib/cmake
+  cmake_path(GET base_dir PARENT_PATH base_dir)  # <base>/lib
+  cmake_path(GET base_dir PARENT_PATH base_dir)  # <base>
+  add_RunCMake_test(AutogenQt6 TEST_DIR Autogen
+    -Dwith_qt_version=6
+    "-DQt6_DIR:PATH=${Qt6_DIR}"
+    "-DCMAKE_PREFIX_PATH:STRING=${base_dir}"
+  )
+  set(want_NoQt_test FALSE)
 endif ()
-add_RunCMake_test(Autogen -Dwith_qt5=${autogen_with_qt5})
+if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
+  add_RunCMake_test(AutogenQt5 TEST_DIR Autogen
+    -Dwith_qt_version=5
+    "-DQt5_DIR:PATH=${Qt5_DIR}"
+  )
+  set(want_NoQt_test FALSE)
+endif ()
+if(want_NoQt_test)
+  add_RunCMake_test(AutogenNoQt TEST_DIR Autogen)
+endif()
 
 add_RunCMake_test(ArtifactOutputDirs)
 

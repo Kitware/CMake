@@ -1,18 +1,21 @@
 enable_language(CXX)
 
-find_package(Qt5Core REQUIRED)
+set(QtX Qt${with_qt_version})
+
+find_package(${QtX} REQUIRED COMPONENTS Core)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOMOC_COMPILER_PREDEFINES OFF)
 
+# Source files are always named qt5.* for simplicity but apply to Qt5 and later
 add_executable(exe qt5.cxx)
-target_link_libraries(exe PRIVATE Qt5::Core)
+target_link_libraries(exe PRIVATE ${QtX}::Core)
 
 include(${CMAKE_CURRENT_LIST_DIR}/Common.cmake)
 generate_output_files(exe)
 
 set(moc_writes_depfiles 0)
-if(Qt5Core_VERSION VERSION_GREATER_EQUAL "5.15.0")
+if(${QtX}Core_VERSION VERSION_GREATER_EQUAL "5.15.0")
   set(moc_writes_depfiles 1)
 endif()
 
