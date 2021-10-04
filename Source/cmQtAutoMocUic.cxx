@@ -2083,7 +2083,7 @@ void cmQtAutoMocUicT::JobCompileUicT::Process()
     auto optionIt = this->UicConst().UiFiles.find(sourceFile);
     if (optionIt != this->UicConst().UiFiles.end()) {
       UicMergeOptions(allOpts, optionIt->second.Options,
-                      (this->BaseConst().QtVersion.Major == 5));
+                      (this->BaseConst().QtVersion.Major >= 5));
     }
     cm::append(cmd, allOpts);
   }
