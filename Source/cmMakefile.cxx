@@ -3982,11 +3982,10 @@ cmValue cmMakefile::GetProperty(const std::string& prop) const
   if (prop == "TESTS") {
     std::vector<std::string> keys;
     // get list of keys
-    std::transform(this->Tests.begin(), this->Tests.end(),
-                   std::back_inserter(keys),
-                   [](decltype(this->Tests)::value_type const& pair) {
-                     return pair.first;
-                   });
+    const auto* t = this;
+    std::transform(
+      t->Tests.begin(), t->Tests.end(), std::back_inserter(keys),
+      [](decltype(t->Tests)::value_type const& pair) { return pair.first; });
     output = cmJoin(keys, ";");
     return cmValue(output);
   }
