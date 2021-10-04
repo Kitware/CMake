@@ -209,7 +209,7 @@
 ### CUDA builds
 
 .cuda9.2:
-    image: "kitware/cmake:ci-cuda9.2-x86_64-2021-07-01"
+    image: "kitware/cmake:ci-cuda9.2-x86_64-2021-10-01"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
