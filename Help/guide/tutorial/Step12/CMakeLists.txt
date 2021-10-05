@@ -107,7 +107,7 @@ write_basic_package_version_file(
   COMPATIBILITY AnyNewerVersion
 )
 
-# install the configuration file
+# install the generated configuration files
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/MathFunctionsConfig.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/MathFunctionsConfigVersion.cmake
