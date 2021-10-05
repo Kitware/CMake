@@ -138,7 +138,7 @@ int main(int ac, char* av[])
       t = clock() - t;
       status_message = (status == -1) ? "not ok" : "ok";
       {
-        double time_taken = ((double)t) / CLOCKS_PER_SEC;
+        double time_taken = CM_CAST(double, t) / CLOCKS_PER_SEC;
         printf("%s %d %s # %f\n", status_message, i + 1, name, time_taken);
       }
     }
