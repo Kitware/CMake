@@ -13,7 +13,7 @@ fi
 # $2: language (e.g. C/CXX/Fortran)
 # $3: The compiler ID, defaults to GNU.
 #     Possible values are: GNU, Intel, Clang, SunPro, HP, XL, VisualAge, PGI,
-#     PathScale, Cray, SCO, MSVC
+#     PathScale, Cray, SCO, MSVC, LCC
 # $4: optional extra arguments to cmake, e.g. "-DCMAKE_SIZEOF_VOID_P=8"
 # $5: optional path to cmake binary
 AC_DEFUN([CMAKE_FIND_PACKAGE], [

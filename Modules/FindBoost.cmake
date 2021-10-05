@@ -917,14 +917,14 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
     if(NOT Boost_VERSION_STRING VERSION_LESS 1.69.0)
       # From GCC 5 and clang 4, versioning changes and minor becomes patch.
       # For those compilers, patch is exclude from compiler tag in Boost 1.69+ library naming.
-      if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND _boost_COMPILER_VERSION_MAJOR VERSION_GREATER 4)
+      if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND _boost_COMPILER_VERSION_MAJOR VERSION_GREATER 4) OR CMAKE_CXX_COMPILER_ID STREQUAL "LCC")
         set(_boost_COMPILER_VERSION "${_boost_COMPILER_VERSION_MAJOR}")
       elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND _boost_COMPILER_VERSION_MAJOR VERSION_GREATER 3)
         set(_boost_COMPILER_VERSION "${_boost_COMPILER_VERSION_MAJOR}")
       endif()
     endif()
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "LCC")
       if(Boost_VERSION_STRING VERSION_LESS 1.34)
         set(_boost_COMPILER "-gcc") # no GCC version encoding prior to 1.34
       else()

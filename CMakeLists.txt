@@ -633,7 +633,7 @@ macro (CMAKE_BUILD_UTILITIES)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_JSONCPP is ON but a JsonCpp is not found!")
     endif()
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|LCC|Clang")
       set_property(TARGET JsonCpp::JsonCpp APPEND PROPERTY
         INTERFACE_COMPILE_OPTIONS -Wno-deprecated-declarations)
     endif()
@@ -820,7 +820,8 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
        (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
         NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 3.0 AND
         NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC") OR
-       CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
+       CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR
+       CMAKE_C_COMPILER_ID STREQUAL "LCC")
       set(C_FLAGS_LIST -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts
                        -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security
                        -Wmissing-format-attribute -fno-common -Wundef

@@ -6,7 +6,7 @@ add_compile_options(-DTEST_OPTION)
 
 add_executable(add_compile_options main.cpp)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|LCC")
   target_compile_definitions(add_compile_options
     PRIVATE
       "DO_GNU_TESTS"

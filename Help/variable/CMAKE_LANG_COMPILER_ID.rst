@@ -28,6 +28,7 @@ include:
   IAR = IAR Systems (iar.com)
   Intel = Intel Compiler (intel.com)
   IntelLLVM = Intel LLVM-Based Compiler (intel.com)
+  LCC = MCST Elbrus C/C++/Fortran Compiler (mcst.ru)
   MSVC = Microsoft Visual Studio (microsoft.com)
   NVHPC = NVIDIA HPC SDK Compiler (nvidia.com)
   NVIDIA = NVIDIA CUDA Compiler (nvidia.com)

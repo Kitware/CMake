@@ -94,7 +94,7 @@ SET(CMAKE_REQUIRED_FLAGS)
 
 # Disable warnings to avoid changing 3rd party code.
 IF(CMAKE_C_COMPILER_ID MATCHES
-    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM|NVHPC)$")
+    "^(GNU|LCC|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM|NVHPC)$")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
@@ -110,7 +110,7 @@ endif ()
 # Especially for early development, we want to be a little
 # aggressive about diagnosing build problems; this can get
 # relaxed somewhat in final shipping versions.
-IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$")
+IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR CMAKE_C_COMPILER_ID MATCHES "^LCC$")
   SET(CMAKE_REQUIRED_FLAGS "-Wall -Wformat -Wformat-security")
   #################################################################
   # Set compile flags for all build types.
@@ -126,7 +126,7 @@ IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wshadow")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wmissing-prototypes")
   SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-qual")
-ENDIF (CMAKE_C_COMPILER_ID MATCHES "^GNU$")
+ENDIF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR CMAKE_C_COMPILER_ID MATCHES "^LCC$")
 IF (CMAKE_C_COMPILER_ID MATCHES "^Clang$")
   SET(CMAKE_REQUIRED_FLAGS "-Wall -Wformat -Wformat-security")
   #################################################################
@@ -1038,7 +1038,7 @@ ENDMACRO(CHECK_CRYPTO_WIN CRYPTO_LIST)
 MACRO(CHECK_ICONV LIB TRY_ICONV_CONST)
   IF(NOT HAVE_ICONV)
     CMAKE_PUSH_CHECK_STATE()	# Save the state of the variables
-    IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
+    IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR CMAKE_C_COMPILER_ID MATCHES "^LCC$" OR
         CMAKE_C_COMPILER_ID MATCHES "^Clang$")
       #
       # During checking iconv proto type, we should use -Werror to avoid the
@@ -1046,7 +1046,7 @@ MACRO(CHECK_ICONV LIB TRY_ICONV_CONST)
       # detection. So this needs for all build mode(even it's a release mode).
       #
       SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
-    ENDIF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
+    ENDIF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR CMAKE_C_COMPILER_ID MATCHES "^LCC$" OR
            CMAKE_C_COMPILER_ID MATCHES "^Clang$")
     IF (CMAKE_C_COMPILER_ID MATCHES "^XL$")
       SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -qhalt=w -qflag=w:w")
@@ -1335,7 +1335,7 @@ ENDIF(NOT FOUND_POSIX_REGEX_LIB AND POSIX_REGEX_LIB MATCHES "^(AUTO|LIBPCREPOSIX
 # Check functions
 #
 CMAKE_PUSH_CHECK_STATE()	# Save the state of the variables
-IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
+IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR CMAKE_C_COMPILER_ID MATCHES "^LCC$" OR
     CMAKE_C_COMPILER_ID MATCHES "^Clang$")
   #
   # During checking functions, we should use -fno-builtin to avoid the
@@ -1343,7 +1343,7 @@ IF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
   # types for built-in function" caused by using -Werror option.
   #
   SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -fno-builtin")
-ENDIF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR
+ENDIF (CMAKE_C_COMPILER_ID MATCHES "^GNU$" OR CMAKE_C_COMPILER_ID MATCHES "^LCC$" OR
        CMAKE_C_COMPILER_ID MATCHES "^Clang$")
 CHECK_SYMBOL_EXISTS(_CrtSetReportMode "crtdbg.h" HAVE__CrtSetReportMode)
 CHECK_FUNCTION_EXISTS_GLIBC(arc4random_buf HAVE_ARC4RANDOM_BUF)

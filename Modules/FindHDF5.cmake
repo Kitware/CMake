@@ -873,7 +873,7 @@ if( NOT HDF5_FOUND )
             # Add library-based search paths for Fortran modules.
             if (NOT _hdf5_main_library STREQUAL "")
               # gfortran module directory
-              if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+              if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" OR CMAKE_Fortran_COMPILER_ID STREQUAL "LCC")
                 get_filename_component(_hdf5_library_dir "${_hdf5_main_library}" DIRECTORY)
                 list(APPEND _hdf5_inc_extra_paths "${_hdf5_library_dir}")
                 unset(_hdf5_library_dir)

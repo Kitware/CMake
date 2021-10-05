@@ -160,7 +160,7 @@ INCLUDE_DIRECTORIES(
 
 # Disable warnings to avoid changing 3rd party code.
 IF(CMAKE_C_COMPILER_ID MATCHES
-    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM|NVHPC)$")
+    "^(GNU|LCC|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM|NVHPC)$")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
@@ -172,7 +172,7 @@ IF(CMAKE_C_COMPILER_ID STREQUAL "XL")
   # Disable the XL compiler optimizer because it causes crashes
   # and other bad behavior in liblzma code.
   SET_PROPERTY(TARGET cmliblzma PROPERTY COMPILE_FLAGS "-qnooptimize")
-ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
+ELSEIF((CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "LCC") AND
        CMAKE_C_COMPILER_VERSION VERSION_LESS 3.4)
   # Disable the old GNU compiler optimizer.
   SET_PROPERTY(TARGET cmliblzma PROPERTY COMPILE_FLAGS "-O0")

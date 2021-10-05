@@ -286,6 +286,7 @@ set_property(TARGET testSharedLibRequired
 set_property(TARGET testSharedLibRequired APPEND PROPERTY
   INTERFACE_COMPILE_OPTIONS
     $<$<CXX_COMPILER_ID:GNU>:-DCUSTOM_COMPILE_OPTION>
+    $<$<CXX_COMPILER_ID:LCC>:-DCUSTOM_COMPILE_OPTION>
 )
 
 add_library(testSharedLibRequiredUser SHARED testSharedLibRequiredUser.cpp)
