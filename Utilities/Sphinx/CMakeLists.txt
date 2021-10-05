@@ -58,6 +58,13 @@ configure_file(conf.py.in conf.py @ONLY)
 set(doc_formats "")
 if(SPHINX_HTML)
   list(APPEND doc_formats html)
+
+  # we provide the path to the produced html output in the console
+  # for tools that support URI protocol schemes
+  set(html_extra_commands
+    COMMAND ${CMAKE_COMMAND} -E echo "sphinx-build html: HTML documentation generated in file://${CMAKE_CURRENT_BINARY_DIR}/html/index.html"
+  )
+
 endif()
 if(SPHINX_MAN)
   list(APPEND doc_formats man)
