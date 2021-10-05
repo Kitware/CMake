@@ -446,14 +446,20 @@ if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
   run_ninja(CudaSimple all-clean build-Debug.ninja clean:Debug)
 endif()
 
-if(CMake_TEST_Qt5)
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Qt5-build)
-  set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all" "-DQt5Core_DIR=${Qt5Core_DIR}")
-  run_cmake_configure(Qt5)
+if(CMake_TEST_Qt_version)
+  set(QtX Qt${CMake_TEST_Qt_version})
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/QtX-build)
+  set(RunCMake_TEST_OPTIONS
+    "-DCMAKE_CROSS_CONFIGS=all"
+    "-Dwith_qt_version:STRING=${CMake_TEST_Qt_version}"
+    "-D${QtX}Core_DIR=${${QtX}Core_DIR}"
+    "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
+  )
+  run_cmake_configure(QtX)
   unset(RunCMake_TEST_OPTIONS)
   include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
-  run_cmake_build(Qt5 debug-in-release-graph Release exe:Debug)
-  if(CMAKE_TEST_Qt5Core_Version VERSION_GREATER_EQUAL 5.15.0)
-    run_ninja(Qt5 automoc-check build-Debug.ninja -t query exe_autogen/timestamp)
+  run_cmake_build(QtX debug-in-release-graph Release exe:Debug)
+  if(CMake_TEST_${QtX}Core_Version VERSION_GREATER_EQUAL 5.15.0)
+    run_ninja(QtX automoc-check build-Debug.ninja -t query exe_autogen/timestamp)
   endif()
 endif()

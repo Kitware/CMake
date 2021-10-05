@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 project(GAT)
 include("../../AutogenCoreTest.cmake")
 
@@ -9,7 +9,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
-# Disable ORIGN_DEPENDS and enable AUTOGEN global targets
+# Disable ORIGIN_DEPENDS and enable AUTOGEN global targets
 set(CMAKE_AUTOGEN_ORIGIN_DEPENDS OFF)
 set(CMAKE_GLOBAL_AUTOGEN_TARGET ON)
 set(CMAKE_GLOBAL_AUTORCC_TARGET ON)

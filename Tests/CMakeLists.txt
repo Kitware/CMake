@@ -257,6 +257,13 @@ if(BUILD_TESTING)
   #---------------------------------------------------------------------------
   # Add tests below here.
 
+  if(NOT DEFINED CMake_TEST_Qt6)
+    set(CMake_TEST_Qt6 1)
+  endif()
+  if(CMake_TEST_Qt6)
+    find_package(Qt6 COMPONENTS Core Widgets QUIET NO_MODULE)
+  endif()
+
   if(NOT DEFINED CMake_TEST_Qt5)
     set(CMake_TEST_Qt5 1)
   endif()
@@ -1384,6 +1391,9 @@ if(BUILD_TESTING)
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt")
 
+  if(CMake_TEST_Qt6 AND Qt6Widgets_FOUND)
+    add_subdirectory(Qt6Autogen)
+  endif()
   if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
     add_subdirectory(Qt5Autogen)
   endif()
