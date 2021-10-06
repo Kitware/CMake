@@ -16,6 +16,7 @@
 #include "cmAddTestCommand.h"
 #include "cmBreakCommand.h"
 #include "cmBuildCommand.h"
+#include "cmCMakeLanguageCommand.h"
 #include "cmCMakeMinimumRequired.h"
 #include "cmCMakePathCommand.h"
 #include "cmCMakePolicyCommand.h"
@@ -93,7 +94,6 @@
 #  include "cmAuxSourceDirectoryCommand.h"
 #  include "cmBuildNameCommand.h"
 #  include "cmCMakeHostSystemInformationCommand.h"
-#  include "cmCMakeLanguageCommand.h"
 #  include "cmExportCommand.h"
 #  include "cmExportLibraryDependenciesCommand.h"
 #  include "cmFLTKWrapUICommand.h"
@@ -128,6 +128,7 @@ void GetScriptingCommands(cmState* state)
   state->AddFlowControlCommand("return", cmReturnCommand);
   state->AddFlowControlCommand("while", cmWhileCommand);
 
+  state->AddBuiltinCommand("cmake_language", cmCMakeLanguageCommand);
   state->AddBuiltinCommand("cmake_minimum_required", cmCMakeMinimumRequired);
   state->AddBuiltinCommand("cmake_path", cmCMakePathCommand);
   state->AddBuiltinCommand("cmake_policy", cmCMakePolicyCommand);
@@ -202,7 +203,6 @@ void GetScriptingCommands(cmState* state)
 #if !defined(CMAKE_BOOTSTRAP)
   state->AddBuiltinCommand("cmake_host_system_information",
                            cmCMakeHostSystemInformationCommand);
-  state->AddBuiltinCommand("cmake_language", cmCMakeLanguageCommand);
   state->AddBuiltinCommand("load_cache", cmLoadCacheCommand);
   state->AddBuiltinCommand("remove", cmRemoveCommand);
   state->AddBuiltinCommand("variable_watch", cmVariableWatchCommand);

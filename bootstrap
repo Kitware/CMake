@@ -297,6 +297,7 @@ CMAKE_CXX_SOURCES="\
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool \
   cmBreakCommand \
   cmBuildCommand \
+  cmCMakeLanguageCommand \
   cmCMakeMinimumRequired \
   cmCMakePath \
   cmCMakePathCommand \
