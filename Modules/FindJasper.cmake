@@ -14,7 +14,9 @@ This module defines the following variables:
 
 ``JASPER_FOUND``
   system has Jasper
-``JASPER_INCLUDE_DIR``
+``JASPER_INCLUDE_DIRS``
+  .. versionadded:: 3.22
+
   the Jasper include directory
 ``JASPER_LIBRARIES``
   the libraries needed to use Jasper
@@ -57,4 +59,5 @@ find_package_handle_standard_args(Jasper
 
 if(JASPER_FOUND)
   set(JASPER_LIBRARIES ${JASPER_LIBRARIES} ${JPEG_LIBRARIES})
+  set(JASPER_INCLUDE_DIRS ${JASPER_INCLUDE_DIR})
 endif()
