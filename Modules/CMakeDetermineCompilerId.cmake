@@ -539,7 +539,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     else()
       set(id_toolset "")
     endif()
-    if("${lang}" STREQUAL "Swift")
+    if("x${lang}" STREQUAL "xSwift")
       if(CMAKE_Swift_LANGUAGE_VERSION)
         set(id_lang_version "SWIFT_VERSION = ${CMAKE_Swift_LANGUAGE_VERSION};")
       elseif(XCODE_VERSION VERSION_GREATER_EQUAL 10.2)
