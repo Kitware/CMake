@@ -572,7 +572,7 @@ test:fedora34-asan:
         - .fedora34_asan
         - .cmake_memcheck_linux
         - .linux_builder_tags_qt
-        - .run_automatically
+        - .run_dependent
     dependencies:
         - build:fedora34-asan
     needs:
