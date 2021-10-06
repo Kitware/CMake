@@ -5,16 +5,33 @@
 FindJasper
 ----------
 
-Try to find the Jasper JPEG2000 library
+Find the Jasper JPEG2000 library.
 
-Once done this will define
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+This module defines the following variables:
 
-  JASPER_FOUND - system has Jasper
-  JASPER_INCLUDE_DIR - the Jasper include directory
-  JASPER_LIBRARIES - the libraries needed to use Jasper
-  JASPER_VERSION_STRING - the version of Jasper found (since CMake 2.8.8)
+``JASPER_FOUND``
+  system has Jasper
+``JASPER_INCLUDE_DIR``
+  the Jasper include directory
+``JASPER_LIBRARIES``
+  the libraries needed to use Jasper
+``JASPER_VERSION_STRING``
+  the version of Jasper found
+
+Cache variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``JASPER_INCLUDE_DIR``
+  where to find jasper/jasper.h, etc.
+``JASPER_LIBRARY_RELEASE``
+  where to find the Jasper library (optimized).
+``JASPER_LIBARRY_DEBUG``
+  where to find the Jasper library (debug).
 #]=======================================================================]
 
 find_path(JASPER_INCLUDE_DIR jasper/jasper.h)
