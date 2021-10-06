@@ -162,6 +162,13 @@ Commands
     This may be needed for things like password prompts or real-time display
     of command progress.
 
+  .. versionadded:: 3.22
+    The :variable:`CMAKE_TLS_VERIFY`, :variable:`CMAKE_TLS_CAINFO`,
+    :variable:`CMAKE_NETRC` and :variable:`CMAKE_NETRC_FILE` variables now
+    provide the defaults for their corresponding content options, just like
+    they do for :command:`ExternalProject_Add`. Previously, these variables
+    were ignored by the ``FetchContent`` module.
+
 .. command:: FetchContent_MakeAvailable
 
   .. versionadded:: 3.14
@@ -1016,18 +1023,29 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
     unset(subCMakeOpts)
   endif()
 
-  if(DEFINED CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY)
-    list(APPEND subCMakeOpts
-      "-DCMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY=${CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY}")
-  endif()
+  set(__FETCHCONTENT_CACHED_INFO "")
+  set(__passthrough_vars
+    CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY
+    CMAKE_TLS_VERIFY
+    CMAKE_TLS_CAINFO
+    CMAKE_NETRC
+    CMAKE_NETRC_FILE
+  )
+  foreach(var IN LISTS __passthrough_vars)
+    if(DEFINED ${var})
+      # Embed directly in the generated CMakeLists.txt file to avoid making
+      # the cmake command line excessively long. It also makes debugging and
+      # testing easier.
+      string(APPEND __FETCHCONTENT_CACHED_INFO "set(${var} [==[${${var}}]==])\n")
+    endif()
+  endforeach()
 
   # Avoid using if(... IN_LIST ...) so we don't have to alter policy settings
-  set(__FETCHCONTENT_CACHED_INFO "")
   list(FIND ARG_UNPARSED_ARGUMENTS GIT_REPOSITORY indexResult)
   if(indexResult GREATER_EQUAL 0)
     find_package(Git QUIET)
-    set(__FETCHCONTENT_CACHED_INFO
-"# Pass through things we've already detected in the main project to avoid
+    string(APPEND __FETCHCONTENT_CACHED_INFO "
+# Pass through things we've already detected in the main project to avoid
 # paying the cost of redetecting them again in ExternalProject_Add()
 set(GIT_EXECUTABLE [==[${GIT_EXECUTABLE}]==])
 set(GIT_VERSION_STRING [==[${GIT_VERSION_STRING}]==])
