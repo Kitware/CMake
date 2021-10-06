@@ -7,6 +7,12 @@ FindJasper
 
 Find the Jasper JPEG2000 library.
 
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
+
+``Jasper::Jasper``
+  The jasper library, if found.
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -60,4 +66,25 @@ find_package_handle_standard_args(Jasper
 if(JASPER_FOUND)
   set(JASPER_LIBRARIES ${JASPER_LIBRARIES} ${JPEG_LIBRARIES})
   set(JASPER_INCLUDE_DIRS ${JASPER_INCLUDE_DIR})
+  if(NOT TARGET Jasper::Jasper)
+    add_library(Jasper::Jasper UNKNOWN IMPORTED)
+    if(JASPER_INCLUDE_DIRS)
+      set_target_properties(Jasper::Jasper PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${JASPER_INCLUDE_DIRS}")
+    endif()
+    if(EXISTS "${JASPER_LIBRARY_RELEASE}")
+      set_property(TARGET Jasper::Jasper APPEND PROPERTY
+        IMPORTED CONFIGURATION RELEASE)
+      set_target_properties(Jasper::Jasper PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+        IMPORTED_LOCATION "${JASPER_LIBRARY_RELEASE}")
+    endif()
+    if(EXISTS "${JASPER_LIBRARY_DEBUG}")
+      set_property(TARGET Jasper::Jasper APPEND PROPERTY
+        IMPORTED CONFIGURATION DEBUG)
+      set_target_properties(Jasper::Jasper PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+        IMPORTED_LOCATION "${JASPER_LIBRARY_DEBUG}")
+    endif()
+  endif()
 endif()

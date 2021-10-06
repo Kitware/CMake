@@ -1466,6 +1466,7 @@ if(BUILD_TESTING)
             Iconv
             ICU
             Intl
+            Jasper
             JPEG
             JsonCpp
             LAPACK
