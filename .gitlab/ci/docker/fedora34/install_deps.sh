@@ -36,6 +36,11 @@ dnf install --setopt=install_weak_deps=False -y \
     jq \
     which
 
+# Packages needed to test CTest.
+dnf install --setopt=install_weak_deps=False -y \
+    subversion \
+    mercurial
+
 # Packages needed to test CPack.
 dnf install --setopt=install_weak_deps=False -y \
     rpm-build
