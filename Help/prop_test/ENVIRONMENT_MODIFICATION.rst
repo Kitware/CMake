@@ -1,6 +1,8 @@
 ENVIRONMENT_MODIFICATION
 ------------------------
 
+.. versionadded:: 3.22
+
 Specify environment variables that should be modified for running a test. Note
 that the operations performed by this property are performed after the
 :prop_test:`ENVIRONMENT` property is already applied.
