@@ -511,7 +511,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
 
     # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
     if(BLA_VENDOR MATCHES "_mp")
-     string(APPEND LAPACK_armpl_LIB "_mp")
+      string(APPEND LAPACK_armpl_LIB "_mp")
     endif()
 
     check_lapack_libraries(
