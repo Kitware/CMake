@@ -264,6 +264,34 @@ Package
 
  This feature is available for QtIFW 4.0.0 or newer.
 
+.. variable:: CPACK_IFW_PACKAGE_RUN_PROGRAM
+
+ .. versionadded:: 3.23
+
+ Command executed after the installer is done if the user accepts the action.
+ Provide the full path to the application.
+
+ This feature is available for QtIFW 4.0.0 and newer.
+
+.. variable:: CPACK_IFW_PACKAGE_RUN_PROGRAM_ARGUMENTS
+
+ .. versionadded:: 3.23
+
+ List of arguments passed to the program specified in
+ :variable:`CPACK_IFW_PACKAGE_RUN_PROGRAM`.
+
+ This feature is available for QtIFW 4.0.0 and newer.
+
+.. variable:: CPACK_IFW_PACKAGE_RUN_PROGRAM_DESCRIPTION
+
+ .. versionadded:: 3.23
+
+ Text shown next to the check box for running the program after the
+ installation. If :variable:`CPACK_IFW_PACKAGE_RUN_PROGRAM` is set but no
+ description provided, the UI will display ``Run <Name> now``. instead.
+
+ This feature is available for QtIFW 4.0.0 and newer.
+
 Components
 """"""""""
 

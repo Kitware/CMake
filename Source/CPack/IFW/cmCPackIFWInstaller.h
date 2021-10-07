@@ -124,6 +124,17 @@ public:
   /// A list of images to be shown on PerformInstallationPage.
   std::vector<std::string> ProductImages;
 
+  /// Command executed after the installer is done if the user accepts the
+  /// action
+  std::string RunProgram;
+
+  /// Arguments passed to the program specified in <RunProgram>
+  std::vector<std::string> RunProgramArguments;
+
+  /// Text shown next to the check box for running the program after the
+  /// installation
+  std::string RunProgramDescription;
+
 public:
   // Internal implementation
 

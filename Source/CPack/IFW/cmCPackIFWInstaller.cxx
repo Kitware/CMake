@@ -292,6 +292,20 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     this->ProductImages.clear();
     cmExpandList(productImages, this->ProductImages);
   }
+
+  // Run program, run program arguments, and run program description
+  if (cmValue program = this->GetOption("CPACK_IFW_PACKAGE_RUN_PROGRAM")) {
+    this->RunProgram = *program;
+  }
+  if (cmValue arguments =
+        this->GetOption("CPACK_IFW_PACKAGE_RUN_PROGRAM_ARGUMENTS")) {
+    this->RunProgramArguments.clear();
+    cmExpandList(arguments, this->RunProgramArguments);
+  }
+  if (cmValue description =
+        this->GetOption("CPACK_IFW_PACKAGE_RUN_PROGRAM_DESCRIPTION")) {
+    this->RunProgramDescription = *description;
+  }
 }
 
 /** \class cmCPackIFWResourcesParser
@@ -541,6 +555,25 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     if (!this->DisableCommandLineInterface.empty()) {
       xout.Element("DisableCommandLineInterface",
                    this->DisableCommandLineInterface);
+    }
+
+    // RunProgram
+    if (!this->RunProgram.empty()) {
+      xout.Element("RunProgram", this->RunProgram);
+    }
+
+    // RunProgramArguments
+    if (!this->RunProgramArguments.empty()) {
+      xout.StartElement("RunProgramArguments");
+      for (const auto& arg : this->RunProgramArguments) {
+        xout.Element("Argument", arg);
+      }
+      xout.EndElement();
+    }
+
+    // RunProgramDescription
+    if (!this->RunProgramDescription.empty()) {
+      xout.Element("RunProgramDescription", this->RunProgramDescription);
     }
   }
 
