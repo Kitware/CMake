@@ -801,16 +801,16 @@ if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
    endif()
 
    if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      sgemm
-      ""
-      "${_blas_armpl_lib}"
-      ""
-      ""
-      ""
-      )
+     check_blas_libraries(
+       BLAS_LIBRARIES
+       BLAS
+       sgemm
+       ""
+       "${_blas_armpl_lib}"
+       ""
+       ""
+       ""
+       )
   endif()
   unset(_blas_armpl_lib)
 endif()
@@ -1197,17 +1197,17 @@ endif()
 # Elbrus Math Library?
 if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
 
-   set(_blas_eml_lib "eml")
+  set(_blas_eml_lib "eml")
 
-   if(_blas_sizeof_integer EQUAL 8)
-     string(APPEND _blas_eml_lib "_ilp64")
-   endif()
-   # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
-   if(BLA_VENDOR MATCHES "_mt")
-     string(APPEND _blas_eml_lib "_mt")
-   endif()
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_eml_lib "_ilp64")
+  endif()
+  # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
+  if(BLA_VENDOR MATCHES "_mt")
+    string(APPEND _blas_eml_lib "_mt")
+  endif()
 
-   if(NOT BLAS_LIBRARIES)
+  if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
