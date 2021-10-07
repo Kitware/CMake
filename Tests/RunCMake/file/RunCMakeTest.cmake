@@ -97,7 +97,9 @@ if(NOT WIN32
   run_cmake(READ_SYMLINK)
   run_cmake(READ_SYMLINK-noexist)
   run_cmake(READ_SYMLINK-notsymlink)
-  run_cmake(INSTALL-FOLLOW_SYMLINK_CHAIN)
+  if(NOT CYGWIN)
+    run_cmake(INSTALL-FOLLOW_SYMLINK_CHAIN)
+  endif()
 endif()
 
 run_cmake(REAL_PATH-unexpected-arg)
