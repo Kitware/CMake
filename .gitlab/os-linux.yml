@@ -321,8 +321,9 @@
 .before_script_linux: &before_script_linux
     - source .gitlab/ci/env.sh
     - .gitlab/ci/cmake.sh
+    - export PATH=$PWD/.gitlab/cmake/bin:$PATH
     - .gitlab/ci/ninja.sh
-    - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
+    - export PATH=$PWD/.gitlab:$PATH
     - cmake --version
     - ninja --version
 

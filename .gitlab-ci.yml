@@ -166,6 +166,8 @@ test:debian10-ninja:
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos6_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
 test:debian10-aarch64-ninja:
     extends:
@@ -611,6 +613,8 @@ test:macos-x86_64-ninja:
         - build:macos-x86_64-ninja
     needs:
         - build:macos-x86_64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
 test:macos-arm64-ninja:
     extends:
