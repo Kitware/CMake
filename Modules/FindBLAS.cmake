@@ -326,9 +326,9 @@ function(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlib
       list(APPEND _libraries "${_library}")
     else()
       string(REGEX REPLACE "[^A-Za-z0-9]" "_" _lib_var "${_library}")
-      set(_combined_name ${_combined_name}_${_lib_var})
+      string(APPEND _combined_name "_${_lib_var}")
       if(NOT "${_deps}" STREQUAL "")
-        set(_combined_name ${_combined_name}_deps)
+        string(APPEND _combined_name "_deps")
       endif()
       if(_libraries_work)
         find_library(${_prefix}_${_lib_var}_LIBRARY
@@ -346,7 +346,7 @@ function(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addlib
 
   foreach(_flag ${_flags})
     string(REGEX REPLACE "[^A-Za-z0-9]" "_" _flag_var "${_flag}")
-    set(_combined_name ${_combined_name}_${_flag_var})
+    string(APPEND _combined_name "_${_flag_var}")
   endforeach()
   if(_libraries_work)
     # Test this combination of libraries.
@@ -797,20 +797,20 @@ if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
 
    # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
    if(BLA_VENDOR MATCHES "_mp")
-     set(_blas_armpl_lib "${_blas_armpl_lib}_mp")
+     string(APPEND _blas_armpl_lib "_mp")
    endif()
 
    if(NOT BLAS_LIBRARIES)
-    check_blas_libraries(
-      BLAS_LIBRARIES
-      BLAS
-      sgemm
-      ""
-      "${_blas_armpl_lib}"
-      ""
-      ""
-      ""
-      )
+     check_blas_libraries(
+       BLAS_LIBRARIES
+       BLAS
+       sgemm
+       ""
+       "${_blas_armpl_lib}"
+       ""
+       ""
+       ""
+       )
   endif()
   unset(_blas_armpl_lib)
 endif()
@@ -942,7 +942,7 @@ if(BLA_VENDOR MATCHES "SCSL" OR BLA_VENDOR STREQUAL "All")
     string(APPEND _blas_scsl_lib "_i8")
   endif()
   if(BLA_VENDOR MATCHES "_mp")
-    set(_blas_scsl_lib "${_blas_scsl_lib}_mp")
+    string(APPEND _blas_scsl_lib "_mp")
   endif()
 
   if(NOT BLAS_LIBRARIES)
@@ -982,7 +982,7 @@ if(BLA_VENDOR MATCHES "IBMESSL" OR BLA_VENDOR STREQUAL "All")
   set(_blas_essl_lib "essl")
 
   if(BLA_VENDOR MATCHES "_SMP")
-    set(_blas_essl_lib "${_blas_essl_lib}smp")
+    string(APPEND _blas_essl_lib "smp")
   endif()
   if(_blas_sizeof_integer EQUAL 8)
     string(APPEND _blas_essl_lib "6464")
@@ -1197,17 +1197,17 @@ endif()
 # Elbrus Math Library?
 if(BLA_VENDOR MATCHES "EML" OR BLA_VENDOR STREQUAL "All")
 
-   set(_blas_eml_lib "eml")
+  set(_blas_eml_lib "eml")
 
-   if(_blas_sizeof_integer EQUAL 8)
-     string(APPEND _blas_eml_lib "_ilp64")
-   endif()
-   # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
-   if(BLA_VENDOR MATCHES "_mt")
-     set(_blas_eml_lib "${_blas_eml_lib}_mt")
-   endif()
+  if(_blas_sizeof_integer EQUAL 8)
+    string(APPEND _blas_eml_lib "_ilp64")
+  endif()
+  # Check for OpenMP support, VIA BLA_VENDOR of eml_mt
+  if(BLA_VENDOR MATCHES "_mt")
+    string(APPEND _blas_eml_lib "_mt")
+  endif()
 
-   if(NOT BLAS_LIBRARIES)
+  if(NOT BLAS_LIBRARIES)
     check_blas_libraries(
       BLAS_LIBRARIES
       BLAS

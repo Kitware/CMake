@@ -181,9 +181,9 @@ function(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addl
       list(APPEND _libraries "${_library}")
     else()
       string(REGEX REPLACE "[^A-Za-z0-9]" "_" _lib_var "${_library}")
-      set(_combined_name ${_combined_name}_${_lib_var})
+      string(APPEND _combined_name "_${_lib_var}")
       if(NOT "${_deps}" STREQUAL "")
-        set(_combined_name ${_combined_name}_deps)
+        string(APPEND _combined_name "_deps")
       endif()
       if(_libraries_work)
         find_library(${_prefix}_${_lib_var}_LIBRARY
@@ -201,7 +201,7 @@ function(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _deps _addl
 
   foreach(_flag ${_flags})
     string(REGEX REPLACE "[^A-Za-z0-9]" "_" _flag_var "${_flag}")
-    set(_combined_name ${_combined_name}_${_flag_var})
+    string(APPEND _combined_name "_${_flag_var}")
   endforeach()
   if(_libraries_work)
     # Test this combination of libraries.
@@ -511,7 +511,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
 
     # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
     if(BLA_VENDOR MATCHES "_mp")
-     set(LAPACK_armpl_LIB "${LAPACK_armpl_LIB}_mp")
+      string(APPEND LAPACK_armpl_LIB "_mp")
     endif()
 
     check_lapack_libraries(
@@ -559,7 +559,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     endif()
     # Check for OpenMP support, VIA BLA_VENDOR of scs_mp
     if(BLA_VENDOR MATCHES "_mp")
-      set(_lapack_scsl_lib "${_lapack_scsl_lib}_mp")
+      string(APPEND _lapack_scsl_lib "_mp")
     endif()
 
     check_lapack_libraries(
