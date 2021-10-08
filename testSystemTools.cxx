@@ -626,6 +626,16 @@ static bool CheckStringOperations()
     res = false;
   }
 
+  std::vector<std::string> linesToJoin = { "Mary", "Had", "A", "Little",
+                                           "Lamb." };
+  std::string joinResult = kwsys::SystemTools::Join(linesToJoin, " ");
+  if (joinResult != "Mary Had A Little Lamb.") {
+    std::cerr << "Problem with Join "
+                 "\"Mary Had A Little Lamb.\""
+              << std::endl;
+    res = false;
+  }
+
   if (kwsys::SystemTools::ConvertToWindowsOutputPath(
         "L://Local Mojo/Hex Power Pack/Iffy Voodoo") !=
       "\"L:\\Local Mojo\\Hex Power Pack\\Iffy Voodoo\"") {
