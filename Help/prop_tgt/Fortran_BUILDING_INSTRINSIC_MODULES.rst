@@ -1,6 +1,8 @@
 Fortran_BUILDING_INSTRINSIC_MODULES
 -----------------------------------
 
+.. versionadded:: 3.22
+
 Instructs the CMake Fortran preprocessor that the target is building
 Fortran intrinsics for building a Fortran compiler.
 

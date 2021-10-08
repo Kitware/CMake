@@ -1,6 +1,8 @@
 CMP0127
 -------
 
+.. versionadded:: 3.22
+
 :command:`cmake_dependent_option` supports full :ref:`Condition Syntax`.
 
 The ``<depends>`` parameter accepts a :ref:`semicolon-separated list <CMake
