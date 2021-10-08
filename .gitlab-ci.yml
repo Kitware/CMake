@@ -52,7 +52,7 @@ prep:doc-package:
         - .cmake_doc_artifacts
         - .run_only_for_package
 
-upload:source-package:
+.upload:source-package:
     extends:
         - .rsync_upload_binary
         - .run_only_for_package
@@ -70,7 +70,7 @@ build:help:master:
         - .cmake_org_help
         - .run_only_for_continuous_master
 
-upload:help:master:
+.upload:help:master:
     extends:
         - .rsync_upload_help
         - .run_only_for_continuous_master
@@ -86,7 +86,7 @@ build:help:stage:
         - .cmake_org_help
         - .run_only_for_continuous_stage
 
-upload:help:stage:
+.upload:help:stage:
     extends:
         - .rsync_upload_help
         - .run_only_for_continuous_stage
@@ -522,7 +522,7 @@ build:linux-x86_64-package:
     needs:
         - prep:doc-package
 
-upload:linux-x86_64-package:
+.upload:linux-x86_64-package:
     extends:
         - .rsync_upload_binary
         - .run_only_for_package
@@ -546,7 +546,7 @@ build:linux-aarch64-package:
     needs:
         - prep:doc-package
 
-upload:linux-aarch64-package:
+.upload:linux-aarch64-package:
     extends:
         - .rsync_upload_binary
         - .run_only_for_package
@@ -687,7 +687,7 @@ build:macos-package:
     needs:
         - prep:doc-package
 
-upload:macos-package:
+.upload:macos-package:
     extends:
         - .rsync_upload_binary
         - .run_only_for_package
@@ -710,7 +710,7 @@ build:macos10.10-package:
     needs:
         - prep:doc-package
 
-upload:macos10.10-package:
+.upload:macos10.10-package:
     extends:
         - .rsync_upload_binary
         - .run_only_for_package
