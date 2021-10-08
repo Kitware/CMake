@@ -371,7 +371,9 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
 
   // Logo
   if (!this->Logo.empty()) {
-    std::string name = cmSystemTools::GetFilenameName(this->Logo);
+    std::string srcName = cmSystemTools::GetFilenameName(this->Logo);
+    std::string suffix = cmSystemTools::GetFilenameLastExtension(srcName);
+    std::string name = "cm_logo." + suffix;
     std::string path = this->Directory + "/config/" + name;
     cmsys::SystemTools::CopyFileIfDifferent(this->Logo, path);
     xout.Element("Logo", name);
@@ -405,19 +407,25 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   if (!this->IsVersionLess("1.4")) {
     // ApplicationIcon
     if (!this->InstallerApplicationIcon.empty()) {
-      std::string name =
+      std::string srcName =
         cmSystemTools::GetFilenameName(this->InstallerApplicationIcon);
+      std::string suffix = cmSystemTools::GetFilenameLastExtension(srcName);
+      std::string name = "cm_appicon." + suffix;
       std::string path = this->Directory + "/config/" + name;
-      name = cmSystemTools::GetFilenameWithoutExtension(name);
       cmsys::SystemTools::CopyFileIfDifferent(this->InstallerApplicationIcon,
                                               path);
+      // The actual file is looked up by attaching a '.icns' (macOS),
+      // '.ico' (Windows). No functionality on Unix.
+      name = cmSystemTools::GetFilenameWithoutExtension(name);
       xout.Element("InstallerApplicationIcon", name);
     }
 
     // WindowIcon
     if (!this->InstallerWindowIcon.empty()) {
-      std::string name =
+      std::string srcName =
         cmSystemTools::GetFilenameName(this->InstallerWindowIcon);
+      std::string suffix = cmSystemTools::GetFilenameLastExtension(srcName);
+      std::string name = "cm_winicon." + suffix;
       std::string path = this->Directory + "/config/" + name;
       cmsys::SystemTools::CopyFileIfDifferent(this->InstallerWindowIcon, path);
       xout.Element("InstallerWindowIcon", name);
