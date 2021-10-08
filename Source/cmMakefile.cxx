@@ -4427,11 +4427,12 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   }
 
   // Deprecate old policies.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0088 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0094 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
-          id == cmPolicies::CMP0065 || id == cmPolicies::CMP0083))) {
+          id == cmPolicies::CMP0065 || id == cmPolicies::CMP0083 ||
+          id == cmPolicies::CMP0091))) {
     this->IssueMessage(MessageType::DEPRECATION_WARNING,
                        cmPolicies::GetPolicyDeprecatedWarning(id));
   }
