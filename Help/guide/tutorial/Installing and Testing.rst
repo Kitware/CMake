@@ -88,6 +88,8 @@ input, and expected results based on the passed arguments.
 Rebuild the application and then cd to the binary directory and run the
 :manual:`ctest <ctest(1)>` executable: ``ctest -N`` and ``ctest -VV``. For
 multi-config generators (e.g. Visual Studio), the configuration type must be
-specified. To run tests in Debug mode, for example, use ``ctest -C Debug -VV``
-from the build directory (not the Debug subdirectory!). Alternatively, build
-the ``RUN_TESTS`` target from the IDE.
+specified with the ``-C <mode>`` flag.  For example, to run tests in Debug
+mode use ``ctest -C Debug -VV`` from the binary directory
+(not the Debug subdirectory!). Release mode would be executed from the same
+location but with a ``-C Release``.  Alternatively, build the ``RUN_TESTS``
+target from the IDE.
