@@ -3170,9 +3170,12 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
                             archive.GetUnresolvedPaths().begin(),
                             archive.GetUnresolvedPaths().end());
     } else {
-      auto it = archive.GetUnresolvedPaths().begin();
-      assert(it != archive.GetUnresolvedPaths().end());
-      status.SetError(cmStrCat("Could not resolve file ", *it));
+      std::ostringstream e;
+      e << "Could not resolve runtime dependencies:";
+      for (auto const& path : archive.GetUnresolvedPaths()) {
+        e << "\n  " << path;
+      }
+      status.SetError(e.str());
       cmSystemTools::SetFatalErrorOccured();
       return false;
     }
