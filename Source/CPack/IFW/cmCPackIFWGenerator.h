@@ -140,6 +140,12 @@ protected:
   std::map<cmCPackComponentGroup*, cmCPackIFWPackage*> GroupPackages;
 
 private:
+  std::vector<std::string> BuildRepogenCommand();
+  int RunRepogen(const std::string& ifwTmpFile);
+
+  std::vector<std::string> BuildBinaryCreatorCommmand();
+  int RunBinaryCreator(const std::string& ifwTmpFile);
+
   std::string RepoGen;
   std::string BinCreator;
   std::string FrameworkVersion;
