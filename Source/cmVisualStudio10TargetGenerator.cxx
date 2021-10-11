@@ -2491,6 +2491,22 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       e2.Element("ObjectFileName", "$(IntDir)/" + objectName);
     }
   }
+
+  if (lang == "ASM_NASM") {
+    if (cmValue objectDeps = sf.GetProperty("OBJECT_DEPENDS")) {
+      std::string dependencies;
+      std::vector<std::string> depends = cmExpandedList(*objectDeps);
+      const char* sep = "";
+      for (std::string& d : depends) {
+        ConvertToWindowsSlash(d);
+        dependencies += sep;
+        dependencies += d;
+        sep = ";";
+      }
+      e2.Element("AdditionalDependencies", dependencies);
+    }
+  }
+
   for (std::string const& config : this->Configurations) {
     std::string configUpper = cmSystemTools::UpperCase(config);
     std::string configDefines = defines;
