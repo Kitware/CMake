@@ -320,3 +320,11 @@ Windows using WiX.
  name is the plain namespace without the usual xmlns: prefix and url is an unquoted
  namespace url. A list of commonly known WiX schemata can be found here:
  https://wixtoolset.org/documentation/manual/v3/xsd/
+
+.. variable:: CPACK_WIX_SKIP_WIX_UI_EXTENSION
+
+ .. versionadded:: 3.23
+
+ If this variable is set then the inclusion of WixUIExtensions is skipped,
+ i.e. the ``-ext "WixUIExtension"`` command line is not included during
+ the execution of the WiX light tool.
