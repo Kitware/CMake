@@ -754,3 +754,31 @@ test:windows-vs2019-x64:
         - test:windows-vs2019-x64-ninja
     needs:
         - test:windows-vs2019-x64-ninja
+
+test:windows-borland5.5:
+    extends:
+        - .windows_borland5.5
+        - .cmake_test_windows_borland
+        - .windows_builder_ext_tags
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - test:windows-vs2019-x64-ninja
+    needs:
+        - test:windows-vs2019-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+test:windows-borland5.8:
+    extends:
+        - .windows_borland5.8
+        - .cmake_test_windows_borland
+        - .windows_builder_ext_tags
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - test:windows-vs2019-x64-ninja
+    needs:
+        - test:windows-vs2019-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
