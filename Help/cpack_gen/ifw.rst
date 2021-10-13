@@ -248,6 +248,14 @@ Package
  By default is ``OFF`` or used value
  from ``CPACK_DOWNLOAD_ALL`` if set
 
+.. variable:: CPACK_IFW_PACKAGE_PRODUCT_IMAGES
+
+ .. versionadded:: 3.23
+
+ A list of images to be shown on the ``PerformInstallationPage``.
+
+ This feature is available for QtIFW 4.0.0 or newer.
+
 Components
 """"""""""
 

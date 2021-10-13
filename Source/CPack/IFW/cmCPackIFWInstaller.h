@@ -118,6 +118,9 @@ public:
   /// List of resources to include in the installer binary
   std::vector<std::string> Resources;
 
+  /// A list of images to be shown on PerformInstallationPage.
+  std::vector<std::string> ProductImages;
+
 public:
   // Internal implementation
 

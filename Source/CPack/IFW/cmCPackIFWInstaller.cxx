@@ -275,6 +275,13 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     this->Resources.clear();
     cmExpandList(optIFW_PACKAGE_RESOURCES, this->Resources);
   }
+
+  // ProductImages
+  if (cmValue productImages =
+        this->GetOption("CPACK_IFW_PACKAGE_PRODUCT_IMAGES")) {
+    this->ProductImages.clear();
+    cmExpandList(productImages, this->ProductImages);
+  }
 }
 
 /** \class cmCPackIFWResourcesParser
@@ -515,6 +522,18 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
 
   if (!this->RemoveTargetDir.empty()) {
     xout.Element("RemoveTargetDir", this->RemoveTargetDir);
+  }
+
+  // Product images (copy to config dir)
+  if (!this->IsVersionLess("4.0") && !this->ProductImages.empty()) {
+    xout.StartElement("ProductImages");
+    for (auto const& srcImg : this->ProductImages) {
+      std::string name = cmSystemTools::GetFilenameName(srcImg);
+      std::string dstImg = this->Directory + "/config/" + name;
+      cmsys::SystemTools::CopyFileIfDifferent(srcImg, dstImg);
+      xout.Element("Image", name);
+    }
+    xout.EndElement();
   }
 
   // Resources (copy to resources dir)
