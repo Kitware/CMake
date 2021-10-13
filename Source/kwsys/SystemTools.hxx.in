@@ -214,6 +214,13 @@ public:
                     char separator);
 
   /**
+   * Joins a vector of strings into a single string, with separator in between
+   * each string.
+   */
+  static std::string Join(const std::vector<std::string>& list,
+                          const std::string& separator);
+
+  /**
    * Return string with space added between capitalized words
    * (i.e. EatMyShorts becomes Eat My Shorts )
    * (note that IEatShorts becomes IEat Shorts)
