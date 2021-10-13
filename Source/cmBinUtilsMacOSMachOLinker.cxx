@@ -5,6 +5,8 @@
 
 #include <sstream>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <cm/memory>
@@ -52,6 +54,26 @@ bool cmBinUtilsMacOSMachOLinker::Prepare()
   return true;
 }
 
+auto cmBinUtilsMacOSMachOLinker::GetFileInfo(std::string const& file)
+  -> const FileInfo*
+{
+  // Memoize processed rpaths and library dependencies to reduce the number
+  // of calls to otool, especially in the case of heavily recursive libraries
+  auto iter = ScannedFileInfo.find(file);
+  if (iter != ScannedFileInfo.end()) {
+    return &iter->second;
+  }
+
+  FileInfo file_info;
+  if (!this->Tool->GetFileInfo(file, file_info.libs, file_info.rpaths)) {
+    // Call to otool failed
+    return nullptr;
+  }
+
+  auto iter_inserted = ScannedFileInfo.insert({ file, std::move(file_info) });
+  return &iter_inserted.first->second;
+}
+
 bool cmBinUtilsMacOSMachOLinker::ScanDependencies(
   std::string const& file, cmStateEnums::TargetType type)
 {
@@ -65,12 +87,12 @@ bool cmBinUtilsMacOSMachOLinker::ScanDependencies(
   if (!executableFile.empty()) {
     executablePath = cmSystemTools::GetFilenamePath(executableFile);
   }
-  std::vector<std::string> libs;
-  std::vector<std::string> rpaths;
-  if (!this->Tool->GetFileInfo(file, libs, rpaths)) {
+  const FileInfo* file_info = this->GetFileInfo(file);
+  if (file_info == nullptr) {
     return false;
   }
-  return this->ScanDependencies(file, libs, rpaths, executablePath);
+  return this->ScanDependencies(file, file_info->libs, file_info->rpaths,
+                                executablePath);
 }
 
 bool cmBinUtilsMacOSMachOLinker::ScanDependencies(
@@ -98,14 +120,16 @@ bool cmBinUtilsMacOSMachOLinker::GetFileDependencies(
             !IsMissingSystemDylib(path)) {
           auto filename = cmSystemTools::GetFilenameName(path);
           bool unique;
-          std::vector<std::string> libs;
-          std::vector<std::string> depRpaths;
-          if (!this->Tool->GetFileInfo(path, libs, depRpaths)) {
+          const FileInfo* dep_file_info = this->GetFileInfo(path);
+          if (dep_file_info == nullptr) {
             return false;
           }
-          this->Archive->AddResolvedPath(filename, path, unique, depRpaths);
+
+          this->Archive->AddResolvedPath(filename, path, unique,
+                                         dep_file_info->rpaths);
           if (unique &&
-              !this->ScanDependencies(path, libs, depRpaths, executablePath)) {
+              !this->ScanDependencies(path, dep_file_info->libs,
+                                      dep_file_info->rpaths, executablePath)) {
             return false;
           }
         }
