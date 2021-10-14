@@ -71,6 +71,7 @@ Variables that Provide Information
    /variable/CMAKE_JOB_POOL_PRECOMPILE_HEADER
    /variable/CMAKE_JOB_POOLS
    /variable/CMAKE_LANG_COMPILER_AR
+   /variable/CMAKE_LANG_COMPILER_FRONTEND_VARIANT
    /variable/CMAKE_LANG_COMPILER_RANLIB
    /variable/CMAKE_LANG_LINK_LIBRARY_SUFFIX
    /variable/CMAKE_LINK_LIBRARY_SUFFIX
