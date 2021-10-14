@@ -747,6 +747,9 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
   if (!depTgt->IsImported() || excludeImported) {
     return;
   }
+  if (depTgt->GetPropertyAsBool("IMPORTED_NO_SYSTEM")) {
+    return;
+  }
 
   if (cmValue dirs = depTgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")) {
     cmExpandList(cmGeneratorExpression::Evaluate(*dirs, lg, config, headTarget,
