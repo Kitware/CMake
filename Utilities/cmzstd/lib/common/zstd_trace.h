@@ -20,7 +20,7 @@ extern "C" {
 /* weak symbol support */
 #if !defined(ZSTD_HAVE_WEAK_SYMBOLS) && defined(__GNUC__) && \
     !defined(__APPLE__) && !defined(_WIN32) && !defined(__MINGW32__) && \
-    !defined(__CYGWIN__)
+    !defined(__CYGWIN__) && !defined(_AIX)
 #  define ZSTD_HAVE_WEAK_SYMBOLS 1
 #else
 #  define ZSTD_HAVE_WEAK_SYMBOLS 0
