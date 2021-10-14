@@ -24,14 +24,14 @@ public:
 
 protected:
   ~codecvt() override;
-  bool do_always_noconv() const throw() override;
+  bool do_always_noconv() const noexcept override;
   result do_out(mbstate_t& state, const char* from, const char* from_end,
                 const char*& from_next, char* to, char* to_end,
                 char*& to_next) const override;
   result do_unshift(mbstate_t& state, char* to, char*,
                     char*& to_next) const override;
-  int do_max_length() const throw() override;
-  int do_encoding() const throw() override;
+  int do_max_length() const noexcept override;
+  int do_encoding() const noexcept override;
 
 private:
   // The mbstate_t argument to do_out and do_unshift is responsible

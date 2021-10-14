@@ -26,6 +26,9 @@ public:
   cmSearchPath(cmFindCommon* findCmd = nullptr);
   ~cmSearchPath();
 
+  cmSearchPath(const cmSearchPath&) = default;
+  cmSearchPath& operator=(const cmSearchPath&) = default;
+
   const std::vector<std::string>& GetPaths() const { return this->Paths; }
   std::size_t size() const { return this->Paths.size(); }
 
