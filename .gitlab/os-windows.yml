@@ -52,6 +52,26 @@
         CMAKE_GENERATOR_TOOLSET: "v142,version=14.29.30133"
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
+.windows_borland:
+    extends: .windows
+
+    variables:
+        CMAKE_GENERATOR: "Borland Makefiles"
+        CMAKE_CI_BUILD_TYPE: Release
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
+.windows_borland5.5:
+    extends: .windows_borland
+
+    variables:
+        CMAKE_CONFIGURATION: windows_borland5.5
+
+.windows_borland5.8:
+    extends: .windows_borland
+
+    variables:
+        CMAKE_CONFIGURATION: windows_borland5.8
+
 ## Tags
 
 .windows_builder_tags:
@@ -120,6 +140,17 @@
     stage: test-ext
 
     script:
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+
+    interruptible: true
+
+.cmake_test_windows_borland:
+    stage: test-ext
+
+    script:
+        - Invoke-Expression -Command .gitlab/ci/borland.ps1
+        - $pwdpath = $pwd.Path
+        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\bcc\bin;$env:PATH"
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
 
     interruptible: true
