@@ -142,3 +142,7 @@ Other Changes
   This became available as of VS 16.10 (toolchain version 14.29.30037).
 
 * The :cpack_gen:`CPack NSIS Generator` now requires NSIS 3.03 or later.
+
+* The :generator:`Visual Studio 17 2022` generator was updated.  This is
+  experimental and based on "Visual Studio 2022 Preview 5" because this
+  version of VS has not been released.
