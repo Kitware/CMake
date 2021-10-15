@@ -195,6 +195,14 @@ Package
 
  Is ``ON`` for QtIFW less 2.0 tools.
 
+.. variable:: CPACK_IFW_PACKAGE_DISABLE_COMMAND_LINE_INTERFACE
+
+ .. versionadded:: 3.23
+
+ Set to ``ON`` if command line interface features should be disabled.
+
+ Is ``OFF`` by default, but will only have an effect if using QtIFW 4.0 or later.
+
 .. variable:: CPACK_IFW_PACKAGE_ALLOW_SPACE_IN_PATH
 
  .. versionadded:: 3.3

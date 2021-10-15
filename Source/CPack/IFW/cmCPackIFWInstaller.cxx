@@ -254,6 +254,16 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     }
   }
 
+  // DisableCommandLineInterface
+  if (this->GetOption("CPACK_IFW_PACKAGE_DISABLE_COMMAND_LINE_INTERFACE")) {
+    if (this->IsOn("CPACK_IFW_PACKAGE_DISABLE_COMMAND_LINE_INTERFACE")) {
+      this->DisableCommandLineInterface = "true";
+    } else if (this->IsSetToOff(
+                 "CPACK_IFW_PACKAGE_DISABLE_COMMAND_LINE_INTERFACE")) {
+      this->DisableCommandLineInterface = "false";
+    }
+  }
+
   // Space in path
   if (this->GetOption("CPACK_IFW_PACKAGE_ALLOW_SPACE_IN_PATH")) {
     if (this->IsOn("CPACK_IFW_PACKAGE_ALLOW_SPACE_IN_PATH")) {
@@ -517,6 +527,12 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     // WizardShowPageList
     if (!this->WizardShowPageList.empty()) {
       xout.Element("WizardShowPageList", this->WizardShowPageList);
+    }
+
+    // DisableCommandLineInterface
+    if (!this->DisableCommandLineInterface.empty()) {
+      xout.Element("DisableCommandLineInterface",
+                   this->DisableCommandLineInterface);
     }
   }
 
