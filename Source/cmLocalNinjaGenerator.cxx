@@ -88,7 +88,7 @@ void cmLocalNinjaGenerator::Generate()
       cmGlobalNinjaGenerator::WriteComment(this->GetRulesFileStream(),
                                            "localized /showIncludes string");
       this->GetRulesFileStream() << "msvc_deps_prefix = ";
-#ifdef WIN32
+#ifdef _WIN32
       // Ninja uses the ANSI Windows APIs, so strings in the rules file
       // typically need to be ANSI encoded. However, in this case the compiler
       // is being invoked using the UTF-8 codepage so the /showIncludes prefix
