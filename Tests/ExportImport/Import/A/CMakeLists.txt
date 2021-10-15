@@ -70,6 +70,10 @@ target_link_libraries(imp_testExe1
   exp_testLibPerConfigDest
   )
 
+add_library(imp_testInterfaceInclude1 STATIC imp_testInterfaceInclude1.c)
+target_include_directories(imp_testInterfaceInclude1 SYSTEM PRIVATE testInterfaceIncludeSystem)
+target_link_libraries(imp_testInterfaceInclude1 PRIVATE exp_testInterfaceIncludeUser)
+
 # Try building a plugin to an executable imported from the install tree.
 add_library(imp_mod1 MODULE imp_mod1.c)
 target_link_libraries(imp_mod1 exp_testExe2)
@@ -109,6 +113,10 @@ target_link_libraries(imp_testExe1b
   bld_testLibCycleA
   bld_testLibPerConfigDest
   )
+
+add_library(imp_testInterfaceInclude1b STATIC imp_testInterfaceInclude1.c)
+target_include_directories(imp_testInterfaceInclude1b SYSTEM PRIVATE testInterfaceIncludeSystem)
+target_link_libraries(imp_testInterfaceInclude1b PRIVATE bld_testInterfaceIncludeUser)
 
 add_custom_target(check_testLib1_genex ALL
   COMMAND ${CMAKE_COMMAND} -DtestLib1=$<TARGET_FILE:exp_testLib1>
