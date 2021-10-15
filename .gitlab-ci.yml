@@ -782,3 +782,17 @@ test:windows-borland5.8:
         - test:windows-vs2019-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+
+test:windows-openwatcom1.9:
+    extends:
+        - .windows_openwatcom1.9
+        - .cmake_test_windows_openwatcom
+        - .windows_builder_ext_tags
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - test:windows-vs2019-x64-ninja
+    needs:
+        - test:windows-vs2019-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
