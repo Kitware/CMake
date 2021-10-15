@@ -72,7 +72,7 @@ bool cmFileCopier::SetPermissions(const std::string& toFile,
                                   mode_t permissions)
 {
   if (permissions) {
-#ifdef WIN32
+#ifdef _WIN32
     if (Makefile->IsOn("CMAKE_CROSSCOMPILING")) {
       // Store the mode in an NTFS alternate stream.
       std::string mode_t_adt_filename = toFile + ":cmake_mode_t";
