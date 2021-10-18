@@ -60,17 +60,19 @@ public:
   class Preset
   {
   public:
-#if __cplusplus < 201703L && (!defined(_MSVC_LANG) || _MSVC_LANG < 201703L)
+    Preset() = default;
+    Preset(Preset&& /*other*/) = default;
+    Preset(const Preset& /*other*/) = default;
+    Preset& operator=(const Preset& /*other*/) = default;
+    virtual ~Preset() = default;
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+    Preset& operator=(Preset&& /*other*/) = default;
+#else
     // The move assignment operators for several STL classes did not become
     // noexcept until C++17, which causes some tools to warn about this move
-    // assignment operator throwing an exception when it shouldn't. Disable the
-    // move assignment operator until C++17 is enabled.
-    // Explicitly defining a copy assignment operator prevents the compiler
-    // from automatically generating a move assignment operator.
-    Preset& operator=(const Preset& /*other*/) = default;
+    // assignment operator throwing an exception when it shouldn't.
+    Preset& operator=(Preset&& /*other*/) = delete;
 #endif
-
-    virtual ~Preset() = default;
 
     std::string Name;
     std::vector<std::string> Inherits;

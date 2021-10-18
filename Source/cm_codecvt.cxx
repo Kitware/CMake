@@ -42,7 +42,7 @@ codecvt::codecvt(Encoding e)
 
 codecvt::~codecvt() = default;
 
-bool codecvt::do_always_noconv() const throw()
+bool codecvt::do_always_noconv() const noexcept
 {
   return this->m_noconv;
 }
@@ -234,12 +234,12 @@ void codecvt::BufferPartial(mbstate_t& state, int size,
 }
 #endif
 
-int codecvt::do_max_length() const throw()
+int codecvt::do_max_length() const noexcept
 {
   return 4;
 }
 
-int codecvt::do_encoding() const throw()
+int codecvt::do_encoding() const noexcept
 {
   return 0;
 }
