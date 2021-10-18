@@ -320,9 +320,9 @@ private:
 };
 #endif
 
-bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
-                        std::set<std::string>& symbols,
-                        std::set<std::string>& dataSymbols)
+static bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
+                               std::set<std::string>& symbols,
+                               std::set<std::string>& dataSymbols)
 {
   std::string output;
   // break up command line into a vector
@@ -375,9 +375,9 @@ bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
   return true;
 }
 
-bool DumpFile(std::string const& nmPath, const char* filename,
-              std::set<std::string>& symbols,
-              std::set<std::string>& dataSymbols)
+static bool DumpFile(std::string const& nmPath, const char* filename,
+                     std::set<std::string>& symbols,
+                     std::set<std::string>& dataSymbols)
 {
 #ifndef _WIN32
   return DumpFileWithLlvmNm(nmPath, filename, symbols, dataSymbols);

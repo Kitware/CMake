@@ -173,9 +173,14 @@ private:
   BT<std::string> PropertyValue;
 };
 
-std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>
-CreateTargetPropertyEntry(const BT<std::string>& propertyValue,
-                          bool evaluateForBuildsystem = false)
+std::unique_ptr<
+  cmGeneratorTarget::
+    TargetPropertyEntry> static CreateTargetPropertyEntry(const BT<std::
+                                                                     string>&
+                                                            propertyValue,
+                                                          bool
+                                                            evaluateForBuildsystem =
+                                                              false)
 {
   if (cmGeneratorExpression::Find(propertyValue.Value) != std::string::npos) {
     cmGeneratorExpression ge(propertyValue.Backtrace);
@@ -190,7 +195,7 @@ CreateTargetPropertyEntry(const BT<std::string>& propertyValue,
     cm::make_unique<TargetPropertyEntryString>(propertyValue));
 }
 
-void CreatePropertyGeneratorExpressions(
+static void CreatePropertyGeneratorExpressions(
   cmBTStringRange entries,
   std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>>& items,
   bool evaluateForBuildsystem = false)
@@ -2926,11 +2931,11 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,
                result);
 }
 
-void processILibs(const std::string& config,
-                  cmGeneratorTarget const* headTarget, cmLinkItem const& item,
-                  cmGlobalGenerator* gg,
-                  std::vector<cmGeneratorTarget const*>& tgts,
-                  std::set<cmGeneratorTarget const*>& emitted)
+static void processILibs(const std::string& config,
+                         cmGeneratorTarget const* headTarget,
+                         cmLinkItem const& item, cmGlobalGenerator* gg,
+                         std::vector<cmGeneratorTarget const*>& tgts,
+                         std::set<cmGeneratorTarget const*>& emitted)
 {
   if (item.Target && emitted.insert(item.Target).second) {
     tgts.push_back(item.Target);
@@ -5695,7 +5700,7 @@ std::string valueAsString<std::nullptr_t>(std::nullptr_t /*unused*/)
   return "(unset)";
 }
 
-std::string compatibilityType(CompatibleType t)
+static std::string compatibilityType(CompatibleType t)
 {
   switch (t) {
     case BoolType:
@@ -5711,7 +5716,7 @@ std::string compatibilityType(CompatibleType t)
   return "";
 }
 
-std::string compatibilityAgree(CompatibleType t, bool dominant)
+static std::string compatibilityAgree(CompatibleType t, bool dominant)
 {
   switch (t) {
     case BoolType:
@@ -5801,23 +5806,23 @@ std::pair<bool, bool> consistentProperty(bool lhs, bool rhs,
   return { lhs == rhs, lhs };
 }
 
-std::pair<bool, const char*> consistentStringProperty(const char* lhs,
-                                                      const char* rhs)
+static std::pair<bool, const char*> consistentStringProperty(const char* lhs,
+                                                             const char* rhs)
 {
   const bool b = strcmp(lhs, rhs) == 0;
   return { b, b ? lhs : nullptr };
 }
 
-std::pair<bool, std::string> consistentStringProperty(const std::string& lhs,
-                                                      const std::string& rhs)
+static std::pair<bool, std::string> consistentStringProperty(
+  const std::string& lhs, const std::string& rhs)
 {
   const bool b = lhs == rhs;
   return { b, b ? lhs : valueAsString(nullptr) };
 }
 
-std::pair<bool, const char*> consistentNumberProperty(const char* lhs,
-                                                      const char* rhs,
-                                                      CompatibleType t)
+static std::pair<bool, const char*> consistentNumberProperty(const char* lhs,
+                                                             const char* rhs,
+                                                             CompatibleType t)
 {
   char* pEnd;
 
@@ -5868,9 +5873,9 @@ std::pair<bool, const char*> consistentProperty(const char* lhs,
   return { false, nullptr };
 }
 
-std::pair<bool, std::string> consistentProperty(const std::string& lhs,
-                                                const std::string& rhs,
-                                                CompatibleType t)
+static std::pair<bool, std::string> consistentProperty(const std::string& lhs,
+                                                       const std::string& rhs,
+                                                       CompatibleType t)
 {
   const std::string null_ptr = valueAsString(nullptr);
 

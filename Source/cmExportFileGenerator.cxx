@@ -494,8 +494,9 @@ void cmExportFileGenerator::PopulateInterfaceProperty(
                                   properties, missingTargets);
 }
 
-void getPropertyContents(cmGeneratorTarget const* tgt, const std::string& prop,
-                         std::set<std::string>& ifaceProperties)
+static void getPropertyContents(cmGeneratorTarget const* tgt,
+                                const std::string& prop,
+                                std::set<std::string>& ifaceProperties)
 {
   cmValue p = tgt->GetProperty(prop);
   if (!p) {
@@ -505,9 +506,9 @@ void getPropertyContents(cmGeneratorTarget const* tgt, const std::string& prop,
   ifaceProperties.insert(content.begin(), content.end());
 }
 
-void getCompatibleInterfaceProperties(cmGeneratorTarget const* target,
-                                      std::set<std::string>& ifaceProperties,
-                                      const std::string& config)
+static void getCompatibleInterfaceProperties(
+  cmGeneratorTarget const* target, std::set<std::string>& ifaceProperties,
+  const std::string& config)
 {
   if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
     // object libraries have no link information, so nothing to compute

@@ -116,7 +116,7 @@ public:
 #  define END_IGNORE_UNINITIALIZED
 #endif
 
-void swap(EventLogger& e1, EventLogger& e2)
+static void swap(EventLogger& e1, EventLogger& e2)
 {
   BEGIN_IGNORE_UNINITIALIZED
   events.push_back({ Event::SWAP, &e1, &e2, e2.Value });
@@ -180,37 +180,37 @@ EventLogger& EventLogger::operator=(int value)
   return *this;
 }
 
-bool operator==(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator==(const EventLogger& lhs, const EventLogger& rhs)
 {
   events.push_back({ Event::COMPARE_EE_EQ, &lhs, &rhs, lhs.Value });
   return lhs.Value == rhs.Value;
 }
 
-bool operator!=(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator!=(const EventLogger& lhs, const EventLogger& rhs)
 {
   events.push_back({ Event::COMPARE_EE_NE, &lhs, &rhs, lhs.Value });
   return lhs.Value != rhs.Value;
 }
 
-bool operator<(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator<(const EventLogger& lhs, const EventLogger& rhs)
 {
   events.push_back({ Event::COMPARE_EE_LT, &lhs, &rhs, lhs.Value });
   return lhs.Value < rhs.Value;
 }
 
-bool operator<=(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator<=(const EventLogger& lhs, const EventLogger& rhs)
 {
   events.push_back({ Event::COMPARE_EE_LE, &lhs, &rhs, lhs.Value });
   return lhs.Value <= rhs.Value;
 }
 
-bool operator>(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator>(const EventLogger& lhs, const EventLogger& rhs)
 {
   events.push_back({ Event::COMPARE_EE_GT, &lhs, &rhs, lhs.Value });
   return lhs.Value > rhs.Value;
 }
 
-bool operator>=(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator>=(const EventLogger& lhs, const EventLogger& rhs)
 {
   events.push_back({ Event::COMPARE_EE_GE, &lhs, &rhs, lhs.Value });
   return lhs.Value >= rhs.Value;

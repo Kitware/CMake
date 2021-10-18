@@ -2135,8 +2135,8 @@ struct NumberFormatter
   {
   }
 };
-std::ostream& operator<<(std::ostream& stream,
-                         NumberFormatter const& formatter)
+static std::ostream& operator<<(std::ostream& stream,
+                                NumberFormatter const& formatter)
 {
   auto const& flags = stream.flags();
   if (formatter.Format == FORMAT_DECIMAL) {

@@ -29,14 +29,14 @@ struct cmELFByteSwapSize
 void cmELFByteSwap(char* /*unused*/, cmELFByteSwapSize<1> /*unused*/)
 {
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<2> /*unused*/)
+static void cmELFByteSwap(char* data, cmELFByteSwapSize<2> /*unused*/)
 {
   char one_byte;
   one_byte = data[0];
   data[0] = data[1];
   data[1] = one_byte;
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<4> /*unused*/)
+static void cmELFByteSwap(char* data, cmELFByteSwapSize<4> /*unused*/)
 {
   char one_byte;
   one_byte = data[0];
@@ -46,7 +46,7 @@ void cmELFByteSwap(char* data, cmELFByteSwapSize<4> /*unused*/)
   data[1] = data[2];
   data[2] = one_byte;
 }
-void cmELFByteSwap(char* data, cmELFByteSwapSize<8> /*unused*/)
+static void cmELFByteSwap(char* data, cmELFByteSwapSize<8> /*unused*/)
 {
   char one_byte;
   one_byte = data[0];

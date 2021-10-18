@@ -1261,7 +1261,7 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
   }
 } deviceLinkNode;
 
-std::string getLinkedTargetsContent(
+static std::string getLinkedTargetsContent(
   cmGeneratorTarget const* target, std::string const& prop,
   cmGeneratorExpressionContext* context,
   cmGeneratorExpressionDAGChecker* dagChecker)
@@ -1830,8 +1830,8 @@ static const char* targetPolicyWhitelist[] = {
 #undef TARGET_POLICY_STRING
 };
 
-cmPolicies::PolicyStatus statusForTarget(cmGeneratorTarget const* tgt,
-                                         const char* policy)
+static cmPolicies::PolicyStatus statusForTarget(cmGeneratorTarget const* tgt,
+                                                const char* policy)
 {
 #define RETURN_POLICY(POLICY)                                                 \
   if (strcmp(policy, #POLICY) == 0) {                                         \
@@ -1846,7 +1846,7 @@ cmPolicies::PolicyStatus statusForTarget(cmGeneratorTarget const* tgt,
   return cmPolicies::WARN;
 }
 
-cmPolicies::PolicyID policyForString(const char* policy_id)
+static cmPolicies::PolicyID policyForString(const char* policy_id)
 {
 #define RETURN_POLICY_ID(POLICY_ID)                                           \
   if (strcmp(policy_id, #POLICY_ID) == 0) {                                   \

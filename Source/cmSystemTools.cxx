@@ -2496,8 +2496,8 @@ bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
   return false;
 }
 
-std::string::size_type cmSystemToolsFindRPath(cm::string_view const& have,
-                                              cm::string_view const& want)
+static std::string::size_type cmSystemToolsFindRPath(
+  cm::string_view const& have, cm::string_view const& want)
 {
   std::string::size_type pos = 0;
   while (pos < have.size()) {
@@ -2694,11 +2694,11 @@ std::function<bool(std::string*, const cmELF&)> MakeEmptyCallback(
 }
 }
 
-cm::optional<bool> ChangeRPathELF(std::string const& file,
-                                  std::string const& oldRPath,
-                                  std::string const& newRPath,
-                                  bool removeEnvironmentRPath,
-                                  std::string* emsg, bool* changed)
+static cm::optional<bool> ChangeRPathELF(std::string const& file,
+                                         std::string const& oldRPath,
+                                         std::string const& newRPath,
+                                         bool removeEnvironmentRPath,
+                                         std::string* emsg, bool* changed)
 {
   auto adjustCallback = [oldRPath, newRPath, removeEnvironmentRPath](
                           cm::optional<std::string>& outRPath,

@@ -7,7 +7,7 @@
 #include <string>
 #include <thread>
 
-std::string getStdin()
+static std::string getStdin()
 {
   char buffer[1024];
   std::ostringstream str;
