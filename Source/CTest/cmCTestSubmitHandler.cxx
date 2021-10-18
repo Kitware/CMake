@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <sstream>
 
+#include <cm/iomanip>
 #include <cmext/algorithm>
 
 #include <cm3p/curl/curl.h>
@@ -216,8 +217,11 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
 
       // if there is little to no activity for too long stop submitting
       ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
-      ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME,
-                         SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
+      auto submitInactivityTimeout = this->GetSubmitInactivityTimeout();
+      if (submitInactivityTimeout != 0) {
+        ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME,
+                           submitInactivityTimeout);
+      }
 
       /* HTTP PUT please */
       ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
@@ -499,7 +503,10 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
   std::vector<std::string> args = cmExpandedList(curlopt);
   curl.SetCurlOptions(args);
-  curl.SetTimeOutSeconds(SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
+  auto submitInactivityTimeout = this->GetSubmitInactivityTimeout();
+  if (submitInactivityTimeout != 0) {
+    curl.SetTimeOutSeconds(submitInactivityTimeout);
+  }
   curl.SetHttpHeaders(this->HttpHeaders);
   std::string url = this->CTest->GetSubmitURL();
   if (!cmHasLiteralPrefix(url, "http://") &&
@@ -891,6 +898,26 @@ void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)
     this->SubmitPart[p] =
       (std::set<cmCTest::Part>::const_iterator(parts.find(p)) != parts.end());
   }
+}
+
+int cmCTestSubmitHandler::GetSubmitInactivityTimeout()
+{
+  int submitInactivityTimeout = SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT;
+  std::string const& timeoutStr =
+    this->CTest->GetCTestConfiguration("SubmitInactivityTimeout");
+  if (!timeoutStr.empty()) {
+    unsigned long timeout;
+    if (cmStrToULong(timeoutStr, &timeout)) {
+      submitInactivityTimeout = static_cast<int>(timeout);
+    } else {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "SubmitInactivityTimeout is invalid: "
+                   << cm::quoted(timeoutStr) << "."
+                   << " Using a default value of "
+                   << SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT << "." << std::endl);
+    }
+  }
+  return submitInactivityTimeout;
 }
 
 void cmCTestSubmitHandler::SelectFiles(std::set<std::string> const& files)

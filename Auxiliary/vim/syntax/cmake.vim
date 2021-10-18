@@ -1608,6 +1608,7 @@ syn keyword cmakeVariable contained
             \ CTEST_SCP_COMMAND
             \ CTEST_SITE
             \ CTEST_SOURCE_DIRECTORY
+            \ CTEST_SUBMIT_INACTIVITY_TIMEOUT
             \ CTEST_SUBMIT_URL
             \ CTEST_SVN_COMMAND
             \ CTEST_SVN_OPTIONS

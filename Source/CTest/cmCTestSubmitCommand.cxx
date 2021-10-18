@@ -58,6 +58,9 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", this->Quiet);
+  this->CTest->SetCTestConfigurationFromCMakeVariable(
+    this->Makefile, "SubmitInactivityTimeout",
+    "CTEST_SUBMIT_INACTIVITY_TIMEOUT", this->Quiet);
 
   cmValue notesFilesVariable =
     this->Makefile->GetDefinition("CTEST_NOTES_FILES");

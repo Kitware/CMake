@@ -1349,6 +1349,13 @@ Configuration settings include:
   * :module:`CTest` module variable: ``SUBMIT_URL`` if set,
     else ``CTEST_SUBMIT_URL``
 
+``SubmitInactivityTimeout``
+  The time to wait for the submission after which it is canceled
+  if not completed. Specify a zero value to disable timeout.
+
+  * `CTest Script`_ variable: :variable:`CTEST_SUBMIT_INACTIVITY_TIMEOUT`
+  * :module:`CTest` module variable: ``CTEST_SUBMIT_INACTIVITY_TIMEOUT``
+
 ``TriggerSite``
   Legacy option.  Not used.
 
