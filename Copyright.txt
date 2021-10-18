@@ -63,6 +63,7 @@ The following individuals and institutions are among the Contributors:
 * Ilya Lavrenov <ilya.lavrenov@itseez.com>
 * Insight Software Consortium <insightsoftwareconsortium.org>
 * Jan Woetzel
+* Jordan Williams <jordan@jwillikers.com>
 * Julien Schueller
 * Kelly Thompson <kgt@lanl.gov>
 * Konstantin Podsvirov <konstantin@podsvirov.pro>
