@@ -1461,7 +1461,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           cmSystemTools::Error("Problem extracting tar: " + outFile);
           return 1;
         }
-#ifdef WIN32
+#ifdef _WIN32
         // OK, on windows 7 after we untar some files,
         // sometimes we can not rename the directory after
         // the untar is done. This breaks the external project
