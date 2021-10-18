@@ -1994,6 +1994,38 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       }
     }
   }
+
+  // Add Watcom runtime library flags.  This is activated by the presence
+  // of a default selection whether or not it is overridden by a property.
+  cmValue watcomRuntimeLibraryDefault =
+    this->Makefile->GetDefinition("CMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT");
+  if (cmNonempty(watcomRuntimeLibraryDefault)) {
+    cmValue watcomRuntimeLibraryValue =
+      target->GetProperty("WATCOM_RUNTIME_LIBRARY");
+    if (!watcomRuntimeLibraryValue) {
+      watcomRuntimeLibraryValue = watcomRuntimeLibraryDefault;
+    }
+    std::string const watcomRuntimeLibrary = cmGeneratorExpression::Evaluate(
+      *watcomRuntimeLibraryValue, this, config, target);
+    if (!watcomRuntimeLibrary.empty()) {
+      if (cmValue watcomRuntimeLibraryOptions = this->Makefile->GetDefinition(
+            "CMAKE_" + lang + "_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_" +
+            watcomRuntimeLibrary)) {
+        this->AppendCompileOptions(flags, *watcomRuntimeLibraryOptions);
+      } else if ((this->Makefile->GetSafeDefinition(
+                    "CMAKE_" + lang + "_COMPILER_ID") == "OpenWatcom" ||
+                  this->Makefile->GetSafeDefinition(
+                    "CMAKE_" + lang + "_SIMULATE_ID") == "OpenWatcom") &&
+                 !cmSystemTools::GetErrorOccuredFlag()) {
+        // The compiler uses the Watcom ABI so it needs a known runtime
+        // library.
+        this->IssueMessage(MessageType::FATAL_ERROR,
+                           "WATCOM_RUNTIME_LIBRARY value '" +
+                             watcomRuntimeLibrary + "' not known for this " +
+                             lang + " compiler.");
+      }
+    }
+  }
 }
 
 void cmLocalGenerator::AddLanguageFlagsForLinking(
