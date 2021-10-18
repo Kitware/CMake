@@ -1072,6 +1072,12 @@ void cmExportFileGenerator::GenerateImportTargetCode(
     os << "set_property(TARGET " << targetName << " PROPERTY DEPRECATION "
        << cmExportFileGeneratorEscape(target->GetDeprecation()) << ")\n";
   }
+
+  if (target->GetPropertyAsBool("IMPORTED_NO_SYSTEM")) {
+    os << "set_property(TARGET " << targetName
+       << " PROPERTY IMPORTED_NO_SYSTEM 1)\n";
+  }
+
   os << "\n";
 }
 

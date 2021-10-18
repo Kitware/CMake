@@ -239,6 +239,7 @@ Properties on Targets
    /prop_tgt/IMPORTED_LOCATION_CONFIG
    /prop_tgt/IMPORTED_NO_SONAME
    /prop_tgt/IMPORTED_NO_SONAME_CONFIG
+   /prop_tgt/IMPORTED_NO_SYSTEM
    /prop_tgt/IMPORTED_OBJECTS
    /prop_tgt/IMPORTED_OBJECTS_CONFIG
    /prop_tgt/IMPORTED_SONAME

@@ -115,6 +115,13 @@ add_library(ordertest ordertest.cpp)
 target_include_directories(ordertest SYSTEM PUBLIC SystemIncludeDirectories/systemlib)
 target_include_directories(ordertest PUBLIC SystemIncludeDirectories/userlib)
 
+add_library(ordertest2 ordertest.cpp)
+target_include_directories(ordertest2 SYSTEM PRIVATE SystemIncludeDirectories/systemlib)
+target_link_libraries(ordertest2 PRIVATE ordertest2_userlib)
+add_library(ordertest2_userlib INTERFACE IMPORTED)
+target_include_directories(ordertest2_userlib INTERFACE SystemIncludeDirectories/userlib)
+set_property(TARGET ordertest2_userlib PROPERTY IMPORTED_NO_SYSTEM 1)
+
 add_subdirectory(StandardIncludeDirectories)
 add_subdirectory(TargetIncludeDirectories)
 
