@@ -237,7 +237,7 @@ bool DebGenerator::generateDataTar() const
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "RELATIVEDIR: \"" << relativeDir << "\"" << std::endl);
 
-#ifdef WIN32
+#ifdef _WIN32
     std::string mode_t_adt_filename = file + ":cmake_mode_t";
     cmsys::ifstream permissionStream(mode_t_adt_filename.c_str());
 
