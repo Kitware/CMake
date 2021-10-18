@@ -134,8 +134,8 @@ Variable Queries
 
 .. genex:: $<CONFIG:cfgs>
 
-  ``1`` if config is any one of the entries in ``cfgs``, else ``0``. This is a
-  case-insensitive comparison. The mapping in
+  ``1`` if config is any one of the entries in comma-separated list
+  ``cfgs``, else ``0``. This is a case-insensitive comparison. The mapping in
   :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by this
   expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
   target.
