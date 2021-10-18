@@ -38,6 +38,7 @@ The following target properties will be applied on the
 - :prop_tgt:`XCODE_SCHEME_ARGUMENTS`
 - :prop_tgt:`XCODE_SCHEME_DEBUG_AS_ROOT`
 - :prop_tgt:`XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING`
+- :prop_tgt:`XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE`
 - :prop_tgt:`XCODE_SCHEME_ENVIRONMENT`
 - :prop_tgt:`XCODE_SCHEME_EXECUTABLE`
 - :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY`
