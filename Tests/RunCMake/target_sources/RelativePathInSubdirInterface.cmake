@@ -1,4 +1,5 @@
 cmake_policy(SET CMP0076 NEW)
+enable_language(CXX)
 
 add_library(iface INTERFACE)
 
