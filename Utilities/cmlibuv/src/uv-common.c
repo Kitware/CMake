@@ -855,7 +855,7 @@ void uv_free_cpu_info(uv_cpu_info_t* cpu_infos, int count) {
 }
 
 
-#ifdef __GNUC__  /* Also covers __clang__ and __INTEL_COMPILER. */
+#ifdef __GNUC__  /* Also covers __clang__, __LCC__, and __INTEL_COMPILER. */
 __attribute__((destructor))
 #endif
 void uv_library_shutdown(void) {

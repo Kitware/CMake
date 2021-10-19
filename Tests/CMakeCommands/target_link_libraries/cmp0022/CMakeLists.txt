@@ -25,7 +25,7 @@ target_link_libraries(staticlib1 LINK_PUBLIC staticlib2)
 
 # Try adding a private link item to be propagated out of a static lib.
 set(private_link "")
-if (CMAKE_CXX_COMPILER_ID MATCHES GNU OR CMAKE_CXX_COMPILER_ID MATCHES Clang)
+if (CMAKE_CXX_COMPILER_ID MATCHES GNU OR CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES LCC)
   if (CMAKE_SYSTEM_NAME STREQUAL "SunOS")
     set(private_link "-Wl,-V")
   else()

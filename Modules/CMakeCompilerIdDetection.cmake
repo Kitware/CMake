@@ -84,6 +84,7 @@ function(compiler_id_detection outvar lang)
     )
     list(APPEND ordered_compilers
       Clang
+      LCC
       GNU
       MSVC
       ADSP

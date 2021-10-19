@@ -247,8 +247,14 @@ function(run_BuildDir)
     run_cmake_command(BuildDir--build-jobs-no-number-trailing--target ${CMAKE_COMMAND} -E chdir ..
       ${CMAKE_COMMAND} --build BuildDir-build -j --target CustomTarget)
     if(RunCMake_GENERATOR MATCHES "Unix Makefiles" OR RunCMake_GENERATOR MATCHES "Ninja")
+      set(_backup_lang "$ENV{LANG}")
+      set(_backup_lc_messages "$ENV{LC_MESSAGES}")
+      set(ENV{LANG} "C")
+      set(ENV{LC_MESSAGES} "C")
       run_cmake_command(BuildDir--build-jobs-no-number-trailing--invalid-target ${CMAKE_COMMAND} -E chdir ..
         ${CMAKE_COMMAND} --build BuildDir-build -j --target invalid-target)
+      set(ENV{LANG} "${_backup_lang}")
+      set(ENV{LC_MESSAGES} "${_backup_lc_messages}")
     endif()
     run_cmake_command(BuildDir--build--parallel-no-number ${CMAKE_COMMAND} -E chdir ..
       ${CMAKE_COMMAND} --build BuildDir-build --parallel)

@@ -1,1 +1,2 @@
-^CPackDeb: ((- Generating dependency list)|(Using only user-provided dependencies because dpkg-shlibdeps is not found\.))$
+^CPackDeb: ((- Generating dependency list)(
+CMake Warning.*broken dpkg-shlibdeps on E2K detected.*\(cpack_deb_prepare_package_vars\))?|(Using only user-provided dependencies because dpkg-shlibdeps is not found\.))$

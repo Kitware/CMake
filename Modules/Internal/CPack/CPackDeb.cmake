@@ -332,6 +332,14 @@ function(cpack_deb_prepare_package_vars)
           RESULT_VARIABLE SHLIBDEPS_RESULT
           ERROR_VARIABLE SHLIBDEPS_ERROR
           OUTPUT_STRIP_TRAILING_WHITESPACE )
+
+        # E2K OSL 6.0.1 and prior has broken dpkg-shlibdeps. CPack will deal with that (mocking SHLIBDEPS_OUTPUT), but inform user of this.
+        if("${SHLIBDEPS_ERROR}" MATCHES "unknown gcc system type e2k.*, falling back to default")
+          message(WARNING "CPackDeb: broken dpkg-shlibdeps on E2K detected, will fall back to minimal dependencies.\n"
+                  "You should expect that dependencies list in the package will be incomplete.")
+          set(SHLIBDEPS_OUTPUT "shlibs:Depends=libc6, lcc-libs")
+        endif()
+
         if(CPACK_DEBIAN_PACKAGE_DEBUG)
           # dpkg-shlibdeps will throw some warnings if some input files are not binary
           message( "CPackDeb Debug: dpkg-shlibdeps warnings \n${SHLIBDEPS_ERROR}")

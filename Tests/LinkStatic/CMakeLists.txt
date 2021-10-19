@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8.4.20110303 FATAL_ERROR)
 project(LinkStatic C)
 
-if(NOT CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  message(FATAL_ERROR "This test works only with the GNU compiler!")
+if(NOT CMAKE_C_COMPILER_ID MATCHES "GNU|LCC")
+  message(FATAL_ERROR "This test works only with the GNU or LCC compiler!")
 endif()
 
 find_library(MATH_LIBRARY NAMES libm.a)

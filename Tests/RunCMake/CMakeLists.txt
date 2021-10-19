@@ -256,7 +256,7 @@ endif()
 add_RunCMake_test(ArtifactOutputDirs)
 
 if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
-    AND CMAKE_C_COMPILER_ID STREQUAL "GNU"
+    AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "LCC")
     AND CMAKE_GENERATOR MATCHES "^Ninja"
     )
   execute_process(COMMAND "${CMAKE_C_COMPILER}" -print-prog-name=as
@@ -682,7 +682,7 @@ set_property(TEST RunCMake.CheckCompilerFlag
 add_RunCMake_test(CheckModules)
 add_RunCMake_test(CheckIPOSupported)
 if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)"
-    AND (CMAKE_C_COMPILER_ID MATCHES "Clang|GNU" OR CMAKE_Fortran_COMPILER_ID MATCHES "GNU"))
+    AND (CMAKE_C_COMPILER_ID MATCHES "Clang|GNU|LCC" OR CMAKE_Fortran_COMPILER_ID MATCHES "GNU|LCC"))
   add_RunCMake_test(CheckLinkerFlag -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
                                     -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
                                     -DCMake_TEST_CUDA=${CMake_TEST_CUDA}

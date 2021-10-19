@@ -83,7 +83,7 @@ elseif(APPLE)
       )
   endif()
   if(NOT OSX_VERSION VERSION_LESS 10.6 AND
-      CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+      CMAKE_C_COMPILER_ID MATCHES "GNU|LCC|Clang|AppleClang")
     set(CMAKE_USE_SECTRANSP ON CACHE INTERNAL "enable Apple OS native SSL/TLS")
   else()
     set(CMAKE_USE_SECTRANSP OFF CACHE INTERNAL "enable Apple OS native SSL/TLS")
@@ -112,7 +112,7 @@ endif(APPLE)
 
 # Disable warnings to avoid changing 3rd party code.
 if(CMAKE_C_COMPILER_ID MATCHES
-    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM|NVHPC)$")
+    "^(GNU|LCC|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM|NVHPC)$")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
