@@ -2337,7 +2337,8 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         }
       }
 
-      if (si.Kind == cmGeneratorTarget::SourceKindObjectSource) {
+      if (si.Kind == cmGeneratorTarget::SourceKindObjectSource ||
+          si.Kind == cmGeneratorTarget::SourceKindUnityBatched) {
         this->OutputSourceSpecificFlags(e2, si.Source);
       }
       if (si.Source->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
