@@ -1,4 +1,7 @@
 cmake_minimum_required (VERSION 2.7.20090711)
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
 project(Export C CXX)
 
 # Pretend that RelWithDebInfo should link to debug libraries to test

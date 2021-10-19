@@ -1,6 +1,10 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
+
 project(target_compile_options)
 
 add_executable(target_compile_options

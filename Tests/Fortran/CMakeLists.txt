@@ -1,4 +1,7 @@
 cmake_minimum_required (VERSION 3.1)
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
 project(testf C CXX Fortran)
 
 message("CTEST_FULL_OUTPUT ")

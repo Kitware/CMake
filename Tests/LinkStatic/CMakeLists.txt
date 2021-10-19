@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 2.8.4.20110303 FATAL_ERROR)
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
 project(LinkStatic C)
 
 if(NOT CMAKE_C_COMPILER_ID MATCHES "GNU|LCC")
