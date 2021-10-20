@@ -8,6 +8,8 @@
 #include <memory>
 #include <string>
 
+#include <cm/optional>
+
 #include "cmGlobalVisualStudio14Generator.h"
 #include "cmVSSetupHelper.h"
 
@@ -72,4 +74,5 @@ private:
   class Factory17;
   friend class Factory17;
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
+  cm::optional<std::string> GeneratorInstance;
 };
