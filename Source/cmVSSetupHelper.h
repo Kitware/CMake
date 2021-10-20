@@ -88,7 +88,6 @@ struct VSInstanceInfo
   std::wstring VSInstallLocation;
   std::wstring Version;
   std::string VCToolsetVersion;
-  ULONGLONG ullVersion = 0; // A.B.C.D = (A<<48)|(B<<32)|(C<<16)|D
   bool IsWin10SDKInstalled = false;
   bool IsWin81SDKInstalled = false;
 
