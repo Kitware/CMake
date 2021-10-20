@@ -48,8 +48,6 @@
 #  include <unistd.h>
 #endif
 
-#define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
-
 cmCTestScriptHandler::cmCTestScriptHandler() = default;
 
 void cmCTestScriptHandler::Initialize()
