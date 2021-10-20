@@ -84,7 +84,6 @@ private:
 
 struct VSInstanceInfo
 {
-  std::wstring InstanceId;
   std::wstring VSInstallLocation;
   std::wstring Version;
   std::string VCToolsetVersion;

@@ -152,13 +152,6 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
   if (pInstance == NULL)
     return false;
 
-  SmartBSTR bstrId;
-  if (SUCCEEDED(pInstance->GetInstanceId(&bstrId))) {
-    vsInstanceInfo.InstanceId = std::wstring(bstrId);
-  } else {
-    return false;
-  }
-
   InstanceState state;
   if (FAILED(pInstance->GetState(&state))) {
     return false;
