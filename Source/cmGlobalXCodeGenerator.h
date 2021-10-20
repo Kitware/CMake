@@ -138,11 +138,6 @@ protected:
   void AddExtraIDETargets() override;
   void Generate() override;
 
-  FindMakeProgramStage GetFindMakeProgramStage() const override
-  {
-    return FindMakeProgramStage::Early;
-  }
-
 private:
   enum EmbedActionFlags
   {
