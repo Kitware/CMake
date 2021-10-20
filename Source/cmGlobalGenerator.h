@@ -444,6 +444,8 @@ public:
 
   virtual bool IsVisualStudio() const { return false; }
 
+  virtual bool IsVisualStudioAtLeast10() const { return false; }
+
   virtual bool IsNinja() const { return false; }
 
   /** Return true if we know the exact location of object files.

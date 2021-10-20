@@ -20,6 +20,8 @@ class cmGlobalVisualStudio10Generator : public cmGlobalVisualStudio8Generator
 public:
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
+  bool IsVisualStudioAtLeast10() const override { return true; }
+
   bool MatchesGeneratorName(const std::string& name) const override;
 
   bool SetSystemName(std::string const& s, cmMakefile* mf) override;
