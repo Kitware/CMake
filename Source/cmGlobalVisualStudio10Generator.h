@@ -134,6 +134,8 @@ public:
 
   bool GetSupportsUnityBuilds() const { return this->SupportsUnityBuilds; }
 
+  virtual cm::optional<std::string> FindMSBuildCommandEarly(cmMakefile* mf);
+
   bool FindMakeProgram(cmMakefile* mf) override;
 
   bool IsIPOSupported() const override { return true; }

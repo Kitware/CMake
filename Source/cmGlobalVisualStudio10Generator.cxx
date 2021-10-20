@@ -856,6 +856,12 @@ std::string const& cmGlobalVisualStudio10Generator::GetMSBuildCommand()
   return this->MSBuildCommand;
 }
 
+cm::optional<std::string>
+cmGlobalVisualStudio10Generator::FindMSBuildCommandEarly(cmMakefile*)
+{
+  return this->GetMSBuildCommand();
+}
+
 std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()
 {
   std::string msbuild;

@@ -31,6 +31,8 @@ public:
 
   bool GetVSInstance(std::string& dir) const;
 
+  cm::optional<std::string> FindMSBuildCommandEarly(cmMakefile* mf) override;
+
   cm::optional<std::string> GetVSInstanceVersion() const override;
 
   AuxToolset FindAuxToolset(std::string& version,

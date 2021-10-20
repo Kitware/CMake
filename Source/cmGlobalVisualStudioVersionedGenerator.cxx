@@ -718,6 +718,17 @@ cmGlobalVisualStudioVersionedGenerator::GetWindows10SDKMaxVersionDefault(
   return std::string();
 }
 
+cm::optional<std::string>
+cmGlobalVisualStudioVersionedGenerator::FindMSBuildCommandEarly(cmMakefile* mf)
+{
+  std::string instance = mf->GetSafeDefinition("CMAKE_GENERATOR_INSTANCE");
+  if (!this->SetGeneratorInstance(instance, mf)) {
+    cmSystemTools::SetFatalErrorOccured();
+    return {};
+  }
+  return this->cmGlobalVisualStudio14Generator::FindMSBuildCommandEarly(mf);
+}
+
 std::string cmGlobalVisualStudioVersionedGenerator::FindMSBuildCommand()
 {
   std::string msbuild;
