@@ -1,5 +1,6 @@
 
 cmake_policy(SET CMP0026 OLD)
+enable_language(CXX)
 
 add_library(objlib OBJECT
     empty_1.cpp

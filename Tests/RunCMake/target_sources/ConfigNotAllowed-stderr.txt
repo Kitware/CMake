@@ -4,9 +4,9 @@ CMake Error in CMakeLists.txt:
 
   Config "Debug":
 
-    .*/Tests/RunCMake/TargetSources/empty_1.cpp
-    .*/Tests/RunCMake/TargetSources/empty_2.cpp
+    .*/Tests/RunCMake/target_sources/empty_1.cpp
+    .*/Tests/RunCMake/target_sources/empty_2.cpp
 
   Config "Release":
 
-    .*/Tests/RunCMake/TargetSources/empty_1.cpp
+    .*/Tests/RunCMake/target_sources/empty_1.cpp
