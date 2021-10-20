@@ -222,6 +222,7 @@ protected:
   bool SystemIsWindowsPhone = false;
   bool SystemIsWindowsStore = false;
   bool SystemIsAndroid = false;
+  bool MSBuildCommandInitialized = false;
 
 private:
   class Factory;
@@ -243,7 +244,6 @@ private:
   LongestSourcePath LongestSource;
 
   std::string MSBuildCommand;
-  bool MSBuildCommandInitialized;
   std::set<std::string> AndroidExecutableWarnings;
   virtual std::string FindMSBuildCommand();
   std::string FindDevEnvCommand() override;
