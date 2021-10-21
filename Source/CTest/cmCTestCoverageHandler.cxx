@@ -49,9 +49,8 @@ public:
   }
   ~cmCTestRunProcess()
   {
-    if (!(this->PipeState == -1) &&
-        !(this->PipeState == cmsysProcess_Pipe_None) &&
-        !(this->PipeState == cmsysProcess_Pipe_Timeout)) {
+    if (this->PipeState != -1 && this->PipeState != cmsysProcess_Pipe_None &&
+        this->PipeState != cmsysProcess_Pipe_Timeout) {
       this->WaitForExit();
     }
     cmsysProcess_Delete(this->Process);
