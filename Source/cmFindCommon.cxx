@@ -240,14 +240,20 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   std::vector<std::string> unrootedPaths = paths;
   paths.clear();
 
+  auto isSameDirectoryOrSubDirectory = [](std::string const& l,
+                                          std::string const& r) {
+    return (cmSystemTools::GetRealPath(l) == cmSystemTools::GetRealPath(r)) ||
+      cmSystemTools::IsSubDirectory(l, r);
+  };
+
   for (std::string const& r : roots) {
     for (std::string const& up : unrootedPaths) {
       // Place the unrooted path under the current root if it is not
       // already inside.  Skip the unrooted path if it is relative to
       // a user home directory or is empty.
       std::string rootedDir;
-      if (cmSystemTools::IsSubDirectory(up, r) ||
-          (stagePrefix && cmSystemTools::IsSubDirectory(up, *stagePrefix))) {
+      if (isSameDirectoryOrSubDirectory(up, r) ||
+          (stagePrefix && isSameDirectoryOrSubDirectory(up, *stagePrefix))) {
         rootedDir = up;
       } else if (!up.empty() && up[0] != '~') {
         // Start with the new root.
