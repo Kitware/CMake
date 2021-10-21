@@ -605,6 +605,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
+  vars.CudaCompileMode = "$CUDA_COMPILE_MODE";
   vars.ISPCHeader = "$ISPC_HEADER_FILE";
 
   cmMakefile* mf = this->GetMakefile();
@@ -815,26 +816,31 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   vars.Flags = flags.c_str();
   vars.DependencyFile = rule.DepFile.c_str();
 
-  // Rule for compiling object file.
-  std::vector<std::string> compileCmds;
+  std::string cudaCompileMode;
   if (lang == "CUDA") {
-    std::string cmdVar;
     if (this->GeneratorTarget->GetPropertyAsBool(
           "CUDA_SEPARABLE_COMPILATION")) {
-      cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
-    } else if (this->GeneratorTarget->GetPropertyAsBool(
-                 "CUDA_PTX_COMPILATION")) {
-      cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
-    } else {
-      cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
+      const std::string& rdcFlag =
+        this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
+      cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, " ");
     }
-    const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
-    cmExpandList(compileCmd, compileCmds);
-  } else {
-    const std::string cmdVar = cmStrCat("CMAKE_", lang, "_COMPILE_OBJECT");
-    const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
-    cmExpandList(compileCmd, compileCmds);
+    if (this->GeneratorTarget->GetPropertyAsBool("CUDA_PTX_COMPILATION")) {
+      const std::string& ptxFlag =
+        this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_PTX_FLAG");
+      cudaCompileMode = cmStrCat(cudaCompileMode, ptxFlag);
+    } else {
+      const std::string& wholeFlag =
+        this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_WHOLE_FLAG");
+      cudaCompileMode = cmStrCat(cudaCompileMode, wholeFlag);
+    }
+    vars.CudaCompileMode = cudaCompileMode.c_str();
   }
+
+  // Rule for compiling object file.
+  std::vector<std::string> compileCmds;
+  const std::string cmdVar = cmStrCat("CMAKE_", lang, "_COMPILE_OBJECT");
+  const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
+  cmExpandList(compileCmd, compileCmds);
 
   // See if we need to use a compiler launcher like ccache or distcc
   std::string compilerLauncher;

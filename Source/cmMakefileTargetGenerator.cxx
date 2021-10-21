@@ -897,27 +897,30 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
   // Construct the compile rules.
   {
-    std::vector<std::string> compileCommands;
+    std::string cudaCompileMode;
     if (lang == "CUDA") {
-      std::string cmdVar;
       if (this->GeneratorTarget->GetPropertyAsBool(
             "CUDA_SEPARABLE_COMPILATION")) {
-        cmdVar = "CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION";
-      } else if (this->GeneratorTarget->GetPropertyAsBool(
-                   "CUDA_PTX_COMPILATION")) {
-        cmdVar = "CMAKE_CUDA_COMPILE_PTX_COMPILATION";
-      } else {
-        cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
+        const std::string& rdcFlag =
+          this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
+        cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, " ");
       }
-      const std::string& compileRule =
-        this->Makefile->GetRequiredDefinition(cmdVar);
-      cmExpandList(compileRule, compileCommands);
-    } else {
-      const std::string cmdVar = "CMAKE_" + lang + "_COMPILE_OBJECT";
-      const std::string& compileRule =
-        this->Makefile->GetRequiredDefinition(cmdVar);
-      cmExpandList(compileRule, compileCommands);
+      if (this->GeneratorTarget->GetPropertyAsBool("CUDA_PTX_COMPILATION")) {
+        const std::string& ptxFlag =
+          this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_PTX_FLAG");
+        cudaCompileMode = cmStrCat(cudaCompileMode, ptxFlag);
+      } else {
+        const std::string& wholeFlag =
+          this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_WHOLE_FLAG");
+        cudaCompileMode = cmStrCat(cudaCompileMode, wholeFlag);
+      }
+      vars.CudaCompileMode = cudaCompileMode.c_str();
     }
+
+    std::vector<std::string> compileCommands;
+    const std::string& compileRule = this->Makefile->GetRequiredDefinition(
+      "CMAKE_" + lang + "_COMPILE_OBJECT");
+    cmExpandList(compileRule, compileCommands);
 
     if (this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS") &&
         lang_can_export_cmds && compileCommands.size() == 1) {
