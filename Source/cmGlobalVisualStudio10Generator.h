@@ -20,6 +20,8 @@ class cmGlobalVisualStudio10Generator : public cmGlobalVisualStudio8Generator
 public:
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
+  bool IsVisualStudioAtLeast10() const override { return true; }
+
   bool MatchesGeneratorName(const std::string& name) const override;
 
   bool SetSystemName(std::string const& s, cmMakefile* mf) override;
@@ -132,6 +134,8 @@ public:
 
   bool GetSupportsUnityBuilds() const { return this->SupportsUnityBuilds; }
 
+  virtual cm::optional<std::string> FindMSBuildCommandEarly(cmMakefile* mf);
+
   bool FindMakeProgram(cmMakefile* mf) override;
 
   bool IsIPOSupported() const override { return true; }
@@ -222,6 +226,7 @@ protected:
   bool SystemIsWindowsPhone = false;
   bool SystemIsWindowsStore = false;
   bool SystemIsAndroid = false;
+  bool MSBuildCommandInitialized = false;
 
 private:
   class Factory;
@@ -243,7 +248,6 @@ private:
   LongestSourcePath LongestSource;
 
   std::string MSBuildCommand;
-  bool MSBuildCommandInitialized;
   std::set<std::string> AndroidExecutableWarnings;
   virtual std::string FindMSBuildCommand();
   std::string FindDevEnvCommand() override;

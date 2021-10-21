@@ -444,6 +444,8 @@ public:
 
   virtual bool IsVisualStudio() const { return false; }
 
+  virtual bool IsVisualStudioAtLeast10() const { return false; }
+
   virtual bool IsNinja() const { return false; }
 
   /** Return true if we know the exact location of object files.
@@ -622,17 +624,6 @@ protected:
   cmGeneratorTarget* FindGeneratorTargetImpl(std::string const& name) const;
 
   std::string GetPredefinedTargetsFolder() const;
-
-  enum class FindMakeProgramStage
-  {
-    Early,
-    Late,
-  };
-
-  virtual FindMakeProgramStage GetFindMakeProgramStage() const
-  {
-    return FindMakeProgramStage::Late;
-  }
 
 private:
   using TargetMap = std::unordered_map<std::string, cmTarget*>;

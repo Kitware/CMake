@@ -1,0 +1,4 @@
+^CMake Error at VsMSBuildMissing.cmake:[0-9]+ \(cmake_host_system_information\):
+  cmake_host_system_information does not recognize <key> VS_MSBUILD_COMMAND
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

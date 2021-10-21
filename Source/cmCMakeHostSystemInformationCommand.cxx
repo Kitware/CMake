@@ -27,6 +27,7 @@
 #ifdef _WIN32
 #  include "cmAlgorithms.h"
 #  include "cmGlobalGenerator.h"
+#  include "cmGlobalVisualStudio10Generator.h"
 #  include "cmGlobalVisualStudioVersionedGenerator.h"
 #  include "cmVSSetupHelper.h"
 #  define HAVE_VS_SETUP_HELPER
@@ -432,6 +433,12 @@ cm::optional<std::string> GetValue(cmExecutionStatus& status,
       }
       return value;
     }
+  }
+
+  if (key == "VS_MSBUILD_COMMAND"_s && gg->IsVisualStudioAtLeast10()) {
+    cmGlobalVisualStudio10Generator* vs10gen =
+      static_cast<cmGlobalVisualStudio10Generator*>(gg);
+    return vs10gen->FindMSBuildCommandEarly(&status.GetMakefile());
   }
 
   return {};
