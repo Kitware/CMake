@@ -509,7 +509,7 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
           cmSystemTools::FileIsDirectory(this->GeneratorInstance)) {
         e << "\n"
              "The directory exists, but the instance is not known to the "
-             "Visual Studio Installer.";
+             "Visual Studio Installer, and no 'version=' field was given.";
       }
       mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;

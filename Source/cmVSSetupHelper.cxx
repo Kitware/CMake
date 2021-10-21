@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVSSetupHelper.h"
 
+#include <utility>
+
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 
@@ -342,6 +344,8 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 
   std::string const wantVersion = std::to_string(this->Version) + '.';
 
+  bool specifiedLocationNotSpecifiedVersion = false;
+
   SmartCOMPtr<ISetupInstance> instance;
   while (SUCCEEDED(enumInstances->Next(1, &instance, NULL)) && instance) {
     SmartCOMPtr<ISetupInstance2> instance2 = NULL;
@@ -373,6 +377,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
             chosenInstanceInfo = instanceInfo;
             return true;
           }
+          specifiedLocationNotSpecifiedVersion = true;
         }
       } else if (!this->SpecifiedVSInstallVersion.empty()) {
         // We are looking for a specific version.
@@ -396,6 +401,13 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
         vecVSInstances.push_back(instanceInfo);
       }
     }
+  }
+
+  if (!this->SpecifiedVSInstallLocation.empty() &&
+      !specifiedLocationNotSpecifiedVersion) {
+    // The VS Installer does not know about the specified location.
+    // Check for one directly on disk.
+    return this->LoadSpecifiedVSInstanceFromDisk();
   }
 
   if (vecVSInstances.size() > 0) {
@@ -458,6 +470,32 @@ int cmVSSetupAPIHelper::ChooseVSInstance(
   }
 
   return chosenIndex;
+}
+
+bool cmVSSetupAPIHelper::LoadSpecifiedVSInstanceFromDisk()
+{
+  if (!cmSystemTools::FileIsDirectory(this->SpecifiedVSInstallLocation)) {
+    return false;
+  }
+  VSInstanceInfo vsInstanceInfo;
+  vsInstanceInfo.VSInstallLocation = this->SpecifiedVSInstallLocation;
+  // FIXME: Is there a better way to get SDK information?
+  vsInstanceInfo.IsWin10SDKInstalled = true;
+  vsInstanceInfo.IsWin81SDKInstalled = false;
+
+  if (!this->SpecifiedVSInstallVersion.empty()) {
+    // Assume the version specified by the user is correct.
+    vsInstanceInfo.Version = this->SpecifiedVSInstallVersion;
+  } else {
+    return false;
+  }
+
+  if (!LoadVSInstanceVCToolsetVersion(vsInstanceInfo)) {
+    return false;
+  }
+
+  chosenInstanceInfo = std::move(vsInstanceInfo);
+  return true;
 }
 
 bool cmVSSetupAPIHelper::Initialize()

@@ -44,6 +44,12 @@ Supported pairs are:
 
   Specify the 4-component VS Build Version.
 
+.. versionadded:: 3.23
+
+  A portable VS instance may be specified that is not known to the
+  Visual Studio Installer tool.  The ``location`` and ``version=``
+  values must both be provided.
+
 If the value of ``CMAKE_GENERATOR_INSTANCE`` is not specified explicitly
 by the user or a toolchain file, CMake queries the Visual Studio Installer
 to locate VS instances, chooses one, and sets the variable as a cache entry

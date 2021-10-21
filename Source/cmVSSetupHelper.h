@@ -117,6 +117,7 @@ private:
                                bool& bWin10SDK, bool& bWin81SDK);
   int ChooseVSInstance(const std::vector<VSInstanceInfo>& vecVSInstances);
   bool EnumerateAndChooseVSInstance();
+  bool LoadSpecifiedVSInstanceFromDisk();
 
   unsigned int Version;
 
