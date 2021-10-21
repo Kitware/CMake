@@ -593,16 +593,6 @@ void cmGlobalGenerator::EnableLanguage(
     }
   }
 
-  if (readCMakeSystem) {
-    // Find the native build tool for this generator.
-    // This has to be done early so that MSBuild can be used to examine the
-    // cross-compilation environment.
-    if (this->GetFindMakeProgramStage() == FindMakeProgramStage::Early &&
-        !this->FindMakeProgram(mf)) {
-      return;
-    }
-  }
-
   //  Load the CMakeDetermineSystem.cmake file and find out
   // what platform we are running on
   if (!mf->GetDefinition("CMAKE_SYSTEM")) {
@@ -676,8 +666,7 @@ void cmGlobalGenerator::EnableLanguage(
     }
 
     // Find the native build tool for this generator.
-    if (this->GetFindMakeProgramStage() == FindMakeProgramStage::Late &&
-        !this->FindMakeProgram(mf)) {
+    if (!this->FindMakeProgram(mf)) {
       return;
     }
   }
