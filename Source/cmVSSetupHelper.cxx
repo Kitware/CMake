@@ -46,11 +46,32 @@ const CLSID CLSID_SetupConfiguration = {
 /* clang-format on */
 #endif
 
+namespace {
 const WCHAR* Win10SDKComponent =
   L"Microsoft.VisualStudio.Component.Windows10SDK";
 const WCHAR* Win81SDKComponent =
   L"Microsoft.VisualStudio.Component.Windows81SDK";
 const WCHAR* ComponentType = L"Component";
+
+bool LoadVSInstanceVCToolsetVersion(VSInstanceInfo& vsInstanceInfo)
+{
+  std::string const vcRoot = vsInstanceInfo.GetInstallLocation();
+  std::string vcToolsVersionFile =
+    vcRoot + "/VC/Auxiliary/Build/Microsoft.VCToolsVersion.default.txt";
+  std::string vcToolsVersion;
+  cmsys::ifstream fin(vcToolsVersionFile.c_str());
+  if (!fin || !cmSystemTools::GetLineFromStream(fin, vcToolsVersion)) {
+    return false;
+  }
+  vcToolsVersion = cmTrimWhitespace(vcToolsVersion);
+  std::string const vcToolsDir = vcRoot + "/VC/Tools/MSVC/" + vcToolsVersion;
+  if (!cmSystemTools::FileIsDirectory(vcToolsDir)) {
+    return false;
+  }
+  vsInstanceInfo.VCToolsetVersion = vcToolsVersion;
+  return true;
+}
+}
 
 std::string VSInstanceInfo::GetInstallLocation() const
 {
@@ -176,21 +197,8 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
   }
 
   // Check if a compiler is installed with this instance.
-  {
-    std::string const vcRoot = vsInstanceInfo.GetInstallLocation();
-    std::string vcToolsVersionFile =
-      vcRoot + "/VC/Auxiliary/Build/Microsoft.VCToolsVersion.default.txt";
-    std::string vcToolsVersion;
-    cmsys::ifstream fin(vcToolsVersionFile.c_str());
-    if (!fin || !cmSystemTools::GetLineFromStream(fin, vcToolsVersion)) {
-      return false;
-    }
-    vcToolsVersion = cmTrimWhitespace(vcToolsVersion);
-    std::string const vcToolsDir = vcRoot + "/VC/Tools/MSVC/" + vcToolsVersion;
-    if (!cmSystemTools::FileIsDirectory(vcToolsDir)) {
-      return false;
-    }
-    vsInstanceInfo.VCToolsetVersion = vcToolsVersion;
+  if (!LoadVSInstanceVCToolsetVersion(vsInstanceInfo)) {
+    return false;
   }
 
   // Reboot may have been required before the product package was registered
@@ -301,7 +309,9 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 
     chosenInstanceInfo.VSInstallLocation = envVsInstallDir;
     chosenInstanceInfo.Version = envVSVersion;
-    chosenInstanceInfo.VCToolsetVersion = envVSVersion;
+    if (!LoadVSInstanceVCToolsetVersion(chosenInstanceInfo)) {
+      return false;
+    }
     chosenInstanceInfo.IsWin10SDKInstalled = true;
     chosenInstanceInfo.IsWin81SDKInstalled = !envWindowsSdkDir81.empty();
     return true;
