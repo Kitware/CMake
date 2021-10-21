@@ -26,9 +26,6 @@ template <size_t s>
 struct cmELFByteSwapSize
 {
 };
-void cmELFByteSwap(char* /*unused*/, cmELFByteSwapSize<1> /*unused*/)
-{
-}
 static void cmELFByteSwap(char* data, cmELFByteSwapSize<2> /*unused*/)
 {
   char one_byte;

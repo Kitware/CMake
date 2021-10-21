@@ -20,9 +20,9 @@
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
-extern "C" int cmBZRXMLParserUnknownEncodingHandler(void* /*unused*/,
-                                                    const XML_Char* name,
-                                                    XML_Encoding* info)
+static int cmBZRXMLParserUnknownEncodingHandler(void* /*unused*/,
+                                                const XML_Char* name,
+                                                XML_Encoding* info)
 {
   static const int latin1[] = {
     0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008,

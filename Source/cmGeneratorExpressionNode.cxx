@@ -814,7 +814,8 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
     }
     return "0";
   }
-} platformIdNode;
+};
+static struct PlatformIdNode platformIdNode;
 
 template <cmSystemTools::CompareOp Op>
 struct VersionNode : public cmGeneratorExpressionNode
