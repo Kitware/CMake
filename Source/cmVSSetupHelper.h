@@ -84,8 +84,8 @@ private:
 
 struct VSInstanceInfo
 {
-  std::wstring VSInstallLocation;
-  std::wstring Version;
+  std::string VSInstallLocation;
+  std::string Version;
   std::string VCToolsetVersion;
   bool IsWin10SDKInstalled = false;
   bool IsWin81SDKInstalled = false;
