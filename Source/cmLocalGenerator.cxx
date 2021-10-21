@@ -3505,7 +3505,7 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
       bool done;
       int cc = 0;
       char rpstr[100];
-      sprintf(rpstr, "_p_");
+      snprintf(rpstr, sizeof(rpstr), "_p_");
       cmSystemTools::ReplaceString(ssin, "+", rpstr);
       std::string sssin = sin;
       do {
@@ -3521,7 +3521,7 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
         }
         sssin = ssin;
         cmSystemTools::ReplaceString(ssin, "_p_", rpstr);
-        sprintf(rpstr, "_p%d_", cc++);
+        snprintf(rpstr, sizeof(rpstr), "_p%d_", cc++);
       } while (!done);
     }
 

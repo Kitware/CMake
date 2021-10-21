@@ -78,7 +78,8 @@ void cmCursesLongMessageForm::UpdateStatusBar()
 
   char version[cmCursesMainForm::MAX_WIDTH];
   char vertmp[128];
-  sprintf(vertmp, "CMake Version %s", cmVersion::GetCMakeVersion());
+  snprintf(vertmp, sizeof(vertmp), "CMake Version %s",
+           cmVersion::GetCMakeVersion());
   size_t sideSpace = (width - strlen(vertmp));
   for (size_t i = 0; i < sideSpace; i++) {
     version[i] = ' ';
@@ -105,7 +106,7 @@ void cmCursesLongMessageForm::PrintKeys()
     return;
   }
   char firstLine[512];
-  sprintf(firstLine, "Press [e] to exit screen");
+  snprintf(firstLine, sizeof(firstLine), "Press [e] to exit screen");
 
   char fmt_s[] = "%s";
   curses_move(y - 2, 0);
@@ -176,7 +177,8 @@ void cmCursesLongMessageForm::HandleInput()
     this->PrintKeys();
     int key = getch();
 
-    sprintf(debugMessage, "Message widget handling input, key: %d", key);
+    snprintf(debugMessage, sizeof(debugMessage),
+             "Message widget handling input, key: %d", key);
     cmCursesForm::LogMessage(debugMessage);
 
     // quit

@@ -1279,7 +1279,7 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
     // it is used then add number to the end of the variable
     while (this->ShortMakeVariableMap.count(ret) && ni < 1000) {
       ++ni;
-      sprintf(buffer, "%04d", ni);
+      snprintf(buffer, sizeof(buffer), "%04d", ni);
       ret = unmodified + buffer;
     }
     this->ShortMakeVariableMap[ret] = "1";
@@ -1304,11 +1304,11 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
     }
     char buffer[5];
     int ni = 0;
-    sprintf(buffer, "%04d", ni);
+    snprintf(buffer, sizeof(buffer), "%04d", ni);
     ret = str1 + str2 + buffer;
     while (this->ShortMakeVariableMap.count(ret) && ni < 1000) {
       ++ni;
-      sprintf(buffer, "%04d", ni);
+      snprintf(buffer, sizeof(buffer), "%04d", ni);
       ret = str1 + str2 + buffer;
     }
     if (ni == 1000) {

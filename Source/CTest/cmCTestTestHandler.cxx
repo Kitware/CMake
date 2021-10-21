@@ -623,7 +623,7 @@ void cmCTestTestHandler::LogTestSummary(const std::vector<std::string>& passed,
     this->PrintLabelOrSubprojectSummary(false);
   }
   char realBuf[1024];
-  sprintf(realBuf, "%6.2f sec", durationInSecs.count());
+  snprintf(realBuf, sizeof(realBuf), "%6.2f sec", durationInSecs.count());
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                      "\nTotal Test time (real) = " << realBuf << "\n",
                      this->Quiet);
@@ -784,7 +784,7 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
     label.resize(maxlen + 3, ' ');
 
     char buf[1024];
-    sprintf(buf, "%6.2f sec*proc", labelTimes[i]);
+    snprintf(buf, sizeof(buf), "%6.2f sec*proc", labelTimes[i]);
 
     std::ostringstream labelCountStr;
     labelCountStr << "(" << labelCounts[i] << " test";

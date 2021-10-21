@@ -134,8 +134,8 @@ cmDirectoryId cmMakefile::GetDirectoryId() const
   // If we ever need to expose this to CMake language code we should
   // add a read-only property in cmMakefile::GetProperty.
   char buf[32];
-  sprintf(buf, "(%p)",
-          static_cast<void const*>(this)); // cast avoids format warning
+  snprintf(buf, sizeof(buf), "(%p)",
+           static_cast<void const*>(this)); // cast avoids format warning
   return std::string(buf);
 }
 

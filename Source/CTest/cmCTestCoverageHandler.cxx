@@ -148,7 +148,8 @@ bool cmCTestCoverageHandler::StartCoverageLogFile(
   cmGeneratedFileStream& covLogFile, int logFileCount)
 {
   char covLogFilename[1024];
-  sprintf(covLogFilename, "CoverageLog-%d", logFileCount);
+  snprintf(covLogFilename, sizeof(covLogFilename), "CoverageLog-%d",
+           logFileCount);
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Open file: " << covLogFilename << std::endl,
                      this->Quiet);
@@ -165,7 +166,8 @@ void cmCTestCoverageHandler::EndCoverageLogFile(cmGeneratedFileStream& ostr,
                                                 int logFileCount)
 {
   char covLogFilename[1024];
-  sprintf(covLogFilename, "CoverageLog-%d.xml", logFileCount);
+  snprintf(covLogFilename, sizeof(covLogFilename), "CoverageLog-%d.xml",
+           logFileCount);
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Close file: " << covLogFilename << std::endl,
                      this->Quiet);

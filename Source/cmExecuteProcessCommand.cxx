@@ -318,7 +318,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
       case cmsysProcess_State_Exited: {
         int v = cmsysProcess_GetExitValue(cp);
         char buf[16];
-        sprintf(buf, "%d", v);
+        snprintf(buf, sizeof(buf), "%d", v);
         status.GetMakefile().AddDefinition(arguments.ResultVariable, buf);
       } break;
       case cmsysProcess_State_Exception:
@@ -346,7 +346,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
               int exitCode =
                 cmsysProcess_GetExitValueByIndex(cp, static_cast<int>(i));
               char buf[16];
-              sprintf(buf, "%d", exitCode);
+              snprintf(buf, sizeof(buf), "%d", exitCode);
               res.emplace_back(buf);
             } break;
             case kwsysProcess_StateByIndex_Exception:

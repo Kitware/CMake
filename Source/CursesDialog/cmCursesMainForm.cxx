@@ -322,22 +322,22 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
       memset(thirdLine, ' ', 68);
     } else {
       if (this->OkToGenerate) {
-        sprintf(firstLine,
-                "      [l] Show log output   [c] Configure"
-                "       [g] Generate        ");
+        snprintf(firstLine, sizeof(firstLine),
+                 "      [l] Show log output   [c] Configure"
+                 "       [g] Generate        ");
       } else {
-        sprintf(firstLine,
-                "      [l] Show log output   [c] Configure"
-                "                           ");
+        snprintf(firstLine, sizeof(firstLine),
+                 "      [l] Show log output   [c] Configure"
+                 "                           ");
       }
       {
         const char* toggleKeyInstruction =
           "      [t] Toggle advanced mode (currently %s)";
-        sprintf(thirdLine, toggleKeyInstruction,
-                this->AdvancedMode ? "on" : "off");
+        snprintf(thirdLine, sizeof(thirdLine), toggleKeyInstruction,
+                 this->AdvancedMode ? "on" : "off");
       }
-      sprintf(secondLine,
-              "      [h] Help              [q] Quit without generating");
+      snprintf(secondLine, sizeof(secondLine),
+               "      [h] Help              [q] Quit without generating");
     }
 
     curses_move(y - 4, 0);
@@ -356,7 +356,8 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
 
   if (cw) {
     char pageLine[512] = "";
-    sprintf(pageLine, "Page %d of %d", cw->GetPage(), this->NumberOfPages);
+    snprintf(pageLine, sizeof(pageLine), "Page %d of %d", cw->GetPage(),
+             this->NumberOfPages);
     curses_move(0, 65 - static_cast<unsigned int>(strlen(pageLine)) - 1);
     printw(fmt_s, pageLine);
   }
@@ -739,7 +740,8 @@ void cmCursesMainForm::HandleInput()
     if ((!currentWidget || !widgetHandled) && !this->SearchMode) {
       // If the current widget does not want to handle input,
       // we handle it.
-      sprintf(debugMessage, "Main form handling input, key: %d", key);
+      snprintf(debugMessage, sizeof(debugMessage),
+               "Main form handling input, key: %d", key);
       cmCursesForm::LogMessage(debugMessage);
       // quit
       if (key == 'q') {

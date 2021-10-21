@@ -227,8 +227,8 @@ struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
   char buf[1024];
   // add todays year day and month to the time in str because
   // curl_getdate no longer assumes the day is today
-  sprintf(buf, "%d%02d%02d %s", lctime->tm_year + 1900, lctime->tm_mon + 1,
-          lctime->tm_mday, str.c_str());
+  snprintf(buf, sizeof(buf), "%d%02d%02d %s", lctime->tm_year + 1900,
+           lctime->tm_mon + 1, lctime->tm_mday, str.c_str());
   cmCTestLog(this, OUTPUT,
              "Determine Nightly Start Time" << std::endl
                                             << "   Specified time: " << str
@@ -543,9 +543,9 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
             this->Impl->TomorrowTag);
         }
         char datestring[100];
-        sprintf(datestring, "%04d%02d%02d-%02d%02d", lctime->tm_year + 1900,
-                lctime->tm_mon + 1, lctime->tm_mday, lctime->tm_hour,
-                lctime->tm_min);
+        snprintf(datestring, sizeof(datestring), "%04d%02d%02d-%02d%02d",
+                 lctime->tm_year + 1900, lctime->tm_mon + 1, lctime->tm_mday,
+                 lctime->tm_hour, lctime->tm_min);
         tag = datestring;
         cmsys::ofstream ofs(tagfile.c_str());
         if (ofs) {
@@ -2967,8 +2967,9 @@ void cmCTest::SetStopTime(std::string const& time_str)
 
   tzone_offset *= 100;
   char buf[1024];
-  sprintf(buf, "%d%02d%02d %s %+05i", lctime->tm_year + 1900,
-          lctime->tm_mon + 1, lctime->tm_mday, time_str.c_str(), tzone_offset);
+  snprintf(buf, sizeof(buf), "%d%02d%02d %s %+05i", lctime->tm_year + 1900,
+           lctime->tm_mon + 1, lctime->tm_mday, time_str.c_str(),
+           tzone_offset);
 
   time_t stop_time = curl_getdate(buf, &current_time);
   if (stop_time == -1) {

@@ -1693,7 +1693,8 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   /* Use uname if it's present, else uid. */
   p = archive_entry_uname(entry);
   if ((p == nullptr) || (*p == '\0')) {
-    sprintf(tmp, "%lu ", static_cast<unsigned long>(archive_entry_uid(entry)));
+    snprintf(tmp, sizeof(tmp), "%lu ",
+             static_cast<unsigned long>(archive_entry_uid(entry)));
     p = tmp;
   }
   w = strlen(p);
@@ -1707,7 +1708,8 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
     fprintf(out, "%s", p);
     w = strlen(p);
   } else {
-    sprintf(tmp, "%lu", static_cast<unsigned long>(archive_entry_gid(entry)));
+    snprintf(tmp, sizeof(tmp), "%lu",
+             static_cast<unsigned long>(archive_entry_gid(entry)));
     w = strlen(tmp);
     fprintf(out, "%s", tmp);
   }
@@ -1721,15 +1723,15 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
       archive_entry_filetype(entry) == AE_IFBLK) {
     unsigned long rdevmajor = archive_entry_rdevmajor(entry);
     unsigned long rdevminor = archive_entry_rdevminor(entry);
-    sprintf(tmp, "%lu,%lu", rdevmajor, rdevminor);
+    snprintf(tmp, sizeof(tmp), "%lu,%lu", rdevmajor, rdevminor);
   } else {
     /*
      * Note the use of platform-dependent macros to format
      * the filesize here.  We need the format string and the
      * corresponding type for the cast.
      */
-    sprintf(tmp, BSDTAR_FILESIZE_PRINTF,
-            static_cast<BSDTAR_FILESIZE_TYPE>(archive_entry_size(entry)));
+    snprintf(tmp, sizeof(tmp), BSDTAR_FILESIZE_PRINTF,
+             static_cast<BSDTAR_FILESIZE_TYPE>(archive_entry_size(entry)));
   }
   if (w + strlen(tmp) >= gs_width) {
     gs_width = w + strlen(tmp) + 1;
@@ -3289,7 +3291,7 @@ std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
       case ' ':
       case '=':
       case '%':
-        sprintf(hexCh, "%%%02X", static_cast<int>(c));
+        snprintf(hexCh, sizeof(hexCh), "%%%02X", static_cast<int>(c));
         break;
       case '/':
         if (escapeSlashes) {
