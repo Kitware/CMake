@@ -181,6 +181,7 @@
         - Set-Item -Force -Path "env:INCLUDE" -Value "$pwdpath\.gitlab\watcom\h;$pwdpath\.gitlab\watcom\h\nt"
         - Set-Item -Force -Path "env:EDPATH" -Value "$pwdpath\.gitlab\watcom\eddat"
         - Set-Item -Force -Path "env:WATCOM" -Value "$pwdpath\.gitlab\watcom"
+        - Set-Item -Force -Path "env:WLINKTMP" -Value "."
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
 
     interruptible: true
