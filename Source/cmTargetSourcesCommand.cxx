@@ -26,8 +26,10 @@ protected:
                               bool prepend, bool system) override
   {
     this->cmTargetPropCommandBase::HandleInterfaceContent(
-      tgt, this->ConvertToAbsoluteContent(tgt, content, true), prepend,
-      system);
+      tgt,
+      this->ConvertToAbsoluteContent(tgt, content, IsInterface::Yes,
+                                     CheckCMP0076::Yes),
+      prepend, system);
   }
 
 private:
@@ -43,9 +45,9 @@ private:
                            const std::vector<std::string>& content,
                            bool /*prepend*/, bool /*system*/) override
   {
-    tgt->AppendProperty(
-      "SOURCES",
-      this->Join(this->ConvertToAbsoluteContent(tgt, content, false)));
+    tgt->AppendProperty("SOURCES",
+                        this->Join(this->ConvertToAbsoluteContent(
+                          tgt, content, IsInterface::No, CheckCMP0076::Yes)));
     return true; // Successfully handled.
   }
 
@@ -54,18 +56,29 @@ private:
     return cmJoin(content, ";");
   }
 
+  enum class IsInterface
+  {
+    Yes,
+    No,
+  };
+  enum class CheckCMP0076
+  {
+    Yes,
+    No,
+  };
   std::vector<std::string> ConvertToAbsoluteContent(
     cmTarget* tgt, const std::vector<std::string>& content,
-    bool isInterfaceContent);
+    IsInterface isInterfaceContent, CheckCMP0076 checkCmp0076);
 };
 
 std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
   cmTarget* tgt, const std::vector<std::string>& content,
-  bool isInterfaceContent)
+  IsInterface isInterfaceContent, CheckCMP0076 checkCmp0076)
 {
   // Skip conversion in case old behavior has been explicitly requested
-  if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0076) ==
-      cmPolicies::OLD) {
+  if (checkCmp0076 == CheckCMP0076::Yes &&
+      this->Makefile->GetPolicyStatus(cmPolicies::CMP0076) ==
+        cmPolicies::OLD) {
     return content;
   }
 
@@ -76,7 +89,7 @@ std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
     std::string absoluteSrc;
     if (cmSystemTools::FileIsFullPath(src) ||
         cmGeneratorExpression::Find(src) == 0 ||
-        (!isInterfaceContent &&
+        (isInterfaceContent == IsInterface::No &&
          (this->Makefile->GetCurrentSourceDirectory() ==
           tgt->GetMakefile()->GetCurrentSourceDirectory()))) {
       absoluteSrc = src;
@@ -95,28 +108,33 @@ std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
   bool issueMessage = true;
   bool useAbsoluteContent = false;
   std::ostringstream e;
-  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0076)) {
-    case cmPolicies::WARN:
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0076) << "\n";
-      break;
-    case cmPolicies::OLD:
-      issueMessage = false;
-      break;
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::REQUIRED_IF_USED:
-      this->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0076));
-      break;
-    case cmPolicies::NEW: {
-      issueMessage = false;
-      useAbsoluteContent = true;
-      break;
+  if (checkCmp0076 == CheckCMP0076::Yes) {
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0076)) {
+      case cmPolicies::WARN:
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0076) << "\n";
+        break;
+      case cmPolicies::OLD:
+        issueMessage = false;
+        break;
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0076));
+        break;
+      case cmPolicies::NEW: {
+        issueMessage = false;
+        useAbsoluteContent = true;
+        break;
+      }
     }
+  } else {
+    issueMessage = false;
+    useAbsoluteContent = true;
   }
 
   if (issueMessage) {
-    if (isInterfaceContent) {
+    if (isInterfaceContent == IsInterface::Yes) {
       e << "An interface source of target \"" << tgt->GetName()
         << "\" has a relative path.";
     } else {
