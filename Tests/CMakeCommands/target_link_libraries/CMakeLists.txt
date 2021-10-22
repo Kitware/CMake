@@ -3,6 +3,10 @@
 # 2.8.12
 cmake_minimum_required(VERSION 2.8)
 
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
+
 project(target_link_libraries)
 
 file(WRITE

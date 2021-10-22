@@ -1,4 +1,7 @@
 cmake_minimum_required (VERSION 3.8)
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
 project(Assembler C)
 message("CTEST_FULL_OUTPUT ")
 set(CMAKE_VERBOSE_MAKEFILE 1)

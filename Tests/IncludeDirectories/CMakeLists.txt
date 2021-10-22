@@ -1,6 +1,10 @@
 cmake_minimum_required (VERSION 2.6)
-project(IncludeDirectories)
 
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
+
+project(IncludeDirectories)
 if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.4)
     OR (CMAKE_C_COMPILER_ID STREQUAL Clang AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
     OR CMAKE_C_COMPILER_ID STREQUAL AppleClang

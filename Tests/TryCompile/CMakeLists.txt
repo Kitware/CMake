@@ -1,4 +1,7 @@
 cmake_minimum_required (VERSION 2.8.12)
+if(POLICY CMP0129)
+  cmake_policy(SET CMP0129 NEW)
+endif()
 project(TryCompile)
 
 macro(TEST_ASSERT value msg)
