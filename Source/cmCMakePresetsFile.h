@@ -101,14 +101,18 @@ public:
   class ConfigurePreset : public Preset
   {
   public:
-#if __cplusplus < 201703L && (!defined(_MSVC_LANG) || _MSVC_LANG < 201703L)
+    ConfigurePreset() = default;
+    ConfigurePreset(ConfigurePreset&& /*other*/) = default;
+    ConfigurePreset(const ConfigurePreset& /*other*/) = default;
+    ConfigurePreset& operator=(const ConfigurePreset& /*other*/) = default;
+    ~ConfigurePreset() override = default;
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+    ConfigurePreset& operator=(ConfigurePreset&& /*other*/) = default;
+#else
     // The move assignment operators for several STL classes did not become
     // noexcept until C++17, which causes some tools to warn about this move
-    // assignment operator throwing an exception when it shouldn't. Disable the
-    // move assignment operator until C++17 is enabled.
-    // Explicitly defining a copy assignment operator prevents the compiler
-    // from automatically generating a move assignment operator.
-    ConfigurePreset& operator=(const ConfigurePreset& /*other*/) = default;
+    // assignment operator throwing an exception when it shouldn't.
+    ConfigurePreset& operator=(ConfigurePreset&& /*other*/) = delete;
 #endif
 
     std::string Generator;
@@ -142,14 +146,18 @@ public:
   class BuildPreset : public Preset
   {
   public:
-#if __cplusplus < 201703L && (!defined(_MSVC_LANG) || _MSVC_LANG < 201703L)
+    BuildPreset() = default;
+    BuildPreset(BuildPreset&& /*other*/) = default;
+    BuildPreset(const BuildPreset& /*other*/) = default;
+    BuildPreset& operator=(const BuildPreset& /*other*/) = default;
+    ~BuildPreset() override = default;
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+    BuildPreset& operator=(BuildPreset&& /*other*/) = default;
+#else
     // The move assignment operators for several STL classes did not become
     // noexcept until C++17, which causes some tools to warn about this move
-    // assignment operator throwing an exception when it shouldn't. Disable the
-    // move assignment operator until C++17 is enabled.
-    // Explicitly defining a copy assignment operator prevents the compiler
-    // from automatically generating a move assignment operator.
-    BuildPreset& operator=(const BuildPreset& /*other*/) = default;
+    // assignment operator throwing an exception when it shouldn't.
+    BuildPreset& operator=(BuildPreset&& /*other*/) = delete;
 #endif
 
     std::string ConfigurePreset;
@@ -168,14 +176,18 @@ public:
   class TestPreset : public Preset
   {
   public:
-#if __cplusplus < 201703L && (!defined(_MSVC_LANG) || _MSVC_LANG < 201703L)
+    TestPreset() = default;
+    TestPreset(TestPreset&& /*other*/) = default;
+    TestPreset(const TestPreset& /*other*/) = default;
+    TestPreset& operator=(const TestPreset& /*other*/) = default;
+    ~TestPreset() override = default;
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+    TestPreset& operator=(TestPreset&& /*other*/) = default;
+#else
     // The move assignment operators for several STL classes did not become
     // noexcept until C++17, which causes some tools to warn about this move
-    // assignment operator throwing an exception when it shouldn't. Disable the
-    // move assignment operator until C++17 is enabled.
-    // Explicitly defining a copy assignment operator prevents the compiler
-    // from automatically generating a move assignment operator.
-    TestPreset& operator=(const TestPreset& /*other*/) = default;
+    // assignment operator throwing an exception when it shouldn't.
+    TestPreset& operator=(TestPreset&& /*other*/) = delete;
 #endif
 
     struct OutputOptions
