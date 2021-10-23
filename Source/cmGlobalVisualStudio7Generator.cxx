@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio7Generator.h"
 
+#include <cassert>
 #include <utility>
 #include <vector>
 
@@ -9,8 +10,6 @@
 #include <cm/string_view>
 
 #include <windows.h>
-
-#include <assert.h>
 
 #include "cmsys/Encoding.hxx"
 

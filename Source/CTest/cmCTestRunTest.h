@@ -4,13 +4,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
-
-#include <stddef.h>
 
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"

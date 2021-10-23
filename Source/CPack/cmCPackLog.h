@@ -4,11 +4,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstring>
 #include <memory>
 #include <ostream>
 #include <string>
-
-#include <string.h>
 
 #define cmCPack_Log(ctSelf, logType, msg)                                     \
   do {                                                                        \

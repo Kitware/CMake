@@ -58,7 +58,6 @@
 #ifdef _WIN32
 #  include <fcntl.h> // for _O_BINARY
 #  include <io.h>    // for _setmode
-#  include <stdio.h> // for std{out,err} and fileno
 #endif
 
 #include <cm/string_view>
