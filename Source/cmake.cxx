@@ -205,7 +205,7 @@ cmake::cmake(Role role, cmState::Mode mode, cmState::ProjectKind projectKind)
       exts.ordered.reserve(extList.size());
       for (cm::string_view ext : extList) {
         exts.ordered.emplace_back(ext);
-      };
+      }
       // Fill unordered set
       exts.unordered.insert(exts.ordered.begin(), exts.ordered.end());
     };
