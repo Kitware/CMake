@@ -511,7 +511,7 @@ std::string cmProcess::GetExitExceptionString() const
     default:
       char buf[1024];
       const char* fmt = "Exit code 0x%" KWIML_INT_PRIx64 "\n";
-      _snprintf(buf, 1024, fmt, this->ExitValue);
+      snprintf(buf, sizeof(buf), fmt, this->ExitValue);
       exception_str.assign(buf);
   }
 #else
