@@ -504,7 +504,7 @@ using cmCPluginAPISourceFileMap =
   std::map<cmSourceFile*, std::unique_ptr<cmCPluginAPISourceFile>>;
 static cmCPluginAPISourceFileMap cmCPluginAPISourceFiles;
 
-static void* CCONV cmCreateSourceFile(void)
+static void* CCONV cmCreateSourceFile()
 {
   return new cmCPluginAPISourceFile;
 }
