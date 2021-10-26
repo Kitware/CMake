@@ -45,6 +45,12 @@ set_property(TEST EchoEnvironment3
     "STRING_MANIP=string_append:suffix"
     "STRING_MANIP=string_prepend:prefix"
 
+    # String manipulation on non-existent.
+    "STRING_DNE=string_append:post-"
+    "STRING_DNE=string_prepend:-pre"
+    "STRING_DNE=string_append:suffix"
+    "STRING_DNE=string_prepend:prefix"
+
     # Path manipulation.
     "PATH_MANIP=set:core"
     "PATH_MANIP=path_list_append:post"
@@ -52,10 +58,22 @@ set_property(TEST EchoEnvironment3
     "PATH_MANIP=path_list_append:suffix"
     "PATH_MANIP=path_list_prepend:prefix"
 
+    # Path manipulation on non-existent.
+    "PATH_DNE=path_list_append:post"
+    "PATH_DNE=path_list_prepend:pre"
+    "PATH_DNE=path_list_append:suffix"
+    "PATH_DNE=path_list_prepend:prefix"
+
     # CMake list manipulation.
     "CMAKE_LIST_MANIP=set:core"
     "CMAKE_LIST_MANIP=cmake_list_append:post"
     "CMAKE_LIST_MANIP=cmake_list_prepend:pre"
     "CMAKE_LIST_MANIP=cmake_list_append:suffix"
     "CMAKE_LIST_MANIP=cmake_list_prepend:prefix"
+
+    # CMake list manipulation on non-existent.
+    "CMAKE_LIST_DNE=cmake_list_append:post"
+    "CMAKE_LIST_DNE=cmake_list_prepend:pre"
+    "CMAKE_LIST_DNE=cmake_list_append:suffix"
+    "CMAKE_LIST_DNE=cmake_list_prepend:prefix"
 )
