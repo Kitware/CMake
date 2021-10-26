@@ -99,7 +99,8 @@ public:
   cmVSSetupAPIHelper(unsigned int version);
   ~cmVSSetupAPIHelper();
 
-  bool SetVSInstance(std::string const& vsInstallLocation);
+  bool SetVSInstance(std::string const& vsInstallLocation,
+                     std::string const& vsInstallVersion);
 
   bool IsVSInstalled();
   bool GetVSInstanceInfo(std::string& vsInstallLocation);
@@ -132,4 +133,5 @@ private:
   bool IsEWDKEnabled();
 
   std::string SpecifiedVSInstallLocation;
+  std::string SpecifiedVSInstallVersion;
 };

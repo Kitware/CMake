@@ -83,5 +83,6 @@ private:
   bool ParseGeneratorInstance(std::string const& is, cmMakefile* mf);
 
   std::string GeneratorInstance;
+  std::string GeneratorInstanceVersion;
   cm::optional<std::string> LastGeneratorInstanceString;
 };

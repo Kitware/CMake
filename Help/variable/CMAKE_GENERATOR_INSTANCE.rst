@@ -37,7 +37,12 @@ of the VS installation.
 
 The ``key=value`` pairs form a comma-separated list of options to
 specify details of the instance selection.
-There are no supported pairs: this syntax is reserved for future use.
+Supported pairs are:
+
+``version=<major>.<minor>.<MMMDD>.<BBB>``
+  .. versionadded:: 3.23
+
+  Specify the 4-component VS Build Version.
 
 If the value of ``CMAKE_GENERATOR_INSTANCE`` is not specified explicitly
 by the user or a toolchain file, CMake queries the Visual Studio Installer

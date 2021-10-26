@@ -102,10 +102,12 @@ cmVSSetupAPIHelper::~cmVSSetupAPIHelper()
     CoUninitialize();
 }
 
-bool cmVSSetupAPIHelper::SetVSInstance(std::string const& vsInstallLocation)
+bool cmVSSetupAPIHelper::SetVSInstance(std::string const& vsInstallLocation,
+                                       std::string const& vsInstallVersion)
 {
   this->SpecifiedVSInstallLocation = vsInstallLocation;
   cmSystemTools::ConvertToUnixSlashes(this->SpecifiedVSInstallLocation);
+  this->SpecifiedVSInstallVersion = vsInstallVersion;
   chosenInstanceInfo = VSInstanceInfo();
   return this->EnumerateAndChooseVSInstance();
 }
@@ -366,6 +368,15 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
         std::string currentVSLocation = instanceInfo.GetInstallLocation();
         if (cmSystemTools::ComparePath(currentVSLocation,
                                        this->SpecifiedVSInstallLocation)) {
+          if (this->SpecifiedVSInstallVersion.empty() ||
+              instanceInfo.Version == this->SpecifiedVSInstallVersion) {
+            chosenInstanceInfo = instanceInfo;
+            return true;
+          }
+        }
+      } else if (!this->SpecifiedVSInstallVersion.empty()) {
+        // We are looking for a specific version.
+        if (instanceInfo.Version == this->SpecifiedVSInstallVersion) {
           chosenInstanceInfo = instanceInfo;
           return true;
         }

@@ -6,6 +6,7 @@
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
@@ -105,6 +106,30 @@ static const char* VSVersionToToolset(
       return "v142";
     case cmGlobalVisualStudioGenerator::VS17:
       return "v143";
+  }
+  return "";
+}
+
+static std::string VSVersionToMajorString(
+  cmGlobalVisualStudioGenerator::VSVersion v)
+{
+  switch (v) {
+    case cmGlobalVisualStudioGenerator::VS9:
+      return "9";
+    case cmGlobalVisualStudioGenerator::VS10:
+      return "10";
+    case cmGlobalVisualStudioGenerator::VS11:
+      return "11";
+    case cmGlobalVisualStudioGenerator::VS12:
+      return "12";
+    case cmGlobalVisualStudioGenerator::VS14:
+      return "14";
+    case cmGlobalVisualStudioGenerator::VS15:
+      return "15";
+    case cmGlobalVisualStudioGenerator::VS16:
+      return "16";
+    case cmGlobalVisualStudioGenerator::VS17:
+      return "17";
   }
   return "";
 }
@@ -445,8 +470,32 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
     return false;
   }
 
-  if (!this->GeneratorInstance.empty()) {
-    if (!this->vsSetupAPIHelper.SetVSInstance(this->GeneratorInstance)) {
+  if (!this->GeneratorInstanceVersion.empty()) {
+    std::string const majorStr = VSVersionToMajorString(this->Version);
+    cmsys::RegularExpression versionRegex(
+      cmStrCat("^", majorStr, "\\.[0-9]+\\.[0-9]+\\.[0-9]+$"));
+    if (!versionRegex.find(this->GeneratorInstanceVersion)) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given instance specification\n"
+        "  " << i << "\n"
+        "but the version field is not 4 integer components"
+        " starting in " << majorStr << "."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+  }
+
+  std::string vsInstance;
+  if (!i.empty()) {
+    vsInstance = i;
+    if (!this->vsSetupAPIHelper.SetVSInstance(
+          this->GeneratorInstance, this->GeneratorInstanceVersion)) {
       std::ostringstream e;
       /* clang-format off */
       e <<
@@ -455,13 +504,17 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
         "could not find specified instance of Visual Studio:\n"
         "  " << i;
       /* clang-format on */
+      if (!this->GeneratorInstance.empty() &&
+          this->GeneratorInstanceVersion.empty() &&
+          cmSystemTools::FileIsDirectory(this->GeneratorInstance)) {
+        e << "\n"
+             "The directory exists, but the instance is not known to the "
+             "Visual Studio Installer.";
+      }
       mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
-  }
-
-  std::string vsInstance;
-  if (!this->vsSetupAPIHelper.GetVSInstanceInfo(vsInstance)) {
+  } else if (!this->vsSetupAPIHelper.GetVSInstanceInfo(vsInstance)) {
     std::ostringstream e;
     /* clang-format off */
     e <<
@@ -493,6 +546,7 @@ bool cmGlobalVisualStudioVersionedGenerator::ParseGeneratorInstance(
   std::string const& is, cmMakefile* mf)
 {
   this->GeneratorInstance.clear();
+  this->GeneratorInstanceVersion.clear();
 
   std::vector<std::string> const fields = cmTokenize(is, ",");
   std::vector<std::string>::const_iterator fi = fields.begin();
@@ -563,8 +617,10 @@ bool cmGlobalVisualStudioVersionedGenerator::ParseGeneratorInstance(
 bool cmGlobalVisualStudioVersionedGenerator::ProcessGeneratorInstanceField(
   std::string const& key, std::string const& value)
 {
-  static_cast<void>(key);
-  static_cast<void>(value);
+  if (key == "version") {
+    this->GeneratorInstanceVersion = value;
+    return true;
+  }
   return false;
 }
 
