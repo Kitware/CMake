@@ -436,9 +436,11 @@ bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
 bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   std::string const& i, cmMakefile* mf)
 {
-  if (this->GeneratorInstance && i == *(this->GeneratorInstance)) {
+  if (this->LastGeneratorInstanceString &&
+      i == *(this->LastGeneratorInstanceString)) {
     return true;
   }
+
   if (!i.empty()) {
     if (!this->vsSetupAPIHelper.SetVSInstance(i)) {
       std::ostringstream e;
@@ -477,6 +479,8 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
 
   // The selected instance may have a different MSBuild than previously found.
   this->MSBuildCommandInitialized = false;
+
+  this->LastGeneratorInstanceString = i;
 
   return true;
 }
