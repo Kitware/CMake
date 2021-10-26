@@ -26,7 +26,18 @@ Visual Studio Instance Selection
 :ref:`Visual Studio Generators` support instance specification for
 Visual Studio 2017 and above.  The ``CMAKE_GENERATOR_INSTANCE`` variable
 may be set as a cache entry selecting an instance of Visual Studio
-via the absolute path to the top-level directory of the VS installation.
+via one of the following forms:
+
+* ``location``
+* ``location[,key=value]*``
+* ``key=value[,key=value]*``
+
+The ``location`` specifies the absolute path to the top-level directory
+of the VS installation.
+
+The ``key=value`` pairs form a comma-separated list of options to
+specify details of the instance selection.
+There are no supported pairs: this syntax is reserved for future use.
 
 If the value of ``CMAKE_GENERATOR_INSTANCE`` is not specified explicitly
 by the user or a toolchain file, CMake queries the Visual Studio Installer

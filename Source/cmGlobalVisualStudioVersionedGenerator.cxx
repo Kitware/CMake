@@ -441,8 +441,12 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
     return true;
   }
 
-  if (!i.empty()) {
-    if (!this->vsSetupAPIHelper.SetVSInstance(i)) {
+  if (!this->ParseGeneratorInstance(i, mf)) {
+    return false;
+  }
+
+  if (!this->GeneratorInstance.empty()) {
+    if (!this->vsSetupAPIHelper.SetVSInstance(this->GeneratorInstance)) {
       std::ostringstream e;
       /* clang-format off */
       e <<
@@ -483,6 +487,85 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   this->LastGeneratorInstanceString = i;
 
   return true;
+}
+
+bool cmGlobalVisualStudioVersionedGenerator::ParseGeneratorInstance(
+  std::string const& is, cmMakefile* mf)
+{
+  this->GeneratorInstance.clear();
+
+  std::vector<std::string> const fields = cmTokenize(is, ",");
+  std::vector<std::string>::const_iterator fi = fields.begin();
+  if (fi == fields.end()) {
+    return true;
+  }
+
+  // The first field may be the VS instance.
+  if (fi->find('=') == fi->npos) {
+    this->GeneratorInstance = *fi;
+    ++fi;
+  }
+
+  std::set<std::string> handled;
+
+  // The rest of the fields must be key=value pairs.
+  for (; fi != fields.end(); ++fi) {
+    std::string::size_type pos = fi->find('=');
+    if (pos == fi->npos) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given instance specification\n"
+        "  " << is << "\n"
+        "that contains a field after the first ',' with no '='."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+    std::string const key = fi->substr(0, pos);
+    std::string const value = fi->substr(pos + 1);
+    if (!handled.insert(key).second) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given instance specification\n"
+        "  " << is << "\n"
+        "that contains duplicate field key '" << key << "'."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+    if (!this->ProcessGeneratorInstanceField(key, value)) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given instance specification\n"
+        "  " << is << "\n"
+        "that contains invalid field '" << *fi << "'."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool cmGlobalVisualStudioVersionedGenerator::ProcessGeneratorInstanceField(
+  std::string const& key, std::string const& value)
+{
+  static_cast<void>(key);
+  static_cast<void>(value);
+  return false;
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::GetVSInstance(
