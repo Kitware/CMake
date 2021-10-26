@@ -292,6 +292,46 @@ Package
 
  This feature is available for QtIFW 4.0.0 and newer.
 
+.. variable:: CPACK_IFW_ARCHIVE_FORMAT
+
+ .. versionadded:: 3.23
+
+ Set the format used when packaging new component data archives. If you omit
+ this option, the ``7z`` format will be used as a default. Supported formats:
+
+ * 7z
+ * zip
+ * tar.gz
+ * tar.bz2
+ * tar.xz
+
+ .. note::
+
+  If the Qt Installer Framework tools were built without libarchive support,
+  only ``7z`` format is supported.
+
+ This feature is available for QtIFW 4.2.0 and newer.
+
+.. variable:: CPACK_IFW_ARCHIVE_COMPRESSION
+
+ .. versionadded:: 3.23
+
+ Archive compression level. Defaults to 5 (*Normal compression*).
+
+  * 0 (*No compression*)
+  * 1 (*Fastest compressing*)
+  * 3 (*Fast compressing*)
+  * 5 (*Normal compressing*)
+  * 7 (*Maximum compressing*)
+  * 9 (*Ultra compressing*)
+
+ .. note::
+
+  Some formats do not support all the possible values. For example ``zip``
+  compression only supports values from 1 to 7.
+
+ This feature is available for QtIFW 4.2.0 and newer.
+
 Components
 """"""""""
 

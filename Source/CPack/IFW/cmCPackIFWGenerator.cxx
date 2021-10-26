@@ -58,6 +58,17 @@ std::vector<std::string> cmCPackIFWGenerator::BuildRepogenCommand()
 
   ifwCmd.emplace_back(this->RepoGen);
 
+  if (!this->IsVersionLess("4.2")) {
+    if (!this->ArchiveFormat.empty()) {
+      ifwCmd.emplace_back("--archive-format");
+      ifwCmd.emplace_back(this->ArchiveFormat);
+    }
+    if (!this->ArchiveCompression.empty()) {
+      ifwCmd.emplace_back("--compression");
+      ifwCmd.emplace_back(this->ArchiveCompression);
+    }
+  }
+
   if (this->IsVersionLess("2.0.0")) {
     ifwCmd.emplace_back("-c");
     ifwCmd.emplace_back(this->toplevel + "/config/config.xml");
@@ -156,6 +167,17 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommmand()
   std::string ifwArg;
 
   ifwCmd.emplace_back(this->BinCreator);
+
+  if (!this->IsVersionLess("4.2")) {
+    if (!this->ArchiveFormat.empty()) {
+      ifwCmd.emplace_back("--archive-format");
+      ifwCmd.emplace_back(this->ArchiveFormat);
+    }
+    if (!this->ArchiveCompression.empty()) {
+      ifwCmd.emplace_back("--compression");
+      ifwCmd.emplace_back(this->ArchiveCompression);
+    }
+  }
 
   ifwCmd.emplace_back("-c");
   ifwCmd.emplace_back(this->toplevel + "/config/config.xml");
@@ -352,6 +374,14 @@ int cmCPackIFWGenerator::InitializeInternal()
   this->RepoDirsVector.clear();
   if (cmValue dirs = this->GetOption("CPACK_IFW_REPOSITORIES_DIRECTORIES")) {
     cmExpandList(dirs, this->RepoDirsVector);
+  }
+
+  // Archive format and compression level
+  if (cmValue af = this->GetOption("CPACK_IFW_ARCHIVE_FORMAT")) {
+    this->ArchiveFormat = *af;
+  }
+  if (cmValue ac = this->GetOption("CPACK_IFW_ARCHIVE_COMPRESSION")) {
+    this->ArchiveCompression = *ac;
   }
 
   // Installer

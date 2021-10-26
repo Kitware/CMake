@@ -151,6 +151,8 @@ private:
   std::string FrameworkVersion;
   std::string ExecutableSuffix;
   std::string OutputExtension;
+  std::string ArchiveFormat;
+  std::string ArchiveCompression;
 
   bool OnlineOnly;
   bool ResolveDuplicateNames;
