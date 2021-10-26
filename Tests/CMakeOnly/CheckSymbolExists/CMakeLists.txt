@@ -48,4 +48,15 @@ if (CMAKE_COMPILER_IS_GNUCC)
   if (CSE_RESULT_O3)
     message(SEND_ERROR "CheckSymbolExists reported a nonexistent symbol as existing with optimization -O3")
   endif ()
+
+  string(APPEND CMAKE_C_FLAGS " -pedantic-errors")
+  unset(CS_RESULT_PEDANTIC_ERRORS CACHE)
+  message(STATUS "Testing with -pedantic-errors")
+
+  check_symbol_exists(fopen "stdio.h" CSE_RESULT_PEDANTIC_ERRORS)
+
+  if(NOT CSE_RESULT_PEDANTIC_ERRORS)
+    message(SEND_ERROR "CheckSymbolExists reported an existing symbol as nonexisting with -pedantic-errors")
+  endif()
+
 endif ()
