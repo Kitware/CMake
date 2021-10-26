@@ -174,7 +174,10 @@ else()
     endif()
     list(PREPEND _CMAKE_AR_NAMES "llvm-ar")
     list(PREPEND _CMAKE_RANLIB_NAMES "llvm-ranlib")
-    list(PREPEND _CMAKE_STRIP_NAMES "llvm-strip")
+    if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 11)
+      # llvm-strip versions prior to 11 require additional flags we do not yet add.
+      list(PREPEND _CMAKE_STRIP_NAMES "llvm-strip")
+    endif()
     list(PREPEND _CMAKE_NM_NAMES "llvm-nm")
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 9)
       # llvm-objdump versions prior to 9 did not support everything we need.
