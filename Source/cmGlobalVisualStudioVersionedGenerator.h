@@ -76,5 +76,5 @@ private:
   class Factory17;
   friend class Factory17;
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
-  cm::optional<std::string> GeneratorInstance;
+  cm::optional<std::string> LastGeneratorInstanceString;
 };
