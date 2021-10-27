@@ -800,13 +800,9 @@ bool cmCTestRunTest::ForkProcess(
     auto apply_diff =
       [&env_application](const std::string& name,
                          std::function<void(std::string&)> const& apply) {
-        auto entry = env_application.find(name);
-        std::string output;
-        if (entry != env_application.end() && entry->second) {
-          output = *entry->second;
-        }
+        std::string output = env_application[name].value_or(std::string{});
         apply(output);
-        entry->second = output;
+        env_application[name] = output;
       };
 
     bool err_occurred = false;

@@ -20,12 +20,18 @@ set(expect_DIRECT "new")
 set(expect_STRING_MANIP "prefix-pre-core-post-suffix")
 set(expect_PATH_MANIP "prefix${path_sep}pre${path_sep}core${path_sep}post${path_sep}suffix")
 set(expect_CMAKE_LIST_MANIP "prefix;pre;core;post;suffix")
+set(expect_STRING_DNE "prefix-prepost-suffix")
+set(expect_PATH_DNE "prefix${path_sep}pre${path_sep}post${path_sep}suffix")
+set(expect_CMAKE_LIST_DNE "prefix;pre;post;suffix")
 
 set(expected_vars
   DIRECT
   STRING_MANIP
   PATH_MANIP
-  CMAKE_LIST_MANIP)
+  CMAKE_LIST_MANIP
+  STRING_DNE
+  PATH_DNE
+  CMAKE_LIST_DNE)
 
 while (out)
   string(FIND "${out}" "\n" nl_pos)
