@@ -39,18 +39,29 @@ This module defines :prop_tgt:`IMPORTED` targets if Vulkan has been found:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module defines the following variables::
+This module defines the following variables:
 
-  Vulkan_FOUND          - "True" if Vulkan was found
-  Vulkan_INCLUDE_DIRS   - include directories for Vulkan
-  Vulkan_LIBRARIES      - link against this library to use Vulkan
+``Vulkan_FOUND``
+  set to true if Vulkan was found
+``Vulkan_INCLUDE_DIRS``
+  include directories for Vulkan
+``Vulkan_LIBRARIES``
+  link against this library to use Vulkan
+``Vulkan_VERSION``
+  .. versionadded:: 3.23
 
-The module will also define three cache variables::
+  value from ``vulkan/vulkan_core.h``
 
-  Vulkan_INCLUDE_DIR        - the Vulkan include directory
-  Vulkan_LIBRARY            - the path to the Vulkan library
-  Vulkan_GLSLC_EXECUTABLE   - the path to the GLSL SPIR-V compiler
-  Vulkan_GLSLANG_VALIDATOR_EXECUTABLE - the path to the glslangValidator tool
+The module will also defines these cache variables:
+
+``Vulkan_INCLUDE_DIR``
+  the Vulkan include directory
+``Vulkan_LIBRARY``
+  the path to the Vulkan library
+``Vulkan_GLSLC_EXECUTABLE``
+  the path to the GLSL SPIR-V compiler
+``Vulkan_GLSLANG_VALIDATOR_EXECUTABLE``
+  the path to the glslangValidator tool
 
 Hints
 ^^^^^
@@ -125,10 +136,28 @@ endif()
 set(Vulkan_LIBRARIES ${Vulkan_LIBRARY})
 set(Vulkan_INCLUDE_DIRS ${Vulkan_INCLUDE_DIR})
 
+# detect version e.g 1.2.189
+set(Vulkan_VERSION "")
+if(Vulkan_INCLUDE_DIR)
+  set(VULKAN_CORE_H ${Vulkan_INCLUDE_DIR}/vulkan/vulkan_core.h)
+  if(EXISTS ${VULKAN_CORE_H})
+    file(STRINGS  ${VULKAN_CORE_H} VulkanHeaderVersionLine REGEX "^#define VK_HEADER_VERSION ")
+    string(REGEX MATCHALL "[0-9]+" VulkanHeaderVersion "${VulkanHeaderVersionLine}")
+    file(STRINGS  ${VULKAN_CORE_H} VulkanHeaderVersionLine REGEX "^#define VK_HEADER_VERSION_COMPLETE ")
+    # "#define VK_HEADER_VERSION_COMPLETE VK_MAKE_API_VERSION(0, 1, 2, VK_HEADER_VERSION)"
+    string(REGEX REPLACE ".*\\([0_9]+[, ]+([0-9]+)[, ]+([0-9]+)[, ].*\\)"
+      "\\1.\\2.${VulkanHeaderVersion}" Vulkan_VERSION "${VulkanHeaderVersionLine}")
+  endif()
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(Vulkan
-  DEFAULT_MSG
-  Vulkan_LIBRARY Vulkan_INCLUDE_DIR)
+  REQUIRED_VARS
+    Vulkan_LIBRARY
+    Vulkan_INCLUDE_DIR
+  VERSION_VAR
+    Vulkan_VERSION
+)
 
 mark_as_advanced(Vulkan_INCLUDE_DIR Vulkan_LIBRARY Vulkan_GLSLC_EXECUTABLE
                  Vulkan_GLSLANG_VALIDATOR_EXECUTABLE)
