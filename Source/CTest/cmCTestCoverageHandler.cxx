@@ -693,7 +693,7 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile* mf)
 #  define fnc_prefix(s, t) cmHasPrefix(s, t)
 #endif
 
-bool IsFileInDir(const std::string& infile, const std::string& indir)
+static bool IsFileInDir(const std::string& infile, const std::string& indir)
 {
   std::string file = cmSystemTools::CollapseFullPath(infile);
   std::string dir = cmSystemTools::CollapseFullPath(indir);

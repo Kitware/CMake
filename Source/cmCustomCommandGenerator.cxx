@@ -342,7 +342,7 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
   return this->CommandLines[c][0];
 }
 
-std::string escapeForShellOldStyle(const std::string& str)
+static std::string escapeForShellOldStyle(const std::string& str)
 {
   std::string result;
 #if defined(_WIN32) && !defined(__CYGWIN__)

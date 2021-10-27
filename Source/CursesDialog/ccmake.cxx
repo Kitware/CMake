@@ -55,7 +55,7 @@ cmCursesForm* cmCursesForm::CurrentForm = nullptr;
 
 extern "C" {
 
-void onsig(int /*unused*/)
+static void onsig(int /*unused*/)
 {
   if (cmCursesForm::CurrentForm) {
     endwin();

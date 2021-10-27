@@ -104,7 +104,7 @@ static const std::vector<ExpectedParseResult> expectedResults{
   /* clang-format on */
 };
 
-bool TestExpectedParseResult(const ExpectedParseResult& expected)
+static bool TestExpectedParseResult(const ExpectedParseResult& expected)
 {
   std::vector<std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>>
     result;

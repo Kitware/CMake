@@ -63,7 +63,7 @@ static char* lowercase(const char* string)
   return new_string;
 }
 
-int isTestSkipped(const char *name, int n_skipped_tests, char *skipped_tests[]) {
+static int isTestSkipped(const char *name, int n_skipped_tests, char *skipped_tests[]) {
   int i;
   for (i = 0; i < n_skipped_tests; i++) {
     if (strcmp(name, skipped_tests[i]) == 0) {

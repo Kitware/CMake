@@ -102,7 +102,7 @@ static int getMessageColor(MessageType t)
   }
 }
 
-void printMessageText(std::ostream& msg, std::string const& text)
+static void printMessageText(std::ostream& msg, std::string const& text)
 {
   msg << ":\n";
   cmDocumentationFormatter formatter;
@@ -110,7 +110,7 @@ void printMessageText(std::ostream& msg, std::string const& text)
   formatter.PrintFormatted(msg, text.c_str());
 }
 
-void displayMessage(MessageType t, std::ostringstream& msg)
+static void displayMessage(MessageType t, std::ostringstream& msg)
 {
   // Add a note about warning suppression.
   if (t == MessageType::AUTHOR_WARNING) {

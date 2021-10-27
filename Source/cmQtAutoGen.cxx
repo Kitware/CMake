@@ -22,10 +22,10 @@
 
 /// @brief Merges newOpts into baseOpts
 /// @arg valueOpts list of options that accept a value
-void MergeOptions(std::vector<std::string>& baseOpts,
-                  std::vector<std::string> const& newOpts,
-                  std::initializer_list<cm::string_view> valueOpts,
-                  bool isQt5OrLater)
+static void MergeOptions(std::vector<std::string>& baseOpts,
+                         std::vector<std::string> const& newOpts,
+                         std::initializer_list<cm::string_view> valueOpts,
+                         bool isQt5OrLater)
 {
   if (newOpts.empty()) {
     return;

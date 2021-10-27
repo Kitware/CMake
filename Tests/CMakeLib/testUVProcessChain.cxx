@@ -64,14 +64,15 @@ bool operator==(const cmUVProcessChain::Status* actual,
   return true;
 }
 
-bool resultsMatch(const std::vector<const cmUVProcessChain::Status*>& actual,
-                  const std::vector<ExpectedStatus>& expected)
+static bool resultsMatch(
+  const std::vector<const cmUVProcessChain::Status*>& actual,
+  const std::vector<ExpectedStatus>& expected)
 {
   return actual.size() == expected.size() &&
     std::equal(actual.begin(), actual.end(), expected.begin());
 }
 
-std::string getInput(std::istream& input)
+static std::string getInput(std::istream& input)
 {
   char buffer[1024];
   std::ostringstream str;
@@ -103,8 +104,9 @@ std::ostream& operator<<(
   return func(stream);
 }
 
-void printResults(const std::vector<const cmUVProcessChain::Status*>& actual,
-                  const std::vector<ExpectedStatus>& expected)
+static void printResults(
+  const std::vector<const cmUVProcessChain::Status*>& actual,
+  const std::vector<ExpectedStatus>& expected)
 {
   std::cout << "Expected: " << std::endl;
   for (auto const& e : expected) {
@@ -129,8 +131,8 @@ void printResults(const std::vector<const cmUVProcessChain::Status*>& actual,
   }
 }
 
-bool checkExecution(cmUVProcessChainBuilder& builder,
-                    std::unique_ptr<cmUVProcessChain>& chain)
+static bool checkExecution(cmUVProcessChainBuilder& builder,
+                           std::unique_ptr<cmUVProcessChain>& chain)
 {
   std::vector<const cmUVProcessChain::Status*> status;
 
@@ -171,7 +173,7 @@ bool checkExecution(cmUVProcessChainBuilder& builder,
   return true;
 }
 
-bool checkOutput(std::istream& outputStream, std::istream& errorStream)
+static bool checkOutput(std::istream& outputStream, std::istream& errorStream)
 {
   std::string output = getInput(outputStream);
   if (output != "HELO WRD!") {

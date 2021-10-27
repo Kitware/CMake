@@ -15,9 +15,10 @@
 #define TEST_STR_LINE_3 "with libuv's uv_stream_t."
 #define TEST_STR TEST_STR_LINE_1 "\n" TEST_STR_LINE_2 "\n" TEST_STR_LINE_3
 
-bool writeDataToStreamPipe(uv_loop_t& loop, cm::uv_pipe_ptr& inputPipe,
-                           char* outputData, unsigned int outputDataLength,
-                           const char* /* unused */)
+static bool writeDataToStreamPipe(uv_loop_t& loop, cm::uv_pipe_ptr& inputPipe,
+                                  char* outputData,
+                                  unsigned int outputDataLength,
+                                  const char* /* unused */)
 {
   int err;
 
@@ -66,9 +67,11 @@ bool writeDataToStreamPipe(uv_loop_t& loop, cm::uv_pipe_ptr& inputPipe,
   return true;
 }
 
-bool writeDataToStreamProcess(uv_loop_t& loop, cm::uv_pipe_ptr& inputPipe,
-                              char* outputData, unsigned int /* unused */,
-                              const char* cmakeCommand)
+static bool writeDataToStreamProcess(uv_loop_t& loop,
+                                     cm::uv_pipe_ptr& inputPipe,
+                                     char* outputData,
+                                     unsigned int /* unused */,
+                                     const char* cmakeCommand)
 {
   int err;
 
@@ -130,7 +133,7 @@ bool writeDataToStreamProcess(uv_loop_t& loop, cm::uv_pipe_ptr& inputPipe,
   return true;
 }
 
-bool testUVStreambufRead(
+static bool testUVStreambufRead(
   bool (*cb)(uv_loop_t& loop, cm::uv_pipe_ptr& inputPipe, char* outputData,
              unsigned int outputDataLength, const char* cmakeCommand),
   const char* cmakeCommand)

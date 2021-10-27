@@ -833,8 +833,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateFlatClone(cmXCodeObject* orig)
   return obj;
 }
 
-std::string GetGroupMapKeyFromPath(cmGeneratorTarget* target,
-                                   const std::string& fullpath)
+static std::string GetGroupMapKeyFromPath(cmGeneratorTarget* target,
+                                          const std::string& fullpath)
 {
   std::string key(target->GetName());
   key += "-";
