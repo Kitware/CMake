@@ -26,9 +26,7 @@ Presets
 Generators
 ----------
 
-* The :generator:`Visual Studio 17 2022` generator was added.  This is
-  experimental and based on "Visual Studio 2022 Release Candidate" because
-  this version of VS has not been released.
+* The :generator:`Visual Studio 17 2022` generator was added.
 
 * The :ref:`Makefile Generators` and the :generator:`Ninja` generator
   learned to add linker launcher tools along with the linker for ``C``,
@@ -329,3 +327,10 @@ Changes made since CMake 3.21.0 include the following.
 
   * ``hipcc`` may once again be used as a ``CXX`` compiler, and is treated as
     whatever compiler it selects underneath, as CMake 3.20 and below did.
+
+3.21.4
+------
+
+* The :generator:`Visual Studio 17 2022` generator is now based on the
+  "Visual Studio 2022" release candidates.  Previously it was based on
+  preview versions.
