@@ -29,19 +29,18 @@ cmValue cmCPackIFWCommon::GetOption(const std::string& op) const
 
 bool cmCPackIFWCommon::IsOn(const std::string& op) const
 {
-  return this->Generator ? this->Generator->cmCPackGenerator::IsOn(op) : false;
+  return this->Generator && this->Generator->cmCPackGenerator::IsOn(op);
 }
 
 bool cmCPackIFWCommon::IsSetToOff(const std::string& op) const
 {
-  return this->Generator ? this->Generator->cmCPackGenerator::IsSetToOff(op)
-                         : false;
+  return this->Generator && this->Generator->cmCPackGenerator::IsSetToOff(op);
 }
 
 bool cmCPackIFWCommon::IsSetToEmpty(const std::string& op) const
 {
-  return this->Generator ? this->Generator->cmCPackGenerator::IsSetToEmpty(op)
-                         : false;
+  return this->Generator &&
+    this->Generator->cmCPackGenerator::IsSetToEmpty(op);
 }
 
 bool cmCPackIFWCommon::IsVersionLess(const char* version) const

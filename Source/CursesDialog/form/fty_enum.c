@@ -116,7 +116,7 @@ static int Compare(const unsigned char *s, const unsigned char *buf,
 
   if (*buf=='\0')
     {
-      return (((*s)!='\0') ? NOMATCH : EXACT);
+      return (((*s)=='\0') ? EXACT : NOMATCH);
     } 
   else 
     {
@@ -144,7 +144,7 @@ static int Compare(const unsigned char *s, const unsigned char *buf,
 
   /* If it happens that the reference buffer is at its end, the partial
      match is actually an exact match. */
-  return ((s[-1]!='\0') ? PARTIAL : EXACT);
+  return ((s[-1]=='\0') ? EXACT : PARTIAL);
 }
 
 /*---------------------------------------------------------------------------
