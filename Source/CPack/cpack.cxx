@@ -67,7 +67,7 @@ struct cpackDefinitions
 {
   using MapType = std::map<std::string, std::string>;
   MapType Map;
-  cmCPackLog* Log;
+  cmCPackLog* Log{};
 };
 
 int cpackDefinitionArgument(const char* argument, const char* cValue,

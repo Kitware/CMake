@@ -52,9 +52,9 @@ public:
   };
 
   State GetProcessStatus();
-  int GetId() { return this->Id; }
+  int GetId() const { return this->Id; }
   void SetId(int id) { this->Id = id; }
-  int64_t GetExitValue() { return this->ExitValue; }
+  int64_t GetExitValue() const { return this->ExitValue; }
   cmDuration GetTotalTime() { return this->TotalTime; }
 
   enum class Exception
@@ -111,15 +111,11 @@ private:
   class Buffer : public std::vector<char>
   {
     // Half-open index range of partial line already scanned.
-    size_type First;
-    size_type Last;
+    size_type First = 0;
+    size_type Last = 0;
 
   public:
-    Buffer()
-      : First(0)
-      , Last(0)
-    {
-    }
+    Buffer() = default;
     bool GetLine(std::string& line);
     bool GetLast(std::string& line);
   };

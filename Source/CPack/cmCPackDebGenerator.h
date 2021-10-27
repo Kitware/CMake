@@ -29,9 +29,9 @@ public:
 #ifdef __APPLE__
     // on MacOS enable CPackDeb iff dpkg is found
     std::vector<std::string> locations;
-    locations.push_back("/sw/bin");        // Fink
-    locations.push_back("/opt/local/bin"); // MacPorts
-    return cmSystemTools::FindProgram("dpkg", locations) != "" ? true : false;
+    locations.emplace_back("/sw/bin");        // Fink
+    locations.emplace_back("/opt/local/bin"); // MacPorts
+    return !cmSystemTools::FindProgram("dpkg", locations).empty();
 #else
     // legacy behavior on other systems
     return true;

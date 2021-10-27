@@ -19,8 +19,8 @@ public:
   ~cmCPackCygwinBinaryGenerator() override;
 
 protected:
-  virtual int InitializeInternal();
-  int PackageFiles();
-  virtual const char* GetOutputExtension();
+  int InitializeInternal() override;
+  int PackageFiles() override;
+  const char* GetOutputExtension() override;
   std::string OutputExtension;
 };

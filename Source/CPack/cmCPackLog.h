@@ -128,7 +128,7 @@ public:
   }
 
   const char* Data;
-  size_t Length;
+  std::streamsize Length;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const cmCPackLogWrite& c)

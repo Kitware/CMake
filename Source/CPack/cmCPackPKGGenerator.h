@@ -43,7 +43,8 @@ protected:
   // which will be configured via ConfigureFile.
   bool CopyCreateResourceFile(const std::string& name,
                               const std::string& dirName);
-  bool CopyResourcePlistFile(const std::string& name, const char* outName = 0);
+  bool CopyResourcePlistFile(const std::string& name,
+                             const char* outName = nullptr);
 
   int CopyInstallScript(const std::string& resdir, const std::string& script,
                         const std::string& name);

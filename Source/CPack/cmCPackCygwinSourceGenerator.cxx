@@ -26,9 +26,7 @@ cmCPackCygwinSourceGenerator::cmCPackCygwinSourceGenerator()
 {
 }
 
-cmCPackCygwinSourceGenerator::~cmCPackCygwinSourceGenerator()
-{
-}
+cmCPackCygwinSourceGenerator::~cmCPackCygwinSourceGenerator() = default;
 
 int cmCPackCygwinSourceGenerator::InitializeInternal()
 {
@@ -50,7 +48,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   // Now create a tar file that contains the above .tar.bz2 file
   // and the CPACK_CYGWIN_PATCH_FILE and CPACK_TOPLEVEL_DIRECTORY
   // files
-  std::string compressOutFile = packageDirFileName;
+  const std::string& compressOutFile = packageDirFileName;
   // at this point compressOutFile is the full path to
   // _CPack_Package/.../package-2.5.0.tar.bz2
   // we want to create a tar _CPack_Package/.../package-2.5.0-1-src.tar.bz2

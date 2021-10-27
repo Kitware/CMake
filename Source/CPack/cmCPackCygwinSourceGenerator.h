@@ -19,10 +19,10 @@ public:
   ~cmCPackCygwinSourceGenerator() override;
 
 protected:
-  const char* GetPackagingInstallPrefix();
-  virtual int InitializeInternal();
-  int PackageFiles();
-  virtual const char* GetOutputExtension();
+  const char* GetPackagingInstallPrefix() override;
+  int InitializeInternal() override;
+  int PackageFiles() override;
+  const char* GetOutputExtension() override;
   std::string InstallPrefix;
   std::string OutputExtension;
 };

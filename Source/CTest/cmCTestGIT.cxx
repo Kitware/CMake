@@ -24,7 +24,7 @@ static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
                                       unsigned int minor, unsigned int fix)
 {
   // 1.6.5.0 maps to 10605000
-  return fix + minor * 1000 + major * 100000 + epic * 10000000;
+  return epic * 10000000 + major * 100000 + minor * 1000 + fix;
 }
 
 cmCTestGIT::cmCTestGIT(cmCTest* ct, std::ostream& log)

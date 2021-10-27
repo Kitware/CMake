@@ -25,7 +25,7 @@ public:
   ~cmCPackOSXX11Generator() override;
 
 protected:
-  virtual int InitializeInternal() override;
+  int InitializeInternal() override;
   int PackageFiles() override;
   const char* GetPackagingInstallPrefix() override;
   const char* GetOutputExtension() override { return ".dmg"; }
@@ -33,7 +33,7 @@ protected:
   // bool CopyCreateResourceFile(const std::string& name,
   //                            const std::string& dir);
   bool CopyResourcePlistFile(const std::string& name, const std::string& dir,
-                             const char* outputFileName = 0,
+                             const char* outputFileName = nullptr,
                              bool copyOnly = false);
   std::string InstallPrefix;
 };

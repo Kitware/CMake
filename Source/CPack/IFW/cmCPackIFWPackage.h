@@ -44,7 +44,7 @@ public:
   struct DependenceStruct
   {
     DependenceStruct();
-    DependenceStruct(const std::string& dependence);
+    explicit DependenceStruct(const std::string& dependence);
 
     std::string Name;
     CompareStruct Compare;

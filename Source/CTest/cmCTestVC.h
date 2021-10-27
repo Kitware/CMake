@@ -95,15 +95,10 @@ protected:
   /** Represent change to one file.  */
   struct File
   {
-    PathStatus Status;
-    Revision const* Rev;
-    Revision const* PriorRev;
-    File()
-      : Status(PathUpdated)
-      , Rev(nullptr)
-      , PriorRev(nullptr)
-    {
-    }
+    PathStatus Status = PathUpdated;
+    Revision const* Rev = nullptr;
+    Revision const* PriorRev = nullptr;
+    File() = default;
     File(PathStatus status, Revision const* rev, Revision const* priorRev)
       : Status(status)
       , Rev(rev)
