@@ -16,11 +16,11 @@
   @KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP@
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC > 0x5130 && defined(__has_attribute)
-#  define @KWSYS_NAMESPACE@__has_cpp_attribute(x) __has_attribute(x)
+#  define @KWSYS_NAMESPACE@_has_cpp_attribute(x) __has_attribute(x)
 #elif defined(__has_cpp_attribute)
-#  define @KWSYS_NAMESPACE@__has_cpp_attribute(x) __has_cpp_attribute(x)
+#  define @KWSYS_NAMESPACE@_has_cpp_attribute(x) __has_cpp_attribute(x)
 #else
-#  define @KWSYS_NAMESPACE@__has_cpp_attribute(x) 0
+#  define @KWSYS_NAMESPACE@_has_cpp_attribute(x) 0
 #endif
 
 #if __cplusplus >= 201103L
@@ -31,13 +31,13 @@
 
 #ifndef @KWSYS_NAMESPACE@_FALLTHROUGH
 #  if __cplusplus >= 201703L &&                                               \
-    @KWSYS_NAMESPACE@__has_cpp_attribute(fallthrough)
+    @KWSYS_NAMESPACE@_has_cpp_attribute(fallthrough)
 #    define @KWSYS_NAMESPACE@_FALLTHROUGH [[fallthrough]]
 #  elif __cplusplus >= 201103L &&                                             \
-    @KWSYS_NAMESPACE@__has_cpp_attribute(gnu::fallthrough)
+    @KWSYS_NAMESPACE@_has_cpp_attribute(gnu::fallthrough)
 #    define @KWSYS_NAMESPACE@_FALLTHROUGH [[gnu::fallthrough]]
 #  elif __cplusplus >= 201103L &&                                             \
-    @KWSYS_NAMESPACE@__has_cpp_attribute(clang::fallthrough)
+    @KWSYS_NAMESPACE@_has_cpp_attribute(clang::fallthrough)
 #    define @KWSYS_NAMESPACE@_FALLTHROUGH [[clang::fallthrough]]
 #  endif
 #endif
@@ -45,7 +45,7 @@
 #  define @KWSYS_NAMESPACE@_FALLTHROUGH static_cast<void>(0)
 #endif
 
-#undef @KWSYS_NAMESPACE@__has_cpp_attribute
+#undef @KWSYS_NAMESPACE@_has_cpp_attribute
 
 /* If building a C++ file in kwsys itself, give the source file
    access to the macros without a configured namespace.  */

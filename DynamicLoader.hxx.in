@@ -73,7 +73,12 @@ public:
     // This is currently only supported on Windows.
     SearchBesideLibrary = 0x00000001,
 
-    AllOpenFlags = SearchBesideLibrary
+    // Make loaded symbols visible globally
+    //
+    // This is currently only supported on *nix systems.
+    RTLDGlobal = 0x00000002,
+
+    AllOpenFlags = SearchBesideLibrary | RTLDGlobal
   };
 
   /** Load a dynamic library into the current process.

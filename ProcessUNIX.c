@@ -2287,7 +2287,8 @@ static void kwsysProcessSetExitExceptionByIndex(kwsysProcess* cp, int sig,
 #endif
     default:
       cp->ProcessResults[idx].ExitException = kwsysProcess_Exception_Other;
-      sprintf(cp->ProcessResults[idx].ExitExceptionString, "Signal %d", sig);
+      snprintf(cp->ProcessResults[idx].ExitExceptionString,
+               KWSYSPE_PIPE_BUFFER_SIZE + 1, "Signal %d", sig);
       break;
   }
 }
@@ -2540,7 +2541,7 @@ static void kwsysProcessKill(pid_t process_id)
       int pid;
       if (sscanf(d->d_name, "%d", &pid) == 1 && pid != 0) {
         struct stat finfo;
-        sprintf(fname, "/proc/%d/stat", pid);
+        snprintf(fname, sizeof(fname), "/proc/%d/stat", pid);
         if (stat(fname, &finfo) == 0) {
           FILE* f = fopen(fname, "r");
           if (f) {

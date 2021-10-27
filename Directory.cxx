@@ -99,18 +99,21 @@ Status Directory::Load(std::string const& name, std::string* errorMessage)
   this->Clear();
   intptr_t srchHandle;
   char* buf;
+  size_t bufLength;
   size_t n = name.size();
   if (name.back() == '/' || name.back() == '\\') {
-    buf = new char[n + 1 + 1];
-    sprintf(buf, "%s*", name.c_str());
+    bufLength = n + 1 + 1;
+    buf = new char[bufLength];
+    snprintf(buf, bufLength, "%s*", name.c_str());
   } else {
     // Make sure the slashes in the wildcard suffix are consistent with the
     // rest of the path
-    buf = new char[n + 2 + 1];
+    bufLength = n + 2 + 1;
+    buf = new char[bufLength];
     if (name.find('\\') != std::string::npos) {
-      sprintf(buf, "%s\\*", name.c_str());
+      snprintf(buf, bufLength, "%s\\*", name.c_str());
     } else {
-      sprintf(buf, "%s/*", name.c_str());
+      snprintf(buf, bufLength, "%s/*", name.c_str());
     }
   }
   struct _wfinddata_t data; // data of current file
@@ -148,13 +151,16 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
 {
   intptr_t srchHandle;
   char* buf;
+  size_t bufLength;
   size_t n = name.size();
   if (name.back() == '/') {
+    bufLength = n + 1 + 1;
     buf = new char[n + 1 + 1];
-    sprintf(buf, "%s*", name.c_str());
+    snprintf(buf, bufLength, "%s*", name.c_str());
   } else {
+    bufLength = n + 2 + 1;
     buf = new char[n + 2 + 1];
-    sprintf(buf, "%s/*", name.c_str());
+    snprintf(buf, bufLength, "%s/*", name.c_str());
   }
   struct _wfinddata_t data; // data of current file
 

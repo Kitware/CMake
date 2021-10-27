@@ -457,9 +457,9 @@ static void kwsys_shared_forward_strerror(char* message)
                    message, KWSYS_SHARED_FORWARD_MAXPATH, 0);
   if (length < 1 || length > KWSYS_SHARED_FORWARD_MAXPATH) {
     /* FormatMessage failed.  Use a default message.  */
-    _snprintf(message, KWSYS_SHARED_FORWARD_MAXPATH,
-              "Error 0x%X (FormatMessage failed with error 0x%X)", original,
-              GetLastError());
+    snprintf(message, KWSYS_SHARED_FORWARD_MAXPATH,
+             "Error 0x%lX (FormatMessage failed with error 0x%lX)", original,
+             GetLastError());
   }
 #  else
   /* Implementation for UNIX.  */

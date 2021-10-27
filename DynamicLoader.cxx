@@ -275,20 +275,20 @@ const char* DynamicLoader::LastError()
 
   if (length < 1) {
     /* FormatMessage failed.  Use a default message.  */
-    _snprintf(str, DYNLOAD_ERROR_BUFFER_SIZE,
-              "DynamicLoader encountered error 0x%X.  "
-              "FormatMessage failed with error 0x%X",
-              error, GetLastError());
+    snprintf(str, DYNLOAD_ERROR_BUFFER_SIZE,
+             "DynamicLoader encountered error 0x%lX.  "
+             "FormatMessage failed with error 0x%lX",
+             error, GetLastError());
     return str;
   }
 
   if (!WideCharToMultiByte(CP_UTF8, 0, lpMsgBuf, -1, str,
                            DYNLOAD_ERROR_BUFFER_SIZE, nullptr, nullptr)) {
     /* WideCharToMultiByte failed.  Use a default message.  */
-    _snprintf(str, DYNLOAD_ERROR_BUFFER_SIZE,
-              "DynamicLoader encountered error 0x%X.  "
-              "WideCharToMultiByte failed with error 0x%X",
-              error, GetLastError());
+    snprintf(str, DYNLOAD_ERROR_BUFFER_SIZE,
+             "DynamicLoader encountered error 0x%lX.  "
+             "WideCharToMultiByte failed with error 0x%lX",
+             error, GetLastError());
   }
 
   return str;
@@ -436,9 +436,14 @@ namespace KWSYS_NAMESPACE {
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
   const std::string& libname, int flags)
 {
-  CHECK_OPEN_FLAGS(flags, 0, nullptr);
+  CHECK_OPEN_FLAGS(flags, RTLDGlobal, nullptr);
 
-  return dlopen(libname.c_str(), RTLD_LAZY);
+  int llFlags = RTLD_LAZY;
+  if (flags & RTLDGlobal) {
+    llFlags |= RTLD_GLOBAL;
+  }
+
+  return dlopen(libname.c_str(), llFlags);
 }
 
 int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)

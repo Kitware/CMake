@@ -6,10 +6,4 @@
 #  define DL_EXPORT
 #endif
 
-#include "testDynload.h"
-
-DL_EXPORT int TestDynamicLoaderData = 0;
-
-DL_EXPORT void TestDynamicLoaderSymbolPointer(void)
-{
-}
+extern DL_EXPORT int TestDynamicLoaderData;
