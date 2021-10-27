@@ -942,9 +942,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
             helper.GetIncludeDestination(&privateHeaderArgs));
         } else {
           std::ostringstream e;
-          e << "INSTALL TARGETS - target " << target.GetName() << " has "
+          e << "Target " << target.GetName() << " has "
             << "PRIVATE_HEADER files but no PRIVATE_HEADER DESTINATION.";
-          cmSystemTools::Message(e.str(), "Warning");
+          helper.Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
         }
       }
 
@@ -964,9 +964,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
             helper.GetIncludeDestination(&publicHeaderArgs));
         } else {
           std::ostringstream e;
-          e << "INSTALL TARGETS - target " << target.GetName() << " has "
+          e << "Target " << target.GetName() << " has "
             << "PUBLIC_HEADER files but no PUBLIC_HEADER DESTINATION.";
-          cmSystemTools::Message(e.str(), "Warning");
+          helper.Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
         }
       }
 
@@ -983,10 +983,10 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           resourceGenerator = CreateInstallFilesGenerator(
             helper.Makefile, absFiles, resourceArgs, false);
         } else if (!target.IsAppBundleOnApple()) {
-          cmSystemTools::Message(
-            cmStrCat("INSTALL TARGETS - target ", target.GetName(),
-                     " has RESOURCE files but no RESOURCE DESTINATION."),
-            "Warning");
+          helper.Makefile->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat("Target ", target.GetName(),
+                     " has RESOURCE files but no RESOURCE DESTINATION."));
         }
       }
     }
