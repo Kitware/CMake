@@ -2176,7 +2176,7 @@ void cmMakefileTargetGenerator::CreateObjectLists(
     for (unsigned int i = 0; i < object_strings.size(); ++i) {
       // Number the response files.
       char rsp[32];
-      sprintf(rsp, "objects%u.rsp", i + 1);
+      snprintf(rsp, sizeof(rsp), "objects%u.rsp", i + 1);
 
       // Create this response file.
       std::string objects_rsp =

@@ -217,7 +217,7 @@ bool HandleReadCommand(std::vector<std::string> const& args,
     char c;
     while ((sizeLimit != 0) && (file.get(c))) {
       char hex[4];
-      sprintf(hex, "%.2x", c & 0xff);
+      snprintf(hex, sizeof(hex), "%.2x", c & 0xff);
       output += hex;
       if (sizeLimit > 0) {
         sizeLimit--;
@@ -1627,8 +1627,9 @@ size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
     case CURLINFO_SSL_DATA_IN:
     case CURLINFO_SSL_DATA_OUT: {
       char buf[128];
-      int n = sprintf(buf, "[%" KWIML_INT_PRIu64 " bytes data]\n",
-                      static_cast<KWIML_INT_uint64_t>(size));
+      int n =
+        snprintf(buf, sizeof(buf), "[%" KWIML_INT_PRIu64 " bytes data]\n",
+                 static_cast<KWIML_INT_uint64_t>(size));
       if (n > 0) {
         cm::append(vec, buf, buf + n);
       }

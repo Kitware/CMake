@@ -155,7 +155,7 @@ bool HandleLengthCommand(std::vector<std::string> const& args,
   GetList(varArgsExpanded, listName, status.GetMakefile());
   size_t length = varArgsExpanded.size();
   char buffer[1024];
-  sprintf(buffer, "%d", static_cast<int>(length));
+  snprintf(buffer, sizeof(buffer), "%d", static_cast<int>(length));
 
   status.GetMakefile().AddDefinition(variableName, buffer);
   return true;

@@ -156,7 +156,7 @@ std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
       encoded += i;
     } else {
       char buf[16];
-      sprintf(buf, ".%02x", static_cast<unsigned int>(i));
+      snprintf(buf, sizeof(buf), ".%02x", static_cast<unsigned int>(i));
       encoded += buf;
     }
   }

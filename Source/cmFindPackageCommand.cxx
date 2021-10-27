@@ -671,7 +671,7 @@ void cmFindPackageCommand::SetVersionVariables(
   addDefinition(prefix, version);
 
   char buf[64];
-  sprintf(buf, "%u", major);
+  snprintf(buf, sizeof(buf), "%u", major);
   addDefinition(prefix + "_MAJOR", buf);
   sprintf(buf, "%u", minor);
   addDefinition(prefix + "_MINOR", buf);

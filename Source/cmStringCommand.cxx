@@ -526,7 +526,7 @@ bool HandleLengthCommand(std::vector<std::string> const& args,
 
   size_t length = stringValue.size();
   char buffer[1024];
-  sprintf(buffer, "%d", static_cast<int>(length));
+  snprintf(buffer, sizeof(buffer), "%d", static_cast<int>(length));
 
   status.GetMakefile().AddDefinition(variableName, buffer);
   return true;

@@ -229,7 +229,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 
   passed = this->TestResult.Status == cmCTestTestHandler::COMPLETED;
   char buf[1024];
-  sprintf(buf, "%6.2f sec", this->TestProcess->GetTotalTime().count());
+  snprintf(buf, sizeof(buf), "%6.2f sec",
+           this->TestProcess->GetTotalTime().count());
   outputStream << buf << "\n";
 
   bool passedOrSkipped = passed || skipped;
@@ -294,9 +295,10 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     ttime -= minutes;
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(ttime);
     char buffer[100];
-    sprintf(buffer, "%02d:%02d:%02d", static_cast<unsigned>(hours.count()),
-            static_cast<unsigned>(minutes.count()),
-            static_cast<unsigned>(seconds.count()));
+    snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d",
+             static_cast<unsigned>(hours.count()),
+             static_cast<unsigned>(minutes.count()),
+             static_cast<unsigned>(seconds.count()));
     *this->TestHandler->LogFile
       << "----------------------------------------------------------"
       << std::endl;

@@ -211,7 +211,7 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
   char retChar[16];
   const char* retStr;
   if (worked) {
-    sprintf(retChar, "%i", retVal);
+    snprintf(retChar, sizeof(retChar), "%i", retVal);
     retStr = retChar;
   } else {
     retStr = "FAILED_TO_RUN";
