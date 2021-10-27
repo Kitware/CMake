@@ -1588,7 +1588,11 @@ int cmcmd::HashSumFile(std::vector<std::string> const& args,
       std::cerr << "Error: " << filename << " is a directory" << std::endl;
       retval++;
     } else {
-      std::string value = cmSystemTools::ComputeFileHash(filename, algo);
+      std::string value
+#ifndef CMAKE_BOOTSTRAP
+        = cmSystemTools::ComputeFileHash(filename, algo)
+#endif
+        ;
       if (value.empty()) {
         // To mimic "md5sum/shasum" behavior in a shell:
         std::cerr << filename << ": No such file or directory" << std::endl;

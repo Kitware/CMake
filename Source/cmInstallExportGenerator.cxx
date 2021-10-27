@@ -85,7 +85,9 @@ void cmInstallExportGenerator::ComputeTempDir()
   }
   if (useMD5) {
     // Replace the destination path with a hash to keep it short.
+#ifndef CMAKE_BOOTSTRAP
     this->TempDir += cmSystemTools::ComputeStringMD5(this->Destination);
+#endif
   } else {
     std::string dest = this->Destination;
     // Avoid unix full paths.
