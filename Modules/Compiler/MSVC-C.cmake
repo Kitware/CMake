@@ -49,6 +49,8 @@ else()
       c_std_90
       c_std_99
       c_std_11
+      c_std_17
+      c_std_23
       c_function_prototypes
       )
     list(APPEND CMAKE_C90_COMPILE_FEATURES c_std_90 c_function_prototypes)
