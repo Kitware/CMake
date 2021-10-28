@@ -15,6 +15,8 @@ if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.27)
     set(CMAKE_C90_STANDARD__HAS_FULL_SUPPORT ON)
     set(CMAKE_C99_STANDARD__HAS_FULL_SUPPORT ON)
     set(CMAKE_C11_STANDARD__HAS_FULL_SUPPORT ON)
+    set(CMAKE_C17_STANDARD_COMPILE_OPTION "-std:c17")
+    set(CMAKE_C17_EXTENSION_COMPILE_OPTION "-std:c17")
   else()
     # Special case for 19.27 (VS 16.7): C11 has partial support.
     macro(cmake_record_c_compile_features)
