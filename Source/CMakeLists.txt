@@ -261,6 +261,8 @@ set(SRCS
   cmFileLockResult.h
   cmFilePathChecksum.cxx
   cmFilePathChecksum.h
+  cmFileSet.cxx
+  cmFileSet.h
   cmFileTime.cxx
   cmFileTime.h
   cmFileTimeCache.cxx
@@ -316,6 +318,8 @@ set(SRCS
   cmInstallExportGenerator.cxx
   cmInstalledFile.h
   cmInstalledFile.cxx
+  cmInstallFileSetGenerator.h
+  cmInstallFileSetGenerator.cxx
   cmInstallFilesGenerator.h
   cmInstallFilesGenerator.cxx
   cmInstallImportedRuntimeArtifactsGenerator.h

@@ -20,6 +20,7 @@
 #include "cmValue.h"
 
 class cmCustomCommand;
+class cmFileSet;
 class cmGlobalGenerator;
 class cmInstallTargetGenerator;
 class cmMakefile;
@@ -260,6 +261,10 @@ public:
 
   cmBTStringRange GetLinkImplementationEntries() const;
 
+  cmBTStringRange GetHeaderSetsEntries() const;
+
+  cmBTStringRange GetInterfaceHeaderSetsEntries() const;
+
   std::string ImportedGetFullPath(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;
 
@@ -267,6 +272,16 @@ public:
   {
     bool operator()(cmTarget const* t1, cmTarget const* t2) const;
   };
+
+  const cmFileSet* GetFileSet(const std::string& name) const;
+  cmFileSet* GetFileSet(const std::string& name);
+  std::pair<cmFileSet*, bool> GetOrCreateFileSet(const std::string& name,
+                                                 const std::string& type);
+
+  std::vector<std::string> GetAllInterfaceFileSets() const;
+
+  static std::string GetFileSetsPropertyName(const std::string& type);
+  static std::string GetInterfaceFileSetsPropertyName(const std::string& type);
 
 private:
   template <typename ValueType>

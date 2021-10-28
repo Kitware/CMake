@@ -1,0 +1,231 @@
+{
+  "name": "c_headers_1",
+  "id": "^c_headers_1::@6b8db101d64c125f29fe$",
+  "directorySource": "^fileset$",
+  "projectName": "codemodel-v2",
+  "type": "STATIC_LIBRARY",
+  "isGeneratorProvided": null,
+  "sources": [
+    {
+      "path": "^fileset/empty\\.c$",
+      "isGenerated": null,
+      "sourceGroupName": "Source Files",
+      "compileGroupLanguage": "C",
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 1,
+          "command": "add_library",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": "^fileset/error\\.c$",
+      "isGenerated": null,
+      "sourceGroupName": "Header Files",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 3,
+          "command": "target_sources",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": "^fileset/other\\.c$",
+      "isGenerated": null,
+      "sourceGroupName": "Source Files",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 3,
+          "command": "target_sources",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": "^fileset/h1\\.h$",
+      "isGenerated": null,
+      "sourceGroupName": "Header Files",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 3,
+          "command": "target_sources",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
+      "path": "^fileset/dir/h2\\.h$",
+      "isGenerated": null,
+      "sourceGroupName": "Header Files",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 7,
+          "command": "target_sources",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    }
+  ],
+  "sourceGroups": [
+    {
+      "name": "Source Files",
+      "sourcePaths": [
+        "^fileset/empty\\.c$",
+        "^fileset/other\\.c$"
+      ]
+    },
+    {
+      "name": "Header Files",
+      "sourcePaths": [
+        "^fileset/error\\.c$",
+        "^fileset/h1\\.h$",
+        "^fileset/dir/h2\\.h$"
+      ]
+    }
+  ],
+  "compileGroups": [
+    {
+      "language": "C",
+      "sourcePaths": [
+        "^fileset/empty\\.c$"
+      ],
+      "includes": [
+        {
+          "path": "^.*/Tests/RunCMake/FileAPI/fileset$",
+          "isSystem": null,
+          "backtrace": [
+            {
+              "file": "^fileset/CMakeLists\\.txt$",
+              "line": 3,
+              "command": "target_sources",
+              "hasParent": true
+            },
+            {
+              "file": "^fileset/CMakeLists\\.txt$",
+              "line": null,
+              "command": null,
+              "hasParent": false
+            }
+          ]
+        },
+        {
+          "path": "^.*/Tests/RunCMake/FileAPI/fileset/dir$",
+          "isSystem": null,
+          "backtrace": [
+            {
+              "file": "^fileset/CMakeLists\\.txt$",
+              "line": 7,
+              "command": "target_sources",
+              "hasParent": true
+            },
+            {
+              "file": "^fileset/CMakeLists\\.txt$",
+              "line": null,
+              "command": null,
+              "hasParent": false
+            }
+          ]
+        }
+      ],
+      "defines": null,
+      "compileCommandFragments": null
+    }
+  ],
+  "backtrace": [
+    {
+      "file": "^fileset/CMakeLists\\.txt$",
+      "line": 1,
+      "command": "add_library",
+      "hasParent": true
+    },
+    {
+      "file": "^fileset/CMakeLists\\.txt$",
+      "line": null,
+      "command": null,
+      "hasParent": false
+    }
+  ],
+  "folder": null,
+  "nameOnDisk": "^(lib)?c_headers_1\\.(a|lib)$",
+  "artifacts": [
+    {
+      "path": "^fileset/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_headers_1\\.(a|lib)$",
+      "_dllExtra": false
+    }
+  ],
+  "build": "^fileset$",
+  "source": "^fileset$",
+  "install": {
+    "prefix": "^(/usr/local|[A-Za-z]:.*/codemodel-v2)$",
+    "destinations": [
+      {
+        "path": "lib",
+        "backtrace": [
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": 20,
+            "command": "install",
+            "hasParent": true
+          },
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
+      }
+    ]
+  },
+  "link": null,
+  "archive": {
+    "lto": null
+  },
+  "dependencies": [
+    {
+      "id": "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
+      "backtrace": null
+    }
+  ]
+}

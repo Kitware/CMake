@@ -1,0 +1,5 @@
+^CMake Error at FileSetInstallMissingSetsInterface\.cmake:[0-9]+ \(install\):
+  install TARGETS target lib1 is exported but not all of its file sets are
+  installed
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

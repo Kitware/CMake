@@ -1,0 +1,4 @@
+^CMake Error at FileSetNoExistPrivate\.cmake:[0-9]+ \(set_property\):
+  Header set "a" has not yet been created\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

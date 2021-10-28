@@ -1,0 +1,5 @@
+^CMake Error at FileSetChangeScope\.cmake:[0-9]+ \(target_sources\):
+  target_sources Scope PUBLIC for file set "a" does not match original scope
+  INTERFACE
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

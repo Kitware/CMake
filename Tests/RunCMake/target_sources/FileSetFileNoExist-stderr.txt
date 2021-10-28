@@ -1,0 +1,10 @@
+^CMake Error at FileSetFileNoExist\.cmake:[0-9]+ \(add_library\):
+  Cannot find source file:
+
+    [^
+]*/Tests/RunCMake/target_sources/noexist\.h
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

@@ -1,0 +1,4 @@
+^CMake Error at FileSetNoType\.cmake:[0-9]+ \(target_sources\):
+  target_sources Must specify a TYPE when creating file set
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

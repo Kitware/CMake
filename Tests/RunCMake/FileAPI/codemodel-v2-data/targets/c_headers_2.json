@@ -1,0 +1,105 @@
+{
+  "name": "c_headers_2",
+  "id": "^c_headers_2::@6b8db101d64c125f29fe$",
+  "directorySource": "^fileset$",
+  "projectName": "codemodel-v2",
+  "type": "STATIC_LIBRARY",
+  "isGeneratorProvided": null,
+  "sources": [
+    {
+      "path": "^fileset/empty\\.c$",
+      "isGenerated": null,
+      "sourceGroupName": "Source Files",
+      "compileGroupLanguage": "C",
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 15,
+          "command": "add_library",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    }
+  ],
+  "sourceGroups": [
+    {
+      "name": "Source Files",
+      "sourcePaths": [
+        "^fileset/empty\\.c$"
+      ]
+    }
+  ],
+  "compileGroups": [
+    {
+      "language": "C",
+      "sourcePaths": [
+        "^fileset/empty\\.c$"
+      ],
+      "includes": null,
+      "defines": null,
+      "compileCommandFragments": null
+    }
+  ],
+  "backtrace": [
+    {
+      "file": "^fileset/CMakeLists\\.txt$",
+      "line": 15,
+      "command": "add_library",
+      "hasParent": true
+    },
+    {
+      "file": "^fileset/CMakeLists\\.txt$",
+      "line": null,
+      "command": null,
+      "hasParent": false
+    }
+  ],
+  "folder": null,
+  "nameOnDisk": "^(lib)?c_headers_2\\.(a|lib)$",
+  "artifacts": [
+    {
+      "path": "^fileset/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_headers_2\\.(a|lib)$",
+      "_dllExtra": false
+    }
+  ],
+  "build": "^fileset$",
+  "source": "^fileset$",
+  "install": {
+    "prefix": "^(/usr/local|[A-Za-z]:.*/codemodel-v2)$",
+    "destinations": [
+      {
+        "path": "lib",
+        "backtrace": [
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": 25,
+            "command": "install",
+            "hasParent": true
+          },
+          {
+            "file": "^fileset/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+          }
+        ]
+      }
+    ]
+  },
+  "link": null,
+  "archive": {
+    "lto": null
+  },
+  "dependencies": [
+    {
+      "id": "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
+      "backtrace": null
+    }
+  ]
+}

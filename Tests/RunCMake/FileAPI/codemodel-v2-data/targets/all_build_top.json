@@ -186,6 +186,14 @@
         {
             "id": "^generated_exe::@[0-9a-f]+$",
             "backtrace": null
+        },
+        {
+            "id": "^c_headers_1::@6b8db101d64c125f29fe$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_headers_2::@6b8db101d64c125f29fe$",
+            "backtrace": null
         }
     ]
 }

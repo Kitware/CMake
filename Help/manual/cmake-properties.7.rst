@@ -214,6 +214,11 @@ Properties on Targets
    /prop_tgt/GHS_NO_SOURCE_GROUP_FILE
    /prop_tgt/GNUtoMS
    /prop_tgt/HAS_CXX
+   /prop_tgt/HEADER_DIRS
+   /prop_tgt/HEADER_DIRS_NAME
+   /prop_tgt/HEADER_SET
+   /prop_tgt/HEADER_SET_NAME
+   /prop_tgt/HEADER_SETS
    /prop_tgt/HIP_ARCHITECTURES
    /prop_tgt/HIP_EXTENSIONS
    /prop_tgt/HIP_STANDARD
@@ -255,6 +260,7 @@ Properties on Targets
    /prop_tgt/INTERFACE_COMPILE_DEFINITIONS
    /prop_tgt/INTERFACE_COMPILE_FEATURES
    /prop_tgt/INTERFACE_COMPILE_OPTIONS
+   /prop_tgt/INTERFACE_HEADER_SETS
    /prop_tgt/INTERFACE_INCLUDE_DIRECTORIES
    /prop_tgt/INTERFACE_LINK_DEPENDS
    /prop_tgt/INTERFACE_LINK_DIRECTORIES

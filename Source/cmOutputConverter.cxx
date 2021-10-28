@@ -219,10 +219,11 @@ std::string cmOutputConverter::EscapeForShell(
   return Shell_GetArgument(str, flags);
 }
 
-std::string cmOutputConverter::EscapeForCMake(cm::string_view str)
+std::string cmOutputConverter::EscapeForCMake(cm::string_view str,
+                                              WrapQuotes wrapQuotes)
 {
   // Always double-quote the argument to take care of most escapes.
-  std::string result = "\"";
+  std::string result = (wrapQuotes == WrapQuotes::Wrap) ? "\"" : "";
   for (const char c : str) {
     if (c == '"') {
       // Escape the double quote to avoid ending the argument.
@@ -238,7 +239,9 @@ std::string cmOutputConverter::EscapeForCMake(cm::string_view str)
       result += c;
     }
   }
-  result += "\"";
+  if (wrapQuotes == WrapQuotes::Wrap) {
+    result += "\"";
+  }
   return result;
 }
 
