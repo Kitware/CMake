@@ -19,7 +19,7 @@ file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 
 #include <testSystemTools.h>
 
-int _doLongPathTest()
+static int _doLongPathTest()
 {
   using namespace kwsys;
   static const int LONG_PATH_THRESHOLD = 512;

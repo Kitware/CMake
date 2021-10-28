@@ -4552,10 +4552,10 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
         }
 
         res += " ";
-        sprintf(buffer, "%ld", osvi.dwMajorVersion);
+        snprintf(buffer, sizeof(buffer), "%ld", osvi.dwMajorVersion);
         res += buffer;
         res += ".";
-        sprintf(buffer, "%ld", osvi.dwMinorVersion);
+        snprintf(buffer, sizeof(buffer), "%ld", osvi.dwMinorVersion);
         res += buffer;
       }
 
@@ -4575,7 +4575,7 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
 
         if (lRet == ERROR_SUCCESS) {
           res += " Service Pack 6a (Build ";
-          sprintf(buffer, "%ld", osvi.dwBuildNumber & 0xFFFF);
+          snprintf(buffer, sizeof(buffer), "%ld", osvi.dwBuildNumber & 0xFFFF);
           res += buffer;
           res += ")";
         } else // Windows NT 4.0 prior to SP6a
@@ -4583,7 +4583,7 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
           res += " ";
           res += osvi.szCSDVersion;
           res += " (Build ";
-          sprintf(buffer, "%ld", osvi.dwBuildNumber & 0xFFFF);
+          snprintf(buffer, sizeof(buffer), "%ld", osvi.dwBuildNumber & 0xFFFF);
           res += buffer;
           res += ")";
         }
@@ -4594,7 +4594,7 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
         res += " ";
         res += osvi.szCSDVersion;
         res += " (Build ";
-        sprintf(buffer, "%ld", osvi.dwBuildNumber & 0xFFFF);
+        snprintf(buffer, sizeof(buffer), "%ld", osvi.dwBuildNumber & 0xFFFF);
         res += buffer;
         res += ")";
       }
