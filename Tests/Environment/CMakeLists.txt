@@ -37,6 +37,14 @@ set_property(TEST EchoEnvironment3
 
 set_property(TEST EchoEnvironment3
   PROPERTY ENVIRONMENT_MODIFICATION
+    # Modifying variables set in the ambient environment (see properties for
+    # this test in `Tests/CMakeLists.txt`).
+    "SET_FROM_AMBIENT_unset=unset:"
+    "SET_FROM_AMBIENT_replace=set:new"
+    "SET_FROM_AMBIENT_string=string_append:new"
+    "SET_FROM_AMBIENT_path=path_list_append:new"
+    "SET_FROM_AMBIENT_list=cmake_list_append:new"
+
     # Modifying variables set in the `ENVIRONMENT` property.
     "SET_FROM_ENVIRONMENT_PROPERTY_unset=unset:"
     "SET_FROM_ENVIRONMENT_PROPERTY_replace=set:new"
