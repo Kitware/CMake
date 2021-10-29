@@ -337,6 +337,12 @@ bool cmGlobalGenerator::CheckTargetsForType() const
   bool failed = false;
   for (const auto& generator : this->LocalGenerators) {
     for (const auto& target : generator->GetGeneratorTargets()) {
+      std::string systemName =
+        target->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME");
+      if (systemName.find("Windows") == std::string::npos) {
+        continue;
+      }
+
       if (target->GetType() == cmStateEnums::EXECUTABLE) {
         std::vector<std::string> const& configs =
           target->Makefile->GetGeneratorConfigs(
