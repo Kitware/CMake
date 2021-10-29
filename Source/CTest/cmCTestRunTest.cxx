@@ -782,6 +782,9 @@ bool cmCTestRunTest::ForkProcess(
 
   std::ostringstream envMeasurement;
   if (environment && !environment->empty()) {
+    // Environment modification works on the assumption that the environment is
+    // actually modified here. If another strategy is used, there will need to
+    // be updates below in `apply_diff`.
     cmSystemTools::AppendEnv(*environment);
     for (auto const& var : *environment) {
       envMeasurement << var << std::endl;
@@ -800,7 +803,20 @@ bool cmCTestRunTest::ForkProcess(
     auto apply_diff =
       [&env_application](const std::string& name,
                          std::function<void(std::string&)> const& apply) {
-        std::string output = env_application[name].value_or(std::string{});
+        cm::optional<std::string> old_value = env_application[name];
+        std::string output;
+        if (old_value) {
+          output = *old_value;
+        } else {
+          // This only works because the environment is actually modified above
+          // (`AppendEnv`). If CTest ever just creates an environment block
+          // directly, that block will need to be queried for the subprocess'
+          // value instead.
+          const char* curval = cmSystemTools::GetEnv(name);
+          if (curval) {
+            output = curval;
+          }
+        }
         apply(output);
         env_application[name] = output;
       };

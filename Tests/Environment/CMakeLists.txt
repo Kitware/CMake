@@ -27,7 +27,23 @@ set_tests_properties(Environment2 EchoEnvironment2 PROPERTIES
 )
 
 set_property(TEST EchoEnvironment3
+  PROPERTY ENVIRONMENT
+    "SET_FROM_ENVIRONMENT_PROPERTY_unset=base"
+    "SET_FROM_ENVIRONMENT_PROPERTY_replace=base"
+    "SET_FROM_ENVIRONMENT_PROPERTY_string=base"
+    "SET_FROM_ENVIRONMENT_PROPERTY_path=base"
+    "SET_FROM_ENVIRONMENT_PROPERTY_list=base"
+)
+
+set_property(TEST EchoEnvironment3
   PROPERTY ENVIRONMENT_MODIFICATION
+    # Modifying variables set in the `ENVIRONMENT` property.
+    "SET_FROM_ENVIRONMENT_PROPERTY_unset=unset:"
+    "SET_FROM_ENVIRONMENT_PROPERTY_replace=set:new"
+    "SET_FROM_ENVIRONMENT_PROPERTY_string=string_append:new"
+    "SET_FROM_ENVIRONMENT_PROPERTY_path=path_list_append:new"
+    "SET_FROM_ENVIRONMENT_PROPERTY_list=cmake_list_append:new"
+
     # Variables expected to be unset.
     "UNSET_EXPLICIT=set:value"
     "UNSET_EXPLICIT=unset:"
