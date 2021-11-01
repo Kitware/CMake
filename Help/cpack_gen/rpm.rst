@@ -1042,6 +1042,8 @@ Source RPM packaging has its own set of variables:
 
 .. variable:: CPACK_RPM_REQUIRES_EXCLUDE_FROM
 
+ .. versionadded:: 3.22
+
  * Mandatory : NO
  * Default   : -
 
