@@ -11,6 +11,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
@@ -18,6 +19,7 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -174,8 +176,33 @@ items that we know the linker will re-use automatically (shared libs).
 
 */
 
+namespace {
+const auto LL_BEGIN = "<LINK_LIBRARY:"_s;
+const auto LL_END = "</LINK_LIBRARY:"_s;
+
+inline std::string ExtractFeature(std::string const& item)
+{
+  return item.substr(LL_BEGIN.length(),
+                     item.find('>', LL_BEGIN.length()) - LL_BEGIN.length());
+}
+
+bool IsFeatureSupported(cmMakefile* makefile, std::string const& linkLanguage,
+                        std::string const& feature)
+{
+  auto featureSupported =
+    cmStrCat("CMAKE_", linkLanguage, "_LINK_USING_", feature, "_SUPPORTED");
+  if (makefile->GetDefinition(featureSupported).IsOn()) {
+    return true;
+  }
+
+  featureSupported = cmStrCat("CMAKE_LINK_USING_", feature, "_SUPPORTED");
+  return makefile->GetDefinition(featureSupported).IsOn();
+}
+}
+
 cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
-                                           const std::string& config)
+                                           const std::string& config,
+                                           const std::string& linkLanguage)
 {
   // Store context information.
   this->Target = target;
@@ -183,6 +210,7 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   this->GlobalGenerator =
     this->Target->GetLocalGenerator()->GetGlobalGenerator();
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
+  this->LinkLanguage = linkLanguage;
 
   // The configuration being linked.
   this->HasConfig = !config.empty();
@@ -249,7 +277,7 @@ cmComputeLinkDepends::Compute()
   }
 
   // Compute the final ordering.
-  this->OrderLinkEntires();
+  this->OrderLinkEntries();
 
   // Compute the final set of link entries.
   // Iterate in reverse order so we can keep only the last occurrence
@@ -281,32 +309,33 @@ cmComputeLinkDepends::Compute()
   return this->FinalLinkEntries;
 }
 
-std::map<cmLinkItem, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
-  cmLinkItem const& item)
+std::pair<std::map<cmLinkItem, int>::iterator, bool>
+cmComputeLinkDepends::AllocateLinkEntry(cmLinkItem const& item)
 {
   std::map<cmLinkItem, int>::value_type index_entry(
     item, static_cast<int>(this->EntryList.size()));
-  auto lei = this->LinkEntryIndex.insert(index_entry).first;
-  this->EntryList.emplace_back();
-  this->InferredDependSets.emplace_back();
-  this->EntryConstraintGraph.emplace_back();
+  auto lei = this->LinkEntryIndex.insert(index_entry);
+  if (lei.second) {
+    this->EntryList.emplace_back();
+    this->InferredDependSets.emplace_back();
+    this->EntryConstraintGraph.emplace_back();
+  }
   return lei;
 }
 
-int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
+std::pair<int, bool> cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
 {
+  // Allocate a spot for the item entry.
+  auto lei = this->AllocateLinkEntry(item);
+
   // Check if the item entry has already been added.
-  auto lei = this->LinkEntryIndex.find(item);
-  if (lei != this->LinkEntryIndex.end()) {
+  if (!lei.second) {
     // Yes.  We do not need to follow the item's dependencies again.
-    return lei->second;
+    return { lei.first->second, false };
   }
 
-  // Allocate a spot for the item entry.
-  lei = this->AllocateLinkEntry(item);
-
   // Initialize the item entry.
-  int index = lei->second;
+  int index = lei.first->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = BT<std::string>(item.AsStr(), item.Backtrace);
   entry.Target = item.Target;
@@ -332,22 +361,21 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
     }
   }
 
-  return index;
+  return { index, true };
 }
 
 void cmComputeLinkDepends::AddLinkObject(cmLinkItem const& item)
 {
+  // Allocate a spot for the item entry.
+  auto lei = this->AllocateLinkEntry(item);
+
   // Check if the item entry has already been added.
-  auto lei = this->LinkEntryIndex.find(item);
-  if (lei != this->LinkEntryIndex.end()) {
+  if (!lei.second) {
     return;
   }
 
-  // Allocate a spot for the item entry.
-  lei = this->AllocateLinkEntry(item);
-
   // Initialize the item entry.
-  int index = lei->second;
+  int index = lei.first->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = BT<std::string>(item.AsStr(), item.Backtrace);
   entry.IsObject = true;
@@ -423,14 +451,14 @@ void cmComputeLinkDepends::QueueSharedDependencies(
 
 void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 {
-  // Check if the target already has an entry.
-  auto lei = this->LinkEntryIndex.find(dep.Item);
-  if (lei == this->LinkEntryIndex.end()) {
-    // Allocate a spot for the item entry.
-    lei = this->AllocateLinkEntry(dep.Item);
+  // Allocate a spot for the item entry.
+  auto lei = this->AllocateLinkEntry(dep.Item);
+  int index = lei.first->second;
 
+  // Check if the target does not already has an entry.
+  if (lei.second) {
     // Initialize the item entry.
-    LinkEntry& entry = this->EntryList[lei->second];
+    LinkEntry& entry = this->EntryList[index];
     entry.Item = BT<std::string>(dep.Item.AsStr(), dep.Item.Backtrace);
     entry.Target = dep.Item.Target;
 
@@ -441,7 +469,6 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   }
 
   // Get the link entry for this target.
-  int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
 
   // This shared library dependency must follow the item that listed
@@ -541,6 +568,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
 {
   // Track inferred dependency sets implied by this list.
   std::map<int, DependSet> dependSets;
+  std::string feature;
 
   // Loop over the libraries linked directly by the depender.
   for (T const& l : libs) {
@@ -550,9 +578,86 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
     if (item.AsStr() == this->Target->GetName() || item.AsStr().empty()) {
       continue;
     }
+    if (cmHasPrefix(item.AsStr(), LL_BEGIN) &&
+        cmHasSuffix(item.AsStr(), '>')) {
+      feature = ExtractFeature(item.AsStr());
+      // emit a warning if an undefined feature is used as part of
+      // an imported target
+      if (depender_index >= 0) {
+        const auto& depender = this->EntryList[depender_index];
+        if (depender.Target != nullptr && depender.Target->IsImported() &&
+            !IsFeatureSupported(this->Makefile, this->LinkLanguage, feature)) {
+          this->CMakeInstance->IssueMessage(
+            MessageType::AUTHOR_ERROR,
+            cmStrCat("The 'IMPORTED' target '", depender.Target->GetName(),
+                     "' uses the generator-expression '$<LINK_LIBRARY>' with "
+                     "the feature '",
+                     feature,
+                     "', which is undefined or unsupported.\nDid you miss to "
+                     "define it by setting variables \"CMAKE_",
+                     this->LinkLanguage, "_LINK_USING_", feature,
+                     "\" and \"CMAKE_", this->LinkLanguage, "_LINK_USING_",
+                     feature, "_SUPPORTED\"?"),
+            this->Target->GetBacktrace());
+        }
+      }
+      continue;
+    }
+    if (cmHasPrefix(item.AsStr(), LL_END) && cmHasSuffix(item.AsStr(), '>')) {
+      feature.clear();
+      continue;
+    }
 
     // Add a link entry for this item.
-    int dependee_index = this->AddLinkEntry(l);
+    auto ale = this->AddLinkEntry(item);
+    int dependee_index = ale.first;
+    LinkEntry& entry = this->EntryList[dependee_index];
+    if (!feature.empty()) {
+      if (ale.second) {
+        // current item not yet defined
+        if (entry.Target != nullptr &&
+            (entry.Target->GetType() ==
+               cmStateEnums::TargetType::OBJECT_LIBRARY ||
+             entry.Target->GetType() ==
+               cmStateEnums::TargetType::INTERFACE_LIBRARY)) {
+          this->CMakeInstance->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat("The feature '", feature,
+                     "', specified as part of a generator-expression "
+                     "'$",
+                     LL_BEGIN, feature, ">', will not be applied to the ",
+                     (entry.Target->GetType() ==
+                          cmStateEnums::TargetType::OBJECT_LIBRARY
+                        ? "OBJECT"
+                        : "INTERFACE"),
+                     " library '", entry.Item.Value, "'."),
+            this->Target->GetBacktrace());
+        } else {
+          entry.Feature = feature;
+        }
+      }
+    }
+
+    bool supportedItem = entry.Target == nullptr ||
+      (entry.Target->GetType() != cmStateEnums::TargetType::OBJECT_LIBRARY &&
+       entry.Target->GetType() != cmStateEnums::TargetType::INTERFACE_LIBRARY);
+
+    if (supportedItem && entry.Feature != feature) {
+      // incompatibles features occurred
+      this->CMakeInstance->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(
+          "Impossible to link target '", this->Target->GetName(),
+          "' because the link item '", entry.Item.Value, "', specified ",
+          (feature.empty() ? "without any feature"
+                           : cmStrCat("with the feature '", feature, '\'')),
+          ", has already occurred ",
+          (entry.Feature.empty()
+             ? "without any feature"
+             : cmStrCat("with the feature '", entry.Feature, '\'')),
+          ", which is not allowed."),
+        this->Target->GetBacktrace());
+    }
 
     // The dependee must come after the depender.
     if (depender_index >= 0) {
@@ -667,7 +772,7 @@ void cmComputeLinkDepends::DisplayConstraintGraph()
   fprintf(stderr, "%s\n", e.str().c_str());
 }
 
-void cmComputeLinkDepends::OrderLinkEntires()
+void cmComputeLinkDepends::OrderLinkEntries()
 {
   // Compute the DAG of strongly connected components.  The algorithm
   // used by cmComputeComponentGraph should identify the components in
@@ -869,10 +974,14 @@ void cmComputeLinkDepends::DisplayFinalEntries()
   fprintf(stderr, "target [%s] links to:\n", this->Target->GetName().c_str());
   for (LinkEntry const& lei : this->FinalLinkEntries) {
     if (lei.Target) {
-      fprintf(stderr, "  target [%s]\n", lei.Target->GetName().c_str());
+      fprintf(stderr, "  target [%s]", lei.Target->GetName().c_str());
     } else {
-      fprintf(stderr, "  item [%s]\n", lei.Item.Value.c_str());
+      fprintf(stderr, "  item [%s]", lei.Item.Value.c_str());
     }
+    if (!lei.Feature.empty()) {
+      fprintf(stderr, ", feature [%s]", lei.Feature.c_str());
+    }
+    fprintf(stderr, "\n");
   }
   fprintf(stderr, "\n");
 }

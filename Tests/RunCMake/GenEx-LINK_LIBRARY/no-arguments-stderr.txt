@@ -1,0 +1,8 @@
+CMake Error at no-arguments.cmake:[0-9]+ \(target_link_libraries\):
+  Error evaluating generator expression:
+
+    \$<LINK_LIBRARY>
+
+  \$<LINK_LIBRARY> expression requires at least one parameter.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

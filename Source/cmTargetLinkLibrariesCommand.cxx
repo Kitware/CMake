@@ -318,6 +318,9 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
     target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
   }
 
+  target->CheckProperty("LINK_LIBRARIES", &mf);
+  target->CheckProperty("INTERFACE_LINK_LIBRARIES", &mf);
+
   return true;
 }
 

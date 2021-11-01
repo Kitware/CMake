@@ -1,0 +1,111 @@
+
+It can contain one or three elements.
+
+::
+
+  [<PREFIX>] <LIBRARY_EXPRESSION> [<SUFFIX>]
+
+When ``<PREFIX>`` and/or ``<SUFFIX>`` are specified, they encapsulate the list
+of libraries.
+
+.. note::
+
+  Even if ``<PREFIX>`` and ``<SUFFIX>`` are specified, there is not guarantee
+  that the list of specified libraries, as part of :genex:`LINK_LIBRARY`
+  generator expression, will be kept grouped. So, constructs like
+  ``start-group`` and ``end-group``, as supported by ``GNU ld``, cannot be
+  used.
+
+``<LIBRARY_EXPRESSION>`` is used to specify the decoration for each
+library. For that purpose, the patterns ``<LIBRARY>``, ``<LINK_ITEM>``, and
+``<LIB_ITEM>`` are available:
+
+* ``<LIBRARY>`` is expanded to the library as computed by CMake.
+* ``<LINK_ITEM>`` is expanded to the same expression as if the library was
+  specified in the standard way.
+* ``<LIB_ITEM>`` is equivalent to ``<LIBRARY>`` for CMake targets and is
+  expanded to the item specified by the user for external libraries.
+
+Moreover, it is possible to have different decorations for paths (CMake targets
+and external libraries specified with absolute paths) and other items specified
+by name. For that purpose, ``PATH{}`` and ``NAME{}`` wrappers can be used.
+
+For all three elements of this variable, the ``LINKER:`` prefix can be used:
+
+  .. include:: ../command/LINK_OPTIONS_LINKER.txt
+    :start-line: 3
+
+Examples
+^^^^^^^^
+
+Loading a whole static library
+""""""""""""""""""""""""""""""
+
+A common need is the capability to load a whole static library. This capability
+is offered by various environments but with a specific syntax:
+
+.. code-block:: cmake
+
+  set(CMAKE_C_LINK_USING_whole_archive_SUPPORTED TRUE)
+  if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
+    set(CMAKE_C_LINK_USING_whole_archive "-force_load <LIB_ITEM>")
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU"
+         AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(CMAKE_C_LINK_USING_whole_archive "LINKER:--push-state,--whole-archive"
+                                         "<LINK_ITEM>"
+                                         "LINKER:--pop-state")
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_C_LINK_USING_whole_archive "/WHOLEARCHIVE:<LIBRARY>")
+  else()
+    # feature not yet supported for the other environments
+    set(CMAKE_C_LINK_USING_whole_archive_SUPPORTED FALSE)
+  endif()
+
+  add_library(lib1 STATIC ...)
+
+  add_library(lib2 SHARED ...)
+  if(CMAKE_C_LINK_USING_whole_archive_SUPPORTED)
+    target_link_libraries(lib2 PRIVATE
+      $<LINK_LIBRARY:whole_archive,lib1,$<IF:$<LINK_LANG_AND_ID:C,Clang>,libexternal.a,external>>)
+  else()
+    target_link_libraries(lib2 PRIVATE lib1 external)
+  endif()
+
+CMake will generate the following link expressions:
+
+* ``Clang``: ``-force_load /path/to/lib1.a -force_load libexternal.a``
+* ``GNU``: ``-Wl,--whole-archive /path/to/lib1.a -lexternal -Wl,--no-whole-archive``
+* ``MSVC``: ``/WHOLEARCHIVE:/path/to/lib1.lib /WHOLEARCHIVE:external.lib``
+
+CMake will ensure, when possible, that ``<PREFIX>`` and ``<SUFFIX>`` are
+not repeated for each library.
+
+In case of ``Clang``, the pattern ``<LIB_ITEM>`` is used because we need to
+specify the library as defined by the user, not the name computed by CMake
+(in that case ``external``).
+
+Linking a library as weak
+"""""""""""""""""""""""""
+
+On MacOS, it is possible to link a library in weak mode (the library and all
+references are marked as weak imports), but different flags must be used for a
+library specified by path and by name. This constraint by be solved by using
+``PATH{}`` and ``NAME{}`` wrappers:
+
+.. code-block:: cmake
+
+  if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
+    set(CMAKE_LINK_USING_weak_library "PATH{-weak_library <LIBRARY>}NAME{LINKER:-weak-l<LIB_ITEM>}")
+    set(CMAKE_LINK_USING_weak_library_SUPPORTED TRUE)
+  endif()
+
+  add_library(lib SHARED ...)
+  add_executable(main ...)
+  if(CMAKE_LINK_USING_weak_library_SUPPORTED)
+    target_link_libraries(main PRIVATE $<LINK_LIBRARY:weak_library,lib,external>)
+  else()
+    target_link_libraries(main PRIVATE lib external)
+  endif()
+
+CMake will generate the following link expression:
+``-weak_library /path/to/lib -Xlinker -weak-lexternal``

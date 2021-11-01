@@ -3741,7 +3741,9 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
             }
             libPaths.Add("-framework " + this->XCodeEscapePath(fwName));
           } else {
-            libPaths.Add(this->XCodeEscapePath(cleanPath));
+            libPaths.Add(
+              libName.GetFormattedItem(this->XCodeEscapePath(cleanPath))
+                .Value);
           }
           if ((!libName.Target || libName.Target->IsImported()) &&
               IsLinkPhaseLibraryExtension(libPath)) {

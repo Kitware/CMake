@@ -1198,6 +1198,68 @@ static const struct LinkLanguageAndIdNode : public cmGeneratorExpressionNode
   }
 } linkLanguageAndIdNode;
 
+static const struct LinkLibraryNode : public cmGeneratorExpressionNode
+{
+  LinkLibraryNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return OneOrMoreParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget || !dagChecker ||
+        !dagChecker->EvaluatingLinkLibraries()) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<LINK_LIBRARY:...> may only be used with binary targets "
+                  "to specify link libraries.");
+      return std::string();
+    }
+
+    std::vector<std::string> list;
+    cmExpandLists(parameters.begin(), parameters.end(), list);
+    if (list.empty()) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<LINK_LIBRARY:...> expects a feature name as first argument.");
+      return std::string();
+    }
+    if (list.size() == 1) {
+      // no libraries specified, ignore this genex
+      return std::string();
+    }
+
+    auto const& feature = list.front();
+    const auto LL_BEGIN = cmStrCat("<LINK_LIBRARY:", feature, '>');
+    const auto LL_END = cmStrCat("</LINK_LIBRARY:", feature, '>');
+
+    // filter out $<LINK_LIBRARY:..> tags with same feature
+    // and raise an error for any different feature
+    cm::erase_if(list, [&](const std::string& item) -> bool {
+      return item == LL_BEGIN || item == LL_END;
+    });
+    auto it =
+      std::find_if(list.cbegin() + 1, list.cend(),
+                   [&feature](const std::string& item) -> bool {
+                     return cmHasPrefix(item, "<LINK_LIBRARY:"_s) &&
+                       item.substr(14, item.find('>', 14) - 14) != feature;
+                   });
+    if (it != list.cend()) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<LINK_LIBRARY:...> with different features cannot be nested.");
+      return std::string();
+    }
+
+    list.front() = LL_BEGIN;
+    list.push_back(LL_END);
+
+    return cmJoin(list, ";"_s);
+  }
+} linkLibraryNode;
+
 static const struct HostLinkNode : public cmGeneratorExpressionNode
 {
   HostLinkNode() {} // NOLINT(modernize-use-equals-default)
@@ -2668,6 +2730,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "COMPILE_LANGUAGE", &languageNode },
     { "LINK_LANG_AND_ID", &linkLanguageAndIdNode },
     { "LINK_LANGUAGE", &linkLanguageNode },
+    { "LINK_LIBRARY", &linkLibraryNode },
     { "HOST_LINK", &hostLinkNode },
     { "DEVICE_LINK", &deviceLinkNode },
     { "SHELL_PATH", &shellPathNode }

@@ -30,7 +30,8 @@ class cmComputeLinkDepends
 {
 public:
   cmComputeLinkDepends(cmGeneratorTarget const* target,
-                       const std::string& config);
+                       const std::string& config,
+                       const std::string& linkLanguage);
   ~cmComputeLinkDepends();
 
   cmComputeLinkDepends(const cmComputeLinkDepends&) = delete;
@@ -51,6 +52,9 @@ public:
     bool IsSharedDep = false;
     bool IsFlag = false;
     bool IsObject = false;
+    // The following member is for the management of items specified
+    // through genex $<LINK_LIBRARY:...>
+    std::string Feature;
   };
 
   using EntryVector = std::vector<LinkEntry>;
@@ -68,12 +72,13 @@ private:
   cmMakefile* Makefile;
   cmGlobalGenerator const* GlobalGenerator;
   cmake* CMakeInstance;
+  std::string LinkLanguage;
   std::string Config;
   EntryVector FinalLinkEntries;
 
-  std::map<cmLinkItem, int>::iterator AllocateLinkEntry(
+  std::pair<std::map<cmLinkItem, int>::iterator, bool> AllocateLinkEntry(
     cmLinkItem const& item);
-  int AddLinkEntry(cmLinkItem const& item);
+  std::pair<int, bool> AddLinkEntry(cmLinkItem const& item);
   void AddLinkObject(cmLinkItem const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddDirectLinkEntries();
@@ -131,7 +136,7 @@ private:
   void DisplayConstraintGraph();
 
   // Ordering algorithm.
-  void OrderLinkEntires();
+  void OrderLinkEntries();
   std::vector<char> ComponentVisited;
   std::vector<int> ComponentOrder;
 
