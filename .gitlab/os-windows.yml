@@ -72,6 +72,20 @@
     variables:
         CMAKE_CONFIGURATION: windows_borland5.8
 
+.windows_nmake:
+    extends: .windows
+
+    variables:
+        CMAKE_GENERATOR: "NMake Makefiles"
+        CMAKE_CI_BUILD_TYPE: Release
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
+.windows_msvc_v71_nmake:
+    extends: .windows_nmake
+
+    variables:
+        CMAKE_CONFIGURATION: windows_msvc_v71_nmake
+
 .windows_openwatcom:
     extends: .windows
 
@@ -167,6 +181,16 @@
         - Invoke-Expression -Command .gitlab/ci/borland.ps1
         - $pwdpath = $pwd.Path
         - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\bcc\bin;$env:PATH"
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+
+    interruptible: true
+
+.cmake_test_windows_nmake:
+    stage: test-ext
+
+    script:
+        - Invoke-Expression -Command .gitlab/ci/msvc.ps1
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
 
     interruptible: true
