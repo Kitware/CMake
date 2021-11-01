@@ -1,0 +1,10 @@
+^CMake Error at CMakeLists.txt:[0-9] \(project\):
+  Generator
+
+    Visual Studio [^
+]+
+
+  could not find specified instance of Visual Studio:
+
+    [^,
+]+,version=[0-9]+\.999\.99999\.999$

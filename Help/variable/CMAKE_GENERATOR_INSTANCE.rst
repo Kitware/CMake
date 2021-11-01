@@ -18,10 +18,43 @@ variable may initialize ``CMAKE_GENERATOR_INSTANCE`` as a cache entry.
 Once a given build tree has been initialized with a particular value
 for this variable, changing the value has undefined behavior.
 
-Instance specification is supported only on specific generators:
+Instance specification is supported only on specific generators.
 
-* For the :generator:`Visual Studio 15 2017` generator (and above)
-  this specifies the absolute path to the VS installation directory
-  of the selected VS instance.
+Visual Studio Instance Selection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-See native build system documentation for allowed instance values.
+:ref:`Visual Studio Generators` support instance specification for
+Visual Studio 2017 and above.  The ``CMAKE_GENERATOR_INSTANCE`` variable
+may be set as a cache entry selecting an instance of Visual Studio
+via one of the following forms:
+
+* ``location``
+* ``location[,key=value]*``
+* ``key=value[,key=value]*``
+
+The ``location`` specifies the absolute path to the top-level directory
+of the VS installation.
+
+The ``key=value`` pairs form a comma-separated list of options to
+specify details of the instance selection.
+Supported pairs are:
+
+``version=<major>.<minor>.<MMMDD>.<BBB>``
+  .. versionadded:: 3.23
+
+  Specify the 4-component VS Build Version.
+
+.. versionadded:: 3.23
+
+  A portable VS instance may be specified that is not known to the
+  Visual Studio Installer tool.  The ``location`` and ``version=``
+  values must both be provided.
+
+If the value of ``CMAKE_GENERATOR_INSTANCE`` is not specified explicitly
+by the user or a toolchain file, CMake queries the Visual Studio Installer
+to locate VS instances, chooses one, and sets the variable as a cache entry
+to hold the value persistently.  If an environment variable of the form
+``VS##0COMNTOOLS``, where ``##`` the Visual Studio major version number,
+is set and points to the ``Common7/Tools`` directory within one of the
+VS instances, that instance will be used.  Otherwise, if more than one
+VS instance is installed we do not define which one is chosen by default.

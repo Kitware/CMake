@@ -11,3 +11,4 @@ elseif(NOT IS_DIRECTORY "${CMAKE_GENERATOR_INSTANCE}")
     "  ${CMAKE_GENERATOR_INSTANCE}\n"
     "which is not an existing directory.")
 endif()
+file(WRITE "${CMAKE_BINARY_DIR}/instance.txt" "${CMAKE_GENERATOR_INSTANCE}")
