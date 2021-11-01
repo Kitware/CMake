@@ -1246,11 +1246,13 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     // PRE_BUILD will work for an OBJECT_LIBRARY in this specific case.
     //
     // PRE_BUILD does not support file dependencies!
-    const std::vector<std::string> no_output;
-    const std::vector<std::string> no_deps;
-    cmCustomCommand cc(no_output, autogenByproducts, no_deps, commandLines,
-                       this->Makefile->GetBacktrace(), autogenComment.c_str(),
-                       this->Dir.Work.c_str(), stdPipesUTF8);
+    cmCustomCommand cc;
+    cc.SetByproducts(autogenByproducts);
+    cc.SetCommandLines(commandLines);
+    cc.SetComment(autogenComment.c_str());
+    cc.SetBacktrace(this->Makefile->GetBacktrace());
+    cc.SetWorkingDirectory(this->Dir.Work.c_str());
+    cc.SetStdPipesUTF8(stdPipesUTF8);
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
     this->GenTarget->Target->AddPreBuildCommand(std::move(cc));

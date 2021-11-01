@@ -38,7 +38,6 @@
 #include "cmInstallGenerator.h"
 #include "cmInstallRuntimeDependencySet.h"
 #include "cmLinkLineComputer.h"
-#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMSVC60LinkLineComputer.h"
 #include "cmMakefile.h"
@@ -2877,13 +2876,11 @@ void cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   cmTarget& target = tb.first;
   target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
 
-  std::vector<std::string> no_outputs;
-  std::vector<std::string> no_byproducts;
-  std::vector<std::string> no_depends;
   // Store the custom command in the target.
-  cmCustomCommand cc(no_outputs, no_byproducts, no_depends, gti.CommandLines,
-                     cmListFileBacktrace(), nullptr, gti.WorkingDir.c_str(),
-                     gti.StdPipesUTF8);
+  cmCustomCommand cc;
+  cc.SetCommandLines(gti.CommandLines);
+  cc.SetWorkingDirectory(gti.WorkingDir.c_str());
+  cc.SetStdPipesUTF8(gti.StdPipesUTF8);
   cc.SetUsesTerminal(gti.UsesTerminal);
   target.AddPostBuildCommand(std::move(cc));
   if (!gti.Message.empty()) {

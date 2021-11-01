@@ -4123,9 +4123,15 @@ cmSourceFile* AddCustomCommand(
       depends2.push_back(main_dependency);
     }
 
-    std::unique_ptr<cmCustomCommand> cc = cm::make_unique<cmCustomCommand>(
-      outputs, byproducts, depends2, commandLines, lfbt, comment, workingDir,
-      stdPipesUTF8);
+    std::unique_ptr<cmCustomCommand> cc = cm::make_unique<cmCustomCommand>();
+    cc->SetByproducts(byproducts);
+    cc->SetDepends(std::move(depends2));
+    cc->SetOutputs(outputs);
+    cc->SetCommandLines(commandLines);
+    cc->SetComment(comment);
+    cc->SetBacktrace(lfbt);
+    cc->SetWorkingDirectory(workingDir);
+    cc->SetStdPipesUTF8(stdPipesUTF8);
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
     cc->SetImplicitDepends(implicit_depends);
@@ -4182,9 +4188,14 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
                               cmPolicies::PolicyStatus cmp0116)
 {
   // Add the command to the appropriate build step for the target.
-  std::vector<std::string> no_output;
-  cmCustomCommand cc(no_output, byproducts, depends, commandLines, lfbt,
-                     comment, workingDir, stdPipesUTF8);
+  cmCustomCommand cc;
+  cc.SetByproducts(byproducts);
+  cc.SetDepends(depends);
+  cc.SetCommandLines(commandLines);
+  cc.SetComment(comment);
+  cc.SetBacktrace(lfbt);
+  cc.SetWorkingDirectory(workingDir);
+  cc.SetStdPipesUTF8(stdPipesUTF8);
   cc.SetEscapeOldStyle(escapeOldStyle);
   cc.SetEscapeAllowMakeVars(true);
   cc.SetUsesTerminal(uses_terminal);

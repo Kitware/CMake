@@ -25,22 +25,18 @@ class cmImplicitDependsList
 class cmCustomCommand
 {
 public:
-  /** Main constructor specifies all information for the command.  */
-  cmCustomCommand(std::vector<std::string> outputs,
-                  std::vector<std::string> byproducts,
-                  std::vector<std::string> depends,
-                  cmCustomCommandLines commandLines, cmListFileBacktrace lfbt,
-                  const char* comment, const char* workingDirectory,
-                  bool stdPipesUTF8);
-
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;
+  void SetOutputs(std::vector<std::string> outputs);
+  void SetOutputs(std::string output);
 
   /** Get the extra files produced by the command.  */
   const std::vector<std::string>& GetByproducts() const;
+  void SetByproducts(std::vector<std::string> byproducts);
 
   /** Get the vector that holds the list of dependencies.  */
   const std::vector<std::string>& GetDepends() const;
+  void SetDepends(std::vector<std::string> depends);
 
   /** Get the working directory.  */
   std::string const& GetWorkingDirectory() const
@@ -48,14 +44,25 @@ public:
     return this->WorkingDirectory;
   }
 
+  void SetWorkingDirectory(const char* workingDirectory)
+  {
+    this->WorkingDirectory = (workingDirectory ? workingDirectory : "");
+  }
+
   /** Get the list of command lines.  */
   const cmCustomCommandLines& GetCommandLines() const;
+  void SetCommandLines(cmCustomCommandLines commandLines);
 
   /** Get the comment string for the command.  */
   const char* GetComment() const;
+  void SetComment(const char* comment);
 
   /** Get a value indicating if the command uses UTF-8 output pipes. */
   bool GetStdPipesUTF8() const { return this->StdPipesUTF8; }
+  void SetStdPipesUTF8(bool stdPipesUTF8)
+  {
+    this->StdPipesUTF8 = stdPipesUTF8;
+  }
 
   /** Append to the list of command lines.  */
   void AppendCommands(const cmCustomCommandLines& commandLines);
@@ -74,6 +81,7 @@ public:
 
   /** Backtrace of the command that created this custom command.  */
   cmListFileBacktrace const& GetBacktrace() const;
+  void SetBacktrace(cmListFileBacktrace lfbt);
 
   void SetImplicitDepends(cmImplicitDependsList const&);
   void AppendImplicitDepends(cmImplicitDependsList const&);

@@ -942,9 +942,13 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
 
   cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
     { cmakeCommand, "-E", "__create_def", mdi->DefFile, objs_file });
-  cmCustomCommand command(outputs, empty, empty, commandLines,
-                          gt->Target->GetMakefile()->GetBacktrace(),
-                          "Auto build dll exports", ".", true);
+  cmCustomCommand command;
+  command.SetOutputs(outputs);
+  command.SetCommandLines(commandLines);
+  command.SetComment("Auto build dll exports");
+  command.SetBacktrace(gt->Target->GetMakefile()->GetBacktrace());
+  command.SetWorkingDirectory(".");
+  command.SetStdPipesUTF8(true);
   commands.push_back(std::move(command));
 }
 

@@ -1723,15 +1723,16 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
       cmStrCat("$<TARGET_SONAME_FILE:", gtgt->GetName(), '>');
     std::string str_link_file =
       cmStrCat("$<TARGET_LINKER_FILE:", gtgt->GetName(), '>');
-    bool stdPipesUTF8 = true;
     cmCustomCommandLines cmd = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), "-E", "cmake_symlink_library",
         str_file, str_so_file, str_link_file });
 
-    cmCustomCommand command(
-      std::vector<std::string>(), std::vector<std::string>(),
-      std::vector<std::string>(), cmd, this->CurrentMakefile->GetBacktrace(),
-      "Creating symlinks", "", stdPipesUTF8);
+    cmCustomCommand command;
+    command.SetCommandLines(cmd);
+    command.SetComment("Creating symlinks");
+    command.SetWorkingDirectory("");
+    command.SetBacktrace(this->CurrentMakefile->GetBacktrace());
+    command.SetStdPipesUTF8(true);
 
     postbuild.push_back(std::move(command));
   }
