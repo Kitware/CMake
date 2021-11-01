@@ -14,6 +14,8 @@ else ()
   set(path_sep ":")
 endif ()
 
+set(unexpect_SET_FROM_AMBIENT_unset "")
+set(unexpect_SET_FROM_ENVIRONMENT_PROPERTY_unset "")
 set(unexpect_UNSET_EXPLICIT "")
 set(unexpect_UNSET_VIA_RESET "")
 set(expect_DIRECT "new")
@@ -23,8 +25,24 @@ set(expect_CMAKE_LIST_MANIP "prefix;pre;core;post;suffix")
 set(expect_STRING_DNE "prefix-prepost-suffix")
 set(expect_PATH_DNE "prefix${path_sep}pre${path_sep}post${path_sep}suffix")
 set(expect_CMAKE_LIST_DNE "prefix;pre;post;suffix")
+set(expect_SET_FROM_AMBIENT_replace "new")
+set(expect_SET_FROM_AMBIENT_string "basenew")
+set(expect_SET_FROM_AMBIENT_path "base${path_sep}new")
+set(expect_SET_FROM_AMBIENT_list "base;new")
+set(expect_SET_FROM_ENVIRONMENT_PROPERTY_replace "new")
+set(expect_SET_FROM_ENVIRONMENT_PROPERTY_string "basenew")
+set(expect_SET_FROM_ENVIRONMENT_PROPERTY_path "base${path_sep}new")
+set(expect_SET_FROM_ENVIRONMENT_PROPERTY_list "base;new")
 
 set(expected_vars
+  SET_FROM_AMBIENT_replace
+  SET_FROM_AMBIENT_string
+  SET_FROM_AMBIENT_path
+  SET_FROM_AMBIENT_list
+  SET_FROM_ENVIRONMENT_PROPERTY_replace
+  SET_FROM_ENVIRONMENT_PROPERTY_string
+  SET_FROM_ENVIRONMENT_PROPERTY_path
+  SET_FROM_ENVIRONMENT_PROPERTY_list
   DIRECT
   STRING_MANIP
   PATH_MANIP
