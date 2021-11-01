@@ -179,6 +179,7 @@ public:
   static void MoveFileIfDifferent(const std::string& source,
                                   const std::string& destination);
 
+#ifndef CMAKE_BOOTSTRAP
   //! Compute the hash of a file
   static std::string ComputeFileHash(const std::string& source,
                                      cmCryptoHash::Algo algo);
@@ -186,8 +187,11 @@ public:
   /** Compute the md5sum of a string.  */
   static std::string ComputeStringMD5(const std::string& input);
 
+#  ifdef _WIN32
   //! Get the SHA thumbprint for a certificate file
   static std::string ComputeCertificateThumbprint(const std::string& source);
+#  endif
+#endif
 
   /**
    * Run a single executable command

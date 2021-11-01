@@ -2831,7 +2831,10 @@ void cmLocalGenerator::IncludeFileInUnitySources(
     unity_file << "/* " << pathToHash << " */\n"
                << "#undef " << *uniqueIdName << "\n"
                << "#define " << *uniqueIdName << " unity_"
-               << cmSystemTools::ComputeStringMD5(pathToHash) << "\n";
+#ifndef CMAKE_BOOTSTRAP
+               << cmSystemTools::ComputeStringMD5(pathToHash) << "\n"
+#endif
+      ;
   }
 
   if (beforeInclude) {

@@ -1158,39 +1158,26 @@ void cmSystemTools::MoveFileIfDifferent(const std::string& source,
   RemoveFile(source);
 }
 
+#ifndef CMAKE_BOOTSTRAP
 std::string cmSystemTools::ComputeFileHash(const std::string& source,
                                            cmCryptoHash::Algo algo)
 {
-#if !defined(CMAKE_BOOTSTRAP)
   cmCryptoHash hash(algo);
   return hash.HashFile(source);
-#else
-  (void)source;
-  cmSystemTools::Message("hashsum not supported in bootstrapping mode",
-                         "Error");
-  return std::string();
-#endif
 }
 
 std::string cmSystemTools::ComputeStringMD5(const std::string& input)
 {
-#if !defined(CMAKE_BOOTSTRAP)
   cmCryptoHash md5(cmCryptoHash::AlgoMD5);
   return md5.HashString(input);
-#else
-  (void)input;
-  cmSystemTools::Message("md5sum not supported in bootstrapping mode",
-                         "Error");
-  return "";
-#endif
 }
 
+#  ifdef _WIN32
 std::string cmSystemTools::ComputeCertificateThumbprint(
   const std::string& source)
 {
   std::string thumbprint;
 
-#if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
   CRYPT_INTEGER_BLOB cryptBlob;
   HCERTSTORE certStore = NULL;
   PCCERT_CONTEXT certContext = NULL;
@@ -1247,14 +1234,11 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
     }
     CloseHandle(certFile);
   }
-#else
-  (void)source;
-  cmSystemTools::Message("ComputeCertificateThumbprint is not implemented",
-                         "Error");
-#endif
 
   return thumbprint;
 }
+#  endif
+#endif
 
 void cmSystemTools::Glob(const std::string& directory,
                          const std::string& regexp,

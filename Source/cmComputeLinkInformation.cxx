@@ -722,7 +722,7 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
         this->AddFrameworkItem(item.Value);
       } else if (cmSystemTools::FileIsDirectory(item.Value)) {
         // This is a directory.
-        this->DropDirectoryItem(item.Value);
+        this->DropDirectoryItem(item);
       } else {
         // Use the full path given to the library file.
         this->Depends.push_back(item.Value);
@@ -1349,16 +1349,17 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
   }
 }
 
-void cmComputeLinkInformation::DropDirectoryItem(std::string const& item)
+void cmComputeLinkInformation::DropDirectoryItem(BT<std::string> const& item)
 {
   // A full path to a directory was found as a link item.  Warn the
   // user.
-  std::ostringstream e;
-  e << "WARNING: Target \"" << this->Target->GetName()
-    << "\" requests linking to directory \"" << item << "\".  "
-    << "Targets may link only to libraries.  "
-    << "CMake is dropping the item.";
-  cmSystemTools::Message(e.str());
+  this->CMakeInstance->IssueMessage(
+    MessageType::WARNING,
+    cmStrCat(
+      "Target \"", this->Target->GetName(),
+      "\" requests linking to directory \"", item.Value,
+      "\".  Targets may link only to libraries.  CMake is dropping the item."),
+    item.Backtrace);
 }
 
 void cmComputeLinkInformation::ComputeFrameworkInfo()
