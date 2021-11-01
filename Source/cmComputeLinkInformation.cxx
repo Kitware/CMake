@@ -517,10 +517,9 @@ bool cmComputeLinkInformation::Compute()
   // Add the link line items.
   for (cmComputeLinkDepends::LinkEntry const& linkEntry : linkEntries) {
     if (linkEntry.IsSharedDep) {
-      this->AddSharedDepItem(linkEntry.Item, linkEntry.Target);
+      this->AddSharedDepItem(linkEntry);
     } else {
-      this->AddItem(linkEntry.Item, linkEntry.Target,
-                    linkEntry.IsObject ? ItemIsObject::Yes : ItemIsObject::No);
+      this->AddItem(linkEntry);
     }
   }
 
@@ -610,7 +609,7 @@ void cmComputeLinkInformation::AddRuntimeLinkLibrary(std::string const& lang)
     std::vector<std::string> libsVec = cmExpandedList(*runtimeLinkOptions);
     for (std::string const& i : libsVec) {
       if (!cm::contains(this->ImplicitLinkLibs, i)) {
-        this->AddItem(i, nullptr);
+        this->AddItem({ i });
       }
     }
   }
@@ -625,7 +624,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
     std::vector<std::string> libsVec = cmExpandedList(*libs);
     for (std::string const& i : libsVec) {
       if (!cm::contains(this->ImplicitLinkLibs, i)) {
-        this->AddItem(i, nullptr);
+        this->AddItem({ i });
       }
     }
   }
@@ -639,10 +638,11 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
   }
 }
 
-void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
-                                       cmGeneratorTarget const* tgt,
-                                       ItemIsObject isObject)
+void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
 {
+  cmGeneratorTarget const* tgt = entry.Target;
+  BT<std::string> const& item = entry.Item;
+
   // Compute the proper name to use to link this library.
   const std::string& config = this->Config;
   bool impexe = (tgt && tgt->IsExecutableWithExports());
@@ -678,7 +678,7 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
       // Also add the item the interface specifies to be used in its place.
       std::string const& libName = tgt->GetImportedLibName(config);
       if (!libName.empty()) {
-        this->AddItem(BT<std::string>(libName, item.Backtrace), nullptr);
+        this->AddItem(BT<std::string>(libName, item.Backtrace));
       }
     } else if (tgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       // Ignore object library!
@@ -706,7 +706,9 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
         this->Depends.push_back(lib.Value);
       }
 
-      this->AddTargetItem(lib, tgt);
+      LinkEntry libEntry{ entry };
+      libEntry.Item = lib;
+      this->AddTargetItem(libEntry);
       this->AddLibraryRuntimeInfo(lib.Value, tgt);
       if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
           this->Target->IsDLLPlatform()) {
@@ -719,26 +721,28 @@ void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
       if (cmSystemTools::IsPathToFramework(item.Value) &&
           this->Makefile->IsOn("APPLE")) {
         // This is a framework.
-        this->AddFrameworkItem(item.Value);
+        this->AddFrameworkItem(entry);
       } else if (cmSystemTools::FileIsDirectory(item.Value)) {
         // This is a directory.
         this->DropDirectoryItem(item);
       } else {
         // Use the full path given to the library file.
         this->Depends.push_back(item.Value);
-        this->AddFullItem(item, isObject);
+        this->AddFullItem(entry);
         this->AddLibraryRuntimeInfo(item.Value);
       }
     } else {
       // This is a library or option specified by the user.
-      this->AddUserItem(item, true);
+      this->AddUserItem(entry, true);
     }
   }
 }
 
-void cmComputeLinkInformation::AddSharedDepItem(BT<std::string> const& item,
-                                                const cmGeneratorTarget* tgt)
+void cmComputeLinkInformation::AddSharedDepItem(LinkEntry const& entry)
 {
+  BT<std::string> const& item = entry.Item;
+  const cmGeneratorTarget* tgt = entry.Target;
+
   // Record dependencies on DLLs.
   if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
       this->Target->IsDLLPlatform() &&
@@ -776,7 +780,7 @@ void cmComputeLinkInformation::AddSharedDepItem(BT<std::string> const& item,
 
   // If in linking mode, just link to the shared library.
   if (this->SharedDependencyMode == SharedDepModeLink) {
-    this->AddItem(item, tgt);
+    this->AddItem(entry);
     return;
   }
 
@@ -1058,8 +1062,7 @@ void cmComputeLinkInformation::SetCurrentLinkType(LinkType lt)
   }
 }
 
-void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
-                                             cmGeneratorTarget const* target)
+void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
 {
   // This is called to handle a link item that is a full path to a target.
   // If the target is not a static library make sure the link type is
@@ -1067,6 +1070,9 @@ void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
   // shared and static libraries but static-mode can handle only
   // static libraries.  If a previous user item changed the link type
   // to static we need to make sure it is back to shared.
+  BT<std::string> const& item = entry.Item;
+  cmGeneratorTarget const* target = entry.Target;
+
   if (target->GetType() != cmStateEnums::STATIC_LIBRARY) {
     this->SetCurrentLinkType(LinkShared);
   }
@@ -1079,7 +1085,7 @@ void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
   // Handle case of an imported shared library with no soname.
   if (this->NoSONameUsesPath &&
       target->IsImportedSharedLibWithoutSOName(this->Config)) {
-    this->AddSharedLibNoSOName(item.Value);
+    this->AddSharedLibNoSOName(entry);
     return;
   }
 
@@ -1095,16 +1101,17 @@ void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
   this->Items.emplace_back(item, ItemIsPath::Yes, ItemIsObject::No, target);
 }
 
-void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item,
-                                           ItemIsObject isObject)
+void cmComputeLinkInformation::AddFullItem(LinkEntry const& entry)
 {
+  BT<std::string> const& item = entry.Item;
+
   // Check for the implicit link directory special case.
-  if (this->CheckImplicitDirItem(item.Value)) {
+  if (this->CheckImplicitDirItem(entry)) {
     return;
   }
 
   // Check for case of shared library with no builtin soname.
-  if (this->NoSONameUsesPath && this->CheckSharedLibNoSOName(item.Value)) {
+  if (this->NoSONameUsesPath && this->CheckSharedLibNoSOName(entry)) {
     return;
   }
 
@@ -1116,7 +1123,7 @@ void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item,
        generator.find("Xcode") != std::string::npos)) {
     std::string file = cmSystemTools::GetFilenameName(item.Value);
     if (!this->ExtractAnyLibraryName.find(file)) {
-      this->HandleBadFullItem(item.Value, file);
+      this->HandleBadFullItem(entry, file);
       return;
     }
   }
@@ -1147,11 +1154,15 @@ void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item,
   }
 
   // Now add the full path to the library.
-  this->Items.emplace_back(item, ItemIsPath::Yes, isObject);
+  this->Items.emplace_back(item, ItemIsPath::Yes,
+                           entry.IsObject ? ItemIsObject::Yes
+                                          : ItemIsObject::No);
 }
 
-bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
+bool cmComputeLinkInformation::CheckImplicitDirItem(LinkEntry const& entry)
 {
+  BT<std::string> const& item = entry.Item;
+
   // We only switch to a pathless item if the link type may be
   // enforced.  Fortunately only platforms that support link types
   // seem to have magic per-architecture implicit link directories.
@@ -1160,7 +1171,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   }
 
   // Check if this item is in an implicit link directory.
-  std::string dir = cmSystemTools::GetFilenamePath(item);
+  std::string dir = cmSystemTools::GetFilenamePath(item.Value);
   if (!cm::contains(this->ImplicitLinkDirs, dir)) {
     // Only libraries in implicit link directories are converted to
     // pathless items.
@@ -1169,7 +1180,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
 
   // Only apply the policy below if the library file is one that can
   // be found by the linker.
-  std::string file = cmSystemTools::GetFilenameName(item);
+  std::string file = cmSystemTools::GetFilenameName(item.Value);
   if (!this->ExtractAnyLibraryName.find(file)) {
     return false;
   }
@@ -1179,10 +1190,10 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
     case cmPolicies::WARN:
       if (this->CMP0060Warn) {
         // Print the warning at most once for this item.
-        std::string const& wid = "CMP0060-WARNING-GIVEN-" + item;
+        std::string const& wid = "CMP0060-WARNING-GIVEN-" + item.Value;
         if (!this->CMakeInstance->GetPropertyAsBool(wid)) {
           this->CMakeInstance->SetProperty(wid, "1");
-          this->CMP0060WarnItems.insert(item);
+          this->CMP0060WarnItems.insert(item.Value);
         }
       }
       CM_FALLTHROUGH;
@@ -1200,15 +1211,19 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   // directory then just report the file name without the directory
   // portion.  This will allow the system linker to locate the proper
   // library for the architecture at link time.
-  this->AddUserItem(file, false);
+  LinkEntry fileEntry{ entry };
+  fileEntry.Item = file;
+  this->AddUserItem(fileEntry, false);
 
   // Make sure the link directory ordering will find the library.
-  this->OrderLinkerSearchPath->AddLinkLibrary(item);
+  this->OrderLinkerSearchPath->AddLinkLibrary(item.Value);
 
   return true;
 }
 
-void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
+// void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
+//                                            bool pathNotKnown)
+void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry,
                                            bool pathNotKnown)
 {
   // This is called to handle a link item that does not match a CMake
@@ -1218,6 +1233,8 @@ void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
   //
   //   foo       ==>  -lfoo
   //   libfoo.a  ==>  -Wl,-Bstatic -lfoo
+
+  BT<std::string> const& item = entry.Item;
 
   // Pass flags through untouched.
   if (item.Value[0] == '-' || item.Value[0] == '$' || item.Value[0] == '`') {
@@ -1315,8 +1332,10 @@ void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
   // specification.
 }
 
-void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
+void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
 {
+  std::string const& item = entry.Item.Value;
+
   // Try to separate the framework name and path.
   if (!this->SplitFramework.find(item)) {
     std::ostringstream e;
@@ -1390,42 +1409,44 @@ void cmComputeLinkInformation::AddFrameworkPath(std::string const& p)
   }
 }
 
-bool cmComputeLinkInformation::CheckSharedLibNoSOName(std::string const& item)
+bool cmComputeLinkInformation::CheckSharedLibNoSOName(LinkEntry const& entry)
 {
   // This platform will use the path to a library as its soname if the
   // library is given via path and was not built with an soname.  If
   // this is a shared library that might be the case.
-  std::string file = cmSystemTools::GetFilenameName(item);
+  std::string file = cmSystemTools::GetFilenameName(entry.Item.Value);
   if (this->ExtractSharedLibraryName.find(file)) {
     // If we can guess the soname fairly reliably then assume the
     // library has one.  Otherwise assume the library has no builtin
     // soname.
     std::string soname;
-    if (!cmSystemTools::GuessLibrarySOName(item, soname)) {
-      this->AddSharedLibNoSOName(item);
+    if (!cmSystemTools::GuessLibrarySOName(entry.Item.Value, soname)) {
+      this->AddSharedLibNoSOName(entry);
       return true;
     }
   }
   return false;
 }
 
-void cmComputeLinkInformation::AddSharedLibNoSOName(std::string const& item)
+void cmComputeLinkInformation::AddSharedLibNoSOName(LinkEntry const& entry)
 {
   // We have a full path to a shared library with no soname.  We need
   // to ask the linker to locate the item because otherwise the path
   // we give to it will be embedded in the target linked.  Then at
   // runtime the dynamic linker will search for the library using the
   // path instead of just the name.
-  std::string file = cmSystemTools::GetFilenameName(item);
-  this->AddUserItem(file, false);
+  LinkEntry fileEntry{ entry };
+  fileEntry.Item = cmSystemTools::GetFilenameName(entry.Item.Value);
+  this->AddUserItem(fileEntry, false);
 
   // Make sure the link directory ordering will find the library.
-  this->OrderLinkerSearchPath->AddLinkLibrary(item);
+  this->OrderLinkerSearchPath->AddLinkLibrary(entry.Item.Value);
 }
 
-void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
+void cmComputeLinkInformation::HandleBadFullItem(LinkEntry const& entry,
                                                  std::string const& file)
 {
+  std::string const& item = entry.Item.Value;
   // Do not depend on things that do not exist.
   auto i = std::find(this->Depends.begin(), this->Depends.end(), item);
   if (i != this->Depends.end()) {
@@ -1435,7 +1456,9 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
   // Tell the linker to search for the item and provide the proper
   // path for it.  Do not contribute to any CMP0003 warning (do not
   // put in OldLinkDirItems or OldUserFlagItems).
-  this->AddUserItem(file, false);
+  LinkEntry fileEntry{ entry };
+  fileEntry.Item = file;
+  this->AddUserItem(fileEntry, false);
   this->OrderLinkerSearchPath->AddLinkLibrary(item);
 
   // Produce any needed message.

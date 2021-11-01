@@ -9,6 +9,7 @@
 #include <queue>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmGraphAdjacencyList.h"
@@ -38,6 +39,13 @@ public:
   // Basic information about each link item.
   struct LinkEntry
   {
+    LinkEntry() = default;
+    LinkEntry(BT<std::string> item, cmGeneratorTarget const* target = nullptr)
+      : Item(std::move(item))
+      , Target(target)
+    {
+    }
+
     BT<std::string> Item;
     cmGeneratorTarget const* Target = nullptr;
     bool IsSharedDep = false;

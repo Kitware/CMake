@@ -13,6 +13,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmComputeLinkDepends.h"
 #include "cmListFileCache.h"
 #include "cmValue.h"
 
@@ -104,10 +105,10 @@ public:
   const cmGeneratorTarget* GetTarget() { return this->Target; }
 
 private:
-  void AddItem(BT<std::string> const& item, const cmGeneratorTarget* tgt,
-               ItemIsObject isObject = ItemIsObject::No);
-  void AddSharedDepItem(BT<std::string> const& item,
-                        cmGeneratorTarget const* tgt);
+  using LinkEntry = cmComputeLinkDepends::LinkEntry;
+
+  void AddItem(LinkEntry const& entry);
+  void AddSharedDepItem(LinkEntry const& entry);
   void AddRuntimeDLL(cmGeneratorTarget const* tgt);
 
   // Output information.
@@ -181,16 +182,15 @@ private:
   std::string NoCaseExpression(std::string const& str);
 
   // Handling of link items.
-  void AddTargetItem(BT<std::string> const& item,
-                     const cmGeneratorTarget* target);
-  void AddFullItem(BT<std::string> const& item, ItemIsObject isObject);
-  bool CheckImplicitDirItem(std::string const& item);
-  void AddUserItem(BT<std::string> const& item, bool pathNotKnown);
-  void AddFrameworkItem(std::string const& item);
+  void AddTargetItem(LinkEntry const& entry);
+  void AddFullItem(LinkEntry const& entry);
+  bool CheckImplicitDirItem(LinkEntry const& entry);
+  void AddUserItem(LinkEntry const& entry, bool pathNotKnown);
+  void AddFrameworkItem(LinkEntry const& entry);
   void DropDirectoryItem(BT<std::string> const& item);
-  bool CheckSharedLibNoSOName(std::string const& item);
-  void AddSharedLibNoSOName(std::string const& item);
-  void HandleBadFullItem(std::string const& item, std::string const& file);
+  bool CheckSharedLibNoSOName(LinkEntry const& entry);
+  void AddSharedLibNoSOName(LinkEntry const& entry);
+  void HandleBadFullItem(LinkEntry const& entry, std::string const& file);
 
   // Framework info.
   void ComputeFrameworkInfo();
