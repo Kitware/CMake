@@ -1380,6 +1380,13 @@ if(BUILD_TESTING)
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
+  set_property(TEST Environment APPEND
+    PROPERTY ENVIRONMENT
+      "SET_FROM_AMBIENT_unset=base"
+      "SET_FROM_AMBIENT_replace=base"
+      "SET_FROM_AMBIENT_string=base"
+      "SET_FROM_AMBIENT_path=base"
+      "SET_FROM_AMBIENT_list=base")
 
   add_test(QtAutomocNoQt  ${CMAKE_CTEST_COMMAND}
     --build-and-test
