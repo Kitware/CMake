@@ -216,6 +216,7 @@ private:
                           const std::string& dstSubfolderSpec,
                           int actionsOnByDefault);
   void AddEmbeddedFrameworks(cmXCodeObject* target);
+  void AddEmbeddedPlugIns(cmXCodeObject* target);
   void AddEmbeddedAppExtensions(cmXCodeObject* target);
   void AddPositionIndependentLinkAttribute(cmGeneratorTarget* target,
                                            cmXCodeObject* buildSettings,

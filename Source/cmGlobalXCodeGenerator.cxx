@@ -3910,6 +3910,14 @@ void cmGlobalXCodeGenerator::AddEmbeddedFrameworks(cmXCodeObject* target)
                            NoActionOnCopyByDefault);
 }
 
+void cmGlobalXCodeGenerator::AddEmbeddedPlugIns(cmXCodeObject* target)
+{
+  static const auto dstSubfolderSpec = "13";
+
+  this->AddEmbeddedObjects(target, "Embed PlugIns", "XCODE_EMBED_PLUGINS",
+                           dstSubfolderSpec, NoActionOnCopyByDefault);
+}
+
 void cmGlobalXCodeGenerator::AddEmbeddedAppExtensions(cmXCodeObject* target)
 {
   static const auto dstSubfolderSpec = "13";
@@ -4298,6 +4306,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   for (auto t : targets) {
     this->AddDependAndLinkInformation(t);
     this->AddEmbeddedFrameworks(t);
+    this->AddEmbeddedPlugIns(t);
     this->AddEmbeddedAppExtensions(t);
     // Inherit project-wide values for any target-specific search paths.
     this->InheritBuildSettingAttribute(t, "HEADER_SEARCH_PATHS");
