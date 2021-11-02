@@ -1027,7 +1027,7 @@ Source RPM packaging has its own set of variables:
  * Mandatory : YES
  * Default   : "/"
 
-.. VARIABLE:: CPACK_RPM_BUILDREQUIRES
+.. variable:: CPACK_RPM_BUILDREQUIRES
 
  List of source rpm build dependencies.
 
@@ -1040,7 +1040,9 @@ Source RPM packaging has its own set of variables:
 
   set(CPACK_RPM_BUILDREQUIRES "python >= 2.5.0, cmake >= 2.8")
 
-.. VARIABLE:: CPACK_RPM_REQUIRES_EXCLUDE_FROM
+.. variable:: CPACK_RPM_REQUIRES_EXCLUDE_FROM
+
+ .. versionadded:: 3.22
 
  * Mandatory : NO
  * Default   : -
