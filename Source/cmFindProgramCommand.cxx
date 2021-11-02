@@ -104,6 +104,26 @@ struct cmFindProgramHelper
   }
   bool FileIsExecutable(std::string const& file) const
   {
+#ifdef _WIN32
+    if (!this->FileIsExecutableCMP0109(file)) {
+      return false;
+    }
+    // Pretend the Windows "python" app installer alias does not exist.
+    if (cmSystemTools::LowerCase(file).find("/windowsapps/python") !=
+        std::string::npos) {
+      std::string dest;
+      if (cmSystemTools::ReadSymlink(file, dest) &&
+          cmHasLiteralSuffix(dest, "\\AppInstallerPythonRedirector.exe")) {
+        return false;
+      }
+    }
+    return true;
+#else
+    return this->FileIsExecutableCMP0109(file);
+#endif
+  }
+  bool FileIsExecutableCMP0109(std::string const& file) const
+  {
     switch (this->PolicyCMP0109) {
       case cmPolicies::OLD:
         return cmSystemTools::FileExists(file, true);

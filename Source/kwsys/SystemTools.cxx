@@ -34,6 +34,10 @@
 #include <utility>
 #include <vector>
 
+#ifdef _WIN32
+#  include <cwchar>
+#endif
+
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
@@ -103,6 +107,9 @@
 #  if defined(_MSC_VER) && _MSC_VER >= 1800
 #    define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 #  endif
+#  ifndef IO_REPARSE_TAG_APPEXECLINK
+#    define IO_REPARSE_TAG_APPEXECLINK (0x8000001BL)
+#  endif
 // from ntifs.h, which can only be used by drivers
 typedef struct _REPARSE_DATA_BUFFER
 {
@@ -132,8 +139,46 @@ typedef struct _REPARSE_DATA_BUFFER
     {
       UCHAR DataBuffer[1];
     } GenericReparseBuffer;
+    struct
+    {
+      ULONG Version;
+      WCHAR StringList[1];
+      // In version 3, there are 4 NUL-terminated strings:
+      // * Package ID
+      // * Entry Point
+      // * Executable Path
+      // * Application Type
+    } AppExecLinkReparseBuffer;
   } DUMMYUNIONNAME;
 } REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
+
+namespace {
+WCHAR* GetAppExecLink(PREPARSE_DATA_BUFFER data, size_t& len)
+{
+  // We only know the layout of version 3.
+  if (data->AppExecLinkReparseBuffer.Version != 3) {
+    return nullptr;
+  }
+
+  WCHAR* pstr = data->AppExecLinkReparseBuffer.StringList;
+
+  // Skip the package id and entry point strings.
+  for (int i = 0; i < 2; ++i) {
+    len = std::wcslen(pstr);
+    if (len == 0) {
+      return nullptr;
+    }
+    pstr += len + 1;
+  }
+
+  // The third string is the executable path.
+  len = std::wcslen(pstr);
+  if (len == 0) {
+    return nullptr;
+  }
+  return pstr;
+}
+}
 #endif
 
 #if !KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H
@@ -1343,8 +1388,8 @@ bool SystemTools::FileExists(const std::string& filename)
     return false;
   }
 #if defined(_WIN32)
-  DWORD attr =
-    GetFileAttributesW(Encoding::ToWindowsExtendedPath(filename).c_str());
+  const std::wstring path = Encoding::ToWindowsExtendedPath(filename);
+  DWORD attr = GetFileAttributesW(path.c_str());
   if (attr == INVALID_FILE_ATTRIBUTES) {
     return false;
   }
@@ -1352,12 +1397,38 @@ bool SystemTools::FileExists(const std::string& filename)
   if (attr & FILE_ATTRIBUTE_REPARSE_POINT) {
     // Using 0 instead of GENERIC_READ as it allows reading of file attributes
     // even if we do not have permission to read the file itself
-    HANDLE handle =
-      CreateFileW(Encoding::ToWindowsExtendedPath(filename).c_str(), 0, 0,
-                  nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+    HANDLE handle = CreateFileW(path.c_str(), 0, 0, nullptr, OPEN_EXISTING,
+                                FILE_FLAG_BACKUP_SEMANTICS, nullptr);
 
     if (handle == INVALID_HANDLE_VALUE) {
-      return false;
+      // A reparse point may be an execution alias (Windows Store app), which
+      // is similar to a symlink but it cannot be opened as a regular file.
+      // We must look at the reparse point data explicitly.
+      handle = CreateFileW(
+        path.c_str(), 0, 0, nullptr, OPEN_EXISTING,
+        FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+
+      if (handle == INVALID_HANDLE_VALUE) {
+        return false;
+      }
+
+      byte buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
+      DWORD bytesReturned = 0;
+
+      if (!DeviceIoControl(handle, FSCTL_GET_REPARSE_POINT, nullptr, 0, buffer,
+                           MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &bytesReturned,
+                           nullptr)) {
+        CloseHandle(handle);
+        return false;
+      }
+
+      CloseHandle(handle);
+
+      PREPARSE_DATA_BUFFER data =
+        reinterpret_cast<PREPARSE_DATA_BUFFER>(&buffer[0]);
+
+      // Assume that file exists if it is an execution alias.
+      return data->ReparseTag == IO_REPARSE_TAG_APPEXECLINK;
     }
 
     CloseHandle(handle);
@@ -3011,11 +3082,7 @@ bool SystemTools::FileIsDirectory(const std::string& inName)
 
 bool SystemTools::FileIsExecutable(const std::string& name)
 {
-#if defined(_WIN32)
-  return SystemTools::FileExists(name, true);
-#else
   return !FileIsDirectory(name) && TestFileAccess(name, TEST_FILE_EXECUTE);
-#endif
 }
 
 bool SystemTools::FileIsSymlink(const std::string& name)
@@ -3164,6 +3231,15 @@ Status SystemTools::ReadSymlink(std::string const& newName,
       data->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
     substituteNameData = data->MountPointReparseBuffer.PathBuffer +
       data->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR);
+  } else if (data->ReparseTag == IO_REPARSE_TAG_APPEXECLINK) {
+    // The reparse buffer is a list of 0-terminated non-empty strings,
+    // terminated by an empty string (0-0).  We need the third string.
+    size_t destLen;
+    substituteNameData = GetAppExecLink(data, destLen);
+    if (substituteNameData == nullptr || destLen == 0) {
+      return Status::Windows(ERROR_SYMLINK_NOT_SUPPORTED);
+    }
+    substituteNameLength = static_cast<USHORT>(destLen);
   } else {
     return Status::Windows(ERROR_REPARSE_TAG_MISMATCH);
   }
