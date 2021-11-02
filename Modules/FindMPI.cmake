@@ -267,7 +267,7 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/FindPkgConfig.cmake)
+find_package(PkgConfig QUIET)
 
 # Generic compiler names
 set(_MPI_C_GENERIC_COMPILER_NAMES          mpicc    mpcc      mpicc_r mpcc_r)
@@ -1583,7 +1583,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
           else()
             set(_MPI_PKG "")
           endif()
-          if(_MPI_PKG)
+          if(_MPI_PKG AND PKG_CONFIG_FOUND)
             pkg_check_modules("MPI_${LANG}_PKG" "${_MPI_PKG}")
             if("${MPI_${LANG}_PKG_FOUND}")
               set(MPI_${LANG}_COMPILE_OPTIONS  ${MPI_${LANG}_PKG_CFLAGS}        CACHE STRING "MPI ${LANG} compilation options"       FORCE)
