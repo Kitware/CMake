@@ -258,13 +258,22 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
   # Append user-specified architectures.
   if(CMAKE_CUDA_ARCHITECTURES)
-    foreach(arch ${CMAKE_CUDA_ARCHITECTURES})
-      # Strip specifiers as PTX vs binary doesn't matter.
-      string(REGEX MATCH "[0-9]+" arch_name "${arch}")
-      string(APPEND clang_test_flags " --cuda-gpu-arch=sm_${arch_name}")
-      string(APPEND nvcc_test_flags " -gencode=arch=compute_${arch_name},code=sm_${arch_name}")
-      list(APPEND tested_architectures "${arch_name}")
-    endforeach()
+    if("x${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "xall")
+      string(APPEND nvcc_test_flags " -arch=all")
+      set(architectures_mode all)
+    elseif("x${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "xall-major")
+      string(APPEND nvcc_test_flags " -arch=all-major")
+      set(architectures_mode all-major)
+    else()
+      set(architectures_mode explicit)
+      foreach(arch ${CMAKE_CUDA_ARCHITECTURES})
+        # Strip specifiers as PTX vs binary doesn't matter.
+        string(REGEX MATCH "[0-9]+" arch_name "${arch}")
+        string(APPEND clang_test_flags " --cuda-gpu-arch=sm_${arch_name}")
+        string(APPEND nvcc_test_flags " -gencode=arch=compute_${arch_name},code=sm_${arch_name}")
+        list(APPEND tested_architectures "${arch_name}")
+      endforeach()
+    endif()
 
     # If the user has specified architectures we'll want to fail during compiler detection if they don't work.
     set(CMAKE_CUDA_COMPILER_ID_REQUIRE_SUCCESS ON)
@@ -597,7 +606,18 @@ if(DEFINED detected_architecture AND "${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
   if(NOT CMAKE_CUDA_ARCHITECTURES)
     message(FATAL_ERROR "Failed to find a working CUDA architecture.")
   endif()
-elseif(architectures)
+elseif(architectures AND (architectures_mode STREQUAL "xall" OR
+                          architectures_mode STREQUAL "xall-major"))
+  if(NOT CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+    message(FATAL_ERROR
+      "The CMAKE_CUDA_ARCHITECTURES:\n"
+      "  ${CMAKE_CUDA_ARCHITECTURES}\n"
+      "is not supported with the ${CMAKE_CUDA_COMPILER_ID} compiler.  Try:\n"
+      "  ${architectures}\n"
+      "instead.")
+  endif()
+
+elseif(architectures AND architectures_mode STREQUAL "xexplicit")
   # Sort since order mustn't matter.
   list(SORT architectures)
   list(SORT tested_architectures)
@@ -629,6 +649,8 @@ unset(_CUDA_NVCC_EXECUTABLE CACHE)
 unset(_CUDA_LIBRARY_DIR)
 unset(_CUDA_TARGET_DIR)
 unset(_CUDA_TARGET_NAME)
+
+unset(architectures_mode)
 
 set(CMAKE_CUDA_COMPILER_ENV_VAR "CUDACXX")
 set(CMAKE_CUDA_HOST_COMPILER_ENV_VAR "CUDAHOSTCXX")
