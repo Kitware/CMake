@@ -588,6 +588,9 @@ if(NOT HDF5_FOUND)
   set(HDF5_COMPILER_NO_INTERROGATE TRUE)
   # Only search for languages we've enabled
   foreach(_lang IN LISTS HDF5_LANGUAGE_BINDINGS)
+    set(HDF5_${_lang}_LIBRARIES)
+    set(HDF5_${_lang}_HL_LIBRARIES)
+
     # First check to see if our regular compiler is one of wrappers
     if(_lang STREQUAL "C")
       _HDF5_test_regular_compiler_C(
@@ -813,6 +816,9 @@ if( NOT HDF5_FOUND )
     endif()
 
     foreach(_lang IN LISTS HDF5_LANGUAGE_BINDINGS)
+        set(HDF5_${_lang}_LIBRARIES)
+        set(HDF5_${_lang}_HL_LIBRARIES)
+
         # The "main" library.
         set(_hdf5_main_library "")
 
