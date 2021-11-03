@@ -14,7 +14,8 @@ These properties specify whether compiler-specific extensions are requested.
 
 These properties are initialized by the value of the
 :variable:`CMAKE_<LANG>_EXTENSIONS` variable if it is set when a target is
-created.
+created and otherwise by the value of
+:variable:`CMAKE_<LANG>_EXTENSIONS_DEFAULT` (see :policy:`CMP0128`).
 
 For supported CMake versions see the respective pages.
 To control language standard versions see :prop_tgt:`<LANG>_STANDARD`.

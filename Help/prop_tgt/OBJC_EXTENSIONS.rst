@@ -18,5 +18,7 @@ See the :manual:`cmake-compile-features(7)` manual for information on
 compile features and a list of supported compilers.
 
 This property is initialized by the value of
-the :variable:`CMAKE_OBJC_EXTENSIONS` variable if it is set when a target
-is created.
+the :variable:`CMAKE_OBJC_EXTENSIONS` variable if set when a target is created
+and otherwise by the value of
+:variable:`CMAKE_OBJC_EXTENSIONS_DEFAULT <CMAKE_<LANG>_EXTENSIONS_DEFAULT>`
+(see :policy:`CMP0128`).
