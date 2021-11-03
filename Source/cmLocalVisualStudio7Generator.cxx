@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio7Generator.h"
 
+#include <cctype> // for isspace
+
 #include <cm/memory>
 #include <cmext/algorithm>
 
 #include <windows.h>
 
 #include <cm3p/expat.h>
-#include <ctype.h> // for isspace
 
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"

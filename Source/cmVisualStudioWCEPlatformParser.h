@@ -4,11 +4,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <map>
 #include <string>
 #include <vector>
-
-#include <stddef.h>
 
 #include "cmXMLParser.h"
 

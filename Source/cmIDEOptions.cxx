@@ -2,11 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIDEOptions.h"
 
+#include <cstring>
 #include <iterator>
 
 #include <cmext/algorithm>
-
-#include <string.h>
 
 #include "cmsys/String.h"
 

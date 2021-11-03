@@ -5,14 +5,14 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <cm3p/uv.h>
-#include <stddef.h>
-#include <stdint.h>
 
 #include "cmDuration.h"
 #include "cmProcessOutput.h"

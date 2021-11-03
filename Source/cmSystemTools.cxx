@@ -540,7 +540,7 @@ size_t cmSystemTools::CalculateCommandLineLengthLimit()
 #if defined(_SC_ARG_MAX)
   // ARG_MAX is the maximum size of the command and environment
   // that can be passed to the exec functions on UNIX.
-  // The value in limits.h does not need to be present and may
+  // The value in climits does not need to be present and may
   // depend upon runtime memory constraints, hence sysconf()
   // should be used to query it.
   long szArgMax = sysconf(_SC_ARG_MAX);
