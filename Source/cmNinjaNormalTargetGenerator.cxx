@@ -902,7 +902,7 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
     const std::string impLibPath = localGen.ConvertToOutputFormat(
       targetOutputImplib, cmOutputConverter::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
-    this->EnsureParentDirectoryExists(impLibPath);
+    this->EnsureParentDirectoryExists(targetOutputImplib);
   }
 
   const std::string objPath =
@@ -1211,7 +1211,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     const std::string impLibPath = localGen.ConvertToOutputFormat(
       targetOutputImplib, cmOutputConverter::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
-    this->EnsureParentDirectoryExists(impLibPath);
+    this->EnsureParentDirectoryExists(targetOutputImplib);
     if (gt->HasImportLibrary(config)) {
       // Some linkers may update a binary without touching its import lib.
       byproducts.ExplicitOuts.emplace_back(targetOutputImplib);
