@@ -76,10 +76,46 @@ bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
 
   this->GeneratorPlatform = p;
 
+  // FIXME: Add CMAKE_GENERATOR_PLATFORM field to set the framework.
+  // For now, just report the generator's default, if any.
+  if (cm::optional<std::string> const& targetFrameworkVersion =
+        this->GetTargetFrameworkVersion()) {
+    mf->AddDefinition("CMAKE_VS_TARGET_FRAMEWORK_VERSION",
+                      *targetFrameworkVersion);
+  }
+  if (cm::optional<std::string> const& targetFrameworkIdentifier =
+        this->GetTargetFrameworkIdentifier()) {
+    mf->AddDefinition("CMAKE_VS_TARGET_FRAMEWORK_IDENTIFIER",
+                      *targetFrameworkIdentifier);
+  }
+  if (cm::optional<std::string> const& targetFrameworkTargetsVersion =
+        this->GetTargetFrameworkTargetsVersion()) {
+    mf->AddDefinition("CMAKE_VS_TARGET_FRAMEWORK_TARGETS_VERSION",
+                      *targetFrameworkTargetsVersion);
+  }
+
   // The generator name does not contain the platform name, and so supports
   // explicit platform specification.  We handled that above, so pass an
   // empty platform name to our base class implementation so it does not error.
   return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
+}
+
+cm::optional<std::string> const&
+cmGlobalVisualStudio8Generator::GetTargetFrameworkVersion() const
+{
+  return this->DefaultTargetFrameworkVersion;
+}
+
+cm::optional<std::string> const&
+cmGlobalVisualStudio8Generator::GetTargetFrameworkIdentifier() const
+{
+  return this->DefaultTargetFrameworkIdentifier;
+}
+
+cm::optional<std::string> const&
+cmGlobalVisualStudio8Generator::GetTargetFrameworkTargetsVersion() const
+{
+  return this->DefaultTargetFrameworkTargetsVersion;
 }
 
 std::string cmGlobalVisualStudio8Generator::GetGenerateStampList()

@@ -507,12 +507,9 @@ void cmVisualStudio10TargetGenerator::Generate()
         } else if (cmValue tfVer = this->GeneratorTarget->GetProperty(
                      "DOTNET_TARGET_FRAMEWORK_VERSION")) {
           targetFrameworkVersion = *tfVer;
-        } else if (this->ProjectType == csproj &&
-                   this->GlobalGenerator->TargetsWindowsCE() &&
-                   this->GlobalGenerator->GetVersion() ==
-                     cmGlobalVisualStudioGenerator::VS12) {
-          // VS12 .NETCF default to .NET framework 3.9
-          targetFrameworkVersion = "v3.9";
+        } else if (this->ProjectType == csproj) {
+          targetFrameworkVersion =
+            this->GlobalGenerator->GetTargetFrameworkVersion();
         }
         if (this->ProjectType == vcxproj &&
             this->GlobalGenerator->TargetsWindowsCE()) {
@@ -527,15 +524,19 @@ void cmVisualStudio10TargetGenerator::Generate()
             if (cmValue tfId = this->GeneratorTarget->GetProperty(
                   "VS_TARGET_FRAMEWORK_IDENTIFIER")) {
               targetFrameworkIdentifier = *tfId;
-            } else {
-              targetFrameworkIdentifier = "WindowsEmbeddedCompact";
             }
             if (cmValue tfTargetsVer = this->GeneratorTarget->GetProperty(
                   "VS_TARGET_FRAMEWORKS_TARGET_VERSION")) {
               targetFrameworkTargetsVersion = *tfTargetsVer;
-            } else {
-              targetFrameworkTargetsVersion = "v8.0";
             }
+          }
+          if (!targetFrameworkIdentifier) {
+            targetFrameworkIdentifier =
+              this->GlobalGenerator->GetTargetFrameworkIdentifier();
+          }
+          if (!targetFrameworkTargetsVersion) {
+            targetFrameworkTargetsVersion =
+              this->GlobalGenerator->GetTargetFrameworkTargetsVersion();
           }
         }
         if (targetFramework) {
