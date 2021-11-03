@@ -320,16 +320,15 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   if (source.empty() && output.empty()) {
     // Source is empty, use the target.
     std::vector<std::string> no_depends;
-    mf.AddCustomCommandToTarget(
-      target, byproducts, no_depends, commandLines, cctype, comment,
-      working.c_str(), mf.GetPolicyStatus(cmPolicies::CMP0116), escapeOldStyle,
-      uses_terminal, depfile, job_pool, command_expand_lists);
+    mf.AddCustomCommandToTarget(target, byproducts, no_depends, commandLines,
+                                cctype, comment, working.c_str(),
+                                escapeOldStyle, uses_terminal, depfile,
+                                job_pool, command_expand_lists);
   } else if (target.empty()) {
     // Target is empty, use the output.
     mf.AddCustomCommandToOutput(
       output, byproducts, depends, main_dependency, implicit_depends,
-      commandLines, comment, working.c_str(),
-      mf.GetPolicyStatus(cmPolicies::CMP0116), nullptr, false, escapeOldStyle,
+      commandLines, comment, working.c_str(), nullptr, false, escapeOldStyle,
       uses_terminal, command_expand_lists, depfile, job_pool);
   } else if (!byproducts.empty()) {
     status.SetError("BYPRODUCTS may not be specified with SOURCE signatures");
@@ -366,8 +365,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
 
     // Use the old-style mode for backward compatibility.
     mf.AddCustomCommandOldStyle(target, outputs, depends, source, commandLines,
-                                comment,
-                                mf.GetPolicyStatus(cmPolicies::CMP0116));
+                                comment);
   }
 
   return true;

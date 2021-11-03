@@ -10,7 +10,6 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
@@ -99,11 +98,9 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
       const char* no_comment = nullptr;
       const char* no_working_dir = nullptr;
       mf.AddCustomCommandToOutput(cxxres, depends, no_main_dependency,
-                                  commandLines, no_comment, no_working_dir,
-                                  mf.GetPolicyStatus(cmPolicies::CMP0116));
+                                  commandLines, no_comment, no_working_dir);
       mf.AddCustomCommandToOutput(hname, depends, no_main_dependency,
-                                  commandLines, no_comment, no_working_dir,
-                                  mf.GetPolicyStatus(cmPolicies::CMP0116));
+                                  commandLines, no_comment, no_working_dir);
 
       cmSourceFile* sf = mf.GetSource(cxxres);
       sf->AddDepend(hname);

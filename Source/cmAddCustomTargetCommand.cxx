@@ -10,7 +10,6 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -214,8 +213,8 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   bool escapeOldStyle = !verbatim;
   cmTarget* target = mf.AddUtilityCommand(
     targetName, excludeFromAll, working_directory.c_str(), byproducts, depends,
-    commandLines, mf.GetPolicyStatus(cmPolicies::CMP0116), escapeOldStyle,
-    comment, uses_terminal, command_expand_lists, job_pool);
+    commandLines, escapeOldStyle, comment, uses_terminal, command_expand_lists,
+    job_pool);
 
   // Add additional user-specified source files to the target.
   target->AddSources(sources);

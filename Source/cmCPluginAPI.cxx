@@ -225,8 +225,7 @@ static void CCONV cmAddUtilityCommand(void* arg, const char* utilityName,
   // Pass the call to the makefile instance.
   std::vector<std::string> no_byproducts;
   mf->AddUtilityCommand(utilityName, !all, nullptr, no_byproducts, depends2,
-                        commandLines,
-                        mf->GetPolicyStatus(cmPolicies::CMP0116));
+                        commandLines);
 }
 
 static void CCONV cmAddCustomCommand(void* arg, const char* source,
@@ -267,8 +266,7 @@ static void CCONV cmAddCustomCommand(void* arg, const char* source,
   // Pass the call to the makefile instance.
   const char* no_comment = nullptr;
   mf->AddCustomCommandOldStyle(target, outputs2, depends2, source,
-                               commandLines, no_comment,
-                               mf->GetPolicyStatus(cmPolicies::CMP0116));
+                               commandLines, no_comment);
 }
 
 static void CCONV cmAddCustomCommandToOutput(void* arg, const char* output,
@@ -304,8 +302,7 @@ static void CCONV cmAddCustomCommandToOutput(void* arg, const char* output,
   const char* no_comment = nullptr;
   const char* no_working_dir = nullptr;
   mf->AddCustomCommandToOutput(output, depends2, main_dependency, commandLines,
-                               no_comment, no_working_dir,
-                               mf->GetPolicyStatus(cmPolicies::CMP0116));
+                               no_comment, no_working_dir);
 }
 
 static void CCONV cmAddCustomCommandToTarget(void* arg, const char* target,
@@ -348,8 +345,7 @@ static void CCONV cmAddCustomCommandToTarget(void* arg, const char* target,
   const char* no_comment = nullptr;
   const char* no_working_dir = nullptr;
   mf->AddCustomCommandToTarget(target, no_byproducts, no_depends, commandLines,
-                               cctype, no_comment, no_working_dir,
-                               mf->GetPolicyStatus(cmPolicies::CMP0116));
+                               cctype, no_comment, no_working_dir);
 }
 
 static void addLinkLibrary(cmMakefile* mf, std::string const& target,
