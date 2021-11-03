@@ -161,6 +161,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 # scope somewhere else. We can't rely on it because different components may
 # have been requested for this call.
 set(HDF5_FOUND OFF)
+set(HDF5_LIBRARIES)
+set(HDF5_HL_LIBRARIES)
 
 # List of the valid HDF5 components
 set(HDF5_VALID_LANGUAGE_BINDINGS C CXX Fortran)
