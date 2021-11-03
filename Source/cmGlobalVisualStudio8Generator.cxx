@@ -67,12 +67,19 @@ void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
                                                           cmMakefile* mf)
 {
-  if (!this->PlatformInGeneratorName) {
-    this->GeneratorPlatform = p;
-    return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
-  } else {
+  if (this->PlatformInGeneratorName) {
+    // This is an old-style generator name that contains the platform name.
+    // No explicit platform specification is supported, so pass it through
+    // to our base class implementation, which errors on non-empty platforms.
     return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform(p, mf);
   }
+
+  this->GeneratorPlatform = p;
+
+  // The generator name does not contain the platform name, and so supports
+  // explicit platform specification.  We handled that above, so pass an
+  // empty platform name to our base class implementation so it does not error.
+  return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
 }
 
 std::string cmGlobalVisualStudio8Generator::GetGenerateStampList()
