@@ -161,6 +161,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 # scope somewhere else. We can't rely on it because different components may
 # have been requested for this call.
 set(HDF5_FOUND OFF)
+set(HDF5_LIBRARIES)
+set(HDF5_HL_LIBRARIES)
 
 # List of the valid HDF5 components
 set(HDF5_VALID_LANGUAGE_BINDINGS C CXX Fortran)
@@ -586,6 +588,9 @@ if(NOT HDF5_FOUND)
   set(HDF5_COMPILER_NO_INTERROGATE TRUE)
   # Only search for languages we've enabled
   foreach(_lang IN LISTS HDF5_LANGUAGE_BINDINGS)
+    set(HDF5_${_lang}_LIBRARIES)
+    set(HDF5_${_lang}_HL_LIBRARIES)
+
     # First check to see if our regular compiler is one of wrappers
     if(_lang STREQUAL "C")
       _HDF5_test_regular_compiler_C(
@@ -811,6 +816,9 @@ if( NOT HDF5_FOUND )
     endif()
 
     foreach(_lang IN LISTS HDF5_LANGUAGE_BINDINGS)
+        set(HDF5_${_lang}_LIBRARIES)
+        set(HDF5_${_lang}_HL_LIBRARIES)
+
         # The "main" library.
         set(_hdf5_main_library "")
 
