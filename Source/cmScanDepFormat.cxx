@@ -97,7 +97,7 @@ bool cmScanDepFormat_P1689_Parse(std::string const& arg_pp,
   }
 
   Json::Value const& version = ppi["version"];
-  if (version.asUInt() != 0) {
+  if (version.asUInt() > 1) {
     cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
                                   arg_pp, ": version ", version.asString()));
     return false;
