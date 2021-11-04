@@ -1749,7 +1749,7 @@ void cmNinjaTargetGenerator::EnsureDirectoryExists(
   } else {
     cmGlobalNinjaGenerator* gg = this->GetGlobalGenerator();
     std::string fullPath = gg->GetCMakeInstance()->GetHomeOutputDirectory();
-    // Also ensures their is a trailing slash.
+    // Also ensures there is a trailing slash.
     gg->StripNinjaOutputPathPrefixAsSuffix(fullPath);
     fullPath += path;
     cmSystemTools::MakeDirectory(fullPath);
