@@ -153,6 +153,8 @@ public:
    */
   virtual void Configure();
 
+  virtual bool InspectConfigTypeVariables() { return true; }
+
   bool Compute();
   virtual void AddExtraIDETargets() {}
 

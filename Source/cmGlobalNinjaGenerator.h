@@ -481,8 +481,6 @@ protected:
     const std::set<std::string>& all, const std::set<std::string>& defaults,
     const std::vector<std::string>& items);
 
-  virtual bool InspectConfigTypeVariables() { return true; }
-
   std::set<std::string> CrossConfigs;
   std::set<std::string> DefaultConfigs;
   std::string DefaultFileConfig;

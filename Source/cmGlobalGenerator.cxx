@@ -1456,6 +1456,9 @@ bool cmGlobalGenerator::Compute()
                                          this->SupportsDefaultConfigs())) {
     return false;
   }
+  if (!this->InspectConfigTypeVariables()) {
+    return false;
+  }
 
   // Some generators track files replaced during the Generate.
   // Start with an empty vector:
