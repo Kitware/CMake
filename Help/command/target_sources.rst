@@ -68,8 +68,8 @@ File Sets
 .. code-block:: cmake
 
   target_sources(<target>
-    <INTERFACE|PUBLIC|PRIVATE> [FILE_SET set1] [TYPE type1] [BASE_DIRS dirs1...] [FILES files1...]
-    [<INTERFACE|PUBLIC|PRIVATE> [FILE_SET set2] [TYPE type2] [BASE_DIRS dirs2...] [FILES files2...])
+    <INTERFACE|PUBLIC|PRIVATE> FILE_SET set1 [TYPE type1] [BASE_DIRS dirs1...] [FILES files1...]
+    [<INTERFACE|PUBLIC|PRIVATE> FILE_SET set2 [TYPE type2] [BASE_DIRS dirs2...] [FILES files2...])
 
 Adds a file set to a target, or adds files to an existing file set. Targets
 have zero or more named file sets. Each file set has a name, a type, a scope of
