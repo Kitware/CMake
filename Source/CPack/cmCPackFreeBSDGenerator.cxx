@@ -205,7 +205,7 @@ std::string cmCPackFreeBSDGenerator::var_lookup(const char* var_name)
 {
   cmValue pv = this->GetOption(var_name);
   if (!pv) {
-    return std::string();
+    return {};
   }
   return *pv;
 }

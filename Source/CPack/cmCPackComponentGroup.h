@@ -35,12 +35,10 @@ class cmCPackComponent
 {
 public:
   cmCPackComponent()
-    : Group(nullptr)
-    , IsRequired(true)
+    : IsRequired(true)
     , IsHidden(false)
     , IsDisabledByDefault(false)
     , IsDownloaded(false)
-    , TotalSize(0)
   {
   }
 
@@ -51,7 +49,7 @@ public:
   std::string DisplayName;
 
   /// The component group that contains this component (if any).
-  cmCPackComponentGroup* Group;
+  cmCPackComponentGroup* Group = nullptr;
 
   /// Whether this component group must always be installed.
   bool IsRequired : 1;
@@ -103,7 +101,7 @@ public:
   unsigned long GetInstalledSizeInKbytes(const std::string& installDir) const;
 
 private:
-  mutable unsigned long TotalSize;
+  mutable unsigned long TotalSize = 0;
 };
 
 /** \class cmCPackComponentGroup
@@ -113,7 +111,8 @@ class cmCPackComponentGroup
 {
 public:
   cmCPackComponentGroup()
-    : ParentGroup(nullptr)
+    : IsBold(false)
+    , IsExpandedByDefault(false)
   {
   }
 
@@ -136,7 +135,7 @@ public:
   std::vector<cmCPackComponent*> Components;
 
   /// The parent group of this component group (if any).
-  cmCPackComponentGroup* ParentGroup;
+  cmCPackComponentGroup* ParentGroup = nullptr;
 
   /// The subgroups of this group.
   std::vector<cmCPackComponentGroup*> Subgroups;

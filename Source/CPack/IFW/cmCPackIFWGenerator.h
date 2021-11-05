@@ -9,12 +9,14 @@
 #include <string>
 #include <vector>
 
-#include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackIFWCommon.h"
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
+
+class cmCPackComponent;
+class cmCPackComponentGroup;
 
 /** \class cmCPackIFWGenerator
  * \brief A generator for Qt Installer Framework tools
@@ -30,8 +32,6 @@ public:
 
   using PackagesMap = std::map<std::string, cmCPackIFWPackage>;
   using RepositoriesMap = std::map<std::string, cmCPackIFWRepository>;
-  using ComponentsMap = std::map<std::string, cmCPackComponent>;
-  using ComponentGoupsMap = std::map<std::string, cmCPackComponentGroup>;
   using DependenceMap =
     std::map<std::string, cmCPackIFWPackage::DependenceStruct>;
 
@@ -154,8 +154,8 @@ private:
   std::string ArchiveFormat;
   std::string ArchiveCompression;
 
-  bool OnlineOnly;
-  bool ResolveDuplicateNames;
+  bool OnlineOnly{};
+  bool ResolveDuplicateNames{};
   std::vector<std::string> PkgsDirsVector;
   std::vector<std::string> RepoDirsVector;
 };

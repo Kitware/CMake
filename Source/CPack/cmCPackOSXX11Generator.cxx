@@ -20,8 +20,6 @@ cmCPackOSXX11Generator::~cmCPackOSXX11Generator() = default;
 
 int cmCPackOSXX11Generator::PackageFiles()
 {
-  // TODO: Use toplevel ?
-  //       It is used! Is this an obsolete comment?
 
   cmValue cpackPackageExecutables =
     this->GetOption("CPACK_PACKAGE_EXECUTABLES");
@@ -147,33 +145,26 @@ int cmCPackOSXX11Generator::PackageFiles()
   // since we get random dashboard failures with this one
   // try running it more than once
   int retVal = 1;
-  int numTries = 10;
   bool res = false;
-  while (numTries > 0) {
+  for (unsigned numTries = 10; numTries > 0; numTries--) {
     res = cmSystemTools::RunSingleCommand(
       dmgCmd.str(), &output, &output, &retVal, nullptr, this->GeneratorVerbose,
       cmDuration::zero());
     if (res && !retVal) {
-      numTries = -1;
-      break;
+      return 1;
     }
     cmSystemTools::Delay(500);
-    numTries--;
-  }
-  if (!res || retVal) {
-    cmGeneratedFileStream ofs(tmpFile);
-    ofs << "# Run command: " << dmgCmd.str() << std::endl
-        << "# Output:" << std::endl
-        << output << std::endl;
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Problem running hdiutil command: "
-                    << dmgCmd.str() << std::endl
-                    << "Please check " << tmpFile << " for errors"
-                    << std::endl);
-    return 0;
   }
 
-  return 1;
+  cmGeneratedFileStream ofs(tmpFile);
+  ofs << "# Run command: " << dmgCmd.str() << std::endl
+      << "# Output:" << std::endl
+      << output << std::endl;
+  cmCPackLogger(cmCPackLog::LOG_ERROR,
+                "Problem running hdiutil command: "
+                  << dmgCmd.str() << std::endl
+                  << "Please check " << tmpFile << " for errors" << std::endl);
+  return 0;
 }
 
 int cmCPackOSXX11Generator::InitializeInternal()

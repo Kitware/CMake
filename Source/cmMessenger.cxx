@@ -155,19 +155,16 @@ void cmMessenger::IssueMessage(MessageType t, const std::string& text,
                                const cmListFileBacktrace& backtrace) const
 {
   bool force = false;
-  if (!force) {
-    // override the message type, if needed, for warnings and errors
-    MessageType override = this->ConvertMessageType(t);
-    if (override != t) {
-      t = override;
-      force = true;
-    }
+  // override the message type, if needed, for warnings and errors
+  MessageType override = this->ConvertMessageType(t);
+  if (override != t) {
+    t = override;
+    force = true;
   }
 
-  if (!force && !this->IsMessageTypeVisible(t)) {
-    return;
+  if (force || this->IsMessageTypeVisible(t)) {
+    this->DisplayMessage(t, text, backtrace);
   }
-  this->DisplayMessage(t, text, backtrace);
 }
 
 void cmMessenger::DisplayMessage(MessageType t, const std::string& text,
