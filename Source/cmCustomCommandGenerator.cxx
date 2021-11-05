@@ -91,7 +91,7 @@ std::string EvaluateSplitConfigGenex(
 
     // Record targets referenced by the genex.
     if (utils) {
-      // FIXME: What is the proper condition for a cross-dependency?
+      // Use a cross-dependency if we referenced the command config.
       bool const cross = !useOutputConfig;
       for (cmGeneratorTarget* gt : cge->GetTargets()) {
         utils->emplace(BT<std::pair<std::string, bool>>(
@@ -176,6 +176,8 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
   cmGeneratorTarget const* target{ lg->FindGeneratorTargetToUse(
     this->Target) };
 
+  bool const distinctConfigs = this->OutputConfig != this->CommandConfig;
+
   const cmCustomCommandLines& cmdlines = this->CC->GetCommandLines();
   for (cmCustomCommandLine const& cmdline : cmdlines) {
     cmCustomCommandLine argv;
@@ -191,8 +193,10 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
         argv.push_back(std::move(parsed_arg));
       }
 
-      // For remaining arguments, we default to the OUTPUT_CONFIG.
-      useOutputConfig = true;
+      if (distinctConfigs) {
+        // For remaining arguments, we default to the OUTPUT_CONFIG.
+        useOutputConfig = true;
+      }
     }
 
     if (!argv.empty()) {
@@ -200,7 +204,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
       // collect the target to add a target-level dependency on it.
       cmGeneratorTarget* gt = this->LG->FindGeneratorTargetToUse(argv.front());
       if (gt && gt->GetType() == cmStateEnums::EXECUTABLE) {
-        // FIXME: What is the proper condition for a cross-dependency?
+        // GetArgv0Location uses the command config, so use a cross-dependency.
         bool const cross = true;
         this->Utilities.emplace(BT<std::pair<std::string, bool>>(
           { gt->GetName(), cross }, cc.GetBacktrace()));

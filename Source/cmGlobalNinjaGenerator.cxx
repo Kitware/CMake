@@ -568,9 +568,6 @@ void cmGlobalNinjaGenerator::Generate()
                                            msg.str());
     return;
   }
-  if (!this->InspectConfigTypeVariables()) {
-    return;
-  }
   if (!this->OpenBuildFileStreams()) {
     return;
   }

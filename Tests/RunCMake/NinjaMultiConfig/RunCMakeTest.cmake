@@ -344,6 +344,16 @@ run_ninja(CustomCommandOutputGenex echo_dbgx-release build-Release.ninja echo_db
 run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
 run_ninja(CustomCommandOutputGenex echo_dbgx-debug-in-release-graph build-Release.ninja echo_dbgx:Debug)
 run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+# echo_depend_target
+run_ninja(CustomCommandOutputGenex echo_depend_target-debug-prep build-Debug.ninja echo:Debug)
+run_ninja(CustomCommandOutputGenex echo_depend_target-debug build-Debug.ninja echo_depend_target)
+run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_depend_target-release-prep build-Release.ninja echo:Release)
+run_ninja(CustomCommandOutputGenex echo_depend_target-release build-Release.ninja echo_depend_target)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
+run_ninja(CustomCommandOutputGenex echo_depend_target-debug-in-release-graph-prep build-Release.ninja echo:Release)
+run_ninja(CustomCommandOutputGenex echo_depend_target-debug-in-release-graph build-Release.ninja echo_depend_target:Debug)
+run_ninja(CustomCommandOutputGenex clean-release-graph build-Release.ninja -t clean)
 # echo_target_raw
 run_ninja(CustomCommandOutputGenex echo_target_raw-debug build-Debug.ninja echo_target_raw:Debug)
 run_ninja(CustomCommandOutputGenex clean-debug-graph build-Debug.ninja -t clean)
