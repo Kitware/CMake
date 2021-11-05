@@ -60,6 +60,11 @@ expressions to ensure the sources are correctly assigned to the target.
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
 
+File Sets
+^^^^^^^^^
+
+.. versionadded:: 3.23
+
 .. code-block:: cmake
 
   target_sources(<target>
