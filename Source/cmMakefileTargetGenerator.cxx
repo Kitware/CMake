@@ -1624,6 +1624,10 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   vars.Fatbinary = fatbinaryOutput.c_str();
   vars.RegisterFile = registerFile.c_str();
 
+  std::string linkFlags;
+  this->GetDeviceLinkFlags(linkFlags, "CUDA");
+  vars.LinkFlags = linkFlags.c_str();
+
   std::string flags = this->GetFlags("CUDA", this->GetConfigName());
   vars.Flags = flags.c_str();
 

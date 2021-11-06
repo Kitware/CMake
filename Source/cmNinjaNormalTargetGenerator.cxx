@@ -326,6 +326,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRules(
   vars.Object = "$out";
   vars.Fatbinary = "$FATBIN";
   vars.RegisterFile = "$REGISTER";
+  vars.LinkFlags = "$LINK_FLAGS";
 
   std::string flags = this->GetFlags("CUDA", config);
   vars.Flags = flags.c_str();
@@ -794,6 +795,20 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatements(
     cmStrCat(objectDir, "/cmake_cuda_fatbin.h"), cmOutputConverter::SHELL);
   dcompile.Variables["REGISTER"] = localGen->ConvertToOutputFormat(
     cmStrCat(objectDir, "/cmake_cuda_register.h"), cmOutputConverter::SHELL);
+
+  cmNinjaLinkLineDeviceComputer linkLineComputer(
+    localGen, localGen->GetStateSnapshot().GetDirectory(), globalGen);
+  linkLineComputer.SetUseNinjaMulti(globalGen->IsMultiConfig());
+
+  // Link libraries and paths are only used during the final executable/library
+  // link.
+  std::string frameworkPath;
+  std::string linkPath;
+  std::string linkLibs;
+  localGen->GetDeviceLinkFlags(linkLineComputer, config, linkLibs,
+                               dcompile.Variables["LINK_FLAGS"], frameworkPath,
+                               linkPath, this->GetGeneratorTarget());
+
   globalGen->WriteBuild(this->GetCommonFileStream(), dcompile);
 }
 
