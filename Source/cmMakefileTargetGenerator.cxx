@@ -1530,9 +1530,9 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
     return;
   }
 
+  cmLocalUnixMakefileGenerator3* localGen{ this->LocalGenerator };
   std::vector<std::string> architectures = cmExpandedList(architecturesStr);
-  std::string const& relPath =
-    this->LocalGenerator->GetHomeRelativeOutputPath();
+  std::string const& relPath = localGen->GetHomeRelativeOutputPath();
 
   // Ensure there are no duplicates.
   const std::vector<std::string> linkDeps = [&]() -> std::vector<std::string> {
@@ -1552,12 +1552,12 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
 
   const std::string objectDir = this->GeneratorTarget->ObjectDirectory;
   const std::string relObjectDir =
-    this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir);
+    localGen->MaybeRelativeToCurBinDir(objectDir);
 
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> cleanFiles;
-  cleanFiles.push_back(this->LocalGenerator->MaybeRelativeToCurBinDir(output));
+  cleanFiles.push_back(localGen->MaybeRelativeToCurBinDir(output));
 
   std::string profiles;
   std::vector<std::string> fatbinaryDepends;
@@ -1594,8 +1594,8 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
       " -arch=sm_", architecture, registerFileCmd, " -o=$@ ",
       cmJoin(linkDeps, " "));
 
-    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr, cubin,
-                                        linkDeps, { command }, false);
+    localGen->WriteMakeRule(*this->BuildFileStream, nullptr, cubin, linkDeps,
+                            { command }, false);
   }
 
   // Combine all architectures into a single fatbinary.
@@ -1609,9 +1609,8 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   const std::string fatbinaryOutputRel =
     cmStrCat(relPath, relObjectDir, "cmake_cuda_fatbin.h");
 
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
-                                      fatbinaryOutputRel, fatbinaryDepends,
-                                      { fatbinaryCommand }, false);
+  localGen->WriteMakeRule(*this->BuildFileStream, nullptr, fatbinaryOutputRel,
+                          fatbinaryDepends, { fatbinaryCommand }, false);
 
   // Compile the stub that registers the kernels and contains the
   // fatbinaries.
@@ -1630,13 +1629,12 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
 
   std::string compileCmd = this->GetLinkRule("CMAKE_CUDA_DEVICE_LINK_COMPILE");
   std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-    this->LocalGenerator->CreateRulePlaceholderExpander());
-  rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
-                                               compileCmd, vars);
+    localGen->CreateRulePlaceholderExpander());
+  rulePlaceholderExpander->ExpandRuleVariables(localGen, compileCmd, vars);
 
   commands.emplace_back(compileCmd);
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr, output,
-                                      { fatbinaryOutputRel }, commands, false);
+  localGen->WriteMakeRule(*this->BuildFileStream, nullptr, output,
+                          { fatbinaryOutputRel }, commands, false);
 
   // Clean all the possible executable names and symlinks.
   this->CleanFiles.insert(cleanFiles.begin(), cleanFiles.end());

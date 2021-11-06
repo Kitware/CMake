@@ -744,9 +744,10 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatements(
     return deps;
   }();
 
+  cmGlobalNinjaGenerator* globalGen{ this->GetGlobalGenerator() };
   const std::string objectDir =
     cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
-             this->GetGlobalGenerator()->ConfigDirectory(config));
+             globalGen->ConfigDirectory(config));
   const std::string ninjaOutputDir = this->ConvertToNinjaPath(objectDir);
 
   cmNinjaBuild fatbinary(this->LanguageLinkerCudaFatbinaryRule(config));
@@ -777,26 +778,23 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatements(
       cmStrCat(" -im=profile=sm_", architecture, ",file=", cubin);
     fatbinary.ExplicitDeps.emplace_back(cubin);
 
-    this->GetGlobalGenerator()->WriteBuild(this->GetCommonFileStream(), dlink);
+    globalGen->WriteBuild(this->GetCommonFileStream(), dlink);
   }
 
   // Combine all architectures into a single fatbinary.
   fatbinary.Outputs = { cmStrCat(ninjaOutputDir, "/cmake_cuda_fatbin.h") };
-  this->GetGlobalGenerator()->WriteBuild(this->GetCommonFileStream(),
-                                         fatbinary);
+  globalGen->WriteBuild(this->GetCommonFileStream(), fatbinary);
 
   // Compile the stub that registers the kernels and contains the fatbinaries.
+  cmLocalNinjaGenerator* localGen{ this->GetLocalGenerator() };
   cmNinjaBuild dcompile(this->LanguageLinkerCudaDeviceCompileRule(config));
   dcompile.Outputs = { output };
   dcompile.ExplicitDeps = { cmStrCat(ninjaOutputDir, "/cmake_cuda_fatbin.h") };
-  dcompile.Variables["FATBIN"] =
-    this->GetLocalGenerator()->ConvertToOutputFormat(
-      cmStrCat(objectDir, "/cmake_cuda_fatbin.h"), cmOutputConverter::SHELL);
-  dcompile.Variables["REGISTER"] =
-    this->GetLocalGenerator()->ConvertToOutputFormat(
-      cmStrCat(objectDir, "/cmake_cuda_register.h"), cmOutputConverter::SHELL);
-  this->GetGlobalGenerator()->WriteBuild(this->GetCommonFileStream(),
-                                         dcompile);
+  dcompile.Variables["FATBIN"] = localGen->ConvertToOutputFormat(
+    cmStrCat(objectDir, "/cmake_cuda_fatbin.h"), cmOutputConverter::SHELL);
+  dcompile.Variables["REGISTER"] = localGen->ConvertToOutputFormat(
+    cmStrCat(objectDir, "/cmake_cuda_register.h"), cmOutputConverter::SHELL);
+  globalGen->WriteBuild(this->GetCommonFileStream(), dcompile);
 }
 
 void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
