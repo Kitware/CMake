@@ -170,9 +170,6 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
 
   // Expand the rule variables.
   {
-    bool useWatcomQuote =
-      this->Makefile->IsOn(linkRuleVar + "_USE_WATCOM_QUOTE");
-
     // Set path conversion for link script shells.
     this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
@@ -181,7 +178,6 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
         this->LocalGenerator,
         this->LocalGenerator->GetStateSnapshot().GetDirectory()));
     linkLineComputer->SetForResponse(useResponseFileForLibs);
-    linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
     linkLineComputer->SetRelink(relink);
 
     // Collect up flags to link in needed libraries.
@@ -193,7 +189,7 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
     // rule.
     std::string buildObjs;
     this->CreateObjectLists(useLinkScript, false, useResponseFileForObjects,
-                            buildObjs, depends, useWatcomQuote);
+                            buildObjs, depends, false);
 
     std::string const& aixExports = this->GetAIXExports(this->GetConfigName());
 
@@ -204,11 +200,9 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
       this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir),
       cmOutputConverter::SHELL);
 
-    cmOutputConverter::OutputFormat output = (useWatcomQuote)
-      ? cmOutputConverter::WATCOMQUOTE
-      : cmOutputConverter::SHELL;
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeRelativeToCurBinDir(targetOutput), output);
+      this->LocalGenerator->MaybeRelativeToCurBinDir(targetOutput),
+      cmOutputConverter::SHELL);
 
     std::string targetFullPathCompilePDB =
       this->ComputeTargetCompilePDB(this->GetConfigName());

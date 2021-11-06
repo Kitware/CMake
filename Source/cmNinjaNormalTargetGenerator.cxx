@@ -850,8 +850,6 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
 
   std::string createRule =
     genTarget->GetCreateRuleVariable(this->TargetLinkLanguage(config), config);
-  const bool useWatcomQuote =
-    this->GetMakefile()->IsOn(createRule + "_USE_WATCOM_QUOTE");
   cmLocalNinjaGenerator& localGen = *this->GetLocalGenerator();
 
   vars["TARGET_FILE"] =
@@ -862,7 +860,6 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
       this->GetLocalGenerator(),
       this->GetLocalGenerator()->GetStateSnapshot().GetDirectory(),
       globalGen));
-  linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
   linkLineComputer->SetUseNinjaMulti(globalGen->IsMultiConfig());
 
   localGen.GetDeviceLinkFlags(linkLineComputer.get(), config,
