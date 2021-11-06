@@ -855,16 +855,14 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
   vars["TARGET_FILE"] =
     localGen.ConvertToOutputFormat(output, cmOutputConverter::SHELL);
 
-  std::unique_ptr<cmLinkLineComputer> linkLineComputer(
-    new cmNinjaLinkLineDeviceComputer(
-      this->GetLocalGenerator(),
-      this->GetLocalGenerator()->GetStateSnapshot().GetDirectory(),
-      globalGen));
-  linkLineComputer->SetUseNinjaMulti(globalGen->IsMultiConfig());
+  cmNinjaLinkLineDeviceComputer linkLineComputer(
+    this->GetLocalGenerator(),
+    this->GetLocalGenerator()->GetStateSnapshot().GetDirectory(), globalGen);
+  linkLineComputer.SetUseNinjaMulti(globalGen->IsMultiConfig());
 
-  localGen.GetDeviceLinkFlags(linkLineComputer.get(), config,
-                              vars["LINK_LIBRARIES"], vars["LINK_FLAGS"],
-                              frameworkPath, linkPath, genTarget);
+  localGen.GetDeviceLinkFlags(linkLineComputer, config, vars["LINK_LIBRARIES"],
+                              vars["LINK_FLAGS"], frameworkPath, linkPath,
+                              genTarget);
 
   this->addPoolNinjaVariable("JOB_POOL_LINK", genTarget, vars);
 

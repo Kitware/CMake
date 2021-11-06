@@ -496,7 +496,7 @@ public:
 
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
-  void GetDeviceLinkFlags(cmLinkLineComputer* linkLineComputer,
+  void GetDeviceLinkFlags(cmLinkLineComputer& linkLineComputer,
                           const std::string& config, std::string& linkLibs,
                           std::string& linkFlags, std::string& frameworkPath,
                           std::string& linkPath, cmGeneratorTarget* target);
