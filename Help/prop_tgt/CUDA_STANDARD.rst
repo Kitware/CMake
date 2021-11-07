@@ -12,21 +12,27 @@ flag such as ``-std=gnu++11`` to the compile line.
 Supported values are:
 
 ``98``
-  CUDA C++98
+  CUDA C++98. Note that this maps to the same as ``03`` internally.
+
+``03``
+  CUDA C++03
 
 ``11``
   CUDA C++11
 
 ``14``
-  CUDA C++14
+  CUDA C++14. While CMake 3.8 and later *recognize* ``14`` as a valid value,
+  CMake 3.9 was the first version to include support for any compiler.
 
 ``17``
-  CUDA C++17
+  CUDA C++17. While CMake 3.8 and later *recognize* ``17`` as a valid value,
+  CMake 3.18 was the first version to include support for any compiler.
 
 ``20``
   .. versionadded:: 3.12
 
-  CUDA C++20
+  CUDA C++20. While CMake 3.12 and later *recognize* ``20`` as a valid value,
+  CMake 3.18 was the first version to include support for any compiler.
 
 ``23``
   .. versionadded:: 3.20
@@ -43,7 +49,7 @@ means that using:
 
 with a compiler which does not support ``-std=gnu++11`` or an equivalent
 flag will not result in an error or warning, but will instead add the
-``-std=gnu++98`` flag if supported.  This "decay" behavior may be controlled
+``-std=gnu++03`` flag if supported.  This "decay" behavior may be controlled
 with the :prop_tgt:`CUDA_STANDARD_REQUIRED` target property.
 Additionally, the :prop_tgt:`CUDA_EXTENSIONS` target property may be used to
 control whether compiler-specific extensions are enabled on a per-target basis.
