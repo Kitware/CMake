@@ -147,13 +147,10 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   auto& lg =
     cm::static_reference_cast<cmLocalVisualStudio7Generator>(generators[0]);
 
-  const char* no_working_directory = nullptr;
-  std::vector<std::string> no_byproducts;
-  std::vector<std::string> no_depends;
-  cmCustomCommandLines no_commands;
-  cmTarget* tgt = lg.AddUtilityCommand(
-    CMAKE_CHECK_BUILD_SYSTEM_TARGET, false, no_working_directory,
-    no_byproducts, no_depends, no_commands, cmPolicies::NEW);
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetCMP0116Status(cmPolicies::NEW);
+  cmTarget* tgt = lg.AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
+                                       std::move(cc));
 
   auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
   auto gt = ptr.get();
@@ -203,17 +200,15 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       std::vector<std::string> byproducts;
       byproducts.push_back(cm->GetGlobVerifyStamp());
 
-      lg.AddCustomCommandToTarget(
-        CMAKE_CHECK_BUILD_SYSTEM_TARGET, byproducts, no_depends,
-        verifyCommandLines, cmCustomCommandType::PRE_BUILD,
-        "Checking File Globs", no_working_directory, cmPolicies::NEW,
-        /*escapeOldStyle=*/true,
-        /*uses_terminal=*/false,
-        /*depfile=*/"",
-        /*job_pool=*/"",
-        /*command_expand_lists=*/false,
-        /*objLibCommands=*/cmObjectLibraryCommands::Reject,
-        /*stdPipesUTF8=*/stdPipesUTF8);
+      cc = cm::make_unique<cmCustomCommand>();
+      cc->SetByproducts(byproducts);
+      cc->SetCommandLines(verifyCommandLines);
+      cc->SetComment("Checking File Globs");
+      cc->SetCMP0116Status(cmPolicies::NEW);
+      cc->SetStdPipesUTF8(stdPipesUTF8);
+      lg.AddCustomCommandToTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET,
+                                  cmCustomCommandType::PRE_BUILD,
+                                  std::move(cc));
 
       // Ensure ZERO_CHECK always runs in Visual Studio using MSBuild,
       // otherwise the prebuild command will not be run.
@@ -241,12 +236,16 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // overwritten by the CreateVCProjBuildRule.
     // (this could be avoided with per-target source files)
     std::string no_main_dependency;
-    cmImplicitDependsList no_implicit_depends;
+    cc = cm::make_unique<cmCustomCommand>();
+    cc->SetOutputs(stamps);
+    cc->SetDepends(listFiles);
+    cc->SetCommandLines(commandLines);
+    cc->SetComment("Checking Build System");
+    cc->SetCMP0116Status(cmPolicies::NEW);
+    cc->SetEscapeOldStyle(false);
+    cc->SetStdPipesUTF8(stdPipesUTF8);
     if (cmSourceFile* file = lg.AddCustomCommandToOutput(
-          stamps, no_byproducts, listFiles, no_main_dependency,
-          no_implicit_depends, commandLines, "Checking Build System",
-          no_working_directory, cmPolicies::NEW, true, false, false, false, "",
-          "", stdPipesUTF8)) {
+          no_main_dependency, std::move(cc), true)) {
       gt->AddSource(file->ResolveFullPath());
     } else {
       cmSystemTools::Error("Error adding rule for " + stamps[0]);

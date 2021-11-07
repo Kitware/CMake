@@ -329,53 +329,24 @@ public:
    * Add a custom PRE_BUILD, PRE_LINK, or POST_BUILD command to a target.
    */
   cmTarget* AddCustomCommandToTarget(
-    const std::string& target, const std::vector<std::string>& byproducts,
-    const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, cmCustomCommandType type,
-    const char* comment, const char* workingDir,
-    cmPolicies::PolicyStatus cmp0116, bool escapeOldStyle = true,
-    bool uses_terminal = false, const std::string& depfile = "",
-    const std::string& job_pool = "", bool command_expand_lists = false,
-    cmObjectLibraryCommands objLibCommands = cmObjectLibraryCommands::Reject,
-    bool stdPipesUTF8 = false);
+    const std::string& target, cmCustomCommandType type,
+    std::unique_ptr<cmCustomCommand> cc,
+    cmObjectLibraryCommands objLibCommands = cmObjectLibraryCommands::Reject);
 
   /**
    * Add a custom command to a source file.
    */
-  cmSourceFile* AddCustomCommandToOutput(
-    const std::string& output, const std::vector<std::string>& depends,
-    const std::string& main_dependency,
-    const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, cmPolicies::PolicyStatus cmp0116,
-    bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
-  cmSourceFile* AddCustomCommandToOutput(
-    const std::vector<std::string>& outputs,
-    const std::vector<std::string>& byproducts,
-    const std::vector<std::string>& depends,
-    const std::string& main_dependency,
-    const cmImplicitDependsList& implicit_depends,
-    const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, cmPolicies::PolicyStatus cmp0116,
-    bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
+  cmSourceFile* AddCustomCommandToOutput(const std::string& main_dependency,
+                                         std::unique_ptr<cmCustomCommand> cc,
+                                         bool replace = false);
 
   /**
    * Add a utility to the build.  A utility target is a command that is run
    * every time the target is built.
    */
-  cmTarget* AddUtilityCommand(
-    const std::string& utilityName, bool excludeFromAll,
-    const char* workingDir, const std::vector<std::string>& byproducts,
-    const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, cmPolicies::PolicyStatus cmp0116,
-    bool escapeOldStyle = true, const char* comment = nullptr,
-    bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& job_pool = "", bool stdPipesUTF8 = false);
+  cmTarget* AddUtilityCommand(const std::string& utilityName,
+                              bool excludeFromAll,
+                              std::unique_ptr<cmCustomCommand> cc);
 
   virtual std::string CreateUtilityOutput(
     std::string const& targetName, std::vector<std::string> const& byproducts,

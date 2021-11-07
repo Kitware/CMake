@@ -1057,14 +1057,8 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
 }
 
 cmTarget* cmLocalGenerator::AddCustomCommandToTarget(
-  const std::string& target, const std::vector<std::string>& byproducts,
-  const std::vector<std::string>& depends,
-  const cmCustomCommandLines& commandLines, cmCustomCommandType type,
-  const char* comment, const char* workingDir,
-  cmPolicies::PolicyStatus cmp0116, bool escapeOldStyle, bool uses_terminal,
-  const std::string& depfile, const std::string& job_pool,
-  bool command_expand_lists, cmObjectLibraryCommands objLibCommands,
-  bool stdPipesUTF8)
+  const std::string& target, cmCustomCommandType type,
+  std::unique_ptr<cmCustomCommand> cc, cmObjectLibraryCommands objLibCommands)
 {
   cmTarget* t = this->Makefile->GetCustomCommandTarget(
     target, objLibCommands, this->DirectoryBacktrace);
@@ -1072,20 +1066,8 @@ cmTarget* cmLocalGenerator::AddCustomCommandToTarget(
     return nullptr;
   }
 
-  auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetBacktrace(this->DirectoryBacktrace);
-  cc->SetByproducts(byproducts);
-  cc->SetDepends(depends);
-  cc->SetCommandLines(commandLines);
-  cc->SetComment(comment);
-  cc->SetWorkingDirectory(workingDir);
-  cc->SetEscapeOldStyle(escapeOldStyle);
-  cc->SetUsesTerminal(uses_terminal);
-  cc->SetDepfile(depfile);
-  cc->SetJobPool(job_pool);
-  cc->SetCommandExpandLists(command_expand_lists);
-  cc->SetStdPipesUTF8(stdPipesUTF8);
-  cc->SetCMP0116Status(cmp0116);
+
   detail::AddCustomCommandToTarget(*this, cmCommandOrigin::Generator, t, type,
                                    std::move(cc));
 
@@ -1093,87 +1075,34 @@ cmTarget* cmLocalGenerator::AddCustomCommandToTarget(
 }
 
 cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
-  const std::string& output, const std::vector<std::string>& depends,
-  const std::string& main_dependency, const cmCustomCommandLines& commandLines,
-  const char* comment, const char* workingDir,
-  cmPolicies::PolicyStatus cmp0116, bool replace, bool escapeOldStyle,
-  bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool, bool stdPipesUTF8)
-{
-  std::vector<std::string> no_byproducts;
-  cmImplicitDependsList no_implicit_depends;
-  return this->AddCustomCommandToOutput(
-    { output }, no_byproducts, depends, main_dependency, no_implicit_depends,
-    commandLines, comment, workingDir, cmp0116, replace, escapeOldStyle,
-    uses_terminal, command_expand_lists, depfile, job_pool, stdPipesUTF8);
-}
-
-cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
-  const std::vector<std::string>& outputs,
-  const std::vector<std::string>& byproducts,
-  const std::vector<std::string>& depends, const std::string& main_dependency,
-  const cmImplicitDependsList& implicit_depends,
-  const cmCustomCommandLines& commandLines, const char* comment,
-  const char* workingDir, cmPolicies::PolicyStatus cmp0116, bool replace,
-  bool escapeOldStyle, bool uses_terminal, bool command_expand_lists,
-  const std::string& depfile, const std::string& job_pool, bool stdPipesUTF8)
+  const std::string& main_dependency, std::unique_ptr<cmCustomCommand> cc,
+  bool replace)
 {
   // Make sure there is at least one output.
-  if (outputs.empty()) {
+  if (cc->GetOutputs().empty()) {
     cmSystemTools::Error("Attempt to add a custom rule with no output!");
     return nullptr;
   }
 
-  auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetBacktrace(this->DirectoryBacktrace);
-  cc->SetOutputs(outputs);
-  cc->SetByproducts(byproducts);
-  cc->SetDepends(depends);
-  cc->SetImplicitDepends(implicit_depends);
-  cc->SetCommandLines(commandLines);
-  cc->SetComment(comment);
-  cc->SetWorkingDirectory(workingDir);
-  cc->SetEscapeOldStyle(escapeOldStyle);
-  cc->SetUsesTerminal(uses_terminal);
-  cc->SetCommandExpandLists(command_expand_lists);
-  cc->SetDepfile(depfile);
-  cc->SetJobPool(job_pool);
-  cc->SetStdPipesUTF8(stdPipesUTF8);
-  cc->SetCMP0116Status(cmp0116);
   return detail::AddCustomCommandToOutput(*this, cmCommandOrigin::Generator,
                                           main_dependency, std::move(cc),
                                           replace);
 }
 
 cmTarget* cmLocalGenerator::AddUtilityCommand(
-  const std::string& utilityName, bool excludeFromAll, const char* workingDir,
-  const std::vector<std::string>& byproducts,
-  const std::vector<std::string>& depends,
-  const cmCustomCommandLines& commandLines, cmPolicies::PolicyStatus cmp0116,
-  bool escapeOldStyle, const char* comment, bool uses_terminal,
-  bool command_expand_lists, const std::string& job_pool, bool stdPipesUTF8)
+  const std::string& utilityName, bool excludeFromAll,
+  std::unique_ptr<cmCustomCommand> cc)
 {
   cmTarget* target =
     this->Makefile->AddNewUtilityTarget(utilityName, excludeFromAll);
   target->SetIsGeneratorProvided(true);
 
-  if (commandLines.empty() && depends.empty()) {
+  if (cc->GetCommandLines().empty() && cc->GetDepends().empty()) {
     return target;
   }
 
-  auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetBacktrace(this->DirectoryBacktrace);
-  cc->SetWorkingDirectory(workingDir);
-  cc->SetByproducts(byproducts);
-  cc->SetDepends(depends);
-  cc->SetCommandLines(commandLines);
-  cc->SetEscapeOldStyle(escapeOldStyle);
-  cc->SetComment(comment);
-  cc->SetUsesTerminal(uses_terminal);
-  cc->SetCommandExpandLists(command_expand_lists);
-  cc->SetJobPool(job_pool);
-  cc->SetStdPipesUTF8(stdPipesUTF8);
-  cc->SetCMP0116Status(cmp0116);
   detail::AddUtilityCommand(*this, cmCommandOrigin::Generator, target,
                             std::move(cc));
 
@@ -2786,8 +2715,6 @@ void cmLocalGenerator::CopyPchCompilePdb(
     file << "endforeach()\n";
   }
 
-  bool stdPipesUTF8 = true;
-
   auto configGenex = [&](cm::string_view expr) -> std::string {
     if (this->GetGlobalGenerator()->IsMultiConfig()) {
       return cmStrCat("$<$<CONFIG:", config, ">:", expr, ">");
@@ -2801,28 +2728,27 @@ void cmLocalGenerator::CopyPchCompilePdb(
       configGenex(copy_script) });
 
   const std::string no_main_dependency;
-  const std::vector<std::string> no_deps;
   const char* no_message = "";
-  const char* no_current_dir = nullptr;
-  const cmPolicies::PolicyStatus cmp0116_new = cmPolicies::NEW;
-  std::vector<std::string> no_byproducts;
 
   std::vector<std::string> outputs;
   outputs.push_back(configGenex(
     cmStrCat(target_compile_pdb_dir, pdb_prefix, ReuseFrom, ".pdb")));
 
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetCommandLines(commandLines);
+  cc->SetComment(no_message);
+  cc->SetCMP0116Status(cmPolicies::NEW);
+  cc->SetStdPipesUTF8(true);
+
   if (this->GetGlobalGenerator()->IsVisualStudio()) {
+    cc->SetByproducts(outputs);
     this->AddCustomCommandToTarget(
-      target->GetName(), outputs, no_deps, commandLines,
-      cmCustomCommandType::PRE_BUILD, no_message, no_current_dir, cmp0116_new,
-      true, false, "", "", false, cmObjectLibraryCommands::Accept,
-      stdPipesUTF8);
+      target->GetName(), cmCustomCommandType::PRE_BUILD, std::move(cc),
+      cmObjectLibraryCommands::Accept);
   } else {
-    cmImplicitDependsList no_implicit_depends;
-    cmSourceFile* copy_rule = this->AddCustomCommandToOutput(
-      outputs, no_byproducts, no_deps, no_main_dependency, no_implicit_depends,
-      commandLines, no_message, no_current_dir, cmp0116_new, false, true,
-      false, false, "", "", stdPipesUTF8);
+    cc->SetOutputs(outputs);
+    cmSourceFile* copy_rule =
+      this->AddCustomCommandToOutput(no_main_dependency, std::move(cc));
 
     if (copy_rule) {
       target->AddSource(copy_rule->ResolveFullPath());

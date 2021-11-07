@@ -110,7 +110,6 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
   const auto& tgts = this->GetGeneratorTargets();
   for (auto& l : tgts) {
     if (l->GetType() == cmStateEnums::GLOBAL_TARGET) {
-      std::vector<std::string> no_depends;
       cmCustomCommandLines force_commands =
         cmMakeSingleCommandLine({ "cd", "." });
       std::string no_main_dependency;
@@ -120,9 +119,13 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
             this->Makefile->GetOrCreateGeneratedSource(force)) {
         sf->SetProperty("SYMBOLIC", "1");
       }
+      auto cc = cm::make_unique<cmCustomCommand>();
+      cc->SetOutputs(force);
+      cc->SetCommandLines(force_commands);
+      cc->SetComment(" ");
+      cc->SetCMP0116Status(cmPolicies::NEW);
       if (cmSourceFile* file = this->AddCustomCommandToOutput(
-            force, no_depends, no_main_dependency, force_commands, " ",
-            nullptr, cmPolicies::NEW, true)) {
+            no_main_dependency, std::move(cc), true)) {
         l->AddSource(file->ResolveFullPath());
       }
     }
@@ -240,16 +243,19 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   std::string argB = cmStrCat("-B", this->GetBinaryDirectory());
   std::string stampName =
     cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/generate.stamp");
-  bool stdPipesUTF8 = true;
   cmCustomCommandLines commandLines =
     cmMakeSingleCommandLine({ cmSystemTools::GetCMakeCommand(), argS, argB,
                               "--check-stamp-file", stampName });
   std::string comment = cmStrCat("Building Custom Rule ", makefileIn);
-  const char* no_working_directory = nullptr;
-  this->AddCustomCommandToOutput(stampName, listFiles, makefileIn,
-                                 commandLines, comment.c_str(),
-                                 no_working_directory, cmPolicies::NEW, true,
-                                 false, false, false, "", "", stdPipesUTF8);
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetOutputs(stampName);
+  cc->SetDepends(listFiles);
+  cc->SetCommandLines(commandLines);
+  cc->SetComment(comment.c_str());
+  cc->SetCMP0116Status(cmPolicies::NEW);
+  cc->SetEscapeOldStyle(false);
+  cc->SetStdPipesUTF8(true);
+  this->AddCustomCommandToOutput(makefileIn, std::move(cc), true);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
     // Finalize the source file path now since we're adding this after
     // the generator validated all project-named sources.
