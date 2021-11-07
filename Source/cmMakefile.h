@@ -199,14 +199,9 @@ public:
    * Dispatch adding a custom PRE_BUILD, PRE_LINK, or POST_BUILD command to a
    * target.
    */
-  cmTarget* AddCustomCommandToTarget(
-    const std::string& target, const std::vector<std::string>& byproducts,
-    const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, cmCustomCommandType type,
-    const char* comment, const char* workingDir, bool escapeOldStyle = true,
-    bool uses_terminal = false, const std::string& depfile = "",
-    const std::string& job_pool = "", bool command_expand_lists = false,
-    bool stdPipesUTF8 = false);
+  cmTarget* AddCustomCommandToTarget(const std::string& target,
+                                     cmCustomCommandType type,
+                                     std::unique_ptr<cmCustomCommand> cc);
 
   /**
    * Called for each file with custom command.
@@ -217,26 +212,8 @@ public:
    * Dispatch adding a custom command to a source file.
    */
   void AddCustomCommandToOutput(
-    const std::string& output, const std::vector<std::string>& depends,
-    const std::string& main_dependency,
-    const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, const CommandSourceCallback& callback = nullptr,
-    bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
-  void AddCustomCommandToOutput(
-    const std::vector<std::string>& outputs,
-    const std::vector<std::string>& byproducts,
-    const std::vector<std::string>& depends,
-    const std::string& main_dependency,
-    const cmImplicitDependsList& implicit_depends,
-    const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, const CommandSourceCallback& callback = nullptr,
-    bool replace = false, bool escapeOldStyle = true,
-    bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
+    const std::string& main_dependency, std::unique_ptr<cmCustomCommand> cc,
+    const CommandSourceCallback& callback = nullptr, bool replace = false);
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
@@ -284,14 +261,9 @@ public:
    * Dispatch adding a utility to the build.  A utility target is a command
    * that is run every time the target is built.
    */
-  cmTarget* AddUtilityCommand(
-    const std::string& utilityName, bool excludeFromAll,
-    const char* workingDir, const std::vector<std::string>& byproducts,
-    const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false, const std::string& job_pool = "",
-    bool stdPipesUTF8 = false);
+  cmTarget* AddUtilityCommand(const std::string& utilityName,
+                              bool excludeFromAll,
+                              std::unique_ptr<cmCustomCommand> cc);
 
   /**
    * Add a subdirectory to the build.

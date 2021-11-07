@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQTWrapUICommand.h"
 
+#include <utility>
+
+#include <cm/memory>
+
+#include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -84,19 +89,26 @@ bool cmQTWrapUICommand(std::vector<std::string> const& args,
       std::vector<std::string> depends;
       depends.push_back(uiName);
       std::string no_main_dependency;
-      const char* no_comment = nullptr;
-      const char* no_working_dir = nullptr;
-      mf.AddCustomCommandToOutput(hName, depends, no_main_dependency,
-                                  hCommandLines, no_comment, no_working_dir);
+      auto cc = cm::make_unique<cmCustomCommand>();
+      cc->SetOutputs(hName);
+      cc->SetDepends(depends);
+      cc->SetCommandLines(hCommandLines);
+      mf.AddCustomCommandToOutput(no_main_dependency, std::move(cc));
 
       depends.push_back(hName);
-      mf.AddCustomCommandToOutput(cxxName, depends, no_main_dependency,
-                                  cxxCommandLines, no_comment, no_working_dir);
+      cc = cm::make_unique<cmCustomCommand>();
+      cc->SetOutputs(cxxName);
+      cc->SetDepends(depends);
+      cc->SetCommandLines(cxxCommandLines);
+      mf.AddCustomCommandToOutput(no_main_dependency, std::move(cc));
 
       depends.clear();
       depends.push_back(hName);
-      mf.AddCustomCommandToOutput(mocName, depends, no_main_dependency,
-                                  mocCommandLines, no_comment, no_working_dir);
+      cc = cm::make_unique<cmCustomCommand>();
+      cc->SetOutputs(mocName);
+      cc->SetDepends(depends);
+      cc->SetCommandLines(mocCommandLines);
+      mf.AddCustomCommandToOutput(no_main_dependency, std::move(cc));
     }
   }
 

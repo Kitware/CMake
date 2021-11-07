@@ -4,6 +4,9 @@
 
 #include <utility>
 
+#include <cm/memory>
+
+#include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -210,11 +213,18 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   }
 
   // Add the utility target to the makefile.
-  bool escapeOldStyle = !verbatim;
-  cmTarget* target = mf.AddUtilityCommand(
-    targetName, excludeFromAll, working_directory.c_str(), byproducts, depends,
-    commandLines, escapeOldStyle, comment, uses_terminal, command_expand_lists,
-    job_pool);
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetWorkingDirectory(working_directory.c_str());
+  cc->SetByproducts(byproducts);
+  cc->SetDepends(depends);
+  cc->SetCommandLines(commandLines);
+  cc->SetEscapeOldStyle(!verbatim);
+  cc->SetComment(comment);
+  cc->SetUsesTerminal(uses_terminal);
+  cc->SetCommandExpandLists(command_expand_lists);
+  cc->SetJobPool(job_pool);
+  cmTarget* target =
+    mf.AddUtilityCommand(targetName, excludeFromAll, std::move(cc));
 
   // Add additional user-specified source files to the target.
   target->AddSources(sources);

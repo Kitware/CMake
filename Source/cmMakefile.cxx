@@ -1054,13 +1054,12 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
 }
 
 cmTarget* cmMakefile::AddCustomCommandToTarget(
-  const std::string& target, const std::vector<std::string>& byproducts,
-  const std::vector<std::string>& depends,
-  const cmCustomCommandLines& commandLines, cmCustomCommandType type,
-  const char* comment, const char* workingDir, bool escapeOldStyle,
-  bool uses_terminal, const std::string& depfile, const std::string& job_pool,
-  bool command_expand_lists, bool stdPipesUTF8)
+  const std::string& target, cmCustomCommandType type,
+  std::unique_ptr<cmCustomCommand> cc)
 {
+  const auto& byproducts = cc->GetByproducts();
+  const auto& commandLines = cc->GetCommandLines();
+
   cmTarget* t = this->GetCustomCommandTarget(
     target, cmObjectLibraryCommands::Reject, this->Backtrace);
 
@@ -1072,21 +1071,7 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
   // Always create the byproduct sources and mark them generated.
   this->CreateGeneratedOutputs(byproducts);
 
-  auto cmp0116 = this->GetPolicyStatus(cmPolicies::CMP0116);
-
-  auto cc = cm::make_unique<cmCustomCommand>();
-  cc->SetByproducts(byproducts);
-  cc->SetDepends(depends);
-  cc->SetCommandLines(commandLines);
-  cc->SetComment(comment);
-  cc->SetWorkingDirectory(workingDir);
-  cc->SetEscapeOldStyle(escapeOldStyle);
-  cc->SetUsesTerminal(uses_terminal);
-  cc->SetDepfile(depfile);
-  cc->SetJobPool(job_pool);
-  cc->SetCommandExpandLists(command_expand_lists);
-  cc->SetStdPipesUTF8(stdPipesUTF8);
-  cc->SetCMP0116Status(cmp0116);
+  cc->SetCMP0116Status(this->GetPolicyStatus(cmPolicies::CMP0116));
 
   // Dispatch command creation to allow generator expressions in outputs.
   this->AddGeneratorAction(
@@ -1103,31 +1088,13 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
 }
 
 void cmMakefile::AddCustomCommandToOutput(
-  const std::string& output, const std::vector<std::string>& depends,
-  const std::string& main_dependency, const cmCustomCommandLines& commandLines,
-  const char* comment, const char* workingDir,
-  const CommandSourceCallback& callback, bool replace, bool escapeOldStyle,
-  bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool, bool stdPipesUTF8)
+  const std::string& main_dependency, std::unique_ptr<cmCustomCommand> cc,
+  const CommandSourceCallback& callback, bool replace)
 {
-  std::vector<std::string> no_byproducts;
-  cmImplicitDependsList no_implicit_depends;
-  this->AddCustomCommandToOutput(
-    { output }, no_byproducts, depends, main_dependency, no_implicit_depends,
-    commandLines, comment, workingDir, callback, replace, escapeOldStyle,
-    uses_terminal, command_expand_lists, depfile, job_pool, stdPipesUTF8);
-}
+  const auto& outputs = cc->GetOutputs();
+  const auto& byproducts = cc->GetByproducts();
+  const auto& commandLines = cc->GetCommandLines();
 
-void cmMakefile::AddCustomCommandToOutput(
-  const std::vector<std::string>& outputs,
-  const std::vector<std::string>& byproducts,
-  const std::vector<std::string>& depends, const std::string& main_dependency,
-  const cmImplicitDependsList& implicit_depends,
-  const cmCustomCommandLines& commandLines, const char* comment,
-  const char* workingDir, const CommandSourceCallback& callback, bool replace,
-  bool escapeOldStyle, bool uses_terminal, bool command_expand_lists,
-  const std::string& depfile, const std::string& job_pool, bool stdPipesUTF8)
-{
   // Make sure there is at least one output.
   if (outputs.empty()) {
     cmSystemTools::Error("Attempt to add a custom rule with no output!");
@@ -1143,23 +1110,7 @@ void cmMakefile::AddCustomCommandToOutput(
   this->CreateGeneratedOutputs(outputs);
   this->CreateGeneratedOutputs(byproducts);
 
-  auto cmp0116 = this->GetPolicyStatus(cmPolicies::CMP0116);
-
-  auto cc = cm::make_unique<cmCustomCommand>();
-  cc->SetOutputs(outputs);
-  cc->SetByproducts(byproducts);
-  cc->SetDepends(depends);
-  cc->SetImplicitDepends(implicit_depends);
-  cc->SetCommandLines(commandLines);
-  cc->SetComment(comment);
-  cc->SetWorkingDirectory(workingDir);
-  cc->SetEscapeOldStyle(escapeOldStyle);
-  cc->SetUsesTerminal(uses_terminal);
-  cc->SetCommandExpandLists(command_expand_lists);
-  cc->SetDepfile(depfile);
-  cc->SetJobPool(job_pool);
-  cc->SetStdPipesUTF8(stdPipesUTF8);
-  cc->SetCMP0116Status(cmp0116);
+  cc->SetCMP0116Status(this->GetPolicyStatus(cmPolicies::CMP0116));
 
   // Dispatch command creation to allow generator expressions in outputs.
   this->AddGeneratorAction(
@@ -1182,16 +1133,19 @@ void cmMakefile::AddCustomCommandOldStyle(
   const std::vector<std::string>& depends, const std::string& source,
   const cmCustomCommandLines& commandLines, const char* comment)
 {
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetDepends(depends);
+  cc->SetCommandLines(commandLines);
+  cc->SetComment(comment);
+
   // Translate the old-style signature to one of the new-style
   // signatures.
   if (source == target) {
     // In the old-style signature if the source and target were the
     // same then it added a post-build rule to the target.  Preserve
     // this behavior.
-    std::vector<std::string> no_byproducts;
-    this->AddCustomCommandToTarget(
-      target, no_byproducts, depends, commandLines,
-      cmCustomCommandType::POST_BUILD, comment, nullptr);
+    this->AddCustomCommandToTarget(target, cmCustomCommandType::POST_BUILD,
+                                   std::move(cc));
     return;
   }
 
@@ -1223,18 +1177,20 @@ void cmMakefile::AddCustomCommandOldStyle(
   if (sourceFiles.find(source)) {
     // The source looks like a real file.  Use it as the main dependency.
     for (std::string const& output : outputs) {
-      this->AddCustomCommandToOutput(output, depends, source, commandLines,
-                                     comment, nullptr, addRuleFileToTarget);
+      auto cc1 = cm::make_unique<cmCustomCommand>(*cc);
+      cc1->SetOutputs(output);
+      this->AddCustomCommandToOutput(source, std::move(cc1),
+                                     addRuleFileToTarget);
     }
   } else {
     std::string no_main_dependency;
-    std::vector<std::string> depends2 = depends;
-    depends2.push_back(source);
+    cc->AppendDepends({ source });
 
     // The source may not be a real file.  Do not use a main dependency.
     for (std::string const& output : outputs) {
-      this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
-                                     commandLines, comment, nullptr,
+      auto cc1 = cm::make_unique<cmCustomCommand>(*cc);
+      cc1->SetOutputs(output);
+      this->AddCustomCommandToOutput(no_main_dependency, std::move(cc1),
                                      addRuleFileToTarget);
     }
   }
@@ -1257,14 +1213,13 @@ void cmMakefile::AppendCustomCommandToOutput(
   }
 }
 
-cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, bool excludeFromAll, const char* workingDir,
-  const std::vector<std::string>& byproducts,
-  const std::vector<std::string>& depends,
-  const cmCustomCommandLines& commandLines, bool escapeOldStyle,
-  const char* comment, bool uses_terminal, bool command_expand_lists,
-  const std::string& job_pool, bool stdPipesUTF8)
+cmTarget* cmMakefile::AddUtilityCommand(const std::string& utilityName,
+                                        bool excludeFromAll,
+                                        std::unique_ptr<cmCustomCommand> cc)
 {
+  const auto& depends = cc->GetDepends();
+  const auto& byproducts = cc->GetByproducts();
+  const auto& commandLines = cc->GetCommandLines();
   cmTarget* target = this->AddNewUtilityTarget(utilityName, excludeFromAll);
 
   // Validate custom commands.
@@ -1276,20 +1231,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
   // Always create the byproduct sources and mark them generated.
   this->CreateGeneratedOutputs(byproducts);
 
-  auto cmp0116 = this->GetPolicyStatus(cmPolicies::CMP0116);
-
-  auto cc = cm::make_unique<cmCustomCommand>();
-  cc->SetWorkingDirectory(workingDir);
-  cc->SetByproducts(byproducts);
-  cc->SetDepends(depends);
-  cc->SetCommandLines(commandLines);
-  cc->SetEscapeOldStyle(escapeOldStyle);
-  cc->SetComment(comment);
-  cc->SetUsesTerminal(uses_terminal);
-  cc->SetCommandExpandLists(command_expand_lists);
-  cc->SetJobPool(job_pool);
-  cc->SetStdPipesUTF8(stdPipesUTF8);
-  cc->SetCMP0116Status(cmp0116);
+  cc->SetCMP0116Status(this->GetPolicyStatus(cmPolicies::CMP0116));
 
   // Dispatch command creation to allow generator expressions in outputs.
   this->AddGeneratorAction(

@@ -223,9 +223,10 @@ static void CCONV cmAddUtilityCommand(void* arg, const char* utilityName,
   }
 
   // Pass the call to the makefile instance.
-  std::vector<std::string> no_byproducts;
-  mf->AddUtilityCommand(utilityName, !all, nullptr, no_byproducts, depends2,
-                        commandLines);
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetDepends(depends2);
+  cc->SetCommandLines(commandLines);
+  mf->AddUtilityCommand(utilityName, !all, std::move(cc));
 }
 
 static void CCONV cmAddCustomCommand(void* arg, const char* source,
@@ -299,10 +300,11 @@ static void CCONV cmAddCustomCommandToOutput(void* arg, const char* output,
   }
 
   // Pass the call to the makefile instance.
-  const char* no_comment = nullptr;
-  const char* no_working_dir = nullptr;
-  mf->AddCustomCommandToOutput(output, depends2, main_dependency, commandLines,
-                               no_comment, no_working_dir);
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetOutputs(output);
+  cc->SetDepends(depends2);
+  cc->SetCommandLines(commandLines);
+  mf->AddCustomCommandToOutput(main_dependency, std::move(cc));
 }
 
 static void CCONV cmAddCustomCommandToTarget(void* arg, const char* target,
@@ -340,12 +342,9 @@ static void CCONV cmAddCustomCommandToTarget(void* arg, const char* target,
   }
 
   // Pass the call to the makefile instance.
-  std::vector<std::string> no_byproducts;
-  std::vector<std::string> no_depends;
-  const char* no_comment = nullptr;
-  const char* no_working_dir = nullptr;
-  mf->AddCustomCommandToTarget(target, no_byproducts, no_depends, commandLines,
-                               cctype, no_comment, no_working_dir);
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetCommandLines(commandLines);
+  mf->AddCustomCommandToTarget(target, cctype, std::move(cc));
 }
 
 static void addLinkLibrary(cmMakefile* mf, std::string const& target,

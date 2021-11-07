@@ -4,6 +4,9 @@
 
 #include <sstream>
 #include <unordered_set>
+#include <utility>
+
+#include <cm/memory>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -316,20 +319,25 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   }
 
   // Choose which mode of the command to use.
-  bool escapeOldStyle = !verbatim;
+  auto cc = cm::make_unique<cmCustomCommand>();
+  cc->SetByproducts(byproducts);
+  cc->SetCommandLines(commandLines);
+  cc->SetComment(comment);
+  cc->SetWorkingDirectory(working.c_str());
+  cc->SetEscapeOldStyle(!verbatim);
+  cc->SetUsesTerminal(uses_terminal);
+  cc->SetDepfile(depfile);
+  cc->SetJobPool(job_pool);
+  cc->SetCommandExpandLists(command_expand_lists);
   if (source.empty() && output.empty()) {
     // Source is empty, use the target.
-    std::vector<std::string> no_depends;
-    mf.AddCustomCommandToTarget(target, byproducts, no_depends, commandLines,
-                                cctype, comment, working.c_str(),
-                                escapeOldStyle, uses_terminal, depfile,
-                                job_pool, command_expand_lists);
+    mf.AddCustomCommandToTarget(target, cctype, std::move(cc));
   } else if (target.empty()) {
     // Target is empty, use the output.
-    mf.AddCustomCommandToOutput(
-      output, byproducts, depends, main_dependency, implicit_depends,
-      commandLines, comment, working.c_str(), nullptr, false, escapeOldStyle,
-      uses_terminal, command_expand_lists, depfile, job_pool);
+    cc->SetOutputs(output);
+    cc->SetDepends(depends);
+    cc->SetImplicitDepends(implicit_depends);
+    mf.AddCustomCommandToOutput(main_dependency, std::move(cc));
   } else if (!byproducts.empty()) {
     status.SetError("BYPRODUCTS may not be specified with SOURCE signatures");
     return false;
