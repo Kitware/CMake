@@ -88,11 +88,14 @@ public:
     Shell_Flag_IsUnix = (1 << 8),
 
     Shell_Flag_UnescapeNinjaConfiguration = (1 << 9),
+
+    Shell_Flag_IsResponse = (1 << 10)
   };
 
   std::string EscapeForShell(cm::string_view str, bool makeVars = false,
                              bool forEcho = false, bool useWatcomQuote = false,
-                             bool unescapeNinjaConfiguration = false) const;
+                             bool unescapeNinjaConfiguration = false,
+                             bool forResponse = false) const;
 
   enum class WrapQuotes
   {
