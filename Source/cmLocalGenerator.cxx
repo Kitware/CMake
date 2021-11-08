@@ -2698,8 +2698,8 @@ void cmLocalGenerator::CopyPchCompilePdb(
     cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
              target->GetName(), ".dir/");
 
-  const std::string copy_script =
-    cmStrCat(target_compile_pdb_dir, "copy_idb_pdb.cmake");
+  const std::string copy_script = cmStrCat(
+    target_compile_pdb_dir, "copy_idb_pdb_", config.c_str(), ".cmake");
   cmGeneratedFileStream file(copy_script);
 
   file << "# CMake generated file\n";
