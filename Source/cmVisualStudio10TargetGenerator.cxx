@@ -6,6 +6,7 @@
 #include <set>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cm/vector>
 #include <cmext/algorithm>
@@ -492,50 +493,68 @@ void cmVisualStudio10TargetGenerator::Generate()
       cmValue projLabel = this->GeneratorTarget->GetProperty("PROJECT_LABEL");
       e1.Element("ProjectName", projLabel ? projLabel : this->Name);
       {
-        cmValue targetFramework =
-          this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK");
-        if (targetFramework) {
-          if (targetFramework->find(';') != std::string::npos) {
-            e1.Element("TargetFrameworks", *targetFramework);
-          } else {
-            e1.Element("TargetFramework", *targetFramework);
-          }
-        } else {
-          // TODO: add deprecation warning for VS_* property?
-          cmValue p = this->GeneratorTarget->GetProperty(
-            "VS_DOTNET_TARGET_FRAMEWORK_VERSION");
-          if (!p) {
-            p = this->GeneratorTarget->GetProperty(
-              "DOTNET_TARGET_FRAMEWORK_VERSION");
-          }
-          std::string targetFrameworkVersion = p;
-          if (targetFrameworkVersion.empty() && this->ProjectType == csproj &&
-              this->GlobalGenerator->TargetsWindowsCE() &&
-              this->GlobalGenerator->GetVersion() ==
-                cmGlobalVisualStudioGenerator::VS12) {
-            // VS12 .NETCF default to .NET framework 3.9
-            targetFrameworkVersion = "v3.9";
-          }
-          if (!targetFrameworkVersion.empty()) {
-            e1.Element("TargetFrameworkVersion", targetFrameworkVersion);
-          }
+        cm::optional<std::string> targetFramework;
+        cm::optional<std::string> targetFrameworkVersion;
+        cm::optional<std::string> targetFrameworkIdentifier;
+        cm::optional<std::string> targetFrameworkTargetsVersion;
+        if (cmValue tf =
+              this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK")) {
+          targetFramework = *tf;
+        } else if (cmValue vstfVer = this->GeneratorTarget->GetProperty(
+                     "VS_DOTNET_TARGET_FRAMEWORK_VERSION")) {
+          // FIXME: Someday, add a deprecation warning for VS_* property.
+          targetFrameworkVersion = *vstfVer;
+        } else if (cmValue tfVer = this->GeneratorTarget->GetProperty(
+                     "DOTNET_TARGET_FRAMEWORK_VERSION")) {
+          targetFrameworkVersion = *tfVer;
+        } else if (this->ProjectType == csproj) {
+          targetFrameworkVersion =
+            this->GlobalGenerator->GetTargetFrameworkVersion();
         }
         if (this->ProjectType == vcxproj &&
             this->GlobalGenerator->TargetsWindowsCE()) {
           e1.Element("EnableRedirectPlatform", "true");
           e1.Element("RedirectPlatformValue", this->Platform);
         }
-        if (this->ProjectType == csproj &&
-            this->GlobalGenerator->TargetsWindowsCE()) {
-          cmValue targetFrameworkId = this->GeneratorTarget->GetProperty(
-            "VS_TARGET_FRAMEWORK_IDENTIFIER");
-          e1.Element("TargetFrameworkIdentifier",
-                     targetFrameworkId ? *targetFrameworkId
-                                       : "WindowsEmbeddedCompact");
-          cmValue targetFrameworkVer = this->GeneratorTarget->GetProperty(
-            "VS_TARGET_FRAMEWORKS_TARGET_VERSION");
+        if (this->ProjectType == csproj) {
+          if (this->GlobalGenerator->TargetsWindowsCE()) {
+            // FIXME: These target VS_TARGET_FRAMEWORK* target properties
+            // are undocumented settings only ever supported for WinCE.
+            // We need a better way to control these in general.
+            if (cmValue tfId = this->GeneratorTarget->GetProperty(
+                  "VS_TARGET_FRAMEWORK_IDENTIFIER")) {
+              targetFrameworkIdentifier = *tfId;
+            }
+            if (cmValue tfTargetsVer = this->GeneratorTarget->GetProperty(
+                  "VS_TARGET_FRAMEWORKS_TARGET_VERSION")) {
+              targetFrameworkTargetsVersion = *tfTargetsVer;
+            }
+          }
+          if (!targetFrameworkIdentifier) {
+            targetFrameworkIdentifier =
+              this->GlobalGenerator->GetTargetFrameworkIdentifier();
+          }
+          if (!targetFrameworkTargetsVersion) {
+            targetFrameworkTargetsVersion =
+              this->GlobalGenerator->GetTargetFrameworkTargetsVersion();
+          }
+        }
+        if (targetFramework) {
+          if (targetFramework->find(';') != std::string::npos) {
+            e1.Element("TargetFrameworks", *targetFramework);
+          } else {
+            e1.Element("TargetFramework", *targetFramework);
+          }
+        }
+        if (targetFrameworkVersion) {
+          e1.Element("TargetFrameworkVersion", *targetFrameworkVersion);
+        }
+        if (targetFrameworkIdentifier) {
+          e1.Element("TargetFrameworkIdentifier", *targetFrameworkIdentifier);
+        }
+        if (targetFrameworkTargetsVersion) {
           e1.Element("TargetFrameworkTargetsVersion",
-                     targetFrameworkVer ? *targetFrameworkVer : "v8.0");
+                     *targetFrameworkTargetsVersion);
         }
         if (!this->GlobalGenerator->GetPlatformToolsetCudaCustomDirString()
                .empty()) {
