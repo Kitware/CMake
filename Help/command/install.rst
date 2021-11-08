@@ -205,6 +205,8 @@ that may be installed:
   ``RESOURCE`` files. See :prop_tgt:`RESOURCE` for details.
 
 ``FILE_SET <set>``
+  .. versionadded:: 3.23
+
   If the file set ``<set>`` exists and is ``PUBLIC`` or ``INTERFACE``, any
   files added to the file set ``<set>`` created by
   :command:`target_sources(FILE_SET)` are installed in the specified
