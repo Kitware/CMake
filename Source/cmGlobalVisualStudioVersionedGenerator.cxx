@@ -426,6 +426,12 @@ cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
     this->DefaultPlatformName = VSHostPlatformName();
     this->DefaultPlatformToolsetHostArchitecture = VSHostArchitecture();
   }
+  if (this->Version >= cmGlobalVisualStudioGenerator::VS17) {
+    // FIXME: Search for an existing framework?  Under '%ProgramFiles(x86)%',
+    // see 'Reference Assemblies\Microsoft\Framework\.NETFramework'.
+    // Use a version installed by VS 2022 without a separate component.
+    this->DefaultTargetFrameworkVersion = "v4.7.2";
+  }
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
