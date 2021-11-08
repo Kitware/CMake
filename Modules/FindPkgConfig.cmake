@@ -12,13 +12,24 @@ Finds the ``pkg-config`` executable and adds the :command:`pkg_get_variable`,
 following variables will also be set:
 
 ``PKG_CONFIG_FOUND``
-  if pkg-config executable was found
-``PKG_CONFIG_EXECUTABLE``
-  pathname of the pkg-config program
-``PKG_CONFIG_ARGN``
-  list of arguments to pass to pkg-config
+  True if a pkg-config executable was found.
+
 ``PKG_CONFIG_VERSION_STRING``
-  version of pkg-config (since CMake 2.8.8)
+  .. versionadded:: 2.8.8
+
+  The version of pkg-config that was found.
+
+``PKG_CONFIG_EXECUTABLE``
+  The pathname of the pkg-config program.
+
+``PKG_CONFIG_ARGN``
+  .. versionadded:: 3.22
+
+  A list of arguments to pass to pkg-config.
+
+Both ``PKG_CONFIG_EXECUTABLE`` and ``PKG_CONFIG_ARGN`` are initialized by the
+module, but may be overridden by the user.  See `Variables Affecting Behavior`_
+for how these variables are initialized.
 
 #]========================================]
 
@@ -923,24 +934,30 @@ Variables Affecting Behavior
 
 .. variable:: PKG_CONFIG_EXECUTABLE
 
-  This can be set to the path of the pkg-config executable.  If not provided,
-  it will be set by the module as a result of calling :command:`find_program`
-  internally.
+  This cache variable can be set to the path of the pkg-config executable.
+  :command:`find_program` is called internally by the module with this
+  variable.
 
   .. versionadded:: 3.1
-    The ``PKG_CONFIG`` environment variable can be used as a hint.
+    The ``PKG_CONFIG`` environment variable can be used as a hint if
+    ``PKG_CONFIG_EXECUTABLE`` has not yet been set.
+
+  .. versionchanged:: 3.22
+    If the ``PKG_CONFIG`` environment variable is set, only the first
+    argument is taken from it when using it as a hint.
 
 .. variable:: PKG_CONFIG_ARGN
 
   .. versionadded:: 3.22
 
-  This can be set to a list of arguments to additionally pass to pkg-config
-  if needed. If not provided, it will be an empty string, however, if the
-  environment variable ``PKG_CONFIG`` is provided, this will be set to the
-  result of splitting the variable.
-
-  The ``PKG_CONFIG`` environment variable can be used to provide both
-  ``PKG_CONFIG_EXECUTABLE`` and ``PKG_CONFIG_ARGN``
+  This cache variable can be set to a list of arguments to additionally pass
+  to pkg-config if needed. If not provided, it will be initialized from the
+  ``PKG_CONFIG`` environment variable, if set. The first argument in that
+  environment variable is assumed to be the pkg-config program, while all
+  remaining arguments after that are used to initialize ``PKG_CONFIG_ARGN``.
+  If no such environment variable is defined, ``PKG_CONFIG_ARGN`` is
+  initialized to an empty string. The module does not update the variable once
+  it has been set in the cache.
 
 .. variable:: PKG_CONFIG_USE_CMAKE_PREFIX_PATH
 
