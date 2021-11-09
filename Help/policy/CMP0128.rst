@@ -9,8 +9,8 @@ When this policy is set to ``NEW``:
   :variable:`CMAKE_<LANG>_EXTENSIONS` if set, otherwise falling back to
   :variable:`CMAKE_<LANG>_EXTENSIONS_DEFAULT`.
 
-* Extensions are correctly disabled/enabled if :prop_tgt:`<LANG>_STANDARD` is
-  unset.
+* Extensions are correctly enabled/disabled if :prop_tgt:`<LANG>_STANDARD` is
+  unset or satisfied by the default.
 
 * Standard mode-affecting flags aren't added unless necessary to achieve the
   specified mode.
@@ -33,26 +33,6 @@ The ``OLD`` behavior:
 
 Code may need to be updated for the ``NEW`` behavior in the following cases:
 
-* If :prop_tgt:`<LANG>_EXTENSIONS` matches
-  :variable:`CMAKE_<LANG>_EXTENSIONS_DEFAULT` or is unset and the compiler's
-  default satisfies :prop_tgt:`<LANG>_STANDARD` but the compiled code requires
-  the exact standard specified.
-  Such code should set :prop_tgt:`<LANG>_STANDARD_REQUIRED` to ``ON``.
-
-  For example:
-
-  .. code-block:: cmake
-
-    cmake_minimum_required(VERSION |release|)
-    project(example C)
-
-    add_executable(exe main.c)
-    set_property(TARGET exe PROPERTY C_STANDARD 99)
-
-  If the compiler defaults to C11 then the standard specification for C99 is
-  satisfied and CMake will pass no flags. ``main.c`` will no longer compile if
-  it is incompatible with C11.
-
 * If a standard mode flag previously overridden by CMake's and not used during
   compiler detection now takes effect due to CMake no longer adding one as the
   default detected is appropriate.
@@ -63,6 +43,17 @@ Code may need to be updated for the ``NEW`` behavior in the following cases:
     of manually adding flags.
 
   * Or ensure the manually-specified flags are used during compiler detection.
+
+* If extensions were disabled without :prop_tgt:`<LANG>_STANDARD` being set
+  CMake previously wouldn't actually disable extensions.
+
+  Such code should be updated to not disable extensions if they are required.
+
+* If extensions were enabled/disabled when :prop_tgt:`<LANG>_STANDARD` was
+  satisfied by the compiler's default CMake previously wouldn't actually
+  enable/disable extensions.
+
+  Such code should be updated to set the correct extensions mode.
 
 If compiler flags affecting the standard mode are used during compiler
 detection (for example in :manual:`a toolchain file <cmake-toolchains(7)>`
