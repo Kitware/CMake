@@ -25,32 +25,33 @@ target_link_options (LinkOptions_private PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEV
 if (CMake_TEST_CUDA)
   enable_language(CUDA)
 
-  # Separable compilation is only supported on NVCC.
-  if(NOT CMake_TEST_CUDA STREQUAL "Clang")
-    add_executable(LinkOptions_CMP0105_UNSET LinkOptionsDevice.cu)
-    set_property(TARGET LinkOptions_CMP0105_UNSET PROPERTY CUDA_SEPARABLE_COMPILATION ON)
-    target_link_options(LinkOptions_CMP0105_UNSET PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>)
+  add_executable(LinkOptions_CMP0105_UNSET LinkOptionsDevice.cu)
+  set_property(TARGET LinkOptions_CMP0105_UNSET PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+  target_link_options(LinkOptions_CMP0105_UNSET PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>)
 
-    cmake_policy(SET CMP0105 OLD)
+  cmake_policy(SET CMP0105 OLD)
 
-    add_executable(LinkOptions_CMP0105_OLD LinkOptionsDevice.cu)
-    set_property(TARGET LinkOptions_CMP0105_OLD PROPERTY CUDA_SEPARABLE_COMPILATION ON)
-    target_link_options(LinkOptions_CMP0105_OLD PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>)
+  add_executable(LinkOptions_CMP0105_OLD LinkOptionsDevice.cu)
+  set_property(TARGET LinkOptions_CMP0105_OLD PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+  target_link_options(LinkOptions_CMP0105_OLD PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>)
 
-    cmake_policy(SET CMP0105 NEW)
+  cmake_policy(SET CMP0105 NEW)
 
-    add_executable(LinkOptions_CMP0105_NEW LinkOptionsDevice.cu)
-    set_property(TARGET LinkOptions_CMP0105_NEW PROPERTY CUDA_SEPARABLE_COMPILATION ON)
-    target_link_options(LinkOptions_CMP0105_NEW PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>)
+  add_executable(LinkOptions_CMP0105_NEW LinkOptionsDevice.cu)
+  set_property(TARGET LinkOptions_CMP0105_NEW PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+  target_link_options(LinkOptions_CMP0105_NEW PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>)
 
-    add_executable(LinkOptions_device LinkOptionsDevice.cu)
-    set_property(TARGET LinkOptions_device PROPERTY CUDA_SEPARABLE_COMPILATION ON)
-    target_link_options(LinkOptions_device PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>
-                                                  $<HOST_LINK:${pre}BADFLAG_NORMAL_LINK${obj}>)
+  add_executable(LinkOptions_device LinkOptionsDevice.cu)
+  set_property(TARGET LinkOptions_device PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+  target_link_options(LinkOptions_device PRIVATE $<DEVICE_LINK:${pre}BADFLAG_DEVICE_LINK${obj}>
+                                                 $<HOST_LINK:${pre}BADFLAG_NORMAL_LINK${obj}>)
 
-    add_executable(LinkOptions_host_link_options LinkOptionsDevice.cu)
-    set_property(TARGET LinkOptions_host_link_options PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+  add_executable(LinkOptions_host_link_options LinkOptionsDevice.cu)
+  set_property(TARGET LinkOptions_host_link_options PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+  if(CMake_TEST_CUDA STREQUAL "NVIDIA")
     target_link_options(LinkOptions_host_link_options PRIVATE -Wl,OPT1 -Xlinker=OPT2 "SHELL:-Xlinker OPT3" "SHELL:LINKER:OPT4 LINKER:OPT5")
+  elseif(CMake_TEST_CUDA STREQUAL "Clang")
+    target_link_options(LinkOptions_host_link_options PRIVATE -Wl,OPT1 "SHELL:-Xlinker OPT2" "SHELL:LINKER:OPT3 LINKER:OPT4")
   endif()
 
   add_executable(LinkOptions_no_device LinkOptionsDevice.cu)

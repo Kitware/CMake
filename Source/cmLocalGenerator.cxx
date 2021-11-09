@@ -1410,25 +1410,23 @@ std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
 }
 
 void cmLocalGenerator::GetDeviceLinkFlags(
-  cmLinkLineComputer* linkLineComputer, const std::string& config,
+  cmLinkLineComputer& linkLineComputer, const std::string& config,
   std::string& linkLibs, std::string& linkFlags, std::string& frameworkPath,
   std::string& linkPath, cmGeneratorTarget* target)
 {
   cmGeneratorTarget::DeviceLinkSetter setter(*target);
 
   cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
-  const std::string linkLanguage =
-    linkLineComputer->GetLinkerLanguage(target, config);
 
   if (pcli) {
     // Compute the required device link libraries when
     // resolving gpu lang device symbols
-    this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs, frameworkPath,
+    this->OutputLinkLibraries(pcli, &linkLineComputer, linkLibs, frameworkPath,
                               linkPath);
   }
 
   std::vector<std::string> linkOpts;
-  target->GetLinkOptions(linkOpts, config, linkLanguage);
+  target->GetLinkOptions(linkOpts, config, "CUDA");
   // LINK_OPTIONS are escaped.
   this->AppendCompileOptions(linkFlags, linkOpts);
 }
