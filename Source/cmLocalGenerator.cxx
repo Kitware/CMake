@@ -2754,7 +2754,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
   bool stdPipesUTF8 = true;
 
   auto configGenex = [&](cm::string_view expr) -> std::string {
-    if (this->GetGlobalGenerator()->IsVisualStudio()) {
+    if (this->GetGlobalGenerator()->IsMultiConfig()) {
       return cmStrCat("$<$<CONFIG:", config, ">:", expr, ">");
     }
     return std::string(expr);
@@ -2773,8 +2773,8 @@ void cmLocalGenerator::CopyPchCompilePdb(
   std::vector<std::string> no_byproducts;
 
   std::vector<std::string> outputs;
-  outputs.push_back(
-    cmStrCat(target_compile_pdb_dir, pdb_prefix, ReuseFrom, ".pdb"));
+  outputs.push_back(configGenex(
+    cmStrCat(target_compile_pdb_dir, pdb_prefix, ReuseFrom, ".pdb")));
 
   if (this->GetGlobalGenerator()->IsVisualStudio()) {
     this->AddCustomCommandToTarget(
