@@ -28,7 +28,6 @@ class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmCustomCommandGenerator;
 class cmCustomCommandLines;
-class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmImplicitDependsList;
@@ -665,10 +664,10 @@ private:
     cmGeneratorTarget* target,
     cmRange<std::vector<cmSourceFile*>::const_iterator> sources,
     cmValue beforeInclude, cmValue afterInclude, std::string filename) const;
-  void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
-                                 std::string const& sf_full_path,
-                                 cmValue beforeInclude, cmValue afterInclude,
-                                 cmValue uniqueIdName) const;
+  void WriteUnitySourceInclude(std::ostream& unity_file,
+                               std::string const& sf_full_path,
+                               cmValue beforeInclude, cmValue afterInclude,
+                               cmValue uniqueIdName) const;
   std::vector<std::string> AddUnityFilesModeAuto(
     cmGeneratorTarget* target, std::string const& lang,
     std::vector<cmSourceFile*> const& filtered_sources, cmValue beforeInclude,
