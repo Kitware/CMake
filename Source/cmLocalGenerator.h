@@ -40,6 +40,9 @@ class cmState;
 class cmTarget;
 class cmake;
 
+template <typename Iter>
+class cmRange;
+
 /** Flag if byproducts shall also be considered.  */
 enum class cmSourceOutputKind
 {
@@ -657,6 +660,11 @@ private:
                          const std::string& ReuseFrom,
                          cmGeneratorTarget* reuseTarget,
                          std::vector<std::string> const& extensions);
+
+  std::string WriteUnitySource(
+    cmGeneratorTarget* target,
+    cmRange<std::vector<cmSourceFile*>::const_iterator> sources,
+    cmValue beforeInclude, cmValue afterInclude, std::string filename) const;
   void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
                                  std::string const& sf_full_path,
                                  cmValue beforeInclude, cmValue afterInclude,
