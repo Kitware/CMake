@@ -11,6 +11,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <cm3p/kwiml/int.h>
@@ -660,22 +661,41 @@ private:
                          cmGeneratorTarget* reuseTarget,
                          std::vector<std::string> const& extensions);
 
-  std::string WriteUnitySource(
+  struct UnityBatchedSource
+  {
+    cmSourceFile* Source = nullptr;
+    UnityBatchedSource(cmSourceFile* sf)
+      : Source(sf)
+    {
+    }
+  };
+  struct UnitySource
+  {
+    std::string Path;
+    UnitySource(std::string path)
+      : Path(std::move(path))
+    {
+    }
+  };
+
+  UnitySource WriteUnitySource(
     cmGeneratorTarget* target,
-    cmRange<std::vector<cmSourceFile*>::const_iterator> sources,
+    cmRange<std::vector<UnityBatchedSource>::const_iterator> sources,
     cmValue beforeInclude, cmValue afterInclude, std::string filename) const;
   void WriteUnitySourceInclude(std::ostream& unity_file,
                                std::string const& sf_full_path,
                                cmValue beforeInclude, cmValue afterInclude,
                                cmValue uniqueIdName) const;
-  std::vector<std::string> AddUnityFilesModeAuto(
+  std::vector<UnitySource> AddUnityFilesModeAuto(
     cmGeneratorTarget* target, std::string const& lang,
-    std::vector<cmSourceFile*> const& filtered_sources, cmValue beforeInclude,
-    cmValue afterInclude, std::string const& filename_base, size_t batchSize);
-  std::vector<std::string> AddUnityFilesModeGroup(
+    std::vector<UnityBatchedSource> const& filtered_sources,
+    cmValue beforeInclude, cmValue afterInclude,
+    std::string const& filename_base, size_t batchSize);
+  std::vector<UnitySource> AddUnityFilesModeGroup(
     cmGeneratorTarget* target, std::string const& lang,
-    std::vector<cmSourceFile*> const& filtered_sources, cmValue beforeInclude,
-    cmValue afterInclude, std::string const& filename_base);
+    std::vector<UnityBatchedSource> const& filtered_sources,
+    cmValue beforeInclude, cmValue afterInclude,
+    std::string const& filename_base);
 };
 
 #if !defined(CMAKE_BOOTSTRAP)
