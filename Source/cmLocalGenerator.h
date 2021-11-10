@@ -14,6 +14,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include <cm3p/kwiml/int.h>
 
 #include "cmCustomCommandTypes.h"
@@ -664,6 +666,7 @@ private:
   struct UnityBatchedSource
   {
     cmSourceFile* Source = nullptr;
+    std::vector<size_t> Configs;
     UnityBatchedSource(cmSourceFile* sf)
       : Source(sf)
     {
@@ -672,27 +675,32 @@ private:
   struct UnitySource
   {
     std::string Path;
-    UnitySource(std::string path)
+    bool PerConfig = false;
+    UnitySource(std::string path, bool perConfig)
       : Path(std::move(path))
+      , PerConfig(perConfig)
     {
     }
   };
 
   UnitySource WriteUnitySource(
-    cmGeneratorTarget* target,
+    cmGeneratorTarget* target, std::vector<std::string> const& configs,
     cmRange<std::vector<UnityBatchedSource>::const_iterator> sources,
     cmValue beforeInclude, cmValue afterInclude, std::string filename) const;
   void WriteUnitySourceInclude(std::ostream& unity_file,
+                               cm::optional<std::string> const& cond,
                                std::string const& sf_full_path,
                                cmValue beforeInclude, cmValue afterInclude,
                                cmValue uniqueIdName) const;
   std::vector<UnitySource> AddUnityFilesModeAuto(
     cmGeneratorTarget* target, std::string const& lang,
+    std::vector<std::string> const& configs,
     std::vector<UnityBatchedSource> const& filtered_sources,
     cmValue beforeInclude, cmValue afterInclude,
     std::string const& filename_base, size_t batchSize);
   std::vector<UnitySource> AddUnityFilesModeGroup(
     cmGeneratorTarget* target, std::string const& lang,
+    std::vector<std::string> const& configs,
     std::vector<UnityBatchedSource> const& filtered_sources,
     cmValue beforeInclude, cmValue afterInclude,
     std::string const& filename_base);
