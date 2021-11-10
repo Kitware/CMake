@@ -143,7 +143,7 @@ std::string cmOutputConverter::ConvertToOutputFormat(cm::string_view source,
     result = this->EscapeForShell(result, true, false, output == WATCOMQUOTE,
                                   output == NINJAMULTI);
   } else if (output == RESPONSE) {
-    result = this->EscapeForShell(result, false, false, false);
+    result = this->EscapeForShell(result, false, false, false, false, true);
   }
   return result;
 }
@@ -175,9 +175,11 @@ static bool cmOutputConverterIsShellOperator(cm::string_view str)
   return (shellOperators.count(str) != 0);
 }
 
-std::string cmOutputConverter::EscapeForShell(
-  cm::string_view str, bool makeVars, bool forEcho, bool useWatcomQuote,
-  bool unescapeNinjaConfiguration) const
+std::string cmOutputConverter::EscapeForShell(cm::string_view str,
+                                              bool makeVars, bool forEcho,
+                                              bool useWatcomQuote,
+                                              bool unescapeNinjaConfiguration,
+                                              bool forResponse) const
 {
   // Do not escape shell operators.
   if (cmOutputConverterIsShellOperator(str)) {
@@ -202,6 +204,9 @@ std::string cmOutputConverter::EscapeForShell(
   }
   if (useWatcomQuote) {
     flags |= Shell_Flag_WatcomQuote;
+  }
+  if (forResponse) {
+    flags |= Shell_Flag_IsResponse;
   }
   if (this->GetState()->UseWatcomWMake()) {
     flags |= Shell_Flag_WatcomWMake;
@@ -358,6 +363,13 @@ bool cmOutputConverter::Shell_CharNeedsQuotes(char c, int flags)
   /* On all platforms quotes are needed to preserve whitespace.  */
   if (Shell_CharIsWhitespace(c)) {
     return true;
+  }
+
+  /* Quote hyphens in response files */
+  if (flags & Shell_Flag_IsResponse) {
+    if (c == '-') {
+      return true;
+    }
   }
 
   if (flags & Shell_Flag_IsUnix) {
