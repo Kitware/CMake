@@ -31,25 +31,25 @@
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.windows_vs2019_x64_ninja:
+.windows_vs2022_x64_ninja:
     extends: .windows_ninja
 
     variables:
-        CMAKE_CONFIGURATION: windows_vs2019_x64_ninja
-        VCVARSALL: "${VS160COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        CMAKE_CONFIGURATION: windows_vs2022_x64_ninja
+        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
-        VCVARSVERSION: "14.29.30133"
+        VCVARSVERSION: "14.30.30705"
 
 ### External testing
 
-.windows_vs2019_x64:
+.windows_vs2022_x64:
     extends: .windows
 
     variables:
-        CMAKE_CONFIGURATION: windows_vs2019_x64
-        CMAKE_GENERATOR: "Visual Studio 16 2019"
+        CMAKE_CONFIGURATION: windows_vs2022_x64
+        CMAKE_GENERATOR: "Visual Studio 17 2022"
         CMAKE_GENERATOR_PLATFORM: "x64"
-        CMAKE_GENERATOR_TOOLSET: "v142,version=14.29.30133"
+        CMAKE_GENERATOR_TOOLSET: "v143,version=14.30.30705"
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .windows_borland:
@@ -104,22 +104,22 @@
 
 ## Tags
 
-.windows_tags_nonconcurrent_vs2019:
+.windows_tags_nonconcurrent_vs2022:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows
         - shell
-        - vs2019
-        - msvc-19.29-16.11
+        - vs2022
+        - msvc-19.30
         - nonconcurrent
 
-.windows_tags_concurrent_vs2019:
+.windows_tags_concurrent_vs2022:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows
         - shell
-        - vs2019
-        - msvc-19.29-16.11
+        - vs2022
+        - msvc-19.30
         - concurrent
 
 .windows_tags_concurrent:
