@@ -104,7 +104,7 @@
 
 ## Tags
 
-.windows_builder_tags:
+.windows_tags_nonconcurrent_vs2019:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows
@@ -113,13 +113,20 @@
         - msvc-19.29-16.11
         - nonconcurrent
 
-.windows_builder_ext_tags:
+.windows_tags_concurrent_vs2019:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows
         - shell
         - vs2019
         - msvc-19.29-16.11
+        - concurrent
+
+.windows_tags_concurrent:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows
+        - shell
         - concurrent
 
 ## Windows-specific scripts

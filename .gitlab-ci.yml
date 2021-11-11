@@ -728,14 +728,14 @@ build:windows-vs2019-x64-ninja:
         - .windows_vs2019_x64_ninja
         - .cmake_build_windows
         - .cmake_build_artifacts
-        - .windows_builder_tags
+        - .windows_tags_nonconcurrent_vs2019
         - .run_manually
 
 test:windows-vs2019-x64-ninja:
     extends:
         - .windows_vs2019_x64_ninja
         - .cmake_test_windows
-        - .windows_builder_tags
+        - .windows_tags_nonconcurrent_vs2019
         - .cmake_test_artifacts
         - .run_dependent
     dependencies:
@@ -747,7 +747,7 @@ test:windows-vs2019-x64:
     extends:
         - .windows_vs2019_x64
         - .cmake_test_windows_external
-        - .windows_builder_ext_tags
+        - .windows_tags_concurrent_vs2019
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
@@ -759,7 +759,7 @@ test:windows-borland5.5:
     extends:
         - .windows_borland5.5
         - .cmake_test_windows_borland
-        - .windows_builder_ext_tags
+        - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
@@ -773,7 +773,7 @@ test:windows-borland5.8:
     extends:
         - .windows_borland5.8
         - .cmake_test_windows_borland
-        - .windows_builder_ext_tags
+        - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
@@ -787,7 +787,7 @@ test:windows-msvc-v71-nmake:
     extends:
         - .windows_msvc_v71_nmake
         - .cmake_test_windows_nmake
-        - .windows_builder_ext_tags
+        - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
@@ -801,7 +801,7 @@ test:windows-openwatcom1.9:
     extends:
         - .windows_openwatcom1.9
         - .cmake_test_windows_openwatcom
-        - .windows_builder_ext_tags
+        - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
