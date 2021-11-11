@@ -3,7 +3,6 @@
 #include "cmXCodeScheme.h"
 
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 #include <utility>
 
@@ -14,7 +13,14 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
-#include "cmXMLSafe.h"
+#include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmValue.h"
+#include "cmXCodeObject.h"
+#include "cmXMLWriter.h"
+
+class cmLocalGenerator;
 
 cmXCodeScheme::cmXCodeScheme(cmLocalGenerator* lg, cmXCodeObject* xcObj,
                              TestObjects tests,

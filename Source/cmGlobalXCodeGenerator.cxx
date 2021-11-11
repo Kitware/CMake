@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <iomanip>
 #include <sstream>
 #include <unordered_set>
@@ -17,35 +18,41 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmCMakePath.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmCustomCommandLines.h"
+#include "cmCustomCommandTypes.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGeneratorFactory.h"
+#include "cmLinkItem.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalXCodeGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocation.h"
+#include "cmSourceFileLocationKind.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
+#include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetDepend.h"
 #include "cmXCode21Object.h"
 #include "cmXCodeObject.h"
 #include "cmXCodeScheme.h"
+#include "cmXMLWriter.h"
 #include "cmake.h"
-
-struct cmLinkImplementation;
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(__APPLE__)
 #  include <CoreFoundation/CoreFoundation.h>

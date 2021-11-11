@@ -2,14 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalXCodeGenerator.h"
 
+#include <memory>
+#include <ostream>
+#include <utility>
+
 #include "cmGeneratorTarget.h"
 #include "cmGlobalXCodeGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
-class cmGeneratorTarget;
 class cmGlobalGenerator;
-class cmMakefile;
 
 cmLocalXCodeGenerator::cmLocalXCodeGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)
