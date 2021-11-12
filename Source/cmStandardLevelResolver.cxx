@@ -206,7 +206,8 @@ struct StandardLevelComputer
 
     // If the standard requested is older than the compiler's default or the
     // extension mode doesn't match then we need to use a flag.
-    if (stdIt < defaultStdIt) {
+    if (stdIt < defaultStdIt ||
+        (cmp0128 == cmPolicies::NEW && ext != defaultExt)) {
       auto offset = std::distance(cm::cbegin(stds), stdIt);
       return cmStrCat("CMAKE_", this->Language, stdsStrings[offset], "_", type,
                       "_COMPILE_OPTION");

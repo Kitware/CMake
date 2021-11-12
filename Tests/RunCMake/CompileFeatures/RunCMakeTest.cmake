@@ -36,7 +36,7 @@ endif()
 
 configure_file("${RunCMake_SOURCE_DIR}/CMakeLists.txt" "${RunCMake_BINARY_DIR}/CMakeLists.txt" COPYONLY)
 
-macro(test_build)
+function(test_build)
   set(test ${name}-${lang})
 
   configure_file("${RunCMake_SOURCE_DIR}/${name}.cmake" "${RunCMake_BINARY_DIR}/${test}.cmake" @ONLY)
@@ -52,7 +52,7 @@ macro(test_build)
   run_cmake(${test})
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(${test}-build ${CMAKE_COMMAND} --build . ${ARGN})
-endmacro()
+endfunction()
 
 # Mangle flags such as they're in verbose build output.
 macro(mangle_flags variable)
@@ -68,7 +68,7 @@ macro(mangle_flags variable)
   list(APPEND flags "${result}")
 endmacro()
 
-function(test_unset_standard)
+function(test_extensions_opposite)
   if(extensions_opposite)
     set(flag_ext "_EXT")
   endif()
@@ -81,8 +81,14 @@ function(test_unset_standard)
 
   mangle_flags(flag)
 
-  set(name UnsetStandard)
+  # Make sure we enable/disable extensions when:
+  # 1. LANG_STANDARD is unset.
+  set(name ExtensionsStandardUnset)
   set(RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0128=NEW)
+  test_build(--verbose)
+
+  # 2. LANG_STANDARD matches CMAKE_LANG_STANDARD_DEFAULT.
+  set(name ExtensionsStandardDefault)
   test_build(--verbose)
 endfunction()
 
@@ -138,7 +144,7 @@ function(test_lang lang ext)
     set(extensions_opposite ON)
   endif()
 
-  test_unset_standard()
+  test_extensions_opposite()
   test_no_unnecessary_flag()
   test_cmp0128_warn_match()
   test_cmp0128_warn_unset()
