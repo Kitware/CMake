@@ -18,7 +18,8 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows")
     set(msvc_year "2015")
     set(qt_abi "win64_msvc${msvc_year}_64")
   elseif ("$ENV{CMAKE_CONFIGURATION}" MATCHES "vs2017" OR
-          "$ENV{CMAKE_CONFIGURATION}" MATCHES "vs2019")
+          "$ENV{CMAKE_CONFIGURATION}" MATCHES "vs2019" OR
+          "$ENV{CMAKE_CONFIGURATION}" MATCHES "vs2022")
     set(qt_platform "windows_x86")
     set(msvc_year "2019")
     set(qt_abi "win64_msvc${msvc_year}_64")
