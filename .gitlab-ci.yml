@@ -755,6 +755,20 @@ test:windows-vs2022-x64:
     needs:
         - test:windows-vs2022-x64-ninja
 
+test:windows-vs2019-x64:
+    extends:
+        - .windows_vs2019_x64
+        - .cmake_test_windows_external
+        - .windows_tags_concurrent_vs2019
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - test:windows-vs2022-x64-ninja
+    needs:
+        - test:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 test:windows-borland5.5:
     extends:
         - .windows_borland5.5
