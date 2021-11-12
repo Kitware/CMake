@@ -11,7 +11,10 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
+
+#include <cm/optional>
 
 #include <cm3p/kwiml/int.h>
 
@@ -28,7 +31,6 @@ class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmCustomCommandGenerator;
 class cmCustomCommandLines;
-class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmImplicitDependsList;
@@ -39,6 +41,9 @@ class cmSourceFile;
 class cmState;
 class cmTarget;
 class cmake;
+
+template <typename Iter>
+class cmRange;
 
 /** Flag if byproducts shall also be considered.  */
 enum class cmSourceOutputKind
@@ -657,18 +662,48 @@ private:
                          const std::string& ReuseFrom,
                          cmGeneratorTarget* reuseTarget,
                          std::vector<std::string> const& extensions);
-  void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
-                                 std::string const& sf_full_path,
-                                 cmValue beforeInclude, cmValue afterInclude,
-                                 cmValue uniqueIdName) const;
-  std::vector<std::string> AddUnityFilesModeAuto(
+
+  struct UnityBatchedSource
+  {
+    cmSourceFile* Source = nullptr;
+    std::vector<size_t> Configs;
+    UnityBatchedSource(cmSourceFile* sf)
+      : Source(sf)
+    {
+    }
+  };
+  struct UnitySource
+  {
+    std::string Path;
+    bool PerConfig = false;
+    UnitySource(std::string path, bool perConfig)
+      : Path(std::move(path))
+      , PerConfig(perConfig)
+    {
+    }
+  };
+
+  UnitySource WriteUnitySource(
+    cmGeneratorTarget* target, std::vector<std::string> const& configs,
+    cmRange<std::vector<UnityBatchedSource>::const_iterator> sources,
+    cmValue beforeInclude, cmValue afterInclude, std::string filename) const;
+  void WriteUnitySourceInclude(std::ostream& unity_file,
+                               cm::optional<std::string> const& cond,
+                               std::string const& sf_full_path,
+                               cmValue beforeInclude, cmValue afterInclude,
+                               cmValue uniqueIdName) const;
+  std::vector<UnitySource> AddUnityFilesModeAuto(
     cmGeneratorTarget* target, std::string const& lang,
-    std::vector<cmSourceFile*> const& filtered_sources, cmValue beforeInclude,
-    cmValue afterInclude, std::string const& filename_base, size_t batchSize);
-  std::vector<std::string> AddUnityFilesModeGroup(
+    std::vector<std::string> const& configs,
+    std::vector<UnityBatchedSource> const& filtered_sources,
+    cmValue beforeInclude, cmValue afterInclude,
+    std::string const& filename_base, size_t batchSize);
+  std::vector<UnitySource> AddUnityFilesModeGroup(
     cmGeneratorTarget* target, std::string const& lang,
-    std::vector<cmSourceFile*> const& filtered_sources, cmValue beforeInclude,
-    cmValue afterInclude, std::string const& filename_base);
+    std::vector<std::string> const& configs,
+    std::vector<UnityBatchedSource> const& filtered_sources,
+    cmValue beforeInclude, cmValue afterInclude,
+    std::string const& filename_base);
 };
 
 #if !defined(CMAKE_BOOTSTRAP)
