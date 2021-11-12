@@ -9,6 +9,8 @@
 
 #include <cmext/algorithm>
 
+#include "cmsys/String.h"
+
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -148,6 +150,16 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
                                     true);
   xout.Attribute("debugServiceExtension", "internal");
   xout.Attribute("allowLocationSimulation", "YES");
+  if (cmValue gpuFrameCaptureMode = this->Target->GetTarget()->GetProperty(
+        "XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE")) {
+    std::string value = *gpuFrameCaptureMode;
+    if (cmsysString_strcasecmp(value.c_str(), "Metal") == 0) {
+      value = "1";
+    } else if (cmsysString_strcasecmp(value.c_str(), "Disabled") == 0) {
+      value = "3";
+    }
+    xout.Attribute("enableGPUFrameCaptureMode", value);
+  }
 
   // Diagnostics tab begin
 
