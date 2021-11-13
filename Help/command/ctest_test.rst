@@ -286,6 +286,8 @@ The following example demonstrates how to specify a custom value for the
    std::cout <<
      "<CTestDetails>My Custom Details Value</CTestDetails>" << std::endl;
 
+.. _`Additional Labels`:
+
 Additional Labels
 """""""""""""""""
 
