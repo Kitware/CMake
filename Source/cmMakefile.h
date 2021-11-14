@@ -24,6 +24,7 @@
 #include "cm_sys_stat.h"
 
 #include "cmAlgorithms.h"
+#include "cmCustomCommand.h"
 #include "cmCustomCommandTypes.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
@@ -50,7 +51,6 @@ class cmExportBuildFileGenerator;
 class cmFunctionBlocker;
 class cmGeneratorExpressionEvaluationFile;
 class cmGlobalGenerator;
-class cmImplicitDependsList;
 class cmInstallGenerator;
 class cmLocalGenerator;
 class cmMessenger;
@@ -144,6 +144,9 @@ public:
   {
     using ActionT =
       std::function<void(cmLocalGenerator&, const cmListFileBacktrace&)>;
+    using CCActionT =
+      std::function<void(cmLocalGenerator&, const cmListFileBacktrace&,
+                         std::unique_ptr<cmCustomCommand> cc)>;
 
   public:
     GeneratorAction(ActionT&& action)
@@ -151,10 +154,20 @@ public:
     {
     }
 
+    GeneratorAction(std::unique_ptr<cmCustomCommand> tcc, CCActionT&& action)
+      : CCAction(std::move(action))
+      , cc(std::move(tcc))
+    {
+    }
+
     void operator()(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt);
 
   private:
     ActionT Action;
+
+    // FIXME: Use std::variant
+    CCActionT CCAction;
+    std::unique_ptr<cmCustomCommand> cc;
   };
 
   /**
