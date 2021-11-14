@@ -56,7 +56,12 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 1)
 
-  set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "-flto")
+  if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 3.9)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "-flto=thin")
+  else()
+    set(CMAKE_${lang}_COMPILE_OPTIONS_IPO "-flto")
+  endif()
+
   set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
   set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)
   set(CMAKE_${lang}_ARCHIVE_CREATE_IPO "<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>")
