@@ -203,11 +203,17 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       std::vector<std::string> byproducts;
       byproducts.push_back(cm->GetGlobVerifyStamp());
 
-      lg.AddCustomCommandToTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET, byproducts,
-                                  no_depends, verifyCommandLines,
-                                  cmCustomCommandType::PRE_BUILD,
-                                  "Checking File Globs", no_working_directory,
-                                  cmPolicies::NEW, stdPipesUTF8);
+      lg.AddCustomCommandToTarget(
+        CMAKE_CHECK_BUILD_SYSTEM_TARGET, byproducts, no_depends,
+        verifyCommandLines, cmCustomCommandType::PRE_BUILD,
+        "Checking File Globs", no_working_directory, cmPolicies::NEW,
+        /*escapeOldStyle=*/true,
+        /*uses_terminal=*/false,
+        /*depfile=*/"",
+        /*job_pool=*/"",
+        /*command_expand_lists=*/false,
+        /*objLibCommands=*/cmObjectLibraryCommands::Reject,
+        /*stdPipesUTF8=*/stdPipesUTF8);
 
       // Ensure ZERO_CHECK always runs in Visual Studio using MSBuild,
       // otherwise the prebuild command will not be run.
