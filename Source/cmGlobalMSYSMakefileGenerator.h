@@ -3,8 +3,15 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <vector>
 
+#include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+
+class cmMakefile;
+class cmake;
+struct cmDocumentationEntry;
 
 /** \class cmGlobalMSYSMakefileGenerator
  * \brief Write a NMake makefiles.

@@ -12,7 +12,6 @@
 #include "cmIDEOptions.h"
 
 class cmLocalVisualStudioGenerator;
-class cmGeneratorTarget;
 
 using cmVS7FlagTable = cmIDEFlagTable;
 

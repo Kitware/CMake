@@ -1,12 +1,18 @@
 #include "cmVisualStudioGeneratorOptions.h"
 
+#include <algorithm>
+#include <map>
+#include <sstream>
+#include <utility>
+#include <vector>
+
 #include <cm/iterator>
 
 #include "cmAlgorithms.h"
-#include "cmGeneratorExpression.h"
-#include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudioGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 static void cmVS10EscapeForMSBuild(std::string& ret)

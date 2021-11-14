@@ -2,13 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalNMakeMakefileGenerator.h"
 
+#include <ostream>
+
+#include <cmext/algorithm>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmDocumentationEntry.h"
 #include "cmDuration.h"
-#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 
 cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator(cmake* cm)

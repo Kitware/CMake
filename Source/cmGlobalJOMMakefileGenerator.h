@@ -4,8 +4,16 @@
 
 #include <iosfwd>
 #include <memory>
+#include <string>
+#include <vector>
 
+#include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmValue.h"
+
+class cmMakefile;
+class cmake;
+struct cmDocumentationEntry;
 
 /** \class cmGlobalJOMMakefileGenerator
  * \brief Write a JOM makefiles.

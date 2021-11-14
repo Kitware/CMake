@@ -2,17 +2,26 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudioVersionedGenerator.h"
 
+#include <cstring>
+#include <set>
+#include <sstream>
+#include <utility>
+#include <vector>
+
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
-#include "cmLocalVisualStudio10Generator.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmVSSetupHelper.h"
 #include "cmake.h"
 

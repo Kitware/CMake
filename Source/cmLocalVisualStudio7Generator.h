@@ -5,7 +5,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 

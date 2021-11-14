@@ -8,6 +8,7 @@
 
 #include "cmLocalVisualStudio7Generator.h"
 
+class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
 

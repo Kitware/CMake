@@ -4,16 +4,18 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <iosfwd>
 #include <memory>
 #include <string>
 
 #include <cm/optional>
 
+#include "cmGlobalVisualStudio10Generator.h"
 #include "cmGlobalVisualStudio14Generator.h"
+#include "cmGlobalVisualStudioGenerator.h"
 #include "cmVSSetupHelper.h"
 
 class cmGlobalGeneratorFactory;
+class cmMakefile;
 class cmake;
 
 /** \class cmGlobalVisualStudioVersionedGenerator  */

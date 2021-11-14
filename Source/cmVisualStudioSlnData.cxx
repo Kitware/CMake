@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVisualStudioSlnData.h"
 
+#include <cstddef>
+#include <utility>
+
 const cmSlnProjectEntry* cmSlnData::GetProjectByGUID(
   const std::string& projectGUID) const
 {

@@ -4,8 +4,16 @@
 
 #include <iosfwd>
 #include <memory>
+#include <string>
+#include <vector>
 
-#include "cmGlobalNMakeMakefileGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
+
+class cmLocalGenerator;
+class cmMakefile;
+class cmake;
+struct cmDocumentationEntry;
 
 /** \class cmGlobalBorlandMakefileGenerator
  * \brief Write a Borland makefiles.

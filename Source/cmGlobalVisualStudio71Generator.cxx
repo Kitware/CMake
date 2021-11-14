@@ -2,11 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio71Generator.h"
 
-#include "cmDocumentationEntry.h"
+#include <map>
+#include <sstream>
+
 #include "cmGeneratorTarget.h"
-#include "cmLocalVisualStudio7Generator.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalVisualStudioGenerator.h"
+#include "cmListFileCache.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+
+class cmake;
 
 cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
   cmake* cm, const std::string& platformName)

@@ -2,8 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVisualStudio10TargetGenerator.h"
 
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
 #include <iterator>
 #include <set>
+#include <sstream>
 
 #include <cm/memory>
 #include <cm/optional>
@@ -13,21 +17,40 @@
 
 #include "windows.h"
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudio10Generator.h"
-#include "cmGlobalVisualStudioVersionedGenerator.h"
+#include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudioGenerator.h"
 #include "cmLinkLineDeviceComputer.h"
+#include "cmListFileCache.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalVisualStudio10Generator.h"
+#include "cmLocalVisualStudio7Generator.h"
+#include "cmLocalVisualStudioGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmPropertyMap.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocation.h"
+#include "cmSourceFileLocationKind.h"
+#include "cmSourceGroup.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmValue.h"
 #include "cmVisualStudioGeneratorOptions.h"
+
+struct cmIDEFlagTable;
 
 static void ConvertToWindowsSlash(std::string& s);
 
