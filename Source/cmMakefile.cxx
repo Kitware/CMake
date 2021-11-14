@@ -891,10 +891,16 @@ struct file_not_persistent
 };
 }
 
-void cmMakefile::AddGeneratorAction(GeneratorAction action)
+void cmMakefile::AddGeneratorAction(GeneratorAction&& action)
 {
   assert(!this->GeneratorActionsInvoked);
   this->GeneratorActions.emplace_back(std::move(action), this->Backtrace);
+}
+
+void cmMakefile::GeneratorAction::operator()(cmLocalGenerator& lg,
+                                             const cmListFileBacktrace& lfbt)
+{
+  Action(lg, lfbt);
 }
 
 void cmMakefile::DoGenerate(cmLocalGenerator& lg)
@@ -904,7 +910,7 @@ void cmMakefile::DoGenerate(cmLocalGenerator& lg)
 
   // give all the commands a chance to do something
   // after the file has been parsed before generation
-  for (const BT<GeneratorAction>& action : this->GeneratorActions) {
+  for (auto& action : this->GeneratorActions) {
     action.Value(lg, action.Backtrace);
   }
   this->GeneratorActionsInvoked = true;

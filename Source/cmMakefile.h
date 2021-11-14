@@ -140,13 +140,34 @@ public:
   bool EnforceUniqueName(std::string const& name, std::string& msg,
                          bool isCustom = false) const;
 
-  using GeneratorAction =
-    std::function<void(cmLocalGenerator&, const cmListFileBacktrace&)>;
+  class GeneratorAction
+  {
+    using ActionT =
+      std::function<void(cmLocalGenerator&, const cmListFileBacktrace&)>;
+
+  public:
+    GeneratorAction(ActionT&& action)
+      : Action(std::move(action))
+    {
+    }
+
+    void operator()(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt);
+
+  private:
+    ActionT Action;
+  };
 
   /**
    * Register an action that is executed during Generate
    */
-  void AddGeneratorAction(GeneratorAction action);
+  void AddGeneratorAction(GeneratorAction&& action);
+
+  /// Helper to insert the constructor GeneratorAction(args...)
+  template <class... Args>
+  void AddGeneratorAction(Args&&... args)
+  {
+    AddGeneratorAction(GeneratorAction(std::move(args)...));
+  }
 
   /**
    * Perform generate actions, Library dependency analysis etc before output of
