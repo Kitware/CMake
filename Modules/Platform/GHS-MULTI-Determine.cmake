@@ -83,4 +83,20 @@ mark_as_advanced(GHS_OS_DIR)
 set(GHS_OS_DIR_OPTION "-os_dir " CACHE STRING "GHS compiler OS option")
 mark_as_advanced(GHS_OS_DIR_OPTION)
 
-set(GHS_BSP_NAME "IGNORE" CACHE STRING "BSP name")
+# Select GHS_BSP_NAME if not set by user and is known to be required
+if(GHS_PRIMARY_TARGET MATCHES "integrity" OR GHS_TARGET_PLATFORM MATCHES "integrity")
+  set(_ghs_bsp_name "GHS_BSP_NAME-NOT-SPECIFIED")
+else()
+  set(_ghs_bsp_name "IGNORE")
+endif()
+
+if(_ghs_bsp_name AND NOT DEFINED GHS_BSP_NAME)
+  # First try taking architecture from `-A` option
+  if(CMAKE_GENERATOR_PLATFORM)
+    set(_ghs_bsp_name "sim${CMAKE_GENERATOR_PLATFORM}")
+  else()
+    set(_ghs_bsp_name "simarm")
+  endif()
+endif()
+
+set(GHS_BSP_NAME "${_ghs_bsp_name}" CACHE STRING "BSP name")

@@ -121,6 +121,8 @@ the ``GHS_BSP_NAME`` variable.
   * ``cmake -G "Green Hills MULTI" -A 86`` for ``sim86`` on ``86_integrity.tgt``.
   * ``cmake -G "Green Hills MULTI" -A ppc -D GHS_BSP_NAME=sim800`` for ``sim800``
     on ``ppc_integrity.tgt``.
+  * ``cmake -G "Green Hills MULTI" -D GHS_PRIMARY_TARGET=ppc_integrity.tgt -D GHS_BSP_NAME=fsl-t1040``
+    for ``fsl-t1040`` on ``ppc_integrity.tgt``.
 
 Target Properties
 ^^^^^^^^^^^^^^^^^

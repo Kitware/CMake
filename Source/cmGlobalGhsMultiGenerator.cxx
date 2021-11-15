@@ -132,23 +132,6 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
                            "Generator selected GHS MULTI primaryTarget.",
                            cmStateEnums::STRING, true);
   }
-
-  // Determine GHS_BSP_NAME
-  std::string bspName = mf->GetSafeDefinition("GHS_BSP_NAME");
-
-  if (cmIsOff(bspName) && platform.find("integrity") != std::string::npos) {
-    std::string arch = "arm"; /* FIXME - extract from GHS_PRIMARY_TARGET */
-    bspName = "sim" + arch;
-    /* write back the calculate name for next time */
-    mf->AddCacheDefinition("GHS_BSP_NAME", bspName,
-                           "Name of GHS target platform.",
-                           cmStateEnums::STRING, true);
-    std::string m = cmStrCat(
-      "Green Hills MULTI: GHS_BSP_NAME not specified; defaulting to \"",
-      bspName, '"');
-    cmSystemTools::Message(m);
-  }
-
   return true;
 }
 
@@ -308,6 +291,7 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
   fout << "# Top Level Project File\n";
 
   // Specify BSP option if supplied by user
+  // -- not all platforms require this entry in the project file
   cmValue bspName =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_BSP_NAME");
   if (!cmIsOff(bspName)) {
