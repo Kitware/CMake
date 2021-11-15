@@ -95,6 +95,20 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
       install(FILES "${_qt_plugin_path}"
         DESTINATION "${_qt_plugin_dest}"
         ${COMPONENT})
+      # JKB
+      get_filename_component(__noext_name "${_qt_plugin_path}" NAME_WE)
+      get_filename_component(__dir "${_qt_plugin_path}" DIRECTORY)
+      get_filename_component(__ext "${_qt_plugin_path}" EXT)
+      set(__debug_lib_path "${__dir}/${__noext_name}d${__ext}")
+
+      message("D: ${__debug_lib_path}")
+      message("L: ${_qt_plugin_path}")
+        if(EXISTS "${__debug_lib_path}")
+          install(FILES "${__debug_lib_path}"
+                  DESTINATION "${_qt_plugin_dest}"
+                  ${COMPONENT})
+        endif()
+        # END: JKB
       set(${_qt_plugins_var}
         "${${_qt_plugins_var}};\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
     endif()
