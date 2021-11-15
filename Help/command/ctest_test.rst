@@ -190,9 +190,10 @@ Check the `CDash test measurement documentation
 <https://github.com/Kitware/CDash/blob/master/docs/test_measurements.md>`_
 for more information on the types of test measurements that CDash recognizes.
 
-Starting in version 3.22, CTest can parse custom measurements from tags named
-``<CTestMeasurement>`` or ``<CTestMeasurementFile>``. The older names
-``<DartMeasurement>`` and ``<DartMeasurementFile>`` are still supported.
+.. versionadded: 3.22
+  CTest can parse custom measurements from tags named
+  ``<CTestMeasurement>`` or ``<CTestMeasurementFile>``. The older names
+  ``<DartMeasurement>`` and ``<DartMeasurementFile>`` are still supported.
 
 The following example demonstrates how to output a variety of custom test
 measurements.
@@ -256,6 +257,8 @@ separate from the interactive comparison UI.
 Attached Files
 """"""""""""""
 
+.. versionadded:: 3.21
+
 The following example demonstrates how to upload non-image files to CDash.
 
 .. code-block:: c++
@@ -273,6 +276,8 @@ properties instead.
 Custom Details
 """"""""""""""
 
+.. versionadded:: 3.21
+
 The following example demonstrates how to specify a custom value for the
 ``Test Details`` field displayed on CDash.
 
@@ -281,8 +286,12 @@ The following example demonstrates how to specify a custom value for the
    std::cout <<
      "<CTestDetails>My Custom Details Value</CTestDetails>" << std::endl;
 
+.. _`Additional Labels`:
+
 Additional Labels
 """""""""""""""""
+
+.. versionadded:: 3.22
 
 The following example demonstrates how to add additional labels to a test
 at runtime.
