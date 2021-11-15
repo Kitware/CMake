@@ -15,6 +15,12 @@ if(CMAKE_GENERATOR MATCHES "Green Hills MULTI")
     set(GHS_TARGET_PLATFORM "integrity" CACHE STRING "GHS MULTI target platform")
     mark_as_advanced(GHS_TARGET_PLATFORM)
   endif()
+
+  # Setup MULTI project variables
+  set(GHS_CUSTOMIZATION "" CACHE FILEPATH "optional GHS customization")
+  mark_as_advanced(GHS_CUSTOMIZATION)
+  set(GHS_GPJ_MACROS "" CACHE STRING "optional GHS macros generated in the .gpjs for legacy reasons")
+  mark_as_advanced(GHS_GPJ_MACROS)
 endif()
 
 if(CMAKE_HOST_UNIX)
@@ -63,9 +69,3 @@ if(NOT GHS_OS_DIR)
 endif()
 
 set(GHS_BSP_NAME "IGNORE" CACHE STRING "BSP name")
-
-# Setup MULTI project variables
-set(GHS_CUSTOMIZATION "" CACHE FILEPATH "optional GHS customization")
-mark_as_advanced(GHS_CUSTOMIZATION)
-set(GHS_GPJ_MACROS "" CACHE STRING "optional GHS macros generated in the .gpjs for legacy reasons")
-mark_as_advanced(GHS_GPJ_MACROS)
