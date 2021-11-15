@@ -191,6 +191,10 @@ public:
   bool UseWindowsVSIDE() const;
   void SetGhsMultiIDE(bool ghsMultiIDE);
   bool UseGhsMultiIDE() const;
+  // JKB:
+  void SetIarIDE(bool iarIDE);
+  bool UseIarIDE() const;
+  // END JKB
   void SetWatcomWMake(bool watcomWMake);
   bool UseWatcomWMake() const;
   void SetMinGWMake(bool minGWMake);
@@ -253,6 +257,9 @@ private:
   bool WindowsShell = false;
   bool WindowsVSIDE = false;
   bool GhsMultiIDE = false;
+  // JKB:
+  bool IarIDE = false;
+  // END JKB
   bool WatcomWMake = false;
   bool MinGWMake = false;
   bool NMake = false;

@@ -709,6 +709,18 @@ bool cmState::UseGhsMultiIDE() const
   return this->GhsMultiIDE;
 }
 
+// JKB:
+void cmState::SetIarIDE(bool iarIDE)
+{
+  this->IarIDE = iarIDE;
+}
+
+bool cmState::UseIarIDE() const
+{
+  return this->IarIDE;
+}
+// END JKB
+
 void cmState::SetWatcomWMake(bool watcomWMake)
 {
   this->WatcomWMake = watcomWMake;
