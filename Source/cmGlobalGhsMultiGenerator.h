@@ -112,7 +112,6 @@ private:
 
   static std::string TrimQuotes(std::string str);
 
-  std::string OsDir;
   static const char* DEFAULT_BUILD_PROGRAM;
 
   bool ComputeTargetBuildOrder(cmGeneratorTarget const* tgt,

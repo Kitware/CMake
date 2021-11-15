@@ -133,27 +133,6 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
                            cmStateEnums::STRING, true);
   }
 
-  /* check if OS location has been updated by platform scripts */
-  std::string platform = mf->GetSafeDefinition("GHS_TARGET_PLATFORM");
-  std::string osdir = mf->GetSafeDefinition("GHS_OS_DIR");
-  if (cmIsOff(osdir) && platform.find("integrity") != std::string::npos) {
-    if (!this->CMakeInstance->GetIsInTryCompile()) {
-      /* required OS location is not found */
-      std::string m = cmStrCat(
-        "Green Hills MULTI: GHS_OS_DIR not specified; No OS found in \"",
-        mf->GetSafeDefinition("GHS_OS_ROOT"), '"');
-      cmSystemTools::Message(m);
-    }
-    osdir = "GHS_OS_DIR-NOT-SPECIFIED";
-  } else if (!this->CMakeInstance->GetIsInTryCompile() &&
-             cmIsOff(this->OsDir) && !cmIsOff(osdir)) {
-    /* OS location was updated by auto-selection */
-    std::string m = cmStrCat(
-      "Green Hills MULTI: GHS_OS_DIR not specified; found \"", osdir, '"');
-    cmSystemTools::Message(m);
-  }
-  this->OsDir = osdir;
-
   // Determine GHS_BSP_NAME
   std::string bspName = mf->GetSafeDefinition("GHS_BSP_NAME");
 
@@ -179,9 +158,6 @@ void cmGlobalGhsMultiGenerator::EnableLanguage(
   mf->AddDefinition("CMAKE_SYSTEM_NAME", "GHS-MULTI");
 
   mf->AddDefinition("GHSMULTI", "1"); // identifier for user CMake files
-
-  /* store original OS location */
-  this->OsDir = mf->GetSafeDefinition("GHS_OS_DIR");
 
   this->cmGlobalGenerator::EnableLanguage(l, mf, optional);
 }
@@ -340,17 +316,17 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
 
   // Specify OS DIR if supplied by user
   // -- not all platforms require this entry in the project file
-  if (!cmIsOff(this->OsDir)) {
+  cmValue osDir = this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR");
+  if (!cmIsOff(osDir)) {
     cmValue osDirOption =
       this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR_OPTION");
-    std::replace(this->OsDir.begin(), this->OsDir.end(), '\\', '/');
     fout << "    ";
     if (cmIsOff(osDirOption)) {
       fout << "";
     } else {
       fout << *osDirOption;
     }
-    fout << "\"" << this->OsDir << "\"\n";
+    fout << "\"" << osDir << "\"\n";
   }
 }
 
