@@ -1,7 +1,21 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-#Setup Green Hills MULTI specific compilation information
+# Setup variables used for Green Hills MULTI generator
+if(CMAKE_GENERATOR MATCHES "Green Hills MULTI")
+
+  # Set the project primaryTarget value
+  # If not set then primaryTarget will be determined by the generator
+  set(GHS_PRIMARY_TARGET "IGNORE" CACHE STRING "GHS MULTI primaryTarget")
+  mark_as_advanced(GHS_PRIMARY_TARGET)
+
+  if(NOT GHS_PRIMARY_TARGET)
+    # If project primaryTarget not set by user then set target platform name
+    # to be used by the generator when determining the primaryTarget.
+    set(GHS_TARGET_PLATFORM "integrity" CACHE STRING "GHS MULTI target platform")
+    mark_as_advanced(GHS_TARGET_PLATFORM)
+  endif()
+endif()
 
 if(CMAKE_HOST_UNIX)
   set(GHS_OS_ROOT "/usr/ghs" CACHE PATH "GHS platform OS search root directory")
@@ -30,7 +44,7 @@ if(NOT GHS_OS_DIR)
     endif ()
 
     #filter based on platform name
-    if(GHS_TARGET_PLATFORM MATCHES "integrity")
+    if(GHS_PRIMARY_TARGET MATCHES "integrity" OR GHS_TARGET_PLATFORM MATCHES "integrity")
       list(FILTER GHS_CANDIDATE_OS_DIRS INCLUDE REGEX "int[0-9][0-9][0-9][0-9a-z]")
     else() #fall-back for standalone
       unset(GHS_CANDIDATE_OS_DIRS)
@@ -50,6 +64,7 @@ endif()
 
 set(GHS_BSP_NAME "IGNORE" CACHE STRING "BSP name")
 
+# Setup MULTI project variables
 set(GHS_CUSTOMIZATION "" CACHE FILEPATH "optional GHS customization")
 mark_as_advanced(GHS_CUSTOMIZATION)
 set(GHS_GPJ_MACROS "" CACHE STRING "optional GHS macros generated in the .gpjs for legacy reasons")

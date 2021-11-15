@@ -124,20 +124,25 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
 bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
                                                      cmMakefile* mf)
 {
-  std::string arch;
-  if (p.empty()) {
-    cmSystemTools::Message(
-      "Green Hills MULTI: -A <arch> not specified; defaulting to \"arm\"");
-    arch = "arm";
-
-    /* store the platform name for later use
-     * -- already done if -A<arch> was specified
-     */
-    mf->AddCacheDefinition("CMAKE_GENERATOR_PLATFORM", arch,
-                           "Name of generator platform.",
-                           cmStateEnums::INTERNAL);
+  /* set primary target */
+  cmValue t =
+    this->GetCMakeInstance()->GetCacheDefinition("GHS_PRIMARY_TARGET");
+  if (!cmIsOff(t)) {
+    this->GetCMakeInstance()->MarkCliAsUsed("GHS_PRIMARY_TARGET");
   } else {
-    arch = p;
+    /* Use the value from `-A` or use `arm` */
+    std::string arch = "arm";
+    if (!cmIsOff(p)) {
+      arch = p;
+    }
+    cmValue platform =
+      this->GetCMakeInstance()->GetCacheDefinition("GHS_TARGET_PLATFORM");
+    std::string tgt = cmStrCat(arch, '_', platform, ".tgt");
+
+    /* update the primary target name*/
+    mf->AddCacheDefinition("GHS_PRIMARY_TARGET", tgt,
+                           "Generator selected GHS MULTI primaryTarget.",
+                           cmStateEnums::STRING, true);
   }
 
   /* check if OS location has been updated by platform scripts */
@@ -165,6 +170,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
   std::string bspName = mf->GetSafeDefinition("GHS_BSP_NAME");
 
   if (cmIsOff(bspName) && platform.find("integrity") != std::string::npos) {
+    std::string arch = "arm"; /* FIXME - extract from GHS_PRIMARY_TARGET */
     bspName = "sim" + arch;
     /* write back the calculate name for next time */
     mf->AddCacheDefinition("GHS_BSP_NAME", bspName,
@@ -185,17 +191,6 @@ void cmGlobalGhsMultiGenerator::EnableLanguage(
   mf->AddDefinition("CMAKE_SYSTEM_NAME", "GHS-MULTI");
 
   mf->AddDefinition("GHSMULTI", "1"); // identifier for user CMake files
-
-  const char* tgtPlatform = mf->GetDefinition("GHS_TARGET_PLATFORM")->c_str();
-  if (!tgtPlatform) {
-    cmSystemTools::Message("Green Hills MULTI: GHS_TARGET_PLATFORM not "
-                           "specified; defaulting to \"integrity\"");
-    tgtPlatform = "integrity";
-  }
-
-  /* store the platform name for later use */
-  mf->AddCacheDefinition("GHS_TARGET_PLATFORM", tgtPlatform,
-                         "Name of GHS target platform.", cmStateEnums::STRING);
 
   /* store original OS location */
   this->OsDir = mf->GetSafeDefinition("GHS_OS_DIR");
@@ -629,20 +624,9 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
 void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
   cmLocalGenerator* root, std::ostream& fout)
 {
-  /* set primary target */
-  std::string tgt;
-  cmValue t =
+  /* put primary target and customization files into project file */
+  cmValue const tgt =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_PRIMARY_TARGET");
-  if (cmNonempty(t)) {
-    tgt = *t;
-    this->GetCMakeInstance()->MarkCliAsUsed("GHS_PRIMARY_TARGET");
-  } else {
-    cmValue a =
-      this->GetCMakeInstance()->GetCacheDefinition("CMAKE_GENERATOR_PLATFORM");
-    cmValue p =
-      this->GetCMakeInstance()->GetCacheDefinition("GHS_TARGET_PLATFORM");
-    tgt = cmStrCat((a ? *a : ""), '_', (p ? *p : ""), ".tgt");
-  }
 
   /* clang-format off */
   fout << "primaryTarget=" << tgt << "\n"
