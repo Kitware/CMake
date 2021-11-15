@@ -3199,7 +3199,7 @@ void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
                                      std::string const& defines_list) const
 {
   std::set<BT<std::string>> tmp;
-  this->AppendDefines(tmp, ExpandListWithBacktrace(defines_list));
+  this->AppendDefines(tmp, cmExpandListWithBacktrace(defines_list));
   for (BT<std::string> const& i : tmp) {
     defines.emplace(i.Value);
   }
@@ -3214,7 +3214,7 @@ void cmLocalGenerator::AppendDefines(std::set<BT<std::string>>& defines,
   }
 
   // Expand the list of definitions.
-  this->AppendDefines(defines, ExpandListWithBacktrace(defines_list));
+  this->AppendDefines(defines, cmExpandListWithBacktrace(defines_list));
 }
 
 void cmLocalGenerator::AppendDefines(

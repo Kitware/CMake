@@ -230,9 +230,10 @@ public:
   friend bool operator==(T const& l, BTs<T> const& r) { return l == r.Value; }
 };
 
-std::vector<BT<std::string>> ExpandListWithBacktrace(
+std::vector<BT<std::string>> cmExpandListWithBacktrace(
   std::string const& list,
-  cmListFileBacktrace const& bt = cmListFileBacktrace());
+  cmListFileBacktrace const& bt = cmListFileBacktrace(),
+  bool emptyArgs = false);
 
 struct cmListFile
 {
