@@ -1903,7 +1903,7 @@ syn keyword cmakeVariable contained
             \ DOXYGEN_XML_PROGRAMLISTING
             \ ENV
             \ EXECUTABLE_OUTPUT_PATH
-            \ GHS-MULTI
+            \ GHSMULTI
             \ IOS
             \ LIBRARY_OUTPUT_PATH
             \ MINGW
