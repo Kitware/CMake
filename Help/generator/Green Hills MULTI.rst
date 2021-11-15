@@ -69,12 +69,15 @@ For example, setting a specific compiler:
 * ``cmake -G "Green Hills MULTI" -T comp_201754`` for ``/usr/ghs/comp_201754``.
 * ``cmake -G "Green Hills MULTI" -T comp_201754 -D GHS_TOOLSET_ROOT=/opt/ghs`` for ``/opt/ghs/comp_201754``.
 * ``cmake -G "Green Hills MULTI" -T /usr/ghs/comp_201554``
-* ``cmake -G "Green Hills MULTI" -T C:\ghs\comp_201754``
+* ``cmake -G "Green Hills MULTI" -T C:/ghs/comp_201754``
 
 For example, searching for latest compiler:
 
 * ``cmake -G "Green Hills MULTI"`` for searching ``/usr/ghs``.
 * ``cmake -G "Green Hills MULTI -D GHS_TOOLSET_ROOT=/opt/ghs"`` for searching ``/opt/ghs``.
+
+.. note::
+  The :variable:`CMAKE_GENERATOR_TOOLSET` should use CMake style paths.
 
 OS and BSP Selection
 ^^^^^^^^^^^^^^^^^^^^
