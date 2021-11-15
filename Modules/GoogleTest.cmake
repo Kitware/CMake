@@ -208,8 +208,11 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
   ``TEST_FILTER expr``
     .. versionadded:: 3.22
 
-    Filter expression to pass to ``--gtest_filter`` argument during test
-    discovery.
+    Filter expression to pass as a ``--gtest_filter`` argument during test
+    discovery.  Note that the expression is a wildcard-based format that
+    matches against the original test names as used by gtest.  For type or
+    value-parameterized tests, these names may be different to the potentially
+    pretty-printed test names that ``ctest`` uses.
 
   ``NO_PRETTY_TYPES``
     By default, the type index of type-parameterized tests is replaced by the
