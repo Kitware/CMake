@@ -114,7 +114,6 @@ private:
 
   std::string OsDir;
   static const char* DEFAULT_BUILD_PROGRAM;
-  static const char* DEFAULT_TOOLSET_ROOT;
 
   bool ComputeTargetBuildOrder(cmGeneratorTarget const* tgt,
                                std::vector<cmGeneratorTarget const*>& build);

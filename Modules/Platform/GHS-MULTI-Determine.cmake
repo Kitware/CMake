@@ -16,6 +16,16 @@ if(CMAKE_GENERATOR MATCHES "Green Hills MULTI")
     mark_as_advanced(GHS_TARGET_PLATFORM)
   endif()
 
+  # Setup MULTI toolset selection variables
+  if(CMAKE_HOST_UNIX)
+    set(_ts_root "/usr/ghs")
+  else()
+    set(_ts_root "C:/ghs")
+  endif()
+  set(GHS_TOOLSET_ROOT "${_ts_root}" CACHE PATH "GHS platform toolset root directory")
+  mark_as_advanced(GHS_TOOLSET_ROOT)
+  unset(_ts_root)
+
   # Setup MULTI project variables
   set(GHS_CUSTOMIZATION "" CACHE FILEPATH "optional GHS customization")
   mark_as_advanced(GHS_CUSTOMIZATION)

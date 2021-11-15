@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalGhsMultiGenerator.h"
 
-#include <algorithm>
 #include <map>
 #include <ostream>
 #include <utility>
@@ -18,6 +17,7 @@
 #include "cmLocalGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -29,10 +29,8 @@
 const char* cmGlobalGhsMultiGenerator::FILE_EXTENSION = ".gpj";
 #ifdef __linux__
 const char* cmGlobalGhsMultiGenerator::DEFAULT_BUILD_PROGRAM = "gbuild";
-const char* cmGlobalGhsMultiGenerator::DEFAULT_TOOLSET_ROOT = "/usr/ghs";
 #elif defined(_WIN32)
 const char* cmGlobalGhsMultiGenerator::DEFAULT_BUILD_PROGRAM = "gbuild.exe";
-const char* cmGlobalGhsMultiGenerator::DEFAULT_TOOLSET_ROOT = "C:/ghs";
 #endif
 
 cmGlobalGhsMultiGenerator::cmGlobalGhsMultiGenerator(cmake* cm)
@@ -70,30 +68,20 @@ void cmGlobalGhsMultiGenerator::ComputeTargetObjectDirectory(
 bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
                                                     bool build, cmMakefile* mf)
 {
+  /* In build mode nothing to be done.
+   * Toolset already determined and build tool absolute path is cached.
+   */
   if (build) {
     return true;
   }
-  std::string tsp; /* toolset path */
 
+  /* Determine the absolute directory for the toolset */
+  std::string tsp;
   this->GetToolset(mf, tsp, ts);
 
   /* no toolset was found */
   if (tsp.empty()) {
     return false;
-  }
-  if (ts.empty()) {
-    std::string message;
-    message = cmStrCat(
-      "Green Hills MULTI: -T <toolset> not specified; defaulting to \"", tsp,
-      '"');
-    cmSystemTools::Message(message);
-
-    /* store the full toolset for later use
-     * -- already done if -T<toolset> was specified
-     */
-    mf->AddCacheDefinition("CMAKE_GENERATOR_TOOLSET", tsp,
-                           "Location of generator toolset.",
-                           cmStateEnums::INTERNAL);
   }
 
   /* set the build tool to use */
@@ -102,13 +90,13 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
   cmValue prevTool = mf->GetDefinition("CMAKE_MAKE_PROGRAM");
 
   /* check if the toolset changed from last generate */
-  if (prevTool && (gbuild != *prevTool)) {
-    std::string message =
+  if (cmNonempty(prevTool) && !cmSystemTools::ComparePath(gbuild, prevTool)) {
+    std::string const& e =
       cmStrCat("toolset build tool: ", gbuild,
-               "\nDoes not match the previously used build tool: ", *prevTool,
+               "\nDoes not match the previously used build tool: ", prevTool,
                "\nEither remove the CMakeCache.txt file and CMakeFiles "
                "directory or choose a different binary directory.");
-    cmSystemTools::Error(message);
+    mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
 
@@ -207,43 +195,59 @@ bool cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* /*mf*/)
   return true;
 }
 
-void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsd,
+void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsp,
                                            const std::string& ts)
 {
-  cmValue ghsRoot = mf->GetDefinition("GHS_TOOLSET_ROOT");
+  /* Determine tsp - full path of the toolset from ts (toolset hint via -T) */
 
-  if (cmNonempty(ghsRoot)) {
-    tsd = *ghsRoot;
-  } else {
-    tsd = DEFAULT_TOOLSET_ROOT;
-  }
+  std::string root = mf->GetSafeDefinition("GHS_TOOLSET_ROOT");
 
+  // Check if `-T` was set by user
   if (ts.empty()) {
+    // Enter toolset search mode
     std::vector<std::string> output;
 
-    // Use latest? version
-    if (tsd.back() != '/') {
-      tsd += "/";
+    // Make sure root exists...
+    if (!cmSystemTools::PathExists(root)) {
+      std::string msg =
+        "GHS_TOOLSET_ROOT directory \"" + root + "\" does not exist.";
+      mf->IssueMessage(MessageType::FATAL_ERROR, msg);
+      tsp = "";
+      return;
     }
-    cmSystemTools::Glob(tsd, "comp_[^;]+", output);
+
+    // Add a directory separator
+    if (root.back() != '/') {
+      root += "/";
+    }
+
+    // Get all compiler directories in toolset root
+    cmSystemTools::Glob(root, "comp_[^;]+", output);
 
     if (output.empty()) {
+      // No compiler directories found
       std::string msg =
-        "No GHS toolsets found in GHS_TOOLSET_ROOT \"" + tsd + "\".";
-      cmSystemTools::Error(msg);
-      tsd = "";
+        "No GHS toolsets found in GHS_TOOLSET_ROOT \"" + root + "\".";
+      mf->IssueMessage(MessageType::FATAL_ERROR, msg);
+      tsp = "";
     } else {
-      tsd += output.back();
+      // Use latest? version
+      tsp = root + output.back();
     }
+
   } else {
+    // Toolset was provided by user
     std::string tryPath;
-    tryPath = cmSystemTools::CollapseFullPath(ts, tsd);
+
+    // NOTE: CollapseFullPath() will determine if user toolset was full path or
+    //       or relative path.
+    tryPath = cmSystemTools::CollapseFullPath(ts, root);
     if (!cmSystemTools::FileExists(tryPath)) {
-      std::string msg = "GHS toolset \"" + tryPath + "\" not found.";
-      cmSystemTools::Error(msg);
-      tsd = "";
+      std::string msg = "GHS toolset \"" + tryPath + "\" does not exist.";
+      mf->IssueMessage(MessageType::FATAL_ERROR, msg);
+      tsp = "";
     } else {
-      tsd = tryPath;
+      tsp = tryPath;
     }
   }
 }
