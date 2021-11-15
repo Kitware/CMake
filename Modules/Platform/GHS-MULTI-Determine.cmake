@@ -2,54 +2,72 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 # Setup variables used for Green Hills MULTI generator
+# -- Allow users to override these values.
+
 if(CMAKE_GENERATOR MATCHES "Green Hills MULTI")
 
   # Set the project primaryTarget value
   # If not set then primaryTarget will be determined by the generator
-  set(GHS_PRIMARY_TARGET "IGNORE" CACHE STRING "GHS MULTI primaryTarget")
-  mark_as_advanced(GHS_PRIMARY_TARGET)
-
-  if(NOT GHS_PRIMARY_TARGET)
-    # If project primaryTarget not set by user then set target platform name
-    # to be used by the generator when determining the primaryTarget.
-    set(GHS_TARGET_PLATFORM "integrity" CACHE STRING "GHS MULTI target platform")
-    mark_as_advanced(GHS_TARGET_PLATFORM)
+  if((NOT DEFINED GHS_PRIMARY_TARGET) OR (DEFINED CACHE{GHS_PRIMARY_TARGET}))
+    set(GHS_PRIMARY_TARGET "IGNORE" CACHE STRING "GHS MULTI primaryTarget")
+    mark_as_advanced(GHS_PRIMARY_TARGET)
   endif()
 
   # Setup MULTI toolset selection variables
-  if(CMAKE_HOST_UNIX)
-    set(_ts_root "/usr/ghs")
-  else()
-    set(_ts_root "C:/ghs")
+  if((NOT DEFINED GHS_TOOLSET_ROOT) OR (DEFINED CACHE{GHS_TOOLSET_ROOT}))
+    if(CMAKE_HOST_UNIX)
+      set(_ts_root "/usr/ghs")
+    else()
+      set(_ts_root "C:/ghs")
+    endif()
+    set(GHS_TOOLSET_ROOT "${_ts_root}" CACHE PATH "GHS platform toolset root directory")
+    mark_as_advanced(GHS_TOOLSET_ROOT)
+    unset(_ts_root)
   endif()
-  set(GHS_TOOLSET_ROOT "${_ts_root}" CACHE PATH "GHS platform toolset root directory")
-  mark_as_advanced(GHS_TOOLSET_ROOT)
-  unset(_ts_root)
 
   # Setup MULTI project variables
-  set(GHS_CUSTOMIZATION "" CACHE FILEPATH "optional GHS customization")
-  mark_as_advanced(GHS_CUSTOMIZATION)
-  set(GHS_GPJ_MACROS "" CACHE STRING "optional GHS macros generated in the .gpjs for legacy reasons")
-  mark_as_advanced(GHS_GPJ_MACROS)
+  if((NOT DEFINED GHS_CUSTOMIZATION) OR (DEFINED CACHE{GHS_CUSTOMIZATION}))
+    set(GHS_CUSTOMIZATION "" CACHE FILEPATH "optional GHS customization")
+    mark_as_advanced(GHS_CUSTOMIZATION)
+  endif()
+
+  if((NOT DEFINED GHS_GPJ_MACROS) OR (DEFINED CACHE{GHS_GPJ_MACROS}))
+    set(GHS_GPJ_MACROS "" CACHE STRING "optional GHS macros generated in the .gpjs for legacy reasons")
+    mark_as_advanced(GHS_GPJ_MACROS)
+  endif()
+
+endif()
+
+# If project primaryTarget not set then set target platform name.
+# -- May be used by the generator when determining the primaryTarget.
+if(NOT GHS_PRIMARY_TARGET)
+  if((NOT DEFINED GHS_TARGET_PLATFORM) OR (DEFINED CACHE{GHS_TARGET_PLATFORM}))
+    set(GHS_TARGET_PLATFORM "integrity" CACHE STRING "GHS MULTI target platform")
+    mark_as_advanced(GHS_TARGET_PLATFORM)
+  endif()
 endif()
 
 # Settings for OS selection
-if(CMAKE_HOST_UNIX)
-  set(_os_root "/usr/ghs")
-else()
-  set(_os_root "C:/ghs")
+if((NOT DEFINED GHS_OS_ROOT) OR (DEFINED CACHE{GHS_OS_ROOT}))
+  if(CMAKE_HOST_UNIX)
+    set(_os_root "/usr/ghs")
+  else()
+    set(_os_root "C:/ghs")
+  endif()
+  set(GHS_OS_ROOT "${_os_root}" CACHE PATH "GHS platform OS search root directory")
+  unset(_os_root)
+  mark_as_advanced(GHS_OS_ROOT)
 endif()
-set(GHS_OS_ROOT "${_os_root}" CACHE PATH "GHS platform OS search root directory")
-unset(_os_root)
-mark_as_advanced(GHS_OS_ROOT)
 
 # Search for GHS_OS_DIR if not set by user and is known to be required
 if(GHS_PRIMARY_TARGET MATCHES "integrity" OR GHS_TARGET_PLATFORM MATCHES "integrity")
-  # Use a value that will make it apparent RTOS selection failed
+  # Needed - Use a value that will make it apparent RTOS selection failed
   set(_ghs_os_dir "GHS_OS_DIR-NOT-SPECIFIED")
 else()
+  # Not needed for this target
   set(_ghs_os_dir "IGNORE")
 endif()
+
 if(_ghs_os_dir AND NOT DEFINED GHS_OS_DIR)
   if(EXISTS ${GHS_OS_ROOT})
 
@@ -77,11 +95,16 @@ if(_ghs_os_dir AND NOT DEFINED GHS_OS_DIR)
 endif()
 
 #Used for targets requiring RTOS
-set(GHS_OS_DIR "${_ghs_os_dir}" CACHE PATH "GHS platform OS directory")
-mark_as_advanced(GHS_OS_DIR)
+if((NOT DEFINED GHS_OS_DIR) OR (DEFINED CACHE{GHS_OS_DIR}))
+  set(GHS_OS_DIR "${_ghs_os_dir}" CACHE PATH "GHS platform OS directory")
+  mark_as_advanced(GHS_OS_DIR)
+endif()
+unset(_ghs_os_dir)
 
-set(GHS_OS_DIR_OPTION "-os_dir " CACHE STRING "GHS compiler OS option")
-mark_as_advanced(GHS_OS_DIR_OPTION)
+if((NOT DEFINED GHS_OS_DIR_OPTION) OR (DEFINED CACHE{GHS_OS_DIR_OPTION}))
+  set(GHS_OS_DIR_OPTION "-os_dir " CACHE STRING "GHS compiler OS option")
+  mark_as_advanced(GHS_OS_DIR_OPTION)
+endif()
 
 # Select GHS_BSP_NAME if not set by user and is known to be required
 if(GHS_PRIMARY_TARGET MATCHES "integrity" OR GHS_TARGET_PLATFORM MATCHES "integrity")
@@ -99,4 +122,8 @@ if(_ghs_bsp_name AND NOT DEFINED GHS_BSP_NAME)
   endif()
 endif()
 
-set(GHS_BSP_NAME "${_ghs_bsp_name}" CACHE STRING "BSP name")
+if((NOT DEFINED GHS_BSP_NAME) OR (DEFINED CACHE{GHS_BSP_NAME}))
+  set(GHS_BSP_NAME "${_ghs_bsp_name}" CACHE STRING "BSP name")
+  mark_as_advanced(GHS_BSP_NAME)
+endif()
+unset(_ghs_bsp_name)

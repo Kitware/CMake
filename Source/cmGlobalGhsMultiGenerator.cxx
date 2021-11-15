@@ -113,24 +113,18 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
                                                      cmMakefile* mf)
 {
   /* set primary target */
-  cmValue t =
-    this->GetCMakeInstance()->GetCacheDefinition("GHS_PRIMARY_TARGET");
-  if (!cmIsOff(t)) {
-    this->GetCMakeInstance()->MarkCliAsUsed("GHS_PRIMARY_TARGET");
-  } else {
+  cmValue t = mf->GetDefinition("GHS_PRIMARY_TARGET");
+  if (cmIsOff(t)) {
     /* Use the value from `-A` or use `arm` */
     std::string arch = "arm";
     if (!cmIsOff(p)) {
       arch = p;
     }
-    cmValue platform =
-      this->GetCMakeInstance()->GetCacheDefinition("GHS_TARGET_PLATFORM");
+    cmValue platform = mf->GetDefinition("GHS_TARGET_PLATFORM");
     std::string tgt = cmStrCat(arch, '_', platform, ".tgt");
 
     /* update the primary target name*/
-    mf->AddCacheDefinition("GHS_PRIMARY_TARGET", tgt,
-                           "Generator selected GHS MULTI primaryTarget.",
-                           cmStateEnums::STRING, true);
+    mf->AddDefinition("GHS_PRIMARY_TARGET", tgt);
   }
   return true;
 }
@@ -292,18 +286,17 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
 
   // Specify BSP option if supplied by user
   // -- not all platforms require this entry in the project file
-  cmValue bspName =
-    this->GetCMakeInstance()->GetCacheDefinition("GHS_BSP_NAME");
+  cmValue bspName = root->GetMakefile()->GetDefinition("GHS_BSP_NAME");
   if (!cmIsOff(bspName)) {
     fout << "    -bsp " << *bspName << '\n';
   }
 
   // Specify OS DIR if supplied by user
   // -- not all platforms require this entry in the project file
-  cmValue osDir = this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR");
+  cmValue osDir = root->GetMakefile()->GetDefinition("GHS_OS_DIR");
   if (!cmIsOff(osDir)) {
     cmValue osDirOption =
-      this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR_OPTION");
+      root->GetMakefile()->GetDefinition("GHS_OS_DIR_OPTION");
     fout << "    ";
     if (cmIsOff(osDirOption)) {
       fout << "";
@@ -575,8 +568,7 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
                                             cmLocalGenerator* root)
 {
   fout << "macro PROJ_NAME=" << root->GetProjectName() << '\n';
-  cmValue ghsGpjMacros =
-    this->GetCMakeInstance()->GetCacheDefinition("GHS_GPJ_MACROS");
+  cmValue ghsGpjMacros = root->GetMakefile()->GetDefinition("GHS_GPJ_MACROS");
   if (ghsGpjMacros) {
     std::vector<std::string> expandedList = cmExpandedList(*ghsGpjMacros);
     for (std::string const& arg : expandedList) {
@@ -589,8 +581,7 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
   cmLocalGenerator* root, std::ostream& fout)
 {
   /* put primary target and customization files into project file */
-  cmValue const tgt =
-    this->GetCMakeInstance()->GetCacheDefinition("GHS_PRIMARY_TARGET");
+  cmValue const tgt = root->GetMakefile()->GetDefinition("GHS_PRIMARY_TARGET");
 
   /* clang-format off */
   fout << "primaryTarget=" << tgt << "\n"
@@ -601,7 +592,7 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
   /* clang-format on */
 
   cmValue const customization =
-    this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");
+    root->GetMakefile()->GetDefinition("GHS_CUSTOMIZATION");
   if (cmNonempty(customization)) {
     fout << "customization="
          << cmGlobalGhsMultiGenerator::TrimQuotes(*customization) << '\n';
