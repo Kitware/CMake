@@ -742,6 +742,8 @@ test:windows-vs2022-x64-ninja:
         - build:windows-vs2022-x64-ninja
     needs:
         - build:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
 test:windows-vs2022-x64:
     extends:
