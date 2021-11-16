@@ -192,6 +192,8 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
     }
   }
 
+  char buffer[16];
+
 #ifdef __MINGW32__
   /* See a bug in MinGW: https://sourceforge.net/p/mingw-w64/bugs/793/. A work
    * around is to try to use strftime() from ucrtbase.dll. */
@@ -209,8 +211,6 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
   };
   static T strftime = loadStrftime();
 #endif
-
-  char buffer[16];
 
   size_t size =
     strftime(buffer, sizeof(buffer), formatString.c_str(), &timeStruct);
