@@ -198,7 +198,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
   /* See a bug in MinGW: https://sourceforge.net/p/mingw-w64/bugs/793/. A work
    * around is to try to use strftime() from ucrtbase.dll. */
   using T = size_t(WINAPI*)(char*, size_t, const char*, const struct tm*);
-  auto loadStrftime = [] {
+  auto loadUcrtStrftime = []() -> T {
     auto handle =
       LoadLibraryExA("ucrtbase.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (handle) {
@@ -207,9 +207,15 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
       return reinterpret_cast<T>(GetProcAddress(handle, "strftime"));
 #  pragma GCC diagnostic pop
     }
-    return strftime;
+    return nullptr;
   };
-  static T strftime = loadStrftime();
+  static T ucrtStrftime = loadUcrtStrftime();
+
+  if (ucrtStrftime) {
+    size_t size =
+      ucrtStrftime(buffer, sizeof(buffer), formatString.c_str(), &timeStruct);
+    return std::string(buffer, size);
+  }
 #endif
 
   size_t size =
