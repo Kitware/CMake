@@ -31,14 +31,19 @@
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.windows_vs2022_x64_ninja:
-    extends: .windows_ninja
-
+.windows_vcvarsall_vs2022_x64:
     variables:
-        CMAKE_CONFIGURATION: windows_vs2022_x64_ninja
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
         VCVARSVERSION: "14.30.30705"
+
+.windows_vs2022_x64_ninja:
+    extends:
+        - .windows_ninja
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2022_x64_ninja
 
 ### External testing
 
