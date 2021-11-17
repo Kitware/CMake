@@ -1040,11 +1040,12 @@ static ssize_t uv__fs_sendfile(uv_fs_t* req) {
 
     off = req->off;
     len = req->bufsml[0].len;
-    try_sendfile = 1;
 
 #ifdef __linux__
     r = uv__fs_try_copy_file_range(in_fd, &off, out_fd, len);
     try_sendfile = (r == -1 && errno == ENOSYS);
+#else
+    try_sendfile = 1;
 #endif
 
     if (try_sendfile)
