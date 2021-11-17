@@ -212,7 +212,7 @@
 
     interruptible: true
 
-.cmake_test_windows_nmake:
+.cmake_test_windows_msvc:
     stage: test-ext
 
     script:

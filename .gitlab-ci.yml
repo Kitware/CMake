@@ -802,7 +802,7 @@ test:windows-borland5.8:
 test:windows-msvc-v71-nmake:
     extends:
         - .windows_msvc_v71_nmake
-        - .cmake_test_windows_nmake
+        - .cmake_test_windows_msvc
         - .windows_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
