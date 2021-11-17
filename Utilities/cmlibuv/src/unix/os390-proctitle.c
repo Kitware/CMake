@@ -22,35 +22,68 @@
 #include "uv.h"
 #include "internal.h"
 
-#include <sys/types.h>
-#include <unistd.h>
-
+#include <stdlib.h>
+#include <string.h>
 
 static uv_mutex_t process_title_mutex;
 static uv_once_t process_title_mutex_once = UV_ONCE_INIT;
-static char* process_title;
+static char* process_title = NULL;
+static void* args_mem = NULL;
 
 
 static void init_process_title_mutex_once(void) {
-  if (uv_mutex_init(&process_title_mutex))
-    abort();
-}
-
-
-void uv__process_title_cleanup(void) {
-  uv_mutex_destroy(&process_title_mutex);
+  uv_mutex_init(&process_title_mutex);
 }
 
 
 char** uv_setup_args(int argc, char** argv) {
-  process_title = argc > 0 ? uv__strdup(argv[0]) : NULL;
-  return argv;
+  char** new_argv;
+  size_t size;
+  char* s;
+  int i;
+
+  if (argc <= 0)
+    return argv;
+
+  /* Calculate how much memory we need for the argv strings. */
+  size = 0;
+  for (i = 0; i < argc; i++)
+    size += strlen(argv[i]) + 1;
+
+  /* Add space for the argv pointers. */
+  size += (argc + 1) * sizeof(char*);
+
+  new_argv = uv__malloc(size);
+  if (new_argv == NULL)
+    return argv;
+
+  /* Copy over the strings and set up the pointer table. */
+  s = (char*) &new_argv[argc + 1];
+  for (i = 0; i < argc; i++) {
+    size = strlen(argv[i]) + 1;
+    memcpy(s, argv[i], size);
+    new_argv[i] = s;
+    s += size;
+  }
+  new_argv[i] = NULL;
+
+  args_mem = new_argv;
+  process_title = uv__strdup(argv[0]);
+
+  return new_argv;
 }
 
 
 int uv_set_process_title(const char* title) {
   char* new_title;
 
+  /* If uv_setup_args wasn't called or failed, we can't continue. */
+  if (args_mem == NULL)
+    return UV_ENOBUFS;
+
+  /* We cannot free this pointer when libuv shuts down,
+   * the process may still be using it.
+   */
   new_title = uv__strdup(title);
   if (new_title == NULL)
     return UV_ENOMEM;
@@ -58,9 +91,10 @@ int uv_set_process_title(const char* title) {
   uv_once(&process_title_mutex_once, init_process_title_mutex_once);
   uv_mutex_lock(&process_title_mutex);
 
-  uv__free(process_title);
+  if (process_title != NULL)
+    uv__free(process_title);
+
   process_title = new_title;
-  setproctitle("%s", title);
 
   uv_mutex_unlock(&process_title_mutex);
 
@@ -74,25 +108,29 @@ int uv_get_process_title(char* buffer, size_t size) {
   if (buffer == NULL || size == 0)
     return UV_EINVAL;
 
+  /* If uv_setup_args wasn't called or failed, we can't continue. */
+  if (args_mem == NULL || process_title == NULL)
+    return UV_ENOBUFS;
+
   uv_once(&process_title_mutex_once, init_process_title_mutex_once);
   uv_mutex_lock(&process_title_mutex);
 
-  if (process_title != NULL) {
-    len = strlen(process_title) + 1;
+  len = strlen(process_title);
 
-    if (size < len) {
-      uv_mutex_unlock(&process_title_mutex);
-      return UV_ENOBUFS;
-    }
-
-    memcpy(buffer, process_title, len);
-  } else {
-    len = 0;
+  if (size <= len) {
+    uv_mutex_unlock(&process_title_mutex);
+    return UV_ENOBUFS;
   }
+
+  strcpy(buffer, process_title);
 
   uv_mutex_unlock(&process_title_mutex);
 
-  buffer[len] = '\0';
-
   return 0;
+}
+
+
+void uv__process_title_cleanup(void) {
+  uv__free(args_mem);  /* Keep valgrind happy. */
+  args_mem = NULL;
 }
