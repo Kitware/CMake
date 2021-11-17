@@ -11,10 +11,12 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmGlobalGenerator.h"
 #include "cmTransformDepfile.h"
+#include "cmValue.h"
 #include "cmXCodeObject.h"
 
 class cmCustomCommand;

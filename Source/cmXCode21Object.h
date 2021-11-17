@@ -6,6 +6,7 @@
 
 #include <iosfwd>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "cmXCodeObject.h"

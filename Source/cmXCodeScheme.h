@@ -4,12 +4,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <iosfwd>
+#include <string>
 #include <vector>
 
-#include "cmGlobalXCodeGenerator.h"
-#include "cmSystemTools.h"
-#include "cmXCodeObject.h"
-#include "cmXMLWriter.h"
+class cmLocalGenerator;
+class cmXCodeObject;
+class cmXMLWriter;
 
 /** \class cmXCodeScheme
  * \brief Write shared schemes for native targets in Xcode project.
