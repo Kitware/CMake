@@ -771,6 +771,20 @@ test:windows-vs2019-x64:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+test:windows-vs2022-x64-nmake:
+    extends:
+        - .windows_vs2022_x64_nmake
+        - .cmake_test_windows_nmake
+        - .windows_tags_concurrent_vs2022
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - test:windows-vs2022-x64-ninja
+    needs:
+        - test:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 test:windows-borland5.5:
     extends:
         - .windows_borland5.5

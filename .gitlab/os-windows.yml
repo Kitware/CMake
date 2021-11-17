@@ -95,6 +95,14 @@
         CMAKE_CI_BUILD_TYPE: Release
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
+.windows_vs2022_x64_nmake:
+    extends:
+        - .windows_nmake
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2022_x64_nmake
+
 .windows_msvc_v71_nmake:
     extends: .windows_nmake
 
@@ -202,6 +210,15 @@
     stage: test-ext
 
     script:
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+
+    interruptible: true
+
+.cmake_test_windows_nmake:
+    stage: test-ext
+
+    script:
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
 
     interruptible: true
