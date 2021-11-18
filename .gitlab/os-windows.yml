@@ -31,14 +31,19 @@
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.windows_vs2022_x64_ninja:
-    extends: .windows_ninja
-
+.windows_vcvarsall_vs2022_x64:
     variables:
-        CMAKE_CONFIGURATION: windows_vs2022_x64_ninja
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
         VCVARSVERSION: "14.30.30705"
+
+.windows_vs2022_x64_ninja:
+    extends:
+        - .windows_ninja
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2022_x64_ninja
 
 ### External testing
 
@@ -89,6 +94,30 @@
         CMAKE_GENERATOR: "NMake Makefiles"
         CMAKE_CI_BUILD_TYPE: Release
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
+.windows_jom:
+    extends: .windows
+
+    variables:
+        CMAKE_GENERATOR: "NMake Makefiles JOM"
+        CMAKE_CI_BUILD_TYPE: Release
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
+.windows_vs2022_x64_nmake:
+    extends:
+        - .windows_nmake
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2022_x64_nmake
+
+.windows_vs2022_x64_jom:
+    extends:
+        - .windows_jom
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2022_x64_jom
 
 .windows_msvc_v71_nmake:
     extends: .windows_nmake
@@ -201,6 +230,27 @@
 
     interruptible: true
 
+.cmake_test_windows_nmake:
+    stage: test-ext
+
+    script:
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+
+    interruptible: true
+
+.cmake_test_windows_jom:
+    stage: test-ext
+
+    script:
+        - Invoke-Expression -Command .gitlab/ci/jom.ps1
+        - $pwdpath = $pwd.Path
+        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\jom;$env:PATH"
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+
+    interruptible: true
+
 .cmake_test_windows_borland:
     stage: test-ext
 
@@ -212,7 +262,7 @@
 
     interruptible: true
 
-.cmake_test_windows_nmake:
+.cmake_test_windows_msvc:
     stage: test-ext
 
     script:
