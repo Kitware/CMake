@@ -202,6 +202,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     )
   list(APPEND uv_defines _GNU_SOURCE)
   list(APPEND uv_sources
+    src/unix/epoll.c
     src/unix/linux-core.c
     src/unix/linux-inotify.c
     src/unix/linux-syscalls.c
