@@ -659,7 +659,7 @@ bool cmDependsFortran::ModulesDiffer(const std::string& modFile,
         return true;
       }
     }
-  } else if (compilerId == "Intel") {
+  } else if (compilerId == "Intel" || compilerId == "IntelLLVM") {
     const char seq[2] = { '\n', '\0' };
     const int seqlen = 2;
 
