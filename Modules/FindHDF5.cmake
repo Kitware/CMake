@@ -319,8 +319,6 @@ function(_HDF5_test_regular_compiler_Fortran success is_parallel)
     file(WRITE ${test_file}
       "program hdf5_hello\n"
       "  use hdf5\n"
-      "  use h5lt\n"
-      "  use h5ds\n"
       "  integer error\n"
       "  call h5open_f(error)\n"
       "  call h5close_f(error)\n"
