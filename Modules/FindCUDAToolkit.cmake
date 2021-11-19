@@ -933,6 +933,23 @@ if(CUDAToolkit_FOUND)
   _CUDAToolkit_find_and_add_import_lib(cusolver DEPS cublas cusparse)
   _CUDAToolkit_find_and_add_import_lib(cusolver_static DEPS cublas_static cusparse_static culibos)
 
+
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.1.2)
+    # cusolver depends on liblapack_static.a starting with CUDA 10.1 update 2,
+    # https://docs.nvidia.com/cuda/archive/11.5.0/cusolver/index.html#static-link-lapack
+    _CUDAToolkit_find_and_add_import_lib(cusolver_lapack_static ALT lapack_static) # implementation detail static lib
+    _CUDAToolkit_find_and_add_import_lib(cusolver_static DEPS cusolver_lapack_static)
+  endif()
+
+  if(CUDAToolkit_VERSION VERSION_GREATER 11.2.1)
+    # cusolver depends on libcusolver_metis and cublasLt
+    # https://docs.nvidia.com/cuda/archive/11.2.2/cusolver/index.html#link-dependency
+    _CUDAToolkit_find_and_add_import_lib(cusolver DEPS cublasLt)
+
+    _CUDAToolkit_find_and_add_import_lib(cusolver_metis_static ALT metis_static) # implementation detail static lib
+    _CUDAToolkit_find_and_add_import_lib(cusolver_static DEPS cusolver_metis_static cublasLt_static)
+  endif()
+
   # nvGRAPH depends on cuRAND, and cuSOLVER.
   _CUDAToolkit_find_and_add_import_lib(nvgraph DEPS curand cusolver)
   _CUDAToolkit_find_and_add_import_lib(nvgraph_static DEPS curand_static cusolver_static)
