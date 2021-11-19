@@ -17,3 +17,10 @@ See also the associated variable
 independent from the link language.
 
 .. include:: CMAKE_LINK_USING_FEATURE.txt
+
+Predefined Features
+^^^^^^^^^^^^^^^^^^^
+
+``CMake`` pre-defines some features of general interest:
+
+.. include:: LINK_LIBRARY_PREDEFINED_FEATURES.txt

@@ -1,0 +1,5 @@
+**Features available in all environments**
+
+* ``DEFAULT``: This feature enables default link expression. This is mainly
+  useful with :prop_tgt:`LINK_LIBRARY_OVERRIDE` and
+  :prop_tgt:`LINK_LIBRARY_OVERRIDE_<LIBRARY>` target properties.

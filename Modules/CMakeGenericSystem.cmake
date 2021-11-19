@@ -24,6 +24,12 @@ set(CMAKE_DL_LIBS "dl")
 set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
 
+# Define feature "DEFAULT" as supported. This special feature generates the
+# default option to link a library
+# This feature is intended to be used in LINK_LIBRARY_OVERRIDE and
+# LINK_LIBRARY_OVERRIDE_<LIBRARY> target properties
+set(CMAKE_LINK_USING_DEFAULT_SUPPORTED TRUE)
+
 set(CMAKE_AUTOGEN_ORIGIN_DEPENDS ON)
 set(CMAKE_AUTOMOC_COMPILER_PREDEFINES ON)
 if(NOT DEFINED CMAKE_AUTOMOC_PATH_PREFIX)

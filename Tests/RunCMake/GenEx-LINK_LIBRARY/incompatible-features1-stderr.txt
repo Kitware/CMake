@@ -1,4 +1,4 @@
-CMake Error at incompatible-features.cmake:[0-9]+ \(add_library\):
+CMake Error at incompatible-features1.cmake:[0-9]+ \(add_library\):
   Impossible to link target 'lib' because the link item 'dep1', specified
   with the feature 'feat1', has already occurred with the feature 'feat2',
   which is not allowed.

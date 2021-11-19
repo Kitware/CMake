@@ -1176,11 +1176,19 @@ Output-Related Expressions
     target_link_libraries(lib3 PRIVATE lib1 lib2)
     # an error will be raised here because lib1 has two different features
 
+  To resolve such incompatibilities, the :prop_tgt:`LINK_LIBRARY_OVERRIDE`
+  and  :prop_tgt:`LINK_LIBRARY_OVERRIDE_<LIBRARY>` target properties can be
+  used.
+
   .. note::
 
     This expression does not guarantee that the list of specified libraries
     will be kept grouped. So, constructs like ``start-group`` and
     ``end-group``, as supported by ``GNU ld``, cannot be used.
+
+  ``CMake`` pre-defines some features of general interest:
+
+  .. include:: ../variable/LINK_LIBRARY_PREDEFINED_FEATURES.txt
 
 .. genex:: $<INSTALL_INTERFACE:...>
 

@@ -47,6 +47,8 @@ public:
     {
     }
 
+    static const std::string DEFAULT;
+
     BT<std::string> Item;
     cmGeneratorTarget const* Target = nullptr;
     bool IsSharedDep = false;
@@ -54,7 +56,7 @@ public:
     bool IsObject = false;
     // The following member is for the management of items specified
     // through genex $<LINK_LIBRARY:...>
-    std::string Feature;
+    std::string Feature = std::string(DEFAULT);
   };
 
   using EntryVector = std::vector<LinkEntry>;
@@ -75,6 +77,10 @@ private:
   std::string LinkLanguage;
   std::string Config;
   EntryVector FinalLinkEntries;
+  std::map<std::string, std::string> LinkLibraryOverride;
+
+  std::string const& GetCurrentFeature(
+    std::string const& item, std::string const& defaultFeature) const;
 
   std::pair<std::map<cmLinkItem, int>::iterator, bool> AllocateLinkEntry(
     cmLinkItem const& item);

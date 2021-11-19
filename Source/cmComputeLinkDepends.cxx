@@ -11,9 +11,12 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmComputeComponentGraph.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
@@ -200,6 +203,8 @@ bool IsFeatureSupported(cmMakefile* makefile, std::string const& linkLanguage,
 }
 }
 
+const std::string cmComputeLinkDepends::LinkEntry::DEFAULT = "DEFAULT";
+
 cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
                                            const std::string& config,
                                            const std::string& linkLanguage)
@@ -211,6 +216,49 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
     this->Target->GetLocalGenerator()->GetGlobalGenerator();
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
   this->LinkLanguage = linkLanguage;
+
+  // target oriented feature override property takes precedence over
+  // global override property
+  cm::string_view lloPrefix = "LINK_LIBRARY_OVERRIDE_"_s;
+  auto const& keys = this->Target->GetPropertyKeys();
+  std::for_each(
+    keys.cbegin(), keys.cend(),
+    [this, &lloPrefix, &config, &linkLanguage](std::string const& key) {
+      if (cmHasPrefix(key, lloPrefix)) {
+        if (cmValue feature = this->Target->GetProperty(key)) {
+          if (!feature->empty() && key.length() > lloPrefix.length()) {
+            auto item = key.substr(lloPrefix.length());
+            cmGeneratorExpressionDAGChecker dag{ this->Target->GetBacktrace(),
+                                                 this->Target,
+                                                 "LINK_LIBRARY_OVERRIDE",
+                                                 nullptr, nullptr };
+            auto overrideFeature = cmGeneratorExpression::Evaluate(
+              feature, this->Target->GetLocalGenerator(), config, this->Target,
+              &dag, this->Target, linkLanguage);
+            this->LinkLibraryOverride.emplace(item, overrideFeature);
+          }
+        }
+      }
+    });
+  // global override property
+  if (cmValue linkLibraryOverride =
+        this->Target->GetProperty("LINK_LIBRARY_OVERRIDE")) {
+    cmGeneratorExpressionDAGChecker dag{ target->GetBacktrace(), target,
+                                         "LINK_LIBRARY_OVERRIDE", nullptr,
+                                         nullptr };
+    auto overrideValue = cmGeneratorExpression::Evaluate(
+      linkLibraryOverride, target->GetLocalGenerator(), config, target, &dag,
+      target, linkLanguage);
+
+    auto overrideList = cmTokenize(overrideValue, ","_s);
+    if (overrideList.size() >= 2) {
+      auto const& feature = overrideList.front();
+      for_each(overrideList.cbegin() + 1, overrideList.cend(),
+               [this, &feature](std::string const& item) {
+                 this->LinkLibraryOverride.emplace(item, feature);
+               });
+    }
+  }
 
   // The configuration being linked.
   this->HasConfig = !config.empty();
@@ -307,6 +355,13 @@ cmComputeLinkDepends::Compute()
   }
 
   return this->FinalLinkEntries;
+}
+
+std::string const& cmComputeLinkDepends::GetCurrentFeature(
+  std::string const& item, std::string const& defaultFeature) const
+{
+  auto it = this->LinkLibraryOverride.find(item);
+  return it == this->LinkLibraryOverride.end() ? defaultFeature : it->second;
 }
 
 std::pair<std::map<cmLinkItem, int>::iterator, bool>
@@ -568,7 +623,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
 {
   // Track inferred dependency sets implied by this list.
   std::map<int, DependSet> dependSets;
-  std::string feature;
+  std::string feature = LinkEntry::DEFAULT;
 
   // Loop over the libraries linked directly by the depender.
   for (T const& l : libs) {
@@ -604,7 +659,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
       continue;
     }
     if (cmHasPrefix(item.AsStr(), LL_END) && cmHasSuffix(item.AsStr(), '>')) {
-      feature.clear();
+      feature = LinkEntry::DEFAULT;
       continue;
     }
 
@@ -612,7 +667,9 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
     auto ale = this->AddLinkEntry(item);
     int dependee_index = ale.first;
     LinkEntry& entry = this->EntryList[dependee_index];
-    if (!feature.empty()) {
+    auto const& itemFeature =
+      this->GetCurrentFeature(entry.Item.Value, feature);
+    if (itemFeature != LinkEntry::DEFAULT) {
       if (ale.second) {
         // current item not yet defined
         if (entry.Target != nullptr &&
@@ -633,7 +690,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
                      " library '", entry.Item.Value, "'."),
             this->Target->GetBacktrace());
         } else {
-          entry.Feature = feature;
+          entry.Feature = itemFeature;
         }
       }
     }
@@ -642,20 +699,21 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
       (entry.Target->GetType() != cmStateEnums::TargetType::OBJECT_LIBRARY &&
        entry.Target->GetType() != cmStateEnums::TargetType::INTERFACE_LIBRARY);
 
-    if (supportedItem && entry.Feature != feature) {
+    if (supportedItem && entry.Feature != itemFeature) {
       // incompatibles features occurred
       this->CMakeInstance->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat(
-          "Impossible to link target '", this->Target->GetName(),
-          "' because the link item '", entry.Item.Value, "', specified ",
-          (feature.empty() ? "without any feature"
-                           : cmStrCat("with the feature '", feature, '\'')),
-          ", has already occurred ",
-          (entry.Feature.empty()
-             ? "without any feature"
-             : cmStrCat("with the feature '", entry.Feature, '\'')),
-          ", which is not allowed."),
+        cmStrCat("Impossible to link target '", this->Target->GetName(),
+                 "' because the link item '", entry.Item.Value,
+                 "', specified ",
+                 (itemFeature == LinkEntry::DEFAULT
+                    ? "without any feature or 'DEFAULT' feature"
+                    : cmStrCat("with the feature '", itemFeature, '\'')),
+                 ", has already occurred ",
+                 (entry.Feature == LinkEntry::DEFAULT
+                    ? "without any feature or 'DEFAULT' feature"
+                    : cmStrCat("with the feature '", entry.Feature, '\'')),
+                 ", which is not allowed."),
         this->Target->GetBacktrace());
     }
 
@@ -978,7 +1036,7 @@ void cmComputeLinkDepends::DisplayFinalEntries()
     } else {
       fprintf(stderr, "  item [%s]", lei.Item.Value.c_str());
     }
-    if (!lei.Feature.empty()) {
+    if (lei.Feature != LinkEntry::DEFAULT) {
       fprintf(stderr, ", feature [%s]", lei.Feature.c_str());
     }
     fprintf(stderr, "\n");

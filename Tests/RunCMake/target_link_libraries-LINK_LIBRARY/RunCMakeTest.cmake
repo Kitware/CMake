@@ -53,6 +53,14 @@ if ((RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode"
   run_cmake_target(LINK_LIBRARY mix-features2 LinkLibrary_mix_features2)
   run_cmake_target(LINK_LIBRARY mix-features3 LinkLibrary_mix_features3)
 
+  # testing target property LINK_LIBRARY_OVERRIDE
+  run_cmake_target(LINK_LIBRARY override-features1 LinkLibrary_override_features1)
+  run_cmake_target(LINK_LIBRARY override-features2 LinkLibrary_override_features2)
+  run_cmake_target(LINK_LIBRARY override-with-DEFAULT LinkLibrary_override_with_default)
+  # testing target property LINK_LIBRARY_OVERRIDE_<LIBRARY>
+  run_cmake_target(LINK_LIBRARY override-features3 LinkLibrary_override_features3)
+  run_cmake_target(LINK_LIBRARY override-features4 LinkLibrary_override_features4)
+
   run_cmake(imported-target)
 
   # tests using features as described in the documentation
