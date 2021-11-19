@@ -199,19 +199,18 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 {
   // Add a special target that depends on ALL projects for easy build
   // of one configuration only.
-  const char* no_working_dir = nullptr;
-  std::vector<std::string> no_byproducts;
-  std::vector<std::string> no_depends;
-  cmCustomCommandLines no_commands;
   for (auto const& it : this->ProjectMap) {
     std::vector<cmLocalGenerator*> const& gen = it.second;
     // add the ALL_BUILD to the first local generator of each project
     if (!gen.empty()) {
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
-      cmTarget* allBuild = gen[0]->AddUtilityCommand(
-        "ALL_BUILD", true, no_working_dir, no_byproducts, no_depends,
-        no_commands, cmPolicies::NEW, false, "Build all projects");
+      auto cc = cm::make_unique<cmCustomCommand>();
+      cc->SetCMP0116Status(cmPolicies::NEW);
+      cc->SetEscapeOldStyle(false);
+      cc->SetComment("Build all projects");
+      cmTarget* allBuild =
+        gen[0]->AddUtilityCommand("ALL_BUILD", true, std::move(cc));
 
       gen[0]->AddGeneratorTarget(
         cm::make_unique<cmGeneratorTarget>(allBuild, gen[0]));
@@ -942,9 +941,13 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
 
   cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
     { cmakeCommand, "-E", "__create_def", mdi->DefFile, objs_file });
-  cmCustomCommand command(outputs, empty, empty, commandLines,
-                          gt->Target->GetMakefile()->GetBacktrace(),
-                          "Auto build dll exports", ".", true);
+  cmCustomCommand command;
+  command.SetOutputs(outputs);
+  command.SetCommandLines(commandLines);
+  command.SetComment("Auto build dll exports");
+  command.SetBacktrace(gt->Target->GetMakefile()->GetBacktrace());
+  command.SetWorkingDirectory(".");
+  command.SetStdPipesUTF8(true);
   commands.push_back(std::move(command));
 }
 

@@ -3,14 +3,17 @@
 #include "cmFLTKWrapUICommand.h"
 
 #include <cstddef>
+#include <utility>
 
+#include <cm/memory>
+
+#include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
@@ -96,14 +99,17 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
 
       // Add command for generating the .h and .cxx files
       std::string no_main_dependency;
-      const char* no_comment = nullptr;
-      const char* no_working_dir = nullptr;
-      mf.AddCustomCommandToOutput(cxxres, depends, no_main_dependency,
-                                  commandLines, no_comment, no_working_dir,
-                                  mf.GetPolicyStatus(cmPolicies::CMP0116));
-      mf.AddCustomCommandToOutput(hname, depends, no_main_dependency,
-                                  commandLines, no_comment, no_working_dir,
-                                  mf.GetPolicyStatus(cmPolicies::CMP0116));
+
+      auto hcc = cm::make_unique<cmCustomCommand>();
+      hcc->SetDepends(depends);
+      hcc->SetCommandLines(commandLines);
+      auto ccc = cm::make_unique<cmCustomCommand>(*hcc);
+
+      hcc->SetOutputs(cxxres);
+      mf.AddCustomCommandToOutput(no_main_dependency, std::move(hcc));
+
+      ccc->SetOutputs(hname);
+      mf.AddCustomCommandToOutput(no_main_dependency, std::move(ccc));
 
       cmSourceFile* sf = mf.GetSource(cxxres);
       sf->AddDepend(hname);

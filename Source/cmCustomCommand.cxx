@@ -6,28 +6,19 @@
 
 #include <cmext/algorithm>
 
-cmCustomCommand::cmCustomCommand(std::vector<std::string> outputs,
-                                 std::vector<std::string> byproducts,
-                                 std::vector<std::string> depends,
-                                 cmCustomCommandLines commandLines,
-                                 cmListFileBacktrace lfbt, const char* comment,
-                                 const char* workingDirectory,
-                                 bool stdPipesUTF8)
-  : Outputs(std::move(outputs))
-  , Byproducts(std::move(byproducts))
-  , Depends(std::move(depends))
-  , CommandLines(std::move(commandLines))
-  , Backtrace(std::move(lfbt))
-  , Comment(comment ? comment : "")
-  , WorkingDirectory(workingDirectory ? workingDirectory : "")
-  , HaveComment(comment != nullptr)
-  , StdPipesUTF8(stdPipesUTF8)
-{
-}
-
 const std::vector<std::string>& cmCustomCommand::GetOutputs() const
 {
   return this->Outputs;
+}
+
+void cmCustomCommand::SetOutputs(std::vector<std::string> outputs)
+{
+  this->Outputs = std::move(outputs);
+}
+
+void cmCustomCommand::SetOutputs(std::string output)
+{
+  this->Outputs = { std::move(output) };
 }
 
 const std::vector<std::string>& cmCustomCommand::GetByproducts() const
@@ -35,9 +26,19 @@ const std::vector<std::string>& cmCustomCommand::GetByproducts() const
   return this->Byproducts;
 }
 
+void cmCustomCommand::SetByproducts(std::vector<std::string> byproducts)
+{
+  this->Byproducts = std::move(byproducts);
+}
+
 const std::vector<std::string>& cmCustomCommand::GetDepends() const
 {
   return this->Depends;
+}
+
+void cmCustomCommand::SetDepends(std::vector<std::string> depends)
+{
+  Depends = std::move(depends);
 }
 
 const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
@@ -45,10 +46,21 @@ const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
   return this->CommandLines;
 }
 
+void cmCustomCommand::SetCommandLines(cmCustomCommandLines commandLines)
+{
+  this->CommandLines = std::move(commandLines);
+}
+
 const char* cmCustomCommand::GetComment() const
 {
   const char* no_comment = nullptr;
   return this->HaveComment ? this->Comment.c_str() : no_comment;
+}
+
+void cmCustomCommand::SetComment(const char* comment)
+{
+  this->Comment = comment ? comment : "";
+  this->HaveComment = (comment != nullptr);
 }
 
 void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
@@ -84,6 +96,11 @@ void cmCustomCommand::SetEscapeAllowMakeVars(bool b)
 cmListFileBacktrace const& cmCustomCommand::GetBacktrace() const
 {
   return this->Backtrace;
+}
+
+void cmCustomCommand::SetBacktrace(cmListFileBacktrace lfbt)
+{
+  this->Backtrace = std::move(lfbt);
 }
 
 cmImplicitDependsList const& cmCustomCommand::GetImplicitDepends() const
