@@ -135,6 +135,11 @@ public:
   /// installation
   std::string RunProgramDescription;
 
+#ifdef __APPLE__
+  /// Code signing identity for signing the generated app bundle
+  std::string SigningIdentity;
+#endif
+
 public:
   // Internal implementation
 

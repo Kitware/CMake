@@ -292,6 +292,13 @@ Package
 
  This feature is available for QtIFW 4.0.0 and newer.
 
+.. variable:: CPACK_IFW_PACKAGE_SIGNING_IDENTITY
+
+ .. versionadded: 3.23
+
+ Allows specifying a code signing identity to be used for signing the generated
+ app bundle. Only available on macOS.
+
 .. variable:: CPACK_IFW_ARCHIVE_FORMAT
 
  .. versionadded:: 3.23
