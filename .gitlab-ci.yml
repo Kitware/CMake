@@ -1,5 +1,5 @@
 include:
-    # Metadata shared my many jobs
+    # Metadata shared by many jobs
     - local: .gitlab/rules.yml
     - local: .gitlab/artifacts.yml
 
