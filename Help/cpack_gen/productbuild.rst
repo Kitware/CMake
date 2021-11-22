@@ -18,6 +18,14 @@ macOS using ProductBuild:
  the automatically detected command (or specify its location if the
  auto-detection fails to find it).
 
+.. variable:: CPACK_PRODUCTBUILD_IDENTIFIER
+
+ .. versionadded:: 3.23
+
+ Set the unique (non-localized) product identifier to be associated with the
+ product (i.e., ``com.kitware.cmake``). Any component product names will be
+ appended to this value.
+
 .. variable:: CPACK_PRODUCTBUILD_IDENTITY_NAME
 
  .. versionadded:: 3.8

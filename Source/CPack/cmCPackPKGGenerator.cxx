@@ -210,9 +210,14 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponentGroup& group,
 void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
                                        cmXMLWriter& xout)
 {
-  std::string packageId =
-    cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
-             this->GetOption("CPACK_PACKAGE_NAME"), '.', component.Name);
+  std::string packageId;
+  if (cmValue i = this->GetOption("CPACK_PRODUCTBUILD_IDENTIFIER")) {
+    packageId = cmStrCat(i, '.', component.Name);
+  } else {
+    packageId =
+      cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
+               this->GetOption("CPACK_PACKAGE_NAME"), '.', component.Name);
+  }
 
   xout.StartElement("choice");
   xout.Attribute("id", component.Name + "Choice");

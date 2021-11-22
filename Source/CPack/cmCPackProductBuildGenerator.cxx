@@ -95,6 +95,10 @@ int cmCPackProductBuildGenerator::PackageFiles()
   if (cmValue p = this->GetOption("CPACK_PRODUCTBUILD_KEYCHAIN_PATH")) {
     keychainPath = p;
   }
+  std::string identifier;
+  if (cmValue i = this->GetOption("CPACK_PRODUCTBUILD_IDENTIFIER")) {
+    identifier = i;
+  }
 
   pkgCmd << productbuild << " --distribution \"" << packageDirFileName
          << "/Contents/distribution.dist\""
@@ -102,6 +106,7 @@ int cmCPackProductBuildGenerator::PackageFiles()
          << "\""
          << " --resources \"" << resDir << "\""
          << " --version \"" << version << "\""
+         << (identifier.empty() ? "" : " --identifier \"" + identifier + "\"")
          << (identityName.empty() ? "" : " --sign \"" + identityName + "\"")
          << (keychainPath.empty() ? ""
                                   : " --keychain \"" + keychainPath + "\"")
@@ -204,8 +209,13 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
   // The command that will be used to run ProductBuild
   std::ostringstream pkgCmd;
 
-  std::string pkgId = cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"),
-                               '.', this->GetOption("CPACK_PACKAGE_NAME"));
+  std::string pkgId;
+  if (cmValue n = this->GetOption("CPACK_PRODUCTBUILD_IDENTIFIER")) {
+    pkgId = n;
+  } else {
+    pkgId = cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
+                     this->GetOption("CPACK_PACKAGE_NAME"));
+  }
   if (component) {
     pkgId += '.';
     pkgId += component->Name;
