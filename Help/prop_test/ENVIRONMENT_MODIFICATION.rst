@@ -21,9 +21,11 @@ order specified in the property's value. The ``OP`` may be one of:
   - ``string_append``: Appends ``VALUE`` to the current value of ``MYVAR``.
   - ``string_prepend``: Prepends ``VALUE`` to the current value of ``MYVAR``.
   - ``path_list_append``: Appends ``VALUE`` to the current value of ``MYVAR``
-    using the platform-specific list separator.
+    using the host platform's path list separator (``;`` on Windows and ``:``
+    elsewhere).
   - ``path_list_prepend``: Prepends ``VALUE`` to the current value of
-    ``MYVAR`` using the platform-specific list separator.
+    ``MYVAR`` using the host platform's path list separator (``;`` on Windows
+    and ``:`` elsewhere).
   - ``cmake_list_append``: Appends ``VALUE`` to the current value of ``MYVAR``
     using ``;`` as the separator.
   - ``cmake_list_prepend``: Prepends ``VALUE`` to the current value of
