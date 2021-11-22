@@ -76,6 +76,7 @@ if(SWIG_FOUND AND NOT SWIG_VERSION VERSION_LESS "4.0.2"
     ${build_generator_args}
     --build-project TestBasicPython
     --build-options ${build_options} -DSWIG_USE_SWIG_DEPENDENCIES=ON
+                                     "-DSWIG_OUTFILE_DIR=${CMake_BINARY_DIR}/Tests/UseSWIG/BasicPython.Depfile"
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
   add_test(NAME UseSWIG.Depfile.BasicPerl COMMAND
