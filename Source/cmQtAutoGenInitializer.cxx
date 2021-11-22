@@ -636,12 +636,12 @@ bool cmQtAutoGenInitializer::InitMoc()
     auto getDefs = [this](std::string const& cfg) -> std::set<std::string> {
       std::set<std::string> defines;
       this->LocalGen->GetTargetDefines(this->GenTarget, cfg, "CXX", defines);
-#ifdef _WIN32
-      if (this->Moc.PredefsCmd.empty()) {
+      if (this->Moc.PredefsCmd.empty() &&
+          this->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") ==
+            "Windows") {
         // Add WIN32 definition if we don't have a moc_predefs.h
         defines.insert("WIN32");
       }
-#endif
       return defines;
     };
 
