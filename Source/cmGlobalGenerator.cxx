@@ -503,7 +503,8 @@ bool cmGlobalGenerator::CheckLanguages(
 void cmGlobalGenerator::EnableLanguage(
   std::vector<std::string> const& languages, cmMakefile* mf, bool optional)
 {
-  if (!this->IsMultiConfig()) {
+  if (!this->IsMultiConfig() &&
+      !this->GetCMakeInstance()->GetIsInTryCompile()) {
     std::string envBuildType;
     if (!mf->GetDefinition("CMAKE_BUILD_TYPE") &&
         cmSystemTools::GetEnv("CMAKE_BUILD_TYPE", envBuildType)) {

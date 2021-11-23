@@ -3138,7 +3138,8 @@ void cmMakefile::InitCMAKE_CONFIGURATION_TYPES(std::string const& genDefault)
     return;
   }
   std::string initConfigs;
-  if (!cmSystemTools::GetEnv("CMAKE_CONFIGURATION_TYPES", initConfigs)) {
+  if (this->GetCMakeInstance()->GetIsInTryCompile() ||
+      !cmSystemTools::GetEnv("CMAKE_CONFIGURATION_TYPES", initConfigs)) {
     initConfigs = genDefault;
   }
   this->AddCacheDefinition(
