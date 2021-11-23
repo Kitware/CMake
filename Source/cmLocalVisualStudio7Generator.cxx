@@ -2,7 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio7Generator.h"
 
-#include <cctype> // for isspace
+#include <algorithm>
+#include <cassert>
+#include <cstring>
+#include <functional>
+#include <sstream>
+#include <utility>
 
 #include <cm/memory>
 #include <cmext/algorithm>
@@ -11,18 +16,30 @@
 
 #include <cm3p/expat.h>
 
+#include "cmsys/FStream.hxx"
+
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmCustomCommandLines.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudioGenerator.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
+#include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
+#include "cmSourceGroup.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTargetDepend.h"
+#include "cmValue.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
 

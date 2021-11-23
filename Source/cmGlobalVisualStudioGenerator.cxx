@@ -3,8 +3,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudioGenerator.h"
 
+#include <cassert>
 #include <future>
 #include <iostream>
+#include <sstream>
+#include <system_error>
+#include <utility>
 
 #include <cm/iterator>
 #include <cm/memory>
@@ -14,17 +18,20 @@
 #include <objbase.h>
 #include <shellapi.h>
 
-#include "cmsys/Encoding.hxx"
-
 #include "cmCallVisualStudioMacro.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
-#include "cmLocalVisualStudioGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
 

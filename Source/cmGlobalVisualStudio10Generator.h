@@ -2,13 +2,24 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 
 #include <cm/optional>
 #include <cm/string_view>
 
 #include "cmGlobalVisualStudio8Generator.h"
+
+class cmGeneratorTarget;
+class cmGlobalGeneratorFactory;
+class cmLocalGenerator;
+class cmMakefile;
+class cmSourceFile;
+class cmake;
+struct cmIDEFlagTable;
 
 /** \class cmGlobalVisualStudio10Generator
  * \brief Write a Unix makefiles.

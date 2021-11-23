@@ -2,14 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalBorlandMakefileGenerator.h"
 
+#include <ostream>
 #include <utility>
 
 #include <cm/memory>
 
 #include "cmDocumentationEntry.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmake.h"
 

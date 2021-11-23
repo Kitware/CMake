@@ -2,13 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio9Generator.h"
 
+#include <cstring>
 #include <utility>
+#include <vector>
 
 #include "cmDocumentationEntry.h"
-#include "cmLocalVisualStudio7Generator.h"
-#include "cmMakefile.h"
-#include "cmMessageType.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmGlobalVisualStudioGenerator.h"
+#include "cmSystemTools.h"
 #include "cmVisualStudioWCEPlatformParser.h"
+
+class cmake;
 
 static const char vs9generatorName[] = "Visual Studio 9 2008";
 

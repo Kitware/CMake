@@ -3,12 +3,14 @@
 #include "cmVisualStudioSlnParser.h"
 
 #include <cassert>
+#include <memory>
 #include <stack>
+#include <utility>
+#include <vector>
 
 #include "cmsys/FStream.hxx"
 
 #include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
 #include "cmVisualStudioSlnData.h"
 
 namespace {

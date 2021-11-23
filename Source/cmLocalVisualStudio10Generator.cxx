@@ -2,17 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio10Generator.h"
 
-#include <cmext/algorithm>
-
 #include <cm3p/expat.h>
 
-#include "cmAlgorithms.h"
-#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudio10Generator.h"
-#include "cmMakefile.h"
+#include "cmGlobalVisualStudioGenerator.h"
+#include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmVisualStudio10TargetGenerator.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
+
+class cmGeneratorTarget;
 
 class cmVS10XMLParser : public cmXMLParser
 {

@@ -2,8 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalJOMMakefileGenerator.h"
 
+#include <ostream>
+
+#include <cmext/algorithm>
+
 #include "cmDocumentationEntry.h"
-#include "cmLocalUnixMakefileGenerator3.h"
+#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmake.h"

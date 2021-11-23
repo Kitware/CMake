@@ -5,10 +5,10 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmDocumentationEntry.h"
-#include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 
 cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator(cmake* cm)

@@ -4,12 +4,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <iosfwd>
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "cmGeneratorTarget.h"
@@ -17,7 +18,6 @@
 class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmCustomCommandGenerator;
-class cmGeneratedFileStream;
 class cmGlobalVisualStudio10Generator;
 class cmLocalVisualStudio10Generator;
 class cmMakefile;

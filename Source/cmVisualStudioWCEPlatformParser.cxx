@@ -2,8 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVisualStudioWCEPlatformParser.h"
 
+#include <algorithm>
+#include <cstring>
+#include <utility>
+
 #include "cmGlobalVisualStudioGenerator.h"
-#include "cmXMLParser.h"
+#include "cmSystemTools.h"
 
 int cmVisualStudioWCEPlatformParser::ParseVersion(const char* version)
 {

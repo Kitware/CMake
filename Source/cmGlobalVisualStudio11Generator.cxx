@@ -2,12 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio11Generator.h"
 
+#include <cstring>
+#include <sstream>
 #include <utility>
+#include <vector>
 
-#include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
-#include "cmLocalVisualStudio10Generator.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmGlobalVisualStudioGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 static const char vs11generatorName[] = "Visual Studio 11 2012";
 

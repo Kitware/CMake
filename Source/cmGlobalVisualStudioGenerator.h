@@ -10,8 +10,11 @@
 #include <string>
 #include <vector>
 
+#include "cm_codecvt.hxx"
+
 #include "cmGlobalGenerator.h"
 #include "cmTargetDepend.h"
+#include "cmValue.h"
 
 class cmCustomCommand;
 class cmGeneratorTarget;

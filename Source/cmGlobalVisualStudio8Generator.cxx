@@ -2,21 +2,40 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio8Generator.h"
 
+#include <algorithm>
+#include <functional>
+#include <ostream>
+#include <utility>
+
 #include <cm/memory>
+#include <cmext/algorithm>
 #include <cmext/memory>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
-#include "cmDocumentationEntry.h"
+#include "cmCustomCommandTypes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudioGenerator.h"
+#include "cmListFileCache.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmSourceFile.h"
-#include "cmVisualStudioWCEPlatformParser.h"
+#include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmTarget.h"
+#include "cmTargetDepend.h"
+#include "cmValue.h"
+#include "cmVisualStudioGeneratorOptions.h"
 #include "cmake.h"
+
+struct cmIDEFlagTable;
 
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
   cmake* cm, const std::string& name,

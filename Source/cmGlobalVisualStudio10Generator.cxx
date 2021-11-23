@@ -3,24 +3,35 @@
 #include "cmGlobalVisualStudio10Generator.h"
 
 #include <algorithm>
+#include <cstring>
+#include <map>
+#include <sstream>
 #include <utility>
 
 #include <cm/memory>
 
 #include <cm3p/json/reader.h>
+#include <cm3p/json/value.h>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmGlobalVisualStudio71Generator.h"
+#include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudioGenerator.h"
+#include "cmIDEFlagTable.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"

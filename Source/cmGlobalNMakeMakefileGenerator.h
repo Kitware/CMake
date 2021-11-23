@@ -4,8 +4,18 @@
 
 #include <iosfwd>
 #include <memory>
+#include <string>
+#include <vector>
 
+#include "cm_codecvt.hxx"
+
+#include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmValue.h"
+
+class cmMakefile;
+class cmake;
+struct cmDocumentationEntry;
 
 /** \class cmGlobalNMakeMakefileGenerator
  * \brief Write a NMake makefiles.

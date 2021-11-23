@@ -2,15 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudioGenerator.h"
 
+#include <utility>
+
 #include "windows.h"
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmCustomCommandLines.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 #include "cmSourceFile.h"
+#include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator(
   cmGlobalGenerator* gg, cmMakefile* mf)
