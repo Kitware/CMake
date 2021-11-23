@@ -81,75 +81,20 @@ public:
   cmCTestTestHandler* TestHandler;
 };
 
-bool cmCTestSubdirCommand(std::vector<std::string> const& args,
-                          cmExecutionStatus& status)
+bool ReadSubdirectory(std::string fname, cmExecutionStatus& status)
 {
-  if (args.empty()) {
-    status.SetError("called with incorrect number of arguments");
-    return false;
-  }
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  for (std::string const& arg : args) {
-    std::string fname;
-
-    if (cmSystemTools::FileIsFullPath(arg)) {
-      fname = arg;
-    } else {
-      fname = cmStrCat(cwd, '/', arg);
-    }
-
-    if (!cmSystemTools::FileIsDirectory(fname)) {
-      // No subdirectory? So what...
-      continue;
-    }
-    bool readit = false;
-    {
-      cmWorkingDirectory workdir(fname);
-      if (workdir.Failed()) {
-        status.SetError("Failed to change directory to " + fname + " : " +
-                        std::strerror(workdir.GetLastResult()));
-        return false;
-      }
-      const char* testFilename;
-      if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
-        // does the CTestTestfile.cmake exist ?
-        testFilename = "CTestTestfile.cmake";
-      } else if (cmSystemTools::FileExists("DartTestfile.txt")) {
-        // does the DartTestfile.txt exist ?
-        testFilename = "DartTestfile.txt";
-      } else {
-        // No CTestTestfile? Who cares...
-        continue;
-      }
-      fname += "/";
-      fname += testFilename;
-      readit = status.GetMakefile().ReadDependentFile(fname);
-    }
-    if (!readit) {
-      status.SetError(cmStrCat("Could not load include file: ", fname));
-      return false;
-    }
-  }
-  return true;
-}
-
-bool cmCTestAddSubdirectoryCommand(std::vector<std::string> const& args,
-                                   cmExecutionStatus& status)
-{
-  if (args.empty()) {
-    status.SetError("called with incorrect number of arguments");
-    return false;
-  }
-
-  std::string fname =
-    cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(), '/', args[0]);
-
   if (!cmSystemTools::FileExists(fname)) {
     // No subdirectory? So what...
     return true;
   }
   bool readit = false;
   {
+    cmWorkingDirectory workdir(fname);
+    if (workdir.Failed()) {
+      status.SetError("Failed to change directory to " + fname + " : " +
+                      std::strerror(workdir.GetLastResult()));
+      return false;
+    }
     const char* testFilename;
     if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
       // does the CTestTestfile.cmake exist ?
@@ -170,6 +115,44 @@ bool cmCTestAddSubdirectoryCommand(std::vector<std::string> const& args,
     return false;
   }
   return true;
+}
+
+bool cmCTestSubdirCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
+{
+  if (args.empty()) {
+    status.SetError("called with incorrect number of arguments");
+    return false;
+  }
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  for (std::string const& arg : args) {
+    std::string fname;
+
+    if (cmSystemTools::FileIsFullPath(arg)) {
+      fname = arg;
+    } else {
+      fname = cmStrCat(cwd, '/', arg);
+    }
+
+    if (!ReadSubdirectory(std::move(fname), status)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool cmCTestAddSubdirectoryCommand(std::vector<std::string> const& args,
+                                   cmExecutionStatus& status)
+{
+  if (args.empty()) {
+    status.SetError("called with incorrect number of arguments");
+    return false;
+  }
+
+  std::string fname =
+    cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(), '/', args[0]);
+
+  return ReadSubdirectory(std::move(fname), status);
 }
 
 class cmCTestAddTestCommand : public cmCTestCommand
