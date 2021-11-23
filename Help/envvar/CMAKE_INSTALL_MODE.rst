@@ -19,14 +19,33 @@ symbolic links instead.
 
 The following values are allowed for ``CMAKE_INSTALL_MODE``:
 
-* empty, unset or ``COPY``: default behavior, duplicate the file at its destination
-* ``ABS_SYMLINK``: create an *absolute* symbolic link to the source file at the destination *or fail*
-* ``ABS_SYMLINK_OR_COPY``: like ``ABS_SYMLINK`` but silently copy on error
-* ``REL_SYMLINK``: create an *relative* symbolic link to the source file at the destination *or fail*
-* ``REL_SYMLINK_OR_COPY``: like ``REL_SYMLINK`` but silently copy on error
-* ``SYMLINK``: try as if through ``REL_SYMLINK`` and fall back to ``ABS_SYMLINK`` if the referenced
-  file cannot be expressed using a relative path. Fail on error.
-* ``SYMLINK_OR_COPY``: like ``SYMLINK`` but silently copy on error
+``COPY``, empty or unset
+  Duplicate the file at its destination.  This is the default behavior.
+
+``ABS_SYMLINK``
+  Create an *absolute* symbolic link to the source file at the destination.
+  Halt with an error if the link cannot be created.
+
+``ABS_SYMLINK_OR_COPY``
+  Like ``ABS_SYMLINK`` but fall back to silently copying if the symlink
+  couldn't be created.
+
+``REL_SYMLINK``
+  Create a *relative* symbolic link to the source file at the destination.
+  Halt with an error if the link cannot be created.
+
+``REL_SYMLINK_OR_COPY``
+  Like ``REL_SYMLINK`` but fall back to silently copying if the symlink
+  couldn't be created.
+
+``SYMLINK``
+  Try as if through ``REL_SYMLINK`` and fall back to ``ABS_SYMLINK`` if the
+  referenced file cannot be expressed using a relative path.
+  Halt with an error if the link cannot be created.
+
+``SYMLINK_OR_COPY``
+  Like ``SYMLINK`` but fall back to silently copying if the symlink couldn't
+  be created.
 
 Installing symbolic links rather than copying files can help conserve storage space because files do
 not have to be duplicated on disk. However, modifications applied to the source immediately affects
