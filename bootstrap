@@ -442,6 +442,7 @@ CMAKE_CXX_SOURCES="\
   cmGccDepfileLexerHelper \
   cmGccDepfileReader \
   cmReturnCommand \
+  cmPlaceholderExpander \
   cmRulePlaceholderExpander \
   cmRuntimeDependencyArchive \
   cmScriptGenerator \
