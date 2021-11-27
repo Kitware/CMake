@@ -45,7 +45,11 @@ To specify the generator, use the ``-G`` option. For multi-config builds, use
 
   cpack -G ZIP -C Debug
 
-To create a source distribution you would type:
+For a list of available generators, see :manual:`cpack-generators(7)` or call
+``cpack --help``. An :cpack_gen:`archive generator <CPack Archive Generator>`
+like ZIP creates a compressed archive of all *installed* files.
+
+To create an archive of the *full* source tree you would type:
 
 .. code-block:: console
 
