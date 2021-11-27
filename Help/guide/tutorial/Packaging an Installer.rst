@@ -23,7 +23,8 @@ libraries that are needed by the project for the current platform. Next we set
 some CPack variables to where we have stored the license and version
 information for this project. The version information was set earlier in this
 tutorial and the ``license.txt`` has been included in the top-level source
-directory for this step.
+directory for this step.  The :variable:`CPACK_SOURCE_GENERATOR` variable
+selects a file format for the source package.
 
 Finally we include the :module:`CPack module <CPack>` which will use these
 variables and some other properties of the current system to setup an
