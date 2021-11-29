@@ -231,6 +231,11 @@ Hints
   * If set to TRUE, search **only** for static libraries.
   * If set to FALSE, search **only** for shared libraries.
 
+  .. note::
+
+    This hint will be ignored on ``Windows`` because static libraries are not
+    available on this platform.
+
 ``Python3_FIND_ABI``
   .. versionadded:: 3.16
 
