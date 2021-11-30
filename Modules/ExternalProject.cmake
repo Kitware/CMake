@@ -637,6 +637,22 @@ External Project Definition
       supported). Passing an empty string as the ``<cmd>`` makes the install
       step do nothing.
 
+    .. note::
+      If the :envvar:`CMAKE_INSTALL_MODE` environment variable is set when the
+      main project is built, it will only have an effect if the following
+      conditions are met:
+
+      * The main project's configure step assumed the external project uses
+        CMake as its build system.
+      * The external project's install command actually runs. Note that due
+        to the way ``ExternalProject`` may use timestamps internally, if
+        nothing the install step depends on needs to be re-executed, the
+        install command might also not need to run.
+
+      Note also that ``ExternalProject`` does not check whether the
+      :envvar:`CMAKE_INSTALL_MODE` environment variable changes from one run
+      to another.
+
   **Test Step Options:**
     The test step is only defined if at least one of the following ``TEST_...``
     options are provided.
