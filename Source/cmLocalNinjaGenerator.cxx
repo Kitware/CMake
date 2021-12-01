@@ -205,11 +205,8 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
 // Virtual protected methods.
 
 std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
-  std::string const& path, IncludePathStyle pathStyle,
-  cmOutputConverter::OutputFormat format)
+  std::string const& path, cmOutputConverter::OutputFormat format)
 {
-  // FIXME: Remove IncludePathStyle infrastructure.  It is no longer used.
-  static_cast<void>(pathStyle);
   return this->ConvertToOutputFormat(path, format);
 }
 
