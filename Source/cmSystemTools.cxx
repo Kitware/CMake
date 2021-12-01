@@ -3252,8 +3252,6 @@ bool cmSystemTools::CheckRPath(std::string const& file,
     return false;
   }
 #endif
-  (void)file;
-  (void)newRPath;
   return false;
 }
 
