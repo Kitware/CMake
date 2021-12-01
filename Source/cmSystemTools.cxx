@@ -2869,6 +2869,14 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
         file, oldRPath, newRPath, removeEnvironmentRPath, emsg, changed)) {
     return result.value();
   }
+  // The file format is not recognized.  Assume it has no RPATH.
+  if (newRPath.empty()) {
+    // The caller wanted no RPATH anyway.
+    return true;
+  }
+  if (emsg) {
+    *emsg = "The file format is not recognized.";
+  }
   return false;
 }
 
@@ -2882,6 +2890,14 @@ bool cmSystemTools::SetRPath(std::string const& file,
   if (cm::optional<bool> result =
         SetRPathXCOFF(file, newRPath, emsg, changed)) {
     return result.value();
+  }
+  // The file format is not recognized.  Assume it has no RPATH.
+  if (newRPath.empty()) {
+    // The caller wanted no RPATH anyway.
+    return true;
+  }
+  if (emsg) {
+    *emsg = "The file format is not recognized.";
   }
   return false;
 }
@@ -3212,7 +3228,8 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
   if (cm::optional<bool> result = RemoveRPathXCOFF(file, emsg, removed)) {
     return result.value();
   }
-  return false;
+  // The file format is not recognized.  Assume it has no RPATH.
+  return true;
 }
 
 bool cmSystemTools::CheckRPath(std::string const& file,
@@ -3252,7 +3269,9 @@ bool cmSystemTools::CheckRPath(std::string const& file,
     return false;
   }
 #endif
-  return false;
+  // The file format is not recognized.  Assume it has no RPATH.
+  // Therefore we succeed if the new rpath is empty anyway.
+  return newRPath.empty();
 }
 
 bool cmSystemTools::RepeatedRemoveDirectory(const std::string& dir)
