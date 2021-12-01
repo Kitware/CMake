@@ -255,7 +255,9 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
     elseif(DEFINED ENV{CONDA_PREFIX})
       set(conda_prefix "$ENV{CONDA_PREFIX}")
       cmake_path(ABSOLUTE_PATH conda_prefix NORMALIZE)
-      if("${CMAKE_INSTALL_PREFIX}" STREQUAL conda_prefix)
+      if("${CMAKE_INSTALL_PREFIX}" STREQUAL conda_prefix AND
+         NOT ("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$" OR
+              "${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/local/?$"))
         set(__system_type_for_install "conda")
       endif()
     endif()
